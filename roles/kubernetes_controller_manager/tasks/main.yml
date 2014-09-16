@@ -1,0 +1,7 @@
+---
+# tasks file for kubernetes_controller_manager
+- name: Install kubernetes
+  yum: pkg=kubernetes
+
+- name: Enable controller-manager
+  service: name=kubernetes-controller-manager enabled=yes state=started

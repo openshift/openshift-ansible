@@ -1,0 +1,4 @@
+---
+# handlers file for kubernetes_apiserver
+- name: restart kubernetes-apiserver
+  service: name=kubernetes-apiserver state=restarted

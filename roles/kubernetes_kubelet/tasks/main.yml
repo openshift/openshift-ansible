@@ -1,0 +1,31 @@
+---
+# tasks file for kubernetes_kubelet
+- name: Install kubernetes
+  yum: pkg=kubernetes state=installed
+
+- name: Configure kubelet
+  lineinfile: >
+    dest=/etc/sysconfig/kubernetes
+    regexp={{ item.regex }}
+    line="{{ item.line }}"
+  with_items:
+    - { regex: '^KUBE_ETCD_SERVERS=', line: 'KUBE_ETCD_SERVERS=\"http://{{ oo_master_ips[0] }}:4001\"' }
+    - { regex: '^KUBE_KUBELET_ADDRESS=', line: 'KUBE_KUBELET_ADDRESS=\"0.0.0.0\"' }
+    - { regex: '^KUBE_KUBELET_HOSTNAME_OVERRIDE=', line: 'KUBE_KUBELET_HOSTNAME_OVERRIDE=\"{{ hostvars[inventory_hostname].ansible_eth0.ipv4.address }}\"' }
+  notify:
+    - restart kubelet
+
+
+#- name: write the cadvisor config
+#  template: src=cadvisor.manifest dest=/etc/kubernetes/manifests/cadvisor.manifest
+#  notify:
+#    - restart kubelet
+
+- name: Enable kubelet
+  service: name=kubernetes-kubelet enabled=yes state=started
+
+- name: Open firewalld port for the kubelet
+  firewalld: port=10250/tcp permanent=false state=enabled
+
+- name: Save firewalld port for the kubelet
+  firewalld: port=10250/tcp permanent=true state=enabled

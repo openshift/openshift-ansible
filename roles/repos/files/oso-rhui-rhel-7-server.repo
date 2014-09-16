@@ -1,0 +1,13 @@
+[oso-rhel-7-server]
+name=Red Hat Enterprise Linux 7 Server from RHUI (RPMs)
+baseurl=http://10.240.169.148/mirror/rhui-rhel-server-7-releases
+enabled=1
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+
+[oso-rhel-7-server-optional]
+name=Red Hat Enterprise Linux 7 Server - Optional from RHUI (RPMs)
+baseurl=http://10.240.169.148/mirror/rhui-rhel-server-7-releases-optional
+enabled=1
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release

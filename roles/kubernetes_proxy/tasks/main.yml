@@ -1,0 +1,17 @@
+---
+# tasks file for kubernetes_proxy
+- name: Install kubernetes
+  yum: pkg=kubernetes state=installed
+
+- name: Configure kubernetes-proxy etcd servers
+  lineinfile: >
+    dest=/etc/sysconfig/kubernetes
+    regexp={{ item.regex }}
+    line="{{ item.line }}"
+  with_items:
+    - { regex: '^KUBE_ETCD_SERVERS=', line: 'KUBE_ETCD_SERVERS=\"http://{{ oo_master_ips[0] }}:4001\"' }
+  notify:
+    - restart kubernetes-proxy
+
+- name: Enable proxy
+  service: name=kubernetes-proxy enabled=yes state=started

@@ -1,0 +1,5 @@
+---
+# handlers file for kubernetes_controller_manager
+- name: restart kubernetes-controller-manager
+  service: name=kubernetes-controller-manager state=restarted
+

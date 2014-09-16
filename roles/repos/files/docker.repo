@@ -1,0 +1,5 @@
+[docker]
+name= Temporary Docker rpm
+baseurl=http://10.240.169.148/mirror/docker
+gpgcheck=0
+enabled=1
