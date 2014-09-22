@@ -1,0 +1,10 @@
+{
+  "id": "dockerregistry",
+  "kind": "Service",
+  "apiVersion": "v1beta1",
+  "port": 8888,
+  "selector": {
+    "name": "docker-registry"
+  }
+}
+

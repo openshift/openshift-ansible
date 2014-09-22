@@ -5,6 +5,7 @@ require 'json'
 require 'yaml'
 require 'securerandom'
 require 'fileutils'
+require 'parseconfig'
 
 SCRIPT_DIR = File.expand_path(File.dirname(__FILE__))
 
@@ -111,22 +112,26 @@ module OpenShift
 
         cmds = []
 
+        #cmds << 'set -x'
         cmds << %Q[export ANSIBLE_FILTER_PLUGINS="#{Dir.pwd}/filter_plugins"]
 
         # We need this for launching instances, otherwise conflicting keys and what not kill it
         cmds << %q[export ANSIBLE_TRANSPORT="ssh"]
-        cmds << %Q[export ANSIBLE_SSH_ARGS="-o ForwardAgent=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"]
+        cmds << %q[export ANSIBLE_SSH_ARGS="-o ForwardAgent=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"]
 
         # We need pipelining off so that we can do sudo to enable the root account
         cmds << %Q[export ANSIBLE_SSH_PIPELINING='#{@pipelining.to_s}']
 
-        ssh_key_arg = "--private-key=~/.ssh/mmcgrath_libra" if File.file?(ENV['HOME']+'/.ssh/mmcgrath_libra.pem')
+        ssh_key_arg = %q[--private-key=~/.ssh/mmcgrath_libra] if File.file?(ENV['HOME']+'/.ssh/mmcgrath_libra.pem')
 
         cmds << %Q[time -p ansible-playbook -i #{@inventory} #{@verbosity} #{playbook} #{ssh_key_arg} --extra-vars '@#{tmpfile.path}']
 
         cmd = cmds.join(' ; ')
 
-        system(cmd)
+        unless system(cmd)
+          puts %Q[Following command failed with exit code: #{$?.exitstatus}\n#{cmd}]
+          puts %Q[extra_vars: #{@extra_vars.to_json}]
+        end
         tmpfile.unlink
       end
 
@@ -135,19 +140,31 @@ module OpenShift
         @extra_vars.merge!(vars)
       end
 
-      def self.for_gce()
-        ah = AnsibleHelper.new()
+      def self.for_gce
+        ah      = AnsibleHelper.new
 
         # GCE specific configs
-        ah.extra_vars['gce_pem_file'] = "#{ENV['HOME']}/.ssh/os302gce_priv_key.pem"
-        ah.extra_vars['gce_service_account_email'] = '198287808360-f457cs26hutqeosmlje1eosfeqo0krlg@developer.gserviceaccount.com'
-        ah.extra_vars['gce_project_id'] = 'corded-cable-672'
+        gce_ini = "#{SCRIPT_DIR}/inventory/gce/gce.ini"
+        config  = ParseConfig.new(gce_ini)
+
+        if config['gce']['gce_project_id'].to_s.empty?
+          raise %Q['gce_project_id' not set in #{gce_ini}]
+        end
+        ah.extra_vars['gce_project_id'] = config['gce']['gce_project_id']
+
+        if config['gce']['gce_service_account_pem_file_path'].to_s.empty?
+          raise %Q['gce_service_account_pem_file_path' not set in #{gce_ini}]
+        end
+        ah.extra_vars['gce_pem_file'] = config['gce']['gce_service_account_pem_file_path']
+
+        if config['gce']['gce_service_account_email_address'].to_s.empty?
+          raise %Q['gce_service_account_email_address' not set in #{gce_ini}]
+        end
+        ah.extra_vars['gce_service_account_email'] = config['gce']['gce_service_account_email_address']
 
         ah.inventory = 'inventory/gce/gce.py'
-
         return ah
       end
-
     end
 
     class GceCommand < Thor
@@ -181,10 +198,10 @@ module OpenShift
         ah.extra_vars['oo_new_inst_tags'] << GceHelper.generate_env_host_type_tag(options[:env], options[:type])
 
         puts
-        puts "Creating instance(s) in GCE..."
+        puts 'Creating instance(s) in GCE...'
         puts
-        puts " .----               Disregard this (ansible bug 6407)                ----."
-        puts " V                                                                        V"
+        puts %q[ .----  Spurious warning "It is unnecessary to use '{{' in loops" (ansible bug 6407)  ----.]
+        puts %q[ V                                                                                        V]
 
 
         ah.run_playbook("playbooks/gce/#{options[:type]}/launch.yml")
@@ -268,7 +285,7 @@ module OpenShift
         else
           cmd += " #{user}@"
         end
-        
+
         if dest.nil?
           download = File.join(Dir.pwd, 'download')
           FileUtils.mkdir_p(download) unless File.exists?(download)
