@@ -5,6 +5,9 @@ Get a gce service key
 ---------------------
 1. ping twiest and ask for a GCE service key
 
+Note: If your GCE project doesn't show a Service Account under <Project>/APIs & auth/Credentials, you will need to use "Create new
+Client ID" to create a Service Account.
+
 
 Convert a GCE service key into a pem (for ansible)
 --------------------------------------------------
