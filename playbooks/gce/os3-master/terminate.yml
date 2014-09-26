@@ -1,0 +1,18 @@
+- name: "populate oo_hosts_to_terminate host group if needed"
+  hosts: localhost
+  gather_facts: no
+  tasks:
+  - name: Evaluate oo_host_group_exp if it's set
+    add_host: "name={{ item }} groups=oo_hosts_to_terminate"
+    with_items: "{{ oo_host_group_exp | default('') }}"
+    when: oo_host_group_exp is defined
+
+- name: "Terminate instances"
+  hosts: localhost
+  connection: local
+  tasks:
+    - name: Terminate master instances
+      local_action:
+        module: gce
+        state: 'absent'
+        instance_names: "{{ oo_hosts_to_terminate }}"
