@@ -6,13 +6,18 @@ require 'yaml'
 require 'securerandom'
 require 'fileutils'
 require 'parseconfig'
+require 'open3'
+
+# Don't buffer output to the client
+STDOUT.sync = true
+STDERR.sync = true
 
 SCRIPT_DIR = File.expand_path(File.dirname(__FILE__))
 
 module OpenShift
   module Ops
     # WARNING: we do not currently support environments with hyphens in the name
-    SUPPORTED_ENVS = ['prod','stg','int','tint','kint','test']
+    SUPPORTED_ENVS = %w(prod stg int tint kint test jint)
 
     class GceHelper
       def self.list_hosts()
@@ -101,14 +106,15 @@ module OpenShift
         @pipelining = true
       end
 
+      def all_eof(files)
+        files.find { |f| !f.eof }.nil?
+      end
+
       def run_playbook(playbook)
         @inventory = 'inventory/hosts' if @inventory.nil?
 
         # This is used instead of passing in the json on the cli to avoid quoting problems
-        tmpfile = Tempfile.new('extra_vars')
-        tmpfile.write(@extra_vars.to_json)
-        tmpfile.sync()
-        tmpfile.close()
+        tmpfile    = Tempfile.open('extra_vars') { |f| f.write(@extra_vars.to_json); f}
 
         cmds = []
 
@@ -121,18 +127,23 @@ module OpenShift
 
         # We need pipelining off so that we can do sudo to enable the root account
         cmds << %Q[export ANSIBLE_SSH_PIPELINING='#{@pipelining.to_s}']
-
-        ssh_key_arg = %q[--private-key=~/.ssh/mmcgrath_libra] if File.file?(ENV['HOME']+'/.ssh/mmcgrath_libra.pem')
-
-        cmds << %Q[time -p ansible-playbook -i #{@inventory} #{@verbosity} #{playbook} #{ssh_key_arg} --extra-vars '@#{tmpfile.path}']
+        cmds << %Q[time -p ansible-playbook -i #{@inventory} #{@verbosity} #{playbook} --extra-vars '@#{tmpfile.path}']
 
         cmd = cmds.join(' ; ')
 
-        unless system(cmd)
-          puts %Q[Following command failed with exit code: #{$?.exitstatus}\n#{cmd}]
-          puts %Q[extra_vars: #{@extra_vars.to_json}]
+        pid = spawn(cmd, :out => $stdout, :err => $stderr, :close_others => true)
+        _, state = Process.wait2(pid)
+
+        if 0 != state.exitstatus
+          raise %Q[Warning failed with exit code: #{state.exitstatus}
+
+#{cmd}
+
+extra_vars: #{@extra_vars.to_json}
+]
         end
-        tmpfile.unlink
+      ensure
+        tmpfile.unlink if tmpfile
       end
 
       def merge_extra_vars_file(file)
@@ -165,9 +176,17 @@ module OpenShift
         ah.inventory = 'inventory/gce/gce.py'
         return ah
       end
+
+      def ignore_bug_6407
+        puts
+        puts %q[ .----  Spurious warning "It is unnecessary to use '{{' in loops" (ansible bug 6407)  ----.]
+        puts %q[ V                                                                                        V]
+      end
+
     end
 
     class GceCommand < Thor
+
       option :type, :required => true, :enum => LaunchHelper.get_gce_host_types,
              :desc => 'The host type of the new instances.'
       option :env, :required => true, :aliases => '-e', :enum => OpenShift::Ops::SUPPORTED_ENVS,
@@ -199,13 +218,11 @@ module OpenShift
 
         puts
         puts 'Creating instance(s) in GCE...'
-        puts
-        puts %q[ .----  Spurious warning "It is unnecessary to use '{{' in loops" (ansible bug 6407)  ----.]
-        puts %q[ V                                                                                        V]
-
+        ah.ignore_bug_6407
 
         ah.run_playbook("playbooks/gce/#{options[:type]}/launch.yml")
       end
+
 
       option :name, :required => false, :type => :string,
              :desc => 'The name of the instance to configure.'
@@ -238,11 +255,47 @@ module OpenShift
 
         puts
         puts "Configuring #{options[:type]} instance(s) in GCE..."
-        puts
-        puts " .----               Disregard this (ansible bug 6407)                ----."
-        puts " V                                                                        V"
+        ah.ignore_bug_6407
 
         ah.run_playbook("playbooks/gce/#{host_type}/config.yml")
+      end
+
+      option :name, :required => false, :type => :string,
+             :desc => 'The name of the instance to terminate.'
+      option :env, :required => false, :aliases => '-e', :enum => OpenShift::Ops::SUPPORTED_ENVS,
+             :desc => 'The environment of the new instances.'
+      option :type, :required => false, :enum => LaunchHelper.get_gce_host_types,
+             :desc => 'The type of the instances to configure.'
+      option :confirm, :required => false, :type => :boolean,
+             :desc => 'Terminate without interactive confirmation'
+      desc "terminate", 'Terminate instances'
+      def terminate()
+        ah = AnsibleHelper.for_gce()
+
+        abort 'Error: you can\'t specify both --name and --type' unless options[:type].nil? || options[:name].nil?
+
+        abort 'Error: you can\'t specify both --name and --env' unless options[:env].nil? || options[:name].nil?
+
+        host_type = nil
+        if options[:name]
+          details = GceHelper.get_host_details(options[:name])
+          ah.extra_vars['oo_host_group_exp'] = options[:name]
+          ah.extra_vars['oo_env'] = details['env']
+          host_type = details['host-type']
+        elsif options[:type] && options[:env]
+          oo_env_host_type_tag = GceHelper.generate_env_host_type_tag_name(options[:env], options[:type])
+          ah.extra_vars['oo_host_group_exp'] = "groups['#{oo_env_host_type_tag}']"
+          ah.extra_vars['oo_env'] = options[:env]
+          host_type = options[:type]
+        else
+          abort 'Error: you need to specify either --name or (--type and --env)'
+        end
+
+        puts
+        puts "Terminating #{options[:type]} instance(s) in GCE..."
+        ah.ignore_bug_6407
+
+        ah.run_playbook("playbooks/gce/#{host_type}/terminate.yml")
       end
 
       desc "list", "Lists instances."
