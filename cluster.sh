@@ -8,6 +8,7 @@ PROVIDER=gce
 function usage {
     cat 1>&2 <<-EOT
         ${0} : [create|destroy|update|list] {GCE environment tag}
+
         Supported environment tags:
         $(grep 'SUPPORTED_ENVS.*=' ./cloud.rb)
 EOT
@@ -23,7 +24,7 @@ function create_cluser {
         ./cloud.rb "${PROVIDER}" launch -e "${ENV}" --type=os3-master
     done
     update_cluster
-    echo -n "\nCreated ${MASTERS} masters and ${MINIONS} minions using ${PROVIDER} provider\n"
+    echo -e "\nCreated ${MASTERS} masters and ${MINIONS} minions using ${PROVIDER} provider\n"
 }
 
 function update_cluster {
@@ -37,23 +38,18 @@ function update_cluster {
 }
 
 function terminate_cluster {
-    for (( i = 0; i < $MINIONS; i ++ )); do
-        ./cloud.rb "${PROVIDER}" terminate -e "${ENV}" --type=os3-minion
-    done
-
-    for (( i = 0; i < $MASTERS; i ++ )); do
-        ./cloud.rb "${PROVIDER}" terminate -e "${ENV}" --type=os3-master
-    done
+    #./cloud.rb "${PROVIDER}" terminate -e "${ENV}" --type=os3-master
+    ./cloud.rb "${PROVIDER}" terminate -e "${ENV}" --type=os3-minion
 }
 
-[ -f ./cloud.rb ] || (echo 1 > 2 'Cannot find ./cloud.rb' && exit 1)
+[ -f ./cloud.rb ] || (echo 1>&2 'Cannot find ./cloud.rb' && exit 1)
 
 while getopts ':p:m:n:' flag; do
     case "${flag}" in
         p) PROVIDER="${OPTARG}" ;;
         m) MASTERS="${OPTARG}" ;;
         n) MINIONS="${OPTARG}" ;;
-        *)  echo -n 2>&1 "unsupported option $OPTARG\n"
+        *)  echo -e 2>&1 "unsupported option $OPTARG\n"
             usage
             exit 1 ;;
     esac
@@ -64,15 +60,15 @@ shift $((OPTIND-1))
 
 case "${1}" in
     'create')
-        [ -z "${2:-''}" ] && (usage; exit 1)
+        [ -z "${2:-}" ] && (usage; exit 1)
         ENV="${2}"
         create_cluser ;;
     'update')
-        [ -z "${2:-''}" ] && (usage; exit 1)
+        [ -z "${2:-}" ] && (usage; exit 1)
         ENV="${2}"
         update_cluster ;;
     'terminate')
-        [ -z "${2:-''}" ] && (usage; exit 1)
+        [ -z "${2:-}" ] && (usage; exit 1)
         ENV="${2}"
         terminate_cluster ;;
     'list')   ./cloud.rb "${PROVIDER}" list ;;
