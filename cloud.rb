@@ -8,6 +8,10 @@ require 'fileutils'
 require 'parseconfig'
 require 'open3'
 
+# Don't buffer output to the client
+STDOUT.sync = true
+STDERR.sync = true
+
 SCRIPT_DIR = File.expand_path(File.dirname(__FILE__))
 
 module OpenShift
@@ -102,6 +106,10 @@ module OpenShift
         @pipelining = true
       end
 
+      def all_eof(files)
+        files.find { |f| !f.eof }.nil?
+      end
+
       def run_playbook(playbook)
         @inventory = 'inventory/hosts' if @inventory.nil?
 
@@ -123,13 +131,15 @@ module OpenShift
 
         cmd = cmds.join(' ; ')
 
-        stdout, stderr, status = Open3.capture3(cmd)
-        if 0 != status.exitstatus
-          raise %Q[Following command failed with exit code: #{status.exitstatus}
+        pid = spawn(cmd, :out => $stdout, :err => $stderr, :close_others => true)
+        _, state = Process.wait2(pid)
+
+        if 0 != state.exitstatus
+          raise %Q[Warning failed with exit code: #{state.exitstatus}
+
 #{cmd}
+
 extra_vars: #{@extra_vars.to_json}
-stdout: #{stdout}
-stderr: #{stderr}
 ]
         end
       ensure
