@@ -11,6 +11,7 @@
 
     - debug: msg="{{ groups['oo_hosts_to_terminate'] }}"
 
+
 - name: Terminate instances
   hosts: localhost
   connection: local
@@ -24,15 +25,15 @@
         instance_names: "{{ groups['oo_hosts_to_terminate'] }}"
         disks: "{{ groups['oo_hosts_to_terminate'] }}"
       register: gce
-
+    
     - debug: var=gce
 
-    - name: Remove disks of instances
-      gce_pd:
-        service_account_email: "{{ gce_service_account_email }}"
-        pem_file: "{{ gce_pem_file }}"
-        project_id: "{{ gce_project_id }}"
-        name: "{{ item }}"
-        zone: "{{ gce.zone }}"
-        state: absent
-      with_items: gce.instance_names
+#    - name: Remove disks of instances
+#      gce_pd:
+#        service_account_email: "{{ gce_service_account_email }}"
+#        pem_file: "{{ gce_pem_file }}"
+#        project_id: "{{ gce_project_id }}"
+#        name: "{{ item }}"
+#        state: deleted
+#      with_items: gce.instance_names
+

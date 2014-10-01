@@ -1,0 +1,24 @@
+---
+# tasks file for openshift_minion
+- name: Install OpenShift
+  yum: pkg=openshift state=installed
+
+- name: Configure OpenShift settings
+  lineinfile: >
+    dest=/etc/sysconfig/openshift
+    regexp={{ item.regex }}
+    line="{{ item.line }}"
+  with_items:
+    - { regex: '^OPENSHIFT_MASTER',  line: 'OPENSHIFT_MASTER=\"{{ oo_master_ips[0] }}\"' }
+    - { regex: '^OPENSHIFT_BIND_ADDR', line: 'OPENSHIFT_BIND_ADDR=\"{{ hostvars[inventory_hostname].ansible_eth0.ipv4.address }}\"'}
+  notify:
+    - restart openshift-minion
+
+- name: Enable OpenShift
+  service: name=openshift enabled=yes state=started
+
+- name: Open firewalld port for OpenShift
+  firewalld: port=10250/tcp permanent=false state=enabled
+
+- name: Save firewalld port for OpenShift
+  firewalld: port=10250/tcp permanent=true state=enabled
