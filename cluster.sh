@@ -23,24 +23,26 @@ EOT
 # @formatter:on
 
 function create_cluser {
+    for (( i = 0; i < $MASTERS; i ++ )); do
+        ./cloud.rb "${PROVIDER}" launch -e "${ENV}" --type=$MASTER_PLAYBOOK
+    done
+
     for (( i = 0; i < $MINIONS; i ++ )); do
         ./cloud.rb "${PROVIDER}" launch -e "${ENV}" --type=$MINION_PLAYBOOK
     done
 
-    for (( i = 0; i < $MASTERS; i ++ )); do
-        ./cloud.rb "${PROVIDER}" launch -e "${ENV}" --type=$MASTER_PLAYBOOK
-    done
     update_cluster
-    echo -e "\nCreated ${MASTERS} ${MASTER_PLAYBOOK} masters and ${MINIONS} ${MINION_PLAYBOOK} minions using ${PROVIDER} provider\n"
+
+    echo -e "\nCreated ${MASTERS}/${MASTER_PLAYBOOK} masters and ${MINIONS}/${MINION_PLAYBOOK} minions using ${PROVIDER} provider\n"
 }
 
 function update_cluster {
-    for (( i = 0; i < $MINIONS; i ++ )); do
-        ./cloud.rb "${PROVIDER}" config -e "${ENV}" --type=$MINION_PLAYBOOK
-    done
-
     for (( i = 0; i < $MASTERS; i ++ )); do
         ./cloud.rb "${PROVIDER}" config -e "${ENV}" --type=$MASTER_PLAYBOOK
+    done
+
+    for (( i = 0; i < $MINIONS; i ++ )); do
+        ./cloud.rb "${PROVIDER}" config -e "${ENV}" --type=$MINION_PLAYBOOK
     done
 }
 

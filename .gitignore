@@ -1,0 +1,15 @@
+*~
+#*#
+.idea
+*.iml
+*.komodoproject
+.loadpath
+.project
+*.pyc
+.pydevproject
+*.pyo
+*.redcar*
+.*.swp
+.sass-cache
+.rvmrc
+.DS_Store

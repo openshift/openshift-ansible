@@ -1,7 +1,7 @@
 ---
 # tasks file for openshift_master
 - name: Install Origin
-  yum: pkg=openshift state=installed
+  yum: pkg=origin state=installed
 
 - name: Configure Origin settings
   lineinfile: >
@@ -14,12 +14,17 @@
   notify:
     - restart openshift-master
 
-- name: Enable OpenShift
-  service: name=openshift enabled=yes state=started
+- name: Open firewalld port for etcd embedded in OpenShift
+  firewalld: port=4001/tcp permanent=false state=enabled
 
-- name: Open firewalld port for Origin
+- name: Save firewalld port for etcd embedded in
+  firewalld: port=4001/tcp permanent=true state=enabled
+
+- name: Open firewalld port for OpenShift
   firewalld: port=8080/tcp permanent=false state=enabled
 
-- name: Save firewalld port for Origin
+- name: Save firewalld port for OpenShift
   firewalld: port=8080/tcp permanent=true state=enabled
 
+- name: Enable OpenShift
+  service: name=openshift enabled=yes state=started

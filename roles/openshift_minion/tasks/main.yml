@@ -1,7 +1,7 @@
 ---
 # tasks file for openshift_minion
 - name: Install OpenShift
-  yum: pkg=openshift state=installed
+  yum: pkg=origin state=installed
 
 - name: Configure OpenShift settings
   lineinfile: >
@@ -14,11 +14,17 @@
   notify:
     - restart openshift-minion
 
-- name: Enable OpenShift
-  service: name=openshift enabled=yes state=started
-
 - name: Open firewalld port for OpenShift
   firewalld: port=10250/tcp permanent=false state=enabled
 
 - name: Save firewalld port for OpenShift
   firewalld: port=10250/tcp permanent=true state=enabled
+
+  # POST ${master_ip}:8080/api/v1beta1/minions kind=Minion id=${node_ip} apiVersion=v1beta1 hostIP=${node_ip} >/dev/null
+
+- name: Enable OpenShift
+  service: name=openshift enabled=yes state=started
+
+- name: Register with OpenShift master
+  command: "curl -X POST -H 'Accept: application/json' -d '{\"kind\":\"Minion\", \"id\":\"{{ hostvars[inventory_hostname].ansible_eth0.ipv4.address }}\", \"apiVersion\":\"v1beta1\", \"hostIP\":\"{{ hostvars[inventory_hostname].ansible_eth0.ipv4.address }}\" }' http://{{ oo_master_ips[0] }}:8080/api/v1beta1/minions"
+  when: oo_master_ips[0] != ''
