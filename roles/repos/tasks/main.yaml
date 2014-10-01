@@ -11,12 +11,6 @@
 #    src=RPM-GPG-KEY-redhat-release
 #    dest=/etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
 
-- name: Ensure rhel-7-libra-candidate client-key.pem exists
-  copy: src=client-key.pem dest=/var/lib/yum/client-key.pem
-
-- name: Ensure rhel-7-libra-candidate client-cert.pem exists
-  copy: src=client-cert.pem dest=/var/lib/yum/client-cert.pem
-
 - name: Ensure rhel 7 libra candidate exists in yum.repos.d
   copy: src=rhel-7-libra-candidate.repo dest=/etc/yum.repos.d/rhel-7-libra-candidate.repo
 
