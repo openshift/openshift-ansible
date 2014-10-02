@@ -10,8 +10,8 @@ def oo_pdb(arg):
   return arg
 
 def oo_len(arg):
-  ''' This returns the size of the argument
-        Ex: "{{ hostvars | oo_size }}"
+  ''' This returns the length of the argument
+        Ex: "{{ hostvars | oo_len }}"
   '''
   return len(arg)
 
