@@ -9,6 +9,12 @@ def oo_pdb(arg):
   pdb.set_trace()
   return arg
 
+def oo_len(arg):
+  ''' This returns the size of the argument
+        Ex: "{{ hostvars | oo_size }}"
+  '''
+  return len(arg)
+
 def get_attr(data, attribute=None):
   ''' This looks up dictionary attributes of the form a.b.c and returns the value.
         Ex: data = {'a': {'b': {'c': 5}}}
@@ -65,5 +71,6 @@ class FilterModule (object):
     return {
       "oo_select_keys": oo_select_keys,
       "oo_collect": oo_collect,
+      "oo_len": oo_len,
       "oo_pdb": oo_pdb
     }
