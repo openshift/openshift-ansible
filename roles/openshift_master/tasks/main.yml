@@ -9,8 +9,8 @@
     regexp={{ item.regex }}
     line="{{ item.line }}"
   with_items:
-    - { regex: '^OPENSHIFT_MASTER',  line: 'OPENSHIFT_MASTER=\"{{ hostvars[inventory_hostname].ansible_eth0.ipv4.address }}\"' }
-    - { regex: '^OPENSHIFT_BIND_ADDR', line: 'OPENSHIFT_BIND_ADDR=\"{{ hostvars[inventory_hostname].ansible_eth0.ipv4.address }}\"'}
+    - { regex: '^OPENSHIFT_MASTER',  line: 'OPENSHIFT_MASTER=\"{{ oo_bind_ip }}\"' }
+    - { regex: '^OPENSHIFT_BIND_ADDR', line: 'OPENSHIFT_BIND_ADDR=\"{{ oo_bind_ip }}\"'}
   notify:
     - restart openshift-master
 
