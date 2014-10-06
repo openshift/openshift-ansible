@@ -1,0 +1,4 @@
+---
+# handlers file for openshift_minion
+- name: restart openshift-minion
+  service: name=openshift state=restarted

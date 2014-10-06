@@ -19,3 +19,6 @@
 
 - name: Ensure the kubernetes repo is available
   copy: src=epel7-kubernetes.repo dest=/etc/yum.repos.d/epel7-kubernetes.repo
+
+- name: Ensure the origin repo is available
+  copy: src=epel7-origin.repo dest=/etc/yum.repos.d/epel7-origin.repo

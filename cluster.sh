@@ -1,8 +1,15 @@
 #!/bin/bash -eu
 
-MINIONS=3
+MINIONS=1
 MASTERS=1
 PROVIDER=gce
+
+# FIXME: Add option
+#MASTER_PLAYBOOK=os3-master
+MASTER_PLAYBOOK=openshift-master
+#MINION_PLAYBOOK=os3-minion
+MINION_PLAYBOOK=openshift-minion
+
 
 # @formatter:off
 function usage {
@@ -16,30 +23,32 @@ EOT
 # @formatter:on
 
 function create_cluser {
-    for (( i = 0; i < $MINIONS; i ++ )); do
-        ./cloud.rb "${PROVIDER}" launch -e "${ENV}" --type=os3-minion
+    for (( i = 0; i < $MASTERS; i ++ )); do
+        ./cloud.rb "${PROVIDER}" launch -e "${ENV}" --type=$MASTER_PLAYBOOK
     done
 
-    for (( i = 0; i < $MASTERS; i ++ )); do
-        ./cloud.rb "${PROVIDER}" launch -e "${ENV}" --type=os3-master
+    for (( i = 0; i < $MINIONS; i ++ )); do
+        ./cloud.rb "${PROVIDER}" launch -e "${ENV}" --type=$MINION_PLAYBOOK
     done
+
     update_cluster
-    echo -e "\nCreated ${MASTERS} masters and ${MINIONS} minions using ${PROVIDER} provider\n"
+
+    echo -e "\nCreated ${MASTERS}/${MASTER_PLAYBOOK} masters and ${MINIONS}/${MINION_PLAYBOOK} minions using ${PROVIDER} provider\n"
 }
 
 function update_cluster {
-    for (( i = 0; i < $MINIONS; i ++ )); do
-        ./cloud.rb "${PROVIDER}" config -e "${ENV}" --type=os3-minion
+    for (( i = 0; i < $MASTERS; i ++ )); do
+        ./cloud.rb "${PROVIDER}" config -e "${ENV}" --type=$MASTER_PLAYBOOK
     done
 
-    for (( i = 0; i < $MASTERS; i ++ )); do
-        ./cloud.rb "${PROVIDER}" config -e "${ENV}" --type=os3-master
+    for (( i = 0; i < $MINIONS; i ++ )); do
+        ./cloud.rb "${PROVIDER}" config -e "${ENV}" --type=$MINION_PLAYBOOK
     done
 }
 
 function terminate_cluster {
-    #./cloud.rb "${PROVIDER}" terminate -e "${ENV}" --type=os3-master
-    ./cloud.rb "${PROVIDER}" terminate -e "${ENV}" --type=os3-minion
+    ./cloud.rb "${PROVIDER}" terminate -e "${ENV}" --type=$MASTER_PLAYBOOK
+    ./cloud.rb "${PROVIDER}" terminate -e "${ENV}" --type=$MINION_PLAYBOOK
 }
 
 [ -f ./cloud.rb ] || (echo 1>&2 'Cannot find ./cloud.rb' && exit 1)

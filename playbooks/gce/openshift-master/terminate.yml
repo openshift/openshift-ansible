@@ -16,7 +16,7 @@
   hosts: localhost
   connection: local
   tasks:
-    - name: Terminate minion instances
+    - name: Terminate master instances
       gce:
         service_account_email: "{{ gce_service_account_email }}"
         pem_file: "{{ gce_pem_file }}"
@@ -37,4 +37,5 @@
         zone: "{{ gce.zone }}"
         state: absent
       with_items: gce.instance_names
+
 

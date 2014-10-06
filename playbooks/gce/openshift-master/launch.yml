@@ -1,0 +1,38 @@
+---
+- name: Launch instance(s)
+  hosts: localhost
+  connection: local
+  gather_facts: no
+
+  vars:
+    inst_names: "{{ oo_new_inst_names }}"
+    machine_type: n1-standard-1
+    image: libra-rhel7
+
+  vars_files:
+      - vars.yml
+
+  tasks:
+    - name: Launch instances
+      gce:
+        instance_names: "{{ inst_names }}"
+        machine_type: "{{ machine_type }}"
+        image: "{{ image }}"
+        service_account_email: "{{ gce_service_account_email }}"
+        pem_file: "{{ gce_pem_file }}"
+        project_id: "{{ gce_project_id }}"
+        tags: "{{ oo_new_inst_tags }}"
+      register: gce
+
+    - name: Add new instances public IPs to oo_hosts_to_config
+      add_host: "hostname={{ item.name }} ansible_ssh_host={{ item.public_ip }} groupname=oo_hosts_to_config"
+      with_items: gce.instance_data
+
+    - name: Wait for ssh
+      wait_for: "port=22 host={{ item.public_ip }}"
+      with_items: gce.instance_data
+
+    - debug: var=gce
+
+# Apply the configs, separate so that just the configs can be run by themselves
+- include: config.yml

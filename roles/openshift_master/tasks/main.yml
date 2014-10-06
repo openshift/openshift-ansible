@@ -1,0 +1,30 @@
+---
+# tasks file for openshift_master
+- name: Install Origin
+  yum: pkg=origin state=installed
+
+- name: Configure Origin settings
+  lineinfile: >
+    dest=/etc/sysconfig/openshift
+    regexp={{ item.regex }}
+    line="{{ item.line }}"
+  with_items:
+    - { regex: '^OPENSHIFT_MASTER',  line: 'OPENSHIFT_MASTER=\"{{ oo_bind_ip }}\"' }
+    - { regex: '^OPENSHIFT_BIND_ADDR', line: 'OPENSHIFT_BIND_ADDR=\"{{ oo_bind_ip }}\"'}
+  notify:
+    - restart openshift-master
+
+- name: Open firewalld port for etcd embedded in OpenShift
+  firewalld: port=4001/tcp permanent=false state=enabled
+
+- name: Save firewalld port for etcd embedded in
+  firewalld: port=4001/tcp permanent=true state=enabled
+
+- name: Open firewalld port for OpenShift
+  firewalld: port=8080/tcp permanent=false state=enabled
+
+- name: Save firewalld port for OpenShift
+  firewalld: port=8080/tcp permanent=true state=enabled
+
+- name: Enable OpenShift
+  service: name=openshift enabled=yes state=started
