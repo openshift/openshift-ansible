@@ -14,7 +14,7 @@ MINION_PLAYBOOK=openshift-minion
 # @formatter:off
 function usage {
     cat 1>&2 <<-EOT
-        ${0} : [create|destroy|update|list] {GCE environment tag}
+        ${0} : [create|terminate|update|list] {GCE environment tag}
 
         Supported environment tags:
         $(grep 'SUPPORTED_ENVS.*=' ./cloud.rb)
