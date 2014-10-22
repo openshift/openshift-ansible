@@ -125,17 +125,12 @@ module OpenShift
 
       desc "list", "Lists instances."
       def list()
-        hosts = GceHelper.list_hosts()
-
-        data = {}
-        hosts.each do |key,value|
-          value.each { |h| (data[h] ||= []) << key }
-        end
+        hosts = GceHelper.get_hosts()
 
         puts
         puts "Instances"
         puts "---------"
-        data.keys.sort.each { |k| puts "  #{k}" }
+        hosts.each { |k| puts "  #{k.name}" }
         puts
       end
 
@@ -177,13 +172,10 @@ module OpenShift
 
       desc "ssh", "Ssh to an instance"
       def ssh(*ssh_ops, host)
-        puts host
         if host =~ /^([\w\d_.-]+)@([\w\d-_.]+)/
           user = $1
           host = $2
         end
-        puts "user=#{user}"
-        puts "host=#{host}"
 
         details = GceHelper.get_host_details(host)
         abort "\nError: Instance [#{host}] is not RUNNING\n\n" unless details['gce_status'] == 'RUNNING'

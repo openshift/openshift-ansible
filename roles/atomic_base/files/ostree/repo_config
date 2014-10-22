@@ -1,0 +1,10 @@
+[core]
+repo_version=1
+mode=bare
+
+[remote "rh-atomic-controller"]
+url=https://mirror.openshift.com/libra/ostree/rhel-7-atomic-host
+branches=rh-atomic-controller/el7/x86_64/buildmaster/controller/docker;
+tls-client-cert-path=/var/lib/yum/client-cert.pem
+tls-client-key-path=/var/lib/yum/client-key.pem
+gpg-verify=false

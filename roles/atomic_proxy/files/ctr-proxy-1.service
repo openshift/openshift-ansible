@@ -1,0 +1,37 @@
+
+
+[Unit]
+Description=Container proxy-1
+
+
+[Service]
+Type=simple
+TimeoutStartSec=5m
+Slice=container-small.slice
+
+ExecStartPre=-/usr/bin/docker rm "proxy-1"
+
+ExecStart=/usr/bin/docker run --rm --name "proxy-1"                           \
+          --volumes-from proxy-shared-data-1                                  \
+          -a stdout -a stderr -p 80:80 -p 443:443 -p 4999:4999                \
+          "proxy:latest"
+
+ExecStartPost=-/usr/bin/gear init --post "proxy-1" "proxy:latest"
+ExecReload=-/usr/bin/docker stop "proxy-1"
+ExecReload=-/usr/bin/docker rm "proxy-1"
+ExecStop=-/usr/bin/docker stop "proxy-1"
+
+[Install]
+WantedBy=container.target
+
+# Container information
+X-ContainerId=proxy-1
+X-ContainerImage=proxy:latest
+X-ContainerUserId=
+X-ContainerRequestId=LwiWtYWaAvSavH6Ze53QJg
+X-ContainerType=simple
+X-PortMapping=80:80
+X-PortMapping=443:443
+X-PortMapping=4999:4999
+
+

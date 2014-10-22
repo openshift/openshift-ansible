@@ -1,15 +1,27 @@
+require 'ostruct'
+
 module OpenShift
   module Ops
     class GceHelper
       MYDIR = File.expand_path(File.dirname(__FILE__))
 
-      def self.list_hosts()
+      def self.get_hosts()
         cmd = "#{MYDIR}/../inventory/gce/gce.py --list"
         hosts = %x[#{cmd} 2>&1]
 
         raise "Error: failed to list hosts\n#{hosts}" unless $?.exitstatus == 0
 
-        return JSON.parse(hosts)
+        # invert the hash so that it's key is the host, and values is an array of metadata
+        data = {}
+        JSON.parse(hosts).each do |key,value|
+          value.each { |h| (data[h] ||= []) << key }
+        end
+
+        # For now, we only care about the name. In the future, we may want the other metadata included.
+        retval = []
+        data.keys.sort.each { |k| retval << OpenStruct.new({ :name => k }) }
+
+        return retval
       end
 
       def self.get_host_details(host)
