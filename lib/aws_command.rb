@@ -108,8 +108,8 @@ module OpenShift
         fmt_str = "%34s %5s %8s %17s %7s"
 
         puts
-        puts fmt_str % ['Name','Env', 'State', 'IP', 'Created By']
-        puts fmt_str % ['----','---', '-----', '--', '----------']
+        puts fmt_str % ['Name','Env', 'State', 'IP Address', 'Created By']
+        puts fmt_str % ['----','---', '-----', '----------', '----------']
         hosts.each { |h| puts fmt_str % [h.name, h.env, h.state, h.public_ip, h.created_by ] }
         puts
       end

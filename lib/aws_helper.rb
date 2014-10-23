@@ -37,7 +37,8 @@ module OpenShift
         hosts = get_list()
         dns_names = hosts["tag_Name_#{host}"]
 
-        raise "Error: host not found [#{host}]" if dns_names.nil?
+        raise "Host not found [#{host}]" if dns_names.nil?
+        raise "Multiple entries found for [#{host}]" if dns_names.size > 1
 
         return hosts['_meta']['hostvars'][dns_names.first]
       end
