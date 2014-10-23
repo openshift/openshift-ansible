@@ -21,12 +21,14 @@ module OpenShift
           retval << OpenStruct.new({
             :name        => info['ec2_tag_Name'],
             :env         => info['ec2_tag_environment'] || 'UNSET',
-            :external_ip => info['ec2_ip_address'],
-            :public_dns  => info['ec2_public_dns_name']
+            :public_ip   => info['ec2_ip_address'],
+            :public_dns  => info['ec2_public_dns_name'],
+            :state       => info['ec2_state'],
+            :created_by  => info['ec2_tag_created-by']
           })
         end
 
-        retval.sort_by! { |h| [h.env, h.name] }
+        retval.sort_by! { |h| [h.env, h.state, h.name] }
 
         return retval
       end

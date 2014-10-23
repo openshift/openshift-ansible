@@ -35,7 +35,7 @@ module OpenShift
         # Add a created by tag
         ah.extra_vars['oo_new_inst_tags'] = {} if ah.extra_vars['oo_new_inst_tags'].nil?
 
-        ah.extra_vars['oo_new_inst_tags']["created-by"] = ENV['USER']
+        ah.extra_vars['oo_new_inst_tags']['created-by'] = ENV['USER']
         ah.extra_vars['oo_new_inst_tags'].merge!(AwsHelper.generate_env_tag(options[:env]))
         ah.extra_vars['oo_new_inst_tags'].merge!(AwsHelper.generate_host_type_tag(options[:type]))
         ah.extra_vars['oo_new_inst_tags'].merge!(AwsHelper.generate_env_host_type_tag(options[:env], options[:type]))
@@ -96,15 +96,21 @@ module OpenShift
         ah.run_playbook("playbooks/aws/#{host_type}/config.yml")
       end
 
+      option :env, :required => false, :aliases => '-e', :enum => SUPPORTED_ENVS,
+             :desc => 'The environment to list.'
       desc "list", "Lists instances."
       def list()
         AwsHelper.check_creds()
         hosts = AwsHelper.get_hosts()
 
+        hosts.delete_if { |h| h.env != options[:env] } unless options[:env].nil?
+
+        fmt_str = "%34s %5s %8s %17s %7s"
+
         puts
-        puts "Instances"
-        puts "---------"
-        hosts.each { |h| puts "  #{h.name}.#{h.env}" }
+        puts fmt_str % ['Name','Env', 'State', 'IP', 'Created By']
+        puts fmt_str % ['----','---', '-----', '--', '----------']
+        hosts.each { |h| puts fmt_str % [h.name, h.env, h.state, h.public_ip, h.created_by ] }
         puts
       end
 
