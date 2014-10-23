@@ -1,0 +1,4 @@
+---
+- include: system.yml
+- include: bash.yml
+- include: ostree.yml

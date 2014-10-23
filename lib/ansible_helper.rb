@@ -60,7 +60,7 @@ extra_vars: #{@extra_vars.to_json}
       end
 
       def self.for_gce
-        ah      = AnsibleHelper.new
+        ah = AnsibleHelper.new
 
         # GCE specific configs
         gce_ini = "#{MYDIR}/../inventory/gce/gce.ini"
@@ -84,6 +84,14 @@ extra_vars: #{@extra_vars.to_json}
         ah.inventory = 'inventory/gce/gce.py'
         return ah
       end
+
+      def self.for_aws
+        ah = AnsibleHelper.new
+
+        ah.inventory = 'inventory/aws/ec2.py'
+        return ah
+      end
+
 
       def ignore_bug_6407
         puts

@@ -1,0 +1,37 @@
+
+
+[Unit]
+Description=Container proxy-puppet-1
+
+
+[Service]
+Type=simple
+TimeoutStartSec=5m
+Slice=container-small.slice
+
+
+ExecStartPre=-/usr/bin/docker rm "proxy-puppet-1"
+
+ExecStart=/usr/bin/docker run --rm --name "proxy-puppet-1"                                    \
+          --volumes-from proxy-shared-data-1                                                  \
+          -v /var/lib/docker/volumes/proxy_puppet/var/lib/puppet/ssl:/var/lib/puppet/ssl      \
+          -v /var/lib/docker/volumes/proxy_puppet/etc/puppet:/etc/puppet                      \
+          -a stdout -a stderr                                                                 \
+          "puppet:latest"
+# Set links (requires container have a name)
+ExecStartPost=-/usr/bin/gear init --post "proxy-puppet-1" "puppet:latest"
+ExecReload=-/usr/bin/docker stop "proxy-puppet-1"
+ExecReload=-/usr/bin/docker rm "proxy-puppet-1"
+ExecStop=-/usr/bin/docker stop "proxy-puppet-1"
+
+[Install]
+WantedBy=container.target
+
+# Container information
+X-ContainerId=proxy-puppet-1
+X-ContainerImage=puppet:latest
+X-ContainerUserId=
+X-ContainerRequestId=Ky0lhw0onwoSDJR4GK6t3g
+X-ContainerType=simple
+
+

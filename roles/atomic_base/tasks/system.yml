@@ -1,0 +1,3 @@
+---
+- name: Upload nofile limits.d file
+  copy: src=system/90-nofile.conf dest=/etc/security/limits.d/90-nofile.conf owner=root group=root mode=0644

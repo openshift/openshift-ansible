@@ -21,6 +21,10 @@ module OpenShift
       def self.get_gce_host_types()
         return Dir.glob("#{MYDIR}/../playbooks/gce/*").map { |d| File.basename(d) }
       end
+
+      def self.get_aws_host_types()
+        return Dir.glob("#{MYDIR}/../playbooks/aws/*").map { |d| File.basename(d) }
+      end
     end
   end
 end

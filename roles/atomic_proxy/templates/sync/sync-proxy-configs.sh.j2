@@ -1,0 +1,16 @@
+#!/bin/bash
+
+VOL_DIR=/var/lib/docker/volumes/proxy
+SSH_CMD="ssh -o StrictHostKeyChecking=no -o PasswordAuthentication=no -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null"
+
+mkdir -p ${VOL_DIR}/etc/haproxy/
+rsync -e "${SSH_CMD}" -va --progress root@proxy1.{{ oo_env }}.rhcloud.com:/etc/haproxy/ ${VOL_DIR}/etc/haproxy/
+
+mkdir -p ${VOL_DIR}/etc/httpd/
+rsync -e "${SSH_CMD}" -va --progress root@proxy1.{{ oo_env }}.rhcloud.com:/etc/httpd/ ${VOL_DIR}/etc/httpd/
+
+mkdir -p ${VOL_DIR}/etc/pki/tls/
+rsync -e "${SSH_CMD}" -va --progress root@proxy1.{{ oo_env }}.rhcloud.com:/etc/pki/tls/ ${VOL_DIR}/etc/pki/tls/
+
+# We need to disable the haproxy chroot
+sed -i -re 's/^(\s+)chroot/\1#chroot/' /var/lib/docker/volumes/proxy/etc/haproxy/haproxy.cfg

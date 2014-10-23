@@ -1,0 +1,37 @@
+
+
+[Unit]
+Description=Container proxy-monitoring-1
+
+
+[Service]
+Type=simple
+TimeoutStartSec=5m
+Slice=container-small.slice
+
+ExecStartPre=-/usr/bin/docker rm "proxy-monitoring-1"
+
+ExecStart=/usr/bin/docker run --rm --name "proxy-monitoring-1"                \
+          --volumes-from proxy-shared-data-1                                  \
+          -a stdout -a stderr                                                 \
+          "monitoring:latest"
+
+ExecStartPost=-/usr/bin/gear init --post "proxy-monitoring-1" "monitoring:latest"
+ExecReload=-/usr/bin/docker stop "proxy-monitoring-1"
+ExecReload=-/usr/bin/docker rm "proxy-monitoring-1"
+ExecStop=-/usr/bin/docker stop "proxy-monitoring-1"
+
+[Install]
+WantedBy=container.target
+
+# Container information
+X-ContainerId=proxy-monitoring-1
+X-ContainerImage=monitoring:latest
+X-ContainerUserId=
+X-ContainerRequestId=LwiWtYWaAvSavH6Ze53QJg
+X-ContainerType=simple
+X-PortMapping=80:80
+X-PortMapping=443:443
+X-PortMapping=4999:4999
+
+

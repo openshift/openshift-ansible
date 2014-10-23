@@ -1,0 +1,21 @@
+---
+- name: upload sbin scripts
+  copy: >
+    src={{ item }}
+    dest=/usr/local/sbin/{{ item }}
+    mode=0750
+  with_items:
+    - setup-proxy-containers.sh
+
+- name: upload /usr/local/etc files
+  copy: >
+    src={{ item }}
+    dest=/usr/local/etc/{{ item }}
+    mode=0640
+  with_items:
+    - proxy_containers_deploy_descriptor.json
+    - ctr-proxy-1.service
+    - ctr-proxy-puppet-1.service
+    - ctr-proxy-monitoring-1.service
+
+- include: setup_puppet.yml

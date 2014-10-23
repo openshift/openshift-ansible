@@ -1,0 +1,29 @@
+{
+  "Containers":[
+    {
+      "Name":"proxy-puppet",
+      "Count":1,
+      "Image":"puppet:latest",
+      "PublicPorts":[
+      ]
+    },
+    {
+      "Name":"proxy",
+      "Count":1,
+      "Image":"proxy:latest",
+      "PublicPorts":[
+        {"Internal":80,"External":80},
+        {"Internal":443,"External":443},
+        {"Internal":4999,"External":4999}
+      ]
+    },
+    {
+      "Name":"proxy-monitoring",
+      "Count":1,
+      "Image":"monitoring:latest",
+      "PublicPorts":[
+      ]
+    }
+  ],
+  "RandomizeIds": false
+}
