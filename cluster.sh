@@ -1,13 +1,11 @@
 #!/bin/bash -eu
 
-MINIONS=1
+MINIONS=3
 MASTERS=1
 PROVIDER=gce
 
-# FIXME: Add option
-#MASTER_PLAYBOOK=os3-master
+# FIXME: Add options
 MASTER_PLAYBOOK=openshift-master
-#MINION_PLAYBOOK=os3-minion
 MINION_PLAYBOOK=openshift-minion
 
 
