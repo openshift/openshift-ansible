@@ -3,7 +3,8 @@
 - name: Install OpenShift
   yum: pkg=origin state=installed
 
-- name: Set hostname to IP Addr
+  # fixme: Once openshift stops resolving hostnames for minion queries remove this...
+- name: Set hostname to IP Addr (WORKAROUND)
   command: /usr/bin/hostname {{ oo_bind_ip }}
 
 - name: Configure OpenShift Minion settings
