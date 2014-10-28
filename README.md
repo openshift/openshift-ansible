@@ -12,5 +12,5 @@ Setup
   ```
 
 - Setup for a specific cloud:
-  - [AWS](../blob/master/README_AWS.md)
-  - [GCE](../blob/master/README_GCE.md)
+  - [AWS](README_AWS.md)
+  - [GCE](README_GCE.md)
