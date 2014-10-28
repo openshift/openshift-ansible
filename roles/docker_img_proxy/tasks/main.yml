@@ -1,0 +1,11 @@
+---
+- name: deploy proxy image build files
+  file: dest=/usr/local/etc/containers/proxy_container mode=755 state=directory
+
+- name: deploy proxy image build files
+  copy: "src=proxy_container/{{ item.name }} dest=/usr/local/etc/containers/proxy_container/{{ item.name }} mode={{ item.mode }}"
+  with_items:
+    - { name: 'Dockerfile',       mode: '644' }
+    - { name: 'ipc-watcher.rb',   mode: '755' }
+    - { name: 'start.sh',         mode: '755' }
+    - { name: 'supervisord.conf', mode: '644' }

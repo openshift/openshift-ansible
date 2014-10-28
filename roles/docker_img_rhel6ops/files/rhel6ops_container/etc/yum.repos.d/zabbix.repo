@@ -1,0 +1,14 @@
+[zabbix]
+name=Zend Server
+baseurl=http://mirror.ops.rhcloud.com/mirror/zabbix/$majorrelease/$basearch
+        http://use-mirror1.ops.rhcloud.com/mirror/zabbix/$majorrelease/$basearch
+        http://use-mirror2.ops.rhcloud.com/mirror/zabbix/$majorrelease/$basearch
+        http://euw-mirror1.ops.rhcloud.com/mirror/zabbix/$majorrelease/$basearch
+enabled=1
+gpgcheck=1
+gpgkey=http://mirror.ops.rhcloud.com/mirror/zabbix/keys/RPM-GPG-KEY-ZABBIX
+failovermethod=priority
+sslverify=0
+sslclientcert=/var/lib/yum/client-cert.pem
+sslclientkey=/var/lib/yum/client-key.pem
+

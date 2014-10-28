@@ -1,0 +1,15 @@
+[li-rhscl]
+name=Li RHSCL repo for Enterprise Linux $majorrelease - $basearch
+baseurl=https://mirror.ops.rhcloud.com/libra/rhscl-rhel-$majorrelease-libra/$basearch/
+        https://use-mirror1.ops.rhcloud.com/libra/rhscl-rhel-$majorrelease-libra/$basearch/
+        https://use-mirror2.ops.rhcloud.com/libra/rhscl-rhel-$majorrelease-libra/$basearch/
+        https://euw-mirror1.ops.rhcloud.com/libra/rhscl-rhel-$majorrelease-libra/$basearch/
+        https://gce-mirror1.ops.rhcloud.com/libra/rhscl-rhel-$majorrelease-libra/$basearch/
+        https://gce-mirror2.ops.rhcloud.com/libra/rhscl-rhel-$majorrelease-libra/$basearch/
+enabled=1
+gpgcheck=1
+gpgkey=https://mirror.ops.rhcloud.com/libra/keys/RPM-GPG-KEY-redhat-release https://mirror.ops.rhcloud.com/libra/keys/RPM-GPG-KEY-redhat-beta https://mirror.ops.rhcloud.com/libra/keys/RPM-GPG-KEY-redhat-openshifthosted
+failovermethod=priority
+sslverify=0
+sslclientcert=/var/lib/yum/client-cert.pem
+sslclientkey=/var/lib/yum/client-key.pem

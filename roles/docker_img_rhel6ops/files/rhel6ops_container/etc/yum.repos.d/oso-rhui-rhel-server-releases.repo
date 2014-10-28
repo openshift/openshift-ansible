@@ -1,0 +1,16 @@
+[oso-rhui-rhel-server-releases]
+name=OpenShift Online RHUI Mirror RH Enterprise Linux $majorrelease
+baseurl=https://mirror.ops.rhcloud.com/libra/rhui-rhel-server-$majorrelease-releases/
+        https://use-mirror1.ops.rhcloud.com/libra/rhui-rhel-server-$majorrelease-releases/
+        https://use-mirror2.ops.rhcloud.com/libra/rhui-rhel-server-$majorrelease-releases/
+        https://euw-mirror1.ops.rhcloud.com/libra/rhui-rhel-server-$majorrelease-releases/
+        https://gce-mirror1.ops.rhcloud.com/libra/rhui-rhel-server-$majorrelease-releases/
+        https://gce-mirror2.ops.rhcloud.com/libra/rhui-rhel-server-$majorrelease-releases/
+enabled=1
+gpgcheck=1
+gpgkey=https://mirror.ops.rhcloud.com/libra/keys/RPM-GPG-KEY-redhat-release https://mirror.ops.rhcloud.com/libra/keys/RPM-GPG-KEY-redhat-beta https://mirror.ops.rhcloud.com/libra/keys/RPM-GPG-KEY-redhat-openshifthosted
+exclude=libcgroup* gluster*
+failovermethod=priority
+sslverify=False
+sslclientcert=/var/lib/yum/client-cert.pem
+sslclientkey=/var/lib/yum/client-key.pem
