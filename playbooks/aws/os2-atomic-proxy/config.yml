@@ -23,4 +23,3 @@
     - ../../../roles/docker_img_puppet
     - ../../../roles/docker_img_proxy
     - ../../../roles/docker_img_monitoring
-    - ../../../roles/shutdown_nightly
