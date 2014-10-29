@@ -1,7 +1,0 @@
----
-- name: Setup nightly shutdown command to save money
-  cron: >
-    name="shutdown system at night to save money"
-    hour="18"
-    minute="0"
-    job="/usr/sbin/shutdown --halt"
