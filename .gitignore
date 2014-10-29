@@ -13,3 +13,4 @@
 .sass-cache
 .rvmrc
 .DS_Store
+secrets.py
