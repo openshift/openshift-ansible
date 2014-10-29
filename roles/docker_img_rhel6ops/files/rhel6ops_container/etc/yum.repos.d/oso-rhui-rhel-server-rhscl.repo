@@ -1,0 +1,15 @@
+[oso-rhui-rhel-server-rhscl]
+name=OpenShift Online RHUI Mirror RH Enterprise Linux $majorrelease - RHSCL
+baseurl=https://mirror.ops.rhcloud.com/libra/rhui-rhel-server-$majorrelease-rhscl/
+        https://use-mirror1.ops.rhcloud.com/libra/rhui-rhel-server-$majorrelease-rhscl/
+        https://use-mirror2.ops.rhcloud.com/libra/rhui-rhel-server-$majorrelease-rhscl/
+        https://euw-mirror1.ops.rhcloud.com/libra/rhui-rhel-server-$majorrelease-rhscl/
+        https://gce-mirror1.ops.rhcloud.com/libra/rhui-rhel-server-$majorrelease-rhscl/
+        https://gce-mirror2.ops.rhcloud.com/libra/rhui-rhel-server-$majorrelease-rhscl/
+enabled=1
+gpgcheck=1
+gpgkey=https://mirror.ops.rhcloud.com/libra/keys/RPM-GPG-KEY-redhat-release https://mirror.ops.rhcloud.com/libra/keys/RPM-GPG-KEY-redhat-beta https://mirror.ops.rhcloud.com/libra/keys/RPM-GPG-KEY-redhat-openshifthosted
+failovermethod=priority
+sslverify=False
+sslclientcert=/var/lib/yum/client-cert.pem
+sslclientkey=/var/lib/yum/client-key.pem

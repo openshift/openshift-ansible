@@ -18,4 +18,9 @@
   roles:
     - ../../../roles/atomic_base
     - ../../../roles/atomic_proxy
+    - ../../../roles/docker_img_build
+    - ../../../roles/docker_img_rhel6ops
+    - ../../../roles/docker_img_puppet
+    - ../../../roles/docker_img_proxy
+    - ../../../roles/docker_img_monitoring
     - ../../../roles/shutdown_nightly

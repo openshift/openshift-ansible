@@ -1,0 +1,14 @@
+---
+galaxy_info:
+  author: Thomas Wiest
+  description: Tools to do docker image builds
+  company: Red Hat
+  license: ASL 2.0
+  min_ansible_version: 1.6
+  platforms:
+  - name: EL
+    versions:
+    - 7
+  categories:
+  - docker
+dependencies: []

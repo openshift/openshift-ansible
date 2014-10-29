@@ -1,0 +1,16 @@
+[epel]
+name=Extra Packages for Enterprise Linux 6 - $basearch
+baseurl=http://mirror.ops.rhcloud.com/mirror/epel/6/$basearch/
+failovermethod=priority
+enabled=1
+gpgcheck=0
+exclude=libmongodb mongodb* nodejs*
+
+[epel-testing]
+name=Extra Packages for Enterprise Linux 6 - Testing - $basearch
+baseurl=http://mirror.ops.rhcloud.com/mirror/epel/testing/6/$basearch/
+failovermethod=priority
+enabled=0
+gpgcheck=0
+exclude=libmongodb mongodb* nodejs*
+

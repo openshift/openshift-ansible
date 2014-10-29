@@ -1,0 +1,10 @@
+---
+- name: deploy monitoring image build files
+  file: dest=/usr/local/etc/containers/monitoring_container mode=755 state=directory
+
+- name: deploy monitoring image build files
+  copy: "src=monitoring_container/{{ item.name }} dest=/usr/local/etc/containers/monitoring_container/{{ item.name }} mode={{ item.mode }}"
+  with_items:
+    - { name: 'Dockerfile',              mode: '644' }
+    - { name: 'register-with-zabbix.rb', mode: '755' }
+    - { name: 'start.rb',                mode: '755' }
