@@ -1,7 +1,7 @@
 openshift-online-ansible
 ========================
 
-This repo houses ansible code used in OpenShift Online.
+This repo houses Ansible code used in OpenShift Online.
 
 Setup
 -----
@@ -14,3 +14,12 @@ Setup
 - Setup for a specific cloud:
   - [AWS](README_AWS.md)
   - [GCE](README_GCE.md)
+
+- Directory Structure:
+  - [cloud.rb](cloud.rb) - light wrapper around Ansible
+  - [cluster.sh](cluster.sh) - easily create OpenShift 3 clusters
+  - [filter_plugins/](filter_plugins) - custom filters used to manipulate data in Ansible
+  - [inventory/](inventory) - houses Ansible dynamic inventory scripts
+  - [lib/](lib) - library components of cloud.rb
+  - [playbooks/](playbooks) - houses host-type Ansible playbooks (launch, config, destroy, vars)
+  - [roles/](roles) - shareable Ansible tasks
