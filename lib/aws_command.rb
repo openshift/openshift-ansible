@@ -41,7 +41,7 @@ module OpenShift
         ah.extra_vars['oo_new_inst_tags'].merge!(AwsHelper.generate_env_host_type_tag(options[:env], options[:type]))
 
         puts
-        puts 'Creating instance(s) in AWS...'
+        puts "Creating #{options[:count]} #{options[:type]} instance(s) in AWS..."
         ah.ignore_bug_6407
 
         # Make sure we're completely up to date before launching
