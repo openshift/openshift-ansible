@@ -34,18 +34,20 @@ Convert a GCE service key into a pem (for ansible)
 1. Once this is done, put the original service key file (projectname-ef83bd90f261.p12) somewhere safe, or delete it (your call, I don not know what else we will use it for, and we can always regen it if needed).
 
 
-Create a secrets.py file for GCE
+Create a gce.ini file for GCE
 --------------------------------
-1. vi ~/.gce/secrets.py
+1. vi ~/.gce/gce.ini
 1. make the contents look like this:
 ```
-  GCE_PARAMS = ('long...@developer.gserviceaccount.com', '/full/path/to/projectname_priv_key.pem')
-  GCE_KEYWORD_PARAMS = {'project': 'my_project_id'}
+[gce]
+gce_service_account_email_address = long...@developer.gserviceaccount.com
+gce_service_account_pem_file_path = /full/path/to/projectname_priv_key.pem
+gce_project_id = my_project_id
 ```
-1. Setup a sym link so that gce.py will pick it up (must be in same dir as gce.py)
+1. Setup a sym link so that gce.py will pick it up (link must be in same dir as gce.py)
 ```
   cd openshift-online-ansible/inventory/gce
-  ln -s ~/.gce/secrets.py secrets.py
+  ln -s ~/.gce/gce.ini gce.ini
 ```
 
 
