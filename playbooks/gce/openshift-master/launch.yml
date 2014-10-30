@@ -34,5 +34,14 @@
 
     - debug: var=gce
 
+    - name: Wait for root user setup
+      command: "ssh -o StrictHostKeyChecking=no -o PasswordAuthentication=no -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null root@{{ item.public_ip }} echo root user is setup"
+      register: result
+      until: result.rc == 0
+      retries: 20
+      delay: 10
+      with_items: gce.instance_data
+
+
 # Apply the configs, separate so that just the configs can be run by themselves
 - include: config.yml
