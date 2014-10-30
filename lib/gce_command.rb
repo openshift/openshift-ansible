@@ -42,7 +42,7 @@ module OpenShift
         ah.extra_vars['oo_new_inst_tags'] << GceHelper.generate_env_host_type_tag(options[:env], options[:type])
 
         puts
-        puts 'Creating instance(s) in GCE...'
+        puts "Creating #{options[:count]} #{options[:type]} instance(s) in GCE..."
         ah.ignore_bug_6407
 
         ah.run_playbook("playbooks/gce/#{options[:type]}/launch.yml")

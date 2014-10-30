@@ -20,14 +20,10 @@ EOT
 }
 # @formatter:on
 
-function create_cluser {
-    for (( i = 0; i < $MASTERS; i ++ )); do
-        ./cloud.rb "${PROVIDER}" launch -e "${ENV}" --type=$MASTER_PLAYBOOK
-    done
+function create_cluster {
+    ./cloud.rb "${PROVIDER}" launch -e "${ENV}" --type=$MASTER_PLAYBOOK -c $MASTERS
 
-    for (( i = 0; i < $MINIONS; i ++ )); do
-        ./cloud.rb "${PROVIDER}" launch -e "${ENV}" --type=$MINION_PLAYBOOK
-    done
+    ./cloud.rb "${PROVIDER}" launch -e "${ENV}" --type=$MINION_PLAYBOOK -c $MINIONS
 
     update_cluster
 
@@ -35,13 +31,8 @@ function create_cluser {
 }
 
 function update_cluster {
-    for (( i = 0; i < $MASTERS; i ++ )); do
-        ./cloud.rb "${PROVIDER}" config -e "${ENV}" --type=$MASTER_PLAYBOOK
-    done
-
-    for (( i = 0; i < $MINIONS; i ++ )); do
-        ./cloud.rb "${PROVIDER}" config -e "${ENV}" --type=$MINION_PLAYBOOK
-    done
+    ./cloud.rb "${PROVIDER}" config -e "${ENV}" --type=$MASTER_PLAYBOOK
+    ./cloud.rb "${PROVIDER}" config -e "${ENV}" --type=$MINION_PLAYBOOK
 }
 
 function terminate_cluster {
@@ -69,7 +60,7 @@ case "${1}" in
     'create')
         [ -z "${2:-}" ] && (usage; exit 1)
         ENV="${2}"
-        create_cluser ;;
+        create_cluster ;;
     'update')
         [ -z "${2:-}" ] && (usage; exit 1)
         ENV="${2}"
