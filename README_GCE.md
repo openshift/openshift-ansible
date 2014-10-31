@@ -40,6 +40,7 @@ Create a gce.ini file for GCE
 * gce_service_account_email_address - Found in "APIs & auth" -> Credentials -> "Service Account" -> "Email Address"
 * gce_service_account_pem_file_path - Full path from previous steps
 * gce_project_id - Found in "Projects", it list all the gce projects you are associated with.  The page lists their "Project Name" and "Project ID".  You want the "Project ID"
+
 1. vi ~/.gce/gce.ini
 1. make the contents look like this:
 ```
