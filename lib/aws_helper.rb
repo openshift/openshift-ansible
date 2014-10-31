@@ -51,7 +51,7 @@ module OpenShift
       def self.clear_inventory_cache()
         path = "#{ENV['HOME']}/.ansible/tmp"
         cache_files = ["#{path}/ansible-ec2.cache", "#{path}/ansible-ec2.index"]
-        FileUtils.rm(cache_files)
+        FileUtils.rm_f(cache_files)
       end
 
       def self.generate_env_tag(env)
