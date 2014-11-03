@@ -20,16 +20,14 @@ Convert a GCE service key into a pem (for ansible)
 ```
    # Temporarily set hash variable and project name
    export GCE_KEY_HASH=ef83bd90f261
-   export PROJECT_NAME=projectname
+   export PROJECT_NAME=Project Name
+   export PROJECT_ID=Project ID
 
    # Convert the service key (note: 'notasecret' is literally what we want here)
-   openssl pkcs12 -in ${PROJECT_NAME}-${GCE_KEY_HASH}.p12 -passin pass:notasecret -nodes -nocerts | openssl rsa -out ${PROJECT_NAME}-${GCE_KEY_HASH}.pem
+   openssl pkcs12 -in "${PROJECT_NAME}-${GCE_KEY_HASH}.p12" -passin pass:notasecret -nodes -nocerts | openssl rsa -out ${PROJECT_ID}-${GCE_KEY_HASH}.pem
 
    # Move the converted service key to the .gce dir
-   mv ${PROJECT_NAME}-${GCE_KEY_HASH}.pem ~/.gce
-
-   # Set a sym link so it is easy to reference
-   ln -s ~/.gce/${PROJECT_NAME}-${GCE_KEY_HASH}.pem ~/.gce/${PROJECT_NAME}_priv_key.pem
+   mv ${PROJECT_ID}-${GCE_KEY_HASH}.pem ~/.gce
 ```
 
 1. Once this is done, put the original service key file (projectname-ef83bd90f261.p12) somewhere safe, or delete it (your call, I don not know what else we will use it for, and we can always regen it if needed).
@@ -46,8 +44,8 @@ Create a gce.ini file for GCE
 ```
 [gce]
 gce_service_account_email_address = long...@developer.gserviceaccount.com
-gce_service_account_pem_file_path = /full/path/to/projectname_priv_key.pem
-gce_project_id = my_project_id
+gce_service_account_pem_file_path = /full/path/to/project_id-gce_key_hash.pem
+gce_project_id = project_id
 ```
 1. Setup a sym link so that gce.py will pick it up (link must be in same dir as gce.py)
 ```
