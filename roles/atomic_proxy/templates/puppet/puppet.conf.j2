@@ -1,6 +1,6 @@
 [main]
     # we need to override the host name of the container
-    certname = ctr-proxy.stg.rhcloud.com
+    certname = ctr-proxy.{{ oo_env }}.rhcloud.com
 
     # The Puppet log directory.
     # The default value is '$vardir/log'.

@@ -5,9 +5,9 @@ require 'fileutils'
 
 # TODO: These should be passed in as env vars. When we're in a POD, make sure to do this.
 # WORKAROUND: ^^
-OO_ENV = 'stg'
+OO_ENV = '{{ oo_env }}'
 OO_CTR_TYPE = 'proxy'
-HOSTGROUPS = ['STG Environment']
+HOSTGROUPS = {{ oo_zabbix_hostgroups | to_nice_json }}
 TEMPLATES = ['Template OpenShift Proxy Ctr']
 CTR_NAME = "ctr-#{OO_CTR_TYPE}-#{OO_ENV}-#{ENV['container_uuid'][0..6]}"
 

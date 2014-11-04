@@ -13,6 +13,9 @@ RUN yum -y install puppet3 crontabs cronie-anacron cronie system-config-firewall
 
 RUN rm /usr/sbin/lokkit ; ln -s /bin/true /usr/sbin/lokkit
 
+# this is needed so that we can run puppet without running the start script
+RUN mkdir -p /etc/haproxy
+
 # END: These are to fake out puppet
 
 # Container specific files
