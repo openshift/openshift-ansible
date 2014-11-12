@@ -7,7 +7,7 @@ MAINTAINER Thomas Wiest <twiest@redhat.com>
 RUN yum -y update ; yum clean all
 
 # Container Specific RPMs
-RUN yum -y install rhc-server-common httpd mod_security mod_ssl haproxy15 supervisor ruby ; yum clean all
+RUN yum -y install rsyslog rhc-server-common httpd mod_security mod_ssl haproxy15 supervisor ruby ruby193-ruby openshift-origin-util-scl ; yum clean all
 # this needs to be on it's own line, otherwise the libra_user group isn't setup properly yet
 RUN yum -y install rhc-site-static ; yum clean all
 
@@ -16,6 +16,9 @@ RUN yum -y install https://kojipkgs.fedoraproject.org//work/tasks/8506/7818506/s
 
 # Setup libra_user group with correct members
 RUN usermod -a -G libra_user apache
+
+# Setup libra_ops group for compatibility with host puppet
+RUN groupadd libra_ops
 
 # Setup ctr-ipc dir
 RUN ln -s /shared/var/run/ctr-ipc /var/run/ctr-ipc
