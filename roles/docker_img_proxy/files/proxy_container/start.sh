@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo _
-for shared_dir in /etc/haproxy /etc/pki /etc/httpd /var/lib/haproxy
+for shared_dir in /etc/haproxy /etc/pki /etc/httpd /var/lib/haproxy /usr/local/bin /usr/local/lib
 do
   echo "Setting up /shared${shared_dir}..."
   rm -rf $shared_dir
@@ -25,6 +25,10 @@ ln -sf /usr/lib64/httpd/modules /shared/etc/httpd/modules
 
 echo "Fixing symlink /etc/httpd/run..."
 ln -sf /var/run/httpd /shared/etc/httpd/run
+echo _
+
+echo "Starting rsyslog service..."
+service rsyslog start
 echo _
 
 echo "Starting supervisord"
