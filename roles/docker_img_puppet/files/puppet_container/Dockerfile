@@ -16,6 +16,9 @@ RUN rm /usr/sbin/lokkit ; ln -s /bin/true /usr/sbin/lokkit
 # this is needed so that we can run puppet without running the start script
 RUN mkdir -p /etc/haproxy
 
+# Setup libra_ops group for compatibility with host puppet
+RUN groupadd libra_ops
+
 # END: These are to fake out puppet
 
 # Container specific files
