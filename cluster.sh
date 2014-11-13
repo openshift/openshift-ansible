@@ -15,7 +15,7 @@ function usage {
         ${0} : [create|terminate|update|list] {GCE environment tag}
 
         Supported environment tags:
-        $(grep 'SUPPORTED_ENVS.*=' ./cloud.rb)
+        $(grep 'SUPPORTED_ENVS.*=' ./lib/gce_command.rb)
 EOT
 }
 # @formatter:on
