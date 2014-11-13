@@ -10,7 +10,7 @@ module OpenShift
   module Ops
     class GceCommand < Thor
       # WARNING: we do not currently support environments with hyphens in the name
-      SUPPORTED_ENVS = %w(prod stg int tint kint test jint amint tdint)
+      SUPPORTED_ENVS = %w(prod stg int tint kint test jint amint tdint lint)
 
       option :type, :required => true, :enum => LaunchHelper.get_gce_host_types,
              :desc => 'The host type of the new instances.'
