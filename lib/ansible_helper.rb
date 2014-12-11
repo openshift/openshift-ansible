@@ -25,7 +25,6 @@ module OpenShift
         tmpfile    = Tempfile.open('extra_vars') { |f| f.write(@extra_vars.to_json); f}
 
         cmds = []
-
         #cmds << 'set -x'
         cmds << %Q[export ANSIBLE_FILTER_PLUGINS="#{Dir.pwd}/filter_plugins"]
 
@@ -35,8 +34,7 @@ module OpenShift
 
         # We need pipelining off so that we can do sudo to enable the root account
         cmds << %Q[export ANSIBLE_SSH_PIPELINING='#{@pipelining.to_s}']
-        cmds << %Q[time -p ansible-playbook -i #{@inventory} #{@verbosity} #{playbook} --extra-vars '@#{tmpfile.path}']
-
+        cmds << %Q[time ansible-playbook  -i #{@inventory} #{@verbosity} #{playbook} --extra-vars '@#{tmpfile.path}' ]
         cmd = cmds.join(' ; ')
 
         pid = spawn(cmd, :out => $stdout, :err => $stderr, :close_others => true)
