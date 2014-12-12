@@ -2,7 +2,16 @@
 
 MINIONS=3
 MASTERS=1
-PROVIDER=gce
+
+# If the environment variable OO_PROVDER is defined, it used for the provider
+PROVIDER=$OO_PROVIDER
+# Otherwise, default is gce (Google Compute Engine)
+if [ "x$PROVIDER" == "x" ];then
+   PROVIDER=gce
+fi
+
+UPPER_CASE_PROVIDER=$(echo $PROVIDER | tr '[:lower:]' '[:upper:]')
+
 
 # FIXME: Add options
 MASTER_PLAYBOOK=openshift-master
@@ -12,10 +21,10 @@ MINION_PLAYBOOK=openshift-minion
 # @formatter:off
 function usage {
     cat 1>&2 <<-EOT
-        ${0} : [create|terminate|update|list] {GCE environment tag}
+        ${0} : [create|terminate|update|list] { ${UPPER_CASE_PROVIDER} environment tag}
 
         Supported environment tags:
-        $(grep 'SUPPORTED_ENVS.*=' ./lib/gce_command.rb)
+        $(grep 'SUPPORTED_ENVS.*=' ./lib/${PROVIDER}_command.rb)
 EOT
 }
 # @formatter:on
