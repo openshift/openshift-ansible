@@ -1,0 +1,15 @@
+# meta inventory configs
+clouds:
+  - name: aws1
+    provider: aws/ec2.py
+    env_vars:
+      AWS_ACCESS_KEY_ID: XXXXXXXXXXXXXXXXXXXX
+      AWS_SECRET_ACCESS_KEY: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+  - name: aws2
+    provider: aws/ec2.py
+    env_vars:
+      AWS_ACCESS_KEY_ID: XXXXXXXXXXXXXXXXXXXX
+      AWS_SECRET_ACCESS_KEY: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+cache_max_age: 60
