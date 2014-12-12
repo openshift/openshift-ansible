@@ -1,5 +1,5 @@
-# meta inventory configs
-clouds:
+# multi ec2 inventory configs
+accounts:
   - name: aws1
     provider: aws/ec2.py
     env_vars:
