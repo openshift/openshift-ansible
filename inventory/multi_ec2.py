@@ -11,7 +11,7 @@ import json
 import pprint
 
 
-class MetaInventory(object):
+class MultiEc2(object):
 
     def __init__(self):
         self.config = None
@@ -176,7 +176,7 @@ class MetaInventory(object):
 
 
 if __name__ == "__main__":
-    mi = MetaInventory()
+    mi = MultiEc2()
     #print mi.result
     pp = pprint.PrettyPrinter(indent=2)
     pp.pprint(mi.result)
