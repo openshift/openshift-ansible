@@ -35,7 +35,7 @@ class MultiEc2(object):
             # get data from disk
             self.get_inventory_from_cache()
 
-    def load_yaml_config(self,conf_file=os.path.join(os.getcwd(),'meta.yaml')):
+    def load_yaml_config(self,conf_file=os.path.join(os.getcwd(),'multi_ec2.yaml')):
         """Load a yaml config file with credentials to query the
         respective cloud for inventory.
         """
