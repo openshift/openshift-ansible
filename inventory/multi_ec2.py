@@ -17,7 +17,7 @@ class MultiEc2(object):
         self.config = None
         self.results = {}
         self.result = {}
-        self.cache_path_cache = os.path.expanduser('~/.ansible/tmp/meta-inventory.cache')
+        self.cache_path_cache = os.path.expanduser('~/.ansible/tmp/multi_ec2_inventory.cache')
 
         self.parse_cli_args()
 
