@@ -106,7 +106,7 @@ class MultiEc2(object):
                     self.results[result['name']] = json.loads(result['out'])
             values = self.results.values()
             values.insert(0, self.result)
-            map(lambda x: self.merge(self.result, x), values)
+            map(lambda x: self.merge_destructively(self.result, x), values)
         else:
             # For any 0 result, return it
             count = 0
@@ -117,12 +117,12 @@ class MultiEc2(object):
                 if count > 1:
                     raise RuntimeError("Found > 1 results for --host %s. \
                                        This is an invalid state." % self.args.host)
-    def merge(self, a, b):
+    def merge_destructively(self, a, b):
         "merges b into a"
         for key in b:
             if key in a:
                 if isinstance(a[key], dict) and isinstance(b[key], dict):
-                    self.merge(a[key], b[key])
+                    self.merge_destructively(a[key], b[key])
                 elif a[key] == b[key]:
                     pass # same leaf value
                 # both lists so add each element in b to a if it does ! exist
