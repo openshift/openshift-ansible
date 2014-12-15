@@ -1,5 +1,5 @@
 ---
-- name: get output of: docker images
+- name: "get output of: docker images"
   command: docker images
   changed_when: False # don't report as changed
   register: docker_images
@@ -16,7 +16,7 @@
     - oso-v2-monitoring
   when: "not docker_images.stdout | search('docker-registry.ops.rhcloud.com/{{ item }}.*{{ oo_env }}')"
 
-- name: get output of: docker ps -a
+- name: "get output of: docker ps -a"
   command: docker ps -a
   changed_when: False # don't report as changed
   register: docker_ps
