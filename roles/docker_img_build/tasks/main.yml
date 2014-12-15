@@ -1,6 +1,0 @@
----
-- name: mkdir -p /usr/local/etc/containers
-  file: dest=/usr/local/etc/containers state=directory
-
-- name: deploy ops-build-container.sh
-  copy: src=ops-build-container.sh dest=/usr/local/bin/ops-build-container.sh mode=755
