@@ -1,2 +1,3 @@
 ---
-# handlers file for atomic_proxy
+- name: reload systemd
+  command: systemctl daemon-reload
