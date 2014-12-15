@@ -4,7 +4,7 @@ MINIONS=3
 MASTERS=1
 
 # If the environment variable OO_PROVDER is defined, it used for the provider
-PROVIDER=$OO_PROVIDER
+PROVIDER=${OO_PROVIDER:-''}
 # Otherwise, default is gce (Google Compute Engine)
 if [ "x$PROVIDER" == "x" ];then
    PROVIDER=gce
