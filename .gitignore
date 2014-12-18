@@ -14,3 +14,4 @@
 .rvmrc
 .DS_Store
 gce.ini
+multi_ec2.yaml
