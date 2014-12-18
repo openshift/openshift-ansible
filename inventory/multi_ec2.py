@@ -75,11 +75,13 @@ class MultiEc2(object):
         if not env:
             env = os.environ
 
+        # Treat the provider as relative to self.file_path
+        provider = os.path.join(self.file_path, provider)
+
         # check to see if provider exists
         if not os.path.isfile(provider) or not os.access(provider, os.X_OK):
             raise RuntimeError("Problem with the provider.  Please check path " \
                         "and that it is executable. (%s)" % provider)
-
         cmds = [provider]
         if self.args.host:
             cmds.append("--host")
@@ -119,6 +121,7 @@ class MultiEc2(object):
                 "code": process.returncode
             })
 
+        # process --host results
         if not self.args.host:
             # For any non-zero, raise an error on it
             for result in all_results:
@@ -128,7 +131,7 @@ class MultiEc2(object):
                     self.all_ec2_results[result['name']] = json.loads(result['out'])
             values = self.all_ec2_results.values()
             values.insert(0, self.result)
-            [self.merge_destructively(self.result, x) for x in  values]
+            [MultiEc2.merge_destructively(self.result, x) for x in  values]
         else:
             # For any 0 result, return it
             count = 0
@@ -139,12 +142,13 @@ class MultiEc2(object):
                 if count > 1:
                     raise RuntimeError("Found > 1 results for --host %s. \
                                        This is an invalid state." % self.args.host)
-    def merge_destructively(self, a, b):
+    @staticmethod
+    def merge_destructively(a, b):
         "merges b into a"
         for key in b:
             if key in a:
                 if isinstance(a[key], dict) and isinstance(b[key], dict):
-                    self.merge_destructively(a[key], b[key])
+                    MultiEc2.merge_destructively(a[key], b[key])
                 elif a[key] == b[key]:
                     pass # same leaf value
                 # both lists so add each element in b to a if it does ! exist
@@ -181,7 +185,7 @@ class MultiEc2(object):
         parser = argparse.ArgumentParser(description='Produce an Ansible Inventory file based on a provider')
         parser.add_argument('--list', action='store_true', default=True,
                            help='List instances (default: True)')
-        parser.add_argument('--host', action='store',
+        parser.add_argument('--host', action='store', default=False,
                            help='Get all the variables about a specific instance')
         self.args = parser.parse_args()
 
