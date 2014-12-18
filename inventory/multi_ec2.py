@@ -75,9 +75,6 @@ class MultiEc2(object):
         if not env:
             env = os.environ
 
-        # Treat the provider as relative to self.file_path
-        provider = os.path.join(self.file_path, provider)
-
         # check to see if provider exists
         if not os.path.isfile(provider) or not os.access(provider, os.X_OK):
             raise RuntimeError("Problem with the provider.  Please check path " \
