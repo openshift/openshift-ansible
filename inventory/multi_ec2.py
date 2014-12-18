@@ -75,6 +75,10 @@ class MultiEc2(object):
         if not env:
             env = os.environ
 
+        # Allow relatively path'd providers in config file
+        if os.path.isfile(os.path.join(self.file_path, provider)):
+            provider = os.path.join(self.file_path, provider)
+
         # check to see if provider exists
         if not os.path.isfile(provider) or not os.access(provider, os.X_OK):
             raise RuntimeError("Problem with the provider.  Please check path " \
