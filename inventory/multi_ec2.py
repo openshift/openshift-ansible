@@ -79,6 +79,7 @@ class MultiEc2(object):
         if not os.path.isfile(provider) or not os.access(provider, os.X_OK):
             raise RuntimeError("Problem with the provider.  Please check path " \
                         "and that it is executable. (%s)" % provider)
+
         cmds = [provider]
         if self.args.host:
             cmds.append("--host")
