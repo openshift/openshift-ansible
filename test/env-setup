@@ -1,0 +1,8 @@
+#!/bin/bash
+
+CUR_PATH=$(pwd)
+
+PREFIX_PYTHONPATH=$CUR_PATH/inventory/
+
+
+export PYTHONPATH=$PREFIX_PYTHONPATH:$PYTHONPATH
