@@ -60,6 +60,34 @@ class MultiEc2Test(unittest.TestCase):
         [multi_ec2.MultiEc2.merge_destructively(result, x) for x in [a,b]]
         self.assertEqual(result, {"a": {"b": {"c": [1,2]}}})
 
+    def test_merge_recursive_array_item(self):
+        a = {"a" : {"b": {"c": [1]}}}
+        b = {"a" : {"b": {"c": 2}}}
+        result = {}
+        [multi_ec2.MultiEc2.merge_destructively(result, x) for x in [a,b]]
+        self.assertEqual(result, {"a": {"b": {"c": [1,2]}}})
+
+    def test_merge_recursive_hash_item(self):
+        a = {"a" : {"b": {"c": {"d": 1}}}}
+        b = {"a" : {"b": {"c": 2}}}
+        result = {}
+        [multi_ec2.MultiEc2.merge_destructively(result, x) for x in [a,b]]
+        self.assertEqual(result, {"a": {"b": {"c": [{"d": 1}, 2]}}})
+
+    def test_merge_recursive_array_hash(self):
+        a = {"a" : [{"b": {"c":  1}}]}
+        b = {"a" : {"b": {"c": 1}}}
+        result = {}
+        [multi_ec2.MultiEc2.merge_destructively(result, x) for x in [a,b]]
+        self.assertEqual(result, {"a": [{"b": {"c": 1}}]})
+
+    def test_merge_recursive_hash_array(self):
+        a = {"a" : {"b": {"c": 1}}}
+        b = {"a" : [{"b": {"c":  1}}]}
+        result = {}
+        [multi_ec2.MultiEc2.merge_destructively(result, x) for x in [a,b]]
+        self.assertEqual(result, {"a": [{"b": {"c": 1}}]})
+
     def tearDown(self):
         pass
 
