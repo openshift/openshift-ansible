@@ -23,7 +23,7 @@ class MultiEc2(object):
         self.parse_cli_args()
 
         # load yaml
-        if os.path.isfile(os.path.join(self.file_path,"multi_ec2.yaml")):
+        if os.path.isfile(self.config_file):
             self.config = self.load_yaml_config()
         elif os.environ.has_key("AWS_ACCESS_KEY_ID") and os.environ.has_key("AWS_SECRET_ACCESS_KEY"):
             self.config = {}
