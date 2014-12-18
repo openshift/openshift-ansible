@@ -4,12 +4,7 @@ import unittest
 import sys
 import os
 import sys
-#print os.path.join(os.path.dirname(os.path.realpath(__file__)), '../inventory/multi_ec2.py')
-#sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                 #'../inventory/'))
-
 import multi_ec2
-
 
 class MultiEc2Test(unittest.TestCase):
 
