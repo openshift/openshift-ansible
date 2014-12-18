@@ -17,7 +17,7 @@ class MultiEc2(object):
         self.config = None
         self.all_ec2_results = {}
         self.result = {}
-        self.cache_path_cache = os.path.expanduser('~/.ansible/tmp/multi_ec2_inventory.cache')
+        self.cache_path = os.path.expanduser('~/.ansible/tmp/multi_ec2_inventory.cache')
         self.file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)))
         self.config_file = os.path.join(self.file_path,"multi_ec2.yaml")
         self.parse_cli_args()
@@ -167,11 +167,10 @@ class MultiEc2(object):
     def is_cache_valid(self):
         ''' Determines if the cache files have expired, or if it is still valid '''
 
-        if os.path.isfile(self.cache_path_cache):
-            mod_time = os.path.getmtime(self.cache_path_cache)
+        if os.path.isfile(self.cache_path):
+            mod_time = os.path.getmtime(self.cache_path)
             current_time = time()
             if (mod_time + self.config['cache_max_age']) > current_time:
-                #if os.path.isfile(self.cache_path_index):
                 return True
 
         return False
@@ -190,14 +189,14 @@ class MultiEc2(object):
         ''' Writes data in JSON format to a file '''
 
         json_data = self.json_format_dict(self.result, True)
-        with open(self.cache_path_cache, 'w') as cache:
+        with open(self.cache_path, 'w') as cache:
             cache.write(json_data)
 
     def get_inventory_from_cache(self):
         ''' Reads the inventory from the cache file and returns it as a JSON
         object '''
 
-        with open(self.cache_path_cache, 'r') as cache:
+        with open(self.cache_path, 'r') as cache:
             self.result = json.loads(cache.read())
 
     def json_format_dict(self, data, pretty=False):
@@ -209,10 +208,10 @@ class MultiEc2(object):
         else:
             return json.dumps(data)
 
+    def result_str(self):
+        return self.json_format_dict(self.result, True)
+
 
 if __name__ == "__main__":
     mi = MultiEc2()
-    #print mi.result
-    pp = pprint.PrettyPrinter(indent=2)
-    pp.pprint(mi.result)
-
+    print mi.result_str()
