@@ -3,6 +3,7 @@
   hosts: localhost
   connection: local
   gather_facts: no
+  accelerate: false
 
   vars:
     inst_region: us-east-1

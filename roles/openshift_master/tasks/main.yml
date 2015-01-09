@@ -5,7 +5,7 @@
 
   # fixme: Once openshift stops resolving hostnames for minion queries remove this...
 - name: Set hostname to IP Addr (WORKAROUND)
-  command: /usr/bin/hostname {{ oo_bind_ip }}
+  hostname: name={{ oo_bind_ip }}
 
 - name: Configure OpenShift Master settings
   lineinfile: >

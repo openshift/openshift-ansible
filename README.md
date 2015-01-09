@@ -10,6 +10,11 @@ Setup
   ```
     yum install -y ansible rubygem-thor rubygem-parseconfig
   ```
+   - RHEL:
+  ```
+    yum install -y ansible rubygem-thor
+    gem install parseconfig
+  ```
 
 - Setup for a specific cloud:
   - [AWS](README_AWS.md)

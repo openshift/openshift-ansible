@@ -10,7 +10,7 @@ module OpenShift
 
       def initialize(extra_vars={}, inventory=nil)
         @extra_vars = extra_vars
-        @verbosity = '-vvvv'
+        @verbosity = '-vvv'
         @pipelining = true
       end
 
@@ -30,7 +30,7 @@ module OpenShift
 
         # We need this for launching instances, otherwise conflicting keys and what not kill it
         cmds << %q[export ANSIBLE_TRANSPORT="ssh"]
-        cmds << %q[export ANSIBLE_SSH_ARGS="-o ForwardAgent=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"]
+        cmds << %q[export ANSIBLE_SSH_ARGS="-o ForwardAgent=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ControlMaster=auto -o ControlPersist=300s "]
 
         # We need pipelining off so that we can do sudo to enable the root account
         cmds << %Q[export ANSIBLE_SSH_PIPELINING='#{@pipelining.to_s}']

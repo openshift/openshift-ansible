@@ -10,6 +10,7 @@
 - name: "Gather facts for minions in {{ oo_env }}"
   hosts: "tag_env-host-type_{{ oo_env }}-openshift-minion"
   connection: ssh
+  accelerate: false
   user: root
 
 - name: "Set Origin specific facts on localhost (for later use)"
@@ -26,6 +27,7 @@
 - name: "Configure instances"
   hosts: oo_hosts_to_config
   connection: ssh
+  accelerate: false
   user: root
   vars_files:
     - vars.yml
