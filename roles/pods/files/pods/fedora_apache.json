@@ -1,5 +1,7 @@
 {
   "id": "apache",
+  "kind": "Pod",
+  "apiVersion": "v1beta2",
   "desiredState": {
     "manifest": {
       "version": "v1beta1",

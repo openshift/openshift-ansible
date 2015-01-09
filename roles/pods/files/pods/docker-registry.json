@@ -1,6 +1,6 @@
 {
   "kind": "Pod",
-  "version": "v1beta1",
+  "version": "v1beta2",
   "desiredState": {
     "manifest": {
       "version": "v1beta1",
