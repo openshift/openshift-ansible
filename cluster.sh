@@ -1,6 +1,6 @@
 #!/bin/bash -eu
 
-MINIONS=3
+MINIONS=2
 MASTERS=1
 
 # If the environment variable OO_PROVDER is defined, it used for the provider
