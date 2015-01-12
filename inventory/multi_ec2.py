@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # vim: expandtab:tabstop=4:shiftwidth=4
 
 from time import time
