@@ -40,6 +40,15 @@ module OpenShift
         ah.extra_vars['oo_new_inst_tags'].merge!(AwsHelper.generate_host_type_tag(options[:type]))
         ah.extra_vars['oo_new_inst_tags'].merge!(AwsHelper.generate_env_host_type_tag(options[:env], options[:type]))
 
+        # Check if we install a custom openshift
+        ah.extra_vars['oo_openshift_binary'] = ENV['OO_OPENSHIFT_BINARY'] if !ENV['OO_OPENSHIFT_BINARY'].nil?
+
+        # Check AWS settings override
+        ah.extra_vars['oo_aws_region']  = ENV['OO_AWS_REGION']  if !ENV['OO_AWS_REGION'].nil?
+        ah.extra_vars['oo_aws_ami']     = ENV['OO_AWS_AMI']     if !ENV['OO_AWS_AMI'].nil?
+        ah.extra_vars['oo_aws_keypair'] = ENV['OO_AWS_KEYPAIR'] if !ENV['OO_AWS_KEYPAIR'].nil?
+        ah.extra_vars['oo_aws_instance_type'] = ENV['OO_AWS_INSTANCE_TYPE'] if !ENV['OO_AWS_INSTANCE_TYPE'].nil?
+
         puts
         puts "Creating #{options[:count]} #{options[:type]} instance(s) in AWS..."
 
@@ -87,6 +96,9 @@ module OpenShift
         else
           abort 'Error: you need to specify either --name or (--type and --env)'
         end
+
+        # Check if we install a custom openshift
+        ah.extra_vars['oo_openshift_binary'] = ENV['OO_OPENSHIFT_BINARY'] if !ENV['OO_OPENSHIFT_BINARY'].nil?
 
         puts
         puts "Configuring #{options[:type]} instance(s) in AWS..."
