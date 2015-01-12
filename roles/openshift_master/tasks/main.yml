@@ -1,22 +1,18 @@
 ---
 # tasks file for openshift_master
-- name: Install Origin
-  yum: pkg=origin state=installed
 
   # fixme: Once openshift stops resolving hostnames for minion queries remove this...
 - name: Set hostname to IP Addr (WORKAROUND)
   hostname: name={{ oo_bind_ip }}
 
-- name: Configure OpenShift Master settings
-  lineinfile: >
-    dest=/etc/sysconfig/openshift
-    regexp={{ item.regex }}
-    line="{{ item.line }}"
-  with_items:
-    - { regex: '^ROLE=', line: 'ROLE=\"master\"' }
-    - { regex: '^OPTIONS=', line: 'OPTIONS=\"--nodes={{ oo_minion_ips | join(",") }}  --loglevel=5\"' }
-  notify:
-    - restart openshift-master
+- name: Install docker
+  yum: pkg=docker state=installed
+
+- include: openshift_from_yum.yml
+  when: oo_openshift_binary is not defined
+
+- include: openshift_from_local.yml
+  when: oo_openshift_binary is defined
 
 - name: Open firewalld port for etcd embedded in OpenShift
   firewalld: port=4001/tcp permanent=false state=enabled

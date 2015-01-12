@@ -1,0 +1,13 @@
+- name: Install Origin
+  yum: pkg=origin state=installed
+
+- name: Configure OpenShift Master settings
+  lineinfile: >
+    dest=/etc/sysconfig/openshift
+    regexp={{ item.regex }}
+    line="{{ item.line }}"
+  with_items:
+    - { regex: '^ROLE=', line: 'ROLE=\"master\"' }
+    - { regex: '^OPTIONS=', line: 'OPTIONS=\"--nodes={{ oo_minion_ips | join(",") }}  --loglevel=5\"' }
+  notify:
+    - restart openshift-master

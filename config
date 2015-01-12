@@ -1,0 +1,66 @@
+####################
+# General settings #
+####################
+
+# OO_PROVIDER
+#
+# Selects the cloud provider to use
+# Choices: gce, aws
+# Default: gce
+
+#export OO_PROVIDER=aws
+
+################
+# GCE settings #
+################
+
+################
+# AWS settings #
+################
+
+# Credentials
+#
+# AWS_ACCESS_KEY_ID
+# AWS_SECRET_ACCESS_KEY
+
+#source ~/aws-credentials
+#export AWS_ACCESS_KEY_ID
+#export AWS_SECRET_ACCESS_KEY
+
+# OO_OPENSHIFT_BINARY
+#
+# Path of a locally built openshift binary
+#
+# If this variable is set, then, the locally built openshift will be installed
+# in /usr/local/bin on the AWS machines.
+# If this variable is not set, then, openshift will be installed from the yum repository
+
+#export OO_OPENSHIFT_BINARY=$HOME/doc/prog/RedHat/origin/_output/local/go/bin/openshift
+
+# OO_AWS_REGION
+#
+# Selects an AWS region
+# Default: us-east-1
+
+#export OO_AWS_REGION=us-east-1
+
+# OO_AWS_AMI
+#
+# AWS image to use to create the VMs
+# Default: ami-86781fee
+
+#export OO_AWS_AMI=ami-d2ee9fba
+
+# OO_AWS_KEYPAIR
+#
+# keypair to use for new VMs
+# Default: libra
+
+#export OO_AWS_KEYPAIR=lenaic@ncelhuard-Xperiment
+
+# OO_AWS_INSTANCE_TYPE
+#
+# Instance type of new VMs
+# Default: m3.large
+
+#export OO_AWS_INSTANCE_TYPE=t2.micro

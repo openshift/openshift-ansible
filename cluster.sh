@@ -3,6 +3,9 @@
 MINIONS=2
 MASTERS=1
 
+# Read the config file
+source "$(dirname $0)/config"
+
 # If the environment variable OO_PROVDER is defined, it used for the provider
 PROVIDER=${OO_PROVIDER:-''}
 # Otherwise, default is gce (Google Compute Engine)
