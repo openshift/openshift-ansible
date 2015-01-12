@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 # Copyright 2013 Google Inc.
 #
 # This file is part of Ansible
