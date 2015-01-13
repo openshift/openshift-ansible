@@ -1,0 +1,9 @@
+DEVICE=vxlan{{ item.0 }}
+DEVICETYPE=ovs
+TYPE=OVSTunnel
+BOOTPROTO=none
+ONBOOT=yes
+NM_CONTROLLED=no
+OVS_BRIDGE=obr0
+OVS_TUNNEL_TYPE=vxlan
+OVS_TUNNEL_OPTIONS="options:remote_ip={{ hostvars[item.1]['ansible_default_ipv4']['address'] }}"

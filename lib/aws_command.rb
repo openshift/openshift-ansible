@@ -23,7 +23,9 @@ module OpenShift
 
         # Expand all of the instance names so that we have a complete array
         names = []
-        options[:count].times { names << "#{options[:env]}-#{options[:type]}-#{SecureRandom.hex(5)}" }
+        options[:count].times do |index|
+          names << "#{options[:env]}-#{options[:type]}-#{index}-#{SecureRandom.hex(5)}"
+        end
 
         ah = AnsibleHelper.for_aws()
 

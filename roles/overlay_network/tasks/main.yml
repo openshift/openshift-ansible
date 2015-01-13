@@ -1,0 +1,56 @@
+- name: Install bridge-utils and Open vSwitch
+  yum: pkg={{ item }} state=installed
+  with_items:
+    - bridge-utils
+    - openvswitch
+
+- name: Network setup
+  template:
+    src: "{{ item }}"
+    dest: "/etc/sysconfig/network-scripts/{{ item }}"
+  with_items:
+    - ifcfg-kbr0
+    - ifcfg-obr0
+    - route-kbr0
+  register: network_setup
+
+- name: (Re-)Start new interfaces
+  shell: ifdown {{ item }} ; ifup {{ item }}
+  with_items:
+    - kbr0
+    - obr0
+  when: network_setup.changed
+
+- name: VxLAN setup
+  template:
+    src: ifcfg-vxlan
+    dest: "/etc/sysconfig/network-scripts/ifcfg-vxlan{{ item.0 }}"
+  with_indexed_items: groups['tag_env-host-type_' + oo_env + '-openshift-minion']
+  when: item.1 != oo_bind_ip
+  register: vxlan_setup
+
+- name: (Re-)Start VxLAN tunnels
+  shell: ifup vxlan{{ item.0 }} ; ifup vxlan{{ item.0 }}
+  with_indexed_items: groups['tag_env-host-type_' + oo_env + '-openshift-minion']
+  when: vxlan_setup.changed and item.1 != oo_bind_ip
+  # There is a bug in /etc/sysconfig/network-scripts/ifup-ovs in case OVSTunnel device type
+  # Once the tunnel has been setup in OVS, it launches ifup-eth to pursue the config
+  # The problem is that ifup-eth looks for a Linux device, but as the OVSTunnel is not, ifup-eth fails
+  # after a time-out
+  ignore_errors: yes
+
+# Use "immediate=yes" instead of these two lines when Ansible 1.9 will be available
+- name: Open firewalld for VxLAN traffic
+  firewalld: port=4789/udp permanent=false state=enabled
+
+- name: Save firewalld for VxLAN traffic
+  firewalld: port=4789/udp permanent=true state=enabled
+
+- name: Open firewalld interPOD network
+  command: firewall-cmd --direct --add-rule ipv4 filter FORWARD 0 -i kbr0 -o kbr0 -j ACCEPT
+  register: direct_firewall
+  changed_when: direct_firewall.stdout.find('ALREADY_ENABLED') == -1
+
+- name: Save firewalld interPOD network
+  command: firewall-cmd --permanent --direct --add-rule ipv4 filter FORWARD 0 -i kbr0 -o kbr0 -j ACCEPT
+  when: direct_firewall | changed

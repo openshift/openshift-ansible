@@ -22,3 +22,6 @@
 
 - name: Ensure the origin repo is available
   copy: src=epel7-origin.repo dest=/etc/yum.repos.d/epel7-origin.repo
+
+- name: Ensure the OpenStack repo is available
+  yum: name=https://repos.fedorapeople.org/repos/openstack/openstack-juno/rdo-release-juno-1.noarch.rpm state=present
