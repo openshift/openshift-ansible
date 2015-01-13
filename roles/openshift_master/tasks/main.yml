@@ -5,9 +5,6 @@
 - name: Set hostname to IP Addr (WORKAROUND)
   hostname: name={{ oo_bind_ip }}
 
-- name: Install docker
-  yum: pkg=docker state=installed
-
 - include: openshift_from_yum.yml
   when: oo_openshift_binary is not defined
 

@@ -1,7 +1,5 @@
 [Unit]
 Description=OpenShift
-After=docker.service
-Requires=docker.service
 Documentation=https://github.com/openshift/origin
 
 [Service]
