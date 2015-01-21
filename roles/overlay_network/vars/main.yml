@@ -1,2 +1,2 @@
 pod_subnet: "192.168.0.0/16"
-kbr0_ip: "192.168.{{ ec2_tag_Name | regex_replace('^.*-(\\d+)-\\w+$','\\\\1') }}.1"
+kbr0_ip: "192.168.{{ ansible_local.minion.minion.creation_index }}.1"

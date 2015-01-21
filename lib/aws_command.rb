@@ -11,7 +11,7 @@ module OpenShift
 
       option :type, :required => true, :enum => LaunchHelper.get_aws_host_types,
              :desc => 'The host type of the new instances.'
-      option :env, :required => true, :aliases => '-e', :enum => SUPPORTED_ENVS,
+      option :env, :required => true, :aliases => '-e', :enum => SUPPORTED_ENVS << ENV['OO_CUSTOM_ENV'],
              :desc => 'The environment of the new instances.'
       option :count, :default => 1, :aliases => '-c', :type => :numeric,
              :desc => 'The number of instances to create'
@@ -23,14 +23,21 @@ module OpenShift
 
         # Expand all of the instance names so that we have a complete array
         names = []
+        minion_indexes = []
+        indexes_by_name = Hash.new
         options[:count].times do |index|
-          names << "#{options[:env]}-#{options[:type]}-#{index}-#{SecureRandom.hex(5)}"
+          name = "#{options[:env]}-#{options[:type]}-#{SecureRandom.hex(5)}"
+          names << name
+          minion_indexes << index
+          indexes_by_name[name] = "#{index}"
         end
 
         ah = AnsibleHelper.for_aws()
 
         # AWS specific configs
         ah.extra_vars['oo_new_inst_names'] = names
+        ah.extra_vars['oo_indexes'] = minion_indexes
+	ah.extra_vars['oo_new_inst_indexes_by_name'] = indexes_by_name
         ah.extra_vars['oo_new_inst_tags'] = options[:tag]
         ah.extra_vars['oo_env'] = options[:env]
 

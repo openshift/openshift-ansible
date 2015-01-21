@@ -29,18 +29,23 @@
   connection: ssh
   accelerate: false
   user: root
+  gather_facts: yes
   vars_files:
     - vars.yml
+  tasks:
+  - name: re-read facts after adding custom fact
+    setup: filter=ansible_local
+
   roles:
     - ../../../roles/base_os
     - ../../../roles/repos
     - {
-        role: ../../../roles/overlay_network,
-        oo_bind_ip: "{{ hostvars[inventory_hostname].ansible_eth0.ipv4.address | default(['']) }}"
+       role: ../../../roles/overlay_network,
+       oo_bind_ip: "{{ hostvars[inventory_hostname].ansible_eth0.ipv4.address | default(['']) }}"
       }
     - ../../../roles/docker
     - {
-        role: ../../../roles/openshift_minion,
-        oo_master_ips: "{{ hostvars['localhost'].oo_master_ips | default(['']) }}",
-        oo_bind_ip: "{{ hostvars[inventory_hostname].ansible_eth0.ipv4.address | default(['']) }}"
+       role: ../../../roles/openshift_minion,
+       oo_master_ips: "{{ hostvars['localhost'].oo_master_ips | default(['']) }}",
+       oo_bind_ip: "{{ hostvars[inventory_hostname].ansible_eth0.ipv4.address | default(['']) }}"
       }
