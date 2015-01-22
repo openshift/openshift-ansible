@@ -26,13 +26,13 @@
     src: ifcfg-vxlan
     dest: "/etc/sysconfig/network-scripts/ifcfg-vxlan{{ item.0 }}"
   with_indexed_items: groups['tag_env-host-type_' + oo_env + '-openshift-minion']
-  when: item.1 != oo_bind_ip
+  when: item.1 != oo_public_ip
   register: vxlan_setup
 
 - name: (Re-)Start VxLAN tunnels
   shell: ifup vxlan{{ item.0 }} ; ifup vxlan{{ item.0 }}
   with_indexed_items: groups['tag_env-host-type_' + oo_env + '-openshift-minion']
-  when: vxlan_setup.changed and item.1 != oo_bind_ip
+  when: vxlan_setup.changed and item.1 != oo_public_ip
   # There is a bug in /etc/sysconfig/network-scripts/ifup-ovs in case OVSTunnel device type
   # Once the tunnel has been setup in OVS, it launches ifup-eth to pursue the config
   # The problem is that ifup-eth looks for a Linux device, but as the OVSTunnel is not, ifup-eth fails

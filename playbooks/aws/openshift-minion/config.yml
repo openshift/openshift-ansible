@@ -41,7 +41,7 @@
     - ../../../roles/repos
     - {
        role: ../../../roles/overlay_network,
-       oo_bind_ip: "{{ hostvars[inventory_hostname].ansible_eth0.ipv4.address | default(['']) }}"
+       oo_public_ip: "{{ hostvars[inventory_hostname].facter_ec2_public_ipv4 | default(['']) }}"
       }
     - ../../../roles/docker
     - {
