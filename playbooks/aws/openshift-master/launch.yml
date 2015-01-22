@@ -3,7 +3,6 @@
   hosts: localhost
   connection: local
   gather_facts: no
-  accelerate: false
 
   vars:
     inst_region: "{{ oo_aws_region | default('us-east-1') }}"

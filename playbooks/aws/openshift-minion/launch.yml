@@ -3,7 +3,6 @@
   hosts: localhost
   connection: local
   gather_facts: no
-  accelerate: false
 
   vars:
     inst_region: "{{ oo_aws_region | default('us-east-1') }}"
@@ -25,7 +24,7 @@
         user_data: "{{ lookup('file', user_data_file) }}"
         wait: yes
       register: ec2
-    
+
     - name: Add new instances public IPs to the atomic proxy host group
       add_host: "hostname={{ item.public_ip }} groupname=new_ec2_instances"
       with_items: ec2.instances
@@ -70,15 +69,12 @@
       retries: 20
       delay: 10
       with_items: ec2.instances
-    
+
 - name: "Configure instances"
   hosts: oo_hosts_to_config
   connection: ssh
-  accelerate: false
   user: root
   vars_files:
     - vars.yml
   roles:
     - { role: ../../../roles/local_facts, oo_minion_creation_index: "{{ oo_minion_index }}" }
-
-
