@@ -11,6 +11,18 @@
 - include: openshift_from_local.yml
   when: oo_openshift_binary is defined
 
+- name: Configure OpenShift Minion settings
+  lineinfile: >
+    dest=/etc/sysconfig/openshift
+    create=yes
+    regexp={{ item.regex }}
+    line="{{ item.line }}"
+  with_items:
+    - { regex: '^ROLE=', line: 'ROLE=\"node\"' }
+    - { regex: '^OPTIONS=', line: 'OPTIONS=\"--master=http://{{ oo_master_ips[0] }}:8080  --loglevel=5\"' }
+  notify:
+    - restart openshift-minion
+
 - name: Open firewalld port for OpenShift
   firewalld: port=10250/tcp permanent=false state=enabled
 
@@ -19,4 +31,3 @@
 
 - name: Enable OpenShift
   service: name=openshift enabled=yes state=started
-

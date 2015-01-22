@@ -11,6 +11,18 @@
 - include: openshift_from_local.yml
   when: oo_openshift_binary is defined
 
+- name: Configure OpenShift Master settings
+  lineinfile: >
+    dest=/etc/sysconfig/openshift
+    create=yes
+    regexp={{ item.regex }}
+    line="{{ item.line }}"
+  with_items:
+    - { regex: '^ROLE=', line: 'ROLE=\"master\"' }
+    - { regex: '^OPTIONS=', line: 'OPTIONS=\"--nodes={{ oo_minion_ips | join(",") }}  --loglevel=5\"' }
+  notify:
+    - restart openshift-master
+
 - name: Open firewalld port for etcd embedded in OpenShift
   firewalld: port=4001/tcp permanent=false state=enabled
 

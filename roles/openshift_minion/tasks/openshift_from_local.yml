@@ -4,15 +4,5 @@
     dest: /usr/local/bin/openshift
     mode: 0755
 
-- name: Configure OpenShift Minion settings
-  template:
-    src: sysconfig_openshift
-    dest: /etc/sysconfig/openshift
-    mode: 0644
-    owner: root
-    group: root
-  notify: restart openshift-minion
-
 - name: Configure OpenShift systemd unit
   copy: src=openshift.service dest=/etc/systemd/system/openshift.service
-
