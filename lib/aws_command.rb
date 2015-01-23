@@ -7,11 +7,11 @@ module OpenShift
   module Ops
     class AwsCommand < Thor
       # WARNING: we do not currently support environments with hyphens in the name
-      SUPPORTED_ENVS = %w(prod stg int tint kint test jint amint tdint lint)
+      SUPPORTED_ENVS = %w(prod stg int tint kint test jint amint tdint lint) << ENV['OO_CUSTOM_ENV']
 
       option :type, :required => true, :enum => LaunchHelper.get_aws_host_types,
              :desc => 'The host type of the new instances.'
-      option :env, :required => true, :aliases => '-e', :enum => SUPPORTED_ENVS << ENV['OO_CUSTOM_ENV'],
+      option :env, :required => true, :aliases => '-e', :enum => SUPPORTED_ENVS,
              :desc => 'The environment of the new instances.'
       option :count, :default => 1, :aliases => '-c', :type => :numeric,
              :desc => 'The number of instances to create'
@@ -24,12 +24,9 @@ module OpenShift
         # Expand all of the instance names so that we have a complete array
         names = []
         minion_indexes = []
-        indexes_by_name = Hash.new
         options[:count].times do |index|
-          name = "#{options[:env]}-#{options[:type]}-#{SecureRandom.hex(5)}"
-          names << name
+          names << "#{options[:env]}-#{options[:type]}-#{SecureRandom.hex(5)}"
           minion_indexes << index
-          indexes_by_name[name] = "#{index}"
         end
 
         ah = AnsibleHelper.for_aws()
@@ -37,7 +34,6 @@ module OpenShift
         # AWS specific configs
         ah.extra_vars['oo_new_inst_names'] = names
         ah.extra_vars['oo_indexes'] = minion_indexes
-	ah.extra_vars['oo_new_inst_indexes_by_name'] = indexes_by_name
         ah.extra_vars['oo_new_inst_tags'] = options[:tag]
         ah.extra_vars['oo_env'] = options[:env]
 
@@ -51,9 +47,7 @@ module OpenShift
 
         # Check if we install a custom openshift
         if !ENV['OO_OPENSHIFT_BINARY'].nil?
-          ah.extra_vars['oo_openshift_binary'] = ENV['OO_OPENSHIFT_BINARY']
-          FileUtils.cp(ENV['OO_OPENSHIFT_BINARY'], 'roles/openshift_master/files')
-          FileUtils.cp(ENV['OO_OPENSHIFT_BINARY'], 'roles/openshift_minion/files')
+          ah.extra_vars['oo_openshift_binary'] = File.expand_path(ENV['OO_OPENSHIFT_BINARY'])
         end
 
         # Check AWS settings override
@@ -113,9 +107,7 @@ module OpenShift
 
         # Check if we install a custom openshift
         if !ENV['OO_OPENSHIFT_BINARY'].nil?
-          ah.extra_vars['oo_openshift_binary'] = ENV['OO_OPENSHIFT_BINARY']
-          FileUtils.cp(ENV['OO_OPENSHIFT_BINARY'], 'roles/openshift_master/files')
-          FileUtils.cp(ENV['OO_OPENSHIFT_BINARY'], 'roles/openshift_minion/files')
+          ah.extra_vars['oo_openshift_binary'] = File.expand_path(ENV['OO_OPENSHIFT_BINARY'])
         end
 
         puts

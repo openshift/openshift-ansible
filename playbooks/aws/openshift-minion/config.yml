@@ -27,7 +27,6 @@
   hosts: oo_hosts_to_config
   connection: ssh
   user: root
-  gather_facts: yes
   vars_files:
     - vars.yml
   tasks:

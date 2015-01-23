@@ -1,6 +1,6 @@
 - name: Copy OpenShift binary
   copy:
-    src: openshift
+    src: '{{ oo_openshift_binary }}'
     dest: /usr/local/bin/openshift
     mode: 0755
 
