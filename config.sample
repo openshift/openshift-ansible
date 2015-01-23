@@ -10,6 +10,20 @@
 
 #export OO_PROVIDER=aws
 
+# MASTERS
+#
+# Number of master nodes
+# Default: 1
+
+#export MASTERS=1
+
+# MINIONS
+#
+# Number of minion nodes
+# Default: 2
+
+#export MINIONS=2
+
 ################
 # GCE settings #
 ################
