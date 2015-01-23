@@ -11,14 +11,17 @@ module OpenShift
 
       option :type, :required => true, :enum => LaunchHelper.get_aws_host_types,
              :desc => 'The host type of the new instances.'
-      option :env, :required => true, :aliases => '-e', :enum => SUPPORTED_ENVS,
-             :desc => 'The environment of the new instances.'
+      option :env, :required => true, :aliases => '-e',
+             :desc => "The environment of the new instances. Possible values: #{SUPPORTED_ENVS.join(', ')}"
       option :count, :default => 1, :aliases => '-c', :type => :numeric,
              :desc => 'The number of instances to create'
+      option :dev, :type => :boolean, :default => false,
+             :desc => 'When set this flag will let you set an env value outside of the allowed values'
       option :tag, :type => :array,
              :desc => 'The tag(s) to add to the new instances. Allowed characters are letters, numbers, and hyphens.'
       desc "launch", "Launches instances."
       def launch()
+        validate_env options
         aws_helper = AwsHelper.new(:launch, options)
 
         ah = AnsibleHelper.for_aws()
@@ -46,18 +49,22 @@ module OpenShift
 
       option :name, :required => false, :type => :string,
              :desc => 'The name of the instance to configure.'
-      option :env, :required => false, :aliases => '-e', :enum => SUPPORTED_ENVS,
-             :desc => 'The environment of the new instances.'
+      option :env, :required => true, :aliases => '-e',
+             :desc => "The environment of the new instances. Possible values: #{SUPPORTED_ENVS.join(', ')}"
+      option :dev, :type => :boolean, :default => false,
+             :desc => 'When set this flag will let you set an env value outside of the allowed values'
       option :type, :required => false, :enum => LaunchHelper.get_aws_host_types,
              :desc => 'The type of the instances to configure.'
       desc "config", 'Configures instances.'
       def config()
+        validate_name_or_env options
         config_task = nil
         if options[:name]
-          abort 'Error you can\'t specify --type or --env when you specify --name' if options[:type] || options[:env]
+          abort 'Error: you can\'t specify --type or --env when you specify --name' if options[:type] || options[:env]
           config_task = :config_host
         elsif options[:type] && options[:env]
-          abort 'Error you can\'t specify --name when you specify --type and --env' if options[:name]
+          abort 'Error: you can\'t specify --name when you specify --type and --env' if options[:name]
+          validate_env options
           config_task = :config_type_env
         else
           abort 'Error: you need to specify either --name or (--type and --env)'
@@ -75,10 +82,13 @@ module OpenShift
         ah.run_playbook("playbooks/aws/#{host_type}/config.yml")
       end
 
-      option :env, :required => false, :aliases => '-e', :enum => SUPPORTED_ENVS,
-             :desc => 'The environment to list.'
+      option :env, :required => false, :aliases => '-e',
+             :desc => "The environment of the new instances. Possible values: #{SUPPORTED_ENVS.join(', ')}"
+      option :dev, :type => :boolean, :default => false,
+             :desc => 'When set this flag will let you set an env value outside of the allowed values'
       desc "list", "Lists instances."
       def list()
+        validate_env options
         hosts = AwsHelper.new(:list, options).get_hosts
 
         fmt_str = "%34s %5s %8s %17s %7s"
@@ -120,6 +130,36 @@ module OpenShift
         puts "--------------------"
         LaunchHelper.get_aws_host_types.each { |t| puts "  #{t}" }
         puts
+      end
+
+      private
+      # a helper to validate that the env belongs to SUPPORTED_ENVS if the dev
+      # flag is not set. If the dev flag is set, then it verifies that the
+      # env name does not contain a dash character.
+      def validate_env(options)
+        if options[:dev]
+          if options[:env].include?('-')
+            abort 'Error: enviroments may not contain a \'-\' character in them'
+          end
+        else
+          unless SUPPORTED_ENVS.include?(options[:env])
+            abort "Error: #{options[:env]} is not a supported environment"
+          end
+        end
+      end
+
+      # A helper to validate that either the name option is set or the env
+      # and type options are set only.
+      def validate_name_or_env(options)
+        if options[:name]
+          if options[:type] || options[:env]
+            abort 'Error: you can\'t specify --type or --env when you specify --name'
+          end
+        else
+          unless options[:type] && options[:env]
+            abort 'Error: you need to specify either --name or (--type and --env)'
+          end
+        end
       end
     end
   end
