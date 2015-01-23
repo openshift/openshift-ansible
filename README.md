@@ -10,7 +10,7 @@ Setup
   ```
     yum install -y ansible rubygem-thor rubygem-parseconfig
   ```
-   - RHEL:
+   - RHEL7:
   ```
     yum install -y ansible rubygem-thor
     gem install parseconfig
