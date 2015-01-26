@@ -17,6 +17,7 @@ module OpenShift
              :desc => 'The number of instances to create'
       option :tag, :type => :array,
              :desc => 'The tag(s) to add to the new instances. Allowed characters are letters, numbers, and hyphens.'
+      option :skip_config, :type => :boolean
       desc "launch", "Launches instances."
       def launch()
         AwsHelper.check_creds()
@@ -42,6 +43,11 @@ module OpenShift
 
         puts
         puts "Creating #{options[:count]} #{options[:type]} instance(s) in AWS..."
+
+        # Should we skip the config at the end of the launch?
+        if options[:skip_config]
+          ah.skip_tags << 'config'
+        end
 
         # Make sure we're completely up to date before launching
         clear_cache()

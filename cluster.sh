@@ -38,9 +38,9 @@ EOT
 # @formatter:on
 
 function create_cluster {
-    ./cloud.rb "${PROVIDER}" launch -e "${ENV}" --type=$MASTER_PLAYBOOK -c $MASTERS
+    ./cloud.rb "${PROVIDER}" launch --skip_config -e "${ENV}" --type=$MASTER_PLAYBOOK -c $MASTERS
 
-    ./cloud.rb "${PROVIDER}" launch -e "${ENV}" --type=$NODE_PLAYBOOK -c $NODES
+    ./cloud.rb "${PROVIDER}" launch --skip_config -e "${ENV}" --type=$NODE_PLAYBOOK -c $NODES
 
     update_cluster
 

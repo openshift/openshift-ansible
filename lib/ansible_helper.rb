@@ -6,12 +6,14 @@ module OpenShift
     class AnsibleHelper
       MYDIR = File.expand_path(File.dirname(__FILE__))
 
-      attr_accessor :inventory, :extra_vars, :verbosity, :pipelining
+      attr_accessor :inventory, :extra_vars, :verbosity, :pipelining, :tags, :skip_tags
 
       def initialize(extra_vars={}, inventory=nil)
         @extra_vars = extra_vars
         @verbosity = '-vvvv'
         @pipelining = true
+        @tags = []
+        @skip_tags = []
       end
 
       def all_eof(files)
@@ -34,7 +36,14 @@ module OpenShift
 
         # We need pipelining off so that we can do sudo to enable the root account
         cmds << %Q[export ANSIBLE_SSH_PIPELINING='#{@pipelining.to_s}']
-        cmds << %Q[time ansible-playbook  -i #{@inventory} #{@verbosity} #{playbook} --extra-vars '@#{tmpfile.path}' ]
+        ansible_cmd = %Q[time ansible-playbook  -i #{@inventory} #{@verbosity} #{playbook} --extra-vars '@#{tmpfile.path}' ]
+        if ! @tags.empty?
+          ansible_cmd += %Q[--tags ] + @tags.join(',') + ' '
+        end
+        if ! @skip_tags.empty?
+          ansible_cmd += %Q[--skip-tags ] + @skip_tags.join(',') + ' '
+        end
+        cmds << ansible_cmd
         cmd = cmds.join(' ; ')
 
         pid = spawn(cmd, :out => $stdout, :err => $stderr, :close_others => true)
