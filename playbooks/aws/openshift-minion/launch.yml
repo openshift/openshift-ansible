@@ -78,3 +78,6 @@
     - vars.yml
   roles:
     - { role: ../../../roles/local_facts, oo_minion_creation_index: "{{ oo_minion_index }}" }
+
+# Apply the configs, seprate so that just the configs can be run by themselves
+- include: config.yml

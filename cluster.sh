@@ -42,9 +42,9 @@ EOT
 # @formatter:on
 
 function create_cluster {
-    ./cloud.rb "${PROVIDER}" launch -e "${ENV}" --type=$MASTER_PLAYBOOK -c $MASTERS
+    ./cloud.rb "${PROVIDER}" launch --skip_config -e "${ENV}" --type=$MASTER_PLAYBOOK -c $MASTERS
 
-    ./cloud.rb "${PROVIDER}" launch -e "${ENV}" --type=$MINION_PLAYBOOK -c $MINIONS
+    ./cloud.rb "${PROVIDER}" launch --skip_config -e "${ENV}" --type=$MINION_PLAYBOOK -c $MINIONS
 
     update_cluster
 

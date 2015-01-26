@@ -63,3 +63,6 @@
       retries: 20
       delay: 10
       with_items: ec2.instances
+
+# Apply the configs, seprate so that just the configs can be run by themselves
+- include: config.yml
