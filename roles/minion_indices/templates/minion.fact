@@ -1,0 +1,3 @@
+[minion]
+subnet_index={{ oo_minion_subnet_index }}
+nb_minions={{ oo_nb_minions }}
