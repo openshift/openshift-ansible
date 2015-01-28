@@ -114,7 +114,7 @@ module OpenShift
 
       desc "ssh", "Ssh to an instance"
       def ssh(*ssh_ops, host)
-        if host =~ /^([\w\d_.-]+)@([\w\d-_.]+)/
+        if host =~ /^([\w\d_.\-]+)@([\w\d\-_.]+)/
           user = $1
           host = $2
         end
