@@ -1,26 +1,26 @@
 ---
 # basic role, configures irbrc, vimrc
-
 - name: Ensure irbrc is installed for user root
   copy: >
     src=irbrc
     dest=/root/.irbrc
+  async: 0
 
 - name: Ensure vimrc is installed for user root
   copy: >
     src=vimrc
     dest=/root/.vimrc
+  async: 0
 
 - name: Ensure vimrc is installed for user root
   copy: >
     src=vimrc
     dest=/root/.vimrc
+  async: 0
 
 - name: Install firewalld
   yum: pkg=firewalld state=installed
 
-- name: enable firewalld service
-  command: /usr/bin/systemctl enable firewalld.service
+- name: start and enable firewalld service
+  service: name=firewalld state=started enabled=yes
 
-- name: start firewalld service
-  command: /usr/bin/systemctl start firewalld.service

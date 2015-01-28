@@ -1,0 +1,13 @@
+- name: create directory for ansible custom facts
+  file: state=directory recurse=yes path=/etc/ansible/facts.d
+
+- name: Local facts
+  template:
+    src: "minion.fact"
+    dest: "/etc/ansible/facts.d/minion.fact"
+
+- name: re-read facts after adding custom fact
+  setup: filter=ansible_local
+
+
+

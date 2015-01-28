@@ -3,6 +3,18 @@
 MINIONS=2
 MASTERS=1
 
+# Read the config file
+if [ -f "$(dirname $0)/config" ]; then
+    source "$(dirname $0)/config"
+else
+    cat <<EOF
+  ^    You have no "config" file. Default settings will be used.
+ /!\\   In order to override default settings, you can copy "config.sample"
+/___\\  as "config" and customize it.
+
+EOF
+fi
+
 # If the environment variable OO_PROVDER is defined, it used for the provider
 PROVIDER=${OO_PROVIDER:-''}
 # Otherwise, default is gce (Google Compute Engine)
@@ -30,9 +42,9 @@ EOT
 # @formatter:on
 
 function create_cluster {
-    ./cloud.rb "${PROVIDER}" launch -e "${ENV}" --type=$MASTER_PLAYBOOK -c $MASTERS
+    ./cloud.rb "${PROVIDER}" launch --skip_config -e "${ENV}" --type=$MASTER_PLAYBOOK -c $MASTERS
 
-    ./cloud.rb "${PROVIDER}" launch -e "${ENV}" --type=$MINION_PLAYBOOK -c $MINIONS
+    ./cloud.rb "${PROVIDER}" launch --skip_config -e "${ENV}" --type=$MINION_PLAYBOOK -c $MINIONS
 
     update_cluster
 

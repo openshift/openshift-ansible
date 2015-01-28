@@ -1,0 +1,2 @@
+pod_subnet: "192.168.0.0/16"
+kbr0_ip: "192.168.{{ ansible_local.minion.minion.creation_index }}.1"

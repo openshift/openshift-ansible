@@ -1,15 +1,20 @@
 ---
 # tasks file for openshift_minion
-- name: Install OpenShift
-  yum: pkg=origin state=installed
 
   # fixme: Once openshift stops resolving hostnames for minion queries remove this...
 - name: Set hostname to IP Addr (WORKAROUND)
-  command: /usr/bin/hostname {{ oo_bind_ip }}
+  hostname: name={{ oo_bind_ip }}
+
+- include: openshift_from_yum.yml
+  when: oo_openshift_binary is not defined
+
+- include: openshift_from_local.yml
+  when: oo_openshift_binary is defined
 
 - name: Configure OpenShift Minion settings
   lineinfile: >
     dest=/etc/sysconfig/openshift
+    create=yes
     regexp={{ item.regex }}
     line="{{ item.line }}"
   with_items:
@@ -26,4 +31,3 @@
 
 - name: Enable OpenShift
   service: name=openshift enabled=yes state=started
-

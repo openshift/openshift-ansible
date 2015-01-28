@@ -1,0 +1,11 @@
+[Unit]
+Description=OpenShift
+Documentation=https://github.com/openshift/origin
+
+[Service]
+Type=simple
+EnvironmentFile=-/etc/sysconfig/openshift
+ExecStart=/usr/local/bin/openshift start $ROLE $OPTIONS
+
+[Install]
+WantedBy=multi-user.target
