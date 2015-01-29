@@ -31,10 +31,16 @@ def get_attr(data, attribute=None):
 
   return ptr
 
-def oo_collect(data, attribute=None):
+def oo_collect(data, attribute=None, filters={}):
   ''' This takes a list of dict and collects all attributes specified into a list
-        Ex: data = [ {'a':1,'b':5}, {'a':2}, {'a':3} ]
+      If filter is specified then we will include all items that match _ALL_ of filters.
+        Ex: data = [ {'a':1, 'b':5, 'z': 'z'}, # True, return
+                     {'a':2, 'z': 'z'},        # True, return
+                     {'a':3, 'z': 'z'},        # True, return
+                     {'a':4, 'z': 'b'},        # FAILED, obj['z'] != obj['z']
+                   ]
             attribute = 'a'
+            filters   = {'z': 'z'}
             returns [1, 2, 3]
   '''
 
@@ -44,7 +50,10 @@ def oo_collect(data, attribute=None):
   if not attribute:
     raise errors.AnsibleFilterError("|failed expects attribute to be set")
 
-  retval = [get_attr(d, attribute) for d in data]
+  if filters:
+    retval = [get_attr(d, attribute) for d in data if all([ d[key] == filters[key] for key in filters ]) ]
+  else:
+    retval = [get_attr(d, attribute) for d in data]
 
   return retval
 
