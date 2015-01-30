@@ -22,7 +22,9 @@ class AnsibleUtil(object):
         if p.returncode != 0:
             raise RuntimeError(err)
 
-        return json.loads(out)
+        with open('/tmp/ans.out','w') as fd:
+            fd.writelines(out)
+        return json.loads(out.strip())
 
     def get_environments(self):
         pattern = re.compile(r'^tag_environment_(.*)')
@@ -47,3 +49,19 @@ class AnsibleUtil(object):
                 groups.append(m.group(1))
 
         return groups
+
+    def get_host_address(self):
+        pattern = re.compile(r'^tag_Name_(.*)')
+        inv = self.get_inventory()
+
+        inst_names = {}
+        for key in inv.keys():
+            m = pattern.match(key)
+            if m: inst_names[m.group(1)] = inv[key]
+
+
+        return inst_names
+
+
+
+
