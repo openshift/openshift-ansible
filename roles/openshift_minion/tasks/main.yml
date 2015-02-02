@@ -9,7 +9,7 @@
   lineinfile:
     dest: /etc/ansible/facts.d/minion.fact
     regexp: '^nb_minions'
-    line: "nb_minions={{ ( 'tag_env-host-type_' + oo_env + '-openshift-minion' ) | oo_max_nb_minions( groups, hostvars ) }}"
+    line: "nb_minions={{ hostvars | oo_select_keys( groups[ 'tag_env-host-type_' + oo_env + '-openshift-minion' ] ) | oo_collect('ansible_local') | oo_collect('minion') | oo_collect('minion') | oo_collect('nb_minions') | map('int') | max }}"
 
 - include: openshift_from_yum.yml
   when: oo_openshift_binary is not defined

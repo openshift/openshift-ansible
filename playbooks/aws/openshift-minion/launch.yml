@@ -86,8 +86,8 @@
     - vars.yml
   roles:
     - { role: ../../../roles/minion_indices,
-        oo_minion_subnet_index: "{{ ( oo_minion_index | int ) + ( ( 'tag_env-host-type_' + oo_env + '-openshift-minion' ) | oo_max_nb_minions( groups, hostvars ) ) }}",
-        oo_nb_minions:          "{{ ( oo_nb_new_inst  | int ) + ( ( 'tag_env-host-type_' + oo_env + '-openshift-minion' ) | oo_max_nb_minions( groups, hostvars ) ) }}"
+        oo_minion_subnet_index: "{%if 'tag_env-host-type_' + oo_env + '-openshift-minion' in groups %}{{ ( oo_minion_index | int ) + ( hostvars | oo_select_keys( groups[ 'tag_env-host-type_' + oo_env + '-openshift-minion' ] ) | oo_collect('ansible_local') | oo_collect('minion') | oo_collect('minion') | oo_collect('nb_minions') | map('int') | max ) }}{% else %}{{ oo_minion_index }}{% endif %}",
+        oo_nb_minions:          "{%if 'tag_env-host-type_' + oo_env + '-openshift-minion' in groups %}{{ ( oo_nb_new_inst  | int ) + ( hostvars | oo_select_keys( groups[ 'tag_env-host-type_' + oo_env + '-openshift-minion' ] ) | oo_collect('ansible_local') | oo_collect('minion') | oo_collect('minion') | oo_collect('nb_minions') | map('int') | max ) }}{% else %}{{ oo_nb_new_inst  }}{% endif %}"
         }
 
 # Apply the configs, seprate so that just the configs can be run by themselves

@@ -66,25 +66,11 @@ def oo_select_keys(data, keys):
 
   return retval
 
-def oo_max_nb_minions(groupname, groups, hostvars):
-  ''' This computes the max of the 'nb_minions' fact of the machines
-        of the given groupname
-  '''
-  if groupname not in groups:
-    return 0
-
-  m = 0
-  for host in groups[groupname]:
-    if int(hostvars[host]['ansible_local']['minion']['minion']['nb_minions']) > m:
-      m = int(hostvars[host]['ansible_local']['minion']['minion']['nb_minions'])
-  return m
-
 class FilterModule (object):
   def filters(self):
     return {
       "oo_select_keys": oo_select_keys,
       "oo_collect": oo_collect,
       "oo_len": oo_len,
-      "oo_pdb": oo_pdb,
-      "oo_max_nb_minions": oo_max_nb_minions
+      "oo_pdb": oo_pdb
     }
