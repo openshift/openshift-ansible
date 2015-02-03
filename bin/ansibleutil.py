@@ -22,8 +22,8 @@ class AnsibleUtil(object):
         if p.returncode != 0:
             raise RuntimeError(err)
 
-        with open('/tmp/ans.out','w') as fd:
-            fd.writelines(out)
+        #with open('/tmp/ans.out','w') as fd:
+            #fd.writelines(out)
         return json.loads(out.strip())
 
     def get_environments(self):
@@ -50,18 +50,22 @@ class AnsibleUtil(object):
 
         return groups
 
-    def get_host_address(self):
-        pattern = re.compile(r'^tag_Name_(.*)')
+    def build_host_dict(self):
         inv = self.get_inventory()
 
-        inst_names = {}
-        for key in inv.keys():
-            m = pattern.match(key)
-            if m: inst_names[m.group(1)] = inv[key]
+        inst_by_env = {}
+        for dns, host in inv['_meta']['hostvars'].items():
+            if host['ec2_tag_environment'] not in inst_by_env:
+                inst_by_env[host['ec2_tag_environment']] = {}
+
+            #if inst_by_env[host['ec2_tag_environment']][host['ec2_tag_Name']]:
+                #raise Exception('Duplicate ec2_tag_Name found: %s' % host['ec2_tag_Name'])
+
+            host_id = "%s:%s" % (host['ec2_tag_Name'],host['ec2_id'])
+            inst_by_env[host['ec2_tag_environment']][host_id] = host
 
 
-        return inst_names
-
+        return inst_by_env
 
 
 
