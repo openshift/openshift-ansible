@@ -24,7 +24,7 @@ function usage {
         ${0} : [create|terminate|update|list] { ${UPPER_CASE_PROVIDER} environment tag}
 
         Supported environment tags:
-        $(grep 'SUPPORTED_ENVS.*=' ./lib/${PROVIDER}_command.rb)
+        $(grep --no-messages 'SUPPORTED_ENVS.*=' ./lib/${PROVIDER}_command.rb)
 EOT
 }
 # @formatter:on
