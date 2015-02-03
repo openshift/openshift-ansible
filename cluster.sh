@@ -25,6 +25,7 @@ function usage {
 
         Supported environment tags:
         $(grep --no-messages 'SUPPORTED_ENVS.*=' ./lib/${PROVIDER}_command.rb)
+        $([ $? -ne 0 ] && echo "No supported environment tags found for ${PROVIDER}")
 EOT
 }
 # @formatter:on
