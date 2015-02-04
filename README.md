@@ -8,7 +8,7 @@ Setup
 - Install base dependencies:
   - Fedora:
   ```
-    yum install -y ansible rubygem-thor rubygem-parseconfig
+    yum install -y ansible rubygem-thor rubygem-parseconfig util-linux
   ```
 
 - Setup for a specific cloud:

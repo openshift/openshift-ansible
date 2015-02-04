@@ -13,9 +13,10 @@ fi
 UPPER_CASE_PROVIDER=$(echo $PROVIDER | tr '[:lower:]' '[:upper:]')
 
 
-# FIXME: Add options
-MASTER_PLAYBOOK=openshift-master
-MINION_PLAYBOOK=openshift-minion
+# Use OO_MASTER_PLAYBOOK/OO_MINION_PLAYBOOK environment variables for playbooks if defined,
+# otherwise use openshift default values.
+MASTER_PLAYBOOK=${OO_MASTER_PLAYBOOK:-'openshift-master'}
+MINION_PLAYBOOK=${OO_MINION_PLAYBOOK:-'openshift-minion'}
 
 
 # @formatter:off
@@ -26,6 +27,12 @@ function usage {
         Supported environment tags:
         $(grep --no-messages 'SUPPORTED_ENVS.*=' ./lib/${PROVIDER}_command.rb)
         $([ $? -ne 0 ] && echo "No supported environment tags found for ${PROVIDER}")
+
+        Optional arguments for create:
+        [-p|--provider, -m|--masters, -n|--minions, --master-playbook, --minion-playbook]
+
+        Optional arguments for terminate|update:
+        [-p|--provider, --master-playbook, --minion-playbook]
 EOT
 }
 # @formatter:on
@@ -52,16 +59,32 @@ function terminate_cluster {
 
 [ -f ./cloud.rb ] || (echo 1>&2 'Cannot find ./cloud.rb' && exit 1)
 
-while getopts ':p:m:n:' flag; do
-    case "${flag}" in
-        p) PROVIDER="${OPTARG}" ;;
-        m) MASTERS="${OPTARG}" ;;
-        n) MINIONS="${OPTARG}" ;;
-        *)  echo -e 2>&1 "unsupported option $OPTARG\n"
-            usage
-            exit 1 ;;
+function check_argval {
+    if [[ $1 == -* ]]; then
+        echo "Invalid value: '$1'"
+        usage
+        exit 1
+    fi
+}
+
+# Using GNU getopt to support both small and long formats
+OPTIONS=`getopt -o p:m:n:h --long provider:,masters:,minions:,master-playbook:,minion-playbook:,help \
+	        -n "$0" -- "$@"`
+eval set -- "$OPTIONS"
+
+while true; do
+    case "$1" in
+        -h|--help) (usage; exit 1) ; shift ;;
+        -p|--provider) PROVIDER="$2" ; check_argval $2 ; shift 2 ;;
+        -m|--masters) MASTERS="$2" ; check_argval $2 ; shift 2 ;;
+        -n|--minions) MINIONS="$2" ; check_argval $2 ; shift 2 ;;
+        --master-playbook) MASTER_PLAYBOOK="$2" ; check_argval $2 ; shift 2 ;;
+        --minion-playbook) MINION_PLAYBOOK="$2" ; check_argval $2 ; shift 2 ;;
+        --) shift ; break ;;
+        *) break ;;
     esac
 done
+
 shift $((OPTIND-1))
 
 [ -z "${1:-}" ] && (usage; exit 1)
