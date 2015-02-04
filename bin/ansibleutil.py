@@ -57,10 +57,6 @@ class AnsibleUtil(object):
         for dns, host in inv['_meta']['hostvars'].items():
             if host['ec2_tag_environment'] not in inst_by_env:
                 inst_by_env[host['ec2_tag_environment']] = {}
-
-            #if inst_by_env[host['ec2_tag_environment']][host['ec2_tag_Name']]:
-                #raise Exception('Duplicate ec2_tag_Name found: %s' % host['ec2_tag_Name'])
-
             host_id = "%s:%s" % (host['ec2_tag_Name'],host['ec2_id'])
             inst_by_env[host['ec2_tag_environment']][host_id] = host
 

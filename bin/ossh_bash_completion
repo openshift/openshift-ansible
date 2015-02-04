@@ -1,0 +1,18 @@
+__ossh_known_hosts(){
+    if [[ -f ~/.ansible/tmp/multi_ec2_inventory.cache ]]; then
+      /usr/bin/python -c 'import json,os; z = json.loads(open("%s"%os.path.expanduser("~/.ansible/tmp/multi_ec2_inventory.cache")).read()); print "\n".join(["%s.%s" % (host["ec2_tag_Name"],host["ec2_tag_environment"]) for dns, host in z["_meta"]["hostvars"].items()])'
+    fi
+}
+
+_ossh()
+{
+    local cur prev known_hosts
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+    known_hosts="$(__ossh_known_hosts)"
+    COMPREPLY=( $(compgen -W "${known_hosts}" -- ${cur}))
+
+    return 0
+}
+complete -F _ossh ossh

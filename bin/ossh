@@ -25,6 +25,11 @@ class Ossh(object):
     def __init__(self):
         self.file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)))
         self.parse_cli_args()
+
+        if self.args.host == '' and not self.args.list:
+            self.parser.print_help()
+            return
+
         self.ansible = ansibleutil.AnsibleUtil()
 
         self.host_inventory = self.get_hosts()
@@ -57,7 +62,6 @@ class Ossh(object):
                           action="store_true", help="Verbose?")
         parser.add_argument('--list', default=False,
                           action="store_true", help="list out hosts")
-        parser.add_argument('host')
         parser.add_argument('-c', '--command', action='store',
                             help='Command to run on remote host')
         parser.add_argument('-l', '--login_name', action='store',
@@ -66,8 +70,11 @@ class Ossh(object):
         parser.add_argument('-o', '--ssh_opts', action='store',
                             help='options to pass to SSH.\n \
                                   "-o ForwardX11 yes"')
+        parser.add_argument('host', nargs='?', default='')
 
         self.args = parser.parse_args()
+        self.parser = parser
+
 
     def process_host(self):
         '''Determine host name and user name for SSH.
