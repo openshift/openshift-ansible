@@ -89,13 +89,6 @@ extra_vars: #{@extra_vars.to_json}
         ah.inventory = 'inventory/aws/ec2.py'
         return ah
       end
-
-
-      def ignore_bug_6407
-        puts
-        puts %q[ .----  Spurious warning "It is unnecessary to use '{{' in loops" (ansible bug 6407)  ----.]
-        puts %q[ V                                                                                        V]
-      end
     end
   end
 end
