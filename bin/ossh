@@ -26,6 +26,13 @@ class Ossh(object):
         self.file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)))
         self.parse_cli_args()
 
+        # parse host and user
+        self.process_host()
+
+        if not self.args.list and not self.env:
+            print "Please specify an environment."
+            return
+
         if self.args.host == '' and not self.args.list:
             self.parser.print_help()
             return
@@ -34,15 +41,12 @@ class Ossh(object):
 
         self.host_inventory = self.get_hosts()
 
-
         if self.args.debug:
             print self.args
 
         # get a dict of host inventory
         self.get_hosts()
 
-        # parse host and user
-        self.process_host()
 
         # perform the SSH
         if self.args.list:

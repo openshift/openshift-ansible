@@ -1,16 +1,10 @@
 # ossh is an ssh replacement.
 
+
 Ossh uses a dynamic inventory cache in order to lookup hostnames and translate them
 to something meaningful such as an IP address or dns name.
 
 This allows us to treat our servers as cattle and not as pets.
-
-In order to setup bash completion, source the following script:
-/path/to/repository/openshift-online-ansible/bin/ossh_bash_completion
-
-This bash_completion script will look at the cached version of your
-multi_ec2 results in ~/.ansible/tmp/.  It will then parse a few
-host.env out of the json and return them to be completable.
 
 If you have not run the ossh command and it has not laid down
 a cache file the completions will not be available.
@@ -18,4 +12,21 @@ a cache file the completions will not be available.
 You can populate the cache by running `ossh --list`.  This
 will populate the cache file and the completions should
 become available.
+
+This zsh script will look at the cached version of your
+multi_ec2 results in ~/.ansible/tmp/.  It will then parse a few
+{host}.{env} out of the json and return them to be completable.
+
+# BASH
+In order to setup bash completion, source the following script:
+/path/to/repository/openshift-online-ansible/bin/ossh_bash_completion
+
+# ZSH
+In order to setup zsh completion, you will need to verify
+that the _ossh_zsh_completion script is somewhere in the path
+of $fpath.
+
+Once $fpath includes the _ossh_zsh_completion script then you should
+run `exec zsh`.  This will then allow you to call `ossh host[TAB]` 
+for a list of completions.
 
