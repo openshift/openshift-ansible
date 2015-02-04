@@ -6,12 +6,14 @@ module OpenShift
     class AnsibleHelper
       MYDIR = File.expand_path(File.dirname(__FILE__))
 
-      attr_accessor :inventory, :extra_vars, :verbosity, :pipelining
+      attr_accessor :inventory, :extra_vars, :verbosity, :pipelining, :tags, :skip_tags
 
       def initialize(extra_vars={}, inventory=nil)
         @extra_vars = extra_vars
-        @verbosity = '-vvvv'
+        @verbosity = '-vvv'
         @pipelining = true
+        @tags = []
+        @skip_tags = []
       end
 
       def all_eof(files)
@@ -30,11 +32,18 @@ module OpenShift
 
         # We need this for launching instances, otherwise conflicting keys and what not kill it
         cmds << %q[export ANSIBLE_TRANSPORT="ssh"]
-        cmds << %q[export ANSIBLE_SSH_ARGS="-o ForwardAgent=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"]
+        cmds << %q[export ANSIBLE_SSH_ARGS="-o ForwardAgent=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ControlMaster=auto -o ControlPersist=300s "]
 
         # We need pipelining off so that we can do sudo to enable the root account
         cmds << %Q[export ANSIBLE_SSH_PIPELINING='#{@pipelining.to_s}']
-        cmds << %Q[time ansible-playbook  -i #{@inventory} #{@verbosity} #{playbook} --extra-vars '@#{tmpfile.path}' ]
+        ansible_cmd = %Q[time ansible-playbook  -i #{@inventory} #{@verbosity} #{playbook} --extra-vars '@#{tmpfile.path}' ]
+        if ! @tags.empty?
+          ansible_cmd += %Q[--tags ] + @tags.join(',') + ' '
+        end
+        if ! @skip_tags.empty?
+          ansible_cmd += %Q[--skip-tags ] + @skip_tags.join(',') + ' '
+        end
+        cmds << ansible_cmd
         cmd = cmds.join(' ; ')
 
         pid = spawn(cmd, :out => $stdout, :err => $stderr, :close_others => true)

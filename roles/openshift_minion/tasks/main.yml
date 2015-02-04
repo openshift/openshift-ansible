@@ -1,15 +1,26 @@
 ---
 # tasks file for openshift_minion
-- name: Install OpenShift
-  yum: pkg=origin state=installed
 
   # fixme: Once openshift stops resolving hostnames for minion queries remove this...
 - name: Set hostname to IP Addr (WORKAROUND)
-  command: /usr/bin/hostname {{ oo_bind_ip }}
+  hostname: name={{ oo_bind_ip }}
+
+- name: Update the nb_minons local fact on all the minions
+  lineinfile:
+    dest: /etc/ansible/facts.d/minion.fact
+    regexp: '^nb_minions'
+    line: "nb_minions={{ hostvars | oo_select_keys( groups[ 'tag_env-host-type_' + oo_env + '-openshift-minion' ] ) | oo_collect('ansible_local') | oo_collect('minion') | oo_collect('minion') | oo_collect('nb_minions') | map('int') | max }}"
+
+- include: openshift_from_yum.yml
+  when: oo_openshift_binary is not defined
+
+- include: openshift_from_local.yml
+  when: oo_openshift_binary is defined
 
 - name: Configure OpenShift Minion settings
   lineinfile: >
     dest=/etc/sysconfig/openshift
+    create=yes
     regexp={{ item.regex }}
     line="{{ item.line }}"
   with_items:
@@ -26,4 +37,3 @@
 
 - name: Enable OpenShift
   service: name=openshift enabled=yes state=started
-

@@ -1,0 +1,2 @@
+ROLE="node"
+OPTIONS="--master=http://{{ oo_master_ips[0] }}:8080  --loglevel=5"

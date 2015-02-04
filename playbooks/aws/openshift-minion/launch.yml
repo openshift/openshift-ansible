@@ -5,8 +5,7 @@
   gather_facts: no
 
   vars:
-    inst_region: us-east-1
-    atomic_ami: ami-86781fee
+    inst_region: "{{ oo_aws_region | default('us-east-1') }}"
     user_data_file: user_data.txt
 
   vars_files:
@@ -17,10 +16,10 @@
       ec2:
         state: present
         region: "{{ inst_region }}"
-        keypair: libra
+        keypair: "{{ oo_aws_keypair | default('libra') }}"
         group: ['public']
-        instance_type: m3.large
-        image: "{{ atomic_ami }}"
+        instance_type: "{{ oo_aws_instance_type | default('m3.large') }}"
+        image: "{{ oo_aws_ami | default('ami-86781fee') }}"
         count: "{{ oo_new_inst_names | oo_len }}"
         user_data: "{{ lookup('file', user_data_file) }}"
         wait: yes
@@ -46,10 +45,16 @@
         tags: "{{ oo_new_inst_tags }}"
 
     - name: Add new instances public IPs to oo_hosts_to_config
-      add_host: "hostname={{ item.0 }} ansible_ssh_host={{ item.1.dns_name }} groupname=oo_hosts_to_config"
+      add_host:
+        hostname: "{{ item.0 }}"
+        ansible_ssh_host: "{{ item.1.dns_name }}"
+        oo_minion_index: "{{ item.2 }}"
+        oo_nb_new_inst: "{{ oo_new_inst_names | count }}"
+        groupname: oo_hosts_to_config
       with_together:
         - oo_new_inst_names
         - ec2.instances
+        - oo_indexes
 
     - debug: var=ec2
 
@@ -64,6 +69,26 @@
       retries: 20
       delay: 10
       with_items: ec2.instances
+
+- name: "Force fact gathering"
+  hosts: "tag_env-host-type_{{ oo_env }}-openshift-minion"
+  connection: ssh
+  user: root
+  tasks:
+    - name: Gather fact
+      setup: filter=ansible_local
+
+- name: "Configure instances"
+  hosts: oo_hosts_to_config
+  connection: ssh
+  user: root
+  vars_files:
+    - vars.yml
+  roles:
+    - { role: ../../../roles/minion_indices,
+        oo_minion_subnet_index: "{%if 'tag_env-host-type_' + oo_env + '-openshift-minion' in groups %}{{ ( oo_minion_index | int ) + ( hostvars | oo_select_keys( groups[ 'tag_env-host-type_' + oo_env + '-openshift-minion' ] ) | oo_collect('ansible_local') | oo_collect('minion') | oo_collect('minion') | oo_collect('nb_minions') | map('int') | max ) }}{% else %}{{ oo_minion_index }}{% endif %}",
+        oo_nb_minions:          "{%if 'tag_env-host-type_' + oo_env + '-openshift-minion' in groups %}{{ ( oo_nb_new_inst  | int ) + ( hostvars | oo_select_keys( groups[ 'tag_env-host-type_' + oo_env + '-openshift-minion' ] ) | oo_collect('ansible_local') | oo_collect('minion') | oo_collect('minion') | oo_collect('nb_minions') | map('int') | max ) }}{% else %}{{ oo_nb_new_inst  }}{% endif %}"
+        }
 
 # Apply the configs, seprate so that just the configs can be run by themselves
 - include: config.yml

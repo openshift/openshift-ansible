@@ -1,0 +1,8 @@
+- name: Copy OpenShift binary
+  copy:
+    src: '{{ oo_openshift_binary }}'
+    dest: /usr/local/bin/openshift
+    mode: 0755
+
+- name: Configure OpenShift systemd unit
+  copy: src=openshift.service dest=/etc/systemd/system/openshift.service

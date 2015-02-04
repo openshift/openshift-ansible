@@ -1,0 +1,14 @@
+[Unit]
+Description=Setup Open vSwitch
+After=openvswitch.service
+Before=network.target network.service
+Requires=openvswitch.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/bin/configure_openvswitch.sh
+ExecStop=/usr/bin/ovs-vsctl emer-reset
+
+[Install]
+WantedBy=basic.target

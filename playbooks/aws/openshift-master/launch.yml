@@ -5,8 +5,7 @@
   gather_facts: no
 
   vars:
-    inst_region: us-east-1
-    atomic_ami: ami-86781fee
+    inst_region: "{{ oo_aws_region | default('us-east-1') }}"
     user_data_file: user_data.txt
 
   vars_files:
@@ -17,10 +16,10 @@
       ec2:
         state: present
         region: "{{ inst_region }}"
-        keypair: libra
+        keypair: "{{ oo_aws_keypair | default('libra') }}"
         group: ['public']
-        instance_type: m3.large
-        image: "{{ atomic_ami }}"
+        instance_type: "{{ oo_aws_instance_type | default('m3.large') }}"
+        image: "{{ oo_aws_ami | default('ami-86781fee') }}"
         count: "{{ oo_new_inst_names | oo_len }}"
         user_data: "{{ lookup('file', user_data_file) }}"
         wait: yes

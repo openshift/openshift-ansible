@@ -7,7 +7,7 @@ module OpenShift
   module Ops
     class AwsCommand < Thor
       # WARNING: we do not currently support environments with hyphens in the name
-      SUPPORTED_ENVS = %w(prod stg int tint kint test jint amint tdint lint)
+      SUPPORTED_ENVS = %w(prod stg int tint kint test jint amint tdint lint) << ENV['OO_CUSTOM_ENV']
 
       option :type, :required => true, :enum => LaunchHelper.get_aws_host_types,
              :desc => 'The host type of the new instances.'
@@ -17,18 +17,24 @@ module OpenShift
              :desc => 'The number of instances to create'
       option :tag, :type => :array,
              :desc => 'The tag(s) to add to the new instances. Allowed characters are letters, numbers, and hyphens.'
+      option :skip_config, :type => :boolean
       desc "launch", "Launches instances."
       def launch()
         AwsHelper.check_creds()
 
         # Expand all of the instance names so that we have a complete array
         names = []
-        options[:count].times { names << "#{options[:env]}-#{options[:type]}-#{SecureRandom.hex(5)}" }
+        minion_indexes = []
+        options[:count].times do |index|
+          names << "#{options[:env]}-#{options[:type]}-#{SecureRandom.hex(5)}"
+          minion_indexes << index
+        end
 
         ah = AnsibleHelper.for_aws()
 
         # AWS specific configs
         ah.extra_vars['oo_new_inst_names'] = names
+        ah.extra_vars['oo_indexes'] = minion_indexes
         ah.extra_vars['oo_new_inst_tags'] = options[:tag]
         ah.extra_vars['oo_env'] = options[:env]
 
@@ -40,9 +46,25 @@ module OpenShift
         ah.extra_vars['oo_new_inst_tags'].merge!(AwsHelper.generate_host_type_tag(options[:type]))
         ah.extra_vars['oo_new_inst_tags'].merge!(AwsHelper.generate_env_host_type_tag(options[:env], options[:type]))
 
+        # Check if we install a custom openshift
+        if !ENV['OO_OPENSHIFT_BINARY'].nil?
+          ah.extra_vars['oo_openshift_binary'] = File.expand_path(ENV['OO_OPENSHIFT_BINARY'])
+        end
+
+        # Check AWS settings override
+        ah.extra_vars['oo_aws_region']  = ENV['OO_AWS_REGION']  if !ENV['OO_AWS_REGION'].nil?
+        ah.extra_vars['oo_aws_ami']     = ENV['OO_AWS_AMI']     if !ENV['OO_AWS_AMI'].nil?
+        ah.extra_vars['oo_aws_keypair'] = ENV['OO_AWS_KEYPAIR'] if !ENV['OO_AWS_KEYPAIR'].nil?
+        ah.extra_vars['oo_aws_instance_type'] = ENV['OO_AWS_INSTANCE_TYPE'] if !ENV['OO_AWS_INSTANCE_TYPE'].nil?
+
         puts
         puts "Creating #{options[:count]} #{options[:type]} instance(s) in AWS..."
         ah.ignore_bug_6407
+
+        # Should we skip the config at the end of the launch?
+        if options[:skip_config]
+          ah.skip_tags << 'config'
+        end
 
         # Make sure we're completely up to date before launching
         clear_cache()
@@ -89,6 +111,11 @@ module OpenShift
           abort 'Error: you need to specify either --name or (--type and --env)'
         end
 
+        # Check if we install a custom openshift
+        if !ENV['OO_OPENSHIFT_BINARY'].nil?
+          ah.extra_vars['oo_openshift_binary'] = File.expand_path(ENV['OO_OPENSHIFT_BINARY'])
+        end
+
         puts
         puts "Configuring #{options[:type]} instance(s) in AWS..."
         ah.ignore_bug_6407
@@ -116,7 +143,7 @@ module OpenShift
 
       desc "ssh", "Ssh to an instance"
       def ssh(*ssh_ops, host)
-        if host =~ /^([\w\d_.-]+)@([\w\d-_.]+)/
+        if host =~ /^([\w\d_.\-]+)@([\w\d\-_.]+)/
           user = $1
           host = $2
         end

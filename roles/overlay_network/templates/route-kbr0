@@ -1,0 +1,1 @@
+{{ pod_subnet }} dev kbr0 src {{ kbr0_ip }}

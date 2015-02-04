@@ -13,6 +13,7 @@
 
 - name: Ensure rhel 7 libra candidate exists in yum.repos.d
   copy: src=rhel-7-libra-candidate.repo dest=/etc/yum.repos.d/rhel-7-libra-candidate.repo
+  when: oo_openshift_binary is not defined
 
 - name: Ensure a docker repo is laid down
   copy: src=docker.repo dest=/etc/yum.repos.d/docker.repo
@@ -22,3 +23,6 @@
 
 - name: Ensure the origin repo is available
   copy: src=epel7-origin.repo dest=/etc/yum.repos.d/epel7-origin.repo
+
+- name: Ensure the OpenStack repo is available
+  yum: name=https://repos.fedorapeople.org/repos/openstack/openstack-juno/rdo-release-juno-1.noarch.rpm state=present
