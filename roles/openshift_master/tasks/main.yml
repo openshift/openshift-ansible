@@ -8,10 +8,10 @@
   command: /usr/bin/hostname {{ oo_bind_ip }}
 
 - name: Configure OpenShift Master settings
-  lineinfile: >
-    dest=/etc/sysconfig/openshift
-    regexp={{ item.regex }}
-    line="{{ item.line }}"
+  lineinfile:
+    dest: /etc/sysconfig/openshift
+    regexp: "{{ item.regex }}"
+    line: "{{ item.line }}"
   with_items:
     - { regex: '^ROLE=', line: 'ROLE=\"master\"' }
     - { regex: '^OPTIONS=', line: 'OPTIONS=\"--nodes={{ oo_minion_ips | join(",") }}  --loglevel=5\"' }
