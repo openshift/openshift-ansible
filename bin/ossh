@@ -1,6 +1,6 @@
 #!/usr/bin/env python
+# vim: expandtab:tabstop=4:shiftwidth=4
 
-import pdb
 import argparse
 import ansibleutil
 import traceback
@@ -8,23 +8,18 @@ import sys
 import os
 import re
 
-
-# use dynamic inventory
-# list instances
-# symlinked to ~/bin
-# list instances that match pattern
-# python!
-
-# list environment stuff as well
-# 3 states:
-#  - an exact match; return result
-#  - a partial match; return all regex results
-#  - no match; None
-
 class Ossh(object):
     def __init__(self):
         self.file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)))
         self.parse_cli_args()
+
+        self.ansible = ansibleutil.AnsibleUtil()
+
+        # get a dict of host inventory
+        if self.args.list:
+            self.get_hosts()
+        else:
+            self.get_hosts(True)
 
         # parse host and user
         self.process_host()
@@ -37,13 +32,6 @@ class Ossh(object):
             self.parser.print_help()
             return
 
-        self.ansible = ansibleutil.AnsibleUtil()
-
-        # get a dict of host inventory
-        if self.args.list:
-            self.get_hosts()
-        else:
-            self.get_hosts(True)
 
         if self.args.debug:
             print self.args
@@ -56,8 +44,6 @@ class Ossh(object):
 
     def parse_cli_args(self):
         parser = argparse.ArgumentParser(description='Openshift Online SSH Tool.')
-        parser.add_argument('-r', '--random', action="store",
-                          help="Choose a random host")
         parser.add_argument('-e', '--env', action="store",
                           help="Which environment to search for the host ")
         parser.add_argument('-d', '--debug', default=False,
@@ -73,7 +59,7 @@ class Ossh(object):
 
         parser.add_argument('-o', '--ssh_opts', action='store',
                             help='options to pass to SSH.\n \
-                                  "-o ForwardX11 yes"')
+                                  "-oForwardX11=yes,TCPKeepAlive=yes"')
         parser.add_argument('host', nargs='?', default='')
 
         self.args = parser.parse_args()
@@ -86,7 +72,7 @@ class Ossh(object):
         self.env = None
         self.user = None
 
-        re_env = re.compile('\.(int|stg|prod|ops)')
+        re_env = re.compile("\.(" + "|".join(self.host_inventory.keys()) + ")")
         search = re_env.search(self.args.host)
         if self.args.env:
             self.env = self.args.env
@@ -106,19 +92,16 @@ class Ossh(object):
             if self.args.login_name:
                 self.user = self.args.login_name
 
-    def get_hosts(self, cache=False):
+    def get_hosts(self, cache_only=False):
         '''Query our host inventory and return a dict where the format
            equals:
 
            dict['servername'] = dns_name
         '''
-        # TODO: perform a numerical sort on these hosts
-        # and display them
-
-        if not cache:
-            self.host_inventory = self.ansible.build_host_dict()
-        else:
+        if cache_only:
             self.host_inventory = self.ansible.build_host_dict(['--cache-only'])
+        else:
+            self.host_inventory = self.ansible.build_host_dict()
 
     def select_host(self, regex=False):
         '''select host attempts to match the host specified
@@ -127,32 +110,23 @@ class Ossh(object):
            if regex is specified then we will attempt to match
            all *{host_string}* equivalents.
         '''
-# list environment stuff as well
-# 3 states:
-#  - an exact match; return result
-#  - a partial match; return all regex results
-#  - no match; None
         re_host = re.compile(self.host)
 
-        exact = []
         results = []
         for hostname, server_info in self.host_inventory[self.env].items():
             if hostname.split(':')[0] == self.host:
-                exact.append((hostname, server_info))
-                break
+                # an exact match, return it!
+                return [(hostname, server_info)]
             elif re_host.search(hostname):
                 results.append((hostname, server_info))
 
-        if exact:
-            return exact
-        elif results:
+        if results:
             return results
         else:
             print "Could not find specified host: %s in %s" % (self.host, self.env)
 
         # default - no results found.
         return None
-
 
     def list_hosts(self, limit=None):
         '''Function to print out the host inventory.
@@ -192,10 +166,8 @@ class Ossh(object):
         '''SSH to a specified host
         '''
         try:
-            cmd = '/usr/bin/ssh'
-
             # shell args start with the program name in position 1
-            ssh_args = [cmd, ]
+            ssh_args = ['/usr/bin/ssh']
 
             if self.user:
                 ssh_args.append('-l%s' % self.user)
@@ -204,7 +176,8 @@ class Ossh(object):
                 ssh_args.append('-vvv')
 
             if self.args.ssh_opts:
-                ssh_args.append("-o%s" % self.args.ssh_opts)
+                for arg in self.args.ssh_opts.split(","):
+                    ssh_args.append("-o%s" % arg)
 
             result = self.select_host()
             if not result:
@@ -235,10 +208,6 @@ class Ossh(object):
             print sys.exc_info()
 
 
-def main():
-    ossh = Ossh()
-
-
 if __name__ == '__main__':
-    main()
+    ossh = Ossh()
 

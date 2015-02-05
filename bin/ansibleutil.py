@@ -26,8 +26,6 @@ class AnsibleUtil(object):
         if p.returncode != 0:
             raise RuntimeError(err)
 
-        #with open('/tmp/ans.out','w') as fd:
-            #fd.writelines(out)
         return json.loads(out.strip())
 
     def get_environments(self):
