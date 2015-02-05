@@ -39,14 +39,14 @@ class Ossh(object):
 
         self.ansible = ansibleutil.AnsibleUtil()
 
-        self.host_inventory = self.get_hosts()
+        # get a dict of host inventory
+        if self.args.list:
+            self.get_hosts()
+        else:
+            self.get_hosts(True)
 
         if self.args.debug:
             print self.args
-
-        # get a dict of host inventory
-        self.get_hosts()
-
 
         # perform the SSH
         if self.args.list:
@@ -106,7 +106,7 @@ class Ossh(object):
             if self.args.login_name:
                 self.user = self.args.login_name
 
-    def get_hosts(self):
+    def get_hosts(self, cache=False):
         '''Query our host inventory and return a dict where the format
            equals:
 
@@ -114,7 +114,11 @@ class Ossh(object):
         '''
         # TODO: perform a numerical sort on these hosts
         # and display them
-        self.host_inventory = self.ansible.build_host_dict()
+
+        if not cache:
+            self.host_inventory = self.ansible.build_host_dict()
+        else:
+            self.host_inventory = self.ansible.build_host_dict(['--cache-only'])
 
     def select_host(self, regex=False):
         '''select host attempts to match the host specified

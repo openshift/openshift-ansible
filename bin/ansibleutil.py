@@ -11,8 +11,12 @@ class AnsibleUtil(object):
         self.file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)))
         self.multi_ec2_path = os.path.realpath(os.path.join(self.file_path, '..','inventory','multi_ec2.py'))
 
-    def get_inventory(self):
+    def get_inventory(self,args=[]):
         cmd = [self.multi_ec2_path]
+
+        if args:
+            cmd.extend(args)
+
         env = {}
         p = subprocess.Popen(cmd, stderr=subprocess.PIPE,
                          stdout=subprocess.PIPE, env=env)
@@ -50,8 +54,8 @@ class AnsibleUtil(object):
 
         return groups
 
-    def build_host_dict(self):
-        inv = self.get_inventory()
+    def build_host_dict(self, args=[]):
+        inv = self.get_inventory(args)
 
         inst_by_env = {}
         for dns, host in inv['_meta']['hostvars'].items():

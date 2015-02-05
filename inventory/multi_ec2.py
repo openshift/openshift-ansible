@@ -43,9 +43,15 @@ class MultiEc2(object):
         else:
             raise RuntimeError("Could not find valid ec2 credentials in the environment.")
 
+        if self.args.cache_only:
+            # get data from disk
+            result = self.get_inventory_from_cache()
 
+            if not result:
+                self.get_inventory()
+                self.write_to_cache()
         # if its a host query, fetch and do not cache
-        if self.args.host:
+        elif self.args.host:
             self.get_inventory()
         elif not self.is_cache_valid():
             # go fetch the inventories and cache them if cache is expired
@@ -186,6 +192,8 @@ class MultiEc2(object):
         ''' Command line argument processing '''
 
         parser = argparse.ArgumentParser(description='Produce an Ansible Inventory file based on a provider')
+        parser.add_argument('--cache-only', action='store_true', default=False,
+                           help='Fetch cached only instances (default: False)')
         parser.add_argument('--list', action='store_true', default=True,
                            help='List instances (default: True)')
         parser.add_argument('--host', action='store', default=False,
@@ -203,8 +211,13 @@ class MultiEc2(object):
         ''' Reads the inventory from the cache file and returns it as a JSON
         object '''
 
+        if not os.path.isfile(self.cache_path):
+            return None
+
         with open(self.cache_path, 'r') as cache:
             self.result = json.loads(cache.read())
+
+        return True
 
     def json_format_dict(self, data, pretty=False):
         ''' Converts a dict to a JSON object and dumps it as a formatted
