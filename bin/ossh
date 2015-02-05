@@ -84,6 +84,7 @@ class Ossh(object):
         '''Determine host name and user name for SSH.
         '''
         self.env = None
+        self.user = None
 
         re_env = re.compile('\.(int|stg|prod|ops)')
         search = re_env.search(self.args.host)
@@ -104,10 +105,6 @@ class Ossh(object):
             self.host = self.args.host
             if self.args.login_name:
                 self.user = self.args.login_name
-            else:
-                self.user = os.environ['USER']
-
-
 
     def get_hosts(self):
         '''Query our host inventory and return a dict where the format
@@ -192,8 +189,12 @@ class Ossh(object):
         '''
         try:
             cmd = '/usr/bin/ssh'
-            ssh_args = [cmd, '-l%s' % self.user]
-            #ssh_args = [cmd, ]
+
+            # shell args start with the program name in position 1
+            ssh_args = [cmd, ]
+
+            if self.user:
+                ssh_args.append('-l%s' % self.user)
 
             if self.args.verbose:
                 ssh_args.append('-vvv')
@@ -211,9 +212,9 @@ class Ossh(object):
 
             # Assume we have one and only one.
             hostname, server_info = result[0]
-            ip = server_info['ec2_ip_address']
+            dns = server_info['ec2_public_dns_name']
 
-            ssh_args.append(ip)
+            ssh_args.append(dns)
 
             #last argument
             if self.args.command:
