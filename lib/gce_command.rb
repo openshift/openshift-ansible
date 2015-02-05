@@ -43,7 +43,6 @@ module OpenShift
 
         puts
         puts "Creating #{options[:count]} #{options[:type]} instance(s) in GCE..."
-        ah.ignore_bug_6407
 
         ah.run_playbook("playbooks/gce/#{options[:type]}/launch.yml")
       end
@@ -80,7 +79,6 @@ module OpenShift
 
         puts
         puts "Configuring #{options[:type]} instance(s) in GCE..."
-        ah.ignore_bug_6407
 
         ah.run_playbook("playbooks/gce/#{host_type}/config.yml")
       end
@@ -118,7 +116,6 @@ module OpenShift
 
         puts
         puts "Terminating #{options[:type]} instance(s) in GCE..."
-        ah.ignore_bug_6407
 
         ah.run_playbook("playbooks/gce/#{host_type}/terminate.yml")
       end

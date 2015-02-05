@@ -8,10 +8,10 @@
   command: /usr/bin/hostname {{ oo_bind_ip }}
 
 - name: Configure OpenShift Minion settings
-  lineinfile: >
-    dest=/etc/sysconfig/openshift
-    regexp={{ item.regex }}
-    line="{{ item.line }}"
+  lineinfile:
+    dest: /etc/sysconfig/openshift
+    regexp: "{{ item.regex }}"
+    line: "{{ item.line }}"
   with_items:
     - { regex: '^ROLE=', line: 'ROLE=\"node\"' }
     - { regex: '^OPTIONS=', line: 'OPTIONS=\"--master=http://{{ oo_master_ips[0] }}:8080  --loglevel=5\"' }

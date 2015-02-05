@@ -8,12 +8,35 @@
     inst_region: us-east-1
     atomic_ami: ami-8e239fe6
     user_data_file: user_data.txt
+    oo_vpc_subnet_id:    # Purposely left blank, these are here to be overridden in env vars_files
+    oo_assign_public_ip: # Purposely left blank, these are here to be overridden in env vars_files
 
   vars_files:
     - vars.yml
+    - "vars.{{ oo_env }}.yml"
 
   tasks:
-    - name: Launch instances
+    - name: Launch instances in VPC
+      ec2:
+        state: present
+        region: "{{ inst_region }}"
+        keypair: mmcgrath_libra
+        group_id: "{{ oo_security_group_ids }}"
+        instance_type: m3.large
+        image: "{{ atomic_ami }}"
+        count: "{{ oo_new_inst_names | oo_len }}"
+        user_data: "{{ lookup('file', user_data_file) }}"
+        wait: yes
+        assign_public_ip: "{{ oo_assign_public_ip }}"
+        vpc_subnet_id: "{{ oo_vpc_subnet_id }}"
+      when: oo_vpc_subnet_id
+      register: ec2_vpc
+
+    - set_fact:
+        ec2: "{{ ec2_vpc }}"
+      when: oo_vpc_subnet_id
+
+    - name: Launch instances in Classic
       ec2:
         state: present
         region: "{{ inst_region }}"
@@ -24,7 +47,12 @@
         count: "{{ oo_new_inst_names | oo_len }}"
         user_data: "{{ lookup('file', user_data_file) }}"
         wait: yes
-      register: ec2
+      when: not oo_vpc_subnet_id
+      register: ec2_classic
+
+    - set_fact:
+        ec2: "{{ ec2_classic }}"
+      when: not oo_vpc_subnet_id
 
     - name: Add new instances public IPs to the atomic proxy host group
       add_host: "hostname={{ item.public_ip }} groupname=new_ec2_instances"

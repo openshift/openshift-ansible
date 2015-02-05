@@ -5,9 +5,10 @@
 - name: Link to .profile to .bashrc
   file: src=/root/.bashrc dest=/root/.profile owner=root group=root state=link
 
-- name: Setup Timezone [{{ oo_timezone }}]
-  file: >
-    src=/usr/share/zoneinfo/{{ oo_timezone }}
-    dest=/etc/localtime
-    owner=root
-    group=root state=link
+- name: "Setup Timezone [{{ oo_timezone }}]"
+  file:
+    src: "/usr/share/zoneinfo/{{ oo_timezone }}"
+    dest: /etc/localtime
+    owner: root
+    group: root
+    state: link

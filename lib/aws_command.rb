@@ -42,7 +42,6 @@ module OpenShift
 
         puts
         puts "Creating #{options[:count]} #{options[:type]} instance(s) in AWS..."
-        ah.ignore_bug_6407
 
         # Make sure we're completely up to date before launching
         clear_cache()
@@ -91,7 +90,6 @@ module OpenShift
 
         puts
         puts "Configuring #{options[:type]} instance(s) in AWS..."
-        ah.ignore_bug_6407
 
         ah.run_playbook("playbooks/aws/#{host_type}/config.yml")
       end

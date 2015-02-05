@@ -4,10 +4,10 @@
   yum: pkg=kubernetes
 
 - name: Configure apiserver settings
-  lineinfile: >
-    dest=/etc/sysconfig/kubernetes
-    regexp={{ item.regex }}
-    line="{{ item.line }}"
+  lineinfile:
+    dest: /etc/sysconfig/kubernetes
+    regexp: "{{ item.regex }}"
+    line: "{{ item.line }}"
   with_items:
     - { regex: '^KUBE_API_MACHINES=', line: 'KUBE_API_MACHINES=\"{{ oo_minion_ips | join(",") }}\"' }
     - { regex: '^KUBE_API_ADDRESS=',  line: 'KUBE_API_ADDRESS=\"0.0.0.0\"' }
