@@ -54,8 +54,8 @@ class Oscp(object):
                             help='options to pass to SSH.\n \
                                   "-oPort=22,TCPKeepAlive=yes"')
 
-        parser.add_argument('src', default='')
-        parser.add_argument('dest',default='')
+        parser.add_argument('src', nargs='?', default='')
+        parser.add_argument('dest',nargs='?', default='')
 
         self.args = parser.parse_args()
         self.parser = parser
@@ -89,9 +89,6 @@ class Oscp(object):
             else:
                 self.host = search.groups()[0]
                 self.path = search.groups()[1]
-        else:
-            print "Could not determine user and hostname."
-            return
 
         if self.args.env:
             self.env = self.args.env

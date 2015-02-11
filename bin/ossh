@@ -24,14 +24,9 @@ class Ossh(object):
         # parse host and user
         self.process_host()
 
-        if not self.args.list and not self.env:
-            print "Please specify an environment."
-            return
-
         if self.args.host == '' and not self.args.list:
             self.parser.print_help()
             return
-
 
         if self.args.debug:
             print self.args
@@ -176,16 +171,18 @@ class Ossh(object):
                 for arg in self.args.ssh_opts.split(","):
                     ssh_args.append("-o%s" % arg)
 
-            result = self.select_host()
-            if not result:
+            results = self.select_host()
+            if not results:
                 return # early exit, no results
 
-            if len(result) > 1:
-                self.list_hosts(10)
+            if len(results) > 1:
+                print "Multiple results found for %s." % self.host
+                for result in results:
+                    print "{ec2_tag_Name:<35} {ec2_tag_environment:<5} {ec2_id:<10}".format(**result[1])
                 return # early exit, too many results
 
             # Assume we have one and only one.
-            hostname, server_info = result[0]
+            hostname, server_info = results[0]
             dns = server_info['ec2_public_dns_name']
 
             ssh_args.append(dns)
