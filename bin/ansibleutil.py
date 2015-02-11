@@ -5,6 +5,7 @@ import sys
 import os
 import json
 import re
+import collections
 
 class AnsibleUtil(object):
     def __init__(self):
@@ -53,7 +54,7 @@ class AnsibleUtil(object):
 
         return groups
 
-    def build_host_dict(self, args=[]):
+    def build_host_dict_by_env(self, args=[]):
         inv = self.get_inventory(args)
 
         inst_by_env = {}
@@ -63,27 +64,5 @@ class AnsibleUtil(object):
             host_id = "%s:%s" % (host['ec2_tag_Name'],host['ec2_id'])
             inst_by_env[host['ec2_tag_environment']][host_id] = host
 
-
         return inst_by_env
 
-
-    def get_hostnames(self, args=[]):
-        inv = self.get_inventory(args)
-
-        import collections
-        hostnames = collections.defaultdict(list)
-
-        for dns, host in inv['_meta']['hostvars'].items():
-            hostnames['ec2_tag_Name'].append(host['ec2_id'])
-
-        return hostnames
-
-    def get_host_ids(self, args=[]):
-        inv = self.get_inventory(args)
-
-        ids = {}
-
-        for dns, host in inv['_meta']['hostvars'].items():
-            ids['ec2_id'] = host
-
-        return ids

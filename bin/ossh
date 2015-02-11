@@ -99,31 +99,28 @@ class Ossh(object):
            dict['servername'] = dns_name
         '''
         if cache_only:
-            self.host_inventory = self.ansible.build_host_dict(['--cache-only'])
+            self.host_inventory = self.ansible.build_host_dict_by_env(['--cache-only'])
         else:
-            self.host_inventory = self.ansible.build_host_dict()
+            self.host_inventory = self.ansible.build_host_dict_by_env()
 
-    def select_host(self, regex=False):
+    def select_host(self):
         '''select host attempts to match the host specified
            on the command line with a list of hosts.
-
-           if regex is specified then we will attempt to match
-           all *{host_string}* equivalents.
         '''
-        re_host = re.compile(self.host)
-
         results = []
-        for hostname, server_info in self.host_inventory[self.env].items():
-            if hostname.split(':')[0] == self.host:
-                # an exact match, return it!
-                return [(hostname, server_info)]
-            elif re_host.search(hostname):
-                results.append((hostname, server_info))
+        for env in self.host_inventory.keys():
+            for hostname, server_info in self.host_inventory[env].items():
+                if hostname.split(':')[0] == self.host:
+                    results.append((hostname, server_info))
+
+        # attempt to select the correct environment if specified
+        if self.env:
+            results = filter(lambda result: result[1]['ec2_tag_environment'] == self.env, results)
 
         if results:
             return results
         else:
-            print "Could not find specified host: %s in %s" % (self.host, self.env)
+            print "Could not find specified host: %s." % self.host
 
         # default - no results found.
         return None
@@ -135,7 +132,7 @@ class Ossh(object):
         '''
 
         if self.env:
-            results = self.select_host(True)
+            results = self.select_host()
             if len(results) == 1:
                 hostname, server_info = results[0]
                 sorted_keys = server_info.keys()
