@@ -17,7 +17,8 @@ class AnsibleUtil(object):
         if args:
             cmd.extend(args)
 
-        env = {}
+        env = os.environ
+
         p = subprocess.Popen(cmd, stderr=subprocess.PIPE,
                          stdout=subprocess.PIPE, env=env)
 
@@ -66,4 +67,23 @@ class AnsibleUtil(object):
         return inst_by_env
 
 
+    def get_hostnames(self, args=[]):
+        inv = self.get_inventory(args)
 
+        import collections
+        hostnames = collections.defaultdict(list)
+
+        for dns, host in inv['_meta']['hostvars'].items():
+            hostnames['ec2_tag_Name'].append(host['ec2_id'])
+
+        return hostnames
+
+    def get_host_ids(self, args=[]):
+        inv = self.get_inventory(args)
+
+        ids = {}
+
+        for dns, host in inv['_meta']['hostvars'].items():
+            ids['ec2_id'] = host
+
+        return ids

@@ -1,0 +1,207 @@
+#!/usr/bin/env python
+# vim: expandtab:tabstop=4:shiftwidth=4
+
+import argparse
+import ansibleutil
+import traceback
+import sys
+import os
+import re
+
+class Oscp(object):
+    def __init__(self):
+        self.file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)))
+        self.parse_cli_args()
+
+        # parse host and user
+        self.process_host()
+
+        print self.args
+        print self.host
+        print self.user
+        print self.path
+        sys.exit(0)
+
+        self.ansible = ansibleutil.AnsibleUtil()
+
+        # get a dict of host inventory
+        if self.args.list:
+            self.get_hosts()
+        else:
+            self.get_hosts(True)
+
+
+        if not self.args.list and not self.env:
+            print "Please specify an environment."
+            return
+
+        if self.args.host == '' and not self.args.list:
+            self.parser.print_help()
+            return
+
+        if self.args.debug:
+            print self.args
+
+        # perform the scp
+        if self.args.list:
+            self.list_hosts()
+        else:
+            self.scp()
+
+    def parse_cli_args(self):
+        parser = argparse.ArgumentParser(description='Openshift Online SSH Tool.')
+        parser.add_argument('-d', '--debug', default=False,
+                          action="store_true", help="debug mode")
+        parser.add_argument('-v', '--verbose', default=False,
+                          action="store_true", help="Verbose?")
+        parser.add_argument('--list', default=False,
+                          action="store_true", help="list out hosts")
+        parser.add_argument('-r', action='store_true', default=False,
+                            help='Recusrively copy files to or from destination.')
+        parser.add_argument('-o', '--ssh_opts', action='store',
+                            help='options to pass to SSH.\n \
+                                  "-oPort=22,TCPKeepAlive=yes"')
+
+        parser.add_argument('src', default='')
+        parser.add_argument('dest',default='')
+
+        self.args = parser.parse_args()
+        self.parser = parser
+
+
+    def process_host(self):
+        '''Determine host name and user name for SSH.
+        '''
+        self.user = None
+        self.path = ''
+
+        self.host = ''
+        if '@' in self.args.src:
+            self.host = self.args.src
+        else:
+            self.host = self.args.dest
+
+        re_host = re.compile("(.*)@(.*)(:.*$)")
+        search = re_host.search(self.host)
+        if search:
+            # take the first?
+            self.user = search.groups()[0]
+            self.host = search.groups()[1]
+            self.path = search.groups()[2]
+        else:
+            print "Could not determine user and hostname."
+            return
+
+    def get_hosts(self, cache_only=False):
+        '''Query our host inventory and return a dict where the format
+           equals:
+
+           dict['environment'] = [{'servername' : {}}, ]
+        '''
+        if cache_only:
+            self.host_inventory = self.ansible.build_host_dict(['--cache-only'])
+        else:
+            self.host_inventory = self.ansible.build_host_dict()
+
+    def select_host(self, regex=False):
+        '''select host attempts to match the host specified
+           on the command line with a list of hosts.
+
+           if regex is specified then we will attempt to match
+           all *{host_string}* equivalents.
+        '''
+        re_host = re.compile(self.host)
+
+        results = []
+        for hostname, server_info in self.host_inventory[self.env].items():
+            if hostname.split(':')[0] == self.host:
+                # an exact match, return it!
+                return [(hostname, server_info)]
+            elif re_host.search(hostname):
+                results.append((hostname, server_info))
+
+        if results:
+            return results
+        else:
+            print "Could not find specified host: %s in %s" % (self.host, self.env)
+
+        # default - no results found.
+        return None
+
+    def list_hosts(self, limit=None):
+        '''Function to print out the host inventory.
+
+           Takes a single parameter to limit the number of hosts printed.
+        '''
+
+        if self.env:
+            results = self.select_host(True)
+            if len(results) == 1:
+                hostname, server_info = results[0]
+                sorted_keys = server_info.keys()
+                sorted_keys.sort()
+                for key in sorted_keys:
+                    print '{0:<35} {1}'.format(key, server_info[key])
+            else:
+                for host_id, server_info in results[:limit]:
+                    name = server_info['ec2_tag_Name']
+                    ec2_id = server_info['ec2_id']
+                    ip = server_info['ec2_ip_address']
+                    print '{ec2_tag_Name:<35} {ec2_tag_environment:<8} {ec2_id:<15} {ec2_ip_address}'.format(**server_info)
+
+                if limit:
+                    print
+                    print 'Showing only the first %d results...' % limit
+                    print
+
+        else:
+            for env, host_ids in self.host_inventory.items():
+                for host_id, server_info in host_ids.items():
+                    name = server_info['ec2_tag_Name']
+                    ec2_id = server_info['ec2_id']
+                    ip = server_info['ec2_ip_address']
+                    print '{ec2_tag_Name:<35} {ec2_tag_environment:<5} {ec2_id:<15} {ec2_ip_address}'.format(**server_info)
+
+    def scp(self):
+        '''scp files to or from a specified host
+        '''
+        try:
+            # shell args start with the program name in position 1
+            scp_args = ['/usr/bin/scp']
+
+            if self.args.verbose:
+                scp_args.append('-v')
+
+            if self.args.ssh_opts:
+                for arg in self.args.ssh_opts.split(","):
+                    scp_args.append("-o%s" % arg)
+
+            result = self.select_host()
+            if not result:
+                return # early exit, no results
+
+            if len(result) > 1:
+                self.list_hosts(10)
+                return # early exit, too many results
+
+            # Assume we have one and only one.
+            hostname, server_info = result[0]
+            dns = server_info['ec2_public_dns_name']
+
+            scp_args.append(dns)
+
+            #last argument
+            if self.args.command:
+                scp_args.append("%s" % self.args.command)
+
+            print "Running: %s\n" % ' '.join(scp_args)
+
+            os.execve('/usr/bin/scp', scp_args, os.environ)
+        except:
+            print traceback.print_exc()
+            print sys.exc_info()
+
+
+if __name__ == '__main__':
+    oscp = Oscp()
+
