@@ -1,10 +1,8 @@
 ---
 # The following role lays down the correct repository and gpg key for yum
 
-#- name: Ensure oso rhui rhel 7 server repository exists in yum.repos.d
-#  copy: >
-#    src=oso-rhui-rhel-7-server.repo
-#    dest=/etc/yum.repos.d/oso-rhui-rhel-7-server.repo
+- name: Ensure oso rhui rhel 7 server repository exists in yum.repos.d
+  copy: src=oso-rhui-rhel-7-server.repo dest=/etc/yum.repos.d/oso-rhui-rhel-7-server.repo
 #
 #- name: Ensure Red Hat GPG Key is in place for the previous repo
 #  copy: >
@@ -14,8 +12,8 @@
 - name: Ensure rhel 7 libra candidate exists in yum.repos.d
   copy: src=rhel-7-libra-candidate.repo dest=/etc/yum.repos.d/rhel-7-libra-candidate.repo
 
-- name: Ensure a docker repo is laid down
-  copy: src=docker.repo dest=/etc/yum.repos.d/docker.repo
+#- name: Ensure a docker repo is laid down
+#  copy: src=docker.repo dest=/etc/yum.repos.d/docker.repo
 
 - name: Ensure the kubernetes repo is available
   copy: src=epel7-kubernetes.repo dest=/etc/yum.repos.d/epel7-kubernetes.repo
