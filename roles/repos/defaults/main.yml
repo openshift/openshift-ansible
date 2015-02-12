@@ -1,0 +1,41 @@
+---
+oo_devel_repos:
+  docker:
+    name: Temporary Docker RPM
+    baseurl: 'http://10.240.169.148/mirror/docker'
+    gpgcheck: 0
+    enabled: 0
+  maxamillion-epel7-kubernetes:
+    name: Copr repo for epel7-kubernetes owned by maxamillion
+    baseurl: 'http://copr-be.cloud.fedoraproject.org/results/maxamillion/epel7-kubernetes/epel-7-$basearch/'
+    skip_if_unavailable: True
+    gpgcheck: 0
+    enabled: 1
+  maxamillion-origin-next:
+    name: Copr repo for origin-next owned by maxamillion
+    baseurl: 'http://copr-be.cloud.fedoraproject.org/results/maxamillion/origin-next/epel-7-$basearch/'
+    skip_if_unavailable: False
+    gpgcheck: 0
+    enabled: 1
+  oso-rhel-7-server:
+    name: Red Hat Enterprise Linux 7 Server from RHUI (RPMs)
+    baseurl: 'http://10.240.169.148/mirror/rhui-rhel-server-7-releases'
+    enabled: 1
+    gpgcheck: 1
+    gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+  oso-rhel-7-server-optional:
+    name: Red Hat Enterprise Linux 7 Server - Optional from RHUI (RPMs)
+    baseurl: 'http://10.240.169.148/mirror/rhui-rhel-server-7-releases-optional'
+    enabled: 1
+    gpgcheck: 1
+    gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+  rhel-7-libra-candidate:
+    name: rhel-7-libra-candidate - \$basearch
+    baseurl: 'https://mirror1.ops.rhcloud.com/libra/rhel-7-libra-candidate/\$basearch/'
+    gpgkey: 'https://mirror1.ops.rhcloud.com/libra/RPM-GPG-KEY-redhat-release https://mirror1.ops.rhcloud.com/libra/RPM-GPG-KEY-redhat-beta https://mirror1.ops.rhcloud.com/libra/RPM-GPG-KEY-redhat-openshifthosted'
+    skip_if_unavailable: True
+    gpgcheck: 0
+    enabled: 1
+    sslclientcert: /var/lib/yum/client-cert.pem
+    sslclientkey: /var/lib/yum/client-key.pem
+    sslverify: False

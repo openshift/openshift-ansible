@@ -1,13 +1,7 @@
 ---
 # The following role lays down the correct repository and gpg key for yum
-- name: Ensure rhel 7 libra candidate exists in yum.repos.d
-  copy: src=rhel-7-libra-candidate.repo dest=/etc/yum.repos.d/rhel-7-libra-candidate.repo
-
-- name: Ensure a docker repo is laid down
-  copy: src=docker.repo dest=/etc/yum.repos.d/docker.repo
-
-- name: Ensure the kubernetes repo is available
-  copy: src=epel7-kubernetes.repo dest=/etc/yum.repos.d/epel7-kubernetes.repo
-
-- name: Ensure the origin repo is available
-  copy: src=epel7-origin.repo dest=/etc/yum.repos.d/epel7-origin.repo
+- name: Create Devel Repos
+  template:
+    src: repo.j2
+    dest: "/etc/yum.repos.d/{{ item.key }}.repo"
+  with_dict: oo_devel_repos
