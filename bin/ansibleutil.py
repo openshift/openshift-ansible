@@ -5,7 +5,6 @@ import sys
 import os
 import json
 import re
-import collections
 
 class AnsibleUtil(object):
     def __init__(self):

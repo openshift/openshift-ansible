@@ -95,7 +95,6 @@ class Oscp(object):
         elif "." in self.host:
             self.host, self.env = self.host.split(".")
         else:
-            print "HERE"
             self.env = None
 
     def get_hosts(self, cache_only=False):
