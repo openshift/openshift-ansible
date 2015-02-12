@@ -1,6 +1,0 @@
-[maxamillion-origin-next]
-name=Copr repo for origin-next owned by maxamillion
-baseurl=http://copr-be.cloud.fedoraproject.org/results/maxamillion/origin-next/epel-7-$basearch/
-skip_if_unavailable=False
-gpgcheck=0
-enabled=1
