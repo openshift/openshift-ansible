@@ -1,0 +1,4 @@
+---
+# handlers file for openshift_node
+- name: restart openshift-node
+  service: name=openshift-node state=restarted

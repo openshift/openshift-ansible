@@ -34,7 +34,7 @@
     - ../../../roles/repos
     - ../../../roles/docker
     - {
-        role: ../../../roles/openshift_minion,
+        role: ../../../roles/openshift_node,
         oo_master_ips: "{{ hostvars['localhost'].oo_master_ips | default(['']) }}",
         oo_bind_ip: "{{ hostvars[inventory_hostname].ansible_eth0.ipv4.address | default(['']) }}"
       }

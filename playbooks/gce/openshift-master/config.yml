@@ -7,8 +7,8 @@
     with_items: "{{ oo_host_group_exp | default('') }}"
     when: oo_host_group_exp is defined
 
-- name: "Gather facts for minions in {{ oo_env }}"
-  hosts: "tag_env-host-type-{{ oo_env }}-openshift-minion"
+- name: "Gather facts for nodes in {{ oo_env }}"
+  hosts: "tag_env-host-type-{{ oo_env }}-openshift-node"
   connection: ssh
   user: root
 
@@ -16,12 +16,12 @@
   hosts: localhost
   gather_facts: no
   tasks:
-    - name: Setting oo_minion_ips fact on localhost
+    - name: Setting oo_node_ips fact on localhost
       set_fact:
-        oo_minion_ips: "{{ hostvars
-            | oo_select_keys(groups['tag_env-host-type-' + oo_env + '-openshift-minion'])
+        oo_node_ips: "{{ hostvars
+            | oo_select_keys(groups['tag_env-host-type-' + oo_env + '-openshift-node'])
             | oo_collect(attribute='ansible_eth0.ipv4.address') }}"
-      when: groups['tag_env-host-type-' + oo_env + '-openshift-minion'] is defined
+      when: groups['tag_env-host-type-' + oo_env + '-openshift-node'] is defined
 
 - name: "Configure instances"
   hosts: oo_hosts_to_config
@@ -34,7 +34,8 @@
     - ../../../roles/repos
     - {
         role: ../../../roles/openshift_master,
-        oo_minion_ips: "{{ hostvars['localhost'].oo_minion_ips | default(['']) }}",
-        oo_bind_ip: "{{ hostvars[inventory_hostname].ansible_eth0.ipv4.address | default(['']) }}"
+        oo_node_ips: "{{ hostvars['localhost'].oo_node_ips | default(['']) }}",
+        oo_bind_ip: "{{ hostvars[inventory_hostname].ansible_eth0.ipv4.address | default(['']) }}",
+        oo_public_ip: "{{ gce_public_ip }}"
       }
     - ../../../roles/pods
