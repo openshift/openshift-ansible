@@ -1,6 +1,0 @@
-[maxamillion-epel7-kubernetes]
-name=Copr repo for epel7-kubernetes owned by maxamillion
-baseurl=http://copr-be.cloud.fedoraproject.org/results/maxamillion/epel7-kubernetes/epel-7-$basearch/
-skip_if_unavailable=True
-gpgcheck=0
-enabled=1
