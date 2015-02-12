@@ -1,5 +1,5 @@
 # {{ ansible_managed }}
 [{{ item.key }}]
-{% for key, val in item.value.iteritems() %}
+{% for key, val in item.value|dictsort %}
 {{ key }}={{ val }}
 {% endfor %}
