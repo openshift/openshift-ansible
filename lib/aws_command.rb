@@ -11,82 +11,68 @@ module OpenShift
 
       option :type, :required => true, :enum => LaunchHelper.get_aws_host_types,
              :desc => 'The host type of the new instances.'
-      option :env, :required => true, :aliases => '-e', :enum => SUPPORTED_ENVS,
-             :desc => 'The environment of the new instances.'
+      option :env, :required => true, :aliases => '-e',
+             :desc => "The environment of the new instances. Possible values: #{SUPPORTED_ENVS.join(', ')}"
       option :count, :default => 1, :aliases => '-c', :type => :numeric,
              :desc => 'The number of instances to create'
+      option :dev, :type => :boolean, :default => false,
+             :desc => 'When set this flag will let you set an env value outside of the allowed values'
       option :tag, :type => :array,
              :desc => 'The tag(s) to add to the new instances. Allowed characters are letters, numbers, and hyphens.'
       desc "launch", "Launches instances."
       def launch()
-        AwsHelper.check_creds()
-
-        # Expand all of the instance names so that we have a complete array
-        names = []
-        options[:count].times { names << "#{options[:env]}-#{options[:type]}-#{SecureRandom.hex(5)}" }
+        validate_env options
+        aws_helper = AwsHelper.new(:launch, options)
 
         ah = AnsibleHelper.for_aws()
-
-        # AWS specific configs
-        ah.extra_vars['oo_new_inst_names'] = names
-        ah.extra_vars['oo_new_inst_tags'] = options[:tag]
-        ah.extra_vars['oo_env'] = options[:env]
-
-        # Add a created by tag
-        ah.extra_vars['oo_new_inst_tags'] = {} if ah.extra_vars['oo_new_inst_tags'].nil?
-
-        ah.extra_vars['oo_new_inst_tags']['created-by'] = ENV['USER']
-        ah.extra_vars['oo_new_inst_tags'].merge!(AwsHelper.generate_env_tag(options[:env]))
-        ah.extra_vars['oo_new_inst_tags'].merge!(AwsHelper.generate_host_type_tag(options[:type]))
-        ah.extra_vars['oo_new_inst_tags'].merge!(AwsHelper.generate_env_host_type_tag(options[:env], options[:type]))
+        ah.extra_vars = aws_helper.extra_vars
 
         puts
         puts "Creating #{options[:count]} #{options[:type]} instance(s) in AWS..."
 
         # Make sure we're completely up to date before launching
-        clear_cache()
+        aws_helper.clear_inventory_cache
         ah.run_playbook("playbooks/aws/#{options[:type]}/launch.yml")
       ensure
         # This is so that if we a config right after a launch, the newly launched instances will be
         # in the list.
-        clear_cache()
+        aws_helper.clear_inventory_cache
       end
 
       desc "clear-cache", 'Clear the inventory cache'
       def clear_cache()
         print "Clearing inventory cache... "
-        AwsHelper.clear_inventory_cache()
+        AwsHelper.new.clear_inventory_cache
         puts "Done."
       end
 
       option :name, :required => false, :type => :string,
              :desc => 'The name of the instance to configure.'
-      option :env, :required => false, :aliases => '-e', :enum => SUPPORTED_ENVS,
-             :desc => 'The environment of the new instances.'
+      option :env, :required => true, :aliases => '-e',
+             :desc => "The environment of the new instances. Possible values: #{SUPPORTED_ENVS.join(', ')}"
+      option :dev, :type => :boolean, :default => false,
+             :desc => 'When set this flag will let you set an env value outside of the allowed values'
       option :type, :required => false, :enum => LaunchHelper.get_aws_host_types,
              :desc => 'The type of the instances to configure.'
       desc "config", 'Configures instances.'
       def config()
-        ah = AnsibleHelper.for_aws()
-
-        abort 'Error: you can\'t specify both --name and --type' unless options[:type].nil? || options[:name].nil?
-
-        abort 'Error: you can\'t specify both --name and --env' unless options[:env].nil? || options[:name].nil?
-
-        host_type = nil
+        validate_name_or_env options
+        config_task = nil
         if options[:name]
-          details = AwsHelper.get_host_details(options[:name])
-          ah.extra_vars['oo_host_group_exp'] = options[:name]
-          ah.extra_vars['oo_env'] = details['env']
-          host_type = details['host-type']
+          abort 'Error: you can\'t specify --type or --env when you specify --name' if options[:type] || options[:env]
+          config_task = :config_host
         elsif options[:type] && options[:env]
-          oo_env_host_type_tag = AwsHelper.generate_env_host_type_tag_name(options[:env], options[:type])
-          ah.extra_vars['oo_host_group_exp'] = "groups['#{oo_env_host_type_tag}']"
-          ah.extra_vars['oo_env'] = options[:env]
-          host_type = options[:type]
+          abort 'Error: you can\'t specify --name when you specify --type and --env' if options[:name]
+          validate_env options
+          config_task = :config_type_env
         else
           abort 'Error: you need to specify either --name or (--type and --env)'
         end
+
+        aws_helper = AwsHelper.new(config_task, options)
+        ah = AnsibleHelper.for_aws()
+
+        host_type = options[:name].nil? ? options[:type] : aws_helper.get_host_type(options[:name])
 
         puts
         puts "Configuring #{options[:type]} instance(s) in AWS..."
@@ -94,14 +80,14 @@ module OpenShift
         ah.run_playbook("playbooks/aws/#{host_type}/config.yml")
       end
 
-      option :env, :required => false, :aliases => '-e', :enum => SUPPORTED_ENVS,
-             :desc => 'The environment to list.'
+      option :env, :required => false, :aliases => '-e',
+             :desc => "The environment of the new instances. Possible values: #{SUPPORTED_ENVS.join(', ')}"
+      option :dev, :type => :boolean, :default => false,
+             :desc => 'When set this flag will let you set an env value outside of the allowed values'
       desc "list", "Lists instances."
       def list()
-        AwsHelper.check_creds()
-        hosts = AwsHelper.get_hosts()
-
-        hosts.delete_if { |h| h.env != options[:env] } unless options[:env].nil?
+        validate_env options
+        hosts = AwsHelper.new(:list, options).get_hosts
 
         fmt_str = "%34s %5s %8s %17s %7s"
 
@@ -119,7 +105,7 @@ module OpenShift
           host = $2
         end
 
-        details = AwsHelper.get_host_details(host)
+        details = AwsHelper.new(:ssh, options).get_host_details(host)
         abort "\nError: Instance [#{host}] is not RUNNING\n\n" unless details['ec2_state'] == 'running'
 
         cmd = "ssh #{ssh_ops.join(' ')}"
@@ -142,6 +128,36 @@ module OpenShift
         puts "--------------------"
         LaunchHelper.get_aws_host_types.each { |t| puts "  #{t}" }
         puts
+      end
+
+      private
+      # a helper to validate that the env belongs to SUPPORTED_ENVS if the dev
+      # flag is not set. If the dev flag is set, then it verifies that the
+      # env name does not contain a dash character.
+      def validate_env(options)
+        if options[:dev]
+          if options[:env].include?('-')
+            abort 'Error: enviroments may not contain a \'-\' character in them'
+          end
+        else
+          unless SUPPORTED_ENVS.include?(options[:env])
+            abort "Error: #{options[:env]} is not a supported environment"
+          end
+        end
+      end
+
+      # A helper to validate that either the name option is set or the env
+      # and type options are set only.
+      def validate_name_or_env(options)
+        if options[:name]
+          if options[:type] || options[:env]
+            abort 'Error: you can\'t specify --type or --env when you specify --name'
+          end
+        else
+          unless options[:type] && options[:env]
+            abort 'Error: you need to specify either --name or (--type and --env)'
+          end
+        end
       end
     end
   end

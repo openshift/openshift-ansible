@@ -50,3 +50,8 @@ Test The Setup
 ```
   ./cloud.rb aws list
 ```
+
+Alternate AWS Credential Config
+-------------------------------
+1. The AWS CLI config settings will be honored if present. This includes the [Environment Variables](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-environment) as well as the [CLI Config Files](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files).
+1. The vagrant-openshift [AWS Credentials File](https://github.com/openshift/vagrant-openshift/#aws-credentials) will be honored if present (and will take precedence over the AWS CLI config if both are present).
