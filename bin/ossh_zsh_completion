@@ -1,4 +1,4 @@
-#compdef ossh
+#compdef ossh oscp
 
 _ossh_known_hosts(){
   if [[ -f ~/.ansible/tmp/multi_ec2_inventory.cache ]]; then

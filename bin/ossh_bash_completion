@@ -15,4 +15,4 @@ _ossh()
 
     return 0
 }
-complete -F _ossh ossh
+complete -F _ossh ossh oscp
