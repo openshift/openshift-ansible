@@ -1,8 +1,8 @@
-# ossh is an ssh replacement.
+# completion is available for ossh/oscp
 
-
-ossh uses a dynamic inventory cache in order to lookup hostnames and translate them
-to something meaningful such as an IP address or dns name.
+ossh/oscp uses a dynamic inventory cache in order to lookup
+hostnames and translate them to something meaningful
+such as an IP address or dns name.
 
 This allows us to treat our servers as cattle and not as pets.
 
@@ -31,3 +31,7 @@ Once $fpath includes the _ossh_zsh_completion script then you should
 run `exec zsh`.  This will then allow you to call `ossh host[TAB]`
 for a list of completions.
 
+Before completing the final step, zsh keeps its own cache in
+~/.zcompdump of the known functions and variables.  In order to
+refresh with new variables and completion arrays you might need
+to `rm ~/.zcompdump` before running `exec zsh`.

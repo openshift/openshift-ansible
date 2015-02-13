@@ -17,7 +17,8 @@ class AnsibleUtil(object):
         if args:
             cmd.extend(args)
 
-        env = {}
+        env = os.environ
+
         p = subprocess.Popen(cmd, stderr=subprocess.PIPE,
                          stdout=subprocess.PIPE, env=env)
 
@@ -52,7 +53,7 @@ class AnsibleUtil(object):
 
         return groups
 
-    def build_host_dict(self, args=[]):
+    def build_host_dict_by_env(self, args=[]):
         inv = self.get_inventory(args)
 
         inst_by_env = {}
@@ -62,8 +63,5 @@ class AnsibleUtil(object):
             host_id = "%s:%s" % (host['ec2_tag_Name'],host['ec2_id'])
             inst_by_env[host['ec2_tag_environment']][host_id] = host
 
-
         return inst_by_env
-
-
 
