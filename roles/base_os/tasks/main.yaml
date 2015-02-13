@@ -16,6 +16,11 @@
     src: vimrc
     dest: /root/.vimrc
 
+- name: Bash Completion
+  yum:
+    pkg: bash-completion
+    state: installed
+
 - name: Install firewalld
   yum:
     pkg: firewalld

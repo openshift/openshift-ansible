@@ -6,7 +6,7 @@
 
   vars:
     inst_region: us-east-1
-    atomic_ami: ami-8e239fe6
+    rhel7_ami: ami-a24e30ca
     user_data_file: user_data.txt
     oo_vpc_subnet_id:    # Purposely left blank, these are here to be overridden in env vars_files
     oo_assign_public_ip: # Purposely left blank, these are here to be overridden in env vars_files
@@ -22,8 +22,8 @@
         region: "{{ inst_region }}"
         keypair: mmcgrath_libra
         group_id: "{{ oo_security_group_ids }}"
-        instance_type: m3.large
-        image: "{{ atomic_ami }}"
+        instance_type: c4.xlarge
+        image: "{{ rhel7_ami }}"
         count: "{{ oo_new_inst_names | oo_len }}"
         user_data: "{{ lookup('file', user_data_file) }}"
         wait: yes
@@ -42,8 +42,8 @@
         region: "{{ inst_region }}"
         keypair: mmcgrath_libra
         group: ['Libra', '{{ oo_env }}', '{{ oo_env }}_proxy', '{{ oo_env }}_proxy_atomic']
-        instance_type: m3.large
-        image: "{{ atomic_ami }}"
+        instance_type: c4.xlarge
+        image: "{{ rhel7_ami }}"
         count: "{{ oo_new_inst_names | oo_len }}"
         user_data: "{{ lookup('file', user_data_file) }}"
         wait: yes
@@ -53,10 +53,6 @@
     - set_fact:
         ec2: "{{ ec2_classic }}"
       when: not oo_vpc_subnet_id
-
-    - name: Add new instances public IPs to the atomic proxy host group
-      add_host: "hostname={{ item.public_ip }} groupname=new_ec2_instances"
-      with_items: ec2.instances
 
     - name: Add Name and environment tags to instances
       ec2_tag: "resource={{ item.1.id }} region={{ inst_region }} state=present"
@@ -93,5 +89,15 @@
       delay: 10
       with_items: ec2.instances
 
+- name: Initial setup
+  hosts: oo_hosts_to_config
+  user: root
+  gather_facts: true
+
+  tasks:
+
+    - name: Yum update
+      yum: name=* state=latest
+
 # Apply the configs, seprate so that just the configs can be run by themselves
-- include: config.yml
+#- include: config.yml
