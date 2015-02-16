@@ -76,9 +76,9 @@ module OpenShift
         host_type = nil
         if options[:name]
           details = AwsHelper.get_host_details(options[:name])
-          ah.extra_vars['oo_host_group_exp'] = options[:name]
-          ah.extra_vars['oo_env'] = details['env']
-          host_type = details['host-type']
+          ah.extra_vars['oo_host_group_exp'] = details['ec2_public_dns_name']
+          ah.extra_vars['oo_env'] = details['ec2_tag_environment']
+          host_type = details['ec2_tag_host-type']
         elsif options[:type] && options[:env]
           oo_env_host_type_tag = AwsHelper.generate_env_host_type_tag_name(options[:env], options[:type])
           ah.extra_vars['oo_host_group_exp'] = "groups['#{oo_env_host_type_tag}']"
