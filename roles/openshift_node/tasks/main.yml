@@ -1,4 +1,5 @@
 ---
+
 # tasks file for openshift_node
 - name: Install OpenShift
   yum: pkg=openshift-node state=installed
@@ -8,13 +9,14 @@
   command: /usr/bin/hostname {{ oo_bind_ip }}
 
 - name: Retrieve OpenShift Master credentials
-  local_action: command /usr/bin/rsync --compress --archive --rsh 'ssh  -S none -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null' root@{{ oo_master_public_ips[0] }}:/var/lib/openshift/openshift.local.certificates/admin/ /tmp/openshift
+  local_action: command /usr/bin/rsync --compress --archive --rsh 'ssh  -S none -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null' root@{{ oo_master_public_ips[0] }}:/var/lib/openshift/openshift.local.certificates/admin/ {{ tmp_dir }}
   ignore_errors: yes
 
 - file: path=/var/lib/openshift/openshift.local.certificates/admin state=directory
+- file: path={{ tmp_dir }} state=directory
 
 - name: Store OpenShift Master credentials
-  local_action: command /usr/bin/rsync --compress --archive --rsh 'ssh  -S none -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null' /tmp/openshift/ root@{{ oo_public_ip }}:/var/lib/openshift/openshift.local.certificates/admin
+  local_action: command /usr/bin/rsync --compress --archive --rsh 'ssh  -S none -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null' {{ tmp_dir }}/ root@{{ oo_public_ip }}:/var/lib/openshift/openshift.local.certificates/admin
   ignore_errors: yes
 
 - name: Configure OpenShift Node settings
@@ -36,3 +38,4 @@
 - name: Enable OpenShift
   service: name=openshift-node enabled=yes state=started
 
+- file: name={{ tmp_dir }} state=absent
