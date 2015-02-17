@@ -3,8 +3,8 @@
 - name: Ensure rhel 7 libra candidate exists in yum.repos.d
   copy: src=rhel-7-libra-candidate.repo dest=/etc/yum.repos.d/rhel-7-libra-candidate.repo
 
-- name: Ensure a docker repo is laid down
-  copy: src=docker.repo dest=/etc/yum.repos.d/docker.repo
+- name: Ensure rhel 7 extras exists in yum.repos.d
+  copy: src=oso-rhui-rhel-7-extras.repo dest=/etc/yum.repos.d/oso-rhui-rhel-7-extras.repo
 
 - name: Ensure the kubernetes repo is available
   copy: src=epel7-kubernetes.repo dest=/etc/yum.repos.d/epel7-kubernetes.repo
