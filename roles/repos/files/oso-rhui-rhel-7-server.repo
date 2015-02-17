@@ -1,13 +1,45 @@
-[oso-rhel-7-server]
-name=Red Hat Enterprise Linux 7 Server from RHUI (RPMs)
-baseurl=http://10.240.169.148/mirror/rhui-rhel-server-7-releases
+[oso-rhui-rhel-server-releases]
+name=OpenShift Online RHUI Mirror RH Enterprise Linux $majorrelease
+baseurl=https://gce-mirror1.ops.rhcloud.com/libra/rhui-rhel-server-$majorrelease-releases/
+        https://mirror.ops.rhcloud.com/libra/rhui-rhel-server-$majorrelease-releases/
 enabled=1
 gpgcheck=1
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+gpgkey=file:///srv/libra/keys/RPM-GPG-KEY-redhat-release
+sslverify=False
+sslclientcert=/var/lib/yum/client-cert.pem
+sslclientkey=/var/lib/yum/client-key.pem
 
-[oso-rhel-7-server-optional]
-name=Red Hat Enterprise Linux 7 Server - Optional from RHUI (RPMs)
-baseurl=http://10.240.169.148/mirror/rhui-rhel-server-7-releases-optional
+[oso-rhui-rhel-server-releases-optional]
+name=OpenShift Online RHUI Mirror RH Enterprise Linux $majorrelease - Optional
+baseurl=https://gce-mirror1.ops.rhcloud.com/libra/rhui-rhel-server-$majorrelease-releases-optional/
+        https://mirror.ops.rhcloud.com/libra/rhui-rhel-server-$majorrelease-releases-optional/
 enabled=1
 gpgcheck=1
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+gpgkey=file:///srv/libra/keys/RPM-GPG-KEY-redhat-release
+sslverify=False
+sslclientcert=/var/lib/yum/client-cert.pem
+sslclientkey=/var/lib/yum/client-key.pem
+
+[oso-rhui-rhel-server-extras]
+name=OpenShift Online RHUI Mirror RH Enterprise Linux - Extras
+baseurl=https://gce-mirror1.ops.rhcloud.com/libra/rhui-rhel-server-$majorrelease-extras/
+        https://mirror.ops.rhcloud.com/libra/rhui-rhel-server-$majorrelease-extras/
+enabled=1
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release,file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-beta
+failovermethod=priority
+sslverify=False
+sslclientcert=/var/lib/yum/client-cert.pem
+sslclientkey=/var/lib/yum/client-key.pem
+
+[oso-rhui-rhel-server-extras-htb]
+name=OpenShift Online RHUI Mirror RH Enterprise Linux - Extras HTB
+baseurl=https://gce-mirror1.ops.rhcloud.com/libra/rhui-rhel-server-$majorrelease-extras-htb/
+        https://mirror.ops.rhcloud.com/libra/rhui-rhel-server-$majorrelease-extras-htb/
+enabled=0
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release,file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-beta
+failovermethod=priority
+sslverify=False
+sslclientcert=/var/lib/yum/client-cert.pem
+sslclientkey=/var/lib/yum/client-key.pem

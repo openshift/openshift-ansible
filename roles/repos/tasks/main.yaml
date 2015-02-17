@@ -10,4 +10,7 @@
   copy: src=epel7-kubernetes.repo dest=/etc/yum.repos.d/epel7-kubernetes.repo
 
 - name: Ensure the origin repo is available
-  copy: src=epel7-origin.repo dest=/etc/yum.repos.d/epel7-origin.repo
+  copy: src=epel7-openshift.repo dest=/etc/yum.repos.d/epel7-openshift.repo
+
+- name: Ensure the rhel repo is available
+  copy: src=oso-rhui-rhel-7-server.repo dest=/etc/yum.repos.d/oso-rhui-rhel-7-server.repo

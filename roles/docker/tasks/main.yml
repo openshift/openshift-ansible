@@ -1,7 +1,7 @@
 ---
 # tasks file for docker
 - name: Install docker
-  yum: pkg=docker
+  yum: pkg=docker-io
 
 - name: enable docker service
   command: /usr/bin/systemctl enable docker.service
