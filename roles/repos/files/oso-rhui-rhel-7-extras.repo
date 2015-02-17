@@ -1,0 +1,10 @@
+[oso-rhel-7-server-extras]
+name=Red Hat Enterprise Linux 7 Server - Extras from RHUI (RPMs)
+baseurl=https://gce-mirror1.ops.rhcloud.com/libra/rhui-rhel-server-7-extras/
+        https://mirror.ops.rhcloud.com/libra/rhui-rhel-server-7-extras/
+enabled=1
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+sslclientcert=/var/lib/yum/client-cert.pem
+sslclientkey=/var/lib/yum/client-key.pem
+sslverify=False
