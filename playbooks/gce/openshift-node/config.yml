@@ -34,10 +34,6 @@
   hosts: oo_hosts_to_config
   connection: ssh
   user: root
-
-  vars:
-    tmp_dir: "/tmp/openshift-{{ 9999 | random }}"
-
   vars_files:
     - vars.yml
   roles:
@@ -49,6 +45,5 @@
         oo_master_ips: "{{ hostvars['localhost'].oo_master_ips | default(['']) }}",
         oo_master_public_ips: "{{ hostvars['localhost'].oo_master_public_ips | default(['']) }}",
         oo_bind_ip: "{{ hostvars[inventory_hostname].ansible_eth0.ipv4.address | default(['']) }}",
-        oo_public_ip: "{{ hostvars[inventory_hostname].ansible_ssh_host }}",
-        tmp_dir: "{{ tmp_dir }}"
+        oo_public_ip: "{{ hostvars[inventory_hostname].ansible_ssh_host }}"
       }
