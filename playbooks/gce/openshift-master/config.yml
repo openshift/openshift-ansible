@@ -30,12 +30,12 @@
   vars_files:
     - vars.yml
   roles:
-    - ../../../roles/base_os
-    - ../../../roles/repos
+    - base_os
+    - repos
     - {
-        role: ../../../roles/openshift_master,
+        role: openshift_master,
         oo_node_ips: "{{ hostvars['localhost'].oo_node_ips | default(['']) }}",
         oo_bind_ip: "{{ hostvars[inventory_hostname].ansible_eth0.ipv4.address | default(['']) }}",
         oo_public_ip: "{{ gce_public_ip }}"
       }
-    - ../../../roles/pods
+    - pods

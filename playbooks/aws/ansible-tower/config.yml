@@ -16,7 +16,7 @@
     - vars.yml
     - "vars.{{ oo_env }}.yml"
   roles:
-    - ../../../roles/base_os
-    - ../../../roles/os_ipv6_disable
-    - ../../../roles/ansible
-    - ../../../roles/ansible_tower
+    - base_os
+    - os_ipv6_disable
+    - ansible
+    - ansible_tower

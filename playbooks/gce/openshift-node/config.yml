@@ -37,11 +37,11 @@
   vars_files:
     - vars.yml
   roles:
-    - ../../../roles/base_os
-    - ../../../roles/repos
-    - ../../../roles/docker
+    - base_os
+    - repos
+    - docker
     - {
-        role: ../../../roles/openshift_node,
+        role: openshift_node,
         oo_master_ips: "{{ hostvars['localhost'].oo_master_ips | default(['']) }}",
         oo_master_public_ips: "{{ hostvars['localhost'].oo_master_public_ips | default(['']) }}",
         oo_bind_ip: "{{ hostvars[inventory_hostname].ansible_eth0.ipv4.address | default(['']) }}",
