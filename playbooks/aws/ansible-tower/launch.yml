@@ -100,4 +100,4 @@
       yum: name=* state=latest
 
 # Apply the configs, seprate so that just the configs can be run by themselves
-#- include: config.yml
+- include: config.yml

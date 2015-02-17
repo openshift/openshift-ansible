@@ -19,3 +19,4 @@
     - ../../../roles/base_os
     - ../../../roles/ipv6_disable
     - ../../../roles/ansible_install
+    - ../../../roles/ansible_tower
