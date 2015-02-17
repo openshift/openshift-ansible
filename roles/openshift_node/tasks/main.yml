@@ -16,7 +16,6 @@
   ignore_errors: yes
 
 - file: path=/var/lib/openshift/openshift.local.certificates/admin state=directory
-- file: path={{ mktemp.stdout }} state=directory
 
 - name: Store OpenShift Master credentials
   local_action: command /usr/bin/rsync --compress --archive --rsh 'ssh  -S none -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null' {{ mktemp.stdout }}/ root@{{ oo_public_ip }}:/var/lib/openshift/openshift.local.certificates/admin
@@ -41,4 +40,4 @@
 - name: Enable OpenShift
   service: name=openshift-node enabled=yes state=started
 
-- file: name={{ mktemp.stdout }} state=absent
+- local_action: file name={{ mktemp.stdout }} state=absent
