@@ -1,21 +1,21 @@
-[oso-rhel-7-server]
-name=Red Hat Enterprise Linux 7 Server from RHUI (RPMs)
+[oso-rhui-rhel-server-releases]
+name=OpenShift Online RHUI Mirror RH Enterprise Linux 7
 baseurl=https://gce-mirror1.ops.rhcloud.com/libra/rhui-rhel-server-7-releases/
         https://mirror.ops.rhcloud.com/libra/rhui-rhel-server-7-releases/
 enabled=1
 gpgcheck=1
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+gpgkey=file:///srv/libra/keys/RPM-GPG-KEY-redhat-release
+sslverify=False
 sslclientcert=/var/lib/yum/client-cert.pem
 sslclientkey=/var/lib/yum/client-key.pem
-sslverify=False
 
-[oso-rhel-7-server-optional]
-name=Red Hat Enterprise Linux 7 Server - Optional from RHUI (RPMs)
+[oso-rhui-rhel-server-releases-optional]
+name=OpenShift Online RHUI Mirror RH Enterprise Linux 7 - Optional
 baseurl=https://gce-mirror1.ops.rhcloud.com/libra/rhui-rhel-server-7-releases-optional/
         https://mirror.ops.rhcloud.com/libra/rhui-rhel-server-7-releases-optional/
 enabled=1
 gpgcheck=1
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+gpgkey=file:///srv/libra/keys/RPM-GPG-KEY-redhat-release
+sslverify=False
 sslclientcert=/var/lib/yum/client-cert.pem
 sslclientkey=/var/lib/yum/client-key.pem
-sslverify=False

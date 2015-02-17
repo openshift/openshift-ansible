@@ -1,20 +1,19 @@
 ---
 # tasks file for openshift_master
 - name: Install Origin
-  yum: pkg=origin state=installed
+  yum: pkg=openshift-master state=installed
 
-  # fixme: Once openshift stops resolving hostnames for minion queries remove this...
+  # fixme: Once openshift stops resolving hostnames for node queries remove this...
 - name: Set hostname to IP Addr (WORKAROUND)
   command: /usr/bin/hostname {{ oo_bind_ip }}
 
 - name: Configure OpenShift Master settings
   lineinfile:
-    dest: /etc/sysconfig/openshift
+    dest: /etc/sysconfig/openshift-master
     regexp: "{{ item.regex }}"
     line: "{{ item.line }}"
   with_items:
-    - { regex: '^ROLE=', line: 'ROLE=\"master\"' }
-    - { regex: '^OPTIONS=', line: 'OPTIONS=\"--nodes={{ oo_minion_ips | join(",") }}  --loglevel=5\"' }
+    - { regex: '^OPTIONS=', line: 'OPTIONS=\"--public-master={{ oo_public_ip }} --nodes={{ oo_node_ips | join(",") }}  --loglevel=5\"' }
   notify:
     - restart openshift-master
 
@@ -31,4 +30,4 @@
   firewalld: port=8080/tcp permanent=true state=enabled
 
 - name: Enable OpenShift
-  service: name=openshift enabled=yes state=started
+  service: name=openshift-master enabled=yes state=started
