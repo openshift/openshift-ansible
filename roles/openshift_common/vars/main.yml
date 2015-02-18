@@ -1,0 +1,2 @@
+---
+openshift_master_credentials_dir: /var/lib/openshift/openshift.local.certificates/admin/

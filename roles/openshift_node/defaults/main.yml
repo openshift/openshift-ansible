@@ -1,2 +1,3 @@
 ---
-# defaults file for openshift_node
+openshift_node_manage_service_externally: false
+openshift_node_debug_level: "{{ openshift_debug_level | default(0) }}"

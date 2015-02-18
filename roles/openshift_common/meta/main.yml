@@ -1,7 +1,6 @@
----
 galaxy_info:
-  author: Jhon Honce
-  description: OpenShift Node
+  author: Jason DeTiberus
+  description: OpenShift Common
   company: Red Hat, Inc.
   license: ASL 2.0
   min_ansible_version: 1.7
@@ -11,5 +10,4 @@ galaxy_info:
     - 7
   categories:
   - cloud
-dependencies:
-- { role: openshift_common }
+dependencies: []

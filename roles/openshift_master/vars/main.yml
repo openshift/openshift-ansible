@@ -1,2 +1,2 @@
 ---
-# vars file for openshift_master
+openshift_host_type: master

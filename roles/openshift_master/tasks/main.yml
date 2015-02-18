@@ -1,37 +1,33 @@
 ---
-# tasks file for openshift_master
-- name: Install Origin
+- name: Install OpenShift Master package
   yum: pkg=openshift-master state=installed
 
-  # fixme: Once openshift stops resolving hostnames for node queries remove this...
-- name: Set hostname to IP Addr (WORKAROUND)
-  command: /usr/bin/hostname {{ oo_bind_ip }}
+- name: Set master OpenShift facts
+  include: "{{ role_path | dirname }}/openshift_common/tasks/set_facts.yml"
+  facts:
+  - { section: master, option: debug_level, value: "{{ openshift_master_debug_level }}" }
+  - { section: master, option: public_ip, value: "{{ openshift_public_ip }}" }
+  - { section: master, option: externally_managed, value: "{{ openshift_master_manage_service_externally }}" }
 
-- name: Configure OpenShift Master settings
+- name: Configure firewall for OpenShift Master
+  include: "{{ role_path | dirname }}/openshift_common/tasks/firewall.yml"
+  allow:
+  - { service: etcd embedded, port: 4001/tcp}
+  - { service: etcd peer, port: 7001/tcp}
+  - { service: OpenShift api https, port: 8443/tcp}
+  - { service: OpenShift web console https, port: 8444/tcp}
+  deny:
+  - { service: OpenShift api http, port: 8080/tcp }
+
+- name: Configure OpenShift settings
   lineinfile:
     dest: /etc/sysconfig/openshift-master
-    regexp: "{{ item.regex }}"
-    line: "{{ item.line }}"
-  with_items:
-    - regex: '^OPTIONS='
-      line: "OPTIONS=\"--public-master={{ oo_public_ip }} --nodes={{ oo_node_ips | join(',') }}  --loglevel=5\""
+    regexp: '^OPTIONS='
+    line: "OPTIONS=\"--public-master={{ openshift_public_ip }} --nodes={{ openshift_node_ips
+          | join(',') }}  --loglevel={{ openshift_master_debug_level }}\""
   notify:
-    - restart openshift-master
+  - restart openshift-master
 
-# Open etcd embedded, etcd embedded peer, openshift api, and
-# openshift client ports
-- name: Open firewalld ports for openshift-master
-  firewalld: port={{ item[0] }} permanent={{ item[1] }} state=enabled
-  with_nested:
-  - [ 4001/tcp, 7001/tcp, 8443/tcp, 8444/tcp ]
-  - [ true, false ]
-
-# Disable previously exposed ports that are no longer needed
-- name: Close firewalld ports for openshift-master that are no longer needed
-  firewalld: port={{ item[0] }} permanent={{ item[1] }} state=enabled
-  with_nested:
-  - [ 8080/tcp ]
-  - [ true, false ]
-
-- name: Enable OpenShift
+- name: Start and enable openshift-master
   service: name=openshift-master enabled=yes state=started
+  when: not openshift_master_manage_service_externally
