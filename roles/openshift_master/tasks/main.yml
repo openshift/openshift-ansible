@@ -24,10 +24,10 @@
   firewalld: port=4001/tcp permanent=true state=enabled
 
 - name: Open firewalld port for OpenShift
-  firewalld: port=8080/tcp permanent=false state=enabled
+  firewalld: port=8443/tcp permanent=false state=enabled
 
 - name: Save firewalld port for OpenShift
-  firewalld: port=8080/tcp permanent=true state=enabled
+  firewalld: port=8443/tcp permanent=true state=enabled
 
 - name: Enable OpenShift
   service: name=openshift-master enabled=yes state=started
