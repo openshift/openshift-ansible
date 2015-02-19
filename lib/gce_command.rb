@@ -120,14 +120,33 @@ module OpenShift
         ah.run_playbook("playbooks/gce/#{host_type}/terminate.yml")
       end
 
+      option :env, :required => false, :aliases => '-e', :enum => SUPPORTED_ENVS,
+             :desc => 'The environments to list.', :type => :array
+      option :type, :required => false, :aliases => '-t', :enum => SUPPORTED_ENVS,
+             :desc => 'The host types to list.', :type => :array
       desc "list", "Lists instances."
       def list()
         hosts = GceHelper.get_hosts()
 
-        puts
-        puts "Instances"
-        puts "---------"
-        hosts.each { |k| puts "  #{k.name}" }
+        hosts.delete_if { |h| not options[:env].include?(h.env) } unless options[:env].nil?
+        hosts.delete_if { |h| not options[:type].include?(h.type) } unless options[:type].nil?
+
+        header = ['Name', 'Env', 'Type', 'State', 'IP Address', 'Created By']
+        col_widths = header.map { |col| col.size }
+        rows = []
+        hosts.each do |h|
+        row = [h.name, h.env, h.type, h.state, h.public_ip, h.created_by]
+        row.each_with_index{ |col, i| col_widths[i] = col.size if col.size > col_widths[i] }
+          rows << row
+        end
+        fmt_str = ""
+        separators = []
+        col_widths.each do |c|
+          fmt_str << "%#{c + 2}s"
+          separators << '-' * c
+        end
+        puts "#{fmt_str % header}\n#{fmt_str % separators}"
+        rows.each { |row| puts fmt_str % row }
         puts
       end
 
