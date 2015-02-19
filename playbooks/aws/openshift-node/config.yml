@@ -23,6 +23,12 @@
             | oo_select_keys(groups['tag_env-host-type_' + oo_env + '-openshift-master'])
             | oo_collect(attribute='ansible_default_ipv4.address') }}"
       when: groups['tag_env-host-type_' + oo_env + '-openshift-master'] is defined
+    - name: Setting openshift_master_public_ips fact on localhost
+      set_fact:
+        openshift_master_public_ips: "{{ hostvars
+            | oo_select_keys(groups['tag_env-host-type-' + oo_env + '-openshift-master'])
+            | oo_collect(attribute='ec2_ip_address') }}"
+      when: groups['tag_env-host-type-' + oo_env + '-openshift-master'] is defined
 
 - name: "Configure instances"
   hosts: oo_hosts_to_config
@@ -36,8 +42,8 @@
     - {
         role: openshift_node,
         openshift_master_ips: "{{ hostvars['localhost'].openshift_master_ips | default(['']) }}",
-        # TODO: add openshift_Master_public_ips
+        openshift_master_public_ips: "{{ hostvars['localhost'].openshift_master_public_ips | default(['']) }}",
         openshift_env: "{{ oo_env }}"
-        # TODO: openshift_public_ip: set to aws instance public ip
+        openshift_public_ip: "{{ ec2_ip_address }}"
       }
     - os_env_extras
