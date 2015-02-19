@@ -5,23 +5,41 @@ module OpenShift
     class GceHelper
       MYDIR = File.expand_path(File.dirname(__FILE__))
 
-      def self.get_hosts()
+      def self.get_list()
         cmd = "#{MYDIR}/../inventory/gce/gce.py --list"
         hosts = %x[#{cmd} 2>&1]
 
         raise "Error: failed to list hosts\n#{hosts}" unless $?.exitstatus == 0
 
-        # invert the hash so that it's key is the host, and values is an array of metadata
-        data = {}
-        JSON.parse(hosts).each do |key,value|
-          value.each { |h| (data[h] ||= []) << key }
+        return JSON.parse(hosts)
+      end
+
+      def self.get_tag(tags, selector)
+        tags.each do |tag|
+          return $1 if tag =~ selector
         end
 
-        # For now, we only care about the name. In the future, we may want the other metadata included.
+        return nil
+      end
+
+      def self.get_hosts()
+        hosts = get_list()
+
         retval = []
-        data.keys.sort.each { |k| retval << OpenStruct.new({ :name => k }) }
+        hosts['_meta']['hostvars'].each do |host, info|
+          retval << OpenStruct.new({
+            :name        => info['gce_name'],
+            :env         => get_tag(info['gce_tags'], /^env-(\w+)$/) || 'UNSET',
+            :public_ip   => info['gce_public_ip'],
+            :state       => info['gce_status'],
+            :created_by  => get_tag(info['gce_tags'], /^created-by-(\w+)$/) || 'UNSET',
+          })
+        end
+
+        retval.sort_by! { |h| [h.env, h.state, h.name] }
 
         return retval
+
       end
 
       def self.get_host_details(host)
