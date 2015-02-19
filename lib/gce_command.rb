@@ -120,14 +120,20 @@ module OpenShift
         ah.run_playbook("playbooks/gce/#{host_type}/terminate.yml")
       end
 
+      option :env, :required => false, :aliases => '-e', :enum => SUPPORTED_ENVS,
+             :desc => 'The environment to list.'
       desc "list", "Lists instances."
       def list()
         hosts = GceHelper.get_hosts()
 
+        hosts.delete_if { |h| h.env != options[:env] } unless options[:env].nil?
+
+        fmt_str = "%34s %5s %8s %17s %7s"
+
         puts
-        puts "Instances"
-        puts "---------"
-        hosts.each { |k| puts "  #{k.name}" }
+        puts fmt_str % ['Name','Env', 'State', 'IP Address', 'Created By']
+        puts fmt_str % ['----','---', '-----', '----------', '----------']
+        hosts.each { |h| puts fmt_str % [h.name, h.env, h.state, h.public_ip, h.created_by ] }
         puts
       end
 
