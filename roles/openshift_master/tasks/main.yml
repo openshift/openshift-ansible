@@ -1,7 +1,14 @@
 ---
 # tasks file for openshift_master
-- name: Install Origin
-  yum: pkg=openshift-master state=installed
+
+- name: Install docker
+  yum: pkg=docker state=installed
+
+- include: openshift_from_yum.yml
+  when: oo_openshift_binary is not defined
+
+- include: openshift_from_local.yml
+  when: oo_openshift_binary is defined
 
   # fixme: Once openshift stops resolving hostnames for node queries remove this...
 - name: Set hostname to IP Addr (WORKAROUND)
@@ -12,7 +19,9 @@
     dest: /etc/sysconfig/openshift-master
     regexp: "{{ item.regex }}"
     line: "{{ item.line }}"
+    create: yes
   with_items:
+    - { regex: '^ROLE=', line: 'ROLE=\"master\"' }
     - { regex: '^OPTIONS=', line: 'OPTIONS=\"--public-master={{ oo_public_ip }} --nodes={{ oo_node_ips | join(",") }}  --loglevel=5\"' }
   notify:
     - restart openshift-master
