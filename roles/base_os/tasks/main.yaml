@@ -11,21 +11,26 @@
     src: vimrc
     dest: /root/.vimrc
 
-- name: Ensure vimrc is installed for user root
-  copy:
-    src: vimrc
-    dest: /root/.vimrc
+- name: Add KUBECONFIG to .bash_profile for user root
+  lineinfile:
+    dest: /root/.bash_profile
+    regexp: "KUBECONFIG="
+    line: "export KUBECONFIG=/var/lib/openshift/openshift.local.certificates/admin/.kubeconfig"
+    state: present
+    insertafter: EOF
 
 - name: Install firewalld
   yum:
     pkg: firewalld
     state: installed
 
-- name: enable firewalld service
-  command: /usr/bin/systemctl enable firewalld.service
-
-- name: start firewalld service
-  command: /usr/bin/systemctl start firewalld.service
+- name: start and enable firewalld service
+  service:
+    name: firewalld
+    state: started
+    enabled: yes
+  register: result
 
 - name: need to pause here, otherwise the firewalld service starting can sometimes cause ssh to fail
   pause: seconds=10
+  when: result | changed
