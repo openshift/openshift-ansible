@@ -13,21 +13,24 @@
     regexp: "{{ item.regex }}"
     line: "{{ item.line }}"
   with_items:
-    - { regex: '^OPTIONS=', line: 'OPTIONS=\"--public-master={{ oo_public_ip }} --nodes={{ oo_node_ips | join(",") }}  --loglevel=5\"' }
+    - { regex: '^OPTIONS=', line: "OPTIONS=\"--public-master={{ oo_public_ip }} --nodes={{ oo_node_ips | join(",") }}  --loglevel=5\"" }
   notify:
     - restart openshift-master
 
-- name: Open firewalld port for etcd embedded in OpenShift
-  firewalld: port=4001/tcp permanent=false state=enabled
+# Open etcd embedded, etcd embedded peer, openshift api, and
+# openshift client ports
+- name: Open firewalld ports for openshift-master
+  firewalld: port={{ item[0] }} permanent={{ item[1] }} state=enabled
+  with_nested:
+  - [ 4001/tcp, 7001/tcp, 8443/tcp, 8444/tcp ]
+  - [ true, false ]
 
-- name: Save firewalld port for etcd embedded in
-  firewalld: port=4001/tcp permanent=true state=enabled
-
-- name: Open firewalld port for OpenShift
-  firewalld: port=8443/tcp permanent=false state=enabled
-
-- name: Save firewalld port for OpenShift
-  firewalld: port=8443/tcp permanent=true state=enabled
+# Disable previously exposed ports that are no longer needed
+- name: Close firewalld ports for openshift-master that are no longer needed
+  firewalld: port={{ item[0] }} permanent={{ item[1] }} state=enabled
+  with_nested:
+  - [ 8080/tcp ]
+  - [ true, false ]
 
 - name: Enable OpenShift
   service: name=openshift-master enabled=yes state=started
