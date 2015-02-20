@@ -15,7 +15,7 @@
   lineinfile:
     dest: /root/.bash_profile
     regexp: "KUBECONFIG="
-    line: "export KUBECONFIG={{ openshift_master_credentials_dir }}.kubeconfig"
+    line: "export KUBECONFIG=/var/lib/openshift/openshift.local.certificates/admin/.kubeconfig"
     state: present
     insertafter: EOF
 
