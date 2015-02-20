@@ -39,6 +39,6 @@
 
   # Always bounce service to pick up new credentials
 - name: Enable OpenShift
-  service: name=openshift-node enabled=yes state=restarted
+  service: name=openshift-node enabled=yes state=started
 
 - local_action: file name={{ mktemp.stdout }} state=absent
