@@ -37,8 +37,9 @@
 - name: Save firewalld port for OpenShift
   firewalld: port=10250/tcp permanent=true state=enabled
 
+  # fixme: Once the openshift_cluster playbook is published state should be started
   # Always bounce service to pick up new credentials
 - name: Enable OpenShift
-  service: name=openshift-node enabled=yes state=started
+  service: name=openshift-node enabled=yes state=restarted
 
 - local_action: file name={{ mktemp.stdout }} state=absent

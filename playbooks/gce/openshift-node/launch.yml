@@ -45,3 +45,13 @@
 
 # Apply the configs, separate so that just the configs can be run by themselves
 - include: config.yml
+
+# Always bounce service to pick up new credentials
+#- name: "Restart instances"
+#  hosts: oo_hosts_to_config
+#  connection: ssh
+#  user: root
+#  tasks:
+#    - debug: var=groups.oo_hosts_to_config
+#    - name: Restart OpenShift
+#      service: name=openshift-node enabled=yes state=restarted
