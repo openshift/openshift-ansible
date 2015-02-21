@@ -1,16 +1,41 @@
 ---
-# The following role lays down the correct repository and gpg key for yum
-- name: Ensure rhel 7 libra candidate exists in yum.repos.d
-  copy: src=rhel-7-libra-candidate.repo dest=/etc/yum.repos.d/rhel-7-libra-candidate.repo
+# TODO: Add flag for enabling EPEL repo, default to false
 
-- name: Ensure rhel 7 extras exists in yum.repos.d
-  copy: src=oso-rhui-rhel-7-extras.repo dest=/etc/yum.repos.d/oso-rhui-rhel-7-extras.repo
+- assert:
+    that: openshift_deployment_type in known_openshift_deployment_types
 
-- name: Ensure the kubernetes repo is available
-  copy: src=epel7-kubernetes.repo dest=/etc/yum.repos.d/epel7-kubernetes.repo
+# TODO: remove this when origin support actually works
+- fail: msg="OpenShift Origin support is not currently enabled"
+  when: openshift_deployment_type == 'origin'
 
-- name: Ensure the origin repo is available
-  copy: src=epel7-openshift.repo dest=/etc/yum.repos.d/epel7-openshift.repo
+- name: Create any additional repos that are defined
+  template:
+    src: yum_repo.j2
+    dest: /etc/yum.repos.d/openshift_additional.repo
+  when: openshift_additional_repos | length > 0
 
-- name: Ensure the rhel repo is available
-  copy: src=oso-rhui-rhel-7-server.repo dest=/etc/yum.repos.d/oso-rhui-rhel-7-server.repo
+- name: Remove the additional repos if no longer defined
+  file:
+    dest: /etc/yum.repos.d/openshift_additional.repo
+    state: absent
+  when: openshift_additional_repos | length == 0
+
+- name: Remove any yum repo files for other deployment types
+  file:
+    path: "/etc/yum.repos.d/{{ item | basename }}"
+    state: absent
+  with_fileglob:
+  - '*/*'
+  when: not (item | search("/files/" + openshift_deployment_type + "/")) and (item | search(".repo$"))
+
+- name: Configure gpg keys if needed
+  copy: src={{ item }} dest=/etc/pki/rpm-gpg/
+  with_fileglob:
+  - "{{ openshift_deployment_type }}/*"
+  when: item | basename | match("RPM-GPG-KEY-")
+
+- name: Configure yum repositories
+  copy: src={{ item }} dest=/etc/yum.repos.d/
+  with_fileglob:
+  - "{{ openshift_deployment_type }}/*"
+  when: item | basename | search(".*\.repo$")
