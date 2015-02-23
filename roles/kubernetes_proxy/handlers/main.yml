@@ -1,4 +1,0 @@
----
-# handlers file for kubernetes_proxy
-- name: restart kubernetes-proxy
-  service: name=kubernetes-proxy state=restarted
