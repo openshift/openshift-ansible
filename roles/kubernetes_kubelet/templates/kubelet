@@ -1,3 +1,0 @@
-
-DAEMON_ARGS=" -etcd_servers=http://10.245.1.2:4001  -hostname_override=10.245.2.2 -address=0.0.0.0 -config=/etc/kubernetes/manifests"
-
