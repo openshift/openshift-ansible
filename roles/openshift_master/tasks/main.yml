@@ -13,7 +13,8 @@
     regexp: "{{ item.regex }}"
     line: "{{ item.line }}"
   with_items:
-    - { regex: '^OPTIONS=', line: "OPTIONS=\"--public-master={{ oo_public_ip }} --nodes={{ oo_node_ips | join(",") }}  --loglevel=5\"" }
+    - regex: '^OPTIONS='
+      line: "OPTIONS=\"--public-master={{ oo_public_ip }} --nodes={{ oo_node_ips | join(',') }}  --loglevel=5\""
   notify:
     - restart openshift-master
 
