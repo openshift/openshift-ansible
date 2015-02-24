@@ -12,11 +12,10 @@
 
 - name: download Tower setup
 #  get_url: url=http://releases.ansible.com/ansible-tower/setup/ansible-tower-setup-{{tower_version}}.tar.gz
-  get_url: url=http://releases.ansible.com/ansible-tower/setup/ansible-tower-setup-2.1.1.tar.gz
-    dest=/opt/ force=yes
+  get_url: url=http://releases.ansible.com/ansible-tower/setup/ansible-tower-setup-2.1.1.tar.gz dest=/opt/ force=no
 
 - name: extract Tower
-  unarchive: src=/opt/ansible-tower-setup-2.1.1.tar.gz dest=/opt copy=no
+  unarchive: src=/opt/ansible-tower-setup-2.1.1.tar.gz dest=/opt copy=no creates=ansible-tower-setup-2.1.1
 
 #- name: copy tower_setup_conf.yml
 #  copy: src=tower_setup_conf.yml dest=/opt/ansible-tower-setup-2.1.1 owner=root group=root mode=0644
@@ -24,8 +23,8 @@
 #- name: copy inventory
 #  copy: src=inventory dest=/opt/ansible-tower-setup-2.1.1 owner=root group=root mode=0644
 
-- name: run the Tower installer
-  command: chdir=/opt/ansible-tower-setup-2.1.1 creates=/etc/awx/settings.py ./setup.sh
+#- name: run the Tower installer
+#  command: chdir=/opt/ansible-tower-setup-2.1.1 creates=/etc/awx/settings.py ./setup.sh
 
 - name: Open firewalld port for http
   firewalld: port=80/tcp permanent=true state=enabled

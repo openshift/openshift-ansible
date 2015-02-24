@@ -17,7 +17,6 @@
     - "vars.{{ oo_env }}.yml"
   roles:
     - ../../../roles/base_os
-    - ../../../roles/timezone
-    - ../../../roles/ipv6_disable
-    - ../../../roles/ansible_install
+    - ../../../roles/os_ipv6_disable
+    - ../../../roles/ansible
     - ../../../roles/ansible_tower

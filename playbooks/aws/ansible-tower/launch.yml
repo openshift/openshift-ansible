@@ -8,8 +8,6 @@
     inst_region: us-east-1
     rhel7_ami: ami-a24e30ca
     user_data_file: user_data.txt
-    oo_vpc_subnet_id:    # Purposely left blank, these are here to be overridden in env vars_files
-    oo_assign_public_ip: # Purposely left blank, these are here to be overridden in env vars_files
 
   vars_files:
     - vars.yml
@@ -29,30 +27,7 @@
         wait: yes
         assign_public_ip: "{{ oo_assign_public_ip }}"
         vpc_subnet_id: "{{ oo_vpc_subnet_id }}"
-      when: oo_vpc_subnet_id
-      register: ec2_vpc
-
-    - set_fact:
-        ec2: "{{ ec2_vpc }}"
-      when: oo_vpc_subnet_id
-
-    - name: Launch instances in Classic
-      ec2:
-        state: present
-        region: "{{ inst_region }}"
-        keypair: mmcgrath_libra
-        group: ['Libra', '{{ oo_env }}', '{{ oo_env }}_proxy', '{{ oo_env }}_proxy_atomic']
-        instance_type: c4.xlarge
-        image: "{{ rhel7_ami }}"
-        count: "{{ oo_new_inst_names | oo_len }}"
-        user_data: "{{ lookup('file', user_data_file) }}"
-        wait: yes
-      when: not oo_vpc_subnet_id
-      register: ec2_classic
-
-    - set_fact:
-        ec2: "{{ ec2_classic }}"
-      when: not oo_vpc_subnet_id
+      register: ec2
 
     - name: Add Name and environment tags to instances
       ec2_tag: "resource={{ item.1.id }} region={{ inst_region }} state=present"
