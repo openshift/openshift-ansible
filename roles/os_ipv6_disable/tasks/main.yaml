@@ -1,0 +1,11 @@
+---
+# Disable ipv6 on RHEL7
+
+- name: Disable all ipv6
+  sysctl: name="net.ipv6.conf.all.disable_ipv6" value=1 sysctl_set=yes state=present reload=yes
+
+- name: Disable default ipv6
+  sysctl: name="net.ipv6.conf.default.disable_ipv6" value=1 sysctl_set=yes state=present reload=yes
+
+- name: Remove ipv6 localhost from /etc/hosts
+  lineinfile: dest='/etc/hosts' regexp='^::1 ' state=absent owner=root group=root mode=0644
