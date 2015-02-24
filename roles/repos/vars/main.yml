@@ -1,0 +1,2 @@
+---
+known_openshift_deployment_types: ['origin', 'online', 'enterprise']

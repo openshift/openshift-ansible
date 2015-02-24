@@ -1,0 +1,11 @@
+[rhel-7-libra-candidate]
+name=rhel-7-libra-candidate - \$basearch
+baseurl=https://gce-mirror1.ops.rhcloud.com/libra/rhel-7-libra-candidate/\$basearch/
+        https://mirror.ops.rhcloud.com/libra/rhel-7-libra-candidate/\$basearch/
+gpgkey=https://mirror.ops.rhcloud.com/libra/RPM-GPG-KEY-redhat-openshifthosted
+skip_if_unavailable=True
+gpgcheck=0
+enabled=1
+sslclientcert=/var/lib/yum/client-cert.pem
+sslclientkey=/var/lib/yum/client-key.pem
+sslverify=False

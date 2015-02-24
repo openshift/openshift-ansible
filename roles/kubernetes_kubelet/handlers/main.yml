@@ -1,4 +1,0 @@
----
-# handlers file for kubernetes_kubelet
-- name: restart kubelet
-  service: name=kubernetes-kubelet state=restarted

@@ -1,0 +1,45 @@
+---
+
+# tasks file for openshift_node
+- name: Install OpenShift
+  yum: pkg=openshift-node state=installed
+
+  # fixme: Once openshift stops resolving hostnames for node queries remove this...
+- name: Set hostname to IP Addr (WORKAROUND)
+  hostname: name={{ oo_bind_ip }}
+
+- local_action: command /usr/bin/mktemp -d /tmp/openshift-ansible-XXXXXXX
+  register: mktemp
+
+- name: Retrieve OpenShift Master credentials
+  local_action: command /usr/bin/rsync --compress --archive --rsh 'ssh  -S none -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null' root@{{ oo_master_public_ips[0] }}:/var/lib/openshift/openshift.local.certificates/admin/ {{ mktemp.stdout }}
+  ignore_errors: yes
+
+- file: path=/var/lib/openshift/openshift.local.certificates/admin state=directory
+
+- name: Store OpenShift Master credentials
+  local_action: command /usr/bin/rsync --compress --archive --rsh 'ssh  -S none -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null' {{ mktemp.stdout }}/ root@{{ oo_public_ip }}:/var/lib/openshift/openshift.local.certificates/admin
+  ignore_errors: yes
+
+- name: Configure OpenShift Node settings
+  lineinfile:
+    dest: /etc/sysconfig/openshift-node
+    regexp: "{{ item.regex }}"
+    line: "{{ item.line }}"
+  with_items:
+    - { regex: '^OPTIONS=', line: 'OPTIONS=\"--master=https://{{ oo_master_ips[0] }}:8443  --loglevel=5\"' }
+  notify:
+    - restart openshift-node
+
+- name: Open firewalld port for OpenShift
+  firewalld: port=10250/tcp permanent=false state=enabled
+
+- name: Save firewalld port for OpenShift
+  firewalld: port=10250/tcp permanent=true state=enabled
+
+  # fixme: Once the openshift_cluster playbook is published state should be started
+  # Always bounce service to pick up new credentials
+- name: Enable OpenShift
+  service: name=openshift-node enabled=yes state=restarted
+
+- local_action: file name={{ mktemp.stdout }} state=absent

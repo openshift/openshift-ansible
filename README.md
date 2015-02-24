@@ -1,7 +1,7 @@
 openshift-online-ansible
 ========================
 
-This repo houses Ansible code used in OpenShift Online.
+This repo contains OpenShift Ansible code.
 
 Setup
 -----

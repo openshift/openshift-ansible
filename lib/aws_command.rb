@@ -7,7 +7,7 @@ module OpenShift
   module Ops
     class AwsCommand < Thor
       # WARNING: we do not currently support environments with hyphens in the name
-      SUPPORTED_ENVS = %w(prod stg int ops tint kint test jint amint tdint lint)
+      SUPPORTED_ENVS = %w(prod stg int twiest gshipley kint test jhonce amint tdint lint)
 
       option :type, :required => true, :enum => LaunchHelper.get_aws_host_types,
              :desc => 'The host type of the new instances.'

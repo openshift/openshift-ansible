@@ -1,6 +1,6 @@
 #!/bin/bash -eu
 
-MINIONS=2
+NODES=2
 MASTERS=1
 
 # If the environment variable OO_PROVDER is defined, it used for the provider
@@ -13,10 +13,10 @@ fi
 UPPER_CASE_PROVIDER=$(echo $PROVIDER | tr '[:lower:]' '[:upper:]')
 
 
-# Use OO_MASTER_PLAYBOOK/OO_MINION_PLAYBOOK environment variables for playbooks if defined,
+# Use OO_MASTER_PLAYBOOK/OO_NODE_PLAYBOOK environment variables for playbooks if defined,
 # otherwise use openshift default values.
 MASTER_PLAYBOOK=${OO_MASTER_PLAYBOOK:-'openshift-master'}
-MINION_PLAYBOOK=${OO_MINION_PLAYBOOK:-'openshift-minion'}
+NODE_PLAYBOOK=${OO_NODE_PLAYBOOK:-'openshift-node'}
 
 
 # @formatter:off
@@ -29,10 +29,10 @@ function usage {
         $([ $? -ne 0 ] && echo "No supported environment tags found for ${PROVIDER}")
 
         Optional arguments for create:
-        [-p|--provider, -m|--masters, -n|--minions, --master-playbook, --minion-playbook]
+        [-p|--provider, -m|--masters, -n|--nodes, --master-playbook, --node-playbook]
 
         Optional arguments for terminate|update:
-        [-p|--provider, --master-playbook, --minion-playbook]
+        [-p|--provider, --master-playbook, --node-playbook]
 EOT
 }
 # @formatter:on
@@ -40,21 +40,21 @@ EOT
 function create_cluster {
     ./cloud.rb "${PROVIDER}" launch -e "${ENV}" --type=$MASTER_PLAYBOOK -c $MASTERS
 
-    ./cloud.rb "${PROVIDER}" launch -e "${ENV}" --type=$MINION_PLAYBOOK -c $MINIONS
+    ./cloud.rb "${PROVIDER}" launch -e "${ENV}" --type=$NODE_PLAYBOOK -c $NODES
 
     update_cluster
 
-    echo -e "\nCreated ${MASTERS}/${MASTER_PLAYBOOK} masters and ${MINIONS}/${MINION_PLAYBOOK} minions using ${PROVIDER} provider\n"
+    echo -e "\nCreated ${MASTERS}/${MASTER_PLAYBOOK} masters and ${NODES}/${NODE_PLAYBOOK} nodes using ${PROVIDER} provider\n"
 }
 
 function update_cluster {
     ./cloud.rb "${PROVIDER}" config -e "${ENV}" --type=$MASTER_PLAYBOOK
-    ./cloud.rb "${PROVIDER}" config -e "${ENV}" --type=$MINION_PLAYBOOK
+    ./cloud.rb "${PROVIDER}" config -e "${ENV}" --type=$NODE_PLAYBOOK
 }
 
 function terminate_cluster {
     ./cloud.rb "${PROVIDER}" terminate -e "${ENV}" --type=$MASTER_PLAYBOOK
-    ./cloud.rb "${PROVIDER}" terminate -e "${ENV}" --type=$MINION_PLAYBOOK
+    ./cloud.rb "${PROVIDER}" terminate -e "${ENV}" --type=$NODE_PLAYBOOK
 }
 
 [ -f ./cloud.rb ] || (echo 1>&2 'Cannot find ./cloud.rb' && exit 1)
@@ -68,7 +68,7 @@ function check_argval {
 }
 
 # Using GNU getopt to support both small and long formats
-OPTIONS=`getopt -o p:m:n:h --long provider:,masters:,minions:,master-playbook:,minion-playbook:,help \
+OPTIONS=`getopt -o p:m:n:h --long provider:,masters:,nodes:,master-playbook:,node-playbook:,help \
 	        -n "$0" -- "$@"`
 eval set -- "$OPTIONS"
 
@@ -77,9 +77,9 @@ while true; do
         -h|--help) (usage; exit 1) ; shift ;;
         -p|--provider) PROVIDER="$2" ; check_argval $2 ; shift 2 ;;
         -m|--masters) MASTERS="$2" ; check_argval $2 ; shift 2 ;;
-        -n|--minions) MINIONS="$2" ; check_argval $2 ; shift 2 ;;
+        -n|--nodes) NODES="$2" ; check_argval $2 ; shift 2 ;;
         --master-playbook) MASTER_PLAYBOOK="$2" ; check_argval $2 ; shift 2 ;;
-        --minion-playbook) MINION_PLAYBOOK="$2" ; check_argval $2 ; shift 2 ;;
+        --node-playbook) NODE_PLAYBOOK="$2" ; check_argval $2 ; shift 2 ;;
         --) shift ; break ;;
         *) break ;;
     esac
