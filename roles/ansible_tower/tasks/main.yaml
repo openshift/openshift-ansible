@@ -11,13 +11,13 @@
   - ack
 
 - name: download Tower setup
-  #get_url: url=http://releases.ansible.com/ansible-tower/setup/ansible-tower-setup-{{tower_version}}.tar.gz
+#  get_url: url=http://releases.ansible.com/ansible-tower/setup/ansible-tower-setup-{{tower_version}}.tar.gz
   get_url: url=http://releases.ansible.com/ansible-tower/setup/ansible-tower-setup-2.1.1.tar.gz
     dest=/opt/ force=yes
 
-#- name: extract Tower
-#  unarchive: src=/opt/ansible-tower-setup-2.1.1.tar.gz dest=/opt copy=no
-#
+- name: extract Tower
+  unarchive: src=/opt/ansible-tower-setup-2.1.1.tar.gz dest=/opt copy=no
+
 #- name: copy tower_setup_conf.yml
 #  copy: src=tower_setup_conf.yml dest=/opt/ansible-tower-setup-2.1.1 owner=root group=root mode=0644
 #
