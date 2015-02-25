@@ -12,3 +12,11 @@
   - { section: common, option: env, value: "{{ openshift_env | default('default') }}" }
   - { section: common, option: host_type, value: "{{ openshift_host_type }}" }
   - { section: common, option: debug_level, value: "{{ openshift_debug_level }}" }
+
+- name: Add KUBECONFIG to .bash_profile for user root
+  lineinfile:
+    dest: /root/.bash_profile
+    regexp: "KUBECONFIG="
+    line: "export KUBECONFIG=/var/lib/openshift/openshift.local.certificates/admin/.kubeconfig"
+    state: present
+    insertafter: EOF
