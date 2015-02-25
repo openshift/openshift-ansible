@@ -27,3 +27,4 @@
     - repos
     - docker
     - openshift-node
+    - openshift-sdn-node

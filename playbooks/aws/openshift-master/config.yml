@@ -23,4 +23,5 @@
     - base_os
     - repos
     - openshift-master
+    - openshift-sdn-master
     - pods
