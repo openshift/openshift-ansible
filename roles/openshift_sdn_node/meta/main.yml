@@ -1,0 +1,14 @@
+---
+galaxy_info:
+  author: Jason DeTiberus
+  description: OpenShift SDN Node
+  company: Red Hat, Inc.
+  license: ASL 2.0
+  min_ansible_version: 1.7
+  platforms:
+  - name: EL
+    versions:
+    - 7
+  categories:
+  - cloud
+dependencies: []

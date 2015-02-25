@@ -1,0 +1,26 @@
+---
+- name: Install openshift-sdn-master
+  yum:
+    pkg: openshift-sdn-master
+    state: installed
+
+- name: Configure openshift-sdn-master settings
+  lineinfile:
+    dest: /etc/sysconfig/openshift-sdn-master
+    regexp: '^OPTIONS='
+    line: "OPTIONS=\"-v={{ openshift_sdn_master_debug_level }}\""
+  notify:
+  - restart openshift-sdn-master
+
+- name: Set openshift-sdn-master facts
+  include: "{{ role_path | dirname }}/openshift_common/tasks/set_facts.yml"
+  facts:
+  - section: sdn-master
+    option: debug_level
+    value: "{{ openshift_sdn_master_debug_level }}"
+
+- name: Enable openshift-sdn-master
+  service:
+    name: openshift-sdn-master
+    enabled: yes
+    state: started
