@@ -34,7 +34,7 @@
     - base_os
     - repos
     - {
-        role: openshift,
+        role: openshift_master,
         openshift_node_ips: "{{ hostvars['localhost'].openshift_node_ips | default(['']) }}",
         openshift_env: "{{ oo_env }}"
         # TODO: openshift_public_ip: set to aws instance public ip
