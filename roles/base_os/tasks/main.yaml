@@ -11,14 +11,6 @@
     src: vimrc
     dest: /root/.vimrc
 
-- name: Add KUBECONFIG to .bash_profile for user root
-  lineinfile:
-    dest: /root/.bash_profile
-    regexp: "KUBECONFIG="
-    line: "export KUBECONFIG=/var/lib/openshift/openshift.local.certificates/admin/.kubeconfig"
-    state: present
-    insertafter: EOF
-
 - name: Bash Completion
   yum:
     pkg: bash-completion

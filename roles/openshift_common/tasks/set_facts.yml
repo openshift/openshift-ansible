@@ -1,0 +1,9 @@
+---
+- name: "Setting local_facts"
+  ini_file:
+    dest: /etc/ansible/facts.d/openshift.fact
+    mode: 0640
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items: facts

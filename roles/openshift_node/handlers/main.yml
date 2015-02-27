@@ -1,4 +1,4 @@
 ---
-# handlers file for openshift_node
 - name: restart openshift-node
   service: name=openshift-node state=restarted
+  when: not openshift_node_manage_service_externally

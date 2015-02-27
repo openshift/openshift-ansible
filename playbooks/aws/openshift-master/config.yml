@@ -1,3 +1,4 @@
+---
 - name: "populate oo_hosts_to_config host group if needed"
   hosts: localhost
   gather_facts: no
@@ -16,11 +17,11 @@
   hosts: localhost
   gather_facts: no
   tasks:
-    - name: Setting oo_node_ips fact on localhost
+    - name: Setting openshift_node_ips fact on localhost
       set_fact:
-        oo_node_ips: "{{ hostvars
+        openshift_node_ips: "{{ hostvars
             | oo_select_keys(groups['tag_env-host-type_' + oo_env + '-openshift-node'])
-            | oo_collect(attribute='ansible_eth0.ipv4.address') }}"
+            | oo_collect(attribute='ansible_default_ipv4.address') }}"
       when: groups['tag_env-host-type_' + oo_env + '-openshift-node'] is defined
 
 - name: "Configure instances"
@@ -30,11 +31,12 @@
   vars_files:
     - vars.yml
   roles:
-    - ../../../roles/base_os
-    - ../../../roles/repos
+    - base_os
+    - repos
     - {
-        role: ../../../roles/openshift_master,
-        oo_node_ips: "{{ hostvars['localhost'].oo_node_ips | default(['']) }}",
-        oo_bind_ip: "{{ hostvars[inventory_hostname].ansible_eth0.ipv4.address | default(['']) }}"
+        role: openshift_master,
+        openshift_node_ips: "{{ hostvars['localhost'].openshift_node_ips | default(['']) }}",
+        openshift_env: "{{ oo_env }}"
+        # TODO: openshift_public_ip: set to aws instance public ip
       }
-    - ../../../roles/pods
+    - pods

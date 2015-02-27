@@ -16,5 +16,5 @@
     - vars.yml
     - "vars.{{ oo_env }}.yml"
   roles:
-    - ../../../roles/atomic_base
-    - ../../../roles/atomic_proxy
+    - atomic_base
+    - atomic_proxy

@@ -1,0 +1,3 @@
+---
+openshift_bind_ip: "{{ ansible_default_ipv4.address }}"
+openshift_debug_level: 0
