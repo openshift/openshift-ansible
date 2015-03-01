@@ -1,2 +1,5 @@
 ---
+ansible_ssh_user: root
 openshift_debug_level: 4
+openshift_env: {{ oo_env }}
+openshift_public_ip: {{ ec2_ip_address }}
