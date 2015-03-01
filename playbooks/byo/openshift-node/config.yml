@@ -1,0 +1,16 @@
+---
+- name: Gather facts for masters hosts
+  hosts: masters
+
+- name: Configure node instances
+  hosts: nodes
+  vars:
+    # TODO: provide a better way to provide defaults for these values
+    openshift_master_ips: "{{ hostvars
+          | oo_select_keys(groups['masters'])
+          | oo_collect(attribute='ansible_default_ipv4.address') }}"
+    openshift_master_public_ips: "{{ openshift_master_ips }}"
+  roles:
+  - repos
+  - openshift_node
+  - openshift_sdn_node

@@ -1,0 +1,4 @@
+---
+# This variable makes sure that we are managing the openshift-node service
+# from the openshift_sdn_node service, since we are assuming sdn config.
+openshift_node_manage_service_externally: true
