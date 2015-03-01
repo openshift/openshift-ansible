@@ -1,4 +1,7 @@
 ---
+# TODO: instead of setting facts using this task, we should embed a module
+# consisting of a fact plugin for dynamically getting/setting facts from the
+# running environment/configs on the host
 - name: "Setting local_facts"
   ini_file:
     dest: /etc/ansible/facts.d/openshift.fact

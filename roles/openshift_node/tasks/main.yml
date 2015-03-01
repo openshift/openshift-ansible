@@ -1,4 +1,7 @@
 ---
+# TODO: allow for overriding default ports where possible
+# TODO: trigger the external service when restart is needed
+
 - name: Install OpenShift Node package
   yum: pkg=openshift-node state=installed
 
