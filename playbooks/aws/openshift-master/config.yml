@@ -1,5 +1,5 @@
 ---
-- name: "populate oo_hosts_to_config host group if needed"
+- name: Populate oo_hosts_to_config host group if needed
   hosts: localhost
   gather_facts: no
   tasks:
@@ -11,7 +11,7 @@
 - name: "Gather facts for nodes in {{ oo_env }}"
   hosts: "tag_env-host-type_{{ oo_env }}-openshift-node"
 
-- name: "Configure instances"
+- name: Configure instances
   hosts: oo_hosts_to_config
   vars_files:
   - vars.yml
