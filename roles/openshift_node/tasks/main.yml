@@ -2,11 +2,6 @@
 - name: Install OpenShift Node package
   yum: pkg=openshift-node state=installed
 
-- name: Set OpenShift node facts
-  include: "{{ role_path | dirname }}/openshift_common/tasks/set_facts.yml"
-  facts:
-  - { section: node, option: debug_level, value: "{{ openshift_node_debug_level }}" }
-
 - local_action: command /usr/bin/mktemp -d /tmp/openshift-ansible-XXXXXXX
   register: mktemp
 
@@ -34,6 +29,13 @@
     line: "OPTIONS=\"--master=https://{{ openshift_master_ips[0] }}:8443 --loglevel={{ openshift_node_debug_level }}\""
   notify:
   - restart openshift-node
+
+- name: Set OpenShift node facts
+  include: "{{ role_path | dirname }}/openshift_common/tasks/set_facts.yml"
+  facts:
+  - { section: node, option: debug_level, value: "{{ openshift_node_debug_level }}" }
+  - { section: node, option: public_ip, value: "{{ openshift_public_ip }}" }
+  - { section: node, option: externally_managed, value: "{{ openshift_node_manage_service_externally }}" }
 
 # fixme: Once the openshift_cluster playbook is published state should be started
 # Always bounce service to pick up new credentials
