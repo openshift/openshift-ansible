@@ -1,6 +1,7 @@
 ---
 # TODO: allow for overriding default ports where possible
 # TODO: trigger the external service when restart is needed
+
 - name: Set node OpenShift facts
   openshift_facts:
     role: 'node'
