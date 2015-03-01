@@ -1,0 +1,4 @@
+---
+# set openshift_node_ips to a bogus value to prevent the master from
+# automatically registering itself as a node
+openshift_node_ips: ['*']

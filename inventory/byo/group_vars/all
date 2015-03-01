@@ -1,0 +1,34 @@
+---
+# lets assume that we want to use the root as the ssh user for all hosts
+ansible_ssh_user: root
+
+# default debug level for all OpenShift hosts
+openshift_debug_level: 4
+
+# set the OpenShift deployment type for all hosts
+openshift_deployment_type: enterprise
+
+# lets assume that all hosts are publicly accessible from the default ipv4
+# address (the one that is associated with the default gateway for the host).
+# This can also be overridden on a per-host or per-group basis
+openshift_public_ip: "{{ ansible_default_ipv4.address }}"
+
+# Override the default registry for development
+openshift_registry_url: docker-buildvm-rhose.usersys.redhat.com:5000/openshift3_beta/ose-${component}:${version}
+
+# Use latest Errata puddle as an additional repo:
+#openshift_additional_repos:
+#- id: ose-devel
+#  name: ose-devel
+#  baseurl: http://buildvm-devops.usersys.redhat.com/puddle/build/OpenShiftEnterpriseErrata/3.0/latest/RH7-RHOSE-3.0/$basearch/os
+#  enabled: 1
+#  gpgcheck: 0
+# Use latest Whitelist puddle as an additional repo:
+openshift_additional_repos:
+- id: ose-devel
+  name: ose-devel
+  baseurl: http://buildvm-devops.usersys.redhat.com/puddle/build/OpenShiftEnterprise/3.0/latest/RH7-RHOSE-3.0/$basearch/os
+  enabled: 1
+
+# Override the hostname workaround for byo
+openshift_hostname_workaround: false
