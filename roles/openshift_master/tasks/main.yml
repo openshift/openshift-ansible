@@ -2,13 +2,6 @@
 - name: Install OpenShift Master package
   yum: pkg=openshift-master state=installed
 
-- name: Set master OpenShift facts
-  include: "{{ role_path | dirname }}/openshift_common/tasks/set_facts.yml"
-  facts:
-  - { section: master, option: debug_level, value: "{{ openshift_master_debug_level }}" }
-  - { section: master, option: public_ip, value: "{{ openshift_public_ip }}" }
-  - { section: master, option: externally_managed, value: "{{ openshift_master_manage_service_externally }}" }
-
 - name: Configure firewall for OpenShift Master
   include: "{{ role_path | dirname }}/openshift_common/tasks/firewall.yml"
   allow:
@@ -27,6 +20,13 @@
           | join(',') }}  --loglevel={{ openshift_master_debug_level }}\""
   notify:
   - restart openshift-master
+
+- name: Set master OpenShift facts
+  include: "{{ role_path | dirname }}/openshift_common/tasks/set_facts.yml"
+  facts:
+  - { section: master, option: debug_level, value: "{{ openshift_master_debug_level }}" }
+  - { section: master, option: public_ip, value: "{{ openshift_public_ip }}" }
+  - { section: master, option: externally_managed, value: "{{ openshift_master_manage_service_externally }}" }
 
 - name: Start and enable openshift-master
   service: name=openshift-master enabled=yes state=started
