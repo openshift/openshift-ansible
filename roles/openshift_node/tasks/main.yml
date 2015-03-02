@@ -30,6 +30,15 @@
   notify:
   - restart openshift-node
 
+- name: Set default registry url
+  lineinfile:
+    dest: /etc/sysconfig/openshift-node
+    regexp: '^IMAGES='
+    line: "IMAGES={{ openshift_registry_url }}"
+  when: openshift_registry_url is defined
+  notify:
+  - restart openshift-node
+
 - name: Set OpenShift node facts
   include: "{{ role_path | dirname }}/openshift_common/tasks/set_facts.yml"
   facts:
