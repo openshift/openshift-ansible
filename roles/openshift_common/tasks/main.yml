@@ -10,9 +10,15 @@
 - name: Set common OpenShift facts
   include: set_facts.yml
   facts:
-  - { section: common, option: env, value: "{{ openshift_env | default('default') }}" }
-  - { section: common, option: host_type, value: "{{ openshift_host_type }}" }
-  - { section: common, option: debug_level, value: "{{ openshift_debug_level }}" }
+  - section: common
+    option: env
+    value: "{{ openshift_env | default('default') }}"
+  - section: common
+    option: host_type
+    value: "{{ openshift_host_type }}"
+  - section: common
+    option: debug_level
+    value: "{{ openshift_debug_level }}"
 
 - name: Add KUBECONFIG to .bash_profile for user root
   lineinfile:

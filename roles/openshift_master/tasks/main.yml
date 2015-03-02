@@ -5,12 +5,17 @@
 - name: Configure firewall for OpenShift Master
   include: "{{ role_path | dirname }}/openshift_common/tasks/firewall.yml"
   allow:
-  - { service: etcd embedded, port: 4001/tcp}
-  - { service: etcd peer, port: 7001/tcp}
-  - { service: OpenShift api https, port: 8443/tcp}
-  - { service: OpenShift web console https, port: 8444/tcp}
+  - service: etcd embedded
+    port: 4001/tcp
+  - service: etcd peer
+    port: 7001/tcp
+  - service: OpenShift api https
+    port: 8443/tcp
+  - service: OpenShift web console https
+    port: 8444/tcp
   deny:
-  - { service: OpenShift api http, port: 8080/tcp }
+  - service: OpenShift api http
+    port: 8080/tcp
 
 - name: Configure OpenShift settings
   lineinfile:
@@ -33,9 +38,15 @@
 - name: Set master OpenShift facts
   include: "{{ role_path | dirname }}/openshift_common/tasks/set_facts.yml"
   facts:
-  - { section: master, option: debug_level, value: "{{ openshift_master_debug_level }}" }
-  - { section: master, option: public_ip, value: "{{ openshift_public_ip }}" }
-  - { section: master, option: externally_managed, value: "{{ openshift_master_manage_service_externally }}" }
+  - section: master
+    option: debug_level
+    value: "{{ openshift_master_debug_level }}" }
+  - section: master
+    option: public_ip
+    value: "{{ openshift_public_ip }}" }
+  - section: master
+    option: externally_managed
+    value: "{{ openshift_master_manage_service_externally }}" }
 
 - name: Start and enable openshift-master
   service: name=openshift-master enabled=yes state=started

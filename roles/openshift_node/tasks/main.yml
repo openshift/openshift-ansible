@@ -42,9 +42,15 @@
 - name: Set OpenShift node facts
   include: "{{ role_path | dirname }}/openshift_common/tasks/set_facts.yml"
   facts:
-  - { section: node, option: debug_level, value: "{{ openshift_node_debug_level }}" }
-  - { section: node, option: public_ip, value: "{{ openshift_public_ip }}" }
-  - { section: node, option: externally_managed, value: "{{ openshift_node_manage_service_externally }}" }
+  - section: node
+    option: debug_level
+    value: "{{ openshift_node_debug_level }}"
+  - section: node
+    option: public_ip
+    value: "{{ openshift_public_ip }}"
+  - section: node
+    option: externally_managed
+    value: "{{ openshift_node_manage_service_externally }}"
 
 # fixme: Once the openshift_cluster playbook is published state should be started
 # Always bounce service to pick up new credentials
