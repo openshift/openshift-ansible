@@ -1,0 +1,3 @@
+---
+- name: restart openshift-sdn-node
+  service: name=openshift-sdn-node state=restarted
