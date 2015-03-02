@@ -55,3 +55,9 @@
 - name: Disable openshift-node if openshift-node is managed externally
   service: name=openshift-node enabled=false
   when: openshift_node_manage_service_externally
+
+# TODO: expose openshift_register_node options to allow for overriding the
+# defaults.
+- name: Register node (if not already registered)
+  openshift_register_node:
+    name: "{{ openshift_hostname }}"
