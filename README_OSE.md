@@ -40,13 +40,13 @@ merged into the upstream repo:
   pre-configured. If using subscription-manager the following commands will
   disable all but the rhel-7-server-beta rhel-7-server-extras and
   rhel-server7-ose-beta repos:
-    ```sh
-    subscription-manager repos --disable="*"
-    subscription-manager repos \
-    --enable="rhel-7-server-beta-rpms" \
-    --enable="rhel-7-server-extras-rpms" \
-    --enable="rhel-server-7-ose-beta-rpms"
-    ```
+```sh
+subscription-manager repos --disable="*"
+subscription-manager repos \
+--enable="rhel-7-server-beta-rpms" \
+--enable="rhel-7-server-extras-rpms" \
+--enable="rhel-server-7-ose-beta-rpms"
+```
 * The openshift-sdn-master service fails to start when no nodes are registered.
   Will need to either pre-populate the first node(s) in /etc/sysconfig/openshift-master
   or apply the openshift-sdn-master role after the openshift-node role has been applied to one or more hosts.
