@@ -31,3 +31,7 @@
 - name: Start and enable openshift-master
   service: name=openshift-master enabled=yes state=started
   when: not openshift_master_manage_service_externally
+
+- name: Disable openshift-master if openshift-master is managed externally
+  service: name=openshift-master enabled=false
+  when: openshift_master_manage_service_externally

@@ -40,3 +40,7 @@
 - name: Start and enable openshift-node
   service: name=openshift-node enabled=yes state=restarted
   when: not openshift_node_manage_service_externally
+
+- name: Disable openshift-node if openshift-node is managed externally
+  service: name=openshift-node enabled=false
+  when: openshift_node_manage_service_externally
