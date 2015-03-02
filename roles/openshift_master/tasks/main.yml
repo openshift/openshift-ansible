@@ -16,8 +16,8 @@
   lineinfile:
     dest: /etc/sysconfig/openshift-master
     regexp: '^OPTIONS='
-    line: "OPTIONS=\"--public-master={{ openshift_public_ip }} --nodes={{ openshift_node_ips
-          | join(',') }}  --loglevel={{ openshift_master_debug_level }}\""
+    line: "OPTIONS=\"--public-master={{ openshift_hostname }} --nodes={{ openshift_node_ips
+              | join(',') }}  --loglevel={{ openshift_master_debug_level }}\""
   notify:
   - restart openshift-master
 
