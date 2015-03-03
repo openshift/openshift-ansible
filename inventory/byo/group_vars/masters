@@ -1,4 +1,6 @@
 ---
+# TODO: remove this once https://github.com/openshift/origin/pull/1182 has
+# been merged and landed in enterprise.
 # set openshift_node_ips to a bogus value to prevent the master from
 # automatically registering itself as a node
 openshift_node_ips: ['*']
