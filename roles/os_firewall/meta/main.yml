@@ -1,7 +1,6 @@
----
 galaxy_info:
   author: Jason DeTiberus
-  description: OpenShift Common
+  description: os_firewall
   company: Red Hat, Inc.
   license: ASL 2.0
   min_ansible_version: 1.7
@@ -10,6 +9,5 @@ galaxy_info:
     versions:
     - 7
   categories:
-  - cloud
-dependencies:
-- { role: os_firewall }
+  - system
+dependencies: []

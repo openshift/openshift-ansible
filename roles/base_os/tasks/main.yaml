@@ -15,19 +15,3 @@
   yum:
     pkg: bash-completion
     state: installed
-
-- name: Install firewalld
-  yum:
-    pkg: firewalld
-    state: installed
-
-- name: start and enable firewalld service
-  service:
-    name: firewalld
-    state: started
-    enabled: yes
-  register: result
-
-- name: need to pause here, otherwise the firewalld service starting can sometimes cause ssh to fail
-  pause: seconds=10
-  when: result | changed
