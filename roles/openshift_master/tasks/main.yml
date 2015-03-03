@@ -40,13 +40,13 @@
   facts:
   - section: master
     option: debug_level
-    value: "{{ openshift_master_debug_level }}" }
+    value: "{{ openshift_master_debug_level }}"
   - section: master
     option: public_ip
-    value: "{{ openshift_public_ip }}" }
+    value: "{{ openshift_public_ip }}"
   - section: master
     option: externally_managed
-    value: "{{ openshift_master_manage_service_externally }}" }
+    value: "{{ openshift_master_manage_service_externally }}"
 
 - name: Start and enable openshift-master
   service: name=openshift-master enabled=yes state=started
