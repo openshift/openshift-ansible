@@ -38,8 +38,13 @@ Alternatively, you can configure your ssh-agent to hold the credentials to conne
 Install Dependencies
 --------------------
 1. Ansible requires python-boto for aws operations:
+RHEL/CentOS/Fedora
 ```
   yum install -y ansible python-boto
+```
+OSX:
+```
+  pip install -U boto
 ```
 
 

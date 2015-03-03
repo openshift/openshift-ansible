@@ -143,7 +143,7 @@ module OpenShift
              :desc => 'A relative path where files are written to.'
       desc "scp_from", "scp files from an instance"
       def scp_from(*ssh_ops, host)
-        if host =~ /^([\w\d_.-]+)@([\w\d-_.]+)$/
+        if host =~ /^([\w\d_.\-]+)@([\w\d\-_.]+)$/
           user = $1
           host = $2
         end
@@ -175,7 +175,7 @@ module OpenShift
 
       desc "ssh", "Ssh to an instance"
       def ssh(*ssh_ops, host)
-        if host =~ /^([\w\d_.-]+)@([\w\d-_.]+)/
+        if host =~ /^([\w\d_.\-]+)@([\w\d\-_.]+)/
           user = $1
           host = $2
         end
