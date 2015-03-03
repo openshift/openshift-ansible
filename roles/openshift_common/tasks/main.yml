@@ -4,15 +4,27 @@
   hostname: name={{ openshift_bind_ip }}
   when: openshift_hostname_workaround
 
+- name: Install firewall packages
+  yum: name={{ item }} state=present
+  with_items: openshift_fw_pkgs
+
+- name: Start and enable firewall service
+  service: name={{ openshift_fw_svc }} state=started enabled=yes
+
+- name: Ensure alternative firewall service(s) are not enabled
+  service: name={{ item }} state=stopped enabled=false
+  with_items: openshift_fw_mask_svcs
+
+- name: Mask alternative firewall service(s) service
+  command: systemctl mask {{ item }}
+  register: result
+  failed_when: result.rc != 0
+  changed_when: False
+  ignore_errors: True
+  with_items: openshift_fw_mask_svcs
+
 - name: Configure local facts file
   file: path=/etc/ansible/facts.d/ state=directory mode=0750
-
-- name: Set common OpenShift facts
-  include: set_facts.yml
-  facts:
-  - { section: common, option: env, value: "{{ openshift_env | default('default') }}" }
-  - { section: common, option: host_type, value: "{{ openshift_host_type }}" }
-  - { section: common, option: debug_level, value: "{{ openshift_debug_level }}" }
 
 - name: Add KUBECONFIG to .bash_profile for user root
   lineinfile:
@@ -21,3 +33,16 @@
     line: "export KUBECONFIG=/var/lib/openshift/openshift.local.certificates/admin/.kubeconfig"
     state: present
     insertafter: EOF
+
+- name: Set common OpenShift facts
+  include: set_facts.yml
+  facts:
+  - section: common
+    option: env
+    value: "{{ openshift_env | default('default') }}"
+  - section: common
+    option: host_type
+    value: "{{ openshift_host_type }}"
+  - section: common
+    option: debug_level
+    value: "{{ openshift_debug_level }}"

@@ -1,0 +1,21 @@
+---
+# These tasks are for adding/removing iptables rules from the default
+# /etc/sysconfig/iptables file, any changes will trigger an iptables restart.
+
+- name: Add iptables allow rules
+  openshift_manage_iptables:
+    name: "{{ item.service }}"
+    action: add
+    protocol: "{{ item.port.split('/')[1] }}"
+    port: "{{ item.port.split('/')[0] }}"
+  with_items: allow
+  when: allow is defined
+
+- name: Remove iptables rules
+  openshift_manage_iptables:
+    name: "{{ item.service }}"
+    action: remove
+    protocol: "{{ item.port.split('/')[1] }}"
+    port: "{{ item.port.split('/')[0] }}"
+  with_items: deny
+  when: deny is defined

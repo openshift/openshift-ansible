@@ -1,0 +1,2 @@
+---
+base_os_use_firewalld: "{{ False if ('openshift_master' in role_names or 'openshift_node' in role_names) else True }}"

@@ -20,6 +20,7 @@
   yum:
     pkg: firewalld
     state: installed
+  when: base_os_use_firewalld
 
 - name: start and enable firewalld service
   service:
@@ -27,7 +28,8 @@
     state: started
     enabled: yes
   register: result
+  when: base_os_use_firewalld
 
 - name: need to pause here, otherwise the firewalld service starting can sometimes cause ssh to fail
   pause: seconds=10
-  when: result | changed
+  when: base_os_use_firewalld and result | changed

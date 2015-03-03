@@ -1,2 +1,9 @@
 ---
 openshift_master_credentials_dir: /var/lib/openshift/openshift.local.certificates/admin/
+
+# TODO: Upstream kubernetes only supports iptables currently, if this changes,
+# then these variable should be moved to defaults
+openshift_use_firewalld: False
+openshift_fw_pkgs: "{{ ['firewalld'] if openshift_use_firewalld else ['iptables', 'iptables-services'] }}"
+openshift_fw_svc: "{{ 'firewalld' if openshift_use_firewalld else 'iptables' }}"
+openshift_fw_mask_svcs: "{{ ['iptables'] if openshift_use_firewalld else ['firewalld'] }}"
