@@ -19,7 +19,7 @@ module OpenShift
         retval = []
         hosts['_meta']['hostvars'].each do |host, info|
           retval << OpenStruct.new({
-            :name        => info['ec2_tag_Name'],
+            :name        => info['ec2_tag_Name']        || 'UNSET',
             :env         => info['ec2_tag_environment'] || 'UNSET',
             :public_ip   => info['ec2_ip_address'],
             :public_dns  => info['ec2_public_dns_name'],
