@@ -37,7 +37,6 @@
   vars_files:
     - vars.yml
   roles:
-    - base_os
     - repos
     - docker
     - {
@@ -47,3 +46,4 @@
         openshift_public_ip: "{{ gce_public_ip }}",
         openshift_env: "{{ oo_env }}",
       }
+    - os_env_extras

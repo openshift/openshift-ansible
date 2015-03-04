@@ -31,7 +31,6 @@
   vars_files:
     - vars.yml
   roles:
-    - base_os
     - repos
     - {
         role: openshift_master,
@@ -40,3 +39,4 @@
         # TODO: openshift_public_ip: set to aws instance public ip
       }
     - pods
+    - os_env_extras

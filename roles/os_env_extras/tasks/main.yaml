@@ -1,5 +1,5 @@
 ---
-# basic role, configures irbrc, vimrc
+# environment configuration role, configures irbrc, vimrc
 
 - name: Ensure irbrc is installed for user root
   copy:
