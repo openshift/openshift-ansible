@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+# vim: expandtab:tabstop=4:shiftwidth=4
 
 import os
 import multiprocessing
