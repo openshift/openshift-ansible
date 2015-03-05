@@ -4,3 +4,4 @@
 # determine if we should manage the service within this role
 openshift_master_manage_service_externally: false
 openshift_master_debug_level: "{{ openshift_debug_level | default(0) }}"
+openshift_node_ips: []

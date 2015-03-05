@@ -13,7 +13,7 @@
   * Tested using ansible-1.8.2-1.fc20.noarch, but should work with version 1.7+
   * Available in Fedora channels
   * Available for EL with EPEL and Optional channel
-* One or more RHEL 7.1 (Beta or GA) VMs
+* One or more RHEL 7.1 VMs
 * ssh key based auth for the root user needs to be pre-configured from the host
   running ansible to the remote hosts
 * The v3-beta2 branch of openshift-online-ansible from
@@ -38,12 +38,12 @@ merged into the upstream repo:
 * Host subscriptions are not configurable yet, the hosts need to be
   pre-registered with subscription-manager or have the RHEL base repo
   pre-configured. If using subscription-manager the following commands will
-  disable all but the rhel-7-server-beta rhel-7-server-extras and
+  disable all but the rhel-7-server rhel-7-server-extras and
   rhel-server7-ose-beta repos:
 ```sh
 subscription-manager repos --disable="*"
 subscription-manager repos \
---enable="rhel-7-server-beta-rpms" \
+--enable="rhel-7-server-rpms" \
 --enable="rhel-7-server-extras-rpms" \
 --enable="rhel-server-7-ose-beta-rpms"
 ```
@@ -130,15 +130,6 @@ openshift_hostname_workaround: false
 # This variable makes sure that we are managing the openshift-node service
 # from the openshift_sdn_node service, since we are assuming sdn config.
 openshift_node_manage_service_externally: true
-```
-
-#### Group vars for master hosts
-/etc/ansible/group_vars/masters:
-```yaml
----
-# set openshift_node_ips to a bogus value to prevent the master from
-# automatically registering itself as a node
-openshift_node_ips: ['*']
 ```
 
 ## Running the ansible playbooks
