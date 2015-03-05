@@ -73,11 +73,12 @@ def main():
             resources     = dict(),
             client_config = dict(default = default_config)
         ),
+        mutually_exclusive = [
+            ['resources', 'cpu'],
+            ['resources', 'memory']
+        ],
         supports_check_mode=True
     )
-
-    if module.params['resources'] and (module.params['cpu'] or module.params['memory']):
-        module.fail_json(msg="Error: argument resources cannot be specified with the following arguments: cpu, memory")
 
     client_env = os.environ.copy()
     client_env['KUBECONFIG'] = module.params['client_config']
