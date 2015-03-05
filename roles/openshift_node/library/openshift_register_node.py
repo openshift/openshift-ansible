@@ -61,17 +61,18 @@ EXAMPLES = '''
 '''
 
 def main():
-    default_config='/var/lib/openshift/openshift.local.certificates/admin/.kubeconfig'
-
     module = AnsibleModule(
-        argument_spec     = dict(
-            name          = dict(required = True),
-            hostIP        = dict(),
-            apiVersion    = dict(),
-            cpu           = dict(),
-            memory        = dict(),
-            resources     = dict(),
-            client_config = dict(default = default_config)
+        argument_spec      = dict(
+            name           = dict(required = True),
+            hostIP         = dict(),
+            apiVersion     = dict(),
+            cpu            = dict(),
+            memory         = dict(),
+            resources      = dict(),
+            client_config  = dict(),
+            client_cluster = dict(default = 'master'),
+            client_context = dict(default = 'master'),
+            client_user    = dict(default = 'admin')
         ),
         mutually_exclusive = [
             ['resources', 'cpu'],
@@ -80,8 +81,53 @@ def main():
         supports_check_mode=True
     )
 
-    client_env = os.environ.copy()
-    client_env['KUBECONFIG'] = module.params['client_config']
+    user_has_client_config = os.path.exists(os.path.expanduser('~/.kube/.kubeconfig'))
+    if not (user_has_client_config or module.params['client_config']):
+        module.fail_json(msg="Could not locate client configuration, "
+                         "client_config must be specified if "
+                         "~/.kube/.kubeconfig is not present")
+
+    client_opts = []
+    if module.params['client_config']:
+        client_opts.append("--kubeconfig=%s" % module.params['client_config'])
+
+    try:
+        output = check_output(["/usr/bin/openshift", "ex", "config", "view",
+                               "-o", "json"] + client_opts,
+                stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as e:
+        module.fail_json(msg="Failed to get client configuration",
+                command=e.cmd, returncode=e.returncode, output=e.output)
+
+    config = json.loads(output)
+    if not (bool(config['clusters']) or bool(config['contexts']) or
+            bool(config['current-context']) or bool(config['users'])):
+        module.fail_json(msg="Client config missing required values",
+                         output=output)
+
+    client_context = module.params['client_context']
+    if client_context:
+        if client_context not in config['contexts']:
+            module.fail_json(msg="Context %s not found in client config" %
+                             client_context)
+        if not config['current-context'] or config['current-context'] != client_context:
+            client_opts.append("--context=%s" % client_context)
+
+    client_user = module.params['client_user']
+    if client_user:
+        if client_user not in config['users']:
+            module.fail_json(msg="User %s not found in client config" %
+                             client_user)
+        if client_user != config['contexts'][client_context]['user']:
+            client_opts.append("--user=%s" % client_user)
+
+    client_cluster = module.params['client_cluster']
+    if client_cluster:
+        if client_cluster not in config['clusters']:
+            module.fail_json(msg="Cluster %s not found in client config" %
+                             client_cluster)
+        if client_cluster != config['contexts'][client_context]['cluster']:
+            client_opts.append("--cluster=%s" % client_cluster)
 
     node_def = dict(
         metadata = dict(
@@ -116,7 +162,7 @@ def main():
                     break
 
     try:
-        output = check_output("osc get nodes", shell=True, env=client_env,
+        output = check_output(["/usr/bin/osc", "get", "nodes"] +  client_opts,
                 stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as e:
         module.fail_json(msg="Failed to get node list", command=e.cmd,
@@ -128,9 +174,9 @@ def main():
         else:
             module.exit_json(changed=True, node_def=node_def)
 
-    p = Popen("osc create node -f -", shell=True, stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True,
-            env=client_env)
+    p = Popen(["/usr/bin/osc", "create", "node"] +  client_opts + ["-f", "-"],
+            stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE, close_fds=True)
     (out, err) = p.communicate(module.jsonify(node_def))
     ret = p.returncode
 
