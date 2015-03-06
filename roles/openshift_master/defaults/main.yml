@@ -1,4 +1,7 @@
 ---
+# TODO: add some logic to provide a sane default for  this var, use the
+# roles assigned to the host and the values of other variables to
+# determine if we should manage the service within this role
 openshift_master_manage_service_externally: false
 openshift_master_debug_level: "{{ openshift_debug_level | default(0) }}"
 openshift_node_ips: []
