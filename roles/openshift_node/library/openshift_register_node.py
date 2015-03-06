@@ -130,13 +130,12 @@ def main():
             client_opts.append("--cluster=%s" % client_cluster)
 
     node_def = dict(
-        metadata = dict(
-            name = module.params['name']
-        ),
-        kind = 'Node',
-        resources = dict(
-            capacity = dict()
-        )
+            id = module.params['name'],
+            kind = 'Node',
+            apiVersion = 'v1beta1',
+            resources = dict(
+                capacity = dict()
+            )
     )
 
     for key, value in module.params.iteritems():
@@ -156,8 +155,8 @@ def main():
             for line in mem:
                 entries = line.split()
                 if str(entries.pop(0)) == 'MemTotal:':
-                    mem_free_kb = int(entries.pop(0))
-                    mem_capacity = int(mem_free_kb * 1024 * .80)
+                    mem_total_kb = int(entries.pop(0))
+                    mem_capacity = int(mem_total_kb * 1024 * .75)
                     node_def['resources']['capacity']['memory'] = mem_capacity
                     break
 
@@ -168,29 +167,37 @@ def main():
         module.fail_json(msg="Failed to get node list", command=e.cmd,
                 returncode=e.returncode, output=e.output)
 
-    if module.check_mode:
-        if re.search(module.params['name'], output, re.MULTILINE):
-            module.exit_json(changed=False, node_def=node_def)
-        else:
-            module.exit_json(changed=True, node_def=node_def)
+    if re.search(module.params['name'], output, re.MULTILINE):
+        module.exit_json(changed=False, node_def=node_def)
+    elif module.check_mode:
+        module.exit_json(changed=True, node_def=node_def)
 
-    p = Popen(["/usr/bin/osc", "create", "node"] +  client_opts + ["-f", "-"],
+    config_def = dict(
+        metadata = dict(
+            name = "add-node-%s" % module.params['name']
+        ),
+        kind = 'Config',
+        apiVersion = 'v1beta1',
+        items = [node_def]
+    )
+
+    p = Popen(["/usr/bin/osc"] + client_opts + ["create", "node"] + ["-f", "-"],
             stdin=subprocess.PIPE, stdout=subprocess.PIPE,
             stderr=subprocess.PIPE, close_fds=True)
-    (out, err) = p.communicate(module.jsonify(node_def))
+    (out, err) = p.communicate(module.jsonify(config_def))
     ret = p.returncode
 
     if ret != 0:
         if re.search("minion \"%s\" already exists" % module.params['name'],
                 err):
             module.exit_json(changed=False,
-                    msg="node definition already exists", node_def=node_def)
+                    msg="node definition already exists", config_def=config_def)
         else:
             module.fail_json(msg="Node creation failed.", ret=ret, out=out,
-                    err=err, node_def=node_def)
+                    err=err, config_def=config_def)
 
     module.exit_json(changed=True, out=out, err=err, ret=ret,
-           node_def=node_def)
+           node_def=config_def)
 
 # import module snippets
 from ansible.module_utils.basic import *
