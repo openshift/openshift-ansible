@@ -1,5 +1,5 @@
 ---
-- name: "populate oo_hosts_to_config host group if needed"
+- name: Populate oo_hosts_to_config host group if needed
   hosts: localhost
   gather_facts: no
   tasks:
@@ -10,33 +10,18 @@
 
 - name: "Gather facts for nodes in {{ oo_env }}"
   hosts: "tag_env-host-type_{{ oo_env }}-openshift-node"
-  connection: ssh
-  user: root
 
-- name: "Set Origin specific facts on localhost (for later use)"
-  hosts: localhost
-  gather_facts: no
-  tasks:
-    - name: Setting openshift_node_ips fact on localhost
-      set_fact:
-        openshift_node_ips: "{{ hostvars
-            | oo_select_keys(groups['tag_env-host-type_' + oo_env + '-openshift-node'])
-            | oo_collect(attribute='ansible_default_ipv4.address') }}"
-      when: groups['tag_env-host-type_' + oo_env + '-openshift-node'] is defined
-
-- name: "Configure instances"
+- name: Configure instances
   hosts: oo_hosts_to_config
-  connection: ssh
-  user: root
   vars_files:
-    - vars.yml
+  - vars.yml
+  vars:
+    openshift_node_ips: "{{ hostvars
+        | oo_select_keys(groups['tag_env-host-type_' + oo_env + '-openshift-node'])
+        | oo_collect(attribute='ansible_default_ipv4.address') | default(['']) }}"
   roles:
     - repos
-    - {
-        role: openshift_master,
-        openshift_node_ips: "{{ hostvars['localhost'].openshift_node_ips | default(['']) }}",
-        openshift_env: "{{ oo_env }}"
-        # TODO: openshift_public_ip: set to aws instance public ip
-      }
+    - openshift-master
+    - openshift-sdn-master
     - pods
     - os_env_extras
