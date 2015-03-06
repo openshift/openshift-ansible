@@ -59,7 +59,7 @@ Use firewalld and open tcp port 443 and close previously open tcp port 80:
 License
 -------
 
-ASL 2.0
+Apache License, Version 2.0
 
 Author Information
 ------------------
