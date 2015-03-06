@@ -14,7 +14,7 @@
     backrefs: yes
   with_items:
     - regex: '^(OPTIONS=)'
-      line: '\1"-v={{ openshift_sdn_node_debug_level }} -hostname={{ openshift_bind_ip if openshift_hostname_workaround else ansible_fqdn }}"'
+      line: '\1"-v={{ openshift_sdn_node_debug_level }} -hostname={{ openshift_hostname }}"'
     - regex: '^(MASTER_URL=)'
       line: '\1"http://{{ openshift_master_ips | first }}:4001"'
     - regex: '^(MINION_IP=)'
@@ -25,12 +25,12 @@
       line: '\1"--insecure-registry=0.0.0.0/0 -b=lbr0 --mtu=1450 --selinux-enabled"'
   notify: restart openshift-sdn-node
 
-- name: Set openshift-sdn-master facts
+- name: Set openshift-sdn-node facts
   include: "{{ role_path | dirname }}/openshift_common/tasks/set_facts.yml"
   facts:
-  - section: sdn-master
+  - section: sdn-node
     option: debug_level
-    value: "{{ openshift_sdn_master_debug_level }}"
+    value: "{{ openshift_sdn_node_debug_level }}"
 
 # fixme: Once the openshift_cluster playbook is published state should be started
 # Always bounce service to pick up new credentials
