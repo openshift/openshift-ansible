@@ -67,6 +67,6 @@
     state: directory
     mode: 700
 - name: Configure root user kubeconfig
-  command: cd /var/lib/openshift/openshift.local.certificates/admin/.kubeconfig /root/.kube/.kubeconfig
+  command: cp /var/lib/openshift/openshift.local.certificates/admin/.kubeconfig /root/.kube/.kubeconfig
   args:
     creates: /root/.kube/.kubeconfig
