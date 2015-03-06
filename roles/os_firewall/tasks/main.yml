@@ -1,0 +1,6 @@
+---
+- include: firewall/firewalld.yml
+  when: os_firewall_use_firewalld
+
+- include: firewall/iptables.yml
+  when: not os_firewall_use_firewalld

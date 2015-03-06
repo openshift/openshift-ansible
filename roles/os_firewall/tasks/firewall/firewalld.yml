@@ -1,0 +1,68 @@
+---
+- name: Install firewalld packages
+  yum:
+    name: firewalld
+    state: present
+
+- name: Start and enable firewalld service
+  service:
+    name: firewalld
+    state: started
+    enabled: yes
+  register: result
+
+- name: need to pause here, otherwise the firewalld service starting can sometimes cause ssh to fail
+  pause: seconds=10
+  when: result | changed
+
+- name: Ensure iptables services are not enabled
+  service:
+    name: "{{ item }}"
+    state: stopped
+    enabled: no
+  with_items:
+  - iptables
+  - ip6tables
+
+- name: Mask iptables services
+  command: systemctl mask "{{ item }}"
+  register: result
+  failed_when: result.rc != 0
+  changed_when: False
+  with_items:
+  - iptables
+  - ip6tables
+
+# TODO: Ansible 1.9 will eliminate the need for separate firewalld tasks for
+# enabling rules and making them permanent with the immediate flag
+- name: Add firewalld allow rules
+  firewalld:
+    port: "{{ item.port }}"
+    permanent: false
+    state: enabled
+  with_items: allow
+  when: allow is defined
+
+- name: Persist firewalld allow rules
+  firewalld:
+    port: "{{ item.port }}"
+    permanent: true
+    state: enabled
+  with_items: allow
+  when: allow is defined
+
+- name: Remove firewalld allow rules
+  firewalld:
+    port: "{{ item.port }}"
+    permanent: false
+    state: disabled
+  with_items: deny
+  when: deny is defined
+
+- name: Persist removal of firewalld allow rules
+  firewalld:
+    port: "{{ item.port }}"
+    permanent: true
+    state: disabled
+  with_items: deny
+  when: deny is defined

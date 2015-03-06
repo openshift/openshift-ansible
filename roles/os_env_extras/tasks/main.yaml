@@ -1,0 +1,17 @@
+---
+# environment configuration role, configures irbrc, vimrc
+
+- name: Ensure irbrc is installed for user root
+  copy:
+    src: irbrc
+    dest: /root/.irbrc
+
+- name: Ensure vimrc is installed for user root
+  copy:
+    src: vimrc
+    dest: /root/.vimrc
+
+- name: Bash Completion
+  yum:
+    pkg: bash-completion
+    state: installed

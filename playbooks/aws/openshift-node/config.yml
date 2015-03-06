@@ -31,7 +31,6 @@
   vars_files:
     - vars.yml
   roles:
-    - base_os
     - repos
     - docker
     - {
@@ -41,3 +40,4 @@
         openshift_env: "{{ oo_env }}"
         # TODO: openshift_public_ip: set to aws instance public ip
       }
+    - os_env_extras
