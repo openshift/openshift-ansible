@@ -62,35 +62,81 @@ EXAMPLES = '''
 '''
 
 def main():
-    default_config='/var/lib/openshift/openshift.local.certificates/admin/.kubeconfig'
-
     module = AnsibleModule(
-        argument_spec     = dict(
-            name          = dict(required = True),
-            hostIP        = dict(),
-            apiVersion    = dict(),
-            cpu           = dict(),
-            memory        = dict(),
-            resources     = dict(),
-            client_config = dict(default = default_config)
+        argument_spec      = dict(
+            name           = dict(required = True),
+            hostIP         = dict(),
+            apiVersion     = dict(),
+            cpu            = dict(),
+            memory         = dict(),
+            resources      = dict(),
+            client_config  = dict(),
+            client_cluster = dict(default = 'master'),
+            client_context = dict(default = 'master'),
+            client_user    = dict(default = 'admin')
         ),
+        mutually_exclusive = [
+            ['resources', 'cpu'],
+            ['resources', 'memory']
+        ],
         supports_check_mode=True
     )
 
-    if module.params['resources'] and (module.params['cpu'] or module.params['memory']):
-        module.fail_json(msg="Error: argument resources cannot be specified with the following arguments: cpu, memory")
+    user_has_client_config = os.path.exists(os.path.expanduser('~/.kube/.kubeconfig'))
+    if not (user_has_client_config or module.params['client_config']):
+        module.fail_json(msg="Could not locate client configuration, "
+                         "client_config must be specified if "
+                         "~/.kube/.kubeconfig is not present")
 
-    client_env = os.environ.copy()
-    client_env['KUBECONFIG'] = module.params['client_config']
+    client_opts = []
+    if module.params['client_config']:
+        client_opts.append("--kubeconfig=%s" % module.params['client_config'])
+
+    try:
+        output = check_output(["/usr/bin/openshift", "ex", "config", "view",
+                               "-o", "json"] + client_opts,
+                stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as e:
+        module.fail_json(msg="Failed to get client configuration",
+                command=e.cmd, returncode=e.returncode, output=e.output)
+
+    config = json.loads(output)
+    if not (bool(config['clusters']) or bool(config['contexts']) or
+            bool(config['current-context']) or bool(config['users'])):
+        module.fail_json(msg="Client config missing required values",
+                         output=output)
+
+    client_context = module.params['client_context']
+    if client_context:
+        if client_context not in config['contexts']:
+            module.fail_json(msg="Context %s not found in client config" %
+                             client_context)
+        if not config['current-context'] or config['current-context'] != client_context:
+            client_opts.append("--context=%s" % client_context)
+
+    client_user = module.params['client_user']
+    if client_user:
+        if client_user not in config['users']:
+            module.fail_json(msg="User %s not found in client config" %
+                             client_user)
+        if client_user != config['contexts'][client_context]['user']:
+            client_opts.append("--user=%s" % client_user)
+
+    client_cluster = module.params['client_cluster']
+    if client_cluster:
+        if client_cluster not in config['clusters']:
+            module.fail_json(msg="Cluster %s not found in client config" %
+                             client_cluster)
+        if client_cluster != config['contexts'][client_context]['cluster']:
+            client_opts.append("--cluster=%s" % client_cluster)
 
     node_def = dict(
-        metadata = dict(
-            name = module.params['name']
-        ),
-        kind = 'Node',
-        resources = dict(
-            capacity = dict()
-        )
+            id = module.params['name'],
+            kind = 'Node',
+            apiVersion = 'v1beta1',
+            resources = dict(
+                capacity = dict()
+            )
     )
 
     for key, value in module.params.iteritems():
@@ -110,41 +156,49 @@ def main():
             for line in mem:
                 entries = line.split()
                 if str(entries.pop(0)) == 'MemTotal:':
-                    mem_free_kb = int(entries.pop(0))
-                    mem_capacity = int(mem_free_kb * 1024 * .80)
+                    mem_total_kb = int(entries.pop(0))
+                    mem_capacity = int(mem_total_kb * 1024 * .75)
                     node_def['resources']['capacity']['memory'] = mem_capacity
                     break
 
     try:
-        output = check_output("osc get nodes", shell=True, env=client_env,
+        output = check_output(["/usr/bin/osc", "get", "nodes"] +  client_opts,
                 stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as e:
         module.fail_json(msg="Failed to get node list", command=e.cmd,
                 returncode=e.returncode, output=e.output)
 
-    if module.check_mode:
-        if re.search(module.params['name'], output, re.MULTILINE):
-            module.exit_json(changed=False, node_def=node_def)
-        else:
-            module.exit_json(changed=True, node_def=node_def)
+    if re.search(module.params['name'], output, re.MULTILINE):
+        module.exit_json(changed=False, node_def=node_def)
+    elif module.check_mode:
+        module.exit_json(changed=True, node_def=node_def)
 
-    p = Popen("osc create node -f -", shell=True, stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True,
-            env=client_env)
-    (out, err) = p.communicate(module.jsonify(node_def))
+    config_def = dict(
+        metadata = dict(
+            name = "add-node-%s" % module.params['name']
+        ),
+        kind = 'Config',
+        apiVersion = 'v1beta1',
+        items = [node_def]
+    )
+
+    p = Popen(["/usr/bin/osc"] + client_opts + ["create", "node"] + ["-f", "-"],
+            stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE, close_fds=True)
+    (out, err) = p.communicate(module.jsonify(config_def))
     ret = p.returncode
 
     if ret != 0:
         if re.search("minion \"%s\" already exists" % module.params['name'],
                 err):
             module.exit_json(changed=False,
-                    msg="node definition already exists", node_def=node_def)
+                    msg="node definition already exists", config_def=config_def)
         else:
             module.fail_json(msg="Node creation failed.", ret=ret, out=out,
-                    err=err, node_def=node_def)
+                    err=err, config_def=config_def)
 
     module.exit_json(changed=True, out=out, err=err, ret=ret,
-           node_def=node_def)
+           node_def=config_def)
 
 # import module snippets
 from ansible.module_utils.basic import *
