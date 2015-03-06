@@ -1,38 +1,50 @@
-Role Name
-=========
+OpenShift Master
+================
 
-A brief description of the role goes here.
+OpenShift Master service installation
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+A RHEL 7.1 host pre-configured with access to the rhel-7-server-rpms,
+rhel-7-server-extras-rpms, and rhel-server-7-ose-beta-rpms repos.
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+From this role:
+| Name                                     | Default value         |
+|
+|------------------------------------------|-----------------------|----------------------------------------|
+| openshift_master_manage_service_externally | False                 | Should the openshift-master role manage the openshift-master service? |
+| openshift_master_debug_level               | openshift_debug_level | Verbosity of the debug logs for openshift-master |
+| openshift_node_ips                         | []                    | List of the openshift node ip addresses, that we want to pre-register to the system when openshift-master starts up |
+| openshift_registry_url                     | UNDEF (Optional)      | Default docker registry to use |
+
+From openshift_common:
+| Name                          |  Default Value      |                     |
+|-------------------------------|---------------------|---------------------|
+| openshift_debug_level         | 0                   | Global openshift debug log verbosity |
+| openshift_hostname_workaround | True                |                     |
+| openshift_public_ip           | UNDEF (Required)    | Public IP address to use for this host |
+| openshift_hostname            | openshift_public_ip if openshift_hostname_workaround else ansible_fqdn | hostname to use for this instance |
 
 Dependencies
 ------------
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+openshift_common
 
 Example Playbook
 ----------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
-
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+TODO
 
 License
 -------
 
-BSD
+Apache License, Version 2.0
 
 Author Information
 ------------------
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+TODO
