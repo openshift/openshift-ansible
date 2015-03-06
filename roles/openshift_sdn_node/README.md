@@ -1,38 +1,51 @@
-Role Name
-=========
+OpenShift SDN Node
+==================
 
-A brief description of the role goes here.
+OpenShift SDN Node service installation
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+A host with the openshift_node role applied
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+From this role:
+| Name                           | Default value         |                                                  |
+|--------------------------------|-----------------------|--------------------------------------------------|
+| openshift_sdn_node_debug_level | openshift_debug_level | Verbosity of the debug logs for openshift-master |
+
+
+From openshift_node:
+| Name                  | Default value    |                                      |
+|-----------------------|------------------|--------------------------------------|
+| openshift_master_ips  | UNDEF (Required) | List of IP addresses for the openshift-master hosts to be used for node -> master communication |
+
+
+From openshift_common:
+| Name                          | Default value       |                                        |
+|-------------------------------|---------------------|----------------------------------------|
+| openshift_debug_level         | 0                   | Global openshift debug log verbosity   |
+| openshift_hostname_workaround | True                |                                        |
+| openshift_public_ip           | UNDEF (Required)    | Public IP address to use for this host |
+| openshift_hostname            | openshift_public_ip if openshift_hostname_workaround else ansible_fqdn | hostname to use for this instance |
 
 Dependencies
 ------------
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
 
 Example Playbook
 ----------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
-
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+TODO
 
 License
 -------
 
-BSD
+Apache License, Version 2.0
 
 Author Information
 ------------------
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+TODO
