@@ -49,3 +49,18 @@
 - name: Disable openshift-master if openshift-master is managed externally
   service: name=openshift-master enabled=false
   when: openshift_master_manage_service_externally
+
+# TODO: create an os_vars role that has generic env related config and move
+# the root kubeconfig setting there, cannot use dependencies to force ordering
+# with openshift_node and openshift_master because the way conditional
+# dependencies work with current ansible would also exclude the
+# openshift_common dependency.
+- name: Create .kube directory
+  file:
+    path: /root/.kube
+    state: directory
+    mode: 700
+- name: Configure root user kubeconfig
+  command: cd /var/lib/openshift/openshift.local.certificates/admin/.kubeconfig /root/.kube/.kubeconfig
+  args:
+    creates: /root/.kube/.kubeconfig

@@ -26,18 +26,6 @@
 - name: Configure local facts file
   file: path=/etc/ansible/facts.d/ state=directory mode=0750
 
-# TODO: create an os_vars role that has generic env related config and move
-# the root kubeconfig setting there
-- name: Create .kube directory
-  file:
-    path: /root/.kube
-    state: directory
-    mode: 700
-- name: Configure root user kubeconfig
-  command: cp /var/lib/openshift/openshift.local.certificates/admin/.kubeconfig /root/.kube/.kubeconfig
-  args:
-    creates: /root/.kube/.kubeconfig
-
 - name: Set common OpenShift facts
   include: set_facts.yml
   facts:
