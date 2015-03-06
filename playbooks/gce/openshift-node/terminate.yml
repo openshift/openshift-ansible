@@ -12,7 +12,7 @@
     - debug: msg="{{ groups['oo_hosts_to_terminate'] }}"
 
 
-- name: Terminate instances
+- name: Terminate node instances
   hosts: localhost
   connection: local
   tasks:

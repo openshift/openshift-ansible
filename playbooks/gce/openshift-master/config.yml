@@ -1,5 +1,4 @@
----
-- name: "populate oo_hosts_to_config host group if needed"
+- name: "master/config.yml, populate oo_hosts_to_config host group if needed"
   hosts: localhost
   gather_facts: no
   tasks:
@@ -12,6 +11,16 @@
   hosts: "tag_env-host-type-{{ oo_env }}-openshift-node"
   connection: ssh
   user: root
+
+- name: "Retrieve public ip"
+  hosts: oo_hosts_to_config
+  connection: ssh
+  user: root
+  gather_facts: yes
+  tasks:
+    - command: 'curl "http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip" -H "Metadata-Flavor: Google"'
+      register: output
+    - set_fact: gce_public_ip="{{ output.stdout }}"
 
 - name: "Set Origin specific facts on localhost (for later use)"
   hosts: localhost

@@ -2,6 +2,9 @@
 - name: Set hostname
   hostname: name={{ openshift_hostname }}
 
+- name: Update all packages
+  yum: name=* state=latest
+
 - name: Configure local facts file
   file: path=/etc/ansible/facts.d/ state=directory mode=0750
 
