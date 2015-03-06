@@ -17,11 +17,6 @@
 
 - local_action: file name={{ mktemp.stdout }} state=absent
 
-- name: Configure firewall for OpenShift Node
-  include: "{{ role_path | dirname }}/openshift_common/tasks/firewall.yml"
-  allow:
-  - { service: OpenShift kubelet, port: 10250/tcp }
-
 - name: Configure OpenShift Node settings
   lineinfile:
     dest: /etc/sysconfig/openshift-node
