@@ -2,21 +2,6 @@
 - name: Install OpenShift Master package
   yum: pkg=openshift-master state=installed
 
-- name: Configure firewall for OpenShift Master
-  include: "{{ role_path | dirname }}/openshift_common/tasks/firewall.yml"
-  allow:
-  - service: etcd embedded
-    port: 4001/tcp
-  - service: etcd peer
-    port: 7001/tcp
-  - service: OpenShift api https
-    port: 8443/tcp
-  - service: OpenShift web console https
-    port: 8444/tcp
-  deny:
-  - service: OpenShift api http
-    port: 8080/tcp
-
 - name: Configure OpenShift settings
   lineinfile:
     dest: /etc/sysconfig/openshift-master

@@ -9,7 +9,7 @@
 
 - name: Start and enable iptables services
   service:
-    name: "{{ os_firewall_svc }}"
+    name: "{{ item }}"
     state: started
     enabled: yes
   with_items:
