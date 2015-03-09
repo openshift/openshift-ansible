@@ -215,8 +215,14 @@ class Ec2Inventory(object):
         # Destination addresses
         self.destination_variable = config.get('ec2', 'destination_variable')
         self.vpc_destination_variable = config.get('ec2', 'vpc_destination_variable')
-        self.destination_format = config.get('ec2', 'destination_format')
-        self.destination_format_tags = config.get('ec2', 'destination_format_tags', '').split(',')
+
+        if config.has_option('ec2', 'destination_format') and \
+           config.has_option('ec2', 'destination_format_tags'):
+            self.destination_format = config.get('ec2', 'destination_format')
+            self.destination_format_tags = config.get('ec2', 'destination_format_tags').split(',')
+        else:
+            self.destination_format = None
+            self.destination_format_tags = None
 
         # Route53
         self.route53_enabled = config.getboolean('ec2', 'route53')
