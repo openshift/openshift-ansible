@@ -21,6 +21,7 @@ From this role:
 | openshift_master_public_ips              | UNDEF (Required)      | List of the public IPs for the openhift-master hosts |
 | openshift_master_ips                     | UNDEF (Required)      | List of IP addresses for the openshift-master hosts to be used for node -> master communication |
 | openshift_registry_url                   | UNDEF (Optional)      | Default docker registry to use |
+| openshift_node_resources                 | { capacity: { cpu: , memory: } } | Resource specification for this node, cpu is the number of CPUs to advertise and memory is the amount of memory in bytes to advertise. Default values chosen when not set are the number of logical CPUs for the host and 75% of total system memory |
 
 From openshift_common:
 | Name                          |  Default Value      |                     | 
