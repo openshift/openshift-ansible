@@ -1,4 +1,4 @@
-openshift-online-ansible
+openshift-ansible
 ========================
 
 This repo contains OpenShift Ansible code.
