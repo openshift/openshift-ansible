@@ -1,4 +1,7 @@
 ---
+# TODO: add task to set the sdn subnet if openshift-sdn-master hasn't been
+# started yet
+
 - name: Install openshift-sdn-master
   yum:
     pkg: openshift-sdn-master

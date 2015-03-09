@@ -1,7 +1,12 @@
 ---
+# TODO: allow for overriding default ports where possible
+
 - name: Install OpenShift Master package
   yum: pkg=openshift-master state=installed
 
+# TODO: instead of setting openshift_node_ips here, we should gather the node
+# info, and then add/update any nodes if needed using osc. Otherwise, we are
+# restarting the openshift-master service everytime we add a node.
 - name: Configure OpenShift settings
   lineinfile:
     dest: /etc/sysconfig/openshift-master
