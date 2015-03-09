@@ -72,8 +72,7 @@
   args:
     creates: /root/.kube/.kubeconfig
 
-# TODO: expose openshift_register_node options to allow for overriding the
-# defaults.
 - name: Register node (if not already registered)
   openshift_register_node:
     name: "{{ openshift_hostname }}"
+    resources: "{{ openshift_node_resources }}"
