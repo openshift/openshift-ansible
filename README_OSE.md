@@ -102,7 +102,7 @@ openshift_deployment_type: enterprise
 openshift_public_ip: "{{ ansible_default_ipv4.address }}"
 
 # Override the default registry for development
-openshift_registry_url: docker-buildvm-rhose.usersys.redhat.com:5000/openshift3_beta/ose-${component}:${version}
+#openshift_registry_url: docker-buildvm-rhose.usersys.redhat.com:5000/openshift3_beta/ose-${component}:${version}
 
 # To use the latest OpenShift Enterprise Errata puddle:
 #openshift_additional_repos:
@@ -112,12 +112,12 @@ openshift_registry_url: docker-buildvm-rhose.usersys.redhat.com:5000/openshift3_
 #  enabled: 1
 #  gpgcheck: 0
 # To use the latest OpenShift Enterprise Whitelist puddle:
-openshift_additional_repos:
-- id: ose-devel
-  name: ose-devel
-  baseurl: http://buildvm-devops.usersys.redhat.com/puddle/build/OpenShiftEnterprise/3.0/latest/RH7-RHOSE-3.0/$basearch/os
-  enabled: 1
-  gpgcheck: 0
+#openshift_additional_repos:
+#- id: ose-devel
+#  name: ose-devel
+#  baseurl: http://buildvm-devops.usersys.redhat.com/puddle/build/OpenShiftEnterprise/3.0/latest/RH7-RHOSE-3.0/$basearch/os
+#  enabled: 1
+#  gpgcheck: 0
 
 # Override the hostname workaround for byo
 openshift_hostname_workaround: false
