@@ -20,7 +20,7 @@ and return them to be completable.
 
 # BASH
 In order to setup bash completion, source the following script:
-/path/to/repository/openshift-online-ansible/bin/ossh_bash_completion
+/path/to/repository/openshift-ansible/bin/ossh_bash_completion
 
 # ZSH
 In order to setup zsh completion, you will need to verify

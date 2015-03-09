@@ -49,7 +49,7 @@ gce_project_id = project_id
 ```
 1. Setup a sym link so that gce.py will pick it up (link must be in same dir as gce.py)
 ```
-  cd openshift-online-ansible/inventory/gce
+  cd openshift-ansible/inventory/gce
   ln -s ~/.gce/gce.ini gce.ini
 ```
 
@@ -64,7 +64,7 @@ Install Dependencies
 
 Test The Setup
 --------------
-1. cd openshift-online-ansible/
+1. cd openshift-ansible/
 2. Try to list all instances:
 ```
   ./cloud.rb gce list

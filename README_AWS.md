@@ -50,7 +50,7 @@ OSX:
 
 Test The Setup
 --------------
-1. cd openshift-online-ansible
+1. cd openshift-ansible
 1. Try to list all instances:
 ```
   ./cloud.rb aws list
