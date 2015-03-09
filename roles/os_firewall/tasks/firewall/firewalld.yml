@@ -4,6 +4,22 @@
     name: firewalld
     state: present
 
+- name: Check if iptables-services is installed
+  command: rpm -q iptables-services
+  register: pkg_check
+  failed_when: pkg_check.rc > 1
+  changed_when: no
+
+- name: Ensure iptables services are not enabled
+  service:
+    name: "{{ item }}"
+    state: stopped
+    enabled: no
+  with_items:
+  - iptables
+  - ip6tables
+  when: pkg_check.rc == 0
+
 - name: Start and enable firewalld service
   service:
     name: firewalld
@@ -15,23 +31,14 @@
   pause: seconds=10
   when: result | changed
 
-- name: Ensure iptables services are not enabled
-  service:
-    name: "{{ item }}"
-    state: stopped
-    enabled: no
-  with_items:
-  - iptables
-  - ip6tables
-
 - name: Mask iptables services
   command: systemctl mask "{{ item }}"
   register: result
-  failed_when: result.rc != 0
-  changed_when: False
+  changed_when: "'iptables' in result.stdout"
   with_items:
   - iptables
   - ip6tables
+  when: pkg_check.rc == 0
 
 # TODO: Ansible 1.9 will eliminate the need for separate firewalld tasks for
 # enabling rules and making them permanent with the immediate flag
@@ -40,29 +47,29 @@
     port: "{{ item.port }}"
     permanent: false
     state: enabled
-  with_items: allow
-  when: allow is defined
+  with_items: os_firewall_allow
+  when: os_firewall_allow is defined
 
 - name: Persist firewalld allow rules
   firewalld:
     port: "{{ item.port }}"
     permanent: true
     state: enabled
-  with_items: allow
-  when: allow is defined
+  with_items: os_firewall_allow
+  when: os_firewall_allow is defined
 
 - name: Remove firewalld allow rules
   firewalld:
     port: "{{ item.port }}"
     permanent: false
     state: disabled
-  with_items: deny
-  when: deny is defined
+  with_items: os_firewall_deny
+  when: os_firewall_deny is defined
 
 - name: Persist removal of firewalld allow rules
   firewalld:
     port: "{{ item.port }}"
     permanent: true
     state: disabled
-  with_items: deny
-  when: deny is defined
+  with_items: os_firewall_deny
+  when: os_firewall_deny is defined

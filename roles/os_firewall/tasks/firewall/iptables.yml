@@ -7,6 +7,19 @@
   - iptables
   - iptables-services
 
+- name: Check if firewalld is installed
+  command: rpm -q firewalld
+  register: pkg_check
+  failed_when: pkg_check.rc > 1
+  changed_when: no
+
+- name: Ensure firewalld service is not enabled
+  service:
+    name: firewalld
+    state: stopped
+    enabled: no
+  when: pkg_check.rc == 0
+
 - name: Start and enable iptables services
   service:
     name: "{{ item }}"
@@ -21,18 +34,12 @@
   pause: seconds=10
   when: result | changed
 
-- name: Ensure firewalld service is not enabled
-  service:
-    name: firewalld
-    state: stopped
-    enabled: no
-
+# TODO: submit PR upstream to add mask/unmask to service module
 - name: Mask firewalld service
   command: systemctl mask firewalld
   register: result
-  failed_when: result.rc != 0
-  changed_when: False
-  ignore_errors: yes
+  changed_when: "'firewalld' in result.stdout"
+  when: pkg_check.rc == 0
 
 - name: Add iptables allow rules
   os_firewall_manage_iptables:
@@ -40,8 +47,8 @@
     action: add
     protocol: "{{ item.port.split('/')[1] }}"
     port: "{{ item.port.split('/')[0] }}"
-  with_items: allow
-  when: allow is defined
+  with_items: os_firewall_allow
+  when: os_firewall_allow is defined
 
 - name: Remove iptables rules
   os_firewall_manage_iptables:
@@ -49,5 +56,5 @@
     action: remove
     protocol: "{{ item.port.split('/')[1] }}"
     port: "{{ item.port.split('/')[0] }}"
-  with_items: deny
-  when: deny is defined
+  with_items: os_firewall_deny
+  when: os_firewall_deny is defined
