@@ -3,7 +3,7 @@
   hosts: localhost
   gather_facts: no
   tasks:
-  - name: Evaluate oo_host_group_exp if it's set
+  - name: "Evaluate oo_host_group_exp if it's set"
     add_host: "name={{ item }} groups=oo_hosts_to_config"
     with_items: "{{ oo_host_group_exp | default('') }}"
     when: oo_host_group_exp is defined
