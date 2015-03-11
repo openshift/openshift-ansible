@@ -1,0 +1,111 @@
+#!/usr/bin/env python
+# vim: expandtab:tabstop=4:shiftwidth=4
+
+import argparse
+import ansibleutil
+import traceback
+import sys
+import os
+import re
+import tempfile
+import time
+import subprocess
+
+DEFAULT_PSSH_PAR=200
+PSSH = '/usr/bin/pssh'
+
+class Opssh(object):
+    def __init__(self):
+        self.file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)))
+        self.ansible = ansibleutil.AnsibleUtil()
+
+        self.parse_cli_args()
+
+        if self.args.list_host_types:
+            self.ansible.print_host_types()
+            return
+
+        if self.args.env and \
+           self.args.host_type and \
+           self.args.command:
+            retval = self.run_pssh()
+            if retval != 0:
+                raise ValueError("ansible run failed")
+
+            return
+
+        # If it makes it here, we weren't able to determine what they wanted to do
+        raise ValueError("Invalid combination of arguments")
+
+    def run_pssh(self):
+        """Actually run the pssh command based off of the supplied options
+        """
+
+        # Default set of options
+        pssh_args = [PSSH, '-i', '-t', '0', '-p', str(self.args.par), '--user', self.args.user]
+
+        if self.args.outdir:
+            pssh_args.append("--outdir='%s'" % self.args.outdir)
+
+        if self.args.errdir:
+            pssh_args.append("--errdir='%s'" % self.args.errdir)
+
+        hosts = self.ansible.get_host_list(self.args.host_type, self.args.env)
+        with tempfile.NamedTemporaryFile(prefix='opssh-', delete=True) as f:
+            for h in hosts:
+                f.write(h + os.linesep)
+            f.flush()
+
+            pssh_args.extend(["-h", "%s" % f.name])
+            pssh_args.append("%s" % self.args.command)
+
+            print
+            print "Running: %s" % ' '.join(pssh_args)
+            print
+            return subprocess.call(pssh_args)
+
+        return None
+
+
+    def parse_cli_args(self):
+        """Setup the command line parser with the options we want
+        """
+
+        parser = argparse.ArgumentParser(description='Openshift Online PSSH Tool.')
+
+        parser.add_argument('--list-host-types', default=False, action='store_true',
+                       help='List all of the host types')
+
+        parser.add_argument('-e', '--env', action="store",
+                       help="Which environment to use")
+
+        parser.add_argument('-t', '--host-type', action="store",
+                       help="Which host type to use")
+
+        parser.add_argument('-c', '--command', action='store',
+                       help='Command to run on remote host(s)')
+
+        parser.add_argument('--user', action='store', default='root',
+                       help='username')
+
+        parser.add_argument('-p', '--par', action='store', default=DEFAULT_PSSH_PAR,
+                       help=('max number of parallel threads (default %s)' % DEFAULT_PSSH_PAR))
+
+        parser.add_argument('--outdir', action='store',
+                       help='output directory for stdout files')
+
+        parser.add_argument('--errdir', action='store',
+                       help='output directory for stderr files')
+
+        self.args = parser.parse_args()
+
+
+if __name__ == '__main__':
+    if len(sys.argv) == 1:
+        print "\nError: No options given. Use --help to see the available options\n"
+        sys.exit(0)
+
+    try:
+        opssh = Opssh()
+    except ValueError as e:
+        print "\nError: %s\n" % e.message
