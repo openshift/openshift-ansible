@@ -87,6 +87,10 @@ class AwsUtil(object):
 
         inst_by_env = {}
         for dns, host in inv['_meta']['hostvars'].items():
+            # If you don't have an environment tag, we're going to ignore you
+            if not host.has_key('ec2_tag_environment'):
+                continue
+
             if host['ec2_tag_environment'] not in inst_by_env:
                 inst_by_env[host['ec2_tag_environment']] = {}
             host_id = "%s:%s" % (host['ec2_tag_Name'],host['ec2_id'])
