@@ -5,7 +5,7 @@ import os
 import json
 import re
 
-class AnsibleUtil(object):
+class AwsUtil(object):
     def __init__(self):
         self.host_type_aliases = {
                 'legacy-openshift-broker': ['broker', 'ex-srv'],

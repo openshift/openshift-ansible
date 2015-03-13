@@ -2,7 +2,7 @@
 # vim: expandtab:tabstop=4:shiftwidth=4
 
 import argparse
-import ansibleutil
+import awsutil
 import traceback
 import sys
 import os
@@ -17,12 +17,12 @@ PSSH = '/usr/bin/pssh'
 class Opssh(object):
     def __init__(self):
         self.file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)))
-        self.ansible = ansibleutil.AnsibleUtil()
+        self.aws = awsutil.AwsUtil()
 
         self.parse_cli_args()
 
         if self.args.list_host_types:
-            self.ansible.print_host_types()
+            self.aws.print_host_types()
             return
 
         if self.args.env and \
@@ -30,7 +30,7 @@ class Opssh(object):
            self.args.command:
             retval = self.run_pssh()
             if retval != 0:
-                raise ValueError("ansible run failed")
+                raise ValueError("pssh run failed")
 
             return
 
@@ -50,7 +50,7 @@ class Opssh(object):
         if self.args.errdir:
             pssh_args.append("--errdir='%s'" % self.args.errdir)
 
-        hosts = self.ansible.get_host_list(self.args.host_type, self.args.env)
+        hosts = self.aws.get_host_list(self.args.host_type, self.args.env)
         with tempfile.NamedTemporaryFile(prefix='opssh-', delete=True) as f:
             for h in hosts:
                 f.write(h + os.linesep)

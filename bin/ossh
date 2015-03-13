@@ -2,7 +2,7 @@
 # vim: expandtab:tabstop=4:shiftwidth=4
 
 import argparse
-import ansibleutil
+import awsutil
 import traceback
 import sys
 import os
@@ -13,7 +13,7 @@ class Ossh(object):
         self.file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)))
         self.parse_cli_args()
 
-        self.ansible = ansibleutil.AnsibleUtil()
+        self.aws = awsutil.AwsUtil()
 
         # get a dict of host inventory
         if self.args.list:
@@ -94,9 +94,9 @@ class Ossh(object):
            dict['servername'] = dns_name
         '''
         if cache_only:
-            self.host_inventory = self.ansible.build_host_dict_by_env(['--cache-only'])
+            self.host_inventory = self.aws.build_host_dict_by_env(['--cache-only'])
         else:
-            self.host_inventory = self.ansible.build_host_dict_by_env()
+            self.host_inventory = self.aws.build_host_dict_by_env()
 
     def select_host(self):
         '''select host attempts to match the host specified

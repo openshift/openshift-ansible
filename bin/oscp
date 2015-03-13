@@ -2,7 +2,7 @@
 # vim: expandtab:tabstop=4:shiftwidth=4
 
 import argparse
-import ansibleutil
+import awsutil
 import traceback
 import sys
 import os
@@ -16,7 +16,7 @@ class Oscp(object):
         # parse host and user
         self.process_host()
 
-        self.ansible = ansibleutil.AnsibleUtil()
+        self.aws = awsutil.AwsUtil()
 
         # get a dict of host inventory
         if self.args.list:
@@ -104,9 +104,9 @@ class Oscp(object):
            dict['environment'] = [{'servername' : {}}, ]
         '''
         if cache_only:
-            self.host_inventory = self.ansible.build_host_dict_by_env(['--cache-only'])
+            self.host_inventory = self.aws.build_host_dict_by_env(['--cache-only'])
         else:
-            self.host_inventory = self.ansible.build_host_dict_by_env()
+            self.host_inventory = self.aws.build_host_dict_by_env()
 
     def select_host(self):
         '''select host attempts to match the host specified
