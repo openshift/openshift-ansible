@@ -108,7 +108,9 @@ def main():
 
     client_context = module.params['client_context']
     if client_context:
-        if client_context not in config['contexts']:
+        config_context = next((context for context in config['contexts']
+                               if context['name'] == client_context), None)
+        if not config_context:
             module.fail_json(msg="Context %s not found in client config" %
                              client_context)
         if not config['current-context'] or config['current-context'] != client_context:
@@ -116,18 +118,22 @@ def main():
 
     client_user = module.params['client_user']
     if client_user:
-        if client_user not in config['users']:
+        config_user = next((user for user in config['users']
+                            if user['name'] == client_user), None)
+        if not config_user:
             module.fail_json(msg="User %s not found in client config" %
                              client_user)
-        if client_user != config['contexts'][client_context]['user']:
+        if client_user != config_context['context']['user']:
             client_opts.append("--user=%s" % client_user)
 
     client_cluster = module.params['client_cluster']
     if client_cluster:
-        if client_cluster not in config['clusters']:
+        config_cluster = next((cluster for cluster in config['clusters']
+                               if cluster['name'] == client_cluster), None)
+        if not client_cluster:
             module.fail_json(msg="Cluster %s not found in client config" %
                              client_cluster)
-        if client_cluster != config['contexts'][client_context]['cluster']:
+        if client_cluster != config_context['context']['cluster']:
             client_opts.append("--cluster=%s" % client_cluster)
 
     node_def = dict(
