@@ -1,0 +1,4 @@
+---
+ansible_ssh_user: root
+openshift_public_ip: "{{ gce_public_ip }}"
+openshift_env: "{{ oo_env }}"
