@@ -53,7 +53,6 @@
   roles:
   - openshift_register_nodes
   tasks:
-  tasks:
   - name: Create local temp directory for syncing certs
     local_action: command /usr/bin/mktemp -d /tmp/openshift-ansible-XXXXXXX
     register: mktemp
@@ -69,7 +68,7 @@
 #
 - name: Configure instances
   hosts: oo_nodes_to_config
-  vars_files:
+vars_files:
   - vars.yml
   vars:
     openshift_master_group: tag_env-host-type-{{ oo_env }}-openshift-master
