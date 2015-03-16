@@ -1,6 +1,6 @@
 Summary:       OpenShift Operations files for mirror
-Name:          openshift-ansible-cmds
-Version:       0.0.0
+Name:          openshift-ansible-bin
+Version:       0.0.1
 Release:       1%{?dist}
 License:       ASL 2.0
 URL:           https://github.com/openshift/openshift-ansible
