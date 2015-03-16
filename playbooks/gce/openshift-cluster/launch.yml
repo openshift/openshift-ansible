@@ -49,6 +49,7 @@
 
 - hosts: "tag_env-{{ cluster_id }}"
   roles:
+  - repos
   - os_update_latest
 
 - include: ../openshift-master/config.yml
