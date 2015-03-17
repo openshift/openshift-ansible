@@ -1,8 +1,6 @@
 ---
-# fixme: Once openshift stops resolving hostnames for node queries remove this...
-- name: Set hostname to IP Addr (WORKAROUND)
-  hostname: name={{ openshift_bind_ip }}
-  when: openshift_hostname_workaround
+- name: Set hostname
+  hostname: name={{ openshift_hostname }}
 
 - name: Configure local facts file
   file: path=/etc/ansible/facts.d/ state=directory mode=0750
