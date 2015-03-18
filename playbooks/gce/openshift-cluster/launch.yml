@@ -10,15 +10,15 @@
 
     - name: Generate master instance names(s)
       set_fact: scratch={{ cluster_id }}-{{ k8s_type }}-{{ '%05x' |format( 1048576 |random) }}
-      register: instance_names_output
+      register: master_names_output
       with_sequence: start=1 end={{ masters }}
 
     # These set_fact's cannot be combined
     - set_fact:
-        instance_names_string: "{% for item in instance_names_output.results %}{{ item.ansible_facts.scratch }} {% endfor %}"
+        master_names_string: "{% for item in master_names_output.results %}{{ item.ansible_facts.scratch }} {% endfor %}"
 
     - set_fact:
-        master_names: "{{ instance_names_string.strip().split(' ') }}"
+        master_names: "{{ master_names_string.strip().split(' ') }}"
 
     - include: launch_instances.yml
       vars:
@@ -31,15 +31,15 @@
 
     - name: Generate node instance names(s)
       set_fact: scratch={{ cluster_id }}-{{ k8s_type }}-{{ '%05x' |format( 1048576 |random) }}
-      register: instance_names_output
+      register: node_names_output
       with_sequence: start=1 end={{ nodes }}
 
     # These set_fact's cannot be combined
     - set_fact:
-        instance_names_string: "{% for item in instance_names_output.results %}{{ item.ansible_facts.scratch }} {% endfor %}"
+        node_names_string: "{% for item in node_names_output.results %}{{ item.ansible_facts.scratch }} {% endfor %}"
 
     - set_fact:
-        node_names: "{{ instance_names_string.strip().split(' ') }}"
+        node_names: "{{ node_names_string.strip().split(' ') }}"
 
     - include: launch_instances.yml
       vars:
