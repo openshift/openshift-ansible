@@ -7,7 +7,7 @@
     with_items: "{{ oo_host_group_exp | default('') }}"
     when: oo_host_group_exp is defined
 
-- name: "Gather facts for nodes in {{ oo_env }}"
+- name: Gather facts for nodes in {{ oo_env }}
   hosts: "tag_env-host-type-{{ oo_env }}-openshift-node"
 
 - name: "Configure instances"
