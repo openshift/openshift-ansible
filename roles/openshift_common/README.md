@@ -14,7 +14,6 @@ Role Variables
 
 | Name                          | Default value                |                                        |
 |-------------------------------|------------------------------|----------------------------------------|
-| openshift_bind_ip             | ansible_default_ipv4.address | IP to use for local binding            |
 | openshift_debug_level         | 0                            | Global openshift debug log verbosity   |
 | openshift_hostname_workaround | True                         | Workaround needed to set hostname to IP address |
 | openshift_hostname            | openshift_public_ip if openshift_hostname_workaround else ansible_fqdn | hostname to use for this instance |
