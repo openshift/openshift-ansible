@@ -21,7 +21,7 @@
   lineinfile:
     dest: /etc/sysconfig/openshift-node
     regexp: '^OPTIONS='
-    line: "OPTIONS=\"--master=https://{{ openshift_master_ips[0] }}:8443 --loglevel={{ openshift_node_debug_level }}\""
+    line: "OPTIONS=\"--master=https://{{ openshift_master_ips[0] }}:8443 --hostname={{ openshift_hostname }} --loglevel={{ openshift_node_debug_level }}\""
   notify:
   - restart openshift-node
 
@@ -75,4 +75,14 @@
 - name: Register node (if not already registered)
   openshift_register_node:
     name: "{{ openshift_hostname }}"
-    resources: "{{ openshift_node_resources }}"
+    api_version: v1beta1
+    cpu: "{{ openshift_node_resources.cpu }}"
+    memory: "{{ openshift_node_resources.memory }}"
+    pod_cidr: "{{ openshift_node_resources.cidr }}"
+    host_ip: "{{ ansible_default_ipv4.address }}"
+    labels: "{{ openshift_node_labels }}"
+    annotations: "{{ openshift_node_annotations }}"
+    # TODO: support customizing other attributes such as: client_config,
+    # client_cluster, client_context, client_user
+    # TODO: updated for v1beta3 changes after rebase: hostnames, external_ips,
+    # internal_ips, external_id

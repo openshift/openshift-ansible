@@ -5,6 +5,8 @@ os_firewall_allow:
 - service: OpenShift kubelet
   port: 10250/tcp
 openshift_node_resources:
-  capacity:
-    cpu:
-    memory:
+  cpu:
+  memory:
+  cidr:
+openshift_node_labels: {}
+openshift_node_annotations: {}
