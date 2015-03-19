@@ -35,7 +35,7 @@
     - {
         role: openshift_master,
         openshift_node_ips: "{{ hostvars['localhost'].openshift_node_ips | default(['']) }}",
-        openshift_env: "{{ oo_env }}"
+        openshift_env: "{{ oo_env }}",
         openshift_public_ip: "{{ ec2_ip_address }}"
       }
     - pods
