@@ -41,6 +41,20 @@
   changed_when: "'firewalld' in result.stdout"
   when: pkg_check.rc == 0
 
+- name: Check for DOCKER chain
+  shell: iptables -L |grep '^Chain DOCKER'
+  ignore_errors: yes
+  register: check_for_chain
+
+- name: Create DOCKER chain
+  command: iptables -N DOCKER
+  register: create_chain
+  when: check_for_chain.rc != 0
+
+- name: Persist DOCKER chain
+  command: service iptables save
+  when: create_chain.rc == 0
+
 - name: Add iptables allow rules
   os_firewall_manage_iptables:
     name: "{{ item.service }}"
