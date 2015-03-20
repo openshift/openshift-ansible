@@ -43,7 +43,7 @@ class Cluster(object):
             inventory = '-i inventory/aws/ec2.py'
         else:
             # this code should never be reached
-            assert False, "invalid PROVIDER {}".format(self.args.provider)
+            raise argparse.ArgumentError("invalid PROVIDER {}".format(self.args.provider))
 
         env = {'cluster_id': self.args.cluster_id}
 
@@ -62,7 +62,7 @@ class Cluster(object):
             raise argparse.ArgumentError("ACTION {} not implemented".format(self.args.action))
         else:
             # this code should never be reached
-            assert False, "invalid ACTION {}".format(self.args.action)
+            raise argparse.ArgumentError("invalid ACTION {}".format(self.args.action))
 
         verbose = ''
         if self.args.verbose > 0:
