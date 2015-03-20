@@ -42,6 +42,7 @@ class Cluster(object):
 
             inventory = '-i inventory/aws/ec2.py'
         else:
+            # this code should never be reached
             assert False, "invalid PROVIDER {}".format(self.args.provider)
 
         env = {'cluster_id': self.args.cluster_id}
@@ -55,11 +56,12 @@ class Cluster(object):
             playbook = "playbooks/{}/openshift-cluster/terminate.yml".format(self.args.provider)
         elif 'list' == self.args.action:
             # todo: implement cluster list
-            argparse.ArgumentError("ACTION {} not implemented".format(self.args.action))
+            raise argparse.ArgumentError("ACTION {} not implemented".format(self.args.action))
         elif 'update' == self.args.action:
             # todo: implement cluster update
-            argparse.ArgumentError("ACTION {} not implemented".format(self.args.action))
+            raise argparse.ArgumentError("ACTION {} not implemented".format(self.args.action))
         else:
+            # this code should never be reached
             assert False, "invalid ACTION {}".format(self.args.action)
 
         verbose = ''
@@ -81,13 +83,14 @@ class Cluster(object):
             sys.stderr.write('RUN [{}]\n'.format(command))
             sys.stderr.flush()
 
-        os.system(command)
+        error = os.system(command)
+        if error != 0:
+            raise Exception("Ansible run failed with exit code %d".format(error))
+
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Manage OpenShift Cluster')
-    parser.add_argument('-p', '--provider', default='gce', choices=['gce', 'aws'],
-                        help='One of the supported cloud providers')
     parser.add_argument('-m', '--masters', default=1, type=int, help='number of masters to create in cluster')
     parser.add_argument('-n', '--nodes', default=2, type=int, help='number of nodes to create in cluster')
     parser.add_argument('-v', '--verbose', action='count', help='Multiple -v options increase the verbosity')
