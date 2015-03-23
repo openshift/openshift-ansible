@@ -83,9 +83,10 @@ class Cluster(object):
             sys.stderr.write('RUN [{}]\n'.format(command))
             sys.stderr.flush()
 
-        error = os.system(command)
-        if error != 0:
-            raise Exception("Ansible run failed with exit code %d".format(error))
+        status = os.system(command)
+        if status != 0:
+            sys.stderr.write("RUN [{}] failed with exit status %d".format(command, status))
+            exit(status)
 
 
 
@@ -99,5 +100,12 @@ if __name__ == '__main__':
     parser.add_argument('provider', choices=['gce', 'aws'])
     parser.add_argument('cluster_id', help='prefix for cluster VM names')
     args = parser.parse_args()
+
+    if 'terminate' == args.action:
+        sys.stderr.write("This will terminate the ENTIRE {} environment. Are you sure? [y/N] ".format(args.cluster_id))
+        sys.stderr.flush()
+        answer = sys.stdin.read(1)
+        if answer not in ['y', 'Y']:
+            exit(0)
 
     Cluster(args).apply()

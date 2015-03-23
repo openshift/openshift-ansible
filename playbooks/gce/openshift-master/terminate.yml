@@ -15,6 +15,7 @@
 - name: Terminate master instances
   hosts: localhost
   connection: local
+  gather_facts: no
   tasks:
     - name: Terminate master instances
       gce:

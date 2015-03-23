@@ -12,7 +12,7 @@
     pem_file: "{{ lookup('env', 'gce_service_account_pem_file_path') }}"
     project_id: "{{ lookup('env', 'gce_project_id') }}"
     tags:
-      - "created-by-{{ cluster }}"
+      - "created-by-{{ lookup('env', 'LOGNAME') |default(cluster, true) }}"
       - "env-{{ cluster }}"
       - "host-type-{{ type }}"
       - "env-host-type-{{ cluster }}-openshift-{{ type }}"
