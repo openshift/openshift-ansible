@@ -44,5 +44,5 @@
         openshift_env: "{{ oo_env }}",
         openshift_public_ip: "{{ ec2_ip_address }}"
       }
-    - docker
     - os_env_extras
+    - os_env_extras_node
