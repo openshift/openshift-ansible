@@ -72,5 +72,5 @@ Test The Setup
 
 3. Try to create an instance:
 ```
-  ./cloud.rb gce launch -n ${USER}-node1 -e int --type os3-node
+  ./cloud.rb gce launch -e int --type openshift-node
 ```
