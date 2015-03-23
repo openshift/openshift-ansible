@@ -1,0 +1,71 @@
+---
+# TODO: support configuration for multiple masters, currently hardcoding
+# the info from the first master
+
+# TODO: create a failed_when condition
+- name: Create node server certificates
+  command: >
+    /usr/bin/openshift admin create-server-cert
+    --overwrite=false
+    --cert={{ openshift_cert_dir }}/node-{{ item.openshift_node_hostname }}/server.crt
+    --key={{ openshift_cert_dir }}/node-{{ item.openshift_node_hostname }}/server.key
+    --hostnames={{ [openshift_hostname, openshift_public_hostname, openshift_ip, openshift_public_ip]|join(",") }}
+  args:
+    chdir: "{{ openshift_cert_dir_parent }}"
+    creates: "{{ openshift_cert_dir_abs }}/node-{{ item.openshift_node_hostname }}/server.crt"
+  with_items: openshift_nodes
+  register: server_cert_result
+
+# TODO: create a failed_when condition
+- name: Create node client certificates
+  command: >
+    /usr/bin/openshift admin create-node-cert
+    --overwrite=false
+    --cert={{ openshift_cert_dir }}/node-{{ item.openshift_node_hostname }}/cert.crt
+    --key={{ openshift_cert_dir }}/node-{{ item.openshift_node_hostname }}/key.key
+    --node-name={{ item.openshift_node_hostname }}
+  args:
+    chdir: "{{ openshift_cert_dir_parent }}"
+    creates: "{{ openshift_cert_dir_abs }}/node-{{ item.openshift_node_hostname }}/cert.crt"
+  with_items: openshift_nodes
+  register: node_cert_result
+
+# TODO: re-create kubeconfig if certs were regenerated, not just if
+# .kubeconfig doesn't exist
+# TODO: create a failed_when condition
+- name: Create kubeconfigs for nodes
+  command: >
+    /usr/bin/openshift admin create-kubeconfig
+    --client-certificate={{ openshift_cert_dir }}/node-{{ item.openshift_node_hostname }}/cert.crt
+    --client-key={{ openshift_cert_dir }}/node-{{ item.openshift_node_hostname }}/key.key
+    --kubeconfig={{ openshift_cert_dir }}/node-{{ item.openshift_node_hostname }}/.kubeconfig
+    --master={{ openshift_master_urls[0] }}
+    --public-master={{ openshift_master_public_urls[0] }}
+  args:
+    chdir: "{{ openshift_cert_dir_parent }}"
+    creates: "{{ openshift_cert_dir_abs }}/node-{{ item.openshift_node_hostname }}/.kubeconfig"
+  with_items: openshift_nodes
+  register: kubeconfig_result
+
+# TODO: generate the node configs (openshift start node --write-config
+# --config='{{ openshift_cert_dir }}/node-{{ item.openshift_node_hostname }}/node.yaml'
+# --kubeconfig='{{ openshift_cert_dir }}/node-{{ item.openshift_node_hostname }}/.kubeconfig'
+# will need to modify the generated node config as needed
+# (servingInfo.{certFile,clientCA,keyFile})
+
+- name: Register unregistered nodes
+  kubernetes_register_node:
+    name: "{{ item.openshift_node_name }}"
+    api_version: "{{ openshift_kube_api_version }}"
+    cpu: "{{ item.openshift_node_cpu if item.openshift_node_cpu else None }}"
+    memory: "{{ item.openshift_node_memory if item.openshift_node_memory else None }}"
+    pod_cidr: "{{ item.openshift_node_pod_cidr if item.openshift_node_pod_cidr else None }}"
+    host_ip: "{{ item.openshift_node_host_ip }}"
+    labels: "{{ item.openshift_node_labels if item.openshift_node_labels else {} }}"
+    annotations: "{{ item.openshift_node_annotations if item.openshift_node_annotations else {} }}"
+    # TODO: support customizing other attributes such as: client_config,
+    # client_cluster, client_context, client_user
+    # TODO: update for v1beta3 changes after rebase: hostnames, external_ips,
+    # internal_ips, external_id
+  with_items: openshift_nodes
+  register: register_result

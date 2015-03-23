@@ -21,7 +21,6 @@ From this role:
 | openshift_master_public_ips              | UNDEF (Required)      | List of the public IPs for the openhift-master hosts |
 | openshift_master_ips                     | UNDEF (Required)      | List of IP addresses for the openshift-master hosts to be used for node -> master communication |
 | openshift_registry_url                   | UNDEF (Optional)      | Default docker registry to use |
-| openshift_node_resources                 | { capacity: { cpu: , memory: } } | Resource specification for this node, cpu is the number of CPUs to advertise and memory is the amount of memory in bytes to advertise. Default values chosen when not set are the number of logical CPUs for the host and 75% of total system memory |
 
 From openshift_common:
 | Name                          |  Default Value      |                     | 
@@ -29,7 +28,7 @@ From openshift_common:
 | openshift_debug_level         | 0                   | Global openshift debug log verbosity |
 | openshift_hostname_workaround | True                |                     |
 | openshift_public_ip           | UNDEF (Required)    | Public IP address to use for this host |
-| openshift_hostname            | openshift_public_ip if openshift_hostname_workaround else ansible_fqdn | hostname to use for this instance |
+| openshift_hostname            | UNDEF (Required)    | hostname to use for this instance |
 
 Dependencies
 ------------
