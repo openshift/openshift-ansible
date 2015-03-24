@@ -6,12 +6,12 @@
     add_host: "name={{ item }} groups=oo_nodes_to_config"
     with_items: "{{ oo_host_group_exp | default('') }}"
     when: oo_host_group_exp is defined
- - name: Find masters for env
+  - name: Find masters for env
     add_host: "name={{ item }} groups=oo_masters_for_node_config"
     with_items: groups['tag_env-host-type-' + oo_env + '-openshift-master']
 
 - name: Gather facts for masters in {{ oo_env }}
-  hosts: "tag_env-host-type-{{ oo_env }}-openshift-master"
+  hosts: tag_env-host-type-{{ oo_env }}-openshift-master
   tasks:
   - set_fact:
       openshift_master_ip: "{{ openshift_ip }}"
@@ -68,7 +68,7 @@
 #
 - name: Configure instances
   hosts: oo_nodes_to_config
-vars_files:
+  vars_files:
   - vars.yml
   vars:
     openshift_master_group: tag_env-host-type-{{ oo_env }}-openshift-master
