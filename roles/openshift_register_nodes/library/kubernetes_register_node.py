@@ -53,21 +53,17 @@ options:
     cpu:
         default: null
         description:
-            - Number of CPUs to allocate for this node. If not provided, then
-              the node will be registered to advertise the number of logical
-              CPUs available. When using the v1beta1 API, you must specify the
-              CPU count as a floating point number with no more than 3 decimal
-              places. API version v1beta3 and newer accepts arbitrary float
-              values.
+            - Number of CPUs to allocate for this node. When using the v1beta1
+              API, you must specify the CPU count as a floating point number
+              with no more than 3 decimal places. API version v1beta3 and newer
+              accepts arbitrary float values.
         required: false
     memory:
         default: null
         description:
-            - Memory available for this node. If not provided, then the node
-              will be registered to advertise 80% of MemTotal as available
-              memory. When using the v1beta1 API, you must specify the memory
-              size in bytes. API version v1beta3 and newer accepts binary SI
-              and decimal SI values.
+            - Memory available for this node. When using the v1beta1 API, you
+              must specify the memory size in bytes. API version v1beta3 and
+              newer accepts binary SI and decimal SI values.
         required: false
 '''
 EXAMPLES = '''
@@ -152,22 +148,6 @@ class ClientConfig:
 
 class Util:
     @staticmethod
-    def getLogicalCores():
-        return multiprocessing.cpu_count()
-
-    @staticmethod
-    def getMemoryPct(pct):
-        with open('/proc/meminfo', 'r') as mem:
-            for line in mem:
-                entries = line.split()
-                if str(entries.pop(0)) == 'MemTotal:':
-                    mem_total_kb = Decimal(entries.pop(0))
-                    mem_capacity_kb = mem_total_kb * Decimal(pct)
-                    return str(mem_capacity_kb.to_integral_value() * 1024)
-
-        return ""
-
-    @staticmethod
     def remove_empty_elements(mapping):
         if isinstance(mapping, dict):
             m = mapping.copy()
@@ -182,8 +162,8 @@ class NodeResources:
     def __init__(self, version, cpu=None, memory=None):
         if version == 'v1beta1':
             self.resources = dict(capacity=dict())
-            self.resources['capacity']['cpu'] = cpu if cpu else Util.getLogicalCores()
-            self.resources['capacity']['memory'] = memory if cpu else Util.getMemoryPct(.75)
+            self.resources['capacity']['cpu'] = cpu
+            self.resources['capacity']['memory'] = memory
 
     def get_resources(self):
         return Util.remove_empty_elements(self.resources)
@@ -193,8 +173,8 @@ class NodeSpec:
         if version == 'v1beta3':
             self.spec = dict(podCIDR=cidr, externalID=externalID,
                              capacity=dict())
-            self.spec['capacity']['cpu'] = cpu if cpu else Util.getLogicalCores()
-            self.spec['capacity']['memory'] = memory if memory else Util.getMemoryPct(.75)
+            self.spec['capacity']['cpu'] = cpu
+            self.spec['capacity']['memory'] = memory
 
     def get_spec(self):
         return Util.remove_empty_elements(self.spec)

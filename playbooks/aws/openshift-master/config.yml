@@ -1,10 +1,10 @@
 ---
-- name: "populate oo_hosts_to_config host group if needed"
+- name: "populate oo_masters_to_config host group if needed"
   hosts: localhost
   gather_facts: no
   tasks:
   - name: "Evaluate oo_host_group_exp if it's set"
-    add_host: "name={{ item }} groups=oo_hosts_to_config"
+    add_host: "name={{ item }} groups=oo_masters_to_config"
     with_items: "{{ oo_host_group_exp | default('') }}"
     when: oo_host_group_exp is defined
 
@@ -25,7 +25,7 @@
       when: groups['tag_env-host-type_' + oo_env + '-openshift-node'] is defined
 
 - name: "Configure instances"
-  hosts: oo_hosts_to_config
+  hosts: oo_masters_to_config
   connection: ssh
   user: root
   vars_files:

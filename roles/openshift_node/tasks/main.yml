@@ -1,27 +1,29 @@
 ---
+- name: Test if node certs and config exist
+  stat: path={{ item }}
+  failed_when: not result.stat.exists
+  register: result
+  with_items:
+  - "{{ cert_path }}"
+  - "{{ cert_path }}/cert.crt"
+  - "{{ cert_path }}/key.key"
+  - "{{ cert_path }}/.kubeconfig"
+  - "{{ cert_path }}/server.crt"
+  - "{{ cert_path }}/server.key"
+  - "{{ cert_parent_path }}/ca/cert.crt"
+  #- "{{ cert_path }}/node.yaml"
+
 - name: Install OpenShift Node package
   yum: pkg=openshift-node state=installed
 
-- local_action: command /usr/bin/mktemp -d /tmp/openshift-ansible-XXXXXXX
-  register: mktemp
-
-- name: Retrieve OpenShift Master credentials
-  local_action: command /usr/bin/rsync --compress --archive --rsh 'ssh -S none -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null' root@{{ openshift_master_public_ips[0] }}:/var/lib/openshift/openshift.local.certificates/admin/ {{ mktemp.stdout }}
-  ignore_errors: yes
-
-- file: path=/var/lib/openshift/openshift.local.certificates/admin state=directory
-
-- name: Store OpenShift Master credentials
-  local_action: command /usr/bin/rsync --compress --archive --rsh 'ssh -S none -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null' {{ mktemp.stdout }}/ root@{{ openshift_public_ip }}:/var/lib/openshift/openshift.local.certificates/admin
-  ignore_errors: yes
-
-- local_action: file name={{ mktemp.stdout }} state=absent
-
+# --create-certs=false is a temporary workaround until
+# https://github.com/openshift/origin/pull/1361 is merged upstream and it is
+# the default for nodes
 - name: Configure OpenShift Node settings
   lineinfile:
     dest: /etc/sysconfig/openshift-node
     regexp: '^OPTIONS='
-    line: "OPTIONS=\"--master=https://{{ openshift_master_ips[0] }}:8443 --hostname={{ openshift_hostname }} --loglevel={{ openshift_node_debug_level }}\""
+    line: "OPTIONS=\"--hostname={{ openshift_hostname }} --loglevel={{ openshift_node_debug_level }} --create-certs=false\""
   notify:
   - restart openshift-node
 
@@ -47,42 +49,10 @@
     option: externally_managed
     value: "{{ openshift_node_manage_service_externally }}"
 
-# fixme: Once the openshift_cluster playbook is published state should be started
-# Always bounce service to pick up new credentials
 - name: Start and enable openshift-node
-  service: name=openshift-node enabled=yes state=restarted
+  service: name=openshift-node enabled=yes state=started
   when: not openshift_node_manage_service_externally
 
 - name: Disable openshift-node if openshift-node is managed externally
   service: name=openshift-node enabled=false
   when: openshift_node_manage_service_externally
-
-# TODO: create an os_vars role that has generic env related config and move
-# the root kubeconfig setting there, cannot use dependencies to force ordering
-# with openshift_node and openshift_master because the way conditional
-# dependencies work with current ansible would also exclude the
-# openshift_common dependency.
-- name: Create .kube directory
-  file:
-    path: /root/.kube
-    state: directory
-    mode: 0700
-- name: Configure root user kubeconfig
-  command: cp /var/lib/openshift/openshift.local.certificates/admin/.kubeconfig /root/.kube/.kubeconfig
-  args:
-    creates: /root/.kube/.kubeconfig
-
-- name: Register node (if not already registered)
-  openshift_register_node:
-    name: "{{ openshift_hostname }}"
-    api_version: v1beta1
-    cpu: "{{ openshift_node_resources.cpu }}"
-    memory: "{{ openshift_node_resources.memory }}"
-    pod_cidr: "{{ openshift_node_resources.cidr }}"
-    host_ip: "{{ ansible_default_ipv4.address }}"
-    labels: "{{ openshift_node_labels }}"
-    annotations: "{{ openshift_node_annotations }}"
-    # TODO: support customizing other attributes such as: client_config,
-    # client_cluster, client_context, client_user
-    # TODO: updated for v1beta3 changes after rebase: hostnames, external_ips,
-    # internal_ips, external_id

@@ -1,0 +1,6 @@
+---
+openshift_node_cpu:
+openshift_node_memory:
+openshift_node_pod_cidr:
+openshift_node_labels: {}
+openshift_node_annotations: {}

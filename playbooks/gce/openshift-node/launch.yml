@@ -24,8 +24,8 @@
         tags: "{{ oo_new_inst_tags }}"
       register: gce
 
-    - name: Add new instances public IPs to oo_hosts_to_config
-      add_host: "hostname={{ item.name }} ansible_ssh_host={{ item.public_ip }} groupname=oo_hosts_to_config"
+    - name: Add new instances public IPs to oo_nodes_to_config
+      add_host: "hostname={{ item.name }} ansible_ssh_host={{ item.public_ip }} groupname=oo_nodes_to_config"
       with_items: gce.instance_data
 
     - name: Wait for ssh
@@ -48,10 +48,10 @@
 
 # Always bounce service to pick up new credentials
 #- name: "Restart instances"
-#  hosts: oo_hosts_to_config
+#  hosts: oo_nodes_to_config
 #  connection: ssh
 #  user: root
 #  tasks:
-#    - debug: var=groups.oo_hosts_to_config
+#    - debug: var=groups.oo_nodes_to_config
 #    - name: Restart OpenShift
 #      service: name=openshift-node enabled=yes state=restarted

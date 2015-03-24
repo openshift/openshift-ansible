@@ -1,0 +1,7 @@
+---
+ansible_ssh_user: root
+openshift_hostname: "{{ ansible_default_ipv4.address }}"
+openshift_public_hostname: "{{ ansible_default_ipv4.address }}"
+openshift_ip: "{{ ansible_default_ipv4.address }}"
+openshift_public_ip: "{{ gce_public_ip }}"
+openshift_env: "{{ oo_env }}"

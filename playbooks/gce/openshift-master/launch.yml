@@ -24,8 +24,8 @@
         tags: "{{ oo_new_inst_tags }}"
       register: gce
 
-    - name: Add new instances public IPs to oo_hosts_to_config
-      add_host: "hostname={{ item.name }} ansible_ssh_host={{ item.public_ip }} groupname=oo_hosts_to_config"
+    - name: Add new instances public IPs to oo_masters_to_config
+      add_host: "hostname={{ item.name }} ansible_ssh_host={{ item.public_ip }} groupname=oo_masters_to_config"
       with_items: gce.instance_data
 
     - name: Wait for ssh
