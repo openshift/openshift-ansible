@@ -8,6 +8,11 @@
 - fail: msg="OpenShift Origin support is not currently enabled"
   when: openshift_deployment_type == 'origin'
 
+- name: Ensure libselinux-python is installed
+  yum:
+    pkg: libselinux-python
+    state: present
+
 - name: Create any additional repos that are defined
   template:
     src: yum_repo.j2

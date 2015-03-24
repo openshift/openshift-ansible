@@ -24,6 +24,7 @@ Dependencies
 ------------
 
 os_firewall
+openshift_repos
 
 Example Playbook
 ----------------

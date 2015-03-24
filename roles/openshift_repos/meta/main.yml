@@ -1,7 +1,7 @@
 ---
 galaxy_info:
-  author: Jason DeTiberus
-  description: OpenShift Common
+  author: TODO
+  description: OpenShift Repositories
   company: Red Hat, Inc.
   license: Apache License, Version 2.0
   min_ansible_version: 1.7
@@ -11,6 +11,4 @@ galaxy_info:
     - 7
   categories:
   - cloud
-dependencies:
-- { role: os_firewall }
-- { role: openshift_repos }
+dependencies: []

@@ -31,7 +31,6 @@
   vars_files:
     - vars.yml
   roles:
-    - repos
     - {
         role: openshift_master,
         openshift_node_ips: "{{ hostvars['localhost'].openshift_node_ips | default(['']) }}",
