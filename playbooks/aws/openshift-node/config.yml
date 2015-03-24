@@ -41,7 +41,7 @@
         role: openshift_node,
         openshift_master_ips: "{{ hostvars['localhost'].openshift_master_ips | default(['']) }}",
         openshift_master_public_ips: "{{ hostvars['localhost'].openshift_master_public_ips | default(['']) }}",
-        openshift_env: "{{ oo_env }}"
+        openshift_env: "{{ oo_env }}",
         openshift_public_ip: "{{ ec2_ip_address }}"
       }
     - docker
