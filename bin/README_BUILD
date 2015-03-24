@@ -1,4 +1,25 @@
-# How to build openshift-ansible
+# openshift-ansible-bin RPM Build instructions
+We use tito to make building and tracking revisions easy.
+
+For more information on tito, please see the [Tito home page](http://rm-rf.ca/tito "Tito home page").
 
 
-Test build
+## Build a test package (no tagging needed)
+```
+tito build --test --rpm
+```
+
+
+## Tag a new build (bumps version number and adds log entries)
+```
+tito tag
+```
+
+Follow the on screen tito instructions.
+
+
+
+## Build a new package based on the latest tag information
+```
+tito build --rpm
+```
