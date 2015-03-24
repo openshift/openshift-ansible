@@ -16,10 +16,7 @@ Role Variables
 From this role:
 | Name                                     | Default value         |                                        |
 |------------------------------------------|-----------------------|----------------------------------------|
-| openshift_node_manage_service_externally | False                 | Should the openshift-node role manage the openshift-node service? |
 | openshift_node_debug_level               | openshift_debug_level | Verbosity of the debug logs for openshift-node |
-| openshift_master_public_ips              | UNDEF (Required)      | List of the public IPs for the openhift-master hosts |
-| openshift_master_ips                     | UNDEF (Required)      | List of IP addresses for the openshift-master hosts to be used for node -> master communication |
 | openshift_registry_url                   | UNDEF (Optional)      | Default docker registry to use |
 
 From openshift_common:

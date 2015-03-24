@@ -1,6 +1,12 @@
 ---
 # TODO: Add flag for enabling EPEL repo, default to false
 
+# TODO: Add subscription-management config, with parameters
+#       for username, password, poolid(name), and official repos to
+#       enable/disable. Might need to make a module that extends the
+#       subscription management module to take a poolid and enable/disable the
+#       proper repos correctly.
+
 - assert:
     that: openshift_deployment_type in known_openshift_deployment_types
 

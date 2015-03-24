@@ -51,7 +51,29 @@ OSX:
 Test The Setup
 --------------
 1. cd openshift-ansible
-1. Try to list all instances:
+1. Try to list all instances (Passing an empty string as the cluster_id
+argument will result in all ec2 instances being listed)
 ```
-  ./cloud.rb aws list
+  bin/cluster list aws ''
+```
+
+Creating a cluster
+------------------
+1. To create a cluster with one master and two nodes
+```
+  bin/cluster create aws <cluster-id>
+```
+
+Updating a cluster
+---------------------
+1. To update the cluster
+```
+  bin/cluster update aws <cluster-id>
+```
+
+Terminating a cluster
+---------------------
+1. To terminate the cluster
+```
+  bin/cluster terminate aws <cluster-id>
 ```

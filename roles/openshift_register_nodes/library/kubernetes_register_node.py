@@ -214,7 +214,8 @@ class Node:
                              resources = NodeResources(version, cpu, memory),
                              cidr = podCIDR,
                              labels = labels,
-                             annotations = annotations
+                             annotations = annotations,
+                             externalID = externalID
                         )
         elif version == 'v1beta3':
             metadata = dict(name = name,

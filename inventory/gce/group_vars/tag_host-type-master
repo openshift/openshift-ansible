@@ -1,5 +1,0 @@
----
-openshift_api_url: https://{{ openshift_hostname }}:8443
-openshift_api_public_url: https://{{ openshift_public_hostname }}:8443
-openshift_webui_url: https://{{ openshift_hostname }}:8444
-openshift_webui_public_url: https://{{ openshift_public_hostname }}:8444

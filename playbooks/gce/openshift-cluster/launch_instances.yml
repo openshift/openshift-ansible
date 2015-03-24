@@ -1,3 +1,7 @@
+---
+# TODO: when we are ready to go to ansible 1.9+ support only, we can update to
+# the gce task to use the disk_auto_delete parameter to avoid having to delete
+# the disk as a separate step on termination
 
 - set_fact:
     machine_type: "{{ lookup('env', 'gce_machine_type') |default('n1-standard-1', true) }}"
@@ -18,12 +22,13 @@
       - "env-host-type-{{ cluster }}-openshift-{{ type }}"
   register: gce
 
-- name: Add new instances public IPs
+- name: Add new instances to groups and set variables needed
   add_host:
     hostname: "{{ item.name }}"
     ansible_ssh_host: "{{ item.public_ip }}"
     groups: "{{ item.tags | oo_prepend_strings_in_list('tag_') | join(',') }}"
     gce_public_ip: "{{ item.public_ip }}"
+    gce_private_ip: "{{ item.private_ip }}"
   with_items: gce.instance_data
 
 - name: Wait for ssh

@@ -1,2 +1,3 @@
 ---
+openshift_cluster_id: 'default'
 openshift_debug_level: 0

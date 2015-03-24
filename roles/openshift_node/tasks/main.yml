@@ -1,4 +1,12 @@
 ---
+# TODO: allow for overriding default ports where possible
+# TODO: trigger the external service when restart is needed
+- name: Set node OpenShift facts
+  openshift_facts:
+    role: 'node'
+    local_facts:
+      debug_level: "{{ openshift_node_debug_level | default(openshift.common.debug_level) }}"
+
 - name: Test if node certs and config exist
   stat: path={{ item }}
   failed_when: not result.stat.exists
@@ -23,7 +31,7 @@
   lineinfile:
     dest: /etc/sysconfig/openshift-node
     regexp: '^OPTIONS='
-    line: "OPTIONS=\"--hostname={{ openshift_hostname }} --loglevel={{ openshift_node_debug_level }} --create-certs=false\""
+    line: "OPTIONS=\"--hostname={{ openshift.common.hostname }} --loglevel={{ openshift.node.debug_level }} --create-certs=false\""
   notify:
   - restart openshift-node
 
@@ -36,23 +44,10 @@
   notify:
   - restart openshift-node
 
-- name: Set OpenShift node facts
-  include: "{{ role_path | dirname }}/openshift_common/tasks/set_facts.yml"
-  facts:
-  - section: node
-    option: debug_level
-    value: "{{ openshift_node_debug_level }}"
-  - section: node
-    option: public_ip
-    value: "{{ openshift_public_ip }}"
-  - section: node
-    option: externally_managed
-    value: "{{ openshift_node_manage_service_externally }}"
-
 - name: Start and enable openshift-node
   service: name=openshift-node enabled=yes state=started
-  when: not openshift_node_manage_service_externally
+  when: not openshift.common.use_openshift_sdn|bool
 
 - name: Disable openshift-node if openshift-node is managed externally
   service: name=openshift-node enabled=false
-  when: openshift_node_manage_service_externally
+  when: openshift.common.use_openshift_sdn|bool
