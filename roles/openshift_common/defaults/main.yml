@@ -1,7 +1,2 @@
 ---
 openshift_debug_level: 0
-
-# TODO: Once openshift stops resolving hostnames for node queries remove
-# this...
-openshift_hostname_workaround: true
-

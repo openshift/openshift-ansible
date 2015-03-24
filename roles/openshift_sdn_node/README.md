@@ -27,7 +27,6 @@ From openshift_common:
 | Name                          | Default value       |                                        |
 |-------------------------------|---------------------|----------------------------------------|
 | openshift_debug_level         | 0                   | Global openshift debug log verbosity   |
-| openshift_hostname_workaround | True                |                                        |
 | openshift_public_ip           | UNDEF (Required)    | Public IP address to use for this host |
 | openshift_hostname            | UNDEF (Required)    | hostname to use for this instance |
 
