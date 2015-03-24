@@ -120,4 +120,3 @@
   roles:
     - openshift_node
     - os_env_extras
-    - os_env_extras_node

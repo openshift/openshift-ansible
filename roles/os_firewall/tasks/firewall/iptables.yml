@@ -41,6 +41,14 @@
   changed_when: "'firewalld' in result.stdout"
   when: pkg_check.rc == 0
 
+# Workaround for Docker 1.4 to create DOCKER chain
+- name: Add DOCKER chain
+  os_firewall_manage_iptables:
+    name: "DOCKER chain"
+    action: verify_chain
+    create_jump_rule: no
+# End of Docker 1.4 workaround
+
 - name: Add iptables allow rules
   os_firewall_manage_iptables:
     name: "{{ item.service }}"
