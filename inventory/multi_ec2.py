@@ -12,6 +12,8 @@ import json
 import pprint
 
 
+CONFIG_FILE_NAME = 'multi_ec2.yaml'
+
 class MultiEc2(object):
 
     def __init__(self):
@@ -20,11 +22,22 @@ class MultiEc2(object):
         self.result = {}
         self.cache_path = os.path.expanduser('~/.ansible/tmp/multi_ec2_inventory.cache')
         self.file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)))
-        self.config_file = os.path.join(self.file_path,"multi_ec2.yaml")
+
+        same_dir_config_file = os.path.join(self.file_path, CONFIG_FILE_NAME)
+        etc_dir_config_file = os.path.join(os.path.sep, 'etc','ansible', CONFIG_FILE_NAME)
+
+        # Prefer a file in the same directory, fall back to a file in etc
+        if os.path.isfile(same_dir_config_file):
+            self.config_file = same_dir_config_file
+        elif os.path.isfile(etc_dir_config_file):
+            self.config_file = etc_dir_config_file
+        else:
+            self.config_file = None # expect env vars
+
         self.parse_cli_args()
 
         # load yaml
-        if os.path.isfile(self.config_file):
+        if self.config_file and os.path.isfile(self.config_file):
             self.config = self.load_yaml_config()
         elif os.environ.has_key("AWS_ACCESS_KEY_ID") and os.environ.has_key("AWS_SECRET_ACCESS_KEY"):
             self.config = {}

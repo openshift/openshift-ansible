@@ -18,18 +18,20 @@ Ansible Inventories used with the openshift-ansible scripts and playbooks.
 %build
 
 %install
+mkdir -p %{buildroot}/etc/ansible
 mkdir -p %{buildroot}/usr/share/ansible/inventory
 mkdir -p %{buildroot}/usr/share/ansible/inventory/aws
 mkdir -p %{buildroot}/usr/share/ansible/inventory/gce
 
-cp -p multi_ec2.py multi_ec2.yaml.example %{buildroot}/usr/share/ansible/inventory
+cp -p multi_ec2.py %{buildroot}/usr/share/ansible/inventory
+cp -p multi_ec2.yaml.example %{buildroot}/etc/ansible/multi_ec2.yaml
 cp -p aws/ec2.py aws/ec2.ini %{buildroot}/usr/share/ansible/inventory/aws
 cp -p gce/gce.py %{buildroot}/usr/share/ansible/inventory/gce
 
 %files
+%config(noreplace) /etc/ansible/*
 %dir /usr/share/ansible/inventory
 /usr/share/ansible/inventory/multi_ec2.py*
-/usr/share/ansible/inventory/multi_ec2.yaml.example
 /usr/share/ansible/inventory/aws/ec2.py*
 %config(noreplace) /usr/share/ansible/inventory/aws/ec2.ini
 /usr/share/ansible/inventory/gce/gce.py*
