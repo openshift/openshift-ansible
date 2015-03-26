@@ -2,15 +2,10 @@
   hosts: localhost
   gather_facts: no
   tasks:
-    - debug: var=oo_host_group_exp
-
     - name: Evaluate oo_host_group_exp if it's set
       add_host: "name={{ item }} groups=oo_hosts_to_terminate"
       with_items: "{{ oo_host_group_exp | default('') }}"
       when: oo_host_group_exp is defined
-
-    - debug: msg="{{ groups['oo_hosts_to_terminate'] }}"
-
 
 - name: Terminate node instances
   hosts: localhost
@@ -26,8 +21,6 @@
         instance_names: "{{ groups['oo_hosts_to_terminate'] }}"
         disks: "{{ groups['oo_hosts_to_terminate'] }}"
       register: gce
-
-    - debug: var=gce
 
     - name: Remove disks of instances
       gce_pd:
