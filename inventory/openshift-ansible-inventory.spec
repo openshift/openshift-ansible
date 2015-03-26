@@ -1,6 +1,6 @@
 Summary:       OpenShift Ansible Inventories
 Name:          openshift-ansible-inventory
-Version:       0.0.1
+Version:       0.0.2
 Release:       1%{?dist}
 License:       ASL 2.0
 URL:           https://github.com/openshift/openshift-ansible
@@ -37,6 +37,14 @@ cp -p gce/gce.py %{buildroot}/usr/share/ansible/inventory/gce
 /usr/share/ansible/inventory/gce/gce.py*
 
 %changelog
+* Thu Mar 26 2015 Thomas Wiest <twiest@redhat.com> 0.0.2-1
+- added the ability to have a config file in /etc/openshift_ansible to
+  multi_ec2.py. (twiest@redhat.com)
+- Merge pull request #97 from jwhonce/wip/cluster (jhonce@redhat.com)
+- gce inventory/playbook updates for node registration changes
+  (jdetiber@redhat.com)
+- Various fixes (jdetiber@redhat.com)
+
 * Tue Mar 24 2015 Thomas Wiest <twiest@redhat.com> 0.0.1-1
 - new package built with tito
 
