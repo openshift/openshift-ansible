@@ -1,0 +1,17 @@
+- name: Gather facts for masters in {{ cluster_id }}
+  hosts: "tag_env-host-type-{{ cluster_id }}-openshift-master"
+  tasks:
+    - add_host: "name={{ item }} groups=oo_vms"
+      with_items: "groups[\"tag_env-host-type-{{ cluster_id }}-openshift-master\"]"
+
+- name: Gather facts for nodes in {{ cluster_id }}
+  hosts: "tag_env-host-type-{{ cluster_id }}-openshift-node"
+  tasks:
+    - add_host: "name={{ item }} groups=oo_vms"
+      with_items: "groups[\"tag_env-host-type-{{ cluster_id }}-openshift-node\"]"
+
+- name: List VMs
+  hosts: oo_vms
+  tasks:
+    - name: List VMs
+      debug: msg="public:{{hostvars[inventory_hostname].gce_public_ip}} private:{{hostvars[inventory_hostname].ansible_default_ipv4.address}}"
