@@ -1,6 +1,6 @@
 Summary:       OpenShift Ansible Scripts for working with metadata hosts
 Name:          openshift-ansible-bin
-Version:       0.0.2
+Version:       0.0.3
 Release:       1%{?dist}
 License:       ASL 2.0
 URL:           https://github.com/openshift/openshift-ansible
@@ -36,6 +36,9 @@ cp -p openshift_ansible.conf.example %{buildroot}/etc/openshift_ansible/openshif
 %config(noreplace) /etc/openshift_ansible/
 
 %changelog
+* Mon Mar 30 2015 Thomas Wiest <twiest@redhat.com> 0.0.3-1
+- created a python package named openshift_ansible (twiest@redhat.com)
+
 * Mon Mar 30 2015 Thomas Wiest <twiest@redhat.com> 0.0.2-1
 - added config file support to opssh, ossh, and oscp (twiest@redhat.com)
 * Tue Mar 24 2015 Thomas Wiest <twiest@redhat.com> 0.0.1-1
