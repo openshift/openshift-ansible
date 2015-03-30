@@ -2,7 +2,6 @@
 # vim: expandtab:tabstop=4:shiftwidth=4
 
 import argparse
-import awsutil
 import traceback
 import sys
 import os
@@ -11,6 +10,8 @@ import tempfile
 import time
 import subprocess
 import ConfigParser
+
+from openshift_ansible import awsutil
 
 DEFAULT_PSSH_PAR = 200
 PSSH = '/usr/bin/pssh'

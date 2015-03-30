@@ -2,12 +2,13 @@
 # vim: expandtab:tabstop=4:shiftwidth=4
 
 import argparse
-import awsutil
 import traceback
 import sys
 import os
 import re
 import ConfigParser
+
+from openshift_ansible import awsutil
 
 CONFIG_MAIN_SECTION = 'main'
 CONFIG_INVENTORY_OPTION = 'inventory'

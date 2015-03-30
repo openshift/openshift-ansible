@@ -12,7 +12,8 @@ class AwsUtil(object):
 
         if inventory_path is None:
             inventory_path = os.path.realpath(os.path.join(self.file_path, \
-                                              '..','inventory','multi_ec2.py'))
+                                              '..', '..', 'inventory', \
+                                              'multi_ec2.py'))
 
         if not os.path.isfile(inventory_path):
             raise Exception("Inventory file not found [%s]" % inventory_path)
