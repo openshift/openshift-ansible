@@ -10,16 +10,30 @@ import re
 import tempfile
 import time
 import subprocess
+import ConfigParser
 
-DEFAULT_PSSH_PAR=200
+DEFAULT_PSSH_PAR = 200
 PSSH = '/usr/bin/pssh'
+CONFIG_MAIN_SECTION = 'main'
+CONFIG_HOST_TYPE_ALIAS_SECTION = 'host_type_aliases'
+CONFIG_INVENTORY_OPTION = 'inventory'
+
 
 class Opssh(object):
     def __init__(self):
+        self.inventory = None
+        self.host_type_aliases = {}
         self.file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)))
-        self.aws = awsutil.AwsUtil()
+
+        # Default the config path to /etc
+        self.config_path = os.path.join(os.path.sep, 'etc',  \
+                                        'openshift_ansible', \
+                                        'openshift_ansible.conf')
 
         self.parse_cli_args()
+        self.parse_config_file()
+
+        self.aws = awsutil.AwsUtil(self.inventory, self.host_type_aliases)
 
         if self.args.list_host_types:
             self.aws.print_host_types()
@@ -66,6 +80,20 @@ class Opssh(object):
 
         return None
 
+    def parse_config_file(self):
+        if os.path.isfile(self.config_path):
+            config = ConfigParser.ConfigParser()
+            config.read(self.config_path)
+
+            if config.has_section(CONFIG_MAIN_SECTION) and \
+               config.has_option(CONFIG_MAIN_SECTION, CONFIG_INVENTORY_OPTION):
+                self.inventory = config.get(CONFIG_MAIN_SECTION, CONFIG_INVENTORY_OPTION)
+
+            self.host_type_aliases = {}
+            if config.has_section(CONFIG_HOST_TYPE_ALIAS_SECTION):
+                for alias in config.options(CONFIG_HOST_TYPE_ALIAS_SECTION):
+                    value = config.get(CONFIG_HOST_TYPE_ALIAS_SECTION, alias).split(',')
+                    self.host_type_aliases[alias] = value
 
     def parse_cli_args(self):
         """Setup the command line parser with the options we want

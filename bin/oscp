@@ -7,16 +7,28 @@ import traceback
 import sys
 import os
 import re
+import ConfigParser
+
+CONFIG_MAIN_SECTION = 'main'
+CONFIG_INVENTORY_OPTION = 'inventory'
 
 class Oscp(object):
     def __init__(self):
+        self.inventory = None
         self.file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)))
+
+        # Default the config path to /etc
+        self.config_path = os.path.join(os.path.sep, 'etc',  \
+                                        'openshift_ansible', \
+                                        'openshift_ansible.conf')
+
         self.parse_cli_args()
+        self.parse_config_file()
 
         # parse host and user
         self.process_host()
 
-        self.aws = awsutil.AwsUtil()
+        self.aws = awsutil.AwsUtil(self.inventory)
 
         # get a dict of host inventory
         if self.args.list:
@@ -38,9 +50,18 @@ class Oscp(object):
         else:
             self.scp()
 
+    def parse_config_file(self):
+        if os.path.isfile(self.config_path):
+            config = ConfigParser.ConfigParser()
+            config.read(self.config_path)
+
+            if config.has_section(CONFIG_MAIN_SECTION) and \
+               config.has_option(CONFIG_MAIN_SECTION, CONFIG_INVENTORY_OPTION):
+                self.inventory = config.get(CONFIG_MAIN_SECTION, CONFIG_INVENTORY_OPTION)
+
     def parse_cli_args(self):
         parser = argparse.ArgumentParser(description='Openshift Online SSH Tool.')
-        parser.add_argument('-e', '--env', 
+        parser.add_argument('-e', '--env',
                           action="store", help="Environment where this server exists.")
         parser.add_argument('-d', '--debug', default=False,
                           action="store_true", help="debug mode")
