@@ -6,27 +6,30 @@ import json
 import re
 
 class AwsUtil(object):
-    def __init__(self):
-        self.host_type_aliases = {
-                'legacy-openshift-broker': ['broker', 'ex-srv'],
-                         'openshift-node': ['node', 'ex-node'],
-                   'openshift-messagebus': ['msg'],
-            'openshift-customer-database': ['mongo'],
-                'openshift-website-proxy': ['proxy'],
-            'openshift-community-website': ['drupal'],
-                         'package-mirror': ['mirror'],
-        }
+    def __init__(self, inventory_path=None, host_type_aliases={}):
+        self.host_type_aliases = host_type_aliases
+        self.file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)))
 
+        if inventory_path is None:
+            inventory_path = os.path.realpath(os.path.join(self.file_path, \
+                                              '..','inventory','multi_ec2.py'))
+
+        if not os.path.isfile(inventory_path):
+            raise Exception("Inventory file not found [%s]" % inventory_path)
+
+        self.inventory_path = inventory_path
+        self.setup_host_type_alias_lookup()
+
+    def setup_host_type_alias_lookup(self):
         self.alias_lookup = {}
         for key, values in self.host_type_aliases.iteritems():
             for value in values:
                 self.alias_lookup[value] = key
 
-        self.file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)))
-        self.multi_ec2_path = os.path.realpath(os.path.join(self.file_path, '..','inventory','multi_ec2.py'))
+
 
     def get_inventory(self,args=[]):
-        cmd = [self.multi_ec2_path]
+        cmd = [self.inventory_path]
 
         if args:
             cmd.extend(args)

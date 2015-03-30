@@ -21,15 +21,19 @@ Scripts to make it nicer when working with hosts that are defined only by metada
 mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{python_sitelib}/openshift_ansible
 mkdir -p %{buildroot}/etc/bash_completion.d
+mkdir -p %{buildroot}/etc/openshift_ansible
 
 cp -p ossh oscp opssh %{buildroot}%{_bindir}
 cp -p awsutil.py %{buildroot}%{python_sitelib}/openshift_ansible
 cp -p ossh_bash_completion %{buildroot}/etc/bash_completion.d
 
+cp -p openshift_ansible.conf.example %{buildroot}/etc/openshift_ansible/openshift_ansible.conf
+
 %files
 %{_bindir}/*
 %{python_sitelib}/openshift_ansible/
 /etc/bash_completion.d/*
+%config(noreplace) /etc/openshift_ansible/
 
 %changelog
 * Tue Mar 24 2015 Thomas Wiest <twiest@redhat.com> 0.0.1-1
