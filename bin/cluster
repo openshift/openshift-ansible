@@ -55,14 +55,25 @@ class Cluster(object):
         :param args: command line arguments provided by user
         :return: exit status from run command
         """
-        raise NotImplementedError("ACTION [{}] not implemented".format(sys._getframe().f_code.co_name))
+        #TODO: implement list in AWS
+        if args.provider in ['aws']:
+            raise NotImplementedError("ACTION [{}] not implemented for aws provider".format(sys._getframe().f_code.co_name))
+
+        env = {'cluster_id': args.cluster_id}
+
+        playbook = "playbooks/{}/openshift-cluster/list.yml".format(args.provider)
+        inventory = self.setup_provider(args.provider)
+
+        return self.action(args, inventory, env, playbook)
 
     def update(self, args):
         """
-        Update OpenShift across clustered VMs
+        Update to latest OpenShift across clustered VMs
         :param args: command line arguments provided by user
         :return: exit status from run command
         """
+        # TODO: implement update in GCE
+        # TODO: implement update in AWS
         raise NotImplementedError("ACTION [{}] not implemented".format(sys._getframe().f_code.co_name))
 
 
