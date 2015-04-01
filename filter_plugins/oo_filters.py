@@ -34,6 +34,15 @@ def get_attr(data, attribute=None):
 
     return ptr
 
+def oo_flatten(data):
+    ''' This filter plugin will flatten a list of lists
+    '''
+    if not issubclass(type(data), list):
+        raise errors.AnsibleFilterError("|failed expects to flatten a List")
+
+    return [ item for sublist in data for item in sublist ]
+
+
 def oo_collect(data, attribute=None, filters={}):
     ''' This takes a list of dict and collects all attributes specified into a list
         If filter is specified then we will include all items that match _ALL_ of filters.
@@ -97,6 +106,7 @@ class FilterModule (object):
         return {
                 "oo_select_keys": oo_select_keys,
                 "oo_collect": oo_collect,
+                "oo_flatten": oo_flatten,
                 "oo_len": oo_len,
                 "oo_pdb": oo_pdb,
                 "oo_prepend_strings_in_list": oo_prepend_strings_in_list
