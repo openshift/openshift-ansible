@@ -1,20 +1,34 @@
 ---
 - name: Terminate instance(s)
   hosts: localhost
-
+  gather_facts: no
   vars_files:
-    - vars.yml
+  - vars.yml
+  tasks:
+  - set_fact: scratch_group=tag_env-host-type-{{ cluster_id }}-openshift-node
+  - add_host:
+      name: "{{ item }}"
+      groups: oo_nodes_to_terminate
+      ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user | default(ansible_ssh_user, true) }}"
+      ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
+    with_items: groups[scratch_group] | default([]) | difference(['localhost']) | difference(groups.status_terminated)
+
+  - set_fact: scratch_group=tag_env-host-type-{{ cluster_id }}-openshift-master
+  - add_host:
+      name: "{{ item }}"
+      groups: oo_masters_to_terminate
+      ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user | default(ansible_ssh_user, true) }}"
+      ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
+    with_items: groups[scratch_group] | default([]) | difference(['localhost']) | difference(groups.status_terminated)
 
 - include: ../openshift-node/terminate.yml
   vars:
-    oo_host_group_exp: 'groups["tag_env-host-type-{{ cluster_id }}-openshift-node"]'
     gce_service_account_email: "{{ lookup('env', 'gce_service_account_email_address') }}"
     gce_pem_file: "{{ lookup('env', 'gce_service_account_pem_file_path') }}"
     gce_project_id: "{{ lookup('env', 'gce_project_id') }}"
 
 - include: ../openshift-master/terminate.yml
   vars:
-    oo_host_group_exp: 'groups["tag_env-host-type-{{ cluster_id }}-openshift-master"]'
     gce_service_account_email: "{{ lookup('env', 'gce_service_account_email_address') }}"
     gce_pem_file: "{{ lookup('env', 'gce_service_account_pem_file_path') }}"
     gce_project_id: "{{ lookup('env', 'gce_project_id') }}"

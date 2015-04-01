@@ -97,10 +97,8 @@ class ClientConfigException(Exception):
 
 class ClientConfig:
     def __init__(self, client_opts, module):
-        _, output, error = module.run_command(["/usr/bin/openshift", "ex",
-                                               "config", "view", "-o",
-                                               "json"] + client_opts,
-                                              check_rc = True)
+        kubectl = module.params['kubectl_cmd']
+        _, output, error = module.run_command(kubectl + ["config", "view", "-o", "json"] + client_opts, check_rc = True)
         self.config = json.loads(output)
 
         if not (bool(self.config['clusters']) or
@@ -145,6 +143,9 @@ class ClientConfig:
 
     def get_cluster_for_context(self, context):
         return self.get_value_for_context(context, 'cluster')
+
+    def get_namespace_for_context(self, context):
+        return self.get_value_for_context(context, 'namespace')
 
 class Util:
     @staticmethod
@@ -247,15 +248,15 @@ class Node:
         return Util.remove_empty_elements(node)
 
     def exists(self):
-        _, output, error = self.module.run_command(["/usr/bin/osc", "get",
-                                                    "nodes"] +  self.client_opts,
-                                                   check_rc = True)
+        kubectl = self.module.params['kubectl_cmd']
+        _, output, error = self.module.run_command(kubectl + ["get", "nodes"] +  self.client_opts, check_rc = True)
         if re.search(self.module.params['name'], output, re.MULTILINE):
             return True
         return False
 
     def create(self):
-        cmd = ['/usr/bin/osc'] + self.client_opts + ['create', 'node', '-f', '-']
+        kubectl = self.module.params['kubectl_cmd']
+        cmd = kubectl + self.client_opts + ['create', '-f', '-']
         rc, output, error = self.module.run_command(cmd,
                                                data=self.module.jsonify(self.get_node()))
         if rc != 0:
@@ -273,24 +274,26 @@ class Node:
 
 def main():
     module = AnsibleModule(
-        argument_spec      = dict(
-            name           = dict(required = True, type = 'str'),
-            host_ip        = dict(type = 'str'),
-            hostnames      = dict(type = 'list', default = []),
-            external_ips   = dict(type = 'list', default = []),
-            internal_ips   = dict(type = 'list', default = []),
-            api_version    = dict(type = 'str', default = 'v1beta1', # TODO: after kube rebase, we can default to v1beta3
-                                  choices = ['v1beta1', 'v1beta3']),
-            cpu            = dict(type = 'str'),
-            memory         = dict(type = 'str'),
-            labels         = dict(type = 'dict', default = {}), # TODO: needs documented
-            annotations    = dict(type = 'dict', default = {}), # TODO: needs documented
-            pod_cidr       = dict(type = 'str'), # TODO: needs documented
-            external_id    = dict(type = 'str'), # TODO: needs documented
-            client_config  = dict(type = 'str'), # TODO: needs documented
-            client_cluster = dict(type = 'str', default = 'master'), # TODO: needs documented
-            client_context = dict(type = 'str', default = 'master'), # TODO: needs documented
-            client_user    = dict(type = 'str', default = 'admin') # TODO: needs documented
+        argument_spec        = dict(
+            name             = dict(required = True, type = 'str'),
+            host_ip          = dict(type = 'str'),
+            hostnames        = dict(type = 'list', default = []),
+            external_ips     = dict(type = 'list', default = []),
+            internal_ips     = dict(type = 'list', default = []),
+            api_version      = dict(type = 'str', default = 'v1beta1', # TODO: after kube rebase, we can default to v1beta3
+                                    choices = ['v1beta1', 'v1beta3']),
+            cpu              = dict(type = 'str'),
+            memory           = dict(type = 'str'),
+            labels           = dict(type = 'dict', default = {}), # TODO: needs documented
+            annotations      = dict(type = 'dict', default = {}), # TODO: needs documented
+            pod_cidr         = dict(type = 'str'), # TODO: needs documented
+            external_id      = dict(type = 'str'), # TODO: needs documented
+            client_config    = dict(type = 'str'), # TODO: needs documented
+            client_cluster   = dict(type = 'str', default = 'master'), # TODO: needs documented
+            client_context   = dict(type = 'str', default = 'default'), # TODO: needs documented
+            client_namespace = dict(type = 'str', default = 'default'), # TODO: needs documented
+            client_user      = dict(type = 'str', default = 'system:openshift-client'), # TODO: needs documented
+            kubectl_cmd      = dict(type = 'list', default = ['kubectl']) # TODO: needs documented
         ),
         mutually_exclusive = [
             ['host_ip', 'external_ips'],
@@ -333,14 +336,16 @@ def main():
 
     client_cluster = module.params['client_cluster']
     if config.has_cluster(client_cluster):
-        if client_cluster != config.get_cluster_for_context(client_cluster):
+        if client_cluster != config.get_cluster_for_context(client_context):
             client_opts.append("--cluster=%s" % client_cluster)
     else:
         module.fail_json(msg="Cluster %s not found in client config" %
                          client_cluster)
 
-    # TODO: provide sane defaults for some (like hostname, externalIP,
-    # internalIP, etc)
+    client_namespace = module.params['client_namespace']
+    if client_namespace != config.get_namespace_for_context(client_context):
+        client_opts.append("--namespace=%s" % client_namespace)
+
     node = Node(module, client_opts, module.params['api_version'],
                 module.params['name'], module.params['host_ip'],
                 module.params['hostnames'], module.params['external_ips'],

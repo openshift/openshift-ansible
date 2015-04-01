@@ -2,16 +2,23 @@
 - name: Generate oo_list_hosts group
   hosts: localhost
   gather_facts: no
+  vars_files:
+  - vars.yml
   tasks:
   - set_fact: scratch_group=tag_env-{{ cluster_id }}
     when: cluster_id != ''
   - set_fact: scratch_group=all
-    when: scratch_group is not defined
-  - add_host: name={{ item }} groups=oo_list_hosts
-    with_items: groups[scratch_group] | difference(['localhost']) | difference(groups.status_terminated)
+    when: cluster_id == ''
+  - add_host:
+      name: "{{ item }}"
+      groups: oo_list_hosts
+      ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user | default(ansible_ssh_user, true) }}"
+      ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
+    with_items: groups[scratch_group] | default([]) | difference(['localhost']) | difference(groups.status_terminated)
 
 - name: List Hosts
   hosts: oo_list_hosts
   gather_facts: no
   tasks:
-  - debug: msg="public:{{hostvars[inventory_hostname].gce_public_ip}} private:{{hostvars[inventory_hostname].gce_private_ip}}"
+  - debug:
+      msg: "public ip:{{ hostvars[inventory_hostname].gce_public_ip }} private ip:{{ hostvars[inventory_hostname].gce_private_ip }} deployment-type: {{ hostvars[inventory_hostname].group_names | oo_get_deployment_type_from_groups }}"

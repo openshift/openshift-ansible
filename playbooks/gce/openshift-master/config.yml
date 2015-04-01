@@ -1,20 +1,18 @@
 ---
-- name: master/config.yml, populate oo_masters_to_config host group if needed
+- name: Populate oo_masters_to_config host group
   hosts: localhost
   gather_facts: no
   tasks:
-  - name: "Evaluate oo_host_group_exp if it's set"
-    add_host: "name={{ item }} groups=oo_masters_to_config"
-    with_items: "{{ oo_host_group_exp | default('') }}"
-    when: oo_host_group_exp is defined
+  - name: Evaluate oo_masters_to_config
+    add_host:
+      name: "{{ item }}"
+      groups: oo_masters_to_config
+      ansible_ssh_user: root
+    with_items: oo_host_group_exp | default([])
 
-- name: "Configure instances"
-  hosts: oo_masters_to_config
+- include: ../../common/openshift-master/config.yml
   vars:
+    openshift_cluster_id: "{{ cluster_id }}"
+    openshift_debug_level: 4
+    openshift_deployment_type: "{{ deployment_type }}"
     openshift_hostname: "{{ gce_private_ip }}"
-  vars_files:
-  - vars.yml
-  roles:
-    - openshift_master
-    - pods
-    - os_env_extras

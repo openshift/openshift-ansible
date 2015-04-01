@@ -1,4 +1,3 @@
-# {{ ansible_managed }}
 {% for repo in openshift_additional_repos %}
 [{{ repo.id }}]
 name={{ repo.name | default(repo.id) }}

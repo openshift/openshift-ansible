@@ -22,13 +22,28 @@ class Cluster(object):
                 '-o ControlPersist=600s '
             )
 
+    def get_deployment_type(self, args):
+        """
+        Get the deployment_type based on the environment variables and the
+        command line arguments
+        :param args: command line arguments provided by the user
+        :return: string representing the deployment type
+        """
+        deployment_type = 'origin'
+        if args.deployment_type:
+            deployment_type = args.deployment_type
+        elif 'OS_DEPLOYMENT_TYPE' in os.environ:
+            deployment_type = os.environ['OS_DEPLOYMENT_TYPE']
+        return deployment_type
+
     def create(self, args):
         """
         Create an OpenShift cluster for given provider
         :param args: command line arguments provided by user
         :return: exit status from run command
         """
-        env = {'cluster_id': args.cluster_id}
+        env = {'cluster_id': args.cluster_id,
+               'deployment_type': self.get_deployment_type(args)}
         playbook = "playbooks/{}/openshift-cluster/launch.yml".format(args.provider)
         inventory = self.setup_provider(args.provider)
 
@@ -43,7 +58,8 @@ class Cluster(object):
         :param args: command line arguments provided by user
         :return: exit status from run command
         """
-        env = {'cluster_id': args.cluster_id}
+        env = {'cluster_id': args.cluster_id,
+               'deployment_type': self.get_deployment_type(args)}
         playbook = "playbooks/{}/openshift-cluster/terminate.yml".format(args.provider)
         inventory = self.setup_provider(args.provider)
 
@@ -55,8 +71,22 @@ class Cluster(object):
         :param args: command line arguments provided by user
         :return: exit status from run command
         """
-        env = {'cluster_id': args.cluster_id}
+        env = {'cluster_id': args.cluster_id,
+               'deployment_type': self.get_deployment_type(args)}
         playbook = "playbooks/{}/openshift-cluster/list.yml".format(args.provider)
+        inventory = self.setup_provider(args.provider)
+
+        return self.action(args, inventory, env, playbook)
+
+    def config(self, args):
+        """
+        Configure or reconfigure OpenShift across clustered VMs
+        :param args: command line arguments provided by user
+        :return: exit status from run command
+        """
+        env = {'cluster_id': args.cluster_id,
+               'deployment_type': self.get_deployment_type(args)}
+        playbook = "playbooks/{}/openshift-cluster/config.yml".format(args.provider)
         inventory = self.setup_provider(args.provider)
 
         return self.action(args, inventory, env, playbook)
@@ -67,7 +97,8 @@ class Cluster(object):
         :param args: command line arguments provided by user
         :return: exit status from run command
         """
-        env = {'cluster_id': args.cluster_id}
+        env = {'cluster_id': args.cluster_id,
+               'deployment_type': self.get_deployment_type(args)}
         playbook = "playbooks/{}/openshift-cluster/update.yml".format(args.provider)
         inventory = self.setup_provider(args.provider)
 
@@ -81,19 +112,19 @@ class Cluster(object):
         """
         config = ConfigParser.ConfigParser()
         if 'gce' == provider:
-            config.readfp(open('inventory/gce/gce.ini'))
+            config.readfp(open('inventory/gce/hosts/gce.ini'))
 
             for key in config.options('gce'):
                 os.environ[key] = config.get('gce', key)
 
-            inventory = '-i inventory/gce/gce.py'
+            inventory = '-i inventory/gce/hosts'
         elif 'aws' == provider:
-            config.readfp(open('inventory/aws/ec2.ini'))
+            config.readfp(open('inventory/aws/hosts/ec2.ini'))
 
             for key in config.options('ec2'):
                 os.environ[key] = config.get('ec2', key)
 
-            inventory = '-i inventory/aws/ec2.py'
+            inventory = '-i inventory/aws/hosts'
         elif 'libvirt' == provider:
             inventory = '-i inventory/libvirt/hosts'
         else:
@@ -145,29 +176,49 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Python wrapper to ensure proper environment for OpenShift ansible playbooks',
     )
-    parser.add_argument('-v', '--verbose', action='count', help='Multiple -v options increase the verbosity')
+    parser.add_argument('-v', '--verbose', action='count',
+                        help='Multiple -v options increase the verbosity')
     parser.add_argument('--version', action='version', version='%(prog)s 0.2')
 
     meta_parser = argparse.ArgumentParser(add_help=False)
     meta_parser.add_argument('provider', choices=providers, help='provider')
     meta_parser.add_argument('cluster_id', help='prefix for cluster VM names')
+    meta_parser.add_argument('-t', '--deployment-type',
+                             choices=['origin', 'online', 'enterprise'],
+                             help='Deployment type. (default: origin)')
 
-    action_parser = parser.add_subparsers(dest='action', title='actions', description='Choose from valid actions')
+    action_parser = parser.add_subparsers(dest='action', title='actions',
+                                          description='Choose from valid actions')
 
-    create_parser = action_parser.add_parser('create', help='Create a cluster', parents=[meta_parser])
-    create_parser.add_argument('-m', '--masters', default=1, type=int, help='number of masters to create in cluster')
-    create_parser.add_argument('-n', '--nodes', default=2, type=int, help='number of nodes to create in cluster')
+    create_parser = action_parser.add_parser('create', help='Create a cluster',
+                                             parents=[meta_parser])
+    create_parser.add_argument('-m', '--masters', default=1, type=int,
+                               help='number of masters to create in cluster')
+    create_parser.add_argument('-n', '--nodes', default=2, type=int,
+                               help='number of nodes to create in cluster')
     create_parser.set_defaults(func=cluster.create)
 
-    terminate_parser = action_parser.add_parser('terminate', help='Destroy a cluster', parents=[meta_parser])
-    terminate_parser.add_argument('-f', '--force', action='store_true', help='Destroy cluster without confirmation')
+    config_parser = action_parser.add_parser('config',
+                                             help='Configure or reconfigure a cluster',
+                                             parents=[meta_parser])
+    config_parser.set_defaults(func=cluster.config)
+
+    terminate_parser = action_parser.add_parser('terminate',
+                                                help='Destroy a cluster',
+                                                parents=[meta_parser])
+    terminate_parser.add_argument('-f', '--force', action='store_true',
+                                  help='Destroy cluster without confirmation')
     terminate_parser.set_defaults(func=cluster.terminate)
 
-    update_parser = action_parser.add_parser('update', help='Update OpenShift across cluster', parents=[meta_parser])
-    update_parser.add_argument('-f', '--force', action='store_true', help='Update cluster without confirmation')
+    update_parser = action_parser.add_parser('update',
+                                             help='Update OpenShift across cluster',
+                                             parents=[meta_parser])
+    update_parser.add_argument('-f', '--force', action='store_true',
+                               help='Update cluster without confirmation')
     update_parser.set_defaults(func=cluster.update)
 
-    list_parser = action_parser.add_parser('list', help='List VMs in cluster', parents=[meta_parser])
+    list_parser = action_parser.add_parser('list', help='List VMs in cluster',
+                                           parents=[meta_parser])
     list_parser.set_defaults(func=cluster.list)
 
     args = parser.parse_args()

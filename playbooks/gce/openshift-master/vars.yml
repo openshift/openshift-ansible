@@ -1,3 +1,0 @@
----
-openshift_debug_level: 4
-openshift_cluster_id: "{{ cluster_id }}"

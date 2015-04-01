@@ -1,41 +1,44 @@
+---
+# TODO: does not handle a non-existant cluster gracefully
+
 - name: Terminate instance(s)
   hosts: localhost
-  connection: local
   gather_facts: no
-
-  vars:
-    libvirt_storage_pool_path: "{{ lookup('env','HOME') }}/libvirt-storage-pool-openshift"
-    libvirt_storage_pool: 'openshift'
-    libvirt_uri: 'qemu:///system'
-
+  vars_files:
+  - vars.yml
   tasks:
-    - name: List VMs
-      virt:
-        command: list_vms
-      register: list_vms
+  - set_fact: cluster_group=tag_env-{{ cluster_id }}
+  - add_host:
+      name: "{{ item }}"
+      groups: oo_hosts_to_terminate
+      ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
+      ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
+    with_items: groups[cluster_group] | default([])
 
-    - name: Destroy VMs
-      virt:
-        name: '{{ item[0] }}'
-        command: '{{ item[1] }}'
-        uri: '{{ libvirt_uri }}'
-      with_nested:
-        - '{{ list_vms.list_vms }}'
-        - [ destroy, undefine ]
-      when: item[0]|truncate(cluster_id|length+1, True) == '{{ cluster_id }}-...'
+  - name: Destroy VMs
+    virt:
+      name: '{{ item[0] }}'
+      command: '{{ item[1] }}'
+      uri: '{{ libvirt_uri }}'
+    with_nested:
+    - groups['oo_hosts_to_terminate']
+    - [ destroy, undefine ]
 
-    - name: Delete VMs config drive
-      file:
-        path: '{{ libvirt_storage_pool_path }}/{{ item }}_configdrive/openstack'
-        state: absent
-      with_items: '{{ list_vms.list_vms }}'
-      when: item|truncate(cluster_id|length+1, True) == '{{ cluster_id }}-...'
+  - name: Delete VMs drives
+    command: 'virsh -c {{ libvirt_uri }} vol-delete --pool {{ libvirt_storage_pool }} {{ item }}.qcow2'
+    args:
+      removes: '{{ libvirt_storage_pool_path }}/{{ item }}.qcow2'
+    with_items: groups['oo_hosts_to_terminate']
 
-    - name: Delete VMs drives
-      command: 'virsh -c {{ libvirt_uri }} vol-delete --pool {{ libvirt_storage_pool }} {{ item[0] }}{{ item[1] }}'
-      args:
-        removes: '{{ libvirt_storage_pool_path }}/{{ item[0] }}{{ item[1] }}'
-      with_nested:
-        - '{{ list_vms.list_vms }}'
-        - [ '_configdrive', '_cloud-init.iso', '.qcow2' ]
-      when: item[0]|truncate(cluster_id|length+1, True) == '{{ cluster_id }}-...'
+  - name: Delete the VM cloud-init image
+    file:
+      path: '{{ libvirt_storage_pool_path }}/{{ item }}_cloud-init.iso'
+      state: absent
+    with_items: groups['oo_hosts_to_terminate']
+
+  - name: Remove the cloud-init config directory
+    file:
+      path: '{{ libvirt_storage_pool_path }}/{{ item }}_configdrive/'
+      state: absent
+    with_items: groups['oo_hosts_to_terminate']
+

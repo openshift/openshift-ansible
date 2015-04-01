@@ -13,17 +13,22 @@
   failed_when: not result.stat.exists
   register: result
   with_items:
-  - "{{ cert_path }}"
-  - "{{ cert_path }}/cert.crt"
-  - "{{ cert_path }}/key.key"
-  - "{{ cert_path }}/.kubeconfig"
-  - "{{ cert_path }}/server.crt"
-  - "{{ cert_path }}/server.key"
-  - "{{ cert_parent_path }}/ca/cert.crt"
-  #- "{{ cert_path }}/node.yaml"
+  - "{{ openshift_node_cert_dir }}"
+  - "{{ openshift_node_cert_dir }}/ca.crt"
+  - "{{ openshift_node_cert_dir }}/client.crt"
+  - "{{ openshift_node_cert_dir }}/client.key"
+  - "{{ openshift_node_cert_dir }}/.kubeconfig"
+  - "{{ openshift_node_cert_dir }}/node-config.yaml"
+  - "{{ openshift_node_cert_dir }}/server.crt"
+  - "{{ openshift_node_cert_dir }}/server.key"
 
 - name: Install OpenShift Node package
   yum: pkg=openshift-node state=installed
+  register: install_result
+
+- name: Reload systemd units
+  command: systemctl daemon-reload
+  when: install_result | changed
 
 # --create-certs=false is a temporary workaround until
 # https://github.com/openshift/origin/pull/1361 is merged upstream and it is
@@ -32,16 +37,7 @@
   lineinfile:
     dest: /etc/sysconfig/openshift-node
     regexp: '^OPTIONS='
-    line: "OPTIONS=\"--hostname={{ openshift.common.hostname }} --loglevel={{ openshift.node.debug_level }} --create-certs=false\""
-  notify:
-  - restart openshift-node
-
-- name: Set default registry url
-  lineinfile:
-    dest: /etc/sysconfig/openshift-node
-    regexp: '^IMAGES='
-    line: "IMAGES={{ openshift_registry_url }}"
-  when: openshift_registry_url is defined
+    line: "OPTIONS=\"--loglevel={{ openshift.node.debug_level }} --config={{ openshift_node_cert_dir }}/node-config.yaml\""
   notify:
   - restart openshift-node
 

@@ -5,6 +5,7 @@
 from ansible import errors, runner
 import json
 import pdb
+import re
 
 def oo_pdb(arg):
     ''' This pops you into a pdb instance where arg is the data passed in from the filter.
@@ -101,6 +102,18 @@ def oo_prepend_strings_in_list(data, prepend):
     retval = [prepend + s for s in data]
     return retval
 
+def oo_get_deployment_type_from_groups(data):
+    ''' This takes a list of groups and returns the associated
+        deployment-type
+    '''
+    if not issubclass(type(data), list):
+        raise errors.AnsibleFilterError("|failed expects first param is a list")
+    regexp = re.compile('^tag_deployment-type[-_]')
+    matches = filter(regexp.match, data)
+    if len(matches) > 0:
+        return regexp.sub('', matches[0])
+    return "Unknown"
+
 class FilterModule (object):
     def filters(self):
         return {
@@ -109,5 +122,6 @@ class FilterModule (object):
                 "oo_flatten": oo_flatten,
                 "oo_len": oo_len,
                 "oo_pdb": oo_pdb,
-                "oo_prepend_strings_in_list": oo_prepend_strings_in_list
+                "oo_prepend_strings_in_list": oo_prepend_strings_in_list,
+                "oo_get_deployment_type_from_groups": oo_get_deployment_type_from_groups
                 }
