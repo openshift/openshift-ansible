@@ -57,13 +57,16 @@ class Opssh(object):
         """
 
         # Default set of options
-        pssh_args = [PSSH, '-i', '-t', '0', '-p', str(self.args.par), '--user', self.args.user]
+        pssh_args = [PSSH, '-t', '0', '-p', str(self.args.par), '--user', self.args.user]
+
+        if self.args.inline:
+            pssh_args.append("--inline")
 
         if self.args.outdir:
-            pssh_args.append("--outdir='%s'" % self.args.outdir)
+            pssh_args.extend(["--outdir", self.args.outdir])
 
         if self.args.errdir:
-            pssh_args.append("--errdir='%s'" % self.args.errdir)
+            pssh_args.extend(["--errdir", self.args.errdir])
 
         hosts = self.aws.get_host_list(self.args.host_type, self.args.env)
         with tempfile.NamedTemporaryFile(prefix='opssh-', delete=True) as f:
@@ -71,8 +74,8 @@ class Opssh(object):
                 f.write(h + os.linesep)
             f.flush()
 
-            pssh_args.extend(["-h", "%s" % f.name])
-            pssh_args.append("%s" % self.args.command)
+            pssh_args.extend(["-h", f.name])
+            pssh_args.append(self.args.command)
 
             print
             print "Running: %s" % ' '.join(pssh_args)
@@ -116,6 +119,9 @@ class Opssh(object):
 
         parser.add_argument('--user', action='store', default='root',
                        help='username')
+
+        parser.add_argument('-i', '--inline', default=False, action='store_true',
+                       help='inline aggregated output and error for each server')
 
         parser.add_argument('-p', '--par', action='store', default=DEFAULT_PSSH_PAR,
                        help=('max number of parallel threads (default %s)' % DEFAULT_PSSH_PAR))
