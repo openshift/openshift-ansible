@@ -6,6 +6,7 @@
   with_items:
   - iptables
   - iptables-services
+  register: install_result
 
 - name: Check if firewalld is installed
   command: rpm -q firewalld
@@ -20,14 +21,15 @@
     enabled: no
   when: pkg_check.rc == 0
 
-- name: Start and enable iptables services
+- name: Reload systemd units
+  command: systemctl daemon-reload
+  when: install_result | changed
+
+- name: Start and enable iptables service
   service:
-    name: "{{ item }}"
+    name: iptables
     state: started
     enabled: yes
-  with_items:
-  - iptables
-  - ip6tables
   register: result
 
 - name: need to pause here, otherwise the iptables service starting can sometimes cause ssh to fail

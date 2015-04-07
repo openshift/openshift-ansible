@@ -17,12 +17,6 @@ From this role:
 | openshift_sdn_node_debug_level | openshift_debug_level | Verbosity of the debug logs for openshift-master |
 
 
-From openshift_node:
-| Name                  | Default value    |                                      |
-|-----------------------|------------------|--------------------------------------|
-| openshift_master_ips  | UNDEF (Required) | List of IP addresses for the openshift-master hosts to be used for node -> master communication |
-
-
 From openshift_common:
 | Name                          | Default value       |                                        |
 |-------------------------------|---------------------|----------------------------------------|

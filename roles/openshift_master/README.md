@@ -13,20 +13,24 @@ Role Variables
 --------------
 
 From this role:
-| Name                                     | Default value         |
-|
-|------------------------------------------|-----------------------|----------------------------------------|
-| openshift_master_manage_service_externally | False                 | Should the openshift-master role manage the openshift-master service? |
-| openshift_master_debug_level               | openshift_debug_level | Verbosity of the debug logs for openshift-master |
-| openshift_node_ips                         | []                    | List of the openshift node ip addresses, that we want to pre-register to the system when openshift-master starts up |
-| openshift_registry_url                     | UNDEF (Optional)      | Default docker registry to use |
+| Name                                | Default value         |                                                  |
+|-------------------------------------|-----------------------|--------------------------------------------------|
+| openshift_master_debug_level        | openshift_debug_level | Verbosity of the debug logs for openshift-master |
+| openshift_node_ips                  | []                    | List of the openshift node ip addresses to pre-register when openshift-master starts up |
+| openshift_registry_url              | UNDEF                 | Default docker registry to use |
+| openshift_master_api_port           | UNDEF                 | |
+| openshift_master_console_port       | UNDEF                 | |
+| openshift_master_api_url            | UNDEF                 | |
+| openshift_master_console_url        | UNDEF                 | |
+| openshift_master_public_api_url     | UNDEF                 | |
+| openshift_master_public_console_url | UNDEF                 | |
 
 From openshift_common:
-| Name                          |  Default Value      |                     |
-|-------------------------------|---------------------|---------------------|
-| openshift_debug_level         | 0                   | Global openshift debug log verbosity |
-| openshift_public_ip           | UNDEF (Required)    | Public IP address to use for this host |
-| openshift_hostname            | UNDEF (Required)    | hostname to use for this instance |
+| Name                          | Default Value  |                                        |
+|-------------------------------|----------------|----------------------------------------|
+| openshift_debug_level         | 0              | Global openshift debug log verbosity   |
+| openshift_public_ip           | UNDEF          | Public IP address to use for this host |
+| openshift_hostname            | UNDEF          | hostname to use for this instance      |
 
 Dependencies
 ------------

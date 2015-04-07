@@ -1,19 +1,37 @@
 ---
-# TODO: allow for overriding default ports where possible
-# TODO: if setting up multiple masters, will need to predistribute the certs
-# to the additional masters before starting openshift-master
+# TODO: actually have api_port, api_use_ssl, console_port, console_use_ssl,
+# etcd_use_ssl actually change the master config.
+
+- name: Set master OpenShift facts
+  openshift_facts:
+    role: 'master'
+    local_facts:
+      debug_level: "{{ openshift_master_debug_level | default(openshift.common.debug_level) }}"
+      api_port: "{{ openshift_master_api_port | default(None) }}"
+      api_url: "{{ openshift_master_api_url | default(None) }}"
+      api_use_ssl: "{{ openshift_master_api_use_ssl | default(None) }}"
+      public_api_url: "{{ openshift_master_public_api_url | default(None) }}"
+      console_port: "{{ openshift_master_console_port | default(None) }}"
+      console_url: "{{ openshift_master_console_url | default(None) }}"
+      console_use_ssl: "{{ openshift_master_console_use_ssl | default(None) }}"
+      public_console_url: "{{ openshift_master_public_console_url | default(None) }}"
+      etcd_use_ssl: "{{ openshift_master_etcd_use_ssl | default(None) }}"
 
 - name: Install OpenShift Master package
   yum: pkg=openshift-master state=installed
 
+# TODO: We should pre-generate the master config and point to the generated
+# config rather than setting command line flags here
 - name: Configure OpenShift settings
   lineinfile:
     dest: /etc/sysconfig/openshift-master
     regexp: '^OPTIONS='
-    line: "OPTIONS=\"--public-master={{ openshift_hostname }} {% if openshift_node_ips %} --nodes={{ openshift_node_ips | join(',') }} {% endif %} --loglevel={{ openshift_master_debug_level }}\""
+    line: "OPTIONS=\"--master={{ openshift.common.hostname }} --public-master={{ openshift.common.public_hostname }} {% if openshift_node_ips %} --nodes={{ openshift_node_ips | join(',') }} {% endif %} --loglevel={{ openshift.master.debug_level }}\""
   notify:
   - restart openshift-master
 
+# TODO: should this be populated by a fact based on the deployment type
+# (origin, online, enterprise)?
 - name: Set default registry url
   lineinfile:
     dest: /etc/sysconfig/openshift-master
@@ -23,34 +41,18 @@
   notify:
   - restart openshift-master
 
-- name: Set master OpenShift facts
-  include: "{{ role_path | dirname }}/openshift_common/tasks/set_facts.yml"
-  facts:
-  - section: master
-    option: debug_level
-    value: "{{ openshift_master_debug_level }}"
-  - section: master
-    option: public_ip
-    value: "{{ openshift_public_ip }}"
-  - section: master
-    option: externally_managed
-    value: "{{ openshift_master_manage_service_externally }}"
-
 - name: Start and enable openshift-master
   service: name=openshift-master enabled=yes state=started
-  when: not openshift_master_manage_service_externally
-  register: result
-
-- name: Disable openshift-master if openshift-master is managed externally
-  service: name=openshift-master enabled=false
-  when: openshift_master_manage_service_externally
 
 - name: Create .kube directory
   file:
     path: /root/.kube
     state: directory
     mode: 0700
+
+# TODO: Update this file if the contents of the source file are not present in
+# the dest file, will need to make sure to ignore things that could be added
 - name: Configure root user kubeconfig
-  command: cp /var/lib/openshift/openshift.local.certificates/admin/.kubeconfig /root/.kube/.kubeconfig
+  command: cp /var/lib/openshift/openshift.local.certificates/openshift-client/.kubeconfig /root/.kube/.kubeconfig
   args:
     creates: /root/.kube/.kubeconfig

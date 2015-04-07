@@ -46,12 +46,15 @@
         tags: "{{ oo_new_inst_tags }}"
 
     - name: Add new instances public IPs to oo_masters_to_config
-      add_host: "hostname={{ item.0 }} ansible_ssh_host={{ item.1.dns_name }} groupname=oo_masters_to_config"
+      add_host:
+        hostname: "{{ item.0 }}"
+        ansible_ssh_host: "{{ item.1.dns_name }}"
+        groupname: oo_masters_to_config
+        ec2_private_ip_address: "{{ item.1.private_ip }}"
+        ec2_ip_address: "{{ item.1.public_ip }}"
       with_together:
         - oo_new_inst_names
         - ec2.instances
-
-    - debug: var=ec2
 
     - name: Wait for ssh
       wait_for: "port=22 host={{ item.dns_name }}"

@@ -1,3 +1,4 @@
+---
 - name: master/config.yml, populate oo_masters_to_config host group if needed
   hosts: localhost
   gather_facts: no
@@ -7,11 +8,10 @@
     with_items: "{{ oo_host_group_exp | default('') }}"
     when: oo_host_group_exp is defined
 
-- name: Gather facts for nodes in {{ oo_env }}
-  hosts: "tag_env-host-type-{{ oo_env }}-openshift-node"
-
 - name: "Configure instances"
   hosts: oo_masters_to_config
+  vars:
+    openshift_hostname: "{{ gce_private_ip }}"
   vars_files:
   - vars.yml
   roles:

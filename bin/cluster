@@ -32,8 +32,8 @@ class Cluster(object):
         playbook = "playbooks/{}/openshift-cluster/launch.yml".format(args.provider)
         inventory = self.setup_provider(args.provider)
 
-        env['masters'] = args.masters
-        env['nodes'] = args.nodes
+        env['num_masters'] = args.masters
+        env['num_nodes'] = args.nodes
 
         return self.action(args, inventory, env, playbook)
 
@@ -55,16 +55,23 @@ class Cluster(object):
         :param args: command line arguments provided by user
         :return: exit status from run command
         """
-        raise NotImplementedError("ACTION [{}] not implemented".format(sys._getframe().f_code.co_name))
+        env = {'cluster_id': args.cluster_id}
+        playbook = "playbooks/{}/openshift-cluster/list.yml".format(args.provider)
+        inventory = self.setup_provider(args.provider)
+
+        return self.action(args, inventory, env, playbook)
 
     def update(self, args):
         """
-        Update OpenShift across clustered VMs
+        Update to latest OpenShift across clustered VMs
         :param args: command line arguments provided by user
         :return: exit status from run command
         """
-        raise NotImplementedError("ACTION [{}] not implemented".format(sys._getframe().f_code.co_name))
+        env = {'cluster_id': args.cluster_id}
+        playbook = "playbooks/{}/openshift-cluster/update.yml".format(args.provider)
+        inventory = self.setup_provider(args.provider)
 
+        return self.action(args, inventory, env, playbook)
 
     def setup_provider(self, provider):
         """

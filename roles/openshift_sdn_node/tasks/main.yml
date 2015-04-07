@@ -1,4 +1,10 @@
 ---
+- name: Set node sdn OpenShift facts
+  openshift_facts:
+    role: 'node_sdn'
+    local_facts:
+      debug_level: "{{ openshift_node_sdn_debug_level | default(openshift.common.debug_level) }}"
+
 - name: Install openshift-sdn-node
   yum:
     pkg: openshift-sdn-node
@@ -14,28 +20,19 @@
     backrefs: yes
   with_items:
     - regex: '^(OPTIONS=)'
-      line: '\1"-v={{ openshift_sdn_node_debug_level }} -hostname={{ openshift_hostname }}"'
+      line: '\1"-v={{ openshift.node_sdn.debug_level }} -hostname={{ openshift.common.hostname }}"'
     - regex: '^(MASTER_URL=)'
-      line: '\1"http://{{ openshift_master_ips | first }}:4001"'
+      line: '\1"{{ openshift_sdn_master_url }}"'
     - regex: '^(MINION_IP=)'
-      line: '\1"{{ openshift_public_ip }}"'
+      line: '\1"{{ openshift.common.ip }}"'
     # TODO lock down the insecure-registry config to a more sane value than
     # 0.0.0.0/0
     - regex: '^(DOCKER_OPTIONS=)'
       line: '\1"--insecure-registry=0.0.0.0/0 -b=lbr0 --mtu=1450 --selinux-enabled"'
   notify: restart openshift-sdn-node
 
-- name: Set openshift-sdn-node facts
-  include: "{{ role_path | dirname }}/openshift_common/tasks/set_facts.yml"
-  facts:
-  - section: sdn-node
-    option: debug_level
-    value: "{{ openshift_sdn_node_debug_level }}"
-
-# fixme: Once the openshift_cluster playbook is published state should be started
-# Always bounce service to pick up new credentials
 - name: Start and enable openshift-sdn-node
   service:
     name: openshift-sdn-node
     enabled: yes
-    state: restarted
+    state: started

@@ -11,7 +11,7 @@
     - name: Generate master instance names(s)
       set_fact: scratch={{ cluster_id }}-{{ k8s_type }}-{{ '%05x' |format( 1048576 |random) }}
       register: master_names_output
-      with_sequence: start=1 end={{ masters }}
+      with_sequence: start=1 end={{ num_masters }}
 
     # These set_fact's cannot be combined
     - set_fact:
@@ -25,14 +25,13 @@
         instances: "{{ master_names }}"
         cluster: "{{ cluster_id }}"
         type: "{{ k8s_type }}"
-        group_name: "tag_env-host-type-{{ cluster_id }}-openshift-master"
 
     - set_fact: k8s_type="node"
 
     - name: Generate node instance names(s)
       set_fact: scratch={{ cluster_id }}-{{ k8s_type }}-{{ '%05x' |format( 1048576 |random) }}
       register: node_names_output
-      with_sequence: start=1 end={{ nodes }}
+      with_sequence: start=1 end={{ num_nodes }}
 
     # These set_fact's cannot be combined
     - set_fact:
@@ -55,9 +54,9 @@
 - include: ../openshift-master/config.yml
   vars:
     oo_host_group_exp: "groups[\"tag_env-host-type-{{ cluster_id }}-openshift-master\"]"
-    oo_env: "{{ cluster_id }}"
 
 - include: ../openshift-node/config.yml
   vars:
     oo_host_group_exp: "groups[\"tag_env-host-type-{{ cluster_id }}-openshift-node\"]"
-    oo_env: "{{ cluster_id }}"
+
+- include: list.yml

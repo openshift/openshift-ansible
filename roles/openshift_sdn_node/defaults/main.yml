@@ -1,2 +1,0 @@
----
-openshift_sdn_node_debug_level: "{{ openshift_debug_level | default(0) }}"

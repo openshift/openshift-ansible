@@ -1,4 +1,3 @@
 ---
 - name: restart openshift-master
   service: name=openshift-master state=restarted
-  when: not openshift_master_manage_service_externally
