@@ -1,0 +1,102 @@
+- name: node/config.yml, populate oo_nodes_to_config host group if needed
+  hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: "Evaluate oo_host_group_exp if it's set"
+      add_host:
+        name: '{{ item }}'
+        groups: oo_nodes_to_config
+      with_items: "{{ oo_host_group_exp | default('') }}"
+      when: oo_host_group_exp is defined
+
+    - add_host:
+        name: "{{ groups['tag_env-host-type-' ~ cluster_id ~ '-openshift-master'][0] }}"
+        groups: oo_first_master
+      when: oo_host_group_exp is defined
+
+
+- name: Gather and set facts for hosts to configure
+  hosts: oo_nodes_to_config
+  roles:
+  - openshift_facts
+  tasks:
+  # Since the master is registering the nodes before they are configured, we
+  # need to make sure to set the node properties beforehand if we do not want
+  # the defaults
+  - openshift_facts:
+      role: "{{ item.role }}"
+      local_facts: "{{ item.local_facts }}"
+    with_items:
+    - role: common
+      local_facts:
+        hostname: "{{ ansible_default_ipv4.address }}"
+    - role: node
+      local_facts:
+        external_id: "{{ openshift_node_external_id | default(None) }}"
+        resources_cpu: "{{ openshfit_node_resources_cpu | default(None) }}"
+        resources_memory: "{{ openshfit_node_resources_memory | default(None) }}"
+        pod_cidr: "{{ openshfit_node_pod_cidr | default(None) }}"
+        labels: "{{ openshfit_node_labels | default(None) }}"
+        annotations: "{{ openshfit_node_annotations | default(None) }}"
+
+
+- name: Register nodes
+  hosts: oo_first_master
+  vars:
+    openshift_nodes: "{{ hostvars
+          | oo_select_keys(groups['oo_nodes_to_config']) }}"
+  roles:
+  - openshift_register_nodes
+  tasks:
+  - name: Create local temp directory for syncing certs
+    local_action: command /usr/bin/mktemp -d /tmp/openshift-ansible-XXXXXXX
+    register: mktemp
+
+  - name: Sync master certs to localhost
+    synchronize:
+      mode: pull
+      checksum: yes
+      src: /var/lib/openshift/openshift.local.certificates
+      dest: "{{ mktemp.stdout }}"
+
+- name: Configure instances
+  hosts: oo_nodes_to_config
+  vars_files:
+  - vars.yml
+  vars:
+    sync_tmpdir: "{{ hostvars[groups['oo_first_master'][0]].mktemp.stdout }}"
+    cert_parent_rel_path: openshift.local.certificates
+    cert_rel_path: "{{ cert_parent_rel_path }}/node-{{ openshift.common.hostname }}"
+    cert_base_path: /var/lib/openshift
+    cert_parent_path: "{{ cert_base_path }}/{{ cert_parent_rel_path }}"
+    cert_path: "{{ cert_base_path }}/{{ cert_rel_path }}"
+  pre_tasks:
+  - name: Ensure certificate directories exists
+    file:
+      path: "{{ item }}"
+      state: directory
+    with_items:
+    - "{{ cert_path }}"
+    - "{{ cert_parent_path }}/ca"
+
+  # TODO: notify restart openshift-node and/or restart openshift-sdn-node,
+  # possibly test service started time against certificate/config file
+  # timestamps in openshift-node or openshift-sdn-node to trigger notify
+  - name: Sync certs to nodes
+    synchronize:
+      checksum: yes
+      src: "{{ item.src }}"
+      dest: "{{ item.dest }}"
+      owner: no
+      group: no
+    with_items:
+    - src: "{{ sync_tmpdir }}/{{ cert_rel_path }}"
+      dest: "{{ cert_parent_path }}"
+    - src: "{{ sync_tmpdir }}/{{ cert_parent_rel_path }}/ca/cert.crt"
+      dest: "{{ cert_parent_path }}/ca/cert.crt"
+  - local_action: file name={{ sync_tmpdir }} state=absent
+    run_once: true
+  roles:
+    - openshift_node
+    - os_env_extras
+    - os_env_extras_node

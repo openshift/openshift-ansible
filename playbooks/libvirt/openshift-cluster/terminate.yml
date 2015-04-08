@@ -1,0 +1,41 @@
+- name: Terminate instance(s)
+  hosts: localhost
+  connection: local
+  gather_facts: no
+
+  vars:
+    libvirt_storage_pool_path: "{{ lookup('env','HOME') }}/libvirt-storage-pool-openshift"
+    libvirt_storage_pool: 'openshift'
+    libvirt_uri: 'qemu:///system'
+
+  tasks:
+    - name: List VMs
+      virt:
+        command: list_vms
+      register: list_vms
+
+    - name: Destroy VMs
+      virt:
+        name: '{{ item[0] }}'
+        command: '{{ item[1] }}'
+        uri: '{{ libvirt_uri }}'
+      with_nested:
+        - '{{ list_vms.list_vms }}'
+        - [ destroy, undefine ]
+      when: item[0]|truncate(cluster_id|length+1, True) == '{{ cluster_id }}-...'
+
+    - name: Delete VMs config drive
+      file:
+        path: '{{ libvirt_storage_pool_path }}/{{ item }}_configdrive/openstack'
+        state: absent
+      with_items: '{{ list_vms.list_vms }}'
+      when: item|truncate(cluster_id|length+1, True) == '{{ cluster_id }}-...'
+
+    - name: Delete VMs drives
+      command: 'virsh -c {{ libvirt_uri }} vol-delete --pool {{ libvirt_storage_pool }} {{ item[0] }}{{ item[1] }}'
+      args:
+        removes: '{{ libvirt_storage_pool_path }}/{{ item[0] }}{{ item[1] }}'
+      with_nested:
+        - '{{ list_vms.list_vms }}'
+        - [ '_configdrive', '_cloud-init.iso', '.qcow2' ]
+      when: item[0]|truncate(cluster_id|length+1, True) == '{{ cluster_id }}-...'
