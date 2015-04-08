@@ -1,6 +1,6 @@
 Summary:       OpenShift Ansible Scripts for working with metadata hosts
 Name:          openshift-ansible-bin
-Version:       0.0.4
+Version:       0.0.5
 Release:       1%{?dist}
 License:       ASL 2.0
 URL:           https://github.com/openshift/openshift-ansible
@@ -36,6 +36,10 @@ cp -p openshift_ansible.conf.example %{buildroot}/etc/openshift_ansible/openshif
 %config(noreplace) /etc/openshift_ansible/
 
 %changelog
+* Wed Apr 08 2015 Thomas Wiest <twiest@redhat.com> 0.0.5-1
+- fixed the opssh default output behavior to be consistent with pssh. Also
+  fixed a bug in how directories are named for --outdir and --errdir.
+  (twiest@redhat.com)
 * Tue Mar 31 2015 Thomas Wiest <twiest@redhat.com> 0.0.4-1
 - Fixed when tag was missing and added opssh completion (kwoodson@redhat.com)
 
