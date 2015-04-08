@@ -2,7 +2,9 @@
 - name: 'Get current hosts who have triggers that are alerting by trigger description'
   hosts: localhost
   gather_facts: no
-  tasks:
+  roles:
+    - os_zabbix
+  post_tasks:
     - assert:
         that: oo_desc is defined
 
