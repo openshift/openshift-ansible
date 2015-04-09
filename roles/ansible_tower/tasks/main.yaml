@@ -25,3 +25,9 @@
 - name: Open firewalld port for https
   firewalld: port=8080/tcp permanent=true state=enabled
 
+- name: Set (httpd_can_network_connect) flag on and keep it persistent across reboots
+  seboolean: name=httpd_can_network_connect state=yes persistent=yes
+
+- name: Set (httpd_can_network_connect_db) flag on and keep it persistent across reboots
+  seboolean: name=httpd_can_network_connect_db state=yes persistent=yes
+
