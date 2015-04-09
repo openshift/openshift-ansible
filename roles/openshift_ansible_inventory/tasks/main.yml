@@ -1,0 +1,11 @@
+---
+- yum:
+    name: openshift-ansible-inventory
+    state: present
+
+- template:
+    src: multi_ec2.yaml.j2
+    dest: /etc/ansible/multi_ec2.yaml
+    group: "{{ oo_inventory_group }}"
+    owner: "{{ oo_inventory_owner }}"
+    mode: "0640"
