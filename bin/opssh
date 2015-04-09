@@ -19,6 +19,7 @@ CONFIG_MAIN_SECTION = 'main'
 CONFIG_HOST_TYPE_ALIAS_SECTION = 'host_type_aliases'
 CONFIG_INVENTORY_OPTION = 'inventory'
 
+class ArgumentMismatchError(ValueError): pass
 
 class Opssh(object):
     def __init__(self):
@@ -36,21 +37,18 @@ class Opssh(object):
 
         self.aws = awsutil.AwsUtil(self.inventory, self.host_type_aliases)
 
+    def run(self):
         if self.args.list_host_types:
             self.aws.print_host_types()
-            return
+            return 0
 
         if self.args.env and \
            self.args.host_type and \
            self.args.command:
-            retval = self.run_pssh()
-            if retval != 0:
-                raise ValueError("pssh run failed")
-
-            return
+            return self.run_pssh()
 
         # If it makes it here, we weren't able to determine what they wanted to do
-        raise ValueError("Invalid combination of arguments")
+        raise ArgumentMismatchError("Invalid combination of arguments")
 
     def run_pssh(self):
         """Actually run the pssh command based off of the supplied options
@@ -142,5 +140,7 @@ if __name__ == '__main__':
 
     try:
         opssh = Opssh()
-    except ValueError as e:
+        exitcode = opssh.run()
+        sys.exit(exitcode)
+    except ArgumentMismatchError as e:
         print "\nError: %s\n" % e.message
