@@ -1,8 +1,0 @@
----
-# tasks file for yum-repo
-
-- name: Installing yum-repo template
-  template:
-    src: yumrepo.j2
-    dest: /etc/yum.repos.d/{{ repo_tag }}.repo
-
