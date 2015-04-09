@@ -1,0 +1,38 @@
+OpenShift Repos 
+================
+
+Configures repositories for an OpenShift installation
+
+Requirements
+------------
+
+A RHEL 7.1 host pre-configured with access to the rhel-7-server-rpms,
+rhel-7-server-extra-rpms, and rhel-7-server-ose-beta-rpms repos.
+
+Role Variables
+--------------
+
+| Name                          | Default value |                                              |
+|-------------------------------|---------------|----------------------------------------------|
+| openshift_deployment_type     | online        | Possible values enterprise, origin, online   |
+| openshift_additional_repos    | {}            | TODO                                         |
+
+Dependencies
+------------
+
+None.
+
+Example Playbook
+----------------
+
+TODO
+
+License
+-------
+
+Apache License, Version 2.0
+
+Author Information
+------------------
+
+TODO

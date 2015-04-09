@@ -1,0 +1,188 @@
+#!/usr/bin/env python
+# vim: expandtab:tabstop=4:shiftwidth=4
+
+import argparse
+import ConfigParser
+import sys
+import os
+
+
+class Cluster(object):
+    """
+    Control and Configuration Interface for OpenShift Clusters
+    """
+    def __init__(self):
+        # setup ansible ssh environment
+        if 'ANSIBLE_SSH_ARGS' not in os.environ:
+            os.environ['ANSIBLE_SSH_ARGS'] = (
+                '-o ForwardAgent=yes '
+                '-o StrictHostKeyChecking=no '
+                '-o UserKnownHostsFile=/dev/null '
+                '-o ControlMaster=auto '
+                '-o ControlPersist=600s '
+            )
+
+    def create(self, args):
+        """
+        Create an OpenShift cluster for given provider
+        :param args: command line arguments provided by user
+        :return: exit status from run command
+        """
+        env = {'cluster_id': args.cluster_id}
+        playbook = "playbooks/{}/openshift-cluster/launch.yml".format(args.provider)
+        inventory = self.setup_provider(args.provider)
+
+        env['num_masters'] = args.masters
+        env['num_nodes'] = args.nodes
+
+        return self.action(args, inventory, env, playbook)
+
+    def terminate(self, args):
+        """
+        Destroy OpenShift cluster
+        :param args: command line arguments provided by user
+        :return: exit status from run command
+        """
+        env = {'cluster_id': args.cluster_id}
+        playbook = "playbooks/{}/openshift-cluster/terminate.yml".format(args.provider)
+        inventory = self.setup_provider(args.provider)
+
+        return self.action(args, inventory, env, playbook)
+
+    def list(self, args):
+        """
+        List VMs in cluster
+        :param args: command line arguments provided by user
+        :return: exit status from run command
+        """
+        env = {'cluster_id': args.cluster_id}
+        playbook = "playbooks/{}/openshift-cluster/list.yml".format(args.provider)
+        inventory = self.setup_provider(args.provider)
+
+        return self.action(args, inventory, env, playbook)
+
+    def update(self, args):
+        """
+        Update to latest OpenShift across clustered VMs
+        :param args: command line arguments provided by user
+        :return: exit status from run command
+        """
+        env = {'cluster_id': args.cluster_id}
+        playbook = "playbooks/{}/openshift-cluster/update.yml".format(args.provider)
+        inventory = self.setup_provider(args.provider)
+
+        return self.action(args, inventory, env, playbook)
+
+    def setup_provider(self, provider):
+        """
+        Setup ansible playbook environment
+        :param provider: command line arguments provided by user
+        :return: path to inventory for given provider
+        """
+        config = ConfigParser.ConfigParser()
+        if 'gce' == provider:
+            config.readfp(open('inventory/gce/gce.ini'))
+
+            for key in config.options('gce'):
+                os.environ[key] = config.get('gce', key)
+
+            inventory = '-i inventory/gce/gce.py'
+        elif 'aws' == provider:
+            config.readfp(open('inventory/aws/ec2.ini'))
+
+            for key in config.options('ec2'):
+                os.environ[key] = config.get('ec2', key)
+
+            inventory = '-i inventory/aws/ec2.py'
+        else:
+            # this code should never be reached
+            raise ValueError("invalid PROVIDER {}".format(provider))
+
+        return inventory
+
+    def action(self, args, inventory, env, playbook):
+        """
+        Build ansible-playbook command line and execute
+        :param args: command line arguments provided by user
+        :param inventory: derived provider library
+        :param env: environment variables for kubernetes
+        :param playbook: ansible playbook to execute
+        :return: exit status from ansible-playbook command
+        """
+
+        verbose = ''
+        if args.verbose > 0:
+            verbose = '-{}'.format('v' * args.verbose)
+
+        ansible_env = '-e \'{}\''.format(
+            ' '.join(['%s=%s' % (key, value) for (key, value) in env.items()])
+        )
+
+        command = 'ansible-playbook {} {} {} {}'.format(
+            verbose, inventory, ansible_env, playbook
+        )
+
+        if args.verbose > 1:
+            command = 'time {}'.format(command)
+
+        if args.verbose > 0:
+            sys.stderr.write('RUN [{}]\n'.format(command))
+            sys.stderr.flush()
+
+        return os.system(command)
+
+
+if __name__ == '__main__':
+    """
+    Implemented to support writing unit tests
+    """
+
+    cluster = Cluster()
+
+    providers = ['gce', 'aws']
+    parser = argparse.ArgumentParser(
+        description='Python wrapper to ensure proper environment for OpenShift ansible playbooks',
+    )
+    parser.add_argument('-v', '--verbose', action='count', help='Multiple -v options increase the verbosity')
+    parser.add_argument('--version', action='version', version='%(prog)s 0.2')
+
+    meta_parser = argparse.ArgumentParser(add_help=False)
+    meta_parser.add_argument('provider', choices=providers, help='provider')
+    meta_parser.add_argument('cluster_id', help='prefix for cluster VM names')
+
+    action_parser = parser.add_subparsers(dest='action', title='actions', description='Choose from valid actions')
+
+    create_parser = action_parser.add_parser('create', help='Create a cluster', parents=[meta_parser])
+    create_parser.add_argument('-m', '--masters', default=1, type=int, help='number of masters to create in cluster')
+    create_parser.add_argument('-n', '--nodes', default=2, type=int, help='number of nodes to create in cluster')
+    create_parser.set_defaults(func=cluster.create)
+
+    terminate_parser = action_parser.add_parser('terminate', help='Destroy a cluster', parents=[meta_parser])
+    terminate_parser.add_argument('-f', '--force', action='store_true', help='Destroy cluster without confirmation')
+    terminate_parser.set_defaults(func=cluster.terminate)
+
+    update_parser = action_parser.add_parser('update', help='Update OpenShift across cluster', parents=[meta_parser])
+    update_parser.add_argument('-f', '--force', action='store_true', help='Update cluster without confirmation')
+    update_parser.set_defaults(func=cluster.update)
+
+    list_parser = action_parser.add_parser('list', help='List VMs in cluster', parents=[meta_parser])
+    list_parser.set_defaults(func=cluster.list)
+
+    args = parser.parse_args()
+
+    if 'terminate' == args.action and not args.force:
+        answer = raw_input("This will destroy the ENTIRE {} environment. Are you sure? [y/N] ".format(args.cluster_id))
+        if answer not in ['y', 'Y']:
+            sys.stderr.write('\nACTION [terminate] aborted by user!\n')
+            exit(1)
+
+    if 'update' == args.action and not args.force:
+        answer = raw_input("This is destructive and could corrupt {} environment. Continue? [y/N] ".format(args.cluster_id))
+        if answer not in ['y', 'Y']:
+            sys.stderr.write('\nACTION [update] aborted by user!\n')
+            exit(1)
+
+    status = args.func(args)
+    if status != 0:
+        sys.stderr.write("ACTION [{}] failed with exit status {}\n".format(args.action, status))
+    exit(status)

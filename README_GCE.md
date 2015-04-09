@@ -4,7 +4,7 @@ GCE Setup Instructions
 
 Get a gce service key
 ---------------------
-1. ask your GCE project administrator for a GCE service key
+1. Ask your GCE project administrator for a GCE service key
 
 Note: If your GCE project does not show a Service Account under <Project>/APIs & auth/Credentials, you will need to use "Create new Client ID" to create a Service Account before your administrator can create the service key for you.
 
@@ -65,12 +65,29 @@ Install Dependencies
 Test The Setup
 --------------
 1. cd openshift-ansible/
-2. Try to list all instances:
+1. Try to list all instances (Passing an empty string as the cluster_id
+argument will result in all gce instances being listed)
 ```
-  ./cloud.rb gce list
+  bin/cluster list gce ''
 ```
 
-3. Try to create an instance:
+Creating a cluster
+------------------
+1. To create a cluster with one master and two nodes
 ```
-  ./cloud.rb gce launch -n ${USER}-node1 -e int --type os3-node
+  bin/cluster create gce <cluster-id>
+```
+
+Updating a cluster
+---------------------
+1. To update the cluster
+```
+  bin/cluster update gce <cluster-id>
+```
+
+Terminating a cluster
+---------------------
+1. To terminate the cluster
+```
+  bin/cluster terminate gce <cluster-id>
 ```

@@ -1,0 +1,10 @@
+# This is an example of a bring your own (byo) host inventory
+
+# host group for masters
+[masters]
+ose3-master-ansible.test.example.com
+
+# host group for nodes
+[nodes]
+ose3-node[1:2]-ansible.test.example.com
+

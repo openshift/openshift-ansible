@@ -1,10 +1,4 @@
 ---
-openshift_node_manage_service_externally: false
-openshift_node_debug_level: "{{ openshift_debug_level | default(0) }}"
 os_firewall_allow:
 - service: OpenShift kubelet
   port: 10250/tcp
-openshift_node_resources:
-  capacity:
-    cpu:
-    memory:

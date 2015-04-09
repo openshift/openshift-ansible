@@ -1,0 +1,7 @@
+---
+# TODO: once we are able to configure/deploy origin using the openshift roles,
+# then we should default to origin
+
+# TODO: push the defaulting of these values to the openshift_facts module
+openshift_deployment_type: online
+openshift_additional_repos: {}

@@ -1,8 +1,3 @@
 ---
-openshift_bind_ip: "{{ ansible_default_ipv4.address }}"
+openshift_cluster_id: 'default'
 openshift_debug_level: 0
-
-# TODO: Once openshift stops resolving hostnames for node queries remove
-# this...
-openshift_hostname_workaround: true
-openshift_hostname: "{{ openshift_public_ip if openshift_hostname_workaround else ansible_fqdn }}"

@@ -21,9 +21,12 @@ Setup
   - [AWS](README_AWS.md)
   - [GCE](README_GCE.md)
 
+- Build
+  - [How to build the openshift-ansible rpms](BUILD.md)
+
 - Directory Structure:
   - [cloud.rb](cloud.rb) - light wrapper around Ansible
-  - [cluster.sh](cluster.sh) - easily create OpenShift 3 clusters
+  - [bin/cluster](bin/cluster) - python script to easily create OpenShift 3 clusters
   - [filter_plugins/](filter_plugins) - custom filters used to manipulate data in Ansible
   - [inventory/](inventory) - houses Ansible dynamic inventory scripts
   - [lib/](lib) - library components of cloud.rb

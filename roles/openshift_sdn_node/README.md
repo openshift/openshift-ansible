@@ -17,19 +17,12 @@ From this role:
 | openshift_sdn_node_debug_level | openshift_debug_level | Verbosity of the debug logs for openshift-master |
 
 
-From openshift_node:
-| Name                  | Default value    |                                      |
-|-----------------------|------------------|--------------------------------------|
-| openshift_master_ips  | UNDEF (Required) | List of IP addresses for the openshift-master hosts to be used for node -> master communication |
-
-
 From openshift_common:
 | Name                          | Default value       |                                        |
 |-------------------------------|---------------------|----------------------------------------|
 | openshift_debug_level         | 0                   | Global openshift debug log verbosity   |
-| openshift_hostname_workaround | True                |                                        |
 | openshift_public_ip           | UNDEF (Required)    | Public IP address to use for this host |
-| openshift_hostname            | openshift_public_ip if openshift_hostname_workaround else ansible_fqdn | hostname to use for this instance |
+| openshift_hostname            | UNDEF (Required)    | hostname to use for this instance |
 
 Dependencies
 ------------

@@ -1,0 +1,5 @@
+---
+# defaults file for yum-repo
+repo_enabled: "1"
+repo_gpg_check: "1"
+
