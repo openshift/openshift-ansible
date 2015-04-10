@@ -12,14 +12,13 @@ import subprocess
 import ConfigParser
 
 from openshift_ansible import awsutil
+from openshift_ansible.awsutil import ArgumentError
 
 DEFAULT_PSSH_PAR = 200
 PSSH = '/usr/bin/pssh'
 CONFIG_MAIN_SECTION = 'main'
 CONFIG_HOST_TYPE_ALIAS_SECTION = 'host_type_aliases'
 CONFIG_INVENTORY_OPTION = 'inventory'
-
-class ArgumentMismatchError(ValueError): pass
 
 class Opssh(object):
     def __init__(self):
@@ -42,13 +41,30 @@ class Opssh(object):
             self.aws.print_host_types()
             return 0
 
-        if self.args.env and \
-           self.args.host_type and \
-           self.args.command:
-            return self.run_pssh()
+        hosts = None
+        if self.args.host_type is not None and \
+           self.args.env is not None:
+            # Both env and host-type specified
+            hosts = self.aws.get_host_list(host_type=self.args.host_type, \
+                                           env=self.args.env)
 
-        # If it makes it here, we weren't able to determine what they wanted to do
-        raise ArgumentMismatchError("Invalid combination of arguments")
+        if self.args.host_type is None and \
+           self.args.env is not None:
+            # Only env specified
+            hosts = self.aws.get_host_list(env=self.args.env)
+
+        if self.args.host_type is not None and \
+           self.args.env is None:
+            # Only host-type specified
+            hosts = self.aws.get_host_list(host_type=self.args.host_type)
+
+        if hosts is None:
+            # We weren't able to determine what they wanted to do
+            raise ArgumentError("Invalid combination of arguments")
+
+        for host in hosts:
+            print host
+        return 0
 
     def run_pssh(self):
         """Actually run the pssh command based off of the supplied options
@@ -109,7 +125,7 @@ class Opssh(object):
         parser.add_argument('-e', '--env', action="store",
                        help="Which environment to use")
 
-        parser.add_argument('-t', '--host-type', action="store",
+        parser.add_argument('-t', '--host-type', action="store", default=None,
                        help="Which host type to use")
 
         parser.add_argument('-c', '--command', action='store',
@@ -142,5 +158,5 @@ if __name__ == '__main__':
         opssh = Opssh()
         exitcode = opssh.run()
         sys.exit(exitcode)
-    except ArgumentMismatchError as e:
+    except ArgumentError as e:
         print "\nError: %s\n" % e.message
