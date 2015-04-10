@@ -1,0 +1,43 @@
+- name: Generate oo_list_hosts group
+  hosts: localhost
+  connection: local
+  gather_facts: no
+
+  vars:
+    libvirt_uri: 'qemu:///system'
+
+  tasks:
+    - name: List VMs
+      virt:
+        command: list_vms
+      register: list_vms
+
+    - name: Collect MAC addresses of the VMs
+      shell: 'virsh -c {{ libvirt_uri }} dumpxml {{ item }} | xmllint --xpath "string(//domain/devices/interface/mac/@address)" -'
+      register: scratch_mac
+      with_items: '{{ list_vms.list_vms }}'
+      when: item|truncate(cluster_id|length+1, True) == '{{ cluster_id }}-...'
+
+    - name: Collect IP addresses of the VMs
+      shell: "awk '/{{ item.stdout }}/ {print $1}' /proc/net/arp"
+      register: scratch_ip
+      with_items: '{{ scratch_mac.results }}'
+      when: item.skipped is not defined
+
+    - name: Add hosts
+      add_host:
+        hostname: '{{ item[0] }}'
+        ansible_ssh_host: '{{ item[1].stdout }}'
+        ansible_ssh_user: root
+        groups: oo_list_hosts
+      with_together:
+        - '{{ list_vms.list_vms }}'
+        - '{{ scratch_ip.results }}'
+      when: item[1].skipped is not defined
+
+- name: List Hosts
+  hosts: oo_list_hosts
+
+  tasks:
+    - debug:
+        msg: 'public:{{ansible_default_ipv4.address}} private:{{ansible_default_ipv4.address}}'

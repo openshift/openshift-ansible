@@ -20,6 +20,7 @@ Setup
 - Setup for a specific cloud:
   - [AWS](README_AWS.md)
   - [GCE](README_GCE.md)
+  - [local VMs](README_libvirt.md)
 
 - Build
   - [How to build the openshift-ansible rpms](BUILD.md)

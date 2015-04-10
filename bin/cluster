@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # vim: expandtab:tabstop=4:shiftwidth=4
 
 import argparse
@@ -94,6 +94,8 @@ class Cluster(object):
                 os.environ[key] = config.get('ec2', key)
 
             inventory = '-i inventory/aws/ec2.py'
+        elif 'libvirt' == provider:
+            inventory = '-i inventory/libvirt/hosts'
         else:
             # this code should never be reached
             raise ValueError("invalid PROVIDER {}".format(provider))
@@ -139,7 +141,7 @@ if __name__ == '__main__':
 
     cluster = Cluster()
 
-    providers = ['gce', 'aws']
+    providers = ['gce', 'aws', 'libvirt']
     parser = argparse.ArgumentParser(
         description='Python wrapper to ensure proper environment for OpenShift ansible playbooks',
     )

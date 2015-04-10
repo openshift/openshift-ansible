@@ -1,0 +1,102 @@
+- name: Create the libvirt storage directory for openshift
+  file:
+    dest: '{{ libvirt_storage_pool_path }}'
+    state: directory
+
+- name: Download Base Cloud image
+  get_url:
+    url: '{{ base_image_url }}'
+    sha256sum: '{{ base_image_sha256 }}'
+    dest: '{{ libvirt_storage_pool_path }}/{{ base_image_name }}'
+
+- name: Create the cloud-init config drive path
+  file:
+    dest: '{{ libvirt_storage_pool_path }}/{{ item }}_configdrive/openstack/latest'
+    state: directory
+  with_items: '{{ instances }}'
+
+- name: Create the cloud-init config drive files
+  template:
+    src: '{{ item[1] }}'
+    dest: '{{ libvirt_storage_pool_path }}/{{ item[0] }}_configdrive/openstack/latest/{{ item[1] }}'
+  with_nested:
+    - '{{ instances }}'
+    - [ user-data, meta-data ]
+
+- name: Create the cloud-init config drive
+  command: 'genisoimage -output {{ libvirt_storage_pool_path }}/{{ item }}_cloud-init.iso -volid cidata -joliet -rock user-data meta-data'
+  args:
+    chdir: '{{ libvirt_storage_pool_path }}/{{ item }}_configdrive/openstack/latest'
+    creates: '{{ libvirt_storage_pool_path }}/{{ item }}_cloud-init.iso'
+  with_items: '{{ instances }}'
+
+- name: Create the libvirt storage pool for openshift
+  command: 'virsh -c {{ libvirt_uri }} pool-create-as {{ libvirt_storage_pool }} dir --target {{ libvirt_storage_pool_path }}'
+  ignore_errors: yes
+
+- name: Refresh the libvirt storage pool for openshift
+  command: 'virsh -c {{ libvirt_uri }} pool-refresh {{ libvirt_storage_pool }}'
+
+- name: Create VMs drives
+  command: 'virsh -c {{ libvirt_uri }} vol-create-as {{ libvirt_storage_pool }} {{ item }}.qcow2 10G --format qcow2 --backing-vol {{ base_image_name }} --backing-vol-format qcow2'
+  with_items: '{{ instances }}'
+
+- name: Create VMs
+  virt:
+    name: '{{ item }}'
+    command: define
+    xml: "{{ lookup('template', '../templates/domain.xml') }}"
+    uri: '{{ libvirt_uri }}'
+  with_items: '{{ instances }}'
+
+- name: Start VMs
+  virt:
+    name: '{{ item }}'
+    state: running
+    uri: '{{ libvirt_uri }}'
+  with_items: '{{ instances }}'
+
+- name: Collect MAC addresses of the VMs
+  shell: 'virsh -c {{ libvirt_uri }} dumpxml {{ item }} | xmllint --xpath "string(//domain/devices/interface/mac/@address)" -'
+  register: scratch_mac
+  with_items: '{{ instances }}'
+
+- name: Wait for the VMs to get an IP
+  command: "egrep -c '{{ scratch_mac.results | oo_collect('stdout') | join('|') }}' /proc/net/arp"
+  ignore_errors: yes
+  register: nb_allocated_ips
+  until: nb_allocated_ips.stdout == '{{ instances | length }}'
+  retries: 30
+  delay: 1
+
+- name: Collect IP addresses of the VMs
+  shell: "awk '/{{ item.stdout }}/ {print $1}' /proc/net/arp"
+  register: scratch_ip
+  with_items: '{{ scratch_mac.results }}'
+
+- set_fact:
+    ips: "{{ scratch_ip.results | oo_collect('stdout') }}"
+
+- name: Add new instances
+  add_host:
+    hostname: '{{ item.0 }}'
+    ansible_ssh_host: '{{ item.1 }}'
+    ansible_ssh_user: root
+    groups: 'tag_env-{{ cluster }}, tag_host-type-{{ type }}, tag_env-host-type-{{ cluster }}-openshift-{{ type }}'
+  with_together:
+    - instances
+    - ips
+
+- name: Wait for ssh
+  wait_for:
+    host: '{{ item }}'
+    port: 22
+  with_items: ips
+
+- name: Wait for root user setup
+  command: 'ssh -o StrictHostKeyChecking=no -o PasswordAuthentication=no -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null root@{{ item }} echo root user is setup'
+  register: result
+  until: result.rc == 0
+  retries: 30
+  delay: 1
+  with_items: ips
