@@ -23,7 +23,7 @@ mkdir -p %{buildroot}%{python_sitelib}/openshift_ansible
 mkdir -p %{buildroot}/etc/bash_completion.d
 mkdir -p %{buildroot}/etc/openshift_ansible
 
-cp -p ossh oscp opssh %{buildroot}%{_bindir}
+cp -p ossh oscp opssh ohi %{buildroot}%{_bindir}
 cp -p openshift_ansible/* %{buildroot}%{python_sitelib}/openshift_ansible
 cp -p ossh_bash_completion %{buildroot}/etc/bash_completion.d
 
