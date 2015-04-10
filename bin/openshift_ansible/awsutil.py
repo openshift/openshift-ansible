@@ -5,6 +5,10 @@ import os
 import json
 import re
 
+class ArgumentError(Exception):
+    def __init__(self, message):
+        self.message = message
+
 class AwsUtil(object):
     def __init__(self, inventory_path=None, host_type_aliases={}):
         self.host_type_aliases = host_type_aliases
@@ -128,15 +132,45 @@ class AwsUtil(object):
             return self.alias_lookup[host_type]
         return host_type
 
+    def gen_env_tag(self, env):
+        """Generate the environment tag
+        """
+        return "tag_environment_%s" % env
+
+    def gen_host_type_tag(self, host_type):
+        """Generate the host type tag
+        """
+        host_type = self.resolve_host_type(host_type)
+        return "tag_host-type_%s" % host_type
+
     def gen_env_host_type_tag(self, host_type, env):
         """Generate the environment host type tag
         """
         host_type = self.resolve_host_type(host_type)
         return "tag_env-host-type_%s-%s" % (env, host_type)
 
-    def get_host_list(self, host_type, env):
+    def get_host_list(self, host_type=None, env=None):
         """Get the list of hosts from the inventory using host-type and environment
         """
         inv = self.get_inventory()
-        host_type_tag = self.gen_env_host_type_tag(host_type, env)
-        return inv[host_type_tag]
+
+        if host_type is not None and \
+           env is not None:
+            # Both host type and environment were specified
+            env_host_type_tag = self.gen_env_host_type_tag(host_type, env)
+            return inv[env_host_type_tag]
+
+        if host_type is None and \
+           env is not None:
+            # Just environment was specified
+            host_type_tag = self.gen_env_tag(env)
+            return inv[host_type_tag]
+
+        if host_type is not None and \
+           env is None:
+            # Just host-type was specified
+            host_type_tag = self.gen_host_type_tag(host_type)
+            return inv[host_type_tag]
+
+        # We should never reach here!
+        raise ArgumentError("Invalid combination of parameters")
