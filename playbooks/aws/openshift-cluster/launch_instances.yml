@@ -5,6 +5,7 @@
     machine_region: "{{ lookup('env', 'ec2_region')|default('us-east-1', true) }}"
     machine_keypair: "{{ lookup('env', 'ec2_keypair')|default('libra', true) }}"
     created_by: "{{ lookup('env', 'LOGNAME')|default(cluster, true) }}"
+    security_group: "{{ lookup('env', 'ec2_security_group')|default('public', true) }}"
     env: "{{ cluster }}"
     host_type: "{{ type }}"
     env_host_type: "{{ cluster }}-openshift-{{ type }}"
@@ -14,7 +15,7 @@
     state: present
     region: "{{ machine_region }}"
     keypair: "{{ machine_keypair }}"
-    group: ['public']
+    group: "{{ security_group }}"
     instance_type: "{{ machine_type }}"
     image: "{{ machine_image }}"
     count: "{{ instances | oo_len }}"
