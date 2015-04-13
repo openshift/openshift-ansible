@@ -1,6 +1,6 @@
 Summary:       OpenShift Ansible Scripts for working with metadata hosts
 Name:          openshift-ansible-bin
-Version:       0.0.7
+Version:       0.0.8
 Release:       1%{?dist}
 License:       ASL 2.0
 URL:           https://github.com/openshift/openshift-ansible
@@ -36,6 +36,9 @@ cp -p openshift_ansible.conf.example %{buildroot}/etc/openshift_ansible/openshif
 %config(noreplace) /etc/openshift_ansible/
 
 %changelog
+* Mon Apr 13 2015 Thomas Wiest <twiest@redhat.com> 0.0.8-1
+- fixed bug in opssh where it wouldn't actually run pssh (twiest@redhat.com)
+
 * Mon Apr 13 2015 Thomas Wiest <twiest@redhat.com> 0.0.7-1
 - added the ability to run opssh and ohi on all hosts in an environment, as
   well as all hosts of the same host-type regardless of environment
