@@ -41,30 +41,12 @@ class Opssh(object):
             self.aws.print_host_types()
             return 0
 
-        hosts = None
-        if self.args.host_type is not None and \
+        if self.args.host_type is not None or \
            self.args.env is not None:
-            # Both env and host-type specified
-            hosts = self.aws.get_host_list(host_type=self.args.host_type, \
-                                           env=self.args.env)
+            return self.run_pssh()
 
-        if self.args.host_type is None and \
-           self.args.env is not None:
-            # Only env specified
-            hosts = self.aws.get_host_list(env=self.args.env)
-
-        if self.args.host_type is not None and \
-           self.args.env is None:
-            # Only host-type specified
-            hosts = self.aws.get_host_list(host_type=self.args.host_type)
-
-        if hosts is None:
-            # We weren't able to determine what they wanted to do
-            raise ArgumentError("Invalid combination of arguments")
-
-        for host in hosts:
-            print host
-        return 0
+        # We weren't able to determine what they wanted to do
+        raise ArgumentError("Invalid combination of arguments")
 
     def run_pssh(self):
         """Actually run the pssh command based off of the supplied options
@@ -82,7 +64,9 @@ class Opssh(object):
         if self.args.errdir:
             pssh_args.extend(["--errdir", self.args.errdir])
 
-        hosts = self.aws.get_host_list(self.args.host_type, self.args.env)
+        hosts = self.aws.get_host_list(host_type=self.args.host_type,
+                                       env=self.args.env)
+
         with tempfile.NamedTemporaryFile(prefix='opssh-', delete=True) as f:
             for h in hosts:
                 f.write(h + os.linesep)
