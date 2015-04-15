@@ -69,12 +69,6 @@
     with_items: openshift_nodes
     changed_when: False
 
-  - name: Remove the temp directory on the master
-    file:
-      path: "{{ sync_tmpdir }}"
-      state: absent
-    changed_when: False
-
 
 - name: Configure node instances
   hosts: oo_nodes_to_config
@@ -103,8 +97,17 @@
     group_by: key=oo_nodes_deployment_type_{{ openshift.common.deployment_type }}
     changed_when: False
 
+- name: Delete the temporary directory on the master
+  hosts: oo_first_master
+  gather_facts: no
+  vars:
+    sync_tmpdir: "{{ hostvars.localhost.mktemp.stdout }}"
+  tasks:
+  - file: name={{ sync_tmpdir }} state=absent
+    changed_when: False
 
-- name: Delete temporary directory
+
+- name: Delete temporary directory on localhost
   hosts: localhost
   gather_facts: no
   tasks:
