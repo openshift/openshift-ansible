@@ -16,7 +16,7 @@
   command: "virsh -c {{ libvirt_uri }} pool-info {{ libvirt_storage_pool }}"
   register: pool_info_result
   changed_when: False
-  failed_when: "pool_info_result.rc != 0 and 'error: Storage pool not found:' not in pool_info_result.stderr"
+  failed_when: "pool_info_result.rc != 0 and 'no storage pool with matching name' not in pool_info_result.stderr"
 
 - name: Create the libvirt storage pool for openshift
   command: 'virsh -c {{ libvirt_uri }} pool-create-as {{ libvirt_storage_pool }} dir --target {{ libvirt_storage_pool_path }}'
