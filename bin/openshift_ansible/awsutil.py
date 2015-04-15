@@ -31,10 +31,8 @@ class AwsUtil(object):
             for value in values:
                 self.alias_lookup[value] = key
 
-
-
     def get_inventory(self,args=[]):
-        cmd = [self.inventory_path]
+        cmd = [self.inventory_path, '--cache-only']
 
         if args:
             cmd.extend(args)
