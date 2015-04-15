@@ -61,8 +61,8 @@
     --master={{ openshift.master.api_url }}
     --public-master={{ openshift.master.public_api_url }}
     --listen={{ 'https' if openshift.master.api_use_ssl else 'http' }}://0.0.0.0:{{ openshift.master.api_port }}
-    {{ ('--images=' ~ openshift_registry_url) if openshift_registry_url is defined else '' }}
-    {{ ('--nodes=' ~ openshift_node_ips | join(',')) if openshift_node_ips is defined else '' }}
+    {{ ('--images=' ~ openshift_registry_url) if (openshift_registry_url | default('', true) != '') else '' }}
+    {{ ('--nodes=' ~ openshift_node_ips | join(',')) if (openshift_node_ips | default('', true) != '') else '' }}
   args:
     chdir: "{{ openshift_cert_parent_dir }}"
     creates: "{{ openshift_master_config }}"
