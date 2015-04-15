@@ -6,7 +6,7 @@
   failed_when: "net_info_result.rc != 0 and 'error: Network not found:' not in net_info_result.stderr"
 
 - name: Create a temp directory for the template xml file
-  command: "/usr/bin/mktemp -d /tmp/openshift-ansible-XXXXXXX"
+  command: "mktemp -d /tmp/openshift-ansible-XXXXXXX"
   register: mktemp
   when: net_info_result.rc == 1
 
