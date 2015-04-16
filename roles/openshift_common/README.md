@@ -12,19 +12,21 @@ rhel-7-server-extra-rpms, and rhel-7-server-ose-beta-rpms repos.
 Role Variables
 --------------
 
-| Name                          | Default value                |                                        |
-|-------------------------------|------------------------------|----------------------------------------|
-| openshift_bind_ip             | ansible_default_ipv4.address | IP to use for local binding            |
-| openshift_debug_level         | 0                            | Global openshift debug log verbosity   |
-| openshift_hostname_workaround | True                         | Workaround needed to set hostname to IP address |
-| openshift_hostname            | openshift_public_ip if openshift_hostname_workaround else ansible_fqdn | hostname to use for this instance |
-| openshift_public_ip           | UNDEF (Required)             | Public IP address to use for this host |
-| openshift_env                 | default                      | Envrionment name if multiple OpenShift instances |
+| Name                      | Default value     |                                             |
+|---------------------------|-------------------|---------------------------------------------|
+| openshift_cluster_id      | default           | Cluster name if multiple OpenShift clusters |
+| openshift_debug_level     | 0                 | Global openshift debug log verbosity        |
+| openshift_hostname        | UNDEF             | Internal hostname to use for this host (this value will set the hostname on the system) |
+| openshift_ip              | UNDEF             | Internal IP address to use for this host    |
+| openshift_public_hostname | UNDEF             | Public hostname to use for this host        |
+| openshift_public_ip       | UNDEF             | Public IP address to use for this host      |
 
 Dependencies
 ------------
 
 os_firewall
+openshift_facts
+openshift_repos
 
 Example Playbook
 ----------------
@@ -39,4 +41,4 @@ Apache License, Version 2.0
 Author Information
 ------------------
 
-TODO
+Jason DeTiberus (jdetiber@redhat.com)

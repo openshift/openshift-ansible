@@ -1,42 +1,24 @@
 ---
-- name: "populate oo_hosts_to_config host group if needed"
+- name: Populate oo_masters_to_config host group if needed
   hosts: localhost
   gather_facts: no
   tasks:
   - name: "Evaluate oo_host_group_exp if it's set"
-    add_host: "name={{ item }} groups=oo_hosts_to_config"
+    add_host: "name={{ item }} groups=oo_masters_to_config"
     with_items: "{{ oo_host_group_exp | default('') }}"
     when: oo_host_group_exp is defined
 
-- name: "Gather facts for nodes in {{ oo_env }}"
-  hosts: "tag_env-host-type_{{ oo_env }}-openshift-node"
-  connection: ssh
-  user: root
-
-- name: "Set Origin specific facts on localhost (for later use)"
-  hosts: localhost
-  gather_facts: no
-  tasks:
-    - name: Setting openshift_node_ips fact on localhost
-      set_fact:
-        openshift_node_ips: "{{ hostvars
-            | oo_select_keys(groups['tag_env-host-type_' + oo_env + '-openshift-node'])
-            | oo_collect(attribute='ansible_default_ipv4.address') }}"
-      when: groups['tag_env-host-type_' + oo_env + '-openshift-node'] is defined
-
-- name: "Configure instances"
-  hosts: oo_hosts_to_config
-  connection: ssh
-  user: root
+- name: Configure instances
+  hosts: oo_masters_to_config
+  vars:
+    openshift_hostname: "{{ ec2_private_ip_address }}"
+    openshift_public_hostname: "{{ ec2_ip_address }}"
+    # TODO: this should be removed once openshift-sdn packages are available
+    openshift_use_openshift_sdn: False
   vars_files:
-    - vars.yml
+  - vars.yml
   roles:
-    - repos
-    - {
-        role: openshift_master,
-        openshift_node_ips: "{{ hostvars['localhost'].openshift_node_ips | default(['']) }}",
-        openshift_env: "{{ oo_env }}"
-        openshift_public_ip: "{{ ec2_ip_address }}"
-      }
+    - openshift_master
+    #- openshift_sdn_master
     - pods
     - os_env_extras

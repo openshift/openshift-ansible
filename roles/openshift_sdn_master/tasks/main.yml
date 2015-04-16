@@ -1,4 +1,13 @@
 ---
+# TODO: add task to set the sdn subnet if openshift-sdn-master hasn't been
+# started yet
+
+- name: Set master sdn OpenShift facts
+  openshift_facts:
+    role: 'master_sdn'
+    local_facts:
+      debug_level: "{{ openshift_master_sdn_debug_level | default(openshift.common.debug_level) }}"
+
 - name: Install openshift-sdn-master
   yum:
     pkg: openshift-sdn-master
@@ -8,16 +17,9 @@
   lineinfile:
     dest: /etc/sysconfig/openshift-sdn-master
     regexp: '^OPTIONS='
-    line: "OPTIONS=\"-v={{ openshift_sdn_master_debug_level }}\""
+    line: "OPTIONS=\"-v={{ openshift.master_sdn.debug_level }}\""
   notify:
   - restart openshift-sdn-master
-
-- name: Set openshift-sdn-master facts
-  include: "{{ role_path | dirname }}/openshift_common/tasks/set_facts.yml"
-  facts:
-  - section: sdn-master
-    option: debug_level
-    value: "{{ openshift_sdn_master_debug_level }}"
 
 - name: Enable openshift-sdn-master
   service:

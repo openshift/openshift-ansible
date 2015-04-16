@@ -2,18 +2,31 @@
 # vim: expandtab:tabstop=4:shiftwidth=4
 
 import argparse
-import awsutil
 import traceback
 import sys
 import os
 import re
+import ConfigParser
+
+from openshift_ansible import awsutil
+
+CONFIG_MAIN_SECTION = 'main'
+CONFIG_INVENTORY_OPTION = 'inventory'
 
 class Ossh(object):
     def __init__(self):
+        self.inventory = None
         self.file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)))
-        self.parse_cli_args()
 
-        self.aws = awsutil.AwsUtil()
+        # Default the config path to /etc
+        self.config_path = os.path.join(os.path.sep, 'etc',  \
+                                        'openshift_ansible', \
+                                        'openshift_ansible.conf')
+
+        self.parse_cli_args()
+        self.parse_config_file()
+
+        self.aws = awsutil.AwsUtil(self.inventory)
 
         # get a dict of host inventory
         if self.args.list:
@@ -36,6 +49,15 @@ class Ossh(object):
             self.list_hosts()
         else:
             self.ssh()
+
+    def parse_config_file(self):
+        if os.path.isfile(self.config_path):
+            config = ConfigParser.ConfigParser()
+            config.read(self.config_path)
+
+            if config.has_section(CONFIG_MAIN_SECTION) and \
+               config.has_option(CONFIG_MAIN_SECTION, CONFIG_INVENTORY_OPTION):
+                self.inventory = config.get(CONFIG_MAIN_SECTION, CONFIG_INVENTORY_OPTION)
 
     def parse_cli_args(self):
         parser = argparse.ArgumentParser(description='Openshift Online SSH Tool.')

@@ -1,0 +1,20 @@
+---
+- name: Terminate instance(s)
+  hosts: localhost
+
+  vars_files:
+    - vars.yml
+
+- include: ../openshift-node/terminate.yml
+  vars:
+    oo_host_group_exp: 'groups["tag_env-host-type-{{ cluster_id }}-openshift-node"]'
+    gce_service_account_email: "{{ lookup('env', 'gce_service_account_email_address') }}"
+    gce_pem_file: "{{ lookup('env', 'gce_service_account_pem_file_path') }}"
+    gce_project_id: "{{ lookup('env', 'gce_project_id') }}"
+
+- include: ../openshift-master/terminate.yml
+  vars:
+    oo_host_group_exp: 'groups["tag_env-host-type-{{ cluster_id }}-openshift-master"]'
+    gce_service_account_email: "{{ lookup('env', 'gce_service_account_email_address') }}"
+    gce_pem_file: "{{ lookup('env', 'gce_service_account_pem_file_path') }}"
+    gce_project_id: "{{ lookup('env', 'gce_project_id') }}"

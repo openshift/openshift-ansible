@@ -1,0 +1,52 @@
+---
+# TODO: Add flag for enabling EPEL repo, default to false
+
+# TODO: Add subscription-management config, with parameters
+#       for username, password, poolid(name), and official repos to
+#       enable/disable. Might need to make a module that extends the
+#       subscription management module to take a poolid and enable/disable the
+#       proper repos correctly.
+
+- assert:
+    that: openshift_deployment_type in known_openshift_deployment_types
+
+# TODO: remove this when origin support actually works
+- fail: msg="OpenShift Origin support is not currently enabled"
+  when: openshift_deployment_type == 'origin'
+
+- name: Ensure libselinux-python is installed
+  yum:
+    pkg: libselinux-python
+    state: present
+
+- name: Create any additional repos that are defined
+  template:
+    src: yum_repo.j2
+    dest: /etc/yum.repos.d/openshift_additional.repo
+  when: openshift_additional_repos | length > 0
+
+- name: Remove the additional repos if no longer defined
+  file:
+    dest: /etc/yum.repos.d/openshift_additional.repo
+    state: absent
+  when: openshift_additional_repos | length == 0
+
+- name: Remove any yum repo files for other deployment types
+  file:
+    path: "/etc/yum.repos.d/{{ item | basename }}"
+    state: absent
+  with_fileglob:
+  - '*/*'
+  when: not (item | search("/files/" + openshift_deployment_type + "/")) and (item | search(".repo$"))
+
+- name: Configure gpg keys if needed
+  copy: src={{ item }} dest=/etc/pki/rpm-gpg/
+  with_fileglob:
+  - "{{ openshift_deployment_type }}/*"
+  when: item | basename | match("RPM-GPG-KEY-")
+
+- name: Configure yum repositories
+  copy: src={{ item }} dest=/etc/yum.repos.d/
+  with_fileglob:
+  - "{{ openshift_deployment_type }}/*"
+  when: item | basename | search(".*\.repo$")

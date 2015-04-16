@@ -1,0 +1,17 @@
+---
+- name: Generate oo_list_hosts group
+  hosts: localhost
+  gather_facts: no
+  tasks:
+  - set_fact: scratch_group=tag_env_{{ cluster_id }}
+    when: cluster_id != ''
+  - set_fact: scratch_group=all
+    when: scratch_group is not defined
+  - add_host: name={{ item }} groups=oo_list_hosts
+    with_items: groups[scratch_group] | difference(['localhost'])
+
+- name: List Hosts
+  hosts: oo_list_hosts
+  gather_facts: no
+  tasks:
+  - debug: msg="public:{{hostvars[inventory_hostname].ec2_ip_address}} private:{{hostvars[inventory_hostname].ec2_private_ip_address}}"

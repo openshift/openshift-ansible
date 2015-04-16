@@ -1,5 +1,0 @@
----
-# TODO: once we are able to configure/deploy origin using the openshift roles,
-# then we should default to origin
-openshift_deployment_type: online
-openshift_additional_repos: {}

@@ -1,4 +1,4 @@
 ---
 - name: restart openshift-node
   service: name=openshift-node state=restarted
-  when: not openshift_node_manage_service_externally
+  when: not openshift.common.use_openshift_sdn|bool
