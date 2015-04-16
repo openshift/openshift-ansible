@@ -1,7 +1,7 @@
 ---
 - set_fact:
     machine_type: "{{ lookup('env', 'ec2_instance_type')|default('m3.large', true) }}"
-    machine_image: "{{ lookup('env', 'ec2_ami')|default('ami-307b3658', true) }}"
+    machine_image: "{{ lookup('env', 'ec2_ami')|default('ami-906240f8', true) }}"
     machine_region: "{{ lookup('env', 'ec2_region')|default('us-east-1', true) }}"
     machine_keypair: "{{ lookup('env', 'ec2_keypair')|default('libra', true) }}"
     created_by: "{{ lookup('env', 'LOGNAME')|default(cluster, true) }}"
