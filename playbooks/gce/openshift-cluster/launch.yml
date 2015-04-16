@@ -6,7 +6,7 @@
   vars_files:
   - vars.yml
   tasks:
-  - fail: msg="Deployment type not supported for libvirt provider yet"
+  - fail: msg="Deployment type not supported for gce provider yet"
     when: deployment_type == 'enterprise'
 
   - include: ../../common/openshift-cluster/set_master_launch_facts_tasks.yml

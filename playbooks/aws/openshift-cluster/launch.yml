@@ -7,7 +7,7 @@
   - vars.yml
   tasks:
   - fail:
-      msg: Deployment type not supported for libvirt provider yet
+      msg: Deployment type not supported for aws provider yet
     when: deployment_type == 'enterprise'
 
   - include: ../../common/openshift-cluster/set_master_launch_facts_tasks.yml
