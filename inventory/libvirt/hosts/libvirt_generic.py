@@ -131,7 +131,7 @@ class LibvirtInventory(object):
 
             root = ET.fromstring(domain.XMLDesc())
             ns = {'ansible': 'https://github.com/ansible/ansible'}
-            for tag_elem in root.findall('./metadata/ansible:tag', ns):
+            for tag_elem in root.findall('./metadata/ansible:tags/ansible:tag', ns):
                 tag = tag_elem.text
                 self.push(inventory, "tag_%s" % tag, domain_name)
                 self.push(hostvars, 'libvirt_tags', tag)

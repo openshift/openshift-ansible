@@ -2,10 +2,12 @@
   <name>{{ item }}</name>
   <memory unit='GiB'>1</memory>
   <metadata xmlns:ansible="https://github.com/ansible/ansible">
-    <ansible:tag>deployment-type-{{ deployment_type }}</ansible:tag>
-    <ansible:tag>env-{{ cluster }}</ansible:tag>
-    <ansible:tag>env-host-type-{{ cluster }}-openshift-{{ type }}</ansible:tag>
-    <ansible:tag>host-type-{{ type }}</ansible:tag>
+    <ansible:tags>
+      <ansible:tag>deployment-type-{{ deployment_type }}</ansible:tag>
+      <ansible:tag>env-{{ cluster }}</ansible:tag>
+      <ansible:tag>env-host-type-{{ cluster }}-openshift-{{ type }}</ansible:tag>
+      <ansible:tag>host-type-{{ type }}</ansible:tag>
+    </ansible:tags>
   </metadata>
   <currentMemory unit='GiB'>1</currentMemory>
   <vcpu placement='static'>2</vcpu>
