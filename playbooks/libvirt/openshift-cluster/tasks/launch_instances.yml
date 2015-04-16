@@ -36,6 +36,9 @@
     creates: '{{ os_libvirt_storage_pool_path }}/{{ item }}_cloud-init.iso'
   with_items: instances
 
+- name: Refresh the libvirt storage pool for openshift
+  command: 'virsh -c {{ libvirt_uri }} pool-refresh {{ libvirt_storage_pool }}'
+
 - name: Create VMs drives
   command: 'virsh -c {{ libvirt_uri }} vol-create-as {{ os_libvirt_storage_pool }} {{ item }}.qcow2 10G --format qcow2 --backing-vol {{ image_name }} --backing-vol-format qcow2'
   with_items: instances
