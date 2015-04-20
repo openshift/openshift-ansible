@@ -1,0 +1,10 @@
+---
+- name: Gather OpenShift facts
+  hosts: all
+  gather_facts: no
+  roles:
+  - openshift_facts
+  tasks:
+  - openshift_facts:
+    register: result
+  - debug: var=result

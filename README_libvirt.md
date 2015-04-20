@@ -1,4 +1,3 @@
-
 LIBVIRT Setup instructions
 ==========================
 
@@ -9,19 +8,21 @@ This makes `libvirt` useful to develop, test and debug Openshift and openshift-a
 Install dependencies
 --------------------
 
-1. Install [dnsmasq](http://www.thekelleys.org.uk/dnsmasq/doc.html)
-2. Install [ebtables](http://ebtables.netfilter.org/)
-3. Install [qemu](http://wiki.qemu.org/Main_Page)
-4. Install [libvirt](http://libvirt.org/)
-5. Enable and start the libvirt daemon, e.g:
-   * ``systemctl enable libvirtd``
-   * ``systemctl start libvirtd``
-6. [Grant libvirt access to your user¹](https://libvirt.org/aclpolkit.html)
-7. Check that your `$HOME` is accessible to the qemu user²
+1.	Install [dnsmasq](http://www.thekelleys.org.uk/dnsmasq/doc.html)
+2.	Install [ebtables](http://ebtables.netfilter.org/)
+3.	Install [qemu](http://wiki.qemu.org/Main_Page)
+4.	Install [libvirt](http://libvirt.org/)
+5.	Enable and start the libvirt daemon, e.g:
+	-	`systemctl enable libvirtd`
+	-	`systemctl start libvirtd`
+6.	[Grant libvirt access to your user¹](https://libvirt.org/aclpolkit.html)
+7.	Check that your `$HOME` is accessible to the qemu user²
+8.	Configure dns resolution on the host³
 
 #### ¹ Depending on your distribution, libvirt access may be denied by default or may require a password at each access.
 
 You can test it with the following command:
+
 ```
 virsh -c qemu:///system pool-list
 ```
@@ -67,12 +68,7 @@ If your `$HOME` is world readable, everything is fine. If your `$HOME` is privat
 error: Cannot access storage file '$HOME/libvirt-storage-pool-openshift/lenaic-master-216d8.qcow2' (as uid:99, gid:78): Permission denied
 ```
 
-In order to fix that issue, you have several possibilities:
-* set `libvirt_storage_pool_path` inside `playbooks/libvirt/openshift-cluster/launch.yml` and `playbooks/libvirt/openshift-cluster/terminate.yml` to a directory:
-  * backed by a filesystem with a lot of free disk space
-  * writable by your user;
-  * accessible by the qemu user.
-* Grant the qemu user access to the storage pool.
+In order to fix that issue, you have several possibilities:* set `libvirt_storage_pool_path` inside `playbooks/libvirt/openshift-cluster/launch.yml` and `playbooks/libvirt/openshift-cluster/terminate.yml` to a directory: * backed by a filesystem with a lot of free disk space * writable by your user; * accessible by the qemu user.* Grant the qemu user access to the storage pool.
 
 On Arch:
 
@@ -80,13 +76,55 @@ On Arch:
 setfacl -m g:kvm:--x ~
 ```
 
-Test the setup
+#### ³ Enabling DNS resolution to your guest VMs with NetworkManager
+
+-	Verify NetworkManager is configured to use dnsmasq:
+
+```sh
+$ sudo vi /etc/NetworkManager/NetworkManager.conf
+[main]
+dns=dnsmasq
+```
+
+-	Configure dnsmasq to use the Virtual Network router for example.com:
+
+```sh
+sudo vi /etc/NetworkManager/dnsmasq.d/libvirt_dnsmasq.conf server=/example.com/192.168.55.1
+```
+
+Test The Setup
 --------------
 
+1.	cd openshift-ansible/
+2.	Try to list all instances (Passing an empty string as the cluster_id argument will result in all libvirt instances being listed)
+
 ```
-cd openshift-ansible
+  bin/cluster list libvirt ''
+```
 
-bin/cluster create -m 1 -n 3 libvirt lenaic
+Creating a cluster
+------------------
 
-bin/cluster terminate libvirt lenaic
+1.	To create a cluster with one master and two nodes
+
+```
+  bin/cluster create libvirt lenaic
+```
+
+Updating a cluster
+------------------
+
+1.	To update the cluster
+
+```
+  bin/cluster update libvirt lenaic
+```
+
+Terminating a cluster
+---------------------
+
+1.	To terminate the cluster
+
+```
+  bin/cluster terminate libvirt lenaic
 ```

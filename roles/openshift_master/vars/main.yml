@@ -1,0 +1,5 @@
+---
+openshift_master_config: /etc/openshift/master.yaml
+openshift_master_ca_dir: "{{ openshift_cert_dir }}/ca"
+openshift_master_ca_cert: "{{ openshift_master_ca_dir }}/cert.crt"
+openshift_master_ca_key: "{{ openshift_master_ca_dir }}/key.key"

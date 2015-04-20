@@ -21,8 +21,11 @@ class OpenShiftFactsUnsupportedRoleError(Exception):
 class OpenShiftFactsFileWriteError(Exception):
     pass
 
+class OpenShiftFactsMetadataUnavailableError(Exception):
+    pass
+
 class OpenShiftFacts():
-    known_roles = ['common', 'master', 'node', 'master_sdn', 'node_sdn']
+    known_roles = ['common', 'master', 'node', 'master_sdn', 'node_sdn', 'dns']
 
     def __init__(self, role, filename, local_facts):
         self.changed = False
@@ -169,20 +172,18 @@ class OpenShiftFacts():
         return hostname
 
     def get_defaults(self, roles):
-        hardware_facts = self.get_hardware_facts()
-        net_facts = self.get_net_facts()
-        base_facts = self.get_base_facts()
+        ansible_facts = self.get_ansible_facts()
 
         defaults = dict()
 
         common = dict(use_openshift_sdn=True)
-        ip = net_facts['default_ipv4']['address']
+        ip = ansible_facts['default_ipv4']['address']
         common['ip'] = ip
         common['public_ip'] = ip
 
         rc, output, error = module.run_command(['hostname', '-f'])
         hostname_f = output.strip() if rc == 0 else ''
-        hostname_values = [hostname_f, base_facts['nodename'], base_facts['fqdn']]
+        hostname_values = [hostname_f, ansible_facts['nodename'], ansible_facts['fqdn']]
         hostname = self.choose_hostname(hostname_values)
 
         common['hostname'] = hostname
@@ -196,14 +197,14 @@ class OpenShiftFacts():
             master = dict(api_use_ssl=True, api_port='8443',
                     console_use_ssl=True, console_path='/console',
                     console_port='8443', etcd_use_ssl=False,
-                    etcd_port='4001')
+                    etcd_port='4001', portal_net='172.30.17.0/24')
             defaults['master'] = master
 
         if 'node' in roles:
             node = dict(external_id=common['hostname'], pod_cidr='',
                         labels={}, annotations={})
-            node['resources_cpu'] = hardware_facts['processor_cores']
-            node['resources_memory'] = int(int(hardware_facts['memtotal_mb']) * 1024 * 1024 * 0.75)
+            node['resources_cpu'] = ansible_facts['processor_cores']
+            node['resources_memory'] = int(int(ansible_facts['memtotal_mb']) * 1024 * 1024 * 0.75)
             defaults['node'] = node
 
         return defaults
@@ -226,8 +227,7 @@ class OpenShiftFacts():
     def query_metadata(self, metadata_url, headers=None, expect_json=False):
         r, info = fetch_url(module, metadata_url, headers=headers)
         if info['status'] != 200:
-            module.fail_json(msg='Failed to query metadata', result=r,
-                             info=info)
+            raise OpenShiftFactsMetadataUnavailableError("Metadata unavailable")
         if expect_json:
             return module.from_json(r.read())
         else:
@@ -252,40 +252,27 @@ class OpenShiftFacts():
 
     def get_provider_metadata(self, metadata_url, supports_recursive=False,
                           headers=None, expect_json=False):
-        if supports_recursive:
-            metadata = self.query_metadata(metadata_url, headers, expect_json)
-        else:
-            metadata = self.walk_metadata(metadata_url, headers, expect_json)
+        try:
+            if supports_recursive:
+                metadata = self.query_metadata(metadata_url, headers, expect_json)
+            else:
+                metadata = self.walk_metadata(metadata_url, headers, expect_json)
+        except OpenShiftFactsMetadataUnavailableError as e:
+            metadata = None
         return metadata
 
-    def get_hardware_facts(self):
-        if not hasattr(self, 'hardware_facts'):
-            self.hardware_facts = Hardware().populate()
-        return self.hardware_facts
-
-    def get_base_facts(self):
-        if not hasattr(self, 'base_facts'):
-            self.base_facts = Facts().populate()
-        return self.base_facts
-
-    def get_virt_facts(self):
-        if not hasattr(self, 'virt_facts'):
-            self.virt_facts = Virtual().populate()
-        return self.virt_facts
-
-    def get_net_facts(self):
-        if not hasattr(self, 'net_facts'):
-            self.net_facts = Network(module).populate()
-        return self.net_facts
+    def get_ansible_facts(self):
+        if not hasattr(self, 'ansible_facts'):
+            self.ansible_facts = ansible_facts(module)
+        return self.ansible_facts
 
     def guess_host_provider(self):
         # TODO: cloud provider facts should probably be submitted upstream
-        virt_facts = self.get_virt_facts()
-        hardware_facts = self.get_hardware_facts()
-        product_name = hardware_facts['product_name']
-        product_version = hardware_facts['product_version']
-        virt_type = virt_facts['virtualization_type']
-        virt_role = virt_facts['virtualization_role']
+        ansible_facts = self.get_ansible_facts()
+        product_name = ansible_facts['product_name']
+        product_version = ansible_facts['product_version']
+        virt_type = ansible_facts['virtualization_type']
+        virt_role = ansible_facts['virtualization_role']
         provider = None
         metadata = None
 
@@ -300,8 +287,9 @@ class OpenShiftFacts():
                                                   True)
 
             # Filter sshKeys and serviceAccounts from gce metadata
-            metadata['project']['attributes'].pop('sshKeys', None)
-            metadata['instance'].pop('serviceAccounts', None)
+            if metadata:
+                metadata['project']['attributes'].pop('sshKeys', None)
+                metadata['instance'].pop('serviceAccounts', None)
         elif virt_type == 'xen' and virt_role == 'guest' and re.match(r'.*\.amazon$', product_version):
             provider = 'ec2'
             metadata_url = 'http://169.254.169.254/latest/meta-data/'
@@ -310,12 +298,18 @@ class OpenShiftFacts():
             provider = 'openstack'
             metadata_url = 'http://169.254.169.254/openstack/latest/meta_data.json'
             metadata = self.get_provider_metadata(metadata_url, True, None, True)
-            ec2_compat_url = 'http://169.254.169.254/latest/meta-data/'
-            metadata['ec2_compat'] = self.get_provider_metadata(ec2_compat_url)
 
-            # Filter public_keys  and random_seed from openstack metadata
-            metadata.pop('public_keys', None)
-            metadata.pop('random_seed', None)
+            if metadata:
+                ec2_compat_url = 'http://169.254.169.254/latest/meta-data/'
+                metadata['ec2_compat'] = self.get_provider_metadata(ec2_compat_url)
+
+                # Filter public_keys  and random_seed from openstack metadata
+                metadata.pop('public_keys', None)
+                metadata.pop('random_seed', None)
+
+                if not metadata['ec2_compat']:
+                    metadata = None
+
         return dict(name=provider, metadata=metadata)
 
     def normalize_provider_facts(self, provider, metadata):
@@ -479,4 +473,6 @@ def main():
 from ansible.module_utils.basic import *
 from ansible.module_utils.facts import *
 from ansible.module_utils.urls import *
-main()
+
+if __name__ == '__main__':
+    main()

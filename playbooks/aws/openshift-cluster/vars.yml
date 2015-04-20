@@ -1,1 +1,20 @@
 ---
+deployment_vars:
+  origin:
+    # fedora, since centos requires marketplace
+    image: ami-acd999c4
+    region: us-east-1
+    ssh_user: fedora
+    sudo: yes
+  online:
+    # private ami
+    image: ami-307b3658
+    region: us-east-1
+    ssh_user: root
+    sudo: no
+  enterprise:
+    # rhel-7.1, requires cloud access subscription
+    image: ami-10663b78
+    region: us-east-1
+    ssh_user: ec2-user
+    sudo: yes

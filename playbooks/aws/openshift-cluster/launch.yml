@@ -4,59 +4,26 @@
   connection: local
   gather_facts: no
   vars_files:
-      - vars.yml
+  - vars.yml
   tasks:
-    - set_fact: k8s_type="master"
+  - fail:
+      msg: Deployment type not supported for aws provider yet
+    when: deployment_type == 'enterprise'
 
-    - name: Generate master instance names(s)
-      set_fact: scratch={{ cluster_id }}-{{ k8s_type }}-{{ '%05x' |format( 1048576 |random) }}
-      register: master_names_output
-      with_sequence: start=1 end={{ num_masters }}
+  - include: ../../common/openshift-cluster/set_master_launch_facts_tasks.yml
+  - include: tasks/launch_instances.yml
+    vars:
+      instances: "{{ master_names }}"
+      cluster: "{{ cluster_id }}"
+      type: "{{ k8s_type }}"
 
-    # These set_fact's cannot be combined
-    - set_fact:
-        master_names_string: "{% for item in master_names_output.results %}{{ item.ansible_facts.scratch }} {% endfor %}"
+  - include: ../../common/openshift-cluster/set_node_launch_facts_tasks.yml
+  - include: tasks/launch_instances.yml
+    vars:
+      instances: "{{ node_names }}"
+      cluster: "{{ cluster_id }}"
+      type: "{{ k8s_type }}"
 
-    - set_fact:
-        master_names: "{{ master_names_string.strip().split(' ') }}"
-
-    - include: launch_instances.yml
-      vars:
-        instances: "{{ master_names }}"
-        cluster: "{{ cluster_id }}"
-        type: "{{ k8s_type }}"
-
-    - set_fact: k8s_type="node"
-
-    - name: Generate node instance names(s)
-      set_fact: scratch={{ cluster_id }}-{{ k8s_type }}-{{ '%05x' |format( 1048576 |random) }}
-      register: node_names_output
-      with_sequence: start=1 end={{ num_nodes }}
-
-    # These set_fact's cannot be combined
-    - set_fact:
-        node_names_string: "{% for item in node_names_output.results %}{{ item.ansible_facts.scratch }} {% endfor %}"
-
-    - set_fact:
-        node_names: "{{ node_names_string.strip().split(' ') }}"
-
-    - include: launch_instances.yml
-      vars:
-        instances: "{{ node_names }}"
-        cluster: "{{ cluster_id }}"
-        type: "{{ k8s_type }}"
-
-- hosts: "tag_env_{{ cluster_id }}"
-  roles:
-  - openshift_repos
-  - os_update_latest
-
-- include: ../openshift-master/config.yml
-  vars:
-    oo_host_group_exp: "groups[\"tag_env-host-type_{{ cluster_id }}-openshift-master\"]"
-
-- include: ../openshift-node/config.yml
-  vars:
-    oo_host_group_exp: "groups[\"tag_env-host-type_{{ cluster_id }}-openshift-node\"]"
+- include: update.yml
 
 - include: list.yml

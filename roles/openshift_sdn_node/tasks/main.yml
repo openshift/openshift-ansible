@@ -9,9 +9,15 @@
   yum:
     pkg: openshift-sdn-node
     state: installed
+  register: install_result
+
+- name: Reload systemd units
+  command: systemctl daemon-reload
+  when: install_result | changed
 
 # TODO: we are specifying -hostname= for OPTIONS as a workaround for
 # openshift-sdn-node not properly detecting the hostname.
+# TODO: we should probably generate certs specifically for sdn
 - name: Configure openshift-sdn-node settings
   lineinfile:
     dest: /etc/sysconfig/openshift-sdn-node
@@ -20,7 +26,10 @@
     backrefs: yes
   with_items:
     - regex: '^(OPTIONS=)'
-      line: '\1"-v={{ openshift.node_sdn.debug_level }} -hostname={{ openshift.common.hostname }}"'
+      line: '\1"-v={{ openshift.node_sdn.debug_level }} -hostname={{ openshift.common.hostname }}
+        -etcd-cafile={{ openshift_node_cert_dir }}/ca.crt
+        -etcd-certfile={{ openshift_node_cert_dir }}/client.crt
+        -etcd-keyfile={{ openshift_node_cert_dir }}/client.key\"'
     - regex: '^(MASTER_URL=)'
       line: '\1"{{ openshift_sdn_master_url }}"'
     - regex: '^(MINION_IP=)'

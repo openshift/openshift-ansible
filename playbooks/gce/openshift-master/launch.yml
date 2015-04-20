@@ -8,13 +8,11 @@
   connection: local
   gather_facts: no
 
+# TODO: modify image based on deployment_type
   vars:
     inst_names: "{{ oo_new_inst_names }}"
     machine_type: n1-standard-1
     image: libra-rhel7
-
-  vars_files:
-      - vars.yml
 
   tasks:
     - name: Launch instances
@@ -37,7 +35,7 @@
       with_items: gce.instance_data
 
     - name: Wait for ssh
-      wait_for: "port=22 host={{ item.public_ip }}"
+      wait_for: port=22 host={{ item.public_ip }}
       with_items: gce.instance_data
 
     - name: Wait for root user setup

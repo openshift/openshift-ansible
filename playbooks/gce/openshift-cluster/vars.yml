@@ -1,1 +1,15 @@
 ---
+deployment_vars:
+  origin:
+    image: centos-7
+    ssh_user:
+    sudo: yes
+  online:
+    image: libra-rhel7
+    ssh_user: root
+    sudo: no
+  enterprise:
+    image: rhel-7
+    ssh_user:
+    sudo: yes
+

@@ -1,65 +1,36 @@
+---
 - name: Launch instance(s)
   hosts: localhost
-  connection: local
   gather_facts: no
-
-  vars:
-    libvirt_storage_pool_path: "{{ lookup('env','HOME') }}/libvirt-storage-pool-openshift"
-    libvirt_storage_pool: 'openshift'
-    libvirt_uri: 'qemu:///system'
-
   vars_files:
-    - vars.yml
-
+  - vars.yml
+  vars:
+    os_libvirt_storage_pool: "{{ libvirt_storage_pool | default('images') }}"
+    os_libvirt_storage_pool_path: "{{ libvirt_storage_pool_path | default('/var/lib/libvirt/images') }}"
+    os_libvirt_network: "{{ libvirt_network | default('default') }}"
+    image_url: "{{ deployment_vars[deployment_type].image.url }}"
+    image_sha256: "{{ deployment_vars[deployment_type].image.sha256 }}"
+    image_name: "{{ deployment_vars[deployment_type].image.name }}"
   tasks:
-    - set_fact:
-        k8s_type: master
+  - fail: msg="Deployment type not supported for libvirt provider yet"
+    when: deployment_type in ['online', 'enterprise']
 
-    - name: Generate master instance name(s)
-      set_fact:
-        scratch_name: "{{ cluster_id }}-{{ k8s_type }}-{{ '%05x' | format( 1048576 | random ) }}"
-      register: master_names_output
-      with_sequence: start=1 end='{{ num_masters }}'
+  - include: tasks/configure_libvirt.yml
 
-    - set_fact:
-        master_names: "{{ master_names_output.results | oo_collect('ansible_facts') | oo_collect('scratch_name') }}"
+  - include: ../../common/openshift-cluster/set_master_launch_facts_tasks.yml
+  - include: tasks/launch_instances.yml
+    vars:
+      instances: "{{ master_names }}"
+      cluster: "{{ cluster_id }}"
+      type: "{{ k8s_type }}"
 
-    - include: launch_instances.yml
-      vars:
-        instances: '{{ master_names }}'
-        cluster: '{{ cluster_id }}'
-        type: '{{ k8s_type }}'
-        group_name: 'tag_env-host-type-{{ cluster_id }}-openshift-master'
+  - include: ../../common/openshift-cluster/set_node_launch_facts_tasks.yml
+  - include: tasks/launch_instances.yml
+    vars:
+      instances: "{{ node_names }}"
+      cluster: "{{ cluster_id }}"
+      type: "{{ k8s_type }}"
 
-    - set_fact:
-        k8s_type: node
+- include: update.yml
 
-    - name: Generate node instance name(s)
-      set_fact:
-        scratch_name: "{{ cluster_id }}-{{ k8s_type }}-{{ '%05x' | format( 1048576 | random ) }}"
-      register: node_names_output
-      with_sequence: start=1 end='{{ num_nodes }}'
-
-    - set_fact:
-        node_names: "{{ node_names_output.results | oo_collect('ansible_facts') | oo_collect('scratch_name') }}"
-
-    - include: launch_instances.yml
-      vars:
-        instances: '{{ node_names }}'
-        cluster: '{{ cluster_id }}'
-        type: '{{ k8s_type }}'
-
-- hosts: 'tag_env-{{ cluster_id }}'
-  roles:
-    - openshift_repos
-    - os_update_latest
-
-- include: ../openshift-master/config.yml
-  vars:
-    oo_host_group_exp: 'groups["tag_env-host-type-{{ cluster_id }}-openshift-master"]'
-    oo_env: '{{ cluster_id }}'
-
-- include: ../openshift-node/config.yml
-  vars:
-    oo_host_group_exp: 'groups["tag_env-host-type-{{ cluster_id }}-openshift-node"]'
-    oo_env: '{{ cluster_id }}'
+- include: list.yml

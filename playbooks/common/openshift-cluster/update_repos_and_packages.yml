@@ -1,0 +1,7 @@
+---
+- hosts: oo_hosts_to_update
+  vars:
+    openshift_deployment_type: "{{ deployment_type }}"
+  roles:
+  - openshift_repos
+  - os_update_latest
