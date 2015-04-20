@@ -3,6 +3,9 @@
     Test file
 '''
 
+'''
+  Test function
+'''
 def main():
     if None:
         print True
