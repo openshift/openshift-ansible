@@ -203,6 +203,12 @@ class FilterModule(object):
             return [root_vol, docker_vol]
         return [root_vol]
 
+    @staticmethod
+    def oo_split(string, separator=','):
+        ''' This splits the input string into a list
+        '''
+        return string.split(separator)
+
     def filters(self):
         ''' returns a mapping of filters to methods '''
         return {
@@ -215,4 +221,5 @@ class FilterModule(object):
             "oo_ami_selector": self.oo_ami_selector,
             "oo_ec2_volume_definition": self.oo_ec2_volume_definition,
             "oo_combine_key_value": self.oo_combine_key_value,
+            "oo_split": self.oo_split,
         }
