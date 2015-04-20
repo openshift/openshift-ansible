@@ -1,7 +1,10 @@
 #!/usr/bin/env python
+'''
+    Test file
+'''
 
 def main():
-    if None
+    if None:
         print True
 
 
