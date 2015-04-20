@@ -3,10 +3,10 @@
     Test file
 '''
 
-'''
-  Test function
-'''
 def main():
+    '''
+      Test function
+    '''
     if None:
         print True
 
