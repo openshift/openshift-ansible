@@ -34,11 +34,24 @@
       line: '\1"{{ openshift_sdn_master_url }}"'
     - regex: '^(MINION_IP=)'
       line: '\1"{{ openshift.common.ip }}"'
-    # TODO lock down the insecure-registry config to a more sane value than
-    # 0.0.0.0/0
-    - regex: '^(DOCKER_OPTIONS=)'
-      line: '\1"--insecure-registry=0.0.0.0/0 -b=lbr0 --mtu=1450 --selinux-enabled"'
   notify: restart openshift-sdn-node
+
+- name: Ensure we aren't setting DOCKER_OPTIONS in /etc/sysconfig/openshift-sdn-node
+  lineinfile:
+    dest: /etc/sysconfig/openshift-sdn-node
+    regexp: '^DOCKER_OPTIONS='
+    state: absent
+  notify: restart openshift-sdn-node
+
+# TODO lock down the insecure-registry config to a more sane value than
+# 0.0.0.0/0
+- name: Configure docker insecure-registry setting
+  lineinfile:
+    dest: /etc/sysconfig/docker
+    regexp: INSECURE_REGISTRY=
+    line: INSECURE_REGISTRY='--insecure-registry=0.0.0.0/0'
+  notify: restart openshift-sdn-node
+
 
 - name: Start and enable openshift-sdn-node
   service:
