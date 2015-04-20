@@ -127,6 +127,8 @@ class Cluster(object):
             inventory = '-i inventory/aws/hosts'
         elif 'libvirt' == provider:
             inventory = '-i inventory/libvirt/hosts'
+        elif 'os' == provider:
+            inventory = '-i inventory/os/hosts'
         else:
             # this code should never be reached
             raise ValueError("invalid PROVIDER {}".format(provider))
@@ -172,7 +174,7 @@ if __name__ == '__main__':
 
     cluster = Cluster()
 
-    providers = ['gce', 'aws', 'libvirt']
+    providers = ['gce', 'aws', 'libvirt', 'os']
     parser = argparse.ArgumentParser(
         description='Python wrapper to ensure proper environment for OpenShift ansible playbooks',
     )

@@ -1,0 +1,39 @@
+---
+openstack_network_prefix: 'openshift-ansible-{{ lookup("env", "LOGNAME") }}'
+openstack_network_cidr: 192.168.{{ 1048576 | random % 256 }}.0/24
+openstack_network_external_net: external
+openstack_network_dns:
+  - 8.8.8.8
+  - 8.8.4.4
+openstack_ssh_keypair: 'lenaic_key'
+openstack_flavor: 'm1.small'
+
+deployment_vars:
+  origin:
+    image:
+#      url: "http://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.qcow2"
+#      name: CentOS-7-x86_64-GenericCloud.qcow2
+      name: CentOS-7-x86_64-GenericCloud.raw
+#      sha256: e324e3ab1d24a1bbf035ddb365e7f9058c0b454acf48d7aa15c5519fae5998ab
+#     ssh_user: openshift
+    ssh_user: centos
+    sudo: yes
+  online:
+    image:
+      url:
+      name:
+      sha256:
+    ssh_user: root
+    sudo: no
+  enterprise:
+    image:
+      url:
+      name:
+      sha256:
+    ssh_user: openshift
+    sudo: yes
+#  origin:
+#    fedora:
+#      url: "http://download.fedoraproject.org/pub/fedora/linux/releases/21/Cloud/Images/x86_64/Fedora-Cloud-Base-20141203-21.x86_64.qcow2"
+#      name: Fedora-Cloud-Base-20141203-21.x86_64.qcow2
+#      sha256: 3a99bb89f33e3d4ee826c8160053cdb8a72c80cd23350b776ce73cd244467d86

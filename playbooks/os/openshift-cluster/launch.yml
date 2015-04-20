@@ -1,0 +1,35 @@
+---
+- name: Launch instance(s)
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  vars_files:
+  - vars.yml
+  vars:
+    os_openstack_image: CentOS-7-x86_64-GenericCloud.raw
+    image_url: "{{ deployment_vars[deployment_type].image.url }}"
+    image_sha256: "{{ deployment_vars[deployment_type].image.sha256 }}"
+    image_name: "{{ deployment_vars[deployment_type].image.name }}"
+  tasks:
+  - fail: msg="Deployment type not supported for OpenStack provider yet"
+    when: deployment_type in ['online', 'enterprise']
+
+  - include: tasks/configure_openstack.yml
+
+  - include: ../../common/openshift-cluster/set_master_launch_facts_tasks.yml
+  - include: tasks/launch_instances.yml
+    vars:
+      instances: "{{ master_names }}"
+      cluster: "{{ cluster_id }}"
+      type: "{{ k8s_type }}"
+
+  - include: ../../common/openshift-cluster/set_node_launch_facts_tasks.yml
+  - include: tasks/launch_instances.yml
+    vars:
+      instances: "{{ node_names }}"
+      cluster: "{{ cluster_id }}"
+      type: "{{ k8s_type }}"
+
+- include: update.yml
+
+# - include: list.yml

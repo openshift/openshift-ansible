@@ -1,0 +1,47 @@
+---
+- name: Get net id
+  shell: 'neutron net-show {{ openstack_network_prefix }}-net | awk "/\\<id\\>/ {print \$4}"'
+  register: net_id_result
+
+- name: Launch instance(s)
+  command: 'nova boot --flavor {{ openstack_flavor }} --nic net-id={{ net_id_result.stdout }} --image {{ deployment_vars[deployment_type].image.name }} --key-name {{ openstack_ssh_keypair }} --security-groups {{ openstack_network_prefix }}-secgrp --meta deployment-type={{ deployment_type }} --meta env={{ cluster }} --meta env-host-type={{ cluster }}-openshift-{{ type }} --meta host-type={{ type }} {{ item }}'
+  with_items: instances
+
+- name: Create floating IPs
+  shell: 'neutron floatingip-create external | awk "/floating_ip_address/ {print \$4}"'
+  with_items: instances
+  register: floating_ip_create_result
+
+- name: Associate floating IPs
+  command: 'nova floating-ip-associate {{ item[0] }} {{ item[1].stdout }}'
+  with_together:
+    - instances
+    - floating_ip_create_result.results
+
+- name: Add new instances groups and variables
+  add_host:
+    hostname: '{{ item[0] }}'
+    ansible_ssh_host: '{{ item[1].stdout }}'
+    ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
+    ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
+#    groups: 'tag_env-{{ cluster }}, tag_host-type-{{ type }}, tag_env-host-type-{{ cluster }}-openshift-{{ type }}'
+    groups: 'meta-env_{{ cluster }}, meta-host-type_{{ type }}, meta-env-host-type_{{ cluster }}-openshift-{{ type }}'
+  with_together:
+    - instances
+    - floating_ip_create_result.results
+
+- name: Wait for ssh
+  wait_for:
+    host: '{{ item.stdout }}'
+    port: 22
+  with_items: floating_ip_create_result.results
+
+- name: Wait for user setup
+  command: 'ssh -o StrictHostKeyChecking=no -o PasswordAuthentication=no -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null {{ hostvars[item[0]].ansible_ssh_user }}@{{ item[1].stdout }} echo {{ hostvars[item[0]].ansible_ssh_user }} user is setup'
+  register: result
+  until: result.rc == 0
+  retries: 30
+  delay: 1
+  with_together:
+    - instances
+    - floating_ip_create_result.results

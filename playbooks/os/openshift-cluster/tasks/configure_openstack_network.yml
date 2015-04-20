@@ -1,0 +1,53 @@
+---
+- name: Check network existence
+  command: 'neutron net-show {{ openstack_network_prefix }}-net'
+  register: net_show_result
+  changed_when: false
+  failed_when: net_show_result.rc != 0 and 'Unable to find network with name' not in net_show_result.stderr
+
+- name: Create network
+  command: 'neutron net-create {{ openstack_network_prefix }}-net'
+  when: net_show_result.rc == 1
+
+- name: Check subnet existence
+  command: 'neutron subnet-show {{ openstack_network_prefix }}-subnet'
+  register: subnet_show_result
+  changed_when: false
+  failed_when: subnet_show_result.rc != 0 and 'Unable to find subnet with name' not in subnet_show_result.stderr
+
+- name: Create subnet
+  command: 'neutron subnet-create --name {{ openstack_network_prefix }}-subnet {{ openstack_network_prefix }}-net {{ openstack_network_cidr }} {% for dns in openstack_network_dns %}--dns-nameserver {{ dns }} {% endfor %}'
+  when: subnet_show_result.rc == 1
+
+- name: Check router existence
+  command: 'neutron router-show {{ openstack_network_prefix }}-router'
+  register: router_show_result
+  changed_when: false
+  failed_when: router_show_result.rc != 0 and 'Unable to find router with name' not in router_show_result.stderr
+
+- name: Create router
+  command: 'neutron router-create {{ openstack_network_prefix }}-router'
+  when: router_show_result.rc == 1
+
+- name: Create router gateway
+  command: 'neutron router-gateway-set {{ openstack_network_prefix }}-router {{ openstack_network_external_net }}'
+
+- name: Create router interface
+  command: 'neutron router-interface-add {{ openstack_network_prefix }}-router {{ openstack_network_prefix }}-subnet'
+  register: router_interface_add_result
+  changed_when: router_interface_add_result.rc == 0 and 'Router already has a port on subnet' not in router_interface_add_result.stderr
+  failed_when: router_interface_add_result.rc != 0 and 'Router already has a port on subnet' not in router_interface_add_result.stderr
+
+- name: Check security group existence
+  command: 'neutron security-group-show {{ openstack_network_prefix }}-secgrp'
+  register: security_group_show_result
+  changed_when: false
+  failed_when: security_group_show_result.rc != 0 and 'Unable to find security_group with name' not in security_group_show_result.stderr
+
+- name: Create security group
+  command: 'neutron security-group-create {{ openstack_network_prefix }}-secgrp'
+  when: security_group_show_result.rc == 1
+
+- name: Authorize ingress ssh
+  command: 'neutron security-group-rule-create --protocol TCP --port-range-min 22 --port-range-max 22 --remote-ip-prefix 0.0.0.0/0 {{ openstack_network_prefix }}-secgrp'
+  when: security_group_show_result.rc == 1
