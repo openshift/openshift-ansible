@@ -44,6 +44,9 @@
   roles:
   - openshift_register_nodes
   tasks:
+  # TODO: update so that we only sync necessary configs/directories, currently
+  # we sync for all nodes in oo_nodes_to_config.  We will need to inspect the
+  # configs on the nodes to make the determination on whether to sync or not.
   - name: Create the temp directory on the master
     file:
       path: "{{ sync_tmpdir }}"
