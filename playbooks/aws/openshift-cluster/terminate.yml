@@ -5,22 +5,12 @@
   vars_files:
   - vars.yml
   tasks:
-  - set_fact: scratch_group=tag_env-host-type_{{ cluster_id }}-openshift-node
+  - set_fact: scratch_group=tag_env_{{ cluster_id }}
   - add_host:
       name: "{{ item }}"
-      groups: oo_nodes_to_terminate
+      groups: oo_hosts_to_terminate
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
     with_items: groups[scratch_group] | default([]) | difference(['localhost'])
 
-  - set_fact: scratch_group=tag_env-host-type_{{ cluster_id }}-openshift-master
-  - add_host:
-      name: "{{ item }}"
-      groups: oo_masters_to_terminate
-      ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
-      ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-    with_items: groups[scratch_group] | default([]) | difference(['localhost'])
-
-- include: ../openshift-node/terminate.yml
-
-- include: ../openshift-master/terminate.yml
+- include: ../terminate.yml
