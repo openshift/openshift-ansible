@@ -1,25 +1,35 @@
 ---
-# TODO: modify machine_image based on deployment_type
 - set_fact:
-    machine_type: "{{ lookup('env', 'ec2_instance_type') | default('m3.large', true) }}"
-    machine_image: "{{ lookup('env', 'ec2_ami') | default(deployment_vars[deployment_type].image, true) }}"
-    machine_region: "{{ lookup('env', 'ec2_region') | default(deployment_vars[deployment_type].region, true) }}"
-    machine_keypair: "{{ lookup('env', 'ec2_keypair')|default('libra', true) }}"
     created_by: "{{ lookup('env', 'LOGNAME')|default(cluster, true) }}"
-    security_group: "{{ lookup('env', 'ec2_security_group')|default('public', true) }}"
     env: "{{ cluster }}"
-    host_type: "{{ type }}"
     env_host_type: "{{ cluster }}-openshift-{{ type }}"
+    host_type: "{{ type }}"
+    machine_type: "{{ lookup('env', 'ec2_instance_type')
+                   | default(deployment_vars[deployment_type].type, true) }}"
+    machine_image: "{{ lookup('env', 'ec2_ami')
+                    | default(deployment_vars[deployment_type].image, true) }}"
+    machine_region: "{{ lookup('env', 'ec2_region')
+                     | default(deployment_vars[deployment_type].region, true) }}"
+    machine_keypair: "{{ lookup('env', 'ec2_keypair')
+                      | default(deployment_vars[deployment_type].keypair, true) }}"
+    machine_subnet: "{{ lookup('env', 'ec2_vpc_subnet')
+                     | default(deployment_vars[deployment_type].vpc_subnet, true) }}"
+    machine_public_ip: "{{ lookup('env', 'ec2_public_ip')
+                        | default(deployment_vars[deployment_type].assign_public_ip, true) }}"
+    security_groups: "{{ lookup('env', 'ec2_security_groups')
+                      | default(deployment_vars[deployment_type].security_groups, true) }}"
 
 - name: Launch instance(s)
   ec2:
     state: present
     region: "{{ machine_region }}"
     keypair: "{{ machine_keypair }}"
-    group: "{{ security_group }}"
+    group: "{{ security_groups }}"
     instance_type: "{{ machine_type }}"
     image: "{{ machine_image }}"
     count: "{{ instances | oo_len }}"
+    vpc_subnet_id: "{{ machine_subnet | default(omit, true) }}"
+    assign_public_ip: "{{ machine_public_ip | default(omit, true) }}"
     wait: yes
     instance_tags:
       created-by: "{{ created_by }}"

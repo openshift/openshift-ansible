@@ -6,15 +6,30 @@ deployment_vars:
     region: us-east-1
     ssh_user: fedora
     sudo: yes
+    keypair: libra
+    type: m3.large
+    security_groups: [ 'public' ]
+    vpc_subnet:
+    assign_public_ip:
   online:
     # private ami
     image: ami-307b3658
     region: us-east-1
     ssh_user: root
     sudo: no
+    keypair: libra
+    type: m3.large
+    security_groups: [ 'public' ]
+    vpc_subnet:
+    assign_public_ip:
   enterprise:
     # rhel-7.1, requires cloud access subscription
     image: ami-10663b78
     region: us-east-1
     ssh_user: ec2-user
     sudo: yes
+    keypair: libra
+    type: m3.large
+    security_groups: [ 'public' ]
+    vpc_subnet:
+    assign_public_ip:
