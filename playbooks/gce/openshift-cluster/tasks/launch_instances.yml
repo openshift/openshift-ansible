@@ -15,7 +15,6 @@
       - env-{{ cluster }}
       - host-type-{{ type }}
       - env-host-type-{{ cluster }}-openshift-{{ type }}
-      - deployment-type-{{ deployment_type }}
   register: gce
 
 - name: Add new instances to groups and set variables needed
