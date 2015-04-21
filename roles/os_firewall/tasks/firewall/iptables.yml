@@ -42,6 +42,7 @@
   register: result
   changed_when: "'firewalld' in result.stdout"
   when: pkg_check.rc == 0
+  ignore_errors: yes
 
 - name: Add iptables allow rules
   os_firewall_manage_iptables:

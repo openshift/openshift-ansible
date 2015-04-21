@@ -150,17 +150,10 @@ class IpTablesManager:
                             continue
                         last_rule_target = rule[1]
 
-                # Raise an exception if we do not find a valid rule
-                if not last_rule_num or not last_rule_target:
-                   raise IpTablesCreateJumpRuleError(
-                        chain=self.chain,
-                        msg="Failed to find existing %s rules" % self.jump_rule_chain,
-                        cmd=None, exit_code=None, output=None)
-
                 # Naively assume that if the last row is a REJECT rule, then
                 # we can add insert our rule right before it, otherwise we
                 # assume that we can just append the rule.
-                if last_rule_target == 'REJECT':
+                if last_rule_num and last_rule_target and last_rule_target == 'REJECT':
                     # insert rule
                     cmd = self.cmd + ['-I', self.jump_rule_chain, str(last_rule_num)]
                 else:
