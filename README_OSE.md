@@ -63,7 +63,7 @@ option to ansible-playbook.
 ```ini
 # This is an example of a bring your own (byo) host inventory
 
-# Create an OSEv3 group that contains the maters and nodes groups
+# Create an OSEv3 group that contains the masters and nodes groups
 [OSEv3:children]
 masters
 nodes
