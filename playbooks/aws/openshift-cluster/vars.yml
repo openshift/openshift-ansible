@@ -13,15 +13,15 @@ deployment_vars:
     assign_public_ip:
   online:
     # private ami
-    image: ami-307b3658
+    image: ami-906240f8
     region: us-east-1
     ssh_user: root
     sudo: no
-    keypair: libra
+    keypair: mmcgrath_libra
     type: m3.large
-    security_groups: [ 'public' ]
-    vpc_subnet:
-    assign_public_ip:
+    security_groups: [ 'int-v3' ]
+    vpc_subnet: subnet-987c0def
+    assign_public_ip: yes
   enterprise:
     # rhel-7.1, requires cloud access subscription
     image: ami-10663b78
