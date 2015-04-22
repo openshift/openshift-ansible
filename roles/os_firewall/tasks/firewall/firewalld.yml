@@ -44,6 +44,7 @@
   - iptables
   - ip6tables
   when: pkg_check.rc == 0
+  ignore_errors: yes
 
 # TODO: Ansible 1.9 will eliminate the need for separate firewalld tasks for
 # enabling rules and making them permanent with the immediate flag
