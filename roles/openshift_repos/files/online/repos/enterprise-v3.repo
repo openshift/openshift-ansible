@@ -7,3 +7,4 @@ gpgcheck=0
 failovermethod=priority
 sslverify=False
 sslclientcert=/var/lib/yum/client-cert.pem
+sslclientkey=/var/lib/yum/client-key.pem
