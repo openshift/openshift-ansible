@@ -59,20 +59,18 @@ class MultiEc2(object):
         if self.args.cache_only:
             # get data from disk
             result = self.get_inventory_from_cache()
+            if result and self.is_cache_valid():
+                return
 
-            if not result:
-                self.get_inventory()
-                self.write_to_cache()
         # if its a host query, fetch and do not cache
         elif self.args.host:
-            self.get_inventory()
-        elif not self.is_cache_valid():
-            # go fetch the inventories and cache them if cache is expired
-            self.get_inventory()
-            self.write_to_cache()
-        else:
-            # get data from disk
-            self.get_inventory_from_cache()
+            result = self.get_inventory()
+            return
+
+        # go fetch the inventories and cache them if cache is expired
+        self.get_inventory()
+        self.write_to_cache()
+        self.get_inventory()
 
     def load_yaml_config(self,conf_file=None):
         """Load a yaml config file with credentials to query the
