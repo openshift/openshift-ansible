@@ -1,14 +1,17 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 # vim: expandtab:tabstop=4:shiftwidth=4
+'''
+Custom filters for use in openshift-ansible
+'''
 
-from ansible import errors, runner
-import json
+from ansible import errors
+from operator import itemgetter
 import pdb
-import re
 
 def oo_pdb(arg):
-    ''' This pops you into a pdb instance where arg is the data passed in from the filter.
+    ''' This pops you into a pdb instance where arg is the data passed in
+        from the filter.
         Ex: "{{ hostvars | oo_pdb }}"
     '''
     pdb.set_trace()
@@ -21,7 +24,8 @@ def oo_len(arg):
     return len(arg)
 
 def get_attr(data, attribute=None):
-    ''' This looks up dictionary attributes of the form a.b.c and returns the value.
+    ''' This looks up dictionary attributes of the form a.b.c and returns
+        the value.
         Ex: data = {'a': {'b': {'c': 5}}}
             attribute = "a.b.c"
             returns 5
@@ -41,12 +45,13 @@ def oo_flatten(data):
     if not issubclass(type(data), list):
         raise errors.AnsibleFilterError("|failed expects to flatten a List")
 
-    return [ item for sublist in data for item in sublist ]
+    return [item for sublist in data for item in sublist]
 
 
-def oo_collect(data, attribute=None, filters={}):
-    ''' This takes a list of dict and collects all attributes specified into a list
-        If filter is specified then we will include all items that match _ALL_ of filters.
+def oo_collect(data, attribute=None, filters=None):
+    ''' This takes a list of dict and collects all attributes specified into a
+        list If filter is specified then we will include all items that match
+        _ALL_ of filters.
         Ex: data = [ {'a':1, 'b':5, 'z': 'z'}, # True, return
                      {'a':2, 'z': 'z'},        # True, return
                      {'a':3, 'z': 'z'},        # True, return
@@ -56,15 +61,18 @@ def oo_collect(data, attribute=None, filters={}):
             filters   = {'z': 'z'}
             returns [1, 2, 3]
     '''
-
     if not issubclass(type(data), list):
         raise errors.AnsibleFilterError("|failed expects to filter on a List")
 
     if not attribute:
         raise errors.AnsibleFilterError("|failed expects attribute to be set")
 
-    if filters:
-        retval = [get_attr(d, attribute) for d in data if all([ d[key] == filters[key] for key in filters ]) ]
+    if filters is not None:
+        if not issubclass(type(filters), dict):
+            raise errors.AnsibleFilterError("|fialed expects filter to be a"
+                                            " dict")
+        retval = [get_attr(d, attribute) for d in data if (
+            all([d[key] == filters[key] for key in filters]))]
     else:
         retval = [get_attr(d, attribute) for d in data]
 
@@ -78,7 +86,7 @@ def oo_select_keys(data, keys):
     '''
 
     if not issubclass(type(data), dict):
-        raise errors.AnsibleFilterError("|failed expects to filter on a Dictionary")
+        raise errors.AnsibleFilterError("|failed expects to filter on a dict")
 
     if not issubclass(type(keys), list):
         raise errors.AnsibleFilterError("|failed expects first param is a list")
@@ -98,30 +106,43 @@ def oo_prepend_strings_in_list(data, prepend):
     if not issubclass(type(data), list):
         raise errors.AnsibleFilterError("|failed expects first param is a list")
     if not all(isinstance(x, basestring) for x in data):
-        raise errors.AnsibleFilterError("|failed expects first param is a list of strings")
+        raise errors.AnsibleFilterError("|failed expects first param is a list"
+                                        " of strings")
     retval = [prepend + s for s in data]
     return retval
 
-def oo_get_deployment_type_from_groups(data):
-    ''' This takes a list of groups and returns the associated
-        deployment-type
+def oo_ami_selector(data, image_name):
+    ''' This takes a list of amis and an image name and attempts to return
+        the latest ami.
     '''
     if not issubclass(type(data), list):
         raise errors.AnsibleFilterError("|failed expects first param is a list")
-    regexp = re.compile('^tag_deployment-type[-_]')
-    matches = filter(regexp.match, data)
-    if len(matches) > 0:
-        return regexp.sub('', matches[0])
-    return "Unknown"
 
-class FilterModule (object):
+    if not data:
+        return None
+    else:
+        if image_name is None or not image_name.endswith('_*'):
+            ami = sorted(data, key=itemgetter('name'), reverse=True)[0]
+            return ami['ami_id']
+        else:
+            ami_info = [(ami, ami['name'].split('_')[-1]) for ami in data]
+            ami = sorted(ami_info, key=itemgetter(1), reverse=True)[0][0]
+            return ami['ami_id']
+
+# disabling pylint checks for too-few-public-methods and no-self-use since we
+# need to expose a FilterModule object that has a filters method that returns
+# a mapping of filter names to methods.
+# pylint: disable=too-few-public-methods, no-self-use
+class FilterModule(object):
+    ''' FilterModule '''
     def filters(self):
+        ''' returns a mapping of filters to methods '''
         return {
-                "oo_select_keys": oo_select_keys,
-                "oo_collect": oo_collect,
-                "oo_flatten": oo_flatten,
-                "oo_len": oo_len,
-                "oo_pdb": oo_pdb,
-                "oo_prepend_strings_in_list": oo_prepend_strings_in_list,
-                "oo_get_deployment_type_from_groups": oo_get_deployment_type_from_groups
-                }
+            "oo_select_keys": oo_select_keys,
+            "oo_collect": oo_collect,
+            "oo_flatten": oo_flatten,
+            "oo_len": oo_len,
+            "oo_pdb": oo_pdb,
+            "oo_prepend_strings_in_list": oo_prepend_strings_in_list,
+            "oo_ami_selector": oo_ami_selector
+        }

@@ -4,32 +4,64 @@
     env: "{{ cluster }}"
     env_host_type: "{{ cluster }}-openshift-{{ type }}"
     host_type: "{{ type }}"
-    machine_type: "{{ lookup('env', 'ec2_instance_type')
-                   | default(deployment_vars[deployment_type].type, true) }}"
-    machine_image: "{{ lookup('env', 'ec2_ami')
-                    | default(deployment_vars[deployment_type].image, true) }}"
-    machine_region: "{{ lookup('env', 'ec2_region')
-                     | default(deployment_vars[deployment_type].region, true) }}"
-    machine_keypair: "{{ lookup('env', 'ec2_keypair')
-                      | default(deployment_vars[deployment_type].keypair, true) }}"
-    machine_subnet: "{{ lookup('env', 'ec2_vpc_subnet')
-                     | default(deployment_vars[deployment_type].vpc_subnet, true) }}"
-    machine_public_ip: "{{ lookup('env', 'ec2_public_ip')
-                        | default(deployment_vars[deployment_type].assign_public_ip, true) }}"
-    security_groups: "{{ lookup('env', 'ec2_security_groups')
-                      | default(deployment_vars[deployment_type].security_groups, true) }}"
+
+- set_fact:
+    ec2_region: "{{ lookup('env', 'ec2_region')
+                    | default(deployment_vars[deployment_type].region, true) }}"
+  when: ec2_region is not defined
+- set_fact:
+    ec2_image_name: "{{ lookup('env', 'ec2_image_name')
+                        | default(deployment_vars[deployment_type].image_name, true) }}"
+  when: ec2_image_name is not defined and ec2_image is not defined
+- set_fact:
+    ec2_image: "{{ lookup('env', 'ec2_image')
+                   | default(deployment_vars[deployment_type].image, true) }}"
+  when: ec2_image is not defined and not ec2_image_name
+- set_fact:
+    ec2_instance_type: "{{ lookup('env', 'ec2_instance_type')
+                    | default(deployment_vars[deployment_type].type, true) }}"
+  when: ec2_instance_type is not defined
+- set_fact:
+    ec2_keypair: "{{ lookup('env', 'ec2_keypair')
+                    | default(deployment_vars[deployment_type].keypair, true) }}"
+  when: ec2_keypair is not defined
+- set_fact:
+    ec2_vpc_subnet: "{{ lookup('env', 'ec2_vpc_subnet')
+                    | default(deployment_vars[deployment_type].vpc_subnet, true) }}"
+  when: ec2_vpc_subnet is not defined
+- set_fact:
+    ec2_assign_public_ip: "{{ lookup('env', 'ec2_assign_public_ip')
+                    | default(deployment_vars[deployment_type].assign_public_ip, true) }}"
+  when: ec2_assign_public_ip is not defined
+- set_fact:
+    ec2_security_groups: "{{ lookup('env', 'ec2_security_groups')
+                    | default(deployment_vars[deployment_type].security_groups, true) }}"
+  when: ec2_security_groups is not defined
+
+- name: Find amis for deployment_type
+  ec2_ami_find:
+    region: "{{ ec2_region }}"
+    ami_id: "{{ ec2_image | default(omit, true) }}"
+    name: "{{ ec2_image_name | default(omit, true) }}"
+  register: ami_result
+
+- fail: msg="Could not find requested ami"
+  when: not ami_result.results
+
+- set_fact:
+    latest_ami: "{{ ami_result.results | oo_ami_selector(ec2_image_name) }}"
 
 - name: Launch instance(s)
   ec2:
     state: present
-    region: "{{ machine_region }}"
-    keypair: "{{ machine_keypair }}"
-    group: "{{ security_groups }}"
-    instance_type: "{{ machine_type }}"
-    image: "{{ machine_image }}"
+    region: "{{ ec2_region }}"
+    keypair: "{{ ec2_keypair }}"
+    group: "{{ ec2_security_groups }}"
+    instance_type: "{{ ec2_instance_type }}"
+    image: "{{ latest_ami }}"
     count: "{{ instances | oo_len }}"
-    vpc_subnet_id: "{{ machine_subnet | default(omit, true) }}"
-    assign_public_ip: "{{ machine_public_ip | default(omit, true) }}"
+    vpc_subnet_id: "{{ ec2_vpc_subnet | default(omit, true) }}"
+    assign_public_ip: "{{ ec2_assign_public_ip | default(omit, true) }}"
     wait: yes
     instance_tags:
       created-by: "{{ created_by }}"
@@ -39,7 +71,7 @@
   register: ec2
 
 - name: Add Name tag to instances
-  ec2_tag: resource={{ item.1.id }} region={{ machine_region }} state=present
+  ec2_tag: resource={{ item.1.id }} region={{ ec2_region }} state=present
   with_together:
   - instances
   - ec2.instances
