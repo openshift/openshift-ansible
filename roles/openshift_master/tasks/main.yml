@@ -84,15 +84,23 @@
 - name: Start and enable openshift-master
   service: name=openshift-master enabled=yes state=started
 
-- name: Create .kube directory
+- name: Create the OpenShift client config dir(s)
   file:
-    path: /root/.kube
+    path: "~{{ item }}/.config/openshift"
     state: directory
     mode: 0700
+    owner: "{{ item }}"
+    group: "{{ item }}"
+  with_items:
+  - root
+  - "{{ ansible_ssh_user }}"
 
 # TODO: Update this file if the contents of the source file are not present in
 # the dest file, will need to make sure to ignore things that could be added
-- name: Configure root user kubeconfig
-  command: cp {{ openshift_cert_dir }}/openshift-client/.kubeconfig /root/.kube/.kubeconfig
+- name: Create the OpenShift client config(s)
+  command: cp {{ openshift_cert_dir }}/openshift-client/.kubeconfig ~{{ item }}/.config/openshift/.config
   args:
-    creates: /root/.kube/.kubeconfig
+    creates: ~{{ item }}/.config/openshift/.config
+  with_items:
+  - root
+  - "{{ ansible_ssh_user }}"
