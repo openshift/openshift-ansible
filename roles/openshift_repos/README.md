@@ -14,7 +14,7 @@ Role Variables
 
 | Name                          | Default value |                                              |
 |-------------------------------|---------------|----------------------------------------------|
-| openshift_deployment_type     | online        | Possible values enterprise, origin, online   |
+| openshift_deployment_type     | None          | Possible values enterprise, origin, online   |
 | openshift_additional_repos    | {}            | TODO                                         |
 
 Dependencies

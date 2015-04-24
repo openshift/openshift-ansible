@@ -1,14 +1,16 @@
 ---
 - name: Terminate instance(s)
   hosts: localhost
-
+  gather_facts: no
   vars_files:
-    - vars.yml
+  - vars.yml
+  tasks:
+  - set_fact: scratch_group=tag_env_{{ cluster_id }}
+  - add_host:
+      name: "{{ item }}"
+      groups: oo_hosts_to_terminate
+      ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
+      ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
+    with_items: groups[scratch_group] | default([]) | difference(['localhost'])
 
-- include: ../openshift-node/terminate.yml
-  vars:
-    oo_host_group_exp: 'groups["tag_env-host-type_{{ cluster_id }}-openshift-node"]'
-
-- include: ../openshift-master/terminate.yml
-  vars:
-    oo_host_group_exp: 'groups["tag_env-host-type_{{ cluster_id }}-openshift-master"]'
+- include: ../terminate.yml

@@ -1,1 +1,38 @@
 ---
+deployment_vars:
+  origin:
+    # fedora, since centos requires marketplace
+    image: ami-acd999c4
+    image_name:
+    region: us-east-1
+    ssh_user: fedora
+    sudo: yes
+    keypair: libra
+    type: m3.large
+    security_groups: [ 'public' ]
+    vpc_subnet:
+    assign_public_ip:
+  online:
+    # private ami
+    image: ami-7a9e9812
+    image_name: openshift-rhel7_*
+    region: us-east-1
+    ssh_user: root
+    sudo: no
+    keypair: libra
+    type: m3.large
+    security_groups: [ 'public' ]
+    vpc_subnet:
+    assign_public_ip:
+  enterprise:
+    # rhel-7.1, requires cloud access subscription
+    image: ami-10663b78
+    image_name:
+    region: us-east-1
+    ssh_user: ec2-user
+    sudo: yes
+    keypair: libra
+    type: m3.large
+    security_groups: [ 'public' ]
+    vpc_subnet:
+    assign_public_ip:

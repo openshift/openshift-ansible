@@ -1,0 +1,7 @@
+---
+openshift_cert_parent_dir: /var/lib/openshift
+openshift_cert_relative_dir: openshift.local.certificates
+openshift_cert_dir: "{{ openshift_cert_parent_dir }}/{{ openshift_cert_relative_dir }}"
+openshift_master_ca_dir: "{{ openshift_cert_dir }}/ca"
+openshift_master_ca_cert: "{{ openshift_master_ca_dir }}/cert.crt"
+openshift_master_ca_key: "{{ openshift_master_ca_dir }}/key.key"

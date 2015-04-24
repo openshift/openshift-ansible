@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 # vim: expandtab:tabstop=4:shiftwidth=4
-
+# pylint: disable=fixme, missing-docstring
 from subprocess import call, check_output
 
 DOCUMENTATION = '''
@@ -17,6 +17,7 @@ EXAMPLES = '''
 
 class IpTablesError(Exception):
     def __init__(self, msg, cmd, exit_code, output):
+        super(IpTablesError, self).__init__(msg)
         self.msg = msg
         self.cmd = cmd
         self.exit_code = exit_code
@@ -36,13 +37,14 @@ class IpTablesSaveError(IpTablesError):
 
 
 class IpTablesCreateChainError(IpTablesError):
-    def __init__(self, chain, msg, cmd, exit_code, output):
-        super(IpTablesCreateChainError, self).__init__(msg, cmd, exit_code, output)
+    def __init__(self, chain, msg, cmd, exit_code, output): # pylint: disable=too-many-arguments, line-too-long
+        super(IpTablesCreateChainError, self).__init__(msg, cmd, exit_code,
+                                                       output)
         self.chain = chain
 
 
 class IpTablesCreateJumpRuleError(IpTablesError):
-    def __init__(self, chain, msg, cmd, exit_code, output):
+    def __init__(self, chain, msg, cmd, exit_code, output): # pylint: disable=too-many-arguments, line-too-long
         super(IpTablesCreateJumpRuleError, self).__init__(msg, cmd, exit_code,
                                                           output)
         self.chain = chain
@@ -51,7 +53,7 @@ class IpTablesCreateJumpRuleError(IpTablesError):
 # TODO: impliment rollbacks for any events that where successful and an
 # exception was thrown later. for example, when the chain is created
 # successfully, but the add/remove rule fails.
-class IpTablesManager:
+class IpTablesManager(object): # pylint: disable=too-many-instance-attributes
     def __init__(self, module):
         self.module = module
         self.ip_version = module.params['ip_version']
@@ -68,10 +70,10 @@ class IpTablesManager:
         try:
             self.output.append(check_output(self.save_cmd,
                                             stderr=subprocess.STDOUT))
-        except subprocess.CalledProcessError as e:
+        except subprocess.CalledProcessError as ex:
             raise IpTablesSaveError(
                 msg="Failed to save iptables rules",
-                cmd=e.cmd, exit_code=e.returncode, output=e.output)
+                cmd=ex.cmd, exit_code=ex.returncode, output=ex.output)
 
     def verify_chain(self):
         if not self.chain_exists():
@@ -93,13 +95,13 @@ class IpTablesManager:
                     self.output.append(check_output(cmd))
                     self.changed = True
                     self.save()
-                except subprocess.CalledProcessError as e:
+                except subprocess.CalledProcessError as ex:
                     raise IpTablesCreateChainError(
                         chain=self.chain,
                         msg="Failed to create rule for "
-                            "%s %s" % (self.proto, self.port),
-                        cmd=e.cmd, exit_code=e.returncode,
-                        output=e.output)
+                            "%s %s" % (proto, port),
+                        cmd=ex.cmd, exit_code=ex.returncode,
+                        output=ex.output)
 
     def remove_rule(self, port, proto):
         rule = self.gen_rule(port, proto)
@@ -113,15 +115,15 @@ class IpTablesManager:
                     self.output.append(check_output(cmd))
                     self.changed = True
                     self.save()
-                except subprocess.CalledProcessError as e:
-                    raise IpTablesRemoveChainError(
+                except subprocess.CalledProcessError as ex:
+                    raise IpTablesRemoveRuleError(
                         chain=self.chain,
                         msg="Failed to remove rule for %s %s" % (proto, port),
-                        cmd=e.cmd, exit_code=e.returncode, output=e.output)
+                        cmd=ex.cmd, exit_code=ex.returncode, output=ex.output)
 
     def rule_exists(self, rule):
         check_cmd = self.cmd + ['-C'] + rule
-        return True if subprocess.call(check_cmd) == 0 else False
+        return True if call(check_cmd) == 0 else False
 
     def gen_rule(self, port, proto):
         return [self.chain, '-p', proto, '-m', 'state', '--state', 'NEW',
@@ -137,7 +139,7 @@ class IpTablesManager:
                 output = check_output(cmd, stderr=subprocess.STDOUT)
 
                 # break the input rules into rows and columns
-                input_rules = map(lambda s: s.split(), output.split('\n'))
+                input_rules = [s.split() for s in output.split('\n')]
 
                 # Find the last numbered rule
                 last_rule_num = None
@@ -150,42 +152,38 @@ class IpTablesManager:
                             continue
                         last_rule_target = rule[1]
 
-                # Raise an exception if we do not find a valid rule
-                if not last_rule_num or not last_rule_target:
-                   raise IpTablesCreateJumpRuleError(
-                        chain=self.chain,
-                        msg="Failed to find existing %s rules" % self.jump_rule_chain,
-                        cmd=None, exit_code=None, output=None)
-
                 # Naively assume that if the last row is a REJECT rule, then
                 # we can add insert our rule right before it, otherwise we
                 # assume that we can just append the rule.
-                if last_rule_target == 'REJECT':
+                if (last_rule_num and last_rule_target
+                        and last_rule_target == 'REJECT'):
                     # insert rule
-                    cmd = self.cmd + ['-I', self.jump_rule_chain, str(last_rule_num)]
+                    cmd = self.cmd + ['-I', self.jump_rule_chain,
+                                      str(last_rule_num)]
                 else:
                     # append rule
                     cmd = self.cmd + ['-A', self.jump_rule_chain]
                 cmd += ['-j', self.chain]
                 output = check_output(cmd, stderr=subprocess.STDOUT)
-                changed = True
+                self.changed = True
                 self.output.append(output)
                 self.save()
-            except subprocess.CalledProcessError as e:
-                if '--line-numbers' in e.cmd:
+            except subprocess.CalledProcessError as ex:
+                if '--line-numbers' in ex.cmd:
                     raise IpTablesCreateJumpRuleError(
                         chain=self.chain,
-                        msg="Failed to query existing %s rules to " % self.jump_rule_chain +
-                            "determine jump rule location",
-                        cmd=e.cmd, exit_code=e.returncode,
-                        output=e.output)
+                        msg=("Failed to query existing " +
+                             self.jump_rule_chain +
+                             " rules to determine jump rule location"),
+                        cmd=ex.cmd, exit_code=ex.returncode,
+                        output=ex.output)
                 else:
                     raise IpTablesCreateJumpRuleError(
                         chain=self.chain,
-                        msg="Failed to create jump rule for chain %s" %
-                            self.chain,
-                        cmd=e.cmd, exit_code=e.returncode,
-                        output=e.output)
+                        msg=("Failed to create jump rule for chain " +
+                             self.chain),
+                        cmd=ex.cmd, exit_code=ex.returncode,
+                        output=ex.output)
 
     def create_chain(self):
         if self.check_mode:
@@ -200,27 +198,26 @@ class IpTablesManager:
                 self.output.append("Successfully created chain %s" %
                                    self.chain)
                 self.save()
-            except subprocess.CalledProcessError as e:
+            except subprocess.CalledProcessError as ex:
                 raise IpTablesCreateChainError(
                     chain=self.chain,
                     msg="Failed to create chain: %s" % self.chain,
-                    cmd=e.cmd, exit_code=e.returncode, output=e.output
+                    cmd=ex.cmd, exit_code=ex.returncode, output=ex.output
                     )
 
     def jump_rule_exists(self):
         cmd = self.cmd + ['-C', self.jump_rule_chain, '-j', self.chain]
-        return True if subprocess.call(cmd) == 0 else False
+        return True if call(cmd) == 0 else False
 
     def chain_exists(self):
         cmd = self.cmd + ['-L', self.chain]
-        return True if subprocess.call(cmd) == 0 else False
+        return True if call(cmd) == 0 else False
 
     def gen_cmd(self):
         cmd = 'iptables' if self.ip_version == 'ipv4' else 'ip6tables'
         return ["/usr/sbin/%s" % cmd]
 
-    def gen_save_cmd(self):
-        cmd = 'iptables' if self.ip_version == 'ipv4' else 'ip6tables'
+    def gen_save_cmd(self): # pylint: disable=no-self-use
         return ['/usr/libexec/iptables/iptables.init', 'save']
 
 
@@ -228,7 +225,8 @@ def main():
     module = AnsibleModule(
         argument_spec=dict(
             name=dict(required=True),
-            action=dict(required=True, choices=['add', 'remove', 'verify_chain']),
+            action=dict(required=True, choices=['add', 'remove',
+                                                'verify_chain']),
             chain=dict(required=False, default='OS_FIREWALL_ALLOW'),
             create_jump_rule=dict(required=False, type='bool', default=True),
             jump_rule_chain=dict(required=False, default='INPUT'),
@@ -261,13 +259,15 @@ def main():
             iptables_manager.remove_rule(port, protocol)
         elif action == 'verify_chain':
             iptables_manager.verify_chain()
-    except IpTablesError as e:
-        module.fail_json(msg=e.msg)
+    except IpTablesError as ex:
+        module.fail_json(msg=ex.msg)
 
     return module.exit_json(changed=iptables_manager.changed,
                             output=iptables_manager.output)
 
 
+# pylint: disable=redefined-builtin, unused-wildcard-import, wildcard-import
 # import module snippets
 from ansible.module_utils.basic import *
-main()
+if __name__ == '__main__':
+    main()

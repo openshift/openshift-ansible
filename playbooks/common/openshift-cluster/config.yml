@@ -1,0 +1,4 @@
+---
+- include: ../openshift-master/config.yml
+
+- include: ../openshift-node/config.yml

@@ -1,0 +1,23 @@
+---
+- name: Create libvirt storage directory for openshift
+  file:
+    dest: "{{ libvirt_storage_pool_path }}"
+    state: directory
+
+- acl:
+    default: yes
+    entity: kvm
+    etype: group
+    name: "{{ libvirt_storage_pool_path }}"
+    permissions: rwx
+    state: present
+
+- name: Test if libvirt storage pool for openshift already exists
+  command: "virsh -c {{ libvirt_uri }} pool-info {{ libvirt_storage_pool }}"
+  register: pool_info_result
+  changed_when: False
+  failed_when: "pool_info_result.rc != 0 and 'no storage pool with matching name' not in pool_info_result.stderr"
+
+- name: Create the libvirt storage pool for openshift
+  command: 'virsh -c {{ libvirt_uri }} pool-create-as {{ libvirt_storage_pool }} dir --target {{ libvirt_storage_pool_path }}'
+  when: pool_info_result.rc == 1

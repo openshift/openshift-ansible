@@ -1,5 +1,2 @@
 ---
 openshift_kube_api_version: v1beta1
-openshift_cert_dir: openshift.local.certificates
-openshift_cert_dir_parent: /var/lib/openshift
-openshift_cert_dir_abs: "{{ openshift_cert_dir_parent ~ '/' ~ openshift_cert_dir }}"

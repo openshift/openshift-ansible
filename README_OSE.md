@@ -7,15 +7,17 @@
 * [Creating the default variables for the hosts and host groups](#creating-the-default-variables-for-the-hosts-and-host-groups)
 * [Running the ansible playbooks](#running-the-ansible-playbooks)
 * [Post-ansible steps](#post-ansible-steps)
+* [Overriding detected ip addresses and hostnames](#overriding-detected-ip-addresses-and-hostnames)
 
 ## Requirements
 * ansible
-  * Tested using ansible-1.8.2-1.fc20.noarch, but should work with version 1.8+
+  * Tested using ansible-1.8.4-1.fc20.noarch, but should work with version 1.8+
+  * There is currently a known issue with ansible-1.9.0, you can downgrade to 1.8.4 on Fedora by installing one of the bulids from Koji: http://koji.fedoraproject.org/koji/packageinfo?packageID=13842
   * Available in Fedora channels
   * Available for EL with EPEL and Optional channel
 * One or more RHEL 7.1 VMs
-* ssh key based auth for the root user needs to be pre-configured from the host
-  running ansible to the remote hosts
+* Either ssh key based auth for the root user or ssh key based auth for a user
+  with sudo access (no password)
 * A checkout of openshift-ansible from https://github.com/openshift/openshift-ansible/
   
   ```sh
@@ -48,9 +50,6 @@ subscription-manager repos \
 ```
 * Configuration of router is not automated yet
 * Configuration of docker-registry is not automated yet
-* End-to-end testing has not been completed yet using this module
-* root user is used for all ansible actions; eventually we will support using
-  a non-root user with sudo.
 
 ## Configuring the host inventory
 [Ansible docs](http://docs.ansible.com/intro_inventory.html)
@@ -64,6 +63,38 @@ option to ansible-playbook.
 ```ini
 # This is an example of a bring your own (byo) host inventory
 
+# Create an OSEv3 group that contains the masters and nodes groups
+[OSEv3:children]
+masters
+nodes
+
+# Set variables common for all OSEv3 hosts
+[OSEv3:vars]
+# SSH user, this user should allow ssh based auth without requiring a password
+ansible_ssh_user=root
+
+# If ansible_ssh_user is not root, ansible_sudo must be set to true
+#ansible_sudo=true
+
+# To deploy origin, change deployment_type to origin
+deployment_type=enterprise
+
+# Pre-release registry URL
+openshift_registry_url=docker-buildvm-rhose.usersys.redhat.com:5000/openshift3_beta/ose-${component}:${version}
+
+# Pre-release additional repo
+openshift_additional_repos=[{'id': 'ose-devel', 'name': 'ose-devel',
+'baseurl':
+'http://buildvm-devops.usersys.redhat.com/puddle/build/OpenShiftEnterprise/3.0/latest/RH7-RHOSE-3.0/$basearch/os',
+'enabled': 1, 'gpgcheck': 0}]
+
+# Origin copr repo
+#openshift_additional_repos=[{'id': 'openshift-origin-copr', 'name':
+'OpenShift Origin COPR', 'baseurl':
+'https://copr-be.cloud.fedoraproject.org/results/maxamillion/origin-next/epel-7-$basearch/',
+'enabled': 1, 'gpgcheck': 1, gpgkey:
+'https://copr-be.cloud.fedoraproject.org/results/maxamillion/origin-next/pubkey.gpg'}]
+
 # host group for masters
 [masters]
 ose3-master.example.com
@@ -76,51 +107,13 @@ ose3-node[1:2].example.com
 The hostnames above should resolve both from the hosts themselves and
 the host where ansible is running (if different).
 
-## Creating the default variables for the hosts and host groups
-[Ansible docs](http://docs.ansible.com/intro_inventory.html#id9)
-
-#### Group vars for all hosts
-/etc/ansible/group_vars/all:
-```yaml
----
-# Assume that we want to use the root as the ssh user for all hosts
-ansible_ssh_user: root
-
-# Default debug level for all OpenShift hosts
-openshift_debug_level: 4
-
-# Set the OpenShift deployment type for all hosts
-openshift_deployment_type: enterprise
-
-# Override the default registry for development
-openshift_registry_url: docker-buildvm-rhose.usersys.redhat.com:5000/openshift3_beta/ose-${component}:${version}
-
-# To use the latest OpenShift Enterprise Errata puddle:
-#openshift_additional_repos:
-#- id: ose-devel
-#  name: ose-devel
-#  baseurl: http://buildvm-devops.usersys.redhat.com/puddle/build/OpenShiftEnterpriseErrata/3.0/latest/RH7-RHOSE-3.0/$basearch/os
-#  enabled: 1
-#  gpgcheck: 0
-# To use the latest OpenShift Enterprise Whitelist puddle:
-openshift_additional_repos:
-- id: ose-devel
-  name: ose-devel
-  baseurl: http://buildvm-devops.usersys.redhat.com/puddle/build/OpenShiftEnterprise/3.0/latest/RH7-RHOSE-3.0/$basearch/os
-  enabled: 1
-  gpgcheck: 0
-
-```
-
 ## Running the ansible playbooks
 From the openshift-ansible checkout run:
 ```sh
 ansible-playbook playbooks/byo/config.yml
 ```
-**Note:** this assumes that the host inventory is /etc/ansible/hosts and the
-group_vars are defined in /etc/ansible/group_vars, if using a different
-inventory file (and a group_vars directory that is in the same directory as
-the directory as the inventory) use the -i option for ansible-playbook.
+**Note:** this assumes that the host inventory is /etc/ansible/hosts, if using a different
+inventory file use the -i option for ansible-playbook.
 
 ## Post-ansible steps
 #### Create the default router
@@ -139,4 +132,110 @@ openshift ex registry --create=true \
   --credentials=/var/lib/openshift/openshift.local.certificates/openshift-client/.kubeconfig \
   --images='docker-buildvm-rhose.usersys.redhat.com:5000/openshift3_beta/ose-${component}:${version}' \
   --mount-host=/var/lib/openshift/docker-registry
+```
+
+## Overriding detected ip addresses and hostnames
+Some deployments will require that the user override the detected hostnames
+and ip addresses for the hosts. To see what the default values will be you can
+run the openshift_facts playbook:
+```sh
+ansible-playbook playbooks/byo/openshift_facts.yml
+```
+The output will be similar to:
+```
+ok: [10.3.9.45] => {
+    "result": {
+        "ansible_facts": {
+            "openshift": {
+                "common": {
+                    "hostname": "jdetiber-osev3-ansible-005dcfa6-27c6-463d-9b95-ef059579befd.os1.phx2.redhat.com",
+                    "ip": "172.16.4.79",
+                    "public_hostname": "jdetiber-osev3-ansible-005dcfa6-27c6-463d-9b95-ef059579befd.os1.phx2.redhat.com",
+                    "public_ip": "10.3.9.45",
+                    "use_openshift_sdn": true
+                },
+                "provider": {
+                  ... <snip> ...
+                }
+            }
+        },
+        "changed": false,
+        "invocation": {
+            "module_args": "",
+            "module_name": "openshift_facts"
+        }
+    }
+}
+ok: [10.3.9.42] => {
+    "result": {
+        "ansible_facts": {
+            "openshift": {
+                "common": {
+                    "hostname": "jdetiber-osev3-ansible-c6ae8cdc-ba0b-4a81-bb37-14549893f9d3.os1.phx2.redhat.com",
+                    "ip": "172.16.4.75",
+                    "public_hostname": "jdetiber-osev3-ansible-c6ae8cdc-ba0b-4a81-bb37-14549893f9d3.os1.phx2.redhat.com",
+                    "public_ip": "10.3.9.42",
+                    "use_openshift_sdn": true
+                },
+                "provider": {
+                  ...<snip>...
+                }
+            }
+        },
+        "changed": false,
+        "invocation": {
+            "module_args": "",
+            "module_name": "openshift_facts"
+        }
+    }
+}
+ok: [10.3.9.36] => {
+    "result": {
+        "ansible_facts": {
+            "openshift": {
+                "common": {
+                    "hostname": "jdetiber-osev3-ansible-bc39a3d3-cdd7-42fe-9c12-9fac9b0ec320.os1.phx2.redhat.com",
+                    "ip": "172.16.4.73",
+                    "public_hostname": "jdetiber-osev3-ansible-bc39a3d3-cdd7-42fe-9c12-9fac9b0ec320.os1.phx2.redhat.com",
+                    "public_ip": "10.3.9.36",
+                    "use_openshift_sdn": true
+                },
+                "provider": {
+                    ...<snip>...
+                }
+            }
+        },
+        "changed": false,
+        "invocation": {
+            "module_args": "",
+            "module_name": "openshift_facts"
+        }
+    }
+}
+```
+Now, we want to verify the detected common settings to verify that they are
+what we expect them to be (if not, we can override them).
+
+* hostname
+  * Should resolve to the internal ip from the instances themselves.
+  * openshift_hostname will override.
+* ip
+  * Should be the internal ip of the instance.
+  * openshift_ip will override.
+* public hostname
+  * Should resolve to the external ip from hosts outside of the cloud
+  * provider openshift_public_hostname will override.
+* public_ip
+  * Should be the externally accessible ip associated with the instance
+  * openshift_public_ip will override
+* use_openshift_sdn
+  * Should be true unless the cloud is GCE.
+  * openshift_use_openshift_sdn overrides
+
+To override the the defaults, you can set the variables in your inventory:
+```
+...snip...
+[masters]
+ose3-master.example.com openshift_ip=1.1.1.1 openshift_hostname=ose3-master.example.com openshift_public_ip=2.2.2.2 openshift_public_hostname=ose3-master.public.example.com
+...snip...
 ```

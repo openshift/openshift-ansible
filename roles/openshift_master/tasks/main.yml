@@ -11,48 +11,96 @@
       api_url: "{{ openshift_master_api_url | default(None) }}"
       api_use_ssl: "{{ openshift_master_api_use_ssl | default(None) }}"
       public_api_url: "{{ openshift_master_public_api_url | default(None) }}"
+      console_path: "{{ openshift_master_console_path | default(None) }}"
       console_port: "{{ openshift_master_console_port | default(None) }}"
       console_url: "{{ openshift_master_console_url | default(None) }}"
       console_use_ssl: "{{ openshift_master_console_use_ssl | default(None) }}"
       public_console_url: "{{ openshift_master_public_console_url | default(None) }}"
+      etcd_port: "{{ openshift_master_etcd_port | default(None) }}"
       etcd_use_ssl: "{{ openshift_master_etcd_use_ssl | default(None) }}"
+      portal_net: "{{ openshift_master_portal_net | default(None) }}"
+
+# TODO: These values need to be configurable
+- name: Set dns OpenShift facts
+  openshift_facts:
+    role: 'dns'
+    local_facts:
+      ip: "{{ openshift.common.ip }}"
+      domain: local
 
 - name: Install OpenShift Master package
   yum: pkg=openshift-master state=installed
+  register: install_result
 
-# TODO: We should pre-generate the master config and point to the generated
-# config rather than setting command line flags here
+- name: Reload systemd units
+  command: systemctl daemon-reload
+  when: install_result | changed
+
+- name: Create certificate parent directory if it doesn't exist
+  file:
+    path: "{{ openshift_cert_parent_dir }}"
+    state: directory
+
+- name: Create config parent directory if it doesn't exist
+  file:
+    path: "{{ openshift_master_config | dirname }}"
+    state: directory
+
+# TODO: should probably use a template lookup for this
+# TODO: should allow for setting --etcd, --kubernetes options
+# TODO: recreate config if values change
+- name: Use enterprise default for openshift_registry_url if not set
+  set_fact:
+    openshift_registry_url: "openshift3_beta/ose-${component}:${version}"
+  when: openshift.common.deployment_type == 'enterprise' and openshift_registry_url is not defined
+
+- name: Use online default for openshift_registry_url if not set
+  set_fact:
+    openshift_registry_url: "docker-registry.ops.rhcloud.com/openshift3_beta/ose-${component}:${version}"
+  when: openshift.common.deployment_type == 'online' and openshift_registry_url is not defined
+
+- name: Create master config
+  command: >
+    /usr/bin/openshift start master --write-config
+    --config={{ openshift_master_config }}
+    --portal-net={{ openshift.master.portal_net }}
+    --master={{ openshift.master.api_url }}
+    --public-master={{ openshift.master.public_api_url }}
+    --listen={{ 'https' if openshift.master.api_use_ssl else 'http' }}://0.0.0.0:{{ openshift.master.api_port }}
+    {{ ('--images=' ~ openshift_registry_url) if (openshift_registry_url | default('', true) != '') else '' }}
+    {{ ('--nodes=' ~ openshift_node_ips | join(',')) if (openshift_node_ips | default('', true) != '') else '' }}
+  args:
+    chdir: "{{ openshift_cert_parent_dir }}"
+    creates: "{{ openshift_master_config }}"
+
 - name: Configure OpenShift settings
   lineinfile:
     dest: /etc/sysconfig/openshift-master
     regexp: '^OPTIONS='
-    line: "OPTIONS=\"--master={{ openshift.common.hostname }} --public-master={{ openshift.common.public_hostname }} {% if openshift_node_ips %} --nodes={{ openshift_node_ips | join(',') }} {% endif %} --loglevel={{ openshift.master.debug_level }}\""
-  notify:
-  - restart openshift-master
-
-# TODO: should this be populated by a fact based on the deployment type
-# (origin, online, enterprise)?
-- name: Set default registry url
-  lineinfile:
-    dest: /etc/sysconfig/openshift-master
-    regexp: '^IMAGES='
-    line: "IMAGES={{ openshift_registry_url }}"
-  when: openshift_registry_url is defined
+    line: "OPTIONS=\"--config={{ openshift_master_config }} --loglevel={{ openshift.master.debug_level }}\""
   notify:
   - restart openshift-master
 
 - name: Start and enable openshift-master
   service: name=openshift-master enabled=yes state=started
 
-- name: Create .kube directory
+- name: Create the OpenShift client config dir(s)
   file:
-    path: /root/.kube
+    path: "~{{ item }}/.config/openshift"
     state: directory
     mode: 0700
+    owner: "{{ item }}"
+    group: "{{ item }}"
+  with_items:
+  - root
+  - "{{ ansible_ssh_user }}"
 
 # TODO: Update this file if the contents of the source file are not present in
 # the dest file, will need to make sure to ignore things that could be added
-- name: Configure root user kubeconfig
-  command: cp /var/lib/openshift/openshift.local.certificates/openshift-client/.kubeconfig /root/.kube/.kubeconfig
+- name: Create the OpenShift client config(s)
+  command: cp {{ openshift_cert_dir }}/openshift-client/.kubeconfig ~{{ item }}/.config/openshift/.config
   args:
-    creates: /root/.kube/.kubeconfig
+    creates: ~{{ item }}/.config/openshift/.config
+  with_items:
+  - root
+  - "{{ ansible_ssh_user }}"
