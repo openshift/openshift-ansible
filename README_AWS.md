@@ -40,10 +40,24 @@ Alternatively, you can configure your ssh-agent to hold the credentials to conne
 By default, a cluster is launched with the following configuration:
 
 - Instance type: m3.large
-- AMI: ami-307b3658
+- AMI: ami-307b3658 (for online deployments, ami-acd999c4 for origin deployments and ami-10663b78 for enterprise deployments)
 - Region: us-east-1
 - Keypair name: libra
 - Security group: public
+
+Master specific defaults:
+- Master root volume size: 10 (in GiBs)
+- Master root volume type: gp2
+- Master root volume iops: 500 (only applicable when volume type is io1)
+
+Node specific defaults:
+- Node root volume size: 10 (in GiBs)
+- Node root volume type: gp2
+- Node root volume iops: 500 (only applicable when volume type is io1)
+- Docker volume size: 25 (in GiBs)
+- Docker volume ephemeral: true (Whether the docker volume is ephemeral)
+- Docker volume type: gp2 (only applicable if ephemeral is false)
+- Docker volume iops: 500 (only applicable when volume type is io1)
 
 If needed, these values can be changed by setting environment variables on your system.
 
@@ -52,6 +66,11 @@ If needed, these values can be changed by setting environment variables on your 
 - export ec2_region='us-east-1'
 - export ec2_keypair='libra'
 - export ec2_security_group='public'
+- export os_master_root_vol_size='20'
+- export os_master_root_vol_type='standard'
+- export os_node_root_vol_size='15'
+- export os_docker_vol_size='50'
+- export os_docker_vol_ephemeral='false'
 
 Install Dependencies
 --------------------

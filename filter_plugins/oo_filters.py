@@ -129,6 +129,53 @@ def oo_ami_selector(data, image_name):
             ami = sorted(ami_info, key=itemgetter(1), reverse=True)[0][0]
             return ami['ami_id']
 
+def oo_ec2_volume_definition(data, host_type, docker_ephemeral=False):
+    ''' This takes a dictionary of volume definitions and returns a valid ec2
+        volume definition based on the host_type and the values in the
+        dictionary.
+        The dictionary should look similar to this:
+            { 'master':
+                { 'root':
+                    { 'volume_size': 10, 'device_type': 'gp2',
+                      'iops': 500
+                    }
+                },
+              'node':
+                { 'root':
+                    { 'volume_size': 10, 'device_type': 'io1',
+                      'iops': 1000
+                    },
+                  'docker':
+                    { 'volume_size': 40, 'device_type': 'gp2',
+                      'iops': 500, 'ephemeral': 'true'
+                    }
+                }
+            }
+    '''
+    if not issubclass(type(data), dict):
+        raise errors.AnsibleFilterError("|failed expects first param is a dict")
+    if host_type not in ['master', 'node']:
+        raise errors.AnsibleFilterError("|failed expects either master or node"
+                                        " host type")
+
+    root_vol = data[host_type]['root']
+    root_vol['device_name'] = '/dev/sda1'
+    root_vol['delete_on_termination'] = True
+    if root_vol['device_type'] != 'io1':
+        root_vol.pop('iops', None)
+    if host_type == 'node':
+        docker_vol = data[host_type]['docker']
+        docker_vol['device_name'] = '/dev/xvdb'
+        docker_vol['delete_on_termination'] = True
+        if docker_vol['device_type'] != 'io1':
+            docker_vol.pop('iops', None)
+        if docker_ephemeral:
+            docker_vol.pop('device_type', None)
+            docker_vol.pop('delete_on_termination', None)
+            docker_vol['ephemeral'] = 'ephemeral0'
+        return [root_vol, docker_vol]
+    return [root_vol]
+
 # disabling pylint checks for too-few-public-methods and no-self-use since we
 # need to expose a FilterModule object that has a filters method that returns
 # a mapping of filter names to methods.
@@ -144,5 +191,6 @@ class FilterModule(object):
             "oo_len": oo_len,
             "oo_pdb": oo_pdb,
             "oo_prepend_strings_in_list": oo_prepend_strings_in_list,
-            "oo_ami_selector": oo_ami_selector
+            "oo_ami_selector": oo_ami_selector,
+            "oo_ec2_volume_definition": oo_ec2_volume_definition
         }
