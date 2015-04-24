@@ -1,0 +1,68 @@
+<domain type='kvm' id='8'>
+  <name>{{ item }}</name>
+  <memory unit='GiB'>1</memory>
+  <metadata xmlns:ansible="https://github.com/ansible/ansible">
+    <ansible:tags>
+      <ansible:tag>env-{{ cluster }}</ansible:tag>
+      <ansible:tag>env-host-type-{{ cluster }}-openshift-{{ type }}</ansible:tag>
+      <ansible:tag>host-type-{{ type }}</ansible:tag>
+    </ansible:tags>
+  </metadata>
+  <currentMemory unit='GiB'>1</currentMemory>
+  <vcpu placement='static'>2</vcpu>
+  <os>
+    <type arch='x86_64' machine='pc'>hvm</type>
+    <boot dev='hd'/>
+  </os>
+  <features>
+    <acpi/>
+    <apic/>
+    <pae/>
+  </features>
+  <clock offset='utc'>
+    <timer name='rtc' tickpolicy='catchup'/>
+    <timer name='pit' tickpolicy='delay'/>
+    <timer name='hpet' present='no'/>
+  </clock>
+  <on_poweroff>destroy</on_poweroff>
+  <on_reboot>restart</on_reboot>
+  <on_crash>restart</on_crash>
+  <devices>
+    <emulator>/usr/bin/qemu-system-x86_64</emulator>
+    <disk type='file' device='disk'>
+      <driver name='qemu' type='qcow2'/>
+      <source file='{{ os_libvirt_storage_pool_path }}/{{ item }}.qcow2'/>
+      <target dev='vda' bus='virtio'/>
+    </disk>
+    <disk type='file' device='cdrom'>
+      <driver name='qemu' type='raw'/>
+      <source file='{{ os_libvirt_storage_pool_path }}/{{ item }}_cloud-init.iso'/>
+      <target dev='vdb' bus='virtio'/>
+      <readonly/>
+    </disk>
+    <controller type='usb' index='0' />
+    <interface type='network'>
+      <source network='{{ os_libvirt_network }}'/>
+      <model type='virtio'/>
+    </interface>
+    <serial type='pty'>
+      <target port='0'/>
+    </serial>
+    <console type='pty'>
+      <target type='serial' port='0'/>
+    </console>
+    <channel type='spicevmc'>
+      <target type='virtio' name='com.redhat.spice.0'/>
+    </channel>
+    <input type='tablet' bus='usb' />
+    <input type='mouse' bus='ps2'/>
+    <graphics type='spice' autoport='yes' />
+    <video>
+      <model type='qxl' ram='65536' vram='65536' vgamem='16384' heads='1'/>
+    </video>
+    <redirdev bus='usb' type='spicevmc'>
+    </redirdev>
+    <memballoon model='virtio'>
+    </memballoon>
+  </devices>
+</domain>

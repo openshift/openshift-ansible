@@ -3,6 +3,7 @@
   yum:
     name: firewalld
     state: present
+  register: install_result
 
 - name: Check if iptables-services is installed
   command: rpm -q iptables-services
@@ -19,6 +20,10 @@
   - iptables
   - ip6tables
   when: pkg_check.rc == 0
+
+- name: Reload systemd units
+  command: systemctl daemon-reload
+  when: install_result | changed
 
 - name: Start and enable firewalld service
   service:
@@ -39,6 +44,7 @@
   - iptables
   - ip6tables
   when: pkg_check.rc == 0
+  ignore_errors: yes
 
 # TODO: Ansible 1.9 will eliminate the need for separate firewalld tasks for
 # enabling rules and making them permanent with the immediate flag

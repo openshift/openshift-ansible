@@ -1,6 +1,11 @@
 ---
-openshift_master_credentials_dir: /var/lib/openshift/openshift.local.certificates/admin/
-
 # TODO: Upstream kubernetes only supports iptables currently, if this changes,
 # then these variable should be moved to defaults
+# TODO: it might be possible to still use firewalld if we wire up the created
+# chains with the public zone (or the zone associated with the correct
+# interfaces)
 os_firewall_use_firewalld: False
+
+openshift_cert_parent_dir: /var/lib/openshift
+openshift_cert_relative_dir: openshift.local.certificates
+openshift_cert_dir: "{{ openshift_cert_parent_dir }}/{{ openshift_cert_relative_dir }}"

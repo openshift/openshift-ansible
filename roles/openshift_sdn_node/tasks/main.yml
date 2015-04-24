@@ -1,11 +1,23 @@
 ---
+- name: Set node sdn OpenShift facts
+  openshift_facts:
+    role: 'node_sdn'
+    local_facts:
+      debug_level: "{{ openshift_node_sdn_debug_level | default(openshift.common.debug_level) }}"
+
 - name: Install openshift-sdn-node
   yum:
     pkg: openshift-sdn-node
     state: installed
+  register: install_result
+
+- name: Reload systemd units
+  command: systemctl daemon-reload
+  when: install_result | changed
 
 # TODO: we are specifying -hostname= for OPTIONS as a workaround for
 # openshift-sdn-node not properly detecting the hostname.
+# TODO: we should probably generate certs specifically for sdn
 - name: Configure openshift-sdn-node settings
   lineinfile:
     dest: /etc/sysconfig/openshift-sdn-node
@@ -14,28 +26,35 @@
     backrefs: yes
   with_items:
     - regex: '^(OPTIONS=)'
-      line: '\1"-v={{ openshift_sdn_node_debug_level }} -hostname={{ openshift_hostname }}"'
+      line: '\1"-v={{ openshift.node_sdn.debug_level }} -hostname={{ openshift.common.hostname }}
+        -etcd-cafile={{ openshift_node_cert_dir }}/ca.crt
+        -etcd-certfile={{ openshift_node_cert_dir }}/client.crt
+        -etcd-keyfile={{ openshift_node_cert_dir }}/client.key\"'
     - regex: '^(MASTER_URL=)'
-      line: '\1"http://{{ openshift_master_ips | first }}:4001"'
+      line: '\1"{{ openshift_sdn_master_url }}"'
     - regex: '^(MINION_IP=)'
-      line: '\1"{{ openshift_public_ip }}"'
-    # TODO lock down the insecure-registry config to a more sane value than
-    # 0.0.0.0/0
-    - regex: '^(DOCKER_OPTIONS=)'
-      line: '\1"--insecure-registry=0.0.0.0/0 -b=lbr0 --mtu=1450 --selinux-enabled"'
+      line: '\1"{{ openshift.common.ip }}"'
   notify: restart openshift-sdn-node
 
-- name: Set openshift-sdn-node facts
-  include: "{{ role_path | dirname }}/openshift_common/tasks/set_facts.yml"
-  facts:
-  - section: sdn-node
-    option: debug_level
-    value: "{{ openshift_sdn_node_debug_level }}"
+- name: Ensure we aren't setting DOCKER_OPTIONS in /etc/sysconfig/openshift-sdn-node
+  lineinfile:
+    dest: /etc/sysconfig/openshift-sdn-node
+    regexp: '^DOCKER_OPTIONS='
+    state: absent
+  notify: restart openshift-sdn-node
 
-# fixme: Once the openshift_cluster playbook is published state should be started
-# Always bounce service to pick up new credentials
+# TODO lock down the insecure-registry config to a more sane value than
+# 0.0.0.0/0
+- name: Configure docker insecure-registry setting
+  lineinfile:
+    dest: /etc/sysconfig/docker
+    regexp: INSECURE_REGISTRY=
+    line: INSECURE_REGISTRY='--insecure-registry=0.0.0.0/0'
+  notify: restart openshift-sdn-node
+
+
 - name: Start and enable openshift-sdn-node
   service:
     name: openshift-sdn-node
     enabled: yes
-    state: restarted
+    state: started

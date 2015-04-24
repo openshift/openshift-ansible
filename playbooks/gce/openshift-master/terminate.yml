@@ -1,20 +1,16 @@
-- name: "populate oo_hosts_to_terminate host group if needed"
+---
+- name: Populate oo_masters_to_terminate host group if needed
   hosts: localhost
   gather_facts: no
   tasks:
-    - debug: var=oo_host_group_exp
+    - name: Evaluate oo_masters_to_terminate
+      add_host: name={{ item }} groups=oo_masters_to_terminate
+      with_items: oo_host_group_exp | default([])
 
-    - name: Evaluate oo_host_group_exp if it's set
-      add_host: "name={{ item }} groups=oo_hosts_to_terminate"
-      with_items: "{{ oo_host_group_exp | default('') }}"
-      when: oo_host_group_exp is defined
-
-    - debug: msg="{{ groups['oo_hosts_to_terminate'] }}"
-
-
-- name: Terminate instances
+- name: Terminate master instances
   hosts: localhost
   connection: local
+  gather_facts: no
   tasks:
     - name: Terminate master instances
       gce:
@@ -22,11 +18,10 @@
         pem_file: "{{ gce_pem_file }}"
         project_id: "{{ gce_project_id }}"
         state: 'absent'
-        instance_names: "{{ groups['oo_hosts_to_terminate'] }}"
-        disks: "{{ groups['oo_hosts_to_terminate'] }}"
+        instance_names: "{{ groups['oo_masters_to_terminate'] }}"
+        disks: "{{ groups['oo_masters_to_terminate'] }}"
       register: gce
-
-    - debug: var=gce
+      when: "'oo_masters_to_terminate' in groups"
 
     - name: Remove disks of instances
       gce_pd:
@@ -37,5 +32,4 @@
         zone: "{{ gce.zone }}"
         state: absent
       with_items: gce.instance_names
-
-
+      when: "'oo_masters_to_terminate' in groups"

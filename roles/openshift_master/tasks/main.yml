@@ -1,81 +1,106 @@
 ---
+# TODO: actually have api_port, api_use_ssl, console_port, console_use_ssl,
+# etcd_use_ssl actually change the master config.
+
+- name: Set master OpenShift facts
+  openshift_facts:
+    role: 'master'
+    local_facts:
+      debug_level: "{{ openshift_master_debug_level | default(openshift.common.debug_level) }}"
+      api_port: "{{ openshift_master_api_port | default(None) }}"
+      api_url: "{{ openshift_master_api_url | default(None) }}"
+      api_use_ssl: "{{ openshift_master_api_use_ssl | default(None) }}"
+      public_api_url: "{{ openshift_master_public_api_url | default(None) }}"
+      console_path: "{{ openshift_master_console_path | default(None) }}"
+      console_port: "{{ openshift_master_console_port | default(None) }}"
+      console_url: "{{ openshift_master_console_url | default(None) }}"
+      console_use_ssl: "{{ openshift_master_console_use_ssl | default(None) }}"
+      public_console_url: "{{ openshift_master_public_console_url | default(None) }}"
+      etcd_port: "{{ openshift_master_etcd_port | default(None) }}"
+      etcd_use_ssl: "{{ openshift_master_etcd_use_ssl | default(None) }}"
+      portal_net: "{{ openshift_master_portal_net | default(None) }}"
+
+# TODO: These values need to be configurable
+- name: Set dns OpenShift facts
+  openshift_facts:
+    role: 'dns'
+    local_facts:
+      ip: "{{ openshift.common.ip }}"
+      domain: local
+
 - name: Install OpenShift Master package
   yum: pkg=openshift-master state=installed
+  register: install_result
+
+- name: Reload systemd units
+  command: systemctl daemon-reload
+  when: install_result | changed
+
+- name: Create certificate parent directory if it doesn't exist
+  file:
+    path: "{{ openshift_cert_parent_dir }}"
+    state: directory
+
+- name: Create config parent directory if it doesn't exist
+  file:
+    path: "{{ openshift_master_config | dirname }}"
+    state: directory
+
+# TODO: should probably use a template lookup for this
+# TODO: should allow for setting --etcd, --kubernetes options
+# TODO: recreate config if values change
+- name: Use enterprise default for openshift_registry_url if not set
+  set_fact:
+    openshift_registry_url: "openshift3_beta/ose-${component}:${version}"
+  when: openshift.common.deployment_type == 'enterprise' and openshift_registry_url is not defined
+
+- name: Use online default for openshift_registry_url if not set
+  set_fact:
+    openshift_registry_url: "docker-registry.ops.rhcloud.com/openshift3_beta/ose-${component}:${version}"
+  when: openshift.common.deployment_type == 'online' and openshift_registry_url is not defined
+
+- name: Create master config
+  command: >
+    /usr/bin/openshift start master --write-config
+    --config={{ openshift_master_config }}
+    --portal-net={{ openshift.master.portal_net }}
+    --master={{ openshift.master.api_url }}
+    --public-master={{ openshift.master.public_api_url }}
+    --listen={{ 'https' if openshift.master.api_use_ssl else 'http' }}://0.0.0.0:{{ openshift.master.api_port }}
+    {{ ('--images=' ~ openshift_registry_url) if (openshift_registry_url | default('', true) != '') else '' }}
+    {{ ('--nodes=' ~ openshift_node_ips | join(',')) if (openshift_node_ips | default('', true) != '') else '' }}
+  args:
+    chdir: "{{ openshift_cert_parent_dir }}"
+    creates: "{{ openshift_master_config }}"
 
 - name: Configure OpenShift settings
   lineinfile:
     dest: /etc/sysconfig/openshift-master
     regexp: '^OPTIONS='
-    line: "OPTIONS=\"--public-master={{ openshift_hostname }} {% if
-    openshift_node_ips %} --nodes={{ openshift_node_ips
-              | join(',') }} {% endif %} --loglevel={{ openshift_master_debug_level }}\""
+    line: "OPTIONS=\"--config={{ openshift_master_config }} --loglevel={{ openshift.master.debug_level }}\""
   notify:
   - restart openshift-master
-
-- name: Set default registry url
-  lineinfile:
-    dest: /etc/sysconfig/openshift-master
-    regexp: '^IMAGES='
-    line: "IMAGES={{ openshift_registry_url }}"
-  when: openshift_registry_url is defined
-  notify:
-  - restart openshift-master
-
-- name: Set master OpenShift facts
-  include: "{{ role_path | dirname }}/openshift_common/tasks/set_facts.yml"
-  facts:
-  - section: master
-    option: debug_level
-    value: "{{ openshift_master_debug_level }}"
-  - section: master
-    option: public_ip
-    value: "{{ openshift_public_ip }}"
-  - section: master
-    option: externally_managed
-    value: "{{ openshift_master_manage_service_externally }}"
-
-# TODO: remove this when origin PR #1298 has landed in OSE
-- name: Workaround for openshift-master taking longer than 90 seconds to issue sdNotify signal
-  command: cp /usr/lib/systemd/system/openshift-master.service /etc/systemd/system/
-  args:
-    creates: /etc/systemd/system/openshift-master.service
-- ini_file:
-    dest: /etc/systemd/system/openshift-master.service
-    option: TimeoutStartSec
-    section: Service
-    value: 300
-    state: present
-  register: result
-- command: systemctl daemon-reload
-  when: result | changed
-# End of workaround pending PR #1298
 
 - name: Start and enable openshift-master
   service: name=openshift-master enabled=yes state=started
-  when: not openshift_master_manage_service_externally
-  register: result
 
-#TODO: remove this when origin PR #1204 has landed in OSE
-- name: need to pause here, otherwise we attempt to copy certificates generated by the master before they are generated
-  pause: seconds=30
-  when: result | changed
-# End of workaround pending PR #1204
-
-- name: Disable openshift-master if openshift-master is managed externally
-  service: name=openshift-master enabled=false
-  when: openshift_master_manage_service_externally
-
-# TODO: create an os_vars role that has generic env related config and move
-# the root kubeconfig setting there, cannot use dependencies to force ordering
-# with openshift_node and openshift_master because the way conditional
-# dependencies work with current ansible would also exclude the
-# openshift_common dependency.
-- name: Create .kube directory
+- name: Create the OpenShift client config dir(s)
   file:
-    path: /root/.kube
+    path: "~{{ item }}/.config/openshift"
     state: directory
     mode: 0700
-- name: Configure root user kubeconfig
-  command: cp /var/lib/openshift/openshift.local.certificates/admin/.kubeconfig /root/.kube/.kubeconfig
+    owner: "{{ item }}"
+    group: "{{ item }}"
+  with_items:
+  - root
+  - "{{ ansible_ssh_user }}"
+
+# TODO: Update this file if the contents of the source file are not present in
+# the dest file, will need to make sure to ignore things that could be added
+- name: Create the OpenShift client config(s)
+  command: cp {{ openshift_cert_dir }}/openshift-client/.kubeconfig ~{{ item }}/.config/openshift/.config
   args:
-    creates: /root/.kube/.kubeconfig
+    creates: ~{{ item }}/.config/openshift/.config
+  with_items:
+  - root
+  - "{{ ansible_ssh_user }}"

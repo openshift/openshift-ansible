@@ -1,0 +1,132 @@
+---
+- set_fact:
+    created_by: "{{ lookup('env', 'LOGNAME')|default(cluster, true) }}"
+    docker_vol_ephemeral: "{{ lookup('env', 'os_docker_vol_ephemeral') | default(false, true) }}"
+    env: "{{ cluster }}"
+    env_host_type: "{{ cluster }}-openshift-{{ type }}"
+    host_type: "{{ type }}"
+
+- set_fact:
+    ec2_region: "{{ lookup('env', 'ec2_region')
+                    | default(deployment_vars[deployment_type].region, true) }}"
+  when: ec2_region is not defined
+- set_fact:
+    ec2_image_name: "{{ lookup('env', 'ec2_image_name')
+                        | default(deployment_vars[deployment_type].image_name, true) }}"
+  when: ec2_image_name is not defined and ec2_image is not defined
+- set_fact:
+    ec2_image: "{{ lookup('env', 'ec2_image')
+                   | default(deployment_vars[deployment_type].image, true) }}"
+  when: ec2_image is not defined and not ec2_image_name
+- set_fact:
+    ec2_instance_type: "{{ lookup('env', 'ec2_instance_type')
+                    | default(deployment_vars[deployment_type].type, true) }}"
+  when: ec2_instance_type is not defined
+- set_fact:
+    ec2_keypair: "{{ lookup('env', 'ec2_keypair')
+                    | default(deployment_vars[deployment_type].keypair, true) }}"
+  when: ec2_keypair is not defined
+- set_fact:
+    ec2_vpc_subnet: "{{ lookup('env', 'ec2_vpc_subnet')
+                    | default(deployment_vars[deployment_type].vpc_subnet, true) }}"
+  when: ec2_vpc_subnet is not defined
+- set_fact:
+    ec2_assign_public_ip: "{{ lookup('env', 'ec2_assign_public_ip')
+                    | default(deployment_vars[deployment_type].assign_public_ip, true) }}"
+  when: ec2_assign_public_ip is not defined
+- set_fact:
+    ec2_security_groups: "{{ lookup('env', 'ec2_security_groups')
+                    | default(deployment_vars[deployment_type].security_groups, true) }}"
+  when: ec2_security_groups is not defined
+
+- name: Find amis for deployment_type
+  ec2_ami_find:
+    region: "{{ ec2_region }}"
+    ami_id: "{{ ec2_image | default(omit, true) }}"
+    name: "{{ ec2_image_name | default(omit, true) }}"
+  register: ami_result
+
+- fail: msg="Could not find requested ami"
+  when: not ami_result.results
+
+- set_fact:
+    latest_ami: "{{ ami_result.results | oo_ami_selector(ec2_image_name) }}"
+    user_data: "{{ lookup('template', '../templates/user_data.j2') if type == 'node' else None | default('omit') }}"
+    volume_defs:
+      master:
+        root:
+          volume_size: "{{ lookup('env', 'os_master_root_vol_size') | default(25, true) }}"
+          device_type: "{{ lookup('env', 'os_master_root_vol_type') | default('gp2', true) }}"
+          iops: "{{ lookup('env', 'os_master_root_vol_iops') | default(500, true) }}"
+      node:
+        root:
+          volume_size: "{{ lookup('env', 'os_node_root_vol_size') | default(25, true) }}"
+          device_type: "{{ lookup('env', 'os_node_root_vol_type') | default('gp2', true) }}"
+          iops: "{{ lookup('env', 'os_node_root_vol_iops') | default(500, true) }}"
+        docker:
+          volume_size: "{{ lookup('env', 'os_docker_vol_size') | default(32, true) }}"
+          device_type: "{{ lookup('env', 'os_docker_vol_type') | default('gp2', true) }}"
+          iops: "{{ lookup('env', 'os_docker_vol_iops') | default(500, true) }}"
+
+- set_fact:
+    volumes: "{{ volume_defs | oo_ec2_volume_definition(host_type, docker_vol_ephemeral | bool) }}"
+
+- name: Launch instance(s)
+  ec2:
+    state: present
+    region: "{{ ec2_region }}"
+    keypair: "{{ ec2_keypair }}"
+    group: "{{ ec2_security_groups }}"
+    instance_type: "{{ ec2_instance_type }}"
+    image: "{{ latest_ami }}"
+    count: "{{ instances | oo_len }}"
+    vpc_subnet_id: "{{ ec2_vpc_subnet | default(omit, true) }}"
+    assign_public_ip: "{{ ec2_assign_public_ip | default(omit, true) }}"
+    user_data: "{{ user_data }}"
+    wait: yes
+    instance_tags:
+      created-by: "{{ created_by }}"
+      env: "{{ env }}"
+      host-type: "{{ host_type }}"
+      env-host-type: "{{ env_host_type }}"
+    volumes: "{{ volumes }}"
+  register: ec2
+
+- name: Add Name tag to instances
+  ec2_tag: resource={{ item.1.id }} region={{ ec2_region }} state=present
+  with_together:
+  - instances
+  - ec2.instances
+  args:
+    tags:
+      Name: "{{ item.0 }}"
+
+- set_fact:
+    instance_groups: tag_created-by_{{ created_by }}, tag_env_{{ env }}, tag_host-type_{{ host_type }}, tag_env-host-type_{{ env_host_type }}
+
+- name: Add new instances groups and variables
+  add_host:
+    hostname: "{{ item.0 }}"
+    ansible_ssh_host: "{{ item.1.dns_name }}"
+    ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
+    ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
+    groups: "{{ instance_groups }}"
+    ec2_private_ip_address: "{{ item.1.private_ip }}"
+    ec2_ip_address: "{{ item.1.public_ip }}"
+  with_together:
+  - instances
+  - ec2.instances
+
+- name: Wait for ssh
+  wait_for: "port=22 host={{ item.dns_name }}"
+  with_items: ec2.instances
+
+- name: Wait for user setup
+  command: "ssh -o StrictHostKeyChecking=no -o PasswordAuthentication=no -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null {{ hostvars[item.0].ansible_ssh_user }}@{{ item.1.dns_name }} echo {{ hostvars[item.0].ansible_ssh_user }} user is setup"
+  register: result
+  until: result.rc == 0
+  retries: 20
+  delay: 10
+  with_together:
+  - instances
+  - ec2.instances

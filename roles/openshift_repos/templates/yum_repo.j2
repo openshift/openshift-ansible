@@ -1,0 +1,14 @@
+{% for repo in openshift_additional_repos %}
+[{{ repo.id }}]
+name={{ repo.name | default(repo.id) }}
+baseurl={{ repo.baseurl }}
+{% set enable_repo = repo.enabled | default('1') %}
+enabled={{ 1 if ( enable_repo == 1 or enable_repo == True ) else 0 }}
+{% set enable_gpg_check = repo.gpgcheck | default('1') %}
+gpgcheck={{ 1 if ( enable_gpg_check == 1 or enable_gpg_check == True ) else 0 }}
+{% for key, value in repo.iteritems() %}
+{% if key not in ['id', 'name', 'baseurl', 'enabled', 'gpgcheck'] and value is defined %}
+{{ key }}={{ value }}
+{% endif %}
+{% endfor %}
+{% endfor %}

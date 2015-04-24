@@ -1,0 +1,6 @@
+---
+- include: configure_libvirt_storage_pool.yml
+  when: libvirt_storage_pool is defined and libvirt_storage_pool_path is defined
+
+- include: configure_libvirt_network.yml
+  when: libvirt_network is defined

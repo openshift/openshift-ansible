@@ -1,0 +1,28 @@
+---
+- name: Launch instance(s)
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  vars_files:
+  - vars.yml
+  tasks:
+  - fail: msg="Deployment type not supported for gce provider yet"
+    when: deployment_type == 'enterprise'
+
+  - include: ../../common/openshift-cluster/set_master_launch_facts_tasks.yml
+  - include: tasks/launch_instances.yml
+    vars:
+      instances: "{{ master_names }}"
+      cluster: "{{ cluster_id }}"
+      type: "{{ k8s_type }}"
+
+  - include: ../../common/openshift-cluster/set_node_launch_facts_tasks.yml
+  - include: tasks/launch_instances.yml
+    vars:
+      instances: "{{ node_names }}"
+      cluster: "{{ cluster_id }}"
+      type: "{{ k8s_type }}"
+
+- include: update.yml
+
+- include: list.yml

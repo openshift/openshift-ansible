@@ -1,0 +1,3 @@
+---
+- name: Gather OpenShift facts
+  openshift_facts:

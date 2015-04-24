@@ -1,16 +1,17 @@
 ---
-openshift_master_manage_service_externally: false
-openshift_master_debug_level: "{{ openshift_debug_level | default(0) }}"
 openshift_node_ips: []
+
+# TODO: update setting these values based on the facts
+# TODO: update for console port change
 os_firewall_allow:
 - service: etcd embedded
   port: 4001/tcp
-- service: etcd peer
-  port: 7001/tcp
 - service: OpenShift api https
   port: 8443/tcp
-- service: OpenShift web console https
-  port: 8444/tcp
 os_firewall_deny:
 - service: OpenShift api http
   port: 8080/tcp
+- service: former OpenShift web console port
+  port: 8444/tcp
+- service: former etcd peer port
+  port: 7001/tcp

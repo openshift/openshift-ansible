@@ -1,0 +1,110 @@
+#!/usr/bin/env python
+# vim: expandtab:tabstop=4:shiftwidth=4
+
+import argparse
+import traceback
+import sys
+import os
+import re
+import tempfile
+import time
+import subprocess
+import ConfigParser
+
+from openshift_ansible import awsutil
+from openshift_ansible.awsutil import ArgumentError
+
+CONFIG_MAIN_SECTION = 'main'
+CONFIG_HOST_TYPE_ALIAS_SECTION = 'host_type_aliases'
+CONFIG_INVENTORY_OPTION = 'inventory'
+
+class Ohi(object):
+    def __init__(self):
+        self.inventory = None
+        self.host_type_aliases = {}
+        self.file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)))
+
+        # Default the config path to /etc
+        self.config_path = os.path.join(os.path.sep, 'etc',  \
+                                        'openshift_ansible', \
+                                        'openshift_ansible.conf')
+
+        self.parse_cli_args()
+        self.parse_config_file()
+
+        self.aws = awsutil.AwsUtil(self.inventory, self.host_type_aliases)
+
+    def run(self):
+        if self.args.list_host_types:
+            self.aws.print_host_types()
+            return 0
+
+        hosts = None
+        if self.args.host_type is not None and \
+           self.args.env is not None:
+            # Both env and host-type specified
+            hosts = self.aws.get_host_list(host_type=self.args.host_type, \
+                                           env=self.args.env)
+
+        if self.args.host_type is None and \
+           self.args.env is not None:
+            # Only env specified
+            hosts = self.aws.get_host_list(env=self.args.env)
+
+        if self.args.host_type is not None and \
+           self.args.env is None:
+            # Only host-type specified
+            hosts = self.aws.get_host_list(host_type=self.args.host_type)
+
+        if hosts is None:
+            # We weren't able to determine what they wanted to do
+            raise ArgumentError("Invalid combination of arguments")
+
+        for host in hosts:
+            print host
+        return 0
+
+    def parse_config_file(self):
+        if os.path.isfile(self.config_path):
+            config = ConfigParser.ConfigParser()
+            config.read(self.config_path)
+
+            if config.has_section(CONFIG_MAIN_SECTION) and \
+               config.has_option(CONFIG_MAIN_SECTION, CONFIG_INVENTORY_OPTION):
+                self.inventory = config.get(CONFIG_MAIN_SECTION, CONFIG_INVENTORY_OPTION)
+
+            self.host_type_aliases = {}
+            if config.has_section(CONFIG_HOST_TYPE_ALIAS_SECTION):
+                for alias in config.options(CONFIG_HOST_TYPE_ALIAS_SECTION):
+                    value = config.get(CONFIG_HOST_TYPE_ALIAS_SECTION, alias).split(',')
+                    self.host_type_aliases[alias] = value
+
+    def parse_cli_args(self):
+        """Setup the command line parser with the options we want
+        """
+
+        parser = argparse.ArgumentParser(description='Openshift Host Inventory')
+
+        parser.add_argument('--list-host-types', default=False, action='store_true',
+                       help='List all of the host types')
+
+        parser.add_argument('-e', '--env', action="store",
+                       help="Which environment to use")
+
+        parser.add_argument('-t', '--host-type', action="store",
+                       help="Which host type to use")
+
+        self.args = parser.parse_args()
+
+
+if __name__ == '__main__':
+    if len(sys.argv) == 1:
+        print "\nError: No options given. Use --help to see the available options\n"
+        sys.exit(0)
+
+    try:
+        ohi = Ohi()
+        exitcode = ohi.run()
+        sys.exit(exitcode)
+    except ArgumentError as e:
+        print "\nError: %s\n" % e.message

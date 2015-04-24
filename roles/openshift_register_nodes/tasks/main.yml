@@ -1,0 +1,56 @@
+---
+# TODO: support new create-config command to generate node certs and config
+# TODO: recreate master/node configs if settings that affect the configs
+# change (hostname, public_hostname, ip, public_ip, etc)
+
+
+# TODO: use a template lookup here
+# TODO: create a failed_when condition
+- name: Use enterprise default for openshift_registry_url if not set
+  set_fact:
+    openshift_registry_url: "openshift3_beta/ose-${component}:${version}"
+  when: openshift.common.deployment_type == 'enterprise' and openshift_registry_url is not defined
+
+- name: Use online default for openshift_registry_url if not set
+  set_fact:
+    openshift_registry_url: "docker-registry.ops.rhcloud.com/openshift3_beta/ose-${component}:${version}"
+  when: openshift.common.deployment_type == 'online' and openshift_registry_url is not defined
+
+- name: Create node config
+  command: >
+    /usr/bin/openshift admin create-node-config
+      --node-dir={{ openshift_cert_dir }}/node-{{ item.openshift.common.hostname }}
+      --node={{ item.openshift.common.hostname }}
+      --hostnames={{ [item.openshift.common.hostname, item.openshift.common.public_hostname]|unique|join(",") }}
+      --dns-domain={{ openshift.dns.domain }}
+      --dns-ip={{ openshift.dns.ip }}
+      --master={{ openshift.master.api_url }}
+      --signer-key={{ openshift_master_ca_key }}
+      --signer-cert={{ openshift_master_ca_cert }}
+      --certificate-authority={{ openshift_master_ca_cert }}
+      --signer-serial={{ openshift_master_ca_dir }}/serial.txt
+      --node-client-certificate-authority={{ openshift_master_ca_cert }}
+      {{ ('--images=' ~ openshift_registry_url) if openshift_registry_url is defined else '' }}
+      --listen=https://0.0.0.0:10250
+  args:
+    chdir: "{{ openshift_cert_parent_dir }}"
+    creates: "{{ openshift_cert_dir }}/node-{{ item.openshift.common.hostname }}"
+  with_items: openshift_nodes
+
+- name: Register unregistered nodes
+  kubernetes_register_node:
+    kubectl_cmd: ['osc']
+    default_client_config: '~/.config/openshift/.config'
+    name: "{{ item.openshift.common.hostname }}"
+    api_version: "{{ openshift_kube_api_version }}"
+    cpu: "{{ item.openshift.node.resources_cpu | default(None) }}"
+    memory: "{{ item.openshift.node.resources_memory | default(None) }}"
+    pod_cidr: "{{ item.openshift.node.pod_cidr | default(None) }}"
+    host_ip: "{{ item.openshift.common.ip }}"
+    labels: "{{ item.openshift.node.labels | default({}) }}"
+    annotations: "{{ item.openshift.node.annotations | default({}) }}"
+    external_id: "{{ item.openshift.node.external_id }}"
+    # TODO: support customizing other attributes such as: client_config,
+    # client_cluster, client_context, client_user
+  with_items: openshift_nodes
+  register: register_result

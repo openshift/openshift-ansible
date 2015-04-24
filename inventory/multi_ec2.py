@@ -1,37 +1,58 @@
 #!/usr/bin/env python2
+'''
+    Fetch and combine multiple ec2 account settings into a single
+    json hash.
+'''
 # vim: expandtab:tabstop=4:shiftwidth=4
 
 from time import time
 import argparse
 import yaml
 import os
-import sys
-import pdb
 import subprocess
 import json
-import pprint
 
+
+CONFIG_FILE_NAME = 'multi_ec2.yaml'
 
 class MultiEc2(object):
+    '''
+       MultiEc2 class:
+            Opens a yaml config file and reads aws credentials.
+            Stores a json hash of resources in result.
+    '''
 
     def __init__(self):
+        self.args = None
         self.config = None
         self.all_ec2_results = {}
         self.result = {}
         self.cache_path = os.path.expanduser('~/.ansible/tmp/multi_ec2_inventory.cache')
         self.file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)))
-        self.config_file = os.path.join(self.file_path,"multi_ec2.yaml")
+
+        same_dir_config_file = os.path.join(self.file_path, CONFIG_FILE_NAME)
+        etc_dir_config_file = os.path.join(os.path.sep, 'etc', 'ansible', CONFIG_FILE_NAME)
+
+        # Prefer a file in the same directory, fall back to a file in etc
+        if os.path.isfile(same_dir_config_file):
+            self.config_file = same_dir_config_file
+        elif os.path.isfile(etc_dir_config_file):
+            self.config_file = etc_dir_config_file
+        else:
+            self.config_file = None # expect env vars
+
         self.parse_cli_args()
 
         # load yaml
-        if os.path.isfile(self.config_file):
+        if self.config_file and os.path.isfile(self.config_file):
             self.config = self.load_yaml_config()
-        elif os.environ.has_key("AWS_ACCESS_KEY_ID") and os.environ.has_key("AWS_SECRET_ACCESS_KEY"):
+        elif os.environ.has_key("AWS_ACCESS_KEY_ID") and \
+             os.environ.has_key("AWS_SECRET_ACCESS_KEY"):
             self.config = {}
             self.config['accounts'] = [
                 {
                     'name': 'default',
-                    'provider': 'aws/ec2.py',
+                    'provider': 'aws/hosts/ec2.py',
                     'env_vars': {
                         'AWS_ACCESS_KEY_ID':     os.environ["AWS_ACCESS_KEY_ID"],
                         'AWS_SECRET_ACCESS_KEY': os.environ["AWS_SECRET_ACCESS_KEY"],
@@ -43,13 +64,9 @@ class MultiEc2(object):
         else:
             raise RuntimeError("Could not find valid ec2 credentials in the environment.")
 
-        if self.args.cache_only:
-            # get data from disk
-            result = self.get_inventory_from_cache()
-
-            if not result:
-                self.get_inventory()
-                self.write_to_cache()
+        if self.args.refresh_cache:
+            self.get_inventory()
+            self.write_to_cache()
         # if its a host query, fetch and do not cache
         elif self.args.host:
             self.get_inventory()
@@ -61,7 +78,7 @@ class MultiEc2(object):
             # get data from disk
             self.get_inventory_from_cache()
 
-    def load_yaml_config(self,conf_file=None):
+    def load_yaml_config(self, conf_file=None):
         """Load a yaml config file with credentials to query the
         respective cloud for inventory.
         """
@@ -75,7 +92,7 @@ class MultiEc2(object):
 
         return config
 
-    def get_provider_tags(self,provider, env={}):
+    def get_provider_tags(self, provider, env=None):
         """Call <provider> and query all of the tags that are usuable
         by ansible.  If environment is empty use the default env.
         """
@@ -140,7 +157,8 @@ class MultiEc2(object):
                     self.all_ec2_results[result['name']] = json.loads(result['out'])
             values = self.all_ec2_results.values()
             values.insert(0, self.result)
-            [MultiEc2.merge_destructively(self.result, x) for x in  values]
+            for result in  values:
+                MultiEc2.merge_destructively(self.result, result)
         else:
             # For any 0 result, return it
             count = 0
@@ -152,30 +170,30 @@ class MultiEc2(object):
                     raise RuntimeError("Found > 1 results for --host %s. \
                                        This is an invalid state." % self.args.host)
     @staticmethod
-    def merge_destructively(a, b):
-        "merges b into a"
-        for key in b:
-            if key in a:
-                if isinstance(a[key], dict) and isinstance(b[key], dict):
-                    MultiEc2.merge_destructively(a[key], b[key])
-                elif a[key] == b[key]:
+    def merge_destructively(input_a, input_b):
+        "merges b into input_a"
+        for key in input_b:
+            if key in input_a:
+                if isinstance(input_a[key], dict) and isinstance(input_b[key], dict):
+                    MultiEc2.merge_destructively(input_a[key], input_b[key])
+                elif input_a[key] == input_b[key]:
                     pass # same leaf value
                 # both lists so add each element in b to a if it does ! exist
-                elif isinstance(a[key], list) and isinstance(b[key],list):
-                    for x in b[key]:
-                        if x not in a[key]:
-                            a[key].append(x)
+                elif isinstance(input_a[key], list) and isinstance(input_b[key], list):
+                    for result in input_b[key]:
+                        if result not in input_a[key]:
+                            input_a[key].input_append(result)
                 # a is a list and not b
-                elif isinstance(a[key], list):
-                    if b[key] not in a[key]:
-                        a[key].append(b[key])
-                elif isinstance(b[key], list):
-                    a[key] = [a[key]] + [k for k in b[key] if k != a[key]]
+                elif isinstance(input_a[key], list):
+                    if input_b[key] not in input_a[key]:
+                        input_a[key].append(input_b[key])
+                elif isinstance(input_b[key], list):
+                    input_a[key] = [input_a[key]] + [k for k in input_b[key] if k != input_a[key]]
                 else:
-                    a[key] = [a[key],b[key]]
+                    input_a[key] = [input_a[key], input_b[key]]
             else:
-                a[key] = b[key]
-        return a
+                input_a[key] = input_b[key]
+        return input_a
 
     def is_cache_valid(self):
         ''' Determines if the cache files have expired, or if it is still valid '''
@@ -191,19 +209,20 @@ class MultiEc2(object):
     def parse_cli_args(self):
         ''' Command line argument processing '''
 
-        parser = argparse.ArgumentParser(description='Produce an Ansible Inventory file based on a provider')
-        parser.add_argument('--cache-only', action='store_true', default=False,
-                           help='Fetch cached only instances (default: False)')
+        parser = argparse.ArgumentParser(
+            description='Produce an Ansible Inventory file based on a provider')
+        parser.add_argument('--refresh-cache', action='store_true', default=False,
+                            help='Fetch cached only instances (default: False)')
         parser.add_argument('--list', action='store_true', default=True,
-                           help='List instances (default: True)')
+                            help='List instances (default: True)')
         parser.add_argument('--host', action='store', default=False,
-                           help='Get all the variables about a specific instance')
+                            help='Get all the variables about a specific instance')
         self.args = parser.parse_args()
 
     def write_to_cache(self):
         ''' Writes data in JSON format to a file '''
 
-        json_data = self.json_format_dict(self.result, True)
+        json_data = MultiEc2.json_format_dict(self.result, True)
         with open(self.cache_path, 'w') as cache:
             cache.write(json_data)
 
@@ -219,7 +238,8 @@ class MultiEc2(object):
 
         return True
 
-    def json_format_dict(self, data, pretty=False):
+    @classmethod
+    def json_format_dict(cls, data, pretty=False):
         ''' Converts a dict to a JSON object and dumps it as a formatted
         string '''
 
@@ -229,9 +249,9 @@ class MultiEc2(object):
             return json.dumps(data)
 
     def result_str(self):
+        '''Return cache string stored in self.result'''
         return self.json_format_dict(self.result, True)
 
 
 if __name__ == "__main__":
-    mi = MultiEc2()
-    print mi.result_str()
+    print MultiEc2().result_str()
