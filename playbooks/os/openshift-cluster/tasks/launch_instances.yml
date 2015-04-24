@@ -4,7 +4,19 @@
   register: net_id_result
 
 - name: Launch instance(s)
-  command: 'nova boot --flavor {{ openstack_flavor }} --nic net-id={{ net_id_result.stdout }} --image {{ deployment_vars[deployment_type].image.name }} --key-name {{ openstack_ssh_keypair }} --user-data files/user-data --security-groups {{ openstack_network_prefix }}-secgrp --meta deployment-type={{ deployment_type }} --meta env={{ cluster }} --meta env-host-type={{ cluster }}-openshift-{{ type }} --meta host-type={{ type }} {{ item }}'
+  nova_compute:
+    name: '{{ item }}'
+    image_name: '{{ deployment_vars[deployment_type].image.name }}'
+    flavor_ram: '{{ openstack_flavor_ram }}'
+    key_name: '{{ openstack_ssh_keypair }}'
+    security_groups: '{{ openstack_network_prefix }}-secgrp'
+    nics:
+      - net-id: '{{ net_id_result.stdout }}'
+    user_data: "{{ lookup('file','files/user-data') }}"
+    meta:
+      env: '{{ cluster }}'
+      host-type: '{{ type }}'
+      env-host-type: '{{ cluster }}-openshift-{{ type }}'
   with_items: instances
 
 - name: Create floating IPs
@@ -24,7 +36,6 @@
     ansible_ssh_host: '{{ item[1].stdout }}'
     ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
     ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-#    groups: 'tag_env-{{ cluster }}, tag_host-type-{{ type }}, tag_env-host-type-{{ cluster }}-openshift-{{ type }}'
     groups: 'meta-env_{{ cluster }}, meta-host-type_{{ type }}, meta-env-host-type_{{ cluster }}-openshift-{{ type }}'
   with_together:
     - instances

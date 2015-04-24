@@ -1,12 +1,12 @@
 ---
-openstack_network_prefix: 'openshift-ansible-{{ lookup("env", "LOGNAME") }}'
+openstack_network_prefix: 'openshift-ansible-{{ cluster_id }}'
 openstack_network_cidr: 192.168.{{ 1048576 | random % 256 }}.0/24
 openstack_network_external_net: external
 openstack_network_dns:
   - 8.8.8.8
   - 8.8.4.4
-openstack_ssh_keypair: 'lenaic_key'
-openstack_flavor: 'm1.small'
+openstack_ssh_keypair: "{{ lookup('env', 'LOGNAME') }}_key"
+openstack_flavor_ram: 2048
 
 deployment_vars:
   origin:

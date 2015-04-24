@@ -13,15 +13,8 @@
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
     with_items: groups[cluster_group] | default([])
 
-  - name: Destroy VMs
-    command: 'nova delete {{ item }}'
+  - name: Terminate instance(s)
+    nova_compute:
+      name: "{{ item }}"
+      state: absent
     with_items: groups['oo_hosts_to_terminate']
-
-  # - name: Terminate instance(s)
-  #   nova_compute:
-  #     login_username: "{{ lookup('ENV','OS_USERNAME') }}"
-  #     login_password: "{{ lookup('ENV','OS_PASSWORD') }}"
-  #     login_tenant_name: "{{ lookup('ENV','OS_TENANT_NAME=') }}"
-  #     name: "{{ item }}"
-  #     state: absent
-  #   with_items: groups['oo_hosts_to_terminate']

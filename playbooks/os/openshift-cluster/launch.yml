@@ -32,4 +32,4 @@
 
 - include: update.yml
 
-# - include: list.yml
+- include: list.yml
