@@ -20,4 +20,4 @@
   hosts: oo_list_hosts
   tasks:
   - debug:
-      msg: 'public:{{ansible_default_ipv4.address}} private:{{ansible_default_ipv4.address}} deployment-type: {{ hostvars[inventory_hostname].group_names | oo_get_deployment_type_from_groups }}'
+      msg: 'public:{{ansible_default_ipv4.address}} private:{{ansible_default_ipv4.address}}'
