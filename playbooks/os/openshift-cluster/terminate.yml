@@ -1,0 +1,27 @@
+- name: Terminate instance(s)
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  vars_files:
+  - vars.yml
+  tasks:
+  - set_fact: cluster_group=meta-env_{{ cluster_id }}
+  - add_host:
+      name: "{{ item }}"
+      groups: oo_hosts_to_terminate
+      ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
+      ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
+    with_items: groups[cluster_group] | default([])
+
+  - name: Destroy VMs
+    command: 'nova delete {{ item }}'
+    with_items: groups['oo_hosts_to_terminate']
+
+  # - name: Terminate instance(s)
+  #   nova_compute:
+  #     login_username: "{{ lookup('ENV','OS_USERNAME') }}"
+  #     login_password: "{{ lookup('ENV','OS_PASSWORD') }}"
+  #     login_tenant_name: "{{ lookup('ENV','OS_TENANT_NAME=') }}"
+  #     name: "{{ item }}"
+  #     state: absent
+  #   with_items: groups['oo_hosts_to_terminate']

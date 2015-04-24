@@ -1,0 +1,23 @@
+---
+- name: Generate oo_list_hosts group
+  hosts: localhost
+  gather_facts: no
+  vars_files:
+  - vars.yml
+  tasks:
+  - set_fact: scratch_group=meta-env_{{ cluster_id }}
+    when: cluster_id != ''
+  - set_fact: scratch_group=all
+    when: cluster_id == ''
+  - add_host:
+      name: "{{ item }}"
+      groups: oo_list_hosts
+      ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
+      ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
+    with_items: groups[scratch_group] | default([]) | difference(['localhost'])
+
+- name: List Hosts
+  hosts: oo_list_hosts
+  tasks:
+  - debug:
+      msg: 'public:{{ansible_default_ipv4.address}} private:{{ansible_default_ipv4.address}} deployment-type: {{ hostvars[inventory_hostname].group_names | oo_get_deployment_type_from_groups }}'

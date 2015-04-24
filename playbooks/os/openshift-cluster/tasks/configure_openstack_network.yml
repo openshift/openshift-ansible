@@ -51,3 +51,8 @@
 - name: Authorize ingress ssh
   command: 'neutron security-group-rule-create --protocol TCP --port-range-min 22 --port-range-max 22 --remote-ip-prefix 0.0.0.0/0 {{ openstack_network_prefix }}-secgrp'
   when: security_group_show_result.rc == 1
+
+- name: Create your keypair
+  nova_keypair:
+    name: "lookup('env', 'LOGNAME')_key"
+    public_key: "{{ lookup('file','~/.ssh/id_rsa.pub') }}"

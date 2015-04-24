@@ -4,7 +4,7 @@
   register: net_id_result
 
 - name: Launch instance(s)
-  command: 'nova boot --flavor {{ openstack_flavor }} --nic net-id={{ net_id_result.stdout }} --image {{ deployment_vars[deployment_type].image.name }} --key-name {{ openstack_ssh_keypair }} --security-groups {{ openstack_network_prefix }}-secgrp --meta deployment-type={{ deployment_type }} --meta env={{ cluster }} --meta env-host-type={{ cluster }}-openshift-{{ type }} --meta host-type={{ type }} {{ item }}'
+  command: 'nova boot --flavor {{ openstack_flavor }} --nic net-id={{ net_id_result.stdout }} --image {{ deployment_vars[deployment_type].image.name }} --key-name {{ openstack_ssh_keypair }} --user-data files/user-data --security-groups {{ openstack_network_prefix }}-secgrp --meta deployment-type={{ deployment_type }} --meta env={{ cluster }} --meta env-host-type={{ cluster }}-openshift-{{ type }} --meta host-type={{ type }} {{ item }}'
   with_items: instances
 
 - name: Create floating IPs
