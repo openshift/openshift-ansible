@@ -23,6 +23,21 @@
       cluster: "{{ cluster_id }}"
       type: "{{ k8s_type }}"
 
+  - set_fact:
+      oo_first_master: "{{ item }}"
+    with_items: master_names.split()
+  - debug: var=oo_first_master
+
 - include: update.yml
+
+- name: Deploy OpenShift Services
+  hosts: oo_first_master
+  connection: ssh
+  gather_facts: yes
+  vars_files:
+  - vars.yml
+  roles:
+  - openshift_docker_registry
+  - openshift_router
 
 - include: list.yml
