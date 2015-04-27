@@ -9,3 +9,23 @@
     group: "{{ oo_inventory_group }}"
     owner: "{{ oo_inventory_owner }}"
     mode: "0640"
+
+- file:
+    state: directory
+    dest: /etc/ansible/inventory
+    owner: root
+    group: libra_ops
+    mode: 0750
+
+- file:
+    state: link
+    src: /usr/share/ansible/inventory/multi_ec2.py
+    dest: /etc/ansible/inventory/multi_ec2.py
+    owner: root
+    group: libra_ops
+
+- lineinfile:
+    dest: /etc/ansible/ansible.cfg
+    backrefs: yes
+    regexp: '^(hostfile|inventory)( *)='
+    line: '\1\2= /etc/ansible/inventory'
