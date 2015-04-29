@@ -104,3 +104,14 @@
   with_items:
   - root
   - "{{ ansible_ssh_user }}"
+
+- name: Update the permissions on the OpenShift client config(s)
+  file:
+    path: "~{{ item }}/.config/openshift/.config"
+    state: file
+    mode: 0700
+    owner: "{{ item }}"
+    group: "{{ item }}"
+  with_items:
+  - root
+  - "{{ ansible_ssh_user }}"
