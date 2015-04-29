@@ -9,7 +9,6 @@
   - ansible
   - telnet
   - ack
-  - python-ansible-tower-cli
 
 - name: download Tower setup
   get_url: url=http://releases.ansible.com/ansible-tower/setup/ansible-tower-setup-2.1.1.tar.gz dest=/opt/ force=no
@@ -31,4 +30,3 @@
 
 - name: Set (httpd_can_network_connect_db) flag on and keep it persistent across reboots
   seboolean: name=httpd_can_network_connect_db state=yes persistent=yes
-
