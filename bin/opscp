@@ -15,6 +15,7 @@ Options:
   -e ENV, --env ENV     Which environment to use
   -t HOST_TYPE, --host-type HOST_TYPE
                         Which host type to use
+  --list-host-types     List all of the host types
   -O OPTION, --option=OPTION
                         SSH option (OPTIONAL)
   -v, --verbose         turn on warning and diagnostic messages (OPTIONAL)
@@ -62,6 +63,10 @@ while [ $# -gt 0 ] ; do
     shift # get past the option
     USER=$1
     shift # get past the value of the option
+
+  elif [ "$1" == "--list-host-types" ] ; then
+    ohi --list-host-types
+    exit 0
 
   elif [ "$1" == "-h" -o "$1" == "--hosts" -o "$1" == "-H" -o "$1" == "--host" ] ||
        [ "$1" == "-o" ] ; then
