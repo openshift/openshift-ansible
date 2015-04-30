@@ -1,0 +1,117 @@
+#!/bin/bash
+
+
+function usage() {
+  cat << EOF
+Usage: opscp [OPTIONS] local remote
+
+Options:
+  --version             show program's version number and exit
+  --help                show this help message and exit
+  -l USER, --user=USER  username (OPTIONAL)
+  -p PAR, --par=PAR     max number of parallel threads (OPTIONAL)
+  --errdir=ERRDIR       output directory for stderr files (OPTIONAL)
+  --outdir=OUTDIR       output directory for stdout files (OPTIONAL)
+  -e ENV, --env ENV     Which environment to use
+  -t HOST_TYPE, --host-type HOST_TYPE
+                        Which host type to use
+  -O OPTION, --option=OPTION
+                        SSH option (OPTIONAL)
+  -v, --verbose         turn on warning and diagnostic messages (OPTIONAL)
+  -A, --askpass         Ask for a password (OPTIONAL)
+  -x ARGS, --extra-args=ARGS
+                        Extra command-line arguments, with processing for
+                        spaces, quotes, and backslashes
+  -X ARG, --extra-arg=ARG
+                        Extra command-line argument
+  -r, --recursive       recusively copy directories (OPTIONAL)
+
+Example: opscp -t ex-srv -e stg -l irb2 foo.txt /home/irb2/foo.txt
+
+EOF
+}
+
+if [ $# -eq 0 ] || [ "$1" == "--help" ]
+then
+  usage
+  exit 1
+fi
+
+PSCP_PAR=200
+USER=root
+PSCP_OPTIONS=""
+ENV=""
+HOST_TYPE=""
+while [ $# -gt 0 ] ; do
+  if [ "$1" == "-t" -o "$1" == "--host-type" ] ; then
+    shift # get past the option
+    HOST_TYPE=$1
+    shift # get past the value of the option
+
+  elif [ "$1" == "-e" ] ; then
+    shift # get past the option
+    ENV=$1
+    shift # get past the value of the option
+
+  elif [ "$1" == "-p" -o "$1" == "--par" ] ; then
+    shift # get past the option
+    PSCP_PAR=$1
+    shift # get past the value of the option
+
+  elif [ "$1" == "-l" -o "$1" == "--user" ] ; then
+    shift # get past the option
+    USER=$1
+    shift # get past the value of the option
+
+  elif [ "$1" == "-h" -o "$1" == "--hosts" -o "$1" == "-H" -o "$1" == "--host" ] ||
+       [ "$1" == "-o" ] ; then
+    echo "ERROR: unknown option $1"
+    exit 20
+
+  else
+    if [ "${1:0:1}" == "-" ] ; then
+      # It's an option, don't quote
+      PSCP_OPTIONS="$PSCP_OPTIONS $1"
+    else
+      PSCP_OPTIONS="$PSCP_OPTIONS '$1'"
+    fi
+    shift # Get past this option
+  fi
+done
+
+if [ -z "$ENV" ]
+then
+  echo
+  echo "-e is a required paramemeter"
+  echo
+  exit 10
+fi
+
+if [ -z "$HOST_TYPE" ]
+then
+  echo
+  echo "-t is a required paramemeter"
+  echo
+  exit 15
+fi
+
+PSCP_OPTIONS="-t 0 -p $PSCP_PAR -l $USER -h <(ohi -t $HOST_TYPE -e $ENV 2>/dev/null) $PSCP_OPTIONS"
+
+
+# See if the ohi options are valid
+ohi -t $HOST_TYPE -e $ENV &> /dev/null
+ECODE=$?
+if [ $ECODE -ne 0 ] ; then
+  echo
+  echo "ERROR: ohi failed with exit code $ECODE"
+  echo
+  echo "This is usually caused by a bad value passed for host-type or environment."
+  echo
+  exit 25
+fi
+
+echo
+echo "Running: pscp.pssh $PSCP_OPTIONS"
+echo
+
+eval pscp.pssh $PSCP_OPTIONS
