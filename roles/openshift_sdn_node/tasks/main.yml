@@ -28,8 +28,8 @@
     - regex: '^(OPTIONS=)'
       line: '\1"-v={{ openshift.node_sdn.debug_level }} -hostname={{ openshift.common.hostname }}
         -etcd-cafile={{ openshift_node_cert_dir }}/ca.crt
-        -etcd-certfile={{ openshift_node_cert_dir }}/client.crt
-        -etcd-keyfile={{ openshift_node_cert_dir }}/client.key\"'
+        -etcd-certfile={{ openshift_node_cert_dir }}/master-client.crt
+        -etcd-keyfile={{ openshift_node_cert_dir }}/master-client.key\"'
     - regex: '^(MASTER_URL=)'
       line: '\1"{{ openshift_sdn_master_url }}"'
     - regex: '^(MINION_IP=)'

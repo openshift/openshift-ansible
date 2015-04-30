@@ -60,7 +60,7 @@
   - name: Create a tarball of the node config directories
     command: tar -czvf {{ sync_tmpdir }}/{{ item.openshift.common.hostname }}.tgz ./
     args:
-      chdir: "{{ openshift_cert_dir }}/node-{{ item.openshift.common.hostname }}"
+      chdir: "{{ openshift_generated_configs_dir }}/node-{{ item.openshift.common.hostname }}"
     with_items: openshift_nodes
     changed_when: False
 
