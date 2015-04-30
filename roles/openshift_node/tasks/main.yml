@@ -1,6 +1,7 @@
 ---
 # TODO: allow for overriding default ports where possible
 # TODO: trigger the external service when restart is needed
+# TODO: work with upstream to fix naming of 'master-client.crt/master-client.key'
 
 - name: Set node OpenShift facts
   openshift_facts:
@@ -15,9 +16,9 @@
   with_items:
   - "{{ openshift_node_cert_dir }}"
   - "{{ openshift_node_cert_dir }}/ca.crt"
-  - "{{ openshift_node_cert_dir }}/client.crt"
-  - "{{ openshift_node_cert_dir }}/client.key"
-  - "{{ openshift_node_cert_dir }}/.kubeconfig"
+  - "{{ openshift_node_cert_dir }}/master-client.crt"
+  - "{{ openshift_node_cert_dir }}/master-client.key"
+  - "{{ openshift_node_cert_dir }}/node.kubeconfig"
   - "{{ openshift_node_cert_dir }}/node-config.yaml"
   - "{{ openshift_node_cert_dir }}/server.crt"
   - "{{ openshift_node_cert_dir }}/server.key"
