@@ -64,7 +64,11 @@ class Ohi(object):
             raise ArgumentError("Invalid combination of arguments")
 
         for host in sorted(hosts, key=utils.normalize_dnsname):
-            print host
+            if self.args.user:
+                print "%s@%s" % (self.args.user, host)
+            else:
+                print host
+
         return 0
 
     def parse_config_file(self):
@@ -96,6 +100,10 @@ class Ohi(object):
 
         parser.add_argument('-t', '--host-type', action="store",
                        help="Which host type to use")
+
+        parser.add_argument('-l', '--user', action='store', default=None,
+                               help='username')
+
 
         self.args = parser.parse_args()
 
