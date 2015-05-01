@@ -38,7 +38,7 @@
 
 - name: Create config parent directory if it doesn't exist
   file:
-    path: "{{ openshift_master_config_dir | dirname }}"
+    path: "{{ openshift_master_config_dir }}"
     state: directory
 
 # TODO: should probably use a template lookup for this
