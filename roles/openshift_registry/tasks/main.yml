@@ -1,0 +1,8 @@
+---
+- set_fact: _option_images="--images={{ openshift_registry_url|quote }}"
+  when: openshift_registry_url is defined
+
+- name: Deploy OpenShift Registry
+  command: openshift admin registry --create --credentials=/var/lib/openshift/openshift.local.certificates/openshift-registry/.kubeconfig {{ _option_images|default() }}
+  register: _openshift_registry__results
+  changed_when: "'service exists' not in _openshift_registry__results.stdout"

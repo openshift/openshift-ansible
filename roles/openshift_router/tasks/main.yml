@@ -3,6 +3,6 @@
   when: openshift_registry_url is defined
 
 - name: Deploy OpenShift Router
-  command: openshift ex router --create --credentials="{{ansible_env['HOME']}}"/.config/openshift/config {{ _option_images|default() }}
+  command: openshift ex router --create --credentials=/var/lib/openshift/openshift.local.certificates/openshift-router/.kubeconfig {{ _option_images|default() }}
   register: _openshift_router__results
   changed_when: "'service exists' not in _openshift_router__results.stdout"
