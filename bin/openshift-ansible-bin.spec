@@ -1,6 +1,6 @@
 Summary:       OpenShift Ansible Scripts for working with metadata hosts
 Name:          openshift-ansible-bin
-Version:       0.0.10
+Version:       0.0.11
 Release:       1%{?dist}
 License:       ASL 2.0
 URL:           https://github.com/openshift/openshift-ansible
@@ -36,6 +36,14 @@ cp -p openshift_ansible.conf.example %{buildroot}/etc/openshift_ansible/openshif
 %config(noreplace) /etc/openshift_ansible/
 
 %changelog
+* Mon May 04 2015 Thomas Wiest <twiest@redhat.com> 0.0.11-1
+- changed opssh to a bash script using ohi to make it easier to maintain, and
+  to expose all of the pssh features directly. (twiest@redhat.com)
+- Added --user option to ohi to pre-pend the username in the hostlist output.
+  (twiest@redhat.com)
+- Added utils.py that contains a normalize_dnsname function good for sorting
+  dns names to a human readable list. (twiest@redhat.com)
+
 * Thu Apr 30 2015 Thomas Wiest <twiest@redhat.com> 0.0.10-1
 - added --list-host-types option to opscp (twiest@redhat.com)
 
