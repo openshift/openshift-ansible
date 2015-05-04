@@ -1,8 +1,9 @@
 #!/bin/bash
+# vim: expandtab:tabstop=4:shiftwidth=4
 
 
 function usage() {
-  cat << EOF
+    cat << EOF
 Usage: opscp [OPTIONS] local remote
 
 Options:
@@ -10,12 +11,13 @@ Options:
   --help                show this help message and exit
   -l USER, --user=USER  username (OPTIONAL)
   -p PAR, --par=PAR     max number of parallel threads (OPTIONAL)
-  --errdir=ERRDIR       output directory for stderr files (OPTIONAL)
   --outdir=OUTDIR       output directory for stdout files (OPTIONAL)
-  -e ENV, --env ENV     Which environment to use
+  --errdir=ERRDIR       output directory for stderr files (OPTIONAL)
+  -e ENV, --env ENV     which environment to use
   -t HOST_TYPE, --host-type HOST_TYPE
-                        Which host type to use
-  --list-host-types     List all of the host types
+                        which host type to use
+  --list-host-types     list all of the host types
+  --timeout=TIMEOUT     timeout (secs) (0 = no timeout) per host (OPTIONAL)
   -O OPTION, --option=OPTION
                         SSH option (OPTIONAL)
   -v, --verbose         turn on warning and diagnostic messages (OPTIONAL)
@@ -34,89 +36,98 @@ EOF
 
 if [ $# -eq 0 ] || [ "$1" == "--help" ]
 then
-  usage
-  exit 1
+    usage
+    exit 1
 fi
 
-PSCP_PAR=200
+# See if ohi is installed
+if ! which ohi &>/dev/null ; then
+    echo "ERROR: can't find ohi (OpenShift Host Inventory) on your system, please either install the openshift-ansible-bin package, or add openshift-ansible/bin to your path."
+
+    exit 10
+fi
+
+PAR=200
 USER=root
-PSCP_OPTIONS=""
+TIMEOUT=0
 ENV=""
 HOST_TYPE=""
+
 while [ $# -gt 0 ] ; do
-  if [ "$1" == "-t" -o "$1" == "--host-type" ] ; then
-    shift # get past the option
-    HOST_TYPE=$1
-    shift # get past the value of the option
+    case $1 in
+        -t|--host-type)
+            shift # get past the option
+            HOST_TYPE=$1
+            shift # get past the value of the option
+            ;;
 
-  elif [ "$1" == "-e" ] ; then
-    shift # get past the option
-    ENV=$1
-    shift # get past the value of the option
+        -e)
+            shift # get past the option
+            ENV=$1
+            shift # get past the value of the option
+            ;;
 
-  elif [ "$1" == "-p" -o "$1" == "--par" ] ; then
-    shift # get past the option
-    PSCP_PAR=$1
-    shift # get past the value of the option
+        --timeout)
+            shift # get past the option
+            TIMEOUT=$1
+            shift # get past the value of the option
+            ;;
 
-  elif [ "$1" == "-l" -o "$1" == "--user" ] ; then
-    shift # get past the option
-    USER=$1
-    shift # get past the value of the option
+        -p|--par)
+            shift # get past the option
+            PAR=$1
+            shift # get past the value of the option
+            ;;
 
-  elif [ "$1" == "--list-host-types" ] ; then
-    ohi --list-host-types
-    exit 0
+        -l|--user)
+            shift # get past the option
+            USER=$1
+            shift # get past the value of the option
+            ;;
 
-  elif [ "$1" == "-h" -o "$1" == "--hosts" -o "$1" == "-H" -o "$1" == "--host" ] ||
-       [ "$1" == "-o" ] ; then
-    echo "ERROR: unknown option $1"
-    exit 20
+        --list-host-types)
+            ohi --list-host-types
+            exit 0
+            ;;
 
-  else
-    if [ "${1:0:1}" == "-" ] ; then
-      # It's an option, don't quote
-      PSCP_OPTIONS="$PSCP_OPTIONS $1"
-    else
-      PSCP_OPTIONS="$PSCP_OPTIONS '$1'"
-    fi
-    shift # Get past this option
-  fi
+        -h|--hosts|-H|--host|-o)
+            echo "ERROR: unknown option $1"
+            exit 20
+            ;;
+
+        *)
+            args+=("$1")
+            shift
+            ;;
+    esac
 done
 
 if [ -z "$ENV" ]
 then
-  echo
-  echo "-e is a required paramemeter"
-  echo
-  exit 10
+    echo
+    echo "-e is a required paramemeter"
+    echo
+    exit 10
 fi
 
 if [ -z "$HOST_TYPE" ]
 then
-  echo
-  echo "-t is a required paramemeter"
-  echo
-  exit 15
+    echo
+    echo "-t is a required paramemeter"
+    echo
+    exit 15
 fi
-
-PSCP_OPTIONS="-t 0 -p $PSCP_PAR -l $USER -h <(ohi -t $HOST_TYPE -e $ENV 2>/dev/null) $PSCP_OPTIONS"
-
 
 # See if the ohi options are valid
-ohi -t $HOST_TYPE -e $ENV &> /dev/null
+HOSTS="$(ohi -t "$HOST_TYPE" -e "$ENV" 2>/dev/null)"
 ECODE=$?
 if [ $ECODE -ne 0 ] ; then
-  echo
-  echo "ERROR: ohi failed with exit code $ECODE"
-  echo
-  echo "This is usually caused by a bad value passed for host-type or environment."
-  echo
-  exit 25
+    echo
+    echo "ERROR: ohi failed with exit code $ECODE"
+    echo
+    echo "This is usually caused by a bad value passed for host-type or environment."
+    echo
+    exit 25
 fi
 
-echo
-echo "Running: pscp.pssh $PSCP_OPTIONS"
-echo
-
-eval pscp.pssh $PSCP_OPTIONS
+exec pscp.pssh -t $TIMEOUT -p $PAR -l $USER -h <(echo "$HOSTS") "${args[@]}"
