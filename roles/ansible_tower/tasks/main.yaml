@@ -30,3 +30,13 @@
 
 - name: Set (httpd_can_network_connect_db) flag on and keep it persistent across reboots
   seboolean: name=httpd_can_network_connect_db state=yes persistent=yes
+
+- name: Setup proot to allow access to /etc/tower/
+  lineinfile:
+    dest: /etc/tower/settings.py
+    backrefs: yes
+    regexp: "^({{ item.option }})( *)="
+    line: '\1\2 = {{ item.value }}'
+  with_items: config_changes | default([])
+    
+
