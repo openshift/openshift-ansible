@@ -22,6 +22,10 @@ Setup
   - [GCE](README_GCE.md)
   - [local VMs](README_libvirt.md)
 
+- Bring your own host deployments:
+  - [OpenShift Enterprise](README_OSE.md)
+  - [OpenShift Origin](README_origin.md)
+
 - Build
   - [How to build the openshift-ansible rpms](BUILD.md)
 
