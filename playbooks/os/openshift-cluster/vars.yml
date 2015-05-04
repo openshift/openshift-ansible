@@ -13,7 +13,8 @@ deployment_vars:
     image:
 #      url: "http://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.qcow2"
 #      name: CentOS-7-x86_64-GenericCloud.qcow2
-      name: CentOS-7-x86_64-GenericCloud.openshift-gtf-2.raw
+#      name: CentOS-7-x86_64-GenericCloud.openshift-gtf-2.raw
+      name: centos-70-raw
 #      name: CentOS-7-x86_64-GenericCloud.raw
 #      sha256: e324e3ab1d24a1bbf035ddb365e7f9058c0b454acf48d7aa15c5519fae5998ab
 #     ssh_user: openshift
