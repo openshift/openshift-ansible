@@ -102,28 +102,26 @@ while [ $# -gt 0 ] ; do
     esac
 done
 
-if [ -z "$ENV" ]
-then
+# Get host list from ohi
+if [ -n "$ENV" -a -n "$HOST_TYPE" ] ; then
+    HOSTS="$(ohi -t "$HOST_TYPE" -e "$ENV" 2>/dev/null)"
+    OHI_ECODE=$?
+elif [ -n "$ENV" ] ; then
+    HOSTS="$(ohi -e "$ENV" 2>/dev/null)"
+    OHI_ECODE=$?
+elif [ -n "$HOST_TYPE" ] ; then
+    HOSTS="$(ohi -t "$HOST_TYPE" 2>/dev/null)"
+    OHI_ECODE=$?
+else
     echo
-    echo "-e is a required paramemeter"
+    echo "Error: either -e or -t must be specified"
     echo
     exit 10
 fi
 
-if [ -z "$HOST_TYPE" ]
-then
+if [ $OHI_ECODE -ne 0 ] ; then
     echo
-    echo "-t is a required paramemeter"
-    echo
-    exit 15
-fi
-
-# See if the ohi options are valid
-HOSTS="$(ohi -t "$HOST_TYPE" -e "$ENV" 2>/dev/null)"
-ECODE=$?
-if [ $ECODE -ne 0 ] ; then
-    echo
-    echo "ERROR: ohi failed with exit code $ECODE"
+    echo "ERROR: ohi failed with exit code $OHI_ECODE"
     echo
     echo "This is usually caused by a bad value passed for host-type or environment."
     echo
