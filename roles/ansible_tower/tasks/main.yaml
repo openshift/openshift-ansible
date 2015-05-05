@@ -36,7 +36,7 @@
     dest: /etc/tower/settings.py
     backrefs: yes
     regexp: "^({{ item.option }})( *)="
-    line: '\1\2 = {{ item.value }}'
-  with_items: config_changes | default([])
+    line: '\1\2= {{ item.value }}'
+  with_items: config_changes | default([], true)
     
 
