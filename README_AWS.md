@@ -65,7 +65,7 @@ If needed, these values can be changed by setting environment variables on your 
 - export ec2_ami='ami-307b3658'
 - export ec2_region='us-east-1'
 - export ec2_keypair='libra'
-- export ec2_security_group='public'
+- export ec2_security_groups="['public']"
 - export os_master_root_vol_size='20'
 - export os_master_root_vol_type='standard'
 - export os_node_root_vol_size='15'

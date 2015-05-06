@@ -1,0 +1,18 @@
+---
+- name: Install python-ansible-tower-cli
+  yum: name=python-ansible-tower-cli
+
+- template:
+    src: tower_cli.cfg.j2
+    dest: /etc/tower/tower_cli.cfg
+    owner: awx
+    group: awx
+    mode: 0640
+
+- file:
+    state: link
+    src: /etc/tower
+    dest: /etc/awx
+    owner: awx
+    group: awx
+
