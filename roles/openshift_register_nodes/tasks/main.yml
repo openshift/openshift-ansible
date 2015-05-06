@@ -8,12 +8,12 @@
 # TODO: create a failed_when condition
 - name: Use enterprise default for openshift_registry_url if not set
   set_fact:
-    openshift_registry_url: "openshift3_beta/ose-${component}:${version}"
+    openshift_registry_url: "openshift3_beta/ose-{{component}}:{{version}}"
   when: openshift.common.deployment_type == 'enterprise' and openshift_registry_url is not defined
 
 - name: Use online default for openshift_registry_url if not set
   set_fact:
-    openshift_registry_url: "docker-registry.ops.rhcloud.com/openshift3_beta/ose-${component}:${version}"
+    openshift_registry_url: "docker-registry.ops.rhcloud.com/openshift3_beta/ose-{{component}}:{{version}}"
   when: openshift.common.deployment_type == 'online' and openshift_registry_url is not defined
 
 - name: Create node config
