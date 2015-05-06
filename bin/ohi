@@ -47,12 +47,12 @@ class Ohi(object):
            self.args.env is not None:
             # Both env and host-type specified
             hosts = self.aws.get_host_list(host_type=self.args.host_type, \
-                                           env=self.args.env)
+                                           envs=self.args.env)
 
         if self.args.host_type is None and \
            self.args.env is not None:
             # Only env specified
-            hosts = self.aws.get_host_list(env=self.args.env)
+            hosts = self.aws.get_host_list(envs=self.args.env)
 
         if self.args.host_type is not None and \
            self.args.env is None:
