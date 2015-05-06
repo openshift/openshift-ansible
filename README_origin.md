@@ -1,4 +1,4 @@
-# Installing OSEv3 from dev puddles using ansible
+# Installing OpenShift Origin against existing hosts
 
 * [Requirements](#requirements)
 * [Caveats](#caveats)
@@ -15,7 +15,7 @@
   * There is currently a known issue with ansible-1.9.0, you can downgrade to 1.8.4 on Fedora by installing one of the builds from Koji: http://koji.fedoraproject.org/koji/packageinfo?packageID=13842
   * Available in Fedora channels
   * Available for EL with EPEL and Optional channel
-* One or more RHEL 7.1 VMs
+* One or more RHEL 7.1 or CentOS 7.1 VMs
 * Either ssh key based auth for the root user or ssh key based auth for a user
   with sudo access (no password)
 * A checkout of openshift-ansible from https://github.com/openshift/openshift-ansible/
@@ -24,19 +24,8 @@
   git clone https://github.com/openshift/openshift-ansible.git
   cd openshift-ansible
   ```
-
-## Caveats
-This ansible repo is currently under heavy revision for providing OSE support;
-the following items are highly likely to change before the OSE support is
-merged into the upstream repo:
-  * the current git branch for testing
-  * how the inventory file should be configured
-  * variables that need to be set
-  * bootstrapping steps
-  * other configuration steps
-
 ## Known Issues
-* Host subscriptions are not configurable yet, the hosts need to be
+* RHEL - Host subscriptions are not configurable yet, the hosts need to be
   pre-registered with subscription-manager or have the RHEL base repo
   pre-configured. If using subscription-manager the following commands will
   disable all but the rhel-7-server rhel-7-server-extras and
@@ -64,44 +53,27 @@ option to ansible-playbook.
 # This is an example of a bring your own (byo) host inventory
 
 # Create an OSEv3 group that contains the masters and nodes groups
-[OSEv3:children]
+[OSv3:children]
 masters
 nodes
 
 # Set variables common for all OSEv3 hosts
-[OSEv3:vars]
+[OSv3:vars]
 # SSH user, this user should allow ssh based auth without requiring a password
 ansible_ssh_user=root
 
 # If ansible_ssh_user is not root, ansible_sudo must be set to true
 #ansible_sudo=true
 
-# To deploy origin, change deployment_type to origin
-deployment_type=enterprise
-
-# Pre-release registry URL
-openshift_registry_url=docker-buildvm-rhose.usersys.redhat.com:5000/openshift3_beta/ose-${component}:${version}
-
-# Pre-release additional repo
-openshift_additional_repos=[{'id': 'ose-devel', 'name': 'ose-devel',
-'baseurl':
-'http://buildvm-devops.usersys.redhat.com/puddle/build/OpenShiftEnterprise/3.0/latest/RH7-RHOSE-3.0/$basearch/os',
-'enabled': 1, 'gpgcheck': 0}]
-
-# Origin copr repo
-#openshift_additional_repos=[{'id': 'openshift-origin-copr', 'name':
-'OpenShift Origin COPR', 'baseurl':
-'https://copr-be.cloud.fedoraproject.org/results/maxamillion/origin-next/epel-7-$basearch/',
-'enabled': 1, 'gpgcheck': 1, gpgkey:
-'https://copr-be.cloud.fedoraproject.org/results/maxamillion/origin-next/pubkey.gpg'}]
+deployment_type=origin
 
 # host group for masters
 [masters]
-ose3-master.example.com
+osv3-master.example.com
 
 # host group for nodes
 [nodes]
-ose3-node[1:2].example.com
+osv3-node[1:2].example.com
 ```
 
 The hostnames above should resolve both from the hosts themselves and
@@ -120,8 +92,7 @@ inventory file use the -i option for ansible-playbook.
 On the master host:
 ```sh
 openshift ex router --create=true \
-  --credentials=/var/lib/openshift/openshift.local.certificates/openshift-router/.kubeconfig \
-  --images='docker-buildvm-rhose.usersys.redhat.com:5000/openshift3_beta/ose-${component}:${version}'
+  --credentials=/var/lib/openshift/openshift.local.certificates/openshift-router/.kubeconfig
 ```
 
 #### Create the default docker-registry
@@ -129,7 +100,6 @@ On the master host:
 ```sh
 openshift ex registry --create=true \
   --credentials=/var/lib/openshift/openshift.local.certificates/openshift-registry/.kubeconfig \
-  --images='docker-buildvm-rhose.usersys.redhat.com:5000/openshift3_beta/ose-${component}:${version}' \
   --mount-host=/var/lib/openshift/docker-registry
 ```
 
@@ -235,6 +205,6 @@ To override the the defaults, you can set the variables in your inventory:
 ```
 ...snip...
 [masters]
-ose3-master.example.com openshift_ip=1.1.1.1 openshift_hostname=ose3-master.example.com openshift_public_ip=2.2.2.2 openshift_public_hostname=ose3-master.public.example.com
+osv3-master.example.com openshift_ip=1.1.1.1 openshift_hostname=osv3-master.example.com openshift_public_ip=2.2.2.2 openshift_public_hostname=osv3-master.public.example.com
 ...snip...
 ```

@@ -4,7 +4,7 @@
 
 function usage() {
     cat << EOF
-Usage: opssh [OPTIONS] command [...]
+Usage: opscp [OPTIONS] local remote
 
 Options:
   --version             show program's version number and exit
@@ -27,12 +27,9 @@ Options:
                         spaces, quotes, and backslashes
   -X ARG, --extra-arg=ARG
                         Extra command-line argument
-  -i, --inline          inline aggregated output and error for each server
-  --inline-stdout       inline standard output for each server
-  -I, --send-input      read from standard input and send as input to ssh
-  -P, --print           print output as we get it
+  -r, --recursive       recusively copy directories (OPTIONAL)
 
-Example: opssh -t ex-srv -e stg -l irb2 --outdir /tmp/foo uptime
+Example: opscp -t ex-srv -e stg -l irb2 foo.txt /home/irb2/foo.txt
 
 EOF
 }
@@ -53,9 +50,9 @@ fi
 PAR=200
 USER=root
 TIMEOUT=0
-ARGS=()
 ENV=""
 HOST_TYPE=""
+
 while [ $# -gt 0 ] ; do
     case $1 in
         -t|--host-type)
@@ -131,4 +128,4 @@ if [ $OHI_ECODE -ne 0 ] ; then
     exit 25
 fi
 
-exec pssh -t $TIMEOUT -p $PAR -l $USER -h <(echo "$HOSTS") "${args[@]}"
+exec pscp.pssh -t $TIMEOUT -p $PAR -l $USER -h <(echo "$HOSTS") "${args[@]}"

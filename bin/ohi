@@ -12,11 +12,14 @@ import subprocess
 import ConfigParser
 
 from openshift_ansible import awsutil
+from openshift_ansible import utils
 from openshift_ansible.awsutil import ArgumentError
 
 CONFIG_MAIN_SECTION = 'main'
 CONFIG_HOST_TYPE_ALIAS_SECTION = 'host_type_aliases'
 CONFIG_INVENTORY_OPTION = 'inventory'
+
+
 
 class Ohi(object):
     def __init__(self):
@@ -60,8 +63,12 @@ class Ohi(object):
             # We weren't able to determine what they wanted to do
             raise ArgumentError("Invalid combination of arguments")
 
-        for host in hosts:
-            print host
+        for host in sorted(hosts, key=utils.normalize_dnsname):
+            if self.args.user:
+                print "%s@%s" % (self.args.user, host)
+            else:
+                print host
+
         return 0
 
     def parse_config_file(self):
@@ -93,6 +100,10 @@ class Ohi(object):
 
         parser.add_argument('-t', '--host-type', action="store",
                        help="Which host type to use")
+
+        parser.add_argument('-l', '--user', action='store', default=None,
+                               help='username')
+
 
         self.args = parser.parse_args()
 
