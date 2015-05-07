@@ -11,9 +11,12 @@ import yaml
 import os
 import subprocess
 import json
+import errno
+import fcntl
 
 
 CONFIG_FILE_NAME = 'multi_ec2.yaml'
+DEFAULT_CACHE_PATH = os.path.expanduser('~/.ansible/tmp/multi_ec2_inventory.cache')
 
 class MultiEc2(object):
     '''
@@ -27,7 +30,6 @@ class MultiEc2(object):
         self.config = None
         self.all_ec2_results = {}
         self.result = {}
-        self.cache_path = os.path.expanduser('~/.ansible/tmp/multi_ec2_inventory.cache')
         self.file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)))
 
         same_dir_config_file = os.path.join(self.file_path, CONFIG_FILE_NAME)
@@ -48,10 +50,12 @@ class MultiEc2(object):
             self.config = self.load_yaml_config()
         elif os.environ.has_key("AWS_ACCESS_KEY_ID") and \
              os.environ.has_key("AWS_SECRET_ACCESS_KEY"):
+            # Build a default config
             self.config = {}
             self.config['accounts'] = [
                 {
                     'name': 'default',
+                    'cache_location': DEFAULT_CACHE_PATH,
                     'provider': 'aws/hosts/ec2.py',
                     'env_vars': {
                         'AWS_ACCESS_KEY_ID':     os.environ["AWS_ACCESS_KEY_ID"],
@@ -63,6 +67,11 @@ class MultiEc2(object):
             self.config['cache_max_age'] = 0
         else:
             raise RuntimeError("Could not find valid ec2 credentials in the environment.")
+
+        # Set the default cache path but if its defined we'll assign it.
+        self.cache_path = DEFAULT_CACHE_PATH
+        if self.config.has_key('cache_location'):
+            self.cache_path = self.config['cache_location']
 
         if self.args.refresh_cache:
             self.get_inventory()
@@ -222,9 +231,22 @@ class MultiEc2(object):
     def write_to_cache(self):
         ''' Writes data in JSON format to a file '''
 
+        # if it does not exist, try and create it.
+        if not os.path.isfile(self.cache_path):
+            path = os.path.dirname(self.cache_path)
+            try:
+                os.makedirs(path)
+            except OSError as exc:
+                if exc.errno != errno.EEXIST or not os.path.isdir(path):
+                    raise
+
         json_data = MultiEc2.json_format_dict(self.result, True)
         with open(self.cache_path, 'w') as cache:
-            cache.write(json_data)
+            try:
+                fcntl.flock(cache, fcntl.LOCK_EX)
+                cache.write(json_data)
+            finally:
+                fcntl.flock(cache, fcntl.LOCK_UN)
 
     def get_inventory_from_cache(self):
         ''' Reads the inventory from the cache file and returns it as a JSON
