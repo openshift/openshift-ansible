@@ -191,7 +191,7 @@ class MultiEc2(object):
                 elif isinstance(input_a[key], list) and isinstance(input_b[key], list):
                     for result in input_b[key]:
                         if result not in input_a[key]:
-                            input_a[key].input_append(result)
+                            input_a[key].append(result)
                 # a is a list and not b
                 elif isinstance(input_a[key], list):
                     if input_b[key] not in input_a[key]:
