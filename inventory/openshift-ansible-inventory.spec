@@ -1,6 +1,6 @@
 Summary:       OpenShift Ansible Inventories
 Name:          openshift-ansible-inventory
-Version:       0.0.2
+Version:       0.0.3
 Release:       1%{?dist}
 License:       ASL 2.0
 URL:           https://github.com/openshift/openshift-ansible
@@ -37,6 +37,13 @@ cp -p gce/hosts/gce.py %{buildroot}/usr/share/ansible/inventory/gce
 /usr/share/ansible/inventory/gce/gce.py*
 
 %changelog
+* Thu May 07 2015 Thomas Wiest <twiest@redhat.com> 0.0.3-1
+- fixed build problems with openshift-ansible-inventory.spec
+  (twiest@redhat.com)
+- Allow option in multi_ec2 to set cache location. (kwoodson@redhat.com)
+- Add ansible_connection=local to localhost in inventory (jdetiber@redhat.com)
+- Adding refresh-cache option and cleanup for pylint. Also updated for
+  aws/hosts/ being added. (kwoodson@redhat.com)
 * Thu Mar 26 2015 Thomas Wiest <twiest@redhat.com> 0.0.2-1
 - added the ability to have a config file in /etc/openshift_ansible to
   multi_ec2.py. (twiest@redhat.com)
