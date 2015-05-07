@@ -1,4 +1,7 @@
 # multi ec2 inventory configs
+#
+cache_location: ~/.ansible/tmp/multi_ec2_inventory.cache
+
 accounts:
   - name: aws1
     provider: aws/hosts/ec2.py
