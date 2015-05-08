@@ -24,6 +24,14 @@
     owner: root
     group: libra_ops
 
+# This cron uses the above location to call its job
+- name: Cron to keep cache fresh
+  cron:
+    name: 'multi_ec2_inventory'
+    minute: '*/10'
+    job: '/usr/share/ansible/inventory/multi_ec2.py --refresh-cache &> /dev/null'
+  when: oo_cron_refresh_cache is defined and oo_cron_refresh_cache
+
 - lineinfile:
     dest: /etc/ansible/ansible.cfg
     backrefs: yes
@@ -43,3 +51,14 @@
     regexp: '^destination_format_tags *='
     line: "destination_format_tags = {{ oo_ec2_destination_format_tags }}"
   when: oo_ec2_destination_format_tags is defined
+
+- name: Set cache location
+  file:
+    state: directory
+    dest: "{{ oo_inventory_cache_location | dirname }}"
+    owner: root
+    group: libra_ops
+    recurse: yes
+    mode: '2750'
+  when: oo_inventory_cache_location is defined
+
