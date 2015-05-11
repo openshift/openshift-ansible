@@ -32,10 +32,10 @@ class Oscp(object):
         self.aws = awsutil.AwsUtil(self.inventory)
 
         # get a dict of host inventory
-        if self.args.list:
-            self.get_hosts()
-        else:
+        if self.args.refresh_cache:
             self.get_hosts(True)
+        else:
+            self.get_hosts()
 
         if (self.args.src == '' or self.args.dest == '') and not self.args.list:
             self.parser.print_help()
@@ -68,6 +68,8 @@ class Oscp(object):
                           action="store_true", help="debug mode")
         parser.add_argument('-v', '--verbose', default=False,
                           action="store_true", help="Verbose?")
+        parser.add_argument('--refresh-cache', default=False,
+                          action="store_true", help="Force a refresh on the host cache.")
         parser.add_argument('--list', default=False,
                           action="store_true", help="list out hosts")
         parser.add_argument('-r', '--recurse', action='store_true', default=False,
@@ -119,14 +121,14 @@ class Oscp(object):
         else:
             self.env = None
 
-    def get_hosts(self, cache_only=False):
+    def get_hosts(self, refresh_cache=False):
         '''Query our host inventory and return a dict where the format
            equals:
 
            dict['environment'] = [{'servername' : {}}, ]
         '''
-        if cache_only:
-            self.host_inventory = self.aws.build_host_dict_by_env(['--cache-only'])
+        if refresh_cache:
+            self.host_inventory = self.aws.build_host_dict_by_env(['--refresh-cache'])
         else:
             self.host_inventory = self.aws.build_host_dict_by_env()
 

@@ -1,5 +1,6 @@
 # multi ec2 inventory configs
 cache_max_age: {{ oo_inventory_cache_max_age }}
+cache_location: {{ oo_inventory_cache_location | default('~/.ansible/tmp/multi_ec2_inventory.cache') }}
 accounts:
 {% for account in oo_inventory_accounts %}
   - name: {{ account.name }}
