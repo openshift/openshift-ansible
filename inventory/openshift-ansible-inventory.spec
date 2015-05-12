@@ -25,7 +25,7 @@ mkdir -p %{buildroot}/usr/share/ansible/inventory/gce
 
 cp -p multi_ec2.py %{buildroot}/usr/share/ansible/inventory
 cp -p multi_ec2.yaml.example %{buildroot}/etc/ansible/multi_ec2.yaml
-cp -p aws/hosts/ec2.py aws/hosts/ec2.ini %{buildroot}/usr/share/ansible/inventory/aws
+cp -p aws/hosts/ec2.py %{buildroot}/usr/share/ansible/inventory/aws
 cp -p gce/hosts/gce.py %{buildroot}/usr/share/ansible/inventory/gce
 
 %files
@@ -33,7 +33,6 @@ cp -p gce/hosts/gce.py %{buildroot}/usr/share/ansible/inventory/gce
 %dir /usr/share/ansible/inventory
 /usr/share/ansible/inventory/multi_ec2.py*
 /usr/share/ansible/inventory/aws/ec2.py*
-%config(noreplace) /usr/share/ansible/inventory/aws/ec2.ini
 /usr/share/ansible/inventory/gce/gce.py*
 
 %changelog
