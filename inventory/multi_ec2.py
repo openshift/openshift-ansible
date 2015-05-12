@@ -13,7 +13,7 @@ import subprocess
 import json
 import errno
 import fcntl
-
+import tempfile
 
 CONFIG_FILE_NAME = 'multi_ec2.yaml'
 DEFAULT_CACHE_PATH = os.path.expanduser('~/.ansible/tmp/multi_ec2_inventory.cache')
@@ -128,6 +128,54 @@ class MultiEc2(object):
 
         return subprocess.Popen(cmds, stderr=subprocess.PIPE, \
                                 stdout=subprocess.PIPE, env=env)
+
+    @staticmethod
+    def generate_config(config_data):
+        """Generate the ec2.ini file in as a secure temp file.
+           Once generated, pass it to the ec2.py as an environment variable.
+        """
+        fildes, tmp_file_path = tempfile.mkstemp(prefix='multi_ec2.ini.')
+        for section, values in config_data.items():
+            os.write(fildes, "[%s]\n" % section)
+            for option, value  in values.items():
+                os.write(fildes, "%s = %s\n" % (option, value))
+        os.close(fildes)
+        return tmp_file_path
+
+    def run_provider(self):
+        '''Setup the provider call with proper variables
+           and call self.get_provider_tags.
+        '''
+        try:
+            all_results = []
+            tmp_file_path = None
+            processes = {}
+            for account in self.config['accounts']:
+                env = account['env_vars']
+                if account.has_key('provider_config'):
+                    tmp_file_path = MultiEc2.generate_config(account['provider_config'])
+                    env['EC2_INI_PATH'] = tmp_file_path
+                name = account['name']
+                provider = account['provider']
+                processes[name] = self.get_provider_tags(provider, env)
+
+            # for each process collect stdout when its available
+            for name, process in processes.items():
+                out, err = process.communicate()
+                all_results.append({
+                    "name": name,
+                    "out": out.strip(),
+                    "err": err.strip(),
+                    "code": process.returncode
+                })
+
+        finally:
+            # Clean up the mkstemp file
+            if tmp_file_path:
+                os.unlink(tmp_file_path)
+
+        return all_results
+
     def get_inventory(self):
         """Create the subprocess to fetch tags from a provider.
         Host query:
@@ -138,28 +186,12 @@ class MultiEc2(object):
         Query all of the different accounts for their tags.  Once completed
         store all of their results into one merged updated hash.
         """
-        processes = {}
-        for account in self.config['accounts']:
-            env = account['env_vars']
-            name = account['name']
-            provider = account['provider']
-            processes[name] = self.get_provider_tags(provider, env)
-
-        # for each process collect stdout when its available
-        all_results = []
-        for name, process in processes.items():
-            out, err = process.communicate()
-            all_results.append({
-                "name": name,
-                "out": out.strip(),
-                "err": err.strip(),
-                "code": process.returncode
-            })
+        provider_results = self.run_provider()
 
         # process --host results
         if not self.args.host:
             # For any non-zero, raise an error on it
-            for result in all_results:
+            for result in provider_results:
                 if result['code'] != 0:
                     raise RuntimeError(result['err'])
                 else:
@@ -171,9 +203,9 @@ class MultiEc2(object):
         else:
             # For any 0 result, return it
             count = 0
-            for results in all_results:
+            for results in provider_results:
                 if results['code'] == 0 and results['err'] == '' and results['out'] != '{}':
-                    self.result = json.loads(out)
+                    self.result = json.loads(results['out'])
                     count += 1
                 if count > 1:
                     raise RuntimeError("Found > 1 results for --host %s. \
