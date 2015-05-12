@@ -1,6 +1,6 @@
 Summary:       OpenShift Ansible Inventories
 Name:          openshift-ansible-inventory
-Version:       0.0.4
+Version:       0.0.5
 Release:       1%{?dist}
 License:       ASL 2.0
 URL:           https://github.com/openshift/openshift-ansible
@@ -36,6 +36,11 @@ cp -p gce/hosts/gce.py %{buildroot}/usr/share/ansible/inventory/gce
 /usr/share/ansible/inventory/gce/gce.py*
 
 %changelog
+* Tue May 12 2015 Thomas Wiest <twiest@redhat.com> 0.0.5-1
+- removed ec2.ini from the openshift-ansible-inventory.spec file so that we're
+  not dictating what the ec2.ini file should look like. (twiest@redhat.com)
+- Added capability to pass in ec2.ini file. (kwoodson@redhat.com)
+
 * Thu May 07 2015 Thomas Wiest <twiest@redhat.com> 0.0.4-1
 - Fixed a bug due to renaming of variables. (kwoodson@redhat.com)
 
