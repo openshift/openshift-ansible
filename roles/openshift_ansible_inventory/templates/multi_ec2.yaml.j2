@@ -5,6 +5,13 @@ accounts:
 {% for account in oo_inventory_accounts %}
   - name: {{ account.name }}
     provider: {{ account.provider }}
+    provider_config:
+{%  for section, items in account.provider_config.items() %}
+      {{ section }}:
+{%    for property, value in items.items() %}
+        {{ property }}: {{ value }}
+{%    endfor %}
+{% endfor %}
     env_vars:
       AWS_ACCESS_KEY_ID: {{ account.env_vars.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: {{ account.env_vars.AWS_SECRET_ACCESS_KEY }}
