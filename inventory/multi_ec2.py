@@ -14,6 +14,7 @@ import json
 import errno
 import fcntl
 import tempfile
+import copy
 
 CONFIG_FILE_NAME = 'multi_ec2.yaml'
 DEFAULT_CACHE_PATH = os.path.expanduser('~/.ansible/tmp/multi_ec2_inventory.cache')
@@ -148,13 +149,13 @@ class MultiEc2(object):
         '''
         try:
             all_results = []
-            tmp_file_path = None
+            tmp_file_paths = []
             processes = {}
             for account in self.config['accounts']:
                 env = account['env_vars']
                 if account.has_key('provider_config'):
-                    tmp_file_path = MultiEc2.generate_config(account['provider_config'])
-                    env['EC2_INI_PATH'] = tmp_file_path
+                    tmp_file_paths.append(MultiEc2.generate_config(account['provider_config']))
+                    env['EC2_INI_PATH'] = tmp_file_paths[-1]
                 name = account['name']
                 provider = account['provider']
                 processes[name] = self.get_provider_tags(provider, env)
@@ -171,8 +172,8 @@ class MultiEc2(object):
 
         finally:
             # Clean up the mkstemp file
-            if tmp_file_path:
-                os.unlink(tmp_file_path)
+            for tmp_file in tmp_file_paths:
+                os.unlink(tmp_file)
 
         return all_results
 
@@ -189,19 +190,8 @@ class MultiEc2(object):
         provider_results = self.run_provider()
 
         # process --host results
-        if not self.args.host:
-            # For any non-zero, raise an error on it
-            for result in provider_results:
-                if result['code'] != 0:
-                    raise RuntimeError(result['err'])
-                else:
-                    self.all_ec2_results[result['name']] = json.loads(result['out'])
-            values = self.all_ec2_results.values()
-            values.insert(0, self.result)
-            for result in  values:
-                MultiEc2.merge_destructively(self.result, result)
-        else:
-            # For any 0 result, return it
+        # For any 0 result, return it
+        if self.args.host:
             count = 0
             for results in provider_results:
                 if results['code'] == 0 and results['err'] == '' and results['out'] != '{}':
@@ -210,6 +200,48 @@ class MultiEc2(object):
                 if count > 1:
                     raise RuntimeError("Found > 1 results for --host %s. \
                                        This is an invalid state." % self.args.host)
+        # process --list results
+        else:
+            # For any non-zero, raise an error on it
+            for result in provider_results:
+                if result['code'] != 0:
+                    raise RuntimeError(result['err'])
+                else:
+                    self.all_ec2_results[result['name']] = json.loads(result['out'])
+
+            # Check if user wants extra vars in yaml by
+            # having hostvars and all_group defined
+            for acc_config in self.config['accounts']:
+                self.apply_account_config(acc_config)
+
+            # Build results by merging all dictionaries
+            values = self.all_ec2_results.values()
+            values.insert(0, self.result)
+            for result in  values:
+                MultiEc2.merge_destructively(self.result, result)
+
+    def apply_account_config(self, acc_config):
+        ''' Apply account config settings
+        '''
+        if not acc_config.has_key('hostvars') and not acc_config.has_key('all_group'):
+            return
+
+        results = self.all_ec2_results[acc_config['name']]
+       # Update each hostvar with the newly desired key: value
+        for host_property, value in acc_config['hostvars'].items():
+            # Verify the account results look sane
+            # by checking for these keys ('_meta' and 'hostvars' exist)
+            if results.has_key('_meta') and results['_meta'].has_key('hostvars'):
+                for data in results['_meta']['hostvars'].values():
+                    data[str(host_property)] = str(value)
+
+            # Add this group
+            results["%s_%s" % (host_property, value)] = \
+              copy.copy(results[acc_config['all_group']])
+
+        # store the results back into all_ec2_results
+        self.all_ec2_results[acc_config['name']] = results
+
     @staticmethod
     def merge_destructively(input_a, input_b):
         "merges b into input_a"

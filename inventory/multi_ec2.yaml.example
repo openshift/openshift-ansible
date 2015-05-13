@@ -17,8 +17,12 @@ accounts:
     env_vars:
       AWS_ACCESS_KEY_ID: XXXXXXXXXXXXXXXXXXXX
       AWS_SECRET_ACCESS_KEY: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    all_group: ec2
+    hostvars:
+      cloud: aws
+      account: aws1
 
-  - name: aws2
+- name: aws2
     provider: aws/hosts/ec2.py
     env_vars:
       AWS_ACCESS_KEY_ID: XXXXXXXXXXXXXXXXXXXX
