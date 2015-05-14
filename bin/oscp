@@ -11,11 +11,9 @@ import ConfigParser
 from openshift_ansible import awsutil
 
 CONFIG_MAIN_SECTION = 'main'
-CONFIG_INVENTORY_OPTION = 'inventory'
 
 class Oscp(object):
     def __init__(self):
-        self.inventory = None
         self.file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)))
 
         # Default the config path to /etc
@@ -29,7 +27,7 @@ class Oscp(object):
         # parse host and user
         self.process_host()
 
-        self.aws = awsutil.AwsUtil(self.inventory)
+        self.aws = awsutil.AwsUtil()
 
         # get a dict of host inventory
         if self.args.refresh_cache:
@@ -55,10 +53,6 @@ class Oscp(object):
         if os.path.isfile(self.config_path):
             config = ConfigParser.ConfigParser()
             config.read(self.config_path)
-
-            if config.has_section(CONFIG_MAIN_SECTION) and \
-               config.has_option(CONFIG_MAIN_SECTION, CONFIG_INVENTORY_OPTION):
-                self.inventory = config.get(CONFIG_MAIN_SECTION, CONFIG_INVENTORY_OPTION)
 
     def parse_cli_args(self):
         parser = argparse.ArgumentParser(description='Openshift Online SSH Tool.')
