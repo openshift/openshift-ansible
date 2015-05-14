@@ -15,5 +15,12 @@ accounts:
     env_vars:
       AWS_ACCESS_KEY_ID: {{ account.env_vars.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: {{ account.env_vars.AWS_SECRET_ACCESS_KEY }}
+{% if account.all_group is defined and account.hostvars is defined%}
+    all_group: {{ account.all_group }}
+    hostvars:
+{%    for property, value in account.hostvars.items() %}
+      {{ property }}: {{ value }}
+{%    endfor %}
+{% endif %}
 
 {% endfor %}
