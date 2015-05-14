@@ -2,10 +2,9 @@
 
 """This module comprises Aws specific utility functions."""
 
-import subprocess
 import os
-import json
 import re
+from openshift_ansible import multi_ec2
 
 class ArgumentError(Exception):
     """This class is raised when improper arguments are passed."""
@@ -22,11 +21,10 @@ class ArgumentError(Exception):
 class AwsUtil(object):
     """This class contains the AWS utility functions."""
 
-    def __init__(self, inventory_path=None, host_type_aliases=None):
+    def __init__(self, host_type_aliases=None):
         """Initialize the AWS utility class.
 
         Keyword arguments:
-        inventory_path    -- the path to find the inventory script
         host_type_aliases -- a list of aliases to common host-types (e.g. ex-node)
         """
 
@@ -35,15 +33,6 @@ class AwsUtil(object):
         self.host_type_aliases = host_type_aliases
         self.file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)))
 
-        if inventory_path is None:
-            inventory_path = os.path.realpath(os.path.join(self.file_path, \
-                                              '..', '..', 'inventory', \
-                                              'multi_ec2.py'))
-
-        if not os.path.isfile(inventory_path):
-            raise Exception("Inventory file not found [%s]" % inventory_path)
-
-        self.inventory_path = inventory_path
         self.setup_host_type_alias_lookup()
 
     def setup_host_type_alias_lookup(self):
@@ -53,31 +42,16 @@ class AwsUtil(object):
             for value in values:
                 self.alias_lookup[value] = key
 
-
-
-    def get_inventory(self, args=None):
+    @staticmethod
+    def get_inventory(args=None):
         """Calls the inventory script and returns a dictionary containing the inventory."
 
         Keyword arguments:
         args -- optional arguments to pass to the inventory script
         """
-        args = args or []
-        cmd = [self.inventory_path]
-
-        if args:
-            cmd.extend(args)
-
-        env = os.environ
-
-        proc = subprocess.Popen(cmd, stderr=subprocess.PIPE,
-                                stdout=subprocess.PIPE, env=env)
-
-        out, err = proc.communicate()
-
-        if proc.returncode != 0:
-            raise RuntimeError(err)
-
-        return json.loads(out.strip())
+        mec2 = multi_ec2.MultiEc2(args)
+        mec2.run()
+        return mec2.result
 
     def get_environments(self):
         """Searches for env tags in the inventory and returns all of the envs found."""
