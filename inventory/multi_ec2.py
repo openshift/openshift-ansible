@@ -26,8 +26,14 @@ class MultiEc2(object):
             Stores a json hash of resources in result.
     '''
 
-    def __init__(self):
-        self.args = None
+    def __init__(self, args=None):
+        # Allow args to be passed when called as a library
+        if not args:
+            self.args = {}
+        else:
+            self.args = args
+
+        self.cache_path = DEFAULT_CACHE_PATH
         self.config = None
         self.all_ec2_results = {}
         self.result = {}
@@ -44,8 +50,15 @@ class MultiEc2(object):
         else:
             self.config_file = None # expect env vars
 
-        self.parse_cli_args()
 
+    def run(self):
+        '''This method checks to see if the local
+           cache is valid for the inventory.
+
+           if the cache is valid; return cache
+           else the credentials are loaded from multi_ec2.yaml or from the env
+           and we attempt to get the inventory from the provider specified.
+        '''
         # load yaml
         if self.config_file and os.path.isfile(self.config_file):
             self.config = self.load_yaml_config()
@@ -70,15 +83,14 @@ class MultiEc2(object):
             raise RuntimeError("Could not find valid ec2 credentials in the environment.")
 
         # Set the default cache path but if its defined we'll assign it.
-        self.cache_path = DEFAULT_CACHE_PATH
         if self.config.has_key('cache_location'):
             self.cache_path = self.config['cache_location']
 
-        if self.args.refresh_cache:
+        if self.args.get('refresh_cache', None):
             self.get_inventory()
             self.write_to_cache()
         # if its a host query, fetch and do not cache
-        elif self.args.host:
+        elif self.args.get('host', None):
             self.get_inventory()
         elif not self.is_cache_valid():
             # go fetch the inventories and cache them if cache is expired
@@ -119,9 +131,9 @@ class MultiEc2(object):
                         "and that it is executable. (%s)" % provider)
 
         cmds = [provider]
-        if self.args.host:
+        if self.args.get('host', None):
             cmds.append("--host")
-            cmds.append(self.args.host)
+            cmds.append(self.args.get('host', None))
         else:
             cmds.append('--list')
 
@@ -191,7 +203,7 @@ class MultiEc2(object):
 
         # process --host results
         # For any 0 result, return it
-        if self.args.host:
+        if self.args.get('host', None):
             count = 0
             for results in provider_results:
                 if results['code'] == 0 and results['err'] == '' and results['out'] != '{}':
@@ -199,7 +211,7 @@ class MultiEc2(object):
                     count += 1
                 if count > 1:
                     raise RuntimeError("Found > 1 results for --host %s. \
-                                       This is an invalid state." % self.args.host)
+                                       This is an invalid state." % self.args.get('host', None))
         # process --list results
         else:
             # For any non-zero, raise an error on it
@@ -290,7 +302,7 @@ class MultiEc2(object):
                             help='List instances (default: True)')
         parser.add_argument('--host', action='store', default=False,
                             help='Get all the variables about a specific instance')
-        self.args = parser.parse_args()
+        self.args = parser.parse_args().__dict__
 
     def write_to_cache(self):
         ''' Writes data in JSON format to a file '''
@@ -340,4 +352,7 @@ class MultiEc2(object):
 
 
 if __name__ == "__main__":
-    print MultiEc2().result_str()
+    MEC2 = MultiEc2()
+    MEC2.parse_cli_args()
+    MEC2.run()
+    print MEC2.result_str()
