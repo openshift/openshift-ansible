@@ -25,6 +25,12 @@ mkdir -p %{buildroot}/etc/openshift_ansible
 
 cp -p ossh oscp opssh opscp ohi %{buildroot}%{_bindir}
 cp -pP openshift_ansible/* %{buildroot}%{python_sitelib}/openshift_ansible
+
+# Make it so we can load multi_ec2.py as a library.
+rm %{buildroot}%{python_sitelib}/openshift_ansible/multi_ec2.py*
+ln -sf /usr/share/ansible/inventory/multi_ec2.py %{buildroot}%{python_sitelib}/openshift_ansible/multi_ec2.py
+ln -sf /usr/share/ansible/inventory/multi_ec2.pyc %{buildroot}%{python_sitelib}/openshift_ansible/multi_ec2.pyc
+
 cp -p ossh_bash_completion %{buildroot}/etc/bash_completion.d
 
 cp -p openshift_ansible.conf.example %{buildroot}/etc/openshift_ansible/openshift_ansible.conf
@@ -36,12 +42,6 @@ cp -p openshift_ansible.conf.example %{buildroot}/etc/openshift_ansible/openshif
 %config(noreplace) /etc/openshift_ansible/
 
 %changelog
-* Fri May 15 2015 Kenny Woodson <kwoodson@redhat.com> 0.0.16-1
-- 
-
-* Fri May 15 2015 Kenny Woodson <kwoodson@redhat.com> 0.0.15-1
-- 
-
 * Fri May 15 2015 Thomas Wiest <twiest@redhat.com> 0.0.14-1
 - Command line tools import multi_ec2 as lib (kwoodson@redhat.com)
 - Adding cache location for multi ec2 (kwoodson@redhat.com)
