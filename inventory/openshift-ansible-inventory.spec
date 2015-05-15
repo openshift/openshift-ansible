@@ -1,6 +1,6 @@
 Summary:       OpenShift Ansible Inventories
 Name:          openshift-ansible-inventory
-Version:       0.0.6
+Version:       0.0.7
 Release:       1%{?dist}
 License:       ASL 2.0
 URL:           https://github.com/openshift/openshift-ansible
@@ -36,6 +36,9 @@ cp -p gce/hosts/gce.py %{buildroot}/usr/share/ansible/inventory/gce
 /usr/share/ansible/inventory/gce/gce.py*
 
 %changelog
+* Fri May 15 2015 Kenny Woodson <kwoodson@redhat.com> 0.0.7-1
+- Making multi_ec2 into a library (kwoodson@redhat.com)
+
 * Wed May 13 2015 Thomas Wiest <twiest@redhat.com> 0.0.6-1
 - Added support for grouping and a bug fix. (kwoodson@redhat.com)
 
