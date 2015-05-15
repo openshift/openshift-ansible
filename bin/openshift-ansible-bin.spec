@@ -1,6 +1,6 @@
 Summary:       OpenShift Ansible Scripts for working with metadata hosts
 Name:          openshift-ansible-bin
-Version:       0.0.16
+Version:       0.0.17
 Release:       1%{?dist}
 License:       ASL 2.0
 URL:           https://github.com/openshift/openshift-ansible
@@ -42,6 +42,9 @@ cp -p openshift_ansible.conf.example %{buildroot}/etc/openshift_ansible/openshif
 %config(noreplace) /etc/openshift_ansible/
 
 %changelog
+* Fri May 15 2015 Thomas Wiest <twiest@redhat.com> 0.0.17-1
+- fixed the openshift-ansible-bin build (twiest@redhat.com)
+
 * Fri May 15 2015 Thomas Wiest <twiest@redhat.com> 0.0.14-1
 - Command line tools import multi_ec2 as lib (kwoodson@redhat.com)
 - Adding cache location for multi ec2 (kwoodson@redhat.com)
