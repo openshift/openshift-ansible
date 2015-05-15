@@ -57,6 +57,7 @@ cp -p gce/hosts/gce.py %{buildroot}/usr/share/ansible/inventory/gce
 - Add ansible_connection=local to localhost in inventory (jdetiber@redhat.com)
 - Adding refresh-cache option and cleanup for pylint. Also updated for
   aws/hosts/ being added. (kwoodson@redhat.com)
+
 * Thu Mar 26 2015 Thomas Wiest <twiest@redhat.com> 0.0.2-1
 - added the ability to have a config file in /etc/openshift_ansible to
   multi_ec2.py. (twiest@redhat.com)
