@@ -32,12 +32,6 @@
     job: '/usr/share/ansible/inventory/multi_ec2.py --refresh-cache &> /dev/null'
   when: oo_cron_refresh_cache is defined and oo_cron_refresh_cache
 
-- lineinfile:
-    dest: /etc/ansible/ansible.cfg
-    backrefs: yes
-    regexp: '^(hostfile|inventory)( *)='
-    line: '\1\2= /etc/ansible/inventory'
-
 - name: setting ec2.ini destination_format
   lineinfile:
     dest: /usr/share/ansible/inventory/aws/ec2.ini
@@ -61,4 +55,3 @@
     recurse: yes
     mode: '2750'
   when: oo_inventory_cache_location is defined
-
