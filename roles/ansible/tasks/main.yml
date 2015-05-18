@@ -5,3 +5,7 @@
   yum:
     pkg: ansible
     state: installed
+
+- include: config.yml
+  vars:
+    cfg_options: "{{ ans_config }}"
