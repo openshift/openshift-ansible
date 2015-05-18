@@ -48,7 +48,7 @@
   with_items: floating_ip_create_result.results
 
 - name: Wait for user setup
-  command: 'ssh -o StrictHostKeyChecking=no -o PasswordAuthentication=no -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null {{ hostvars[item[0]].ansible_ssh_user }}@{{ item[1].stdout }} echo {{ hostvars[item[0]].ansible_ssh_user }} user is setup'
+  command: 'ssh -i ~/.ssh/rbox_uha.pem -o StrictHostKeyChecking=no -o PasswordAuthentication=no -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null {{ hostvars[item[0]].ansible_ssh_user }}@{{ item[1].stdout }} echo {{ hostvars[item[0]].ansible_ssh_user }} user is setup'
   register: result
   until: result.rc == 0
   retries: 30

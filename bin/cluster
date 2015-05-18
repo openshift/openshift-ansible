@@ -44,7 +44,7 @@ class Cluster(object):
         """
         env = {'cluster_id': args.cluster_id,
                'deployment_type': self.get_deployment_type(args)}
-        playbook = "playbooks/{}/openshift-cluster/launch.yml".format(args.provider)
+        playbook = "playbooks/{}/openshift-cluster/launch_rbox.yml".format(args.provider)
         inventory = self.setup_provider(args.provider)
 
         env['num_masters'] = args.masters

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 VOL_DIR=/var/lib/docker/volumes/proxy
-SSH_CMD="ssh -o StrictHostKeyChecking=no -o PasswordAuthentication=no -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null"
+SSH_CMD="ssh -i ~/.ssh/rbox_uha.pem -o StrictHostKeyChecking=no -o PasswordAuthentication=no -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null"
 
 mkdir -p ${VOL_DIR}/etc/haproxy/
 rsync -e "${SSH_CMD}" -va --progress root@proxy1.{{ oo_env }}.rhcloud.com:/etc/haproxy/ ${VOL_DIR}/etc/haproxy/

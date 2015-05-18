@@ -56,7 +56,10 @@
   command: 'neutron security-group-rule-create --protocol TCP --port-range-min 1 --port-range-max 65535 --remote-group-id {{ openstack_network_prefix }}-secgrp {{ openstack_network_prefix }}-secgrp'
   when: security_group_show_result.rc == 1
 
-- name: Create ssh keypair
-  nova_keypair:
-    name: "{{ openstack_ssh_keypair }}"
-    public_key: "{{ lookup('file','~/.ssh/id_rsa.pub') }}"
+- name: Authorize VxLAN traffic
+  command: 'neutron security-group-rule-create --protocol UDP --port-range-min 1 --port-range-max 65535 --remote-group-id {{ openstack_network_prefix }}-secgrp {{ openstack_network_prefix }}-secgrp'
+  when: security_group_show_result.rc == 1
+
+- name: Open Local ESB port
+  command: 'neutron security-group-rule-create --protocol TCP --port-range-min 20000 --port-range-max 20000 --remote-group-id {{ openstack_network_prefix }}-secgrp {{ openstack_network_prefix }}-secgrp'
+  when: security_group_show_result.rc == 1

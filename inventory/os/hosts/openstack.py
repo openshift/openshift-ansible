@@ -55,6 +55,7 @@ class OpenStackInventory(object):
             os_client_config.config.CONFIG_FILES.append(
                 '/etc/ansible/openstack.yml'),
             private)
+
         self.clouds = shade.openstack_clouds(self.openstack_config)
         self.refresh = refresh
 
@@ -93,9 +94,9 @@ class OpenStackInventory(object):
 
         for cloud in self.clouds:
 
+            if cloud.name == "openstack": continue # Default setup - invalid
             # Cycle on servers
             for server in cloud.list_servers():
-
                 meta = cloud.get_server_meta(server)
 
                 if 'interface_ip' not in meta['server_vars']:

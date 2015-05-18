@@ -1,0 +1,51 @@
+---
+- name: Installing git
+  yum: name=git state=latest
+
+- name: Install Openshift files for UHA
+  git:
+    repo: http://172.16.141.210/git/scm/~cmu/mip.git
+    dest: ~/mip
+    version: multinode
+    clone: yes
+
+- name: Install Openshift blueprints for RBox
+  git:
+    repo: http://172.16.141.210/git/scm/~cmu/openshift_blueprints.git
+    dest: ~/openshift_blueprints
+    version: multinode
+    clone: yes
+
+- name: Create symlink to blueprints
+  file:
+    src: ~/openshift_blueprints
+    dest: ~/mip/openshift_blueprints
+    state: link
+
+- name: Update config files for RBox
+  shell: ./update_to_cluster.sh rbox openstack
+  args:
+    chdir: ~/mip
+  environment:
+    OS_BIN: /usr/bin/openshift  
+
+- name: Creating Project
+  shell: ./tools/deploy-siz-one.sh 
+  args:
+    chdir: ~/mip
+  environment:
+    OS_BIN: /usr/bin/openshift
+
+- name: Deploying Service Registry
+  shell: ./tools/deploy-service-registry.sh
+  args:
+    chdir: ~/mip
+  environment:
+    OS_BIN: /usr/bin/openshift
+
+- name: Deploying RBox
+  shell: ./tools/deploy-full-rbox-pods.sh
+  args:
+    chdir: ~/mip
+  environment:
+    OS_BIN: /usr/bin/openshift
