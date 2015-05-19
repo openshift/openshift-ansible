@@ -63,3 +63,7 @@
 - name: Open Local ESB port
   command: 'neutron security-group-rule-create --protocol TCP --port-range-min 20000 --port-range-max 20000 --remote-group-id {{ openstack_network_prefix }}-secgrp {{ openstack_network_prefix }}-secgrp'
   when: security_group_show_result.rc == 1
+
+- name: Open Openshift GUI port
+  command: 'neutron security-group-rule-create --protocol TCP --port-range-min 8443 --port-range-max 8443 --remote-group-id {{ openstack_network_prefix }}-secgrp {{ openstack_network_prefix }}-secgrp'
+  when: security_group_show_result.rc == 1
