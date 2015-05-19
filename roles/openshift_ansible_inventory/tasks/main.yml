@@ -32,20 +32,6 @@
     job: '/usr/share/ansible/inventory/multi_ec2.py --refresh-cache &> /dev/null'
   when: oo_cron_refresh_cache is defined and oo_cron_refresh_cache
 
-- name: setting ec2.ini destination_format
-  lineinfile:
-    dest: /usr/share/ansible/inventory/aws/ec2.ini
-    regexp: '^destination_format *='
-    line: "destination_format = {{ oo_ec2_destination_format }}"
-  when: oo_ec2_destination_format is defined
-
-- name: setting ec2.ini destination_format_tags
-  lineinfile:
-    dest: /usr/share/ansible/inventory/aws/ec2.ini
-    regexp: '^destination_format_tags *='
-    line: "destination_format_tags = {{ oo_ec2_destination_format_tags }}"
-  when: oo_ec2_destination_format_tags is defined
-
 - name: Set cache location
   file:
     state: directory
