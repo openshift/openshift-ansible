@@ -176,38 +176,6 @@ def oo_ec2_volume_definition(data, host_type, docker_ephemeral=False):
         return [root_vol, docker_vol]
     return [root_vol]
 
-def oo_set_node_label(arg, key, value, attr_key=None, attr_value=None):
-    ''' This cycles through openshift node definitions
-        (from "osc get nodes -o json"), and adds a label.
-
-        If attr_key and attr_value are set, this will only set the label on
-        nodes where the attribute matches the specified value.
-
-        Ex:
-        - shell: osc get nodes -o json
-          register: output
-
-        - set_fact:
-          node_facts: "{{ output.stdout
-                             | from_json
-                             | oo_set_node_label('region', 'infra',
-                                            'metadata.name', '172.16.17.43') }}"
-    '''
-
-    for item in arg['items']:
-        if attr_key and attr_value:
-            actual_attr_value = get_attr(item, attr_key)
-
-            if str(attr_value) != str(actual_attr_value):
-                continue # We only want to set the values on hosts with defined attributes
-
-        if 'labels' not in item['metadata']:
-            item['metadata']['labels'] = {}
-
-        item['metadata']['labels'][key] = value
-
-    return arg
-
 # disabling pylint checks for too-few-public-methods and no-self-use since we
 # need to expose a FilterModule object that has a filters method that returns
 # a mapping of filter names to methods.
