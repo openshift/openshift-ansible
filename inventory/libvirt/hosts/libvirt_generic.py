@@ -36,9 +36,7 @@ info about all of your managed instances.
 import argparse
 import ConfigParser
 import os
-import re
 import sys
-from time import time
 import libvirt
 import xml.etree.ElementTree as ET
 
@@ -59,11 +57,11 @@ class LibvirtInventory(object):
         self.parse_cli_args()
 
         if self.args.host:
-            print self.json_format_dict(self.get_host_info(), self.args.pretty)
+            print _json_format_dict(self.get_host_info(), self.args.pretty)
         elif self.args.list:
-            print self.json_format_dict(self.get_inventory(), self.args.pretty)
+            print _json_format_dict(self.get_inventory(), self.args.pretty)
         else:  # default action with no options
-            print self.json_format_dict(self.get_inventory(), self.args.pretty)
+            print _json_format_dict(self.get_inventory(), self.args.pretty)
 
     def read_settings(self):
         config = ConfigParser.SafeConfigParser()
@@ -105,12 +103,12 @@ class LibvirtInventory(object):
 
         conn = libvirt.openReadOnly(self.libvirt_uri)
         if conn is None:
-            print "Failed to open connection to %s" % libvirt_uri
+            print "Failed to open connection to %s" % self.libvirt_uri
             sys.exit(1)
 
         domains = conn.listAllDomains()
         if domains is None:
-            print "Failed to list domains for connection %s" % libvirt_uri
+            print "Failed to list domains for connection %s" % self.libvirt_uri
             sys.exit(1)
 
         for domain in domains:
@@ -131,18 +129,19 @@ class LibvirtInventory(object):
             ns = {'ansible': 'https://github.com/ansible/ansible'}
             for tag_elem in root.findall('./metadata/ansible:tags/ansible:tag', ns):
                 tag = tag_elem.text
-                self.push(inventory, "tag_%s" % tag, domain_name)
-                self.push(hostvars, 'libvirt_tags', tag)
+                _push(inventory, "tag_%s" % tag, domain_name)
+                _push(hostvars, 'libvirt_tags', tag)
 
             # TODO: support more than one network interface, also support
             # interface types other than 'network'
             interface = root.find("./devices/interface[@type='network']")
             if interface is not None:
                 source_elem = interface.find('source')
-                mac_elem    = interface.find('mac')
+                mac_elem = interface.find('mac')
                 if source_elem is not None and \
                    mac_elem    is not None:
-                    dhcp_leases = conn.networkLookupByName(source_elem.get('network')).DHCPLeases(mac_elem.get('address'))
+                    dhcp_leases = conn.networkLookupByName(source_elem.get('network')) \
+                                      .DHCPLeases(mac_elem.get('address'))
                     if len(dhcp_leases) > 0:
                         ip_address = dhcp_leases[0]['ipaddr']
                         hostvars['ansible_ssh_host'] = ip_address
@@ -152,16 +151,16 @@ class LibvirtInventory(object):
 
         return inventory
 
-    def push(self, my_dict, key, element):
-        if key in my_dict:
-            my_dict[key].append(element)
-        else:
-            my_dict[key] = [element]
+def _push(my_dict, key, element):
+    if key in my_dict:
+        my_dict[key].append(element)
+    else:
+        my_dict[key] = [element]
 
-    def json_format_dict(self, data, pretty=False):
-        if pretty:
-            return json.dumps(data, sort_keys=True, indent=2)
-        else:
-            return json.dumps(data)
+def _json_format_dict(data, pretty=False):
+    if pretty:
+        return json.dumps(data, sort_keys=True, indent=2)
+    else:
+        return json.dumps(data)
 
 LibvirtInventory()
