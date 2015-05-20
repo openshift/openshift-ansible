@@ -113,8 +113,6 @@ class LibvirtInventory(object):
             print "Failed to list domains for connection %s" % libvirt_uri
             sys.exit(1)
 
-        arp_entries = self.parse_arp_entries()
-
         for domain in domains:
             hostvars = dict(libvirt_name=domain.name(),
                             libvirt_id=domain.ID(),
@@ -140,29 +138,19 @@ class LibvirtInventory(object):
             # interface types other than 'network'
             interface = root.find("./devices/interface[@type='network']")
             if interface is not None:
-                mac_elem = interface.find('mac')
-                if mac_elem is not None:
-                    mac = mac_elem.get('address')
-                    if mac in arp_entries:
-                        ip_address = arp_entries[mac]['ip_address']
+                source_elem = interface.find('source')
+                mac_elem    = interface.find('mac')
+                if source_elem is not None and \
+                   mac_elem    is not None:
+                    dhcp_leases = conn.networkLookupByName(source_elem.get('network')).DHCPLeases(mac_elem.get('address'))
+                    if len(dhcp_leases) > 0:
+                        ip_address = dhcp_leases[0]['ipaddr']
                         hostvars['ansible_ssh_host'] = ip_address
                         hostvars['libvirt_ip_address'] = ip_address
 
             inventory['_meta']['hostvars'][domain_name] = hostvars
 
         return inventory
-
-    def parse_arp_entries(self):
-        arp_entries = dict()
-        with open('/proc/net/arp', 'r') as f:
-            # throw away the header
-            f.readline()
-
-            for line in f:
-                ip_address, _, _, mac, _, device = line.strip().split()
-                arp_entries[mac] = dict(ip_address=ip_address, device=device)
-
-        return arp_entries
 
     def push(self, my_dict, key, element):
         if key in my_dict:
