@@ -192,6 +192,5 @@ class FilterModule(object):
             "oo_pdb": oo_pdb,
             "oo_prepend_strings_in_list": oo_prepend_strings_in_list,
             "oo_ami_selector": oo_ami_selector,
-            "oo_ec2_volume_definition": oo_ec2_volume_definition,
-            "oo_set_node_label": oo_set_node_label
+            "oo_ec2_volume_definition": oo_ec2_volume_definition
         }
