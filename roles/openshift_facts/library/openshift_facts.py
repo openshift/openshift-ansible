@@ -200,7 +200,7 @@ def normalize_aws_facts(metadata, facts):
         int_info = dict()
         var_map = {'ips': 'local-ipv4s', 'public_ips': 'public-ipv4s'}
         for ips_var, int_var in var_map.iteritems():
-            ips = interface[int_var]
+            ips = interface.get(int_var)
             if isinstance(ips, basestring):
                 int_info[ips_var] = [ips]
             else:
@@ -220,14 +220,14 @@ def normalize_aws_facts(metadata, facts):
     # TODO: actually attempt to determine default local and public ips
     # by using the ansible default ip fact and the ipv4-associations
     # from the ec2 metadata
-    facts['network']['ip'] = metadata['local-ipv4']
-    facts['network']['public_ip'] = metadata['public-ipv4']
+    facts['network']['ip'] = metadata.get('local-ipv4')
+    facts['network']['public_ip'] = metadata.get('public-ipv4')
 
     # TODO: verify that local hostname makes sense and is resolvable
-    facts['network']['hostname'] = metadata['local-hostname']
+    facts['network']['hostname'] = metadata.get('local-hostname')
 
     # TODO: verify that public hostname makes sense and is resolvable
-    facts['network']['public_hostname'] = metadata['public-hostname']
+    facts['network']['public_hostname'] = metadata.get('public-hostname')
 
     return facts
 
