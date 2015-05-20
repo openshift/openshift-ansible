@@ -24,6 +24,12 @@ def get_attr(data, attribute=None):
     return ptr
 
 def set_attr(item, key, value, attr_key=None, attr_value=None):
+    ''' This creates an attribute with the passed in value.
+        if the parent nodes are not present then it will create them
+
+        Ex: set_attr({}, 'a.b.c.d', 25)
+            returns {'a': {'b': {'c': {'d': 25}}}}
+    '''
     if attr_key and attr_value:
         actual_attr_value = get_attr(item, attr_key)
 
@@ -39,12 +45,20 @@ def set_attr(item, key, value, attr_key=None, attr_value=None):
                 kvp[attr] = {}
 
             kvp = kvp[attr]
+
     return item
 
 
 def set_attrs(items, key, value, attr_key=None, attr_value=None):
+    ''' Takes an array and runs set_attr on each item in the array
+        using the specified key and value
+
+        Ex: myarray=[{},{}]
+            set_attrs(myarray, 'a.b', 25)
+            returns [{'a': {'b': 25}}, {'a': {'b': 25}}]
+    '''
     for item in items:
-        create_update_key(item, key, value, attr_key, attr_value)
+        create_update_key(item, key, value)
 
     return items
 
@@ -57,7 +71,7 @@ def oo_set_node_label(arg, key, value, attr_key=None, attr_value=None):
         nodes where the attribute matches the specified value.
 
         Ex:
-        - shell: osc get nodes -o json
+        - shell: osc get nodes -o json | sed -e '/"resourceVersion"/d'
           register: output
 
         - set_fact:
@@ -72,6 +86,16 @@ def oo_set_node_label(arg, key, value, attr_key=None, attr_value=None):
 
 
 def oo_set_resource_node(arg, value):
+    ''' This sets a deploymentConfig for a pod to deploy on specific
+        nodes matching the value passed in.
+
+        Ex:
+        - shell: osc get deploymentConfig router -o json | sed -e '/"resourceVersion"/d'
+          register: output
+
+        - set_fact:
+          router_deploymentconfig: "{{ output.stdout | from_json | oo_set_resource_node('infra') }}"
+    '''
     arg = set_attr(arg, 'template.podTemplate.nodeSelector.region', value)
 
     return arg
