@@ -1,0 +1,27 @@
+---
+- name: Get Nodes Config
+  shell: osc get nodes -o json | sed -e '/"resourceVersion"/d'
+  register: output
+
+- name: Set node regions
+    node_facts: "{{ output.stdout | from_json
+                  | oo_set_node_label('region', {{omp_node_region}}) }}"
+
+- name: Set infra node labels
+  set_fact:
+    node_final_facts: "{{ output.stdout | from_json
+                  | oo_set_node_label('region', {{omp_infra_node_label}},
+                  {{omp_infra_node_filter_key}}, {{omp_infra_node_filter_value}}) }}"
+
+- name: Write node config to temp file
+  copy:
+    content: "{{ node_final_facts }}"
+    dest: /tmp/nodes.json
+
+- name: Import new node config
+  shell: osc update node -f /tmp/nodes.json
+
+- name: Remove node temp file
+  file:
+    path: /tmp/nodes.json
+	state: absent
