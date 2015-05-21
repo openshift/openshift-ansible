@@ -1,113 +1,120 @@
 # vim: expandtab:tabstop=4:shiftwidth=4
 
-import subprocess
+"""This module comprises Aws specific utility functions."""
+
 import os
-import json
 import re
+from openshift_ansible import multi_ec2
 
 class ArgumentError(Exception):
+    """This class is raised when improper arguments are passed."""
+
     def __init__(self, message):
+        """Initialize an ArgumentError.
+
+        Keyword arguments:
+        message -- the exact error message being raised
+        """
+        super(ArgumentError, self).__init__()
         self.message = message
 
 class AwsUtil(object):
-    def __init__(self, inventory_path=None, host_type_aliases={}):
+    """This class contains the AWS utility functions."""
+
+    def __init__(self, host_type_aliases=None):
+        """Initialize the AWS utility class.
+
+        Keyword arguments:
+        host_type_aliases -- a list of aliases to common host-types (e.g. ex-node)
+        """
+
+        host_type_aliases = host_type_aliases or {}
+
         self.host_type_aliases = host_type_aliases
         self.file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)))
 
-        if inventory_path is None:
-            inventory_path = os.path.realpath(os.path.join(self.file_path, \
-                                              '..', '..', 'inventory', \
-                                              'multi_ec2.py'))
-
-        if not os.path.isfile(inventory_path):
-            raise Exception("Inventory file not found [%s]" % inventory_path)
-
-        self.inventory_path = inventory_path
         self.setup_host_type_alias_lookup()
 
     def setup_host_type_alias_lookup(self):
+        """Sets up the alias to host-type lookup table."""
         self.alias_lookup = {}
         for key, values in self.host_type_aliases.iteritems():
             for value in values:
                 self.alias_lookup[value] = key
 
+    @staticmethod
+    def get_inventory(args=None):
+        """Calls the inventory script and returns a dictionary containing the inventory."
 
-
-    def get_inventory(self,args=[]):
-        cmd = [self.inventory_path]
-
-        if args:
-            cmd.extend(args)
-
-        env = os.environ
-
-        p = subprocess.Popen(cmd, stderr=subprocess.PIPE,
-                         stdout=subprocess.PIPE, env=env)
-
-        out,err = p.communicate()
-
-        if p.returncode != 0:
-            raise RuntimeError(err)
-
-        return json.loads(out.strip())
+        Keyword arguments:
+        args -- optional arguments to pass to the inventory script
+        """
+        mec2 = multi_ec2.MultiEc2(args)
+        mec2.run()
+        return mec2.result
 
     def get_environments(self):
+        """Searches for env tags in the inventory and returns all of the envs found."""
         pattern = re.compile(r'^tag_environment_(.*)')
 
         envs = []
         inv = self.get_inventory()
         for key in inv.keys():
-            m = pattern.match(key)
-            if m:
-                envs.append(m.group(1))
+            matched = pattern.match(key)
+            if matched:
+                envs.append(matched.group(1))
 
         envs.sort()
         return envs
 
     def get_host_types(self):
+        """Searches for host-type tags in the inventory and returns all host-types found."""
         pattern = re.compile(r'^tag_host-type_(.*)')
 
         host_types = []
         inv = self.get_inventory()
         for key in inv.keys():
-            m = pattern.match(key)
-            if m:
-                host_types.append(m.group(1))
+            matched = pattern.match(key)
+            if matched:
+                host_types.append(matched.group(1))
 
         host_types.sort()
         return host_types
 
     def get_security_groups(self):
+        """Searches for security_groups in the inventory and returns all SGs found."""
         pattern = re.compile(r'^security_group_(.*)')
 
         groups = []
         inv = self.get_inventory()
         for key in inv.keys():
-            m = pattern.match(key)
-            if m:
-                groups.append(m.group(1))
+            matched = pattern.match(key)
+            if matched:
+                groups.append(matched.group(1))
 
         groups.sort()
         return groups
 
-    def build_host_dict_by_env(self, args=[]):
+    def build_host_dict_by_env(self, args=None):
+        """Searches the inventory for hosts in an env and returns their hostvars."""
+        args = args or []
         inv = self.get_inventory(args)
 
         inst_by_env = {}
-        for dns, host in inv['_meta']['hostvars'].items():
+        for _, host in inv['_meta']['hostvars'].items():
             # If you don't have an environment tag, we're going to ignore you
             if 'ec2_tag_environment' not in host:
                 continue
 
             if host['ec2_tag_environment'] not in inst_by_env:
                 inst_by_env[host['ec2_tag_environment']] = {}
-            host_id = "%s:%s" % (host['ec2_tag_Name'],host['ec2_id'])
+            host_id = "%s:%s" % (host['ec2_tag_Name'], host['ec2_id'])
             inst_by_env[host['ec2_tag_environment']][host_id] = host
 
         return inst_by_env
 
-    # Display host_types
     def print_host_types(self):
+        """Gets the list of host types and aliases and outputs them in columns."""
         host_types = self.get_host_types()
         ht_format_str = "%35s"
         alias_format_str = "%-20s"
@@ -117,22 +124,31 @@ class AwsUtil(object):
         print combined_format_str % ('Host Types', 'Aliases')
         print combined_format_str % ('----------', '-------')
 
-        for ht in host_types:
+        for host_type in host_types:
             aliases = []
-            if ht in self.host_type_aliases:
-                aliases = self.host_type_aliases[ht]
-                print combined_format_str % (ht, ", ".join(aliases))
+            if host_type in self.host_type_aliases:
+                aliases = self.host_type_aliases[host_type]
+                print combined_format_str % (host_type, ", ".join(aliases))
             else:
-                print  ht_format_str % ht
+                print  ht_format_str % host_type
         print
 
-    # Convert host-type aliases to real a host-type
     def resolve_host_type(self, host_type):
+        """Converts a host-type alias into a host-type.
+
+        Keyword arguments:
+        host_type -- The alias or host_type to look up.
+
+        Example (depends on aliases defined in config file):
+            host_type = ex-node
+            returns: openshift-node
+        """
         if self.alias_lookup.has_key(host_type):
             return self.alias_lookup[host_type]
         return host_type
 
-    def gen_env_tag(self, env):
+    @staticmethod
+    def gen_env_tag(env):
         """Generate the environment tag
         """
         return "tag_environment_%s" % env
@@ -149,28 +165,44 @@ class AwsUtil(object):
         host_type = self.resolve_host_type(host_type)
         return "tag_env-host-type_%s-%s" % (env, host_type)
 
-    def get_host_list(self, host_type=None, env=None):
+    def get_host_list(self, host_type=None, envs=None):
         """Get the list of hosts from the inventory using host-type and environment
         """
+        envs = envs or []
         inv = self.get_inventory()
 
-        if host_type is not None and \
-           env is not None:
+        # We prefer to deal with a list of environments
+        if issubclass(type(envs), basestring):
+            if envs == 'all':
+                envs = self.get_environments()
+            else:
+                envs = [envs]
+
+        if host_type and envs:
             # Both host type and environment were specified
-            env_host_type_tag = self.gen_env_host_type_tag(host_type, env)
-            return inv[env_host_type_tag]
+            retval = []
+            for env in envs:
+                env_host_type_tag = self.gen_env_host_type_tag(host_type, env)
+                if env_host_type_tag in inv.keys():
+                    retval += inv[env_host_type_tag]
+            return set(retval)
 
-        if host_type is None and \
-           env is not None:
+        if envs and not host_type:
             # Just environment was specified
-            host_type_tag = self.gen_env_tag(env)
-            return inv[host_type_tag]
+            retval = []
+            for env in envs:
+                env_tag = AwsUtil.gen_env_tag(env)
+                if env_tag in inv.keys():
+                    retval += inv[env_tag]
+            return set(retval)
 
-        if host_type is not None and \
-           env is None:
+        if host_type and not envs:
             # Just host-type was specified
+            retval = []
             host_type_tag = self.gen_host_type_tag(host_type)
-            return inv[host_type_tag]
+            if host_type_tag in inv.keys():
+                retval = inv[host_type_tag]
+            return set(retval)
 
         # We should never reach here!
         raise ArgumentError("Invalid combination of parameters")

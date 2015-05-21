@@ -11,11 +11,9 @@ import ConfigParser
 from openshift_ansible import awsutil
 
 CONFIG_MAIN_SECTION = 'main'
-CONFIG_INVENTORY_OPTION = 'inventory'
 
 class Ossh(object):
     def __init__(self):
-        self.inventory = None
         self.file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)))
 
         # Default the config path to /etc
@@ -26,13 +24,12 @@ class Ossh(object):
         self.parse_cli_args()
         self.parse_config_file()
 
-        self.aws = awsutil.AwsUtil(self.inventory)
+        self.aws = awsutil.AwsUtil()
 
-        # get a dict of host inventory
-        if self.args.list:
-            self.get_hosts()
-        else:
+        if self.args.refresh_cache:
             self.get_hosts(True)
+        else:
+            self.get_hosts()
 
         # parse host and user
         self.process_host()
@@ -55,10 +52,6 @@ class Ossh(object):
             config = ConfigParser.ConfigParser()
             config.read(self.config_path)
 
-            if config.has_section(CONFIG_MAIN_SECTION) and \
-               config.has_option(CONFIG_MAIN_SECTION, CONFIG_INVENTORY_OPTION):
-                self.inventory = config.get(CONFIG_MAIN_SECTION, CONFIG_INVENTORY_OPTION)
-
     def parse_cli_args(self):
         parser = argparse.ArgumentParser(description='Openshift Online SSH Tool.')
         parser.add_argument('-e', '--env', action="store",
@@ -67,6 +60,8 @@ class Ossh(object):
                           action="store_true", help="debug mode")
         parser.add_argument('-v', '--verbose', default=False,
                           action="store_true", help="Verbose?")
+        parser.add_argument('--refresh-cache', default=False,
+                          action="store_true", help="Force a refresh on the host cache.")
         parser.add_argument('--list', default=False,
                           action="store_true", help="list out hosts")
         parser.add_argument('-c', '--command', action='store',
@@ -109,14 +104,14 @@ class Ossh(object):
             if self.args.login_name:
                 self.user = self.args.login_name
 
-    def get_hosts(self, cache_only=False):
+    def get_hosts(self, refresh_cache=False):
         '''Query our host inventory and return a dict where the format
            equals:
 
            dict['servername'] = dns_name
         '''
-        if cache_only:
-            self.host_inventory = self.aws.build_host_dict_by_env(['--cache-only'])
+        if refresh_cache:
+            self.host_inventory = self.aws.build_host_dict_by_env(['--refresh-cache'])
         else:
             self.host_inventory = self.aws.build_host_dict_by_env()
 
