@@ -25,6 +25,13 @@
       cluster: "{{ cluster_id }}"
       type: "{{ k8s_type }}"
 
+  - include: ../../common/openshift-cluster/set_infra_launch_facts_tasks.yml
+  - include: tasks/launch_instances.yml
+    vars:
+      instances: "{{ infra_names }}"
+      cluster: "{{ cluster_id }}"
+      type: "{{ k8s_type }}"
+
 - include: update.yml
 
 - include: list.yml

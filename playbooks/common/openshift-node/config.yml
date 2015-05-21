@@ -1,6 +1,8 @@
 ---
 - name: Gather and set facts for node hosts
-  hosts: oo_nodes_to_config
+  hosts:
+    - oo_nodes_to_config
+    - oo_infra_to_config
   roles:
   - openshift_facts
   tasks:

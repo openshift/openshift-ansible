@@ -19,8 +19,14 @@
                    | default(deployment_vars[deployment_type].image, true) }}"
   when: ec2_image is not defined and not ec2_image_name
 - set_fact:
-    ec2_instance_type: "{{ lookup('env', 'ec2_instance_type')
-                    | default(deployment_vars[deployment_type].type, true) }}"
+    ec2_master_instance_type: "{{ lookup('env', 'ec2_master_instance_type')
+                    | default(deployment_vars[deployment_type].master_type, true) }}"
+- set_fact:
+    ec2_node_instance_type: "{{ lookup('env', 'ec2_node_instance_type')
+                    | default(deployment_vars[deployment_type].node_type, true) }}"
+- set_fact:
+    ec2_infra_instance_type: "{{ lookup('env', 'ec2_infra_instance_type')
+                    | default(deployment_vars[deployment_type].infra_type, true) }}"
   when: ec2_instance_type is not defined
 - set_fact:
     ec2_keypair: "{{ lookup('env', 'ec2_keypair')
@@ -67,9 +73,28 @@
           volume_size: "{{ lookup('env', 'os_docker_vol_size') | default(32, true) }}"
           device_type: "{{ lookup('env', 'os_docker_vol_type') | default('gp2', true) }}"
           iops: "{{ lookup('env', 'os_docker_vol_iops') | default(500, true) }}"
+      infra:
+        root:
+          volume_size: "{{ lookup('env', 'os_infra_root_vol_size') | default(25, true) }}"
+          device_type: "{{ lookup('env', 'os_infra_root_vol_type') | default('gp2', true) }}"
+          iops: "{{ lookup('env', 'os_node_root_vol_iops') | default(500, true) }}"
+        docker:
+          volume_size: "{{ lookup('env', 'os_infra_docker_vol_size') | default(200, true) }}"
+          device_type: "{{ lookup('env', 'os_infra_docker_vol_type') | default('gp2', true) }}"
+          iops: "{{ lookup('env', 'os_docker_vol_iops') | default(500, true) }}"
 
 - set_fact:
     volumes: "{{ volume_defs | oo_ec2_volume_definition(host_type, docker_vol_ephemeral | bool) }}"
+
+- set_fact:
+    ec2_instance_type: "{{ ec2_master_instance_type }}"
+    when: host_type is master
+- set_fact:
+    ec2_instance_type: "{{ ec2_node_instance_type }}"
+    when: host_type is node
+- set_fact:
+    ec2_instance_type: "{{ ec2_infra_instance_type }}"
+    when: host_type is infra
 
 - name: Launch instance(s)
   ec2:
