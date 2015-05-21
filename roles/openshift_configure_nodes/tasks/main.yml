@@ -5,13 +5,12 @@
 
 - name: Set node regions
     node_facts: "{{ output.stdout | from_json
-                  | oo_set_node_label('region', {{omp_node_region}}) }}"
+                  | oo_set_node_label('region', {{ocn_node_region}}) }}"
 
 - name: Set infra node labels
   set_fact:
     node_final_facts: "{{ output.stdout | from_json
-                  | oo_set_node_label('region', {{omp_infra_node_label}},
-                  {{omp_infra_node_filter_key}}, {{omp_infra_node_filter_value}}) }}"
+                  | oo_set_node_label('region', {{ocn_infra_node_label}}, {{ocn_infra_node_filter_key}}, {{ocn_infra_node_filter_value}}) }}"
 
 - name: Write node config to temp file
   copy:

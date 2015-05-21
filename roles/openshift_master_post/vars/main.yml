@@ -1,5 +1,0 @@
----
-omp_infra_node_filter_key: "status.capacity"
-omp_infra_node_filter_value: "7232144Ki"
-omp_infra_node_label: "infra"
-omp_node_region: "us-east"
