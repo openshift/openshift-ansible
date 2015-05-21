@@ -2,12 +2,15 @@
 openshift_node_ips: []
 
 # TODO: update setting these values based on the facts
-# TODO: update for console port change
 os_firewall_allow:
 - service: etcd embedded
   port: 4001/tcp
 - service: OpenShift api https
   port: 8443/tcp
+- service: OpenShift dns tcp
+  port: 53/tcp
+- service: OpenShift dns udp
+  port: 53/udp
 os_firewall_deny:
 - service: OpenShift api http
   port: 8080/tcp
