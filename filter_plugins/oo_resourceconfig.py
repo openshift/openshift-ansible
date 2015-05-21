@@ -38,14 +38,17 @@ def set_attr(item, key, value, attr_key=None, attr_value=None):
             return item # We only want to set the values on hosts with defined attributes
 
     kvp = item
+    keynum = 1;
     for attr in key.split('.'):
-        if attr == key.split('.')[len(key.split('.'))-1]:
+        if keynum == len(key.split('.')):
             kvp[attr] = value
             continue
+
         if attr not in kvp:
             kvp[attr] = {}
 
         kvp = kvp[attr]
+        keynum = keynum + 1
 
     return item
 
