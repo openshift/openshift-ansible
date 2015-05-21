@@ -23,6 +23,7 @@ def get_attr(data, attribute=None):
 
     return ptr
 
+
 def set_attr(item, key, value, attr_key=None, attr_value=None):
     ''' This creates an attribute with the passed in value.
         if the parent nodes are not present then it will create them
@@ -34,17 +35,17 @@ def set_attr(item, key, value, attr_key=None, attr_value=None):
         actual_attr_value = get_attr(item, attr_key)
 
         if str(attr_value) != str(actual_attr_value):
-            continue # We only want to set the values on hosts with defined attributes
+            return item # We only want to set the values on hosts with defined attributes
 
-        kvp = item
-        for attr in key.split('.'):
-            if attr == key.split('.')[len(key.split('.'))-1]:
-                kvp[attr] = value
-                continue
-            if attr not in kvp:
-                kvp[attr] = {}
+    kvp = item
+    for attr in key.split('.'):
+        if attr == key.split('.')[len(key.split('.'))-1]:
+            kvp[attr] = value
+            continue
+        if attr not in kvp:
+            kvp[attr] = {}
 
-            kvp = kvp[attr]
+        kvp = kvp[attr]
 
     return item
 
@@ -53,12 +54,15 @@ def set_attrs(items, key, value, attr_key=None, attr_value=None):
     ''' Takes an array and runs set_attr on each item in the array
         using the specified key and value
 
-        Ex: myarray=[{},{}]
-            set_attrs(myarray, 'a.b', 25)
-            returns [{'a': {'b': 25}}, {'a': {'b': 25}}]
+        Ex: myitem={'a': 1, 'myarray': [{},{}]}
+            set_attrs(myitem['myarray'], 'a', 25)
+            returns [{'a': 25}, {'a': 25}]
+
+        Even though it just returns the array, myitem will have the
+        value of: {'a': 1, 'myarray': [{'a': 25}, {'a': 25}]}
     '''
     for item in items:
-        create_update_key(item, key, value)
+        set_attr(item, key, value, attr_key, attr_value)
 
     return items
 
@@ -80,7 +84,7 @@ def oo_set_node_label(arg, key, value, attr_key=None, attr_value=None):
                              | oo_set_node_label('region', 'infra',
                                             'metadata.name', '172.16.17.43') }}"
     '''
-    arg['items'] = set_attrs(arg['items'], key, value, attr_key, attr_value)
+    set_attrs(arg['items'], key, value, attr_key, attr_value)
 
     return arg
 
@@ -96,7 +100,7 @@ def oo_set_resource_node(arg, value):
         - set_fact:
           router_deploymentconfig: "{{ output.stdout | from_json | oo_set_resource_node('infra') }}"
     '''
-    arg = set_attr(arg, 'template.podTemplate.nodeSelector.region', value)
+    set_attr(arg, 'template.podTemplate.nodeSelector.region', value)
 
     return arg
 
