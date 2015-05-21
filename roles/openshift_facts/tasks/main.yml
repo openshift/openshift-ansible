@@ -1,3 +1,9 @@
 ---
+- name: Verify Ansible version is greater than 1.8.0 and not 1.9.0
+  assert:
+    that:
+    - ansible_version | version_compare('1.8.0', 'ge')
+    - ansible_version | version_compare('1.9.0', 'ne')
+
 - name: Gather OpenShift facts
   openshift_facts:
