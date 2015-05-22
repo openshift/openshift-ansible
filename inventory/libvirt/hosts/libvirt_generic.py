@@ -1,6 +1,6 @@
 #!/usr/bin/env python2
 
-"""
+'''
 libvirt external inventory script
 =================================
 
@@ -12,7 +12,7 @@ To use this, copy this file over /etc/ansible/hosts and chmod +x the file.
 This, more or less, allows you to keep one central database containing
 info about all of your managed instances.
 
-"""
+'''
 
 # (c) 2015, Jason DeTiberus <jdetiber@redhat.com>
 #
@@ -47,8 +47,11 @@ except ImportError:
 
 
 class LibvirtInventory(object):
+    ''' libvirt dynamic inventory '''
 
     def __init__(self):
+        ''' Main execution path '''
+
         self.inventory = dict()  # A list of groups and the hosts in that group
         self.cache = dict()  # Details about hosts in the inventory
 
@@ -64,6 +67,8 @@ class LibvirtInventory(object):
             print _json_format_dict(self.get_inventory(), self.args.pretty)
 
     def read_settings(self):
+        ''' Reads the settings from the libvirt.ini file '''
+
         config = ConfigParser.SafeConfigParser()
         config.read(
             os.path.dirname(os.path.realpath(__file__)) + '/libvirt.ini'
@@ -71,6 +76,8 @@ class LibvirtInventory(object):
         self.libvirt_uri = config.get('libvirt', 'uri')
 
     def parse_cli_args(self):
+        ''' Command line argument processing '''
+
         parser = argparse.ArgumentParser(
             description='Produce an Ansible Inventory file based on libvirt'
         )
@@ -94,11 +101,15 @@ class LibvirtInventory(object):
         self.args = parser.parse_args()
 
     def get_host_info(self):
+        ''' Get variables about a specific host '''
+
         inventory = self.get_inventory()
         if self.args.host in inventory['_meta']['hostvars']:
             return inventory['_meta']['hostvars'][self.args.host]
 
     def get_inventory(self):
+        ''' Construct the inventory '''
+
         inventory = dict(_meta=dict(hostvars=dict()))
 
         conn = libvirt.openReadOnly(self.libvirt_uri)
@@ -126,8 +137,8 @@ class LibvirtInventory(object):
             hostvars['libvirt_status'] = 'running'
 
             root = ET.fromstring(domain.XMLDesc())
-            ns = {'ansible': 'https://github.com/ansible/ansible'}
-            for tag_elem in root.findall('./metadata/ansible:tags/ansible:tag', ns):
+            ansible_ns = {'ansible': 'https://github.com/ansible/ansible'}
+            for tag_elem in root.findall('./metadata/ansible:tags/ansible:tag', ansible_ns):
                 tag = tag_elem.text
                 _push(inventory, "tag_%s" % tag, domain_name)
                 _push(hostvars, 'libvirt_tags', tag)
@@ -140,6 +151,12 @@ class LibvirtInventory(object):
                 mac_elem = interface.find('mac')
                 if source_elem is not None and \
                    mac_elem    is not None:
+                    # Adding this to disable pylint check specifically
+                    # ignoring libvirt-python versions that
+                    # do not include DHCPLeases
+                    # This is needed until we upgrade the build bot to
+                    # RHEL7 (>= 1.2.6 libvirt)
+                    # pylint: disable=no-member
                     dhcp_leases = conn.networkLookupByName(source_elem.get('network')) \
                                       .DHCPLeases(mac_elem.get('address'))
                     if len(dhcp_leases) > 0:
@@ -152,12 +169,19 @@ class LibvirtInventory(object):
         return inventory
 
 def _push(my_dict, key, element):
+    '''
+    Push element to the my_dict[key] list.
+    After having initialized my_dict[key] if it dosn't exist.
+    '''
+
     if key in my_dict:
         my_dict[key].append(element)
     else:
         my_dict[key] = [element]
 
 def _json_format_dict(data, pretty=False):
+    ''' Serialize data to a JSON formated str '''
+
     if pretty:
         return json.dumps(data, sort_keys=True, indent=2)
     else:
