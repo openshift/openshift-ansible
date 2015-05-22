@@ -1,0 +1,23 @@
+{
+  "kind": "PersistentVolume",
+  "apiVersion": "v1beta3",
+  "metadata": {
+    "name": "pv-{{ inventory_hostname | regex_replace("\.", "-")  }}-{{ item.name }}",
+    "labels": {
+      "type": "nfs"
+    }
+  },
+  "spec": {
+    "capacity": {
+      "storage": "{{ item.size }}"
+    },
+    "accessModes": [
+      "ReadWriteOnce"
+    ],
+    "NFS": {
+      "Server": "{{ inventory_hostname }}",
+      "Path": "{{ mount_dir }}/{{ item.name }}",
+      "ReadOnly": false
+    }
+  }
+}
