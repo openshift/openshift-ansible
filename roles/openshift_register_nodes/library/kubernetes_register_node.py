@@ -3,15 +3,13 @@
 # vim: expandtab:tabstop=4:shiftwidth=4
 #
 # disable pylint checks
-# temporarily disabled until items can be addressed:
-#   fixme - until all TODO comments have been addressed
 # permanently disabled unless someone wants to refactor the object model:
 #   too-few-public-methods
 #   no-self-use
 #   too-many-arguments
 #   too-many-locals
 #   too-many-branches
-# pylint:disable=fixme, too-many-arguments, no-self-use
+# pylint:disable=too-many-arguments, no-self-use
 # pylint:disable=too-many-locals, too-many-branches, too-few-public-methods
 """Ansible module to register a kubernetes node to the cluster"""
 
@@ -41,24 +39,6 @@ options:
             - IP Address to associate with the node when registering.
               Available in the following API versions: v1beta1.
         required: false
-    hostnames:
-        default: []
-        description:
-            - Valid hostnames for this node. Available in the following API
-              versions: v1beta3.
-        required: false
-    external_ips:
-        default: []
-        description:
-            - External IP Addresses for this node. Available in the following API
-              versions: v1beta3.
-        required: false
-    internal_ips:
-        default: []
-        description:
-            - Internal IP Addresses for this node. Available in the following API
-              versions: v1beta3.
-        required: false
     cpu:
         default: null
         description:
@@ -87,17 +67,6 @@ EXAMPLES = '''
     hostIP: 192.168.1.1
     cpu: 1
     memory: 500000000
-
-# Node registration using the v1beta3 API, setting an alternate hostname,
-# internalIP, externalIP and assigning 3.5 CPU cores and 1 TiB of Memory
-- openshift_register_node:
-    name: ose3.node.example.com
-    api_version: v1beta3
-    external_ips: ['192.168.1.5']
-    internal_ips: ['10.0.0.5']
-    hostnames: ['ose2.node.internal.local']
-    cpu: 3.5
-    memory: 1Ti
 '''
 
 
@@ -313,57 +282,11 @@ class NodeSpec(object):
         """
         return Util.remove_empty_elements(self.spec)
 
-class NodeStatus(object):
-    """ Kubernetes Node Status
-
-        Attributes:
-            status (dict): A dictionary representing the node status
-
-        Args:
-            version (str): kubernetes api version
-            externalIPs (list, optional): externalIPs for the node
-            internalIPs (list, optional): internalIPs for the node
-            hostnames (list, optional): hostnames for the node
-    """
-    def add_addresses(self, address_type, addresses):
-        """ Adds addresses of the specified type
-
-            Args:
-                address_type (str): address type
-                addresses (list): addresses to add
-        """
-        address_list = []
-        for address in addresses:
-            address_list.append(dict(type=address_type, address=address))
-        return address_list
-
-    def __init__(self, version, externalIPs=None, internalIPs=None,
-                 hostnames=None):
-        if version == 'v1beta3':
-            addresses = []
-            if externalIPs is not None:
-                addresses += self.add_addresses('ExternalIP', externalIPs)
-            if internalIPs is not None:
-                addresses += self.add_addresses('InternalIP', internalIPs)
-            if hostnames is not None:
-                addresses += self.add_addresses('Hostname', hostnames)
-
-            self.status = dict(addresses=addresses)
-
-    def get_status(self):
-        """ Get the dict representing the node status
-
-            Returns:
-                dict: representation of the node status with any empty elements
-                    removed
-        """
-        return Util.remove_empty_elements(self.status)
-
 class Node(object):
     """ Kubernetes Node
 
         Attributes:
-            status (dict): A dictionary representing the node
+            node (dict): A dictionary representing the node
 
         Args:
             module (AnsibleModule):
@@ -371,9 +294,6 @@ class Node(object):
             version (str, optional): kubernetes api version
             node_name (str, optional): name for node
             hostIP (str, optional): node host ip
-            hostnames (list, optional): hostnames for the node
-            externalIPs (list, optional): externalIPs for the node
-            internalIPs (list, optional): internalIPs for the node
             cpu (str, optional): cpu resources for the node
             memory (str, optional): memory resources for the node
             labels (list, optional): labels for the node
@@ -382,8 +302,7 @@ class Node(object):
             externalID (str, optional): external id of the node
     """
     def __init__(self, module, client_opts, version='v1beta1', node_name=None,
-                 hostIP=None, hostnames=None, externalIPs=None,
-                 internalIPs=None, cpu=None, memory=None, labels=None,
+                 hostIP=None, cpu=None, memory=None, labels=None,
                  annotations=None, podCIDR=None, externalID=None):
         self.module = module
         self.client_opts = client_opts
@@ -405,9 +324,7 @@ class Node(object):
                              apiVersion=version,
                              metadata=metadata,
                              spec=NodeSpec(version, cpu, memory, podCIDR,
-                                           externalID),
-                             status=NodeStatus(version, externalIPs,
-                                               internalIPs, hostnames))
+                                           externalID))
 
     def get_name(self):
         """ Get the name for the node
@@ -432,7 +349,6 @@ class Node(object):
             node['resources'] = self.node['resources'].get_resources()
         elif self.node['apiVersion'] == 'v1beta3':
             node['spec'] = self.node['spec'].get_spec()
-            node['status'] = self.node['status'].get_status()
         return Util.remove_empty_elements(node)
 
     def exists(self):
@@ -473,52 +389,15 @@ class Node(object):
         else:
             return True
 
-def main():
-    """ main """
-    module = AnsibleModule(
-        argument_spec=dict(
-            name=dict(required=True, type='str'),
-            host_ip=dict(type='str'),
-            hostnames=dict(type='list', default=[]),
-            external_ips=dict(type='list', default=[]),
-            internal_ips=dict(type='list', default=[]),
-            api_version=dict(type='str', default='v1beta1',
-                             choices=['v1beta1', 'v1beta3']),
-            cpu=dict(type='str'),
-            memory=dict(type='str'),
-            # TODO: needs documented
-            labels=dict(type='dict', default={}),
-            # TODO: needs documented
-            annotations=dict(type='dict', default={}),
-            # TODO: needs documented
-            pod_cidr=dict(type='str'),
-            # TODO: needs documented
-            external_id=dict(type='str'),
-            # TODO: needs documented
-            client_config=dict(type='str'),
-            # TODO: needs documented
-            client_cluster=dict(type='str', default='master'),
-            # TODO: needs documented
-            client_context=dict(type='str', default='default'),
-            # TODO: needs documented
-            client_namespace=dict(type='str', default='default'),
-            # TODO: needs documented
-            client_user=dict(type='str', default='system:openshift-client'),
-            # TODO: needs documented
-            kubectl_cmd=dict(type='list', default=['kubectl']),
-            # TODO: needs documented
-            kubeconfig_flag=dict(type='str'),
-            # TODO: needs documented
-            default_client_config=dict(type='str')
-        ),
-        mutually_exclusive=[
-            ['host_ip', 'external_ips'],
-            ['host_ip', 'internal_ips'],
-            ['host_ip', 'hostnames'],
-        ],
-        supports_check_mode=True
-    )
+def generate_client_opts(module):
+    """ Generates the client options
 
+        Args:
+            module(AnsibleModule)
+
+        Returns:
+            str: client options
+    """
     client_config = '~/.kube/.kubeconfig'
     if 'default_client_config' in module.params:
         client_config = module.params['default_client_config']
@@ -533,8 +412,7 @@ def main():
         kubeconfig_flag = '--kubeconfig'
         if 'kubeconfig_flag' in module.params:
             kubeconfig_flag = module.params['kubeconfig_flag']
-        client_opts.append(kubeconfig_flag + '=' +
-                           os.path.expanduser(module.params['client_config']))
+        client_opts.append(kubeconfig_flag + '=' + os.path.expanduser(module.params['client_config']))
 
     try:
         config = ClientConfig(client_opts, module)
@@ -547,51 +425,85 @@ def main():
         if client_context != config.current_context():
             client_opts.append("--context=%s" % client_context)
     else:
-        module.fail_json(msg="Context %s not found in client config" %
-                         client_context)
+        module.fail_json(msg="Context %s not found in client config" % client_context)
 
     client_user = module.params['client_user']
     if config.has_user(client_user):
         if client_user != config.get_user_for_context(client_context):
             client_opts.append("--user=%s" % client_user)
     else:
-        module.fail_json(msg="User %s not found in client config" %
-                         client_user)
+        module.fail_json(msg="User %s not found in client config" % client_user)
 
     client_cluster = module.params['client_cluster']
     if config.has_cluster(client_cluster):
         if client_cluster != config.get_cluster_for_context(client_context):
             client_opts.append("--cluster=%s" % client_cluster)
     else:
-        module.fail_json(msg="Cluster %s not found in client config" %
-                         client_cluster)
+        module.fail_json(msg="Cluster %s not found in client config" % client_cluster)
 
     client_namespace = module.params['client_namespace']
     if client_namespace != config.get_namespace_for_context(client_context):
         client_opts.append("--namespace=%s" % client_namespace)
 
-    node = Node(module, client_opts, module.params['api_version'],
-                module.params['name'], module.params['host_ip'],
-                module.params['hostnames'], module.params['external_ips'],
-                module.params['internal_ips'], module.params['cpu'],
-                module.params['memory'], module.params['labels'],
-                module.params['annotations'], module.params['pod_cidr'],
-                module.params['external_id'])
+    return client_opts
 
-    # TODO: attempt to support changing node settings where possible and/or
-    # modifying node resources
+
+def main():
+    """ main """
+    module = AnsibleModule(
+        argument_spec=dict(
+            name=dict(required=True, type='str'),
+            host_ip=dict(type='str'),
+            api_version=dict(type='str', default='v1beta1',
+                             choices=['v1beta1', 'v1beta3']),
+            cpu=dict(type='str'),
+            memory=dict(type='str'),
+            # TODO: needs documented
+            labels=dict(type='dict', default={}),
+            # TODO: needs documented
+            annotations=dict(type='dict', default={}),
+            # TODO: needs documented
+            pod_cidr=dict(type='str'),
+            # TODO: needs documented
+            client_config=dict(type='str'),
+            # TODO: needs documented
+            client_cluster=dict(type='str', default='master'),
+            # TODO: needs documented
+            client_context=dict(type='str', default='default'),
+            # TODO: needs documented
+            client_namespace=dict(type='str', default='default'),
+            # TODO: needs documented
+            client_user=dict(type='str', default='system:admin'),
+            # TODO: needs documented
+            kubectl_cmd=dict(type='list', default=['kubectl']),
+            # TODO: needs documented
+            kubeconfig_flag=dict(type='str'),
+            # TODO: needs documented
+            default_client_config=dict(type='str')
+        ),
+        supports_check_mode=True
+    )
+
+    labels = module.params['labels']
+    kube_hostname_label = 'kubernetes.io/hostname'
+    if kube_hostname_label not in labels:
+        labels[kube_hostname_label] = module.params['name']
+
+    node = Node(module, generate_client_opts(module),
+                module.params['api_version'], module.params['name'],
+                module.params['host_ip'], module.params['cpu'],
+                module.params['memory'], labels, module.params['annotations'],
+                module.params['pod_cidr'])
+
     if node.exists():
         module.exit_json(changed=False, node=node.get_node())
     elif module.check_mode:
         module.exit_json(changed=True, node=node.get_node())
+    elif node.create():
+        module.exit_json(changed=True, msg="Node created successfully",
+                         node=node.get_node())
     else:
-        if node.create():
-            module.exit_json(changed=True,
-                             msg="Node created successfully",
-                             node=node.get_node())
-        else:
-            module.fail_json(msg="Unknown error creating node",
-                             node=node.get_node())
+        module.fail_json(msg="Unknown error creating node", node=node.get_node())
 
 # ignore pylint errors related to the module_utils import
 # pylint: disable=redefined-builtin, unused-wildcard-import, wildcard-import

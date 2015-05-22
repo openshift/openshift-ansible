@@ -1,10 +1,16 @@
 ---
-# TODO: actually have api_port, api_use_ssl, console_port, console_use_ssl,
-# etcd_use_ssl actually change the master config.
+# TODO: add validation for openshift_master_identity_providers
+# TODO: add ability to configure certificates given either a local file to
+#       point to or certificate contents, set in default cert locations.
+
+- assert:
+    that:
+    - openshift_master_oauth_grant_method in openshift_master_valid_grant_methods
+  when: openshift_master_oauth_grant_method is defined
 
 - name: Set master OpenShift facts
   openshift_facts:
-    role: 'master'
+    role: master
     local_facts:
       debug_level: "{{ openshift_master_debug_level | default(openshift.common.debug_level) }}"
       api_port: "{{ openshift_master_api_port | default(None) }}"
@@ -18,15 +24,32 @@
       public_console_url: "{{ openshift_master_public_console_url | default(None) }}"
       etcd_port: "{{ openshift_master_etcd_port | default(None) }}"
       etcd_use_ssl: "{{ openshift_master_etcd_use_ssl | default(None) }}"
+      etcd_urls: "{{ openshift_master_etcd_urls | default(None) }}"
+      embedded_etcd: "{{ openshift_master_embedded_etcd | default(None) }}"
+      embedded_kube: "{{ openshift_master_embedded_kube | default(None) }}"
+      embedded_dns: "{{ openshift_master_embedded_dns | default(None) }}"
+      dns_port: "{{ openshift_master_dns_port | default(None) }}"
+      bind_addr: "{{ openshift_master_bind_addr | default(None) }}"
       portal_net: "{{ openshift_master_portal_net | default(None) }}"
+      session_max_seconds: "{{ openshift_master_session_max_seconds | default(None) }}"
+      session_name: "{{ openshift_master_session_name | default(None) }}"
+      session_secrets_file: "{{ openshift_master_session_secrets_file | default(None) }}"
+      access_token_max_seconds: "{{ openshift_master_access_token_max_seconds | default(None) }}"
+      auth_token_max_seconds: "{{ openshift_master_auth_token_max_seconds | default(None) }}"
+      identity_providers: "{{ openshift_master_identity_providers | default(None) }}"
+      registry_url: "{{ oreg_url | default(None) }}"
+      oauth_grant_method: "{{ openshift_master_oauth_grant_method | default(None) }}"
+      sdn_cluster_network_cidr: "{{ osm_cluster_network_cidr | default(None) }}"
+      sdn_host_subnet_length: "{{ osm_host_subnet_length | default(None) }}"
 
 # TODO: These values need to be configurable
 - name: Set dns OpenShift facts
   openshift_facts:
-    role: 'dns'
+    role: dns
     local_facts:
       ip: "{{ openshift.common.ip }}"
-      domain: local
+      domain: cluster.local
+  when: openshift.master.embedded_dns
 
 - name: Install OpenShift Master package
   yum: pkg=openshift-master state=installed
@@ -41,34 +64,53 @@
     path: "{{ openshift_master_config_dir }}"
     state: directory
 
-# TODO: should probably use a template lookup for this
-# TODO: should allow for setting --etcd, --kubernetes options
-# TODO: recreate config if values change
-- name: Use enterprise default for oreg_url if not set
-  set_fact:
-    oreg_url: "openshift3_beta/ose-${component}:${version}"
-  when: openshift.common.deployment_type == 'enterprise' and oreg_url is not defined
-
-- name: Use online default for oreg_url if not set
-  set_fact:
-    oreg_url: "docker-registry.ops.rhcloud.com/openshift3_beta/ose-${component}:${version}"
-  when: openshift.common.deployment_type == 'online' and oreg_url is not defined
-
-# TODO: Need to get a flag added for volumes path, i think it'll get put in
-- name: Create master config
+- name: Create the master certificates if they do not already exist
   command: >
-    /usr/bin/openshift start master
-    --write-config={{ openshift_master_config_dir }}
-    --portal-net={{ openshift.master.portal_net }}
-    --etcd-dir={{ openshift_data_dir }}/openshift.local.etcd
-    --master={{ openshift.master.api_url }}
-    --public-master={{ openshift.master.public_api_url }}
-    --listen={{ 'https' if openshift.master.api_use_ssl else 'http' }}://0.0.0.0:{{ openshift.master.api_port }}
-    {{ ('--images=' ~ oreg_url) if (oreg_url | default('', true) != '') else '' }}
-    {{ ('--nodes=' ~ openshift_node_ips | join(',')) if (openshift_node_ips | default('', true) != '') else '' }}
+    {{ openshift.common.admin_binary }} create-master-certs
+      --hostnames={{ openshift.common.hostname }},{{ openshift.common.public_hostname }}
+      --master={{ openshift.master.api_url }}
+      --public-master={{ openshift.master.public_api_url }}
+      --cert-dir={{ openshift_master_config_dir }} --overwrite=false
   args:
-    chdir: "{{ openshift_master_config_dir }}"
-    creates: "{{ openshift_master_config_file }}"
+    creates: "{{ openshift_master_config_dir }}/master.server.key"
+
+- name: Create the policy file if it does not already exist
+  command: >
+    {{ openshift.common.admin_binary }} create-bootstrap-policy-file
+      --filename={{ openshift_master_policy }}
+  args:
+    creates: "{{ openshift_master_policy }}"
+  notify:
+  - restart openshift-master
+
+- name: Create the scheduler config
+  template:
+    dest: "{{ openshift_master_scheduler_conf }}"
+    src: scheduler.json.j2
+  notify:
+  - restart openshift-master
+
+- name: Install httpd-tools if needed
+  yum: pkg=httpd-tools state=installed
+  when: item.kind == 'HTPasswdPasswordIdentityProvider'
+  with_items: openshift.master.identity_providers
+
+- name: Create the htpasswd file if needed
+  copy:
+    dest: "{{ item.filename }}"
+    content: ""
+    mode: 0600
+    force: no
+  when: item.kind == 'HTPasswdPasswordIdentityProvider'
+  with_items: openshift.master.identity_providers
+
+# TODO: add the validate parameter when there is a validation command to run
+- name: Create master config
+  template:
+    dest: "{{ openshift_master_config_file }}"
+    src: master.yaml.v1.j2
+  notify:
+  - restart openshift-master
 
 - name: Configure OpenShift settings
   lineinfile:
@@ -79,7 +121,7 @@
     - regex: '^OPTIONS='
       line: "OPTIONS=--loglevel={{ openshift.master.debug_level }}"
     - regex: '^CONFIG_FILE='
-      line: "CONFIG_FILE={{ openshift_master_config_file}}"
+      line: "CONFIG_FILE={{ openshift_master_config_file }}"
   notify:
   - restart openshift-master
 
@@ -99,15 +141,15 @@
 
 # TODO: Update this file if the contents of the source file are not present in
 # the dest file, will need to make sure to ignore things that could be added
-- name: Create the OpenShift client config(s)
-  command: cp {{ openshift_master_config_dir }}/openshift-client.kubeconfig ~{{ item }}/.config/openshift/.config
+- name: Copy the OpenShift admin client config(s)
+  command: cp {{ openshift_master_config_dir }}/admin.kubeconfig ~{{ item }}/.config/openshift/.config
   args:
     creates: ~{{ item }}/.config/openshift/.config
   with_items:
   - root
   - "{{ ansible_ssh_user }}"
 
-- name: Update the permissions on the OpenShift client config(s)
+- name: Update the permissions on the OpenShift admin client config(s)
   file:
     path: "~{{ item }}/.config/openshift/.config"
     state: file

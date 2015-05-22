@@ -1,0 +1,18 @@
+allowDisabledDocker: false
+apiVersion: v1
+dnsDomain: {{ hostvars[openshift_first_master].openshift.dns.domain }}
+dnsIP: {{ hostvars[openshift_first_master].openshift.dns.ip }}
+imageConfig:
+  format: {{ openshift.node.registry_url }}
+  latest: false
+kind: NodeConfig
+masterKubeConfig: node.kubeconfig
+networkPluginName: {{ openshift.common.sdn_network_plugin_name }}
+nodeName: {{ openshift.common.hostname }}
+podManifestConfig: null
+servingInfo:
+  bindAddress: 0.0.0.0:10250
+  certFile: server.crt
+  clientCA: ca.crt
+  keyFile: server.key
+volumeDirectory: {{ openshift_data_dir }}/openshift.local.volumes
