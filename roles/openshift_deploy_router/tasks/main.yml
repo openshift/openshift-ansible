@@ -1,0 +1,24 @@
+---
+- name: Deploy router
+  shell: osadm router --create --credentials=/var/lib/openshift/openshift.local.certificates/openshift-router/.kubeconfig --images='registry.access.redhat.com/openshift3_beta/ose-${component}:${version}'
+
+- name: Get router deployment config
+  shell: osc get deploymentConfig/router -o json | sed -e '/"resourceVersion"/d'
+  register: output
+
+- name: Set router node region
+  set_fact:
+  	router_fact: "{{ output.stdout | from_json | oo_set_resource_node({{ocom_infra_node_label}}) }}"
+
+- name: Write router deployment config to temp file
+  copy:
+    content: "{{ router_fact }}"
+	dest: /tmp/router.json
+
+- name: Import new router deployment config
+  shell: osc update deploymentConfig/router -f /tmp/router.json
+
+- name: Remove router deployment config temp file
+  file:
+    path: /tmp/router.json
+	state: absent
