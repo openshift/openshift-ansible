@@ -19,6 +19,13 @@
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
     with_items: groups["tag_env-host-type_{{ cluster_id }}-openshift-node"] | default([])
+  - name: Evaluate oo_infra_to_config
+    add_host:
+      name: "{{ item }}"
+      groups: oo_infra_to_config
+      ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
+      ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
+    with_items: groups["tag_env-host-type_{{ cluster_id }}-openshift-infra"] | default([])
   - name: Evaluate oo_first_master
     add_host:
       name: "{{ groups['tag_env-host-type_' ~ cluster_id ~ '-openshift-master'][0] }}"

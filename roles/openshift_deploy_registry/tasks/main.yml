@@ -1,0 +1,24 @@
+---
+- name: Deploy registry
+  shell: osadm registry --create --credentials=/var/lib/openshift/openshift.local.certificates/openshift-registry/.kubeconfig --images='registry.access.redhat.com/openshift3_beta/ose-${component}:${version}'
+
+- name: Get registry deployment config
+  shell: osc get deploymentConfig/docker-registry -o json | sed -e '/"resourceVersion"/d'
+  register: output
+
+- name: Set registry node region
+  set_fact:
+    registry_fact: "{{ output.stdout | from_json | oo_set_resource_node({{ocom_infra_node_label}}) }}"
+
+- name: Write registry deployment config to temp file
+  copy:
+    content: "{{ registry_fact }}"
+    dest: /tmp/registry.json
+
+- name: Import new registry deployment config
+  shell: osc update deploymentConfig/docker-registry -f /tmp/registry.json
+
+- name: Remove registry deployment config temp file
+  file:
+    path: /tmp/registry.json
+    state: absent

@@ -1,3 +1,4 @@
 ---
 openshift_cluster_id: 'default'
 openshift_debug_level: 0
+ocom_infra_node_label: 'infra'

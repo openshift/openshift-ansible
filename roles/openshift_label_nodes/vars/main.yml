@@ -1,0 +1,4 @@
+---
+oln_infra_node_filter_key: "status.capacity"
+oln_infra_node_filter_value: "7232144Ki"
+oln_node_region: "us-east"

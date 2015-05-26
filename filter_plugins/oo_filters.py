@@ -154,7 +154,7 @@ def oo_ec2_volume_definition(data, host_type, docker_ephemeral=False):
     '''
     if not issubclass(type(data), dict):
         raise errors.AnsibleFilterError("|failed expects first param is a dict")
-    if host_type not in ['master', 'node']:
+    if host_type not in ['master', 'node', 'infra']:
         raise errors.AnsibleFilterError("|failed expects either master or node"
                                         " host type")
 
