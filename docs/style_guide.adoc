@@ -1,7 +1,7 @@
 // vim: ft=asciidoc
 
 = Openshift-Ansible Style Guide
------------------------------
+
 The purpose of this guide is to describe the preferred coding conventions used in this repository (both in ansible and python).
 
 It is important to note that this repository may not currently comply with all style guide rules, but our intention is that it will.
