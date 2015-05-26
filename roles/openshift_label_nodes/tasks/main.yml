@@ -4,6 +4,7 @@
   register: output
 
 - name: Set node regions
+  set_fact:
     node_facts: "{{ output.stdout | from_json
                   | oo_set_node_label('region', {{oln_node_region}}) }}"
 
