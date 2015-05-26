@@ -4,7 +4,7 @@
 
 The purpose of this guide is to describe the preferred patterns and best practices used in this repository (both in ansible and python).
 
-It is important to note that this repository may not currently comply with all best practices, but our intention is that it will.
+It is important to note that this repository may not currently comply with all best practices, but the intention is that it will.
 
 All new pull requests created against this repository MUST comply with this guide.
 
@@ -22,14 +22,14 @@ This guide complies with https://www.ietf.org/rfc/rfc2119.txt[RFC2119].
 
 The purpose of this rule is to avoid cases where the build bot will fail pull requests for code modified in a previous pull request.
 
-Our tooling is flexible enough that exceptions can be made so that the tool the build bot is running will ignore certain areas or certain checks, but the build bot itself must pass for the pull request to be merged.
+The tooling is flexible enough that exceptions can be made so that the tool the build bot is running will ignore certain areas or certain checks, but the build bot itself must pass for the pull request to be merged.
 
 
 
 == Python
 
 === PyLint
-We use http://www.pylint.org/[PyLint] in an attempt to keep our python code as clean and as managable as possible. Our build bot runs each pull request through PyLint and any warnings or errors cause the build bot to fail the pull request.
+http://www.pylint.org/[PyLint] is used in an attempt to keep the python code as clean and as managable as possible. The build bot runs each pull request through PyLint and any warnings or errors cause the build bot to fail the pull request.
 
 '''
 [cols="2v,v"]
@@ -49,7 +49,7 @@ Instead, http://docs.pylint.org/faq.html#is-it-possible-to-locally-disable-a-par
 
 .Exceptions:
 1. When PyLint fails because of a dependency that can't be installed on the build bot
-1. When PyLint fails because we are including a module that is outside of our control (like Ansible)
+1. When PyLint fails because of including a module that is outside of control (like Ansible)
 
 '''
 [cols="2v,v"]
@@ -70,13 +70,30 @@ The purpose of this rule is to inform future developers about the disable.
 # Reason: disable pylint maybe-no-member because overloaded use of
 #     the module name causes pylint to not detect that 'results'
 #     is an array or hash
-# Status: permanently disabled unless we can find a way to fix this.
+# Status: permanently disabled unless a way is found to fix this.
 # pylint: disable=maybe-no-member
 metadata[line] = results.pop()
 ----
 
 
 == Ansible
+
+=== Role Directory
+.Context
+* http://docs.ansible.com/playbooks_best_practices.html#directory-layout[Ansible Suggested Directory Layout]
+
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| The Ansible roles directory MUST maintain a flat structure.
+|===
+
+.The purpose of this rule is to:
+* Comply with the upstream best practices
+* Make it familiar for new contributors
+* Make it compatible with Ansible Galaxy
+
 
 === Filters
 .Context:
@@ -92,7 +109,7 @@ metadata[line] = results.pop()
 
 When using the jinja2 `default` filter, unless the variable is a boolean, specify `true` as the second parameter. This will cause the default filter to replace empty strings, lists, etc with the provided default.
 
-This is because we would prefer to either have a sane default set than to have an empty string, list, etc. We don't, for example, want config values set to an empty string.
+This is because it is preferable to either have a sane default set than to have an empty string, list, etc. For example, it is preferable to have a config value set to a sane default than to have it simply set as an empty string.
 
 .From the http://jinja.pocoo.org/docs/dev/templates/[Jinja2 Docs]:
 [quote]
@@ -119,4 +136,4 @@ If you want to use default with variables that evaluate to false you have to set
 
 In other words, normally the `default` filter will only replace the value if it's undefined. By setting the second parameter to `true`, it will also replace the value if it defaults to a false value in python, so None, empty list, empty string, etc.
 
-We almost always want this instead of the empty list, string, etc.
+This is almost always more desirable than an empty list, string, etc.
