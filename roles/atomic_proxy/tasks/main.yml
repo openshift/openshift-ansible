@@ -1,3 +1,0 @@
----
-- include: setup_puppet.yml
-- include: setup_containers.yml
