@@ -1,0 +1,25 @@
+---
+- name: Install pyparted (RedHat/Fedora)
+  yum: name=pyparted,python-httplib2 state=installed
+
+- name: partition the drives
+  partitionpool: disks={{ disks }} force={{ force }} sizes={{ sizes }}
+
+- name: create filesystem
+  filesystem: fstype=ext4 dev=/dev/{{ item.name }}
+  with_items: partition_pool
+
+- name: mount
+  mount: name={{mount_dir}}/{{ item.name }} src=/dev/{{ item.name }} state=mounted fstype=ext4 passno=2
+  with_items: partition_pool
+
+- include: nfs.yml
+
+- name: export physical volumes
+  uri: url={{ kubernetes_url }}/api/v1beta3/persistentvolumes
+       method=POST
+       body='{{ lookup("template", "../templates/nfs.json.j2") }}'
+       body_format=json
+       status_code=201
+       HEADER_Authorization="Bearer {{ kubernetes_token }}"
+  with_items: partition_pool

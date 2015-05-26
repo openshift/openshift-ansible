@@ -1,0 +1,122 @@
+// vim: ft=asciidoc
+
+= Openshift-Ansible Best Practices Guide
+
+The purpose of this guide is to describe the preferred patterns and best practices used in this repository (both in ansible and python).
+
+It is important to note that this repository may not currently comply with all best practices, but our intention is that it will.
+
+All new pull requests created against this repository MUST comply with this guide.
+
+This guide complies with https://www.ietf.org/rfc/rfc2119.txt[RFC2119].
+
+
+== Pull Requests
+
+[cols="2v,v"]
+|===
+| **Rule**
+| All pull requests MUST pass the build bot *before* they are merged.
+|===
+
+
+The purpose of this rule is to avoid cases where the build bot will fail pull requests for code modified in a previous pull request.
+
+Our tooling is flexible enough that exceptions can be made so that the tool the build bot is running will ignore certain areas or certain checks, but the build bot itself must pass for the pull request to be merged.
+
+
+
+== Python
+
+=== PyLint
+We use http://www.pylint.org/[PyLint] in an attempt to keep our python code as clean and as managable as possible. Our build bot runs each pull request through PyLint and any warnings or errors cause the build bot to fail the pull request.
+
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| PyLint rules MUST NOT be disabled on a whole file.
+|===
+
+Instead, http://docs.pylint.org/faq.html#is-it-possible-to-locally-disable-a-particular-message[disable the PyLint check on the line where PyLint is complaining].
+
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| PyLint rules MUST NOT be disabled unless they meet one of the following exceptions
+|===
+
+.Exceptions:
+1. When PyLint fails because of a dependency that can't be installed on the build bot
+1. When PyLint fails because we are including a module that is outside of our control (like Ansible)
+
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| All PyLint rule disables MUST be documented in the code.
+|===
+
+The purpose of this rule is to inform future developers about the disable.
+
+.Specifically, the following MUST accompany every PyLint disable:
+1. Why is the check being disabled?
+1. Is disabling this check meant to be permanent or temporary?
+
+.Example:
+[source,python]
+----
+# Reason: disable pylint maybe-no-member because overloaded use of
+#     the module name causes pylint to not detect that 'results'
+#     is an array or hash
+# Status: permanently disabled unless we can find a way to fix this.
+# pylint: disable=maybe-no-member
+metadata[line] = results.pop()
+----
+
+
+== Ansible
+
+=== Filters
+.Context:
+* https://docs.ansible.com/playbooks_filters.html[Ansible Playbook Filters]
+* http://jinja.pocoo.org/docs/dev/templates/#builtin-filters[Jinja2 Builtin Filters]
+
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| The `default` filter SHOULD replace empty strings, lists, etc.
+|===
+
+When using the jinja2 `default` filter, unless the variable is a boolean, specify `true` as the second parameter. This will cause the default filter to replace empty strings, lists, etc with the provided default.
+
+This is because we would prefer to either have a sane default set than to have an empty string, list, etc. We don't, for example, want config values set to an empty string.
+
+.From the http://jinja.pocoo.org/docs/dev/templates/[Jinja2 Docs]:
+[quote]
+If you want to use default with variables that evaluate to false you have to set the second parameter to true
+
+.Example:
+[source,yaml]
+----
+---
+- hosts: localhost
+  gather_facts: no
+  vars:
+    somevar: ''
+  tasks:
+  - debug: var=somevar
+
+  - name: "Will output 'somevar: []'"
+    debug: "msg='somevar: [{{ somevar | default('the string was empty') }}]'"
+
+  - name: "Will output 'somevar: [the string was empty]'"
+    debug: "msg='somevar: [{{ somevar | default('the string was empty', true) }}]'"
+----
+
+
+In other words, normally the `default` filter will only replace the value if it's undefined. By setting the second parameter to `true`, it will also replace the value if it defaults to a false value in python, so None, empty list, empty string, etc.
+
+We almost always want this instead of the empty list, string, etc.
