@@ -52,13 +52,6 @@ def set_attr(item, key, value, attr_key=None, attr_value=None):
             kvp = kvp[attr]
             keynum = keynum + 1
 
-            ''' This is for handling cases where one of the subkeys
-                is an array.
-
-                Ex:
-                set_attr({'a':{'b':[{'c':{}},{'c':{}}]}}, 'a.b.c', 25)
-                returns {'a': {'b': [{'c': 25}, {'c': 25}]}}
-            '''
             if isinstance(kvp, (list, tuple)):
                 set_attrs(kvp, '.'.join(keyarray[keynum-1::]), value)
                 return item
@@ -118,7 +111,10 @@ def oo_set_resource_node(arg, value):
 
     return arg
 
-
+# disabling pylint checks for too-few-public-methods and no-self-use since we
+# need to expose a FilterModule object that has a filters method that returns
+# a mapping of filter names to methods.
+# pylint: disable=too-few-public-methods, no-self-use
 class FilterModule(object):
     ''' FilterModule '''
     def filters(self):
