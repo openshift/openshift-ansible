@@ -29,7 +29,7 @@ Our tooling is flexible enough that exceptions can be made so that the tool the 
 == Python
 
 === PyLint
-We use http://www.pylint.org/[PyLint] in an attempt to keep our python code as clean and as managable as possible. Our build bot runs each pull request through PyLint and any warnings or errors cause the build bot to fail the pull request.
+http://www.pylint.org/[PyLint] is used in an attempt to keep our python code as clean and as managable as possible. Our build bot runs each pull request through PyLint and any warnings or errors cause the build bot to fail the pull request.
 
 '''
 [cols="2v,v"]
@@ -49,7 +49,7 @@ Instead, http://docs.pylint.org/faq.html#is-it-possible-to-locally-disable-a-par
 
 .Exceptions:
 1. When PyLint fails because of a dependency that can't be installed on the build bot
-1. When PyLint fails because we are including a module that is outside of our control (like Ansible)
+1. When PyLint fails because of including a module that is outside of our control (like Ansible)
 
 '''
 [cols="2v,v"]
@@ -70,7 +70,7 @@ The purpose of this rule is to inform future developers about the disable.
 # Reason: disable pylint maybe-no-member because overloaded use of
 #     the module name causes pylint to not detect that 'results'
 #     is an array or hash
-# Status: permanently disabled unless we can find a way to fix this.
+# Status: permanently disabled unless a way is found to fix this.
 # pylint: disable=maybe-no-member
 metadata[line] = results.pop()
 ----
@@ -92,7 +92,7 @@ metadata[line] = results.pop()
 
 When using the jinja2 `default` filter, unless the variable is a boolean, specify `true` as the second parameter. This will cause the default filter to replace empty strings, lists, etc with the provided default.
 
-This is because we would prefer to either have a sane default set than to have an empty string, list, etc. We don't, for example, want config values set to an empty string.
+This is because it is preferable to either have a sane default set than to have an empty string, list, etc. For example, it is preferable to have a config value set to a sane default than to have it simply set as an empty string.
 
 .From the http://jinja.pocoo.org/docs/dev/templates/[Jinja2 Docs]:
 [quote]
@@ -119,4 +119,4 @@ If you want to use default with variables that evaluate to false you have to set
 
 In other words, normally the `default` filter will only replace the value if it's undefined. By setting the second parameter to `true`, it will also replace the value if it defaults to a false value in python, so None, empty list, empty string, etc.
 
-We almost always want this instead of the empty list, string, etc.
+This is almost always more desirable than an empty list, string, etc.

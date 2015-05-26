@@ -13,7 +13,7 @@ This style guide complies with https://www.ietf.org/rfc/rfc2119.txt[RFC2119].
 == Ansible Variable Naming
 
 === Global Variables
-We define Ansible global variables as any variables outside of ansible roles. Examples include playbook variables, variables passed in on the cli, etc.
+Ansible global variables are defined as any variables outside of ansible roles. Examples include playbook variables, variables passed in on the cli, etc.
 
 '''
 [cols="2v,v"]
@@ -30,7 +30,7 @@ g_environment: someval
 ----
 
 ==== Role Variables
-We define Ansible role variables as variables contained in (or passed into) a role.
+Ansible role variables are defined as variables contained in (or passed into) a role.
 
 '''
 [cols="2v,v"]
@@ -104,4 +104,4 @@ Even though both roles have the same prefix (mur), and even though both roles ha
 
 This would only be a problem if my_uber_role depended on made_up_role, or vice versa. Or if either of these two roles included things from the other.
 
-We think this is enough of a corner case that it is unlikely to happen. If it does, we will address it on a case by case basis.
+This is enough of a corner case that it is unlikely to happen. If it does, it will be addressed on a case by case basis.
