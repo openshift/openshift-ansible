@@ -1,0 +1,3 @@
+---
+oic_docker_registry: "registry.access.redhat.com"
+oic_image_version: "v0.4.3.2"

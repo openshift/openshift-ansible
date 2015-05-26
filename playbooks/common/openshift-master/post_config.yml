@@ -1,0 +1,5 @@
+---
+- name: Configure Node Labels
+  hosts: oo_masters_to_config
+  roles:
+  - openshift_label_nodes

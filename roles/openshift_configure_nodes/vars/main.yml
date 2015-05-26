@@ -1,5 +1,0 @@
----
-ocn_infra_node_filter_key: "status.capacity"
-ocn_infra_node_filter_value: "7232144Ki"
-ocn_infra_node_label: "infra"
-ocn_node_region: "us-east"

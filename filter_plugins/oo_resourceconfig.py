@@ -35,22 +35,33 @@ def set_attr(item, key, value, attr_key=None, attr_value=None):
         actual_attr_value = get_attr(item, attr_key)
 
         if str(attr_value) != str(actual_attr_value):
-            return item # We only want to set the values on hosts with defined attributes
+            # We only want to set the values on hosts with defined attributes
+            return item
 
     kvp = item
-    keynum = 1;
-    for attr in key.split('.'):
-        if keynum == len(key.split('.')):
+    keyarray = key.split('.')
+    keynum = 1
+    for attr in keyarray:
+        if keynum == len(keyarray):
             kvp[attr] = value
-            continue
+            return item
+        else:
+            if attr not in kvp:
+                kvp[attr] = {}
 
-        if attr not in kvp:
-            kvp[attr] = {}
+            kvp = kvp[attr]
+            keynum = keynum + 1
 
-        kvp = kvp[attr]
-        keynum = keynum + 1
+            ''' This is for handling cases where one of the subkeys
+                is an array.
 
-    return item
+                Ex:
+                set_attr({'a':{'b':[{'c':{}},{'c':{}}]}}, 'a.b.c', 25)
+                returns {'a': {'b': [{'c': 25}, {'c': 25}]}}
+            '''
+            if isinstance(kvp, (list, tuple)):
+                set_attrs(kvp, '.'.join(keyarray[keynum-1::]), value)
+                return item
 
 
 def set_attrs(items, key, value, attr_key=None, attr_value=None):
@@ -87,7 +98,7 @@ def oo_set_node_label(arg, key, value, attr_key=None, attr_value=None):
                              | oo_set_node_label('region', 'infra',
                                             'metadata.name', '172.16.17.43') }}"
     '''
-    set_attrs(arg['items'], key, value, attr_key, attr_value)
+    set_attrs(arg['items'], 'metadata.labels.'+key, value, attr_key, attr_value)
 
     return arg
 

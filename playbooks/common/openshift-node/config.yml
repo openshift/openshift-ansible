@@ -43,7 +43,7 @@
 - name: Register nodes
   hosts: oo_first_master
   vars:
-    openshift_nodes: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config']) }}"
+    openshift_nodes: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config', 'oo_infra_to_config']) }}"
     sync_tmpdir: "{{ hostvars.localhost.mktemp.stdout }}"
   roles:
   - openshift_register_nodes
@@ -77,7 +77,9 @@
 
 
 - name: Configure node instances
-  hosts: oo_nodes_to_config
+  hosts:
+    - oo_nodes_to_config
+    - oo_infra_to_config
   gather_facts: no
   vars:
     sync_tmpdir: "{{ hostvars.localhost.mktemp.stdout }}/{{ groups['oo_first_master'][0] }}/{{ hostvars.localhost.mktemp.stdout }}"
@@ -130,3 +132,15 @@
   roles:
   - os_env_extras
   - os_env_extras_node
+
+- name: Pre-pull common docker images
+  hosts:
+    - oo_nodes_to_config
+    - oo_infra_to_config
+  roles:
+    - openshift_images_common
+
+- name: Pre-pull infra docker images
+  hosts: oo_infra_to_config
+  roles:
+    - openshift_images_infra
