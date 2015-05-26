@@ -24,4 +24,4 @@
 - name: Remove node temp file
   file:
     path: /tmp/nodes.json
-	  state: absent
+    state: absent
