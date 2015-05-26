@@ -7,9 +7,9 @@ The purpose of this guide is to describe core concepts used in this repository.
 It is important to note that this repository may not currently implement all of the concepts, but our intention is that it will.
 
 == Logical Grouping Concepts
-The following are the concepts we use to logically group OpenShift cluster instances.
+The following are the concepts used to logically group OpenShift cluster instances.
 
-We use these groupings to perform operations specifically against instances in the specified group.
+These groupings are used to perform operations specifically against instances in the specified group.
 
 For example, run an Ansible playbook against all instances in the `production` environment, or run an adhoc command against all instances in the `acme-corp` cluster group.
 
