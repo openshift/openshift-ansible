@@ -78,7 +78,7 @@ metadata[line] = results.pop()
 
 == Ansible
 
-=== Role Directory
+=== Roles
 .Context
 * http://docs.ansible.com/playbooks_best_practices.html#directory-layout[Ansible Suggested Directory Layout]
 
@@ -94,6 +94,20 @@ metadata[line] = results.pop()
 * Make it familiar for new contributors
 * Make it compatible with Ansible Galaxy
 
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| Ansible Roles SHOULD be named like technology_component[_subcomponent].
+|===
+
+For clarity, it is suggested to follow a pattern when naming roles. It is important to note that this is a recommendation for role naming, and follows the pattern used by upstream.
+
+Many times the `technology` portion of the pattern will line up with a package name. It is advised that whenever possible, the package name should be used.
+
+.Examples:
+* The role to configure an OpenShift Master is called `openshift_master`
+* The role to configure OpenShift specific yum repositories is called `openshift_repos`
 
 === Filters
 .Context:
