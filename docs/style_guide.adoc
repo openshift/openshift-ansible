@@ -4,15 +4,46 @@
 
 The purpose of this guide is to describe the preferred coding conventions used in this repository (both in ansible and python).
 
-It is important to note that this repository may not currently comply with all style guide rules, but our intention is that it will.
+It is important to note that this repository may not currently comply with all style guide rules, but the intention is that it will.
 
 All new pull requests created against this repository MUST comply with this guide.
 
 This style guide complies with https://www.ietf.org/rfc/rfc2119.txt[RFC2119].
 
-== Ansible Variable Naming
+== Python
 
-=== Global Variables
+
+=== Python Maximum Line Length
+
+.Context:
+* https://www.python.org/dev/peps/pep-0008/#maximum-line-length[Python Pep8 Line Length]
+
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| All lines SHOULD be no longer than 80 characters.
+|===
+
+Every attempt SHOULD be made to comply with this soft line length limit, and only when it makes the code more readable should this be violated.
+
+Code readability is subjective, therefore pull-requests SHOULD still be merged, even if they violate this soft limit as it is up to the individual contributor to determine if they should violate the 80 character soft limit.
+
+
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| All lines MUST be no longer than 120 characters.
+|===
+
+This is a hard limit and is enforced by the build bot. This check MUST NOT be disabled.
+
+
+
+== Ansible
+
+=== Ansible Global Variables
 Ansible global variables are defined as any variables outside of ansible roles. Examples include playbook variables, variables passed in on the cli, etc.
 
 '''
@@ -29,7 +60,7 @@ Example:
 g_environment: someval
 ----
 
-==== Role Variables
+=== Ansible Role Variables
 Ansible role variables are defined as variables contained in (or passed into) a role.
 
 '''
@@ -39,7 +70,7 @@ Ansible role variables are defined as variables contained in (or passed into) a 
 | Role variables MUST have a prefix of atleast 3 characters. See below for specific naming rules.
 |===
 
-===== Role with 3 (or more) words in the name
+==== Role with 3 (or more) words in the name
 
 Take the first letter of each of the words.
 
@@ -61,7 +92,7 @@ tmur_var1: value_one
 
 
 
-===== Role with 2 (or less) words in the name
+==== Role with 2 (or less) words in the name
 
 Make up a prefix that makes sense.
 
@@ -82,7 +113,7 @@ tow_var1: value_one
 ----
 
 
-===== Role name prefix conflicts
+==== Role name prefix conflicts
 If two role names contain words that start with the same letters, it will seem like their prefixes would conflict.
 
 Role variables are confined to the roles themselves, so this is actually only a problem if one of the roles depends on the other role (or uses includes into the other role).

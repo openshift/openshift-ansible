@@ -4,7 +4,7 @@
 
 The purpose of this guide is to describe the preferred patterns and best practices used in this repository (both in ansible and python).
 
-It is important to note that this repository may not currently comply with all best practices, but our intention is that it will.
+It is important to note that this repository may not currently comply with all best practices, but the intention is that it will.
 
 All new pull requests created against this repository MUST comply with this guide.
 
@@ -22,14 +22,14 @@ This guide complies with https://www.ietf.org/rfc/rfc2119.txt[RFC2119].
 
 The purpose of this rule is to avoid cases where the build bot will fail pull requests for code modified in a previous pull request.
 
-Our tooling is flexible enough that exceptions can be made so that the tool the build bot is running will ignore certain areas or certain checks, but the build bot itself must pass for the pull request to be merged.
+The tooling is flexible enough that exceptions can be made so that the tool the build bot is running will ignore certain areas or certain checks, but the build bot itself must pass for the pull request to be merged.
 
 
 
 == Python
 
 === PyLint
-http://www.pylint.org/[PyLint] is used in an attempt to keep our python code as clean and as managable as possible. Our build bot runs each pull request through PyLint and any warnings or errors cause the build bot to fail the pull request.
+http://www.pylint.org/[PyLint] is used in an attempt to keep the python code as clean and as managable as possible. The build bot runs each pull request through PyLint and any warnings or errors cause the build bot to fail the pull request.
 
 '''
 [cols="2v,v"]
@@ -49,7 +49,7 @@ Instead, http://docs.pylint.org/faq.html#is-it-possible-to-locally-disable-a-par
 
 .Exceptions:
 1. When PyLint fails because of a dependency that can't be installed on the build bot
-1. When PyLint fails because of including a module that is outside of our control (like Ansible)
+1. When PyLint fails because of including a module that is outside of control (like Ansible)
 
 '''
 [cols="2v,v"]
@@ -77,6 +77,23 @@ metadata[line] = results.pop()
 
 
 == Ansible
+
+=== Role Directory
+.Context
+* http://docs.ansible.com/playbooks_best_practices.html#directory-layout[Ansible Suggested Directory Layout]
+
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| The Ansible roles directory MUST maintain a flat structure.
+|===
+
+.The purpose of this rule is to:
+* Comply with the upstream best practices
+* Make it familiar for new contributors
+* Make it compatible with Ansible Galaxy
+
 
 === Filters
 .Context:
