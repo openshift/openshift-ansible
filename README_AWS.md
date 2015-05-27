@@ -18,7 +18,7 @@ Create a credentials file
 ```
   source ~/.aws_creds
 ```
-Note: You must source this file in each shell that you want to run cloud.rb
+Note: You must source this file before running any Ansible commands.
 
 
 (Optional) Setup your $HOME/.ssh/config file
