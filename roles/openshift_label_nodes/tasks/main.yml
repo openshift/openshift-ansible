@@ -1,21 +1,32 @@
 ---
+- name: Set nodelabel OpenShift facts
+  set_fact:
+      infranode_label: "{{ ocom_infra_node_label | default(openshift.common.infranode_label) }}"
+
 - name: Get Nodes Config
   shell: osc get nodes -o json | sed -e '/"resourceVersion"/d'
   register: output
 
-- name: Set node regions
+- name: Set node_facts
   set_fact:
-    node_facts: "{{ output.stdout | from_json
-                  | oo_set_node_label('region', {{oln_node_region}}) }}"
+    node_facts: "{{ output.stdout | from_json }}"
+
+- name: Get Node Lists
+  set_fact:
+    compute_hostvars: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config']) }}"
+    infra_hostvars:  "{{ hostvars | oo_select_keys(groups['oo_infra_to_config']) }}"
+
+- name: Set compute node regions
+  set_fact:
+    node_facts: "{{ node_facts | oo_set_node_region(oln_node_region, compute_hostvars) }}"
 
 - name: Set infra node labels
   set_fact:
-    node_final_facts: "{{ node_facts
-                  | oo_set_node_label('region', {{ocom_infra_node_label}}, {{oln_infra_node_filter_key}}, {{oln_infra_node_filter_value}}) }}"
+    node_facts: "{{ node_facts | oo_set_node_region(infranode_label, infra_hostvars) }}"
 
 - name: Write node config to temp file
   copy:
-    content: "{{ node_final_facts }}"
+    content: "{{ node_facts }}"
     dest: /tmp/nodes.json
 
 - name: Import new node config

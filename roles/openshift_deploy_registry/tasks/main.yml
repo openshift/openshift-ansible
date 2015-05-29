@@ -1,4 +1,8 @@
 ---
+- name: Set nodelabel OpenShift facts
+  set_fact:
+      infranode_label: "{{ ocom_infra_node_label | default(openshift.common.infranode_label) }}"
+
 - name: Deploy registry
   shell: osadm registry --create --credentials=/var/lib/openshift/openshift.local.certificates/openshift-registry/.kubeconfig --images='registry.access.redhat.com/openshift3_beta/ose-${component}:${version}'
 
@@ -8,7 +12,7 @@
 
 - name: Set registry node region
   set_fact:
-    registry_fact: "{{ output.stdout | from_json | oo_set_resource_node({{ocom_infra_node_label}}) }}"
+    registry_fact: "{{ output.stdout | from_json | oo_set_resource_node(infranode_label) }}"
 
 - name: Write registry deployment config to temp file
   copy:

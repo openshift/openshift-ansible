@@ -1,6 +1,6 @@
 ---
 - name: Pulling docker images for infra nodes
-  shell: docker pull {{ osi_docker_registry }}/openshift3_beta/{{ item }}:{{ osi_image_version }}
+  shell: docker pull {{ oii_docker_registry }}/openshift3_beta/{{ item }}:{{ oii_image_version }}
   with_items:
   - ose-haproxy-router
   - ose-docker-registry

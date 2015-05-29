@@ -9,6 +9,12 @@
       groups: oo_nodes_to_config
       ansible_ssh_user: root
     with_items: oo_host_group_exp | default([])
+  - name: Evaluate oo_infra_to_config
+    add_host:
+      name: "{{ item }}"
+      groups: oo_infra_to_config
+      ansible_ssh_user: root
+    with_items: oo_host_group_exp | default([])
   - name: Evaluate oo_first_master
     add_host:
       name: "{{ groups['tag_env-host-type_' ~ cluster_id ~ '-openshift-master'][0] }}"

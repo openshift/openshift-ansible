@@ -11,7 +11,7 @@
       public_ip: "{{ openshift_public_ip | default(None) }}"
       use_openshift_sdn: "{{ openshift_use_openshift_sdn | default(None) }}"
       deployment_type: "{{ openshift_deployment_type }}"
-      infrastructure_node_label: "{{ ocom_infra_node_label }}"
+      infranode_label: "{{ ocom_infra_node_label }}"
 - name: Set hostname
   hostname: name={{ openshift.common.hostname }}
 

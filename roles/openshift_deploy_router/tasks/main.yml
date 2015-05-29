@@ -1,4 +1,8 @@
 ---
+- name: Set nodelabel OpenShift facts
+  set_fact:
+      infranode_label: "{{ ocom_infra_node_label | default(openshift.common.infranode_label) }}"
+
 - name: Deploy router
   shell: osadm router --create --credentials=/var/lib/openshift/openshift.local.certificates/openshift-router/.kubeconfig --images='registry.access.redhat.com/openshift3_beta/ose-${component}:${version}'
 
@@ -8,7 +12,7 @@
 
 - name: Set router node region
   set_fact:
-    router_fact: "{{ output.stdout | from_json | oo_set_resource_node({{ocom_infra_node_label}}) }}"
+    router_fact: "{{ output.stdout | from_json | oo_set_resource_node(infranode_label) }}"
 
 - name: Write router deployment config to temp file
   copy:

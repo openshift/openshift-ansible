@@ -1,6 +1,6 @@
 ---
 - name: Pulling common docker images
-  shell: docker pull {{ osi_docker_registry }}/openshift3_beta/{{ item }}:{{ osi_image_version }}
+  shell: docker pull {{ oic_docker_registry }}/openshift3_beta/{{ item }}:{{ oic_image_version }}
   with_items:
     - ose-deployer
     - ose-sti-builder

@@ -43,7 +43,9 @@
 - name: Register nodes
   hosts: oo_first_master
   vars:
-    openshift_nodes: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config', 'oo_infra_to_config']) }}"
+    openshift_nodes_hacka: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config']) }}"
+    openshift_nodes_hackb: "{{ hostvars | oo_select_keys(groups['oo_infra_to_config']) }}"
+    openshift_nodes: "{{ openshift_nodes_hacka + openshift_nodes_hackb }}"
     sync_tmpdir: "{{ hostvars.localhost.mktemp.stdout }}"
   roles:
   - openshift_register_nodes
