@@ -146,3 +146,10 @@
   hosts: oo_infra_to_config
   roles:
     - openshift_images_infra
+
+- name: Configure Node Labels
+  hosts: oo_masters_to_config
+  roles:
+    - openshift_label_nodes
+    - openshift_deploy_registry
+    - openshift_deploy_router

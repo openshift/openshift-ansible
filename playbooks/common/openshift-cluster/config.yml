@@ -2,5 +2,3 @@
 - include: ../openshift-master/config.yml
 
 - include: ../openshift-node/config.yml
-
-- include: ../openshift-master/post_config.yml
