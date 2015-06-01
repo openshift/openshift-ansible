@@ -6,15 +6,15 @@
 
 # TODO: use a template lookup here
 # TODO: create a failed_when condition
-- name: Use enterprise default for openshift_registry_url if not set
+- name: Use enterprise default for oreg_url if not set
   set_fact:
-    openshift_registry_url: "openshift3_beta/ose-${component}:${version}"
-  when: openshift.common.deployment_type == 'enterprise' and openshift_registry_url is not defined
+    oreg_url: "openshift3_beta/ose-${component}:${version}"
+  when: openshift.common.deployment_type == 'enterprise' and oreg_url is not defined
 
-- name: Use online default for openshift_registry_url if not set
+- name: Use online default for oreg_url if not set
   set_fact:
-    openshift_registry_url: "docker-registry.ops.rhcloud.com/openshift3_beta/ose-${component}:${version}"
-  when: openshift.common.deployment_type == 'online' and openshift_registry_url is not defined
+    oreg_url: "docker-registry.ops.rhcloud.com/openshift3_beta/ose-${component}:${version}"
+  when: openshift.common.deployment_type == 'online' and oreg_url is not defined
 
 - name: Create node config
   command: >
@@ -30,7 +30,7 @@
       --certificate-authority={{ openshift_master_ca_cert }}
       --signer-serial={{ openshift_master_ca_dir }}/serial.txt
       --node-client-certificate-authority={{ openshift_master_ca_cert }}
-      {{ ('--images=' ~ openshift_registry_url) if openshift_registry_url is defined else '' }}
+      {{ ('--images=' ~ oreg_url) if oreg_url is defined else '' }}
       --listen=https://0.0.0.0:10250
   args:
     chdir: "{{ openshift_cert_parent_dir }}"

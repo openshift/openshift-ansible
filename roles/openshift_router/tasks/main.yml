@@ -1,0 +1,8 @@
+---
+- set_fact: _ortr_images="--images={{ oreg_url|quote }}"
+  when: oreg_url is defined
+
+- name: Deploy OpenShift Router
+  command: openshift ex router --create --credentials=/var/lib/openshift/openshift.local.certificates/openshift-router/.kubeconfig {{ _ortr_images|default() }}
+  register: _ortr_results
+  changed_when: "'service exists' not in _ortr_results.stdout"

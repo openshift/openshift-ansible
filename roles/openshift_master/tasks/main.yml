@@ -49,15 +49,15 @@
 # TODO: should probably use a template lookup for this
 # TODO: should allow for setting --etcd, --kubernetes options
 # TODO: recreate config if values change
-- name: Use enterprise default for openshift_registry_url if not set
+- name: Use enterprise default for oreg_url if not set
   set_fact:
-    openshift_registry_url: "openshift3_beta/ose-${component}:${version}"
-  when: openshift.common.deployment_type == 'enterprise' and openshift_registry_url is not defined
+    oreg_url: "openshift3_beta/ose-${component}:${version}"
+  when: openshift.common.deployment_type == 'enterprise' and oreg_url is not defined
 
-- name: Use online default for openshift_registry_url if not set
+- name: Use online default for oreg_url if not set
   set_fact:
-    openshift_registry_url: "docker-registry.ops.rhcloud.com/openshift3_beta/ose-${component}:${version}"
-  when: openshift.common.deployment_type == 'online' and openshift_registry_url is not defined
+    oreg_url: "docker-registry.ops.rhcloud.com/openshift3_beta/ose-${component}:${version}"
+  when: openshift.common.deployment_type == 'online' and oreg_url is not defined
 
 - name: Create master config
   command: >
@@ -67,7 +67,7 @@
     --master={{ openshift.master.api_url }}
     --public-master={{ openshift.master.public_api_url }}
     --listen={{ 'https' if openshift.master.api_use_ssl else 'http' }}://0.0.0.0:{{ openshift.master.api_port }}
-    {{ ('--images=' ~ openshift_registry_url) if (openshift_registry_url | default('', true) != '') else '' }}
+    {{ ('--images=' ~ oreg_url) if (oreg_url | default('', true) != '') else '' }}
     {{ ('--nodes=' ~ openshift_node_ips | join(',')) if (openshift_node_ips | default('', true) != '') else '' }}
   args:
     chdir: "{{ openshift_cert_parent_dir }}"
