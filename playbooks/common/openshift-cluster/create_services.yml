@@ -1,12 +1,6 @@
 ---
-- name: Debug Deploy OpenShift Services
-  hosts: localhost
-  gather_facts: no
-  tasks:
-  - debug: var=create_services__master
-
 - name: Deploy OpenShift Services
-  hosts: "{{ create_services__master }}"
+  hosts: "{{ g_svc_master }}"
   connection: ssh
   gather_facts: yes
   roles:

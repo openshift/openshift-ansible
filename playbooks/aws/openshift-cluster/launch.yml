@@ -33,6 +33,6 @@
 
 - include: ../../common/openshift-cluster/create_services.yml
   vars:
-     create_services__master: "{{ service_master }}"
+     g_svc_master: "{{ service_master }}"
 
 - include: list.yml
