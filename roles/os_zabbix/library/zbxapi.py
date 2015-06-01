@@ -1,4 +1,8 @@
 #!/usr/bin/env python
+# vim: expandtab:tabstop=4:shiftwidth=4
+'''
+   ZabbixAPI ansible module
+'''
 
 #   Copyright 2015 Red Hat Inc.
 #
@@ -17,11 +21,22 @@
 #  Purpose: An ansible module to communicate with zabbix.
 #
 
+# pylint: disable=line-too-long
+# Disabling line length for readability
+
 import json
 import httplib2
 import sys
 import os
 import re
+import copy
+
+class ZabbixAPIError(Exception):
+    '''
+        ZabbixAPIError
+        Exists to propagate errors up from the api
+    '''
+    pass
 
 class ZabbixAPI(object):
     '''
@@ -69,23 +84,26 @@ class ZabbixAPI(object):
         'Usermedia': ['get'],
     }
 
-    def __init__(self, data={}):
-        self.server = data['server'] or None
-        self.username = data['user'] or None
-        self.password = data['password'] or None
-        if any(map(lambda value: value == None, [self.server, self.username, self.password])):
+    def __init__(self, data=None):
+        if not data:
+            data = {}
+        self.server = data.get('server', None)
+        self.username = data.get('user', None)
+        self.password = data.get('password', None)
+        if any([value == None for value in [self.server, self.username, self.password]]):
             print 'Please specify zabbix server url, username, and password.'
             sys.exit(1)
 
-        self.verbose = data.has_key('verbose')
+        self.verbose = data.get('verbose', False)
         self.use_ssl = data.has_key('use_ssl')
         self.auth = None
 
-        for class_name, method_names in self.classes.items():
-            #obj = getattr(self, class_name)(self)
-            #obj.__dict__
-            setattr(self, class_name.lower(), getattr(self, class_name)(self))
+        for cname, _ in self.classes.items():
+            setattr(self, cname.lower(), getattr(self, cname)(self))
 
+        # pylint: disable=no-member
+        # This method does not exist until the metaprogramming executed
+        # This is permanently disabled.
         results = self.user.login(user=self.username, password=self.password)
 
         if results[0]['status'] == '200':
@@ -98,48 +116,40 @@ class ZabbixAPI(object):
             print "Error in call to zabbix. Http status: {0}.".format(results[0]['status'])
             sys.exit(1)
 
-    def perform(self, method, params):
+    def perform(self, method, rpc_params):
         '''
         This method calls your zabbix server.
 
         It requires the following parameters in order for a proper request to be processed:
-
-            jsonrpc - the version of the JSON-RPC protocol used by the API; the Zabbix API implements JSON-RPC version 2.0;
+            jsonrpc - the version of the JSON-RPC protocol used by the API;
+                      the Zabbix API implements JSON-RPC version 2.0;
             method - the API method being called;
-            params - parameters that will be passed to the API method;
+            rpc_params - parameters that will be passed to the API method;
             id - an arbitrary identifier of the request;
             auth - a user authentication token; since we don't have one yet, it's set to null.
         '''
         http_method = "POST"
-        if params.has_key("http_method"):
-            http_method = params['http_method']
-
         jsonrpc = "2.0"
-        if params.has_key('jsonrpc'):
-            jsonrpc = params['jsonrpc']
-
         rid = 1
-        if params.has_key('id'):
-            rid = params['id']
 
         http = None
         if self.use_ssl:
             http = httplib2.Http()
         else:
-            http = httplib2.Http( disable_ssl_certificate_validation=True,)
+            http = httplib2.Http(disable_ssl_certificate_validation=True,)
 
-        headers = params.get('headers', {})
+        headers = {}
         headers["Content-type"] = "application/json"
 
         body = {
             "jsonrpc": jsonrpc,
             "method":  method,
-            "params":  params,
+            "params":  rpc_params.get('params', {}),
             "id":      rid,
             'auth':    self.auth,
         }
 
-        if method in ['user.login','api.version']:
+        if method in ['user.login', 'api.version']:
             del body['auth']
 
         body = json.dumps(body)
@@ -150,48 +160,70 @@ class ZabbixAPI(object):
             print headers
             httplib2.debuglevel = 1
 
-        response, results = http.request(self.server, http_method, body, headers)
+        response, content = http.request(self.server, http_method, body, headers)
+
+        if response['status'] not in ['200', '201']:
+            raise ZabbixAPIError('Error calling zabbix.  Zabbix returned %s' % response['status'])
 
         if self.verbose:
             print response
-            print results
+            print content
 
         try:
-            results = json.loads(results)
-        except ValueError as e:
-            results = {"error": e.message}
+            content = json.loads(content)
+        except ValueError as err:
+            content = {"error": err.message}
 
-        return response, results
+        return response, content
 
-    '''
-    This bit of metaprogramming is where the ZabbixAPI subclasses are created.
-    For each of ZabbixAPI.classes we create a class from the key and methods
-    from the ZabbixAPI.classes values.  We pass a reference to ZabbixAPI class
-    to each subclass in order for each to be able to call the perform method.
-    '''
     @staticmethod
-    def meta(class_name, method_names):
-        # This meta method allows a class to add methods to it.
-        def meta_method(Class, method_name):
+    def meta(cname, method_names):
+        '''
+        This bit of metaprogramming is where the ZabbixAPI subclasses are created.
+        For each of ZabbixAPI.classes we create a class from the key and methods
+        from the ZabbixAPI.classes values.  We pass a reference to ZabbixAPI class
+        to each subclass in order for each to be able to call the perform method.
+        '''
+        def meta_method(_class, method_name):
+            '''
+            This meta method allows a class to add methods to it.
+            '''
             # This template method is a stub method for each of the subclass
             # methods.
-            def template_method(self, **params):
-                return self.parent.perform(class_name.lower()+"."+method_name, params)
-            template_method.__doc__ = "https://www.zabbix.com/documentation/2.4/manual/api/reference/%s/%s" % (class_name.lower(), method_name)
+            def template_method(self, params=None, **rpc_params):
+                '''
+                This template method is a stub method for each of the subclass methods.
+                '''
+                if params:
+                    rpc_params['params'] = params
+                else:
+                    rpc_params['params'] = copy.deepcopy(rpc_params)
+
+                return self.parent.perform(cname.lower()+"."+method_name, rpc_params)
+
+            template_method.__doc__ = \
+              "https://www.zabbix.com/documentation/2.4/manual/api/reference/%s/%s" % \
+              (cname.lower(), method_name)
             template_method.__name__ = method_name
             # this is where the template method is placed inside of the subclass
             # e.g. setattr(User, "create", stub_method)
-            setattr(Class, template_method.__name__, template_method)
+            setattr(_class, template_method.__name__, template_method)
 
         # This class call instantiates a subclass. e.g. User
-        Class=type(class_name, (object,), { '__doc__': "https://www.zabbix.com/documentation/2.4/manual/api/reference/%s" % class_name.lower() })
-        # This init method gets placed inside of the Class 
-        # to allow it to be instantiated.  A reference to the parent class(ZabbixAPI)
-        # is passed in to allow each class access to the perform method.
+        _class = type(cname,
+                      (object,),
+                      {'__doc__': \
+                      "https://www.zabbix.com/documentation/2.4/manual/api/reference/%s" % cname.lower()})
         def __init__(self, parent):
+            '''
+            This init method gets placed inside of the _class
+            to allow it to be instantiated.  A reference to the parent class(ZabbixAPI)
+            is passed in to allow each class access to the perform method.
+            '''
             self.parent = parent
+
         # This attaches the init to the subclass. e.g. Create
-        setattr(Class, __init__.__name__, __init__)
+        setattr(_class, __init__.__name__, __init__)
         # For each of our ZabbixAPI.classes dict values
         # Create a method and attach it to our subclass.
         # e.g.  'User': ['delete', 'get', 'updatemedia', 'updateprofile',
@@ -200,25 +232,54 @@ class ZabbixAPI(object):
         # User.delete
         # User.get
         for method_name in method_names:
-            meta_method(Class, method_name)
+            meta_method(_class, method_name)
         # Return our subclass with all methods attached
-        return Class
+        return _class
 
 # Attach all ZabbixAPI.classes to ZabbixAPI class through metaprogramming
-for class_name, method_names in ZabbixAPI.classes.items():
-    setattr(ZabbixAPI, class_name, ZabbixAPI.meta(class_name, method_names))
+for _class_name, _method_names in ZabbixAPI.classes.items():
+    setattr(ZabbixAPI, _class_name, ZabbixAPI.meta(_class_name, _method_names))
+
+def exists(content, key='result'):
+    ''' Check if key exists in content or the size of content[key] > 0
+    '''
+    if not content.has_key(key):
+        return False
+
+    if not content[key]:
+        return False
+
+    return True
+
+def diff_content(from_zabbix, from_user):
+    ''' Compare passed in object to results returned from zabbix
+    '''
+    terms = ['search', 'output', 'groups', 'select', 'expand']
+    regex = '(' + '|'.join(terms) + ')'
+    retval = {}
+    for key, value in from_user.items():
+        if re.findall(regex, key):
+            continue
+
+        if from_zabbix[key] != str(value):
+            retval[key] = str(value)
+
+    return retval
 
 def main():
+    '''
+    This main method runs the ZabbixAPI Ansible Module
+    '''
 
     module = AnsibleModule(
-        argument_spec = dict(
+        argument_spec=dict(
             server=dict(default='https://localhost/zabbix/api_jsonrpc.php', type='str'),
             user=dict(default=None, type='str'),
             password=dict(default=None, type='str'),
             zbx_class=dict(choices=ZabbixAPI.classes.keys()),
-            action=dict(default=None, type='str'),
             params=dict(),
             debug=dict(default=False, type='bool'),
+            state=dict(default='present', type='str'),
         ),
         #supports_check_mode=True
     )
@@ -227,47 +288,83 @@ def main():
     if not user:
         user = os.environ['ZABBIX_USER']
 
-    pw = module.params.get('password', None)
-    if not pw:
-        pw = os.environ['ZABBIX_PASSWORD']
+    passwd = module.params.get('password', None)
+    if not passwd:
+        passwd = os.environ['ZABBIX_PASSWORD']
 
-    server = module.params['server']
 
-    if module.params['debug']:
-        options['debug'] = True
 
     api_data = {
         'user': user,
-        'password': pw,
-        'server': server,
+        'password': passwd,
+        'server': module.params['server'],
+        'verbose': module.params['debug']
     }
 
-    if not user or not pw or not server:
-        module.fail_json('Please specify the user, password, and the zabbix server.')
+    if not user or not passwd or not module.params['server']:
+        module.fail_json(msg='Please specify the user, password, and the zabbix server.')
 
     zapi = ZabbixAPI(api_data)
 
     zbx_class = module.params.get('zbx_class')
-    action = module.params.get('action')
-    params = module.params.get('params', {})
-
+    rpc_params = module.params.get('params', {})
+    state = module.params.get('state')
 
     # Get the instance we are trying to call
     zbx_class_inst = zapi.__getattribute__(zbx_class.lower())
+
+    # perform get
     # Get the instance's method we are trying to call
-    zbx_action_method = zapi.__getattribute__(zbx_class.capitalize()).__dict__[action]
-    # Make the call with the incoming params
-    results = zbx_action_method(zbx_class_inst, **params)
 
-    # Results Section
-    changed_state = False
-    status = results[0]['status']
-    if status not in ['200', '201']:
-        #changed_state = False
-        module.fail_json(msg="Http response: [%s] - Error: %s" % (str(results[0]), results[1]))
+    zbx_action_method = zapi.__getattribute__(zbx_class.capitalize()).__dict__['get']
+    _, content = zbx_action_method(zbx_class_inst, rpc_params)
 
-    module.exit_json(**{'results': results[1]['result']})
+    if state == 'list':
+        module.exit_json(changed=False, results=content['result'], state="list")
 
+    if state == 'absent':
+        if not exists(content):
+            module.exit_json(changed=False, state="absent")
+        # If we are coming from a query, we need to pass in the correct rpc_params for delete.
+        # specifically the zabbix class name + 'id'
+        # if rpc_params is a list then we need to pass it. (list of ids to delete)
+        idname = zbx_class.lower() + "id"
+        if not isinstance(rpc_params, list) and content['result'][0].has_key(idname):
+            rpc_params = [content['result'][0][idname]]
+
+        zbx_action_method = zapi.__getattribute__(zbx_class.capitalize()).__dict__['delete']
+        _, content = zbx_action_method(zbx_class_inst, rpc_params)
+        module.exit_json(changed=True, results=content['result'], state="absent")
+
+    if state == 'present':
+	# It's not there, create it!
+        if not exists(content):
+            zbx_action_method = zapi.__getattribute__(zbx_class.capitalize()).__dict__['create']
+            _, content = zbx_action_method(zbx_class_inst, rpc_params)
+            module.exit_json(changed=True, results=content['result'], state='present')
+
+	# It's there and the same, do nothing!
+        diff_params = diff_content(content['result'][0], rpc_params)
+        if not diff_params:
+            module.exit_json(changed=False, results=content['result'], state="present")
+
+        # Add the id to update with
+        idname = zbx_class.lower() + "id"
+        diff_params[idname] = content['result'][0][idname]
+
+
+        ## It's there and not the same, update it!
+        zbx_action_method = zapi.__getattribute__(zbx_class.capitalize()).__dict__['update']
+        _, content = zbx_action_method(zbx_class_inst, diff_params)
+        module.exit_json(changed=True, results=content, state="present")
+
+    module.exit_json(failed=True,
+                     changed=False,
+                     results='Unknown state passed. %s' % state,
+                     state="unknown")
+
+# pylint: disable=redefined-builtin, unused-wildcard-import, wildcard-import, locally-disabled
+# import module snippets.  This are required
 from ansible.module_utils.basic import *
 
 main()
