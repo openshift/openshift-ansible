@@ -5,8 +5,14 @@
     name: 'http://packages.treasuredata.com/2/redhat/7/x86_64/td-agent-2.2.0-0.x86_64.rpm'
     state: present
 
+- name: Verify fluentd plugin installed
+  command: '/opt/td-agent/embedded/bin/gem query -i fluent-plugin-kubernetes'
+  register: _fluent_plugin_check
+  ignore_errors: yes
+
 - name: install Kubernetes fluentd plugin
   command: '/opt/td-agent/embedded/bin/gem install fluent-plugin-kubernetes'
+  when: _fluent_plugin_check.rc == 1
 
 - name: Creates directories
   file:
