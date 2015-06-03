@@ -33,7 +33,7 @@ disks: /dev/sdb,/dev/sdc
 # Whether to re-partition already partitioned disks.
 # Even though the disks won't get repartitioned on 'false', all existing
 # partitions on the disk are exported via NFS as physical volumes!
-foce: false
+force: false
 
 # Specification of size of partitions to create. See library/partitionpool.py
 # for details.
