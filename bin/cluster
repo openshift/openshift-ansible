@@ -9,8 +9,9 @@ import os
 
 class Cluster(object):
     """
-    Control and Configuration Interface for OpenShift Clusters
+    Provide Command, Control and Configuration (c3) Interface for OpenShift Clusters
     """
+
     def __init__(self):
         # setup ansible ssh environment
         if 'ANSIBLE_SSH_ARGS' not in os.environ:
@@ -104,6 +105,21 @@ class Cluster(object):
 
         return self.action(args, inventory, env, playbook)
 
+    def service(self, args):
+        """
+        Make the same service call across all nodes in the cluster
+        :param args: command line arguments provided by user
+        :return: exit status from run command
+        """
+        env = {'cluster_id': args.cluster_id,
+               'deployment_type': self.get_deployment_type(args),
+               'new_cluster_state': args.state}
+
+        playbook = "playbooks/{}/openshift-cluster/service.yml".format(args.provider)
+        inventory = self.setup_provider(args.provider)
+
+        return self.action(args, inventory, env, playbook)
+
     def setup_provider(self, provider):
         """
         Setup ansible playbook environment
@@ -167,7 +183,7 @@ class Cluster(object):
 
 if __name__ == '__main__':
     """
-    Implemented to support writing unit tests
+    User command to invoke ansible playbooks in a "known" environment
     """
 
     cluster = Cluster()
@@ -221,6 +237,13 @@ if __name__ == '__main__':
                                            parents=[meta_parser])
     list_parser.set_defaults(func=cluster.list)
 
+    service_parser = action_parser.add_parser('service', help='service for openshift across cluster',
+                                              parents=[meta_parser])
+    # choices are the only ones valid for the ansible service module: http://docs.ansible.com/service_module.html
+    service_parser.add_argument('state', choices=['started', 'stopped', 'restarted', 'reloaded'],
+                                help='make service call across cluster')
+    service_parser.set_defaults(func=cluster.service)
+
     args = parser.parse_args()
 
     if 'terminate' == args.action and not args.force:
@@ -230,7 +253,8 @@ if __name__ == '__main__':
             exit(1)
 
     if 'update' == args.action and not args.force:
-        answer = raw_input("This is destructive and could corrupt {} environment. Continue? [y/N] ".format(args.cluster_id))
+        answer = raw_input(
+            "This is destructive and could corrupt {} environment. Continue? [y/N] ".format(args.cluster_id))
         if answer not in ['y', 'Y']:
             sys.stderr.write('\nACTION [update] aborted by user!\n')
             exit(1)
