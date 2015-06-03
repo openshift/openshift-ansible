@@ -1,10 +1,8 @@
-openshift-ansible
-========================
+#openshift-ansible
 
 This repo contains OpenShift Ansible code.
 
-Setup
------
+##Setup
 - Install base dependencies:
   - Fedora:
   ```
@@ -36,3 +34,8 @@ Setup
   - [inventory/](inventory) - houses Ansible dynamic inventory scripts
   - [playbooks/](playbooks) - houses host-type Ansible playbooks (launch, config, destroy, vars)
   - [roles/](roles) - shareable Ansible tasks
+
+##Contributing
+
+###Feature Roadmap
+Our Feature Roadmap is available in our public [Trello board](https://trello.com/b/Qb18IWHF/openshift-ansible)
