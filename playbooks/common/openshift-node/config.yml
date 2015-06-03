@@ -148,8 +148,21 @@
     - openshift_images_infra
 
 - name: Configure Node Labels
-  hosts: oo_masters_to_config
+  hosts: oo_first_master
   roles:
     - openshift_label_nodes
+
+- name: Restart openshift-node
+  hosts:
+    - oo_nodes_to_config
+    - oo_infra_to_config
+  tasks:
+    - name: Restart openshift-node
+      service: name=openshift-node state=restarted
+
+
+- name: Deploy router and registry
+  hosts: oo_first_master
+  roles:
     - openshift_deploy_registry
     - openshift_deploy_router

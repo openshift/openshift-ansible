@@ -4,7 +4,7 @@
       infranode_label: "{{ ocom_infra_node_label | default(openshift.common.infranode_label) }}"
 
 - name: Deploy registry
-  shell: "osadm registry --create --credentials=/var/lib/openshift/openshift.local.certificates/openshift-registry/.kubeconfig --images='registry.access.redhat.com/openshift3_beta/ose-${component}:${version}'"
+  shell: "osadm registry --create --credentials=/var/lib/openshift/openshift.local.certificates/openshift-registry/.kubeconfig --images='docker-registry.ops.rhcloud.com/openshift3_beta/ose-${component}:${version}'"
 
 
 - name: Set region for registry
