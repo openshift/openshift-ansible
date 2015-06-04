@@ -188,12 +188,12 @@ if __name__ == '__main__':
     Reads ~/.openshift-ansible for default configuration items
       [DEFAULT]
       validate_cluster_ids = False
-      cluster_ids = production,stage,integration
+      cluster_ids = marketing,sales
       providers = gce,aws,libvirt
     """
 
     environment = ConfigParser.SafeConfigParser({
-        'cluster_ids': 'prod,stg,int',
+        'cluster_ids': 'marketing,sales',
         'validate_cluster_ids': 'False',
         'providers': 'gce,aws,libvirt',
     })
