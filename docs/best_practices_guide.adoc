@@ -78,6 +78,27 @@ metadata[line] = results.pop()
 
 == Ansible
 
+=== Yaml Files (Playbooks, Roles, Vars, etc)
+
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| Ansible files SHOULD NOT use JSON (use pure YAML instead).
+|===
+
+YAML is a superset of JSON, which means that Ansible allows JSON syntax to be interspersed. Even though YAML (and by extension Ansible) allows for this, JSON SHOULD NOT be used.
+
+.Reasons:
+* Ansible is able to give clearer error messages when the files are pure YAML
+* YAML reads nicer (preference held by several team members)
+* YAML makes for nicer diffs as YAML tends to be multi-line, whereas JSON tends to be more concise
+
+.Exceptions:
+* Ansible static inventory files are INI files. To pass in variables for specific hosts, Ansible allows for these variables to be put inside of the static inventory files. These variables can be in JSON format, but can't be in YAML format. This is an acceptable use of JSON, as YAML is not allowed in this case.
+
+Every effort should be made to keep our Ansible YAML files in pure YAML.
+
 === Defensive Programming
 
 .Context
@@ -122,8 +143,6 @@ If an Ansible role requires certain variables to be set, it's best to check for 
 ----
 
 === Roles
-.Context
-* http://docs.ansible.com/playbooks_best_practices.html#directory-layout[Ansible Suggested Directory Layout]
 
 '''
 [cols="2v,v"]
@@ -131,6 +150,9 @@ If an Ansible role requires certain variables to be set, it's best to check for 
 | **Rule**
 | The Ansible roles directory MUST maintain a flat structure.
 |===
+
+.Context
+* http://docs.ansible.com/playbooks_best_practices.html#directory-layout[Ansible Suggested Directory Layout]
 
 .The purpose of this rule is to:
 * Comply with the upstream best practices
