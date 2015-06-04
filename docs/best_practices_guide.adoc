@@ -19,7 +19,6 @@ This guide complies with https://www.ietf.org/rfc/rfc2119.txt[RFC2119].
 | All pull requests MUST pass the build bot *before* they are merged.
 |===
 
-
 The purpose of this rule is to avoid cases where the build bot will fail pull requests for code modified in a previous pull request.
 
 The tooling is flexible enough that exceptions can be made so that the tool the build bot is running will ignore certain areas or certain checks, but the build bot itself must pass for the pull request to be merged.
@@ -78,6 +77,49 @@ metadata[line] = results.pop()
 
 == Ansible
 
+=== Defensive Programming
+
+.Context
+* http://docs.ansible.com/fail_module.html[Ansible Fail Module]
+
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| Ansible playbooks MUST begin with checks for any variables that they require.
+|===
+
+If an Ansible playbook requires certain variables to be set, it's best to check for these up front before any other actions have been performed. In this way, the user knows exactly what needs to be passed into the playbook.
+
+.Example:
+[source,yaml]
+----
+---
+- hosts: localhost
+  gather_facts: no
+  tasks:
+  - fail: msg="This playbook requires g_environment to be set and non empty"
+    when: g_environment is not defined or g_environment == ''
+----
+
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| Ansible roles tasks/main.yml file MUST begin with checks for any variables that they require.
+|===
+
+If an Ansible role requires certain variables to be set, it's best to check for these up front before any other actions have been performed. In this way, the user knows exactly what needs to be passed into the role.
+
+.Example:
+[source,yaml]
+----
+---
+# tasks/main.yml
+- fail: msg="This role requires arl_environment to be set and non empty"
+  when: arl_environment is not defined or arl_environment == ''
+----
+
 === Roles
 .Context
 * http://docs.ansible.com/playbooks_best_practices.html#directory-layout[Ansible Suggested Directory Layout]
@@ -101,7 +143,7 @@ metadata[line] = results.pop()
 | Ansible Roles SHOULD be named like technology_component[_subcomponent].
 |===
 
-For clarity, it is suggested to follow a pattern when naming roles. It is important to note that this is a recommendation for role naming, and follows the pattern used by upstream.
+For consistency, role names SHOULD follow the above naming pattern. It is important to note that this is a recommendation for role naming, and follows the pattern used by upstream.
 
 Many times the `technology` portion of the pattern will line up with a package name. It is advised that whenever possible, the package name should be used.
 
