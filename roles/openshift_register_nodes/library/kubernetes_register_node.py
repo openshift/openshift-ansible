@@ -335,7 +335,7 @@ class Node(object):
         if self.node['apiVersion'] == 'v1beta1':
             return self.node['id']
         elif self.node['apiVersion'] == 'v1beta3':
-            return self.node['name']
+            return self.node['metadata']['name']
 
     def get_node(self):
         """ Get the dict representing the node

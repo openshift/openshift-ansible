@@ -64,7 +64,7 @@
   post_tasks:
   - name: Create a tarball of the node config directories
     command: >
-      tar -czvf {{ item.config_dir }}.tgz ./
+      tar -czvf {{ item.config_dir }}.tgz
         --transform 's|system:{{ item.node_subdir }}|node|'
         -C {{ item.config_dir }} .
     args:

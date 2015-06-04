@@ -48,4 +48,3 @@
     annotations: "{{ item.openshift.node.annotations | default({}) }}"
   with_items: openshift_nodes
   register: register_result
-
