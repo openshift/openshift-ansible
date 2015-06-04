@@ -184,21 +184,43 @@ class Cluster(object):
 if __name__ == '__main__':
     """
     User command to invoke ansible playbooks in a "known" environment
+
+    Reads ~/.openshift-ansible for default configuration items
+      [DEFAULT]
+      validate_cluster_ids = False
+      cluster_ids = marketing,sales
+      providers = gce,aws,libvirt
     """
+
+    environment = ConfigParser.SafeConfigParser({
+        'cluster_ids': 'marketing,sales',
+        'validate_cluster_ids': 'False',
+        'providers': 'gce,aws,libvirt',
+    })
+
+    path = os.path.expanduser("~/.openshift-ansible")
+    if os.path.isfile(path):
+        environment.read(path)
 
     cluster = Cluster()
 
-    providers = ['gce', 'aws', 'libvirt']
     parser = argparse.ArgumentParser(
         description='Python wrapper to ensure proper environment for OpenShift ansible playbooks',
     )
     parser.add_argument('-v', '--verbose', action='count',
                         help='Multiple -v options increase the verbosity')
-    parser.add_argument('--version', action='version', version='%(prog)s 0.2')
+    parser.add_argument('--version', action='version', version='%(prog)s 0.3')
 
     meta_parser = argparse.ArgumentParser(add_help=False)
+    providers = environment.get('DEFAULT', 'providers').split(',')
     meta_parser.add_argument('provider', choices=providers, help='provider')
-    meta_parser.add_argument('cluster_id', help='prefix for cluster VM names')
+
+    if environment.get('DEFAULT', 'validate_cluster_ids').lower() in ("yes", "true", "1"):
+        meta_parser.add_argument('cluster_id', choices=environment.get('DEFAULT', 'cluster_ids').split(','),
+                                 help='prefix for cluster VM names')
+    else:
+        meta_parser.add_argument('cluster_id', help='prefix for cluster VM names')
+
     meta_parser.add_argument('-t', '--deployment-type',
                              choices=['origin', 'online', 'enterprise'],
                              help='Deployment type. (default: origin)')
