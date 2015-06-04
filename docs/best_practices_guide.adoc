@@ -49,6 +49,7 @@ Instead, http://docs.pylint.org/faq.html#is-it-possible-to-locally-disable-a-par
 .Exceptions:
 1. When PyLint fails because of a dependency that can't be installed on the build bot
 1. When PyLint fails because of including a module that is outside of control (like Ansible)
+1. When PyLint fails, but the code makes more sense the way it is formatted (stylistic exception). For this exception, the description of the PyLint disable MUST state why the code is more clear, AND the person reviewing the PR will decide if they agree or not. The reviewer may reject the PR if they disagree with the reason for the disable.
 
 '''
 [cols="2v,v"]
