@@ -242,8 +242,8 @@ def normalize_openstack_facts(metadata, facts):
     # metadata api, should be updated if neutron exposes this.
 
     facts['zone'] = metadata['availability_zone']
-
-    facts['network']['ip'] = metadata['ec2_compat']['local-ipv4']
+    local_ipv4 = metadata['ec2_compat']['local-ipv4'].split(',')[0]
+    facts['network']['ip'] = local_ipv4
     facts['network']['public_ip'] = metadata['ec2_compat']['public-ipv4']
 
     # TODO: verify local hostname makes sense and is resolvable
