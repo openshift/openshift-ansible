@@ -13,7 +13,7 @@
     image_name: "{{ deployment_vars[deployment_type].image.name }}"
   tasks:
   - fail: msg="Deployment type not supported for libvirt provider yet"
-    when: deployment_type in ['online', 'enterprise']
+    when: deployment_type == 'online'
 
   - include: tasks/configure_libvirt.yml
 
