@@ -21,7 +21,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     vbox.cpus = 2
 
     # Enable multiple guest CPUs if available
-    vbox.customize ["modifyvm", :id, "--ioapic", "on"]
+    vbox.customize ["modifyvm", :id, "--ioapic", "on", "--nic1", "nat", "--natnet1", "192.168.100/24", "--nictype1", "virtio"]
   end
 
   config.vm.provider "libvirt" do |libvirt, override|
