@@ -41,6 +41,9 @@
   notify:
   - restart openshift-node
 
+- name: Allow NFS access for VMs
+  seboolean: name=virt_use_nfs state=yes persistent=yes
+
 - name: Start and enable openshift-node
   service: name=openshift-node enabled=yes state=started
   when: not openshift.common.use_openshift_sdn|bool
