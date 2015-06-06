@@ -288,6 +288,21 @@ def normalize_provider_facts(provider, metadata):
         facts = normalize_openstack_facts(metadata, facts)
     return facts
 
+def set_fluentd_facts_if_unset(facts):
+    """ Set fluentd facts if not already present in facts dict
+
+        Args:
+            facts (dict): existing facts
+        Returns:
+            dict: the facts dict updated with the generated fluentd facts if
+            missing
+    """
+    if 'common' in facts:
+        deployment_type = facts['common']['deployment_type']
+        if 'use_fluentd' not in facts['common']:
+            use_fluentd = True if deployment_type == 'online' else False
+            facts['common']['use_fluentd'] = use_fluentd
+    return facts
 
 def set_url_facts_if_unset(facts):
     """ Set url facts if not already present in facts dict
@@ -560,6 +575,7 @@ class OpenShiftFacts(object):
         facts = merge_facts(facts, local_facts)
         facts['current_config'] = get_current_config(facts)
         facts = set_url_facts_if_unset(facts)
+        facts = set_fluentd_facts_if_unset(facts)
         return dict(openshift=facts)
 
     def get_defaults(self, roles):
