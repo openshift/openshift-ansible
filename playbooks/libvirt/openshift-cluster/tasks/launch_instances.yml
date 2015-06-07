@@ -14,6 +14,7 @@
     url: '{{ image_url }}'
     sha256sum: '{{ image_sha256 }}'
     dest: '{{ os_libvirt_storage_pool_path }}/{{ image_name }}'
+  when: '{{ ( lookup("oo_option", "skip_image_download") | default("no", True) | lower ) in ["false", "no"] }}'
 
 - name: Create the cloud-init config drive path
   file:
