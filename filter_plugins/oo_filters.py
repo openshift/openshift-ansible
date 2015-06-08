@@ -23,13 +23,6 @@ class FilterModule(object):
         return arg
 
     @staticmethod
-    def oo_len(arg):
-        ''' This returns the length of the argument
-            Ex: "{{ hostvars | oo_len }}"
-        '''
-        return len(arg)
-
-    @staticmethod
     def get_attr(data, attribute=None):
         ''' This looks up dictionary attributes of the form a.b.c and returns
             the value.
@@ -209,7 +202,6 @@ class FilterModule(object):
             "oo_select_keys": self.oo_select_keys,
             "oo_collect": self.oo_collect,
             "oo_flatten": self.oo_flatten,
-            "oo_len": self.oo_len,
             "oo_pdb": self.oo_pdb,
             "oo_prepend_strings_in_list": self.oo_prepend_strings_in_list,
             "oo_ami_selector": self.oo_ami_selector,

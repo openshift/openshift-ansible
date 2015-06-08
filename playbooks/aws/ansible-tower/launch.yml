@@ -22,7 +22,7 @@
         group_id: "{{ oo_security_group_ids }}"
         instance_type: c4.xlarge
         image: "{{ rhel7_ami }}"
-        count: "{{ oo_new_inst_names | oo_len }}"
+        count: "{{ oo_new_inst_names | length }}"
         user_data: "{{ lookup('file', user_data_file) }}"
         wait: yes
         assign_public_ip: "{{ oo_assign_public_ip }}"

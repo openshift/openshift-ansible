@@ -19,7 +19,7 @@
         group: ['public']
         instance_type: m3.large
         image: "{{ g_ami }}"
-        count: "{{ oo_new_inst_names | oo_len }}"
+        count: "{{ oo_new_inst_names | length }}"
         user_data: "{{ lookup('file', user_data_file) }}"
         wait: yes
       register: ec2
