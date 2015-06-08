@@ -143,6 +143,8 @@ class Cluster(object):
             inventory = '-i inventory/aws/hosts'
         elif 'libvirt' == provider:
             inventory = '-i inventory/libvirt/hosts'
+        elif 'openstack' == provider:
+            inventory = '-i inventory/openstack/hosts'
         else:
             # this code should never be reached
             raise ValueError("invalid PROVIDER {}".format(provider))
@@ -162,6 +164,11 @@ class Cluster(object):
         verbose = ''
         if args.verbose > 0:
             verbose = '-{}'.format('v' * args.verbose)
+
+        if args.option:
+            for opt in args.option:
+                k, v = opt.split('=', 1)
+                env['opt_'+k] = v
 
         ansible_env = '-e \'{}\''.format(
             ' '.join(['%s=%s' % (key, value) for (key, value) in env.items()])
@@ -189,13 +196,13 @@ if __name__ == '__main__':
       [DEFAULT]
       validate_cluster_ids = False
       cluster_ids = marketing,sales
-      providers = gce,aws,libvirt
+      providers = gce,aws,libvirt,openstack
     """
 
     environment = ConfigParser.SafeConfigParser({
         'cluster_ids': 'marketing,sales',
         'validate_cluster_ids': 'False',
-        'providers': 'gce,aws,libvirt',
+        'providers': 'gce,aws,libvirt,openstack',
     })
 
     path = os.path.expanduser("~/.openshift-ansible")
@@ -224,6 +231,8 @@ if __name__ == '__main__':
     meta_parser.add_argument('-t', '--deployment-type',
                              choices=['origin', 'online', 'enterprise'],
                              help='Deployment type. (default: origin)')
+    meta_parser.add_argument('-o', '--option', action='append',
+                             help='options')
 
     action_parser = parser.add_subparsers(dest='action', title='actions',
                                           description='Choose from valid actions')
