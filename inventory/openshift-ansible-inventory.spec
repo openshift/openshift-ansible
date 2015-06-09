@@ -1,6 +1,6 @@
 Summary:       OpenShift Ansible Inventories
 Name:          openshift-ansible-inventory
-Version:       0.0.7
+Version:       0.0.8
 Release:       1%{?dist}
 License:       ASL 2.0
 URL:           https://github.com/openshift/openshift-ansible
@@ -36,6 +36,17 @@ cp -p gce/hosts/gce.py %{buildroot}/usr/share/ansible/inventory/gce
 /usr/share/ansible/inventory/gce/gce.py*
 
 %changelog
+* Tue Jun 09 2015 Kenny Woodson <kwoodson@redhat.com> 0.0.8-1
+- Added more verbosity when error happens.  Also fixed a bug.
+  (kwoodson@redhat.com)
+- Implement OpenStack provider (lhuard@amadeus.com)
+- * rename openshift_registry_url oreg_url * rename option_images to
+  _{oreg|ortr}_images (jhonce@redhat.com)
+- Fix the remaining pylint warnings (lhuard@amadeus.com)
+- Fix some of the pylint warnings (lhuard@amadeus.com)
+- [libvirt cluster] Use net-dhcp-leases to find VMs’ IPs (lhuard@amadeus.com)
+- fixed the openshift-ansible-bin build (twiest@redhat.com)
+
 * Fri May 15 2015 Kenny Woodson <kwoodson@redhat.com> 0.0.7-1
 - Making multi_ec2 into a library (kwoodson@redhat.com)
 
