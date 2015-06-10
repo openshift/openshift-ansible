@@ -3,6 +3,9 @@
   when: oreg_url is defined
 
 - name: Deploy OpenShift Registry
-  command: openshift admin registry --create --credentials=/var/lib/openshift/openshift.local.certificates/openshift-registry/.kubeconfig {{ _oreg_images|default() }}
+  command: >
+    {{ openshift.common.admin_binary }} registry
+    --create
+    --credentials={{ openshift_master_config_dir }}/openshift-registry.kubeconfig {{ _oreg_images|default() }}
   register: _oreg_results
   changed_when: "'service exists' not in _oreg_results.stdout"
