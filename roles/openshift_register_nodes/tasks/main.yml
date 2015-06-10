@@ -46,5 +46,8 @@
     host_ip: "{{ item.openshift.common.ip }}"
     labels: "{{ item.openshift.node.labels | default({}) }}"
     annotations: "{{ item.openshift.node.annotations | default({}) }}"
+    client_context: default/ose3-master-example-com:8443/system:openshift-client
+    client_user: system:openshift-client/ose3-master-example-com:8443
+    client_cluster: ose3-master-example-com:8443
   with_items: openshift_nodes
   register: register_result
