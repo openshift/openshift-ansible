@@ -52,7 +52,7 @@
   when: openshift.master.embedded_dns
 
 - name: Install OpenShift Master package
-  yum: pkg=openshift-master state=installed
+  yum: pkg=openshift-master state=present
   register: install_result
 
 - name: Reload systemd units
@@ -91,7 +91,7 @@
   - restart openshift-master
 
 - name: Install httpd-tools if needed
-  yum: pkg=httpd-tools state=installed
+  yum: pkg=httpd-tools state=present
   when: item.kind == 'HTPasswdPasswordIdentityProvider'
   with_items: openshift.master.identity_providers
 
