@@ -16,10 +16,15 @@
     oreg_url: "docker-registry.ops.rhcloud.com/openshift3_beta/ose-${component}:${version}"
   when: openshift.common.deployment_type == 'online' and oreg_url is not defined
 
+- name: Create openshift_generated_configs_dir if it doesn't exist
+  file:
+    path: "{{ openshift_generated_configs_dir }}"
+    state: directory
+
 - name: Create node config
   command: >
     /usr/bin/openshift admin create-node-config
-      --node-dir={{ openshift_cert_dir }}/node-{{ item.openshift.common.hostname }}
+      --node-dir={{ openshift_generated_configs_dir }}/node-{{ item.openshift.common.hostname }}
       --node={{ item.openshift.common.hostname }}
       --hostnames={{ [item.openshift.common.hostname, item.openshift.common.public_hostname]|unique|join(",") }}
       --dns-domain={{ openshift.dns.domain }}
@@ -28,13 +33,14 @@
       --signer-key={{ openshift_master_ca_key }}
       --signer-cert={{ openshift_master_ca_cert }}
       --certificate-authority={{ openshift_master_ca_cert }}
-      --signer-serial={{ openshift_master_ca_dir }}/serial.txt
+      --signer-serial={{ openshift_master_ca_serial }}
       --node-client-certificate-authority={{ openshift_master_ca_cert }}
       {{ ('--images=' ~ oreg_url) if oreg_url is defined else '' }}
       --listen=https://0.0.0.0:10250
+      --volume-dir={{ openshift_data_dir }}/openshift.local.volumes
   args:
-    chdir: "{{ openshift_cert_parent_dir }}"
-    creates: "{{ openshift_cert_dir }}/node-{{ item.openshift.common.hostname }}"
+    chdir: "{{ openshift_generated_configs_dir }}"
+    creates: "{{ openshift_generated_configs_dir }}/node-{{ item.openshift.common.hostname }}"
   with_items: openshift_nodes
 
 - name: Register unregistered nodes

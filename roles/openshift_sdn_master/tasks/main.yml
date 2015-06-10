@@ -24,9 +24,9 @@
     dest: /etc/sysconfig/openshift-sdn-master
     regexp: '^OPTIONS='
     line: "OPTIONS=\"-v={{ openshift.master_sdn.debug_level }} -etcd-endpoints={{ openshift_sdn_master_url}}
-      -etcd-cafile={{ openshift_cert_dir }}/ca/ca.crt
-      -etcd-certfile={{ openshift_cert_dir }}/openshift-client/cert.crt
-      -etcd-keyfile={{ openshift_cert_dir }}/openshift-client/key.key\""
+      -etcd-cafile={{ openshift_master_config_dir }}/ca.crt
+      -etcd-certfile={{ openshift_master_config_dir }}/master.etcd-client.crt
+      -etcd-keyfile={{ openshift_master_config_dir }}/master.etcd-client.key\""
   notify:
   - restart openshift-sdn-master
 

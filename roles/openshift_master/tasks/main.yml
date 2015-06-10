@@ -36,14 +36,9 @@
   command: systemctl daemon-reload
   when: install_result | changed
 
-- name: Create certificate parent directory if it doesn't exist
-  file:
-    path: "{{ openshift_cert_parent_dir }}"
-    state: directory
-
 - name: Create config parent directory if it doesn't exist
   file:
-    path: "{{ openshift_master_config | dirname }}"
+    path: "{{ openshift_master_config_dir }}"
     state: directory
 
 # TODO: should probably use a template lookup for this
@@ -59,25 +54,32 @@
     oreg_url: "docker-registry.ops.rhcloud.com/openshift3_beta/ose-${component}:${version}"
   when: openshift.common.deployment_type == 'online' and oreg_url is not defined
 
+# TODO: Need to get a flag added for volumes path, i think it'll get put in
 - name: Create master config
   command: >
-    /usr/bin/openshift start master --write-config
-    --config={{ openshift_master_config }}
+    /usr/bin/openshift start master
+    --write-config={{ openshift_master_config_dir }}
     --portal-net={{ openshift.master.portal_net }}
+    --etcd-dir={{ openshift_data_dir }}/openshift.local.etcd
     --master={{ openshift.master.api_url }}
     --public-master={{ openshift.master.public_api_url }}
     --listen={{ 'https' if openshift.master.api_use_ssl else 'http' }}://0.0.0.0:{{ openshift.master.api_port }}
     {{ ('--images=' ~ oreg_url) if (oreg_url | default('', true) != '') else '' }}
     {{ ('--nodes=' ~ openshift_node_ips | join(',')) if (openshift_node_ips | default('', true) != '') else '' }}
   args:
-    chdir: "{{ openshift_cert_parent_dir }}"
-    creates: "{{ openshift_master_config }}"
+    chdir: "{{ openshift_master_config_dir }}"
+    creates: "{{ openshift_master_config_file }}"
 
 - name: Configure OpenShift settings
   lineinfile:
     dest: /etc/sysconfig/openshift-master
-    regexp: '^OPTIONS='
-    line: "OPTIONS=\"--config={{ openshift_master_config }} --loglevel={{ openshift.master.debug_level }}\""
+    regexp: "{{ item.regex }}"
+    line: "{{ item.line }}"
+  with_items:
+    - regex: '^OPTIONS='
+      line: "OPTIONS=--loglevel={{ openshift.master.debug_level }}"
+    - regex: '^CONFIG_FILE='
+      line: "CONFIG_FILE={{ openshift_master_config_file}}"
   notify:
   - restart openshift-master
 
@@ -98,7 +100,7 @@
 # TODO: Update this file if the contents of the source file are not present in
 # the dest file, will need to make sure to ignore things that could be added
 - name: Create the OpenShift client config(s)
-  command: cp {{ openshift_cert_dir }}/openshift-client/.kubeconfig ~{{ item }}/.config/openshift/.config
+  command: cp {{ openshift_master_config_dir }}/openshift-client.kubeconfig ~{{ item }}/.config/openshift/.config
   args:
     creates: ~{{ item }}/.config/openshift/.config
   with_items:
