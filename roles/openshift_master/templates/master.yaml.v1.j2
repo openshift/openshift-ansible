@@ -67,7 +67,6 @@ kubernetesMasterConfig:
 {% endif %}
 masterClients:
 {# TODO: allow user to set externalKubernetesKubeConfig #}
-  deployerKubeConfig: openshift-deployer.kubeconfig
   externalKubernetesKubeConfig: ""
   openshiftLoopbackKubeConfig: openshift-client.kubeconfig
 masterPublicURL: {{ openshift.master.public_api_url }}
