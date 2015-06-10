@@ -27,10 +27,12 @@
     stat:
       path: "{{ item }}"
     with_items:
-    - "/etc/openshift/node/node.key"
-    - "/etc/openshift/node/node.kubeconfig"
+    - "/etc/openshift/node/system:node:{{ openshift.common.hostname }}.crt"
+    - "/etc/openshift/node/system:node:{{ openshift.common.hostname }}.key"
+    - "/etc/openshift/node/system:node:{{ openshift.common.hostname }}.kubeconfig"
     - "/etc/openshift/node/ca.crt"
     - "/etc/openshift/node/server.key"
+    - "/etc/openshift/node/server.crt"
     register: stat_result
   - set_fact:
       certs_missing: "{{ stat_result.results | map(attribute='stat.exists')
@@ -50,7 +52,7 @@
     register: mktemp
     changed_when: False
 
-- name: Register nodes
+- name: Create node certificates
   hosts: oo_first_master
   vars:
     nodes_needing_certs: "{{ hostvars
@@ -60,7 +62,7 @@
                          | oo_select_keys(groups['oo_nodes_to_config']) }}"
     sync_tmpdir: "{{ hostvars.localhost.mktemp.stdout }}"
   roles:
-  - openshift_register_nodes
+  - openshift_node_certificates
   post_tasks:
   - name: Create a tarball of the node config directories
     command: >
