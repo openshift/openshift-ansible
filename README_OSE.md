@@ -19,7 +19,7 @@
 * Either ssh key based auth for the root user or ssh key based auth for a user
   with sudo access (no password)
 * A checkout of openshift-ansible from https://github.com/openshift/openshift-ansible/
-  
+
   ```sh
   git clone https://github.com/openshift/openshift-ansible.git
   cd openshift-ansible
