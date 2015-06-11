@@ -38,4 +38,4 @@ This repo contains OpenShift Ansible code.
 ##Contributing
 
 ###Feature Roadmap
-Our Feature Roadmap is available in our public [Trello board](https://trello.com/b/Qb18IWHF/openshift-ansible)
+Our Feature Roadmap is available on the OpenShift Origin Infrastructure [Trello board](https://trello.com/b/nbkIrqKa/openshift-origin-infrastructure). All ansible items will be tagged with [installv3].
