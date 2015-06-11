@@ -1,0 +1,98 @@
+apiVersion: v1
+assetConfig:
+  logoutURL: ""
+  masterPublicURL: {{ openshift.master.public_api_url }}
+  publicURL: {{ openshift.master.public_console_url }}/
+  servingInfo:
+    bindAddress: {{ openshift.master.bind_addr }}:{{ openshift.master.console_port }}
+    certFile: master.server.crt
+    clientCA: ""
+    keyFile: master.server.key
+corsAllowedOrigins:
+{# TODO: add support for user specified corsAllowedOrigins #}
+{% for origin in ['127.0.0.1', 'localhost', openshift.common.hostname, openshift.common.ip, openshift.common.public_hostname, openshift.common.public_ip] %}
+  - {{ origin }}
+{% endfor %}
+{% if openshift.master.embedded_dns %}
+dnsConfig:
+  bindAddress: {{ openshift.master.bind_addr }}:{{ openshift.master.dns_port }}
+{% endif %}
+etcdClientInfo:
+  ca: ca.crt
+  certFile: master.etcd-client.crt
+  keyFile: master.etcd-client.key
+  urls:
+{% for etcd_url in openshift.master.etcd_urls %}
+    - {{ etcd_url }}
+{% endfor %}
+{% if openshift.master.embedded_etcd %}
+etcdConfig:
+  address: {{ openshift.common.hostname }}:{{ openshift.master.etcd_port }}
+  peerAddress: {{ openshift.common.hostname }}:7001
+  peerServingInfo:
+    bindAddress: {{ openshift.master.bind_addr }}:7001
+    certFile: etcd.server.crt
+    clientCA: ca.crt
+    keyFile: etcd.server.key
+  servingInfo:
+    bindAddress: {{ openshift.master.bind_addr }}:{{ openshift.master.etcd_port }}
+    certFile: etcd.server.crt
+    clientCA: ca.crt
+    keyFile: etcd.server.key
+  storageDirectory: {{ openshift_data_dir }}/openshift.local.etcd
+{% endif %}
+etcdStorageConfig:
+  kubernetesStoragePrefix: kubernetes.io
+  kubernetesStorageVersion: v1beta3
+  kubernetesStoragePrefix: kubernetes.io
+  openShiftStorageVersion: v1beta3
+imageConfig:
+  format: {{ openshift.master.registry_url }}
+  latest: false
+kind: MasterConfig
+kubeletClientInfo:
+{# TODO: allow user specified kubelet port #}
+  ca: ca.crt
+  certFile: master.kubelet-client.crt
+  keyFile: master.kubelet-client.key
+  port: 10250
+{% if openshift.master.embedded_kube %}
+kubernetesMasterConfig:
+{# TODO: support overriding masterCount #}
+  masterCount: 1
+  masterIP: ""
+  schedulerConfigFile: {{ openshift_master_scheduler_conf }}
+  servicesSubnet: {{ openshift.master.portal_net }}
+  staticNodeNames: {{ openshift_node_ips | default([], true) }}
+{% endif %}
+masterClients:
+{# TODO: allow user to set externalKubernetesKubeConfig #}
+  deployerKubeConfig: openshift-deployer.kubeconfig
+  externalKubernetesKubeConfig: ""
+  openshiftLoopbackKubeConfig: openshift-client.kubeconfig
+masterPublicURL: {{ openshift.master.public_api_url }}
+networkConfig:
+  clusterNetworkCIDR: {{ openshift.master.sdn_cluster_network_cidr }}
+  hostSubnetLength: {{ openshift.master.sdn_host_subnet_length }}
+  networkPluginName: {{ openshift.common.sdn_network_plugin_name }}
+{% include 'v1_partials/oauthConfig.j2' %}
+policyConfig:
+  bootstrapPolicyFile: {{ openshift_master_policy }}
+  openshiftSharedResourcesNamespace: openshift
+{# TODO: Allow users to override projectConfig items #}
+projectConfig:
+  defaultNodeSelector: ""
+  projectRequestMessage: ""
+  projectRequestTemplate: ""
+serviceAccountConfig:
+  managedNames:
+  - default
+  - builder
+  privateKeyFile: serviceaccounts.private.key
+  publicKeyFiles:
+  - serviceaccounts.public.key
+servingInfo:
+  bindAddress: {{ openshift.master.bind_addr }}:{{ openshift.master.api_port }}
+  certFile: master.server.crt
+  clientCA: ca.crt
+  keyFile: master.server.key

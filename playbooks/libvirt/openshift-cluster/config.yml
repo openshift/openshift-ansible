@@ -36,3 +36,4 @@
     openshift_cluster_id: "{{ cluster_id }}"
     openshift_debug_level: 4
     openshift_deployment_type: "{{ deployment_type }}"
+    openshift_first_master: "{{ groups.oo_first_master.0 }}"

@@ -8,7 +8,8 @@
 - name: Verify fluentd plugin installed
   command: '/opt/td-agent/embedded/bin/gem query -i fluent-plugin-kubernetes'
   register: _fluent_plugin_check
-  ignore_errors: yes
+  failed_when: false
+  changed_when: false
 
 - name: install Kubernetes fluentd plugin
   command: '/opt/td-agent/embedded/bin/gem install fluent-plugin-kubernetes'

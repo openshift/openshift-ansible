@@ -1,12 +1,8 @@
 ---
 - name: Configure master instances
   hosts: oo_masters_to_config
-  vars:
-    openshift_sdn_master_url: https://{{ openshift.common.hostname }}:4001
   roles:
   - openshift_master
-  - role: openshift_sdn_master
-    when: openshift.common.use_openshift_sdn | bool
   - role: fluentd_master
     when: openshift.common.use_fluentd | bool
   tasks:
