@@ -17,7 +17,7 @@ ansible_ssh_user=root
 deployment_type=enterprise
 
 # Pre-release registry URL
-oreg_url=docker-buildvm-rhose.usersys.redhat.com:5000/openshift3_beta/ose-${component}:${version}
+oreg_url=docker-buildvm-rhose.usersys.redhat.com:5000/openshift3/ose-${component}:${version}
 
 # Pre-release additional repo
 openshift_additional_repos=[{'id': 'ose-devel', 'name': 'ose-devel', 'baseurl': 'http://buildvm-devops.usersys.redhat.com/puddle/build/OpenShiftEnterprise/3.0/latest/RH7-RHOSE-3.0/$basearch/os', 'enabled': 1, 'gpgcheck': 0}]
