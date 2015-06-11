@@ -50,7 +50,7 @@
     register: mktemp
     changed_when: False
 
-- name: Register nodes
+- name: Create node certificates
   hosts: oo_first_master
   vars:
     nodes_needing_certs: "{{ hostvars
@@ -60,7 +60,7 @@
                          | oo_select_keys(groups['oo_nodes_to_config']) }}"
     sync_tmpdir: "{{ hostvars.localhost.mktemp.stdout }}"
   roles:
-  - openshift_register_nodes
+  - openshift_node_certificates
   post_tasks:
   - name: Create a tarball of the node config directories
     command: >

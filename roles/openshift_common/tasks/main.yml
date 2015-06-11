@@ -15,4 +15,3 @@
 
 - name: Set hostname
   hostname: name={{ openshift.common.hostname }}
-

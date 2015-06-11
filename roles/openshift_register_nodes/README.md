@@ -1,27 +1,8 @@
 OpenShift Register Nodes
 ========================
 
-TODO
-
-Requirements
-------------
-
-TODO
-
-Role Variables
---------------
-
-TODO
-
-Dependencies
-------------
-
-TODO
-
-Example Playbook
-----------------
-
-TODO
+DEPRECATED!!!
+Nodes should now auto register themselves. Use openshift_node_certificates role instead.
 
 License
 -------

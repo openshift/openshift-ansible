@@ -33,21 +33,3 @@
     chdir: "{{ openshift_generated_configs_dir }}/node-{{ item.openshift.common.hostname }}"
     creates: "{{ openshift_generated_configs_dir }}/node-{{ item.openshift.common.hostname }}/server.crt"
   with_items: nodes_needing_certs
-
-- name: Register unregistered nodes
-  kubernetes_register_node:
-    kubectl_cmd: "{{ [openshift.common.client_binary] }}"
-    default_client_config: '~/.config/openshift/.config'
-    name: "{{ item.openshift.common.hostname }}"
-    api_version: "{{ openshift_kube_api_version }}"
-    cpu: "{{ item.openshift.node.resources_cpu | default(None) }}"
-    memory: "{{ item.openshift.node.resources_memory | default(None) }}"
-    pod_cidr: "{{ item.openshift.node.pod_cidr | default(None) }}"
-    host_ip: "{{ item.openshift.common.ip }}"
-    labels: "{{ item.openshift.node.labels | default({}) }}"
-    annotations: "{{ item.openshift.node.annotations | default({}) }}"
-    client_context: default/ose3-master-example-com:8443/system:openshift-client
-    client_user: system:openshift-client/ose3-master-example-com:8443
-    client_cluster: ose3-master-example-com:8443
-  with_items: openshift_nodes
-  register: register_result

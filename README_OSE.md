@@ -19,7 +19,7 @@
 * Either ssh key based auth for the root user or ssh key based auth for a user
   with sudo access (no password)
 * A checkout of openshift-ansible from https://github.com/openshift/openshift-ansible/
-  
+
   ```sh
   git clone https://github.com/openshift/openshift-ansible.git
   cd openshift-ansible
@@ -80,7 +80,7 @@ ansible_ssh_user=root
 deployment_type=enterprise
 
 # Pre-release registry URL
-oreg_url=docker-buildvm-rhose.usersys.redhat.com:5000/openshift3_beta/ose-${component}:${version}
+oreg_url=docker-buildvm-rhose.usersys.redhat.com:5000/openshift3/ose-${component}:${version}
 
 # Pre-release additional repo
 openshift_additional_repos=[{'id': 'ose-devel', 'name': 'ose-devel',
@@ -121,7 +121,7 @@ On the master host:
 ```sh
 openshift ex router --create=true \
   --credentials=/var/lib/openshift/openshift.local.certificates/openshift-router/.kubeconfig \
-  --images='docker-buildvm-rhose.usersys.redhat.com:5000/openshift3_beta/ose-${component}:${version}'
+  --images='docker-buildvm-rhose.usersys.redhat.com:5000/openshift3/ose-${component}:${version}'
 ```
 
 #### Create the default docker-registry
@@ -129,7 +129,7 @@ On the master host:
 ```sh
 openshift ex registry --create=true \
   --credentials=/var/lib/openshift/openshift.local.certificates/openshift-registry/.kubeconfig \
-  --images='docker-buildvm-rhose.usersys.redhat.com:5000/openshift3_beta/ose-${component}:${version}' \
+  --images='docker-buildvm-rhose.usersys.redhat.com:5000/openshift3/ose-${component}:${version}' \
   --mount-host=/var/lib/openshift/docker-registry
 ```
 
