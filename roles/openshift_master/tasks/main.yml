@@ -130,7 +130,7 @@
 
 - name: Create the OpenShift client config dir(s)
   file:
-    path: "~{{ item }}/.config/openshift"
+    path: "~{{ item }}/.kube"
     state: directory
     mode: 0700
     owner: "{{ item }}"
@@ -142,16 +142,16 @@
 # TODO: Update this file if the contents of the source file are not present in
 # the dest file, will need to make sure to ignore things that could be added
 - name: Copy the OpenShift admin client config(s)
-  command: cp {{ openshift_master_config_dir }}/admin.kubeconfig ~{{ item }}/.config/openshift/.config
+  command: cp {{ openshift_master_config_dir }}/admin.kubeconfig ~{{ item }}/.kube/config
   args:
-    creates: ~{{ item }}/.config/openshift/.config
+    creates: ~{{ item }}/.kube/config
   with_items:
   - root
   - "{{ ansible_ssh_user }}"
 
 - name: Update the permissions on the OpenShift admin client config(s)
   file:
-    path: "~{{ item }}/.config/openshift/.config"
+    path: "~{{ item }}/.kube/config"
     state: file
     mode: 0700
     owner: "{{ item }}"

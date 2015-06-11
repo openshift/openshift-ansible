@@ -37,7 +37,7 @@
 - name: Register unregistered nodes
   kubernetes_register_node:
     kubectl_cmd: "{{ [openshift.common.client_binary] }}"
-    default_client_config: '~/.config/openshift/.config'
+    default_client_config: '~/.kube/config'
     name: "{{ item.openshift.common.hostname }}"
     api_version: "{{ openshift_kube_api_version }}"
     cpu: "{{ item.openshift.node.resources_cpu | default(None) }}"
