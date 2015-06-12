@@ -1,0 +1,1 @@
+localhost ansible_sudo=no ansible_python_interpreter=/usr/bin/python2 connection=local

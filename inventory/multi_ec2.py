@@ -82,7 +82,6 @@ class MultiEc2(object):
         else:
             raise RuntimeError("Could not find valid ec2 credentials in the environment.")
 
-        # Set the default cache path but if its defined we'll assign it.
         if self.config.has_key('cache_location'):
             self.cache_path = self.config['cache_location']
 
@@ -217,7 +216,12 @@ class MultiEc2(object):
             # For any non-zero, raise an error on it
             for result in provider_results:
                 if result['code'] != 0:
-                    raise RuntimeError(result['err'])
+                    err_msg = ['\nProblem fetching account: {name}',
+                               'Error Code: {code}',
+                               'StdErr: {err}',
+                               'Stdout: {out}',
+                              ]
+                    raise RuntimeError('\n'.join(err_msg).format(**result))
                 else:
                     self.all_ec2_results[result['name']] = json.loads(result['out'])
 
@@ -248,8 +252,9 @@ class MultiEc2(object):
                     data[str(host_property)] = str(value)
 
             # Add this group
-            results["%s_%s" % (host_property, value)] = \
-              copy.copy(results[acc_config['all_group']])
+            if results.has_key(acc_config['all_group']):
+                results["%s_%s" % (host_property, value)] = \
+                  copy.copy(results[acc_config['all_group']])
 
         # store the results back into all_ec2_results
         self.all_ec2_results[acc_config['name']] = results

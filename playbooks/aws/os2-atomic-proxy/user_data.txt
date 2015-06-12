@@ -1,6 +1,0 @@
-#cloud-config
-disable_root: 0
-
-system_info:
-  default_user:
-    name: root

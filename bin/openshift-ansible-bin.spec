@@ -1,6 +1,6 @@
 Summary:       OpenShift Ansible Scripts for working with metadata hosts
 Name:          openshift-ansible-bin
-Version:       0.0.17
+Version:       0.0.18
 Release:       1%{?dist}
 License:       ASL 2.0
 URL:           https://github.com/openshift/openshift-ansible
@@ -42,6 +42,13 @@ cp -p openshift_ansible.conf.example %{buildroot}/etc/openshift_ansible/openshif
 %config(noreplace) /etc/openshift_ansible/
 
 %changelog
+* Tue Jun 09 2015 Kenny Woodson <kwoodson@redhat.com> 0.0.18-1
+- Implement OpenStack provider (lhuard@amadeus.com)
+- * Update defaults and examples to track core concepts guide
+  (jhonce@redhat.com)
+- Issue 119 - Add support for ~/.openshift-ansible (jhonce@redhat.com)
+- Infrastructure - Add service action to bin/cluster (jhonce@redhat.com)
+
 * Fri May 15 2015 Thomas Wiest <twiest@redhat.com> 0.0.17-1
 - fixed the openshift-ansible-bin build (twiest@redhat.com)
 

@@ -79,13 +79,14 @@
     group: "{{ ec2_security_groups }}"
     instance_type: "{{ ec2_instance_type }}"
     image: "{{ latest_ami }}"
-    count: "{{ instances | oo_len }}"
+    count: "{{ instances | length }}"
     vpc_subnet_id: "{{ ec2_vpc_subnet | default(omit, true) }}"
     assign_public_ip: "{{ ec2_assign_public_ip | default(omit, true) }}"
     user_data: "{{ user_data }}"
     wait: yes
     instance_tags:
       created-by: "{{ created_by }}"
+      environment: "{{ env }}"
       env: "{{ env }}"
       host-type: "{{ host_type }}"
       env-host-type: "{{ env_host_type }}"

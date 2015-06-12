@@ -1,3 +1,0 @@
----
-- name: restart openshift-sdn-master
-  service: name=openshift-sdn-master state=restarted
