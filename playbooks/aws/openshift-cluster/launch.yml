@@ -25,6 +25,14 @@
       cluster: "{{ cluster_id }}"
       type: "{{ k8s_type }}"
 
+  - set_fact:
+      a_master: "{{ master_names[0] }}"
+  - add_host: name={{ a_master }} groups=service_master
+
 - include: update.yml
+
+- include: ../../common/openshift-cluster/create_services.yml
+  vars:
+     g_svc_master: "{{ service_master }}"
 
 - include: list.yml

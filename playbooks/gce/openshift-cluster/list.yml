@@ -16,7 +16,7 @@
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
     with_items: groups[scratch_group] | default([]) | difference(['localhost']) | difference(groups.status_terminated)
 
-- name: List Hosts
+- name: List instance(s)
   hosts: oo_list_hosts
   gather_facts: no
   tasks:
