@@ -20,6 +20,7 @@
       annotations: "{{ openshift_node_annotations | default(none) }}"
       registry_url: "{{ oreg_url | default(none) }}"
       debug_level: "{{ openshift_node_debug_level | default(openshift.common.debug_level) }}"
+      portal_net: "{{ openshift_master_portal_net | default(None) }}"
 
 - name: Install OpenShift Node package
   yum: pkg=openshift-node state=present
@@ -64,7 +65,7 @@
   lineinfile:
     dest: /etc/sysconfig/docker
     regexp: '^OPTIONS=.*'
-    line: "OPTIONS='--insecure-registry=172.30.0.0/16 --selinux-enabled'"
+    line: "OPTIONS='--insecure-registry={{ openshift.node.portal_net }} --selinux-enabled'"
   when: docker_check.stat.isreg
 
 - name: Allow NFS access for VMs
