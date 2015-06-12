@@ -1,0 +1,106 @@
+---
+- name: Gather and set facts for etcd hosts
+  hosts: oo_etcd_hosts_to_config
+  roles:
+  - openshift_facts
+  tasks:
+  - openshift_facts:
+      role: common
+      local_facts:
+        hostname: "{{ openshift_hostname | default(None) }}"
+  - name: Check for etcd certificates
+    stat:
+      path: "{{ item }}"
+    with_items:
+    - "/etc/etcd/ca.crt"
+    - "/etc/etcd/client.crt"
+    - "/etc/etcd/client.key"
+    - "/etc/etcd/peer-ca.crt"
+    - "/etc/etcd/peer.crt"
+    - "/etc/etcd/peer.key"
+    register: g_etcd_certs_stat
+  - set_fact:
+      etcd_certs_missing: "{{ g_etcd_certs_stat.results | map(attribute='stat.exists')
+                              | list | intersect([false])}}"
+      etcd_subdir: etcd-{{ openshift.common.hostname }}
+      etcd_dir: /etc/openshift/generated-configs/etcd-{{ openshift.common.hostname }}
+      etcd_cert_dir: /etc/etcd
+
+- name: Create temp directory for syncing certs
+  hosts: localhost
+  connection: local
+  sudo: false
+  gather_facts: no
+  tasks:
+  - name: Create local temp directory for syncing certs
+    local_action: command mktemp -d /tmp/openshift-ansible-XXXXXXX
+    register: g_etcd_mktemp
+    changed_when: False
+
+- name: Create etcd certs
+  hosts: oo_first_master
+  vars:
+    etcd_hosts_needing_certs: "{{ hostvars
+                             | oo_select_keys(groups['oo_etcd_hosts_to_config'])
+                             | oo_filter_list(filter_attr='etcd_certs_missing') }}"
+    etcd_hosts: "{{ hostvars
+                         | oo_select_keys(groups['oo_etcd_hosts_to_config']) }}"
+    sync_tmpdir: "{{ hostvars.localhost.g_etcd_mktemp.stdout }}"
+  roles:
+  - openshift_etcd_certs
+  post_tasks:
+  - name: Create a tarball of the etcd certs
+    command: >
+      tar -czvf {{ item.etcd_dir }}.tgz
+        -C {{ item.etcd_dir }} .
+    args:
+      creates: "{{ item.etcd_dir }}.tgz"
+    with_items: etcd_hosts_needing_certs
+
+  - name: Retrieve the etcd cert tarballs from the master
+    fetch:
+      src: "{{ item.etcd_dir }}.tgz"
+      dest: "{{ sync_tmpdir }}/"
+      flat: yes
+      fail_on_missing: yes
+      validate_checksum: yes
+    with_items: etcd_hosts_needing_certs
+
+- name: Deploy etcd
+  hosts: oo_etcd_hosts_to_config
+  vars:
+    sync_tmpdir: "{{ hostvars.localhost.g_etcd_mktemp.stdout }}"
+    etcd_url_scheme: https
+  pre_tasks:
+  - name: Ensure certificate directory exists
+    file:
+      path: "{{ etcd_cert_dir }}"
+      state: directory
+  - name: Unarchive the tarball on the node
+    unarchive:
+      src: "{{ sync_tmpdir }}/{{ etcd_subdir }}.tgz"
+      dest: "{{ etcd_cert_dir }}"
+    when: etcd_certs_missing
+  - file: path=/etc/etcd/client.crt mode=0600 owner=etcd group=etcd
+  - file: path=/etc/etcd/client.key mode=0600 owner=etcd group=etcd
+  - file: path=/etc/etcd/ca.crt mode=0644 owner=etcd group=etcd
+  roles:
+  - etcd
+
+- name: Delete the temporary directory on the master
+  hosts: oo_first_master
+  gather_facts: no
+  vars:
+    sync_tmpdir: "{{ hostvars.localhost.g_etcd_mktemp.stdout }}"
+  tasks:
+  - file: name={{ sync_tmpdir }} state=absent
+    changed_when: False
+
+- name: Delete temporary directory on localhost
+  hosts: localhost
+  connection: local
+  sudo: false
+  gather_facts: no
+  tasks:
+  - file: name={{ g_etcd_mktemp.stdout }} state=absent
+    changed_when: False
