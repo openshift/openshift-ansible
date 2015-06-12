@@ -1,0 +1,16 @@
+---
+galaxy_info:
+  author: Jan Safranek
+  description: Partition disks and use them as Kubernetes NFS physical volumes.
+  company: Red Hat, Inc.
+  license: license (Apache)
+  min_ansible_version: 1.4
+  platforms:
+  - name: EL
+    versions:
+    - 7
+  - name: Fedora
+    versions:
+    - all
+  categories:
+    - cloud

@@ -58,23 +58,17 @@
     uri: '{{ libvirt_uri }}'
   with_items: instances
 
-- name: Collect MAC addresses of the VMs
-  shell: 'virsh -c {{ libvirt_uri }} dumpxml {{ item }} | xmllint --xpath "string(//domain/devices/interface/mac/@address)" -'
-  register: scratch_mac
-  with_items: instances
-
 - name: Wait for the VMs to get an IP
-  command: "egrep -c '{{ scratch_mac.results | oo_collect('stdout') | join('|') }}' /proc/net/arp"
-  ignore_errors: yes
+  shell: 'virsh -c {{ libvirt_uri }} net-dhcp-leases openshift-ansible | egrep -c ''{{ instances | join("|") }}'''
   register: nb_allocated_ips
   until: nb_allocated_ips.stdout == '{{ instances | length }}'
   retries: 30
   delay: 1
 
 - name: Collect IP addresses of the VMs
-  shell: "awk '/{{ item.stdout }}/ {print $1}' /proc/net/arp"
+  shell: 'virsh -c {{ libvirt_uri }} net-dhcp-leases openshift-ansible | awk ''$6 == "{{ item }}" {gsub(/\/.*/, "", $5); print $5}'''
   register: scratch_ip
-  with_items: scratch_mac.results
+  with_items: instances
 
 - set_fact:
     ips: "{{ scratch_ip.results | oo_collect('stdout') }}"

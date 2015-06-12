@@ -4,10 +4,10 @@
   connection: local
   gather_facts: no
 
-# TODO: modify atomic_ami based on deployment_type
+# TODO: modify g_ami based on deployment_type
   vars:
     inst_region: us-east-1
-    atomic_ami: ami-86781fee
+    g_ami: ami-86781fee
     user_data_file: user_data.txt
 
   tasks:
@@ -18,13 +18,13 @@
         keypair: libra
         group: ['public']
         instance_type: m3.large
-        image: "{{ atomic_ami }}"
-        count: "{{ oo_new_inst_names | oo_len }}"
+        image: "{{ g_ami }}"
+        count: "{{ oo_new_inst_names | length }}"
         user_data: "{{ lookup('file', user_data_file) }}"
         wait: yes
       register: ec2
 
-    - name: Add new instances public IPs to the atomic proxy host group
+    - name: Add new instances public IPs to the host group
       add_host:
         hostname: "{{ item.public_ip }}"
         groupname: new_ec2_instances"

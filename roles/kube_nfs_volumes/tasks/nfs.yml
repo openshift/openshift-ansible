@@ -1,0 +1,16 @@
+---
+- name: Install NFS server on Fedora/Red Hat
+  yum: name=nfs-utils state=present
+
+- name: Start rpcbind on Fedora/Red Hat
+  service: name=rpcbind state=started enabled=yes
+
+- name: Start nfs on Fedora/Red Hat
+  service: name=nfs-server state=started enabled=yes
+
+- name: Export the directories
+  lineinfile: dest=/etc/exports
+              regexp="^{{ mount_dir }}/{{ item.name }} "
+              line="{{ mount_dir }}/{{ item.name }} {{nfs_export_options}}"
+  with_items: partition_pool
+  notify: restart nfs

@@ -1,45 +1,42 @@
 ---
-# TODO: support new create-config command to generate node certs and config
-# TODO: recreate master/node configs if settings that affect the configs
-# change (hostname, public_hostname, ip, public_ip, etc)
+- name: Create openshift_generated_configs_dir if it doesn't exist
+  file:
+    path: "{{ openshift_generated_configs_dir }}"
+    state: directory
 
-
-# TODO: use a template lookup here
-# TODO: create a failed_when condition
-- name: Use enterprise default for openshift_registry_url if not set
-  set_fact:
-    openshift_registry_url: "openshift3_beta/ose-${component}:${version}"
-  when: openshift.common.deployment_type == 'enterprise' and openshift_registry_url is not defined
-
-- name: Use online default for openshift_registry_url if not set
-  set_fact:
-    openshift_registry_url: "docker-registry.ops.rhcloud.com/openshift3_beta/ose-${component}:${version}"
-  when: openshift.common.deployment_type == 'online' and openshift_registry_url is not defined
-
-- name: Create node config
+- name: Generate the node client config
   command: >
-    /usr/bin/openshift admin create-node-config
-      --node-dir={{ openshift_cert_dir }}/node-{{ item.openshift.common.hostname }}
-      --node={{ item.openshift.common.hostname }}
-      --hostnames={{ [item.openshift.common.hostname, item.openshift.common.public_hostname]|unique|join(",") }}
-      --dns-domain={{ openshift.dns.domain }}
-      --dns-ip={{ openshift.dns.ip }}
-      --master={{ openshift.master.api_url }}
-      --signer-key={{ openshift_master_ca_key }}
-      --signer-cert={{ openshift_master_ca_cert }}
+    {{ openshift.common.admin_binary }} create-api-client-config
       --certificate-authority={{ openshift_master_ca_cert }}
-      --signer-serial={{ openshift_master_ca_dir }}/serial.txt
-      --node-client-certificate-authority={{ openshift_master_ca_cert }}
-      {{ ('--images=' ~ openshift_registry_url) if openshift_registry_url is defined else '' }}
-      --listen=https://0.0.0.0:10250
+      --client-dir={{ openshift_generated_configs_dir }}/node-{{ item.openshift.common.hostname }}
+      --groups=system:nodes
+      --master={{ openshift.master.api_url }}
+      --signer-cert={{ openshift_master_ca_cert }}
+      --signer-key={{ openshift_master_ca_key }}
+      --signer-serial={{ openshift_master_ca_serial }}
+      --user=system:node-{{ item.openshift.common.hostname }}
   args:
-    chdir: "{{ openshift_cert_parent_dir }}"
-    creates: "{{ openshift_cert_dir }}/node-{{ item.openshift.common.hostname }}"
-  with_items: openshift_nodes
+    chdir: "{{ openshift_generated_configs_dir }}"
+    creates: "{{ openshift_generated_configs_dir }}/node-{{ item.openshift.common.hostname }}"
+  with_items: nodes_needing_certs
+
+- name: Generate the node server certificate
+  delegate_to: "{{ openshift_first_master }}"
+  command: >
+    {{ openshift.common.admin_binary }} create-server-cert
+      --cert=server.crt --key=server.key --overwrite=true
+      --hostnames={{ [item.openshift.common.hostname, item.openshift.common.public_hostname]|unique|join(",") }}
+      --signer-cert={{ openshift_master_ca_cert }}
+      --signer-key={{ openshift_master_ca_key }}
+      --signer-serial={{ openshift_master_ca_serial }}
+  args:
+    chdir: "{{ openshift_generated_configs_dir }}/node-{{ item.openshift.common.hostname }}"
+    creates: "{{ openshift_generated_configs_dir }}/node-{{ item.openshift.common.hostname }}/server.crt"
+  with_items: nodes_needing_certs
 
 - name: Register unregistered nodes
   kubernetes_register_node:
-    kubectl_cmd: ['osc']
+    kubectl_cmd: "{{ [openshift.common.client_binary] }}"
     default_client_config: '~/.config/openshift/.config'
     name: "{{ item.openshift.common.hostname }}"
     api_version: "{{ openshift_kube_api_version }}"
@@ -49,8 +46,5 @@
     host_ip: "{{ item.openshift.common.ip }}"
     labels: "{{ item.openshift.node.labels | default({}) }}"
     annotations: "{{ item.openshift.node.annotations | default({}) }}"
-    external_id: "{{ item.openshift.node.external_id }}"
-    # TODO: support customizing other attributes such as: client_config,
-    # client_cluster, client_context, client_user
   with_items: openshift_nodes
   register: register_result

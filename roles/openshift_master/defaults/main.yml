@@ -11,6 +11,10 @@ os_firewall_allow:
   port: 53/tcp
 - service: OpenShift dns udp
   port: 53/udp
+- service: Fluentd td-agent tcp
+  port: 24224/tcp
+- service: Fluentd td-agent udp
+  port: 24224/udp
 os_firewall_deny:
 - service: OpenShift api http
   port: 8080/tcp

@@ -1,0 +1,12 @@
+{
+  "predicates": [
+    {"name": "PodFitsResources"},
+    {"name": "PodFitsPorts"},
+    {"name": "NoDiskConflict"},
+    {"name": "Region", "argument": {"serviceAffinity" : {"labels" : ["region"]}}}
+  ],"priorities": [
+    {"name": "LeastRequestedPriority", "weight": 1},
+    {"name": "ServiceSpreadingPriority", "weight": 1},
+    {"name": "Zone", "weight" : 2, "argument": {"serviceAntiAffinity" : {"label": "zone"}}}
+  ]
+}
