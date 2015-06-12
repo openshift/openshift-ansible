@@ -56,6 +56,17 @@
   notify:
   - restart openshift-node
 
+- stat: path=/etc/sysconfig/docker
+  register: docker_check
+
+  # TODO: Enable secure registry when code available in origin
+- name: Secure OpenShift Registry
+  lineinfile:
+    dest: /etc/sysconfig/docker
+    regexp: '^OPTIONS=.*'
+    line: "OPTIONS='--insecure-registry=172.30.0.0/16 --selinux-enabled'"
+  when: docker_check.stat.isreg
+
 - name: Allow NFS access for VMs
   seboolean: name=virt_use_nfs state=yes persistent=yes
 
