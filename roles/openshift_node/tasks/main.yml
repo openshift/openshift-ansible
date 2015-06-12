@@ -20,6 +20,7 @@
       annotations: "{{ openshift_node_annotations | default(none) }}"
       registry_url: "{{ oreg_url | default(none) }}"
       debug_level: "{{ openshift_node_debug_level | default(openshift.common.debug_level) }}"
+      portal_net: "{{ openshift_master_portal_net | default(None) }}"
 
 - name: Install OpenShift Node package
   yum: pkg=openshift-node state=present
@@ -55,6 +56,17 @@
       line: "CONFIG_FILE={{ openshift_node_config_file }}"
   notify:
   - restart openshift-node
+
+- stat: path=/etc/sysconfig/docker
+  register: docker_check
+
+  # TODO: Enable secure registry when code available in origin
+- name: Secure OpenShift Registry
+  lineinfile:
+    dest: /etc/sysconfig/docker
+    regexp: '^OPTIONS=.*'
+    line: "OPTIONS='--insecure-registry={{ openshift.node.portal_net }} --selinux-enabled'"
+  when: docker_check.stat.isreg
 
 - name: Allow NFS access for VMs
   seboolean: name=virt_use_nfs state=yes persistent=yes

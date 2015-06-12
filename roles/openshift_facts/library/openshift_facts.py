@@ -705,7 +705,7 @@ class OpenShiftFacts(object):
             defaults['master'] = master
 
         if 'node' in roles:
-            node = dict(pod_cidr='', labels={}, annotations={})
+            node = dict(pod_cidr='', labels={}, annotations={}, portal_net='172.30.0.0/16')
             node['resources_cpu'] = self.system_facts['processor_cores']
             node['resources_memory'] = int(
                 int(self.system_facts['memtotal_mb']) * 1024 * 1024 * 0.75
