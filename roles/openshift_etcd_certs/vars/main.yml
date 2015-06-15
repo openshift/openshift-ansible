@@ -1,0 +1,8 @@
+---
+openshift_node_config_dir: /etc/openshift/node
+openshift_master_config_dir: /etc/openshift/master
+openshift_generated_configs_dir: /etc/openshift/generated-configs
+openshift_master_ca_cert: "{{ openshift_master_config_dir }}/ca.crt"
+openshift_master_ca_key: "{{ openshift_master_config_dir }}/ca.key"
+openshift_master_ca_serial: "{{ openshift_master_config_dir }}/ca.serial.txt"
+openshift_kube_api_version: v1beta3

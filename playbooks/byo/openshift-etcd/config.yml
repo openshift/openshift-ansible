@@ -1,0 +1,23 @@
+---
+- name: Populate oo_etcd_hosts_to_config and oo_first_master host groups
+  hosts: localhost
+  gather_facts: no
+  tasks:
+  - name: Evaluate oo_etcd_hosts_to_config
+    add_host:
+      name: "{{ item }}"
+      groups: oo_etcd_hosts_to_config
+    with_items: groups.etcd
+  - name: Evaluate oo_first_master
+    add_host:
+      name: "{{ item }}"
+      groups: oo_first_master
+    with_items: groups.masters.0
+
+
+- include: ../../common/openshift-etcd/config.yml
+  vars:
+    openshift_first_master: "{{ groups.masters.0 }}"
+    openshift_cluster_id: "{{ cluster_id | default('default') }}"
+    openshift_debug_level: 4
+    openshift_deployment_type: "{{ deployment_type }}"
