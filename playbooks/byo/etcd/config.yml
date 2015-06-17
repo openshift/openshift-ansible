@@ -1,0 +1,5 @@
+---
+- name: Configure etcd
+  hosts: etcd
+  roles:
+  - etcd
