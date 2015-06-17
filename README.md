@@ -36,6 +36,9 @@ This repo contains OpenShift Ansible code.
   - [roles/](roles) - shareable Ansible tasks
 
 ##Contributing
+- [Best Practices Guide](docs/best_practices_guide.adoc)
+- [Core Concepts](docs/core_concepts_guide.adoc)
+- [Style Guide](docs/style_guide.adoc)
 
 ###Feature Roadmap
 Our Feature Roadmap is available on the OpenShift Origin Infrastructure [Trello board](https://trello.com/b/nbkIrqKa/openshift-origin-infrastructure). All ansible items will be tagged with [installv3].
