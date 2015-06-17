@@ -2,14 +2,16 @@ allowDisabledDocker: false
 apiVersion: v1
 dnsDomain: {{ hostvars[openshift_first_master].openshift.dns.domain }}
 dnsIP: {{ hostvars[openshift_first_master].openshift.dns.ip }}
+dockerConfig:
+  execHandlerName: ""
 imageConfig:
   format: {{ openshift.node.registry_url }}
   latest: false
 kind: NodeConfig
-masterKubeConfig: node.kubeconfig
+masterKubeConfig: system:node:{{ openshift.common.hostname }}.kubeconfig
 networkPluginName: {{ openshift.common.sdn_network_plugin_name }}
 nodeName: {{ openshift.common.hostname }}
-podManifestConfig: null
+podManifestConfig:
 servingInfo:
   bindAddress: 0.0.0.0:10250
   certFile: server.crt

@@ -1,6 +1,20 @@
 ---
 # TODO: allow for overriding default ports where possible
 
+- name: Install OpenShift Node package
+  yum: pkg=openshift-node state=present
+  register: node_install_result
+
+- name: Install openshift-sdn-ovs
+  yum: pkg=openshift-sdn-ovs state=present
+  register: sdn_install_result
+  when: openshift.common.use_openshift_sdn
+
+- name: Reload systemd units
+  command: systemctl daemon-reload
+  when: (node_install_result | changed or (openshift.common.use_openshift_sdn
+          and sdn_install_result | changed))
+
 - name: Set node OpenShift facts
   openshift_facts:
     role: "{{ item.role }}"
@@ -21,20 +35,6 @@
       registry_url: "{{ oreg_url | default(none) }}"
       debug_level: "{{ openshift_node_debug_level | default(openshift.common.debug_level) }}"
       portal_net: "{{ openshift_master_portal_net | default(None) }}"
-
-- name: Install OpenShift Node package
-  yum: pkg=openshift-node state=present
-  register: node_install_result
-
-- name: Install openshift-sdn-ovs
-  yum: pkg=openshift-sdn-ovs state=present
-  register: sdn_install_result
-  when: openshift.common.use_openshift_sdn
-
-- name: Reload systemd units
-  command: systemctl daemon-reload
-  when: (node_install_result | changed or (openshift.common.use_openshift_sdn
-          and sdn_install_result | changed))
 
 # TODO: add the validate parameter when there is a validation command to run
 - name: Create the Node config

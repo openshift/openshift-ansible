@@ -1,3 +1,6 @@
+apiLevels:
+- v1beta3
+- v1
 apiVersion: v1
 assetConfig:
   logoutURL: ""
@@ -8,6 +11,8 @@ assetConfig:
     certFile: master.server.crt
     clientCA: ""
     keyFile: master.server.key
+    maxRequestsInFlight: 0
+    requestTimeoutSeconds: 0
 corsAllowedOrigins:
 {# TODO: add support for user specified corsAllowedOrigins #}
 {% for origin in ['127.0.0.1', 'localhost', openshift.common.hostname, openshift.common.ip, openshift.common.public_hostname, openshift.common.public_ip] %}
@@ -43,9 +48,9 @@ etcdConfig:
 {% endif %}
 etcdStorageConfig:
   kubernetesStoragePrefix: kubernetes.io
-  kubernetesStorageVersion: v1beta3
-  kubernetesStoragePrefix: kubernetes.io
-  openShiftStorageVersion: v1beta3
+  kubernetesStorageVersion: v1
+  openShiftStoragePrefix: openshift.io
+  openShiftStorageVersion: v1
 imageConfig:
   format: {{ openshift.master.registry_url }}
   latest: false
@@ -58,18 +63,24 @@ kubeletClientInfo:
   port: 10250
 {% if openshift.master.embedded_kube %}
 kubernetesMasterConfig:
+  apiLevels:
+  - v1beta3
+  - v1
+  apiServerArguments: null
+  controllerArguments: null
 {# TODO: support overriding masterCount #}
   masterCount: 1
   masterIP: ""
+  podEvictionTimeout: ""
   schedulerConfigFile: {{ openshift_master_scheduler_conf }}
+  servicesNodePortRange: ""
   servicesSubnet: {{ openshift.master.portal_net }}
   staticNodeNames: {{ openshift_node_ips | default([], true) }}
 {% endif %}
 masterClients:
 {# TODO: allow user to set externalKubernetesKubeConfig #}
-  deployerKubeConfig: openshift-deployer.kubeconfig
   externalKubernetesKubeConfig: ""
-  openshiftLoopbackKubeConfig: openshift-client.kubeconfig
+  openshiftLoopbackKubeConfig: openshift-master.kubeconfig
 masterPublicURL: {{ openshift.master.public_api_url }}
 networkConfig:
   clusterNetworkCIDR: {{ openshift.master.sdn_cluster_network_cidr }}
@@ -78,16 +89,22 @@ networkConfig:
 {% include 'v1_partials/oauthConfig.j2' %}
 policyConfig:
   bootstrapPolicyFile: {{ openshift_master_policy }}
+  openshiftInfrastructureNamespace: openshift-infra
   openshiftSharedResourcesNamespace: openshift
 {# TODO: Allow users to override projectConfig items #}
 projectConfig:
   defaultNodeSelector: ""
   projectRequestMessage: ""
   projectRequestTemplate: ""
+  securityAllocator:
+    mcsAllocatorRange: s0:/2
+    mcsLabelsPerProject: 5
+    uidAllocatorRange: 1000000000-1999999999/10000
 serviceAccountConfig:
   managedNames:
   - default
   - builder
+  - deployer
   privateKeyFile: serviceaccounts.private.key
   publicKeyFiles:
   - serviceaccounts.public.key
@@ -96,3 +113,5 @@ servingInfo:
   certFile: master.server.crt
   clientCA: ca.crt
   keyFile: master.server.key
+  maxRequestsInFlight: 0
+  requestTimeoutSeconds: 0

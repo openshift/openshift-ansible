@@ -19,7 +19,7 @@
 * Either ssh key based auth for the root user or ssh key based auth for a user
   with sudo access (no password)
 * A checkout of openshift-ansible from https://github.com/openshift/openshift-ansible/
-  
+
   ```sh
   git clone https://github.com/openshift/openshift-ansible.git
   cd openshift-ansible
@@ -92,14 +92,14 @@ inventory file use the -i option for ansible-playbook.
 On the master host:
 ```sh
 openshift ex router --create=true \
-  --credentials=/var/lib/openshift/openshift.local.certificates/openshift-router/.kubeconfig
+  --credentials=/etc/openshift/master/openshift-router.kubeconfig
 ```
 
 #### Create the default docker-registry
 On the master host:
 ```sh
 openshift ex registry --create=true \
-  --credentials=/var/lib/openshift/openshift.local.certificates/openshift-registry/.kubeconfig \
+  --credentials=/etc/openshift/master/openshift-registry.kubeconfig \
   --mount-host=/var/lib/openshift/docker-registry
 ```
 
