@@ -1,11 +1,16 @@
 ---
 - name: Install etcd
-  yum: pkg=etcd state=installed disable_gpg_check=yes
+  yum: pkg=etcd state=present disable_gpg_check=yes
 
 - name: Write etcd global config file
-  template: src=etcd.conf.j2 dest=/etc/etcd/etcd.conf
+  template:
+    src: etcd.conf.j2
+    dest: /etc/etcd/etcd.conf
   notify:
     - restart etcd
 
 - name: Enable etcd
-  service: name=etcd state=started enabled=yes
+  service:
+    name: etcd
+    state: started
+    enabled: yes
