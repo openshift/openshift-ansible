@@ -3,6 +3,7 @@
   hosts: oo_masters_to_config
   roles:
   - openshift_master
+  - openshift_examples
   - role: fluentd_master
     when: openshift.common.use_fluentd | bool
   tasks:
