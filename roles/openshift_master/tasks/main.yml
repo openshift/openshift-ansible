@@ -65,7 +65,7 @@
       disabled_features: "{{ osm_disabled_features | default(None) }}"
 
 - name: Install Master package
-  yum: pkg={{ openshift.common.service_type }}-master{{ openshift_version  }} state=present
+  yum: pkg={{ openshift.common.service_type }}-master state=present
   register: install_result
 
 # TODO: These values need to be configurable

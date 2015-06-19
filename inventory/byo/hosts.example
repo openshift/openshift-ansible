@@ -20,9 +20,6 @@ ansible_ssh_user=root
 # deployment type valid values are origin, online and enterprise
 deployment_type=atomic-enterprise
 
-# Enable cluster metrics
-#use_cluster_metrics=true
-
 # Pre-release registry URL
 #oreg_url=example.com/openshift3/ose-${component}:${version}
 
