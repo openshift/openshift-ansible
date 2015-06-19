@@ -8,7 +8,7 @@ imageConfig:
   format: {{ openshift.node.registry_url }}
   latest: false
 kind: NodeConfig
-masterKubeConfig: node.kubeconfig
+masterKubeConfig: system:node:{{ openshift.common.hostname }}.kubeconfig
 networkPluginName: {{ openshift.common.sdn_network_plugin_name }}
 nodeName: {{ openshift.common.hostname }}
 podManifestConfig:
