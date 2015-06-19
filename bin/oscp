@@ -55,7 +55,7 @@ class Oscp(object):
             config.read(self.config_path)
 
     def parse_cli_args(self):
-        parser = argparse.ArgumentParser(description='Openshift Online SSH Tool.')
+        parser = argparse.ArgumentParser(description='OpenShift Online SSH Tool.')
         parser.add_argument('-e', '--env',
                           action="store", help="Environment where this server exists.")
         parser.add_argument('-d', '--debug', default=False,

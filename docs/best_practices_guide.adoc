@@ -1,6 +1,6 @@
 // vim: ft=asciidoc
 
-= Openshift-Ansible Best Practices Guide
+= openshift-ansible Best Practices Guide
 
 The purpose of this guide is to describe the preferred patterns and best practices used in this repository (both in ansible and python).
 
