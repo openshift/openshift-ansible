@@ -7,16 +7,16 @@
     msg: This role requres that osn_cluster_dns_ip is set
   when: osn_cluster_dns_ip is not defined or not osn_cluster_dns_ip
 
-- name: Install OpenShift Node package
-  yum: pkg=openshift-node state=present
+- name: Install Atomic Enterprise Node package
+  yum: pkg=atomic-enterprise-node state=present
   register: node_install_result
 
 - name: Install openshift-sdn-ovs
-  yum: pkg=openshift-sdn-ovs state=present
+  yum: pkg=atomic-enterprise-sdn-ovs state=present
   register: sdn_install_result
   when: openshift.common.use_openshift_sdn
 
-- name: Set node OpenShift facts
+- name: Set node Atomic Enterprise facts
   openshift_facts:
     role: "{{ item.role }}"
     local_facts: "{{ item.local_facts }}"
@@ -42,7 +42,7 @@
   notify:
   - restart openshift-node
 
-- name: Configure OpenShift Node settings
+- name: Configure Atomic Enterprise Node settings
   lineinfile:
     dest: /etc/sysconfig/openshift-node
     regexp: "{{ item.regex }}"
@@ -59,7 +59,7 @@
   register: docker_check
 
   # TODO: Enable secure registry when code available in origin
-- name: Secure OpenShift Registry
+- name: Secure Atomic Enterprise Registry
   lineinfile:
     dest: /etc/sysconfig/docker
     regexp: '^OPTIONS=.*'

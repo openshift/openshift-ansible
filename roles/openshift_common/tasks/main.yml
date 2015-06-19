@@ -1,5 +1,5 @@
 ---
-- name: Set common OpenShift facts
+- name: Set common Atomic Enterprise facts
   openshift_facts:
     role: common
     local_facts:

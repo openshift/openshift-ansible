@@ -1,7 +1,7 @@
-OpenShift Master
+Atomic Enterprise Master
 ================
 
-OpenShift Master service installation
+Atomic Enterprise Master service installation
 
 Requirements
 ------------

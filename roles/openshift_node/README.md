@@ -1,12 +1,12 @@
-OpenShift Node
+Atomic Enterprise Node
 ==============
 
-OpenShift Node service installation
+Atomic Enterprise Node service installation
 
 Requirements
 ------------
 
-One or more OpenShift Master servers.
+One or more Atomic Enterprise Master servers.
 
 A RHEL 7.1 host pre-configured with access to the rhel-7-server-rpms,
 rhel-7-server-extras-rpms, and rhel-7-server-ose-3.0-rpms repos.

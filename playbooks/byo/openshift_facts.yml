@@ -1,5 +1,5 @@
 ---
-- name: Gather OpenShift facts
+- name: Gather Atomic Enterprise facts
   hosts: all
   gather_facts: no
   roles:
