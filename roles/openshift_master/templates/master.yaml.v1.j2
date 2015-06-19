@@ -100,6 +100,8 @@ projectConfig:
     mcsAllocatorRange: s0:/2
     mcsLabelsPerProject: 5
     uidAllocatorRange: 1000000000-1999999999/10000
+routingConfig:
+  subdomain: router.default.local
 serviceAccountConfig:
   managedNames:
   - default
@@ -113,5 +115,5 @@ servingInfo:
   certFile: master.server.crt
   clientCA: ca.crt
   keyFile: master.server.key
-  maxRequestsInFlight: 0
-  requestTimeoutSeconds: 0
+  maxRequestsInFlight: 500
+  requestTimeoutSeconds: 3600
