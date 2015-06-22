@@ -18,9 +18,9 @@
     - "/etc/etcd/peer-ca.crt"
     - "/etc/etcd/peer.crt"
     - "/etc/etcd/peer.key"
-    register: stat_result
+    register: g_etcd_certs_stat
   - set_fact:
-      etcd_certs_missing: "{{ stat_result.results | map(attribute='stat.exists')
+      etcd_certs_missing: "{{ g_etcd_certs_stat.results | map(attribute='stat.exists')
                               | list | intersect([false])}}"
       etcd_subdir: etcd-{{ openshift.common.hostname }}
       etcd_dir: /etc/openshift/generated-configs/etcd-{{ openshift.common.hostname }}
@@ -34,7 +34,7 @@
   tasks:
   - name: Create local temp directory for syncing certs
     local_action: command mktemp -d /tmp/openshift-ansible-XXXXXXX
-    register: mktemp
+    register: g_etcd_mktemp
     changed_when: False
 
 - name: Create etcd certs
@@ -45,7 +45,7 @@
                              | oo_filter_list(filter_attr='etcd_certs_missing') }}"
     etcd_hosts: "{{ hostvars
                          | oo_select_keys(groups['oo_etcd_hosts_to_config']) }}"
-    sync_tmpdir: "{{ hostvars.localhost.mktemp.stdout }}"
+    sync_tmpdir: "{{ hostvars.localhost.g_etcd_mktemp.stdout }}"
   roles:
   - openshift_etcd_certs
   post_tasks:
@@ -69,7 +69,7 @@
 - name: Deploy etcd
   hosts: oo_etcd_hosts_to_config
   vars:
-    sync_tmpdir: "{{ hostvars.localhost.mktemp.stdout }}"
+    sync_tmpdir: "{{ hostvars.localhost.g_etcd_mktemp.stdout }}"
     etcd_url_scheme: https
   pre_tasks:
   - name: Ensure certificate directory exists
@@ -91,7 +91,7 @@
   hosts: oo_first_master
   gather_facts: no
   vars:
-    sync_tmpdir: "{{ hostvars.localhost.mktemp.stdout }}"
+    sync_tmpdir: "{{ hostvars.localhost.g_etcd_mktemp.stdout }}"
   tasks:
   - file: name={{ sync_tmpdir }} state=absent
     changed_when: False
@@ -102,5 +102,5 @@
   sudo: false
   gather_facts: no
   tasks:
-  - file: name={{ mktemp.stdout }} state=absent
+  - file: name={{ g_etcd_mktemp.stdout }} state=absent
     changed_when: False
