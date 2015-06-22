@@ -374,7 +374,8 @@ def set_url_facts_if_unset(facts):
         if 'etcd_urls' not in facts['master']:
             etcd_urls = []
             if etcd_hosts != '':
-                facts['master']['etcd_port']=2379
+                etcd_port=2379
+                facts['master']['etcd_port']=etcd_port
                 facts['master']['embedded_etcd']=False
                 for host in etcd_hosts:
                     etcd_urls.append(format_url(etcd_use_ssl, host,

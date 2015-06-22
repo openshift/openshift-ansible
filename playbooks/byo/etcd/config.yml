@@ -1,3 +1,5 @@
+## deploys a simple etcd cluster, this cluster does not provide client side ssl
+## and cannot be used directly for openshift. This should only be used for testing.
 ---
 - name: Configure etcd
   hosts: etcd

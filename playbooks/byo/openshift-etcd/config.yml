@@ -18,6 +18,3 @@
 - include: ../../common/openshift-etcd/config.yml
   vars:
     openshift_first_master: "{{ groups.masters.0 }}"
-    openshift_cluster_id: "{{ cluster_id | default('default') }}"
-    openshift_debug_level: 4
-    openshift_deployment_type: "{{ deployment_type }}"
