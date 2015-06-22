@@ -178,6 +178,9 @@ class Cluster(object):
             verbose, inventory, ansible_env, playbook
         )
 
+        if args.profile:
+            command = 'ANSIBLE_CALLBACK_PLUGINS=ansible-profile/callback_plugins ' + command
+
         if args.verbose > 1:
             command = 'time {}'.format(command)
 
@@ -233,6 +236,9 @@ if __name__ == '__main__':
                              help='Deployment type. (default: origin)')
     meta_parser.add_argument('-o', '--option', action='append',
                              help='options')
+
+    meta_parser.add_argument('-p', '--profile', action='store_true',
+                             help='Enable playbook profiling')
 
     action_parser = parser.add_subparsers(dest='action', title='actions',
                                           description='Choose from valid actions')
