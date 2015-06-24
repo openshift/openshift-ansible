@@ -27,6 +27,32 @@ The tooling is flexible enough that exceptions can be made so that the tool the 
 
 == Python
 
+=== Method Signatures
+
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| When adding a new paramemter to an existing method, a default value SHOULD be used
+|===
+The purpose of this rule is to make it so that method signatures are backwards compatible.
+
+If this rule isn't followed, it will be necessary for the person who changed the method to search out all callers and make sure that they're able to use the new method signature.
+
+Example:
+.Before:
+[source,python]
+----
+def add_person(first_name, last_name):
+----
+
+.After:
+[source,python]
+----
+def add_person(first_name, last_name, age=None):
+----
+
+
 === PyLint
 http://www.pylint.org/[PyLint] is used in an attempt to keep the python code as clean and as managable as possible. The build bot runs each pull request through PyLint and any warnings or errors cause the build bot to fail the pull request.
 
