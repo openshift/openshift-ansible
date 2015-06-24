@@ -3,7 +3,7 @@ LIBVIRT Setup instructions
 
 `libvirt` is an `openshift-ansible` provider that uses `libvirt` to create local Fedora VMs that are provisioned exactly the same way that cloud VMs would be provisioned.
 
-This makes `libvirt` useful to develop, test and debug Openshift and openshift-ansible locally on the developer’s workstation before going to the cloud.
+This makes `libvirt` useful to develop, test and debug OpenShift and openshift-ansible locally on the developer’s workstation before going to the cloud.
 
 Install dependencies
 --------------------
