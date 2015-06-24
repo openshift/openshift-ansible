@@ -125,6 +125,58 @@ YAML is a superset of JSON, which means that Ansible allows JSON syntax to be in
 
 Every effort should be made to keep our Ansible YAML files in pure YAML.
 
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| Parameters to Ansible Modules SHOULD use the Yaml dictionary format when 3 or more parameters are being passed
+|===
+
+When a module has several parameters that are being passed in, it's hard to see exactly what value each parameter is getting. It is preferred to use the Ansible Yaml syntax to pass in parameters so that it's more clear what values are being passed for each paramemter.
+
+.Bad:
+[source,yaml]
+----
+- file: src=/file/to/link/to dest=/path/to/symlink owner=foo group=foo state=link
+----
+
+.Good:
+[source,yaml]
+----
+- file:
+    src: /file/to/link/to
+    dest: /path/to/symlink
+    owner: foo
+    group: foo
+    state: link
+----
+
+
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| Parameters to Ansible Modules SHOULD use the Yaml dictionary format when the line length exceeds 120 characters
+|===
+
+Lines that are long quickly become a wall of text that isn't easily parsable. It is preferred to use the Ansible Yaml syntax to pass in parameters so that it's more clear what values are being passed for each paramemter.
+
+.Bad:
+[source,yaml]
+----
+- get_url: url=http://example.com/path/file.conf dest=/etc/foo.conf sha256sum=b5bb9d8014a0f9b1d61e21e796d78dccdf1352f23cd32812f4850b878ae4944c
+----
+
+.Good:
+[source,yaml]
+----
+- get_url:
+    url: http://example.com/path/file.conf
+    dest: /etc/foo.conf
+    sha256sum: b5bb9d8014a0f9b1d61e21e796d78dccdf1352f23cd32812f4850b878ae4944c
+----
+
+
 === Defensive Programming
 
 .Context
