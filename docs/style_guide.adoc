@@ -43,6 +43,20 @@ This is a hard limit and is enforced by the build bot. This check MUST NOT be di
 
 == Ansible
 
+
+=== Ansible Yaml file extension
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| All Ansible Yaml files MUST have a .yml extension (and NOT .YML, .yaml etc).
+|===
+
+Ansible tooling (like `ansible-galaxy init`) create files with a .yml extension. Also, the Ansible documentation website references files with a .yml extension several times. Because of this, it is normal in the Ansible community to use a .yml extension for all Ansible Yaml files.
+
+Example: `tasks.yml`
+
+
 === Ansible Global Variables
 Ansible global variables are defined as any variables outside of ansible roles. Examples include playbook variables, variables passed in on the cli, etc.
 
