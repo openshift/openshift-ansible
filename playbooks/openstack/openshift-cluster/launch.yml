@@ -8,23 +8,105 @@
   tasks:
   - fail:
       msg: "Deployment type not supported for OpenStack provider yet"
-    when: deployment_type in ['online', 'enterprise']
+    when: deployment_type == 'online'
 
-  - include: tasks/configure_openstack.yml
+  # TODO: Write an Ansible module for dealing with HEAT stacks
+  #       Dealing with the outputs is currently terrible
 
-  - include: ../../common/openshift-cluster/set_master_launch_facts_tasks.yml
-  - include: tasks/launch_instances.yml
-    vars:
-      instances: "{{ master_names }}"
-      cluster: "{{ cluster_id }}"
-      type: "{{ k8s_type }}"
+  - name: Check OpenStack stack
+    command: 'heat stack-show openshift-ansible-{{ cluster_id }}-stack'
+    register: stack_show_result
+    changed_when: false
+    failed_when: stack_show_result.rc != 0 and 'Stack not found' not in stack_show_result.stderr
 
-  - include: ../../common/openshift-cluster/set_node_launch_facts_tasks.yml
-  - include: tasks/launch_instances.yml
-    vars:
-      instances: "{{ node_names }}"
-      cluster: "{{ cluster_id }}"
-      type: "{{ k8s_type }}"
+  - name: Create OpenStack Stack
+    command: 'heat stack-create -f {{ openstack_infra_heat_stack }}
+             -P cluster_id={{ cluster_id }}
+             -P dns_nameservers={{ openstack_network_dns | join(",") }}
+             -P cidr={{ openstack_network_cidr }}
+             -P ssh_incoming={{ openstack_ssh_access_from }}
+             -P num_masters={{ num_masters }}
+             -P num_nodes={{ num_nodes }}
+             -P master_image={{ deployment_vars[deployment_type].image }}
+             -P node_image={{ deployment_vars[deployment_type].image }}
+             -P master_flavor={{ openstack_flavor["master"] }}
+             -P node_flavor={{ openstack_flavor["node"] }}
+             -P ssh_public_key="{{ openstack_ssh_public_key }}"
+             openshift-ansible-{{ cluster_id }}-stack'
+    when: stack_show_result.rc == 1
+
+  - name: Update OpenStack Stack
+    command: 'heat stack-update -f {{ openstack_infra_heat_stack }}
+             -P cluster_id={{ cluster_id }}
+             -P dns_nameservers={{ openstack_network_dns | join(",") }}
+             -P cidr={{ openstack_network_cidr }}
+             -P ssh_incoming={{ openstack_ssh_access_from }}
+             -P num_masters={{ num_masters }}
+             -P num_nodes={{ num_nodes }}
+             -P master_image={{ deployment_vars[deployment_type].image }}
+             -P node_image={{ deployment_vars[deployment_type].image }}
+             -P master_flavor={{ openstack_flavor["master"] }}
+             -P node_flavor={{ openstack_flavor["node"] }}
+             -P ssh_public_key="{{ openstack_ssh_public_key }}"
+             openshift-ansible-{{ cluster_id }}-stack'
+    when: stack_show_result.rc == 0
+
+  - name: Wait for OpenStack Stack readiness
+    shell: 'heat stack-show openshift-ansible-{{ cluster_id }}-stack | awk ''$2 == "stack_status" {print $4}'''
+    register: stack_show_status_result
+    until: stack_show_status_result.stdout not in ['CREATE_IN_PROGRESS', 'UPDATE_IN_PROGRESS']
+    retries: 30
+    delay: 1
+    failed_when: stack_show_status_result.stdout not in ['CREATE_COMPLETE', 'UPDATE_COMPLETE']
+
+  - name: Read OpenStack Stack outputs
+    command: 'heat stack-show openshift-ansible-{{ cluster_id }}-stack'
+    register: stack_show_result
+
+  - set_fact:
+      parsed_outputs: "{{ stack_show_result | oo_parse_heat_stack_outputs }}"
+
+  - name: Add new master instances groups and variables
+    add_host:
+      hostname: '{{ item[0] }}'
+      ansible_ssh_host: '{{ item[2] }}'
+      ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
+      ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
+      groups: 'tag_env_{{ cluster_id }}, tag_host-type_master, tag_env-host-type_{{ cluster_id }}-openshift-master'
+    with_together:
+      - parsed_outputs.master_names
+      - parsed_outputs.master_ips
+      - parsed_outputs.master_floating_ips
+
+  - name: Add new node instances groups and variables
+    add_host:
+      hostname: '{{ item[0] }}'
+      ansible_ssh_host: '{{ item[2] }}'
+      ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
+      ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
+      groups: 'tag_env_{{ cluster_id }}, tag_host-type_node, tag_env-host-type_{{ cluster_id }}-openshift-node'
+    with_together:
+      - parsed_outputs.node_names
+      - parsed_outputs.node_ips
+      - parsed_outputs.node_floating_ips
+
+  - name: Wait for ssh
+    wait_for:
+      host: '{{ item }}'
+      port: 22
+    with_flattened:
+      - parsed_outputs.master_floating_ips
+      - parsed_outputs.node_floating_ips
+
+  - name: Wait for user setup
+    command: 'ssh -o StrictHostKeyChecking=no -o PasswordAuthentication=no -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null {{ deployment_vars[deployment_type].ssh_user }}@{{ item }} echo {{ deployment_vars[deployment_type].ssh_user }} user is setup'
+    register: result
+    until: result.rc == 0
+    retries: 30
+    delay: 1
+    with_flattened:
+      - parsed_outputs.master_floating_ips
+      - parsed_outputs.node_floating_ips
 
 - include: update.yml
 

@@ -1,6 +1,6 @@
 ---
 openstack_infra_heat_stack:     "{{ lookup('oo_option', 'infra_heat_stack' ) |
-                                    default('files/heat_stack.yml',          True) }}"
+                                    default('files/heat_stack.yaml',         True) }}"
 openstack_network_prefix:       "{{ lookup('oo_option', 'network_prefix'   ) |
                                     default('openshift-ansible-'+cluster_id, True) }}"
 openstack_network_cidr:         "{{ lookup('oo_option', 'net_cidr'         ) |
@@ -18,31 +18,19 @@ openstack_ssh_public_key:       "{{ lookup('file', lookup('oo_option', 'public_k
 openstack_ssh_access_from:      "{{ lookup('oo_option', 'ssh_from')          |
                                     default('0.0.0.0/0',                     True) }}"
 openstack_flavor:
-  master:
-    ram:     "{{ lookup('oo_option', 'master_flavor_ram'    ) | default(2048, True) }}"
-    id:      "{{ lookup('oo_option', 'master_flavor_id'     ) | default(True) }}"
-    include: "{{ lookup('oo_option', 'master_flavor_include') | default(True) }}"
-  node:
-    ram:     "{{ lookup('oo_option', 'node_flavor_ram'      ) | default(4096, True) }}"
-    id:      "{{ lookup('oo_option', 'node_flavor_id'       ) | default(True) }}"
-    include: "{{ lookup('oo_option', 'node_flavor_include'  ) | default(True) }}"
+  master: "{{ lookup('oo_option', 'master_flavor'    ) | default('m1.small',  True) }}"
+  node:   "{{ lookup('oo_option', 'node_flavor'      ) | default('m1.medium', True) }}"
 
 deployment_vars:
   origin:
-    image:
-      name: "{{ lookup('oo_option', 'image_name') | default('centos-70-raw', True) }}"
-      id:
+    image: "{{ lookup('oo_option', 'image_name') | default('centos-70-raw', True) }}"
     ssh_user: openshift
     sudo: yes
   online:
     image:
-      name:
-      id:
     ssh_user: root
     sudo: no
   enterprise:
-    image:
-      name: "{{ lookup('oo_option', 'image_name') | default('rhel-guest-image-7.1-20150224.0.x86_64', True) }}"
-      id:
+    image: "{{ lookup('oo_option', 'image_name') | default('rhel-guest-image-7.1-20150224.0.x86_64', True) }}"
     ssh_user: openshift
     sudo: yes

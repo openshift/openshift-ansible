@@ -1,0 +1,279 @@
+heat_template_version: 2014-10-16
+
+description: OpenShift cluster
+
+parameters:
+
+  cluster_id:
+    type: string
+    label: Cluster ID
+    description: Identifier of the cluster
+
+  num_masters:
+    type: number
+    label: Number of masters
+    description: Number of masters
+
+  num_nodes:
+    type: number
+    label: Number of nodes
+    description: Number of nodes
+
+  cidr:
+    type: string
+    label: CIDR
+    description: CIDR of the network of the cluster
+
+  dns_nameservers:
+    type: comma_delimited_list
+    label: DNS nameservers list
+    description: List of DNS nameservers
+
+  external_net:
+    type: string
+    label: External network
+    description: Name of the external network
+    default: external
+
+  ssh_public_key:
+    type: string
+    label: SSH public key
+    description: SSH public key
+    hidden: true
+
+  ssh_incoming:
+    type: string
+    label: Source of ssh connections
+    description: Source of legitimate ssh connections
+    default: 0.0.0.0/0
+
+  master_image:
+    type: string
+    label: Master image
+    description: Name of the image for the master servers
+
+  node_image:
+    type: string
+    label: Node image
+    description: Name of the image for the node servers
+
+  master_flavor:
+    type: string
+    label: Master flavor
+    description: Flavor of the master servers
+
+  node_flavor:
+    type: string
+    label: Node flavor
+    description: Flavor of the node servers
+
+outputs:
+
+  master_names:
+    description: Name of the masters
+    value: { get_attr: [ masters, name ] }
+
+  master_ips:
+    description: IPs of the masters
+    value: { get_attr: [ masters, private_ip ] }
+
+  master_floating_ips:
+    description: Floating IPs of the masters
+    value: { get_attr: [ masters, floating_ip ] }
+
+  node_names:
+    description: Name of the nodes
+    value: { get_attr: [ nodes, name ] }
+
+  node_ips:
+    description: IPs of the nodes
+    value: { get_attr: [ nodes, private_ip ] }
+
+  node_floating_ips:
+    description: Floating IPs of the nodes
+    value: { get_attr: [ nodes, floating_ip ] }
+
+resources:
+
+  net:
+    type: OS::Neutron::Net
+    properties:
+      name:
+        str_replace:
+          template: openshift-ansible-cluster_id-net
+          params:
+            cluster_id: { get_param: cluster_id }
+
+  subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      name:
+        str_replace:
+          template: openshift-ansible-cluster_id-subnet
+          params:
+            cluster_id: { get_param: cluster_id }
+      network: { get_resource: net }
+      cidr: { get_param: cidr }
+      dns_nameservers: { get_param: dns_nameservers }
+
+  router:
+    type: OS::Neutron::Router
+    properties:
+      name:
+        str_replace:
+          template: openshift-ansible-cluster_id-router
+          params:
+            cluster_id: { get_param: cluster_id }
+      external_gateway_info:
+        network: { get_param: external_net }
+
+  interface:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router_id: { get_resource: router }
+      subnet_id: { get_resource: subnet }
+
+  keypair:
+    type: OS::Nova::KeyPair
+    properties:
+      name:
+        str_replace:
+          template: openshift-ansible-cluster_id-keypair
+          params:
+            cluster_id: { get_param: cluster_id }
+      public_key: { get_param: ssh_public_key }
+
+  master-secgrp:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name:
+        str_replace:
+          template: openshift-ansible-cluster_id-master-secgrp
+          params:
+            cluster_id: { get_param: cluster_id }
+      description:
+        str_replace:
+          template: Security group for cluster_id OpenShift cluster master
+          params:
+            cluster_id: { get_param: cluster_id }
+      rules:
+        - direction: ingress
+          protocol: tcp
+          port_range_min: 22
+          port_range_max: 22
+          remote_ip_prefix: { get_param: ssh_incoming }
+        - direction: ingress
+          protocol: tcp
+          port_range_min: 4001
+          port_range_max: 4001
+        - direction: ingress
+          protocol: tcp
+          port_range_min: 8443
+          port_range_max: 8443
+        - direction: ingress
+          protocol: tcp
+          port_range_min: 53
+          port_range_max: 53
+        - direction: ingress
+          protocol: udp
+          port_range_min: 53
+          port_range_max: 53
+        - direction: ingress
+          protocol: tcp
+          port_range_min: 24224
+          port_range_max: 24224
+        - direction: ingress
+          protocol: udp
+          port_range_min: 24224
+          port_range_max: 24224
+
+  node-secgrp:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name:
+        str_replace:
+          template: openshift-ansible-cluster_id-node-secgrp
+          params:
+            cluster_id: { get_param: cluster_id }
+      description:
+        str_replace:
+          template: Security group for cluster_id OpenShift cluster nodes
+          params:
+            cluster_id: { get_param: cluster_id }
+      rules:
+        - direction: ingress
+          protocol: tcp
+          port_range_min: 22
+          port_range_max: 22
+          remote_ip_prefix: { get_param: ssh_incoming }
+        - direction: ingress
+          protocol: udp
+          port_range_min: 4789
+          port_range_max: 4789
+          remote_mode: remote_group_id
+        - direction: ingress
+          protocol: tcp
+          port_range_min: 10250
+          port_range_max: 10250
+          remote_mode: remote_group_id
+          remote_group_id: { get_resource: master-secgrp }
+
+  masters:
+    type: OS::Heat::ResourceGroup
+    properties:
+      count: { get_param: num_masters }
+      resource_def:
+        type: heat_stack_server.yaml
+        properties:
+          name:
+            str_replace:
+              template: cluster_id-k8s_type-%index%
+              params:
+                cluster_id: { get_param: cluster_id }
+                k8s_type: master
+          cluster_id: { get_param: cluster_id }
+          type:       master
+          image:      { get_param: master_image }
+          flavor:     { get_param: master_flavor }
+          key_name:   { get_resource: keypair }
+          net:        { get_resource: net }
+          subnet:     { get_resource: subnet }
+          secgrp:
+            - { get_resource: master-secgrp }
+          floating_network: { get_param: external_net }
+          net_name:
+            str_replace:
+              template: openshift-ansible-cluster_id-net
+              params:
+                cluster_id: { get_param: cluster_id }
+    depends_on: interface
+
+  nodes:
+    type: OS::Heat::ResourceGroup
+    properties:
+      count: { get_param: num_nodes }
+      resource_def:
+        type: heat_stack_server.yaml
+        properties:
+          name:
+            str_replace:
+              template: cluster_id-k8s_type-%index%
+              params:
+                cluster_id: { get_param: cluster_id }
+                k8s_type: node
+          cluster_id: { get_param: cluster_id }
+          type:       node
+          image:      { get_param: node_image }
+          flavor:     { get_param: node_flavor }
+          key_name:   { get_resource: keypair }
+          net:        { get_resource: net }
+          subnet:     { get_resource: subnet }
+          secgrp:
+            - { get_resource: node-secgrp }
+          floating_network: { get_param: external_net }
+          net_name:
+            str_replace:
+              template: openshift-ansible-cluster_id-net
+              params:
+                cluster_id: { get_param: cluster_id }
+    depends_on: interface
