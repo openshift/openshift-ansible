@@ -119,7 +119,7 @@ inventory file use the -i option for ansible-playbook.
 #### Create the default router
 On the master host:
 ```sh
-openshift ex router --create=true \
+openshift admin router --create=true \
   --credentials=/etc/openshift/master/openshift-router.kubeconfig \
   --images='docker-buildvm-rhose.usersys.redhat.com:5000/openshift3/ose-${component}:${version}'
 ```
@@ -127,7 +127,7 @@ openshift ex router --create=true \
 #### Create the default docker-registry
 On the master host:
 ```sh
-openshift ex registry --create=true \
+openshift admin registry --create=true \
   --credentials=/etc/openshift/master/openshift-registry.kubeconfig \
   --images='docker-buildvm-rhose.usersys.redhat.com:5000/openshift3/ose-${component}:${version}' \
   --mount-host=/var/lib/openshift/docker-registry
