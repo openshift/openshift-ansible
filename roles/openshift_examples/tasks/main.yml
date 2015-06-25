@@ -1,8 +1,11 @@
 ---
+- name: Allow ansible user to create files in examples directory
+  file: path={{ examples_base }} group={{ ansible_ssh_user }} state=directory mode=0775
+
 - name: Copy openshift examples
-  copy:
-    src: examples
-    dest: /usr/share/openshift
+  # For non-root users it's best to disable archive mode because the user can't
+  # usually update the directory modified time.
+  synchronize: src=examples dest=/usr/share/openshift archive=no recursive=yes
 
 # RHEL and Centos image streams are mutually exclusive
 - name: Import RHEL streams
