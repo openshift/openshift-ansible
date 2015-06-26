@@ -1,0 +1,11 @@
+- name: Handle unscheduleable node
+  delegate_to: "{{ openshift_first_master }}"
+  command: >
+    {{ openshift.common.admin_binary }} manage-node {{ item }} --schedulable=false
+  with_items: openshift_unscheduleable_nodes
+
+- name: Handle scheduleable node
+  delegate_to: "{{ openshift_first_master }}"
+  command: >
+    {{ openshift.common.admin_binary }} manage-node {{ item }} --schedulable=true
+  with_items: openshift_scheduleable_nodes
