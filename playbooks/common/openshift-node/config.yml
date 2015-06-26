@@ -135,3 +135,28 @@
   roles:
   - os_env_extras
   - os_env_extras_node
+
+- name: Set scheduleability
+  serial: 1
+  hosts: oo_nodes_to_config
+  tasks:
+  - name: Check scheduleable state
+    delegate_to: "{{ openshift_first_master }}"
+    command: >
+      {{ openshift.common.client_binary }} get node {{ openshift.common.hostname }}
+    register: ond_get_node
+    until: ond_get_node.rc == 0
+    retries: 10
+    delay: 5
+
+  - name: Handle unscheduleable node
+    delegate_to: "{{ openshift_first_master }}"
+    command: >
+      {{ openshift.common.admin_binary }} manage-node {{ openshift.common.hostname }} --schedulable=false
+    when: openshift_scheduleable is defined and openshift_scheduleable == False and "SchedulingDisabled" not in ond_get_node.stdout
+
+  - name: Handle scheduleable node
+    delegate_to: "{{ openshift_first_master }}"
+    command: >
+      {{ openshift.common.admin_binary }} manage-node {{ openshift.common.hostname }} --schedulable=true
+    when: (openshift_scheduleable is not defined or openshift_scheduleable == True) and "SchedulingDisabled" in ond_get_node.stdout
