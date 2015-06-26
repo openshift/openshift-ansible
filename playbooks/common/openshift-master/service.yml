@@ -10,9 +10,9 @@
     add_host: name={{ item }} groups=g_service_masters
     with_items: oo_host_group_exp | default([])
 
-- name: Change openshift-master state on master instance(s)
+- name: Change atomic-enterprise-master state on master instance(s)
   hosts: g_service_masters
   connection: ssh
   gather_facts: no
   tasks:
-    - service: name=openshift-master state="{{ new_cluster_state }}"
+    - service: name=atomic-enterprise-master state="{{ new_cluster_state }}"

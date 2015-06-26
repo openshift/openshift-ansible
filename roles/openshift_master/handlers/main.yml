@@ -1,4 +1,4 @@
 ---
-- name: restart openshift-master
-  service: name=openshift-master state=restarted
+- name: restart atomic-enterprise-master
+  service: name=atomic-enterprise-master state=restarted
   when: not openshift_master_ha | bool

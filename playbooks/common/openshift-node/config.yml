@@ -89,9 +89,9 @@
       path: "{{ node_cert_dir }}"
       state: directory
 
-  # TODO: notify restart openshift-node
+  # TODO: notify restart atomic-enterprise-node
   # possibly test service started time against certificate/config file
-  # timestamps in openshift-node to trigger notify
+  # timestamps in atomic-enterprise-node to trigger notify
   - name: Unarchive the tarball on the node
     unarchive:
       src: "{{ sync_tmpdir }}/{{ node_subdir }}.tgz"

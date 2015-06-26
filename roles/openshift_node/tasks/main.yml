@@ -11,7 +11,7 @@
   yum: pkg=atomic-enterprise-node state=present
   register: node_install_result
 
-- name: Install openshift-sdn-ovs
+- name: Install atomic-enterprise-sdn-ovs
   yum: pkg=atomic-enterprise-sdn-ovs state=present
   register: sdn_install_result
   when: openshift.common.use_openshift_sdn
@@ -40,11 +40,11 @@
     dest: "{{ openshift_node_config_file }}"
     src: node.yaml.v1.j2
   notify:
-  - restart openshift-node
+  - restart atomic-enterprise-node
 
 - name: Configure Atomic Enterprise Node settings
   lineinfile:
-    dest: /etc/sysconfig/openshift-node
+    dest: /etc/sysconfig/atomic-enterprise-node
     regexp: "{{ item.regex }}"
     line: "{{ item.line }}"
   with_items:
@@ -53,7 +53,7 @@
     - regex: '^CONFIG_FILE='
       line: "CONFIG_FILE={{ openshift_node_config_file }}"
   notify:
-  - restart openshift-node
+  - restart atomic-enterprise-node
 
 - stat: path=/etc/sysconfig/docker
   register: docker_check
@@ -69,8 +69,8 @@
 - name: Allow NFS access for VMs
   seboolean: name=virt_use_nfs state=yes persistent=yes
 
-- name: Start and enable openshift-node
-  service: name=openshift-node enabled=yes state=started
+- name: Start and enable atomic-enterprise-node
+  service: name=atomic-enterprise-node enabled=yes state=started
   register: start_result
 
 - name: pause to prevent service restart from interfering with bootstrapping

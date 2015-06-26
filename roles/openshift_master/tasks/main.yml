@@ -76,14 +76,14 @@
   args:
     creates: "{{ openshift_master_policy }}"
   notify:
-  - restart openshift-master
+  - restart atomic-enterprise-master
 
 - name: Create the scheduler config
   template:
     dest: "{{ openshift_master_scheduler_conf }}"
     src: scheduler.json.j2
   notify:
-  - restart openshift-master
+  - restart atomic-enterprise-master
 
 - name: Install httpd-tools if needed
   yum: pkg=httpd-tools state=present
@@ -105,11 +105,11 @@
     dest: "{{ openshift_master_config_file }}"
     src: master.yaml.v1.j2
   notify:
-  - restart openshift-master
+  - restart atomic-enterprise-master
 
 - name: Configure Atomic Enterprise settings
   lineinfile:
-    dest: /etc/sysconfig/openshift-master
+    dest: /etc/sysconfig/atomic-enterprise-master
     regexp: "{{ item.regex }}"
     line: "{{ item.line }}"
   with_items:
@@ -118,10 +118,10 @@
     - regex: '^CONFIG_FILE='
       line: "CONFIG_FILE={{ openshift_master_config_file }}"
   notify:
-  - restart openshift-master
+  - restart atomic-enterprise-master
 
-- name: Start and enable openshift-master
-  service: name=openshift-master enabled=yes state=started
+- name: Start and enable atomic-enterprise-master
+  service: name=atomic-enterprise-master enabled=yes state=started
   when: not openshift_master_ha | bool
   register: start_result
 

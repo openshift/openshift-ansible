@@ -1,3 +1,3 @@
 ---
-- name: restart openshift-node
-  service: name=openshift-node state=restarted
+- name: restart atomic-enterprise-node
+  service: name=atomic-enterprise-node state=restarted
