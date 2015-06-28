@@ -12,11 +12,13 @@ Role Variables
 --------------
 
 From this role:
+
 | Name               | Default value                                         |                     |
 |--------------------|-------------------------------------------------------|---------------------|
 |                    |                                                       |                     |
 
 From openshift_common:
+
 | Name                  | Default value |                                      |
 |-----------------------|---------------|--------------------------------------|
 | openshift_debug_level | 0             | Global openshift debug log verbosity |
