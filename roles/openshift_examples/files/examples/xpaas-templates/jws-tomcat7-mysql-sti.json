@@ -23,9 +23,9 @@
             "value": "jws-app"
         },
         {
-            "description": "Hostname for service routes",
+            "description": "Custom hostname for service routes.  Leave blank for default hostname, e.g.: <application-name>.<project>.<default-domain-suffix>",
             "name": "APPLICATION_HOSTNAME",
-            "value": "jws-app.local"
+            "value": ""
         },
         {
             "description": "Git source URI for application",
@@ -70,6 +70,18 @@
             "description": "The certificate password",
             "name": "JWS_HTTPS_CERTIFICATE_PASSWORD",
             "value": ""
+        },
+        {
+            "description": "Sets xa-pool/min-pool-size for the configured datasource.",
+            "name": "DB_MIN_POOL_SIZE"
+        },
+        {
+            "description": "Sets xa-pool/max-pool-size for the configured datasource.",
+            "name": "DB_MAX_POOL_SIZE"
+        },
+        {
+            "description": "Sets transaction-isolation for the configured datasource.",
+            "name": "DB_TX_ISOLATION"
         },
         {
             "description": "Sets how the table names are stored and compared.",
@@ -144,7 +156,7 @@
                 }
             },
             "metadata": {
-                "name": "${APPLICATION_NAME}-http-service",
+                "name": "${APPLICATION_NAME}",
                 "labels": {
                     "application": "${APPLICATION_NAME}"
                 },
@@ -168,7 +180,7 @@
                 }
             },
             "metadata": {
-                "name": "${APPLICATION_NAME}-https-service",
+                "name": "secure-${APPLICATION_NAME}",
                 "labels": {
                     "application": "${APPLICATION_NAME}"
                 },
@@ -217,7 +229,7 @@
             "spec": {
                 "host": "${APPLICATION_HOSTNAME}",
                 "to": {
-                    "name": "${APPLICATION_NAME}-http-service"
+                    "name": "${APPLICATION_NAME}"
                 }
             }
         },
@@ -237,7 +249,7 @@
             "spec": {
                 "host": "${APPLICATION_HOSTNAME}",
                 "to": {
-                    "name": "${APPLICATION_NAME}-https-service"
+                    "name": "secure-${APPLICATION_NAME}"
                 },
                 "tls": {
                     "termination" : "passthrough"
@@ -277,6 +289,7 @@
                     "sourceStrategy": {
                         "from": {
                             "kind": "ImageStreamTag",
+                            "namespace": "openshift",
                             "name": "jboss-webserver3-tomcat7-openshift:${JWS_RELEASE}"
                         }
                     }
@@ -403,6 +416,18 @@
                                         "value": "${DB_DATABASE}"
                                     },
                                     {
+                                        "name": "DB_MIN_POOL_SIZE",
+                                        "value": "${DB_MIN_POOL_SIZE}"
+                                    },
+                                    {
+                                        "name": "DB_MAX_POOL_SIZE",
+                                        "value": "${DB_MAX_POOL_SIZE}"
+                                    },
+                                    {
+                                        "name": "DB_TX_ISOLATION",
+                                        "value": "${DB_TX_ISOLATION}"
+                                    },
+                                    {
                                         "name": "JWS_HTTPS_CERTIFICATE_DIR",
                                         "value": "/etc/jws-secret-volume"
                                     },
@@ -464,7 +489,8 @@
                             ],
                             "from": {
                                 "kind": "ImageStreamTag",
-                                "name": "jboss-mysql-55:latest"
+                                "namespace": "openshift",
+                                "name": "mysql:latest"
                             }
                         }
                     }
@@ -485,7 +511,7 @@
                         "containers": [
                             {
                                 "name": "${APPLICATION_NAME}-mysql",
-                                "image": "registry.access.redhat.com/openshift3_beta/mysql-55-rhel7:latest",
+                                "image": "mysql",
                                 "ports": [
                                     {
                                         "name": "${APPLICATION_NAME}-mysql-tcp-3306",

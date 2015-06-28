@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Utility script to update the ansible repo with the latest templates and image
+# streams from several github repos
+#
+# This script should be run from openshift-ansible/roles/openshift_examples
+
 EXAMPLES_BASE=$(pwd)/files/examples
 find files/examples -name '*.json' -delete
 TEMP=`mktemp -d`
@@ -26,6 +31,6 @@ cp nodejs-ex-master/openshift/templates/* ${EXAMPLES_BASE}/quickstart-templates/
 cp dancer-ex-master/openshift/templates/* ${EXAMPLES_BASE}/quickstart-templates/
 cp cakephp-ex-master/openshift/templates/* ${EXAMPLES_BASE}/quickstart-templates/
 mv application-templates-master/jboss-image-streams.json ${EXAMPLES_BASE}/xpaas-streams/
-find application-templates-master/ -name '*.json' -exec mv {} ${EXAMPLES_BASE}/xpaas-templates/ \;
+find application-templates-master/ -name '*.json' ! -wholename '*secret*' -exec mv {} ${EXAMPLES_BASE}/xpaas-templates/ \;
 popd
 git diff files/examples

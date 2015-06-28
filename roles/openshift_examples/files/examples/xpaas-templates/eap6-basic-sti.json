@@ -23,23 +23,24 @@
             "value": "eap-app"
         },
         {
-            "description": "Hostname for service routes",
+            "description": "Custom hostname for service routes.  Leave blank for default hostname, e.g.: <application-name>.<project>.<default-domain-suffix>",
             "name": "APPLICATION_HOSTNAME",
-            "value": "eap-app.local"
+            "value": ""
         },
         {
             "description": "Git source URI for application",
-            "name": "GIT_URI"
+            "name": "GIT_URI",
+            "value": "https://github.com/jboss-developer/jboss-eap-quickstarts"
         },
         {
             "description": "Git branch/tag reference",
             "name": "GIT_REF",
-            "value": "master"
+            "value": "6.4.x"
         },
         {
             "description": "Path within Git project to build; empty for root project directory.",
             "name": "GIT_CONTEXT_DIR",
-            "value": ""
+            "value": "kitchensink"
         },
         {
             "description": "Queue names",
@@ -49,26 +50,6 @@
         {
             "description": "Topic names",
             "name": "HORNETQ_TOPICS",
-            "value": ""
-        },
-        {
-            "description": "The name of the secret containing the keystore file",
-            "name": "EAP_HTTPS_SECRET",
-            "value": "eap-app-secret"
-        },
-        {
-            "description": "The name of the keystore file within the secret",
-            "name": "EAP_HTTPS_KEYSTORE",
-            "value": "keystore.jks"
-        },
-        {
-            "description": "The name associated with the server certificate",
-            "name": "EAP_HTTPS_NAME",
-            "value": ""
-        },
-        {
-            "description": "The password for the keystore and certificate",
-            "name": "EAP_HTTPS_PASSWORD",
             "value": ""
         },
         {
@@ -106,36 +87,12 @@
                 }
             },
             "metadata": {
-                "name": "${APPLICATION_NAME}-http-service",
+                "name": "${APPLICATION_NAME}",
                 "labels": {
                     "application": "${APPLICATION_NAME}"
                 },
                 "annotations": {
                     "description": "The web server's http port."
-                }
-            }
-        },
-        {
-            "kind": "Service",
-            "apiVersion": "v1",
-            "spec": {
-                "ports": [
-                    {
-                        "port": 8443,
-                        "targetPort": 8443
-                    }
-                ],
-                "selector": {
-                    "deploymentConfig": "${APPLICATION_NAME}"
-                }
-            },
-            "metadata": {
-                "name": "${APPLICATION_NAME}-https-service",
-                "labels": {
-                    "application": "${APPLICATION_NAME}"
-                },
-                "annotations": {
-                    "description": "The web server's https port."
                 }
             }
         },
@@ -180,30 +137,7 @@
             "spec": {
                 "host": "${APPLICATION_HOSTNAME}",
                 "to": {
-                    "name": "${APPLICATION_NAME}-http-service"
-                }
-            }
-        },
-        {
-            "kind": "Route",
-            "apiVersion": "v1",
-            "id": "${APPLICATION_NAME}-https-route",
-            "metadata": {
-                "name": "${APPLICATION_NAME}-https-route",
-                "labels": {
-                    "application": "${APPLICATION_NAME}"
-                },
-                "annotations": {
-                    "description": "Route for application's https service."
-                }
-            },
-            "spec": {
-                "host": "${APPLICATION_HOSTNAME}",
-                "to": {
-                    "name": "${APPLICATION_NAME}-https-service"
-                },
-                "tls": {
-                    "termination" : "passthrough"
+                    "name": "${APPLICATION_NAME}"
                 }
             }
         },
@@ -240,6 +174,7 @@
                     "sourceStrategy": {
                         "from": {
                             "kind": "ImageStreamTag",
+                            "namespace": "openshift",
                             "name": "jboss-eap6-openshift:${EAP_RELEASE}"
                         }
                     }
@@ -310,19 +245,11 @@
                         }
                     },
                     "spec": {
-                        "serviceAccount": "eap-service-account",
                         "containers": [
                             {
                                 "name": "${APPLICATION_NAME}",
                                 "image": "${APPLICATION_NAME}",
                                 "imagePullPolicy": "Always",
-                                "volumeMounts": [
-                                    {
-                                        "name": "eap-keystore-volume",
-                                        "mountPath": "/etc/eap-secret-volume",
-                                        "readOnly": true
-                                    }
-                                ],
                                 "readinessProbe": {
                                     "exec": {
                                         "command": [
@@ -336,11 +263,6 @@
                                     {
                                         "name": "${APPLICATION_NAME}-tcp-8080",
                                         "containerPort": 8080,
-                                        "protocol": "TCP"
-                                    },
-                                    {
-                                        "name": "${APPLICATION_NAME}-tcp-8443",
-                                        "containerPort": 8443,
                                         "protocol": "TCP"
                                     },
                                     {
@@ -359,22 +281,6 @@
                                         "value": "8888"
                                     },
                                     {
-                                        "name": "EAP_HTTPS_KEYSTORE_DIR",
-                                        "value": "/etc/eap-secret-volume"
-                                    },
-                                    {
-                                        "name": "EAP_HTTPS_KEYSTORE",
-                                        "value": "${EAP_HTTPS_KEYSTORE}"
-                                    },
-                                    {
-                                        "name": "EAP_HTTPS_NAME",
-                                        "value": "${EAP_HTTPS_NAME}"
-                                    },
-                                    {
-                                        "name": "EAP_HTTPS_PASSWORD",
-                                        "value": "${EAP_HTTPS_PASSWORD}"
-                                    },
-                                    {
                                         "name": "HORNETQ_CLUSTER_PASSWORD",
                                         "value": "${HORNETQ_CLUSTER_PASSWORD}"
                                     },
@@ -387,14 +293,6 @@
                                         "value": "${HORNETQ_TOPICS}"
                                     }
                                 ]
-                            }
-                        ],
-                        "volumes": [
-                            {
-                                "name": "eap-keystore-volume",
-                                "secret": {
-                                    "secretName": "${EAP_HTTPS_SECRET}"
-                                }
                             }
                         ]
                     }

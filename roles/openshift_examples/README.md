@@ -4,6 +4,10 @@ OpenShift Examples
 Installs example image streams, db-templates, and quickstart-templates by copying
 examples from this module to your first master and importing them with oc create -n into the openshift namespace
 
+The examples-sync.sh script can be used to pull the latest content from github
+and stage it for updating the ansible repo. This script is not used directly by
+ansible.
+
 Requirements
 ------------
 
