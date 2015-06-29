@@ -52,8 +52,9 @@ class FilterModule(object):
     @staticmethod
     def oo_collect(data, attribute=None, filters=None):
         ''' This takes a list of dict and collects all attributes specified into a
-            list If filter is specified then we will include all items that match
-            _ALL_ of filters.
+            list. If filter is specified then we will include all items that
+            match _ALL_ of filters.  If a dict entry is missing the key in a
+            filter it will be excluded from the match.
             Ex: data = [ {'a':1, 'b':5, 'z': 'z'}, # True, return
                          {'a':2, 'z': 'z'},        # True, return
                          {'a':3, 'z': 'z'},        # True, return
@@ -74,7 +75,7 @@ class FilterModule(object):
                 raise errors.AnsibleFilterError("|fialed expects filter to be a"
                                                 " dict")
             retval = [FilterModule.get_attr(d, attribute) for d in data if (
-                all([d[key] == filters[key] for key in filters]))]
+                all([d.get(key, None) == filters[key] for key in filters]))]
         else:
             retval = [FilterModule.get_attr(d, attribute) for d in data]
 

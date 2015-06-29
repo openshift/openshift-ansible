@@ -135,3 +135,18 @@
   roles:
   - os_env_extras
   - os_env_extras_node
+
+- name: Set scheduleability
+  hosts: oo_first_master
+  vars:
+    openshift_unscheduleable_nodes: "{{ hostvars
+                                        | oo_select_keys(groups['oo_nodes_to_config']) 
+                                        | oo_collect('openshift_hostname', {'openshift_scheduleable': False}) }}"
+  pre_tasks:
+  - set_fact:
+      openshift_scheduleable_nodes: "{{ hostvars
+                                      | oo_select_keys(groups['oo_nodes_to_config'])
+                                      | oo_collect('openshift_hostname') 
+                                      | difference(openshift_unscheduleable_nodes) }}"
+  roles:
+  - openshift_manage_node
