@@ -487,7 +487,7 @@ def get_current_config(facts):
                 current_config['kubeconfig'] = config
 
             # override pylint broad-except warning, since we do not want
-            # to bubble up any exceptions if openshift ex config view
+            # to bubble up any exceptions if oc config view
             # fails
             # pylint: disable=broad-except
             except Exception:
