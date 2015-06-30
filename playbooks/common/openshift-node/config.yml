@@ -141,12 +141,12 @@
   vars:
     openshift_unscheduleable_nodes: "{{ hostvars
                                         | oo_select_keys(groups['oo_nodes_to_config']) 
-                                        | oo_collect('openshift_hostname', {'openshift_scheduleable': False}) }}"
+                                        | oo_collect('openshift.common.hostname', {'openshift_scheduleable': False}) }}"
   pre_tasks:
   - set_fact:
       openshift_scheduleable_nodes: "{{ hostvars
                                       | oo_select_keys(groups['oo_nodes_to_config'])
-                                      | oo_collect('openshift_hostname') 
+                                      | oo_collect('openshift.common.hostname')
                                       | difference(openshift_unscheduleable_nodes) }}"
   roles:
   - openshift_manage_node
