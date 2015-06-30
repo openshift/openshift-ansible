@@ -3,8 +3,9 @@
 
 import argparse
 import ConfigParser
-import sys
 import os
+import sys
+import traceback
 
 
 class Cluster(object):
@@ -141,6 +142,11 @@ class Cluster(object):
                 os.environ[key] = config.get('ec2', key)
 
             inventory = '-i inventory/aws/hosts'
+
+            missing = [key for key in ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY'] if key not in os.environ]
+            if len(missing) > 0:
+                raise ValueError("PROVIDER aws requires {} environment variable(s). See README_AWS.md".format(missing))
+
         elif 'libvirt' == provider:
             inventory = '-i inventory/libvirt/hosts'
         elif 'openstack' == provider:
@@ -168,7 +174,7 @@ class Cluster(object):
         if args.option:
             for opt in args.option:
                 k, v = opt.split('=', 1)
-                env['opt_'+k] = v
+                env['opt_' + k] = v
 
         ansible_env = '-e \'{}\''.format(
             ' '.join(['%s=%s' % (key, value) for (key, value) in env.items()])
@@ -290,7 +296,14 @@ if __name__ == '__main__':
             sys.stderr.write('\nACTION [update] aborted by user!\n')
             exit(1)
 
-    status = args.func(args)
-    if status != 0:
-        sys.stderr.write("ACTION [{}] failed with exit status {}\n".format(args.action, status))
+    status = 1
+    try:
+        status = args.func(args)
+        if status != 0:
+            sys.stderr.write("ACTION [{}] failed with exit status {}\n".format(args.action, status))
+    except Exception, e:
+        if args.verbose:
+            traceback.print_exc(file=sys.stderr)
+        else:
+            sys.stderr.write("{}\n".format(e))
     exit(status)
