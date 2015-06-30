@@ -3,7 +3,7 @@
 openshift_examples_load_centos: "{{ openshift_deployment_type != 'enterprise' }}"
 openshift_examples_load_rhel: "{{ openshift_deployment_type == 'enterprise' }}"
 openshift_examples_load_db_templates: true
-openshift_examples_load_xpaas: false
+openshift_examples_load_xpaas: "{{ openshift_deployment_type == 'enterprise' }}"
 openshift_examples_load_quickstarts: true
 
 examples_base: /usr/share/openshift/examples

@@ -81,7 +81,7 @@
                 "name": "jboss-amq-6"
             },
             "spec": {
-                "dockerImageRepository": "registry.access.redhat.com/jboss-amq-6/amq-openshift:6.2",
+                "dockerImageRepository": "registry.access.redhat.com/jboss-amq-6/amq-openshift",
                 "tags": [
                     {
                         "name": "6.2",
@@ -92,63 +92,6 @@
                             "supports":"amq:6.2,jee,java",
                             "version": "6.2"
                         }
-                    }
-                ]
-            }
-        },
-        {
-            "kind": "ImageStream",
-            "apiVersion": "v1",
-            "metadata": {
-                "name": "jboss-mysql-55",
-                "annotations": {
-                    "description": "Provides MySQL 5.5 images for use with JBoss Middleware products."
-                }
-            },
-            "spec": {
-                "dockerImageRepository": "registry.access.redhat.com/openshift3_beta/mysql-55-rhel7",
-                "tags": [
-                    {
-                        "name": "latest",
-                        "dockerImageReference": "registry.access.redhat.com/openshift3_beta/mysql-55-rhel7:latest"
-                    }
-                ]
-            }
-        },
-        {
-            "kind": "ImageStream",
-            "apiVersion": "v1",
-            "metadata": {
-                "name": "jboss-postgresql-92",
-                "annotations": {
-                    "description": "Provides PostgreSQL 9.2 images for use with JBoss Middleware products."
-                }
-            },
-            "spec": {
-                "dockerImageRepository": "registry.access.redhat.com/openshift3_beta/postgresql-92-rhel7",
-                "tags": [
-                    {
-                        "name": "latest",
-                        "dockerImageReference": "registry.access.redhat.com/openshift3_beta/postgresql-92-rhel7:latest"
-                    }
-                ]
-            }
-        },
-        {
-            "kind": "ImageStream",
-            "apiVersion": "v1",
-            "metadata": {
-                "name": "jboss-mongodb-24",
-                "annotations": {
-                    "description": "Provides MongoDB 2.4 images for use with JBoss Middleware products."
-                }
-            },
-            "spec": {
-                "dockerImageRepository": "registry.access.redhat.com/openshift3_beta/mongodb-24-rhel7",
-                "tags": [
-                    {
-                        "name": "latest",
-                        "dockerImageReference": "registry.access.redhat.com/openshift3_beta/mongodb-24-rhel7:latest"
                     }
                 ]
             }

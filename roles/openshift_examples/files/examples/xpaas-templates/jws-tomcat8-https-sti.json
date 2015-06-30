@@ -4,12 +4,12 @@
     "metadata": {
         "annotations": {
             "iconClass" : "icon-tomcat",
-            "description": "Application template for JWS PostgreSQL applications built using STI."
+            "description": "Application template for JWS applications built using STI."
         },
-        "name": "jws-tomcat8-postgresql-sti"
+        "name": "jws-tomcat8-basic-sti"
     },
     "labels": {
-        "template": "jws-tomcat8-postgresql-sti"
+        "template": "jws-tomcat8-basic-sti"
     },
     "parameters": [
         {
@@ -42,16 +42,6 @@
             "value": ""
         },
         {
-            "description": "Database JNDI name used by application to resolve the datasource, e.g. java:/jboss/datasources/mongodb",
-            "name": "DB_JNDI",
-            "value": ""
-        },
-        {
-            "description": "Database name",
-            "name": "DB_DATABASE",
-            "value": "root"
-        },
-        {
             "description": "The name of the secret containing the certificate files",
             "name": "JWS_HTTPS_SECRET",
             "value": "jws-app-secret"
@@ -70,38 +60,6 @@
             "description": "The certificate password",
             "name": "JWS_HTTPS_CERTIFICATE_PASSWORD",
             "value": ""
-        },
-        {
-            "description": "Sets xa-pool/min-pool-size for the configured datasource.",
-            "name": "DB_MIN_POOL_SIZE"
-        },
-        {
-            "description": "Sets xa-pool/max-pool-size for the configured datasource.",
-            "name": "DB_MAX_POOL_SIZE"
-        },
-        {
-            "description": "Sets transaction-isolation for the configured datasource.",
-            "name": "DB_TX_ISOLATION"
-        },
-        {
-            "description": "The maximum number of client connections allowed. This also sets the maximum number of prepared transactions.",
-            "name": "POSTGRESQL_MAX_CONNECTIONS"
-        },
-        {
-            "description": "Configures how much memory is dedicated to PostgreSQL for caching data.",
-            "name": "POSTGRESQL_SHARED_BUFFERS"
-        },
-        {
-            "description": "Database user name",
-            "name": "DB_USERNAME",
-            "from": "user[a-zA-Z0-9]{3}",
-            "generate": "expression"
-        },
-        {
-            "description": "Database user password",
-            "name": "DB_PASSWORD",
-            "from": "[a-zA-Z0-9]{8}",
-            "generate": "expression"
         },
         {
             "description": "JWS Admin User",
@@ -174,30 +132,6 @@
                 },
                 "annotations": {
                     "description": "The web server's https port."
-                }
-            }
-        },
-        {
-            "kind": "Service",
-            "apiVersion": "v1",
-            "spec": {
-                "ports": [
-                    {
-                        "port": 5432,
-                        "targetPort": 5432
-                    }
-                ],
-                "selector": {
-                    "deploymentConfig": "${APPLICATION_NAME}-postgresql"
-                }
-            },
-            "metadata": {
-                "name": "${APPLICATION_NAME}-postgresql",
-                "labels": {
-                    "application": "${APPLICATION_NAME}"
-                },
-                "annotations": {
-                    "description": "The database server's port."
                 }
             }
         },
@@ -384,38 +318,6 @@
                                 ],
                                 "env": [
                                     {
-                                        "name": "DB_SERVICE_PREFIX_MAPPING",
-                                        "value": "${APPLICATION_NAME}-postgresql=DB"
-                                    },
-                                    {
-                                        "name": "DB_JNDI",
-                                        "value": "${DB_JNDI}"
-                                    },
-                                    {
-                                        "name": "DB_USERNAME",
-                                        "value": "${DB_USERNAME}"
-                                    },
-                                    {
-                                        "name": "DB_PASSWORD",
-                                        "value": "${DB_PASSWORD}"
-                                    },
-                                    {
-                                        "name": "DB_DATABASE",
-                                        "value": "${DB_DATABASE}"
-                                    },
-                                    {
-                                        "name": "DB_MIN_POOL_SIZE",
-                                        "value": "${DB_MIN_POOL_SIZE}"
-                                    },
-                                    {
-                                        "name": "DB_MAX_POOL_SIZE",
-                                        "value": "${DB_MAX_POOL_SIZE}"
-                                    },
-                                    {
-                                        "name": "DB_TX_ISOLATION",
-                                        "value": "${DB_TX_ISOLATION}"
-                                    },
-                                    {
                                         "name": "JWS_HTTPS_CERTIFICATE_DIR",
                                         "value": "/etc/jws-secret-volume"
                                     },
@@ -448,87 +350,6 @@
                                 "secret": {
                                     "secretName": "${JWS_HTTPS_SECRET}"
                                 }
-                            }
-                        ]
-                    }
-                }
-            }
-        },
-        {
-            "kind": "DeploymentConfig",
-            "apiVersion": "v1",
-            "metadata": {
-                "name": "${APPLICATION_NAME}-postgresql",
-                "labels": {
-                    "application": "${APPLICATION_NAME}"
-                }
-            },
-            "spec": {
-                "strategy": {
-                    "type": "Recreate"
-                },
-                "triggers": [
-                    {
-                        "type": "ImageChange",
-                        "imageChangeParams": {
-                            "automatic": true,
-                            "containerNames": [
-                                "${APPLICATION_NAME}-postgresql"
-                            ],
-                            "from": {
-                                "kind": "ImageStreamTag",
-                                "namespace": "openshift",
-                                "name": "postgresql:latest"
-                            }
-                        }
-                    }
-                ],
-                "replicas": 1,
-                "selector": {
-                    "deploymentConfig": "${APPLICATION_NAME}-postgresql"
-                },
-                "template": {
-                    "metadata": {
-                        "name": "${APPLICATION_NAME}-postgresql",
-                        "labels": {
-                            "deploymentConfig": "${APPLICATION_NAME}-postgresql",
-                            "application": "${APPLICATION_NAME}"
-                        }
-                    },
-                    "spec": {
-                        "containers": [
-                            {
-                                "name": "${APPLICATION_NAME}-postgresql",
-                                "image": "postgresql",
-                                "ports": [
-                                    {
-                                        "name": "${APPLICATION_NAME}-postgresql-tcp-5432",
-                                        "containerPort": 5432,
-                                        "protocol": "TCP"
-                                    }
-                                ],
-                                "env": [
-                                    {
-                                        "name": "POSTGRESQL_USER",
-                                        "value": "${DB_USERNAME}"
-                                    },
-                                    {
-                                        "name": "POSTGRESQL_PASSWORD",
-                                        "value": "${DB_PASSWORD}"
-                                    },
-                                    {
-                                        "name": "POSTGRESQL_DATABASE",
-                                        "value": "${DB_DATABASE}"
-                                    },
-                                    {
-                                        "name": "POSTGRESQL_MAX_CONNECTIONS",
-                                        "value": "${POSTGRESQL_MAX_CONNECTIONS}"
-                                    },
-                                    {
-                                        "name": "POSTGRESQL_SHARED_BUFFERS",
-                                        "value": "${POSTGRESQL_SHARED_BUFFERS}"
-                                    }
-                                ]
                             }
                         ]
                     }

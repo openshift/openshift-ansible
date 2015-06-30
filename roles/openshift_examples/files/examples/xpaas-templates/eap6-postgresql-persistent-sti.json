@@ -23,9 +23,9 @@
             "value": "eap-app"
         },
         {
-            "description": "Hostname for service routes",
+            "description": "Custom hostname for service routes.  Leave blank for default hostname, e.g.: <application-name>.<project>.<default-domain-suffix>",
             "name": "APPLICATION_HOSTNAME",
-            "value": "eap-app.local"
+            "value": ""
         },
         {
             "description": "Git source URI for application",
@@ -87,6 +87,18 @@
             "value": ""
         },
         {
+            "description": "Sets xa-pool/min-pool-size for the configured datasource.",
+            "name": "DB_MIN_POOL_SIZE"
+        },
+        {
+            "description": "Sets xa-pool/max-pool-size for the configured datasource.",
+            "name": "DB_MAX_POOL_SIZE"
+        },
+        {
+            "description": "Sets transaction-isolation for the configured datasource.",
+            "name": "DB_TX_ISOLATION"
+        },
+        {
             "description": "The maximum number of client connections allowed. This also sets the maximum number of prepared transactions.",
             "name": "POSTGRESQL_MAX_CONNECTIONS"
         },
@@ -141,7 +153,7 @@
                 }
             },
             "metadata": {
-                "name": "${APPLICATION_NAME}-http-service",
+                "name": "${APPLICATION_NAME}",
                 "labels": {
                     "application": "${APPLICATION_NAME}"
                 },
@@ -165,7 +177,7 @@
                 }
             },
             "metadata": {
-                "name": "${APPLICATION_NAME}-https-service",
+                "name": "secure-${APPLICATION_NAME}",
                 "labels": {
                     "application": "${APPLICATION_NAME}"
                 },
@@ -239,7 +251,7 @@
             "spec": {
                 "host": "${APPLICATION_HOSTNAME}",
                 "to": {
-                    "name": "${APPLICATION_NAME}-http-service"
+                    "name": "${APPLICATION_NAME}"
                 }
             }
         },
@@ -259,7 +271,7 @@
             "spec": {
                 "host": "${APPLICATION_HOSTNAME}",
                 "to": {
-                    "name": "${APPLICATION_NAME}-https-service"
+                    "name": "secure-${APPLICATION_NAME}"
                 },
                 "tls": {
                     "termination" : "passthrough"
@@ -299,6 +311,7 @@
                     "sourceStrategy": {
                         "from": {
                             "kind": "ImageStreamTag",
+                            "namespace": "openshift",
                             "name": "jboss-eap6-openshift:${EAP_RELEASE}"
                         }
                     }
@@ -434,6 +447,18 @@
                                         "value": "${APPLICATION_NAME}-postgresql=DB"
                                     },
                                     {
+                                        "name": "DB_MIN_POOL_SIZE",
+                                        "value": "${DB_MIN_POOL_SIZE}"
+                                    },
+                                    {
+                                        "name": "DB_MAX_POOL_SIZE",
+                                        "value": "${DB_MAX_POOL_SIZE}"
+                                    },
+                                    {
+                                        "name": "DB_TX_ISOLATION",
+                                        "value": "${DB_TX_ISOLATION}"
+                                    },
+                                    {
                                         "name": "OPENSHIFT_DNS_PING_SERVICE_NAME",
                                         "value": "${APPLICATION_NAME}-ping"
                                     },
@@ -507,7 +532,8 @@
                             ],
                             "from": {
                                 "kind": "ImageStreamTag",
-                                "name": "jboss-postgresql-92:latest"
+                                "namespace": "openshift",
+                                "name": "postgresql:latest"
                             }
                         }
                     }
@@ -528,7 +554,7 @@
                         "containers": [
                             {
                                 "name": "${APPLICATION_NAME}-postgresql",
-                                "image": "registry.access.redhat.com/openshift3_beta/postgresql-92-rhel7:latest",
+                                "image": "postgresql",
                                 "imagePullPolicy": "Always",
                                 "ports": [
                                     {

@@ -28,9 +28,9 @@
             "value": "eap-app"
         },
         {
-            "description": "Hostname for service routes",
+            "description": "Custom hostname for service routes.  Leave blank for default hostname, e.g.: <application-name>.<project>.<default-domain-suffix>",
             "name": "APPLICATION_HOSTNAME",
-            "value": "eap-app.local"
+            "value": ""
         },
         {
             "description": "Git source URI for application",
@@ -139,7 +139,7 @@
                 }
             },
             "metadata": {
-                "name": "${APPLICATION_NAME}-http-service",
+                "name": "${APPLICATION_NAME}",
                 "labels": {
                     "application": "${APPLICATION_NAME}"
                 },
@@ -163,7 +163,7 @@
                 }
             },
             "metadata": {
-                "name": "${APPLICATION_NAME}-https-service",
+                "name": "secure-${APPLICATION_NAME}",
                 "labels": {
                     "application": "${APPLICATION_NAME}"
                 },
@@ -237,7 +237,7 @@
             "spec": {
                 "host": "${APPLICATION_HOSTNAME}",
                 "to": {
-                    "name": "${APPLICATION_NAME}-http-service"
+                    "name": "${APPLICATION_NAME}"
                 }
             }
         },
@@ -257,7 +257,7 @@
             "spec": {
                 "host": "${APPLICATION_HOSTNAME}",
                 "to": {
-                    "name": "${APPLICATION_NAME}-https-service"
+                    "name": "secure-${APPLICATION_NAME}"
                 },
                 "tls": {
                     "termination" : "passthrough"
@@ -297,6 +297,7 @@
                     "sourceStrategy": {
                         "from": {
                             "kind": "ImageStreamTag",
+                            "namespace": "openshift",
                             "name": "jboss-eap6-openshift:${EAP_RELEASE}"
                         }
                     }
@@ -497,6 +498,7 @@
                             ],
                             "from": {
                                 "kind": "ImageStreamTag",
+                                "namespace": "openshift",
                                 "name": "jboss-amq-6:${AMQ_RELEASE}"
                             }
                         }
@@ -518,7 +520,7 @@
                         "containers": [
                             {
                                 "name": "${APPLICATION_NAME}-amq",
-                                "image": "registry.access.redhat.com/jboss-amq-6/amq-openshift:${AMQ_RELEASE}",
+                                "image": "jboss-amq-6",
                                 "imagePullPolicy": "Always",
                                 "readinessProbe": {
                                     "exec": {
