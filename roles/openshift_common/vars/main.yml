@@ -6,4 +6,4 @@
 # interfaces)
 os_firewall_use_firewalld: False
 
-openshift_data_dir: /var/lib/openshift
+openshift_data_dir: /var/lib/atomic-enterprise

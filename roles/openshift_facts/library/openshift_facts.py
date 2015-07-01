@@ -493,7 +493,7 @@ def get_current_config(facts):
         # anything from working properly as far as I can tell, perhaps because
         # we override the kubeconfig path everywhere we use it?
         # Query kubeconfig settings
-        kubeconfig_dir = '/var/lib/openshift/openshift.local.certificates'
+        kubeconfig_dir = '/var/lib/atomic-enterprise/openshift.local.certificates'
         if role == 'node':
             kubeconfig_dir = os.path.join(
                 kubeconfig_dir, "node-%s" % facts['common']['hostname']
