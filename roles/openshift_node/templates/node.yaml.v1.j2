@@ -6,7 +6,7 @@ dockerConfig:
   execHandlerName: ""
 imageConfig:
   format: {{ openshift.node.registry_url }}
-  latest: false
+  latest: true
 kind: NodeConfig
 masterKubeConfig: system:node:{{ openshift.common.hostname }}.kubeconfig
 networkPluginName: {{ openshift.common.sdn_network_plugin_name }}

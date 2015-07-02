@@ -53,7 +53,7 @@ etcdStorageConfig:
   openShiftStorageVersion: v1
 imageConfig:
   format: {{ openshift.master.registry_url }}
-  latest: false
+  latest: true
 kind: MasterConfig
 kubeletClientInfo:
 {# TODO: allow user specified kubelet port #}
