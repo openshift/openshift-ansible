@@ -1,0 +1,46 @@
+# This deletes *ALL* Docker images, and uninstalls OpenShift and
+# Atomic Enterprise RPMs.  It is primarily intended for use
+# with the tutorial as well as for developers to reset state.
+
+- hosts:
+    - OSEv3:children
+
+  sudo: yes
+
+  tasks:
+    - service: name={{ item }} state=stopped
+      with_items:
+        - docker
+        - atomic-enterprise-master
+        - atomic-enterprise-node
+
+    - yum: name={{ item }} state=absent
+      with_items:
+        - openvswitch
+        - atomic-enterprise
+        - atomic-enterprise-master
+        - atomic-enterprise-node
+        - atomic-enterprise-sdn-ovs
+        - tuned-profiles-atomic-enterprise-node
+
+    - shell: systemctl reset-failed
+      changed_when: False
+
+    - shell: systemctl daemon-reload
+      changed_when: False
+
+    - shell: find /var/lib/atomic-enterprise/openshift.local.volumes -type d -exec umount {} \; 2>/dev/null || true
+      changed_when: False
+
+    - file: path={{ item }} state=absent
+      with_items:
+        - /var/lib/atomic-enterprise
+        - /etc/sysconfig/atomic-enterprise
+        - /etc/atomic-enterprise
+        - /etc/openshift
+        - /var/lib/docker
+
+    - user: name={{ item }} state=absent remove=yes
+      with_items:
+        - alice
+        - joe
