@@ -1,0 +1,18 @@
+---
+- name: Gather OpenShift facts
+  hosts: all
+  gather_facts: no
+  roles:
+    - openshift_facts
+
+- name: Configure DNS server
+  hosts: dns
+  gather_facts: no
+  roles:
+    - dns_server
+
+- name: Make systems use DNS server
+  hosts: all
+  gather_facts: no
+  roles:
+    - dns_client

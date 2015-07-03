@@ -1,0 +1,40 @@
+---
+- name: Get OpenShift facts
+  openshift_facts:
+    local_facts:
+      hostname: "{{ openshift_hostname | default(None) }}"
+      ip: "{{ openshift_ip | default(None) }}"
+      public_hostname: "{{ openshift_public_hostname | default(None) }}"
+      public_ip: "{{ openshift_public_ip | default(None) }}"
+
+- name: Calculate subnet
+  set_fact: subnet={{ openshift.common.ip|subnet }}
+  run_once: true
+
+- name: Set subnet name
+  set_fact: subnet_name={{ subnet|subnet_name }}
+  run_once: true
+
+- name: Set hostname
+  hostname: name={{ openshift.common.hostname }}
+
+- name: Install bind DNS server
+  yum: name=bind state=latest
+
+  # FIXME: this should be generated, not copied
+- name: Copy rndc key
+  copy: src=rndc.key dest=/etc/rndc.key mode=0640 owner=root group=named
+
+- name: Internal zone file
+  template: src=example.com-internal dest={{ named_dir}}/{{ dns_domain }}-internal
+
+- name: External zone file
+  template: src=example.com dest={{ named_dir}}/{{ dns_domain }}
+
+  # TODO: this one needs further "templatization"
+- name: Reverse zone file
+  template: src=192.168.1 dest={{ named_dir}}/{{ subnet_name }}
+
+- name: Build named.conf
+  template: src=named.conf dest=/etc/named.conf
+  notify: restart named

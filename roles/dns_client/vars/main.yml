@@ -1,0 +1,5 @@
+---
+network_file: /etc/sysconfig/network-scripts/ifcfg-eth0
+dns_domain: "{{ lookup('env', 'CLOUD_DOMAIN')|default('example.com', true) }}"
+        # FIXME getting the DNS server IP address
+dns_server: "{{ hostvars['dns.example.com'].openshift.common.ip }}"

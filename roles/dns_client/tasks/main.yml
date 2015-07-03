@@ -1,0 +1,17 @@
+---
+- name: Get OpenShift facts
+  openshift_facts:
+    local_facts:
+      hostname: "{{ openshift_hostname | default(None) }}"
+      ip: "{{ openshift_ip | default(None) }}"
+      public_hostname: "{{ openshift_public_hostname | default(None) }}"
+      public_ip: "{{ openshift_public_ip | default(None) }}"
+
+- name: Configure the resolver
+  template: dest=/etc/resolv.conf src=resolv.conf
+
+- name: Disable DHCP DNS
+  lineinfile: dest={{ network_file }} regexp=^PEERDNS line=PEERDNS=no
+
+- name: Override DHCP DNS
+  lineinfile: dest={{ network_file }} regexp=^DNS1 line=DNS1={{ dns_server }}
