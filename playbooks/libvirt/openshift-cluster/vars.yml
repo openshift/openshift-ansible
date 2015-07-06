@@ -7,9 +7,12 @@ libvirt_uri: 'qemu:///system'
 deployment_vars:
   origin:
     image:
-      url: "http://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.qcow2"
-      name: CentOS-7-x86_64-GenericCloud.qcow2
-      sha256: e324e3ab1d24a1bbf035ddb365e7f9058c0b454acf48d7aa15c5519fae5998ab
+      url:    "{{ lookup('oo_option', 'image_url') |
+                  default('http://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.qcow2', True) }}"
+      name:   "{{ lookup('oo_option', 'image_name') |
+                  default('CentOS-7-x86_64-GenericCloud.qcow2', True) }}"
+      sha256: "{{ lookup('oo_option', 'image_sha256') |
+                  default('e324e3ab1d24a1bbf035ddb365e7f9058c0b454acf48d7aa15c5519fae5998ab', True) }}"
     ssh_user: openshift
     sudo: yes
   online:
