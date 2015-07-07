@@ -21,7 +21,6 @@
   with_items: nodes_needing_certs
 
 - name: Generate the node server certificate
-  delegate_to: "{{ openshift_first_master }}"
   command: >
     {{ openshift.common.admin_binary }} create-server-cert
       --cert=server.crt --key=server.key --overwrite=true
