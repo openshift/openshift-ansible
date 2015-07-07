@@ -29,7 +29,7 @@
       domain: local
 
 - name: Install OpenShift Master package
-  yum: pkg=openshift-master state=installed
+  yum: pkg="openshift-master-{{ openshift_version }}" state=installed
   register: install_result
 
 - name: Reload systemd units

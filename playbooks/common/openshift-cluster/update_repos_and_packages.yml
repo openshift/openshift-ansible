@@ -4,4 +4,4 @@
     openshift_deployment_type: "{{ deployment_type }}"
   roles:
   - openshift_repos
-  - os_update_latest
+#  - os_update_latest

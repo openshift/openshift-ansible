@@ -1,2 +1,3 @@
 ---
 openshift_node_cert_dir: /etc/openshift/node
+openshift_version: 0.4.3

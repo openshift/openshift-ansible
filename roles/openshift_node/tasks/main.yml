@@ -22,9 +22,20 @@
   - "{{ openshift_node_cert_dir }}/server.crt"
   - "{{ openshift_node_cert_dir }}/server.key"
 
+#- name: Tweak yum to allow static openshift version
+#  lineinfile: dest=/etc/yum.conf line:"exclude=openshift"
+
+#- name: Install tuned profile package
+#  yum: pkg=tuned-profiles-openshift-node-{{ openshift_version }} state=installed
+
 - name: Install OpenShift Node package
-  yum: pkg=openshift-node state=installed
-  register: install_result
+  command: yum install -y openshift-{{ openshift_version }} tuned-profiles-openshift-node-{{ openshift_version }} openshift-node-{{ openshift_version }}
+#  yum: pkg="{{ item }}-{{ openshift_version }}" state=installed
+#  register: install_result
+#  with_items:
+#    - openshift
+#    - tuned-profiles-openshift-node
+#    - openshift-node
 
 - name: Reload systemd units
   command: systemctl daemon-reload

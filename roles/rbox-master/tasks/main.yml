@@ -23,11 +23,14 @@
     state: link
 
 - name: Update config files for RBox
-  shell: ./update_to_cluster.sh rbox openstack
+  shell: ./update_to_cluster.sh rbox artifactory
   args:
     chdir: ~/mip
   environment:
     OS_BIN: /usr/bin/openshift  
+
+#- name: Logging in
+#  shell: /usr/bin/openshift login
 
 - name: Creating Project
   shell: ./tools/deploy-siz-one.sh 
