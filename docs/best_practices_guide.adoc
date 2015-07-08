@@ -27,6 +27,24 @@ The tooling is flexible enough that exceptions can be made so that the tool the 
 
 == Python
 
+=== Python Source Files
+
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| Python source files MUST contain the following vim mode line.
+|===
+
+[source]
+----
+# vim: expandtab:tabstop=4:shiftwidth=4
+----
+
+Since most developers contributing to this repository use vim, this rule helps to promote consistency.
+
+If mode lines for other editors are needed, please open a GitHub issue.
+
 === Method Signatures
 
 '''
@@ -39,7 +57,6 @@ The purpose of this rule is to make it so that method signatures are backwards c
 
 If this rule isn't followed, it will be necessary for the person who changed the method to search out all callers and make sure that they're able to use the new method signature.
 
-Example:
 .Before:
 [source,python]
 ----
@@ -125,6 +142,7 @@ YAML is a superset of JSON, which means that Ansible allows JSON syntax to be in
 
 Every effort should be made to keep our Ansible YAML files in pure YAML.
 
+=== Modules
 '''
 [cols="2v,v"]
 |===
@@ -176,6 +194,51 @@ Lines that are long quickly become a wall of text that isn't easily parsable. It
     sha256sum: b5bb9d8014a0f9b1d61e21e796d78dccdf1352f23cd32812f4850b878ae4944c
 ----
 
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| The Ansible `shell` module SHOULD NOT be used. Instead, use the `command` module.
+|===
+.Context
+* http://docs.ansible.com/shell_module.html#notes[Ansible Doc on why using the command module is a best practice]
+
+The Ansible `shell` module can run most commands that can be run from a bash CLI. This makes it extremely powerful, but it also opens our playbooks up to being exploited by attackers.
+
+.Bad:
+[source,yaml]
+----
+- shell: "/bin/echo {{ cli_var }}"
+----
+
+.Better:
+[source,yaml]
+----
+- command: "/bin/echo {{ cli_var }}"
+----
+
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| The Ansible `quote` filter MUST be used with any variable passed into the shell module.
+|===
+.Context
+* http://docs.ansible.com/shell_module.html#notes[Ansible Doc describing why to use the quote filter]
+
+It is recommended not to use the `shell` module. However, if it absolutely must be used, all variables passed into the `shell` module MUST use the `quote` filter to ensure they are shell safe.
+
+.Bad:
+[source,yaml]
+----
+- shell: "/bin/echo {{ cli_var }}"
+----
+
+.Good:
+[source,yaml]
+----
+- shell: "/bin/echo {{ cli_var | quote }}"
+----
 
 === Defensive Programming
 
@@ -220,7 +283,83 @@ If an Ansible role requires certain variables to be set, it's best to check for 
   when: arl_environment is not defined or arl_environment == ''
 ----
 
+=== Tasks
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| Ansible tasks SHOULD NOT be used in ansible playbooks. Instead, use pre_tasks and post_tasks.
+|===
+An Ansible play is defined as a Yaml dictionary. Because of that, ansible doesn't know if the play's tasks list or roles list was specified first. Therefore Ansible always runs tasks after roles.
+
+This can be quite confusing if the tasks list is defined in the playbook before the roles list because people assume in order execution in Ansible.
+
+Therefore, we SHOULD use pre_tasks and post_tasks to make it more clear when the tasks will be run.
+
+.Context
+* https://docs.ansible.com/playbooks_roles.html[Ansible documentation on pre_tasks and post_tasks]
+
+.Bad:
+[source,yaml]
+----
+---
+# playbook.yml
+- hosts: localhost
+  gather_facts: no
+  tasks:
+  - name: This will execute AFTER the example_role, so it's confusing
+    debug: msg="in tasks list"
+  roles:
+  - role: example_role
+
+# roles/example_role/tasks/main.yml
+- debug: msg="in example_role"
+----
+
+.Good:
+[source,yaml]
+----
+---
+# playbook.yml
+- hosts: localhost
+  gather_facts: no
+  pre_tasks:
+  - name: This will execute BEFORE the example_role, so it makes sense
+    debug: msg="in pre_tasks list"
+  roles:
+  - role: example_role
+
+# roles/example_role/tasks/main.yml
+- debug: msg="in example_role"
+----
+
+
 === Roles
+
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| All tasks in a role SHOULD be tagged with the role name.
+|===
+
+.Context
+* http://docs.ansible.com/playbooks_tags.html[Ansible doc explaining tags]
+
+Ansible tasks can be tagged, and then these tags can be used to either _run_ or _skip_ the tagged tasks using the `--tags` and `--skip-tags` ansible-playbook options respectively.
+
+This is very useful when developing and debugging new tasks. It can also significantly speed up playbook runs if the user specifies only the roles that changed.
+
+.Example:
+[source,yaml]
+----
+---
+# roles/example_role/tasks/main.yml
+- debug: msg="in example_role"
+  tags:
+  - example_role
+----
+
 
 '''
 [cols="2v,v"]

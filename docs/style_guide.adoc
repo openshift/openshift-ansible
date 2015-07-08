@@ -57,18 +57,34 @@ Ansible tooling (like `ansible-galaxy init`) create files with a .yml extension.
 Example: `tasks.yml`
 
 
-=== Ansible Global Variables
-Ansible global variables are defined as any variables outside of ansible roles. Examples include playbook variables, variables passed in on the cli, etc.
+=== Ansible CLI Variables
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| Variables meant to be passed in from the ansible CLI MUST have a prefix of cli_
+|===
 
+Ansible allows variables to be passed in on the command line using the `-e` option. These variables MUST have a prefix of cli_ so that it's clear where they came from, and how dangerous they are (can be exploited).
+
+
+.Example:
+[source]
+----
+ansible-playbook -e cli_foo=bar someplays.yml
+----
+
+=== Ansible Global Variables
 '''
 [cols="2v,v"]
 |===
 | **Rule**
 | Global variables MUST have a prefix of g_
 |===
+Ansible global variables are defined as any variables outside of ansible roles. Examples include playbook variables, variables passed in on the cli, etc.
 
 
-Example:
+.Example:
 [source]
 ----
 g_environment: someval
