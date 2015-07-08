@@ -15,4 +15,28 @@
 
 - include: ../../common/openshift-cluster/update_repos_and_packages.yml
 
+- name: Utilize entire disk
+  hosts: oo_hosts_to_update
+  gather_facts: no
+  roles:
+  - role: openshift_expand_partition
+    oep_drive: "/dev/xvda"
+    oep_partition: 3
+    oep_file_system: "xfs"
+
 - include: config.yml
+
+- name: Use direct-lvm for docker cache storage
+  hosts: oo_nodes_deployment_type_online
+  gather_facts: no
+  roles:
+  - role: docker_storage
+    dst_device: /dev/xvdb
+    dst_vg: direct-lvm
+    dst_options:
+    - key: dm.datadev
+      value: /dev/direct-lvm/data
+    - key: dm.metadatadev
+      value: /dev/direct-lvm/metadata
+    - key: dm.fs
+      value: xfs
