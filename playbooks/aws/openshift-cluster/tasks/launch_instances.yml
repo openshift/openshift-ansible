@@ -51,7 +51,7 @@
 
 - set_fact:
     latest_ami: "{{ ami_result.results | oo_ami_selector(ec2_image_name) }}"
-    user_data: "{{ lookup('template', '../templates/user_data.j2') if type == 'node' else None | default('omit') }}"
+    user_data: "{{ lookup('template', '../templates/user_data.j2') }}"
     volume_defs:
       master:
         root:

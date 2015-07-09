@@ -1,17 +1,5 @@
 #cloud-config
-yum_repos:
-  jdetiber-copr:
-    name: Copr repo for origin owned by jdetiber
-    baseurl: https://copr-be.cloud.fedoraproject.org/results/jdetiber/origin/epel-7-$basearch/
-    skip_if_unavailable: true
-    gpgcheck: true
-    gpgkey: https://copr-be.cloud.fedoraproject.org/results/jdetiber/origin/pubkey.gpg
-    enabled: true
-
-packages:
-- xfsprogs # can be dropped after docker-storage-setup properly requires it: https://github.com/projectatomic/docker-storage-setup/pull/8
-- docker-storage-setup
-
+{% if type == 'node' %}
 mounts:
 - [ xvdb ]
 - [ ephemeral0 ]
@@ -23,7 +11,15 @@ write_files:
   path: /etc/sysconfig/docker-storage-setup
   owner: root:root
   permissions: '0644'
+{% endif %}
 
+{% if deployment_type == 'online' %}
+devices: ['/var'] # Workaround for https://bugs.launchpad.net/bugs/1455436
+
+disable_root: 0
+growpart:
+  mode: auto
+  devices: ['/var']
 runcmd:
-- systemctl daemon-reload
-- systemctl enable lvm2-lvmetad.service docker-storage-setup.service
+- xfs_growfs /var
+{% endif %}
