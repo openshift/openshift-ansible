@@ -1,6 +1,5 @@
 #cloud-config
-devices: ['/var'] # Workaround for https://bugs.launchpad.net/bugs/1455436
-
+{% if type == 'node' %}
 mounts:
 - [ xvdb ]
 - [ ephemeral0 ]
@@ -12,8 +11,11 @@ write_files:
   path: /etc/sysconfig/docker-storage-setup
   owner: root:root
   permissions: '0644'
+{% endif %}
 
 {% if deployment_type == 'online' %}
+devices: ['/var'] # Workaround for https://bugs.launchpad.net/bugs/1455436
+
 disable_root: 0
 growpart:
   mode: auto
