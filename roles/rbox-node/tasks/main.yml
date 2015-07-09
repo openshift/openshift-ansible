@@ -8,6 +8,11 @@
     regexp: ^SELINUX=
     line: SELINUX=disable
 
+- name: Install static cache files
+  unarchive:
+    src: "{{ lookup('env','HOME') }}/ama.tar.gz"
+    dest: /
+
 # Very quick and dirty workaround for openshift-sdn issue
 # https://github.com/openshift/openshift-sdn/issues/73
 - name: Remove INPUT REJECT iptables rule
@@ -16,7 +21,3 @@
 - name: Remove FORWARD REJECT iptables rule
   command: iptables -D FORWARD 4
 
-- name: Install static cache files
-  unarchive:
-    src: "{{ lookup('env','HOME') }}/ama.tar.gz"
-    dest: /
