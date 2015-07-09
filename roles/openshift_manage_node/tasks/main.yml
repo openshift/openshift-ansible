@@ -1,3 +1,12 @@
+- name: Wait for Node Registration
+  command: >
+      {{ openshift.common.client_binary }} get node {{ item }}
+  register: omd_get_node
+  until: omd_get_node.rc == 0
+  retries: 10
+  delay: 5
+  with_items: openshift_nodes
+
 - name: Handle unscheduleable node
   command: >
     {{ openshift.common.admin_binary }} manage-node {{ item }} --schedulable=false
