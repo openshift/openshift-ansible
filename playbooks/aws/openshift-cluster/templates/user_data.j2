@@ -1,4 +1,6 @@
 #cloud-config
+devices: ['/var'] # Workaround for https://bugs.launchpad.net/bugs/1455436
+
 mounts:
 - [ xvdb ]
 - [ ephemeral0 ]
@@ -13,4 +15,9 @@ write_files:
 
 {% if deployment_type == 'online' %}
 disable_root: 0
+growpart:
+  mode: auto
+  devices: ['/var']
+runcmd:
+- xfs_growfs /var
 {% endif %}
