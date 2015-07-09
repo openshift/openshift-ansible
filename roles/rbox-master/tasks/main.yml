@@ -4,14 +4,14 @@
 
 - name: Install Openshift files for UHA
   git:
-    repo: http://172.16.141.210/git/scm/~cmu/mip.git
+    repo: http://172.16.141.210/git/scm/rbox/mip.git
     dest: ~/mip
     version: multinode
     clone: yes
 
 - name: Install Openshift blueprints for RBox
   git:
-    repo: http://172.16.141.210/git/scm/~cmu/openshift_blueprints.git
+    repo: http://172.16.141.210/git/scm/rbox/openshift_blueprints.git
     dest: ~/openshift_blueprints
     version: multinode
     clone: yes
