@@ -139,6 +139,9 @@
 - name: Set scheduleability
   hosts: oo_first_master
   vars:
+    openshift_nodes: "{{ hostvars
+                         | oo_select_keys(groups['oo_nodes_to_config'])
+                         | oo_collect('openshift.common.hostname') }}"
     openshift_unscheduleable_nodes: "{{ hostvars
                                         | oo_select_keys(groups['oo_nodes_to_config']) 
                                         | oo_collect('openshift.common.hostname', {'openshift_scheduleable': False}) }}"
