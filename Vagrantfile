@@ -39,6 +39,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.vm.define "node#{node_index}" do |node|
       node.vm.hostname = "ose3-node#{node_index}.example.com"
       node.vm.network :private_network, ip: "192.168.100.#{200 + n}"
+      config.vm.provision "shell", inline: "nmcli connection reload; systemctl restart network.service"
     end
   end
 
@@ -46,6 +47,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     master.vm.hostname = "ose3-master.example.com"
     master.vm.network :private_network, ip: "192.168.100.100"
     master.vm.network :forwarded_port, guest: 8443, host: 8443
+    config.vm.provision "shell", inline: "nmcli connection reload; systemctl restart network.service"
     master.vm.provision "ansible" do |ansible|
       ansible.limit = 'all'
       ansible.sudo = true
