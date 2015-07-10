@@ -195,6 +195,13 @@ class FilterModule(object):
                 docker_vol.pop('delete_on_termination', None)
                 docker_vol['ephemeral'] = 'ephemeral0'
             return [root_vol, docker_vol]
+        elif host_type == 'etcd':
+            etcd_vol = data[host_type]['etcd']
+            etcd_vol['device_name'] = '/dev/xvdb'
+            etcd_vol['delete_on_termination'] = True
+            if etcd_vol['device_type'] != 'io1':
+                etcd_vol.pop('iops', None)
+            return [root_vol, etcd_vol]
         return [root_vol]
 
     @staticmethod

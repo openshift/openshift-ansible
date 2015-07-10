@@ -43,7 +43,7 @@
 
     # Fail if any of the instances failed to terminate with an error other
     # than 403 Forbidden
-    - fail: msg=Terminating instance {{ item.item.ec2_id }} failed with message {{ item.msg }}
+    - fail: msg=Terminating instance {{ item.ec2_id }} failed with message {{ item.msg }}
       when: "'oo_hosts_to_terminate' in groups and item.failed and not item.msg | search(\"error: EC2ResponseError: 403 Forbidden\")"
       with_items: ec2_term.results
 
