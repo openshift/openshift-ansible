@@ -103,7 +103,6 @@ class ZabbixAPI(object):
 
         # pylint: disable=no-member
         # This method does not exist until the metaprogramming executed
-        # This is permanently disabled.
         results = self.user.login(user=self.username, password=self.password)
 
         if results[0]['status'] == '200':
@@ -251,17 +250,26 @@ def exists(content, key='result'):
 
     return True
 
-def diff_content(from_zabbix, from_user):
+def diff_content(from_zabbix, from_user, ignore=None):
     ''' Compare passed in object to results returned from zabbix
     '''
-    terms = ['search', 'output', 'groups', 'select', 'expand']
+    terms = ['search', 'output', 'groups', 'select', 'expand', 'filter']
+    if ignore:
+        terms.extend(ignore)
     regex = '(' + '|'.join(terms) + ')'
     retval = {}
     for key, value in from_user.items():
         if re.findall(regex, key):
             continue
 
-        if from_zabbix[key] != str(value):
+        # special case here for templates.  You query templates and
+        # the zabbix api returns parentTemplates.  These will obviously fail.
+        # So when its templates compare against parentTemplates.
+        if key == 'templates' and from_zabbix.has_key('parentTemplates'):
+            if from_zabbix['parentTemplates'] != value:
+                retval[key] = value
+
+        elif from_zabbix[key] != str(value):
             retval[key] = str(value)
 
     return retval
@@ -280,6 +288,7 @@ def main():
             params=dict(),
             debug=dict(default=False, type='bool'),
             state=dict(default='present', type='str'),
+            ignore=dict(default=None, type='list'),
         ),
         #supports_check_mode=True
     )
@@ -306,9 +315,11 @@ def main():
 
     zapi = ZabbixAPI(api_data)
 
+    ignore = module.params['ignore']
     zbx_class = module.params.get('zbx_class')
     rpc_params = module.params.get('params', {})
     state = module.params.get('state')
+
 
     # Get the instance we are trying to call
     zbx_class_inst = zapi.__getattribute__(zbx_class.lower())
@@ -337,14 +348,14 @@ def main():
         module.exit_json(changed=True, results=content['result'], state="absent")
 
     if state == 'present':
-	# It's not there, create it!
+    # It's not there, create it!
         if not exists(content):
             zbx_action_method = zapi.__getattribute__(zbx_class.capitalize()).__dict__['create']
             _, content = zbx_action_method(zbx_class_inst, rpc_params)
             module.exit_json(changed=True, results=content['result'], state='present')
 
-	# It's there and the same, do nothing!
-        diff_params = diff_content(content['result'][0], rpc_params)
+    # It's there and the same, do nothing!
+        diff_params = diff_content(content['result'][0], rpc_params, ignore)
         if not diff_params:
             module.exit_json(changed=False, results=content['result'], state="present")
 
@@ -368,3 +379,4 @@ def main():
 from ansible.module_utils.basic import *
 
 main()
+
