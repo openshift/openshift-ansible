@@ -1,0 +1,55 @@
+---
+- name: 'Create a host object in zabbix'
+  hosts: localhost
+  gather_facts: no
+  roles:
+    - os_zabbix
+  post_tasks:
+
+    - zbxapi:
+        server: https://noc2.ops.rhcloud.com/zabbix/api_jsonrpc.php
+        zbx_class: Template
+        state: list
+        params:
+          host: ctr_test_kwoodson
+          filter:
+            host:
+            -  ctr_kwoodson_test_tmpl
+
+      register: tmpl_results
+
+    - debug: var=tmpl_results
+
+#ansible-playbook -e 'oo_desc=kwoodson test' -e 'oo_name=kwoodson test name' -e 'oo_start=1435715357' -e 'oo_stop=1435718985' -e 'oo_hostids=11549' create_maintenance.yml
+- name: 'Create a host object in zabbix'
+  hosts: localhost
+  gather_facts: no
+  roles:
+    - os_zabbix
+  post_tasks:
+
+    - zbxapi:
+        server: https://noc2.ops.rhcloud.com/zabbix/api_jsonrpc.php
+        zbx_class: Host
+        state: absent
+        params:
+          host: ctr_test_kwoodson
+          interfaces:
+          - type: 1
+            main: 1
+            useip: 1
+            ip: 127.0.0.1
+            dns: ""
+            port: 10050
+          groups:
+          - groupid: 1
+          templates: "{{ tmpl_results.results | oo_collect('templateid') | oo_build_zabbix_list_dict('templateid') }}"
+          output: extend
+          filter:
+            host:
+            -  ctr_test_kwoodson
+
+      register: host_results
+
+    - debug: var=host_results
+
