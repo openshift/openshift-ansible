@@ -12,11 +12,6 @@
   yum: pkg=openshift-master state=present
   register: install_result
 
-# TODO: Is this necessary or was this a workaround for an old bug in packaging?
-- name: Reload systemd units
-  command: systemctl daemon-reload
-  when: install_result | changed
-
 - name: Set master OpenShift facts
   openshift_facts:
     role: master

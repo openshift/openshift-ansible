@@ -18,19 +18,19 @@ corsAllowedOrigins:
 {% for origin in ['127.0.0.1', 'localhost', openshift.common.hostname, openshift.common.ip, openshift.common.public_hostname, openshift.common.public_ip] %}
   - {{ origin }}
 {% endfor %}
-{% if openshift.master.embedded_dns %}
+{% if openshift.master.embedded_dns | bool %}
 dnsConfig:
   bindAddress: {{ openshift.master.bind_addr }}:{{ openshift.master.dns_port }}
 {% endif %}
 etcdClientInfo:
-  ca: ca.crt
+  ca: {{ "ca.crt" if (openshift.master.embedded_etcd | bool) else "master.etcd-ca.crt" }}
   certFile: master.etcd-client.crt
   keyFile: master.etcd-client.key
   urls:
 {% for etcd_url in openshift.master.etcd_urls %}
     - {{ etcd_url }}
 {% endfor %}
-{% if openshift.master.embedded_etcd %}
+{% if openshift.master.embedded_etcd | bool %}
 etcdConfig:
   address: {{ openshift.common.hostname }}:{{ openshift.master.etcd_port }}
   peerAddress: {{ openshift.common.hostname }}:7001
@@ -61,7 +61,7 @@ kubeletClientInfo:
   certFile: master.kubelet-client.crt
   keyFile: master.kubelet-client.key
   port: 10250
-{% if openshift.master.embedded_kube %}
+{% if openshift.master.embedded_kube | bool %}
 kubernetesMasterConfig:
   apiLevels:
   - v1beta3

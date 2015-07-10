@@ -1,6 +1,6 @@
 ---
 galaxy_info:
-  author: Scott Dodson
+  author: Jason DeTiberus
   description:
   company: Red Hat, Inc.
   license: Apache License, Version 2.0
@@ -13,4 +13,4 @@ galaxy_info:
   - cloud
   - system
 dependencies:
-- { role: openshift_facts }
+- { role: etcd_ca }

@@ -15,3 +15,5 @@ galaxy_info:
   categories:
   - cloud
   - system
+dependencies:
+- { role: os_firewall }

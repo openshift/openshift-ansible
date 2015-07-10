@@ -1,4 +1,4 @@
-OpenShift etcd certs
+etcd_ca
 ========================
 
 TODO

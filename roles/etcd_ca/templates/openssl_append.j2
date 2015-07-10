@@ -1,0 +1,51 @@
+
+[ etcd_v3_req ]
+basicConstraints = critical,CA:FALSE
+keyUsage         = digitalSignature,keyEncipherment
+subjectAltName   = ${ENV::SAN}
+
+[ etcd_ca ]
+dir             = {{ etcd_ca_dir }}
+crl_dir         = $dir/crl
+database        = $dir/index.txt
+new_certs_dir   = $dir/certs
+certificate     = $dir/ca.crt
+serial          = $dir/serial
+private_key     = $dir/ca.key
+crl_number      = $dir/crlnumber
+x509_extensions = etcd_v3_ca_client
+default_days    = 365
+default_md      = sha256
+preserve        = no
+name_opt        = ca_default
+cert_opt        = ca_default
+policy          = policy_anything
+unique_subject  = no
+copy_extensions = copy
+
+[ etcd_v3_ca_self ]
+authorityKeyIdentifier = keyid,issuer
+basicConstraints       = critical,CA:TRUE,pathlen:0
+keyUsage               = critical,digitalSignature,keyEncipherment,keyCertSign
+subjectKeyIdentifier   = hash
+
+[ etcd_v3_ca_peer ]
+authorityKeyIdentifier = keyid,issuer:always
+basicConstraints       = critical,CA:FALSE
+extendedKeyUsage       = clientAuth,serverAuth
+keyUsage               = digitalSignature,keyEncipherment
+subjectKeyIdentifier   = hash
+
+[ etcd_v3_ca_server ]
+authorityKeyIdentifier = keyid,issuer:always
+basicConstraints       = critical,CA:FALSE
+extendedKeyUsage       = serverAuth
+keyUsage               = digitalSignature,keyEncipherment
+subjectKeyIdentifier   = hash
+
+[ etcd_v3_ca_client ]
+authorityKeyIdentifier = keyid,issuer:always
+basicConstraints       = critical,CA:FALSE
+extendedKeyUsage       = clientAuth
+keyUsage               = digitalSignature,keyEncipherment
+subjectKeyIdentifier   = hash

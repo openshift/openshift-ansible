@@ -374,7 +374,6 @@ def set_url_facts_if_unset(facts):
         if 'etcd_urls' not in facts['master']:
             etcd_urls = []
             if etcd_hosts != '':
-                etcd_port = 2379
                 facts['master']['etcd_port'] = etcd_port
                 facts['master']['embedded_etcd'] = False
                 for host in etcd_hosts:
@@ -718,11 +717,7 @@ class OpenShiftFacts(object):
             defaults['master'] = master
 
         if 'node' in roles:
-            node = dict(pod_cidr='', labels={}, annotations={}, portal_net='172.30.0.0/16')
-            node['resources_cpu'] = self.system_facts['processor_cores']
-            node['resources_memory'] = int(
-                int(self.system_facts['memtotal_mb']) * 1024 * 1024 * 0.75
-            )
+            node = dict(labels={}, annotations={}, portal_net='172.30.0.0/16')
             defaults['node'] = node
 
         return defaults
