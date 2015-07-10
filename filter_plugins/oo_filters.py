@@ -175,9 +175,9 @@ class FilterModule(object):
         '''
         if not issubclass(type(data), dict):
             raise errors.AnsibleFilterError("|failed expects first param is a dict")
-        if host_type not in ['master', 'node']:
-            raise errors.AnsibleFilterError("|failed expects either master or node"
-                                            " host type")
+        if host_type not in ['master', 'node', 'etcd']:
+            raise errors.AnsibleFilterError("|failed expects etcd, master or node"
+                                            " as the host type")
 
         root_vol = data[host_type]['root']
         root_vol['device_name'] = '/dev/sda1'

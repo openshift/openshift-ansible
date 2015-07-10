@@ -4,6 +4,7 @@
 [OSEv3:children]
 masters
 nodes
+etcd
 
 # Set variables common for all OSEv3 hosts
 [OSEv3:vars]
@@ -33,7 +34,10 @@ openshift_additional_repos=[{'id': 'ose-devel', 'name': 'ose-devel', 'baseurl': 
 [masters]
 ose3-master-ansible.test.example.com
 
+[etcd]
+#ose3-master-ansible.test.example.com
+
 # host group for nodes
 [nodes]
-#ose3-master-ansible.test.example.com openshift_node_labels="{'region': 'infra', 'zone': 'default'}"
+ose3-master-ansible.test.example.com openshift_scheduleable=False
 ose3-node[1:2]-ansible.test.example.com openshift_node_labels="{'region': 'primary', 'zone': 'default'}"

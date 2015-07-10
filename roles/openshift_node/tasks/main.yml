@@ -1,5 +1,11 @@
 ---
 # TODO: allow for overriding default ports where possible
+- fail:
+    msg: This role requres that osn_cluster_dns_domain is set
+  when: osn_cluster_dns_domain is not defined or not osn_cluster_dns_domain
+- fail:
+    msg: This role requres that osn_cluster_dns_ip is set
+  when: osn_cluster_dns_ip is not defined or not osn_cluster_dns_ip
 
 - name: Install OpenShift Node package
   yum: pkg=openshift-node state=present

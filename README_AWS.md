@@ -20,10 +20,11 @@ Create a credentials file
 ```
 Note: You must source this file before running any Ansible commands.
 
+Alternatively, you could configure credentials in either ~/.boto or ~/.aws/credentials, see the [boto docs](http://docs.pythonboto.org/en/latest/boto_config_tut.html) for the format.
 
 (Optional) Setup your $HOME/.ssh/config file
 -------------------------------------------
-In case of a cluster creation, or any other case where you don't know the machine hostname in advance, you can use '.ssh/config'
+In case of a cluster creation, or any other case where you don't know the machine hostname in advance, you can use `.ssh/config`
 to setup a private key file to allow ansible to connect to the created hosts.
 
 To do so, add the the following entry to your $HOME/.ssh/config file and make it point to the private key file which allows you to login on AWS.
@@ -62,10 +63,16 @@ Node specific defaults:
 If needed, these values can be changed by setting environment variables on your system.
 
 - export ec2_instance_type='m3.large'
-- export ec2_ami='ami-307b3658'
+- export ec2_image='ami-307b3658'
 - export ec2_region='us-east-1'
 - export ec2_keypair='libra'
 - export ec2_security_groups="['public']"
+- export ec2_vpc_subnet='my_vpc_subnet'
+- export ec2_assign_public_ip='true'
+- export os_etcd_root_vol_size='20'
+- export os_etcd_root_vol_type='standard'
+- export os_etcd_vol_size='20'
+- export os_etcd_vol_type='standard'
 - export os_master_root_vol_size='20'
 - export os_master_root_vol_type='standard'
 - export os_node_root_vol_size='15'
@@ -114,3 +121,12 @@ Terminating a cluster
 ```
   bin/cluster terminate aws <cluster-id>
 ```
+
+Specifying a deployment type
+---------------------------
+The --deployment-type flag can be passed to bin/cluster to specify the deployment type
+1. To launch an online cluster (requires access to private repositories and amis):
+```
+  bin/cluster create aws --deployment-type=online <cluster-id>
+```
+Note: If no deployment type is specified, then the default is origin.

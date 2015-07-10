@@ -11,6 +11,13 @@
       msg: Deployment type not supported for aws provider yet
     when: deployment_type == 'enterprise'
 
+  - include: ../../common/openshift-cluster/set_etcd_launch_facts_tasks.yml
+  - include: tasks/launch_instances.yml
+    vars:
+      instances: "{{ etcd_names }}"
+      cluster: "{{ cluster_id }}"
+      type: "{{ k8s_type }}"
+
   - include: ../../common/openshift-cluster/set_master_launch_facts_tasks.yml
   - include: tasks/launch_instances.yml
     vars:
@@ -25,9 +32,10 @@
       cluster: "{{ cluster_id }}"
       type: "{{ k8s_type }}"
 
-  - set_fact:
-      a_master: "{{ master_names[0] }}"
-  - add_host: name={{ a_master }} groups=service_master
+  - add_host:
+      name: "{{ master_names.0 }}"
+      groups: service_master
+    when: master_names is defined and master_names.0 is defined
 
 - include: update.yml
 

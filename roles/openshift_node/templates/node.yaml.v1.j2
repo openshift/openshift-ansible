@@ -1,7 +1,7 @@
 allowDisabledDocker: false
 apiVersion: v1
-dnsDomain: {{ hostvars[openshift_first_master].openshift.dns.domain }}
-dnsIP: {{ hostvars[openshift_first_master].openshift.dns.ip }}
+dnsDomain: {{ osn_cluster_dns_domain }}
+dnsIP: {{ osn_cluster_dns_ip }}
 dockerConfig:
   execHandlerName: ""
 imageConfig:
