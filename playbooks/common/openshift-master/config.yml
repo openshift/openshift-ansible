@@ -27,6 +27,9 @@
           api_url: "{{ openshift_master_api_url | default(None) }}"
           api_use_ssl: "{{ openshift_master_api_use_ssl | default(None) }}"
           public_api_url: "{{ openshift_master_public_api_url | default(None) }}"
+          cluster_hostname: "{{ openshift_master_cluster_hostname | default(None) }}"
+          cluster_public_hostname: "{{ openshift_master_cluster_public_hostname | default(None) }}"
+          cluster_defer_ha: "{{ openshift_master_cluster_defer_ha | default(None) }}"
           console_path: "{{ openshift_master_console_path | default(None) }}"
           console_port: "{{ openshift_master_console_port | default(None) }}"
           console_url: "{{ openshift_master_console_url | default(None) }}"
@@ -152,16 +155,26 @@
   roles:
   - openshift_master_certificates
   post_tasks:
+  - name: Remove generated etcd client certs when using external etcd
+    file:
+      path: "{{ master_generated_certs_dir }}/{{ item.0.master_cert_subdir }}/{{ item.1 }}"
+      state: absent
+    when: groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config
+    with_nested:
+    - masters_needing_certs
+    - - master.etcd-client.crt
+      - master.etcd-client.key
+
   - name: Create a tarball of the master certs
     command: >
-      tar -czvf {{ master_generated_certs_dir }}/{{ item.master.cert_subdir }}.tgz
-        -C {{ master_generated_certs_dir }}/{{ item.master.cert_subdir }} .
+      tar -czvf {{ master_generated_certs_dir }}/{{ item.master_cert_subdir }}.tgz
+        -C {{ master_generated_certs_dir }}/{{ item.master_cert_subdir }} .
     args:
-      creates: "{{ master_generated_certs_dir }}/{{ item.master.cert_subdir }}.tgz"
+      creates: "{{ master_generated_certs_dir }}/{{ item.master_cert_subdir }}.tgz"
     with_items: masters_needing_certs
   - name: Retrieve the master cert tarball from the master
     fetch:
-      src: "{{ master_generated_certs_dir }}/{{ item.master.cert_subdir }}.tgz"
+      src: "{{ master_generated_certs_dir }}/{{ item.master_cert_subdir }}.tgz"
       dest: "{{ sync_tmpdir }}/"
       flat: yes
       fail_on_missing: yes
@@ -172,6 +185,7 @@
   hosts: oo_masters_to_config
   vars:
     sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
+    openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
   pre_tasks:
   - name: Ensure certificate directory exists
     file:
@@ -192,9 +206,14 @@
     group_by: key=oo_masters_deployment_type_{{ openshift.common.deployment_type }}
     changed_when: False
 
-- name: Deploy OpenShift examples
+- name: Additional master configuration
   hosts: oo_first_master
+  vars:
+    openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
+    omc_cluster_hosts: "{{ groups.oo_masters_to_config | join(' ')}}"
   roles:
+  - role: openshift_master_cluster
+    when: openshift_master_ha | bool
   - openshift_examples
 
 # Additional instance config for online deployments

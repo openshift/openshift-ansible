@@ -8,6 +8,10 @@
     - openshift_master_oauth_grant_method in openshift_master_valid_grant_methods
   when: openshift_master_oauth_grant_method is defined
 
+- fail:
+    msg: "openshift_master_cluster_password must be set for multi-master installations"
+  when: openshift_master_ha and not openshift.master.cluster_defer_ha | bool and openshift_master_cluster_password is not defined
+
 - name: Install OpenShift Master package
   yum: pkg=openshift-master state=present
   register: install_result
@@ -16,6 +20,9 @@
   openshift_facts:
     role: master
     local_facts:
+      cluster_hostname: "{{ openshift_master_cluster_hostname | default(None) }}"
+      cluster_public_hostname: "{{ openshift_master_cluster_public_hostname | default(None) }}"
+      cluster_defer_ha: "{{ openshift_master_cluster_defer_ha | default(None) }}"
       debug_level: "{{ openshift_master_debug_level | default(openshift.common.debug_level) }}"
       api_port: "{{ openshift_master_api_port | default(None) }}"
       api_url: "{{ openshift_master_api_url | default(None) }}"
@@ -114,11 +121,25 @@
 
 - name: Start and enable openshift-master
   service: name=openshift-master enabled=yes state=started
+  when: not openshift_master_ha
   register: start_result
 
 - name: pause to prevent service restart from interfering with bootstrapping
   pause: seconds=30
   when: start_result | changed
+
+- name: Install cluster packagese
+  yum: pkg=pcs state=present
+  when: openshift_master_ha and not openshift.master.cluster_defer_ha | bool
+  register: install_result
+
+- name: Start and enable cluster service
+  service: name=pcsd enabled=yes state=started
+  when: openshift_master_ha and not openshift.master.cluster_defer_ha | bool
+
+- name: Set the cluster user password
+  shell: echo {{ openshift_master_cluster_password | quote }} | passwd --stdin hacluster
+  when: install_result | changed
 
 - name: Create the OpenShift client config dir(s)
   file:

@@ -15,6 +15,12 @@ os_firewall_allow:
   port: 24224/tcp
 - service: Fluentd td-agent udp
   port: 24224/udp
+- service: pcsd
+  port: 2224/tcp
+- service: Corosync UDP
+  port: 5404/udp
+- service: Corosync UDP
+  port: 5405/udp
 os_firewall_deny:
 - service: OpenShift api http
   port: 8080/tcp

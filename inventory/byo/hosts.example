@@ -38,14 +38,30 @@ deployment_type=enterprise
 # Allow all auth
 #openshift_master_identity_providers=[{'name': 'allow_all', 'login': 'true', 'challenge': 'true', 'kind': 'AllowAllPasswordIdentityProvider'}]
 
+# master cluster ha variables using pacemaker or RHEL HA
+#openshift_master_cluster_password=openshift_cluster
+#openshift_master_cluster_vip=192.168.133.25
+#openshift_master_cluster_public_vip=192.168.133.25
+#openshift_master_cluster_hostname=openshift-ansible.test.example.com
+#openshift_master_cluster_public_hostname=openshift-ansible.test.example.com
+
+# master cluster ha variables when using a different HA solution
+# For installation the value of openshift_master_cluster_hostname must resolve
+# to the first master defined in the inventory.
+# The HA solution must be manually configured after installation and must ensure
+# that openshift-master is running on a single master host.
+#openshift_master_cluster_hostname=openshift-ansible.test.example.com
+#openshift_master_cluster_public_hostname=openshift-ansible.test.example.com
+#openshift_master_cluster_defer_ha=True
+
 # host group for masters
 [masters]
-ose3-master-ansible.test.example.com
+ose3-master[1:3]-ansible.test.example.com
 
 [etcd]
 ose3-etcd[1:3]-ansible.test.example.com
 
 # host group for nodes
 [nodes]
-ose3-master-ansible.test.example.com openshift_scheduleable=False
+ose3-master[1:3]-ansible.test.example.com openshift_scheduleable=False
 ose3-node[1:2]-ansible.test.example.com openshift_node_labels="{'region': 'primary', 'zone': 'default'}"

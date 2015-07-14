@@ -367,9 +367,11 @@ def set_url_facts_if_unset(facts):
         console_path = facts['master']['console_path']
         etcd_use_ssl = facts['master']['etcd_use_ssl']
         etcd_hosts = facts['master']['etcd_hosts']
-        etcd_port = facts['master']['etcd_port'],
+        etcd_port = facts['master']['etcd_port']
         hostname = facts['common']['hostname']
         public_hostname = facts['common']['public_hostname']
+        cluster_hostname = facts['master'].get('cluster_hostname')
+        cluster_public_hostname = facts['master'].get('cluster_public_hostname')
 
         if 'etcd_urls' not in facts['master']:
             etcd_urls = []
@@ -384,22 +386,49 @@ def set_url_facts_if_unset(facts):
                                         etcd_port)]
             facts['master']['etcd_urls'] = etcd_urls
         if 'api_url' not in facts['master']:
-            facts['master']['api_url'] = format_url(api_use_ssl, hostname,
+            api_hostname = cluster_hostname if cluster_hostname else hostname
+            facts['master']['api_url'] = format_url(api_use_ssl, api_hostname,
                                                     api_port)
         if 'public_api_url' not in facts['master']:
+            api_public_hostname = cluster_public_hostname if cluster_public_hostname else public_hostname
             facts['master']['public_api_url'] = format_url(api_use_ssl,
-                                                           public_hostname,
+                                                           api_public_hostname,
                                                            api_port)
         if 'console_url' not in facts['master']:
+            console_hostname = cluster_hostname if cluster_hostname else hostname
             facts['master']['console_url'] = format_url(console_use_ssl,
-                                                        hostname,
+                                                        console_hostname,
                                                         console_port,
                                                         console_path)
         if 'public_console_url' not in facts['master']:
+            console_public_hostname = cluster_public_hostname if cluster_public_hostname else public_hostname
             facts['master']['public_console_url'] = format_url(console_use_ssl,
-                                                               public_hostname,
+                                                               console_public_hostname,
                                                                console_port,
                                                                console_path)
+    return facts
+
+def set_aggregate_facts(facts):
+    """ Set aggregate facts
+
+        Args:
+            facts (dict): existing facts
+        Returns:
+            dict: the facts dict updated with aggregated facts
+    """
+    all_hostnames = set()
+    if 'common' in facts:
+        all_hostnames.add(facts['common']['hostname'])
+        all_hostnames.add(facts['common']['public_hostname'])
+
+        if 'master' in facts:
+            if 'cluster_hostname' in facts['master']:
+                all_hostnames.add(facts['master']['cluster_hostname'])
+            if 'cluster_public_hostname' in facts['master']:
+                all_hostnames.add(facts['master']['cluster_public_hostname'])
+
+        facts['common']['all_hostnames'] = list(all_hostnames)
+
     return facts
 
 def set_sdn_facts_if_unset(facts):
@@ -675,6 +704,7 @@ class OpenShiftFacts(object):
         facts = set_identity_providers_if_unset(facts)
         facts = set_registry_url_if_unset(facts)
         facts = set_sdn_facts_if_unset(facts)
+        facts = set_aggregate_facts(facts)
         return dict(openshift=facts)
 
     def get_defaults(self, roles):
@@ -713,7 +743,7 @@ class OpenShiftFacts(object):
                           session_name='ssn', session_secrets_file='',
                           access_token_max_seconds=86400,
                           auth_token_max_seconds=500,
-                          oauth_grant_method='auto')
+                          oauth_grant_method='auto', cluster_defer_ha=False)
             defaults['master'] = master
 
         if 'node' in roles:
