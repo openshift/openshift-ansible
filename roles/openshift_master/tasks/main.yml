@@ -114,6 +114,11 @@
 
 - name: Start and enable openshift-master
   service: name=openshift-master enabled=yes state=started
+  register: start_result
+
+- name: pause to prevent service restart from interfering with bootstrapping
+  pause: seconds=30
+  when: start_result | changed
 
 - name: Create the OpenShift client config dir(s)
   file:

@@ -46,5 +46,7 @@
     name: etcd
     state: started
     enabled: yes
+  register: start_result
 
-- pause: seconds=10
+- pause: seconds=30
+  when: start_result | changed
