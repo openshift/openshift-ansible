@@ -53,6 +53,15 @@
     latest_ami: "{{ ami_result.results | oo_ami_selector(ec2_image_name) }}"
     user_data: "{{ lookup('template', '../templates/user_data.j2') }}"
     volume_defs:
+      etcd:
+        root:
+          volume_size: "{{ lookup('env', 'os_etcd_root_vol_size') | default(25, true) }}"
+          device_type: "{{ lookup('env', 'os_etcd_root_vol_type') | default('gp2', true) }}"
+          iops: "{{ lookup('env', 'os_etcd_root_vol_iops') | default(500, true) }}"
+        etcd:
+          volume_size: "{{ lookup('env', 'os_etcd_vol_size') | default(32, true) }}"
+          device_type: "{{ lookup('env', 'os_etcd_vol_type') | default('gp2', true) }}"
+          iops: "{{ lookup('env', 'os_etcd_vol_iops') | default(500, true) }}"
       master:
         root:
           volume_size: "{{ lookup('env', 'os_master_root_vol_size') | default(25, true) }}"

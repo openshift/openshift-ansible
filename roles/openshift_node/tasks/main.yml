@@ -1,5 +1,11 @@
 ---
 # TODO: allow for overriding default ports where possible
+- fail:
+    msg: This role requres that osn_cluster_dns_domain is set
+  when: osn_cluster_dns_domain is not defined or not osn_cluster_dns_domain
+- fail:
+    msg: This role requres that osn_cluster_dns_ip is set
+  when: osn_cluster_dns_ip is not defined or not osn_cluster_dns_ip
 
 - name: Install OpenShift Node package
   yum: pkg=openshift-node state=present
@@ -9,11 +15,6 @@
   yum: pkg=openshift-sdn-ovs state=present
   register: sdn_install_result
   when: openshift.common.use_openshift_sdn
-
-- name: Reload systemd units
-  command: systemctl daemon-reload
-  when: (node_install_result | changed or (openshift.common.use_openshift_sdn
-          and sdn_install_result | changed))
 
 - name: Set node OpenShift facts
   openshift_facts:
@@ -27,9 +28,6 @@
       deployment_type: "{{ openshift_deployment_type }}"
   - role: node
     local_facts:
-      resources_cpu: "{{ openshift_node_resources_cpu | default(none) }}"
-      resources_memory: "{{ openshift_node_resources_memory | default(none) }}"
-      pod_cidr: "{{ openshift_node_pod_cidr | default(none) }}"
       labels: "{{ openshift_node_labels | default(none) }}"
       annotations: "{{ openshift_node_annotations | default(none) }}"
       registry_url: "{{ oreg_url | default(none) }}"

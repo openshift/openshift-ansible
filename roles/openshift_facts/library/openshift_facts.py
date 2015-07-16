@@ -366,13 +366,23 @@ def set_url_facts_if_unset(facts):
         console_port = facts['master']['console_port']
         console_path = facts['master']['console_path']
         etcd_use_ssl = facts['master']['etcd_use_ssl']
+        etcd_hosts = facts['master']['etcd_hosts']
         etcd_port = facts['master']['etcd_port'],
         hostname = facts['common']['hostname']
         public_hostname = facts['common']['public_hostname']
 
         if 'etcd_urls' not in facts['master']:
-            facts['master']['etcd_urls'] = [format_url(etcd_use_ssl, hostname,
-                                                       etcd_port)]
+            etcd_urls = []
+            if etcd_hosts != '':
+                facts['master']['etcd_port'] = etcd_port
+                facts['master']['embedded_etcd'] = False
+                for host in etcd_hosts:
+                    etcd_urls.append(format_url(etcd_use_ssl, host,
+                                                etcd_port))
+            else:
+                etcd_urls = [format_url(etcd_use_ssl, hostname,
+                                        etcd_port)]
+            facts['master']['etcd_urls'] = etcd_urls
         if 'api_url' not in facts['master']:
             facts['master']['api_url'] = format_url(api_use_ssl, hostname,
                                                     api_port)
@@ -695,7 +705,7 @@ class OpenShiftFacts(object):
         if 'master' in roles:
             master = dict(api_use_ssl=True, api_port='8443',
                           console_use_ssl=True, console_path='/console',
-                          console_port='8443', etcd_use_ssl=True,
+                          console_port='8443', etcd_use_ssl=True, etcd_hosts='',
                           etcd_port='4001', portal_net='172.30.0.0/16',
                           embedded_etcd=True, embedded_kube=True,
                           embedded_dns=True, dns_port='53',
@@ -707,11 +717,7 @@ class OpenShiftFacts(object):
             defaults['master'] = master
 
         if 'node' in roles:
-            node = dict(pod_cidr='', labels={}, annotations={}, portal_net='172.30.0.0/16')
-            node['resources_cpu'] = self.system_facts['processor_cores']
-            node['resources_memory'] = int(
-                int(self.system_facts['memtotal_mb']) * 1024 * 1024 * 0.75
-            )
+            node = dict(labels={}, annotations={}, portal_net='172.30.0.0/16')
             defaults['node'] = node
 
         return defaults

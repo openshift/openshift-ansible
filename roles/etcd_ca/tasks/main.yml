@@ -1,0 +1,44 @@
+---
+- file:
+    path: "{{ etcd_ca_dir }}/{{ item }}"
+    state: directory
+    mode: 0700
+    owner: root
+    group: root
+  with_items:
+  - certs
+  - crl
+  - fragments
+
+- command: cp /etc/pki/tls/openssl.cnf ./
+  args:
+    chdir: "{{ etcd_ca_dir }}/fragments"
+    creates: "{{ etcd_ca_dir }}/fragments/openssl.cnf"
+
+- template:
+    dest: "{{ etcd_ca_dir }}/fragments/openssl_append.cnf"
+    src: openssl_append.j2
+
+- assemble:
+    src: "{{ etcd_ca_dir }}/fragments"
+    dest: "{{ etcd_ca_dir }}/openssl.cnf"
+
+- command: touch index.txt
+  args:
+    chdir: "{{ etcd_ca_dir }}"
+    creates: "{{ etcd_ca_dir }}/index.txt"
+
+- copy:
+    dest: "{{ etcd_ca_dir }}/serial"
+    content: "01"
+    force: no
+
+- command: >
+    openssl req -config openssl.cnf -newkey rsa:4096
+    -keyout ca.key -new -out ca.crt -x509 -extensions etcd_v3_ca_self
+    -batch -nodes -subj /CN=etcd-signer@{{ ansible_date_time.epoch }}
+  args:
+    chdir: "{{ etcd_ca_dir }}"
+    creates: "{{ etcd_ca_dir }}/ca.crt"
+  environment:
+    SAN: ''

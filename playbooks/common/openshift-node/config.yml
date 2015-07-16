@@ -18,21 +18,18 @@
           deployment_type: "{{ openshift_deployment_type }}"
       - role: node
         local_facts:
-          resources_cpu: "{{ openshift_node_resources_cpu | default(None) }}"
-          resources_memory: "{{ openshift_node_resources_memory | default(None) }}"
-          pod_cidr: "{{ openshift_node_pod_cidr | default(None) }}"
           labels: "{{ openshift_node_labels | default(None) }}"
           annotations: "{{ openshift_node_annotations | default(None) }}"
   - name: Check status of node certificates
     stat:
-      path: "{{ item }}"
+      path: "/etc/openshift/node/{{ item }}"
     with_items:
-    - "/etc/openshift/node/system:node:{{ openshift.common.hostname }}.crt"
-    - "/etc/openshift/node/system:node:{{ openshift.common.hostname }}.key"
-    - "/etc/openshift/node/system:node:{{ openshift.common.hostname }}.kubeconfig"
-    - "/etc/openshift/node/ca.crt"
-    - "/etc/openshift/node/server.key"
-    - "/etc/openshift/node/server.crt"
+    - "system:node:{{ openshift.common.hostname }}.crt"
+    - "system:node:{{ openshift.common.hostname }}.key"
+    - "system:node:{{ openshift.common.hostname }}.kubeconfig"
+    - ca.crt
+    - server.key
+    - server.crt
     register: stat_result
   - set_fact:
       certs_missing: "{{ stat_result.results | map(attribute='stat.exists')
@@ -56,10 +53,9 @@
   hosts: oo_first_master
   vars:
     nodes_needing_certs: "{{ hostvars
-                             | oo_select_keys(groups['oo_nodes_to_config'])
+                             | oo_select_keys(groups['oo_nodes_to_config']
+                                              | default([]))
                              | oo_filter_list(filter_attr='certs_missing') }}"
-    openshift_nodes: "{{ hostvars
-                         | oo_select_keys(groups['oo_nodes_to_config']) }}"
     sync_tmpdir: "{{ hostvars.localhost.mktemp.stdout }}"
   roles:
   - openshift_node_certificates
@@ -86,7 +82,7 @@
   hosts: oo_nodes_to_config
   vars:
     sync_tmpdir: "{{ hostvars.localhost.mktemp.stdout }}"
-    openshift_node_master_api_url: "{{ hostvars[openshift_first_master].openshift.master.api_url }}"
+    openshift_node_master_api_url: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_url }}"
   pre_tasks:
   - name: Ensure certificate directory exists
     file:
@@ -108,15 +104,6 @@
   tasks:
   - name: Create group for deployment type
     group_by: key=oo_nodes_deployment_type_{{ openshift.common.deployment_type }}
-    changed_when: False
-
-- name: Delete the temporary directory on the master
-  hosts: oo_first_master
-  gather_facts: no
-  vars:
-    sync_tmpdir: "{{ hostvars.localhost.mktemp.stdout }}"
-  tasks:
-  - file: name={{ sync_tmpdir }} state=absent
     changed_when: False
 
 - name: Delete temporary directory on localhost
@@ -143,12 +130,14 @@
                          | oo_select_keys(groups['oo_nodes_to_config'])
                          | oo_collect('openshift.common.hostname') }}"
     openshift_unscheduleable_nodes: "{{ hostvars
-                                        | oo_select_keys(groups['oo_nodes_to_config']) 
+                                        | oo_select_keys(groups['oo_nodes_to_config']
+                                                         | default([]))
                                         | oo_collect('openshift.common.hostname', {'openshift_scheduleable': False}) }}"
   pre_tasks:
   - set_fact:
       openshift_scheduleable_nodes: "{{ hostvars
-                                      | oo_select_keys(groups['oo_nodes_to_config'])
+                                      | oo_select_keys(groups['oo_nodes_to_config']
+                                                       | default([]))
                                       | oo_collect('openshift.common.hostname')
                                       | difference(openshift_unscheduleable_nodes) }}"
   roles:

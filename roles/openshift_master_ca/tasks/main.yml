@@ -1,0 +1,22 @@
+---
+- name: Install the OpenShift package for admin tooling
+  yum: pkg=openshift state=present
+  register: install_result
+
+- name: Reload generated facts
+  openshift_facts:
+
+- name: Create openshift_master_config_dir if it doesn't exist
+  file:
+    path: "{{ openshift_master_config_dir }}"
+    state: directory
+
+- name: Create the master certificates if they do not already exist
+  command: >
+    {{ openshift.common.admin_binary }} create-master-certs
+      --hostnames={{ openshift.common.hostname }},{{ openshift.common.public_hostname }}
+      --master={{ openshift.master.api_url }}
+      --public-master={{ openshift.master.public_api_url }}
+      --cert-dir={{ openshift_master_config_dir }} --overwrite=false
+  args:
+    creates: "{{ openshift_master_config_dir }}/master.server.key"

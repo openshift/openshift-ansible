@@ -175,9 +175,9 @@ class FilterModule(object):
         '''
         if not issubclass(type(data), dict):
             raise errors.AnsibleFilterError("|failed expects first param is a dict")
-        if host_type not in ['master', 'node']:
-            raise errors.AnsibleFilterError("|failed expects either master or node"
-                                            " host type")
+        if host_type not in ['master', 'node', 'etcd']:
+            raise errors.AnsibleFilterError("|failed expects etcd, master or node"
+                                            " as the host type")
 
         root_vol = data[host_type]['root']
         root_vol['device_name'] = '/dev/sda1'
@@ -195,6 +195,13 @@ class FilterModule(object):
                 docker_vol.pop('delete_on_termination', None)
                 docker_vol['ephemeral'] = 'ephemeral0'
             return [root_vol, docker_vol]
+        elif host_type == 'etcd':
+            etcd_vol = data[host_type]['etcd']
+            etcd_vol['device_name'] = '/dev/xvdb'
+            etcd_vol['delete_on_termination'] = True
+            if etcd_vol['device_type'] != 'io1':
+                etcd_vol.pop('iops', None)
+            return [root_vol, etcd_vol]
         return [root_vol]
 
     @staticmethod
