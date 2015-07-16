@@ -1,0 +1,123 @@
+heat_template_version: 2014-10-16
+
+description: OpenShift cluster server
+
+parameters:
+
+  name:
+    type: string
+    label: Name
+    description: Name
+
+  cluster_id:
+    type: string
+    label: Cluster ID
+    description: Identifier of the cluster
+
+  type:
+    type: string
+    label: Type
+    description: Type master or node
+
+  key_name:
+    type: string
+    label: Key name
+    description: Key name of keypair
+
+  image:
+    type: string
+    label: Image
+    description: Name of the image
+
+  flavor:
+    type: string
+    label: Flavor
+    description: Name of the flavor
+
+  net:
+    type: string
+    label: Net ID
+    description: Net resource
+
+  net_name:
+    type: string
+    label: Net name
+    description: Net name
+
+  subnet:
+    type: string
+    label: Subnet ID
+    description: Subnet resource
+
+  secgrp:
+    type: comma_delimited_list
+    label: Security groups
+    description: Security group resources
+
+  floating_network:
+    type: string
+    label: Floating network
+    description: Network to allocate floating IP from
+
+outputs:
+
+  name:
+    description: Name of the server
+    value: { get_attr: [ server, name ] }
+
+  private_ip:
+    description: Private IP of the server
+    value:
+      get_attr:
+        - server
+        - addresses
+        - { get_param: net_name }
+        - 0
+        - addr
+
+  floating_ip:
+    description: Floating IP of the server
+    value:
+      get_attr:
+        - server
+        - addresses
+        - { get_param: net_name }
+        - 1
+        - addr
+
+resources:
+
+  server:
+    type: OS::Nova::Server
+    properties:
+      name:      { get_param: name }
+      key_name:  { get_param: key_name }
+      image:     { get_param: image }
+      flavor:    { get_param: flavor }
+      networks:
+        - port:  { get_resource: port }
+      user_data: { get_file: user-data }
+      user_data_format: RAW
+      metadata:
+        env: { get_param: cluster_id }
+        host-type: { get_param: type }
+        env-host-type:
+          str_template:
+            template: cluster_id-openshift-type
+            params:
+              cluster_id: { get_param: cluster_id }
+              type:       { get_param: type }
+
+  port:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_param: net }
+      fixed_ips:
+        - subnet: { get_param: subnet }
+      security_groups: { get_param: secgrp }
+
+  floating-ip:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network: { get_param: floating_network }
+      port_id: { get_resource: port }
