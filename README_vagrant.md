@@ -1,7 +1,7 @@
 Requirements
 ------------
 - vagrant (tested against version 1.7.2)
-- vagrant-hostmaster plugin (tested against version 1.5.0)
+- vagrant-hostmanager plugin (tested against version 1.5.0)
 - vagrant-libvirt (tested against version 0.0.26)
   - Only required if using libvirt instead of virtualbox
 
