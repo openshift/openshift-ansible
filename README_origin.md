@@ -35,7 +35,7 @@ subscription-manager repos --disable="*"
 subscription-manager repos \
 --enable="rhel-7-server-rpms" \
 --enable="rhel-7-server-extras-rpms" \
---enable="rhel-server-7-ose-beta-rpms"
+--enable="rhel-7-server-ose-3.0-rpms"
 ```
 * Configuration of router is not automated yet
 * Configuration of docker-registry is not automated yet
