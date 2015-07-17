@@ -15,7 +15,9 @@ NEWREV=$2
 
 PYTHON=/var/lib/jenkins/python27/bin/python
 
+set +e
 PY_DIFF=$(/usr/bin/git diff --name-only $OLDREV $NEWREV --diff-filter=ACM | grep ".py$")
+set -e
 
 FILES_TO_TEST=""
 
@@ -40,5 +42,7 @@ done
 
 if [ "${FILES_TO_TEST}" != "" ]; then
   echo "Testing files: ${FILES_TO_TEST}"
-  ${PYTHON} -m pylint --rcfile ${WORKSPACE}/git/.pylintrc ${FILES_TO_TEST}
+  exec ${PYTHON} -m pylint --rcfile ${WORKSPACE}/git/.pylintrc ${FILES_TO_TEST}
+else
+  exit 0
 fi
