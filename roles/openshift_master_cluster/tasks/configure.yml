@@ -29,7 +29,7 @@
   when: openshift_master_cluster_public_vip != openshift_master_cluster_vip
 
 - name: Add the cluster openshift-master service resource
-  command: pcs resource create master systemd:openshift-master --group openshift-master
+  command: pcs resource create master systemd:openshift-master op start timeout=90s stop timeout=90s --group openshift-master
 
 - name: Disable stonith
   command: pcs property set stonith-enabled=false
