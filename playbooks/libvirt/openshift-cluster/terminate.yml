@@ -15,6 +15,23 @@
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
     with_items: groups[cluster_group] | default([])
 
+- name: Unsubscribe VMs
+  hosts: oo_hosts_to_terminate
+  vars_files:
+  - vars.yml
+  roles:
+  - role: rhel_unsubscribe
+    when: deployment_type == "enterprise" and
+          ansible_distribution == "RedHat" and
+          lookup('oo_option', 'rhel_skip_subscription') | default(rhsub_skip, True) |
+            default('no', True) | lower in ['no', 'false']
+
+- name: Terminate instance(s)
+  hosts: localhost
+  gather_facts: no
+  vars_files:
+  - vars.yml
+  tasks:
   - name: Destroy VMs
     virt:
       name: '{{ item[0] }}'

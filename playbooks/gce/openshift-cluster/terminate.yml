@@ -8,7 +8,7 @@
   - set_fact: scratch_group=tag_env-host-type-{{ cluster_id }}-openshift-node
   - add_host:
       name: "{{ item }}"
-      groups: oo_nodes_to_terminate
+      groups: oo_hosts_to_terminate, oo_nodes_to_terminate
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user | default(ansible_ssh_user, true) }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
     with_items: groups[scratch_group] | default([]) | difference(['localhost']) | difference(groups.status_terminated)
@@ -16,10 +16,21 @@
   - set_fact: scratch_group=tag_env-host-type-{{ cluster_id }}-openshift-master
   - add_host:
       name: "{{ item }}"
-      groups: oo_masters_to_terminate
+      groups: oo_hosts_to_terminate, oo_masters_to_terminate
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user | default(ansible_ssh_user, true) }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
     with_items: groups[scratch_group] | default([]) | difference(['localhost']) | difference(groups.status_terminated)
+
+- name: Unsubscribe VMs
+  hosts: oo_hosts_to_terminate
+  vars_files:
+  - vars.yml
+  roles:
+  - role: rhel_unsubscribe
+    when: deployment_type == "enterprise" and
+          ansible_distribution == "RedHat" and
+          lookup('oo_option', 'rhel_skip_subscription') | default(rhsub_skip, True) |
+            default('no', True) | lower in ['no', 'false']
 
 - include: ../openshift-node/terminate.yml
   vars:

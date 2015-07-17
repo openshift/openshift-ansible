@@ -13,6 +13,15 @@
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
     with_items: groups[scratch_group] | default([]) | difference(['localhost'])
 
+- name: Unsubscribe VMs
+  hosts: oo_hosts_to_terminate
+  roles:
+  - role: rhel_unsubscribe
+    when: deployment_type == "enterprise" and
+          ansible_distribution == "RedHat" and
+          lookup('oo_option', 'rhel_skip_subscription') | default(rhsub_skip, True) |
+            default('no', True) | lower in ['no', 'false']
+
 - name: Terminate instances
   hosts: localhost
   connection: local
