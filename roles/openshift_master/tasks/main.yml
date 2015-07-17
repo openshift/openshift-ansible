@@ -128,7 +128,7 @@
   pause: seconds=30
   when: start_result | changed
 
-- name: Install cluster packagese
+- name: Install cluster packages
   yum: pkg=pcs state=present
   when: openshift_master_ha and not openshift.master.cluster_defer_ha | bool
   register: install_result
