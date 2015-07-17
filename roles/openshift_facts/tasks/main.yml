@@ -4,6 +4,7 @@
     that:
     - ansible_version | version_compare('1.8.0', 'ge')
     - ansible_version | version_compare('1.9.0', 'ne')
+    - ansible_version | version_compare('1.9.0.1', 'ne')
 
 - name: Gather OpenShift facts
   openshift_facts:
