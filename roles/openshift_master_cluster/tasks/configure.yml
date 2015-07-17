@@ -40,4 +40,5 @@
     host: "{{ openshift_master_cluster_vip }}"
     port: 8443
     state: started
-    timeout: 300
+    timeout: 180
+    delay: 90
