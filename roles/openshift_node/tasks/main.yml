@@ -63,11 +63,13 @@
   lineinfile:
     dest: /etc/sysconfig/docker
     regexp: '^OPTIONS=.*'
-    line: "OPTIONS='--insecure-registry={{ openshift.node.portal_net }} --selinux-enabled'"
+    line: "OPTIONS='--insecure-registry={{ openshift.node.portal_net }} \
+{% if ansible_selinux and ansible_selinux.status == '''enabled''' %}--selinux-enabled{% endif %}'"
   when: docker_check.stat.isreg
 
 - name: Allow NFS access for VMs
   seboolean: name=virt_use_nfs state=yes persistent=yes
+  when: ansible_selinux and ansible_selinux.status == "enabled"
 
 - name: Start and enable openshift-node
   service: name=openshift-node enabled=yes state=started
