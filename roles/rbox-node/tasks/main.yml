@@ -8,10 +8,10 @@
     regexp: ^SELINUX=
     line: SELINUX=disable
 
-- name: Install static cache files
-  unarchive:
-    src: "{{ lookup('env','HOME') }}/ama.tar.gz"
-    dest: /
+#- name: Install static cache files
+#  unarchive:
+#    src: "{{ lookup('env','HOME') }}/ama.tar.gz"
+#    dest: /
 
 # Very quick and dirty workaround for openshift-sdn issue
 # https://github.com/openshift/openshift-sdn/issues/73
@@ -19,13 +19,17 @@
   shell: iptables -nvL INPUT --line-numbers | grep "reject-with icmp-host-prohibited" | tail -n 1 | awk '{print $1}'
   register: input_rule_nb
 
+- debug: var=input_rule_nb
+
 - name: Get FORWARD REJECT iptables rule
   shell: iptables -nvL FORWARD --line-numbers | grep "reject-with icmp-host-prohibited" | tail -n 1 | awk '{print $1}'
   register: forward_rule_nb
 
+- debug: var=forward_rule_nb
+
 - name: Remove INPUT REJECT iptables rule
-  command: iptables -D INPUT {{ input_rule_nb }}
+  command: iptables -D INPUT {{ input_rule_nb.stdout }}
 
 - name: Remove FORWARD REJECT iptables rule
-  command: iptables -D FORWARD {{ forward_rule_nb }}
+  command: iptables -D FORWARD {{ forward_rule_nb.stdout }}
 
