@@ -14,6 +14,7 @@
       - created-by-{{ lookup('env', 'LOGNAME') |default(cluster, true) }}
       - env-{{ cluster }}
       - host-type-{{ type }}
+      - sub-host-type-{{ sub_host_type }}
       - env-host-type-{{ cluster }}-openshift-{{ type }}
   register: gce
 

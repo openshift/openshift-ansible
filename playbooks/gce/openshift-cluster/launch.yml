@@ -15,17 +15,33 @@
       instances: "{{ master_names }}"
       cluster: "{{ cluster_id }}"
       type: "{{ k8s_type }}"
+      g_sub_host_type: "default"
 
   - include: ../../common/openshift-cluster/set_node_launch_facts_tasks.yml
+    vars:
+      type: "compute"
+      count: "{{ num_nodes }}"
   - include: tasks/launch_instances.yml
     vars:
       instances: "{{ node_names }}"
       cluster: "{{ cluster_id }}"
       type: "{{ k8s_type }}"
+      g_sub_host_type: "{{ sub_host_type }}"
+
+  - include: ../../common/openshift-cluster/set_node_launch_facts_tasks.yml
+    vars:
+      type: "infra"
+      count: "{{ num_infra }}"
+  - include: tasks/launch_instances.yml
+    vars:
+      instances: "{{ infra_names }}"
+      cluster: "{{ cluster_id }}"
+      type: "{{ k8s_type }}"
+      g_sub_host_type: "{{ sub_host_type }}"
 
   - set_fact:
-      a_master: "{{ master_names[0] }}"
-  - add_host: name={{ a_master }} groups=service_master
+      a_infra: "{{ infra_names[0] }}"
+  - add_host: name={{ a_infra }} groups=service_master
 
 - include: update.yml
 

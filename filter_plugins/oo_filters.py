@@ -50,7 +50,6 @@ class FilterModule(object):
 
         return [item for sublist in data for item in sublist]
 
-
     @staticmethod
     def oo_collect(data, attribute=None, filters=None):
         ''' This takes a list of dict and collects all attributes specified into a
