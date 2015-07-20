@@ -16,8 +16,8 @@
 # Very quick and dirty workaround for openshift-sdn issue
 # https://github.com/openshift/openshift-sdn/issues/73
 - name: Remove INPUT REJECT iptables rule
-  command: iptables -D INPUT 8
+  command: iptables -D INPUT $(iptables -nvL INPUT --line-numbers | grep "reject-with icmp-host-prohibited" | tail -n 1 | awk '{print $1}')
 
 - name: Remove FORWARD REJECT iptables rule
-  command: iptables -D FORWARD 4
+  command: iptables -D FORWARD $(iptables -nvL FORWARD --line-numbers | grep "reject-with icmp-host-prohibited" | tail -n 1 | awk '{print $1}')
 
