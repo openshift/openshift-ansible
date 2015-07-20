@@ -10,7 +10,7 @@
 
 - fail:
     msg: "openshift_master_cluster_password must be set for multi-master installations"
-  when: openshift_master_ha and not openshift.master.cluster_defer_ha | bool and openshift_master_cluster_password is not defined
+  when: openshift_master_ha | bool and not openshift.master.cluster_defer_ha | bool and openshift_master_cluster_password is not defined
 
 - name: Install OpenShift Master package
   yum: pkg=openshift-master state=present
@@ -121,7 +121,7 @@
 
 - name: Start and enable openshift-master
   service: name=openshift-master enabled=yes state=started
-  when: not openshift_master_ha
+  when: not openshift_master_ha | bool
   register: start_result
 
 - name: pause to prevent service restart from interfering with bootstrapping
@@ -130,12 +130,12 @@
 
 - name: Install cluster packages
   yum: pkg=pcs state=present
-  when: openshift_master_ha and not openshift.master.cluster_defer_ha | bool
+  when: openshift_master_ha | bool and not openshift.master.cluster_defer_ha | bool
   register: install_result
 
 - name: Start and enable cluster service
   service: name=pcsd enabled=yes state=started
-  when: openshift_master_ha and not openshift.master.cluster_defer_ha | bool
+  when: openshift_master_ha | bool and not openshift.master.cluster_defer_ha | bool
 
 - name: Set the cluster user password
   shell: echo {{ openshift_master_cluster_password | quote }} | passwd --stdin hacluster
