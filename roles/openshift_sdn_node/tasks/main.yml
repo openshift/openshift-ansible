@@ -49,7 +49,7 @@
   lineinfile:
     dest: /etc/sysconfig/docker
     regexp: OPTIONS=
-    line: OPTIONS='--insecure-registry=dockerhub.rnd.amadeus.net:5000' # --selinux-enabled' #INSECURE_REGISTRY='--insecure-registry=10.64.109.209:5000'
+    line: OPTIONS='--insecure-registry=dockerhub.rnd.amadeus.net:5000 --insecure-registry=dockerhub.rnd.amadeus.net:5001 --insecure-registry=dockerhub.rnd.amadeus.net:5002' # --selinux-enabled' #INSECURE_REGISTRY='--insecure-registry=10.64.109.209:5000'
   notify: restart openshift-sdn-node
 
 

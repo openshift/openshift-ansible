@@ -6,20 +6,20 @@
   git:
     repo: http://172.16.141.210/git/scm/rbox/mip.git
     dest: ~/mip
-    version: multinode
+    version: split 
     clone: yes
 
 - name: Install Openshift blueprints for RBox
   git:
-    repo: http://172.16.141.210/git/scm/rbox/openshift_blueprints.git
-    dest: ~/openshift_blueprints
-    version: multinode
+    repo: http://172.16.141.210/git/scm/rbox/blueprints_rbox.git
+    dest: ~/blueprints_rbox
+    version: master 
     clone: yes
 
 - name: Create symlink to blueprints
   file:
-    src: ~/openshift_blueprints
-    dest: ~/mip/openshift_blueprints
+    src: ~/blueprints_rbox
+    dest: ~/mip/blueprints_rbox
     state: link
 
 - name: Update config files for RBox
