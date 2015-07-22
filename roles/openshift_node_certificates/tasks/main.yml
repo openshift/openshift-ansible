@@ -25,7 +25,7 @@
   command: >
     {{ openshift.common.admin_binary }} create-server-cert
       --cert=server.crt --key=server.key --overwrite=true
-      --hostnames={{ openshift.common.all_hostnames |join(",") }}
+      --hostnames={{ item.openshift.common.all_hostnames |join(",") }}
       --signer-cert={{ openshift_master_ca_cert }}
       --signer-key={{ openshift_master_ca_key }}
       --signer-serial={{ openshift_master_ca_serial }}
