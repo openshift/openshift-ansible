@@ -147,7 +147,40 @@ Every effort should be made to keep our Ansible YAML files in pure YAML.
 [cols="2v,v"]
 |===
 | **Rule**
-| Parameters to Ansible Modules SHOULD use the Yaml dictionary format when 3 or more parameters are being passed
+| Custom Ansible modules SHOULD be embedded in a role.
+|===
+
+.Context
+* http://docs.ansible.com/ansible/playbooks_roles.html#embedding-modules-in-roles[Ansible doc on how to embed modules in roles]
+
+The purpose of this rule is to make it easy to include custom modules in our playbooks and share them on Ansible Galaxy.
+
+.Custom module `openshift_facts.py` is embedded in the `openshift_facts` role.
+----
+> ll openshift-ansible/roles/openshift_facts/library/
+-rwxrwxr-x. 1 user group 33616 Jul 22 09:36 openshift_facts.py
+----
+
+.Custom module `openshift_facts` can be used after `openshift_facts` role has been referenced.
+[source,yaml]
+----
+- hosts: openshift_hosts
+  gather_facts: no
+  roles:
+  - role: openshift_facts
+  post_tasks:
+  - openshift_facts
+      role: common
+      hostname: host
+      public_hostname: host.example.com
+----
+
+
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| Parameters to Ansible modules SHOULD use the Yaml dictionary format when 3 or more parameters are being passed
 |===
 
 When a module has several parameters that are being passed in, it's hard to see exactly what value each parameter is getting. It is preferred to use the Ansible Yaml syntax to pass in parameters so that it's more clear what values are being passed for each paramemter.
@@ -174,7 +207,7 @@ When a module has several parameters that are being passed in, it's hard to see 
 [cols="2v,v"]
 |===
 | **Rule**
-| Parameters to Ansible Modules SHOULD use the Yaml dictionary format when the line length exceeds 120 characters
+| Parameters to Ansible modules SHOULD use the Yaml dictionary format when the line length exceeds 120 characters
 |===
 
 Lines that are long quickly become a wall of text that isn't easily parsable. It is preferred to use the Ansible Yaml syntax to pass in parameters so that it's more clear what values are being passed for each paramemter.
@@ -198,10 +231,10 @@ Lines that are long quickly become a wall of text that isn't easily parsable. It
 [cols="2v,v"]
 |===
 | **Rule**
-| The Ansible `shell` module SHOULD NOT be used. Instead, use the `command` module.
+| The Ansible `command` module SHOULD be used instead of the Ansible `shell` module.
 |===
 .Context
-* http://docs.ansible.com/shell_module.html#notes[Ansible Doc on why using the command module is a best practice]
+* http://docs.ansible.com/shell_module.html#notes[Ansible doc on why using the command module is a best practice]
 
 The Ansible `shell` module can run most commands that can be run from a bash CLI. This makes it extremely powerful, but it also opens our playbooks up to being exploited by attackers.
 
@@ -224,7 +257,7 @@ The Ansible `shell` module can run most commands that can be run from a bash CLI
 | The Ansible `quote` filter MUST be used with any variable passed into the shell module.
 |===
 .Context
-* http://docs.ansible.com/shell_module.html#notes[Ansible Doc describing why to use the quote filter]
+* http://docs.ansible.com/shell_module.html#notes[Ansible doc describing why to use the quote filter]
 
 It is recommended not to use the `shell` module. However, if it absolutely must be used, all variables passed into the `shell` module MUST use the `quote` filter to ensure they are shell safe.
 
