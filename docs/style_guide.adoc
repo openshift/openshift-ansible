@@ -65,7 +65,7 @@ Example: `tasks.yml`
 | Variables meant to be passed in from the ansible CLI MUST have a prefix of cli_
 |===
 
-Ansible allows variables to be passed in on the command line using the `-e` option. These variables MUST have a prefix of cli_ so that it's clear where they came from, and how dangerous they are (can be exploited).
+Ansible allows variables to be passed in on the command line using the `-e` option. These variables MUST have a prefix of cli_ so that it's clear where they came from, and that they could be exploited.
 
 
 .Example:
