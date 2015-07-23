@@ -15,6 +15,22 @@
   - - ca.crt
     - ca.key
     - ca.serial.txt
+    - admin.crt
+    - admin.key
+    - admin.kubeconfig
+    - master.kubelet-client.crt
+    - master.kubelet-client.key
+    - openshift-master.crt
+    - openshift-master.key
+    - openshift-master.kubeconfig
+    - openshift-registry.crt
+    - openshift-registry.key
+    - openshift-registry.kubeconfig
+    - openshift-router.crt
+    - openshift-router.key
+    - openshift-router.kubeconfig
+    - serviceaccounts.private.key
+    - serviceaccounts.public.key
 
 
 - name: Create the master certificates if they do not already exist
