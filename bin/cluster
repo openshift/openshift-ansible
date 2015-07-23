@@ -51,6 +51,7 @@ class Cluster(object):
 
         env['num_masters'] = args.masters
         env['num_nodes'] = args.nodes
+        env['num_infra'] = args.infra
         env['num_etcd'] = args.etcd
 
         return self.action(args, inventory, env, playbook)
@@ -149,7 +150,7 @@ class Cluster(object):
 
             boto_conf_files = ['~/.aws/credentials', '~/.boto']
             conf_exists = lambda conf: os.path.isfile(os.path.expanduser(conf))
-            boto_configs = [ conf for conf in boto_conf_files if conf_exists(conf)]
+            boto_configs = [conf for conf in boto_conf_files if conf_exists(conf)]
 
             if len(key_missing) > 0 and len(boto_configs) == 0:
                 raise ValueError("PROVIDER aws requires {} environment variable(s). See README_AWS.md".format(missing))
@@ -262,6 +263,8 @@ if __name__ == '__main__':
                                help='number of masters to create in cluster')
     create_parser.add_argument('-n', '--nodes', default=2, type=int,
                                help='number of nodes to create in cluster')
+    create_parser.add_argument('-i', '--infra', default=1, type=int,
+                               help='number of infra nodes to create in cluster')
     create_parser.add_argument('-e', '--etcd', default=0, type=int,
                                help='number of external etcd hosts to create in cluster')
     create_parser.set_defaults(func=cluster.create)

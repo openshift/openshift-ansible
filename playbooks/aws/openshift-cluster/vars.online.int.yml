@@ -3,7 +3,13 @@ ec2_image: ami-9101c8fa
 ec2_image_name: libra-ops-rhel7*
 ec2_region: us-east-1
 ec2_keypair: mmcgrath_libra
-ec2_instance_type: m3.large
-ec2_security_groups: [ 'int-v3' ]
+ec2_master_instance_type: m3.large
+ec2_master_security_groups: [ 'integration', 'integration-master' ]
+ec2_infra_instance_type: m3.large
+ec2_infra_security_groups: [ 'integration', 'integration-infra' ]
+ec2_node_instance_type: m3.large
+ec2_node_security_groups: [ 'integration', 'integration-node' ]
+ec2_etcd_instance_type: m3.large
+ec2_etcd_security_groups: [ 'integration', 'integration-etcd' ]
 ec2_vpc_subnet: subnet-987c0def
 ec2_assign_public_ip: yes

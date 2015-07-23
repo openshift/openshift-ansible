@@ -27,10 +27,13 @@
              -P ssh_incoming={{ openstack_ssh_access_from }}
              -P num_masters={{ num_masters }}
              -P num_nodes={{ num_nodes }}
+             -P num_infra={{ num_infra }}
              -P master_image={{ deployment_vars[deployment_type].image }}
              -P node_image={{ deployment_vars[deployment_type].image }}
+             -P infra_image={{ deployment_vars[deployment_type].image }}
              -P master_flavor={{ openstack_flavor["master"] }}
              -P node_flavor={{ openstack_flavor["node"] }}
+             -P infra_flavor={{ openstack_flavor["infra"] }}
              -P ssh_public_key="{{ openstack_ssh_public_key }}"
              openshift-ansible-{{ cluster_id }}-stack'
     when: stack_show_result.rc == 1
@@ -43,10 +46,13 @@
              -P ssh_incoming={{ openstack_ssh_access_from }}
              -P num_masters={{ num_masters }}
              -P num_nodes={{ num_nodes }}
+             -P num_infra={{ num_infra }}
              -P master_image={{ deployment_vars[deployment_type].image }}
              -P node_image={{ deployment_vars[deployment_type].image }}
+             -P infra_image={{ deployment_vars[deployment_type].image }}
              -P master_flavor={{ openstack_flavor["master"] }}
              -P node_flavor={{ openstack_flavor["node"] }}
+             -P infra_flavor={{ openstack_flavor["infra"] }}
              -P ssh_public_key="{{ openstack_ssh_public_key }}"
              openshift-ansible-{{ cluster_id }}-stack'
     when: stack_show_result.rc == 0
@@ -72,7 +78,7 @@
       ansible_ssh_host: '{{ item[2] }}'
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-      groups: 'tag_env_{{ cluster_id }}, tag_host-type_master, tag_env-host-type_{{ cluster_id }}-openshift-master'
+      groups: 'tag_env_{{ cluster_id }}, tag_host-type_master, tag_env-host-type_{{ cluster_id }}-openshift-master, tag_sub-host-type_default'
     with_together:
       - parsed_outputs.master_names
       - parsed_outputs.master_ips
@@ -84,11 +90,23 @@
       ansible_ssh_host: '{{ item[2] }}'
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-      groups: 'tag_env_{{ cluster_id }}, tag_host-type_node, tag_env-host-type_{{ cluster_id }}-openshift-node'
+      groups: 'tag_env_{{ cluster_id }}, tag_host-type_node, tag_env-host-type_{{ cluster_id }}-openshift-node, tag_sub-host-type_node'
     with_together:
       - parsed_outputs.node_names
       - parsed_outputs.node_ips
       - parsed_outputs.node_floating_ips
+
+  - name: Add new infra instances groups and variables
+    add_host:
+      hostname: '{{ item[0] }}'
+      ansible_ssh_host: '{{ item[2] }}'
+      ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
+      ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
+      groups: 'tag_env_{{ cluster_id }}, tag_host-type_node, tag_env-host-type_{{ cluster_id }}-openshift-node, tag_sub-host-type_infra'
+    with_together:
+      - parsed_outputs.infra_names
+      - parsed_outputs.infra_ips
+      - parsed_outputs.infra_floating_ips
 
   - name: Wait for ssh
     wait_for:
