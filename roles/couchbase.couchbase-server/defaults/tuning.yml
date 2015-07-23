@@ -1,0 +1,22 @@
+---
+# File: defaults/tuning.yml - OS Tuning ansible-couchbase-server variables
+
+# NB: Change these only when you know what you are doing
+
+couchbase_server_swappiness: 0
+couchbase_server_tcp_rfc1337: 1
+couchbase_server_tcp_workaround_signed_windows: 1
+couchbase_server_tcp_sack: 1
+couchbase_server_tcp_fack: 1
+couchbase_server_mtu_probing: 1
+couchbase_server_file_max: 524288
+couchbase_server_netdev_max_backlog: 300000
+couchbase_server_tcp_moderate_rcvbuf: 1
+couchbase_server_tcp_congestion_control: htcp
+couchbase_server_somaxconn: 40000
+couchbase_server_tcp_max_syn_backlog: 40000
+couchbase_server_tcp_window_scaling: 1
+couchbase_server_tcp_fin_timeout: 15
+couchbase_server_tcp_keepalive_intvl: 30
+couchbase_server_dirty_bytes: 209715200
+couchbase_server_dirty_background_bytes: 104857600

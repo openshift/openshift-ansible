@@ -1,0 +1,25 @@
+---
+# File: tasks/Ubuntu_firewall.yml - firewall Ubuntu tasks for ansible-couchbase-server
+
+## Static firewall rules using iptables
+
+- name: Install iptables rules
+  sudo: True
+  apt: "name=iptables-services state=present"
+  tags: firewall
+
+- name: Enable iptables
+  shell: "systemctl enable iptables.service"
+  tags: firewall
+
+- name: Start services
+  service: "name=iptables state=started"
+  tags: firewall
+
+- name: Install iptables rules
+  template: "src=etc_sysconfig_iptables.j2 dest=/etc/sysconfig/iptables.couchbase-server owner=couchbase group=couchbase"
+  tags: firewall
+
+- name: Import iptables rules
+  shell: "/sbin/iptables-restore < /etc/sysconfig/iptables.couchbase-server"
+  tags: firewall

@@ -1,0 +1,59 @@
+---
+# File: defaults/main.yml - Default ansible-couchbase-server variables
+
+#############################################################################
+# Couchbase Server default variables
+#
+# couchbase_server_edition: Couchbase Server edition: Community or Enterprise
+# couchbase_server_admin: Couchbase Server administrator user name
+# couchbase_server_password: Couchbase Server administrator user password
+# couchbase_server_ram: The per server RAM quota specified in megabytes
+# couchbase_server_admin_port: Administration and web console port
+# couchbase_server_api_port: Couchbase Server API port
+# couchbase_server_admin_ssl_port: SSL enabled Couchbase Server REST port
+# couchbase_server_api_ssl_port: SSL enabled Couchbase Server CAPI port
+# couchbase_server_internal_ports: Memcached and client ports
+# couchbase_server_node_data_ports: Distributed Erlang communication ports
+# couchbase_server_home_path: Base path to Couchbase Server installation
+# couchbase_server_bin_path: Path to Couchbase Server binary utilities
+# couchbase_server_config_file: Full path to the config.dat file
+# couchbase_server_filesystem: Default filesystem for data and index volumes
+# couchbase_server_mountpoint: Logical volume mountpoint
+# couchbase_server_partition: Logical volume partition
+# couchbase_server_mount_options: Additional mount options
+# couchbase_server_data_path: Path to data files
+# couchbase_server_index_path: Path to index files
+# couchbase_server_log_path: Path to log files
+# couchbase_server_cbbackup_path: Path to store output of cbbackup
+# couchbase_server_cbcollect_path: Path to cbcollect_info output
+# couchbase_server_tmpdir: System wide TMPDIR for cbcollect_info
+# couchbase_server_tune_os: Whether to tune OS with optimized settings
+# couchbase_server_firewall: Whether to use strict firewall rules
+#
+#############################################################################
+
+couchbase_server_edition: "enterprise"
+couchbase_server_admin: "Administrator"
+couchbase_server_password: "couchbase"
+couchbase_server_ram: 3072
+couchbase_server_admin_port: 8091
+couchbase_server_admin_ssl_port: 18091
+couchbase_server_api_port: 8092
+couchbase_server_api_ssl_port: 8092
+couchbase_server_internal_ports: "11207:11215"
+couchbase_server_node_data_ports: "21100:21299"
+couchbase_server_home_path: "/opt/couchbase"
+couchbase_server_bin_path: "{{ couchbase_server_home_path }}/bin"
+couchbase_server_config_file: "{{ couchbase_server_home_path }}/var/lib/couchbase/config/config.dat"
+couchbase_server_filesystem: "ext4"
+couchbase_server_mountpoint: "/"
+couchbase_server_partition: "/dev/mapper/VolGroup-lv_root"
+couchbase_server_mount_options: "noatime,barrier=0,errors=remount-ro"
+couchbase_server_data_path: "{{ couchbase_server_home_path }}/var/lib/couchbase/data"
+couchbase_server_index_path: "{{ couchbase_server_home_path }}/var/lib/couchbase/data"
+couchbase_server_log_path: "{{ couchbase_server_home_path }}/var/lib/couchbase/logs"
+couchbase_server_cbbackup_path: "/opt/couchbase_backups"
+couchbase_server_cbcollect_path: "/tmp"
+couchbase_server_tmpdir: "/tmp"
+couchbase_server_tune_os: false
+couchbase_server_firewall: false

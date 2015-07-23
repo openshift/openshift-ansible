@@ -1,0 +1,12 @@
+---
+# File: handlers/main.yml
+# Main handlers for the common features of the ansible-couchbase-server role
+
+- name: Update kernel settings
+  command: sysctl -e -p /etc/sysctl.d/couchbase-server.conf
+
+- name: Source local settings
+  command: /bin/bash /etc/rc.local
+
+- name: Restart Couchbase Server
+  service: name=couchbase-server state=restarted

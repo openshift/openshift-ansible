@@ -10,3 +10,5 @@
   hosts: oo_masters_to_config
   roles:
     - rbox-master
+
+- include: launch_couchbase.yml

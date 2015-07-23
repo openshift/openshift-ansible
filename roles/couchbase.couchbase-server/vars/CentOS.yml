@@ -1,0 +1,70 @@
+---
+# File: vars/CentOS.yml - CentOS ansible-couchbase-server variables
+
+# This file contains variables used for installing Couchbase software,
+# including the following:
+#
+# * Couchbase Server Enterprise Edition
+# * Couchbase Server Community Edition
+
+#############################################################################
+#
+# COUCHBASE SERVER ENTERPRISE EDITION
+#
+# A listing of available Couchbase Server Enterprise Edition packages and
+# their metadata for CentOS and RHEL
+#
+# Default installed version is currently set to:
+# Couchbase Server Enterprise Edition version 3.0.3
+#
+# Comment out the 4 variables below and uncoment variables for any older
+# version that you wish to install or pass them in as --extra-vars to the
+# ansible-playbook command.
+#
+#############################################################################
+
+couchbase_server_centos_ee_version: 3.0.3
+couchbase_server_centos_ee_package: couchbase-server-enterprise-{{ couchbase_server_centos_ee_version }}-centos6.x86_64.rpm
+couchbase_server_centos_ee_url: http://packages.couchbase.com/releases/{{ couchbase_server_centos_ee_version }}/{{ couchbase_server_centos_ee_package }}
+couchbase_server_centos_ee_sha256: 1f21843bf0cc86390bc707d7c93bba6e8678dbc0eaf784bb2dc9a6718b46bd04
+
+# couchbase_server_centos_ee_version: 3.0.2
+# couchbase_server_centos_ee_package: couchbase-server-enterprise-{{ couchbase_server_centos_ee_version }}-centos6.x86_64.rpm
+# couchbase_server_centos_ee_url: http://packages.couchbase.com/releases/{{ couchbase_server_centos_ee_version }}/{{ couchbase_server_centos_ee_package }}
+# couchbase_server_centos_ee_sha256: 7c678d4fc9207f04996c2a0a0d33df74171813504348fd3f66acf8dd0dc5b106
+
+# couchbase_server_centos_ee_version: 3.0.1
+# couchbase_server_centos_ee_package: couchbase-server-enterprise-{{ couchbase_server_centos_ee_version }}-centos6.x86_64.rpm
+# couchbase_server_centos_ee_url: http://packages.couchbase.com/releases/{{ couchbase_server_centos_ee_version }}/{{ couchbase_server_centos_ee_package }}
+# couchbase_server_centos_ee_sha256: 000667d4f1f075cb94e740d7296841233086ad8f704b656a38f583a334359700
+
+# couchbase_server_centos_ee_version: 3.0.0
+# couchbase_server_centos_ee_package: couchbase-server-enterprise-{{ couchbase_server_centos_ee_version }}-centos6.x86_64.rpm
+# couchbase_server_centos_ee_url: http://packages.couchbase.com/releases/{{ couchbase_server_centos_ee_version }}/{{ couchbase_server_centos_ee_package }}
+# couchbase_server_centos_ee_sha256: a10c830dec6f749708c4836c02118526bb3afb713f87064f27f91251c64867d3
+
+# couchbase_server_centos_ee_version: 2.5.2
+# couchbase_server_centos_ee_package: couchbase-server-enterprise_{{ couchbase_server_centos_ee_version }}_x86_64.rpm
+# couchbase_server_centos_ee_url: http://packages.couchbase.com/releases/{{ couchbase_server_centos_ee_version }}/{{ couchbase_server_centos_ee_package }}
+# couchbase_server_centos_ee_sha256: b662fedb00b7dc843732889d8f1c245e8e8c3f18dadcd3c7f9a389d4171cc17b
+
+#############################################################################
+#
+# COUCHBASE SERVER COMMUNITY EDITION
+#
+# A listing of available Couchbase Server Community Edition packages and
+# their metadata for CentOS and RHEL
+#
+# Default installed version is currently set to:
+# Couchbase Server Community Edition version 3.0.1
+#
+# Comment out the 4 variables below and uncoment variables for any older
+# version that you wish to install or pass them in as --extra-vars to the
+# ansible-playbook command.
+#
+#############################################################################
+
+couchbase_server_centos_ce_version: 3.0.1
+couchbase_server_centos_ce_package: couchbase-server-community-{{ couchbase_server_centos_ce_version }}-centos6.x86_64.rpm
+couchbase_server_centos_ce_url: http://packages.couchbase.com/releases/{{ couchbase_server_centos_ce_version }}/{{ couchbase_server_centos_ce_package }}
+couchbase_server_centos_ce_sha256: 65fabf18adfbe5136dd700866c479e99f33ba839b6de9973e7878e685102bb28

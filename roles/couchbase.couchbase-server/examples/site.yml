@@ -1,0 +1,8 @@
+---
+# File: site.yml - Example Couchbase Server site playbook
+
+- name: Couchbase Server
+  hosts: cluster_nodes
+  sudo: True
+  roles:
+    - { role: couchbase.couchbase-server }

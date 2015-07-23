@@ -1,0 +1,36 @@
+---
+# File: retreive_ssl_cert.yml
+# Ansible playbook to grab SSL certificates from all cluster nodes
+
+- hosts: cluster_nodes
+  sudo: True
+  tasks:
+  - name: Create cluster grouping
+    group_by: key={{ couchbase_server_node_role }}
+
+- hosts: primary
+  gather_facts: False
+  sudo: True
+  vars:
+    couchbase_server_primary_node: "{{hostvars[groups['primary'][0]]['inventory_hostname']}}"
+  vars_files:
+    - ../defaults/main.yml
+
+  tasks:
+
+  - name: Remove previous local data
+    sudo: False
+    local_action: file name=var/ssl_certs/*.pem state=absent
+
+  - name: Ensure local data dir exists
+    sudo: False
+    local_action: file name=var/ssl_certs state=directory
+
+  - name: Store SSL certificate
+    shell: "{{ couchbase_server_bin_path }}/couchbase-cli ssl-manage --retrieve-cert=/tmp/{{ couchbase_server_primary_node }}.pem -c {{ couchbase_server_primary_node }}:{{ couchbase_server_admin_port }} -u {{ couchbase_server_admin }} -p {{ couchbase_server_password }}"
+
+  - name: Gather SSL certificate
+    fetch: "src=/tmp/{{ couchbase_server_primary_node }}.pem dest=var/ssl_certs/{{ ansible_hostname }}.pem flat=yes"
+
+  - name: Cleanup
+    shell: "rm -rf /tmp/{{ couchbase_server_primary_node }}.pem"

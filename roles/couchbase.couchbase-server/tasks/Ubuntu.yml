@@ -1,0 +1,45 @@
+---
+# File: tasks/Ubuntu.yml - Ubuntu tasks for ansible-couchbase-server
+
+## Couchbase Server Enterprise Edition
+
+- name: Download
+  get_url: "url={{ couchbase_server_ubuntu_ee_url }} dest=/tmp/{{ couchbase_server_ubuntu_ee_package }} sha256sum={{ couchbase_server_ubuntu_ee_sha256 }} timeout=240"
+  when: couchbase_server_edition == "enterprise"
+  tags: installation
+
+- name: Install
+  sudo: True
+  apt: "deb=/tmp/{{ couchbase_server_ubuntu_ee_package }}"
+  when: couchbase_server_edition == "enterprise"
+  tags: installation
+
+- name: Package file cleanup
+  sudo: True
+  shell: "rm -rf /tmp/{{ couchbase_server_ubuntu_ee_package }}"
+  when: couchbase_server_edition == "enterprise"
+  tags: installation
+
+## Couchbase Server Community Edition
+
+- name: Download
+  get_url: "url={{ couchbase_server_ubuntu_ce_url }} dest=/tmp/{{ couchbase_server_ubuntu_ce_package }} sha256sum={{ couchbase_server_ubuntu_ce_sha256 }} timeout=240"
+  when: couchbase_server_edition == "community"
+  tags: installation
+
+- name: Install
+  sudo: True
+  apt: "deb=/tmp/{{ couchbase_server_ubuntu_ce_package }}"
+  when: couchbase_server_edition == "community"
+  tags: installation
+
+- name: Package file cleanup
+  sudo: True
+  shell: "rm -rf /tmp/{{ couchbase_server_ubuntu_ce_package }}"
+  when: couchbase_server_edition == "community"
+  tags: installation
+
+# Firewall (optional)
+- name: Firewall limitations
+  include: Ubuntu_firewall.yml
+  when: couchbase_server_firewall == True

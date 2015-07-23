@@ -1,0 +1,4 @@
+---
+# File: defaults/Ubuntu.yml - Ubuntu ansible-couchbase-server defaults
+
+couchbase_server_latest_version: 3.0.3
