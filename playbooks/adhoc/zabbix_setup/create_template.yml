@@ -27,7 +27,7 @@
 #        name: "{{ ctp_template.application.name}}"
 #  register: ctp_created_application
 
-- debug: var=ctp_created_application
+#- debug: var=ctp_created_application
 
 - name: Create Items
   zbxapi:
@@ -40,7 +40,7 @@
   with_items: ctp_template.zitems
   register: ctp_created_items
 
-- debug: var=ctp_created_items
+#- debug: var=ctp_created_items
 
 - name: Create Triggers
   zbxapi:
@@ -54,6 +54,6 @@
   register: ctp_created_triggers
   when: ctp_template.ztriggers is defined
 
-- debug: var=ctp_created_triggers
+#- debug: var=ctp_created_triggers
 
 
