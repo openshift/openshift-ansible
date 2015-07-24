@@ -4,8 +4,8 @@
 - name: Generate couchbase node instance names(s)
   set_fact:
     scratch_name: "{{ cluster_id }}-{{ node_type }}-{{ '%05x' | format(1048576 | random) }}"
-  register: node_names_output
+  register: cb_node_names_output
   with_sequence: start=1 end={{ num_cb }}
 
 - set_fact:
-    node_names: "{{ node_names_output.results | oo_collect('ansible_facts') | oo_collect('scratch_name') }}"
+    cb_node_names: "{{ node_names_output.results | oo_collect('ansible_facts') | oo_collect('scratch_name') }}"

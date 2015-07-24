@@ -1,0 +1,39 @@
+---
+# TODO: need to figure out a plan for setting hostname, currently the default
+# is localhost, so no hostname value (or public_hostname) value is getting
+# assigned
+
+- name: Populate oo_masters_to_config host group
+  hosts: localhost
+  gather_facts: no
+  vars_files:
+  - vars.yml
+  tasks:
+  - name: Evaluate oo_masters_to_config
+    add_host:
+      name: "{{ item }}"
+      ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
+      ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
+      groups: oo_masters_to_config
+    with_items: groups["meta-env-host-type_{{ cluster_id }}-openshift-master"] | default([])
+  - name: Evaluate oo_nodes_to_config
+    add_host:
+      name: "{{ item }}"
+      ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
+      ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
+      groups: oo_nodes_to_config
+    with_items: groups["meta-env-host-type_{{ cluster_id }}-openshift-node"] | default([])
+  - name: Evaluate oo_first_master
+    add_host:
+      name: "{{ groups['meta-env-host-type_' ~ cluster_id ~ '-openshift-master'][0] }}"
+      ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
+      ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
+      groups: oo_first_master
+    when: "'meta-env-host-type_{{ cluster_id }}-openshift-master' in groups"
+
+- include: ../../common/openshift-cluster/config.yml
+  vars:
+    openshift_cluster_id: "{{ cluster_id }}"
+    openshift_debug_level: 4
+    openshift_deployment_type: "{{ deployment_type }}"
+    openshift_hostname: "{{ ansible_default_ipv4.address }}"

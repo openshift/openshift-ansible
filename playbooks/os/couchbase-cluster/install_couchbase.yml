@@ -1,0 +1,10 @@
+---
+- hosts: groups["meta-env-host-type_{{ cluster_id }}-couchbase"] | default([])
+  sudo: True
+  vars_files:
+    - roles/couchbase.couchbase-server/vars/{{ ansible_os_distribution }}.yml
+  roles:
+    - couchbase.couchbase-server
+  tasks:
+  - name :
+    service: name=couchbase-server state=started 
