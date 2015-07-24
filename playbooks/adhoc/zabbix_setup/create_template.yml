@@ -1,0 +1,59 @@
+---
+- debug: var=ctp_template
+
+- name: Create Template
+  zbxapi:
+    server: "{{ ctp_zserver }}"
+    user: "{{ ctp_zuser }}"
+    password: "{{ ctp_zpassword }}"
+    zbx_class: Template
+    state: present
+    params: "{{ ctp_template.params }}"
+  register: ctp_created_templates
+
+- debug: var=ctp_created_templates
+
+#- name: Create Application
+#  zbxapi:
+#    server: "{{ ctp_zserver }}"
+#    user: "{{ ctp_zuser }}"
+#    password: "{{ ctp_zpassword }}"
+#    zbx_class: Application
+#    state: present
+#    params:
+#      name: "{{ ctp_template.application.name}}"
+#      hostid: "{{ ctp_created_templates.results[0].templateid }}"
+#      search:
+#        name: "{{ ctp_template.application.name}}"
+#  register: ctp_created_application
+
+- debug: var=ctp_created_application
+
+- name: Create Items
+  zbxapi:
+    server: "{{ ctp_zserver }}"
+    user: "{{ ctp_zuser }}"
+    password: "{{ ctp_zpassword }}"
+    zbx_class: Item
+    state: present
+    params: "{{ item | oo_set_zbx_item_hostid(ctp_created_templates.results) }}"
+  with_items: ctp_template.zitems
+  register: ctp_created_items
+
+- debug: var=ctp_created_items
+
+- name: Create Triggers
+  zbxapi:
+    server: "{{ ctp_zserver }}"
+    user: "{{ ctp_zuser }}"
+    password: "{{ ctp_zpassword }}"
+    zbx_class: Trigger
+    state: present
+    params: "{{ item }}"
+  with_items: ctp_template.ztriggers
+  register: ctp_created_triggers
+  when: ctp_template.ztriggers is defined
+
+- debug: var=ctp_created_triggers
+
+

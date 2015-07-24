@@ -232,15 +232,6 @@ class FilterModule(object):
         return [x for x in data if x[filter_attr]]
 
     @staticmethod
-    def oo_build_zabbix_list_dict(values, string):
-        ''' Build a list of dicts with string as key for each value
-        '''
-        rval = []
-        for value in values:
-            rval.append({string: value})
-        return rval
-
-    @staticmethod
     def oo_parse_heat_stack_outputs(data):
         ''' Formats the HEAT stack output into a usable form
 
@@ -320,6 +311,5 @@ class FilterModule(object):
             "oo_combine_key_value": self.oo_combine_key_value,
             "oo_split": self.oo_split,
             "oo_filter_list": self.oo_filter_list,
-            "oo_build_zabbix_list_dict": self.oo_build_zabbix_list_dict,
             "oo_parse_heat_stack_outputs": self.oo_parse_heat_stack_outputs
         }
