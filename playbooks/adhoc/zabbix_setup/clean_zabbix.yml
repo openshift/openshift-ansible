@@ -1,0 +1,66 @@
+---
+- hosts: localhost
+  gather_facts: no
+  vars:
+    g_zserver: http://oso-rhel7-zabbix-web.kwoodsontest2.opstest.online.openshift.com/zabbix/api_jsonrpc.php
+    g_zuser: Admin
+    g_zpassword: zabbix
+  roles:
+  - ../roles/os_zabbix
+  post_tasks:
+
+  - zbxapi:
+      server: "{{ g_zserver }}"
+      user: "{{ g_zuser }}"
+      password: "{{ g_zpassword }}"
+      zbx_class: Template
+      state: list
+      params:
+        output: extend
+        search:
+          host: 'Template Heartbeat'
+    register: templ_heartbeat
+
+  - zbxapi:
+      server: "{{ g_zserver }}"
+      user: "{{ g_zuser }}"
+      password: "{{ g_zpassword }}"
+      zbx_class: Template
+      state: list
+      params:
+        output: extend
+        search:
+          host: 'Template App Zabbix Server'
+    register: templ_zabbix_server
+
+  - zbxapi:
+      server: "{{ g_zserver }}"
+      user: "{{ g_zuser }}"
+      password: "{{ g_zpassword }}"
+      zbx_class: Template
+      state: list
+      params:
+        output: extend
+        search:
+          host: 'Template App Zabbix Agent'
+    register: templ_zabbix_agent
+
+  - zbxapi:
+      server: "{{ g_zserver }}"
+      user: "{{ g_zuser }}"
+      password: "{{ g_zpassword }}"
+      zbx_class: Template
+      state: list
+    register: templates
+
+  - debug: var=templ_heartbeat.results
+
+  - zbxapi:
+      server: "{{ g_zserver }}"
+      user: "{{ g_zuser }}"
+      password: "{{ g_zpassword }}"
+      zbx_class: Template
+      state: absent
+      params: "{{templates.results | difference(templ_zabbix_agent.results) | difference(templ_zabbix_server.results) | oo_collect('templateid') }}"
+    register: template_results
+    when:  templ_heartbeat.results | length == 0
