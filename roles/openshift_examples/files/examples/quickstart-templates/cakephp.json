@@ -17,7 +17,7 @@
       "kind": "Service",
       "apiVersion": "v1",
       "metadata": {
-        "name": "cakephp-frontend",
+        "name": "cakephp-example",
         "annotations": {
           "description": "Exposes and load balances the application pods"
         }
@@ -31,7 +31,7 @@
           }
         ],
         "selector": {
-          "name": "cakephp-frontend" 
+          "name": "cakephp-example" 
         }
       }
     },
@@ -39,13 +39,13 @@
       "kind": "Route",
       "apiVersion": "v1",
       "metadata": {
-        "name": "cakephp-route"
+        "name": "cakephp-example"
       },
       "spec": {
         "host": "${APPLICATION_DOMAIN}",
         "to": {
           "kind": "Service",
-          "name": "cakephp-frontend"
+          "name": "cakephp-example"
         }
       }
     },
@@ -110,7 +110,7 @@
       "kind": "DeploymentConfig",
       "apiVersion": "v1",
       "metadata": {
-        "name": "cakephp-frontend",
+        "name": "cakephp-example",
         "annotations": {
           "description": "Defines how to deploy the application server"
         }
@@ -139,13 +139,13 @@
         ],
         "replicas": 1,
         "selector": {
-          "name": "cakephp-frontend"
+          "name": "cakephp-example"
         },
         "template": {
           "metadata": {
-            "name": "cakephp-frontend",
+            "name": "cakephp-example",
             "labels": {
-              "name": "cakephp-frontend"
+              "name": "cakephp-example"
             }
           },
           "spec": {

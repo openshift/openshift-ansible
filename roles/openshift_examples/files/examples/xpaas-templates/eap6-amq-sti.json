@@ -304,24 +304,25 @@
                 },
                 "output": {
                     "to": {
-                        "name": "${APPLICATION_NAME}"
+                        "kind": "ImageStreamTag",
+                        "name": "${APPLICATION_NAME}:latest"
                     }
                 },
                 "triggers": [
                     {
-                        "type": "github",
+                        "type": "Github",
                         "github": {
                             "secret": "${GITHUB_TRIGGER_SECRET}"
                         }
                     },
                     {
-                        "type": "generic",
+                        "type": "Generic",
                         "generic": {
                             "secret": "${GENERIC_TRIGGER_SECRET}"
                         }
                     },
                     {
-                        "type": "imageChange",
+                        "type": "ImageChange",
                         "imageChange": {}
                     }
                 ]
@@ -392,17 +393,17 @@
                                 },
                                 "ports": [
                                     {
-                                        "name": "${APPLICATION_NAME}-tcp-8080",
+                                        "name": "http",
                                         "containerPort": 8080,
                                         "protocol": "TCP"
                                     },
                                     {
-                                        "name": "${APPLICATION_NAME}-tcp-8443",
+                                        "name": "https",
                                         "containerPort": 8443,
                                         "protocol": "TCP"
                                     },
                                     {
-                                        "name": "${APPLICATION_NAME}-ping-8888",
+                                        "name": "ping",
                                         "containerPort": 8888,
                                         "protocol": "TCP"
                                     }
@@ -533,37 +534,37 @@
                                 },
                                 "ports": [
                                     {
-                                        "name": "${APPLICATION_NAME}-amq-amqp",
+                                        "name": "amqp",
                                         "containerPort": 5672,
                                         "protocol": "TCP"
                                     },
                                     {
-                                        "name": "${APPLICATION_NAME}-amq-amqp-ssl",
+                                        "name": "amqp-ssl",
                                         "containerPort": 5671,
                                         "protocol": "TCP"
                                     },
                                     {
-                                        "name": "${APPLICATION_NAME}-amq-mqtt",
+                                        "name": "mqtt",
                                         "containerPort": 1883,
                                         "protocol": "TCP"
                                     },
                                     {
-                                        "name": "${APPLICATION_NAME}-amq-stomp",
+                                        "name": "stomp",
                                         "containerPort": 61613,
                                         "protocol": "TCP"
                                     },
                                     {
-                                        "name": "${APPLICATION_NAME}-amq-stomp-ssl",
+                                        "name": "stomp-ssl",
                                         "containerPort": 61612,
                                         "protocol": "TCP"
                                     },
                                     {
-                                        "name": "${APPLICATION_NAME}-amq-tcp",
+                                        "name": "tcp",
                                         "containerPort": 61616,
                                         "protocol": "TCP"
                                     },
                                     {
-                                        "name": "${APPLICATION_NAME}-amq-tcp-ssl",
+                                        "name": "tcp-ssl",
                                         "containerPort": 61617,
                                         "protocol": "TCP"
                                     }

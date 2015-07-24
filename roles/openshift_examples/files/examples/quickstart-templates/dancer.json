@@ -17,7 +17,7 @@
       "kind": "Service",
       "apiVersion": "v1",
       "metadata": {
-        "name": "dancer-frontend",
+        "name": "dancer-example",
         "annotations": {
           "description": "Exposes and load balances the application pods"
         }
@@ -31,7 +31,7 @@
           }
         ],
         "selector": {
-          "name": "dancer-frontend"
+          "name": "dancer-example"
         }
       }
     },
@@ -39,13 +39,13 @@
       "kind": "Route",
       "apiVersion": "v1",
       "metadata": {
-        "name": "dancer-route"
+        "name": "dancer-example"
       },
       "spec": {
         "host": "${APPLICATION_DOMAIN}",
         "to": {
           "kind": "Service",
-          "name": "dancer-frontend"
+          "name": "dancer-example"
         }
       }
     },
@@ -110,7 +110,7 @@
       "kind": "DeploymentConfig",
       "apiVersion": "v1",
       "metadata": {
-        "name": "dancer-frontend",
+        "name": "dancer-example",
         "annotations": {
           "description": "Defines how to deploy the application server"
         }
@@ -139,13 +139,13 @@
         ],
         "replicas": 1,
         "selector": {
-          "name": "dancer-frontend"
+          "name": "dancer-example"
         },
         "template": {
           "metadata": {
-            "name": "dancer-frontend",
+            "name": "dancer-example",
             "labels": {
-              "name": "dancer-frontend"
+              "name": "dancer-example"
             }
           },
           "spec": {

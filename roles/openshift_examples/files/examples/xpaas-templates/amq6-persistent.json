@@ -320,37 +320,37 @@
                                 },
                                 "ports": [
                                     {
-                                        "name": "${APPLICATION_NAME}-amq-amqp",
+                                        "name": "amqp",
                                         "containerPort": 5672,
                                         "protocol": "TCP"
                                     },
                                     {
-                                        "name": "${APPLICATION_NAME}-amq-amqp-ssl",
+                                        "name": "amqp-ssl",
                                         "containerPort": 5671,
                                         "protocol": "TCP"
                                     },
                                     {
-                                        "name": "${APPLICATION_NAME}-amq-mqtt",
+                                        "name": "mqtt",
                                         "containerPort": 1883,
                                         "protocol": "TCP"
                                     },
                                     {
-                                        "name": "${APPLICATION_NAME}-amq-stomp",
+                                        "name": "stomp",
                                         "containerPort": 61613,
                                         "protocol": "TCP"
                                     },
                                     {
-                                        "name": "${APPLICATION_NAME}-amq-stomp-ssl",
+                                        "name": "stomp-ssl",
                                         "containerPort": 61612,
                                         "protocol": "TCP"
                                     },
                                     {
-                                        "name": "${APPLICATION_NAME}-amq-tcp",
+                                        "name": "tcp",
                                         "containerPort": 61616,
                                         "protocol": "TCP"
                                     },
                                     {
-                                        "name": "${APPLICATION_NAME}-amq-tcp-ssl",
+                                        "name": "tcp-ssl",
                                         "containerPort": 61617,
                                         "protocol": "TCP"
                                     }

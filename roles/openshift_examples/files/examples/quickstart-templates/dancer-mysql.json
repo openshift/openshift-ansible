@@ -17,7 +17,7 @@
       "kind": "Service",
       "apiVersion": "v1",
       "metadata": {
-        "name": "dancer-frontend",
+        "name": "dancer-mysql-example",
         "annotations": {
           "description": "Exposes and load balances the application pods"
         }
@@ -31,7 +31,7 @@
           }
         ],
         "selector": {
-          "name": "dancer-frontend"
+          "name": "dancer-mysql-example"
         }
       }
     },
@@ -39,13 +39,13 @@
       "kind": "Route",
       "apiVersion": "v1",
       "metadata": {
-        "name": "dancer-route"
+        "name": "dancer-mysql-example"
       },
       "spec": {
         "host": "${APPLICATION_DOMAIN}",
         "to": {
           "kind": "Service",
-          "name": "dancer-frontend"
+          "name": "dancer-mysql-example"
         }
       }
     },
@@ -53,7 +53,7 @@
       "kind": "ImageStream",
       "apiVersion": "v1",
       "metadata": {
-        "name": "dancer-example",
+        "name": "dancer-mysql-example",
         "annotations": {
           "description": "Keeps track of changes in the application image"
         }
@@ -63,7 +63,7 @@
       "kind": "BuildConfig",
       "apiVersion": "v1",
       "metadata": {
-        "name": "dancer-example",
+        "name": "dancer-mysql-example",
         "annotations": {
           "description": "Defines how to build the application"
         }
@@ -90,7 +90,7 @@
         "output": {
           "to": {
             "kind": "ImageStreamTag",
-            "name": "dancer-example:latest"
+            "name": "dancer-mysql-example:latest"
           }
         },
         "triggers": [
@@ -110,7 +110,7 @@
       "kind": "DeploymentConfig",
       "apiVersion": "v1",
       "metadata": {
-        "name": "dancer-frontend",
+        "name": "dancer-mysql-example",
         "annotations": {
           "description": "Defines how to deploy the application server"
         }
@@ -122,11 +122,11 @@
             "imageChangeParams": {
               "automatic": true,
               "containerNames": [
-                "dancer-example"
+                "dancer-mysql-example"
               ],
               "from": {
                 "kind": "ImageStreamTag",
-                "name": "dancer-example:latest"
+                "name": "dancer-mysql-example:latest"
               }
             }
           },
@@ -136,20 +136,20 @@
         ],
         "replicas": 1,
         "selector": {
-          "name": "dancer-frontend"
+          "name": "dancer-mysql-example"
         },
         "template": {
           "metadata": {
-            "name": "dancer-frontend",
+            "name": "dancer-mysql-example",
             "labels": {
-              "name": "dancer-frontend"
+              "name": "dancer-mysql-example"
             }
           },
           "spec": {
             "containers": [
               {
-                "name": "dancer-example",
-                "image": "dancer-example",
+                "name": "dancer-mysql-example",
+                "image": "dancer-mysql-example",
                 "ports": [
                   {
                     "containerPort": 8080
@@ -282,7 +282,7 @@
     {
       "name": "APPLICATION_DOMAIN",
       "description": "The exposed hostname that will route to the Dancer service",
-      "value": "dancer-example.openshiftapps.com"
+      "value": "dancer-mysql-example.openshiftapps.com"
     },
     {
       "name": "GITHUB_WEBHOOK_SECRET",

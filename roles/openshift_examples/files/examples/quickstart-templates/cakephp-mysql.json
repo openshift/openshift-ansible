@@ -17,7 +17,7 @@
       "kind": "Service",
       "apiVersion": "v1",
       "metadata": {
-        "name": "cakephp-frontend",
+        "name": "cakephp-mysql-example",
         "annotations": {
           "description": "Exposes and load balances the application pods"
         }
@@ -31,7 +31,7 @@
           }
         ],
         "selector": {
-          "name": "cakephp-frontend"
+          "name": "cakephp-mysql-example"
         }
       }
     },
@@ -39,13 +39,13 @@
       "kind": "Route",
       "apiVersion": "v1",
       "metadata": {
-        "name": "cakephp-route"
+        "name": "cakephp-mysql-example"
       },
       "spec": {
         "host": "${APPLICATION_DOMAIN}",
         "to": {
           "kind": "Service",
-          "name": "cakephp-frontend"
+          "name": "cakephp-mysql-example"
         }
       }
     },
@@ -53,7 +53,7 @@
       "kind": "ImageStream",
       "apiVersion": "v1",
       "metadata": {
-        "name": "cakephp-example",
+        "name": "cakephp-mysql-example",
         "annotations": {
           "description": "Keeps track of changes in the application image"
         }
@@ -63,7 +63,7 @@
       "kind": "BuildConfig",
       "apiVersion": "v1",
       "metadata": {
-        "name": "cakephp-example",
+        "name": "cakephp-mysql-example",
         "annotations": {
           "description": "Defines how to build the application"
         }
@@ -90,7 +90,7 @@
         "output": {
           "to": {
             "kind": "ImageStreamTag",
-            "name": "cakephp-example:latest"
+            "name": "cakephp-mysql-example:latest"
           }
         },
         "triggers": [
@@ -110,7 +110,7 @@
       "kind": "DeploymentConfig",
       "apiVersion": "v1",
       "metadata": {
-        "name": "cakephp-frontend",
+        "name": "cakephp-mysql-example",
         "annotations": {
           "description": "Defines how to deploy the application server"
         }
@@ -125,7 +125,7 @@
                 "command": [
                   "./migrate-database.sh"
                 ],
-                "containerName": "cakephp-example"
+                "containerName": "cakephp-mysql-example"
               }
             }
           }
@@ -136,11 +136,11 @@
             "imageChangeParams": {
               "automatic": true,
               "containerNames": [
-                "cakephp-example"
+                "cakephp-mysql-example"
               ],
               "from": {
                 "kind": "ImageStreamTag",
-                "name": "cakephp-example:latest"
+                "name": "cakephp-mysql-example:latest"
               }
             }
           },
@@ -150,20 +150,20 @@
         ],
         "replicas": 1,
         "selector": {
-          "name": "cakephp-frontend"
+          "name": "cakephp-mysql-example"
         },
         "template": {
           "metadata": {
-            "name": "cakephp-frontend",
+            "name": "cakephp-mysql-example",
             "labels": {
-              "name": "cakephp-frontend"
+              "name": "cakephp-mysql-example"
             }
           },
           "spec": {
             "containers": [
               {
-                "name": "cakephp-example",
-                "image": "cakephp-example",
+                "name": "cakephp-mysql-example",
+                "image": "cakephp-mysql-example",
                 "ports": [
                   {
                     "containerPort": 8080
@@ -308,7 +308,7 @@
     {
       "name": "APPLICATION_DOMAIN",
       "description": "The exposed hostname that will route to the CakePHP service",
-      "value": "cakephp-example.openshiftapps.com"
+      "value": "cakephp-mysql-example.openshiftapps.com"
     },
     {
       "name": "GITHUB_WEBHOOK_SECRET",
