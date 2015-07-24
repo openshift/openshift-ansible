@@ -71,3 +71,8 @@
 
 - name: Start and enable openshift-node
   service: name=openshift-node enabled=yes state=started
+  register: start_result
+
+- name: pause to prevent service restart from interfering with bootstrapping
+  pause: seconds=30
+  when: start_result | changed
