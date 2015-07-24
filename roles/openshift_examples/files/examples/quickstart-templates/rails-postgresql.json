@@ -17,7 +17,7 @@
       "kind": "Service",
       "apiVersion": "v1",
       "metadata": {
-        "name": "rails-frontend",
+        "name": "rails-postgresql-example",
         "annotations": {
           "description": "Exposes and load balances the application pods"
         }
@@ -31,7 +31,7 @@
           }
         ],
         "selector": {
-          "name": "rails-frontend"
+          "name": "rails-postgresql-example"
         }
       }
     },
@@ -39,13 +39,13 @@
       "kind": "Route",
       "apiVersion": "v1",
       "metadata": {
-        "name": "rails-route"
+        "name": "rails-postgresql-example"
       },
       "spec": {
         "host": "${APPLICATION_DOMAIN}",
         "to": {
           "kind": "Service",
-          "name": "rails-frontend"
+          "name": "rails-postgresql-example"
         }
       }
     },
@@ -53,7 +53,7 @@
       "kind": "ImageStream",
       "apiVersion": "v1",
       "metadata": {
-        "name": "rails-example",
+        "name": "rails-postgresql-example",
         "annotations": {
           "description": "Keeps track of changes in the application image"
         }
@@ -63,7 +63,7 @@
       "kind": "BuildConfig",
       "apiVersion": "v1",
       "metadata": {
-        "name": "rails-example",
+        "name": "rails-postgresql-example",
         "annotations": {
           "description": "Defines how to build the application"
         }
@@ -90,7 +90,7 @@
         "output": {
           "to": {
             "kind": "ImageStreamTag",
-            "name": "rails-example:latest"
+            "name": "rails-postgresql-example:latest"
           }
         },
         "triggers": [
@@ -110,7 +110,7 @@
       "kind": "DeploymentConfig",
       "apiVersion": "v1",
       "metadata": {
-        "name": "rails-frontend",
+        "name": "rails-postgresql-example",
         "annotations": {
           "description": "Defines how to deploy the application server"
         }
@@ -125,7 +125,7 @@
                 "command": [
                   "./migrate-database.sh"
                 ],
-                "containerName": "rails-example"
+                "containerName": "rails-postgresql-example"
               }
             }
           }
@@ -136,11 +136,11 @@
             "imageChangeParams": {
               "automatic": true,
               "containerNames": [
-                "rails-example"
+                "rails-postgresql-example"
               ],
               "from": {
                 "kind": "ImageStreamTag",
-                "name": "rails-example:latest"
+                "name": "rails-postgresql-example:latest"
               }
             }
           },
@@ -150,20 +150,20 @@
         ],
         "replicas": 1,
         "selector": {
-          "name": "rails-frontend"
+          "name": "rails-postgresql-example"
         },
         "template": {
           "metadata": {
-            "name": "rails-frontend",
+            "name": "rails-postgresql-example",
             "labels": {
-              "name": "rails-frontend"
+              "name": "rails-postgresql-example"
             }
           },
           "spec": {
             "containers": [
               {
-                "name": "rails-example",
-                "image": "rails-example",
+                "name": "rails-postgresql-example",
+                "image": "rails-postgresql-example",
                 "ports": [
                   {
                     "containerPort": 8080
@@ -328,7 +328,7 @@
     {
       "name": "APPLICATION_DOMAIN",
       "description": "The exposed hostname that will route to the Rails service",
-      "value": "rails-example.openshiftapps.com"
+      "value": "rails-postgresql-example.openshiftapps.com"
     },
     {
       "name": "GITHUB_WEBHOOK_SECRET",

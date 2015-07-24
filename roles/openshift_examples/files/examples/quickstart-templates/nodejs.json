@@ -17,7 +17,7 @@
       "kind": "Service",
       "apiVersion": "v1",
       "metadata": {
-        "name": "nodejs-frontend",
+        "name": "nodejs-example",
         "annotations": {
           "description": "Exposes and load balances the application pods"
         }
@@ -31,7 +31,7 @@
           }
         ],
         "selector": {
-          "name": "nodejs-frontend"
+          "name": "nodejs-example"
         }
       }
     },
@@ -39,13 +39,13 @@
       "kind": "Route",
       "apiVersion": "v1",
       "metadata": {
-        "name": "nodejs-route"
+        "name": "nodejs-example"
       },
       "spec": {
         "host": "${APPLICATION_DOMAIN}",
         "to": {
           "kind": "Service",
-          "name": "nodejs-frontend"
+          "name": "nodejs-example"
         }
       }
     },
@@ -110,7 +110,7 @@
       "kind": "DeploymentConfig",
       "apiVersion": "v1",
       "metadata": {
-        "name": "nodejs-frontend",
+        "name": "nodejs-example",
         "annotations": {
           "description": "Defines how to deploy the application server"
         }
@@ -139,13 +139,13 @@
         ],
         "replicas": 1,
         "selector": {
-          "name": "nodejs-frontend"
+          "name": "nodejs-example"
         },
         "template": {
           "metadata": {
-            "name": "nodejs-frontend",
+            "name": "nodejs-example",
             "labels": {
-              "name": "nodejs-frontend"
+              "name": "nodejs-example"
             }
           },
           "spec": {

@@ -17,7 +17,7 @@
       "kind": "Service",
       "apiVersion": "v1",
       "metadata": {
-        "name": "django-frontend",
+        "name": "django-postgresql-example",
         "annotations": {
           "description": "Exposes and load balances the application pods"
         }
@@ -31,7 +31,7 @@
           }
         ],
         "selector": {
-          "name": "django-frontend"
+          "name": "django-postgresql-example"
         }
       }
     },
@@ -39,13 +39,13 @@
       "kind": "Route",
       "apiVersion": "v1",
       "metadata": {
-        "name": "django-route"
+        "name": "django-postgresql-example"
       },
       "spec": {
         "host": "${APPLICATION_DOMAIN}",
         "to": {
           "kind": "Service",
-          "name": "django-frontend"
+          "name": "django-postgresql-example"
         }
       }
     },
@@ -53,7 +53,7 @@
       "kind": "ImageStream",
       "apiVersion": "v1",
       "metadata": {
-        "name": "django-example",
+        "name": "django-postgresql-example",
         "annotations": {
           "description": "Keeps track of changes in the application image"
         }
@@ -63,7 +63,7 @@
       "kind": "BuildConfig",
       "apiVersion": "v1",
       "metadata": {
-        "name": "django-example",
+        "name": "django-postgresql-example",
         "annotations": {
           "description": "Defines how to build the application"
         }
@@ -90,7 +90,7 @@
         "output": {
           "to": {
             "kind": "ImageStreamTag",
-            "name": "django-example:latest"
+            "name": "django-postgresql-example:latest"
           }
         },
         "triggers": [
@@ -110,7 +110,7 @@
       "kind": "DeploymentConfig",
       "apiVersion": "v1",
       "metadata": {
-        "name": "django-frontend",
+        "name": "django-postgresql-example",
         "annotations": {
           "description": "Defines how to deploy the application server"
         }
@@ -125,11 +125,11 @@
             "imageChangeParams": {
               "automatic": true,
               "containerNames": [
-                "django-example"
+                "django-postgresql-example"
               ],
               "from": {
                 "kind": "ImageStreamTag",
-                "name": "django-example:latest"
+                "name": "django-postgresql-example:latest"
               }
             }
           },
@@ -139,20 +139,20 @@
         ],
         "replicas": 1,
         "selector": {
-          "name": "django-frontend"
+          "name": "django-postgresql-example"
         },
         "template": {
           "metadata": {
-            "name": "django-frontend",
+            "name": "django-postgresql-example",
             "labels": {
-              "name": "django-frontend"
+              "name": "django-postgresql-example"
             }
           },
           "spec": {
             "containers": [
               {
-                "name": "django-example",
-                "image": "django-example",
+                "name": "django-postgresql-example",
+                "image": "django-postgresql-example",
                 "ports": [
                   {
                     "containerPort": 8080
@@ -293,7 +293,7 @@
     {
       "name": "APPLICATION_DOMAIN",
       "description": "The exposed hostname that will route to the Django service",
-      "value": "django-example.openshiftapps.com"
+      "value": "django-postgresql-example.openshiftapps.com"
     },
     {
       "name": "GITHUB_WEBHOOK_SECRET",

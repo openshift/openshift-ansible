@@ -17,7 +17,7 @@
       "kind": "Service",
       "apiVersion": "v1",
       "metadata": {
-        "name": "django-frontend",
+        "name": "django-example",
         "annotations": {
           "description": "Exposes and load balances the application pods"
         }
@@ -31,7 +31,7 @@
           }
         ],
         "selector": {
-          "name": "django-frontend"
+          "name": "django-example"
         }
       }
     },
@@ -39,13 +39,13 @@
       "kind": "Route",
       "apiVersion": "v1",
       "metadata": {
-        "name": "django-route"
+        "name": "django-example"
       },
       "spec": {
         "host": "${APPLICATION_DOMAIN}",
         "to": {
           "kind": "Service",
-          "name": "django-frontend"
+          "name": "django-example"
         }
       }
     },
@@ -110,7 +110,7 @@
       "kind": "DeploymentConfig",
       "apiVersion": "v1",
       "metadata": {
-        "name": "django-frontend",
+        "name": "django-example",
         "annotations": {
           "description": "Defines how to deploy the application server"
         }
@@ -139,13 +139,13 @@
         ],
         "replicas": 1,
         "selector": {
-          "name": "django-frontend"
+          "name": "django-example"
         },
         "template": {
           "metadata": {
-            "name": "django-frontend",
+            "name": "django-example",
             "labels": {
-              "name": "django-frontend"
+              "name": "django-example"
             }
           },
           "spec": {

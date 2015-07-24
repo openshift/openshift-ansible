@@ -289,24 +289,25 @@
                 },
                 "output": {
                     "to": {
-                        "name": "${APPLICATION_NAME}"
+                        "kind": "ImageStreamTag",
+                        "name": "${APPLICATION_NAME}:latest"
                     }
                 },
                 "triggers": [
                     {
-                        "type": "github",
+                        "type": "Github",
                         "github": {
                             "secret": "${GITHUB_TRIGGER_SECRET}"
                         }
                     },
                     {
-                        "type": "generic",
+                        "type": "Generic",
                         "generic": {
                             "secret": "${GENERIC_TRIGGER_SECRET}"
                         }
                     },
                     {
-                        "type": "imageChange",
+                        "type": "ImageChange",
                         "imageChange": {}
                     }
                 ]
@@ -377,12 +378,12 @@
                                 ],
                                 "ports": [
                                     {
-                                        "name": "${APPLICATION_NAME}-tcp-8080",
+                                        "name": "http",
                                         "containerPort": 8080,
                                         "protocol": "TCP"
                                     },
                                     {
-                                        "name": "${APPLICATION_NAME}-tcp-8443",
+                                        "name": "https",
                                         "containerPort": 8443,
                                         "protocol": "TCP"
                                     }
@@ -507,7 +508,6 @@
                                 "image": "postgresql",
                                 "ports": [
                                     {
-                                        "name": "${APPLICATION_NAME}-postgresql-tcp-5432",
                                         "containerPort": 5432,
                                         "protocol": "TCP"
                                     }
