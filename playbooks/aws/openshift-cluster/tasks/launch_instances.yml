@@ -37,6 +37,7 @@
   when: ec2_assign_public_ip is not defined
 
 - set_fact:
+    openshift_node_labels="{'region': '{{ ec2_region }}', 'type': 'master'}"
     ec2_instance_type: "{{ ec2_master_instance_type | default(deployment_vars[deployment_type].type, true) }}"
     ec2_security_groups: "{{ ec2_master_security_groups
                     | default(deployment_vars[deployment_type].security_groups, true) }}"
@@ -49,12 +50,14 @@
   when: host_type == "etcd" and sub_host_type == "default"
 
 - set_fact:
+    openshift_node_labels="{'region': '{{ ec2_region }}', 'type': 'infra'}"
     ec2_instance_type: "{{ ec2_infra_instance_type | default(deployment_vars[deployment_type].type, true) }}"
     ec2_security_groups: "{{ ec2_infra_security_groups
                     | default(deployment_vars[deployment_type].security_groups, true) }}"
   when: host_type == "node" and sub_host_type == "infra"
 
 - set_fact:
+    openshift_node_labels="{'region': '{{ ec2_region }}', 'type': 'compute'}"
     ec2_instance_type: "{{ ec2_node_instance_type | default(deployment_vars[deployment_type].type, true) }}"
     ec2_security_groups: "{{ ec2_node_security_groups
                     | default(deployment_vars[deployment_type].security_groups, true) }}"
