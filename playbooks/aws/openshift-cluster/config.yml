@@ -15,6 +15,7 @@
     g_nodes_group: "{{ 'tag_env-host-type_' ~ cluster_id ~ '-openshift-node' }}"
     g_ssh_user: "{{ hostvars.localhost.g_ssh_user_tmp }}"
     g_sudo: "{{ hostvars.localhost.g_sudo_tmp }}"
+    g_nodeonmaster: true
     openshift_cluster_id: "{{ cluster_id }}"
     openshift_debug_level: 4
     openshift_deployment_type: "{{ deployment_type }}"
