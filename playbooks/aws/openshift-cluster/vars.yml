@@ -8,7 +8,7 @@ deployment_vars:
     ssh_user: fedora
     sudo: yes
     keypair: libra
-    type: m3.large
+    type: m4.large
     security_groups: [ 'public' ]
     vpc_subnet:
     assign_public_ip:
@@ -20,7 +20,7 @@ deployment_vars:
     ssh_user: root
     sudo: no
     keypair: libra
-    type: m3.large
+    type: m4.large
     security_groups: [ 'public' ]
     vpc_subnet:
     assign_public_ip:
@@ -32,7 +32,7 @@ deployment_vars:
     ssh_user: ec2-user
     sudo: yes
     keypair: libra
-    type: m3.large
+    type: m4.large
     security_groups: [ 'public' ]
     vpc_subnet:
     assign_public_ip:
