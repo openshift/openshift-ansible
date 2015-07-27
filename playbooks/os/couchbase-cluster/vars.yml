@@ -4,7 +4,8 @@
 # depending on type of VM
 # m1.xlarge : 16GB RAM = 16384 MB RAM
 #               160GB disk
-ram_per_server: 16384
+#               Usable for bucket : 14862 MB
+ram_per_server: 14862
 
 openstack_network_prefix: 'openshift-ansible-{{ cluster_id }}'
 openstack_network_cidr: 192.168.{{ 1048576 | random % 256 }}.0/24
@@ -13,7 +14,7 @@ openstack_network_dns:
   - 172.16.50.210
   - 172.16.50.250 
 openstack_ssh_keypair: "Rbox_UHA"
-openstack_flavor_ram: "{{ ram_per_server }}"
+openstack_flavor_ram: 16384 
 openshift_version: 0.4.3
 
 deployment_vars:

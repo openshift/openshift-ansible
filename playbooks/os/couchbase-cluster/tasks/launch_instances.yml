@@ -56,7 +56,7 @@
     ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
     groups: additional 
   with_items: groups["meta-env-host-type_{{ cluster_id }}-openshift-couchbase"] | default([])
-  when: "item not in primary"
+  when: item not in groups['primary']
 
 - name: Evaluate couchbase_servers_hosts 
   add_host:
