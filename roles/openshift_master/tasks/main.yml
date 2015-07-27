@@ -59,7 +59,7 @@
   openshift_facts:
     role: dns
     local_facts:
-      ip: "{{ openshift.common.ip }}"
+      ip: "{{ openshift_master_cluster_vip | default(openshift.common.ip, true) | default(None) }}"
       domain: cluster.local
   when: openshift.master.embedded_dns
 
