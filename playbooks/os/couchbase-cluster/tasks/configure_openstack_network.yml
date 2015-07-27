@@ -52,6 +52,10 @@
   command: 'neutron security-group-rule-create --protocol TCP --port-range-min 22 --port-range-max 22 --remote-ip-prefix 0.0.0.0/0 {{ openstack_network_prefix }}-secgrp'
   when: security_group_show_result.rc == 1
 
+- name: Authorize ingress http
+  command: 'neutron security-group-rule-create --protocol TCP --port-range-min 8091 --port-range-max 8091 --remote-ip-prefix 0.0.0.0/0 {{ openstack_network_prefix }}-secgrp'
+  when: security_group_show_result.rc == 1
+
 - name: Authorize intra-cluster traffic
   command: 'neutron security-group-rule-create --protocol TCP --port-range-min 1 --port-range-max 65535 --remote-group-id {{ openstack_network_prefix }}-secgrp {{ openstack_network_prefix }}-secgrp'
   when: security_group_show_result.rc == 1

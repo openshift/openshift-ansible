@@ -10,25 +10,24 @@
     image_url: "{{ deployment_vars[deployment_type].image.url }}"
     image_sha256: "{{ deployment_vars[deployment_type].image.sha256 }}"
     image_name: "{{ deployment_vars[deployment_type].image.name }}"
+  tasks:
 
+  - include: tasks/configure_openstack.yml
   - include: ../../common/couchbase/set_couchbase_launch_facts_tasks.yml
-
   - include: tasks/launch_instances.yml
     vars:
       instances: "{{ cb_node_names }}"
       cluster: "{{ cluster_id }}"
       type: "{{ node_type }}"
 
-
-# TODO 
 - include: install_couchbase.yml
+  vars:
+      cluster: "{{ cluster_id }}"
 
 # TODO 
 - include: init_couchbase.yml
 
 # TODO 
-- include: create_bucket.yml
-
--
+#- include: create_bucket.yml
 
 # TODO create XDCR from parent 

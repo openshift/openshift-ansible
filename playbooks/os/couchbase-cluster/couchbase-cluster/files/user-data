@@ -1,7 +1,0 @@
-#cloud-config
-disable_root: true
-
-system_info:
-  default_user:
-    name: openshift
-    sudo: ["ALL=(ALL) NOPASSWD: ALL"]

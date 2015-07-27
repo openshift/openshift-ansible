@@ -1,3 +1,0 @@
----
-- include: configure_openstack_network.yml
-  when: openstack_network_prefix is defined

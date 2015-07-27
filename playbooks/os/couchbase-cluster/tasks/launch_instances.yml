@@ -36,10 +36,35 @@
     ansible_ssh_host: '{{ item[1].stdout }}'
     ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
     ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-    groups: 'meta-env_{{ cluster }}, meta-host-type_{{ type }}, meta-env-host-type_{{ cluster }}-{{ type }}'
+    groups: 'meta-env_{{ cluster }}, meta-host-type_{{ type }}, meta-env-host-type_{{ cluster }}-openshift-{{ type }}'
   with_together:
     - instances
     - floating_ip_create_result.results
+  
+- name: Evaluate primary 
+  add_host:
+    name: "{{ groups['meta-env-host-type_' ~ cluster_id ~ '-openshift-couchbase'][0] }}"
+    ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
+    ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
+    groups: primary
+  when: "'meta-env-host-type_{{ cluster_id }}-openshift-couchbase' in groups"
+
+- name: Evaluate additional 
+  add_host:
+    name: "{{ item }}"
+    ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
+    ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
+    groups: additional 
+  with_items: groups["meta-env-host-type_{{ cluster_id }}-openshift-couchbase"] | default([])
+  when: "item not in primary"
+
+- name: Evaluate couchbase_servers_hosts 
+  add_host:
+    name: "{{ item }}"
+    groups: couchbase_servers_hosts 
+    ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
+    ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
+  with_items: groups["meta-env-host-type_{{ cluster_id }}-openshift-couchbase"] | default([])
 
 - name: Wait for ssh
   wait_for:

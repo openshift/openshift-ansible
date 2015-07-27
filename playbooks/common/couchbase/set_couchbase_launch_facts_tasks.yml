@@ -8,4 +8,4 @@
   with_sequence: start=1 end={{ num_cb }}
 
 - set_fact:
-    cb_node_names: "{{ node_names_output.results | oo_collect('ansible_facts') | oo_collect('scratch_name') }}"
+    cb_node_names: "{{ cb_node_names_output.results | oo_collect('ansible_facts') | oo_collect('scratch_name') }}"

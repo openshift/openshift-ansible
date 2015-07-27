@@ -1,5 +1,5 @@
 ---
-- hosts: groups["meta-env-host-type_{{ cluster_id }}-couchbase"] | default([])
+- hosts: couchbase_servers_hosts 
   sudo: True
   vars_files:
     - roles/couchbase.couchbase-server/vars/{{ ansible_os_distribution }}.yml
