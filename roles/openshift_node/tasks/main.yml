@@ -28,7 +28,7 @@
       deployment_type: "{{ openshift_deployment_type }}"
   - role: node
     local_facts:
-      labels: "{{ openshift_node_labels | default(none) }}"
+      labels: "{{ openshift_node_labels | default('region': 'us-east') }}"
       annotations: "{{ openshift_node_annotations | default(none) }}"
       registry_url: "{{ oreg_url | default(none) }}"
       debug_level: "{{ openshift_node_debug_level | default(openshift.common.debug_level) }}"
