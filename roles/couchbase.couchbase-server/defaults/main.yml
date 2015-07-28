@@ -35,7 +35,7 @@
 couchbase_server_edition: "enterprise"
 couchbase_server_admin: "Administrator"
 couchbase_server_password: "couchbase"
-couchbase_server_ram: "{{ ram_per_server | default(16384) }}"
+couchbase_server_ram: "{{ ram_per_server | default(14862) }}"
 couchbase_server_admin_port: 8091
 couchbase_server_admin_ssl_port: 18091
 couchbase_server_api_port: 8092
