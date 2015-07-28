@@ -39,6 +39,15 @@
       ansible_sudo: "{{ g_sudo | default(omit) }}"
     with_items: groups[g_nodes_group] | default([])
 
+  - name: Evaluate oo_nodes_to_config
+    add_host:
+      name: "{{ item }}"
+      groups: oo_nodes_to_config
+      ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
+      ansible_sudo: "{{ g_sudo | default(omit) }}"
+    with_items: groups[g_masters_group] | default([])
+    when: g_nodeonmaster is defined and g_nodeonmaster == true
+
   - name: Evaluate oo_first_etcd
     add_host:
       name: "{{ groups[g_etcd_group][0] }}"
