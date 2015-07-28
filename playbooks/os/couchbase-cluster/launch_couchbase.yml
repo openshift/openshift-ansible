@@ -24,10 +24,8 @@
   vars:
       cluster: "{{ cluster_id }}"
 
-# TODO 
 - include: init_couchbase.yml
 
-# TODO 
-#- include: create_bucket.yml
+- include: create_bucket.yml
 
 # TODO create XDCR from parent 

@@ -1,7 +1,6 @@
 ---
 - hosts: couchbase_servers_hosts 
   sudo: True
-  gather_facts: False
   tasks:
  
   - name: Wait for Admin
@@ -14,7 +13,6 @@
 - hosts: primary
   sudo: True
   serial: 1
-  gather_facts: False
   vars_files:
     - roles/couchbase.couchbase-server/defaults/main.yml
   vars:
@@ -29,14 +27,13 @@
     shell: "{{ couchbase_server_bin_path }}/couchbase-cli cluster-init -c {{ couchbase_server_primary_node }}:{{ couchbase_server_admin_port }} --user={{ couchbase_server_admin }} --password={{ couchbase_server_password }} --cluster-init-username={{ couchbase_server_admin }} --cluster-init-password={{ couchbase_server_password }} --cluster-init-port={{couchbase_server_admin_port}} --cluster-init-ramsize={{ couchbase_server_ram }}"
 
   - name: Initialize primary node
-    shell: "{{ couchbase_server_bin_path }}/couchbase-cli node-init -c {{ couchbase_server_primary_node }}:{{ couchbase_server_admin_port }} --user={{ couchbase_server_admin }} --password={{ couchbase_server_password }} --cluster-init-username={{ couchbase_server_admin }} --node-init-hostname={{ ansible_fqdn }}"
+    shell: "{{ couchbase_server_bin_path }}/couchbase-cli node-init -c {{ couchbase_server_primary_node }}:{{ couchbase_server_admin_port }} --user={{ couchbase_server_admin }} --password={{ couchbase_server_password }} --cluster-init-username={{ couchbase_server_admin }}}}"
     when: cb_major_version['stdout'] != 2
 
 
 - hosts: additional
   sudo: True
   serial: 1
-  gather_facts: False
   vars_files:
     - roles/couchbase.couchbase-server/defaults/main.yml
   tasks:
@@ -49,7 +46,7 @@
     shell: "{{ couchbase_server_home_path }}/bin/couchbase-cli cluster-init -c {{ ansible_fqdn }}:{{ couchbase_server_admin_port }} --user={{ couchbase_server_admin }} --password={{ couchbase_server_password }} --cluster-init-username={{ couchbase_server_admin }} --cluster-init-password={{ couchbase_server_password }} --cluster-init-port={{couchbase_server_admin_port}} --cluster-init-ramsize={{ couchbase_server_ram }}"
 
   - name: Initialize additional node
-    shell: "{{ couchbase_server_home_path }}/bin/couchbase-cli node-init -c {{ ansible_fqdn }}:{{ couchbase_server_admin_port }} --user={{ couchbase_server_admin }} --password={{ couchbase_server_password }} --cluster-init-username={{ couchbase_server_admin }} --node-init-hostname={{ ansible_fqdn }}"
+    shell: "{{ couchbase_server_home_path }}/bin/couchbase-cli node-init -c {{ ansible_fqdn }}:{{ couchbase_server_admin_port }} --user={{ couchbase_server_admin }} --password={{ couchbase_server_password }} --cluster-init-username={{ couchbase_server_admin }} }}"
     when: cb_major_version['stdout'] != 2
 
 

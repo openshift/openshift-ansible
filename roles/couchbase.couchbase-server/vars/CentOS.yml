@@ -26,6 +26,8 @@
 couchbase_server_centos_ee_version: 3.0.3
 couchbase_server_centos_ee_package: couchbase-server-enterprise-{{ couchbase_server_centos_ee_version }}-centos6.x86_64.rpm
 couchbase_server_centos_ee_url: http://packages.couchbase.com/releases/{{ couchbase_server_centos_ee_version }}/{{ couchbase_server_centos_ee_package }}
+## Added a tarball in local machine
+couchbase_server_centos_local_path: "{{ lookup('env','HOME') }}/couchbase-rpm/{{ couchbase_server_centos_ee_version }}/{{ couchbase_server_centos_ee_package }}"
 couchbase_server_centos_ee_sha256: 1f21843bf0cc86390bc707d7c93bba6e8678dbc0eaf784bb2dc9a6718b46bd04
 
 # couchbase_server_centos_ee_version: 3.0.2
