@@ -18,7 +18,7 @@
           deployment_type: "{{ openshift_deployment_type }}"
       - role: node
         local_facts:
-          labels: "{{ openshift_node_labels | default(None) }}"
+          labels: "{{ openshift_node_labels | default({'region': 'infra', 'zone': 'default'}) }}"
           annotations: "{{ openshift_node_annotations | default(None) }}"
   - name: Check status of node certificates
     stat:
