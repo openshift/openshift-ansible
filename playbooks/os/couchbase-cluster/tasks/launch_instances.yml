@@ -60,11 +60,14 @@
 
 - name: Evaluate couchbase_servers_hosts 
   add_host:
-    name: "{{ item }}"
+    name: "{{ item[0] }}"
     groups: couchbase_servers_hosts 
     ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
     ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-  with_items: groups["meta-env-host-type_{{ cluster_id }}-openshift-couchbase"] | default([])
+    public_ip: '{{ item[1].stdout }}'
+  with_together: 
+    - groups["meta-env-host-type_{{ cluster_id }}-openshift-couchbase"] | default([])
+    - floating_ip_create_result.results
 
 - name: Wait for ssh
   wait_for:

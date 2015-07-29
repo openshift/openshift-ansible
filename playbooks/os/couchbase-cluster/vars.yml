@@ -9,8 +9,8 @@ ram_per_server: 14862
 bucket_name: devicb
 bucket_type: couchbase
 bucket_ram: "{{ ram_per_server }}"
-bucket_replica: 1
 bucket_port: 11211
+bucket_replica: 1
 
 openstack_network_prefix: 'openshift-ansible-{{ cluster_id }}'
 openstack_network_cidr: 192.168.{{ 1048576 | random % 256 }}.0/24
