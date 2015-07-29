@@ -20,9 +20,9 @@ From this role:
 | oreg_url                                 | UNDEF (Optional)      | Default docker registry to use |
 
 From openshift_common:
-| Name                          |  Default Value      |                     | 
+| Name                          |  Default Value      |                     |
 |-------------------------------|---------------------|---------------------|
-| openshift_debug_level         | 0                   | Global openshift debug log verbosity |
+| openshift_debug_level         | 2                   | Global openshift debug log verbosity |
 | openshift_public_ip           | UNDEF (Required)    | Public IP address to use for this host |
 | openshift_hostname            | UNDEF (Required)    | hostname to use for this instance |
 

@@ -28,7 +28,7 @@ From this role:
 From openshift_common:
 | Name                          | Default Value  |                                        |
 |-------------------------------|----------------|----------------------------------------|
-| openshift_debug_level         | 0              | Global openshift debug log verbosity   |
+| openshift_debug_level         | 2              | Global openshift debug log verbosity   |
 | openshift_public_ip           | UNDEF          | Public IP address to use for this host |
 | openshift_hostname            | UNDEF          | hostname to use for this instance      |
 
