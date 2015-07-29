@@ -140,3 +140,23 @@
 
   roles:
   - openshift_manage_node
+
+- name: Label Nodes
+  hosts: oo_first_master
+  vars:
+    default_nodes: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config'] | default([]))
+                                  | oo_collect('openshift.common.hostname', {'sub_host_type': 'default'}) }}"
+  pre_tasks:
+  - set_fact:
+      not_default_nodes: "{{ hostvars
+                                      | oo_select_keys(groups['oo_nodes_to_config'] | default([]))
+                                      | oo_collect('openshift.common.hostname')
+                                      | difference(default_nodes) }}"
+  tasks:
+  - name: Label Default Nodes
+    command: "oc label node {{ item.common.hostname }} region={{ item.ec2_region }} type={{ item.host_type }}"
+    with_items: default_nodes
+
+  - name: Label Not Default Nodes
+    command: "oc label node {{ item.common.hostname }} region={{ item.ec2_region }} type={{ item.sub_host_type }}"
+    with_items: not_default_nodes
