@@ -58,6 +58,6 @@
 
 - include: ../../common/openshift-cluster/create_services.yml
   vars:
-     g_svc_master: "{{ 'tag_env-host-type_' ~ cluster_id ~ '-openshift-master' }}"
+     g_svc_master: "{{ service_master }}"
 
 - include: list.yml
