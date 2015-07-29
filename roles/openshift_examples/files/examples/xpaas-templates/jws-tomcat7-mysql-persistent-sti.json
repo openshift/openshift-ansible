@@ -307,7 +307,7 @@
                 },
                 "triggers": [
                     {
-                        "type": "Github",
+                        "type": "GitHub",
                         "github": {
                             "secret": "${GITHUB_TRIGGER_SECRET}"
                         }
