@@ -5,7 +5,9 @@
   - vars/template_heartbeat.yml
   - vars/template_os_linux.yml
   vars:
-    g_zserver: http://oso-rhel7-zabbix-web.kwoodsontest2.opstest.online.openshift.com/zabbix/api_jsonrpc.php
+    # Use this for local ZAIO
+    g_zserver: http://localhost/zabbix/api_jsonrpc.php
+
     g_zuser: Admin
     g_zpassword: zabbix
   roles:
