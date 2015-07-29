@@ -19,7 +19,8 @@
       instances: "{{ cb_node_names }}"
       cluster: "{{ cluster_id }}"
       type: "{{ node_type }}"
-  - include: tasks/setdns.yml
+
+- include: tasks/setdns.yml
 
 - include: install_couchbase.yml
   vars:
