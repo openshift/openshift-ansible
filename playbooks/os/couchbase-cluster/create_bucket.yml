@@ -14,7 +14,7 @@
   tasks:
 
     - name: Verify node health
-      shell: "{{ couchbase_server_bin_path }}/couchbase-cli server-list -c {{ couchbase_server_primary_node }}:{{ couchbase_server_admin_port }} --user={{ couchbase_server_admin }} --password={{ couchbase_server_password }} | awk '{print $3}'"
+      shell: "{{ couchbase_server_bin_path }}/couchbase-cli server-list -c {{ couchbase_server_primary_node }}:{{ couchbase_server_admin_port }} --user={{ couchbase_server_admin }} --password={{ couchbase_server_password }} | awk '/{{ ansible_default_ipv4.address }}/ {print $3}'"
       register: couchbase_server_health
 
     - name: Create new bucket
