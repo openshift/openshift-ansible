@@ -16,6 +16,7 @@ openstack_network_prefix: 'openshift-ansible-{{ cluster_id }}'
 openstack_network_cidr: 192.168.{{ 1048576 | random % 256 }}.0/24
 openstack_network_external_net: external
 openstack_network_dns:
+  - 10.64.109.124
   - 172.16.50.210
   - 172.16.50.250 
 openstack_ssh_keypair: "Rbox_UHA"

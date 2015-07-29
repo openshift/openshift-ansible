@@ -4,10 +4,10 @@
   tasks:
  
   - name: Wait for Admin
-    wait_for: port=8091 delay=60
+    wait_for: port=8091 delay=5
 
   - name: Wait for EPMD
-    wait_for: port=4369 delay=60
+    wait_for: port=4369 delay=5
 
 
 - hosts: primary
@@ -64,7 +64,7 @@
     register: cb_major_version
 
   - name: Join additional cluster nodes
-    shell: "{{ couchbase_server_home_path }}/bin/couchbase-cli server-add -c {{ couchbase_server_primary_node }}:{{ couchbase_server_admin_port }} --user={{ couchbase_server_admin }} --password={{ couchbase_server_password }} --server-add={{hostvars[[item][0]]['inventory_hostname']}}:{{ couchbase_server_admin_port }} --server-add-username={{ couchbase_server_admin }} --server-add-password={{ couchbase_server_password }}"
+    shell: "{{ couchbase_server_home_path }}/bin/couchbase-cli server-add -c {{ couchbase_server_primary_node }}:{{ couchbase_server_admin_port }} --user={{ couchbase_server_admin }} --password={{ couchbase_server_password }} --server-add={{hostvars[item][0]['ansible_default_ipv4'].address}}:{{ couchbase_server_admin_port }} --server-add-username={{ couchbase_server_admin }} --server-add-password={{ couchbase_server_password }}"
     with_items: "{{ groups['additional'] | default([]) }}"
     when: groups['additional'] | length > 0 
 

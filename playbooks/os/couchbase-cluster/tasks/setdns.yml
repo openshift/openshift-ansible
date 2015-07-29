@@ -1,0 +1,36 @@
+---
+- hosts: couchbase_servers_hosts
+  sudo: True
+  tasks:
+
+  - name: Install dns python
+    yum: name=python-dns state=present
+
+#  - name: Update /etc/hostname # Deprecated since we have a DNS
+#
+
+  - name: Update /etc/resolv.conf
+    lineinfile:
+      dest: /etc/resolv.conf
+      regexp: '^search'
+      line: "search openstack.rbox"
+#TODO Mettre le domaine en variable 
+          
+  
+  - name: update dns
+    local_action: dnsupdate keyname="rbox."
+                  secret="op9Cj64TUEPdpUL5kOcDdDZZCyZA2aE2mF8JTkM4G8BC/Ra6t5PpvyJl 079c9rgf33f2QkGsPaXUZ/jAGnzbCg=="
+                  mname="10.64.109.124"
+                  zone="openstack.rbox."
+                  domain={{ ansible_fqdn }}
+                  a={{ public_ip }}
+                  op=add
+
+#- hosts: localhost
+#  name: Hack /etc/hosts
+#  sudo: True
+#  tasks:
+#
+#    - name: 
+                  
+#TODO mettre les variables dehors 
