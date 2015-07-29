@@ -101,7 +101,7 @@ projectConfig:
     mcsLabelsPerProject: 5
     uidAllocatorRange: 1000000000-1999999999/10000
 routingConfig:
-  subdomain: router.default.local
+  subdomain:  "{{ openshift.master.default_subdomain | default("") }}"
 serviceAccountConfig:
   managedNames:
   - default
