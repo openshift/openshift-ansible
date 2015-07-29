@@ -154,9 +154,9 @@
                                       | difference(default_nodes) }}"
   tasks:
   - name: Label Default Nodes
-    command: "oc label node {{ item.common.hostname }} region={{ item.ec2_region }} type={{ item.host_type }}"
+    command: "oc label node {{ item }} region={{ item.ec2_region }} type={{ item.host_type }}"
     with_items: default_nodes
 
   - name: Label Not Default Nodes
-    command: "oc label node {{ item.common.hostname }} region={{ item.ec2_region }} type={{ item.sub_host_type }}"
+    command: "oc label node {{ item }} region={{ item.ec2_region }} type={{ item.sub_host_type }}"
     with_items: not_default_nodes
