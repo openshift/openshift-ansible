@@ -54,10 +54,18 @@
       groups: service_master
     when: master_names is defined and master_names.0 is defined
 
+  - name: Evaluate oo_first_master
+    add_host:
+      name: "{{ groups[g_masters_group][0] }}"
+      groups: oo_first_master
+      ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
+      ansible_sudo: "{{ g_sudo | default(omit) }}"
+    when: g_masters_group in groups and (groups[g_masters_group] | length) > 0
+
 - include: update.yml
 
 - include: ../../common/openshift-cluster/create_services.yml
   vars:
-     g_svc_master: "{{ service_master }}"
+     g_svc_master: "{{ oo_first_master }}"
 
 - include: list.yml
