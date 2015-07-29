@@ -271,6 +271,169 @@ class Zbx(object):
                                'verbose': self.zc.verbose,
                                'ssl': self.zc.ssl,
                               })
+    def hostgroup(self, name, state='present', params=None):
+        '''
+        '''
+        #Set the instance and the template for the rest of the calls
+        zbx_class_inst = self.zapi.__getattribute__('hostgroup')
+        zbx_class = self.zapi.__getattribute__('Hostgroup')
+        idname = "groupid"
+
+        if not params:
+            params = {}
+
+        zbx_action_method = zbx_class.__dict__['get']
+        _, content = zbx_action_method(zbx_class_inst,
+                                       {'search': {'name': name},
+                                       })
+        if state == 'list':
+            return (False, content['result'], 'list')
+
+        if state == 'absent':
+            if not exists(content):
+                return (False, content, 'absent')
+            if not isinstance(params, list) and content['result'][0].has_key(idname):
+                params = [content['result'][0][idname]]
+
+            zbx_action_method = zbx_class.__dict__['delete']
+            _, content = zbx_action_method(zbx_class_inst, params)
+            return (True, content['result'], 'absent')
+
+        if state == 'present':
+            params['name'] = name
+
+            pdb.set_trace()
+            if not exists(content):
+                # if we didn't find it, create it
+                zbx_action_method = zbx_class.__dict__['create']
+                _, content = zbx_action_method(zbx_class_inst, params)
+                return (True, content['result'], 'present')
+            # already exists, we need to update it
+            # let's compare properties
+            differences = {}
+            zab_results = content['result'][0]
+            regex = '(' + '|'.join(TERMS) + ')'
+            retval = {}
+            for key, value in params.items():
+                if re.findall(regex, key):
+                    continue
+
+                if zab_results[key] != value and \
+                   zab_results[key] != str(value):
+                    pdb.set_trace()
+                    differences[key] = value
+
+            if not differences:
+                return(False, zab_results, 'present')
+
+            # We have differences and need to update
+            differences[idname] = zab_results[idname]
+            zbx_action_method = zbx_class.__dict__['update']
+            _, content = zbx_action_method(zbx_class_inst, differences)
+            return (True, content, 'present')
+        return (False, 'ERROR', 'UNKOWN state')
+
+    def host(self, name, host_groups=None, templates=None, interfaces=None, state='present', params=None):
+        '''
+        '''
+        #Set the instance and the template for the rest of the calls
+        zbx_class_inst = self.zapi.__getattribute__('host')
+        zbx_class = self.zapi.__getattribute__('Host')
+        idname = "hostid"
+
+        # Fetch groups by name
+        groups = []
+        if host_groups:
+            for hgr in host_groups:
+                changed, results, _ = self.hostgroup(hgr, state='list')
+                if results[0]:
+                    groups.append({'groupid': results[0]['groupid']})
+
+        templs = []
+        # Fetch templates by name
+        if templates:
+            for template_name in templates:
+                changed, results, _ = self.template(template_name, state='list')
+                if results[0]:
+                    pdb.set_trace()
+                    templs.append({'templateid': results[0]['templateid']})
+
+        if not interfaces:
+            interfaces = [
+               {'type':  1, # interface type, 1 = agent
+                'main':  1, # default interface? 1 = true
+                'useip':  1, # default interface? 1 = true
+                'ip':  '127.0.0.1', # default interface? 1 = true
+                'dns':  '', # dns for host
+                'port':  '10050', # port for interface? 10050
+               }
+           ]
+        else:
+            interfaces = []
+
+        if not params:
+            params = {}
+
+        zbx_action_method = zbx_class.__dict__['get']
+        _, content = zbx_action_method(zbx_class_inst,
+                                       {'search': {'host': name},
+                                       'selectGroups': 'groupid',
+                                       #'selectParentTemplates': 'templateid',
+                                       })
+        if state == 'list':
+            return (False, content['result'], 'list')
+
+        if state == 'absent':
+            if not exists(content):
+                return (False, content, 'absent')
+            if not isinstance(params, list) and content['result'][0].has_key(idname):
+                params = [content['result'][0][idname]]
+
+            zbx_action_method = zbx_class.__dict__['delete']
+            _, content = zbx_action_method(zbx_class_inst, params)
+            return (True, content['result'], 'absent')
+
+        if state == 'present':
+            params['host'] = name
+            params['groups'] = groups
+            params['templates'] = groups
+            params['interfaces'] = interfaces
+
+            if not exists(content):
+                # if we didn't find it, create it
+                zbx_action_method = zbx_class.__dict__['create']
+                _, content = zbx_action_method(zbx_class_inst, params)
+                print params
+                print content
+                return (True, content['result'], 'present')
+            # already exists, we need to update it
+            # let's compare properties
+            differences = {}
+            zab_results = content['result'][0]
+            regex = '(' + '|'.join(TERMS) + '|interfaces)'
+            retval = {}
+            for key, value in params.items():
+                if re.findall(regex, key):
+                    continue
+
+                pdb.set_trace()
+                if key == 'templates' and zab_results.has_key('parentTemplates') and \
+                  zab_results['parentTemplates'] == value:
+                    differences[key] = value
+
+                elif zab_results[key] != value and \
+                   zab_results[key] != str(value):
+                    differences[key] = value
+
+            if not differences:
+                return(False, zab_results, 'present')
+
+            # We have differences and need to update
+            differences[idname] = zab_results[idname]
+            zbx_action_method = zbx_class.__dict__['update']
+            _, content = zbx_action_method(zbx_class_inst, differences)
+            return (True, content, 'present')
+        return (False, 'ERROR', 'UNKOWN state')
 
     def trigger(self, expression, desc='', dependencies=None, state='present', params=None):
         '''
@@ -295,8 +458,8 @@ class Zbx(object):
         deps = []
         if dependencies:
             for depend_expr in dependencies:
-                changed, results, state = self.trigger(depend_expr)
-                if results[0].has_key['result']:
+                changed, results, _ = self.trigger(depend_expr)
+                if results[0]:
                     deps.append({'triggerid': results[0]['triggerid']})
         else:
             dependencies = []
@@ -359,6 +522,7 @@ class Zbx(object):
             _, content = zbx_action_method(zbx_class_inst, differences)
             return (True, content, 'present')
         return (False, 'ERROR', 'UNKOWN state')
+
     def item(self, name, key, templ_name, zabbix_type=2, vtype='int', interfaceid=None, \
              applications=None, state='present', params=None):
         '''
@@ -483,8 +647,8 @@ class Zbx(object):
         zbx_action_method = zbx_class.__dict__['get']
         _, content = zbx_action_method(zbx_class_inst,
                                        {'search': {'host': name},
-                                        'selectParentTemplates': 'extend',
-                                        'selectGroups': 'extend',
+                                        'selectParentTemplates': 'templateid',
+                                        'selectGroups': 'groupid',
                                         #'selectApplications': extend,
                                        })
         if state == 'list':
@@ -533,11 +697,12 @@ class Zbx(object):
         return (False, 'ERROR', 'UNKOWN state')
 
 if __name__ == '__main__':
-    zc = ZabbixConnection('http://oso-rhel7-zabbix-web.kwoodsontest1.opstest.online.openshift.com/zabbix/api_jsonrpc.php', 'admin', 'zabbix')
+    zc = ZabbixConnection('http://oso-rhel7-zabbix-web.kwoodsontest2.opstest.online.openshift.com/zabbix/api_jsonrpc.php', 'admin', 'zabbix')
     ezz = Zbx(zc)
-    #print ezz.template('Kenny')
-    #print ezz.item('Kenny name updated', 'kenny_was_here', 'Kenny', )
+    print ezz.template('Kenny')
+    print ezz.item('Kenny name updated', 'kenny_was_here', 'Kenny', )
     print ezz.trigger('{Kenny:kenny_was_here.last()}>2', 'Kenny desc', state='present')
+    print ezz.host('kenny host', host_groups=['Linux servers'], templates=['Kenny'], interfaces=None, state='present', params=None)
     #print name, key, templ_name, zabbix_type=2, vtype='int', interfaceid=None, \
              #applications=None, state='present', params=None):
     #hosts = [{'hostid': 10088}]
