@@ -30,3 +30,5 @@
 
 - include: create_bucket.yml
 
+# TODO 
+#- include: xdcr.yml

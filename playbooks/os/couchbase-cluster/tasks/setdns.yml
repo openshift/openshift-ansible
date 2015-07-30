@@ -15,6 +15,7 @@
 
 
 - hosts: couchbase_servers_hosts
+  serial: 1
   gather_facts: True
   sudo: True
   tasks:
@@ -28,6 +29,11 @@
 
   - name: Fetch /etc/hosts from localhost
     fetch: dest=/tmp/commonhosts/hosts src=/etc/hosts flat=yes
+
+- hosts: couchbase_servers_hosts
+  gather_facts: True
+  sudo: True
+  tasks:
 
   - name: Install dns python
     yum: name=python-dns state=present
