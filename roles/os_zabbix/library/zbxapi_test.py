@@ -216,7 +216,7 @@ class ZabbixAPI(object):
 for _class_name, _method_names in ZabbixAPI.classes.items():
     setattr(ZabbixAPI, _class_name, ZabbixAPI.meta(_class_name, _method_names))
 
-TERMS = ['search', 'output', 'groups', 'select', 'expand', 'filter']
+TERMS = ['search', 'output', 'select', 'expand', 'filter']
 
 def diff_content(from_zabbix, from_user, ignore=None):
     ''' Compare passed in object to results returned from zabbix
@@ -271,6 +271,260 @@ class Zbx(object):
                                'verbose': self.zc.verbose,
                                'ssl': self.zc.ssl,
                               })
+
+    def mediatype(self, desc, smtp_server='admin@openshift.com', mtype='email', smtp_helo='openshift.com', smtp_email='zabbix@openshift.com', state='present', params=None):
+        '''
+        '''
+        #Set the instance and the template for the rest of the calls
+        zbx_class_inst = self.zapi.__getattribute__('mediatype')
+        zbx_class = self.zapi.__getattribute__('Mediatype')
+        idname = "mediatypeid"
+
+        mtype = mtype.lower()
+        media_type = None
+        if mtype == 'script':
+            media_type = 1
+        elif mtype == 'sms':
+            media_type = 2
+        elif mtype == 'jabber':
+            media_type = 3
+        elif mtype == 'script':
+            media_type = 100
+        else:
+            media_type = 0
+
+        if not params:
+            params = {}
+
+        zbx_action_method = zbx_class.__dict__['get']
+        _, content = zbx_action_method(zbx_class_inst,
+                                       {'search': {'description': desc},
+                                       })
+        if state == 'list':
+            return (False, content['result'], 'list')
+
+        if state == 'absent':
+            if not exists(content):
+                return (False, content, 'absent')
+            if not isinstance(params, list) and content['result'][0].has_key(idname):
+                params = [content['result'][0][idname]]
+
+            zbx_action_method = zbx_class.__dict__['delete']
+            _, content = zbx_action_method(zbx_class_inst, params)
+            return (True, content['result'], 'absent')
+
+        if state == 'present':
+            params['description'] = desc
+            params['type'] = media_type
+            params['smtp_server'] = smtp_server
+            params['smtp_helo'] = smtp_helo
+            params['smtp_email'] = smtp_email
+
+            if not exists(content):
+                # if we didn't find it, create it
+                zbx_action_method = zbx_class.__dict__['create']
+                _, content = zbx_action_method(zbx_class_inst, params)
+                return (True, content['result'], 'present')
+            # already exists, we need to update it
+            # let's compare properties
+            differences = {}
+            zab_results = content['result'][0]
+            regex = '(' + '|'.join(TERMS) + ')'
+            retval = {}
+            for key, value in params.items():
+                if re.findall(regex, key):
+                    continue
+
+                if zab_results[key] != value and \
+                   zab_results[key] != str(value):
+                    differences[key] = value
+
+            if not differences:
+                return(False, zab_results, 'present')
+
+            # We have differences and need to update
+            differences[idname] = zab_results[idname]
+            zbx_action_method = zbx_class.__dict__['update']
+            _, content = zbx_action_method(zbx_class_inst, differences)
+            return (True, content, 'present')
+        return (False, 'ERROR', 'UNKOWN state')
+
+    def user(self, alias, passwd, user_groups, state='present', params=None):
+        '''
+        '''
+        #Set the instance and the template for the rest of the calls
+        zbx_class_inst = self.zapi.__getattribute__('user')
+        zbx_class = self.zapi.__getattribute__('User')
+        idname = "userid"
+
+        ugroups = []
+        if user_groups:
+            for ugr in user_groups:
+                changed, results, _ = self.usergroup(ugr, state='list')
+                if results[0]:
+                    ugroups.append({'usrgrpid': results[0]['usrgrpid']})
+
+        if not params:
+            params = {}
+
+        zbx_action_method = zbx_class.__dict__['get']
+        _, content = zbx_action_method(zbx_class_inst,
+                                       {'output': 'extend',
+                                        'search': {'alias': alias},
+                                        'selectUsrgrps': ['usrgrpid'],
+                                       })
+        print content
+        if state == 'list':
+            return (False, content['result'], 'list')
+
+        if state == 'absent':
+            if not exists(content):
+                return (False, content, 'absent')
+            if not isinstance(params, list) and content['result'][0].has_key(idname):
+                params = [content['result'][0][idname]]
+
+            zbx_action_method = zbx_class.__dict__['delete']
+            _, content = zbx_action_method(zbx_class_inst, params)
+            return (True, content['result'], 'absent')
+
+        if state == 'present':
+            params['alias'] = alias
+            params['passwd'] = passwd
+            params['usrgrps'] = ugroups
+
+            if not exists(content):
+                # if we didn't find it, create it
+                zbx_action_method = zbx_class.__dict__['create']
+                _, content = zbx_action_method(zbx_class_inst, params)
+                return (True, content['result'], 'present')
+            # already exists, we need to update it
+            # let's compare properties
+            differences = {}
+            zab_results = content['result'][0]
+            regex = '(' + '|'.join(TERMS) + ')'
+            retval = {}
+            for key, value in params.items():
+                if re.findall(regex, key):
+                    continue
+
+                # TODO: NOT PASS IT FOR UPDATE? Error on the side of not updating this
+                if key == 'passwd': # and not zab_results.has_key(key):
+                    continue
+                    #differences[key] = value
+
+                elif zab_results[key] != value and \
+                   zab_results[key] != str(value):
+                    differences[key] = value
+
+            if not differences:
+                return(False, zab_results, 'present')
+
+            # We have differences and need to update
+            differences[idname] = zab_results[idname]
+            print 
+            print zab_results
+            print 
+            print params
+            print 
+            print differences
+            zbx_action_method = zbx_class.__dict__['update']
+            _, content = zbx_action_method(zbx_class_inst, differences)
+            return (True, content, 'present')
+        return (False, 'ERROR', 'UNKOWN state')
+
+    def usergroup(self, name, rights=None, users=None, state='present', params=None):
+        '''
+        '''
+        #Set the instance and the template for the rest of the calls
+        zbx_class_inst = self.zapi.__getattribute__('usergroup')
+        zbx_class = self.zapi.__getattribute__('Usergroup')
+        idname = "usrgrpid"
+
+        # Fetch groups by name
+        perms = []
+        if rights:
+            for hstgrp, perm in rights:
+                changed, results, _ = self.hostgroup(hstgrp, state='list')
+                if results[0]:
+                    permission = 0
+                    if not perm:
+                        permission = 0
+                    elif perm == 'ro':
+                        permission = 2
+                    elif perm == 'rw':
+                        permission = 3
+                    perms.append({'id': results[0]['groupid'],
+                                  'permission': permission})
+
+        userids = []
+        if users:
+            for user in users:
+                changed, results, _ = self.user(user, state='list')
+                if results[0]:
+                    userids.append(results[0]['userid'])
+
+        if not params:
+            params = {}
+
+        zbx_action_method = zbx_class.__dict__['get']
+        _, content = zbx_action_method(zbx_class_inst,
+                                       {'search': {'name': name},
+                                        'selectUsers': 'userid',
+                                       })
+        if state == 'list':
+            return (False, content['result'], 'list')
+
+        if state == 'absent':
+            if not exists(content):
+                return (False, content, 'absent')
+            if not isinstance(params, list) and content['result'][0].has_key(idname):
+                params = [content['result'][0][idname]]
+
+            zbx_action_method = zbx_class.__dict__['delete']
+            _, content = zbx_action_method(zbx_class_inst, params)
+            return (True, content['result'], 'absent')
+
+        if state == 'present':
+            params['name'] = name
+            params['rights'] = perms
+            params['userids'] = userids
+
+            if not exists(content):
+                # if we didn't find it, create it
+                zbx_action_method = zbx_class.__dict__['create']
+                _, content = zbx_action_method(zbx_class_inst, params)
+                return (True, content['result'], 'present')
+            # already exists, we need to update it
+            # let's compare properties
+            differences = {}
+            zab_results = content['result'][0]
+            regex = '(' + '|'.join(TERMS) + ')'
+            retval = {}
+            for key, value in params.items():
+                if re.findall(regex, key):
+                    continue
+
+                if key == 'rights':
+                    differences['rights'] = value
+
+                elif key == 'userids' and zab_results.has_key('users'):
+                    if zab_results['users'] != value:
+                        differences['userids'] = value
+
+                elif zab_results[key] != value and \
+                   zab_results[key] != str(value):
+                    differences[key] = value
+
+            if not differences:
+                return(False, zab_results, 'present')
+
+            # We have differences and need to update
+            differences[idname] = zab_results[idname]
+            zbx_action_method = zbx_class.__dict__['update']
+            _, content = zbx_action_method(zbx_class_inst, differences)
+            return (True, content, 'present')
+        return (False, 'ERROR', 'UNKOWN state')
+
     def hostgroup(self, name, state='present', params=None):
         '''
         '''
@@ -302,7 +556,6 @@ class Zbx(object):
         if state == 'present':
             params['name'] = name
 
-            pdb.set_trace()
             if not exists(content):
                 # if we didn't find it, create it
                 zbx_action_method = zbx_class.__dict__['create']
@@ -320,7 +573,6 @@ class Zbx(object):
 
                 if zab_results[key] != value and \
                    zab_results[key] != str(value):
-                    pdb.set_trace()
                     differences[key] = value
 
             if not differences:
@@ -355,7 +607,6 @@ class Zbx(object):
             for template_name in templates:
                 changed, results, _ = self.template(template_name, state='list')
                 if results[0]:
-                    pdb.set_trace()
                     templs.append({'templateid': results[0]['templateid']})
 
         if not interfaces:
@@ -378,7 +629,7 @@ class Zbx(object):
         _, content = zbx_action_method(zbx_class_inst,
                                        {'search': {'host': name},
                                        'selectGroups': 'groupid',
-                                       #'selectParentTemplates': 'templateid',
+                                       'selectParentTemplates': 'templateid',
                                        })
         if state == 'list':
             return (False, content['result'], 'list')
@@ -396,15 +647,13 @@ class Zbx(object):
         if state == 'present':
             params['host'] = name
             params['groups'] = groups
-            params['templates'] = groups
+            params['templates'] = templs
             params['interfaces'] = interfaces
 
             if not exists(content):
                 # if we didn't find it, create it
                 zbx_action_method = zbx_class.__dict__['create']
                 _, content = zbx_action_method(zbx_class_inst, params)
-                print params
-                print content
                 return (True, content['result'], 'present')
             # already exists, we need to update it
             # let's compare properties
@@ -416,10 +665,9 @@ class Zbx(object):
                 if re.findall(regex, key):
                     continue
 
-                pdb.set_trace()
-                if key == 'templates' and zab_results.has_key('parentTemplates') and \
-                  zab_results['parentTemplates'] == value:
-                    differences[key] = value
+                if key == 'templates' and zab_results.has_key('parentTemplates'):
+                    if zab_results['parentTemplates'] != value:
+                        differences[key] = value
 
                 elif zab_results[key] != value and \
                    zab_results[key] != str(value):
@@ -495,8 +743,6 @@ class Zbx(object):
                 # if we didn't find it, create it
                 zbx_action_method = zbx_class.__dict__['create']
                 _, content = zbx_action_method(zbx_class_inst, params)
-                print params
-                print content
                 return (True, content['result'], 'present')
             # already exists, we need to update it
             # let's compare properties
@@ -510,7 +756,6 @@ class Zbx(object):
 
                 if zab_results[key] != value and \
                    zab_results[key] != str(value):
-                    pdb.set_trace()
                     differences[key] = value
 
             if not differences:
@@ -622,7 +867,6 @@ class Zbx(object):
 
                 if zab_results[key] != value and \
                    zab_results[key] != str(value):
-                    pdb.set_trace()
                     differences[key] = value
 
             if not differences:
@@ -699,11 +943,28 @@ class Zbx(object):
 if __name__ == '__main__':
     zc = ZabbixConnection('http://oso-rhel7-zabbix-web.kwoodsontest2.opstest.online.openshift.com/zabbix/api_jsonrpc.php', 'admin', 'zabbix')
     ezz = Zbx(zc)
-    print ezz.template('Kenny')
-    print ezz.item('Kenny name updated', 'kenny_was_here', 'Kenny', )
-    print ezz.trigger('{Kenny:kenny_was_here.last()}>2', 'Kenny desc', state='present')
-    print ezz.host('kenny host', host_groups=['Linux servers'], templates=['Kenny'], interfaces=None, state='present', params=None)
-    #print name, key, templ_name, zabbix_type=2, vtype='int', interfaceid=None, \
-             #applications=None, state='present', params=None):
-    #hosts = [{'hostid': 10088}]
-    #print ezz.template('Kenny', state='list')
+    #print "CREATE template"
+    #print ezz.template('Kenny')
+    #print "CREATE item"
+    #print ezz.item('Kenny name updated', 'kenny_was_here', 'Kenny', )
+    #print "CREATE trigger"
+    #print ezz.trigger('{Kenny:kenny_was_here.last()}>2', 'Kenny desc', state='present')
+    #print "CREATE hostgroup"
+    #print ezz.hostgroup('kenny hostgroup', state='present', params=None)
+    #print "CREATE host"
+    #print ezz.host('kenny host', host_groups=['kenny hostgroup'], templates=['Kenny'], interfaces=None, state='present', params=None)
+    ##def usergroup(self, name, rights=None, users=None, state='present', params=None):
+    #print "CREATE usergroup"
+    #print ezz.usergroup('kenny group', rights=[{'Kenny hostgroup', 'rw'},], state='present', params=None)
+    ##def user(self, name, state='present', params=None):
+    ## before we can create a user media and users with media types we need media
+    ##def mediatype(self, desc, mtype, smtp_server, smtp_helo='redhat.com', smtp_email='zabbix@openshift.com', ,state='present', params=None):
+    #print "CREATE mediatype"
+    #print ezz.mediatype('kenny mediatype desc', state='list', params=None)
+    #print "CREATE user"
+    #print ezz.user('kenny user', 'zabbix', ['kenny group'], state='present', params=None)
+    #media = {
+        #'active': True,
+        #'mediatype': True,
+    #}
+    #print ezz.user('kenny user', 'zabbix', ['kenny group'], state='present', params=None)
