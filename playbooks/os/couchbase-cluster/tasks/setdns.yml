@@ -1,13 +1,36 @@
 ---
-- hosts: couchbase_servers_hosts
+- hosts: localhost
+  connection: local
   sudo: True
   tasks:
 
+  - name: create tmp dir for common /etc/hosts
+    shell: mkdir -p /tmp/commonhosts
+
+  - name: rm file
+    file: path=/tmp/commonhosts/hosts state=absent
+
+  - name: Basic /etc/hosts
+    shell: echo "127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4\n::1         localhost localhost.localdomain localhost6 localhost6.localdomain6" >> /tmp/commonhosts/hosts
+
+
+- hosts: couchbase_servers_hosts
+  gather_facts: True
+  sudo: True
+  tasks:
+
+  - name: Copy /etc/hosts from localhost
+    copy: src=/tmp/commonhosts/hosts dest=/etc/hosts owner=root group=root mode=0644
+
+##TODO Mettre domaine en var
+  - name: Adding node config in /etc/hosts 
+    lineinfile: line="{{ ansible_default_ipv4.address }}  {{ ansible_fqdn }} {{ ansible_fqdn }}.openstack.rbox" dest=/etc/hosts 
+
+  - name: Fetch /etc/hosts from localhost
+    fetch: dest=/tmp/commonhosts/hosts src=/etc/hosts flat=yes
+
   - name: Install dns python
     yum: name=python-dns state=present
-
-#  - name: Update /etc/hostname # Deprecated since we have a DNS
-#
 
   - name: Update /etc/resolv.conf
     lineinfile:
@@ -26,11 +49,17 @@
                   a={{ public_ip }}
                   op=add
 
-#- hosts: localhost
-#  name: Hack /etc/hosts
-#  sudo: True
-#  tasks:
-#
-#    - name: 
-                  
-#TODO mettre les variables dehors 
+- hosts: couchbase_servers_hosts
+  sudo: True
+  tasks:
+
+  - name: Copy /etc/hosts from localhost definitely
+    copy: src=/tmp/commonhosts/hosts dest=/etc/hosts owner=root group=root mode=0644
+
+- hosts: localhost
+  connection: local
+  sudo: True
+  tasks:
+
+  - name: Clean tmp dir for common /etc/hosts
+    file: path=/tmp/commonhosts state=absent
