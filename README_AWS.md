@@ -40,7 +40,7 @@ Alternatively, you can configure your ssh-agent to hold the credentials to conne
 
 By default, a cluster is launched with the following configuration:
 
-- Instance type: m3.large
+- Instance type: m4.large
 - AMI: ami-307b3658 (for online deployments, ami-acd999c4 for origin deployments and ami-10663b78 for enterprise deployments)
 - Region: us-east-1
 - Keypair name: libra
@@ -62,7 +62,7 @@ Node specific defaults:
 
 If needed, these values can be changed by setting environment variables on your system.
 
-- export ec2_instance_type='m3.large'
+- export ec2_instance_type='m4.large'
 - export ec2_image='ami-307b3658'
 - export ec2_region='us-east-1'
 - export ec2_keypair='libra'
