@@ -271,22 +271,23 @@ class Zbx(object):
                                'verbose': self.zc.verbose,
                                'ssl': self.zc.ssl,
                               })
+    def get_content(self, zbx_class_name, method, params):
+        zbx_class_inst = self.zapi.__getattribute__(zbx_class_name.lower())
+        zbx_class = self.zapi.__getattribute__(zbx_class_name.capitalize())
+        return zbx_class.__dict__[method](zbx_class_inst, params)[1]
 
     def user(self, name, state='present', params=None):
         '''
         '''
         #Set the instance and the template for the rest of the calls
-        zbx_class_inst = self.zapi.__getattribute__('user')
-        zbx_class = self.zapi.__getattribute__('User')
+        zbx_class_name = 'user'
         idname = "userid"
 
         if not params:
             params = {}
 
-        zbx_action_method = zbx_class.__dict__['get']
-        _, content = zbx_action_method(zbx_class_inst,
-                                       {'search': {'name': name},
-                                       })
+        content = self.get_content(zbx_class_name, 'get', {'search': {'name': name}})
+
         if state == 'list':
             return (False, content['result'], 'list')
 
@@ -296,20 +297,16 @@ class Zbx(object):
             if not isinstance(params, list) and content['result'][0].has_key(idname):
                 params = [content['result'][0][idname]]
 
-            zbx_action_method = zbx_class.__dict__['delete']
-            _, content = zbx_action_method(zbx_class_inst, params)
+            content = self.get_content(zbx_class_name, 'delete', params)
             return (True, content['result'], 'absent')
 
         if state == 'present':
             params['name'] = name
 
             if not exists(content):
-                # if we didn't find it, create it
-                zbx_action_method = zbx_class.__dict__['create']
-                _, content = zbx_action_method(zbx_class_inst, params)
+                content = self.get_content(zbx_class_name, 'create', params)
                 return (True, content['result'], 'present')
-            # already exists, we need to update it
-            # let's compare properties
+
             differences = {}
             zab_results = content['result'][0]
             regex = '(' + '|'.join(TERMS) + ')'
@@ -327,8 +324,7 @@ class Zbx(object):
 
             # We have differences and need to update
             differences[idname] = zab_results[idname]
-            zbx_action_method = zbx_class.__dict__['update']
-            _, content = zbx_action_method(zbx_class_inst, differences)
+            content = self.get_content(zbx_class_name, 'update', differences)
             return (True, content, 'present')
         return (False, 'ERROR', 'UNKOWN state')
 
@@ -336,9 +332,8 @@ class Zbx(object):
         '''
         '''
         #Set the instance and the template for the rest of the calls
-        zbx_class_inst = self.zapi.__getattribute__('usergroup')
-        zbx_class = self.zapi.__getattribute__('Usergroup')
-        idname = "usrgrpids"
+        zbx_class_name = 'usergroup'
+        idname = "usrgrpid"
 
         # Fetch groups by name
         perms = []
@@ -366,11 +361,10 @@ class Zbx(object):
         if not params:
             params = {}
 
-        zbx_action_method = zbx_class.__dict__['get']
-        _, content = zbx_action_method(zbx_class_inst,
-                                       {'search': {'name': name},
-                                        'selectUsers': 'userid',
-                                       })
+        content = self.get_content(zbx_class_name, 'get', {'search': {'name': name},
+                                                           'selectUsers': 'userid',
+                                                           'getRights': 'extend'
+                                                          })
         if state == 'list':
             return (False, content['result'], 'list')
 
@@ -380,8 +374,7 @@ class Zbx(object):
             if not isinstance(params, list) and content['result'][0].has_key(idname):
                 params = [content['result'][0][idname]]
 
-            zbx_action_method = zbx_class.__dict__['delete']
-            _, content = zbx_action_method(zbx_class_inst, params)
+            content = self.get_content(zbx_class_name, 'delete', params)
             return (True, content['result'], 'absent')
 
         if state == 'present':
@@ -389,25 +382,26 @@ class Zbx(object):
             params['rights'] = perms
             params['userids'] = userids
 
-            print params
             if not exists(content):
-                # if we didn't find it, create it
-                zbx_action_method = zbx_class.__dict__['create']
-                _, content = zbx_action_method(zbx_class_inst, params)
-                return (True, content['result'], 'present')
-            # already exists, we need to update it
-            # let's compare properties
+                content = self.get_content(zbx_class_name, 'create', params)
+
             differences = {}
             zab_results = content['result'][0]
             regex = '(' + '|'.join(TERMS) + ')'
-            retval = {}
             for key, value in params.items():
                 if re.findall(regex, key):
                     continue
 
-                if key == 'userids'
-                pdb.set_trace()
-                if zab_results[key] != value and \
+                #if key == '
+                if key == 'rights':
+                    differences['rights'] = value
+                    continue
+                elif key == 'userids' and zab_results.has_key('users'):
+                    uids = [uid for user in zab_results['users'] for key, uid in user.items()]
+                    if uids != value:
+                        differences[key] = value
+                        continue
+                elif zab_results[key] != value and \
                    zab_results[key] != str(value):
                     differences[key] = value
 
@@ -416,8 +410,13 @@ class Zbx(object):
 
             # We have differences and need to update
             differences[idname] = zab_results[idname]
-            zbx_action_method = zbx_class.__dict__['update']
-            _, content = zbx_action_method(zbx_class_inst, differences)
+            print
+            print params
+            print
+            print zab_results
+            print
+            print differences
+            content = self.get_content(zbx_class_name, 'update', differences)
             return (True, content, 'present')
         return (False, 'ERROR', 'UNKOWN state')
 
@@ -425,17 +424,13 @@ class Zbx(object):
         '''
         '''
         #Set the instance and the template for the rest of the calls
-        zbx_class_inst = self.zapi.__getattribute__('hostgroup')
-        zbx_class = self.zapi.__getattribute__('Hostgroup')
+        zbx_class_name = 'hostgroup'
         idname = "groupid"
 
         if not params:
             params = {}
 
-        zbx_action_method = zbx_class.__dict__['get']
-        _, content = zbx_action_method(zbx_class_inst,
-                                       {'search': {'name': name},
-                                       })
+        content = self.get_content(zbx_class_name, 'get', {'search': {'name': name}})
         if state == 'list':
             return (False, content['result'], 'list')
 
@@ -445,8 +440,7 @@ class Zbx(object):
             if not isinstance(params, list) and content['result'][0].has_key(idname):
                 params = [content['result'][0][idname]]
 
-            zbx_action_method = zbx_class.__dict__['delete']
-            _, content = zbx_action_method(zbx_class_inst, params)
+            content = self.get_content(zbx_class_name, 'delete', params)
             return (True, content['result'], 'absent')
 
         if state == 'present':
@@ -454,8 +448,7 @@ class Zbx(object):
 
             if not exists(content):
                 # if we didn't find it, create it
-                zbx_action_method = zbx_class.__dict__['create']
-                _, content = zbx_action_method(zbx_class_inst, params)
+                content = self.get_content(zbx_class_name, 'create', params)
                 return (True, content['result'], 'present')
             # already exists, we need to update it
             # let's compare properties
@@ -476,8 +469,7 @@ class Zbx(object):
 
             # We have differences and need to update
             differences[idname] = zab_results[idname]
-            zbx_action_method = zbx_class.__dict__['update']
-            _, content = zbx_action_method(zbx_class_inst, differences)
+            content = self.get_content(zbx_class_name, 'update', differences)
             return (True, content, 'present')
         return (False, 'ERROR', 'UNKOWN state')
 
@@ -485,8 +477,7 @@ class Zbx(object):
         '''
         '''
         #Set the instance and the template for the rest of the calls
-        zbx_class_inst = self.zapi.__getattribute__('host')
-        zbx_class = self.zapi.__getattribute__('Host')
+        zbx_class_name = 'host'
         idname = "hostid"
 
         # Fetch groups by name
@@ -495,9 +486,6 @@ class Zbx(object):
             for hgr in host_groups:
                 changed, results, _ = self.hostgroup(hgr, state='list')
                 if results[0]:
-                    print
-                    print results[0]
-                    print
                     groups.append({'groupid': results[0]['groupid']})
 
         templs = []
@@ -506,9 +494,6 @@ class Zbx(object):
             for template_name in templates:
                 changed, results, _ = self.template(template_name, state='list')
                 if results[0]:
-                    print
-                    print results[0]
-                    print
                     templs.append({'templateid': results[0]['templateid']})
 
         if not interfaces:
@@ -527,12 +512,10 @@ class Zbx(object):
         if not params:
             params = {}
 
-        zbx_action_method = zbx_class.__dict__['get']
-        _, content = zbx_action_method(zbx_class_inst,
-                                       {'search': {'host': name},
-                                       'selectGroups': 'groupid',
-                                       'selectParentTemplates': 'templateid',
-                                       })
+        content = self.get_content(zbx_class_name, 'get', {'search': {'host': name},
+                                                           'selectGroups': 'groupid',
+                                                           'selectParentTemplates': 'templateid',
+                                                          })
         if state == 'list':
             return (False, content['result'], 'list')
 
@@ -542,8 +525,7 @@ class Zbx(object):
             if not isinstance(params, list) and content['result'][0].has_key(idname):
                 params = [content['result'][0][idname]]
 
-            zbx_action_method = zbx_class.__dict__['delete']
-            _, content = zbx_action_method(zbx_class_inst, params)
+            content = self.get_content(zbx_class_name, 'delete', params)
             return (True, content['result'], 'absent')
 
         if state == 'present':
@@ -554,10 +536,7 @@ class Zbx(object):
 
             if not exists(content):
                 # if we didn't find it, create it
-                zbx_action_method = zbx_class.__dict__['create']
-                _, content = zbx_action_method(zbx_class_inst, params)
-                print params
-                print content
+                content = self.get_content(zbx_class_name, 'create', params)
                 return (True, content['result'], 'present')
             # already exists, we need to update it
             # let's compare properties
@@ -582,8 +561,7 @@ class Zbx(object):
 
             # We have differences and need to update
             differences[idname] = zab_results[idname]
-            zbx_action_method = zbx_class.__dict__['update']
-            _, content = zbx_action_method(zbx_class_inst, differences)
+            content = self.get_content(zbx_class_name, 'update', differences)
             return (True, content, 'present')
         return (False, 'ERROR', 'UNKOWN state')
 
@@ -601,8 +579,7 @@ class Zbx(object):
 
         '''
         #Set the instance and the template for the rest of the calls
-        zbx_class_inst = self.zapi.__getattribute__('trigger')
-        zbx_class = self.zapi.__getattribute__('Trigger')
+        zbx_class_name = 'trigger'
         idname = "triggerid"
 
         # need to look up dependencies by expression? description?
@@ -619,12 +596,10 @@ class Zbx(object):
         if not params:
             params = {}
 
-        zbx_action_method = zbx_class.__dict__['get']
-        _, content = zbx_action_method(zbx_class_inst,
-                                       {'search': {'description': desc},
-                                       'expandExpression': True,
-                                       'selectDependencies': 'triggerid',
-                                       })
+        content = self.get_content(zbx_class_name, 'get', {'search': {'description': desc},
+                                                           'expandExpression': True,
+                                                           'selectDependencies': 'triggerid',
+                                                           })
         if state == 'list':
             return (False, content['result'], 'list')
 
@@ -634,8 +609,7 @@ class Zbx(object):
             if not isinstance(params, list) and content['result'][0].has_key(idname):
                 params = [content['result'][0][idname]]
 
-            zbx_action_method = zbx_class.__dict__['delete']
-            _, content = zbx_action_method(zbx_class_inst, params)
+            content = self.get_content(zbx_class_name, 'delete', params)
             return (True, content['result'], 'absent')
 
         if state == 'present':
@@ -645,10 +619,7 @@ class Zbx(object):
 
             if not exists(content):
                 # if we didn't find it, create it
-                zbx_action_method = zbx_class.__dict__['create']
-                _, content = zbx_action_method(zbx_class_inst, params)
-                print params
-                print content
+                content = self.get_content(zbx_class_name, 'create', params)
                 return (True, content['result'], 'present')
             # already exists, we need to update it
             # let's compare properties
@@ -669,8 +640,7 @@ class Zbx(object):
 
             # We have differences and need to update
             differences[idname] = zab_results[idname]
-            zbx_action_method = zbx_class.__dict__['update']
-            _, content = zbx_action_method(zbx_class_inst, differences)
+            content = self.get_content(zbx_class_name, 'update', differences)
             return (True, content, 'present')
         return (False, 'ERROR', 'UNKOWN state')
 
@@ -693,8 +663,7 @@ class Zbx(object):
         },
         '''
         #Set the instance and the template for the rest of the calls
-        zbx_class_inst = self.zapi.__getattribute__('item')
-        zbx_class = self.zapi.__getattribute__('Item')
+        zbx_class_name = 'item'
         idname = "itemid"
 
         changed, results, _ = self.template(templ_name, state='list')
@@ -729,11 +698,9 @@ class Zbx(object):
         if not params:
             params = {}
 
-        zbx_action_method = zbx_class.__dict__['get']
-        _, content = zbx_action_method(zbx_class_inst,
-                                       {'search': {'key_': key},
-                                        'selectApplications': 'applicationid',
-                                       })
+        content = self.get_content(zbx_class_name, 'get', {'search': {'key_': key},
+                                                           'selectApplications': 'applicationid',
+                                                          })
         if state == 'list':
             return (False, content['result'], 'list')
 
@@ -743,8 +710,7 @@ class Zbx(object):
             if not isinstance(params, list) and content['result'][0].has_key(idname):
                 params = [content['result'][0][idname]]
 
-            zbx_action_method = zbx_class.__dict__['delete']
-            _, content = zbx_action_method(zbx_class_inst, params)
+            content = self.get_content(zbx_class_name, 'delete', params)
             return (True, content['result'], 'absent')
 
         if state == 'present':
@@ -758,8 +724,7 @@ class Zbx(object):
 
             if not exists(content):
                 # if we didn't find it, create it
-                zbx_action_method = zbx_class.__dict__['create']
-                _, content = zbx_action_method(zbx_class_inst, params)
+                content = self.get_content(zbx_class_name, 'create', params)
                 return (True, content['result'], 'present')
             # already exists, we need to update it
             # let's compare properties
@@ -780,27 +745,23 @@ class Zbx(object):
 
             # We have differences and need to update
             differences[idname] = zab_results[idname]
-            zbx_action_method = zbx_class.__dict__['update']
-            _, content = zbx_action_method(zbx_class_inst, differences)
+            content = self.get_content(zbx_class_name, 'update', differences)
             return (True, content, 'present')
         return (False, 'ERROR', 'UNKOWN state')
 
     def template(self, name, state='present', params=None):
         #Set the instance and the template for the rest of the calls
-        zbx_class_inst = self.zapi.__getattribute__('template')
-        zbx_class = self.zapi.__getattribute__('Template')
+        zbx_class_name = 'template'
         idname = 'templateid'
 
         if not params:
             params = {}
         # get a template, see if it exists
-        zbx_action_method = zbx_class.__dict__['get']
-        _, content = zbx_action_method(zbx_class_inst,
-                                       {'search': {'host': name},
-                                        'selectParentTemplates': 'templateid',
-                                        'selectGroups': 'groupid',
-                                        #'selectApplications': extend,
-                                       })
+        content = self.get_content(zbx_class_name, 'get', {'search': {'host': name},
+                                                           'selectParentTemplates': 'templateid',
+                                                           'selectGroups': 'groupid',
+                                                           #'selectApplications': extend,
+                                                          })
         if state == 'list':
             return (False, content['result'], 'list')
 
@@ -810,20 +771,18 @@ class Zbx(object):
             if not isinstance(params, list) and content['result'][0].has_key(idname):
                 params = [content['result'][0][idname]]
 
-            zbx_action_method = zbx_class.__dict__['delete']
-            _, content = zbx_action_method(zbx_class_inst, params)
+            content = self.get_content(zbx_class_name, 'delete', params)
             return (True, content['result'], 'absent')
 
         if state == 'present':
             if not exists(content):
                 # if we didn't find it, create it
-                zbx_action_method = zbx_class.__dict__['create']
                 groups = params.get('groups', [])
                 params['groups'] = groups
                 params['groups'].append({'groupid': 1})
                 params['host'] = name
                 params['output'] = 'extend'
-                _, content = zbx_action_method(zbx_class_inst, params)
+                content = self.get_content(zbx_class_name, 'create', params)
                 return (True, content['result'], 'present')
             # already exists, we need to update it
             # let's compare properties
@@ -841,19 +800,17 @@ class Zbx(object):
 
             # We have differences and need to update
             differences[idname] = zab_results[idname]
-            zbx_action_method = zbx_class.__dict__['update']
-            _, content = zbx_action_method(zbx_class_inst, differences)
+            content = self.get_content(zbx_class_name, 'update', differences)
             return (True, content, 'present')
         return (False, 'ERROR', 'UNKOWN state')
 
 if __name__ == '__main__':
     zc = ZabbixConnection('http://oso-rhel7-zabbix-web.kwoodsontest2.opstest.online.openshift.com/zabbix/api_jsonrpc.php', 'admin', 'zabbix')
     ezz = Zbx(zc)
-    #print ezz.template('Kenny')
-    #print ezz.item('Kenny name updated', 'kenny_was_here', 'Kenny', )
-    #print ezz.trigger('{Kenny:kenny_was_here.last()}>2', 'Kenny desc', state='present')
-    #print ezz.hostgroup('kenny hostgroup', state='present', params=None)
-    #print ezz.host('kenny host', host_groups=['kenny hostgroup'], templates=['Kenny'], interfaces=None, state='present', params=None)
-    #def usergroup(self, name, rights=None, users=None, state='present', params=None):
-    print ezz.usergroup('kenny group', rights=[{'Kenny hostgroup', 'rw'},], state='present', params=None)
+    print ezz.template('Kenny')
+    print ezz.item('Kenny name updated', 'kenny_was_here', 'Kenny', )
+    print ezz.trigger('{Kenny:kenny_was_here.last()}>2', 'Kenny desc', state='present')
+    print ezz.hostgroup('kenny hostgroup', state='present', params=None)
+    print ezz.host('kenny host', host_groups=['kenny hostgroup'], templates=['Kenny'], interfaces=None, state='present', params=None)
+    print ezz.usergroup('kenny group', rights=[{'Kenny hostgroup', 'rw'},], users=['test'], state='present', params=None)
     #print ezz.user('kenny host', host_groups=['kenny hostgroup'], templates=['Kenny'], interfaces=None, state='present', params=None)
