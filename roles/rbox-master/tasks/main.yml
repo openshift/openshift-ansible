@@ -6,7 +6,7 @@
   git:
     repo: http://172.16.141.210/git/scm/rbox/mip.git
     dest: ~/mip
-    version: split 
+    version: multinode 
     clone: yes
 
 - name: Install Openshift blueprints for RBox
