@@ -15,23 +15,21 @@
 
 
 - hosts: couchbase_servers_hosts
+  name: Constructing common /etc/hosts file
   serial: 1
+  vars_files:
+  - ../vars.yml
   gather_facts: True
   sudo: True
   tasks:
 
-  - name: Copy /etc/hosts from localhost
-    copy: src=/tmp/commonhosts/hosts dest=/etc/hosts owner=root group=root mode=0644
-
-##TODO Mettre domaine en var
-  - name: Adding node config in /etc/hosts 
-    lineinfile: line="{{ ansible_default_ipv4.address }}  {{ ansible_fqdn }} {{ ansible_fqdn }}.openstack.rbox" dest=/etc/hosts 
-
-  - name: Fetch /etc/hosts from localhost
-    fetch: dest=/tmp/commonhosts/hosts src=/etc/hosts flat=yes
+  - name: Adding node config in /tmp/commonhosts/hosts a common /etc/hosts
+    local_action: lineinfile line="{{ ansible_default_ipv4.address }}  {{ ansible_fqdn }} {{ ansible_fqdn }}.{{ domain }}" dest=/tmp/commonhosts/hosts
 
 - hosts: couchbase_servers_hosts
   gather_facts: True
+  vars_files:
+  - ../vars.yml
   sudo: True
   tasks:
 
@@ -41,36 +39,36 @@
   - name: Ensure bind-utils is installed, needed for nsupdate
     yum: name=bind-utils state=present
 
-  - name: Add domain in /etc/resolv.conf if not present
-    lineinfile: line="search openstack.rbox" dest=/etc/resolv.conf
+  - name: Update /etc/resolv.conf
+    lineinfile: line="search {{ domain }}" dest=/etc/resolv.conf
+
+  - name: Add dns in /etc/resolv.conf
+    lineinfile: line="nameserver {{ dns_server }}" dest=/etc/resolv.conf
 
   - name: Create nsupdate file
     file: path=/tmp/nsinput state=touch 
 
-  - name: Configure nsupdate input file 
-    lineinfile: line="server 10.64.109.124" dest=/tmp/nsinput 
+  - name: Configure nsupdate input file,  add dns server 
+    lineinfile: line="server {{ dns_server }}" dest=/tmp/nsinput 
+
+  - name: Configure nsupdate input file, add zone
+    lineinfile: line="zone {{ domain }}" dest=/tmp/nsinput 
+
+  - name: Configure nsupdate input file,  delete old records
+    lineinfile: line="update delete {{ inventory_hostname }}.{{ domain }}." dest=/tmp/nsinput 
+
+  - name: Configure nsupdate input file, add new record
+    lineinfile: line="update add {{ inventory_hostname }}.{{ domain }}. 86400 A {{ public_ip }}" dest=/tmp/nsinput 
 
   - name: Configure nsupdate input file 
-    lineinfile: line="zone openstack.rbox" dest=/tmp/nsinput 
+    lineinfile: line="show" dest=/tmp/nsinput
 
-  - name: Configure nsupdate input file 
-    lineinfile: line="update delete {{ ansible_fqdn }}." dest=/tmp/nsinput 
-
-  - name: Configure nsupdate input file 
-    lineinfile: line="update add {{ ansible_fqdn }}. 86400 A {{ public_ip }}" dest=/tmp/nsinput 
-
-  - name: Configure nsupdate input file 
-    lineinfile: line="show" dest=/tmp/nsinput 
-
-  - name: Configure nsupdate input file 
-    lineinfile: line="send" dest=/tmp/nsinput 
-
-  - name: Show nsinput file
-    shell: cat /tmp/nsinput
+  - name: Configure nsupdate input file
+    lineinfile: line="send" dest=/tmp/nsinput
 
   - name: Update DNS with bind-utils' nsupdate
-    shell: nsupdate -y "rbox.":"op9Cj64TUEPdpUL5kOcDdDZZCyZA2aE2mF8JTkM4G8BC/Ra6t5PpvyJl 079c9rgf33f2QkGsPaXUZ/jAGnzbCg==" -v /tmp/nsinput 
- 
+    shell: nsupdate -y "{{ key }}":"{{ secret }}" -v /tmp/nsinput
+
   - name: Delete nsupdate file
     file: path=/tmp/nsinput state=absent 
 
@@ -87,7 +85,7 @@
   sudo: True
   tasks:
 
-  - name: Copy /etc/hosts from localhost definitely
+  - name: Copy /etc/hosts from localhost definitely to each node
     copy: src=/tmp/commonhosts/hosts dest=/etc/hosts owner=root group=root mode=0644
 
 - hosts: localhost

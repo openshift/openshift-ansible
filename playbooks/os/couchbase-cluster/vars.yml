@@ -1,4 +1,9 @@
 ---
+########################
+# Variables file
+# for
+# couchbase cluster
+########################
 
 # Variables for couchbase
 # depending on type of VM
@@ -12,6 +17,14 @@ bucket_ram: "{{ ram_per_server }}"
 bucket_port: 11211
 bucket_replica: 1
 
+
+# DNS info
+domain: openstack.rbox
+dns_server: 10.64.109.124
+key: "rbox."
+secret: "op9Cj64TUEPdpUL5kOcDdDZZCyZA2aE2mF8JTkM4G8BC/Ra6t5PpvyJl 079c9rgf33f2QkGsPaXUZ/jAGnzbCg=="
+
+# Openstack Info
 openstack_network_prefix: 'openshift-ansible-{{ cluster_id }}'
 openstack_network_cidr: 192.168.{{ 1048576 | random % 256 }}.0/24
 openstack_network_external_net: external
