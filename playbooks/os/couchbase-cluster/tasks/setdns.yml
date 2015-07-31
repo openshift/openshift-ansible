@@ -35,25 +35,53 @@
   sudo: True
   tasks:
 
-  - name: Install dns python
-    yum: name=python-dns state=present
+#  - name: Install dns python
+#    yum: name=python-dns state=present
 
-  - name: Update /etc/resolv.conf
-    lineinfile:
-      dest: /etc/resolv.conf
-      regexp: '^search'
-      line: "search openstack.rbox"
-#TODO Mettre le domaine en variable 
-          
-  
-  - name: update dns
-    local_action: dnsupdate keyname="rbox."
-                  secret="op9Cj64TUEPdpUL5kOcDdDZZCyZA2aE2mF8JTkM4G8BC/Ra6t5PpvyJl 079c9rgf33f2QkGsPaXUZ/jAGnzbCg=="
-                  mname="10.64.109.124"
-                  zone="openstack.rbox."
-                  domain={{ ansible_fqdn }}
-                  a={{ public_ip }}
-                  op=add
+  - name: Ensure bind-utils is installed, needed for nsupdate
+    yum: name=bind-utils state=present
+
+  - name: Add domain in /etc/resolv.conf if not present
+    lineinfile: line="search openstack.rbox" dest=/etc/resolv.conf
+
+  - name: Create nsupdate file
+    file: path=/tmp/nsinput state=touch 
+
+  - name: Configure nsupdate input file 
+    lineinfile: line="server 10.64.109.124" dest=/tmp/nsinput 
+
+  - name: Configure nsupdate input file 
+    lineinfile: line="zone openstack.rbox" dest=/tmp/nsinput 
+
+  - name: Configure nsupdate input file 
+    lineinfile: line="update delete {{ ansible_fqdn }}." dest=/tmp/nsinput 
+
+  - name: Configure nsupdate input file 
+    lineinfile: line="update add {{ ansible_fqdn }}. 86400 A {{ public_ip }}" dest=/tmp/nsinput 
+
+  - name: Configure nsupdate input file 
+    lineinfile: line="show" dest=/tmp/nsinput 
+
+  - name: Configure nsupdate input file 
+    lineinfile: line="send" dest=/tmp/nsinput 
+
+  - name: Show nsinput file
+    shell: cat /tmp/nsinput
+
+  - name: Update DNS with bind-utils' nsupdate
+    shell: nsupdate -y "rbox.":"op9Cj64TUEPdpUL5kOcDdDZZCyZA2aE2mF8JTkM4G8BC/Ra6t5PpvyJl 079c9rgf33f2QkGsPaXUZ/jAGnzbCg==" -v /tmp/nsinput 
+ 
+  - name: Delete nsupdate file
+    file: path=/tmp/nsinput state=absent 
+
+#  - name: update dns with ansible module
+#    local_action: dnsupdate keyname="rbox."
+#                  secret="op9Cj64TUEPdpUL5kOcDdDZZCyZA2aE2mF8JTkM4G8BC/Ra6t5PpvyJl 079c9rgf33f2QkGsPaXUZ/jAGnzbCg=="
+#                  mname="10.64.109.124"
+#                  zone="openstack.rbox."
+#                  domain={{ inventory_hostname }}
+#                  a={{ public_ip }}
+#                  op=add
 
 - hosts: couchbase_servers_hosts
   sudo: True

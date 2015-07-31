@@ -11,4 +11,4 @@
   roles:
     - rbox-master
 
-- include: launch_couchbase.yml
+#- include: launch_couchbase.yml

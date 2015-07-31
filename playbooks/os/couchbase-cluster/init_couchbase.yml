@@ -70,3 +70,5 @@
 
   - name: Rebalance cluster
     shell: "{{ couchbase_server_home_path }}/bin/couchbase-cli rebalance -c {{ couchbase_server_primary_node }}:{{ couchbase_server_admin_port }} --user={{ couchbase_server_admin }} --password={{ couchbase_server_password }}"
+    with_items: "{{ groups['additional'] | default([]) }}"
+    when: groups['additional'] | length > 0 
