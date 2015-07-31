@@ -2,6 +2,7 @@
 - hosts: oo_hosts_to_update
   vars:
     openshift_deployment_type: "{{ deployment_type }}"
+    openshift_product_type: "{{ product_type }}"
   roles:
   - role: rhel_subscribe
     when: deployment_type == "enterprise" and

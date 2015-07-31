@@ -1,7 +1,7 @@
-Atomic Enterprise Master
+Cluster Master
 ================
 
-Atomic Enterprise Master service installation
+Master service installation
 
 Requirements
 ------------
@@ -15,8 +15,8 @@ Role Variables
 From this role:
 | Name                                | Default value         |                                                  |
 |-------------------------------------|-----------------------|--------------------------------------------------|
-| openshift_master_debug_level        | openshift_debug_level | Verbosity of the debug logs for atomic-enterprise-master |
-| openshift_node_ips                  | []                    | List of the openshift node ip addresses to pre-register when atomic-enterprise-master starts up |
+| openshift_master_debug_level        | openshift_debug_level | Verbosity of the debug logs for master |
+| openshift_node_ips                  | []                    | List of the openshift node ip addresses to pre-register when master starts up |
 | oreg_url                            | UNDEF                 | Default docker registry to use |
 | openshift_master_api_port           | UNDEF                 | |
 | openshift_master_console_port       | UNDEF                 | |

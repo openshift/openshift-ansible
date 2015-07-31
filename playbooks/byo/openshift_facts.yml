@@ -1,5 +1,5 @@
 ---
-- name: Gather Atomic Enterprise facts
+- name: Gather Cluster facts
   hosts: all
   gather_facts: no
   roles:

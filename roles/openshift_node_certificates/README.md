@@ -1,4 +1,4 @@
-Atomic Enterprise Node Certificates
+Node Certificates
 ====================================
 
 TODO
