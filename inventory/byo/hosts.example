@@ -54,6 +54,9 @@ deployment_type=enterprise
 #openshift_master_cluster_public_hostname=openshift-ansible.test.example.com
 #openshift_master_cluster_defer_ha=True
 
+# default subdomain to use for exposed routes
+#osm_default_subdomain=apps.test.example.com
+
 # host group for masters
 [masters]
 ose3-master[1:3]-ansible.test.example.com
