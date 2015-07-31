@@ -99,9 +99,12 @@ oadm router --create=true \
 On the master host:
 ```sh
 oadm registry --create=true \
-  --credentials=/etc/openshift/master/openshift-registry.kubeconfig \
-  --mount-host=/var/lib/openshift/docker-registry
+  --credentials=/etc/openshift/master/openshift-registry.kubeconfig
 ```
+
+If you would like persistent storage, refer to the
+[OpenShift documentation](https://docs.openshift.org/latest/admin_guide/install/docker_registry.html)
+for more information on deployment options for the built in docker-registry.
 
 ## Overriding detected ip addresses and hostnames
 Some deployments will require that the user override the detected hostnames
