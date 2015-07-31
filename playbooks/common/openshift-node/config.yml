@@ -16,6 +16,7 @@
           hostname: "{{ openshift_hostname | default(None) }}"
           public_hostname: "{{ openshift_public_hostname | default(None) }}"
           deployment_type: "{{ openshift_deployment_type }}"
+          product_type: "{{ openshift_product_type }}"
       - role: node
         local_facts:
           labels: "{{ openshift_node_labels | default(None) }}"
@@ -89,9 +90,9 @@
       path: "{{ node_cert_dir }}"
       state: directory
 
-  # TODO: notify restart atomic-enterprise-node
+  # TODO: notify restart node
   # possibly test service started time against certificate/config file
-  # timestamps in atomic-enterprise-node to trigger notify
+  # timestamps in node to trigger notify
   - name: Unarchive the tarball on the node
     unarchive:
       src: "{{ sync_tmpdir }}/{{ node_subdir }}.tgz"

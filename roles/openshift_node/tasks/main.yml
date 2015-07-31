@@ -7,16 +7,7 @@
     msg: This role requres that osn_cluster_dns_ip is set
   when: osn_cluster_dns_ip is not defined or not osn_cluster_dns_ip
 
-- name: Install Atomic Enterprise Node package
-  yum: pkg=atomic-enterprise-node state=present
-  register: node_install_result
-
-- name: Install atomic-enterprise-sdn-ovs
-  yum: pkg=atomic-enterprise-sdn-ovs state=present
-  register: sdn_install_result
-  when: openshift.common.use_openshift_sdn
-
-- name: Set node Atomic Enterprise facts
+- name: Set node facts
   openshift_facts:
     role: "{{ item.role }}"
     local_facts: "{{ item.local_facts }}"
@@ -26,6 +17,7 @@
       hostname: "{{ openshift_hostname | default(none) }}"
       public_hostname: "{{ openshift_public_hostname | default(none) }}"
       deployment_type: "{{ openshift_deployment_type }}"
+      product_type: "{{ openshift_product_type }}"
   - role: node
     local_facts:
       labels: "{{ openshift_node_labels | default(none) }}"
@@ -34,17 +26,26 @@
       debug_level: "{{ openshift_node_debug_level | default(openshift.common.debug_level) }}"
       portal_net: "{{ openshift_master_portal_net | default(None) }}"
 
+- name: Install Node package
+  yum: pkg={{ product_type }}-node state=present
+  register: node_install_result
+
+- name: Install sdn-ovs package
+  yum: pkg={{ product_type }}-sdn-ovs state=present
+  register: sdn_install_result
+  when: openshift.common.use_openshift_sdn
+
 # TODO: add the validate parameter when there is a validation command to run
 - name: Create the Node config
   template:
     dest: "{{ openshift_node_config_file }}"
     src: node.yaml.v1.j2
   notify:
-  - restart atomic-enterprise-node
+  - restart {{ product_type }}-node
 
-- name: Configure Atomic Enterprise Node settings
+- name: Configure Node settings
   lineinfile:
-    dest: /etc/sysconfig/atomic-enterprise-node
+    dest: /etc/sysconfig/{{ product_type }}-node
     regexp: "{{ item.regex }}"
     line: "{{ item.line }}"
   with_items:
@@ -53,13 +54,13 @@
     - regex: '^CONFIG_FILE='
       line: "CONFIG_FILE={{ openshift_node_config_file }}"
   notify:
-  - restart atomic-enterprise-node
+  - restart {{ product_type }}-node
 
 - stat: path=/etc/sysconfig/docker
   register: docker_check
 
   # TODO: Enable secure registry when code available in origin
-- name: Secure Atomic Enterprise Registry
+- name: Secure Registry
   lineinfile:
     dest: /etc/sysconfig/docker
     regexp: '^OPTIONS=.*'
@@ -69,8 +70,8 @@
 - name: Allow NFS access for VMs
   seboolean: name=virt_use_nfs state=yes persistent=yes
 
-- name: Start and enable atomic-enterprise-node
-  service: name=atomic-enterprise-node enabled=yes state=started
+- name: Start and enable node
+  service: name={{ product_type }}-node enabled=yes state=started
   register: start_result
 
 - name: pause to prevent service restart from interfering with bootstrapping
