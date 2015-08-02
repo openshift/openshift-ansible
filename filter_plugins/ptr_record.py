@@ -1,53 +1,54 @@
 #!/usr/bin/python
 
-# FIXME all of these filters assume /24 subnets
-# and are pretty basic
+'''
+Filters to help work with bind DNS configuration files
+'''
 
-def subnet(ip):
-    # Returns the subnet in CIDR format
-    # FIXME we need the netmask here!
-    # FIXME assuming /24
-    index = ip.rfind('.')
-    if index > 0:
-        return ip[:index] + '.0/24'
-    else:
-        return ip
-
-def subnet_name(subnet):
-    # Returns a subnet "name" from a CIDR subnet definition
-    # e.g. "192.168.1.0/24" -> "192.168.1"
-    # FIXME assuming /24 ! need to do the real thing
-    index = subnet.rfind('.')
-    if index > 0:
-        return subnet[:index]
-    else:
-        return subnet
-
-def ptr_record(ip):
-    # From a string representing an IPv4 address, get only the last byte:
-    #   X.Y.Z.A  ->  A
-    # Doesn't perform any real checks.
-    # Meant to be useful while building DNS PTR records e.g.
-    # for the zone Z.Y.X.in-addr.arpa.
-    index = ip.rfind('.')
-    if index > 0:
-        return ip[index+1:]
-    else:
-        return ip
-
-def reverse_zone(subnet):
-    # From "192.168.1" it returns "1.168.192.in-addr.arpa"
-    zone = subnet.split('.')
-    zone.reverse()
-    return '.'.join(zone) + ".in-addr.arpa"
+from netaddr import IPAddress, IPNetwork
 
 class FilterModule(object):
+    ''' Custom ansible filters of IP address and network handling
+    '''
+
+    @staticmethod
+    def subnet(address):
+        ''' Returns the subnet of an IP in CIDR format '''
+        # We would need the netmask here! Using implicit prefix for now
+        ipnet = IPNetwork(address, implicit_prefix=True)
+        return str(ipnet)
+
+    @staticmethod
+    def subnet_name(network):
+        ''' Get a nice name from a subnet definition in CDR format
+            e.g. "192.168.1.129/24" -> "192.168.1.0"
+        '''
+        ipnet = IPNetwork(network)
+        return str(ipnet.network)
+
+    @staticmethod
+    def ptr_record(address):
+        ''' Return a reverse DNS lookup record for an IP address
+            Meant to be useful while building DNS PTR records e.g.
+              X.Y.Z.A  ->  A.Z.Y.X.in-addr.arpa.
+        '''
+        ipaddr = IPAddress(address)
+        return ipaddr.reverse_dns
+
+    @staticmethod
+    def reverse_zone(network):
+        ''' Get a nice name for a reverse zone name for a subnet
+            e.g. "192.168.1.129/24" -> "0.1.168.192.in-addr.arpa"
+        '''
+        ipnet = IPNetwork(network, implicit_prefix=True)
+        return ipnet.network.reverse_dns.rstrip('.')
+
     def filters(self):
+        ''' returns a mapping of filters to methods '''
         return {
-            'subnet': subnet,
-            'subnet_name': subnet_name,
-            'ptr_record': ptr_record,
-            'reverse_zone': reverse_zone
+            'subnet': self.subnet,
+            'subnet_name': self.subnet_name,
+            'ptr_record': self.ptr_record,
+            'reverse_zone': self.reverse_zone
         }
 
 # vim: set et ts=4 sw=4 :
