@@ -1,6 +1,6 @@
 ; {{ dns_domain }} {{ view_type }} view
 @		IN SOA	dns.{{ dns_domain }}. hostmaster.{{ dns_domain }}. (
-				2015062401 ; serial
+				{{ zone_serial }} ; serial
 				60         ; refresh (1 minute)
 				15         ; retry (15 seconds)
 				1800       ; expire (30 minutes)

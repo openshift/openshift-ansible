@@ -7,5 +7,4 @@ named_dir: /var/named
 forwarders:
   - 10.5.30.45
   - 10.5.30.46
-# FIXME WIP to share a common internal/external zone template
-view_type: external
+zone_serial: "2015062401"
