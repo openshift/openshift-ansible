@@ -83,7 +83,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         "nodes"   => ["master", "node1", "node2"],
       }
       ansible.extra_vars = {
-        openshift_deployment_type: deployment_type,
+        deployment_type: deployment_type,
       }
       ansible.playbook = "playbooks/byo/vagrant.yml"
     end
