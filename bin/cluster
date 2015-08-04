@@ -49,7 +49,6 @@ class Cluster(object):
 
         env['num_masters'] = args.masters
         env['num_nodes'] = args.nodes
-        env['num_cb'] = args.cb_nodes
 
         return self.action(args, inventory, env, playbook)
 
@@ -199,8 +198,6 @@ if __name__ == '__main__':
                                help='number of masters to create in cluster')
     create_parser.add_argument('-n', '--nodes', default=2, type=int,
                                help='number of nodes to create in cluster')
-    create_parser.add_argument('-c', '--cb_nodes', default=2, type=int,
-                               help='number of couchbase nodes to create')
     create_parser.set_defaults(func=cluster.create)
 
     config_parser = action_parser.add_parser('config',

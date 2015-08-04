@@ -21,4 +21,4 @@ For example :
 ## Usage
 
 This command deploys a cluster of 2 couchbase nodes
-ansible-playbook -v -i inventory/os/hosts/ -e '\''cluster_id=rbox num_cb=2 deployment_type=origin'\'' playbooks/os/couchbase-cluster/launch_couchbase.yml
+ansible-playbook -v -i inventory/os/hosts/ -e 'cluster_id=rbox num_cb=2 deployment_type=origin' playbooks/os/couchbase-cluster/launch_couchbase.yml
