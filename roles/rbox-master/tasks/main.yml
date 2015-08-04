@@ -9,46 +9,10 @@
     version: multinode 
     clone: yes
 
-- name: Install Openshift blueprints for RBox
-  git:
-    repo: http://172.16.141.210/git/scm/uha/blueprints_rbox.git
-    dest: ~/blueprints_rbox
-    version: master 
-    clone: yes
-
-- name: Create symlink to blueprints
-  file:
-    src: ~/blueprints_rbox
-    dest: ~/mip/blueprints_rbox
-    state: link
-
-- name: Update config files for RBox
-  shell: ./update_to_cluster.sh rbox artifactory
-  args:
-    chdir: ~/mip
-  environment:
-    OS_BIN: /usr/bin/openshift  
-
-#- name: Logging in
-#  shell: /usr/bin/openshift login
-
-- name: Creating Project
-  shell: ./tools/deploy-siz-one.sh 
+- name: Launch R-Box
+  shell: ./launch_rbox.sh artifactory
   args:
     chdir: ~/mip
   environment:
     OS_BIN: /usr/bin/openshift
 
-- name: Deploying Service Registry
-  shell: ./tools/deploy-service-registry.sh
-  args:
-    chdir: ~/mip
-  environment:
-    OS_BIN: /usr/bin/openshift
-
-- name: Deploying RBox
-  shell: ./tools/deploy-full-rbox-pods.sh
-  args:
-    chdir: ~/mip
-  environment:
-    OS_BIN: /usr/bin/openshift
