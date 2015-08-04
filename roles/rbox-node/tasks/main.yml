@@ -13,6 +13,9 @@
     src: "{{ lookup('env','HOME') }}/ama.tar.gz"
     dest: /
 
+- name: Show that caches are ready
+  file: path=/ama/obe/MIG/ngi/com/local_data/cacheIsReady state=touch
+
 # Very quick and dirty workaround for openshift-sdn issue
 # https://github.com/openshift/openshift-sdn/issues/73
 - name: Get INPUT REJECT iptables rule
