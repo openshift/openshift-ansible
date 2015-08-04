@@ -6,7 +6,7 @@
   git:
     repo: http://172.16.141.210/git/scm/rbox/mip.git
     dest: ~/mip
-    version: multinode 
+    version: multinode
     clone: yes
 
 - name: Launch R-Box
