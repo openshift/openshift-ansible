@@ -16,3 +16,10 @@
   command: >
     {{ openshift.common.admin_binary }} manage-node {{ item }} --schedulable=true
   with_items: openshift_scheduleable_nodes
+
+- name: Tag schedulable nodes
+  command: >
+    {{ openshift.common.client_binary }} label --overwrite node {{ item.0 }} {{ item.1 | oo_combine_dict }}
+  with_nested:
+    -  openshift_scheduleable_nodes
+    -  openshift_node_labels
