@@ -1,0 +1,10 @@
+---
+# File: vars/main.yml - Global ansible-couchbase-server variables
+
+#############################################################################
+#
+# Couchbase Server additional variables
+#
+#############################################################################
+
+couchbase_server_default_bucket: default

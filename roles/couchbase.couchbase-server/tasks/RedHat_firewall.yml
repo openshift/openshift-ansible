@@ -1,0 +1,42 @@
+---
+# File: tasks/RedHat_firewall.yml - firewall Red Hat tasks for ansible-couchbase-server
+
+## Static firewall rules using iptables instead of firewalld
+
+- name: Stop firewalld
+  sudo: True
+  service: name=firewalld state=stopped
+  when: ansible_distribution_major_version >= 7 
+  tags: firewall
+
+- name: Install iptables rules
+  sudo: True
+  yum: "name=iptables-services state=present"
+  tags: firewall
+
+- name: Mask firewalld
+  sudo: True
+  shell: systemctl mask firewalld.service
+  when: ansible_distribution_major_version >= 7 
+  tags: firewall
+
+- name: Enable iptables
+  shell: "systemctl enable iptables.service"
+  tags: firewall
+
+- name: Stop services
+  service: "name=firewalld state=stopped"
+  when: ansible_distribution_major_version >= 7 
+  tags: firewall
+
+- name: Start services
+  service: "name=iptables state=started"
+  tags: firewall
+
+- name: Install iptables rules
+  template: "src=etc_sysconfig_iptables.j2 dest=/etc/sysconfig/iptables.couchbase-server owner=couchbase group=couchbase"
+  tags: firewall
+
+- name: Import iptables rules
+  shell: "/sbin/iptables-restore < /etc/sysconfig/iptables.couchbase-server"
+  tags: firewall

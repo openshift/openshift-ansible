@@ -1,0 +1,52 @@
+---
+# File: tasks/main.yml - Main tasks for ansible-couchbase-server
+
+- include_vars: ../defaults/tuning.yml
+
+- name: Distribution specific variables
+  include_vars: "{{ ansible_distribution }}.yml"
+
+# CentOS tasks
+- include: CentOS.yml
+  when: ansible_distribution  == "CentOS"
+
+# Debian tasks
+- include: Debian.yml
+  when: ansible_distribution  == "Debian"
+
+# Red Hat tasks
+- include: RedHat.yml
+  when: ansible_distribution  == "RedHat"
+
+# Ubuntu tasks
+- include: Ubuntu.yml
+  when: ansible_distribution  == "Ubuntu"
+
+- name: Update user limits
+  sudo: True
+  copy: src=etc_security_limits.d_couchbase-server.conf dest=/etc/security/limits.d/couchbase-server.conf owner=root group=root mode=0644
+
+- name: Install profile.d script
+  sudo: True
+  template: src=profile_couchbase-server.sh.j2 dest=/etc/profile.d/couchbase-server.sh
+
+- name: Optimized settings for Couchbase Server data and index volumes
+  sudo: True
+  mount: name={{ couchbase_server_mountpoint }} src={{ couchbase_server_partition }} opts={{ couchbase_server_mount_options }} fstype={{ couchbase_server_filesystem }} state=mounted
+  when: couchbase_server_tune_os
+
+- name: Kernel settings dir
+  file: dest=/etc/sysctl.d state=directory
+
+- name: Kernel settings config
+  sudo: True
+  template: src=etc_sysctl.d_couchbase-server.conf.j2 dest=/etc/sysctl.d/couchbase-server.conf owner=root group=root mode=0644
+  notify: Update kernel settings
+
+- name: Disable THP
+  sudo: True
+  shell: echo 'for i in /sys/kernel/mm/*transparent_hugepage/enabled; do echo never > $i; done' >> /etc/rc.local
+  shell: echo 'for i in /sys/kernel/mm/*transparent_hugepage/defrag; do echo never > $i; done' >> /etc/rc.local
+  shell: for i in /sys/kernel/mm/*transparent_hugepage/enabled; do echo never > $i; done
+  when: ansible_distribution_version != "12.04"
+  notify: Source local settings

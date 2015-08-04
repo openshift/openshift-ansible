@@ -1,0 +1,22 @@
+- hosts: primary
+  name: Bucket management
+  sudo: False
+  vars_files:
+    - roles/couchbase.couchbase-server/defaults/main.yml
+    - vars.yml
+  vars:
+    couchbase_server_primary_node: "{{hostvars[groups['primary'][0]]['ansible_fqdn']}}"
+    couchbase_server_bucket_name: "{{ bucket_name }}" 
+    couchbase_server_bucket_type: "{{ bucket_type }}" 
+    couchbase_server_bucket_ram: "{{ bucket_ram }}" 
+    couchbase_server_bucket_port: "{{ bucket_port }}" 
+    couchbase_server_bucket_replica: "{{ bucket_replica }}"
+  tasks:
+
+    - name: Verify node health
+      shell: "{{ couchbase_server_bin_path }}/couchbase-cli server-list -c {{ couchbase_server_primary_node }}:{{ couchbase_server_admin_port }} --user={{ couchbase_server_admin }} --password={{ couchbase_server_password }} | awk '/{{ ansible_fqdn }}/ {print $3}'"
+      register: couchbase_server_health
+
+    - name: Create new bucket
+      shell: "{{ couchbase_server_bin_path }}/couchbase-cli bucket-create -c {{ ansible_fqdn }}:{{ couchbase_server_admin_port }} --user={{ couchbase_server_admin }} --password={{ couchbase_server_password }} --bucket={{ couchbase_server_bucket_name }} --bucket-type={{ couchbase_server_bucket_type }} --bucket-port={{ couchbase_server_bucket_port }} --bucket-ramsize={{ couchbase_server_bucket_ram }} --bucket-replica={{ couchbase_server_bucket_replica }}"
+      when: couchbase_server_health['stdout'] == "healthy"

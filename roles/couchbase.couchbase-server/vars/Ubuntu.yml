@@ -1,0 +1,68 @@
+---
+# File: vars/Debian.yml - Ubuntu ansible-couchbase-server variables
+#
+
+# This file contains variables used for installing Couchbase software,
+# including Couchbase Server and Sync Gateway
+
+#############################################################################
+#
+# COUCHBASE SERVER ENTERPRISE EDITION
+#
+# A listing of available Couchbase Server Enterprise Edition packages and
+# their metadata for Ubuntu
+#
+# Default installed version is currently set to:
+# Couchbase Server Enterprise Edition version 3.0.3
+#
+# Comment out the 4 variables below and uncoment variables for any older
+# version that you wish to install or pass them in as --extra-vars to the
+# ansible-playbook command.
+#
+#############################################################################
+
+couchbase_server_ubuntu_ee_version: 3.0.3
+couchbase_server_ubuntu_ee_package: couchbase-server-enterprise_{{ couchbase_server_ubuntu_ee_version }}-ubuntu12.04_amd64.deb
+couchbase_server_ubuntu_ee_url: http://packages.couchbase.com/releases/{{ couchbase_server_ubuntu_ee_version }}/{{ couchbase_server_ubuntu_ee_package }}
+couchbase_server_ubuntu_ee_sha256: 13e925fa8b806aecd09751bdb7be1f8cfa188ad894e266108e8c44785c08e474
+
+# couchbase_server_ubuntu_ee_version: 3.0.2
+# couchbase_server_ubuntu_ee_package: couchbase-server-enterprise_{{ couchbase_server_ubuntu_ee_version }}-ubuntu12.04_amd64.deb
+# couchbase_server_ubuntu_ee_url: http://packages.couchbase.com/releases/{{ couchbase_server_ubuntu_ee_version }}/{{ couchbase_server_ubuntu_ee_package }}
+# couchbase_server_ubuntu_ee_sha256: 29490c49f4ba5e25fe68db9abe7a78f884a0ea47c7825813b50fd5b9c2bf691c
+
+# couchbase_server_ubuntu_ee_version: 3.0.1
+# couchbase_server_ubuntu_ee_package: couchbase-server-enterprise_{{ couchbase_server_ubuntu_ee_version }}-ubuntu12.04_amd64.deb
+# couchbase_server_ubuntu_ee_url: http://packages.couchbase.com/releases/{{ couchbase_server_ubuntu_ee_version }}/{{ couchbase_server_ubuntu_ee_package }}
+# couchbase_server_ubuntu_ee_sha256: 6914fb71d7e2fca314b7767f64a49cb45112f487f0d577239459f890a0a69b16
+
+# couchbase_server_ubuntu_ee_version: 3.0.0
+# couchbase_server_ubuntu_ee_package: couchbase-server-enterprise_{{ couchbase_server_ubuntu_ee_version }}-ubuntu12.04_amd64.deb
+# couchbase_server_ubuntu_ee_url: http://packages.couchbase.com/releases/{{ couchbase_server_ubuntu_ee_version }}/{{ couchbase_server_ubuntu_ee_package }}
+# couchbase_server_ubuntu_ee_sha256: b86db55ee57dc465eb81443f97e21064666557c275e2e699f73d24be6b51d4d4
+
+# couchbase_server_ubuntu_ee_version: 2.5.2
+# couchbase_server_ubuntu_ee_package: couchbase-server-enterprise_{{ couchbase_server_ubuntu_ee_version }}_x86_64.deb
+# couchbase_server_ubuntu_ee_url: http://packages.couchbase.com/releases/{{ couchbase_server_ubuntu_ee_version }}/{{ couchbase_server_ubuntu_ee_package }}
+# couchbase_server_ubuntu_ee_sha256: 27a79a65758023c34ed900e8ef8c54bab4a65f4c84b7c94359cba910800a4b19
+
+#############################################################################
+#
+# COUCHBASE SERVER COMMUNITY EDITION
+#
+# A listing of available Couchbase Server Community Edition packages and
+# their metadata for Ubuntu
+#
+# Default installed version is currently set to:
+# Couchbase Server Community Edition version 3.0.1
+#
+# Comment out the 4 variables below and uncoment variables for any older
+# version that you wish to install or pass them in as --extra-vars to the
+# ansible-playbook command.
+#
+#############################################################################
+
+couchbase_server_ubuntu_ce_version: 3.0.1
+couchbase_server_ubuntu_ce_package: couchbase-server-community_{{ couchbase_server_ubuntu_ce_version }}-ubuntu12.04_amd64.deb
+couchbase_server_ubuntu_ce_url: http://packages.couchbase.com/releases/{{ couchbase_server_ubuntu_ce_version }}/{{ couchbase_server_ubuntu_ce_package }}
+couchbase_server_ubuntu_ce_sha256: 59efbd8924969f71c9a6b438afea94d974db51607464c55d7a2d527368026150

@@ -19,7 +19,6 @@ deployment_vars:
       name: centos-70-utd
 #      name: CentOS-7-x86_64-GenericCloud.raw
 #      sha256: e324e3ab1d24a1bbf035ddb365e7f9058c0b454acf48d7aa15c5519fae5998ab
-#     ssh_user: openshift
     ssh_user: openshift
     ansible_ssh_private_key_file: /home/john/.ssh/rbox_uha.pem 
     sudo: yes
@@ -37,8 +36,3 @@ deployment_vars:
       sha256:
     ssh_user: openshift
     sudo: yes
-#  origin:
-#    fedora:
-#      url: "http://download.fedoraproject.org/pub/fedora/linux/releases/21/Cloud/Images/x86_64/Fedora-Cloud-Base-20141203-21.x86_64.qcow2"
-#      name: Fedora-Cloud-Base-20141203-21.x86_64.qcow2
-#      sha256: 3a99bb89f33e3d4ee826c8160053cdb8a72c80cd23350b776ce73cd244467d86

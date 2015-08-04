@@ -1,0 +1,34 @@
+---
+- name: Launch couchbase instance(s)
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  vars_files:
+  - vars.yml
+  vars:
+    os_openstack_image: CentOS-7-x86_64-GenericCloud.raw
+    image_url: "{{ deployment_vars[deployment_type].image.url }}"
+    image_sha256: "{{ deployment_vars[deployment_type].image.sha256 }}"
+    image_name: "{{ deployment_vars[deployment_type].image.name }}"
+  tasks:
+
+  - include: tasks/configure_openstack.yml
+  - include: ../../common/couchbase/set_couchbase_launch_facts_tasks.yml
+  - include: tasks/launch_instances.yml
+    vars:
+      instances: "{{ cb_node_names }}"
+      cluster: "{{ cluster_id }}"
+      type: "{{ node_type }}"
+
+- include: tasks/setdns.yml
+
+- include: install_couchbase.yml
+  vars:
+      cluster: "{{ cluster_id }}"
+
+- include: init_couchbase.yml
+
+- include: create_bucket.yml
+
+# TODO 
+#- include: xdcr.yml

@@ -1,0 +1,31 @@
+---
+# File: load_bucket.yml
+# Example Ansible playbook to load Couchbase Server bucket with example items
+
+- hosts: cluster_nodes
+  sudo: False
+  gather_facts: False
+  tasks:
+  - name: Create cluster grouping
+    group_by: key={{ couchbase_server_node_role }}
+
+- hosts: primary
+  sudo: False
+  gather_facts: False
+  vars_files:
+    - ../defaults/main.yml
+  vars:
+    couchbase_server_primary_node: "{{hostvars[groups['primary'][0]]['inventory_hostname']}}"
+    couchbase_server_bucket_name: default
+    couchbase_server_bucket_item_count: 9001
+    couchbase_server_bucket_item_size: 256
+
+  tasks:
+
+    - name: Verify bucket warmup
+      shell: "{{ couchbase_server_bin_path }}/cbstats localhost:11210 warmup | awk '/ep_warmup_state:/ {print $2}'"
+      register: couchbase_server_warmup
+
+    - name: Load bucket with sample JSON items
+      shell: "{{ couchbase_server_bin_path }}/cbworkloadgen -n {{ couchbase_server_primary_node }}:{{ couchbase_server_admin_port }} -i {{ couchbase_server_bucket_item_count }} -s {{ couchbase_server_bucket_item_size }} -j -b {{ couchbase_server_bucket_name }} -u {{ couchbase_server_admin }} -p {{ couchbase_server_password }}"
+      when: couchbase_server_warmup['stdout'] == "done"

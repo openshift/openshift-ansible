@@ -1,0 +1,31 @@
+---
+# File: create_bucket.yml
+# Example Ansible playbook to create a new Couchbase Server bucket
+
+- hosts: cluster_nodes
+  sudo: False
+  gather_facts: False
+  tasks:
+  - name: Create cluster grouping
+    group_by: key={{ couchbase_server_node_role }}
+
+- hosts: primary
+  sudo: False
+  vars_files:
+    - ../defaults/main.yml
+  vars:
+    couchbase_server_primary_node: "{{hostvars[groups['primary'][0]]['inventory_hostname']}}"
+    couchbase_server_bucket_name: default
+    couchbase_server_bucket_type: couchbase
+    couchbase_server_bucket_ram: 256
+    couchbase_server_bucket_port: 11211
+    couchbase_server_bucket_replica: 1
+  tasks:
+
+    - name: Verify node health
+      shell: "{{ couchbase_server_bin_path }}/couchbase-cli server-list -c {{ couchbase_server_primary_node }}:{{ couchbase_server_admin_port }} --user={{ couchbase_server_admin }} --password={{ couchbase_server_password }} | awk '/{{ couchbase_server_primary_node }}:{{ couchbase_server_admin_port }}/ {print $3}'"
+      register: couchbase_server_health
+
+    - name: Create new bucket
+      shell: "{{ couchbase_server_bin_path }}/couchbase-cli bucket-create -c {{ ansible_fqdn }}:{{ couchbase_server_admin_port }} --user={{ couchbase_server_admin }} --password={{ couchbase_server_password }} --bucket={{ couchbase_server_bucket_name }} --bucket-type={{ couchbase_server_bucket_type }} --bucket-port={{ couchbase_server_bucket_port }} --bucket-ramsize={{ couchbase_server_bucket_ram }} --bucket-replica={{ couchbase_server_bucket_replica }}"
+      when: couchbase_server_health['stdout'] == "healthy"

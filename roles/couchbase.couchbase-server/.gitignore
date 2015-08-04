@@ -1,0 +1,8 @@
+.DS_Store
+.vagrant
+.tm_properties
+meta/.galaxy_install_info
+examples/hosts
+examples/labmachines
+examples/cluster_uninstall.yml
+

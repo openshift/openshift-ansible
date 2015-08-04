@@ -1,0 +1,67 @@
+---
+# File: tasks/CentOS.yml - CentOS tasks for ansible-couchbase-server
+
+# Download and install SELinux Python module (required by Ansible)  
+
+- name: SELinux Python Module
+  yum: "name=libselinux-python state=present"
+  tags: installation
+
+## Couchbase local
+
+- name: Copy RPM from local host 
+  copy: src={{ couchbase_server_centos_local_path }} dest=/tmp/{{ couchbase_server_centos_ee_package }} 
+  when: couchbase_server_edition == "local"
+  tags: installation
+
+- name: Install
+  yum: "name=/tmp/{{ couchbase_server_centos_ee_package }} state=present"
+  when: couchbase_server_edition == "local"
+  tags: installation
+
+- name: Package file cleanup
+  sudo: True
+  shell: "rm -rf /tmp/{{ couchbase_server_centos_ee_package }}"
+  when: couchbase_server_edition == "local"
+  tags: installation
+
+## Couchbase Server Enterprise Edition
+
+- name: Download
+  get_url: "url={{ couchbase_server_centos_ee_url }} dest=/tmp/{{ couchbase_server_centos_ee_package }} sha256sum={{ couchbase_server_centos_ee_sha256 }} timeout=240"
+  when: couchbase_server_edition == "enterprise"
+  tags: installation
+
+- name: Install
+  yum: "name=/tmp/{{ couchbase_server_centos_ee_package }} state=present"
+  when: couchbase_server_edition == "enterprise"
+  tags: installation
+
+- name: Package file cleanup
+  sudo: True
+  shell: "rm -rf /tmp/{{ couchbase_server_centos_ee_package }}"
+  when: couchbase_server_edition == "enterprise"
+  tags: installation
+
+## Couchbase Server Community Edition
+
+- name: Download
+  get_url: "url={{ couchbase_server_centos_ce_url }} dest=/tmp/{{ couchbase_server_centos_ce_package }} sha256sum={{ couchbase_server_centos_ce_sha256 }} timeout=240"
+  when: couchbase_server_edition == "community"
+  tags: installation
+
+- name: Install
+  yum: "name=/tmp/{{ couchbase_server_centos_ce_package }} state=present"
+  when: couchbase_server_edition == "community"
+  tags: installation
+
+- name: Package file cleanup
+  sudo: True
+  shell: "rm -rf /tmp/{{ couchbase_server_centos_ce_package }}"
+  when: couchbase_server_edition == "community"
+  tags: installation
+
+# Firewall (optional)
+- name: Firewall limitations
+  include: CentOS_firewall.yml
+  when: couchbase_server_firewall == true

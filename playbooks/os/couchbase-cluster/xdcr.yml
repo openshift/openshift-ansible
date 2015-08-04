@@ -1,0 +1,13 @@
+---
+#TODO : 
+- hosts: primary
+  sudo: True
+  serial: 1
+  vars_files:
+    - roles/couchbase.couchbase-server/defaults/main.yml
+  vars:
+    couchbase_server_primary_node: "{{hostvars[groups['primary'][0]]['ansible_fqdn']}}"
+  tasks:
+
+  - name: Create XDCR link from parent cluster
+

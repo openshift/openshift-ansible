@@ -1,0 +1,44 @@
+---
+# File: cluster_backup.yml
+# Ansible playbook to grab a full cluster backup from the specified 
+# Couchbase Server cluster with cbbackup and save as a
+# tarball in $PWD/var/couchbase_backups/
+
+- hosts: cluster_nodes
+  sudo: True
+  vars:
+    couchbase_server_primary_node: "{{hostvars[groups['primary'][0]]['inventory_hostname']}}"
+  vars_files:
+    - ../defaults/main.yml
+  tasks:
+  - name: Create cluster grouping
+    group_by: key={{ couchbase_server_node_role }}
+
+- hosts: primary
+  gather_facts: False
+  sudo: True
+  vars:
+    couchbase_server_primary_node: "{{hostvars[groups['primary'][0]]['inventory_hostname']}}"
+  vars_files:
+    - ../defaults/main.yml
+  tasks:
+
+  - name: Ensure backup target exists
+    file: "path={{ couchbase_server_cbbackup_path }} state=directory"
+
+  - name: Verify bucket warmup
+    shell: "{{ couchbase_server_bin_path }}/cbstats localhost:11210 warmup | awk '/ep_warmup_state:/ {print $2}'"
+    register: couchbase_server_warmup
+
+  - name: Execute cbbackup
+    shell: "{{ couchbase_server_bin_path }}/cbbackup -m full http://{{ ansible_fqdn }}:{{ couchbase_server_admin_port }} {{ couchbase_server_cbbackup_path }}/{{ ansible_hostname }}"
+    when: couchbase_server_warmup['stdout'] == "done"
+
+  - name: Create backup archive
+    shell: "tar zcf {{ couchbase_server_cbbackup_path }}/{{ ansible_hostname }}.tgz {{ couchbase_server_cbbackup_path }}/{{ ansible_hostname }}"
+
+  - name: Retrieve backup archive
+    fetch: "src={{ couchbase_server_cbbackup_path }}/{{ ansible_hostname }}.tgz dest=var/couchbase_backups/{{ ansible_hostname }}.tgz flat=yes fail_on_missing=yes validate_checksum=yes"
+
+  - name: Cleanup
+    shell: "rm -rf {{ couchbase_server_cbbackup_path }}/{{ ansible_hostname }} {{ couchbase_server_cbbackup_path }}/{{ ansible_hostname }}.tgz"

@@ -1,0 +1,27 @@
+---
+# File: node_failover.yml
+# Ansible playbook to perform manual failover on a target cluster node
+
+- hosts: cluster_nodes
+  sudo: True
+  gather_facts: False
+  tasks:
+  - name: Create cluster grouping
+    group_by: key={{ couchbase_server_node_role }}
+
+- hosts: primary
+  sudo: True
+  gather_facts: False
+  vars_files:
+    - ../defaults/main.yml
+  vars:
+    couchbase_server_primary_node: "{{hostvars[groups['primary'][0]]['inventory_hostname']}}"
+    couchbase_server_failover_node:
+  tasks:
+
+  - name: Failover node
+    shell: "{{ couchbase_server_bin_path }}/couchbase-cli failover -u {{ couchbase_server_admin }} -p {{ couchbase_server_password }} -c {{ couchbase_server_primary_node }} --server-failover={{ couchbase_server_failover_node }}"
+    ignore_errors: True
+
+  - debug: msg="You must supply a value for variable couchbase_server_failover_node"
+    when: result|failed

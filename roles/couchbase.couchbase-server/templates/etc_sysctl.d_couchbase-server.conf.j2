@@ -1,0 +1,71 @@
+# File: templates/etc_sysctl.d/couchbase-server.conf.j2
+# Kernel tunables for Couchbase Server set by Ansbile
+
+###
+### STANDARD TUNING
+###
+
+# Instructs the kernel to swap only as a last resort
+vm.swappiness = {{ couchbase_server_swappiness }}
+
+# Remote buggy TCP workaround / no effect on the local network
+# net.ipv4.tcp_workaround_signed_windows = {{ couchbase_server_tcp_workaround_signed_windows }}
+
+# Increases maximum number of remembered connection requests which
+# did not receive  an acknowledgment from connecting client
+# Must be less than or equal to somaxconn or it will be truncated
+net.ipv4.tcp_max_syn_backlog = {{ couchbase_server_tcp_max_syn_backlog }}
+
+###
+### ADDITIONAL EXPERIMENTAL TUNING
+### Uncomment to activate
+###
+
+# RFC 1337 / time-wait assasination hazards fix
+# net.ipv4.tcp_rfc1337 = {{ couchbase_server_tcp_rfc1337 }}
+
+# Reduce retransmit bandwidth with selective ACK
+# net.ipv4.tcp_sack = {{ couchbase_server_tcp_sack }}
+
+# Forward Acknowledgement System works with SACK
+# to improve packet loss recovery
+# net.ipv4.tcp_fack = {{ couchbase_server_tcp_fack }}
+
+# Disables MTU probing unless ICMP black hole detected
+# net.ipv4.tcp_mtu_probing = {{ couchbase_server_mtu_probing }}
+
+# Increase OS filesystem limit for open files
+# fs.file-max = {{ couchbase_server_file_max }}
+
+# Increase processor input queue length
+# net.core.netdev_max_backlog = {{ couchbase_server_netdev_max_backlog }}
+
+# Per connection receive buffer and TCP window size auto tuning
+# net.ipv4.tcp_moderate_rcvbuf = {{ couchbase_server_tcp_moderate_rcvbuf }}
+
+# Better performance over high bandwidth networks than [New] Reno
+# Also generally regarded as safer than cubic
+# net.ipv4.tcp_congestion_control = {{ couchbase_server_tcp_congestion_control }}
+
+# Increases socket listen backlog to support request bursts
+# net.core.somaxconn = {{ couchbase_server_somaxconn }}
+
+# Reduce bandwidth loss on fast networks by allowing for very large windows
+# Larger windows are good for high bandwidth*delay
+# net.ipv4.tcp_window_scaling = {{ couchbase_server_tcp_window_scaling }}
+
+# Decreases amount of time connections remain in FIN-WAIT-2 state
+# Cleans up broken connections faster
+# net.ipv4.tcp_fin_timeout = {{ couchbase_server_tcp_fin_timeout }}
+
+# Increase the frequency of keepalive probes
+# Helps to quickly identify and time out dead connections
+# net.ipv4.tcp_keepalive_intvl = {{ couchbase_server_tcp_keepalive_intvl }}
+
+# Limits the maximum memory used to 200MB before pdflush
+# The default value can overwhelm the storage system once flushed.
+# vm.dirty_bytes = {{ couchbase_server_dirty_bytes }}
+
+# The lower threshold for vm.dirty_bytes
+# vm.dirty_background_bytes = {{ couchbase_server_dirty_background_bytes }}
+
