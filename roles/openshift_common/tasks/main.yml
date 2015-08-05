@@ -12,7 +12,7 @@
       use_openshift_sdn: "{{ openshift_use_openshift_sdn | default(None) }}"
       sdn_network_plugin_name: "{{ os_sdn_network_plugin_name | default(None) }}"
       deployment_type: "{{ openshift_deployment_type }}"
-      product_type: ""{{ openshift_product_type }}"
+      product_type: "{{ openshift_product_type }}"
 
 - name: Set hostname
   hostname: name={{ openshift.common.hostname }}

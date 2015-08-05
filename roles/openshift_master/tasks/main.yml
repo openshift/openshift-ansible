@@ -12,10 +12,6 @@
     msg: "openshift_master_cluster_password must be set for multi-master installations"
   when: openshift_master_ha | bool and not openshift.master.cluster_defer_ha | bool and openshift_master_cluster_password is not defined
 
-- name: Install Master package
-  yum: pkg={{ product_type }}-master state=present
-  register: install_result
-
 - name: Set master facts
   openshift_facts:
     role: master
@@ -54,6 +50,11 @@
       sdn_cluster_network_cidr: "{{ osm_cluster_network_cidr | default(None) }}"
       sdn_host_subnet_length: "{{ osm_host_subnet_length | default(None) }}"
       default_subdomain: "{{ osm_default_subdomain | default(None) }}"
+      product_type: "{{ openshift_product_type }}"
+
+- name: Install Master package
+  yum: pkg={{ product_type }}-master state=present
+  register: install_result
 
 # TODO: These values need to be configurable
 - name: Set dns facts
