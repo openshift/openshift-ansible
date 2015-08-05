@@ -1,0 +1,11 @@
+# File: vagrant_hosts
+# Couchbase Server cluster node hosts configuration for Vagrant
+#
+# NB: Replace the hosts below with your preferred node hostnames and continue
+#     the 'nodeN' pattern for additional nodes past 'node3'
+#     Do not modify the labels (text appearing between []), however
+
+[cluster_nodes]
+cb1.local couchbase_server_node_role=primary ansible_ssh_user=vagrant ansible_ssh_private_key_file=./.vagrant/machines/cb1/virtualbox/private_key
+cb2.local couchbase_server_node_role=additional ansible_ssh_user=vagrant ansible_ssh_private_key_file=./.vagrant/machines/cb2/virtualbox/private_key
+cb3.local couchbase_server_node_role=additional ansible_ssh_user=vagrant ansible_ssh_private_key_file=./.vagrant/machines/cb3/virtualbox/private_key

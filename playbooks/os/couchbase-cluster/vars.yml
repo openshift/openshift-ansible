@@ -1,0 +1,45 @@
+---
+########################
+# Variables file
+# for
+# couchbase cluster
+########################
+
+# Variables for couchbase
+# depending on type of VM
+# m1.xlarge : 16GB RAM = 16384 MB RAM
+#               160GB disk
+#               Usable for bucket : 14862 MB
+ram_per_server: 14862
+bucket_name: devicb
+bucket_type: couchbase
+bucket_ram: "{{ ram_per_server }}"
+bucket_port: 11211
+bucket_replica: 1
+
+
+# DNS info
+domain: openstack.rbox
+dns_server: 10.64.109.124
+key: "rbox."
+secret: "op9Cj64TUEPdpUL5kOcDdDZZCyZA2aE2mF8JTkM4G8BC/Ra6t5PpvyJl 079c9rgf33f2QkGsPaXUZ/jAGnzbCg=="
+
+# Openstack Info
+openstack_network_prefix: 'openshift-ansible-{{ cluster_id }}'
+openstack_network_cidr: 192.168.{{ 1048576 | random % 256 }}.0/24
+openstack_network_external_net: external
+openstack_network_dns:
+  - 10.64.109.124
+  - 172.16.50.210
+  - 172.16.50.250 
+openstack_ssh_keypair: "Rbox_UHA"
+openstack_flavor_ram: 16384 
+openshift_version: 0.4.3
+
+deployment_vars:
+  origin:
+    image:
+      name: centos-70-utd
+    ssh_user: openshift
+    ansible_ssh_private_key_file: /home/john/.ssh/rbox_uha.pem 
+    sudo: yes

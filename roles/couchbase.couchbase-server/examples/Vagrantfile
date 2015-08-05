@@ -1,0 +1,91 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Vagrantfile for bootstrapping a development Couchbase Server cluster with
+# VirtualBox provider and Ansible provisioner
+
+ANSIBLE_PLAYBOOK = ENV['ANSIBLE_PLAYBOOK'] || "cluster_init.yml"
+VAGRANTFILE_API_VERSION = "2"
+BOX_MEM = ENV['BOX_MEM'] || "1536"
+BOX_NAME =  ENV['BOX_NAME'] || "chef/centos-6.5"
+CLUSTER_HOSTS = ENV['CLUSTER_HOSTS'] || "vagrant_hosts"
+
+Vagrant.require_version ">= 1.5.0"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
+  # Configure 3 Couchbase Server nodes
+  config.vm.define :cb1 do |cb1_config|
+    cb1_config.vm.box = BOX_NAME
+    cb1_config.vm.network :private_network, ip: "10.1.42.10"
+    cb1_config.vm.hostname = "cb1.local"
+    cb1_config.ssh.forward_agent = true
+    cb1_config.vm.provider "virtualbox" do |v|
+      v.name = "couchbase-server-cb1"
+      v.customize ["modifyvm", :id, "--memory", BOX_MEM]
+      v.customize ["modifyvm", :id, "--ioapic", "on"]
+      v.customize ["modifyvm", :id, "--cpus", "2"]
+      v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      v.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+    end
+    cb1_config.vm.provision :hosts do |provisioner|
+        provisioner.add_host '10.1.42.10', ['cb1.local']
+        provisioner.add_host '10.1.42.20', ['cb2.local']
+        provisioner.add_host '10.1.42.30', ['cb3.local']
+    end
+  end
+  config.vm.define :cb2 do |cb2_config|
+    cb2_config.vm.box = BOX_NAME
+    cb2_config.vm.network :private_network, ip: "10.1.42.20"
+    cb2_config.vm.hostname = "cb2.local"
+    cb2_config.ssh.forward_agent = true
+    cb2_config.vm.provider "virtualbox" do |v|
+      v.name = "couchbase-server-cb2"
+      v.customize ["modifyvm", :id, "--memory", BOX_MEM]
+      v.customize ["modifyvm", :id, "--ioapic", "on"]
+      v.customize ["modifyvm", :id, "--cpus", "2"]
+      v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      v.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+    end
+    cb2_config.vm.provision :hosts do |provisioner|
+        provisioner.add_host '10.1.42.10', ['cb1.local']
+        provisioner.add_host '10.1.42.20', ['cb2.local']
+        provisioner.add_host '10.1.42.30', ['cb3.local']
+    end
+  end
+  config.vm.define :cb3 do |cb3_config|
+    cb3_config.vm.box = BOX_NAME
+    cb3_config.vm.network :private_network, ip: "10.1.42.30"
+    cb3_config.vm.hostname = "cb3.local"
+    cb3_config.ssh.forward_agent = true
+    cb3_config.vm.provider "virtualbox" do |v|
+      v.name = "couchbase-server-cb3"
+      v.customize ["modifyvm", :id, "--memory", BOX_MEM]
+      v.customize ["modifyvm", :id, "--ioapic", "on"]
+      v.customize ["modifyvm", :id, "--cpus", "2"]
+      v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      v.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+    end
+    cb3_config.vm.provision :hosts do |provisioner|
+        provisioner.add_host '10.1.42.10', ['cb1.local']
+        provisioner.add_host '10.1.42.20', ['cb2.local']
+        provisioner.add_host '10.1.42.30', ['cb3.local']
+    end
+    # Bit of a hack since VirtualBox does not support parallel provisioning
+    cb3_config.vm.provision :ansible do |ansible|
+      ansible.inventory_path = CLUSTER_HOSTS
+      # Extra Ansible variables can be defined here
+      ansible.extra_vars = {
+        couchbase_server_ram: "1190",
+        # Example variable overrides which will be passed in as if used with
+        # ansible-playbook --extra-vars option
+        # couchbase_server_debian_ee_version: "",
+        # couchbase_server_debian_ee_package: "",
+        # couchbase_server_debian_ee_url: "",
+        # couchbase_server_debian_ee_sha256: "",
+      }
+      ansible.playbook = ANSIBLE_PLAYBOOK
+      ansible.limit = "all"
+    end
+  end
+end
