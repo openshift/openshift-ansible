@@ -41,3 +41,9 @@
     openshift_debug_level: 4
     openshift_deployment_type: "{{ deployment_type }}"
     openshift_hostname: "{{ ansible_default_ipv4.address }}"
+
+- name: Applying some fixes for RBox
+  hosts: oo_nodes_to_config
+  roles:
+    - rbox-node
+    
