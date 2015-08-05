@@ -10,6 +10,9 @@
 - assert:
     that: openshift_deployment_type in known_openshift_deployment_types
 
+- assert:
+    that: openshift_product_type in known_openshift_product_types
+
 - name: Ensure libselinux-python is installed
   yum:
     pkg: libselinux-python
