@@ -38,6 +38,21 @@ class Cluster(object):
             deployment_type = os.environ['OS_DEPLOYMENT_TYPE']
         return deployment_type
 
+
+    def get_product_type(self, args):
+        """
+        Get the product_type based on the environment variables and the
+        command line arguments
+        :param args: command line arguments provided by the user
+        :return: string representing the product type
+        """
+        product_type = 'openshift'
+        if args.product_type:
+            product_type = args.product_type
+        elif 'OS_DEPLOYMENT_TYPE' in os.environ:
+            product_type = os.environ['OS_DEPLOYMENT_TYPE']
+        return product_type
+
     def create(self, args):
         """
         Create an OpenShift cluster for given provider
@@ -45,7 +60,8 @@ class Cluster(object):
         :return: exit status from run command
         """
         env = {'cluster_id': args.cluster_id,
-               'deployment_type': self.get_deployment_type(args)}
+               'deployment_type': self.get_deployment_type(args),
+               'product_type': self.get_product_type(args)}
         playbook = "playbooks/{}/openshift-cluster/launch.yml".format(args.provider)
         inventory = self.setup_provider(args.provider)
 
@@ -63,7 +79,8 @@ class Cluster(object):
         :return: exit status from run command
         """
         env = {'cluster_id': args.cluster_id,
-               'deployment_type': self.get_deployment_type(args)}
+               'deployment_type': self.get_deployment_type(args),
+               'product_type': self.get_product_type(args)}
         playbook = "playbooks/{}/openshift-cluster/terminate.yml".format(args.provider)
         inventory = self.setup_provider(args.provider)
 
@@ -76,7 +93,8 @@ class Cluster(object):
         :return: exit status from run command
         """
         env = {'cluster_id': args.cluster_id,
-               'deployment_type': self.get_deployment_type(args)}
+               'deployment_type': self.get_deployment_type(args),
+               'product_type': self.get_product_type(args)}
         playbook = "playbooks/{}/openshift-cluster/list.yml".format(args.provider)
         inventory = self.setup_provider(args.provider)
 
@@ -89,7 +107,8 @@ class Cluster(object):
         :return: exit status from run command
         """
         env = {'cluster_id': args.cluster_id,
-               'deployment_type': self.get_deployment_type(args)}
+               'deployment_type': self.get_deployment_type(args),
+               'product_type': self.get_product_type(args)}
         playbook = "playbooks/{}/openshift-cluster/config.yml".format(args.provider)
         inventory = self.setup_provider(args.provider)
 
@@ -102,7 +121,8 @@ class Cluster(object):
         :return: exit status from run command
         """
         env = {'cluster_id': args.cluster_id,
-               'deployment_type': self.get_deployment_type(args)}
+               'deployment_type': self.get_deployment_type(args),
+               'product_type': self.get_product_type(args)}
         playbook = "playbooks/{}/openshift-cluster/update.yml".format(args.provider)
         inventory = self.setup_provider(args.provider)
 
@@ -116,6 +136,7 @@ class Cluster(object):
         """
         env = {'cluster_id': args.cluster_id,
                'deployment_type': self.get_deployment_type(args),
+               'product_type': self.get_product_type(args),
                'new_cluster_state': args.state}
 
         playbook = "playbooks/{}/openshift-cluster/service.yml".format(args.provider)

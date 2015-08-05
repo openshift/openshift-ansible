@@ -25,6 +25,7 @@
       registry_url: "{{ oreg_url | default(none) }}"
       debug_level: "{{ openshift_node_debug_level | default(openshift.common.debug_level) }}"
       portal_net: "{{ openshift_master_portal_net | default(None) }}"
+      product_type: "{{ openshift_product_type }}"
 
 - name: Install Node package
   yum: pkg={{ product_type }}-node state=present

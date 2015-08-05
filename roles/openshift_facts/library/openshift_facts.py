@@ -298,6 +298,7 @@ def set_registry_url_if_unset(facts):
             if 'registry_url' not in facts[role]:
                 registry_url = "openshift/origin-${component}:${version}"
                 if deployment_type == 'enterprise':
+                    product_type = facts['common']['product_type']
                     if product_type == 'openshift':
                        registry_url = "openshift3/ose-${component}:${version}"
                     elif product_type == 'atomic-enterprise':
