@@ -112,6 +112,7 @@
 
 - name: Delete temporary directory on localhost
   hosts: localhost
+  connection: local
   gather_facts: no
   tasks:
   - file: name={{ mktemp.stdout }} state=absent
