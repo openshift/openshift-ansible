@@ -6,9 +6,7 @@
   roles:
     - rbox-node
 
-- name: Configuring Masters for RBox
-  hosts: oo_masters_to_config
-  roles:
-    - rbox-master
-
-#- include: launch_couchbase.yml
+#- name: Configuring Masters for RBox
+#  hosts: oo_masters_to_config
+#  roles:
+#    - rbox-master
