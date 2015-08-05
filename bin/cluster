@@ -49,8 +49,8 @@ class Cluster(object):
         product_type = 'openshift'
         if args.product_type:
             product_type = args.product_type
-        elif 'OS_DEPLOYMENT_TYPE' in os.environ:
-            product_type = os.environ['OS_DEPLOYMENT_TYPE']
+        elif 'OS_PRODUCT_TYPE' in os.environ:
+            product_type = os.environ['OS_PRODUCT_TYPE']
         return product_type
 
     def create(self, args):
