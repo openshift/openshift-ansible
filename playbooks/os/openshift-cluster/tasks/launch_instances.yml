@@ -56,3 +56,4 @@
   with_together:
     - instances
     - floating_ip_create_result.results
+

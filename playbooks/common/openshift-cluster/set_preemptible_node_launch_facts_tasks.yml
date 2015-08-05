@@ -1,0 +1,34 @@
+---
+- set_fact: 
+    k8s_type="node_preemptible"
+    start_value={% if 'num_preemptible_nodes' > 0 %}1{% else %}0{% endif %}
+
+- debug: msg="num_preemptible_nodes = {{ num_preemptible_nodes }}, start_value = {{ start_value }}"
+# http://docs.ansible.com/ansible/playbooks_conditionals.html: 
+# Note that if you have several tasks that all share the same conditional statement, you can affix the conditional to a task include statement as below. 
+# Note this does not work with playbook includes, just task includes. All the tasks get evaluated, but the conditional is applied to each and every task
+# --> In our case this cannot work as num_preemptible_nodes can be 0 leading to an "to count backwards make stride negative" error
+# I found no way to prevent this task if num_preemptible_nodes <= 0. Condition include do not make it as they will eveluate each and every task
+- name: Generate node instance name(s) for preemptible machines
+  set_fact:
+    scratch_name: "{{ cluster_id }}-{{ k8s_type }}-{{ '%05x' | format(1048576 | random) }}"
+  register: node_names_output
+  with_sequence: start={{ start_value }} end={{ num_preemptible_nodes }}
+  when: num_preemptible_nodes|int > 1 
+
+- name: Generate a node instance name for a preemptible machine
+  set_fact:
+    scratch_name: "{{ cluster_id }}-{{ k8s_type }}-{{ '%05x' | format(1048576 | random) }}"
+  register: node_names_output
+  when: num_preemptible_nodes|int == 1
+
+- debug: var=node_names_output
+
+- set_fact:
+    node_names: "{{ node_names_output.results | oo_collect('ansible_facts') | oo_collect('scratch_name') | default ('') }}"
+  when: num_preemptible_nodes|int > 1
+
+- set_fact:
+    node_names: "{{ node_names_output['ansible_facts']['scratch_name'] }}"
+  when: num_preemptible_nodes|int == 1
+

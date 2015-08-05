@@ -1,4 +1,8 @@
 ---
+
+- set_fact:
+    has_preemptible_node={% if 'num_preemptible_nodes' > 0 %}1{% else %}0{% endif %}
+
 - name: Installing git
   yum: name=git state=latest
 
@@ -10,9 +14,14 @@
     clone: yes
 
 - name: Launch R-Box
-  shell: ./launch_rbox.sh artifactory
+  shell: export HAS_PREEMPTIBLE_NODE=${has_preemptible_node}; ./launch_rbox.sh artifactory
   args:
     chdir: ~/mip
-  environment:
+  environment: 
     OS_BIN: /usr/bin/openshift
 
+- name: Copy scheduler Json file
+  copy: src=files/scheduler.json dest=~/scheduler.json mode="u+rw,g+r,o+r"
+
+- name: Configure scheduler
+  shell: openshift cli create -f ~/scheduler.json -n siz-one
