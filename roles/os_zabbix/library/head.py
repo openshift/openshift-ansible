@@ -1,28 +1,4 @@
-#!/usr/bin/env python
-# vim: expandtab:tabstop=4:shiftwidth=4
-'''
-   ZabbixAPI ansible module
-'''
-
-#   Copyright 2015 Red Hat Inc.
-#
-#   Licensed under the Apache License, Version 2.0 (the "License");
-#   you may not use this file except in compliance with the License.
-#   You may obtain a copy of the License at
-#
-#       http://www.apache.org/licenses/LICENSE-2.0
-#
-#   Unless required by applicable law or agreed to in writing, software
-#   distributed under the License is distributed on an "AS IS" BASIS,
-#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#   See the License for the specific language governing permissions and
-#   limitations under the License.
-#
-#  Purpose: An ansible module to communicate with zabbix.
-#
-
-# pylint: disable=line-too-long
-# Disabling line length for readability
+#!/usr/bin/python
 
 import json
 import httplib2
@@ -30,6 +6,7 @@ import sys
 import os
 import re
 import copy
+import pdb
 
 class ZabbixAPIError(Exception):
     '''
@@ -47,8 +24,8 @@ class ZabbixAPI(object):
         'Alert': ['get'],
         'Application': ['create', 'delete', 'get', 'massadd', 'update'],
         'Configuration': ['export', 'import'],
-        'Dhost': ['get'],
         'Dcheck': ['get'],
+        'Dhost': ['get'],
         'Drule': ['copy', 'create', 'delete', 'get', 'isreadable', 'iswritable', 'update'],
         'Dservice': ['get'],
         'Event': ['acknowledge', 'get'],
@@ -88,7 +65,7 @@ class ZabbixAPI(object):
         if not data:
             data = {}
         self.server = data.get('server', None)
-        self.username = data.get('user', None)
+        self.username = data.get('username', None)
         self.password = data.get('password', None)
         if any([value == None for value in [self.server, self.username, self.password]]):
             print 'Please specify zabbix server url, username, and password.'
@@ -235,154 +212,62 @@ class ZabbixAPI(object):
         # Return our subclass with all methods attached
         return _class
 
-    def get_content(self, zbx_class_name, method, params):
-        zbx_class_inst = self.zapi.__getattribute__(zbx_class_name.lower())
-        zbx_class = self.zapi.__getattribute__(zbx_class_name.capitalize())
-        return zbx_class.__dict__[method](zbx_class_inst, params)[1]
-
-
 # Attach all ZabbixAPI.classes to ZabbixAPI class through metaprogramming
 for _class_name, _method_names in ZabbixAPI.classes.items():
     setattr(ZabbixAPI, _class_name, ZabbixAPI.meta(_class_name, _method_names))
 
-#def exists(content, key='result'):
-#    ''' Check if key exists in content or the size of content[key] > 0
-#    '''
-#    if not content.has_key(key):
-#        return False
-#
-#    if not content[key]:
-#        return False
-#
-#    return True
-#
-#def diff_content(from_zabbix, from_user, ignore=None):
-#    ''' Compare passed in object to results returned from zabbix
-#    '''
-#    terms = ['search', 'output', 'groups', 'select', 'expand', 'filter']
-#    if ignore:
-#        terms.extend(ignore)
-#    regex = '(' + '|'.join(terms) + ')'
-#    retval = {}
-#    for key, value in from_user.items():
-#        if re.findall(regex, key):
-#            continue
-#
-#        # special case here for templates.  You query templates and
-#        # the zabbix api returns parentTemplates.  These will obviously fail.
-#        # So when its templates compare against parentTemplates.
-#        if key == 'templates' and from_zabbix.has_key('parentTemplates'):
-#            if from_zabbix['parentTemplates'] != value:
-#                retval[key] = value
-#
-#        elif from_zabbix[key] != str(value):
-#            retval[key] = str(value)
-#
-#    return retval
-#
-#def main():
-#    '''
-#    This main method runs the ZabbixAPI Ansible Module
-#    '''
-#
-#    module = AnsibleModule(
-#        argument_spec=dict(
-#            server=dict(default='https://localhost/zabbix/api_jsonrpc.php', type='str'),
-#            user=dict(default=None, type='str'),
-#            password=dict(default=None, type='str'),
-#            zbx_class=dict(choices=ZabbixAPI.classes.keys()),
-#            params=dict(),
-#            debug=dict(default=False, type='bool'),
-#            state=dict(default='present', type='str'),
-#            ignore=dict(default=None, type='list'),
-#        ),
-#        #supports_check_mode=True
-#    )
-#
-#    user = module.params.get('user', None)
-#    if not user:
-#        user = os.environ['ZABBIX_USER']
-#
-#    passwd = module.params.get('password', None)
-#    if not passwd:
-#        passwd = os.environ['ZABBIX_PASSWORD']
-#
-#
-#
-#    api_data = {
-#        'user': user,
-#        'password': passwd,
-#        'server': module.params['server'],
-#        'verbose': module.params['debug']
-#    }
-#
-#    if not user or not passwd or not module.params['server']:
-#        module.fail_json(msg='Please specify the user, password, and the zabbix server.')
-#
-#    zapi = ZabbixAPI(api_data)
-#
-#    ignore = module.params['ignore']
-#    zbx_class = module.params.get('zbx_class')
-#    rpc_params = module.params.get('params', {})
-#    state = module.params.get('state')
-#
-#
-#    # Get the instance we are trying to call
-#    zbx_class_inst = zapi.__getattribute__(zbx_class.lower())
-#
-#    # perform get
-#    # Get the instance's method we are trying to call
-#
-#    zbx_action_method = zapi.__getattribute__(zbx_class.capitalize()).__dict__['get']
-#    _, content = zbx_action_method(zbx_class_inst, rpc_params)
-#
-#    if state == 'list':
-#        module.exit_json(changed=False, results=content['result'], state="list")
-#
-#    if state == 'absent':
-#        if not exists(content):
-#            module.exit_json(changed=False, state="absent")
-#        # If we are coming from a query, we need to pass in the correct rpc_params for delete.
-#        # specifically the zabbix class name + 'id'
-#        # if rpc_params is a list then we need to pass it. (list of ids to delete)
-#        idname = zbx_class.lower() + "id"
-#        if not isinstance(rpc_params, list) and content['result'][0].has_key(idname):
-#            rpc_params = [content['result'][0][idname]]
-#
-#        zbx_action_method = zapi.__getattribute__(zbx_class.capitalize()).__dict__['delete']
-#        _, content = zbx_action_method(zbx_class_inst, rpc_params)
-#        module.exit_json(changed=True, results=content['result'], state="absent")
-#
-#    if state == 'present':
-#    # It's not there, create it!
-#        if not exists(content):
-#            zbx_action_method = zapi.__getattribute__(zbx_class.capitalize()).__dict__['create']
-#            _, content = zbx_action_method(zbx_class_inst, rpc_params)
-#            module.exit_json(changed=True, results=content['result'], state='present')
-#
-#    # It's there and the same, do nothing!
-#        diff_params = diff_content(content['result'][0], rpc_params, ignore)
-#        if not diff_params:
-#            module.exit_json(changed=False, results=content['result'], state="present")
-#
-#        # Add the id to update with
-#        idname = zbx_class.lower() + "id"
-#        diff_params[idname] = content['result'][0][idname]
-#
-#
-#        ## It's there and not the same, update it!
-#        zbx_action_method = zapi.__getattribute__(zbx_class.capitalize()).__dict__['update']
-#        _, content = zbx_action_method(zbx_class_inst, diff_params)
-#        module.exit_json(changed=True, results=content, state="present")
-#
-#    module.exit_json(failed=True,
-#                     changed=False,
-#                     results='Unknown state passed. %s' % state,
-#                     state="unknown")
-#
-## pylint: disable=redefined-builtin, unused-wildcard-import, wildcard-import, locally-disabled
-## import module snippets.  This are required
-#from ansible.module_utils.basic import *
-#
-#main()
-#
+TERMS = ['search', 'output', 'select', 'expand', 'filter']
+
+def diff_content(from_zabbix, from_user, ignore=None):
+    ''' Compare passed in object to results returned from zabbix
+    '''
+    if ignore:
+        terms.extend(ignore)
+    regex = '(' + '|'.join(TERMS) + ')'
+    retval = {}
+    for key, value in from_user.items():
+        if re.findall(regex, key):
+            continue
+
+        # special case here for templates.  You query templates and
+        # the zabbix api returns parentTemplates.  These will obviously fail.
+        # So when its templates compare against parentTemplates.
+        if key == 'templates' and from_zabbix.has_key('parentTemplates'):
+            if from_zabbix['parentTemplates'] != value:
+                retval[key] = value
+
+        elif from_zabbix[key] != str(value):
+            retval[key] = str(value)
+
+    return retval
+
+def exists(content, key='result'):
+    ''' Check if key exists in content or the size of content[key] > 0
+    '''
+    if not content.has_key(key):
+        return False
+
+    if not content[key]:
+        return False
+
+    return True
+
+class ZabbixConnection(object):
+    '''Zabbix connection object
+    '''
+    def __init__(self, server, username, password, verbose=False, ssl=False):
+        self.server = server
+        self.username = username
+        self.password = password
+        self.verbose = verbose
+        self.ssl = ssl
+
+class Zbx(object):
+    def __init__(self, zabbix_connection):
+        self.zc = zabbix_connection
+        self.zapi = ZabbixAPI({'server': self.zc.server,
+                               'username': self.zc.username,
+                               'password': self.zc.password,
+                               'verbose': self.zc.verbose,
+                               'ssl': self.zc.ssl,
+                              })
