@@ -1,4 +1,12 @@
 ---
+#example run: 
+# ansible-playbook -e "cli_volume_size=1" \
+#                  -e "cli_device_name=/dev/xvdf" \
+#                  -e "cli_hosttype=master" \
+#                  -e "cli_environment=ops" \
+#                  create_pv.yaml
+# FIXME: we need to change "environment" to "clusterid" as that's what it really is now.
+#
 - name: Create a volume and attach it to master
   hosts: localhost
   gather_facts: no
