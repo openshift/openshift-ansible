@@ -2,8 +2,8 @@
 
 # Create an OSEv3 group that contains the masters and nodes groups
 [OSEv3:children]
-openshift_masters
-openshift_nodes
+masters
+nodes
 etcd
 
 # Set variables common for all OSEv3 hosts
@@ -58,13 +58,13 @@ deployment_type=enterprise
 #osm_default_subdomain=apps.test.example.com
 
 # host group for masters
-[openshift_masters]
+[masters]
 ose3-master[1:3]-ansible.test.example.com
 
 [etcd]
 ose3-etcd[1:3]-ansible.test.example.com
 
 # host group for nodes
-[openshift_nodes]
+[nodes]
 ose3-master[1:3]-ansible.test.example.com openshift_scheduleable=False
 ose3-node[1:2]-ansible.test.example.com openshift_node_labels="{'region': 'primary', 'zone': 'default'}"
