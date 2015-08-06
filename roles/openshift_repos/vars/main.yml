@@ -1,3 +1,3 @@
 ---
 known_openshift_deployment_types: ['origin', 'online', 'enterprise']
-known_openshift_product_types: ['origin', 'openshift', 'atomic-enterprise']
+known_openshift_product_types: ['openshift', 'atomic-enterprise']
