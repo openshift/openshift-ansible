@@ -99,7 +99,7 @@
           iops: "{{ lookup('env', 'os_master_root_vol_iops') | default(500, true) }}"
       node:
         root:
-          volume_size: "{{ lookup('env', 'os_node_root_vol_size') | default(25, true) }}"
+          volume_size: "{{ lookup('env', 'os_node_root_vol_size') | default(85, true) }}"
           device_type: "{{ lookup('env', 'os_node_root_vol_type') | default('gp2', true) }}"
           iops: "{{ lookup('env', 'os_node_root_vol_iops') | default(500, true) }}"
         docker:
