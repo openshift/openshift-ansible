@@ -42,7 +42,7 @@
     dest: "{{ openshift_node_config_file }}"
     src: node.yaml.v1.j2
   notify:
-  - restart {{ product_type }}-node
+  - restart node
 
 - name: Configure Node settings
   lineinfile:
@@ -55,7 +55,7 @@
     - regex: '^CONFIG_FILE='
       line: "CONFIG_FILE={{ openshift_node_config_file }}"
   notify:
-  - restart {{ product_type }}-node
+  - restart node
 
 - stat: path=/etc/sysconfig/docker
   register: docker_check
