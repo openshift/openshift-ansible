@@ -39,6 +39,9 @@
     owner: 'td-agent'
     mode: 0444
 
+- name: "Pause before restarting td-agent, since openshift-master needs more time to start"
+  pause: seconds=20
+
 - name: ensure td-agent is running
   service:
     name: 'td-agent'
