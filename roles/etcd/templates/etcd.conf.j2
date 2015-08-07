@@ -1,15 +1,15 @@
 {% macro initial_cluster() -%}
 {% for host in groups[etcd_peers_group] -%}
 {% if loop.last -%}
-{{ host }}={{ etcd_peer_url_scheme }}://{{ hostvars[host]['ansible_' + etcd_interface]['ipv4']['address'] }}:{{ etcd_peer_port }}
+{{ hostvars[host]['ansible_hostname'] }}={{ etcd_peer_url_scheme }}://{{ hostvars[host]['ansible_fqdn'] }}:{{ etcd_peer_port }}
 {%- else -%}
-{{ host }}={{ etcd_peer_url_scheme }}://{{ hostvars[host]['ansible_' + etcd_interface]['ipv4']['address'] }}:{{ etcd_peer_port }},
+{{ hostvars[host]['ansible_hostname'] }}={{ etcd_peer_url_scheme }}://{{ hostvars[host]['ansible_fqdn'] }}:{{ etcd_peer_port }},
 {%- endif -%}
 {% endfor -%}
 {% endmacro -%}
 
 {% if groups[etcd_peers_group] and groups[etcd_peers_group] | length > 1 %}
-ETCD_NAME={{ inventory_hostname }}
+ETCD_NAME={{ ansible_hostname }}
 ETCD_LISTEN_PEER_URLS={{ etcd_listen_peer_urls }}
 {% else %}
 ETCD_NAME=default
