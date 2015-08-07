@@ -19,18 +19,31 @@
 #   limitations under the License.
 #
 
-from openshift_tools.monitoring.zbxapi import ZabbixAPI
+import os, sys
+sys.path.append(os.getcwd())
+from zbxapi import ZabbixAPI
+#from openshift_tools.monitoring.zbxapi import ZabbixAPI
+
+def exists(content, key='result'):
+    ''' Check if key exists in content or the size of content[key] > 0
+    '''
+    if not content.has_key(key):
+        return False
+
+    if not content[key]:
+        return False
+
+    return True
 
 def main():
-
-def hostgroup(self, name, state='present', params=None):
 
     module = AnsibleModule(
         argument_spec=dict(
             server=dict(default='https://localhost/zabbix/api_jsonrpc.php', type='str'),
             user=dict(default=None, type='str'),
             password=dict(default=None, type='str'),
-            params=dict(),
+            name=dict(default=None, type='str'),
+            params=dict(default={}, type='dict'),
             debug=dict(default=False, type='bool'),
             state=dict(default='present', type='str'),
         ),
@@ -57,14 +70,12 @@ def hostgroup(self, name, state='present', params=None):
 
     zapi = ZabbixAPI(api_data)
 
-    '''
-    '''
     #Set the instance and the template for the rest of the calls
     zbx_class_name = 'hostgroup'
     idname = "groupid"
-
-    if not params:
-        params = {}
+    name = module.params['name']
+    params = module.params['params']
+    state = module.params['state']
 
     content = zapi.get_content(zbx_class_name,
                                'get',
@@ -93,11 +104,7 @@ def hostgroup(self, name, state='present', params=None):
         # let's compare properties
         differences = {}
         zab_results = content['result'][0]
-        regex = '(' + '|'.join(TERMS) + ')'
-        retval = {}
         for key, value in params.items():
-            if re.findall(regex, key):
-                continue
 
             if zab_results[key] != value and \
                zab_results[key] != str(value):

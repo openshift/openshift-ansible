@@ -91,8 +91,7 @@ class ZabbixAPI(object):
         self.username = data.get('user', None)
         self.password = data.get('password', None)
         if any([value == None for value in [self.server, self.username, self.password]]):
-            print 'Please specify zabbix server url, username, and password.'
-            sys.exit(1)
+            raise ZabbixAPIError('Please specify zabbix server url, username, and password.')
 
         self.verbose = data.get('verbose', False)
         self.use_ssl = data.has_key('use_ssl')
@@ -236,8 +235,8 @@ class ZabbixAPI(object):
         return _class
 
     def get_content(self, zbx_class_name, method, params):
-        zbx_class_inst = self.zapi.__getattribute__(zbx_class_name.lower())
-        zbx_class = self.zapi.__getattribute__(zbx_class_name.capitalize())
+        zbx_class_inst = self.__getattribute__(zbx_class_name.lower())
+        zbx_class = self.__getattribute__(zbx_class_name.capitalize())
         return zbx_class.__dict__[method](zbx_class_inst, params)[1]
 
 

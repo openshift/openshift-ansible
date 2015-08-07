@@ -21,6 +21,17 @@
 
 from openshift_tools.monitoring.zbxapi import ZabbixAPI
 
+def exists(content, key='result'):
+    ''' Check if key exists in content or the size of content[key] > 0
+    '''
+    if not content.has_key(key):
+        return False
+
+    if not content[key]:
+        return False
+
+    return True
+
 def main():
 
     ##def mediatype(self, desc, mtype, smtp_server, smtp_helo='redhat.com', smtp_email='zabbix@openshift.com', ,state='present', params=None):

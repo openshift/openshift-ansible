@@ -19,18 +19,33 @@
 #   limitations under the License.
 #
 
-from openshift_tools.monitoring.zbxapi import ZabbixAPI
+import os, sys
+sys.path.append(os.getcwd())
+from zbxapi import ZabbixAPI
+#from openshift_tools.monitoring.zbxapi import ZabbixAPI
+
+def exists(content, key='result'):
+    ''' Check if key exists in content or the size of content[key] > 0
+    '''
+    if not content.has_key(key):
+        return False
+
+    if not content[key]:
+        return False
+
+    return True
 
 def main():
-
-def trigger(self, expression, desc='', dependencies=None, state='present', params=None):
 
     module = AnsibleModule(
         argument_spec=dict(
             server=dict(default='https://localhost/zabbix/api_jsonrpc.php', type='str'),
             user=dict(default=None, type='str'),
             password=dict(default=None, type='str'),
-            params=dict(),
+            expression=dict(default=None, type='str'),
+            desc=dict(default=None, type='str'),
+            dependencies=dict(default=None, type='list'),
+            params=dict(default={}, type='dict'),
             debug=dict(default=False, type='bool'),
             state=dict(default='present', type='str'),
         ),
@@ -70,16 +85,20 @@ def trigger(self, expression, desc='', dependencies=None, state='present', param
 
     '''
     #Set the instance and the template for the rest of the calls
-    zbx_class_name = self.zapi.__getattribute__('trigger')
     zbx_class_name = 'trigger'
     idname = "triggerid"
+    state = module.params['state']
+    params = module.params['params']
+    expression = module.params['expression']
+    desc = module.params['desc']
+    dependencies = module.params['dependencies']
 
     # need to look up dependencies by expression? description?
     # TODO
     deps = []
     if dependencies:
         for description in dependencies:
-            results = self.get_content('trigger', 
+            results = zapi.get_content('trigger', 
                                        'get', 
                                        {'search': {'description': description},
                                         'expandExpression': True,
@@ -122,11 +141,7 @@ def trigger(self, expression, desc='', dependencies=None, state='present', param
         # let's compare properties
         differences = {}
         zab_results = content['result'][0]
-        regex = '(' + '|'.join(TERMS) + ')'
-        retval = {}
         for key, value in params.items():
-            if re.findall(regex, key):
-                continue
 
             if zab_results[key] != value and \
                zab_results[key] != str(value):

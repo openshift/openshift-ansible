@@ -19,18 +19,40 @@
 #   limitations under the License.
 #
 
-from openshift_tools.monitoring.zbxapi import ZabbixAPI
+import os, sys
+sys.path.append(os.getcwd())
+from zbxapi import ZabbixAPI
+#from openshift_tools.monitoring.zbxapi import ZabbixAPI
+
+def exists(content, key='result'):
+    ''' Check if key exists in content or the size of content[key] > 0
+    '''
+    if not content.has_key(key):
+        return False
+
+    if not content[key]:
+        return False
+
+    return True
 
 def main():
 
-def item(self, name, key, template_name, zabbix_type=2, vtype='int', interfaceid=None, \
+#def item(self, name, key, template_name, zabbix_type=2, vtype='int', interfaceid=None, \
+#applications=None, state='present', params=None):
 
     module = AnsibleModule(
         argument_spec=dict(
             server=dict(default='https://localhost/zabbix/api_jsonrpc.php', type='str'),
             user=dict(default=None, type='str'),
             password=dict(default=None, type='str'),
-            params=dict(),
+            name=dict(default=None, type='str'),
+            key=dict(default=None, type='str'),
+            template_name=dict(default=None, type='str'),
+            zabbix_type=dict(default=2, type='int'),
+            value_type=dict(default='int', type='str'),
+            interface_id=dict(default=None, type='str'),
+            applications=dict(default=None, type='str'),
+            params=dict(default={}, type='dict'),
             debug=dict(default=False, type='bool'),
             state=dict(default='present', type='str'),
         ),
@@ -57,7 +79,6 @@ def item(self, name, key, template_name, zabbix_type=2, vtype='int', interfaceid
 
     zapi = ZabbixAPI(api_data)
 
-         applications=None, state='present', params=None):
     '''
     zabbix_type is the type of item.  2 = zabbix_trapper
     "params": {
@@ -77,11 +98,20 @@ def item(self, name, key, template_name, zabbix_type=2, vtype='int', interfaceid
     #Set the instance and the template for the rest of the calls
     zbx_class_name = 'item'
     idname = "itemid"
+    params = module.params['params']
+    state = module.params['state']
+    name = module.params['name']
+    key = module.params['key']
+    template_name = module.params['template_name']
+    zabbix_type = module.params['zabbix_type']
+    value_type = module.params['value_type']
+    interface_id = module.params['interface_id']
+    applications = module.params['applications']
 
-    results = self.get_content('template', 'get', {'search': {'host': template_name}})
+    content = zapi.get_content('template', 'get', {'search': {'host': template_name}})
     templateid = None
-    if results:
-        templateid = results[0]['templateid']
+    if content['result']:
+        templateid = content['result'][0]['templateid']
     else:
         module.exit_json(changed=False, results='Error: Could find template with name %s for item.' % template_name, state="Unkown")
 
@@ -93,15 +123,15 @@ def item(self, name, key, template_name, zabbix_type=2, vtype='int', interfaceid
     3 - numeric unsigned; 
     4 - text.
     '''
-    value_type = 0
-    if 'int' in vtype:
-        value_type = 3
-    elif 'float' in vtype:
-        value_type = 0
-    elif 'char' in vtype:
-        value_type = 1
-    elif vtype == 'string':
-        value_type = 4
+    vtype = 0
+    if 'int' in value_type:
+        vtype = 3
+    elif 'float' == value_type:
+        vtype = 0
+    elif 'char' in value_type:
+        vtype = 1
+    elif value_type == 'string':
+        vtype = 4
 
     if not applications:
         applications = []
@@ -131,8 +161,7 @@ def item(self, name, key, template_name, zabbix_type=2, vtype='int', interfaceid
         params['key_'] = key
         params['hostid'] =  templateid
         params['type'] = zabbix_type
-        params['value_type'] = value_type
-        params['output'] = 'extend'
+        params['value_type'] = vtype
         params['applications'] = applications
 
         if not exists(content):
@@ -143,11 +172,7 @@ def item(self, name, key, template_name, zabbix_type=2, vtype='int', interfaceid
         # let's compare properties
         differences = {}
         zab_results = content['result'][0]
-        regex = '(' + '|'.join(TERMS) + ')'
-        retval = {}
         for key, value in params.items():
-            if re.findall(regex, key):
-                continue
 
             if zab_results[key] != value and \
                zab_results[key] != str(value):

@@ -19,18 +19,31 @@
 #   limitations under the License.
 #
 
-from openshift_tools.monitoring.zbxapi import ZabbixAPI
+import os, sys
+sys.path.append(os.getcwd())
+from zbxapi import ZabbixAPI
+#from openshift_tools.monitoring.zbxapi import ZabbixAPI
+
+def exists(content, key='result'):
+    ''' Check if key exists in content or the size of content[key] > 0
+    '''
+    if not content.has_key(key):
+        return False
+
+    if not content[key]:
+        return False
+
+    return True
 
 def main():
-
-def template(self, name, state='present', params=None):
 
     module = AnsibleModule(
         argument_spec=dict(
             server=dict(default='https://localhost/zabbix/api_jsonrpc.php', type='str'),
             user=dict(default=None, type='str'),
             password=dict(default=None, type='str'),
-            params=dict(),
+            name=dict(default=None, type='str'),
+            params=dict(default={}),
             debug=dict(default=False, type='bool'),
             state=dict(default='present', type='str'),
         ),
@@ -61,8 +74,11 @@ def template(self, name, state='present', params=None):
     zbx_class_name = 'template'
     idname = 'templateid'
 
-    if not params:
-        params = {}
+    #if not params:
+        #params = {}
+    params = module.params['params']
+    name = module.params['name']
+    state = module.params['state']
     # get a template, see if it exists
     content = zapi.get_content(zbx_class_name,
                                'get',
