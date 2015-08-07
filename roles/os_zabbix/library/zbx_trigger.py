@@ -19,10 +19,7 @@
 #   limitations under the License.
 #
 
-import os, sys
-sys.path.append(os.getcwd())
-from zbxapi import ZabbixAPI
-#from openshift_tools.monitoring.zbxapi import ZabbixAPI
+from openshift_tools.monitoring.zbxapi import ZabbixAPI
 
 def exists(content, key='result'):
     ''' Check if key exists in content or the size of content[key] > 0
@@ -45,6 +42,7 @@ def main():
             expression=dict(default=None, type='str'),
             desc=dict(default=None, type='str'),
             dependencies=dict(default=None, type='list'),
+            priority=dict(default='avg', type='str'),
             params=dict(default={}, type='dict'),
             debug=dict(default=False, type='bool'),
             state=dict(default='present', type='str'),
@@ -92,6 +90,21 @@ def main():
     expression = module.params['expression']
     desc = module.params['desc']
     dependencies = module.params['dependencies']
+    priority = module.params['priority']
+
+    prior = 0
+    if 'info' in priority:
+        prior = 1
+    elif 'warn' in priority:
+        prior = 2
+    elif 'avg' == priority or 'ave' in priority:
+        prior = 3
+    elif 'high' in priority:
+        prior = 4
+    elif 'high' in priority:
+        prior = 4
+    elif 'dis' in priority:
+        prior = 5
 
     # need to look up dependencies by expression? description?
     # TODO
@@ -106,9 +119,6 @@ def main():
                                        })
             if results[0]:
                 deps.append({'triggerid': results[0]['triggerid']})
-
-    if not params:
-        params = {}
 
     content = zapi.get_content(zbx_class_name,
                                'get',
@@ -132,6 +142,7 @@ def main():
         params['description'] = desc
         params['expression'] = expression
         params['dependencies'] =  deps
+        params['priority'] =  prior
 
         if not exists(content):
             # if we didn't find it, create it
@@ -166,4 +177,3 @@ def main():
 from ansible.module_utils.basic import *
 
 main()
-        

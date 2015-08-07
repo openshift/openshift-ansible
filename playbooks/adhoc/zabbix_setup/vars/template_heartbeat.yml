@@ -1,33 +1,13 @@
 ---
 g_template_heartbeat:
-  application:
-    name: Heartbeat
-#output: extend
-    search:
-      name: Heartbeat
-  params:
-    name: Template Heartbeat
-    host: Template Heartbeat
-    groups:
-    - groupid: 1 # FIXME (not real)
-    output: extend
-    search:
-      name: Template Heartbeat
+  name: Template Heartbeat
   zitems:
   - name: Heartbeat Ping
     hostid:
-    key_: heartbeat.ping
-    type: 2
-    value_type: 1
-    output: extend
-    search:
-      key_: heartbeat.ping
-    selectApplications: extend
+    key: heartbeat.ping
+    selectApplications: 'applicationid'
   ztriggers:
-  - description: 'Heartbeat.ping has failed on {HOST.NAME}'
+  - desc: 'Heartbeat.ping has failed on {HOST.NAME}'
     expression: '{Template Heartbeat:heartbeat.ping.last()}<>0'
-    priority: 3
-    searchWildcardsEnabled: True
-    search:
-      description: 'Heartbeat.ping has failed on*'
+    priority: avg
     expandExpression: True

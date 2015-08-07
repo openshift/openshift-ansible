@@ -6,60 +6,46 @@
     g_zuser: Admin
     g_zpassword: zabbix
   roles:
-  - ../roles/os_zabbix
+  - ../../../roles/os_zabbix
   post_tasks:
 
-  - zbxapi:
+  - zbx_template:
       server: "{{ g_zserver }}"
       user: "{{ g_zuser }}"
       password: "{{ g_zpassword }}"
-      zbx_class: Template
       state: list
-      params:
-        output: extend
-        search:
-          host: 'Template Heartbeat'
+      name: 'Template Heartbeat'
     register: templ_heartbeat
 
-  - zbxapi:
+  - zbx_template:
       server: "{{ g_zserver }}"
       user: "{{ g_zuser }}"
       password: "{{ g_zpassword }}"
-      zbx_class: Template
       state: list
-      params:
-        output: extend
-        search:
-          host: 'Template App Zabbix Server'
+      name: 'Template App Zabbix Server'
     register: templ_zabbix_server
 
-  - zbxapi:
+  - zbx_template:
       server: "{{ g_zserver }}"
       user: "{{ g_zuser }}"
       password: "{{ g_zpassword }}"
-      zbx_class: Template
       state: list
-      params:
-        output: extend
-        search:
-          host: 'Template App Zabbix Agent'
+      name: 'Template App Zabbix Agent'
     register: templ_zabbix_agent
 
-  - zbxapi:
+  - zbx_template:
       server: "{{ g_zserver }}"
       user: "{{ g_zuser }}"
       password: "{{ g_zpassword }}"
-      zbx_class: Template
       state: list
     register: templates
 
   - debug: var=templ_heartbeat.results
 
-  - zbxapi:
+  - zbx_template:
       server: "{{ g_zserver }}"
       user: "{{ g_zuser }}"
       password: "{{ g_zpassword }}"
-      zbx_class: Template
       state: absent
       params: "{{templates.results | difference(templ_zabbix_agent.results) | difference(templ_zabbix_server.results) | oo_collect('templateid') }}"
     register: template_results

@@ -19,10 +19,7 @@
 #   limitations under the License.
 #
 
-import os, sys
-sys.path.append(os.getcwd())
-from zbxapi import ZabbixAPI
-#from openshift_tools.monitoring.zbxapi import ZabbixAPI
+from openshift_tools.monitoring.zbxapi import ZabbixAPI
 
 def exists(content, key='result'):
     ''' Check if key exists in content or the size of content[key] > 0

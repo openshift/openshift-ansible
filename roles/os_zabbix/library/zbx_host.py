@@ -34,13 +34,15 @@ def exists(content, key='result'):
 
 def main():
 
-def host(self, name, host_groups=None, templates=None, interfaces=None, state='present', params=None):
-
     module = AnsibleModule(
         argument_spec=dict(
             server=dict(default='https://localhost/zabbix/api_jsonrpc.php', type='str'),
             user=dict(default=None, type='str'),
             password=dict(default=None, type='str'),
+            name=dict(default=None, type='str'),
+            host_groups=dict(default=[], type='list'),
+            templates=dict(default=[], type='list'),
+            interfaces=dict(default=[], type='list'),
             params=dict(),
             debug=dict(default=False, type='bool'),
             state=dict(default='present', type='str'),
@@ -68,29 +70,34 @@ def host(self, name, host_groups=None, templates=None, interfaces=None, state='p
 
     zapi = ZabbixAPI(api_data)
 
-    '''
-    '''
     #Set the instance and the template for the rest of the calls
     zbx_class_name = 'host'
     idname = "hostid"
+    name = module.params['name']
+    host_groups = module.params['host_groups']
+    templates = module.params['templates']
+    interfaces = module.params['interfaces']
+    params = module.params['params']
+    state = module.params['state']
 
     # Fetch groups by name
     groups = []
     if host_groups:
         for hgr in host_groups:
-            results = self.get_content('hostgroup', 'get', {'search': {'name': hgr}})
-            if results[0]:
-                groups.append({'groupid': results[0]['groupid']})
+            content = zapi.get_content('hostgroup', 'get', {'search': {'name': hgr}})
+            if content['result']:
+                groups.append({'groupid': content['result'][0]['groupid']})
 
     templs = []
     # Fetch templates by name
     if templates:
         for template_name in templates:
-            results = self.get_content('template', 'get', {'search': {'host': template_name}})
+            results = zapi.get_content('template', 'get', {'search': {'host': template_name}})
             if results[0]:
-                templs.append({'templateid': results[0]['templateid']})
+                templs.append({'templateid': content['results'][0]['templateid']})
 
     if not interfaces:
+        # Default interface creation
         interfaces = [
            {'type':  1, # interface type, 1 = agent
             'main':  1, # default interface? 1 = true
@@ -100,17 +107,17 @@ def host(self, name, host_groups=None, templates=None, interfaces=None, state='p
             'port':  '10050', # port for interface? 10050
            }
        ]
-    else:
-        interfaces = []
 
     if not params:
         params = {}
 
+    # selectInterfaces doesn't appear to be working but is needed.
     content = zapi.get_content(zbx_class_name,
                                'get',
                                {'search': {'host': name},
                                'selectGroups': 'groupid',
                                'selectParentTemplates': 'templateid',
+                               'selectInterfaces': 'interfaceid',
                                })
     if state == 'list':
         module.exit_json(changed=False, results=content['result'], state="list")
@@ -138,11 +145,7 @@ def host(self, name, host_groups=None, templates=None, interfaces=None, state='p
         # let's compare properties
         differences = {}
         zab_results = content['result'][0]
-        regex = '(' + '|'.join(TERMS) + '|interfaces)'
-        retval = {}
         for key, value in params.items():
-            if re.findall(regex, key):
-                continue
 
             if key == 'templates' and zab_results.has_key('parentTemplates'):
                 if zab_results['parentTemplates'] != value:
@@ -170,4 +173,4 @@ def host(self, name, host_groups=None, templates=None, interfaces=None, state='p
 from ansible.module_utils.basic import *
 
 main()
-        
+ 

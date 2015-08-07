@@ -19,10 +19,7 @@
 #   limitations under the License.
 #
 
-import os, sys
-sys.path.append(os.getcwd())
-from zbxapi import ZabbixAPI
-#from openshift_tools.monitoring.zbxapi import ZabbixAPI
+from openshift_tools.monitoring.zbxapi import ZabbixAPI
 
 def exists(content, key='result'):
     ''' Check if key exists in content or the size of content[key] > 0
@@ -88,27 +85,26 @@ def main():
                                #'selectApplications': extend,
                                })
     if state == 'list':
-        return module.exit_json(changed=False, results=content['result'], state="list")
+        module.exit_json(changed=False, results=content['result'], state="list")
 
     if state == 'absent':
         if not exists(content):
-            return module.exit_json(changed=False, state="absent")
+            module.exit_json(changed=False, state="absent")
         if not isinstance(params, list) and content['result'][0].has_key(idname):
             params = [content['result'][0][idname]]
 
         content = zapi.get_content(zbx_class_name, 'delete', params)
-        return module.exit_json(changed=True, results=content['result'], state="absent")
+        module.exit_json(changed=True, results=content['result'], state="absent")
 
     if state == 'present':
+        groups = params.get('groups', [])
+        params['groups'] = groups
+        params['groups'].append({'groupid': '1'})
+        params['host'] = name
         if not exists(content):
             # if we didn't find it, create it
-            groups = params.get('groups', [])
-            params['groups'] = groups
-            params['groups'].append({'groupid': 1})
-            params['host'] = name
-            params['output'] = 'extend'
             content = zapi.get_content(zbx_class_name, 'create', params)
-            return module.exit_json(changed=True, results=content['result'], state='present')
+            module.exit_json(changed=True, results=content['result'], state='present')
         # already exists, we need to update it
         # let's compare properties
         differences = {}
@@ -117,16 +113,17 @@ def main():
             if key == 'templates' and zab_results.has_key('parentTemplates'):
                 if zab_results['parentTemplates'] != value:
                     differences[key] = value
-            elif zab_results[key] != str(value):
-                differences[key] = str(value)
+            elif zab_results[key] != str(value) and zab_results[key] != value:
+                differences[key] = value
 
         if not differences:
-            return module.exit_json(changed=False, results=content['result'], state="present")
+            module.exit_json(changed=False, results=content['result'], state="present")
 
         # We have differences and need to update
+
         differences[idname] = zab_results[idname]
         content = zapi.get_content(zbx_class_name, 'update', differences)
-        return module.exit_json(changed=True, results=content['result'], state="present")
+        module.exit_json(changed=True, results=content['result'], state="present")
 
     module.exit_json(failed=True,
                      changed=False,

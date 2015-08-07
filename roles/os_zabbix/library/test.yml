@@ -51,3 +51,15 @@
     register: hostgroup_output
 #
   - debug: var=hostgroup_output
+
+  - name: Create a host
+    zbx_host:
+      server: "{{ zbx_server }}"
+      user: "{{ zbx_user }}"
+      password: "{{ zbx_password }}"
+      name: 'kenny host'
+      host_groups:
+      -  'kenny hostgroup'
+    register: host_output
+#
+  - debug: var=host_output
