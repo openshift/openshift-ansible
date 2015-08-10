@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+'''
+ansible module for zabbix triggers
+'''
 # vim: expandtab:tabstop=4:shiftwidth=4
 #
 #   Zabbix trigger ansible module
@@ -19,7 +22,9 @@
 #   limitations under the License.
 #
 
+# pylint: disable=import-error
 from openshift_tools.monitoring.zbxapi import ZabbixAPI
+from openshift_tools.monitoring.zbxapi import ZabbixConnection
 
 def exists(content, key='result'):
     ''' Check if key exists in content or the size of content[key] > 0
@@ -32,7 +37,42 @@ def exists(content, key='result'):
 
     return True
 
+
+def get_priority(priority):
+    ''' determine priority
+    '''
+    prior = 0
+    if 'info' in priority:
+        prior = 1
+    elif 'warn' in priority:
+        prior = 2
+    elif 'avg' == priority or 'ave' in priority:
+        prior = 3
+    elif 'high' in priority:
+        prior = 4
+    elif 'high' in priority:
+        prior = 4
+    elif 'dis' in priority:
+        prior = 5
+
+    return prior
+
 def main():
+    '''
+    Create a trigger in zabbix
+
+    Example:
+    "params": {
+        "description": "Processor load is too high on {HOST.NAME}",
+        "expression": "{Linux server:system.cpu.load[percpu,avg1].last()}>5",
+        "dependencies": [
+            {
+                "triggerid": "14062"
+            }
+        ]
+    },
+
+    '''
 
     module = AnsibleModule(
         argument_spec=dict(
@@ -50,81 +90,37 @@ def main():
         #supports_check_mode=True
     )
 
-    user = module.params.get('user', None)
-    if not user:
-        user = os.environ['ZABBIX_USER']
+    user = module.params.get('user', os.environ['ZABBIX_USER'])
+    passwd = module.params.get('password', os.environ['ZABBIX_PASSWORD'])
 
-    passwd = module.params.get('password', None)
-    if not passwd:
-        passwd = os.environ['ZABBIX_PASSWORD']
 
-    api_data = {
-        'user': user,
-        'password': passwd,
-        'server': module.params['server'],
-        'verbose': module.params['debug']
-    }
+    zapi = ZabbixAPI(ZabbixConnection(module.params['server'], user, passwd, module.params['debug']))
 
-    if not user or not passwd or not module.params['server']:
-        module.fail_json(msg='Please specify the user, password, and the zabbix server.')
-
-    zapi = ZabbixAPI(api_data)
-
-    '''
-    "params": {
-        "description": "Processor load is too high on {HOST.NAME}",
-        "expression": "{Linux server:system.cpu.load[percpu,avg1].last()}>5",
-        "dependencies": [
-            {
-                "triggerid": "14062"
-            }
-        ]
-    },
-
-    '''
     #Set the instance and the template for the rest of the calls
     zbx_class_name = 'trigger'
     idname = "triggerid"
     state = module.params['state']
     params = module.params['params']
-    expression = module.params['expression']
     desc = module.params['desc']
-    dependencies = module.params['dependencies']
-    priority = module.params['priority']
-
-    prior = 0
-    if 'info' in priority:
-        prior = 1
-    elif 'warn' in priority:
-        prior = 2
-    elif 'avg' == priority or 'ave' in priority:
-        prior = 3
-    elif 'high' in priority:
-        prior = 4
-    elif 'high' in priority:
-        prior = 4
-    elif 'dis' in priority:
-        prior = 5
 
     # need to look up dependencies by expression? description?
     # TODO
     deps = []
-    if dependencies:
-        for description in dependencies:
-            results = zapi.get_content('trigger', 
-                                       'get', 
-                                       {'search': {'description': description},
-                                        'expandExpression': True,
-                                        'selectDependencies': 'triggerid',
-                                       })
-            if results[0]:
-                deps.append({'triggerid': results[0]['triggerid']})
+    for description in module.params['dependencies']:
+        results = zapi.get_content('trigger',
+                                   'get',
+                                   {'search': {'description': description},
+                                    'expandExpression': True,
+                                    'selectDependencies': 'triggerid',
+                                   })
+        if results[0]:
+            deps.append({'triggerid': results[0]['triggerid']})
 
     content = zapi.get_content(zbx_class_name,
                                'get',
                                {'search': {'description': desc},
-                               'expandExpression': True,
-                               'selectDependencies': 'triggerid',
+                                'expandExpression': True,
+                                'selectDependencies': 'triggerid',
                                })
     if state == 'list':
         module.exit_json(changed=False, results=content['result'], state="list")
@@ -133,16 +129,17 @@ def main():
         if not exists(content):
             module.exit_json(changed=False, state="absent")
         if not isinstance(params, list) and content['result'][0].has_key(idname):
-            params = [content['result'][0][idname]]
-
-        content = zapi.get_content(zbx_class_name, 'delete', params)
+            content = zapi.get_content(zbx_class_name, 'delete', [content['result'][0][idname]])
+        else:
+            content = zapi.get_content(zbx_class_name, 'delete', params)
         module.exit_json(changed=True, results=content['result'], state="absent")
 
     if state == 'present':
-        params['description'] = desc
-        params['expression'] = expression
-        params['dependencies'] =  deps
-        params['priority'] =  prior
+        params.update({'description': desc,
+                       'expression':  module.params['expression'],
+                       'dependencies': deps,
+                       'priority': get_priority(module.params['priority']),
+                      })
 
         if not exists(content):
             # if we didn't find it, create it
@@ -154,8 +151,7 @@ def main():
         zab_results = content['result'][0]
         for key, value in params.items():
 
-            if zab_results[key] != value and \
-               zab_results[key] != str(value):
+            if zab_results[key] != value and zab_results[key] != str(value):
                 differences[key] = value
 
         if not differences:

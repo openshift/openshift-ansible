@@ -1,11 +1,8 @@
 #!/usr/bin/env python
 '''
- Ansible module for zabbix items
+Zabbix host ansible module
 '''
 # vim: expandtab:tabstop=4:shiftwidth=4
-#
-#   Zabbix item ansible module
-#
 #
 #   Copyright 2015 Red Hat Inc.
 #
@@ -37,32 +34,10 @@ def exists(content, key='result'):
 
     return True
 
-def get_value_type(value_type):
-    '''
-    Possible values:
-    0 - numeric float;
-    1 - character;
-    2 - log;
-    3 - numeric unsigned;
-    4 - text
-    '''
-    vtype = 0
-    if 'int' in value_type:
-        vtype = 3
-    elif 'char' in value_type:
-        vtype = 1
-    elif 'str' in value_type:
-        vtype = 4
-
-    return vtype
-
 def main():
     '''
-    ansible zabbix module for zbx_item
+    Ansible module for zabbix host
     '''
-
-#def item(self, name, key, template_name, zabbix_type=2, vtype='int', interfaceid=None, \
-#applications=None, state='present', params=None):
 
     module = AnsibleModule(
         argument_spec=dict(
@@ -70,12 +45,9 @@ def main():
             user=dict(default=None, type='str'),
             password=dict(default=None, type='str'),
             name=dict(default=None, type='str'),
-            key=dict(default=None, type='str'),
-            template_name=dict(default=None, type='str'),
-            zabbix_type=dict(default=2, type='int'),
-            value_type=dict(default='int', type='str'),
-            interface_id=dict(default=None, type='str'),
-            applications=dict(default=[], type='list'),
+            host_groups=dict(default=[], type='list'),
+            templates=dict(default=[], type='list'),
+            interfaces=dict(default=[], type='list'),
             params=dict(default={}, type='dict'),
             debug=dict(default=False, type='bool'),
             state=dict(default='present', type='str'),
@@ -83,32 +55,61 @@ def main():
         #supports_check_mode=True
     )
 
-    user = module.params.get('user', os.environ['ZABBIX_USER'])
-    passwd = module.params.get('password', os.environ['ZABBIX_PASSWORD'])
+    user = module.params.get('user', None)
+    if not user:
+        user = os.environ['ZABBIX_USER']
 
-    zapi = ZabbixAPI(ZabbixConnection(module.params['server'], user, passwd, module.params['debug']))
+    passwd = module.params.get('password', None)
+    if not passwd:
+        passwd = os.environ['ZABBIX_PASSWORD']
+
+    if not user or not passwd or not module.params['server']:
+        module.fail_json(msg='Please specify the user, password, and the zabbix server.')
+
+    zbc = ZabbixConnection(module.params['server'], user, passwd, module.params['debug'])
+    zapi = ZabbixAPI(zbc)
 
     #Set the instance and the template for the rest of the calls
-    zbx_class_name = 'item'
-    idname = "itemid"
+    zbx_class_name = 'host'
+    idname = "hostid"
+    host_name = module.params['name']
+    host_groups = module.params['host_groups']
+    templates = module.params['templates']
+    interfaces = module.params['interfaces']
     params = module.params['params']
     state = module.params['state']
-    key = module.params['key']
-    template_name = module.params['template_name']
 
-    content = zapi.get_content('template', 'get', {'search': {'host': template_name}})
-    templateid = None
-    if content['result']:
-        templateid = content['result'][0]['templateid']
-    else:
-        module.exit_json(changed=False,
-                         results='Error: Could find template with name %s for item.' % template_name,
-                         state="Unkown")
+    # Fetch groups by name
+    groups = []
+    for hgr in host_groups:
+        content = zapi.get_content('hostgroup', 'get', {'search': {'name': hgr}})
+        if content.has_key('result'):
+            groups.append({'groupid': content['result'][0]['groupid']})
 
+    templs = []
+    # Fetch templates by name
+    for template_name in templates:
+        content = zapi.get_content('template', 'get', {'search': {'host': template_name}})
+        if content.has_key('result'):
+            templs.append({'templateid': content['results'][0]['templateid']})
+
+    if not interfaces:
+        # Default interface creation
+        interfaces = [{'type':  1,         # interface type, 1 = agent
+                       'main':  1,         # default interface? 1 = true
+                       'useip':  1,        # default interface? 1 = true
+                       'ip':  '127.0.0.1', # default interface? 1 = true
+                       'dns':  '',         # dns for host
+                       'port':  '10050',   # port for interface? 10050
+                      }]
+
+    # selectInterfaces doesn't appear to be working but is needed.
     content = zapi.get_content(zbx_class_name,
                                'get',
-                               {'search': {'key_': key},
-                                'selectApplications': 'applicationid',
+                               {'search': {'host': name},
+                                'selectGroups': 'groupid',
+                                'selectParentTemplates': 'templateid',
+                                'selectInterfaces': 'interfaceid',
                                })
     if state == 'list':
         module.exit_json(changed=False, results=content['result'], state="list")
@@ -116,6 +117,7 @@ def main():
     if state == 'absent':
         if not exists(content):
             module.exit_json(changed=False, state="absent")
+
         if not isinstance(params, list) and content['result'][0].has_key(idname):
             content = zapi.get_content(zbx_class_name, 'delete', [content['result'][0][idname]])
         else:
@@ -124,14 +126,10 @@ def main():
         module.exit_json(changed=True, results=content['result'], state="absent")
 
     if state == 'present':
-        params.update({'name': module.params['name'],
-                       'key_': key,
-                       'hostid': templateid,
-                       'type': module.params['zabbix_type'],
-                       'value_type': get_value_type(module.params['value_type']),
-                       'applications': module.params['applications'],
-                       'interface_id': module.params['interface_id'],
-                      })
+        params['host'] = host_name
+        params['groups'] = groups
+        params['templates'] = templs
+        params['interfaces'] = interfaces
 
         if not exists(content):
             # if we didn't find it, create it
@@ -143,7 +141,11 @@ def main():
         zab_results = content['result'][0]
         for key, value in params.items():
 
-            if zab_results[key] != value and zab_results[key] != str(value):
+            if key == 'templates' and zab_results.has_key('parentTemplates'):
+                if zab_results['parentTemplates'] != value:
+                    differences[key] = value
+
+            elif zab_results[key] != value and zab_results[key] != str(value):
                 differences[key] = value
 
         if not differences:

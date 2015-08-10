@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+'''
+ Ansible module for mediatype
+'''
 # vim: expandtab:tabstop=4:shiftwidth=4
 #
 #   Zabbix mediatype ansible module
@@ -19,7 +22,9 @@
 #   limitations under the License.
 #
 
+# pylint: disable=import-error
 from openshift_tools.monitoring.zbxapi import ZabbixAPI
+from openshift_tools.monitoring.zbxapi import ZabbixConnection
 
 def exists(content, key='result'):
     ''' Check if key exists in content or the size of content[key] > 0
@@ -33,6 +38,9 @@ def exists(content, key='result'):
     return True
 
 def main():
+    '''
+    Ansible zabbix module for mediatype
+    '''
 
     ##def mediatype(self, desc, mtype, smtp_server, smtp_helo='redhat.com', smtp_email='zabbix@openshift.com', ,state='present', params=None):
 
@@ -48,25 +56,11 @@ def main():
         #supports_check_mode=True
     )
 
-    user = module.params.get('user', None)
-    if not user:
-        user = os.environ['ZABBIX_USER']
+    user = module.params.get('user', os.environ['ZABBIX_USER'])
 
-    passwd = module.params.get('password', None)
-    if not passwd:
-        passwd = os.environ['ZABBIX_PASSWORD']
+    passwd = module.params.get('password', os.environ['ZABBIX_PASSWORD'])
 
-    api_data = {
-        'user': user,
-        'password': passwd,
-        'server': module.params['server'],
-        'verbose': module.params['debug']
-    }
-
-    if not user or not passwd or not module.params['server']:
-        module.fail_json(msg='Please specify the user, password, and the zabbix server.')
-
-    zapi = ZabbixAPI(api_data)
+    zapi = ZabbixAPI(ZabbixConnection(module.params['server'], user, passwd, module.params['debug']))
 
     #print "CREATE mediatype"
     #print ezz.mediatype('kenny mediatype desc', state='list', params=None)

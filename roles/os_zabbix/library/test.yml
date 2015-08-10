@@ -3,8 +3,7 @@
   hosts: localhost
   gather_facts: no
   vars:
-    zbx_server: http://oso-rhel7-zabbix-web.kwoodsontest2.opstest.online.openshift.com/zabbix/api_jsonrpc.php
-#zbx_server: http://oso-rhel7-zabbix-web.kwoodsontest2.opstest.online.openshift.com/zabbix/api_jsonrpc.php
+    zbx_server: http://localhost/zabbix/api_jsonrpc.php
     zbx_user: Admin
     zbx_password: zabbix
 
@@ -28,7 +27,7 @@
       key: 'kenny.item.1'
       template_name: "{{ template_output.results[0].host }}"
     register: item_output
-#
+
   - debug: var=item_output
 
   - name: Create an trigger
@@ -39,7 +38,7 @@
       expression: '{test template:kenny.item.1.last()}>2'
       desc: 'Kenny desc'
     register: trigger_output
-#
+
   - debug: var=trigger_output
 
   - name: Create a hostgroup
@@ -49,7 +48,7 @@
       password: "{{ zbx_password }}"
       name: 'kenny hostgroup'
     register: hostgroup_output
-#
+
   - debug: var=hostgroup_output
 
   - name: Create a host
@@ -58,8 +57,36 @@
       user: "{{ zbx_user }}"
       password: "{{ zbx_password }}"
       name: 'kenny host'
-      host_groups:
+      hostgroups:
       -  'kenny hostgroup'
     register: host_output
-#
+
   - debug: var=host_output
+
+    #print ezz.usergroup('kenny group', rights=[{'Kenny hostgroup', 'rw'},], state='present', params=None)
+  - name: Create a usergroup
+    zbx_usergroup:
+      server: "{{ zbx_server }}"
+      user: "{{ zbx_user }}"
+      password: "{{ zbx_password }}"
+      name: kenny usergroup
+      rights:
+      - 'kenny hostgroup': rw
+    register: usergroup_output
+
+  - debug: var=usergroup_output
+
+#print ezz.user('kenny user', 'zabbix', ['kenny group'], state='present', params=None)
+
+  - name: Create a user
+    zbx_user:
+      server: "{{ zbx_server }}"
+      user: "{{ zbx_user }}"
+      password: "{{ zbx_password }}"
+      alias: kenny user
+      passwd: zabbix
+      usergroups:
+      - kenny usergroup
+    register: user_output
+
+  - debug: var=user_output

@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+''' Ansible module for hostgroup
+'''
 # vim: expandtab:tabstop=4:shiftwidth=4
 #
 #   Zabbix hostgroup ansible module
@@ -19,7 +21,9 @@
 #   limitations under the License.
 #
 
+# pylint: disable=import-error
 from openshift_tools.monitoring.zbxapi import ZabbixAPI
+from openshift_tools.monitoring.zbxapi import ZabbixConnection
 
 def exists(content, key='result'):
     ''' Check if key exists in content or the size of content[key] > 0
@@ -33,13 +37,15 @@ def exists(content, key='result'):
     return True
 
 def main():
+    ''' ansible module for hostgroup
+    '''
 
     module = AnsibleModule(
         argument_spec=dict(
             server=dict(default='https://localhost/zabbix/api_jsonrpc.php', type='str'),
             user=dict(default=None, type='str'),
             password=dict(default=None, type='str'),
-            name=dict(default=None, type='str'),
+            hname=dict(default=None, type='str'),
             params=dict(default={}, type='dict'),
             debug=dict(default=False, type='bool'),
             state=dict(default='present', type='str'),
@@ -47,36 +53,21 @@ def main():
         #supports_check_mode=True
     )
 
-    user = module.params.get('user', None)
-    if not user:
-        user = os.environ['ZABBIX_USER']
+    user = module.params.get('user', os.environ['ZABBIX_USER'])
+    passwd = module.params.get('password', os.environ['ZABBIX_PASSWORD'])
 
-    passwd = module.params.get('password', None)
-    if not passwd:
-        passwd = os.environ['ZABBIX_PASSWORD']
-
-    api_data = {
-        'user': user,
-        'password': passwd,
-        'server': module.params['server'],
-        'verbose': module.params['debug']
-    }
-
-    if not user or not passwd or not module.params['server']:
-        module.fail_json(msg='Please specify the user, password, and the zabbix server.')
-
-    zapi = ZabbixAPI(api_data)
+    zapi = ZabbixAPI(ZabbixConnection(module.params['server'], user, passwd, module.params['debug']))
 
     #Set the instance and the template for the rest of the calls
     zbx_class_name = 'hostgroup'
     idname = "groupid"
-    name = module.params['name']
+    hname = module.params['name']
     params = module.params['params']
     state = module.params['state']
 
     content = zapi.get_content(zbx_class_name,
                                'get',
-                               {'search': {'name': name},
+                               {'search': {'name': hname},
                                })
     if state == 'list':
         module.exit_json(changed=False, results=content['result'], state="list")
@@ -85,13 +76,15 @@ def main():
         if not exists(content):
             module.exit_json(changed=False, state="absent")
         if not isinstance(params, list) and content['result'][0].has_key(idname):
-            params = [content['result'][0][idname]]
+            content = zapi.get_content(zbx_class_name, 'delete', [content['result'][0][idname]])
+        else:
+            content = zapi.get_content(zbx_class_name, 'delete', params)
 
         content = zapi.get_content(zbx_class_name, 'delete', params)
         module.exit_json(changed=True, results=content['result'], state="absent")
 
     if state == 'present':
-        params['name'] = name
+        params['name'] = hname
 
         if not exists(content):
             # if we didn't find it, create it
@@ -102,9 +95,7 @@ def main():
         differences = {}
         zab_results = content['result'][0]
         for key, value in params.items():
-
-            if zab_results[key] != value and \
-               zab_results[key] != str(value):
+            if zab_results[key] != value and zab_results[key] != str(value):
                 differences[key] = value
 
         if not differences:
@@ -125,4 +116,3 @@ def main():
 from ansible.module_utils.basic import *
 
 main()
-        
