@@ -59,10 +59,6 @@
   command: '/usr/bin/openshift kube label node {{ item.openshift.common.hostname }} is_preemptible=no'
   with_items: non_preemptible_nodes
 
-- name: Create label on non preemptible nodes
-  command: '/usr/bin/openshift kube label node {{ item.openshift.common.hostname }} not_preemptible=true'
-  with_items: non_preemptible_nodes
-
 - name: Create label on preemptible nodes
   command: '/usr/bin/openshift kube label node {{ item.openshift.common.hostname }} is_preemptible=yes'
   with_items: preemptible_nodes
