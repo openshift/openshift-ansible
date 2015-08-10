@@ -300,8 +300,7 @@ def set_registry_url_if_unset(facts):
                 if deployment_type == 'enterprise':
                     registry_url = "openshift3/ose-${component}:${version}"
                 elif deployment_type == 'online':
-                    registry_url = ("docker-registry.ops.rhcloud.com/"
-                                    "openshift3/ose-${component}:${version}")
+                    registry_url = ("openshift3/ose-${component}:${version}")
                 facts[role]['registry_url'] = registry_url
 
     return facts
