@@ -5,20 +5,17 @@
   - vars/template_heartbeat.yml
   - vars/template_os_linux.yml
   vars:
-    g_zserver: http://oso-rhel7-zabbix-web.kwoodsontest2.opstest.online.openshift.com/zabbix/api_jsonrpc.php
+    g_zserver: http://localhost/zabbix/api_jsonrpc.php
     g_zuser: Admin
     g_zpassword: zabbix
   roles:
-  - ../roles/os_zabbix
+  - ../../../roles/os_zabbix
   post_tasks:
-  - zbxapi:
+  - zbx_template:
       server: "{{ g_zserver }}"
       user: "{{ g_zuser }}"
       password: "{{ g_zpassword }}"
-      zbx_class: Template
       state: list
-      params:
-        output: extend
     register: templates
 
   - debug: var=templates
