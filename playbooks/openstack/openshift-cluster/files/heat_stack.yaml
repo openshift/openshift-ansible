@@ -16,8 +16,13 @@ parameters:
 
   num_nodes:
     type: number
-    label: Number of nodes
-    description: Number of nodes
+    label: Number of compute nodes
+    description: Number of compute nodes
+
+  num_infra:
+    type: number
+    label: Number of infrastructure nodes
+    description: Number of infrastructure nodes
 
   cidr:
     type: string
@@ -55,7 +60,12 @@ parameters:
   node_image:
     type: string
     label: Node image
-    description: Name of the image for the node servers
+    description: Name of the image for the compute node servers
+
+  infra_image:
+    type: string
+    label: Infra image
+    description: Name of the image for the infra node servers
 
   master_flavor:
     type: string
@@ -65,7 +75,12 @@ parameters:
   node_flavor:
     type: string
     label: Node flavor
-    description: Flavor of the node servers
+    description: Flavor of the compute node servers
+
+  infra_flavor:
+    type: string
+    label: Infra flavor
+    description: Flavor of the infra node servers
 
 outputs:
 
@@ -83,15 +98,27 @@ outputs:
 
   node_names:
     description: Name of the nodes
-    value: { get_attr: [ nodes, name ] }
+    value: { get_attr: [ compute_nodes, name ] }
 
   node_ips:
     description: IPs of the nodes
-    value: { get_attr: [ nodes, private_ip ] }
+    value: { get_attr: [ compute_nodes, private_ip ] }
 
   node_floating_ips:
     description: Floating IPs of the nodes
-    value: { get_attr: [ nodes, floating_ip ] }
+    value: { get_attr: [ compute_nodes, floating_ip ] }
+
+  infra_names:
+    description: Name of the nodes
+    value: { get_attr: [ infra_nodes, name ] }
+
+  infra_ips:
+    description: IPs of the nodes
+    value: { get_attr: [ infra_nodes, private_ip ] }
+
+  infra_floating_ips:
+    description: Floating IPs of the nodes
+    value: { get_attr: [ infra_nodes, floating_ip ] }
 
 resources:
 
@@ -218,6 +245,29 @@ resources:
           remote_mode: remote_group_id
           remote_group_id: { get_resource: master-secgrp }
 
+  infra-secgrp:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name:
+        str_replace:
+          template: openshift-ansible-cluster_id-infra-secgrp
+          params:
+            cluster_id: { get_param: cluster_id }
+      description:
+        str_replace:
+          template: Security group for cluster_id OpenShift infrastructure cluster nodes
+          params:
+            cluster_id: { get_param: cluster_id }
+      rules:
+        - direction: ingress
+          protocol: tcp
+          port_range_min: 80
+          port_range_max: 80
+        - direction: ingress
+          protocol: tcp
+          port_range_min: 443
+          port_range_max: 443
+
   masters:
     type: OS::Heat::ResourceGroup
     properties:
@@ -248,7 +298,7 @@ resources:
                 cluster_id: { get_param: cluster_id }
     depends_on: interface
 
-  nodes:
+  compute_nodes:
     type: OS::Heat::ResourceGroup
     properties:
       count: { get_param: num_nodes }
@@ -257,12 +307,14 @@ resources:
         properties:
           name:
             str_replace:
-              template: cluster_id-k8s_type-%index%
+              template: cluster_id-k8s_type-sub_host_type-%index%
               params:
                 cluster_id: { get_param: cluster_id }
                 k8s_type: node
+                sub_host_type: compute
           cluster_id: { get_param: cluster_id }
           type:       node
+          subtype:    compute
           image:      { get_param: node_image }
           flavor:     { get_param: node_flavor }
           key_name:   { get_resource: keypair }
@@ -270,6 +322,39 @@ resources:
           subnet:     { get_resource: subnet }
           secgrp:
             - { get_resource: node-secgrp }
+          floating_network: { get_param: external_net }
+          net_name:
+            str_replace:
+              template: openshift-ansible-cluster_id-net
+              params:
+                cluster_id: { get_param: cluster_id }
+    depends_on: interface
+
+  infra_nodes:
+    type: OS::Heat::ResourceGroup
+    properties:
+      count: { get_param: num_infra }
+      resource_def:
+        type: heat_stack_server.yaml
+        properties:
+          name:
+            str_replace:
+              template: cluster_id-k8s_type-sub_host_type-%index%
+              params:
+                cluster_id: { get_param: cluster_id }
+                k8s_type: node
+                sub_host_type: infra
+          cluster_id: { get_param: cluster_id }
+          type:       node
+          subtype:    infra
+          image:      { get_param: infra_image }
+          flavor:     { get_param: infra_flavor }
+          key_name:   { get_resource: keypair }
+          net:        { get_resource: net }
+          subnet:     { get_resource: subnet }
+          secgrp:
+            - { get_resource: node-secgrp }
+            - { get_resource: infra-secgrp }
           floating_network: { get_param: external_net }
           net_name:
             str_replace:

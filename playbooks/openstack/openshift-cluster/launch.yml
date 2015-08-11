@@ -90,7 +90,7 @@
       ansible_ssh_host: '{{ item[2] }}'
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-      groups: 'tag_env_{{ cluster_id }}, tag_host-type_node, tag_env-host-type_{{ cluster_id }}-openshift-node, tag_sub-host-type_node'
+      groups: 'tag_env_{{ cluster_id }}, tag_host-type_node, tag_env-host-type_{{ cluster_id }}-openshift-node, tag_sub-host-type_compute'
     with_together:
       - parsed_outputs.node_names
       - parsed_outputs.node_ips
@@ -115,6 +115,7 @@
     with_flattened:
       - parsed_outputs.master_floating_ips
       - parsed_outputs.node_floating_ips
+      - parsed_outputs.infra_floating_ips
 
   - name: Wait for user setup
     command: 'ssh -o StrictHostKeyChecking=no -o PasswordAuthentication=no -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null {{ deployment_vars[deployment_type].ssh_user }}@{{ item }} echo {{ deployment_vars[deployment_type].ssh_user }} user is setup'
@@ -125,6 +126,7 @@
     with_flattened:
       - parsed_outputs.master_floating_ips
       - parsed_outputs.node_floating_ips
+      - parsed_outputs.infra_floating_ips
 
 - include: update.yml
 
