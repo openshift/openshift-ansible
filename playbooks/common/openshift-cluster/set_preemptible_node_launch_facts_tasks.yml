@@ -1,9 +1,10 @@
 ---
 - set_fact: 
     k8s_type="node_preemptible"
-    start_value={% if 'num_preemptible_nodes' > 0 %}1{% else %}0{% endif %}
+    start_value={% if num_preemptible_nodes|int == 0 or num_preemptible_nodes is undefined  %}0{% else %}1{% endif %}
 
 - debug: msg="num_preemptible_nodes = {{ num_preemptible_nodes }}, start_value = {{ start_value }}"
+
 # http://docs.ansible.com/ansible/playbooks_conditionals.html: 
 # Note that if you have several tasks that all share the same conditional statement, you can affix the conditional to a task include statement as below. 
 # Note this does not work with playbook includes, just task includes. All the tasks get evaluated, but the conditional is applied to each and every task
