@@ -9,6 +9,8 @@
   vars_files:
   - vars.yml
   tasks:
+
+  # Fill group of masters in oo_masters_to_config
   - name: Evaluate oo_masters_to_config
     add_host:
       name: "{{ item }}"
@@ -16,13 +18,35 @@
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
       groups: oo_masters_to_config
     with_items: groups["meta-env-host-type_{{ cluster_id }}-openshift-master"] | default([])
-  - name: Evaluate oo_nodes_to_config
+
+#  # Fill group of all nodes (preemptible + non preemptible nodes) in oo_nodes_to_config
+#  - name: Evaluate oo_nodes_to_config. Fill group of all nodes (preemptible + non preemptible nodes) in oo_nodes_to_config
+#    add_host:
+#      name: "{{ item }}"
+#      ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
+#      ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
+#      groups: oo_nodes_to_config
+#    with_items: groups["meta-env-host-type_{{ cluster_id }}-openshift-node"]  | union(groups["meta-env-host-type_{{ cluster_id }}-openshift-node_preemptible"]) | default([])
+
+  # Fill group of preemptible nodes in oo_non_preemptible_nodes
+  - name: Evaluate oo_non_preemptible_nodes
+    add_host:
+      name: "{{ item }}" 
+      ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
+      ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
+      groups: oo_non_preemptible_nodes, oo_nodes_to_config
+    with_items: groups["meta-env-host-type_{{ cluster_id }}-openshift-node"] | default([])
+
+  # Fill group of preemptible nodes in oo_preemptible_nodes
+  - name: Evaluate oo_preemptible_nodes
     add_host:
       name: "{{ item }}"
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-      groups: oo_nodes_to_config
-    with_items: groups["meta-env-host-type_{{ cluster_id }}-openshift-node"] | default([])
+      groups: oo_preemptible_nodes, oo_nodes_to_config
+    with_items: groups["meta-env-host-type_{{ cluster_id }}-openshift-node_preemptible"] | default([])
+
+  # Save first master
   - name: Evaluate oo_first_master
     add_host:
       name: "{{ groups['meta-env-host-type_' ~ cluster_id ~ '-openshift-master'][0] }}"

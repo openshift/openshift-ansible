@@ -49,6 +49,10 @@ class Cluster(object):
 
         env['num_masters'] = args.masters
         env['num_nodes'] = args.nodes
+        env['num_preemptible_nodes'] = args.num_preemptible_nodes
+
+        print("num_preemptible_nodes=(%d, %d)" % (env['num_preemptible_nodes'], args.num_preemptible_nodes))
+        
 
         return self.action(args, inventory, env, playbook)
 
@@ -198,6 +202,8 @@ if __name__ == '__main__':
                                help='number of masters to create in cluster')
     create_parser.add_argument('-n', '--nodes', default=2, type=int,
                                help='number of nodes to create in cluster')
+    create_parser.add_argument('-p', '--num_preemptible_nodes', default=0, type=int,
+                               help='number of preemtible nodes to create in cluster')
     create_parser.set_defaults(func=cluster.create)
 
     config_parser = action_parser.add_parser('config',

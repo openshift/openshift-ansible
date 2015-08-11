@@ -54,3 +54,12 @@
     # client_cluster, client_context, client_user
   with_items: openshift_nodes
   register: register_result
+
+- name: Create label on non preemptible nodes
+  command: '/usr/bin/openshift kube label node {{ item.openshift.common.hostname }} is_preemptible=no'
+  with_items: non_preemptible_nodes
+
+- name: Create label on preemptible nodes
+  command: '/usr/bin/openshift kube label node {{ item.openshift.common.hostname }} is_preemptible=yes'
+  with_items: preemptible_nodes
+ 

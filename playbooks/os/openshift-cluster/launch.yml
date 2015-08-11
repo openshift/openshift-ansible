@@ -11,11 +11,14 @@
     image_sha256: "{{ deployment_vars[deployment_type].image.sha256 }}"
     image_name: "{{ deployment_vars[deployment_type].image.name }}"
   tasks:
+
   - fail: msg="Deployment type not supported for OpenStack provider yet"
     when: deployment_type in ['online', 'enterprise']
 
+  # Configuration of openstack (Network, routing, interfaces, ...)
   - include: tasks/configure_openstack.yml
 
+  # Creation of the openshift master node
   - include: ../../common/openshift-cluster/set_master_launch_facts_tasks.yml
   - include: tasks/launch_instances.yml
     vars:
@@ -23,12 +26,25 @@
       cluster: "{{ cluster_id }}"
       type: "{{ k8s_type }}"
 
+  # Creation of the preemptible nodes
+  - include: ../../common/openshift-cluster/set_preemptible_node_launch_facts_tasks.yml
+  - include: tasks/launch_instances.yml
+    vars:
+      instances: "{{ node_names }}"
+      cluster: "{{ cluster_id }}"
+      type: "{{ k8s_type }}"
+
+  # Creation of the non preemptible nodes
   - include: ../../common/openshift-cluster/set_node_launch_facts_tasks.yml
   - include: tasks/launch_instances.yml
     vars:
       instances: "{{ node_names }}"
       cluster: "{{ cluster_id }}"
       type: "{{ k8s_type }}"
+
+  # Creation of the pre emptible nodes
+#  - include: launch_preemptible_node.yml
+#    when: num_preemptible_nodes|int >= 1
 
 - include: update.yml
 

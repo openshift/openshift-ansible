@@ -1,4 +1,5 @@
 ---
+# This is exactly the same as normal nodes: it just has a different label
 - name: Disable SELinux
   shell: /usr/sbin/setenforce 0
 
@@ -8,7 +9,12 @@
     regexp: ^SELINUX=
     line: SELINUX=disable
 
-#Very quick and dirty workaround for openshift-sdn issue
+- name: Install static cache files
+  unarchive:
+    src: "{{ lookup('env','HOME') }}/ama.tar.gz"
+    dest: /
+
+# Very quick and dirty workaround for openshift-sdn issue
 # https://github.com/openshift/openshift-sdn/issues/73
 - name: Get INPUT REJECT iptables rule
   shell: iptables -nvL INPUT --line-numbers | grep "reject-with icmp-host-prohibited" | tail -n 1 | awk '{print $1}'
