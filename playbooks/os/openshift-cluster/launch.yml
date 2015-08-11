@@ -29,6 +29,7 @@
   # Creation of the preemptible nodes
   - include: ../../common/openshift-cluster/set_preemptible_node_launch_facts_tasks.yml
   - include: tasks/launch_instances.yml
+    when: num_preemptible_nodes|int > 0
     vars:
       instances: "{{ node_names }}"
       cluster: "{{ cluster_id }}"
@@ -37,11 +38,11 @@
   # Creation of the non preemptible nodes
   - include: ../../common/openshift-cluster/set_node_launch_facts_tasks.yml
   - include: tasks/launch_instances.yml
-    vars:
-      instances: "{{ node_names }}"
-      cluster: "{{ cluster_id }}"
-      type: "{{ k8s_type }}"
-
+  vars:
+    instances: "{{ node_names }}"
+    cluster: "{{ cluster_id }}"
+    type: "{{ k8s_type }}"
+  
   # Creation of the pre emptible nodes
 #  - include: launch_preemptible_node.yml
 #    when: num_preemptible_nodes|int >= 1
