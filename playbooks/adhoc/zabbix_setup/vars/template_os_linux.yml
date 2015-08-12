@@ -1,248 +1,90 @@
 ---
 g_template_os_linux:
-  application:
-    name: OS Linux
-    output: extend
-    search:
-      name: OS Linux
-  params:
-    name: Template OS Linux
-    host: Template OS Linux
-    groups:
-    - groupid: 1 # FIXME (not real)
-    output: extend
-    search:
-      name: Template OS Linux
+  name: Template OS Linux
   zitems:
-  - hostid: null
-    key_: kernel.uname.sysname
-    name: kernel.uname.sysname
-    search:
-      key_: kernel.uname.sysname
-    type: 2
-    value_type: 4
-    selectApplications: extend
-  - hostid: null
-    key_: kernel.all.cpu.wait.total
-    name: kernel.all.cpu.wait.total
-    search:
-      key_: kernel.all.cpu.wait.total
-    type: 2
-    value_type: 3
-    selectApplications: extend
-  - hostid: null
-    key_: kernel.all.cpu.irq.hard
-    name: kernel.all.cpu.irq.hard
-    search:
-      key_: kernel.all.cpu.irq.hard
-    type: 2
-    value_type: 3
-    selectApplications: extend
-  - hostid: null
-    key_: kernel.all.cpu.idle
-    name: kernel.all.cpu.idle
-    search:
-      key_: kernel.all.cpu.idle
-    type: 2
-    value_type: 3
-    selectApplications: extend
-  - hostid: null
-    key_: kernel.uname.distro
-    name: kernel.uname.distro
-    search:
-      key_: kernel.uname.distro
-    type: 2
-    value_type: 4
-    selectApplications: extend
-  - hostid: null
-    key_: kernel.uname.nodename
-    name: kernel.uname.nodename
-    search:
-      key_: kernel.uname.nodename
-    type: 2
-    value_type: 4
-    selectApplications: extend
-  - hostid: null
-    key_: kernel.all.cpu.irq.soft
-    name: kernel.all.cpu.irq.soft
-    search:
-      key_: kernel.all.cpu.irq.soft
-    type: 2
-    value_type: 3
-    selectApplications: extend
-  - hostid: null
-    key_: kernel.all.load.15_minute
-    name: kernel.all.load.15_minute
-    search:
-      key_: kernel.all.load.15_minute
-    type: 2
-    value_type: 0
-    selectApplications: extend
-  - hostid: null
-    key_: kernel.all.cpu.sys
-    name: kernel.all.cpu.sys
-    search:
-      key_: kernel.all.cpu.sys
-    type: 2
-    value_type: 3
-    selectApplications: extend
-  - hostid: null
-    key_: kernel.all.load.5_minute
-    name: kernel.all.load.5_minute
-    search:
-      key_: kernel.all.load.5_minute
-    type: 2
-    value_type: 0
-    selectApplications: extend
-  - hostid: null
-    key_: mem.freemem
-    name: mem.freemem
-    search:
-      key_: mem.freemem
-    type: 2
-    value_type: 3
-    selectApplications: extend
-  - hostid: null
-    key_: kernel.all.cpu.nice
-    name: kernel.all.cpu.nice
-    search:
-      key_: kernel.all.cpu.nice
-    type: 2
-    value_type: 3
-    selectApplications: extend
-  - hostid: null
-    key_: mem.util.bufmem
-    name: mem.util.bufmem
-    search:
-      key_: mem.util.bufmem
-    type: 2
-    value_type: 3
-    selectApplications: extend
-  - hostid: null
-    key_: swap.used
-    name: swap.used
-    search:
-      key_: swap.used
-    type: 2
-    value_type: 3
-    selectApplications: extend
-  - hostid: null
-    key_: kernel.all.load.1_minute
-    name: kernel.all.load.1_minute
-    search:
-      key_: kernel.all.load.1_minute
-    type: 2
-    value_type: 0
-    selectApplications: extend
-  - hostid: null
-    key_: kernel.uname.version
-    name: kernel.uname.version
-    search:
-      key_: kernel.uname.version
-    type: 2
-    value_type: 4
-    selectApplications: extend
-  - hostid: null
-    key_: swap.length
-    name: swap.length
-    search:
-      key_: swap.length
-    type: 2
-    value_type: 3
-    selectApplications: extend
-  - hostid: null
-    key_: mem.physmem
-    name: mem.physmem
-    search:
-      key_: mem.physmem
-    type: 2
-    value_type: 3
-    selectApplications: extend
-  - hostid: null
-    key_: kernel.all.uptime
-    name: kernel.all.uptime
-    search:
-      key_: kernel.all.uptime
-    type: 2
-    value_type: 3
-    selectApplications: extend
-  - hostid: null
-    key_: swap.free
-    name: swap.free
-    search:
-      key_: swap.free
-    type: 2
-    value_type: 3
-    selectApplications: extend
-  - hostid: null
-    key_: mem.util.used
-    name: mem.util.used
-    search:
-      key_: mem.util.used
-    type: 2
-    value_type: 3
-    selectApplications: extend
-  - hostid: null
-    key_: kernel.all.cpu.user
-    name: kernel.all.cpu.user
-    search:
-      key_: kernel.all.cpu.user
-    type: 2
-    value_type: 3
-    selectApplications: extend
-  - hostid: null
-    key_: kernel.uname.machine
-    name: kernel.uname.machine
-    search:
-      key_: kernel.uname.machine
-    type: 2
-    value_type: 4
-    selectApplications: extend
-  - hostid: null
-    key_: hinv.ncpu
-    name: hinv.ncpu
-    search:
-      key_: hinv.ncpu
-    type: 2
-    value_type: 3
-    selectApplications: extend
-  - hostid: null
-    key_: mem.util.cached
-    name: mem.util.cached
-    search:
-      key_: mem.util.cached
-    type: 2
-    value_type: 3
-    selectApplications: extend
-  - hostid: null
-    key_: kernel.all.cpu.steal
-    name: kernel.all.cpu.steal
-    search:
-      key_: kernel.all.cpu.steal
-    type: 2
-    value_type: 3
-    selectApplications: extend
-  - hostid: null
-    key_: kernel.all.pswitch
-    name: kernel.all.pswitch
-    search:
-      key_: kernel.all.pswitch
-    type: 2
-    value_type: 3
-    selectApplications: extend
-  - hostid: null
-    key_: kernel.uname.release
-    name: kernel.uname.release
-    search:
-      key_: kernel.uname.release
-    type: 2
-    value_type: 4
-    selectApplications: extend
-  - hostid: null
-    key_: proc.nprocs
-    name: proc.nprocs
-    search:
-      key_: proc.nprocs
-    type: 2
-    value_type: 3
-    selectApplications: extend
+  - key: kernel.uname.sysname
+    value_type: string
+
+  - key: kernel.all.cpu.wait.total
+    value_type: int
+
+  - key: kernel.all.cpu.irq.hard
+    value_type: int
+
+  - key: kernel.all.cpu.idle
+    value_type: int
+
+  - key: kernel.uname.distro
+    value_type: string
+
+  - key: kernel.uname.nodename
+    value_type: string
+
+  - key: kernel.all.cpu.irq.soft
+    value_type: int
+
+  - key: kernel.all.load.15_minute
+    value_type: float
+
+  - key: kernel.all.cpu.sys
+    value_type: int
+
+  - key: kernel.all.load.5_minute
+    value_type: float
+
+  - key: mem.freemem
+    value_type: int
+
+  - key: kernel.all.cpu.nice
+    value_type: int
+
+  - key: mem.util.bufmem
+    value_type: int
+
+  - key: swap.used
+    value_type: int
+
+  - key: kernel.all.load.1_minute
+    value_type: float
+
+  - key: kernel.uname.version
+    value_type: string
+
+  - key: swap.length
+    value_type: int
+
+  - key: mem.physmem
+    value_type: int
+
+  - key: kernel.all.uptime
+    value_type: int
+
+  - key: swap.free
+    value_type: int
+
+  - key: mem.util.used
+    value_type: int
+
+  - key: kernel.all.cpu.user
+    value_type: int
+
+  - key: kernel.uname.machine
+    value_type: string
+
+  - key: hinv.ncpu
+    value_type: int
+
+  - key: mem.util.cached
+    value_type: int
+
+  - key: kernel.all.cpu.steal
+    value_type: int
+
+  - key: kernel.all.pswitch
+    value_type: int
+
+  - key: kernel.uname.release
+    value_type: string
+
+  - key: proc.nprocs
+    value_type: int

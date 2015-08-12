@@ -65,8 +65,8 @@ option to ansible-playbook.
 
 # Create an OSEv3 group that contains the masters and nodes groups
 [OSEv3:children]
-openshift_masters
-openshift_nodes
+masters
+nodes
 
 # Set variables common for all OSEv3 hosts
 [OSEv3:vars]
@@ -96,11 +96,11 @@ openshift_additional_repos=[{'id': 'ose-devel', 'name': 'ose-devel',
 'https://copr-be.cloud.fedoraproject.org/results/maxamillion/origin-next/pubkey.gpg'}]
 
 # host group for masters
-[openshift_masters]
+[masters]
 ose3-master.example.com
 
 # host group for nodes
-[openshift_nodes]
+[nodes]
 ose3-node[1:2].example.com
 ```
 
@@ -234,7 +234,7 @@ what we expect them to be (if not, we can override them).
 To override the the defaults, you can set the variables in your inventory:
 ```
 ...snip...
-[openshift_masters]
+[masters]
 ose3-master.example.com openshift_ip=1.1.1.1 openshift_hostname=ose3-master.example.com openshift_public_ip=2.2.2.2 openshift_public_hostname=ose3-master.public.example.com
 ...snip...
 ```

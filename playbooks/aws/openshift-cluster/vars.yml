@@ -1,11 +1,11 @@
 ---
 deployment_vars:
   origin:
-    # fedora, since centos requires marketplace
-    image: ami-acd999c4
+    # centos-7, requires marketplace
+    image: ami-96a818fe
     image_name:
     region: us-east-1
-    ssh_user: fedora
+    ssh_user: centos
     sudo: yes
     keypair: libra
     type: m4.large

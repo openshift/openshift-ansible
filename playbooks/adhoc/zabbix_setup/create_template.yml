@@ -2,16 +2,14 @@
 - debug: var=ctp_template
 
 - name: Create Template
-  zbxapi:
+  zbx_template:
     server: "{{ ctp_zserver }}"
     user: "{{ ctp_zuser }}"
     password: "{{ ctp_zpassword }}"
-    zbx_class: Template
-    state: present
-    params: "{{ ctp_template.params }}"
-  register: ctp_created_templates
+    name: "{{ ctp_template.name }}"
+  register: ctp_created_template
 
-- debug: var=ctp_created_templates
+- debug: var=ctp_created_template
 
 #- name: Create Application
 #  zbxapi:
@@ -22,7 +20,7 @@
 #    state: present
 #    params:
 #      name: "{{ ctp_template.application.name}}"
-#      hostid: "{{ ctp_created_templates.results[0].templateid }}"
+#      hostid: "{{ ctp_created_template.results[0].templateid }}"
 #      search:
 #        name: "{{ ctp_template.application.name}}"
 #  register: ctp_created_application
@@ -30,28 +28,28 @@
 #- debug: var=ctp_created_application
 
 - name: Create Items
-  zbxapi:
+  zbx_item:
     server: "{{ ctp_zserver }}"
     user: "{{ ctp_zuser }}"
     password: "{{ ctp_zpassword }}"
-    zbx_class: Item
-    state: present
-    params: "{{ item | oo_set_zbx_item_hostid(ctp_created_templates.results) }}"
+    key: "{{ item.key }}"
+    name: "{{ item.name | default(item.key, true) }}"
+    value_type: "{{ item.value_type | default('int') }}"
+    template_name: "{{ ctp_template.name }}"
   with_items: ctp_template.zitems
   register: ctp_created_items
 
 #- debug: var=ctp_created_items
 
 - name: Create Triggers
-  zbxapi:
+  zbx_trigger:
     server: "{{ ctp_zserver }}"
     user: "{{ ctp_zuser }}"
     password: "{{ ctp_zpassword }}"
-    zbx_class: Trigger
-    state: present
-    params: "{{ item }}"
+    description: "{{ item.description }}"
+    expression: "{{ item.expression }}"
+    priority: "{{ item.priority }}"
   with_items: ctp_template.ztriggers
-  register: ctp_created_triggers
   when: ctp_template.ztriggers is defined
 
 #- debug: var=ctp_created_triggers

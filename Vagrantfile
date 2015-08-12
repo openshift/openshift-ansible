@@ -52,8 +52,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       ansible.limit = 'all'
       ansible.sudo = true
       ansible.groups = {
-        "openshift_masters" => ["master"],
-        "openshift_nodes"   => ["node1", "node2"],
+        "masters" => ["master"],
+        "nodes"   => ["node1", "node2"],
       }
       ansible.extra_vars = {
         openshift_deployment_type: "origin",

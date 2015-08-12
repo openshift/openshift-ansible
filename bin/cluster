@@ -23,6 +23,16 @@ class Cluster(object):
                 '-o ControlMaster=auto '
                 '-o ControlPersist=600s '
             )
+            # Because of `UserKnownHostsFile=/dev/null`
+            # our `.ssh/known_hosts` file most probably misses the ssh host public keys
+            # of our servers.
+            # In that case, ansible serializes the execution of ansible modules
+            # because we might be interactively prompted to accept the ssh host public keys.
+            # Because of `StrictHostKeyChecking=no` we know that we won't be prompted
+            # So, we don't want our modules execution to be serialized.
+            os.environ['ANSIBLE_HOST_KEY_CHECKING'] = 'False'
+            # TODO: A more secure way to proceed would consist in dynamically
+            # retrieving the ssh host public keys from the IaaS interface
 
     def get_deployment_type(self, args):
         """

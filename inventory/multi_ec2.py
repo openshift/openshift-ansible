@@ -78,7 +78,7 @@ class MultiEc2(object):
                 },
             ]
 
-            self.config['cache_max_age'] = 0
+            self.config['cache_max_age'] = 300
         else:
             raise RuntimeError("Could not find valid ec2 credentials in the environment.")
 
