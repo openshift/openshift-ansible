@@ -55,6 +55,9 @@
   with_items: openshift_nodes
   register: register_result
 
+- name: Displaying hostvars 
+  debug: var=hostvars
+
 - name: Displaying non preemptible nodes
   debug: var=non_preemptible_nodes
 

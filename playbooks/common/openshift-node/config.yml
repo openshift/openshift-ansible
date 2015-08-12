@@ -35,13 +35,15 @@
     register: mktemp
     changed_when: False
 
+- name: Deplaying hostvars (first time)
+  debug: var=hostvars
 
 - name: Register nodes
   hosts: oo_first_master
   vars:
     openshift_nodes: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config'] | default([]))}}"
     sync_tmpdir: "{{ hostvars.localhost.mktemp.stdout }}"
-    non_preemptible_nodes: "{{ hostvars | oo_select_keys(groups['oo_non_preemptible_nodes']) }}"
+    non_preemptible_nodes: "{{ hostvars | oo_select_keys(groups['oo_non_preemptible_nodes'] | default([]) ) }}"
     preemptible_nodes: "{{ hostvars | oo_select_keys(groups['oo_preemptible_nodes'] | default([])) }}"
   roles:
   - openshift_register_nodes
