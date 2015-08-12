@@ -38,6 +38,9 @@ deployment_type=enterprise
 # Allow all auth
 #openshift_master_identity_providers=[{'name': 'allow_all', 'login': 'true', 'challenge': 'true', 'kind': 'AllowAllPasswordIdentityProvider'}]
 
+# Configure Fluentd
+#use_fluentd=true
+
 # master cluster ha variables using pacemaker or RHEL HA
 #openshift_master_cluster_password=openshift_cluster
 #openshift_master_cluster_vip=192.168.133.25
