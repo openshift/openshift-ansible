@@ -11,7 +11,7 @@
       groups: oo_hosts_to_update
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-    with_items: groups["meta-env-host-type_{{ cluster_id }}-openshift-master"] | union(groups["meta-env-host-type_{{ cluster_id }}-openshift-node"]) | union(groups["meta-env-host-type_{{ cluster_id }}-openshift-node_preemptible"]|default([])) | default([])
+    with_items: groups["meta-env-host-type_{{ cluster_id }}-openshift-master"] | union(groups["meta-env-host-type_{{ cluster_id }}-openshift-node"]) | union(groups["meta-env-host-type_{{ cluster_id }}-openshift-nodepreemptible"]|default([])) | default([])
 
 - include: ../../common/openshift-cluster/update_repos_and_packages.yml
 
