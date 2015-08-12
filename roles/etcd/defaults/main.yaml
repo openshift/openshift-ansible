@@ -5,6 +5,8 @@ etcd_peers_group: etcd
 etcd_url_scheme: http
 etcd_peer_url_scheme: http
 etcd_conf_dir: /etc/etcd
+etcd_fqdn: "{{ ansible_fqdn }}"
+etcd_hostname: "{{ ansible_hostname }}"
 etcd_ca_file: "{{ etcd_conf_dir }}/ca.crt"
 etcd_cert_file: "{{ etcd_conf_dir }}/server.crt"
 etcd_key_file: "{{ etcd_conf_dir }}/server.key"
@@ -13,12 +15,12 @@ etcd_peer_cert_file: "{{ etcd_conf_dir }}/peer.crt"
 etcd_peer_key_file: "{{ etcd_conf_dir }}/peer.key"
 
 etcd_initial_cluster_state: new
-etcd_initial_cluster_token: etcd-os-cluster-1
+etcd_initial_cluster_token: etcd-cluster-1
 
-etcd_initial_advertise_peer_urls: "{{ etcd_peer_url_scheme }}://{{ ansible_fqdn }}:{{ etcd_peer_port }}"
-etcd_listen_peer_urls: "{{ etcd_peer_url_scheme }}://{{ ansible_fqdn }}:{{ etcd_peer_port }}"
-etcd_advertise_client_urls: "{{ etcd_url_scheme }}://{{ ansible_fqdn }}:{{ etcd_client_port }}"
-etcd_listen_client_urls: "{{ etcd_url_scheme }}://{{ ansible_fqdn }}:{{ etcd_client_port }}"
+etcd_initial_advertise_peer_urls: "{{ etcd_peer_url_scheme }}://{{ etcd_fqdn }}:{{ etcd_peer_port }}"
+etcd_listen_peer_urls: "{{ etcd_peer_url_scheme }}://{{ etcd_fqdn }}:{{ etcd_peer_port }}"
+etcd_advertise_client_urls: "{{ etcd_url_scheme }}://{{ etcd_fqdn }}:{{ etcd_client_port }}"
+etcd_listen_client_urls: "{{ etcd_url_scheme }}://{{ etcd_fqdn }}:{{ etcd_client_port }}"
 
 etcd_data_dir: /var/lib/etcd/
 

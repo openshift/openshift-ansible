@@ -9,7 +9,7 @@
 {% endmacro -%}
 
 {% if groups[etcd_peers_group] and groups[etcd_peers_group] | length > 1 %}
-ETCD_NAME={{ ansible_hostname }}
+ETCD_NAME={{ etcd_hostname }}
 ETCD_LISTEN_PEER_URLS={{ etcd_listen_peer_urls }}
 {% else %}
 ETCD_NAME=default
