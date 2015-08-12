@@ -39,6 +39,7 @@
         - /etc/atomic-enterprise
         - /etc/openshift
         - /var/lib/docker
+        - /root/.kube
 
     - user: name={{ item }} state=absent remove=yes
       with_items:
