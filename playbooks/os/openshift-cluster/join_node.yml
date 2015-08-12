@@ -27,13 +27,16 @@
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
       groups: oo_nodes_to_config
 
+  - name: display preemptible
+    debug: var=preemptible
+
   - name: Add to preemptible group if needed
     add_host:
       name: "{{ node_ip }}"
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
       groups: oo_preemptible_nodes
-    when: preemptible is defined and {{ preemptible }} == "true"
+    when: preemptible is defined and preemptible == "true"
   
   - name: Add to not preemptible group if needed
     add_host:
@@ -41,7 +44,7 @@
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
       groups: oo_non_preemptible_nodes
-    when: preemptible is defined and {{ preemptible }} == "false"
+    when: preemptible is defined and  preemptible == "false"
   
   - name: Evaluate oo_first_master
     add_host:
