@@ -26,7 +26,7 @@
 #      ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
 #      ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
 #      groups: oo_nodes_to_config
-#    with_items: groups["meta-env-host-type_{{ cluster_id }}-openshift-node"]  | union(groups["meta-env-host-type_{{ cluster_id }}-openshift-node_preemptible"]) | default([])
+#    with_items: groups["meta-env-host-type_{{ cluster_id }}-openshift-node"]  | union(groups["meta-env-host-type_{{ cluster_id }}-openshift-nodepreemptible"]) | default([])
 
   # Fill group of preemptible nodes in oo_non_preemptible_nodes
   - name: Evaluate oo_non_preemptible_nodes
@@ -44,7 +44,7 @@
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
       groups: oo_preemptible_nodes, oo_nodes_to_config
-    with_items: groups["meta-env-host-type_{{ cluster_id }}-openshift-node_preemptible"] | default([])
+    with_items: groups["meta-env-host-type_{{ cluster_id }}-openshift-nodepreemptible"] | default([])
 
   # Save first master
   - name: Evaluate oo_first_master
