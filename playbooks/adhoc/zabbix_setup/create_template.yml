@@ -32,8 +32,8 @@
     server: "{{ ctp_zserver }}"
     user: "{{ ctp_zuser }}"
     password: "{{ ctp_zpassword }}"
-    name: "{{ item.name }}"
     key: "{{ item.key }}"
+    name: "{{ item.name | default(item.key, true) }}"
     value_type: "{{ item.value_type | default('int') }}"
     template_name: "{{ ctp_template.name }}"
   with_items: ctp_template.zitems

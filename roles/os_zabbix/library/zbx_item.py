@@ -119,7 +119,7 @@ def main():
         module.exit_json(changed=True, results=content['result'], state="absent")
 
     if state == 'present':
-        params = {'name': module.params['name'],
+        params = {'name': module.params.get('name', module.params['key']),
                   'key_': key,
                   'hostid': templateid,
                   'type': module.params['zabbix_type'],
