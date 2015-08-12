@@ -57,6 +57,9 @@ deployment_type=enterprise
 # default subdomain to use for exposed routes
 #osm_default_subdomain=apps.test.example.com
 
+# additional cors origins
+#osm_custom_cors_origins=['foo.example.com', 'bar.example.com'] 
+
 # host group for masters
 [masters]
 ose3-master[1:3]-ansible.test.example.com
