@@ -55,6 +55,8 @@
       sdn_host_subnet_length: "{{ osm_host_subnet_length | default(None) }}"
       default_subdomain: "{{ osm_default_subdomain | default(None) }}"
       custom_cors_origins: "{{ osm_custom_cors_origins | default(None) }}"
+      project_config: "{{ openshift_master_project_config | default(None) }}"
+
 
 # TODO: These values need to be configurable
 - name: Set dns OpenShift facts
