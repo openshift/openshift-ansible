@@ -1,6 +1,6 @@
 ---
 os_firewall_allow:
-- service: OpenShift kubelet
+- service: Kubernetes kubelet
   port: 10250/tcp
 - service: http
   port: 80/tcp
