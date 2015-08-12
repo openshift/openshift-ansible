@@ -22,6 +22,27 @@ Note: You must source this file before running any Ansible commands.
 
 Alternatively, you could configure credentials in either ~/.boto or ~/.aws/credentials, see the [boto docs](http://docs.pythonboto.org/en/latest/boto_config_tut.html) for the format.
 
+Subscribe to CentOS
+-------------------
+
+1. [CentOS on AWS](https://aws.amazon.com/marketplace/pp/B00O7WM7QW)
+
+
+Set up Security Group
+---------------------
+By default, a cluster is launched into the `public` security group. Make sure you allow hosts to talk to each other on port `4789` for SDN.
+You may also want to allow access from the outside world on the following ports:
+
+```
+• 22    - ssh
+• 80    - Web Apps
+• 443   - Web Apps (https)
+• 4789  - SDN / VXLAN
+• 8443  - Openshift Console
+• 10250 - kubelet 
+```
+
+
 (Optional) Setup your $HOME/.ssh/config file
 -------------------------------------------
 In case of a cluster creation, or any other case where you don't know the machine hostname in advance, you can use `.ssh/config`
@@ -130,3 +151,21 @@ The --deployment-type flag can be passed to bin/cluster to specify the deploymen
   bin/cluster create aws --deployment-type=online <cluster-id>
 ```
 Note: If no deployment type is specified, then the default is origin.
+
+
+## Post-ansible steps
+Create the default router
+-------------------------
+On the master host:
+```sh
+oadm router --create=true \
+  --credentials=/etc/openshift/master/openshift-router.kubeconfig
+```
+
+Create the default docker-registry
+----------------------------------
+On the master host:
+```sh
+oadm registry --create=true \
+  --credentials=/etc/openshift/master/openshift-registry.kubeconfig
+```
