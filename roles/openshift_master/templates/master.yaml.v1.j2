@@ -95,7 +95,7 @@ policyConfig:
   openshiftSharedResourcesNamespace: openshift
 {# TODO: Allow users to override projectConfig items #}
 projectConfig:
-  defaultNodeSelector: ""
+  defaultNodeSelector: "{{ openshift.master.default_node_selector | default("") }}"
   projectRequestMessage: ""
   projectRequestTemplate: ""
   securityAllocator:
