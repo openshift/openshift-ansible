@@ -93,15 +93,7 @@ policyConfig:
   bootstrapPolicyFile: {{ openshift_master_policy }}
   openshiftInfrastructureNamespace: openshift-infra
   openshiftSharedResourcesNamespace: openshift
-{# TODO: Allow users to override projectConfig items #}
-projectConfig:
-  defaultNodeSelector: ""
-  projectRequestMessage: ""
-  projectRequestTemplate: ""
-  securityAllocator:
-    mcsAllocatorRange: s0:/2
-    mcsLabelsPerProject: 5
-    uidAllocatorRange: 1000000000-1999999999/10000
+{% include 'v1_partials/projectConfig.j2' %}
 routingConfig:
   subdomain:  "{{ openshift.master.default_subdomain | default("") }}"
 serviceAccountConfig:
