@@ -116,6 +116,10 @@ class Cluster(object):
         playbook = "playbooks/{}/openshift-cluster/update.yml".format(args.provider)
         inventory = self.setup_provider(args.provider)
 
+        env['num_masters'] = args.masters
+        env['num_nodes'] = args.nodes
+        env['num_infra'] = args.infra
+        env['num_etcd'] = args.etcd
         return self.action(args, inventory, env, playbook)
 
     def service(self, args):
@@ -294,6 +298,16 @@ if __name__ == '__main__':
     update_parser = action_parser.add_parser('update',
                                              help='Update OpenShift across cluster',
                                              parents=[meta_parser])
+    update_parser.add_argument('-m', '--masters', default=1, type=int,
+                               help='number of masters to create in cluster')
+    update_parser.add_argument('-n', '--nodes', default=2, type=int,
+                               help='number of nodes to create in cluster')
+    update_parser.add_argument('-i', '--infra', default=1, type=int,
+                               help='number of infra nodes to create in cluster')
+    update_parser.add_argument('-e', '--etcd', default=0, type=int,
+                               help='number of external etcd hosts to create in cluster')
+    update_parser.set_defaults(func=cluster.create)
+
     update_parser.add_argument('-f', '--force', action='store_true',
                                help='Update cluster without confirmation')
     update_parser.set_defaults(func=cluster.update)

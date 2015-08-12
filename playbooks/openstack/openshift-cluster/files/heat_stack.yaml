@@ -24,6 +24,11 @@ parameters:
     label: Number of infrastructure nodes
     description: Number of infrastructure nodes
 
+  num_infra:
+    type: number
+    label: Number of nodes
+    description: Number of nodes
+
   cidr:
     type: string
     label: CIDR
@@ -67,6 +72,11 @@ parameters:
     label: Infra image
     description: Name of the image for the infra node servers
 
+  infra_image:
+    type: string
+    label: Node image
+    description: Name of the image for the node servers
+
   master_flavor:
     type: string
     label: Master flavor
@@ -81,6 +91,11 @@ parameters:
     type: string
     label: Infra flavor
     description: Flavor of the infra node servers
+
+  infra_flavor:
+    type: string
+    label: Node flavor
+    description: Flavor of the node servers
 
 outputs:
 

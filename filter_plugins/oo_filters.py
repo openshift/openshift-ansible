@@ -34,11 +34,9 @@ class FilterModule(object):
         '''
         if not attribute:
             raise errors.AnsibleFilterError("|failed expects attribute to be set")
-
         ptr = data
         for attr in attribute.split('.'):
             ptr = ptr[attr]
-
         return ptr
 
     @staticmethod
@@ -239,7 +237,13 @@ class FilterModule(object):
             raise errors.AnsibleFilterError("|failed expects filter_attr is a str")
 
         # Gather up the values for the list of keys passed in
-        return [x for x in data if x[filter_attr]]
+        return [x for x in data if (filter_attr in x.keys()) and (x[filter_attr])]
+
+    @staticmethod
+    def oo_hash(string, modulo='255'):
+        ''' Hashes a string to return an int lower than modulo
+        '''
+        return abs(hash(string)) % int(modulo)
 
     @staticmethod
     def oo_parse_heat_stack_outputs(data):
@@ -322,5 +326,6 @@ class FilterModule(object):
             "oo_combine_dict": self.oo_combine_dict,
             "oo_split": self.oo_split,
             "oo_filter_list": self.oo_filter_list,
+            "oo_hash": self.oo_hash,
             "oo_parse_heat_stack_outputs": self.oo_parse_heat_stack_outputs
         }

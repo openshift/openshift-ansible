@@ -92,7 +92,6 @@ outputs:
         - addr
 
 resources:
-
   server:
     type: OS::Nova::Server
     properties:
@@ -101,7 +100,7 @@ resources:
       image:     { get_param: image }
       flavor:    { get_param: flavor }
       networks:
-        - port:  { get_resource: port }
+      - port:  { get_resource: port }
       user_data: { get_file: user-data }
       user_data_format: RAW
       metadata:
@@ -115,16 +114,18 @@ resources:
               type:       { get_param: type }
         sub-host-type:    { get_param: subtype }
 
-  port:
-    type: OS::Neutron::Port
-    properties:
-      network: { get_param: net }
-      fixed_ips:
-        - subnet: { get_param: subnet }
-      security_groups: { get_param: secgrp }
-
-  floating-ip:
+  floating_ip:
     type: OS::Neutron::FloatingIP
     properties:
       floating_network: { get_param: floating_network }
       port_id: { get_resource: port }
+
+  port:
+      type: OS::Neutron::Port
+      properties:
+        replacement_policy: AUTO
+        network: { get_param: net }
+        fixed_ips:
+          - subnet: { get_param: subnet }
+        security_groups: { get_param: secgrp }
+

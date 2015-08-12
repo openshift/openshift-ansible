@@ -12,6 +12,7 @@
     g_etcd_group: "{{ 'tag_env-host-type_' ~ cluster_id ~ '-openshift-etcd' }}"
     g_masters_group: "{{ 'tag_env-host-type_' ~ cluster_id ~ '-openshift-master' }}"
     g_nodes_group: "{{ 'tag_env-host-type_' ~ cluster_id ~ '-openshift-node' }}"
+    g_nodeonmaster: false
     g_ssh_user: "{{ hostvars.localhost.g_ssh_user_tmp }}"
     g_sudo: "{{ hostvars.localhost.g_sudo_tmp }}"
     openshift_cluster_id: "{{ cluster_id }}"

@@ -52,10 +52,7 @@
 - name: Create node certificates
   hosts: oo_first_master
   vars:
-    nodes_needing_certs: "{{ hostvars
-                             | oo_select_keys(groups['oo_nodes_to_config']
-                                              | default([]))
-                             | oo_filter_list(filter_attr='certs_missing') }}"
+    nodes_needing_certs: "{{ hostvars| oo_select_keys(groups['oo_nodes_to_config'] | default([])) | oo_filter_list(filter_attr='certs_missing') }}"
     sync_tmpdir: "{{ hostvars.localhost.mktemp.stdout }}"
   roles:
   - openshift_node_certificates
