@@ -3,118 +3,88 @@ g_template_os_linux:
   name: Template OS Linux
   zitems:
   - key: kernel.uname.sysname
-    name: kernel.uname.sysname
     value_type: string
 
   - key: kernel.all.cpu.wait.total
-    name: kernel.all.cpu.wait.total
     value_type: int
 
   - key: kernel.all.cpu.irq.hard
-    name: kernel.all.cpu.irq.hard
     value_type: int
 
   - key: kernel.all.cpu.idle
-    name: kernel.all.cpu.idle
     value_type: int
 
   - key: kernel.uname.distro
-    name: kernel.uname.distro
     value_type: string
 
   - key: kernel.uname.nodename
-    name: kernel.uname.nodename
     value_type: string
 
   - key: kernel.all.cpu.irq.soft
-    name: kernel.all.cpu.irq.soft
     value_type: int
 
   - key: kernel.all.load.15_minute
-    name: kernel.all.load.15_minute
     value_type: float
 
   - key: kernel.all.cpu.sys
-    name: kernel.all.cpu.sys
     value_type: int
 
   - key: kernel.all.load.5_minute
-    name: kernel.all.load.5_minute
     value_type: float
 
   - key: mem.freemem
-    name: mem.freemem
     value_type: int
 
   - key: kernel.all.cpu.nice
-    name: kernel.all.cpu.nice
     value_type: int
 
   - key: mem.util.bufmem
-    name: mem.util.bufmem
     value_type: int
 
   - key: swap.used
-    name: swap.used
     value_type: int
 
   - key: kernel.all.load.1_minute
-    name: kernel.all.load.1_minute
     value_type: float
 
   - key: kernel.uname.version
-    name: kernel.uname.version
     value_type: string
 
   - key: swap.length
-    name: swap.length
     value_type: int
 
   - key: mem.physmem
-    name: mem.physmem
     value_type: int
 
   - key: kernel.all.uptime
-    name: kernel.all.uptime
     value_type: int
 
   - key: swap.free
-    name: swap.free
     value_type: int
 
   - key: mem.util.used
-    name: mem.util.used
     value_type: int
 
   - key: kernel.all.cpu.user
-    name: kernel.all.cpu.user
     value_type: int
 
   - key: kernel.uname.machine
-    name: kernel.uname.machine
     value_type: string
 
   - key: hinv.ncpu
-    name: hinv.ncpu
     value_type: int
 
   - key: mem.util.cached
-    name: mem.util.cached
     value_type: int
 
   - key: kernel.all.cpu.steal
-    name: kernel.all.cpu.steal
     value_type: int
 
-
   - key: kernel.all.pswitch
-    name: kernel.all.pswitch
     value_type: int
 
   - key: kernel.uname.release
-    name: kernel.uname.release
     value_type: string
 
   - key: proc.nprocs
-    name: proc.nprocs
     value_type: int
