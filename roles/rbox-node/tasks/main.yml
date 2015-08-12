@@ -24,9 +24,12 @@
 
 - name: Remove INPUT REJECT iptables rule
   command: iptables -D INPUT {{ input_rule_nb.stdout }}
+  ignore_errors: yes
+  
 
 - name: Remove FORWARD REJECT iptables rule
   command: iptables -D FORWARD {{ forward_rule_nb.stdout }}
+  ignore_errors: yes
 
 # Configure every node to 
 # 1. unregister itself from consul killing all consul_registrator_rbox (leading to consul unregistration thanks to UHA)
