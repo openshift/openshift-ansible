@@ -8,6 +8,9 @@ imageConfig:
   format: {{ openshift.node.registry_url }}
   latest: false
 kind: NodeConfig
+{% if openshift.common.kubelet_args is defined and openshift.common.kubelet_args %}
+kubeletArguments: {{ kubelet_args }}
+{% endif %}
 masterKubeConfig: system:node:{{ openshift.common.hostname }}.kubeconfig
 networkPluginName: {{ openshift.common.sdn_network_plugin_name }}
 nodeName: {{ openshift.common.hostname }}
