@@ -22,6 +22,7 @@
           public_hostname: "{{ openshift_public_hostname | default(None) }}"
           deployment_type: "{{ openshift_deployment_type }}"
           product_type: "{{ openshift_product_type }}"
+          service_type: "{{ 'origin' if deployment_type == 'origin' else 'atomic-enterprise' }}"
       - role: master
         local_facts:
           api_port: "{{ openshift_master_api_port | default(None) }}"
@@ -36,6 +37,7 @@
           console_url: "{{ openshift_master_console_url | default(None) }}"
           console_use_ssl: "{{ openshift_master_console_use_ssl | default(None) }}"
           public_console_url: "{{ openshift_master_public_console_url | default(None) }}"
+          service_type: "{{ 'origin' if deployment_type == 'origin' else 'atomic-enterprise' }}"
   - name: Check status of external etcd certificatees
     stat:
       path: "/etc/openshift/master/{{ item }}"

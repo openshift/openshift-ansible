@@ -51,6 +51,7 @@
       sdn_host_subnet_length: "{{ osm_host_subnet_length | default(None) }}"
       default_subdomain: "{{ osm_default_subdomain | default(None) }}"
       product_type: "{{ openshift_product_type }}"
+      service_type: "{{ 'origin' if deployment_type == 'origin' else 'atomic-enterprise' }}"
 
 - name: Install Master package
   yum: pkg={{ product_type }}-master state=present
@@ -122,7 +123,7 @@
   - restart master
 
 - name: Start and enable master
-  service: name={{ product_type }}-master enabled=yes state=started
+  service: name={{ service_type }}-master enabled=yes state=started
   when: not openshift_master_ha | bool
   register: start_result
 
