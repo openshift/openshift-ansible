@@ -16,3 +16,11 @@
   command: >
     {{ openshift.common.admin_binary }} manage-node {{ item }} --schedulable=true
   with_items: openshift_scheduleable_nodes
+
+- name: Label nodes
+  command: >
+    {{ openshift.common.client_binary }} label --overwrite node {{ item }} {{ hostvars[item]['openshift_node_labels'] | oo_combine_dict  }}
+  with_items:
+    -  "{{ openshift_nodes }}"
+  when: 
+    "'openshift_node_labels' in hostvars[item]"

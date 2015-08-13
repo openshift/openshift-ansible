@@ -34,6 +34,18 @@ openshift_common
 Example Playbook
 ----------------
 
+Notes
+-----
+
+Currently we support re-labeling nodes but we don't re-schedule running pods nor remove existing labels. That means you will have to trigger the re-schedulling manually. To re-schedule your pods, just follow the steps below:
+
+```
+oadm manage-node --schedulable=false ${NODE}
+oadm manage-node --evacuate ${NODE}
+oadm manage-node --schedulable=true ${NODE}
+````
+
+
 TODO
 
 License
