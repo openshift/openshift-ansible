@@ -269,6 +269,9 @@ if __name__ == '__main__':
     meta_parser.add_argument('-t', '--deployment-type',
                              choices=['origin', 'online', 'enterprise'],
                              help='Deployment type. (default: origin)')
+    meta_parser.add_argument('-T', '--product-type',
+                             choices=['openshift' 'atomic-enterprise'],
+                             help='Product type. (default: openshift)')
     meta_parser.add_argument('-o', '--option', action='append',
                              help='options')
 
