@@ -55,7 +55,12 @@
       sdn_host_subnet_length: "{{ osm_host_subnet_length | default(None) }}"
       default_subdomain: "{{ osm_default_subdomain | default(None) }}"
       custom_cors_origins: "{{ osm_custom_cors_origins | default(None) }}"
-      project_config: "{{ openshift_master_project_config | default(None) }}"
+      default_node_selector: "{{ osm_default_node_selector | default(None) }}"
+      project_request_message: "{{ osm_project_request_message | default(None) }}"
+      project_request_template: "{{ osm_project_request_template | default(None) }}"
+      mcs_allocator_range: "{{ osm_mcs_allocator_range | default(None) }}"
+      mcs_labels_per_project: "{{ osm_mcs_labels_per_project | default(None) }}"
+      uid_allocator_range: "{{ osm_uid_allocator_range | default(None) }}"
 
 
 # TODO: These values need to be configurable

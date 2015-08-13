@@ -349,33 +349,6 @@ def set_identity_providers_if_unset(facts):
 
     return facts
 
-def set_project_config_if_unset(facts):
-    """ Set project_config fact if not already present in facts dict
-
-        Args:
-            facts (dict): existing facts
-        Returns:
-            dict: the facts dict updated with the generated identity providers
-            facts if they were not already present
-    """
-    if 'master' in facts:
-        if 'project_config' not in facts['master']:
-            config = dict(
-                projectConfig=dict(
-                    defaultNodeSelector='',
-                    projectRequestMessage='',
-                    projectRequestTemplate='',
-                        securityAllocator=dict(
-                            mcsAllocatorRange='s0:/2',
-                            mcsLabelsPerProject=5,
-                            uidAllocatorRange='1000000000-1999999999/10000'
-                        )
-                    )
-                )            
-            facts['master']['project_config'] = [config]
-
-    return facts
-
 def set_url_facts_if_unset(facts):
     """ Set url facts if not already present in facts dict
 
@@ -727,7 +700,6 @@ class OpenShiftFacts(object):
         facts['current_config'] = get_current_config(facts)
         facts = set_url_facts_if_unset(facts)
         facts = set_fluentd_facts_if_unset(facts)
-        facts = set_project_config_if_unset(facts)
         facts = set_identity_providers_if_unset(facts)
         facts = set_registry_url_if_unset(facts)
         facts = set_sdn_facts_if_unset(facts)

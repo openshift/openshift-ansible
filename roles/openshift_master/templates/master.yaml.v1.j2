@@ -93,7 +93,14 @@ policyConfig:
   bootstrapPolicyFile: {{ openshift_master_policy }}
   openshiftInfrastructureNamespace: openshift-infra
   openshiftSharedResourcesNamespace: openshift
-{% include 'v1_partials/projectConfig.j2' %}
+projectConfig:
+  defaultNodeSelector: "{{ openshift.master.default_node_selector | default("") }}"
+  projectRequestMessage: "{{ openshift.master.project_request_message | default("") }}"
+  projectRequestTemplate: "{{ openshift.master.project_request_template | default("") }}"
+  securityAllocator:
+    mcsAllocatorRange: "{{ openshift.master.project_request_template | default("s0:/2") }}"
+    mcsLabelsPerProject: "{{ openshift.master.mcs_labels_per_project | default("5") }}"
+    uidAllocatorRange: "{{ openshift.master.uid_allocator_range | default("1000000000-1999999999/10000") }}"
 routingConfig:
   subdomain:  "{{ openshift.master.default_subdomain | default("") }}"
 serviceAccountConfig:
