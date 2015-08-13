@@ -6,3 +6,7 @@ os_firewall_allow:
   port: 80/tcp
 - service: https
   port: 443/tcp
+- service: Openshift kubelet ReadOnlyPort
+  port: 10255/tcp
+- service: Openshift kubelet ReadOnlyPort udp
+  port: 10255/udp
