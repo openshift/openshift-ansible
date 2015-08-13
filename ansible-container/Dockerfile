@@ -10,6 +10,6 @@ RUN yum install -y --enablerepo rhel-7-server-extras-rpms net-tools bind-utils t
 
 RUN git clone https://github.com/openshift/openshift-ansible.git /opt/openshift-ansible
 
-CMD ansible-playbook /opt/openshift-ansible/playbooks/byo/config.yml
+ENTRYPOINT ["/usr/bin/ansible-playbook", "/opt/openshift-ansible/playbooks/byo/config.yml"]
 
-LABEL RUN docker run -it --rm --privileged --net=host -v ~/.ssh:/root/.ssh -v /etc/ansible/hosts:/etc/ansible/hosts --name NAME -e NAME=NAME -e IMAGE=IMAGE IMAGE
+LABEL RUN docker run -it --rm --privileged --net=host -v ~/.ssh:/root/.ssh -v /etc/ansible:/etc/ansible --name NAME -e NAME=NAME -e IMAGE=IMAGE IMAGE
