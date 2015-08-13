@@ -58,11 +58,11 @@
 #- name: Displaying hostvars 
 #  debug: var=hostvars
 
-- name: Displaying non preemptible nodes
-  debug: var=non_preemptible_nodes
+#- name: Displaying non preemptible nodes
+#  debug: var=non_preemptible_nodes
 
-- name: Displaying preemtible nodes
-  debug: var=preemptible_nodes
+#- name: Displaying preemtible nodes
+#  debug: var=preemptible_nodes
 
 - name: Create label on non preemptible nodes
   command: '/usr/bin/openshift kube label node {{ item.openshift.common.hostname }} is_preemptible=no'
