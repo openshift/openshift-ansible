@@ -19,6 +19,12 @@
 
 - name: List Hosts
   hosts: oo_list_hosts
+
+- name: List Hosts
+  hosts: localhost
+  gather_facts: no
+  vars_files:
+  - vars.yml
   tasks:
   - debug:
-      msg: 'public:{{ansible_ssh_host}} private:{{ansible_default_ipv4.address}}'
+      msg: "{{ hostvars | oo_select_keys(groups[scratch_group] | default([])) | oo_pretty_print_cluster }}"

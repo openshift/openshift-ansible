@@ -401,6 +401,60 @@ class FilterModule(object):
                                                  "certificate names in host inventory"))
         return certificates
 
+    @staticmethod
+    def oo_pretty_print_cluster(data):
+        ''' Read a subset of hostvars and build a summary of the cluster
+            in the following layout:
+
+"c_id": {
+  "master": [
+    { "name": "c_id-master-12345",       "public IP": "172.16.0.1", "private IP": "192.168.0.1", "subtype": "default" }]
+  "node": [
+    { "name": "c_id-node-infra-23456",   "public IP": "172.16.0.2", "private IP": "192.168.0.2", "subtype": "infra" },
+    { "name": "c_id-node-compute-23456", "public IP": "172.16.0.3", "private IP": "192.168.0.3", "subtype": "compute" },
+  ...
+  ]}
+        '''
+
+        def _get_tag_value(tags, key):
+            ''' Extract values of a map implemented as a set.
+                Ex: tags = { 'tag_foo_value1', 'tag_bar_value2', 'tag_baz_value3' }
+                    key = 'bar'
+                    returns 'value2'
+            '''
+            for tag in tags:
+                # Skip tag_env-host-type to avoid ambiguity with tag_env
+                if tag[:17] == 'tag_env-host-type':
+                    continue
+                if tag[:len(key)+4] == 'tag_' + key:
+                    return tag[len(key)+5:]
+            raise KeyError(key)
+
+        def _add_host(clusters,
+                      env,
+                      host_type,
+                      host):
+            ''' Add a new host in the clusters data structure '''
+            if env not in clusters:
+                clusters[env] = {}
+            if host_type not in clusters[env]:
+                clusters[env][host_type] = []
+            clusters[env][host_type].append(host)
+
+        clusters = {}
+        for host in data:
+            try:
+                _add_host(clusters=clusters,
+                          env=_get_tag_value(host['group_names'], 'env'),
+                          host_type=_get_tag_value(host['group_names'], 'host-type'),
+                          host={'name': host['inventory_hostname'],
+                                'public IP': host['ansible_ssh_host'],
+                                'private IP': host['ansible_default_ipv4']['address'],
+                                'subtype': _get_tag_value(host['group_names'], 'sub-host-type')})
+            except KeyError:
+                pass
+        return clusters
+
     def filters(self):
         ''' returns a mapping of filters to methods '''
         return {
@@ -418,5 +472,6 @@ class FilterModule(object):
             "oo_filter_list": self.oo_filter_list,
             "oo_parse_heat_stack_outputs": self.oo_parse_heat_stack_outputs,
             "oo_parse_certificate_names": self.oo_parse_certificate_names,
-            "oo_haproxy_backend_masters": self.oo_haproxy_backend_masters
+            "oo_haproxy_backend_masters": self.oo_haproxy_backend_masters,
+            "oo_pretty_print_cluster": self.oo_pretty_print_cluster
         }
