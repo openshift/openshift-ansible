@@ -40,7 +40,7 @@
     mode: 0444
 
 - name: "Pause before restarting td-agent and openshift-master, depending on the number of nodes."
-  pause: seconds={{ ( num_nodes|int < 3 ) | ternary(15, (num_nodes * 5)) }}
+  pause: seconds={{ ( num_nodes|int < 3 ) | ternary(15, (num_nodes|int * 5)) }}
 
 - name: ensure td-agent is running
   service:
