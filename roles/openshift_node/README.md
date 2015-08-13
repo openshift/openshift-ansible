@@ -1,5 +1,5 @@
-Cluster Node
-==============
+OpenShift/Atomic Enterprise Node
+================================
 
 Node service installation
 

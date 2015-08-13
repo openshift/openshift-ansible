@@ -1,5 +1,5 @@
-Cluster Master
-================
+OpenShift/Atomic Enterprise Master
+==================================
 
 Master service installation
 
