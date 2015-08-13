@@ -52,7 +52,7 @@
   register: result
   until: result.rc == 0
   retries: 30
-  delay: 1
+  delay: 2
   with_together:
     - instances
     - floating_ip_create_result.results

@@ -27,9 +27,6 @@
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
       groups: oo_nodes_to_config
 
-  - name: display preemptible
-    debug: var=preemptible
-
   - name: Add to preemptible group if needed
     add_host:
       name: "{{ node_ip }}"
