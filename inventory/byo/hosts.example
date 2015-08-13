@@ -20,8 +20,8 @@ ansible_ssh_user=root
 # deployment type valid values are origin, online and enterprise
 deployment_type=enterprise
 
-# product type valud values are openshift and atomic-enterprise
-product_type=openshift
+# product type valid values are openshift and atomic-enterprise
+#product_type=atomic-enterprise
 
 
 # Pre-release registry URL
