@@ -60,6 +60,9 @@ deployment_type=enterprise
 # additional cors origins
 #osm_custom_cors_origins=['foo.example.com', 'bar.example.com'] 
 
+# default project node selector
+#osm_default_node_selector='region=primary'
+
 # host group for masters
 [masters]
 ose3-master[1:3]-ansible.test.example.com
