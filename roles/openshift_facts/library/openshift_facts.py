@@ -645,22 +645,22 @@ def get_local_facts_from_file(filename):
 
 
 class OpenShiftFactsUnsupportedRoleError(Exception):
-    """Facts Unsupported Role Error"""
+    """Origin Facts Unsupported Role Error"""
     pass
 
 
 class OpenShiftFactsFileWriteError(Exception):
-    """Facts File Write Error"""
+    """Origin Facts File Write Error"""
     pass
 
 
 class OpenShiftFactsMetadataUnavailableError(Exception):
-    """Facts Metadata Unavailable Error"""
+    """Origin Facts Metadata Unavailable Error"""
     pass
 
 
 class OpenShiftFacts(object):
-    """ Facts
+    """ Origin Facts
 
         Attributes:
             facts (dict): facts for the host
