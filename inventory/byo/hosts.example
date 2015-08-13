@@ -39,7 +39,12 @@ deployment_type=enterprise
 #openshift_master_identity_providers=[{'name': 'allow_all', 'login': 'true', 'challenge': 'true', 'kind': 'AllowAllPasswordIdentityProvider'}]
 
 # Project Configuration
-#openshift_master_project_config=[{'projectConfig': {'defaultNodeSelector':'', 'projectRequestMessage':'','projectRequestTemplate':'','securityAllocator':{'mcsAllocatorRange':'s0:/2', 'mcsLabelsPerProject':5, 'uidAllocatorRange':'1000000000-1999999999/10000'}}}]
+#osm_default_node_selector=''
+#osm_project_request_message=''
+#osm_project_request_template=''
+#osm_mcs_allocator_range='s0:/2'
+#osm_mcs_labels_per_project=5
+#osm_uid_allocator_range='1000000000-1999999999/10000'
 
 # master cluster ha variables using pacemaker or RHEL HA
 #openshift_master_cluster_password=openshift_cluster
