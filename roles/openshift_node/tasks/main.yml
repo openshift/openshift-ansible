@@ -6,6 +6,9 @@
 - fail:
     msg: This role requres that osn_cluster_dns_ip is set
   when: osn_cluster_dns_ip is not defined or not osn_cluster_dns_ip
+- fail:
+    msg: "SELinux is disabled, This deployment type requires that SELinux is enabled."
+  when: (not ansible_selinux or ansible_selinux.status != 'enabled') and deployment_type in ['enterprise', 'online']
 
 - name: Install OpenShift Node package
   yum: pkg=openshift-node state=present
@@ -64,11 +67,13 @@
   lineinfile:
     dest: /etc/sysconfig/docker
     regexp: '^OPTIONS=.*'
-    line: "OPTIONS='--insecure-registry={{ openshift.node.portal_net }} --selinux-enabled'"
+    line: "OPTIONS='--insecure-registry={{ openshift.node.portal_net }} \
+{% if ansible_selinux and ansible_selinux.status == '''enabled''' %}--selinux-enabled{% endif %}'"
   when: docker_check.stat.isreg
 
 - name: Allow NFS access for VMs
   seboolean: name=virt_use_nfs state=yes persistent=yes
+  when: ansible_selinux and ansible_selinux.status == "enabled"
 
 - name: Start and enable openshift-node
   service: name=openshift-node enabled=yes state=started
