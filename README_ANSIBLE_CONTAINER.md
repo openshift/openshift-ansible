@@ -1,4 +1,4 @@
-# Running ansible in a docker container 
+# Running ansible in a docker container
 * Building ansible container:
 
   ```sh
@@ -13,6 +13,3 @@
   ```sh
   docker run -it --rm --privileged --net=host -v ~/.ssh:/root/.ssh -v /etc/ansible:/etc/ansible ansible
   ```
-
-
- 
