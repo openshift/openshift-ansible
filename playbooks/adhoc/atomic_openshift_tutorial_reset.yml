@@ -10,7 +10,9 @@
   tasks:
     - service: name={{ item }} state=stopped
       with_items:
-        - docker
+        - openshift-master
+        - openshift-node
+        - openvswitch
         - atomic-enterprise-master
         - atomic-enterprise-node
 
@@ -22,6 +24,11 @@
         - atomic-enterprise-node
         - atomic-enterprise-sdn-ovs
         - tuned-profiles-atomic-enterprise-node
+        - openshift
+        - openshift-master
+        - openshift-node
+        - openshift-sdn-ovs
+        - tuned-profiles-openshift-node
 
     - shell: systemctl reset-failed
       changed_when: False
@@ -32,14 +39,28 @@
     - shell: find /var/lib/atomic-enterprise/openshift.local.volumes -type d -exec umount {} \; 2>/dev/null || true
       changed_when: False
 
+    - shell: find /var/lib/openshift/openshift.local.volumes -type d -exec umount {} \; 2>/dev/null || true
+      changed_when: False
+
+    - shell: docker ps -a -q | xargs docker stop
+      changed_when: False
+
+    - shell: docker ps -a -q| xargs docker rm
+      changed_when: False
+
+    - shell:  docker images -q |xargs docker rmi
+      changed_when: False
+
     - file: path={{ item }} state=absent
       with_items:
         - /var/lib/atomic-enterprise
         - /etc/sysconfig/atomic-enterprise
         - /etc/atomic-enterprise
         - /etc/openshift
-        - /var/lib/docker
+        - /etc/openshift-sdn
         - /root/.kube
+        - /etc/sysconfig/openshift
+        - /var/lib/openshift
 
     - user: name={{ item }} state=absent remove=yes
       with_items:
