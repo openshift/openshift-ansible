@@ -13,11 +13,11 @@
   # TODO: Write an Ansible module for dealing with HEAT stacks
   #       Dealing with the outputs is currently terrible
 
-  - name: Check OpenStack stack
+  - name: Check OpenStack stack already exist
     command: 'heat stack-show openshift-ansible-{{ cluster_id }}-stack'
     register: stack_show_result
     changed_when: false
-    failed_when: stack_show_result.rc != 0 and 'Stack not found' not in stack_show_result.stderr
+    failed_when: stack_show_result.rc != 0 and 'Stack not found' in stack_show_result.stderr
 
   - name: Update OpenStack Stack
     command: 'heat stack-update -f {{ openstack_infra_heat_stack }}
@@ -84,6 +84,7 @@
     with_flattened:
       - parsed_outputs.master_floating_ips
       - parsed_outputs.node_floating_ips
+      - parsed_outputs.infra_floating_ips
 
   - name: Wait for user setup
     command: 'ssh -o StrictHostKeyChecking=no -o PasswordAuthentication=no -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null {{ deployment_vars[deployment_type].ssh_user }}@{{ item }} echo {{ deployment_vars[deployment_type].ssh_user }} user is setup'
@@ -94,8 +95,7 @@
     with_flattened:
       - parsed_outputs.master_floating_ips
       - parsed_outputs.node_floating_ips
-
-
+      - parsed_outputs.infra_floating_ips
 
 - name: Populate oo_hosts_to_update group
   hosts: localhost

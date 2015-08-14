@@ -96,17 +96,17 @@
       - parsed_outputs.node_ips
       - parsed_outputs.node_floating_ips
 
-#  - name: Add new infra instances groups and variables
-#    add_host:
-#      hostname: '{{ item[0] }}'
-#      ansible_ssh_host: '{{ item[2] }}'
-#      ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
-#      ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-#      groups: 'tag_env_{{ cluster_id }}, tag_host-type_node, tag_env-host-type_{{ cluster_id }}-openshift-node, tag_sub-host-type_infra'
-#    with_together:
-#      - parsed_outputs.infra_names
-#      - parsed_outputs.infra_ips
-#      - parsed_outputs.infra_floating_ips
+  - name: Add new infra instances groups and variables
+    add_host:
+      hostname: '{{ item[0] }}'
+      ansible_ssh_host: '{{ item[2] }}'
+      ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
+      ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
+      groups: 'tag_env_{{ cluster_id }}, tag_host-type_node, tag_env-host-type_{{ cluster_id }}-openshift-node, tag_sub-host-type_infra'
+    with_together:
+      - parsed_outputs.infra_names
+      - parsed_outputs.infra_ips
+      - parsed_outputs.infra_floating_ips
 
   - name: Wait for ssh
     wait_for:
