@@ -22,4 +22,4 @@
     {{ openshift.common.client_binary }} label --overwrite node {{ item.openshift.common.hostname }} {{ item.openshift.node.labels | oo_combine_dict  }}
   with_items:
     -  "{{ openshift_node_vars }}"
-  when: "'labels' in item.openshift.node"
+  when: "'labels' in item.openshift.node and item.openshift.node.labels != {}"
