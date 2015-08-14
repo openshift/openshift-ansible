@@ -6,7 +6,7 @@
   hosts: localhost
   gather_facts: no
   vars:
-    zbx_server: http://localhost/zabbix/api_jsonrpc.php
+    zbx_server: http://localhost:8080/zabbix/api_jsonrpc.php
     zbx_user: Admin
     zbx_password: zabbix
 
@@ -21,6 +21,41 @@
 
   - debug: var=template_output
 
+  - name: Create a discoveryrule
+    zbx_discoveryrule:
+      server: "{{ zbx_server }}"
+      user: "{{ zbx_user }}"
+      password: "{{ zbx_password }}"
+      name: test discoverule
+      key: test_listener
+      template_name: test template
+      lifetime: 14
+    register: discoveryrule
+
+  - debug: var=discoveryrule
+
+  - name: Create an itemprototype
+    zbx_itemprototype:
+      server: "{{ zbx_server }}"
+      user: "{{ zbx_user }}"
+      password: "{{ zbx_password }}"
+      name: 'Test itemprototype on {#TEST_LISTENER}'
+      key: 'test[{#TEST_LISTENER}]'
+      template_name: test template
+      discoveryrule_name: test discoverule
+    register: itemproto
+
+  - debug: var=itemproto
+
+  - name: Create an application
+    zbx_application:
+      server: "{{ zbx_server }}"
+      user: "{{ zbx_user }}"
+      password: "{{ zbx_password }}"
+      name: 'Test App'
+      template_name: "test template"
+    register: item_output
+
   - name: Create an item
     zbx_item:
       server: "{{ zbx_server }}"
@@ -28,7 +63,9 @@
       password: "{{ zbx_password }}"
       name: 'test item'
       key: 'kenny.item.1'
-      template_name: "{{ template_output.results[0].host }}"
+      applications:
+      - 'Test App'
+      template_name: "test template"
     register: item_output
 
   - debug: var=item_output
@@ -39,7 +76,7 @@
       user: "{{ zbx_user }}"
       password: "{{ zbx_password }}"
       expression: '{test template:kenny.item.1.last()}>2'
-      desc: 'Kenny desc'
+      description: 'Kenny desc'
     register: trigger_output
 
   - debug: var=trigger_output
@@ -60,8 +97,10 @@
       user: "{{ zbx_user }}"
       password: "{{ zbx_password }}"
       name: 'kenny host'
-      hostgroups:
-      -  'kenny hostgroup'
+      template_names:
+      - test template
+      hostgroup_names:
+      - kenny hostgroup
     register: host_output
 
   - debug: var=host_output
