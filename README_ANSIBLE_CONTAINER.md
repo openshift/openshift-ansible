@@ -3,7 +3,7 @@
 
   ```sh
   git clone https://github.com/openshift/openshift-ansible.git
-  cd openshift-ansible/ansible-container
+  cd openshift-ansible
   docker build --rm -t ansible .
   ```
 * Create /etc/ansible directory on the host machine and copy inventory file (hosts) into it.
