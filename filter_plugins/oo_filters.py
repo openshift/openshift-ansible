@@ -130,7 +130,7 @@ class FilterModule(object):
             rval.append("%s%s%s" % (item['key'], joiner, item['value']))
 
         return rval
-    
+
     @staticmethod
     def oo_combine_dict(data, in_joiner='=', out_joiner=' '):
         '''Take a dict in the form of { 'key': 'value', 'key': 'value' } and
@@ -139,7 +139,7 @@ class FilterModule(object):
         if not issubclass(type(data), dict):
             raise errors.AnsibleFilterError("|failed expects first param is a dict")
 
-        return out_joiner.join([ in_joiner.join([k, v]) for k, v in data.items() ])
+        return out_joiner.join([in_joiner.join([k, v]) for k, v in data.items()])
 
     @staticmethod
     def oo_ami_selector(data, image_name):
