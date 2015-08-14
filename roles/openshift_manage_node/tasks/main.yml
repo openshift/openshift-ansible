@@ -19,8 +19,7 @@
 
 - name: Label nodes
   command: >
-    {{ openshift.common.client_binary }} label --overwrite node {{ item }} {{ hostvars[item]['openshift_node_labels'] | oo_combine_dict  }}
+    {{ openshift.common.client_binary }} label --overwrite node {{ item.openshift.common.hostname }} {{ item.openshift.node.labels | oo_combine_dict  }}
   with_items:
-    -  "{{ openshift_nodes }}"
-  when: 
-    "'openshift_node_labels' in hostvars[item]"
+    -  "{{ openshift_node_vars }}"
+  when: "'labels' in item.openshift.node"
