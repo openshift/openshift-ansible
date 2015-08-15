@@ -1,6 +1,6 @@
 ---
 - name: Install etcd
-  yum: pkg=etcd state=present
+  yum: pkg=etcd-2.* state=present
 
 - name: Validate permissions on the config dir
   file:

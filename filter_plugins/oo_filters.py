@@ -132,6 +132,16 @@ class FilterModule(object):
         return rval
 
     @staticmethod
+    def oo_combine_dict(data, in_joiner='=', out_joiner=' '):
+        '''Take a dict in the form of { 'key': 'value', 'key': 'value' } and
+           arrange them as a string 'key=value key=value'
+        '''
+        if not issubclass(type(data), dict):
+            raise errors.AnsibleFilterError("|failed expects first param is a dict")
+
+        return out_joiner.join([in_joiner.join([k, v]) for k, v in data.items()])
+
+    @staticmethod
     def oo_ami_selector(data, image_name):
         ''' This takes a list of amis and an image name and attempts to return
             the latest ami.
@@ -309,6 +319,7 @@ class FilterModule(object):
             "oo_ami_selector": self.oo_ami_selector,
             "oo_ec2_volume_definition": self.oo_ec2_volume_definition,
             "oo_combine_key_value": self.oo_combine_key_value,
+            "oo_combine_dict": self.oo_combine_dict,
             "oo_split": self.oo_split,
             "oo_filter_list": self.oo_filter_list,
             "oo_parse_heat_stack_outputs": self.oo_parse_heat_stack_outputs
