@@ -20,6 +20,9 @@ ansible_ssh_user=root
 # deployment type valid values are origin, online and enterprise
 deployment_type=enterprise
 
+# Enable cluster metrics
+#use_cluster_metrics=true
+
 # Pre-release registry URL
 #oreg_url=docker-buildvm-rhose.usersys.redhat.com:5000/openshift3/ose-${component}:${version}
 
