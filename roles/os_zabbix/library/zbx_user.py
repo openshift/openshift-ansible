@@ -56,6 +56,19 @@ def get_usergroups(zapi, usergroups):
 
     return ugroups
 
+
+def get_usertype(user_type):
+    '''
+    Determine zabbix user account type
+    '''
+    utype = 1
+    if 'super' in user_type:
+        utype = 3
+    elif 'admin' in user_type or user_type == 'admin':
+        utype = 2
+
+    return utype
+
 def main():
     '''
     ansible zabbix module for users
@@ -69,6 +82,9 @@ def main():
             user=dict(default=None, type='str'),
             password=dict(default=None, type='str'),
             alias=dict(default=None, type='str'),
+            name=dict(default=None, type='str'),
+            surname=dict(default=None, type='str'),
+            user_type=dict(default='user', type='str'),
             passwd=dict(default=None, type='str'),
             usergroups=dict(default=None, type='list'),
             debug=dict(default=False, type='bool'),
@@ -80,8 +96,7 @@ def main():
     user = module.params.get('user', os.environ['ZABBIX_USER'])
     password = module.params.get('password', os.environ['ZABBIX_PASSWORD'])
 
-    zbc = ZabbixConnection(module.params['server'], user, password, module.params['debug'])
-    zapi = ZabbixAPI(zbc)
+    zapi = ZabbixAPI(ZabbixConnection(module.params['server'], user, password, module.params['debug']))
 
     ## before we can create a user media and users with media types we need media
     zbx_class_name = 'user'
@@ -109,6 +124,9 @@ def main():
         params = {'alias': alias,
                   'passwd': module.params['passwd'],
                   'usrgrps': get_usergroups(zapi, module.params['usergroups']),
+                  'name': module.params['name'],
+                  'surname': module.params['surname'],
+                  'type': get_usertype(module.params['user_type']),
                  }
 
         if not exists(content):
