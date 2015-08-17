@@ -80,7 +80,7 @@ ansible_ssh_user=root
 deployment_type=enterprise
 
 # Pre-release registry URL
-oreg_url=docker-buildvm-rhose.usersys.redhat.com:5000/openshift3/ose-${component}:${version}
+oreg_url=rcm-img-docker01.build.eng.bos.redhat.com:5001/openshift3/ose-${component}:${version}
 
 # Pre-release additional repo
 openshift_additional_repos=[{'id': 'ose-devel', 'name': 'ose-devel',
@@ -121,7 +121,7 @@ On the master host:
 ```sh
 oadm router --create=true \
   --credentials=/etc/openshift/master/openshift-router.kubeconfig \
-  --images='docker-buildvm-rhose.usersys.redhat.com:5000/openshift3/ose-${component}:${version}'
+  --images='rcm-img-docker01.build.eng.bos.redhat.com:5001/openshift3/ose-${component}:${version}'
 ```
 
 #### Create the default docker-registry
@@ -129,7 +129,7 @@ On the master host:
 ```sh
 oadm registry --create=true \
   --credentials=/etc/openshift/master/openshift-registry.kubeconfig \
-  --images='docker-buildvm-rhose.usersys.redhat.com:5000/openshift3/ose-${component}:${version}' \
+  --images='rcm-img-docker01.build.eng.bos.redhat.com:5001/openshift3/ose-${component}:${version}' \
   --mount-host=/var/lib/openshift/docker-registry
 ```
 
