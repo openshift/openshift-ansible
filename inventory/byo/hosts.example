@@ -39,7 +39,6 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_master_identity_providers=[{'name': 'allow_all', 'login': 'true', 'challenge': 'true', 'kind': 'AllowAllPasswordIdentityProvider'}]
 
 # Project Configuration
-#osm_default_node_selector=''
 #osm_project_request_message=''
 #osm_project_request_template=''
 #osm_mcs_allocator_range='s0:/2'
