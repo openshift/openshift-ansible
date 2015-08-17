@@ -20,6 +20,10 @@ ansible_ssh_user=root
 # deployment type valid values are origin, online and enterprise
 deployment_type=enterprise
 
+# product type valid values are openshift and atomic-enterprise
+#product_type=atomic-enterprise
+
+
 # Pre-release registry URL
 #oreg_url=rcm-img-docker01.build.eng.bos.redhat.com:5001/openshift3/ose-${component}:${version}
 
