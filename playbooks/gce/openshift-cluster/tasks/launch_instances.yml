@@ -25,7 +25,7 @@
 - name: Add new instances to groups and set variables needed
   add_host:
     hostname: "{{ item.name }}"
-    ansible_ssh_host: "{{ item.public_ip }}"
+    ansible_ssh_host: "{{ item.name }}"
     ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user | default(ansible_ssh_user, true) }}"
     ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
     groups: "{{ item.tags | oo_prepend_strings_in_list('tag_') | join(',') }}"
@@ -34,13 +34,13 @@
   with_items: gce.instance_data
 
 - name: Wait for ssh
-  wait_for: port=22 host={{ item.public_ip }}
+  wait_for: port=22 host={{ item.name }}
   with_items: gce.instance_data
 
 - name: Wait for user setup
   command: "ssh -o StrictHostKeyChecking=no -o PasswordAuthentication=no -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null {{ hostvars[item.name].ansible_ssh_user }}@{{ item.public_ip }} echo {{ hostvars[item.name].ansible_ssh_user }} user is setup"
   register: result
   until: result.rc == 0
-  retries: 20
-  delay: 10
+  retries: 30
+  delay: 5
   with_items: gce.instance_data

@@ -1,25 +1,20 @@
 ---
 - name: Terminate instance(s)
   hosts: localhost
+  connection: local
   gather_facts: no
   vars_files:
   - vars.yml
   tasks:
-  - set_fact: scratch_group=tag_env-host-type-{{ cluster_id }}-openshift-node
+  - set_fact: scratch_group=tag_env-{{ cluster_id }}
   - add_host:
       name: "{{ item }}"
-      groups: oo_hosts_to_terminate, oo_nodes_to_terminate
+      groups: oo_hosts_to_terminate
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user | default(ansible_ssh_user, true) }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
     with_items: groups[scratch_group] | default([]) | difference(['localhost']) | difference(groups.status_terminated)
-
-  - set_fact: scratch_group=tag_env-host-type-{{ cluster_id }}-openshift-master
-  - add_host:
-      name: "{{ item }}"
-      groups: oo_hosts_to_terminate, oo_masters_to_terminate
-      ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user | default(ansible_ssh_user, true) }}"
-      ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-    with_items: groups[scratch_group] | default([]) | difference(['localhost']) | difference(groups.status_terminated)
+  - name: show oo_hosts_to_terminate
+    debug: var=groups['oo_hosts_to_terminate']
 
 - name: Unsubscribe VMs
   hosts: oo_hosts_to_terminate
@@ -31,6 +26,28 @@
           ansible_distribution == "RedHat" and
           lookup('oo_option', 'rhel_skip_subscription') | default(rhsub_skip, True) |
             default('no', True) | lower in ['no', 'false']
+
+- name: Terminate instances(s)
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  vars_files:
+  - vars.yml
+  tasks:
+    - name: show oo_hosts_to_terminate
+      debug: var=oo_hosts_to_terminate
+
+    - name: Terminate instances that were previously launched
+      local_action:
+        module: gce
+        state: 'absent'
+        name: "{{ item }}"
+        service_account_email: "{{ lookup('env', 'gce_service_account_email_address') }}"
+        pem_file: "{{ lookup('env', 'gce_service_account_pem_file_path') }}"
+        project_id: "{{ lookup('env', 'gce_project_id') }}"
+        zone: "{{ lookup('env', 'zone') }}"
+      with_items: groups['oo_hosts_to_terminate'] | default([])
+      when: item is defined
 
 #- include: ../openshift-node/terminate.yml
 #  vars:
