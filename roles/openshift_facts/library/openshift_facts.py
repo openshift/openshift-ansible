@@ -300,10 +300,11 @@ def set_registry_url_if_unset(facts):
                 if deployment_type == 'enterprise':
                     registry_url = "openshift3/ose-${component}:${version}"
                     product_type = facts['common']['product_type']
+### TODO: openshift will change to aos3/aos-${component}:${version} with 3.1
                     if product_type == 'openshift':
                        registry_url = "openshift3/ose-${component}:${version}"
                     elif product_type == 'atomic-enterprise':
-                       registry_url = "openshift3/ose-${component}:latest"
+                       registry_url = "aos3/aos-${component}:${version}"
                 elif deployment_type == 'online':
                     registry_url = ("openshift3/ose-${component}:${version}")
                 facts[role]['registry_url'] = registry_url
