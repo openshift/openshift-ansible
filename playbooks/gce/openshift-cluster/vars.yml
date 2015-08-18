@@ -1,8 +1,8 @@
 ---
 deployment_vars:
   origin:
-    image: centos-7
-    ssh_user:
+    image: centos-7-v20150710
+    ssh_user: preinstalled-slave-50g-v5
     sudo: yes
   online:
     image: libra-rhel7
@@ -12,4 +12,3 @@ deployment_vars:
     image: rhel-7
     ssh_user:
     sudo: yes
-
