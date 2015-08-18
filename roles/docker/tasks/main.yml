@@ -1,15 +1,8 @@
 ---
 # tasks file for docker
 - name: Install docker
-  yum: pkg=docker-io
+  yum: pkg=docker
 
 - name: enable and start the docker service
   service: name=docker enabled=yes state=started
-
-- copy: src=enter-container.sh dest=/usr/local/bin/enter-container.sh mode=0755
-
-# From the origin rpm there exists instructions on how to
-# setup origin properly.  The following steps come from there
-- name: Change root to be in the Docker group
-  user: name=root groups=dockerroot append=yes
 

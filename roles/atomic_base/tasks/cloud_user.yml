@@ -1,6 +1,0 @@
----
-- name: Remove cloud-user account
-  user: name=cloud-user state=absent remove=yes force=yes
-
-- name: Remove cloud-user sudo
-  file: path=/etc/sudoers.d/90-cloud-init-users state=absent

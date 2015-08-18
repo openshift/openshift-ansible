@@ -1,0 +1,4 @@
+---
+- include: rhel_subscribe.yml
+
+- include: config.yml

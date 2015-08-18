@@ -1,0 +1,100 @@
+{
+    "kind": "List",
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "jboss-image-streams",
+        "annotations": {
+            "description": "ImageStream definitions for JBoss Middleware products."
+        }
+    },
+    "items": [
+        {
+            "kind": "ImageStream",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "jboss-webserver3-tomcat7-openshift"
+            },
+            "spec": {
+                "dockerImageRepository": "registry.access.redhat.com/jboss-webserver-3/tomcat7-openshift",
+                "tags": [
+                    {
+                        "name": "3.0",
+                        "annotations": {
+                            "description": "JBoss Web Server v3 Tomcat 7 STI images.",
+                            "iconClass": "icon-jboss",
+                            "tags": "java",
+                            "supports":"tomcat7:3.0,java",
+                            "version": "3.0"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "ImageStream",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "jboss-webserver3-tomcat8-openshift"
+            },
+            "spec": {
+                "dockerImageRepository": "registry.access.redhat.com/jboss-webserver-3/tomcat8-openshift",
+                "tags": [
+                    {
+                        "name": "3.0",
+                        "annotations": {
+                            "description": "JBoss Web Server v3 Tomcat 8 STI images.",
+                            "iconClass": "icon-jboss",
+                            "tags": "java",
+                            "supports":"tomcat8:3.0,java",
+                            "version": "3.0"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "ImageStream",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "jboss-eap6-openshift"
+            },
+            "spec": {
+                "dockerImageRepository": "registry.access.redhat.com/jboss-eap-6/eap-openshift",
+                "tags": [
+                    {
+                        "name": "6.4",
+                        "annotations": {
+                            "description": "JBoss EAP 6 STI images.",
+                            "iconClass": "icon-jboss",
+                            "tags": "javaee",
+                            "supports":"eap:6.4,jee,java",
+                            "version": "6.4"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "ImageStream",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "jboss-amq-6"
+            },
+            "spec": {
+                "dockerImageRepository": "registry.access.redhat.com/jboss-amq-6/amq-openshift",
+                "tags": [
+                    {
+                        "name": "6.2",
+                        "annotations": {
+                            "description": "JBoss ActiveMQ 6 broker image.",
+                            "iconClass": "icon-jboss",
+                            "tags": "javaee",
+                            "supports":"amq:6.2,jee,java",
+                            "version": "6.2"
+                        }
+                    }
+                ]
+            }
+        }
+    ]
+}

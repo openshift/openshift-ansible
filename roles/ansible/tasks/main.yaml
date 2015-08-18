@@ -1,7 +1,0 @@
----
-# Install ansible client
-
-- name: Install Ansible
-  yum:
-    pkg: ansible
-    state: installed

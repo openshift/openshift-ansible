@@ -1,10 +1,8 @@
-openshift-ansible
-========================
+#Openshift and Atomic Enterprise Ansible
 
-This repo contains OpenShift Ansible code.
+This repo contains Ansible code for Openshift and Atomic Enterprise.
 
-Setup
------
+##Setup
 - Install base dependencies:
   - Fedora:
   ```
@@ -22,14 +20,23 @@ Setup
   - [GCE](README_GCE.md)
   - [local VMs](README_libvirt.md)
 
+- Bring your own host deployments:
+  - [OpenShift Enterprise](README_OSE.md)
+  - [OpenShift Origin](README_origin.md)
+  - [Atomic Enterprise](README_AEP.md)
+
 - Build
   - [How to build the openshift-ansible rpms](BUILD.md)
 
 - Directory Structure:
-  - [cloud.rb](cloud.rb) - light wrapper around Ansible
-  - [bin/cluster](bin/cluster) - python script to easily create OpenShift 3 clusters
+  - [bin/cluster](bin/cluster) - python script to easily create clusters
+  - [docs](docs) - Documentation for the project
   - [filter_plugins/](filter_plugins) - custom filters used to manipulate data in Ansible
   - [inventory/](inventory) - houses Ansible dynamic inventory scripts
-  - [lib/](lib) - library components of cloud.rb
   - [playbooks/](playbooks) - houses host-type Ansible playbooks (launch, config, destroy, vars)
   - [roles/](roles) - shareable Ansible tasks
+
+##Contributing
+
+###Feature Roadmap
+Our Feature Roadmap is available on the OpenShift Origin Infrastructure [Trello board](https://trello.com/b/nbkIrqKa/openshift-origin-infrastructure). All ansible items will be tagged with [installv3].

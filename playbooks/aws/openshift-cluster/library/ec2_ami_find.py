@@ -158,7 +158,7 @@ EXAMPLES = '''
 # Launch an EC2 instance
 - ec2:
     image: "{{ ami_search.results[0].ami_id }}"
-    instance_type: m3.medium
+    instance_type: m4.medium
     key_name: mykey
     wait: yes
 '''

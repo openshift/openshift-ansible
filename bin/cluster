@@ -3,14 +3,16 @@
 
 import argparse
 import ConfigParser
-import sys
 import os
+import sys
+import traceback
 
 
 class Cluster(object):
     """
-    Control and Configuration Interface for OpenShift Clusters
+    Provide Command, Control and Configuration (c3) Interface for OpenShift Clusters
     """
+
     def __init__(self):
         # setup ansible ssh environment
         if 'ANSIBLE_SSH_ARGS' not in os.environ:
@@ -21,6 +23,16 @@ class Cluster(object):
                 '-o ControlMaster=auto '
                 '-o ControlPersist=600s '
             )
+            # Because of `UserKnownHostsFile=/dev/null`
+            # our `.ssh/known_hosts` file most probably misses the ssh host public keys
+            # of our servers.
+            # In that case, ansible serializes the execution of ansible modules
+            # because we might be interactively prompted to accept the ssh host public keys.
+            # Because of `StrictHostKeyChecking=no` we know that we won't be prompted
+            # So, we don't want our modules execution to be serialized.
+            os.environ['ANSIBLE_HOST_KEY_CHECKING'] = 'False'
+            # TODO: A more secure way to proceed would consist in dynamically
+            # retrieving the ssh host public keys from the IaaS interface
 
     def get_deployment_type(self, args):
         """
@@ -44,15 +56,14 @@ class Cluster(object):
         """
         env = {'cluster_id': args.cluster_id,
                'deployment_type': self.get_deployment_type(args)}
-        playbook = "playbooks/{}/openshift-cluster/launch_rbox.yml".format(args.provider)
+        playbook = "playbooks/{}/openshift-cluster/launch.yml".format(args.provider)
         inventory = self.setup_provider(args.provider)
 
         env['num_masters'] = args.masters
         env['num_nodes'] = args.nodes
-        env['num_preemptible_nodes'] = args.num_preemptible_nodes
-
-        print("num_preemptible_nodes=(%d, %d)" % (env['num_preemptible_nodes'], args.num_preemptible_nodes))
-        
+        env['num_infra'] = args.infra
+        env['num_etcd'] = args.etcd
+        env['sub_host_type'] = "sub_host_bidon"
 
         return self.action(args, inventory, env, playbook)
 
@@ -108,6 +119,21 @@ class Cluster(object):
 
         return self.action(args, inventory, env, playbook)
 
+    def service(self, args):
+        """
+        Make the same service call across all nodes in the cluster
+        :param args: command line arguments provided by user
+        :return: exit status from run command
+        """
+        env = {'cluster_id': args.cluster_id,
+               'deployment_type': self.get_deployment_type(args),
+               'new_cluster_state': args.state}
+
+        playbook = "playbooks/{}/openshift-cluster/service.yml".format(args.provider)
+        inventory = self.setup_provider(args.provider)
+
+        return self.action(args, inventory, env, playbook)
+
     def setup_provider(self, provider):
         """
         Setup ansible playbook environment
@@ -129,10 +155,21 @@ class Cluster(object):
                 os.environ[key] = config.get('ec2', key)
 
             inventory = '-i inventory/aws/hosts'
+
+            key_vars = ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY']
+            key_missing = [key for key in key_vars if key not in os.environ]
+
+            boto_conf_files = ['~/.aws/credentials', '~/.boto']
+            conf_exists = lambda conf: os.path.isfile(os.path.expanduser(conf))
+            boto_configs = [conf for conf in boto_conf_files if conf_exists(conf)]
+
+            if len(key_missing) > 0 and len(boto_configs) == 0:
+                raise ValueError("PROVIDER aws requires {} environment variable(s). See README_AWS.md".format(missing))
+
         elif 'libvirt' == provider:
             inventory = '-i inventory/libvirt/hosts'
-        elif 'os' == provider:
-            inventory = '-i inventory/os/hosts'
+        elif 'openstack' == provider:
+            inventory = '-i inventory/openstack/hosts'
         else:
             # this code should never be reached
             raise ValueError("invalid PROVIDER {}".format(provider))
@@ -153,6 +190,11 @@ class Cluster(object):
         if args.verbose > 0:
             verbose = '-{}'.format('v' * args.verbose)
 
+        if args.option:
+            for opt in args.option:
+                k, v = opt.split('=', 1)
+                env['cli_' + k] = v
+
         ansible_env = '-e \'{}\''.format(
             ' '.join(['%s=%s' % (key, value) for (key, value) in env.items()])
         )
@@ -160,6 +202,9 @@ class Cluster(object):
         command = 'ansible-playbook {} {} {} {}'.format(
             verbose, inventory, ansible_env, playbook
         )
+
+        if args.profile:
+            command = 'ANSIBLE_CALLBACK_PLUGINS=ansible-profile/callback_plugins ' + command
 
         if args.verbose > 1:
             command = 'time {}'.format(command)
@@ -173,25 +218,52 @@ class Cluster(object):
 
 if __name__ == '__main__':
     """
-    Implemented to support writing unit tests
+    User command to invoke ansible playbooks in a "known" environment
+
+    Reads ~/.openshift-ansible for default configuration items
+      [DEFAULT]
+      validate_cluster_ids = False
+      cluster_ids = marketing,sales
+      providers = gce,aws,libvirt,openstack
     """
+
+    environment = ConfigParser.SafeConfigParser({
+        'cluster_ids': 'marketing,sales',
+        'validate_cluster_ids': 'False',
+        'providers': 'gce,aws,libvirt,openstack',
+    })
+
+    path = os.path.expanduser("~/.openshift-ansible")
+    if os.path.isfile(path):
+        environment.read(path)
 
     cluster = Cluster()
 
-    providers = ['gce', 'aws', 'libvirt', 'os']
     parser = argparse.ArgumentParser(
         description='Python wrapper to ensure proper environment for OpenShift ansible playbooks',
     )
     parser.add_argument('-v', '--verbose', action='count',
                         help='Multiple -v options increase the verbosity')
-    parser.add_argument('--version', action='version', version='%(prog)s 0.2')
+    parser.add_argument('--version', action='version', version='%(prog)s 0.3')
 
     meta_parser = argparse.ArgumentParser(add_help=False)
+    providers = environment.get('DEFAULT', 'providers').split(',')
     meta_parser.add_argument('provider', choices=providers, help='provider')
-    meta_parser.add_argument('cluster_id', help='prefix for cluster VM names')
+
+    if environment.get('DEFAULT', 'validate_cluster_ids').lower() in ("yes", "true", "1"):
+        meta_parser.add_argument('cluster_id', choices=environment.get('DEFAULT', 'cluster_ids').split(','),
+                                 help='prefix for cluster VM names')
+    else:
+        meta_parser.add_argument('cluster_id', help='prefix for cluster VM names')
+
     meta_parser.add_argument('-t', '--deployment-type',
                              choices=['origin', 'online', 'enterprise'],
                              help='Deployment type. (default: origin)')
+    meta_parser.add_argument('-o', '--option', action='append',
+                             help='options')
+
+    meta_parser.add_argument('-p', '--profile', action='store_true',
+                             help='Enable playbook profiling')
 
     action_parser = parser.add_subparsers(dest='action', title='actions',
                                           description='Choose from valid actions')
@@ -202,8 +274,10 @@ if __name__ == '__main__':
                                help='number of masters to create in cluster')
     create_parser.add_argument('-n', '--nodes', default=2, type=int,
                                help='number of nodes to create in cluster')
-    create_parser.add_argument('-p', '--num_preemptible_nodes', default=0, type=int,
-                               help='number of preemtible nodes to create in cluster')
+    create_parser.add_argument('-i', '--infra', default=1, type=int,
+                               help='number of infra nodes to create in cluster')
+    create_parser.add_argument('-e', '--etcd', default=0, type=int,
+                               help='number of external etcd hosts to create in cluster')
     create_parser.set_defaults(func=cluster.create)
 
     config_parser = action_parser.add_parser('config',
@@ -229,6 +303,13 @@ if __name__ == '__main__':
                                            parents=[meta_parser])
     list_parser.set_defaults(func=cluster.list)
 
+    service_parser = action_parser.add_parser('service', help='service for openshift across cluster',
+                                              parents=[meta_parser])
+    # choices are the only ones valid for the ansible service module: http://docs.ansible.com/service_module.html
+    service_parser.add_argument('state', choices=['started', 'stopped', 'restarted', 'reloaded'],
+                                help='make service call across cluster')
+    service_parser.set_defaults(func=cluster.service)
+
     args = parser.parse_args()
 
     if 'terminate' == args.action and not args.force:
@@ -238,12 +319,20 @@ if __name__ == '__main__':
             exit(1)
 
     if 'update' == args.action and not args.force:
-        answer = raw_input("This is destructive and could corrupt {} environment. Continue? [y/N] ".format(args.cluster_id))
+        answer = raw_input(
+            "This is destructive and could corrupt {} environment. Continue? [y/N] ".format(args.cluster_id))
         if answer not in ['y', 'Y']:
             sys.stderr.write('\nACTION [update] aborted by user!\n')
             exit(1)
 
-    status = args.func(args)
-    if status != 0:
-        sys.stderr.write("ACTION [{}] failed with exit status {}\n".format(args.action, status))
+    status = 1
+    try:
+        status = args.func(args)
+        if status != 0:
+            sys.stderr.write("ACTION [{}] failed with exit status {}\n".format(args.action, status))
+    except Exception, e:
+        if args.verbose:
+            traceback.print_exc(file=sys.stderr)
+        else:
+            sys.stderr.write("{}\n".format(e))
     exit(status)

@@ -11,11 +11,9 @@ import ConfigParser
 from openshift_ansible import awsutil
 
 CONFIG_MAIN_SECTION = 'main'
-CONFIG_INVENTORY_OPTION = 'inventory'
 
 class Oscp(object):
     def __init__(self):
-        self.inventory = None
         self.file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)))
 
         # Default the config path to /etc
@@ -29,13 +27,13 @@ class Oscp(object):
         # parse host and user
         self.process_host()
 
-        self.aws = awsutil.AwsUtil(self.inventory)
+        self.aws = awsutil.AwsUtil()
 
         # get a dict of host inventory
-        if self.args.list:
-            self.get_hosts()
-        else:
+        if self.args.refresh_cache:
             self.get_hosts(True)
+        else:
+            self.get_hosts()
 
         if (self.args.src == '' or self.args.dest == '') and not self.args.list:
             self.parser.print_help()
@@ -56,18 +54,16 @@ class Oscp(object):
             config = ConfigParser.ConfigParser()
             config.read(self.config_path)
 
-            if config.has_section(CONFIG_MAIN_SECTION) and \
-               config.has_option(CONFIG_MAIN_SECTION, CONFIG_INVENTORY_OPTION):
-                self.inventory = config.get(CONFIG_MAIN_SECTION, CONFIG_INVENTORY_OPTION)
-
     def parse_cli_args(self):
-        parser = argparse.ArgumentParser(description='Openshift Online SSH Tool.')
+        parser = argparse.ArgumentParser(description='OpenShift Online SSH Tool.')
         parser.add_argument('-e', '--env',
                           action="store", help="Environment where this server exists.")
         parser.add_argument('-d', '--debug', default=False,
                           action="store_true", help="debug mode")
         parser.add_argument('-v', '--verbose', default=False,
                           action="store_true", help="Verbose?")
+        parser.add_argument('--refresh-cache', default=False,
+                          action="store_true", help="Force a refresh on the host cache.")
         parser.add_argument('--list', default=False,
                           action="store_true", help="list out hosts")
         parser.add_argument('-r', '--recurse', action='store_true', default=False,
@@ -119,14 +115,14 @@ class Oscp(object):
         else:
             self.env = None
 
-    def get_hosts(self, cache_only=False):
+    def get_hosts(self, refresh_cache=False):
         '''Query our host inventory and return a dict where the format
            equals:
 
            dict['environment'] = [{'servername' : {}}, ]
         '''
-        if cache_only:
-            self.host_inventory = self.aws.build_host_dict_by_env(['--cache-only'])
+        if refresh_cache:
+            self.host_inventory = self.aws.build_host_dict_by_env(['--refresh-cache'])
         else:
             self.host_inventory = self.aws.build_host_dict_by_env()
 

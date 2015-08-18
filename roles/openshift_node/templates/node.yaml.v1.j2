@@ -1,0 +1,23 @@
+allowDisabledDocker: false
+apiVersion: v1
+dnsDomain: {{ osn_cluster_dns_domain }}
+dnsIP: {{ osn_cluster_dns_ip }}
+dockerConfig:
+  execHandlerName: ""
+imageConfig:
+  format: {{ openshift.node.registry_url }}
+  latest: false
+kind: NodeConfig
+{% if openshift.common.kubelet_args is defined and openshift.common.kubelet_args %}
+kubeletArguments: {{ kubelet_args }}
+{% endif %}
+masterKubeConfig: system:node:{{ openshift.common.hostname }}.kubeconfig
+networkPluginName: {{ openshift.common.sdn_network_plugin_name }}
+nodeName: {{ openshift.common.hostname }}
+podManifestConfig:
+servingInfo:
+  bindAddress: 0.0.0.0:10250
+  certFile: server.crt
+  clientCA: ca.crt
+  keyFile: server.key
+volumeDirectory: {{ openshift_data_dir }}/openshift.local.volumes

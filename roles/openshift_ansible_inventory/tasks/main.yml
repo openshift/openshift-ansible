@@ -9,3 +9,35 @@
     group: "{{ oo_inventory_group }}"
     owner: "{{ oo_inventory_owner }}"
     mode: "0640"
+
+- file:
+    state: directory
+    dest: /etc/ansible/inventory
+    owner: root
+    group: libra_ops
+    mode: 0750
+
+- file:
+    state: link
+    src: /usr/share/ansible/inventory/multi_ec2.py
+    dest: /etc/ansible/inventory/multi_ec2.py
+    owner: root
+    group: libra_ops
+
+# This cron uses the above location to call its job
+- name: Cron to keep cache fresh
+  cron:
+    name: 'multi_ec2_inventory'
+    minute: '*/10'
+    job: '/usr/share/ansible/inventory/multi_ec2.py --refresh-cache &> /dev/null'
+  when: oo_cron_refresh_cache is defined and oo_cron_refresh_cache
+
+- name: Set cache location
+  file:
+    state: directory
+    dest: "{{ oo_inventory_cache_location | dirname }}"
+    owner: root
+    group: libra_ops
+    recurse: yes
+    mode: '2750'
+  when: oo_inventory_cache_location is defined

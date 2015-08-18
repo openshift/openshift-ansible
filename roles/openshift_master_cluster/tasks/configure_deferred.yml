@@ -1,0 +1,8 @@
+---
+- debug: msg="Deferring config"
+
+- name: Start and enable openshift-master
+  service:
+    name: openshift-master
+    state: started
+    enabled: yes

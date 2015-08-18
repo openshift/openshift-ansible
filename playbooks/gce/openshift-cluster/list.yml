@@ -16,9 +16,9 @@
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
     with_items: groups[scratch_group] | default([]) | difference(['localhost']) | difference(groups.status_terminated)
 
-- name: List Hosts
+- name: List instance(s)
   hosts: oo_list_hosts
   gather_facts: no
   tasks:
   - debug:
-      msg: "public ip:{{ hostvars[inventory_hostname].gce_public_ip }} private ip:{{ hostvars[inventory_hostname].gce_private_ip }} deployment-type: {{ hostvars[inventory_hostname].group_names | oo_get_deployment_type_from_groups }}"
+      msg: "public ip:{{ hostvars[inventory_hostname].gce_public_ip }} private ip:{{ hostvars[inventory_hostname].gce_private_ip }}"

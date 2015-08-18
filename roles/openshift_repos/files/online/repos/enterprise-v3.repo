@@ -1,7 +1,7 @@
 [enterprise-v3]
-name=OpenShift Enterprise Beta3
-baseurl=https://gce-mirror1.ops.rhcloud.com/libra/libra-7-ose-beta3/
-        https://mirror.ops.rhcloud.com/libra/libra-7-ose-beta3/
+name=OpenShift Enterprise
+baseurl=https://mirror.ops.rhcloud.com/libra/rhui-rhel-server-7-ose/
+        https://gce-mirror1.ops.rhcloud.com/libra/rhui-rhel-server-7-ose/
 enabled=1
 gpgcheck=0
 failovermethod=priority

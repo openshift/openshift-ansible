@@ -1,0 +1,468 @@
+// vim: ft=asciidoc
+
+= openshift-ansible Best Practices Guide
+
+The purpose of this guide is to describe the preferred patterns and best practices used in this repository (both in ansible and python).
+
+It is important to note that this repository may not currently comply with all best practices, but the intention is that it will.
+
+All new pull requests created against this repository MUST comply with this guide.
+
+This guide complies with https://www.ietf.org/rfc/rfc2119.txt[RFC2119].
+
+
+== Pull Requests
+
+[cols="2v,v"]
+|===
+| **Rule**
+| All pull requests MUST pass the build bot *before* they are merged.
+|===
+
+The purpose of this rule is to avoid cases where the build bot will fail pull requests for code modified in a previous pull request.
+
+The tooling is flexible enough that exceptions can be made so that the tool the build bot is running will ignore certain areas or certain checks, but the build bot itself must pass for the pull request to be merged.
+
+
+
+== Python
+
+=== Python Source Files
+
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| Python source files MUST contain the following vim mode line.
+|===
+
+[source]
+----
+# vim: expandtab:tabstop=4:shiftwidth=4
+----
+
+Since most developers contributing to this repository use vim, this rule helps to promote consistency.
+
+If mode lines for other editors are needed, please open a GitHub issue.
+
+=== Method Signatures
+
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| When adding a new paramemter to an existing method, a default value SHOULD be used
+|===
+The purpose of this rule is to make it so that method signatures are backwards compatible.
+
+If this rule isn't followed, it will be necessary for the person who changed the method to search out all callers and make sure that they're able to use the new method signature.
+
+.Before:
+[source,python]
+----
+def add_person(first_name, last_name):
+----
+
+.After:
+[source,python]
+----
+def add_person(first_name, last_name, age=None):
+----
+
+
+=== PyLint
+http://www.pylint.org/[PyLint] is used in an attempt to keep the python code as clean and as managable as possible. The build bot runs each pull request through PyLint and any warnings or errors cause the build bot to fail the pull request.
+
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| PyLint rules MUST NOT be disabled on a whole file.
+|===
+
+Instead, http://docs.pylint.org/faq.html#is-it-possible-to-locally-disable-a-particular-message[disable the PyLint check on the line where PyLint is complaining].
+
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| PyLint rules MUST NOT be disabled unless they meet one of the following exceptions
+|===
+
+.Exceptions:
+1. When PyLint fails because of a dependency that can't be installed on the build bot
+1. When PyLint fails because of including a module that is outside of control (like Ansible)
+1. When PyLint fails, but the code makes more sense the way it is formatted (stylistic exception). For this exception, the description of the PyLint disable MUST state why the code is more clear, AND the person reviewing the PR will decide if they agree or not. The reviewer may reject the PR if they disagree with the reason for the disable.
+
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| All PyLint rule disables MUST be documented in the code.
+|===
+
+The purpose of this rule is to inform future developers about the disable.
+
+.Specifically, the following MUST accompany every PyLint disable:
+1. Why is the check being disabled?
+1. Is disabling this check meant to be permanent or temporary?
+
+.Example:
+[source,python]
+----
+# Reason: disable pylint maybe-no-member because overloaded use of
+#     the module name causes pylint to not detect that 'results'
+#     is an array or hash
+# Status: permanently disabled unless a way is found to fix this.
+# pylint: disable=maybe-no-member
+metadata[line] = results.pop()
+----
+
+
+== Ansible
+
+=== Yaml Files (Playbooks, Roles, Vars, etc)
+
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| Ansible files SHOULD NOT use JSON (use pure YAML instead).
+|===
+
+YAML is a superset of JSON, which means that Ansible allows JSON syntax to be interspersed. Even though YAML (and by extension Ansible) allows for this, JSON SHOULD NOT be used.
+
+.Reasons:
+* Ansible is able to give clearer error messages when the files are pure YAML
+* YAML reads nicer (preference held by several team members)
+* YAML makes for nicer diffs as YAML tends to be multi-line, whereas JSON tends to be more concise
+
+.Exceptions:
+* Ansible static inventory files are INI files. To pass in variables for specific hosts, Ansible allows for these variables to be put inside of the static inventory files. These variables can be in JSON format, but can't be in YAML format. This is an acceptable use of JSON, as YAML is not allowed in this case.
+
+Every effort should be made to keep our Ansible YAML files in pure YAML.
+
+=== Modules
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| Custom Ansible modules SHOULD be embedded in a role.
+|===
+
+.Context
+* http://docs.ansible.com/ansible/playbooks_roles.html#embedding-modules-in-roles[Ansible doc on how to embed modules in roles]
+
+The purpose of this rule is to make it easy to include custom modules in our playbooks and share them on Ansible Galaxy.
+
+.Custom module `openshift_facts.py` is embedded in the `openshift_facts` role.
+----
+> ll openshift-ansible/roles/openshift_facts/library/
+-rwxrwxr-x. 1 user group 33616 Jul 22 09:36 openshift_facts.py
+----
+
+.Custom module `openshift_facts` can be used after `openshift_facts` role has been referenced.
+[source,yaml]
+----
+- hosts: openshift_hosts
+  gather_facts: no
+  roles:
+  - role: openshift_facts
+  post_tasks:
+  - openshift_facts
+      role: common
+      hostname: host
+      public_hostname: host.example.com
+----
+
+
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| Parameters to Ansible modules SHOULD use the Yaml dictionary format when 3 or more parameters are being passed
+|===
+
+When a module has several parameters that are being passed in, it's hard to see exactly what value each parameter is getting. It is preferred to use the Ansible Yaml syntax to pass in parameters so that it's more clear what values are being passed for each paramemter.
+
+.Bad:
+[source,yaml]
+----
+- file: src=/file/to/link/to dest=/path/to/symlink owner=foo group=foo state=link
+----
+
+.Good:
+[source,yaml]
+----
+- file:
+    src: /file/to/link/to
+    dest: /path/to/symlink
+    owner: foo
+    group: foo
+    state: link
+----
+
+
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| Parameters to Ansible modules SHOULD use the Yaml dictionary format when the line length exceeds 120 characters
+|===
+
+Lines that are long quickly become a wall of text that isn't easily parsable. It is preferred to use the Ansible Yaml syntax to pass in parameters so that it's more clear what values are being passed for each paramemter.
+
+.Bad:
+[source,yaml]
+----
+- get_url: url=http://example.com/path/file.conf dest=/etc/foo.conf sha256sum=b5bb9d8014a0f9b1d61e21e796d78dccdf1352f23cd32812f4850b878ae4944c
+----
+
+.Good:
+[source,yaml]
+----
+- get_url:
+    url: http://example.com/path/file.conf
+    dest: /etc/foo.conf
+    sha256sum: b5bb9d8014a0f9b1d61e21e796d78dccdf1352f23cd32812f4850b878ae4944c
+----
+
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| The Ansible `command` module SHOULD be used instead of the Ansible `shell` module.
+|===
+.Context
+* http://docs.ansible.com/shell_module.html#notes[Ansible doc on why using the command module is a best practice]
+
+The Ansible `shell` module can run most commands that can be run from a bash CLI. This makes it extremely powerful, but it also opens our playbooks up to being exploited by attackers.
+
+.Bad:
+[source,yaml]
+----
+- shell: "/bin/echo {{ cli_var }}"
+----
+
+.Better:
+[source,yaml]
+----
+- command: "/bin/echo {{ cli_var }}"
+----
+
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| The Ansible `quote` filter MUST be used with any variable passed into the shell module.
+|===
+.Context
+* http://docs.ansible.com/shell_module.html#notes[Ansible doc describing why to use the quote filter]
+
+It is recommended not to use the `shell` module. However, if it absolutely must be used, all variables passed into the `shell` module MUST use the `quote` filter to ensure they are shell safe.
+
+.Bad:
+[source,yaml]
+----
+- shell: "/bin/echo {{ cli_var }}"
+----
+
+.Good:
+[source,yaml]
+----
+- shell: "/bin/echo {{ cli_var | quote }}"
+----
+
+=== Defensive Programming
+
+.Context
+* http://docs.ansible.com/fail_module.html[Ansible Fail Module]
+
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| Ansible playbooks MUST begin with checks for any variables that they require.
+|===
+
+If an Ansible playbook requires certain variables to be set, it's best to check for these up front before any other actions have been performed. In this way, the user knows exactly what needs to be passed into the playbook.
+
+.Example:
+[source,yaml]
+----
+---
+- hosts: localhost
+  gather_facts: no
+  tasks:
+  - fail: msg="This playbook requires g_environment to be set and non empty"
+    when: g_environment is not defined or g_environment == ''
+----
+
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| Ansible roles tasks/main.yml file MUST begin with checks for any variables that they require.
+|===
+
+If an Ansible role requires certain variables to be set, it's best to check for these up front before any other actions have been performed. In this way, the user knows exactly what needs to be passed into the role.
+
+.Example:
+[source,yaml]
+----
+---
+# tasks/main.yml
+- fail: msg="This role requires arl_environment to be set and non empty"
+  when: arl_environment is not defined or arl_environment == ''
+----
+
+=== Tasks
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| Ansible tasks SHOULD NOT be used in ansible playbooks. Instead, use pre_tasks and post_tasks.
+|===
+An Ansible play is defined as a Yaml dictionary. Because of that, ansible doesn't know if the play's tasks list or roles list was specified first. Therefore Ansible always runs tasks after roles.
+
+This can be quite confusing if the tasks list is defined in the playbook before the roles list because people assume in order execution in Ansible.
+
+Therefore, we SHOULD use pre_tasks and post_tasks to make it more clear when the tasks will be run.
+
+.Context
+* https://docs.ansible.com/playbooks_roles.html[Ansible documentation on pre_tasks and post_tasks]
+
+.Bad:
+[source,yaml]
+----
+---
+# playbook.yml
+- hosts: localhost
+  gather_facts: no
+  tasks:
+  - name: This will execute AFTER the example_role, so it's confusing
+    debug: msg="in tasks list"
+  roles:
+  - role: example_role
+
+# roles/example_role/tasks/main.yml
+- debug: msg="in example_role"
+----
+
+.Good:
+[source,yaml]
+----
+---
+# playbook.yml
+- hosts: localhost
+  gather_facts: no
+  pre_tasks:
+  - name: This will execute BEFORE the example_role, so it makes sense
+    debug: msg="in pre_tasks list"
+  roles:
+  - role: example_role
+
+# roles/example_role/tasks/main.yml
+- debug: msg="in example_role"
+----
+
+
+=== Roles
+
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| All tasks in a role SHOULD be tagged with the role name.
+|===
+
+.Context
+* http://docs.ansible.com/playbooks_tags.html[Ansible doc explaining tags]
+
+Ansible tasks can be tagged, and then these tags can be used to either _run_ or _skip_ the tagged tasks using the `--tags` and `--skip-tags` ansible-playbook options respectively.
+
+This is very useful when developing and debugging new tasks. It can also significantly speed up playbook runs if the user specifies only the roles that changed.
+
+.Example:
+[source,yaml]
+----
+---
+# roles/example_role/tasks/main.yml
+- debug: msg="in example_role"
+  tags:
+  - example_role
+----
+
+
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| The Ansible roles directory MUST maintain a flat structure.
+|===
+
+.Context
+* http://docs.ansible.com/playbooks_best_practices.html#directory-layout[Ansible Suggested Directory Layout]
+
+.The purpose of this rule is to:
+* Comply with the upstream best practices
+* Make it familiar for new contributors
+* Make it compatible with Ansible Galaxy
+
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| Ansible Roles SHOULD be named like technology_component[_subcomponent].
+|===
+
+For consistency, role names SHOULD follow the above naming pattern. It is important to note that this is a recommendation for role naming, and follows the pattern used by upstream.
+
+Many times the `technology` portion of the pattern will line up with a package name. It is advised that whenever possible, the package name should be used.
+
+.Examples:
+* The role to configure a master is called `openshift_master`
+* The role to configure OpenShift specific yum repositories is called `openshift_repos`
+
+=== Filters
+.Context:
+* https://docs.ansible.com/playbooks_filters.html[Ansible Playbook Filters]
+* http://jinja.pocoo.org/docs/dev/templates/#builtin-filters[Jinja2 Builtin Filters]
+
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| The `default` filter SHOULD replace empty strings, lists, etc.
+|===
+
+When using the jinja2 `default` filter, unless the variable is a boolean, specify `true` as the second parameter. This will cause the default filter to replace empty strings, lists, etc with the provided default.
+
+This is because it is preferable to either have a sane default set than to have an empty string, list, etc. For example, it is preferable to have a config value set to a sane default than to have it simply set as an empty string.
+
+.From the http://jinja.pocoo.org/docs/dev/templates/[Jinja2 Docs]:
+[quote]
+If you want to use default with variables that evaluate to false you have to set the second parameter to true
+
+.Example:
+[source,yaml]
+----
+---
+- hosts: localhost
+  gather_facts: no
+  vars:
+    somevar: ''
+  tasks:
+  - debug: var=somevar
+
+  - name: "Will output 'somevar: []'"
+    debug: "msg='somevar: [{{ somevar | default('the string was empty') }}]'"
+
+  - name: "Will output 'somevar: [the string was empty]'"
+    debug: "msg='somevar: [{{ somevar | default('the string was empty', true) }}]'"
+----
+
+
+In other words, normally the `default` filter will only replace the value if it's undefined. By setting the second parameter to `true`, it will also replace the value if it defaults to a false value in python, so None, empty list, empty string, etc.
+
+This is almost always more desirable than an empty list, string, etc.

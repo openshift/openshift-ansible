@@ -1,0 +1,55 @@
+---
+- name: Copy openshift examples
+  copy:
+    src: examples
+    dest: /usr/share/openshift
+
+# RHEL and Centos image streams are mutually exclusive
+- name: Import RHEL streams
+  command: >
+    {{ openshift.common.client_binary }} create -n openshift -f {{ rhel_image_streams }}
+  when: openshift_examples_load_rhel
+  register: oex_import_rhel_streams
+  failed_when: "'already exists' not in oex_import_rhel_streams.stderr and oex_import_rhel_streams.rc != 0"
+  changed_when: false
+
+- name: Import Centos Image streams
+  command: >
+    {{ openshift.common.client_binary }} create -n openshift -f {{ centos_image_streams }}
+  when: openshift_examples_load_centos | bool
+  register: oex_import_centos_streams
+  failed_when: "'already exists' not in oex_import_centos_streams.stderr and oex_import_centos_streams.rc != 0"
+  changed_when: false
+
+- name: Import db templates
+  command: >
+    {{ openshift.common.client_binary }} create -n openshift -f {{ db_templates_base }}
+  when: openshift_examples_load_db_templates | bool
+  register: oex_import_db_templates
+  failed_when: "'already exists' not in oex_import_db_templates.stderr and oex_import_db_templates.rc != 0"
+  changed_when: false
+
+- name: Import quickstart-templates
+  command: >
+    {{ openshift.common.client_binary }} create -n openshift -f {{ quickstarts_base }}
+  when: openshift_examples_load_quickstarts
+  register: oex_import_quickstarts
+  failed_when: "'already exists' not in oex_import_quickstarts.stderr and oex_import_quickstarts.rc != 0"
+  changed_when: false
+
+
+- name: Import xPaas image streams
+  command: >
+    {{ openshift.common.client_binary }} create -n openshift -f {{ xpaas_image_streams }}
+  when: openshift_examples_load_xpaas | bool
+  register: oex_import_xpaas_streams
+  failed_when: "'already exists' not in oex_import_xpaas_streams.stderr and oex_import_xpaas_streams.rc != 0"
+  changed_when: false
+
+- name: Import xPaas templates
+  command: >
+    {{ openshift.common.client_binary }} create -n openshift -f {{ xpaas_templates_base }}
+  when: openshift_examples_load_xpaas | bool
+  register: oex_import_xpaas_templates
+  failed_when: "'already exists' not in oex_import_xpaas_templates.stderr and oex_import_xpaas_templates.rc != 0"
+  changed_when: false

@@ -10,7 +10,8 @@
       public_hostname: "{{ openshift_public_hostname | default(None) }}"
       public_ip: "{{ openshift_public_ip | default(None) }}"
       use_openshift_sdn: "{{ openshift_use_openshift_sdn | default(None) }}"
+      sdn_network_plugin_name: "{{ os_sdn_network_plugin_name | default(None) }}"
       deployment_type: "{{ openshift_deployment_type }}"
+
 - name: Set hostname
   hostname: name={{ openshift.common.hostname }}
-

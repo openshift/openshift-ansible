@@ -1,34 +1,52 @@
-# This configuration file is written in [TOML](https://github.com/mojombo/toml)
+{% macro initial_cluster() -%}
+{% for host in groups[etcd_peers_group] -%}
+{% if loop.last -%}
+{{ host }}={{ etcd_peer_url_scheme }}://{{ hostvars[host]['ansible_' + etcd_interface]['ipv4']['address'] }}:{{ etcd_peer_port }}
+{%- else -%}
+{{ host }}={{ etcd_peer_url_scheme }}://{{ hostvars[host]['ansible_' + etcd_interface]['ipv4']['address'] }}:{{ etcd_peer_port }},
+{%- endif -%}
+{% endfor -%}
+{% endmacro -%}
 
-# addr = "127.0.0.1:4001"
-# bind_addr = "127.0.0.1:4001"
-# ca_file = ""
-# cert_file = ""
-# cors = []
-# cpu_profile_file = ""
-# data_dir = "."
-# discovery = "http://etcd.local:4001/v2/keys/_etcd/registry/examplecluster"
-# http_read_timeout = 10
-# http_write_timeout = 10
-# key_file = ""
-# peers = []
-# peers_file = ""
-# max_cluster_size = 9
-# max_result_buffer = 1024
-# max_retry_attempts = 3
-# name = "default-name"
-# snapshot = false
-# verbose = false
-# very_verbose = false
+{% if groups[etcd_peers_group] and groups[etcd_peers_group] | length > 1 %}
+ETCD_NAME={{ inventory_hostname }}
+ETCD_LISTEN_PEER_URLS={{ etcd_listen_peer_urls }}
+{% else %}
+ETCD_NAME=default
+{% endif %}
+ETCD_DATA_DIR={{ etcd_data_dir }}
+#ETCD_SNAPSHOT_COUNTER="10000"
+ETCD_HEARTBEAT_INTERVAL="500"
+ETCD_ELECTION_TIMEOUT="2500"
+ETCD_LISTEN_CLIENT_URLS={{ etcd_listen_client_urls }}
+#ETCD_MAX_SNAPSHOTS="5"
+#ETCD_MAX_WALS="5"
+#ETCD_CORS=""
 
-# [peer]
-# addr = "127.0.0.1:7001"
-# bind_addr = "127.0.0.1:7001"
-# ca_file = ""
-# cert_file = ""
-# key_file = ""
+{% if groups[etcd_peers_group] and groups[etcd_peers_group] | length > 1 %}
+#[cluster]
+ETCD_INITIAL_ADVERTISE_PEER_URLS={{ etcd_initial_advertise_peer_urls }}
+ETCD_INITIAL_CLUSTER={{ initial_cluster() }}
+ETCD_INITIAL_CLUSTER_STATE={{ etcd_initial_cluster_state }}
+ETCD_INITIAL_CLUSTER_TOKEN={{ etcd_initial_cluster_token }}
+#ETCD_DISCOVERY=""
+#ETCD_DISCOVERY_SRV=""
+#ETCD_DISCOVERY_FALLBACK="proxy"
+#ETCD_DISCOVERY_PROXY=""
+{% endif %}
+ETCD_ADVERTISE_CLIENT_URLS={{ etcd_advertise_client_urls }}
 
-# [cluster]
-# active_size = 9
-# remove_delay = 1800.0
-# sync_interval = 5.0
+#[proxy]
+#ETCD_PROXY="off"
+
+#[security]
+{% if etcd_url_scheme == 'https' -%}
+ETCD_CA_FILE={{ etcd_ca_file }}
+ETCD_CERT_FILE={{ etcd_cert_file }}
+ETCD_KEY_FILE={{ etcd_key_file }}
+{% endif -%}
+{% if etcd_peer_url_scheme == 'https' -%}
+ETCD_PEER_CA_FILE={{ etcd_peer_ca_file }}
+ETCD_PEER_CERT_FILE={{ etcd_peer_cert_file }}
+ETCD_PEER_KEY_FILE={{ etcd_peer_key_file }}
+{% endif -%}

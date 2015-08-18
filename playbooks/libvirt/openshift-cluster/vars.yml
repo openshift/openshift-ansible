@@ -7,9 +7,12 @@ libvirt_uri: 'qemu:///system'
 deployment_vars:
   origin:
     image:
-      url: "http://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.qcow2"
-      name: CentOS-7-x86_64-GenericCloud.qcow2
-      sha256: e324e3ab1d24a1bbf035ddb365e7f9058c0b454acf48d7aa15c5519fae5998ab
+      url:    "{{ lookup('oo_option', 'image_url') |
+                  default('http://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.qcow2', True) }}"
+      name:   "{{ lookup('oo_option', 'image_name') |
+                  default('CentOS-7-x86_64-GenericCloud.qcow2', True) }}"
+      sha256: "{{ lookup('oo_option', 'image_sha256') |
+                  default('e324e3ab1d24a1bbf035ddb365e7f9058c0b454acf48d7aa15c5519fae5998ab', True) }}"
     ssh_user: openshift
     sudo: yes
   online:
@@ -21,9 +24,12 @@ deployment_vars:
     sudo: no
   enterprise:
     image:
-      url:
-      name:
-      sha256:
+      url:    "{{ lookup('oo_option', 'image_url') |
+                  default('https://access.cdn.redhat.com//content/origin/files/sha256/ff/ff8198653cfd9c39411fc57077451ac291b3a605d305e905932fd6d5b1890bf3/rhel-guest-image-7.1-20150224.0.x86_64.qcow2', True) }}"
+      name:   "{{ lookup('oo_option', 'image_name') |
+                  default('rhel-guest-image-7.1-20150224.0.x86_64.qcow2', True) }}"
+      sha256: "{{ lookup('oo_option', 'image_sha256') |
+                  default('ff8198653cfd9c39411fc57077451ac291b3a605d305e905932fd6d5b1890bf3', True) }}"
     ssh_user: openshift
     sudo: yes
 #  origin:

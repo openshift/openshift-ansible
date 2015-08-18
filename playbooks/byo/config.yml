@@ -1,6 +1,2 @@
 ---
-- name: Run the openshift-master config playbook
-  include: openshift-master/config.yml
-
-- name: Run the openshift-node config playbook
-  include: openshift-node/config.yml
+- include: openshift-cluster/config.yml

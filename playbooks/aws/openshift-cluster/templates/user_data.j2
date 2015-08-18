@@ -1,0 +1,45 @@
+#cloud-config
+{% if type =='etcd' %}
+cloud_config_modules:
+- disk_setup
+- mounts
+
+mounts:
+- [ xvdb, /var/lib/etcd, xfs, "defaults" ]
+
+disk_setup:
+  xvdb:
+    table_type: mbr
+    layout: True
+
+fs_setup:
+- label: etcd_storage
+  filesystem: xfs
+  device: /dev/xvdb
+  partition: auto
+{% endif %}
+
+{% if type == 'node' %}
+mounts:
+- [ xvdb ]
+- [ ephemeral0 ]
+
+write_files:
+- content: |
+    DEVS=/dev/xvdb
+    VG=docker_vg
+  path: /etc/sysconfig/docker-storage-setup
+  owner: root:root
+  permissions: '0644'
+{% endif %}
+
+{% if deployment_type == 'online' %}
+devices: ['/var'] # Workaround for https://bugs.launchpad.net/bugs/1455436
+
+disable_root: 0
+growpart:
+  mode: auto
+  devices: ['/var']
+runcmd:
+- xfs_growfs /var
+{% endif %}

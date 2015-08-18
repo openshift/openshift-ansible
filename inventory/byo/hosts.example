@@ -1,0 +1,76 @@
+# This is an example of a bring your own (byo) host inventory
+
+# Create an OSEv3 group that contains the masters and nodes groups
+[OSEv3:children]
+masters
+nodes
+etcd
+
+# Set variables common for all OSEv3 hosts
+[OSEv3:vars]
+# SSH user, this user should allow ssh based auth without requiring a
+# password. If using ssh key based auth, then the key should be managed by an
+# ssh agent.
+ansible_ssh_user=root
+
+# If ansible_ssh_user is not root, ansible_sudo must be set to true and the
+# user must be configured for passwordless sudo
+#ansible_sudo=true
+
+# deployment type valid values are origin, online and enterprise
+deployment_type=enterprise
+
+# Pre-release registry URL
+#oreg_url=docker-buildvm-rhose.usersys.redhat.com:5000/openshift3/ose-${component}:${version}
+
+# Pre-release Dev puddle repo
+#openshift_additional_repos=[{'id': 'ose-devel', 'name': 'ose-devel', 'baseurl': 'http://buildvm-devops.usersys.redhat.com/puddle/build/OpenShiftEnterprise/3.0/latest/RH7-RHOSE-3.0/$basearch/os', 'enabled': 1, 'gpgcheck': 0}]
+
+# Pre-release Errata puddle repo
+#openshift_additional_repos=[{'id': 'ose-devel', 'name': 'ose-devel', 'baseurl': 'http://buildvm-devops.usersys.redhat.com/puddle/build/OpenShiftEnterpriseErrata/3.0/latest/RH7-RHOSE-3.0/$basearch/os', 'enabled': 1, 'gpgcheck': 0}]
+
+# Origin copr repo
+#openshift_additional_repos=[{'id': 'openshift-origin-copr', 'name': 'OpenShift Origin COPR', 'baseurl': 'https://copr-be.cloud.fedoraproject.org/results/maxamillion/origin-next/epel-7-$basearch/', 'enabled': 1, 'gpgcheck': 1, gpgkey: 'https://copr-be.cloud.fedoraproject.org/results/maxamillion/origin-next/pubkey.gpg'}]
+
+# htpasswd auth
+openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/openshift/htpasswd'}]
+
+# Allow all auth
+#openshift_master_identity_providers=[{'name': 'allow_all', 'login': 'true', 'challenge': 'true', 'kind': 'AllowAllPasswordIdentityProvider'}]
+
+# master cluster ha variables using pacemaker or RHEL HA
+#openshift_master_cluster_password=openshift_cluster
+#openshift_master_cluster_vip=192.168.133.25
+#openshift_master_cluster_public_vip=192.168.133.25
+#openshift_master_cluster_hostname=openshift-ansible.test.example.com
+#openshift_master_cluster_public_hostname=openshift-ansible.test.example.com
+
+# master cluster ha variables when using a different HA solution
+# For installation the value of openshift_master_cluster_hostname must resolve
+# to the first master defined in the inventory.
+# The HA solution must be manually configured after installation and must ensure
+# that openshift-master is running on a single master host.
+#openshift_master_cluster_hostname=openshift-ansible.test.example.com
+#openshift_master_cluster_public_hostname=openshift-ansible.test.example.com
+#openshift_master_cluster_defer_ha=True
+
+# default subdomain to use for exposed routes
+#osm_default_subdomain=apps.test.example.com
+
+# additional cors origins
+#osm_custom_cors_origins=['foo.example.com', 'bar.example.com'] 
+
+# default project node selector
+#osm_default_node_selector='region=primary'
+
+# host group for masters
+[masters]
+ose3-master[1:3]-ansible.test.example.com
+
+[etcd]
+ose3-etcd[1:3]-ansible.test.example.com
+
+# host group for nodes
+[nodes]
+ose3-master[1:3]-ansible.test.example.com openshift_scheduleable=False
+ose3-node[1:2]-ansible.test.example.com openshift_node_labels="{'region': 'primary', 'zone': 'default'}"

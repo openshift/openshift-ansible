@@ -21,4 +21,4 @@
   gather_facts: no
   tasks:
   - debug:
-      msg: "public ip:{{ hostvars[inventory_hostname].ec2_ip_address }} private ip:{{ hostvars[inventory_hostname].ec2_private_ip_address }} deployment-type: {{ hostvars[inventory_hostname].group_names | oo_get_deployment_type_from_groups }}"
+      msg: "public ip:{{ hostvars[inventory_hostname].ec2_ip_address }} private ip:{{ hostvars[inventory_hostname].ec2_private_ip_address }}"

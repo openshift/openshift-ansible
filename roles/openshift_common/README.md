@@ -1,13 +1,13 @@
-OpenShift Common
-================
+OpenShift/Atomic Enterprise Common
+===================================
 
-OpenShift common installation and configuration tasks.
+OpenShift/Atomic Enterprise common installation and configuration tasks.
 
 Requirements
 ------------
 
 A RHEL 7.1 host pre-configured with access to the rhel-7-server-rpms,
-rhel-7-server-extra-rpms, and rhel-7-server-ose-beta-rpms repos.
+rhel-7-server-extra-rpms, and rhel-7-server-ose-3.0-rpms repos.
 
 Role Variables
 --------------

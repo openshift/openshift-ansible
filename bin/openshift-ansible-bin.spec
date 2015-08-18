@@ -1,6 +1,6 @@
 Summary:       OpenShift Ansible Scripts for working with metadata hosts
 Name:          openshift-ansible-bin
-Version:       0.0.8
+Version:       0.0.18
 Release:       1%{?dist}
 License:       ASL 2.0
 URL:           https://github.com/openshift/openshift-ansible
@@ -23,8 +23,14 @@ mkdir -p %{buildroot}%{python_sitelib}/openshift_ansible
 mkdir -p %{buildroot}/etc/bash_completion.d
 mkdir -p %{buildroot}/etc/openshift_ansible
 
-cp -p ossh oscp opssh ohi %{buildroot}%{_bindir}
-cp -p openshift_ansible/* %{buildroot}%{python_sitelib}/openshift_ansible
+cp -p ossh oscp opssh opscp ohi %{buildroot}%{_bindir}
+cp -pP openshift_ansible/* %{buildroot}%{python_sitelib}/openshift_ansible
+
+# Make it so we can load multi_ec2.py as a library.
+rm %{buildroot}%{python_sitelib}/openshift_ansible/multi_ec2.py*
+ln -sf /usr/share/ansible/inventory/multi_ec2.py %{buildroot}%{python_sitelib}/openshift_ansible/multi_ec2.py
+ln -sf /usr/share/ansible/inventory/multi_ec2.pyc %{buildroot}%{python_sitelib}/openshift_ansible/multi_ec2.pyc
+
 cp -p ossh_bash_completion %{buildroot}/etc/bash_completion.d
 
 cp -p openshift_ansible.conf.example %{buildroot}/etc/openshift_ansible/openshift_ansible.conf
@@ -36,6 +42,39 @@ cp -p openshift_ansible.conf.example %{buildroot}/etc/openshift_ansible/openshif
 %config(noreplace) /etc/openshift_ansible/
 
 %changelog
+* Tue Jun 09 2015 Kenny Woodson <kwoodson@redhat.com> 0.0.18-1
+- Implement OpenStack provider (lhuard@amadeus.com)
+- * Update defaults and examples to track core concepts guide
+  (jhonce@redhat.com)
+- Issue 119 - Add support for ~/.openshift-ansible (jhonce@redhat.com)
+- Infrastructure - Add service action to bin/cluster (jhonce@redhat.com)
+
+* Fri May 15 2015 Thomas Wiest <twiest@redhat.com> 0.0.17-1
+- fixed the openshift-ansible-bin build (twiest@redhat.com)
+
+* Fri May 15 2015 Thomas Wiest <twiest@redhat.com> 0.0.14-1
+- Command line tools import multi_ec2 as lib (kwoodson@redhat.com)
+- Adding cache location for multi ec2 (kwoodson@redhat.com)
+* Thu May 07 2015 Thomas Wiest <twiest@redhat.com> 0.0.13-1
+- added '-e all' to ohi and fixed pylint errors. (twiest@redhat.com)
+
+* Tue May 05 2015 Thomas Wiest <twiest@redhat.com> 0.0.12-1
+- fixed opssh and opscp to allow just environment or just host-type.
+  (twiest@redhat.com)
+
+* Mon May 04 2015 Thomas Wiest <twiest@redhat.com> 0.0.11-1
+- changed opssh to a bash script using ohi to make it easier to maintain, and
+  to expose all of the pssh features directly. (twiest@redhat.com)
+- Added --user option to ohi to pre-pend the username in the hostlist output.
+  (twiest@redhat.com)
+- Added utils.py that contains a normalize_dnsname function good for sorting
+  dns names to a human readable list. (twiest@redhat.com)
+
+* Thu Apr 30 2015 Thomas Wiest <twiest@redhat.com> 0.0.10-1
+- added --list-host-types option to opscp (twiest@redhat.com)
+
+* Thu Apr 30 2015 Thomas Wiest <twiest@redhat.com> 0.0.9-1
+- added opscp (twiest@redhat.com)
 * Mon Apr 13 2015 Thomas Wiest <twiest@redhat.com> 0.0.8-1
 - fixed bug in opssh where it wouldn't actually run pssh (twiest@redhat.com)
 

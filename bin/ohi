@@ -12,15 +12,15 @@ import subprocess
 import ConfigParser
 
 from openshift_ansible import awsutil
+from openshift_ansible import utils
 from openshift_ansible.awsutil import ArgumentError
 
 CONFIG_MAIN_SECTION = 'main'
 CONFIG_HOST_TYPE_ALIAS_SECTION = 'host_type_aliases'
-CONFIG_INVENTORY_OPTION = 'inventory'
+
 
 class Ohi(object):
     def __init__(self):
-        self.inventory = None
         self.host_type_aliases = {}
         self.file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)))
 
@@ -32,7 +32,7 @@ class Ohi(object):
         self.parse_cli_args()
         self.parse_config_file()
 
-        self.aws = awsutil.AwsUtil(self.inventory, self.host_type_aliases)
+        self.aws = awsutil.AwsUtil(self.host_type_aliases)
 
     def run(self):
         if self.args.list_host_types:
@@ -44,12 +44,12 @@ class Ohi(object):
            self.args.env is not None:
             # Both env and host-type specified
             hosts = self.aws.get_host_list(host_type=self.args.host_type, \
-                                           env=self.args.env)
+                                           envs=self.args.env)
 
         if self.args.host_type is None and \
            self.args.env is not None:
             # Only env specified
-            hosts = self.aws.get_host_list(env=self.args.env)
+            hosts = self.aws.get_host_list(envs=self.args.env)
 
         if self.args.host_type is not None and \
            self.args.env is None:
@@ -60,18 +60,18 @@ class Ohi(object):
             # We weren't able to determine what they wanted to do
             raise ArgumentError("Invalid combination of arguments")
 
-        for host in hosts:
-            print host
+        for host in sorted(hosts, key=utils.normalize_dnsname):
+            if self.args.user:
+                print "%s@%s" % (self.args.user, host)
+            else:
+                print host
+
         return 0
 
     def parse_config_file(self):
         if os.path.isfile(self.config_path):
             config = ConfigParser.ConfigParser()
             config.read(self.config_path)
-
-            if config.has_section(CONFIG_MAIN_SECTION) and \
-               config.has_option(CONFIG_MAIN_SECTION, CONFIG_INVENTORY_OPTION):
-                self.inventory = config.get(CONFIG_MAIN_SECTION, CONFIG_INVENTORY_OPTION)
 
             self.host_type_aliases = {}
             if config.has_section(CONFIG_HOST_TYPE_ALIAS_SECTION):
@@ -83,7 +83,7 @@ class Ohi(object):
         """Setup the command line parser with the options we want
         """
 
-        parser = argparse.ArgumentParser(description='Openshift Host Inventory')
+        parser = argparse.ArgumentParser(description='OpenShift Host Inventory')
 
         parser.add_argument('--list-host-types', default=False, action='store_true',
                        help='List all of the host types')
@@ -93,6 +93,10 @@ class Ohi(object):
 
         parser.add_argument('-t', '--host-type', action="store",
                        help="Which host type to use")
+
+        parser.add_argument('-l', '--user', action='store', default=None,
+                               help='username')
+
 
         self.args = parser.parse_args()
 

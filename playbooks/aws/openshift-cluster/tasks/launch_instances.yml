@@ -1,9 +1,11 @@
 ---
 - set_fact:
     created_by: "{{ lookup('env', 'LOGNAME')|default(cluster, true) }}"
+    docker_vol_ephemeral: "{{ lookup('env', 'os_docker_vol_ephemeral') | default(false, true) }}"
     env: "{{ cluster }}"
     env_host_type: "{{ cluster }}-openshift-{{ type }}"
     host_type: "{{ type }}"
+    sub_host_type: "{{ g_sub_host_type }}"
 
 - set_fact:
     ec2_region: "{{ lookup('env', 'ec2_region')
@@ -33,6 +35,35 @@
     ec2_assign_public_ip: "{{ lookup('env', 'ec2_assign_public_ip')
                     | default(deployment_vars[deployment_type].assign_public_ip, true) }}"
   when: ec2_assign_public_ip is not defined
+
+- set_fact:
+    ec2_instance_type: "{{ ec2_master_instance_type | default(deployment_vars[deployment_type].type, true) }}"
+    ec2_security_groups: "{{ ec2_master_security_groups
+                    | default(deployment_vars[deployment_type].security_groups, true) }}"
+  when: host_type == "master" and sub_host_type == "default"
+
+- set_fact:
+    ec2_instance_type: "{{ ec2_etcd_instance_type | default(deployment_vars[deployment_type].type, true) }}"
+    ec2_security_groups: "{{ ec2_etcd_security_groups
+                    | default(deployment_vars[deployment_type].security_groups, true)}}"
+  when: host_type == "etcd" and sub_host_type == "default"
+
+- set_fact:
+    ec2_instance_type: "{{ ec2_infra_instance_type | default(deployment_vars[deployment_type].type, true) }}"
+    ec2_security_groups: "{{ ec2_infra_security_groups
+                    | default(deployment_vars[deployment_type].security_groups, true) }}"
+  when: host_type == "node" and sub_host_type == "infra"
+
+- set_fact:
+    ec2_instance_type: "{{ ec2_node_instance_type | default(deployment_vars[deployment_type].type, true) }}"
+    ec2_security_groups: "{{ ec2_node_security_groups
+                    | default(deployment_vars[deployment_type].security_groups, true) }}"
+  when: host_type == "node" and sub_host_type == "compute"
+
+- set_fact:
+    ec2_instance_type: "{{ lookup('env', 'ec2_instance_type')
+                          | default(deployment_vars[deployment_type].type, true) }}"
+  when: ec2_instance_type is not defined
 - set_fact:
     ec2_security_groups: "{{ lookup('env', 'ec2_security_groups')
                     | default(deployment_vars[deployment_type].security_groups, true) }}"
@@ -50,6 +81,34 @@
 
 - set_fact:
     latest_ami: "{{ ami_result.results | oo_ami_selector(ec2_image_name) }}"
+    user_data: "{{ lookup('template', '../templates/user_data.j2') }}"
+    volume_defs:
+      etcd:
+        root:
+          volume_size: "{{ lookup('env', 'os_etcd_root_vol_size') | default(25, true) }}"
+          device_type: "{{ lookup('env', 'os_etcd_root_vol_type') | default('gp2', true) }}"
+          iops: "{{ lookup('env', 'os_etcd_root_vol_iops') | default(500, true) }}"
+        etcd:
+          volume_size: "{{ lookup('env', 'os_etcd_vol_size') | default(32, true) }}"
+          device_type: "{{ lookup('env', 'os_etcd_vol_type') | default('gp2', true) }}"
+          iops: "{{ lookup('env', 'os_etcd_vol_iops') | default(500, true) }}"
+      master:
+        root:
+          volume_size: "{{ lookup('env', 'os_master_root_vol_size') | default(25, true) }}"
+          device_type: "{{ lookup('env', 'os_master_root_vol_type') | default('gp2', true) }}"
+          iops: "{{ lookup('env', 'os_master_root_vol_iops') | default(500, true) }}"
+      node:
+        root:
+          volume_size: "{{ lookup('env', 'os_node_root_vol_size') | default(85, true) }}"
+          device_type: "{{ lookup('env', 'os_node_root_vol_type') | default('gp2', true) }}"
+          iops: "{{ lookup('env', 'os_node_root_vol_iops') | default(500, true) }}"
+        docker:
+          volume_size: "{{ lookup('env', 'os_docker_vol_size') | default(32, true) }}"
+          device_type: "{{ lookup('env', 'os_docker_vol_type') | default('gp2', true) }}"
+          iops: "{{ lookup('env', 'os_docker_vol_iops') | default(500, true) }}"
+
+- set_fact:
+    volumes: "{{ volume_defs | oo_ec2_volume_definition(host_type, docker_vol_ephemeral | bool) }}"
 
 - name: Launch instance(s)
   ec2:
@@ -59,15 +118,19 @@
     group: "{{ ec2_security_groups }}"
     instance_type: "{{ ec2_instance_type }}"
     image: "{{ latest_ami }}"
-    count: "{{ instances | oo_len }}"
+    count: "{{ instances | length }}"
     vpc_subnet_id: "{{ ec2_vpc_subnet | default(omit, true) }}"
     assign_public_ip: "{{ ec2_assign_public_ip | default(omit, true) }}"
+    user_data: "{{ user_data }}"
     wait: yes
     instance_tags:
       created-by: "{{ created_by }}"
+      environment: "{{ env }}"
       env: "{{ env }}"
       host-type: "{{ host_type }}"
       env-host-type: "{{ env_host_type }}"
+      sub-host-type: "{{ sub_host_type }}"
+    volumes: "{{ volumes }}"
   register: ec2
 
 - name: Add Name tag to instances
@@ -80,7 +143,9 @@
       Name: "{{ item.0 }}"
 
 - set_fact:
-    instance_groups: tag_created-by_{{ created_by }}, tag_env_{{ env }}, tag_host-type_{{ host_type }}, tag_env-host-type_{{ env_host_type }}
+    instance_groups: "tag_created-by_{{ created_by }}, tag_env_{{ env }},
+                    tag_host-type_{{ host_type }}, tag_env-host-type_{{ env_host_type }},
+                    tag_sub-host-type_{{ sub_host_type }}"
 
 - name: Add new instances groups and variables
   add_host:

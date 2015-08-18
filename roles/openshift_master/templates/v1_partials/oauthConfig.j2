@@ -1,0 +1,92 @@
+{% macro identity_provider_config(identity_provider) %}
+      apiVersion: v1
+      kind: {{ identity_provider.kind }}
+{% if identity_provider.kind == 'HTPasswdPasswordIdentityProvider' %}
+      file: {{ identity_provider.filename }}
+{% elif identity_provider.kind == 'BasicAuthPasswordIdentityProvider' %}
+      url: {{ identity_provider.url }}
+{% for key in ('ca', 'certFile', 'keyFile') %}
+{% if key in identity_provider %}
+      {{ key }}: {{ identity_provider[key] }}"
+{% endif %}
+{% endfor %}
+{% elif identity_provider.kind == 'LDAPPasswordIdentityProvider' %}
+      attributes:
+{% for attribute_key in identity_provider.attributes %}
+        {{ attribute_key }}:
+{% for attribute_value in identity_provider.attributes[attribute_key] %}
+        - {{ attribute_value }}
+{% endfor %}
+{% endfor %}
+{% for key in ('bindDN', 'bindPassword', 'ca') %}
+      {{ key }}: "{{ identity_provider[key] }}"
+{% endfor %}
+{% for key in ('insecure', 'url') %}
+      {{ key }}: {{ identity_provider[key] }}
+{% endfor %}
+{% elif identity_provider.kind == 'RequestHeaderIdentityProvider' %}
+      headers: {{ identity_provider.headers }}
+{% if 'clientCA' in identity_provider %}
+      clientCA: {{ identity_provider.clientCA }}
+{% endif %}
+{% elif identity_provider.kind == 'GitHubIdentityProvider' %}
+      clientID: {{ identity_provider.clientID }}
+      clientSecret: {{ identity_provider.clientSecret }}
+{% elif identity_provider.kind == 'GoogleIdentityProvider' %}
+      clientID: {{ identity_provider.clientID }}
+      clientSecret: {{ identity_provider.clientSecret }}
+{% if 'hostedDomain' in identity_provider %}
+      hostedDomain: {{ identity_provider.hostedDomain }}
+{% endif %}
+{% elif identity_provider.kind == 'OpenIDIdentityProvider' %}
+      clientID: {{ identity_provider.clientID }}
+      clientSecret: {{ identity_provider.clientSecret }}
+      claims:
+        id: identity_provider.claims.id
+{% for claim_key in ('preferredUsername', 'name', 'email') %}
+{% if claim_key in identity_provider.claims %}
+        {{ claim_key }}: {{ identity_provider.claims[claim_key] }}
+{% endif %}
+{% endfor %}
+      urls:
+        authorize: {{ identity_provider.urls.authorize }}
+        token: {{ identity_provider.urls.token }}
+{% if 'userInfo' in identity_provider.urls %}
+        userInfo: {{ identity_provider.userInfo }}
+{% endif %}
+{% if 'extraScopes' in identity_provider %}
+      extraScopes:
+{% for scope in identity_provider.extraScopes %}
+      - {{ scope }}
+{% endfor %}
+{% endif %}
+{% if 'extraAuthorizeParameters' in identity_provider %}
+      extraAuthorizeParameters:
+{% for param_key, param_value in identity_provider.extraAuthorizeParameters.iteritems() %}
+        {{ param_key }}: {{ param_value }}
+{% endfor %}
+{% endif %}
+{% endif %}
+{% endmacro %}
+oauthConfig:
+  assetPublicURL: {{ openshift.master.public_console_url }}/
+  grantConfig:
+    method: {{ openshift.master.oauth_grant_method }}
+  identityProviders:
+{% for identity_provider in openshift.master.identity_providers %}
+  - name: {{ identity_provider.name }}
+    challenge: {{ identity_provider.challenge }}
+    login: {{ identity_provider.login }}
+    provider:
+{{ identity_provider_config(identity_provider) }}
+{%- endfor %}
+  masterPublicURL: {{ openshift.master.public_api_url }}
+  masterURL: {{ openshift.master.api_url }}
+  sessionConfig:
+    sessionMaxAgeSeconds: {{ openshift.master.session_max_seconds }}
+    sessionName: {{ openshift.master.session_name }}
+    sessionSecretsFile: {{ openshift.master.session_secrets_file }}
+  tokenConfig:
+    accessTokenMaxAgeSeconds: {{ openshift.master.access_token_max_seconds }}
+    authorizeTokenMaxAgeSeconds: {{ openshift.master.auth_token_max_seconds }}
+{# Comment to preserve newline after authorizeTokenMaxAgeSeconds #}
