@@ -3,7 +3,7 @@ ec2_image: ami-9101c8fa
 ec2_image_name: libra-ops-rhel7*
 ec2_region: us-east-1
 ec2_keypair: mmcgrath_libra
-ec2_master_instance_type: t2.small
+ec2_master_instance_type: t2.medium
 ec2_master_security_groups: [ 'stage', 'stage-master' ]
 ec2_infra_instance_type: c4.large
 ec2_infra_security_groups: [ 'stage', 'stage-infra' ]

@@ -142,10 +142,14 @@ class Cluster(object):
         """
         config = ConfigParser.ConfigParser()
         if 'gce' == provider:
-            config.readfp(open('inventory/gce/hosts/gce.ini'))
+            gce_ini_default_path = os.path.join(
+                'inventory/gce/hosts/gce.ini')
+            gce_ini_path = os.environ.get('GCE_INI_PATH', gce_ini_default_path)
+            if os.path.exists(gce_ini_path): 
+                config.readfp(open(gce_ini_path))
 
-            for key in config.options('gce'):
-                os.environ[key] = config.get('gce', key)
+                for key in config.options('gce'):
+                    os.environ[key] = config.get('gce', key)
 
             inventory = '-i inventory/gce/hosts'
         elif 'aws' == provider:
@@ -164,7 +168,7 @@ class Cluster(object):
             boto_configs = [conf for conf in boto_conf_files if conf_exists(conf)]
 
             if len(key_missing) > 0 and len(boto_configs) == 0:
-                raise ValueError("PROVIDER aws requires {} environment variable(s). See README_AWS.md".format(missing))
+                raise ValueError("PROVIDER aws requires {} environment variable(s). See README_AWS.md".format(key_missing))
 
         elif 'libvirt' == provider:
             inventory = '-i inventory/libvirt/hosts'
@@ -193,7 +197,7 @@ class Cluster(object):
         if args.option:
             for opt in args.option:
                 k, v = opt.split('=', 1)
-                env['cli_' + k] = v
+                env[k] = v
 
         ansible_env = '-e \'{}\''.format(
             ' '.join(['%s=%s' % (key, value) for (key, value) in env.items()])
