@@ -7,7 +7,7 @@
       url: {{ identity_provider.url }}
 {% for key in ('ca', 'certFile', 'keyFile') %}
 {% if key in identity_provider %}
-      {{ key }}: {{ identity_provider[key] }}"
+      {{ key }}: "{{ identity_provider[key] }}"
 {% endif %}
 {% endfor %}
 {% elif identity_provider.kind == 'LDAPPasswordIdentityProvider' %}
