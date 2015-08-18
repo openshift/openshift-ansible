@@ -10,10 +10,6 @@
     msg: "SELinux is disabled, This deployment type requires that SELinux is enabled."
   when: (not ansible_selinux or ansible_selinux.status != 'enabled') and deployment_type in ['enterprise', 'online']
 
-- name: Install Node package
-  yum: pkg={{ product_type }}-node state=present
-  register: node_install_result
-
 - name: Set node facts
   openshift_facts:
     role: "{{ item.role }}"
@@ -24,8 +20,8 @@
       hostname: "{{ openshift_hostname | default(none) }}"
       public_hostname: "{{ openshift_public_hostname | default(none) }}"
       deployment_type: "{{ openshift_deployment_type }}"
-      product_type: "{{ openshift_product_type }}"
-      service_type: "{{ 'origin' if deployment_type == 'origin' else 'atomic-enterprise' }}"
+      product_type: "{{ openshift_product_type | default('openshift') }}"
+      service_type: "{{ 'origin' if deployment_type == 'origin' else 'atomic-openshift' }}"
   - role: node
     local_facts:
       labels: "{{ openshift_node_labels | default(none) }}"
@@ -35,10 +31,13 @@
       portal_net: "{{ openshift_master_portal_net | default(None) }}"
       kubelet_args: "{{ openshift_node_kubelet_args | default(None) }}"
       product_type: "{{ openshift_product_type | default('openshift') }}"
-      service_type: "{{ 'origin' if deployment_type == 'origin' else 'atomic-enterprise' }}"
+
+- name: Install Node package
+  yum: pkg={{ openshift.common.service_type }}-node state=present
+  register: node_install_result
 
 - name: Install sdn-ovs package
-  yum: pkg={{ product_type }}-sdn-ovs state=present
+  yum: pkg={{ openshift.common.service_type }}-sdn-ovs state=present
   register: sdn_install_result
   when: openshift.common.use_openshift_sdn
 
@@ -52,7 +51,7 @@
 
 - name: Configure Node settings
   lineinfile:
-    dest: /etc/sysconfig/{{ product_type }}-node
+    dest: /etc/sysconfig/{{ openshift.common.service_type }}-node
     regexp: "{{ item.regex }}"
     line: "{{ item.line }}"
   with_items:
@@ -80,7 +79,7 @@
   when: ansible_selinux and ansible_selinux.status == "enabled"
 
 - name: Start and enable node
-  service: name={{ service_type }}-node enabled=yes state=started
+  service: name={{ openshift.common.service_type }}-node enabled=yes state=started
   register: start_result
 
 - name: pause to prevent service restart from interfering with bootstrapping

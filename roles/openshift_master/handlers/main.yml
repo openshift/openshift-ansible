@@ -1,4 +1,4 @@
 ---
 - name: restart master
-  service: name={{ service_type }}-master state=restarted
+  service: name={{ openshift.common.service_type }}-master state=restarted
   when: not openshift_master_ha | bool

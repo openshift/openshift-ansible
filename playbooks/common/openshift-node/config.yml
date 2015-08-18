@@ -17,12 +17,12 @@
           public_hostname: "{{ openshift_public_hostname | default(None) }}"
           deployment_type: "{{ openshift_deployment_type }}"
           product_type: "{{ openshift_product_type }}"
-          service_type: "{{ 'origin' if deployment_type == 'origin' else 'atomic-enterprise' }}"
+          service_type: "{{ 'origin' if deployment_type == 'origin' else 'atomic-openshift' }}"
       - role: node
         local_facts:
           labels: "{{ openshift_node_labels | default(None) }}"
           annotations: "{{ openshift_node_annotations | default(None) }}"
-          service_type: "{{ 'origin' if deployment_type == 'origin' else 'atomic-enterprise' }}"
+          service_type: "{{ 'origin' if deployment_type == 'origin' else 'atomic-openshift' }}"
   - name: Check status of node certificates
     stat:
       path: "/etc/openshift/node/{{ item }}"
