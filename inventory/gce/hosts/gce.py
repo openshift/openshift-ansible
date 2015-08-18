@@ -120,6 +120,8 @@ class GceInventory(object):
             os.path.dirname(os.path.realpath(__file__)), "gce.ini")
         gce_ini_path = os.environ.get('GCE_INI_PATH', gce_ini_default_path)
 
+	print "GCE INI PATH :: "+gce_ini_path
+
         # Create a ConfigParser.
         # This provides empty defaults to each key, so that environment
         # variable configuration (as opposed to INI configuration) is able
@@ -173,6 +175,10 @@ class GceInventory(object):
         args[1] = os.environ.get('GCE_PEM_FILE_PATH', args[1])
         kwargs['project'] = os.environ.get('GCE_PROJECT', kwargs['project'])
 
+	sys.stderr.write("GCE_EMAIL : "+args[0]+"\n")
+	sys.stderr.write("GCE_PEM_FILE_PATH : "+args[1]+"\n")
+	sys.stderr.write("GCE_PROJECT : "+kwargs['project']+"\n")
+
         # Retrieve and return the GCE driver.
         gce = get_driver(Provider.GCE)(*args, **kwargs)
         gce.connection.user_agent_append(
@@ -211,7 +217,7 @@ class GceInventory(object):
             'gce_image': inst.image,
             'gce_machine_type': inst.size,
             'gce_private_ip': inst.private_ips[0],
-            'gce_public_ip': inst.public_ips[0],
+            #'gce_public_ip': inst.public_ips[0],
             'gce_name': inst.name,
             'gce_description': inst.extra['description'],
             'gce_status': inst.extra['status'],
@@ -220,7 +226,7 @@ class GceInventory(object):
             'gce_metadata': md,
             'gce_network': net,
             # Hosts don't have a public name, so we add an IP
-            'ansible_ssh_host': inst.public_ips[0]
+            #'ansible_ssh_host': inst.public_ips[0]
         }
 
     def get_instance(self, instance_name):
@@ -284,4 +290,5 @@ class GceInventory(object):
 
 
 # Run the script
+print "Hello world"
 GceInventory()

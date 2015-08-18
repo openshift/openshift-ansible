@@ -63,6 +63,7 @@ class Cluster(object):
         env['num_nodes'] = args.nodes
         env['num_infra'] = args.infra
         env['num_etcd'] = args.etcd
+        env['sub_host_type'] = "sub_host_bidon"
 
         return self.action(args, inventory, env, playbook)
 

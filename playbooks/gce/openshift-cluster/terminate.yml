@@ -32,14 +32,14 @@
           lookup('oo_option', 'rhel_skip_subscription') | default(rhsub_skip, True) |
             default('no', True) | lower in ['no', 'false']
 
-- include: ../openshift-node/terminate.yml
-  vars:
-    gce_service_account_email: "{{ lookup('env', 'gce_service_account_email_address') }}"
-    gce_pem_file: "{{ lookup('env', 'gce_service_account_pem_file_path') }}"
-    gce_project_id: "{{ lookup('env', 'gce_project_id') }}"
-
-- include: ../openshift-master/terminate.yml
-  vars:
-    gce_service_account_email: "{{ lookup('env', 'gce_service_account_email_address') }}"
-    gce_pem_file: "{{ lookup('env', 'gce_service_account_pem_file_path') }}"
-    gce_project_id: "{{ lookup('env', 'gce_project_id') }}"
+#- include: ../openshift-node/terminate.yml
+#  vars:
+#    gce_service_account_email: "{{ lookup('env', 'gce_service_account_email_address') }}"
+#    gce_pem_file: "{{ lookup('env', 'gce_service_account_pem_file_path') }}"
+#    gce_project_id: "{{ lookup('env', 'gce_project_id') }}"
+#
+#- include: ../openshift-master/terminate.yml
+#  vars:
+#    gce_service_account_email: "{{ lookup('env', 'gce_service_account_email_address') }}"
+#    gce_pem_file: "{{ lookup('env', 'gce_service_account_pem_file_path') }}"
+#    gce_project_id: "{{ lookup('env', 'gce_project_id') }}"
