@@ -88,6 +88,12 @@ parameters:
     label: Infra flavor
     description: Flavor of the infra node servers
 
+  key_pair:
+    type: string
+    label: Key name
+    description: Name of the key
+
+
 outputs:
 
   master_names:
@@ -250,6 +256,14 @@ resources:
           port_range_max: 10250
           remote_mode: remote_group_id
           remote_group_id: { get_resource: master-secgrp }
+        - direction: ingress
+          protocol: tcp
+          port_range_min: 30001 
+          port_range_max: 30001
+        - direction: ingress
+          protocol: tcp
+          port_range_min: 30850 
+          port_range_max: 30850
 
   infra-secgrp:
     type: OS::Neutron::SecurityGroup
@@ -291,7 +305,7 @@ resources:
           type:       master
           image:      { get_param: master_image }
           flavor:     { get_param: master_flavor }
-          key_name:   { get_resource: keypair }
+          key_name:   { get_param: key_pair }
           net:        { get_resource: net }
           subnet:     { get_resource: subnet }
           secgrp:
@@ -323,7 +337,7 @@ resources:
           subtype:    compute
           image:      { get_param: node_image }
           flavor:     { get_param: node_flavor }
-          key_name:   { get_resource: keypair }
+          key_name:   { get_param: key_pair }
           net:        { get_resource: net }
           subnet:     { get_resource: subnet }
           secgrp:
@@ -355,7 +369,7 @@ resources:
           subtype:    infra
           image:      { get_param: infra_image }
           flavor:     { get_param: infra_flavor }
-          key_name:   { get_resource: keypair }
+          key_name:   { get_param: key_pair }
           net:        { get_resource: net }
           subnet:     { get_resource: subnet }
           secgrp:

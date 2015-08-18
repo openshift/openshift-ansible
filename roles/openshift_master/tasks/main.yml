@@ -8,6 +8,15 @@
     - openshift_master_oauth_grant_method in openshift_master_valid_grant_methods
   when: openshift_master_oauth_grant_method is defined
 
+- name: Displaying openshift_master_ha
+  debug: var=openshift_master_ha
+
+- name: openshift_master_cluster_password
+  debug: var=openshift_master_cluster_password
+
+- name: openshift.master.cluster_defer_ha
+  debug: var=openshift.master.cluster_defer_ha
+
 - fail:
     msg: "openshift_master_cluster_password must be set for multi-master installations"
   when: openshift_master_ha | bool and not openshift.master.cluster_defer_ha | bool and openshift_master_cluster_password is not defined
@@ -23,7 +32,7 @@
       api_port: "{{ openshift_master_api_port | default(None) }}"
       api_url: "{{ openshift_master_api_url | default(None) }}"
       api_use_ssl: "{{ openshift_master_api_use_ssl | default(None) }}"
-      public_api_url: "{{ openshift_master_public_api_url | default(None) }}"
+      public_api_url: "{{ openshift_master_public_api_url | default('https://' ~ openshift.common.public_ip ~ ':8443') }}"
       console_path: "{{ openshift_master_console_path | default(None) }}"
       console_port: "{{ openshift_master_console_port | default(None) }}"
       console_url: "{{ openshift_master_console_url | default(None) }}"

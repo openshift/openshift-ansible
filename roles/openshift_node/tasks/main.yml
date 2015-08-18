@@ -22,7 +22,7 @@
       deployment_type: "{{ openshift_deployment_type }}"
   - role: node
     local_facts:
-      labels: "{{ openshift_node_labels | default(none) }}"
+      labels: "{{ lookup('oo_option', 'openshift_node_labels') | default( openshift_node_labels | default() ) }}"
       annotations: "{{ openshift_node_annotations | default(none) }}"
       registry_url: "{{ oreg_url | default(none) }}"
       debug_level: "{{ openshift_node_debug_level | default(openshift.common.debug_level) }}"
@@ -73,6 +73,12 @@
     dest: /etc/sysconfig/docker
     regexp: '^OPTIONS=.*$'
     line: "OPTIONS='--insecure-registry={{ openshift.node.portal_net }} \
+--insecure-registry=dockerhub.rnd.amadeus.net:5000 \
+--insecure-registry=dockerhub.rnd.amadeus.net:5001 \
+--insecure-registry=dockerhub.rnd.amadeus.net:5002 \
+--add-registry=dockerhub.rnd.amadeus.net:5000 \
+--add-registry=dockerhub.rnd.amadeus.net:5001 \
+--add-registry=dockerhub.rnd.amadeus.net:5002 \
 {% if ansible_selinux and ansible_selinux.status == '''enabled''' %}--selinux-enabled{% endif %}'"
   when: docker_check.stat.isreg
   notify:
