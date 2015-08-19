@@ -25,7 +25,7 @@
           service_type: "{{ 'origin' if deployment_type == 'origin' else 'atomic-openshift' }}"
   - name: Check status of node certificates
     stat:
-      path: "/etc/openshift/node/{{ item }}"
+      path: "{{ openshift.common.config_base }}/node/{{ item }}"
     with_items:
     - "system:node:{{ openshift.common.hostname }}.crt"
     - "system:node:{{ openshift.common.hostname }}.key"
@@ -38,8 +38,8 @@
       certs_missing: "{{ stat_result.results | map(attribute='stat.exists')
                          | list | intersect([false])}}"
       node_subdir: node-{{ openshift.common.hostname }}
-      config_dir: /etc/openshift/generated-configs/node-{{ openshift.common.hostname }}
-      node_cert_dir: /etc/openshift/node
+      config_dir: "{{ openshift.common.config_base }}/generated-configs/node-{{ openshift.common.hostname }}"
+      node_cert_dir: "{{ openshift.common.config_base }}/node"
 
 - name: Create temp directory for syncing certs
   hosts: localhost

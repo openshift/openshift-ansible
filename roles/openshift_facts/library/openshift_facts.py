@@ -735,6 +735,8 @@ class OpenShiftFacts(object):
                       public_hostname=hostname)
         common['client_binary'] = 'oc' if os.path.isfile('/usr/bin/oc') else 'osc'
         common['admin_binary'] = 'oadm' if os.path.isfile('/usr/bin/oadm') else 'osadm'
+        common['service_type'] = 'origin' if common['deployment_type'] == 'origin' else 'atomic-openshift'
+        common['config_base'] = '/etc/openshift' if common['deployment_type'] in ['enterprise','online'] else '/etc/origin'
         defaults['common'] = common
 
         if 'master' in roles:

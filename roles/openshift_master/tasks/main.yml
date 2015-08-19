@@ -55,11 +55,27 @@
       api_server_args: "{{ osm_api_server_args | default(None) }}"
       controller_args: "{{ osm_controller_args | default(None) }}"
       product_type: "{{ openshift_product_type | default('openshift') }}"
-      service_type: "{{ 'origin' if deployment_type == 'origin' else 'atomic-openshift' }}"
 
 - name: Install Master package
   yum: pkg={{ openshift.common.service_type }}-master state=present
   register: install_result
+
+- name: Check for RPM generated config marker file /etc/origin/.config_managed
+  stat: path=/etc/origin/.rpmgenerated
+  register: config_managed
+
+- debug: var=openshift.common.service_type
+- debug: var=config_managed.stat
+
+- name: Remove RPM generated config files
+  file:
+    path: "{{ item }}"
+    state: absent
+  when: openshift.common.service_type == 'atomic-openshift' and config_managed.stat.exists == true
+  with_items:
+    - "{{ openshift.common.config_base }}/master"
+    - "{{ openshift.common.config_base }}/node"
+    - "{{ openshift.common.config_base }}/.rpmgenerated"
 
 # TODO: These values need to be configurable
 - name: Set dns facts
@@ -93,6 +109,13 @@
 
 - name: Install httpd-tools if needed
   yum: pkg=httpd-tools state=present
+  when: item.kind == 'HTPasswdPasswordIdentityProvider'
+  with_items: openshift.master.identity_providers
+
+- name: Ensure htpasswd directory exists
+  file:
+    path: "{{ item.filename }} | dir"
+    state: directory
   when: item.kind == 'HTPasswdPasswordIdentityProvider'
   with_items: openshift.master.identity_providers
 
