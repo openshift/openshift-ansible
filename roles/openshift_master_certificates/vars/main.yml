@@ -1,3 +1,3 @@
 ---
-openshift_generated_configs_dir: /etc/openshift/generated-configs
-openshift_master_config_dir: /etc/openshift/master
+openshift_generated_configs_dir: "{{ openshift.common.config_base }}/generated-configs"
+openshift_master_config_dir: "{{ openshift.common.config_base }}/master"

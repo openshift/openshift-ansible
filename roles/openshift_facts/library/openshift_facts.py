@@ -6,7 +6,7 @@
 DOCUMENTATION = '''
 ---
 module: openshift_facts
-short_description: OpenShift Facts
+short_description: Cluster Facts
 author: Jason DeTiberus
 requirements: [ ]
 '''
@@ -299,6 +299,12 @@ def set_registry_url_if_unset(facts):
                 registry_url = "openshift/origin-${component}:${version}"
                 if deployment_type == 'enterprise':
                     registry_url = "openshift3/ose-${component}:${version}"
+                    product_type = facts['common']['product_type']
+### TODO: openshift will change to aos3/aos-${component}:${version} with 3.1
+                    if product_type == 'openshift':
+                       registry_url = "openshift3/ose-${component}:${version}"
+                    elif product_type == 'atomic-enterprise':
+                       registry_url = "aos3/aos-${component}:${version}"
                 elif deployment_type == 'online':
                     registry_url = ("openshift3/ose-${component}:${version}")
                 facts[role]['registry_url'] = registry_url
@@ -492,7 +498,7 @@ def get_current_config(facts):
         # anything from working properly as far as I can tell, perhaps because
         # we override the kubeconfig path everywhere we use it?
         # Query kubeconfig settings
-        kubeconfig_dir = '/var/lib/openshift/openshift.local.certificates'
+        kubeconfig_dir = '/var/lib/origin/openshift.local.certificates'
         if role == 'node':
             kubeconfig_dir = os.path.join(
                 kubeconfig_dir, "node-%s" % facts['common']['hostname']
@@ -639,25 +645,25 @@ def get_local_facts_from_file(filename):
 
 
 class OpenShiftFactsUnsupportedRoleError(Exception):
-    """OpenShift Facts Unsupported Role Error"""
+    """Origin Facts Unsupported Role Error"""
     pass
 
 
 class OpenShiftFactsFileWriteError(Exception):
-    """OpenShift Facts File Write Error"""
+    """Origin Facts File Write Error"""
     pass
 
 
 class OpenShiftFactsMetadataUnavailableError(Exception):
-    """OpenShift Facts Metadata Unavailable Error"""
+    """Origin Facts Metadata Unavailable Error"""
     pass
 
 
 class OpenShiftFacts(object):
-    """ OpenShift Facts
+    """ Origin Facts
 
         Attributes:
-            facts (dict): OpenShift facts for the host
+            facts (dict): facts for the host
 
         Args:
             role (str): role for setting local facts
@@ -729,6 +735,8 @@ class OpenShiftFacts(object):
                       public_hostname=hostname)
         common['client_binary'] = 'oc' if os.path.isfile('/usr/bin/oc') else 'osc'
         common['admin_binary'] = 'oadm' if os.path.isfile('/usr/bin/oadm') else 'osadm'
+        common['service_type'] = 'origin' if common['deployment_type'] == 'origin' else 'atomic-openshift'
+        common['config_base'] = '/etc/openshift' if common['deployment_type'] in ['enterprise','online'] else '/etc/origin'
         defaults['common'] = common
 
         if 'master' in roles:

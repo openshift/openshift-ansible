@@ -19,5 +19,6 @@
     openshift_cluster_id: "{{ cluster_id }}"
     openshift_debug_level: 2
     openshift_deployment_type: "{{ deployment_type }}"
+    openshift_product_type: "{{ product_type }}"
     openshift_hostname: "{{ ec2_private_ip_address }}"
     openshift_public_hostname: "{{ ec2_ip_address }}"

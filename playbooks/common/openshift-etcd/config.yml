@@ -13,6 +13,7 @@
           hostname: "{{ openshift_hostname | default(None) }}"
           public_hostname: "{{ openshift_public_hostname | default(None) }}"
           deployment_type: "{{ openshift_deployment_type }}"
+          product_type: "{{ openshift_product_type }}"
   - name: Check status of etcd certificates
     stat:
       path: "{{ item }}"
