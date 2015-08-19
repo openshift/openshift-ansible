@@ -118,6 +118,13 @@
       state: unmounted
       fstype: ext4
 
+  - name: remove from fstab
+    mount:
+      name: "{{ pv_mntdir }}"
+      src: "{{ cli_device_name }}"
+      state: absent
+      fstype: ext4
+
   - name: detach drive
     delegate_to: localhost
     ec2_vol:
