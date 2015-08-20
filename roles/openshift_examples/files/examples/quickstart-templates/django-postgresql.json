@@ -2,7 +2,7 @@
   "kind": "Template",
   "apiVersion": "v1",
   "metadata": {
-    "name": "django-postgresql-example",
+    "name": "django-psql-example",
     "annotations": {
       "description": "An example Django application with a PostgreSQL database",
       "tags": "instant-app,python,django,postgresql",
@@ -10,14 +10,14 @@
     }
   },
   "labels": {
-    "template": "django-postgresql-example"
+    "template": "django-psql-example"
   },
   "objects": [
     {
       "kind": "Service",
       "apiVersion": "v1",
       "metadata": {
-        "name": "django-postgresql-example",
+        "name": "django-psql-example",
         "annotations": {
           "description": "Exposes and load balances the application pods"
         }
@@ -31,7 +31,7 @@
           }
         ],
         "selector": {
-          "name": "django-postgresql-example"
+          "name": "django-psql-example"
         }
       }
     },
@@ -39,13 +39,13 @@
       "kind": "Route",
       "apiVersion": "v1",
       "metadata": {
-        "name": "django-postgresql-example"
+        "name": "django-psql-example"
       },
       "spec": {
         "host": "${APPLICATION_DOMAIN}",
         "to": {
           "kind": "Service",
-          "name": "django-postgresql-example"
+          "name": "django-psql-example"
         }
       }
     },
@@ -53,7 +53,7 @@
       "kind": "ImageStream",
       "apiVersion": "v1",
       "metadata": {
-        "name": "django-postgresql-example",
+        "name": "django-psql-example",
         "annotations": {
           "description": "Keeps track of changes in the application image"
         }
@@ -63,7 +63,7 @@
       "kind": "BuildConfig",
       "apiVersion": "v1",
       "metadata": {
-        "name": "django-postgresql-example",
+        "name": "django-psql-example",
         "annotations": {
           "description": "Defines how to build the application"
         }
@@ -90,7 +90,7 @@
         "output": {
           "to": {
             "kind": "ImageStreamTag",
-            "name": "django-postgresql-example:latest"
+            "name": "django-psql-example:latest"
           }
         },
         "triggers": [
@@ -110,7 +110,7 @@
       "kind": "DeploymentConfig",
       "apiVersion": "v1",
       "metadata": {
-        "name": "django-postgresql-example",
+        "name": "django-psql-example",
         "annotations": {
           "description": "Defines how to deploy the application server"
         }
@@ -125,11 +125,11 @@
             "imageChangeParams": {
               "automatic": true,
               "containerNames": [
-                "django-postgresql-example"
+                "django-psql-example"
               ],
               "from": {
                 "kind": "ImageStreamTag",
-                "name": "django-postgresql-example:latest"
+                "name": "django-psql-example:latest"
               }
             }
           },
@@ -139,20 +139,20 @@
         ],
         "replicas": 1,
         "selector": {
-          "name": "django-postgresql-example"
+          "name": "django-psql-example"
         },
         "template": {
           "metadata": {
-            "name": "django-postgresql-example",
+            "name": "django-psql-example",
             "labels": {
-              "name": "django-postgresql-example"
+              "name": "django-psql-example"
             }
           },
           "spec": {
             "containers": [
               {
-                "name": "django-postgresql-example",
-                "image": "django-postgresql-example",
+                "name": "django-psql-example",
+                "image": "django-psql-example",
                 "ports": [
                   {
                     "containerPort": 8080
@@ -249,7 +249,7 @@
             "containers": [
               {
                 "name": "postgresql",
-                "image": "openshift/postgresql-92-centos7",
+                "image": "${POSTGRESQL_IMAGE}",
                 "ports": [
                   {
                     "containerPort": 5432
@@ -292,8 +292,8 @@
     },
     {
       "name": "APPLICATION_DOMAIN",
-      "description": "The exposed hostname that will route to the Django service",
-      "value": "django-postgresql-example.openshiftapps.com"
+      "description": "The exposed hostname that will route to the Django service, if left blank a value will be defaulted.",
+      "value": ""
     },
     {
       "name": "GITHUB_WEBHOOK_SECRET",
@@ -326,6 +326,11 @@
       "description": "Database user password",
       "generate": "expression",
       "from": "[a-zA-Z0-9]{16}"
+    },
+    {
+      "name": "POSTGRESQL_IMAGE",
+      "description": "Image to use for postgresql",
+      "value": "openshift/postgresql-92-centos7"      
     },
     {
       "name": "APP_CONFIG",
