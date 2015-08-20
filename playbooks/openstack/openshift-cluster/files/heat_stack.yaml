@@ -9,21 +9,6 @@ parameters:
     label: Cluster ID
     description: Identifier of the cluster
 
-  num_masters:
-    type: number
-    label: Number of masters
-    description: Number of masters
-
-  num_nodes:
-    type: number
-    label: Number of compute nodes
-    description: Number of compute nodes
-
-  num_infra:
-    type: number
-    label: Number of infrastructure nodes
-    description: Number of infrastructure nodes
-
   cidr:
     type: string
     label: CIDR
@@ -40,6 +25,12 @@ parameters:
     description: Name of the external network
     default: external
 
+  floating_ip_pool:
+    type: string
+    label: Floating IP pool
+    description: Floating IP pools
+    default: external
+
   ssh_public_key:
     type: string
     label: SSH public key
@@ -51,6 +42,21 @@ parameters:
     label: Source of ssh connections
     description: Source of legitimate ssh connections
     default: 0.0.0.0/0
+
+  num_masters:
+    type: number
+    label: Number of masters
+    description: Number of masters
+
+  num_nodes:
+    type: number
+    label: Number of compute nodes
+    description: Number of compute nodes
+
+  num_infra:
+    type: number
+    label: Number of infrastructure nodes
+    description: Number of infrastructure nodes
 
   master_image:
     type: string
@@ -290,7 +296,7 @@ resources:
           subnet:     { get_resource: subnet }
           secgrp:
             - { get_resource: master-secgrp }
-          floating_network: { get_param: external_net }
+          floating_network: { get_param: floating_ip_pool }
           net_name:
             str_replace:
               template: openshift-ansible-cluster_id-net
@@ -322,7 +328,7 @@ resources:
           subnet:     { get_resource: subnet }
           secgrp:
             - { get_resource: node-secgrp }
-          floating_network: { get_param: external_net }
+          floating_network: { get_param: floating_ip_pool }
           net_name:
             str_replace:
               template: openshift-ansible-cluster_id-net
@@ -355,7 +361,7 @@ resources:
           secgrp:
             - { get_resource: node-secgrp }
             - { get_resource: infra-secgrp }
-          floating_network: { get_param: external_net }
+          floating_network: { get_param: floating_ip_pool }
           net_name:
             str_replace:
               template: openshift-ansible-cluster_id-net
