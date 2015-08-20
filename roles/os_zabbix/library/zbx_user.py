@@ -54,13 +54,15 @@ def get_usergroups(zapi, usergroups):
         if content['result']:
             ugroups.append({'usrgrpid': content['result'][0]['usrgrpid']})
 
-    return ugroups
-
+    return ugroups or None
 
 def get_usertype(user_type):
     '''
     Determine zabbix user account type
     '''
+    if not user_type:
+        return None
+
     utype = 1
     if 'super' in user_type:
         utype = 3
@@ -84,9 +86,9 @@ def main():
             alias=dict(default=None, type='str'),
             name=dict(default=None, type='str'),
             surname=dict(default=None, type='str'),
-            user_type=dict(default='user', type='str'),
+            user_type=dict(default=None, type='str'),
             passwd=dict(default=None, type='str'),
-            usergroups=dict(default=None, type='list'),
+            usergroups=dict(default=[], type='list'),
             debug=dict(default=False, type='bool'),
             state=dict(default='present', type='str'),
         ),
@@ -128,6 +130,9 @@ def main():
                   'surname': module.params['surname'],
                   'type': get_usertype(module.params['user_type']),
                  }
+
+        # Remove any None valued params
+        _ = [params.pop(key, None) for key in params.keys() if params[key] is None]
 
         if not exists(content):
             # if we didn't find it, create it
