@@ -14,10 +14,7 @@
       groups: oo_hosts_to_terminate
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user | default(ansible_ssh_user, true) }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-    with_items: groups[scratch_group] | default([]) | difference(['localhost'])
-    #| difference(groups.status_terminated)
-    # This difference is not working
-    # It's working properly without it
+    with_items: groups[scratch_group] | default([]) | difference(['localhost']) | difference(groups.status_terminated | default([]))
 
   - name: show oo_hosts_to_terminate
     debug: var=groups['oo_hosts_to_terminate']
