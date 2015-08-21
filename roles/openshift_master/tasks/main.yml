@@ -8,6 +8,15 @@
     - openshift_master_oauth_grant_method in openshift_master_valid_grant_methods
   when: openshift_master_oauth_grant_method is defined
 
+- name: Displaying openshift_master_ha
+  debug: var=openshift_master_ha
+
+- name: openshift_master_cluster_password
+  debug: var=openshift_master_cluster_password
+
+- name: openshift.master.cluster_defer_ha
+  debug: var=openshift.master.cluster_defer_ha
+
 - fail:
     msg: "openshift_master_cluster_password must be set for multi-master installations"
   when: openshift_master_ha | bool and not openshift.master.cluster_defer_ha | bool and openshift_master_cluster_password is not defined
