@@ -13,33 +13,21 @@
   # TODO: Write an Ansible module for dealing with HEAT stacks
   #       Dealing with the outputs is currently terrible
 
-  - name: Check OpenStack stack
+  - name: Check OpenStack Stack existence
     command: 'heat stack-show openshift-ansible-{{ cluster_id }}-stack'
     register: stack_show_result
     changed_when: false
     failed_when: stack_show_result.rc != 0 and 'Stack not found' not in stack_show_result.stderr
 
-  - name: Create OpenStack Stack
-    command: 'heat stack-create -f {{ openstack_infra_heat_stack }}
-             -P cluster_id={{ cluster_id }}
-             -P dns_nameservers={{ openstack_network_dns | join(",") }}
-             -P cidr={{ openstack_network_cidr }}
-             -P ssh_incoming={{ openstack_ssh_access_from }}
-             -P num_masters={{ num_masters }}
-             -P num_nodes={{ num_nodes }}
-             -P num_infra={{ num_infra }}
-             -P master_image={{ deployment_vars[deployment_type].image }}
-             -P node_image={{ deployment_vars[deployment_type].image }}
-             -P infra_image={{ deployment_vars[deployment_type].image }}
-             -P master_flavor={{ openstack_flavor["master"] }}
-             -P node_flavor={{ openstack_flavor["node"] }}
-             -P infra_flavor={{ openstack_flavor["infra"] }}
-             -P ssh_public_key="{{ openstack_ssh_public_key }}"
-             openshift-ansible-{{ cluster_id }}-stack'
+  - set_fact:
+      heat_stack_action: 'stack-update'
+  - set_fact:
+      heat_stack_action: 'stack-create'
     when: stack_show_result.rc == 1
 
-  - name: Update OpenStack Stack
-    command: 'heat stack-update -f {{ openstack_infra_heat_stack }}
+
+  - name: Create or Update OpenStack Stack
+    command: 'heat {{ heat_stack_action }} -f {{ openstack_infra_heat_stack }}
              -P cluster_id={{ cluster_id }}
              -P dns_nameservers={{ openstack_network_dns | join(",") }}
              -P cidr={{ openstack_network_cidr }}
@@ -55,7 +43,6 @@
              -P infra_flavor={{ openstack_flavor["infra"] }}
              -P ssh_public_key="{{ openstack_ssh_public_key }}"
              openshift-ansible-{{ cluster_id }}-stack'
-    when: stack_show_result.rc == 0
 
   - name: Wait for OpenStack Stack readiness
     shell: 'heat stack-show openshift-ansible-{{ cluster_id }}-stack | awk ''$2 == "stack_status" {print $4}'''
@@ -90,23 +77,11 @@
       ansible_ssh_host: '{{ item[2] }}'
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-      groups: 'tag_env_{{ cluster_id }}, tag_host-type_node, tag_env-host-type_{{ cluster_id }}-openshift-node, tag_sub-host-type_compute'
+      groups: 'tag_env_{{ cluster_id }}, tag_host-type_node, tag_env-host-type_{{ cluster_id }}-openshift-node, tag_sub-host-type_node'
     with_together:
       - parsed_outputs.node_names
       - parsed_outputs.node_ips
       - parsed_outputs.node_floating_ips
-
-  - name: Add new infra instances groups and variables
-    add_host:
-      hostname: '{{ item[0] }}'
-      ansible_ssh_host: '{{ item[2] }}'
-      ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
-      ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-      groups: 'tag_env_{{ cluster_id }}, tag_host-type_node, tag_env-host-type_{{ cluster_id }}-openshift-node, tag_sub-host-type_infra'
-    with_together:
-      - parsed_outputs.infra_names
-      - parsed_outputs.infra_ips
-      - parsed_outputs.infra_floating_ips
 
   - name: Wait for ssh
     wait_for:
@@ -128,6 +103,23 @@
       - parsed_outputs.node_floating_ips
       - parsed_outputs.infra_floating_ips
 
+- name: Populate oo_hosts_to_update group
+  hosts: localhost
+  gather_facts: no
+  vars_files:
+  - vars.yml
+  tasks:
+  - name: Evaluate oo_hosts_to_update
+    add_host:
+      name: "{{ item }}"
+      groups: oo_hosts_to_update
+      ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
+      ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
+    with_items: (groups["tag_env-host-type_{{ cluster_id }}-openshift-master"] | default([]))
+                | union(groups["tag_env-host-type_{{ cluster_id }}-openshift-node"] | default([]))
+                | union(groups["tag_env-host-type_{{ cluster_id }}-openshift-etcd"] | default([]))
+
 - include: update.yml
 
 - include: list.yml
+

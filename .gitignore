@@ -14,5 +14,6 @@
 .rvmrc
 .DS_Store
 gce.ini
+nova.ini
 multi_ec2.yaml
 .vagrant
