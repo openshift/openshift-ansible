@@ -56,6 +56,14 @@ def get_usergroups(zapi, usergroups):
 
     return ugroups or None
 
+def get_passwd(passwd):
+    '''Determine if password is set, if not, return 'zabbix'
+    '''
+    if passwd:
+        return passwd
+
+    return 'zabbix'
+
 def get_usertype(user_type):
     '''
     Determine zabbix user account type
@@ -80,54 +88,55 @@ def main():
 
     module = AnsibleModule(
         argument_spec=dict(
-            server=dict(default='https://localhost/zabbix/api_jsonrpc.php', type='str'),
-            user=dict(default=None, type='str'),
-            password=dict(default=None, type='str'),
-            alias=dict(default=None, type='str'),
-            name=dict(default=None, type='str'),
-            surname=dict(default=None, type='str'),
+            zbx_server=dict(default='https://localhost/zabbix/api_jsonrpc.php', type='str'),
+            zbx_user=dict(default=os.environ['ZABBIX_USER'], type='str'),
+            zbx_password=dict(default=os.environ['ZABBIX_PASSWORD'], type='str'),
+            zbx_debug=dict(default=False, type='bool'),
+            login=dict(default=None, type='str'),
+            first_name=dict(default=None, type='str'),
+            last_name=dict(default=None, type='str'),
             user_type=dict(default=None, type='str'),
-            passwd=dict(default=None, type='str'),
-            usergroups=dict(default=[], type='list'),
-            debug=dict(default=False, type='bool'),
+            password=dict(default=None, type='str'),
+            update_password=dict(default=False, type='bool'),
+            user_groups=dict(default=[], type='list'),
             state=dict(default='present', type='str'),
         ),
         #supports_check_mode=True
     )
 
-    user = module.params.get('user', os.environ['ZABBIX_USER'])
-    password = module.params.get('password', os.environ['ZABBIX_PASSWORD'])
-
-    zapi = ZabbixAPI(ZabbixConnection(module.params['server'], user, password, module.params['debug']))
+    zapi = ZabbixAPI(ZabbixConnection(module.params['zbx_server'],
+                                      module.params['zbx_user'],
+                                      module.params['zbx_password'],
+                                      module.params['zbx_debug']))
 
     ## before we can create a user media and users with media types we need media
     zbx_class_name = 'user'
     idname = "userid"
-    alias = module.params['alias']
     state = module.params['state']
 
     content = zapi.get_content(zbx_class_name,
                                'get',
                                {'output': 'extend',
-                                'search': {'alias': alias},
+                                'search': {'alias': module.params['login']},
                                 "selectUsrgrps": 'usergrpid',
                                })
     if state == 'list':
         module.exit_json(changed=False, results=content['result'], state="list")
 
     if state == 'absent':
-        if not exists(content):
+        if not exists(content) or len(content['result']) == 0:
             module.exit_json(changed=False, state="absent")
 
         content = zapi.get_content(zbx_class_name, 'delete', [content['result'][0][idname]])
         module.exit_json(changed=True, results=content['result'], state="absent")
 
     if state == 'present':
-        params = {'alias': alias,
-                  'passwd': module.params['passwd'],
-                  'usrgrps': get_usergroups(zapi, module.params['usergroups']),
-                  'name': module.params['name'],
-                  'surname': module.params['surname'],
+
+        params = {'alias': module.params['login'],
+                  'passwd': get_passwd(module.params['password']),
+                  'usrgrps': get_usergroups(zapi, module.params['user_groups']),
+                  'name': module.params['first_name'],
+                  'surname': module.params['last_name'],
                   'type': get_usertype(module.params['user_type']),
                  }
 
@@ -137,14 +146,26 @@ def main():
         if not exists(content):
             # if we didn't find it, create it
             content = zapi.get_content(zbx_class_name, 'create', params)
+
+            if content.has_key('Error'):
+                module.exit_json(failed=True, changed=False, results=content, state='present')
+
             module.exit_json(changed=True, results=content['result'], state='present')
         # already exists, we need to update it
         # let's compare properties
         differences = {}
+
+        # Update password
+        if not module.params['update_password']:
+            params.pop('passwd', None)
+
         zab_results = content['result'][0]
         for key, value in params.items():
-            if key == 'passwd':
-                differences[key] = value
+
+            if key == 'usrgrps':
+                # this must be done as a list of ordered dictionaries fails comparison
+                if not all([True for _ in zab_results[key][0] if _ in value[0]]):
+                    differences[key] = value
 
             elif zab_results[key] != value and zab_results[key] != str(value):
                 differences[key] = value

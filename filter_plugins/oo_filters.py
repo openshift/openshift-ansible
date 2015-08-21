@@ -73,7 +73,7 @@ class FilterModule(object):
 
         if filters is not None:
             if not issubclass(type(filters), dict):
-                raise errors.AnsibleFilterError("|fialed expects filter to be a"
+                raise errors.AnsibleFilterError("|failed expects filter to be a"
                                                 " dict")
             retval = [FilterModule.get_attr(d, attribute) for d in data if (
                 all([d.get(key, None) == filters[key] for key in filters]))]
@@ -81,6 +81,25 @@ class FilterModule(object):
             retval = [FilterModule.get_attr(d, attribute) for d in data]
 
         return retval
+
+    @staticmethod
+    def oo_select_keys_from_list(data, keys):
+        ''' This returns a list, which contains the value portions for the keys
+            Ex: data = { 'a':1, 'b':2, 'c':3 }
+                keys = ['a', 'c']
+                returns [1, 3]
+        '''
+
+        if not issubclass(type(data), list):
+            raise errors.AnsibleFilterError("|failed expects to filter on a list")
+
+        if not issubclass(type(keys), list):
+            raise errors.AnsibleFilterError("|failed expects first param is a list")
+
+        # Gather up the values for the list of keys passed in
+        retval = [FilterModule.oo_select_keys(item, keys) for item in data]
+
+        return FilterModule.oo_flatten(retval)
 
     @staticmethod
     def oo_select_keys(data, keys):
@@ -97,7 +116,7 @@ class FilterModule(object):
             raise errors.AnsibleFilterError("|failed expects first param is a list")
 
         # Gather up the values for the list of keys passed in
-        retval = [data[key] for key in keys]
+        retval = [data[key] for key in keys if data.has_key(key)]
 
         return retval
 
@@ -312,6 +331,7 @@ class FilterModule(object):
         ''' returns a mapping of filters to methods '''
         return {
             "oo_select_keys": self.oo_select_keys,
+            "oo_select_keys_from_list": self.oo_select_keys_from_list,
             "oo_collect": self.oo_collect,
             "oo_flatten": self.oo_flatten,
             "oo_pdb": self.oo_pdb,

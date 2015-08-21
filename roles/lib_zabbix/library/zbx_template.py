@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 '''
-Zabbix host ansible module
+Ansible module for template
 '''
 # vim: expandtab:tabstop=4:shiftwidth=4
+#
+#   Zabbix template ansible module
+#
 #
 #   Copyright 2015 Red Hat Inc.
 #
@@ -38,69 +41,40 @@ def exists(content, key='result'):
 
     return True
 
-def get_group_ids(zapi, hostgroup_names):
-    '''
-    get hostgroups
-    '''
-    # Fetch groups by name
-    group_ids = []
-    for hgr in hostgroup_names:
-        content = zapi.get_content('hostgroup', 'get', {'search': {'name': hgr}})
-        if content.has_key('result'):
-            group_ids.append({'groupid': content['result'][0]['groupid']})
-
-    return group_ids
-
-def get_template_ids(zapi, template_names):
-    '''
-    get related templates
-    '''
-    template_ids = []
-    # Fetch templates by name
-    for template_name in template_names:
-        content = zapi.get_content('template', 'get', {'search': {'host': template_name}})
-        if content.has_key('result'):
-            template_ids.append({'templateid': content['result'][0]['templateid']})
-    return template_ids
-
 def main():
-    '''
-    Ansible module for zabbix host
+    ''' Ansible module for template
     '''
 
     module = AnsibleModule(
         argument_spec=dict(
-            server=dict(default='https://localhost/zabbix/api_jsonrpc.php', type='str'),
-            user=dict(default=os.environ['ZABBIX_USER'], type='str'),
-            password=dict(default=os.environ['ZABBIX_PASSWORD'], type='str'),
+            zbx_server=dict(default='https://localhost/zabbix/api_jsonrpc.php', type='str'),
+            zbx_user=dict(default=os.environ['ZABBIX_USER'], type='str'),
+            zbx_password=dict(default=os.environ['ZABBIX_PASSWORD'], type='str'),
+            zbx_debug=dict(default=False, type='bool'),
             name=dict(default=None, type='str'),
-            hostgroup_names=dict(default=[], type='list'),
-            template_names=dict(default=[], type='list'),
-            debug=dict(default=False, type='bool'),
             state=dict(default='present', type='str'),
-            interfaces=dict(default=None, type='list'),
         ),
         #supports_check_mode=True
     )
 
-    user = module.params['user']
-    passwd = module.params['password']
-
-    zapi = ZabbixAPI(ZabbixConnection(module.params['server'], user, passwd, module.params['debug']))
+    zapi = ZabbixAPI(ZabbixConnection(module.params['zbx_server'],
+                                      module.params['zbx_user'],
+                                      module.params['zbx_password'],
+                                      module.params['zbx_debug']))
 
     #Set the instance and the template for the rest of the calls
-    zbx_class_name = 'host'
-    idname = "hostid"
-    hname = module.params['name']
+    zbx_class_name = 'template'
+    idname = 'templateid'
+    tname = module.params['name']
     state = module.params['state']
-
-    # selectInterfaces doesn't appear to be working but is needed.
+    # get a template, see if it exists
     content = zapi.get_content(zbx_class_name,
                                'get',
-                               {'search': {'host': hname},
-                                'selectGroups': 'groupid',
+                               {'search': {'host': tname},
                                 'selectParentTemplates': 'templateid',
-                                'selectInterfaces': 'interfaceid',
+                                'selectGroups': 'groupid',
+                                'selectApplications': 'applicationid',
+                                'selectDiscoveries': 'extend',
                                })
     if state == 'list':
         module.exit_json(changed=False, results=content['result'], state="list")
@@ -109,21 +83,18 @@ def main():
         if not exists(content):
             module.exit_json(changed=False, state="absent")
 
+        if not tname:
+            module.exit_json(failed=True,
+                             changed=False,
+                             results='Must specifiy a template name.',
+                             state="absent")
+
         content = zapi.get_content(zbx_class_name, 'delete', [content['result'][0][idname]])
         module.exit_json(changed=True, results=content['result'], state="absent")
 
     if state == 'present':
-        ifs = module.params['interfaces'] or [{'type':  1,         # interface type, 1 = agent
-                                               'main':  1,         # default interface? 1 = true
-                                               'useip':  1,        # default interface? 1 = true
-                                               'ip':  '127.0.0.1', # default interface? 1 = true
-                                               'dns':  '',         # dns for host
-                                               'port':  '10050',   # port for interface? 10050
-                                              }]
-        params = {'host': hname,
-                  'groups':  get_group_ids(zapi, module.params['hostgroup_names']),
-                  'templates':  get_template_ids(zapi, module.params['template_names']),
-                  'interfaces': ifs,
+        params = {'groups': module.params.get('groups', [{'groupid': '1'}]),
+                  'host': tname,
                  }
 
         if not exists(content):
@@ -135,16 +106,14 @@ def main():
         differences = {}
         zab_results = content['result'][0]
         for key, value in params.items():
-
             if key == 'templates' and zab_results.has_key('parentTemplates'):
                 if zab_results['parentTemplates'] != value:
                     differences[key] = value
-
-            elif zab_results[key] != value and zab_results[key] != str(value):
+            elif zab_results[key] != str(value) and zab_results[key] != value:
                 differences[key] = value
 
         if not differences:
-            module.exit_json(changed=False, results=zab_results, state="present")
+            module.exit_json(changed=False, results=content['result'], state="present")
 
         # We have differences and need to update
         differences[idname] = zab_results[idname]

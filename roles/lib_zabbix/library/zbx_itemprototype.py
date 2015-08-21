@@ -1,11 +1,8 @@
 #!/usr/bin/env python
 '''
- Ansible module for zabbix items
+Zabbix discovery rule ansible module
 '''
 # vim: expandtab:tabstop=4:shiftwidth=4
-#
-#   Zabbix item ansible module
-#
 #
 #   Copyright 2015 Red Hat Inc.
 #
@@ -41,6 +38,62 @@ def exists(content, key='result'):
 
     return True
 
+def get_rule_id(zapi, discoveryrule_name):
+    '''get a discoveryrule by name
+    '''
+    content = zapi.get_content('discoveryrule',
+                               'get',
+                               {'search': {'name': discoveryrule_name},
+                                'output': 'extend',
+                               })
+    if not content['result']:
+        return None
+    return content['result'][0]['itemid']
+
+def get_template(zapi, template_name):
+    '''get a template by name
+    '''
+    content = zapi.get_content('template',
+                               'get',
+                               {'search': {'host': template_name},
+                                'output': 'extend',
+                                'selectInterfaces': 'interfaceid',
+                               })
+    if not content['result']:
+        return None
+    return content['result'][0]
+
+def get_type(ztype):
+    '''
+    Determine which type of discoverrule this is
+    '''
+    _types = {'agent': 0,
+              'SNMPv1': 1,
+              'trapper': 2,
+              'simple': 3,
+              'SNMPv2': 4,
+              'internal': 5,
+              'SNMPv3': 6,
+              'active': 7,
+              'aggregate': 8,
+              'external': 10,
+              'database monitor': 11,
+              'ipmi': 12,
+              'ssh': 13,
+              'telnet': 14,
+              'calculated': 15,
+              'JMX': 16,
+             }
+
+    for typ in _types.keys():
+        if ztype in typ or ztype == typ:
+            _vtype = _types[typ]
+            break
+    else:
+        _vtype = 2
+
+    return _vtype
+
 def get_value_type(value_type):
     '''
     Possible values:
@@ -60,6 +113,17 @@ def get_value_type(value_type):
 
     return vtype
 
+def get_status(status):
+    ''' Determine status
+    '''
+    _status = 0
+    if status == 'disabled':
+        _status = 1
+    elif status == 'unsupported':
+        _status = 3
+
+    return _status
+
 def get_app_ids(zapi, application_names):
     ''' get application ids from names
     '''
@@ -72,51 +136,49 @@ def get_app_ids(zapi, application_names):
 
 def main():
     '''
-    ansible zabbix module for zbx_item
+    Ansible module for zabbix discovery rules
     '''
 
     module = AnsibleModule(
         argument_spec=dict(
-            server=dict(default='https://localhost/zabbix/api_jsonrpc.php', type='str'),
-            user=dict(default=None, type='str'),
-            password=dict(default=None, type='str'),
+            zbx_server=dict(default='https://localhost/zabbix/api_jsonrpc.php', type='str'),
+            zbx_user=dict(default=os.environ['ZABBIX_USER'], type='str'),
+            zbx_password=dict(default=os.environ['ZABBIX_PASSWORD'], type='str'),
+            zbx_debug=dict(default=False, type='bool'),
             name=dict(default=None, type='str'),
             key=dict(default=None, type='str'),
-            template_name=dict(default=None, type='str'),
-            zabbix_type=dict(default=2, type='int'),
-            value_type=dict(default='int', type='str'),
-            applications=dict(default=[], type='list'),
-            debug=dict(default=False, type='bool'),
+            interfaceid=dict(default=None, type='int'),
+            ztype=dict(default='trapper', type='str'),
+            value_type=dict(default='float', type='str'),
+            delay=dict(default=60, type='int'),
+            lifetime=dict(default=30, type='int'),
+            template_name=dict(default=[], type='list'),
             state=dict(default='present', type='str'),
+            status=dict(default='enabled', type='str'),
+            discoveryrule_name=dict(default=None, type='str'),
+            applications=dict(default=[], type='list'),
         ),
         #supports_check_mode=True
     )
 
-    user = module.params.get('user', os.environ['ZABBIX_USER'])
-    passwd = module.params.get('password', os.environ['ZABBIX_PASSWORD'])
-
-    zapi = ZabbixAPI(ZabbixConnection(module.params['server'], user, passwd, module.params['debug']))
+    zapi = ZabbixAPI(ZabbixConnection(module.params['zbx_server'],
+                                      module.params['zbx_user'],
+                                      module.params['zbx_password'],
+                                      module.params['zbx_debug']))
 
     #Set the instance and the template for the rest of the calls
-    zbx_class_name = 'item'
+    zbx_class_name = 'itemprototype'
     idname = "itemid"
+    dname = module.params['name']
     state = module.params['state']
-    key = module.params['key']
-    template_name = module.params['template_name']
 
-    content = zapi.get_content('template', 'get', {'search': {'host': template_name}})
-    templateid = None
-    if content['result']:
-        templateid = content['result'][0]['templateid']
-    else:
-        module.exit_json(changed=False,
-                         results='Error: Could find template with name %s for item.' % template_name,
-                         state="Unkown")
-
+    # selectInterfaces doesn't appear to be working but is needed.
     content = zapi.get_content(zbx_class_name,
                                'get',
-                               {'search': {'key_': key},
+                               {'search': {'name': dname},
                                 'selectApplications': 'applicationid',
+                                'selectDiscoveryRule': 'itemid',
+                                #'selectDhosts': 'dhostid',
                                })
     if state == 'list':
         module.exit_json(changed=False, results=content['result'], state="list")
@@ -129,13 +191,18 @@ def main():
         module.exit_json(changed=True, results=content['result'], state="absent")
 
     if state == 'present':
-        params = {'name': module.params.get('name', module.params['key']),
-                  'key_': key,
-                  'hostid': templateid,
-                  'type': module.params['zabbix_type'],
+        template = get_template(zapi, module.params['template_name'])
+        params = {'name': dname,
+                  'key_':  module.params['key'],
+                  'hostid':  template['templateid'],
+                  'interfaceid': module.params['interfaceid'],
+                  'ruleid': get_rule_id(zapi, module.params['discoveryrule_name']),
+                  'type': get_type(module.params['ztype']),
                   'value_type': get_value_type(module.params['value_type']),
                   'applications': get_app_ids(zapi, module.params['applications']),
                  }
+        if params['type'] in [2, 5, 7, 8, 11, 15]:
+            params.pop('interfaceid')
 
         if not exists(content):
             # if we didn't find it, create it
@@ -147,7 +214,11 @@ def main():
         zab_results = content['result'][0]
         for key, value in params.items():
 
-            if zab_results[key] != value and zab_results[key] != str(value):
+            if key == 'ruleid':
+                if value != zab_results['discoveryRule']['itemid']:
+                    differences[key] = value
+
+            elif zab_results[key] != value and zab_results[key] != str(value):
                 differences[key] = value
 
         if not differences:
