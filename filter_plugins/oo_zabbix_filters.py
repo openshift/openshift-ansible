@@ -60,6 +60,17 @@ class FilterModule(object):
         return None
 
     @staticmethod
+    def oo_build_zabbix_collect(data, string, value):
+        ''' Build a list of dicts from a list of data matched on string attribute
+        '''
+        rval = []
+        for item in data:
+            if item[string] == value:
+                rval.append(item)
+
+        return rval
+
+    @staticmethod
     def oo_build_zabbix_list_dict(values, string):
         ''' Build a list of dicts with string as key for each value
         '''
@@ -67,6 +78,22 @@ class FilterModule(object):
         for value in values:
             rval.append({string: value})
         return rval
+
+    @staticmethod
+    def oo_remove_attr_from_list_dict(data, attr):
+        ''' Remove a specific attribute from a dict
+        '''
+        attrs = []
+        if isinstance(attr, str):
+            attrs.append(attr)
+        else:
+            attrs = attr
+
+        for attribute in attrs:
+            for _entry in data:
+                _entry.pop(attribute, None)
+
+        return data
 
     def filters(self):
         ''' returns a mapping of filters to methods '''
@@ -76,4 +103,6 @@ class FilterModule(object):
             "oo_set_zbx_trigger_triggerid": self.oo_set_zbx_trigger_triggerid,
             "oo_build_zabbix_list_dict": self.oo_build_zabbix_list_dict,
             "create_data": self.create_data,
+            "oo_build_zabbix_collect": self.oo_build_zabbix_collect,
+            "oo_remove_attr_from_list_dict": self.oo_remove_attr_from_list_dict,
         }
