@@ -8,9 +8,9 @@
     - openshift_master_oauth_grant_method in openshift_master_valid_grant_methods
   when: openshift_master_oauth_grant_method is defined
 
-- fail:
-    msg: "openshift_master_cluster_password must be set for multi-master installations"
-  when: openshift_master_ha | bool and not openshift.master.cluster_defer_ha | bool and openshift_master_cluster_password is not defined
+#- fail:
+#    msg: "openshift_master_cluster_password must be set for multi-master installations"
+#  when: openshift_master_ha | bool and not openshift.master.cluster_defer_ha | bool and openshift_master_cluster_password is not defined
 
 - name: Set master facts
   openshift_facts:
@@ -144,7 +144,7 @@
 
 - name: Start and enable master
   service: name={{ openshift.common.service_type }}-master enabled=yes state=started
-  when: not openshift_master_ha | bool
+#  when: not openshift_master_ha | bool
   register: start_result
 
 - set_fact:
