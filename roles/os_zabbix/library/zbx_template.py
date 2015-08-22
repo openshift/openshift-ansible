@@ -74,7 +74,8 @@ def main():
                                {'search': {'host': tname},
                                 'selectParentTemplates': 'templateid',
                                 'selectGroups': 'groupid',
-                                #'selectApplications': extend,
+                                'selectApplications': 'applicationid',
+                                'selectDiscoveries': 'extend',
                                })
     if state == 'list':
         module.exit_json(changed=False, results=content['result'], state="list")

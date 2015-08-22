@@ -1,4 +1,4 @@
-# Installing OSEv3 from dev puddles using ansible
+# Installing AEP from dev puddles using ansible
 
 * [Requirements](#requirements)
 * [Caveats](#caveats)
@@ -11,18 +11,18 @@
 
 ## Requirements
 * ansible
-  * Tested using ansible-1.8.4-1.fc20.noarch, but should work with version 1.8+
+  * Tested using ansible 1.9.1 and 1.9.2
   * There is currently a known issue with ansible-1.9.0, you can downgrade to 1.8.4 on Fedora by installing one of the builds from Koji: http://koji.fedoraproject.org/koji/packageinfo?packageID=13842
   * Available in Fedora channels
   * Available for EL with EPEL and Optional channel
 * One or more RHEL 7.1 VMs
 * Either ssh key based auth for the root user or ssh key based auth for a user
   with sudo access (no password)
-* A checkout of openshift-ansible from https://github.com/openshift/openshift-ansible/
+* A checkout of atomic-enterprise-ansible from https://github.com/projectatomic/atomic-enterprise-ansible/
 
   ```sh
-  git clone https://github.com/openshift/openshift-ansible.git
-  cd openshift-ansible
+  git clone https://github.com/projectatomic/atomic-enterprise-ansible.git
+  cd atomic-enterprise-ansible
   ```
 
 ## Caveats
@@ -80,7 +80,7 @@ ansible_ssh_user=root
 deployment_type=enterprise
 
 # Pre-release registry URL
-oreg_url=rcm-img-docker01.build.eng.bos.redhat.com:5001/openshift3/ose-${component}:${version}
+oreg_url=docker-buildvm-rhose.usersys.redhat.com:5000/openshift3/ose-${component}:${version}
 
 # Pre-release additional repo
 openshift_additional_repos=[{'id': 'ose-devel', 'name': 'ose-devel',
@@ -108,7 +108,7 @@ The hostnames above should resolve both from the hosts themselves and
 the host where ansible is running (if different).
 
 ## Running the ansible playbooks
-From the openshift-ansible checkout run:
+From the atomic-enterprise-ansible checkout run:
 ```sh
 ansible-playbook playbooks/byo/config.yml
 ```
@@ -121,7 +121,7 @@ On the master host:
 ```sh
 oadm router --create=true \
   --credentials=/etc/openshift/master/openshift-router.kubeconfig \
-  --images='rcm-img-docker01.build.eng.bos.redhat.com:5001/openshift3/ose-${component}:${version}'
+  --images='docker-buildvm-rhose.usersys.redhat.com:5000/openshift3/ose-${component}:${version}'
 ```
 
 #### Create the default docker-registry
@@ -129,7 +129,7 @@ On the master host:
 ```sh
 oadm registry --create=true \
   --credentials=/etc/openshift/master/openshift-registry.kubeconfig \
-  --images='rcm-img-docker01.build.eng.bos.redhat.com:5001/openshift3/ose-${component}:${version}' \
+  --images='docker-buildvm-rhose.usersys.redhat.com:5000/openshift3/ose-${component}:${version}' \
   --mount-host=/var/lib/openshift/docker-registry
 ```
 

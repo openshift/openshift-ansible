@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-Zabbix host ansible module
+Zabbix discovery rule ansible module
 '''
 # vim: expandtab:tabstop=4:shiftwidth=4
 #
@@ -38,34 +38,51 @@ def exists(content, key='result'):
 
     return True
 
-def get_group_ids(zapi, hostgroup_names):
+def get_template(zapi, template_name):
+    '''get a template by name
     '''
-    get hostgroups
-    '''
-    # Fetch groups by name
-    group_ids = []
-    for hgr in hostgroup_names:
-        content = zapi.get_content('hostgroup', 'get', {'search': {'name': hgr}})
-        if content.has_key('result'):
-            group_ids.append({'groupid': content['result'][0]['groupid']})
+    content = zapi.get_content('template',
+                               'get',
+                               {'search': {'host': template_name},
+                                'output': 'extend',
+                                'selectInterfaces': 'interfaceid',
+                               })
+    if not content['result']:
+        return None
+    return content['result'][0]
 
-    return group_ids
+def get_type(vtype):
+    '''
+    Determine which type of discoverrule this is
+    '''
+    _types = {'agent': 0,
+              'SNMPv1': 1,
+              'trapper': 2,
+              'simple': 3,
+              'SNMPv2': 4,
+              'internal': 5,
+              'SNMPv3': 6,
+              'active': 7,
+              'external': 10,
+              'database monitor': 11,
+              'ipmi': 12,
+              'ssh': 13,
+              'telnet': 14,
+              'JMX': 16,
+             }
 
-def get_template_ids(zapi, template_names):
-    '''
-    get related templates
-    '''
-    template_ids = []
-    # Fetch templates by name
-    for template_name in template_names:
-        content = zapi.get_content('template', 'get', {'search': {'host': template_name}})
-        if content.has_key('result'):
-            template_ids.append({'templateid': content['result'][0]['templateid']})
-    return template_ids
+    for typ in _types.keys():
+        if vtype in typ or vtype == typ:
+            _vtype = _types[typ]
+            break
+    else:
+        _vtype = 2
+
+    return _vtype
 
 def main():
     '''
-    Ansible module for zabbix host
+    Ansible module for zabbix discovery rules
     '''
 
     module = AnsibleModule(
@@ -74,11 +91,14 @@ def main():
             user=dict(default=os.environ['ZABBIX_USER'], type='str'),
             password=dict(default=os.environ['ZABBIX_PASSWORD'], type='str'),
             name=dict(default=None, type='str'),
-            hostgroup_names=dict(default=[], type='list'),
-            template_names=dict(default=[], type='list'),
+            key=dict(default=None, type='str'),
+            interfaceid=dict(default=None, type='int'),
+            ztype=dict(default='trapper', type='str'),
+            delay=dict(default=60, type='int'),
+            lifetime=dict(default=30, type='int'),
+            template_name=dict(default=[], type='list'),
             debug=dict(default=False, type='bool'),
             state=dict(default='present', type='str'),
-            interfaces=dict(default=None, type='list'),
         ),
         #supports_check_mode=True
     )
@@ -89,18 +109,18 @@ def main():
     zapi = ZabbixAPI(ZabbixConnection(module.params['server'], user, passwd, module.params['debug']))
 
     #Set the instance and the template for the rest of the calls
-    zbx_class_name = 'host'
-    idname = "hostid"
-    hname = module.params['name']
+    zbx_class_name = 'discoveryrule'
+    idname = "itemid"
+    dname = module.params['name']
     state = module.params['state']
 
     # selectInterfaces doesn't appear to be working but is needed.
     content = zapi.get_content(zbx_class_name,
                                'get',
-                               {'search': {'host': hname},
-                                'selectGroups': 'groupid',
-                                'selectParentTemplates': 'templateid',
-                                'selectInterfaces': 'interfaceid',
+                               {'search': {'name': dname},
+                                #'selectDServices': 'extend',
+                                #'selectDChecks': 'extend',
+                                #'selectDhosts': 'dhostid',
                                })
     if state == 'list':
         module.exit_json(changed=False, results=content['result'], state="list")
@@ -113,18 +133,16 @@ def main():
         module.exit_json(changed=True, results=content['result'], state="absent")
 
     if state == 'present':
-        ifs = module.params['interfaces'] or [{'type':  1,         # interface type, 1 = agent
-                                               'main':  1,         # default interface? 1 = true
-                                               'useip':  1,        # default interface? 1 = true
-                                               'ip':  '127.0.0.1', # default interface? 1 = true
-                                               'dns':  '',         # dns for host
-                                               'port':  '10050',   # port for interface? 10050
-                                              }]
-        params = {'host': hname,
-                  'groups':  get_group_ids(zapi, module.params['hostgroup_names']),
-                  'templates':  get_template_ids(zapi, module.params['template_names']),
-                  'interfaces': ifs,
+        template = get_template(zapi, module.params['template_name'])
+        params = {'name': dname,
+                  'key_':  module.params['key'],
+                  'hostid':  template['templateid'],
+                  'interfaceid': module.params['interfaceid'],
+                  'lifetime': module.params['lifetime'],
+                  'type': get_type(module.params['ztype']),
                  }
+        if params['type'] in [2, 5, 7, 11]:
+            params.pop('interfaceid')
 
         if not exists(content):
             # if we didn't find it, create it
@@ -136,11 +154,7 @@ def main():
         zab_results = content['result'][0]
         for key, value in params.items():
 
-            if key == 'templates' and zab_results.has_key('parentTemplates'):
-                if zab_results['parentTemplates'] != value:
-                    differences[key] = value
-
-            elif zab_results[key] != value and zab_results[key] != str(value):
+            if zab_results[key] != value and zab_results[key] != str(value):
                 differences[key] = value
 
         if not differences:

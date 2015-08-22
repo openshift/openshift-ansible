@@ -1,7 +1,7 @@
-OpenShift Common
-================
+OpenShift/Atomic Enterprise Common
+===================================
 
-OpenShift common installation and configuration tasks.
+OpenShift/Atomic Enterprise common installation and configuration tasks.
 
 Requirements
 ------------
@@ -15,7 +15,7 @@ Role Variables
 | Name                      | Default value     |                                             |
 |---------------------------|-------------------|---------------------------------------------|
 | openshift_cluster_id      | default           | Cluster name if multiple OpenShift clusters |
-| openshift_debug_level     | 0                 | Global openshift debug log verbosity        |
+| openshift_debug_level     | 2                 | Global openshift debug log verbosity        |
 | openshift_hostname        | UNDEF             | Internal hostname to use for this host (this value will set the hostname on the system) |
 | openshift_ip              | UNDEF             | Internal IP address to use for this host    |
 | openshift_public_hostname | UNDEF             | Public hostname to use for this host        |

@@ -5,5 +5,5 @@
     g_masters_group: "{{ 'masters' }}"
     g_nodes_group: "{{ 'nodes' }}"
     openshift_cluster_id: "{{ cluster_id | default('default') }}"
-    openshift_debug_level: 4
+    openshift_debug_level: 2
     openshift_deployment_type: "{{ deployment_type }}"

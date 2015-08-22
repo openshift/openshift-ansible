@@ -50,6 +50,16 @@
 
   - debug: var=vol
 
+  - name: tag the vol with a name
+    ec2_tag: region={{ hostvars[oo_name]['ec2_region'] }} resource={{vol.volume_id}}
+    args:
+      tags:
+        Name: "pv-{{ hostvars[oo_name]['ec2_tag_Name'] }}"
+        env: "{{cli_environment}}"
+    register: voltags
+
+  - debug: var=voltags
+
 - name: Configure the drive
   gather_facts: no
   hosts: oo_master
@@ -116,6 +126,13 @@
       name: "{{ pv_mntdir }}"
       src: "{{ cli_device_name }}"
       state: unmounted
+      fstype: ext4
+
+  - name: remove from fstab
+    mount:
+      name: "{{ pv_mntdir }}"
+      src: "{{ cli_device_name }}"
+      state: absent
       fstype: ext4
 
   - name: detach drive

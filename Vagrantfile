@@ -15,6 +15,28 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.hostmanager.manage_host = true
   config.hostmanager.include_offline = true
   config.ssh.insert_key = false
+
+  if deployment_type === 'enterprise'
+    unless Vagrant.has_plugin?('vagrant-registration')
+      raise 'vagrant-registration-plugin is required for enterprise deployment'
+    end
+    username = ENV['rhel_subscription_user']
+    password = ENV['rhel_subscription_pass']
+    unless username and password
+      raise 'rhel_subscription_user and rhel_subscription_pass are required'
+    end
+    config.registration.username = username
+    config.registration.password = password
+    # FIXME this is temporary until vagrant/ansible registration modules
+    # are capable of handling specific subscription pools
+    if not ENV['rhel_subscription_pool'].nil?
+      config.vm.provision "shell" do |s|
+        s.inline = "subscription-manager attach --pool=$1 || true"
+        s.args = "#{ENV['rhel_subscription_pool']}"
+      end
+    end
+  end
+
   config.vm.provider "virtualbox" do |vbox, override|
     override.vm.box = "chef/centos-7.1"
     vbox.memory = 1024
@@ -28,10 +50,15 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     libvirt.cpus = 2
     libvirt.memory = 1024
     libvirt.driver = 'kvm'
-    override.vm.box = "centos-7.1"
-    override.vm.box_url = "https://download.gluster.org/pub/gluster/purpleidea/vagrant/centos-7.1/centos-7.1.box"
-    override.vm.box_download_checksum = "b2a9f7421e04e73a5acad6fbaf4e9aba78b5aeabf4230eebacc9942e577c1e05"
-    override.vm.box_download_checksum_type = "sha256"
+    case deployment_type
+    when "enterprise"
+      override.vm.box = "rhel-7"
+    when "origin"
+      override.vm.box = "centos-7.1"
+      override.vm.box_url = "https://download.gluster.org/pub/gluster/purpleidea/vagrant/centos-7.1/centos-7.1.box"
+      override.vm.box_download_checksum = "b2a9f7421e04e73a5acad6fbaf4e9aba78b5aeabf4230eebacc9942e577c1e05"
+      override.vm.box_download_checksum_type = "sha256"
+    end
   end
 
   num_nodes.times do |n|
@@ -53,12 +80,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       ansible.sudo = true
       ansible.groups = {
         "masters" => ["master"],
-        "nodes"   => ["node1", "node2"],
+        "nodes"   => ["master", "node1", "node2"],
       }
       ansible.extra_vars = {
-        openshift_deployment_type: "origin",
+        deployment_type: deployment_type,
       }
-      ansible.playbook = "playbooks/byo/config.yml"
+      ansible.playbook = "playbooks/byo/vagrant.yml"
     end
   end
 end
