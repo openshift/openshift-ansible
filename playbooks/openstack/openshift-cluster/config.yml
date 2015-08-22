@@ -18,3 +18,4 @@
     openshift_debug_level: 2
     openshift_deployment_type: "{{ deployment_type }}"
     openshift_hostname: "{{ ansible_default_ipv4.address }}"
+    openshift_public_hostname: "{{ ansible_ssh_host }}"

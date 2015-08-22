@@ -22,3 +22,4 @@
     openshift_cluster_id: "{{ cluster_id }}"
     openshift_debug_level: 2
     openshift_deployment_type: "{{ deployment_type }}"
+    openshift_public_hostname: "{{ ansible_default_ipv4.address }}"
