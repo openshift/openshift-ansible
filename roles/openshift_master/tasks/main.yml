@@ -8,9 +8,9 @@
     - openshift_master_oauth_grant_method in openshift_master_valid_grant_methods
   when: openshift_master_oauth_grant_method is defined
 
-- fail:
-    msg: "openshift_master_cluster_password must be set for multi-master installations"
-  when: openshift_master_ha | bool and not openshift.master.cluster_defer_ha | bool and openshift_master_cluster_password is not defined
+#- fail:
+#    msg: "openshift_master_cluster_password must be set for multi-master installations"
+#  when: openshift_master_ha | bool and not openshift.master.cluster_defer_ha | bool and openshift_master_cluster_password is not defined
 
 - name: Set master facts
   openshift_facts:
@@ -147,25 +147,25 @@
 
 - name: Start and enable master
   service: name={{ openshift.common.service_type }}-master enabled=yes state=started
-  when: not openshift_master_ha | bool
+#  when: not openshift_master_ha | bool
   register: start_result
 
-- name: pause to prevent service restart from interfering with bootstrapping
-  pause: seconds=30
-  when: start_result | changed
-
-- name: Install cluster packages
-  yum: pkg=pcs state=present
-  when: openshift_master_ha | bool and not openshift.master.cluster_defer_ha | bool
-  register: install_result
-
-- name: Start and enable cluster service
-  service: name=pcsd enabled=yes state=started
-  when: openshift_master_ha | bool and not openshift.master.cluster_defer_ha | bool
-
-- name: Set the cluster user password
-  shell: echo {{ openshift_master_cluster_password | quote }} | passwd --stdin hacluster
-  when: install_result | changed
+#- name: pause to prevent service restart from interfering with bootstrapping
+#  pause: seconds=30
+#  when: start_result | changed
+#
+#- name: Install cluster packages
+#  yum: pkg=pcs state=present
+#  when: openshift_master_ha | bool and not openshift.master.cluster_defer_ha | bool
+#  register: install_result
+#
+#- name: Start and enable cluster service
+#  service: name=pcsd enabled=yes state=started
+#  when: openshift_master_ha | bool and not openshift.master.cluster_defer_ha | bool
+#
+#- name: Set the cluster user password
+#  shell: echo {{ openshift_master_cluster_password | quote }} | passwd --stdin hacluster
+#  when: install_result | changed
 
 - name: Create the client config dir(s)
   file:

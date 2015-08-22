@@ -241,6 +241,21 @@ class FilterModule(object):
         return string.split(separator)
 
     @staticmethod
+    def oo_haproxy_backend_masters(hosts):
+        ''' This takes an array of dicts and returns an array of dicts
+            to be used as a backend for the haproxy role
+        '''
+        servers = []
+        for idx, host_info in enumerate(hosts):
+            server = dict(name="master%s" % idx)
+            server_ip = host_info['openshift']['common']['ip']
+            server_port = host_info['openshift']['master']['api_port']
+            server['address'] = "%s:%s" % (server_ip, server_port)
+            server['opts'] = 'check ssl verify none'
+            servers.append(server)
+        return servers
+
+    @staticmethod
     def oo_filter_list(data, filter_attr=None):
         ''' This returns a list, which contains all items where filter_attr
             evaluates to true
@@ -342,5 +357,6 @@ class FilterModule(object):
             "oo_combine_dict": self.oo_combine_dict,
             "oo_split": self.oo_split,
             "oo_filter_list": self.oo_filter_list,
-            "oo_parse_heat_stack_outputs": self.oo_parse_heat_stack_outputs
+            "oo_parse_heat_stack_outputs": self.oo_parse_heat_stack_outputs,
+            "oo_haproxy_backend_masters": self.oo_haproxy_backend_masters
         }

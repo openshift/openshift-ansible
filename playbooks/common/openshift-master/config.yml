@@ -19,7 +19,9 @@
       - role: common
         local_facts:
           hostname: "{{ openshift_hostname | default(None) }}"
+          ip: "{{ openshift_ip | default(None) }}"
           public_hostname: "{{ openshift_public_hostname | default(None) }}"
+          public_ip: "{{ openshift_public_ip | default(None) }}"
           deployment_type: "{{ openshift_deployment_type }}"
       - role: master
         local_facts:
@@ -180,6 +182,30 @@
       fail_on_missing: yes
       validate_checksum: yes
     with_items: masters_needing_certs
+
+- name: Compute haproxy_backend_servers
+  hosts: localhost
+  connection: local
+  sudo: false
+  gather_facts: no
+  tasks:
+  - set_fact:
+      haproxy_backend_servers: "{{ hostvars | oo_select_keys(groups['oo_masters_to_config']) | oo_haproxy_backend_masters }}"
+
+- name: Configure load balancers
+  hosts: oo_first_master
+  vars:
+    haproxy_frontends:
+    - name: atomic-openshift
+      bind: "*:80"
+      default_backend: atomic-openshift
+    haproxy_backends:
+    - name: atomic-openshift
+      balance: roundrobin
+      servers: "{{ hostvars.localhost.haproxy_backend_servers }}"
+  roles:
+  - role: haproxy
+    when: groups.oo_masters_to_config | length > 1
 
 - name: Configure master instances
   hosts: oo_masters_to_config
