@@ -2,9 +2,6 @@ apiLevels:
 - v1beta3
 - v1
 apiVersion: v1
-{% if api_server_args is defined and api_server_args %}
-apiServerArguments: {{ api_server_args }}
-{% endif %}
 assetConfig:
   logoutURL: ""
   masterPublicURL: {{ openshift.master.public_api_url }}
@@ -16,9 +13,6 @@ assetConfig:
     keyFile: master.server.key
     maxRequestsInFlight: 0
     requestTimeoutSeconds: 0
-{% if controller_args is defined and controller_args %}
-controllerArguments: {{ controller_args }}
-{% endif %}
 corsAllowedOrigins:
 {% for origin in ['127.0.0.1', 'localhost', openshift.common.hostname, openshift.common.ip, openshift.common.public_hostname, openshift.common.public_ip] %}
   - {{ origin }}
@@ -74,8 +68,8 @@ kubernetesMasterConfig:
   apiLevels:
   - v1beta3
   - v1
-  apiServerArguments: null
-  controllerArguments: null
+  apiServerArguments: {{ api_server_args if api_server_args is defined else null }}
+  controllerArguments: {{ controller_args if controller_args is defined else null }}
 {# TODO: support overriding masterCount #}
   masterCount: 1
   masterIP: ""
