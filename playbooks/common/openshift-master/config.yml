@@ -212,6 +212,7 @@
   vars:
     sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
     openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
+    openshift_master_count: "{{ groups.oo_masters_to_config | length }}"
   pre_tasks:
   - name: Ensure certificate directory exists
     file:
@@ -236,11 +237,11 @@
 - name: Additional master configuration
   hosts: oo_first_master
   vars:
-    openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
-    omc_cluster_hosts: "{{ groups.oo_masters_to_config | join(' ')}}"
+  #openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
+  #  omc_cluster_hosts: "{{ groups.oo_masters_to_config | join(' ')}}"
   roles:
-  - role: openshift_master_cluster
-    when: openshift_master_ha | bool
+#  - role: openshift_master_cluster
+#    when: openshift_master_ha | bool
   - role: openshift_examples
     when: deployment_type in ['enterprise','openshift-enterprise','origin']
   - role: openshift_cluster_metrics
