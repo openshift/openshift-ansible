@@ -9,6 +9,8 @@
   - fail: msg="Deployment type not supported for gce provider yet"
     when: deployment_type == 'enterprise'
 
+  - debug: var=openshift_node_labels
+
   - include: ../../common/openshift-cluster/set_master_launch_facts_tasks.yml
   - include: tasks/launch_instances.yml
     vars:
