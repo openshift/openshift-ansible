@@ -1,12 +1,12 @@
-OpenShift Node
-==============
+OpenShift/Atomic Enterprise Node
+================================
 
-OpenShift Node service installation
+Node service installation
 
 Requirements
 ------------
 
-One or more OpenShift Master servers.
+One or more Master servers.
 
 A RHEL 7.1 host pre-configured with access to the rhel-7-server-rpms,
 rhel-7-server-extras-rpms, and rhel-7-server-ose-3.0-rpms repos.
@@ -14,10 +14,10 @@ rhel-7-server-extras-rpms, and rhel-7-server-ose-3.0-rpms repos.
 Role Variables
 --------------
 From this role:
-| Name                                     | Default value         |                                        |
-|------------------------------------------|-----------------------|----------------------------------------|
-| openshift_node_debug_level               | openshift_debug_level | Verbosity of the debug logs for openshift-node |
-| oreg_url                                 | UNDEF (Optional)      | Default docker registry to use |
+| Name                                     | Default value         |                                                        |
+|------------------------------------------|-----------------------|--------------------------------------------------------|
+| openshift_node_debug_level               | openshift_debug_level | Verbosity of the debug logs for node |
+| oreg_url                                 | UNDEF (Optional)      | Default docker registry to use                         |
 
 From openshift_common:
 | Name                          |  Default Value      |                     |

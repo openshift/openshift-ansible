@@ -22,14 +22,14 @@
   command: pcs resource defaults resource-stickiness=100
 
 - name: Add the cluster VIP resource
-  command: pcs resource create virtual-ip IPaddr2 ip={{ openshift_master_cluster_vip }} --group openshift-master
+  command: pcs resource create virtual-ip IPaddr2 ip={{ openshift_master_cluster_vip }} --group {{ openshift.common.service_type }}-master
 
 - name: Add the cluster public VIP resource
-  command: pcs resource create virtual-ip IPaddr2 ip={{ openshift_master_cluster_public_vip }} --group openshift-master
+  command: pcs resource create virtual-ip IPaddr2 ip={{ openshift_master_cluster_public_vip }} --group {{ openshift.common.service_type }}-master
   when: openshift_master_cluster_public_vip != openshift_master_cluster_vip
 
-- name: Add the cluster openshift-master service resource
-  command: pcs resource create master systemd:openshift-master op start timeout=90s stop timeout=90s --group openshift-master
+- name: Add the cluster master service resource
+  command: pcs resource create master systemd:{{ openshift.common.service_type }}-master op start timeout=90s stop timeout=90s --group {{ openshift.common.service_type }}-master
 
 - name: Disable stonith
   command: pcs property set stonith-enabled=false

@@ -6,7 +6,7 @@
 DOCUMENTATION = '''
 ---
 module: openshift_facts
-short_description: OpenShift Facts
+short_description: Cluster Facts
 author: Jason DeTiberus
 requirements: [ ]
 '''
@@ -283,28 +283,6 @@ def normalize_provider_facts(provider, metadata):
         facts = normalize_openstack_facts(metadata, facts)
     return facts
 
-def set_registry_url_if_unset(facts):
-    """ Set registry_url fact if not already present in facts dict
-
-        Args:
-            facts (dict): existing facts
-        Returns:
-            dict: the facts dict updated with the generated identity providers
-            facts if they were not already present
-    """
-    for role in ('master', 'node'):
-        if role in facts:
-            deployment_type = facts['common']['deployment_type']
-            if 'registry_url' not in facts[role]:
-                registry_url = "openshift/origin-${component}:${version}"
-                if deployment_type == 'enterprise':
-                    registry_url = "openshift3/ose-${component}:${version}"
-                elif deployment_type == 'online':
-                    registry_url = ("openshift3/ose-${component}:${version}")
-                facts[role]['registry_url'] = registry_url
-
-    return facts
-
 def set_fluentd_facts_if_unset(facts):
     """ Set fluentd facts if not already present in facts dict
             dict: the facts dict updated with the generated fluentd facts if
@@ -430,6 +408,48 @@ def set_aggregate_facts(facts):
 
     return facts
 
+def set_deployment_facts_if_unset(facts):
+    """ Set Facts that vary based on deployment_type. This currently
+        includes common.service_type, common.config_base, master.registry_url,
+        node.registry_url
+
+        Args:
+            facts (dict): existing facts
+        Returns:
+            dict: the facts dict updated with the generated deployment_type
+            facts
+    """
+    if 'common' in facts:
+        deployment_type = facts['common']['deployment_type']
+        if 'service_type' not in facts['common']:
+            service_type = 'atomic-openshift'
+            if deployment_type == 'origin':
+                service_type = 'openshift'
+            elif deployment_type in ['enterprise', 'online']:
+                service_type = 'openshift'
+            facts['common']['service_type'] = service_type
+        if 'config_base' not in facts['common']:
+            config_base = '/etc/origin'
+            if deployment_type in ['enterprise', 'online']:
+                config_base = '/etc/openshift'
+            elif deployment_type == 'origin':
+                config_base = '/etc/openshift'
+            facts['common']['config_base'] = config_base
+
+    for role in ('master', 'node'):
+        if role in facts:
+            deployment_type = facts['common']['deployment_type']
+            if 'registry_url' not in facts[role]:
+                registry_url = 'aos3/aos-${component}:${version}'
+                if deployment_type in ['enterprise', 'online']:
+                    registry_url = 'openshift3/ose-${component}:${version}'
+                elif deployment_type == 'origin':
+                    registry_url = 'openshift/origin-${component}:${version}'
+                facts[role]['registry_url'] = registry_url
+
+    return facts
+
+
 def set_sdn_facts_if_unset(facts):
     """ Set sdn facts if not already present in facts dict
 
@@ -492,7 +512,7 @@ def get_current_config(facts):
         # anything from working properly as far as I can tell, perhaps because
         # we override the kubeconfig path everywhere we use it?
         # Query kubeconfig settings
-        kubeconfig_dir = '/var/lib/openshift/openshift.local.certificates'
+        kubeconfig_dir = '/var/lib/origin/openshift.local.certificates'
         if role == 'node':
             kubeconfig_dir = os.path.join(
                 kubeconfig_dir, "node-%s" % facts['common']['hostname']
@@ -639,25 +659,25 @@ def get_local_facts_from_file(filename):
 
 
 class OpenShiftFactsUnsupportedRoleError(Exception):
-    """OpenShift Facts Unsupported Role Error"""
+    """Origin Facts Unsupported Role Error"""
     pass
 
 
 class OpenShiftFactsFileWriteError(Exception):
-    """OpenShift Facts File Write Error"""
+    """Origin Facts File Write Error"""
     pass
 
 
 class OpenShiftFactsMetadataUnavailableError(Exception):
-    """OpenShift Facts Metadata Unavailable Error"""
+    """Origin Facts Metadata Unavailable Error"""
     pass
 
 
 class OpenShiftFacts(object):
-    """ OpenShift Facts
+    """ Origin Facts
 
         Attributes:
-            facts (dict): OpenShift facts for the host
+            facts (dict): facts for the host
 
         Args:
             role (str): role for setting local facts
@@ -701,8 +721,8 @@ class OpenShiftFacts(object):
         facts = set_url_facts_if_unset(facts)
         facts = set_fluentd_facts_if_unset(facts)
         facts = set_identity_providers_if_unset(facts)
-        facts = set_registry_url_if_unset(facts)
         facts = set_sdn_facts_if_unset(facts)
+        facts = set_deployment_facts_if_unset(facts)
         facts = set_aggregate_facts(facts)
         return dict(openshift=facts)
 
