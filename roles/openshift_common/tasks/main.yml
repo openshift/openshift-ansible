@@ -1,4 +1,10 @@
 ---
+- name: Debug showing use_openshift_sdn
+  debug: var=use_openshift_sdn
+
+- name: Show sdn network plugin name
+  debug: var=sdn_network_plugin_name
+
 - name: Set common OpenShift facts
   openshift_facts:
     role: common

@@ -1,4 +1,7 @@
 ---
+openshift_use_openshift_sdn: true
+os_sdn_network_plugin_name: ovssubnet
+# os_sdn_network_plugin_name can be ovssubnet or multitenant, see https://docs.openshift.org/latest/architecture/additional_concepts/sdn.html#ovssubnet-plugin-operation
 deployment_vars:
   origin:
     image: preinstalled-slave-50g-v5
