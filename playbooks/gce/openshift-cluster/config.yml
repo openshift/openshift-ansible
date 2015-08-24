@@ -22,5 +22,5 @@
     openshift_debug_level: 4
     openshift_deployment_type: "{{ deployment_type }}"
     openshift_hostname: "{{ gce_private_ip }}"
-    openshifT_use_openshift_sdn: "{{ use_openshift_sdn }}"
-    os_sdn_network_plugin_name: "{{ os_sdn_network_plugin_name }}"
+    openshift_use_openshift_sdn: "{{ do_we_use_openshift_sdn }}"
+    os_sdn_network_plugin_name: "{{ sdn_network_plugin }}"

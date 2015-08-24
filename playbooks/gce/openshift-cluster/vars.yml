@@ -1,6 +1,6 @@
 ---
-openshift_use_openshift_sdn: true
-os_sdn_network_plugin_name: ovssubnet
+do_we_use_openshift_sdn: true
+sdn_network_plugin: ovssubnet
 # os_sdn_network_plugin_name can be ovssubnet or multitenant, see https://docs.openshift.org/latest/architecture/additional_concepts/sdn.html#ovssubnet-plugin-operation
 deployment_vars:
   origin:
