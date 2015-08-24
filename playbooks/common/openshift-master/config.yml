@@ -186,6 +186,7 @@
   vars:
     sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
     openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
+    embedded_etcd: "{{ openshift.master.embedded_etcd }}"
   pre_tasks:
   - name: Ensure certificate directory exists
     file:
