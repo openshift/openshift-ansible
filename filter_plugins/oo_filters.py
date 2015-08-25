@@ -251,7 +251,7 @@ class FilterModule(object):
             server_ip = host_info['openshift']['common']['ip']
             server_port = host_info['openshift']['master']['api_port']
             server['address'] = "%s:%s" % (server_ip, server_port)
-            server['opts'] = 'check ssl verify none'
+            server['opts'] = 'check'
             servers.append(server)
         return servers
 

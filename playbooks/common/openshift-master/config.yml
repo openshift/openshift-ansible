@@ -153,6 +153,10 @@
     masters_needing_certs: "{{ hostvars
                                | oo_select_keys(groups['oo_masters_to_config'] | difference(groups['oo_first_master']))
                                | oo_filter_list(filter_attr='master_certs_missing') }}"
+    master_hostnames: "{{ hostvars
+                               | oo_select_keys(groups['oo_masters_to_config'])
+                               | oo_collect('openshift.common.all_hostnames')
+                               | oo_flatten | unique }}"
     sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
   roles:
   - openshift_master_certificates
@@ -174,6 +178,7 @@
     args:
       creates: "{{ master_generated_certs_dir }}/{{ item.master_cert_subdir }}.tgz"
     with_items: masters_needing_certs
+
   - name: Retrieve the master cert tarball from the master
     fetch:
       src: "{{ master_generated_certs_dir }}/{{ item.master_cert_subdir }}.tgz"
@@ -183,24 +188,7 @@
       validate_checksum: yes
     with_items: masters_needing_certs
 
-- name: Fetch master server certificate for load balancer
-  hosts: oo_first_master
-  vars:
-    sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
-  tasks:
-  - file:
-      path: "{{ sync_tmpdir }}/haproxy_cert"
-      state: directory
-  - fetch:
-      src: /etc/origin/master/master.server.crt
-      dest: "{{ sync_tmpdir }}/haproxy_cert/server.crt"
-      flat: yes
-  - fetch:
-      src: /etc/origin/master/master.server.key
-      dest: "{{ sync_tmpdir }}/haproxy_cert/server.key"
-      flat: yes
-
-- name: Compute haproxy_backend_servers and combine certificate
+- name: Compute haproxy_backend_servers
   hosts: localhost
   connection: local
   sudo: false
@@ -208,11 +196,6 @@
   tasks:
   - set_fact:
       haproxy_backend_servers: "{{ hostvars | oo_select_keys(groups['oo_masters_to_config']) | oo_haproxy_backend_masters }}"
-  - shell: cat server.crt server.key > server.pem
-    args:
-      chdir: "{{ g_master_mktemp.stdout }}/haproxy_cert"
-      creates: "{{ g_master_mktemp.stdout }}/haproxy_cert/server.pem"
-
 
 - name: Configure load balancers
   hosts: oo_lb_to_config
@@ -220,32 +203,24 @@
     sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
     haproxy_frontends:
     - name: atomic-openshift-api
+      mode: tcp
       options:
       - tcplog
       binds:
-      - "*:{{ hostvars[groups.oo_first_master.0].openshift.master.api_port }} ssl crt /etc/haproxy/server.pem"
+      - "*:{{ hostvars[groups.oo_first_master.0].openshift.master.api_port }}"
       default_backend: atomic-openshift-api
     haproxy_backends:
     - name: atomic-openshift-api
+      mode: tcp
+      option: tcplog
       balance: roundrobin
       servers: "{{ hostvars.localhost.haproxy_backend_servers }}"
-  pre_tasks:
-  - file:
-      path: /etc/haproxy
-      state: directory
-  - copy:
-      src: "{{ sync_tmpdir }}/haproxy_cert/server.pem"
-      dest: /etc/haproxy/server.pem
-      mode: 0600
-      owner: root
-      group: root
   roles:
   - role: haproxy
     when: groups.oo_masters_to_config | length > 1
 
 - name: Configure master instances
   hosts: oo_masters_to_config
-  serial: 1
   vars:
     sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
     openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"

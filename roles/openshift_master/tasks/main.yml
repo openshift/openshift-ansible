@@ -207,26 +207,15 @@
   when: not openshift_master_ha | bool
   register: start_result
 
-# workaround for start bug when configuring ha
-- name: Start master for ha workaround
-  service: name={{ openshift.common.service_type }}-master state=started
-  when: openshift_master_ha | bool and inventory_hostname in groups.oo_first_master
-
-- name: pause for 30 seconds to let master finish starting up for ha workaround
-  pause: seconds=30
-  when: openshift_master_ha | bool and inventory_hostname in groups.oo_first_master
-
-- name: Stop master for ha workaround
-  service: name={{ openshift.common.service_type }}-master state=stopped
-  when: openshift_master_ha | bool and inventory_hostname in groups.oo_first_master
-# end workaround for start bug when configuring ha
-
-- fail:
-
 - name: Start and enable master api
   service: name={{ openshift.common.service_type }}-master-api enabled=yes state=started
   when: openshift_master_ha | bool
   register: start_result
+
+# TODO: work to eliminate this workaround
+- name: pause a random interval to avoid startup errors for controller
+  pause: seconds={{ 60 | random(step=5) }}
+  when: openshift_master_ha | bool
 
 - name: Start and enable master controller
   service: name={{ openshift.common.service_type }}-master-controllers enabled=yes state=started
