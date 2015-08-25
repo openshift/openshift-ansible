@@ -23,9 +23,3 @@
   with_items:
     -  "{{ openshift_node_vars }}"
   when: "'labels' in item.openshift.node and item.openshift.node.labels != {}"
-
-- name: Label node type
-  command: >
-    {{ openshift.common.client_binary }} label --overwrite node {{ item.openshift.common.hostname }} type={{ item.openshift.common.deployment_type  }}
-  with_items:
-    -  "{{ openshift_node_vars }}"
