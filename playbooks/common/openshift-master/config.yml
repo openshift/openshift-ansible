@@ -221,6 +221,7 @@
 
 - name: Configure master instances
   hosts: oo_masters_to_config
+  serial: 1
   vars:
     sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
     openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
