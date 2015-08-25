@@ -5,6 +5,7 @@
 masters
 nodes
 etcd
+lb
 
 # Set variables common for all OSEv3 hosts
 [OSEv3:vars]
@@ -70,6 +71,12 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_master_cluster_public_hostname=openshift-ansible.test.example.com
 #openshift_master_cluster_defer_ha=True
 
+# Native clustering with haproxy as an optional load balancer
+#openshift_master_cluster_hostname=openshift-ansible.test.example.com
+#openshift_master_cluster_public_hostname=openshift-ansible.test.example.com
+#openshift_master_cluster_vip=192.168.133.25
+#openshift_master_cluster_public_vip=192.168.133.25
+
 # default subdomain to use for exposed routes
 #osm_default_subdomain=apps.test.example.com
 
@@ -108,9 +115,10 @@ ose3-master[1:3]-ansible.test.example.com
 [etcd]
 ose3-etcd[1:3]-ansible.test.example.com
 
-# NOTE: Currently we require that masters be part of the SDN which requires that they also be nodes
-# However, in order to ensure that your masters are not burdened with running pods you should
-# make them unschedulable by adding openshift_scheduleable=False any node that's also a master.
+[lb]
+ose3-lb-ansible.test.example.com
+
+# host group for nodes
 [nodes]
 ose3-master[1:3]-ansible.test.example.com
 ose3-node[1:2]-ansible.test.example.com openshift_node_labels="{'region': 'primary', 'zone': 'default'}"
