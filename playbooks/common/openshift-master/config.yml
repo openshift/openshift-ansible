@@ -209,7 +209,24 @@
       parsed_named_certificates: "{{ openshift_master_named_certificates | oo_parse_certificate_names(master_cert_config_dir, openshift.common.internal_hostnames) }}"
     when: openshift_master_named_certificates is defined
 
-- name: Compute haproxy_backend_servers
+- name: Fetch master server certificate for load balancer
+  hosts: oo_first_master
+  vars:
+    sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
+  tasks:
+  - file:
+      path: "{{ sync_tmpdir }}/haproxy_cert"
+      state: directory
+  - fetch:
+      src: /etc/origin/master/master.server.crt
+      dest: "{{ sync_tmpdir }}/haproxy_cert/server.crt"
+      flat: yes
+  - fetch:
+      src: /etc/origin/master/master.server.key
+      dest: "{{ sync_tmpdir }}/haproxy_cert/server.key"
+      flat: yes
+
+- name: Compute haproxy_backend_servers and combine certificate
   hosts: localhost
   connection: local
   sudo: false
@@ -217,24 +234,44 @@
   tasks:
   - set_fact:
       haproxy_backend_servers: "{{ hostvars | oo_select_keys(groups['oo_masters_to_config']) | oo_haproxy_backend_masters }}"
+  - shell: cat server.crt server.key > server.pem
+    args:
+      chdir: "{{ g_master_mktemp.stdout }}/haproxy_cert"
+      creates: "{{ g_master_mktemp.stdout }}/haproxy_cert/server.pem"
+
 
 - name: Configure load balancers
-  hosts: oo_first_master
+  hosts: oo_lb_to_config
   vars:
+    sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
     haproxy_frontends:
-    - name: atomic-openshift
-      bind: "*:80"
-      default_backend: atomic-openshift
+    - name: atomic-openshift-api
+      options:
+      - tcplog
+      binds:
+      - "*:{{ hostvars[groups.oo_first_master.0].openshift.master.api_port }} ssl crt /etc/haproxy/server.pem"
+      default_backend: atomic-openshift-api
     haproxy_backends:
-    - name: atomic-openshift
+    - name: atomic-openshift-api
       balance: roundrobin
       servers: "{{ hostvars.localhost.haproxy_backend_servers }}"
+  pre_tasks:
+  - file:
+      path: /etc/haproxy
+      state: directory
+  - copy:
+      src: "{{ sync_tmpdir }}/haproxy_cert/server.pem"
+      dest: /etc/haproxy/server.pem
+      mode: 0600
+      owner: root
+      group: root
   roles:
   - role: haproxy
     when: groups.oo_masters_to_config | length > 1
 
 - name: Configure master instances
   hosts: oo_masters_to_config
+  serial: 1
   vars:
     named_certificates: "{{ hostvars[groups['oo_first_master'][0]]['parsed_named_certificates'] | default([])}}"
     sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"

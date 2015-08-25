@@ -10,13 +10,16 @@ assetConfig:
   publicURL: {{ openshift.master.public_console_url }}/
   servingInfo:
     bindAddress: {{ openshift.master.bind_addr }}:{{ openshift.master.console_port }}
+    bindNetwork: tcp4
     certFile: master.server.crt
     clientCA: ""
     keyFile: master.server.key
     maxRequestsInFlight: 0
     requestTimeoutSeconds: 0
+controllerLeaseTTL: 0
+controllers: '*'
 corsAllowedOrigins:
-{% for origin in ['127.0.0.1', 'localhost', openshift.common.hostname, openshift.common.ip, openshift.common.public_hostname, openshift.common.public_ip] | unique %}
+{% for origin in ['127.0.0.1', 'localhost', openshift.common.ip, openshift.common.public_ip] | union(openshift.common.all_hostnames) | unique %}
   - {{ origin }}
 {% endfor %}
 {% for custom_origin in openshift.master.custom_cors_origins | default("") %}
@@ -29,8 +32,10 @@ corsAllowedOrigins:
 disabledFeatures: {{ openshift.master.disabled_features | to_json }}
 {% endif %}
 {% if openshift.master.embedded_dns | bool %}
+disabledFeatures: null
 dnsConfig:
   bindAddress: {{ openshift.master.bind_addr }}:{{ openshift.master.dns_port }}
+  bindNetwork: tcp4
 {% endif %}
 etcdClientInfo:
   ca: {{ "ca.crt" if (openshift.master.embedded_etcd | bool) else "master.etcd-ca.crt" }}
@@ -81,13 +86,13 @@ kubernetesMasterConfig:
   apiServerArguments: {{ api_server_args if api_server_args is defined else 'null' }}
   controllerArguments: {{ controller_args if controller_args is defined else 'null' }}
   masterCount: {{ openshift.master.master_count }}
-  masterIP: ""
-  podEvictionTimeout: ""
+  masterIP: {{ openshift.common.ip }}
+  podEvictionTimeout: 5m
   proxyClientInfo:
     certFile: master.proxy-client.crt
     keyFile: master.proxy-client.key
   schedulerConfigFile: {{ openshift_master_scheduler_conf }}
-  servicesNodePortRange: ""
+  servicesNodePortRange: 30000-32767
   servicesSubnet: {{ openshift.master.portal_net }}
   staticNodeNames: {{ openshift_node_ips | default([], true) }}
 {% endif %}
@@ -105,6 +110,7 @@ networkConfig:
 # serviceNetworkCIDR must match kubernetesMasterConfig.servicesSubnet
   serviceNetworkCIDR: {{ openshift.master.portal_net }}
 {% include 'v1_partials/oauthConfig.j2' %}
+pauseControllers: false
 policyConfig:
   bootstrapPolicyFile: {{ openshift_master_policy }}
   openshiftInfrastructureNamespace: openshift-infra
@@ -118,8 +124,9 @@ projectConfig:
     mcsLabelsPerProject: {{ openshift.master.mcs_labels_per_project }}
     uidAllocatorRange: "{{ openshift.master.uid_allocator_range  }}"
 routingConfig:
-  subdomain:  "{{ openshift.master.default_subdomain | default("") }}"
+  subdomain:  "{{ openshift.master.default_subdomain | default("router.default.svc.cluster.local") }}"
 serviceAccountConfig:
+  limitSecretReferences: false
   managedNames:
   - default
   - builder
@@ -130,6 +137,7 @@ serviceAccountConfig:
   - serviceaccounts.public.key
 servingInfo:
   bindAddress: {{ openshift.master.bind_addr }}:{{ openshift.master.api_port }}
+  bindNetwork: tcp4
   certFile: master.server.crt
   clientCA: ca.crt
   keyFile: master.server.key

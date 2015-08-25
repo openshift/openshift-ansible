@@ -1,6 +1,14 @@
 ---
 - include: evaluate_groups.yml
 
+  - name: Evaluate oo_lb_to_config
+    add_host:
+      name: "{{ item }}"
+      groups: oo_lb_to_config
+      ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
+      ansible_sudo: "{{ g_sudo | default(omit) }}"
+    with_items: groups[g_lb_group] | default(groups[g_masters_group]) | default([])
+
 - include: ../openshift-etcd/config.yml
 
 - include: ../openshift-master/config.yml

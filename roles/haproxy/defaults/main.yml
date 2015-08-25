@@ -1,7 +1,8 @@
 ---
 haproxy_frontends:
 - name: main
-  bind: "*:80"
+  binds:
+  - "*:80"
   default_backend: default
 
 haproxy_backends:
