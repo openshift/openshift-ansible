@@ -70,6 +70,48 @@
     line: "OPTIONS='--insecure-registry={{ openshift.node.portal_net }} \
 {% if ansible_selinux and ansible_selinux.status == '''enabled''' %}--selinux-enabled{% endif %}'"
   when: docker_check.stat.isreg
+  notify:
+    - restart docker
+
+- set_fact:
+    docker_additional_registries: "registry.access.redhat.com,{{ lookup('oo_option', 'docker_additional_registries') }}"
+  when: deployment_type == 'enterprise'
+- set_fact:
+    docker_additional_registries: "{{ lookup('oo_option', 'docker_additional_registries') }}"
+  when: deployment_type != 'enterprise'
+
+- name: Add personal registries
+  lineinfile:
+    dest: /etc/sysconfig/docker
+    regexp: '^ADD_REGISTRY=.*'
+    line: "ADD_REGISTRY='{{ docker_additional_registries | oo_split()
+                              | oo_prepend_strings_in_list('--add-registry ') | join(' ') }}'"
+  when: docker_check.stat.isreg and
+        docker_additional_registries != ''
+  notify:
+    - restart docker
+
+- name: Block registries
+  lineinfile:
+    dest: /etc/sysconfig/docker
+    regexp: '^BLOCK_REGISTRY=.*'
+    line: "BLOCK_REGISTRY='{{ lookup('oo_option', 'docker_blocked_registries') | oo_split()
+                              | oo_prepend_strings_in_list('--block-registry ') | join(' ') }}'"
+  when: docker_check.stat.isreg and
+        lookup('oo_option', 'docker_blocked_registries') != ''
+  notify:
+    - restart docker
+
+- name: Grant access to additional insecure registries
+  lineinfile:
+    dest: /etc/sysconfig/docker
+    regexp: '^INSECURE_REGISTRY=.*'
+    line: "INSECURE_REGISTRY='{{ lookup('oo_option', 'docker_insecure_registries') | oo_split()
+                              | oo_prepend_strings_in_list('--insecure-registry ') | join(' ') }}'"
+  when: docker_check.stat.isreg and
+        lookup('oo_option', 'docker_insecure_registries') != ''
+  notify:
+    - restart docker
 
 - name: Allow NFS access for VMs
   seboolean: name=virt_use_nfs state=yes persistent=yes
