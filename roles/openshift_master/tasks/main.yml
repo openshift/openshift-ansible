@@ -209,15 +209,17 @@
   when: openshift_master_ha | bool
   register: start_result
 
-# TODO: work to eliminate this workaround
-- name: pause a random interval to avoid startup errors for controller
-  pause: seconds={{ 60 | random(step=5) }}
+- name: pause to prevent service restart from interfering with bootstrapping
+  pause: seconds=30
   when: openshift_master_ha | bool
 
+# TODO: fix the ugly workaround of setting ignore_errors
+#       the controllers service tries to start even if it is already started
 - name: Start and enable master controller
   service: name={{ openshift.common.service_type }}-master-controllers enabled=yes state=started
   when: openshift_master_ha | bool
   register: start_result
+  ignore_errors: yes
 
 - set_fact:
     master_service_status_changed = start_result | changed

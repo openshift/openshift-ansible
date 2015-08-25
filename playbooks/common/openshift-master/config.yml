@@ -246,6 +246,7 @@
 
 - name: Configure master instances
   hosts: oo_masters_to_config
+  serial: 1
   vars:
     named_certificates: "{{ hostvars[groups['oo_first_master'][0]]['parsed_named_certificates'] | default([])}}"
     sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
