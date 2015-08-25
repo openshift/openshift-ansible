@@ -96,6 +96,8 @@
     creates: "{{ openshift_master_policy }}"
   notify:
   - restart master
+  - restart master api
+  - restart master controllers
 
 - name: Create the scheduler config
   template:
@@ -103,6 +105,8 @@
     src: scheduler.json.j2
   notify:
   - restart master
+  - restart master api
+  - restart master controllers
 
 - name: Install httpd-tools if needed
   yum: pkg=httpd-tools state=present
@@ -125,6 +129,30 @@
   when: item.kind == 'HTPasswdPasswordIdentityProvider'
   with_items: openshift.master.identity_providers
 
+# workaround for missing systemd unit files for controllers/api
+- name: Create the api service file
+  copy:
+    src: atomic-openshift-master-api.service
+    dest: /usr/lib/systemd/system/atomic-openshift-master-api.service
+    force: no
+- name: Create the controllers service file
+  copy:
+    src: atomic-openshift-master-controllers.service
+    dest: /usr/lib/systemd/system/atomic-openshift-master-controllers.service
+    force: no
+- name: Create the api env file
+  copy:
+    src: atomic-openshift-master-api
+    dest: /etc/sysconfig/atomic-openshift-master-api
+    force: no
+- name: Create the controllers env file
+  copy:
+    src: atomic-openshift-master-controllers
+    dest: /etc/sysconfig/atomic-openshift-master-controllers
+    force: no
+- command: systemctl daemon-reload
+# end workaround for missing systemd unit files
+
 # TODO: add the validate parameter when there is a validation command to run
 - name: Create master config
   template:
@@ -132,6 +160,8 @@
     src: master.yaml.v1.j2
   notify:
   - restart master
+  - restart master api
+  - restart master controllers
 
 - name: Configure master settings
   lineinfile:
@@ -146,14 +176,66 @@
   notify:
   - restart master
 
+- name: Configure master api settings
+  lineinfile:
+    dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-api
+    regexp: "{{ item.regex }}"
+    line: "{{ item.line }}"
+  with_items:
+    - regex: '^OPTIONS='
+      line: "OPTIONS=--loglevel={{ openshift.master.debug_level }} --listen=https://0.0.0.0:8443 --master=https://{{ openshift.common.ip }}:8443"
+    - regex: '^CONFIG_FILE='
+      line: "CONFIG_FILE={{ openshift_master_config_file }}"
+  notify:
+  - restart master api
+
+- name: Configure master controller settings
+  lineinfile:
+    dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-controllers
+    regexp: "{{ item.regex }}"
+    line: "{{ item.line }}"
+  with_items:
+    - regex: '^OPTIONS='
+      line: "OPTIONS=--loglevel={{ openshift.master.debug_level }} --listen=https://0.0.0.0:8444"
+    - regex: '^CONFIG_FILE='
+      line: "CONFIG_FILE={{ openshift_master_config_file }}"
+  notify:
+  - restart master controllers
+
 - name: Start and enable master
   service: name={{ openshift.common.service_type }}-master enabled=yes state=started
-#  when: not openshift_master_ha | bool
+  when: not openshift_master_ha | bool
   register: start_result
 
-#- name: pause to prevent service restart from interfering with bootstrapping
-#  pause: seconds=30
-#  when: start_result | changed
+# workaround for start bug when configuring ha
+- name: Start master for ha workaround
+  service: name={{ openshift.common.service_type }}-master state=started
+  when: openshift_master_ha | bool and inventory_hostname in groups.oo_first_master
+
+- name: pause for 30 seconds to let master finish starting up for ha workaround
+  pause: seconds=30
+  when: openshift_master_ha | bool and inventory_hostname in groups.oo_first_master
+
+- name: Stop master for ha workaround
+  service: name={{ openshift.common.service_type }}-master state=stopped
+  when: openshift_master_ha | bool and inventory_hostname in groups.oo_first_master
+# end workaround for start bug when configuring ha
+
+- fail:
+
+- name: Start and enable master api
+  service: name={{ openshift.common.service_type }}-master-api enabled=yes state=started
+  when: openshift_master_ha | bool
+  register: start_result
+
+- name: Start and enable master controller
+  service: name={{ openshift.common.service_type }}-master-controllers enabled=yes state=started
+  when: openshift_master_ha | bool
+  register: start_result
+
+- name: pause to prevent service restart from interfering with bootstrapping
+  pause: seconds=30
+  when: start_result | changed
 #
 #- name: Install cluster packages
 #  yum: pkg=pcs state=present

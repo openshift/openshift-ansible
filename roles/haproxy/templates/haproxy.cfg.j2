@@ -35,13 +35,36 @@ defaults
 
 {% for frontend in haproxy_frontends %}
 frontend  {{ frontend.name }}
-    bind {{ frontend.bind }}
+{% for bind in frontend.binds %}
+    bind {{ bind }}
+{% endfor %}
     default_backend {{ frontend.default_backend }}
+{% if 'mode' in frontend %}
+    mode {{ frontend.mode }}
+{% endif %}
+{% if 'options' in frontend %}
+{% for option in frontend.options %}
+    option {{ option }}
+{% endfor %}
+{% endif %}
+{% if 'redirects' in frontend %}
+{% for redirect in frontend.redirects %}
+    redirect {{ redirect }}
+{% endfor %}
+{% endif %}
 {% endfor %}
 
 {% for backend in haproxy_backends %}
 backend {{ backend.name }}
     balance {{ backend.balance }}
+{% if 'mode' in backend %}
+    mode {{ backend.mode }}
+{% endif %}
+{% if 'options' in backend %}
+{% for option in backend.options %}
+    option {{ option }}
+{% endfor %}
+{% endif %}
 {% for server in backend.servers %}
     server      {{ server.name }} {{ server.address }} {{ server.opts }}
 {% endfor %}
