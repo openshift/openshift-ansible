@@ -1,3 +1,6 @@
 ---
 - name: restart openshift-node
   service: name=openshift-node state=restarted
+
+- name: restart docker
+  service: name=docker state=restarted
