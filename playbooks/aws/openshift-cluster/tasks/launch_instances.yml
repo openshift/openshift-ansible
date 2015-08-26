@@ -147,6 +147,18 @@
                     tag_host-type_{{ host_type }}, tag_env-host-type_{{ env_host_type }},
                     tag_sub-host-type_{{ sub_host_type }}"
 
+- set_fact:
+    node_label:
+      region: "{{ec2_region}}"
+      type: "{{sub_host_type}}"
+  when: host_type == "node"
+
+- set_fact:
+    node_label:
+      region: "{{ec2_region}}"
+      type: "{{host_type}}"
+  when: host_type != "node"
+
 - name: Add new instances groups and variables
   add_host:
     hostname: "{{ item.0 }}"
@@ -156,6 +168,7 @@
     groups: "{{ instance_groups }}"
     ec2_private_ip_address: "{{ item.1.private_ip }}"
     ec2_ip_address: "{{ item.1.public_ip }}"
+    openshift_node_labels: "{{ node_label }}"
   with_together:
   - instances
   - ec2.instances
