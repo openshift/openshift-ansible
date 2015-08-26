@@ -66,6 +66,8 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_master_cluster_public_hostname=openshift-ansible.test.example.com
 #openshift_master_cluster_vip=192.168.133.25
 #openshift_master_cluster_public_vip=192.168.133.25
+# Override the default controller lease ttl
+#osm_controller_lease_ttl=30
 
 # default subdomain to use for exposed routes
 #osm_default_subdomain=apps.test.example.com

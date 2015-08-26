@@ -14,7 +14,9 @@ assetConfig:
     keyFile: master.server.key
     maxRequestsInFlight: 0
     requestTimeoutSeconds: 0
-controllerLeaseTTL: 0
+{% if openshift_master_ha | bool %}
+controllerLeaseTTL: {{ openshift.master.controller_lease_ttl | default('30') }}
+{% endif %}
 controllers: '*'
 corsAllowedOrigins:
 {% for origin in ['127.0.0.1', 'localhost', openshift.common.ip, openshift.common.public_ip] | union(openshift.common.all_hostnames) %}
