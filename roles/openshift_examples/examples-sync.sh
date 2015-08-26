@@ -24,6 +24,7 @@ unzip dancer-ex-master.zip
 unzip cakephp-ex-master.zip
 unzip application-templates-master.zip
 cp origin-master/examples/db-templates/* ${EXAMPLES_BASE}/db-templates/
+cp origin-master/examples/jenkins/jenkins-*template.json ${EXAMPLES_BASE}/quickstart-templates/
 cp origin-master/examples/image-streams/* ${EXAMPLES_BASE}/image-streams/
 cp django-ex-master/openshift/templates/* ${EXAMPLES_BASE}/quickstart-templates/
 cp rails-ex-master/openshift/templates/* ${EXAMPLES_BASE}/quickstart-templates/
