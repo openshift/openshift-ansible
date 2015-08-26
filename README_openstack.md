@@ -25,20 +25,20 @@ Configuration
 
 The following options can be passed via the `-o` flag of the `create` command:
 
-* `image_name`: Name of the image to use to spawn VMs
-* `keypair` (default to `${LOGNAME}_key`): Name of the ssh key
-* `public_key` (default to `~/.ssh/id_rsa.pub`): filename of the ssh public key
-* `master_flavor` (default to `m1.small`): The ID or name of the flavor for the master
-* `node_flavor` (default to `m1.medium`): The ID or name of the flavor for the nodes
 * `infra_heat_stack` (default to `playbooks/openstack/openshift-cluster/files/heat_stack.yaml`): filename of the HEAT template to use to create the cluster infrastructure
 
 The following options are used only by `heat_stack.yaml`. They are so used only if the `infra_heat_stack` option is left with its default value.
 
+* `image_name`: Name of the image to use to spawn VMs
+* `public_key` (default to `~/.ssh/id_rsa.pub`): filename of the ssh public key
+* `master_flavor` (default to `m1.small`): The ID or name of the flavor for the master
+* `node_flavor` (default to `m1.medium`): The ID or name of the flavor for the compute nodes
+* `infra_flavor` (default to `m1.small`): The ID or name of the flavor for the infrastructure nodes
 * `network_prefix` (default to `openshift-ansible-<cluster_id>`): prefix prepended to all network objects (net, subnet, router, security groups)
 * `dns` (default to `8.8.8.8,8.8.4.4`): comma separated list of DNS to use
 * `net_cidr` (default to `192.168.<rand()>.0/24`): CIDR of the network created by `heat_stack.yaml`
 * `external_net` (default to `external`): Name of the external network to connect to
-* `floating_ip_pools` (default to `external`): comma separated list of floating IP pools
+* `floating_ip_pool` (default to `external`): comma separated list of floating IP pools
 * `ssh_from` (default to `0.0.0.0/0`): IPs authorized to connect to the VMs via ssh
 
 
