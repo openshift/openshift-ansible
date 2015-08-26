@@ -64,6 +64,7 @@
       infra_nodes: "{{ num_infra | default(None) }}"
       disabled_features: "{{ osm_disabled_features | default(None) }}"
       master_count: "{{ openshift_master_count | default(None) }}"
+      controller_lease_ttl: "{{ osm_controller_lease_ttl | default(None) }}"
 
 - name: Install Master package
   yum: pkg={{ openshift.common.service_type }}-master state=present
