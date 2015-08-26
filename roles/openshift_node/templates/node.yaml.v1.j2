@@ -21,3 +21,4 @@ servingInfo:
   clientCA: ca.crt
   keyFile: server.key
 volumeDirectory: {{ openshift_data_dir }}/openshift.local.volumes
+{% include 'partials/kubeletArguments.j2' %}
