@@ -213,7 +213,7 @@
     - name: atomic-openshift-api
       mode: tcp
       option: tcplog
-      balance: roundrobin
+      balance: source
       servers: "{{ hostvars.localhost.haproxy_backend_servers }}"
   roles:
   - role: haproxy
