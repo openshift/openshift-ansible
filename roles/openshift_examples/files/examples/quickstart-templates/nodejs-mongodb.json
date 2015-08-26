@@ -165,19 +165,19 @@
                   },
                   {
                     "name": "MONGODB_USER",
-                    "value": "${MONGODB_USER}"
+                    "value": "${DATABASE_USER}"
                   },
                   {
                     "name": "MONGODB_PASSWORD",
-                    "value": "${MONGODB_PASSWORD}"
+                    "value": "${DATABASE_PASSWORD}"
                   },
                   {
                     "name": "MONGODB_DATABASE",
-                    "value": "${MONGODB_DATABASE}"
+                    "value": "${DATABASE_NAME}"
                   },
                   {
                     "name": "MONGODB_ADMIN_PASSWORD",
-                    "value": "${MONGODB_ADMIN_PASSWORD}"
+                    "value": "${DATABASE_ADMIN_PASSWORD}"
                   }
                 ]
               }
@@ -241,7 +241,7 @@
             "containers": [
               {
                 "name": "mongodb",
-                "image": "openshift/mongodb-24-centos7",
+                "image": "${MONGODB_IMAGE}",
                 "ports": [
                   {
                     "containerPort": 27017
@@ -250,19 +250,19 @@
                 "env": [
                   {
                     "name": "MONGODB_USER",
-                    "value": "${MONGODB_USER}"
+                    "value": "${DATABASE_USER}"
                   },
                   {
                     "name": "MONGODB_PASSWORD",
-                    "value": "${MONGODB_PASSWORD}"
+                    "value": "${DATABASE_PASSWORD}"
                   },
                   {
                     "name": "MONGODB_DATABASE",
-                    "value": "${MONGODB_DATABASE}"
+                    "value": "${DATABASE_NAME}"
                   },
                   {
                     "name": "MONGODB_ADMIN_PASSWORD",
-                    "value": "${MONGODB_ADMIN_PASSWORD}"
+                    "value": "${DATABASE_ADMIN_PASSWORD}"
                   }
                 ]
               }
@@ -288,8 +288,8 @@
     },
     {
       "name": "APPLICATION_DOMAIN",
-      "description": "The exposed hostname that will route to the Node.js service",
-      "value": "nodejs-mongodb-example.openshiftapps.com"
+      "description": "The exposed hostname that will route to the Node.js service, if left blank a value will be defaulted.",
+      "value": ""
     },
     {
       "name": "GITHUB_WEBHOOK_SECRET",
@@ -303,27 +303,32 @@
       "value": "mongodb"
     },
     {
-      "name": "MONGODB_USER",
+      "name": "DATABASE_USER",
       "description": "Username for MongoDB user that will be used for accessing the database",
       "generate": "expression",
       "from": "user[A-Z0-9]{3}"
     },
     {
-      "name": "MONGODB_PASSWORD",
+      "name": "DATABASE_PASSWORD",
       "description": "Password for the MongoDB user",
       "generate": "expression",
       "from": "[a-zA-Z0-9]{16}"
     },
     {
-      "name": "MONGODB_DATABASE",
+      "name": "DATABASE_NAME",
       "description": "Database name",
       "value": "sampledb"
     },
     {
-      "name": "MONGODB_ADMIN_PASSWORD",
+      "name": "DATABASE_ADMIN_PASSWORD",
       "description": "Password for the database admin user",
       "generate": "expression",
       "from": "[a-zA-Z0-9]{16}"
+    },
+    {
+      "name": "MONGODB_IMAGE",
+      "description": "Image to use for mongodb",
+      "value": "openshift/mongodb-24-centos7"      
     }
   ]
 }
