@@ -8,16 +8,12 @@
   tasks:
   - set_fact: scratch_group=tag_env-{{ cluster_id }}
   - name: show scratch group 
-    debug: var=groups[scratch_group]
   - add_host:
       name: "{{ item }}"
       groups: oo_hosts_to_terminate
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user | default(ansible_ssh_user, true) }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
     with_items: groups[scratch_group] | default([]) | difference(['localhost']) | difference(groups.status_terminated | default([]))
-
-  - name: show oo_hosts_to_terminate
-    debug: var=groups['oo_hosts_to_terminate']
 
 - name: Unsubscribe VMs
   hosts: oo_hosts_to_terminate
@@ -37,8 +33,6 @@
   vars_files:
   - vars.yml
   tasks:
-    - name: show oo_hosts_to_terminate
-      debug: var=oo_hosts_to_terminate
 
     - name: Terminate instances that were previously launched
       local_action:
