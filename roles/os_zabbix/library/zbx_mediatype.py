@@ -40,7 +40,6 @@ def exists(content, key='result'):
         return False
 
     return True
-
 def get_mtype(mtype):
     '''
     Transport used by the media type.
@@ -81,10 +80,6 @@ def main():
             smtp_server=dict(default=None, type='str'),
             smtp_helo=dict(default=None, type='str'),
             smtp_email=dict(default=None, type='str'),
-            passwd=dict(default=None, type='str'),
-            path=dict(default=None, type='str'),
-            username=dict(default=None, type='str'),
-            status=dict(default='enabled', type='str'),
             debug=dict(default=False, type='bool'),
             state=dict(default='present', type='str'),
         ),
@@ -114,30 +109,16 @@ def main():
         module.exit_json(changed=True, results=content['result'], state="absent")
 
     if state == 'present':
-        status = 1
-        if module.params['status']:
-            status = 0
         params = {'description': description,
-                  'type': get_mtype(module.params['mtype']),
+                  'type': get_mtype(module.params['media_type']),
                   'smtp_server': module.params['smtp_server'],
                   'smtp_helo': module.params['smtp_helo'],
                   'smtp_email': module.params['smtp_email'],
-                  'passwd': module.params['passwd'],
-                  'exec_path': module.params['path'],
-                  'username': module.params['username'],
-                  'status': status,
                  }
-
-        # Remove any None valued params
-        _ = [params.pop(key, None) for key in params.keys() if params[key] is None]
 
         if not exists(content):
             # if we didn't find it, create it
             content = zapi.get_content(zbx_class_name, 'create', params)
-
-            if content.has_key('error'):
-                module.exit_json(failed=True, changed=False, results=content['error'], state="present")
-
             module.exit_json(changed=True, results=content['result'], state='present')
         # already exists, we need to update it
         # let's compare properties

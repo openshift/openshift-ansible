@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 '''
-Ansible module for template
+ansible module for zabbix users
 '''
 # vim: expandtab:tabstop=4:shiftwidth=4
 #
-#   Zabbix template ansible module
+#   Zabbix user ansible module
 #
 #
 #   Copyright 2015 Red Hat Inc.
@@ -21,7 +21,6 @@ Ansible module for template
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
-
 # This is in place because each module looks similar to each other.
 # These need duplicate code as their behavior is very similar
 # but different for each zabbix class.
@@ -41,41 +40,77 @@ def exists(content, key='result'):
 
     return True
 
-def main():
-    ''' Ansible module for template
+def get_usergroups(zapi, usergroups):
+    ''' Get usergroups
     '''
+    ugroups = []
+    for ugr in usergroups:
+        content = zapi.get_content('usergroup',
+                                   'get',
+                                   {'search': {'name': ugr},
+                                    #'selectUsers': 'userid',
+                                    #'getRights': 'extend'
+                                   })
+        if content['result']:
+            ugroups.append({'usrgrpid': content['result'][0]['usrgrpid']})
+
+    return ugroups or None
+
+def get_usertype(user_type):
+    '''
+    Determine zabbix user account type
+    '''
+    if not user_type:
+        return None
+
+    utype = 1
+    if 'super' in user_type:
+        utype = 3
+    elif 'admin' in user_type or user_type == 'admin':
+        utype = 2
+
+    return utype
+
+def main():
+    '''
+    ansible zabbix module for users
+    '''
+
+    ##def user(self, name, state='present', params=None):
 
     module = AnsibleModule(
         argument_spec=dict(
             server=dict(default='https://localhost/zabbix/api_jsonrpc.php', type='str'),
-            user=dict(default=os.environ['ZABBIX_USER'], type='str'),
-            password=dict(default=os.environ['ZABBIX_PASSWORD'], type='str'),
+            user=dict(default=None, type='str'),
+            password=dict(default=None, type='str'),
+            alias=dict(default=None, type='str'),
             name=dict(default=None, type='str'),
+            surname=dict(default=None, type='str'),
+            user_type=dict(default=None, type='str'),
+            passwd=dict(default=None, type='str'),
+            usergroups=dict(default=[], type='list'),
             debug=dict(default=False, type='bool'),
             state=dict(default='present', type='str'),
         ),
         #supports_check_mode=True
     )
 
-    zbc = ZabbixConnection(module.params['server'],
-                           module.params['user'],
-                           module.params['password'],
-                           module.params['debug'])
-    zapi = ZabbixAPI(zbc)
+    user = module.params.get('user', os.environ['ZABBIX_USER'])
+    password = module.params.get('password', os.environ['ZABBIX_PASSWORD'])
 
-    #Set the instance and the template for the rest of the calls
-    zbx_class_name = 'template'
-    idname = 'templateid'
-    tname = module.params['name']
+    zapi = ZabbixAPI(ZabbixConnection(module.params['server'], user, password, module.params['debug']))
+
+    ## before we can create a user media and users with media types we need media
+    zbx_class_name = 'user'
+    idname = "userid"
+    alias = module.params['alias']
     state = module.params['state']
-    # get a template, see if it exists
+
     content = zapi.get_content(zbx_class_name,
                                'get',
-                               {'search': {'host': tname},
-                                'selectParentTemplates': 'templateid',
-                                'selectGroups': 'groupid',
-                                'selectApplications': 'applicationid',
-                                'selectDiscoveries': 'extend',
+                               {'output': 'extend',
+                                'search': {'alias': alias},
+                                "selectUsrgrps": 'usergrpid',
                                })
     if state == 'list':
         module.exit_json(changed=False, results=content['result'], state="list")
@@ -84,19 +119,20 @@ def main():
         if not exists(content):
             module.exit_json(changed=False, state="absent")
 
-        if not tname:
-            module.exit_json(failed=True,
-                             changed=False,
-                             results='Must specifiy a template name.',
-                             state="absent")
-
         content = zapi.get_content(zbx_class_name, 'delete', [content['result'][0][idname]])
         module.exit_json(changed=True, results=content['result'], state="absent")
 
     if state == 'present':
-        params = {'groups': module.params.get('groups', [{'groupid': '1'}]),
-                  'host': tname,
+        params = {'alias': alias,
+                  'passwd': module.params['passwd'],
+                  'usrgrps': get_usergroups(zapi, module.params['usergroups']),
+                  'name': module.params['name'],
+                  'surname': module.params['surname'],
+                  'type': get_usertype(module.params['user_type']),
                  }
+
+        # Remove any None valued params
+        _ = [params.pop(key, None) for key in params.keys() if params[key] is None]
 
         if not exists(content):
             # if we didn't find it, create it
@@ -107,14 +143,14 @@ def main():
         differences = {}
         zab_results = content['result'][0]
         for key, value in params.items():
-            if key == 'templates' and zab_results.has_key('parentTemplates'):
-                if zab_results['parentTemplates'] != value:
-                    differences[key] = value
-            elif zab_results[key] != str(value) and zab_results[key] != value:
+            if key == 'passwd':
+                differences[key] = value
+
+            elif zab_results[key] != value and zab_results[key] != str(value):
                 differences[key] = value
 
         if not differences:
-            module.exit_json(changed=False, results=content['result'], state="present")
+            module.exit_json(changed=False, results=zab_results, state="present")
 
         # We have differences and need to update
         differences[idname] = zab_results[idname]
