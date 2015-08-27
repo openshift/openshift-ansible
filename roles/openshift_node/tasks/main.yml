@@ -8,7 +8,7 @@
   when: osn_cluster_dns_ip is not defined or not osn_cluster_dns_ip
 - fail:
     msg: "SELinux is disabled, This deployment type requires that SELinux is enabled."
-  when: (not ansible_selinux or ansible_selinux.status != 'enabled') and deployment_type in ['enterprise', 'online']
+  when: (not ansible_selinux or ansible_selinux.status != 'enabled') and deployment_type in ['enterprise', 'online', 'atomic-enterprise', 'openshift-enterprise']
 
 - name: Set node facts
   openshift_facts:

@@ -407,7 +407,7 @@ def set_identity_providers_if_unset(facts):
                 name='allow_all', challenge=True, login=True,
                 kind='AllowAllPasswordIdentityProvider'
             )
-            if deployment_type == 'enterprise':
+            if deployment_type in ['enterprise', 'atomic-enterprise', 'openshift-enterprise']:
                 identity_provider = dict(
                     name='deny_all', challenge=True, login=True,
                     kind='DenyAllPasswordIdentityProvider'
