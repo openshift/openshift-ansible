@@ -1,0 +1,5 @@
+---
+os_firewall_use_firewalld: false
+os_firewall_allow:
+- service: cockpit-ws
+  port: 9090/tcp

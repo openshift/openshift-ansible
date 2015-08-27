@@ -44,6 +44,12 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Configure Fluentd
 #use_fluentd=true
 
+# Enable cockpit
+#osm_use_cockpit=true
+#
+# Set cockpit plugins
+#osm_cockpit_plugins=['cockpit-kubernetes']
+
 # master cluster ha variables using pacemaker or RHEL HA
 #openshift_master_cluster_password=openshift_cluster
 #openshift_master_cluster_vip=192.168.133.25
