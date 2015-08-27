@@ -7,15 +7,11 @@
   delay: 5
   with_items: openshift_nodes
 
-- name: Handle unscheduleable node
+- name: Set node schedulability
   command: >
-    {{ openshift.common.admin_binary }} manage-node {{ item }} --schedulable=false
-  with_items: openshift_unscheduleable_nodes
-
-- name: Handle scheduleable node
-  command: >
-    {{ openshift.common.admin_binary }} manage-node {{ item }} --schedulable=true
-  with_items: openshift_scheduleable_nodes
+    {{ openshift.common.admin_binary }} manage-node {{ item.openshift.common.hostname }} --schedulable={{ 'true' if item.openshift.node.schedulable | bool else 'false' }}
+  with_items:
+    -  "{{ openshift_node_vars }}"
 
 - name: Label nodes
   command: >

@@ -20,6 +20,7 @@
         local_facts:
           labels: "{{ openshift_node_labels | default(None) }}"
           annotations: "{{ openshift_node_annotations | default(None) }}"
+          schedulable: "{{ openshift_schedulable | default(openshift_scheduleable) | default(None) }}"
   - name: Check status of node certificates
     stat:
       path: "{{ openshift.common.config_base }}/node/{{ item }}"
@@ -124,21 +125,14 @@
   - os_env_extras
   - os_env_extras_node
 
-- name: Set scheduleability
+- name: Set schedulability
   hosts: oo_first_master
   vars:
     openshift_nodes: "{{ hostvars
                          | oo_select_keys(groups['oo_nodes_to_config'])
                          | oo_collect('openshift.common.hostname') }}"
-    openshift_unscheduleable_nodes: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config'] | default([]))
-                                      | oo_collect('openshift.common.hostname', {'openshift_scheduleable': False}) }}"
     openshift_node_vars: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config']) }}"
   pre_tasks:
-  - set_fact:
-      openshift_scheduleable_nodes: "{{ hostvars
-                                      | oo_select_keys(groups['oo_nodes_to_config'] | default([]))
-                                      | oo_collect('openshift.common.hostname')
-                                      | difference(openshift_unscheduleable_nodes) }}"
 
   roles:
   - openshift_manage_node

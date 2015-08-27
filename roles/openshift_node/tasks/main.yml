@@ -29,6 +29,7 @@
       portal_net: "{{ openshift_master_portal_net | default(None) }}"
       kubelet_args: "{{ openshift_node_kubelet_args | default(None) }}"
       sdn_mtu: "{{ openshift_node_sdn_mtu | default(None) }}"
+      schedulable: "{{ openshift_schedulable | default(openshift_scheduleable) | default(None) }}"
 
 - name: Install Node package
   yum: pkg={{ openshift.common.service_type }}-node state=present
