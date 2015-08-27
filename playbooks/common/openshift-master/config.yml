@@ -199,6 +199,7 @@
     when: master_certs_missing and 'oo_first_master' not in group_names
   roles:
   - openshift_master
+  - role: nickhammond.logrotate
   - role: fluentd_master
     when: openshift.common.use_fluentd | bool
   post_tasks:

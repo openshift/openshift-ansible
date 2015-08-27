@@ -1,0 +1,10 @@
+---
+- name: nickhammond.logrotate | Install logrotate
+  action: "{{ansible_pkg_mgr}} pkg=logrotate state=present"
+
+- name: nickhammond.logrotate | Setup logrotate.d scripts
+  template:
+    src: logrotate.d.j2
+    dest: /etc/logrotate.d/{{ item.name }}
+  with_items: logrotate_scripts
+  when: logrotate_scripts is defined
