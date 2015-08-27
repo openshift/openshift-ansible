@@ -41,6 +41,7 @@ def exists(content, key='result'):
 
     return True
 
+
 def get_priority(priority):
     ''' determine priority
     '''

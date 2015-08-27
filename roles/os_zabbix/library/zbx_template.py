@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 '''
-Ansible module for application
+Ansible module for template
 '''
 # vim: expandtab:tabstop=4:shiftwidth=4
 #
-#   Zabbix application ansible module
+#   Zabbix template ansible module
 #
 #
 #   Copyright 2015 Red Hat Inc.
@@ -41,50 +41,41 @@ def exists(content, key='result'):
 
     return True
 
-def get_template_ids(zapi, template_names):
-    '''
-    get related templates
-    '''
-    template_ids = []
-    # Fetch templates by name
-    for template_name in template_names:
-        content = zapi.get_content('template', 'get', {'search': {'host': template_name}})
-        if content.has_key('result'):
-            template_ids.append(content['result'][0]['templateid'])
-    return template_ids
-
 def main():
-    ''' Ansible module for application
+    ''' Ansible module for template
     '''
 
     module = AnsibleModule(
         argument_spec=dict(
             server=dict(default='https://localhost/zabbix/api_jsonrpc.php', type='str'),
-            user=dict(default=os.environ['ZABBIX_USER'], type='str'),
-            password=dict(default=os.environ['ZABBIX_PASSWORD'], type='str'),
+            user=dict(default=None, type='str'),
+            password=dict(default=None, type='str'),
             name=dict(default=None, type='str'),
-            template_name=dict(default=None, type='list'),
             debug=dict(default=False, type='bool'),
             state=dict(default='present', type='str'),
         ),
         #supports_check_mode=True
     )
 
-    zapi = ZabbixAPI(ZabbixConnection(module.params['server'],
-                                      module.params['user'],
-                                      module.params['password'],
-                                      module.params['debug']))
+    user = module.params.get('user', os.environ['ZABBIX_USER'])
+    passwd = module.params.get('password', os.environ['ZABBIX_PASSWORD'])
 
-    #Set the instance and the application for the rest of the calls
-    zbx_class_name = 'application'
-    idname = 'applicationid'
-    aname = module.params['name']
+    zbc = ZabbixConnection(module.params['server'], user, passwd, module.params['debug'])
+    zapi = ZabbixAPI(zbc)
+
+    #Set the instance and the template for the rest of the calls
+    zbx_class_name = 'template'
+    idname = 'templateid'
+    tname = module.params['name']
     state = module.params['state']
-    # get a applicationid, see if it exists
+    # get a template, see if it exists
     content = zapi.get_content(zbx_class_name,
                                'get',
-                               {'search': {'name': aname},
-                                'selectHost': 'hostid',
+                               {'search': {'host': tname},
+                                'selectParentTemplates': 'templateid',
+                                'selectGroups': 'groupid',
+                                'selectApplications': 'applicationid',
+                                'selectDiscoveries': 'extend',
                                })
     if state == 'list':
         module.exit_json(changed=False, results=content['result'], state="list")
@@ -97,9 +88,10 @@ def main():
         module.exit_json(changed=True, results=content['result'], state="absent")
 
     if state == 'present':
-        params = {'hostid': get_template_ids(zapi, module.params['template_name'])[0],
-                  'name': aname,
+        params = {'groups': module.params.get('groups', [{'groupid': '1'}]),
+                  'host': tname,
                  }
+
         if not exists(content):
             # if we didn't find it, create it
             content = zapi.get_content(zbx_class_name, 'create', params)
@@ -121,10 +113,6 @@ def main():
         # We have differences and need to update
         differences[idname] = zab_results[idname]
         content = zapi.get_content(zbx_class_name, 'update', differences)
-
-        if content.has_key('error'):
-            module.exit_json(failed=True, changed=False, results=content['error'], state="present")
-
         module.exit_json(changed=True, results=content['result'], state="present")
 
     module.exit_json(failed=True,

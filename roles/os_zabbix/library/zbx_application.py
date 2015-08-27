@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 '''
- Ansible module for zabbix items
+Ansible module for application
 '''
 # vim: expandtab:tabstop=4:shiftwidth=4
 #
-#   Zabbix item ansible module
+#   Zabbix application ansible module
 #
 #
 #   Copyright 2015 Red Hat Inc.
@@ -41,40 +41,20 @@ def exists(content, key='result'):
 
     return True
 
-def get_value_type(value_type):
+def get_template_ids(zapi, template_names):
     '''
-    Possible values:
-    0 - numeric float;
-    1 - character;
-    2 - log;
-    3 - numeric unsigned;
-    4 - text
+    get related templates
     '''
-    vtype = 0
-    if 'int' in value_type:
-        vtype = 3
-    elif 'char' in value_type:
-        vtype = 1
-    elif 'str' in value_type:
-        vtype = 4
-
-    return vtype
-
-def get_app_ids(zapi, application_names):
-    ''' get application ids from names
-    '''
-    if isinstance(application_names, str):
-        application_names = [application_names]
-    app_ids = []
-    for app_name in application_names:
-        content = zapi.get_content('application', 'get', {'search': {'name': app_name}})
+    template_ids = []
+    # Fetch templates by name
+    for template_name in template_names:
+        content = zapi.get_content('template', 'get', {'search': {'host': template_name}})
         if content.has_key('result'):
-            app_ids.append(content['result'][0]['applicationid'])
-    return app_ids
+            template_ids.append(content['result'][0]['templateid'])
+    return template_ids
 
 def main():
-    '''
-    ansible zabbix module for zbx_item
+    ''' Ansible module for application
     '''
 
     module = AnsibleModule(
@@ -83,11 +63,7 @@ def main():
             user=dict(default=None, type='str'),
             password=dict(default=None, type='str'),
             name=dict(default=None, type='str'),
-            key=dict(default=None, type='str'),
-            template_name=dict(default=None, type='str'),
-            zabbix_type=dict(default=2, type='int'),
-            value_type=dict(default='int', type='str'),
-            applications=dict(default=[], type='list'),
+            template_name=dict(default=None, type='list'),
             debug=dict(default=False, type='bool'),
             state=dict(default='present', type='str'),
         ),
@@ -99,28 +75,17 @@ def main():
 
     zapi = ZabbixAPI(ZabbixConnection(module.params['server'], user, passwd, module.params['debug']))
 
-    #Set the instance and the template for the rest of the calls
-    zbx_class_name = 'item'
-    idname = "itemid"
+    #Set the instance and the application for the rest of the calls
+    zbx_class_name = 'application'
+    idname = 'applicationid'
+    aname = module.params['name']
     state = module.params['state']
-    key = module.params['key']
-    template_name = module.params['template_name']
-
-    content = zapi.get_content('template', 'get', {'search': {'host': template_name}})
-    templateid = None
-    if content['result']:
-        templateid = content['result'][0]['templateid']
-    else:
-        module.exit_json(changed=False,
-                         results='Error: Could find template with name %s for item.' % template_name,
-                         state="Unkown")
-
+    # get a applicationid, see if it exists
     content = zapi.get_content(zbx_class_name,
                                'get',
-                               {'search': {'key_': key},
-                                'selectApplications': 'applicationid',
+                               {'search': {'host': aname},
+                                'selectHost': 'hostid',
                                })
-
     if state == 'list':
         module.exit_json(changed=False, results=content['result'], state="list")
 
@@ -132,14 +97,9 @@ def main():
         module.exit_json(changed=True, results=content['result'], state="absent")
 
     if state == 'present':
-        params = {'name': module.params.get('name', module.params['key']),
-                  'key_': key,
-                  'hostid': templateid,
-                  'type': module.params['zabbix_type'],
-                  'value_type': get_value_type(module.params['value_type']),
-                  'applications': get_app_ids(zapi, module.params['applications']),
+        params = {'hostid': get_template_ids(zapi, module.params['template_name'])[0],
+                  'name': aname,
                  }
-
         if not exists(content):
             # if we didn't find it, create it
             content = zapi.get_content(zbx_class_name, 'create', params)
@@ -149,12 +109,14 @@ def main():
         differences = {}
         zab_results = content['result'][0]
         for key, value in params.items():
-
-            if zab_results[key] != value and zab_results[key] != str(value):
+            if key == 'templates' and zab_results.has_key('parentTemplates'):
+                if zab_results['parentTemplates'] != value:
+                    differences[key] = value
+            elif zab_results[key] != str(value) and zab_results[key] != value:
                 differences[key] = value
 
         if not differences:
-            module.exit_json(changed=False, results=zab_results, state="present")
+            module.exit_json(changed=False, results=content['result'], state="present")
 
         # We have differences and need to update
         differences[idname] = zab_results[idname]
