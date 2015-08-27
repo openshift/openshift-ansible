@@ -2,50 +2,57 @@
 - hosts: localhost
   gather_facts: no
   vars:
-    g_zserver: http://localhost/zabbix/api_jsonrpc.php
-    g_zuser: Admin
-    g_zpassword: zabbix
-  roles:
-  - ../../../roles/os_zabbix
-  post_tasks:
+    g_server: http://localhost:8080/zabbix/api_jsonrpc.php
+    g_user: ''
+    g_password: ''
 
-  - zbx_template:
-      server: "{{ g_zserver }}"
-      user: "{{ g_zuser }}"
-      password: "{{ g_zpassword }}"
+  roles:
+  - lib_zabbix
+
+  post_tasks:
+  - name: CLEAN List template for heartbeat
+    zbx_template:
+      zbx_server: "{{ g_server }}"
+      zbx_user: "{{ g_user }}"
+      zbx_password: "{{ g_password }}"
       state: list
       name: 'Template Heartbeat'
     register: templ_heartbeat
 
-  - zbx_template:
-      server: "{{ g_zserver }}"
-      user: "{{ g_zuser }}"
-      password: "{{ g_zpassword }}"
+  - name: CLEAN List template app zabbix server
+    zbx_template:
+      zbx_server: "{{ g_server }}"
+      zbx_user: "{{ g_user }}"
+      zbx_password: "{{ g_password }}"
       state: list
       name: 'Template App Zabbix Server'
     register: templ_zabbix_server
 
-  - zbx_template:
-      server: "{{ g_zserver }}"
-      user: "{{ g_zuser }}"
-      password: "{{ g_zpassword }}"
+  - name: CLEAN List template app zabbix server
+    zbx_template:
+      zbx_server: "{{ g_server }}"
+      zbx_user: "{{ g_user }}"
+      zbx_password: "{{ g_password }}"
       state: list
       name: 'Template App Zabbix Agent'
     register: templ_zabbix_agent
 
-  - zbx_template:
-      server: "{{ g_zserver }}"
-      user: "{{ g_zuser }}"
-      password: "{{ g_zpassword }}"
+  - name: CLEAN List all templates
+    zbx_template:
+      zbx_server: "{{ g_server }}"
+      zbx_user: "{{ g_user }}"
+      zbx_password: "{{ g_password }}"
       state: list
     register: templates
 
   - debug: var=templ_heartbeat.results
 
-  - zbx_template:
-      server: "{{ g_zserver }}"
-      user: "{{ g_zuser }}"
-      password: "{{ g_zpassword }}"
+  - name: Remove templates if heartbeat template is missing
+    zbx_template:
+      zbx_server: "{{ g_server }}"
+      zbx_user: "{{ g_user }}"
+      zbx_password: "{{ g_password }}"
+      name: "{{ item }}"
       state: absent
     with_items: "{{ templates.results | difference(templ_zabbix_agent.results) | difference(templ_zabbix_server.results) | oo_collect('host') }}"
     when:  templ_heartbeat.results | length == 0

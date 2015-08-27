@@ -3,7 +3,8 @@ g_template_heartbeat:
   name: Template Heartbeat
   zitems:
   - name: Heartbeat Ping
-    hostid:
+    applications:
+    - Heartbeat
     key: heartbeat.ping
   ztriggers:
   - description: 'Heartbeat.ping has failed on {HOST.NAME}'

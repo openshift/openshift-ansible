@@ -46,20 +46,20 @@ def main():
 
     module = AnsibleModule(
         argument_spec=dict(
-            server=dict(default='https://localhost/zabbix/api_jsonrpc.php', type='str'),
-            user=dict(default=None, type='str'),
-            password=dict(default=None, type='str'),
+            zbx_server=dict(default='https://localhost/zabbix/api_jsonrpc.php', type='str'),
+            zbx_user=dict(default=os.environ['ZABBIX_USER'], type='str'),
+            zbx_password=dict(default=os.environ['ZABBIX_PASSWORD'], type='str'),
+            zbx_debug=dict(default=False, type='bool'),
             name=dict(default=None, type='str'),
-            debug=dict(default=False, type='bool'),
             state=dict(default='present', type='str'),
         ),
         #supports_check_mode=True
     )
 
-    user = module.params.get('user', os.environ['ZABBIX_USER'])
-    passwd = module.params.get('password', os.environ['ZABBIX_PASSWORD'])
-
-    zapi = ZabbixAPI(ZabbixConnection(module.params['server'], user, passwd, module.params['debug']))
+    zapi = ZabbixAPI(ZabbixConnection(module.params['zbx_server'],
+                                      module.params['zbx_user'],
+                                      module.params['zbx_password'],
+                                      module.params['zbx_debug']))
 
     #Set the instance and the template for the rest of the calls
     zbx_class_name = 'hostgroup'

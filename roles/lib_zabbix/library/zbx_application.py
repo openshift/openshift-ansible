@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 '''
- Ansible module for mediatype
+Ansible module for application
 '''
 # vim: expandtab:tabstop=4:shiftwidth=4
 #
-#   Zabbix mediatype ansible module
+#   Zabbix application ansible module
 #
 #
 #   Copyright 2015 Red Hat Inc.
@@ -40,64 +40,52 @@ def exists(content, key='result'):
         return False
 
     return True
-def get_mtype(mtype):
-    '''
-    Transport used by the media type.
-    Possible values:
-    0 - email;
-    1 - script;
-    2 - SMS;
-    3 - Jabber;
-    100 - Ez Texting.
-    '''
-    mtype = mtype.lower()
-    media_type = None
-    if mtype == 'script':
-        media_type = 1
-    elif mtype == 'sms':
-        media_type = 2
-    elif mtype == 'jabber':
-        media_type = 3
-    elif mtype == 'script':
-        media_type = 100
-    else:
-        media_type = 0
 
-    return media_type
+def get_template_ids(zapi, template_names):
+    '''
+    get related templates
+    '''
+    template_ids = []
+    # Fetch templates by name
+    for template_name in template_names:
+        content = zapi.get_content('template', 'get', {'search': {'host': template_name}})
+        if content.has_key('result'):
+            template_ids.append(content['result'][0]['templateid'])
+    return template_ids
 
 def main():
-    '''
-    Ansible zabbix module for mediatype
+    ''' Ansible module for application
     '''
 
     module = AnsibleModule(
         argument_spec=dict(
-            server=dict(default='https://localhost/zabbix/api_jsonrpc.php', type='str'),
-            user=dict(default=None, type='str'),
-            password=dict(default=None, type='str'),
-            description=dict(default=None, type='str'),
-            mtype=dict(default=None, type='str'),
-            smtp_server=dict(default=None, type='str'),
-            smtp_helo=dict(default=None, type='str'),
-            smtp_email=dict(default=None, type='str'),
-            debug=dict(default=False, type='bool'),
+            zbx_server=dict(default='https://localhost/zabbix/api_jsonrpc.php', type='str'),
+            zbx_user=dict(default=os.environ['ZABBIX_USER'], type='str'),
+            zbx_password=dict(default=os.environ['ZABBIX_PASSWORD'], type='str'),
+            zbx_debug=dict(default=False, type='bool'),
+            name=dict(default=None, type='str'),
+            template_name=dict(default=None, type='list'),
             state=dict(default='present', type='str'),
         ),
         #supports_check_mode=True
     )
 
-    user = module.params.get('user', os.environ['ZABBIX_USER'])
-    passwd = module.params.get('password', os.environ['ZABBIX_PASSWORD'])
+    zapi = ZabbixAPI(ZabbixConnection(module.params['zbx_server'],
+                                      module.params['zbx_user'],
+                                      module.params['zbx_password'],
+                                      module.params['zbx_debug']))
 
-    zapi = ZabbixAPI(ZabbixConnection(module.params['server'], user, passwd, module.params['debug']))
-
-    #Set the instance and the template for the rest of the calls
-    zbx_class_name = 'mediatype'
-    idname = "mediatypeid"
-    description = module.params['description']
+    #Set the instance and the application for the rest of the calls
+    zbx_class_name = 'application'
+    idname = 'applicationid'
+    aname = module.params['name']
     state = module.params['state']
-
-    content = zapi.get_content(zbx_class_name, 'get', {'search': {'description': description}})
+    # get a applicationid, see if it exists
+    content = zapi.get_content(zbx_class_name,
+                               'get',
+                               {'search': {'name': aname},
+                                'selectHost': 'hostid',
+                               })
     if state == 'list':
         module.exit_json(changed=False, results=content['result'], state="list")
 
@@ -109,13 +97,9 @@ def main():
         module.exit_json(changed=True, results=content['result'], state="absent")
 
     if state == 'present':
-        params = {'description': description,
-                  'type': get_mtype(module.params['media_type']),
-                  'smtp_server': module.params['smtp_server'],
-                  'smtp_helo': module.params['smtp_helo'],
-                  'smtp_email': module.params['smtp_email'],
+        params = {'hostid': get_template_ids(zapi, module.params['template_name'])[0],
+                  'name': aname,
                  }
-
         if not exists(content):
             # if we didn't find it, create it
             content = zapi.get_content(zbx_class_name, 'create', params)
@@ -125,16 +109,22 @@ def main():
         differences = {}
         zab_results = content['result'][0]
         for key, value in params.items():
-            if zab_results[key] != value and \
-               zab_results[key] != str(value):
+            if key == 'templates' and zab_results.has_key('parentTemplates'):
+                if zab_results['parentTemplates'] != value:
+                    differences[key] = value
+            elif zab_results[key] != str(value) and zab_results[key] != value:
                 differences[key] = value
 
         if not differences:
-            module.exit_json(changed=False, results=zab_results, state="present")
+            module.exit_json(changed=False, results=content['result'], state="present")
 
         # We have differences and need to update
         differences[idname] = zab_results[idname]
         content = zapi.get_content(zbx_class_name, 'update', differences)
+
+        if content.has_key('error'):
+            module.exit_json(failed=True, changed=False, results=content['error'], state="present")
+
         module.exit_json(changed=True, results=content['result'], state="present")
 
     module.exit_json(failed=True,

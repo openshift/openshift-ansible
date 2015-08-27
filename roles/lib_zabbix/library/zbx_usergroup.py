@@ -44,6 +44,9 @@ def exists(content, key='result'):
 def get_rights(zapi, rights):
     '''Get rights
     '''
+    if rights == None:
+        return None
+
     perms = []
     for right in rights:
         hstgrp = right.keys()[0]
@@ -59,16 +62,49 @@ def get_rights(zapi, rights):
                           'permission': permission})
     return perms
 
-def get_userids(zapi, users):
-    ''' Get userids from user aliases
+def get_gui_access(access):
+    ''' Return the gui_access for a usergroup
     '''
-    userids = []
-    for alias in users:
-        content = zapi.get_content('user', 'get', {'search': {'alias': alias}})
-        if content['result']:
-            userids.append(content['result'][0]['userid'])
+    access = access.lower()
+    if access == 'internal':
+        return 1
+    elif access == 'disabled':
+        return 2
 
-    return userids
+    return 0
+
+def get_debug_mode(mode):
+    ''' Return the debug_mode for a usergroup
+    '''
+    mode = mode.lower()
+    if mode == 'enabled':
+        return 1
+
+    return 0
+
+def get_user_status(status):
+    ''' Return the user_status for a usergroup
+    '''
+    status = status.lower()
+    if status == 'enabled':
+        return 0
+
+    return 1
+
+
+#def get_userids(zapi, users):
+#    ''' Get userids from user aliases
+#    '''
+#    if not users:
+#        return None
+#
+#    userids = []
+#    for alias in users:
+#        content = zapi.get_content('user', 'get', {'search': {'alias': alias}})
+#        if content['result']:
+#            userids.append(content['result'][0]['userid'])
+#
+#    return userids
 
 def main():
     ''' Ansible module for usergroup
@@ -78,22 +114,25 @@ def main():
 
     module = AnsibleModule(
         argument_spec=dict(
-            server=dict(default='https://localhost/zabbix/api_jsonrpc.php', type='str'),
-            user=dict(default=None, type='str'),
-            password=dict(default=None, type='str'),
-            name=dict(default=None, type='str'),
-            rights=dict(default=[], type='list'),
-            users=dict(default=[], type='list'),
-            debug=dict(default=False, type='bool'),
+            zbx_server=dict(default='https://localhost/zabbix/api_jsonrpc.php', type='str'),
+            zbx_user=dict(default=os.environ.get('ZABBIX_USER', None), type='str'),
+            zbx_password=dict(default=os.environ.get('ZABBIX_PASSWORD', None), type='str'),
+            zbx_debug=dict(default=False, type='bool'),
+            debug_mode=dict(default='disabled', type='str'),
+            gui_access=dict(default='default', type='str'),
+            status=dict(default='enabled', type='str'),
+            name=dict(default=None, type='str', required=True),
+            rights=dict(default=None, type='list'),
+            #users=dict(default=None, type='list'),
             state=dict(default='present', type='str'),
         ),
         #supports_check_mode=True
     )
 
-    user = module.params.get('user', os.environ['ZABBIX_USER'])
-    passwd = module.params.get('password', os.environ['ZABBIX_PASSWORD'])
-
-    zapi = ZabbixAPI(ZabbixConnection(module.params['server'], user, passwd, module.params['debug']))
+    zapi = ZabbixAPI(ZabbixConnection(module.params['zbx_server'],
+                                      module.params['zbx_user'],
+                                      module.params['zbx_password'],
+                                      module.params['zbx_debug']))
 
     zbx_class_name = 'usergroup'
     idname = "usrgrpid"
@@ -112,14 +151,23 @@ def main():
         if not exists(content):
             module.exit_json(changed=False, state="absent")
 
+        if not uname:
+            module.exit_json(failed=True, changed=False, results='Need to pass in a user.', state="error")
+
         content = zapi.get_content(zbx_class_name, 'delete', [content['result'][0][idname]])
         module.exit_json(changed=True, results=content['result'], state="absent")
 
     if state == 'present':
+
         params = {'name': uname,
                   'rights': get_rights(zapi, module.params['rights']),
-                  'userids': get_userids(zapi, module.params['users']),
+                  'users_status': get_user_status(module.params['status']),
+                  'gui_access': get_gui_access(module.params['gui_access']),
+                  'debug_mode': get_debug_mode(module.params['debug_mode']),
+                  #'userids': get_userids(zapi, module.params['users']),
                  }
+
+        _ = [params.pop(key, None) for key in params.keys() if params[key] == None]
 
         if not exists(content):
             # if we didn't find it, create it
@@ -133,9 +181,9 @@ def main():
             if key == 'rights':
                 differences['rights'] = value
 
-            elif key == 'userids' and zab_results.has_key('users'):
-                if zab_results['users'] != value:
-                    differences['userids'] = value
+            #elif key == 'userids' and zab_results.has_key('users'):
+                #if zab_results['users'] != value:
+                    #differences['userids'] = value
 
             elif zab_results[key] != value and zab_results[key] != str(value):
                 differences[key] = value

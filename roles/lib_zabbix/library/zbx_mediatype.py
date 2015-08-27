@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 '''
-ansible module for zabbix triggers
+ Ansible module for mediatype
 '''
 # vim: expandtab:tabstop=4:shiftwidth=4
 #
-#   Zabbix trigger ansible module
+#   Zabbix mediatype ansible module
 #
 #
 #   Copyright 2015 Red Hat Inc.
@@ -41,117 +41,111 @@ def exists(content, key='result'):
 
     return True
 
-
-def get_priority(priority):
-    ''' determine priority
+def get_mtype(mtype):
     '''
-    prior = 0
-    if 'info' in priority:
-        prior = 1
-    elif 'warn' in priority:
-        prior = 2
-    elif 'avg' == priority or 'ave' in priority:
-        prior = 3
-    elif 'high' in priority:
-        prior = 4
-    elif 'dis' in priority:
-        prior = 5
-
-    return prior
-
-def get_deps(zapi, deps):
-    ''' get trigger dependencies
+    Transport used by the media type.
+    Possible values:
+    0 - email;
+    1 - script;
+    2 - SMS;
+    3 - Jabber;
+    100 - Ez Texting.
     '''
-    results = []
-    for desc in deps:
-        content = zapi.get_content('trigger',
-                                   'get',
-                                   {'search': {'description': desc},
-                                    'expandExpression': True,
-                                    'selectDependencies': 'triggerid',
-                                   })
-        if content.has_key('result'):
-            results.append({'triggerid': content['result'][0]['triggerid']})
+    mtype = mtype.lower()
+    media_type = None
+    if mtype == 'script':
+        media_type = 1
+    elif mtype == 'sms':
+        media_type = 2
+    elif mtype == 'jabber':
+        media_type = 3
+    elif mtype == 'script':
+        media_type = 100
+    else:
+        media_type = 0
 
-    return results
+    return media_type
 
 def main():
     '''
-    Create a trigger in zabbix
-
-    Example:
-    "params": {
-        "description": "Processor load is too high on {HOST.NAME}",
-        "expression": "{Linux server:system.cpu.load[percpu,avg1].last()}>5",
-        "dependencies": [
-            {
-                "triggerid": "14062"
-            }
-        ]
-    },
-
+    Ansible zabbix module for mediatype
     '''
 
     module = AnsibleModule(
         argument_spec=dict(
-            server=dict(default='https://localhost/zabbix/api_jsonrpc.php', type='str'),
-            user=dict(default=None, type='str'),
-            password=dict(default=None, type='str'),
-            expression=dict(default=None, type='str'),
+            zbx_server=dict(default='https://localhost/zabbix/api_jsonrpc.php', type='str'),
+            zbx_user=dict(default=os.environ['ZABBIX_USER'], type='str'),
+            zbx_password=dict(default=os.environ['ZABBIX_PASSWORD'], type='str'),
+            zbx_debug=dict(default=False, type='bool'),
             description=dict(default=None, type='str'),
-            dependencies=dict(default=[], type='list'),
-            priority=dict(default='avg', type='str'),
-            debug=dict(default=False, type='bool'),
+            mtype=dict(default=None, type='str'),
+            smtp_server=dict(default=None, type='str'),
+            smtp_helo=dict(default=None, type='str'),
+            smtp_email=dict(default=None, type='str'),
+            passwd=dict(default=None, type='str'),
+            path=dict(default=None, type='str'),
+            username=dict(default=None, type='str'),
+            status=dict(default='enabled', type='str'),
             state=dict(default='present', type='str'),
         ),
         #supports_check_mode=True
     )
 
-    user = module.params.get('user', os.environ['ZABBIX_USER'])
-    passwd = module.params.get('password', os.environ['ZABBIX_PASSWORD'])
-
-
-    zapi = ZabbixAPI(ZabbixConnection(module.params['server'], user, passwd, module.params['debug']))
+    zapi = ZabbixAPI(ZabbixConnection(module.params['zbx_server'],
+                                      module.params['zbx_user'],
+                                      module.params['zbx_password'],
+                                      module.params['zbx_debug']))
 
     #Set the instance and the template for the rest of the calls
-    zbx_class_name = 'trigger'
-    idname = "triggerid"
-    state = module.params['state']
+    zbx_class_name = 'mediatype'
+    idname = "mediatypeid"
     description = module.params['description']
+    state = module.params['state']
 
-    content = zapi.get_content(zbx_class_name,
-                               'get',
-                               {'search': {'description': description},
-                                'expandExpression': True,
-                                'selectDependencies': 'triggerid',
-                               })
+    content = zapi.get_content(zbx_class_name, 'get', {'search': {'description': description}})
     if state == 'list':
         module.exit_json(changed=False, results=content['result'], state="list")
 
     if state == 'absent':
         if not exists(content):
             module.exit_json(changed=False, state="absent")
+
         content = zapi.get_content(zbx_class_name, 'delete', [content['result'][0][idname]])
         module.exit_json(changed=True, results=content['result'], state="absent")
 
     if state == 'present':
+        status = 1
+        if module.params['status']:
+            status = 0
         params = {'description': description,
-                  'expression':  module.params['expression'],
-                  'dependencies': get_deps(zapi, module.params['dependencies']),
-                  'priority': get_priority(module.params['priority']),
+                  'type': get_mtype(module.params['mtype']),
+                  'smtp_server': module.params['smtp_server'],
+                  'smtp_helo': module.params['smtp_helo'],
+                  'smtp_email': module.params['smtp_email'],
+                  'passwd': module.params['passwd'],
+                  'exec_path': module.params['path'],
+                  'username': module.params['username'],
+                  'status': status,
                  }
+
+        # Remove any None valued params
+        _ = [params.pop(key, None) for key in params.keys() if params[key] is None]
 
         if not exists(content):
             # if we didn't find it, create it
             content = zapi.get_content(zbx_class_name, 'create', params)
+
+            if content.has_key('error'):
+                module.exit_json(failed=True, changed=False, results=content['error'], state="present")
+
             module.exit_json(changed=True, results=content['result'], state='present')
         # already exists, we need to update it
         # let's compare properties
         differences = {}
         zab_results = content['result'][0]
         for key, value in params.items():
-
-            if zab_results[key] != value and zab_results[key] != str(value):
+            if zab_results[key] != value and \
+               zab_results[key] != str(value):
                 differences[key] = value
 
         if not differences:
@@ -161,7 +155,6 @@ def main():
         differences[idname] = zab_results[idname]
         content = zapi.get_content(zbx_class_name, 'update', differences)
         module.exit_json(changed=True, results=content['result'], state="present")
-
 
     module.exit_json(failed=True,
                      changed=False,
