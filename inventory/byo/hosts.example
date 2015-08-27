@@ -20,6 +20,9 @@ ansible_ssh_user=root
 # deployment type valid values are origin, online and enterprise
 deployment_type=enterprise
 
+# Enable cluster metrics
+#use_cluster_metrics=true
+
 # Pre-release registry URL
 #oreg_url=rcm-img-docker01.build.eng.bos.redhat.com:5001/openshift3/ose-${component}:${version}
 
@@ -37,6 +40,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 
 # Allow all auth
 #openshift_master_identity_providers=[{'name': 'allow_all', 'login': 'true', 'challenge': 'true', 'kind': 'AllowAllPasswordIdentityProvider'}]
+
+# Configure Fluentd
+#use_fluentd=true
 
 # master cluster ha variables using pacemaker or RHEL HA
 #openshift_master_cluster_password=openshift_cluster

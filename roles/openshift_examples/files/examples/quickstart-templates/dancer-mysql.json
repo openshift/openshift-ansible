@@ -162,15 +162,15 @@
                   },
                   {
                     "name": "MYSQL_USER",
-                    "value": "${MYSQL_USER}"
+                    "value": "${DATABASE_USER}"
                   },
                   {
                     "name": "MYSQL_PASSWORD",
-                    "value": "${MYSQL_PASSWORD}"
+                    "value": "${DATABASE_PASSWORD}"
                   },
                   {
                     "name": "MYSQL_DATABASE",
-                    "value": "${MYSQL_DATABASE}"
+                    "value": "${DATABASE_NAME}"
                   },
                   {
                     "name": "SECRET_KEY_BASE",
@@ -238,7 +238,7 @@
             "containers": [
               {
                 "name": "mysql",
-                "image": "openshift/mysql-55-centos7",
+                "image": "${MYSQL_IMAGE}",
                 "ports": [
                   {
                     "containerPort": 3306
@@ -247,15 +247,15 @@
                 "env": [
                   {
                     "name": "MYSQL_USER",
-                    "value": "${MYSQL_USER}"
+                    "value": "${DATABASE_USER}"
                   },
                   {
                     "name": "MYSQL_PASSWORD",
-                    "value": "${MYSQL_PASSWORD}"
+                    "value": "${DATABASE_PASSWORD}"
                   },
                   {
                     "name": "MYSQL_DATABASE",
-                    "value": "${MYSQL_DATABASE}"
+                    "value": "${DATABASE_NAME}"
                   }
                 ]
               }
@@ -281,8 +281,8 @@
     },
     {
       "name": "APPLICATION_DOMAIN",
-      "description": "The exposed hostname that will route to the Dancer service",
-      "value": "dancer-mysql-example.openshiftapps.com"
+      "description": "The exposed hostname that will route to the Dancer service, if left blank a value will be defaulted.",
+      "value": ""
     },
     {
       "name": "GITHUB_WEBHOOK_SECRET",
@@ -308,21 +308,26 @@
       "value": "database"
     },
     {
-      "name": "MYSQL_USER",
+      "name": "DATABASE_USER",
       "description": "database username",
       "generate": "expression",
       "from": "user[A-Z0-9]{3}"
     },
     {
-      "name": "MYSQL_PASSWORD",
+      "name": "DATABASE_PASSWORD",
       "description": "database password",
       "generate": "expression",
       "from": "[a-zA-Z0-9]{8}"
     },
     {
-      "name": "MYSQL_DATABASE",
+      "name": "DATABASE_NAME",
       "description": "database name",
       "value": "sampledb"
+    },
+    {
+      "name": "MYSQL_IMAGE",
+      "description": "Image to use for mysql",
+      "value": "openshift/mysql-55-centos7"      
     },
     {
       "name": "SECRET_KEY_BASE",
