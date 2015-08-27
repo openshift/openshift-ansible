@@ -74,8 +74,8 @@ def main():
     module = AnsibleModule(
         argument_spec=dict(
             zbx_server=dict(default='https://localhost/zabbix/api_jsonrpc.php', type='str'),
-            zbx_user=dict(default=os.environ['ZABBIX_USER'], type='str'),
-            zbx_password=dict(default=os.environ['ZABBIX_PASSWORD'], type='str'),
+            zbx_user=dict(default=os.environ.get('ZABBIX_USER', None), type='str'),
+            zbx_password=dict(default=os.environ.get('ZABBIX_PASSWORD', None), type='str'),
             zbx_debug=dict(default=False, type='bool'),
             description=dict(default=None, type='str'),
             mtype=dict(default=None, type='str'),
