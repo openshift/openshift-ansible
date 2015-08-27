@@ -7,7 +7,6 @@
   - vars.yml
   tasks:
   - set_fact: scratch_group=tag_env-{{ cluster_id }}
-  - name: show scratch group 
   - add_host:
       name: "{{ item }}"
       groups: oo_hosts_to_terminate
