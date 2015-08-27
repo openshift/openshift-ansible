@@ -1,90 +1,143 @@
 ---
 g_template_os_linux:
   name: Template OS Linux
+  zapplications:
+  - Disk
+  - Memory
+  - Kernel
   zitems:
   - key: kernel.uname.sysname
+    application: Kernel
     value_type: string
 
   - key: kernel.all.cpu.wait.total
+    application: Kernel
     value_type: int
 
   - key: kernel.all.cpu.irq.hard
+    application: Kernel
     value_type: int
 
   - key: kernel.all.cpu.idle
+    application: Kernel
     value_type: int
 
   - key: kernel.uname.distro
+    application: Kernel
     value_type: string
 
   - key: kernel.uname.nodename
+    application: Kernel
     value_type: string
 
   - key: kernel.all.cpu.irq.soft
+    application: Kernel
     value_type: int
 
   - key: kernel.all.load.15_minute
+    application: Kernel
     value_type: float
 
   - key: kernel.all.cpu.sys
+    application: Kernel
     value_type: int
 
   - key: kernel.all.load.5_minute
+    application: Kernel
     value_type: float
 
   - key: mem.freemem
+    application: Memory
     value_type: int
 
   - key: kernel.all.cpu.nice
+    application: Kernel
     value_type: int
 
   - key: mem.util.bufmem
+    application: Memory
     value_type: int
 
   - key: swap.used
+    application: Memory
     value_type: int
 
   - key: kernel.all.load.1_minute
+    application: Kernel
     value_type: float
 
   - key: kernel.uname.version
+    application: Kernel
     value_type: string
 
   - key: swap.length
+    application: Memory
     value_type: int
 
   - key: mem.physmem
+    application: Memory
     value_type: int
 
   - key: kernel.all.uptime
+    application: Kernel
     value_type: int
 
   - key: swap.free
+    application: Memory
     value_type: int
 
   - key: mem.util.used
+    application: Memory
     value_type: int
 
   - key: kernel.all.cpu.user
+    application: Kernel
     value_type: int
 
   - key: kernel.uname.machine
+    application: Kernel
     value_type: string
 
   - key: hinv.ncpu
+    application: Kernel
     value_type: int
 
   - key: mem.util.cached
+    application: Memory
     value_type: int
 
   - key: kernel.all.cpu.steal
+    application: Kernel
     value_type: int
 
   - key: kernel.all.pswitch
+    application: Kernel
     value_type: int
 
   - key: kernel.uname.release
+    application: Kernel
     value_type: string
 
   - key: proc.nprocs
+    application: Kernel
     value_type: int
+
+  - key: filesys.avail
+    application: Disk
+    value_type: int
+
+  - key: filesys.capacity
+    application: Disk
+    value_type: int
+
+  - key: filesys.free
+    application: Disk
+    value_type: int
+
+  - key: filesys.full
+    application: Disk
+    value_type: float
+
+  - key: filesys.used
+    application: Disk
+    value_type: float
