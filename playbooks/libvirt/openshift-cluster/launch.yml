@@ -17,6 +17,14 @@
 
   - include: tasks/configure_libvirt.yml
 
+  - include: ../../common/openshift-cluster/set_etcd_launch_facts_tasks.yml
+  - include: tasks/launch_instances.yml
+    vars:
+      instances: "{{ etcd_names }}"
+      cluster: "{{ cluster_id }}"
+      type: "{{ k8s_type }}"
+      g_sub_host_type: "default"
+
   - include: ../../common/openshift-cluster/set_master_launch_facts_tasks.yml
   - include: tasks/launch_instances.yml
     vars:

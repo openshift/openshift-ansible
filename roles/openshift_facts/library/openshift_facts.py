@@ -301,6 +301,23 @@ def set_fluentd_facts_if_unset(facts):
             facts['common']['use_fluentd'] = use_fluentd
     return facts
 
+def set_metrics_facts_if_unset(facts):
+    """ Set cluster metrics facts if not already present in facts dict
+            dict: the facts dict updated with the generated cluster metrics facts if
+            missing
+        Args:
+            facts (dict): existing facts
+        Returns:
+            dict: the facts dict updated with the generated cluster metrics
+            facts if they were not already present
+
+    """
+    if 'common' in facts:
+        if 'use_cluster_metrics' not in facts['common']:
+            use_cluster_metrics = False
+            facts['common']['use_cluster_metrics'] = use_cluster_metrics
+    return facts
+
 def set_identity_providers_if_unset(facts):
     """ Set identity_providers fact if not already present in facts dict
 
@@ -720,6 +737,7 @@ class OpenShiftFacts(object):
         facts['current_config'] = get_current_config(facts)
         facts = set_url_facts_if_unset(facts)
         facts = set_fluentd_facts_if_unset(facts)
+        facts = set_metrics_facts_if_unset(facts)
         facts = set_identity_providers_if_unset(facts)
         facts = set_sdn_facts_if_unset(facts)
         facts = set_deployment_facts_if_unset(facts)

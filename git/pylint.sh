@@ -13,7 +13,7 @@ OLDREV=$1
 NEWREV=$2
 #TRG_BRANCH=$3
 
-PYTHON=/var/lib/jenkins/python27/bin/python
+PYTHON=$(which python)
 
 set +e
 PY_DIFF=$(/usr/bin/git diff --name-only $OLDREV $NEWREV --diff-filter=ACM | grep ".py$")

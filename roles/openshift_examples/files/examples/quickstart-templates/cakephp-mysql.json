@@ -264,7 +264,7 @@
             "containers": [
               {
                 "name": "mysql",
-                "image": "openshift/mysql-55-centos7",
+                "image": "${MYSQL_IMAGE}",
                 "ports": [
                   {
                     "containerPort": 3306
@@ -307,8 +307,8 @@
     },
     {
       "name": "APPLICATION_DOMAIN",
-      "description": "The exposed hostname that will route to the CakePHP service",
-      "value": "cakephp-mysql-example.openshiftapps.com"
+      "description": "The exposed hostname that will route to the CakePHP service, if left blank a value will be defaulted.",
+      "value": ""
     },
     {
       "name": "GITHUB_WEBHOOK_SECRET",
@@ -341,6 +341,11 @@
       "description": "Database user password",
       "generate": "expression",
       "from": "[a-zA-Z0-9]{16}"
+    },
+    {
+      "name": "MYSQL_IMAGE",
+      "description": "Image to use for mysql",
+      "value": "openshift/mysql-55-centos7"      
     },
     {
       "name": "CAKEPHP_SECRET_TOKEN",

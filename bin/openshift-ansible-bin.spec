@@ -1,6 +1,6 @@
 Summary:       OpenShift Ansible Scripts for working with metadata hosts
 Name:          openshift-ansible-bin
-Version:       0.0.18
+Version:       0.0.19
 Release:       1%{?dist}
 License:       ASL 2.0
 URL:           https://github.com/openshift/openshift-ansible
@@ -42,6 +42,24 @@ cp -p openshift_ansible.conf.example %{buildroot}/etc/openshift_ansible/openshif
 %config(noreplace) /etc/openshift_ansible/
 
 %changelog
+* Thu Aug 20 2015 Kenny Woodson <kwoodson@redhat.com> 0.0.19-1
+- Updated to show private ips when doing a list (kwoodson@redhat.com)
+- Updated to read config first and default to users home dir
+  (kwoodson@redhat.com)
+- Prevent Ansible from serializing tasks (lhuard@amadeus.com)
+- Infra node support (whearn@redhat.com)
+- Playbook updates for clustered etcd (jdetiber@redhat.com)
+- bin/cluster supports boto credentials as well as env variables
+  (jdetiber@redhat.com)
+- Merge pull request #291 from lhuard1A/profile
+  (twiest@users.noreply.github.com)
+- Add a generic mechanism for passing options (lhuard@amadeus.com)
+- Infrastructure - Validate AWS environment before calling playbooks
+  (jhonce@redhat.com)
+- Add a --profile option to spot which task takes more time
+  (lhuard@amadeus.com)
+- changed Openshift to OpenShift (twiest@redhat.com)
+
 * Tue Jun 09 2015 Kenny Woodson <kwoodson@redhat.com> 0.0.18-1
 - Implement OpenStack provider (lhuard@amadeus.com)
 - * Update defaults and examples to track core concepts guide
