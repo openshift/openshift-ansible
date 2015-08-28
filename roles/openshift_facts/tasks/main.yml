@@ -6,5 +6,5 @@
     - ansible_version | version_compare('1.9.0', 'ne')
     - ansible_version | version_compare('1.9.0.1', 'ne')
 
-- name: Gather OpenShift facts
+- name: Gather Cluster facts
   openshift_facts:

@@ -5,11 +5,11 @@ openshift_node_ips: []
 os_firewall_allow:
 - service: etcd embedded
   port: 4001/tcp
-- service: OpenShift api https
+- service: api server https
   port: 8443/tcp
-- service: OpenShift dns tcp
+- service: dns tcp
   port: 53/tcp
-- service: OpenShift dns udp
+- service: dns udp
   port: 53/udp
 - service: Fluentd td-agent tcp
   port: 24224/tcp
@@ -22,9 +22,9 @@ os_firewall_allow:
 - service: Corosync UDP
   port: 5405/udp
 os_firewall_deny:
-- service: OpenShift api http
+- service: api server http
   port: 8080/tcp
-- service: former OpenShift web console port
+- service: former web console port
   port: 8444/tcp
 - service: former etcd peer port
   port: 7001/tcp
