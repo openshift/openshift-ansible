@@ -32,7 +32,6 @@
     - serviceaccounts.private.key
     - serviceaccounts.public.key
 
-
 - name: Create the master certificates if they do not already exist
   command: >
     {{ openshift.common.admin_binary }} create-master-certs

@@ -1,9 +1,9 @@
 ---
 # By default install rhel and xpaas streams on enterprise installs
-openshift_examples_load_centos: "{{ openshift_deployment_type != 'enterprise' }}"
-openshift_examples_load_rhel: "{{ openshift_deployment_type == 'enterprise' }}"
+openshift_examples_load_centos: "{{ openshift_deployment_type not in ['enterprise', 'atomic-enterprise', 'openshift_enterprise'] }}"
+openshift_examples_load_rhel: "{{ openshift_deployment_type in ['enterprise', 'atomic-enterprise', 'openshift_enterprise'] }}"
 openshift_examples_load_db_templates: true
-openshift_examples_load_xpaas: "{{ openshift_deployment_type == 'enterprise' }}"
+openshift_examples_load_xpaas: "{{ openshift_deployment_type in ['enterprise', 'atomic-enterprise', 'openshift_enterprise'] }}"
 openshift_examples_load_quickstarts: true
 
 examples_base: /usr/share/openshift/examples
