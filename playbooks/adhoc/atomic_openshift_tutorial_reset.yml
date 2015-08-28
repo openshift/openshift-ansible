@@ -19,10 +19,12 @@
         - openshift-node
         - atomic-enterprise-master
         - atomic-enterprise-node
+        - etcd
 
     - yum: name={{ item }} state=absent
       with_items:
         - openvswitch
+        - etcd
         - origin
         - origin-master
         - origin-node
@@ -89,6 +91,8 @@
         - /etc/sysconfig/openshift-node
         - /etc/sysconfig/atomic-enterprise-master
         - /etc/sysconfig/atomic-enterprise-node
+        - /etc/etcd
+        - /var/lib/etcd
 
     - user: name={{ item }} state=absent remove=yes
       with_items:
