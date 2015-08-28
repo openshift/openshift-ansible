@@ -335,9 +335,8 @@ def set_metrics_facts_if_unset(facts):
 
     """
     if 'common' in facts:
-        deployment_type = facts['common']['deployment_type']
         if 'use_cluster_metrics' not in facts['common']:
-            use_cluster_metrics = True if deployment_type == 'origin' else False
+            use_cluster_metrics = False
             facts['common']['use_cluster_metrics'] = use_cluster_metrics
     return facts
 
