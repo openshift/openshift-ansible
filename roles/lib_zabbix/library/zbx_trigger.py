@@ -65,7 +65,7 @@ def get_deps(zapi, deps):
     for desc in deps:
         content = zapi.get_content('trigger',
                                    'get',
-                                   {'search': {'description': desc},
+                                   {'filter': {'description': desc},
                                     'expandExpression': True,
                                     'selectDependencies': 'triggerid',
                                    })
@@ -119,7 +119,7 @@ def main():
 
     content = zapi.get_content(zbx_class_name,
                                'get',
-                               {'search': {'description': description},
+                               {'filter': {'description': description},
                                 'expandExpression': True,
                                 'selectDependencies': 'triggerid',
                                })

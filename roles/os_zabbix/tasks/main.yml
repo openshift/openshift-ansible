@@ -11,6 +11,7 @@
 
 - include_vars: template_heartbeat.yml
 - include_vars: template_os_linux.yml
+- include_vars: template_docker.yml
 
 - name: Include Template Heartbeat
   include: ../../lib_zabbix/tasks/create_template.yml
@@ -24,6 +25,14 @@
   include: ../../lib_zabbix/tasks/create_template.yml
   vars:
     template: "{{ g_template_os_linux }}"
+    server: "{{ ozb_server }}"
+    user: "{{ ozb_user }}"
+    password: "{{ ozb_password }}"
+
+- name: Include Template docker
+  include: ../../lib_zabbix/tasks/create_template.yml
+  vars:
+    template: "{{ g_template_docker }}"
     server: "{{ ozb_server }}"
     user: "{{ ozb_user }}"
     password: "{{ ozb_password }}"
