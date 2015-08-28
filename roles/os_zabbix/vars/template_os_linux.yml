@@ -147,27 +147,12 @@ g_template_os_linux:
     - Kernel
     value_type: int
 
-  - key: filesys.avail
-    applications:
-    - Disk
-    value_type: int
-
-  - key: filesys.capacity
-    applications:
-    - Disk
-    value_type: int
-
-  - key: filesys.free
-    applications:
-    - Disk
-    value_type: int
-
-  - key: filesys.full
+  - key: filesys.full.xvda2
     applications:
     - Disk
     value_type: float
 
-  - key: filesys.used
+  - key: filesys.full.xvda3
     applications:
     - Disk
     value_type: float
