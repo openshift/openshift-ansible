@@ -89,10 +89,35 @@ inventory file use the -i option for ansible-playbook.
 
 ## Post-ansible steps
 #### Create the default router
+
+The router requires you to specify a service account to create because it is binding to host networking and requires elevated privileges by default. So you should create a service account for it, refer to the [Openshift Document](https://docs.openshift.org/latest/admin_guide/install/deploy_router.html#haproxy-router) for detail information.
+
 On the master host:
+
+Create a service account, for example named *router*:
+```sh
+$ echo \
+  '{"kind":"ServiceAccount","apiVersion":"v1","metadata":{"name":"router"}}' \
+  | oc create -f -
+```
+Edit the *privileged* SCC:
+```sh
+$ oc edit scc privileged
+```
+Add the *router* service account in the form of
+*system:serviceaccount:<project>:<name>* to the `*users*` section:
+
+    
+    ...
+    users:
+    - system:serviceaccount:openshift-infra:build-controller
+    - system:serviceaccount:default:router
+
+At last, create a router using service account created above:
 ```sh
 oadm router --create=true \
   --credentials=/etc/openshift/master/openshift-router.kubeconfig
+  --service-account=router
 ```
 
 #### Create the default docker-registry
