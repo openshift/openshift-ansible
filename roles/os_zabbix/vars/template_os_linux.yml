@@ -173,3 +173,11 @@ g_template_os_linux:
   - description: 'Filesystem: /var has less than 5% free on {HOST.NAME}'
     expression: '{Template OS Linux:filesys.full.xvda3.last()}>95'
     priority: high
+
+  - description: 'Too many TOTAL processes on {HOST.NAME}'
+    expression: '{Template OS Linux:proc.nprocs.last()}>5000'
+    priority: warn
+
+  - description: 'Lack of available memory on {HOST.NAME}'
+    expression: '{Template OS Linux:mem.freemem.last()}<3000'
+    priority: warn
