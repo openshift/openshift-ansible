@@ -1,0 +1,12 @@
+---
+g_template_openshift_master:
+  name: Template Openshift Master
+  zitems:
+  - name: create_app
+    applications:
+    - Openshift Master
+    key: create_app
+  ztriggers:
+  - description: 'Application creation has failed on {HOST.NAME}'
+    expression: '{Template Openshift Master:create_app.last(#1)}=1 and {Template Openshift Master:create_app.last(#2)}=1'
+    priority: avg
