@@ -1,6 +1,6 @@
 - name: Wait for Node Registration
   command: >
-      {{ openshift.common.client_binary }} get node {{ item }}
+      {{ openshift.common.client_binary }} get node {{ item | lower }}
   register: omd_get_node
   until: omd_get_node.rc == 0
   retries: 10
@@ -9,17 +9,17 @@
 
 - name: Handle unscheduleable node
   command: >
-    {{ openshift.common.admin_binary }} manage-node {{ item }} --schedulable=false
+    {{ openshift.common.admin_binary }} manage-node {{ item | lower }} --schedulable=false
   with_items: openshift_unscheduleable_nodes
 
 - name: Handle scheduleable node
   command: >
-    {{ openshift.common.admin_binary }} manage-node {{ item }} --schedulable=true
+    {{ openshift.common.admin_binary }} manage-node {{ item | lower }} --schedulable=true
   with_items: openshift_scheduleable_nodes
 
 - name: Label nodes
   command: >
-    {{ openshift.common.client_binary }} label --overwrite node {{ item.openshift.common.hostname }} {{ item.openshift.node.labels | oo_combine_dict  }}
+    {{ openshift.common.client_binary }} label --overwrite node {{ item.openshift.common.hostname | lower }} {{ item.openshift.node.labels | oo_combine_dict  }}
   with_items:
     -  "{{ openshift_node_vars }}"
   when: "'labels' in item.openshift.node and item.openshift.node.labels != {}"
