@@ -488,6 +488,10 @@ def set_sdn_facts_if_unset(facts):
         if 'sdn_host_subnet_length' not in facts['master']:
             facts['master']['sdn_host_subnet_length'] = '8'
 
+    if 'node' in facts:
+        if 'sdn_mtu' not in facts['node']:
+            facts['node']['sdn_mtu'] = '1450'
+
     return facts
 
 def format_url(use_ssl, hostname, port, path=''):
