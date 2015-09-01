@@ -7,8 +7,6 @@
     state: list
   register: templates
 
-- debug: var=templates
-
 - include_vars: template_heartbeat.yml
 - include_vars: template_os_linux.yml
 - include_vars: template_docker.yml

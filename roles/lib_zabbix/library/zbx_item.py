@@ -60,18 +60,36 @@ def get_value_type(value_type):
 
     return vtype
 
-def get_app_ids(zapi, application_names):
+def get_app_ids(application_names, app_name_ids):
     ''' get application ids from names
     '''
-    if isinstance(application_names, str):
-        application_names = [application_names]
-    app_ids = []
-    for app_name in application_names:
-        content = zapi.get_content('application', 'get', {'search': {'name': app_name}})
-        if content.has_key('result'):
-            app_ids.append(content['result'][0]['applicationid'])
-    return app_ids
+    applications = []
+    if application_names:
+        for app in application_names:
+            applications.append(app_name_ids[app])
 
+    return applications
+
+def get_template_id(zapi, template_name):
+    '''
+    get related templates
+    '''
+    template_ids = []
+    app_ids = {}
+    # Fetch templates by name
+    content = zapi.get_content('template',
+                               'get',
+                               {'search': {'host': template_name},
+                                'selectApplications': ['applicationid', 'name']})
+    if content.has_key('result'):
+        template_ids.append(content['result'][0]['templateid'])
+        for app in content['result'][0]['applications']:
+            app_ids[app['name']] = app['applicationid']
+
+    return template_ids, app_ids
+
+# The branches are needed for CRUD and error handling
+# pylint: disable=too-many-branches
 def main():
     '''
     ansible zabbix module for zbx_item
@@ -88,7 +106,7 @@ def main():
             template_name=dict(default=None, type='str'),
             zabbix_type=dict(default=2, type='int'),
             value_type=dict(default='int', type='str'),
-            applications=dict(default=[], type='list'),
+            applications=dict(default=None, type='list'),
             state=dict(default='present', type='str'),
         ),
         #supports_check_mode=True
@@ -101,59 +119,74 @@ def main():
 
     #Set the instance and the template for the rest of the calls
     zbx_class_name = 'item'
-    idname = "itemid"
     state = module.params['state']
-    key = module.params['key']
-    template_name = module.params['template_name']
 
-    content = zapi.get_content('template', 'get', {'search': {'host': template_name}})
-    templateid = None
-    if content['result']:
-        templateid = content['result'][0]['templateid']
-    else:
-        module.exit_json(changed=False,
-                         results='Error: Could find template with name %s for item.' % template_name,
+    templateid, app_name_ids = get_template_id(zapi, module.params['template_name'])
+
+    # Fail if a template was not found matching the name
+    if not templateid:
+        module.exit_json(failed=True,
+                         changed=False,
+                         results='Error: Could find template with name %s for item.' % module.params['template_name'],
                          state="Unkown")
 
     content = zapi.get_content(zbx_class_name,
                                'get',
-                               {'search': {'key_': key},
+                               {'search': {'key_': module.params['key']},
                                 'selectApplications': 'applicationid',
+                                'templateids': templateid,
                                })
 
+    # Get
     if state == 'list':
         module.exit_json(changed=False, results=content['result'], state="list")
 
+    # Delete
     if state == 'absent':
         if not exists(content):
             module.exit_json(changed=False, state="absent")
 
-        content = zapi.get_content(zbx_class_name, 'delete', [content['result'][0][idname]])
+        content = zapi.get_content(zbx_class_name, 'delete', [content['result'][0]['itemid']])
         module.exit_json(changed=True, results=content['result'], state="absent")
 
+    # Create and Update
     if state == 'present':
+
         params = {'name': module.params.get('name', module.params['key']),
-                  'key_': key,
-                  'hostid': templateid,
+                  'key_': module.params['key'],
+                  'hostid': templateid[0],
                   'type': module.params['zabbix_type'],
                   'value_type': get_value_type(module.params['value_type']),
-                  'applications': get_app_ids(zapi, module.params['applications']),
+                  'applications': get_app_ids(module.params['applications'], app_name_ids),
                  }
 
+        # Remove any None valued params
+        _ = [params.pop(key, None) for key in params.keys() if params[key] is None]
+
+        #******#
+        # CREATE
+        #******#
         if not exists(content):
-            # if we didn't find it, create it
             content = zapi.get_content(zbx_class_name, 'create', params)
+
+            if content.has_key('error'):
+                module.exit_json(failed=True, changed=True, results=content['error'], state="present")
+
             module.exit_json(changed=True, results=content['result'], state='present')
-        # already exists, we need to update it
-        # let's compare properties
+
+
+        ########
+        # UPDATE
+        ########
+        _ = params.pop('hostid', None)
         differences = {}
         zab_results = content['result'][0]
         for key, value in params.items():
 
             if key == 'applications':
-                zab_apps = set([item['applicationid'] for item in zab_results[key]])
-                if zab_apps != set(value):
-                    differences[key] = zab_apps
+                app_ids = [item['applicationid'] for item in zab_results[key]]
+                if set(app_ids) != set(value):
+                    differences[key] = value
 
             elif zab_results[key] != value and zab_results[key] != str(value):
                 differences[key] = value
@@ -162,8 +195,12 @@ def main():
             module.exit_json(changed=False, results=zab_results, state="present")
 
         # We have differences and need to update
-        differences[idname] = zab_results[idname]
+        differences['itemid'] = zab_results['itemid']
         content = zapi.get_content(zbx_class_name, 'update', differences)
+
+        if content.has_key('error'):
+            module.exit_json(failed=True, changed=False, results=content['error'], state="present")
+
         module.exit_json(changed=True, results=content['result'], state="present")
 
     module.exit_json(failed=True,
