@@ -41,16 +41,17 @@ def exists(content, key='result'):
 
     return True
 
-def get_template_ids(zapi, template_names):
+def get_template_ids(zapi, template_name):
     '''
     get related templates
     '''
     template_ids = []
     # Fetch templates by name
-    for template_name in template_names:
-        content = zapi.get_content('template', 'get', {'search': {'host': template_name}})
-        if content.has_key('result'):
-            template_ids.append(content['result'][0]['templateid'])
+    content = zapi.get_content('template',
+                               'get',
+                               {'search': {'host': template_name}})
+    if content.has_key('result'):
+        template_ids.append(content['result'][0]['templateid'])
     return template_ids
 
 def main():
@@ -63,8 +64,8 @@ def main():
             zbx_user=dict(default=os.environ.get('ZABBIX_USER', None), type='str'),
             zbx_password=dict(default=os.environ.get('ZABBIX_PASSWORD', None), type='str'),
             zbx_debug=dict(default=False, type='bool'),
-            name=dict(default=None, type='str'),
-            template_name=dict(default=None, type='list'),
+            name=dict(default=None, type='str', required=True),
+            template_name=dict(default=None, type='str'),
             state=dict(default='present', type='str'),
         ),
         #supports_check_mode=True
@@ -81,10 +82,11 @@ def main():
     aname = module.params['name']
     state = module.params['state']
     # get a applicationid, see if it exists
+    tids = get_template_ids(zapi, module.params['template_name'])
     content = zapi.get_content(zbx_class_name,
                                'get',
                                {'search': {'name': aname},
-                                'selectHost': 'hostid',
+                                'templateids': tids[0],
                                })
     if state == 'list':
         module.exit_json(changed=False, results=content['result'], state="list")
@@ -97,9 +99,10 @@ def main():
         module.exit_json(changed=True, results=content['result'], state="absent")
 
     if state == 'present':
-        params = {'hostid': get_template_ids(zapi, module.params['template_name'])[0],
+        params = {'hostid': tids[0],
                   'name': aname,
                  }
+
         if not exists(content):
             # if we didn't find it, create it
             content = zapi.get_content(zbx_class_name, 'create', params)

@@ -1,6 +1,4 @@
 ---
-- debug: var=template
-
 - name: Template Create Template
   zbx_template:
     zbx_server: "{{ server }}"
@@ -9,28 +7,20 @@
     name: "{{ template.name }}"
   register: created_template
 
-- debug: var=created_template
 
 - set_fact:
     lzbx_applications: "{{ template.zitems | oo_select_keys_from_list(['applications']) | oo_flatten | unique }}"
 
-- debug: var=lzbx_applications
-
-#
-# twiest: This is commented out because it doesn't work correctly
-#
-#- name: Create Application
-#  zbx_application:
-#    zbx_server: "{{ server }}"
-#    zbx_user: "{{ user }}"
-#    zbx_password: "{{ password }}"
-#    name: "{{ item }}"
-#    template_name: "{{ template.name }}"
-#  with_items: lzbx_applications
-#  register: created_application
-#  when: template.zitems is defined
-
-#- debug: var=created_application
+- name: Create Application
+  zbx_application:
+    zbx_server: "{{ server }}"
+    zbx_user: "{{ user }}"
+    zbx_password: "{{ password }}"
+    name: "{{ item }}"
+    template_name: "{{ template.name }}"
+  with_items: lzbx_applications
+  register: created_application
+  when: template.zitems is defined
 
 - name: Create Items
   zbx_item:
@@ -41,7 +31,7 @@
     name: "{{ item.name | default(item.key, true) }}"
     value_type: "{{ item.value_type | default('int') }}"
     template_name: "{{ template.name }}"
-#    applications: "{{ item.applications }}"
+    applications: "{{ item.applications }}"
   with_items: template.zitems
   register: created_items
   when: template.zitems is defined
