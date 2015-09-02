@@ -65,7 +65,7 @@ g_template_docker:
     priority: high
 
   - description: 'Critically low docker storage metadata space on {HOST.NAME}'
-    expression: '{Template Docker:docker.storage.metadata.space.percent_available.max(#3)}<5 or {Template Docker:docker.storage.metadata.space.available.max(#3)}<0.1' # < 5% or < 100MB
+    expression: '{Template Docker:docker.storage.metadata.space.percent_available.max(#3)}<5 or {Template Docker:docker.storage.metadata.space.available.max(#3)}<0.005' # < 5% or < 5MB
     priority: high
 
   # Put triggers that depend on other triggers here (deps must be created first)
@@ -76,7 +76,7 @@ g_template_docker:
     priority: average
 
   - description: 'Low docker storage metadata space on {HOST.NAME}'
-    expression: '{Template Docker:docker.storage.metadata.space.percent_available.max(#3)}<10 or {Template Docker:docker.storage.metadata.space.available.max(#3)}<0.2' # < 10% or < 200MB
+    expression: '{Template Docker:docker.storage.metadata.space.percent_available.max(#3)}<10 or {Template Docker:docker.storage.metadata.space.available.max(#3)}<0.01' # < 10% or < 10MB
     dependencies:
     - 'Critically low docker storage metadata space on {HOST.NAME}'
     priority: average
