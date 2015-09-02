@@ -130,4 +130,12 @@
 
 - include: update.yml
 
+# Fix icmp reject iptables rules
+# It should be solved in openshift-sdn but unfortunately it's not the case
+# Mysterious
+- name: Configuring Nodes for RBox
+  hosts: oo_nodes_to_config
+  roles:
+    - rbox-node
+
 - include: list.yml

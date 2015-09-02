@@ -14,8 +14,6 @@
   shell: iptables -nvL INPUT --line-numbers | grep "reject-with icmp-host-prohibited" | tail -n 1 | awk '{print $1}'
   register: input_rule_nb
 
-- debug: var=input_rule_nb
-
 - name: Get FORWARD REJECT iptables rule
   shell: iptables -nvL FORWARD --line-numbers | grep "reject-with icmp-host-prohibited" | tail -n 1 | awk '{print $1}'
   register: forward_rule_nb
@@ -30,26 +28,3 @@
 - name: Remove FORWARD REJECT iptables rule
   command: iptables -D FORWARD {{ forward_rule_nb.stdout }}
   ignore_errors: yes
-
-# Configure every node to 
-# 1. unregister itself from consul killing all consul_registrator_rbox (leading to consul unregistration thanks to UHA)
-# 2. kill local openshift
-
-- name: Install UnRegister systemd hook
-  copy: 
-    src: "{{ lookup('env','HOME') }}/uha-rbox-spawner/rbox-node/rbox_unregister.service"
-    dest: /usr/lib/systemd/system/rbox_unregister.service
-
-- name: Install UnRegister systemd script
-  copy:
-    src: "{{ lookup('env','HOME') }}/uha-rbox-spawner/rbox-node/rbox_unregister.sh"
-    dest: /usr/lib/systemd/scripts/rbox_unregister.sh
-    mode: "u=rx,g=rx,o=rx"
-
-- name: Load and Activate UnRegister systemd hook
-  service:
-    name: rbox_unregister
-    state: started
-    enabled: yes
-
-
