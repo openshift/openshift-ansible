@@ -28,6 +28,7 @@
       debug_level: "{{ openshift_node_debug_level | default(openshift.common.debug_level) }}"
       portal_net: "{{ openshift_master_portal_net | default(None) }}"
       kubelet_args: "{{ openshift_node_kubelet_args | default(None) }}"
+      sdn_mtu: "{{ openshift_node_sdn_mtu | default(None) }}"
 
 - name: Install Node package
   yum: pkg={{ openshift.common.service_type }}-node state=present
