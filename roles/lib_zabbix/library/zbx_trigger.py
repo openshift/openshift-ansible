@@ -101,6 +101,7 @@ def main():
             description=dict(default=None, type='str'),
             dependencies=dict(default=[], type='list'),
             priority=dict(default='avg', type='str'),
+            url=dict(default=None, type='str'),
             state=dict(default='present', type='str'),
         ),
         #supports_check_mode=True
@@ -123,28 +124,41 @@ def main():
                                 'expandExpression': True,
                                 'selectDependencies': 'triggerid',
                                })
+
+    # Get
     if state == 'list':
         module.exit_json(changed=False, results=content['result'], state="list")
 
+    # Delete
     if state == 'absent':
         if not exists(content):
             module.exit_json(changed=False, state="absent")
         content = zapi.get_content(zbx_class_name, 'delete', [content['result'][0][idname]])
         module.exit_json(changed=True, results=content['result'], state="absent")
 
+    # Create and Update
     if state == 'present':
         params = {'description': description,
                   'expression':  module.params['expression'],
                   'dependencies': get_deps(zapi, module.params['dependencies']),
                   'priority': get_priority(module.params['priority']),
+                  'url': module.params['url'],
                  }
 
+        # Remove any None valued params
+        _ = [params.pop(key, None) for key in params.keys() if params[key] is None]
+
+        #******#
+        # CREATE
+        #******#
         if not exists(content):
             # if we didn't find it, create it
             content = zapi.get_content(zbx_class_name, 'create', params)
             module.exit_json(changed=True, results=content['result'], state='present')
-        # already exists, we need to update it
-        # let's compare properties
+
+        ########
+        # UPDATE
+        ########
         differences = {}
         zab_results = content['result'][0]
         for key, value in params.items():
