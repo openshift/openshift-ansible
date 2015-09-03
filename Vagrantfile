@@ -38,7 +38,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
 
   config.vm.provider "virtualbox" do |vbox, override|
-    override.vm.box = "chef/centos-7.1"
+    override.vm.box = "centos/7"
     vbox.memory = 1024
     vbox.cpus = 2
 
@@ -54,8 +54,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     when "enterprise"
       override.vm.box = "rhel-7"
     when "origin"
-      override.vm.box = "centos-7.1"
-      override.vm.box_url = "https://download.gluster.org/pub/gluster/purpleidea/vagrant/centos-7.1/centos-7.1.box"
+      override.vm.box = "centos/7"
       override.vm.box_download_checksum = "b2a9f7421e04e73a5acad6fbaf4e9aba78b5aeabf4230eebacc9942e577c1e05"
       override.vm.box_download_checksum_type = "sha256"
     end
@@ -66,7 +65,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.vm.define "node#{node_index}" do |node|
       node.vm.hostname = "ose3-node#{node_index}.example.com"
       node.vm.network :private_network, ip: "192.168.100.#{200 + n}"
-      config.vm.provision "shell", inline: "nmcli connection reload; systemctl restart network.service"
+      config.vm.provision "shell", inline: "nmcli connection reload; systemctl restart NetworkManager.service"
     end
   end
 
@@ -74,7 +73,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     master.vm.hostname = "ose3-master.example.com"
     master.vm.network :private_network, ip: "192.168.100.100"
     master.vm.network :forwarded_port, guest: 8443, host: 8443
-    config.vm.provision "shell", inline: "nmcli connection reload; systemctl restart network.service"
+    config.vm.provision "shell", inline: "nmcli connection reload; systemctl restart NetworkManager.service"
     master.vm.provision "ansible" do |ansible|
       ansible.limit = 'all'
       ansible.sudo = true
