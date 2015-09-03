@@ -69,6 +69,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # default project node selector
 #osm_default_node_selector='region=primary'
 
+# set RPM version for debugging purposes
+#openshift_version=-3.0.0.0
+
 # host group for masters
 [masters]
 ose3-master[1:3]-ansible.test.example.com
