@@ -45,5 +45,6 @@
     dependencies: "{{ item.dependencies | default([], true) }}"
     expression: "{{ item.expression }}"
     priority: "{{ item.priority }}"
+    url: "{{ item.url | default(None, True) }}"
   with_items: template.ztriggers
   when: template.ztriggers is defined
