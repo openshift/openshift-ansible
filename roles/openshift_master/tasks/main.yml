@@ -56,7 +56,7 @@
       controller_args: "{{ osm_controller_args | default(None) }}"
 
 - name: Install Master package
-  yum: pkg={{ openshift.common.service_type }}-master state=present
+  yum: pkg={{ openshift.common.service_type }}-master{{ openshift_version  }} state=present
   register: install_result
 
 - name: Check for RPM generated config marker file /etc/origin/.config_managed

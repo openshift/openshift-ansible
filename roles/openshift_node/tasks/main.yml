@@ -31,12 +31,14 @@
       sdn_mtu: "{{ openshift_node_sdn_mtu | default(None) }}"
       schedulable: "{{ openshift_schedulable | default(openshift_scheduleable) | default(None) }}"
 
+# We have to add tuned-profiles in the same transaction otherwise we run into depsolving
+# problems because the rpms don't pin the version properly.
 - name: Install Node package
-  yum: pkg={{ openshift.common.service_type }}-node state=present
+  yum: pkg={{ openshift.common.service_type }}-node{{ openshift_version  }},tuned-profiles-{{ openshift.common.service_type }}-node{{ openshift_version  }} state=present
   register: node_install_result
 
 - name: Install sdn-ovs package
-  yum: pkg={{ openshift.common.service_type }}-sdn-ovs state=present
+  yum: pkg={{ openshift.common.service_type }}-sdn-ovs{{ openshift_version }} state=present
   register: sdn_install_result
   when: openshift.common.use_openshift_sdn
 
