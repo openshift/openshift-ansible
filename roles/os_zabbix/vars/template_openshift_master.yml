@@ -9,4 +9,5 @@ g_template_openshift_master:
   ztriggers:
   - description: 'Application creation has failed on {HOST.NAME}'
     expression: '{Template Openshift Master:create_app.last(#1)}=1 and {Template Openshift Master:create_app.last(#2)}=1'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_create_app.asciidoc'
     priority: avg

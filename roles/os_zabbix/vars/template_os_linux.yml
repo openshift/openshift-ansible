@@ -160,24 +160,30 @@ g_template_os_linux:
   ztriggers:
   - description: 'Filesystem: / has less than 10% free on {HOST.NAME}'
     expression: '{Template OS Linux:filesys.full.xvda2.last()}>90'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_filesys_full.asciidoc'
     priority: warn
 
   - description: 'Filesystem: / has less than 5% free on {HOST.NAME}'
     expression: '{Template OS Linux:filesys.full.xvda2.last()}>95'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_filesys_full.asciidoc'
     priority: high
 
   - description: 'Filesystem: /var has less than 10% free on {HOST.NAME}'
     expression: '{Template OS Linux:filesys.full.xvda3.last()}>90'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_filesys_full.asciidoc'
     priority: warn
 
   - description: 'Filesystem: /var has less than 5% free on {HOST.NAME}'
     expression: '{Template OS Linux:filesys.full.xvda3.last()}>95'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_filesys_full.asciidoc'
     priority: high
 
   - description: 'Too many TOTAL processes on {HOST.NAME}'
     expression: '{Template OS Linux:proc.nprocs.last()}>5000'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_proc.asciidoc'
     priority: warn
 
   - description: 'Lack of available memory on {HOST.NAME}'
     expression: '{Template OS Linux:mem.freemem.last()}<3000'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_memory.asciidoc'
     priority: warn
