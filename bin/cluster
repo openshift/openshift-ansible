@@ -164,7 +164,7 @@ class Cluster(object):
             boto_configs = [conf for conf in boto_conf_files if conf_exists(conf)]
 
             if len(key_missing) > 0 and len(boto_configs) == 0:
-                raise ValueError("PROVIDER aws requires {} environment variable(s). See README_AWS.md".format(missing))
+                raise ValueError("PROVIDER aws requires {} environment variable(s). See README_AWS.md".format(key_missing))
 
         elif 'libvirt' == provider:
             inventory = '-i inventory/libvirt/hosts'
