@@ -30,6 +30,9 @@
     key: "{{ item.key }}"
     name: "{{ item.name | default(item.key, true) }}"
     value_type: "{{ item.value_type | default('int') }}"
+    description: "{{ item.description | default('', True) }}"
+    multiplier: "{{ item.multiplier | default('', True) }}"
+    units: "{{ item.units | default('', True) }}"
     template_name: "{{ template.name }}"
     applications: "{{ item.applications }}"
   with_items: template.zitems
