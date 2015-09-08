@@ -82,6 +82,12 @@ parameters:
     label: Infra flavor
     description: Flavor of the infra node servers
 
+  key_pair:
+    type: string
+    label: Key name
+    description: Name of the key
+
+
 outputs:
 
   master_names:
@@ -293,7 +299,7 @@ resources:
           type:       master
           image:      { get_param: master_image }
           flavor:     { get_param: master_flavor }
-          key_name:   { get_resource: keypair }
+          key_name:   { get_param: key_pair }
           net:        { get_resource: net }
           subnet:     { get_resource: subnet }
           secgrp:
@@ -325,7 +331,7 @@ resources:
           subtype:    compute
           image:      { get_param: node_image }
           flavor:     { get_param: node_flavor }
-          key_name:   { get_resource: keypair }
+          key_name:   { get_param: key_pair }
           net:        { get_resource: net }
           subnet:     { get_resource: subnet }
           secgrp:
@@ -357,7 +363,7 @@ resources:
           subtype:    infra
           image:      { get_param: infra_image }
           flavor:     { get_param: infra_flavor }
-          key_name:   { get_resource: keypair }
+          key_name:   { get_param: key_pair }
           net:        { get_resource: net }
           subnet:     { get_resource: subnet }
           secgrp:

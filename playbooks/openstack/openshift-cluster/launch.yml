@@ -21,6 +21,7 @@
 
   - name: Create OpenStack Stack
     command: 'heat stack-create -f {{ openstack_infra_heat_stack }}
+             -P key_pair={{ openstack_ssh_keypair }}
              -P cluster_id={{ cluster_id }}
              -P dns_nameservers={{ openstack_network_dns | join(",") }}
              -P cidr={{ openstack_network_cidr }}
@@ -40,6 +41,7 @@
 
   - name: Update OpenStack Stack
     command: 'heat stack-update -f {{ openstack_infra_heat_stack }}
+             -P key_pair={{ openstack_ssh_keypair }}
              -P cluster_id={{ cluster_id }}
              -P dns_nameservers={{ openstack_network_dns | join(",") }}
              -P cidr={{ openstack_network_cidr }}
