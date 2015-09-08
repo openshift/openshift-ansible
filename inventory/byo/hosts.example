@@ -70,7 +70,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #osm_default_node_selector='region=primary'
 
 # set RPM version for debugging purposes
-#openshift_version=-3.0.0.0
+#openshift_pkg_version=-3.0.0.0
 
 # host group for masters
 [masters]
