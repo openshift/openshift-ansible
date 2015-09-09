@@ -64,6 +64,7 @@ class Cluster(object):
         env['num_nodes'] = args.nodes
         env['num_infra'] = args.infra
         env['num_etcd'] = args.etcd
+        env['sub_host_type'] = args.subhosttype 
 
         return self.action(args, inventory, env, playbook)
 
@@ -281,6 +282,8 @@ if __name__ == '__main__':
                                help='number of infra nodes to create in cluster')
     create_parser.add_argument('-e', '--etcd', default=0, type=int,
                                help='number of external etcd hosts to create in cluster')
+    create_parser.add_argument('-s', '--subhosttype', default="default", type=str,
+        help='sub-host-type')
     create_parser.set_defaults(func=cluster.create)
 
     config_parser = action_parser.add_parser('config',
