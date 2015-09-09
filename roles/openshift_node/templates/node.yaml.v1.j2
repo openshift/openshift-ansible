@@ -25,5 +25,5 @@ servingInfo:
   certFile: server.crt
   clientCA: ca.crt
   keyFile: server.key
-volumeDirectory: {{ openshift_data_dir }}/openshift.local.volumes
+volumeDirectory: {{ openshift.common.data_dir }}/openshift.local.volumes
 {% include 'partials/kubeletArguments.j2' %}

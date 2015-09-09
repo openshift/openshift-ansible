@@ -454,6 +454,8 @@ def set_deployment_facts_if_unset(facts):
             dict: the facts dict updated with the generated deployment_type
             facts
     """
+    # Perhaps re-factor this as a map?
+    # pylint: disable=too-many-branches
     if 'common' in facts:
         deployment_type = facts['common']['deployment_type']
         if 'service_type' not in facts['common']:
@@ -470,6 +472,13 @@ def set_deployment_facts_if_unset(facts):
             elif deployment_type == 'origin':
                 config_base = '/etc/openshift'
             facts['common']['config_base'] = config_base
+        if 'data_dir' not in facts['common']:
+            data_dir = '/var/lib/origin'
+            if deployment_type in ['enterprise', 'online']:
+                data_dir = '/var/lib/openshift'
+            elif deployment_type == 'origin':
+                data_dir = '/var/lib/openshift'
+            facts['common']['data_dir'] = data_dir
 
     for role in ('master', 'node'):
         if role in facts:
