@@ -196,6 +196,11 @@ class Cluster(object):
                 k, v = opt.split('=', 1)
                 env['cli_' + k] = v
 
+        if args.ansiblevariables:
+            for opt in args.ansiblevariables:
+                k, v = opt.split('=', 1)
+                env[k] = v
+
         ansible_env = '-e \'{}\''.format(
             ' '.join(['%s=%s' % (key, value) for (key, value) in env.items()])
         )
@@ -265,6 +270,8 @@ if __name__ == '__main__':
                              help='Product type. (default: openshift)')
     meta_parser.add_argument('-o', '--option', action='append',
                              help='options')
+    meta_parser.add_argument('-a', '--ansiblevariables', action='append',
+                             help='ansiblevariables')
 
     meta_parser.add_argument('-p', '--profile', action='store_true',
                              help='Enable playbook profiling')
