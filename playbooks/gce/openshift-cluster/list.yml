@@ -5,8 +5,6 @@
   vars_files:
   - vars.yml
   tasks:
-  - name: show terminated
-    debug: var=groups.status_terminated
   - set_fact: scratch_group=tag_env-{{ cluster_id }}
     when: cluster_id != ''
   - set_fact: scratch_group=all

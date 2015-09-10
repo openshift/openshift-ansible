@@ -58,8 +58,6 @@
                                               | default([]))
                              | oo_filter_list(filter_attr='certs_missing') }}"
     sync_tmpdir: "{{ hostvars.localhost.mktemp.stdout }}"
-    non_preemptible_nodes: "{{ hostvars | oo_select_keys(groups['oo_non_preemptible_nodes'] | default([]) ) }}"
-    preemptible_nodes: "{{ hostvars | oo_select_keys(groups['oo_preemptible_nodes'] | default([])) }}"
   roles:
   - openshift_node_certificates
   post_tasks:
