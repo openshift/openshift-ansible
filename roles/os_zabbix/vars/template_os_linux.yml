@@ -52,24 +52,9 @@ g_template_os_linux:
     - Kernel
     value_type: float
 
-  - key: mem.freemem
-    applications:
-    - Memory
-    value_type: int
-
   - key: kernel.all.cpu.nice
     applications:
     - Kernel
-    value_type: int
-
-  - key: mem.util.bufmem
-    applications:
-    - Memory
-    value_type: int
-
-  - key: swap.used
-    applications:
-    - Memory
     value_type: int
 
   - key: kernel.all.load.1_minute
@@ -82,38 +67,10 @@ g_template_os_linux:
     - Kernel
     value_type: string
 
-  - key: swap.length
-    applications:
-    - Memory
-    value_type: int
-
-  - key: mem.physmem
-    applications:
-    - Memory
-    value_type: int
-
   - key: kernel.all.uptime
     applications:
     - Kernel
     value_type: int
-
-  - key: swap.free
-    applications:
-    - Memory
-    value_type: int
-
-  - key: mem.util.available
-    applications:
-    - Memory
-    value_type: int
-
-  - key: mem.util.used
-    applications:
-    - Memory
-    value_type: int
-    description: used memory
-    multiplier: 1024
-    units: B
 
   - key: kernel.all.cpu.user
     applications:
@@ -129,14 +86,6 @@ g_template_os_linux:
     applications:
     - Kernel
     value_type: int
-
-  - key: mem.util.cached
-    applications:
-    - Memory
-    value_type: int
-    description: cached memory
-    multiplier: 1024
-    units: B
 
   - key: kernel.all.cpu.steal
     applications:
@@ -158,6 +107,80 @@ g_template_os_linux:
     - Kernel
     value_type: int
 
+  # Memory Items
+  - key: mem.freemem
+    applications:
+    - Memory
+    value_type: int
+    description: "PCP: free system memory metric from /proc/meminfo"
+    multiplier: 1024
+    units: B
+
+  - key: mem.util.bufmem
+    applications:
+    - Memory
+    value_type: int
+    description: "PCP: Memory allocated for buffer_heads.; I/O buffers metric from /proc/meminfo"
+    multiplier: 1024
+    units: B
+
+  - key: swap.used
+    applications:
+    - Memory
+    value_type: int
+    description: "PCP: swap used metric from /proc/meminfo"
+    multiplier: 1024
+    units: B
+
+  - key: swap.length
+    applications:
+    - Memory
+    value_type: int
+    description: "PCP: total swap available metric from /proc/meminfo"
+    multiplier: 1024
+    units: B
+
+  - key: mem.physmem
+    applications:
+    - Memory
+    value_type: int
+    description: "PCP: The value of this metric corresponds to the \"MemTotal\" field reported by /proc/meminfo. Note that this does not necessarily correspond to actual installed physical memory - there may be areas of the physical address space mapped as ROM in various peripheral devices and the bios may be mirroring certain ROMs in RAM."
+    multiplier: 1024
+    units: B
+
+  - key: swap.free
+    applications:
+    - Memory
+    value_type: int
+    description: "PCP: swap free metric from /proc/meminfo"
+    multiplier: 1024
+    units: B
+
+  - key: mem.util.available
+    applications:
+    - Memory
+    value_type: int
+    description: "PCP: The amount of memory that is available for a new workload, without pushing the system into swap. Estimated from MemFree, Active(file), Inactive(file), and SReclaimable, as well as the \"low\" watermarks from /proc/zoneinfo.; available memory from /proc/meminfo"
+    multiplier: 1024
+    units: B
+
+  - key: mem.util.used
+    applications:
+    - Memory
+    value_type: int
+    description: "PCP: Used memory is the difference between mem.physmem and mem.freemem; used memory metric from /proc/meminfo"
+    multiplier: 1024
+    units: B
+
+  - key: mem.util.cached
+    applications:
+    - Memory
+    value_type: int
+    description: "PCP: Memory used by the page cache, including buffered file data.  This is in-memory cache for files read from the disk (the pagecache) but doesn't include SwapCached.; page cache metric from /proc/meminfo"
+    multiplier: 1024
+    units: B
+
+  # Disk items
   - key: filesys.full.xvda2
     applications:
     - Disk
@@ -169,32 +192,33 @@ g_template_os_linux:
     value_type: float
 
   ztriggers:
-  - description: 'Filesystem: / has less than 10% free on {HOST.NAME}'
+  - name: 'Filesystem: / has less than 10% free on {HOST.NAME}'
     expression: '{Template OS Linux:filesys.full.xvda2.last()}>90'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_filesys_full.asciidoc'
     priority: warn
 
-  - description: 'Filesystem: / has less than 5% free on {HOST.NAME}'
+  - name: 'Filesystem: / has less than 5% free on {HOST.NAME}'
     expression: '{Template OS Linux:filesys.full.xvda2.last()}>95'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_filesys_full.asciidoc'
     priority: high
 
-  - description: 'Filesystem: /var has less than 10% free on {HOST.NAME}'
+  - name: 'Filesystem: /var has less than 10% free on {HOST.NAME}'
     expression: '{Template OS Linux:filesys.full.xvda3.last()}>90'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_filesys_full.asciidoc'
     priority: warn
 
-  - description: 'Filesystem: /var has less than 5% free on {HOST.NAME}'
+  - name: 'Filesystem: /var has less than 5% free on {HOST.NAME}'
     expression: '{Template OS Linux:filesys.full.xvda3.last()}>95'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_filesys_full.asciidoc'
     priority: high
 
-  - description: 'Too many TOTAL processes on {HOST.NAME}'
+  - name: 'Too many TOTAL processes on {HOST.NAME}'
     expression: '{Template OS Linux:proc.nprocs.last()}>5000'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_proc.asciidoc'
     priority: warn
 
-  - description: 'Lack of available memory on {HOST.NAME}'
-    expression: '{Template OS Linux:mem.freemem.last()}<3000'
+  - name: 'Lack of available memory on {HOST.NAME}'
+    expression: '{Template OS Linux:mem.freemem.last()}<30720000'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_memory.asciidoc'
     priority: warn
+    description: 'Alert on less than 30MegaBytes.  This is 30 Million Bytes.  30000 KB x 1024'
