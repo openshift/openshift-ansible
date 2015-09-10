@@ -98,6 +98,7 @@ def main():
             zbx_password=dict(default=os.environ.get('ZABBIX_PASSWORD', None), type='str'),
             zbx_debug=dict(default=False, type='bool'),
             expression=dict(default=None, type='str'),
+            name=dict(default=None, type='str'),
             description=dict(default=None, type='str'),
             dependencies=dict(default=[], type='list'),
             priority=dict(default='avg', type='str'),
@@ -116,11 +117,11 @@ def main():
     zbx_class_name = 'trigger'
     idname = "triggerid"
     state = module.params['state']
-    description = module.params['description']
+    tname = module.params['name']
 
     content = zapi.get_content(zbx_class_name,
                                'get',
-                               {'filter': {'description': description},
+                               {'filter': {'description': tname},
                                 'expandExpression': True,
                                 'selectDependencies': 'triggerid',
                                })
@@ -138,7 +139,8 @@ def main():
 
     # Create and Update
     if state == 'present':
-        params = {'description': description,
+        params = {'description': tname,
+                  'comments':  module.params['description'],
                   'expression':  module.params['expression'],
                   'dependencies': get_deps(zapi, module.params['dependencies']),
                   'priority': get_priority(module.params['priority']),
