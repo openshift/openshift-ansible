@@ -111,6 +111,9 @@ g_template_os_linux:
     applications:
     - Memory
     value_type: int
+    description: used memory
+    multiplier: 1024
+    units: B
 
   - key: kernel.all.cpu.user
     applications:
@@ -131,6 +134,9 @@ g_template_os_linux:
     applications:
     - Memory
     value_type: int
+    description: cached memory
+    multiplier: 1024
+    units: B
 
   - key: kernel.all.cpu.steal
     applications:

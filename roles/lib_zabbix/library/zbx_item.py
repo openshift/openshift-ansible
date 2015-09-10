@@ -88,6 +88,23 @@ def get_template_id(zapi, template_name):
 
     return template_ids, app_ids
 
+def get_multiplier(inval):
+    ''' Determine the multiplier
+    '''
+    if inval == None or inval == '':
+        return None, None
+
+    rval = None
+    try:
+        rval = int(inval)
+    except ValueError:
+        pass
+
+    if rval:
+        return rval, True
+
+    return rval, False
+
 # The branches are needed for CRUD and error handling
 # pylint: disable=too-many-branches
 def main():
@@ -106,6 +123,9 @@ def main():
             template_name=dict(default=None, type='str'),
             zabbix_type=dict(default=2, type='int'),
             value_type=dict(default='int', type='str'),
+            multiplier=dict(default=None, type='str'),
+            description=dict(default=None, type='str'),
+            units=dict(default=None, type='str'),
             applications=dict(default=None, type='list'),
             state=dict(default='present', type='str'),
         ),
@@ -137,11 +157,15 @@ def main():
                                 'templateids': templateid,
                                })
 
-    # Get
+    #******#
+    # GET
+    #******#
     if state == 'list':
         module.exit_json(changed=False, results=content['result'], state="list")
 
-    # Delete
+    #******#
+    # DELETE
+    #******#
     if state == 'absent':
         if not exists(content):
             module.exit_json(changed=False, state="absent")
@@ -152,12 +176,17 @@ def main():
     # Create and Update
     if state == 'present':
 
+        formula, use_multiplier = get_multiplier(module.params['multiplier'])
         params = {'name': module.params.get('name', module.params['key']),
                   'key_': module.params['key'],
                   'hostid': templateid[0],
                   'type': module.params['zabbix_type'],
                   'value_type': get_value_type(module.params['value_type']),
                   'applications': get_app_ids(module.params['applications'], app_name_ids),
+                  'formula': formula,
+                  'multiplier': use_multiplier,
+                  'description': module.params['description'],
+                  'units': module.params['units'],
                  }
 
         # Remove any None valued params
