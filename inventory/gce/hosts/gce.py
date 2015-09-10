@@ -213,6 +213,7 @@ class GceInventory(object):
             'gce_image': inst.image,
             'gce_machine_type': inst.size,
             'gce_private_ip': inst.private_ips[0],
+            # Hosts don't always have a public IP name
             #'gce_public_ip': inst.public_ips[0],
             'gce_name': inst.name,
             'gce_description': inst.extra['description'],
@@ -221,7 +222,7 @@ class GceInventory(object):
             'gce_tags': inst.extra['tags'],
             'gce_metadata': md,
             'gce_network': net,
-            # Hosts don't have a public name, so we add an IP
+            # Hosts don't always have a public IP name
             #'ansible_ssh_host': inst.public_ips[0]
         }
 
