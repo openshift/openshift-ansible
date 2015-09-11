@@ -46,7 +46,7 @@ etcdConfig:
     certFile: etcd.server.crt
     clientCA: ca.crt
     keyFile: etcd.server.key
-  storageDirectory: {{ openshift_data_dir }}/openshift.local.etcd
+  storageDirectory: {{ openshift.common.data_dir }}/openshift.local.etcd
 {% endif %}
 etcdStorageConfig:
   kubernetesStoragePrefix: kubernetes.io
