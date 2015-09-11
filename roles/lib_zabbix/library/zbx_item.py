@@ -92,7 +92,7 @@ def get_multiplier(inval):
     ''' Determine the multiplier
     '''
     if inval == None or inval == '':
-        return None, None
+        return None, 0
 
     rval = None
     try:
@@ -101,9 +101,9 @@ def get_multiplier(inval):
         pass
 
     if rval:
-        return rval, True
+        return rval, 1
 
-    return rval, False
+    return rval, 0
 
 # The branches are needed for CRUD and error handling
 # pylint: disable=too-many-branches
