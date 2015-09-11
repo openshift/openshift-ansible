@@ -164,7 +164,7 @@ def main():
 
             if key == 'usrgrps':
                 # this must be done as a list of ordered dictionaries fails comparison
-                if not all([True for _ in zab_results[key][0] if _ in value[0]]):
+                if not all([_ in value for _ in zab_results[key]]):
                     differences[key] = value
 
             elif zab_results[key] != value and zab_results[key] != str(value):
