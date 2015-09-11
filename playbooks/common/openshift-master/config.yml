@@ -236,3 +236,12 @@
   tasks:
   - file: name={{ g_master_mktemp.stdout }} state=absent
     changed_when: False
+
+- name: Configure service accounts
+  hosts: oo_first_master
+
+  vars:
+    accounts: ["router", "registry"]
+
+  roles:
+  - openshift_serviceaccounts
