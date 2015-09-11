@@ -146,7 +146,7 @@ class Cluster(object):
             gce_ini_default_path = os.path.join(
                 'inventory/gce/hosts/gce.ini')
             gce_ini_path = os.environ.get('GCE_INI_PATH', gce_ini_default_path)
-            if os.path.exists(gce_ini_path) 
+            if os.path.exists(gce_ini_path): 
                 config.readfp(open(gce_ini_path))
 
                 for key in config.options('gce'):
