@@ -20,9 +20,10 @@
         local_facts:
           labels: "{{ openshift_node_labels | default(None) }}"
           annotations: "{{ openshift_node_annotations | default(None) }}"
+          schedulable: "{{ openshift_schedulable | default(openshift_scheduleable) | default(None) }}"
   - name: Check status of node certificates
     stat:
-      path: "/etc/openshift/node/{{ item }}"
+      path: "{{ openshift.common.config_base }}/node/{{ item }}"
     with_items:
     - "system:node:{{ openshift.common.hostname }}.crt"
     - "system:node:{{ openshift.common.hostname }}.key"
@@ -35,8 +36,8 @@
       certs_missing: "{{ stat_result.results | map(attribute='stat.exists')
                          | list | intersect([false])}}"
       node_subdir: node-{{ openshift.common.hostname }}
-      config_dir: /etc/openshift/generated-configs/node-{{ openshift.common.hostname }}
-      node_cert_dir: /etc/openshift/node
+      config_dir: "{{ openshift.common.config_base }}/generated-configs/node-{{ openshift.common.hostname }}"
+      node_cert_dir: "{{ openshift.common.config_base }}/node"
 
 - name: Create temp directory for syncing certs
   hosts: localhost
@@ -89,9 +90,9 @@
       path: "{{ node_cert_dir }}"
       state: directory
 
-  # TODO: notify restart openshift-node
+  # TODO: notify restart node
   # possibly test service started time against certificate/config file
-  # timestamps in openshift-node to trigger notify
+  # timestamps in node to trigger notify
   - name: Unarchive the tarball on the node
     unarchive:
       src: "{{ sync_tmpdir }}/{{ node_subdir }}.tgz"
@@ -99,6 +100,7 @@
     when: certs_missing
   roles:
   - openshift_node
+  - role: nickhammond.logrotate
   - role: fluentd_node
     when: openshift.common.use_fluentd | bool
   tasks:
@@ -123,21 +125,14 @@
   - os_env_extras
   - os_env_extras_node
 
-- name: Set scheduleability
+- name: Set schedulability
   hosts: oo_first_master
   vars:
     openshift_nodes: "{{ hostvars
                          | oo_select_keys(groups['oo_nodes_to_config'])
                          | oo_collect('openshift.common.hostname') }}"
-    openshift_unscheduleable_nodes: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config'] | default([]))
-                                      | oo_collect('openshift.common.hostname', {'openshift_scheduleable': False}) }}"
     openshift_node_vars: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config']) }}"
   pre_tasks:
-  - set_fact:
-      openshift_scheduleable_nodes: "{{ hostvars
-                                      | oo_select_keys(groups['oo_nodes_to_config'] | default([]))
-                                      | oo_collect('openshift.common.hostname')
-                                      | difference(openshift_unscheduleable_nodes) }}"
 
   roles:
   - openshift_manage_node

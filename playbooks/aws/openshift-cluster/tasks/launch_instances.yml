@@ -159,6 +159,22 @@
       type: "{{host_type}}"
   when: host_type != "node"
 
+- set_fact:
+    logrotate:
+        - name: syslog
+          path: "/var/log/cron
+                 \n/var/log/maillog
+                 \n/var/log/messages
+                 \n/var/log/secure
+                 \n/var/log/spooler \n"
+          options:
+            - daily
+            - rotate 7
+            - compress
+            - sharedscripts
+          scripts:
+            postrotate: "/bin/kill -HUP `cat /var/run/syslogd.pid 2> /dev/null` 2> /dev/null || true"
+
 - name: Add new instances groups and variables
   add_host:
     hostname: "{{ item.0 }}"
@@ -169,6 +185,7 @@
     ec2_private_ip_address: "{{ item.1.private_ip }}"
     ec2_ip_address: "{{ item.1.public_ip }}"
     openshift_node_labels: "{{ node_label }}"
+    logrotate_scripts: "{{ logrotate }}"
   with_together:
   - instances
   - ec2.instances

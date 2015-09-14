@@ -44,5 +44,3 @@
   args:
     creates: "{{ openshift_generated_configs_dir }}/{{ item.master_cert_subdir }}/master.server.crt"
   with_items: masters_needing_certs
-
-

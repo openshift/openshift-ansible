@@ -37,7 +37,7 @@
           public_console_url: "{{ openshift_master_public_console_url | default(None) }}"
   - name: Check status of external etcd certificatees
     stat:
-      path: "/etc/openshift/master/{{ item }}"
+      path: "{{ openshift.common.config_base }}/master/{{ item }}"
     with_items:
     - master.etcd-client.crt
     - master.etcd-ca.crt
@@ -47,7 +47,7 @@
                                     | map(attribute='stat.exists')
                                     | list | intersect([false])}}"
       etcd_cert_subdir: openshift-master-{{ openshift.common.hostname }}
-      etcd_cert_config_dir: /etc/openshift/master
+      etcd_cert_config_dir: "{{ openshift.common.config_base }}/master"
       etcd_cert_prefix: master.etcd-
     when: groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config
 
@@ -96,7 +96,7 @@
   tasks:
   - name: Ensure certificate directory exists
     file:
-      path: /etc/openshift/master
+      path: "{{ openshift.common.config_base }}/master"
       state: directory
     when: etcd_client_certs_missing is defined and etcd_client_certs_missing
   - name: Unarchive the tarball on the master
@@ -134,7 +134,7 @@
 
   - name: Check status of master certificates
     stat:
-      path: "/etc/openshift/master/{{ item }}"
+      path: "{{ openshift.common.config_base }}/master/{{ item }}"
     with_items: openshift_master_certs
     register: g_master_cert_stat_result
   - set_fact:
@@ -142,12 +142,12 @@
                                 | map(attribute='stat.exists')
                                 | list | intersect([false])}}"
       master_cert_subdir: master-{{ openshift.common.hostname }}
-      master_cert_config_dir: /etc/openshift/master
+      master_cert_config_dir: "{{ openshift.common.config_base }}/master"
 
 - name: Configure master certificates
   hosts: oo_first_master
   vars:
-    master_generated_certs_dir: /etc/openshift/generated-configs
+    master_generated_certs_dir: "{{ openshift.common.config_base }}/generated-configs"
     masters_needing_certs: "{{ hostvars
                                | oo_select_keys(groups['oo_masters_to_config'] | difference(groups['oo_first_master']))
                                | oo_filter_list(filter_attr='master_certs_missing') }}"
@@ -186,10 +186,11 @@
   vars:
     sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
     openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
+    embedded_etcd: "{{ openshift.master.embedded_etcd }}"
   pre_tasks:
   - name: Ensure certificate directory exists
     file:
-      path: /etc/openshift/master
+      path: "{{ openshift.common.config_base }}/master"
       state: directory
     when: master_certs_missing and 'oo_first_master' not in group_names
   - name: Unarchive the tarball on the master
@@ -199,6 +200,7 @@
     when: master_certs_missing and 'oo_first_master' not in group_names
   roles:
   - openshift_master
+  - role: nickhammond.logrotate
   - role: fluentd_master
     when: openshift.common.use_fluentd | bool
   post_tasks:
@@ -214,7 +216,8 @@
   roles:
   - role: openshift_master_cluster
     when: openshift_master_ha | bool
-  - openshift_examples
+  - role: openshift_examples
+    when: deployment_type in ['enterprise','openshift-enterprise','origin']
   - role: openshift_cluster_metrics
     when: openshift.common.use_cluster_metrics | bool
 
@@ -233,3 +236,12 @@
   tasks:
   - file: name={{ g_master_mktemp.stdout }} state=absent
     changed_when: False
+
+- name: Configure service accounts
+  hosts: oo_first_master
+
+  vars:
+    accounts: ["router", "registry"]
+
+  roles:
+  - openshift_serviceaccounts

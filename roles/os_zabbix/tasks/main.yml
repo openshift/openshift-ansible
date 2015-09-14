@@ -1,0 +1,45 @@
+---
+- name: Main List all templates
+  zbx_template:
+    zbx_server: "{{ ozb_server }}"
+    zbx_user: "{{ ozb_user }}"
+    zbx_password: "{{ ozb_password }}"
+    state: list
+  register: templates
+
+- include_vars: template_heartbeat.yml
+- include_vars: template_os_linux.yml
+- include_vars: template_docker.yml
+- include_vars: template_openshift_master.yml
+
+- name: Include Template Heartbeat
+  include: ../../lib_zabbix/tasks/create_template.yml
+  vars:
+    template: "{{ g_template_heartbeat }}"
+    server: "{{ ozb_server }}"
+    user: "{{ ozb_user }}"
+    password: "{{ ozb_password }}"
+
+- name: Include Template os_linux
+  include: ../../lib_zabbix/tasks/create_template.yml
+  vars:
+    template: "{{ g_template_os_linux }}"
+    server: "{{ ozb_server }}"
+    user: "{{ ozb_user }}"
+    password: "{{ ozb_password }}"
+
+- name: Include Template docker
+  include: ../../lib_zabbix/tasks/create_template.yml
+  vars:
+    template: "{{ g_template_docker }}"
+    server: "{{ ozb_server }}"
+    user: "{{ ozb_user }}"
+    password: "{{ ozb_password }}"
+
+- name: Include Template Openshift Master
+  include: ../../lib_zabbix/tasks/create_template.yml
+  vars:
+    template: "{{ g_template_openshift_master }}"
+    server: "{{ ozb_server }}"
+    user: "{{ ozb_user }}"
+    password: "{{ ozb_password }}"

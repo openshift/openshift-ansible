@@ -48,6 +48,7 @@ class Cluster(object):
             deployment_type = os.environ['OS_DEPLOYMENT_TYPE']
         return deployment_type
 
+
     def create(self, args):
         """
         Create an OpenShift cluster for given provider
@@ -163,7 +164,7 @@ class Cluster(object):
             boto_configs = [conf for conf in boto_conf_files if conf_exists(conf)]
 
             if len(key_missing) > 0 and len(boto_configs) == 0:
-                raise ValueError("PROVIDER aws requires {} environment variable(s). See README_AWS.md".format(missing))
+                raise ValueError("PROVIDER aws requires {} environment variable(s). See README_AWS.md".format(key_missing))
 
         elif 'libvirt' == provider:
             inventory = '-i inventory/libvirt/hosts'
@@ -258,6 +259,9 @@ if __name__ == '__main__':
     meta_parser.add_argument('-t', '--deployment-type',
                              choices=['origin', 'online', 'enterprise'],
                              help='Deployment type. (default: origin)')
+    meta_parser.add_argument('-T', '--product-type',
+                             choices=['openshift' 'atomic-enterprise'],
+                             help='Product type. (default: openshift)')
     meta_parser.add_argument('-o', '--option', action='append',
                              help='options')
 

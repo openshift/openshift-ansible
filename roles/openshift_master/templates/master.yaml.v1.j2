@@ -46,7 +46,7 @@ etcdConfig:
     certFile: etcd.server.crt
     clientCA: ca.crt
     keyFile: etcd.server.key
-  storageDirectory: {{ openshift_data_dir }}/openshift.local.etcd
+  storageDirectory: {{ openshift.common.data_dir }}/openshift.local.etcd
 {% endif %}
 etcdStorageConfig:
   kubernetesStoragePrefix: kubernetes.io
@@ -88,6 +88,8 @@ networkConfig:
   clusterNetworkCIDR: {{ openshift.master.sdn_cluster_network_cidr }}
   hostSubnetLength: {{ openshift.master.sdn_host_subnet_length }}
   networkPluginName: {{ openshift.common.sdn_network_plugin_name }}
+# serviceNetworkCIDR must match kubernetesMasterConfig.servicesSubnet
+  serviceNetworkCIDR: {{ openshift.master.portal_net }}
 {% include 'v1_partials/oauthConfig.j2' %}
 policyConfig:
   bootstrapPolicyFile: {{ openshift_master_policy }}

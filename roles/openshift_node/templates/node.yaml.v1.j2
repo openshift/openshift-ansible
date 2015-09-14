@@ -13,6 +13,11 @@ kubeletArguments: {{ openshift.node.kubelet_args | to_json }}
 {% endif %}
 masterKubeConfig: system:node:{{ openshift.common.hostname }}.kubeconfig
 networkPluginName: {{ openshift.common.sdn_network_plugin_name }}
+# networkConfig struct introduced in origin 1.0.6 and OSE 3.0.2 which
+# deprecates networkPluginName above. The two should match.
+networkConfig:
+   mtu: {{ openshift.node.sdn_mtu }}
+   networkPluginName: {{ openshift.common.sdn_network_plugin_name }}
 nodeName: {{ openshift.common.hostname }}
 podManifestConfig:
 servingInfo:
@@ -20,5 +25,5 @@ servingInfo:
   certFile: server.crt
   clientCA: ca.crt
   keyFile: server.key
-volumeDirectory: {{ openshift_data_dir }}/openshift.local.volumes
+volumeDirectory: {{ openshift.common.data_dir }}/openshift.local.volumes
 {% include 'partials/kubeletArguments.j2' %}

@@ -1,0 +1,13 @@
+#!/usr/bin/ansible-playbook
+---
+- hosts: localhost
+  gather_facts: no
+  vars:
+    g_server: http://localhost/zabbix/api_jsonrpc.php
+    g_user: Admin
+    g_password: zabbix
+  roles:
+  - role: os_zabbix
+    ozb_server: "{{ g_server }}"
+    ozb_user: "{{ g_user }}"
+    ozb_password: "{{ g_password }}"

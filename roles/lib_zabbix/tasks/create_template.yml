@@ -1,0 +1,54 @@
+---
+- name: Template Create Template
+  zbx_template:
+    zbx_server: "{{ server }}"
+    zbx_user: "{{ user }}"
+    zbx_password: "{{ password }}"
+    name: "{{ template.name }}"
+  register: created_template
+
+
+- set_fact:
+    lzbx_applications: "{{ template.zitems | oo_select_keys_from_list(['applications']) | oo_flatten | unique }}"
+
+- name: Create Application
+  zbx_application:
+    zbx_server: "{{ server }}"
+    zbx_user: "{{ user }}"
+    zbx_password: "{{ password }}"
+    name: "{{ item }}"
+    template_name: "{{ template.name }}"
+  with_items: lzbx_applications
+  register: created_application
+  when: template.zitems is defined
+
+- name: Create Items
+  zbx_item:
+    zbx_server: "{{ server }}"
+    zbx_user: "{{ user }}"
+    zbx_password: "{{ password }}"
+    key: "{{ item.key }}"
+    name: "{{ item.name | default(item.key, true) }}"
+    value_type: "{{ item.value_type | default('int') }}"
+    description: "{{ item.description | default('', True) }}"
+    multiplier: "{{ item.multiplier | default('', True) }}"
+    units: "{{ item.units | default('', True) }}"
+    template_name: "{{ template.name }}"
+    applications: "{{ item.applications }}"
+  with_items: template.zitems
+  register: created_items
+  when: template.zitems is defined
+
+- name: Create Triggers
+  zbx_trigger:
+    zbx_server: "{{ server }}"
+    zbx_user: "{{ user }}"
+    zbx_password: "{{ password }}"
+    name: "{{ item.name }}"
+    description: "{{ item.description | default('', True) }}"
+    dependencies: "{{ item.dependencies | default([], True) }}"
+    expression: "{{ item.expression }}"
+    priority: "{{ item.priority }}"
+    url: "{{ item.url | default(None, True) }}"
+  with_items: template.ztriggers
+  when: template.ztriggers is defined

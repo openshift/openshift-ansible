@@ -10,16 +10,7 @@
     msg: "SELinux is disabled, This deployment type requires that SELinux is enabled."
   when: (not ansible_selinux or ansible_selinux.status != 'enabled') and deployment_type in ['enterprise', 'online']
 
-- name: Install OpenShift Node package
-  yum: pkg=openshift-node state=present
-  register: node_install_result
-
-- name: Install openshift-sdn-ovs
-  yum: pkg=openshift-sdn-ovs state=present
-  register: sdn_install_result
-  when: openshift.common.use_openshift_sdn
-
-- name: Set node OpenShift facts
+- name: Set node facts
   openshift_facts:
     role: "{{ item.role }}"
     local_facts: "{{ item.local_facts }}"
@@ -37,6 +28,19 @@
       debug_level: "{{ openshift_node_debug_level | default(openshift.common.debug_level) }}"
       portal_net: "{{ openshift_master_portal_net | default(None) }}"
       kubelet_args: "{{ openshift_node_kubelet_args | default(None) }}"
+      sdn_mtu: "{{ openshift_node_sdn_mtu | default(None) }}"
+      schedulable: "{{ openshift_schedulable | default(openshift_scheduleable) | default(None) }}"
+
+# We have to add tuned-profiles in the same transaction otherwise we run into depsolving
+# problems because the rpms don't pin the version properly.
+- name: Install Node package
+  yum: pkg={{ openshift.common.service_type }}-node{{ openshift_version  }},tuned-profiles-{{ openshift.common.service_type }}-node{{ openshift_version  }} state=present
+  register: node_install_result
+
+- name: Install sdn-ovs package
+  yum: pkg={{ openshift.common.service_type }}-sdn-ovs{{ openshift_version }} state=present
+  register: sdn_install_result
+  when: openshift.common.use_openshift_sdn
 
 # TODO: add the validate parameter when there is a validation command to run
 - name: Create the Node config
@@ -44,11 +48,11 @@
     dest: "{{ openshift_node_config_file }}"
     src: node.yaml.v1.j2
   notify:
-  - restart openshift-node
+  - restart node
 
-- name: Configure OpenShift Node settings
+- name: Configure Node settings
   lineinfile:
-    dest: /etc/sysconfig/openshift-node
+    dest: /etc/sysconfig/{{ openshift.common.service_type }}-node
     regexp: "{{ item.regex }}"
     line: "{{ item.line }}"
   with_items:
@@ -57,13 +61,13 @@
     - regex: '^CONFIG_FILE='
       line: "CONFIG_FILE={{ openshift_node_config_file }}"
   notify:
-  - restart openshift-node
+  - restart node
 
 - stat: path=/etc/sysconfig/docker
   register: docker_check
 
   # TODO: Enable secure registry when code available in origin
-- name: Secure OpenShift Registry
+- name: Secure Registry
   lineinfile:
     dest: /etc/sysconfig/docker
     regexp: '^OPTIONS=.*$'
@@ -119,8 +123,8 @@
   seboolean: name=virt_use_nfs state=yes persistent=yes
   when: ansible_selinux and ansible_selinux.status == "enabled"
 
-- name: Start and enable openshift-node
-  service: name=openshift-node enabled=yes state=started
+- name: Start and enable node
+  service: name={{ openshift.common.service_type }}-node enabled=yes state=started
   register: start_result
 
 - name: pause to prevent service restart from interfering with bootstrapping

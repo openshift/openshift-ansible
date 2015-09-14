@@ -12,11 +12,7 @@
     msg: "openshift_master_cluster_password must be set for multi-master installations"
   when: openshift_master_ha | bool and not openshift.master.cluster_defer_ha | bool and openshift_master_cluster_password is not defined
 
-- name: Install OpenShift Master package
-  yum: pkg=openshift-master state=present
-  register: install_result
-
-- name: Set master OpenShift facts
+- name: Set master facts
   openshift_facts:
     role: master
     local_facts:
@@ -59,8 +55,26 @@
       api_server_args: "{{ osm_api_server_args | default(None) }}"
       controller_args: "{{ osm_controller_args | default(None) }}"
 
+- name: Install Master package
+  yum: pkg={{ openshift.common.service_type }}-master{{ openshift_version  }} state=present
+  register: install_result
+
+- name: Check for RPM generated config marker file /etc/origin/.config_managed
+  stat: path=/etc/origin/.rpmgenerated
+  register: rpmgenerated_config
+
+- name: Remove RPM generated config files
+  file:
+    path: "{{ item }}"
+    state: absent
+  when: openshift.common.service_type in ['atomic-enterprise','openshift-enterprise'] and rpmgenerated_config.stat.exists == true
+  with_items:
+    - "{{ openshift.common.config_base }}/master"
+    - "{{ openshift.common.config_base }}/node"
+    - "{{ openshift.common.config_base }}/.rpmgenerated"
+
 # TODO: These values need to be configurable
-- name: Set dns OpenShift facts
+- name: Set dns facts
   openshift_facts:
     role: dns
     local_facts:
@@ -80,17 +94,24 @@
   args:
     creates: "{{ openshift_master_policy }}"
   notify:
-  - restart openshift-master
+  - restart master
 
 - name: Create the scheduler config
   template:
     dest: "{{ openshift_master_scheduler_conf }}"
     src: scheduler.json.j2
   notify:
-  - restart openshift-master
+  - restart master
 
 - name: Install httpd-tools if needed
   yum: pkg=httpd-tools state=present
+  when: item.kind == 'HTPasswdPasswordIdentityProvider'
+  with_items: openshift.master.identity_providers
+
+- name: Ensure htpasswd directory exists
+  file:
+    path: "{{ item.filename | dirname }}"
+    state: directory
   when: item.kind == 'HTPasswdPasswordIdentityProvider'
   with_items: openshift.master.identity_providers
 
@@ -109,11 +130,11 @@
     dest: "{{ openshift_master_config_file }}"
     src: master.yaml.v1.j2
   notify:
-  - restart openshift-master
+  - restart master
 
-- name: Configure OpenShift settings
+- name: Configure master settings
   lineinfile:
-    dest: /etc/sysconfig/openshift-master
+    dest: /etc/sysconfig/{{ openshift.common.service_type }}-master
     regexp: "{{ item.regex }}"
     line: "{{ item.line }}"
   with_items:
@@ -122,10 +143,10 @@
     - regex: '^CONFIG_FILE='
       line: "CONFIG_FILE={{ openshift_master_config_file }}"
   notify:
-  - restart openshift-master
+  - restart master
 
-- name: Start and enable openshift-master
-  service: name=openshift-master enabled=yes state=started
+- name: Start and enable master
+  service: name={{ openshift.common.service_type }}-master enabled=yes state=started
   when: not openshift_master_ha | bool
   register: start_result
 
@@ -146,7 +167,7 @@
   shell: echo {{ openshift_master_cluster_password | quote }} | passwd --stdin hacluster
   when: install_result | changed
 
-- name: Create the OpenShift client config dir(s)
+- name: Create the client config dir(s)
   file:
     path: "~{{ item }}/.kube"
     state: directory
@@ -159,7 +180,7 @@
 
 # TODO: Update this file if the contents of the source file are not present in
 # the dest file, will need to make sure to ignore things that could be added
-- name: Copy the OpenShift admin client config(s)
+- name: Copy the admin client config(s)
   command: cp {{ openshift_master_config_dir }}/admin.kubeconfig ~{{ item }}/.kube/config
   args:
     creates: ~{{ item }}/.kube/config
@@ -167,7 +188,7 @@
   - root
   - "{{ ansible_ssh_user }}"
 
-- name: Update the permissions on the OpenShift admin client config(s)
+- name: Update the permissions on the admin client config(s)
   file:
     path: "~{{ item }}/.kube/config"
     state: file

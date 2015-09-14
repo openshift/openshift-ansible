@@ -18,7 +18,7 @@ ansible_ssh_user=root
 #ansible_sudo=true
 
 # deployment type valid values are origin, online and enterprise
-deployment_type=enterprise
+deployment_type=atomic-enterprise
 
 # Enable cluster metrics
 #use_cluster_metrics=true
@@ -55,7 +55,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # For installation the value of openshift_master_cluster_hostname must resolve
 # to the first master defined in the inventory.
 # The HA solution must be manually configured after installation and must ensure
-# that openshift-master is running on a single master host.
+# that the master is running on a single master host.
 #openshift_master_cluster_hostname=openshift-ansible.test.example.com
 #openshift_master_cluster_public_hostname=openshift-ansible.test.example.com
 #openshift_master_cluster_defer_ha=True
@@ -64,10 +64,13 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #osm_default_subdomain=apps.test.example.com
 
 # additional cors origins
-#osm_custom_cors_origins=['foo.example.com', 'bar.example.com'] 
+#osm_custom_cors_origins=['foo.example.com', 'bar.example.com']
 
 # default project node selector
 #osm_default_node_selector='region=primary'
+
+# set RPM version for debugging purposes
+#openshift_pkg_version=-3.0.0.0
 
 # host group for masters
 [masters]
@@ -76,7 +79,9 @@ ose3-master[1:3]-ansible.test.example.com
 [etcd]
 ose3-etcd[1:3]-ansible.test.example.com
 
-# host group for nodes
+# NOTE: Currently we require that masters be part of the SDN which requires that they also be nodes
+# However, in order to ensure that your masters are not burdened with running pods you should
+# make them unschedulable by adding openshift_scheduleable=False any node that's also a master.
 [nodes]
-ose3-master[1:3]-ansible.test.example.com openshift_scheduleable=False
+ose3-master[1:3]-ansible.test.example.com
 ose3-node[1:2]-ansible.test.example.com openshift_node_labels="{'region': 'primary', 'zone': 'default'}"

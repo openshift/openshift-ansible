@@ -1,0 +1,89 @@
+---
+g_template_docker:
+  name: Template Docker
+  zitems:
+  - key: docker.ping
+    applications:
+    - Docker Daemon
+    value_type: int
+
+  - key: docker.storage.is_loopback
+    applications:
+    - Docker Storage
+    value_type: int
+
+  - key: docker.storage.data.space.total
+    applications:
+    - Docker Storage
+    value_type: float
+
+  - key: docker.storage.data.space.used
+    applications:
+    - Docker Storage
+    value_type: float
+
+  - key: docker.storage.data.space.available
+    applications:
+    - Docker Storage
+    value_type: float
+
+  - key: docker.storage.data.space.percent_available
+    applications:
+    - Docker Storage
+    value_type: float
+
+  - key: docker.storage.metadata.space.total
+    applications:
+    - Docker Storage
+    value_type: float
+
+  - key: docker.storage.metadata.space.used
+    applications:
+    - Docker Storage
+    value_type: float
+
+  - key: docker.storage.metadata.space.available
+    applications:
+    - Docker Storage
+    value_type: float
+
+  - key: docker.storage.metadata.space.percent_available
+    applications:
+    - Docker Storage
+    value_type: float
+  ztriggers:
+  - name: 'docker.ping failed on {HOST.NAME}'
+    expression: '{Template Docker:docker.ping.max(#3)}<1'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_docker_ping.asciidoc'
+    priority: high
+
+  - name: 'Docker storage is using LOOPBACK on {HOST.NAME}'
+    expression: '{Template Docker:docker.storage.is_loopback.last()}<>0'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_docker_loopback.asciidoc'
+    priority: high
+
+  - name: 'Critically low docker storage data space on {HOST.NAME}'
+    expression: '{Template Docker:docker.storage.data.space.percent_available.max(#3)}<5 or {Template Docker:docker.storage.data.space.available.max(#3)}<5' # < 5% or < 5GB
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_docker_storage.asciidoc'
+    priority: high
+
+  - name: 'Critically low docker storage metadata space on {HOST.NAME}'
+    expression: '{Template Docker:docker.storage.metadata.space.percent_available.max(#3)}<5 or {Template Docker:docker.storage.metadata.space.available.max(#3)}<0.005' # < 5% or < 5MB
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_docker_storage.asciidoc'
+    priority: high
+
+  # Put triggers that depend on other triggers here (deps must be created first)
+  - name: 'Low docker storage data space on {HOST.NAME}'
+    expression: '{Template Docker:docker.storage.data.space.percent_available.max(#3)}<10 or {Template Docker:docker.storage.data.space.available.max(#3)}<10' # < 10% or < 10GB
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_docker_storage.asciidoc'
+    dependencies:
+    - 'Critically low docker storage data space on {HOST.NAME}'
+    priority: average
+
+  - name: 'Low docker storage metadata space on {HOST.NAME}'
+    expression: '{Template Docker:docker.storage.metadata.space.percent_available.max(#3)}<10 or {Template Docker:docker.storage.metadata.space.available.max(#3)}<0.01' # < 10% or < 10MB
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_docker_storage.asciidoc'
+    dependencies:
+    - 'Critically low docker storage metadata space on {HOST.NAME}'
+    priority: average
+
