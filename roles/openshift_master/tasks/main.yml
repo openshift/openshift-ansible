@@ -55,8 +55,6 @@
       api_server_args: "{{ osm_api_server_args | default(None) }}"
       controller_args: "{{ osm_controller_args | default(None) }}"
 
-- name: Set master facts
-  debug: var=openshift.master
 - name: Install Master package
   yum: pkg={{ openshift.common.service_type }}-master{{ openshift_version  }} state=present
   register: install_result
