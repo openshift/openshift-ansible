@@ -80,7 +80,7 @@ oauthConfig:
     provider:
 {{ identity_provider_config(identity_provider) }}
 {%- endfor %}
-  masterPublicURL: https://{{ openshift.master.public_api_url }}:8443
+  masterPublicURL: {{ openshift.master.public_api_url }}
   masterURL: {{ openshift.master.api_url }}
   sessionConfig:
     sessionMaxAgeSeconds: {{ openshift.master.session_max_seconds }}

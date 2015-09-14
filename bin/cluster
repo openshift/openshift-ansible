@@ -64,7 +64,6 @@ class Cluster(object):
         env['num_nodes'] = args.nodes
         env['num_infra'] = args.infra
         env['num_etcd'] = args.etcd
-        env['sub_host_type'] = args.subhosttype 
 
         return self.action(args, inventory, env, playbook)
 
@@ -200,11 +199,6 @@ class Cluster(object):
                 k, v = opt.split('=', 1)
                 env['cli_' + k] = v
 
-        if args.ansiblevariables:
-            for opt in args.ansiblevariables:
-                k, v = opt.split('=', 1)
-                env[k] = v
-
         ansible_env = '-e \'{}\''.format(
             ' '.join(['%s=%s' % (key, value) for (key, value) in env.items()])
         )
@@ -274,8 +268,6 @@ if __name__ == '__main__':
                              help='Product type. (default: openshift)')
     meta_parser.add_argument('-o', '--option', action='append',
                              help='options')
-    meta_parser.add_argument('-a', '--ansiblevariables', action='append',
-                             help='ansiblevariables')
 
     meta_parser.add_argument('-p', '--profile', action='store_true',
                              help='Enable playbook profiling')
@@ -293,8 +285,6 @@ if __name__ == '__main__':
                                help='number of infra nodes to create in cluster')
     create_parser.add_argument('-e', '--etcd', default=0, type=int,
                                help='number of external etcd hosts to create in cluster')
-    create_parser.add_argument('-s', '--subhosttype', default="default", type=str,
-        help='sub-host-type')
     create_parser.set_defaults(func=cluster.create)
 
     config_parser = action_parser.add_parser('config',
