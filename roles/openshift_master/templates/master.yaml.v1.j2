@@ -4,7 +4,7 @@ apiLevels:
 apiVersion: v1
 assetConfig:
   logoutURL: ""
-  masterPublicURL: https://{{ openshift.master.public_api_url }}
+  masterPublicURL: {{ openshift.master.public_api_url }}
   publicURL: {{ openshift.master.public_console_url }}/
   servingInfo:
     bindAddress: {{ openshift.master.bind_addr }}:{{ openshift.master.console_port }}
@@ -83,7 +83,7 @@ masterClients:
 {# TODO: allow user to set externalKubernetesKubeConfig #}
   externalKubernetesKubeConfig: ""
   openshiftLoopbackKubeConfig: openshift-master.kubeconfig
-masterPublicURL: https://{{ openshift.master.public_api_url }}
+masterPublicURL: {{ openshift.master.public_api_url }}
 networkConfig:
   clusterNetworkCIDR: {{ openshift.master.sdn_cluster_network_cidr }}
   hostSubnetLength: {{ openshift.master.sdn_host_subnet_length }}
