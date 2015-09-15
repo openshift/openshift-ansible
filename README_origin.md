@@ -92,7 +92,7 @@ inventory file use the -i option for ansible-playbook.
 On the master host:
 ```sh
 oadm router --create=true \
-  --credentials=/etc/openshift/master/openshift-router.kubeconfig
+  --credentials=/etc/openshift/master/openshift-router.kubeconfig \
   --service-account=router
 ```
 
