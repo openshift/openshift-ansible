@@ -1,0 +1,20 @@
+---
+g_template_openshift_node:
+  name: Template Openshift Node
+  zitems:
+  - key: openshift.node.process.count
+    description: Shows number of OpenShift Node processes running
+    type: int
+    applications:
+    - Openshift Node
+
+  ztriggers:
+  - name: 'Openshift Node process not running on {HOST.NAME}'
+    expression: '{Template Openshift Node:openshift.node.process.count.max(#3)}<1'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_node.asciidoc'
+    priority: high
+
+  - name: 'Too many Openshift Node processes running on {HOST.NAME}'
+    expression: '{Template Openshift Node:openshift.node.process.count.min(#3)}>1'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_node.asciidoc'
+    priority: high
