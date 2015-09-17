@@ -36,7 +36,7 @@
 - name: Create the master certificates if they do not already exist
   command: >
     {{ openshift.common.admin_binary }} create-master-certs
-      --hostnames={{ item.openshift.common.all_hostnames | join(',') }}
+      --hostnames={{ item.openshift.common.all_hostnames | join(',') }},kubernetes.default.svc.cluster.local
       --master={{ item.openshift.master.api_url }}
       --public-master={{ item.openshift.master.public_api_url }}
       --cert-dir={{ openshift_generated_configs_dir }}/{{ item.master_cert_subdir }}
