@@ -23,7 +23,7 @@
 
 - name: Generate the node server certificate
   command: >
-    {{ openshift.common.admin_binary }} create-server-cert
+    {{ openshift.common.admin_binary }} {{ 'ca create-server-cert' if (openshift.common.version_greater_than_3_1_or_1_1 | bool) else 'create-server-cert' }}
       --cert=server.crt --key=server.key --overwrite=true
       --hostnames={{ item.openshift.common.all_hostnames |join(",") }}
       --signer-cert={{ openshift_master_ca_cert }}
