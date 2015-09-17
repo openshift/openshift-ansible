@@ -11,6 +11,7 @@
 - include_vars: template_os_linux.yml
 - include_vars: template_docker.yml
 - include_vars: template_openshift_master.yml
+- include_vars: template_openshift_node.yml
 
 - name: Include Template Heartbeat
   include: ../../lib_zabbix/tasks/create_template.yml
@@ -40,6 +41,14 @@
   include: ../../lib_zabbix/tasks/create_template.yml
   vars:
     template: "{{ g_template_openshift_master }}"
+    server: "{{ ozb_server }}"
+    user: "{{ ozb_user }}"
+    password: "{{ ozb_password }}"
+
+- name: Include Template Openshift Node
+  include: ../../lib_zabbix/tasks/create_template.yml
+  vars:
+    template: "{{ g_template_openshift_node }}"
     server: "{{ ozb_server }}"
     user: "{{ ozb_user }}"
     password: "{{ ozb_password }}"
