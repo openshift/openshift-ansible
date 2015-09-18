@@ -461,7 +461,7 @@ def set_deployment_facts_if_unset(facts):
         if 'service_type' not in facts['common']:
             service_type = 'atomic-openshift'
             if deployment_type == 'origin':
-                service_type = 'openshift'
+                service_type = 'origin'
             elif deployment_type in ['enterprise', 'online']:
                 service_type = 'openshift'
             facts['common']['service_type'] = service_type
@@ -469,14 +469,10 @@ def set_deployment_facts_if_unset(facts):
             config_base = '/etc/origin'
             if deployment_type in ['enterprise', 'online']:
                 config_base = '/etc/openshift'
-            elif deployment_type == 'origin':
-                config_base = '/etc/openshift'
             facts['common']['config_base'] = config_base
         if 'data_dir' not in facts['common']:
             data_dir = '/var/lib/origin'
             if deployment_type in ['enterprise', 'online']:
-                data_dir = '/var/lib/openshift'
-            elif deployment_type == 'origin':
                 data_dir = '/var/lib/openshift'
             facts['common']['data_dir'] = data_dir
 
