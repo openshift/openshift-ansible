@@ -11,7 +11,7 @@
 #   ansible-playbook -e 'cli_tag_name=<tag-name>' -e "cli_volume_size=30" docker_loopback_to_direct_lvm.yml
 #
 #  Example:
-#   ansible-playbook -e 'cli_tag_name=ops-master-f58e0' -e "cli_volume_size=30" docker_loopback_to_direct_lvm.yml
+#   ansible-playbook -e 'cli_tag_name=ops-master-12345' -e "cli_volume_size=30" docker_loopback_to_direct_lvm.yml
 #
 #  Notes:
 #  * By default this will do a 30GB volume.
@@ -136,9 +136,16 @@
 
   - debug: var=setup_output
 
-
   - name: start docker
     command: systemctl start docker.service
     register: dockerstart
 
   - debug: var=dockerstart
+
+  - name: Wait for docker to stabilize
+    pause:
+      seconds: 30
+
+  # leaving off the '-t' for docker exec.  With it, it doesn't work with ansible and tty support
+  - name: update zabbix docker items
+    command: docker exec -i oso-rhel7-zagg-client /usr/local/bin/cron-send-docker-metrics.py
