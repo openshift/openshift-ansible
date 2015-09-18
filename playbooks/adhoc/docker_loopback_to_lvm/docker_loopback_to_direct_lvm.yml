@@ -8,7 +8,10 @@
 #    export AWS_SECRET_ACCESS_KEY='XXXXXX'
 #
 # 2. run the playbook:
-#   ansible-playbook -e 'cli_environment=<env-name>' -e "cli_volume_size=30" -e  docker_loopback_to_direct_lvm.yml.yml
+#   ansible-playbook -e 'cli_tag_name=<tag-name>' -e "cli_volume_size=30" docker_loopback_to_direct_lvm.yml
+#
+#  Example:
+#   ansible-playbook -e 'cli_tag_name=ops-master-f58e0' -e "cli_volume_size=30" docker_loopback_to_direct_lvm.yml
 #
 #  Notes:
 #  * By default this will do a 30GB volume.
@@ -26,7 +29,7 @@
   vars:
     cli_volume_type: io1
     cli_volume_size: 30
-    cli_volume_iops: {{ 30 * cli_volume_size}}
+    cli_volume_iops: "{{ 30 * cli_volume_size }}"
 
   pre_tasks:
   - fail:
