@@ -51,10 +51,9 @@
     shell: "docker images -q -f dangling=true | xargs --no-run-if-empty docker rmi"
     ignore_errors: yes
 
-#  mwoodson & twiest: this is dangerous, commenting out for now.
-#  - name: Remove non-running docker images
-#    shell: "docker images -aq | xargs --no-run-if-empty docker rmi 2>/dev/null"
-#    ignore_errors: yes
+  - name: Remove non-running docker images
+    shell: "docker images | grep -v -e registry.access.redhat.com -e docker-registry.usersys.redhat.com -e docker-registry.ops.rhcloud.com | awk '{print $3}' | xargs --no-run-if-empty docker rmi 2>/dev/null"
+    ignore_errors: yes
 
   # leaving off the '-t' for docker exec.  With it, it doesn't work with ansible and tty support
   - name: update zabbix docker items
