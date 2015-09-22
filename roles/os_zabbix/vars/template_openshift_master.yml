@@ -22,7 +22,7 @@ g_template_openshift_master:
   - name: 'Openshift Master process not running on {HOST.NAME}'
     expression: '{Template Openshift Master:openshift.master.process.count.max(#3)}<1'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
-    priority: high
+    priority: disaster
 
   - name: 'Too many Openshift Master processes running on {HOST.NAME}'
     expression: '{Template Openshift Master:openshift.master.process.count.min(#3)}>1'
