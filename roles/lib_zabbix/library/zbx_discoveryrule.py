@@ -94,6 +94,7 @@ def main():
             zbx_debug=dict(default=False, type='bool'),
             name=dict(default=None, type='str'),
             key=dict(default=None, type='str'),
+            description=dict(default=None, type='str'),
             interfaceid=dict(default=None, type='int'),
             ztype=dict(default='trapper', type='str'),
             delay=dict(default=60, type='int'),
@@ -151,6 +152,7 @@ def main():
                   'interfaceid': module.params['interfaceid'],
                   'lifetime': module.params['lifetime'],
                   'type': get_type(module.params['ztype']),
+                  'description': module.params['description'],
                  }
         if params['type'] in [2, 5, 7, 11]:
             params.pop('interfaceid')
