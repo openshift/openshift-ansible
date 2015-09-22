@@ -152,6 +152,7 @@ def main():
             zbx_debug=dict(default=False, type='bool'),
             name=dict(default=None, type='str'),
             key=dict(default=None, type='str'),
+            description=dict(default=None, type='str'),
             interfaceid=dict(default=None, type='int'),
             ztype=dict(default='trapper', type='str'),
             value_type=dict(default='float', type='str'),
@@ -209,6 +210,7 @@ def main():
                   'type': get_type(module.params['ztype']),
                   'value_type': get_value_type(module.params['value_type']),
                   'applications': get_app_ids(zapi, module.params['applications']),
+                  'description': module.params['description'],
                  }
 
         if params['type'] in [2, 5, 7, 8, 11, 15]:
