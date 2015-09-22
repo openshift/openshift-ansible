@@ -183,8 +183,6 @@ def main():
             module.exit_json(changed=False, results=zab_results, state="present")
 
         # We have differences and need to update
-        module.exit_json(failed=True, changed=False, results=differences, state="present")
-
         differences[idname] = zab_results[idname]
         content = zapi.get_content(zbx_class_name, 'update', differences)
 
