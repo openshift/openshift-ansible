@@ -157,10 +157,8 @@ def main():
             value_type=dict(default='float', type='str'),
             delay=dict(default=60, type='int'),
             lifetime=dict(default=30, type='int'),
-            template_name=dict(default=None, required=True, type='str'),
             state=dict(default='present', type='str'),
             status=dict(default='enabled', type='str'),
-            discoveryrule_name=dict(default=None, required=True, type='str'),
             applications=dict(default=[], type='list'),
         ),
         #supports_check_mode=True
@@ -175,14 +173,14 @@ def main():
     zbx_class_name = 'itemprototype'
     idname = "itemid"
     state = module.params['state']
-    template = get_template(zapi, module.params['template_name'])
 
     # selectInterfaces doesn't appear to be working but is needed.
     content = zapi.get_content(zbx_class_name,
                                'get',
-                               {'search': {'name': module.params['name']},
+                               {'search': {'key_': module.params['key']},
                                 'selectApplications': 'applicationid',
                                 'selectDiscoveryRule': 'itemid',
+                                'templated': True,
                                })
 
     #******#
@@ -205,9 +203,9 @@ def main():
     if state == 'present':
         params = {'name': module.params['name'],
                   'key_':  module.params['key'],
-                  'hostid':  template['templateid'],
+                  'hostid':  content['result'][0]['hostid'],
                   'interfaceid': module.params['interfaceid'],
-                  'ruleid': get_rule_id(zapi, module.params['discoveryrule_name'], template['templateid']),
+                  'ruleid': content['result'][0]['discoveryRule']['itemid'],
                   'type': get_type(module.params['ztype']),
                   'value_type': get_value_type(module.params['value_type']),
                   'applications': get_app_ids(zapi, module.params['applications']),
@@ -226,7 +224,7 @@ def main():
             content = zapi.get_content(zbx_class_name, 'create', params)
 
             if content.has_key('error'):
-                module.exit_json(failed=True, changed=True, results=content['error'], state="present")
+                module.exit_json(failed=True, changed=False, results=content['error'], state="present")
 
             module.exit_json(changed=True, results=content['result'], state='present')
 
