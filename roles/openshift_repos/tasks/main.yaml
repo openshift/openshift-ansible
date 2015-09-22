@@ -8,7 +8,7 @@
 #       proper repos correctly.
 
 - assert:
-    that: openshift_deployment_type in known_openshift_deployment_types
+    that: openshift.common.deployment_type in known_openshift_deployment_types
 
 - name: Ensure libselinux-python is installed
   yum:

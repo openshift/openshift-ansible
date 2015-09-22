@@ -422,6 +422,6 @@ class FilterModule(object):
             "oo_split": self.oo_split,
             "oo_filter_list": self.oo_filter_list,
             "oo_parse_heat_stack_outputs": self.oo_parse_heat_stack_outputs,
-            "oo_parse_certificate_names": self.oo_parse_certificate_names
+            "oo_parse_certificate_names": self.oo_parse_certificate_names,
             "oo_haproxy_backend_masters": self.oo_haproxy_backend_masters
         }

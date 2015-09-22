@@ -2,21 +2,21 @@
 Description=Atomic OpenShift Master Controllers
 Documentation=https://github.com/openshift/origin
 After=network.target
-After=atomic-openshift-master-api.service
-Before=atomic-openshift-node.service
+After={{ openshift.common.service_type }}-master-api.service
+Before={{ openshift.common.service_type }}-node.service
 Requires=network.target
 
 [Service]
 Type=notify
-EnvironmentFile=/etc/sysconfig/atomic-openshift-master-controllers
+EnvironmentFile=/etc/sysconfig/{{ openshift.common.service_type }}-master-controllers
 Environment=GOTRACEBACK=crash
 ExecStart=/usr/bin/openshift start master controllers --config=${CONFIG_FILE} $OPTIONS
 LimitNOFILE=131072
 LimitCORE=infinity
-WorkingDirectory=/var/lib/origin/
-SyslogIdentifier=atomic-openshift-master-controllers
+WorkingDirectory={{ openshift.common.data_dir }}
+SyslogIdentifier={{ openshift.common.service_type }}-master-controllers
 Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
-WantedBy=atomic-openshift-node.service
+WantedBy={{ openshift.common.service_type }}-node.service
