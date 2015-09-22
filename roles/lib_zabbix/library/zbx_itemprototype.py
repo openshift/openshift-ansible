@@ -38,12 +38,12 @@ def exists(content, key='result'):
 
     return True
 
-def get_rule_id(zapi, discoveryrule_name, templateid):
+def get_rule_id(zapi, discoveryrule_key, templateid):
     '''get a discoveryrule by name
     '''
     content = zapi.get_content('discoveryrule',
                                'get',
-                               {'search': {'name': discoveryrule_name},
+                               {'search': {'key_': discoveryrule_key},
                                 'output': 'extend',
                                 'templateids': templateid,
                                })
@@ -152,6 +152,7 @@ def main():
             zbx_debug=dict(default=False, type='bool'),
             name=dict(default=None, type='str'),
             key=dict(default=None, type='str'),
+            description=dict(default=None, type='str'),
             interfaceid=dict(default=None, type='int'),
             ztype=dict(default='trapper', type='str'),
             value_type=dict(default='float', type='str'),
@@ -160,6 +161,8 @@ def main():
             state=dict(default='present', type='str'),
             status=dict(default='enabled', type='str'),
             applications=dict(default=[], type='list'),
+            template_name=dict(default=None, type='str'),
+            discoveryrule_key=dict(default=None, type='str'),
         ),
         #supports_check_mode=True
     )
@@ -173,6 +176,7 @@ def main():
     zbx_class_name = 'itemprototype'
     idname = "itemid"
     state = module.params['state']
+    template = get_template(zapi, module.params['template_name'])
 
     # selectInterfaces doesn't appear to be working but is needed.
     content = zapi.get_content(zbx_class_name,
@@ -203,12 +207,13 @@ def main():
     if state == 'present':
         params = {'name': module.params['name'],
                   'key_':  module.params['key'],
-                  'hostid':  content['result'][0]['hostid'],
+                  'hostid':  template['templateid'],
                   'interfaceid': module.params['interfaceid'],
-                  'ruleid': content['result'][0]['discoveryRule']['itemid'],
+                  'ruleid': get_rule_id(zapi, module.params['discoveryrule_key'], template['templateid']),
                   'type': get_type(module.params['ztype']),
                   'value_type': get_value_type(module.params['value_type']),
                   'applications': get_app_ids(zapi, module.params['applications']),
+                  'description': module.params['description'],
                  }
 
         if params['type'] in [2, 5, 7, 8, 11, 15]:
