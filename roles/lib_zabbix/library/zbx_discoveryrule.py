@@ -85,6 +85,7 @@ def main():
     Ansible module for zabbix discovery rules
     '''
 
+
     module = AnsibleModule(
         argument_spec=dict(
             zbx_server=dict(default='https://localhost/zabbix/api_jsonrpc.php', type='str'),
@@ -113,18 +114,27 @@ def main():
     idname = "itemid"
     dname = module.params['name']
     state = module.params['state']
+    template = get_template(zapi, module.params['template_name'])
 
     # selectInterfaces doesn't appear to be working but is needed.
     content = zapi.get_content(zbx_class_name,
                                'get',
                                {'search': {'name': dname},
+                                'templateids': template['templateid'],
                                 #'selectDServices': 'extend',
                                 #'selectDChecks': 'extend',
                                 #'selectDhosts': 'dhostid',
                                })
+
+    #******#
+    # GET
+    #******#
     if state == 'list':
         module.exit_json(changed=False, results=content['result'], state="list")
 
+    #******#
+    # DELETE
+    #******#
     if state == 'absent':
         if not exists(content):
             module.exit_json(changed=False, state="absent")
@@ -132,8 +142,9 @@ def main():
         content = zapi.get_content(zbx_class_name, 'delete', [content['result'][0][idname]])
         module.exit_json(changed=True, results=content['result'], state="absent")
 
+
+    # Create and Update
     if state == 'present':
-        template = get_template(zapi, module.params['template_name'])
         params = {'name': dname,
                   'key_':  module.params['key'],
                   'hostid':  template['templateid'],
@@ -144,12 +155,23 @@ def main():
         if params['type'] in [2, 5, 7, 11]:
             params.pop('interfaceid')
 
+        # Remove any None valued params
+        _ = [params.pop(key, None) for key in params.keys() if params[key] is None]
+
+        #******#
+        # CREATE
+        #******#
         if not exists(content):
-            # if we didn't find it, create it
             content = zapi.get_content(zbx_class_name, 'create', params)
+
+            if content.has_key('error'):
+                module.exit_json(failed=True, changed=True, results=content['error'], state="present")
+
             module.exit_json(changed=True, results=content['result'], state='present')
-        # already exists, we need to update it
-        # let's compare properties
+
+        ########
+        # UPDATE
+        ########
         differences = {}
         zab_results = content['result'][0]
         for key, value in params.items():
@@ -161,8 +183,14 @@ def main():
             module.exit_json(changed=False, results=zab_results, state="present")
 
         # We have differences and need to update
+        module.exit_json(failed=True, changed=False, results=differences, state="present")
+
         differences[idname] = zab_results[idname]
         content = zapi.get_content(zbx_class_name, 'update', differences)
+
+        if content.has_key('error'):
+            module.exit_json(failed=True, changed=False, results=content['error'], state="present")
+
         module.exit_json(changed=True, results=content['result'], state="present")
 
     module.exit_json(failed=True,
