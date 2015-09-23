@@ -12,6 +12,10 @@
     msg: "openshift_master_cluster_password must be set for multi-master installations"
   when: openshift_master_ha | bool and not openshift.master.cluster_defer_ha | bool and openshift_master_cluster_password is not defined
 
+- fail:
+    msg: "openshift_master_ha is not yet supported on atomic hosts"
+  when: openshift_master_ha | bool and is_atomic
+
 - name: Set master facts
   openshift_facts:
     role: master
@@ -58,6 +62,25 @@
 - name: Install Master package
   yum: pkg={{ openshift.common.service_type }}-master{{ openshift_version  }} state=present
   register: install_result
+  when: not is_atomic
+
+# TODO: enable when ansible#1993 lands and is widespread enough
+# - name: Docker image present
+#   docker:
+#     image: "{{ openshift.common.docker.image }}"
+#     state: image_present
+#   when: is_atomic
+
+- name: Install Master docker service file
+  template:
+    dest: "/etc/systemd/system/{{ openshift.common.service_type }}-master.service"
+    src: openshift.docker.master.service
+  register: install_result 
+  when: is_atomic
+
+- name: Reload systemd units                                                                        
+  command: systemctl daemon-reload
+  when: is_atomic and install_result | changed
 
 - name: Check for RPM generated config marker file /etc/origin/.config_managed
   stat: path=/etc/origin/.rpmgenerated
@@ -108,6 +131,7 @@
   yum: pkg=httpd-tools state=present
   when: item.kind == 'HTPasswdPasswordIdentityProvider'
   with_items: openshift.master.identity_providers
+  when: not is_atomic
 
 - name: Ensure htpasswd directory exists
   file:
@@ -139,6 +163,7 @@
     dest: /etc/sysconfig/{{ openshift.common.service_type }}-master
     regexp: "{{ item.regex }}"
     line: "{{ item.line }}"
+    create: true
   with_items:
     - regex: '^OPTIONS='
       line: "OPTIONS=--loglevel={{ openshift.master.debug_level }}"
@@ -176,6 +201,7 @@
     mode: 0700
     owner: "{{ item }}"
     group: "{{ item }}"
+  when: not is_atomic
   with_items:
   - root
   - "{{ ansible_ssh_user }}"
@@ -186,6 +212,7 @@
   command: cp {{ openshift_master_config_dir }}/admin.kubeconfig ~{{ item }}/.kube/config
   args:
     creates: ~{{ item }}/.kube/config
+  when: not is_atomic
   with_items:
   - root
   - "{{ ansible_ssh_user }}"
@@ -197,6 +224,7 @@
     mode: 0700
     owner: "{{ item }}"
     group: "{{ item }}"
+  when: not is_atomic
   with_items:
   - root
   - "{{ ansible_ssh_user }}"

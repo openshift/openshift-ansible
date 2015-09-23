@@ -101,6 +101,7 @@
   roles:
   - openshift_node
   - role: nickhammond.logrotate
+    when: not is_atomic
   - role: fluentd_node
     when: openshift.common.use_fluentd | bool
   tasks:
