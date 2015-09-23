@@ -1,4 +1,8 @@
 ---
+- fail:
+    msg: "Not possible on atomic hosts for now"
+  when: is_atomic
+
 - name: Test if cluster is already configured
   command: pcs status
   register: pcs_status

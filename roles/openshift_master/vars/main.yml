@@ -5,6 +5,8 @@ openshift_master_scheduler_conf: "{{ openshift_master_config_dir }}/scheduler.js
 openshift_master_session_secrets_file: "{{ openshift_master_config_dir }}/session-secrets.yaml"
 openshift_master_policy: "{{ openshift_master_config_dir }}/policy.json"
 openshift_version: "{{ openshift_pkg_version | default('') }}"
+openshift_docker_image_name: openshift/origin
+openshift_docker_image: "{{ openshift_docker_image_name }}:{{ openshift_pkg_version | default('latest') }}"
 
 openshift_master_valid_grant_methods:
 - auto

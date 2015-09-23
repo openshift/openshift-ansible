@@ -1,4 +1,8 @@
 ---
+- fail:
+    msg: "fluentd node is not yet supported on atomic hosts"
+  when: is_atomic
+
 # TODO: Update fluentd install and configuration when packaging is complete
 - name: download and install td-agent
   action: "{{ ansible_pkg_mgr }} name='http://packages.treasuredata.com/2/redhat/7/x86_64/td-agent-2.2.0-0.x86_64.rpm' state=present"

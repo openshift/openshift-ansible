@@ -4,6 +4,10 @@
     msg: "SELinux is disabled, This deployment type requires that SELinux is enabled."
   when: (not ansible_selinux or ansible_selinux.status != 'enabled') and deployment_type in ['enterprise', 'online', 'atomic-enterprise', 'openshift-enterprise']
 
+- fail:
+    msg: "This playbook does not support using SDN on atomic hosts yet"
+  when: openshift.common.use_openshift_sdn and is_atomic
+
 - name: Set node facts
   openshift_facts:
     role: "{{ item.role }}"
@@ -38,10 +42,11 @@
 # problems because the rpms don't pin the version properly.
 - name: Install Node package
   action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-node{{ openshift_version  }},tuned-profiles-{{ openshift.common.service_type }}-node{{ openshift_version  }} state=present"
+  when: not is_atomic
 
 - name: Install sdn-ovs package
   action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-sdn-ovs{{ openshift_version }} state=present"
-  when: openshift.common.use_openshift_sdn
+  when: openshift.common.use_openshift_sdn and not is_atomic
 
 # TODO: add the validate parameter when there is a validation command to run
 - name: Create the Node config
@@ -57,6 +62,7 @@
     dest: /etc/sysconfig/{{ openshift.common.service_type }}-node
     regexp: "{{ item.regex }}"
     line: "{{ item.line }}"
+    create: true
   with_items:
     - regex: '^OPTIONS='
       line: "OPTIONS=--loglevel={{ openshift.node.debug_level }}"

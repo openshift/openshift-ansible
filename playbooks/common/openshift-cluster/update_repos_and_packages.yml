@@ -8,5 +8,5 @@
           ansible_distribution == "RedHat" and
           lookup('oo_option', 'rhel_skip_subscription') | default(rhsub_skip, True) |
             default('no', True) | lower in ['no', 'false']
-  - openshift_repos
+  - {role: openshift_repos, when: not is_atomic}
   - os_update_latest

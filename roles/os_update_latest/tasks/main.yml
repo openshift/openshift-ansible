@@ -1,3 +1,8 @@
 ---
+- fail:
+    msg: "Update is not yet supported by this playbook on atomic hosts"
+  when: is_atomic
+
 - name: Update all packages
   action: "{{ ansible_pkg_mgr }} name=* state=latest"
+  when: not is_atomic

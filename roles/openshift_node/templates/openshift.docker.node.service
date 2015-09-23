@@ -1,0 +1,11 @@
+[Unit]
+After=docker.service
+Require=docker.service
+
+[Service]
+EnvironmentFile=/etc/sysconfig/{{ openshift.common.service_type }}-node
+ExecStart=/usr/bin/docker run --rm --privileged --net=host --name "{{ openshift.common.service_type }}-node" -v /:/rootfs:ro -v {{ openshift.common.data_dir }}:{{ openshift.common.data_dir }} -v /var/run/docker.sock:/var/run/docker.sock -v {{ openshift.common.config_base }}:{{ openshift.common.config_base }} {{ openshift_docker_image }} start node --config=${CONFIG_FILE} ${OPTIONS}
+ExecStop=/usr/bin/docker stop {{ openshift.common.service_type }}-node
+
+[Install]
+WantedBy=multi-user.target

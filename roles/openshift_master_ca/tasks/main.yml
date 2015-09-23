@@ -1,9 +1,11 @@
 ---
 - name: Install the base package for admin tooling
   action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}{{ openshift_version  }} state=present"
+  when: not is_atomic
 
 - name: Reload generated facts
   openshift_facts:
+  when: install_result | changed
 
 - name: Create openshift_master_config_dir if it doesn't exist
   file:

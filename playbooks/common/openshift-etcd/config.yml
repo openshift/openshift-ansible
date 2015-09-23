@@ -87,7 +87,7 @@
     when: etcd_server_certs_missing
   roles:
   - etcd
-  - role: nickhammond.logrotate
+  - { role: nickhammond.logrotate, when: not is_atomic }
 
 - name: Delete temporary directory on localhost
   hosts: localhost

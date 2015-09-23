@@ -328,6 +328,7 @@
   roles:
   - openshift_master
   - role: nickhammond.logrotate
+    when: not is_atomic
   - role: fluentd_master
     when: openshift.common.use_fluentd | bool
   post_tasks:
