@@ -6,20 +6,6 @@
     - ansible_version | version_compare('1.9.0', 'ne')
     - ansible_version | version_compare('1.9.0.1', 'ne')
 
-- name: Determine if Atomic
-  stat: path=/run/ostree-booted
-  register: s
-  changed_when: false
-
-- name: Init the is_atomic fact
-  set_fact:
-    is_atomic: false
-
-- name: Set the is_atomic fact
-  set_fact:
-    is_atomic: true
-  when: s.stat.exists
-
 - name: Gather Cluster facts
   openshift_facts:
 
