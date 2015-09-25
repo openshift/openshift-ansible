@@ -52,3 +52,31 @@
     url: "{{ item.url | default(None, True) }}"
   with_items: template.ztriggers
   when: template.ztriggers is defined
+
+- name: Create Discoveryrules
+  zbx_discoveryrule:
+    zbx_server: "{{ server }}"
+    zbx_user: "{{ user }}"
+    zbx_password: "{{ password }}"
+    name: "{{ item.name }}"
+    key: "{{ item.key }}"
+    lifetime: "{{ item.lifetime }}"
+    template_name: "{{ template.name }}"
+    description: "{{ item.description | default('', True) }}"
+  with_items: template.zdiscoveryrules
+  when: template.zdiscoveryrules is defined
+
+- name: Create Item Prototype
+  zbx_itemprototype:
+    zbx_server: "{{ server }}"
+    zbx_user: "{{ user }}"
+    zbx_password: "{{ password }}"
+    name: "{{ item.name }}"
+    key: "{{ item.key }}"
+    discoveryrule_key: "{{ item.discoveryrule_key }}"
+    value_type: "{{ item.value_type }}"
+    template_name: "{{ template.name }}"
+    applications: "{{ item.applications }}"
+    description: "{{ item.description | default('', True) }}"
+  with_items: template.zitemprototypes
+  when: template.zitemprototypes is defined

@@ -191,6 +191,24 @@ g_template_os_linux:
     - Disk
     value_type: float
 
+
+  zdiscoveryrules:
+  - name: disc.filesys
+    key: disc.filesys
+    lifetime: 1
+    template_name: Template OS Linux
+    description: "Dynamically register the filesystems"
+
+  zitemprototypes:
+  - discoveryrule_key: disc.filesys
+    template_name: Template OS Linux
+    name: "disc.filesys.full.{#OSO_FILESYS}"
+    key: "disc.filesys.full[{#OSO_FILESYS}]"
+    value_type: float
+    description: "PCP filesys.full option.  This is the percent full returned from pcp filesys.full"
+    applications:
+    - Disk
+
   ztriggers:
   - name: 'Filesystem: / has less than 10% free on {HOST.NAME}'
     expression: '{Template OS Linux:filesys.full.xvda2.last()}>90'
