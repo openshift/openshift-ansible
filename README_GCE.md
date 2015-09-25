@@ -39,11 +39,12 @@ Create a gce.ini file for GCE
 * gce_service_account_pem_file_path - Full path from previous steps
 * gce_project_id - Found in "Projects", it list all the gce projects you are associated with.  The page lists their "Project Name" and "Project ID".  You want the "Project ID"
 
-Optional variables (check the values according to your tenant):
+Mandatory customization variables (check the values according to your tenant):
 * zone = europe-west1-d
 * network = default
 * gce_machine_type = n1-standard-2
 * gce_machine_image = preinstalled-slave-50g-v5
+
 
 1. vi ~/.gce/gce.ini
 1. make the contents look like this:
@@ -58,14 +59,9 @@ gce_machine_type = n1-standard-2
 gce_machine_image = preinstalled-slave-50g-v5
 
 ```
-1. Setup a sym link so that gce.py will pick it up (link must be in same dir as gce.py) or define the environment variable GCE_INI_PATH
+1. Define the environment variable GCE_INI_PATH so gce.py can pick it up and bin/cluster can also read it
 ```
-  cd openshift-ansible/inventory/gce
-  ln -s ~/.gce/gce.ini gce.ini
-```
-or
-```
-  export GCE_INIT_PATH=~/.gce/gce.ini
+export GCE_INI_PATH=~/.gce/gce.ini
 ```
 
 
