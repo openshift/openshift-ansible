@@ -36,8 +36,4 @@ g_template_openshift_master:
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
     priority: high
  
-  - name: 'There are over 1000 user in the cluster checked on {HOST.NAME}'
-    expression: '{Template Openshift Master:openshift.master.user.pod.running.count.last(0)}>1000'
-    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
-    priority: avg
  
