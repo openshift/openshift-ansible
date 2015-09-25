@@ -68,7 +68,12 @@ If your `$HOME` is world readable, everything is fine. If your `$HOME` is privat
 error: Cannot access storage file '$HOME/libvirt-storage-pool-openshift/lenaic-master-216d8.qcow2' (as uid:99, gid:78): Permission denied
 ```
 
-In order to fix that issue, you have several possibilities:* set `libvirt_storage_pool_path` inside `playbooks/libvirt/openshift-cluster/launch.yml` and `playbooks/libvirt/openshift-cluster/terminate.yml` to a directory: * backed by a filesystem with a lot of free disk space * writable by your user; * accessible by the qemu user.* Grant the qemu user access to the storage pool.
+In order to fix that issue, you have several possibilities:
+ * set `libvirt_storage_pool_path` inside `playbooks/libvirt/openshift-cluster/launch.yml` and `playbooks/libvirt/openshift-cluster/terminate.yml` to a directory:
+   * backed by a filesystem with a lot of free disk space
+   * writable by your user;
+   * accessible by the qemu user.
+ * Grant the qemu user access to the storage pool.
 
 On Arch:
 
