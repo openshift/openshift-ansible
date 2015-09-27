@@ -7,6 +7,3 @@ openshift_version: "{{ openshift_pkg_version | default('') }}"
 
 openshift_docker_image_name: openshift/origin
 openshift_docker_image: "{{ openshift_docker_image_name }}:{{ openshift_pkg_version | default('latest') }}"
-
-openshift_tools_runner: "{% if is_atomic %} docker exec openshift-tools -- {% endif %}"
-
