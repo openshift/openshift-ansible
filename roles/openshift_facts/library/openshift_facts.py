@@ -502,7 +502,8 @@ def set_sdn_facts_if_unset(facts):
     if 'common' in facts:
         use_sdn = facts['common']['use_openshift_sdn']
         if not (use_sdn == '' or isinstance(use_sdn, bool)):
-            facts['common']['use_openshift_sdn'] = bool(strtobool(str(use_sdn)))
+            use_sdn = bool(strtobool(str(use_sdn)))
+            facts['common']['use_openshift_sdn'] = use_sdn
         if 'sdn_network_plugin_name' not in facts['common']:
             plugin = 'redhat/openshift-ovs-subnet' if use_sdn else ''
             facts['common']['sdn_network_plugin_name'] = plugin
