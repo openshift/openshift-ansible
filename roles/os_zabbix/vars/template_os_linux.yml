@@ -209,6 +209,17 @@ g_template_os_linux:
     applications:
     - Disk
 
+  ztriggerprototypes:
+  - name: 'Filesystem: {#OSO_FILESYS} has less than 10% free on {HOST.NAME}'
+    expression: '{Template OS Linux:disc.filesys.full[{#OSO_FILESYS}].last()}>90'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_filesys_full.asciidoc'
+    priority: warn
+
+  - name: 'Filesystem: {#OSO_FILESYS} has less than 5% free on {HOST.NAME}'
+    expression: '{Template OS Linux:disc.filesys.full[{#OSO_FILESYS}].last()}>95'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_filesys_full.asciidoc'
+    priority: high
+
   ztriggers:
   - name: 'Filesystem: / has less than 10% free on {HOST.NAME}'
     expression: '{Template OS Linux:filesys.full.xvda2.last()}>90'
