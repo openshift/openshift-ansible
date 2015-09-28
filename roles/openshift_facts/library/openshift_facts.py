@@ -644,7 +644,7 @@ def merge_facts(orig, new):
     facts = dict()
     for key, value in orig.iteritems():
         if key in new:
-            if isinstance(value, dict):
+            if isinstance(value, dict) and isinstance(new[key], dict):
                 facts[key] = merge_facts(value, new[key])
             else:
                 facts[key] = copy.copy(new[key])
