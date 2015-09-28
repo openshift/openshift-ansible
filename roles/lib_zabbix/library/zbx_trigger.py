@@ -170,6 +170,10 @@ def main():
         if not exists(content):
             # if we didn't find it, create it
             content = zapi.get_content(zbx_class_name, 'create', params)
+
+            if content.has_key('error'):
+                module.exit_json(failed=True, changed=True, results=content['error'], state="present")
+
             module.exit_json(changed=True, results=content['result'], state='present')
 
         ########
