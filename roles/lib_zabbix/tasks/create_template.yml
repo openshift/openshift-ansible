@@ -66,7 +66,7 @@
   with_items: template.zdiscoveryrules
   when: template.zdiscoveryrules is defined
 
-- name: Create Item Prototype
+- name: Create Item Prototypes
   zbx_itemprototype:
     zbx_server: "{{ server }}"
     zbx_user: "{{ user }}"
@@ -80,3 +80,16 @@
     description: "{{ item.description | default('', True) }}"
   with_items: template.zitemprototypes
   when: template.zitemprototypes is defined
+
+- name: Create Trigger Prototypes
+  zbx_triggerprototype:
+    zbx_server: "{{ server }}"
+    zbx_user: "{{ user }}"
+    zbx_password: "{{ password }}"
+    name: "{{ item.name }}"
+    expression: "{{ item.expression }}"
+    url: "{{ item.url | default('', True) }}"
+    priority: "{{ item.priority | default('average', True) }}"
+    description: "{{ item.description | default('', True) }}"
+  with_items: template.ztriggerprototypes
+  when: template.ztriggerprototypes is defined
