@@ -9,6 +9,7 @@
   - ansible
   - telnet
   - ack
+  - pylint
 
 - name: download Tower setup
   get_url: url=http://releases.ansible.com/ansible-tower/setup/ansible-tower-setup-2.1.1.tar.gz dest=/opt/ force=no
@@ -38,5 +39,3 @@
     regexp: "^({{ item.option }})( *)="
     line: '\1\2= {{ item.value }}'
   with_items: config_changes | default([], true)
-    
-
