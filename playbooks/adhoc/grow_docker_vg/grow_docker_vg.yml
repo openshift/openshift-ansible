@@ -24,6 +24,8 @@
 #  * This does a GP2 by default.  Support for Provisioned IOPS has not been added
 #  * This will assign the new volume to /dev/xvdc. This is not variablized, yet.
 #  * This can be done with NO downtime on the host
+#  * This playbook assumes that there is a Logical Volume that is installed and called "docker-pool".  This is
+#      the LV that gets created via the "docker-storage-setup" command
 #
 
 - name: Grow the docker volume group
