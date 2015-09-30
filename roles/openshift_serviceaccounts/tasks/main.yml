@@ -23,4 +23,4 @@
   with_items: accounts
 
 - name: Apply new scc rules for service accounts
-  command: "{{ openshift.common.client_binary }} replace -f /tmp/scc.yaml"
+  command: "{{ openshift.common.client_binary }} update -f /tmp/scc.yaml"
