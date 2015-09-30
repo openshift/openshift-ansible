@@ -10,17 +10,17 @@ g_template_os_linux:
   - key: kernel.all.cpu.wait.total
     applications:
     - Kernel
-    value_type: int
+    value_type: float
 
   - key: kernel.all.cpu.irq.hard
     applications:
     - Kernel
-    value_type: int
+    value_type: float
 
   - key: kernel.all.cpu.idle
     applications:
     - Kernel
-    value_type: int
+    value_type: float
 
   - key: kernel.uname.distro
     applications:
@@ -35,7 +35,7 @@ g_template_os_linux:
   - key: kernel.all.cpu.irq.soft
     applications:
     - Kernel
-    value_type: int
+    value_type: float
 
   - key: kernel.all.load.15_minute
     applications:
@@ -45,7 +45,7 @@ g_template_os_linux:
   - key: kernel.all.cpu.sys
     applications:
     - Kernel
-    value_type: int
+    value_type: float
 
   - key: kernel.all.load.5_minute
     applications:
@@ -55,7 +55,7 @@ g_template_os_linux:
   - key: kernel.all.cpu.nice
     applications:
     - Kernel
-    value_type: int
+    value_type: float
 
   - key: kernel.all.load.1_minute
     applications:
@@ -75,7 +75,7 @@ g_template_os_linux:
   - key: kernel.all.cpu.user
     applications:
     - Kernel
-    value_type: int
+    value_type: float
 
   - key: kernel.uname.machine
     applications:
@@ -90,7 +90,7 @@ g_template_os_linux:
   - key: kernel.all.cpu.steal
     applications:
     - Kernel
-    value_type: int
+    value_type: float
 
   - key: kernel.all.pswitch
     applications:
