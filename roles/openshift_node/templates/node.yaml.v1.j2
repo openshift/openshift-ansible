@@ -18,7 +18,7 @@ networkPluginName: {{ openshift.common.sdn_network_plugin_name }}
 networkConfig:
    mtu: {{ openshift.node.sdn_mtu }}
    networkPluginName: {{ openshift.common.sdn_network_plugin_name }}
-nodeName: {{ openshift.common.hostname }}
+nodeName: {{ openshift.common.hostname | lower }}
 podManifestConfig:
 servingInfo:
   bindAddress: 0.0.0.0:10250
