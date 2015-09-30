@@ -204,12 +204,10 @@ g_template_os_linux:
   - name: disc.filesys
     key: disc.filesys
     lifetime: 1
-    template_name: Template OS Linux
     description: "Dynamically register the filesystems"
 
   zitemprototypes:
   - discoveryrule_key: disc.filesys
-    template_name: Template OS Linux
     name: "disc.filesys.full.{#OSO_FILESYS}"
     key: "disc.filesys.full[{#OSO_FILESYS}]"
     value_type: float
