@@ -13,6 +13,12 @@ g_template_openshift_master:
     applications:
     - Openshift Master
 
+  - key: openshift.master.user.count
+    description: Shows number of users in a cluster
+    type: int
+    applications:
+    - Openshift Master
+
   ztriggers:
   - name: 'Application creation has failed on {HOST.NAME}'
     expression: '{Template Openshift Master:create_app.last(#1)}=1 and {Template Openshift Master:create_app.last(#2)}=1'
@@ -28,3 +34,9 @@ g_template_openshift_master:
     expression: '{Template Openshift Master:openshift.master.process.count.min(#3)}>1'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
     priority: high
+
+  - name: 'Number of users for Openshift Master on {HOST.NAME}'
+    expression: '{Template Openshift Master:openshift.master.user.count.last(,3)}>0'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
+    priority: info
+
