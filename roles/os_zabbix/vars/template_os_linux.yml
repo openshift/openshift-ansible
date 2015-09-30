@@ -11,16 +11,19 @@ g_template_os_linux:
     applications:
     - Kernel
     value_type: float
+    units: '%'
 
   - key: kernel.all.cpu.irq.hard
     applications:
     - Kernel
     value_type: float
+    units: '%'
 
   - key: kernel.all.cpu.idle
     applications:
     - Kernel
     value_type: float
+    units: '%'
 
   - key: kernel.uname.distro
     applications:
@@ -36,6 +39,7 @@ g_template_os_linux:
     applications:
     - Kernel
     value_type: float
+    units: '%'
 
   - key: kernel.all.load.15_minute
     applications:
@@ -46,6 +50,7 @@ g_template_os_linux:
     applications:
     - Kernel
     value_type: float
+    units: '%'
 
   - key: kernel.all.load.5_minute
     applications:
@@ -56,6 +61,7 @@ g_template_os_linux:
     applications:
     - Kernel
     value_type: float
+    units: '%'
 
   - key: kernel.all.load.1_minute
     applications:
@@ -76,6 +82,7 @@ g_template_os_linux:
     applications:
     - Kernel
     value_type: float
+    units: '%'
 
   - key: kernel.uname.machine
     applications:
@@ -91,6 +98,7 @@ g_template_os_linux:
     applications:
     - Kernel
     value_type: float
+    units: '%'
 
   - key: kernel.all.pswitch
     applications:
