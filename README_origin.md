@@ -92,14 +92,16 @@ inventory file use the -i option for ansible-playbook.
 On the master host:
 ```sh
 oadm router --create=true \
-  --credentials=/etc/openshift/master/openshift-router.kubeconfig
+  --credentials=/etc/openshift/master/openshift-router.kubeconfig \
+  --service-account=router
 ```
 
 #### Create the default docker-registry
 On the master host:
 ```sh
 oadm registry --create=true \
-  --credentials=/etc/openshift/master/openshift-registry.kubeconfig
+  --credentials=/etc/openshift/master/openshift-registry.kubeconfig \
+  --service-account=registry
 ```
 
 If you would like persistent storage, refer to the
