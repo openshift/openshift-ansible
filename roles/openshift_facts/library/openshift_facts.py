@@ -296,9 +296,8 @@ def set_fluentd_facts_if_unset(facts):
 
     """
     if 'common' in facts:
-        deployment_type = facts['common']['deployment_type']
         if 'use_fluentd' not in facts['common']:
-            use_fluentd = True if deployment_type == 'online' else False
+            use_fluentd = False
             facts['common']['use_fluentd'] = use_fluentd
     return facts
 
