@@ -27,22 +27,6 @@
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
       groups: oo_nodes_to_config
 
-  - name: Add to preemptible group if needed
-    add_host:
-      name: "{{ node_ip }}"
-      ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
-      ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-      groups: oo_preemptible_nodes
-    when: preemptible is defined and preemptible == "true"
-  
-  - name: Add to not preemptible group if needed
-    add_host:
-      name: "{{ node_ip }}"
-      ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
-      ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-      groups: oo_non_preemptible_nodes
-    when: preemptible is defined and  preemptible == "false"
-  
   - name: Evaluate oo_first_master
     add_host:
       name: "{{ groups['tag_env-host-type-' ~ cluster_id ~ '-openshift-master'][0] }}"
@@ -59,6 +43,7 @@
     openshift_deployment_type: "{{ deployment_type }}"
     openshift_hostname: "{{ ansible_default_ipv4.address }}"
     openshift_use_openshift_sdn: true
+    openshift_node_labels: "{{ lookup('oo_option', 'openshift_node_labels') }} "
     os_sdn_network_plugin_name: "redhat/openshift-ovs-subnet"
     osn_cluster_dns_domain: "{{ hostvars[groups.oo_first_master.0].openshift.dns.domain }}"
     osn_cluster_dns_ip: "{{ hostvars[groups.oo_first_master.0].openshift.dns.ip }}"

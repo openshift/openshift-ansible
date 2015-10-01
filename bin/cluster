@@ -197,7 +197,7 @@ class Cluster(object):
         if args.option:
             for opt in args.option:
                 k, v = opt.split('=', 1)
-                env[k] = v
+                env['cli_' + k] = v
 
         ansible_env = '-e \'{}\''.format(
             ' '.join(['%s=%s' % (key, value) for (key, value) in env.items()])
