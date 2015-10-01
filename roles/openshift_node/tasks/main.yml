@@ -73,12 +73,6 @@
     dest: /etc/sysconfig/docker
     regexp: '^OPTIONS=.*$'
     line: "OPTIONS='--insecure-registry={{ openshift.node.portal_net }} \
---insecure-registry=dockerhub.rnd.amadeus.net:5000 \
---insecure-registry=dockerhub.rnd.amadeus.net:5001 \
---insecure-registry=dockerhub.rnd.amadeus.net:5002 \
---add-registry=dockerhub.rnd.amadeus.net:5000 \
---add-registry=dockerhub.rnd.amadeus.net:5001 \
---add-registry=dockerhub.rnd.amadeus.net:5002 \
 {% if ansible_selinux and ansible_selinux.status == '''enabled''' %}--selinux-enabled{% endif %}'"
   when: docker_check.stat.isreg
   notify:
