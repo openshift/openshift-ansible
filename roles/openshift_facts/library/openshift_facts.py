@@ -475,6 +475,7 @@ def set_deployment_facts_if_unset(facts):
             if deployment_type in ['enterprise', 'online']:
                 data_dir = '/var/lib/openshift'
             facts['common']['data_dir'] = data_dir
+        facts['common']['version'] = get_openshift_version()
 
     for role in ('master', 'node'):
         if role in facts:
@@ -599,6 +600,19 @@ def get_current_config(facts):
 
     return current_config
 
+def get_openshift_version():
+    """ Get current version of openshift on the host
+
+        Returns:
+            version: the current openshift version
+    """
+    if os.path.isfile('/usr/bin/openshift'):
+        _, output, _ = module.run_command(['/usr/bin/openshift', 'version'])
+        versions = dict(e.split(' v') for e in output.splitlines())
+        version = versions.get('openshift', '')
+
+        #TODO: acknowledge the possility of a containerized install
+    return version
 
 def apply_provider_facts(facts, provider_facts):
     """ Apply provider facts to supplied facts dict
