@@ -605,6 +605,8 @@ def get_openshift_version():
         Returns:
             version: the current openshift version
     """
+    version = ''
+
     if os.path.isfile('/usr/bin/openshift'):
         _, output, _ = module.run_command(['/usr/bin/openshift', 'version'])
         versions = dict(e.split(' v') for e in output.splitlines())
