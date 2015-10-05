@@ -5,6 +5,7 @@ import argparse
 import ConfigParser
 import os
 import sys
+import subprocess
 import traceback
 
 
@@ -53,7 +54,6 @@ class Cluster(object):
         """
         Create an OpenShift cluster for given provider
         :param args: command line arguments provided by user
-        :return: exit status from run command
         """
         env = {'cluster_id': args.cluster_id,
                'deployment_type': self.get_deployment_type(args)}
@@ -65,65 +65,60 @@ class Cluster(object):
         env['num_infra'] = args.infra
         env['num_etcd'] = args.etcd
 
-        return self.action(args, inventory, env, playbook)
+        self.action(args, inventory, env, playbook)
 
     def terminate(self, args):
         """
         Destroy OpenShift cluster
         :param args: command line arguments provided by user
-        :return: exit status from run command
         """
         env = {'cluster_id': args.cluster_id,
                'deployment_type': self.get_deployment_type(args)}
         playbook = "playbooks/{}/openshift-cluster/terminate.yml".format(args.provider)
         inventory = self.setup_provider(args.provider)
 
-        return self.action(args, inventory, env, playbook)
+        self.action(args, inventory, env, playbook)
 
     def list(self, args):
         """
         List VMs in cluster
         :param args: command line arguments provided by user
-        :return: exit status from run command
         """
         env = {'cluster_id': args.cluster_id,
                'deployment_type': self.get_deployment_type(args)}
         playbook = "playbooks/{}/openshift-cluster/list.yml".format(args.provider)
         inventory = self.setup_provider(args.provider)
 
-        return self.action(args, inventory, env, playbook)
+        self.action(args, inventory, env, playbook)
 
     def config(self, args):
         """
         Configure or reconfigure OpenShift across clustered VMs
         :param args: command line arguments provided by user
-        :return: exit status from run command
         """
         env = {'cluster_id': args.cluster_id,
                'deployment_type': self.get_deployment_type(args)}
         playbook = "playbooks/{}/openshift-cluster/config.yml".format(args.provider)
         inventory = self.setup_provider(args.provider)
 
-        return self.action(args, inventory, env, playbook)
+        self.action(args, inventory, env, playbook)
 
     def update(self, args):
         """
         Update to latest OpenShift across clustered VMs
         :param args: command line arguments provided by user
-        :return: exit status from run command
         """
         env = {'cluster_id': args.cluster_id,
                'deployment_type': self.get_deployment_type(args)}
         playbook = "playbooks/{}/openshift-cluster/update.yml".format(args.provider)
         inventory = self.setup_provider(args.provider)
 
-        return self.action(args, inventory, env, playbook)
+        self.action(args, inventory, env, playbook)
 
     def service(self, args):
         """
         Make the same service call across all nodes in the cluster
         :param args: command line arguments provided by user
-        :return: exit status from run command
         """
         env = {'cluster_id': args.cluster_id,
                'deployment_type': self.get_deployment_type(args),
@@ -132,7 +127,7 @@ class Cluster(object):
         playbook = "playbooks/{}/openshift-cluster/service.yml".format(args.provider)
         inventory = self.setup_provider(args.provider)
 
-        return self.action(args, inventory, env, playbook)
+        self.action(args, inventory, env, playbook)
 
     def setup_provider(self, provider):
         """
@@ -183,7 +178,6 @@ class Cluster(object):
         :param inventory: derived provider library
         :param env: environment variables for kubernetes
         :param playbook: ansible playbook to execute
-        :return: exit status from ansible-playbook command
         """
 
         verbose = ''
@@ -213,7 +207,18 @@ class Cluster(object):
             sys.stderr.write('RUN [{}]\n'.format(command))
             sys.stderr.flush()
 
-        return os.system(command)
+        try:
+            subprocess.check_call(command, shell=True)
+        except subprocess.CalledProcessError as exc:
+            raise ActionFailed("ACTION [{}] failed: {}"
+                               .format(args.action, exc))
+
+
+class ActionFailed(Exception):
+    """
+    Raised when action failed.
+    """
+    pass
 
 
 if __name__ == '__main__':
@@ -328,14 +333,11 @@ if __name__ == '__main__':
             sys.stderr.write('\nACTION [update] aborted by user!\n')
             exit(1)
 
-    status = 1
     try:
-        status = args.func(args)
-        if status != 0:
-            sys.stderr.write("ACTION [{}] failed with exit status {}\n".format(args.action, status))
-    except Exception, e:
+        args.func(args)
+    except Exception as exc:
         if args.verbose:
             traceback.print_exc(file=sys.stderr)
         else:
-            sys.stderr.write("{}\n".format(e))
-    exit(status)
+            print >>sys.stderr, exc
+        exit(1)
