@@ -19,32 +19,15 @@
     changed_when: false
     failed_when: stack_show_result.rc != 0 and 'Stack not found' not in stack_show_result.stderr
 
-  - name: Create OpenStack Stack
-    command: 'heat stack-create -f {{ openstack_infra_heat_stack }}
-             -P key_pair={{ openstack_ssh_keypair }}
-             -P cluster_id={{ cluster_id }}
-             -P dns_nameservers={{ openstack_network_dns | join(",") }}
-             -P cidr={{ openstack_network_cidr }}
-             -P ssh_incoming={{ openstack_ssh_access_from }}
-             -P num_masters={{ num_masters }}
-             -P num_nodes={{ num_nodes }}
-             -P num_infra={{ num_infra }}
-             -P master_image={{ deployment_vars[deployment_type].image }}
-             -P node_image={{ deployment_vars[deployment_type].image }}
-             -P infra_image={{ deployment_vars[deployment_type].image }}
-             -P master_flavor={{ openstack_flavor["master"] }}
-             -P node_flavor={{ openstack_flavor["node"] }}
-             -P infra_flavor={{ openstack_flavor["infra"] }}
-             -P ssh_public_key="{{ openstack_ssh_public_key }}"
-             openshift-ansible-{{ cluster_id }}-stack'
+  - set_fact:
+      heat_stack_action: 'stack-create'
     when: stack_show_result.rc == 1
   - set_fact:
       heat_stack_action: 'stack-update'
     when: stack_show_result.rc == 0
 
-  - name: Update OpenStack Stack
-    command: 'heat stack-update -f {{ openstack_infra_heat_stack }}
-             -P key_pair={{ openstack_ssh_keypair }}
+  - name: Create or Update OpenStack Stack
+    command: 'heat {{ heat_stack_action }} -f {{ openstack_infra_heat_stack }}
              -P cluster_id={{ cluster_id }}
              -P cidr={{ openstack_network_cidr }}
              -P dns_nameservers={{ openstack_network_dns | join(",") }}
@@ -67,7 +50,7 @@
     shell: 'heat stack-show openshift-ansible-{{ cluster_id }}-stack | awk ''$2 == "stack_status" {print $4}'''
     register: stack_show_status_result
     until: stack_show_status_result.stdout not in ['CREATE_IN_PROGRESS', 'UPDATE_IN_PROGRESS']
-    retries: 300
+    retries: 30
     delay: 1
     failed_when: stack_show_status_result.stdout not in ['CREATE_COMPLETE', 'UPDATE_COMPLETE']
 
@@ -135,13 +118,5 @@
       - parsed_outputs.infra_floating_ips
 
 - include: update.yml
-
-# Fix icmp reject iptables rules
-# It should be solved in openshift-sdn but unfortunately it's not the case
-# Mysterious
-- name: Configuring Nodes for RBox
-  hosts: oo_nodes_to_config
-  roles:
-    - rbox-node
 
 - include: list.yml
