@@ -36,7 +36,7 @@ g_template_openshift_master:
     priority: high
 
   - name: 'Number of users for Openshift Master on {HOST.NAME}'
-    expression: '{Template Openshift Master:openshift.master.user.count.last(,3)}>0'
+    expression: '{Template Openshift Master:openshift.master.user.count.last()}=0'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
     priority: info
 
