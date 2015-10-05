@@ -142,10 +142,14 @@ class Cluster(object):
         """
         config = ConfigParser.ConfigParser()
         if 'gce' == provider:
-            config.readfp(open('inventory/gce/hosts/gce.ini'))
+            gce_ini_default_path = os.path.join(
+                'inventory/gce/hosts/gce.ini')
+            gce_ini_path = os.environ.get('GCE_INI_PATH', gce_ini_default_path)
+            if os.path.exists(gce_ini_path): 
+                config.readfp(open(gce_ini_path))
 
-            for key in config.options('gce'):
-                os.environ[key] = config.get('gce', key)
+                for key in config.options('gce'):
+                    os.environ[key] = config.get('gce', key)
 
             inventory = '-i inventory/gce/hosts'
         elif 'aws' == provider:

@@ -1,7 +1,8 @@
 ---
 - set_fact: k8s_type="master"
 
-- name: Generate master instance names(s)
+# Dirty hacks to work around the fact that the first task is skipped when with_sequence count==1. Why ???
+- name: Generate master instance names
   set_fact:
     scratch_name: "{{ cluster_id }}-{{ k8s_type }}-{{ '%05x' | format(1048576 | random) }}"
   register: master_names_output
