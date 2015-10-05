@@ -1,7 +1,7 @@
 ---
 - fail:
-    msg: "That playbook is not yet supported on atomic hosts"
-  when: is_atomic
+    msg: "This role is not yet supported on atomic hosts"
+  when: openshift.common.is_atomic | bool
 
 - name: Install pyparted (RedHat/Fedora)
   action: "{{ ansible_pkg_mgr }} name=pyparted,python-httplib2 state=present"

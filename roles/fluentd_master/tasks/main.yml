@@ -1,7 +1,7 @@
 ---
 - fail:
     msg: "fluentd master is not yet supported on atomic hosts"
-  when: is_atomic
+  when: openshift.common.is_containerized | bool
 
 # TODO: Update fluentd install and configuration when packaging is complete
 - name: download and install td-agent

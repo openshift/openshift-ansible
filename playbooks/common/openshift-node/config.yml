@@ -181,7 +181,7 @@
   - role: flannel
     when: openshift.common.use_flannel | bool
   - role: nickhammond.logrotate
-    when: not is_atomic
+    when: not openshift.common.is_containerized | bool
   - role: fluentd_node
     when: openshift.common.use_fluentd | bool
   tasks:

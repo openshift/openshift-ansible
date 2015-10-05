@@ -1,7 +1,7 @@
 ---
 - fail:
     msg: "Not possible on atomic hosts for now"
-  when: is_atomic
+  when: openshift.common.is_containerized | bool
 
 - name: Test if cluster is already configured
   command: pcs status

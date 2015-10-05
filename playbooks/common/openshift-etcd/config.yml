@@ -14,7 +14,8 @@
           public_hostname: "{{ openshift_public_hostname | default(None) }}"
           deployment_type: "{{ openshift_deployment_type }}"
       - role: etcd
-        local_facts: {}
+        local_facts:
+          etcd_image: "{{ osm_etcd_image | default(None) }}"
   - name: Check status of etcd certificates
     stat:
       path: "{{ item }}"
@@ -87,7 +88,8 @@
     when: etcd_server_certs_missing
   roles:
   - etcd
-  - { role: nickhammond.logrotate, when: not is_atomic }
+  - role: nickhammond.logrotate
+    when: not openshift.common.is_containerized | bool
 
 - name: Delete temporary directory on localhost
   hosts: localhost

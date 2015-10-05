@@ -20,10 +20,9 @@
 - fail:
     msg: "openshift_master_cluster_password must be set for multi-master installations"
   when: openshift_master_ha | bool and openshift_master_cluster_method == "pacemaker" and (openshift_master_cluster_password is not defined or not openshift_master_cluster_password)
-
 - fail:
-    msg: "openshift_master_ha is not yet supported on atomic hosts"
-  when: openshift_master_ha | bool and is_atomic
+    msg: "Pacemaker based HA is not supported at this time when used with containerized installs"
+  when: openshift_master_ha | bool and openshift_master_cluster_method == "pacemaker" and openshift.common.is_containerized | bool
 
 - name: Set master facts
   openshift_facts:
@@ -80,28 +79,38 @@
       disabled_features: "{{ osm_disabled_features | default(None) }}"
       master_count: "{{ openshift_master_count | default(None) }}"
       controller_lease_ttl: "{{ osm_controller_lease_ttl | default(None) }}"
+      master_image: "{{ osm_image | default(None) }}"
 
 - name: Install Master package
   action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-master{{ openshift_version  }} state=present"
-  when: not is_atomic
+  when: not openshift.common.is_containerized | bool
 
 # TODO: enable when ansible#1993 lands and is widespread enough
 # - name: Docker image present
 #   docker:
 #     image: "{{ openshift.common.docker.image }}"
 #     state: image_present
-#   when: is_atomic
+#   when: openshift.common.is_containerized | bool
 
 - name: Install Master docker service file
   template:
     dest: "/etc/systemd/system/{{ openshift.common.service_type }}-master.service"
-    src: openshift.docker.master.service
-  register: install_result 
-  when: is_atomic
+    src: master.docker.service.j2
+  register: install_result
+  when: openshift.common.is_containerized | bool and not openshift_master_ha | bool
+  
+- name: Create openshift.common.data_dir
+  file: 
+    path: "{{ openshift.common.data_dir }}"
+    state: directory
+    mode: 0755
+    owner: root
+    group: root
+  when: openshift.common.is_containerized | bool
 
-- name: Reload systemd units                                                                        
+- name: Reload systemd units
   command: systemctl daemon-reload
-  when: is_atomic and install_result | changed
+  when: openshift.common.is_containerized | bool and install_result | changed
 
 - name: Re-gather package dependent master facts
   openshift_facts:
@@ -134,9 +143,9 @@
 
 - name: Install httpd-tools if needed
   action: "{{ ansible_pkg_mgr }} name=httpd-tools state=present"
-  when: (item.kind == 'HTPasswdPasswordIdentityProvider')
+  when: (item.kind == 'HTPasswdPasswordIdentityProvider') and
+        not openshift.common.is_containerized | bool
   with_items: openshift.master.identity_providers
-  when: not is_atomic
 
 - name: Ensure htpasswd directory exists
   file:
@@ -154,16 +163,27 @@
   when: item.kind == 'HTPasswdPasswordIdentityProvider'
   with_items: openshift.master.identity_providers
 
+- name: Init HA Service Info
+  set_fact:
+    ha_suffix: ""
+    ha_svcdir: "/usr/lib/systemd/system"
+
+- name: Set HA Service Info for containerized installs
+  set_fact:
+    ha_suffix: ".docker"
+    ha_svcdir: "/etc/systemd/system"
+  when: openshift.common.is_containerized | bool
+
 # workaround for missing systemd unit files for controllers/api
 - name: Create the api service file
   template:
-    src: atomic-openshift-master-api.service.j2
-    dest: /usr/lib/systemd/system/{{ openshift.common.service_type }}-master-api.service
+    src: atomic-openshift-master-api{{ ha_suffix }}.service.j2
+    dest: "{{ ha_svcdir }}/{{ openshift.common.service_type }}-master-api.service"
   when: openshift_master_ha | bool and openshift_master_cluster_method == "native"
 - name: Create the controllers service file
   template:
-    src: atomic-openshift-master-controllers.service.j2
-    dest: /usr/lib/systemd/system/{{ openshift.common.service_type }}-master-controllers.service
+    src: atomic-openshift-master-controllers{{ ha_suffix }}.service.j2
+    dest: "{{ ha_svcdir }}/{{ openshift.common.service_type }}-master-controllers.service"
   when: openshift_master_ha | bool and openshift_master_cluster_method == "native"
 - name: Create the api env file
   template:
@@ -251,6 +271,10 @@
   when: not openshift_master_ha | bool
   register: start_result
 
+- name: Stop and disable non HA master when running HA
+  service: name={{ openshift.common.service_type }}-master enabled=no state=stopped
+  when: openshift_master_ha | bool
+
 - set_fact:
     master_service_status_changed: start_result | changed
   when: not openshift_master_ha | bool
@@ -275,12 +299,14 @@
 
 - name: Install cluster packages
   action: "{{ ansible_pkg_mgr }} name=pcs state=present"
-  when: openshift_master_ha | bool and openshift.master.cluster_method == 'pacemaker' and not is_atomic
+  when: openshift_master_ha | bool and openshift.master.cluster_method == 'pacemaker'
+    and not openshift.common.is_containerized | bool
   register: install_result
 
 - name: Start and enable cluster service
   service: name=pcsd enabled=yes state=started
   when: openshift_master_ha | bool and openshift.master.cluster_method == 'pacemaker'
+    and not openshift.common.is_containerized | bool
 
 - name: Set the cluster user password
   shell: echo {{ openshift_master_cluster_password | quote }} | passwd --stdin hacluster
@@ -307,7 +333,6 @@
   command: cp {{ openshift_master_config_dir }}/admin.kubeconfig ~{{ item }}/.kube/config
   args:
     creates: ~{{ item }}/.kube/config
-  when: not is_atomic
   with_items:
   - root
   - "{{ ansible_ssh_user }}"
