@@ -87,7 +87,9 @@ masterPublicURL: {{ openshift.master.public_api_url }}
 networkConfig:
   clusterNetworkCIDR: {{ openshift.master.sdn_cluster_network_cidr }}
   hostSubnetLength: {{ openshift.master.sdn_host_subnet_length }}
+  {% if openshift.common.use_openshift_sdn %}
   networkPluginName: {{ openshift.common.sdn_network_plugin_name }}
+  {% endif %}
 # serviceNetworkCIDR must match kubernetesMasterConfig.servicesSubnet
   serviceNetworkCIDR: {{ openshift.master.portal_net }}
 {% include 'v1_partials/oauthConfig.j2' %}
