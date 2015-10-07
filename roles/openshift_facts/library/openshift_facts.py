@@ -480,11 +480,11 @@ def set_deployment_facts_if_unset(facts):
         if role in facts:
             deployment_type = facts['common']['deployment_type']
             if 'registry_url' not in facts[role]:
-                registry_url = 'aos3/aos-${component}:${version}'
-                if deployment_type in ['enterprise', 'online']:
+                registry_url = 'openshift/origin-${component}:${version}'
+                if deployment_type in ['enterprise', 'online', 'openshift-enterprise']:
                     registry_url = 'openshift3/ose-${component}:${version}'
-                elif deployment_type == 'origin':
-                    registry_url = 'openshift/origin-${component}:${version}'
+                elif deployment_type == 'atomic-enterprise':
+                    registry_url = 'aep3/aep-${component}:${version}'
                 facts[role]['registry_url'] = registry_url
 
     return facts
