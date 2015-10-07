@@ -94,7 +94,8 @@ dns=dnsmasq
 -	Configure dnsmasq to use the Virtual Network router for example.com:
 
 ```sh
-sudo vi /etc/NetworkManager/dnsmasq.d/libvirt_dnsmasq.conf server=/example.com/192.168.55.1
+sudo vi /etc/NetworkManager/dnsmasq.d/libvirt_dnsmasq.conf
+server=/example.com/192.168.55.1
 ```
 
 Test The Setup
