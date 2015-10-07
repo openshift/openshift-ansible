@@ -21,9 +21,10 @@
 - name: Install bind DNS server
   yum: name=bind state=latest
 
-  # FIXME: this should be generated, not copied
-- name: Copy rndc key
-  copy: src=rndc.key dest=/etc/rndc.key mode=0640 owner=root group=named
+- name: Generate rndc key
+  command: >
+    dnssec-keygen -a HMAC-MD5 -b 512 -n USER -r /dev/urandom -K /etc rndc
+    creates=/etc/rndc.key
 
 - set_fact: view_type=external
 - name: External zone file
@@ -45,3 +46,6 @@
 - name: Build named.conf
   template: src=named.conf dest=/etc/named.conf
   notify: restart named
+
+- name: Enable bind DNS server
+  service: name=named enabled=yes

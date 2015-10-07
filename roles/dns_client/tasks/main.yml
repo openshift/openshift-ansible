@@ -10,8 +10,15 @@
 - name: Configure the resolver
   template: dest=/etc/resolv.conf src=resolv.conf
 
-- name: Disable DHCP DNS
-  lineinfile: dest={{ network_file }} regexp=^PEERDNS line=PEERDNS=no
+- name: Set hostname
+  hostname: name={{ openshift.common.hostname }}
+
+- name: Override DNS configuration
+  lineinfile: dest={{ network_conf_file }} regexp=^DNS1 line=DNS1={{ dns_server }}
 
 - name: Override DHCP DNS
-  lineinfile: dest={{ network_file }} regexp=^DNS1 line=DNS1={{ dns_server }}
+  lineinfile:
+    dest: "{{ dhclient_conf_file }}"
+    regexp: "{{ dns_server }}"
+    line: "prepend domain-name-servers {{ dns_server }};"
+    create: yes
