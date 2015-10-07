@@ -27,9 +27,8 @@
   gather_facts: no
 
   vars:
-    cli_volume_type: io1
+    cli_volume_type: gp2
     cli_volume_size: 30
-    cli_volume_iops: "{{ 30 * cli_volume_size }}"
 
   pre_tasks:
   - fail:
@@ -104,7 +103,6 @@
       volume_size: "{{ cli_volume_size | default(30, True)}}"
       volume_type: "{{ cli_volume_type }}"
       device_name: /dev/xvdb
-      iops: "{{ 30 * cli_volume_size }}"
     register: vol
 
   - debug: var=vol
