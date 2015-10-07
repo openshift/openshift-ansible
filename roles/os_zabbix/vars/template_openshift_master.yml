@@ -13,7 +13,7 @@ g_template_openshift_master:
     applications:
     - Openshift Master
     
-    key: openshift.master.project.count
+  -  key: openshift.master.project.count
 +    description: Shows number of projects in a cluster
 +    type: int
 +    applications:
