@@ -13,6 +13,7 @@
 - include_vars: template_openshift_master.yml
 - include_vars: template_openshift_node.yml
 - include_vars: template_ops_tools.yml
+- include_vars: template_app_zabbix_server.yml
 
 - name: Include Template Heartbeat
   include: ../../lib_zabbix/tasks/create_template.yml
@@ -58,6 +59,14 @@
   include: ../../lib_zabbix/tasks/create_template.yml
   vars:
     template: "{{ g_template_ops_tools }}"
+    server: "{{ ozb_server }}"
+    user: "{{ ozb_user }}"
+    password: "{{ ozb_password }}"
+
+- name: Include Template App Zabbix Server
+  include: ../../lib_zabbix/tasks/create_template.yml
+  vars:
+    template: "{{ g_template_app_zabbix_server }}"
     server: "{{ ozb_server }}"
     user: "{{ ozb_user }}"
     password: "{{ ozb_password }}"
