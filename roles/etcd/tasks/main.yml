@@ -38,6 +38,7 @@
   template:
     src: etcd.conf.j2
     dest: /etc/etcd/etcd.conf
+    backup: true
   notify:
     - restart etcd
 

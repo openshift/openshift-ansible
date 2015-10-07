@@ -52,4 +52,3 @@
     name: 'td-agent'
     state: started
     enabled: yes
-

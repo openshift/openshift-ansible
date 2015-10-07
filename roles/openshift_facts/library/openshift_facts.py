@@ -296,9 +296,8 @@ def set_fluentd_facts_if_unset(facts):
 
     """
     if 'common' in facts:
-        deployment_type = facts['common']['deployment_type']
         if 'use_fluentd' not in facts['common']:
-            use_fluentd = True if deployment_type == 'online' else False
+            use_fluentd = False
             facts['common']['use_fluentd'] = use_fluentd
     return facts
 
@@ -461,7 +460,7 @@ def set_deployment_facts_if_unset(facts):
         if 'service_type' not in facts['common']:
             service_type = 'atomic-openshift'
             if deployment_type == 'origin':
-                service_type = 'openshift'
+                service_type = 'origin'
             elif deployment_type in ['enterprise', 'online']:
                 service_type = 'openshift'
             facts['common']['service_type'] = service_type
@@ -469,16 +468,13 @@ def set_deployment_facts_if_unset(facts):
             config_base = '/etc/origin'
             if deployment_type in ['enterprise', 'online']:
                 config_base = '/etc/openshift'
-            elif deployment_type == 'origin':
-                config_base = '/etc/openshift'
             facts['common']['config_base'] = config_base
         if 'data_dir' not in facts['common']:
             data_dir = '/var/lib/origin'
             if deployment_type in ['enterprise', 'online']:
                 data_dir = '/var/lib/openshift'
-            elif deployment_type == 'origin':
-                data_dir = '/var/lib/openshift'
             facts['common']['data_dir'] = data_dir
+        facts['common']['version'] = get_openshift_version()
 
     for role in ('master', 'node'):
         if role in facts:
@@ -603,6 +599,21 @@ def get_current_config(facts):
 
     return current_config
 
+def get_openshift_version():
+    """ Get current version of openshift on the host
+
+        Returns:
+            version: the current openshift version
+    """
+    version = ''
+
+    if os.path.isfile('/usr/bin/openshift'):
+        _, output, _ = module.run_command(['/usr/bin/openshift', 'version'])
+        versions = dict(e.split(' v') for e in output.splitlines())
+        version = versions.get('openshift', '')
+
+        #TODO: acknowledge the possility of a containerized install
+    return version
 
 def apply_provider_facts(facts, provider_facts):
     """ Apply provider facts to supplied facts dict
@@ -648,7 +659,7 @@ def merge_facts(orig, new):
     facts = dict()
     for key, value in orig.iteritems():
         if key in new:
-            if isinstance(value, dict):
+            if isinstance(value, dict) and isinstance(new[key], dict):
                 facts[key] = merge_facts(value, new[key])
             else:
                 facts[key] = copy.copy(new[key])

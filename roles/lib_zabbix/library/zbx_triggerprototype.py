@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 '''
-ansible module for zabbix triggers
+ansible module for zabbix triggerprototypes
 '''
 # vim: expandtab:tabstop=4:shiftwidth=4
 #
-#   Zabbix trigger ansible module
+#   Zabbix triggerprototypes ansible module
 #
 #
 #   Copyright 2015 Red Hat Inc.
@@ -58,23 +58,6 @@ def get_priority(priority):
 
     return prior
 
-def get_deps(zapi, deps):
-    ''' get trigger dependencies
-    '''
-    results = []
-    for desc in deps:
-        content = zapi.get_content('trigger',
-                                   'get',
-                                   {'filter': {'description': desc},
-                                    'expandExpression': True,
-                                    'selectDependencies': 'triggerid',
-                                   })
-        if content.has_key('result'):
-            results.append({'triggerid': content['result'][0]['triggerid']})
-
-    return results
-
-
 def get_trigger_status(inc_status):
     ''' Determine the trigger's status
         0 is enabled
@@ -86,21 +69,10 @@ def get_trigger_status(inc_status):
 
     return r_status
 
+
 def main():
     '''
-    Create a trigger in zabbix
-
-    Example:
-    "params": {
-        "description": "Processor load is too high on {HOST.NAME}",
-        "expression": "{Linux server:system.cpu.load[percpu,avg1].last()}>5",
-        "dependencies": [
-            {
-                "triggerid": "14062"
-            }
-        ]
-    },
-
+    Create a triggerprototype in zabbix
     '''
 
     module = AnsibleModule(
@@ -109,10 +81,9 @@ def main():
             zbx_user=dict(default=os.environ.get('ZABBIX_USER', None), type='str'),
             zbx_password=dict(default=os.environ.get('ZABBIX_PASSWORD', None), type='str'),
             zbx_debug=dict(default=False, type='bool'),
-            expression=dict(default=None, type='str'),
             name=dict(default=None, type='str'),
+            expression=dict(default=None, type='str'),
             description=dict(default=None, type='str'),
-            dependencies=dict(default=[], type='list'),
             priority=dict(default='avg', type='str'),
             url=dict(default=None, type='str'),
             status=dict(default=None, type='str'),
@@ -127,7 +98,7 @@ def main():
                                       module.params['zbx_debug']))
 
     #Set the instance and the template for the rest of the calls
-    zbx_class_name = 'trigger'
+    zbx_class_name = 'triggerprototype'
     idname = "triggerid"
     state = module.params['state']
     tname = module.params['name']
@@ -155,7 +126,6 @@ def main():
         params = {'description': tname,
                   'comments':  module.params['description'],
                   'expression':  module.params['expression'],
-                  'dependencies': get_deps(zapi, module.params['dependencies']),
                   'priority': get_priority(module.params['priority']),
                   'url': module.params['url'],
                   'status': get_trigger_status(module.params['status']),

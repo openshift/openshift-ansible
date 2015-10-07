@@ -47,6 +47,7 @@
   template:
     dest: "{{ openshift_node_config_file }}"
     src: node.yaml.v1.j2
+    backup: true
   notify:
   - restart node
 

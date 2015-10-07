@@ -100,6 +100,7 @@
   template:
     dest: "{{ openshift_master_scheduler_conf }}"
     src: scheduler.json.j2
+    backup: true
   notify:
   - restart master
 
@@ -129,6 +130,7 @@
   template:
     dest: "{{ openshift_master_config_file }}"
     src: master.yaml.v1.j2
+    backup: true
   notify:
   - restart master
 
