@@ -40,7 +40,7 @@
   hosts: oo_first_master
   tasks:
     fail: This playbook requires Origin 1.0.6 or Atomic OpenShift 3.0.2 or later
-    when: _new_version.stdout < 1.0.6 or (_new_version.stdout >= 3.0 and _new_version.stdout < 3.0.2)
+    when: _new_version.stdout | version_compare('1.0.6','<') or ( _new_version.stdout | version_compare('3.0','>=' and _new_version.stdout | version_compare('3.0.2','<') )
 
 - name: Update cluster policy
   hosts: oo_first_master
@@ -49,6 +49,19 @@
       command: >
         {{ openshift.common.admin_binary}} --config={{ openshift.common.config_base }}/master/admin.kubeconfig
         policy reconcile-cluster-roles --confirm
+
+- name: Update cluster policy bindings
+  hosts: oo_first_master
+  tasks:
+    - name: oadm policy reconcile-cluster-role-bindings --confirm
+      command: >
+        {{ openshift.common.admin_binary}} --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+        policy reconcile-cluster-role-bindings
+        --exclude-groups=system:authenticated
+        --exclude-groups=system:unauthenticated
+        --exclude-users=system:anonymous
+        --additive-only=true --confirm
+  when: ( _new_version.stdout | version_compare('1.0.6', '>') and _new_version.stdout | version_compare('3.0','<') ) or _new_version.stdout | version_compare('3.0.2','>')
 
 - name: Upgrade default router
   hosts: oo_first_master
