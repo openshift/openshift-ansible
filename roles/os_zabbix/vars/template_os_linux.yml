@@ -188,18 +188,6 @@ g_template_os_linux:
     multiplier: 1024
     units: B
 
-  # Disk items
-  - key: filesys.full.xvda2
-    applications:
-    - Disk
-    value_type: float
-
-  - key: filesys.full.xvda3
-    applications:
-    - Disk
-    value_type: float
-
-
   zdiscoveryrules:
   - name: disc.filesys
     key: disc.filesys
@@ -227,26 +215,6 @@ g_template_os_linux:
     priority: high
 
   ztriggers:
-  - name: 'Filesystem: / has less than 10% free on {HOST.NAME}'
-    expression: '{Template OS Linux:filesys.full.xvda2.last()}>90'
-    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_filesys_full.asciidoc'
-    priority: warn
-
-  - name: 'Filesystem: / has less than 5% free on {HOST.NAME}'
-    expression: '{Template OS Linux:filesys.full.xvda2.last()}>95'
-    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_filesys_full.asciidoc'
-    priority: high
-
-  - name: 'Filesystem: /var has less than 10% free on {HOST.NAME}'
-    expression: '{Template OS Linux:filesys.full.xvda3.last()}>90'
-    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_filesys_full.asciidoc'
-    priority: warn
-
-  - name: 'Filesystem: /var has less than 5% free on {HOST.NAME}'
-    expression: '{Template OS Linux:filesys.full.xvda3.last()}>95'
-    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_filesys_full.asciidoc'
-    priority: high
-
   - name: 'Too many TOTAL processes on {HOST.NAME}'
     expression: '{Template OS Linux:proc.nprocs.last()}>5000'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_proc.asciidoc'
