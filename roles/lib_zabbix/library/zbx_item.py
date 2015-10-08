@@ -53,6 +53,8 @@ def get_value_type(value_type):
     vtype = 0
     if 'int' in value_type:
         vtype = 3
+    elif 'log' in value_type:
+        vtype = 2
     elif 'char' in value_type:
         vtype = 1
     elif 'str' in value_type:
