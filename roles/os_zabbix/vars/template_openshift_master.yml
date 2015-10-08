@@ -59,7 +59,7 @@ g_template_openshift_master:
     priority: info
 
   - name: 'OVS may not be running on {HOST.NAME}'
-    expression: '{Template Openshift Master:openshift.master.ovs.pids.count.last()}!=4'
+    expression: '{Template Openshift Master:openshift.master.ovs.pids.count.last()}<>4'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
     priority: high
     
