@@ -260,6 +260,9 @@ def main():
         for user in params['users']:
             diff['users']['userid'] = user['userid']
 
+        # Medias have no real unique key so therefore we need to make it like the incoming user's request
+        diff['medias'] = medias
+
         # We have differences and need to update
         content = zapi.get_content(zbx_class_name, 'updatemedia', diff)
 
