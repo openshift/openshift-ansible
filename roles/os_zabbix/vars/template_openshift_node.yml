@@ -8,13 +8,37 @@ g_template_openshift_node:
     applications:
     - Openshift Node
 
+  - key: openshift.node.ovs.pids.count
+    description: Shows number of ovs process ids running
+    type: int
+    applications:
+    - Openshift Node
+
+  - key: openshift.node.ovs.ports.count
+    description: Shows number of OVS ports defined
+    type: int
+    applications:
+    - Openshift Node
+
   ztriggers:
   - name: 'Openshift Node process not running on {HOST.NAME}'
     expression: '{Template Openshift Node:openshift.node.process.count.max(#3)}<1'
-    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_node.asciidoc'
+    url: 'https://github.com/openshift/ops-sop/blob/node/V3/Alerts/openshift_node.asciidoc'
     priority: high
 
   - name: 'Too many Openshift Node processes running on {HOST.NAME}'
     expression: '{Template Openshift Node:openshift.node.process.count.min(#3)}>1'
-    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_node.asciidoc'
+    url: 'https://github.com/openshift/ops-sop/blob/node/V3/Alerts/openshift_node.asciidoc'
     priority: high
+
+  - name: 'OVS may not be running on {HOST.NAME}'
+    expression: '{Template Openshift Node:openshift.node.ovs.pids.count.last()}<>4'
+    url: 'https://github.com/openshift/ops-sop/blob/node/V3/Alerts/openshift_node.asciidoc'
+    priority: high
+
+  - name: 'Number of OVS ports is 0 on {HOST.NAME}'
+    expression: '{Template Openshift Node:openshift.node.ovs.ports.count.last()}=0'
+    url: 'https://github.com/openshift/ops-sop/blob/node/V3/Alerts/openshift_node.asciidoc'
+    priority: high
+
+
