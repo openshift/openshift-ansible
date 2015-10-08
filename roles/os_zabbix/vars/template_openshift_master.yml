@@ -25,6 +25,18 @@ g_template_openshift_master:
     applications:
     - Openshift Master
 
+  - key: openshift.master.ovs.ports.count
+    description: Shows number of OVS ports defined
+    type: int
+    applications:
+    - Openshift Master
+
+  - key: openshift.master.ovs.pids.count
+    description: Shows number of ovs process ids running
+    type: int
+    applications:
+    - Openshift Master
+
   ztriggers:
   - name: 'Application creation has failed on {HOST.NAME}'
     expression: '{Template Openshift Master:create_app.last(#1)}=1 and {Template Openshift Master:create_app.last(#2)}=1'
@@ -46,3 +58,13 @@ g_template_openshift_master:
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
     priority: info
 
+  - name: 'OVS may not be running on {HOST.NAME}'
+    expression: '{Template Openshift Master:openshift.master.ovs.pids.count.last()}!=4'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
+    priority: high
+    
+  - name: 'Number of OVS ports is 0 on {HOST.NAME}'
+    expression: '{Template Openshift Master:openshift.master.ovs.ports.count.last()}=0'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
+    priority: high
+    
