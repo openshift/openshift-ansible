@@ -12,7 +12,7 @@
       groups: oo_hosts_to_terminate
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user | default(ansible_ssh_user, true) }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-    with_items: groups[scratch_group] | default([]) | difference(['localhost']) | difference(groups.status_terminated | default([]))
+    with_items: groups[scratch_group] | default([], true) | difference(['localhost']) | difference(groups.status_terminated | default([], true))
 
 - name: Unsubscribe VMs
   hosts: oo_hosts_to_terminate
@@ -42,7 +42,7 @@
         pem_file: "{{ lookup('env', 'gce_service_account_pem_file_path') }}"
         project_id: "{{ lookup('env', 'gce_project_id') }}"
         zone: "{{ lookup('env', 'zone') }}"
-      with_items: groups['oo_hosts_to_terminate'] | default([])
+      with_items: groups['oo_hosts_to_terminate'] | default([], true)
       when: item is defined
 
 #- include: ../openshift-node/terminate.yml

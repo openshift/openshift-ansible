@@ -10,6 +10,6 @@
   with_sequence: count={{ number_infra }}
 
 - set_fact:
-    infra_names: "{{ infra_names_output.results | default([])
+    infra_names: "{{ infra_names_output.results | default([], true)
                     | oo_collect('ansible_facts')
                     | oo_collect('scratch_name') }}"
