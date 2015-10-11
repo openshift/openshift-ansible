@@ -24,6 +24,12 @@ g_template_openshift_master:
     type: int
     applications:
     - Openshift Master
+  
+  - key: openshift.project.counter
+    description: Shows number of projects on a cluster
+    type: int
+    applications:
+    - Openshift Master
 
   ztriggers:
   - name: 'Application creation has failed on {HOST.NAME}'
@@ -46,3 +52,7 @@ g_template_openshift_master:
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
     priority: info
 
+  - name: 'There are no projects running on {HOST.NAME}'
+    expression: '{Template Openshift Master:openshift.project.counter.last()}=0'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
+    priority: info
