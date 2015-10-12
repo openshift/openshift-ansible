@@ -34,13 +34,13 @@
       count: "{{ num_infra }}"
   - include: tasks/launch_instances.yml
     vars:
-      instances: "{{ infra_names }}"
+      instances: "{{ node_names }}"
       cluster: "{{ cluster_id }}"
       type: "{{ k8s_type }}"
       g_sub_host_type: "{{ sub_host_type }}"
 
   - set_fact:
-      a_infra: "{{ infra_names[0] }}"
+      a_infra: "{{ node_names[0] }}"
   - add_host: name={{ a_infra }} groups=service_master
 
 - include: update.yml
