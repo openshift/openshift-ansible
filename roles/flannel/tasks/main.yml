@@ -1,0 +1,44 @@
+---
+- name: Install flannel
+  sudo: true
+  yum: pkg=flannel state=present
+
+- name: Set flannel etcd url
+  sudo: true
+  lineinfile:
+    dest: /etc/sysconfig/flanneld
+    backrefs: yes
+    regexp: "^(FLANNEL_ETCD=)"
+    line: '\1{{ etcd_hosts|join(",") }}'
+
+- name: Set flannel etcd key
+  sudo: true
+  lineinfile:
+    dest: /etc/sysconfig/flanneld
+    backrefs: yes
+    regexp: "^(FLANNEL_ETCD_KEY=)"
+    line: '\1{{ flannel_etcd_key }}'
+  notify:
+
+- name: Set flannel options
+  sudo: true
+  lineinfile:
+    dest: /etc/sysconfig/flanneld
+    backrefs: yes
+    regexp: "^#?(FLANNEL_OPTIONS=)"
+    line: '\1--iface {{ flannel_interface }} --etcd-cafile={{ etcd_peer_ca_file }} --etcd-keyfile={{ etcd_peer_key_file }} --etcd-certfile={{ etcd_peer_cert_file }}'
+
+- name: Enable flanneld
+  sudo: true
+  service:
+    name: flanneld
+    state: started
+    enabled: yes
+  register: start_result
+
+- name: Remove docker bridge ip
+  sudo: true
+  shell: ip a del `ip a show docker0 | grep inet | awk '{print $2}'` dev docker0
+  notify:
+    - restart docker
+    - restart node

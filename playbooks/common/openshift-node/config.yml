@@ -84,6 +84,7 @@
   vars:
     sync_tmpdir: "{{ hostvars.localhost.mktemp.stdout }}"
     openshift_node_master_api_url: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_url }}"
+    etcd_urls: "{{ hostvars[groups.oo_first_master.0].openshift.master.etcd_urls }}"
   pre_tasks:
   - name: Ensure certificate directory exists
     file:
@@ -100,6 +101,8 @@
     when: certs_missing
   roles:
   - openshift_node
+  - role: flannel
+    when: openshift.common.use_flannel | bool
   - role: nickhammond.logrotate
   - role: fluentd_node
     when: openshift.common.use_fluentd | bool

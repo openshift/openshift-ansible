@@ -1,0 +1,8 @@
+---
+flannel_interface: "{{ ansible_default_ipv4.interface }}"
+flannel_etcd_key: /openshift.com/network
+etcd_hosts: "{{ etcd_urls }}"
+etcd_conf_dir: "{{ openshift.common.config_base }}/node"
+etcd_peer_ca_file: "{{ etcd_conf_dir }}/ca.crt"
+etcd_peer_cert_file: "{{ etcd_conf_dir }}/system:node:{{ openshift.common.hostname }}.crt"
+etcd_peer_key_file: "{{ etcd_conf_dir }}/system:node:{{ openshift.common.hostname }}.key"
