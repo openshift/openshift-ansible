@@ -172,7 +172,7 @@
 
   - name: pvmove onto new volume
     command: "pvmove {{ docker_pv_name.stdout }} /dev/xvdc1"
-    async: 3600
+    async: 43200
     poll: 10
 
   - name: Remove the old docker drive from the volume group
