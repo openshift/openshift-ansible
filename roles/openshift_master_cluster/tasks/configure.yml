@@ -38,7 +38,7 @@
 - name: Wait for the clustered master service to be available
   wait_for:
     host: "{{ openshift_master_cluster_vip }}"
-    port: 8443
+    port: 443
     state: started
     timeout: 180
     delay: 90
