@@ -75,7 +75,7 @@ In order to fix that issue, you have several possibilities:
    * accessible by the qemu user.
  * Grant the qemu user access to the storage pool.
 
-On Arch:
+On Arch or Fedora 22+:
 
 ```
 setfacl -m g:kvm:--x ~
