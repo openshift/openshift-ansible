@@ -22,7 +22,7 @@
       deployment_type: "{{ openshift_deployment_type }}"
   - role: node
     local_facts:
-      labels: "{{ openshift_node_labels | default(none) }}"
+      labels: "{{ lookup('oo_option', 'openshift_node_labels') | default( openshift_node_labels | default(none), true) }}"
       annotations: "{{ openshift_node_annotations | default(none) }}"
       registry_url: "{{ oreg_url | default(none) }}"
       debug_level: "{{ openshift_node_debug_level | default(openshift.common.debug_level) }}"
@@ -47,6 +47,7 @@
   template:
     dest: "{{ openshift_node_config_file }}"
     src: node.yaml.v1.j2
+    backup: true
   notify:
   - restart node
 

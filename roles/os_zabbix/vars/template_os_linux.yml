@@ -10,17 +10,20 @@ g_template_os_linux:
   - key: kernel.all.cpu.wait.total
     applications:
     - Kernel
-    value_type: int
+    value_type: float
+    units: '%'
 
   - key: kernel.all.cpu.irq.hard
     applications:
     - Kernel
-    value_type: int
+    value_type: float
+    units: '%'
 
   - key: kernel.all.cpu.idle
     applications:
     - Kernel
-    value_type: int
+    value_type: float
+    units: '%'
 
   - key: kernel.uname.distro
     applications:
@@ -35,7 +38,8 @@ g_template_os_linux:
   - key: kernel.all.cpu.irq.soft
     applications:
     - Kernel
-    value_type: int
+    value_type: float
+    units: '%'
 
   - key: kernel.all.load.15_minute
     applications:
@@ -45,7 +49,8 @@ g_template_os_linux:
   - key: kernel.all.cpu.sys
     applications:
     - Kernel
-    value_type: int
+    value_type: float
+    units: '%'
 
   - key: kernel.all.load.5_minute
     applications:
@@ -55,7 +60,8 @@ g_template_os_linux:
   - key: kernel.all.cpu.nice
     applications:
     - Kernel
-    value_type: int
+    value_type: float
+    units: '%'
 
   - key: kernel.all.load.1_minute
     applications:
@@ -75,7 +81,8 @@ g_template_os_linux:
   - key: kernel.all.cpu.user
     applications:
     - Kernel
-    value_type: int
+    value_type: float
+    units: '%'
 
   - key: kernel.uname.machine
     applications:
@@ -90,7 +97,8 @@ g_template_os_linux:
   - key: kernel.all.cpu.steal
     applications:
     - Kernel
-    value_type: int
+    value_type: float
+    units: '%'
 
   - key: kernel.all.pswitch
     applications:
@@ -180,38 +188,51 @@ g_template_os_linux:
     multiplier: 1024
     units: B
 
-  # Disk items
-  - key: filesys.full.xvda2
-    applications:
-    - Disk
-    value_type: float
+  zdiscoveryrules:
+  - name: disc.filesys
+    key: disc.filesys
+    lifetime: 1
+    description: "Dynamically register the filesystems"
 
-  - key: filesys.full.xvda3
+  zitemprototypes:
+  - discoveryrule_key: disc.filesys
+    name: "disc.filesys.full.{#OSO_FILESYS}"
+    key: "disc.filesys.full[{#OSO_FILESYS}]"
+    value_type: float
+    description: "PCP filesys.full option.  This is the percent full returned from pcp filesys.full"
     applications:
     - Disk
+
+  - discoveryrule_key: disc.filesys
+    name: "Percentage of used inodes on {#OSO_FILESYS}"
+    key: "disc.filesys.inodes.pused[{#OSO_FILESYS}]"
     value_type: float
+    description: "PCP derived value of percentage of used inodes on a filesystem."
+    applications:
+    - Disk
+
+  ztriggerprototypes:
+  - name: 'Filesystem: {#OSO_FILESYS} has less than 15% free disk space on {HOST.NAME}'
+    expression: '{Template OS Linux:disc.filesys.full[{#OSO_FILESYS}].last()}>85'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_filesys_full.asciidoc'
+    priority: warn
+
+  - name: 'Filesystem: {#OSO_FILESYS} has less than 10% free disk space on {HOST.NAME}'
+    expression: '{Template OS Linux:disc.filesys.full[{#OSO_FILESYS}].last()}>90'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_filesys_full.asciidoc'
+    priority: high
+
+  - name: 'Filesystem: {#OSO_FILESYS} has less than 10% free inodes on {HOST.NAME}'
+    expression: '{Template OS Linux:disc.filesys.inodes.pused[{#OSO_FILESYS}].last()}>90'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_filesys_full.asciidoc'
+    priority: warn
+
+  - name: 'Filesystem: {#OSO_FILESYS} has less than 5% free inodes on {HOST.NAME}'
+    expression: '{Template OS Linux:disc.filesys.inodes.pused[{#OSO_FILESYS}].last()}>95'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_filesys_full.asciidoc'
+    priority: high
 
   ztriggers:
-  - name: 'Filesystem: / has less than 10% free on {HOST.NAME}'
-    expression: '{Template OS Linux:filesys.full.xvda2.last()}>90'
-    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_filesys_full.asciidoc'
-    priority: warn
-
-  - name: 'Filesystem: / has less than 5% free on {HOST.NAME}'
-    expression: '{Template OS Linux:filesys.full.xvda2.last()}>95'
-    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_filesys_full.asciidoc'
-    priority: high
-
-  - name: 'Filesystem: /var has less than 10% free on {HOST.NAME}'
-    expression: '{Template OS Linux:filesys.full.xvda3.last()}>90'
-    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_filesys_full.asciidoc'
-    priority: warn
-
-  - name: 'Filesystem: /var has less than 5% free on {HOST.NAME}'
-    expression: '{Template OS Linux:filesys.full.xvda3.last()}>95'
-    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_filesys_full.asciidoc'
-    priority: high
-
   - name: 'Too many TOTAL processes on {HOST.NAME}'
     expression: '{Template OS Linux:proc.nprocs.last()}>5000'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_proc.asciidoc'
@@ -222,3 +243,18 @@ g_template_os_linux:
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_memory.asciidoc'
     priority: warn
     description: 'Alert on less than 30MegaBytes.  This is 30 Million Bytes.  30000 KB x 1024'
+
+    #  CPU Utilization #
+  - name: 'CPU idle less than 5% on {HOST.NAME}'
+    expression: '{Template OS Linux:kernel.all.cpu.idle.last()}<5 and {Template OS Linux:kernel.all.cpu.idle.last(#2)}<5'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_cpu_idle.asciidoc'
+    priority: high
+    description: 'CPU is less than 5% idle'
+
+  - name: 'CPU idle less than 10% on {HOST.NAME}'
+    expression: '{Template OS Linux:kernel.all.cpu.idle.last()}<10 and {Template OS Linux:kernel.all.cpu.idle.last(#2)}<10'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_cpu_idle.asciidoc'
+    priority: warn
+    description: 'CPU is less than 10% idle'
+    dependencies:
+    - 'CPU idle less than 5% on {HOST.NAME}'

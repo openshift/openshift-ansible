@@ -128,12 +128,12 @@ def get_status(status):
 
     return _status
 
-def get_app_ids(zapi, application_names):
+def get_app_ids(zapi, application_names, templateid):
     ''' get application ids from names
     '''
     app_ids = []
     for app_name in application_names:
-        content = zapi.get_content('application', 'get', {'search': {'name': app_name}})
+        content = zapi.get_content('application', 'get', {'filter': {'name': app_name}, 'templateids': templateid})
         if content.has_key('result'):
             app_ids.append(content['result'][0]['applicationid'])
     return app_ids
@@ -212,7 +212,7 @@ def main():
                   'ruleid': get_rule_id(zapi, module.params['discoveryrule_key'], template['templateid']),
                   'type': get_type(module.params['ztype']),
                   'value_type': get_value_type(module.params['value_type']),
-                  'applications': get_app_ids(zapi, module.params['applications']),
+                  'applications': get_app_ids(zapi, module.params['applications'], template['templateid']),
                   'description': module.params['description'],
                  }
 

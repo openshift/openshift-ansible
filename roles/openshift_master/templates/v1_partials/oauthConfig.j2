@@ -80,6 +80,7 @@ oauthConfig:
     provider:
 {{ identity_provider_config(identity_provider) }}
 {%- endfor %}
+  masterCA: ca.crt
   masterPublicURL: {{ openshift.master.public_api_url }}
   masterURL: {{ openshift.master.api_url }}
   sessionConfig:

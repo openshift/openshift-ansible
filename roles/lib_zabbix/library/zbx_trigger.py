@@ -74,6 +74,36 @@ def get_deps(zapi, deps):
 
     return results
 
+
+def get_trigger_status(inc_status):
+    ''' Determine the trigger's status
+        0 is enabled
+        1 is disabled
+    '''
+    r_status = 0
+    if inc_status == 'disabled':
+        r_status = 1
+
+    return r_status
+
+def get_template_id(zapi, template_name):
+    '''
+    get related templates
+    '''
+    template_ids = []
+    app_ids = {}
+    # Fetch templates by name
+    content = zapi.get_content('template',
+                               'get',
+                               {'search': {'host': template_name},
+                                'selectApplications': ['applicationid', 'name']})
+    if content.has_key('result'):
+        template_ids.append(content['result'][0]['templateid'])
+        for app in content['result'][0]['applications']:
+            app_ids[app['name']] = app['applicationid']
+
+    return template_ids, app_ids
+
 def main():
     '''
     Create a trigger in zabbix
@@ -103,7 +133,9 @@ def main():
             dependencies=dict(default=[], type='list'),
             priority=dict(default='avg', type='str'),
             url=dict(default=None, type='str'),
+            status=dict(default=None, type='str'),
             state=dict(default='present', type='str'),
+            template_name=dict(default=None, type='str'),
         ),
         #supports_check_mode=True
     )
@@ -119,11 +151,16 @@ def main():
     state = module.params['state']
     tname = module.params['name']
 
+    templateid = None
+    if module.params['template_name']:
+        templateid, _ = get_template_id(zapi, module.params['template_name'])
+
     content = zapi.get_content(zbx_class_name,
                                'get',
                                {'filter': {'description': tname},
                                 'expandExpression': True,
                                 'selectDependencies': 'triggerid',
+                                'templateids': templateid,
                                })
 
     # Get
@@ -145,6 +182,7 @@ def main():
                   'dependencies': get_deps(zapi, module.params['dependencies']),
                   'priority': get_priority(module.params['priority']),
                   'url': module.params['url'],
+                  'status': get_trigger_status(module.params['status']),
                  }
 
         # Remove any None valued params
@@ -156,6 +194,10 @@ def main():
         if not exists(content):
             # if we didn't find it, create it
             content = zapi.get_content(zbx_class_name, 'create', params)
+
+            if content.has_key('error'):
+                module.exit_json(failed=True, changed=True, results=content['error'], state="present")
+
             module.exit_json(changed=True, results=content['result'], state='present')
 
         ########

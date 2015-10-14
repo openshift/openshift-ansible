@@ -15,10 +15,17 @@ g_template_openshift_master:
 
   - key: openshift.master.user.pod.running.count
     description: Shows number of total user pods in a cluster
+  - key: openshift.master.user.count
+    description: Shows number of users in a cluster
     type: int
     applications:
     - Openshift Master
 
+  - key: openshift.master.pod.running.count
+    description: Shows number of pods running
+    type: int
+    applications:
+    - Openshift Master
 
   ztriggers:
   - name: 'Application creation has failed on {HOST.NAME}'
@@ -37,3 +44,9 @@ g_template_openshift_master:
     priority: high
  
  
+
+  - name: 'Number of users for Openshift Master on {HOST.NAME}'
+    expression: '{Template Openshift Master:openshift.master.user.count.last()}=0'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
+    priority: info
+

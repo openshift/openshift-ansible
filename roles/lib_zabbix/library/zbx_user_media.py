@@ -54,8 +54,8 @@ def get_mtype(zapi, mtype):
     except ValueError:
         pass
 
-    content = zapi.get_content('mediatype', 'get', {'search': {'description': mtype}})
-    if content.has_key['result'] and content['result']:
+    content = zapi.get_content('mediatype', 'get', {'filter': {'description': mtype}})
+    if content.has_key('result') and content['result']:
         return content['result'][0]['mediatypeid']
 
     return None
@@ -63,7 +63,7 @@ def get_mtype(zapi, mtype):
 def get_user(zapi, user):
     ''' Get userids from user aliases
     '''
-    content = zapi.get_content('user', 'get', {'search': {'alias': user}})
+    content = zapi.get_content('user', 'get', {'filter': {'alias': user}})
     if content['result']:
         return content['result'][0]
 
@@ -104,15 +104,17 @@ def find_media(medias, user_media):
     ''' Find the user media in the list of medias
     '''
     for media in medias:
-        if all([media[key] == user_media[key] for key in user_media.keys()]):
+        if all([media[key] == str(user_media[key]) for key in user_media.keys()]):
             return media
     return None
 
-def get_active(in_active):
+def get_active(is_active):
     '''Determine active value
+       0 - enabled
+       1 - disabled
     '''
     active = 1
-    if in_active:
+    if is_active:
         active = 0
 
     return active
@@ -128,6 +130,21 @@ def get_mediatype(zapi, mediatype, mediatype_desc):
 
     return mtypeid
 
+def preprocess_medias(zapi, medias):
+    ''' Insert the correct information when processing medias '''
+    for media in medias:
+        # Fetch the mediatypeid from the media desc (name)
+        if media.has_key('mediatype'):
+            media['mediatypeid'] = get_mediatype(zapi, mediatype=None, mediatype_desc=media.pop('mediatype'))
+
+        media['active'] = get_active(media.get('active'))
+        media['severity'] = int(get_severity(media['severity']))
+
+    return medias
+
+# Disabling branching as the logic requires branches.
+# I've also added a few safeguards which required more branches.
+# pylint: disable=too-many-branches
 def main():
     '''
     Ansible zabbix module for mediatype
@@ -166,11 +183,17 @@ def main():
 
     # User media is fetched through the usermedia.get
     zbx_user_query = get_zbx_user_query_data(zapi, module.params['login'])
-    content = zapi.get_content('usermedia', 'get', zbx_user_query)
-
+    content = zapi.get_content('usermedia', 'get',
+                               {'userids': [uid for user, uid in zbx_user_query.items()]})
+    #####
+    # Get
+    #####
     if state == 'list':
         module.exit_json(changed=False, results=content['result'], state="list")
 
+    ########
+    # Delete
+    ########
     if state == 'absent':
         if not exists(content) or len(content['result']) == 0:
             module.exit_json(changed=False, state="absent")
@@ -178,13 +201,14 @@ def main():
         if not module.params['login']:
             module.exit_json(failed=True, changed=False, results='Must specifiy a user login.', state="absent")
 
-        content = zapi.get_content(zbx_class_name, 'deletemedia', [content['result'][0][idname]])
+        content = zapi.get_content(zbx_class_name, 'deletemedia', [res[idname] for res in content['result']])
 
         if content.has_key('error'):
             module.exit_json(changed=False, results=content['error'], state="absent")
 
         module.exit_json(changed=True, results=content['result'], state="absent")
 
+    # Create and Update
     if state == 'present':
         active = get_active(module.params['active'])
         mtypeid = get_mediatype(zapi, module.params['mediatype'], module.params['mediatype_desc'])
@@ -197,13 +221,21 @@ def main():
                        'severity': int(get_severity(module.params['severity'])),
                        'period': module.params['period'],
                       }]
+        else:
+            medias = preprocess_medias(zapi, medias)
 
         params = {'users': [zbx_user_query],
                   'medias': medias,
                   'output': 'extend',
                  }
 
+        ########
+        # Create
+        ########
         if not exists(content):
+            if not params['medias']:
+                module.exit_json(changed=False, results=content['result'], state='present')
+
             # if we didn't find it, create it
             content = zapi.get_content(zbx_class_name, 'addmedia', params)
 
@@ -216,6 +248,9 @@ def main():
         # If user params exists, check to see if they already exist in zabbix
         # if they exist, then return as no update
         # elif they do not exist, then take user params only
+        ########
+        # Update
+        ########
         diff = {'medias': [], 'users': {}}
         _ = [diff['medias'].append(media) for media in params['medias'] if not find_media(content['result'], media)]
 
@@ -224,6 +259,9 @@ def main():
 
         for user in params['users']:
             diff['users']['userid'] = user['userid']
+
+        # Medias have no real unique key so therefore we need to make it like the incoming user's request
+        diff['medias'] = medias
 
         # We have differences and need to update
         content = zapi.get_content(zbx_class_name, 'updatemedia', diff)
