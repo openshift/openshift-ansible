@@ -31,6 +31,78 @@ g_template_openshift_master:
     applications:
     - Openshift Master
 
+  - key: openshift.master.etcd.create.success
+    description: Show number of successful create actions
+    type: int
+    applications:
+    - Openshift Master
+
+  - key: openshift.master.etcd.create.fail
+    description: Show number of failed create actions
+    type: int
+    applications:
+    - Openshift Master
+
+  - key: openshift.master.etcd.delete.success
+    description: Show number of successful delete actions
+    type: int
+    applications:
+    - Openshift Master
+
+  - key: openshift.master.etcd.delete.fail
+    description: Show number of failed delete actions
+    type: int
+    applications:
+    - Openshift Master
+
+  - key: openshift.master.etcd.get.success
+    description: Show number of successful get actions
+    type: int
+    applications:
+    - Openshift Master
+
+  - key: openshift.master.etcd.get.fail
+    description: Show number of failed get actions
+    type: int
+    applications:
+    - Openshift Master
+
+  - key: openshift.master.etcd.set.success
+    description: Show number of successful set actions
+    type: int
+    applications:
+    - Openshift Master
+
+  - key: openshift.master.etcd.set.fail
+    description: Show number of failed set actions
+    type: int
+    applications:
+    - Openshift Master
+
+  - key: openshift.master.etcd.update.success
+    description: Show number of successful update actions
+    type: int
+    applications:
+    - Openshift Master
+
+  - key: openshift.master.etcd.update.fail
+    description: Show number of failed update actions
+    type: int
+    applications:
+    - Openshift Master
+
+  - key: openshift.master.etcd.watchers
+    description: Show number of etcd watchers
+    type: int
+    applications:
+    - Openshift Master
+
+  - key: openshift.master.etcd.ping
+    description: etcd ping
+    type: int
+    applications:
+    - Openshift Master
+
   ztriggers:
   - name: 'Application creation has failed on {HOST.NAME}'
     expression: '{Template Openshift Master:create_app.last(#1)}=1 and {Template Openshift Master:create_app.last(#2)}=1'
@@ -56,3 +128,13 @@ g_template_openshift_master:
     expression: '{Template Openshift Master:openshift.project.counter.last()}=0'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
     priority: info
+
+  - name: 'Low number of etcd watchers on {HOST.NAME}'
+    expression: '{Template Openshift Master:openshift.master.etcd.watchers.last(#1)}<10 and {Template Openshift Master:openshift.master.etcd.watchers.last(#2)}<10'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_etcd.asciidoc'
+    priority: avg
+
+  - name: 'Etcd ping failed on {HOST.NAME}'
+    expression: '{Template Openshift Master:openshift.master.etcd.ping.last(#1)}=0 and {Template Openshift Master:openshift.master.etcd.ping.last(#2)}=0'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_etcd.asciidoc'
+    priority: high
