@@ -12,7 +12,15 @@ named 'flannel' available via yum, in version superior to 0.3.
 Role Variables
 --------------
 
-TODO
+| Name                | Default value                           | Description                                   |
+|---------------------|-----------------------------------------|-----------------------------------------------|
+| flannel_interface   | ansible_default_ipv4.interface          | interface to use for inter-host communication |
+| flannel_etcd_key    | /openshift.com/network                  | etcd prefix                                   |
+| etcd_hosts          | etcd_urls                               | a list of etcd endpoints                      |
+| etcd_conf_dir       | {{ openshift.common.config_base }}/node | SSL certificates directory                    |
+| etcd_peer_ca_file   | {{ etcd_conf_dir }}/ca.crt              | SSL CA to use for etcd                        |
+| etcd_peer_cert_file | Openshift SSL cert                      | SSL cert to use for etcd                      |
+| etcd_peer_key_file  | Openshift SSL key                       | SSL key to use for etcd                       |
 
 Dependencies
 ------------
@@ -24,7 +32,7 @@ Example Playbook
 
     - hosts: openshift_node
       roles:
-         - { flannel }
+        - { role: flannel, etcd_urls: ['https://127.0.0.1:2379'] }
 
 License
 -------
