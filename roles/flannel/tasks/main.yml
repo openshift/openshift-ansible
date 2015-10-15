@@ -38,7 +38,7 @@
 
 - name: Remove docker bridge ip
   sudo: true
-  shell: ip a del `ip a show docker0 | grep inet | awk '{print $2}'` dev docker0
+  shell: ip a del `ip a show docker0 | grep "inet[[:space:]]" | awk '{print $2}'` dev docker0
   notify:
     - restart docker
     - restart node
