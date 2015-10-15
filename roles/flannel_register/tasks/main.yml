@@ -11,4 +11,4 @@
 
 - name: Insert flannel configuration into etcd
   sudo: true
-  shell: 'curl -L --cacert "{{ etcd_peer_ca_file }}" --cert "{{ etcd_peer_cert_file }}" --key "{{ etcd_peer_key_file }}" "{{ etcd_hosts[0] }}/v2/keys{{ flannel_etcd_key }}/config" -XPUT --data-urlencode value@/etc/flannel/config.json'
+  command: 'curl -L --cacert "{{ etcd_peer_ca_file }}" --cert "{{ etcd_peer_cert_file }}" --key "{{ etcd_peer_key_file }}" "{{ etcd_hosts[0] }}/v2/keys{{ flannel_etcd_key }}/config" -XPUT --data-urlencode value@/etc/flannel/config.json'
