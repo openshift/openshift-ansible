@@ -27,6 +27,12 @@ g_template_openshift_master:
     applications:
     - Openshift Master
 
+  - key: openshift.master.pod.total.count
+    description: Shows number of pods total
+    type: int
+    applications:
+    - Openshift Master
+
   ztriggers:
   - name: 'Application creation has failed on {HOST.NAME}'
     expression: '{Template Openshift Master:create_app.last(#1)}=1 and {Template Openshift Master:create_app.last(#2)}=1'
