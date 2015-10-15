@@ -7,8 +7,8 @@ storage:
   cache:
     layerinfo: inmemory
   s3:
-    accesskey: {{ accesskey }}
-    secretkey: {{ secretkey }}
+    accesskey: {{ aws_access_key }}
+    secretkey: {{ aws_secret_key }}
     region: us-east-1
     bucket: {{ clusterid }}-docker
     encrypt: true
