@@ -10,11 +10,22 @@
   remote_user: root
   gather_facts: False
 
+  vars:
+    aws_access_key: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"
+    aws_secret_key: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}"
   tasks:
+
+  - name: Check for AWS creds
+    fail: 
+      msg: "Couldn't find {{ item }} creds in ENV"
+    when: "{{ item }} == ''"
+    with_items:
+    - aws_access_key
+    - aws_secret_key
 
   - name: Create S3 bucket
     local_action:
-      module: s3 bucket="{{ clusterid }}-docker" mode=create aws_access_key={{ accesskey|quote }} aws_secret_key={{ secretkey|quote }}
+      module: s3 bucket="{{ clusterid }}-docker" mode=create
 
   - name: Generate docker registry config
     template: src="s3_registry.j2" dest="/root/config.yml" owner=root mode=0600
