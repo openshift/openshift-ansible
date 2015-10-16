@@ -17,7 +17,7 @@ TODO
 Dependencies
 ------------
 
-None
+etcd-common
 
 Example Playbook
 ----------------
