@@ -6,8 +6,53 @@ g_template_openshift_master:
     applications:
     - Openshift Master
     key: create_app
+
+  - key: openshift.master.process.count
+    description: Shows number of master processes running
+    type: int
+    applications:
+    - Openshift Master
+
+  - key: openshift.master.user.count
+    description: Shows number of users in a cluster
+    type: int
+    applications:
+    - Openshift Master
+
+  - key: openshift.master.pod.running.count
+    description: Shows number of pods running
+    type: int
+    applications:
+    - Openshift Master
+  
+  - key: openshift.project.counter
+    description: Shows number of projects on a cluster
+    type: int
+    applications:
+    - Openshift Master
+
   ztriggers:
   - name: 'Application creation has failed on {HOST.NAME}'
     expression: '{Template Openshift Master:create_app.last(#1)}=1 and {Template Openshift Master:create_app.last(#2)}=1'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_create_app.asciidoc'
     priority: avg
+
+  - name: 'Openshift Master process not running on {HOST.NAME}'
+    expression: '{Template Openshift Master:openshift.master.process.count.max(#3)}<1'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
+    priority: high
+
+  - name: 'Too many Openshift Master processes running on {HOST.NAME}'
+    expression: '{Template Openshift Master:openshift.master.process.count.min(#3)}>1'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
+    priority: high
+
+  - name: 'Number of users for Openshift Master on {HOST.NAME}'
+    expression: '{Template Openshift Master:openshift.master.user.count.last()}=0'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
+    priority: info
+
+  - name: 'There are no projects running on {HOST.NAME}'
+    expression: '{Template Openshift Master:openshift.project.counter.last()}=0'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
+    priority: info

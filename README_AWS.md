@@ -154,18 +154,10 @@ Note: If no deployment type is specified, then the default is origin.
 
 
 ## Post-ansible steps
-Create the default router
--------------------------
-On the master host:
-```sh
-oadm router --create=true \
-  --credentials=/etc/openshift/master/openshift-router.kubeconfig
-```
 
-Create the default docker-registry
-----------------------------------
-On the master host:
-```sh
-oadm registry --create=true \
-  --credentials=/etc/openshift/master/openshift-registry.kubeconfig
-```
+You should now be ready to follow the **What's Next?** section of the advanced installation guide to deploy your router, registry, and other components.
+
+Refer to the advanced installation guide for your deployment type:
+
+* [OpenShift Enterprise](https://docs.openshift.com/enterprise/3.0/install_config/install/advanced_install.html#what-s-next)
+* [OpenShift Origin](https://docs.openshift.org/latest/install_config/install/advanced_install.html#what-s-next)

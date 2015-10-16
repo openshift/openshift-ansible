@@ -8,7 +8,7 @@
   <!-- TODO: query for first available virbr interface available -->
   <bridge name='virbr3' stp='on' delay='0'/>
   <!-- TODO: make overridable -->
-  <domain name='example.com'/>
+  <domain name='example.com' localOnly='yes' />
   <dns>
     <!-- TODO: automatically add host entries -->
   </dns>
