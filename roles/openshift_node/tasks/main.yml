@@ -39,6 +39,15 @@
   yum: pkg={{ openshift.common.service_type }}-node{{ openshift_version  }},tuned-profiles-{{ openshift.common.service_type }}-node{{ openshift_version  }} state=present
   register: node_install_result
 
+# TODO: allow for storage pre-requisites to be optional
+- name: Install storage plugin pre-requisites
+  yum:
+    pkg: "{{ item }}"
+    state: installed
+  with_items:
+  - glusterfs-fuse
+  - ceph-common
+
 - name: Install sdn-ovs package
   yum: pkg={{ openshift.common.service_type }}-sdn-ovs{{ openshift_version }} state=present
   register: sdn_install_result
@@ -124,9 +133,15 @@
   notify:
     - restart docker
 
-- name: Allow NFS access for VMs
-  seboolean: name=virt_use_nfs state=yes persistent=yes
+- name: Set sebooleans to allow storage plugin access from containers
+  seboolean:
+    name: "{{ item }}"
+    state: yes
+    persistent: yes
   when: ansible_selinux and ansible_selinux.status == "enabled"
+  with_items:
+  - virt_use_nfs
+  - virt_use_fusefs
 
 - name: Start and enable node
   service: name={{ openshift.common.service_type }}-node enabled=yes state=started
