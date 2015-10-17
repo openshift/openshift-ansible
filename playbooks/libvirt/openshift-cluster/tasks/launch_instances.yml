@@ -64,7 +64,7 @@
   register: nb_allocated_ips
   until: nb_allocated_ips.stdout == '{{ instances | length }}'
   retries: 60
-  delay: 1
+  delay: 3
   when: instances | length != 0
 
 - name: Collect IP addresses of the VMs
