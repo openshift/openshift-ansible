@@ -5,7 +5,7 @@ flannel_subnet_len: "{{ subnet_len | default(24, true) }}"
 flannel_etcd_key: /openshift.com/network
 etcd_hosts: "{{ etcd_urls }}"
 etcd_conf_dir: "{{ openshift.common.config_base }}/master"
-etcd_peer_ca_file: "{{ etcd_conf_dir }}/ca.crt"
+etcd_peer_ca_file: "{{ etcd_conf_dir + '/ca.crt' if (openshift.master.embedded_etcd | bool) else etcd_conf_dir + '/master.etcd-ca.crt' }}"
 etcd_peer_cert_file: "{{ etcd_conf_dir }}/master.etcd-client.crt"
 etcd_peer_key_file: "{{ etcd_conf_dir }}/master.etcd-client.key"
 

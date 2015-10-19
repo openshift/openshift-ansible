@@ -38,6 +38,21 @@
       node_subdir: node-{{ openshift.common.hostname }}
       config_dir: "{{ openshift.common.config_base }}/generated-configs/node-{{ openshift.common.hostname }}"
       node_cert_dir: "{{ openshift.common.config_base }}/node"
+  - name: Check status of flannel external etcd certificates
+    stat:
+      path: "{{ openshift.common.config_base }}/node/{{ item }}"
+    with_items:
+    - node.etcd-client.crt
+    - node.etcd-ca.crt
+    register: g_external_etcd_flannel_cert_stat_result
+  - set_fact:
+      etcd_client_flannel_certs_missing: "{{ g_external_etcd_flannel_cert_stat_result.results
+                                             | map(attribute='stat.exists')
+                                             | list | intersect([false])}}"
+      etcd_cert_subdir: openshift-node-{{ openshift.common.hostname }}
+      etcd_cert_config_dir: "{{ openshift.common.config_base }}/node"
+      etcd_cert_prefix: node.etcd-
+    when: groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config
 
 - name: Create temp directory for syncing certs
   hosts: localhost
@@ -49,6 +64,60 @@
     local_action: command mktemp -d /tmp/openshift-ansible-XXXXXXX
     register: mktemp
     changed_when: False
+
+- name: Configure flannel etcd certificates
+  hosts: oo_first_etcd
+  vars:
+    etcd_generated_certs_dir: /etc/etcd/generated_certs
+    etcd_needing_client_certs: "{{ hostvars
+                                   | oo_select_keys(groups['oo_nodes_to_config'])
+                                   | oo_filter_list(filter_attr='etcd_client_flannel_certs_missing') }}"
+    sync_tmpdir: "{{ hostvars.localhost.mktemp.stdout }}"
+  pre_tasks:
+  roles:
+  - role: etcd_certificates
+  post_tasks:
+  - name: Create a tarball of the etcd flannel certs
+    command: >
+      tar -czvf {{ etcd_generated_certs_dir }}/{{ item.etcd_cert_subdir }}.tgz
+        -C {{ etcd_generated_certs_dir }}/{{ item.etcd_cert_subdir }} .
+    args:
+      creates: "{{ etcd_generated_certs_dir }}/{{ item.etcd_cert_subdir }}.tgz"
+    with_items: etcd_needing_client_certs
+  - name: Retrieve the etcd cert tarballs
+    fetch:
+      src: "{{ etcd_generated_certs_dir }}/{{ item.etcd_cert_subdir }}.tgz"
+      dest: "{{ sync_tmpdir }}/"
+      flat: yes
+      fail_on_missing: yes
+      validate_checksum: yes
+    with_items: etcd_needing_client_certs
+
+- name: Copy the external etcd flannel certs to the nodes
+  hosts: oo_nodes_to_config
+  vars:
+    sync_tmpdir: "{{ hostvars.localhost.mktemp.stdout }}"
+  tasks:
+  - name: Ensure certificate directory exists
+    file:
+      path: "{{ openshift.common.config_base }}/node"
+      state: directory
+    when: etcd_client_flannel_certs_missing is defined and etcd_client_flannel_certs_missing
+  - name: Unarchive the tarball on the master
+    unarchive:
+      src: "{{ sync_tmpdir }}/{{ etcd_cert_subdir }}.tgz"
+      dest: "{{ etcd_cert_config_dir }}"
+    when: etcd_client_flannel_certs_missing is defined and etcd_client_flannel_certs_missing
+  - file:
+      path: "{{ etcd_cert_config_dir }}/{{ item }}"
+      owner: root
+      group: root
+      mode: 0600
+    with_items:
+    - node.etcd-client.crt
+    - node.etcd-client.key
+    - node.etcd-ca.crt
+    when: etcd_client_flannel_certs_missing is defined and etcd_client_flannel_certs_missing
 
 - name: Create node certificates
   hosts: oo_first_master
@@ -85,6 +154,7 @@
     sync_tmpdir: "{{ hostvars.localhost.mktemp.stdout }}"
     openshift_node_master_api_url: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_url }}"
     etcd_urls: "{{ hostvars[groups.oo_first_master.0].openshift.master.etcd_urls }}"
+    embedded_etcd: "{{ hostvars[groups.oo_first_master.0].openshift.master.embedded_etcd }}"
   pre_tasks:
   - name: Ensure certificate directory exists
     file:
