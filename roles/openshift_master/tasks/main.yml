@@ -169,13 +169,17 @@
   shell: echo {{ openshift_master_cluster_password | quote }} | passwd --stdin hacluster
   when: install_result | changed
 
+- name: Lookup default group for ansible_ssh_user
+  command: "/usr/bin/id -g {{ ansible_ssh_user }}"
+  register: _ansible_ssh_user_gid
+
 - name: Create the client config dir(s)
   file:
     path: "~{{ item }}/.kube"
     state: directory
     mode: 0700
     owner: "{{ item }}"
-    group: "{{ item }}"
+    group: "{{ 'root' if item == 'root' else _ansible_ssh_user_gid.stdout  }}"
   with_items:
   - root
   - "{{ ansible_ssh_user }}"
@@ -196,7 +200,7 @@
     state: file
     mode: 0700
     owner: "{{ item }}"
-    group: "{{ item }}"
+    group: "{{ 'root' if item == 'root' else _ansible_ssh_user_gid.stdout  }}"
   with_items:
   - root
   - "{{ ansible_ssh_user }}"
