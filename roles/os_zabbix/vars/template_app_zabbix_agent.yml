@@ -6,14 +6,14 @@ g_template_app_zabbix_agent:
      applications:
      - Zabbix agent
      value_type: character
-     zabbix_type: '0'
+     zabbix_type: 0
 
    - key: agent.ping
      applications:
      - Zabbix agent
      description: The agent always returns 1 for this item. It could be used in combination with nodata() for availability check.
      value_type: int
-     zabbix_type: '0'
+     zabbix_type: 0
 
    ztriggers:
    - name: '[Reboot] Zabbix agent on {HOST.NAME} is unreachable for 15 minutes'

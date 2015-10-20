@@ -125,6 +125,7 @@ def main():
             template_name=dict(default=None, type='str'),
             zabbix_type=dict(default=2, type='int'),
             value_type=dict(default='int', type='str'),
+            interval=dict(default=60, type='int'),
             multiplier=dict(default=None, type='str'),
             description=dict(default=None, type='str'),
             units=dict(default=None, type='str'),
@@ -189,6 +190,7 @@ def main():
                   'multiplier': use_multiplier,
                   'description': module.params['description'],
                   'units': module.params['units'],
+                  'delay': module.params['interval'],
                  }
 
         # Remove any None valued params
