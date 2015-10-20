@@ -244,6 +244,8 @@ g_template_app_zabbix_server:
      units: ''
      value_type: float
      zabbix_type: 5
+     delta: 1 # speed per second
+
    ztriggers:
    - description: "There has been unexpected output while running the housekeeping script\
        \ on the Zabbix. There are only three kinds of lines we expect to see in the output,\

@@ -40,6 +40,7 @@
     applications: "{{ item.applications }}"
     zabbix_type: "{{ item.zabbix_type | default(2, True) }}"
     interval: "{{ item.interval | default(60, True) }}"
+    delta: "{{ item.delta | default(0, True) }}"
   with_items: template.zitems
   register: created_items
   when: template.zitems is defined
