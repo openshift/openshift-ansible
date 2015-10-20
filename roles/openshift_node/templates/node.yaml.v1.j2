@@ -12,12 +12,16 @@ kind: NodeConfig
 kubeletArguments: {{ openshift.node.kubelet_args | to_json }}
 {% endif %}
 masterKubeConfig: system:node:{{ openshift.common.hostname }}.kubeconfig
+{% if openshift.common.use_openshift_sdn %}
 networkPluginName: {{ openshift.common.sdn_network_plugin_name }}
+{% endif %}
 # networkConfig struct introduced in origin 1.0.6 and OSE 3.0.2 which
 # deprecates networkPluginName above. The two should match.
 networkConfig:
    mtu: {{ openshift.node.sdn_mtu }}
+{% if openshift.common.use_openshift_sdn %}
    networkPluginName: {{ openshift.common.sdn_network_plugin_name }}
+{% endif %}
 nodeName: {{ openshift.common.hostname | lower }}
 podManifestConfig:
 servingInfo:
