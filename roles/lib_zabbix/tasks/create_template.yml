@@ -38,6 +38,8 @@
     units: "{{ item.units | default('', True) }}"
     template_name: "{{ template.name }}"
     applications: "{{ item.applications }}"
+    zabbix_type: "{{ item.zabbix_type | default(2, True) }}"
+    interval: "{{ item.interval | default(60, True) }}"
   with_items: template.zitems
   register: created_items
   when: template.zitems is defined
