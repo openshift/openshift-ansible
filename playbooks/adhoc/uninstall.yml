@@ -1,0 +1,111 @@
+# This deletes *ALL* Origin, Atomic Enterprise Platform and OpenShift
+# Enterprise content installed by ansible.  This includes:
+# 
+#    configuration
+#    containers
+#    example templates and imagestreams
+#    images
+#    RPMs
+---
+- hosts:
+    - OSEv3:children
+
+  sudo: yes
+
+  tasks:
+    - service: name={{ item }} state=stopped
+      with_items:
+        - openvswitch
+        - origin-master
+        - origin-node
+        - atomic-openshift-master
+        - atomic-openshift-node
+        - openshift-master
+        - openshift-node
+        - atomic-enterprise-master
+        - atomic-enterprise-node
+        - etcd
+
+    - yum: name={{ item }} state=absent
+      with_items:
+        - openvswitch
+        - etcd
+        - origin
+        - origin-master
+        - origin-node
+        - origin-sdn-ovs
+        - tuned-profiles-origin-node
+        - atomic-openshift
+        - atomic-openshift-master
+        - atomic-openshift-node
+        - atomic-openshift-sdn-ovs
+        - tuned-profiles-atomic-openshift-node
+        - atomic-enterprise
+        - atomic-enterprise-master
+        - atomic-enterprise-node
+        - atomic-enterprise-sdn-ovs
+        - tuned-profiles-atomic-enterprise-node
+        - openshift
+        - openshift-master
+        - openshift-node
+        - openshift-sdn-ovs
+        - tuned-profiles-openshift-node
+
+    - shell: systemctl reset-failed
+      changed_when: False
+
+    - shell: systemctl daemon-reload
+      changed_when: False
+
+    - shell: find /var/lib/origin/openshift.local.volumes -type d -exec umount {} \; 2>/dev/null || true
+      changed_when: False
+
+    - shell: find /var/lib/atomic-enterprise/openshift.local.volumes -type d -exec umount {} \; 2>/dev/null || true
+      changed_when: False
+
+    - shell: find /var/lib/openshift/openshift.local.volumes -type d -exec umount {} \; 2>/dev/null || true
+      changed_when: False
+
+    - shell: docker rm -f "{{ item }}"-master "{{ item }}"-node 
+      changed_when: False
+      failed_when: False
+      with_items:
+        - openshift-enterprise
+        - atomic-enterprise
+        - origin
+
+    - shell: docker images | grep {{ item }} | awk '{ print $3 }'
+      changed_when: False
+      failed_when: False
+      register: images_to_delete
+      with_items:
+        - registry.access.redhat.com/openshift3
+        - registry.access.redhat.com/aep3
+        - docker.io/openshift
+
+    - shell:  "docker rmi {{ item.stdout_lines | join(' ') }}"
+      changed_when: False
+      failed_when: False
+      with_items: "{{ images_to_delete.results }}"
+
+    - file: path={{ item }} state=absent
+      with_items:
+        - /etc/atomic-enterprise
+        - /etc/etcd
+        - /etc/openshift
+        - /etc/openshift-sdn
+        - /etc/origin
+        - /etc/sysconfig/atomic-enterprise-master
+        - /etc/sysconfig/atomic-enterprise-node
+        - /etc/sysconfig/atomic-openshift-master
+        - /etc/sysconfig/atomic-openshift-node
+        - /etc/sysconfig/openshift-master
+        - /etc/sysconfig/openshift-node
+        - /etc/sysconfig/origin-master
+        - /etc/sysconfig/origin-node
+        - /root/.kube
+        - /usr/share/openshift/examples
+        - /var/lib/atomic-enterprise
+        - /var/lib/etcd
+        - /var/lib/openshift
+        - /var/lib/origin
