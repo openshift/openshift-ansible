@@ -1,0 +1,5 @@
+---
+- name: "Testing with this template"
+  hosts: localhost
+
+
