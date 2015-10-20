@@ -15,3 +15,4 @@
   yum:
     pkg: bash-completion
     state: installed
+  when: not is_atomic

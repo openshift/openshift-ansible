@@ -502,7 +502,8 @@ def set_sdn_facts_if_unset(facts):
     if 'common' in facts:
         use_sdn = facts['common']['use_openshift_sdn']
         if not (use_sdn == '' or isinstance(use_sdn, bool)):
-            facts['common']['use_openshift_sdn'] = bool(strtobool(str(use_sdn)))
+            use_sdn = bool(strtobool(str(use_sdn)))
+            facts['common']['use_openshift_sdn'] = use_sdn
         if 'sdn_network_plugin_name' not in facts['common']:
             plugin = 'redhat/openshift-ovs-subnet' if use_sdn else ''
             facts['common']['sdn_network_plugin_name'] = plugin
@@ -787,6 +788,7 @@ class OpenShiftFacts(object):
         facts = set_sdn_facts_if_unset(facts)
         facts = set_deployment_facts_if_unset(facts)
         facts = set_aggregate_facts(facts)
+        facts = self.init_in_docker_facts(facts)
         return dict(openshift=facts)
 
     def get_defaults(self, roles):
@@ -810,8 +812,10 @@ class OpenShiftFacts(object):
         common = dict(use_openshift_sdn=True, ip=ip_addr, public_ip=ip_addr,
                       deployment_type='origin', hostname=hostname,
                       public_hostname=hostname)
+
         common['client_binary'] = 'oc' if os.path.isfile('/usr/bin/oc') else 'osc'
         common['admin_binary'] = 'oadm' if os.path.isfile('/usr/bin/oadm') else 'osadm'
+
         defaults['common'] = common
 
         if 'master' in roles:
@@ -948,6 +952,28 @@ class OpenShiftFacts(object):
 
         self.changed = changed
         return new_local_facts
+
+    def init_in_docker_facts(self, facts):
+        facts['is_atomic'] = os.path.isfile('/run/ostree-booted')
+
+        docker = dict()
+        docker['image_name'] = 'openshift/origin'
+        # TODO: figure out right way to set the version
+        docker['image_version'] = 'latest'
+        docker['image'] = "%s:%s" % (docker['image_name'], docker['image_version'])
+
+        # shared /tmp/openshift vol is for file exchange with ansible
+        # --privileged is required to read the config dir
+        # --net host to access openshift from the container
+        # maybe -v /var/run/docker.sock:/var/run/docker.sock is required as well
+        docker['runner'] = "docker run --rm --privileged --net host -v /tmp/openshift:/tmp/openshift -v {datadir}:{datadir} -v {confdir}:{confdir} -e KUBECONFIG={confdir}/master/admin.kubeconfig {image}".format(confdir=facts['common']['config_base'], datadir=facts['common']['data_dir'], image=docker['image'])
+
+        if facts['is_atomic']:
+            facts['common']['client_binary'] = '%s cli' % docker['runner']
+            facts['common']['admin_binary'] = '%s admin' % docker['runner']
+
+        facts['docker'] = docker
+        return facts
 
 
 def main():

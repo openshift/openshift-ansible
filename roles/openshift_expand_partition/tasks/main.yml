@@ -1,6 +1,14 @@
 ---
 - name: Ensure growpart is installed
   yum: pkg=cloud-utils-growpart state=present
+  when: not is_atomic
+
+- name: Determine if growpart is installed
+  command: "rpm -q cloud-utils-growpart"
+  register: has_growpart
+  failed_when: "has_growpart.cr != 0 and 'package cloud-utils-growpart is not installed' not in has_growpart.stdout"
+  changed_when: false
+  when: is_atomic
 
 - name: Grow the partitions
   command: "growpart {{oep_drive}} {{oep_partition}}"

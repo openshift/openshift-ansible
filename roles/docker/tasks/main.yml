@@ -2,6 +2,7 @@
 # tasks file for docker
 - name: Install docker
   yum: pkg=docker
+  when: not is_atomic
 
 - name: enable and start the docker service
   service: name=docker enabled=yes state=started

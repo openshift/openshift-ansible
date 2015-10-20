@@ -1,8 +1,8 @@
 ---
 - name: Copy openshift examples
   copy:
-    src: examples
-    dest: /usr/share/openshift
+    src: examples/
+    dest: "{{ examples_base }}"
 
 # RHEL and Centos image streams are mutually exclusive
 - name: Import RHEL streams

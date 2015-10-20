@@ -1,4 +1,8 @@
 ---
+- fail:
+    msg: "Zabbix config is not yet supported on atomic hosts"
+  when: is_atomic
+
 - name: Main List all templates
   zbx_template:
     zbx_server: "{{ ozb_server }}"

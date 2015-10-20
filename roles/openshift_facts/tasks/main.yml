@@ -8,3 +8,6 @@
 
 - name: Gather Cluster facts
   openshift_facts:
+
+- set_fact:
+    is_atomic: "{{openshift.is_atomic}}"

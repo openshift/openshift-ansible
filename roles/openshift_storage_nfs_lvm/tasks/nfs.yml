@@ -1,6 +1,7 @@
 ---
 - name: Install NFS server
   yum: name=nfs-utils state=present
+  when: not is_atomic
 
 - name: Start rpcbind
   service: name=rpcbind state=started enabled=yes
