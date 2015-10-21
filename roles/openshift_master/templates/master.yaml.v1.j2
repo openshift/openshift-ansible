@@ -74,6 +74,9 @@ kubernetesMasterConfig:
   masterCount: 1
   masterIP: ""
   podEvictionTimeout: ""
+  proxyClientInfo:
+    certFile: master.proxy-client.crt
+    keyFile: master.proxy-client.key
   schedulerConfigFile: {{ openshift_master_scheduler_conf }}
   servicesNodePortRange: ""
   servicesSubnet: {{ openshift.master.portal_net }}

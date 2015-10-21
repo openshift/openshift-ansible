@@ -137,6 +137,7 @@
       openshift_master_certs_no_etcd:
       - admin.crt
       - master.kubelet-client.crt
+      - master.proxy-client.crt
       - master.server.crt
       - openshift-master.crt
       - openshift-registry.crt
@@ -144,6 +145,7 @@
       - etcd.server.crt
       openshift_master_certs_etcd:
       - master.etcd-client.crt
+
   - set_fact:
       openshift_master_certs: "{{ (openshift_master_certs_no_etcd | union(openshift_master_certs_etcd)) if (groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config) else openshift_master_certs_no_etcd }}"
 
