@@ -2,6 +2,21 @@
 - name: Set master facts and determine if external etcd certs need to be generated
   hosts: oo_masters_to_config
   pre_tasks:
+  - name: Check for RPM generated config marker file .config_managed
+    stat:
+      path: /etc/origin/.config_managed
+    register: rpmgenerated_config
+
+  - name: Remove RPM generated config files if present
+    file:
+      path: "/etc/origin/{{ item }}"
+      state: absent
+    when: rpmgenerated_config.stat.exists == true and deployment_type in ['openshift-enterprise', 'atomic-enterprise']
+    with_items:
+    - master
+    - node
+    - .config_managed
+
   - set_fact:
       openshift_master_etcd_port: "{{ (etcd_client_port | default('2379')) if (groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config) else none }}"
       openshift_master_etcd_hosts: "{{ hostvars
