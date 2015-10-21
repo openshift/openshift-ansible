@@ -15,41 +15,47 @@
   tasks:
     - service: name={{ item }} state=stopped
       with_items:
-        - openvswitch
-        - origin-master
-        - origin-node
-        - atomic-openshift-master
-        - atomic-openshift-node
-        - openshift-master
-        - openshift-node
         - atomic-enterprise-master
         - atomic-enterprise-node
+        - atomic-openshift-master
+        - atomic-openshift-master-api
+        - atomic-openshift-master-controllers
+        - atomic-openshift-node
         - etcd
+        - openshift-master
+        - openshift-master-api
+        - openshift-master-controllers
+        - openshift-node
+        - openvswitch
+        - origin-master
+        - origin-master-api
+        - origin-master-controllers
+        - origin-node
 
     - yum: name={{ item }} state=absent
       with_items:
-        - openvswitch
-        - etcd
-        - origin
-        - origin-master
-        - origin-node
-        - origin-sdn-ovs
-        - tuned-profiles-origin-node
-        - atomic-openshift
-        - atomic-openshift-master
-        - atomic-openshift-node
-        - atomic-openshift-sdn-ovs
-        - tuned-profiles-atomic-openshift-node
         - atomic-enterprise
         - atomic-enterprise-master
         - atomic-enterprise-node
         - atomic-enterprise-sdn-ovs
-        - tuned-profiles-atomic-enterprise-node
+        - atomic-openshift
+        - atomic-openshift-master
+        - atomic-openshift-node
+        - atomic-openshift-sdn-ovs
+        - etcd
         - openshift
         - openshift-master
         - openshift-node
         - openshift-sdn-ovs
+        - openvswitch
+        - origin
+        - origin-master
+        - origin-node
+        - origin-sdn-ovs
+        - tuned-profiles-atomic-enterprise-node
+        - tuned-profiles-atomic-openshift-node
         - tuned-profiles-openshift-node
+        - tuned-profiles-origin-node
 
     - shell: systemctl reset-failed
       changed_when: False
