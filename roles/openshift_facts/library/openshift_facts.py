@@ -609,8 +609,9 @@ def get_openshift_version():
 
     if os.path.isfile('/usr/bin/openshift'):
         _, output, _ = module.run_command(['/usr/bin/openshift', 'version'])
-        versions = dict(e.split(' v') for e in output.splitlines())
-        version = versions.get('openshift', '')
+        for line in output.splitlines():
+            if line.startswith("openshift"):
+                version = line.split(' v')[1]
 
         #TODO: acknowledge the possility of a containerized install
     return version
