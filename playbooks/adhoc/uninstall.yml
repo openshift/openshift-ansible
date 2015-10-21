@@ -39,6 +39,7 @@
         - atomic-enterprise-node
         - atomic-enterprise-sdn-ovs
         - atomic-openshift
+        - atomic-openshift-clients
         - atomic-openshift-master
         - atomic-openshift-node
         - atomic-openshift-sdn-ovs
@@ -46,6 +47,7 @@
         - openshift
         - openshift-master
         - openshift-node
+        - openshift-sdn
         - openshift-sdn-ovs
         - openvswitch
         - origin
@@ -80,6 +82,20 @@
         - atomic-enterprise
         - origin
 
+    - shell: docker ps -a | grep Exited | grep "{{ item }}" | awk '{print $1}'
+      changed_when: False
+      failed_when: False
+      register: exited_containers_to_delete
+      with_items:
+        - aep3/aep
+        - openshift3/ose
+        - openshift/origin
+
+    - shell: "docker rm {{ item.stdout_lines | join(' ') }}"
+      changed_when: False
+      failed_when: False
+      with_items: "{{ exited_containers_to_delete.results }}"
+
     - shell: docker images | grep {{ item }} | awk '{ print $3 }'
       changed_when: False
       failed_when: False
@@ -89,7 +105,7 @@
         - registry.access.redhat.com/aep3
         - docker.io/openshift
 
-    - shell:  "docker rmi {{ item.stdout_lines | join(' ') }}"
+    - shell:  "docker rmi -f {{ item.stdout_lines | join(' ') }}"
       changed_when: False
       failed_when: False
       with_items: "{{ images_to_delete.results }}"
