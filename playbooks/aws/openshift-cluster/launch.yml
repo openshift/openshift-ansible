@@ -55,9 +55,4 @@
     when: master_names is defined and master_names.0 is defined
 
 - include: update.yml
-
-- include: ../../common/openshift-cluster/create_services.yml
-  vars:
-     g_svc_master: "{{ service_master }}"
-
 - include: list.yml

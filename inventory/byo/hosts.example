@@ -75,6 +75,10 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # default project node selector
 #osm_default_node_selector='region=primary'
 
+# default selectors for router and registry services
+# openshift_router_selector='region=infra'
+# openshift_registry_selector='region=infra'
+
 # set RPM version for debugging purposes
 #openshift_pkg_version=-3.0.0.0
 

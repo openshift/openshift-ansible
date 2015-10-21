@@ -52,8 +52,11 @@
       default_subdomain: "{{ osm_default_subdomain | default(None) }}"
       custom_cors_origins: "{{ osm_custom_cors_origins | default(None) }}"
       default_node_selector: "{{ osm_default_node_selector | default(None) }}"
+      router_selector: "{{ openshift_router_selector | default(None) }}"
+      registry_selector: "{{ openshift_registry_selector | default(None) }}"
       api_server_args: "{{ osm_api_server_args | default(None) }}"
       controller_args: "{{ osm_controller_args | default(None) }}"
+      infra_nodes: "{{ num_infra | default(None) }}"
 
 - name: Install Master package
   yum: pkg={{ openshift.common.service_type }}-master{{ openshift_version  }} state=present

@@ -1,6 +1,9 @@
-#!/usr/bin/python
+#!/usr/bin/python # pylint: disable=too-many-lines
 # -*- coding: utf-8 -*-
 # vim: expandtab:tabstop=4:shiftwidth=4
+# Reason: Disable pylint too-many-lines because we don't want to split up this file.
+# Status: Permanently disabled to keep this module as self-contained as possible.
+
 """Ansible module for retrieving and setting openshift related facts"""
 
 DOCUMENTATION = '''
@@ -316,6 +319,29 @@ def set_node_schedulability(facts):
                 facts['node']['schedulable'] = False
             else:
                 facts['node']['schedulable'] = True
+    return facts
+
+def set_master_selectors(facts):
+    """ Set selectors facts if not already present in facts dict
+        Args:
+            facts (dict): existing facts
+        Returns:
+            dict: the facts dict updated with the generated selectors
+            facts if they were not already present
+
+    """
+    if 'master' in facts:
+        if 'infra_nodes' in facts['master']:
+            deployment_type = facts['common']['deployment_type']
+            if deployment_type == 'online':
+                selector = "type=infra"
+            else:
+                selector = "region=infra"
+
+            if 'router_selector' not in facts['master']:
+                facts['master']['router_selector'] = selector
+            if 'registry_selector' not in facts['master']:
+                facts['master']['registry_selector'] = selector
     return facts
 
 def set_metrics_facts_if_unset(facts):
@@ -782,6 +808,7 @@ class OpenShiftFacts(object):
         facts = set_url_facts_if_unset(facts)
         facts = set_fluentd_facts_if_unset(facts)
         facts = set_node_schedulability(facts)
+        facts = set_master_selectors(facts)
         facts = set_metrics_facts_if_unset(facts)
         facts = set_identity_providers_if_unset(facts)
         facts = set_sdn_facts_if_unset(facts)

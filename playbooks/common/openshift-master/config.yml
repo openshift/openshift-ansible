@@ -254,3 +254,10 @@
 
   roles:
   - openshift_serviceaccounts
+
+- name: Create services
+  hosts: oo_first_master
+
+  roles:
+    - openshift_router
+#    - openshift_registry
