@@ -1,6 +1,7 @@
 ---
 - name: restart node
   service: name={{ openshift.common.service_type }}-node state=restarted
+  when: not skip_node_restart | default(false)
 
 - name: restart docker
   service: name=docker state=restarted
