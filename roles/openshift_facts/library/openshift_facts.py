@@ -1,4 +1,5 @@
-#!/usr/bin/python # pylint: disable=too-many-lines
+#!/usr/bin/python
+# pylint: disable=too-many-lines
 # -*- coding: utf-8 -*-
 # vim: expandtab:tabstop=4:shiftwidth=4
 # Reason: Disable pylint too-many-lines because we don't want to split up this file.
