@@ -96,6 +96,7 @@
 
     - file: path={{ item }} state=absent
       with_items:
+        - /etc/ansible/facts.d/openshift.fact
         - /etc/atomic-enterprise
         - /etc/etcd
         - /etc/openshift
