@@ -61,7 +61,7 @@
         --exclude-groups=system:unauthenticated
         --exclude-users=system:anonymous
         --additive-only=true --confirm
-  when: ( _new_version.stdout | version_compare('1.0.6', '>') and _new_version.stdout | version_compare('3.0','<') ) or _new_version.stdout | version_compare('3.0.2','>')
+      when: ( _new_version.stdout | version_compare('1.0.6', '>') and _new_version.stdout | version_compare('3.0','<') ) or _new_version.stdout | version_compare('3.0.2','>')
 
 - name: Upgrade default router
   hosts: oo_first_master
