@@ -248,7 +248,7 @@ g_template_os_linux:
   - name: 'CPU idle less than 5% on {HOST.NAME}'
     expression: '{Template OS Linux:kernel.all.cpu.idle.last()}<5 and {Template OS Linux:kernel.all.cpu.idle.last(#2)}<5'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_cpu_idle.asciidoc'
-    priority: high
+    priority: average
     description: 'CPU is less than 5% idle'
 
   - name: 'CPU idle less than 10% on {HOST.NAME}'
