@@ -1,6 +1,6 @@
 Summary:       OpenShift Ansible Inventories
 Name:          openshift-ansible-inventory
-Version:       0.0.8
+Version:       0.0.9
 Release:       1%{?dist}
 License:       ASL 2.0
 URL:           https://github.com/openshift/openshift-ansible
@@ -36,6 +36,32 @@ cp -p gce/hosts/gce.py %{buildroot}/usr/share/ansible/inventory/gce
 /usr/share/ansible/inventory/gce/gce.py*
 
 %changelog
+* Thu Aug 20 2015 Kenny Woodson <kwoodson@redhat.com> 0.0.9-1
+- Merge pull request #408 from sdodson/docker-buildvm (bleanhar@redhat.com)
+- Merge pull request #428 from jtslear/issue-383
+  (twiest@users.noreply.github.com)
+- Merge pull request #407 from aveshagarwal/ae-ansible-merge-auth
+  (bleanhar@redhat.com)
+- Enable htpasswd by default in the example hosts file. (avagarwa@redhat.com)
+- Add support for setting default node selector (jdetiber@redhat.com)
+- Merge pull request #429 from spinolacastro/custom_cors (bleanhar@redhat.com)
+- Updated to read config first and default to users home dir
+  (kwoodson@redhat.com)
+- Fix Custom Cors (spinolacastro@gmail.com)
+- Revert "namespace the byo inventory so the group names aren't so generic"
+  (sdodson@redhat.com)
+- Removes hardcoded python2 (jtslear@gmail.com)
+- namespace the byo inventory so the group names aren't so generic
+  (admiller@redhat.com)
+- docker-buildvm-rhose is dead (sdodson@redhat.com)
+- Add support for setting routingConfig:subdomain (jdetiber@redhat.com)
+- Initial HA master (jdetiber@redhat.com)
+- Make it clear that the byo inventory file is just an example
+  (jdetiber@redhat.com)
+- Playbook updates for clustered etcd (jdetiber@redhat.com)
+- Update for RC2 changes (sdodson@redhat.com)
+- Templatize configs and 0.5.2 changes (jdetiber@redhat.com)
+
 * Tue Jun 09 2015 Kenny Woodson <kwoodson@redhat.com> 0.0.8-1
 - Added more verbosity when error happens.  Also fixed a bug.
   (kwoodson@redhat.com)

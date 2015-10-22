@@ -1,0 +1,7 @@
+#!/usr/bin/env ansible-playbook
+---
+- include: clean_zabbix.yml
+  vars:
+    g_server: http://localhost/zabbix/api_jsonrpc.php
+    g_user: Admin
+    g_password: zabbix

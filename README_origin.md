@@ -73,6 +73,7 @@ osv3-master.example.com
 
 # host group for nodes
 [nodes]
+osv3-master.example.com
 osv3-node[1:2].example.com
 ```
 
@@ -88,23 +89,8 @@ ansible-playbook playbooks/byo/config.yml
 inventory file use the -i option for ansible-playbook.
 
 ## Post-ansible steps
-#### Create the default router
-On the master host:
-```sh
-oadm router --create=true \
-  --credentials=/etc/openshift/master/openshift-router.kubeconfig
-```
 
-#### Create the default docker-registry
-On the master host:
-```sh
-oadm registry --create=true \
-  --credentials=/etc/openshift/master/openshift-registry.kubeconfig
-```
-
-If you would like persistent storage, refer to the
-[OpenShift documentation](https://docs.openshift.org/latest/admin_guide/install/docker_registry.html)
-for more information on deployment options for the built in docker-registry.
+You should now be ready to follow the [What's Next?](https://docs.openshift.org/latest/install_config/install/advanced_install.html#what-s-next) section of the advanced installation guide to deploy your router, registry, and other components.
 
 ## Overriding detected ip addresses and hostnames
 Some deployments will require that the user override the detected hostnames

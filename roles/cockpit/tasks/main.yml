@@ -1,0 +1,16 @@
+---
+- name: Install cockpit-ws
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - cockpit-ws
+    - cockpit-shell
+    - cockpit-bridge
+    - "{{ cockpit_plugins }}"
+
+- name: Enable cockpit-ws
+  service:
+    name: cockpit.socket
+    enabled: true
+    state: started

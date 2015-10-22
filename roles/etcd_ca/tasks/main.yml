@@ -18,6 +18,7 @@
 - template:
     dest: "{{ etcd_ca_dir }}/fragments/openssl_append.cnf"
     src: openssl_append.j2
+    backup: true
 
 - assemble:
     src: "{{ etcd_ca_dir }}/fragments"
@@ -37,6 +38,7 @@
     openssl req -config openssl.cnf -newkey rsa:4096
     -keyout ca.key -new -out ca.crt -x509 -extensions etcd_v3_ca_self
     -batch -nodes -subj /CN=etcd-signer@{{ ansible_date_time.epoch }}
+    -days 365
   args:
     chdir: "{{ etcd_ca_dir }}"
     creates: "{{ etcd_ca_dir }}/ca.crt"

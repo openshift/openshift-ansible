@@ -21,4 +21,4 @@
   template: src=../templates/nfs.json.j2 dest=/root/persistent-volume.{{ item }}.json
   with_sequence: start={{osnl_volume_num_start}} count={{osnl_number_of_volumes}} format={{osnl_volume_prefix}}{{osnl_volume_size}}g%04d
 
-# TODO - Get the json files to an openshift-master, and load them.
+# TODO - Get the json files to a master, and load them.

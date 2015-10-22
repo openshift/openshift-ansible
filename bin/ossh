@@ -156,7 +156,7 @@ class Ossh(object):
                     name = server_info['ec2_tag_Name']
                     ec2_id = server_info['ec2_id']
                     ip = server_info['ec2_ip_address']
-                    print '{ec2_tag_Name:<35} {ec2_tag_environment:<8} {ec2_id:<15} {ec2_ip_address}'.format(**server_info)
+                    print '{ec2_tag_Name:<35} {ec2_tag_environment:<8} {ec2_id:<15} {ec2_ip_address:<18} {ec2_private_ip_address}'.format(**server_info)
 
                 if limit:
                     print
@@ -169,7 +169,7 @@ class Ossh(object):
                     name = server_info['ec2_tag_Name']
                     ec2_id = server_info['ec2_id']
                     ip = server_info['ec2_ip_address']
-                    print '{ec2_tag_Name:<35} {ec2_tag_environment:<5} {ec2_id:<15} {ec2_ip_address}'.format(**server_info)
+                    print '{ec2_tag_Name:<35} {ec2_tag_environment:<8} {ec2_id:<15} {ec2_ip_address:<18} {ec2_private_ip_address}'.format(**server_info)
 
     def ssh(self):
         '''SSH to a specified host

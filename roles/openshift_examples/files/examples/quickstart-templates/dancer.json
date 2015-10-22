@@ -181,8 +181,8 @@
     },
     {
       "name": "APPLICATION_DOMAIN",
-      "description": "The exposed hostname that will route to the Dancer service",
-      "value": "dancer-example.openshiftapps.com"
+      "description": "The exposed hostname that will route to the Dancer service, if left blank a value will be defaulted.",
+      "value": ""
     },
     {
       "name": "GITHUB_WEBHOOK_SECRET",

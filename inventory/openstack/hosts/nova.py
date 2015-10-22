@@ -34,7 +34,7 @@ except ImportError:
 # executed with no parameters, return the list of
 # all groups and hosts
 
-NOVA_CONFIG_FILES = [os.getcwd() + "/nova.ini",
+NOVA_CONFIG_FILES = [os.path.join(os.path.dirname(os.path.realpath(__file__)), "nova.ini"),
                      os.path.expanduser(os.environ.get('ANSIBLE_CONFIG', "~/nova.ini")),
                      "/etc/ansible/nova.ini"]
 

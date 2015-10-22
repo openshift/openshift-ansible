@@ -7,7 +7,7 @@
       url: {{ identity_provider.url }}
 {% for key in ('ca', 'certFile', 'keyFile') %}
 {% if key in identity_provider %}
-      {{ key }}: {{ identity_provider[key] }}"
+      {{ key }}: "{{ identity_provider[key] }}"
 {% endif %}
 {% endfor %}
 {% elif identity_provider.kind == 'LDAPPasswordIdentityProvider' %}
@@ -80,6 +80,7 @@ oauthConfig:
     provider:
 {{ identity_provider_config(identity_provider) }}
 {%- endfor %}
+  masterCA: ca.crt
   masterPublicURL: {{ openshift.master.public_api_url }}
   masterURL: {{ openshift.master.api_url }}
   sessionConfig:

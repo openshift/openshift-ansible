@@ -1,6 +1,6 @@
 ---
-- name: Install the OpenShift package for admin tooling
-  yum: pkg=openshift state=present
+- name: Install the base package for admin tooling
+  yum: pkg={{ openshift.common.service_type }}{{ openshift_version  }} state=present
   register: install_result
 
 - name: Reload generated facts

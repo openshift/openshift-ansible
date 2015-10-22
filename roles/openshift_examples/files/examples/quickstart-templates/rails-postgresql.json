@@ -176,15 +176,15 @@
                   },
                   {
                     "name": "POSTGRESQL_USER",
-                    "value": "${POSTGRESQL_USER}"
+                    "value": "${DATABASE_USER}"
                   },
                   {
                     "name": "POSTGRESQL_PASSWORD",
-                    "value": "${POSTGRESQL_PASSWORD}"
+                    "value": "${DATABASE_PASSWORD}"
                   },
                   {
                     "name": "POSTGRESQL_DATABASE",
-                    "value": "${POSTGRESQL_DATABASE}"
+                    "value": "${DATABASE_NAME}"
                   },
                   {
                     "name": "SECRET_KEY_BASE",
@@ -213,6 +213,10 @@
                   {
                     "name": "APPLICATION_PASSWORD",
                     "value": "${APPLICATION_PASSWORD}"
+                  },
+                  {
+                    "name": "RAILS_ENV",
+                    "value": "${RAILS_ENV}"
                   }
                 ]
               }
@@ -276,7 +280,7 @@
             "containers": [
               {
                 "name": "postgresql",
-                "image": "openshift/postgresql-92-centos7",
+                "image": "${POSTGRESQL_IMAGE}",
                 "ports": [
                   {
                     "containerPort": 5432
@@ -285,15 +289,15 @@
                 "env": [
                   {
                     "name": "POSTGRESQL_USER",
-                    "value": "${POSTGRESQL_USER}"
+                    "value": "${DATABASE_USER}"
                   },
                   {
                     "name": "POSTGRESQL_PASSWORD",
-                    "value": "${POSTGRESQL_PASSWORD}"
+                    "value": "${DATABASE_PASSWORD}"
                   },
                   {
                     "name": "POSTGRESQL_DATABASE",
-                    "value": "${POSTGRESQL_DATABASE}"
+                    "value": "${DATABASE_NAME}"
                   },
                   {
                     "name": "POSTGRESQL_MAX_CONNECTIONS",
@@ -327,8 +331,8 @@
     },
     {
       "name": "APPLICATION_DOMAIN",
-      "description": "The exposed hostname that will route to the Rails service",
-      "value": "rails-postgresql-example.openshiftapps.com"
+      "description": "The exposed hostname that will route to the Rails service, if left blank a value will be defaulted.",
+      "value": ""
     },
     {
       "name": "GITHUB_WEBHOOK_SECRET",
@@ -353,26 +357,36 @@
       "value": "secret"
     },
     {
+      "name": "RAILS_ENV",
+      "description": "Environment under which the sample application will run. Could be set to production, development or test",
+      "value": "production"
+    },
+    {
       "name": "DATABASE_SERVICE_NAME",
       "description": "Database service name",
       "value": "postgresql"
     },
     {
-      "name": "POSTGRESQL_USER",
+      "name": "DATABASE_USER",
       "description": "database username",
       "generate": "expression",
       "from": "user[A-Z0-9]{3}"
     },
     {
-      "name": "POSTGRESQL_PASSWORD",
+      "name": "DATABASE_PASSWORD",
       "description": "database password",
       "generate": "expression",
       "from": "[a-zA-Z0-9]{8}"
     },
     {
-      "name": "POSTGRESQL_DATABASE",
+      "name": "DATABASE_NAME",
       "description": "database name",
       "value": "root"
+    },
+    {
+      "name": "POSTGRESQL_IMAGE",
+      "description": "Image to use for postgresql",
+      "value": "openshift/postgresql-92-centos7"      
     },
     {
       "name": "POSTGRESQL_MAX_CONNECTIONS",

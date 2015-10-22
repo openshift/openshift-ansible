@@ -6,10 +6,10 @@
             "iconClass" : "icon-jboss",
             "description": "Application template for EAP 6 applications built using STI."
         },
-        "name": "eap6-basic-sti"
+        "name": "eap6-https-sti"
     },
     "labels": {
-        "template": "eap6-basic-sti"
+        "template": "eap6-https-sti"
     },
     "parameters": [
         {

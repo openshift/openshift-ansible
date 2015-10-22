@@ -1,12 +1,16 @@
 #!/usr/bin/python
+# pylint: disable=too-many-lines
 # -*- coding: utf-8 -*-
 # vim: expandtab:tabstop=4:shiftwidth=4
+# Reason: Disable pylint too-many-lines because we don't want to split up this file.
+# Status: Permanently disabled to keep this module as self-contained as possible.
+
 """Ansible module for retrieving and setting openshift related facts"""
 
 DOCUMENTATION = '''
 ---
 module: openshift_facts
-short_description: OpenShift Facts
+short_description: Cluster Facts
 author: Jason DeTiberus
 requirements: [ ]
 '''
@@ -16,6 +20,7 @@ EXAMPLES = '''
 import ConfigParser
 import copy
 import os
+from distutils.util import strtobool
 
 
 def hostname_valid(hostname):
@@ -283,28 +288,6 @@ def normalize_provider_facts(provider, metadata):
         facts = normalize_openstack_facts(metadata, facts)
     return facts
 
-def set_registry_url_if_unset(facts):
-    """ Set registry_url fact if not already present in facts dict
-
-        Args:
-            facts (dict): existing facts
-        Returns:
-            dict: the facts dict updated with the generated identity providers
-            facts if they were not already present
-    """
-    for role in ('master', 'node'):
-        if role in facts:
-            deployment_type = facts['common']['deployment_type']
-            if 'registry_url' not in facts[role]:
-                registry_url = "openshift/origin-${component}:${version}"
-                if deployment_type == 'enterprise':
-                    registry_url = "openshift3/ose-${component}:${version}"
-                elif deployment_type == 'online':
-                    registry_url = ("openshift3/ose-${component}:${version}")
-                facts[role]['registry_url'] = registry_url
-
-    return facts
-
 def set_fluentd_facts_if_unset(facts):
     """ Set fluentd facts if not already present in facts dict
             dict: the facts dict updated with the generated fluentd facts if
@@ -317,10 +300,66 @@ def set_fluentd_facts_if_unset(facts):
 
     """
     if 'common' in facts:
-        deployment_type = facts['common']['deployment_type']
         if 'use_fluentd' not in facts['common']:
-            use_fluentd = True if deployment_type == 'online' else False
+            use_fluentd = False
             facts['common']['use_fluentd'] = use_fluentd
+    return facts
+
+def set_node_schedulability(facts):
+    """ Set schedulable facts if not already present in facts dict
+        Args:
+            facts (dict): existing facts
+        Returns:
+            dict: the facts dict updated with the generated schedulable
+            facts if they were not already present
+
+    """
+    if 'node' in facts:
+        if 'schedulable' not in facts['node']:
+            if 'master' in facts:
+                facts['node']['schedulable'] = False
+            else:
+                facts['node']['schedulable'] = True
+    return facts
+
+def set_master_selectors(facts):
+    """ Set selectors facts if not already present in facts dict
+        Args:
+            facts (dict): existing facts
+        Returns:
+            dict: the facts dict updated with the generated selectors
+            facts if they were not already present
+
+    """
+    if 'master' in facts:
+        if 'infra_nodes' in facts['master']:
+            deployment_type = facts['common']['deployment_type']
+            if deployment_type == 'online':
+                selector = "type=infra"
+            else:
+                selector = "region=infra"
+
+            if 'router_selector' not in facts['master']:
+                facts['master']['router_selector'] = selector
+            if 'registry_selector' not in facts['master']:
+                facts['master']['registry_selector'] = selector
+    return facts
+
+def set_metrics_facts_if_unset(facts):
+    """ Set cluster metrics facts if not already present in facts dict
+            dict: the facts dict updated with the generated cluster metrics facts if
+            missing
+        Args:
+            facts (dict): existing facts
+        Returns:
+            dict: the facts dict updated with the generated cluster metrics
+            facts if they were not already present
+
+    """
+    if 'common' in facts:
+        if 'use_cluster_metrics' not in facts['common']:
+            use_cluster_metrics = False
+            facts['common']['use_cluster_metrics'] = use_cluster_metrics
     return facts
 
 def set_project_config_facts_if_unset(facts):
@@ -457,6 +496,54 @@ def set_aggregate_facts(facts):
 
     return facts
 
+def set_deployment_facts_if_unset(facts):
+    """ Set Facts that vary based on deployment_type. This currently
+        includes common.service_type, common.config_base, master.registry_url,
+        node.registry_url
+
+        Args:
+            facts (dict): existing facts
+        Returns:
+            dict: the facts dict updated with the generated deployment_type
+            facts
+    """
+    # Perhaps re-factor this as a map?
+    # pylint: disable=too-many-branches
+    if 'common' in facts:
+        deployment_type = facts['common']['deployment_type']
+        if 'service_type' not in facts['common']:
+            service_type = 'atomic-openshift'
+            if deployment_type == 'origin':
+                service_type = 'origin'
+            elif deployment_type in ['enterprise', 'online']:
+                service_type = 'openshift'
+            facts['common']['service_type'] = service_type
+        if 'config_base' not in facts['common']:
+            config_base = '/etc/origin'
+            if deployment_type in ['enterprise', 'online']:
+                config_base = '/etc/openshift'
+            facts['common']['config_base'] = config_base
+        if 'data_dir' not in facts['common']:
+            data_dir = '/var/lib/origin'
+            if deployment_type in ['enterprise', 'online']:
+                data_dir = '/var/lib/openshift'
+            facts['common']['data_dir'] = data_dir
+        facts['common']['version'] = get_openshift_version()
+
+    for role in ('master', 'node'):
+        if role in facts:
+            deployment_type = facts['common']['deployment_type']
+            if 'registry_url' not in facts[role]:
+                registry_url = 'openshift/origin-${component}:${version}'
+                if deployment_type in ['enterprise', 'online', 'openshift-enterprise']:
+                    registry_url = 'openshift3/ose-${component}:${version}'
+                elif deployment_type == 'atomic-enterprise':
+                    registry_url = 'aep3/aep-${component}:${version}'
+                facts[role]['registry_url'] = registry_url
+
+    return facts
+
+
 def set_sdn_facts_if_unset(facts):
     """ Set sdn facts if not already present in facts dict
 
@@ -467,8 +554,10 @@ def set_sdn_facts_if_unset(facts):
                   were not already present
     """
     if 'common' in facts:
+        use_sdn = facts['common']['use_openshift_sdn']
+        if not (use_sdn == '' or isinstance(use_sdn, bool)):
+            facts['common']['use_openshift_sdn'] = bool(strtobool(str(use_sdn)))
         if 'sdn_network_plugin_name' not in facts['common']:
-            use_sdn = facts['common']['use_openshift_sdn']
             plugin = 'redhat/openshift-ovs-subnet' if use_sdn else ''
             facts['common']['sdn_network_plugin_name'] = plugin
 
@@ -477,6 +566,10 @@ def set_sdn_facts_if_unset(facts):
             facts['master']['sdn_cluster_network_cidr'] = '10.1.0.0/16'
         if 'sdn_host_subnet_length' not in facts['master']:
             facts['master']['sdn_host_subnet_length'] = '8'
+
+    if 'node' in facts:
+        if 'sdn_mtu' not in facts['node']:
+            facts['node']['sdn_mtu'] = '1450'
 
     return facts
 
@@ -519,7 +612,7 @@ def get_current_config(facts):
         # anything from working properly as far as I can tell, perhaps because
         # we override the kubeconfig path everywhere we use it?
         # Query kubeconfig settings
-        kubeconfig_dir = '/var/lib/openshift/openshift.local.certificates'
+        kubeconfig_dir = '/var/lib/origin/openshift.local.certificates'
         if role == 'node':
             kubeconfig_dir = os.path.join(
                 kubeconfig_dir, "node-%s" % facts['common']['hostname']
@@ -560,6 +653,21 @@ def get_current_config(facts):
 
     return current_config
 
+def get_openshift_version():
+    """ Get current version of openshift on the host
+
+        Returns:
+            version: the current openshift version
+    """
+    version = ''
+
+    if os.path.isfile('/usr/bin/openshift'):
+        _, output, _ = module.run_command(['/usr/bin/openshift', 'version'])
+        versions = dict(e.split(' v') for e in output.splitlines())
+        version = versions.get('openshift', '')
+
+        #TODO: acknowledge the possility of a containerized install
+    return version
 
 def apply_provider_facts(facts, provider_facts):
     """ Apply provider facts to supplied facts dict
@@ -605,7 +713,7 @@ def merge_facts(orig, new):
     facts = dict()
     for key, value in orig.iteritems():
         if key in new:
-            if isinstance(value, dict):
+            if isinstance(value, dict) and isinstance(new[key], dict):
                 facts[key] = merge_facts(value, new[key])
             else:
                 facts[key] = copy.copy(new[key])
@@ -666,25 +774,25 @@ def get_local_facts_from_file(filename):
 
 
 class OpenShiftFactsUnsupportedRoleError(Exception):
-    """OpenShift Facts Unsupported Role Error"""
+    """Origin Facts Unsupported Role Error"""
     pass
 
 
 class OpenShiftFactsFileWriteError(Exception):
-    """OpenShift Facts File Write Error"""
+    """Origin Facts File Write Error"""
     pass
 
 
 class OpenShiftFactsMetadataUnavailableError(Exception):
-    """OpenShift Facts Metadata Unavailable Error"""
+    """Origin Facts Metadata Unavailable Error"""
     pass
 
 
 class OpenShiftFacts(object):
-    """ OpenShift Facts
+    """ Origin Facts
 
         Attributes:
-            facts (dict): OpenShift facts for the host
+            facts (dict): facts for the host
 
         Args:
             role (str): role for setting local facts
@@ -728,9 +836,12 @@ class OpenShiftFacts(object):
         facts = set_url_facts_if_unset(facts)
         facts = set_project_config_facts_if_unset(facts)
         facts = set_fluentd_facts_if_unset(facts)
+        facts = set_node_schedulability(facts)
+        facts = set_master_selectors(facts)
+        facts = set_metrics_facts_if_unset(facts)
         facts = set_identity_providers_if_unset(facts)
-        facts = set_registry_url_if_unset(facts)
         facts = set_sdn_facts_if_unset(facts)
+        facts = set_deployment_facts_if_unset(facts)
         facts = set_aggregate_facts(facts)
         return dict(openshift=facts)
 

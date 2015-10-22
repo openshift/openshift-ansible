@@ -1,0 +1,67 @@
+apiVersion: "v1"
+kind: "List"
+items:
+  -
+    apiVersion: "v1"
+    kind: "Service"
+    metadata:
+      labels:
+        provider: "fabric8"
+        component: "influxdb-monitoring"
+      name: "influxdb-monitoring"
+    spec:
+      ports:
+        -
+          port: 8086
+          targetPort: "http"
+      selector:
+        provider: "fabric8"
+        component: "influxdb-monitoring"
+  -
+    apiVersion: "v1"
+    kind: "ReplicationController"
+    metadata:
+      labels:
+        provider: "fabric8"
+        component: "influxdb-monitoring"
+      name: "influxdb-monitoring"
+    spec:
+      replicas: 1
+      selector:
+        provider: "fabric8"
+        component: "influxdb-monitoring"
+      template:
+        metadata:
+          labels:
+            provider: "fabric8"
+            component: "influxdb-monitoring"
+        spec:
+          containers:
+            -
+              env:
+                -
+                  name: "PRE_CREATE_DB"
+                  value: "k8s;grafana"
+              image: "fabric8/influxdb:0.8.8"
+              name: "influxdb"
+              ports:
+                -
+                  containerPort: 8090
+                  name: "raft"
+                -
+                  containerPort: 8099
+                  name: "protobuf"
+                -
+                  containerPort: 8083
+                  name: "admin"
+                -
+                  containerPort: 8086
+                  name: "http"
+              volumeMounts:
+                -
+                  mountPath: "/data"
+                  name: "influxdb-data"
+          volumes:
+            -
+              emptyDir:
+              name: "influxdb-data"
