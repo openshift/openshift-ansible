@@ -7,7 +7,7 @@
 - name: Deploy OpenShift Router
   command: >
     {{ openshift.common.admin_binary }} router
-    --create --replicas={{ num_infra }}
+    --create --replicas={{ openshift.master.infra_nodes }}
     --service-account=router {{ _ortr_selector }}
     --credentials={{ openshift_master_config_dir }}/openshift-router.kubeconfig {{ _ortr_images }}
   register: _ortr_results
