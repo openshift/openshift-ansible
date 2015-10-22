@@ -257,7 +257,7 @@
 
 - name: Create services
   hosts: oo_first_master
-
   roles:
-    - openshift_router
-#    - openshift_registry
+  - role: openshift_router
+    when: openshift.master.infra_nodes is defined
+  #- role: openshift_registry
