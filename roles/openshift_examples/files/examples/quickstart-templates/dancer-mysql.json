@@ -175,6 +175,10 @@
                   {
                     "name": "SECRET_KEY_BASE",
                     "value": "${SECRET_KEY_BASE}"
+                  },
+                  {
+                    "name": "PERL_APACHE2_RELOAD",
+                    "value": "${PERL_APACHE2_RELOAD}"
                   }
                 ]
               }
@@ -328,6 +332,11 @@
       "name": "MYSQL_IMAGE",
       "description": "Image to use for mysql",
       "value": "openshift/mysql-55-centos7"      
+    },
+    {
+      "name": "PERL_APACHE2_RELOAD",
+      "description": "Set this to \"true\" to enable automatic reloading of modified Perl modules",
+      "value": ""
     },
     {
       "name": "SECRET_KEY_BASE",

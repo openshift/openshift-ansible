@@ -157,6 +157,12 @@
                   {
                     "containerPort": 8080
                   }
+                ],
+                "env": [
+                  {
+                    "name": "PERL_APACHE2_RELOAD",
+                    "value": "${PERL_APACHE2_RELOAD}"
+                  }
                 ]
               }
             ]
@@ -195,6 +201,11 @@
       "description": "Your secret key for verifying the integrity of signed cookies",
       "generate": "expression",
       "from": "[a-z0-9]{127}"
+    },
+    {
+      "name": "PERL_APACHE2_RELOAD",
+      "description": "Set this to \"true\" to enable automatic reloading of modified Perl modules",
+      "value": ""
     }
   ]
 }
