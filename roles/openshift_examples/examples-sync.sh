@@ -15,7 +15,7 @@ wget https://github.com/openshift/rails-ex/archive/master.zip -O rails-ex-master
 wget https://github.com/openshift/nodejs-ex/archive/master.zip -O nodejs-ex-master.zip
 wget https://github.com/openshift/dancer-ex/archive/master.zip -O dancer-ex-master.zip
 wget https://github.com/openshift/cakephp-ex/archive/master.zip -O cakephp-ex-master.zip
-wget https://github.com/jboss-openshift/application-templates/archive/master.zip -O application-templates-master.zip
+wget https://github.com/jboss-openshift/application-templates/archive/ose-v1.0.2.zip -O application-templates-master.zip
 unzip origin-master.zip
 unzip django-ex-master.zip
 unzip rails-ex-master.zip
