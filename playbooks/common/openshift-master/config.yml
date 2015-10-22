@@ -216,8 +216,7 @@
   roles:
   - role: openshift_master_cluster
     when: openshift_master_ha | bool
-  - role: openshift_examples
-    when: deployment_type in ['enterprise','openshift-enterprise','origin']
+  - openshift_examples
   - role: openshift_cluster_metrics
     when: openshift.common.use_cluster_metrics | bool
 
