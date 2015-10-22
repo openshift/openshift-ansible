@@ -1,6 +1,9 @@
 # This deletes *ALL* Docker images, and uninstalls OpenShift and
 # Atomic Enterprise RPMs.  It is primarily intended for use
 # with the tutorial as well as for developers to reset state.
+#
+---
+- include: uninstall.yml
 
 - hosts:
     - OSEv3:children
@@ -8,59 +11,6 @@
   sudo: yes
 
   tasks:
-    - service: name={{ item }} state=stopped
-      with_items:
-        - openvswitch
-        - origin-master
-        - origin-node
-        - atomic-openshift-master
-        - atomic-openshift-node
-        - openshift-master
-        - openshift-node
-        - atomic-enterprise-master
-        - atomic-enterprise-node
-        - etcd
-
-    - yum: name={{ item }} state=absent
-      with_items:
-        - openvswitch
-        - etcd
-        - origin
-        - origin-master
-        - origin-node
-        - origin-sdn-ovs
-        - tuned-profiles-origin-node
-        - atomic-openshift
-        - atomic-openshift-master
-        - atomic-openshift-node
-        - atomic-openshift-sdn-ovs
-        - tuned-profiles-atomic-openshift-node
-        - atomic-enterprise
-        - atomic-enterprise-master
-        - atomic-enterprise-node
-        - atomic-enterprise-sdn-ovs
-        - tuned-profiles-atomic-enterprise-node
-        - openshift
-        - openshift-master
-        - openshift-node
-        - openshift-sdn-ovs
-        - tuned-profiles-openshift-node
-
-    - shell: systemctl reset-failed
-      changed_when: False
-
-    - shell: systemctl daemon-reload
-      changed_when: False
-
-    - shell: find /var/lib/origin/openshift.local.volumes -type d -exec umount {} \; 2>/dev/null || true
-      changed_when: False
-
-    - shell: find /var/lib/atomic-enterprise/openshift.local.volumes -type d -exec umount {} \; 2>/dev/null || true
-      changed_when: False
-
-    - shell: find /var/lib/openshift/openshift.local.volumes -type d -exec umount {} \; 2>/dev/null || true
-      changed_when: False
-
     - shell: docker ps -a -q | xargs docker stop
       changed_when: False
       failed_when: False
@@ -72,27 +22,6 @@
     - shell:  docker images -q |xargs docker rmi
       changed_when: False
       failed_when: False
-
-    - file: path={{ item }} state=absent
-      with_items:
-        - /etc/openshift-sdn
-        - /root/.kube
-        - /etc/origin
-        - /etc/atomic-enterprise
-        - /etc/openshift
-        - /var/lib/origin
-        - /var/lib/openshift
-        - /var/lib/atomic-enterprise
-        - /etc/sysconfig/origin-master
-        - /etc/sysconfig/origin-node
-        - /etc/sysconfig/atomic-openshift-master
-        - /etc/sysconfig/atomic-openshift-node
-        - /etc/sysconfig/openshift-master
-        - /etc/sysconfig/openshift-node
-        - /etc/sysconfig/atomic-enterprise-master
-        - /etc/sysconfig/atomic-enterprise-node
-        - /etc/etcd
-        - /var/lib/etcd
 
     - user: name={{ item }} state=absent remove=yes
       with_items:
