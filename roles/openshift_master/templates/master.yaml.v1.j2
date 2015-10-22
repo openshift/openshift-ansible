@@ -80,8 +80,7 @@ kubernetesMasterConfig:
   - v1
   apiServerArguments: {{ api_server_args if api_server_args is defined else 'null' }}
   controllerArguments: {{ controller_args if controller_args is defined else 'null' }}
-{# TODO: support overriding masterCount #}
-  masterCount: 1
+  masterCount: {{ openshift.master.master_count }}
   masterIP: ""
   podEvictionTimeout: ""
   proxyClientInfo:
