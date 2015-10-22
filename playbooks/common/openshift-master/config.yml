@@ -134,13 +134,10 @@
   hosts: oo_masters_to_config
   tasks:
   - set_fact:
-      include_proxy_client_cert: "{{ (openshift.common.version | version_compare('1.0.6', '>')) if openshift.common.deployment_type == 'origin' else (openshift.common.version | version_compare('3.0.2', '>')) }}"
-
-  - set_fact:
       openshift_master_certs_no_etcd:
       - admin.crt
       - master.kubelet-client.crt
-      - "{{ 'master.proxy-client.crt' if include_proxy_client_cert else omit }}"
+      - "{{ 'master.proxy-client.crt' if openshift.common.version_greater_than_3_1_or_1_1 else omit }}"
       - master.server.crt
       - openshift-master.crt
       - openshift-registry.crt

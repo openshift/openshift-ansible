@@ -20,8 +20,8 @@
     - admin.kubeconfig
     - master.kubelet-client.crt
     - master.kubelet-client.key
-    - "{{ 'master.proxy-client.crt' if openshift.master.include_proxy_client_cert else omit }}"
-    - "{{ 'master.proxy-client.key' if openshift.master.include_proxy_client_cert else omit }}"
+    - "{{ 'master.proxy-client.crt' if openshift.common.version_greater_than_3_1_or_1_1 else omit }}"
+    - "{{ 'master.proxy-client.key' if openshift.common.version_greater_than_3_1_or_1_1 else omit }}"
     - openshift-master.crt
     - openshift-master.key
     - openshift-master.kubeconfig
