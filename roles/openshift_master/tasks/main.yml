@@ -62,20 +62,6 @@
   yum: pkg={{ openshift.common.service_type }}-master{{ openshift_version  }} state=present
   register: install_result
 
-- name: Check for RPM generated config marker file /etc/origin/.config_managed
-  stat: path=/etc/origin/.rpmgenerated
-  register: rpmgenerated_config
-
-- name: Remove RPM generated config files
-  file:
-    path: "{{ item }}"
-    state: absent
-  when: openshift.common.service_type in ['atomic-enterprise','openshift-enterprise'] and rpmgenerated_config.stat.exists == true
-  with_items:
-    - "{{ openshift.common.config_base }}/master"
-    - "{{ openshift.common.config_base }}/node"
-    - "{{ openshift.common.config_base }}/.rpmgenerated"
-
 # TODO: These values need to be configurable
 - name: Set dns facts
   openshift_facts:
