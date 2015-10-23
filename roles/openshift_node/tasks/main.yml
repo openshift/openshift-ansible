@@ -32,21 +32,13 @@
       schedulable: "{{ openshift_schedulable | default(openshift_scheduleable) | default(None) }}"
       docker_log_driver:  "{{ lookup( 'oo_option' , 'docker_log_driver'  )  | default('',True) }}"
       docker_log_options: "{{ lookup( 'oo_option' , 'docker_log_options' )  | default('',True) }}"
+      storage_plugin_deps: "{{ osn_storage_plugin_deps | default(None) }}"
 
 # We have to add tuned-profiles in the same transaction otherwise we run into depsolving
 # problems because the rpms don't pin the version properly.
 - name: Install Node package
   yum: pkg={{ openshift.common.service_type }}-node{{ openshift_version  }},tuned-profiles-{{ openshift.common.service_type }}-node{{ openshift_version  }} state=present
   register: node_install_result
-
-# TODO: allow for storage pre-requisites to be optional
-- name: Install storage plugin pre-requisites
-  yum:
-    pkg: "{{ item }}"
-    state: installed
-  with_items:
-  - glusterfs-fuse
-  - ceph-common
 
 - name: Install sdn-ovs package
   yum: pkg={{ openshift.common.service_type }}-sdn-ovs{{ openshift_version }} state=present
@@ -133,15 +125,8 @@
   notify:
     - restart docker
 
-- name: Set sebooleans to allow storage plugin access from containers
-  seboolean:
-    name: "{{ item }}"
-    state: yes
-    persistent: yes
-  when: ansible_selinux and ansible_selinux.status == "enabled"
-  with_items:
-  - virt_use_nfs
-  - virt_use_fusefs
+- name: Additional storage plugin configuration
+  include: storage_plugins/main.yml
 
 - name: Start and enable node
   service: name={{ openshift.common.service_type }}-node enabled=yes state=started

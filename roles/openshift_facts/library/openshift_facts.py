@@ -469,6 +469,21 @@ def set_aggregate_facts(facts):
 
     return facts
 
+def set_node_plugin_facts_if_unset(facts):
+    """ Set Facts for node storage plugin dependencies if not set.
+
+        Args:
+            facts (dict): existing facts
+        Returns:
+            dict: the facts dict updated with the generated storage plugin
+            dependency facts
+    """
+    if 'node' in facts:
+        if 'storage_plugin_deps' not in facts['node']:
+            facts['node']['storage_plugin_deps'] = ['ceph', 'glusterfs']
+
+    return facts
+
 def set_deployment_facts_if_unset(facts):
     """ Set Facts that vary based on deployment_type. This currently
         includes common.service_type, common.config_base, master.registry_url,
@@ -814,6 +829,7 @@ class OpenShiftFacts(object):
         facts = set_identity_providers_if_unset(facts)
         facts = set_sdn_facts_if_unset(facts)
         facts = set_deployment_facts_if_unset(facts)
+        facts = set_node_plugin_facts_if_unset(facts)
         facts = set_aggregate_facts(facts)
         return dict(openshift=facts)
 
