@@ -16,27 +16,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.hostmanager.include_offline = true
   config.ssh.insert_key = false
 
-  if deployment_type === 'enterprise'
-    unless Vagrant.has_plugin?('vagrant-registration')
-      raise 'vagrant-registration-plugin is required for enterprise deployment'
-    end
-    username = ENV['rhel_subscription_user']
-    password = ENV['rhel_subscription_pass']
-    unless username and password
-      raise 'rhel_subscription_user and rhel_subscription_pass are required'
-    end
-    config.registration.username = username
-    config.registration.password = password
-    # FIXME this is temporary until vagrant/ansible registration modules
-    # are capable of handling specific subscription pools
-    if not ENV['rhel_subscription_pool'].nil?
-      config.vm.provision "shell" do |s|
-        s.inline = "subscription-manager attach --pool=$1 || true"
-        s.args = "#{ENV['rhel_subscription_pool']}"
-      end
-    end
-  end
-
   config.vm.provider "virtualbox" do |vbox, override|
     override.vm.box = "centos/7"
     vbox.memory = 1024
