@@ -1,6 +1,6 @@
-#Openshift and Atomic Enterprise Ansible
+#OpenShift and Atomic Enterprise Ansible
 
-This repo contains Ansible code for Openshift and Atomic Enterprise.
+This repo contains Ansible code for OpenShift and Atomic Enterprise.
 
 ##Setup
 - Install base dependencies:
