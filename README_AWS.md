@@ -38,8 +38,8 @@ You may also want to allow access from the outside world on the following ports:
 • 80    - Web Apps
 • 443   - Web Apps (https)
 • 4789  - SDN / VXLAN
-• 8443  - Openshift Console
-• 10250 - kubelet 
+• 8443  - OpenShift Console
+• 10250 - kubelet
 ```
 
 
