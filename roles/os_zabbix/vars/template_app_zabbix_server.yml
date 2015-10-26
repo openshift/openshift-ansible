@@ -8,7 +8,7 @@ g_template_app_zabbix_server:
      description: A simple count of the number of partition creates output by the housekeeper script.
      units: ''
      value_type: int
-     zabbix_type: 5
+     zabbix_type: internal
 
    - key: housekeeper_drops
      applications:
@@ -16,7 +16,7 @@ g_template_app_zabbix_server:
      description: A simple count of the number of partition drops output by the housekeeper script.
      units: ''
      value_type: int
-     zabbix_type: 5
+     zabbix_type: internal
 
    - key: housekeeper_errors
      applications:
@@ -24,7 +24,7 @@ g_template_app_zabbix_server:
      description: A simple count of the number of errors output by the housekeeper script.
      units: ''
      value_type: int
-     zabbix_type: 5
+     zabbix_type: internal
 
    - key: housekeeper_total
      applications:
@@ -33,7 +33,7 @@ g_template_app_zabbix_server:
        script.
      units: ''
      value_type: int
-     zabbix_type: 5
+     zabbix_type: internal
 
    - key: zabbix[process,alerter,avg,busy]
      applications:
@@ -41,7 +41,7 @@ g_template_app_zabbix_server:
      description: ''
      units: '%'
      value_type: float
-     zabbix_type: 5
+     zabbix_type: internal
 
    - key: zabbix[process,configuration syncer,avg,busy]
      applications:
@@ -49,7 +49,7 @@ g_template_app_zabbix_server:
      description: ''
      units: '%'
      value_type: float
-     zabbix_type: 5
+     zabbix_type: internal
 
    - key: zabbix[process,db watchdog,avg,busy]
      applications:
@@ -57,7 +57,7 @@ g_template_app_zabbix_server:
      description: ''
      units: '%'
      value_type: float
-     zabbix_type: 5
+     zabbix_type: internal
 
    - key: zabbix[process,discoverer,avg,busy]
      applications:
@@ -65,7 +65,7 @@ g_template_app_zabbix_server:
      description: ''
      units: '%'
      value_type: float
-     zabbix_type: 5
+     zabbix_type: internal
 
    - key: zabbix[process,escalator,avg,busy]
      applications:
@@ -73,7 +73,7 @@ g_template_app_zabbix_server:
      description: ''
      units: '%'
      value_type: float
-     zabbix_type: 5
+     zabbix_type: internal
 
    - key: zabbix[process,history syncer,avg,busy]
      applications:
@@ -81,7 +81,7 @@ g_template_app_zabbix_server:
      description: ''
      units: '%'
      value_type: float
-     zabbix_type: 5
+     zabbix_type: internal
 
    - key: zabbix[process,housekeeper,avg,busy]
      applications:
@@ -89,7 +89,7 @@ g_template_app_zabbix_server:
      description: ''
      units: '%'
      value_type: float
-     zabbix_type: 5
+     zabbix_type: internal
 
    - key: zabbix[process,http poller,avg,busy]
      applications:
@@ -97,7 +97,7 @@ g_template_app_zabbix_server:
      description: ''
      units: '%'
      value_type: float
-     zabbix_type: 5
+     zabbix_type: internal
 
    - key: zabbix[process,icmp pinger,avg,busy]
      applications:
@@ -105,7 +105,7 @@ g_template_app_zabbix_server:
      description: ''
      units: '%'
      value_type: float
-     zabbix_type: 5
+     zabbix_type: internal
 
    - key: zabbix[process,ipmi poller,avg,busy]
      applications:
@@ -113,7 +113,7 @@ g_template_app_zabbix_server:
      description: ''
      units: '%'
      value_type: float
-     zabbix_type: 5
+     zabbix_type: internal
 
    - key: zabbix[process,java poller,avg,busy]
      applications:
@@ -121,7 +121,7 @@ g_template_app_zabbix_server:
      description: ''
      units: '%'
      value_type: float
-     zabbix_type: 5
+     zabbix_type: internal
 
    - key: zabbix[process,node watcher,avg,busy]
      applications:
@@ -129,7 +129,7 @@ g_template_app_zabbix_server:
      description: ''
      units: '%'
      value_type: float
-     zabbix_type: 5
+     zabbix_type: internal
 
    - key: zabbix[process,poller,avg,busy]
      applications:
@@ -137,7 +137,7 @@ g_template_app_zabbix_server:
      description: ''
      units: '%'
      value_type: float
-     zabbix_type: 5
+     zabbix_type: internal
 
    - key: zabbix[process,proxy poller,avg,busy]
      applications:
@@ -145,7 +145,7 @@ g_template_app_zabbix_server:
      description: ''
      units: '%'
      value_type: float
-     zabbix_type: 5
+     zabbix_type: internal
 
    - key: zabbix[process,self-monitoring,avg,busy]
      applications:
@@ -153,7 +153,7 @@ g_template_app_zabbix_server:
      description: ''
      units: '%'
      value_type: float
-     zabbix_type: 5
+     zabbix_type: internal
 
    - key: zabbix[process,snmp trapper,avg,busy]
      applications:
@@ -161,7 +161,7 @@ g_template_app_zabbix_server:
      description: ''
      units: '%'
      value_type: float
-     zabbix_type: 5
+     zabbix_type: internal
 
    - key: zabbix[process,timer,avg,busy]
      applications:
@@ -169,7 +169,7 @@ g_template_app_zabbix_server:
      description: ''
      units: '%'
      value_type: float
-     zabbix_type: 5
+     zabbix_type: internal
 
    - key: zabbix[process,trapper,avg,busy]
      applications:
@@ -177,7 +177,7 @@ g_template_app_zabbix_server:
      description: ''
      units: '%'
      value_type: float
-     zabbix_type: 5
+     zabbix_type: internal
 
    - key: zabbix[process,unreachable poller,avg,busy]
      applications:
@@ -185,7 +185,7 @@ g_template_app_zabbix_server:
      description: ''
      units: '%'
      value_type: float
-     zabbix_type: 5
+     zabbix_type: internal
 
    - key: zabbix[queue,10m]
      applications:
@@ -193,7 +193,7 @@ g_template_app_zabbix_server:
      description: ''
      units: ''
      value_type: int
-     zabbix_type: 5
+     zabbix_type: internal
      interval: 600
 
    - key: zabbix[queue]
@@ -202,7 +202,7 @@ g_template_app_zabbix_server:
      description: ''
      units: ''
      value_type: int
-     zabbix_type: 5
+     zabbix_type: internal
      interval: 600
 
    - key: zabbix[rcache,buffer,pfree]
@@ -211,7 +211,7 @@ g_template_app_zabbix_server:
      description: ''
      units: ''
      value_type: float
-     zabbix_type: 5
+     zabbix_type: internal
 
    - key: zabbix[wcache,history,pfree]
      applications:
@@ -219,7 +219,7 @@ g_template_app_zabbix_server:
      description: ''
      units: ''
      value_type: float
-     zabbix_type: 5
+     zabbix_type: internal
 
    - key: zabbix[wcache,text,pfree]
      applications:
@@ -227,7 +227,7 @@ g_template_app_zabbix_server:
      description: ''
      units: ''
      value_type: float
-     zabbix_type: 5
+     zabbix_type: internal
 
    - key: zabbix[wcache,trend,pfree]
      applications:
@@ -235,7 +235,7 @@ g_template_app_zabbix_server:
      description: ''
      units: ''
      value_type: float
-     zabbix_type: 5
+     zabbix_type: internal
 
    - key: zabbix[wcache,values]
      applications:
@@ -243,7 +243,7 @@ g_template_app_zabbix_server:
      description: ''
      units: ''
      value_type: float
-     zabbix_type: 5
+     zabbix_type: internal
      delta: 1 # speed per second
 
    ztriggers:
