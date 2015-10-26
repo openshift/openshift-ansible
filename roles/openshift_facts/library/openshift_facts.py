@@ -444,6 +444,19 @@ def set_url_facts_if_unset(facts):
                                                                console_public_hostname,
                                                                console_port,
                                                                console_path)
+        if 'public_metrics_url' not in facts['master']:
+            metrics_public_hostname = cluster_public_hostname if cluster_public_hostname else public_hostname
+            facts['master']['public_metrics_url'] = format_url(console_use_ssl,
+                                                               metrics_public_hostname,
+                                                               console_port,
+                                                               metrics_path)
+        if 'public_logging_url' not in facts['master']:
+            logging_public_hostname = cluster_public_hostname if cluster_public_hostname else public_hostname
+            facts['master']['public_logging_url'] = format_url(console_use_ssl,
+                                                               logging_public_hostname,
+                                                               console_port,
+                                                               logging_path)
+
     return facts
 
 def set_aggregate_facts(facts):
