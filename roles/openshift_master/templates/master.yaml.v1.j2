@@ -103,7 +103,7 @@ projectConfig:
   projectRequestTemplate: "{{ openshift.master.project_request_template }}"
   securityAllocator:
     mcsAllocatorRange: "{{ openshift.master.mcs_allocator_range }}"
-    mcsLabelsPerProject: "{{ openshift.master.mcs_labels_per_project }}"
+    mcsLabelsPerProject: {{ openshift.master.mcs_labels_per_project }}
     uidAllocatorRange: "{{ openshift.master.uid_allocator_range  }}"
 routingConfig:
   subdomain:  "{{ openshift.master.default_subdomain | default("") }}"
