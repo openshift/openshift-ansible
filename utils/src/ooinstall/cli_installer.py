@@ -431,16 +431,30 @@ def cli(ctx, unattended, configuration, ansible_playbook_directory, ansible_conf
     oo_cfg.settings['ansible_log_path'] = ctx.obj['ansible_log_path']
 
     ctx.obj['oo_cfg'] = oo_cfg
+    install_transactions.set_config(oo_cfg)
 
 
 @click.command()
 @click.pass_context
 def uninstall(ctx):
-    #oo_cfg = ctx.obj['oo_cfg']
-    click.echo("Running uninstall command.")
+    oo_cfg = ctx.obj['oo_cfg']
+
+    if len(oo_cfg.hosts) == 0:
+        click.echo("No hosts defined in: %s" % oo_cfg['configuration'])
+        sys.exit(1)
+
+    click.echo("OpenShift will be uninstalled from the following hosts:\n")
     if not ctx.obj['unattended']:
         # Prompt interactively to confirm:
-        pass
+        for host in oo_cfg.hosts:
+            click.echo("  * %s" % host.name)
+        proceed = click.confirm("\nDo you wish to proceed?")
+        if not proceed:
+            click.echo("Uninstall cancelled.")
+            sys.exit(0)
+
+    install_transactions.run_uninstall_playbook()
+
 
 
 @click.command()
@@ -448,7 +462,6 @@ def uninstall(ctx):
 @click.pass_context
 def install(ctx, force):
     oo_cfg = ctx.obj['oo_cfg']
-    install_transactions.set_config(oo_cfg)
 
     if ctx.obj['unattended']:
         error_if_missing_info(oo_cfg)
