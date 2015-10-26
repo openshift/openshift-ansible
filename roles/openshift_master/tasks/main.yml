@@ -141,9 +141,8 @@
   when: not openshift_master_ha | bool
   register: start_result
 
-- name: pause to prevent service restart from interfering with bootstrapping
-  pause: seconds=30
-  when: start_result | changed
+- set_fact:
+    master_service_status_changed = start_result | changed
 
 - name: Install cluster packages
   yum: pkg=pcs state=present
