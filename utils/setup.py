@@ -79,7 +79,7 @@ setup(
     # pip to create the appropriate form of executable for the target platform.
     entry_points={
         'console_scripts': [
-            'oo-install=ooinstall.cli_installer:main',
+            'oo-install=ooinstall.cli_installer:cli',
         ],
     },
 )

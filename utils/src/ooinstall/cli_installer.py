@@ -367,46 +367,59 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force):
 
     return hosts_to_run_on, callback_facts
 
-@click.command()
-@click.option('--configuration', '-c',
-              type=click.Path(file_okay=True,
-                              dir_okay=False,
-                              writable=True,
-                              readable=True),
-              default=None)
-@click.option('--ansible-playbook-directory',
-              '-a',
-              type=click.Path(exists=True,
-                              file_okay=False,
-                              dir_okay=True,
-                              writable=True,
-                              readable=True),
-              # callback=validate_ansible_dir,
-              envvar='OO_ANSIBLE_PLAYBOOK_DIRECTORY')
-@click.option('--ansible-config',
-              type=click.Path(file_okay=True,
-                              dir_okay=False,
-                              writable=True,
-                              readable=True),
-              default=None)
-@click.option('--ansible-log-path',
-              type=click.Path(file_okay=True,
-                              dir_okay=False,
-                              writable=True,
-                              readable=True),
-              default="/tmp/ansible.log")
+
+@click.group()
+@click.pass_context
 @click.option('--unattended', '-u', is_flag=True, default=False)
-@click.option('--force', '-f', is_flag=True, default=False)
+@click.option('--configuration', '-c',
+    type=click.Path(file_okay=True,
+        dir_okay=False,
+        writable=True,
+        readable=True),
+    default=None)
+@click.option('--ansible-playbook-directory',
+    '-a',
+    type=click.Path(exists=True,
+        file_okay=False,
+        dir_okay=True,
+        writable=True,
+        readable=True),
+    # callback=validate_ansible_dir,
+    envvar='OO_ANSIBLE_PLAYBOOK_DIRECTORY')
+@click.option('--ansible-config',
+    type=click.Path(file_okay=True,
+        dir_okay=False,
+        writable=True,
+        readable=True),
+    default=None)
+@click.option('--ansible-log-path',
+    type=click.Path(file_okay=True,
+        dir_okay=False,
+        writable=True,
+        readable=True),
+    default="/tmp/ansible.log")
 #pylint: disable=too-many-arguments
 # Main CLI entrypoint, not much we can do about too many arguments.
-def main(configuration, ansible_playbook_directory, ansible_config, ansible_log_path, unattended, force):
-    oo_cfg = OOConfig(configuration)
+def cli(ctx, unattended, configuration, ansible_playbook_directory, ansible_config, ansible_log_path):
+    """
+    The main click CLI module. Responsible for handling most common CLI options,
+    assigning any defaults and adding to the context for the sub-commands.
+    """
+    ctx.obj = {}
+    ctx.obj['unattended'] = unattended
+    ctx.obj['configuration'] = configuration
+    ctx.obj['ansible_playbook_directory'] = ansible_playbook_directory
+    ctx.obj['ansible_config'] = ansible_config
+    ctx.obj['ansible_log_path'] = ansible_log_path
 
+    oo_cfg = OOConfig(ctx.obj['configuration'])
+
+    ansible_playbook_directory = ctx.obj['ansible_playbook_directory']
     if not ansible_playbook_directory:
         ansible_playbook_directory = oo_cfg.settings.get('ansible_playbook_directory', '')
 
-    if ansible_config:
-        oo_cfg.settings['ansible_config'] = ansible_config
+    if ctx.obj['ansible_config']:
+        oo_cfg.settings['ansible_config'] = ctx.obj['ansible_config']
     elif os.path.exists(DEFAULT_ANSIBLE_CONFIG):
         # If we're installed by RPM this file should exist and we can use it as our default:
         oo_cfg.settings['ansible_config'] = DEFAULT_ANSIBLE_CONFIG
@@ -415,10 +428,29 @@ def main(configuration, ansible_playbook_directory, ansible_config, ansible_log_
     oo_cfg.settings['ansible_playbook_directory'] = ansible_playbook_directory
     oo_cfg.ansible_playbook_directory = ansible_playbook_directory
 
-    oo_cfg.settings['ansible_log_path'] = ansible_log_path
+    oo_cfg.settings['ansible_log_path'] = ctx.obj['ansible_log_path']
+
+    ctx.obj['oo_cfg'] = oo_cfg
+
+
+@click.command()
+@click.pass_context
+def uninstall(ctx):
+    #oo_cfg = ctx.obj['oo_cfg']
+    click.echo("Running uninstall command.")
+    if not ctx.obj['unattended']:
+        # Prompt interactively to confirm:
+        pass
+
+
+@click.command()
+@click.option('--force', '-f', is_flag=True, default=False)
+@click.pass_context
+def install(ctx, force):
+    oo_cfg = ctx.obj['oo_cfg']
     install_transactions.set_config(oo_cfg)
 
-    if unattended:
+    if ctx.obj['unattended']:
         error_if_missing_info(oo_cfg)
     else:
         oo_cfg = get_missing_info_from_user(oo_cfg)
@@ -430,8 +462,7 @@ def main(configuration, ansible_playbook_directory, ansible_config, ansible_log_
                    "Please see {} for details.".format(oo_cfg.settings['ansible_log_path']))
         sys.exit(1)
 
-    hosts_to_run_on, callback_facts = get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force)
-
+    hosts_to_run_on, callback_facts = get_hosts_to_run_on(oo_cfg, callback_facts, ctx.obj['unattended'], force)
 
     click.echo('Writing config to: %s' % oo_cfg.config_path)
 
@@ -449,7 +480,7 @@ def main(configuration, ansible_playbook_directory, ansible_config, ansible_log_
     message = """
 If changes are needed to the values recorded by the installer please update {}.
 """.format(oo_cfg.config_path)
-    if not unattended:
+    if not ctx.obj['unattended']:
         confirm_continue(message)
 
     error = install_transactions.run_main_playbook(oo_cfg.hosts,
@@ -475,5 +506,10 @@ http://docs.openshift.com/enterprise/latest/admin_guide/overview.html
         click.echo(message)
         click.pause()
 
+cli.add_command(install)
+cli.add_command(uninstall)
+
 if __name__ == '__main__':
-    main()
+    # This is expected behaviour for context passing with click library:
+    # pylint: disable=unexpected-keyword-arg
+    cli(obj={})

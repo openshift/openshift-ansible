@@ -131,3 +131,4 @@ def run_ansible(playbook, inventory, env_vars):
                              '--inventory-file={}'.format(inventory),
                              playbook],
                              env=env_vars)
+

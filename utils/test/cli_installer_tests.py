@@ -76,7 +76,7 @@ class OOCliFixture(OOInstallFixture):
         self.cli_args = ["-a", self.work_dir]
 
     def run_cli(self):
-        return self.runner.invoke(cli.main, self.cli_args)
+        return self.runner.invoke(cli.cli, self.cli_args)
 
     def assert_result(self, result, exit_code):
         if result.exception is not None or result.exit_code != exit_code:
@@ -111,8 +111,8 @@ class UnattendedCliTests(OOCliFixture):
         config_file = self.write_config(os.path.join(self.work_dir,
             'ooinstall.conf'), SAMPLE_CONFIG % 'openshift-enterprise')
 
-        self.cli_args.extend(["-c", config_file])
-        result = self.runner.invoke(cli.main, self.cli_args)
+        self.cli_args.extend(["-c", config_file, "install"])
+        result = self.runner.invoke(cli.cli, self.cli_args)
         self.assert_result(result, 0)
 
         load_facts_args = load_facts_mock.call_args[0]
@@ -146,8 +146,8 @@ class UnattendedCliTests(OOCliFixture):
         config_file = self.write_config(os.path.join(self.work_dir,
             'ooinstall.conf'), merged_config)
 
-        self.cli_args.extend(["-c", config_file])
-        result = self.runner.invoke(cli.main, self.cli_args)
+        self.cli_args.extend(["-c", config_file, "install"])
+        result = self.runner.invoke(cli.cli, self.cli_args)
         self.assert_result(result, 0)
 
         # Check the inventory file looks as we would expect:
@@ -182,8 +182,8 @@ class UnattendedCliTests(OOCliFixture):
         config_file = self.write_config(os.path.join(self.work_dir,
             'ooinstall.conf'), SAMPLE_CONFIG % 'openshift-enterprise')
 
-        self.cli_args.extend(["-c", config_file])
-        result = self.runner.invoke(cli.main, self.cli_args)
+        self.cli_args.extend(["-c", config_file, "install"])
+        result = self.runner.invoke(cli.cli, self.cli_args)
         self.assert_result(result, 0)
 
         written_config = self._read_yaml(config_file)
@@ -211,8 +211,8 @@ class UnattendedCliTests(OOCliFixture):
         config_file = self.write_config(os.path.join(self.work_dir,
             'ooinstall.conf'), config)
 
-        self.cli_args.extend(["-c", config_file])
-        result = self.runner.invoke(cli.main, self.cli_args)
+        self.cli_args.extend(["-c", config_file, "install"])
+        result = self.runner.invoke(cli.cli, self.cli_args)
         self.assert_result(result, 0)
 
         written_config = self._read_yaml(config_file)
@@ -282,7 +282,8 @@ class UnattendedCliTests(OOCliFixture):
         self.cli_args.extend(["-c", config_file])
         if ansible_config_cli:
             self.cli_args.extend(["--ansible-config", ansible_config_cli])
-        result = self.runner.invoke(cli.main, self.cli_args)
+        self.cli_args.append("install")
+        result = self.runner.invoke(cli.cli, self.cli_args)
         self.assert_result(result, 0)
 
         # Test the env vars for facts playbook:
@@ -401,7 +402,8 @@ class AttendedCliTests(OOCliFixture):
                                       ssh_user='root',
                                       variant_num=1,
                                       confirm_facts='y')
-        result = self.runner.invoke(cli.main, self.cli_args,
+        self.cli_args.append("install")
+        result = self.runner.invoke(cli.cli, self.cli_args,
             input=cli_input)
         self.assert_result(result, 0)
 
@@ -432,7 +434,8 @@ class AttendedCliTests(OOCliFixture):
                                       ssh_user='root',
                                       variant_num=1,
                                       confirm_facts='y')
-        result = self.runner.invoke(cli.main,
+        self.cli_args.append("install")
+        result = self.runner.invoke(cli.cli,
                                     self.cli_args,
                                     input=cli_input)
         self.assert_result(result, 0)
@@ -454,7 +457,8 @@ class AttendedCliTests(OOCliFixture):
                                         SAMPLE_CONFIG % 'openshift-enterprise')
         cli_input = self._build_input(confirm_facts='y')
         self.cli_args.extend(["-c", config_file])
-        result = self.runner.invoke(cli.main,
+        self.cli_args.append("install")
+        result = self.runner.invoke(cli.cli,
                                     self.cli_args,
                                     input=cli_input)
         self.assert_result(result, 0)
