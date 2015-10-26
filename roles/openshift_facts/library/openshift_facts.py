@@ -362,6 +362,33 @@ def set_metrics_facts_if_unset(facts):
             facts['common']['use_cluster_metrics'] = use_cluster_metrics
     return facts
 
+def set_project_config_facts_if_unset(facts):
+    """ Set Project Configuration facts if not already present in facts dict
+            dict:
+        Args:
+            facts (dict): existing facts
+        Returns:
+            dict: the facts dict updated with the generated Project Configuration
+            facts if they were not already present
+
+    """
+
+    config={
+        'default_node_selector': '',
+        'project_request_message': '',
+        'project_request_template': '',
+        'mcs_allocator_range': 's0:/2',
+        'mcs_labels_per_project': 5,
+        'uid_allocator_range': '1000000000-1999999999/10000'
+    }
+
+    if 'master' in facts:
+        for key,value in config.items():
+            if key not in facts['master']:
+                facts['master'][key] = value
+
+    return facts
+
 def set_identity_providers_if_unset(facts):
     """ Set identity_providers fact if not already present in facts dict
 
@@ -807,6 +834,7 @@ class OpenShiftFacts(object):
         facts = merge_facts(facts, local_facts)
         facts['current_config'] = get_current_config(facts)
         facts = set_url_facts_if_unset(facts)
+        facts = set_project_config_facts_if_unset(facts)
         facts = set_fluentd_facts_if_unset(facts)
         facts = set_node_schedulability(facts)
         facts = set_master_selectors(facts)
