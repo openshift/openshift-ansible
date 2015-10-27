@@ -1,6 +1,4 @@
 ---
-- pause:
-
 # The NFS storage plugin is always enabled since it doesn't require any
 # additional package dependencies
 - name: NFS storage plugin configuration
@@ -13,5 +11,3 @@
 - name: Ceph storage plugin configuration
   include: ceph.yml
   when: "'ceph' in openshift.node.storage_plugin_deps"
-
-- pause:
