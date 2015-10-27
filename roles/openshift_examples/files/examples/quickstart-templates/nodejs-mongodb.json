@@ -102,6 +102,12 @@
             "github": {
               "secret": "${GITHUB_WEBHOOK_SECRET}"
             }
+          },
+          {
+            "type": "Generic",
+            "generic": {
+              "secret": "${GENERIC_WEBHOOK_SECRET}"
+            }
           }
         ]
       }
@@ -298,6 +304,12 @@
       "from": "[a-zA-Z0-9]{40}"
     },
     {
+      "name": "GENERIC_WEBHOOK_SECRET",
+      "description": "A secret string used to configure the Generic webhook",
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{40}"
+    },
+    {
       "name": "DATABASE_SERVICE_NAME",
       "description": "Database service name",
       "value": "mongodb"
@@ -328,7 +340,7 @@
     {
       "name": "MONGODB_IMAGE",
       "description": "Image to use for mongodb",
-      "value": "openshift/mongodb-24-centos7"      
+      "value": "openshift/mongodb-24-centos7"
     }
   ]
 }
