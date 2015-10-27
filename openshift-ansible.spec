@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.2
+Version:        3.0.3
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -225,6 +225,27 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Oct 27 2015 Troy Dawson <tdawson@redhat.com> 3.0.3-1
+- Pylint fixes and ignores for incoming oo-install code. (dgoodwin@redhat.com)
+- Pylint fixes (abutcher@redhat.com)
+- Adding zabbix type and fixing zabbix agent vars (kwoodson@redhat.com)
+- Add atomic-openshift-utils add atomic-openshift-utils to openshift-
+  ansible.spec file (tdawson@redhat.com)
+- Fix quotes (spinolacastro@gmail.com)
+- Use standard library for version comparison. (abutcher@redhat.com)
+- added docker info to the end of docker loop to direct lvm playbook.
+  (twiest@redhat.com)
+- Add missing quotes (spinolacastro@gmail.com)
+- Adding Docker Log Options capabilities (epo@jemba.net)
+- Move version greater_than_fact into openshift_facts (abutcher@redhat.com)
+- Don't include proxy client cert when <3.1 or <1.1 (abutcher@redhat.com)
+- Add proxy client certs to master config. (abutcher@redhat.com)
+- Update imagestreams and quickstarts from origin (sdodson@redhat.com)
+- Get default values from openshift_facts (spinolacastro@gmail.com)
+- Cleanup (spinolacastro@gmail.com)
+- Add missing inventory example (spinolacastro@gmail.com)
+- Custom Project Config (spinolacastro@gmail.com)
+
 * Mon Oct 19 2015 Troy Dawson <tdawson@redhat.com> 3.0.2-1
 - Initial Package
 
