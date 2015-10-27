@@ -1,4 +1,7 @@
-import sys
+# TODO: Temporarily disabled due to importing old code into openshift-ansible
+# repo. We will work on these over time.
+# pylint: disable=bad-continuation,missing-docstring,no-self-use,invalid-name
+
 import copy
 import os
 import ConfigParser
@@ -7,7 +10,7 @@ import yaml
 import ooinstall.cli_installer as cli
 
 from click.testing import CliRunner
-from oo_config_tests import OOInstallFixture
+from test.oo_config_tests import OOInstallFixture
 from mock import patch
 
 
@@ -77,14 +80,14 @@ class OOCliFixture(OOInstallFixture):
 
     def assert_result(self, result, exit_code):
         if result.exception is not None or result.exit_code != exit_code:
-            print("Unexpected result from CLI execution")
-            print("Exit code: %s" % result.exit_code)
-            print("Exception: %s" % result.exception)
+            print "Unexpected result from CLI execution"
+            print "Exit code: %s" % result.exit_code
+            print "Exception: %s" % result.exception
             print result.exc_info
             import traceback
             traceback.print_exception(*result.exc_info)
-            print("Output:\n%s" % result.output)
-            self.assertTrue("Exception during CLI execution", False)
+            print "Output:\n%s" % result.output
+            self.fail("Exception during CLI execution")
 
     def _read_yaml(self, config_file_path):
         f = open(config_file_path, 'r')
@@ -261,6 +264,9 @@ class UnattendedCliTests(OOCliFixture):
         self._ansible_config_test(load_facts_mock, run_ansible_mock,
             config, None, ansible_config)
 
+    #pylint: disable=too-many-arguments
+    # This method allows for drastically simpler tests to write, and the args
+    # are all useful.
     def _ansible_config_test(self, load_facts_mock, run_ansible_mock,
         installer_config, ansible_config_cli=None, expected_result=None):
         """
@@ -287,7 +293,7 @@ class UnattendedCliTests(OOCliFixture):
             self.assertFalse('ANSIBLE_CONFIG' in facts_env_vars)
 
         # Test the env vars for main playbook:
-        playbook, inventory, env_vars = run_ansible_mock.call_args[0]
+        env_vars = run_ansible_mock.call_args[0][2]
         if expected_result:
             self.assertEquals(expected_result, env_vars['ANSIBLE_CONFIG'])
         else:
@@ -302,7 +308,9 @@ class AttendedCliTests(OOCliFixture):
         self.config_file = os.path.join(self.work_dir, 'config.yml')
         self.cli_args.extend(["-c", self.config_file])
 
-    def _build_input(self, ssh_user=None, hosts=None, variant_num=None, add_nodes=None, confirm_facts=None):
+    #pylint: disable=too-many-arguments
+    def _build_input(self, ssh_user=None, hosts=None, variant_num=None,
+        add_nodes=None, confirm_facts=None):
         """
         Builds a CLI input string with newline characters to simulate
         the full run.

@@ -1,3 +1,7 @@
+# TODO: Temporarily disabled due to importing old code into openshift-ansible
+# repo. We will work on these over time.
+# pylint: disable=bad-continuation,missing-docstring,no-self-use,invalid-name,no-value-for-parameter
+
 import click
 import os
 import re
@@ -5,11 +9,11 @@ import sys
 from ooinstall import install_transactions
 from ooinstall import OOConfig
 from ooinstall.oo_config import Host
-from variants import find_variant, get_variant_version_combos
+from ooinstall.variants import find_variant, get_variant_version_combos
 
 DEFAULT_ANSIBLE_CONFIG = '/usr/share/atomic-openshift-util/ansible.cfg'
 
-def validate_ansible_dir(ctx, param, path):
+def validate_ansible_dir(path):
     if not path:
         raise click.BadParameter('An ansible path must be provided')
     return path
@@ -20,18 +24,9 @@ def is_valid_hostname(hostname):
     if not hostname or len(hostname) > 255:
         return False
     if hostname[-1] == ".":
-        hostname = hostname[:-1] # strip exactly one dot from the right, if present
-    allowed = re.compile("(?!-)[A-Z\d-]{1,63}(?<!-)$", re.IGNORECASE)
+        hostname = hostname[:-1]  # strip exactly one dot from the right, if present
+    allowed = re.compile(r"(?!-)[A-Z\d-]{1,63}(?<!-)$", re.IGNORECASE)
     return all(allowed.match(x) for x in hostname.split("."))
-
-def validate_hostname(ctx, param, hosts):
-    # if '' == hostname or is_valid_hostname(hostname):
-    for hostname in hosts:
-        if not is_valid_hostname(hostname):
-            raise click.BadParameter('"{}" appears to be an invalid hostname. ' \
-                                     'Please double-check this value ' \
-                                     'and re-enter it.'.format(hostname))
-    return hosts
 
 def validate_prompt_hostname(hostname):
     if '' == hostname or is_valid_hostname(hostname):
@@ -402,6 +397,8 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force):
               default="/tmp/ansible.log")
 @click.option('--unattended', '-u', is_flag=True, default=False)
 @click.option('--force', '-f', is_flag=True, default=False)
+#pylint: disable=too-many-arguments
+# Main CLI entrypoint, not much we can do about too many arguments.
 def main(configuration, ansible_playbook_directory, ansible_config, ansible_log_path, unattended, force):
     oo_cfg = OOConfig(configuration)
 
@@ -414,7 +411,7 @@ def main(configuration, ansible_playbook_directory, ansible_config, ansible_log_
         # If we're installed by RPM this file should exist and we can use it as our default:
         oo_cfg.settings['ansible_config'] = DEFAULT_ANSIBLE_CONFIG
 
-    validate_ansible_dir(None, None, ansible_playbook_directory)
+    validate_ansible_dir(ansible_playbook_directory)
     oo_cfg.settings['ansible_playbook_directory'] = ansible_playbook_directory
     oo_cfg.ansible_playbook_directory = ansible_playbook_directory
 
@@ -444,7 +441,7 @@ def main(configuration, ansible_playbook_directory, ansible_config, ansible_log_
     # to confirm the settings for new nodes. Look into this once we're distinguishing
     # between new and pre-existing nodes.
     if len(oo_cfg.calc_missing_facts()) > 0:
-        validated_hosts = confirm_hosts_facts(oo_cfg, callback_facts)
+        confirm_hosts_facts(oo_cfg, callback_facts)
 
     oo_cfg.save_to_disk()
 

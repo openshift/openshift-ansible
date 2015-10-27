@@ -1,3 +1,7 @@
+# TODO: Temporarily disabled due to importing old code into openshift-ansible
+# repo. We will work on these over time.
+# pylint: disable=bad-continuation,missing-docstring,no-self-use,invalid-name,too-many-instance-attributes,too-few-public-methods
+
 import os
 import yaml
 from pkg_resources import resource_filename
@@ -123,7 +127,8 @@ class OOConfig(object):
             self.settings['ansible_plugins_directory'] = resource_filename(__name__, 'ansible_plugins')
 
         if 'ansible_callback_facts_yaml' not in self.settings:
-            self.settings['ansible_callback_facts_yaml'] = '{}/callback_facts.yaml'.format(self.settings['ansible_inventory_directory'])
+            self.settings['ansible_callback_facts_yaml'] = '%s/callback_facts.yaml' % \
+                self.settings['ansible_inventory_directory']
 
         if 'ansible_ssh_user' not in self.settings:
             self.settings['ansible_ssh_user'] = ''

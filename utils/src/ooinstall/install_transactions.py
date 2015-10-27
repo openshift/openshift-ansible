@@ -1,7 +1,11 @@
+# TODO: Temporarily disabled due to importing old code into openshift-ansible
+# repo. We will work on these over time.
+# pylint: disable=bad-continuation,missing-docstring,no-self-use,invalid-name,global-statement,global-variable-not-assigned
+
 import subprocess
 import os
 import yaml
-from variants import find_variant
+from ooinstall.variants import find_variant
 
 CFG = None
 
@@ -21,14 +25,19 @@ def generate_inventory(hosts):
         base_inventory.write('ansible_sudo=true\n')
 
     # Find the correct deployment type for ansible:
-    variant, ver = find_variant(CFG.settings['variant'],
-        version=CFG.settings.get('variant_version', None))
+    ver = find_variant(CFG.settings['variant'],
+        version=CFG.settings.get('variant_version', None))[1]
     base_inventory.write('deployment_type={}\n'.format(ver.ansible_key))
 
     if 'OO_INSTALL_DEVEL_REGISTRY' in os.environ:
-        base_inventory.write('oreg_url=rcm-img-docker01.build.eng.bos.redhat.com:5001/openshift3/ose-${component}:${version}\n')
+        base_inventory.write('oreg_url=rcm-img-docker01.build.eng.bos.redhat.com:'
+            '5001/openshift3/ose-${component}:${version}\n')
     if 'OO_INSTALL_PUDDLE_REPO_ENABLE' in os.environ:
-        base_inventory.write("openshift_additional_repos=[{'id': 'ose-devel', 'name': 'ose-devel', 'baseurl': 'http://buildvm-devops.usersys.redhat.com/puddle/build/AtomicOpenShift/3.1/latest/RH7-RHAOS-3.1/$basearch/os', 'enabled': 1, 'gpgcheck': 0}]\n")
+        base_inventory.write("openshift_additional_repos=[{'id': 'ose-devel', "
+            "'name': 'ose-devel', "
+            "'baseurl': 'http://buildvm-devops.usersys.redhat.com"
+            "/puddle/build/AtomicOpenShift/3.1/latest/RH7-RHAOS-3.1/$basearch/os', "
+            "'enabled': 1, 'gpgcheck': 0}]\n")
     if 'OO_INSTALL_STAGE_REGISTRY' in os.environ:
         base_inventory.write('oreg_url=registry.access.stage.redhat.com/openshift3/ose-${component}:${version}\n')
 
@@ -76,8 +85,8 @@ def load_system_facts(inventory_file, os_facts_path, env_vars):
     status = subprocess.call(['ansible-playbook',
                      '--inventory-file={}'.format(inventory_file),
                      os_facts_path],
-                     env=env_vars)
-                         #                     stdout=FNULL)
+                     env=env_vars,
+                     stdout=FNULL)
     if not status == 0:
         return [], 1
     callback_facts_file = open(CFG.settings['ansible_callback_facts_yaml'], 'r')

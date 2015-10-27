@@ -1,3 +1,7 @@
+# TODO: Temporarily disabled due to importing old code into openshift-ansible
+# repo. We will work on these over time.
+# pylint: disable=bad-continuation,missing-docstring,no-self-use,invalid-name,too-few-public-methods
+
 """
 Defines the supported variants and versions the installer supports, and metadata
 required to run Ansible correctly.
