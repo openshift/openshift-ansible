@@ -208,6 +208,7 @@ BuildArch:     noarch
 %package -n atomic-openshift-utils
 Summary:       Atomic OpenShift Utilities
 BuildRequires: python-setuptools
+Requires:      openshift-ansible-playbooks
 Requires:      ansible
 Requires:      python-click
 Requires:      python-setuptools

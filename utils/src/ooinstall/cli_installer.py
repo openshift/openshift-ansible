@@ -12,6 +12,7 @@ from ooinstall.oo_config import Host
 from ooinstall.variants import find_variant, get_variant_version_combos
 
 DEFAULT_ANSIBLE_CONFIG = '/usr/share/atomic-openshift-util/ansible.cfg'
+DEFAULT_PLAYBOOK_DIR = '/usr/share/ansible/openshift-ansible/'
 
 def validate_ansible_dir(path):
     if not path:
@@ -382,7 +383,7 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force):
     type=click.Path(exists=True,
         file_okay=False,
         dir_okay=True,
-        writable=True,
+        writable=False,
         readable=True),
     # callback=validate_ansible_dir,
     envvar='OO_ANSIBLE_PLAYBOOK_DIRECTORY')
@@ -408,25 +409,27 @@ def cli(ctx, unattended, configuration, ansible_playbook_directory, ansible_conf
     ctx.obj = {}
     ctx.obj['unattended'] = unattended
     ctx.obj['configuration'] = configuration
-    ctx.obj['ansible_playbook_directory'] = ansible_playbook_directory
     ctx.obj['ansible_config'] = ansible_config
     ctx.obj['ansible_log_path'] = ansible_log_path
 
     oo_cfg = OOConfig(ctx.obj['configuration'])
 
-    ansible_playbook_directory = ctx.obj['ansible_playbook_directory']
+    # If no playbook dir on the CLI, check the config:
     if not ansible_playbook_directory:
         ansible_playbook_directory = oo_cfg.settings.get('ansible_playbook_directory', '')
+    # If still no playbook dir, check for the default location:
+    if not ansible_playbook_directory and os.path.exists(DEFAULT_PLAYBOOK_DIR):
+        ansible_playbook_directory = DEFAULT_PLAYBOOK_DIR
+    validate_ansible_dir(ansible_playbook_directory)
+    oo_cfg.settings['ansible_playbook_directory'] = ansible_playbook_directory
+    oo_cfg.ansible_playbook_directory = ansible_playbook_directory
+    ctx.obj['ansible_playbook_directory'] = ansible_playbook_directory
 
     if ctx.obj['ansible_config']:
         oo_cfg.settings['ansible_config'] = ctx.obj['ansible_config']
     elif os.path.exists(DEFAULT_ANSIBLE_CONFIG):
         # If we're installed by RPM this file should exist and we can use it as our default:
         oo_cfg.settings['ansible_config'] = DEFAULT_ANSIBLE_CONFIG
-
-    validate_ansible_dir(ansible_playbook_directory)
-    oo_cfg.settings['ansible_playbook_directory'] = ansible_playbook_directory
-    oo_cfg.ansible_playbook_directory = ansible_playbook_directory
 
     oo_cfg.settings['ansible_log_path'] = ctx.obj['ansible_log_path']
 
