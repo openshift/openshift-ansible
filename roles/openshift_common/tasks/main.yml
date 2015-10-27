@@ -1,7 +1,7 @@
 ---
 - fail:
     msg: Flannel can not be used with openshift sdn
-  when: openshift_use_openshift_sdn | bool and openshift_use_flannel | bool
+  when: openshift_use_openshift_sdn | default(false) | bool and openshift_use_flannel | default(false) | bool
 
 - name: Set common Cluster facts
   openshift_facts:
