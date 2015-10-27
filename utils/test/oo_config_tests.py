@@ -1,3 +1,7 @@
+# TODO: Temporarily disabled due to importing old code into openshift-ansible
+# repo. We will work on these over time.
+# pylint: disable=bad-continuation,missing-docstring,no-self-use,invalid-name
+
 import os
 import unittest
 import tempfile
@@ -64,9 +68,9 @@ class OOInstallFixture(unittest.TestCase):
         up in teardown.
         Returns full path to the file.
         """
-        f = open(path, 'w')
-        f.write(config_str)
-        f.close()
+        cfg_file = open(path, 'w')
+        cfg_file.write(config_str)
+        cfg_file.close()
         return path
 
 
@@ -88,7 +92,7 @@ class OOConfigTests(OOInstallFixture):
 
         self.assertEquals('openshift-enterprise', ooconfig.settings['variant'])
 
-    def test_load_complete_validated_facts(self):
+    def test_load_complete_facts(self):
         cfg_path = self.write_config(os.path.join(self.work_dir,
             'ooinstall.conf'), SAMPLE_CONFIG)
         ooconfig = OOConfig(cfg_path)

@@ -1,20 +1,25 @@
+# TODO: Temporarily disabled due to importing old code into openshift-ansible
+# repo. We will work on these over time.
+# pylint: disable=bad-continuation,missing-docstring,no-self-use,invalid-name,no-value-for-parameter
+
 import os
 import yaml
-from tempfile import mkstemp
 
 class CallbackModule(object):
-    """
-    """
 
     def __init__(self):
         ######################
         # This is ugly stoopid. This should be updated in the following ways:
-        # 1) it should probably only be used for the openshift_facts.yml playbook, so maybe there's some way to check a variable that's set when that playbook is run?
+        # 1) it should probably only be used for the
+        # openshift_facts.yml playbook, so maybe there's some way to check
+        # a variable that's set when that playbook is run?
         try:
             self.hosts_yaml_name = os.environ['OO_INSTALL_CALLBACK_FACTS_YAML']
         except KeyError:
-            raise ValueError('The OO_INSTALL_CALLBACK_FACTS_YAML environment variable must be set.')
-        self.hosts_yaml = os.open(self.hosts_yaml_name, os.O_CREAT | os.O_WRONLY)
+            raise ValueError('The OO_INSTALL_CALLBACK_FACTS_YAML environment '
+                'variable must be set.')
+        self.hosts_yaml = os.open(self.hosts_yaml_name, os.O_CREAT |
+            os.O_WRONLY)
 
     def on_any(self, *args, **kwargs):
         pass
@@ -62,7 +67,9 @@ class CallbackModule(object):
     def playbook_on_task_start(self, name, is_conditional):
         pass
 
-    def playbook_on_vars_prompt(self, varname, private=True, prompt=None, encrypt=None, confirm=False, salt_size=None, salt=None, default=None):
+    #pylint: disable=too-many-arguments
+    def playbook_on_vars_prompt(self, varname, private=True, prompt=None,
+        encrypt=None, confirm=False, salt_size=None, salt=None, default=None):
         pass
 
     def playbook_on_setup(self):
