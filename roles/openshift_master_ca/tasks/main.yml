@@ -18,5 +18,4 @@
       --master={{ openshift.master.api_url }}
       --public-master={{ openshift.master.public_api_url }}
       --cert-dir={{ openshift_master_config_dir }} --overwrite=false
-  args:
-    creates: "{{ openshift_master_config_dir }}/master.server.key"
+  when: master_certs_missing

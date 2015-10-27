@@ -20,6 +20,8 @@
     - admin.kubeconfig
     - master.kubelet-client.crt
     - master.kubelet-client.key
+    - "{{ 'master.proxy-client.crt' if openshift.common.version_greater_than_3_1_or_1_1 else omit }}"
+    - "{{ 'master.proxy-client.key' if openshift.common.version_greater_than_3_1_or_1_1 else omit }}"
     - openshift-master.crt
     - openshift-master.key
     - openshift-master.kubeconfig
@@ -41,6 +43,5 @@
       --public-master={{ item.openshift.master.public_api_url }}
       --cert-dir={{ openshift_generated_configs_dir }}/{{ item.master_cert_subdir }}
       --overwrite=false
-  args:
-    creates: "{{ openshift_generated_configs_dir }}/{{ item.master_cert_subdir }}/master.server.crt"
+  when: master_certs_missing
   with_items: masters_needing_certs

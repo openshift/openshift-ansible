@@ -21,6 +21,7 @@ import ConfigParser
 import copy
 import os
 from distutils.util import strtobool
+from distutils.version import LooseVersion
 
 
 def hostname_valid(hostname):
@@ -528,7 +529,15 @@ def set_deployment_facts_if_unset(facts):
             if deployment_type in ['enterprise', 'online']:
                 data_dir = '/var/lib/openshift'
             facts['common']['data_dir'] = data_dir
-        facts['common']['version'] = get_openshift_version()
+        facts['common']['version'] = version = get_openshift_version()
+        if version is not None:
+            if deployment_type == 'origin':
+                version_gt_3_1_or_1_1 = LooseVersion(version) > LooseVersion('1.0.6')
+            else:
+                version_gt_3_1_or_1_1 = LooseVersion(version) > LooseVersion('3.0.2')
+        else:
+            version_gt_3_1_or_1_1 = True
+        facts['common']['version_greater_than_3_1_or_1_1'] = version_gt_3_1_or_1_1
 
     for role in ('master', 'node'):
         if role in facts:
@@ -659,7 +668,7 @@ def get_openshift_version():
         Returns:
             version: the current openshift version
     """
-    version = ''
+    version = None
 
     if os.path.isfile('/usr/bin/openshift'):
         _, output, _ = module.run_command(['/usr/bin/openshift', 'version'])
