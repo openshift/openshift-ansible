@@ -26,6 +26,10 @@ for Openshift and Atomic Enterprise.
 
 %build
 
+# atomic-openshift-utils install
+pushd utils
+%{__python} setup.py build
+popd
 
 %install
 # Base openshift-ansible install
@@ -72,6 +76,13 @@ cp -rp filter_plugins %{buildroot}%{_datadir}/ansible_plugins/
 
 # openshift-ansible-lookup-plugins install
 cp -rp lookup_plugins %{buildroot}%{_datadir}/ansible_plugins/
+
+# atomic-openshift-utils install
+pushd utils
+%{__python} setup.py install --skip-build --root %{buildroot}
+# Remove this line once the name change has happened
+mv -f %{buildroot}%{_bindir}/oo-install %{buildroot}%{_bindir}/atomic-openshift-installer
+popd
 
 # Base openshift-ansible files
 %files
@@ -189,6 +200,28 @@ BuildArch:     noarch
 
 %files lookup-plugins
 %{_datadir}/ansible_plugins/lookup_plugins
+
+# ----------------------------------------------------------------------------------
+# atomic-openshift-utils subpackage
+# ----------------------------------------------------------------------------------
+
+%package -n atomic-openshift-utils
+Summary:       Atomic OpenShift Utilities
+BuildRequires: python-setuptools
+Requires:      ansible
+Requires:      python-click
+Requires:      python-setuptools
+Requires:      PyYAML
+BuildArch:     noarch
+
+%description -n atomic-openshift-utils
+Atomic OpenShift Utilities includes
+ - atomic-openshift-installer
+ - other utilities
+
+%files -n atomic-openshift-utils
+%{python_sitelib}/ooinstall*
+%{_bindir}/atomic-openshift-installer
 
 
 %changelog
