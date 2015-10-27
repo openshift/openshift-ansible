@@ -1,6 +1,6 @@
 # This deletes *ALL* Origin, Atomic Enterprise Platform and OpenShift
 # Enterprise content installed by ansible.  This includes:
-# 
+#
 #    configuration
 #    containers
 #    example templates and imagestreams
@@ -13,6 +13,14 @@
   sudo: yes
 
   tasks:
+    - name: Detecting Operating System
+      shell: ls /run/ostree-booted
+      ignore_errors: yes
+      register: ostree_output
+
+    - set_fact:
+        is_atomic: ostree_output.rc == 0
+
     - service: name={{ item }} state=stopped
       with_items:
         - atomic-enterprise-master
@@ -33,6 +41,7 @@
         - origin-node
 
     - yum: name={{ item }} state=absent
+      when: not is_atomic
       with_items:
         - atomic-enterprise
         - atomic-enterprise-master
