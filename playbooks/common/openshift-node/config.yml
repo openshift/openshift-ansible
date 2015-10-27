@@ -52,7 +52,7 @@
       etcd_cert_subdir: openshift-node-{{ openshift.common.hostname }}
       etcd_cert_config_dir: "{{ openshift.common.config_base }}/node"
       etcd_cert_prefix: node.etcd-
-    when: groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config
+    when: groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config and (openshift.common.use_flannel | bool)
 
 - name: Create temp directory for syncing certs
   hosts: localhost
