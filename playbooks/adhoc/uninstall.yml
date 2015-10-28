@@ -16,10 +16,11 @@
     - name: Detecting Operating System
       shell: ls /run/ostree-booted
       ignore_errors: yes
+      failed_when: false
       register: ostree_output
 
     - set_fact:
-        is_atomic: ostree_output.rc == 0
+        is_atomic: "{{ ostree_output.rc == 0 }}"
 
     - service: name={{ item }} state=stopped
       with_items:
@@ -41,7 +42,7 @@
         - origin-node
 
     - yum: name={{ item }} state=absent
-      when: not is_atomic
+      when: not is_atomic | bool
       with_items:
         - atomic-enterprise
         - atomic-enterprise-master
