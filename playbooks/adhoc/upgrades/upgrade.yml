@@ -1,11 +1,36 @@
 ---
-- name: Verify deployment type
+- name: Verify upgrade can proceed
   hosts: masters
   tasks:
   # Checking the global deployment type rather than host facts, this is about
   # what the user is requesting.
     - fail: msg="Deployment type enterprise not supported for upgrade"
       when: deployment_type == "enterprise"
+
+- name: Backup etcd
+  hosts: masters
+  vars:
+    embedded_etcd: "{{ openshift.master.embedded_etcd }}"
+  roles:
+  - openshift_facts
+  tasks:
+  - name: display all variables set for the current host
+    debug:
+      var: hostvars[inventory_hostname]
+  - debug: var=embedded_etcd
+  - name: Check available data dir disk space
+    shell: >
+      df --output=avail -k {{ openshift.common.data_dir }} | tail -n 1
+    register: avail_disk
+    when: embedded_etcd | bool
+  - debug: var=avail_disk.stdout
+  - name: Check current etcd disk usage
+    shell: >
+      df --output=avail -k /var/lib/openshift/openshift.local.etcd/ | tail -n 1
+    register: etc_disk_usage
+    when: embedded_etcd | bool
+  - debug: var=etc_disk_usage.stdout
+  - fail: msg="All done for now."
 
 - name: Re-Run cluster configuration to apply latest configuration changes
   include: ../../common/openshift-cluster/config.yml

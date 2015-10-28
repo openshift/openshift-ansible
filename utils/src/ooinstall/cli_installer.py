@@ -191,7 +191,7 @@ Notes:
     facts_confirmed = click.confirm("Do the above facts look correct?")
     if not facts_confirmed:
         message = """
-Edit %s with the desired values and rerun oo-install with --unattended .
+Edit %s with the desired values and re-run with --unattended .
 """ % oo_cfg.config_path
         click.echo(message)
         # Make sure we actually write out the config file.
@@ -477,6 +477,19 @@ def upgrade(ctx):
         if not proceed:
             click.echo("Upgrade cancelled.")
             sys.exit(0)
+
+    # Update config to reflect the version we're targetting, we'll write
+    # to disk once ansible completes successfully, not before.
+    old_variant = oo_cfg.settings['variant']
+    old_version = oo_cfg.settings['variant_version']
+    if oo_cfg.settings['variant'] == 'enterprise':
+        oo_cfg.settings['variant'] = 'openshift-enterprise'
+    variant, version = find_variant(oo_cfg.settings['variant'])
+    oo_cfg.settings['variant_version'] = version.name
+    click.echo("Upgrading from %s %s to %s %s" % (
+        old_variant, old_version, oo_cfg.settings['variant'],
+        oo_cfg.settings['variant_version']))
+
     install_transactions.run_upgrade_playbook()
 
 

@@ -14,7 +14,6 @@ def set_config(cfg):
     CFG = cfg
 
 def generate_inventory(hosts):
-    print hosts
     global CFG
     base_inventory_path = CFG.settings['ansible_inventory_path']
     base_inventory = open(base_inventory_path, 'w')
