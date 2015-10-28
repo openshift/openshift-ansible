@@ -1,6 +1,6 @@
 Summary:       OpenShift Ansible Scripts for working with metadata hosts
 Name:          openshift-ansible-bin
-Version:       0.0.19
+Version:       0.0.20
 Release:       1%{?dist}
 License:       ASL 2.0
 URL:           https://github.com/openshift/openshift-ansible
@@ -42,6 +42,9 @@ cp -p openshift_ansible.conf.example %{buildroot}/etc/openshift_ansible/openshif
 %config(noreplace) /etc/openshift_ansible/
 
 %changelog
+* Wed Oct 28 2015 Kenny Woodson <kwoodson@redhat.com> 0.0.20-1
+- new package built with tito
+
 * Thu Aug 20 2015 Kenny Woodson <kwoodson@redhat.com> 0.0.19-1
 - Updated to show private ips when doing a list (kwoodson@redhat.com)
 - Updated to read config first and default to users home dir
