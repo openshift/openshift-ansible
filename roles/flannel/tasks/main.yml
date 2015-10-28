@@ -18,7 +18,6 @@
     backrefs: yes
     regexp: "^(FLANNEL_ETCD_KEY=)"
     line: '\1{{ flannel_etcd_key }}'
-  notify:
 
 - name: Set flannel options
   sudo: true
