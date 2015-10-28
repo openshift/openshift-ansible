@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.3
+Version:        3.0.4
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -225,6 +225,27 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Oct 28 2015 Kenny Woodson <kwoodson@redhat.com> 3.0.4-1
+- Removing spec files. (kwoodson@redhat.com)
+- Updated example (kwoodson@redhat.com)
+- Automatic commit of package [openshift-ansible-inventory] release [0.0.11-1].
+  (kwoodson@redhat.com)
+- Automatic commit of package [openshift-ansible-bin] release [0.0.21-1].
+  (kwoodson@redhat.com)
+- Automatic commit of package [openshift-ansible-inventory] release [0.0.10-1].
+  (kwoodson@redhat.com)
+- Automatic commit of package [openshift-ansible-bin] release [0.0.20-1].
+  (kwoodson@redhat.com)
+- Adding tito releasers configuration (bleanhar@redhat.com)
+- Bug fixes for the uninstall playbook (bleanhar@redhat.com)
+- Adding clone vars and groups. Renamed hostvars to extra_vars.
+  (kwoodson@redhat.com)
+- Start tracking docker info execution time (jdiaz@redhat.com)
+- The uninstall playbook should remove the kubeconfig for non-root installs
+  (bleanhar@redhat.com)
+- Adding uninstall support for Atomic Host (bleanhar@redhat.com)
+- add examples for SDN configuration (jdetiber@redhat.com)
+
 * Tue Oct 27 2015 Troy Dawson <tdawson@redhat.com> 3.0.3-1
 - Pylint fixes and ignores for incoming oo-install code. (dgoodwin@redhat.com)
 - Pylint fixes (abutcher@redhat.com)
