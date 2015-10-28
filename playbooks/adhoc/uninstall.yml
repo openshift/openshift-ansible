@@ -136,6 +136,7 @@
         - /etc/sysconfig/origin-master
         - /etc/sysconfig/origin-node
         - /root/.kube
+        - "~{{ ansible_ssh_user }}/.kube"
         - /usr/share/openshift/examples
         - /var/lib/atomic-enterprise
         - /var/lib/etcd
