@@ -1,6 +1,6 @@
 Summary:       OpenShift Ansible Inventories
 Name:          openshift-ansible-inventory
-Version:       0.0.9
+Version:       0.0.10
 Release:       1%{?dist}
 License:       ASL 2.0
 URL:           https://github.com/openshift/openshift-ansible
@@ -36,6 +36,9 @@ cp -p gce/hosts/gce.py %{buildroot}/usr/share/ansible/inventory/gce
 /usr/share/ansible/inventory/gce/gce.py*
 
 %changelog
+* Wed Oct 28 2015 Kenny Woodson <kwoodson@redhat.com> 0.0.10-1
+- new package built with tito
+
 * Thu Aug 20 2015 Kenny Woodson <kwoodson@redhat.com> 0.0.9-1
 - Merge pull request #408 from sdodson/docker-buildvm (bleanhar@redhat.com)
 - Merge pull request #428 from jtslear/issue-383
