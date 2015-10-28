@@ -1,4 +1,12 @@
 ---
+- name: Verify deployment type
+  hosts: masters
+  tasks:
+  # Checking the global deployment type rather than host facts, this is about
+  # what the user is requesting.
+    - fail: msg="Deployment type enterprise not supported for upgrade"
+      when: deployment_type == "enterprise"
+
 - name: Re-Run cluster configuration to apply latest configuration changes
   include: ../../common/openshift-cluster/config.yml
   vars:

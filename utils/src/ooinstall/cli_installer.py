@@ -459,6 +459,26 @@ def uninstall(ctx):
     install_transactions.run_uninstall_playbook()
 
 
+@click.command()
+@click.pass_context
+def upgrade(ctx):
+    oo_cfg = ctx.obj['oo_cfg']
+
+    if len(oo_cfg.hosts) == 0:
+        click.echo("No hosts defined in: %s" % oo_cfg['configuration'])
+        sys.exit(1)
+
+    click.echo("OpenShift will be upgraded on the following hosts:\n")
+    if not ctx.obj['unattended']:
+        # Prompt interactively to confirm:
+        for host in oo_cfg.hosts:
+            click.echo("  * %s" % host.name)
+        proceed = click.confirm("\nDo you wish to proceed?")
+        if not proceed:
+            click.echo("Upgrade cancelled.")
+            sys.exit(0)
+    install_transactions.run_upgrade_playbook()
+
 
 @click.command()
 @click.option('--force', '-f', is_flag=True, default=False)
@@ -523,6 +543,7 @@ http://docs.openshift.com/enterprise/latest/admin_guide/overview.html
         click.pause()
 
 cli.add_command(install)
+cli.add_command(upgrade)
 cli.add_command(uninstall)
 
 if __name__ == '__main__':
