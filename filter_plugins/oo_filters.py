@@ -8,6 +8,8 @@ Custom filters for use in openshift-ansible
 from ansible import errors
 from operator import itemgetter
 import pdb
+import re
+import json
 
 
 class FilterModule(object):
@@ -48,12 +50,12 @@ class FilterModule(object):
 
         return [item for sublist in data for item in sublist]
 
-
     @staticmethod
     def oo_collect(data, attribute=None, filters=None):
         ''' This takes a list of dict and collects all attributes specified into a
-            list If filter is specified then we will include all items that match
-            _ALL_ of filters.
+            list. If filter is specified then we will include all items that
+            match _ALL_ of filters.  If a dict entry is missing the key in a
+            filter it will be excluded from the match.
             Ex: data = [ {'a':1, 'b':5, 'z': 'z'}, # True, return
                          {'a':2, 'z': 'z'},        # True, return
                          {'a':3, 'z': 'z'},        # True, return
@@ -71,14 +73,33 @@ class FilterModule(object):
 
         if filters is not None:
             if not issubclass(type(filters), dict):
-                raise errors.AnsibleFilterError("|fialed expects filter to be a"
+                raise errors.AnsibleFilterError("|failed expects filter to be a"
                                                 " dict")
             retval = [FilterModule.get_attr(d, attribute) for d in data if (
-                all([d[key] == filters[key] for key in filters]))]
+                all([d.get(key, None) == filters[key] for key in filters]))]
         else:
             retval = [FilterModule.get_attr(d, attribute) for d in data]
 
         return retval
+
+    @staticmethod
+    def oo_select_keys_from_list(data, keys):
+        ''' This returns a list, which contains the value portions for the keys
+            Ex: data = { 'a':1, 'b':2, 'c':3 }
+                keys = ['a', 'c']
+                returns [1, 3]
+        '''
+
+        if not issubclass(type(data), list):
+            raise errors.AnsibleFilterError("|failed expects to filter on a list")
+
+        if not issubclass(type(keys), list):
+            raise errors.AnsibleFilterError("|failed expects first param is a list")
+
+        # Gather up the values for the list of keys passed in
+        retval = [FilterModule.oo_select_keys(item, keys) for item in data]
+
+        return FilterModule.oo_flatten(retval)
 
     @staticmethod
     def oo_select_keys(data, keys):
@@ -95,7 +116,7 @@ class FilterModule(object):
             raise errors.AnsibleFilterError("|failed expects first param is a list")
 
         # Gather up the values for the list of keys passed in
-        retval = [data[key] for key in keys]
+        retval = [data[key] for key in keys if data.has_key(key)]
 
         return retval
 
@@ -128,6 +149,16 @@ class FilterModule(object):
             rval.append("%s%s%s" % (item['key'], joiner, item['value']))
 
         return rval
+
+    @staticmethod
+    def oo_combine_dict(data, in_joiner='=', out_joiner=' '):
+        '''Take a dict in the form of { 'key': 'value', 'key': 'value' } and
+           arrange them as a string 'key=value key=value'
+        '''
+        if not issubclass(type(data), dict):
+            raise errors.AnsibleFilterError("|failed expects first param is a dict")
+
+        return out_joiner.join([in_joiner.join([k, v]) for k, v in data.items()])
 
     @staticmethod
     def oo_ami_selector(data, image_name):
@@ -174,9 +205,9 @@ class FilterModule(object):
         '''
         if not issubclass(type(data), dict):
             raise errors.AnsibleFilterError("|failed expects first param is a dict")
-        if host_type not in ['master', 'node']:
-            raise errors.AnsibleFilterError("|failed expects either master or node"
-                                            " host type")
+        if host_type not in ['master', 'node', 'etcd']:
+            raise errors.AnsibleFilterError("|failed expects etcd, master or node"
+                                            " as the host type")
 
         root_vol = data[host_type]['root']
         root_vol['device_name'] = '/dev/sda1'
@@ -194,6 +225,13 @@ class FilterModule(object):
                 docker_vol.pop('delete_on_termination', None)
                 docker_vol['ephemeral'] = 'ephemeral0'
             return [root_vol, docker_vol]
+        elif host_type == 'etcd':
+            etcd_vol = data[host_type]['etcd']
+            etcd_vol['device_name'] = '/dev/xvdb'
+            etcd_vol['delete_on_termination'] = True
+            if etcd_vol['device_type'] != 'io1':
+                etcd_vol.pop('iops', None)
+            return [root_vol, etcd_vol]
         return [root_vol]
 
     @staticmethod
@@ -222,10 +260,78 @@ class FilterModule(object):
         # Gather up the values for the list of keys passed in
         return [x for x in data if x[filter_attr]]
 
+    @staticmethod
+    def oo_parse_heat_stack_outputs(data):
+        ''' Formats the HEAT stack output into a usable form
+
+            The goal is to transform something like this:
+
+            +---------------+-------------------------------------------------+
+            | Property      | Value                                           |
+            +---------------+-------------------------------------------------+
+            | capabilities  | [] |                                            |
+            | creation_time | 2015-06-26T12:26:26Z |                          |
+            | description   | OpenShift cluster |                             |
+            | …             | …                                               |
+            | outputs       | [                                               |
+            |               |   {                                             |
+            |               |     "output_value": "value_A"                   |
+            |               |     "description": "This is the value of Key_A" |
+            |               |     "output_key": "Key_A"                       |
+            |               |   },                                            |
+            |               |   {                                             |
+            |               |     "output_value": [                           |
+            |               |       "value_B1",                               |
+            |               |       "value_B2"                                |
+            |               |     ],                                          |
+            |               |     "description": "This is the value of Key_B" |
+            |               |     "output_key": "Key_B"                       |
+            |               |   },                                            |
+            |               | ]                                               |
+            | parameters    | {                                               |
+            | …             | …                                               |
+            +---------------+-------------------------------------------------+
+
+            into something like this:
+
+            {
+              "Key_A": "value_A",
+              "Key_B": [
+                "value_B1",
+                "value_B2"
+              ]
+            }
+        '''
+
+        # Extract the “outputs” JSON snippet from the pretty-printed array
+        in_outputs = False
+        outputs = ''
+
+        line_regex = re.compile(r'\|\s*(.*?)\s*\|\s*(.*?)\s*\|')
+        for line in data['stdout_lines']:
+            match = line_regex.match(line)
+            if match:
+                if match.group(1) == 'outputs':
+                    in_outputs = True
+                elif match.group(1) != '':
+                    in_outputs = False
+                if in_outputs:
+                    outputs += match.group(2)
+
+        outputs = json.loads(outputs)
+
+        # Revamp the “outputs” to put it in the form of a “Key: value” map
+        revamped_outputs = {}
+        for output in outputs:
+            revamped_outputs[output['output_key']] = output['output_value']
+
+        return revamped_outputs
+
     def filters(self):
         ''' returns a mapping of filters to methods '''
         return {
             "oo_select_keys": self.oo_select_keys,
+            "oo_select_keys_from_list": self.oo_select_keys_from_list,
             "oo_collect": self.oo_collect,
             "oo_flatten": self.oo_flatten,
             "oo_pdb": self.oo_pdb,
@@ -233,6 +339,8 @@ class FilterModule(object):
             "oo_ami_selector": self.oo_ami_selector,
             "oo_ec2_volume_definition": self.oo_ec2_volume_definition,
             "oo_combine_key_value": self.oo_combine_key_value,
+            "oo_combine_dict": self.oo_combine_dict,
             "oo_split": self.oo_split,
-            "oo_filter_list": self.oo_filter_list
+            "oo_filter_list": self.oo_filter_list,
+            "oo_parse_heat_stack_outputs": self.oo_parse_heat_stack_outputs
         }

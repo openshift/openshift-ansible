@@ -1,0 +1,13 @@
+---
+- name: Test if cluster is already configured
+  command: pcs status
+  register: pcs_status
+  changed_when: false
+  failed_when: false
+  when: not openshift.master.cluster_defer_ha | bool
+
+- include: configure.yml
+  when: "pcs_status | failed and 'Error: cluster is not currently running on this node' in pcs_status.stderr"
+
+- include: configure_deferred.yml
+  when: openshift.master.cluster_defer_ha | bool

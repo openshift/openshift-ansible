@@ -1,0 +1,412 @@
+---
+g_template_app_zabbix_server:
+   name: Template App Zabbix Server
+   zitems:
+   - key: housekeeper_creates
+     applications:
+     - Zabbix server
+     description: A simple count of the number of partition creates output by the housekeeper script.
+     units: ''
+     value_type: int
+     zabbix_type: internal
+
+   - key: housekeeper_drops
+     applications:
+     - Zabbix server
+     description: A simple count of the number of partition drops output by the housekeeper script.
+     units: ''
+     value_type: int
+     zabbix_type: internal
+
+   - key: housekeeper_errors
+     applications:
+     - Zabbix server
+     description: A simple count of the number of errors output by the housekeeper script.
+     units: ''
+     value_type: int
+     zabbix_type: internal
+
+   - key: housekeeper_total
+     applications:
+     - Zabbix server
+     description: A simple count of the total number of lines output by the housekeeper
+       script.
+     units: ''
+     value_type: int
+     zabbix_type: internal
+
+   - key: zabbix[process,alerter,avg,busy]
+     applications:
+     - Zabbix server
+     description: ''
+     units: '%'
+     value_type: float
+     zabbix_type: internal
+
+   - key: zabbix[process,configuration syncer,avg,busy]
+     applications:
+     - Zabbix server
+     description: ''
+     units: '%'
+     value_type: float
+     zabbix_type: internal
+
+   - key: zabbix[process,db watchdog,avg,busy]
+     applications:
+     - Zabbix server
+     description: ''
+     units: '%'
+     value_type: float
+     zabbix_type: internal
+
+   - key: zabbix[process,discoverer,avg,busy]
+     applications:
+     - Zabbix server
+     description: ''
+     units: '%'
+     value_type: float
+     zabbix_type: internal
+
+   - key: zabbix[process,escalator,avg,busy]
+     applications:
+     - Zabbix server
+     description: ''
+     units: '%'
+     value_type: float
+     zabbix_type: internal
+
+   - key: zabbix[process,history syncer,avg,busy]
+     applications:
+     - Zabbix server
+     description: ''
+     units: '%'
+     value_type: float
+     zabbix_type: internal
+
+   - key: zabbix[process,housekeeper,avg,busy]
+     applications:
+     - Zabbix server
+     description: ''
+     units: '%'
+     value_type: float
+     zabbix_type: internal
+
+   - key: zabbix[process,http poller,avg,busy]
+     applications:
+     - Zabbix server
+     description: ''
+     units: '%'
+     value_type: float
+     zabbix_type: internal
+
+   - key: zabbix[process,icmp pinger,avg,busy]
+     applications:
+     - Zabbix server
+     description: ''
+     units: '%'
+     value_type: float
+     zabbix_type: internal
+
+   - key: zabbix[process,ipmi poller,avg,busy]
+     applications:
+     - Zabbix server
+     description: ''
+     units: '%'
+     value_type: float
+     zabbix_type: internal
+
+   - key: zabbix[process,java poller,avg,busy]
+     applications:
+     - Zabbix server
+     description: ''
+     units: '%'
+     value_type: float
+     zabbix_type: internal
+
+   - key: zabbix[process,node watcher,avg,busy]
+     applications:
+     - Zabbix server
+     description: ''
+     units: '%'
+     value_type: float
+     zabbix_type: internal
+
+   - key: zabbix[process,poller,avg,busy]
+     applications:
+     - Zabbix server
+     description: ''
+     units: '%'
+     value_type: float
+     zabbix_type: internal
+
+   - key: zabbix[process,proxy poller,avg,busy]
+     applications:
+     - Zabbix server
+     description: ''
+     units: '%'
+     value_type: float
+     zabbix_type: internal
+
+   - key: zabbix[process,self-monitoring,avg,busy]
+     applications:
+     - Zabbix server
+     description: ''
+     units: '%'
+     value_type: float
+     zabbix_type: internal
+
+   - key: zabbix[process,snmp trapper,avg,busy]
+     applications:
+     - Zabbix server
+     description: ''
+     units: '%'
+     value_type: float
+     zabbix_type: internal
+
+   - key: zabbix[process,timer,avg,busy]
+     applications:
+     - Zabbix server
+     description: ''
+     units: '%'
+     value_type: float
+     zabbix_type: internal
+
+   - key: zabbix[process,trapper,avg,busy]
+     applications:
+     - Zabbix server
+     description: ''
+     units: '%'
+     value_type: float
+     zabbix_type: internal
+
+   - key: zabbix[process,unreachable poller,avg,busy]
+     applications:
+     - Zabbix server
+     description: ''
+     units: '%'
+     value_type: float
+     zabbix_type: internal
+
+   - key: zabbix[queue,10m]
+     applications:
+     - Zabbix server
+     description: ''
+     units: ''
+     value_type: int
+     zabbix_type: internal
+     interval: 600
+
+   - key: zabbix[queue]
+     applications:
+     - Zabbix server
+     description: ''
+     units: ''
+     value_type: int
+     zabbix_type: internal
+     interval: 600
+
+   - key: zabbix[rcache,buffer,pfree]
+     applications:
+     - Zabbix server
+     description: ''
+     units: ''
+     value_type: float
+     zabbix_type: internal
+
+   - key: zabbix[wcache,history,pfree]
+     applications:
+     - Zabbix server
+     description: ''
+     units: ''
+     value_type: float
+     zabbix_type: internal
+
+   - key: zabbix[wcache,text,pfree]
+     applications:
+     - Zabbix server
+     description: ''
+     units: ''
+     value_type: float
+     zabbix_type: internal
+
+   - key: zabbix[wcache,trend,pfree]
+     applications:
+     - Zabbix server
+     description: ''
+     units: ''
+     value_type: float
+     zabbix_type: internal
+
+   - key: zabbix[wcache,values]
+     applications:
+     - Zabbix server
+     description: ''
+     units: ''
+     value_type: float
+     zabbix_type: internal
+     delta: 1 # speed per second
+
+   ztriggers:
+   - description: "There has been unexpected output while running the housekeeping script\
+       \ on the Zabbix. There are only three kinds of lines we expect to see in the output,\
+       \ and we've gotten something enw.\r\n\r\nCheck the script's output in /var/lib/zabbix/state\
+       \ for more details."
+     expression: '{Template App Zabbix Server:housekeeper_errors.last(0)}+{Template App Zabbix Server:housekeeper_creates.last(0)}+{Template App Zabbix Server:housekeeper_drops.last(0)}<>{Template App Zabbix Server:housekeeper_total.last(0)}'
+     name: Unexpected output in Zabbix DB Housekeeping
+     priority: avg
+     url: https://github.com/openshift/ops-sop/blob/master/Alerts/Zabbix_DB_Housekeeping.asciidoc
+
+   - description: An error has occurred during running the housekeeping script on the Zabbix. Check the script's output in /var/lib/zabbix/state for more details.
+     expression: '{Template App Zabbix Server:housekeeper_errors.last(0)}>0'
+     name: Errors during Zabbix DB Housekeeping
+     priority: high
+     url: https://github.com/openshift/ops-sop/blob/master/Alerts/Zabbix_state_check.asciidoc
+
+   - description: ''
+     expression: '{Template App Zabbix Server:zabbix[process,alerter,avg,busy].min(600)}>75'
+     name: Zabbix alerter processes more than 75% busy
+     priority: avg
+     url: https://github.com/openshift/ops-sop/blob/master/Alerts/Zabbix_state_check.asciidoc
+
+   - description: ''
+     expression: '{Template App Zabbix Server:zabbix[process,configuration syncer,avg,busy].min(600)}>75'
+     name: Zabbix configuration syncer processes more than 75% busy
+     priority: avg
+     url: https://github.com/openshift/ops-sop/blob/master/Alerts/Zabbix_state_check.asciidoc
+
+   - description: ''
+     expression: '{Template App Zabbix Server:zabbix[process,db watchdog,avg,busy].min(600)}>75'
+     name: Zabbix db watchdog processes more than 75% busy
+     priority: avg
+     url: https://github.com/openshift/ops-sop/blob/master/Alerts/Zabbix_state_check.asciidoc
+
+   - description: ''
+     expression: '{Template App Zabbix Server:zabbix[process,discoverer,avg,busy].min(600)}>75'
+     name: Zabbix discoverer processes more than 75% busy
+     priority: avg
+     url: https://github.com/openshift/ops-sop/blob/master/Alerts/Zabbix_state_check.asciidoc
+
+   - description: ''
+     expression: '{Template App Zabbix Server:zabbix[process,escalator,avg,busy].min(600)}>75'
+     name: Zabbix escalator processes more than 75% busy
+     priority: avg
+     url: https://github.com/openshift/ops-sop/blob/master/Alerts/Zabbix_state_check.asciidoc
+
+   - description: ''
+     expression: '{Template App Zabbix Server:zabbix[process,history syncer,avg,busy].min(600)}>75'
+     name: Zabbix history syncer processes more than 75% busy
+     priority: avg
+     url: https://github.com/openshift/ops-sop/blob/master/Alerts/Zabbix_state_check.asciidoc
+
+   - description: ''
+     expression: '{Template App Zabbix Server:zabbix[process,housekeeper,avg,busy].min(1800)}>75'
+     name: Zabbix housekeeper processes more than 75% busy
+     priority: avg
+     url: https://github.com/openshift/ops-sop/blob/master/Alerts/Zabbix_state_check.asciidoc
+
+   - description: ''
+     expression: '{Template App Zabbix Server:zabbix[process,http poller,avg,busy].min(600)}>75'
+     name: Zabbix http poller processes more than 75% busy
+     priority: avg
+     url: https://github.com/openshift/ops-sop/blob/master/Alerts/Zabbix_state_check.asciidoc
+
+   - description: ''
+     expression: '{Template App Zabbix Server:zabbix[process,icmp pinger,avg,busy].min(600)}>75'
+     name: Zabbix icmp pinger processes more than 75% busy
+     priority: avg
+     url: https://github.com/openshift/ops-sop/blob/master/Alerts/Zabbix_state_check.asciidoc
+
+   - description: ''
+     expression: '{Template App Zabbix Server:zabbix[process,ipmi poller,avg,busy].min(600)}>75'
+     name: Zabbix ipmi poller processes more than 75% busy
+     priority: avg
+     url: https://github.com/openshift/ops-sop/blob/master/Alerts/Zabbix_state_check.asciidoc
+
+   - description: ''
+     expression: '{Template App Zabbix Server:zabbix[process,java poller,avg,busy].min(600)}>75'
+     name: Zabbix java poller processes more than 75% busy
+     priority: avg
+     url: https://github.com/openshift/ops-sop/blob/master/Alerts/Zabbix_state_check.asciidoc
+
+   - description: ''
+     expression: '{Template App Zabbix Server:zabbix[process,node watcher,avg,busy].min(600)}>75'
+     name: Zabbix node watcher processes more than 75% busy
+     priority: avg
+     url: https://github.com/openshift/ops-sop/blob/master/Alerts/Zabbix_state_check.asciidoc
+
+   - description: ''
+     expression: '{Template App Zabbix Server:zabbix[process,poller,avg,busy].min(600)}>75'
+     name: Zabbix poller processes more than 75% busy
+     priority: high
+     url: https://github.com/openshift/ops-sop/blob/master/Alerts/Zabbix_state_check.asciidoc
+
+   - description: ''
+     expression: '{Template App Zabbix Server:zabbix[process,proxy poller,avg,busy].min(600)}>75'
+     name: Zabbix proxy poller processes more than 75% busy
+     priority: avg
+     url: https://github.com/openshift/ops-sop/blob/master/Alerts/Zabbix_state_check.asciidoc
+
+   - description: ''
+     expression: '{Template App Zabbix Server:zabbix[process,self-monitoring,avg,busy].min(600)}>75'
+     name: Zabbix self-monitoring processes more than 75% busy
+     priority: avg
+     url: https://github.com/openshift/ops-sop/blob/master/Alerts/Zabbix_state_check.asciidoc
+
+   - description: ''
+     expression: '{Template App Zabbix Server:zabbix[process,snmp trapper,avg,busy].min(600)}>75'
+     name: Zabbix snmp trapper processes more than 75% busy
+     priority: avg
+     url: https://github.com/openshift/ops-sop/blob/master/Alerts/Zabbix_state_check.asciidoc
+
+   - description: Timer processes usually are busy because they have to process time
+       based trigger functions
+     expression: '{Template App Zabbix Server:zabbix[process,timer,avg,busy].min(600)}>75'
+     name: Zabbix timer processes more than 75% busy
+     priority: avg
+     url: https://github.com/openshift/ops-sop/blob/master/Alerts/Zabbix_state_check.asciidoc
+
+   - description: ''
+     expression: '{Template App Zabbix Server:zabbix[process,trapper,avg,busy].min(600)}>75'
+     name: Zabbix trapper processes more than 75% busy
+     priority: avg
+     url: https://github.com/openshift/ops-sop/blob/master/Alerts/Zabbix_state_check.asciidoc
+
+   - description: ''
+     expression: '{Template App Zabbix Server:zabbix[process,unreachable poller,avg,busy].min(600)}>75'
+     name: Zabbix unreachable poller processes more than 75% busy
+     priority: avg
+     url: https://github.com/openshift/ops-sop/blob/master/Alerts/Zabbix_state_check.asciidoc
+
+   - description: "This alert generally indicates a performance problem or a problem\
+       \ with the zabbix-server or proxy.\r\n\r\nThe first place to check for issues\
+       \ is Administration > Queue. Be sure to check the general view and the per-proxy\
+       \ view."
+     expression: '{Template App Zabbix Server:zabbix[queue,10m].min(600)}>1000'
+     name: More than 1000 items having missing data for more than 10 minutes
+     priority: high
+     url: https://github.com/openshift/ops-sop/blob/master/Alerts/data_lost_overview_plugin.asciidoc
+
+   - description: Consider increasing CacheSize in the zabbix_server.conf configuration
+       file
+     expression: '{Template App Zabbix Server:zabbix[rcache,buffer,pfree].min(600)}<5'
+     name: Less than 5% free in the configuration cache
+     priority: info
+     url: https://github.com/openshift/ops-sop/blob/master/Alerts/check_cache.asciidoc
+
+   - description: ''
+     expression: '{Template App Zabbix Server:zabbix[wcache,history,pfree].min(600)}<25'
+     name: Less than 25% free in the history cache
+     priority: avg
+     url: https://github.com/openshift/ops-sop/blob/master/Alerts/check_cache.asciidoc
+
+   - description: ''
+     expression: '{Template App Zabbix Server:zabbix[wcache,text,pfree].min(600)}<25'
+     name: Less than 25% free in the text history cache
+     priority: avg
+     url: https://github.com/openshift/ops-sop/blob/master/Alerts/check_cache.asciidoc
+
+   - description: ''
+     expression: '{Template App Zabbix Server:zabbix[wcache,trend,pfree].min(600)}<25'
+     name: Less than 25% free in the trends cache
+     priority: avg
+     url: https://github.com/openshift/ops-sop/blob/master/Alerts/check_cache.asciidoc

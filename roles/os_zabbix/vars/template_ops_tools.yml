@@ -1,0 +1,23 @@
+---
+g_template_ops_tools:
+  name: Template Operations Tools
+  zdiscoveryrules:
+  - name: disc.ops.runner
+    key: disc.ops.runner
+    lifetime: 1
+    description: "Dynamically register operations runner items"
+
+  zitemprototypes:
+  - discoveryrule_key: disc.ops.runner
+    name: "Exit code of ops-runner[{#OSO_COMMAND}]"
+    key: "disc.ops.runner.command.exitcode[{#OSO_COMMAND}]"
+    value_type: int
+    description: "The exit code of the command run from ops-runner"
+    applications:
+    - Ops Runner
+
+  ztriggerprototypes:
+  - name: 'ops-runner[{#OSO_COMMAND}]: non-zero exit code on {HOST.NAME}'
+    expression: '{Template Operations Tools:disc.ops.runner.command.exitcode[{#OSO_COMMAND}].last()}<>0'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_ops_runner_command.asciidoc'
+    priority: average

@@ -1,8 +1,2 @@
 ---
-- name: Run the openshift-master config playbook
-  include: openshift-master/config.yml
-  when: groups.masters is defined and groups.masters
-
-- name: Run the openshift-node config playbook
-  include: openshift-node/config.yml
-  when: groups.nodes is defined and groups.nodes and groups.masters is defined and groups.masters
+- include: openshift-cluster/config.yml

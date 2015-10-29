@@ -1,14 +1,14 @@
 ---
 deployment_vars:
   origin:
-    # fedora, since centos requires marketplace
-    image: ami-acd999c4
+    # centos-7, requires marketplace
+    image: ami-96a818fe
     image_name:
     region: us-east-1
-    ssh_user: fedora
+    ssh_user: centos
     sudo: yes
     keypair: libra
-    type: m3.large
+    type: m4.large
     security_groups: [ 'public' ]
     vpc_subnet:
     assign_public_ip:
@@ -20,7 +20,7 @@ deployment_vars:
     ssh_user: root
     sudo: no
     keypair: libra
-    type: m3.large
+    type: m4.large
     security_groups: [ 'public' ]
     vpc_subnet:
     assign_public_ip:
@@ -32,7 +32,7 @@ deployment_vars:
     ssh_user: ec2-user
     sudo: yes
     keypair: libra
-    type: m3.large
+    type: m4.large
     security_groups: [ 'public' ]
     vpc_subnet:
     assign_public_ip:

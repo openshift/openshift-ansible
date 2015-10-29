@@ -1,6 +1,6 @@
 ---
 galaxy_info:
-  author: Openshift
+  author: OpenShift
   description:  Install and configure openshift-ansible-inventory
   company: Red Hat, Inc
   license: ASL 2.0

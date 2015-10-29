@@ -19,5 +19,5 @@ system_info:
 ssh_authorized_keys:
   - {{ lookup('file', '~/.ssh/id_rsa.pub') }}
 
-bootcmd:
+runcmd:
   - NETWORK_CONFIG=/etc/sysconfig/network-scripts/ifcfg-eth0; if ! grep DHCP_HOSTNAME ${NETWORK_CONFIG}; then echo 'DHCP_HOSTNAME="{{ item[0] }}.example.com"' >> ${NETWORK_CONFIG}; fi; pkill -9 dhclient; service network restart

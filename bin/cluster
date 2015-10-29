@@ -3,8 +3,10 @@
 
 import argparse
 import ConfigParser
-import sys
 import os
+import sys
+import subprocess
+import traceback
 
 
 class Cluster(object):
@@ -22,6 +24,16 @@ class Cluster(object):
                 '-o ControlMaster=auto '
                 '-o ControlPersist=600s '
             )
+            # Because of `UserKnownHostsFile=/dev/null`
+            # our `.ssh/known_hosts` file most probably misses the ssh host public keys
+            # of our servers.
+            # In that case, ansible serializes the execution of ansible modules
+            # because we might be interactively prompted to accept the ssh host public keys.
+            # Because of `StrictHostKeyChecking=no` we know that we won't be prompted
+            # So, we don't want our modules execution to be serialized.
+            os.environ['ANSIBLE_HOST_KEY_CHECKING'] = 'False'
+            # TODO: A more secure way to proceed would consist in dynamically
+            # retrieving the ssh host public keys from the IaaS interface
 
     def get_deployment_type(self, args):
         """
@@ -37,11 +49,11 @@ class Cluster(object):
             deployment_type = os.environ['OS_DEPLOYMENT_TYPE']
         return deployment_type
 
+
     def create(self, args):
         """
         Create an OpenShift cluster for given provider
         :param args: command line arguments provided by user
-        :return: exit status from run command
         """
         env = {'cluster_id': args.cluster_id,
                'deployment_type': self.get_deployment_type(args)}
@@ -50,66 +62,63 @@ class Cluster(object):
 
         env['num_masters'] = args.masters
         env['num_nodes'] = args.nodes
+        env['num_infra'] = args.infra
+        env['num_etcd'] = args.etcd
 
-        return self.action(args, inventory, env, playbook)
+        self.action(args, inventory, env, playbook)
 
     def terminate(self, args):
         """
         Destroy OpenShift cluster
         :param args: command line arguments provided by user
-        :return: exit status from run command
         """
         env = {'cluster_id': args.cluster_id,
                'deployment_type': self.get_deployment_type(args)}
         playbook = "playbooks/{}/openshift-cluster/terminate.yml".format(args.provider)
         inventory = self.setup_provider(args.provider)
 
-        return self.action(args, inventory, env, playbook)
+        self.action(args, inventory, env, playbook)
 
     def list(self, args):
         """
         List VMs in cluster
         :param args: command line arguments provided by user
-        :return: exit status from run command
         """
         env = {'cluster_id': args.cluster_id,
                'deployment_type': self.get_deployment_type(args)}
         playbook = "playbooks/{}/openshift-cluster/list.yml".format(args.provider)
         inventory = self.setup_provider(args.provider)
 
-        return self.action(args, inventory, env, playbook)
+        self.action(args, inventory, env, playbook)
 
     def config(self, args):
         """
         Configure or reconfigure OpenShift across clustered VMs
         :param args: command line arguments provided by user
-        :return: exit status from run command
         """
         env = {'cluster_id': args.cluster_id,
                'deployment_type': self.get_deployment_type(args)}
         playbook = "playbooks/{}/openshift-cluster/config.yml".format(args.provider)
         inventory = self.setup_provider(args.provider)
 
-        return self.action(args, inventory, env, playbook)
+        self.action(args, inventory, env, playbook)
 
     def update(self, args):
         """
         Update to latest OpenShift across clustered VMs
         :param args: command line arguments provided by user
-        :return: exit status from run command
         """
         env = {'cluster_id': args.cluster_id,
                'deployment_type': self.get_deployment_type(args)}
         playbook = "playbooks/{}/openshift-cluster/update.yml".format(args.provider)
         inventory = self.setup_provider(args.provider)
 
-        return self.action(args, inventory, env, playbook)
+        self.action(args, inventory, env, playbook)
 
     def service(self, args):
         """
         Make the same service call across all nodes in the cluster
         :param args: command line arguments provided by user
-        :return: exit status from run command
         """
         env = {'cluster_id': args.cluster_id,
                'deployment_type': self.get_deployment_type(args),
@@ -118,7 +127,7 @@ class Cluster(object):
         playbook = "playbooks/{}/openshift-cluster/service.yml".format(args.provider)
         inventory = self.setup_provider(args.provider)
 
-        return self.action(args, inventory, env, playbook)
+        self.action(args, inventory, env, playbook)
 
     def setup_provider(self, provider):
         """
@@ -128,10 +137,14 @@ class Cluster(object):
         """
         config = ConfigParser.ConfigParser()
         if 'gce' == provider:
-            config.readfp(open('inventory/gce/hosts/gce.ini'))
+            gce_ini_default_path = os.path.join(
+                'inventory/gce/hosts/gce.ini')
+            gce_ini_path = os.environ.get('GCE_INI_PATH', gce_ini_default_path)
+            if os.path.exists(gce_ini_path): 
+                config.readfp(open(gce_ini_path))
 
-            for key in config.options('gce'):
-                os.environ[key] = config.get('gce', key)
+                for key in config.options('gce'):
+                    os.environ[key] = config.get('gce', key)
 
             inventory = '-i inventory/gce/hosts'
         elif 'aws' == provider:
@@ -141,6 +154,17 @@ class Cluster(object):
                 os.environ[key] = config.get('ec2', key)
 
             inventory = '-i inventory/aws/hosts'
+
+            key_vars = ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY']
+            key_missing = [key for key in key_vars if key not in os.environ]
+
+            boto_conf_files = ['~/.aws/credentials', '~/.boto']
+            conf_exists = lambda conf: os.path.isfile(os.path.expanduser(conf))
+            boto_configs = [conf for conf in boto_conf_files if conf_exists(conf)]
+
+            if len(key_missing) > 0 and len(boto_configs) == 0:
+                raise ValueError("PROVIDER aws requires {} environment variable(s). See README_AWS.md".format(key_missing))
+
         elif 'libvirt' == provider:
             inventory = '-i inventory/libvirt/hosts'
         elif 'openstack' == provider:
@@ -158,7 +182,6 @@ class Cluster(object):
         :param inventory: derived provider library
         :param env: environment variables for kubernetes
         :param playbook: ansible playbook to execute
-        :return: exit status from ansible-playbook command
         """
 
         verbose = ''
@@ -168,7 +191,7 @@ class Cluster(object):
         if args.option:
             for opt in args.option:
                 k, v = opt.split('=', 1)
-                env['opt_'+k] = v
+                env['cli_' + k] = v
 
         ansible_env = '-e \'{}\''.format(
             ' '.join(['%s=%s' % (key, value) for (key, value) in env.items()])
@@ -178,6 +201,9 @@ class Cluster(object):
             verbose, inventory, ansible_env, playbook
         )
 
+        if args.profile:
+            command = 'ANSIBLE_CALLBACK_PLUGINS=ansible-profile/callback_plugins ' + command
+
         if args.verbose > 1:
             command = 'time {}'.format(command)
 
@@ -185,7 +211,18 @@ class Cluster(object):
             sys.stderr.write('RUN [{}]\n'.format(command))
             sys.stderr.flush()
 
-        return os.system(command)
+        try:
+            subprocess.check_call(command, shell=True)
+        except subprocess.CalledProcessError as exc:
+            raise ActionFailed("ACTION [{}] failed: {}"
+                               .format(args.action, exc))
+
+
+class ActionFailed(Exception):
+    """
+    Raised when action failed.
+    """
+    pass
 
 
 if __name__ == '__main__':
@@ -231,8 +268,14 @@ if __name__ == '__main__':
     meta_parser.add_argument('-t', '--deployment-type',
                              choices=['origin', 'online', 'enterprise'],
                              help='Deployment type. (default: origin)')
+    meta_parser.add_argument('-T', '--product-type',
+                             choices=['openshift', 'atomic-enterprise'],
+                             help='Product type. (default: openshift)')
     meta_parser.add_argument('-o', '--option', action='append',
                              help='options')
+
+    meta_parser.add_argument('-p', '--profile', action='store_true',
+                             help='Enable playbook profiling')
 
     action_parser = parser.add_subparsers(dest='action', title='actions',
                                           description='Choose from valid actions')
@@ -243,6 +286,10 @@ if __name__ == '__main__':
                                help='number of masters to create in cluster')
     create_parser.add_argument('-n', '--nodes', default=2, type=int,
                                help='number of nodes to create in cluster')
+    create_parser.add_argument('-i', '--infra', default=1, type=int,
+                               help='number of infra nodes to create in cluster')
+    create_parser.add_argument('-e', '--etcd', default=0, type=int,
+                               help='number of external etcd hosts to create in cluster')
     create_parser.set_defaults(func=cluster.create)
 
     config_parser = action_parser.add_parser('config',
@@ -290,7 +337,11 @@ if __name__ == '__main__':
             sys.stderr.write('\nACTION [update] aborted by user!\n')
             exit(1)
 
-    status = args.func(args)
-    if status != 0:
-        sys.stderr.write("ACTION [{}] failed with exit status {}\n".format(args.action, status))
-    exit(status)
+    try:
+        args.func(args)
+    except Exception as exc:
+        if args.verbose:
+            traceback.print_exc(file=sys.stderr)
+        else:
+            print >>sys.stderr, exc
+        exit(1)

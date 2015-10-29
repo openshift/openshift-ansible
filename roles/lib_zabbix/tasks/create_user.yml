@@ -1,0 +1,11 @@
+---
+- name: Update zabbix credentialss for a user
+  zbx_user:
+    server: "{{ ozb_server }}"
+    user: "{{ ozb_user }}"
+    password: "{{ ozb_password }}"
+    alias: "{{ ozb_username }}"
+    passwd: "{{ ozb_new_password | default(ozb_password, true) }}"
+  register: user
+
+- debug: var=user.results
