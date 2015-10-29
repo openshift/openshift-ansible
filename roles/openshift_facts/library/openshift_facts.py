@@ -500,7 +500,7 @@ def set_aggregate_facts(facts):
 def set_deployment_facts_if_unset(facts):
     """ Set Facts that vary based on deployment_type. This currently
         includes common.service_type, common.config_base, master.registry_url,
-        node.registry_url
+        node.registry_url, node.storage_plugin_deps
 
         Args:
             facts (dict): existing facts
@@ -549,6 +549,14 @@ def set_deployment_facts_if_unset(facts):
                 elif deployment_type == 'atomic-enterprise':
                     registry_url = 'aep3/aep-${component}:${version}'
                 facts[role]['registry_url'] = registry_url
+
+    if 'node' in facts:
+        deployment_type = facts['common']['deployment_type']
+        if 'storage_plugin_deps' not in facts['node']:
+            if deployment_type in ['openshift-enterprise', 'atomic-enterprise']:
+                facts['node']['storage_plugin_deps'] = ['ceph', 'glusterfs']
+            else:
+                facts['node']['storage_plugin_deps'] = []
 
     return facts
 

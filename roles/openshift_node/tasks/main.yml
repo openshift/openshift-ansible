@@ -32,6 +32,7 @@
       schedulable: "{{ openshift_schedulable | default(openshift_scheduleable) | default(None) }}"
       docker_log_driver:  "{{ lookup( 'oo_option' , 'docker_log_driver'  )  | default('',True) }}"
       docker_log_options: "{{ lookup( 'oo_option' , 'docker_log_options' )  | default('',True) }}"
+      storage_plugin_deps: "{{ osn_storage_plugin_deps | default(None) }}"
 
 # We have to add tuned-profiles in the same transaction otherwise we run into depsolving
 # problems because the rpms don't pin the version properly.
@@ -124,9 +125,8 @@
   notify:
     - restart docker
 
-- name: Allow NFS access for VMs
-  seboolean: name=virt_use_nfs state=yes persistent=yes
-  when: ansible_selinux and ansible_selinux.status == "enabled"
+- name: Additional storage plugin configuration
+  include: storage_plugins/main.yml
 
 - name: Start and enable node
   service: name={{ openshift.common.service_type }}-node enabled=yes state=started

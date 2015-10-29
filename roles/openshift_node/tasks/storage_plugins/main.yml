@@ -1,0 +1,13 @@
+---
+# The NFS storage plugin is always enabled since it doesn't require any
+# additional package dependencies
+- name: NFS storage plugin configuration
+  include: nfs.yml
+
+- name: GlusterFS storage plugin configuration
+  include: glusterfs.yml
+  when: "'glusterfs' in openshift.node.storage_plugin_deps"
+
+- name: Ceph storage plugin configuration
+  include: ceph.yml
+  when: "'ceph' in openshift.node.storage_plugin_deps"
