@@ -26,10 +26,13 @@
   - debug: var=avail_disk.stdout
   - name: Check current etcd disk usage
     shell: >
-      df --output=avail -k /var/lib/openshift/openshift.local.etcd/ | tail -n 1
+      du -k {{ openshift.common.data_dir }}/openshift.local.etcd | tail -n 1 | cut -f1
     register: etc_disk_usage
     when: embedded_etcd | bool
   - debug: var=etc_disk_usage.stdout
+  - name: Abort if insufficient disk space for etcd backup
+    fail: msg="{{ etc_disk_usage.stdout }} Kb disk space required for etcd backup, {{ avail_disk.stdout }} Kb available."
+    when: (embedded_etcd | bool) and (etc_disk_usage.stdout|int > avail_disk.stdout|int)
   - fail: msg="All done for now."
 
 - name: Re-Run cluster configuration to apply latest configuration changes
