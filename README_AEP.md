@@ -120,16 +120,18 @@ inventory file use the -i option for ansible-playbook.
 On the master host:
 ```sh
 oadm router --create=true \
-  --credentials=/etc/openshift/master/openshift-router.kubeconfig \
-  --images='docker-buildvm-rhose.usersys.redhat.com:5000/openshift3/ose-${component}:${version}'
+  --service-account=router \
+  --credentials=/etc/origin/master/openshift-router.kubeconfig \
+  --images='rcm-img-docker01.build.eng.bos.redhat.com:5001/openshift3/ose-${component}:${version}'
 ```
 
 #### Create the default docker-registry
 On the master host:
 ```sh
 oadm registry --create=true \
-  --credentials=/etc/openshift/master/openshift-registry.kubeconfig \
-  --images='docker-buildvm-rhose.usersys.redhat.com:5000/openshift3/ose-${component}:${version}' \
+  --service-account=registry \
+  --credentials=/etc/origin/master/openshift-registry.kubeconfig \
+  --images='rcm-img-docker01.build.eng.bos.redhat.com:5001/openshift3/ose-${component}:${version}' \
   --mount-host=/var/lib/openshift/docker-registry
 ```
 
