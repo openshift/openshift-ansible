@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.4
+Version:        3.0.5
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -225,6 +225,20 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Oct 29 2015 Kenny Woodson <kwoodson@redhat.com> 3.0.5-1
+- Updating multi_ec2 to support extra_vars and extra_groups
+  (kwoodson@redhat.com)
+- Removing the template and doing to_nice_yaml instead (kwoodson@redhat.com)
+- README_AEP.md: update instructions for creating router and registry
+  (jlebon@redhat.com)
+- README_AEP: Various fixes (walters@verbum.org)
+- Fixing for extra_vars rename. (kwoodson@redhat.com)
+- make storage_plugin_deps conditional on deployment_type (jdetiber@redhat.com)
+- remove debugging pauses (jdetiber@redhat.com)
+- make storage plugin dependency installation more flexible
+  (jdetiber@redhat.com)
+- Install storage plugin dependencies (jdetiber@redhat.com)
+
 * Wed Oct 28 2015 Kenny Woodson <kwoodson@redhat.com> 3.0.4-1
 - Removing spec files. (kwoodson@redhat.com)
 - Updated example (kwoodson@redhat.com)
