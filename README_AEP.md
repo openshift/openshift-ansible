@@ -76,39 +76,30 @@ ansible_ssh_user=root
 # If ansible_ssh_user is not root, ansible_sudo must be set to true
 #ansible_sudo=true
 
-# To deploy origin, change deployment_type to origin
-deployment_type=enterprise
+# See DEPLOYMENT_TYPES.md
+deployment_type=atomic-enterprise
 
-# Pre-release registry URL
-oreg_url=docker-buildvm-rhose.usersys.redhat.com:5000/openshift3/ose-${component}:${version}
+# Pre-release registry URL; note that in the future these images 
+# may have an atomicenterprise/aep- prefix or so.
+oreg_url=rcm-img-docker01.build.eng.bos.redhat.com:5001/openshift3/ose-${component}:${version}
 
 # Pre-release additional repo
-openshift_additional_repos=[{'id': 'ose-devel', 'name': 'ose-devel',
-'baseurl':
-'http://buildvm-devops.usersys.redhat.com/puddle/build/OpenShiftEnterprise/3.0/latest/RH7-RHOSE-3.0/$basearch/os',
-'enabled': 1, 'gpgcheck': 0}]
-
-# Origin copr repo
-#openshift_additional_repos=[{'id': 'openshift-origin-copr', 'name':
-'OpenShift Origin COPR', 'baseurl':
-'https://copr-be.cloud.fedoraproject.org/results/maxamillion/origin-next/epel-7-$basearch/',
-'enabled': 1, 'gpgcheck': 1, gpgkey:
-'https://copr-be.cloud.fedoraproject.org/results/maxamillion/origin-next/pubkey.gpg'}]
+openshift_additional_repos=[{'id': 'ose-devel', 'name': 'ose-devel', 'baseurl': 'http://buildvm-devops.usersys.redhat.com/puddle/build/AtomicOpenShift/3.1/2015-10-27.1', 'enabled': 1, 'gpgcheck': 0}]
 
 # host group for masters
 [masters]
-ose3-master.example.com
+aep3-master.example.com
 
 # host group for nodes
 [nodes]
-ose3-node[1:2].example.com
+aep3-node[1:2].example.com
 ```
 
 The hostnames above should resolve both from the hosts themselves and
 the host where ansible is running (if different).
 
 ## Running the ansible playbooks
-From the atomic-enterprise-ansible checkout run:
+From the openshift-ansible checkout run:
 ```sh
 ansible-playbook playbooks/byo/config.yml
 ```
@@ -120,16 +111,18 @@ inventory file use the -i option for ansible-playbook.
 On the master host:
 ```sh
 oadm router --create=true \
-  --credentials=/etc/openshift/master/openshift-router.kubeconfig \
-  --images='docker-buildvm-rhose.usersys.redhat.com:5000/openshift3/ose-${component}:${version}'
+  --service-account=router \
+  --credentials=/etc/origin/master/openshift-router.kubeconfig \
+  --images='rcm-img-docker01.build.eng.bos.redhat.com:5001/openshift3/ose-${component}:${version}'
 ```
 
 #### Create the default docker-registry
 On the master host:
 ```sh
 oadm registry --create=true \
-  --credentials=/etc/openshift/master/openshift-registry.kubeconfig \
-  --images='docker-buildvm-rhose.usersys.redhat.com:5000/openshift3/ose-${component}:${version}' \
+  --service-account=registry \
+  --credentials=/etc/origin/master/openshift-registry.kubeconfig \
+  --images='rcm-img-docker01.build.eng.bos.redhat.com:5001/openshift3/ose-${component}:${version}' \
   --mount-host=/var/lib/openshift/docker-registry
 ```
 
