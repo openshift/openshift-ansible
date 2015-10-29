@@ -1,0 +1,36 @@
+---
+#ansible-playbook -e 'oo_desc=kwoodson test' -e 'oo_name=kwoodson test name' -e 'oo_start=1435715357' -e 'oo_stop=1435718985' -e 'oo_hostids=11549' create_maintenance.yml
+- name: 'Create a maintenace object in zabbix'
+  hosts: localhost
+  gather_facts: no
+  roles:
+    - os_zabbix
+  vars:
+    oo_hostids: ''
+    oo_groupids: ''
+  post_tasks:
+    - assert:
+        that: oo_desc is defined
+
+    - zbxapi:
+        server: https://noc2.ops.rhcloud.com/zabbix/api_jsonrpc.php
+        zbx_class: Maintenance
+        state: present
+        params:
+          name: "{{ oo_name }}"
+          description: "{{ oo_desc }}"
+          active_since: "{{ oo_start }}"
+          active_till: "{{ oo_stop }}"
+          maintenance_type: "0"
+          output: extend
+          hostids: "{{ oo_hostids.split(',') | default([]) }}"
+#groupids: "{{ oo_groupids.split(',') | default([]) }}"
+          timeperiods:
+          - start_time: "{{ oo_start }}"
+            period: "{{ oo_stop }}"
+          selectTimeperiods: extend
+
+      register: maintenance
+
+    - debug: var=maintenance
+

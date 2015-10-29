@@ -1,6 +1,6 @@
 // vim: ft=asciidoc
 
-= Openshift-Ansible Best Practices Guide
+= openshift-ansible Best Practices Guide
 
 The purpose of this guide is to describe the preferred patterns and best practices used in this repository (both in ansible and python).
 
@@ -26,6 +26,49 @@ The tooling is flexible enough that exceptions can be made so that the tool the 
 
 
 == Python
+
+=== Python Source Files
+
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| Python source files MUST contain the following vim mode line.
+|===
+
+[source]
+----
+# vim: expandtab:tabstop=4:shiftwidth=4
+----
+
+Since most developers contributing to this repository use vim, this rule helps to promote consistency.
+
+If mode lines for other editors are needed, please open a GitHub issue.
+
+=== Method Signatures
+
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| When adding a new paramemter to an existing method, a default value SHOULD be used
+|===
+The purpose of this rule is to make it so that method signatures are backwards compatible.
+
+If this rule isn't followed, it will be necessary for the person who changed the method to search out all callers and make sure that they're able to use the new method signature.
+
+.Before:
+[source,python]
+----
+def add_person(first_name, last_name):
+----
+
+.After:
+[source,python]
+----
+def add_person(first_name, last_name, age=None):
+----
+
 
 === PyLint
 http://www.pylint.org/[PyLint] is used in an attempt to keep the python code as clean and as managable as possible. The build bot runs each pull request through PyLint and any warnings or errors cause the build bot to fail the pull request.
@@ -99,6 +142,137 @@ YAML is a superset of JSON, which means that Ansible allows JSON syntax to be in
 
 Every effort should be made to keep our Ansible YAML files in pure YAML.
 
+=== Modules
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| Custom Ansible modules SHOULD be embedded in a role.
+|===
+
+.Context
+* http://docs.ansible.com/ansible/playbooks_roles.html#embedding-modules-in-roles[Ansible doc on how to embed modules in roles]
+
+The purpose of this rule is to make it easy to include custom modules in our playbooks and share them on Ansible Galaxy.
+
+.Custom module `openshift_facts.py` is embedded in the `openshift_facts` role.
+----
+> ll openshift-ansible/roles/openshift_facts/library/
+-rwxrwxr-x. 1 user group 33616 Jul 22 09:36 openshift_facts.py
+----
+
+.Custom module `openshift_facts` can be used after `openshift_facts` role has been referenced.
+[source,yaml]
+----
+- hosts: openshift_hosts
+  gather_facts: no
+  roles:
+  - role: openshift_facts
+  post_tasks:
+  - openshift_facts
+      role: common
+      hostname: host
+      public_hostname: host.example.com
+----
+
+
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| Parameters to Ansible modules SHOULD use the Yaml dictionary format when 3 or more parameters are being passed
+|===
+
+When a module has several parameters that are being passed in, it's hard to see exactly what value each parameter is getting. It is preferred to use the Ansible Yaml syntax to pass in parameters so that it's more clear what values are being passed for each paramemter.
+
+.Bad:
+[source,yaml]
+----
+- file: src=/file/to/link/to dest=/path/to/symlink owner=foo group=foo state=link
+----
+
+.Good:
+[source,yaml]
+----
+- file:
+    src: /file/to/link/to
+    dest: /path/to/symlink
+    owner: foo
+    group: foo
+    state: link
+----
+
+
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| Parameters to Ansible modules SHOULD use the Yaml dictionary format when the line length exceeds 120 characters
+|===
+
+Lines that are long quickly become a wall of text that isn't easily parsable. It is preferred to use the Ansible Yaml syntax to pass in parameters so that it's more clear what values are being passed for each paramemter.
+
+.Bad:
+[source,yaml]
+----
+- get_url: url=http://example.com/path/file.conf dest=/etc/foo.conf sha256sum=b5bb9d8014a0f9b1d61e21e796d78dccdf1352f23cd32812f4850b878ae4944c
+----
+
+.Good:
+[source,yaml]
+----
+- get_url:
+    url: http://example.com/path/file.conf
+    dest: /etc/foo.conf
+    sha256sum: b5bb9d8014a0f9b1d61e21e796d78dccdf1352f23cd32812f4850b878ae4944c
+----
+
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| The Ansible `command` module SHOULD be used instead of the Ansible `shell` module.
+|===
+.Context
+* http://docs.ansible.com/shell_module.html#notes[Ansible doc on why using the command module is a best practice]
+
+The Ansible `shell` module can run most commands that can be run from a bash CLI. This makes it extremely powerful, but it also opens our playbooks up to being exploited by attackers.
+
+.Bad:
+[source,yaml]
+----
+- shell: "/bin/echo {{ cli_var }}"
+----
+
+.Better:
+[source,yaml]
+----
+- command: "/bin/echo {{ cli_var }}"
+----
+
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| The Ansible `quote` filter MUST be used with any variable passed into the shell module.
+|===
+.Context
+* http://docs.ansible.com/shell_module.html#notes[Ansible doc describing why to use the quote filter]
+
+It is recommended not to use the `shell` module. However, if it absolutely must be used, all variables passed into the `shell` module MUST use the `quote` filter to ensure they are shell safe.
+
+.Bad:
+[source,yaml]
+----
+- shell: "/bin/echo {{ cli_var }}"
+----
+
+.Good:
+[source,yaml]
+----
+- shell: "/bin/echo {{ cli_var | quote }}"
+----
+
 === Defensive Programming
 
 .Context
@@ -142,7 +316,83 @@ If an Ansible role requires certain variables to be set, it's best to check for 
   when: arl_environment is not defined or arl_environment == ''
 ----
 
+=== Tasks
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| Ansible tasks SHOULD NOT be used in ansible playbooks. Instead, use pre_tasks and post_tasks.
+|===
+An Ansible play is defined as a Yaml dictionary. Because of that, ansible doesn't know if the play's tasks list or roles list was specified first. Therefore Ansible always runs tasks after roles.
+
+This can be quite confusing if the tasks list is defined in the playbook before the roles list because people assume in order execution in Ansible.
+
+Therefore, we SHOULD use pre_tasks and post_tasks to make it more clear when the tasks will be run.
+
+.Context
+* https://docs.ansible.com/playbooks_roles.html[Ansible documentation on pre_tasks and post_tasks]
+
+.Bad:
+[source,yaml]
+----
+---
+# playbook.yml
+- hosts: localhost
+  gather_facts: no
+  tasks:
+  - name: This will execute AFTER the example_role, so it's confusing
+    debug: msg="in tasks list"
+  roles:
+  - role: example_role
+
+# roles/example_role/tasks/main.yml
+- debug: msg="in example_role"
+----
+
+.Good:
+[source,yaml]
+----
+---
+# playbook.yml
+- hosts: localhost
+  gather_facts: no
+  pre_tasks:
+  - name: This will execute BEFORE the example_role, so it makes sense
+    debug: msg="in pre_tasks list"
+  roles:
+  - role: example_role
+
+# roles/example_role/tasks/main.yml
+- debug: msg="in example_role"
+----
+
+
 === Roles
+
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| All tasks in a role SHOULD be tagged with the role name.
+|===
+
+.Context
+* http://docs.ansible.com/playbooks_tags.html[Ansible doc explaining tags]
+
+Ansible tasks can be tagged, and then these tags can be used to either _run_ or _skip_ the tagged tasks using the `--tags` and `--skip-tags` ansible-playbook options respectively.
+
+This is very useful when developing and debugging new tasks. It can also significantly speed up playbook runs if the user specifies only the roles that changed.
+
+.Example:
+[source,yaml]
+----
+---
+# roles/example_role/tasks/main.yml
+- debug: msg="in example_role"
+  tags:
+  - example_role
+----
+
 
 '''
 [cols="2v,v"]
@@ -171,7 +421,7 @@ For consistency, role names SHOULD follow the above naming pattern. It is import
 Many times the `technology` portion of the pattern will line up with a package name. It is advised that whenever possible, the package name should be used.
 
 .Examples:
-* The role to configure an OpenShift Master is called `openshift_master`
+* The role to configure a master is called `openshift_master`
 * The role to configure OpenShift specific yum repositories is called `openshift_repos`
 
 === Filters

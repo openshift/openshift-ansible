@@ -13,9 +13,17 @@
     image_name: "{{ deployment_vars[deployment_type].image.name }}"
   tasks:
   - fail: msg="Deployment type not supported for libvirt provider yet"
-    when: deployment_type in ['online', 'enterprise']
+    when: deployment_type == 'online'
 
   - include: tasks/configure_libvirt.yml
+
+  - include: ../../common/openshift-cluster/set_etcd_launch_facts_tasks.yml
+  - include: tasks/launch_instances.yml
+    vars:
+      instances: "{{ etcd_names }}"
+      cluster: "{{ cluster_id }}"
+      type: "{{ k8s_type }}"
+      g_sub_host_type: "default"
 
   - include: ../../common/openshift-cluster/set_master_launch_facts_tasks.yml
   - include: tasks/launch_instances.yml
@@ -23,13 +31,29 @@
       instances: "{{ master_names }}"
       cluster: "{{ cluster_id }}"
       type: "{{ k8s_type }}"
+      g_sub_host_type: "default"
 
   - include: ../../common/openshift-cluster/set_node_launch_facts_tasks.yml
+    vars:
+      type: "compute"
+      count: "{{ num_nodes }}"
   - include: tasks/launch_instances.yml
     vars:
       instances: "{{ node_names }}"
       cluster: "{{ cluster_id }}"
       type: "{{ k8s_type }}"
+      g_sub_host_type: "{{ sub_host_type }}"
+
+  - include: ../../common/openshift-cluster/set_node_launch_facts_tasks.yml
+    vars:
+      type: "infra"
+      count: "{{ num_infra }}"
+  - include: tasks/launch_instances.yml
+    vars:
+      instances: "{{ node_names }}"
+      cluster: "{{ cluster_id }}"
+      type: "{{ k8s_type }}"
+      g_sub_host_type: "{{ sub_host_type }}"
 
 - include: update.yml
 

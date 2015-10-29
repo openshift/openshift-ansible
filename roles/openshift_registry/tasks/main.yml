@@ -1,11 +1,14 @@
 ---
-- set_fact: _oreg_images="--images={{ oreg_url|quote }}"
-  when: oreg_url is defined
+# This role is unused until we add options for configuring the backend storage
+
+- set_fact: _oreg_images="--images='{{ openshift.master.registry_url }}'"
+
+- set_fact: _oreg_selector="--selector='{{ openshift.master.registry_selector }}'"
 
 - name: Deploy OpenShift Registry
   command: >
     {{ openshift.common.admin_binary }} registry
-    --create
-    --credentials={{ openshift_master_config_dir }}/openshift-registry.kubeconfig {{ _oreg_images|default() }}
+    --create --service-account=registry {{ _oreg_selector }}
+    --credentials={{ openshift_master_config_dir }}/openshift-registry.kubeconfig {{ _oreg_images }}
   register: _oreg_results
   changed_when: "'service exists' not in _oreg_results.stdout"

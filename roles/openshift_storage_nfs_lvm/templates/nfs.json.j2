@@ -1,0 +1,21 @@
+{
+  "apiVersion": "v1",
+  "kind": "PersistentVolume",
+  "metadata": {
+    "name": "pv-{{ inventory_hostname | regex_replace("\.", "-")  }}-{{ item }}",
+    "labels": {
+      "type": "nfs"
+    }
+  },
+  "spec": {
+    "capacity": {
+      "storage": "{{ osnl_volume_size }}Gi"
+    },
+    "accessModes": [ "ReadWriteMany" ],
+    "persistentVolumeReclaimPolicy": "Recycle",
+    "nfs": {
+      "Server": "{{ inventory_hostname }}",
+      "Path": "{{ osnl_mount_dir }}/{{ item }}"
+    }
+  }
+}

@@ -55,7 +55,7 @@ class Oscp(object):
             config.read(self.config_path)
 
     def parse_cli_args(self):
-        parser = argparse.ArgumentParser(description='Openshift Online SSH Tool.')
+        parser = argparse.ArgumentParser(description='OpenShift Online SSH Tool.')
         parser.add_argument('-e', '--env',
                           action="store", help="Environment where this server exists.")
         parser.add_argument('-d', '--debug', default=False,
@@ -167,7 +167,7 @@ class Oscp(object):
                     name = server_info['ec2_tag_Name']
                     ec2_id = server_info['ec2_id']
                     ip = server_info['ec2_ip_address']
-                    print '{ec2_tag_Name:<35} {ec2_tag_environment:<8} {ec2_id:<15} {ec2_ip_address}'.format(**server_info)
+                    print '{ec2_tag_Name:<35} {ec2_tag_environment:<8} {ec2_id:<15} {ec2_ip_address:<18} {ec2_private_ip_address}'.format(**server_info)
 
                 if limit:
                     print
@@ -180,7 +180,7 @@ class Oscp(object):
                     name = server_info['ec2_tag_Name']
                     ec2_id = server_info['ec2_id']
                     ip = server_info['ec2_ip_address']
-                    print '{ec2_tag_Name:<35} {ec2_tag_environment:<5} {ec2_id:<15} {ec2_ip_address}'.format(**server_info)
+                    print '{ec2_tag_Name:<35} {ec2_tag_environment:<8} {ec2_id:<15} {ec2_ip_address:<18} {ec2_private_ip_address}'.format(**server_info)
 
     def scp(self):
         '''scp files to or from a specified host

@@ -13,7 +13,16 @@
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
     with_items: groups[cluster_group] | default([])
 
-- hosts: oo_hosts_to_terminate
+- name: Unsubscribe VMs
+  hosts: oo_hosts_to_terminate
+  vars_files:
+  - vars.yml
+  roles:
+  - role: rhel_unsubscribe
+    when: deployment_type == "enterprise" and
+          ansible_distribution == "RedHat" and
+          lookup('oo_option', 'rhel_skip_subscription') | default(rhsub_skip, True) |
+            default('no', True) | lower in ['no', 'false']
 
 - hosts: localhost
   connection: local
@@ -21,23 +30,18 @@
   vars_files:
   - vars.yml
   tasks:
-  - name: Retrieve the floating IPs
-    shell: "neutron floatingip-list | awk '/{{ hostvars[item].ansible_default_ipv4.address }}/ {print $2}'"
-    with_items: groups['oo_hosts_to_terminate'] | default([])
-    register: floating_ips_to_delete
-
-  - name: Terminate instance(s)
-    nova_compute:
-      name: "{{ hostvars[item].os_name }}"
-      state: absent
-    with_items: groups['oo_hosts_to_terminate'] | default([])
-
-  - name: Delete floating IPs
-    command: "neutron floatingip-delete {{ item.stdout }}"
-    with_items: floating_ips_to_delete.results | default([])
-
-  - name: Destroy the network
-    command: "heat stack-delete {{ openstack_network_prefix }}-stack"
+  - name: Delete the OpenStack Stack
+    command: 'heat stack-delete openshift-ansible-{{ cluster_id }}-stack'
     register: stack_delete_result
     changed_when: stack_delete_result.rc == 0
     failed_when: stack_delete_result.rc != 0 and 'could not be found' not in stack_delete_result.stdout
+
+  - name: Wait for the completion of the OpenStack Stack deletion
+    shell: 'heat stack-show openshift-ansible-{{ cluster_id }}-stack | awk ''$2 == "stack_status" {print $4}'''
+    when: stack_delete_result.changed
+    register: stack_show_result
+    until: stack_show_result.stdout != 'DELETE_IN_PROGRESS'
+    retries: 60
+    delay: 1
+    failed_when: '"Stack not found" not in stack_show_result.stderr and
+                   stack_show_result.stdout != "DELETE_COMPLETE"'

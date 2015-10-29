@@ -1,0 +1,20 @@
+version: 0.1
+log:
+  level: debug
+http:
+  addr: :5000
+storage:
+  cache:
+    layerinfo: inmemory
+  s3:
+    accesskey: {{ aws_access_key }}
+    secretkey: {{ aws_secret_key }}
+    region: us-east-1
+    bucket: {{ clusterid }}-docker
+    encrypt: true
+    secure: true
+    v4auth: true
+    rootdirectory: /registry
+middleware:
+  repository:
+    - name: openshift

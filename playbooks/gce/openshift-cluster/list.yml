@@ -14,11 +14,11 @@
       groups: oo_list_hosts
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user | default(ansible_ssh_user, true) }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-    with_items: groups[scratch_group] | default([]) | difference(['localhost']) | difference(groups.status_terminated)
+    with_items: groups[scratch_group] | default([], true) | difference(['localhost']) | difference(groups.status_terminated | default([], true))
 
 - name: List instance(s)
   hosts: oo_list_hosts
   gather_facts: no
   tasks:
   - debug:
-      msg: "public ip:{{ hostvars[inventory_hostname].gce_public_ip }} private ip:{{ hostvars[inventory_hostname].gce_private_ip }}"
+      msg: "private ip:{{ hostvars[inventory_hostname].gce_private_ip }}"

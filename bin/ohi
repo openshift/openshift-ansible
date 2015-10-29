@@ -83,7 +83,7 @@ class Ohi(object):
         """Setup the command line parser with the options we want
         """
 
-        parser = argparse.ArgumentParser(description='Openshift Host Inventory')
+        parser = argparse.ArgumentParser(description='OpenShift Host Inventory')
 
         parser.add_argument('--list-host-types', default=False, action='store_true',
                        help='List all of the host types')

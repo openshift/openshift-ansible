@@ -1,0 +1,29 @@
+# This deletes *ALL* Docker images, and uninstalls OpenShift and
+# Atomic Enterprise RPMs.  It is primarily intended for use
+# with the tutorial as well as for developers to reset state.
+#
+---
+- include: uninstall.yml
+
+- hosts:
+    - OSEv3:children
+
+  sudo: yes
+
+  tasks:
+    - shell: docker ps -a -q | xargs docker stop
+      changed_when: False
+      failed_when: False
+
+    - shell: docker ps -a -q| xargs docker rm
+      changed_when: False
+      failed_when: False
+
+    - shell:  docker images -q |xargs docker rmi
+      changed_when: False
+      failed_when: False
+
+    - user: name={{ item }} state=absent remove=yes
+      with_items:
+        - alice
+        - joe

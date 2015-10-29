@@ -18,26 +18,26 @@
           deployment_type: "{{ openshift_deployment_type }}"
       - role: node
         local_facts:
-          resources_cpu: "{{ openshift_node_resources_cpu | default(None) }}"
-          resources_memory: "{{ openshift_node_resources_memory | default(None) }}"
-          pod_cidr: "{{ openshift_node_pod_cidr | default(None) }}"
           labels: "{{ openshift_node_labels | default(None) }}"
           annotations: "{{ openshift_node_annotations | default(None) }}"
+          schedulable: "{{ openshift_schedulable | default(openshift_scheduleable) | default(None) }}"
   - name: Check status of node certificates
     stat:
-      path: "{{ item }}"
+      path: "{{ openshift.common.config_base }}/node/{{ item }}"
     with_items:
-    - "/etc/openshift/node/node.key"
-    - "/etc/openshift/node/node.kubeconfig"
-    - "/etc/openshift/node/ca.crt"
-    - "/etc/openshift/node/server.key"
+    - "system:node:{{ openshift.common.hostname }}.crt"
+    - "system:node:{{ openshift.common.hostname }}.key"
+    - "system:node:{{ openshift.common.hostname }}.kubeconfig"
+    - ca.crt
+    - server.key
+    - server.crt
     register: stat_result
   - set_fact:
       certs_missing: "{{ stat_result.results | map(attribute='stat.exists')
                          | list | intersect([false])}}"
       node_subdir: node-{{ openshift.common.hostname }}
-      config_dir: /etc/openshift/generated-configs/node-{{ openshift.common.hostname }}
-      node_cert_dir: /etc/openshift/node
+      config_dir: "{{ openshift.common.config_base }}/generated-configs/node-{{ openshift.common.hostname }}"
+      node_cert_dir: "{{ openshift.common.config_base }}/node"
 
 - name: Create temp directory for syncing certs
   hosts: localhost
@@ -50,17 +50,16 @@
     register: mktemp
     changed_when: False
 
-- name: Register nodes
+- name: Create node certificates
   hosts: oo_first_master
   vars:
     nodes_needing_certs: "{{ hostvars
-                             | oo_select_keys(groups['oo_nodes_to_config'])
+                             | oo_select_keys(groups['oo_nodes_to_config']
+                                              | default([]))
                              | oo_filter_list(filter_attr='certs_missing') }}"
-    openshift_nodes: "{{ hostvars
-                         | oo_select_keys(groups['oo_nodes_to_config']) }}"
     sync_tmpdir: "{{ hostvars.localhost.mktemp.stdout }}"
   roles:
-  - openshift_register_nodes
+  - openshift_node_certificates
   post_tasks:
   - name: Create a tarball of the node config directories
     command: >
@@ -84,16 +83,16 @@
   hosts: oo_nodes_to_config
   vars:
     sync_tmpdir: "{{ hostvars.localhost.mktemp.stdout }}"
-    openshift_node_master_api_url: "{{ hostvars[openshift_first_master].openshift.master.api_url }}"
+    openshift_node_master_api_url: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_url }}"
   pre_tasks:
   - name: Ensure certificate directory exists
     file:
       path: "{{ node_cert_dir }}"
       state: directory
 
-  # TODO: notify restart openshift-node
+  # TODO: notify restart node
   # possibly test service started time against certificate/config file
-  # timestamps in openshift-node to trigger notify
+  # timestamps in node to trigger notify
   - name: Unarchive the tarball on the node
     unarchive:
       src: "{{ sync_tmpdir }}/{{ node_subdir }}.tgz"
@@ -101,20 +100,12 @@
     when: certs_missing
   roles:
   - openshift_node
+  - role: nickhammond.logrotate
   - role: fluentd_node
     when: openshift.common.use_fluentd | bool
   tasks:
   - name: Create group for deployment type
     group_by: key=oo_nodes_deployment_type_{{ openshift.common.deployment_type }}
-    changed_when: False
-
-- name: Delete the temporary directory on the master
-  hosts: oo_first_master
-  gather_facts: no
-  vars:
-    sync_tmpdir: "{{ hostvars.localhost.mktemp.stdout }}"
-  tasks:
-  - file: name={{ sync_tmpdir }} state=absent
     changed_when: False
 
 - name: Delete temporary directory on localhost
@@ -133,3 +124,15 @@
   roles:
   - os_env_extras
   - os_env_extras_node
+
+- name: Set schedulability
+  hosts: oo_first_master
+  vars:
+    openshift_nodes: "{{ hostvars
+                         | oo_select_keys(groups['oo_nodes_to_config'])
+                         | oo_collect('openshift.common.hostname') }}"
+    openshift_node_vars: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config']) }}"
+  pre_tasks:
+
+  roles:
+  - openshift_manage_node

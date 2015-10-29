@@ -11,7 +11,7 @@
     - zbxapi:
         server: https://noc2.ops.rhcloud.com/zabbix/api_jsonrpc.php
         zbx_class: Trigger
-        action: get
+        state: list
         params:
           only_true: true
           output: extend

@@ -1,6 +1,6 @@
 // vim: ft=asciidoc
 
-= Openshift-Ansible Core Concepts Guide
+= openshift-ansible Core Concepts Guide
 
 The purpose of this guide is to describe core concepts used in this repository.
 

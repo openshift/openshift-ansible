@@ -19,7 +19,7 @@
 * Either ssh key based auth for the root user or ssh key based auth for a user
   with sudo access (no password)
 * A checkout of openshift-ansible from https://github.com/openshift/openshift-ansible/
-  
+
   ```sh
   git clone https://github.com/openshift/openshift-ansible.git
   cd openshift-ansible
@@ -35,7 +35,7 @@ subscription-manager repos --disable="*"
 subscription-manager repos \
 --enable="rhel-7-server-rpms" \
 --enable="rhel-7-server-extras-rpms" \
---enable="rhel-server-7-ose-beta-rpms"
+--enable="rhel-7-server-ose-3.0-rpms"
 ```
 * Configuration of router is not automated yet
 * Configuration of docker-registry is not automated yet
@@ -73,6 +73,7 @@ osv3-master.example.com
 
 # host group for nodes
 [nodes]
+osv3-master.example.com
 osv3-node[1:2].example.com
 ```
 
@@ -88,20 +89,8 @@ ansible-playbook playbooks/byo/config.yml
 inventory file use the -i option for ansible-playbook.
 
 ## Post-ansible steps
-#### Create the default router
-On the master host:
-```sh
-openshift ex router --create=true \
-  --credentials=/var/lib/openshift/openshift.local.certificates/openshift-router/.kubeconfig
-```
 
-#### Create the default docker-registry
-On the master host:
-```sh
-openshift ex registry --create=true \
-  --credentials=/var/lib/openshift/openshift.local.certificates/openshift-registry/.kubeconfig \
-  --mount-host=/var/lib/openshift/docker-registry
-```
+You should now be ready to follow the [What's Next?](https://docs.openshift.org/latest/install_config/install/advanced_install.html#what-s-next) section of the advanced installation guide to deploy your router, registry, and other components.
 
 ## Overriding detected ip addresses and hostnames
 Some deployments will require that the user override the detected hostnames

@@ -1,0 +1,3 @@
+---
+openshift_generated_configs_dir: "{{ openshift.common.config_base }}/generated-configs"
+openshift_master_config_dir: "{{ openshift.common.config_base }}/master"
