@@ -1,5 +1,7 @@
 apiLevels:
+{% if openshift.common.deployment_type == "enterprise" %}
 - v1beta3
+{% endif %}
 - v1
 apiVersion: v1
 assetConfig:
@@ -66,7 +68,9 @@ kubeletClientInfo:
 {% if openshift.master.embedded_kube | bool %}
 kubernetesMasterConfig:
   apiLevels:
+{% if openshift.common.deployment_type == "enterprise" %}
   - v1beta3
+{% endif %}
   - v1
   apiServerArguments: {{ api_server_args if api_server_args is defined else 'null' }}
   controllerArguments: {{ controller_args if controller_args is defined else 'null' }}
