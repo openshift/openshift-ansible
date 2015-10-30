@@ -22,6 +22,11 @@
     - set_fact:
         is_atomic: "{{ ostree_output.rc == 0 }}"
 
+    - name: Remove br0 interface
+      shell: ovs-vsctl del-br br0
+      changed_when: False
+      failed_when: False
+
     - service: name={{ item }} state=stopped
       with_items:
         - atomic-enterprise-master
@@ -68,6 +73,15 @@
         - tuned-profiles-atomic-openshift-node
         - tuned-profiles-openshift-node
         - tuned-profiles-origin-node
+
+    - name: Remove linux interfaces
+      shell: ip link del "{{ item }}"
+      changed_when: False
+      failed_when: False
+      with_items:
+        - lbr0
+        - vlinuxbr
+        - vovsbr
 
     - shell: systemctl reset-failed
       changed_when: False
