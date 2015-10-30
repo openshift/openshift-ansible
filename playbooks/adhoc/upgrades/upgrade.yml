@@ -11,10 +11,10 @@
   hosts: masters
   vars:
     embedded_etcd: "{{ openshift.master.embedded_etcd }}"
+    timestamp: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
   roles:
   - openshift_facts
   tasks:
-  - debug: var=etcd_data_dir
   - name: Check available disk space for etcd backup
     # We assume to be using the data dir for all backups.
     shell: >
@@ -33,7 +33,7 @@
   - name: Install etcd (for etcdctl)
     yum: pkg=etcd state=latest
   - name: Generate etcd backup
-    command: etcdctl backup
+    command: etcdctl backup --data-dir={{ openshift.master.etcd_data_dir }} --backup-dir={{ openshift.common.data_dir }}/etcd-backup-{{ timestamp }}
   - fail: msg="All done for now."
 
 - name: Re-Run cluster configuration to apply latest configuration changes
