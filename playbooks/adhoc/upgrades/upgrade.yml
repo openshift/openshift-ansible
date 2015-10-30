@@ -34,7 +34,6 @@
     yum: pkg=etcd state=latest
   - name: Generate etcd backup
     command: etcdctl backup --data-dir={{ openshift.master.etcd_data_dir }} --backup-dir={{ openshift.common.data_dir }}/etcd-backup-{{ timestamp }}
-  - fail: msg="All done for now."
 
 - name: Re-Run cluster configuration to apply latest configuration changes
   include: ../../common/openshift-cluster/config.yml
@@ -50,6 +49,8 @@
   vars:
     openshift_version: "{{ openshift_pkg_version | default('') }}"
   tasks:
+    - name: Upgrade to latest available kernel
+      yum: pkg=kernel state=latest
     - name: Upgrade master packages
       yum: pkg={{ openshift.common.service_type }}-master{{ openshift_version }} state=latest
     - name: Restart master services
