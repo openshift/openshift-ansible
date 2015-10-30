@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.5
+Version:        3.0.6
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -225,6 +225,13 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Oct 30 2015 Kenny Woodson <kwoodson@redhat.com> 3.0.6-1
+- Adding python-boto and python-libcloud to openshift-ansible-inventory
+  dependency (kwoodson@redhat.com)
+- Use more specific enterprise version for version_greater_than_3_1_or_1_1.
+  (abutcher@redhat.com)
+- Conditionalizing the support for the v1beta3 api (bleanhar@redhat.com)
+
 * Thu Oct 29 2015 Kenny Woodson <kwoodson@redhat.com> 3.0.5-1
 - Updating multi_ec2 to support extra_vars and extra_groups
   (kwoodson@redhat.com)
