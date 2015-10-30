@@ -534,7 +534,7 @@ def set_deployment_facts_if_unset(facts):
             if deployment_type == 'origin':
                 version_gt_3_1_or_1_1 = LooseVersion(version) > LooseVersion('1.0.6')
             else:
-                version_gt_3_1_or_1_1 = LooseVersion(version) > LooseVersion('3.0.2')
+                version_gt_3_1_or_1_1 = LooseVersion(version) > LooseVersion('3.0.2.900')
         else:
             version_gt_3_1_or_1_1 = True
         facts['common']['version_greater_than_3_1_or_1_1'] = version_gt_3_1_or_1_1
