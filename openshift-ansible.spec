@@ -128,7 +128,7 @@ BuildArch:     noarch
 # ----------------------------------------------------------------------------------
 %package inventory
 Summary:       Openshift and Atomic Enterprise Ansible Inventories
-Requires:      python2
+Requires:      python2, python-boto, python-libcloud >= 0.13
 BuildArch:     noarch
 
 %description inventory
