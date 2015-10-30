@@ -22,6 +22,9 @@ corsAllowedOrigins:
 {% for custom_origin in openshift.master.custom_cors_origins | default("") %}
   - {{ custom_origin }}
 {% endfor %}
+{% if 'disabled_features' in openshift.master %}
+disabledFeatures: {{ openshift.master.disabled_features | to_json }}
+{% endif %}
 {% if openshift.master.embedded_dns | bool %}
 dnsConfig:
   bindAddress: {{ openshift.master.bind_addr }}:{{ openshift.master.dns_port }}
