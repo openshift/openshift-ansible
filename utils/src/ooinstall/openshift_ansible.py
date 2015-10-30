@@ -2,6 +2,7 @@
 # repo. We will work on these over time.
 # pylint: disable=bad-continuation,missing-docstring,no-self-use,invalid-name,global-statement,global-variable-not-assigned
 
+import socket
 import subprocess
 import os
 import yaml
@@ -16,6 +17,8 @@ def set_config(cfg):
 def generate_inventory(hosts):
     print hosts
     global CFG
+
+    installer_host = socket.gethostname()
     base_inventory_path = CFG.settings['ansible_inventory_path']
     base_inventory = open(base_inventory_path, 'w')
     base_inventory.write('\n[OSEv3:children]\nmasters\nnodes\n')
@@ -40,6 +43,10 @@ def generate_inventory(hosts):
             "'enabled': 1, 'gpgcheck': 0}]\n")
     if 'OO_INSTALL_STAGE_REGISTRY' in os.environ:
         base_inventory.write('oreg_url=registry.access.stage.redhat.com/openshift3/ose-${component}:${version}\n')
+
+    if any(host.hostname == installer_host for host in hosts):
+        base_inventory.write("ansible_connection=local\n")
+        base_inventory.write("ansible_sudo=no\n")
 
     base_inventory.write('\n[masters]\n')
     masters = (host for host in hosts if host.master)
