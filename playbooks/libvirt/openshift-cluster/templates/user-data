@@ -21,3 +21,4 @@ ssh_authorized_keys:
 
 runcmd:
   - NETWORK_CONFIG=/etc/sysconfig/network-scripts/ifcfg-eth0; if ! grep DHCP_HOSTNAME ${NETWORK_CONFIG}; then echo 'DHCP_HOSTNAME="{{ item[0] }}.example.com"' >> ${NETWORK_CONFIG}; fi; pkill -9 dhclient; service network restart
+  - echo "Defaults !requiretty" >> /etc/sudoers.d/00-no-requiretty
