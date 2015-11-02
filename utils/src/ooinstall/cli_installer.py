@@ -490,7 +490,12 @@ def upgrade(ctx):
         old_variant, old_version, oo_cfg.settings['variant'],
         oo_cfg.settings['variant_version']))
 
-    install_transactions.run_upgrade_playbook()
+    retcode = install_transactions.run_upgrade_playbook()
+    if retcode > 0:
+        click.echo("Errors encountered during upgrade, please check %s." %
+            oo_cfg.settings['ansible_log_path'])
+    else:
+        click.echo("Upgrade completed! Rebooting all hosts is recommended.")
 
 
 @click.command()

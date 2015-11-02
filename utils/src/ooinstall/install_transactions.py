@@ -143,6 +143,7 @@ def run_uninstall_playbook():
         facts_env['ANSIBLE_CONFIG'] = CFG.settings['ansible_config']
     return run_ansible(playbook, inventory_file, facts_env)
 
+
 def run_upgrade_playbook():
     playbook = os.path.join(CFG.settings['ansible_playbook_directory'],
         'playbooks/adhoc/upgrades/upgrade.yml')
@@ -154,3 +155,4 @@ def run_upgrade_playbook():
     if 'ansible_config' in CFG.settings:
         facts_env['ANSIBLE_CONFIG'] = CFG.settings['ansible_config']
     return run_ansible(playbook, inventory_file, facts_env)
+
