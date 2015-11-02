@@ -1,6 +1,6 @@
 #!/usr/bin/env python2
 '''
-    Fetch and combine multiple ec2 account settings into a single
+    Fetch and combine multiple inventory account settings into a single
     json hash.
 '''
 # vim: expandtab:tabstop=4:shiftwidth=4
@@ -15,13 +15,19 @@ import errno
 import fcntl
 import tempfile
 import copy
+from string import Template
+import shutil
 
-CONFIG_FILE_NAME = 'multi_ec2.yaml'
-DEFAULT_CACHE_PATH = os.path.expanduser('~/.ansible/tmp/multi_ec2_inventory.cache')
+CONFIG_FILE_NAME = 'multi_inventory.yaml'
+DEFAULT_CACHE_PATH = os.path.expanduser('~/.ansible/tmp/multi_inventory.cache')
 
-class MultiEc2(object):
+class MultiInventoryException(Exception):
+    '''Exceptions for MultiInventory class'''
+    pass
+
+class MultiInventory(object):
     '''
-       MultiEc2 class:
+       MultiInventory class:
             Opens a yaml config file and reads aws credentials.
             Stores a json hash of resources in result.
     '''
@@ -35,7 +41,7 @@ class MultiEc2(object):
 
         self.cache_path = DEFAULT_CACHE_PATH
         self.config = None
-        self.all_ec2_results = {}
+        self.all_inventory_results = {}
         self.result = {}
         self.file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)))
 
@@ -56,7 +62,7 @@ class MultiEc2(object):
            cache is valid for the inventory.
 
            if the cache is valid; return cache
-           else the credentials are loaded from multi_ec2.yaml or from the env
+           else the credentials are loaded from multi_inventory.yaml or from the env
            and we attempt to get the inventory from the provider specified.
         '''
         # load yaml
@@ -111,6 +117,10 @@ class MultiEc2(object):
         with open(conf_file) as conf:
             config = yaml.safe_load(conf)
 
+        # Provide a check for unique account names
+        if len(set([acc['name'] for acc in config['accounts']])) != len(config['accounts']):
+            raise MultiInventoryException('Duplicate account names in config file')
+
         return config
 
     def get_provider_tags(self, provider, env=None):
@@ -136,23 +146,25 @@ class MultiEc2(object):
         else:
             cmds.append('--list')
 
-        cmds.append('--refresh-cache')
+        if 'aws' in provider.lower():
+            cmds.append('--refresh-cache')
 
         return subprocess.Popen(cmds, stderr=subprocess.PIPE, \
                                 stdout=subprocess.PIPE, env=env)
 
     @staticmethod
-    def generate_config(config_data):
-        """Generate the ec2.ini file in as a secure temp file.
-           Once generated, pass it to the ec2.py as an environment variable.
+    def generate_config(provider_files):
+        """Generate the provider_files in a temporary directory.
         """
-        fildes, tmp_file_path = tempfile.mkstemp(prefix='multi_ec2.ini.')
-        for section, values in config_data.items():
-            os.write(fildes, "[%s]\n" % section)
-            for option, value  in values.items():
-                os.write(fildes, "%s = %s\n" % (option, value))
-        os.close(fildes)
-        return tmp_file_path
+        prefix = 'multi_inventory.'
+        tmp_dir_path = tempfile.mkdtemp(prefix=prefix)
+        for provider_file in provider_files:
+            filedes = open(os.path.join(tmp_dir_path, provider_file['name']), 'w+')
+            content = Template(provider_file['contents']).substitute(tmpdir=tmp_dir_path)
+            filedes.write(content)
+            filedes.close()
+
+        return tmp_dir_path
 
     def run_provider(self):
         '''Setup the provider call with proper variables
@@ -160,13 +172,21 @@ class MultiEc2(object):
         '''
         try:
             all_results = []
-            tmp_file_paths = []
+            tmp_dir_paths = []
             processes = {}
             for account in self.config['accounts']:
-                env = account['env_vars']
-                if account.has_key('provider_config'):
-                    tmp_file_paths.append(MultiEc2.generate_config(account['provider_config']))
-                    env['EC2_INI_PATH'] = tmp_file_paths[-1]
+                tmp_dir = None
+                if account.has_key('provider_files'):
+                    tmp_dir = MultiInventory.generate_config(account['provider_files'])
+                    tmp_dir_paths.append(tmp_dir)
+
+                # Update env vars after creating provider_config_files
+                # so that we can grab the tmp_dir if it exists
+                env = account.get('env_vars', {})
+                if env and tmp_dir:
+                    for key, value in env.items():
+                        env[key] = Template(value).substitute(tmpdir=tmp_dir)
+
                 name = account['name']
                 provider = account['provider']
                 processes[name] = self.get_provider_tags(provider, env)
@@ -182,9 +202,9 @@ class MultiEc2(object):
                 })
 
         finally:
-            # Clean up the mkstemp file
-            for tmp_file in tmp_file_paths:
-                os.unlink(tmp_file)
+            # Clean up the mkdtemp dirs
+            for tmp_dir in tmp_dir_paths:
+                shutil.rmtree(tmp_dir)
 
         return all_results
 
@@ -223,7 +243,7 @@ class MultiEc2(object):
                               ]
                     raise RuntimeError('\n'.join(err_msg).format(**result))
                 else:
-                    self.all_ec2_results[result['name']] = json.loads(result['out'])
+                    self.all_inventory_results[result['name']] = json.loads(result['out'])
 
             # Check if user wants extra vars in yaml by
             # having hostvars and all_group defined
@@ -231,29 +251,52 @@ class MultiEc2(object):
                 self.apply_account_config(acc_config)
 
             # Build results by merging all dictionaries
-            values = self.all_ec2_results.values()
+            values = self.all_inventory_results.values()
             values.insert(0, self.result)
             for result in  values:
-                MultiEc2.merge_destructively(self.result, result)
+                MultiInventory.merge_destructively(self.result, result)
+
+    def add_entry(self, data, keys, item):
+        ''' Add an item to a dictionary with key notation a.b.c
+            d = {'a': {'b': 'c'}}}
+            keys = a.b
+            item = c
+        '''
+        if "." in keys:
+            key, rest = keys.split(".", 1)
+            if key not in data:
+                data[key] = {}
+            self.add_entry(data[key], rest, item)
+        else:
+            data[keys] = item
+
+    def get_entry(self, data, keys):
+        ''' Get an item from a dictionary with key notation a.b.c
+            d = {'a': {'b': 'c'}}}
+            keys = a.b
+            return c
+        '''
+        if keys and "." in keys:
+            key, rest = keys.split(".", 1)
+            return self.get_entry(data[key], rest)
+        else:
+            return data.get(keys, None)
 
     def apply_account_config(self, acc_config):
         ''' Apply account config settings
         '''
-        results = self.all_ec2_results[acc_config['name']]
+        results = self.all_inventory_results[acc_config['name']]
+        results['all_hosts'] = results['_meta']['hostvars'].keys()
 
         # Update each hostvar with the newly desired key: value from extra_*
-        for _extra in ['extra_groups', 'extra_vars']:
+        for _extra in ['extra_vars', 'extra_groups']:
             for new_var, value in acc_config.get(_extra, {}).items():
-                # Verify the account results look sane
-                # by checking for these keys ('_meta' and 'hostvars' exist)
-                if results.has_key('_meta') and results['_meta'].has_key('hostvars'):
-                    for data in results['_meta']['hostvars'].values():
-                        data[str(new_var)] = str(value)
+                for data in results['_meta']['hostvars'].values():
+                    self.add_entry(data, new_var, value)
 
                 # Add this group
-                if _extra == 'extra_groups' and results.has_key(acc_config['all_group']):
-                    results["%s_%s" % (new_var, value)] = \
-                     copy.copy(results[acc_config['all_group']])
+                if _extra == 'extra_groups':
+                    results["%s_%s" % (new_var, value)] = copy.copy(results['all_hosts'])
 
         # Clone groups goes here
         for to_name, from_name in acc_config.get('clone_groups', {}).items():
@@ -262,14 +305,11 @@ class MultiEc2(object):
 
         # Clone vars goes here
         for to_name, from_name in acc_config.get('clone_vars', {}).items():
-            # Verify the account results look sane
-            # by checking for these keys ('_meta' and 'hostvars' exist)
-            if results.has_key('_meta') and results['_meta'].has_key('hostvars'):
-                for data in results['_meta']['hostvars'].values():
-                    data[str(to_name)] = data.get(str(from_name), 'nil')
+            for data in results['_meta']['hostvars'].values():
+                self.add_entry(data, to_name, self.get_entry(data, from_name))
 
-        # store the results back into all_ec2_results
-        self.all_ec2_results[acc_config['name']] = results
+        # store the results back into all_inventory_results
+        self.all_inventory_results[acc_config['name']] = results
 
     @staticmethod
     def merge_destructively(input_a, input_b):
@@ -277,7 +317,7 @@ class MultiEc2(object):
         for key in input_b:
             if key in input_a:
                 if isinstance(input_a[key], dict) and isinstance(input_b[key], dict):
-                    MultiEc2.merge_destructively(input_a[key], input_b[key])
+                    MultiInventory.merge_destructively(input_a[key], input_b[key])
                 elif input_a[key] == input_b[key]:
                     pass # same leaf value
                 # both lists so add each element in b to a if it does ! exist
@@ -333,7 +373,7 @@ class MultiEc2(object):
                 if exc.errno != errno.EEXIST or not os.path.isdir(path):
                     raise
 
-        json_data = MultiEc2.json_format_dict(self.result, True)
+        json_data = MultiInventory.json_format_dict(self.result, True)
         with open(self.cache_path, 'w') as cache:
             try:
                 fcntl.flock(cache, fcntl.LOCK_EX)
@@ -369,7 +409,7 @@ class MultiEc2(object):
 
 
 if __name__ == "__main__":
-    MEC2 = MultiEc2()
-    MEC2.parse_cli_args()
-    MEC2.run()
-    print MEC2.result_str()
+    MI2 = MultiInventory()
+    MI2.parse_cli_args()
+    MI2.run()
+    print MI2.result_str()
