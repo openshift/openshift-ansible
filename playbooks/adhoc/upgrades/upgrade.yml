@@ -15,6 +15,11 @@
   roles:
   - openshift_facts
   tasks:
+  - stat: path=/var/lib/openshift
+    register: var_lib_openshift
+  - name: Create origin symlink if necessary
+    file: src=/var/lib/openshift/ dest=/var/lib/origin state=link
+    when: var_lib_openshift.stat.exists == True
   - name: Check available disk space for etcd backup
     # We assume to be using the data dir for all backups.
     shell: >
