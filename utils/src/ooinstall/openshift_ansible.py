@@ -4,6 +4,7 @@
 
 import socket
 import subprocess
+import sys
 import os
 import yaml
 from ooinstall.variants import find_variant
@@ -25,7 +26,7 @@ def generate_inventory(hosts):
     base_inventory.write('\n[OSEv3:vars]\n')
     base_inventory.write('ansible_ssh_user={}\n'.format(CFG.settings['ansible_ssh_user']))
     if CFG.settings['ansible_ssh_user'] != 'root':
-        base_inventory.write('ansible_sudo=true\n')
+        base_inventory.write('ansible_become=true\n')
 
     # Find the correct deployment type for ansible:
     ver = find_variant(CFG.settings['variant'],
@@ -46,6 +47,10 @@ def generate_inventory(hosts):
 
     if any(host.hostname == installer_host or host.public_hostname == installer_host
             for host in hosts):
+        no_pwd_sudo = subprocess.call(['sudo', '-v', '--non-interactive'])
+        if no_pwd_sudo == 1:
+            print 'The atomic-openshift-installer requires sudo access without a password.'
+            sys.exit(1)
         base_inventory.write("ansible_connection=local\n")
 
     base_inventory.write('\n[masters]\n')
