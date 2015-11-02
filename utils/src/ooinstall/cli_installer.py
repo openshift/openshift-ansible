@@ -94,7 +94,7 @@ The OpenShift Node provides the runtime environments for containers.  It will
 host the required services to be managed by the Master.
 
 http://docs.openshift.com/enterprise/latest/architecture/infrastructure_components/kubernetes_infrastructure.html#master
-http://docs.openshift.com/enterprise/3.0/architecture/infrastructure_components/kubernetes_infrastructure.html#node
+http://docs.openshift.com/enterprise/latest/architecture/infrastructure_components/kubernetes_infrastructure.html#node
     """
     click.echo(message)
 
