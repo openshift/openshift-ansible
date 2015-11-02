@@ -128,7 +128,7 @@ BuildArch:     noarch
 # ----------------------------------------------------------------------------------
 %package inventory
 Summary:       Openshift and Atomic Enterprise Ansible Inventories
-Requires:      python2, python-boto, python-libcloud >= 0.13
+Requires:      python2
 BuildArch:     noarch
 
 %description inventory
@@ -138,7 +138,29 @@ Ansible Inventories used with the openshift-ansible scripts and playbooks.
 %config(noreplace) /etc/ansible/*
 %dir %{_datadir}/ansible/inventory
 %{_datadir}/ansible/inventory/multi_ec2.py*
+
+%package inventory-aws
+Summary:       Openshift and Atomic Enterprise Ansible Inventories for AWS
+Requires:      %{name}-inventory
+Requires:      python-boto
+BuildArch:     noarch
+
+%description inventory-aws
+Ansible Inventories for AWS used with the openshift-ansible scripts and playbooks.
+
+%files inventory-aws
 %{_datadir}/ansible/inventory/aws/ec2.py*
+
+%package inventory-gce
+Summary:       Openshift and Atomic Enterprise Ansible Inventories for GCE
+Requires:      %{name}-inventory
+Requires:      python-libcloud >= 0.13
+BuildArch:     noarch
+
+%description inventory-gce
+Ansible Inventories for GCE used with the openshift-ansible scripts and playbooks.
+
+%files inventory-gce
 %{_datadir}/ansible/inventory/gce/gce.py*
 
 
