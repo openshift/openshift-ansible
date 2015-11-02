@@ -246,15 +246,15 @@ g_template_os_linux:
 
     #  CPU Utilization #
   - name: 'CPU idle less than 5% on {HOST.NAME}'
-    expression: '{Template OS Linux:kernel.all.cpu.idle.last()}<5 and {Template OS Linux:kernel.all.cpu.idle.last(#2)}<5'
+    expression: '{Template OS Linux:kernel.all.cpu.idle.max(#5)}<5'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_cpu_idle.asciidoc'
-    priority: high
+    priority: average
     description: 'CPU is less than 5% idle'
 
   - name: 'CPU idle less than 10% on {HOST.NAME}'
-    expression: '{Template OS Linux:kernel.all.cpu.idle.last()}<10 and {Template OS Linux:kernel.all.cpu.idle.last(#2)}<10'
+    expression: '{Template OS Linux:kernel.all.cpu.idle.max(#5)}<10'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_cpu_idle.asciidoc'
-    priority: warn
+    priority: average
     description: 'CPU is less than 10% idle'
     dependencies:
     - 'CPU idle less than 5% on {HOST.NAME}'
