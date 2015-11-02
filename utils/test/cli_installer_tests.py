@@ -102,8 +102,8 @@ class UnattendedCliTests(OOCliFixture):
         OOCliFixture.setUp(self)
         self.cli_args.append("-u")
 
-    @patch('ooinstall.install_transactions.run_main_playbook')
-    @patch('ooinstall.install_transactions.load_system_facts')
+    @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.load_system_facts')
     def test_cfg_full_run(self, load_facts_mock, run_playbook_mock):
         load_facts_mock.return_value = (MOCK_FACTS, 0)
         run_playbook_mock.return_value = 0
@@ -133,8 +133,8 @@ class UnattendedCliTests(OOCliFixture):
         self.assertEquals(3, len(hosts))
         self.assertEquals(3, len(hosts_to_run_on))
 
-    @patch('ooinstall.install_transactions.run_main_playbook')
-    @patch('ooinstall.install_transactions.load_system_facts')
+    @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.load_system_facts')
     def test_inventory_write(self, load_facts_mock, run_playbook_mock):
 
         # Add an ssh user so we can verify it makes it to the inventory file:
@@ -172,8 +172,8 @@ class UnattendedCliTests(OOCliFixture):
             self.assertTrue('openshift_hostname' in master_line)
             self.assertTrue('openshift_public_hostname' in master_line)
 
-    @patch('ooinstall.install_transactions.run_main_playbook')
-    @patch('ooinstall.install_transactions.load_system_facts')
+    @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.load_system_facts')
     def test_variant_version_latest_assumed(self, load_facts_mock,
         run_playbook_mock):
         load_facts_mock.return_value = (MOCK_FACTS, 0)
@@ -199,8 +199,8 @@ class UnattendedCliTests(OOCliFixture):
         self.assertEquals('openshift-enterprise',
             inventory.get('OSEv3:vars', 'deployment_type'))
 
-    @patch('ooinstall.install_transactions.run_main_playbook')
-    @patch('ooinstall.install_transactions.load_system_facts')
+    @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.load_system_facts')
     def test_variant_version_preserved(self, load_facts_mock,
         run_playbook_mock):
         load_facts_mock.return_value = (MOCK_FACTS, 0)
@@ -227,8 +227,8 @@ class UnattendedCliTests(OOCliFixture):
         self.assertEquals('enterprise',
             inventory.get('OSEv3:vars', 'deployment_type'))
 
-    @patch('ooinstall.install_transactions.run_ansible')
-    @patch('ooinstall.install_transactions.load_system_facts')
+    @patch('ooinstall.openshift_ansible.run_ansible')
+    @patch('ooinstall.openshift_ansible.load_system_facts')
     def test_no_ansible_config_specified(self, load_facts_mock, run_ansible_mock):
         load_facts_mock.return_value = (MOCK_FACTS, 0)
         run_ansible_mock.return_value = 0
@@ -238,8 +238,8 @@ class UnattendedCliTests(OOCliFixture):
         self._ansible_config_test(load_facts_mock, run_ansible_mock,
             config, None, None)
 
-    @patch('ooinstall.install_transactions.run_ansible')
-    @patch('ooinstall.install_transactions.load_system_facts')
+    @patch('ooinstall.openshift_ansible.run_ansible')
+    @patch('ooinstall.openshift_ansible.load_system_facts')
     def test_ansible_config_specified_cli(self, load_facts_mock, run_ansible_mock):
         load_facts_mock.return_value = (MOCK_FACTS, 0)
         run_ansible_mock.return_value = 0
@@ -250,8 +250,8 @@ class UnattendedCliTests(OOCliFixture):
         self._ansible_config_test(load_facts_mock, run_ansible_mock,
             config, ansible_config, ansible_config)
 
-    @patch('ooinstall.install_transactions.run_ansible')
-    @patch('ooinstall.install_transactions.load_system_facts')
+    @patch('ooinstall.openshift_ansible.run_ansible')
+    @patch('ooinstall.openshift_ansible.load_system_facts')
     def test_ansible_config_specified_in_installer_config(self,
         load_facts_mock, run_ansible_mock):
 
@@ -389,8 +389,8 @@ class AttendedCliTests(OOCliFixture):
             self.assertTrue('public_ip' in h)
             self.assertTrue('public_hostname' in h)
 
-    @patch('ooinstall.install_transactions.run_main_playbook')
-    @patch('ooinstall.install_transactions.load_system_facts')
+    @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.load_system_facts')
     def test_full_run(self, load_facts_mock, run_playbook_mock):
         load_facts_mock.return_value = (MOCK_FACTS, 0)
         run_playbook_mock.return_value = 0
@@ -413,8 +413,8 @@ class AttendedCliTests(OOCliFixture):
         written_config = self._read_yaml(self.config_file)
         self._verify_config_hosts(written_config, 3)
 
-    @patch('ooinstall.install_transactions.run_main_playbook')
-    @patch('ooinstall.install_transactions.load_system_facts')
+    @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.load_system_facts')
     def test_add_nodes(self, load_facts_mock, run_playbook_mock):
 
         # Modify the mock facts to return a version indicating OpenShift
@@ -446,8 +446,8 @@ class AttendedCliTests(OOCliFixture):
         written_config = self._read_yaml(self.config_file)
         self._verify_config_hosts(written_config, 3)
 
-    @patch('ooinstall.install_transactions.run_main_playbook')
-    @patch('ooinstall.install_transactions.load_system_facts')
+    @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.load_system_facts')
     def test_fresh_install_with_config(self, load_facts_mock, run_playbook_mock):
         load_facts_mock.return_value = (MOCK_FACTS, 0)
         run_playbook_mock.return_value = 0

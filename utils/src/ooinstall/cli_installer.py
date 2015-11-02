@@ -6,7 +6,7 @@ import click
 import os
 import re
 import sys
-from ooinstall import install_transactions
+from ooinstall import openshift_ansible
 from ooinstall import OOConfig
 from ooinstall.oo_config import Host
 from ooinstall.variants import find_variant, get_variant_version_combos
@@ -357,8 +357,8 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force):
                 hosts_to_run_on.extend(new_nodes)
                 oo_cfg.hosts.extend(new_nodes)
 
-                install_transactions.set_config(oo_cfg)
-                callback_facts, error = install_transactions.default_facts(oo_cfg.hosts)
+                openshift_ansible.set_config(oo_cfg)
+                callback_facts, error = openshift_ansible.default_facts(oo_cfg.hosts)
                 if error:
                     click.echo("There was a problem fetching the required information. " \
                                "See {} for details.".format(oo_cfg.settings['ansible_log_path']))
@@ -434,7 +434,7 @@ def cli(ctx, unattended, configuration, ansible_playbook_directory, ansible_conf
     oo_cfg.settings['ansible_log_path'] = ctx.obj['ansible_log_path']
 
     ctx.obj['oo_cfg'] = oo_cfg
-    install_transactions.set_config(oo_cfg)
+    openshift_ansible.set_config(oo_cfg)
 
 
 @click.command()
@@ -456,7 +456,7 @@ def uninstall(ctx):
             click.echo("Uninstall cancelled.")
             sys.exit(0)
 
-    install_transactions.run_uninstall_playbook()
+    openshift_ansible.run_uninstall_playbook()
 
 
 
@@ -472,7 +472,7 @@ def install(ctx, force):
         oo_cfg = get_missing_info_from_user(oo_cfg)
 
     click.echo('Gathering information from hosts...')
-    callback_facts, error = install_transactions.default_facts(oo_cfg.hosts)
+    callback_facts, error = openshift_ansible.default_facts(oo_cfg.hosts)
     if error:
         click.echo("There was a problem fetching the required information. " \
                    "Please see {} for details.".format(oo_cfg.settings['ansible_log_path']))
@@ -499,7 +499,7 @@ If changes are needed to the values recorded by the installer please update {}.
     if not ctx.obj['unattended']:
         confirm_continue(message)
 
-    error = install_transactions.run_main_playbook(oo_cfg.hosts,
+    error = openshift_ansible.run_main_playbook(oo_cfg.hosts,
                                                    hosts_to_run_on)
     if error:
         # The bootstrap script will print out the log location.
