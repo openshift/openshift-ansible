@@ -468,16 +468,6 @@ def upgrade(ctx):
         click.echo("No hosts defined in: %s" % oo_cfg['configuration'])
         sys.exit(1)
 
-    click.echo("OpenShift will be upgraded on the following hosts:\n")
-    if not ctx.obj['unattended']:
-        # Prompt interactively to confirm:
-        for host in oo_cfg.hosts:
-            click.echo("  * %s" % host.name)
-        proceed = click.confirm("\nDo you wish to proceed?")
-        if not proceed:
-            click.echo("Upgrade cancelled.")
-            sys.exit(0)
-
     # Update config to reflect the version we're targetting, we'll write
     # to disk once ansible completes successfully, not before.
     old_variant = oo_cfg.settings['variant']
@@ -486,9 +476,18 @@ def upgrade(ctx):
         oo_cfg.settings['variant'] = 'openshift-enterprise'
     variant, version = find_variant(oo_cfg.settings['variant'])
     oo_cfg.settings['variant_version'] = version.name
-    click.echo("Upgrading from %s %s to %s %s" % (
+    click.echo("Openshift will be upgraded from %s %s to %s %s on the following hosts:\n" % (
         old_variant, old_version, oo_cfg.settings['variant'],
         oo_cfg.settings['variant_version']))
+    for host in oo_cfg.hosts:
+        click.echo("  * %s" % host.name)
+
+    if not ctx.obj['unattended']:
+        # Prompt interactively to confirm:
+        proceed = click.confirm("\nDo you wish to proceed?")
+        if not proceed:
+            click.echo("Upgrade cancelled.")
+            sys.exit(0)
 
     retcode = install_transactions.run_upgrade_playbook()
     if retcode > 0:
