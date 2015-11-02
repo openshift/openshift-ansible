@@ -3,133 +3,162 @@
     "apiVersion": "v1",
     "metadata": {
         "annotations": {
-            "description": "Application template for EAP 6 PostgreSQL applications built using STI.",
-            "iconClass" : "icon-jboss"
+            "iconClass": "icon-tomcat",
+            "description": "Application template for JWS PostgreSQL applications with persistent storage built using S2I.",
+            "tags": "tomcat,tomcat8,postgresql,java,database,jboss,xpaas",
+            "version": "1.1.0"
         },
-        "name": "eap6-postgresql-sti"
+        "name": "jws30-tomcat8-postgresql-persistent-s2i"
     },
     "labels": {
-        "template": "eap6-postgresql-sti"
+        "template": "jws30-tomcat8-postgresql-persistent-s2i",
+        "xpaas": "1.1.0"
     },
     "parameters": [
         {
-            "description": "EAP Release version, e.g. 6.4, etc.",
-            "name": "EAP_RELEASE",
-            "value": "6.4"
-        },
-        {
             "description": "The name for the application.",
             "name": "APPLICATION_NAME",
-            "value": "eap-app"
+            "value": "jws-app",
+            "required": true
         },
         {
             "description": "Custom hostname for service routes.  Leave blank for default hostname, e.g.: <application-name>.<project>.<default-domain-suffix>",
-            "name": "APPLICATION_HOSTNAME",
-            "value": ""
+            "name": "APPLICATION_DOMAIN",
+            "value": "",
+            "required": false
         },
         {
             "description": "Git source URI for application",
-            "name": "GIT_URI"
+            "name": "SOURCE_REPOSITORY_URL",
+            "value": "https://github.com/jboss-openshift/openshift-quickstarts",
+            "required": true
         },
         {
             "description": "Git branch/tag reference",
-            "name": "GIT_REF",
-            "value": "master"
+            "name": "SOURCE_REPOSITORY_REF",
+            "value": "1.1",
+            "required": false
         },
         {
             "description": "Path within Git project to build; empty for root project directory.",
-            "name": "GIT_CONTEXT_DIR",
-            "value": ""
+            "name": "CONTEXT_DIR",
+            "value": "todolist/todolist-jdbc",
+            "required": false
         },
         {
-            "description": "Database JNDI name used by application to resolve the datasource, e.g. java:/jboss/datasources/postgresql",
+            "description": "Database JNDI name used by application to resolve the datasource, e.g. java:/jboss/datasources/mongodb",
             "name": "DB_JNDI",
-            "value": ""
+            "value": "java:jboss/datasources/TodoListDS",
+            "required": false
         },
         {
             "description": "Database name",
             "name": "DB_DATABASE",
-            "value": "root"
+            "value": "root",
+            "required": true
         },
         {
-            "description": "Queue names",
-            "name": "HORNETQ_QUEUES",
-            "value": ""
+            "description": "Size of persistent storage for database volume.",
+            "name": "VOLUME_CAPACITY",
+            "value": "512Mi",
+            "required": true
         },
         {
-            "description": "Topic names",
-            "name": "HORNETQ_TOPICS",
-            "value": ""
+            "description": "The name of the secret containing the certificate files",
+            "name": "JWS_HTTPS_SECRET",
+            "value": "jws-app-secret",
+            "required": true
         },
         {
-            "description": "The name of the secret containing the keystore file",
-            "name": "EAP_HTTPS_SECRET",
-            "value": "eap-app-secret"
+            "description": "The name of the certificate file within the secret",
+            "name": "JWS_HTTPS_CERTIFICATE",
+            "value": "server.crt",
+            "required": false
         },
         {
-            "description": "The name of the keystore file within the secret",
-            "name": "EAP_HTTPS_KEYSTORE",
-            "value": "keystore.jks"
+            "description": "The name of the certificate key file within the secret",
+            "name": "JWS_HTTPS_CERTIFICATE_KEY",
+            "value": "server.key",
+            "required": false
         },
         {
-            "description": "The name associated with the server certificate",
-            "name": "EAP_HTTPS_NAME",
-            "value": ""
-        },
-        {
-            "description": "The password for the keystore and certificate",
-            "name": "EAP_HTTPS_PASSWORD",
-            "value": ""
+            "description": "The certificate password",
+            "name": "JWS_HTTPS_CERTIFICATE_PASSWORD",
+            "value": "",
+            "required": false
         },
         {
             "description": "Sets xa-pool/min-pool-size for the configured datasource.",
-            "name": "DB_MIN_POOL_SIZE"
+            "name": "DB_MIN_POOL_SIZE",
+            "required": false
         },
         {
             "description": "Sets xa-pool/max-pool-size for the configured datasource.",
-            "name": "DB_MAX_POOL_SIZE"
+            "name": "DB_MAX_POOL_SIZE",
+            "required": false
         },
         {
             "description": "Sets transaction-isolation for the configured datasource.",
-            "name": "DB_TX_ISOLATION"
+            "name": "DB_TX_ISOLATION",
+            "required": false
         },
         {
             "description": "The maximum number of client connections allowed. This also sets the maximum number of prepared transactions.",
-            "name": "POSTGRESQL_MAX_CONNECTIONS"
+            "name": "POSTGRESQL_MAX_CONNECTIONS",
+            "required": false
         },
         {
             "description": "Configures how much memory is dedicated to PostgreSQL for caching data.",
-            "name": "POSTGRESQL_SHARED_BUFFERS"
-        },
-        {
-            "description": "HornetQ cluster admin password",
-            "name": "HORNETQ_CLUSTER_PASSWORD",
-            "from": "[a-zA-Z0-9]{8}",
-            "generate": "expression"
+            "name": "POSTGRESQL_SHARED_BUFFERS",
+            "required": false
         },
         {
             "description": "Database user name",
             "name": "DB_USERNAME",
             "from": "user[a-zA-Z0-9]{3}",
-            "generate": "expression"
+            "generate": "expression",
+            "required": true
         },
         {
             "description": "Database user password",
             "name": "DB_PASSWORD",
             "from": "[a-zA-Z0-9]{8}",
-            "generate": "expression"
+            "generate": "expression",
+            "required": true
         },
         {
-            "description": "Github trigger secret",
-            "name": "GITHUB_TRIGGER_SECRET",
+            "description": "JWS Admin User",
+            "name": "JWS_ADMIN_USERNAME",
             "from": "[a-zA-Z0-9]{8}",
-            "generate": "expression"
+            "generate": "expression",
+            "required": true
+        },
+        {
+            "description": "JWS Admin Password",
+            "name": "JWS_ADMIN_PASSWORD",
+            "from": "[a-zA-Z0-9]{8}",
+            "generate": "expression",
+            "required": true
+        },
+        {
+            "description": "GitHub trigger secret",
+            "name": "GITHUB_WEBHOOK_SECRET",
+            "from": "[a-zA-Z0-9]{8}",
+            "generate": "expression",
+            "required": true
         },
         {
             "description": "Generic build trigger secret",
-            "name": "GENERIC_TRIGGER_SECRET",
+            "name": "GENERIC_WEBHOOK_SECRET",
             "from": "[a-zA-Z0-9]{8}",
-            "generate": "expression"
+            "generate": "expression",
+            "required": true
+        },
+        {
+            "description": "Namespace in which the ImageStreams for Red Hat Middleware images are installed. These ImageStreams are normally installed in the openshift namespace. You should only need to modify this if you've installed the ImageStreams in a different namespace/project.",
+            "name": "IMAGE_STREAM_NAMESPACE",
+            "value": "openshift",
+            "required": true
         }
     ],
     "objects": [
@@ -187,31 +216,6 @@
             "spec": {
                 "ports": [
                     {
-                        "port": 8888,
-                        "targetPort": 8888
-                    }
-                ],
-                "portalIP": "None",
-                "selector": {
-                    "deploymentConfig": "${APPLICATION_NAME}"
-                }
-            },
-            "metadata": {
-                "name": "${APPLICATION_NAME}-ping",
-                "labels": {
-                    "application": "${APPLICATION_NAME}"
-                },
-                "annotations": {
-                    "description": "Ping service for clustered applications."
-                }
-            }
-        },
-        {
-            "kind": "Service",
-            "apiVersion": "v1",
-            "spec": {
-                "ports": [
-                    {
                         "port": 5432,
                         "targetPort": 5432
                     }
@@ -233,9 +237,9 @@
         {
             "kind": "Route",
             "apiVersion": "v1",
-            "id": "${APPLICATION_NAME}-http-route",
+            "id": "${APPLICATION_NAME}-http",
             "metadata": {
-                "name": "${APPLICATION_NAME}-http-route",
+                "name": "${APPLICATION_NAME}",
                 "labels": {
                     "application": "${APPLICATION_NAME}"
                 },
@@ -244,7 +248,7 @@
                 }
             },
             "spec": {
-                "host": "${APPLICATION_HOSTNAME}",
+                "host": "${APPLICATION_DOMAIN}",
                 "to": {
                     "name": "${APPLICATION_NAME}"
                 }
@@ -253,9 +257,9 @@
         {
             "kind": "Route",
             "apiVersion": "v1",
-            "id": "${APPLICATION_NAME}-https-route",
+            "id": "${APPLICATION_NAME}-https",
             "metadata": {
-                "name": "${APPLICATION_NAME}-https-route",
+                "name": "secure-${APPLICATION_NAME}",
                 "labels": {
                     "application": "${APPLICATION_NAME}"
                 },
@@ -264,12 +268,12 @@
                 }
             },
             "spec": {
-                "host": "${APPLICATION_HOSTNAME}",
+                "host": "${APPLICATION_DOMAIN}",
                 "to": {
                     "name": "secure-${APPLICATION_NAME}"
                 },
                 "tls": {
-                    "termination" : "passthrough"
+                    "termination": "passthrough"
                 }
             }
         },
@@ -296,18 +300,19 @@
                 "source": {
                     "type": "Git",
                     "git": {
-                        "uri": "${GIT_URI}",
-                        "ref": "${GIT_REF}"
+                        "uri": "${SOURCE_REPOSITORY_URL}",
+                        "ref": "${SOURCE_REPOSITORY_REF}"
                     },
-                    "contextDir":"${GIT_CONTEXT_DIR}"
+                    "contextDir": "${CONTEXT_DIR}"
                 },
                 "strategy": {
                     "type": "Source",
                     "sourceStrategy": {
+                        "forcePull": true,
                         "from": {
                             "kind": "ImageStreamTag",
-                            "namespace": "openshift",
-                            "name": "jboss-eap6-openshift:${EAP_RELEASE}"
+                            "namespace": "${IMAGE_STREAM_NAMESPACE}",
+                            "name": "jboss-webserver30-tomcat8-openshift:1.1"
                         }
                     }
                 },
@@ -321,18 +326,21 @@
                     {
                         "type": "GitHub",
                         "github": {
-                            "secret": "${GITHUB_TRIGGER_SECRET}"
+                            "secret": "${GITHUB_WEBHOOK_SECRET}"
                         }
                     },
                     {
                         "type": "Generic",
                         "generic": {
-                            "secret": "${GENERIC_TRIGGER_SECRET}"
+                            "secret": "${GENERIC_WEBHOOK_SECRET}"
                         }
                     },
                     {
                         "type": "ImageChange",
                         "imageChange": {}
+                    },
+                    {
+                        "type": "ConfigChange"
                     }
                 ]
             }
@@ -363,6 +371,9 @@
                                 "name": "${APPLICATION_NAME}"
                             }
                         }
+                    },
+                    {
+                        "type": "ConfigChange"
                     }
                 ],
                 "replicas": 1,
@@ -378,28 +389,29 @@
                         }
                     },
                     "spec": {
-                        "serviceAccount": "eap-service-account",
+                        "serviceAccount": "jws-service-account",
+                        "terminationGracePeriodSeconds": 60,
                         "containers": [
                             {
                                 "name": "${APPLICATION_NAME}",
                                 "image": "${APPLICATION_NAME}",
                                 "imagePullPolicy": "Always",
-                                "volumeMounts": [
-                                    {
-                                        "name": "eap-keystore-volume",
-                                        "mountPath": "/etc/eap-secret-volume",
-                                        "readOnly": true
-                                    }
-                                ],
                                 "readinessProbe": {
                                     "exec": {
                                         "command": [
                                             "/bin/bash",
                                             "-c",
-                                            "/opt/eap/bin/readinessProbe.sh"
+                                            "curl -s -u ${JWS_ADMIN_USERNAME}:${JWS_ADMIN_PASSWORD} 'http://localhost:8080/manager/jmxproxy/?get=Catalina%3Atype%3DServer&att=stateName' |grep -iq 'stateName *= *STARTED'"
                                         ]
                                     }
                                 },
+                                "volumeMounts": [
+                                    {
+                                        "name": "jws-certificate-volume",
+                                        "mountPath": "/etc/jws-secret-volume",
+                                        "readOnly": true
+                                    }
+                                ],
                                 "ports": [
                                     {
                                         "name": "http",
@@ -409,11 +421,6 @@
                                     {
                                         "name": "https",
                                         "containerPort": 8443,
-                                        "protocol": "TCP"
-                                    },
-                                    {
-                                        "name": "ping",
-                                        "containerPort": 8888,
                                         "protocol": "TCP"
                                     }
                                 ],
@@ -439,10 +446,6 @@
                                         "value": "${DB_DATABASE}"
                                     },
                                     {
-                                        "name": "TX_DATABASE_PREFIX_MAPPING",
-                                        "value": "${APPLICATION_NAME}-postgresql=DB"
-                                    },
-                                    {
                                         "name": "DB_MIN_POOL_SIZE",
                                         "value": "${DB_MIN_POOL_SIZE}"
                                     },
@@ -455,49 +458,37 @@
                                         "value": "${DB_TX_ISOLATION}"
                                     },
                                     {
-                                        "name": "OPENSHIFT_DNS_PING_SERVICE_NAME",
-                                        "value": "${APPLICATION_NAME}-ping"
+                                        "name": "JWS_HTTPS_CERTIFICATE_DIR",
+                                        "value": "/etc/jws-secret-volume"
                                     },
                                     {
-                                        "name": "OPENSHIFT_DNS_PING_SERVICE_PORT",
-                                        "value": "8888"
+                                        "name": "JWS_HTTPS_CERTIFICATE",
+                                        "value": "${JWS_HTTPS_CERTIFICATE}"
                                     },
                                     {
-                                        "name": "EAP_HTTPS_KEYSTORE_DIR",
-                                        "value": "/etc/eap-secret-volume"
+                                        "name": "JWS_HTTPS_CERTIFICATE_KEY",
+                                        "value": "${JWS_HTTPS_CERTIFICATE_KEY}"
                                     },
                                     {
-                                        "name": "EAP_HTTPS_KEYSTORE",
-                                        "value": "${EAP_HTTPS_KEYSTORE}"
+                                        "name": "JWS_HTTPS_CERTIFICATE_PASSWORD",
+                                        "value": "${JWS_HTTPS_CERTIFICATE_PASSWORD}"
                                     },
                                     {
-                                        "name": "EAP_HTTPS_NAME",
-                                        "value": "${EAP_HTTPS_NAME}"
+                                        "name": "JWS_ADMIN_USERNAME",
+                                        "value": "${JWS_ADMIN_USERNAME}"
                                     },
                                     {
-                                        "name": "EAP_HTTPS_PASSWORD",
-                                        "value": "${EAP_HTTPS_PASSWORD}"
-                                    },
-                                    {
-                                        "name": "HORNETQ_CLUSTER_PASSWORD",
-                                        "value": "${HORNETQ_CLUSTER_PASSWORD}"
-                                    },
-                                    {
-                                        "name": "HORNETQ_QUEUES",
-                                        "value": "${HORNETQ_QUEUES}"
-                                    },
-                                    {
-                                        "name": "HORNETQ_TOPICS",
-                                        "value": "${HORNETQ_TOPICS}"
+                                        "name": "JWS_ADMIN_PASSWORD",
+                                        "value": "${JWS_ADMIN_PASSWORD}"
                                     }
                                 ]
                             }
                         ],
                         "volumes": [
                             {
-                                "name": "eap-keystore-volume",
+                                "name": "jws-certificate-volume",
                                 "secret": {
-                                    "secretName": "${EAP_HTTPS_SECRET}"
+                                    "secretName": "${JWS_HTTPS_SECRET}"
                                 }
                             }
                         ]
@@ -528,10 +519,13 @@
                             ],
                             "from": {
                                 "kind": "ImageStreamTag",
-                                "namespace": "openshift",
+                                "namespace": "${IMAGE_STREAM_NAMESPACE}",
                                 "name": "postgresql:latest"
                             }
                         }
+                    },
+                    {
+                        "type": "ConfigChange"
                     }
                 ],
                 "replicas": 1,
@@ -547,15 +541,21 @@
                         }
                     },
                     "spec": {
+                        "terminationGracePeriodSeconds": 60,
                         "containers": [
                             {
                                 "name": "${APPLICATION_NAME}-postgresql",
                                 "image": "postgresql",
-                                "imagePullPolicy": "Always",
                                 "ports": [
                                     {
                                         "containerPort": 5432,
                                         "protocol": "TCP"
+                                    }
+                                ],
+                                "volumeMounts": [
+                                    {
+                                        "mountPath": "/var/lib/pgsql/data",
+                                        "name": "${APPLICATION_NAME}-postgresql-pvol"
                                     }
                                 ],
                                 "env": [
@@ -581,7 +581,35 @@
                                     }
                                 ]
                             }
+                        ],
+                        "volumes": [
+                            {
+                                "name": "${APPLICATION_NAME}-postgresql-pvol",
+                                "persistentVolumeClaim": {
+                                    "claimName": "${APPLICATION_NAME}-postgresql-claim"
+                                }
+                            }
                         ]
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "PersistentVolumeClaim",
+            "metadata": {
+                "name": "${APPLICATION_NAME}-postgresql-claim",
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                }
+            },
+            "spec": {
+                "accessModes": [
+                    "ReadWriteOnce"
+                ],
+                "resources": {
+                    "requests": {
+                        "storage": "${VOLUME_CAPACITY}"
                     }
                 }
             }

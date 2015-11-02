@@ -12,19 +12,21 @@
             "kind": "ImageStream",
             "apiVersion": "v1",
             "metadata": {
-                "name": "jboss-webserver3-tomcat7-openshift"
+                "name": "jboss-webserver30-tomcat7-openshift"
             },
             "spec": {
-                "dockerImageRepository": "registry.access.redhat.com/jboss-webserver-3/tomcat7-openshift",
+                "dockerImageRepository": "registry.access.redhat.com/jboss-webserver-3/webserver30-tomcat7-openshift",
                 "tags": [
                     {
-                        "name": "3.0",
+                        "name": "1.1",
                         "annotations": {
-                            "description": "JBoss Web Server v3 Tomcat 7 STI images.",
+                            "description": "JBoss Web Server 3.0 Tomcat 7 S2I images.",
                             "iconClass": "icon-jboss",
-                            "tags": "java",
-                            "supports":"tomcat7:3.0,java",
-                            "version": "3.0"
+                            "tags": "builder,tomcat,tomcat7,java,jboss,xpaas",
+                            "supports":"tomcat7:3.0,tomcat:7,java:8,xpaas:1.1",
+                            "sampleRepo": "https://github.com/jboss-openshift/openshift-quickstarts.git",
+                            "sampleContextDir": "tomcat-websocket-chat",
+                            "version": "1.1"
                         }
                     }
                 ]
@@ -34,19 +36,21 @@
             "kind": "ImageStream",
             "apiVersion": "v1",
             "metadata": {
-                "name": "jboss-webserver3-tomcat8-openshift"
+                "name": "jboss-webserver30-tomcat8-openshift"
             },
             "spec": {
-                "dockerImageRepository": "registry.access.redhat.com/jboss-webserver-3/tomcat8-openshift",
+                "dockerImageRepository": "registry.access.redhat.com/jboss-webserver-3/webserver30-tomcat8-openshift",
                 "tags": [
                     {
-                        "name": "3.0",
+                        "name": "1.1",
                         "annotations": {
-                            "description": "JBoss Web Server v3 Tomcat 8 STI images.",
+                            "description": "JBoss Web Server 3.0 Tomcat 8 S2I images.",
                             "iconClass": "icon-jboss",
-                            "tags": "java",
-                            "supports":"tomcat8:3.0,java",
-                            "version": "3.0"
+                            "tags": "builder,tomcat,tomcat8,java,jboss,xpaas",
+                            "supports":"tomcat8:3.0,tomcat:8,java:8,xpaas:1.1",
+                            "sampleRepo": "https://github.com/jboss-openshift/openshift-quickstarts.git",
+                            "sampleContextDir": "tomcat-websocket-chat",
+                            "version": "1.1"
                         }
                     }
                 ]
@@ -56,19 +60,22 @@
             "kind": "ImageStream",
             "apiVersion": "v1",
             "metadata": {
-                "name": "jboss-eap6-openshift"
+                "name": "jboss-eap64-openshift"
             },
             "spec": {
-                "dockerImageRepository": "registry.access.redhat.com/jboss-eap-6/eap-openshift",
+                "dockerImageRepository": "registry.access.redhat.com/jboss-eap-6/eap64-openshift",
                 "tags": [
                     {
-                        "name": "6.4",
+                        "name": "1.1",
                         "annotations": {
-                            "description": "JBoss EAP 6 STI images.",
+                            "description": "JBoss EAP 6.4 S2I images.",
                             "iconClass": "icon-jboss",
-                            "tags": "javaee",
-                            "supports":"eap:6.4,jee,java",
-                            "version": "6.4"
+                            "tags": "builder,eap,javaee,java,jboss,xpaas",
+                            "supports":"eap:6.4,javaee:6,java:8,xpaas:1.1",
+                            "sampleRepo": "https://github.com/jboss-developer/jboss-eap-quickstarts.git",
+                            "sampleContextDir": "kitchensink",
+                            "sampleRef": "6.4.x",
+                            "version": "1.1"
                         }
                     }
                 ]
@@ -78,19 +85,19 @@
             "kind": "ImageStream",
             "apiVersion": "v1",
             "metadata": {
-                "name": "jboss-amq-6"
+                "name": "jboss-amq-62"
             },
             "spec": {
-                "dockerImageRepository": "registry.access.redhat.com/jboss-amq-6/amq-openshift",
+                "dockerImageRepository": "registry.access.redhat.com/jboss-amq-6/amq62-openshift",
                 "tags": [
                     {
-                        "name": "6.2",
+                        "name": "1.1",
                         "annotations": {
-                            "description": "JBoss ActiveMQ 6 broker image.",
+                            "description": "JBoss A-MQ 6.2 broker image.",
                             "iconClass": "icon-jboss",
-                            "tags": "javaee",
-                            "supports":"amq:6.2,jee,java",
-                            "version": "6.2"
+                            "tags": "messaging,amq,jboss,xpaas",
+                            "supports":"amq:6.2,messaging,xpaas:1.1",
+                            "version": "1.1"
                         }
                     }
                 ]
