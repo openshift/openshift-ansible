@@ -379,14 +379,14 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force):
         readable=True),
     default=None)
 @click.option('--ansible-playbook-directory',
-    '-a',
-    type=click.Path(exists=True,
-        file_okay=False,
-        dir_okay=True,
-        writable=False,
-        readable=True),
-    # callback=validate_ansible_dir,
-    envvar='OO_ANSIBLE_PLAYBOOK_DIRECTORY')
+              '-a',
+              type=click.Path(exists=True,
+                              file_okay=False,
+                              dir_okay=True,
+                              readable=True),
+              # callback=validate_ansible_dir,
+              default='/usr/share/openshift-ansible/',
+              envvar='OO_ANSIBLE_PLAYBOOK_DIRECTORY')
 @click.option('--ansible-config',
     type=click.Path(file_okay=True,
         dir_okay=False,
