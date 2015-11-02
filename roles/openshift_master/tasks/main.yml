@@ -62,6 +62,7 @@
       api_server_args: "{{ osm_api_server_args | default(None) }}"
       controller_args: "{{ osm_controller_args | default(None) }}"
       infra_nodes: "{{ num_infra | default(None) }}"
+      disabled_features: "{{ osm_disabled_features | default(None) }}"
 
 - name: Install Master package
   yum: pkg={{ openshift.common.service_type }}-master{{ openshift_version  }} state=present

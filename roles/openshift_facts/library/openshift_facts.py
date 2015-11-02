@@ -508,8 +508,9 @@ def set_deployment_facts_if_unset(facts):
             dict: the facts dict updated with the generated deployment_type
             facts
     """
-    # Perhaps re-factor this as a map?
-    # pylint: disable=too-many-branches
+    # disabled to avoid breaking up facts related to deployment type into
+    # multiple methods for now.
+    # pylint: disable=too-many-statements, too-many-branches
     if 'common' in facts:
         deployment_type = facts['common']['deployment_type']
         if 'service_type' not in facts['common']:
@@ -549,6 +550,17 @@ def set_deployment_facts_if_unset(facts):
                 elif deployment_type == 'atomic-enterprise':
                     registry_url = 'aep3/aep-${component}:${version}'
                 facts[role]['registry_url'] = registry_url
+
+    if 'master' in facts:
+        deployment_type = facts['common']['deployment_type']
+        openshift_features = ['Builder', 'S2IBuilder', 'WebConsole']
+        if 'disabled_features' in facts['master']:
+            if deployment_type == 'atomic-enterprise':
+                curr_disabled_features = set(facts['master']['disabled_features'])
+                facts['master']['disabled_features'] = list(curr_disabled_features.union(openshift_features))
+        else:
+            if deployment_type == 'atomic-enterprise':
+                facts['master']['disabled_features'] = openshift_features
 
     if 'node' in facts:
         deployment_type = facts['common']['deployment_type']
