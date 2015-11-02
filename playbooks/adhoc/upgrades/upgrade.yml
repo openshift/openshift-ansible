@@ -40,6 +40,16 @@
   - name: Generate etcd backup
     command: etcdctl backup --data-dir={{ openshift.master.etcd_data_dir }} --backup-dir={{ openshift.common.data_dir }}/etcd-backup-{{ timestamp }}
 
+- name: Upgrade base package on masters
+  hosts: masters
+  roles:
+  - openshift_facts
+  vars:
+    openshift_version: "{{ openshift_pkg_version | default('') }}"
+  tasks:
+    - name: Upgrade base package
+      yum: pkg={{ openshift.common.service_type }}{{ openshift_version  }} state=latest
+
 - name: Re-Run cluster configuration to apply latest configuration changes
   include: ../../common/openshift-cluster/config.yml
   vars:

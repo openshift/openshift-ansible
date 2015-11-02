@@ -102,6 +102,12 @@
             "github": {
               "secret": "${GITHUB_WEBHOOK_SECRET}"
             }
+          },
+          {
+            "type": "Generic",
+            "generic": {
+              "secret": "${GENERIC_WEBHOOK_SECRET}"
+            }
           }
         ]
       }
@@ -209,6 +215,12 @@
     {
       "name": "GITHUB_WEBHOOK_SECRET",
       "description": "A secret string used to configure the GitHub webhook",
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{40}"
+    },
+    {
+      "name": "GENERIC_WEBHOOK_SECRET",
+      "description": "A secret string used to configure the Generic webhook",
       "generate": "expression",
       "from": "[a-zA-Z0-9]{40}"
     },

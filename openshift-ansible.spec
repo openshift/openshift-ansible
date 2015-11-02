@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.2
+Version:        3.0.6
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -138,7 +138,29 @@ Ansible Inventories used with the openshift-ansible scripts and playbooks.
 %config(noreplace) /etc/ansible/*
 %dir %{_datadir}/ansible/inventory
 %{_datadir}/ansible/inventory/multi_ec2.py*
+
+%package inventory-aws
+Summary:       Openshift and Atomic Enterprise Ansible Inventories for AWS
+Requires:      %{name}-inventory
+Requires:      python-boto
+BuildArch:     noarch
+
+%description inventory-aws
+Ansible Inventories for AWS used with the openshift-ansible scripts and playbooks.
+
+%files inventory-aws
 %{_datadir}/ansible/inventory/aws/ec2.py*
+
+%package inventory-gce
+Summary:       Openshift and Atomic Enterprise Ansible Inventories for GCE
+Requires:      %{name}-inventory
+Requires:      python-libcloud >= 0.13
+BuildArch:     noarch
+
+%description inventory-gce
+Ansible Inventories for GCE used with the openshift-ansible scripts and playbooks.
+
+%files inventory-gce
 %{_datadir}/ansible/inventory/gce/gce.py*
 
 
@@ -227,6 +249,69 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Oct 30 2015 Kenny Woodson <kwoodson@redhat.com> 3.0.6-1
+- Adding python-boto and python-libcloud to openshift-ansible-inventory
+  dependency (kwoodson@redhat.com)
+- Use more specific enterprise version for version_greater_than_3_1_or_1_1.
+  (abutcher@redhat.com)
+- Conditionalizing the support for the v1beta3 api (bleanhar@redhat.com)
+
+* Thu Oct 29 2015 Kenny Woodson <kwoodson@redhat.com> 3.0.5-1
+- Updating multi_ec2 to support extra_vars and extra_groups
+  (kwoodson@redhat.com)
+- Removing the template and doing to_nice_yaml instead (kwoodson@redhat.com)
+- README_AEP.md: update instructions for creating router and registry
+  (jlebon@redhat.com)
+- README_AEP: Various fixes (walters@verbum.org)
+- Fixing for extra_vars rename. (kwoodson@redhat.com)
+- make storage_plugin_deps conditional on deployment_type (jdetiber@redhat.com)
+- remove debugging pauses (jdetiber@redhat.com)
+- make storage plugin dependency installation more flexible
+  (jdetiber@redhat.com)
+- Install storage plugin dependencies (jdetiber@redhat.com)
+
+* Wed Oct 28 2015 Kenny Woodson <kwoodson@redhat.com> 3.0.4-1
+- Removing spec files. (kwoodson@redhat.com)
+- Updated example (kwoodson@redhat.com)
+- Automatic commit of package [openshift-ansible-inventory] release [0.0.11-1].
+  (kwoodson@redhat.com)
+- Automatic commit of package [openshift-ansible-bin] release [0.0.21-1].
+  (kwoodson@redhat.com)
+- Automatic commit of package [openshift-ansible-inventory] release [0.0.10-1].
+  (kwoodson@redhat.com)
+- Automatic commit of package [openshift-ansible-bin] release [0.0.20-1].
+  (kwoodson@redhat.com)
+- Adding tito releasers configuration (bleanhar@redhat.com)
+- Bug fixes for the uninstall playbook (bleanhar@redhat.com)
+- Adding clone vars and groups. Renamed hostvars to extra_vars.
+  (kwoodson@redhat.com)
+- Start tracking docker info execution time (jdiaz@redhat.com)
+- The uninstall playbook should remove the kubeconfig for non-root installs
+  (bleanhar@redhat.com)
+- Adding uninstall support for Atomic Host (bleanhar@redhat.com)
+- add examples for SDN configuration (jdetiber@redhat.com)
+
+* Tue Oct 27 2015 Troy Dawson <tdawson@redhat.com> 3.0.3-1
+- Pylint fixes and ignores for incoming oo-install code. (dgoodwin@redhat.com)
+- Pylint fixes (abutcher@redhat.com)
+- Adding zabbix type and fixing zabbix agent vars (kwoodson@redhat.com)
+- Add atomic-openshift-utils add atomic-openshift-utils to openshift-
+  ansible.spec file (tdawson@redhat.com)
+- Fix quotes (spinolacastro@gmail.com)
+- Use standard library for version comparison. (abutcher@redhat.com)
+- added docker info to the end of docker loop to direct lvm playbook.
+  (twiest@redhat.com)
+- Add missing quotes (spinolacastro@gmail.com)
+- Adding Docker Log Options capabilities (epo@jemba.net)
+- Move version greater_than_fact into openshift_facts (abutcher@redhat.com)
+- Don't include proxy client cert when <3.1 or <1.1 (abutcher@redhat.com)
+- Add proxy client certs to master config. (abutcher@redhat.com)
+- Update imagestreams and quickstarts from origin (sdodson@redhat.com)
+- Get default values from openshift_facts (spinolacastro@gmail.com)
+- Cleanup (spinolacastro@gmail.com)
+- Add missing inventory example (spinolacastro@gmail.com)
+- Custom Project Config (spinolacastro@gmail.com)
+
 * Mon Oct 19 2015 Troy Dawson <tdawson@redhat.com> 3.0.2-1
 - Initial Package
 

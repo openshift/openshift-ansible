@@ -1,6 +1,6 @@
 # This deletes *ALL* Origin, Atomic Enterprise Platform and OpenShift
 # Enterprise content installed by ansible.  This includes:
-# 
+#
 #    configuration
 #    containers
 #    example templates and imagestreams
@@ -13,6 +13,20 @@
   sudo: yes
 
   tasks:
+    - name: Detecting Operating System
+      shell: ls /run/ostree-booted
+      ignore_errors: yes
+      failed_when: false
+      register: ostree_output
+
+    - set_fact:
+        is_atomic: "{{ ostree_output.rc == 0 }}"
+
+    - name: Remove br0 interface
+      shell: ovs-vsctl del-br br0
+      changed_when: False
+      failed_when: False
+
     - service: name={{ item }} state=stopped
       with_items:
         - atomic-enterprise-master
@@ -33,6 +47,7 @@
         - origin-node
 
     - yum: name={{ item }} state=absent
+      when: not is_atomic | bool
       with_items:
         - atomic-enterprise
         - atomic-enterprise-master
@@ -58,6 +73,15 @@
         - tuned-profiles-atomic-openshift-node
         - tuned-profiles-openshift-node
         - tuned-profiles-origin-node
+
+    - name: Remove linux interfaces
+      shell: ip link del "{{ item }}"
+      changed_when: False
+      failed_when: False
+      with_items:
+        - lbr0
+        - vlinuxbr
+        - vovsbr
 
     - shell: systemctl reset-failed
       changed_when: False
@@ -127,6 +151,7 @@
         - /etc/sysconfig/origin-master
         - /etc/sysconfig/origin-node
         - /root/.kube
+        - "~{{ ansible_ssh_user }}/.kube"
         - /usr/share/openshift/examples
         - /var/lib/atomic-enterprise
         - /var/lib/etcd

@@ -3,8 +3,9 @@
     name: openshift-ansible-inventory
     state: present
 
-- template:
-    src: multi_ec2.yaml.j2
+- name:
+  copy:
+    content: "{{ oo_inventory_accounts | to_nice_yaml }}"
     dest: /etc/ansible/multi_ec2.yaml
     group: "{{ oo_inventory_group }}"
     owner: "{{ oo_inventory_owner }}"
@@ -39,5 +40,5 @@
     owner: root
     group: libra_ops
     recurse: yes
-    mode: '2750'
+    mode: '2770'
   when: oo_inventory_cache_location is defined

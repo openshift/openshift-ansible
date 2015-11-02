@@ -21,6 +21,7 @@ import ConfigParser
 import copy
 import os
 from distutils.util import strtobool
+from distutils.version import LooseVersion
 
 
 def hostname_valid(hostname):
@@ -362,6 +363,33 @@ def set_metrics_facts_if_unset(facts):
             facts['common']['use_cluster_metrics'] = use_cluster_metrics
     return facts
 
+def set_project_cfg_facts_if_unset(facts):
+    """ Set Project Configuration facts if not already present in facts dict
+            dict:
+        Args:
+            facts (dict): existing facts
+        Returns:
+            dict: the facts dict updated with the generated Project Configuration
+            facts if they were not already present
+
+    """
+
+    config = {
+        'default_node_selector': '',
+        'project_request_message': '',
+        'project_request_template': '',
+        'mcs_allocator_range': 's0:/2',
+        'mcs_labels_per_project': 5,
+        'uid_allocator_range': '1000000000-1999999999/10000'
+    }
+
+    if 'master' in facts:
+        for key, value in config.items():
+            if key not in facts['master']:
+                facts['master'][key] = value
+
+    return facts
+
 def set_identity_providers_if_unset(facts):
     """ Set identity_providers fact if not already present in facts dict
 
@@ -478,7 +506,7 @@ def set_aggregate_facts(facts):
 def set_deployment_facts_if_unset(facts):
     """ Set Facts that vary based on deployment_type. This currently
         includes common.service_type, common.config_base, master.registry_url,
-        node.registry_url
+        node.registry_url, node.storage_plugin_deps
 
         Args:
             facts (dict): existing facts
@@ -486,8 +514,9 @@ def set_deployment_facts_if_unset(facts):
             dict: the facts dict updated with the generated deployment_type
             facts
     """
-    # Perhaps re-factor this as a map?
-    # pylint: disable=too-many-branches
+    # disabled to avoid breaking up facts related to deployment type into
+    # multiple methods for now.
+    # pylint: disable=too-many-statements, too-many-branches
     if 'common' in facts:
         deployment_type = facts['common']['deployment_type']
         if 'service_type' not in facts['common']:
@@ -507,7 +536,15 @@ def set_deployment_facts_if_unset(facts):
             if deployment_type in ['enterprise', 'online']:
                 data_dir = '/var/lib/openshift'
             facts['common']['data_dir'] = data_dir
-        facts['common']['version'] = get_openshift_version()
+        facts['common']['version'] = version = get_openshift_version()
+        if version is not None:
+            if deployment_type == 'origin':
+                version_gt_3_1_or_1_1 = LooseVersion(version) > LooseVersion('1.0.6')
+            else:
+                version_gt_3_1_or_1_1 = LooseVersion(version) > LooseVersion('3.0.2.900')
+        else:
+            version_gt_3_1_or_1_1 = True
+        facts['common']['version_greater_than_3_1_or_1_1'] = version_gt_3_1_or_1_1
 
     for role in ('master', 'node'):
         if role in facts:
@@ -519,6 +556,25 @@ def set_deployment_facts_if_unset(facts):
                 elif deployment_type == 'atomic-enterprise':
                     registry_url = 'aep3/aep-${component}:${version}'
                 facts[role]['registry_url'] = registry_url
+
+    if 'master' in facts:
+        deployment_type = facts['common']['deployment_type']
+        openshift_features = ['Builder', 'S2IBuilder', 'WebConsole']
+        if 'disabled_features' in facts['master']:
+            if deployment_type == 'atomic-enterprise':
+                curr_disabled_features = set(facts['master']['disabled_features'])
+                facts['master']['disabled_features'] = list(curr_disabled_features.union(openshift_features))
+        else:
+            if deployment_type == 'atomic-enterprise':
+                facts['master']['disabled_features'] = openshift_features
+
+    if 'node' in facts:
+        deployment_type = facts['common']['deployment_type']
+        if 'storage_plugin_deps' not in facts['node']:
+            if deployment_type in ['openshift-enterprise', 'atomic-enterprise']:
+                facts['node']['storage_plugin_deps'] = ['ceph', 'glusterfs']
+            else:
+                facts['node']['storage_plugin_deps'] = []
 
     return facts
 
@@ -638,7 +694,7 @@ def get_openshift_version():
         Returns:
             version: the current openshift version
     """
-    version = ''
+    version = None
 
     if os.path.isfile('/usr/bin/openshift'):
         _, output, _ = module.run_command(['/usr/bin/openshift', 'version'])
@@ -813,6 +869,7 @@ class OpenShiftFacts(object):
         facts = merge_facts(facts, local_facts)
         facts['current_config'] = get_current_config(facts)
         facts = set_url_facts_if_unset(facts)
+        facts = set_project_cfg_facts_if_unset(facts)
         facts = set_fluentd_facts_if_unset(facts)
         facts = set_node_schedulability(facts)
         facts = set_master_selectors(facts)

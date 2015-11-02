@@ -1,5 +1,7 @@
 apiLevels:
+{% if openshift.common.deployment_type == "enterprise" %}
 - v1beta3
+{% endif %}
 - v1
 apiVersion: v1
 assetConfig:
@@ -20,6 +22,9 @@ corsAllowedOrigins:
 {% for custom_origin in openshift.master.custom_cors_origins | default("") %}
   - {{ custom_origin }}
 {% endfor %}
+{% if 'disabled_features' in openshift.master %}
+disabledFeatures: {{ openshift.master.disabled_features | to_json }}
+{% endif %}
 {% if openshift.master.embedded_dns | bool %}
 dnsConfig:
   bindAddress: {{ openshift.master.bind_addr }}:{{ openshift.master.dns_port }}
@@ -66,7 +71,9 @@ kubeletClientInfo:
 {% if openshift.master.embedded_kube | bool %}
 kubernetesMasterConfig:
   apiLevels:
+{% if openshift.common.deployment_type == "enterprise" %}
   - v1beta3
+{% endif %}
   - v1
   apiServerArguments: {{ api_server_args if api_server_args is defined else 'null' }}
   controllerArguments: {{ controller_args if controller_args is defined else 'null' }}
@@ -74,6 +81,9 @@ kubernetesMasterConfig:
   masterCount: 1
   masterIP: ""
   podEvictionTimeout: ""
+  proxyClientInfo:
+    certFile: master.proxy-client.crt
+    keyFile: master.proxy-client.key
   schedulerConfigFile: {{ openshift_master_scheduler_conf }}
   servicesNodePortRange: ""
   servicesSubnet: {{ openshift.master.portal_net }}
@@ -97,15 +107,14 @@ policyConfig:
   bootstrapPolicyFile: {{ openshift_master_policy }}
   openshiftInfrastructureNamespace: openshift-infra
   openshiftSharedResourcesNamespace: openshift
-{# TODO: Allow users to override projectConfig items #}
 projectConfig:
-  defaultNodeSelector: "{{ openshift.master.default_node_selector | default("") }}"
-  projectRequestMessage: ""
-  projectRequestTemplate: ""
+  defaultNodeSelector: "{{ openshift.master.default_node_selector }}"
+  projectRequestMessage: "{{ openshift.master.project_request_message }}"
+  projectRequestTemplate: "{{ openshift.master.project_request_template }}"
   securityAllocator:
-    mcsAllocatorRange: s0:/2
-    mcsLabelsPerProject: 5
-    uidAllocatorRange: 1000000000-1999999999/10000
+    mcsAllocatorRange: "{{ openshift.master.mcs_allocator_range }}"
+    mcsLabelsPerProject: {{ openshift.master.mcs_labels_per_project }}
+    uidAllocatorRange: "{{ openshift.master.uid_allocator_range  }}"
 routingConfig:
   subdomain:  "{{ openshift.master.default_subdomain | default("") }}"
 serviceAccountConfig:

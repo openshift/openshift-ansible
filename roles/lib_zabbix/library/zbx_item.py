@@ -107,6 +107,39 @@ def get_multiplier(inval):
 
     return rval, 0
 
+def get_zabbix_type(ztype):
+    '''
+    Determine which type of discoverrule this is
+    '''
+    _types = {'agent': 0,
+              'SNMPv1': 1,
+              'trapper': 2,
+              'simple': 3,
+              'SNMPv2': 4,
+              'internal': 5,
+              'SNMPv3': 6,
+              'active': 7,
+              'aggregate': 8,
+              'web': 9,
+              'external': 10,
+              'database monitor': 11,
+              'ipmi': 12,
+              'ssh': 13,
+              'telnet': 14,
+              'calculated': 15,
+              'JMX': 16,
+              'SNMP trap': 17,
+             }
+
+    for typ in _types.keys():
+        if ztype in typ or ztype == typ:
+            _vtype = _types[typ]
+            break
+    else:
+        _vtype = 2
+
+    return _vtype
+
 # The branches are needed for CRUD and error handling
 # pylint: disable=too-many-branches
 def main():
@@ -123,7 +156,7 @@ def main():
             name=dict(default=None, type='str'),
             key=dict(default=None, type='str'),
             template_name=dict(default=None, type='str'),
-            zabbix_type=dict(default=2, type='int'),
+            zabbix_type=dict(default='trapper', type='str'),
             value_type=dict(default='int', type='str'),
             interval=dict(default=60, type='int'),
             delta=dict(default=0, type='int'),
@@ -184,7 +217,7 @@ def main():
         params = {'name': module.params.get('name', module.params['key']),
                   'key_': module.params['key'],
                   'hostid': templateid[0],
-                  'type': module.params['zabbix_type'],
+                  'type': get_zabbix_type(module.params['zabbix_type']),
                   'value_type': get_value_type(module.params['value_type']),
                   'applications': get_app_ids(module.params['applications'], app_name_ids),
                   'formula': formula,

@@ -30,6 +30,9 @@
       kubelet_args: "{{ openshift_node_kubelet_args | default(None) }}"
       sdn_mtu: "{{ openshift_node_sdn_mtu | default(None) }}"
       schedulable: "{{ openshift_schedulable | default(openshift_scheduleable) | default(None) }}"
+      docker_log_driver:  "{{ lookup( 'oo_option' , 'docker_log_driver'  )  | default('',True) }}"
+      docker_log_options: "{{ lookup( 'oo_option' , 'docker_log_options' )  | default('',True) }}"
+      storage_plugin_deps: "{{ osn_storage_plugin_deps | default(None) }}"
 
 # We have to add tuned-profiles in the same transaction otherwise we run into depsolving
 # problems because the rpms don't pin the version properly.
@@ -68,12 +71,14 @@
   register: docker_check
 
   # TODO: Enable secure registry when code available in origin
-- name: Secure Registry
+- name: Secure Registry and Logs Options
   lineinfile:
     dest: /etc/sysconfig/docker
     regexp: '^OPTIONS=.*$'
     line: "OPTIONS='--insecure-registry={{ openshift.node.portal_net }} \
-{% if ansible_selinux and ansible_selinux.status == '''enabled''' %}--selinux-enabled{% endif %}'"
+{% if ansible_selinux and ansible_selinux.status == '''enabled''' %}--selinux-enabled{% endif %} \
+{% if openshift.node.docker_log_driver is defined  %} --log-driver {{ openshift.node.docker_log_driver }}  {% endif %} \
+{% if openshift.node.docker_log_options is defined %}   {{ openshift.node.docker_log_options |  oo_split() | oo_prepend_strings_in_list('--log-opt ') | join(' ')}}  {% endif %} '"
   when: docker_check.stat.isreg
   notify:
     - restart docker
@@ -120,9 +125,8 @@
   notify:
     - restart docker
 
-- name: Allow NFS access for VMs
-  seboolean: name=virt_use_nfs state=yes persistent=yes
-  when: ansible_selinux and ansible_selinux.status == "enabled"
+- name: Additional storage plugin configuration
+  include: storage_plugins/main.yml
 
 - name: Start and enable node
   service: name={{ openshift.common.service_type }}-node enabled=yes state=started

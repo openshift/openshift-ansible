@@ -239,22 +239,34 @@ class MultiEc2(object):
     def apply_account_config(self, acc_config):
         ''' Apply account config settings
         '''
-        if not acc_config.has_key('hostvars') and not acc_config.has_key('all_group'):
-            return
-
         results = self.all_ec2_results[acc_config['name']]
-       # Update each hostvar with the newly desired key: value
-        for host_property, value in acc_config['hostvars'].items():
+
+        # Update each hostvar with the newly desired key: value from extra_*
+        for _extra in ['extra_groups', 'extra_vars']:
+            for new_var, value in acc_config.get(_extra, {}).items():
+                # Verify the account results look sane
+                # by checking for these keys ('_meta' and 'hostvars' exist)
+                if results.has_key('_meta') and results['_meta'].has_key('hostvars'):
+                    for data in results['_meta']['hostvars'].values():
+                        data[str(new_var)] = str(value)
+
+                # Add this group
+                if _extra == 'extra_groups' and results.has_key(acc_config['all_group']):
+                    results["%s_%s" % (new_var, value)] = \
+                     copy.copy(results[acc_config['all_group']])
+
+        # Clone groups goes here
+        for to_name, from_name in acc_config.get('clone_groups', {}).items():
+            if results.has_key(from_name):
+                results[to_name] = copy.copy(results[from_name])
+
+        # Clone vars goes here
+        for to_name, from_name in acc_config.get('clone_vars', {}).items():
             # Verify the account results look sane
             # by checking for these keys ('_meta' and 'hostvars' exist)
             if results.has_key('_meta') and results['_meta'].has_key('hostvars'):
                 for data in results['_meta']['hostvars'].values():
-                    data[str(host_property)] = str(value)
-
-            # Add this group
-            if results.has_key(acc_config['all_group']):
-                results["%s_%s" % (host_property, value)] = \
-                  copy.copy(results[acc_config['all_group']])
+                    data[str(to_name)] = data.get(str(from_name), 'nil')
 
         # store the results back into all_ec2_results
         self.all_ec2_results[acc_config['name']] = results

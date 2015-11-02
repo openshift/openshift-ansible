@@ -97,8 +97,19 @@
 
   - debug: var=setup_output
 
-  - name: start docker
-    command: systemctl start docker.service
-    register: dockerstart
+  - name: extend the vg
+    command: lvextend -l 90%VG /dev/docker_vg/docker-pool
+    register: extend_output
 
-  - debug: var=dockerstart
+  - debug: var=extend_output
+
+  - name: start docker
+    service:
+      name: docker
+      state: restarted
+
+  - name: docker info
+    command: docker info
+    register: dockerinfo
+
+  - debug: var=dockerinfo

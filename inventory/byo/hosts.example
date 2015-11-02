@@ -41,6 +41,13 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Allow all auth
 #openshift_master_identity_providers=[{'name': 'allow_all', 'login': 'true', 'challenge': 'true', 'kind': 'AllowAllPasswordIdentityProvider'}]
 
+# Project Configuration
+#osm_project_request_message=''
+#osm_project_request_template=''
+#osm_mcs_allocator_range='s0:/2'
+#osm_mcs_labels_per_project=5
+#osm_uid_allocator_range='1000000000-1999999999/10000'
+
 # Configure Fluentd
 #use_fluentd=true
 
@@ -75,9 +82,19 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # default project node selector
 #osm_default_node_selector='region=primary'
 
+# default storage plugin dependencies to install, by default the ceph and
+# glusterfs plugin dependencies will be installed, if available.
+#osn_storage_plugin_deps=['ceph','glusterfs']
+
 # default selectors for router and registry services
 # openshift_router_selector='region=infra'
 # openshift_registry_selector='region=infra'
+
+# Configure the multi-tenant SDN plugin (default is 'redhat/openshift-ovs-subnet')
+# os_sdn_network_plugin_name='redhat/openshift-ovs-multitenant'
+
+# Disable the OpenShift SDN plugin
+# openshift_use_openshift_sdn=False
 
 # set RPM version for debugging purposes
 #openshift_pkg_version=-3.0.0.0

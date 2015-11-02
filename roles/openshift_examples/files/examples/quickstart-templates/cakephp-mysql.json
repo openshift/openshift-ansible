@@ -201,6 +201,10 @@
                   {
                     "name": "CAKEPHP_SECURITY_CIPHER_SEED",
                     "value": "${CAKEPHP_SECURITY_CIPHER_SEED}"
+                  },
+                  {
+                    "name": "OPCACHE_REVALIDATE_FREQ",
+                    "value": "${OPCACHE_REVALIDATE_FREQ}"
                   }
                 ]
               }
@@ -364,6 +368,11 @@
       "description": "Security cipher seed for session hash",
       "generate": "expression",
       "from": "[0-9]{30}"
+    },
+    {
+      "name": "OPCACHE_REVALIDATE_FREQ",
+      "description": "The How often to check script timestamps for updates, in seconds. 0 will result in OPcache checking for updates on every request.",
+      "value": "2"
     }
   ]
 }

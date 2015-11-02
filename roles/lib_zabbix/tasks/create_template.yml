@@ -38,7 +38,7 @@
     units: "{{ item.units | default('', True) }}"
     template_name: "{{ template.name }}"
     applications: "{{ item.applications }}"
-    zabbix_type: "{{ item.zabbix_type | default(2, True) }}"
+    zabbix_type: "{{ item.zabbix_type | default('trapper') }}"
     interval: "{{ item.interval | default(60, True) }}"
     delta: "{{ item.delta | default(0, True) }}"
   with_items: template.zitems

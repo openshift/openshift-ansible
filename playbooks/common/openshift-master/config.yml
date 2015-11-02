@@ -137,6 +137,7 @@
       openshift_master_certs_no_etcd:
       - admin.crt
       - master.kubelet-client.crt
+      - "{{ 'master.proxy-client.crt' if openshift.common.version_greater_than_3_1_or_1_1 else omit }}"
       - master.server.crt
       - openshift-master.crt
       - openshift-registry.crt
@@ -144,6 +145,7 @@
       - etcd.server.crt
       openshift_master_certs_etcd:
       - master.etcd-client.crt
+
   - set_fact:
       openshift_master_certs: "{{ (openshift_master_certs_no_etcd | union(openshift_master_certs_etcd)) if (groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config) else openshift_master_certs_no_etcd }}"
 
@@ -153,9 +155,9 @@
     with_items: openshift_master_certs
     register: g_master_cert_stat_result
   - set_fact:
-      master_certs_missing: "{{ g_master_cert_stat_result.results
+      master_certs_missing: "{{ False in (g_master_cert_stat_result.results
                                 | map(attribute='stat.exists')
-                                | list | intersect([false])}}"
+                                | list ) }}"
       master_cert_subdir: master-{{ openshift.common.hostname }}
       master_cert_config_dir: "{{ openshift.common.config_base }}/master"
 
@@ -187,6 +189,7 @@
     args:
       creates: "{{ master_generated_certs_dir }}/{{ item.master_cert_subdir }}.tgz"
     with_items: masters_needing_certs
+
   - name: Retrieve the master cert tarball from the master
     fetch:
       src: "{{ master_generated_certs_dir }}/{{ item.master_cert_subdir }}.tgz"
