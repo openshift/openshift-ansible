@@ -40,15 +40,6 @@
   - name: Generate etcd backup
     command: etcdctl backup --data-dir={{ openshift.master.etcd_data_dir }} --backup-dir={{ openshift.common.data_dir }}/etcd-backup-{{ timestamp }}
 
-- name: Update 3.0 configuration to 3.1
-  hosts: masters
-  tasks:
-  tasks:
-    - debug: var=openshift_master_config_dir
-    - name: Upgrade configuration.
-      openshift_upgrade_config: from_version=3.0 to_version=3.1 role=master
-    - fail: All done for now.
-
 - name: Upgrade base package on masters
   hosts: masters
   roles:
@@ -77,6 +68,8 @@
       yum: pkg=kernel state=latest
     - name: Upgrade master packages
       yum: pkg={{ openshift.common.service_type }}-master{{ openshift_version }} state=latest
+    - name: Upgrade master configuration.
+      openshift_upgrade_config: from_version=3.0 to_version=3.1 role=master
     - name: Restart master services
       service: name="{{ openshift.common.service_type}}-master" state=restarted
 
@@ -84,11 +77,29 @@
   hosts: nodes
   vars:
     openshift_version: "{{ openshift_pkg_version | default('') }}"
+  roles:
+  - openshift_facts
   tasks:
     - name: Upgrade node packages
       yum: pkg={{ openshift.common.service_type }}-node{{ openshift_version }} state=latest
     - name: Restart node services
       service: name="{{ openshift.common.service_type }}-node" state=restarted
+
+- name: Evaluate oo_first_master
+  hosts: localhost
+  vars:
+    g_masters_group: "{{ 'masters' }}"
+  tasks:
+    - name: display all variables set for the current host
+      debug:
+        var: hostvars[inventory_hostname]
+    - name: Evaluate oo_first_master
+      add_host:
+        name: "{{ groups[g_masters_group][0] }}"
+        groups: oo_first_master
+        ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
+        ansible_sudo: "{{ g_sudo | default(omit) }}"
+      when: g_masters_group in groups and (groups[g_masters_group] | length) > 0
 
 - name: Determine new master version
   hosts: oo_first_master
