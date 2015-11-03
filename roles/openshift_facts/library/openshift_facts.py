@@ -493,6 +493,12 @@ def set_aggregate_facts(facts):
             if 'cluster_public_hostname' in facts['master']:
                 all_hostnames.add(facts['master']['cluster_public_hostname'])
 
+            if facts['master']['embedded_etcd']:
+                facts['master']['etcd_data_dir'] = os.path.join(
+                    facts['common']['data_dir'], 'openshift.local.etcd')
+            else:
+                facts['master']['etcd_data_dir'] = '/var/lib/etcd'
+
         facts['common']['all_hostnames'] = list(all_hostnames)
 
     return facts

@@ -1,4 +1,45 @@
 ---
+- name: Verify upgrade can proceed
+  hosts: masters
+  tasks:
+  # Checking the global deployment type rather than host facts, this is about
+  # what the user is requesting.
+    - fail: msg="Deployment type enterprise not supported for upgrade"
+      when: deployment_type == "enterprise"
+
+- name: Backup etcd
+  hosts: masters
+  vars:
+    embedded_etcd: "{{ openshift.master.embedded_etcd }}"
+    timestamp: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
+  roles:
+  - openshift_facts
+  tasks:
+  - stat: path=/var/lib/openshift
+    register: var_lib_openshift
+  - name: Create origin symlink if necessary
+    file: src=/var/lib/openshift/ dest=/var/lib/origin state=link
+    when: var_lib_openshift.stat.exists == True
+  - name: Check available disk space for etcd backup
+    # We assume to be using the data dir for all backups.
+    shell: >
+      df --output=avail -k {{ openshift.common.data_dir }} | tail -n 1
+    register: avail_disk
+
+  - name: Check current embedded etcd disk usage
+    shell: >
+      du -k {{ openshift.master.etcd_data_dir }} | tail -n 1 | cut -f1
+    register: etcd_disk_usage
+    when: embedded_etcd | bool
+
+  - name: Abort if insufficient disk space for etcd backup
+    fail: msg="{{ etcd_disk_usage.stdout }} Kb disk space required for etcd backup, {{ avail_disk.stdout }} Kb available."
+    when: (embedded_etcd | bool) and (etcd_disk_usage.stdout|int > avail_disk.stdout|int)
+  - name: Install etcd (for etcdctl)
+    yum: pkg=etcd state=latest
+  - name: Generate etcd backup
+    command: etcdctl backup --data-dir={{ openshift.master.etcd_data_dir }} --backup-dir={{ openshift.common.data_dir }}/etcd-backup-{{ timestamp }}
+
 - name: Upgrade base package on masters
   hosts: masters
   roles:
@@ -23,6 +64,8 @@
   vars:
     openshift_version: "{{ openshift_pkg_version | default('') }}"
   tasks:
+    - name: Upgrade to latest available kernel
+      yum: pkg=kernel state=latest
     - name: Upgrade master packages
       yum: pkg={{ openshift.common.service_type }}-master{{ openshift_version }} state=latest
     - name: Restart master services
