@@ -2,7 +2,9 @@
 # repo. We will work on these over time.
 # pylint: disable=bad-continuation,missing-docstring,no-self-use,invalid-name,global-statement,global-variable-not-assigned
 
+import socket
 import subprocess
+import sys
 import os
 import yaml
 from ooinstall.variants import find_variant
@@ -16,13 +18,15 @@ def set_config(cfg):
 def generate_inventory(hosts):
     print hosts
     global CFG
+
+    installer_host = socket.gethostname()
     base_inventory_path = CFG.settings['ansible_inventory_path']
     base_inventory = open(base_inventory_path, 'w')
     base_inventory.write('\n[OSEv3:children]\nmasters\nnodes\n')
     base_inventory.write('\n[OSEv3:vars]\n')
     base_inventory.write('ansible_ssh_user={}\n'.format(CFG.settings['ansible_ssh_user']))
     if CFG.settings['ansible_ssh_user'] != 'root':
-        base_inventory.write('ansible_sudo=true\n')
+        base_inventory.write('ansible_become=true\n')
 
     # Find the correct deployment type for ansible:
     ver = find_variant(CFG.settings['variant'],
@@ -40,6 +44,14 @@ def generate_inventory(hosts):
             "'enabled': 1, 'gpgcheck': 0}]\n")
     if 'OO_INSTALL_STAGE_REGISTRY' in os.environ:
         base_inventory.write('oreg_url=registry.access.stage.redhat.com/openshift3/ose-${component}:${version}\n')
+
+    if any(host.hostname == installer_host or host.public_hostname == installer_host
+            for host in hosts):
+        no_pwd_sudo = subprocess.call(['sudo', '-v', '--non-interactive'])
+        if no_pwd_sudo == 1:
+            print 'The atomic-openshift-installer requires sudo access without a password.'
+            sys.exit(1)
+        base_inventory.write("ansible_connection=local\n")
 
     base_inventory.write('\n[masters]\n')
     masters = (host for host in hosts if host.master)
