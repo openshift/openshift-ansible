@@ -39,10 +39,10 @@ Name: OpenShift Ansible-Based Installer Configuration
 Subscription: {type: none}
 Vendor: OpenShift Community
 Version: 0.0.1
-ansible_config: /home/dgoodwin/.python-eggs/ooinstall-3.0.0-py2.7.egg-tmp/ooinstall/ansible.cfg
-ansible_inventory_directory: /home/dgoodwin/.config/openshift/.ansible
+ansible_config: /tmp/notreal/ansible.cfg
+ansible_inventory_directory: /tmp/notreal/.config/openshift/.ansible
 ansible_log_path: /tmp/ansible.log
-ansible_plugins_directory: /home/dgoodwin/.python-eggs/ooinstall-3.0.0-py2.7.egg-tmp/ooinstall/ansible_plugins
+ansible_plugins_directory: /tmp/notreal/.python-eggs/ooinstall-3.0.0-py2.7.egg-tmp/ooinstall/ansible_plugins
 masters: [10.0.0.1]
 nodes: [10.0.0.2, 10.0.0.3]
 validated_facts:
