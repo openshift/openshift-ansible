@@ -218,7 +218,7 @@ g_template_os_linux:
 
   - discoveryrule_key: disc.disk
     name: "TPS (IOPS) for disk {#OSO_DISK}"
-    key: "disc.disk.tps[{#OSO_FILESYS}]"
+    key: "disc.disk.tps[{#OSO_DISK}]"
     value_type: int
     description: "PCP disk.dev.totals metric measured over a period of time.  This shows how many disk transactions per second the disk is using"
     applications:
