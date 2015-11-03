@@ -17,4 +17,4 @@ galaxy_info:
   - system
 dependencies:
 - { role: os_firewall }
-- { role: openshift_repos }
+- { role: etcd_common }

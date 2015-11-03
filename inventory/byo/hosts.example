@@ -24,7 +24,7 @@ deployment_type=atomic-enterprise
 #use_cluster_metrics=true
 
 # Pre-release registry URL
-#oreg_url=rcm-img-docker01.build.eng.bos.redhat.com:5001/openshift3/ose-${component}:${version}
+#oreg_url=example.com/openshift3/ose-${component}:${version}
 
 # Pre-release Dev puddle repo
 #openshift_additional_repos=[{'id': 'ose-devel', 'name': 'ose-devel', 'baseurl': 'http://buildvm-devops.usersys.redhat.com/puddle/build/OpenShiftEnterprise/3.0/latest/RH7-RHOSE-3.0/$basearch/os', 'enabled': 1, 'gpgcheck': 0}]

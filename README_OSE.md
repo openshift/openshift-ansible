@@ -79,9 +79,6 @@ ansible_ssh_user=root
 # To deploy origin, change deployment_type to origin
 deployment_type=enterprise
 
-# Pre-release registry URL
-oreg_url=rcm-img-docker01.build.eng.bos.redhat.com:5001/openshift3/ose-${component}:${version}
-
 # Pre-release additional repo
 openshift_additional_repos=[{'id': 'ose-devel', 'name': 'ose-devel',
 'baseurl':

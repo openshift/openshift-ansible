@@ -4,6 +4,3 @@
 
 - include: server.yml
   when: etcd_needing_server_certs is defined and etcd_needing_server_certs
-
-
-
