@@ -39,6 +39,9 @@
     yum: pkg=etcd state=latest
   - name: Generate etcd backup
     command: etcdctl backup --data-dir={{ openshift.master.etcd_data_dir }} --backup-dir={{ openshift.common.data_dir }}/etcd-backup-{{ timestamp }}
+  - name: Display location of etcd backup
+    debug: msg="Etcd backup created in {{ openshift.common.data_dir }}/etcd-backup-{{ timestamp }}"
+
 
 - name: Upgrade base package on masters
   hosts: masters
