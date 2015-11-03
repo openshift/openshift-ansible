@@ -26,6 +26,7 @@ def get_cfg_dir():
         cfg_path = '/etc/openshift/'
     return cfg_path
 
+
 def upgrade_master_3_0_to_3_1(backup):
     changed = False
 
@@ -42,11 +43,17 @@ def upgrade_master_3_0_to_3_1(backup):
         'v1beta3' in config['apiLevels']:
             config['apiLevels'].remove('v1beta3')
             changed = True
-    if 'kubernetesMasterConfig' in config and \
-        'apiLevels' in config['kubernetesMasterConfig'] and \
+    if 'apiLevels' in config['kubernetesMasterConfig'] and \
         'v1beta3' in config['kubernetesMasterConfig']['apiLevels']:
             config['kubernetesMasterConfig']['apiLevels'].remove('v1beta3')
             changed = True
+
+    # Add the new master proxy client certs:
+    if 'proxyClientInfo' not in config['kubernetesMasterConfig']:
+        config['kubernetesMasterConfig']['proxyClientInfo'] = {
+            'certFile': 'master.proxy-client.crt',
+            'keyFile': 'master.proxy-client.key'
+        }
 
     if changed:
         if backup:
@@ -85,7 +92,6 @@ def main():
         ),
         supports_check_mode=True,
     )
-
 
     from_version = module.params['from_version']
     to_version = module.params['to_version']
