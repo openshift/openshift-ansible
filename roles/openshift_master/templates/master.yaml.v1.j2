@@ -16,7 +16,7 @@ assetConfig:
     maxRequestsInFlight: 0
     requestTimeoutSeconds: 0
 corsAllowedOrigins:
-{% for origin in ['127.0.0.1', 'localhost', openshift.common.hostname, openshift.common.ip, openshift.common.public_hostname, openshift.common.public_ip] %}
+{% for origin in ['127.0.0.1', 'localhost', openshift.common.hostname, openshift.common.ip, openshift.common.public_hostname, openshift.common.public_ip] | unique %}
   - {{ origin }}
 {% endfor %}
 {% for custom_origin in openshift.master.custom_cors_origins | default("") %}

@@ -204,7 +204,7 @@
   tasks:
   - name: Collect certificate names
     set_fact:
-      parsed_named_certificates: "{{ openshift_master_named_certificates | oo_parse_certificate_names(master_cert_config_dir) }}"
+      parsed_named_certificates: "{{ openshift_master_named_certificates | oo_parse_certificate_names(master_cert_config_dir, openshift.common.internal_hostnames) }}"
     when: openshift_master_named_certificates is defined
 
 - name: Configure master instances

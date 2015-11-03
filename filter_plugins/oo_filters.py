@@ -330,7 +330,8 @@ class FilterModule(object):
         return revamped_outputs
 
     @staticmethod
-    def oo_parse_certificate_names(certificates, data_dir):
+    # pylint: disable=too-many-branches
+    def oo_parse_certificate_names(certificates, data_dir, internal_hostnames):
         ''' Parses names from list of certificate hashes.
 
             Ex: certificates = [{ "certfile": "/etc/origin/master/custom1.crt",
@@ -352,6 +353,9 @@ class FilterModule(object):
         if not issubclass(type(data_dir), unicode):
             raise errors.AnsibleFilterError("|failed expects data_dir is unicode")
 
+        if not issubclass(type(internal_hostnames), list):
+            raise errors.AnsibleFilterError("|failed expects internal_hostnames is list")
+
         for certificate in certificates:
             if 'names' in certificate.keys():
                 continue
@@ -364,7 +368,7 @@ class FilterModule(object):
                 certificate['keyfile'] = os.path.join(data_dir, certificate['keyfile'])
                 if not os.path.isfile(certificate['certfile']) and not os.path.isfile(certificate['keyfile']):
                     # Unable to find cert/key in data_dir
-                    raise errors.AnsibleFilterError("|certificate and/or key does not exist %s, %s" %
+                    raise errors.AnsibleFilterError("|certificate and/or key does not exist '%s', '%s'" %
                                                     (certificate['certfile'], certificate['keyfile']))
 
             try:
@@ -376,9 +380,15 @@ class FilterModule(object):
                         for name in str(cert.get_extension(i)).replace('DNS:', '').split(', '):
                             certificate['names'].append(name)
             except:
-                raise errors.AnsibleFilterError("|failed to parse certificate %s" % certificate['certfile'])
+                raise errors.AnsibleFilterError(("|failed to parse certificate '%s', " % certificate['certfile'] +
+                                                 "please specify certificate names in host inventory"))
 
+            certificate['names'] = [name for name in certificate['names'] if name not in internal_hostnames]
             certificate['names'] = list(set(certificate['names']))
+            if not certificate['names']:
+                raise errors.AnsibleFilterError(("|failed to parse certificate '%s' or " % certificate['certfile'] +
+                                                 "detected a collision with internal hostname, please specify " +
+                                                 "certificate names in host inventory"))
         return certificates
 
     def filters(self):
