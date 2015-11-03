@@ -105,6 +105,7 @@ class LegacyOOConfigTests(OOInstallFixture):
     def test_load_config_memory(self):
         self.assertEquals('openshift-enterprise', self.cfg.settings['variant'])
         self.assertEquals('3.0', self.cfg.settings['variant_version'])
+        self.assertEquals('v1', self.cfg.settings['version'])
 
         self.assertEquals(3, len(self.cfg.hosts))
         h1 = self.cfg.get_host('10.0.0.1')
@@ -152,6 +153,7 @@ class OOConfigTests(OOInstallFixture):
                           [host['ip'] for host in ooconfig.settings['hosts']])
 
         self.assertEquals('openshift-enterprise', ooconfig.settings['variant'])
+        self.assertEquals('v1', ooconfig.settings['version'])
 
     def test_load_complete_facts(self):
         cfg_path = self.write_config(os.path.join(self.work_dir,
@@ -189,6 +191,7 @@ class OOConfigTests(OOInstallFixture):
 
         self.assertTrue('ansible_ssh_user' in written_config)
         self.assertTrue('variant' in written_config)
+        self.assertEquals('v1', written_config['version'])
 
         # Some advanced settings should not get written out if they
         # were not specified by the user:

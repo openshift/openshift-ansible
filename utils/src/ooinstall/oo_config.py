@@ -12,6 +12,7 @@ PERSIST_SETTINGS = [
     'ansible_log_path',
     'variant',
     'variant_version',
+    'version',
     ]
 REQUIRED_FACTS = ['ip', 'public_ip', 'hostname', 'public_hostname']
 
@@ -146,6 +147,8 @@ class OOConfig(object):
             os.makedirs(self.settings['ansible_inventory_directory'])
         if 'ansible_plugins_directory' not in self.settings:
             self.settings['ansible_plugins_directory'] = resource_filename(__name__, 'ansible_plugins')
+        if 'version' not in self.settings:
+            self.settings['version'] = 'v1'
 
         if 'ansible_callback_facts_yaml' not in self.settings:
             self.settings['ansible_callback_facts_yaml'] = '%s/callback_facts.yaml' % \
