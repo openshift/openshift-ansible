@@ -7,6 +7,7 @@ The default location this config file will be written to ~/.config/openshift/ins
 ## Example
 
 ```
+version: v1
 variant: openshift-enterprise
 variant_version: 3.0
 ansible_ssh_user: root
@@ -31,6 +32,10 @@ hosts:
 ```
 
 ## Primary Settings
+
+### version
+
+Indicates the version of configuration this file was written with. Current implementation is v1.
 
 ### variant
 
