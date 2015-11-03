@@ -474,7 +474,7 @@ def upgrade(ctx):
     old_version = oo_cfg.settings['variant_version']
     if oo_cfg.settings['variant'] == 'enterprise':
         oo_cfg.settings['variant'] = 'openshift-enterprise'
-    variant, version = find_variant(oo_cfg.settings['variant'])
+    version = find_variant(oo_cfg.settings['variant'])[0]
     oo_cfg.settings['variant_version'] = version.name
     click.echo("Openshift will be upgraded from %s %s to %s %s on the following hosts:\n" % (
         old_variant, old_version, oo_cfg.settings['variant'],
