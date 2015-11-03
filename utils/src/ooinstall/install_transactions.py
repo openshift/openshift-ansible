@@ -127,7 +127,7 @@ def run_main_playbook(hosts, hosts_to_run_on):
 
 
 def run_ansible(playbook, inventory, env_vars):
-    return subprocess.call(['ansible-playbook',
+    return subprocess.call(['ansible-playbook', '-v',
                              '--inventory-file={}'.format(inventory),
                              playbook],
                              env=env_vars)

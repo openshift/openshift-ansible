@@ -40,6 +40,15 @@
   - name: Generate etcd backup
     command: etcdctl backup --data-dir={{ openshift.master.etcd_data_dir }} --backup-dir={{ openshift.common.data_dir }}/etcd-backup-{{ timestamp }}
 
+- name: Update 3.0 configuration to 3.1
+  hosts: masters
+  tasks:
+  tasks:
+    - debug: var=openshift_master_config_dir
+    - name: Upgrade configuration.
+      openshift_upgrade_config: from_version=3.0 to_version=3.1 role=master
+    - fail: All done for now.
+
 - name: Upgrade base package on masters
   hosts: masters
   roles:
@@ -50,14 +59,14 @@
     - name: Upgrade base package
       yum: pkg={{ openshift.common.service_type }}{{ openshift_version  }} state=latest
 
-- name: Re-Run cluster configuration to apply latest configuration changes
-  include: ../../common/openshift-cluster/config.yml
-  vars:
-    g_etcd_group: "{{ 'etcd' }}"
-    g_masters_group: "{{ 'masters' }}"
-    g_nodes_group: "{{ 'nodes' }}"
-    openshift_cluster_id: "{{ cluster_id | default('default') }}"
-    openshift_deployment_type: "{{ deployment_type }}"
+      #- name: Re-Run cluster configuration to apply latest configuration changes
+      #  include: ../../common/openshift-cluster/config.yml
+      #  vars:
+      #    g_etcd_group: "{{ 'etcd' }}"
+      #    g_masters_group: "{{ 'masters' }}"
+      #    g_nodes_group: "{{ 'nodes' }}"
+      #    openshift_cluster_id: "{{ cluster_id | default('default') }}"
+      #    openshift_deployment_type: "{{ deployment_type }}"
 
 - name: Upgrade masters
   hosts: masters
