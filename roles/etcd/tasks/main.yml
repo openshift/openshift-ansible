@@ -1,4 +1,12 @@
 ---
+- fail:
+    msg: Interface {{ etcd_interface }} not found
+  when: "'ansible_' ~ etcd_interface not in hostvars[inventory_hostname]"
+
+- fail:
+    msg: IPv4 address not found for {{ etcd_interface }}
+  when: "'ipv4' not in hostvars[inventory_hostname]['ansible_' ~ etcd_interface] or 'address' not in hostvars[inventory_hostname]['ansible_' ~ etcd_interface].ipv4"
+
 - name: Install etcd
   yum: pkg=etcd-2.* state=present
 
@@ -49,5 +57,5 @@
     enabled: yes
   register: start_result
 
-- pause: seconds=30
-  when: start_result | changed
+- set_fact:
+    etcd_service_status_changed = start_result | changed

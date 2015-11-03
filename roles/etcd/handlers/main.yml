@@ -1,3 +1,4 @@
 ---
 - name: restart etcd
   service: name=etcd state=restarted
+  when: not etcd_service_status_changed | default(false)

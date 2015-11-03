@@ -18,7 +18,7 @@
     creates: "{{ etcd_generated_certs_dir ~ '/' ~  item.etcd_cert_subdir ~ '/'
                  ~ item.etcd_cert_prefix ~ 'server.csr' }}"
   environment:
-    SAN: "IP:{{ item.openshift.common.ip }}"
+    SAN: "IP:{{ etcd_host_int_map[item.inventory_hostname].interface.ipv4.address }}"
   with_items: etcd_needing_server_certs
 
 - name: Sign and create the server crt
@@ -32,7 +32,7 @@
     creates: "{{ etcd_generated_certs_dir ~ '/' ~  item.etcd_cert_subdir ~ '/'
                  ~ item.etcd_cert_prefix ~ 'server.crt' }}"
   environment:
-    SAN: ''
+    SAN: "IP:{{ etcd_host_int_map[item.inventory_hostname].interface.ipv4.address }}"
   with_items: etcd_needing_server_certs
 
 - name: Create the peer csr
@@ -47,7 +47,7 @@
     creates: "{{ etcd_generated_certs_dir ~ '/' ~  item.etcd_cert_subdir ~ '/'
                  ~ item.etcd_cert_prefix ~ 'peer.csr' }}"
   environment:
-    SAN: "IP:{{ item.openshift.common.ip }}"
+    SAN: "IP:{{ etcd_host_int_map[item.inventory_hostname].interface.ipv4.address }}"
   with_items: etcd_needing_server_certs
 
 - name: Sign and create the peer crt
@@ -61,7 +61,7 @@
     creates: "{{ etcd_generated_certs_dir ~ '/' ~  item.etcd_cert_subdir ~ '/'
                  ~ item.etcd_cert_prefix ~ 'peer.crt' }}"
   environment:
-    SAN: ''
+    SAN: "IP:{{ etcd_host_int_map[item.inventory_hostname].interface.ipv4.address }}"
   with_items: etcd_needing_server_certs
 
 - file:
@@ -69,5 +69,3 @@
     dest: "{{ etcd_generated_certs_dir}}/{{ item.etcd_cert_subdir }}/{{ item.etcd_cert_prefix }}ca.crt"
     state: hard
   with_items: etcd_needing_server_certs
-
-

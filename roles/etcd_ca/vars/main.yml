@@ -1,3 +1,0 @@
----
-etcd_conf_dir: /etc/etcd
-etcd_ca_dir: /etc/etcd/ca
