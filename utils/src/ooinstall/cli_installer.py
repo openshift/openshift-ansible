@@ -191,7 +191,7 @@ Notes:
     facts_confirmed = click.confirm("Do the above facts look correct?")
     if not facts_confirmed:
         message = """
-Edit %s with the desired values and rerun oo-install with --unattended .
+Edit %s with the desired values and rerun atomic-openshift-installer with --unattended .
 """ % oo_cfg.config_path
         click.echo(message)
         # Make sure we actually write out the config file.
