@@ -1,7 +1,11 @@
 ---
 - yum:
-    name: openshift-ansible-inventory
+    name: "{{ item }}"
     state: present
+  with_items:
+  - openshift-ansible-inventory
+  - openshift-ansible-inventory-aws
+  - openshift-ansible-inventory-gce
 
 - name:
   copy:
