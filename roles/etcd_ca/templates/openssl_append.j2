@@ -1,20 +1,20 @@
 
-[ etcd_v3_req ]
+[ {{ etcd_req_ext }} ]
 basicConstraints = critical,CA:FALSE
 keyUsage         = digitalSignature,keyEncipherment
 subjectAltName   = ${ENV::SAN}
 
-[ etcd_ca ]
+[ {{ etcd_ca_name }} ]
 dir             = {{ etcd_ca_dir }}
-crl_dir         = $dir/crl
-database        = $dir/index.txt
-new_certs_dir   = $dir/certs
-certificate     = $dir/ca.crt
-serial          = $dir/serial
-private_key     = $dir/ca.key
-crl_number      = $dir/crlnumber
-x509_extensions = etcd_v3_ca_client
-default_days    = 365
+crl_dir         = {{ etcd_ca_crl_dir }}
+database        = {{ etcd_ca_db }}
+new_certs_dir   = {{ etcd_ca_new_certs_dir }}
+certificate     = {{ etcd_ca_cert }}
+serial          = {{ etcd_ca_serial }}
+private_key     = {{ etcd_ca_key }}
+crl_number      = {{ etcd_ca_crl_number }}
+x509_extensions = {{ etcd_ca_exts_client }}
+default_days    = {{ etcd_ca_default_days }}
 default_md      = sha256
 preserve        = no
 name_opt        = ca_default
@@ -23,27 +23,27 @@ policy          = policy_anything
 unique_subject  = no
 copy_extensions = copy
 
-[ etcd_v3_ca_self ]
+[ {{ etcd_ca_exts_self }} ]
 authorityKeyIdentifier = keyid,issuer
 basicConstraints       = critical,CA:TRUE,pathlen:0
 keyUsage               = critical,digitalSignature,keyEncipherment,keyCertSign
 subjectKeyIdentifier   = hash
 
-[ etcd_v3_ca_peer ]
+[ {{ etcd_ca_exts_peer }} ]
 authorityKeyIdentifier = keyid,issuer:always
 basicConstraints       = critical,CA:FALSE
 extendedKeyUsage       = clientAuth,serverAuth
 keyUsage               = digitalSignature,keyEncipherment
 subjectKeyIdentifier   = hash
 
-[ etcd_v3_ca_server ]
+[ {{ etcd_ca_exts_server }} ]
 authorityKeyIdentifier = keyid,issuer:always
 basicConstraints       = critical,CA:FALSE
 extendedKeyUsage       = serverAuth
 keyUsage               = digitalSignature,keyEncipherment
 subjectKeyIdentifier   = hash
 
-[ etcd_v3_ca_client ]
+[ {{ etcd_ca_exts_client }} ]
 authorityKeyIdentifier = keyid,issuer:always
 basicConstraints       = critical,CA:FALSE
 extendedKeyUsage       = clientAuth

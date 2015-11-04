@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.6
+Version:        3.0.7
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -47,9 +47,9 @@ cp -pP bin/openshift_ansible/* %{buildroot}%{python_sitelib}/openshift_ansible
 cp -p bin/ossh_bash_completion %{buildroot}/etc/bash_completion.d
 cp -p bin/openshift_ansible.conf.example %{buildroot}/etc/openshift_ansible/openshift_ansible.conf
 # Fix links
-rm -f %{buildroot}%{python_sitelib}/openshift_ansible/multi_ec2.py
+rm -f %{buildroot}%{python_sitelib}/openshift_ansible/multi_inventory.py
 rm -f %{buildroot}%{python_sitelib}/openshift_ansible/aws
-ln -sf %{_datadir}/ansible/inventory/multi_ec2.py %{buildroot}%{python_sitelib}/openshift_ansible/multi_ec2.py
+ln -sf %{_datadir}/ansible/inventory/multi_inventory.py %{buildroot}%{python_sitelib}/openshift_ansible/multi_inventory.py
 ln -sf %{_datadir}/ansible/inventory/aws %{buildroot}%{python_sitelib}/openshift_ansible/aws
 
 # openshift-ansible-docs install
@@ -60,8 +60,8 @@ mkdir -p %{buildroot}/etc/ansible
 mkdir -p %{buildroot}%{_datadir}/ansible/inventory
 mkdir -p %{buildroot}%{_datadir}/ansible/inventory/aws
 mkdir -p %{buildroot}%{_datadir}/ansible/inventory/gce
-cp -p inventory/multi_ec2.py %{buildroot}%{_datadir}/ansible/inventory
-cp -p inventory/multi_ec2.yaml.example %{buildroot}/etc/ansible/multi_ec2.yaml
+cp -p inventory/multi_inventory.py %{buildroot}%{_datadir}/ansible/inventory
+cp -p inventory/multi_inventory.yaml.example %{buildroot}/etc/ansible/multi_inventory.yaml
 cp -p inventory/aws/hosts/ec2.py %{buildroot}%{_datadir}/ansible/inventory/aws
 cp -p inventory/gce/hosts/gce.py %{buildroot}%{_datadir}/ansible/inventory/gce
 
@@ -137,7 +137,7 @@ Ansible Inventories used with the openshift-ansible scripts and playbooks.
 %files inventory
 %config(noreplace) /etc/ansible/*
 %dir %{_datadir}/ansible/inventory
-%{_datadir}/ansible/inventory/multi_ec2.py*
+%{_datadir}/ansible/inventory/multi_inventory.py*
 
 %package inventory-aws
 Summary:       Openshift and Atomic Enterprise Ansible Inventories for AWS
@@ -230,6 +230,8 @@ BuildArch:     noarch
 %package -n atomic-openshift-utils
 Summary:       Atomic OpenShift Utilities
 BuildRequires: python-setuptools
+Requires:      openshift-ansible-playbooks
+Requires:      openshift-ansible-roles
 Requires:      ansible
 Requires:      python-click
 Requires:      python-setuptools
@@ -247,6 +249,45 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Nov 04 2015 Kenny Woodson <kwoodson@redhat.com> 3.0.7-1
+- added the %%util in zabbix (mwoodson@redhat.com)
+- atomic-openshift-installer: Correct default playbook directory
+  (smunilla@redhat.com)
+- Support for gce (kwoodson@redhat.com)
+- fixed a dumb naming mistake (mwoodson@redhat.com)
+- added disk tps checks to zabbix (mwoodson@redhat.com)
+- atomic-openshift-installer: Correct inaccurate prompt (smunilla@redhat.com)
+- atomic-openshift-installer: Add default openshift-ansible-playbook
+  (smunilla@redhat.com)
+- ooinstall: Add check for nopwd sudo (smunilla@redhat.com)
+- ooinstall: Update local install check (smunilla@redhat.com)
+- oo-install: Support running on the host to be deployed (smunilla@redhat.com)
+- Moving to Openshift Etcd application (mmahut@redhat.com)
+- Add all the possible servicenames to openshift_all_hostnames for masters
+  (sdodson@redhat.com)
+- Adding openshift.node.etcd items (mmahut@redhat.com)
+- Fix etcd cert generation when etcd_interface is defined (jdetiber@redhat.com)
+- get zabbix ready to start tracking status of pcp (jdiaz@redhat.com)
+- split inventory into subpackages (tdawson@redhat.com)
+- changed the cpu alert to only alert if cpu idle more than 5x. Change alert to
+  warning (mwoodson@redhat.com)
+- Rename install_transactions module to openshift_ansible.
+  (dgoodwin@redhat.com)
+- atomic-openshift-installer: Text improvements (smunilla@redhat.com)
+- Add utils subpackage missing dep on openshift-ansible-roles.
+  (dgoodwin@redhat.com)
+- Disable requiretty for only the openshift user (error@ioerror.us)
+- Don't require tty to run sudo (error@ioerror.us)
+- Attempt to remove the various interfaces left over from an install
+  (bleanhar@redhat.com)
+- Pulling latest gce.py module from ansible (kwoodson@redhat.com)
+- Disable OpenShift features if installing Atomic Enterprise
+  (jdetiber@redhat.com)
+- Use default playbooks if available. (dgoodwin@redhat.com)
+- Add uninstall subcommand. (dgoodwin@redhat.com)
+- Add subcommands to CLI. (dgoodwin@redhat.com)
+- Remove images options in oadm command (nakayamakenjiro@gmail.com)
+
 * Fri Oct 30 2015 Kenny Woodson <kwoodson@redhat.com> 3.0.6-1
 - Adding python-boto and python-libcloud to openshift-ansible-inventory
   dependency (kwoodson@redhat.com)

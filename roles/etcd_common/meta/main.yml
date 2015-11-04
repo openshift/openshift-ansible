@@ -13,4 +13,4 @@ galaxy_info:
   - cloud
   - system
 dependencies:
-- { role: etcd_common }
+- { role: openshift_repos }
