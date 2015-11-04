@@ -194,6 +194,11 @@ g_template_os_linux:
     lifetime: 1
     description: "Dynamically register the filesystems"
 
+  - name: disc.disk
+    key: disc.disk
+    lifetime: 1
+    description: "Dynamically register disks on a node"
+
   zitemprototypes:
   - discoveryrule_key: disc.filesys
     name: "disc.filesys.full.{#OSO_FILESYS}"
@@ -208,6 +213,22 @@ g_template_os_linux:
     key: "disc.filesys.inodes.pused[{#OSO_FILESYS}]"
     value_type: float
     description: "PCP derived value of percentage of used inodes on a filesystem."
+    applications:
+    - Disk
+
+  - discoveryrule_key: disc.disk
+    name: "TPS (IOPS) for disk {#OSO_DISK}"
+    key: "disc.disk.tps[{#OSO_DISK}]"
+    value_type: int
+    description: "PCP disk.dev.totals metric measured over a period of time.  This shows how many disk transactions per second the disk is using"
+    applications:
+    - Disk
+
+  - discoveryrule_key: disc.disk
+    name: "Percent Utilized for disk {#OSO_DISK}"
+    key: "disc.disk.putil[{#OSO_DISK}]"
+    value_type: float
+    description: "PCP disk.dev.avactive metric measured over a period of time.  This is the '%util' in the iostat command"
     applications:
     - Disk
 

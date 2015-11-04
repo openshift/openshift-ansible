@@ -6,12 +6,13 @@ import click
 import os
 import re
 import sys
-from ooinstall import install_transactions
+from ooinstall import openshift_ansible
 from ooinstall import OOConfig
 from ooinstall.oo_config import Host
 from ooinstall.variants import find_variant, get_variant_version_combos
 
 DEFAULT_ANSIBLE_CONFIG = '/usr/share/atomic-openshift-util/ansible.cfg'
+DEFAULT_PLAYBOOK_DIR = '/usr/share/ansible/openshift-ansible/'
 
 def validate_ansible_dir(path):
     if not path:
@@ -94,7 +95,7 @@ The OpenShift Node provides the runtime environments for containers.  It will
 host the required services to be managed by the Master.
 
 http://docs.openshift.com/enterprise/latest/architecture/infrastructure_components/kubernetes_infrastructure.html#master
-http://docs.openshift.com/enterprise/3.0/architecture/infrastructure_components/kubernetes_infrastructure.html#node
+http://docs.openshift.com/enterprise/latest/architecture/infrastructure_components/kubernetes_infrastructure.html#node
     """
     click.echo(message)
 
@@ -190,7 +191,7 @@ Notes:
     facts_confirmed = click.confirm("Do the above facts look correct?")
     if not facts_confirmed:
         message = """
-Edit %s with the desired values and rerun oo-install with --unattended .
+Edit %s with the desired values and rerun atomic-openshift-installer with --unattended .
 """ % oo_cfg.config_path
         click.echo(message)
         # Make sure we actually write out the config file.
@@ -356,8 +357,8 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force):
                 hosts_to_run_on.extend(new_nodes)
                 oo_cfg.hosts.extend(new_nodes)
 
-                install_transactions.set_config(oo_cfg)
-                callback_facts, error = install_transactions.default_facts(oo_cfg.hosts)
+                openshift_ansible.set_config(oo_cfg)
+                callback_facts, error = openshift_ansible.default_facts(oo_cfg.hosts)
                 if error:
                     click.echo("There was a problem fetching the required information. " \
                                "See {} for details.".format(oo_cfg.settings['ansible_log_path']))
@@ -367,71 +368,117 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force):
 
     return hosts_to_run_on, callback_facts
 
-@click.command()
+
+@click.group()
+@click.pass_context
+@click.option('--unattended', '-u', is_flag=True, default=False)
 @click.option('--configuration', '-c',
-              type=click.Path(file_okay=True,
-                              dir_okay=False,
-                              writable=True,
-                              readable=True),
-              default=None)
+    type=click.Path(file_okay=True,
+        dir_okay=False,
+        writable=True,
+        readable=True),
+    default=None)
 @click.option('--ansible-playbook-directory',
               '-a',
               type=click.Path(exists=True,
                               file_okay=False,
                               dir_okay=True,
-                              writable=True,
                               readable=True),
               # callback=validate_ansible_dir,
+              default='/usr/share/ansible/openshift-ansible/',
               envvar='OO_ANSIBLE_PLAYBOOK_DIRECTORY')
 @click.option('--ansible-config',
-              type=click.Path(file_okay=True,
-                              dir_okay=False,
-                              writable=True,
-                              readable=True),
-              default=None)
+    type=click.Path(file_okay=True,
+        dir_okay=False,
+        writable=True,
+        readable=True),
+    default=None)
 @click.option('--ansible-log-path',
-              type=click.Path(file_okay=True,
-                              dir_okay=False,
-                              writable=True,
-                              readable=True),
-              default="/tmp/ansible.log")
-@click.option('--unattended', '-u', is_flag=True, default=False)
-@click.option('--force', '-f', is_flag=True, default=False)
+    type=click.Path(file_okay=True,
+        dir_okay=False,
+        writable=True,
+        readable=True),
+    default="/tmp/ansible.log")
 #pylint: disable=too-many-arguments
 # Main CLI entrypoint, not much we can do about too many arguments.
-def main(configuration, ansible_playbook_directory, ansible_config, ansible_log_path, unattended, force):
-    oo_cfg = OOConfig(configuration)
+def cli(ctx, unattended, configuration, ansible_playbook_directory, ansible_config, ansible_log_path):
+    """
+    The main click CLI module. Responsible for handling most common CLI options,
+    assigning any defaults and adding to the context for the sub-commands.
+    """
+    ctx.obj = {}
+    ctx.obj['unattended'] = unattended
+    ctx.obj['configuration'] = configuration
+    ctx.obj['ansible_config'] = ansible_config
+    ctx.obj['ansible_log_path'] = ansible_log_path
 
+    oo_cfg = OOConfig(ctx.obj['configuration'])
+
+    # If no playbook dir on the CLI, check the config:
     if not ansible_playbook_directory:
         ansible_playbook_directory = oo_cfg.settings.get('ansible_playbook_directory', '')
+    # If still no playbook dir, check for the default location:
+    if not ansible_playbook_directory and os.path.exists(DEFAULT_PLAYBOOK_DIR):
+        ansible_playbook_directory = DEFAULT_PLAYBOOK_DIR
+    validate_ansible_dir(ansible_playbook_directory)
+    oo_cfg.settings['ansible_playbook_directory'] = ansible_playbook_directory
+    oo_cfg.ansible_playbook_directory = ansible_playbook_directory
+    ctx.obj['ansible_playbook_directory'] = ansible_playbook_directory
 
-    if ansible_config:
-        oo_cfg.settings['ansible_config'] = ansible_config
+    if ctx.obj['ansible_config']:
+        oo_cfg.settings['ansible_config'] = ctx.obj['ansible_config']
     elif os.path.exists(DEFAULT_ANSIBLE_CONFIG):
         # If we're installed by RPM this file should exist and we can use it as our default:
         oo_cfg.settings['ansible_config'] = DEFAULT_ANSIBLE_CONFIG
 
-    validate_ansible_dir(ansible_playbook_directory)
-    oo_cfg.settings['ansible_playbook_directory'] = ansible_playbook_directory
-    oo_cfg.ansible_playbook_directory = ansible_playbook_directory
+    oo_cfg.settings['ansible_log_path'] = ctx.obj['ansible_log_path']
 
-    oo_cfg.settings['ansible_log_path'] = ansible_log_path
-    install_transactions.set_config(oo_cfg)
+    ctx.obj['oo_cfg'] = oo_cfg
+    openshift_ansible.set_config(oo_cfg)
 
-    if unattended:
+
+@click.command()
+@click.pass_context
+def uninstall(ctx):
+    oo_cfg = ctx.obj['oo_cfg']
+
+    if len(oo_cfg.hosts) == 0:
+        click.echo("No hosts defined in: %s" % oo_cfg['configuration'])
+        sys.exit(1)
+
+    click.echo("OpenShift will be uninstalled from the following hosts:\n")
+    if not ctx.obj['unattended']:
+        # Prompt interactively to confirm:
+        for host in oo_cfg.hosts:
+            click.echo("  * %s" % host.name)
+        proceed = click.confirm("\nDo you wish to proceed?")
+        if not proceed:
+            click.echo("Uninstall cancelled.")
+            sys.exit(0)
+
+    openshift_ansible.run_uninstall_playbook()
+
+
+
+@click.command()
+@click.option('--force', '-f', is_flag=True, default=False)
+@click.pass_context
+def install(ctx, force):
+    oo_cfg = ctx.obj['oo_cfg']
+
+    if ctx.obj['unattended']:
         error_if_missing_info(oo_cfg)
     else:
         oo_cfg = get_missing_info_from_user(oo_cfg)
 
     click.echo('Gathering information from hosts...')
-    callback_facts, error = install_transactions.default_facts(oo_cfg.hosts)
+    callback_facts, error = openshift_ansible.default_facts(oo_cfg.hosts)
     if error:
         click.echo("There was a problem fetching the required information. " \
                    "Please see {} for details.".format(oo_cfg.settings['ansible_log_path']))
         sys.exit(1)
 
-    hosts_to_run_on, callback_facts = get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force)
-
+    hosts_to_run_on, callback_facts = get_hosts_to_run_on(oo_cfg, callback_facts, ctx.obj['unattended'], force)
 
     click.echo('Writing config to: %s' % oo_cfg.config_path)
 
@@ -449,10 +496,10 @@ def main(configuration, ansible_playbook_directory, ansible_config, ansible_log_
     message = """
 If changes are needed to the values recorded by the installer please update {}.
 """.format(oo_cfg.config_path)
-    if not unattended:
+    if not ctx.obj['unattended']:
         confirm_continue(message)
 
-    error = install_transactions.run_main_playbook(oo_cfg.hosts,
+    error = openshift_ansible.run_main_playbook(oo_cfg.hosts,
                                                    hosts_to_run_on)
     if error:
         # The bootstrap script will print out the log location.
@@ -475,5 +522,10 @@ http://docs.openshift.com/enterprise/latest/admin_guide/overview.html
         click.echo(message)
         click.pause()
 
+cli.add_command(install)
+cli.add_command(uninstall)
+
 if __name__ == '__main__':
-    main()
+    # This is expected behaviour for context passing with click library:
+    # pylint: disable=unexpected-keyword-arg
+    cli(obj={})

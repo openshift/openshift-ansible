@@ -38,7 +38,7 @@ OSE = Variant('openshift-enterprise', 'OpenShift Enterprise',
     ]
 )
 
-AEP = Variant('atomic-enterprise', 'Atomic OpenShift Enterprise',
+AEP = Variant('atomic-enterprise', 'Atomic Enterprise Platform',
     [
         Version('3.1', 'atomic-enterprise')
     ]

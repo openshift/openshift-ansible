@@ -199,9 +199,18 @@
       validate_checksum: yes
     with_items: masters_needing_certs
 
+- name: Inspect named certificates
+  hosts: oo_first_master
+  tasks:
+  - name: Collect certificate names
+    set_fact:
+      parsed_named_certificates: "{{ openshift_master_named_certificates | oo_parse_certificate_names(master_cert_config_dir, openshift.common.internal_hostnames) }}"
+    when: openshift_master_named_certificates is defined
+
 - name: Configure master instances
   hosts: oo_masters_to_config
   vars:
+    named_certificates: "{{ hostvars[groups['oo_first_master'][0]]['parsed_named_certificates'] | default([])}}"
     sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
     openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
     embedded_etcd: "{{ openshift.master.embedded_etcd }}"

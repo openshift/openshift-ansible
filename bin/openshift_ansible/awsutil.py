@@ -4,7 +4,10 @@
 
 import os
 import re
-from openshift_ansible import multi_ec2
+
+# Buildbot does not have multi_inventory installed
+#pylint: disable=no-name-in-module
+from openshift_ansible import multi_inventory
 
 class ArgumentError(Exception):
     """This class is raised when improper arguments are passed."""
@@ -49,9 +52,9 @@ class AwsUtil(object):
         Keyword arguments:
         args -- optional arguments to pass to the inventory script
         """
-        mec2 = multi_ec2.MultiEc2(args)
-        mec2.run()
-        return mec2.result
+        minv = multi_inventory.MultiInventory(args)
+        minv.run()
+        return minv.result
 
     def get_environments(self):
         """Searches for env tags in the inventory and returns all of the envs found."""

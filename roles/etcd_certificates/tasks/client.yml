@@ -32,7 +32,7 @@
     creates: "{{ etcd_generated_certs_dir ~ '/' ~  item.etcd_cert_subdir ~ '/'
                  ~ item.etcd_cert_prefix ~ 'client.crt' }}"
   environment:
-    SAN: ''
+    SAN: "IP:{{ item.openshift.common.ip }}"
   with_items: etcd_needing_client_certs
 
 - file:

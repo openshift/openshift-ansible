@@ -22,6 +22,7 @@ import copy
 import os
 from distutils.util import strtobool
 from distutils.version import LooseVersion
+from netaddr import IPNetwork
 
 
 def hostname_valid(hostname):
@@ -483,17 +484,34 @@ def set_aggregate_facts(facts):
             dict: the facts dict updated with aggregated facts
     """
     all_hostnames = set()
+    internal_hostnames = set()
     if 'common' in facts:
         all_hostnames.add(facts['common']['hostname'])
         all_hostnames.add(facts['common']['public_hostname'])
+        all_hostnames.add(facts['common']['ip'])
+        all_hostnames.add(facts['common']['public_ip'])
+
+        internal_hostnames.add(facts['common']['hostname'])
+        internal_hostnames.add(facts['common']['ip'])
 
         if 'master' in facts:
+            # FIXME: not sure why but facts['dns']['domain'] fails
+            cluster_domain = 'cluster.local'
             if 'cluster_hostname' in facts['master']:
                 all_hostnames.add(facts['master']['cluster_hostname'])
             if 'cluster_public_hostname' in facts['master']:
                 all_hostnames.add(facts['master']['cluster_public_hostname'])
+            svc_names = ['openshift', 'openshift.default', 'openshift.default.svc',
+                         'openshift.default.svc.' + cluster_domain, 'kubernetes', 'kubernetes.default',
+                         'kubernetes.default.svc', 'kubernetes.default.svc.' + cluster_domain]
+            all_hostnames.update(svc_names)
+            internal_hostnames.update(svc_names)
+            first_svc_ip = str(IPNetwork(facts['master']['portal_net'])[1])
+            all_hostnames.add(first_svc_ip)
+            internal_hostnames.add(first_svc_ip)
 
         facts['common']['all_hostnames'] = list(all_hostnames)
+        facts['common']['internal_hostnames'] = list(all_hostnames)
 
     return facts
 
@@ -508,8 +526,9 @@ def set_deployment_facts_if_unset(facts):
             dict: the facts dict updated with the generated deployment_type
             facts
     """
-    # Perhaps re-factor this as a map?
-    # pylint: disable=too-many-branches
+    # disabled to avoid breaking up facts related to deployment type into
+    # multiple methods for now.
+    # pylint: disable=too-many-statements, too-many-branches
     if 'common' in facts:
         deployment_type = facts['common']['deployment_type']
         if 'service_type' not in facts['common']:
@@ -549,6 +568,17 @@ def set_deployment_facts_if_unset(facts):
                 elif deployment_type == 'atomic-enterprise':
                     registry_url = 'aep3/aep-${component}:${version}'
                 facts[role]['registry_url'] = registry_url
+
+    if 'master' in facts:
+        deployment_type = facts['common']['deployment_type']
+        openshift_features = ['Builder', 'S2IBuilder', 'WebConsole']
+        if 'disabled_features' in facts['master']:
+            if deployment_type == 'atomic-enterprise':
+                curr_disabled_features = set(facts['master']['disabled_features'])
+                facts['master']['disabled_features'] = list(curr_disabled_features.union(openshift_features))
+        else:
+            if deployment_type == 'atomic-enterprise':
+                facts['master']['disabled_features'] = openshift_features
 
     if 'node' in facts:
         deployment_type = facts['common']['deployment_type']

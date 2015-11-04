@@ -6,5 +6,8 @@
     - ansible_version | version_compare('1.9.0', 'ne')
     - ansible_version | version_compare('1.9.0.1', 'ne')
 
+- name: Ensure python-netaddr is installed
+  yum: pkg=python-netaddr state=installed
+
 - name: Gather Cluster facts
   openshift_facts:

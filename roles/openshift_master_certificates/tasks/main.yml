@@ -34,6 +34,8 @@
     - serviceaccounts.private.key
     - serviceaccounts.public.key
 
+- debug: msg="{{ item.openshift.master.all_hostnames | join (',') }}"
+  with_items: masters_needing_certs
 
 - name: Create the master certificates if they do not already exist
   command: >
