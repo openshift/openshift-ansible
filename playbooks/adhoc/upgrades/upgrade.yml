@@ -98,6 +98,14 @@
     fail: This playbook requires Origin 1.0.6 or Atomic OpenShift 3.0.2 or later
     when: _new_version.stdout | version_compare('1.0.6','<') or ( _new_version.stdout | version_compare('3.0','>=' and _new_version.stdout | version_compare('3.0.2','<') )
 
+- name: Verify upgrade can proceed
+  hosts: masters
+  tasks:
+  # Checking the global deployment type rather than host facts, this is about
+  # what the user is requesting.
+  - fail: msg="Deployment type 'enterprise' must be updated to 'openshift-enterprise' for upgrade to proceed"
+    when: deployment_type == "enterprise" and (_new_version.stdout | version_compare('1.0.7', '>=') or _new_version.stdout | version_compare('3.1', '>='))
+
 - name: Update cluster policy
   hosts: oo_first_master
   tasks:
