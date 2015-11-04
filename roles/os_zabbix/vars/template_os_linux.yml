@@ -224,6 +224,14 @@ g_template_os_linux:
     applications:
     - Disk
 
+  - discoveryrule_key: disc.disk
+    name: "Percent Utilized for disk {#OSO_DISK}"
+    key: "disc.disk.putil[{#OSO_DISK}]"
+    value_type: float
+    description: "PCP disk.dev.avactive metric measured over a period of time.  This is the '%util' in the iostat command"
+    applications:
+    - Disk
+
   ztriggerprototypes:
   - name: 'Filesystem: {#OSO_FILESYS} has less than 15% free disk space on {HOST.NAME}'
     expression: '{Template OS Linux:disc.filesys.full[{#OSO_FILESYS}].last()}>85'
