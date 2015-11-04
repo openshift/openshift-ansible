@@ -2,13 +2,13 @@
 # -*- coding: utf-8 -*-
 # vim: expandtab:tabstop=4:shiftwidth=4
 
+"""Ansible module for modifying OpenShift configs during an upgrade"""
+
 import os
 import shutil
 import yaml
 
 from datetime import datetime
-
-"""Ansible module for modifying OpenShift configs during an upgrade"""
 
 DOCUMENTATION = '''
 ---
@@ -21,6 +21,7 @@ EXAMPLES = '''
 '''
 
 def get_cfg_dir():
+    """Return the correct config directory to use."""
     cfg_path = '/etc/origin/'
     if not os.path.exists(cfg_path):
         cfg_path = '/etc/openshift/'
@@ -28,25 +29,26 @@ def get_cfg_dir():
 
 
 def upgrade_master_3_0_to_3_1(backup):
+    """Main upgrade method for 3.0 to 3.1."""
     changed = False
 
     # Facts do not get transferred to the hosts where custom modules run,
     # need to make some assumptions here.
     master_config = os.path.join(get_cfg_dir(), 'master/master-config.yaml')
 
-    f = open(master_config, 'r')
-    config = yaml.safe_load(f.read())
-    f.close()
+    master_cfg_file = open(master_config, 'r')
+    config = yaml.safe_load(master_cfg_file.read())
+    master_cfg_file.close()
 
     # Remove v1beta3 from apiLevels:
     if 'apiLevels' in config and \
         'v1beta3' in config['apiLevels']:
-            config['apiLevels'].remove('v1beta3')
-            changed = True
+        config['apiLevels'].remove('v1beta3')
+        changed = True
     if 'apiLevels' in config['kubernetesMasterConfig'] and \
         'v1beta3' in config['kubernetesMasterConfig']['apiLevels']:
-            config['kubernetesMasterConfig']['apiLevels'].remove('v1beta3')
-            changed = True
+        config['kubernetesMasterConfig']['apiLevels'].remove('v1beta3')
+        changed = True
 
     # Add the new master proxy client certs:
     # TODO: re-enable this once these certs are generated during upgrade:
@@ -61,7 +63,7 @@ def upgrade_master_3_0_to_3_1(backup):
             timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
             basedir = os.path.split(master_config)[0]
             backup_file = os.path.join(basedir, 'master-config.yaml.bak-%s'
-                % timestamp)
+                                       % timestamp)
             shutil.copyfile(master_config, backup_file)
         # Write the modified config:
         out_file = open(master_config, 'w')
@@ -72,6 +74,7 @@ def upgrade_master_3_0_to_3_1(backup):
 
 
 def upgrade_master(from_version, to_version, backup):
+    """Upgrade entry point."""
     if from_version == '3.0':
         if to_version == '3.1':
             return upgrade_master_3_0_to_3_1(backup)
