@@ -4,15 +4,15 @@
   gather_facts: no
   tasks:
   - fail:
-      msg: This playbook rquires g_etcd_group to be set
+      msg: This playbook requires g_etcd_group to be set
     when: g_etcd_group is not defined
 
   - fail:
-      msg: This playbook rquires g_masters_group to be set
+      msg: This playbook requires g_masters_group to be set
     when: g_masters_group is not defined
 
   - fail:
-      msg: This playbook rquires g_nodes_group to be set
+      msg: This playbook requires g_nodes_group to be set
     when: g_nodes_group is not defined
 
   - name: Evaluate oo_etcd_to_config

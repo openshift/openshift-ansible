@@ -93,14 +93,14 @@
   - fail: msg="Deployment type 'enterprise' must be updated to 'openshift-enterprise' for upgrade to proceed"
     when: deployment_type == "enterprise" and (_new_version.stdout | version_compare('1.0.7', '>=') or _new_version.stdout | version_compare('3.1', '>='))
 
-- name: Re-Run cluster configuration to apply latest configuration changes
-  include: ../../common/openshift-cluster/config.yml
-  vars:
-    g_etcd_group: "{{ 'etcd' }}"
-    g_masters_group: "{{ 'masters' }}"
-    g_nodes_group: "{{ 'nodes' }}"
-    openshift_cluster_id: "{{ cluster_id | default('default') }}"
-    openshift_deployment_type: "{{ deployment_type }}"
+      #- name: Re-Run cluster configuration to apply latest configuration changes
+      #  include: ../../common/openshift-cluster/config.yml
+      #  vars:
+      #    g_etcd_group: "{{ 'etcd' }}"
+      #    g_masters_group: "{{ 'masters' }}"
+      #    g_nodes_group: "{{ 'nodes' }}"
+      #    openshift_cluster_id: "{{ cluster_id | default('default') }}"
+      #    openshift_deployment_type: "{{ deployment_type }}"
 
 - name: Upgrade masters
   hosts: masters
@@ -111,6 +111,8 @@
       yum: pkg=kernel state=latest
     - name: Upgrade master packages
       yum: pkg={{ openshift.common.service_type }}-master{{ openshift_version }} state=latest
+    - name: Upgrade master configuration.
+      openshift_upgrade_config: from_version=3.0 to_version=3.1 role=master
     - name: Restart master services
       service: name="{{ openshift.common.service_type}}-master" state=restarted
 
@@ -118,6 +120,8 @@
   hosts: nodes
   vars:
     openshift_version: "{{ openshift_pkg_version | default('') }}"
+  roles:
+  - openshift_facts
   tasks:
     - name: Upgrade node packages
       yum: pkg={{ openshift.common.service_type }}-node{{ openshift_version }} state=latest
