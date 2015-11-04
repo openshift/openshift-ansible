@@ -385,7 +385,7 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force):
                               dir_okay=True,
                               readable=True),
               # callback=validate_ansible_dir,
-              default='/usr/share/openshift-ansible/',
+              default=DEFAULT_PLAYBOOK_DIR,
               envvar='OO_ANSIBLE_PLAYBOOK_DIRECTORY')
 @click.option('--ansible-config',
     type=click.Path(file_okay=True,
