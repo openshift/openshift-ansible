@@ -57,9 +57,6 @@
   vars:
     g_masters_group: "{{ 'masters' }}"
   tasks:
-    - name: display all variables set for the current host
-      debug:
-        var: hostvars[inventory_hostname]
     - name: Evaluate oo_first_master
       add_host:
         name: "{{ groups[g_masters_group][0] }}"
@@ -93,15 +90,6 @@
   - fail: msg="Deployment type 'enterprise' must be updated to 'openshift-enterprise' for upgrade to proceed"
     when: deployment_type == "enterprise" and (_new_version.stdout | version_compare('1.0.7', '>=') or _new_version.stdout | version_compare('3.1', '>='))
 
-      #- name: Re-Run cluster configuration to apply latest configuration changes
-      #  include: ../../common/openshift-cluster/config.yml
-      #  vars:
-      #    g_etcd_group: "{{ 'etcd' }}"
-      #    g_masters_group: "{{ 'masters' }}"
-      #    g_nodes_group: "{{ 'nodes' }}"
-      #    openshift_cluster_id: "{{ cluster_id | default('default') }}"
-      #    openshift_deployment_type: "{{ deployment_type }}"
-
 - name: Upgrade masters
   hosts: masters
   vars:
@@ -109,8 +97,11 @@
   tasks:
     - name: Upgrade to latest available kernel
       yum: pkg=kernel state=latest
+    - name: display just the deployment_type variable for the current host
+      debug:
+        var: hostvars[inventory_hostname]
     - name: Upgrade master packages
-      yum: pkg={{ openshift.common.service_type }}-master{{ openshift_version }} state=latest
+      command: yum update -y {{ openshift.common.service_type }}-master{{ openshift_version }}
     - name: Upgrade master configuration.
       openshift_upgrade_config: from_version=3.0 to_version=3.1 role=master
     - name: Restart master services
@@ -124,7 +115,7 @@
   - openshift_facts
   tasks:
     - name: Upgrade node packages
-      yum: pkg={{ openshift.common.service_type }}-node{{ openshift_version }} state=latest
+      command: yum update -y {{ openshift.common.service_type }}-node{{ openshift_version }}
     - name: Restart node services
       service: name="{{ openshift.common.service_type }}-node" state=restarted
 

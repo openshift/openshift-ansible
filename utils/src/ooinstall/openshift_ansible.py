@@ -144,6 +144,7 @@ def run_ansible(playbook, inventory, env_vars):
                              playbook],
                              env=env_vars)
 
+
 def run_uninstall_playbook():
     playbook = os.path.join(CFG.settings['ansible_playbook_directory'],
         'playbooks/adhoc/uninstall.yml')
