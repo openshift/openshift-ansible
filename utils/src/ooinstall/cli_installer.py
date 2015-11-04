@@ -489,7 +489,7 @@ def upgrade(ctx):
             click.echo("Upgrade cancelled.")
             sys.exit(0)
 
-    retcode = install_transactions.run_upgrade_playbook()
+    retcode = openshift_ansible.run_upgrade_playbook()
     if retcode > 0:
         click.echo("Errors encountered during upgrade, please check %s." %
             oo_cfg.settings['ansible_log_path'])
