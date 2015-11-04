@@ -7,6 +7,8 @@ Custom filters for use in openshift-ansible
 
 from ansible import errors
 from operator import itemgetter
+import OpenSSL.crypto
+import os.path
 import pdb
 import re
 import json
@@ -327,6 +329,68 @@ class FilterModule(object):
 
         return revamped_outputs
 
+    @staticmethod
+    # pylint: disable=too-many-branches
+    def oo_parse_certificate_names(certificates, data_dir, internal_hostnames):
+        ''' Parses names from list of certificate hashes.
+
+            Ex: certificates = [{ "certfile": "/etc/origin/master/custom1.crt",
+                                  "keyfile": "/etc/origin/master/custom1.key" },
+                                { "certfile": "custom2.crt",
+                                  "keyfile": "custom2.key" }]
+
+                returns [{ "certfile": "/etc/origin/master/custom1.crt",
+                           "keyfile": "/etc/origin/master/custom1.key",
+                           "names": [ "public-master-host.com",
+                                      "other-master-host.com" ] },
+                         { "certfile": "/etc/origin/master/custom2.crt",
+                           "keyfile": "/etc/origin/master/custom2.key",
+                           "names": [ "some-hostname.com" ] }]
+        '''
+        if not issubclass(type(certificates), list):
+            raise errors.AnsibleFilterError("|failed expects certificates is a list")
+
+        if not issubclass(type(data_dir), unicode):
+            raise errors.AnsibleFilterError("|failed expects data_dir is unicode")
+
+        if not issubclass(type(internal_hostnames), list):
+            raise errors.AnsibleFilterError("|failed expects internal_hostnames is list")
+
+        for certificate in certificates:
+            if 'names' in certificate.keys():
+                continue
+            else:
+                certificate['names'] = []
+
+            if not os.path.isfile(certificate['certfile']) and not os.path.isfile(certificate['keyfile']):
+                # Unable to find cert/key, try to prepend data_dir to paths
+                certificate['certfile'] = os.path.join(data_dir, certificate['certfile'])
+                certificate['keyfile'] = os.path.join(data_dir, certificate['keyfile'])
+                if not os.path.isfile(certificate['certfile']) and not os.path.isfile(certificate['keyfile']):
+                    # Unable to find cert/key in data_dir
+                    raise errors.AnsibleFilterError("|certificate and/or key does not exist '%s', '%s'" %
+                                                    (certificate['certfile'], certificate['keyfile']))
+
+            try:
+                st_cert = open(certificate['certfile'], 'rt').read()
+                cert = OpenSSL.crypto.load_certificate(OpenSSL.crypto.FILETYPE_PEM, st_cert)
+                certificate['names'].append(str(cert.get_subject().commonName.decode()))
+                for i in range(cert.get_extension_count()):
+                    if cert.get_extension(i).get_short_name() == 'subjectAltName':
+                        for name in str(cert.get_extension(i)).replace('DNS:', '').split(', '):
+                            certificate['names'].append(name)
+            except:
+                raise errors.AnsibleFilterError(("|failed to parse certificate '%s', " % certificate['certfile'] +
+                                                 "please specify certificate names in host inventory"))
+
+            certificate['names'] = [name for name in certificate['names'] if name not in internal_hostnames]
+            certificate['names'] = list(set(certificate['names']))
+            if not certificate['names']:
+                raise errors.AnsibleFilterError(("|failed to parse certificate '%s' or " % certificate['certfile'] +
+                                                 "detected a collision with internal hostname, please specify " +
+                                                 "certificate names in host inventory"))
+        return certificates
+
     def filters(self):
         ''' returns a mapping of filters to methods '''
         return {
@@ -342,5 +406,6 @@ class FilterModule(object):
             "oo_combine_dict": self.oo_combine_dict,
             "oo_split": self.oo_split,
             "oo_filter_list": self.oo_filter_list,
-            "oo_parse_heat_stack_outputs": self.oo_parse_heat_stack_outputs
+            "oo_parse_heat_stack_outputs": self.oo_parse_heat_stack_outputs,
+            "oo_parse_certificate_names": self.oo_parse_certificate_names
         }

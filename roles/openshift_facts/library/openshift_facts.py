@@ -484,11 +484,15 @@ def set_aggregate_facts(facts):
             dict: the facts dict updated with aggregated facts
     """
     all_hostnames = set()
+    internal_hostnames = set()
     if 'common' in facts:
         all_hostnames.add(facts['common']['hostname'])
         all_hostnames.add(facts['common']['public_hostname'])
         all_hostnames.add(facts['common']['ip'])
         all_hostnames.add(facts['common']['public_ip'])
+
+        internal_hostnames.add(facts['common']['hostname'])
+        internal_hostnames.add(facts['common']['ip'])
 
         if 'master' in facts:
             # FIXME: not sure why but facts['dns']['domain'] fails
@@ -497,13 +501,17 @@ def set_aggregate_facts(facts):
                 all_hostnames.add(facts['master']['cluster_hostname'])
             if 'cluster_public_hostname' in facts['master']:
                 all_hostnames.add(facts['master']['cluster_public_hostname'])
-            all_hostnames.update(['openshift', 'openshift.default', 'openshift.default.svc',
-                                  'openshift.default.svc.' + cluster_domain, 'kubernetes', 'kubernetes.default',
-                                  'kubernetes.default.svc', 'kubernetes.default.svc.' + cluster_domain])
+            svc_names = ['openshift', 'openshift.default', 'openshift.default.svc',
+                         'openshift.default.svc.' + cluster_domain, 'kubernetes', 'kubernetes.default',
+                         'kubernetes.default.svc', 'kubernetes.default.svc.' + cluster_domain]
+            all_hostnames.update(svc_names)
+            internal_hostnames.update(svc_names)
             first_svc_ip = str(IPNetwork(facts['master']['portal_net'])[1])
             all_hostnames.add(first_svc_ip)
+            internal_hostnames.add(first_svc_ip)
 
         facts['common']['all_hostnames'] = list(all_hostnames)
+        facts['common']['internal_hostnames'] = list(all_hostnames)
 
     return facts
 
