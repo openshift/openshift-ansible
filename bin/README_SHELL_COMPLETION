@@ -14,7 +14,7 @@ will populate the cache file and the completions should
 become available.
 
 This script will look at the cached version of your
-multi_ec2 results in ~/.ansible/tmp/multi_ec2_inventory.cache.
+multi_inventory results in ~/.ansible/tmp/multi_inventory.cache.
 It will then parse a few {host}.{env} out of the json
 and return them to be completable.
 

@@ -47,9 +47,9 @@ cp -pP bin/openshift_ansible/* %{buildroot}%{python_sitelib}/openshift_ansible
 cp -p bin/ossh_bash_completion %{buildroot}/etc/bash_completion.d
 cp -p bin/openshift_ansible.conf.example %{buildroot}/etc/openshift_ansible/openshift_ansible.conf
 # Fix links
-rm -f %{buildroot}%{python_sitelib}/openshift_ansible/multi_ec2.py
+rm -f %{buildroot}%{python_sitelib}/openshift_ansible/multi_inventory.py
 rm -f %{buildroot}%{python_sitelib}/openshift_ansible/aws
-ln -sf %{_datadir}/ansible/inventory/multi_ec2.py %{buildroot}%{python_sitelib}/openshift_ansible/multi_ec2.py
+ln -sf %{_datadir}/ansible/inventory/multi_inventory.py %{buildroot}%{python_sitelib}/openshift_ansible/multi_inventory.py
 ln -sf %{_datadir}/ansible/inventory/aws %{buildroot}%{python_sitelib}/openshift_ansible/aws
 
 # openshift-ansible-docs install
@@ -60,8 +60,8 @@ mkdir -p %{buildroot}/etc/ansible
 mkdir -p %{buildroot}%{_datadir}/ansible/inventory
 mkdir -p %{buildroot}%{_datadir}/ansible/inventory/aws
 mkdir -p %{buildroot}%{_datadir}/ansible/inventory/gce
-cp -p inventory/multi_ec2.py %{buildroot}%{_datadir}/ansible/inventory
-cp -p inventory/multi_ec2.yaml.example %{buildroot}/etc/ansible/multi_ec2.yaml
+cp -p inventory/multi_inventory.py %{buildroot}%{_datadir}/ansible/inventory
+cp -p inventory/multi_inventory.yaml.example %{buildroot}/etc/ansible/multi_inventory.yaml
 cp -p inventory/aws/hosts/ec2.py %{buildroot}%{_datadir}/ansible/inventory/aws
 cp -p inventory/gce/hosts/gce.py %{buildroot}%{_datadir}/ansible/inventory/gce
 
@@ -137,7 +137,7 @@ Ansible Inventories used with the openshift-ansible scripts and playbooks.
 %files inventory
 %config(noreplace) /etc/ansible/*
 %dir %{_datadir}/ansible/inventory
-%{_datadir}/ansible/inventory/multi_ec2.py*
+%{_datadir}/ansible/inventory/multi_inventory.py*
 
 %package inventory-aws
 Summary:       Openshift and Atomic Enterprise Ansible Inventories for AWS
