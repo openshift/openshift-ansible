@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.6
+Version:        3.0.7
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,45 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Nov 04 2015 Kenny Woodson <kwoodson@redhat.com> 3.0.7-1
+- added the %%util in zabbix (mwoodson@redhat.com)
+- atomic-openshift-installer: Correct default playbook directory
+  (smunilla@redhat.com)
+- Support for gce (kwoodson@redhat.com)
+- fixed a dumb naming mistake (mwoodson@redhat.com)
+- added disk tps checks to zabbix (mwoodson@redhat.com)
+- atomic-openshift-installer: Correct inaccurate prompt (smunilla@redhat.com)
+- atomic-openshift-installer: Add default openshift-ansible-playbook
+  (smunilla@redhat.com)
+- ooinstall: Add check for nopwd sudo (smunilla@redhat.com)
+- ooinstall: Update local install check (smunilla@redhat.com)
+- oo-install: Support running on the host to be deployed (smunilla@redhat.com)
+- Moving to Openshift Etcd application (mmahut@redhat.com)
+- Add all the possible servicenames to openshift_all_hostnames for masters
+  (sdodson@redhat.com)
+- Adding openshift.node.etcd items (mmahut@redhat.com)
+- Fix etcd cert generation when etcd_interface is defined (jdetiber@redhat.com)
+- get zabbix ready to start tracking status of pcp (jdiaz@redhat.com)
+- split inventory into subpackages (tdawson@redhat.com)
+- changed the cpu alert to only alert if cpu idle more than 5x. Change alert to
+  warning (mwoodson@redhat.com)
+- Rename install_transactions module to openshift_ansible.
+  (dgoodwin@redhat.com)
+- atomic-openshift-installer: Text improvements (smunilla@redhat.com)
+- Add utils subpackage missing dep on openshift-ansible-roles.
+  (dgoodwin@redhat.com)
+- Disable requiretty for only the openshift user (error@ioerror.us)
+- Don't require tty to run sudo (error@ioerror.us)
+- Attempt to remove the various interfaces left over from an install
+  (bleanhar@redhat.com)
+- Pulling latest gce.py module from ansible (kwoodson@redhat.com)
+- Disable OpenShift features if installing Atomic Enterprise
+  (jdetiber@redhat.com)
+- Use default playbooks if available. (dgoodwin@redhat.com)
+- Add uninstall subcommand. (dgoodwin@redhat.com)
+- Add subcommands to CLI. (dgoodwin@redhat.com)
+- Remove images options in oadm command (nakayamakenjiro@gmail.com)
+
 * Fri Oct 30 2015 Kenny Woodson <kwoodson@redhat.com> 3.0.6-1
 - Adding python-boto and python-libcloud to openshift-ansible-inventory
   dependency (kwoodson@redhat.com)
