@@ -1,4 +1,14 @@
 ---
+- name: Update deployment type
+  hosts: OSEv3
+  roles:
+  - openshift_facts
+  post_tasks: # technically tasks are run after roles, but post_tasks is a bit more explicit.
+  - openshift_facts:
+      role: common
+      local_facts:
+        deployment_type: "{{ deployment_type }}"
+
 - name: Verify upgrade can proceed
   hosts: masters
   tasks:
