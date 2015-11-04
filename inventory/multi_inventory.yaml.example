@@ -1,0 +1,51 @@
+# multi ec2 inventory configs
+#
+cache_location: ~/.ansible/tmp/multi_inventory.cache
+
+accounts:
+  - name: aws1
+    provider: aws/ec2.py
+    provider_files:
+    - name: ec2.ini
+      content: |-
+        [ec2]
+        regions = all
+        regions_exclude =  us-gov-west-1,cn-north-1
+        destination_variable = public_dns_name
+        route53 = False
+        cache_path = ~/.ansible/tmp
+        cache_max_age = 300
+        vpc_destination_variable = ip_address
+    env_vars:
+      AWS_ACCESS_KEY_ID: XXXXXXXXXXXXXXXXXXXX
+      AWS_SECRET_ACCESS_KEY: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+      EC2_INI_PATH: ${tmpdir}/ec2.ini # we replace ${tmpdir} with the temporary directory that we've created for the provider.
+    extra_vars:
+      cloud: aws
+      account: aws1
+
+-   name: mygce
+    extra_vars:
+      cloud: gce
+      account: gce1
+    env_vars:
+      GCE_INI_PATH: ${tmpdir}/gce.ini # we replace ${tmpdir} with the temporary directory that we've created for the provider.
+    provider: gce/gce.py
+    provider_files:
+    - name: priv_key.pem
+      contents: |-
+        -----BEGIN PRIVATE KEY-----
+        yourprivatekeydatahere
+        -----END PRIVATE KEY-----
+    - name: gce.ini
+      contents: |-
+        [gce]
+        gce_service_account_email_address = <uuid>@developer.gserviceaccount.com
+        gce_service_account_pem_file_path = ${tmpdir}/priv_key.pem # we replace ${tmpdir} with the temporary directory that we've created for the provider.
+        gce_project_id = gce-project
+        zone = us-central1-a
+        network = default
+        gce_machine_type = n1-standard-2
+        gce_machine_image = rhel7
+
+cache_max_age: 600
