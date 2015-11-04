@@ -16,7 +16,6 @@ def set_config(cfg):
     CFG = cfg
 
 def generate_inventory(hosts):
-    print hosts
     global CFG
 
     installer_host = socket.gethostname()
@@ -145,6 +144,7 @@ def run_ansible(playbook, inventory, env_vars):
                              playbook],
                              env=env_vars)
 
+
 def run_uninstall_playbook():
     playbook = os.path.join(CFG.settings['ansible_playbook_directory'],
         'playbooks/adhoc/uninstall.yml')
@@ -155,3 +155,17 @@ def run_uninstall_playbook():
     if 'ansible_config' in CFG.settings:
         facts_env['ANSIBLE_CONFIG'] = CFG.settings['ansible_config']
     return run_ansible(playbook, inventory_file, facts_env)
+
+
+def run_upgrade_playbook():
+    playbook = os.path.join(CFG.settings['ansible_playbook_directory'],
+        'playbooks/adhoc/upgrades/upgrade.yml')
+    # TODO: Upgrade inventory for upgrade?
+    inventory_file = generate_inventory(CFG.hosts)
+    facts_env = os.environ.copy()
+    if 'ansible_log_path' in CFG.settings:
+        facts_env['ANSIBLE_LOG_PATH'] = CFG.settings['ansible_log_path']
+    if 'ansible_config' in CFG.settings:
+        facts_env['ANSIBLE_CONFIG'] = CFG.settings['ansible_config']
+    return run_ansible(playbook, inventory_file, facts_env)
+

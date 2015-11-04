@@ -12,6 +12,7 @@ PERSIST_SETTINGS = [
     'ansible_log_path',
     'variant',
     'variant_version',
+    'version',
     ]
 REQUIRED_FACTS = ['ip', 'public_ip', 'hostname', 'public_hostname']
 
@@ -73,7 +74,6 @@ class Host(object):
 
 
 class OOConfig(object):
-    new_config = True
     default_dir = os.path.normpath(
         os.environ.get('XDG_CONFIG_HOME',
                        os.environ['HOME'] + '/.config/') + '/openshift/')
@@ -86,19 +86,22 @@ class OOConfig(object):
             self.config_path = os.path.normpath(self.default_dir +
                                                 self.default_file)
         self.settings = {}
-        self.read_config()
-        self.set_defaults()
+        self._read_config()
+        self._set_defaults()
 
-    def read_config(self, is_new=False):
+    def _read_config(self):
         self.hosts = []
         try:
-            new_settings = None
             if os.path.exists(self.config_path):
                 cfgfile = open(self.config_path, 'r')
-                new_settings = yaml.safe_load(cfgfile.read())
+                self.settings = yaml.safe_load(cfgfile.read())
                 cfgfile.close()
-            if new_settings:
-                self.settings = new_settings
+
+                # Use the presence of a Description as an indicator this is
+                # a legacy config file:
+                if 'Description' in self.settings:
+                    self._upgrade_legacy_config()
+
                 # Parse the hosts into DTO objects:
                 if 'hosts' in self.settings:
                     for host in self.settings['hosts']:
@@ -114,9 +117,28 @@ class OOConfig(object):
                                                                               ferr.strerror))
         except yaml.scanner.ScannerError:
             raise OOConfigFileError('Config file "{}" is not a valid YAML document'.format(self.config_path))
-        self.new_config = is_new
 
-    def set_defaults(self):
+    def _upgrade_legacy_config(self):
+        new_hosts = []
+        if 'validated_facts' in self.settings:
+            for key, value in self.settings['validated_facts'].iteritems():
+                if 'masters' in self.settings and key in self.settings['masters']:
+                    value['master'] = True
+                if 'nodes' in self.settings and key in self.settings['nodes']:
+                    value['node'] = True
+                new_hosts.append(value)
+        self.settings['hosts'] = new_hosts
+
+        remove_settings = ['validated_facts', 'Description', 'Name',
+            'Subscription', 'Vendor', 'Version', 'masters', 'nodes']
+        for s in remove_settings:
+            del self.settings[s]
+
+        # A legacy config implies openshift-enterprise 3.0:
+        self.settings['variant'] = 'openshift-enterprise'
+        self.settings['variant_version'] = '3.0'
+
+    def _set_defaults(self):
 
         if 'ansible_inventory_directory' not in self.settings:
             self.settings['ansible_inventory_directory'] = \
@@ -125,6 +147,8 @@ class OOConfig(object):
             os.makedirs(self.settings['ansible_inventory_directory'])
         if 'ansible_plugins_directory' not in self.settings:
             self.settings['ansible_plugins_directory'] = resource_filename(__name__, 'ansible_plugins')
+        if 'version' not in self.settings:
+            self.settings['version'] = 'v1'
 
         if 'ansible_callback_facts_yaml' not in self.settings:
             self.settings['ansible_callback_facts_yaml'] = '%s/callback_facts.yaml' % \

@@ -29,6 +29,9 @@ class Variant(object):
 
         self.versions = versions
 
+    def latest_version(self):
+        return self.versions[-1]
+
 
 # WARNING: Keep the versions ordered, most recent last:
 OSE = Variant('openshift-enterprise', 'OpenShift Enterprise',
@@ -58,7 +61,7 @@ def find_variant(name, version=None):
     for prod in SUPPORTED_VARIANTS:
         if prod.name == name:
             if version is None:
-                return (prod, prod.versions[-1])
+                return (prod, prod.latest_version())
             for v in prod.versions:
                 if v.name == version:
                     return (prod, v)

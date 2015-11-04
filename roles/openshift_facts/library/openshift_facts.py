@@ -510,6 +510,12 @@ def set_aggregate_facts(facts):
             all_hostnames.add(first_svc_ip)
             internal_hostnames.add(first_svc_ip)
 
+            if facts['master']['embedded_etcd']:
+                facts['master']['etcd_data_dir'] = os.path.join(
+                    facts['common']['data_dir'], 'openshift.local.etcd')
+            else:
+                facts['master']['etcd_data_dir'] = '/var/lib/etcd'
+
         facts['common']['all_hostnames'] = list(all_hostnames)
         facts['common']['internal_hostnames'] = list(all_hostnames)
 

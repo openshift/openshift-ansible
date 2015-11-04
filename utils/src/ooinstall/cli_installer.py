@@ -385,7 +385,7 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force):
                               dir_okay=True,
                               readable=True),
               # callback=validate_ansible_dir,
-              default='/usr/share/ansible/openshift-ansible/',
+              default=DEFAULT_PLAYBOOK_DIR,
               envvar='OO_ANSIBLE_PLAYBOOK_DIRECTORY')
 @click.option('--ansible-config',
     type=click.Path(file_okay=True,
@@ -459,6 +459,43 @@ def uninstall(ctx):
     openshift_ansible.run_uninstall_playbook()
 
 
+@click.command()
+@click.pass_context
+def upgrade(ctx):
+    oo_cfg = ctx.obj['oo_cfg']
+
+    if len(oo_cfg.hosts) == 0:
+        click.echo("No hosts defined in: %s" % oo_cfg['configuration'])
+        sys.exit(1)
+
+    # Update config to reflect the version we're targetting, we'll write
+    # to disk once ansible completes successfully, not before.
+    old_variant = oo_cfg.settings['variant']
+    old_version = oo_cfg.settings['variant_version']
+    if oo_cfg.settings['variant'] == 'enterprise':
+        oo_cfg.settings['variant'] = 'openshift-enterprise'
+    version = find_variant(oo_cfg.settings['variant'])[1]
+    oo_cfg.settings['variant_version'] = version.name
+    click.echo("Openshift will be upgraded from %s %s to %s %s on the following hosts:\n" % (
+        old_variant, old_version, oo_cfg.settings['variant'],
+        oo_cfg.settings['variant_version']))
+    for host in oo_cfg.hosts:
+        click.echo("  * %s" % host.name)
+
+    if not ctx.obj['unattended']:
+        # Prompt interactively to confirm:
+        proceed = click.confirm("\nDo you wish to proceed?")
+        if not proceed:
+            click.echo("Upgrade cancelled.")
+            sys.exit(0)
+
+    retcode = openshift_ansible.run_upgrade_playbook()
+    if retcode > 0:
+        click.echo("Errors encountered during upgrade, please check %s." %
+            oo_cfg.settings['ansible_log_path'])
+    else:
+        click.echo("Upgrade completed! Rebooting all hosts is recommended.")
+
 
 @click.command()
 @click.option('--force', '-f', is_flag=True, default=False)
@@ -523,6 +560,7 @@ http://docs.openshift.com/enterprise/latest/admin_guide/overview.html
         click.pause()
 
 cli.add_command(install)
+cli.add_command(upgrade)
 cli.add_command(uninstall)
 
 if __name__ == '__main__':
