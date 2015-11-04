@@ -417,6 +417,9 @@ def set_identity_providers_if_unset(facts):
 
     return facts
 
+# Disable pylint check for too many locals to avoid refactoring URL facts into
+# separate methods
+# pylint: disable=too-many-locals
 def set_url_facts_if_unset(facts):
     """ Set url facts if not already present in facts dict
 
@@ -439,6 +442,8 @@ def set_url_facts_if_unset(facts):
         public_hostname = facts['common']['public_hostname']
         cluster_hostname = facts['master'].get('cluster_hostname')
         cluster_public_hostname = facts['master'].get('cluster_public_hostname')
+        metrics_path = facts['master']['metrics_path']
+        logging_path = facts['master']['logging_path']
 
         if 'etcd_urls' not in facts['master']:
             etcd_urls = []
@@ -473,6 +478,19 @@ def set_url_facts_if_unset(facts):
                                                                console_public_hostname,
                                                                console_port,
                                                                console_path)
+        if 'public_metrics_url' not in facts['master']:
+            metrics_public_hostname = cluster_public_hostname if cluster_public_hostname else public_hostname
+            facts['master']['public_metrics_url'] = format_url(console_use_ssl,
+                                                               metrics_public_hostname,
+                                                               console_port,
+                                                               metrics_path)
+        if 'public_logging_url' not in facts['master']:
+            logging_public_hostname = cluster_public_hostname if cluster_public_hostname else public_hostname
+            facts['master']['public_logging_url'] = format_url(console_use_ssl,
+                                                               logging_public_hostname,
+                                                               console_port,
+                                                               logging_path)
+
     return facts
 
 def set_aggregate_facts(facts):
@@ -934,7 +952,8 @@ class OpenShiftFacts(object):
                           session_name='ssn', session_secrets_file='',
                           access_token_max_seconds=86400,
                           auth_token_max_seconds=500,
-                          oauth_grant_method='auto', cluster_defer_ha=False)
+                          oauth_grant_method='auto', cluster_defer_ha=False,
+                          metrics_path='/metrics', logging_path='/logging')
             defaults['master'] = master
 
         if 'node' in roles:

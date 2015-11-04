@@ -6,8 +6,10 @@ apiLevels:
 apiVersion: v1
 assetConfig:
   logoutURL: ""
+  loggingPublicURL: {{ openshift.master.public_logging_url }}
   masterPublicURL: {{ openshift.master.public_api_url }}
   publicURL: {{ openshift.master.public_console_url }}/
+  metricsPublicURL: {{ openshift.master.public_metrics_url }}
   servingInfo:
     bindAddress: {{ openshift.master.bind_addr }}:{{ openshift.master.console_port }}
     certFile: master.server.crt
