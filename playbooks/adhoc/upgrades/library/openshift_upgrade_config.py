@@ -49,11 +49,12 @@ def upgrade_master_3_0_to_3_1(backup):
             changed = True
 
     # Add the new master proxy client certs:
-    if 'proxyClientInfo' not in config['kubernetesMasterConfig']:
-        config['kubernetesMasterConfig']['proxyClientInfo'] = {
-            'certFile': 'master.proxy-client.crt',
-            'keyFile': 'master.proxy-client.key'
-        }
+    # TODO: re-enable this once these certs are generated during upgrade:
+#    if 'proxyClientInfo' not in config['kubernetesMasterConfig']:
+#        config['kubernetesMasterConfig']['proxyClientInfo'] = {
+#            'certFile': 'master.proxy-client.crt',
+#            'keyFile': 'master.proxy-client.key'
+#       }
 
     if changed:
         if backup:
