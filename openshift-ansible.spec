@@ -170,6 +170,9 @@ Ansible Inventories for GCE used with the openshift-ansible scripts and playbook
 %package playbooks
 Summary:       Openshift and Atomic Enterprise Ansible Playbooks
 Requires:      %{name}
+Requires:      %{name}-roles
+Requires:      %{name}-lookup-plugins
+Requires:      %{name}-filter-plugins
 BuildArch:     noarch
 
 %description playbooks
@@ -185,6 +188,8 @@ BuildArch:     noarch
 %package roles
 Summary:       Openshift and Atomic Enterprise Ansible roles
 Requires:      %{name}
+Requires:      %{name}-lookup-plugins
+Requires:      %{name}-filter-plugins
 BuildArch:     noarch
 
 %description roles
