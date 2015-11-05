@@ -1,22 +1,16 @@
 ---
-- name: Update deployment type
-  hosts: OSEv3
-  roles:
-  - openshift_facts
-  post_tasks:
-  - openshift_facts:
-      role: common
-      local_facts:
-        deployment_type: "{{ deployment_type }}"
-
 - name: Verify upgrade can proceed
-  hosts: masters
+  hosts: localhost
   tasks:
   # Checking the global deployment type rather than host facts, this is about
   # what the user is requesting.
     - fail: msg="Deployment type enterprise not supported for upgrade"
       when: deployment_type == "enterprise"
 
+# TODO: etcd is only guaranteed to be run on the master if embedded etcd is
+# used, we should have a task to create a new group consisting of the single
+# master running embedded etcd or an external etcd cluster specified by the
+# etcd group in the inventory (which could also be the masters)
 - name: Backup etcd
   hosts: masters
   vars:
@@ -27,9 +21,11 @@
   tasks:
   - stat: path=/var/lib/openshift
     register: var_lib_openshift
+
   - name: Create origin symlink if necessary
     file: src=/var/lib/openshift/ dest=/var/lib/origin state=link
     when: var_lib_openshift.stat.exists == True
+
   - name: Check available disk space for etcd backup
     # We assume to be using the data dir for all backups.
     shell: >
@@ -43,14 +39,35 @@
     when: embedded_etcd | bool
 
   - name: Abort if insufficient disk space for etcd backup
-    fail: msg="{{ etcd_disk_usage.stdout }} Kb disk space required for etcd backup, {{ avail_disk.stdout }} Kb available."
+    fail:
+      msg: >
+        {{ etcd_disk_usage.stdout }} Kb disk space required for etcd backup,
+        {{ avail_disk.stdout }} Kb available.
     when: (embedded_etcd | bool) and (etcd_disk_usage.stdout|int > avail_disk.stdout|int)
+
   - name: Install etcd (for etcdctl)
-    yum: pkg=etcd state=latest
+    yum:
+      pkg: etcd
+      state: latest
+
   - name: Generate etcd backup
-    command: etcdctl backup --data-dir={{ openshift.master.etcd_data_dir }} --backup-dir={{ openshift.common.data_dir }}/etcd-backup-{{ timestamp }}
+    command: >
+      etcdctl backup --data-dir={{ openshift.master.etcd_data_dir }}
+      --backup-dir={{ openshift.common.data_dir }}/etcd-backup-{{ timestamp }}
+
   - name: Display location of etcd backup
-    debug: msg="Etcd backup created in {{ openshift.common.data_dir }}/etcd-backup-{{ timestamp }}"
+    debug:
+      msg: "Etcd backup created in {{ openshift.common.data_dir }}/etcd-backup-{{ timestamp }}"
+
+- name: Update deployment type
+  hosts: OSEv3
+  roles:
+  - openshift_facts
+  post_tasks:
+  - openshift_facts:
+      role: common
+      local_facts:
+        deployment_type: "{{ deployment_type }}"
 
 - name: Upgrade base package on masters
   hosts: masters
@@ -60,44 +77,31 @@
     openshift_version: "{{ openshift_pkg_version | default('') }}"
   tasks:
     - name: Upgrade base package
-      yum: pkg={{ openshift.common.service_type }}{{ openshift_version  }} state=latest
-
-- name: Evaluate oo_first_master
-  hosts: localhost
-  vars:
-    g_masters_group: "{{ 'masters' }}"
-  tasks:
-    - name: Evaluate oo_first_master
-      add_host:
-        name: "{{ groups[g_masters_group][0] }}"
-        groups: oo_first_master
-        ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
-        ansible_sudo: "{{ g_sudo | default(omit) }}"
-      when: g_masters_group in groups and (groups[g_masters_group] | length) > 0
+      yum:
+        pkg: "{{ openshift.common.service_type }}{{ openshift_version  }}"
+        state: latest
 
 # TODO: ideally we would check the new version, without installing it. (some
 # kind of yum repoquery? would need to handle openshift -> atomic-openshift
 # package rename)
 - name: Perform upgrade version checking
-  hosts: oo_first_master
+  hosts: masters[0]
   tasks:
     - name: Determine new version
       command: >
         rpm -q --queryformat '%{version}' {{ openshift.common.service_type }}
       register: _new_version
 
-- name: Ensure AOS 3.0.2 or Origin 1.0.6
-  hosts: oo_first_master
-  tasks:
-    fail: This playbook requires Origin 1.0.6 or Atomic OpenShift 3.0.2 or later
-    when: _new_version.stdout | version_compare('1.0.6','<') or ( _new_version.stdout | version_compare('3.0','>=' and _new_version.stdout | version_compare('3.0.2','<') )
+    - fail: This playbook requires Origin 1.0.6 or Atomic OpenShift 3.0.2 or later
+      when: _new_version.stdout | version_compare('1.0.6','<') or ( _new_version.stdout | version_compare('3.0','>=' and _new_version.stdout | version_compare('3.0.2','<') )
 
 - name: Verify upgrade can proceed
-  hosts: oo_first_master
+  hosts: masters[0]
   tasks:
   # Checking the global deployment type rather than host facts, this is about
   # what the user is requesting.
-  - fail: msg="Deployment type 'enterprise' must be updated to 'openshift-enterprise' for upgrade to proceed"
+  - fail:
+      msg: "Deployment type 'enterprise' must be updated to 'openshift-enterprise' for upgrade to proceed"
     when: deployment_type == "enterprise" and (_new_version.stdout | version_compare('1.0.7', '>=') or _new_version.stdout | version_compare('3.1', '>='))
 
 - name: Upgrade masters
@@ -129,17 +133,14 @@
     - name: Restart node services
       service: name="{{ openshift.common.service_type }}-node" state=restarted
 
-- name: Update cluster policy
-  hosts: oo_first_master
+- name: Update cluster policy and policy bindings
+  hosts: masters[0]
   tasks:
     - name: oadm policy reconcile-cluster-roles --confirm
       command: >
         {{ openshift.common.admin_binary}} --config={{ openshift.common.config_base }}/master/admin.kubeconfig
         policy reconcile-cluster-roles --confirm
 
-- name: Update cluster policy bindings
-  hosts: oo_first_master
-  tasks:
     - name: oadm policy reconcile-cluster-role-bindings --confirm
       command: >
         {{ openshift.common.admin_binary}} --config={{ openshift.common.config_base }}/master/admin.kubeconfig
@@ -150,6 +151,7 @@
         --additive-only=true --confirm
       when: ( _new_version.stdout | version_compare('1.0.6', '>') and _new_version.stdout | version_compare('3.0','<') ) or _new_version.stdout | version_compare('3.0.2','>')
 
+
 - name: Restart masters post reconcile
   hosts: masters
   tasks:
@@ -157,9 +159,10 @@
       service: name="{{ openshift.common.service_type}}-master" state=restarted
 
 
-- name: Upgrade default router
-  hosts: oo_first_master
+- name: Upgrade default router and registry
+  hosts: masters[0]
   vars:
+    - registry_image: "{{  openshift.master.registry_url | replace( '${component}', 'docker-registry' )  | replace ( '${version}', 'v' + _new_version.stdout  ) }}"
     - router_image: "{{ openshift.master.registry_url | replace( '${component}', 'haproxy-router' ) | replace ( '${version}', 'v' + _new_version.stdout ) }}"
     - oc_cmd: "{{ openshift.common.client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig"
   tasks:
@@ -195,12 +198,6 @@
         {{ oc_cmd }} patch dc/router -p
         '{"spec":{"template":{"spec":{"containers":[{"name":"router","image":"{{ router_image }}"}]}}}}'
 
-- name: Upgrade default
-  hosts: oo_first_master
-  vars:
-    - registry_image: "{{  openshift.master.registry_url | replace( '${component}', 'docker-registry' )  | replace ( '${version}', 'v' + _new_version.stdout  ) }}"
-    - oc_cmd: "{{ openshift.common.client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig"
-  tasks:
     - name: Check for default registry
       command: >
           {{ oc_cmd }} get -n default dc/docker-registry
@@ -214,7 +211,7 @@
         '{"spec":{"template":{"spec":{"containers":[{"name":"registry","image":"{{ registry_image }}"}]}}}}'
 
 - name: Update image streams and templates
-  hosts: oo_first_master
+  hosts: masters[0]
   vars:
     openshift_examples_import_command: "update"
     openshift_deployment_type: "{{ deployment_type }}"
