@@ -89,12 +89,12 @@ kubernetesMasterConfig:
   controllerArguments: {{ controller_args if controller_args is defined else 'null' }}
   masterCount: {{ openshift.master.master_count }}
   masterIP: {{ openshift.common.ip }}
-  podEvictionTimeout: 5m
+  podEvictionTimeout: ""
   proxyClientInfo:
     certFile: master.proxy-client.crt
     keyFile: master.proxy-client.key
   schedulerConfigFile: {{ openshift_master_scheduler_conf }}
-  servicesNodePortRange: 30000-32767
+  servicesNodePortRange: ""
   servicesSubnet: {{ openshift.master.portal_net }}
   staticNodeNames: {{ openshift_node_ips | default([], true) }}
 {% endif %}
@@ -126,7 +126,7 @@ projectConfig:
     mcsLabelsPerProject: {{ openshift.master.mcs_labels_per_project }}
     uidAllocatorRange: "{{ openshift.master.uid_allocator_range  }}"
 routingConfig:
-  subdomain:  "{{ openshift.master.default_subdomain | default("router.default.svc.cluster.local") }}"
+  subdomain:  "{{ openshift.master.default_subdomain | default("") }}"
 serviceAccountConfig:
   limitSecretReferences: false
   managedNames:
