@@ -18,7 +18,6 @@ def set_config(cfg):
 def generate_inventory(hosts):
     global CFG
 
-    installer_host = socket.gethostname()
     base_inventory_path = CFG.settings['ansible_inventory_path']
     base_inventory = open(base_inventory_path, 'w')
     base_inventory.write('\n[OSEv3:children]\nmasters\nnodes\n')
@@ -32,25 +31,18 @@ def generate_inventory(hosts):
         version=CFG.settings.get('variant_version', None))[1]
     base_inventory.write('deployment_type={}\n'.format(ver.ansible_key))
 
-    if 'OO_INSTALL_DEVEL_REGISTRY' in os.environ:
-        base_inventory.write('oreg_url=rcm-img-docker01.build.eng.bos.redhat.com:'
-            '5001/openshift3/ose-${component}:${version}\n')
-    if 'OO_INSTALL_PUDDLE_REPO_ENABLE' in os.environ:
-        base_inventory.write("openshift_additional_repos=[{'id': 'ose-devel', "
+    if 'OO_INSTALL_ADDITIONAL_REGISTRIES' in os.environ:
+        base_inventory.write('cli_docker_additional_registries={}\n'
+          .format(os.environ['OO_INSTALL_ADDITIONAL_REGISTRIES']))
+    if 'OO_INSTALL_INSECURE_REGISTRIES' in os.environ:
+        base_inventory.write('cli_docker_insecure_registries={}\n'
+          .format(os.environ['OO_INSTALL_INSECURE_REGISTRIES']))
+    if 'OO_INSTALL_PUDDLE_REPO' in os.environ:
+        # We have to double the '{' here for literals
+        base_inventory.write("openshift_additional_repos=[{{'id': 'ose-devel', "
             "'name': 'ose-devel', "
-            "'baseurl': 'http://buildvm-devops.usersys.redhat.com"
-            "/puddle/build/AtomicOpenShift/3.1/latest/RH7-RHAOS-3.1/$basearch/os', "
-            "'enabled': 1, 'gpgcheck': 0}]\n")
-    if 'OO_INSTALL_STAGE_REGISTRY' in os.environ:
-        base_inventory.write('oreg_url=registry.access.stage.redhat.com/openshift3/ose-${component}:${version}\n')
-
-    if any(host.hostname == installer_host or host.public_hostname == installer_host
-            for host in hosts):
-        no_pwd_sudo = subprocess.call(['sudo', '-v', '--non-interactive'])
-        if no_pwd_sudo == 1:
-            print 'The atomic-openshift-installer requires sudo access without a password.'
-            sys.exit(1)
-        base_inventory.write("ansible_connection=local\n")
+            "'baseurl': '{}', "
+            "'enabled': 1, 'gpgcheck': 0}}]\n".format(os.environ['OO_INSTALL_PUDDLE_REPO']))
 
     base_inventory.write('\n[masters]\n')
     masters = (host for host in hosts if host.master)
@@ -72,6 +64,7 @@ def generate_inventory(hosts):
 
 def write_host(host, inventory, scheduleable=True):
     global CFG
+
     facts = ''
     if host.ip:
         facts += ' openshift_ip={}'.format(host.ip)
@@ -85,6 +78,16 @@ def write_host(host, inventory, scheduleable=True):
     # Technically only nodes will ever need this.
     if not scheduleable:
         facts += ' openshift_scheduleable=False'
+    installer_host = socket.gethostname()
+    if host.hostname == installer_host or host.public_hostname == installer_host:
+        facts += ' ansible_connection=local'
+        if os.geteuid() != 0:
+            no_pwd_sudo = subprocess.call(['sudo', '-v', '-n'])
+            if no_pwd_sudo == 1:
+                print 'The atomic-openshift-installer requires sudo access without a password.'
+                sys.exit(1)
+            facts += ' ansible_become=true'
+
     inventory.write('{} {}\n'.format(host, facts))
 
 
