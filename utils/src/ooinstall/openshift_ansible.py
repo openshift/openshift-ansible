@@ -46,7 +46,7 @@ def generate_inventory(hosts):
 
     if any(host.hostname == installer_host or host.public_hostname == installer_host
             for host in hosts):
-        no_pwd_sudo = subprocess.call(['sudo', '-v', '--non-interactive'])
+        no_pwd_sudo = subprocess.call(['sudo', '-v', '-n'])
         if no_pwd_sudo == 1:
             print 'The atomic-openshift-installer requires sudo access without a password.'
             sys.exit(1)
