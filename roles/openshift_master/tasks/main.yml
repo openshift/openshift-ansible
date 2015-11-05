@@ -140,22 +140,27 @@
     src: atomic-openshift-master-api.service.j2
     dest: /usr/lib/systemd/system/{{ openshift.common.service_type }}-master-api.service
     force: no
+  when: openshift_master_ha | bool and openshift_master_cluster_method == "native"
 - name: Create the controllers service file
   template:
     src: atomic-openshift-master-controllers.service.j2
     dest: /usr/lib/systemd/system/{{ openshift.common.service_type }}-master-controllers.service
     force: no
+  when: openshift_master_ha | bool and openshift_master_cluster_method == "native"
 - name: Create the api env file
   template:
     src: atomic-openshift-master-api.j2
     dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-api
     force: no
+  when: openshift_master_ha | bool and openshift_master_cluster_method == "native"
 - name: Create the controllers env file
   template:
     src: atomic-openshift-master-controllers.j2
     dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-controllers
     force: no
+  when: openshift_master_ha | bool and openshift_master_cluster_method == "native"
 - command: systemctl daemon-reload
+  when: openshift_master_ha | bool and openshift_master_cluster_method == "native"
 # end workaround for missing systemd unit files
 
 - name: Create session secrets file
