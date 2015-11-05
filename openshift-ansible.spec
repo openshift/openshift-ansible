@@ -104,6 +104,7 @@ Scripts to make it nicer when working with hosts that are defined only by metada
 
 %files bin
 %{_bindir}/*
+%exclude %{_bindir}/atomic-openshift-installer
 %{python_sitelib}/openshift_ansible/
 /etc/bash_completion.d/*
 %config(noreplace) /etc/openshift_ansible/
