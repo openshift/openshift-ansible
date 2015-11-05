@@ -3,7 +3,7 @@
   hosts: OSEv3
   roles:
   - openshift_facts
-  post_tasks: # technically tasks are run after roles, but post_tasks is a bit more explicit.
+  post_tasks:
   - openshift_facts:
       role: common
       local_facts:
@@ -149,6 +149,13 @@
         --exclude-users=system:anonymous
         --additive-only=true --confirm
       when: ( _new_version.stdout | version_compare('1.0.6', '>') and _new_version.stdout | version_compare('3.0','<') ) or _new_version.stdout | version_compare('3.0.2','>')
+
+- name: Restart masters post reconcile
+  hosts: masters
+  tasks:
+    - name: Restart master services
+      service: name="{{ openshift.common.service_type}}-master" state=restarted
+
 
 - name: Upgrade default router
   hosts: oo_first_master
