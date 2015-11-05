@@ -92,12 +92,15 @@ def main():
     backup = module.params['backup']
     config_base = module.params['config_base']
 
-    changed = False
-    if role == 'master':
-        changed = upgrade_master(module, config_base, from_version,
-            to_version, backup)
+    try:
+        changed = False
+        if role == 'master':
+            changed = upgrade_master(module, config_base, from_version,
+                to_version, backup)
 
-    return module.exit_json(changed=changed)
+        return module.exit_json(changed=changed)
+    except Exception, e:
+        return module.fail_json(msg=str(e))
 
 # ignore pylint errors related to the module_utils import
 # pylint: disable=redefined-builtin, unused-wildcard-import, wildcard-import
