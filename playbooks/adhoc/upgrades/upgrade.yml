@@ -52,26 +52,26 @@
   - name: Display location of etcd backup
     debug: msg="Etcd backup created in {{ openshift.common.data_dir }}/etcd-backup-{{ timestamp }}"
 
-- name: Upgrade base package on masters
-  hosts: masters
-  roles:
-  - openshift_facts
-  vars:
-    openshift_version: "{{ openshift_pkg_version | default('') }}"
-  tasks:
-    - name: Upgrade base package
-      yum: pkg={{ openshift.common.service_type }}{{ openshift_version  }} state=latest
-
-# TODO: ideally we would check the new version, without installing it. (some
-# kind of yum repoquery? would need to handle openshift -> atomic-openshift
-# package rename)
 - name: Perform upgrade version checking
   hosts: masters[0]
   tasks:
-    - name: Determine new version
+    - name: Determine available version
+      shell: >
+        yum list available {{ openshift.common.service_type }} | tail -n 1 | cut -f 2 -d " " | cut -f 1 -d "-"
+      register: _new_version
+    - debug: var=_new_version
+    # The above check will return nothing if the package is already installed,
+    # and we may be re-running upgrade due to a failure.
+    - name: Determine installed version
       command: >
         rpm -q --queryformat '%{version}' {{ openshift.common.service_type }}
       register: _new_version
+      when: _new_version.stdout == ""
+    # Fail if we still don't know:
+    - debug: var=_new_version
+    - name: Verify upgrade version
+      fail: Unable to determine upgrade version for {{ openshift.common.service_type }}
+      when: _new_version.stdout == ""
 
 - name: Ensure AOS 3.0.2 or Origin 1.0.6
   hosts: masters[0]
