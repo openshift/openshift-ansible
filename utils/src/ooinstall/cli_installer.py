@@ -331,7 +331,22 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force):
     # Check if master or nodes already have something installed
     installed_hosts = get_installed_hosts(oo_cfg.hosts, callback_facts)
     if len(installed_hosts) > 0:
-        # present a message listing already installed hosts
+        click.echo('Installed environment detected.')
+        # This check has to happen before we start removing hosts later in this method
+        if not force:
+            if not unattended:
+                click.echo('By default the installer only adds new nodes to an installed environment.')
+                response = click.prompt('Do you want to (1) only add additional nodes or ' \
+                                        '(2) perform a clean install?', type=int)
+                # TODO: this should be reworked with error handling.
+                # Click can certainly do this for us.
+                # This should be refactored as soon as we add a 3rd option.
+                if response == 1:
+                    force = False
+                if response == 2:
+                    force = True
+
+        # present a message listing already installed hosts and remove hosts if needed
         for host in installed_hosts:
             if host.master:
                 click.echo("{} is already an OpenShift Master".format(host))
@@ -343,33 +358,37 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force):
                 # anything.
                 if not force:
                     hosts_to_run_on.remove(host)
-        for new_host in set(hosts_to_run_on) - set(installed_hosts):
-            click.echo("{} is currently uninstalled".format(new_host))
-        # for unattended either continue if they force install or exit if they didn't
-        if unattended:
-            if not force:
-                click.echo('Installed environment detected and no additional nodes specified: ' \
-                           'aborting. If you want a fresh install, use --force')
-                sys.exit(1)
-        # for attended ask the user what to do
+
+        # Handle the cases where we know about uninstalled systems
+        new_hosts = set(hosts_to_run_on) - set(installed_hosts)
+        if len(new_hosts) > 0:
+            for new_host in new_hosts:
+                click.echo("{} is currently uninstalled".format(new_host))
+
+            # Fall through
+            click.echo('Adding additional nodes...')
         else:
-            click.echo('Installed environment detected and no additional nodes specified. ')
-            response = click.prompt('Do you want to (1) add more nodes or ' \
-                                    '(2) perform a clean install?', type=int)
-            if response == 1: # add more nodes
-                new_nodes = collect_new_nodes()
-
-                hosts_to_run_on.extend(new_nodes)
-                oo_cfg.hosts.extend(new_nodes)
-
-                openshift_ansible.set_config(oo_cfg)
-                callback_facts, error = openshift_ansible.default_facts(oo_cfg.hosts)
-                if error:
-                    click.echo("There was a problem fetching the required information. " \
-                               "See {} for details.".format(oo_cfg.settings['ansible_log_path']))
+            if unattended:
+                if not force:
+                    click.echo('Installed environment detected and no additional nodes specified: ' \
+                               'aborting. If you want a fresh install, use --force')
                     sys.exit(1)
             else:
-                pass # proceeding as normal should do a clean install
+                if not force:
+                    new_nodes = collect_new_nodes()
+
+                    hosts_to_run_on.extend(new_nodes)
+                    oo_cfg.hosts.extend(new_nodes)
+
+                    openshift_ansible.set_config(oo_cfg)
+                    click.echo('Gathering information from hosts...')
+                    callback_facts, error = openshift_ansible.default_facts(oo_cfg.hosts)
+                    if error:
+                        click.echo("There was a problem fetching the required information. " \
+                                   "See {} for details.".format(oo_cfg.settings['ansible_log_path']))
+                        sys.exit(1)
+                else:
+                    pass # proceeding as normal should do a clean install
 
     return hosts_to_run_on, callback_facts
 
