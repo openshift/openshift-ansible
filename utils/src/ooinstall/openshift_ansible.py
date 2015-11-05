@@ -88,16 +88,17 @@ def write_host(host, inventory, scheduleable=True):
     inventory.write('{} {}\n'.format(host, facts))
 
 
-def load_system_facts(inventory_file, os_facts_path, env_vars):
+def load_system_facts(inventory_file, os_facts_path, env_vars, verbose=False):
     """
     Retrieves system facts from the remote systems.
     """
     FNULL = open(os.devnull, 'w')
-    status = subprocess.call(['ansible-playbook',
-                     '--inventory-file={}'.format(inventory_file),
-                     os_facts_path],
-                     env=env_vars,
-                     stdout=FNULL)
+    args = ['ansible-playbook', '-v'] if verbose \
+        else ['ansible-playbook']
+    args.extend([
+        '--inventory-file={}'.format(inventory_file),
+        os_facts_path])
+    status = subprocess.call(args, env=env_vars, stdout=FNULL)
     if not status == 0:
         return [], 1
     callback_facts_file = open(CFG.settings['ansible_callback_facts_yaml'], 'r')
@@ -106,7 +107,7 @@ def load_system_facts(inventory_file, os_facts_path, env_vars):
     return callback_facts, 0
 
 
-def default_facts(hosts):
+def default_facts(hosts, verbose=False):
     global CFG
     inventory_file = generate_inventory(hosts)
     os_facts_path = '{}/playbooks/byo/openshift_facts.yml'.format(CFG.ansible_playbook_directory)
@@ -118,10 +119,10 @@ def default_facts(hosts):
         facts_env["ANSIBLE_LOG_PATH"] = CFG.settings['ansible_log_path']
     if 'ansible_config' in CFG.settings:
         facts_env['ANSIBLE_CONFIG'] = CFG.settings['ansible_config']
-    return load_system_facts(inventory_file, os_facts_path, facts_env)
+    return load_system_facts(inventory_file, os_facts_path, facts_env, verbose)
 
 
-def run_main_playbook(hosts, hosts_to_run_on):
+def run_main_playbook(hosts, hosts_to_run_on, verbose=False):
     global CFG
     inventory_file = generate_inventory(hosts)
     if len(hosts_to_run_on) != len(hosts):
@@ -135,17 +136,19 @@ def run_main_playbook(hosts, hosts_to_run_on):
         facts_env['ANSIBLE_LOG_PATH'] = CFG.settings['ansible_log_path']
     if 'ansible_config' in CFG.settings:
         facts_env['ANSIBLE_CONFIG'] = CFG.settings['ansible_config']
-    return run_ansible(main_playbook_path, inventory_file, facts_env)
+    return run_ansible(main_playbook_path, inventory_file, facts_env, verbose)
 
 
-def run_ansible(playbook, inventory, env_vars):
-    return subprocess.call(['ansible-playbook',
-                             '--inventory-file={}'.format(inventory),
-                             playbook],
-                             env=env_vars)
+def run_ansible(playbook, inventory, env_vars, verbose=False):
+    args = ['ansible-playbook', '-v'] if verbose \
+        else ['ansible-playbook']
+    args.extend([
+        '--inventory-file={}'.format(inventory),
+        playbook])
+    return subprocess.call(args, env=env_vars)
 
 
-def run_uninstall_playbook():
+def run_uninstall_playbook(verbose=False):
     playbook = os.path.join(CFG.settings['ansible_playbook_directory'],
         'playbooks/adhoc/uninstall.yml')
     inventory_file = generate_inventory(CFG.hosts)
@@ -154,10 +157,10 @@ def run_uninstall_playbook():
         facts_env['ANSIBLE_LOG_PATH'] = CFG.settings['ansible_log_path']
     if 'ansible_config' in CFG.settings:
         facts_env['ANSIBLE_CONFIG'] = CFG.settings['ansible_config']
-    return run_ansible(playbook, inventory_file, facts_env)
+    return run_ansible(playbook, inventory_file, facts_env, verbose)
 
 
-def run_upgrade_playbook():
+def run_upgrade_playbook(verbose=False):
     playbook = os.path.join(CFG.settings['ansible_playbook_directory'],
         'playbooks/adhoc/upgrades/upgrade.yml')
     # TODO: Upgrade inventory for upgrade?
@@ -167,5 +170,5 @@ def run_upgrade_playbook():
         facts_env['ANSIBLE_LOG_PATH'] = CFG.settings['ansible_log_path']
     if 'ansible_config' in CFG.settings:
         facts_env['ANSIBLE_CONFIG'] = CFG.settings['ansible_config']
-    return run_ansible(playbook, inventory_file, facts_env)
+    return run_ansible(playbook, inventory_file, facts_env, verbose)
 
