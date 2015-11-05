@@ -22,6 +22,7 @@ networkConfig:
 {% if openshift.common.use_openshift_sdn %}
    networkPluginName: {{ openshift.common.sdn_network_plugin_name }}
 {% endif %}
+nodeIP: {{ openshift.common.ip }}
 nodeName: {{ openshift.common.hostname | lower }}
 podManifestConfig:
 servingInfo:
