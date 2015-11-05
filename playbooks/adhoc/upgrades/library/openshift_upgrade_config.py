@@ -5,10 +5,7 @@
 """Ansible module for modifying OpenShift configs during an upgrade"""
 
 import os
-import shutil
 import yaml
-
-from datetime import datetime
 
 DOCUMENTATION = '''
 ---
@@ -21,7 +18,7 @@ EXAMPLES = '''
 '''
 
 
-def upgrade_master_3_0_to_3_1(config_base, backup):
+def upgrade_master_3_0_to_3_1(module, config_base, backup):
     """Main upgrade method for 3.0 to 3.1."""
     changed = False
 
@@ -53,11 +50,9 @@ def upgrade_master_3_0_to_3_1(config_base, backup):
 
     if changed:
         if backup:
-            timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-            basedir = os.path.split(master_config)[0]
-            backup_file = os.path.join(basedir, 'master-config.yaml.bak-%s'
-                                       % timestamp)
-            shutil.copyfile(master_config, backup_file)
+            # TODO: Check success:
+            module.backup_local(master_config)
+
         # Write the modified config:
         out_file = open(master_config, 'w')
         out_file.write(yaml.safe_dump(config, default_flow_style=False))
@@ -66,11 +61,11 @@ def upgrade_master_3_0_to_3_1(config_base, backup):
     return changed
 
 
-def upgrade_master(config_base, from_version, to_version, backup):
+def upgrade_master(module, config_base, from_version, to_version, backup):
     """Upgrade entry point."""
     if from_version == '3.0':
         if to_version == '3.1':
-            return upgrade_master_3_0_to_3_1(config_base, backup)
+            return upgrade_master_3_0_to_3_1(module, config_base, backup)
 
 
 def main():
@@ -99,7 +94,8 @@ def main():
 
     changed = False
     if role == 'master':
-        changed = upgrade_master(config_base, from_version, to_version, backup)
+        changed = upgrade_master(module, config_base, from_version,
+            to_version, backup)
 
     return module.exit_json(changed=changed)
 

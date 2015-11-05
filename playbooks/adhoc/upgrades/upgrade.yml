@@ -16,7 +16,6 @@
   # what the user is requesting.
     - fail: msg="Deployment type enterprise not supported for upgrade"
       when: deployment_type == "enterprise"
-    - fail: msg="done for now"
 
 - name: Backup etcd
   hosts: masters
