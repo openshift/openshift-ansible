@@ -220,8 +220,8 @@
 - name: Update cluster policy and policy bindings
   hosts: masters[0]
   vars:
-    origin_reconcile_bindings: "{{ deployment_type == 'origin' and gg_new_version | version_compare('1.0.6', '>') }}"
-    ent_reconcile_bindings: "{{ deployment_type in ['openshift-enterprise', 'atomic-enterprise'] and gg_new_version | version_compare('3.0.2','>') }}"
+    origin_reconcile_bindings: "{{ deployment_type == 'origin' and g_new_version | version_compare('1.0.6', '>') }}"
+    ent_reconcile_bindings: "{{ deployment_type in ['openshift-enterprise', 'atomic-enterprise'] and g_new_version | version_compare('3.0.2','>') }}"
   tasks:
     - name: oadm policy reconcile-cluster-roles --confirm
       command: >
