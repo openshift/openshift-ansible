@@ -20,21 +20,14 @@ requirements: [ ]
 EXAMPLES = '''
 '''
 
-def get_cfg_dir():
-    """Return the correct config directory to use."""
-    cfg_path = '/etc/origin/'
-    if not os.path.exists(cfg_path):
-        cfg_path = '/etc/openshift/'
-    return cfg_path
 
-
-def upgrade_master_3_0_to_3_1(backup):
+def upgrade_master_3_0_to_3_1(config_base, backup):
     """Main upgrade method for 3.0 to 3.1."""
     changed = False
 
     # Facts do not get transferred to the hosts where custom modules run,
     # need to make some assumptions here.
-    master_config = os.path.join(get_cfg_dir(), 'master/master-config.yaml')
+    master_config = os.path.join(config_base, 'master/master-config.yaml')
 
     master_cfg_file = open(master_config, 'r')
     config = yaml.safe_load(master_cfg_file.read())
@@ -73,11 +66,11 @@ def upgrade_master_3_0_to_3_1(backup):
     return changed
 
 
-def upgrade_master(from_version, to_version, backup):
+def upgrade_master(config_base, from_version, to_version, backup):
     """Upgrade entry point."""
     if from_version == '3.0':
         if to_version == '3.1':
-            return upgrade_master_3_0_to_3_1(backup)
+            return upgrade_master_3_0_to_3_1(config_base, backup)
 
 
 def main():
@@ -89,6 +82,7 @@ def main():
 
     module = AnsibleModule(
         argument_spec=dict(
+            config_base=dict(required=True),
             from_version=dict(required=True, choices=['3.0']),
             to_version=dict(required=True, choices=['3.1']),
             role=dict(required=True, choices=['master']),
@@ -101,10 +95,11 @@ def main():
     to_version = module.params['to_version']
     role = module.params['role']
     backup = module.params['backup']
+    config_base = module.params['config_base']
 
     changed = False
     if role == 'master':
-        changed = upgrade_master(from_version, to_version, backup)
+        changed = upgrade_master(config_base, from_version, to_version, backup)
 
     return module.exit_json(changed=changed)
 
