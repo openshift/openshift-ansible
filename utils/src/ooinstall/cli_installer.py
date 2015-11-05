@@ -343,6 +343,8 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force):
                 # anything.
                 if not force:
                     hosts_to_run_on.remove(host)
+        for new_host in set(hosts_to_run_on) - set(installed_hosts):
+            click.echo("{} is currently uninstalled".format(new_host))
         # for unattended either continue if they force install or exit if they didn't
         if unattended:
             if not force:
