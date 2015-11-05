@@ -323,7 +323,7 @@ def get_installed_hosts(hosts, callback_facts):
             installed_hosts.append(host)
     return installed_hosts
 
-def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force):
+def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force, verbose):
 
     # Copy the list of existing hosts so we can remove any already installed nodes.
     hosts_to_run_on = list(oo_cfg.hosts)
@@ -358,7 +358,7 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force):
                 oo_cfg.hosts.extend(new_nodes)
 
                 openshift_ansible.set_config(oo_cfg)
-                callback_facts, error = openshift_ansible.default_facts(oo_cfg.hosts)
+                callback_facts, error = openshift_ansible.default_facts(oo_cfg.hosts, verbose)
                 if error:
                     click.echo("There was a problem fetching the required information. " \
                                "See {} for details.".format(oo_cfg.settings['ansible_log_path']))
@@ -399,9 +399,11 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force):
         writable=True,
         readable=True),
     default="/tmp/ansible.log")
+@click.option('-v', '--verbose',
+    is_flag=True, default=False)
 #pylint: disable=too-many-arguments
 # Main CLI entrypoint, not much we can do about too many arguments.
-def cli(ctx, unattended, configuration, ansible_playbook_directory, ansible_config, ansible_log_path):
+def cli(ctx, unattended, configuration, ansible_playbook_directory, ansible_config, ansible_log_path, verbose):
     """
     The main click CLI module. Responsible for handling most common CLI options,
     assigning any defaults and adding to the context for the sub-commands.
@@ -411,6 +413,7 @@ def cli(ctx, unattended, configuration, ansible_playbook_directory, ansible_conf
     ctx.obj['configuration'] = configuration
     ctx.obj['ansible_config'] = ansible_config
     ctx.obj['ansible_log_path'] = ansible_log_path
+    ctx.obj['verbose'] = verbose
 
     oo_cfg = OOConfig(ctx.obj['configuration'])
 
@@ -441,6 +444,7 @@ def cli(ctx, unattended, configuration, ansible_playbook_directory, ansible_conf
 @click.pass_context
 def uninstall(ctx):
     oo_cfg = ctx.obj['oo_cfg']
+    verbose = ctx.obj['verbose']
 
     if len(oo_cfg.hosts) == 0:
         click.echo("No hosts defined in: %s" % oo_cfg['configuration'])
@@ -456,13 +460,14 @@ def uninstall(ctx):
             click.echo("Uninstall cancelled.")
             sys.exit(0)
 
-    openshift_ansible.run_uninstall_playbook()
+    openshift_ansible.run_uninstall_playbook(verbose)
 
 
 @click.command()
 @click.pass_context
 def upgrade(ctx):
     oo_cfg = ctx.obj['oo_cfg']
+    verbose = ctx.obj['verbose']
 
     if len(oo_cfg.hosts) == 0:
         click.echo("No hosts defined in: %s" % oo_cfg['configuration'])
@@ -489,7 +494,7 @@ def upgrade(ctx):
             click.echo("Upgrade cancelled.")
             sys.exit(0)
 
-    retcode = openshift_ansible.run_upgrade_playbook()
+    retcode = openshift_ansible.run_upgrade_playbook(verbose)
     if retcode > 0:
         click.echo("Errors encountered during upgrade, please check %s." %
             oo_cfg.settings['ansible_log_path'])
@@ -502,6 +507,7 @@ def upgrade(ctx):
 @click.pass_context
 def install(ctx, force):
     oo_cfg = ctx.obj['oo_cfg']
+    verbose = ctx.obj['verbose']
 
     if ctx.obj['unattended']:
         error_if_missing_info(oo_cfg)
@@ -509,13 +515,15 @@ def install(ctx, force):
         oo_cfg = get_missing_info_from_user(oo_cfg)
 
     click.echo('Gathering information from hosts...')
-    callback_facts, error = openshift_ansible.default_facts(oo_cfg.hosts)
+    callback_facts, error = openshift_ansible.default_facts(oo_cfg.hosts,
+        verbose)
     if error:
         click.echo("There was a problem fetching the required information. " \
                    "Please see {} for details.".format(oo_cfg.settings['ansible_log_path']))
         sys.exit(1)
 
-    hosts_to_run_on, callback_facts = get_hosts_to_run_on(oo_cfg, callback_facts, ctx.obj['unattended'], force)
+    hosts_to_run_on, callback_facts = get_hosts_to_run_on(
+        oo_cfg, callback_facts, ctx.obj['unattended'], force, verbose)
 
     click.echo('Writing config to: %s' % oo_cfg.config_path)
 
@@ -537,7 +545,7 @@ If changes are needed to the values recorded by the installer please update {}.
         confirm_continue(message)
 
     error = openshift_ansible.run_main_playbook(oo_cfg.hosts,
-                                                   hosts_to_run_on)
+                                                   hosts_to_run_on, verbose)
     if error:
         # The bootstrap script will print out the log location.
         message = """
