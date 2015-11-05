@@ -206,6 +206,9 @@
 
 - name: Update cluster policy and policy bindings
   hosts: masters[0]
+  vars:
+    origin_reconcile_bindings: "{{ deployment_type == 'origin' and g_new_version.stdout | version_compare('1.0.6', '>') }}"
+    ent_reconcile_bindings: "{{ deployment_type in ['openshift-enterprise', 'atomic-enterprise'] and g_new_version.stdout | version_compare('3.0.2','>') }}"
   tasks:
     - name: oadm policy reconcile-cluster-roles --confirm
       command: >
@@ -220,7 +223,7 @@
         --exclude-groups=system:unauthenticated
         --exclude-users=system:anonymous
         --additive-only=true --confirm
-      when: ( _new_version.stdout | version_compare('1.0.6', '>') and _new_version.stdout | version_compare('3.0','<') ) or _new_version.stdout | version_compare('3.0.2','>')
+      when: origin_reconcile_bindings | bool or ent_reconcile_bindings | bool
 
 - name: Restart masters post reconcile
   hosts: masters
