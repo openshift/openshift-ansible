@@ -88,7 +88,7 @@ def write_host(host, inventory, scheduleable=True):
                 sys.exit(1)
             facts += ' ansible_become=true'
 
-    inventory.write('{} {}\n'.format(host, facts))
+    inventory.write('{} {}\n'.format(host.connect_to, facts))
 
 
 def load_system_facts(inventory_file, os_facts_path, env_vars):

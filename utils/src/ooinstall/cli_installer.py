@@ -101,18 +101,13 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
 
     hosts = []
     more_hosts = True
-    ip_regex = re.compile(r'^\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}$')
-
     while more_hosts:
         host_props = {}
         hostname_or_ip = click.prompt('Enter hostname or IP address:',
                                       default='',
                                       value_proc=validate_prompt_hostname)
 
-        if ip_regex.match(hostname_or_ip):
-            host_props['ip'] = hostname_or_ip
-        else:
-            host_props['hostname'] = hostname_or_ip
+        host_props['connect_to'] = hostname_or_ip
 
         host_props['master'] = click.confirm('Will this host be an OpenShift Master?')
         host_props['node'] = True
@@ -150,7 +145,7 @@ Plese confirm that they are correct before moving forward.
     notes = """
 Format:
 
-IP,public IP,hostname,public hostname
+connect_to,IP,public IP,hostname,public hostname
 
 Notes:
  * The installation host is the hostname from the installer's perspective.
@@ -168,16 +163,15 @@ Notes:
 
     default_facts_lines = []
     default_facts = {}
-    validated_facts = {}
     for h in hosts:
-        default_facts[h] = {}
-        h.ip = callback_facts[str(h)]["common"]["ip"]
-        h.public_ip = callback_facts[str(h)]["common"]["public_ip"]
-        h.hostname = callback_facts[str(h)]["common"]["hostname"]
-        h.public_hostname = callback_facts[str(h)]["common"]["public_hostname"]
+        default_facts[h.connect_to] = {}
+        h.ip = callback_facts[h.connect_to]["common"]["ip"]
+        h.public_ip = callback_facts[h.connect_to]["common"]["public_ip"]
+        h.hostname = callback_facts[h.connect_to]["common"]["hostname"]
+        h.public_hostname = callback_facts[h.connect_to]["common"]["public_hostname"]
 
-        validated_facts[h] = {}
-        default_facts_lines.append(",".join([h.ip,
+        default_facts_lines.append(",".join([h.connect_to,
+                                             h.ip,
                                              h.public_ip,
                                              h.hostname,
                                              h.public_hostname]))
@@ -316,10 +310,10 @@ Add new nodes here
 def get_installed_hosts(hosts, callback_facts):
     installed_hosts = []
     for host in hosts:
-        if(host.name in callback_facts.keys()
-           and 'common' in callback_facts[host.name].keys()
-           and callback_facts[host.name]['common'].get('version', '')
-           and callback_facts[host.name]['common'].get('version', '') != 'None'):
+        if(host.connect_to in callback_facts.keys()
+           and 'common' in callback_facts[host.connect_to].keys()
+           and callback_facts[host.connect_to]['common'].get('version', '')
+           and callback_facts[host.connect_to]['common'].get('version', '') != 'None'):
             installed_hosts.append(host)
     return installed_hosts
 
@@ -475,7 +469,7 @@ def uninstall(ctx):
     if not ctx.obj['unattended']:
         # Prompt interactively to confirm:
         for host in oo_cfg.hosts:
-            click.echo("  * %s" % host.name)
+            click.echo("  * %s" % host.connect_to)
         proceed = click.confirm("\nDo you wish to proceed?")
         if not proceed:
             click.echo("Uninstall cancelled.")
@@ -505,7 +499,7 @@ def upgrade(ctx):
         old_variant, old_version, oo_cfg.settings['variant'],
         oo_cfg.settings['variant_version']))
     for host in oo_cfg.hosts:
-        click.echo("  * %s" % host.name)
+        click.echo("  * %s" % host.connect_to)
 
     if not ctx.obj['unattended']:
         # Prompt interactively to confirm:
