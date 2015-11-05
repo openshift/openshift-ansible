@@ -20,7 +20,7 @@ EXAMPLES = '''
 
 def upgrade_master_3_0_to_3_1(module, config_base, backup):
     """Main upgrade method for 3.0 to 3.1."""
-    changed = False
+    changes = []
 
     # Facts do not get transferred to the hosts where custom modules run,
     # need to make some assumptions here.
@@ -35,6 +35,7 @@ def upgrade_master_3_0_to_3_1(module, config_base, backup):
         'v1beta3' in config['apiLevels']:
         config['apiLevels'].remove('v1beta3')
         changed = True
+        changes.append("master-config.yaml: removed v1beta3 from apiLevels")
     if 'apiLevels' in config['kubernetesMasterConfig'] and \
         'v1beta3' in config['kubernetesMasterConfig']['apiLevels']:
         config['kubernetesMasterConfig']['apiLevels'].remove('v1beta3')
@@ -47,8 +48,9 @@ def upgrade_master_3_0_to_3_1(module, config_base, backup):
 #            'certFile': 'master.proxy-client.crt',
 #            'keyFile': 'master.proxy-client.key'
 #       }
+#        changes.append("master-config.yaml: added proxyClientInfo")
 
-    if changed:
+    if len(changes) > 0:
         if backup:
             # TODO: Check success:
             module.backup_local(master_config)
@@ -58,7 +60,7 @@ def upgrade_master_3_0_to_3_1(module, config_base, backup):
         out_file.write(yaml.safe_dump(config, default_flow_style=False))
         out_file.close()
 
-    return changed
+    return changes
 
 
 def upgrade_master(module, config_base, from_version, to_version, backup):
@@ -93,12 +95,13 @@ def main():
     config_base = module.params['config_base']
 
     try:
-        changed = False
+        changes = []
         if role == 'master':
-            changed = upgrade_master(module, config_base, from_version,
+            changes = upgrade_master(module, config_base, from_version,
                 to_version, backup)
 
-        return module.exit_json(changed=changed)
+        changed = len(changes) > 0
+        return module.exit_json(changed=changed, changes=changes)
     except Exception, e:
         return module.fail_json(msg=str(e))
 
