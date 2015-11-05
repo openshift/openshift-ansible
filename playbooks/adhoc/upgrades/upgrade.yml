@@ -1,4 +1,9 @@
 ---
+- name: Load master facts
+  hosts: masters
+  roles:
+  - openshift_facts
+
 - name: Verify upgrade can proceed
   hosts: masters[0]
   gather_facts: no
@@ -8,18 +13,30 @@
     - fail: msg="Deployment type enterprise not supported for upgrade"
       when: deployment_type == "enterprise"
 
-# TODO: etcd is only guaranteed to be run on the master if embedded etcd is
-# used, we should have a task to create a new group consisting of the single
-# master running embedded etcd or an external etcd cluster specified by the
-# etcd group in the inventory (which could also be the masters)
+- name: Evaluate etcd_hosts
+  hosts: localhost
+  tasks:
+  - name: Evaluate etcd hosts
+    add_host:
+      name: "{{ groups.masters.0 }}"
+      groups: etcd_hosts
+    when: hostvars[groups.masters.0].openshift.master.embedded_etcd | bool
+  - name: Evaluate etcd hosts
+    add_host:
+      name: "{{ item }}"
+      groups: etcd_hosts
+    with_items: groups.etcd
+    when: not hostvars[groups.masters.0].openshift.master.embedded_etcd | bool
+
 - name: Backup etcd
-  hosts: masters
+  hosts: etcd_hosts
   vars:
     embedded_etcd: "{{ openshift.master.embedded_etcd }}"
     timestamp: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
   roles:
   - openshift_facts
   tasks:
+
   - stat: path=/var/lib/openshift
     register: var_lib_openshift
 
@@ -142,6 +159,7 @@
         from_version: '3.0'
         to_version: '3.1'
         role: master
+        config_base: "{{ hostvars[inventory_hostname].openshift.common.config_base }}"
 
     - set_fact:
         master_certs_missing: True
@@ -235,8 +253,8 @@
 - name: Update cluster policy and policy bindings
   hosts: masters[0]
   vars:
-    origin_reconcile_bindings: "{{ deployment_type == 'origin' and g_new_version.stdout | version_compare('1.0.6', '>') }}"
-    ent_reconcile_bindings: "{{ deployment_type in ['openshift-enterprise', 'atomic-enterprise'] and g_new_version.stdout | version_compare('3.0.2','>') }}"
+    origin_reconcile_bindings: "{{ deployment_type == 'origin' and gg_new_version.stdout | version_compare('1.0.6', '>') }}"
+    ent_reconcile_bindings: "{{ deployment_type in ['openshift-enterprise', 'atomic-enterprise'] and gg_new_version.stdout | version_compare('3.0.2','>') }}"
   tasks:
     - name: oadm policy reconcile-cluster-roles --confirm
       command: >
@@ -264,8 +282,8 @@
 - name: Upgrade default router and registry
   hosts: masters[0]
   vars:
-    - registry_image: "{{  openshift.master.registry_url | replace( '${component}', 'docker-registry' )  | replace ( '${version}', 'v' + _new_version.stdout  ) }}"
-    - router_image: "{{ openshift.master.registry_url | replace( '${component}', 'haproxy-router' ) | replace ( '${version}', 'v' + _new_version.stdout ) }}"
+    - registry_image: "{{  openshift.master.registry_url | replace( '${component}', 'docker-registry' )  | replace ( '${version}', 'v' + g_new_version.stdout  ) }}"
+    - router_image: "{{ openshift.master.registry_url | replace( '${component}', 'haproxy-router' ) | replace ( '${version}', 'v' + g_new_version.stdout ) }}"
     - oc_cmd: "{{ openshift.common.client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig"
   tasks:
     - name: Check for default router
