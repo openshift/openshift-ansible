@@ -140,10 +140,11 @@
 
     - file: path={{ item }} state=absent
       with_items:
+        - "~{{ ansible_ssh_user }}/.kube"
         - /etc/ansible/facts.d/openshift.fact
         - /etc/atomic-enterprise
-        - /etc/etcd
         - /etc/corosync
+        - /etc/etcd
         - /etc/openshift
         - /etc/openshift-sdn
         - /etc/origin
@@ -156,10 +157,13 @@
         - /etc/sysconfig/origin-master
         - /etc/sysconfig/origin-node
         - /root/.kube
-        - "~{{ ansible_ssh_user }}/.kube"
+        - /run/openshift-sdn
         - /usr/share/openshift/examples
         - /var/lib/atomic-enterprise
         - /var/lib/etcd
         - /var/lib/openshift
         - /var/lib/origin
         - /var/lib/pacemaker
+
+    - name: restart docker
+      service: name=docker state=restarted
