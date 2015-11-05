@@ -155,6 +155,10 @@
 - name: Generate missing master certificates
   hosts: masters[0]
   vars:
+    master_hostnames: "{{ hostvars
+                          | oo_select_keys(groups.masters)
+                          | oo_collect('openshift.common.all_hostnames')
+                          | oo_flatten | unique }}"
     master_generated_certs_dir: "{{ openshift.common.config_base }}/generated-configs"
     masters_needing_certs: "{{ hostvars
                                | oo_select_keys(groups.masters)
