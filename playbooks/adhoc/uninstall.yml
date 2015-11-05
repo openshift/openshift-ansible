@@ -45,6 +45,7 @@
         - origin-master-api
         - origin-master-controllers
         - origin-node
+        - pcsd
 
     - yum: name={{ item }} state=absent
       when: not is_atomic | bool
@@ -59,6 +60,7 @@
         - atomic-openshift-node
         - atomic-openshift-sdn-ovs
         - etcd
+        - corosync
         - openshift
         - openshift-master
         - openshift-node
@@ -69,6 +71,8 @@
         - origin-master
         - origin-node
         - origin-sdn-ovs
+        - pacemaker
+        - pcs
         - tuned-profiles-atomic-enterprise-node
         - tuned-profiles-atomic-openshift-node
         - tuned-profiles-openshift-node
@@ -139,6 +143,7 @@
         - /etc/ansible/facts.d/openshift.fact
         - /etc/atomic-enterprise
         - /etc/etcd
+        - /etc/corosync
         - /etc/openshift
         - /etc/openshift-sdn
         - /etc/origin
@@ -157,3 +162,4 @@
         - /var/lib/etcd
         - /var/lib/openshift
         - /var/lib/origin
+        - /var/lib/pacemaker
