@@ -597,11 +597,12 @@ def set_deployment_facts_if_unset(facts):
     return facts
 
 
-def set_sdn_facts_if_unset(facts):
+def set_sdn_facts_if_unset(facts, system_facts):
     """ Set sdn facts if not already present in facts dict
 
         Args:
             facts (dict): existing facts
+            system_facts (dict): ansible_facts
         Returns:
             dict: the facts dict updated with the generated sdn facts if they
                   were not already present
@@ -620,9 +621,18 @@ def set_sdn_facts_if_unset(facts):
         if 'sdn_host_subnet_length' not in facts['master']:
             facts['master']['sdn_host_subnet_length'] = '8'
 
-    if 'node' in facts:
-        if 'sdn_mtu' not in facts['node']:
-            facts['node']['sdn_mtu'] = '1450'
+    if 'node' in facts and 'sdn_mtu' not in facts['node']:
+        node_ip = facts['common']['ip']
+
+        # default MTU if interface MTU cannot be detected
+        facts['node']['sdn_mtu'] = '1450'
+
+        for val in system_facts.itervalues():
+            if isinstance(val, dict) and 'mtu' in val:
+                mtu = val['mtu']
+
+                if 'ipv4' in val and val['ipv4'].get('address') == node_ip:
+                    facts['node']['sdn_mtu'] = str(mtu - 50)
 
     return facts
 
@@ -893,7 +903,7 @@ class OpenShiftFacts(object):
         facts = set_master_selectors(facts)
         facts = set_metrics_facts_if_unset(facts)
         facts = set_identity_providers_if_unset(facts)
-        facts = set_sdn_facts_if_unset(facts)
+        facts = set_sdn_facts_if_unset(facts, self.system_facts)
         facts = set_deployment_facts_if_unset(facts)
         facts = set_aggregate_facts(facts)
         return dict(openshift=facts)
