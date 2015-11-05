@@ -5,6 +5,7 @@
 masters
 nodes
 etcd
+lb
 
 # Set variables common for all OSEv3 hosts
 [OSEv3:vars]
@@ -57,21 +58,29 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Set cockpit plugins
 #osm_cockpit_plugins=['cockpit-kubernetes']
 
-# master cluster ha variables using pacemaker or RHEL HA
+# Native high availbility cluster method with optional load balancer.
+# If no lb group is defined installer assumes that a load balancer has
+# been preconfigured. For installation the value of
+# openshift_master_cluster_hostname must resolve to the load balancer
+# or to one or all of the masters defined in the inventory if no load
+# balancer is present.
+#openshift_master_cluster_method=native
+#openshift_master_cluster_hostname=openshift-ansible.test.example.com
+#openshift_master_cluster_public_hostname=openshift-ansible.test.example.com
+
+# Pacemaker high availability cluster method.
+# Pacemaker HA environment must be able to self provision the
+# configured VIP. For installation openshift_master_cluster_hostname
+# must resolve to the configured VIP.
+#openshift_master_cluster_method=pacemaker
 #openshift_master_cluster_password=openshift_cluster
 #openshift_master_cluster_vip=192.168.133.25
 #openshift_master_cluster_public_vip=192.168.133.25
 #openshift_master_cluster_hostname=openshift-ansible.test.example.com
 #openshift_master_cluster_public_hostname=openshift-ansible.test.example.com
 
-# master cluster ha variables when using a different HA solution
-# For installation the value of openshift_master_cluster_hostname must resolve
-# to the first master defined in the inventory.
-# The HA solution must be manually configured after installation and must ensure
-# that the master is running on a single master host.
-#openshift_master_cluster_hostname=openshift-ansible.test.example.com
-#openshift_master_cluster_public_hostname=openshift-ansible.test.example.com
-#openshift_master_cluster_defer_ha=True
+# Override the default controller lease ttl
+#osm_controller_lease_ttl=30
 
 # default subdomain to use for exposed routes
 #osm_default_subdomain=apps.test.example.com
@@ -104,12 +113,31 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Detected names may be overridden by specifying the "names" key
 #openshift_master_named_certificates=[{"certfile": "/path/to/custom1.crt", "keyfile": "/path/to/custom1.key", "names": ["public-master-host.com"]}]
 
+# Session options
+#openshift_master_session_name=ssn
+#openshift_master_session_max_seconds=3600
+
+# An authentication and encryption secret will be generated if secrets
+# are not provided. If provided, openshift_master_session_auth_secrets
+# and openshift_master_encryption_secrets must be equal length.
+#
+# Signing secrets, used to authenticate sessions using
+# HMAC. Recommended to use secrets with 32 or 64 bytes.
+#openshift_master_session_auth_secrets=['DONT+USE+THIS+SECRET+b4NV+pmZNSO']
+#
+# Encrypting secrets, used to encrypt sessions. Must be 16, 24, or 32
+# characters long, to select AES-128, AES-192, or AES-256.
+#openshift_master_session_encryption_secrets=['DONT+USE+THIS+SECRET+b4NV+pmZNSO']
+
 # host group for masters
 [masters]
 ose3-master[1:3]-ansible.test.example.com
 
 [etcd]
 ose3-etcd[1:3]-ansible.test.example.com
+
+[lb]
+ose3-lb-ansible.test.example.com
 
 # NOTE: Currently we require that masters be part of the SDN which requires that they also be nodes
 # However, in order to ensure that your masters are not burdened with running pods you should

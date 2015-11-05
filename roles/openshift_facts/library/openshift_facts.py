@@ -407,7 +407,7 @@ def set_identity_providers_if_unset(facts):
                 name='allow_all', challenge=True, login=True,
                 kind='AllowAllPasswordIdentityProvider'
             )
-            if deployment_type == 'enterprise':
+            if deployment_type in ['enterprise', 'atomic-enterprise', 'openshift-enterprise']:
                 identity_provider = dict(
                     name='deny_all', challenge=True, login=True,
                     kind='DenyAllPasswordIdentityProvider'
@@ -551,18 +551,7 @@ def set_deployment_facts_if_unset(facts):
             facts['common']['config_base'] = config_base
         if 'data_dir' not in facts['common']:
             data_dir = '/var/lib/origin'
-            if deployment_type in ['enterprise', 'online']:
-                data_dir = '/var/lib/openshift'
             facts['common']['data_dir'] = data_dir
-        facts['common']['version'] = version = get_openshift_version()
-        if version is not None:
-            if deployment_type == 'origin':
-                version_gt_3_1_or_1_1 = LooseVersion(version) > LooseVersion('1.0.6')
-            else:
-                version_gt_3_1_or_1_1 = LooseVersion(version) > LooseVersion('3.0.2.900')
-        else:
-            version_gt_3_1_or_1_1 = True
-        facts['common']['version_greater_than_3_1_or_1_1'] = version_gt_3_1_or_1_1
 
     for role in ('master', 'node'):
         if role in facts:
@@ -596,6 +585,27 @@ def set_deployment_facts_if_unset(facts):
 
     return facts
 
+def set_version_facts_if_unset(facts):
+    """ Set version facts. This currently includes common.version and
+        common.version_greater_than_3_1_or_1_1.
+
+        Args:
+            facts (dict): existing facts
+        Returns:
+            dict: the facts dict updated with version facts.
+    """
+    if 'common' in facts:
+        deployment_type = facts['common']['deployment_type']
+        facts['common']['version'] = version = get_openshift_version()
+        if version is not None:
+            if deployment_type == 'origin':
+                version_gt_3_1_or_1_1 = LooseVersion(version) > LooseVersion('1.0.6')
+            else:
+                version_gt_3_1_or_1_1 = LooseVersion(version) > LooseVersion('3.0.2.900')
+        else:
+            version_gt_3_1_or_1_1 = True
+        facts['common']['version_greater_than_3_1_or_1_1'] = version_gt_3_1_or_1_1
+    return facts
 
 def set_sdn_facts_if_unset(facts, system_facts):
     """ Set sdn facts if not already present in facts dict
@@ -905,6 +915,7 @@ class OpenShiftFacts(object):
         facts = set_identity_providers_if_unset(facts)
         facts = set_sdn_facts_if_unset(facts, self.system_facts)
         facts = set_deployment_facts_if_unset(facts)
+        facts = set_version_facts_if_unset(facts)
         facts = set_aggregate_facts(facts)
         return dict(openshift=facts)
 
@@ -944,7 +955,7 @@ class OpenShiftFacts(object):
                           session_name='ssn', session_secrets_file='',
                           access_token_max_seconds=86400,
                           auth_token_max_seconds=500,
-                          oauth_grant_method='auto', cluster_defer_ha=False)
+                          oauth_grant_method='auto')
             defaults['master'] = master
 
         if 'node' in roles:

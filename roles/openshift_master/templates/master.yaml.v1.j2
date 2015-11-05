@@ -10,13 +10,18 @@ assetConfig:
   publicURL: {{ openshift.master.public_console_url }}/
   servingInfo:
     bindAddress: {{ openshift.master.bind_addr }}:{{ openshift.master.console_port }}
+    bindNetwork: tcp4
     certFile: master.server.crt
     clientCA: ""
     keyFile: master.server.key
     maxRequestsInFlight: 0
     requestTimeoutSeconds: 0
+{% if openshift_master_ha | bool %}
+controllerLeaseTTL: {{ openshift.master.controller_lease_ttl | default('30') }}
+{% endif %}
+controllers: '*'
 corsAllowedOrigins:
-{% for origin in ['127.0.0.1', 'localhost', openshift.common.hostname, openshift.common.ip, openshift.common.public_hostname, openshift.common.public_ip] | unique %}
+{% for origin in ['127.0.0.1', 'localhost', openshift.common.ip, openshift.common.public_ip] | union(openshift.common.all_hostnames) | unique %}
   - {{ origin }}
 {% endfor %}
 {% for custom_origin in openshift.master.custom_cors_origins | default("") %}
@@ -29,8 +34,10 @@ corsAllowedOrigins:
 disabledFeatures: {{ openshift.master.disabled_features | to_json }}
 {% endif %}
 {% if openshift.master.embedded_dns | bool %}
+disabledFeatures: null
 dnsConfig:
   bindAddress: {{ openshift.master.bind_addr }}:{{ openshift.master.dns_port }}
+  bindNetwork: tcp4
 {% endif %}
 etcdClientInfo:
   ca: {{ "ca.crt" if (openshift.master.embedded_etcd | bool) else "master.etcd-ca.crt" }}
@@ -80,9 +87,8 @@ kubernetesMasterConfig:
   - v1
   apiServerArguments: {{ api_server_args if api_server_args is defined else 'null' }}
   controllerArguments: {{ controller_args if controller_args is defined else 'null' }}
-{# TODO: support overriding masterCount #}
-  masterCount: 1
-  masterIP: ""
+  masterCount: {{ openshift.master.master_count }}
+  masterIP: {{ openshift.common.ip }}
   podEvictionTimeout: ""
   proxyClientInfo:
     certFile: master.proxy-client.crt
@@ -106,6 +112,7 @@ networkConfig:
 # serviceNetworkCIDR must match kubernetesMasterConfig.servicesSubnet
   serviceNetworkCIDR: {{ openshift.master.portal_net }}
 {% include 'v1_partials/oauthConfig.j2' %}
+pauseControllers: false
 policyConfig:
   bootstrapPolicyFile: {{ openshift_master_policy }}
   openshiftInfrastructureNamespace: openshift-infra
@@ -121,6 +128,7 @@ projectConfig:
 routingConfig:
   subdomain:  "{{ openshift.master.default_subdomain | default("") }}"
 serviceAccountConfig:
+  limitSecretReferences: false
   managedNames:
   - default
   - builder
@@ -131,6 +139,7 @@ serviceAccountConfig:
   - serviceaccounts.public.key
 servingInfo:
   bindAddress: {{ openshift.master.bind_addr }}:{{ openshift.master.api_port }}
+  bindNetwork: tcp4
   certFile: master.server.crt
   clientCA: ca.crt
   keyFile: master.server.key

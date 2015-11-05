@@ -9,16 +9,22 @@
   when: openshift_master_oauth_grant_method is defined
 
 - fail:
+    msg: "openshift_master_cluster_method must be set to either 'native' or 'pacemaker' for multi-master installations"
+  when: openshift_master_ha | bool and ((openshift_master_cluster_method is not defined) or (openshift_master_cluster_method is defined and openshift_master_cluster_method not in ["native", "pacemaker"]))
+- fail:
+    msg: "'native' high availability is not supported for the requested OpenShift version"
+  when: openshift_master_ha | bool and openshift_master_cluster_method == "native" and not openshift.common.version_greater_than_3_1_or_1_1 | bool
+- fail:
     msg: "openshift_master_cluster_password must be set for multi-master installations"
-  when: openshift_master_ha | bool and not openshift.master.cluster_defer_ha | bool and openshift_master_cluster_password is not defined
+  when: openshift_master_ha | bool and openshift_master_cluster_method == "pacemaker" and (openshift_master_cluster_password is not defined or not openshift_master_cluster_password)
 
 - name: Set master facts
   openshift_facts:
     role: master
     local_facts:
+      cluster_method: "{{ openshift_master_cluster_method | default(None) }}"
       cluster_hostname: "{{ openshift_master_cluster_hostname | default(None) }}"
       cluster_public_hostname: "{{ openshift_master_cluster_public_hostname | default(None) }}"
-      cluster_defer_ha: "{{ openshift_master_cluster_defer_ha | default(None) }}"
       debug_level: "{{ openshift_master_debug_level | default(openshift.common.debug_level) }}"
       api_port: "{{ openshift_master_api_port | default(None) }}"
       api_url: "{{ openshift_master_api_url | default(None) }}"
@@ -41,6 +47,8 @@
       portal_net: "{{ openshift_master_portal_net | default(None) }}"
       session_max_seconds: "{{ openshift_master_session_max_seconds | default(None) }}"
       session_name: "{{ openshift_master_session_name | default(None) }}"
+      session_auth_secrets: "{{ openshift_master_session_auth_secrets | default(None) }}"
+      session_encryption_secrets: "{{ openshift_master_session_encryption_secrets | default(None) }}"
       session_secrets_file: "{{ openshift_master_session_secrets_file | default(None) }}"
       access_token_max_seconds: "{{ openshift_master_access_token_max_seconds | default(None) }}"
       auth_token_max_seconds: "{{ openshift_master_auth_token_max_seconds | default(None) }}"
@@ -63,6 +71,8 @@
       controller_args: "{{ osm_controller_args | default(None) }}"
       infra_nodes: "{{ num_infra | default(None) }}"
       disabled_features: "{{ osm_disabled_features | default(None) }}"
+      master_count: "{{ openshift_master_count | default(None) }}"
+      controller_lease_ttl: "{{ osm_controller_lease_ttl | default(None) }}"
 
 - name: Install Master package
   yum: pkg={{ openshift.common.service_type }}-master{{ openshift_version  }} state=present
@@ -77,7 +87,7 @@
       domain: cluster.local
   when: openshift.master.embedded_dns
 
-- name: Create config parent directory if it doesn't exist
+- name: Create config parent directory if it does not exist
   file:
     path: "{{ openshift_master_config_dir }}"
     state: directory
@@ -90,6 +100,8 @@
     creates: "{{ openshift_master_policy }}"
   notify:
   - restart master
+  - restart master api
+  - restart master controllers
 
 - name: Create the scheduler config
   template:
@@ -98,6 +110,8 @@
     backup: true
   notify:
   - restart master
+  - restart master api
+  - restart master controllers
 
 - name: Install httpd-tools if needed
   yum: pkg=httpd-tools state=present
@@ -120,6 +134,39 @@
   when: item.kind == 'HTPasswdPasswordIdentityProvider'
   with_items: openshift.master.identity_providers
 
+# workaround for missing systemd unit files for controllers/api
+- name: Create the api service file
+  template:
+    src: atomic-openshift-master-api.service.j2
+    dest: /usr/lib/systemd/system/{{ openshift.common.service_type }}-master-api.service
+    force: no
+- name: Create the controllers service file
+  template:
+    src: atomic-openshift-master-controllers.service.j2
+    dest: /usr/lib/systemd/system/{{ openshift.common.service_type }}-master-controllers.service
+    force: no
+- name: Create the api env file
+  template:
+    src: atomic-openshift-master-api.j2
+    dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-api
+    force: no
+- name: Create the controllers env file
+  template:
+    src: atomic-openshift-master-controllers.j2
+    dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-controllers
+    force: no
+- command: systemctl daemon-reload
+# end workaround for missing systemd unit files
+
+- name: Create session secrets file
+  template:
+    dest: "{{ openshift.master.session_secrets_file }}"
+    src: sessionSecretsFile.yaml.v1.j2
+    force: no
+  notify:
+  - restart master
+  - restart master api
+
 # TODO: add the validate parameter when there is a validation command to run
 - name: Create master config
   template:
@@ -128,12 +175,15 @@
     backup: true
   notify:
   - restart master
+  - restart master api
+  - restart master controllers
 
 - name: Configure master settings
   lineinfile:
     dest: /etc/sysconfig/{{ openshift.common.service_type }}-master
     regexp: "{{ item.regex }}"
     line: "{{ item.line }}"
+    create: yes
   with_items:
     - regex: '^OPTIONS='
       line: "OPTIONS=--loglevel={{ openshift.master.debug_level }}"
@@ -142,6 +192,32 @@
   notify:
   - restart master
 
+- name: Configure master api settings
+  lineinfile:
+    dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-api
+    regexp: "{{ item.regex }}"
+    line: "{{ item.line }}"
+  with_items:
+    - regex: '^OPTIONS='
+      line: "OPTIONS=--loglevel={{ openshift.master.debug_level }} --listen=https://0.0.0.0:8443 --master=https://{{ openshift.common.ip }}:8443"
+    - regex: '^CONFIG_FILE='
+      line: "CONFIG_FILE={{ openshift_master_config_file }}"
+  notify:
+  - restart master api
+
+- name: Configure master controller settings
+  lineinfile:
+    dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-controllers
+    regexp: "{{ item.regex }}"
+    line: "{{ item.line }}"
+  with_items:
+    - regex: '^OPTIONS='
+      line: "OPTIONS=--loglevel={{ openshift.master.debug_level }} --listen=https://0.0.0.0:8444"
+    - regex: '^CONFIG_FILE='
+      line: "CONFIG_FILE={{ openshift_master_config_file }}"
+  notify:
+  - restart master controllers
+
 - name: Start and enable master
   service: name={{ openshift.common.service_type }}-master enabled=yes state=started
   when: not openshift_master_ha | bool
@@ -149,15 +225,37 @@
 
 - set_fact:
     master_service_status_changed = start_result | changed
+  when: not openshift_master_ha | bool
+
+- name: Start and enable master api
+  service: name={{ openshift.common.service_type }}-master-api enabled=yes state=started
+  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
+  register: start_result
+
+- set_fact:
+    master_api_service_status_changed = start_result | changed
+  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
+
+# TODO: fix the ugly workaround of setting ignore_errors
+#       the controllers service tries to start even if it is already started
+- name: Start and enable master controller
+  service: name={{ openshift.common.service_type }}-master-controllers enabled=yes state=started
+  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
+  register: start_result
+  ignore_errors: yes
+
+- set_fact:
+    master_controllers_service_status_changed = start_result | changed
+  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
 
 - name: Install cluster packages
   yum: pkg=pcs state=present
-  when: openshift_master_ha | bool and not openshift.master.cluster_defer_ha | bool
+  when: openshift_master_ha | bool and openshift.master.cluster_method == 'pacemaker'
   register: install_result
 
 - name: Start and enable cluster service
   service: name=pcsd enabled=yes state=started
-  when: openshift_master_ha | bool and not openshift.master.cluster_defer_ha | bool
+  when: openshift_master_ha | bool and openshift.master.cluster_method == 'pacemaker'
 
 - name: Set the cluster user password
   shell: echo {{ openshift_master_cluster_password | quote }} | passwd --stdin hacluster

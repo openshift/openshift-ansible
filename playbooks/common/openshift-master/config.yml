@@ -34,7 +34,9 @@
       - role: common
         local_facts:
           hostname: "{{ openshift_hostname | default(None) }}"
+          ip: "{{ openshift_ip | default(None) }}"
           public_hostname: "{{ openshift_public_hostname | default(None) }}"
+          public_ip: "{{ openshift_public_ip | default(None) }}"
           deployment_type: "{{ openshift_deployment_type }}"
       - role: master
         local_facts:
@@ -44,7 +46,6 @@
           public_api_url: "{{ openshift_master_public_api_url | default(None) }}"
           cluster_hostname: "{{ openshift_master_cluster_hostname | default(None) }}"
           cluster_public_hostname: "{{ openshift_master_cluster_public_hostname | default(None) }}"
-          cluster_defer_ha: "{{ openshift_master_cluster_defer_ha | default(None) }}"
           console_path: "{{ openshift_master_console_path | default(None) }}"
           console_port: "{{ openshift_master_console_port | default(None) }}"
           console_url: "{{ openshift_master_console_url | default(None) }}"
@@ -168,6 +169,10 @@
     masters_needing_certs: "{{ hostvars
                                | oo_select_keys(groups['oo_masters_to_config'] | difference(groups['oo_first_master']))
                                | oo_filter_list(filter_attr='master_certs_missing') }}"
+    master_hostnames: "{{ hostvars
+                               | oo_select_keys(groups['oo_masters_to_config'])
+                               | oo_collect('openshift.common.all_hostnames')
+                               | oo_flatten | unique }}"
     sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
   roles:
   - openshift_master_certificates
@@ -207,13 +212,76 @@
       parsed_named_certificates: "{{ openshift_master_named_certificates | oo_parse_certificate_names(master_cert_config_dir, openshift.common.internal_hostnames) }}"
     when: openshift_master_named_certificates is defined
 
+- name: Compute haproxy_backend_servers
+  hosts: localhost
+  connection: local
+  sudo: false
+  gather_facts: no
+  tasks:
+  - set_fact:
+      haproxy_backend_servers: "{{ hostvars | oo_select_keys(groups['oo_masters_to_config']) | oo_haproxy_backend_masters }}"
+
+- name: Configure load balancers
+  hosts: oo_lb_to_config
+  vars:
+    sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
+    haproxy_frontends:
+    - name: atomic-openshift-api
+      mode: tcp
+      options:
+      - tcplog
+      binds:
+      - "*:{{ hostvars[groups.oo_first_master.0].openshift.master.api_port }}"
+      default_backend: atomic-openshift-api
+    haproxy_backends:
+    - name: atomic-openshift-api
+      mode: tcp
+      option: tcplog
+      balance: source
+      servers: "{{ hostvars.localhost.haproxy_backend_servers }}"
+  roles:
+  - role: haproxy
+    when: groups.oo_masters_to_config | length > 1
+
+- name: Generate master session keys
+  hosts: oo_first_master
+  tasks:
+  - fail:
+      msg: "Both openshift_master_session_auth_secrets and openshift_master_session_encryption_secrets must be provided if either variable is set"
+    when: (openshift_master_session_auth_secrets is defined and openshift_master_session_encryption_secrets is not defined) or (openshift_master_session_encryption_secrets is defined and openshift_master_session_auth_secrets is not defined)
+  - fail:
+      msg: "openshift_master_session_auth_secrets and openshift_master_encryption_secrets must be equal length"
+    when: (openshift_master_session_auth_secrets is defined and openshift_master_session_encryption_secrets is defined) and (openshift_master_session_auth_secrets | length != openshift_master_session_encryption_secrets | length)
+  - name: Generate session authentication key
+    command: /usr/bin/openssl rand -base64 24
+    register: session_auth_output
+    with_sequence: count=1
+    when: openshift_master_session_auth_secrets is undefined
+  - name: Generate session encryption key
+    command: /usr/bin/openssl rand -base64 24
+    register: session_encryption_output
+    with_sequence: count=1
+    when: openshift_master_session_encryption_secrets is undefined
+  - set_fact:
+      session_auth_secret: "{{ openshift_master_session_auth_secrets
+                                | default(session_auth_output.results
+                                | map(attribute='stdout')
+                                | list) }}"
+      session_encryption_secret: "{{ openshift_master_session_encryption_secrets
+                                      | default(session_encryption_output.results
+                                      | map(attribute='stdout')
+                                      | list) }}"
+
 - name: Configure master instances
   hosts: oo_masters_to_config
+  serial: 1
   vars:
     named_certificates: "{{ hostvars[groups['oo_first_master'][0]]['parsed_named_certificates'] | default([])}}"
     sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
     openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
-    embedded_etcd: "{{ openshift.master.embedded_etcd }}"
+    openshift_master_count: "{{ groups.oo_masters_to_config | length }}"
+    openshift_master_session_auth_secrets: "{{ hostvars[groups['oo_first_master'][0]]['session_auth_secret'] }}"
+    openshift_master_session_encryption_secrets: "{{ hostvars[groups['oo_first_master'][0]]['session_encryption_secret'] }}"
   pre_tasks:
   - name: Ensure certificate directory exists
     file:
@@ -242,10 +310,24 @@
     omc_cluster_hosts: "{{ groups.oo_masters_to_config | join(' ')}}"
   roles:
   - role: openshift_master_cluster
-    when: openshift_master_ha | bool
+    when: openshift_master_ha | bool and openshift.master.cluster_method == "pacemaker"
   - openshift_examples
   - role: openshift_cluster_metrics
     when: openshift.common.use_cluster_metrics | bool
+
+- name: Determine cluster dns ip
+  hosts: oo_first_master
+  tasks:
+  - name: Get master service ip
+    command: "{{ openshift.common.client_binary }} get -o template svc kubernetes --template=\\{\\{.spec.clusterIP\\}\\}"
+    register: master_service_ip_output
+    when: openshift.common.version_greater_than_3_1_or_1_1 | bool
+  - set_fact:
+      cluster_dns_ip: "{{ hostvars[groups.oo_first_master.0].openshift.dns.ip }}"
+    when: not openshift.common.version_greater_than_3_1_or_1_1 | bool
+  - set_fact:
+      cluster_dns_ip: "{{ master_service_ip_output.stdout }}"
+    when: openshift.common.version_greater_than_3_1_or_1_1 | bool
 
 - name: Enable cockpit
   hosts: oo_first_master
