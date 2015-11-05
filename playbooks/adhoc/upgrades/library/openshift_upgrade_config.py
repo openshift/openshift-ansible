@@ -17,8 +17,40 @@ requirements: [ ]
 EXAMPLES = '''
 '''
 
+def modify_api_levels(level_list, remove, ensure, msg_prepend='',
+                      msg_append=''):
+    """ modify_api_levels """
+    changed = False
+    changes = []
 
-def upgrade_master_3_0_to_3_1(module, config_base, backup):
+    if not isinstance(remove, list):
+        remove = []
+
+    if not isinstance(ensure, list):
+        ensure = []
+
+    if not isinstance(level_list, list):
+        new_list = []
+        changed = True
+        changes.append("%s created missing %s" % (msg_prepend, msg_append))
+    else:
+        new_list = level_list
+        for level in remove:
+            if level in new_list:
+                new_list.remove(level)
+                changed = True
+                changes.append("%s removed %s %s" % (msg_prepend, level, msg_append))
+
+    for level in ensure:
+        if level not in new_list:
+            new_list.append(level)
+            changed = True
+            changes.append("%s added %s %s" % (msg_prepend, level, msg_append))
+
+    return {'new_list': new_list, 'changed': changed, 'changes': changes}
+
+
+def upgrade_master_3_0_to_3_1(ansible_module, config_base, backup):
     """Main upgrade method for 3.0 to 3.1."""
     changes = []
 
@@ -30,30 +62,38 @@ def upgrade_master_3_0_to_3_1(module, config_base, backup):
     config = yaml.safe_load(master_cfg_file.read())
     master_cfg_file.close()
 
-    # Remove v1beta3 from apiLevels:
-    if 'apiLevels' in config and \
-        'v1beta3' in config['apiLevels']:
-        config['apiLevels'].remove('v1beta3')
-        changed = True
-        changes.append("master-config.yaml: removed v1beta3 from apiLevels")
-    if 'apiLevels' in config['kubernetesMasterConfig'] and \
-        'v1beta3' in config['kubernetesMasterConfig']['apiLevels']:
-        config['kubernetesMasterConfig']['apiLevels'].remove('v1beta3')
-        changed = True
 
-    # Add the new master proxy client certs:
-    # TODO: re-enable this once these certs are generated during upgrade:
-#    if 'proxyClientInfo' not in config['kubernetesMasterConfig']:
-#        config['kubernetesMasterConfig']['proxyClientInfo'] = {
-#            'certFile': 'master.proxy-client.crt',
-#            'keyFile': 'master.proxy-client.key'
-#       }
-#        changes.append("master-config.yaml: added proxyClientInfo")
+    # Remove unsupported api versions and ensure supported api versions from
+    # master config
+    unsupported_levels = ['v1beta1', 'v1beta2', 'v1beta3']
+    supported_levels = ['v1']
+
+    result = modify_api_levels(config.get('apiLevels'), unsupported_levels,
+                               supported_levels, 'master-config.yaml:', 'from apiLevels')
+    if result['changed']:
+        config['apiLevels'] = result['new_list']
+        changes.append(result['changes'])
+
+    if 'kubernetesMasterConfig' in config:
+        result = modify_api_levels(config['kubernetesMasterConfig'].get('apiLevels'),
+                                   unsupported_levels, supported_levels, 'master-config.yaml:',
+                                   'from apiLevels')
+        if result['changed']:
+            config['kubernetesMasterConfig']['apiLevels'] = result['new_list']
+            changes.append(result['changes'])
+
+    # Add proxyClientInfo to master-config
+    if 'proxyClientInfo' not in config['kubernetesMasterConfig']:
+        config['kubernetesMasterConfig']['proxyClientInfo'] = {
+            'certFile': 'master.proxy-client.crt',
+            'keyFile': 'master.proxy-client.key'
+        }
+        changes.append("master-config.yaml: added proxyClientInfo")
 
     if len(changes) > 0:
         if backup:
             # TODO: Check success:
-            module.backup_local(master_config)
+            ansible_module.backup_local(master_config)
 
         # Write the modified config:
         out_file = open(master_config, 'w')
@@ -63,18 +103,19 @@ def upgrade_master_3_0_to_3_1(module, config_base, backup):
     return changes
 
 
-def upgrade_master(module, config_base, from_version, to_version, backup):
+def upgrade_master(ansible_module, config_base, from_version, to_version, backup):
     """Upgrade entry point."""
     if from_version == '3.0':
         if to_version == '3.1':
-            return upgrade_master_3_0_to_3_1(module, config_base, backup)
+            return upgrade_master_3_0_to_3_1(ansible_module, config_base, backup)
 
 
 def main():
     """ main """
     # disabling pylint errors for global-variable-undefined and invalid-name
     # for 'global module' usage, since it is required to use ansible_facts
-    # pylint: disable=global-variable-undefined, invalid-name
+    # pylint: disable=global-variable-undefined, invalid-name,
+    # redefined-outer-name
     global module
 
     module = AnsibleModule(
@@ -98,10 +139,13 @@ def main():
         changes = []
         if role == 'master':
             changes = upgrade_master(module, config_base, from_version,
-                to_version, backup)
+                                     to_version, backup)
 
         changed = len(changes) > 0
         return module.exit_json(changed=changed, changes=changes)
+
+    # ignore broad-except error to avoid stack trace to ansible user
+    # pylint: disable=broad-except
     except Exception, e:
         return module.fail_json(msg=str(e))
 
