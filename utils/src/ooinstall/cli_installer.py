@@ -371,7 +371,8 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force):
             if unattended:
                 if not force:
                     click.echo('Installed environment detected and no additional nodes specified: ' \
-                               'aborting. If you want a fresh install, use --force')
+                               'aborting. If you want a fresh install, use ' \
+                               '`atomic-openshift-installer install --force`')
                     sys.exit(1)
             else:
                 if not force:
