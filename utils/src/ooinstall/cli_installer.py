@@ -339,7 +339,10 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force):
                 # new nodes.
             elif host.node:
                 click.echo("{} is already an OpenShift Node".format(host))
-                hosts_to_run_on.remove(host)
+                # force is only used for reinstalls so we don't want to remove
+                # anything.
+                if not force:
+                    hosts_to_run_on.remove(host)
         # for unattended either continue if they force install or exit if they didn't
         if unattended:
             if not force:
