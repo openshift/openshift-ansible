@@ -377,14 +377,9 @@ class FilterModule(object):
             else:
                 certificate['names'] = []
 
-            if not os.path.isfile(certificate['certfile']) and not os.path.isfile(certificate['keyfile']):
-                # Unable to find cert/key, try to prepend data_dir to paths
-                certificate['certfile'] = os.path.join(data_dir, certificate['certfile'])
-                certificate['keyfile'] = os.path.join(data_dir, certificate['keyfile'])
-                if not os.path.isfile(certificate['certfile']) and not os.path.isfile(certificate['keyfile']):
-                    # Unable to find cert/key in data_dir
-                    raise errors.AnsibleFilterError("|certificate and/or key does not exist '%s', '%s'" %
-                                                    (certificate['certfile'], certificate['keyfile']))
+            if not os.path.isfile(certificate['certfile']) or not os.path.isfile(certificate['keyfile']):
+                raise errors.AnsibleFilterError("|certificate and/or key does not exist '%s', '%s'" %
+                                                (certificate['certfile'], certificate['keyfile']))
 
             try:
                 st_cert = open(certificate['certfile'], 'rt').read()

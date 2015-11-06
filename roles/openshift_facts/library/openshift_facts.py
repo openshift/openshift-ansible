@@ -517,7 +517,7 @@ def set_aggregate_facts(facts):
                 facts['master']['etcd_data_dir'] = '/var/lib/etcd'
 
         facts['common']['all_hostnames'] = list(all_hostnames)
-        facts['common']['internal_hostnames'] = list(all_hostnames)
+        facts['common']['internal_hostnames'] = list(internal_hostnames)
 
     return facts
 
