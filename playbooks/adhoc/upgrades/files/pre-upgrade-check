@@ -131,8 +131,11 @@ def main():
         print "found"
     except:
         print(
-            'Can not find oc (%s). Override the path with the '
-            'OC_PATH environment variable. Exiting...' % OC_PATH)
+            'Unable to run "%s whoami"\n'
+            'Please ensure OpenShift is running, and "oc" is on your system '
+            'path.\n'
+            'You can override the path with the OC_PATH environment variable.'
+            % OC_PATH)
         raise SystemExit(1)
 
     # Where the magic happens
