@@ -75,7 +75,7 @@ def upgrade_master_3_0_to_3_1(ansible_module, config_base, backup):
         changes.append(result['changes'])
 
     if 'kubernetesMasterConfig' in config and 'apiLevels' in config['kubernetesMasterConfig']:
-        config['kubernetesMasterConfig'].remove('apiLevels')
+        config['kubernetesMasterConfig'].pop('apiLevels')
         changes.append('master-config.yaml: removed kubernetesMasterConfig.apiLevels')
 
     # Add proxyClientInfo to master-config
