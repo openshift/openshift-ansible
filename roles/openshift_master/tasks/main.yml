@@ -207,6 +207,7 @@
       line: "OPTIONS=--loglevel={{ openshift.master.debug_level }} --listen=https://0.0.0.0:8443 --master=https://{{ openshift.common.ip }}:8443"
     - regex: '^CONFIG_FILE='
       line: "CONFIG_FILE={{ openshift_master_config_file }}"
+  when: openshift_master_ha | bool and openshift_master_cluster_method == "native"
   notify:
   - restart master api
 
@@ -220,6 +221,7 @@
       line: "OPTIONS=--loglevel={{ openshift.master.debug_level }} --listen=https://0.0.0.0:8444"
     - regex: '^CONFIG_FILE='
       line: "CONFIG_FILE={{ openshift_master_config_file }}"
+  when: openshift_master_ha | bool and openshift_master_cluster_method == "native"
   notify:
   - restart master controllers
 
