@@ -10,6 +10,7 @@
 - include: ../../common/openshift-cluster/config.yml
   vars:
     g_etcd_group: "{{ 'tag_env-host-type_' ~ cluster_id ~ '-openshift-etcd' }}"
+    g_lb_group: "{{ 'tag_env-host-type_' ~ cluster_id ~ '-openshift-lb' }}"
     g_masters_group: "{{ 'tag_env-host-type_' ~ cluster_id ~ '-openshift-master' }}"
     g_nodes_group: "{{ 'tag_env-host-type_' ~ cluster_id ~ '-openshift-node' }}"
     g_ssh_user: "{{ hostvars.localhost.g_ssh_user_tmp }}"
