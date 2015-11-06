@@ -323,6 +323,14 @@
     - name: Restart master cluster
       command: pcs resource restart master
       when: openshift_master_ha | bool
+    - name: Wait for the clustered master service to be available
+      wait_for:
+        host: "{{ openshift_master_cluster_vip }}"
+        port: 8443
+        state: started
+        timeout: 180
+        delay: 90
+      when: openshift_master_ha | bool
 
 - name: Upgrade default router and registry
   hosts: masters[0]
