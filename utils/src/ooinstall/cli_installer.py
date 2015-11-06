@@ -323,6 +323,8 @@ def get_installed_hosts(hosts, callback_facts):
             installed_hosts.append(host)
     return installed_hosts
 
+# pylint: disable=too-many-branches
+# This pylint error will be corrected shortly in separate PR.
 def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force, verbose):
 
     # Copy the list of existing hosts so we can remove any already installed nodes.
@@ -383,7 +385,7 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force, verbose):
 
                     openshift_ansible.set_config(oo_cfg)
                     click.echo('Gathering information from hosts...')
-                    callback_facts, error = openshift_ansible.default_facts(oo_cfg.hosts)
+                    callback_facts, error = openshift_ansible.default_facts(oo_cfg.hosts, verbose)
                     if error:
                         click.echo("There was a problem fetching the required information. " \
                                    "See {} for details.".format(oo_cfg.settings['ansible_log_path']))

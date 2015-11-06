@@ -18,6 +18,13 @@
     - fail: msg="openshift_master_cluster_method must be set to 'pacemaker'"
       when: openshift_master_ha | bool and ((openshift_master_cluster_method is not defined) or (openshift_master_cluster_method is defined and openshift_master_cluster_method != "pacemaker"))
 
+- name: Run pre-upgrade checks on first master
+  hosts: masters[0]
+  tasks:
+  # If this script errors out ansible will show the default stdout/stderr
+  # which contains details for the user:
+  - script: files/pre-upgrade-check
+
 - name: Evaluate etcd_hosts
   hosts: localhost
   tasks:
