@@ -13,6 +13,13 @@
     - fail: msg="Deployment type enterprise not supported for upgrade"
       when: deployment_type == "enterprise"
 
+- name: Run pre-upgrade checks on first master
+  hosts: masters[0]
+  tasks:
+  # If this script errors out ansible will show the default stdout/stderr
+  # which contains details for the user:
+  - script: files/pre-upgrade-check
+
 - name: Evaluate etcd_hosts
   hosts: localhost
   tasks:
