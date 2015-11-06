@@ -1,5 +1,5 @@
 apiLevels:
-{% if openshift.common.deployment_type == "enterprise" %}
+{% if not openshift.common.version_greater_than_3_1_or_1_1 | bool %}
 - v1beta3
 {% endif %}
 - v1
@@ -73,11 +73,11 @@ kubeletClientInfo:
   port: 10250
 {% if openshift.master.embedded_kube | bool %}
 kubernetesMasterConfig:
+{% if not openshift.common.version_greater_than_3_1_or_1_1 | bool %}
   apiLevels:
-{% if openshift.common.deployment_type == "enterprise" %}
   - v1beta3
-{% endif %}
   - v1
+{% endif %}
   apiServerArguments: {{ api_server_args if api_server_args is defined else 'null' }}
   controllerArguments: {{ controller_args if controller_args is defined else 'null' }}
 {# TODO: support overriding masterCount #}
