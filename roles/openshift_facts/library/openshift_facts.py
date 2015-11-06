@@ -551,6 +551,8 @@ def set_deployment_facts_if_unset(facts):
             facts['common']['config_base'] = config_base
         if 'data_dir' not in facts['common']:
             data_dir = '/var/lib/origin'
+            if deployment_type in ['enterprise', 'online']:
+                data_dir = '/var/lib/openshift'
             facts['common']['data_dir'] = data_dir
 
     for role in ('master', 'node'):
