@@ -16,10 +16,11 @@
 - include: nfs.yml
 
 - name: export physical volumes
-  uri: url={{ kubernetes_url }}/api/v1beta3/persistentvolumes
-       method=POST
-       body='{{ lookup("template", "../templates/nfs.json.j2") }}'
-       body_format=json
-       status_code=201
-       HEADER_Authorization="Bearer {{ kubernetes_token }}"
+  uri:
+    url: "{{ kubernetes_url }}/api/{{ kube_api_version }}/persistentvolumes"
+    method: POST
+    body: "{{ lookup('template', kube_req_template) }}"
+    body_format: json
+    status_code: 201
+    HEADER_Authorization: "Bearer {{ kubernetes_token }}"
   with_items: partition_pool
