@@ -1,4 +1,9 @@
 ---
+- name: Gather and set facts for first master
+  hosts: oo_first_master
+  roles:
+  - openshift_facts
+
 - name: Gather and set facts for node hosts
   hosts: oo_nodes_to_config
   roles:
