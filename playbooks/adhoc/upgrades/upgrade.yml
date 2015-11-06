@@ -12,10 +12,12 @@
   tasks:
     # Checking the global deployment type rather than host facts, this is about
     # what the user is requesting.
-    - fail: msg="Deployment type enterprise not supported for upgrade"
+    - fail:
+        msg: "Deployment type enterprise not supported for upgrade"
       when: deployment_type == "enterprise"
     # Pacemaker is currently the only supported upgrade path for multiple masters
-    - fail: msg="openshift_master_cluster_method must be set to 'pacemaker'"
+    - fail:
+        msg: "openshift_master_cluster_method must be set to 'pacemaker'"
       when: openshift_master_ha | bool and ((openshift_master_cluster_method is not defined) or (openshift_master_cluster_method is defined and openshift_master_cluster_method != "pacemaker"))
 
 - name: Run pre-upgrade checks on first master
@@ -119,11 +121,17 @@
   - set_fact:
       g_new_version: "{{ g_aos_versions.curr_version.split('-', 1).0 if g_aos_versions.avail_version is none else g_aos_versions.avail_version.split('-', 1).0 }}"
 
-  - fail: This playbook requires Origin 1.0.6 or later
+  - fail:
+      msg: This playbook requires Origin 1.0.6 or later
     when: deployment_type == 'origin' and g_aos_versions.curr_version | version_compare('1.0.6','<')
 
-  - fail: This playbook requires Atomic OpenShift 3.0.2 or later
+  - fail:
+      msg: This playbook requires Atomic OpenShift 3.0.2 or later
     when: deployment_type in ['openshift-enterprise', 'atomic-openshift'] and g_aos_versions.curr_version | version_compare('3.0.2','<')
+
+  - fail:
+      msg: Atomic OpenShift 3.1 packages not found
+    when: deployment_type in ['openshift-enterprise', 'atomic-openshift'] and g_aos_versions.curr_version | version_compare('3.0.2.900','<') and (g_aos_versions.avail_version is none or g_aos_versions.avail_version | version_compare('3.0.2.900','<'))
 
 
 - name: Upgrade masters
