@@ -152,8 +152,6 @@
         pkg: python-yaml
         state: installed
 
-    - debug: var=hostvars[inventory_hostname].openshift.common.config_base
-
     - name: Upgrade master configuration
       openshift_upgrade_config:
         from_version: '3.0'
