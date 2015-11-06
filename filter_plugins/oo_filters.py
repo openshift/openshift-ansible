@@ -377,7 +377,7 @@ class FilterModule(object):
             else:
                 certificate['names'] = []
 
-            if not os.path.isfile(certificate['certfile']) and not os.path.isfile(certificate['keyfile']):
+            if not os.path.isfile(certificate['certfile']) or not os.path.isfile(certificate['keyfile']):
                 raise errors.AnsibleFilterError("|certificate and/or key does not exist '%s', '%s'" %
                                                 (certificate['certfile'], certificate['keyfile']))
 
