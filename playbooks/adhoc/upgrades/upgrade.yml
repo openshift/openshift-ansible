@@ -52,9 +52,12 @@
   - stat: path=/var/lib/openshift
     register: var_lib_openshift
 
+  - stat: path=/var/lib/origin
+    register: var_lib_origin
+
   - name: Create origin symlink if necessary
     file: src=/var/lib/openshift/ dest=/var/lib/origin state=link
-    when: var_lib_openshift.stat.exists == True
+    when: var_lib_openshift.stat.exists == True and var_lib_origin.stat.exists == False
 
   - name: Check available disk space for etcd backup
     # We assume to be using the data dir for all backups.
