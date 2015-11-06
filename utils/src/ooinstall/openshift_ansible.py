@@ -79,7 +79,7 @@ def write_host(host, inventory, scheduleable=True):
     if not scheduleable:
         facts += ' openshift_scheduleable=False'
     installer_host = socket.gethostname()
-    if host.hostname == installer_host or host.public_hostname == installer_host:
+    if installer_host in [host.connect_to, host.hostname, host.public_hostname]:
         facts += ' ansible_connection=local'
         if os.geteuid() != 0:
             no_pwd_sudo = subprocess.call(['sudo', '-v', '-n'])
