@@ -526,6 +526,7 @@ def upgrade(ctx):
         click.echo("Errors encountered during upgrade, please check %s." %
             oo_cfg.settings['ansible_log_path'])
     else:
+        oo_cfg.save_to_disk()
         click.echo("Upgrade completed! Rebooting all hosts is recommended.")
 
 
