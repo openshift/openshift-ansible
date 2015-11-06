@@ -238,7 +238,7 @@ g_template_os_linux:
     - Disk
 
   - discoveryrule_key: disc.network
-    name: "Bytes per second on network interface {#OSO_NET_INTERFACE}"
+    name: "Bytes per second IN on network interface {#OSO_NET_INTERFACE}"
     key: "disc.network.in.bytes[{#OSO_NET_INTERFACE}]"
     value_type: int
     units: B
@@ -248,7 +248,7 @@ g_template_os_linux:
     - Network
 
   - discoveryrule_key: disc.network
-    name: "Bytes per second on network interface {#OSO_NET_INTERFACE}"
+    name: "Bytes per second OUT on network interface {#OSO_NET_INTERFACE}"
     key: "disc.network.out.bytes[{#OSO_NET_INTERFACE}]"
     value_type: int
     units: B
