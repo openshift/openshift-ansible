@@ -10,11 +10,6 @@
     openshift_master_ha: "{{ groups['masters'] | length > 1 }}"
   gather_facts: no
   tasks:
-    # Checking the global deployment type rather than host facts, this is about
-    # what the user is requesting.
-    - fail:
-        msg: "Deployment type enterprise not supported for upgrade"
-      when: deployment_type == "enterprise"
     # Pacemaker is currently the only supported upgrade path for multiple masters
     - fail:
         msg: "openshift_master_cluster_method must be set to 'pacemaker'"
@@ -132,6 +127,12 @@
   - fail:
       msg: Atomic OpenShift 3.1 packages not found
     when: deployment_type in ['openshift-enterprise', 'atomic-openshift'] and g_aos_versions.curr_version | version_compare('3.0.2.900','<') and (g_aos_versions.avail_version is none or g_aos_versions.avail_version | version_compare('3.0.2.900','<'))
+  # Deployment type 'enterprise' is no longer valid if we're upgrading to 3.1 or beyond.
+  # (still valid for 3.0.x to 3.0.y however) Using the global deployment_type here as
+  # we're checking what was requested by the upgrade, not the current type on the system.
+  - fail:
+      msg: "Deployment type enterprise not supported for upgrade"
+    when: deployment_type == "enterprise" and  g_aos_versions.curr_version | version_compare('3.1', '>=')
 
 
 - name: Upgrade masters
@@ -158,6 +159,7 @@
         to_version: '3.1'
         role: master
         config_base: "{{ hostvars[inventory_hostname].openshift.common.config_base }}"
+        when: deployment_type in ['openshift-enterprise', 'atomic-enterprise'] and g_aos_versions.curr_version | version_compare('3.1', '>=')
 
     - set_fact:
         master_certs_missing: True
