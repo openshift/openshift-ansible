@@ -6,12 +6,24 @@
 
 - name: Verify upgrade can proceed
   hosts: masters[0]
+  vars:
+    openshift_master_ha: "{{ groups['masters'] | length > 1 }}"
   gather_facts: no
   tasks:
     # Checking the global deployment type rather than host facts, this is about
     # what the user is requesting.
     - fail: msg="Deployment type enterprise not supported for upgrade"
       when: deployment_type == "enterprise"
+    # Pacemaker is currently the only supported upgrade path for multiple masters
+    - fail: msg="openshift_master_cluster_method must be set to 'pacemaker'"
+      when: openshift_master_ha | bool and ((openshift_master_cluster_method is not defined) or (openshift_master_cluster_method is defined and openshift_master_cluster_method != "pacemaker"))
+
+- name: Run pre-upgrade checks on first master
+  hosts: masters[0]
+  tasks:
+  # If this script errors out ansible will show the default stdout/stderr
+  # which contains details for the user:
+  - script: files/pre-upgrade-check
 
 - name: Evaluate etcd_hosts
   hosts: localhost
@@ -182,8 +194,6 @@
     command: >
       tar -czvf {{ master_generated_certs_dir }}/{{ item.master_cert_subdir }}.tgz
         -C {{ master_generated_certs_dir }}/{{ item.master_cert_subdir }} .
-    args:
-      creates: "{{ master_generated_certs_dir }}/{{ item.master_cert_subdir }}.tgz"
     with_items: masters_needing_certs
 
   - name: Retrieve the master cert tarball from the master
@@ -195,11 +205,11 @@
       validate_checksum: yes
     with_items: masters_needing_certs
 
-
 - name: Sync certs and restart masters post configuration change
   hosts: masters
   vars:
     sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
+    openshift_master_ha: "{{ groups['masters'] | length > 1 }}"
   tasks:
   - name: Unarchive the tarball on the master
     unarchive:
@@ -209,7 +219,41 @@
 
   - name: Restart master services
     service: name="{{ openshift.common.service_type}}-master" state=restarted
+    when: not openshift_master_ha | bool
 
+- name: Destroy cluster
+  hosts: masters[0]
+  vars:
+    openshift_master_ha: "{{ groups['masters'] | length > 1 }}"
+    openshift_deployment_type: "{{ deployment_type }}"
+  pre_tasks:
+  - name: Check for configured cluster
+    stat:
+      path: /etc/corosync/corosync.conf
+    register: corosync_conf
+    when: openshift_master_ha | bool
+  - name: Destroy cluster
+    command: pcs cluster destroy --all
+    when: openshift_master_ha | bool and corosync_conf.stat.exists == true
+
+- name: Start pcsd on masters
+  hosts: masters
+  vars:
+    openshift_master_ha: "{{ groups['masters'] | length > 1 }}"
+  tasks:
+  - name: Start pcsd
+    service: name=pcsd state=started
+    when: openshift_master_ha | bool
+
+- name: Re-create cluster
+  hosts: masters[0]
+  vars:
+    openshift_master_ha: "{{ groups['masters'] | length > 1 }}"
+    openshift_deployment_type: "{{ deployment_type }}"
+    omc_cluster_hosts: "{{ groups.masters | join(' ') }}"
+  roles:
+  - role: openshift_master_cluster
+    when: openshift_master_ha | bool
 
 - name: Delete temporary directory on localhost
   hosts: localhost
@@ -255,10 +299,21 @@
 
 - name: Restart masters post reconcile
   hosts: masters
+  vars:
+    openshift_master_ha: "{{ groups['masters'] | length > 1 }}"
   tasks:
     - name: Restart master services
       service: name="{{ openshift.common.service_type}}-master" state=restarted
+      when: not openshift_master_ha | bool
 
+- name: Restart cluster post reconcile
+  hosts: masters[0]
+  vars:
+    openshift_master_ha: "{{ groups['masters'] | length > 1 }}"
+  tasks:
+    - name: Restart master cluster
+      command: pcs resource restart master
+      when: openshift_master_ha | bool
 
 - name: Upgrade default router and registry
   hosts: masters[0]
