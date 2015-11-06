@@ -1,35 +1,61 @@
 ---
-- name: Update deployment type
-  hosts: OSEv3
+- name: Load master facts
+  hosts: masters
   roles:
   - openshift_facts
-  post_tasks: # technically tasks are run after roles, but post_tasks is a bit more explicit.
-  - openshift_facts:
-      role: common
-      local_facts:
-        deployment_type: "{{ deployment_type }}"
 
 - name: Verify upgrade can proceed
-  hosts: masters
+  hosts: masters[0]
+  vars:
+    openshift_master_ha: "{{ groups['masters'] | length > 1 }}"
+  gather_facts: no
   tasks:
-  # Checking the global deployment type rather than host facts, this is about
-  # what the user is requesting.
-    - fail: msg="Deployment type enterprise not supported for upgrade"
-      when: deployment_type == "enterprise"
+    # Pacemaker is currently the only supported upgrade path for multiple masters
+    - fail:
+        msg: "openshift_master_cluster_method must be set to 'pacemaker'"
+      when: openshift_master_ha | bool and ((openshift_master_cluster_method is not defined) or (openshift_master_cluster_method is defined and openshift_master_cluster_method != "pacemaker"))
+
+- name: Run pre-upgrade checks on first master
+  hosts: masters[0]
+  tasks:
+  # If this script errors out ansible will show the default stdout/stderr
+  # which contains details for the user:
+  - script: files/pre-upgrade-check
+
+- name: Evaluate etcd_hosts
+  hosts: localhost
+  tasks:
+  - name: Evaluate etcd hosts
+    add_host:
+      name: "{{ groups.masters.0 }}"
+      groups: etcd_hosts
+    when: hostvars[groups.masters.0].openshift.master.embedded_etcd | bool
+  - name: Evaluate etcd hosts
+    add_host:
+      name: "{{ item }}"
+      groups: etcd_hosts
+    with_items: groups.etcd
+    when: not hostvars[groups.masters.0].openshift.master.embedded_etcd | bool
 
 - name: Backup etcd
-  hosts: masters
+  hosts: etcd_hosts
   vars:
     embedded_etcd: "{{ openshift.master.embedded_etcd }}"
     timestamp: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
   roles:
   - openshift_facts
   tasks:
+
   - stat: path=/var/lib/openshift
     register: var_lib_openshift
+
+  - stat: path=/var/lib/origin
+    register: var_lib_origin
+
   - name: Create origin symlink if necessary
     file: src=/var/lib/openshift/ dest=/var/lib/origin state=link
-    when: var_lib_openshift.stat.exists == True
+    when: var_lib_openshift.stat.exists == True and var_lib_origin.stat.exists == False
+
   - name: Check available disk space for etcd backup
     # We assume to be using the data dir for all backups.
     shell: >
@@ -43,62 +69,71 @@
     when: embedded_etcd | bool
 
   - name: Abort if insufficient disk space for etcd backup
-    fail: msg="{{ etcd_disk_usage.stdout }} Kb disk space required for etcd backup, {{ avail_disk.stdout }} Kb available."
+    fail:
+      msg: >
+        {{ etcd_disk_usage.stdout }} Kb disk space required for etcd backup,
+        {{ avail_disk.stdout }} Kb available.
     when: (embedded_etcd | bool) and (etcd_disk_usage.stdout|int > avail_disk.stdout|int)
-  - name: Install etcd (for etcdctl)
-    yum: pkg=etcd state=latest
-  - name: Generate etcd backup
-    command: etcdctl backup --data-dir={{ openshift.master.etcd_data_dir }} --backup-dir={{ openshift.common.data_dir }}/etcd-backup-{{ timestamp }}
-  - name: Display location of etcd backup
-    debug: msg="Etcd backup created in {{ openshift.common.data_dir }}/etcd-backup-{{ timestamp }}"
 
-- name: Upgrade base package on masters
-  hosts: masters
+  - name: Install etcd (for etcdctl)
+    yum:
+      pkg: etcd
+      state: latest
+
+  - name: Generate etcd backup
+    command: >
+      etcdctl backup --data-dir={{ openshift.master.etcd_data_dir }}
+      --backup-dir={{ openshift.common.data_dir }}/etcd-backup-{{ timestamp }}
+
+  - name: Display location of etcd backup
+    debug:
+      msg: "Etcd backup created in {{ openshift.common.data_dir }}/etcd-backup-{{ timestamp }}"
+
+- name: Update deployment type
+  hosts: OSEv3
   roles:
   - openshift_facts
-  vars:
-    openshift_version: "{{ openshift_pkg_version | default('') }}"
-  tasks:
-    - name: Upgrade base package
-      yum: pkg={{ openshift.common.service_type }}{{ openshift_version  }} state=latest
+  post_tasks:
+  - openshift_facts:
+      role: common
+      local_facts:
+        deployment_type: "{{ deployment_type }}"
 
-- name: Evaluate oo_first_master
-  hosts: localhost
-  vars:
-    g_masters_group: "{{ 'masters' }}"
-  tasks:
-    - name: Evaluate oo_first_master
-      add_host:
-        name: "{{ groups[g_masters_group][0] }}"
-        groups: oo_first_master
-        ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
-        ansible_sudo: "{{ g_sudo | default(omit) }}"
-      when: g_masters_group in groups and (groups[g_masters_group] | length) > 0
 
-# TODO: ideally we would check the new version, without installing it. (some
-# kind of yum repoquery? would need to handle openshift -> atomic-openshift
-# package rename)
 - name: Perform upgrade version checking
-  hosts: oo_first_master
+  hosts: masters[0]
   tasks:
-    - name: Determine new version
-      command: >
-        rpm -q --queryformat '%{version}' {{ openshift.common.service_type }}
-      register: _new_version
+  - name: Clean yum cache
+    command: yum clean all
 
-- name: Ensure AOS 3.0.2 or Origin 1.0.6
-  hosts: oo_first_master
-  tasks:
-    fail: This playbook requires Origin 1.0.6 or Atomic OpenShift 3.0.2 or later
-    when: _new_version.stdout | version_compare('1.0.6','<') or ( _new_version.stdout | version_compare('3.0','>=' and _new_version.stdout | version_compare('3.0.2','<') )
+  - name: Determine available versions
+    script: files/versions.sh {{ openshift.common.service_type }} openshift
+    register: g_versions_result
 
-- name: Verify upgrade can proceed
-  hosts: oo_first_master
-  tasks:
-  # Checking the global deployment type rather than host facts, this is about
-  # what the user is requesting.
-  - fail: msg="Deployment type 'enterprise' must be updated to 'openshift-enterprise' for upgrade to proceed"
-    when: deployment_type == "enterprise" and (_new_version.stdout | version_compare('1.0.7', '>=') or _new_version.stdout | version_compare('3.1', '>='))
+  - set_fact:
+      g_aos_versions: "{{ g_versions_result.stdout | from_yaml }}"
+
+  - set_fact:
+      g_new_version: "{{ g_aos_versions.curr_version.split('-', 1).0 if g_aos_versions.avail_version is none else g_aos_versions.avail_version.split('-', 1).0 }}"
+
+  - fail:
+      msg: This playbook requires Origin 1.0.6 or later
+    when: deployment_type == 'origin' and g_aos_versions.curr_version | version_compare('1.0.6','<')
+
+  - fail:
+      msg: This playbook requires Atomic OpenShift 3.0.2 or later
+    when: deployment_type in ['openshift-enterprise', 'atomic-openshift'] and g_aos_versions.curr_version | version_compare('3.0.2','<')
+
+  - fail:
+      msg: Atomic OpenShift 3.1 packages not found
+    when: deployment_type in ['openshift-enterprise', 'atomic-openshift'] and g_aos_versions.curr_version | version_compare('3.0.2.900','<') and (g_aos_versions.avail_version is none or g_aos_versions.avail_version | version_compare('3.0.2.900','<'))
+  # Deployment type 'enterprise' is no longer valid if we're upgrading to 3.1 or beyond.
+  # (still valid for 3.0.x to 3.0.y however) Using the global deployment_type here as
+  # we're checking what was requested by the upgrade, not the current type on the system.
+  - fail:
+      msg: "Deployment type enterprise not supported for upgrade"
+    when: deployment_type == "enterprise" and  g_aos_versions.curr_version | version_compare('3.1', '>=')
+
 
 - name: Upgrade masters
   hosts: masters
@@ -106,16 +141,138 @@
     openshift_version: "{{ openshift_pkg_version | default('') }}"
   tasks:
     - name: Upgrade to latest available kernel
-      yum: pkg=kernel state=latest
-    - name: display just the deployment_type variable for the current host
-      debug:
-        var: hostvars[inventory_hostname]
+      yum:
+        pkg: kernel
+        state: latest
+
     - name: Upgrade master packages
       command: yum update -y {{ openshift.common.service_type }}-master{{ openshift_version }}
-    - name: Upgrade master configuration.
-      openshift_upgrade_config: from_version=3.0 to_version=3.1 role=master
-    - name: Restart master services
-      service: name="{{ openshift.common.service_type}}-master" state=restarted
+
+    - name: Ensure python-yaml present for config upgrade
+      yum:
+        pkg: python-yaml
+        state: installed
+
+    - name: Upgrade master configuration
+      openshift_upgrade_config:
+        from_version: '3.0'
+        to_version: '3.1'
+        role: master
+        config_base: "{{ hostvars[inventory_hostname].openshift.common.config_base }}"
+        when: deployment_type in ['openshift-enterprise', 'atomic-enterprise'] and g_aos_versions.curr_version | version_compare('3.1', '>=')
+
+    - set_fact:
+        master_certs_missing: True
+        master_cert_subdir: master-{{ openshift.common.hostname }}
+        master_cert_config_dir: "{{ openshift.common.config_base }}/master"
+
+- name: Create temp directory for syncing certs
+  hosts: localhost
+  gather_facts: no
+  tasks:
+  - name: Create local temp directory for syncing certs
+    local_action: command mktemp -d /tmp/openshift-ansible-XXXXXXX
+    register: g_master_mktemp
+    changed_when: False
+
+- name: Generate missing master certificates
+  hosts: masters[0]
+  vars:
+    master_hostnames: "{{ hostvars
+                          | oo_select_keys(groups.masters)
+                          | oo_collect('openshift.common.all_hostnames')
+                          | oo_flatten | unique }}"
+    master_generated_certs_dir: "{{ openshift.common.config_base }}/generated-configs"
+    masters_needing_certs: "{{ hostvars
+                               | oo_select_keys(groups.masters)
+                               | difference([groups.masters.0]) }}"
+    sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
+    openshift_deployment_type: "{{ deployment_type }}"
+  roles:
+  - openshift_master_certificates
+  post_tasks:
+  - name: Remove generated etcd client certs when using external etcd
+    file:
+      path: "{{ master_generated_certs_dir }}/{{ item.0.master_cert_subdir }}/{{ item.1 }}"
+      state: absent
+    when: groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config
+    with_nested:
+    - masters_needing_certs
+    - - master.etcd-client.crt
+      - master.etcd-client.key
+
+  - name: Create a tarball of the master certs
+    command: >
+      tar -czvf {{ master_generated_certs_dir }}/{{ item.master_cert_subdir }}.tgz
+        -C {{ master_generated_certs_dir }}/{{ item.master_cert_subdir }} .
+    with_items: masters_needing_certs
+
+  - name: Retrieve the master cert tarball from the master
+    fetch:
+      src: "{{ master_generated_certs_dir }}/{{ item.master_cert_subdir }}.tgz"
+      dest: "{{ sync_tmpdir }}/"
+      flat: yes
+      fail_on_missing: yes
+      validate_checksum: yes
+    with_items: masters_needing_certs
+
+- name: Sync certs and restart masters post configuration change
+  hosts: masters
+  vars:
+    sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
+    openshift_master_ha: "{{ groups['masters'] | length > 1 }}"
+  tasks:
+  - name: Unarchive the tarball on the master
+    unarchive:
+      src: "{{ sync_tmpdir }}/{{ master_cert_subdir }}.tgz"
+      dest: "{{ master_cert_config_dir }}"
+    when: inventory_hostname != groups.masters.0
+
+  - name: Restart master services
+    service: name="{{ openshift.common.service_type}}-master" state=restarted
+    when: not openshift_master_ha | bool
+
+- name: Destroy cluster
+  hosts: masters[0]
+  vars:
+    openshift_master_ha: "{{ groups['masters'] | length > 1 }}"
+    openshift_deployment_type: "{{ deployment_type }}"
+  pre_tasks:
+  - name: Check for configured cluster
+    stat:
+      path: /etc/corosync/corosync.conf
+    register: corosync_conf
+    when: openshift_master_ha | bool
+  - name: Destroy cluster
+    command: pcs cluster destroy --all
+    when: openshift_master_ha | bool and corosync_conf.stat.exists == true
+
+- name: Start pcsd on masters
+  hosts: masters
+  vars:
+    openshift_master_ha: "{{ groups['masters'] | length > 1 }}"
+  tasks:
+  - name: Start pcsd
+    service: name=pcsd state=started
+    when: openshift_master_ha | bool
+
+- name: Re-create cluster
+  hosts: masters[0]
+  vars:
+    openshift_master_ha: "{{ groups['masters'] | length > 1 }}"
+    openshift_deployment_type: "{{ deployment_type }}"
+    omc_cluster_hosts: "{{ groups.masters | join(' ') }}"
+  roles:
+  - role: openshift_master_cluster
+    when: openshift_master_ha | bool
+
+- name: Delete temporary directory on localhost
+  hosts: localhost
+  gather_facts: no
+  tasks:
+  - file: name={{ g_master_mktemp.stdout }} state=absent
+    changed_when: False
+
 
 - name: Upgrade nodes
   hosts: nodes
@@ -129,17 +286,17 @@
     - name: Restart node services
       service: name="{{ openshift.common.service_type }}-node" state=restarted
 
-- name: Update cluster policy
-  hosts: oo_first_master
+- name: Update cluster policy and policy bindings
+  hosts: masters[0]
+  vars:
+    origin_reconcile_bindings: "{{ deployment_type == 'origin' and g_new_version | version_compare('1.0.6', '>') }}"
+    ent_reconcile_bindings: "{{ deployment_type in ['openshift-enterprise', 'atomic-enterprise'] and g_new_version | version_compare('3.0.2','>') }}"
   tasks:
     - name: oadm policy reconcile-cluster-roles --confirm
       command: >
         {{ openshift.common.admin_binary}} --config={{ openshift.common.config_base }}/master/admin.kubeconfig
         policy reconcile-cluster-roles --confirm
 
-- name: Update cluster policy bindings
-  hosts: oo_first_master
-  tasks:
     - name: oadm policy reconcile-cluster-role-bindings --confirm
       command: >
         {{ openshift.common.admin_binary}} --config={{ openshift.common.config_base }}/master/admin.kubeconfig
@@ -148,12 +305,40 @@
         --exclude-groups=system:unauthenticated
         --exclude-users=system:anonymous
         --additive-only=true --confirm
-      when: ( _new_version.stdout | version_compare('1.0.6', '>') and _new_version.stdout | version_compare('3.0','<') ) or _new_version.stdout | version_compare('3.0.2','>')
+      when: origin_reconcile_bindings | bool or ent_reconcile_bindings | bool
 
-- name: Upgrade default router
-  hosts: oo_first_master
+
+- name: Restart masters post reconcile
+  hosts: masters
   vars:
-    - router_image: "{{ openshift.master.registry_url | replace( '${component}', 'haproxy-router' ) | replace ( '${version}', 'v' + _new_version.stdout ) }}"
+    openshift_master_ha: "{{ groups['masters'] | length > 1 }}"
+  tasks:
+    - name: Restart master services
+      service: name="{{ openshift.common.service_type}}-master" state=restarted
+      when: not openshift_master_ha | bool
+
+- name: Restart cluster post reconcile
+  hosts: masters[0]
+  vars:
+    openshift_master_ha: "{{ groups['masters'] | length > 1 }}"
+  tasks:
+    - name: Restart master cluster
+      command: pcs resource restart master
+      when: openshift_master_ha | bool
+    - name: Wait for the clustered master service to be available
+      wait_for:
+        host: "{{ openshift_master_cluster_vip }}"
+        port: 8443
+        state: started
+        timeout: 180
+        delay: 90
+      when: openshift_master_ha | bool
+
+- name: Upgrade default router and registry
+  hosts: masters[0]
+  vars:
+    - registry_image: "{{  openshift.master.registry_url | replace( '${component}', 'docker-registry' )  | replace ( '${version}', 'v' + g_new_version  ) }}"
+    - router_image: "{{ openshift.master.registry_url | replace( '${component}', 'haproxy-router' ) | replace ( '${version}', 'v' + g_new_version ) }}"
     - oc_cmd: "{{ openshift.common.client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig"
   tasks:
     - name: Check for default router
@@ -188,12 +373,6 @@
         {{ oc_cmd }} patch dc/router -p
         '{"spec":{"template":{"spec":{"containers":[{"name":"router","image":"{{ router_image }}"}]}}}}'
 
-- name: Upgrade default
-  hosts: oo_first_master
-  vars:
-    - registry_image: "{{  openshift.master.registry_url | replace( '${component}', 'docker-registry' )  | replace ( '${version}', 'v' + _new_version.stdout  ) }}"
-    - oc_cmd: "{{ openshift.common.client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig"
-  tasks:
     - name: Check for default registry
       command: >
           {{ oc_cmd }} get -n default dc/docker-registry
@@ -207,7 +386,7 @@
         '{"spec":{"template":{"spec":{"containers":[{"name":"registry","image":"{{ registry_image }}"}]}}}}'
 
 - name: Update image streams and templates
-  hosts: oo_first_master
+  hosts: masters[0]
   vars:
     openshift_examples_import_command: "update"
     openshift_deployment_type: "{{ deployment_type }}"
