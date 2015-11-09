@@ -20,6 +20,8 @@ EXAMPLES = '''
 import ConfigParser
 import copy
 import os
+import StringIO
+import yaml
 from distutils.util import strtobool
 from distutils.version import LooseVersion
 from netaddr import IPNetwork
@@ -526,17 +528,54 @@ def set_aggregate_facts(facts):
             first_svc_ip = str(IPNetwork(facts['master']['portal_net'])[1])
             all_hostnames.add(first_svc_ip)
             internal_hostnames.add(first_svc_ip)
-
-            if facts['master']['embedded_etcd']:
-                facts['master']['etcd_data_dir'] = os.path.join(
-                    facts['common']['data_dir'], 'openshift.local.etcd')
-            else:
-                facts['master']['etcd_data_dir'] = '/var/lib/etcd'
+            _add_etcd_data_dir_fact(facts)
 
         facts['common']['all_hostnames'] = list(all_hostnames)
         facts['common']['internal_hostnames'] = list(internal_hostnames)
 
     return facts
+
+
+def _add_etcd_data_dir_fact(facts):
+    """
+    If using embedded etcd, loads the data directory from master-config.yaml.
+
+    If using standalone etcd, loads ETCD_DATA_DIR from etcd.conf.
+
+    If anything goes wrong parsing these, the fact will not be set.
+    """
+    if facts['master']['embedded_etcd']:
+        try:
+            # Parse master config to find actual etcd data dir:
+            master_cfg_path = os.path.join(facts['common']['config_base'],
+                                           'master/master-config.yaml')
+            master_cfg_f = open(master_cfg_path, 'r')
+            config = yaml.safe_load(master_cfg_f.read())
+            master_cfg_f.close()
+
+            facts['master']['etcd_data_dir'] = \
+                config['etcdConfig']['storageDirectory']
+        # We don't want exceptions bubbling up here:
+        # pylint: disable=broad-except
+        except Exception:
+            pass
+    else:
+        # Read ETCD_DATA_DIR from /etc/etcd/etcd.conf:
+        try:
+            # Add a fake section for parsing:
+            ini_str = '[root]\n' + open('/etc/etcd/etcd.conf', 'r').read()
+            ini_fp = StringIO.StringIO(ini_str)
+            config = ConfigParser.RawConfigParser()
+            config.readfp(ini_fp)
+            etcd_data_dir = config.get('root', 'ETCD_DATA_DIR')
+            if etcd_data_dir.startswith('"') and etcd_data_dir.endswith('"'):
+                etcd_data_dir = etcd_data_dir[1:-1]
+            facts['master']['etcd_data_dir'] = etcd_data_dir
+        # We don't want exceptions bubbling up here:
+        # pylint: disable=broad-except
+        except Exception:
+            pass
+
 
 def set_deployment_facts_if_unset(facts):
     """ Set Facts that vary based on deployment_type. This currently

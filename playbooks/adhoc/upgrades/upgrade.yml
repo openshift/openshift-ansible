@@ -150,7 +150,7 @@
 
     - name: Ensure python-yaml present for config upgrade
       yum:
-        pkg: python-yaml
+        pkg: PyYAML
         state: installed
 
     - name: Upgrade master configuration
