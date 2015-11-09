@@ -120,10 +120,7 @@
       msg: This playbook requires Origin 1.0.6 or later
     when: deployment_type == 'origin' and g_aos_versions.curr_version | version_compare('1.0.6','<')
 
-  - fail:
-      msg: This playbook requires Atomic OpenShift 3.0.2 or later
-    when: deployment_type in ['openshift-enterprise', 'atomic-openshift'] and g_aos_versions.curr_version | version_compare('3.0.2','<')
-
+  # TODO: This should be specific to the 3.1 upgrade playbook (coming in future refactor), otherwise we are blocking 3.0.1 to 3.0.2 here.
   - fail:
       msg: Atomic OpenShift 3.1 packages not found
     when: deployment_type in ['openshift-enterprise', 'atomic-openshift'] and g_aos_versions.curr_version | version_compare('3.0.2.900','<') and (g_aos_versions.avail_version is none or g_aos_versions.avail_version | version_compare('3.0.2.900','<'))
