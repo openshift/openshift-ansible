@@ -14,18 +14,21 @@ SAMPLE_CONFIG = """
 variant: openshift-enterprise
 ansible_ssh_user: root
 hosts:
-  - ip: 10.0.0.1
+  - connect_to: master-private.example.com
+    ip: 10.0.0.1
     hostname: master-private.example.com
     public_ip: 24.222.0.1
     public_hostname: master.example.com
     master: true
     node: true
-  - ip: 10.0.0.2
+  - connect_to: node1-private.example.com
+    ip: 10.0.0.2
     hostname: node1-private.example.com
     public_ip: 24.222.0.2
     public_hostname: node1.example.com
     node: true
-  - ip: 10.0.0.3
+  - connect_to: node2-private.example.com
+    ip: 10.0.0.3
     hostname: node2-private.example.com
     public_ip: 24.222.0.3
     public_hostname: node2.example.com
@@ -54,16 +57,19 @@ validated_facts:
 
 CONFIG_INCOMPLETE_FACTS = """
 hosts:
-  - ip: 10.0.0.1
+  - connect_to: 10.0.0.1
+    ip: 10.0.0.1
     hostname: master-private.example.com
     public_ip: 24.222.0.1
     public_hostname: master.example.com
     master: true
-  - ip: 10.0.0.2
-    hostname: node1-private.example.com
+  - connect_to: 10.0.0.2
+    ip: 10.0.0.2
+    hostname: 24.222.0.2
     public_ip: 24.222.0.2
     node: true
-  - ip: 10.0.0.3
+  - connect_to: 10.0.0.3
+    ip: 10.0.0.3
     node: true
 """
 
@@ -145,7 +151,7 @@ class OOConfigTests(OOInstallFixture):
         ooconfig = OOConfig(cfg_path)
 
         self.assertEquals(3, len(ooconfig.hosts))
-        self.assertEquals("10.0.0.1", ooconfig.hosts[0].name)
+        self.assertEquals("master-private.example.com", ooconfig.hosts[0].connect_to)
         self.assertEquals("10.0.0.1", ooconfig.hosts[0].ip)
         self.assertEquals("master-private.example.com", ooconfig.hosts[0].hostname)
 
