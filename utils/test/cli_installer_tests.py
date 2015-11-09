@@ -46,18 +46,21 @@ SAMPLE_CONFIG = """
 variant: %s
 ansible_ssh_user: root
 hosts:
-  - ip: 10.0.0.1
+  - connect_to: master-private.example.com
+    ip: 10.0.0.1
     hostname: master-private.example.com
     public_ip: 24.222.0.1
     public_hostname: master.example.com
     master: true
     node: true
-  - ip: 10.0.0.2
+  - connect_to: node1-private.example.com
+    ip: 10.0.0.2
     hostname: node1-private.example.com
     public_ip: 24.222.0.2
     public_hostname: node1.example.com
     node: true
-  - ip: 10.0.0.3
+  - connect_to: node2-private.example.com
+    ip: 10.0.0.3
     hostname: node2-private.example.com
     public_ip: 24.222.0.3
     public_hostname: node2.example.com

@@ -118,6 +118,7 @@ class OOConfig(object):
         new_hosts = []
         if 'validated_facts' in self.settings:
             for key, value in self.settings['validated_facts'].iteritems():
+                value['connect_to'] = key
                 if 'masters' in self.settings and key in self.settings['masters']:
                     value['master'] = True
                 if 'nodes' in self.settings and key in self.settings['nodes']:
