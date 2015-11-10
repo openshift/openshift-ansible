@@ -604,10 +604,16 @@ def set_deployment_facts_if_unset(facts):
             config_base = '/etc/origin'
             if deployment_type in ['enterprise', 'online']:
                 config_base = '/etc/openshift'
+            # Handle upgrade scenarios when symlinks don't yet exist:
+            if not os.path.exists(config_base) and os.path.exists('/etc/openshift'):
+                config_base = '/etc/openshift'
             facts['common']['config_base'] = config_base
         if 'data_dir' not in facts['common']:
             data_dir = '/var/lib/origin'
             if deployment_type in ['enterprise', 'online']:
+                data_dir = '/var/lib/openshift'
+            # Handle upgrade scenarios when symlinks don't yet exist:
+            if not os.path.exists(data_dir) and os.path.exists('/var/lib/openshift'):
                 data_dir = '/var/lib/openshift'
             facts['common']['data_dir'] = data_dir
 
