@@ -250,7 +250,7 @@
     openshift_master_ha: "{{ groups['masters'] | length > 1 }}"
   tasks:
   - name: Start pcsd
-    service: name=pcsd state=started
+    service: name=pcsd enabled=yes state=started
     when: openshift_master_ha | bool
 
 - name: Re-create cluster
@@ -389,3 +389,19 @@
     openshift_deployment_type: "{{ deployment_type }}"
   roles:
     - openshift_examples
+
+- name: Ensure master services enabled
+  hosts: masters
+  vars:
+    openshift_master_ha: "{{ groups['masters'] | length > 1 }}"
+  tasks:
+  - name: Enable master services
+    service: name="{{ openshift.common.service_type}}-master" state=started enabled=yes
+    when: not openshift_master_ha | bool
+
+- name: Ensure node services enabled
+  hosts: nodes
+  tasks:
+    - name: Restart node services
+      service: name="{{ openshift.common.service_type }}-node" state=started enabled=yes
+
