@@ -7,8 +7,10 @@
 
 EXAMPLES_BASE=$(pwd)/files/examples
 find files/examples -name '*.json' -delete
+find files/examples -name '*.yaml' -delete
 TEMP=`mktemp -d`
 pushd $TEMP
+
 wget https://github.com/openshift/origin/archive/master.zip -O origin-master.zip
 wget https://github.com/openshift/django-ex/archive/master.zip -O django-ex-master.zip
 wget https://github.com/openshift/rails-ex/archive/master.zip -O rails-ex-master.zip
@@ -33,5 +35,11 @@ cp dancer-ex-master/openshift/templates/* ${EXAMPLES_BASE}/quickstart-templates/
 cp cakephp-ex-master/openshift/templates/* ${EXAMPLES_BASE}/quickstart-templates/
 mv application-templates-master/jboss-image-streams.json ${EXAMPLES_BASE}/xpaas-streams/
 find application-templates-master/ -name '*.json' ! -wholename '*secret*' -exec mv {} ${EXAMPLES_BASE}/xpaas-templates/ \;
+
+wget https://raw.githubusercontent.com/openshift/origin-metrics/master/metrics.yaml                            -O ${EXAMPLES_BASE}/infrastructure-templates/origin/metrics-deployer.yaml
+cp ${EXAMPLES_BASE}/infrastructure-templates/origin/metrics-*.yaml                                                ${EXAMPLES_BASE}/infrastructure-templates/enterprise/
+wget https://raw.githubusercontent.com/openshift/origin-aggregated-logging/master/deployment/deployer.yaml     -O ${EXAMPLES_BASE}/infrastructure-templates/origin/logging-deployer.yaml
+wget https://raw.githubusercontent.com/openshift/origin-aggregated-logging/enterprise/deployment/deployer.yaml -O ${EXAMPLES_BASE}/infrastructure-templates/enterprise/logging-deployer.yaml
+
 popd
 git diff files/examples
