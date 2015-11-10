@@ -112,13 +112,15 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
         host_props['master'] = click.confirm('Will this host be an OpenShift Master?')
         host_props['node'] = True
 
-        rpm_or_container = click.prompt('Will this host be RPM or Container based (rpm/container)?',
-                                        type=click.Choice(['rpm', 'container']),
-                                        default='rpm')
-        if rpm_or_container == 'container':
-            host_props['containerized'] = True
-        else:
-            host_props['containerized'] = False
+        #TODO: Reenable this option once container installs are out of tech preview
+        #rpm_or_container = click.prompt('Will this host be RPM or Container based (rpm/container)?',
+        #                                type=click.Choice(['rpm', 'container']),
+        #                                default='rpm')
+        #if rpm_or_container == 'container':
+        #    host_props['containerized'] = True
+        #else:
+        #    host_props['containerized'] = False
+        host_props['containerized'] = False
 
         host = Host(**host_props)
 
