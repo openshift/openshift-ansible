@@ -64,7 +64,7 @@
 
   - name: Check current embedded etcd disk usage
     shell: >
-      du -k {{ openshift.master.etcd_data_dir }} | tail -n 1 | cut -f1
+      du -k {{ openshift.common.etcd_data_dir }} | tail -n 1 | cut -f1
     register: etcd_disk_usage
     when: embedded_etcd | bool
 
@@ -82,7 +82,7 @@
 
   - name: Generate etcd backup
     command: >
-      etcdctl backup --data-dir={{ openshift.master.etcd_data_dir }}
+      etcdctl backup --data-dir={{ openshift.common.etcd_data_dir }}
       --backup-dir={{ openshift.common.data_dir }}/etcd-backup-{{ timestamp }}
 
   - name: Display location of etcd backup
