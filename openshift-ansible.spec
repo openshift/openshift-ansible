@@ -82,6 +82,8 @@ pushd utils
 %{__python} setup.py install --skip-build --root %{buildroot}
 # Remove this line once the name change has happened
 mv -f %{buildroot}%{_bindir}/oo-install %{buildroot}%{_bindir}/atomic-openshift-installer
+mkdir -p %{buildroot}%{_datadir}/atomic-openshift-utils/
+cp etc/ansible.cfg %{buildroot}%{_datadir}/atomic-openshift-utils/ansible.cfg
 popd
 
 # Base openshift-ansible files
@@ -252,6 +254,7 @@ Atomic OpenShift Utilities includes
 %files -n atomic-openshift-utils
 %{python_sitelib}/ooinstall*
 %{_bindir}/atomic-openshift-installer
+%{_datadir}/atomic-openshift-utils/ansible.cfg
 
 
 %changelog

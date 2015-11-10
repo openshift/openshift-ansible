@@ -11,7 +11,7 @@ from ooinstall import OOConfig
 from ooinstall.oo_config import Host
 from ooinstall.variants import find_variant, get_variant_version_combos
 
-DEFAULT_ANSIBLE_CONFIG = '/usr/share/atomic-openshift-util/ansible.cfg'
+DEFAULT_ANSIBLE_CONFIG = '/usr/share/atomic-openshift-utils/ansible.cfg'
 DEFAULT_PLAYBOOK_DIR = '/usr/share/ansible/openshift-ansible/'
 
 def validate_ansible_dir(path):
