@@ -59,8 +59,8 @@
         - atomic-openshift-master
         - atomic-openshift-node
         - atomic-openshift-sdn-ovs
-        - etcd
         - corosync
+        - etcd
         - openshift
         - openshift-master
         - openshift-node
@@ -68,6 +68,7 @@
         - openshift-sdn-ovs
         - openvswitch
         - origin
+        - origin-clients
         - origin-master
         - origin-node
         - origin-sdn-ovs
