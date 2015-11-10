@@ -34,7 +34,6 @@ corsAllowedOrigins:
 disabledFeatures: {{ openshift.master.disabled_features | to_json }}
 {% endif %}
 {% if openshift.master.embedded_dns | bool %}
-disabledFeatures: null
 dnsConfig:
   bindAddress: {{ openshift.master.bind_addr }}:{{ openshift.master.dns_port }}
   bindNetwork: tcp4
