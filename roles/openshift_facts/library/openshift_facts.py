@@ -513,6 +513,8 @@ def set_aggregate_facts(facts):
         internal_hostnames.add(facts['common']['hostname'])
         internal_hostnames.add(facts['common']['ip'])
 
+        _add_etcd_data_dir_fact(facts)
+
         if 'master' in facts:
             # FIXME: not sure why but facts['dns']['domain'] fails
             cluster_domain = 'cluster.local'
@@ -528,7 +530,6 @@ def set_aggregate_facts(facts):
             first_svc_ip = str(IPNetwork(facts['master']['portal_net'])[1])
             all_hostnames.add(first_svc_ip)
             internal_hostnames.add(first_svc_ip)
-            _add_etcd_data_dir_fact(facts)
 
         facts['common']['all_hostnames'] = list(all_hostnames)
         facts['common']['internal_hostnames'] = list(internal_hostnames)
@@ -544,21 +545,21 @@ def _add_etcd_data_dir_fact(facts):
 
     If anything goes wrong parsing these, the fact will not be set.
     """
-    if facts['master']['embedded_etcd']:
-        try:
-            # Parse master config to find actual etcd data dir:
-            master_cfg_path = os.path.join(facts['common']['config_base'],
-                                           'master/master-config.yaml')
-            master_cfg_f = open(master_cfg_path, 'r')
-            config = yaml.safe_load(master_cfg_f.read())
-            master_cfg_f.close()
+    if 'master' in facts:
+        if facts['master']['embedded_etcd']:
+            try:
+                # Parse master config to find actual etcd data dir:
+                master_cfg_path = os.path.join(facts['common']['config_base'],
+                                               'master/master-config.yaml')
+                master_cfg_f = open(master_cfg_path, 'r')
+                config = yaml.safe_load(master_cfg_f.read())
+                master_cfg_f.close()
 
-            facts['master']['etcd_data_dir'] = \
-                config['etcdConfig']['storageDirectory']
-        # We don't want exceptions bubbling up here:
-        # pylint: disable=broad-except
-        except Exception:
-            pass
+                facts['common']['etcd_data_dir'] = config['etcdConfig']['storageDirectory']
+            # We don't want exceptions bubbling up here:
+            # pylint: disable=broad-except
+            except Exception:
+                pass
     else:
         # Read ETCD_DATA_DIR from /etc/etcd/etcd.conf:
         try:
@@ -570,7 +571,7 @@ def _add_etcd_data_dir_fact(facts):
             etcd_data_dir = config.get('root', 'ETCD_DATA_DIR')
             if etcd_data_dir.startswith('"') and etcd_data_dir.endswith('"'):
                 etcd_data_dir = etcd_data_dir[1:-1]
-            facts['master']['etcd_data_dir'] = etcd_data_dir
+            facts['common']['etcd_data_dir'] = etcd_data_dir
         # We don't want exceptions bubbling up here:
         # pylint: disable=broad-except
         except Exception:
