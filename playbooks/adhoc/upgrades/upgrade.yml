@@ -226,7 +226,7 @@
     when: inventory_hostname != groups.masters.0
 
   - name: Restart master services
-    service: name="{{ openshift.common.service_type}}-master" state=restarted
+    service: name="{{ openshift.common.service_type}}-master" enabled=yes state=restarted
     when: not openshift_master_ha | bool
 
 - name: Destroy cluster
@@ -250,7 +250,7 @@
     openshift_master_ha: "{{ groups['masters'] | length > 1 }}"
   tasks:
   - name: Start pcsd
-    service: name=pcsd state=started
+    service: name=pcsd enabled=yes state=started
     when: openshift_master_ha | bool
 
 - name: Re-create cluster
@@ -281,7 +281,7 @@
     - name: Upgrade node packages
       command: yum update -y {{ openshift.common.service_type }}-node{{ openshift_version }}
     - name: Restart node services
-      service: name="{{ openshift.common.service_type }}-node" state=restarted
+      service: name="{{ openshift.common.service_type }}-node" enabled=yes state=restarted
 
 - name: Update cluster policy and policy bindings
   hosts: masters[0]
@@ -311,7 +311,7 @@
     openshift_master_ha: "{{ groups['masters'] | length > 1 }}"
   tasks:
     - name: Restart master services
-      service: name="{{ openshift.common.service_type}}-master" state=restarted
+      service: name="{{ openshift.common.service_type}}-master" enabled=yes state=restarted
       when: not openshift_master_ha | bool
 
 - name: Restart cluster post reconcile
