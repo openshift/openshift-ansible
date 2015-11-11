@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.8
+Version:        3.0.9
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -258,6 +258,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Nov 11 2015 Brenton Leanhardt <bleanhar@redhat.com> 3.0.9-1
+- Refactor upgrade playbook(s) (jdetiber@redhat.com)
+
 * Tue Nov 10 2015 Scott Dodson <sdodson@redhat.com> 3.0.8-1
 - Add origin-clients to uninstall playbook. (abutcher@redhat.com)
 - examples: include logging and metrics infrastructure (lmeyer@redhat.com)
