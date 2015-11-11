@@ -363,13 +363,20 @@
 - name: Upgrade default router and default registry
   hosts: oo_first_master
   vars:
-    openshift_examples_import_command: "update"
     openshift_deployment_type: "{{ deployment_type }}"
     registry_image: "{{  openshift.master.registry_url | replace( '${component}', 'docker-registry' )  | replace ( '${version}', 'v' + g_new_version  ) }}"
     router_image: "{{ openshift.master.registry_url | replace( '${component}', 'haproxy-router' ) | replace ( '${version}', 'v' + g_new_version ) }}"
     oc_cmd: "{{ openshift.common.client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig"
   roles:
+  # Create the new templates shipped in 3.1, existing templates are left
+  # unmodified. This prevents the subsequent role definition for
+  # openshift_examples from failing when trying to replace templates that do
+  # not already exist. We could have potentially done a replace --force to
+  # create and update in one step.
   - openshift_examples
+  # Update the existing templates
+  - role: openshift_examples
+    openshift_examples_import_command: replace
   pre_tasks:
   - name: Check for default router
     command: >
