@@ -1,36 +1,14 @@
 ---
+###############################################################################
+# Evaluate host groups and gather facts
+###############################################################################
 - name: Evaluate host groups
   include: ../../evaluate_groups.yml
 
-- name: Load openshift_facts from the environment
-  hosts: oo_masters_to_config oo_nodes_to_config oo_etcd_to_config oo_lb_to_config
+- name: Load openshift_facts
+  hosts: oo_masters_to_config:oo_nodes_to_config:oo_etcd_to_config:oo_lb_to_config
   roles:
   - openshift_facts
-
-- name: Verify upgrade can proceed
-  hosts: oo_first_master
-  vars:
-    openshift_master_ha: "{{ groups['masters'] | length > 1 }}"
-  gather_facts: no
-  tasks:
-  # Pacemaker is currently the only supported upgrade path for multiple masters
-  - fail:
-      msg: "openshift_master_cluster_method must be set to 'pacemaker'"
-    when: openshift_master_ha | bool and ((openshift_master_cluster_method is not defined) or (openshift_master_cluster_method is defined and openshift_master_cluster_method != "pacemaker"))
-  - fail:
-      msg: >
-        This upgrade is only supported for origin and openshift-enterprise
-        deployment types
-    when: deployment_type not in ['origin','openshift-enterprise']
-  - fail:
-      msg: >
-        openshift_pkg_version is {{ openshift_pkg_version }} which is not a
-        valid version for a 3.1 upgrade
-    when: openshift_pkg_version is defined and openshift_pkg_version.split('-',1).1 | version_compare('3.0.2.900','<')
-
-  # If this script errors out ansible will show the default stdout/stderr
-  # which contains details for the user:
-  - script: ../files/pre-upgrade-check
 
 - name: Evaluate etcd_hosts_to_backup
   hosts: localhost
@@ -41,6 +19,69 @@
       groups: etcd_hosts_to_backup
     with_items: groups.oo_etcd_to_config if groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config | length > 0 else groups.oo_first_master
 
+
+###############################################################################
+# Pre-upgrade checks
+###############################################################################
+- name: Verify upgrade can proceed
+  hosts: oo_first_master
+  vars:
+    openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
+  gather_facts: no
+  tasks:
+  # Pacemaker is currently the only supported upgrade path for multiple masters
+  - fail:
+      msg: "openshift_master_cluster_method must be set to 'pacemaker'"
+    when: openshift_master_ha | bool and ((openshift_master_cluster_method is not defined) or (openshift_master_cluster_method is defined and openshift_master_cluster_method != "pacemaker"))
+
+  - fail:
+      msg: >
+        This upgrade is only supported for origin and openshift-enterprise
+        deployment types
+    when: deployment_type not in ['origin','openshift-enterprise']
+
+  - fail:
+      msg: >
+        openshift_pkg_version is {{ openshift_pkg_version }} which is not a
+        valid version for a 3.1 upgrade
+    when: openshift_pkg_version is defined and openshift_pkg_version.split('-',1).1 | version_compare('3.0.2.900','<')
+
+  # If this script errors out ansible will show the default stdout/stderr
+  # which contains details for the user:
+  - script: ../files/pre-upgrade-check
+
+
+- name: Verify upgrade can proceed
+  hosts: masters:nodes
+  tasks:
+  - name: Clean yum cache
+    command: yum clean all
+
+  - set_fact:
+      g_new_service_name: "{{ 'origin' if deployment_type =='origin' else 'atomic-openshift' }}"
+
+  - name: Determine available versions
+    script: ../files/versions.sh {{ g_new_service_name }} openshift
+    register: g_versions_result
+
+  - set_fact:
+      g_aos_versions: "{{ g_versions_result.stdout | from_yaml }}"
+
+  - set_fact:
+      g_new_version: "{{ g_aos_versions.curr_version.split('-', 1).0 if g_aos_versions.avail_version is none else g_aos_versions.avail_version.split('-', 1).0 }}"
+
+  - fail:
+      msg: This playbook requires Origin 1.0.6 or later
+    when: deployment_type == 'origin' and g_aos_versions.curr_version | version_compare('1.0.6','<')
+
+  - fail:
+      msg: Atomic OpenShift 3.1 packages not found
+    when: g_aos_versions.curr_version | version_compare('3.0.2.900','<') and (g_aos_versions.avail_version is none or g_aos_versions.avail_version | version_compare('3.0.2.900','<'))
+
+
+###############################################################################
+# Backup etcd
+###############################################################################
 - name: Backup etcd
   hosts: etcd_hosts_to_backup
   vars:
@@ -64,15 +105,15 @@
     file: src=/var/lib/openshift/ dest=/var/lib/origin state=link
     when: var_lib_openshift.stat.exists == True and var_lib_origin.stat.exists == False
 
+  # TODO: replace shell module with command and update later checks
+  # We assume to be using the data dir for all backups.
   - name: Check available disk space for etcd backup
-    # We assume to be using the data dir for all backups.
-    shell: >
-      df --output=avail -k {{ openshift.common.data_dir }} | tail -n 1
+    shell: df --output=avail -k {{ openshift.common.data_dir }} | tail -n 1
     register: avail_disk
 
+  # TODO: replace shell module with command and update later checks
   - name: Check current embedded etcd disk usage
-    shell: >
-      du -k {{ openshift.etcd.etcd_data_dir }} | tail -n 1 | cut -f1
+    shell: du -k {{ openshift.etcd.etcd_data_dir }} | tail -n 1 | cut -f1
     register: etcd_disk_usage
     when: embedded_etcd | bool
 
@@ -98,6 +139,18 @@
       msg: "Etcd backup created in {{ openshift.common.data_dir }}/etcd-backup-{{ timestamp }}"
 
 
+###############################################################################
+# Upgrade Masters
+###############################################################################
+- name: Create temp directory for syncing certs
+  hosts: localhost
+  gather_facts: no
+  tasks:
+  - name: Create local temp directory for syncing certs
+    local_action: command mktemp -d /tmp/openshift-ansible-XXXXXXX
+    register: g_master_mktemp
+    changed_when: False
+
 - name: Update deployment type
   hosts: OSEv3
   roles:
@@ -108,81 +161,48 @@
       local_facts:
         deployment_type: "{{ deployment_type }}"
 
-
-- name: Perform upgrade version checking
-  hosts: masters[0]
-  tasks:
-  - name: Clean yum cache
-    command: yum clean all
-
-  - name: Determine available versions
-    script: ../files/versions.sh {{ openshift.common.service_type }} openshift
-    register: g_versions_result
-
-  - set_fact:
-      g_aos_versions: "{{ g_versions_result.stdout | from_yaml }}"
-
-  - set_fact:
-      g_new_version: "{{ g_aos_versions.curr_version.split('-', 1).0 if g_aos_versions.avail_version is none else g_aos_versions.avail_version.split('-', 1).0 }}"
-
-  - fail:
-      msg: This playbook requires Origin 1.0.6 or later
-    when: deployment_type == 'origin' and g_aos_versions.curr_version | version_compare('1.0.6','<')
-
-  - fail:
-      msg: Atomic OpenShift 3.1 packages not found
-    when: g_aos_versions.curr_version | version_compare('3.0.2.900','<') and (g_aos_versions.avail_version is none or g_aos_versions.avail_version | version_compare('3.0.2.900','<'))
-
-- name: Upgrade masters
-  hosts: masters
+- name: Upgrade master packages and configuration
+  hosts: oo_masters_to_config
   vars:
     openshift_version: "{{ openshift_pkg_version | default('') }}"
   tasks:
-    - name: Upgrade to latest available kernel
-      yum:
-        pkg: kernel
-        state: latest
+  - name: Upgrade to latest available kernel
+    yum:
+      pkg: kernel
+      state: latest
 
-    - name: Upgrade master packages
-      command: yum update -y {{ openshift.common.service_type }}-master{{ openshift_version }}
+  - name: Upgrade master packages
+    command: yum update -y {{ openshift.common.service_type }}-master{{ openshift_version }}
 
-    - name: Ensure python-yaml present for config upgrade
-      yum:
-        pkg: PyYAML
-        state: installed
+  - name: Ensure python-yaml present for config upgrade
+    yum:
+      pkg: PyYAML
+      state: installed
 
-    - name: Upgrade master configuration
-      openshift_upgrade_config:
-        from_version: '3.0'
-        to_version: '3.1'
-        role: master
-        config_base: "{{ hostvars[inventory_hostname].openshift.common.config_base }}"
+  - name: Upgrade master configuration
+    openshift_upgrade_config:
+      from_version: '3.0'
+      to_version: '3.1'
+      role: master
+      config_base: "{{ hostvars[inventory_hostname].openshift.common.config_base }}"
 
-    - set_fact:
-        master_certs_missing: True
-        master_cert_subdir: master-{{ openshift.common.hostname }}
-        master_cert_config_dir: "{{ openshift.common.config_base }}/master"
+  - set_fact:
+      master_certs_missing: True
+      master_cert_subdir: master-{{ openshift.common.hostname }}
+      master_cert_config_dir: "{{ openshift.common.config_base }}/master"
 
-- name: Create temp directory for syncing certs
-  hosts: localhost
-  gather_facts: no
-  tasks:
-  - name: Create local temp directory for syncing certs
-    local_action: command mktemp -d /tmp/openshift-ansible-XXXXXXX
-    register: g_master_mktemp
-    changed_when: False
 
 - name: Generate missing master certificates
-  hosts: masters[0]
+  hosts: oo_first_master
   vars:
     master_hostnames: "{{ hostvars
-                          | oo_select_keys(groups.masters)
+                          | oo_select_keys(groups.oo_masters_to_config)
                           | oo_collect('openshift.common.all_hostnames')
                           | oo_flatten | unique }}"
     master_generated_certs_dir: "{{ openshift.common.config_base }}/generated-configs"
     masters_needing_certs: "{{ hostvars
-                               | oo_select_keys(groups.masters)
-                               | difference([groups.masters.0]) }}"
+                               | oo_select_keys(groups.oo_masters_to_config)
+                               | difference([groups.oo_first_master.0]) }}"
     sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
     openshift_deployment_type: "{{ deployment_type }}"
   roles:
@@ -213,55 +233,54 @@
       validate_checksum: yes
     with_items: masters_needing_certs
 
-- name: Sync certs and restart masters post configuration change
-  hosts: masters
+
+- name: Sync generated certs, update service config and restart master services
+  hosts: oo_masters_to_config
   vars:
     sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
-    openshift_master_ha: "{{ groups['masters'] | length > 1 }}"
+    openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
+    openshift_deployment_type: "{{ deployment_type }}"
   tasks:
   - name: Unarchive the tarball on the master
     unarchive:
       src: "{{ sync_tmpdir }}/{{ master_cert_subdir }}.tgz"
       dest: "{{ master_cert_config_dir }}"
-    when: inventory_hostname != groups.masters.0
+    when: inventory_hostname != groups.oo_first_master.0
 
-  - name: Restart master services
+  - name: Restart master service
     service: name="{{ openshift.common.service_type}}-master" state=restarted
     when: not openshift_master_ha | bool
 
-- name: Destroy cluster
-  hosts: masters[0]
-  vars:
-    openshift_master_ha: "{{ groups['masters'] | length > 1 }}"
-    openshift_deployment_type: "{{ deployment_type }}"
-  pre_tasks:
+  - name: Ensure the master service is enabled
+    service: name="{{ openshift.common.service_type}}-master" state=started enabled=yes
+    when: not openshift_master_ha | bool
+
   - name: Check for configured cluster
     stat:
       path: /etc/corosync/corosync.conf
     register: corosync_conf
     when: openshift_master_ha | bool
+
   - name: Destroy cluster
     command: pcs cluster destroy --all
     when: openshift_master_ha | bool and corosync_conf.stat.exists == true
+    run_once: true
 
-- name: Start pcsd on masters
-  hosts: masters
-  vars:
-    openshift_master_ha: "{{ groups['masters'] | length > 1 }}"
-  tasks:
   - name: Start pcsd
     service: name=pcsd enabled=yes state=started
     when: openshift_master_ha | bool
 
+
 - name: Re-create cluster
-  hosts: masters[0]
+  hosts: oo_first_master
   vars:
-    openshift_master_ha: "{{ groups['masters'] | length > 1 }}"
+    openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
     openshift_deployment_type: "{{ deployment_type }}"
-    omc_cluster_hosts: "{{ groups.masters | join(' ') }}"
+    omc_cluster_hosts: "{{ groups.oo_masters_to_config | join(' ') }}"
   roles:
   - role: openshift_master_cluster
     when: openshift_master_ha | bool
+
 
 - name: Delete temporary directory on localhost
   hosts: localhost
@@ -271,137 +290,133 @@
     changed_when: False
 
 
+###############################################################################
+# Upgrade Nodes
+###############################################################################
 - name: Upgrade nodes
-  hosts: nodes
+  hosts: oo_nodes_to_config
   vars:
     openshift_version: "{{ openshift_pkg_version | default('') }}"
   roles:
   - openshift_facts
   tasks:
-    - name: Upgrade node packages
-      command: yum update -y {{ openshift.common.service_type }}-node{{ openshift_version }}
-    - name: Restart node services
-      service: name="{{ openshift.common.service_type }}-node" state=restarted
+  - name: Upgrade node packages
+    command: yum update -y {{ openshift.common.service_type }}-node{{ openshift_version }}
 
-- name: Update cluster policy and policy bindings
-  hosts: masters[0]
+  - name: Restart node service
+    service: name="{{ openshift.common.service_type }}-node" state=restarted
+
+  - name: Ensure node service enabled
+    service: name="{{ openshift.common.service_type }}-node" state=started enabled=yes
+
+
+###############################################################################
+# Post upgrade - Reconcile Cluster Roles and Cluster Role Bindings
+###############################################################################
+- name: Reconcile Cluster Roles and Cluster Role Bindings
+  hosts: oo_masters_to_config
   vars:
     origin_reconcile_bindings: "{{ deployment_type == 'origin' and g_new_version | version_compare('1.0.6', '>') }}"
     ent_reconcile_bindings: true
+    openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
   tasks:
-    - name: oadm policy reconcile-cluster-roles --confirm
-      command: >
-        {{ openshift.common.admin_binary}} --config={{ openshift.common.config_base }}/master/admin.kubeconfig
-        policy reconcile-cluster-roles --confirm
+  - name: Reconcile Cluster Roles
+    command: >
+      {{ openshift.common.admin_binary}} --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+      policy reconcile-cluster-roles --confirm
+    run_once: true
 
-    - name: oadm policy reconcile-cluster-role-bindings --confirm
-      command: >
-        {{ openshift.common.admin_binary}} --config={{ openshift.common.config_base }}/master/admin.kubeconfig
-        policy reconcile-cluster-role-bindings
-        --exclude-groups=system:authenticated
-        --exclude-groups=system:unauthenticated
-        --exclude-users=system:anonymous
-        --additive-only=true --confirm
-      when: origin_reconcile_bindings | bool or ent_reconcile_bindings | bool
+  - name: Reconcile Cluster Role Bindings
+    command: >
+      {{ openshift.common.admin_binary}} --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+      policy reconcile-cluster-role-bindings
+      --exclude-groups=system:authenticated
+      --exclude-groups=system:unauthenticated
+      --exclude-users=system:anonymous
+      --additive-only=true --confirm
+    when: origin_reconcile_bindings | bool or ent_reconcile_bindings | bool
+    run_once: true
+
+  - name: Restart master services
+    service: name="{{ openshift.common.service_type}}-master" state=restarted
+    when: not openshift_master_ha | bool
+
+  - name: Restart master cluster
+    command: pcs resource restart master
+    when: openshift_master_ha | bool
+    run_once: true
+
+  - name: Wait for the clustered master service to be available
+    wait_for:
+      host: "{{ openshift_master_cluster_vip }}"
+      port: 8443
+      state: started
+      timeout: 180
+      delay: 90
+    when: openshift_master_ha | bool
+    run_once: true
 
 
-- name: Restart masters post reconcile
-  hosts: masters
-  vars:
-    openshift_master_ha: "{{ groups['masters'] | length > 1 }}"
-  tasks:
-    - name: Restart master services
-      service: name="{{ openshift.common.service_type}}-master" state=restarted
-      when: not openshift_master_ha | bool
-
-- name: Restart cluster post reconcile
-  hosts: masters[0]
-  vars:
-    openshift_master_ha: "{{ groups['masters'] | length > 1 }}"
-  tasks:
-    - name: Restart master cluster
-      command: pcs resource restart master
-      when: openshift_master_ha | bool
-    - name: Wait for the clustered master service to be available
-      wait_for:
-        host: "{{ openshift_master_cluster_vip }}"
-        port: 8443
-        state: started
-        timeout: 180
-        delay: 90
-      when: openshift_master_ha | bool
-
-- name: Upgrade default router and registry
-  hosts: masters[0]
-  vars:
-    - registry_image: "{{  openshift.master.registry_url | replace( '${component}', 'docker-registry' )  | replace ( '${version}', 'v' + g_new_version  ) }}"
-    - router_image: "{{ openshift.master.registry_url | replace( '${component}', 'haproxy-router' ) | replace ( '${version}', 'v' + g_new_version ) }}"
-    - oc_cmd: "{{ openshift.common.client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig"
-  tasks:
-    - name: Check for default router
-      command: >
-        {{ oc_cmd }} get -n default dc/router
-      register: _default_router
-      failed_when: false
-      changed_when: false
-    - name: Check for allowHostNetwork and allowHostPorts
-      when: _default_router.rc == 0
-      shell: >
-        {{ oc_cmd }} get -o yaml scc/privileged | /usr/bin/grep -e allowHostPorts -e allowHostNetwork
-      register: _scc
-    - name: Grant allowHostNetwork and allowHostPorts
-      when:
-        - _default_router.rc == 0
-        - "'false' in _scc.stdout"
-      command: >
-        {{ oc_cmd }} patch scc/privileged -p '{"allowHostPorts":true,"allowHostNetwork":true}' --loglevel=9
-    - name: Update deployment config to 1.0.4/3.0.1 spec
-      when: _default_router.rc == 0
-      command: >
-        {{ oc_cmd }} patch dc/router -p
-        '{"spec":{"strategy":{"rollingParams":{"updatePercent":-10},"spec":{"serviceAccount":"router","serviceAccountName":"router"}}}}'
-    - name: Switch to hostNetwork=true
-      when: _default_router.rc == 0
-      command: >
-        {{ oc_cmd }} patch dc/router -p '{"spec":{"template":{"spec":{"hostNetwork":true}}}}'
-    - name: Update router image to current version
-      when: _default_router.rc == 0
-      command: >
-        {{ oc_cmd }} patch dc/router -p
-        '{"spec":{"template":{"spec":{"containers":[{"name":"router","image":"{{ router_image }}"}]}}}}'
-
-    - name: Check for default registry
-      command: >
-          {{ oc_cmd }} get -n default dc/docker-registry
-      register: _default_registry
-      failed_when: false
-      changed_when: false
-    - name: Update registry image to current version
-      when: _default_registry.rc == 0
-      command: >
-        {{ oc_cmd }} patch dc/docker-registry -p
-        '{"spec":{"template":{"spec":{"containers":[{"name":"registry","image":"{{ registry_image }}"}]}}}}'
-
-- name: Update image streams and templates
-  hosts: masters[0]
+###############################################################################
+# Post upgrade - Upgrade default router, default registry and examples
+###############################################################################
+- name: Upgrade default router and default registry
+  hosts: oo_first_master
   vars:
     openshift_examples_import_command: "update"
     openshift_deployment_type: "{{ deployment_type }}"
+    registry_image: "{{  openshift.master.registry_url | replace( '${component}', 'docker-registry' )  | replace ( '${version}', 'v' + g_new_version  ) }}"
+    router_image: "{{ openshift.master.registry_url | replace( '${component}', 'haproxy-router' ) | replace ( '${version}', 'v' + g_new_version ) }}"
+    oc_cmd: "{{ openshift.common.client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig"
   roles:
-    - openshift_examples
+  - openshift_examples
+  pre_tasks:
+  - name: Check for default router
+    command: >
+      {{ oc_cmd }} get -n default dc/router
+    register: _default_router
+    failed_when: false
+    changed_when: false
 
-- name: Ensure master services enabled
-  hosts: masters
-  vars:
-    openshift_master_ha: "{{ groups['masters'] | length > 1 }}"
-  tasks:
-  - name: Enable master services
-    service: name="{{ openshift.common.service_type}}-master" state=started enabled=yes
-    when: not openshift_master_ha | bool
+  - name: Check for allowHostNetwork and allowHostPorts
+    when: _default_router.rc == 0
+    shell: >
+      {{ oc_cmd }} get -o yaml scc/privileged | /usr/bin/grep -e allowHostPorts -e allowHostNetwork
+    register: _scc
 
-- name: Ensure node services enabled
-  hosts: nodes
-  tasks:
-    - name: Restart node services
-      service: name="{{ openshift.common.service_type }}-node" state=started enabled=yes
+  - name: Grant allowHostNetwork and allowHostPorts
+    when:
+    - _default_router.rc == 0
+    - "'false' in _scc.stdout"
+    command: >
+      {{ oc_cmd }} patch scc/privileged -p '{"allowHostPorts":true,"allowHostNetwork":true}' --loglevel=9
 
+  - name: Update deployment config to 1.0.4/3.0.1 spec
+    when: _default_router.rc == 0
+    command: >
+      {{ oc_cmd }} patch dc/router -p
+      '{"spec":{"strategy":{"rollingParams":{"updatePercent":-10},"spec":{"serviceAccount":"router","serviceAccountName":"router"}}}}'
+
+  - name: Switch to hostNetwork=true
+    when: _default_router.rc == 0
+    command: >
+      {{ oc_cmd }} patch dc/router -p '{"spec":{"template":{"spec":{"hostNetwork":true}}}}'
+
+  - name: Update router image to current version
+    when: _default_router.rc == 0
+    command: >
+      {{ oc_cmd }} patch dc/router -p
+      '{"spec":{"template":{"spec":{"containers":[{"name":"router","image":"{{ router_image }}"}]}}}}'
+
+  - name: Check for default registry
+    command: >
+      {{ oc_cmd }} get -n default dc/docker-registry
+    register: _default_registry
+    failed_when: false
+    changed_when: false
+
+  - name: Update registry image to current version
+    when: _default_registry.rc == 0
+    command: >
+      {{ oc_cmd }} patch dc/docker-registry -p
+      '{"spec":{"template":{"spec":{"containers":[{"name":"registry","image":"{{ registry_image }}"}]}}}}'
