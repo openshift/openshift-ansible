@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.11
+Version:        3.0.12
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -258,6 +258,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Nov 11 2015 Brenton Leanhardt <bleanhar@redhat.com> 3.0.12-1
+- Sync with the latest image streams (sdodson@redhat.com)
+
 * Wed Nov 11 2015 Brenton Leanhardt <bleanhar@redhat.com> 3.0.11-1
 - Migrate xpaas content from pre v1.1.0 (sdodson@redhat.com)
 - Import latest xpaas templates and image streams (sdodson@redhat.com)
