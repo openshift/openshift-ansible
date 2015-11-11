@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.9
+Version:        3.0.10
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -258,6 +258,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Nov 11 2015 Brenton Leanhardt <bleanhar@redhat.com> 3.0.10-1
+- Fix update error for templates that didn't previously exist
+  (jdetiber@redhat.com)
+- General cleanup of v3_0_to_v3_1/upgrade.yml (jdetiber@redhat.com)
+- Add zabbix pieces to hold AWS S3 bucket stats (jdiaz@redhat.com)
+- add ansible dep to vagrant doc (jdetiber@redhat.com)
+- oo_filter: don't fail when attribute is not defined (tob@butter.sh)
+
 * Wed Nov 11 2015 Brenton Leanhardt <bleanhar@redhat.com> 3.0.9-1
 - Refactor upgrade playbook(s) (jdetiber@redhat.com)
 
