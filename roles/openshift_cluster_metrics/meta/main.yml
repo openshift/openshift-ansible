@@ -1,0 +1,14 @@
+---
+galaxy_info:
+  author: Diego Castro
+  description: OpenShift Cluster Metrics
+  license: Apache License, Version 2.0
+  min_ansible_version: 1.7
+  platforms:
+  - name: EL
+    versions:
+    - 7
+  categories:
+  - cloud
+dependencies:
+- role: openshift_common
