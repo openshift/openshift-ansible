@@ -24,8 +24,25 @@ import StringIO
 import yaml
 from distutils.util import strtobool
 from distutils.version import LooseVersion
-from netaddr import IPNetwork
+import struct
+import socket
 
+def first_ip(network):
+    """ Return the first IPv4 address in network
+
+        Args:
+            network (str): network in CIDR format
+        Returns:
+            str: first IPv4 address
+    """
+    def atoi(addr):
+        return struct.unpack("!I", socket.inet_aton(addr))[0]
+    def itoa(addr):
+        return socket.inet_ntoa(struct.pack("!I", addr))
+
+    (address, netmask) = network.split('/')
+    netmask_i = (0xffffffff << (32 - atoi(netmask))) & 0xffffffff
+    return itoa((atoi(address) & netmask_i) + 1)
 
 def hostname_valid(hostname):
     """ Test if specified hostname should be considered valid
@@ -525,7 +542,7 @@ def set_aggregate_facts(facts):
                          'kubernetes.default.svc', 'kubernetes.default.svc.' + cluster_domain]
             all_hostnames.update(svc_names)
             internal_hostnames.update(svc_names)
-            first_svc_ip = str(IPNetwork(facts['master']['portal_net'])[1])
+            first_svc_ip = first_ip(facts['master']['portal_net'])
             all_hostnames.add(first_svc_ip)
             internal_hostnames.add(first_svc_ip)
             _add_etcd_data_dir_fact(facts)
