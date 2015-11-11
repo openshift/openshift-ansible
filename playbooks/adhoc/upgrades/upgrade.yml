@@ -101,7 +101,7 @@
 
 
 - name: Perform upgrade version checking
-  hosts: masters[0]
+  hosts: masters:nodes
   tasks:
   - name: Clean yum cache
     command: yum clean all
@@ -156,7 +156,7 @@
         to_version: '3.1'
         role: master
         config_base: "{{ hostvars[inventory_hostname].openshift.common.config_base }}"
-      when: deployment_type in ['openshift-enterprise', 'atomic-enterprise'] and g_aos_versions.curr_version | version_compare('3.1', '>=')
+      when: deployment_type in ['openshift-enterprise', 'atomic-enterprise'] and g_new_version | version_compare('3.1', '>=')
 
     - set_fact:
         master_certs_missing: True
