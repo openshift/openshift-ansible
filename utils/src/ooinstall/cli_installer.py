@@ -177,7 +177,8 @@ Notes:
                                              h.public_ip,
                                              h.hostname,
                                              h.public_hostname]))
-        output = "%s\n%s" % (output, ",".join([h.ip,
+        output = "%s\n%s" % (output, ",".join([h.connect_to,
+                             h.ip,
                              h.public_ip,
                              h.hostname,
                              h.public_hostname]))
@@ -493,7 +494,7 @@ def upgrade(ctx):
     verbose = ctx.obj['verbose']
 
     if len(oo_cfg.hosts) == 0:
-        click.echo("No hosts defined in: %s" % oo_cfg['configuration'])
+        click.echo("No hosts defined in: %s" % oo_cfg.config_path)
         sys.exit(1)
 
     # Update config to reflect the version we're targetting, we'll write

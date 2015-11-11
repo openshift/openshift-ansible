@@ -164,8 +164,10 @@ def run_uninstall_playbook(verbose=False):
 
 
 def run_upgrade_playbook(verbose=False):
+    # TODO: do not hardcode the upgrade playbook, add ability to select the
+    # right playbook depending on the type of upgrade.
     playbook = os.path.join(CFG.settings['ansible_playbook_directory'],
-        'playbooks/adhoc/upgrades/upgrade.yml')
+        'playbooks/byo/openshift-cluster/upgrades/v3_0_to_v3_1/upgrade.yml')
     # TODO: Upgrade inventory for upgrade?
     inventory_file = generate_inventory(CFG.hosts)
     facts_env = os.environ.copy()

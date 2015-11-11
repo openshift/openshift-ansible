@@ -116,6 +116,9 @@ class OOConfig(object):
 
     def _upgrade_legacy_config(self):
         new_hosts = []
+        remove_settings = ['validated_facts', 'Description', 'Name',
+            'Subscription', 'Vendor', 'Version', 'masters', 'nodes']
+
         if 'validated_facts' in self.settings:
             for key, value in self.settings['validated_facts'].iteritems():
                 value['connect_to'] = key
@@ -126,10 +129,9 @@ class OOConfig(object):
                 new_hosts.append(value)
         self.settings['hosts'] = new_hosts
 
-        remove_settings = ['validated_facts', 'Description', 'Name',
-            'Subscription', 'Vendor', 'Version', 'masters', 'nodes']
         for s in remove_settings:
-            del self.settings[s]
+            if s in self.settings:
+                del self.settings[s]
 
         # A legacy config implies openshift-enterprise 3.0:
         self.settings['variant'] = 'openshift-enterprise'

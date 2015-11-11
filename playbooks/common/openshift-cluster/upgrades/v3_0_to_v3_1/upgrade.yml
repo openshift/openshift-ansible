@@ -1,50 +1,58 @@
 ---
-- name: Load master facts
-  hosts: masters
+- name: Evaluate host groups
+  include: ../../evaluate_groups.yml
+
+- name: Load openshift_facts from the environment
+  hosts: oo_masters_to_config oo_nodes_to_config oo_etcd_to_config oo_lb_to_config
   roles:
   - openshift_facts
 
 - name: Verify upgrade can proceed
-  hosts: masters[0]
+  hosts: oo_first_master
   vars:
     openshift_master_ha: "{{ groups['masters'] | length > 1 }}"
   gather_facts: no
   tasks:
-    # Pacemaker is currently the only supported upgrade path for multiple masters
-    - fail:
-        msg: "openshift_master_cluster_method must be set to 'pacemaker'"
-      when: openshift_master_ha | bool and ((openshift_master_cluster_method is not defined) or (openshift_master_cluster_method is defined and openshift_master_cluster_method != "pacemaker"))
+  # Pacemaker is currently the only supported upgrade path for multiple masters
+  - fail:
+      msg: "openshift_master_cluster_method must be set to 'pacemaker'"
+    when: openshift_master_ha | bool and ((openshift_master_cluster_method is not defined) or (openshift_master_cluster_method is defined and openshift_master_cluster_method != "pacemaker"))
+  - fail:
+      msg: >
+        This upgrade is only supported for origin and openshift-enterprise
+        deployment types
+    when: deployment_type not in ['origin','openshift-enterprise']
+  - fail:
+      msg: >
+        openshift_pkg_version is {{ openshift_pkg_version }} which is not a
+        valid version for a 3.1 upgrade
+    when: openshift_pkg_version is defined and openshift_pkg_version.split('-',1).1 | version_compare('3.0.2.900','<')
 
-- name: Run pre-upgrade checks on first master
-  hosts: masters[0]
-  tasks:
   # If this script errors out ansible will show the default stdout/stderr
   # which contains details for the user:
-  - script: files/pre-upgrade-check
+  - script: ../files/pre-upgrade-check
 
-- name: Evaluate etcd_hosts
+- name: Evaluate etcd_hosts_to_backup
   hosts: localhost
   tasks:
-  - name: Evaluate etcd hosts
-    add_host:
-      name: "{{ groups.masters.0 }}"
-      groups: etcd_hosts
-    when: hostvars[groups.masters.0].openshift.master.embedded_etcd | bool
-  - name: Evaluate etcd hosts
+  - name: Evaluate etcd_hosts_to_backup
     add_host:
       name: "{{ item }}"
-      groups: etcd_hosts
-    with_items: groups.etcd
-    when: not hostvars[groups.masters.0].openshift.master.embedded_etcd | bool
+      groups: etcd_hosts_to_backup
+    with_items: groups.oo_etcd_to_config if groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config | length > 0 else groups.oo_first_master
 
 - name: Backup etcd
-  hosts: etcd_hosts
+  hosts: etcd_hosts_to_backup
   vars:
     embedded_etcd: "{{ openshift.master.embedded_etcd }}"
     timestamp: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
   roles:
   - openshift_facts
   tasks:
+  - openshift_facts:
+      role: etcd
+      local_facts: {}
+    when: "'etcd' not in openshift"
 
   - stat: path=/var/lib/openshift
     register: var_lib_openshift
@@ -64,7 +72,7 @@
 
   - name: Check current embedded etcd disk usage
     shell: >
-      du -k {{ openshift.master.etcd_data_dir }} | tail -n 1 | cut -f1
+      du -k {{ openshift.etcd.etcd_data_dir }} | tail -n 1 | cut -f1
     register: etcd_disk_usage
     when: embedded_etcd | bool
 
@@ -82,12 +90,13 @@
 
   - name: Generate etcd backup
     command: >
-      etcdctl backup --data-dir={{ openshift.master.etcd_data_dir }}
+      etcdctl backup --data-dir={{ openshift.etcd.etcd_data_dir }}
       --backup-dir={{ openshift.common.data_dir }}/etcd-backup-{{ timestamp }}
 
   - name: Display location of etcd backup
     debug:
       msg: "Etcd backup created in {{ openshift.common.data_dir }}/etcd-backup-{{ timestamp }}"
+
 
 - name: Update deployment type
   hosts: OSEv3
@@ -107,7 +116,7 @@
     command: yum clean all
 
   - name: Determine available versions
-    script: files/versions.sh {{ openshift.common.service_type }} openshift
+    script: ../files/versions.sh {{ openshift.common.service_type }} openshift
     register: g_versions_result
 
   - set_fact:
@@ -120,17 +129,9 @@
       msg: This playbook requires Origin 1.0.6 or later
     when: deployment_type == 'origin' and g_aos_versions.curr_version | version_compare('1.0.6','<')
 
-  # TODO: This should be specific to the 3.1 upgrade playbook (coming in future refactor), otherwise we are blocking 3.0.1 to 3.0.2 here.
   - fail:
       msg: Atomic OpenShift 3.1 packages not found
-    when: deployment_type in ['openshift-enterprise', 'atomic-openshift'] and g_aos_versions.curr_version | version_compare('3.0.2.900','<') and (g_aos_versions.avail_version is none or g_aos_versions.avail_version | version_compare('3.0.2.900','<'))
-  # Deployment type 'enterprise' is no longer valid if we're upgrading to 3.1 or beyond.
-  # (still valid for 3.0.x to 3.0.y however) Using the global deployment_type here as
-  # we're checking what was requested by the upgrade, not the current type on the system.
-  - fail:
-      msg: "Deployment type enterprise not supported for upgrade"
-    when: deployment_type == "enterprise" and  g_aos_versions.curr_version | version_compare('3.1', '>=')
-
+    when: g_aos_versions.curr_version | version_compare('3.0.2.900','<') and (g_aos_versions.avail_version is none or g_aos_versions.avail_version | version_compare('3.0.2.900','<'))
 
 - name: Upgrade masters
   hosts: masters
@@ -156,7 +157,6 @@
         to_version: '3.1'
         role: master
         config_base: "{{ hostvars[inventory_hostname].openshift.common.config_base }}"
-      when: deployment_type in ['openshift-enterprise', 'atomic-enterprise'] and g_aos_versions.curr_version | version_compare('3.1', '>=')
 
     - set_fact:
         master_certs_missing: True
@@ -287,7 +287,7 @@
   hosts: masters[0]
   vars:
     origin_reconcile_bindings: "{{ deployment_type == 'origin' and g_new_version | version_compare('1.0.6', '>') }}"
-    ent_reconcile_bindings: "{{ deployment_type in ['openshift-enterprise', 'atomic-enterprise'] and g_new_version | version_compare('3.0.2','>') }}"
+    ent_reconcile_bindings: true
   tasks:
     - name: oadm policy reconcile-cluster-roles --confirm
       command: >
