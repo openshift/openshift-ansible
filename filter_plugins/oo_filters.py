@@ -275,7 +275,7 @@ class FilterModule(object):
             raise errors.AnsibleFilterError("|failed expects filter_attr is a str")
 
         # Gather up the values for the list of keys passed in
-        return [x for x in data if x[filter_attr]]
+        return [x for x in data if x.has_key(filter_attr) and x[filter_attr]]
 
     @staticmethod
     def oo_parse_heat_stack_outputs(data):
