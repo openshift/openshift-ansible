@@ -16,6 +16,7 @@
 - include_vars: template_app_zabbix_server.yml
 - include_vars: template_app_zabbix_agent.yml
 - include_vars: template_performance_copilot.yml
+- include_vars: template_aws.yml
 
 - name: Include Template Heartbeat
   include: ../../lib_zabbix/tasks/create_template.yml
@@ -85,6 +86,14 @@
   include: ../../lib_zabbix/tasks/create_template.yml
   vars:
     template: "{{ g_template_performance_copilot }}"
+    server: "{{ ozb_server }}"
+    user: "{{ ozb_user }}"
+    password: "{{ ozb_password }}"
+
+- name: Include Template AWS
+  include: ../../lib_zabbix/tasks/create_template.yml
+  vars:
+    template: "{{ g_template_aws }}"
     server: "{{ ozb_server }}"
     user: "{{ ozb_user }}"
     password: "{{ ozb_password }}"
