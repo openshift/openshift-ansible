@@ -4,10 +4,7 @@
   register: pcs_status
   changed_when: false
   failed_when: false
-  when: not openshift.master.cluster_defer_ha | bool
+  when: openshift.master.cluster_method == "pacemaker"
 
 - include: configure.yml
   when: "pcs_status | failed and 'Error: cluster is not currently running on this node' in pcs_status.stderr"
-
-- include: configure_deferred.yml
-  when: openshift.master.cluster_defer_ha | bool

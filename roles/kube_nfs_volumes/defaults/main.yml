@@ -1,4 +1,10 @@
 ---
+kubernetes_url: https://172.30.0.1:443
+
+kube_api_version: v1
+
+kube_req_template: "../templates/{{ kube_api_version }}/nfs.json.j2"
+
 # Options of NFS exports.
 nfs_export_options: "*(rw,no_root_squash,insecure,no_subtree_check)"
 

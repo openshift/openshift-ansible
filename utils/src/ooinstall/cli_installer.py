@@ -11,7 +11,7 @@ from ooinstall import OOConfig
 from ooinstall.oo_config import Host
 from ooinstall.variants import find_variant, get_variant_version_combos
 
-DEFAULT_ANSIBLE_CONFIG = '/usr/share/atomic-openshift-util/ansible.cfg'
+DEFAULT_ANSIBLE_CONFIG = '/usr/share/atomic-openshift-utils/ansible.cfg'
 DEFAULT_PLAYBOOK_DIR = '/usr/share/ansible/openshift-ansible/'
 
 def validate_ansible_dir(path):
@@ -101,29 +101,26 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
 
     hosts = []
     more_hosts = True
-    ip_regex = re.compile(r'^\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}$')
-
     while more_hosts:
         host_props = {}
         hostname_or_ip = click.prompt('Enter hostname or IP address:',
                                       default='',
                                       value_proc=validate_prompt_hostname)
 
-        if ip_regex.match(hostname_or_ip):
-            host_props['ip'] = hostname_or_ip
-        else:
-            host_props['hostname'] = hostname_or_ip
+        host_props['connect_to'] = hostname_or_ip
 
         host_props['master'] = click.confirm('Will this host be an OpenShift Master?')
         host_props['node'] = True
 
-        rpm_or_container = click.prompt('Will this host be RPM or Container based (rpm/container)?',
-                                        type=click.Choice(['rpm', 'container']),
-                                        default='rpm')
-        if rpm_or_container == 'container':
-            host_props['containerized'] = True
-        else:
-            host_props['containerized'] = False
+        #TODO: Reenable this option once container installs are out of tech preview
+        #rpm_or_container = click.prompt('Will this host be RPM or Container based (rpm/container)?',
+        #                                type=click.Choice(['rpm', 'container']),
+        #                                default='rpm')
+        #if rpm_or_container == 'container':
+        #    host_props['containerized'] = True
+        #else:
+        #    host_props['containerized'] = False
+        host_props['containerized'] = False
 
         host = Host(**host_props)
 
@@ -150,7 +147,7 @@ Plese confirm that they are correct before moving forward.
     notes = """
 Format:
 
-IP,public IP,hostname,public hostname
+connect_to,IP,public IP,hostname,public hostname
 
 Notes:
  * The installation host is the hostname from the installer's perspective.
@@ -168,20 +165,20 @@ Notes:
 
     default_facts_lines = []
     default_facts = {}
-    validated_facts = {}
     for h in hosts:
-        default_facts[h] = {}
-        h.ip = callback_facts[str(h)]["common"]["ip"]
-        h.public_ip = callback_facts[str(h)]["common"]["public_ip"]
-        h.hostname = callback_facts[str(h)]["common"]["hostname"]
-        h.public_hostname = callback_facts[str(h)]["common"]["public_hostname"]
+        default_facts[h.connect_to] = {}
+        h.ip = callback_facts[h.connect_to]["common"]["ip"]
+        h.public_ip = callback_facts[h.connect_to]["common"]["public_ip"]
+        h.hostname = callback_facts[h.connect_to]["common"]["hostname"]
+        h.public_hostname = callback_facts[h.connect_to]["common"]["public_hostname"]
 
-        validated_facts[h] = {}
-        default_facts_lines.append(",".join([h.ip,
+        default_facts_lines.append(",".join([h.connect_to,
+                                             h.ip,
                                              h.public_ip,
                                              h.hostname,
                                              h.public_hostname]))
-        output = "%s\n%s" % (output, ",".join([h.ip,
+        output = "%s\n%s" % (output, ",".join([h.connect_to,
+                             h.ip,
                              h.public_ip,
                              h.hostname,
                              h.public_hostname]))
@@ -316,14 +313,16 @@ Add new nodes here
 def get_installed_hosts(hosts, callback_facts):
     installed_hosts = []
     for host in hosts:
-        if(host.name in callback_facts.keys()
-           and 'common' in callback_facts[host.name].keys()
-           and callback_facts[host.name]['common'].get('version', '')
-           and callback_facts[host.name]['common'].get('version', '') != 'None'):
+        if(host.connect_to in callback_facts.keys()
+           and 'common' in callback_facts[host.connect_to].keys()
+           and callback_facts[host.connect_to]['common'].get('version', '')
+           and callback_facts[host.connect_to]['common'].get('version', '') != 'None'):
             installed_hosts.append(host)
     return installed_hosts
 
-def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force):
+# pylint: disable=too-many-branches
+# This pylint error will be corrected shortly in separate PR.
+def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force, verbose):
 
     # Copy the list of existing hosts so we can remove any already installed nodes.
     hosts_to_run_on = list(oo_cfg.hosts)
@@ -331,7 +330,22 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force):
     # Check if master or nodes already have something installed
     installed_hosts = get_installed_hosts(oo_cfg.hosts, callback_facts)
     if len(installed_hosts) > 0:
-        # present a message listing already installed hosts
+        click.echo('Installed environment detected.')
+        # This check has to happen before we start removing hosts later in this method
+        if not force:
+            if not unattended:
+                click.echo('By default the installer only adds new nodes to an installed environment.')
+                response = click.prompt('Do you want to (1) only add additional nodes or ' \
+                                        '(2) perform a clean install?', type=int)
+                # TODO: this should be reworked with error handling.
+                # Click can certainly do this for us.
+                # This should be refactored as soon as we add a 3rd option.
+                if response == 1:
+                    force = False
+                if response == 2:
+                    force = True
+
+        # present a message listing already installed hosts and remove hosts if needed
         for host in installed_hosts:
             if host.master:
                 click.echo("{} is already an OpenShift Master".format(host))
@@ -339,32 +353,42 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force):
                 # new nodes.
             elif host.node:
                 click.echo("{} is already an OpenShift Node".format(host))
-                hosts_to_run_on.remove(host)
-        # for unattended either continue if they force install or exit if they didn't
-        if unattended:
-            if not force:
-                click.echo('Installed environment detected and no additional nodes specified: ' \
-                           'aborting. If you want a fresh install, use --force')
-                sys.exit(1)
-        # for attended ask the user what to do
+                # force is only used for reinstalls so we don't want to remove
+                # anything.
+                if not force:
+                    hosts_to_run_on.remove(host)
+
+        # Handle the cases where we know about uninstalled systems
+        new_hosts = set(hosts_to_run_on) - set(installed_hosts)
+        if len(new_hosts) > 0:
+            for new_host in new_hosts:
+                click.echo("{} is currently uninstalled".format(new_host))
+
+            # Fall through
+            click.echo('Adding additional nodes...')
         else:
-            click.echo('Installed environment detected and no additional nodes specified. ')
-            response = click.prompt('Do you want to (1) add more nodes or ' \
-                                    '(2) perform a clean install?', type=int)
-            if response == 1: # add more nodes
-                new_nodes = collect_new_nodes()
-
-                hosts_to_run_on.extend(new_nodes)
-                oo_cfg.hosts.extend(new_nodes)
-
-                openshift_ansible.set_config(oo_cfg)
-                callback_facts, error = openshift_ansible.default_facts(oo_cfg.hosts)
-                if error:
-                    click.echo("There was a problem fetching the required information. " \
-                               "See {} for details.".format(oo_cfg.settings['ansible_log_path']))
+            if unattended:
+                if not force:
+                    click.echo('Installed environment detected and no additional nodes specified: ' \
+                               'aborting. If you want a fresh install, use ' \
+                               '`atomic-openshift-installer install --force`')
                     sys.exit(1)
             else:
-                pass # proceeding as normal should do a clean install
+                if not force:
+                    new_nodes = collect_new_nodes()
+
+                    hosts_to_run_on.extend(new_nodes)
+                    oo_cfg.hosts.extend(new_nodes)
+
+                    openshift_ansible.set_config(oo_cfg)
+                    click.echo('Gathering information from hosts...')
+                    callback_facts, error = openshift_ansible.default_facts(oo_cfg.hosts, verbose)
+                    if error:
+                        click.echo("There was a problem fetching the required information. " \
+                                   "See {} for details.".format(oo_cfg.settings['ansible_log_path']))
+                        sys.exit(1)
+                else:
+                    pass # proceeding as normal should do a clean install
 
     return hosts_to_run_on, callback_facts
 
@@ -385,7 +409,7 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force):
                               dir_okay=True,
                               readable=True),
               # callback=validate_ansible_dir,
-              default='/usr/share/ansible/openshift-ansible/',
+              default=DEFAULT_PLAYBOOK_DIR,
               envvar='OO_ANSIBLE_PLAYBOOK_DIRECTORY')
 @click.option('--ansible-config',
     type=click.Path(file_okay=True,
@@ -399,9 +423,11 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force):
         writable=True,
         readable=True),
     default="/tmp/ansible.log")
+@click.option('-v', '--verbose',
+    is_flag=True, default=False)
 #pylint: disable=too-many-arguments
 # Main CLI entrypoint, not much we can do about too many arguments.
-def cli(ctx, unattended, configuration, ansible_playbook_directory, ansible_config, ansible_log_path):
+def cli(ctx, unattended, configuration, ansible_playbook_directory, ansible_config, ansible_log_path, verbose):
     """
     The main click CLI module. Responsible for handling most common CLI options,
     assigning any defaults and adding to the context for the sub-commands.
@@ -411,6 +437,7 @@ def cli(ctx, unattended, configuration, ansible_playbook_directory, ansible_conf
     ctx.obj['configuration'] = configuration
     ctx.obj['ansible_config'] = ansible_config
     ctx.obj['ansible_log_path'] = ansible_log_path
+    ctx.obj['verbose'] = verbose
 
     oo_cfg = OOConfig(ctx.obj['configuration'])
 
@@ -441,6 +468,7 @@ def cli(ctx, unattended, configuration, ansible_playbook_directory, ansible_conf
 @click.pass_context
 def uninstall(ctx):
     oo_cfg = ctx.obj['oo_cfg']
+    verbose = ctx.obj['verbose']
 
     if len(oo_cfg.hosts) == 0:
         click.echo("No hosts defined in: %s" % oo_cfg['configuration'])
@@ -450,14 +478,53 @@ def uninstall(ctx):
     if not ctx.obj['unattended']:
         # Prompt interactively to confirm:
         for host in oo_cfg.hosts:
-            click.echo("  * %s" % host.name)
+            click.echo("  * %s" % host.connect_to)
         proceed = click.confirm("\nDo you wish to proceed?")
         if not proceed:
             click.echo("Uninstall cancelled.")
             sys.exit(0)
 
-    openshift_ansible.run_uninstall_playbook()
+    openshift_ansible.run_uninstall_playbook(verbose)
 
+
+@click.command()
+@click.pass_context
+def upgrade(ctx):
+    oo_cfg = ctx.obj['oo_cfg']
+    verbose = ctx.obj['verbose']
+
+    if len(oo_cfg.hosts) == 0:
+        click.echo("No hosts defined in: %s" % oo_cfg.config_path)
+        sys.exit(1)
+
+    # Update config to reflect the version we're targetting, we'll write
+    # to disk once ansible completes successfully, not before.
+    old_variant = oo_cfg.settings['variant']
+    old_version = oo_cfg.settings['variant_version']
+    if oo_cfg.settings['variant'] == 'enterprise':
+        oo_cfg.settings['variant'] = 'openshift-enterprise'
+    version = find_variant(oo_cfg.settings['variant'])[1]
+    oo_cfg.settings['variant_version'] = version.name
+    click.echo("Openshift will be upgraded from %s %s to %s %s on the following hosts:\n" % (
+        old_variant, old_version, oo_cfg.settings['variant'],
+        oo_cfg.settings['variant_version']))
+    for host in oo_cfg.hosts:
+        click.echo("  * %s" % host.connect_to)
+
+    if not ctx.obj['unattended']:
+        # Prompt interactively to confirm:
+        proceed = click.confirm("\nDo you wish to proceed?")
+        if not proceed:
+            click.echo("Upgrade cancelled.")
+            sys.exit(0)
+
+    retcode = openshift_ansible.run_upgrade_playbook(verbose)
+    if retcode > 0:
+        click.echo("Errors encountered during upgrade, please check %s." %
+            oo_cfg.settings['ansible_log_path'])
+    else:
+        oo_cfg.save_to_disk()
+        click.echo("Upgrade completed! Rebooting all hosts is recommended.")
 
 
 @click.command()
@@ -465,6 +532,7 @@ def uninstall(ctx):
 @click.pass_context
 def install(ctx, force):
     oo_cfg = ctx.obj['oo_cfg']
+    verbose = ctx.obj['verbose']
 
     if ctx.obj['unattended']:
         error_if_missing_info(oo_cfg)
@@ -472,13 +540,15 @@ def install(ctx, force):
         oo_cfg = get_missing_info_from_user(oo_cfg)
 
     click.echo('Gathering information from hosts...')
-    callback_facts, error = openshift_ansible.default_facts(oo_cfg.hosts)
+    callback_facts, error = openshift_ansible.default_facts(oo_cfg.hosts,
+        verbose)
     if error:
         click.echo("There was a problem fetching the required information. " \
                    "Please see {} for details.".format(oo_cfg.settings['ansible_log_path']))
         sys.exit(1)
 
-    hosts_to_run_on, callback_facts = get_hosts_to_run_on(oo_cfg, callback_facts, ctx.obj['unattended'], force)
+    hosts_to_run_on, callback_facts = get_hosts_to_run_on(
+        oo_cfg, callback_facts, ctx.obj['unattended'], force, verbose)
 
     click.echo('Writing config to: %s' % oo_cfg.config_path)
 
@@ -500,7 +570,7 @@ If changes are needed to the values recorded by the installer please update {}.
         confirm_continue(message)
 
     error = openshift_ansible.run_main_playbook(oo_cfg.hosts,
-                                                   hosts_to_run_on)
+                                                   hosts_to_run_on, verbose)
     if error:
         # The bootstrap script will print out the log location.
         message = """
@@ -523,6 +593,7 @@ http://docs.openshift.com/enterprise/latest/admin_guide/overview.html
         click.pause()
 
 cli.add_command(install)
+cli.add_command(upgrade)
 cli.add_command(uninstall)
 
 if __name__ == '__main__':

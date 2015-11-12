@@ -136,6 +136,8 @@ def main():
             status=dict(default=None, type='str'),
             state=dict(default='present', type='str'),
             template_name=dict(default=None, type='str'),
+            hostgroup_name=dict(default=None, type='str'),
+            query_type=dict(default='filter', choices=['filter', 'search'], type='str'),
         ),
         #supports_check_mode=True
     )
@@ -157,10 +159,11 @@ def main():
 
     content = zapi.get_content(zbx_class_name,
                                'get',
-                               {'filter': {'description': tname},
+                               {module.params['query_type']: {'description': tname},
                                 'expandExpression': True,
                                 'selectDependencies': 'triggerid',
                                 'templateids': templateid,
+                                'group': module.params['hostgroup_name'],
                                })
 
     # Get

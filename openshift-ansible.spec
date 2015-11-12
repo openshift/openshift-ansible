@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.7
+Version:        3.0.12
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -82,6 +82,8 @@ pushd utils
 %{__python} setup.py install --skip-build --root %{buildroot}
 # Remove this line once the name change has happened
 mv -f %{buildroot}%{_bindir}/oo-install %{buildroot}%{_bindir}/atomic-openshift-installer
+mkdir -p %{buildroot}%{_datadir}/atomic-openshift-utils/
+cp etc/ansible.cfg %{buildroot}%{_datadir}/atomic-openshift-utils/ansible.cfg
 popd
 
 # Base openshift-ansible files
@@ -104,6 +106,7 @@ Scripts to make it nicer when working with hosts that are defined only by metada
 
 %files bin
 %{_bindir}/*
+%exclude %{_bindir}/atomic-openshift-installer
 %{python_sitelib}/openshift_ansible/
 /etc/bash_completion.d/*
 %config(noreplace) /etc/openshift_ansible/
@@ -170,6 +173,9 @@ Ansible Inventories for GCE used with the openshift-ansible scripts and playbook
 %package playbooks
 Summary:       Openshift and Atomic Enterprise Ansible Playbooks
 Requires:      %{name}
+Requires:      %{name}-roles
+Requires:      %{name}-lookup-plugins
+Requires:      %{name}-filter-plugins
 BuildArch:     noarch
 
 %description playbooks
@@ -185,6 +191,8 @@ BuildArch:     noarch
 %package roles
 Summary:       Openshift and Atomic Enterprise Ansible roles
 Requires:      %{name}
+Requires:      %{name}-lookup-plugins
+Requires:      %{name}-filter-plugins
 BuildArch:     noarch
 
 %description roles
@@ -246,9 +254,187 @@ Atomic OpenShift Utilities includes
 %files -n atomic-openshift-utils
 %{python_sitelib}/ooinstall*
 %{_bindir}/atomic-openshift-installer
+%{_datadir}/atomic-openshift-utils/ansible.cfg
 
 
 %changelog
+* Wed Nov 11 2015 Brenton Leanhardt <bleanhar@redhat.com> 3.0.12-1
+- Sync with the latest image streams (sdodson@redhat.com)
+
+* Wed Nov 11 2015 Brenton Leanhardt <bleanhar@redhat.com> 3.0.11-1
+- Migrate xpaas content from pre v1.1.0 (sdodson@redhat.com)
+- Import latest xpaas templates and image streams (sdodson@redhat.com)
+
+* Wed Nov 11 2015 Brenton Leanhardt <bleanhar@redhat.com> 3.0.10-1
+- Fix update error for templates that didn't previously exist
+  (jdetiber@redhat.com)
+- General cleanup of v3_0_to_v3_1/upgrade.yml (jdetiber@redhat.com)
+- Add zabbix pieces to hold AWS S3 bucket stats (jdiaz@redhat.com)
+- add ansible dep to vagrant doc (jdetiber@redhat.com)
+- oo_filter: don't fail when attribute is not defined (tob@butter.sh)
+
+* Wed Nov 11 2015 Brenton Leanhardt <bleanhar@redhat.com> 3.0.9-1
+- Refactor upgrade playbook(s) (jdetiber@redhat.com)
+
+* Tue Nov 10 2015 Scott Dodson <sdodson@redhat.com> 3.0.8-1
+- Add origin-clients to uninstall playbook. (abutcher@redhat.com)
+- examples: include logging and metrics infrastructure (lmeyer@redhat.com)
+- Add separate step to enable services during upgrade. (dgoodwin@redhat.com)
+- Update tests now that cli is not asking for rpm/container install
+  (smunilla@redhat.com)
+- atomic-openshift-installer: Remove question for container install
+  (smunilla@redhat.com)
+- Remove references to multi_ec2.py (jdetiber@redhat.com)
+- 1279746: Fix leftover disabled features line in config template.
+  (dgoodwin@redhat.com)
+- 1279734: Ensure services are enabled after upgrade. (dgoodwin@redhat.com)
+- Fix missing etcd_data_dir bug. (dgoodwin@redhat.com)
+- Package the default ansible.cfg with atomic-openshift-utils.
+  (dgoodwin@redhat.com)
+- Add ldap auth identity provider to example inventory. (abutcher@redhat.com)
+- Read etcd data dir from appropriate config file. (dgoodwin@redhat.com)
+- atomic-openshift-installer: Generate inventory off hosts_to_run_on
+  (smunilla@redhat.com)
+- Various fixes related to connect_to (bleanhar@redhat.com)
+- Remove upgrade playbook restriction on 3.0.2. (dgoodwin@redhat.com)
+- Conditionals for flannel etcd client certs. (abutcher@redhat.com)
+- New `iptablesSyncPeriod` field in node configuration (abutcher@redhat.com)
+- Fix indentation on when (jdetiber@redhat.com)
+- Bug 1278863 - Error using openshift_pkg_version (jdetiber@redhat.com)
+- more cleanup of names (mwoodson@redhat.com)
+- Missing conditionals for api/controller sysconfig. (abutcher@redhat.com)
+- Updating the atomic-openshift-isntaller local connection logic for the
+  connect_to addition. (bleanhar@redhat.com)
+- cleaned up network checks (mwoodson@redhat.com)
+- Minor upgrade improvements. (dgoodwin@redhat.com)
+- Wait for cluster to recover after pcs resource restart. (abutcher@redhat.com)
+- Bug 1278245 - Failed to add node to existing env using atomic-openshift-
+  installer (bleanhar@redhat.com)
+- remove debug statement (jdetiber@redhat.com)
+- Fix removal of kubernetesMasterConfig.apiLevels (jdetiber@redhat.com)
+- atomic-openshift-installer: Better specification of ansible connection point
+  (smunilla@redhat.com)
+- Fix issues related to upgrade packages being unavailable
+  (jdetiber@redhat.com)
+- added network checks.  also updated item prototype code to support more
+  (mwoodson@redhat.com)
+- Fix data_dir for 3.0 deployments (jdetiber@redhat.com)
+- Fix apiLevels modifications (jdetiber@redhat.com)
+- Fix creation of origin symlink when dir already exists. (dgoodwin@redhat.com)
+- apiLevel changes (jdetiber@redhat.com)
+- Write new config to disk after successful upgrade. (dgoodwin@redhat.com)
+- Fix pylint errors with getting hosts to run on. (dgoodwin@redhat.com)
+- Remove v1beta3 by default for kube_nfs_volumes (jdetiber@redhat.com)
+- Add pre-upgrade script to be run on first master. (dgoodwin@redhat.com)
+- Start to handle pacemaker ha during upgrade (abutcher@redhat.com)
+- Fix lb group related errors (jdetiber@redhat.com)
+- Fix file check conditional. (abutcher@redhat.com)
+- Don't check for certs in data_dir just raise when they can't be found. Fix
+  typo. (abutcher@redhat.com)
+- exclude atomic-openshift-installer from bin subpackage (tdawson@redhat.com)
+- add master_hostnames definition for upgrade (jdetiber@redhat.com)
+- Additional upgrade enhancements (jdetiber@redhat.com)
+- Handle backups for separate etcd hosts if necessary. (dgoodwin@redhat.com)
+- Further upgrade improvements (jdetiber@redhat.com)
+- Upgrade improvements (dgoodwin@redhat.com)
+- Bug 1278243 - Confusing prompt from atomic-openshift-installer
+  (bleanhar@redhat.com)
+- Bug 1278244 - Previously there was no way to add a node in unattended mode
+  (bleanhar@redhat.com)
+- Revert to defaults (abutcher@redhat.com)
+- Bug 1278244 - Incorrect node information gathered by atomic-openshift-
+  installer (bleanhar@redhat.com)
+- atomic-openshift-installer's unattended mode wasn't work with --force for all
+  cases (bleanhar@redhat.com)
+- Making it easier to use pre-release content (bleanhar@redhat.com)
+- The uninstall playbook needs to remove /run/openshift-sdn
+  (bleanhar@redhat.com)
+- Various HA changes for pacemaker and native methods. (abutcher@redhat.com)
+- Bug 1274201 - Fixing non-root installations if using a local connection
+  (bleanhar@redhat.com)
+- Bug 1274201 - Fixing sudo non-interactive test (bleanhar@redhat.com)
+- Bug 1277592 - SDN MTU has hardcoded default (jdetiber@redhat.com)
+- Atomic Enterprise/OpenShift Enterprise merge update (jdetiber@redhat.com)
+- fix dueling controllers - without controllerLeaseTTL set in config, multiple
+  controllers will attempt to start (jdetiber@redhat.com)
+- default to source persistence for haproxy (jdetiber@redhat.com)
+- hardcode openshift binaries for now (jdetiber@redhat.com)
+- more tweaks (jdetiber@redhat.com)
+- more tweaks (jdetiber@redhat.com)
+- additional ha related updates (jdetiber@redhat.com)
+- additional native ha changes (abutcher@redhat.com)
+- Start of true master ha (jdetiber@redhat.com)
+- Atomic Enterprise related changes. (avagarwa@redhat.com)
+- Remove pacemaker bits. (abutcher@redhat.com)
+- Override hosts deployment_type fact for version we're upgrading to.
+  (dgoodwin@redhat.com)
+- Pylint fixes for config upgrade module. (dgoodwin@redhat.com)
+- Disable proxy cert config upgrade until certs being generated.
+  (dgoodwin@redhat.com)
+- remove debug line (florian.lambert@enovance.com)
+- [roles/openshift_master_certificates/tasks/main.yml] Fix variable
+  openshift.master.all_hostnames to openshift.common.all_hostnames
+  (florian.lambert@enovance.com)
+- Fix bug with not upgrading openshift-master to atomic-openshift-master.
+  (dgoodwin@redhat.com)
+- Adding aws and gce packages to ansible-inventory (kwoodson@redhat.com)
+- Fix subpackage dependencies (jdetiber@redhat.com)
+- Refactor common group evaluation to avoid duplication (jdetiber@redhat.com)
+- common/openshift-cluster: Scaleup playbook (smunilla@redhat.com)
+- Fix bug from module rename. (dgoodwin@redhat.com)
+- Fix bug with default ansible playbook dir. (dgoodwin@redhat.com)
+- Use the base package upgrade version so we can check things earlier.
+  (dgoodwin@redhat.com)
+- Skip fail if enterprise deployment type depending on version.
+  (dgoodwin@redhat.com)
+- Add debug output for location of etcd backup. (dgoodwin@redhat.com)
+- Filter internal hostnames from the list of parsed names.
+  (abutcher@redhat.com)
+- Move config upgrade to correct place, fix node facts. (dgoodwin@redhat.com)
+- Add custom certificates to serving info in master configuration.
+  (abutcher@redhat.com)
+- Add in proxyClientInfo if missing during config upgrade.
+  (dgoodwin@redhat.com)
+- Implement master-config.yaml upgrade for v1beta3 apiLevel removal.
+  (dgoodwin@redhat.com)
+- Fix installer upgrade bug following pylint fix. (dgoodwin@redhat.com)
+- Document the new version field for installer config. (dgoodwin@redhat.com)
+- Remove my username from some test data. (dgoodwin@redhat.com)
+- Add a simple version for the installer config file. (dgoodwin@redhat.com)
+- Pylint fix. (dgoodwin@redhat.com)
+- Fix issue with master.proxy-client.{crt,key} and omit. (abutcher@redhat.com)
+- initial module framework (jdetiber@redhat.com)
+- Better info prior to initiating upgrade. (dgoodwin@redhat.com)
+- Fix etcd backup bug with not-yet-created /var/lib/origin symlink
+  (dgoodwin@redhat.com)
+- Print info after upgrade completes. (dgoodwin@redhat.com)
+- Automatically upgrade legacy config files. (dgoodwin@redhat.com)
+- Remove devel fail and let upgrade proceed. (dgoodwin@redhat.com)
+- Add utils subpackage missing dep on openshift-ansible-roles.
+  (dgoodwin@redhat.com)
+- Generate timestamped etcd backups. (dgoodwin@redhat.com)
+- Add etcd_data_dir fact. (dgoodwin@redhat.com)
+- Functional disk space checking for etcd backup. (dgoodwin@redhat.com)
+- First cut at checking available disk space for etcd backup.
+  (dgoodwin@redhat.com)
+- Block upgrade if targetting enterprise deployment type. (dgoodwin@redhat.com)
+- Change flannel registration default values (sbaubeau@redhat.com)
+- Remove empty notify section (sbaubeau@redhat.com)
+- Check etcd certs exist for flannel when its support is enabled
+  (sbaubeau@redhat.com)
+- Fix when neither use_openshift_sdn nor use_flannel are specified
+  (sbaubeau@redhat.com)
+- Generate etcd certificats for flannel when is not embedded
+  (sbaubeau@redhat.com)
+- Add missing 2nd true parameters to default Jinja filter (sbaubeau@redhat.com)
+- Use 'command' module instead of 'shell' (sbaubeau@redhat.com)
+- Add flannel modules documentation (sbaubeau@redhat.com)
+- Only remove IPv4 address from docker bridge (sbaubeau@redhat.com)
+- Remove multiple use_flannel fact definition (sbaubeau@redhat.com)
+- Ensure openshift-sdn and flannel can't be used at the same time
+  (sbaubeau@redhat.com)
+- Add flannel support (sbaubeau@redhat.com)
+
 * Wed Nov 04 2015 Kenny Woodson <kwoodson@redhat.com> 3.0.7-1
 - added the %%util in zabbix (mwoodson@redhat.com)
 - atomic-openshift-installer: Correct default playbook directory

@@ -67,7 +67,24 @@ def get_template(zapi, template_name):
         return None
     return content['result'][0]
 
-def get_type(ztype):
+def get_multiplier(inval):
+    ''' Determine the multiplier
+    '''
+    if inval == None or inval == '':
+        return None, 0
+
+    rval = None
+    try:
+        rval = int(inval)
+    except ValueError:
+        pass
+
+    if rval:
+        return rval, 1
+
+    return rval, 0
+
+def get_zabbix_type(ztype):
     '''
     Determine which type of discoverrule this is
     '''
@@ -87,6 +104,7 @@ def get_type(ztype):
               'telnet': 14,
               'calculated': 15,
               'JMX': 16,
+              'SNMP trap': 17,
              }
 
     for typ in _types.keys():
@@ -153,16 +171,21 @@ def main():
             name=dict(default=None, type='str'),
             key=dict(default=None, type='str'),
             description=dict(default=None, type='str'),
+            template_name=dict(default=None, type='str'),
             interfaceid=dict(default=None, type='int'),
-            ztype=dict(default='trapper', type='str'),
+            zabbix_type=dict(default='trapper', type='str'),
             value_type=dict(default='float', type='str'),
             delay=dict(default=60, type='int'),
             lifetime=dict(default=30, type='int'),
             state=dict(default='present', type='str'),
             status=dict(default='enabled', type='str'),
             applications=dict(default=[], type='list'),
-            template_name=dict(default=None, type='str'),
             discoveryrule_key=dict(default=None, type='str'),
+            interval=dict(default=60, type='int'),
+            delta=dict(default=0, type='int'),
+            multiplier=dict(default=None, type='str'),
+            units=dict(default=None, type='str'),
+
         ),
         #supports_check_mode=True
     )
@@ -205,15 +228,23 @@ def main():
 
     # Create and Update
     if state == 'present':
+
+        formula, use_multiplier = get_multiplier(module.params['multiplier'])
+
         params = {'name': module.params['name'],
                   'key_':  module.params['key'],
                   'hostid':  template['templateid'],
                   'interfaceid': module.params['interfaceid'],
                   'ruleid': get_rule_id(zapi, module.params['discoveryrule_key'], template['templateid']),
-                  'type': get_type(module.params['ztype']),
+                  'type': get_zabbix_type(module.params['zabbix_type']),
                   'value_type': get_value_type(module.params['value_type']),
                   'applications': get_app_ids(zapi, module.params['applications'], template['templateid']),
+                  'formula': formula,
+                  'multiplier': use_multiplier,
                   'description': module.params['description'],
+                  'units': module.params['units'],
+                  'delay': module.params['interval'],
+                  'delta': module.params['delta'],
                  }
 
         if params['type'] in [2, 5, 7, 8, 11, 15]:

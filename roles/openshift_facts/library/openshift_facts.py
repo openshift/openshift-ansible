@@ -20,6 +20,8 @@ EXAMPLES = '''
 import ConfigParser
 import copy
 import os
+import StringIO
+import yaml
 from distutils.util import strtobool
 from distutils.version import LooseVersion
 from netaddr import IPNetwork
@@ -307,6 +309,23 @@ def set_fluentd_facts_if_unset(facts):
             facts['common']['use_fluentd'] = use_fluentd
     return facts
 
+def set_flannel_facts_if_unset(facts):
+    """ Set flannel facts if not already present in facts dict
+            dict: the facts dict updated with the flannel facts if
+            missing
+        Args:
+            facts (dict): existing facts
+        Returns:
+            dict: the facts dict updated with the flannel
+            facts if they were not already present
+
+    """
+    if 'common' in facts:
+        if 'use_flannel' not in facts['common']:
+            use_flannel = False
+            facts['common']['use_flannel'] = use_flannel
+    return facts
+
 def set_node_schedulability(facts):
     """ Set schedulable facts if not already present in facts dict
         Args:
@@ -407,7 +426,7 @@ def set_identity_providers_if_unset(facts):
                 name='allow_all', challenge=True, login=True,
                 kind='AllowAllPasswordIdentityProvider'
             )
-            if deployment_type == 'enterprise':
+            if deployment_type in ['enterprise', 'atomic-enterprise', 'openshift-enterprise']:
                 identity_provider = dict(
                     name='deny_all', challenge=True, login=True,
                     kind='DenyAllPasswordIdentityProvider'
@@ -511,8 +530,51 @@ def set_aggregate_facts(facts):
             internal_hostnames.add(first_svc_ip)
 
         facts['common']['all_hostnames'] = list(all_hostnames)
-        facts['common']['internal_hostnames'] = list(all_hostnames)
+        facts['common']['internal_hostnames'] = list(internal_hostnames)
 
+    return facts
+
+
+def set_etcd_facts_if_unset(facts):
+    """
+    If using embedded etcd, loads the data directory from master-config.yaml.
+
+    If using standalone etcd, loads ETCD_DATA_DIR from etcd.conf.
+
+    If anything goes wrong parsing these, the fact will not be set.
+    """
+    if 'etcd' in facts:
+        if 'master' in facts and facts['master']['embedded_etcd']:
+            try:
+                # Parse master config to find actual etcd data dir:
+                master_cfg_path = os.path.join(facts['common']['config_base'],
+                                               'master/master-config.yaml')
+                master_cfg_f = open(master_cfg_path, 'r')
+                config = yaml.safe_load(master_cfg_f.read())
+                master_cfg_f.close()
+
+                facts['etcd']['etcd_data_dir'] = \
+                    config['etcdConfig']['storageDirectory']
+            # We don't want exceptions bubbling up here:
+            # pylint: disable=broad-except
+            except Exception:
+                pass
+        else:
+            # Read ETCD_DATA_DIR from /etc/etcd/etcd.conf:
+            try:
+                # Add a fake section for parsing:
+                ini_str = '[root]\n' + open('/etc/etcd/etcd.conf', 'r').read()
+                ini_fp = StringIO.StringIO(ini_str)
+                config = ConfigParser.RawConfigParser()
+                config.readfp(ini_fp)
+                etcd_data_dir = config.get('root', 'ETCD_DATA_DIR')
+                if etcd_data_dir.startswith('"') and etcd_data_dir.endswith('"'):
+                    etcd_data_dir = etcd_data_dir[1:-1]
+                facts['etcd']['etcd_data_dir'] = etcd_data_dir
+            # We don't want exceptions bubbling up here:
+            # pylint: disable=broad-except
+            except Exception:
+                pass
     return facts
 
 def set_deployment_facts_if_unset(facts):
@@ -542,21 +604,18 @@ def set_deployment_facts_if_unset(facts):
             config_base = '/etc/origin'
             if deployment_type in ['enterprise', 'online']:
                 config_base = '/etc/openshift'
+            # Handle upgrade scenarios when symlinks don't yet exist:
+            if not os.path.exists(config_base) and os.path.exists('/etc/openshift'):
+                config_base = '/etc/openshift'
             facts['common']['config_base'] = config_base
         if 'data_dir' not in facts['common']:
             data_dir = '/var/lib/origin'
             if deployment_type in ['enterprise', 'online']:
                 data_dir = '/var/lib/openshift'
+            # Handle upgrade scenarios when symlinks don't yet exist:
+            if not os.path.exists(data_dir) and os.path.exists('/var/lib/openshift'):
+                data_dir = '/var/lib/openshift'
             facts['common']['data_dir'] = data_dir
-        facts['common']['version'] = version = get_openshift_version()
-        if version is not None:
-            if deployment_type == 'origin':
-                version_gt_3_1_or_1_1 = LooseVersion(version) > LooseVersion('1.0.6')
-            else:
-                version_gt_3_1_or_1_1 = LooseVersion(version) > LooseVersion('3.0.2.900')
-        else:
-            version_gt_3_1_or_1_1 = True
-        facts['common']['version_greater_than_3_1_or_1_1'] = version_gt_3_1_or_1_1
 
     for role in ('master', 'node'):
         if role in facts:
@@ -590,12 +649,34 @@ def set_deployment_facts_if_unset(facts):
 
     return facts
 
+def set_version_facts_if_unset(facts):
+    """ Set version facts. This currently includes common.version and
+        common.version_greater_than_3_1_or_1_1.
 
-def set_sdn_facts_if_unset(facts):
+        Args:
+            facts (dict): existing facts
+        Returns:
+            dict: the facts dict updated with version facts.
+    """
+    if 'common' in facts:
+        deployment_type = facts['common']['deployment_type']
+        facts['common']['version'] = version = get_openshift_version()
+        if version is not None:
+            if deployment_type == 'origin':
+                version_gt_3_1_or_1_1 = LooseVersion(version) > LooseVersion('1.0.6')
+            else:
+                version_gt_3_1_or_1_1 = LooseVersion(version) > LooseVersion('3.0.2.900')
+        else:
+            version_gt_3_1_or_1_1 = True
+        facts['common']['version_greater_than_3_1_or_1_1'] = version_gt_3_1_or_1_1
+    return facts
+
+def set_sdn_facts_if_unset(facts, system_facts):
     """ Set sdn facts if not already present in facts dict
 
         Args:
             facts (dict): existing facts
+            system_facts (dict): ansible_facts
         Returns:
             dict: the facts dict updated with the generated sdn facts if they
                   were not already present
@@ -614,9 +695,18 @@ def set_sdn_facts_if_unset(facts):
         if 'sdn_host_subnet_length' not in facts['master']:
             facts['master']['sdn_host_subnet_length'] = '8'
 
-    if 'node' in facts:
-        if 'sdn_mtu' not in facts['node']:
-            facts['node']['sdn_mtu'] = '1450'
+    if 'node' in facts and 'sdn_mtu' not in facts['node']:
+        node_ip = facts['common']['ip']
+
+        # default MTU if interface MTU cannot be detected
+        facts['node']['sdn_mtu'] = '1450'
+
+        for val in system_facts.itervalues():
+            if isinstance(val, dict) and 'mtu' in val:
+                mtu = val['mtu']
+
+                if 'ipv4' in val and val['ipv4'].get('address') == node_ip:
+                    facts['node']['sdn_mtu'] = str(mtu - 50)
 
     return facts
 
@@ -849,7 +939,7 @@ class OpenShiftFacts(object):
         Raises:
             OpenShiftFactsUnsupportedRoleError:
     """
-    known_roles = ['common', 'master', 'node', 'master_sdn', 'node_sdn', 'dns']
+    known_roles = ['common', 'master', 'node', 'master_sdn', 'node_sdn', 'dns', 'etcd']
 
     def __init__(self, role, filename, local_facts):
         self.changed = False
@@ -883,13 +973,16 @@ class OpenShiftFacts(object):
         facts = set_url_facts_if_unset(facts)
         facts = set_project_cfg_facts_if_unset(facts)
         facts = set_fluentd_facts_if_unset(facts)
+        facts = set_flannel_facts_if_unset(facts)
         facts = set_node_schedulability(facts)
         facts = set_master_selectors(facts)
         facts = set_metrics_facts_if_unset(facts)
         facts = set_identity_providers_if_unset(facts)
-        facts = set_sdn_facts_if_unset(facts)
+        facts = set_sdn_facts_if_unset(facts, self.system_facts)
         facts = set_deployment_facts_if_unset(facts)
+        facts = set_version_facts_if_unset(facts)
         facts = set_aggregate_facts(facts)
+        facts = set_etcd_facts_if_unset(facts)
         return dict(openshift=facts)
 
     def get_defaults(self, roles):
@@ -928,11 +1021,12 @@ class OpenShiftFacts(object):
                           session_name='ssn', session_secrets_file='',
                           access_token_max_seconds=86400,
                           auth_token_max_seconds=500,
-                          oauth_grant_method='auto', cluster_defer_ha=False)
+                          oauth_grant_method='auto')
             defaults['master'] = master
 
         if 'node' in roles:
-            node = dict(labels={}, annotations={}, portal_net='172.30.0.0/16')
+            node = dict(labels={}, annotations={}, portal_net='172.30.0.0/16',
+                        iptables_sync_period='5s')
             defaults['node'] = node
 
         return defaults

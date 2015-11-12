@@ -45,6 +45,7 @@
         - origin-master-api
         - origin-master-controllers
         - origin-node
+        - pcsd
 
     - yum: name={{ item }} state=absent
       when: not is_atomic | bool
@@ -58,6 +59,7 @@
         - atomic-openshift-master
         - atomic-openshift-node
         - atomic-openshift-sdn-ovs
+        - corosync
         - etcd
         - openshift
         - openshift-master
@@ -66,9 +68,12 @@
         - openshift-sdn-ovs
         - openvswitch
         - origin
+        - origin-clients
         - origin-master
         - origin-node
         - origin-sdn-ovs
+        - pacemaker
+        - pcs
         - tuned-profiles-atomic-enterprise-node
         - tuned-profiles-atomic-openshift-node
         - tuned-profiles-openshift-node
@@ -136,8 +141,10 @@
 
     - file: path={{ item }} state=absent
       with_items:
+        - "~{{ ansible_ssh_user }}/.kube"
         - /etc/ansible/facts.d/openshift.fact
         - /etc/atomic-enterprise
+        - /etc/corosync
         - /etc/etcd
         - /etc/openshift
         - /etc/openshift-sdn
@@ -151,9 +158,13 @@
         - /etc/sysconfig/origin-master
         - /etc/sysconfig/origin-node
         - /root/.kube
-        - "~{{ ansible_ssh_user }}/.kube"
+        - /run/openshift-sdn
         - /usr/share/openshift/examples
         - /var/lib/atomic-enterprise
         - /var/lib/etcd
         - /var/lib/openshift
         - /var/lib/origin
+        - /var/lib/pacemaker
+
+    - name: restart docker
+      service: name=docker state=restarted

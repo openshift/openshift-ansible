@@ -7,6 +7,7 @@ The default location this config file will be written to ~/.config/openshift/ins
 ## Example
 
 ```
+version: v1
 variant: openshift-enterprise
 variant_version: 3.0
 ansible_ssh_user: root
@@ -18,19 +19,26 @@ hosts:
   master: true
   node: true
   containerized: true
+  connect_to: 24.222.0.1
 - ip: 10.0.0.2
   hostname: node1-private.example.com
   public_ip: 24.222.0.2
   public_hostname: node1.example.com
   node: true
+  connect_to: 10.0.0.2
 - ip: 10.0.0.3
   hostname: node2-private.example.com
   public_ip: 24.222.0.3
   public_hostname: node2.example.com
   node: true
+  connect_to: 10.0.0.3
 ```
 
 ## Primary Settings
+
+### version
+
+Indicates the version of configuration this file was written with. Current implementation is v1.
 
 ### variant
 
