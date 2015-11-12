@@ -95,6 +95,54 @@ class FilterModule(object):
 
         return data
 
+    @staticmethod
+    def itservice_results_builder(data, clusters, keys):
+        '''Take a list of dict results,
+           loop through each results and create a hash
+           of:
+             [{clusterid:  cluster1, key: 111 }]
+        '''
+        r_list = []
+        for cluster in clusters:
+            for results in data:
+                if cluster == results['item'][0]:
+                    results = results['results']
+                    if results and len(results) > 0 and all([results[0].has_key(_key) for _key in keys]):
+                        tmp = {}
+                        tmp['clusterid'] = cluster
+                        for key in keys:
+                            tmp[key] = results[0][key]
+                        r_list.append(tmp)
+
+        return r_list
+
+    @staticmethod
+    def itservice_dependency_builder(data, cluster):
+        '''Take a list of dict results,
+           loop through each results and create a hash
+           of:
+             [{clusterid:  cluster1, key: 111 }]
+        '''
+        r_list = []
+        for dep in data:
+            if cluster == dep['clusterid']:
+                r_list.append({'name': '%s - %s' % (dep['clusterid'], dep['description']), 'dep_type': 'hard'})
+
+        return r_list
+
+    @staticmethod
+    def itservice_dep_builder_list(data):
+        '''Take a list of dict results,
+           loop through each results and create a hash
+           of:
+             [{clusterid:  cluster1, key: 111 }]
+        '''
+        r_list = []
+        for dep in data:
+            r_list.append({'name': '%s' % dep, 'dep_type': 'hard'})
+
+        return r_list
+
     def filters(self):
         ''' returns a mapping of filters to methods '''
         return {
@@ -105,4 +153,7 @@ class FilterModule(object):
             "create_data": self.create_data,
             "oo_build_zabbix_collect": self.oo_build_zabbix_collect,
             "oo_remove_attr_from_list_dict": self.oo_remove_attr_from_list_dict,
+            "itservice_results_builder": self.itservice_results_builder,
+            "itservice_dependency_builder": self.itservice_dependency_builder,
+            "itservice_dep_builder_list": self.itservice_dep_builder_list,
         }
