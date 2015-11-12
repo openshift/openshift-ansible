@@ -111,8 +111,17 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # set RPM version for debugging purposes
 #openshift_pkg_version=-3.0.0.0
 
-# Configure custom master certificates
+# Configure custom named certificates
+# NOTE: openshift_master_named_certificates is cached on masters and is an
+# additive fact, meaning that each run with a different set of certificates
+# will add the newly provided certificates to the cached set of certificates.
+# If you would like openshift_master_named_certificates to be overwritten with
+# the provided value, specify openshift_master_overwrite_named_certificates.
+#openshift_master_overwrite_named_certificates: true
+#
+# Provide local certificate paths which will be deployed to masters
 #openshift_master_named_certificates=[{"certfile": "/path/to/custom1.crt", "keyfile": "/path/to/custom1.key"}]
+#
 # Detected names may be overridden by specifying the "names" key
 #openshift_master_named_certificates=[{"certfile": "/path/to/custom1.crt", "keyfile": "/path/to/custom1.key", "names": ["public-master-host.com"]}]
 

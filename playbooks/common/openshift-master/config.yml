@@ -204,14 +204,6 @@
       validate_checksum: yes
     with_items: masters_needing_certs
 
-- name: Inspect named certificates
-  hosts: oo_first_master
-  tasks:
-  - name: Collect certificate names
-    set_fact:
-      parsed_named_certificates: "{{ openshift_master_named_certificates | oo_parse_certificate_names(master_cert_config_dir, openshift.common.internal_hostnames) }}"
-    when: openshift_master_named_certificates is defined
-
 - name: Compute haproxy_backend_servers
   hosts: localhost
   connection: local
@@ -272,11 +264,54 @@
                                       | map(attribute='stdout')
                                       | list) }}"
 
+- name: Parse named certificates
+  hosts: localhost
+  vars:
+    internal_hostnames: "{{ hostvars[groups.oo_first_master.0].openshift.common.internal_hostnames }}"
+    named_certificates: "{{ hostvars[groups.oo_first_master.0].openshift_master_named_certificates | default([]) }}"
+    named_certificates_dir: "{{ hostvars[groups.oo_first_master.0].master_cert_config_dir }}/named_certificates/"
+  tasks:
+  - set_fact:
+      parsed_named_certificates: "{{ named_certificates | oo_parse_named_certificates(named_certificates_dir, internal_hostnames) }}"
+    when: named_certificates | length > 0
+
+- name: Deploy named certificates
+  hosts: oo_masters_to_config
+  vars:
+    named_certs_dir: "{{ master_cert_config_dir }}/named_certificates/"
+    named_certs_specified: "{{ openshift_master_named_certificates is defined }}"
+    overwrite_named_certs: "{{ openshift_master_overwrite_named_certificates | default(false) }}"
+  roles:
+  - role: openshift_facts
+  post_tasks:
+  - openshift_facts:
+      role: master
+      local_facts:
+        named_certificates: "{{ hostvars.localhost.parsed_named_certificates | default([]) }}"
+      overwrite_additive_facts: "{{ overwrite_named_certs }}"
+  - name: Clear named certificates
+    file:
+      path: "{{ named_certs_dir }}"
+      state: absent
+    when: overwrite_named_certs | bool
+  - name: Ensure named certificate directory exists
+    file:
+      path: "{{ named_certs_dir }}"
+      state: directory
+    when: named_certs_specified | bool
+  - name: Land named certificates
+    copy: src="{{ item.certfile }}" dest="{{ named_certs_dir }}"
+    with_items: openshift_master_named_certificates
+    when: named_certs_specified | bool
+  - name: Land named certificate keys
+    copy: src="{{ item.keyfile }}" dest="{{ named_certs_dir }}"
+    with_items: openshift_master_named_certificates
+    when: named_certs_specified | bool
+
 - name: Configure master instances
   hosts: oo_masters_to_config
   serial: 1
   vars:
-    named_certificates: "{{ hostvars[groups['oo_first_master'][0]]['parsed_named_certificates'] | default([])}}"
     sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
     openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
     openshift_master_count: "{{ groups.oo_masters_to_config | length }}"
