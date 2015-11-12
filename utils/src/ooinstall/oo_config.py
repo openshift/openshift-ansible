@@ -12,6 +12,7 @@ PERSIST_SETTINGS = [
     'ansible_log_path',
     'variant',
     'variant_version',
+    'version',
     ]
 REQUIRED_FACTS = ['ip', 'public_ip', 'hostname', 'public_hostname']
 
@@ -34,6 +35,7 @@ class Host(object):
         self.hostname = kwargs.get('hostname', None)
         self.public_ip = kwargs.get('public_ip', None)
         self.public_hostname = kwargs.get('public_hostname', None)
+        self.connect_to = kwargs.get('connect_to', None)
 
         # Should this host run as an OpenShift master:
         self.master = kwargs.get('master', False)
@@ -42,30 +44,25 @@ class Host(object):
         self.node = kwargs.get('node', False)
         self.containerized = kwargs.get('containerized', False)
 
-        if self.ip is None and self.hostname is None:
-            raise OOConfigInvalidHostError("You must specify either 'ip' or 'hostname'")
+        if self.connect_to is None:
+            raise OOConfigInvalidHostError("You must specify either and 'ip' " \
+                                           "or 'hostname' to connect to.")
 
         if self.master is False and self.node is False:
             raise OOConfigInvalidHostError(
                 "You must specify each host as either a master or a node.")
 
-        # Hosts can be specified with an ip, hostname, or both. However we need
-        # something authoritative we can connect to and refer to the host by.
-        # Preference given to the IP if specified as this is more specific.
-        # We know one must be set by this point.
-        self.name = self.ip if self.ip is not None else self.hostname
-
     def __str__(self):
-        return self.name
+        return self.connect_to
 
     def __repr__(self):
-        return self.name
+        return self.connect_to
 
     def to_dict(self):
         """ Used when exporting to yaml. """
         d = {}
         for prop in ['ip', 'hostname', 'public_ip', 'public_hostname',
-                     'master', 'node', 'containerized']:
+                     'master', 'node', 'containerized', 'connect_to']:
             # If the property is defined (not None or False), export it:
             if getattr(self, prop):
                 d[prop] = getattr(self, prop)
@@ -73,7 +70,6 @@ class Host(object):
 
 
 class OOConfig(object):
-    new_config = True
     default_dir = os.path.normpath(
         os.environ.get('XDG_CONFIG_HOME',
                        os.environ['HOME'] + '/.config/') + '/openshift/')
@@ -86,19 +82,22 @@ class OOConfig(object):
             self.config_path = os.path.normpath(self.default_dir +
                                                 self.default_file)
         self.settings = {}
-        self.read_config()
-        self.set_defaults()
+        self._read_config()
+        self._set_defaults()
 
-    def read_config(self, is_new=False):
+    def _read_config(self):
         self.hosts = []
         try:
-            new_settings = None
             if os.path.exists(self.config_path):
                 cfgfile = open(self.config_path, 'r')
-                new_settings = yaml.safe_load(cfgfile.read())
+                self.settings = yaml.safe_load(cfgfile.read())
                 cfgfile.close()
-            if new_settings:
-                self.settings = new_settings
+
+                # Use the presence of a Description as an indicator this is
+                # a legacy config file:
+                if 'Description' in self.settings:
+                    self._upgrade_legacy_config()
+
                 # Parse the hosts into DTO objects:
                 if 'hosts' in self.settings:
                     for host in self.settings['hosts']:
@@ -114,9 +113,31 @@ class OOConfig(object):
                                                                               ferr.strerror))
         except yaml.scanner.ScannerError:
             raise OOConfigFileError('Config file "{}" is not a valid YAML document'.format(self.config_path))
-        self.new_config = is_new
 
-    def set_defaults(self):
+    def _upgrade_legacy_config(self):
+        new_hosts = []
+        remove_settings = ['validated_facts', 'Description', 'Name',
+            'Subscription', 'Vendor', 'Version', 'masters', 'nodes']
+
+        if 'validated_facts' in self.settings:
+            for key, value in self.settings['validated_facts'].iteritems():
+                value['connect_to'] = key
+                if 'masters' in self.settings and key in self.settings['masters']:
+                    value['master'] = True
+                if 'nodes' in self.settings and key in self.settings['nodes']:
+                    value['node'] = True
+                new_hosts.append(value)
+        self.settings['hosts'] = new_hosts
+
+        for s in remove_settings:
+            if s in self.settings:
+                del self.settings[s]
+
+        # A legacy config implies openshift-enterprise 3.0:
+        self.settings['variant'] = 'openshift-enterprise'
+        self.settings['variant_version'] = '3.0'
+
+    def _set_defaults(self):
 
         if 'ansible_inventory_directory' not in self.settings:
             self.settings['ansible_inventory_directory'] = \
@@ -125,6 +146,8 @@ class OOConfig(object):
             os.makedirs(self.settings['ansible_inventory_directory'])
         if 'ansible_plugins_directory' not in self.settings:
             self.settings['ansible_plugins_directory'] = resource_filename(__name__, 'ansible_plugins')
+        if 'version' not in self.settings:
+            self.settings['version'] = 'v1'
 
         if 'ansible_callback_facts_yaml' not in self.settings:
             self.settings['ansible_callback_facts_yaml'] = '%s/callback_facts.yaml' % \
@@ -158,7 +181,7 @@ class OOConfig(object):
                 if not getattr(host, required_fact):
                     missing_facts.append(required_fact)
             if len(missing_facts) > 0:
-                result[host.name] = missing_facts
+                result[host.connect_to] = missing_facts
         return result
 
     def save_to_disk(self):
@@ -190,6 +213,6 @@ class OOConfig(object):
 
     def get_host(self, name):
         for host in self.hosts:
-            if host.name == name:
+            if host.connect_to == name:
                 return host
         return None

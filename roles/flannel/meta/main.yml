@@ -1,0 +1,16 @@
+---
+galaxy_info:
+  author: Sylvain
+  description: flannel management
+  company: Red Hat, Inc.
+  license: Apache License, Version 2.0
+  min_ansible_version: 1.2
+  platforms:
+  - name: EL
+    versions:
+    - 7
+  categories:
+  - cloud
+  - system
+dependencies:
+- { role: openshift_facts }

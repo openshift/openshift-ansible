@@ -1,5 +1,6 @@
 Requirements
 ------------
+- ansible (the latest 1.9 release is preferred, but any version greater than 1.9.1 should be sufficient).
 - vagrant (tested against version 1.7.2)
 - vagrant-hostmanager plugin (tested against version 1.5.0)
 - vagrant-registration plugin (only required for enterprise deployment type)

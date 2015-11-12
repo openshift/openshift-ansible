@@ -1,0 +1,25 @@
+---
+- name: Install haproxy
+  yum:
+    pkg: haproxy
+    state: present
+
+- name: Configure haproxy
+  template:
+    src: haproxy.cfg.j2
+    dest: /etc/haproxy/haproxy.cfg
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart haproxy
+
+- name: Enable and start haproxy
+  service:
+    name: haproxy
+    state: started
+    enabled: yes
+  register: start_result
+
+- name: Pause 30 seconds if haproxy was just started
+  pause: seconds=30
+  when: start_result | changed

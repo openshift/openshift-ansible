@@ -16,10 +16,8 @@ def set_config(cfg):
     CFG = cfg
 
 def generate_inventory(hosts):
-    print hosts
     global CFG
 
-    installer_host = socket.gethostname()
     base_inventory_path = CFG.settings['ansible_inventory_path']
     base_inventory = open(base_inventory_path, 'w')
     base_inventory.write('\n[OSEv3:children]\nmasters\nnodes\n')
@@ -33,25 +31,18 @@ def generate_inventory(hosts):
         version=CFG.settings.get('variant_version', None))[1]
     base_inventory.write('deployment_type={}\n'.format(ver.ansible_key))
 
-    if 'OO_INSTALL_DEVEL_REGISTRY' in os.environ:
-        base_inventory.write('oreg_url=rcm-img-docker01.build.eng.bos.redhat.com:'
-            '5001/openshift3/ose-${component}:${version}\n')
-    if 'OO_INSTALL_PUDDLE_REPO_ENABLE' in os.environ:
-        base_inventory.write("openshift_additional_repos=[{'id': 'ose-devel', "
+    if 'OO_INSTALL_ADDITIONAL_REGISTRIES' in os.environ:
+        base_inventory.write('cli_docker_additional_registries={}\n'
+          .format(os.environ['OO_INSTALL_ADDITIONAL_REGISTRIES']))
+    if 'OO_INSTALL_INSECURE_REGISTRIES' in os.environ:
+        base_inventory.write('cli_docker_insecure_registries={}\n'
+          .format(os.environ['OO_INSTALL_INSECURE_REGISTRIES']))
+    if 'OO_INSTALL_PUDDLE_REPO' in os.environ:
+        # We have to double the '{' here for literals
+        base_inventory.write("openshift_additional_repos=[{{'id': 'ose-devel', "
             "'name': 'ose-devel', "
-            "'baseurl': 'http://buildvm-devops.usersys.redhat.com"
-            "/puddle/build/AtomicOpenShift/3.1/latest/RH7-RHAOS-3.1/$basearch/os', "
-            "'enabled': 1, 'gpgcheck': 0}]\n")
-    if 'OO_INSTALL_STAGE_REGISTRY' in os.environ:
-        base_inventory.write('oreg_url=registry.access.stage.redhat.com/openshift3/ose-${component}:${version}\n')
-
-    if any(host.hostname == installer_host or host.public_hostname == installer_host
-            for host in hosts):
-        no_pwd_sudo = subprocess.call(['sudo', '-v', '--non-interactive'])
-        if no_pwd_sudo == 1:
-            print 'The atomic-openshift-installer requires sudo access without a password.'
-            sys.exit(1)
-        base_inventory.write("ansible_connection=local\n")
+            "'baseurl': '{}', "
+            "'enabled': 1, 'gpgcheck': 0}}]\n".format(os.environ['OO_INSTALL_PUDDLE_REPO']))
 
     base_inventory.write('\n[masters]\n')
     masters = (host for host in hosts if host.master)
@@ -73,6 +64,7 @@ def generate_inventory(hosts):
 
 def write_host(host, inventory, scheduleable=True):
     global CFG
+
     facts = ''
     if host.ip:
         facts += ' openshift_ip={}'.format(host.ip)
@@ -86,19 +78,30 @@ def write_host(host, inventory, scheduleable=True):
     # Technically only nodes will ever need this.
     if not scheduleable:
         facts += ' openshift_scheduleable=False'
-    inventory.write('{} {}\n'.format(host, facts))
+    installer_host = socket.gethostname()
+    if installer_host in [host.connect_to, host.hostname, host.public_hostname]:
+        facts += ' ansible_connection=local'
+        if os.geteuid() != 0:
+            no_pwd_sudo = subprocess.call(['sudo', '-v', '-n'])
+            if no_pwd_sudo == 1:
+                print 'The atomic-openshift-installer requires sudo access without a password.'
+                sys.exit(1)
+            facts += ' ansible_become=true'
+
+    inventory.write('{} {}\n'.format(host.connect_to, facts))
 
 
-def load_system_facts(inventory_file, os_facts_path, env_vars):
+def load_system_facts(inventory_file, os_facts_path, env_vars, verbose=False):
     """
     Retrieves system facts from the remote systems.
     """
     FNULL = open(os.devnull, 'w')
-    status = subprocess.call(['ansible-playbook',
-                     '--inventory-file={}'.format(inventory_file),
-                     os_facts_path],
-                     env=env_vars,
-                     stdout=FNULL)
+    args = ['ansible-playbook', '-v'] if verbose \
+        else ['ansible-playbook']
+    args.extend([
+        '--inventory-file={}'.format(inventory_file),
+        os_facts_path])
+    status = subprocess.call(args, env=env_vars, stdout=FNULL)
     if not status == 0:
         return [], 1
     callback_facts_file = open(CFG.settings['ansible_callback_facts_yaml'], 'r')
@@ -107,7 +110,7 @@ def load_system_facts(inventory_file, os_facts_path, env_vars):
     return callback_facts, 0
 
 
-def default_facts(hosts):
+def default_facts(hosts, verbose=False):
     global CFG
     inventory_file = generate_inventory(hosts)
     os_facts_path = '{}/playbooks/byo/openshift_facts.yml'.format(CFG.ansible_playbook_directory)
@@ -119,12 +122,12 @@ def default_facts(hosts):
         facts_env["ANSIBLE_LOG_PATH"] = CFG.settings['ansible_log_path']
     if 'ansible_config' in CFG.settings:
         facts_env['ANSIBLE_CONFIG'] = CFG.settings['ansible_config']
-    return load_system_facts(inventory_file, os_facts_path, facts_env)
+    return load_system_facts(inventory_file, os_facts_path, facts_env, verbose)
 
 
-def run_main_playbook(hosts, hosts_to_run_on):
+def run_main_playbook(hosts, hosts_to_run_on, verbose=False):
     global CFG
-    inventory_file = generate_inventory(hosts)
+    inventory_file = generate_inventory(hosts_to_run_on)
     if len(hosts_to_run_on) != len(hosts):
         main_playbook_path = os.path.join(CFG.ansible_playbook_directory,
                                           'playbooks/common/openshift-cluster/scaleup.yml')
@@ -136,16 +139,19 @@ def run_main_playbook(hosts, hosts_to_run_on):
         facts_env['ANSIBLE_LOG_PATH'] = CFG.settings['ansible_log_path']
     if 'ansible_config' in CFG.settings:
         facts_env['ANSIBLE_CONFIG'] = CFG.settings['ansible_config']
-    return run_ansible(main_playbook_path, inventory_file, facts_env)
+    return run_ansible(main_playbook_path, inventory_file, facts_env, verbose)
 
 
-def run_ansible(playbook, inventory, env_vars):
-    return subprocess.call(['ansible-playbook',
-                             '--inventory-file={}'.format(inventory),
-                             playbook],
-                             env=env_vars)
+def run_ansible(playbook, inventory, env_vars, verbose=False):
+    args = ['ansible-playbook', '-v'] if verbose \
+        else ['ansible-playbook']
+    args.extend([
+        '--inventory-file={}'.format(inventory),
+        playbook])
+    return subprocess.call(args, env=env_vars)
 
-def run_uninstall_playbook():
+
+def run_uninstall_playbook(verbose=False):
     playbook = os.path.join(CFG.settings['ansible_playbook_directory'],
         'playbooks/adhoc/uninstall.yml')
     inventory_file = generate_inventory(CFG.hosts)
@@ -154,4 +160,20 @@ def run_uninstall_playbook():
         facts_env['ANSIBLE_LOG_PATH'] = CFG.settings['ansible_log_path']
     if 'ansible_config' in CFG.settings:
         facts_env['ANSIBLE_CONFIG'] = CFG.settings['ansible_config']
-    return run_ansible(playbook, inventory_file, facts_env)
+    return run_ansible(playbook, inventory_file, facts_env, verbose)
+
+
+def run_upgrade_playbook(verbose=False):
+    # TODO: do not hardcode the upgrade playbook, add ability to select the
+    # right playbook depending on the type of upgrade.
+    playbook = os.path.join(CFG.settings['ansible_playbook_directory'],
+        'playbooks/byo/openshift-cluster/upgrades/v3_0_to_v3_1/upgrade.yml')
+    # TODO: Upgrade inventory for upgrade?
+    inventory_file = generate_inventory(CFG.hosts)
+    facts_env = os.environ.copy()
+    if 'ansible_log_path' in CFG.settings:
+        facts_env['ANSIBLE_LOG_PATH'] = CFG.settings['ansible_log_path']
+    if 'ansible_config' in CFG.settings:
+        facts_env['ANSIBLE_CONFIG'] = CFG.settings['ansible_config']
+    return run_ansible(playbook, inventory_file, facts_env, verbose)
+

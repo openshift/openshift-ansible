@@ -243,6 +243,21 @@ class FilterModule(object):
         return string.split(separator)
 
     @staticmethod
+    def oo_haproxy_backend_masters(hosts):
+        ''' This takes an array of dicts and returns an array of dicts
+            to be used as a backend for the haproxy role
+        '''
+        servers = []
+        for idx, host_info in enumerate(hosts):
+            server = dict(name="master%s" % idx)
+            server_ip = host_info['openshift']['common']['ip']
+            server_port = host_info['openshift']['master']['api_port']
+            server['address'] = "%s:%s" % (server_ip, server_port)
+            server['opts'] = 'check'
+            servers.append(server)
+        return servers
+
+    @staticmethod
     def oo_filter_list(data, filter_attr=None):
         ''' This returns a list, which contains all items where filter_attr
             evaluates to true
@@ -260,7 +275,7 @@ class FilterModule(object):
             raise errors.AnsibleFilterError("|failed expects filter_attr is a str")
 
         # Gather up the values for the list of keys passed in
-        return [x for x in data if x[filter_attr]]
+        return [x for x in data if x.has_key(filter_attr) and x[filter_attr]]
 
     @staticmethod
     def oo_parse_heat_stack_outputs(data):
@@ -362,14 +377,9 @@ class FilterModule(object):
             else:
                 certificate['names'] = []
 
-            if not os.path.isfile(certificate['certfile']) and not os.path.isfile(certificate['keyfile']):
-                # Unable to find cert/key, try to prepend data_dir to paths
-                certificate['certfile'] = os.path.join(data_dir, certificate['certfile'])
-                certificate['keyfile'] = os.path.join(data_dir, certificate['keyfile'])
-                if not os.path.isfile(certificate['certfile']) and not os.path.isfile(certificate['keyfile']):
-                    # Unable to find cert/key in data_dir
-                    raise errors.AnsibleFilterError("|certificate and/or key does not exist '%s', '%s'" %
-                                                    (certificate['certfile'], certificate['keyfile']))
+            if not os.path.isfile(certificate['certfile']) or not os.path.isfile(certificate['keyfile']):
+                raise errors.AnsibleFilterError("|certificate and/or key does not exist '%s', '%s'" %
+                                                (certificate['certfile'], certificate['keyfile']))
 
             try:
                 st_cert = open(certificate['certfile'], 'rt').read()
@@ -407,5 +417,6 @@ class FilterModule(object):
             "oo_split": self.oo_split,
             "oo_filter_list": self.oo_filter_list,
             "oo_parse_heat_stack_outputs": self.oo_parse_heat_stack_outputs,
-            "oo_parse_certificate_names": self.oo_parse_certificate_names
+            "oo_parse_certificate_names": self.oo_parse_certificate_names,
+            "oo_haproxy_backend_masters": self.oo_haproxy_backend_masters
         }
