@@ -4,4 +4,5 @@
 # TODO: it might be possible to still use firewalld if we wire up the created
 # chains with the public zone (or the zone associated with the correct
 # interfaces)
+some_var_name: "openshift_common"
 os_firewall_use_firewalld: False

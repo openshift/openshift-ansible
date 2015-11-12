@@ -40,7 +40,7 @@
 - name: Create temp directory for syncing certs
   hosts: localhost
   connection: local
-  become: no
+  become: false
   gather_facts: no
   tasks:
   - name: Create local temp directory for syncing certs
@@ -66,7 +66,7 @@
         -C {{ item.config_dir }} .
     args:
       creates: "{{ item.config_dir }}.tgz"
-    with_items: nodes_needing_certs
+    with_items: "{{ nodes_needing_certs }}"
 
   - name: Retrieve the node config tarballs from the master
     fetch:
@@ -75,7 +75,7 @@
       flat: yes
       fail_on_missing: yes
       validate_checksum: yes
-    with_items: nodes_needing_certs
+    with_items: "{{ nodes_needing_certs }}"
 
 - name: Deploy node certificates
   hosts: oo_nodes_to_config
@@ -239,7 +239,7 @@
 - name: Delete temporary directory on localhost
   hosts: localhost
   connection: local
-  become: no
+  become: false
   gather_facts: no
   tasks:
   - file: name={{ mktemp.stdout }} state=absent

@@ -78,14 +78,14 @@
   action: "{{ ansible_pkg_mgr }} name=httpd-tools state=present"
   when: (item.kind == 'HTPasswdPasswordIdentityProvider') and
         not openshift.common.is_atomic | bool
-  with_items: openshift.master.identity_providers
+  with_items: "{{ openshift.master.identity_providers }}"
 
 - name: Ensure htpasswd directory exists
   file:
     path: "{{ item.filename | dirname }}"
     state: directory
   when: item.kind == 'HTPasswdPasswordIdentityProvider'
-  with_items: openshift.master.identity_providers
+  with_items: "{{ openshift.master.identity_providers }}"
 
 - name: Create the htpasswd file if needed
   template:
@@ -94,7 +94,7 @@
     mode: 0600
     backup: yes
   when: item.kind == 'HTPasswdPasswordIdentityProvider'
-  with_items: openshift.master.identity_providers
+  with_items: "{{ openshift.master.identity_providers }}"
 
 - name: Create the ldap ca file if needed
   copy:

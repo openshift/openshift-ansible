@@ -16,7 +16,7 @@ ansible_ssh_user=root
 
 # If ansible_ssh_user is not root, ansible_become must be set to true and the
 # user must be configured for passwordless sudo
-#ansible_become=yes
+#ansible_become=true
 
 # Debug level for all Atomic Enterprise components (Defaults to 2)
 debug_level=2
