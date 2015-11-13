@@ -1,13 +1,5 @@
 ---
 - include: evaluate_groups.yml
-  vars:
-    g_etcd_group: "{{ 'etcd' }}"
-    g_masters_group: "{{ 'masters' }}"
-    g_nodes_group: "{{ 'nodes' }}"
-    g_lb_group: "{{ 'lb' }}"
-    openshift_cluster_id: "{{ cluster_id | default('default') }}"
-    openshift_debug_level: 2
-    openshift_deployment_type: "{{ deployment_type }}"
 
 - include: ../openshift-node/config.yml
   vars:
