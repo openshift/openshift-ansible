@@ -183,7 +183,7 @@ def main():
         if not exists(content):
             module.exit_json(changed=False, state="absent")
 
-        content = zapi.get_content(zbx_class_name, 'delete', [content['result'][0]['itemid']])
+        content = zapi.get_content(zbx_class_name, 'delete', [content['result'][0]['serviceid']])
         module.exit_json(changed=True, results=content['result'], state="absent")
 
     # Create and Update
@@ -210,6 +210,7 @@ def main():
             if content.has_key('error'):
                 module.exit_json(failed=True, changed=True, results=content['error'], state="present")
 
+            if dependencies:
                 content = add_dependencies(zapi, module.params['name'], dependencies)
 
                 if content.has_key('error'):

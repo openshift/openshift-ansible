@@ -188,7 +188,7 @@ Notes:
     facts_confirmed = click.confirm("Do the above facts look correct?")
     if not facts_confirmed:
         message = """
-Edit %s with the desired values and rerun atomic-openshift-installer with --unattended .
+Edit %s with the desired values and run `atomic-openshift-installer --unattended install` to restart the install.
 """ % oo_cfg.config_path
         click.echo(message)
         # Make sure we actually write out the config file.
@@ -336,7 +336,9 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force, verbose):
             if not unattended:
                 click.echo('By default the installer only adds new nodes to an installed environment.')
                 response = click.prompt('Do you want to (1) only add additional nodes or ' \
-                                        '(2) perform a clean install?', type=int)
+                                        '(2) reinstall the existing hosts ' \
+                                        'potentially erasing any custom changes?',
+                                        type=int)
                 # TODO: this should be reworked with error handling.
                 # Click can certainly do this for us.
                 # This should be refactored as soon as we add a 3rd option.
@@ -429,8 +431,10 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force, verbose):
 # Main CLI entrypoint, not much we can do about too many arguments.
 def cli(ctx, unattended, configuration, ansible_playbook_directory, ansible_config, ansible_log_path, verbose):
     """
-    The main click CLI module. Responsible for handling most common CLI options,
-    assigning any defaults and adding to the context for the sub-commands.
+    atomic-openshift-installer makes the process for installing OSE or AEP easier by interactively gathering the data needed to run on each host.
+    It can also be run in unattended mode if provided with a configuration file.
+
+    Further reading: https://docs.openshift.com/enterprise/latest/install_config/install/quick_install.html
     """
     ctx.obj = {}
     ctx.obj['unattended'] = unattended
