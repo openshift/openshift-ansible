@@ -90,6 +90,7 @@
   roles:
   - openshift_facts
   tasks:
+  # Ensure we persist the etcd role for this host in openshift_facts
   - openshift_facts:
       role: etcd
       local_facts: {}
