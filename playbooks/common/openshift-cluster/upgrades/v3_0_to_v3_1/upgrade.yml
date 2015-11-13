@@ -161,6 +161,16 @@
       local_facts:
         deployment_type: "{{ deployment_type }}"
 
+- name: Update master facts
+  hosts: oo_masters_to_config
+  roles:
+  - openshift_facts
+  post_tasks:
+  - openshift_facts:
+      role: master
+      local_facts:
+        cluster_method: "{{ openshift_master_cluster_method | default(None) }}"
+
 - name: Upgrade master packages and configuration
   hosts: oo_masters_to_config
   vars:
