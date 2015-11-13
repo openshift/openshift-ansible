@@ -35,10 +35,8 @@ def first_ip(network):
         Returns:
             str: first IPv4 address
     """
-    def atoi(addr):
-        return struct.unpack("!I", socket.inet_aton(addr))[0]
-    def itoa(addr):
-        return socket.inet_ntoa(struct.pack("!I", addr))
+    atoi = lambda addr: struct.unpack("!I", socket.inet_aton(addr))[0]
+    itoa = lambda addr: socket.inet_ntoa(struct.pack("!I", addr))
 
     (address, netmask) = network.split('/')
     netmask_i = (0xffffffff << (32 - atoi(netmask))) & 0xffffffff
