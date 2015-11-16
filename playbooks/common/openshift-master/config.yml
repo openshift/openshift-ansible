@@ -288,7 +288,8 @@
       role: master
       local_facts:
         named_certificates: "{{ hostvars.localhost.parsed_named_certificates | default([]) }}"
-      overwrite_additive_facts: "{{ overwrite_named_certs }}"
+      additive_facts_to_overwrite:
+      - "{{ 'master.named_certificates' if overwrite_named_certs | bool else omit }}"
   - name: Clear named certificates
     file:
       path: "{{ named_certs_dir }}"
