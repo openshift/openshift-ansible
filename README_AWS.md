@@ -105,7 +105,7 @@ Install Dependencies
 1. Ansible requires python-boto for aws operations:
 RHEL/CentOS/Fedora
 ```
-  yum install -y ansible python-boto
+  yum install -y ansible python-boto pyOpenSSL
 ```
 OSX:
 ```
