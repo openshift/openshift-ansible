@@ -133,7 +133,7 @@ BuildArch:     noarch
 # ----------------------------------------------------------------------------------
 %package inventory
 Summary:       Openshift and Atomic Enterprise Ansible Inventories
-Requires:      %{name} = ${version}
+Requires:      %{name} = %{version}
 BuildArch:     noarch
 
 %description inventory
@@ -146,7 +146,7 @@ Ansible Inventories used with the openshift-ansible scripts and playbooks.
 
 %package inventory-aws
 Summary:       Openshift and Atomic Enterprise Ansible Inventories for AWS
-Requires:      %{name}-inventory = ${version}
+Requires:      %{name}-inventory = %{version}
 Requires:      python-boto
 BuildArch:     noarch
 
@@ -158,7 +158,7 @@ Ansible Inventories for AWS used with the openshift-ansible scripts and playbook
 
 %package inventory-gce
 Summary:       Openshift and Atomic Enterprise Ansible Inventories for GCE
-Requires:      %{name}-inventory = ${version}
+Requires:      %{name}-inventory = %{version}
 Requires:      python-libcloud >= 0.13
 BuildArch:     noarch
 
