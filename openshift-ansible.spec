@@ -13,7 +13,8 @@ URL:            https://github.com/openshift/openshift-ansible
 Source0:        https://github.com/openshift/openshift-ansible/archive/%{commit}/%{name}-%{version}.tar.gz
 BuildArch:      noarch
 
-Requires:      ansible
+Requires:      ansible >= 1.9.3
+Requires:      python2
 
 %description
 Openshift and Atomic Enterprise Ansible
@@ -96,8 +97,9 @@ popd
 # ----------------------------------------------------------------------------------
 %package bin
 Summary:       Openshift and Atomic Enterprise Ansible Scripts for working with metadata hosts
-Requires:      %{name}-inventory
-Requires:      python2
+Requires:      %{name} = %{version}
+Requires:      %{name}-inventory = %{version}
+Requires:      %{name}-playbooks = %{version}
 BuildRequires: python2-devel
 BuildArch:     noarch
 
@@ -117,7 +119,7 @@ Scripts to make it nicer when working with hosts that are defined only by metada
 # ----------------------------------------------------------------------------------
 %package docs
 Summary:       Openshift and Atomic Enterprise Ansible documents
-Requires:      %{name}
+Requires:      %{name} = %{version}
 BuildArch:     noarch
 
 %description docs
@@ -131,7 +133,7 @@ BuildArch:     noarch
 # ----------------------------------------------------------------------------------
 %package inventory
 Summary:       Openshift and Atomic Enterprise Ansible Inventories
-Requires:      python2
+Requires:      %{name} = ${version}
 BuildArch:     noarch
 
 %description inventory
@@ -144,7 +146,7 @@ Ansible Inventories used with the openshift-ansible scripts and playbooks.
 
 %package inventory-aws
 Summary:       Openshift and Atomic Enterprise Ansible Inventories for AWS
-Requires:      %{name}-inventory
+Requires:      %{name}-inventory = ${version}
 Requires:      python-boto
 BuildArch:     noarch
 
@@ -156,7 +158,7 @@ Ansible Inventories for AWS used with the openshift-ansible scripts and playbook
 
 %package inventory-gce
 Summary:       Openshift and Atomic Enterprise Ansible Inventories for GCE
-Requires:      %{name}-inventory
+Requires:      %{name}-inventory = ${version}
 Requires:      python-libcloud >= 0.13
 BuildArch:     noarch
 
@@ -172,10 +174,10 @@ Ansible Inventories for GCE used with the openshift-ansible scripts and playbook
 # ----------------------------------------------------------------------------------
 %package playbooks
 Summary:       Openshift and Atomic Enterprise Ansible Playbooks
-Requires:      %{name}
-Requires:      %{name}-roles
-Requires:      %{name}-lookup-plugins
-Requires:      %{name}-filter-plugins
+Requires:      %{name} = %{version}
+Requires:      %{name}-roles = %{version}
+Requires:      %{name}-lookup-plugins = %{version}
+Requires:      %{name}-filter-plugins = %{version}
 BuildArch:     noarch
 
 %description playbooks
@@ -191,8 +193,8 @@ BuildArch:     noarch
 %package roles
 Summary:       Openshift and Atomic Enterprise Ansible roles
 Requires:      %{name}
-Requires:      %{name}-lookup-plugins
-Requires:      %{name}-filter-plugins
+Requires:      %{name}-lookup-plugins = %{version}
+Requires:      %{name}-filter-plugins = %{version}
 BuildArch:     noarch
 
 %description roles
@@ -238,9 +240,7 @@ BuildArch:     noarch
 %package -n atomic-openshift-utils
 Summary:       Atomic OpenShift Utilities
 BuildRequires: python-setuptools
-Requires:      openshift-ansible-playbooks
-Requires:      openshift-ansible-roles
-Requires:      ansible
+Requires:      %{name}-playbooks >= %{version}
 Requires:      python-click
 Requires:      python-setuptools
 Requires:      PyYAML
