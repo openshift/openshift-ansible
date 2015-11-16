@@ -57,7 +57,7 @@ class Cluster(object):
         """
         env = {'cluster_id': args.cluster_id,
                'deployment_type': self.get_deployment_type(args)}
-        playbook = "playbooks/{}/openshift-cluster/launch.yml".format(args.provider)
+        playbook = "playbooks/{0}/openshift-cluster/launch.yml".format(args.provider)
         inventory = self.setup_provider(args.provider)
 
         env['num_masters'] = args.masters
@@ -74,7 +74,7 @@ class Cluster(object):
         """
         env = {'cluster_id': args.cluster_id,
                'deployment_type': self.get_deployment_type(args)}
-        playbook = "playbooks/{}/openshift-cluster/terminate.yml".format(args.provider)
+        playbook = "playbooks/{0}/openshift-cluster/terminate.yml".format(args.provider)
         inventory = self.setup_provider(args.provider)
 
         self.action(args, inventory, env, playbook)
@@ -86,7 +86,7 @@ class Cluster(object):
         """
         env = {'cluster_id': args.cluster_id,
                'deployment_type': self.get_deployment_type(args)}
-        playbook = "playbooks/{}/openshift-cluster/list.yml".format(args.provider)
+        playbook = "playbooks/{0}/openshift-cluster/list.yml".format(args.provider)
         inventory = self.setup_provider(args.provider)
 
         self.action(args, inventory, env, playbook)
@@ -98,7 +98,7 @@ class Cluster(object):
         """
         env = {'cluster_id': args.cluster_id,
                'deployment_type': self.get_deployment_type(args)}
-        playbook = "playbooks/{}/openshift-cluster/config.yml".format(args.provider)
+        playbook = "playbooks/{0}/openshift-cluster/config.yml".format(args.provider)
         inventory = self.setup_provider(args.provider)
 
         self.action(args, inventory, env, playbook)
@@ -110,7 +110,7 @@ class Cluster(object):
         """
         env = {'cluster_id': args.cluster_id,
                'deployment_type': self.get_deployment_type(args)}
-        playbook = "playbooks/{}/openshift-cluster/update.yml".format(args.provider)
+        playbook = "playbooks/{0}/openshift-cluster/update.yml".format(args.provider)
         inventory = self.setup_provider(args.provider)
 
         self.action(args, inventory, env, playbook)
@@ -124,7 +124,7 @@ class Cluster(object):
                'deployment_type': self.get_deployment_type(args),
                'new_cluster_state': args.state}
 
-        playbook = "playbooks/{}/openshift-cluster/service.yml".format(args.provider)
+        playbook = "playbooks/{0}/openshift-cluster/service.yml".format(args.provider)
         inventory = self.setup_provider(args.provider)
 
         self.action(args, inventory, env, playbook)
