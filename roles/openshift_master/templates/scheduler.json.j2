@@ -1,5 +1,8 @@
 {
+  "kind": "Policy",
+  "apiVersion": "v1",
   "predicates": [
+    {"name": "MatchNodeSelector"},
     {"name": "PodFitsResources"},
     {"name": "PodFitsPorts"},
     {"name": "NoDiskConflict"},

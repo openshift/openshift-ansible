@@ -44,6 +44,9 @@ kubernetes_url: https://10.245.1.2:6443
 
 # Token to use for authentication to the API server
 kubernetes_token: tJdce6Fn3cL1112YoIJ5m2exzAbzcPZX
+
+# API Version to use for kubernetes
+kube_api_version: v1
 ```
 
 ## Dependencies

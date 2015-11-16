@@ -1,0 +1,36 @@
+---
+# TODO: Enhance redhat_subscription module
+#       to make it able to attach to a pool
+#       to make it able to enable repositories
+
+- set_fact:
+    rhel_subscription_user: "{{ lookup('oo_option', 'rhel_subscription_user') | default(rhsub_user, True) | default(omit, True) }}"
+    rhel_subscription_pass: "{{ lookup('oo_option', 'rhel_subscription_pass') | default(rhsub_pass, True) | default(omit, True) }}"
+    rhel_subscription_server: "{{ lookup('oo_option', 'rhel_subscription_server') | default(rhsub_server) }}"
+
+- fail:
+    msg: "This role is only supported for Red Hat hosts"
+  when: ansible_distribution != 'RedHat'
+
+- fail:
+    msg: Either rhsub_user or the rhel_subscription_user env variable are required for this role.
+  when: rhel_subscription_user is not defined
+
+- fail:
+    msg: Either rhsub_pass or the rhel_subscription_pass env variable are required for this role.
+  when: rhel_subscription_pass is not defined
+
+- name: Satellite preparation
+  command: "rpm -Uvh http://{{ rhel_subscription_server }}/pub/katello-ca-consumer-latest.noarch.rpm"
+  args:
+    creates: /etc/rhsm/ca/katello-server-ca.pem
+  when: rhel_subscription_server is defined and rhel_subscription_server
+
+- name: RedHat subscriptions
+  redhat_subscription:
+    username: "{{ rhel_subscription_user }}"
+    password: "{{ rhel_subscription_pass }}"
+    autosubscribe: yes
+
+- include: enterprise.yml
+  when: deployment_type == 'enterprise'

@@ -1,0 +1,30 @@
+---
+etcd_peers_group: etcd
+
+# etcd server vars
+etcd_conf_dir: /etc/etcd
+etcd_ca_file: "{{ etcd_conf_dir }}/ca.crt"
+etcd_cert_file: "{{ etcd_conf_dir }}/server.crt"
+etcd_key_file: "{{ etcd_conf_dir }}/server.key"
+etcd_peer_ca_file: "{{ etcd_conf_dir }}/ca.crt"
+etcd_peer_cert_file: "{{ etcd_conf_dir }}/peer.crt"
+etcd_peer_key_file: "{{ etcd_conf_dir }}/peer.key"
+
+# etcd ca vars
+etcd_ca_dir: "{{ etcd_conf_dir}}/ca"
+etcd_generated_certs_dir: "{{ etcd_conf_dir }}/generated_certs"
+etcd_ca_cert: "{{ etcd_ca_dir }}/ca.crt"
+etcd_ca_key: "{{ etcd_ca_dir }}/ca.key"
+etcd_openssl_conf: "{{ etcd_ca_dir }}/openssl.cnf"
+etcd_ca_name: etcd_ca
+etcd_req_ext: etcd_v3_req
+etcd_ca_exts_peer: etcd_v3_ca_peer
+etcd_ca_exts_server: etcd_v3_ca_server
+etcd_ca_exts_self: etcd_v3_ca_self
+etcd_ca_exts_client: etcd_v3_ca_client
+etcd_ca_crl_dir: "{{ etcd_ca_dir }}/crl"
+etcd_ca_new_certs_dir: "{{ etcd_ca_dir }}/certs"
+etcd_ca_db: "{{ etcd_ca_dir }}/index.txt"
+etcd_ca_serial: "{{ etcd_ca_dir }}/serial"
+etcd_ca_crl_number: "{{ etcd_ca_dir }}/crlnumber"
+etcd_ca_default_days: 365

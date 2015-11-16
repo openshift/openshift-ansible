@@ -39,9 +39,16 @@
     owner: 'td-agent'
     mode: 0444
 
+- name: wait for etcd to start up
+  wait_for: port=4001 delay=10
+  when: embedded_etcd | bool
+
+- name: wait for etcd peer to start up
+  wait_for: port=7001 delay=10
+  when: embedded_etcd | bool
+
 - name: ensure td-agent is running
   service:
     name: 'td-agent'
     state: started
     enabled: yes
-

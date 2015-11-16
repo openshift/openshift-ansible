@@ -1,0 +1,13 @@
+---
+- set_fact: k8s_type="etcd"
+
+- name: Generate etcd instance names(s)
+  set_fact:
+    scratch_name: "{{ cluster_id }}-{{ k8s_type }}-{{ '%05x' | format(1048576 | random) }}"
+  register: etcd_names_output
+  with_sequence: count={{ num_etcd }}
+
+- set_fact:
+    etcd_names: "{{ etcd_names_output.results | default([])
+                    | oo_collect('ansible_facts')
+                    | oo_collect('scratch_name') }}"

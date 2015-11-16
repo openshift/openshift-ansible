@@ -1,10 +1,14 @@
 ---
-- name: Set common OpenShift facts
+- fail:
+    msg: Flannel can not be used with openshift sdn
+  when: openshift_use_openshift_sdn | default(false) | bool and openshift_use_flannel | default(false) | bool
+
+- name: Set common Cluster facts
   openshift_facts:
     role: common
     local_facts:
       cluster_id: "{{ openshift_cluster_id | default('default') }}"
-      debug_level: "{{ openshift_debug_level | default(0) }}"
+      debug_level: "{{ openshift_debug_level | default(2) }}"
       hostname: "{{ openshift_hostname | default(None) }}"
       ip: "{{ openshift_ip | default(None) }}"
       public_hostname: "{{ openshift_public_hostname | default(None) }}"
@@ -12,7 +16,8 @@
       use_openshift_sdn: "{{ openshift_use_openshift_sdn | default(None) }}"
       sdn_network_plugin_name: "{{ os_sdn_network_plugin_name | default(None) }}"
       deployment_type: "{{ openshift_deployment_type }}"
+      use_fluentd: "{{ openshift_use_fluentd | default(None) }}"
+      use_flannel: "{{ openshift_use_flannel | default(None) }}"
 
 - name: Set hostname
   hostname: name={{ openshift.common.hostname }}
-

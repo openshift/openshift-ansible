@@ -1,0 +1,4 @@
+---
+- yum:
+    name: copr-cli
+    state: present

@@ -14,6 +14,7 @@
     url: '{{ image_url }}'
     sha256sum: '{{ image_sha256 }}'
     dest: '{{ os_libvirt_storage_pool_path }}/{{ image_name }}'
+  when: '{{ ( lookup("oo_option", "skip_image_download") | default("no", True) | lower ) in ["false", "no"] }}'
 
 - name: Create the cloud-init config drive path
   file:
@@ -62,8 +63,9 @@
   shell: 'virsh -c {{ libvirt_uri }} net-dhcp-leases openshift-ansible | egrep -c ''{{ instances | join("|") }}'''
   register: nb_allocated_ips
   until: nb_allocated_ips.stdout == '{{ instances | length }}'
-  retries: 30
-  delay: 1
+  retries: 60
+  delay: 3
+  when: instances | length != 0
 
 - name: Collect IP addresses of the VMs
   shell: 'virsh -c {{ libvirt_uri }} net-dhcp-leases openshift-ansible | awk ''$6 == "{{ item }}" {gsub(/\/.*/, "", $5); print $5}'''
@@ -71,7 +73,7 @@
   with_items: instances
 
 - set_fact:
-    ips: "{{ scratch_ip.results | oo_collect('stdout') }}"
+    ips: "{{ scratch_ip.results | default([]) | oo_collect('stdout') }}"
 
 - name: Add new instances
   add_host:
@@ -79,7 +81,7 @@
     ansible_ssh_host: '{{ item.1 }}'
     ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
     ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-    groups: 'tag_env-{{ cluster }}, tag_host-type-{{ type }}, tag_env-host-type-{{ cluster }}-openshift-{{ type }}'
+    groups: 'tag_env-{{ cluster }}, tag_host-type-{{ type }}, tag_env-host-type-{{ cluster }}-openshift-{{ type }}, tag_sub-host-type-{{ g_sub_host_type }}'
   with_together:
     - instances
     - ips

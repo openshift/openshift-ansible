@@ -1,3 +1,8 @@
+apiLevels:
+{% if not openshift.common.version_greater_than_3_1_or_1_1 | bool %}
+- v1beta3
+{% endif %}
+- v1
 apiVersion: v1
 assetConfig:
   logoutURL: ""
@@ -5,27 +10,43 @@ assetConfig:
   publicURL: {{ openshift.master.public_console_url }}/
   servingInfo:
     bindAddress: {{ openshift.master.bind_addr }}:{{ openshift.master.console_port }}
+    bindNetwork: tcp4
     certFile: master.server.crt
     clientCA: ""
     keyFile: master.server.key
+    maxRequestsInFlight: 0
+    requestTimeoutSeconds: 0
+{% if openshift_master_ha | bool %}
+controllerLeaseTTL: {{ openshift.master.controller_lease_ttl | default('30') }}
+{% endif %}
+controllers: '*'
 corsAllowedOrigins:
-{# TODO: add support for user specified corsAllowedOrigins #}
-{% for origin in ['127.0.0.1', 'localhost', openshift.common.hostname, openshift.common.ip, openshift.common.public_hostname, openshift.common.public_ip] %}
+{% for origin in ['127.0.0.1', 'localhost', openshift.common.ip, openshift.common.public_ip] | union(openshift.common.all_hostnames) | unique %}
   - {{ origin }}
 {% endfor %}
-{% if openshift.master.embedded_dns %}
+{% for custom_origin in openshift.master.custom_cors_origins | default("") %}
+  - {{ custom_origin }}
+{% endfor %}
+{% for name in (named_certificates | map(attribute='names')) | list | oo_flatten %}
+  - {{ name }}
+{% endfor %}
+{% if 'disabled_features' in openshift.master %}
+disabledFeatures: {{ openshift.master.disabled_features | to_json }}
+{% endif %}
+{% if openshift.master.embedded_dns | bool %}
 dnsConfig:
   bindAddress: {{ openshift.master.bind_addr }}:{{ openshift.master.dns_port }}
+  bindNetwork: tcp4
 {% endif %}
 etcdClientInfo:
-  ca: ca.crt
+  ca: {{ "ca.crt" if (openshift.master.embedded_etcd | bool) else "master.etcd-ca.crt" }}
   certFile: master.etcd-client.crt
   keyFile: master.etcd-client.key
   urls:
 {% for etcd_url in openshift.master.etcd_urls %}
     - {{ etcd_url }}
 {% endfor %}
-{% if openshift.master.embedded_etcd %}
+{% if openshift.master.embedded_etcd | bool %}
 etcdConfig:
   address: {{ openshift.common.hostname }}:{{ openshift.master.etcd_port }}
   peerAddress: {{ openshift.common.hostname }}:7001
@@ -39,13 +60,13 @@ etcdConfig:
     certFile: etcd.server.crt
     clientCA: ca.crt
     keyFile: etcd.server.key
-  storageDirectory: {{ openshift_data_dir }}/openshift.local.etcd
+  storageDirectory: {{ openshift.common.data_dir }}/openshift.local.etcd
 {% endif %}
 etcdStorageConfig:
   kubernetesStoragePrefix: kubernetes.io
-  kubernetesStorageVersion: v1beta3
-  kubernetesStoragePrefix: kubernetes.io
-  openShiftStorageVersion: v1beta3
+  kubernetesStorageVersion: v1
+  openShiftStoragePrefix: openshift.io
+  openShiftStorageVersion: v1
 imageConfig:
   format: {{ openshift.master.registry_url }}
   latest: false
@@ -56,43 +77,81 @@ kubeletClientInfo:
   certFile: master.kubelet-client.crt
   keyFile: master.kubelet-client.key
   port: 10250
-{% if openshift.master.embedded_kube %}
+{% if openshift.master.embedded_kube | bool %}
 kubernetesMasterConfig:
-{# TODO: support overriding masterCount #}
-  masterCount: 1
-  masterIP: ""
+{% if not openshift.common.version_greater_than_3_1_or_1_1 | bool %}
+  apiLevels:
+  - v1beta3
+  - v1
+{% endif %}
+  apiServerArguments: {{ api_server_args if api_server_args is defined else 'null' }}
+  controllerArguments: {{ controller_args if controller_args is defined else 'null' }}
+  masterCount: {{ openshift.master.master_count }}
+  masterIP: {{ openshift.common.ip }}
+  podEvictionTimeout: ""
+  proxyClientInfo:
+    certFile: master.proxy-client.crt
+    keyFile: master.proxy-client.key
   schedulerConfigFile: {{ openshift_master_scheduler_conf }}
+  servicesNodePortRange: ""
   servicesSubnet: {{ openshift.master.portal_net }}
   staticNodeNames: {{ openshift_node_ips | default([], true) }}
 {% endif %}
 masterClients:
 {# TODO: allow user to set externalKubernetesKubeConfig #}
-  deployerKubeConfig: openshift-deployer.kubeconfig
   externalKubernetesKubeConfig: ""
-  openshiftLoopbackKubeConfig: openshift-client.kubeconfig
+  openshiftLoopbackKubeConfig: openshift-master.kubeconfig
 masterPublicURL: {{ openshift.master.public_api_url }}
 networkConfig:
   clusterNetworkCIDR: {{ openshift.master.sdn_cluster_network_cidr }}
   hostSubnetLength: {{ openshift.master.sdn_host_subnet_length }}
+{% if openshift.common.use_openshift_sdn %}
   networkPluginName: {{ openshift.common.sdn_network_plugin_name }}
+{% endif %}
+# serviceNetworkCIDR must match kubernetesMasterConfig.servicesSubnet
+  serviceNetworkCIDR: {{ openshift.master.portal_net }}
 {% include 'v1_partials/oauthConfig.j2' %}
+pauseControllers: false
 policyConfig:
   bootstrapPolicyFile: {{ openshift_master_policy }}
+  openshiftInfrastructureNamespace: openshift-infra
   openshiftSharedResourcesNamespace: openshift
-{# TODO: Allow users to override projectConfig items #}
 projectConfig:
-  defaultNodeSelector: ""
-  projectRequestMessage: ""
-  projectRequestTemplate: ""
+  defaultNodeSelector: "{{ openshift.master.default_node_selector }}"
+  projectRequestMessage: "{{ openshift.master.project_request_message }}"
+  projectRequestTemplate: "{{ openshift.master.project_request_template }}"
+  securityAllocator:
+    mcsAllocatorRange: "{{ openshift.master.mcs_allocator_range }}"
+    mcsLabelsPerProject: {{ openshift.master.mcs_labels_per_project }}
+    uidAllocatorRange: "{{ openshift.master.uid_allocator_range  }}"
+routingConfig:
+  subdomain:  "{{ openshift.master.default_subdomain | default("") }}"
 serviceAccountConfig:
+  limitSecretReferences: false
   managedNames:
   - default
   - builder
+  - deployer
+  masterCA: ca.crt
   privateKeyFile: serviceaccounts.private.key
   publicKeyFiles:
   - serviceaccounts.public.key
 servingInfo:
   bindAddress: {{ openshift.master.bind_addr }}:{{ openshift.master.api_port }}
+  bindNetwork: tcp4
   certFile: master.server.crt
   clientCA: ca.crt
   keyFile: master.server.key
+  maxRequestsInFlight: 500
+  requestTimeoutSeconds: 3600
+{% if named_certificates %}
+  namedCertificates:
+{% for named_certificate in named_certificates %}
+  - certFile: {{ named_certificate['certfile'] }}
+    keyFile: {{ named_certificate['keyfile'] }}
+    names:
+{% for name in named_certificate['names'] %}
+    - "{{ name }}"
+{% endfor %}
+{% endfor %}
+{% endif %}

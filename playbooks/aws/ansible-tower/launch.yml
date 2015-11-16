@@ -6,7 +6,7 @@
 
   vars:
     inst_region: us-east-1
-    rhel7_ami: ami-78756d10
+    rhel7_ami: ami-9101c8fa
     user_data_file: user_data.txt
 
   vars_files:

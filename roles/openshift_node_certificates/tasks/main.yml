@@ -1,0 +1,35 @@
+---
+- name: Create openshift_generated_configs_dir if it doesn't exist
+  file:
+    path: "{{ openshift_generated_configs_dir }}"
+    state: directory
+  when: nodes_needing_certs | length > 0
+
+- name: Generate the node client config
+  command: >
+    {{ openshift.common.admin_binary }} create-api-client-config
+      --certificate-authority={{ openshift_master_ca_cert }}
+      --client-dir={{ openshift_generated_configs_dir }}/node-{{ item.openshift.common.hostname }}
+      --groups=system:nodes
+      --master={{ openshift.master.api_url }}
+      --signer-cert={{ openshift_master_ca_cert }}
+      --signer-key={{ openshift_master_ca_key }}
+      --signer-serial={{ openshift_master_ca_serial }}
+      --user=system:node:{{ item.openshift.common.hostname }}
+  args:
+    chdir: "{{ openshift_generated_configs_dir }}"
+    creates: "{{ openshift_generated_configs_dir }}/node-{{ item.openshift.common.hostname }}"
+  with_items: nodes_needing_certs
+
+- name: Generate the node server certificate
+  command: >
+    {{ openshift.common.admin_binary }} create-server-cert
+      --cert=server.crt --key=server.key --overwrite=true
+      --hostnames={{ item.openshift.common.all_hostnames |join(",") }}
+      --signer-cert={{ openshift_master_ca_cert }}
+      --signer-key={{ openshift_master_ca_key }}
+      --signer-serial={{ openshift_master_ca_serial }}
+  args:
+    chdir: "{{ openshift_generated_configs_dir }}/node-{{ item.openshift.common.hostname }}"
+    creates: "{{ openshift_generated_configs_dir }}/node-{{ item.openshift.common.hostname }}/server.crt"
+  with_items: nodes_needing_certs

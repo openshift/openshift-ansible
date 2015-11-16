@@ -1,0 +1,12 @@
+---
+- name: Install GlusterFS storage plugin dependencies
+  yum:
+    pkg: glusterfs-fuse
+    state: installed
+
+- name: Set seboolean to allow gluster storage plugin access from containers
+  seboolean:
+    name: virt_use_fusefs
+    state: yes
+    persistent: yes
+  when: ansible_selinux and ansible_selinux.status == "enabled"

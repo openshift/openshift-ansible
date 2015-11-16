@@ -66,11 +66,21 @@ Examples:
   $ ansible -i gce.py us-central1-a -m shell -a "/bin/uname -a"
 
   Use the GCE inventory script to print out instance specific information
-  $ plugins/inventory/gce.py --host my_instance
+  $ contrib/inventory/gce.py --host my_instance
 
 Author: Eric Johnson <erjohnso@google.com>
 Version: 0.0.1
 '''
+
+__requires__ = ['pycrypto>=2.6']
+try:
+    import pkg_resources
+except ImportError:
+    # Use pkg_resources to find the correct versions of libraries and set
+    # sys.path appropriately when there are multiversion installs.  We don't
+    # fail here as there is code that better expresses the errors where the
+    # library is used.
+    pass
 
 USER_AGENT_PRODUCT="Ansible-gce_inventory_plugin"
 USER_AGENT_VERSION="v1"
@@ -102,9 +112,9 @@ class GceInventory(object):
 
         # Just display data for specific host
         if self.args.host:
-            print self.json_format_dict(self.node_to_dict(
+            print(self.json_format_dict(self.node_to_dict(
                     self.get_instance(self.args.host)),
-                    pretty=self.args.pretty)
+                    pretty=self.args.pretty))
             sys.exit(0)
 
         # Otherwise, assume user wants all instances grouped
@@ -211,7 +221,7 @@ class GceInventory(object):
             'gce_image': inst.image,
             'gce_machine_type': inst.size,
             'gce_private_ip': inst.private_ips[0],
-            'gce_public_ip': inst.public_ips[0],
+            'gce_public_ip': inst.public_ips[0] if len(inst.public_ips) >= 1 else None,
             'gce_name': inst.name,
             'gce_description': inst.extra['description'],
             'gce_status': inst.extra['status'],
@@ -220,14 +230,14 @@ class GceInventory(object):
             'gce_metadata': md,
             'gce_network': net,
             # Hosts don't have a public name, so we add an IP
-            'ansible_ssh_host': inst.public_ips[0]
+            'ansible_ssh_host': inst.public_ips[0] if len(inst.public_ips) >= 1 else inst.private_ips[0]
         }
 
     def get_instance(self, instance_name):
         '''Gets details about a specific instance '''
         try:
             return self.driver.ex_get_node(instance_name)
-        except Exception, e:
+        except Exception as e:
             return None
 
     def group_instances(self):
@@ -247,7 +257,10 @@ class GceInventory(object):
 
             tags = node.extra['tags']
             for t in tags:
-                tag = 'tag_%s' % t
+                if t.startswith('group-'):
+                    tag = t[6:]
+                else:
+                    tag = 'tag_%s' % t
                 if groups.has_key(tag): groups[tag].append(name)
                 else: groups[tag] = [name]
 

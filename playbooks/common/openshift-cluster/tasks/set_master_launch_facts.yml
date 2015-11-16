@@ -1,0 +1,13 @@
+---
+- set_fact: k8s_type="master"
+
+- name: Generate master instance names(s)
+  set_fact:
+    scratch_name: "{{ cluster_id }}-{{ k8s_type }}-{{ '%05x' | format(1048576 | random) }}"
+  register: master_names_output
+  with_sequence: count={{ num_masters }}
+
+- set_fact:
+    master_names: "{{ master_names_output.results | default([])
+                      | oo_collect('ansible_facts')
+                      | oo_collect('scratch_name') }}"

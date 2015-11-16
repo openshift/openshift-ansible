@@ -1,0 +1,15 @@
+---
+- set_fact: k8s_type=node
+- set_fact: sub_host_type="{{ type }}"
+- set_fact: number_nodes="{{ count }}"
+
+- name: Generate node instance names(s)
+  set_fact:
+    scratch_name: "{{ cluster_id }}-{{ k8s_type }}-{{ sub_host_type }}-{{ '%05x' | format(1048576 | random) }}"
+  register: node_names_output
+  with_sequence: count={{ number_nodes }}
+
+- set_fact:
+    node_names: "{{ node_names_output.results | default([])
+                    | oo_collect('ansible_facts')
+                    | oo_collect('scratch_name') }}"

@@ -1,0 +1,71 @@
+---
+# This playbook creates an S3 bucket named after your cluster and configures the docker-registry service to use the bucket as its backend storage.
+# Usage:
+#  ansible-playbook s3_registry.yml -e clusterid="mycluster"
+#
+# The AWS access/secret keys should be the keys of a separate user (not your main user), containing only the necessary S3 access role.
+# The 'clusterid' is the short name of your cluster.
+
+- hosts: tag_env-host-type_{{ clusterid }}-openshift-master
+  remote_user: root
+  gather_facts: False
+
+  vars:
+    aws_access_key: "{{ lookup('env', 'S3_ACCESS_KEY_ID') }}"
+    aws_secret_key: "{{ lookup('env', 'S3_SECRET_ACCESS_KEY') }}"
+
+  tasks:
+
+  - name: Check for AWS creds
+    fail: 
+      msg: "Couldn't find {{ item }} creds in ENV"
+    when: "{{ item }} == ''"
+    with_items:
+    - aws_access_key
+    - aws_secret_key
+
+  - name: Scale down registry
+    command: oc scale --replicas=0 dc/docker-registry
+
+  - name: Create S3 bucket
+    local_action:
+      module: s3 bucket="{{ clusterid }}-docker" mode=create
+
+  - name: Set up registry environment variable
+    command: oc env dc/docker-registry REGISTRY_CONFIGURATION_PATH=/etc/registryconfig/config.yml
+
+  - name: Generate docker registry config
+    template: src="s3_registry.j2" dest="/root/config.yml" owner=root mode=0600
+
+  - name: Determine if new secrets are needed
+    command: oc get secrets
+    register: secrets
+
+  - name: Create registry secrets
+    command: oc secrets new dockerregistry /root/config.yml
+    when: "'dockerregistry' not in secrets.stdout"
+
+  - name: Determine if service account contains secrets
+    command: oc describe serviceaccount/registry
+    register: serviceaccount
+
+  - name: Add secrets to registry service account
+    command: oc secrets add serviceaccount/registry secrets/dockerregistry
+    when: "'dockerregistry' not in serviceaccount.stdout"
+
+  - name: Determine if deployment config contains secrets
+    command: oc volume dc/docker-registry --list
+    register: dc
+
+  - name: Add secrets to registry deployment config
+    command: oc volume dc/docker-registry --add --name=dockersecrets -m /etc/registryconfig --type=secret --secret-name=dockerregistry
+    when: "'dockersecrets' not in dc.stdout"
+
+  - name: Wait for deployment config to take effect before scaling up
+    pause: seconds=30
+
+  - name: Scale up registry
+    command: oc scale --replicas=1 dc/docker-registry
+
+  - name: Delete temporary config file
+    file: path=/root/config.yml state=absent

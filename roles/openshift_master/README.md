@@ -1,13 +1,13 @@
-OpenShift Master
-================
+OpenShift/Atomic Enterprise Master
+==================================
 
-OpenShift Master service installation
+Master service installation
 
 Requirements
 ------------
 
 A RHEL 7.1 host pre-configured with access to the rhel-7-server-rpms,
-rhel-7-server-extras-rpms, and rhel-server-7-ose-beta-rpms repos.
+rhel-7-server-extras-rpms, and rhel-7-server-ose-3.0-rpms repos.
 
 Role Variables
 --------------
@@ -15,8 +15,8 @@ Role Variables
 From this role:
 | Name                                | Default value         |                                                  |
 |-------------------------------------|-----------------------|--------------------------------------------------|
-| openshift_master_debug_level        | openshift_debug_level | Verbosity of the debug logs for openshift-master |
-| openshift_node_ips                  | []                    | List of the openshift node ip addresses to pre-register when openshift-master starts up |
+| openshift_master_debug_level        | openshift_debug_level | Verbosity of the debug logs for master |
+| openshift_node_ips                  | []                    | List of the openshift node ip addresses to pre-register when master starts up |
 | oreg_url                            | UNDEF                 | Default docker registry to use |
 | openshift_master_api_port           | UNDEF                 | |
 | openshift_master_console_port       | UNDEF                 | |
@@ -28,7 +28,7 @@ From this role:
 From openshift_common:
 | Name                          | Default Value  |                                        |
 |-------------------------------|----------------|----------------------------------------|
-| openshift_debug_level         | 0              | Global openshift debug log verbosity   |
+| openshift_debug_level         | 2              | Global openshift debug log verbosity   |
 | openshift_public_ip           | UNDEF          | Public IP address to use for this host |
 | openshift_hostname            | UNDEF          | hostname to use for this instance      |
 

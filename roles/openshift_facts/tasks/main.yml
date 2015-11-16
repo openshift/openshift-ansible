@@ -1,9 +1,15 @@
 ---
-- name: Verify Ansible version is greater than 1.8.0 and not 1.9.0
+- name: Verify Ansible version is greater than 1.8.0 and not 1.9.0 and not 1.9.0.1
   assert:
     that:
     - ansible_version | version_compare('1.8.0', 'ge')
     - ansible_version | version_compare('1.9.0', 'ne')
+    - ansible_version | version_compare('1.9.0.1', 'ne')
 
-- name: Gather OpenShift facts
+- name: Ensure PyYaml is installed
+  yum: pkg={{ item }} state=installed
+  with_items:
+    - PyYAML
+
+- name: Gather Cluster facts
   openshift_facts:

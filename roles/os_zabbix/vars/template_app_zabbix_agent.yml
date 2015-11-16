@@ -1,0 +1,23 @@
+---
+g_template_app_zabbix_agent:
+   name: Template App Zabbix Agent
+   zitems:
+   - key: agent.hostname
+     applications:
+     - Zabbix agent
+     value_type: character
+     zabbix_type: agent
+
+   - key: agent.ping
+     applications:
+     - Zabbix agent
+     description: The agent always returns 1 for this item. It could be used in combination with nodata() for availability check.
+     value_type: int
+     zabbix_type: agent
+
+   ztriggers:
+   - name: '[Reboot] Zabbix agent on {HOST.NAME} is unreachable for 15 minutes'
+     description: Zabbix agent is unreachable for 15 minutes.
+     expression: '{Template App Zabbix Agent:agent.ping.nodata(15m)}=1'
+     priority: high
+     url: https://github.com/openshift/ops-sop/blob/master/Alerts/check_ping.asciidoc

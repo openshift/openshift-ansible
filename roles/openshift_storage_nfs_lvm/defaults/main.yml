@@ -1,0 +1,10 @@
+---
+# Options of NFS exports.
+osnl_nfs_export_options: "*(rw,sync,all_squash)"
+
+# Directory, where the created partitions should be mounted. They will be
+# mounted as <osnl_mount_dir>/test1g0001 etc.
+osnl_mount_dir: /exports/openshift
+
+# Volume Group to use.
+osnl_volume_group: openshiftvg

@@ -1,12 +1,12 @@
-#openshift-ansible
+#OpenShift and Atomic Enterprise Ansible
 
-This repo contains OpenShift Ansible code.
+This repo contains Ansible code for OpenShift and Atomic Enterprise.
 
 ##Setup
 - Install base dependencies:
   - Fedora:
   ```
-    yum install -y ansible rubygem-thor rubygem-parseconfig util-linux
+    dnf install -y ansible rubygem-thor rubygem-parseconfig util-linux pyOpenSSL libffi-devel python-cryptography
   ```
    - OSX:
   ```
@@ -23,12 +23,13 @@ This repo contains OpenShift Ansible code.
 - Bring your own host deployments:
   - [OpenShift Enterprise](README_OSE.md)
   - [OpenShift Origin](README_origin.md)
+  - [Atomic Enterprise](README_AEP.md)
 
 - Build
   - [How to build the openshift-ansible rpms](BUILD.md)
 
 - Directory Structure:
-  - [bin/cluster](bin/cluster) - python script to easily create OpenShift 3 clusters
+  - [bin/cluster](bin/cluster) - python script to easily create clusters
   - [docs](docs) - Documentation for the project
   - [filter_plugins/](filter_plugins) - custom filters used to manipulate data in Ansible
   - [inventory/](inventory) - houses Ansible dynamic inventory scripts
@@ -36,6 +37,9 @@ This repo contains OpenShift Ansible code.
   - [roles/](roles) - shareable Ansible tasks
 
 ##Contributing
+- [Best Practices Guide](docs/best_practices_guide.adoc)
+- [Core Concepts](docs/core_concepts_guide.adoc)
+- [Style Guide](docs/style_guide.adoc)
 
 ###Feature Roadmap
 Our Feature Roadmap is available on the OpenShift Origin Infrastructure [Trello board](https://trello.com/b/nbkIrqKa/openshift-origin-infrastructure). All ansible items will be tagged with [installv3].

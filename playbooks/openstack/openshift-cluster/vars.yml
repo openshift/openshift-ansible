@@ -1,39 +1,33 @@
 ---
-openstack_infra_heat_stack:     "{{ opt_infra_heat_stack  | default('files/heat_stack.yml') }}"
-openstack_network_prefix:       "{{ opt_network_prefix    | default('openshift-ansible-'+cluster_id) }}"
-openstack_network_cidr:         "{{ opt_net_cidr          | default('192.168.' + ( ( 1048576 | random % 256 ) | string() ) + '.0/24') }}"
-openstack_network_external_net: "{{ opt_external_net      | default('external') }}"
-openstack_floating_ip_pools:    "{{ opt_floating_ip_pools | default('external')        | oo_split() }}"
-openstack_network_dns:          "{{ opt_dns               | default('8.8.8.8,8.8.4.4') | oo_split() }}"
-openstack_ssh_keypair:          "{{ opt_keypair           | default(lookup('env', 'LOGNAME')+'_key') }}"
-openstack_ssh_public_key:       "{{ lookup('file', opt_public_key | default('~/.ssh/id_rsa.pub')) }}"
-openstack_ssh_access_from:      "{{ opt_ssh_from          | default('0.0.0.0/0') }}"
+openstack_infra_heat_stack:     "{{ lookup('oo_option', 'infra_heat_stack' ) |
+                                    default('files/heat_stack.yaml',         True) }}"
+openstack_network_cidr:         "{{ lookup('oo_option', 'net_cidr'         ) |
+                                    default('192.168.' + ( ( 1048576 | random % 256 ) | string() ) + '.0/24', True) }}"
+openstack_network_external_net: "{{ lookup('oo_option', 'external_net'     ) |
+                                    default('external',                      True) }}"
+openstack_floating_ip_pool:     "{{ lookup('oo_option', 'floating_ip_pool' ) |
+                                    default('external',                      True) }}"
+openstack_network_dns:          "{{ lookup('oo_option', 'dns'              ) |
+                                    default('8.8.8.8,8.8.4.4',               True) | oo_split() }}"
+openstack_ssh_public_key:       "{{ lookup('file', lookup('oo_option', 'public_key') |
+                                    default('~/.ssh/id_rsa.pub',             True)) }}"
+openstack_ssh_access_from:      "{{ lookup('oo_option', 'ssh_from')          |
+                                    default('0.0.0.0/0',                     True) }}"
 openstack_flavor:
-  master:
-    ram:     "{{ opt_master_flavor_ram     | default(2048) }}"
-    id:      "{{ opt_master_flavor_id      | default() }}"
-    include: "{{ opt_master_flavor_include | default() }}"
-  node:
-    ram:     "{{ opt_node_flavor_ram     | default(4096) }}"
-    id:      "{{ opt_node_flavor_id      | default() }}"
-    include: "{{ opt_node_flavor_include | default() }}"
+  master: "{{ lookup('oo_option', 'master_flavor'    ) | default('m1.small',  True) }}"
+  infra:  "{{ lookup('oo_option', 'infra_flavor'     ) | default('m1.small',  True) }}"
+  node:   "{{ lookup('oo_option', 'node_flavor'      ) | default('m1.medium', True) }}"
 
 deployment_vars:
   origin:
-    image:
-      name: "{{ opt_image_name | default('centos-70-raw') }}"
-      id:
+    image: "{{ lookup('oo_option', 'image_name') | default('centos-70-raw', True) }}"
     ssh_user: openshift
     sudo: yes
   online:
     image:
-      name:
-      id:
     ssh_user: root
     sudo: no
   enterprise:
-    image:
-      name: "{{ opt_image_name | default('centos-70-raw') }}"
-      id:
+    image: "{{ lookup('oo_option', 'image_name') | default('rhel-guest-image-7.1-20150224.0.x86_64', True) }}"
     ssh_user: openshift
     sudo: yes

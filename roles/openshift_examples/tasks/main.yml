@@ -1,0 +1,121 @@
+---
+- name: Copy openshift examples
+  copy:
+    src: examples
+    dest: /usr/share/openshift
+
+# RHEL and Centos image streams are mutually exclusive
+- name: Import RHEL streams
+  command: >
+    {{ openshift.common.client_binary }} {{ openshift_examples_import_command }} -n openshift -f {{ rhel_image_streams }}
+  when: openshift_examples_load_rhel
+  register: oex_import_rhel_streams
+  failed_when: "'already exists' not in oex_import_rhel_streams.stderr and oex_import_rhel_streams.rc != 0"
+  changed_when: false
+
+- name: Import Centos Image streams
+  command: >
+    {{ openshift.common.client_binary }} {{ openshift_examples_import_command }} -n openshift -f {{ centos_image_streams }}
+  when: openshift_examples_load_centos | bool
+  register: oex_import_centos_streams
+  failed_when: "'already exists' not in oex_import_centos_streams.stderr and oex_import_centos_streams.rc != 0"
+  changed_when: false
+
+- name: Import db templates
+  command: >
+    {{ openshift.common.client_binary }} {{ openshift_examples_import_command }} -n openshift -f {{ db_templates_base }}
+  when: openshift_examples_load_db_templates | bool
+  register: oex_import_db_templates
+  failed_when: "'already exists' not in oex_import_db_templates.stderr and oex_import_db_templates.rc != 0"
+  changed_when: false
+
+- name: Import quickstart-templates
+  command: >
+    {{ openshift.common.client_binary }} {{ openshift_examples_import_command }} -n openshift -f {{ quickstarts_base }}
+  when: openshift_examples_load_quickstarts | bool
+  register: oex_import_quickstarts
+  failed_when: "'already exists' not in oex_import_quickstarts.stderr and oex_import_quickstarts.rc != 0"
+  changed_when: false
+
+- name: Import origin infrastructure-templates
+  command: >
+    {{ openshift.common.client_binary }} {{ openshift_examples_import_command }} -n openshift -f {{ infrastructure_origin_base }}
+  when: openshift_examples_load_centos | bool
+  register: oex_import_infrastructure
+  failed_when: "'already exists' not in oex_import_infrastructure.stderr and oex_import_infrastructure.rc != 0"
+  changed_when: false
+
+- name: Import enterprise infrastructure-templates
+  command: >
+    {{ openshift.common.client_binary }} {{ openshift_examples_import_command }} -n openshift -f {{ infrastructure_enterprise_base }}
+  when: openshift_examples_load_rhel | bool
+  register: oex_import_infrastructure
+  failed_when: "'already exists' not in oex_import_infrastructure.stderr and oex_import_infrastructure.rc != 0"
+  changed_when: false
+
+# The 1.1 release of the xpaas content for OpenShift renamed all the templates
+- name: Remove old xpaas templates from filesystem
+  file:
+    path: "{{ xpaas_templates_base }}/{{ item }}"
+    state: absent
+  with_items:
+    - amq6-persistent.json
+    - amq6.json
+    - eap6-amq-persistent-sti.json
+    - eap6-amq-sti.json
+    - eap6-basic-sti.json
+    - eap6-https-sti.json
+    - eap6-mongodb-persistent-sti.json
+    - eap6-mongodb-sti.json
+    - eap6-mysql-persistent-sti.json
+    - eap6-mysql-sti.json
+    - eap6-postgresql-persistent-sti.json
+    - eap6-postgresql-sti.json
+    - jws-tomcat7-basic-sti.json
+    - jws-tomcat7-https-sti.json
+    - jws-tomcat7-mongodb-sti.json
+    - jws-tomcat7-mongodb-persistent-sti.json
+    - jws-tomcat7-mysql-persistent-sti.json
+    - jws-tomcat7-mysql-sti.json
+    - jws-tomcat7-postgresql-persistent-sti.json
+    - jws-tomcat8-postgresql-persistent-sti.json
+    - jws-tomcat8-basic-sti.json
+    - jws-tomcat8-https-sti.json
+    - jws-tomcat8-mongodb-sti.json
+    - jws-tomcat8-mongodb-persistent-sti.json
+    - jws-tomcat8-mysql-sti.json
+    - jws-tomcat8-mysql-persistent-sti.json
+    - jws-tomcat8-postgresql-sti.json
+    - jws-tomcat7-postgresql-sti.json
+
+- name: Remove old xpaas templates from openshift namespace
+  command: >
+    {{ openshift.common.client_binary }} -n openshift delete
+    templates/amq6 templates/amq6-persistent templates/eap6-amq-persistent-sti templates/eap6-amq-sti \
+    templates/eap6-basic-sti templates/eap6-basic-sti templates/eap6-mongodb-persistent-sti templates/eap6-mongodb-sti \
+    templates/eap6-mysql-persistent-sti templates/eap6-mysql-sti templates/eap6-postgresql-persistent-sti \
+    templates/eap6-postgresql-sti templates/jws-tomcat7-basic-sti templates/jws-tomcat7-basic-sti \
+    templates/jws-tomcat7-mongodb-persistent-sti templates/jws-tomcat7-mongodb-sti \
+    templates/jws-tomcat7-mysql-persistent-sti templates/jws-tomcat7-mysql-sti \
+    templates/jws-tomcat7-postgresql-persistent-sti templates/jws-tomcat7-postgresql-sti \
+    templates/jws-tomcat8-basic-sti templates/jws-tomcat8-basic-sti templates/jws-tomcat8-mongodb-persistent-sti
+  when: openshift_examples_load_xpaas | bool
+  register: oex_delete_old_xpaas_templates
+  failed_when: "'not found' not in oex_delete_old_xpaas_templates.stderr and oex_delete_old_xpaas_templates.rc != 0"
+  changed_when: false
+
+- name: Import xPaas image streams
+  command: >
+    {{ openshift.common.client_binary }} {{ openshift_examples_import_command }} -n openshift -f {{ xpaas_image_streams }}
+  when: openshift_examples_load_xpaas | bool
+  register: oex_import_xpaas_streams
+  failed_when: "'already exists' not in oex_import_xpaas_streams.stderr and oex_import_xpaas_streams.rc != 0"
+  changed_when: false
+
+- name: Import xPaas templates
+  command: >
+    {{ openshift.common.client_binary }} {{ openshift_examples_import_command }} -n openshift -f {{ xpaas_templates_base }}
+  when: openshift_examples_load_xpaas | bool
+  register: oex_import_xpaas_templates
+  failed_when: "'already exists' not in oex_import_xpaas_templates.stderr and oex_import_xpaas_templates.rc != 0"
+  changed_when: false

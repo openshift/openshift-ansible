@@ -1,0 +1,21 @@
+---
+haproxy_frontends:
+- name: main
+  binds:
+  - "*:80"
+  default_backend: default
+
+haproxy_backends:
+- name: default
+  balance: roundrobin
+  servers:
+  - name: web01
+    address: 127.0.0.1:9000
+    opts: check
+
+os_firewall_use_firewalld: False
+os_firewall_allow:
+- service: haproxy stats
+  port: "9000/tcp"
+- service: haproxy balance
+  port: "8443/tcp"

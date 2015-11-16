@@ -36,4 +36,4 @@ ASL 2.0
 Author Information
 ------------------
 
-Openshift operations, Red Hat, Inc
+OpenShift operations, Red Hat, Inc

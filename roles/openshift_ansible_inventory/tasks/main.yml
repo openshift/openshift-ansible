@@ -1,11 +1,16 @@
 ---
 - yum:
-    name: openshift-ansible-inventory
+    name: "{{ item }}"
     state: present
+  with_items:
+  - openshift-ansible-inventory
+  - openshift-ansible-inventory-aws
+  - openshift-ansible-inventory-gce
 
-- template:
-    src: multi_ec2.yaml.j2
-    dest: /etc/ansible/multi_ec2.yaml
+- name:
+  copy:
+    content: "{{ oo_inventory_accounts | to_nice_yaml }}"
+    dest: /etc/ansible/multi_inventory.yaml
     group: "{{ oo_inventory_group }}"
     owner: "{{ oo_inventory_owner }}"
     mode: "0640"
@@ -19,17 +24,17 @@
 
 - file:
     state: link
-    src: /usr/share/ansible/inventory/multi_ec2.py
-    dest: /etc/ansible/inventory/multi_ec2.py
+    src: /usr/share/ansible/inventory/multi_inventory.py
+    dest: /etc/ansible/inventory/multi_inventory.py
     owner: root
     group: libra_ops
 
 # This cron uses the above location to call its job
 - name: Cron to keep cache fresh
   cron:
-    name: 'multi_ec2_inventory'
+    name: 'multi_inventory'
     minute: '*/10'
-    job: '/usr/share/ansible/inventory/multi_ec2.py --refresh-cache &> /dev/null'
+    job: '/usr/share/ansible/inventory/multi_inventory.py --refresh-cache &> /dev/null'
   when: oo_cron_refresh_cache is defined and oo_cron_refresh_cache
 
 - name: Set cache location
@@ -39,5 +44,5 @@
     owner: root
     group: libra_ops
     recurse: yes
-    mode: '2750'
+    mode: '2770'
   when: oo_inventory_cache_location is defined
