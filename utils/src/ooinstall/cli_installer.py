@@ -432,7 +432,8 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force, verbose):
 # Main CLI entrypoint, not much we can do about too many arguments.
 def cli(ctx, unattended, configuration, ansible_playbook_directory, ansible_config, ansible_log_path, verbose):
     """
-    atomic-openshift-installer makes the process for installing OSE or AEP easier by interactively gathering the data needed to run on each host.
+    atomic-openshift-installer makes the process for installing OSE or AEP
+    easier by interactively gathering the data needed to run on each host.
     It can also be run in unattended mode if provided with a configuration file.
 
     Further reading: https://docs.openshift.com/enterprise/latest/install_config/install/quick_install.html
