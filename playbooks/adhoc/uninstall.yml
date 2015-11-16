@@ -103,7 +103,7 @@
     - shell: find /var/lib/openshift/openshift.local.volumes -type d -exec umount {} \; 2>/dev/null || true
       changed_when: False
 
-    - shell: docker rm -f "{{ item }}"-master "{{ item }}"-node 
+    - shell: docker rm -f "{{ item }}"-master "{{ item }}"-node
       changed_when: False
       failed_when: False
       with_items:
@@ -152,10 +152,14 @@
         - /etc/sysconfig/atomic-enterprise-master
         - /etc/sysconfig/atomic-enterprise-node
         - /etc/sysconfig/atomic-openshift-master
+        - /etc/sysconfig/atomic-openshift-master-api
+        - /etc/sysconfig/atomic-openshift-master-controllers
         - /etc/sysconfig/atomic-openshift-node
         - /etc/sysconfig/openshift-master
         - /etc/sysconfig/openshift-node
         - /etc/sysconfig/origin-master
+        - /etc/sysconfig/origin-master-api
+        - /etc/sysconfig/origin-master-controllers
         - /etc/sysconfig/origin-node
         - /root/.kube
         - /run/openshift-sdn
@@ -165,6 +169,16 @@
         - /var/lib/openshift
         - /var/lib/origin
         - /var/lib/pacemaker
+        - /usr/lib/systemd/system/atomic-openshift-master-api.service
+        - /usr/lib/systemd/system/atomic-openshift-master-controllers.service
+        - /usr/lib/systemd/system/origin-master-api.service
+        - /usr/lib/systemd/system/origin-master-controllers.service
+
+    # Since we are potentially removing the systemd unit files for separated
+    # master-api and master-controllers services, so we need to reload the
+    # systemd configuration manager
+    - name: Reload systemd manager configuration
+      command: systemctl daemon-reload
 
     - name: restart docker
       service: name=docker state=restarted
