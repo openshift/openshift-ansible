@@ -6,10 +6,9 @@
     - ansible_version | version_compare('1.9.0', 'ne')
     - ansible_version | version_compare('1.9.0.1', 'ne')
 
-- name: Ensure python-netaddr and PyYaml are installed
+- name: Ensure PyYaml is installed
   yum: pkg={{ item }} state=installed
   with_items:
-    - python-netaddr
     - PyYAML
 
 - name: Gather Cluster facts
