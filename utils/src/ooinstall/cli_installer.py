@@ -205,6 +205,7 @@ def get_variant_and_version():
         message = "%s\n(%s) %s %s" % (message, i, variant.description,
             version.name)
         i = i + 1
+    message = "%s\n" % message
 
     click.echo(message)
     response = click.prompt("Choose a variant from above: ", default=1)
