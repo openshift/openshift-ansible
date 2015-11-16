@@ -458,7 +458,8 @@ def cli(ctx, unattended, configuration, ansible_playbook_directory, ansible_conf
 
     if ctx.obj['ansible_config']:
         oo_cfg.settings['ansible_config'] = ctx.obj['ansible_config']
-    elif os.path.exists(DEFAULT_ANSIBLE_CONFIG):
+    elif 'ansible_config' not in oo_cfg.settings and \
+        os.path.exists(DEFAULT_ANSIBLE_CONFIG):
         # If we're installed by RPM this file should exist and we can use it as our default:
         oo_cfg.settings['ansible_config'] = DEFAULT_ANSIBLE_CONFIG
 
