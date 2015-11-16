@@ -6,6 +6,7 @@
       <ansible:tag>env-{{ cluster }}</ansible:tag>
       <ansible:tag>env-host-type-{{ cluster }}-openshift-{{ type }}</ansible:tag>
       <ansible:tag>host-type-{{ type }}</ansible:tag>
+      <ansible:tag>sub-host-type-{{ g_sub_host_type }}</ansible:tag>
     </ansible:tags>
   </metadata>
   <currentMemory unit='GiB'>1</currentMemory>

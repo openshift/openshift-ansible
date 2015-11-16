@@ -40,6 +40,8 @@ for PY_FILE in $PY_DIFF; do
   fi
 done
 
+export PYTHONPATH=${WORKSPACE}/utils/src/:${WORKSPACE}/utils/test/
+
 if [ "${FILES_TO_TEST}" != "" ]; then
   echo "Testing files: ${FILES_TO_TEST}"
   exec ${PYTHON} -m pylint --rcfile ${WORKSPACE}/git/.pylintrc ${FILES_TO_TEST}

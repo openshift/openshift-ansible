@@ -83,7 +83,7 @@ def get(obj, *paths):
 
 
 # pylint: disable=too-many-arguments
-def pretty_print_errors(namespace, kind, item_name, container_name, port_name, valid):
+def pretty_print_errors(namespace, kind, item_name, container_name, invalid_label, port_name, valid):
     """
     Prints out results in human friendly way.
 
@@ -93,15 +93,16 @@ def pretty_print_errors(namespace, kind, item_name, container_name, port_name, v
        - `item_name`: Name of the resource
        - `container_name`: Name of the container. May be "" when kind=Service.
        - `port_name`: Name of the port
+       - `invalid_label`: The label of the invalid port. Port.name/targetPort
        - `valid`: True if the port is valid
     """
     if not valid:
         if len(container_name) > 0:
-            print('%s/%s -n %s (Container="%s" Port="%s")' % (
-                kind, item_name, namespace, container_name, port_name))
+            print('%s/%s -n %s (Container="%s" %s="%s")' % (
+                kind, item_name, namespace, container_name, invalid_label, port_name))
         else:
-            print('%s/%s -n %s (Port="%s")' % (
-                kind, item_name, namespace, port_name))
+            print('%s/%s -n %s (%s="%s")' % (
+                kind, item_name, namespace, invalid_label, port_name))
 
 
 def print_validation_header():
@@ -160,7 +161,7 @@ def main():
                         print_validation_header()
                     pretty_print_errors(
                         namespace, kind, item_name,
-                        container_name, port_name, valid)
+                        container_name, "Port.name", port_name, valid)
 
     # Services follow a different flow
     for item in list_items('services'):
@@ -176,7 +177,8 @@ def main():
                 first_error = False
                 print_validation_header()
             pretty_print_errors(
-                namespace, "services", item_name, "", port_name, valid)
+                namespace, "services", item_name, "",
+                "targetPort", port_name, valid)
 
     # If we had at least 1 error then exit with 1
     if not first_error:

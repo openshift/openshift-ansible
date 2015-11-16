@@ -46,20 +46,20 @@ SAMPLE_CONFIG = """
 variant: %s
 ansible_ssh_user: root
 hosts:
-  - connect_to: master-private.example.com
+  - connect_to: 10.0.0.1
     ip: 10.0.0.1
     hostname: master-private.example.com
     public_ip: 24.222.0.1
     public_hostname: master.example.com
     master: true
     node: true
-  - connect_to: node1-private.example.com
+  - connect_to: 10.0.0.2
     ip: 10.0.0.2
     hostname: node1-private.example.com
     public_ip: 24.222.0.2
     public_hostname: node1.example.com
     node: true
-  - connect_to: node2-private.example.com
+  - connect_to: 10.0.0.3
     ip: 10.0.0.3
     hostname: node2-private.example.com
     public_ip: 24.222.0.3
@@ -98,12 +98,168 @@ class OOCliFixture(OOInstallFixture):
         f.close()
         return config
 
+    def _verify_load_facts(self, load_facts_mock):
+        """ Check that we ran load facts with expected inputs. """
+        load_facts_args = load_facts_mock.call_args[0]
+        self.assertEquals(os.path.join(self.work_dir, ".ansible/hosts"),
+            load_facts_args[0])
+        self.assertEquals(os.path.join(self.work_dir,
+            "playbooks/byo/openshift_facts.yml"), load_facts_args[1])
+        env_vars = load_facts_args[2]
+        self.assertEquals(os.path.join(self.work_dir,
+            '.ansible/callback_facts.yaml'),
+            env_vars['OO_INSTALL_CALLBACK_FACTS_YAML'])
+        self.assertEqual('/tmp/ansible.log', env_vars['ANSIBLE_LOG_PATH'])
+
+    def _verify_run_playbook(self, run_playbook_mock, exp_hosts_len, exp_hosts_to_run_on_len):
+        """ Check that we ran playbook with expected inputs. """
+        hosts = run_playbook_mock.call_args[0][0]
+        hosts_to_run_on = run_playbook_mock.call_args[0][1]
+        self.assertEquals(exp_hosts_len, len(hosts))
+        self.assertEquals(exp_hosts_to_run_on_len, len(hosts_to_run_on))
+
+    def _verify_config_hosts(self, written_config, host_count):
+        print written_config['hosts']
+        self.assertEquals(host_count, len(written_config['hosts']))
+        for h in written_config['hosts']:
+            self.assertTrue(h['node'])
+            self.assertTrue('ip' in h)
+            self.assertTrue('hostname' in h)
+            self.assertTrue('public_ip' in h)
+            self.assertTrue('public_hostname' in h)
+
+    #pylint: disable=too-many-arguments
+    def _verify_get_hosts_to_run_on(self, mock_facts, load_facts_mock,
+                                    run_playbook_mock, cli_input,
+                                    exp_hosts_len=None, exp_hosts_to_run_on_len=None,
+                                    force=None):
+        """
+        Tests cli_installer.py:get_hosts_to_run_on.  That method has quite a
+        few subtle branches in the logic.  The goal with this method is simply
+        to handle all the messy stuff here and allow the main test cases to be
+        easily read.  The basic idea is to modify mock_facts to return a
+        version indicating OpenShift is already installed on particular hosts.
+        """
+        load_facts_mock.return_value = (mock_facts, 0)
+        run_playbook_mock.return_value = 0
+
+        if cli_input:
+            self.cli_args.append("install")
+            result = self.runner.invoke(cli.cli,
+                                        self.cli_args,
+                                        input=cli_input)
+        else:
+            config_file = self.write_config(os.path.join(self.work_dir,
+                'ooinstall.conf'), SAMPLE_CONFIG % 'openshift-enterprise')
+
+            self.cli_args.extend(["-c", config_file, "install"])
+            if force:
+                self.cli_args.append("--force")
+            result = self.runner.invoke(cli.cli, self.cli_args)
+            written_config = self._read_yaml(config_file)
+            self._verify_config_hosts(written_config, exp_hosts_len)
+
+        self.assert_result(result, 0)
+        self._verify_load_facts(load_facts_mock)
+        self._verify_run_playbook(run_playbook_mock, exp_hosts_len, exp_hosts_to_run_on_len)
+
+        # Make sure we ran on the expected masters and nodes:
+        hosts = run_playbook_mock.call_args[0][0]
+        hosts_to_run_on = run_playbook_mock.call_args[0][1]
+        self.assertEquals(exp_hosts_len, len(hosts))
+        self.assertEquals(exp_hosts_to_run_on_len, len(hosts_to_run_on))
 
 class UnattendedCliTests(OOCliFixture):
 
     def setUp(self):
         OOCliFixture.setUp(self)
         self.cli_args.append("-u")
+
+    # unattended with config file and all installed hosts (without --force)
+    @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.load_system_facts')
+    def test_get_hosts_to_run_on1(self, load_facts_mock, run_playbook_mock):
+        mock_facts = copy.deepcopy(MOCK_FACTS)
+        mock_facts['10.0.0.1']['common']['version'] = "3.0.0"
+        mock_facts['10.0.0.2']['common']['version'] = "3.0.0"
+        mock_facts['10.0.0.3']['common']['version'] = "3.0.0"
+
+        load_facts_mock.return_value = (mock_facts, 0)
+        run_playbook_mock.return_value = 0
+
+        config_file = self.write_config(os.path.join(self.work_dir,
+            'ooinstall.conf'), SAMPLE_CONFIG % 'openshift-enterprise')
+
+        self.cli_args.extend(["-c", config_file, "install"])
+        result = self.runner.invoke(cli.cli, self.cli_args)
+
+        if result.exception is None or result.exit_code != 1:
+            print "Exit code: %s" % result.exit_code
+            self.fail("Unexpected CLI return")
+
+    # unattended with config file and all installed hosts (with --force)
+    @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.load_system_facts')
+    def test_get_hosts_to_run_on2(self, load_facts_mock, run_playbook_mock):
+        mock_facts = copy.deepcopy(MOCK_FACTS)
+        mock_facts['10.0.0.1']['common']['version'] = "3.0.0"
+        mock_facts['10.0.0.2']['common']['version'] = "3.0.0"
+        mock_facts['10.0.0.3']['common']['version'] = "3.0.0"
+        self._verify_get_hosts_to_run_on(mock_facts, load_facts_mock, run_playbook_mock,
+                                         cli_input=None,
+                                         exp_hosts_len=3,
+                                         exp_hosts_to_run_on_len=3,
+                                         force=True)
+
+    # unattended with config file and no installed hosts (without --force)
+    @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.load_system_facts')
+    def test_get_hosts_to_run_on3(self, load_facts_mock, run_playbook_mock):
+        load_facts_mock.return_value = (MOCK_FACTS, 0)
+        run_playbook_mock.return_value = 0
+        self._verify_get_hosts_to_run_on(MOCK_FACTS, load_facts_mock, run_playbook_mock,
+                                         cli_input=None,
+                                         exp_hosts_len=3,
+                                         exp_hosts_to_run_on_len=3,
+                                         force=False)
+
+    # unattended with config file and no installed hosts (with --force)
+    @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.load_system_facts')
+    def test_get_hosts_to_run_on4(self, load_facts_mock, run_playbook_mock):
+        load_facts_mock.return_value = (MOCK_FACTS, 0)
+        run_playbook_mock.return_value = 0
+        self._verify_get_hosts_to_run_on(MOCK_FACTS, load_facts_mock, run_playbook_mock,
+                                         cli_input=None,
+                                         exp_hosts_len=3,
+                                         exp_hosts_to_run_on_len=3,
+                                         force=True)
+
+    # unattended with config file and some installed some uninstalled hosts (without --force)
+    @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.load_system_facts')
+    def test_get_hosts_to_run_on5(self, load_facts_mock, run_playbook_mock):
+        mock_facts = copy.deepcopy(MOCK_FACTS)
+        mock_facts['10.0.0.1']['common']['version'] = "3.0.0"
+        mock_facts['10.0.0.2']['common']['version'] = "3.0.0"
+        self._verify_get_hosts_to_run_on(mock_facts, load_facts_mock, run_playbook_mock,
+                                         cli_input=None,
+                                         exp_hosts_len=3,
+                                         exp_hosts_to_run_on_len=2,
+                                         force=False)
+
+    # unattended with config file and some installed some uninstalled hosts (with --force)
+    @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.load_system_facts')
+    def test_get_hosts_to_run_on6(self, load_facts_mock, run_playbook_mock):
+        mock_facts = copy.deepcopy(MOCK_FACTS)
+        mock_facts['10.0.0.1']['common']['version'] = "3.0.0"
+        mock_facts['10.0.0.2']['common']['version'] = "3.0.0"
+        self._verify_get_hosts_to_run_on(mock_facts, load_facts_mock, run_playbook_mock,
+                                         cli_input=None,
+                                         exp_hosts_len=3,
+                                         exp_hosts_to_run_on_len=3,
+                                         force=True)
 
     @patch('ooinstall.openshift_ansible.run_main_playbook')
     @patch('ooinstall.openshift_ansible.load_system_facts')
@@ -363,35 +519,6 @@ class AttendedCliTests(OOCliFixture):
 
         return '\n'.join(inputs)
 
-    def _verify_load_facts(self, load_facts_mock):
-        """ Check that we ran load facts with expected inputs. """
-        load_facts_args = load_facts_mock.call_args[0]
-        self.assertEquals(os.path.join(self.work_dir, ".ansible/hosts"),
-            load_facts_args[0])
-        self.assertEquals(os.path.join(self.work_dir,
-            "playbooks/byo/openshift_facts.yml"), load_facts_args[1])
-        env_vars = load_facts_args[2]
-        self.assertEquals(os.path.join(self.work_dir,
-            '.ansible/callback_facts.yaml'),
-            env_vars['OO_INSTALL_CALLBACK_FACTS_YAML'])
-        self.assertEqual('/tmp/ansible.log', env_vars['ANSIBLE_LOG_PATH'])
-
-    def _verify_run_playbook(self, run_playbook_mock, exp_hosts_len, exp_hosts_to_run_on_len):
-        """ Check that we ran playbook with expected inputs. """
-        hosts = run_playbook_mock.call_args[0][0]
-        hosts_to_run_on = run_playbook_mock.call_args[0][1]
-        self.assertEquals(exp_hosts_len, len(hosts))
-        self.assertEquals(exp_hosts_to_run_on_len, len(hosts_to_run_on))
-
-    def _verify_config_hosts(self, written_config, host_count):
-        self.assertEquals(host_count, len(written_config['hosts']))
-        for h in written_config['hosts']:
-            self.assertTrue(h['node'])
-            self.assertTrue('ip' in h)
-            self.assertTrue('hostname' in h)
-            self.assertTrue('public_ip' in h)
-            self.assertTrue('public_hostname' in h)
-
     @patch('ooinstall.openshift_ansible.run_main_playbook')
     @patch('ooinstall.openshift_ansible.load_system_facts')
     def test_full_run(self, load_facts_mock, run_playbook_mock):
@@ -416,6 +543,7 @@ class AttendedCliTests(OOCliFixture):
         written_config = self._read_yaml(self.config_file)
         self._verify_config_hosts(written_config, 3)
 
+    # interactive with config file and some installed some uninstalled hosts
     @patch('ooinstall.openshift_ansible.run_main_playbook')
     @patch('ooinstall.openshift_ansible.load_system_facts')
     def test_add_nodes(self, load_facts_mock, run_playbook_mock):
@@ -471,6 +599,29 @@ class AttendedCliTests(OOCliFixture):
 
         written_config = self._read_yaml(config_file)
         self._verify_config_hosts(written_config, 3)
+
+    #interactive with config file and all installed hosts
+    @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.load_system_facts')
+    def test_get_hosts_to_run_on(self, load_facts_mock, run_playbook_mock):
+        mock_facts = copy.deepcopy(MOCK_FACTS)
+        mock_facts['10.0.0.1']['common']['version'] = "3.0.0"
+        mock_facts['10.0.0.2']['common']['version'] = "3.0.0"
+
+        cli_input = self._build_input(hosts=[
+            ('10.0.0.1', True),
+            ],
+                                      add_nodes=[('10.0.0.2', False)],
+                                      ssh_user='root',
+                                      variant_num=1,
+                                      confirm_facts='y')
+
+        self._verify_get_hosts_to_run_on(mock_facts, load_facts_mock,
+                                         run_playbook_mock,
+                                         cli_input,
+                                         exp_hosts_len=2,
+                                         exp_hosts_to_run_on_len=2,
+                                         force=False)
 
 # TODO: test with config file, attended add node
 # TODO: test with config file, attended new node already in config file

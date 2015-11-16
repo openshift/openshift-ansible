@@ -1,0 +1,4 @@
+---
+- yum:
+    name: tito
+    state: present

@@ -24,8 +24,23 @@ import StringIO
 import yaml
 from distutils.util import strtobool
 from distutils.version import LooseVersion
-from netaddr import IPNetwork
+import struct
+import socket
 
+def first_ip(network):
+    """ Return the first IPv4 address in network
+
+        Args:
+            network (str): network in CIDR format
+        Returns:
+            str: first IPv4 address
+    """
+    atoi = lambda addr: struct.unpack("!I", socket.inet_aton(addr))[0]
+    itoa = lambda addr: socket.inet_ntoa(struct.pack("!I", addr))
+
+    (address, netmask) = network.split('/')
+    netmask_i = (0xffffffff << (32 - atoi(netmask))) & 0xffffffff
+    return itoa((atoi(address) & netmask_i) + 1)
 
 def hostname_valid(hostname):
     """ Test if specified hostname should be considered valid
@@ -525,7 +540,7 @@ def set_aggregate_facts(facts):
                          'kubernetes.default.svc', 'kubernetes.default.svc.' + cluster_domain]
             all_hostnames.update(svc_names)
             internal_hostnames.update(svc_names)
-            first_svc_ip = str(IPNetwork(facts['master']['portal_net'])[1])
+            first_svc_ip = first_ip(facts['master']['portal_net'])
             all_hostnames.add(first_svc_ip)
             internal_hostnames.add(first_svc_ip)
 
@@ -543,8 +558,10 @@ def set_etcd_facts_if_unset(facts):
 
     If anything goes wrong parsing these, the fact will not be set.
     """
-    if 'etcd' in facts:
-        if 'master' in facts and facts['master']['embedded_etcd']:
+    if 'master' in facts and facts['master']['embedded_etcd']:
+        etcd_facts = facts['etcd'] if 'etcd' in facts else dict()
+
+        if 'etcd_data_dir' not in etcd_facts:
             try:
                 # Parse master config to find actual etcd data dir:
                 master_cfg_path = os.path.join(facts['common']['config_base'],
@@ -553,28 +570,37 @@ def set_etcd_facts_if_unset(facts):
                 config = yaml.safe_load(master_cfg_f.read())
                 master_cfg_f.close()
 
-                facts['etcd']['etcd_data_dir'] = \
+                etcd_facts['etcd_data_dir'] = \
                     config['etcdConfig']['storageDirectory']
+
+                facts['etcd'] = etcd_facts
+
             # We don't want exceptions bubbling up here:
             # pylint: disable=broad-except
             except Exception:
                 pass
-        else:
-            # Read ETCD_DATA_DIR from /etc/etcd/etcd.conf:
-            try:
-                # Add a fake section for parsing:
-                ini_str = '[root]\n' + open('/etc/etcd/etcd.conf', 'r').read()
-                ini_fp = StringIO.StringIO(ini_str)
-                config = ConfigParser.RawConfigParser()
-                config.readfp(ini_fp)
-                etcd_data_dir = config.get('root', 'ETCD_DATA_DIR')
-                if etcd_data_dir.startswith('"') and etcd_data_dir.endswith('"'):
-                    etcd_data_dir = etcd_data_dir[1:-1]
-                facts['etcd']['etcd_data_dir'] = etcd_data_dir
-            # We don't want exceptions bubbling up here:
-            # pylint: disable=broad-except
-            except Exception:
-                pass
+    else:
+        etcd_facts = facts['etcd'] if 'etcd' in facts else dict()
+
+        # Read ETCD_DATA_DIR from /etc/etcd/etcd.conf:
+        try:
+            # Add a fake section for parsing:
+            ini_str = '[root]\n' + open('/etc/etcd/etcd.conf', 'r').read()
+            ini_fp = StringIO.StringIO(ini_str)
+            config = ConfigParser.RawConfigParser()
+            config.readfp(ini_fp)
+            etcd_data_dir = config.get('root', 'ETCD_DATA_DIR')
+            if etcd_data_dir.startswith('"') and etcd_data_dir.endswith('"'):
+                etcd_data_dir = etcd_data_dir[1:-1]
+
+            etcd_facts['etcd_data_dir'] = etcd_data_dir
+            facts['etcd'] = etcd_facts
+
+        # We don't want exceptions bubbling up here:
+        # pylint: disable=broad-except
+        except Exception:
+            pass
+
     return facts
 
 def set_deployment_facts_if_unset(facts):
