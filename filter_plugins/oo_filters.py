@@ -433,13 +433,16 @@ class FilterModule(object):
         def _add_host(clusters,
                       env,
                       host_type,
+                      sub_host_type,
                       host):
             ''' Add a new host in the clusters data structure '''
             if env not in clusters:
                 clusters[env] = {}
             if host_type not in clusters[env]:
-                clusters[env][host_type] = []
-            clusters[env][host_type].append(host)
+                clusters[env][host_type] = {}
+            if sub_host_type not in clusters[env][host_type]:
+                clusters[env][host_type][sub_host_type] = []
+            clusters[env][host_type][sub_host_type].append(host)
 
         clusters = {}
         for host in data:
@@ -447,10 +450,10 @@ class FilterModule(object):
                 _add_host(clusters=clusters,
                           env=_get_tag_value(host['group_names'], 'env'),
                           host_type=_get_tag_value(host['group_names'], 'host-type'),
+                          sub_host_type=_get_tag_value(host['group_names'], 'sub-host-type'),
                           host={'name': host['inventory_hostname'],
                                 'public IP': host['ansible_ssh_host'],
-                                'private IP': host['ansible_default_ipv4']['address'],
-                                'subtype': _get_tag_value(host['group_names'], 'sub-host-type')})
+                                'private IP': host['ansible_default_ipv4']['address']})
             except KeyError:
                 pass
         return clusters
