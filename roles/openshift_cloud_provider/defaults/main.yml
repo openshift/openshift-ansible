@@ -1,0 +1,7 @@
+---
+ocp_os_auth_url: "{{ lookup('env', 'OS_AUTH_URL') }}"
+ocp_os_username: "{{ lookup('env', 'OS_USERNAME') }}"
+ocp_os_password: "{{ lookup('env', 'OS_PASSWORD') }}"
+ocp_os_tenant_id: "{{ lookup('env', 'OS_TENANT_ID') }}"
+ocp_os_tenant_name: "{{ lookup('env', 'OS_TENANT_NAME') }}"
+ocp_os_region: "{{ lookup('env', 'OS_REGION_NAME') }}"
