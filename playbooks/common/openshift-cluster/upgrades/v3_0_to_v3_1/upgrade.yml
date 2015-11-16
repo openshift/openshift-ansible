@@ -10,7 +10,7 @@
   roles:
   - openshift_facts
 
-- name: Evaluate etcd_hosts_to_backup
+- name: Evaluate additional groups for upgrade
   hosts: localhost
   tasks:
   - name: Evaluate etcd_hosts_to_backup
@@ -52,7 +52,7 @@
 
 
 - name: Verify upgrade can proceed
-  hosts: masters:nodes
+  hosts: oo_masters_to_config:oo_nodes_to_config
   tasks:
   - name: Clean yum cache
     command: yum clean all
@@ -77,6 +77,29 @@
   - fail:
       msg: Atomic OpenShift 3.1 packages not found
     when: g_aos_versions.curr_version | version_compare('3.0.2.900','<') and (g_aos_versions.avail_version is none or g_aos_versions.avail_version | version_compare('3.0.2.900','<'))
+
+  - set_fact:
+      pre_upgrade_complete: True
+
+
+##############################################################################
+# Gate on pre-upgrade checks
+##############################################################################
+- name: Gate on pre-upgrade checks
+  hosts: localhost
+  vars:
+    pre_upgrade_hosts: "{{ groups.oo_masters_to_config | union(groups.oo_nodes_to_config) }}"
+  tasks:
+  - set_fact:
+      pre_upgrade_completed: "{{ hostvars
+                                 | oo_select_keys(pre_upgrade_hosts)
+                                 | oo_collect('inventory_hostname', {'pre_upgrade_complete': true}) }}"
+  - set_fact:
+      pre_upgrade_failed: "{{ pre_upgrade_hosts | difference(pre_upgrade_completed) }}"
+  - fail:
+      msg: "Upgrade cannot continue. The following hosts did not complete pre-upgrade checks: {{ pre_upgrade_failed | join(',') }}"
+    when: pre_upgrade_failed | length > 0
+
 
 
 ###############################################################################
@@ -135,9 +158,30 @@
       etcdctl backup --data-dir={{ openshift.etcd.etcd_data_dir }}
       --backup-dir={{ openshift.common.data_dir }}/etcd-backup-{{ timestamp }}
 
+  - set_fact:
+      etcd_backup_complete: True
+
   - name: Display location of etcd backup
     debug:
       msg: "Etcd backup created in {{ openshift.common.data_dir }}/etcd-backup-{{ timestamp }}"
+
+
+##############################################################################
+# Gate on etcd backup
+##############################################################################
+- name: Gate on etcd backup
+  hosts: localhost
+  tasks:
+  - set_fact:
+      etcd_backup_completed: "{{ hostvars
+                                 | oo_select_keys(groups.etcd_hosts_to_backup)
+                                 | oo_collect('inventory_hostname', {'etcd_backup_complete': true}) }}"
+  - set_fact:
+      etcd_backup_failed: "{{ groups.etcd_hosts_to_backup | difference(etcd_backup_completed) }}"
+  - fail:
+      msg: "Upgrade cannot continue. The following hosts did not complete etcd backup: {{ etcd_backup_failed | join(',') }}"
+    when: etcd_backup_failed | length > 0
+
 
 
 ###############################################################################
@@ -153,7 +197,7 @@
     changed_when: False
 
 - name: Update deployment type
-  hosts: OSEv3
+  hosts: oo_masters_to_config:oo_nodes_to_config:oo_etcd_to_config
   roles:
   - openshift_facts
   post_tasks:
@@ -301,6 +345,30 @@
     changed_when: False
 
 
+- name: Set master update status to complete
+  hosts: oo_masters_to_config
+  tasks:
+  - set_fact:
+      master_update_complete: True
+
+
+##############################################################################
+# Gate on master update complete
+##############################################################################
+- name: Gate on master update
+  hosts: localhost
+  tasks:
+  - set_fact:
+      master_update_completed: "{{ hostvars
+                                 | oo_select_keys(groups.oo_masters_to_config)
+                                 | oo_collect('inventory_hostname', {'master_update_complete': true}) }}"
+  - set_fact:
+      master_update_failed: "{{ groups.oo_masters_to_config | difference(master_update_completed) }}"
+  - fail:
+      msg: "Upgrade cannot continue. The following masters did not finish updating: {{ master_update_failed | join(',') }}"
+    when: master_update_failed | length > 0
+
+
 ###############################################################################
 # Upgrade Nodes
 ###############################################################################
@@ -319,6 +387,26 @@
 
   - name: Ensure node service enabled
     service: name="{{ openshift.common.service_type }}-node" state=started enabled=yes
+
+  - set_fact:
+      node_update_complete: True
+
+
+##############################################################################
+# Gate on nodes update
+##############################################################################
+- name: Gate on nodes update
+  hosts: localhost
+  tasks:
+  - set_fact:
+      node_update_completed: "{{ hostvars
+                                 | oo_select_keys(groups.oo_nodes_to_config)
+                                 | oo_collect('inventory_hostname', {'node_update_complete': true}) }}"
+  - set_fact:
+      node_update_failed: "{{ groups.oo_nodes_to_config | difference(node_update_completed) }}"
+  - fail:
+      msg: "Upgrade cannot continue. The following nodes did not finish updating: {{ node_update_failed | join(',') }}"
+    when: node_update_failed | length > 0
 
 
 ###############################################################################
@@ -366,6 +454,28 @@
       delay: 90
     when: openshift_master_ha | bool
     run_once: true
+
+  - set_fact:
+      reconcile_complete: True
+
+
+##############################################################################
+# Gate on reconcile
+##############################################################################
+- name: Gate on reconcile
+  hosts: localhost
+  tasks:
+  - set_fact:
+      reconcile_completed: "{{ hostvars
+                                 | oo_select_keys(groups.oo_masters_to_config)
+                                 | oo_collect('inventory_hostname', {'reconcile_complete': true}) }}"
+  - set_fact:
+      reconcile_failed: "{{ groups.oo_masters_to_config | difference(reconcile_completed) }}"
+  - fail:
+      msg: "Upgrade cannot continue. The following masters did not finish reconciling: {{ reconcile_failed | join(',') }}"
+    when: reconcile_failed | length > 0
+
+
 
 
 ###############################################################################
