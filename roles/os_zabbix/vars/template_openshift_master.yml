@@ -13,6 +13,12 @@ g_template_openshift_master:
     applications:
     - Openshift Master
 
+  - key: openshift.master.api.healthz
+    description: "Checks the healthz check of the master's api: https://master_host/healthz"
+    type: bool
+    applications:
+    - Openshift Master
+
   - key: openshift.master.user.count
     description: Shows number of users in a cluster
     type: int
@@ -24,7 +30,19 @@ g_template_openshift_master:
     type: int
     applications:
     - Openshift Master
-  
+
+  - key: openshift.master.pod.user.running.count
+    description: Shows number of user pods running (non infrastructure pods)
+    type: int
+    applications:
+    - Openshift Master
+
+  - key: openshift.master.pod.total.count
+    description: Shows total number of pods (running and non running)
+    type: int
+    applications:
+    - Openshift Master
+
   - key: openshift.project.counter
     description: Shows number of projects on a cluster
     type: int
@@ -108,6 +126,11 @@ g_template_openshift_master:
     expression: '{Template Openshift Master:create_app.last(#1)}=1 and {Template Openshift Master:create_app.last(#2)}=1'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_create_app.asciidoc'
     priority: avg
+
+  - name: 'Openshift Master API health check is failing on {HOST.NAME}'
+    expression: '{Template Openshift Master:openshift.master.api.healthz.max(#3)}<1'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
+    priority: high
 
   - name: 'Openshift Master process not running on {HOST.NAME}'
     expression: '{Template Openshift Master:openshift.master.process.count.max(#3)}<1'
