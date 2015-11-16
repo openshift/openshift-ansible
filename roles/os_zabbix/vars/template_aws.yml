@@ -4,7 +4,7 @@ g_template_aws:
   zdiscoveryrules:
   - name: disc.aws
     key: disc.aws
-    lifetime: 1
+    lifetime: 14
     description: "Dynamically register AWS bucket info"
 
   zitemprototypes:
