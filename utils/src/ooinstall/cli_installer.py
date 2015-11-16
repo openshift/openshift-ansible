@@ -71,7 +71,7 @@ def delete_hosts(hosts):
                 click.echo("\"{}\" doesn't coorespond to any valid input.".format(del_idx))
     return hosts, None
 
-def collect_hosts():
+def collect_hosts(master_set=False):
     """
         Collect host information from user. This will later be filled in using
         ansible.
@@ -108,8 +108,10 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
                                       value_proc=validate_prompt_hostname)
 
         host_props['connect_to'] = hostname_or_ip
-
-        host_props['master'] = click.confirm('Will this host be an OpenShift Master?')
+        if not master_set:
+            is_master = click.confirm('Will this host be an OpenShift Master?')
+            host_props['master'] = is_master
+            master_set = True
         host_props['node'] = True
 
         #TODO: Reenable this option once container installs are out of tech preview
@@ -308,7 +310,7 @@ def collect_new_nodes():
 Add new nodes here
     """
     click.echo(message)
-    return collect_hosts()
+    return collect_hosts(True)
 
 def get_installed_hosts(hosts, callback_facts):
     installed_hosts = []
