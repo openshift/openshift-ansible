@@ -111,7 +111,7 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
         if not master_set:
             is_master = click.confirm('Will this host be an OpenShift Master?')
             host_props['master'] = is_master
-            master_set = True
+            master_set = is_master
         host_props['node'] = True
 
         #TODO: Reenable this option once container installs are out of tech preview
