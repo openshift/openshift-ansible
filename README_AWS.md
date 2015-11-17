@@ -81,9 +81,20 @@ Node specific defaults:
 - Docker volume type: gp2 (only applicable if ephemeral is false)
 - Docker volume iops: 500 (only applicable when volume type is io1)
 
+Specifying ec2 instance type.
+All instances:
+- export ec2_instance_type='m4.large'
+Master instances:
+- export ec2_master_instance_type='m4.large'
+Infra node instances:
+- export ec2_infra_instance_type='m4.large'
+Non-infra node instances:
+- export ec2_node_instance_type='m4.large'
+etcd instances:
+- export ec2_etcd_instance_type='m4.large'
+
 If needed, these values can be changed by setting environment variables on your system.
 
-- export ec2_instance_type='m4.large'
 - export ec2_image='ami-307b3658'
 - export ec2_region='us-east-1'
 - export ec2_keypair='libra'
