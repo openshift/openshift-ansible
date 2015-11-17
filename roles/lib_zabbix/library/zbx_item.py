@@ -41,6 +41,24 @@ def exists(content, key='result'):
 
     return True
 
+def get_data_type(data_type):
+    '''
+    Possible values:
+    0 - decimal;
+    1 - octal;
+    2 - hexadecimal;
+    3 - bool;
+    '''
+    vtype = 0
+    if 'octal' in data_type:
+        vtype = 1
+    elif 'hexadecimal' in data_type:
+        vtype = 2
+    elif 'bool' in data_type:
+        vtype = 3
+
+    return vtype
+
 def get_value_type(value_type):
     '''
     Possible values:
@@ -158,6 +176,7 @@ def main():
             template_name=dict(default=None, type='str'),
             zabbix_type=dict(default='trapper', type='str'),
             value_type=dict(default='int', type='str'),
+            data_type=dict(default='decimal', type='str'),
             interval=dict(default=60, type='int'),
             delta=dict(default=0, type='int'),
             multiplier=dict(default=None, type='str'),
@@ -219,6 +238,7 @@ def main():
                   'hostid': templateid[0],
                   'type': get_zabbix_type(module.params['zabbix_type']),
                   'value_type': get_value_type(module.params['value_type']),
+                  'data_type': get_data_type(module.params['data_type']),
                   'applications': get_app_ids(module.params['applications'], app_name_ids),
                   'formula': formula,
                   'multiplier': use_multiplier,
