@@ -6,9 +6,10 @@
 # This script should be run from openshift-ansible/roles/openshift_examples
 
 XPAAS_VERSION=ose-v1.1.0
-EXAMPLES_BASE=$(pwd)/files/examples
-find files/examples -name '*.json' -delete
-find files/examples -name '*.yaml' -delete
+ORIGIN_VERSION=v1.1
+EXAMPLES_BASE=$(pwd)/files/examples/${ORIGIN_VERSION}
+find ${EXAMPLES_BASE} -name '*.json' -delete
+find ${EXAMPLES_BASE} -name '*.yaml' -delete
 TEMP=`mktemp -d`
 pushd $TEMP
 
