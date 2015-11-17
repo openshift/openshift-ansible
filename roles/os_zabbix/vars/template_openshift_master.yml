@@ -15,7 +15,8 @@ g_template_openshift_master:
 
   - key: openshift.master.api.healthz
     description: "Checks the healthz check of the master's api: https://master_host/healthz"
-    type: bool
+    type: int
+    data_type: bool
     applications:
     - Openshift Master
 
