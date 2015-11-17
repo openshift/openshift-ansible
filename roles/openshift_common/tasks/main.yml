@@ -18,6 +18,3 @@
       deployment_type: "{{ openshift_deployment_type }}"
       use_fluentd: "{{ openshift_use_fluentd | default(None) }}"
       use_flannel: "{{ openshift_use_flannel | default(None) }}"
-
-- name: Set hostname
-  hostname: name={{ openshift.common.hostname }}
