@@ -13,6 +13,13 @@ g_template_openshift_master:
     applications:
     - Openshift Master
 
+  - key: openshift.master.api.healthz
+    description: "Checks the healthz check of the master's api: https://master_host/healthz"
+    type: int
+    data_type: bool
+    applications:
+    - Openshift Master
+
   - key: openshift.master.user.count
     description: Shows number of users in a cluster
     type: int
@@ -24,8 +31,20 @@ g_template_openshift_master:
     type: int
     applications:
     - Openshift Master
-  
-  - key: openshift.project.counter
+
+  - key: openshift.master.pod.user.running.count
+    description: Shows number of user pods running (non infrastructure pods)
+    type: int
+    applications:
+    - Openshift Master
+
+  - key: openshift.master.pod.total.count
+    description: Shows total number of pods (running and non running)
+    type: int
+    applications:
+    - Openshift Master
+
+  - key: openshift.project.count
     description: Shows number of projects on a cluster
     type: int
     applications:
@@ -109,6 +128,11 @@ g_template_openshift_master:
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_create_app.asciidoc'
     priority: avg
 
+  - name: 'Openshift Master API health check is failing on {HOST.NAME}'
+    expression: '{Template Openshift Master:openshift.master.api.healthz.max(#3)}<1'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
+    priority: high
+
   - name: 'Openshift Master process not running on {HOST.NAME}'
     expression: '{Template Openshift Master:openshift.master.process.count.max(#3)}<1'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
@@ -125,7 +149,7 @@ g_template_openshift_master:
     priority: info
 
   - name: 'There are no projects running on {HOST.NAME}'
-    expression: '{Template Openshift Master:openshift.project.counter.last()}=0'
+    expression: '{Template Openshift Master:openshift.project.count.last()}=0'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
     priority: info
 
