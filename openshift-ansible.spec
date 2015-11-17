@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.12
+Version:        3.0.13
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -258,6 +258,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Nov 17 2015 Brenton Leanhardt <bleanhar@redhat.com> 3.0.13-1
+- The aep3 images changed locations. (bleanhar@redhat.com)
+- atomic-openshift-installer: Correct single master case (smunilla@redhat.com)
+- atomic-openshift-installer: Temporarily restrict to single master
+  (smunilla@redhat.com)
+
 * Wed Nov 11 2015 Brenton Leanhardt <bleanhar@redhat.com> 3.0.12-1
 - Sync with the latest image streams (sdodson@redhat.com)
 
