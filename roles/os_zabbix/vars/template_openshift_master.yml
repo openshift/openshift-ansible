@@ -44,7 +44,7 @@ g_template_openshift_master:
     applications:
     - Openshift Master
 
-  - key: openshift.project.counter
+  - key: openshift.project.count
     description: Shows number of projects on a cluster
     type: int
     applications:
@@ -149,7 +149,7 @@ g_template_openshift_master:
     priority: info
 
   - name: 'There are no projects running on {HOST.NAME}'
-    expression: '{Template Openshift Master:openshift.project.counter.last()}=0'
+    expression: '{Template Openshift Master:openshift.project.count.last()}=0'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
     priority: info
 
