@@ -72,7 +72,7 @@ def delete_hosts(hosts):
                 click.echo("\"{}\" doesn't coorespond to any valid input.".format(del_idx))
     return hosts, None
 
-def collect_hosts(master_set=False):
+def collect_hosts(masters_set=False):
     """
         Collect host information from user. This will later be filled in using
         ansible.
@@ -102,17 +102,20 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
 
     hosts = []
     more_hosts = True
+    num_masters = 0
     while more_hosts:
         host_props = {}
-        hostname_or_ip = click.prompt('Enter hostname or IP address:',
-                                      default='',
-                                      value_proc=validate_prompt_hostname)
+        host_props['connect_to'] = click.prompt('Enter hostname or IP address:',
+                                                default='',
+                                                value_proc=validate_prompt_hostname)
 
-        host_props['connect_to'] = hostname_or_ip
-        if not master_set:
-            is_master = click.confirm('Will this host be an OpenShift Master?')
-            host_props['master'] = is_master
-            master_set = is_master
+        if not masters_set:
+            if click.confirm('Will this host be an OpenShift Master?'):
+                host_props['master'] = True
+                num_masters += 1
+                if num_masters >= 3:
+                    masters_set = True
+                    hosts.append(collect_ha_proxy())
         host_props['node'] = True
 
         #TODO: Reenable this option once container installs are out of tech preview
@@ -131,6 +134,29 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
 
         more_hosts = click.confirm('Do you want to add additional hosts?')
     return hosts
+
+def collect_ha_proxy():
+    """
+    Get an HA proxy from the user
+    """
+    message = """
+Setting up High Availability Masters requires a load balancing solution.
+Please provide a host that will be configured as a proxy. This can either be
+an existing load balancer configured to balance all masters on port 8443 or a
+new host that will have HAProxy installed on it.
+"""
+    click.echo(message)
+    host_props = {}
+    host_props['connect_to'] = click.prompt('Enter hostname or IP address:',
+                                            default='',
+                                            value_proc=validate_prompt_hostname)
+    host_props['run_on'] = click.confirm('Is this a clean host you want to install HAProxy on?')
+    host_props['master'] = False
+    host_props['node'] = False
+    host_props['ha_proxy'] = True
+    ha_proxy = Host(**host_props)
+
+    return ha_proxy
 
 def confirm_hosts_facts(oo_cfg, callback_facts):
     hosts = oo_cfg.hosts
@@ -198,6 +224,40 @@ Edit %s with the desired values and run `atomic-openshift-installer --unattended
         oo_cfg.save_to_disk()
         sys.exit(0)
     return default_facts
+
+
+
+def check_hosts_config(oo_cfg):
+    click.clear()
+    masters = [host for host in oo_cfg.hosts if host.master]
+    if len(masters) > 1:
+        ha_proxy = [host for host in oo_cfg.hosts if host.ha_proxy]
+        click.echo(ha_proxy)
+        if len(ha_proxy) > 1:
+            click.echo('More than one HAProxy specified. Only one proxy is allowed.')
+            sys.exit(0)
+        elif len(ha_proxy) == 1:
+            if ha_proxy[0].master or ha_proxy[0].node:
+                click.echo('HAProxy is configured as a master or node. Please correct this.')
+                sys.exit(0)
+        else:
+            message = """
+No HAProxy given in config. Either specify one or provide a load balancing solution
+of your choice to balance the master API (port 8443) on all master hosts.
+
+https://docs.openshift.org/latest/install_config/install/advanced_install.html#multiple-masters
+"""
+            confirm_continue(message)
+
+    nodes = [host.node for host in oo_cfg.hosts]
+    if len(masters) == len(nodes):
+        message = """
+No dedicated Nodes specified. By default, colocated Masters have their Nodes set to unscheduleable.
+Would you like to label the colocated masters as scheduleable?
+"""
+        confirm_continue(message)
+
+    return
 
 def get_variant_and_version():
     message = "\nWhich variant would you like to install?\n\n"
@@ -554,6 +614,8 @@ def install(ctx, force):
         error_if_missing_info(oo_cfg)
     else:
         oo_cfg = get_missing_info_from_user(oo_cfg)
+
+    check_hosts_config(oo_cfg)
 
     click.echo('Gathering information from hosts...')
     callback_facts, error = openshift_ansible.default_facts(oo_cfg.hosts,

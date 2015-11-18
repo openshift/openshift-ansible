@@ -36,19 +36,24 @@ class Host(object):
         self.public_ip = kwargs.get('public_ip', None)
         self.public_hostname = kwargs.get('public_hostname', None)
         self.connect_to = kwargs.get('connect_to', None)
+        self.run_on = kwargs.get('run_on', None)
 
         # Should this host run as an OpenShift master:
         self.master = kwargs.get('master', False)
 
         # Should this host run as an OpenShift node:
         self.node = kwargs.get('node', False)
+
+        # Should this host run as an HAProxy:
+        self.ha_proxy = kwargs.get('ha_proxy', False)
+
         self.containerized = kwargs.get('containerized', False)
 
         if self.connect_to is None:
             raise OOConfigInvalidHostError("You must specify either and 'ip' " \
                                            "or 'hostname' to connect to.")
 
-        if self.master is False and self.node is False:
+        if self.master is False and self.node is False and self.ha_proxy is False:
             raise OOConfigInvalidHostError(
                 "You must specify each host as either a master or a node.")
 
@@ -62,7 +67,7 @@ class Host(object):
         """ Used when exporting to yaml. """
         d = {}
         for prop in ['ip', 'hostname', 'public_ip', 'public_hostname',
-                     'master', 'node', 'containerized', 'connect_to']:
+                     'master', 'node', 'ha_proxy', 'containerized', 'connect_to', 'run_on']:
             # If the property is defined (not None or False), export it:
             if getattr(self, prop):
                 d[prop] = getattr(self, prop)

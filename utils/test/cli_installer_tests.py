@@ -613,6 +613,7 @@ class AttendedCliTests(OOCliFixture):
         result = self.runner.invoke(cli.cli,
                                     self.cli_args,
                                     input=cli_input)
+        print result
         self.assert_result(result, 0)
 
         self._verify_load_facts(load_facts_mock)
