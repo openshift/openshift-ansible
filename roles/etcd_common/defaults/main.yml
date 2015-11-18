@@ -1,5 +1,5 @@
 ---
-etcd_peers_group: etcd
+etcd_peers_group: oo_etcd_to_config
 
 # etcd server vars
 etcd_conf_dir: /etc/etcd
