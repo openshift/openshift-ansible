@@ -163,7 +163,7 @@ class Cluster(object):
             boto_configs = [conf for conf in boto_conf_files if conf_exists(conf)]
 
             if len(key_missing) > 0 and len(boto_configs) == 0:
-                raise ValueError("PROVIDER aws requires {} environment variable(s). See README_AWS.md".format(key_missing))
+                raise ValueError("PROVIDER aws requires {0} environment variable(s). See README_AWS.md".format(key_missing))
 
         elif 'libvirt' == provider:
             inventory = '-i inventory/libvirt/hosts'
@@ -171,7 +171,7 @@ class Cluster(object):
             inventory = '-i inventory/openstack/hosts'
         else:
             # this code should never be reached
-            raise ValueError("invalid PROVIDER {}".format(provider))
+            raise ValueError("invalid PROVIDER {0}".format(provider))
 
         return inventory
 
@@ -186,18 +186,18 @@ class Cluster(object):
 
         verbose = ''
         if args.verbose > 0:
-            verbose = '-{}'.format('v' * args.verbose)
+            verbose = '-{0}'.format('v' * args.verbose)
 
         if args.option:
             for opt in args.option:
                 k, v = opt.split('=', 1)
                 env['cli_' + k] = v
 
-        ansible_env = '-e \'{}\''.format(
+        ansible_env = '-e \'{0}\''.format(
             ' '.join(['%s=%s' % (key, value) for (key, value) in env.items()])
         )
 
-        command = 'ansible-playbook {} {} {} {}'.format(
+        command = 'ansible-playbook {0} {1} {2} {3}'.format(
             verbose, inventory, ansible_env, playbook
         )
 
@@ -205,16 +205,16 @@ class Cluster(object):
             command = 'ANSIBLE_CALLBACK_PLUGINS=ansible-profile/callback_plugins ' + command
 
         if args.verbose > 1:
-            command = 'time {}'.format(command)
+            command = 'time {0}'.format(command)
 
         if args.verbose > 0:
-            sys.stderr.write('RUN [{}]\n'.format(command))
+            sys.stderr.write('RUN [{0}]\n'.format(command))
             sys.stderr.flush()
 
         try:
             subprocess.check_call(command, shell=True)
         except subprocess.CalledProcessError as exc:
-            raise ActionFailed("ACTION [{}] failed: {}"
+            raise ActionFailed("ACTION [{0}] failed: {1}"
                                .format(args.action, exc))
 
 
@@ -325,14 +325,14 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if 'terminate' == args.action and not args.force:
-        answer = raw_input("This will destroy the ENTIRE {} environment. Are you sure? [y/N] ".format(args.cluster_id))
+        answer = raw_input("This will destroy the ENTIRE {0} environment. Are you sure? [y/N] ".format(args.cluster_id))
         if answer not in ['y', 'Y']:
             sys.stderr.write('\nACTION [terminate] aborted by user!\n')
             exit(1)
 
     if 'update' == args.action and not args.force:
         answer = raw_input(
-            "This is destructive and could corrupt {} environment. Continue? [y/N] ".format(args.cluster_id))
+            "This is destructive and could corrupt {0} environment. Continue? [y/N] ".format(args.cluster_id))
         if answer not in ['y', 'Y']:
             sys.stderr.write('\nACTION [update] aborted by user!\n')
             exit(1)
