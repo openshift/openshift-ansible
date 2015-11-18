@@ -19,7 +19,7 @@ fs_setup:
   partition: auto
 {% endif %}
 
-{% if type == 'node' %}
+{% if type == 'node' or type == 'master' %}
 mounts:
 - [ xvdb ]
 - [ ephemeral0 ]

@@ -191,7 +191,11 @@ class FilterModule(object):
                     { 'root':
                         { 'volume_size': 10, 'device_type': 'gp2',
                           'iops': 500
-                        }
+                        },
+                        'docker':
+                          { 'volume_size': 40, 'device_type': 'gp2',
+                            'iops': 500, 'ephemeral': 'true'
+                          }
                     },
                   'node':
                     { 'root':
@@ -216,7 +220,7 @@ class FilterModule(object):
         root_vol['delete_on_termination'] = True
         if root_vol['device_type'] != 'io1':
             root_vol.pop('iops', None)
-        if host_type == 'node':
+        if host_type in ['master', 'node']:
             docker_vol = data[host_type]['docker']
             docker_vol['device_name'] = '/dev/xvdb'
             docker_vol['delete_on_termination'] = True
