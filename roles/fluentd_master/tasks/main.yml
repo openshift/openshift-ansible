@@ -4,6 +4,13 @@
   yum:
     name: 'http://packages.treasuredata.com/2/redhat/7/x86_64/td-agent-2.2.0-0.x86_64.rpm'
     state: present
+  when: ansible_pkg_mgr == "yum"
+
+- name: download and install td-agent
+  dnf:
+    name: 'http://packages.treasuredata.com/2/redhat/7/x86_64/td-agent-2.2.0-0.x86_64.rpm'
+    state: present
+  when: ansible_pkg_mgr == "dnf"
 
 - name: Verify fluentd plugin installed
   command: '/opt/td-agent/embedded/bin/gem query -i fluent-plugin-kubernetes'
