@@ -17,14 +17,31 @@ def set_config(cfg):
 
 def generate_inventory(hosts):
     global CFG
+    masters = [host for host in hosts if host.master]
+    nodes = [host for host in hosts if host.node]
+    proxy = next((host for host in hosts if host.ha_proxy), None)
+    multiple_masters = len(masters) > 1
 
     base_inventory_path = CFG.settings['ansible_inventory_path']
     base_inventory = open(base_inventory_path, 'w')
-    base_inventory.write('\n[OSEv3:children]\nmasters\nnodes\n')
+
+    base_inventory.write('\n[OSEv3:children]\n')
+    base_inventory.write('masters\n')
+    base_inventory.write('nodes\n')
+    if multiple_masters:
+        base_inventory.write('etcd\n')
+    if getattr(proxy, 'run_on', False):
+        base_inventory.write('lb\n')
+
     base_inventory.write('\n[OSEv3:vars]\n')
     base_inventory.write('ansible_ssh_user={}\n'.format(CFG.settings['ansible_ssh_user']))
     if CFG.settings['ansible_ssh_user'] != 'root':
         base_inventory.write('ansible_become=true\n')
+    if multiple_masters:
+        base_inventory.write('openshift_master_cluster_method=native\n')
+        base_inventory.write("openshift_master_cluster_hostname={}\n".format(proxy.hostname))
+        base_inventory.write("openshift_master_cluster_public_hostname={}\n".format(proxy.public_hostname))
+
 
     # Find the correct deployment type for ansible:
     ver = find_variant(CFG.settings['variant'],
@@ -45,19 +62,28 @@ def generate_inventory(hosts):
             "'enabled': 1, 'gpgcheck': 0}}]\n".format(os.environ['OO_INSTALL_PUDDLE_REPO']))
 
     base_inventory.write('\n[masters]\n')
-    masters = (host for host in hosts if host.master)
     for master in masters:
         write_host(master, base_inventory)
+
+    if len(masters) > 1:
+        base_inventory.write('\n[etcd]\n')
+        for master in masters:
+            write_host(master, base_inventory)
+
     base_inventory.write('\n[nodes]\n')
-    nodes = (host for host in hosts if host.node)
     for node in nodes:
         # TODO: Until the Master can run the SDN itself we have to configure the Masters
         # as Nodes too.
         scheduleable = True
         # If there's only one Node and it's also a Master we want it to be scheduleable:
-        if node in masters and len(masters) != 1:
+        if node in masters and len(masters) != len(nodes):
             scheduleable = False
         write_host(node, base_inventory, scheduleable)
+
+    if getattr(proxy, 'run_on', False):
+        base_inventory.write('\n[lb]\n')
+        write_host(proxy, base_inventory)
+
     base_inventory.close()
     return base_inventory_path
 
@@ -118,6 +144,7 @@ def default_facts(hosts, verbose=False):
     facts_env = os.environ.copy()
     facts_env["OO_INSTALL_CALLBACK_FACTS_YAML"] = CFG.settings['ansible_callback_facts_yaml']
     facts_env["ANSIBLE_CALLBACK_PLUGINS"] = CFG.settings['ansible_plugins_directory']
+    facts_env["OPENSHIFT_MASTER_CLUSTER_METHOD"] = 'native'
     if 'ansible_log_path' in CFG.settings:
         facts_env["ANSIBLE_LOG_PATH"] = CFG.settings['ansible_log_path']
     if 'ansible_config' in CFG.settings:
@@ -176,4 +203,3 @@ def run_upgrade_playbook(verbose=False):
     if 'ansible_config' in CFG.settings:
         facts_env['ANSIBLE_CONFIG'] = CFG.settings['ansible_config']
     return run_ansible(playbook, inventory_file, facts_env, verbose)
-
