@@ -3,6 +3,8 @@
 
 - include: ../openshift-etcd/config.yml
 
+- include: ../openshift-nfs/config.yml
+
 - include: ../openshift-master/config.yml
 
 - include: ../openshift-node/config.yml

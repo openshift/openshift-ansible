@@ -6,6 +6,7 @@ masters
 nodes
 etcd
 lb
+nfs
 
 # Set variables common for all OSEv3 hosts
 [OSEv3:vars]
@@ -166,6 +167,11 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 
 # Configure dnsIP in the node config
 #openshift_dns_ip=172.30.0.1
+
+# NFS Options
+#openshift_nfs_exports_dir=/var/export
+#openshift_nfs_registry_volume=regvol
+#openshift_nfs_export_options='*(rw,sync,all_squash)'
 
 # host group for masters
 [masters]

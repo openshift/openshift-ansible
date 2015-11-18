@@ -1,0 +1,8 @@
+---
+exports_dir: /var/export
+registry_volume: regvol
+export_options: '*(rw,sync,all_squash)'
+os_firewall_use_firewalld: False
+os_firewall_allow:
+- service: nfs
+  port: "2049/tcp"
