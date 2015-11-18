@@ -161,6 +161,7 @@
         - /etc/sysconfig/origin-master-api
         - /etc/sysconfig/origin-master-controllers
         - /etc/sysconfig/origin-node
+        - /etc/systemd/system/atomic-openshift-node.service.wants
         - /root/.kube
         - /run/openshift-sdn
         - /usr/share/openshift/examples
