@@ -400,6 +400,7 @@ class FilterModule(object):
                                                  "detected a collision with internal hostname, please specify " +
                                                  "certificate names in host inventory"))
 
+        for certificate in certificates:
             # Update paths for configuration
             certificate['certfile'] = os.path.join(named_certs_dir, os.path.basename(certificate['certfile']))
             certificate['keyfile'] = os.path.join(named_certs_dir, os.path.basename(certificate['keyfile']))
