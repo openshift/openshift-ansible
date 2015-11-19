@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.13
+Version:        3.0.14
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -258,6 +258,71 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Nov 19 2015 Brenton Leanhardt <bleanhar@redhat.com> 3.0.14-1
+- added metric items to zabbix for openshift online (mwoodson@redhat.com)
+- Updating usergroups to accept users (kwoodson@redhat.com)
+- Differentiate machine types on GCE (master and nodes)
+  (romain.dossin@amadeus.com)
+- Uninstall - Remove systemd wants file for node (jdetiber@redhat.com)
+- ec2 - force !requiretty for ssh_user (jdetiber@redhat.com)
+- small tweaks for adding docker volume for aws master hosts
+  (jdetiber@redhat.com)
+- Created role to deploy ops host monitoring (jdiaz@redhat.com)
+- Update certificate paths when 'names' key is provided. (abutcher@redhat.com)
+- add a volume on master host, in AWS provisioning (chengcheng.mu@amadeus.com)
+- First attempt at adding web scenarios (kwoodson@redhat.com)
+- Use field numbers for all formats in bin/cluster for python 2.6
+  (abutcher@redhat.com)
+- atomic-openshift-installer: Correct single master case (smunilla@redhat.com)
+- added copr-openshift-ansible releaser, removed old rel-eng stuff.
+  (twiest@redhat.com)
+- changed counter -> count (mwoodson@redhat.com)
+- Updating zbx_item classes to support data types for bool.
+  (kwoodson@redhat.com)
+- Fix ec2 instance type override (jdetiber@redhat.com)
+- updated my check to support the boolean data type (mwoodson@redhat.com)
+- Add additive_facts_to_overwrite instead of overwriting all additive_facts
+  (abutcher@redhat.com)
+- added healthz check and more pod count checks (mwoodson@redhat.com)
+- updating to the latest ec2.py (and re-patching with our changes).
+  (twiest@redhat.com)
+- atomic-openshift-installer: Temporarily restrict to single master
+  (smunilla@redhat.com)
+- openshift-ansible: Correct variable (smunilla@redhat.com)
+- Refactor named certificates. (abutcher@redhat.com)
+- atomic-openshift-utils: Version lock playbooks (smunilla@redhat.com)
+- Add the native ha services and configs to uninstall (jdetiber@redhat.com)
+- Bug 1282336 - Add additional seboolean for gluster (jdetiber@redhat.com)
+- Raise lifetime to 2 weeks for dynamic AWS items (jdiaz@redhat.com)
+- bin/cluster fix python 2.6 issue (jdetiber@redhat.com)
+- cluster list: break host types by subtype (lhuard@amadeus.com)
+- README_AWS: Add needed dependency (c.witt.1900@gmail.com)
+- Fix invalid sudo command test (takayoshi@gmail.com)
+- Docs: Fedora: Add missing dependencies and update to dnf. (public@omeid.me)
+- Gate upgrade steps for 3.0 to 3.1 upgrade (jdetiber@redhat.com)
+- added the tito and copr_cli roles (twiest@redhat.com)
+- pylint openshift_facts (jdetiber@redhat.com)
+- Update etcd default facts setting (jdetiber@redhat.com)
+- Update master facts prior to upgrading incase facts are missing.
+  (abutcher@redhat.com)
+- pre-upgrade-check: differentiates between port and targetPort in output
+  (smilner@redhat.com)
+- Better structure the output of the list playbook (lhuard@amadeus.com)
+- Add the sub-host-type tag to the libvirt VMs (lhuard@amadeus.com)
+- atomic-openshift-installer: Update nopwd sudo test (smunilla@redhat.com)
+- Fix pylint import errors for utils/test/. (dgoodwin@redhat.com)
+- atomic-openshift-installer: Update prompts and help messages
+  (smunilla@redhat.com)
+- Dependencies need to be added when a create occurs on SLA object.
+  (kwoodson@redhat.com)
+- Test additions for cli_installer:get_hosts_to_install_on
+  (bleanhar@redhat.com)
+- adding itservice (kwoodson@redhat.com)
+- remove netaddr dependency (tob@butter.sh)
+- Add pyOpenSSL to dependencies for Fedora. (public@omeid.me)
+- Vagrant RHEL registration cleanup (pep@redhat.com)
+- RH subscription: optional satellite and pkg update (pep@redhat.com)
+
 * Tue Nov 17 2015 Brenton Leanhardt <bleanhar@redhat.com> 3.0.13-1
 - The aep3 images changed locations. (bleanhar@redhat.com)
 - atomic-openshift-installer: Correct single master case (smunilla@redhat.com)
