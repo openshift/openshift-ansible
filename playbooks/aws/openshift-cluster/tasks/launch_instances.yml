@@ -77,7 +77,6 @@
 
 - set_fact:
     latest_ami: "{{ ami_result.results | oo_ami_selector(ec2_image_name) }}"
-    user_data: "{{ lookup('template', '../templates/user_data.j2') }}"
     volume_defs:
       etcd:
         root:
@@ -93,6 +92,10 @@
           volume_size: "{{ lookup('env', 'os_master_root_vol_size') | default(25, true) }}"
           device_type: "{{ lookup('env', 'os_master_root_vol_type') | default('gp2', true) }}"
           iops: "{{ lookup('env', 'os_master_root_vol_iops') | default(500, true) }}"
+        docker:
+          volume_size: "{{ lookup('env', 'os_docker_vol_size') | default(10, true) }}"
+          device_type: "{{ lookup('env', 'os_docker_vol_type') | default('gp2', true) }}"
+          iops: "{{ lookup('env', 'os_docker_vol_iops') | default(500, true) }}"
       node:
         root:
           volume_size: "{{ lookup('env', 'os_node_root_vol_size') | default(85, true) }}"
@@ -117,7 +120,7 @@
     count: "{{ instances | length }}"
     vpc_subnet_id: "{{ ec2_vpc_subnet | default(omit, true) }}"
     assign_public_ip: "{{ ec2_assign_public_ip | default(omit, true) }}"
-    user_data: "{{ user_data }}"
+    user_data: "{{ lookup('template', '../templates/user_data.j2') }}"
     wait: yes
     instance_tags:
       created-by: "{{ created_by }}"
