@@ -13,6 +13,12 @@ g_template_openshift_master:
     applications:
     - Openshift Master
 
+  - key: openshift.master.api.ping
+    description: "Verify that the Openshift API is up"
+    type: int
+    applications:
+    - Openshift Master
+
   - key: openshift.master.api.healthz
     description: "Checks the healthz check of the master's api: https://master_host/healthz"
     type: int
@@ -40,6 +46,12 @@ g_template_openshift_master:
 
   - key: openshift.master.pod.total.count
     description: Shows total number of pods (running and non running)
+    type: int
+    applications:
+    - Openshift Master
+
+  - key: openshift.master.node.count
+    description: Shows the total number of nodes found in the Openshift Cluster
     type: int
     applications:
     - Openshift Master
@@ -122,6 +134,66 @@ g_template_openshift_master:
     applications:
     - Openshift Etcd
 
+  - key: openshift.master.metric.ping
+    description: "This check verifies that the https://master/metrics check is alive and communicating properly."
+    type: int
+    applications:
+    - Openshift Master Metrics
+
+  - key: openshift.master.apiserver.latency.summary.pods.quantile.list.5
+    description: "Value from https://master/metrics.  This is the time, in miliseconds, that 50% of the pod operations have taken to completed."
+    type: int
+    applications:
+    - Openshift Master Metrics
+
+  - key: openshift.master.apiserver.latency.summary.pods.quantile.list.9
+    description: "Value from https://master/metrics.  This is the time, in miliseconds, that 90% of the pod operations have taken to completed."
+    type: int
+    applications:
+    - Openshift Master Metrics
+
+  - key: openshift.master.apiserver.latency.summary.pods.quantile.list.99
+    description: "Value from https://master/metrics.  This is the time, in miliseconds, that 99% of the pod operations have taken to completed."
+    type: int
+    applications:
+    - Openshift Master Metrics
+
+  - key: openshift.master.apiserver.latency.summary.pods.quantile.watchlist.5
+    description: "Value from https://master/metrics.  This is the time, in miliseconds, that 50% of the pod operations have taken to completed."
+    type: int
+    applications:
+    - Openshift Master Metrics
+
+  - key: openshift.master.apiserver.latency.summary.pods.quantile.watchlist.9
+    description: "Value from https://master/metrics.  This is the time, in miliseconds, that 90% of the pod operations have taken to completed."
+    type: int
+    applications:
+    - Openshift Master Metrics
+
+  - key: openshift.master.apiserver.latency.summary.pods.quantile.watchlist.99
+    description: "Value from https://master/metrics.  This is the time, in miliseconds, that 99% of the pod operations have taken to completed."
+    type: int
+    applications:
+    - Openshift Master Metrics
+
+  - key: openshift.master.scheduler.e2e.scheduling.latency.quantile.5
+    description: "Value from https://master/metrics.  This is the time, in miliseconds, that 50% of the end to end scheduling operations have taken to completed."
+    type: int
+    applications:
+    - Openshift Master Metrics
+
+  - key: openshift.master.scheduler.e2e.scheduling.latency.quantile.9
+    description: "Value from https://master/metrics.  This is the time, in miliseconds, that 90% of the end to end scheduling operations have taken to completed."
+    type: int
+    applications:
+    - Openshift Master Metrics
+
+  - key: openshift.master.scheduler.e2e.scheduling.latency.quantile.99
+    description: "Value from https://master/metrics.  This is the time, in miliseconds, that 99% of the end to end scheduling operations have taken to completed."
+    type: int
+    applications:
+    - Openshift Master Metrics
+
   ztriggers:
   - name: 'Application creation has failed on {HOST.NAME}'
     expression: '{Template Openshift Master:create_app.last(#1)}=1 and {Template Openshift Master:create_app.last(#2)}=1'
@@ -132,6 +204,16 @@ g_template_openshift_master:
     expression: '{Template Openshift Master:openshift.master.api.healthz.max(#3)}<1'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
     priority: high
+
+  - name: 'Openshift Master API PING check is failing on {HOST.NAME}'
+    expression: '{Template Openshift Master:openshift.master.api.ping.max(#3)}<1'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
+    priority: high
+
+  - name: 'Openshift Master metric PING check is failing on {HOST.NAME}'
+    expression: '{Template Openshift Master:openshift.master.metric.ping.max(#3)}<1'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
+    priority: avg
 
   - name: 'Openshift Master process not running on {HOST.NAME}'
     expression: '{Template Openshift Master:openshift.master.process.count.max(#3)}<1'
