@@ -1,5 +1,5 @@
 #cloud-config
-{% if type =='etcd' %}
+{% if type == 'etcd' and 'etcd' in volume_defs[type] %}
 cloud_config_modules:
 - disk_setup
 - mounts
@@ -19,7 +19,7 @@ fs_setup:
   partition: auto
 {% endif %}
 
-{% if type == 'node' or type == 'master' %}
+{% if type in ['node', 'master'] and 'docker' in volume_defs[type] %}
 mounts:
 - [ xvdb ]
 - [ ephemeral0 ]
