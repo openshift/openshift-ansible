@@ -5,4 +5,5 @@
     docker_insecure_registries: "{{ lookup('oo_option',  'docker_insecure_registries') | oo_split }}"
     docker_blocked_registries: "{{ lookup('oo_option', 'docker_blocked_registries') | oo_split }}"
   roles:
-  - openshift-docker
+  - openshift_facts
+  - openshift_docker

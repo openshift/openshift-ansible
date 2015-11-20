@@ -23,6 +23,7 @@
   shell: >
     {{ openshift.common.client_binary }} get scc privileged -o yaml
     --output-version=v1 > /tmp/openshift/scc.yaml
+  changed_when: false
 
 - name: Add security context constraint for {{ item }}
   lineinfile:

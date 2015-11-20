@@ -9,5 +9,8 @@
 - name: Ensure PyYaml is installed
   action: "{{ ansible_pkg_mgr }} name=PyYAML state=present"
 
-- name: Gather Cluster facts
+- name: Gather Cluster facts and set is_containerized if needed
   openshift_facts:
+    role: common
+    local_facts:
+      is_containerized: "{{ openshift_containerized | default(None) }}"

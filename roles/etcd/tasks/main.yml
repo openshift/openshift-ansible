@@ -7,9 +7,6 @@
     msg: IPv4 address not found for {{ etcd_interface }}
   when: "'ipv4' not in hostvars[inventory_hostname]['ansible_' ~ etcd_interface] or 'address' not in hostvars[inventory_hostname]['ansible_' ~ etcd_interface].ipv4"
 
-- debug: var=openshift.common.is_containerized
-- debug: var=openshift.common.is_atomic
-
 - name: Install etcd
   action: "{{ ansible_pkg_mgr }} name=etcd-2.* state=present"
   when: not openshift.common.is_containerized | bool
@@ -25,7 +22,7 @@
     src: etcd.docker.service
   register: install_etcd_result
   when: openshift.common.is_containerized | bool
-  
+
 - name: Ensure etcd datadir exists
   when: openshift.common.is_containerized | bool
   file:
@@ -48,16 +45,16 @@
   file:
     path: "{{ etcd_conf_dir }}"
     state: directory
-    owner: etcd
-    group: etcd
+    owner: "{{ 'etcd' if not openshift.common.is_containerized | bool else omit }}"
+    group: "{{ 'etcd' if not openshift.common.is_containerized | bool else omit }}"
     mode: 0700
 
 - name: Validate permissions on certificate files
   file:
     path: "{{ item }}"
     mode: 0600
-    group: etcd
-    owner: etcd
+    owner: "{{ 'etcd' if not openshift.common.is_containerized | bool else omit }}"
+    group: "{{ 'etcd' if not openshift.common.is_containerized | bool else omit }}"
   when: etcd_url_scheme == 'https'
   with_items:
   - "{{ etcd_ca_file }}"
@@ -68,8 +65,8 @@
   file:
     path: "{{ item }}"
     mode: 0600
-    group: etcd
-    owner: etcd
+    owner: "{{ 'etcd' if not openshift.common.is_containerized | bool else omit }}"
+    group: "{{ 'etcd' if not openshift.common.is_containerized | bool else omit }}"
   when: etcd_peer_url_scheme == 'https'
   with_items:
   - "{{ etcd_peer_ca_file }}"

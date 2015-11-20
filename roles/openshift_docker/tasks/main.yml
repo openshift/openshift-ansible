@@ -1,27 +1,27 @@
 ---
 - openshift_facts:
-  - role: common
+    role: common
     local_facts:
       deployment_type: "{{ openshift_deployment_type }}"
-      docker_additional_registries: "{{ docker_additional_registries | oo_split() }}"
-      docker_insecure_registries: "{{ docker_insecure_registries | oo_split() }}"
-      docker_blocked_registries: "{{ docker_blocked_registries | oo_split() }}"
+      docker_additional_registries: "{{ docker_additional_registries }}"
+      docker_insecure_registries: "{{ docker_insecure_registries }}"
+      docker_blocked_registries: "{{ docker_blocked_registries }}"
 
 - name: Set registry params
   lineinfile:
     dest: /etc/sysconfig/docker
-    regexp: '^{{ reg_conf_var }}=.*$'
-    line: "{{ reg_conf_var }}='{{ reg_fact_val | oo_prepend_strings_in_list(reg_flag ~ ' ') | join(' ') }}'"
+    regexp: '^{{ item.reg_conf_var }}=.*$'
+    line: "{{ item.reg_conf_var }}='{{ item.reg_fact_val | oo_prepend_strings_in_list(item.reg_flag ~ ' ') | join(' ') }}'"
   when: "'docker_additional_registries' in openshift.common"
   with_items:
   - reg_conf_var: ADD_REGISTRY
-    reg_fact_val: {{ openshift.common.docker_additional_registries }}
+    reg_fact_val: "{{ openshift.common.docker_additional_registries }}"
     reg_flag: --add-registry
   - reg_conf_var: BLOCK_REGISTRY
-    reg_fact_val: {{ openshift.common.docker_blocked_registries }}
+    reg_fact_val: "{{ openshift.common.docker_blocked_registries }}"
     reg_flag: --block-registry
   - reg_conf_var: INSECURE_REGISTRY
-    reg_fact_val: {{ openshift.common.docker_insecure_registries }}
+    reg_fact_val: "{{ openshift.common.docker_insecure_registries }}"
     reg_flag: --insecure-registry
   notify:
   - restart docker
