@@ -111,12 +111,12 @@
         - atomic-enterprise
         - origin
 
-    - shell: docker ps -a | grep Exited | grep "{{ item }}" | awk '{print $1}'
+    - shell: docker ps -a | grep Exited | egrep "{{ item }}" | awk '{print $1}'
       changed_when: False
       failed_when: False
       register: exited_containers_to_delete
       with_items:
-        - aep3/aep
+        - aep3.*/aep
         - openshift3/ose
         - openshift/origin
 
@@ -125,13 +125,13 @@
       failed_when: False
       with_items: "{{ exited_containers_to_delete.results }}"
 
-    - shell: docker images | grep {{ item }} | awk '{ print $3 }'
+    - shell: docker images | egrep {{ item }} | awk '{ print $3 }'
       changed_when: False
       failed_when: False
       register: images_to_delete
       with_items:
-        - registry.access.redhat.com/openshift3
-        - registry.access.redhat.com/aep3
+        - registry\.access\..*redhat\.com/openshift3
+        - registry\.access\..*redhat\.com/aep3
         - docker.io/openshift
 
     - shell:  "docker rmi -f {{ item.stdout_lines | join(' ') }}"
