@@ -668,6 +668,33 @@ class AttendedCliTests(OOCliFixture):
                                          exp_hosts_to_run_on_len=2,
                                          force=False)
 
+    #interactive multimaster
+    @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.load_system_facts')
+    def test_quick_ha(self, load_facts_mock, run_playbook_mock):
+        load_facts_mock.return_value = (MOCK_FACTS, 0)
+        run_playbook_mock.return_value = 0
+
+        cli_input = self._build_input(hosts=[
+            ('10.0.0.1', True),
+            ('10.0.0.2', True),
+            ('10.0.0.3', False),
+            ('10.0.0.4', True)],
+                                      ssh_user='root',
+                                      variant_num=1,
+                                      confirm_facts='y')
+        self.cli_args.append("install")
+        result = self.runner.invoke(cli.cli, self.cli_args,
+            input=cli_input)
+        self.assert_result(result, 0)
+
+        self._verify_load_facts(load_facts_mock)
+        self._verify_run_playbook(run_playbook_mock, 3, 3)
+
+        written_config = self._read_yaml(self.config_file)
+        self._verify_config_hosts(written_config, 3)
+
+        return
 # TODO: test with config file, attended add node
 # TODO: test with config file, attended new node already in config file
 # TODO: test with config file, attended new node already in config file, plus manually added nodes
