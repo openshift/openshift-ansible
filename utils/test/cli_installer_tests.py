@@ -155,7 +155,7 @@ hosts:
     hostname: proxy-private.example.com
     public_ip: 24.222.0.4
     public_hostname: proxy.example.com
-    ha_proxy: true
+    master_lb: true
 """
 
 class OOCliFixture(OOInstallFixture):
