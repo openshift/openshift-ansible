@@ -72,7 +72,7 @@ def delete_hosts(hosts):
                 click.echo("\"{}\" doesn't coorespond to any valid input.".format(del_idx))
     return hosts, None
 
-def collect_hosts(masters_set=False):
+def collect_hosts(version=None, masters_set=False):
     """
         Collect host information from user. This will later be filled in using
         ansible.
@@ -117,7 +117,7 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
                 if num_masters > 1:
                     hosts.append(collect_ha_proxy())
 
-                if num_masters >= 3:
+                if num_masters >= 3 or version == '3.0':
                     masters_set = True
         host_props['node'] = True
 
@@ -265,7 +265,7 @@ Would you like to label the colocated masters as scheduleable?
 
     return
 
-def get_variant_and_version():
+def get_variant_and_version(multi_master=False):
     message = "\nWhich variant would you like to install?\n\n"
 
     i = 1
@@ -277,6 +277,8 @@ def get_variant_and_version():
     message = "%s\n" % message
 
     click.echo(message)
+    if multi_master:
+        click.echo('NOTE: 3.0 installations are not')
     response = click.prompt("Choose a variant from above: ", default=1)
     product, version = combos[response - 1]
 
@@ -358,14 +360,14 @@ https://docs.openshift.com/enterprise/latest/admin_guide/install/prerequisites.h
         oo_cfg.settings['ansible_ssh_user'] = get_ansible_ssh_user()
         click.clear()
 
-    if not oo_cfg.hosts:
-        oo_cfg.hosts = collect_hosts()
-        click.clear()
-
     if oo_cfg.settings.get('variant', '') == '':
         variant, version = get_variant_and_version()
         oo_cfg.settings['variant'] = variant.name
         oo_cfg.settings['variant_version'] = version.name
+        click.clear()
+
+    if not oo_cfg.hosts:
+        oo_cfg.hosts = collect_hosts(version=oo_cfg.settings['variant_version'])
         click.clear()
 
     return oo_cfg
@@ -378,7 +380,7 @@ def collect_new_nodes():
 Add new nodes here
     """
     click.echo(message)
-    return collect_hosts(True)
+    return collect_hosts(masters_set=True)
 
 def get_installed_hosts(hosts, callback_facts):
     installed_hosts = []

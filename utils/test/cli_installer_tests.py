@@ -628,6 +628,9 @@ class AttendedCliTests(OOCliFixture):
         if ssh_user:
             inputs.append(ssh_user)
 
+        if variant_num:
+            inputs.append(str(variant_num))  # Choose variant + version
+
         if hosts:
             i = 0
             for (host, is_master) in hosts:
@@ -639,9 +642,6 @@ class AttendedCliTests(OOCliFixture):
                 else:
                     inputs.append('n')  # Done adding hosts
                 i += 1
-
-        if variant_num:
-            inputs.append(str(variant_num))  # Choose variant + version
 
         # TODO: support option 2, fresh install
         if add_nodes:
