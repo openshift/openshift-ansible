@@ -19,7 +19,7 @@ def generate_inventory(hosts):
     global CFG
     masters = [host for host in hosts if host.master]
     nodes = [host for host in hosts if host.node]
-    proxy = next((host for host in hosts if host.ha_proxy), None)
+    proxy = next((host for host in hosts if host.master_lb), None)
     multiple_masters = len(masters) > 1
 
     base_inventory_path = CFG.settings['ansible_inventory_path']

@@ -45,7 +45,7 @@ class Host(object):
         self.node = kwargs.get('node', False)
 
         # Should this host run as an HAProxy:
-        self.ha_proxy = kwargs.get('ha_proxy', False)
+        self.master_lb = kwargs.get('master_lb', False)
 
         self.containerized = kwargs.get('containerized', False)
 
@@ -53,7 +53,7 @@ class Host(object):
             raise OOConfigInvalidHostError("You must specify either and 'ip' " \
                                            "or 'hostname' to connect to.")
 
-        if self.master is False and self.node is False and self.ha_proxy is False:
+        if self.master is False and self.node is False and self.master_lb is False:
             raise OOConfigInvalidHostError(
                 "You must specify each host as either a master or a node.")
 
@@ -67,7 +67,7 @@ class Host(object):
         """ Used when exporting to yaml. """
         d = {}
         for prop in ['ip', 'hostname', 'public_ip', 'public_hostname',
-                     'master', 'node', 'ha_proxy', 'containerized', 'connect_to', 'run_on']:
+                     'master', 'node', 'master_lb', 'containerized', 'connect_to', 'run_on']:
             # If the property is defined (not None or False), export it:
             if getattr(self, prop):
                 d[prop] = getattr(self, prop)

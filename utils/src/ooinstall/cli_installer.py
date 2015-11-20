@@ -115,7 +115,7 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
                 num_masters += 1
 
                 if num_masters > 1:
-                    hosts.append(collect_ha_proxy())
+                    hosts.append(collect_master_lb())
 
                 if num_masters >= 3 or version == '3.0':
                     masters_set = True
@@ -139,7 +139,7 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
             more_hosts = click.confirm('Do you want to add additional hosts?')
     return hosts
 
-def collect_ha_proxy():
+def collect_master_lb():
     """
     Get an HA proxy from the user
     """
@@ -159,10 +159,10 @@ This will also require you to set a third master.
     host_props['run_on'] = click.confirm('Is this a clean host you want to install HAProxy on?')
     host_props['master'] = False
     host_props['node'] = False
-    host_props['ha_proxy'] = True
-    ha_proxy = Host(**host_props)
+    host_props['master_lb'] = True
+    master_lb = Host(**host_props)
 
-    return ha_proxy
+    return master_lb
 
 def confirm_hosts_facts(oo_cfg, callback_facts):
     hosts = oo_cfg.hosts
@@ -237,13 +237,13 @@ def check_hosts_config(oo_cfg):
     click.clear()
     masters = [host for host in oo_cfg.hosts if host.master]
     if len(masters) > 1:
-        ha_proxy = [host for host in oo_cfg.hosts if host.ha_proxy]
-        click.echo(ha_proxy)
-        if len(ha_proxy) > 1:
+        master_lb = [host for host in oo_cfg.hosts if host.master_lb]
+        click.echo(master_lb)
+        if len(master_lb) > 1:
             click.echo('More than one HAProxy specified. Only one proxy is allowed.')
             sys.exit(0)
-        elif len(ha_proxy) == 1:
-            if ha_proxy[0].master or ha_proxy[0].node:
+        elif len(master_lb) == 1:
+            if master_lb[0].master or master_lb[0].node:
                 click.echo('HAProxy is configured as a master or node. Please correct this.')
                 sys.exit(0)
         else:
