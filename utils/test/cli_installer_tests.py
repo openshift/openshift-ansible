@@ -499,10 +499,10 @@ class UnattendedCliTests(OOCliFixture):
             'ooinstall.conf'), BAD_CONFIG % 'openshift-enterprise')
 
         self.cli_args.extend(["-c", config_file, "install"])
-        self.runner.invoke(cli.cli, self.cli_args)
+        result = self.runner.invoke(cli.cli, self.cli_args)
 
-        # proving here that we didn't generate an exception from the bad config
-        assert True
+        assert result.exit_code == 1
+        assert result.output == "You must specify either and 'ip' or 'hostname' to connect to.\n"
 
 class AttendedCliTests(OOCliFixture):
 
