@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.14
+Version:        3.0.15
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -258,6 +258,24 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Nov 20 2015 Kenny Woodson <kwoodson@redhat.com> 3.0.15-1
+- Fixing clone group functionality.  Also separating extra_vars from
+  extra_groups (kwoodson@redhat.com)
+- Check the end result on bad config file (smunilla@redhat.com)
+- Add some tests for a bad config (smunilla@redhat.com)
+- atomic-openshift-installer: connect_to error handling (smunilla@redhat.com)
+- atomic-openshift-installer: pylint fixes (smunilla@redhat.com)
+- Replace map with oo_collect to support python-jinja2 <2.7
+  (abutcher@redhat.com)
+- Making the uninstall playbook more flexible (bleanhar@redhat.com)
+- Install version dependent image streams for v1.0 and v1.1
+  (sdodson@redhat.com)
+- Do not update the hostname (jdetiber@redhat.com)
+- Pylint fix for long line in cli docstring. (dgoodwin@redhat.com)
+- Default to installing OSE 3.1 instead of 3.0. (dgoodwin@redhat.com)
+- Fix tests on systems with openshift-ansible rpms installed.
+  (dgoodwin@redhat.com)
+
 * Thu Nov 19 2015 Brenton Leanhardt <bleanhar@redhat.com> 3.0.14-1
 - added metric items to zabbix for openshift online (mwoodson@redhat.com)
 - Updating usergroups to accept users (kwoodson@redhat.com)
