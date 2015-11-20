@@ -25,23 +25,9 @@ def generate_inventory(hosts):
     base_inventory_path = CFG.settings['ansible_inventory_path']
     base_inventory = open(base_inventory_path, 'w')
 
-    base_inventory.write('\n[OSEv3:children]\n')
-    base_inventory.write('masters\n')
-    base_inventory.write('nodes\n')
-    if multiple_masters:
-        base_inventory.write('etcd\n')
-    if getattr(proxy, 'run_on', False):
-        base_inventory.write('lb\n')
+    write_inventory_children(base_inventory, multiple_masters, proxy)
 
-    base_inventory.write('\n[OSEv3:vars]\n')
-    base_inventory.write('ansible_ssh_user={}\n'.format(CFG.settings['ansible_ssh_user']))
-    if CFG.settings['ansible_ssh_user'] != 'root':
-        base_inventory.write('ansible_become=true\n')
-    if multiple_masters:
-        base_inventory.write('openshift_master_cluster_method=native\n')
-        base_inventory.write("openshift_master_cluster_hostname={}\n".format(proxy.hostname))
-        base_inventory.write("openshift_master_cluster_public_hostname={}\n".format(proxy.public_hostname))
-
+    write_inventory_vars(base_inventory, multiple_masters, proxy)
 
     # Find the correct deployment type for ansible:
     ver = find_variant(CFG.settings['variant'],
@@ -86,6 +72,28 @@ def generate_inventory(hosts):
 
     base_inventory.close()
     return base_inventory_path
+
+def write_inventory_children(base_inventory, multiple_masters, proxy):
+    global CFG
+
+    base_inventory.write('\n[OSEv3:children]\n')
+    base_inventory.write('masters\n')
+    base_inventory.write('nodes\n')
+    if multiple_masters:
+        base_inventory.write('etcd\n')
+    if getattr(proxy, 'run_on', False):
+        base_inventory.write('lb\n')
+
+def write_inventory_vars(base_inventory, multiple_masters, proxy):
+    global CFG
+    base_inventory.write('\n[OSEv3:vars]\n')
+    base_inventory.write('ansible_ssh_user={}\n'.format(CFG.settings['ansible_ssh_user']))
+    if CFG.settings['ansible_ssh_user'] != 'root':
+        base_inventory.write('ansible_become=true\n')
+    if multiple_masters:
+        base_inventory.write('openshift_master_cluster_method=native\n')
+        base_inventory.write("openshift_master_cluster_hostname={}\n".format(proxy.hostname))
+        base_inventory.write("openshift_master_cluster_public_hostname={}\n".format(proxy.public_hostname))
 
 
 def write_host(host, inventory, scheduleable=True):
