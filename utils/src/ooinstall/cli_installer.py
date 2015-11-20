@@ -337,7 +337,8 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force, verbose):
         # This check has to happen before we start removing hosts later in this method
         if not force:
             if not unattended:
-                click.echo('By default the installer only adds new nodes to an installed environment.')
+                click.echo('By default the installer only adds new nodes ' \
+                           'to an installed environment.')
                 response = click.prompt('Do you want to (1) only add additional nodes or ' \
                                         '(2) reinstall the existing hosts ' \
                                         'potentially erasing any custom changes?',
@@ -374,8 +375,8 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force, verbose):
         else:
             if unattended:
                 if not force:
-                    click.echo('Installed environment detected and no additional nodes specified: ' \
-                               'aborting. If you want a fresh install, use ' \
+                    click.echo('Installed environment detected and no additional ' \
+                               'nodes specified: aborting. If you want a fresh install, use ' \
                                '`atomic-openshift-installer install --force`')
                     sys.exit(1)
             else:
@@ -389,8 +390,8 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force, verbose):
                     click.echo('Gathering information from hosts...')
                     callback_facts, error = openshift_ansible.default_facts(oo_cfg.hosts, verbose)
                     if error:
-                        click.echo("There was a problem fetching the required information. " \
-                                   "See {} for details.".format(oo_cfg.settings['ansible_log_path']))
+                        click.echo("There was a problem fetching the required information. See " \
+                                   "{} for details.".format(oo_cfg.settings['ansible_log_path']))
                         sys.exit(1)
                 else:
                     pass # proceeding as normal should do a clean install
@@ -431,6 +432,7 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force, verbose):
 @click.option('-v', '--verbose',
     is_flag=True, default=False)
 #pylint: disable=too-many-arguments
+#pylint: disable=line-too-long
 # Main CLI entrypoint, not much we can do about too many arguments.
 def cli(ctx, unattended, configuration, ansible_playbook_directory, ansible_config, ansible_log_path, verbose):
     """
