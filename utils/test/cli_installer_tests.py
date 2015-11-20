@@ -284,7 +284,9 @@ class UnattendedCliTests(OOCliFixture):
             '.ansible/callback_facts.yaml'),
             env_vars['OO_INSTALL_CALLBACK_FACTS_YAML'])
         self.assertEqual('/tmp/ansible.log', env_vars['ANSIBLE_LOG_PATH'])
-        self.assertTrue('ANSIBLE_CONFIG' not in env_vars)
+        # If user running test has rpm installed, this might be set to default:
+        self.assertTrue('ANSIBLE_CONFIG' not in env_vars or
+            env_vars['ANSIBLE_CONFIG'] == cli.DEFAULT_ANSIBLE_CONFIG)
 
         # Make sure we ran on the expected masters and nodes:
         hosts = run_playbook_mock.call_args[0][0]
@@ -450,14 +452,18 @@ class UnattendedCliTests(OOCliFixture):
         if expected_result:
             self.assertEquals(expected_result, facts_env_vars['ANSIBLE_CONFIG'])
         else:
-            self.assertFalse('ANSIBLE_CONFIG' in facts_env_vars)
+            # If user running test has rpm installed, this might be set to default:
+            self.assertTrue('ANSIBLE_CONFIG' not in facts_env_vars or
+                facts_env_vars['ANSIBLE_CONFIG'] == cli.DEFAULT_ANSIBLE_CONFIG)
 
         # Test the env vars for main playbook:
         env_vars = run_ansible_mock.call_args[0][2]
         if expected_result:
             self.assertEquals(expected_result, env_vars['ANSIBLE_CONFIG'])
         else:
-            self.assertFalse('ANSIBLE_CONFIG' in env_vars)
+            # If user running test has rpm installed, this might be set to default:
+            self.assertTrue('ANSIBLE_CONFIG' not in env_vars or
+                env_vars['ANSIBLE_CONFIG'] == cli.DEFAULT_ANSIBLE_CONFIG)
 
 
 class AttendedCliTests(OOCliFixture):
