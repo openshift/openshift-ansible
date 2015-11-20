@@ -41,6 +41,41 @@ MOCK_FACTS = {
     },
 }
 
+MOCK_FACTS_QUICKHA = {
+    '10.0.0.1': {
+        'common': {
+            'ip': '10.0.0.1',
+            'public_ip': '10.0.0.1',
+            'hostname': 'master-private.example.com',
+            'public_hostname': 'master.example.com'
+        }
+    },
+    '10.0.0.2': {
+        'common': {
+            'ip': '10.0.0.2',
+            'public_ip': '10.0.0.2',
+            'hostname': 'node1-private.example.com',
+            'public_hostname': 'node1.example.com'
+        }
+    },
+    '10.0.0.3': {
+        'common': {
+            'ip': '10.0.0.3',
+            'public_ip': '10.0.0.3',
+            'hostname': 'node2-private.example.com',
+            'public_hostname': 'node2.example.com'
+        }
+    },
+    '10.0.0.4': {
+        'common': {
+            'ip': '10.0.0.4',
+            'public_ip': '10.0.0.4',
+            'hostname': 'proxy-private.example.com',
+            'public_hostname': 'proxy.example.com'
+        }
+    },
+}
+
 # Substitute in a product name before use:
 SAMPLE_CONFIG = """
 variant: %s
@@ -89,6 +124,38 @@ hosts:
     public_ip: 24.222.0.3
     public_hostname: node2.example.com
     node: true
+"""
+
+QUICKHA_CONFIG = """
+variant: %s
+ansible_ssh_user: root
+hosts:
+  - connect_to: 10.0.0.1
+    ip: 10.0.0.1
+    hostname: master-private.example.com
+    public_ip: 24.222.0.1
+    public_hostname: master.example.com
+    master: true
+    node: true
+  - connect_to: 10.0.0.2
+    ip: 10.0.0.2
+    hostname: node1-private.example.com
+    public_ip: 24.222.0.2
+    public_hostname: node1.example.com
+    master: true
+    node: true
+  - connect_to: 10.0.0.3
+    ip: 10.0.0.3
+    hostname: node2-private.example.com
+    public_ip: 24.222.0.3
+    public_hostname: node2.example.com
+    node: true
+  - connect_to: 10.0.0.4
+    ip: 10.0.0.4
+    hostname: proxy-private.example.com
+    public_ip: 24.222.0.4
+    public_hostname: proxy.example.com
+    ha_proxy: true
 """
 
 class OOCliFixture(OOInstallFixture):
@@ -503,6 +570,40 @@ class UnattendedCliTests(OOCliFixture):
 
         assert result.exit_code == 1
         assert result.output == "You must specify either and 'ip' or 'hostname' to connect to.\n"
+
+    #unattended with two masters, one node, and haproxy
+    @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.load_system_facts')
+    def test_quick_ha_full_run(self, load_facts_mock, run_playbook_mock):
+        load_facts_mock.return_value = (MOCK_FACTS_QUICKHA, 0)
+        run_playbook_mock.return_value = 0
+
+        config_file = self.write_config(os.path.join(self.work_dir,
+            'ooinstall.conf'), QUICKHA_CONFIG % 'openshift-enterprise')
+
+        self.cli_args.extend(["-c", config_file, "install"])
+        result = self.runner.invoke(cli.cli, self.cli_args)
+        self.assert_result(result, 0)
+
+        load_facts_args = load_facts_mock.call_args[0]
+        self.assertEquals(os.path.join(self.work_dir, ".ansible/hosts"),
+            load_facts_args[0])
+        self.assertEquals(os.path.join(self.work_dir,
+            "playbooks/byo/openshift_facts.yml"), load_facts_args[1])
+        env_vars = load_facts_args[2]
+        self.assertEquals(os.path.join(self.work_dir,
+            '.ansible/callback_facts.yaml'),
+            env_vars['OO_INSTALL_CALLBACK_FACTS_YAML'])
+        self.assertEqual('/tmp/ansible.log', env_vars['ANSIBLE_LOG_PATH'])
+        # If user running test has rpm installed, this might be set to default:
+        self.assertTrue('ANSIBLE_CONFIG' not in env_vars or
+            env_vars['ANSIBLE_CONFIG'] == cli.DEFAULT_ANSIBLE_CONFIG)
+
+        # Make sure we ran on the expected masters and nodes:
+        hosts = run_playbook_mock.call_args[0][0]
+        hosts_to_run_on = run_playbook_mock.call_args[0][1]
+        self.assertEquals(4, len(hosts))
+        self.assertEquals(4, len(hosts_to_run_on))
 
 class AttendedCliTests(OOCliFixture):
 
