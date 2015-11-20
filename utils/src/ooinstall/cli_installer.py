@@ -8,6 +8,7 @@ import re
 import sys
 from ooinstall import openshift_ansible
 from ooinstall import OOConfig
+from ooinstall.oo_config import OOConfigInvalidHostError
 from ooinstall.oo_config import Host
 from ooinstall.variants import find_variant, get_variant_version_combos
 
@@ -449,7 +450,11 @@ def cli(ctx, unattended, configuration, ansible_playbook_directory, ansible_conf
     ctx.obj['ansible_log_path'] = ansible_log_path
     ctx.obj['verbose'] = verbose
 
-    oo_cfg = OOConfig(ctx.obj['configuration'])
+    try:
+        oo_cfg = OOConfig(ctx.obj['configuration'])
+    except OOConfigInvalidHostError as e:
+        click.echo(e)
+        sys.exit(1)
 
     # If no playbook dir on the CLI, check the config:
     if not ansible_playbook_directory:
