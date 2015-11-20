@@ -113,9 +113,12 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
             if click.confirm('Will this host be an OpenShift Master?'):
                 host_props['master'] = True
                 num_masters += 1
+
+                if num_masters > 1:
+                    hosts.append(collect_ha_proxy())
+
                 if num_masters >= 3:
                     masters_set = True
-                    hosts.append(collect_ha_proxy())
         host_props['node'] = True
 
         #TODO: Reenable this option once container installs are out of tech preview
@@ -132,7 +135,8 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
 
         hosts.append(host)
 
-        more_hosts = click.confirm('Do you want to add additional hosts?')
+        if num_masters <= 1 or num_masters >= 3:
+            more_hosts = click.confirm('Do you want to add additional hosts?')
     return hosts
 
 def collect_ha_proxy():
@@ -144,6 +148,8 @@ Setting up High Availability Masters requires a load balancing solution.
 Please provide a host that will be configured as a proxy. This can either be
 an existing load balancer configured to balance all masters on port 8443 or a
 new host that will have HAProxy installed on it.
+
+This will also require you to set a third master.
 """
     click.echo(message)
     host_props = {}
