@@ -85,12 +85,16 @@
   action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-master{{ openshift_version  }} state=present"
   when: not openshift.common.is_containerized | bool
 
-# TODO: enable when ansible#1993 lands and is widespread enough
-# - name: Docker image present
-#   docker:
-#     image: "{{ openshift.common.docker.image }}"
-#     state: image_present
-#   when: openshift.common.is_containerized | bool
+- name: Get docker images
+  command: docker images
+  changed_when: false
+  when: openshift.common.is_containerized | bool
+  register: docker_images
+
+- name: Pull required docker image
+  command: >
+    docker pull {{ openshift.master.master_image }}
+  when: openshift.common.is_containerized | bool and openshift.master.master_image not in docker_images.stdout
 
 - name: Install Master docker service file
   template:
