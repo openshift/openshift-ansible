@@ -1,10 +1,10 @@
 ---
 galaxy_info:
-  author: Jhon Honce
-  description: Master
+  author: Jason DeTiberus
+  description: OpenShift Docker
   company: Red Hat, Inc.
   license: Apache License, Version 2.0
-  min_ansible_version: 1.7
+  min_ansible_version: 1.9
   platforms:
   - name: EL
     versions:
@@ -13,4 +13,4 @@ galaxy_info:
   - cloud
 dependencies:
 - { role: openshift_common }
-- { role: openshift_cli }
+- { role: docker }

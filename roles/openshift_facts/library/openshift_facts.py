@@ -1014,22 +1014,6 @@ def set_container_facts_if_unset(facts):
         if 'ovs_image' not in facts['node']:
             facts['node']['ovs_image'] = ovs_image
 
-    # shared /tmp/openshift vol is for file exchange with ansible
-    # --privileged is required to read the config dir
-    # --net host to access openshift from the container
-    # maybe -v /var/run/docker.sock:/var/run/docker.sock is required as well
-    runner = ("docker run --rm --privileged --net host -v "
-              "/tmp/openshift:/tmp/openshift -v {datadir}:{datadir} "
-              "-v {confdir}:{confdir} "
-              "-e KUBECONFIG={confdir}/master/admin.kubeconfig "
-              "{image}").format(confdir=facts['common']['config_base'],
-                                datadir=facts['common']['data_dir'],
-                                image=facts['common']['cli_image'])
-
-    if facts['common']['is_containerized']:
-        facts['common']['client_binary'] = '%s cli' % runner
-        facts['common']['admin_binary'] = '%s admin' % runner
-
     return facts
 
 
@@ -1134,8 +1118,8 @@ class OpenShiftFacts(object):
         common = dict(use_openshift_sdn=True, ip=ip_addr, public_ip=ip_addr,
                       deployment_type='origin', hostname=hostname,
                       public_hostname=hostname, use_manageiq=False)
-        common['client_binary'] = 'oc' if os.path.isfile('/usr/bin/oc') else 'osc'
-        common['admin_binary'] = 'oadm' if os.path.isfile('/usr/bin/oadm') else 'osadm'
+        common['client_binary'] = 'oc'
+        common['admin_binary'] = 'oadm'
         common['dns_domain'] = 'cluster.local'
         common['install_examples'] = True
         defaults['common'] = common
