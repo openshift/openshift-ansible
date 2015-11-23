@@ -131,6 +131,14 @@ def steps_equal(zab_steps, user_steps):
 
     return True
 
+def process_steps(steps):
+    '''Preprocess the step parameters'''
+    for idx, step in enumerate(steps):
+        if not step.has_key('no'):
+            step['no'] = idx + 1
+
+    return steps
+
 # The branches are needed for CRUD and error handling
 # pylint: disable=too-many-branches
 def main():
@@ -218,7 +226,7 @@ def main():
                   'hostid': hostid,
                   'agent': module.params['agent'],
                   'retries': module.params['retries'],
-                  'steps': module.params['steps'],
+                  'steps': process_steps(module.params['steps']),
                   'applicationid': get_app_id(zapi, module.params['application']),
                   'delay': module.params['interval'],
                   'verify_host': get_verify_host(module.params['verify_host']),
