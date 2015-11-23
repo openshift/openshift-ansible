@@ -79,7 +79,7 @@ def determine_proxy_configuration(hosts):
         if proxy.hostname == None:
             proxy.hostname = proxy.connect_to
             proxy.public_hostname = proxy.connect_to
-        print('asd09o')
+        print 'asd09o'
         return proxy
 
     return None
