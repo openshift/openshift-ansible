@@ -79,6 +79,7 @@ def collect_hosts(version=None, masters_set=False):
 
         Returns: a list of host information collected from the user
     """
+    min_masters_for_ha = 3
     click.clear()
     click.echo('***Host Configuration***')
     message = """
@@ -114,10 +115,7 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
                 host_props['master'] = True
                 num_masters += 1
 
-                if num_masters > 1:
-                    hosts.append(collect_master_lb())
-
-                if num_masters >= 3 or version == '3.0':
+                if num_masters >= min_masters_for_ha or version == '3.0':
                     masters_set = True
         host_props['node'] = True
 
@@ -135,8 +133,18 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
 
         hosts.append(host)
 
-        if num_masters <= 1 or num_masters >= 3:
+        click.echo('')
+        click.echo('Current Masters: {}'.format(num_masters))
+        click.echo('Current Nodes: {}'.format(len(hosts)))
+        click.echo('Additional Masters required for HA: {}'.format(max(min_masters_for_ha - num_masters, 0)))
+        click.echo('')
+
+        if num_masters <= 1 or num_masters >= min_masters_for_ha:
             more_hosts = click.confirm('Do you want to add additional hosts?')
+
+    if num_masters > 1:
+        hosts.append(collect_master_lb())
+
     return hosts
 
 def collect_master_lb():
@@ -149,14 +157,19 @@ Please provide a host that will be configured as a proxy. This can either be
 an existing load balancer configured to balance all masters on port 8443 or a
 new host that will have HAProxy installed on it.
 
-This will also require you to set a third master.
+If the host provided does is not yet configured a reference haproxy load
+balancer will be installed.  It's important to note that while the rest of the
+environment will be fault tolerant this reference load balancer will not be.
+It can be replaced post-installation with a load balancer with the same
+hostname.
 """
     click.echo(message)
     host_props = {}
     host_props['connect_to'] = click.prompt('Enter hostname or IP address:',
                                             default='',
                                             value_proc=validate_prompt_hostname)
-    host_props['run_on'] = click.confirm('Is this a clean host you want to install HAProxy on?')
+    install_haproxy = click.confirm('Should the reference haproxy load balancer be installed on this host?')
+    host_props['preconfigured'] = not install_haproxy
     host_props['master'] = False
     host_props['node'] = False
     host_props['master_lb'] = True
@@ -201,6 +214,8 @@ Notes:
     default_facts_lines = []
     default_facts = {}
     for h in hosts:
+        if h.preconfigured == True:
+            continue
         default_facts[h.connect_to] = {}
         h.ip = callback_facts[h.connect_to]["common"]["ip"]
         h.public_ip = callback_facts[h.connect_to]["common"]["public_ip"]
@@ -238,13 +253,12 @@ def check_hosts_config(oo_cfg):
     masters = [host for host in oo_cfg.hosts if host.master]
     if len(masters) > 1:
         master_lb = [host for host in oo_cfg.hosts if host.master_lb]
-        click.echo(master_lb)
         if len(master_lb) > 1:
-            click.echo('More than one HAProxy specified. Only one proxy is allowed.')
+            click.echo('More than one Master load balancer specified. Only one is allowed.')
             sys.exit(0)
         elif len(master_lb) == 1:
             if master_lb[0].master or master_lb[0].node:
-                click.echo('HAProxy is configured as a master or node. Please correct this.')
+                click.echo('The Master load balancer is configured as a master or node. Please correct this.')
                 sys.exit(0)
         else:
             message = """
