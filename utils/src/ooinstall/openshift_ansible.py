@@ -19,7 +19,7 @@ def generate_inventory(hosts):
     global CFG
     masters = [host for host in hosts if host.master]
     nodes = [host for host in hosts if host.node]
-    proxy = next((host for host in hosts if host.master_lb), None)
+    proxy = determine_proxy_configuration(hosts)
     multiple_masters = len(masters) > 1
 
     base_inventory_path = CFG.settings['ansible_inventory_path']
@@ -66,12 +66,23 @@ def generate_inventory(hosts):
             scheduleable = False
         write_host(node, base_inventory, scheduleable)
 
-    if getattr(proxy, 'run_on', False):
+    if not getattr(proxy, 'preconfigured', True):
         base_inventory.write('\n[lb]\n')
         write_host(proxy, base_inventory)
 
     base_inventory.close()
     return base_inventory_path
+
+def determine_proxy_configuration(hosts):
+    proxy = next((host for host in hosts if host.master_lb), None)
+    if proxy:
+        if proxy.hostname == None:
+            proxy.hostname = proxy.connect_to
+            proxy.public_hostname = proxy.connect_to
+        print('asd09o')
+        return proxy
+
+    return None
 
 def write_inventory_children(base_inventory, multiple_masters, proxy):
     global CFG
@@ -81,7 +92,7 @@ def write_inventory_children(base_inventory, multiple_masters, proxy):
     base_inventory.write('nodes\n')
     if multiple_masters:
         base_inventory.write('etcd\n')
-    if getattr(proxy, 'run_on', False):
+    if not getattr(proxy, 'preconfigured', True):
         base_inventory.write('lb\n')
 
 def write_inventory_vars(base_inventory, multiple_masters, proxy):
