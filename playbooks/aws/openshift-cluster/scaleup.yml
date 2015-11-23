@@ -6,10 +6,16 @@
   become: no
   vars_files:
   - vars.yml
+  - cluster_hosts.yml
   tasks:
   - set_fact:
       g_ssh_user_tmp: "{{ deployment_vars[deployment_type].ssh_user }}"
       g_sudo_tmp: "{{ deployment_vars[deployment_type].sudo }}"
+      g_etcd_hosts: "{{ etcd_hosts }}"
+      g_master_hosts: "{{ master_hosts }}"
+      g_node_hosts: "{{ node_hosts }}"
+      g_lb_hosts: "{{ lb_hosts }}"
+
   - name: Evaluate oo_hosts_to_update
     add_host:
       name: "{{ item }}"
@@ -22,9 +28,14 @@
 
 - include: ../../common/openshift-cluster/scaleup.yml
   vars:
-    g_etcd_hosts:   "{{ (groups['tag_host-type_etcd']|default([]))   | intersect((groups['tag_env_' ~ cluster_id]|default([]))) }}"
-    g_lb_hosts:     "{{ (groups['tag_host-type_lb']|default([]))     | intersect((groups['tag_env_' ~ cluster_id]|default([]))) }}"
-    g_master_hosts: "{{ (groups['tag_host-type_master']|default([])) | intersect((groups['tag_env_' ~ cluster_id]|default([]))) }}"
+    g_etcd_hosts:   "{{ hostvars.localhost.g_etcd_hosts }}"
+    g_master_hosts: "{{ hostvars.localhost.g_master_hosts }}"
+    g_node_hosts:   "{{ hostvars.localhost.g_node_hosts }}"
+    g_lb_hosts:     "{{ hostvars.localhost.g_lb_hosts }}"
+    g_etcd_hosts: "{{ etcd_hosts }}"
+    g_lb_hosts: "{{ lb_hosts }}"
+    g_master_hosts: "{{ master_hosts }}"
+    g_node_hosts: "{{ node_hosts }}"
     g_new_node_hosts: "{{ groups.nodes_to_add }}"
     g_ssh_user: "{{ hostvars.localhost.g_ssh_user_tmp }}"
     g_sudo: "{{ hostvars.localhost.g_sudo_tmp }}"

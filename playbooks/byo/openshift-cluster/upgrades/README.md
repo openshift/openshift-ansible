@@ -1,6 +1,6 @@
 # Upgrade playbooks
 The playbooks provided in this directory can be used for upgrading an existing
-environment. Additional notes for the associated upgrade playbooks are
+cluster. Additional notes for the associated upgrade playbooks are
 provided in their respective directories.
 
 # Upgrades available

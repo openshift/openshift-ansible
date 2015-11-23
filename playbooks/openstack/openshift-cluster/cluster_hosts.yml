@@ -1,0 +1,20 @@
+---
+etcd_hosts:   "{{ (groups['tag_host-type_etcd']|default([])
+                   | intersect((groups['tag_clusterid_' ~ cluster_id]|default([])))
+                   | intersect((groups['tag_environment_' ~ cluster_env]|default([]))) }}"
+
+lb_hosts:     "{{ (groups['tag_host-type_lb']|default([]))
+                   | intersect((groups['tag_clusterid_' ~ cluster_id]|default([])))
+                   | intersect((groups['tag_environment_' ~ cluster_env]|default([]))) }}"
+
+master_hosts: "{{ (groups['tag_host-type_master']|default([]))
+                   | intersect((groups['tag_clusterid_' ~ cluster_id]|default([])))
+                   | intersect((groups['tag_environment_' ~ cluster_env]|default([]))) }}"
+
+node_hosts:   "{{ (groups['tag_host-type_node']|default([]))
+                   | intersect((groups['tag_clusterid_' ~ cluster_id]|default([])))
+                   | intersect((groups['tag_environment_' ~ cluster_env]|default([]))) }}"
+
+nfs_hosts:  "{{ (groups['tag_host-type_nfs']|default([]))
+                   | intersect((groups['tag_env_' ~ cluster_id]|default([]))) }}"
+

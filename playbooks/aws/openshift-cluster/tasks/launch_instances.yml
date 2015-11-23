@@ -2,7 +2,8 @@
 - set_fact:
     created_by: "{{ lookup('env', 'LOGNAME')|default(cluster, true) }}"
     docker_vol_ephemeral: "{{ lookup('env', 'os_docker_vol_ephemeral') | default(false, true) }}"
-    env: "{{ cluster }}"
+    cluster: "{{ cluster_id }}"
+    env: "{{ cluster_env }}"
     host_type: "{{ type }}"
     sub_host_type: "{{ g_sub_host_type }}"
 
@@ -123,7 +124,8 @@
     wait: yes
     instance_tags:
       created-by: "{{ created_by }}"
-      env: "{{ env }}"
+      clusterid: "{{ cluster }}"
+      environment: "{{ cluster_env }}"
       host-type: "{{ host_type }}"
       sub-host-type: "{{ sub_host_type }}"
     volumes: "{{ volumes }}"
@@ -139,7 +141,8 @@
       Name: "{{ item.0 }}"
 
 - set_fact:
-    instance_groups: "tag_created-by_{{ created_by }}, tag_env_{{ env }}, tag_host-type_{{ host_type }}, tag_sub-host-type_{{ sub_host_type }}"
+    instance_groups: "tag_created-by_{{ created_by }}, tag_clusterid_{{ cluster }}, tag_environment_{{ cluster_env }},
+                    tag_host-type_{{ host_type }}, tag_sub-host-type_{{ sub_host_type }}"
 
 - set_fact:
     node_label:

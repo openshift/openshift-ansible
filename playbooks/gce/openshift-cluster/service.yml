@@ -6,6 +6,7 @@
   gather_facts: no
   vars_files:
   - vars.yml
+  - cluster_hosts.yml
   tasks:
   - fail: msg="cluster_id is required to be injected in this playbook"
     when: cluster_id is not defined
@@ -15,14 +16,14 @@
       groups: g_service_nodes
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user | default(ansible_ssh_user, true) }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-    with_items: "{{ g_node_hosts | default([]) | difference(['localhost']) | difference(groups.status_terminated) }}"
+    with_items: "{{ node_hosts | default([]) | difference(['localhost']) | difference(groups.status_terminated) }}"
 
   - add_host:
       name: "{{ item }}"
       groups: g_service_masters
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user | default(ansible_ssh_user, true) }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-    with_items: "{{ g_master_hosts | default([]) | difference(['localhost']) | difference(groups.status_terminated) }}"
+    with_items: "{{ master_hosts | default([]) | difference(['localhost']) | difference(groups.status_terminated) }}"
 
 - include: ../../common/openshift-node/service.yml
 - include: ../../common/openshift-master/service.yml

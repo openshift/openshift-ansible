@@ -7,22 +7,23 @@
   vars_files:
   - ../../vars.yml
   - "../../vars.{{ deployment_type }}.{{ cluster_id }}.yml"
+  - ../../cluster_hosts.yml
 
   tasks:
   - set_fact:
       g_ssh_user_tmp: "{{ deployment_vars[deployment_type].ssh_user }}"
       g_sudo_tmp: "{{ deployment_vars[deployment_type].sudo }}"
-
-  - set_fact:
-      tmp_nodes_group: "{{ 'tag_env-host-type_' ~ cluster_id ~ '-openshift-node' }}"
-    when: deployment_type != 'online'
+      g_etcd_hosts: "{{ etcd_hosts }}"
+      g_master_hosts: "{{ master_hosts }}"
+      g_node_hosts: "{{ node_hosts }}"
+      g_lb_hosts: "{{ lb_hosts }}"
 
 - include: ../../../../common/openshift-cluster/upgrades/v3_0_to_v3_1/upgrade.yml
   vars:
-    g_etcd_hosts:   "{{ (groups['tag_host-type_etcd']|default([]))   | intersect((groups['tag_env_' ~ cluster_id]|default([]))) }}"
-    g_lb_hosts:     "{{ (groups['tag_host-type_lb']|default([]))     | intersect((groups['tag_env_' ~ cluster_id]|default([]))) }}"
-    g_master_hosts: "{{ (groups['tag_host-type_master']|default([])) | intersect((groups['tag_env_' ~ cluster_id]|default([]))) }}"
-    g_node_hosts:   "{{ (groups['tag_host-type_node']|default([]))   | intersect((groups['tag_env_' ~ cluster_id]|default([]))) }}"
+    g_etcd_hosts:   "{{ hostvars.localhost.g_etcd_hosts }}"
+    g_master_hosts: "{{ hostvars.localhost.g_master_hosts }}"
+    g_node_hosts:   "{{ hostvars.localhost.g_node_hosts }}"
+    g_lb_hosts:     "{{ hostvars.localhost.g_lb_hosts }}"
     g_ssh_user: "{{ hostvars.localhost.g_ssh_user_tmp }}"
     g_sudo: "{{ hostvars.localhost.g_sudo_tmp }}"
     g_nodeonmaster: true
