@@ -81,11 +81,11 @@ parameters:
 -
   description: 'Specify prefix for metrics components; e.g. for "openshift/origin-metrics-deployer:v1.1", set prefix "openshift/origin-"'
   name: IMAGE_PREFIX
-  value: "hawkular/"
+  value: "registry.access.redhat.com/openshift3/"
 -
   description: 'Specify version for metrics components; e.g. for "openshift/origin-metrics-deployer:v1.1", set version "v1.1"'
   name: IMAGE_VERSION
-  value: "0.7.0-SNAPSHOT"
+  value: "3.1.0"
 -
   description: "Internal URL for the master, for authentication retrieval"
   name: MASTER_URL
