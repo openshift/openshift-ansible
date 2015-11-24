@@ -72,7 +72,7 @@ def delete_hosts(hosts):
                 click.echo("\"{}\" doesn't coorespond to any valid input.".format(del_idx))
     return hosts, None
 
-def collect_hosts(version=None, masters_set=False):
+def collect_hosts(version=None, masters_set=False, print_summary=True):
     """
         Collect host information from user. This will later be filled in using
         ansible.
@@ -133,11 +133,12 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
 
         hosts.append(host)
 
-        click.echo('')
-        click.echo('Current Masters: {}'.format(num_masters))
-        click.echo('Current Nodes: {}'.format(len(hosts)))
-        click.echo('Additional Masters required for HA: {}'.format(max(min_masters_for_ha - num_masters, 0)))
-        click.echo('')
+        if print_summary:
+            click.echo('')
+            click.echo('Current Masters: {}'.format(num_masters))
+            click.echo('Current Nodes: {}'.format(len(hosts)))
+            click.echo('Additional Masters required for HA: {}'.format(max(min_masters_for_ha - num_masters, 0)))
+            click.echo('')
 
         if num_masters <= 1 or num_masters >= min_masters_for_ha:
             more_hosts = click.confirm('Do you want to add additional hosts?')
@@ -395,7 +396,7 @@ def collect_new_nodes():
 Add new nodes here
     """
     click.echo(message)
-    return collect_hosts(masters_set=True)
+    return collect_hosts(masters_set=True, print_summary=False)
 
 def get_installed_hosts(hosts, callback_facts):
     installed_hosts = []
