@@ -518,8 +518,7 @@
     - "'false' in _scc.stdout"
     command: >
       {{ oc_cmd }} patch scc/privileged -p
-      '{"allowHostPorts":true,"allowHostNetwork":true}' --loglevel=9
-      --api-version=v1
+      '{"allowHostPorts":true,"allowHostNetwork":true}' --api-version=v1
 
   - name: Update deployment config to 1.0.4/3.0.1 spec
     when: _default_router.rc == 0
