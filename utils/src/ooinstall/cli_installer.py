@@ -90,7 +90,7 @@ change this later using etcd from Red Hat Enterprise Linux 7.
 
 Any Masters configured as part of this installation process will also be
 configured as Nodes.  This is so that the Master will be able to proxy to Pods
-from the API.  By default this Node will be unscheduleable but this can be changed
+from the API.  By default this Node will be unschedulable but this can be changed
 after installation with 'oadm manage-node'.
 
 The OpenShift Node provides the runtime environments for containers.  It will
@@ -274,8 +274,8 @@ https://docs.openshift.org/latest/install_config/install/advanced_install.html#m
     if len(masters) == len(nodes):
         message = """
 No dedicated Nodes specified. By default, colocated Masters have their Nodes
-set to unscheduleable.  Continuing at this point will label all nodes as
-scheduleable.
+set to unschedulable.  Continuing at this point will label all nodes as
+schedulable.
 """
         confirm_continue(message)
 
