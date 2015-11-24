@@ -633,9 +633,9 @@ class AttendedCliTests(OOCliFixture):
         if variant_num:
             inputs.append(str(variant_num))  # Choose variant + version
 
+        num_masters = 0
         if hosts:
             i = 0
-            num_masters = 0
             min_masters_for_ha = 3
             for (host, is_master) in hosts:
                 inputs.append(host)
@@ -671,6 +671,13 @@ class AttendedCliTests(OOCliFixture):
                     inputs.append('n')  # Done adding hosts
                 i += 1
 
+        if add_nodes is None:
+            total_hosts = hosts
+        else:
+            total_hosts = hosts + add_nodes
+        if total_hosts is not None and num_masters == len(total_hosts):
+            inputs.append('y')
+
         inputs.extend([
             confirm_facts,
             'y',  # lets do this
@@ -701,6 +708,15 @@ class AttendedCliTests(OOCliFixture):
 
         written_config = self._read_yaml(self.config_file)
         self._verify_config_hosts(written_config, 3)
+
+        inventory = ConfigParser.ConfigParser(allow_no_value=True)
+        inventory.read(os.path.join(self.work_dir, '.ansible/hosts'))
+        self.assertEquals('False',
+            inventory.get('nodes', '10.0.0.1  openshift_scheduleable'))
+        self.assertEquals(None,
+            inventory.get('nodes', '10.0.0.2'))
+        self.assertEquals(None,
+            inventory.get('nodes', '10.0.0.3'))
 
     # interactive with config file and some installed some uninstalled hosts
     @patch('ooinstall.openshift_ansible.run_main_playbook')
@@ -784,10 +800,10 @@ class AttendedCliTests(OOCliFixture):
                                          exp_hosts_to_run_on_len=2,
                                          force=False)
 
-    #interactive multimaster
+    #interactive multimaster: one more node than master
     @patch('ooinstall.openshift_ansible.run_main_playbook')
     @patch('ooinstall.openshift_ansible.load_system_facts')
-    def test_quick_ha(self, load_facts_mock, run_playbook_mock):
+    def test_quick_ha1(self, load_facts_mock, run_playbook_mock):
         load_facts_mock.return_value = (MOCK_FACTS_QUICKHA, 0)
         run_playbook_mock.return_value = 0
 
@@ -811,7 +827,86 @@ class AttendedCliTests(OOCliFixture):
         written_config = self._read_yaml(self.config_file)
         self._verify_config_hosts(written_config, 5)
 
+        inventory = ConfigParser.ConfigParser(allow_no_value=True)
+        inventory.read(os.path.join(self.work_dir, '.ansible/hosts'))
+        self.assertEquals('False',
+            inventory.get('nodes', '10.0.0.1  openshift_scheduleable'))
+        self.assertEquals('False',
+            inventory.get('nodes', '10.0.0.2  openshift_scheduleable'))
+        self.assertEquals(None,
+            inventory.get('nodes', '10.0.0.3'))
+        self.assertEquals('False',
+            inventory.get('nodes', '10.0.0.4  openshift_scheduleable'))
+
         return
+
+    #interactive multimaster: equal number masters and nodes
+    @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.load_system_facts')
+    def test_quick_ha2(self, load_facts_mock, run_playbook_mock):
+        load_facts_mock.return_value = (MOCK_FACTS_QUICKHA, 0)
+        run_playbook_mock.return_value = 0
+
+        cli_input = self._build_input(hosts=[
+            ('10.0.0.1', True),
+            ('10.0.0.2', True),
+            ('10.0.0.3', True)],
+                                      ssh_user='root',
+                                      variant_num=1,
+                                      confirm_facts='y',
+                                      master_lb=('10.0.0.5', False))
+        self.cli_args.append("install")
+        result = self.runner.invoke(cli.cli, self.cli_args,
+            input=cli_input)
+        self.assert_result(result, 0)
+
+        self._verify_load_facts(load_facts_mock)
+        self._verify_run_playbook(run_playbook_mock, 4, 4)
+
+        written_config = self._read_yaml(self.config_file)
+        self._verify_config_hosts(written_config, 4)
+
+        inventory = ConfigParser.ConfigParser(allow_no_value=True)
+        inventory.read(os.path.join(self.work_dir, '.ansible/hosts'))
+        self.assertEquals(None,
+            inventory.get('nodes', '10.0.0.1'))
+        self.assertEquals(None,
+            inventory.get('nodes', '10.0.0.2'))
+        self.assertEquals(None,
+            inventory.get('nodes', '10.0.0.3'))
+
+        return
+
+    #interactive all-in-one
+    @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.load_system_facts')
+    def test_all_in_one(self, load_facts_mock, run_playbook_mock):
+        load_facts_mock.return_value = (MOCK_FACTS, 0)
+        run_playbook_mock.return_value = 0
+
+        cli_input = self._build_input(hosts=[
+            ('10.0.0.1', True)],
+                                      ssh_user='root',
+                                      variant_num=1,
+                                      confirm_facts='y')
+        self.cli_args.append("install")
+        result = self.runner.invoke(cli.cli, self.cli_args,
+            input=cli_input)
+        self.assert_result(result, 0)
+
+        self._verify_load_facts(load_facts_mock)
+        self._verify_run_playbook(run_playbook_mock, 1, 1)
+
+        written_config = self._read_yaml(self.config_file)
+        self._verify_config_hosts(written_config, 1)
+
+        inventory = ConfigParser.ConfigParser(allow_no_value=True)
+        inventory.read(os.path.join(self.work_dir, '.ansible/hosts'))
+        self.assertEquals(None,
+            inventory.get('nodes', '10.0.0.1'))
+
+        return
+
 # TODO: test with config file, attended add node
 # TODO: test with config file, attended new node already in config file
 # TODO: test with config file, attended new node already in config file, plus manually added nodes
