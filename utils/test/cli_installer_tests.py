@@ -212,11 +212,12 @@ class OOCliFixture(OOInstallFixture):
         print written_config['hosts']
         self.assertEquals(host_count, len(written_config['hosts']))
         for h in written_config['hosts']:
-            self.assertTrue(h['node'])
-            self.assertTrue('ip' in h)
             self.assertTrue('hostname' in h)
-            self.assertTrue('public_ip' in h)
             self.assertTrue('public_hostname' in h)
+            if 'preconfigured' not in h:
+                self.assertTrue(h['node'])
+                self.assertTrue('ip' in h)
+                self.assertTrue('public_ip' in h)
 
     #pylint: disable=too-many-arguments
     def _verify_get_hosts_to_run_on(self, mock_facts, load_facts_mock,
@@ -615,7 +616,8 @@ class AttendedCliTests(OOCliFixture):
 
     #pylint: disable=too-many-arguments
     def _build_input(self, ssh_user=None, hosts=None, variant_num=None,
-        add_nodes=None, confirm_facts=None):
+        add_nodes=None, confirm_facts=None, scheduleable_masters_ok=None,
+        master_lb=None):
         """
         Builds a CLI input string with newline characters to simulate
         the full run.
@@ -633,23 +635,35 @@ class AttendedCliTests(OOCliFixture):
 
         if hosts:
             i = 0
+            num_masters = 0
+            min_masters_for_ha = 3
             for (host, is_master) in hosts:
                 inputs.append(host)
-                inputs.append('y' if is_master else 'n')
+                if is_master:
+                    inputs.append('y')
+                    num_masters += 1
+                else:
+                    inputs.append('n')
                 #inputs.append('rpm')
                 if i < len(hosts) - 1:
-                    inputs.append('y')  # Add more hosts
+                    if num_masters <= 1 or num_masters >= min_masters_for_ha:
+                        inputs.append('y')  # Add more hosts
                 else:
                     inputs.append('n')  # Done adding hosts
                 i += 1
 
+        if master_lb:
+            inputs.append(master_lb[0])
+            inputs.append('y' if master_lb[1] else 'n')
+
         # TODO: support option 2, fresh install
         if add_nodes:
+            if scheduleable_masters_ok:
+                inputs.append('y')
             inputs.append('1')  # Add more nodes
             i = 0
             for (host, is_master) in add_nodes:
                 inputs.append(host)
-                inputs.append('y' if is_master else 'n')
                 #inputs.append('rpm')
                 if i < len(add_nodes) - 1:
                     inputs.append('y')  # Add more hosts
@@ -760,6 +774,7 @@ class AttendedCliTests(OOCliFixture):
                                       add_nodes=[('10.0.0.2', False)],
                                       ssh_user='root',
                                       variant_num=1,
+                                      scheduleable_masters_ok=True,
                                       confirm_facts='y')
 
         self._verify_get_hosts_to_run_on(mock_facts, load_facts_mock,
@@ -773,7 +788,7 @@ class AttendedCliTests(OOCliFixture):
     @patch('ooinstall.openshift_ansible.run_main_playbook')
     @patch('ooinstall.openshift_ansible.load_system_facts')
     def test_quick_ha(self, load_facts_mock, run_playbook_mock):
-        load_facts_mock.return_value = (MOCK_FACTS, 0)
+        load_facts_mock.return_value = (MOCK_FACTS_QUICKHA, 0)
         run_playbook_mock.return_value = 0
 
         cli_input = self._build_input(hosts=[
@@ -783,17 +798,18 @@ class AttendedCliTests(OOCliFixture):
             ('10.0.0.4', True)],
                                       ssh_user='root',
                                       variant_num=1,
-                                      confirm_facts='y')
+                                      confirm_facts='y',
+                                      master_lb=('10.0.0.5', False))
         self.cli_args.append("install")
         result = self.runner.invoke(cli.cli, self.cli_args,
             input=cli_input)
         self.assert_result(result, 0)
 
         self._verify_load_facts(load_facts_mock)
-        self._verify_run_playbook(run_playbook_mock, 3, 3)
+        self._verify_run_playbook(run_playbook_mock, 5, 5)
 
         written_config = self._read_yaml(self.config_file)
-        self._verify_config_hosts(written_config, 3)
+        self._verify_config_hosts(written_config, 5)
 
         return
 # TODO: test with config file, attended add node

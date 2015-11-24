@@ -272,8 +272,9 @@ https://docs.openshift.org/latest/install_config/install/advanced_install.html#m
     nodes = [host.node for host in oo_cfg.hosts]
     if len(masters) == len(nodes):
         message = """
-No dedicated Nodes specified. By default, colocated Masters have their Nodes set to unscheduleable.
-Would you like to label the colocated masters as scheduleable?
+No dedicated Nodes specified. By default, colocated Masters have their Nodes
+set to unscheduleable.  Continuing at this point will lable all nodes as
+scheduleable.
 """
         confirm_continue(message)
 
