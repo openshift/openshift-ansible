@@ -614,7 +614,7 @@ class AttendedCliTests(OOCliFixture):
         self.config_file = os.path.join(self.work_dir, 'config.yml')
         self.cli_args.extend(["-c", self.config_file])
 
-    #pylint: disable=too-many-arguments
+    #pylint: disable=too-many-arguments,too-many-branches
     def _build_input(self, ssh_user=None, hosts=None, variant_num=None,
         add_nodes=None, confirm_facts=None, scheduleable_masters_ok=None,
         master_lb=None):
