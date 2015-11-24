@@ -107,7 +107,24 @@ networkConfig:
 {% endif %}
 # serviceNetworkCIDR must match kubernetesMasterConfig.servicesSubnet
   serviceNetworkCIDR: {{ openshift.master.portal_net }}
-{% include 'v1_partials/oauthConfig.j2' %}
+oauthConfig:
+  assetPublicURL: {{ openshift.master.public_console_url }}/
+  grantConfig:
+    method: {{ openshift.master.oauth_grant_method }}
+  identityProviders:
+{% for line in translated_identity_providers.splitlines() %}
+  {{ line }}
+{% endfor %}
+  masterCA: ca.crt
+  masterPublicURL: {{ openshift.master.public_api_url }}
+  masterURL: {{ openshift.master.api_url }}
+  sessionConfig:
+    sessionMaxAgeSeconds: {{ openshift.master.session_max_seconds }}
+    sessionName: {{ openshift.master.session_name }}
+    sessionSecretsFile: {{ openshift.master.session_secrets_file }}
+  tokenConfig:
+    accessTokenMaxAgeSeconds: {{ openshift.master.access_token_max_seconds }}
+    authorizeTokenMaxAgeSeconds: {{ openshift.master.auth_token_max_seconds }}
 pauseControllers: false
 policyConfig:
   bootstrapPolicyFile: {{ openshift_master_policy }}

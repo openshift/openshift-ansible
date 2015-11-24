@@ -487,7 +487,7 @@ def uninstall(ctx):
     verbose = ctx.obj['verbose']
 
     if len(oo_cfg.hosts) == 0:
-        click.echo("No hosts defined in: %s" % oo_cfg['configuration'])
+        click.echo("No hosts defined in: %s" % oo_cfg.config_path)
         sys.exit(1)
 
     click.echo("OpenShift will be uninstalled from the following hosts:\n")
