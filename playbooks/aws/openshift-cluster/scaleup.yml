@@ -14,7 +14,7 @@
       groups: oo_hosts_to_update
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-    with_items: groups.nodes_to_add
+    with_items: "{{ groups.nodes_to_add }}"
 
 - include: ../../common/openshift-cluster/update_repos_and_packages.yml
 
