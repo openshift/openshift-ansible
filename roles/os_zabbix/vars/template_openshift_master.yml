@@ -244,3 +244,37 @@ g_template_openshift_master:
     expression: '{Template Openshift Master:openshift.master.etcd.ping.last(#1)}=0 and {Template Openshift Master:openshift.master.etcd.ping.last(#2)}=0'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_etcd.asciidoc'
     priority: high
+
+  zgraphs:
+  - name: Openshift Master API Server Latency Pods LIST Quantiles
+    width: 900
+    height: 200
+    graph_items:
+    - item_name: openshift.master.apiserver.latency.summary.pods.quantile.list.5
+      color: red
+    - item_name: openshift.master.apiserver.latency.summary.pods.quantile.list.9
+      color: blue
+    - item_name: openshift.master.apiserver.latency.summary.pods.quantile.list.99
+      color: orange
+
+  - name: Openshift Master API Server Latency Pods WATCHLIST Quantiles
+    width: 900
+    height: 200
+    graph_items:
+    - item_name: openshift.master.apiserver.latency.summary.pods.quantile.watchlist.5
+      color: red
+    - item_name: openshift.master.apiserver.latency.summary.pods.quantile.watchlist.9
+      color: blue
+    - item_name: openshift.master.apiserver.latency.summary.pods.quantile.watchlist.99
+      color: orange
+
+  - name: Openshift Master Scheduler End to End Latency Quantiles
+    width: 900
+    height: 200
+    graph_items:
+    - item_name: openshift.master.scheduler.e2e.scheduling.latency.quantile.5
+      color: red
+    - item_name: openshift.master.scheduler.e2e.scheduling.latency.quantile.9
+      color: blue
+    - item_name: openshift.master.scheduler.e2e.scheduling.latency.quantile.99
+      color: orange

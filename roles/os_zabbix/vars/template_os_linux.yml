@@ -304,3 +304,15 @@ g_template_os_linux:
     description: 'CPU is less than 10% idle'
     dependencies:
     - 'CPU idle less than 5% on {HOST.NAME}'
+
+  zgraphprototypes:
+  - name: Network Interface Usage
+    width: 1000
+    height: 400
+    graph_items:
+    - item_name: "Bytes per second IN on network interface {#OSO_NET_INTERFACE}"
+      item_type: prototype
+      color: red
+    - item_name: "Bytes per second OUT on network interface {#OSO_NET_INTERFACE}"
+      item_type: prototype
+      color: blue
