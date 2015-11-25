@@ -623,7 +623,7 @@ def set_deployment_facts_if_unset(facts):
             service_type = 'atomic-openshift'
             if deployment_type == 'origin':
                 service_type = 'origin'
-            elif deployment_type in ['enterprise', 'online']:
+            elif deployment_type in ['enterprise']:
                 service_type = 'openshift'
             facts['common']['service_type'] = service_type
         if 'config_base' not in facts['common']:

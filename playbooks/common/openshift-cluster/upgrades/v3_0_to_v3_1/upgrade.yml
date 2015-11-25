@@ -36,9 +36,9 @@
 
   - fail:
       msg: >
-        This upgrade is only supported for origin and openshift-enterprise
+        This upgrade is only supported for origin, openshift-enterprise, and online
         deployment types
-    when: deployment_type not in ['origin','openshift-enterprise']
+    when: deployment_type not in ['origin','openshift-enterprise', 'online']
 
   - fail:
       msg: >
