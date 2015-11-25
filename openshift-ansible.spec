@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.15
+Version:        3.0.16
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -258,6 +258,40 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Nov 24 2015 Brenton Leanhardt <bleanhar@redhat.com> 3.0.16-1
+- Silencing pylint branch errors for now for the atomic-openshift-installer
+  harness (bleanhar@redhat.com)
+- Properly setting scheduleability for HA Master scenarios
+  (bleanhar@redhat.com)
+- added graphs (mwoodson@redhat.com)
+- Rework setting of hostname (jdetiber@redhat.com)
+- Fixed a bug in the actions.  It now supports changing opconditions
+  (kwoodson@redhat.com)
+- Conditionally set the nodeIP (jdetiber@redhat.com)
+- Bug 1284991 - "atomic-openshift-installer uninstall" error when configuration
+  file is missing. (bleanhar@redhat.com)
+- Avoid printing the master and node totals in the add-a-node scenario
+  (bleanhar@redhat.com)
+- Fixing tests for quick_ha (bleanhar@redhat.com)
+- Removing a debug line (bleanhar@redhat.com)
+- atomic-openshift-installer: Fix lint issue (smunilla@redhat.com)
+- Handling preconfigured load balancers (bleanhar@redhat.com)
+- atomic-openshift-installer: Rename ha_proxy (smunilla@redhat.com)
+- atomic-openshift-installer: Reverse version and host collection
+  (smunilla@redhat.com)
+- cli_installer_tests: Add test for unattended quick HA (smunilla@redhat.com)
+- Breakup inventory writing (smunilla@redhat.com)
+- Enforce 1 or 3 masters (smunilla@redhat.com)
+- Add interactive test (smunilla@redhat.com)
+- atomic-openshift-installer: HA for quick installer (smunilla@redhat.com)
+- Adding zbx_graph support (kwoodson@redhat.com)
+- Modified step params to be in order when passed as a list
+  (kwoodson@redhat.com)
+- Add serviceAccountConfig.masterCA during 3.1 upgrade (jdetiber@redhat.com)
+- Use the identity_providers from openshift_facts instead of always using the
+  inventory variable (jdetiber@redhat.com)
+- Refactor master identity provider configuration (jdetiber@redhat.com)
+
 * Fri Nov 20 2015 Kenny Woodson <kwoodson@redhat.com> 3.0.15-1
 - Fixing clone group functionality.  Also separating extra_vars from
   extra_groups (kwoodson@redhat.com)

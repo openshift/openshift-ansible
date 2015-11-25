@@ -34,6 +34,7 @@
       schedulable: "{{ openshift_schedulable | default(openshift_scheduleable) | default(None) }}"
       sdn_mtu: "{{ openshift_node_sdn_mtu | default(None) }}"
       storage_plugin_deps: "{{ osn_storage_plugin_deps | default(None) }}"
+      set_node_ip: "{{ openshift_set_node_ip | default(None) }}"
 
 # We have to add tuned-profiles in the same transaction otherwise we run into depsolving
 # problems because the rpms don't pin the version properly.

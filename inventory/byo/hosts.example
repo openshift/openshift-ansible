@@ -144,6 +144,16 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # configure how often node iptables rules are refreshed
 #openshift_node_iptables_sync_period=5s
 
+# Configure nodeIP in the node config
+# This is needed in cases where node traffic is desired to go over an
+# interface other than the default network interface.
+#openshift_node_set_node_ip=True
+
+# Force setting of system hostname when configuring OpenShift
+# This works around issues related to installations that do not have valid dns
+# entries for the interfaces attached to the host.
+#openshift_set_hostname=True
+
 # host group for masters
 [masters]
 ose3-master[1:3]-ansible.test.example.com

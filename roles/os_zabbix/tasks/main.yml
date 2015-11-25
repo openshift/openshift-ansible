@@ -8,15 +8,35 @@
   register: templates
 
 - include_vars: template_heartbeat.yml
+  tags:
+  - heartbeat
 - include_vars: template_os_linux.yml
+  tags:
+  - linux
 - include_vars: template_docker.yml
+  tags:
+  - docker
 - include_vars: template_openshift_master.yml
+  tags:
+  - openshift_master
 - include_vars: template_openshift_node.yml
+  tags:
+  - openshift_node
 - include_vars: template_ops_tools.yml
+  tags:
+  - ops_tools
 - include_vars: template_app_zabbix_server.yml
+  tags:
+  - zabbix_server
 - include_vars: template_app_zabbix_agent.yml
+  tags:
+  - zabbix_agent
 - include_vars: template_performance_copilot.yml
+  tags:
+  - pcp
 - include_vars: template_aws.yml
+  tags:
+  - aws
 
 - name: Include Template Heartbeat
   include: ../../lib_zabbix/tasks/create_template.yml
@@ -25,6 +45,8 @@
     server: "{{ ozb_server }}"
     user: "{{ ozb_user }}"
     password: "{{ ozb_password }}"
+  tags:
+  - heartbeat
 
 - name: Include Template os_linux
   include: ../../lib_zabbix/tasks/create_template.yml
@@ -33,6 +55,8 @@
     server: "{{ ozb_server }}"
     user: "{{ ozb_user }}"
     password: "{{ ozb_password }}"
+  tags:
+  - linux
 
 - name: Include Template docker
   include: ../../lib_zabbix/tasks/create_template.yml
@@ -41,6 +65,8 @@
     server: "{{ ozb_server }}"
     user: "{{ ozb_user }}"
     password: "{{ ozb_password }}"
+  tags:
+  - docker
 
 - name: Include Template Openshift Master
   include: ../../lib_zabbix/tasks/create_template.yml
@@ -49,6 +75,8 @@
     server: "{{ ozb_server }}"
     user: "{{ ozb_user }}"
     password: "{{ ozb_password }}"
+  tags:
+  - openshift_master
 
 - name: Include Template Openshift Node
   include: ../../lib_zabbix/tasks/create_template.yml
@@ -57,6 +85,8 @@
     server: "{{ ozb_server }}"
     user: "{{ ozb_user }}"
     password: "{{ ozb_password }}"
+  tags:
+  - openshift_node
 
 - name: Include Template Ops Tools
   include: ../../lib_zabbix/tasks/create_template.yml
@@ -65,6 +95,8 @@
     server: "{{ ozb_server }}"
     user: "{{ ozb_user }}"
     password: "{{ ozb_password }}"
+  tags:
+  - ops_tools
 
 - name: Include Template App Zabbix Server
   include: ../../lib_zabbix/tasks/create_template.yml
@@ -73,6 +105,8 @@
     server: "{{ ozb_server }}"
     user: "{{ ozb_user }}"
     password: "{{ ozb_password }}"
+  tags:
+  - zabbix_server
 
 - name: Include Template App Zabbix Agent
   include: ../../lib_zabbix/tasks/create_template.yml
@@ -81,6 +115,8 @@
     server: "{{ ozb_server }}"
     user: "{{ ozb_user }}"
     password: "{{ ozb_password }}"
+  tags:
+  - zabbix_agent
 
 - name: Include Template Performance Copilot
   include: ../../lib_zabbix/tasks/create_template.yml
@@ -89,6 +125,8 @@
     server: "{{ ozb_server }}"
     user: "{{ ozb_user }}"
     password: "{{ ozb_password }}"
+  tags:
+  - pcp
 
 - name: Include Template AWS
   include: ../../lib_zabbix/tasks/create_template.yml
@@ -97,3 +135,5 @@
     server: "{{ ozb_server }}"
     user: "{{ ozb_user }}"
     password: "{{ ozb_password }}"
+  tags:
+  - aws
