@@ -209,7 +209,6 @@ class OOCliFixture(OOInstallFixture):
         self.assertEquals(exp_hosts_to_run_on_len, len(hosts_to_run_on))
 
     def _verify_config_hosts(self, written_config, host_count):
-        print written_config['hosts']
         self.assertEquals(host_count, len(written_config['hosts']))
         for h in written_config['hosts']:
             self.assertTrue('hostname' in h)
@@ -712,7 +711,7 @@ class AttendedCliTests(OOCliFixture):
         inventory = ConfigParser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, '.ansible/hosts'))
         self.assertEquals('False',
-            inventory.get('nodes', '10.0.0.1  openshift_scheduleable'))
+            inventory.get('nodes', '10.0.0.1  openshift_schedulable'))
         self.assertEquals(None,
             inventory.get('nodes', '10.0.0.2'))
         self.assertEquals(None,
@@ -744,7 +743,6 @@ class AttendedCliTests(OOCliFixture):
         result = self.runner.invoke(cli.cli,
                                     self.cli_args,
                                     input=cli_input)
-        print result
         self.assert_result(result, 0)
 
         self._verify_load_facts(load_facts_mock)
@@ -830,15 +828,13 @@ class AttendedCliTests(OOCliFixture):
         inventory = ConfigParser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, '.ansible/hosts'))
         self.assertEquals('False',
-            inventory.get('nodes', '10.0.0.1  openshift_scheduleable'))
+            inventory.get('nodes', '10.0.0.1  openshift_schedulable'))
         self.assertEquals('False',
-            inventory.get('nodes', '10.0.0.2  openshift_scheduleable'))
+            inventory.get('nodes', '10.0.0.2  openshift_schedulable'))
         self.assertEquals(None,
             inventory.get('nodes', '10.0.0.3'))
         self.assertEquals('False',
-            inventory.get('nodes', '10.0.0.4  openshift_scheduleable'))
-
-        return
+            inventory.get('nodes', '10.0.0.4  openshift_schedulable'))
 
     #interactive multimaster: equal number masters and nodes
     @patch('ooinstall.openshift_ansible.run_main_playbook')
@@ -868,14 +864,12 @@ class AttendedCliTests(OOCliFixture):
 
         inventory = ConfigParser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, '.ansible/hosts'))
-        self.assertEquals(None,
-            inventory.get('nodes', '10.0.0.1'))
-        self.assertEquals(None,
-            inventory.get('nodes', '10.0.0.2'))
-        self.assertEquals(None,
-            inventory.get('nodes', '10.0.0.3'))
-
-        return
+        self.assertEquals('True',
+            inventory.get('nodes', '10.0.0.1  openshift_schedulable'))
+        self.assertEquals('True',
+            inventory.get('nodes', '10.0.0.2  openshift_schedulable'))
+        self.assertEquals('True',
+            inventory.get('nodes', '10.0.0.3  openshift_schedulable'))
 
     #interactive all-in-one
     @patch('ooinstall.openshift_ansible.run_main_playbook')
@@ -902,10 +896,8 @@ class AttendedCliTests(OOCliFixture):
 
         inventory = ConfigParser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, '.ansible/hosts'))
-        self.assertEquals(None,
-            inventory.get('nodes', '10.0.0.1'))
-
-        return
+        self.assertEquals('True',
+            inventory.get('nodes', '10.0.0.1  openshift_schedulable'))
 
 # TODO: test with config file, attended add node
 # TODO: test with config file, attended new node already in config file
