@@ -640,20 +640,6 @@ class UnattendedCliTests(OOCliFixture):
         result = self.runner.invoke(cli.cli, self.cli_args)
         self.assert_result(result, 0)
 
-        load_facts_args = load_facts_mock.call_args[0]
-        self.assertEquals(os.path.join(self.work_dir, ".ansible/hosts"),
-            load_facts_args[0])
-        self.assertEquals(os.path.join(self.work_dir,
-            "playbooks/byo/openshift_facts.yml"), load_facts_args[1])
-        env_vars = load_facts_args[2]
-        self.assertEquals(os.path.join(self.work_dir,
-            '.ansible/callback_facts.yaml'),
-            env_vars['OO_INSTALL_CALLBACK_FACTS_YAML'])
-        self.assertEqual('/tmp/ansible.log', env_vars['ANSIBLE_LOG_PATH'])
-        # If user running test has rpm installed, this might be set to default:
-        self.assertTrue('ANSIBLE_CONFIG' not in env_vars or
-            env_vars['ANSIBLE_CONFIG'] == cli.DEFAULT_ANSIBLE_CONFIG)
-
         # Make sure we ran on the expected masters and nodes:
         hosts = run_playbook_mock.call_args[0][0]
         hosts_to_run_on = run_playbook_mock.call_args[0][1]
@@ -677,20 +663,6 @@ class UnattendedCliTests(OOCliFixture):
         # was displayed:
         self.assert_result(result, 0)
         self.assertTrue('No master load balancer specified in config' in result.output)
-
-        load_facts_args = load_facts_mock.call_args[0]
-        self.assertEquals(os.path.join(self.work_dir, ".ansible/hosts"),
-            load_facts_args[0])
-        self.assertEquals(os.path.join(self.work_dir,
-            "playbooks/byo/openshift_facts.yml"), load_facts_args[1])
-        env_vars = load_facts_args[2]
-        self.assertEquals(os.path.join(self.work_dir,
-            '.ansible/callback_facts.yaml'),
-            env_vars['OO_INSTALL_CALLBACK_FACTS_YAML'])
-        self.assertEqual('/tmp/ansible.log', env_vars['ANSIBLE_LOG_PATH'])
-        # If user running test has rpm installed, this might be set to default:
-        self.assertTrue('ANSIBLE_CONFIG' not in env_vars or
-            env_vars['ANSIBLE_CONFIG'] == cli.DEFAULT_ANSIBLE_CONFIG)
 
         # Make sure we ran on the expected masters and nodes:
         hosts = run_playbook_mock.call_args[0][0]
