@@ -1,6 +1,6 @@
 # TODO: Temporarily disabled due to importing old code into openshift-ansible
 # repo. We will work on these over time.
-# pylint: disable=bad-continuation,missing-docstring,no-self-use,invalid-name
+# pylint: disable=bad-continuation,missing-docstring,no-self-use,invalid-name,too-many-lines
 
 import copy
 import os
@@ -735,7 +735,7 @@ class AttendedCliTests(OOCliFixture):
 
         # You can pass a single master_lb or a list if you intend for one to get rejected:
         if master_lb:
-            if type(master_lb[0]) is list or type(master_lb[0]) is tuple:
+            if isinstance(master_lb[0], list) or isinstance(master_lb[0], tuple):
                 inputs.extend(master_lb[0])
             else:
                 inputs.append(master_lb[0])
