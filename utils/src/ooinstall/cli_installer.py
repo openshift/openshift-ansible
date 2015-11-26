@@ -263,7 +263,7 @@ Edit %s with the desired values and run `atomic-openshift-installer --unattended
 
 
 
-def check_hosts_config(oo_cfg):
+def check_hosts_config(oo_cfg, unattended):
     click.clear()
     masters = [host for host in oo_cfg.hosts if host.master]
     if len(masters) > 1:
@@ -283,7 +283,8 @@ of your choice to balance the master API (port 8443) on all master hosts.
 
 https://docs.openshift.org/latest/install_config/install/advanced_install.html#multiple-masters
 """
-            confirm_continue(message)
+            if not unattended:
+                confirm_continue(message)
 
     nodes = [host for host in oo_cfg.hosts if host.node]
     if len(masters) == len(nodes):
@@ -292,7 +293,8 @@ No dedicated Nodes specified. By default, colocated Masters have their Nodes
 set to unscheduleable.  Continuing at this point will label all nodes as
 scheduleable.
 """
-        confirm_continue(message)
+        if not unattended:
+            confirm_continue(message)
 
     return
 
@@ -654,7 +656,7 @@ def install(ctx, force):
     else:
         oo_cfg = get_missing_info_from_user(oo_cfg)
 
-    check_hosts_config(oo_cfg)
+    check_hosts_config(oo_cfg, ctx.obj['unattended'])
 
     click.echo('Gathering information from hosts...')
     callback_facts, error = openshift_ansible.default_facts(oo_cfg.hosts,
