@@ -50,8 +50,8 @@ class Host(object):
         self.containerized = kwargs.get('containerized', False)
 
         if self.connect_to is None:
-            raise OOConfigInvalidHostError("You must specify either and 'ip' " \
-                                           "or 'hostname' to connect to.")
+            raise OOConfigInvalidHostError("You must specify either an ip " \
+                "or hostname as 'connect_to'")
 
         if self.master is False and self.node is False and self.master_lb is False:
             raise OOConfigInvalidHostError(

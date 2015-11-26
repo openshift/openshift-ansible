@@ -106,8 +106,7 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
     num_masters = 0
     while more_hosts:
         host_props = {}
-        host_props['connect_to'] = click.prompt('Enter hostname or IP address:',
-                                                default='',
+        host_props['connect_to'] = click.prompt('Enter hostname or IP address',
                                                 value_proc=validate_prompt_hostname)
 
         if not masters_set:
@@ -144,13 +143,17 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
             more_hosts = click.confirm('Do you want to add additional hosts?')
 
     if num_masters > 1:
-        hosts.append(collect_master_lb())
+        collect_master_lb(hosts)
 
     return hosts
 
-def collect_master_lb():
+def collect_master_lb(hosts):
     """
-    Get an HA proxy from the user
+    Get a valid load balancer from the user and append it to the list of
+    hosts.
+
+    Ensure user does not specify a system already used as a master/node as
+    this is an invalid configuration.
     """
     message = """
 Setting up High Availability Masters requires a load balancing solution.
@@ -166,17 +169,28 @@ hostname.
 """
     click.echo(message)
     host_props = {}
-    host_props['connect_to'] = click.prompt('Enter hostname or IP address:',
-                                            default='',
-                                            value_proc=validate_prompt_hostname)
+
+    # Using an embedded function here so we have access to the hosts list:
+    def validate_prompt_lb(hostname):
+        # Run the standard hostname check first:
+        hostname = validate_prompt_hostname(hostname)
+
+        # Make sure this host wasn't already specified:
+        for host in hosts:
+            if host.connect_to == hostname and (host.master or host.node):
+                raise click.BadParameter('Cannot re-use "%s" as a load balancer, '
+                                         'please specify a separate host' % hostname)
+        return hostname
+
+    host_props['connect_to'] = click.prompt('Enter hostname or IP address',
+                                            value_proc=validate_prompt_lb)
     install_haproxy = click.confirm('Should the reference haproxy load balancer be installed on this host?')
     host_props['preconfigured'] = not install_haproxy
     host_props['master'] = False
     host_props['node'] = False
     host_props['master_lb'] = True
     master_lb = Host(**host_props)
-
-    return master_lb
+    hosts.append(master_lb)
 
 def confirm_hosts_facts(oo_cfg, callback_facts):
     hosts = oo_cfg.hosts
@@ -261,6 +275,7 @@ def check_hosts_config(oo_cfg):
             if master_lb[0].master or master_lb[0].node:
                 click.echo('The Master load balancer is configured as a master or node. Please correct this.')
                 sys.exit(0)
+            # Check for another host with same connect_to?
         else:
             message = """
 No HAProxy given in config. Either specify one or provide a load balancing solution

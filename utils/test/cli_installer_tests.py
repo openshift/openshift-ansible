@@ -568,8 +568,9 @@ class UnattendedCliTests(OOCliFixture):
         self.cli_args.extend(["-c", config_file, "install"])
         result = self.runner.invoke(cli.cli, self.cli_args)
 
-        assert result.exit_code == 1
-        assert result.output == "You must specify either and 'ip' or 'hostname' to connect to.\n"
+        self.assertEquals(1, result.exit_code)
+        self.assertTrue("You must specify either an ip or hostname"
+            in result.output)
 
     #unattended with two masters, one node, and haproxy
     @patch('ooinstall.openshift_ansible.run_main_playbook')
@@ -651,8 +652,12 @@ class AttendedCliTests(OOCliFixture):
                     inputs.append('n')  # Done adding hosts
                 i += 1
 
+        # You can pass a single master_lb or a list if you intend for one to get rejected:
         if master_lb:
-            inputs.append(master_lb[0])
+            if type(master_lb[0]) is list or type(master_lb[0]) is tuple:
+                inputs.extend(master_lb[0])
+            else:
+                inputs.append(master_lb[0])
             inputs.append('y' if master_lb[1] else 'n')
 
         # TODO: support option 2, fresh install
@@ -801,7 +806,7 @@ class AttendedCliTests(OOCliFixture):
     #interactive multimaster: one more node than master
     @patch('ooinstall.openshift_ansible.run_main_playbook')
     @patch('ooinstall.openshift_ansible.load_system_facts')
-    def test_quick_ha1(self, load_facts_mock, run_playbook_mock):
+    def test_ha_dedicated_node(self, load_facts_mock, run_playbook_mock):
         load_facts_mock.return_value = (MOCK_FACTS_QUICKHA, 0)
         run_playbook_mock.return_value = 0
 
@@ -836,10 +841,10 @@ class AttendedCliTests(OOCliFixture):
         self.assertEquals('False',
             inventory.get('nodes', '10.0.0.4  openshift_schedulable'))
 
-    #interactive multimaster: equal number masters and nodes
+    #interactive multimaster: identical masters and nodes
     @patch('ooinstall.openshift_ansible.run_main_playbook')
     @patch('ooinstall.openshift_ansible.load_system_facts')
-    def test_quick_ha2(self, load_facts_mock, run_playbook_mock):
+    def test_ha_no_dedicated_nodes(self, load_facts_mock, run_playbook_mock):
         load_facts_mock.return_value = (MOCK_FACTS_QUICKHA, 0)
         run_playbook_mock.return_value = 0
 
@@ -870,6 +875,27 @@ class AttendedCliTests(OOCliFixture):
             inventory.get('nodes', '10.0.0.2  openshift_schedulable'))
         self.assertEquals('True',
             inventory.get('nodes', '10.0.0.3  openshift_schedulable'))
+
+    #interactive multimaster: attempting to use a master as the load balancer should fail:
+    @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.load_system_facts')
+    def test_ha_reuse_master_as_lb(self, load_facts_mock, run_playbook_mock):
+        load_facts_mock.return_value = (MOCK_FACTS_QUICKHA, 0)
+        run_playbook_mock.return_value = 0
+
+        cli_input = self._build_input(hosts=[
+                                      ('10.0.0.1', True),
+                                      ('10.0.0.2', True),
+                                      ('10.0.0.3', False),
+                                      ('10.0.0.4', True)],
+                                      ssh_user='root',
+                                      variant_num=1,
+                                      confirm_facts='y',
+                                      master_lb=(['10.0.0.2', '10.0.0.5'], False))
+        self.cli_args.append("install")
+        result = self.runner.invoke(cli.cli, self.cli_args,
+            input=cli_input)
+        self.assert_result(result, 0)
 
     #interactive all-in-one
     @patch('ooinstall.openshift_ansible.run_main_playbook')
