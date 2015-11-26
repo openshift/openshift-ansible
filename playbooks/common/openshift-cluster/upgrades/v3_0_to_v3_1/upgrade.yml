@@ -76,7 +76,7 @@
 
   - fail:
       msg: Atomic OpenShift 3.1 packages not found
-    when: g_aos_versions.curr_version | version_compare('3.0.2.900','<') and (g_aos_versions.avail_version is none or g_aos_versions.avail_version | version_compare('3.0.2.900','<'))
+    when: deployment_type == 'atomic-openshift' and (g_aos_versions.curr_version | version_compare('3.0.2.900','<') and (g_aos_versions.avail_version is none or g_aos_versions.avail_version | version_compare('3.0.2.900','<')))
 
   - set_fact:
       pre_upgrade_complete: True
