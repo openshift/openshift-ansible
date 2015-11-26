@@ -278,22 +278,28 @@ def check_hosts_config(oo_cfg, unattended):
             # Check for another host with same connect_to?
         else:
             message = """
-No HAProxy given in config. Either specify one or provide a load balancing solution
-of your choice to balance the master API (port 8443) on all master hosts.
+WARNING: No master load balancer specified in config. If you proceed you will
+need to provide a load balancing solution of your choice to balance the
+API (port 8443) on all master hosts.
 
 https://docs.openshift.org/latest/install_config/install/advanced_install.html#multiple-masters
 """
-            if not unattended:
+            if unattended:
+                click.echo(message)
+            else:
                 confirm_continue(message)
 
     nodes = [host for host in oo_cfg.hosts if host.node]
+    # TODO: This looks a little unsafe, maybe look for dedicated nodes only:
     if len(masters) == len(nodes):
         message = """
-No dedicated Nodes specified. By default, colocated Masters have their Nodes
-set to unscheduleable.  Continuing at this point will label all nodes as
-scheduleable.
+WARNING: No dedicated Nodes specified. By default, colocated Masters have
+their Nodes set to unscheduleable.  If you proceed all nodes will be labelled
+as schedulable.
 """
-        if not unattended:
+        if unattended:
+            click.echo(message)
+        else:
             confirm_continue(message)
 
     return
@@ -318,7 +324,8 @@ def get_variant_and_version(multi_master=False):
     return product, version
 
 def confirm_continue(message):
-    click.echo(message)
+    if message:
+        click.echo(message)
     click.confirm("Are you ready to continue?", default=False, abort=True)
     return
 

@@ -106,7 +106,7 @@ def write_inventory_vars(base_inventory, multiple_masters, proxy):
     base_inventory.write('ansible_ssh_user={}\n'.format(CFG.settings['ansible_ssh_user']))
     if CFG.settings['ansible_ssh_user'] != 'root':
         base_inventory.write('ansible_become=true\n')
-    if multiple_masters:
+    if multiple_masters and proxy is not None:
         base_inventory.write('openshift_master_cluster_method=native\n')
         base_inventory.write("openshift_master_cluster_hostname={}\n".format(proxy.hostname))
         base_inventory.write("openshift_master_cluster_public_hostname={}\n".format(proxy.public_hostname))
