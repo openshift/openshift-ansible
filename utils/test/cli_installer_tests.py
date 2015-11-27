@@ -123,10 +123,49 @@ hosts:
     public_ip: 24.222.0.3
     public_hostname: node2.example.com
     node: true
+    master: true
   - connect_to: 10.0.0.4
     ip: 10.0.0.4
-    hostname: proxy-private.example.com
+    hostname: node3-private.example.com
     public_ip: 24.222.0.4
+    public_hostname: node3.example.com
+    node: true
+  - connect_to: 10.0.0.5
+    ip: 10.0.0.5
+    hostname: proxy-private.example.com
+    public_ip: 24.222.0.5
+    public_hostname: proxy.example.com
+    master_lb: true
+"""
+
+QUICKHA_2_MASTER_CONFIG = """
+variant: %s
+ansible_ssh_user: root
+hosts:
+  - connect_to: 10.0.0.1
+    ip: 10.0.0.1
+    hostname: master-private.example.com
+    public_ip: 24.222.0.1
+    public_hostname: master.example.com
+    master: true
+    node: true
+  - connect_to: 10.0.0.2
+    ip: 10.0.0.2
+    hostname: node1-private.example.com
+    public_ip: 24.222.0.2
+    public_hostname: node1.example.com
+    master: true
+    node: true
+  - connect_to: 10.0.0.4
+    ip: 10.0.0.4
+    hostname: node3-private.example.com
+    public_ip: 24.222.0.4
+    public_hostname: node3.example.com
+    node: true
+  - connect_to: 10.0.0.5
+    ip: 10.0.0.5
+    hostname: proxy-private.example.com
+    public_ip: 24.222.0.5
     public_hostname: proxy.example.com
     master_lb: true
 """
@@ -156,6 +195,7 @@ hosts:
     public_ip: 24.222.0.3
     public_hostname: node2.example.com
     node: true
+    master: true
 """
 
 QUICKHA_CONFIG_NO_LB = """
@@ -182,6 +222,7 @@ hosts:
     public_ip: 24.222.0.3
     public_hostname: node2.example.com
     node: true
+    master: true
 """
 
 class UnattendedCliTests(OOCliFixture):
@@ -497,7 +538,7 @@ class UnattendedCliTests(OOCliFixture):
         self.assertTrue("You must specify either an ip or hostname"
             in result.output)
 
-    #unattended with two masters, one node, and haproxy
+    #unattended with three masters, one node, and haproxy
     @patch('ooinstall.openshift_ansible.run_main_playbook')
     @patch('ooinstall.openshift_ansible.load_system_facts')
     def test_quick_ha_full_run(self, load_facts_mock, run_playbook_mock):
@@ -514,10 +555,27 @@ class UnattendedCliTests(OOCliFixture):
         # Make sure we ran on the expected masters and nodes:
         hosts = run_playbook_mock.call_args[0][0]
         hosts_to_run_on = run_playbook_mock.call_args[0][1]
-        self.assertEquals(4, len(hosts))
-        self.assertEquals(4, len(hosts_to_run_on))
+        self.assertEquals(5, len(hosts))
+        self.assertEquals(5, len(hosts_to_run_on))
 
-    #unattended with two masters, one node, but no load balancer specified:
+    #unattended with two masters, one node, and haproxy
+    @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.load_system_facts')
+    def test_quick_ha_only_2_masters(self, load_facts_mock, run_playbook_mock):
+        load_facts_mock.return_value = (MOCK_FACTS_QUICKHA, 0)
+        run_playbook_mock.return_value = 0
+
+        config_file = self.write_config(os.path.join(self.work_dir,
+            'ooinstall.conf'), QUICKHA_2_MASTER_CONFIG % 'openshift-enterprise')
+
+        self.cli_args.extend(["-c", config_file, "install"])
+        result = self.runner.invoke(cli.cli, self.cli_args)
+
+        # This is an invalid config:
+        self.assert_result(result, 1)
+        self.assertTrue("A minimum of 3 Masters are required" in result.output)
+
+    #unattended with three masters, one node, but no load balancer specified:
     @patch('ooinstall.openshift_ansible.run_main_playbook')
     @patch('ooinstall.openshift_ansible.load_system_facts')
     def test_quick_ha_no_lb(self, load_facts_mock, run_playbook_mock):
@@ -541,7 +599,7 @@ class UnattendedCliTests(OOCliFixture):
         self.assertEquals(3, len(hosts))
         self.assertEquals(3, len(hosts_to_run_on))
 
-    #unattended with two masters, one node, and one of the masters reused as load balancer:
+    #unattended with three masters, one node, and one of the masters reused as load balancer:
     @patch('ooinstall.openshift_ansible.run_main_playbook')
     @patch('ooinstall.openshift_ansible.load_system_facts')
     def test_quick_ha_reused_lb(self, load_facts_mock, run_playbook_mock):
@@ -555,7 +613,7 @@ class UnattendedCliTests(OOCliFixture):
         result = self.runner.invoke(cli.cli, self.cli_args)
 
         # This is not a valid configuration:
-        self.assert_result(result, 0)
+        self.assert_result(result, 1)
 
 
 class AttendedCliTests(OOCliFixture):
@@ -690,8 +748,8 @@ class AttendedCliTests(OOCliFixture):
         cli_input = build_input(hosts=[
             ('10.0.0.1', True),
             ('10.0.0.2', True),
-            ('10.0.0.3', False),
-            ('10.0.0.4', True)],
+            ('10.0.0.3', True),
+            ('10.0.0.4', False)],
                                       ssh_user='root',
                                       variant_num=1,
                                       confirm_facts='y',
@@ -713,10 +771,10 @@ class AttendedCliTests(OOCliFixture):
             inventory.get('nodes', '10.0.0.1  openshift_schedulable'))
         self.assertEquals('False',
             inventory.get('nodes', '10.0.0.2  openshift_schedulable'))
-        self.assertEquals(None,
-            inventory.get('nodes', '10.0.0.3'))
         self.assertEquals('False',
-            inventory.get('nodes', '10.0.0.4  openshift_schedulable'))
+            inventory.get('nodes', '10.0.0.3  openshift_schedulable'))
+        self.assertEquals(None,
+            inventory.get('nodes', '10.0.0.4'))
 
         self.assertTrue(inventory.has_section('etcd'))
         self.assertEquals(3, len(inventory.items('etcd')))

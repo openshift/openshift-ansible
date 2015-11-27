@@ -14,7 +14,6 @@ from ooinstall.variants import find_variant, get_variant_version_combos
 
 DEFAULT_ANSIBLE_CONFIG = '/usr/share/atomic-openshift-utils/ansible.cfg'
 DEFAULT_PLAYBOOK_DIR = '/usr/share/ansible/openshift-ansible/'
-MIN_MASTERS_FOR_HA = 3
 
 def validate_ansible_dir(path):
     if not path:
@@ -126,7 +125,7 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
                 host_props['master'] = True
                 num_masters += 1
 
-                if num_masters >= MIN_MASTERS_FOR_HA or version == '3.0':
+                if version == '3.0':
                     masters_set = True
         host_props['node'] = True
 
@@ -147,10 +146,13 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
         if print_summary:
             print_host_summary(hosts)
 
-        if num_masters <= 1 or num_masters >= MIN_MASTERS_FOR_HA:
+        # If we have one master, this is enough for an all-in-one deployment,
+        # thus we can start asking if you wish to proceed. Otherwise we assume
+        # you must.
+        if masters_set or num_masters != 2:
             more_hosts = click.confirm('Do you want to add additional hosts?')
 
-    if num_masters > 1:
+    if num_masters >= 3:
         collect_master_lb(hosts)
 
     return hosts
@@ -166,8 +168,26 @@ def print_host_summary(hosts):
     click.echo('OpenShift Nodes: %s' % len(nodes))
     for host in nodes:
         click.echo('  %s' % host.connect_to)
-    click.echo('Additional Masters required for HA: %s' %
-               max(MIN_MASTERS_FOR_HA - len(masters), 0))
+
+    click.echo("")
+
+    if len(masters) == 1:
+        click.echo("NOTE: Add a total of 3 or more Masters to perform an HA"
+                   " installation.")
+    elif len(masters) == 2:
+        min_masters_message = """
+WARNING: A minimum of 3 masters are required to perform an HA installation.
+Please add one more to proceed.
+"""
+        click.echo(min_masters_message)
+    elif len(masters) >= 3:
+        ha_message = """
+NOTE: Multiple Masters specified, this will be an HA deployment with a separate
+etcd cluster. You will be prompted to provide the FQDN of a load balancer once
+finished entering hosts.
+"""
+        click.echo(ha_message)
+
     click.echo('')
 
 
@@ -290,15 +310,20 @@ Edit %s with the desired values and run `atomic-openshift-installer --unattended
 def check_hosts_config(oo_cfg, unattended):
     click.clear()
     masters = [host for host in oo_cfg.hosts if host.master]
+
+    if len(masters) == 2:
+        click.echo("A minimum of 3 Masters are required for HA deployments.")
+        sys.exit(1)
+
     if len(masters) > 1:
         master_lb = [host for host in oo_cfg.hosts if host.master_lb]
         if len(master_lb) > 1:
             click.echo('More than one Master load balancer specified. Only one is allowed.')
-            sys.exit(0)
+            sys.exit(1)
         elif len(master_lb) == 1:
             if master_lb[0].master or master_lb[0].node:
                 click.echo('The Master load balancer is configured as a master or node. Please correct this.')
-                sys.exit(0)
+                sys.exit(1)
             # Check for another host with same connect_to?
         else:
             message = """

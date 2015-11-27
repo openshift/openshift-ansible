@@ -54,7 +54,7 @@ class OOCliFixture(OOInstallFixture):
         return self.runner.invoke(cli.cli, self.cli_args)
 
     def assert_result(self, result, exit_code):
-        if result.exception is not None or result.exit_code != exit_code:
+        if result.exit_code != exit_code:
             print "Unexpected result from CLI execution"
             print "Exit code: %s" % result.exit_code
             print "Exception: %s" % result.exception
@@ -163,7 +163,6 @@ def build_input(ssh_user=None, hosts=None, variant_num=None,
     num_masters = 0
     if hosts:
         i = 0
-        min_masters_for_ha = 3
         for (host, is_master) in hosts:
             inputs.append(host)
             if is_master:
@@ -172,11 +171,15 @@ def build_input(ssh_user=None, hosts=None, variant_num=None,
             else:
                 inputs.append('n')
             #inputs.append('rpm')
-            if i < len(hosts) - 1:
-                if num_masters <= 1 or num_masters >= min_masters_for_ha:
-                    inputs.append('y')  # Add more hosts
-            else:
-                inputs.append('n')  # Done adding hosts
+            # We should not be prompted to add more hosts if we're currently at
+            # 2 masters, this is an invalid HA configuration, so this question
+            # will not be asked, and the user must enter the next host:
+            if num_masters != 2:
+                if i < len(hosts) - 1:
+                    if num_masters >= 1:
+                        inputs.append('y')  # Add more hosts
+                else:
+                    inputs.append('n')  # Done adding hosts
             i += 1
 
     # You can pass a single master_lb or a list if you intend for one to get rejected:
