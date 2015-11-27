@@ -14,6 +14,7 @@ from ooinstall.variants import find_variant, get_variant_version_combos
 
 DEFAULT_ANSIBLE_CONFIG = '/usr/share/atomic-openshift-utils/ansible.cfg'
 DEFAULT_PLAYBOOK_DIR = '/usr/share/ansible/openshift-ansible/'
+MIN_MASTERS_FOR_HA = 3
 
 def validate_ansible_dir(path):
     if not path:
@@ -79,7 +80,6 @@ def collect_hosts(version=None, masters_set=False, print_summary=True):
 
         Returns: a list of host information collected from the user
     """
-    min_masters_for_ha = 3
     click.clear()
     click.echo('*** Host Configuration ***')
     message = """
@@ -126,7 +126,7 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
                 host_props['master'] = True
                 num_masters += 1
 
-                if num_masters >= min_masters_for_ha or version == '3.0':
+                if num_masters >= MIN_MASTERS_FOR_HA or version == '3.0':
                     masters_set = True
         host_props['node'] = True
 
@@ -145,19 +145,31 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
         hosts.append(host)
 
         if print_summary:
-            click.echo('')
-            click.echo('Current Masters: {}'.format(num_masters))
-            click.echo('Current Nodes: {}'.format(len(hosts)))
-            click.echo('Additional Masters required for HA: {}'.format(max(min_masters_for_ha - num_masters, 0)))
-            click.echo('')
+            print_host_summary(hosts)
 
-        if num_masters <= 1 or num_masters >= min_masters_for_ha:
+        if num_masters <= 1 or num_masters >= MIN_MASTERS_FOR_HA:
             more_hosts = click.confirm('Do you want to add additional hosts?')
 
     if num_masters > 1:
         collect_master_lb(hosts)
 
     return hosts
+
+
+def print_host_summary(hosts):
+    masters = [host for host in hosts if host.master]
+    nodes = [host for host in hosts if host.node]
+    click.echo('')
+    click.echo('Current Masters: %s' % len(masters))
+    for host in masters:
+        click.echo('  %s' % host.connect_to)
+    click.echo('Current Nodes: %s' % len(nodes))
+    for host in nodes:
+        click.echo('  %s' % host.connect_to)
+    click.echo('Additional Masters required for HA: %s' %
+               max(MIN_MASTERS_FOR_HA - len(masters), 0))
+    click.echo('')
+
 
 def collect_master_lb(hosts):
     """
