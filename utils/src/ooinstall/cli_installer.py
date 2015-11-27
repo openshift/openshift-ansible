@@ -160,10 +160,10 @@ def print_host_summary(hosts):
     masters = [host for host in hosts if host.master]
     nodes = [host for host in hosts if host.node]
     click.echo('')
-    click.echo('Current Masters: %s' % len(masters))
+    click.echo('OpenShift Masters: %s' % len(masters))
     for host in masters:
         click.echo('  %s' % host.connect_to)
-    click.echo('Current Nodes: %s' % len(nodes))
+    click.echo('OpenShift Nodes: %s' % len(nodes))
     for host in nodes:
         click.echo('  %s' % host.connect_to)
     click.echo('Additional Masters required for HA: %s' %
@@ -690,6 +690,7 @@ def install(ctx, force):
     check_hosts_config(oo_cfg, ctx.obj['unattended'])
 
     click.echo('Gathering information from hosts...')
+    print_host_summary(oo_cfg.hosts)
     callback_facts, error = openshift_ansible.default_facts(oo_cfg.hosts,
         verbose)
     if error:
@@ -714,8 +715,8 @@ def install(ctx, force):
 
     click.echo('Ready to run installation process.')
     message = """
-If changes are needed to the values recorded by the installer please update {}.
-""".format(oo_cfg.config_path)
+If changes are needed please edit the config file above and re-run.
+"""
     if not ctx.obj['unattended']:
         confirm_continue(message)
 
