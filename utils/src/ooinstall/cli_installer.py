@@ -81,19 +81,31 @@ def collect_hosts(version=None, masters_set=False, print_summary=True):
     """
     min_masters_for_ha = 3
     click.clear()
-    click.echo('***Host Configuration***')
+    click.echo('*** Host Configuration ***')
     message = """
-The OpenShift Master serves the API and web console.  It also coordinates the
-jobs that have to run across the environment.  It can even run the datastore.
-For wizard based installations the database will be embedded.  It's possible to
-change this later using etcd from Red Hat Enterprise Linux 7.
+You must now specify the hosts that will compose your OpenShift cluster.
+
+Please enter an IP or hostname to connect to for each system in the cluster.
+You will then be prompted to identify what role you would like this system to
+serve in the cluster.
+
+OpenShift Masters serve the API and web console and coordinate the jobs to run
+across the environment.  If desired you can specify multiple Master systems for
+an HA deployment, in which case you will be prompted to identify a *separate*
+system to act as the load balancer for your cluster after all Masters and Nodes
+are defined.
+
+If only one Master is specified, an etcd instance embedded within the OpenShift
+Master service will be used as the datastore.  This can be later replaced with a
+separate etcd instance if desired.  If multiple Masters are specified, a
+separate etcd cluster will be configured with each Master serving as a member.
 
 Any Masters configured as part of this installation process will also be
 configured as Nodes.  This is so that the Master will be able to proxy to Pods
 from the API.  By default this Node will be unscheduleable but this can be changed
 after installation with 'oadm manage-node'.
 
-The OpenShift Node provides the runtime environments for containers.  It will
+OpenShift Nodes provide the runtime environments for containers.  They will
 host the required services to be managed by the Master.
 
 http://docs.openshift.com/enterprise/latest/architecture/infrastructure_components/kubernetes_infrastructure.html#master
@@ -415,7 +427,7 @@ https://docs.openshift.com/enterprise/latest/admin_guide/install/prerequisites.h
 
 def collect_new_nodes():
     click.clear()
-    click.echo('***New Node Configuration***')
+    click.echo('*** New Node Configuration ***')
     message = """
 Add new nodes here
     """
