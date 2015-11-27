@@ -718,6 +718,9 @@ class AttendedCliTests(OOCliFixture):
         self.assertEquals('False',
             inventory.get('nodes', '10.0.0.4  openshift_schedulable'))
 
+        self.assertTrue(inventory.has_section('etcd'))
+        self.assertEquals(3, len(inventory.items('etcd')))
+
     #interactive multimaster: identical masters and nodes
     @patch('ooinstall.openshift_ansible.run_main_playbook')
     @patch('ooinstall.openshift_ansible.load_system_facts')
