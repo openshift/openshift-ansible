@@ -290,8 +290,8 @@ class BasicAuthPasswordIdentityProvider(IdentityProviderBase):
     def __init__(self, api_version, idp):
         IdentityProviderBase.__init__(self, api_version, idp)
         self._allow_additional = False
-        self._required += [['ca'], ['certFile', 'cert_file'], ['keyFile', 'key_file']]
-        self._optional += [['key']]
+        self._required += [['url']]
+        self._optional += [['ca'], ['certFile', 'cert_file'], ['keyFile', 'key_file']]
 
 
 class IdentityProviderOauthBase(IdentityProviderBase):
