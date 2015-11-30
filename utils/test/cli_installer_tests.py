@@ -616,7 +616,7 @@ class AttendedCliTests(OOCliFixture):
 
     #pylint: disable=too-many-arguments,too-many-branches
     def _build_input(self, ssh_user=None, hosts=None, variant_num=None,
-        add_nodes=None, confirm_facts=None, scheduleable_masters_ok=None,
+        add_nodes=None, confirm_facts=None, schedulable_masters_ok=None,
         master_lb=None):
         """
         Builds a CLI input string with newline characters to simulate
@@ -658,7 +658,7 @@ class AttendedCliTests(OOCliFixture):
 
         # TODO: support option 2, fresh install
         if add_nodes:
-            if scheduleable_masters_ok:
+            if schedulable_masters_ok:
                 inputs.append('y')
             inputs.append('1')  # Add more nodes
             i = 0
@@ -712,7 +712,7 @@ class AttendedCliTests(OOCliFixture):
         inventory = ConfigParser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, '.ansible/hosts'))
         self.assertEquals('False',
-            inventory.get('nodes', '10.0.0.1  openshift_scheduleable'))
+            inventory.get('nodes', '10.0.0.1  openshift_schedulable'))
         self.assertEquals(None,
             inventory.get('nodes', '10.0.0.2'))
         self.assertEquals(None,
@@ -790,7 +790,7 @@ class AttendedCliTests(OOCliFixture):
                                       add_nodes=[('10.0.0.2', False)],
                                       ssh_user='root',
                                       variant_num=1,
-                                      scheduleable_masters_ok=True,
+                                      schedulable_masters_ok=True,
                                       confirm_facts='y')
 
         self._verify_get_hosts_to_run_on(mock_facts, load_facts_mock,
@@ -830,13 +830,13 @@ class AttendedCliTests(OOCliFixture):
         inventory = ConfigParser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, '.ansible/hosts'))
         self.assertEquals('False',
-            inventory.get('nodes', '10.0.0.1  openshift_scheduleable'))
+            inventory.get('nodes', '10.0.0.1  openshift_schedulable'))
         self.assertEquals('False',
-            inventory.get('nodes', '10.0.0.2  openshift_scheduleable'))
+            inventory.get('nodes', '10.0.0.2  openshift_schedulable'))
         self.assertEquals(None,
             inventory.get('nodes', '10.0.0.3'))
         self.assertEquals('False',
-            inventory.get('nodes', '10.0.0.4  openshift_scheduleable'))
+            inventory.get('nodes', '10.0.0.4  openshift_schedulable'))
 
         return
 
