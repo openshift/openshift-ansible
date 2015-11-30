@@ -201,11 +201,11 @@ def collect_master_lb(hosts):
     """
     message = """
 Setting up High Availability Masters requires a load balancing solution.
-Please provide a host that will be configured as a proxy. This can either be
-an existing load balancer configured to balance all masters on port 8443 or a
-new host that will have HAProxy installed on it.
+Please provide a the FQDN of a host that will be configured as a proxy. This
+can be either an existing load balancer configured to balance all masters on
+port 8443 or a new host that will have HAProxy installed on it.
 
-If the host provided does is not yet configured a reference haproxy load
+If the host provided does is not yet configured, a reference haproxy load
 balancer will be installed.  It's important to note that while the rest of the
 environment will be fault tolerant this reference load balancer will not be.
 It can be replaced post-installation with a load balancer with the same
@@ -318,25 +318,21 @@ def check_hosts_config(oo_cfg, unattended):
     if len(masters) > 1:
         master_lb = [host for host in oo_cfg.hosts if host.master_lb]
         if len(master_lb) > 1:
-            click.echo('More than one Master load balancer specified. Only one is allowed.')
+            click.echo('ERROR: More than one Master load balancer specified. Only one is allowed.')
             sys.exit(1)
         elif len(master_lb) == 1:
             if master_lb[0].master or master_lb[0].node:
-                click.echo('The Master load balancer is configured as a master or node. Please correct this.')
+                click.echo('ERROR: The Master load balancer is configured as a master or node. Please correct this.')
                 sys.exit(1)
-            # Check for another host with same connect_to?
         else:
             message = """
-WARNING: No master load balancer specified in config. If you proceed you will
-need to provide a load balancing solution of your choice to balance the
-API (port 8443) on all master hosts.
+ERROR: No master load balancer specified in config. You must provide the FQDN
+of a load balancer to balance the API (port 8443) on all Master hosts.
 
 https://docs.openshift.org/latest/install_config/install/advanced_install.html#multiple-masters
 """
-            if unattended:
-                click.echo(message)
-            else:
-                confirm_continue(message)
+            click.echo(message)
+            sys.exit(1)
 
     nodes = [host for host in oo_cfg.hosts if host.node]
     # TODO: This looks a little unsafe, maybe look for dedicated nodes only:

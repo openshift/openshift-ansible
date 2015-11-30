@@ -588,16 +588,9 @@ class UnattendedCliTests(OOCliFixture):
         self.cli_args.extend(["-c", config_file, "install"])
         result = self.runner.invoke(cli.cli, self.cli_args)
 
-        # We consider this a valid outcome but lets make sure the warning
-        # was displayed:
-        self.assert_result(result, 0)
+        # This is not a valid input:
+        self.assert_result(result, 1)
         self.assertTrue('No master load balancer specified in config' in result.output)
-
-        # Make sure we ran on the expected masters and nodes:
-        hosts = run_playbook_mock.call_args[0][0]
-        hosts_to_run_on = run_playbook_mock.call_args[0][1]
-        self.assertEquals(3, len(hosts))
-        self.assertEquals(3, len(hosts_to_run_on))
 
     #unattended with three masters, one node, and one of the masters reused as load balancer:
     @patch('ooinstall.openshift_ansible.run_main_playbook')
