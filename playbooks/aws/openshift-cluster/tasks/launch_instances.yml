@@ -3,7 +3,6 @@
     created_by: "{{ lookup('env', 'LOGNAME')|default(cluster, true) }}"
     docker_vol_ephemeral: "{{ lookup('env', 'os_docker_vol_ephemeral') | default(false, true) }}"
     env: "{{ cluster }}"
-    env_host_type: "{{ cluster }}-openshift-{{ type }}"
     host_type: "{{ type }}"
     sub_host_type: "{{ g_sub_host_type }}"
 
@@ -124,10 +123,8 @@
     wait: yes
     instance_tags:
       created-by: "{{ created_by }}"
-      environment: "{{ env }}"
       env: "{{ env }}"
       host-type: "{{ host_type }}"
-      env-host-type: "{{ env_host_type }}"
       sub-host-type: "{{ sub_host_type }}"
     volumes: "{{ volumes }}"
   register: ec2
@@ -142,9 +139,7 @@
       Name: "{{ item.0 }}"
 
 - set_fact:
-    instance_groups: "tag_created-by_{{ created_by }}, tag_env_{{ env }},
-                    tag_host-type_{{ host_type }}, tag_env-host-type_{{ env_host_type }},
-                    tag_sub-host-type_{{ sub_host_type }}"
+    instance_groups: "tag_created-by_{{ created_by }}, tag_env_{{ env }}, tag_host-type_{{ host_type }}, tag_sub-host-type_{{ sub_host_type }}"
 
 - set_fact:
     node_label:
