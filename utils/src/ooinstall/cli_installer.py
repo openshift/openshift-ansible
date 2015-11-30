@@ -188,6 +188,15 @@ finished entering hosts.
 """
         click.echo(ha_message)
 
+        dedicated_nodes_message = """
+WARNING: Dedicated Nodes are recommended for an HA deployment. If no dedicated
+Nodes are specified, each configured Master will be marked as a schedulable
+Node.
+"""
+        dedicated_nodes = [host for host in hosts if host.node and not host.master]
+        if len(dedicated_nodes) == 0:
+            click.echo(dedicated_nodes_message)
+
     click.echo('')
 
 
