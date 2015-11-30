@@ -343,9 +343,8 @@ https://docs.openshift.org/latest/install_config/install/advanced_install.html#m
             click.echo(message)
             sys.exit(1)
 
-    nodes = [host for host in oo_cfg.hosts if host.node]
-    # TODO: This looks a little unsafe, maybe look for dedicated nodes only:
-    if len(masters) == len(nodes):
+    dedicated_nodes = [host for host in oo_cfg.hosts if host.node and not host.master]
+    if len(dedicated_nodes) == 0:
         message = """
 WARNING: No dedicated Nodes specified. By default, colocated Masters have
 their Nodes set to unscheduleable.  If you proceed all nodes will be labelled
