@@ -357,7 +357,7 @@
   hosts: oo_first_master
   tasks:
   - name: Get master service ip
-    command: "{{ openshift.common.client_binary }} get -o template svc kubernetes --template=\\{\\{.spec.clusterIP\\}\\}"
+    command: "{{ openshift.common.client_binary }} -n default --config={{ openshift.common.config_base }}/master/admin.kubeconfig get -o template svc kubernetes --template=\\{\\{.spec.clusterIP\\}\\}"
     register: master_service_ip_output
     when: openshift.common.version_greater_than_3_1_or_1_1 | bool
   - set_fact:
