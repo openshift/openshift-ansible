@@ -12,6 +12,8 @@
 
 - name: Evaluate additional groups for upgrade
   hosts: localhost
+  connection: local
+  become: no
   tasks:
   - name: Evaluate etcd_hosts_to_backup
     add_host:
@@ -87,6 +89,8 @@
 ##############################################################################
 - name: Gate on pre-upgrade checks
   hosts: localhost
+  connection: local
+  become: no
   vars:
     pre_upgrade_hosts: "{{ groups.oo_masters_to_config | union(groups.oo_nodes_to_config) }}"
   tasks:
@@ -171,6 +175,8 @@
 ##############################################################################
 - name: Gate on etcd backup
   hosts: localhost
+  connection: local
+  become: no
   tasks:
   - set_fact:
       etcd_backup_completed: "{{ hostvars
@@ -189,6 +195,8 @@
 ###############################################################################
 - name: Create temp directory for syncing certs
   hosts: localhost
+  connection: local
+  become: no
   gather_facts: no
   tasks:
   - name: Create local temp directory for syncing certs
@@ -339,6 +347,8 @@
 
 - name: Delete temporary directory on localhost
   hosts: localhost
+  connection: local
+  become: no
   gather_facts: no
   tasks:
   - file: name={{ g_master_mktemp.stdout }} state=absent
@@ -357,6 +367,8 @@
 ##############################################################################
 - name: Gate on master update
   hosts: localhost
+  connection: local
+  become: no
   tasks:
   - set_fact:
       master_update_completed: "{{ hostvars
@@ -397,6 +409,8 @@
 ##############################################################################
 - name: Gate on nodes update
   hosts: localhost
+  connection: local
+  become: no
   tasks:
   - set_fact:
       node_update_completed: "{{ hostvars
@@ -464,6 +478,8 @@
 ##############################################################################
 - name: Gate on reconcile
   hosts: localhost
+  connection: local
+  become: no
   tasks:
   - set_fact:
       reconcile_completed: "{{ hostvars

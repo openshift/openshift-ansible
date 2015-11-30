@@ -1,6 +1,8 @@
 ---
 - name: Terminate instance(s)
   hosts: localhost
+  connection: local
+  become: no
   gather_facts: no
   vars_files:
   - vars.yml
@@ -25,6 +27,7 @@
 - name: Terminate instances
   hosts: localhost
   connection: local
+  become: no
   gather_facts: no
   vars:
     host_vars: "{{ hostvars

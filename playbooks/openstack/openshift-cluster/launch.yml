@@ -1,6 +1,7 @@
 ---
 - name: Launch instance(s)
   hosts: localhost
+  become: no
   connection: local
   gather_facts: no
   vars_files:

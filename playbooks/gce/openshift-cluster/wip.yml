@@ -1,6 +1,7 @@
 ---
 - name: WIP
   hosts: localhost
+  become: no
   connection: local
   gather_facts: no
   vars_files:

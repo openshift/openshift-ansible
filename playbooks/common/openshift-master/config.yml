@@ -70,7 +70,7 @@
 - name: Create temp directory for syncing certs
   hosts: localhost
   connection: local
-  sudo: false
+  become: no
   gather_facts: no
   tasks:
   - name: Create local temp directory for syncing certs
@@ -207,7 +207,7 @@
 - name: Compute haproxy_backend_servers
   hosts: localhost
   connection: local
-  sudo: false
+  become: no
   gather_facts: no
   tasks:
   - set_fact:
@@ -268,6 +268,8 @@
 
 - name: Parse named certificates
   hosts: localhost
+  connection: local
+  become: no
   vars:
     internal_hostnames: "{{ hostvars[groups.oo_first_master.0].openshift.common.internal_hostnames }}"
     named_certificates: "{{ hostvars[groups.oo_first_master.0].openshift_master_named_certificates | default([]) }}"
@@ -394,7 +396,7 @@
 - name: Delete temporary directory on localhost
   hosts: localhost
   connection: local
-  sudo: false
+  become: no
   gather_facts: no
   tasks:
   - file: name={{ g_master_mktemp.stdout }} state=absent

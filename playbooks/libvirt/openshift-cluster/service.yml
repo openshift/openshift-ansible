@@ -5,6 +5,8 @@
 
 - name: Call same systemctl command for openshift on all instance(s)
   hosts: localhost
+  become: no
+  connection: local
   gather_facts: no
   vars_files:
   - vars.yml

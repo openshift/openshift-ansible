@@ -58,7 +58,7 @@
 - name: Create temp directory for syncing certs
   hosts: localhost
   connection: local
-  sudo: false
+  become: no
   gather_facts: no
   tasks:
   - name: Create local temp directory for syncing certs
@@ -189,7 +189,7 @@
 - name: Delete temporary directory on localhost
   hosts: localhost
   connection: local
-  sudo: false
+  become: no
   gather_facts: no
   tasks:
   - file: name={{ mktemp.stdout }} state=absent
