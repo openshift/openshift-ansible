@@ -50,6 +50,9 @@ class Host(object):
         # Should this host run as an HAProxy:
         self.master_lb = kwargs.get('master_lb', False)
 
+        # Should this host run as an HAProxy:
+        self.storage = kwargs.get('storage', False)
+
         self.containerized = kwargs.get('containerized', False)
 
         if self.connect_to is None:
@@ -70,7 +73,7 @@ class Host(object):
         """ Used when exporting to yaml. """
         d = {}
         for prop in ['ip', 'hostname', 'public_ip', 'public_hostname',
-                     'master', 'node', 'master_lb', 'containerized',
+                     'master', 'node', 'master_lb', 'storage', 'containerized',
                      'connect_to', 'preconfigured', 'new_host']:
             # If the property is defined (not None or False), export it:
             if getattr(self, prop):

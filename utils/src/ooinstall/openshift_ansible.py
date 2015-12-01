@@ -21,13 +21,14 @@ def generate_inventory(hosts):
     nodes = [host for host in hosts if host.node]
     new_nodes = [host for host in hosts if host.node and host.new_host]
     proxy = determine_proxy_configuration(hosts)
+    storage = determine_storage_configuration(hosts)
     multiple_masters = len(masters) > 1
     scaleup = len(new_nodes) > 0
 
     base_inventory_path = CFG.settings['ansible_inventory_path']
     base_inventory = open(base_inventory_path, 'w')
 
-    write_inventory_children(base_inventory, multiple_masters, proxy, scaleup)
+    write_inventory_children(base_inventory, multiple_masters, proxy, storage, scaleup)
 
     write_inventory_vars(base_inventory, multiple_masters, proxy)
 
@@ -73,10 +74,15 @@ def generate_inventory(hosts):
         base_inventory.write('\n[lb]\n')
         write_host(proxy, base_inventory)
 
+
     if scaleup:
         base_inventory.write('\n[new_nodes]\n')
         for node in new_nodes:
             write_host(node, base_inventory)
+
+    if storage:
+        base_inventory.write('\n[nfs]\n')
+        write_host(storage, base_inventory)
 
     base_inventory.close()
     return base_inventory_path
@@ -87,11 +93,15 @@ def determine_proxy_configuration(hosts):
         if proxy.hostname == None:
             proxy.hostname = proxy.connect_to
             proxy.public_hostname = proxy.connect_to
-        return proxy
 
-    return None
+    return proxy
 
-def write_inventory_children(base_inventory, multiple_masters, proxy, scaleup):
+def determine_storage_configuration(hosts):
+    storage = next((host for host in hosts if host.storage), None)
+
+    return storage
+
+def write_inventory_children(base_inventory, multiple_masters, proxy, storage, scaleup):
     global CFG
 
     base_inventory.write('\n[OSEv3:children]\n')
@@ -103,6 +113,8 @@ def write_inventory_children(base_inventory, multiple_masters, proxy, scaleup):
         base_inventory.write('etcd\n')
     if not getattr(proxy, 'preconfigured', True):
         base_inventory.write('lb\n')
+    if storage:
+        base_inventory.write('nfs\n')
 
 def write_inventory_vars(base_inventory, multiple_masters, proxy):
     global CFG
