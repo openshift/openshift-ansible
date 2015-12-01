@@ -58,7 +58,7 @@ def generate_inventory(hosts):
 
     base_inventory.write('\n[nodes]\n')
 
-    # TODO: It would be much better to calculate the scheduleability elsewhere
+    # TODO: It would be much better to calculate the schedulability elsewhere
     # and store it on the Node object.
     if set(nodes) == set(masters):
         for node in nodes:

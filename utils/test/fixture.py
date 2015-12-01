@@ -140,7 +140,7 @@ class OOCliFixture(OOInstallFixture):
 
 #pylint: disable=too-many-arguments,too-many-branches
 def build_input(ssh_user=None, hosts=None, variant_num=None,
-                add_nodes=None, confirm_facts=None, scheduleable_masters_ok=None,
+                add_nodes=None, confirm_facts=None, schedulable_masters_ok=None,
                 master_lb=None):
     """
     Build an input string simulating a user entering values in an interactive
@@ -192,7 +192,7 @@ def build_input(ssh_user=None, hosts=None, variant_num=None,
 
     # TODO: support option 2, fresh install
     if add_nodes:
-        if scheduleable_masters_ok:
+        if schedulable_masters_ok:
             inputs.append('y')
         inputs.append('1')  # Add more nodes
         i = 0
