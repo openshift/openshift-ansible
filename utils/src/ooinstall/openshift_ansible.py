@@ -58,19 +58,14 @@ def generate_inventory(hosts):
 
     base_inventory.write('\n[nodes]\n')
 
-    # TODO: It would be much better to calculate the schedulability elsewhere
-    # and store it on the Node object.
-    if set(nodes) == set(masters):
-        for node in nodes:
-            write_host(node, base_inventory, True)
-    else:
-        for node in nodes:
-            # TODO: Until the Master can run the SDN itself we have to configure the Masters
-            # as Nodes too.
-            schedulable = None
-            if node in masters:
-                schedulable = False
-            write_host(node, base_inventory, schedulable)
+    for node in nodes:
+        # Let the fact defaults decide if we're not a master:
+        schedulable = None
+
+        # If the node is also a master, we must explicitly set schedulablity:
+        if node.master:
+            schedulable = node.is_schedulable_node(hosts)
+        write_host(node, base_inventory, schedulable)
 
     if not getattr(proxy, 'preconfigured', True):
         base_inventory.write('\n[lb]\n')

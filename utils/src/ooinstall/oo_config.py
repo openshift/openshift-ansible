@@ -73,6 +73,32 @@ class Host(object):
                 d[prop] = getattr(self, prop)
         return d
 
+    def is_etcd_member(self, all_hosts):
+        """ Will this host be a member of a standalone etcd cluster. """
+        if not self.master:
+            return False
+        masters = [host for host in all_hosts if host.master]
+        if len(masters) > 1:
+            return True
+        return False
+
+    def is_dedicated_node(self):
+        """ Will this host be a dedicated node. (not a master) """
+        return self.node and not self.master
+
+    def is_schedulable_node(self, all_hosts):
+        """ Will this host be a node marked as schedulable. """
+        if not self.node:
+            return False
+        if not self.master:
+            return True
+
+        masters = [host for host in all_hosts if host.master]
+        nodes = [host for host in all_hosts if host.node]
+        if len(masters) == len(nodes):
+            return True
+        return False
+
 
 class OOConfig(object):
     default_dir = os.path.normpath(

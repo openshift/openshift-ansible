@@ -212,16 +212,13 @@ deployment."""
 
 
 def print_host_summary(all_hosts, host):
-    description_tokens = []
-    masters = [ahost for ahost in all_hosts if ahost.master]
-    nodes = [ahost for ahost in all_hosts if ahost.node]
     click.echo("- %s" % host.connect_to)
     if host.master:
         click.echo("  - OpenShift Master")
     if host.node:
-        if not host.master:
+        if host.is_dedicated_node():
             click.echo("  - OpenShift Node (Dedicated)")
-        elif host.master and len(masters) == len(nodes):
+        elif host.is_schedulable_node(all_hosts):
             click.echo("  - OpenShift Node")
         else:
             click.echo("  - OpenShift Node (Unscheduled)")
@@ -231,7 +228,7 @@ def print_host_summary(all_hosts, host):
         else:
             click.echo("  - Load Balancer (HAProxy)")
     if host.master:
-        if len(masters) > 1:
+        if host.is_etcd_member(all_hosts):
             click.echo("  - Etcd Member")
         else:
             click.echo("  - Etcd (Embedded)")
