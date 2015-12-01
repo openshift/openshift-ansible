@@ -721,7 +721,7 @@ class AttendedCliTests(OOCliFixture):
                                       add_nodes=[('10.0.0.2', False)],
                                       ssh_user='root',
                                       variant_num=1,
-                                      scheduleable_masters_ok=True,
+                                      schedulable_masters_ok=True,
                                       confirm_facts='y')
 
         self._verify_get_hosts_to_run_on(mock_facts, load_facts_mock,

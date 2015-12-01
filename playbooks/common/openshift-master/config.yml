@@ -244,6 +244,8 @@
   - fail:
       msg: "openshift_master_session_auth_secrets and openshift_master_encryption_secrets must be equal length"
     when: (openshift_master_session_auth_secrets is defined and openshift_master_session_encryption_secrets is defined) and (openshift_master_session_auth_secrets | length != openshift_master_session_encryption_secrets | length)
+  - name: Install OpenSSL package
+    action: "{{ansible_pkg_mgr}} pkg=openssl state=present"
   - name: Generate session authentication key
     command: /usr/bin/openssl rand -base64 24
     register: session_auth_output
@@ -351,11 +353,16 @@
   - role: openshift_cluster_metrics
     when: openshift.common.use_cluster_metrics | bool
 
+  # TODO: Setting the cluster dns ip should be pushed into openshift-facts
 - name: Determine cluster dns ip
   hosts: oo_first_master
   tasks:
   - name: Get master service ip
-    command: "{{ openshift.common.client_binary }} get -o template svc kubernetes --template=\\{\\{.spec.clusterIP\\}\\}"
+    command: >
+      {{ openshift.common.client_binary }} -n default
+      --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+      get -o template svc kubernetes --template=\\{\\{.spec.clusterIP\\}\\}
+      --output-version=v1
     register: master_service_ip_output
     when: openshift.common.version_greater_than_3_1_or_1_1 | bool
   - set_fact:

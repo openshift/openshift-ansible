@@ -181,5 +181,8 @@
     - name: Reload systemd manager configuration
       command: systemctl daemon-reload
 
+- hosts: nodes
+  sudo: yes
+  tasks:
     - name: restart docker
       service: name=docker state=restarted

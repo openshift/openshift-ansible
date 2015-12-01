@@ -67,10 +67,10 @@ def generate_inventory(hosts):
         for node in nodes:
             # TODO: Until the Master can run the SDN itself we have to configure the Masters
             # as Nodes too.
-            scheduleable = None
+            schedulable = None
             if node in masters:
-                scheduleable = False
-            write_host(node, base_inventory, scheduleable)
+                schedulable = False
+            write_host(node, base_inventory, schedulable)
 
     if not getattr(proxy, 'preconfigured', True):
         base_inventory.write('\n[lb]\n')
@@ -112,7 +112,7 @@ def write_inventory_vars(base_inventory, multiple_masters, proxy):
         base_inventory.write("openshift_master_cluster_public_hostname={}\n".format(proxy.public_hostname))
 
 
-def write_host(host, inventory, scheduleable=None):
+def write_host(host, inventory, schedulable=None):
     global CFG
 
     facts = ''
@@ -129,11 +129,11 @@ def write_host(host, inventory, scheduleable=None):
 
     # Distinguish between three states, no schedulability specified (use default),
     # explicitly set to True, or explicitly set to False:
-    if scheduleable is None:
+    if schedulable is None:
         pass
-    elif scheduleable:
+    elif schedulable:
         facts += ' openshift_schedulable=True'
-    elif not scheduleable:
+    elif not schedulable:
         facts += ' openshift_schedulable=False'
 
     installer_host = socket.gethostname()

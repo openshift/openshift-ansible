@@ -20,12 +20,14 @@
     src: yum_repo.j2
     dest: /etc/yum.repos.d/openshift_additional.repo
   when: openshift_additional_repos | length > 0
+  notify: refresh package cache
 
 - name: Remove the additional repos if no longer defined
   file:
     dest: /etc/yum.repos.d/openshift_additional.repo
     state: absent
   when: openshift_additional_repos | length == 0
+  notify: refresh package cache
 
 - name: Remove any yum repo files for other deployment types
   file:
@@ -34,13 +36,16 @@
   with_fileglob:
   - '*/repos/*'
   when: not (item | search("/files/" ~ openshift_deployment_type ~ "/repos"))
+  notify: refresh package cache
 
 - name: Configure gpg keys if needed
   copy: src={{ item }} dest=/etc/pki/rpm-gpg/
   with_fileglob:
   - "{{ openshift_deployment_type }}/gpg_keys/*"
+  notify: refresh package cache
 
 - name: Configure yum repositories
   copy: src={{ item }} dest=/etc/yum.repos.d/
   with_fileglob:
   - "{{ openshift_deployment_type }}/repos/*"
+  notify: refresh package cache

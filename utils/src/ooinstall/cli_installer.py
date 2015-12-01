@@ -101,7 +101,7 @@ separate etcd cluster will be configured with each Master serving as a member.
 
 Any Masters configured as part of this installation process will also be
 configured as Nodes.  This is so that the Master will be able to proxy to Pods
-from the API.  By default this Node will be unscheduleable but this can be changed
+from the API.  By default this Node will be unschedulable but this can be changed
 after installation with 'oadm manage-node'.
 
 OpenShift Nodes provide the runtime environments for containers.  They will
@@ -347,7 +347,7 @@ https://docs.openshift.org/latest/install_config/install/advanced_install.html#m
     if len(dedicated_nodes) == 0:
         message = """
 WARNING: No dedicated Nodes specified. By default, colocated Masters have
-their Nodes set to unscheduleable.  If you proceed all nodes will be labelled
+their Nodes set to unschedulable.  If you proceed all nodes will be labelled
 as schedulable.
 """
         if unattended:
