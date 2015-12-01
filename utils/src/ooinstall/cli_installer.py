@@ -172,30 +172,34 @@ def print_host_summary(hosts):
     click.echo("")
 
     if len(masters) == 1:
-        click.echo("NOTE: Add a total of 3 or more Masters to perform an HA"
-                   " installation.")
+        ha_hint_message = """
+NOTE: Add a total of 3 or more Masters to perform an HA installation."""
+        click.echo(ha_hint_message)
     elif len(masters) == 2:
         min_masters_message = """
 WARNING: A minimum of 3 masters are required to perform an HA installation.
-Please add one more to proceed.
-"""
+Please add one more to proceed."""
         click.echo(min_masters_message)
     elif len(masters) >= 3:
         ha_message = """
 NOTE: Multiple Masters specified, this will be an HA deployment with a separate
 etcd cluster. You will be prompted to provide the FQDN of a load balancer once
-finished entering hosts.
-"""
+finished entering hosts."""
         click.echo(ha_message)
 
         dedicated_nodes_message = """
 WARNING: Dedicated Nodes are recommended for an HA deployment. If no dedicated
 Nodes are specified, each configured Master will be marked as a schedulable
-Node.
-"""
+Node."""
+
+        min_ha_nodes_message = """
+WARNING: A minimum of 3 dedicated Nodes are recommended for an HA
+deployment."""
         dedicated_nodes = [host for host in hosts if host.node and not host.master]
         if len(dedicated_nodes) == 0:
             click.echo(dedicated_nodes_message)
+        elif len(dedicated_nodes) < 3:
+            click.echo(min_ha_nodes_message)
 
     click.echo('')
 
