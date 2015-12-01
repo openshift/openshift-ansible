@@ -7,6 +7,12 @@ g_template_openshift_master:
     - Openshift Master
     key: create_app
 
+  - key: openshift.master.registry.healthz
+    description: "Shows the health status of the cluster's docker registry"
+    type: int
+    applications:
+    - Openshift Master
+
   - key: openshift.master.process.count
     description: Shows number of master processes running
     type: int
@@ -243,6 +249,11 @@ g_template_openshift_master:
   - name: 'Etcd ping failed on {HOST.NAME}'
     expression: '{Template Openshift Master:openshift.master.etcd.ping.last(#1)}=0 and {Template Openshift Master:openshift.master.etcd.ping.last(#2)}=0'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_etcd.asciidoc'
+    priority: high
+
+  - name: 'Docker Registry check failed on {HOST.NAME}'
+    expression: '{Template Openshift Master:openshift.master.registry.healthz.max(#2)}<1'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
     priority: high
 
   zgraphs:
