@@ -144,7 +144,7 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
         hosts.append(host)
 
         if print_summary:
-            print_host_summary(hosts)
+            print_installation_summary(hosts)
 
         # If we have one master, this is enough for an all-in-one deployment,
         # thus we can start asking if you wish to proceed. Otherwise we assume
@@ -158,18 +158,26 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
     return hosts
 
 
-def print_host_summary(hosts):
+def print_installation_summary(hosts):
+    """
+    Displays a summary of all hosts configured thus far, and what role each
+    will play.
+
+    Shows total nodes/masters, hints for performing/modifying the deployment
+    with additional setup, warnings for invalid or sub-optimal configurations.
+    """
+    click.clear()
+    click.echo('*** Installation Summary ***\n')
+    click.echo('Hosts:')
+    for host in hosts:
+        print_host_summary(hosts, host)
+
     masters = [host for host in hosts if host.master]
     nodes = [host for host in hosts if host.node]
+    dedicated_nodes = [host for host in hosts if host.node and not host.master]
     click.echo('')
-    click.echo('OpenShift Masters: %s' % len(masters))
-    for host in masters:
-        click.echo('  %s' % host.connect_to)
-    click.echo('OpenShift Nodes: %s' % len(nodes))
-    for host in nodes:
-        click.echo('  %s' % host.connect_to)
-
-    click.echo("")
+    click.echo('Total OpenShift Masters: %s' % len(masters))
+    click.echo('Total OpenShift Nodes: %s' % len(nodes))
 
     if len(masters) == 1:
         ha_hint_message = """
@@ -195,13 +203,38 @@ Node."""
         min_ha_nodes_message = """
 WARNING: A minimum of 3 dedicated Nodes are recommended for an HA
 deployment."""
-        dedicated_nodes = [host for host in hosts if host.node and not host.master]
         if len(dedicated_nodes) == 0:
             click.echo(dedicated_nodes_message)
         elif len(dedicated_nodes) < 3:
             click.echo(min_ha_nodes_message)
 
     click.echo('')
+
+
+def print_host_summary(all_hosts, host):
+    description_tokens = []
+    masters = [ahost for ahost in all_hosts if ahost.master]
+    nodes = [ahost for ahost in all_hosts if ahost.node]
+    click.echo("- %s" % host.connect_to)
+    if host.master:
+        click.echo("  - OpenShift Master")
+    if host.node:
+        if not host.master:
+            click.echo("  - OpenShift Node (Dedicated)")
+        elif host.master and len(masters) == len(nodes):
+            click.echo("  - OpenShift Node")
+        else:
+            click.echo("  - OpenShift Node (Unscheduled)")
+    if host.master_lb:
+        if host.preconfigured:
+            click.echo("  - Load Balancer (Preconfigured)")
+        else:
+            click.echo("  - Load Balancer (HAProxy)")
+    if host.master:
+        if len(masters) > 1:
+            click.echo("  - Etcd Member")
+        else:
+            click.echo("  - Etcd (Embedded)")
 
 
 def collect_master_lb(hosts):
@@ -723,7 +756,7 @@ def install(ctx, force):
     check_hosts_config(oo_cfg, ctx.obj['unattended'])
 
     click.echo('Gathering information from hosts...')
-    print_host_summary(oo_cfg.hosts)
+    print_installation_summary(oo_cfg.hosts)
     callback_facts, error = openshift_ansible.default_facts(oo_cfg.hosts,
         verbose)
     if error:
