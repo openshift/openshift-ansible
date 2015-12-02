@@ -7,9 +7,28 @@ g_template_openshift_master:
     - Openshift Master
     key: create_app
 
+  - key: openshift.master.registry.healthz
+    description: "Shows the health status of the cluster's docker registry"
+    type: int
+    applications:
+    - Openshift Master
+
   - key: openshift.master.process.count
     description: Shows number of master processes running
     type: int
+    applications:
+    - Openshift Master
+
+  - key: openshift.master.api.ping
+    description: "Verify that the Openshift API is up"
+    type: int
+    applications:
+    - Openshift Master
+
+  - key: openshift.master.api.healthz
+    description: "Checks the healthz check of the master's api: https://master_host/healthz"
+    type: int
+    data_type: bool
     applications:
     - Openshift Master
 
@@ -24,17 +43,182 @@ g_template_openshift_master:
     type: int
     applications:
     - Openshift Master
-  
-  - key: openshift.project.counter
+
+  - key: openshift.master.pod.user.running.count
+    description: Shows number of user pods running (non infrastructure pods)
+    type: int
+    applications:
+    - Openshift Master
+
+  - key: openshift.master.pod.total.count
+    description: Shows total number of pods (running and non running)
+    type: int
+    applications:
+    - Openshift Master
+
+  - key: openshift.master.node.count
+    description: Shows the total number of nodes found in the Openshift Cluster
+    type: int
+    applications:
+    - Openshift Master
+
+  - key: openshift.project.count
     description: Shows number of projects on a cluster
     type: int
     applications:
     - Openshift Master
 
+  - key: openshift.master.etcd.create.success
+    description: Show number of successful create actions
+    type: int
+    applications:
+    - Openshift Etcd
+
+  - key: openshift.master.etcd.create.fail
+    description: Show number of failed create actions
+    type: int
+    applications:
+    - Openshift Etcd
+
+  - key: openshift.master.etcd.delete.success
+    description: Show number of successful delete actions
+    type: int
+    applications:
+    - Openshift Etcd
+
+  - key: openshift.master.etcd.delete.fail
+    description: Show number of failed delete actions
+    type: int
+    applications:
+    - Openshift Etcd
+
+  - key: openshift.master.etcd.get.success
+    description: Show number of successful get actions
+    type: int
+    applications:
+    - Openshift Etcd
+
+  - key: openshift.master.etcd.get.fail
+    description: Show number of failed get actions
+    type: int
+    applications:
+    - Openshift Etcd
+
+  - key: openshift.master.etcd.set.success
+    description: Show number of successful set actions
+    type: int
+    applications:
+    - Openshift Etcd
+
+  - key: openshift.master.etcd.set.fail
+    description: Show number of failed set actions
+    type: int
+    applications:
+    - Openshift Etcd
+
+  - key: openshift.master.etcd.update.success
+    description: Show number of successful update actions
+    type: int
+    applications:
+    - Openshift Etcd
+
+  - key: openshift.master.etcd.update.fail
+    description: Show number of failed update actions
+    type: int
+    applications:
+    - Openshift Etcd
+
+  - key: openshift.master.etcd.watchers
+    description: Show number of etcd watchers
+    type: int
+    applications:
+    - Openshift Etcd
+
+  - key: openshift.master.etcd.ping
+    description: etcd ping
+    type: int
+    applications:
+    - Openshift Etcd
+
+  - key: openshift.master.metric.ping
+    description: "This check verifies that the https://master/metrics check is alive and communicating properly."
+    type: int
+    applications:
+    - Openshift Master Metrics
+
+  - key: openshift.master.apiserver.latency.summary.pods.quantile.list.5
+    description: "Value from https://master/metrics.  This is the time, in miliseconds, that 50% of the pod operations have taken to completed."
+    type: int
+    applications:
+    - Openshift Master Metrics
+
+  - key: openshift.master.apiserver.latency.summary.pods.quantile.list.9
+    description: "Value from https://master/metrics.  This is the time, in miliseconds, that 90% of the pod operations have taken to completed."
+    type: int
+    applications:
+    - Openshift Master Metrics
+
+  - key: openshift.master.apiserver.latency.summary.pods.quantile.list.99
+    description: "Value from https://master/metrics.  This is the time, in miliseconds, that 99% of the pod operations have taken to completed."
+    type: int
+    applications:
+    - Openshift Master Metrics
+
+  - key: openshift.master.apiserver.latency.summary.pods.quantile.watchlist.5
+    description: "Value from https://master/metrics.  This is the time, in miliseconds, that 50% of the pod operations have taken to completed."
+    type: int
+    applications:
+    - Openshift Master Metrics
+
+  - key: openshift.master.apiserver.latency.summary.pods.quantile.watchlist.9
+    description: "Value from https://master/metrics.  This is the time, in miliseconds, that 90% of the pod operations have taken to completed."
+    type: int
+    applications:
+    - Openshift Master Metrics
+
+  - key: openshift.master.apiserver.latency.summary.pods.quantile.watchlist.99
+    description: "Value from https://master/metrics.  This is the time, in miliseconds, that 99% of the pod operations have taken to completed."
+    type: int
+    applications:
+    - Openshift Master Metrics
+
+  - key: openshift.master.scheduler.e2e.scheduling.latency.quantile.5
+    description: "Value from https://master/metrics.  This is the time, in miliseconds, that 50% of the end to end scheduling operations have taken to completed."
+    type: int
+    applications:
+    - Openshift Master Metrics
+
+  - key: openshift.master.scheduler.e2e.scheduling.latency.quantile.9
+    description: "Value from https://master/metrics.  This is the time, in miliseconds, that 90% of the end to end scheduling operations have taken to completed."
+    type: int
+    applications:
+    - Openshift Master Metrics
+
+  - key: openshift.master.scheduler.e2e.scheduling.latency.quantile.99
+    description: "Value from https://master/metrics.  This is the time, in miliseconds, that 99% of the end to end scheduling operations have taken to completed."
+    type: int
+    applications:
+    - Openshift Master Metrics
+
   ztriggers:
   - name: 'Application creation has failed on {HOST.NAME}'
     expression: '{Template Openshift Master:create_app.last(#1)}=1 and {Template Openshift Master:create_app.last(#2)}=1'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_create_app.asciidoc'
+    priority: avg
+
+  - name: 'Openshift Master API health check is failing on {HOST.NAME}'
+    expression: '{Template Openshift Master:openshift.master.api.healthz.max(#3)}<1'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
+    priority: high
+
+  - name: 'Openshift Master API PING check is failing on {HOST.NAME}'
+    expression: '{Template Openshift Master:openshift.master.api.ping.max(#3)}<1'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
+    priority: high
+
+  - name: 'Openshift Master metric PING check is failing on {HOST.NAME}'
+    expression: '{Template Openshift Master:openshift.master.metric.ping.max(#3)}<1'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
     priority: avg
 
   - name: 'Openshift Master process not running on {HOST.NAME}'
@@ -53,6 +237,55 @@ g_template_openshift_master:
     priority: info
 
   - name: 'There are no projects running on {HOST.NAME}'
-    expression: '{Template Openshift Master:openshift.project.counter.last()}=0'
+    expression: '{Template Openshift Master:openshift.project.count.last()}=0'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
     priority: info
+
+  - name: 'Low number of etcd watchers on {HOST.NAME}'
+    expression: '{Template Openshift Master:openshift.master.etcd.watchers.last(#1)}<10 and {Template Openshift Master:openshift.master.etcd.watchers.last(#2)}<10'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_etcd.asciidoc'
+    priority: avg
+
+  - name: 'Etcd ping failed on {HOST.NAME}'
+    expression: '{Template Openshift Master:openshift.master.etcd.ping.last(#1)}=0 and {Template Openshift Master:openshift.master.etcd.ping.last(#2)}=0'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_etcd.asciidoc'
+    priority: high
+
+  - name: 'Docker Registry check failed on {HOST.NAME}'
+    expression: '{Template Openshift Master:openshift.master.registry.healthz.max(#2)}<1'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
+    priority: high
+
+  zgraphs:
+  - name: Openshift Master API Server Latency Pods LIST Quantiles
+    width: 900
+    height: 200
+    graph_items:
+    - item_name: openshift.master.apiserver.latency.summary.pods.quantile.list.5
+      color: red
+    - item_name: openshift.master.apiserver.latency.summary.pods.quantile.list.9
+      color: blue
+    - item_name: openshift.master.apiserver.latency.summary.pods.quantile.list.99
+      color: orange
+
+  - name: Openshift Master API Server Latency Pods WATCHLIST Quantiles
+    width: 900
+    height: 200
+    graph_items:
+    - item_name: openshift.master.apiserver.latency.summary.pods.quantile.watchlist.5
+      color: red
+    - item_name: openshift.master.apiserver.latency.summary.pods.quantile.watchlist.9
+      color: blue
+    - item_name: openshift.master.apiserver.latency.summary.pods.quantile.watchlist.99
+      color: orange
+
+  - name: Openshift Master Scheduler End to End Latency Quantiles
+    width: 900
+    height: 200
+    graph_items:
+    - item_name: openshift.master.scheduler.e2e.scheduling.latency.quantile.5
+      color: red
+    - item_name: openshift.master.scheduler.e2e.scheduling.latency.quantile.9
+      color: blue
+    - item_name: openshift.master.scheduler.e2e.scheduling.latency.quantile.99
+      color: orange

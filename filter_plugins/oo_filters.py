@@ -7,6 +7,8 @@ Custom filters for use in openshift-ansible
 
 from ansible import errors
 from operator import itemgetter
+import OpenSSL.crypto
+import os.path
 import pdb
 import re
 import json
@@ -189,7 +191,11 @@ class FilterModule(object):
                     { 'root':
                         { 'volume_size': 10, 'device_type': 'gp2',
                           'iops': 500
-                        }
+                        },
+                        'docker':
+                          { 'volume_size': 40, 'device_type': 'gp2',
+                            'iops': 500, 'ephemeral': 'true'
+                          }
                     },
                   'node':
                     { 'root':
@@ -214,7 +220,7 @@ class FilterModule(object):
         root_vol['delete_on_termination'] = True
         if root_vol['device_type'] != 'io1':
             root_vol.pop('iops', None)
-        if host_type == 'node':
+        if host_type in ['master', 'node'] and 'docker' in data[host_type]:
             docker_vol = data[host_type]['docker']
             docker_vol['device_name'] = '/dev/xvdb'
             docker_vol['delete_on_termination'] = True
@@ -225,7 +231,7 @@ class FilterModule(object):
                 docker_vol.pop('delete_on_termination', None)
                 docker_vol['ephemeral'] = 'ephemeral0'
             return [root_vol, docker_vol]
-        elif host_type == 'etcd':
+        elif host_type == 'etcd' and 'etcd' in data[host_type]:
             etcd_vol = data[host_type]['etcd']
             etcd_vol['device_name'] = '/dev/xvdb'
             etcd_vol['delete_on_termination'] = True
@@ -239,6 +245,21 @@ class FilterModule(object):
         ''' This splits the input string into a list
         '''
         return string.split(separator)
+
+    @staticmethod
+    def oo_haproxy_backend_masters(hosts):
+        ''' This takes an array of dicts and returns an array of dicts
+            to be used as a backend for the haproxy role
+        '''
+        servers = []
+        for idx, host_info in enumerate(hosts):
+            server = dict(name="master%s" % idx)
+            server_ip = host_info['openshift']['common']['ip']
+            server_port = host_info['openshift']['master']['api_port']
+            server['address'] = "%s:%s" % (server_ip, server_port)
+            server['opts'] = 'check'
+            servers.append(server)
+        return servers
 
     @staticmethod
     def oo_filter_list(data, filter_attr=None):
@@ -258,7 +279,7 @@ class FilterModule(object):
             raise errors.AnsibleFilterError("|failed expects filter_attr is a str")
 
         # Gather up the values for the list of keys passed in
-        return [x for x in data if x[filter_attr]]
+        return [x for x in data if x.has_key(filter_attr) and x[filter_attr]]
 
     @staticmethod
     def oo_parse_heat_stack_outputs(data):
@@ -327,6 +348,125 @@ class FilterModule(object):
 
         return revamped_outputs
 
+    @staticmethod
+    # pylint: disable=too-many-branches
+    def oo_parse_named_certificates(certificates, named_certs_dir, internal_hostnames):
+        ''' Parses names from list of certificate hashes.
+
+            Ex: certificates = [{ "certfile": "/root/custom1.crt",
+                                  "keyfile": "/root/custom1.key" },
+                                { "certfile": "custom2.crt",
+                                  "keyfile": "custom2.key" }]
+
+                returns [{ "certfile": "/etc/origin/master/named_certificates/custom1.crt",
+                           "keyfile": "/etc/origin/master/named_certificates/custom1.key",
+                           "names": [ "public-master-host.com",
+                                      "other-master-host.com" ] },
+                         { "certfile": "/etc/origin/master/named_certificates/custom2.crt",
+                           "keyfile": "/etc/origin/master/named_certificates/custom2.key",
+                           "names": [ "some-hostname.com" ] }]
+        '''
+        if not issubclass(type(certificates), list):
+            raise errors.AnsibleFilterError("|failed expects certificates is a list")
+
+        if not issubclass(type(named_certs_dir), unicode):
+            raise errors.AnsibleFilterError("|failed expects named_certs_dir is unicode")
+
+        if not issubclass(type(internal_hostnames), list):
+            raise errors.AnsibleFilterError("|failed expects internal_hostnames is list")
+
+        for certificate in certificates:
+            if 'names' in certificate.keys():
+                continue
+            else:
+                certificate['names'] = []
+
+            if not os.path.isfile(certificate['certfile']) or not os.path.isfile(certificate['keyfile']):
+                raise errors.AnsibleFilterError("|certificate and/or key does not exist '%s', '%s'" %
+                                                (certificate['certfile'], certificate['keyfile']))
+
+            try:
+                st_cert = open(certificate['certfile'], 'rt').read()
+                cert = OpenSSL.crypto.load_certificate(OpenSSL.crypto.FILETYPE_PEM, st_cert)
+                certificate['names'].append(str(cert.get_subject().commonName.decode()))
+                for i in range(cert.get_extension_count()):
+                    if cert.get_extension(i).get_short_name() == 'subjectAltName':
+                        for name in str(cert.get_extension(i)).replace('DNS:', '').split(', '):
+                            certificate['names'].append(name)
+            except:
+                raise errors.AnsibleFilterError(("|failed to parse certificate '%s', " % certificate['certfile'] +
+                                                 "please specify certificate names in host inventory"))
+
+            certificate['names'] = [name for name in certificate['names'] if name not in internal_hostnames]
+            certificate['names'] = list(set(certificate['names']))
+            if not certificate['names']:
+                raise errors.AnsibleFilterError(("|failed to parse certificate '%s' or " % certificate['certfile'] +
+                                                 "detected a collision with internal hostname, please specify " +
+                                                 "certificate names in host inventory"))
+
+        for certificate in certificates:
+            # Update paths for configuration
+            certificate['certfile'] = os.path.join(named_certs_dir, os.path.basename(certificate['certfile']))
+            certificate['keyfile'] = os.path.join(named_certs_dir, os.path.basename(certificate['keyfile']))
+        return certificates
+
+    @staticmethod
+    def oo_pretty_print_cluster(data):
+        ''' Read a subset of hostvars and build a summary of the cluster
+            in the following layout:
+
+"c_id": {
+  "master": [
+    { "name": "c_id-master-12345",       "public IP": "172.16.0.1", "private IP": "192.168.0.1", "subtype": "default" }]
+  "node": [
+    { "name": "c_id-node-infra-23456",   "public IP": "172.16.0.2", "private IP": "192.168.0.2", "subtype": "infra" },
+    { "name": "c_id-node-compute-23456", "public IP": "172.16.0.3", "private IP": "192.168.0.3", "subtype": "compute" },
+  ...
+  ]}
+        '''
+
+        def _get_tag_value(tags, key):
+            ''' Extract values of a map implemented as a set.
+                Ex: tags = { 'tag_foo_value1', 'tag_bar_value2', 'tag_baz_value3' }
+                    key = 'bar'
+                    returns 'value2'
+            '''
+            for tag in tags:
+                # Skip tag_env-host-type to avoid ambiguity with tag_env
+                if tag[:17] == 'tag_env-host-type':
+                    continue
+                if tag[:len(key)+4] == 'tag_' + key:
+                    return tag[len(key)+5:]
+            raise KeyError(key)
+
+        def _add_host(clusters,
+                      env,
+                      host_type,
+                      sub_host_type,
+                      host):
+            ''' Add a new host in the clusters data structure '''
+            if env not in clusters:
+                clusters[env] = {}
+            if host_type not in clusters[env]:
+                clusters[env][host_type] = {}
+            if sub_host_type not in clusters[env][host_type]:
+                clusters[env][host_type][sub_host_type] = []
+            clusters[env][host_type][sub_host_type].append(host)
+
+        clusters = {}
+        for host in data:
+            try:
+                _add_host(clusters=clusters,
+                          env=_get_tag_value(host['group_names'], 'env'),
+                          host_type=_get_tag_value(host['group_names'], 'host-type'),
+                          sub_host_type=_get_tag_value(host['group_names'], 'sub-host-type'),
+                          host={'name': host['inventory_hostname'],
+                                'public IP': host['ansible_ssh_host'],
+                                'private IP': host['ansible_default_ipv4']['address']})
+            except KeyError:
+                pass
+        return clusters
+
     def filters(self):
         ''' returns a mapping of filters to methods '''
         return {
@@ -342,5 +482,8 @@ class FilterModule(object):
             "oo_combine_dict": self.oo_combine_dict,
             "oo_split": self.oo_split,
             "oo_filter_list": self.oo_filter_list,
-            "oo_parse_heat_stack_outputs": self.oo_parse_heat_stack_outputs
+            "oo_parse_heat_stack_outputs": self.oo_parse_heat_stack_outputs,
+            "oo_parse_named_certificates": self.oo_parse_named_certificates,
+            "oo_haproxy_backend_masters": self.oo_haproxy_backend_masters,
+            "oo_pretty_print_cluster": self.oo_pretty_print_cluster
         }

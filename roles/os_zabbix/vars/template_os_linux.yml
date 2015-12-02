@@ -194,6 +194,16 @@ g_template_os_linux:
     lifetime: 1
     description: "Dynamically register the filesystems"
 
+  - name: disc.disk
+    key: disc.disk
+    lifetime: 1
+    description: "Dynamically register disks on a node"
+
+  - name: disc.network
+    key: disc.network
+    lifetime: 1
+    description: "Dynamically register network interfaces on a node"
+
   zitemprototypes:
   - discoveryrule_key: disc.filesys
     name: "disc.filesys.full.{#OSO_FILESYS}"
@@ -210,6 +220,42 @@ g_template_os_linux:
     description: "PCP derived value of percentage of used inodes on a filesystem."
     applications:
     - Disk
+
+  - discoveryrule_key: disc.disk
+    name: "TPS (IOPS) for disk {#OSO_DISK}"
+    key: "disc.disk.tps[{#OSO_DISK}]"
+    value_type: int
+    description: "PCP disk.dev.totals metric measured over a period of time.  This shows how many disk transactions per second the disk is using"
+    applications:
+    - Disk
+
+  - discoveryrule_key: disc.disk
+    name: "Percent Utilized for disk {#OSO_DISK}"
+    key: "disc.disk.putil[{#OSO_DISK}]"
+    value_type: float
+    description: "PCP disk.dev.avactive metric measured over a period of time.  This is the '%util' in the iostat command"
+    applications:
+    - Disk
+
+  - discoveryrule_key: disc.network
+    name: "Bytes per second IN on network interface {#OSO_NET_INTERFACE}"
+    key: "disc.network.in.bytes[{#OSO_NET_INTERFACE}]"
+    value_type: int
+    units: B
+    delta: 1
+    description: "PCP network.interface.in.bytes metric.  This is setup as a delta in Zabbix to measure the speed per second"
+    applications:
+    - Network
+
+  - discoveryrule_key: disc.network
+    name: "Bytes per second OUT on network interface {#OSO_NET_INTERFACE}"
+    key: "disc.network.out.bytes[{#OSO_NET_INTERFACE}]"
+    value_type: int
+    units: B
+    delta: 1
+    description: "PCP network.interface.out.bytes metric.  This is setup as a delta in Zabbix to measure the speed per second"
+    applications:
+    - Network
 
   ztriggerprototypes:
   - name: 'Filesystem: {#OSO_FILESYS} has less than 15% free disk space on {HOST.NAME}'
@@ -246,15 +292,27 @@ g_template_os_linux:
 
     #  CPU Utilization #
   - name: 'CPU idle less than 5% on {HOST.NAME}'
-    expression: '{Template OS Linux:kernel.all.cpu.idle.last()}<5 and {Template OS Linux:kernel.all.cpu.idle.last(#2)}<5'
+    expression: '{Template OS Linux:kernel.all.cpu.idle.max(#5)}<5'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_cpu_idle.asciidoc'
-    priority: high
+    priority: average
     description: 'CPU is less than 5% idle'
 
   - name: 'CPU idle less than 10% on {HOST.NAME}'
-    expression: '{Template OS Linux:kernel.all.cpu.idle.last()}<10 and {Template OS Linux:kernel.all.cpu.idle.last(#2)}<10'
+    expression: '{Template OS Linux:kernel.all.cpu.idle.max(#5)}<10'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_cpu_idle.asciidoc'
-    priority: warn
+    priority: average
     description: 'CPU is less than 10% idle'
     dependencies:
     - 'CPU idle less than 5% on {HOST.NAME}'
+
+  zgraphprototypes:
+  - name: Network Interface Usage
+    width: 1000
+    height: 400
+    graph_items:
+    - item_name: "Bytes per second IN on network interface {#OSO_NET_INTERFACE}"
+      item_type: prototype
+      color: red
+    - item_name: "Bytes per second OUT on network interface {#OSO_NET_INTERFACE}"
+      item_type: prototype
+      color: blue

@@ -13,6 +13,8 @@
           hostname: "{{ openshift_hostname | default(None) }}"
           public_hostname: "{{ openshift_public_hostname | default(None) }}"
           deployment_type: "{{ openshift_deployment_type }}"
+      - role: etcd
+        local_facts: {}
   - name: Check status of etcd certificates
     stat:
       path: "{{ item }}"
@@ -22,7 +24,7 @@
     - /etc/etcd/ca.crt
     register: g_etcd_server_cert_stat_result
   - set_fact:
-      etcd_server_certs_missing: "{{ g_etcd_server_cert_stat_result.results | map(attribute='stat.exists')
+      etcd_server_certs_missing: "{{ g_etcd_server_cert_stat_result.results | oo_collect(attribute='stat.exists')
                                     | list | intersect([false])}}"
       etcd_cert_subdir: etcd-{{ openshift.common.hostname }}
       etcd_cert_config_dir: /etc/etcd

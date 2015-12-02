@@ -11,7 +11,7 @@
       msg: Deployment type not supported for aws provider yet
     when: deployment_type == 'enterprise'
 
-  - include: ../../common/openshift-cluster/set_etcd_launch_facts_tasks.yml
+  - include: ../../common/openshift-cluster/tasks/set_etcd_launch_facts.yml
   - include: tasks/launch_instances.yml
     vars:
       instances: "{{ etcd_names }}"
@@ -19,7 +19,7 @@
       type: "{{ k8s_type }}"
       g_sub_host_type: "default"
 
-  - include: ../../common/openshift-cluster/set_master_launch_facts_tasks.yml
+  - include: ../../common/openshift-cluster/tasks/set_master_launch_facts.yml
   - include: tasks/launch_instances.yml
     vars:
       instances: "{{ master_names }}"
@@ -27,7 +27,7 @@
       type: "{{ k8s_type }}"
       g_sub_host_type: "default"
 
-  - include: ../../common/openshift-cluster/set_node_launch_facts_tasks.yml
+  - include: ../../common/openshift-cluster/tasks/set_node_launch_facts.yml
     vars:
       type: "compute"
       count: "{{ num_nodes }}"
@@ -38,7 +38,7 @@
       type: "{{ k8s_type }}"
       g_sub_host_type: "{{ sub_host_type }}"
 
-  - include: ../../common/openshift-cluster/set_node_launch_facts_tasks.yml
+  - include: ../../common/openshift-cluster/tasks/set_node_launch_facts.yml
     vars:
       type: "infra"
       count: "{{ num_infra }}"
@@ -55,9 +55,4 @@
     when: master_names is defined and master_names.0 is defined
 
 - include: update.yml
-
-- include: ../../common/openshift-cluster/create_services.yml
-  vars:
-     g_svc_master: "{{ service_master }}"
-
 - include: list.yml

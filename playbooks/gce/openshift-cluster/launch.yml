@@ -9,15 +9,17 @@
   - fail: msg="Deployment type not supported for gce provider yet"
     when: deployment_type == 'enterprise'
 
-  - include: ../../common/openshift-cluster/set_master_launch_facts_tasks.yml
+  - include: ../../common/openshift-cluster/tasks/set_master_launch_facts.yml
   - include: tasks/launch_instances.yml
     vars:
       instances: "{{ master_names }}"
       cluster: "{{ cluster_id }}"
       type: "{{ k8s_type }}"
       g_sub_host_type: "default"
+      gce_machine_type: "{{ lookup('env', 'gce_machine_master_type') | default(lookup('env', 'gce_machine_type'), true) }}"
+      gce_machine_image: "{{ lookup('env', 'gce_machine_master_image') | default(lookup('env', 'gce_machine_image'), true) }}"
 
-  - include: ../../common/openshift-cluster/set_node_launch_facts_tasks.yml
+  - include: ../../common/openshift-cluster/tasks/set_node_launch_facts.yml
     vars:
       type: "compute"
       count: "{{ num_nodes }}"
@@ -27,8 +29,10 @@
       cluster: "{{ cluster_id }}"
       type: "{{ k8s_type }}"
       g_sub_host_type: "{{ sub_host_type }}"
+      gce_machine_type: "{{ lookup('env', 'gce_machine_node_type') | default(lookup('env', 'gce_machine_type'), true) }}"
+      gce_machine_image: "{{ lookup('env', 'gce_machine_node_image') | default(lookup('env', 'gce_machine_image'), true) }}"
 
-  - include: ../../common/openshift-cluster/set_node_launch_facts_tasks.yml
+  - include: ../../common/openshift-cluster/tasks/set_node_launch_facts.yml
     vars:
       type: "infra"
       count: "{{ num_infra }}"

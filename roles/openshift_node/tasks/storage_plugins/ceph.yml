@@ -1,0 +1,5 @@
+---
+- name: Install Ceph storage plugin dependencies
+  yum:
+    pkg: ceph-common
+    state: installed

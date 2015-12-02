@@ -64,7 +64,7 @@
   register: nb_allocated_ips
   until: nb_allocated_ips.stdout == '{{ instances | length }}'
   retries: 60
-  delay: 1
+  delay: 3
   when: instances | length != 0
 
 - name: Collect IP addresses of the VMs
@@ -81,7 +81,7 @@
     ansible_ssh_host: '{{ item.1 }}'
     ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
     ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-    groups: 'tag_env-{{ cluster }}, tag_host-type-{{ type }}, tag_env-host-type-{{ cluster }}-openshift-{{ type }}'
+    groups: 'tag_env-{{ cluster }}, tag_host-type-{{ type }}, tag_env-host-type-{{ cluster }}-openshift-{{ type }}, tag_sub-host-type-{{ g_sub_host_type }}'
   with_together:
     - instances
     - ips

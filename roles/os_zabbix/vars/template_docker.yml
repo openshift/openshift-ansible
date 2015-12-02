@@ -7,6 +7,11 @@ g_template_docker:
     - Docker Daemon
     value_type: int
 
+  - key: docker.info_elapsed_ms
+    applications:
+    - Docker Daemon
+    value_type: int
+
   - key: docker.storage.is_loopback
     applications:
     - Docker Storage

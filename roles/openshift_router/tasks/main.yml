@@ -1,11 +1,14 @@
 ---
-- set_fact: _ortr_images="--images={{ oreg_url|quote }}"
-  when: oreg_url is defined
+
+- set_fact: _ortr_images="--images='{{ openshift.master.registry_url }}'"
+
+- set_fact: _ortr_selector="--selector='{{ openshift.master.router_selector }}'"
 
 - name: Deploy OpenShift Router
   command: >
     {{ openshift.common.admin_binary }} router
-    --create
-    --credentials={{ openshift_master_config_dir }}/openshift-router.kubeconfig {{ _ortr_images|default() }}
+    --create --replicas={{ openshift.master.infra_nodes }}
+    --service-account=router {{ _ortr_selector }}
+    --credentials={{ openshift_master_config_dir }}/openshift-router.kubeconfig {{ _ortr_images }}
   register: _ortr_results
   changed_when: "'service exists' not in _ortr_results.stdout"

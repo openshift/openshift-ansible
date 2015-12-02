@@ -1,8 +1,0 @@
----
-- name: Deploy OpenShift Services
-  hosts: "{{ g_svc_master }}"
-  connection: ssh
-  gather_facts: yes
-  roles:
-  - openshift_registry
-  - openshift_router

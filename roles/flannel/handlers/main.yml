@@ -1,0 +1,8 @@
+---
+- name: restart flanneld
+  sudo: true
+  service: name=flanneld state=restarted
+
+- name: restart docker
+  sudo: true
+  service: name=docker state=restarted

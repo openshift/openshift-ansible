@@ -1,8 +1,0 @@
----
-- debug: msg="Deferring config"
-
-- name: Start and enable the master
-  service:
-    name: "{{ openshift.common.service_type }}-master"
-    state: started
-    enabled: yes

@@ -8,7 +8,7 @@
   when: osn_cluster_dns_ip is not defined or not osn_cluster_dns_ip
 - fail:
     msg: "SELinux is disabled, This deployment type requires that SELinux is enabled."
-  when: (not ansible_selinux or ansible_selinux.status != 'enabled') and deployment_type in ['enterprise', 'online']
+  when: (not ansible_selinux or ansible_selinux.status != 'enabled') and deployment_type in ['enterprise', 'online', 'atomic-enterprise', 'openshift-enterprise']
 
 - name: Set node facts
   openshift_facts:
@@ -22,14 +22,19 @@
       deployment_type: "{{ openshift_deployment_type }}"
   - role: node
     local_facts:
-      labels: "{{ lookup('oo_option', 'openshift_node_labels') | default( openshift_node_labels | default(none), true) }}"
       annotations: "{{ openshift_node_annotations | default(none) }}"
-      registry_url: "{{ oreg_url | default(none) }}"
       debug_level: "{{ openshift_node_debug_level | default(openshift.common.debug_level) }}"
-      portal_net: "{{ openshift_master_portal_net | default(None) }}"
+      docker_log_driver:  "{{ lookup( 'oo_option' , 'docker_log_driver'  )  | default('',True) }}"
+      docker_log_options: "{{ lookup( 'oo_option' , 'docker_log_options' )  | default('',True) }}"
+      iptables_sync_period: "{{ openshift_node_iptables_sync_period | default(None) }}"
       kubelet_args: "{{ openshift_node_kubelet_args | default(None) }}"
-      sdn_mtu: "{{ openshift_node_sdn_mtu | default(None) }}"
+      labels: "{{ lookup('oo_option', 'openshift_node_labels') | default( openshift_node_labels | default(none), true) }}"
+      portal_net: "{{ openshift_master_portal_net | default(None) }}"
+      registry_url: "{{ oreg_url | default(none) }}"
       schedulable: "{{ openshift_schedulable | default(openshift_scheduleable) | default(None) }}"
+      sdn_mtu: "{{ openshift_node_sdn_mtu | default(None) }}"
+      storage_plugin_deps: "{{ osn_storage_plugin_deps | default(None) }}"
+      set_node_ip: "{{ openshift_set_node_ip | default(None) }}"
 
 # We have to add tuned-profiles in the same transaction otherwise we run into depsolving
 # problems because the rpms don't pin the version properly.
@@ -68,12 +73,14 @@
   register: docker_check
 
   # TODO: Enable secure registry when code available in origin
-- name: Secure Registry
+- name: Secure Registry and Logs Options
   lineinfile:
     dest: /etc/sysconfig/docker
     regexp: '^OPTIONS=.*$'
     line: "OPTIONS='--insecure-registry={{ openshift.node.portal_net }} \
-{% if ansible_selinux and ansible_selinux.status == '''enabled''' %}--selinux-enabled{% endif %}'"
+{% if ansible_selinux and ansible_selinux.status == '''enabled''' %}--selinux-enabled{% endif %} \
+{% if openshift.node.docker_log_driver is defined  %} --log-driver {{ openshift.node.docker_log_driver }}  {% endif %} \
+{% if openshift.node.docker_log_options is defined %}   {{ openshift.node.docker_log_options |  oo_split() | oo_prepend_strings_in_list('--log-opt ') | join(' ')}}  {% endif %} '"
   when: docker_check.stat.isreg
   notify:
     - restart docker
@@ -120,14 +127,12 @@
   notify:
     - restart docker
 
-- name: Allow NFS access for VMs
-  seboolean: name=virt_use_nfs state=yes persistent=yes
-  when: ansible_selinux and ansible_selinux.status == "enabled"
+- name: Additional storage plugin configuration
+  include: storage_plugins/main.yml
 
 - name: Start and enable node
   service: name={{ openshift.common.service_type }}-node enabled=yes state=started
   register: start_result
 
-- name: pause to prevent service restart from interfering with bootstrapping
-  pause: seconds=30
-  when: start_result | changed
+- set_fact:
+    node_service_status_changed = start_result | changed

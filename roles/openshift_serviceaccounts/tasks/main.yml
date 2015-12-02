@@ -13,7 +13,9 @@
   changed_when: "'serviceaccounts \"{{ item }}\" already exists' not in _sa_result.stderr and _sa_result.rc == 0"
 
 - name: Get current security context constraints
-  shell: "{{ openshift.common.client_binary }} get scc privileged -o yaml > /tmp/scc.yaml"
+  shell: >
+    {{ openshift.common.client_binary }} get scc privileged -o yaml
+    --output-version=v1 > /tmp/scc.yaml
 
 - name: Add security context constraint for {{ item }}
   lineinfile:
@@ -23,4 +25,4 @@
   with_items: accounts
 
 - name: Apply new scc rules for service accounts
-  command: "{{ openshift.common.client_binary }} update -f /tmp/scc.yaml"
+  command: "{{ openshift.common.client_binary }} update -f /tmp/scc.yaml --api-version=v1"

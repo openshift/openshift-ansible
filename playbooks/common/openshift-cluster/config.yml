@@ -1,68 +1,5 @@
 ---
-- name: Populate config host groups
-  hosts: localhost
-  gather_facts: no
-  tasks:
-  - fail:
-      msg: This playbook rquires g_etcd_group to be set
-    when: g_etcd_group is not defined
-
-  - fail:
-      msg: This playbook rquires g_masters_group to be set
-    when: g_masters_group is not defined
-
-  - fail:
-      msg: This playbook rquires g_nodes_group to be set
-    when: g_nodes_group is not defined
-
-  - name: Evaluate oo_etcd_to_config
-    add_host:
-      name: "{{ item }}"
-      groups: oo_etcd_to_config
-      ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
-      ansible_sudo: "{{ g_sudo | default(omit) }}"
-    with_items: groups[g_etcd_group] | default([])
-
-  - name: Evaluate oo_masters_to_config
-    add_host:
-      name: "{{ item }}"
-      groups: oo_masters_to_config
-      ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
-      ansible_sudo: "{{ g_sudo | default(omit) }}"
-    with_items: groups[g_masters_group] | default([])
-
-  - name: Evaluate oo_nodes_to_config
-    add_host:
-      name: "{{ item }}"
-      groups: oo_nodes_to_config
-      ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
-      ansible_sudo: "{{ g_sudo | default(omit) }}"
-    with_items: groups[g_nodes_group] | default([])
-
-  - name: Evaluate oo_nodes_to_config
-    add_host:
-      name: "{{ item }}"
-      groups: oo_nodes_to_config
-      ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
-      ansible_sudo: "{{ g_sudo | default(omit) }}"
-    with_items: groups[g_masters_group] | default([])
-    when: g_nodeonmaster is defined and g_nodeonmaster == true
-
-  - name: Evaluate oo_first_etcd
-    add_host:
-      name: "{{ groups[g_etcd_group][0] }}"
-      groups: oo_first_etcd
-      ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
-      ansible_sudo: "{{ g_sudo | default(omit) }}"
-    when: g_etcd_group in groups and (groups[g_etcd_group] | length) > 0
-
-  - name: Evaluate oo_first_master
-    add_host:
-      name: "{{ groups[g_masters_group][0] }}"
-      groups: oo_first_master
-      ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
-      ansible_sudo: "{{ g_sudo | default(omit) }}"
-    when: g_masters_group in groups and (groups[g_masters_group] | length) > 0
+- include: evaluate_groups.yml
 
 - include: ../openshift-etcd/config.yml
 
@@ -71,4 +8,4 @@
 - include: ../openshift-node/config.yml
   vars:
     osn_cluster_dns_domain: "{{ hostvars[groups.oo_first_master.0].openshift.dns.domain }}"
-    osn_cluster_dns_ip: "{{ hostvars[groups.oo_first_master.0].openshift.dns.ip }}"
+    osn_cluster_dns_ip: "{{ hostvars[groups.oo_first_master.0].cluster_dns_ip }}"

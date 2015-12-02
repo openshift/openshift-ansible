@@ -1,4 +1,12 @@
 ---
+- fail:
+    msg: Flannel can not be used with openshift sdn
+  when: openshift_use_openshift_sdn | default(false) | bool and openshift_use_flannel | default(false) | bool
+
+- fail:
+    msg: openshift_hostname must be 64 characters or less
+  when: openshift_hostname is defined and openshift_hostname | length > 64
+
 - name: Set common Cluster facts
   openshift_facts:
     role: common
@@ -13,6 +21,13 @@
       sdn_network_plugin_name: "{{ os_sdn_network_plugin_name | default(None) }}"
       deployment_type: "{{ openshift_deployment_type }}"
       use_fluentd: "{{ openshift_use_fluentd | default(None) }}"
+      use_flannel: "{{ openshift_use_flannel | default(None) }}"
+
+  # For enterprise versions < 3.1 and origin versions < 1.1 we want to set the
+  # hostname by default.
+- set_fact:
+    set_hostname_default: "{{ not openshift.common.version_greater_than_3_1_or_1_1 }}"
 
 - name: Set hostname
   hostname: name={{ openshift.common.hostname }}
+  when: openshift_set_hostname | default(set_hostname_default) | bool

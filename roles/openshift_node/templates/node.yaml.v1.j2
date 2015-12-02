@@ -4,6 +4,7 @@ dnsDomain: {{ osn_cluster_dns_domain }}
 dnsIP: {{ osn_cluster_dns_ip }}
 dockerConfig:
   execHandlerName: ""
+iptablesSyncPeriod: "{{ openshift.node.iptables_sync_period }}"
 imageConfig:
   format: {{ openshift.node.registry_url }}
   latest: false
@@ -12,12 +13,19 @@ kind: NodeConfig
 kubeletArguments: {{ openshift.node.kubelet_args | to_json }}
 {% endif %}
 masterKubeConfig: system:node:{{ openshift.common.hostname }}.kubeconfig
+{% if openshift.common.use_openshift_sdn %}
 networkPluginName: {{ openshift.common.sdn_network_plugin_name }}
+{% endif %}
 # networkConfig struct introduced in origin 1.0.6 and OSE 3.0.2 which
 # deprecates networkPluginName above. The two should match.
 networkConfig:
    mtu: {{ openshift.node.sdn_mtu }}
+{% if openshift.common.use_openshift_sdn %}
    networkPluginName: {{ openshift.common.sdn_network_plugin_name }}
+{% endif %}
+{% if openshift.node.set_node_ip | bool %}
+nodeIP: {{ openshift.common.ip }}
+{% endif %}
 nodeName: {{ openshift.common.hostname | lower }}
 podManifestConfig:
 servingInfo:

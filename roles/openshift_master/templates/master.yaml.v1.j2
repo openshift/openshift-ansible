@@ -1,5 +1,7 @@
 apiLevels:
+{% if not openshift.common.version_greater_than_3_1_or_1_1 | bool %}
 - v1beta3
+{% endif %}
 - v1
 apiVersion: v1
 assetConfig:
@@ -8,21 +10,30 @@ assetConfig:
   publicURL: {{ openshift.master.public_console_url }}/
   servingInfo:
     bindAddress: {{ openshift.master.bind_addr }}:{{ openshift.master.console_port }}
+    bindNetwork: tcp4
     certFile: master.server.crt
     clientCA: ""
     keyFile: master.server.key
     maxRequestsInFlight: 0
     requestTimeoutSeconds: 0
+{% if openshift_master_ha | bool %}
+controllerLeaseTTL: {{ openshift.master.controller_lease_ttl | default('30') }}
+{% endif %}
+controllers: '*'
 corsAllowedOrigins:
-{% for origin in ['127.0.0.1', 'localhost', openshift.common.hostname, openshift.common.ip, openshift.common.public_hostname, openshift.common.public_ip] %}
+{% for origin in ['127.0.0.1', 'localhost', openshift.common.ip, openshift.common.public_ip] | union(openshift.common.all_hostnames) | unique %}
   - {{ origin }}
 {% endfor %}
 {% for custom_origin in openshift.master.custom_cors_origins | default("") %}
   - {{ custom_origin }}
 {% endfor %}
+{% if 'disabled_features' in openshift.master %}
+disabledFeatures: {{ openshift.master.disabled_features | to_json }}
+{% endif %}
 {% if openshift.master.embedded_dns | bool %}
 dnsConfig:
   bindAddress: {{ openshift.master.bind_addr }}:{{ openshift.master.dns_port }}
+  bindNetwork: tcp4
 {% endif %}
 etcdClientInfo:
   ca: {{ "ca.crt" if (openshift.master.embedded_etcd | bool) else "master.etcd-ca.crt" }}
@@ -65,15 +76,19 @@ kubeletClientInfo:
   port: 10250
 {% if openshift.master.embedded_kube | bool %}
 kubernetesMasterConfig:
+{% if not openshift.common.version_greater_than_3_1_or_1_1 | bool %}
   apiLevels:
   - v1beta3
   - v1
+{% endif %}
   apiServerArguments: {{ api_server_args if api_server_args is defined else 'null' }}
   controllerArguments: {{ controller_args if controller_args is defined else 'null' }}
-{# TODO: support overriding masterCount #}
-  masterCount: 1
-  masterIP: ""
+  masterCount: {{ openshift.master.master_count }}
+  masterIP: {{ openshift.common.ip }}
   podEvictionTimeout: ""
+  proxyClientInfo:
+    certFile: master.proxy-client.crt
+    keyFile: master.proxy-client.key
   schedulerConfigFile: {{ openshift_master_scheduler_conf }}
   servicesNodePortRange: ""
   servicesSubnet: {{ openshift.master.portal_net }}
@@ -87,26 +102,46 @@ masterPublicURL: {{ openshift.master.public_api_url }}
 networkConfig:
   clusterNetworkCIDR: {{ openshift.master.sdn_cluster_network_cidr }}
   hostSubnetLength: {{ openshift.master.sdn_host_subnet_length }}
+{% if openshift.common.use_openshift_sdn %}
   networkPluginName: {{ openshift.common.sdn_network_plugin_name }}
+{% endif %}
 # serviceNetworkCIDR must match kubernetesMasterConfig.servicesSubnet
   serviceNetworkCIDR: {{ openshift.master.portal_net }}
-{% include 'v1_partials/oauthConfig.j2' %}
+oauthConfig:
+  assetPublicURL: {{ openshift.master.public_console_url }}/
+  grantConfig:
+    method: {{ openshift.master.oauth_grant_method }}
+  identityProviders:
+{% for line in translated_identity_providers.splitlines() %}
+  {{ line }}
+{% endfor %}
+  masterCA: ca.crt
+  masterPublicURL: {{ openshift.master.public_api_url }}
+  masterURL: {{ openshift.master.api_url }}
+  sessionConfig:
+    sessionMaxAgeSeconds: {{ openshift.master.session_max_seconds }}
+    sessionName: {{ openshift.master.session_name }}
+    sessionSecretsFile: {{ openshift.master.session_secrets_file }}
+  tokenConfig:
+    accessTokenMaxAgeSeconds: {{ openshift.master.access_token_max_seconds }}
+    authorizeTokenMaxAgeSeconds: {{ openshift.master.auth_token_max_seconds }}
+pauseControllers: false
 policyConfig:
   bootstrapPolicyFile: {{ openshift_master_policy }}
   openshiftInfrastructureNamespace: openshift-infra
   openshiftSharedResourcesNamespace: openshift
-{# TODO: Allow users to override projectConfig items #}
 projectConfig:
-  defaultNodeSelector: "{{ openshift.master.default_node_selector | default("") }}"
-  projectRequestMessage: ""
-  projectRequestTemplate: ""
+  defaultNodeSelector: "{{ openshift.master.default_node_selector }}"
+  projectRequestMessage: "{{ openshift.master.project_request_message }}"
+  projectRequestTemplate: "{{ openshift.master.project_request_template }}"
   securityAllocator:
-    mcsAllocatorRange: s0:/2
-    mcsLabelsPerProject: 5
-    uidAllocatorRange: 1000000000-1999999999/10000
+    mcsAllocatorRange: "{{ openshift.master.mcs_allocator_range }}"
+    mcsLabelsPerProject: {{ openshift.master.mcs_labels_per_project }}
+    uidAllocatorRange: "{{ openshift.master.uid_allocator_range  }}"
 routingConfig:
   subdomain:  "{{ openshift.master.default_subdomain | default("") }}"
 serviceAccountConfig:
+  limitSecretReferences: false
   managedNames:
   - default
   - builder
@@ -117,8 +152,20 @@ serviceAccountConfig:
   - serviceaccounts.public.key
 servingInfo:
   bindAddress: {{ openshift.master.bind_addr }}:{{ openshift.master.api_port }}
+  bindNetwork: tcp4
   certFile: master.server.crt
   clientCA: ca.crt
   keyFile: master.server.key
   maxRequestsInFlight: 500
   requestTimeoutSeconds: 3600
+{% if openshift.master.named_certificates %}
+  namedCertificates:
+{% for named_certificate in openshift.master.named_certificates %}
+  - certFile: {{ named_certificate['certfile'] }}
+    keyFile: {{ named_certificate['keyfile'] }}
+    names:
+{% for name in named_certificate['names'] %}
+    - "{{ name }}"
+{% endfor %}
+{% endfor %}
+{% endif %}

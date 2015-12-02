@@ -6,13 +6,9 @@
     mode: 0700
   with_items: masters_needing_certs
 
-- file:
-    src: "{{ openshift_master_config_dir }}/{{ item.1 }}"
-    dest: "{{ openshift_generated_configs_dir }}/{{ item.0.master_cert_subdir }}/{{ item.1 }}"
-    state: hard
-  with_nested:
-  - masters_needing_certs
-  - - ca.crt
+- set_fact:
+    master_certificates:
+    - ca.crt
     - ca.key
     - ca.serial.txt
     - admin.crt
@@ -31,7 +27,17 @@
     - openshift-router.kubeconfig
     - serviceaccounts.private.key
     - serviceaccounts.public.key
+    master_31_certificates:
+    - master.proxy-client.crt
+    - master.proxy-client.key
 
+- file:
+    src: "{{ openshift_master_config_dir }}/{{ item.1 }}"
+    dest: "{{ openshift_generated_configs_dir }}/{{ item.0.master_cert_subdir }}/{{ item.1 }}"
+    state: hard
+  with_nested:
+  - masters_needing_certs
+  - "{{ master_certificates | union(master_31_certificates) if openshift.common.version_greater_than_3_1_or_1_1 | bool else master_certificates }}"
 
 - name: Create the master certificates if they do not already exist
   command: >
@@ -41,6 +47,5 @@
       --public-master={{ item.openshift.master.public_api_url }}
       --cert-dir={{ openshift_generated_configs_dir }}/{{ item.master_cert_subdir }}
       --overwrite=false
-  args:
-    creates: "{{ openshift_generated_configs_dir }}/{{ item.master_cert_subdir }}/master.server.crt"
+  when: master_certs_missing
   with_items: masters_needing_certs

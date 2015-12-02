@@ -5,13 +5,16 @@ sdn_network_plugin: redhat/openshift-ovs-subnet
 deployment_vars:
   origin:
     image: preinstalled-slave-50g-v5
+    machine_type: n1-standard-1
     ssh_user: root
     sudo: yes
   online:
     image: libra-rhel7
+    machine_type: n1-standard-1
     ssh_user: root
     sudo: no
   enterprise:
     image: rhel-7
+    machine_type: n1-standard-1
     ssh_user:
     sudo: yes

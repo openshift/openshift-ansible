@@ -5,8 +5,8 @@
 - name: Launch instance(s)
   gce:
     instance_names: "{{ instances }}"
-    machine_type: "{{ lookup('env', 'gce_machine_type') | default('n1-standard-1', true) }}"
-    image: "{{ lookup('env', 'gce_machine_image') | default(deployment_vars[deployment_type].image, true) }}"
+    machine_type: "{{ gce_machine_type | default(deployment_vars[deployment_type].machine_type, true) }}"
+    image: "{{ gce_machine_image | default(deployment_vars[deployment_type].image, true) }}"
     service_account_email: "{{ lookup('env', 'gce_service_account_email_address') }}"
     pem_file: "{{ lookup('env', 'gce_service_account_pem_file_path') }}"
     project_id: "{{ lookup('env', 'gce_project_id') }}"

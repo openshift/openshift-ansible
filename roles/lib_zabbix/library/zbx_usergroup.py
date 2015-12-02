@@ -27,6 +27,10 @@ zabbix ansible module for usergroups
 # but different for each zabbix class.
 # pylint: disable=duplicate-code
 
+# Disabling too-many-branches as we need the error checking and the if-statements
+# to determine the proper state
+# pylint: disable=too-many-branches
+
 # pylint: disable=import-error
 from openshift_tools.monitoring.zbxapi import ZabbixAPI, ZabbixConnection
 
@@ -92,25 +96,23 @@ def get_user_status(status):
     return 1
 
 
-#def get_userids(zapi, users):
-#    ''' Get userids from user aliases
-#    '''
-#    if not users:
-#        return None
-#
-#    userids = []
-#    for alias in users:
-#        content = zapi.get_content('user', 'get', {'search': {'alias': alias}})
-#        if content['result']:
-#            userids.append(content['result'][0]['userid'])
-#
-#    return userids
+def get_userids(zapi, users):
+    ''' Get userids from user aliases
+    '''
+    if not users:
+        return None
+
+    userids = []
+    for alias in users:
+        content = zapi.get_content('user', 'get', {'search': {'alias': alias}})
+        if content['result']:
+            userids.append(content['result'][0]['userid'])
+
+    return userids
 
 def main():
     ''' Ansible module for usergroup
     '''
-
-    ##def usergroup(self, name, rights=None, users=None, state='present', params=None):
 
     module = AnsibleModule(
         argument_spec=dict(
@@ -123,7 +125,7 @@ def main():
             status=dict(default='enabled', type='str'),
             name=dict(default=None, type='str', required=True),
             rights=dict(default=None, type='list'),
-            #users=dict(default=None, type='list'),
+            users=dict(default=None, type='list'),
             state=dict(default='present', type='str'),
         ),
         #supports_check_mode=True
@@ -144,9 +146,15 @@ def main():
                                {'search': {'name': uname},
                                 'selectUsers': 'userid',
                                })
+    #******#
+    # GET
+    #******#
     if state == 'list':
         module.exit_json(changed=False, results=content['result'], state="list")
 
+    #******#
+    # DELETE
+    #******#
     if state == 'absent':
         if not exists(content):
             module.exit_json(changed=False, state="absent")
@@ -157,6 +165,7 @@ def main():
         content = zapi.get_content(zbx_class_name, 'delete', [content['result'][0][idname]])
         module.exit_json(changed=True, results=content['result'], state="absent")
 
+    # Create and Update
     if state == 'present':
 
         params = {'name': uname,
@@ -164,26 +173,37 @@ def main():
                   'users_status': get_user_status(module.params['status']),
                   'gui_access': get_gui_access(module.params['gui_access']),
                   'debug_mode': get_debug_mode(module.params['debug_mode']),
-                  #'userids': get_userids(zapi, module.params['users']),
+                  'userids': get_userids(zapi, module.params['users']),
                  }
 
+        # Remove any None valued params
         _ = [params.pop(key, None) for key in params.keys() if params[key] == None]
 
+        #******#
+        # CREATE
+        #******#
         if not exists(content):
             # if we didn't find it, create it
             content = zapi.get_content(zbx_class_name, 'create', params)
+
+            if content.has_key('error'):
+                module.exit_json(failed=True, changed=True, results=content['error'], state="present")
+
             module.exit_json(changed=True, results=content['result'], state='present')
-        # already exists, we need to update it
-        # let's compare properties
+
+
+        ########
+        # UPDATE
+        ########
         differences = {}
         zab_results = content['result'][0]
         for key, value in params.items():
             if key == 'rights':
                 differences['rights'] = value
 
-            #elif key == 'userids' and zab_results.has_key('users'):
-                #if zab_results['users'] != value:
-                    #differences['userids'] = value
+            elif key == 'userids' and zab_results.has_key('users'):
+                if zab_results['users'] != value:
+                    differences['userids'] = value
 
             elif zab_results[key] != value and zab_results[key] != str(value):
                 differences[key] = value

@@ -1,12 +1,12 @@
-#Openshift and Atomic Enterprise Ansible
+#OpenShift and Atomic Enterprise Ansible
 
-This repo contains Ansible code for Openshift and Atomic Enterprise.
+This repo contains Ansible code for OpenShift and Atomic Enterprise.
 
 ##Setup
 - Install base dependencies:
   - Fedora:
   ```
-    yum install -y ansible rubygem-thor rubygem-parseconfig util-linux
+    dnf install -y ansible rubygem-thor rubygem-parseconfig util-linux pyOpenSSL libffi-devel python-cryptography
   ```
    - OSX:
   ```

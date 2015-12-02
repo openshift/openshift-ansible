@@ -1,8 +1,8 @@
 Requirements
 ------------
+- ansible (the latest 1.9 release is preferred, but any version greater than 1.9.1 should be sufficient).
 - vagrant (tested against version 1.7.2)
 - vagrant-hostmanager plugin (tested against version 1.5.0)
-- vagrant-registration plugin (only required for enterprise deployment type)
 - vagrant-libvirt (tested against version 0.0.26)
   - Only required if using libvirt instead of virtualbox
 
@@ -43,7 +43,8 @@ The following environment variables can be overriden:
 - ``OPENSHIFT_DEPLOYMENT_TYPE`` (defaults to origin, choices: origin, enterprise, online)
 - ``OPENSHIFT_NUM_NODES`` (the number of nodes to create, defaults to 2)
 
-For ``enterprise`` deployment types these env variables should also be specified:
+Note that if ``OPENSHIFT_DEPLOYMENT_TYPE`` is ``enterprise`` you should also specify environment variables related to ``subscription-manager`` which are used by the ``rhel_subscribe`` role:
+
 - ``rhel_subscription_user``: rhsm user
 - ``rhel_subscription_pass``: rhsm password
 - (optional) ``rhel_subscription_pool``: poolID to attach a specific subscription besides what auto-attach detects
