@@ -89,11 +89,11 @@
     docker_additional_registries: "{{ lookup('oo_option', 'docker_additional_registries')
                                       | oo_split() | union(['registry.access.redhat.com'])
                                       | difference(['']) }}"
-  when: openshift.common.deployment_type == 'enterprise'
+  when: openshift.common.deployment_type in ['enterprise', 'openshift-enterprise', 'atomic-enterprise', 'online']
 - set_fact:
     docker_additional_registries: "{{ lookup('oo_option', 'docker_additional_registries')
                                       | oo_split() | difference(['']) }}"
-  when: openshift.common.deployment_type != 'enterprise'
+  when: openshift.common.deployment_type not in ['enterprise', 'openshift-enterprise', 'atomic-enterprise', 'online']
 
 - name: Add personal registries
   lineinfile:
