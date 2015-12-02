@@ -8,7 +8,7 @@
   - vars.yml
   tasks:
   - set_fact:
-      g_ssh_user_tmp: "{{ deployment_vars[deployment_type].ssh_user }}"
+      g_ssh_user_tmp: "{{ lookup('env', 'gce_ssh_user') | default(deployment_vars[deployment_type].ssh_user, true) }}"
       g_sudo_tmp: "{{ deployment_vars[deployment_type].sudo }}"
       use_sdn: "{{ do_we_use_openshift_sdn }}"
       sdn_plugin: "{{ sdn_network_plugin }}"
