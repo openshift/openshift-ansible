@@ -1,12 +1,12 @@
 ---
 do_we_use_openshift_sdn: true
-sdn_network_plugin: redhat/openshift-ovs-subnet 
+sdn_network_plugin: redhat/openshift-ovs-subnet
 # os_sdn_network_plugin_name can be ovssubnet or multitenant, see https://docs.openshift.org/latest/architecture/additional_concepts/sdn.html#ovssubnet-plugin-operation
 deployment_vars:
   origin:
-    image: preinstalled-slave-50g-v5
+    image: centos-7
     machine_type: n1-standard-1
-    ssh_user: root
+    ssh_user: "{{ ansible_ssh_user }}"
     sudo: yes
   online:
     image: libra-rhel7
@@ -16,5 +16,5 @@ deployment_vars:
   enterprise:
     image: rhel-7
     machine_type: n1-standard-1
-    ssh_user:
+    ssh_user: "{{ ansible_ssh_user }}"
     sudo: yes
