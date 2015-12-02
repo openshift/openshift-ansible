@@ -1,7 +1,4 @@
 ---
-do_we_use_openshift_sdn: true
-# os_sdn_network_plugin_name can be ovssubnet or multitenant, see https://docs.openshift.org/latest/architecture/additional_concepts/sdn.html#ovssubnet-plugin-operation
-sdn_network_plugin: redhat/openshift-ovs-subnet
 debug_level: 2
 deployment_vars:
   origin:
