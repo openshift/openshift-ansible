@@ -24,3 +24,7 @@
     openshift_public_hostname: "{{ ec2_ip_address }}"
     openshift_router_selector: 'type=infra'
     osm_infra_nodes: "{{ groups['tag_env-host-type_' ~ cluster_id ~ '-openshift-node'] | intersect(groups['tag_sub-host-type_infra']) }}"
+    openshift_use_openshift_sdn: "{{ lookup('oo_option', 'use_openshift_sdn') }}"
+    os_sdn_network_plugin_name: "{{ lookup('oo_option', 'sdn_network_plugin_name') }}"
+    openshift_use_flannel: "{{ lookup('oo_option', 'use_flannel') }}"
+    openshift_use_fluentd: "{{ lookup('oo_option', 'use_fluentd') }}"
