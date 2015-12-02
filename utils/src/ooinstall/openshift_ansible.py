@@ -58,19 +58,14 @@ def generate_inventory(hosts):
 
     base_inventory.write('\n[nodes]\n')
 
-    # TODO: It would be much better to calculate the scheduleability elsewhere
-    # and store it on the Node object.
-    if set(nodes) == set(masters):
-        for node in nodes:
-            write_host(node, base_inventory)
-    else:
-        for node in nodes:
-            # TODO: Until the Master can run the SDN itself we have to configure the Masters
-            # as Nodes too.
-            schedulable = True
-            if node in masters:
-                schedulable = False
-            write_host(node, base_inventory, schedulable)
+    for node in nodes:
+        # Let the fact defaults decide if we're not a master:
+        schedulable = None
+
+        # If the node is also a master, we must explicitly set schedulablity:
+        if node.master:
+            schedulable = node.is_schedulable_node(hosts)
+        write_host(node, base_inventory, schedulable)
 
     if not getattr(proxy, 'preconfigured', True):
         base_inventory.write('\n[lb]\n')
@@ -106,13 +101,13 @@ def write_inventory_vars(base_inventory, multiple_masters, proxy):
     base_inventory.write('ansible_ssh_user={}\n'.format(CFG.settings['ansible_ssh_user']))
     if CFG.settings['ansible_ssh_user'] != 'root':
         base_inventory.write('ansible_become=true\n')
-    if multiple_masters:
+    if multiple_masters and proxy is not None:
         base_inventory.write('openshift_master_cluster_method=native\n')
         base_inventory.write("openshift_master_cluster_hostname={}\n".format(proxy.hostname))
         base_inventory.write("openshift_master_cluster_public_hostname={}\n".format(proxy.public_hostname))
 
 
-def write_host(host, inventory, schedulable=True):
+def write_host(host, inventory, schedulable=None):
     global CFG
 
     facts = ''
@@ -126,8 +121,16 @@ def write_host(host, inventory, schedulable=True):
         facts += ' openshift_public_hostname={}'.format(host.public_hostname)
     # TODO: For not write_host is handles both master and nodes.
     # Technically only nodes will ever need this.
-    if not schedulable:
+
+    # Distinguish between three states, no schedulability specified (use default),
+    # explicitly set to True, or explicitly set to False:
+    if schedulable is None:
+        pass
+    elif schedulable:
+        facts += ' openshift_schedulable=True'
+    elif not schedulable:
         facts += ' openshift_schedulable=False'
+
     installer_host = socket.gethostname()
     if installer_host in [host.connect_to, host.hostname, host.public_hostname]:
         facts += ' ansible_connection=local'
