@@ -83,7 +83,7 @@
             "from": {
               "kind": "ImageStreamTag",
               "namespace": "openshift",
-              "name": "perl:5.16"
+              "name": "perl:5.20"
             }
           }
         },
@@ -96,6 +96,9 @@
         "triggers": [
           {
             "type": "ImageChange"
+          },
+          {
+            "type": "ConfigChange"
           },
           {
             "type": "GitHub",
@@ -224,6 +227,20 @@
         },
         "triggers": [
           {
+            "type": "ImageChange",
+            "imageChangeParams": {
+              "automatic": false,
+              "containerNames": [
+                "mysql"
+              ],
+              "from": {
+                "kind": "ImageStreamTag",
+                "namespace": "openshift",
+                "name": "mysql:5.6"
+              }
+            }
+          },
+          {
             "type": "ConfigChange"
           }
         ],
@@ -242,7 +259,7 @@
             "containers": [
               {
                 "name": "mysql",
-                "image": "${MYSQL_IMAGE}",
+                "image": "mysql",
                 "ports": [
                   {
                     "containerPort": 3306
@@ -327,11 +344,6 @@
       "name": "DATABASE_NAME",
       "description": "database name",
       "value": "sampledb"
-    },
-    {
-      "name": "MYSQL_IMAGE",
-      "description": "Image to use for mysql",
-      "value": "openshift/mysql-55-centos7"      
     },
     {
       "name": "PERL_APACHE2_RELOAD",
