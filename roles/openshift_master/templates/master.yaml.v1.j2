@@ -83,7 +83,7 @@ kubernetesMasterConfig:
 {% endif %}
   apiServerArguments: {{ api_server_args if api_server_args is defined else 'null' }}
   controllerArguments: {{ controller_args if controller_args is defined else 'null' }}
-  masterCount: {{ openshift.master.master_count }}
+  masterCount: {{ openshift.master.master_count if openshift.master.cluster_method | default(None) == 'native' else 1 }}
   masterIP: {{ openshift.common.ip }}
   podEvictionTimeout: ""
   proxyClientInfo:
