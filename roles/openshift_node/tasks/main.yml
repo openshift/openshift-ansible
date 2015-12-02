@@ -40,12 +40,23 @@
 # problems because the rpms don't pin the version properly.
 - name: Install Node package
   yum: pkg={{ openshift.common.service_type }}-node{{ openshift_version  }},tuned-profiles-{{ openshift.common.service_type }}-node{{ openshift_version  }} state=present
+  when: ansible_pkg_mgr == "yum"
+  register: node_install_result
+
+- name: Install Node package
+  dnf: pkg={{ openshift.common.service_type }}-node{{ openshift_version  }},tuned-profiles-{{ openshift.common.service_type }}-node{{ openshift_version  }} state=present
+  when: ansible_pkg_mgr == "dnf"
   register: node_install_result
 
 - name: Install sdn-ovs package
   yum: pkg={{ openshift.common.service_type }}-sdn-ovs{{ openshift_version }} state=present
   register: sdn_install_result
-  when: openshift.common.use_openshift_sdn
+  when: ansible_pkg_mgr == "yum" and openshift.common.use_openshift_sdn
+
+- name: Install sdn-ovs package
+  dnf: pkg={{ openshift.common.service_type }}-sdn-ovs{{ openshift_version }} state=present
+  register: sdn_install_result
+  when: ansible_pkg_mgr == "dnf" and openshift.common.use_openshift_sdn
 
 # TODO: add the validate parameter when there is a validation command to run
 - name: Create the Node config
