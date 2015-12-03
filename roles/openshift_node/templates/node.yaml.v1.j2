@@ -1,7 +1,9 @@
 allowDisabledDocker: false
 apiVersion: v1
-dnsDomain: {{ osn_cluster_dns_domain }}
-dnsIP: {{ osn_cluster_dns_ip }}
+dnsDomain: {{ openshift.common.dns_domain }}
+{% if 'dns_ip' in openshift.common %}
+dnsIP: {{ openshift.common.dns_ip }}
+{% endif %}
 dockerConfig:
   execHandlerName: ""
 iptablesSyncPeriod: "{{ openshift.node.iptables_sync_period }}"

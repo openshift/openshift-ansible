@@ -353,22 +353,6 @@
   - role: openshift_cluster_metrics
     when: openshift.common.use_cluster_metrics | bool
 
-  # TODO: Setting the cluster dns ip should be pushed into openshift-facts
-- name: Determine cluster dns ip
-  hosts: oo_first_master
-  tasks:
-  - name: Get master service ip
-    # This command has to be on a single line.
-    command: "{{ openshift.common.client_binary }} -n default --config={{ openshift.common.config_base }}/master/admin.kubeconfig get -o template svc kubernetes --template=\\{\\{.spec.clusterIP\\}\\} --output-version=v1"
-    register: master_service_ip_output
-    when: openshift.common.version_greater_than_3_1_or_1_1 | bool
-  - set_fact:
-      cluster_dns_ip: "{{ hostvars[groups.oo_first_master.0].openshift.dns.ip }}"
-    when: not openshift.common.version_greater_than_3_1_or_1_1 | bool
-  - set_fact:
-      cluster_dns_ip: "{{ master_service_ip_output.stdout }}"
-    when: openshift.common.version_greater_than_3_1_or_1_1 | bool
-
 - name: Enable cockpit
   hosts: oo_first_master
   vars:

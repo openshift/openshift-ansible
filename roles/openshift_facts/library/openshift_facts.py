@@ -528,9 +528,9 @@ def set_aggregate_facts(facts):
         internal_hostnames.add(facts['common']['hostname'])
         internal_hostnames.add(facts['common']['ip'])
 
+        cluster_domain = facts['common']['dns_domain']
+
         if 'master' in facts:
-            # FIXME: not sure why but facts['dns']['domain'] fails
-            cluster_domain = 'cluster.local'
             if 'cluster_hostname' in facts['master']:
                 all_hostnames.add(facts['master']['cluster_hostname'])
             if 'cluster_public_hostname' in facts['master']:
@@ -985,7 +985,7 @@ class OpenShiftFacts(object):
         Raises:
             OpenShiftFactsUnsupportedRoleError:
     """
-    known_roles = ['common', 'master', 'node', 'master_sdn', 'node_sdn', 'dns', 'etcd']
+    known_roles = ['common', 'master', 'node', 'master_sdn', 'node_sdn', 'etcd']
 
     def __init__(self, role, filename, local_facts, additive_facts_to_overwrite=False):
         self.changed = False
@@ -1056,6 +1056,7 @@ class OpenShiftFacts(object):
                       public_hostname=hostname)
         common['client_binary'] = 'oc' if os.path.isfile('/usr/bin/oc') else 'osc'
         common['admin_binary'] = 'oadm' if os.path.isfile('/usr/bin/oadm') else 'osadm'
+        common['dns_domain'] = 'cluster.local'
         defaults['common'] = common
 
         if 'master' in roles:
@@ -1076,7 +1077,6 @@ class OpenShiftFacts(object):
             node = dict(labels={}, annotations={}, portal_net='172.30.0.0/16',
                         iptables_sync_period='5s', set_node_ip=False)
             defaults['node'] = node
-
         return defaults
 
     def guess_host_provider(self):
