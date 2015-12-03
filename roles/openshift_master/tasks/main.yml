@@ -9,6 +9,13 @@
       Invalid OAuth grant method: {{ openshift_master_oauth_grant_method }}
   when: openshift_master_oauth_grant_method is defined and openshift_master_oauth_grant_method not in openshift_master_valid_grant_methods
 
+# Session Options Validation
+- fail:
+    msg: "Both openshift_master_session_auth_secrets and openshift_master_session_encryption_secrets must be provided if either variable is set"
+  when: (openshift_master_session_auth_secrets is defined and openshift_master_session_encryption_secrets is not defined) or (openshift_master_session_encryption_secrets is defined and openshift_master_session_auth_secrets is not defined)
+- fail:
+    msg: "openshift_master_session_auth_secrets and openshift_master_encryption_secrets must be equal length"
+  when: (openshift_master_session_auth_secrets is defined and openshift_master_session_encryption_secrets is defined) and (openshift_master_session_auth_secrets | length != openshift_master_session_encryption_secrets | length)
 
 # HA Variable Validation
 - fail:
@@ -55,9 +62,9 @@
       portal_net: "{{ openshift_master_portal_net | default(None) }}"
       session_max_seconds: "{{ openshift_master_session_max_seconds | default(None) }}"
       session_name: "{{ openshift_master_session_name | default(None) }}"
+      session_secrets_file: "{{ openshift_master_session_secrets_file | default(None) }}"
       session_auth_secrets: "{{ openshift_master_session_auth_secrets | default(None) }}"
       session_encryption_secrets: "{{ openshift_master_session_encryption_secrets | default(None) }}"
-      session_secrets_file: "{{ openshift_master_session_secrets_file | default(None) }}"
       access_token_max_seconds: "{{ openshift_master_access_token_max_seconds | default(None) }}"
       auth_token_max_seconds: "{{ openshift_master_auth_token_max_seconds | default(None) }}"
       identity_providers: "{{ openshift_master_identity_providers | default(None) }}"
@@ -221,7 +228,7 @@
   template:
     dest: "{{ openshift.master.session_secrets_file }}"
     src: sessionSecretsFile.yaml.v1.j2
-    force: no
+  when: openshift.master.session_auth_secrets is defined and openshift.master.session_encryption_secrets is defined
   notify:
   - restart master
   - restart master api
