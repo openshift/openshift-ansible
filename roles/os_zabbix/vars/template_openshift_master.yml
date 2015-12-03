@@ -68,6 +68,36 @@ g_template_openshift_master:
     applications:
     - Openshift Master
 
+  - key: openshift.master.pv.total.count
+    description: Total number of Persistent Volumes in the Openshift Cluster
+    type: int
+    applications:
+    - Openshift Master
+
+  - key: openshift.master.pv.available.count
+    description: Total number of Available Persistent Volumes in the Openshift Cluster
+    type: int
+    applications:
+    - Openshift Master
+
+  - key: openshift.master.pv.released.count
+    description: Total number of Released Persistent Volumes in the Openshift Cluster
+    type: int
+    applications:
+    - Openshift Master
+
+  - key: openshift.master.pv.bound.count
+    description: Total number of Bound Persistent Volumes in the Openshift Cluster
+    type: int
+    applications:
+    - Openshift Master
+
+  - key: openshift.master.pv.failed.count
+    description: Total number of Failed Persistent Volumes in the Openshift Cluster
+    type: int
+    applications:
+    - Openshift Master
+
   - key: openshift.master.etcd.create.success
     description: Show number of successful create actions
     type: int
