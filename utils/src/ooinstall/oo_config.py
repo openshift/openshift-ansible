@@ -207,6 +207,8 @@ class OOConfig(object):
         result = {}
 
         for host in self.hosts:
+            if host.preconfigured:
+                continue
             missing_facts = []
             for required_fact in REQUIRED_FACTS:
                 if not getattr(host, required_fact):
