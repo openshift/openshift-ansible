@@ -415,5 +415,5 @@
   hosts: oo_first_master
   roles:
   - role: openshift_router
-    when: openshift.master.infra_nodes is defined
+    when: openshift.master.infra_nodes | default([], true) | length > 0
   #- role: openshift_registry

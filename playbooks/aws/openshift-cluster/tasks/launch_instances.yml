@@ -60,6 +60,7 @@
     ec2_instance_type: "{{ lookup('env', 'ec2_instance_type')
                           | default(deployment_vars[deployment_type].type, true) }}"
   when: ec2_instance_type is not defined
+
 - set_fact:
     ec2_security_groups: "{{ lookup('env', 'ec2_security_groups')
                     | default(deployment_vars[deployment_type].security_groups, true) }}"
@@ -72,7 +73,8 @@
     name: "{{ ec2_image_name | default(omit, true) }}"
   register: ami_result
 
-- fail: msg="Could not find requested ami"
+- fail:
+    msg: "Could not find requested ami"
   when: not ami_result.results
 
 - set_fact:
@@ -141,70 +143,41 @@
     tags:
       Name: "{{ item.0 }}"
 
-- set_fact:
-    instance_groups: "tag_created-by_{{ created_by }}, tag_env_{{ env }},
-                    tag_host-type_{{ host_type }}, tag_env-host-type_{{ env_host_type }},
-                    tag_sub-host-type_{{ sub_host_type }}"
-
-- set_fact:
-    node_label:
-      region: "{{ec2_region}}"
-      type: "{{sub_host_type}}"
-  when: host_type == "node"
-
-- set_fact:
-    node_label:
-      region: "{{ec2_region}}"
-      type: "{{host_type}}"
-  when: host_type != "node"
-
-- set_fact:
-    logrotate:
-        - name: syslog
-          path: "/var/log/cron
-                 \n/var/log/maillog
-                 \n/var/log/messages
-                 \n/var/log/secure
-                 \n/var/log/spooler \n"
-          options:
-            - daily
-            - rotate 7
-            - compress
-            - sharedscripts
-            - missingok
-          scripts:
-            postrotate: "/bin/kill -HUP `cat /var/run/syslogd.pid 2> /dev/null` 2> /dev/null || true"
-
 - name: Add new instances groups and variables
   add_host:
     hostname: "{{ item.0 }}"
     ansible_ssh_host: "{{ item.1.dns_name }}"
     ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
     ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-    groups: "{{ instance_groups }}"
+    groups: >
+      tag_created-by_{{ created_by }}, tag_env_{{ env }},
+      tag_host-type_{{ host_type }}, tag_env-host-type_{{ env_host_type }},
+      tag_sub-host-type_{{ sub_host_type }}
+      {{ ', nodes_to_add' if oo_extend_env | default(false, true) | bool else '' }}
     ec2_private_ip_address: "{{ item.1.private_ip }}"
     ec2_ip_address: "{{ item.1.public_ip }}"
-    openshift_node_labels: "{{ node_label }}"
-    logrotate_scripts: "{{ logrotate }}"
+    openshift_node_labels:
+      region: "{{ec2_region}}"
+      type: "{{sub_host_type if host_type == 'node' else host_type}}"
+    logrotate_scripts:
+    - name: syslog
+      path: |
+        /var/log/cron
+        /var/log/maillog
+        /var/log/messages
+        /var/log/secure
+        /var/log/spooler
+      options:
+      - daily
+      - rotate 7
+      - compress
+      - sharedscripts
+      - missingok
+      scripts:
+        postrotate: "/bin/kill -HUP `cat /var/run/syslogd.pid 2> /dev/null` 2> /dev/null || true"
   with_together:
   - instances
   - ec2.instances
-
-- name: Add new instances to nodes_to_add group if needed
-  add_host:
-    hostname: "{{ item.0 }}"
-    ansible_ssh_host: "{{ item.1.dns_name }}"
-    ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
-    ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-    groups: nodes_to_add
-    ec2_private_ip_address: "{{ item.1.private_ip }}"
-    ec2_ip_address: "{{ item.1.public_ip }}"
-    openshift_node_labels: "{{ node_label }}"
-    logrotate_scripts: "{{ logrotate }}"
-  with_together:
-  - instances
-  - ec2.instances
-  when: oo_extend_env is defined and oo_extend_env | bool
 
 - name: Wait for ssh
   wait_for: "port=22 host={{ item.dns_name }}"

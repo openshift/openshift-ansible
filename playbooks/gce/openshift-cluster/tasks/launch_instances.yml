@@ -23,20 +23,6 @@
   when: instances |length > 0
   register: gce
 
-- set_fact:
-    node_label:
-      # There doesn't seem to be a way to get the region directly, so parse it out of the zone.
-      region: "{{ gce.zone | regex_replace('^(.*)-.*$', '\\\\1') }}"
-      type: "{{ g_sub_host_type }}"
-  when: instances |length > 0 and type == "node"
-
-- set_fact:
-    node_label:
-      # There doesn't seem to be a way to get the region directly, so parse it out of the zone.
-      region: "{{ gce.zone | regex_replace('^(.*)-.*$', '\\\\1') }}"
-      type: "{{ type }}"
-  when: instances |length > 0 and type != "node"
-
 - name: Add new instances to groups and set variables needed
   add_host:
     hostname: "{{ item.name }}"
@@ -46,7 +32,10 @@
     groups: "{{ item.tags | oo_prepend_strings_in_list('tag_') | join(',') }}"
     gce_public_ip: "{{ item.public_ip }}"
     gce_private_ip: "{{ item.private_ip }}"
-    openshift_node_labels: "{{ node_label }}"
+    openshift_node_labels:
+      # There doesn't seem to be a way to get the region directly, so parse it out of the zone.
+      region: "{{ gce.zone | regex_replace('^(.*)-.*$', '\\\\1') }}"
+      type: "{{ g_sub_host_type if type == 'node' else type }}"
   with_items: gce.instance_data | default([], true)
 
 - name: Wait for ssh

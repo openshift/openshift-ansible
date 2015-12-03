@@ -19,3 +19,7 @@
     openshift_debug_level: 2
     openshift_deployment_type: "{{ deployment_type }}"
     openshift_hostname: "{{ ansible_default_ipv4.address }}"
+    openshift_use_openshift_sdn: "{{ lookup('oo_option', 'use_openshift_sdn') }}"
+    os_sdn_network_plugin_name: "{{ lookup('oo_option', 'sdn_network_plugin_name') }}"
+    openshift_use_flannel: "{{ lookup('oo_option', 'use_flannel') }}"
+    openshift_use_fluentd: "{{ lookup('oo_option', 'use_fluentd') }}"

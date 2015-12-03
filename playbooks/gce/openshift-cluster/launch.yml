@@ -49,17 +49,5 @@
     when: master_names is defined and master_names.0 is defined
 
 - include: update.yml
-#
-#- name: Deploy OpenShift Services
-#  hosts: service_master
-#  connection: ssh
-#  gather_facts: yes
-#  roles:
-#  - openshift_registry
-#  - openshift_router
-#
-#- include: ../../common/openshift-cluster/create_services.yml
-#  vars:
-#     g_svc_master: "{{ service_master }}"
 
 - include: list.yml

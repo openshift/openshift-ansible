@@ -8,10 +8,8 @@
   - vars.yml
   tasks:
   - set_fact:
-      g_ssh_user_tmp: "{{ deployment_vars[deployment_type].ssh_user }}"
+      g_ssh_user_tmp: "{{ lookup('env', 'gce_ssh_user') | default(deployment_vars[deployment_type].ssh_user, true) }}"
       g_sudo_tmp: "{{ deployment_vars[deployment_type].sudo }}"
-      use_sdn: "{{ do_we_use_openshift_sdn }}"
-      sdn_plugin: "{{ sdn_network_plugin }}"
 
 - include: ../../common/openshift-cluster/config.yml
   vars:
@@ -26,5 +24,9 @@
     openshift_debug_level: 2
     openshift_deployment_type: "{{ deployment_type }}"
     openshift_hostname: "{{ gce_private_ip }}"
-    openshift_use_openshift_sdn: "{{ hostvars.localhost.use_sdn  }}"
-    os_sdn_network_plugin_name: "{{ hostvars.localhost.sdn_plugin }}"
+    openshift_router_selector: 'type=infra'
+    osm_infra_nodes: "{{ groups['tag_env-host-type-' ~ cluster_id ~ '-openshift-node'] | intersect(groups['tag_sub-host-type-infra']) }}"
+    openshift_use_openshift_sdn: "{{ lookup('oo_option', 'use_openshift_sdn') }}"
+    os_sdn_network_plugin_name: "{{ lookup('oo_option', 'sdn_network_plugin_name') }}"
+    openshift_use_flannel: "{{ lookup('oo_option', 'use_flannel') }}"
+    openshift_use_fluentd: "{{ lookup('oo_option', 'use_fluentd') }}"
