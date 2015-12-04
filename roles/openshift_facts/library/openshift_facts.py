@@ -1053,7 +1053,7 @@ class OpenShiftFacts(object):
 
         common = dict(use_openshift_sdn=True, ip=ip_addr, public_ip=ip_addr,
                       deployment_type='origin', hostname=hostname,
-                      public_hostname=hostname)
+                      public_hostname=hostname, use_manageiq=False)
         common['client_binary'] = 'oc' if os.path.isfile('/usr/bin/oc') else 'osc'
         common['admin_binary'] = 'oadm' if os.path.isfile('/usr/bin/oadm') else 'osadm'
         common['dns_domain'] = 'cluster.local'

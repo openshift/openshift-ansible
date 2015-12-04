@@ -352,6 +352,8 @@
   - openshift_examples
   - role: openshift_cluster_metrics
     when: openshift.common.use_cluster_metrics | bool
+  - role: openshift_manageiq
+    when: openshift.common.use_manageiq | bool
 
 - name: Enable cockpit
   hosts: oo_first_master
