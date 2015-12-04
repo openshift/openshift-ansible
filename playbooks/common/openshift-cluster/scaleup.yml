@@ -3,6 +3,4 @@
 
 - include: ../openshift-node/config.yml
   vars:
-    osn_cluster_dns_domain: "{{ hostvars[groups.oo_first_master.0].openshift.dns.domain }}"
-    osn_cluster_dns_ip: "{{ hostvars[groups.oo_first_master.0].openshift.dns.ip }}"
     openshift_deployment_type: "{{ deployment_type }}"
