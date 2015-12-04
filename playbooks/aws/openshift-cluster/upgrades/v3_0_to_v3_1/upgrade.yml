@@ -1,0 +1,33 @@
+---
+# This playbook upgrades an existing AWS cluster, leaving nodes untouched if used with an 'online' deployment type.
+# Usage:
+#  ansible-playbook playbooks/aws/openshift-cluster/upgrades/v3_0_to_v3_1/upgrade.yml -e deployment_type=online -e cluster_id=<cluster_id>
+- hosts: localhost
+  gather_facts: no
+  vars_files:
+  - ../../vars.yml
+  - "../../vars.{{ deployment_type }}.{{ cluster_id }}.yml"
+
+  tasks:
+  - set_fact:
+      g_ssh_user_tmp: "{{ deployment_vars[deployment_type].ssh_user }}"
+      g_sudo_tmp: "{{ deployment_vars[deployment_type].sudo }}"
+
+  - set_fact:
+      tmp_nodes_group: "{{ 'tag_env-host-type_' ~ cluster_id ~ '-openshift-node' }}"
+    when: deployment_type != 'online'
+
+- include: ../../../../common/openshift-cluster/upgrades/v3_0_to_v3_1/upgrade.yml
+  vars:
+    g_etcd_group: "{{ 'tag_env-host-type_' ~ cluster_id ~ '-openshift-etcd' }}"
+    g_lb_group: "{{ 'tag_env-host-type_' ~ cluster_id ~ '-openshift-lb' }}"
+    g_masters_group: "{{ 'tag_env-host-type_' ~ cluster_id ~ '-openshift-master' }}"
+    g_nodes_group: "{{ tmp_nodes_group | default('') }}"
+    g_ssh_user: "{{ hostvars.localhost.g_ssh_user_tmp }}"
+    g_sudo: "{{ hostvars.localhost.g_sudo_tmp }}"
+    g_nodeonmaster: true
+    openshift_cluster_id: "{{ cluster_id }}"
+    openshift_debug_level: 2
+    openshift_deployment_type: "{{ deployment_type }}"
+    openshift_hostname: "{{ ec2_private_ip_address }}"
+    openshift_public_hostname: "{{ ec2_ip_address }}"
