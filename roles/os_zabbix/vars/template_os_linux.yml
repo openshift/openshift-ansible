@@ -258,15 +258,18 @@ g_template_os_linux:
     - Network
 
   ztriggerprototypes:
-  - name: 'Filesystem: {#OSO_FILESYS} has less than 15% free disk space on {HOST.NAME}'
-    expression: '{Template OS Linux:disc.filesys.full[{#OSO_FILESYS}].last()}>85'
-    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_filesys_full.asciidoc'
-    priority: warn
-
   - name: 'Filesystem: {#OSO_FILESYS} has less than 10% free disk space on {HOST.NAME}'
     expression: '{Template OS Linux:disc.filesys.full[{#OSO_FILESYS}].last()}>90'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_filesys_full.asciidoc'
     priority: high
+
+  # This has a dependency on the previous trigger
+  - name: 'Filesystem: {#OSO_FILESYS} has less than 15% free disk space on {HOST.NAME}'
+    expression: '{Template OS Linux:disc.filesys.full[{#OSO_FILESYS}].last()}>85'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_filesys_full.asciidoc'
+    priority: warn
+    dependencies:
+    - 'Filesystem: {#OSO_FILESYS} has less than 10% free disk space on {HOST.NAME}'
 
   - name: 'Filesystem: {#OSO_FILESYS} has less than 10% free inodes on {HOST.NAME}'
     expression: '{Template OS Linux:disc.filesys.inodes.pused[{#OSO_FILESYS}].last()}>90'
