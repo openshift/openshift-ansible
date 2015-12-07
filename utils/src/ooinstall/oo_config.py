@@ -38,6 +38,7 @@ class Host(object):
         self.public_hostname = kwargs.get('public_hostname', None)
         self.connect_to = kwargs.get('connect_to', None)
         self.preconfigured = kwargs.get('preconfigured', None)
+
         self.new_host = kwargs.get('new_host', None)
 
         # Should this host run as an OpenShift master:
@@ -50,12 +51,13 @@ class Host(object):
         self.master_lb = kwargs.get('master_lb', False)
 
         self.containerized = kwargs.get('containerized', False)
+        self.roles = kwargs.get('roles', None)
 
         if self.connect_to is None:
-            raise OOConfigInvalidHostError("You must specify either an ip " \
-                "or hostname as 'connect_to'")
+            raise OOConfigInvalidHostError(
+                "You must specify either an ip or hostname as 'connect_to'.")
 
-        if self.master is False and self.node is False and self.master_lb is False:
+        if self.is_master is False and self.is_node is False and self.is_master_lb is False:
             raise OOConfigInvalidHostError(
                 "You must specify each host as either a master or a node.")
 
@@ -68,9 +70,10 @@ class Host(object):
     def to_dict(self):
         """ Used when exporting to yaml. """
         d = {}
-        for prop in ['ip', 'hostname', 'public_ip', 'public_hostname',
-                     'master', 'node', 'master_lb', 'containerized',
-                     'connect_to', 'preconfigured', 'new_host']:
+
+        for prop in ['ip', 'hostname', 'public_ip', 'public_hostname', 'connect_to', 'roles',
+                     'containerized', 'preconfigured']:
+
             # If the property is defined (not None or False), export it:
             if getattr(self, prop):
                 d[prop] = getattr(self, prop)
@@ -78,29 +81,49 @@ class Host(object):
 
     def is_etcd_member(self, all_hosts):
         """ Will this host be a member of a standalone etcd cluster. """
-        if not self.master:
+        if not self.is_master:
             return False
-        masters = [host for host in all_hosts if host.master]
+        masters = [host for host in all_hosts if host.is_master]
         if len(masters) > 1:
             return True
         return False
 
+    def is_master(self):
+        """ Will this host be an openshift master. """
+        return 'master' in self.roles
+
+    def is_node(self):
+        """ Will this host be an openshift node. """
+        return 'node' in self.roles
+
     def is_dedicated_node(self):
         """ Will this host be a dedicated node. (not a master) """
-        return self.node and not self.master
+        return self.is_node and not self.is_master
 
     def is_schedulable_node(self, all_hosts):
         """ Will this host be a node marked as schedulable. """
-        if not self.node:
+        if not self.is_node:
             return False
-        if not self.master:
+        if not self.is_master:
             return True
 
-        masters = [host for host in all_hosts if host.master]
-        nodes = [host for host in all_hosts if host.node]
+        masters = [host for host in all_hosts if host.is_master]
+        nodes = [host for host in all_hosts if host.is_node]
         if len(masters) == len(nodes):
             return True
         return False
+
+    def is_infra_node(self):
+        """ Will this host be an infrastruction node. """
+        return 'infra' in self.roles
+
+    def is_master_lb(self):
+        """ Is this host a load balancer for all masters. """
+        return 'master_lb' in self.roles
+
+    def is_storage(self):
+        """ Will this host be NFS storage for a registry. """
+        return 'storage' in self.roles
 
 
 class OOConfig(object):
@@ -181,7 +204,7 @@ class OOConfig(object):
         if 'ansible_plugins_directory' not in self.settings:
             self.settings['ansible_plugins_directory'] = resource_filename(__name__, 'ansible_plugins')
         if 'version' not in self.settings:
-            self.settings['version'] = 'v1'
+            self.settings['version'] = 'v2'
 
         if 'ansible_callback_facts_yaml' not in self.settings:
             self.settings['ansible_callback_facts_yaml'] = '%s/callback_facts.yaml' % \
