@@ -5,6 +5,7 @@
 
 - name: Install pyparted (RedHat/Fedora)
   action: "{{ ansible_pkg_mgr }} name=pyparted,python-httplib2 state=present"
+  when: not openshift.common.is_containerized | bool
 
 - name: partition the drives
   partitionpool: disks={{ disks }} force={{ force }} sizes={{ sizes }}

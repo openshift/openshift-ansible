@@ -1,7 +1,8 @@
 ---
 - name: Install the base package for admin tooling
   action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}{{ openshift_version  }} state=present"
-  when: openshift.common.is_containerized | bool
+  when: not openshift.common.is_containerized | bool
+  register: install_result
 
 - name: Reload generated facts
   openshift_facts:

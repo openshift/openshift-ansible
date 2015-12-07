@@ -50,7 +50,7 @@
   when: openshift.common.is_containerized | bool
   register: docker_images
 
-- name: Pull required docker image
+- name: Pull node image
   command: >
     docker pull {{ openshift.node.node_image }}
   when: openshift.common.is_containerized | bool and openshift.node.node_image not in docker_images.stdout
@@ -61,17 +61,8 @@
     src: openshift.docker.node.service
   register: install_node_result
   when: openshift.common.is_containerized | bool
-  
-- name: Create openshift.common.data_dir
-  file: 
-    path: openshift.common.data_dir
-    state: directory
-    mode: 0755
-    owner: root
-    group: root
-  when: openshift.common.is_containerized | bool
 
-- name: Pull required docker image
+- name: Pull OpenvSwitch docker image
   command: >
     docker pull {{ openshift.node.ovs_image }}
   when: openshift.common.is_containerized | bool and openshift.node.ovs_image not in docker_images.stdout

@@ -235,6 +235,7 @@
 
   - name: Ensure python-yaml present for config upgrade
     action: "{{ ansible_pkg_mgr }} name=PyYAML state=present"
+    when: not openshift.common.is_atomic | bool
 
   - name: Upgrade master configuration
     openshift_upgrade_config:

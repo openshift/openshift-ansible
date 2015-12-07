@@ -1,2 +1,3 @@
 ---
 - action: "{{ ansible_pkg_mgr }} name=copr-cli state=present"
+  when: not openshift.common.is_containerized | bool

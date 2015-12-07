@@ -3,6 +3,7 @@
 
 - name: Install Ansible
   action: "{{ ansible_pkg_mgr }} name=ansible state=present"
+  when: not openshift.common.is_containerized | bool
 
 - include: config.yml
   vars:

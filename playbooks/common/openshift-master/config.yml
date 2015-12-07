@@ -246,6 +246,7 @@
     when: (openshift_master_session_auth_secrets is defined and openshift_master_session_encryption_secrets is defined) and (openshift_master_session_auth_secrets | length != openshift_master_session_encryption_secrets | length)
   - name: Install OpenSSL package
     action: "{{ ansible_pkg_mgr }} name=openssl state=present"
+    when: not openshift.common.is_atomic | bool
   - name: Generate session authentication key
     command: /usr/bin/openssl rand -base64 24
     register: session_auth_output

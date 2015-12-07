@@ -8,7 +8,7 @@
 #       proper repos correctly.
 
 - assert:
-    that: openshift.common.deployment_type in known_openshift_deployment_types
+    that: openshift_deployment_type in known_openshift_deployment_types
 
 - name: Ensure libselinux-python is installed
   action: "{{ ansible_pkg_mgr }} name=libselinux-python state=present"
@@ -46,7 +46,7 @@
   with_fileglob:
   - '*/repos/*'
   when: not (item | search("/files/fedora-" ~ openshift_deployment_type ~ "/repos")) and
-        (ansible_distribution == "Fedora")
+        (ansible_distribution == "Fedora") 
         and not openshift.common.is_containerized | bool
   notify: refresh cache
 
