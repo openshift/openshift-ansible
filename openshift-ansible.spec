@@ -211,6 +211,7 @@ BuildArch:     noarch
 Summary:       Openshift and Atomic Enterprise Ansible filter plugins
 Requires:      %{name}
 BuildArch:     noarch
+Requires:      pyOpenSSL
 
 %description filter-plugins
 %{summary}.
