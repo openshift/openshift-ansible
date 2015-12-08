@@ -1,8 +1,8 @@
 #!/usr/bin/env python
+# vim: expandtab:tabstop=4:shiftwidth=4
 '''
  Ansible module for zabbix actions
 '''
-# vim: expandtab:tabstop=4:shiftwidth=4
 #
 #   Zabbix action ansible module
 #
@@ -457,7 +457,7 @@ def main():
         if not exists(content):
             module.exit_json(changed=False, state="absent")
 
-        content = zapi.get_content(zbx_class_name, 'delete', [content['result'][0]['itemid']])
+        content = zapi.get_content(zbx_class_name, 'delete', [content['result'][0]['actionid']])
         module.exit_json(changed=True, results=content['result'], state="absent")
 
     # Create and Update
