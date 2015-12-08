@@ -192,7 +192,7 @@ BuildArch:     noarch
 # ----------------------------------------------------------------------------------
 %package roles
 Summary:       Openshift and Atomic Enterprise Ansible roles
-Requires:      %{name}
+Requires:      %{name} = %{version}
 Requires:      %{name}-lookup-plugins = %{version}
 Requires:      %{name}-filter-plugins = %{version}
 BuildArch:     noarch
@@ -209,7 +209,7 @@ BuildArch:     noarch
 # ----------------------------------------------------------------------------------
 %package filter-plugins
 Summary:       Openshift and Atomic Enterprise Ansible filter plugins
-Requires:      %{name}
+Requires:      %{name} = %{version}
 BuildArch:     noarch
 
 %description filter-plugins
@@ -224,7 +224,7 @@ BuildArch:     noarch
 # ----------------------------------------------------------------------------------
 %package lookup-plugins
 Summary:       Openshift and Atomic Enterprise Ansible lookup plugins
-Requires:      %{name}
+Requires:      %{name} = %{version}
 BuildArch:     noarch
 
 %description lookup-plugins
