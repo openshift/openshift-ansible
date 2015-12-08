@@ -18,30 +18,29 @@ ansible_ssh_user=root
 # user must be configured for passwordless sudo
 #ansible_sudo=true
 
-# deployment type valid values are origin, online and enterprise
-deployment_type=atomic-enterprise
+# deployment type valid values are origin, online, atomic-enterprise, and openshift-enterprise
+deployment_type=openshift-enterprise
 
 # Enable cluster metrics
 #use_cluster_metrics=true
 
-# Pre-release registry URL
+# Add additional, insecure, and blocked registries to global docker configuration
+# For enterprise deployment types we ensure that registry.access.redhat.com is
+# included if you do not include it
+#cli_docker_additional_registries=registry.example.com
+#cli_docker_insecure_registries=registry.example.com
+#cli_docker_blocked_registries=registry.hacker.com
+
+# Alternate image format string. If you're not modifying the format string and
+# only need to inject your own registry you may want to consider
+# cli_docker_additional_registries instead
 #oreg_url=example.com/openshift3/ose-${component}:${version}
 
-# Pre-release Dev puddle repo
-#openshift_additional_repos=[{'id': 'ose-devel', 'name': 'ose-devel', 'baseurl': 'http://buildvm-devops.usersys.redhat.com/puddle/build/OpenShiftEnterprise/3.0/latest/RH7-RHOSE-3.0/$basearch/os', 'enabled': 1, 'gpgcheck': 0}]
-
-# Pre-release Errata puddle repo
-#openshift_additional_repos=[{'id': 'ose-devel', 'name': 'ose-devel', 'baseurl': 'http://buildvm-devops.usersys.redhat.com/puddle/build/OpenShiftEnterpriseErrata/3.0/latest/RH7-RHOSE-3.0/$basearch/os', 'enabled': 1, 'gpgcheck': 0}]
-
-# Origin copr repo
-#openshift_additional_repos=[{'id': 'openshift-origin-copr', 'name': 'OpenShift Origin COPR', 'baseurl': 'https://copr-be.cloud.fedoraproject.org/results/maxamillion/origin-next/epel-7-$basearch/', 'enabled': 1, 'gpgcheck': 1, gpgkey: 'https://copr-be.cloud.fedoraproject.org/results/maxamillion/origin-next/pubkey.gpg'}]
-
-# Origin Fedora copr repo
-# Use this if you are installing on Fedora
-#openshift_additional_repos=[{'id': 'fedora-openshift-origin-copr', 'name': 'OpenShift Origin COPR for Fedora', 'baseurl': 'https://copr-be.cloud.fedoraproject.org/results/maxamillion/fedora-openshift/fedora-$releasever-$basearch/', 'enabled': 1, 'gpgcheck': 1, gpgkey: 'https://copr-be.cloud.fedoraproject.org/results/maxamillion/fedora-openshift/pubkey.gpg'}]
+# Additional yum repos to install
+#openshift_additional_repos=[{'id': 'ose-devel', 'name': 'ose-devel', 'baseurl': 'http://example.com/puddle/build/AtomicOpenShift/3.1/latest/RH7-RHOSE-3.0/$basearch/os', 'enabled': 1, 'gpgcheck': 0}]
 
 # htpasswd auth
-openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/openshift/htpasswd'}]
+openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/htpasswd'}]
 
 # Allow all auth
 #openshift_master_identity_providers=[{'name': 'allow_all', 'login': 'true', 'challenge': 'true', 'kind': 'AllowAllPasswordIdentityProvider'}]
@@ -113,7 +112,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # openshift_use_openshift_sdn=False
 
 # set RPM version for debugging purposes
-#openshift_pkg_version=-3.0.0.0
+#openshift_pkg_version=-3.1.0.0
 
 # Configure custom named certificates
 # NOTE: openshift_master_named_certificates is cached on masters and is an
