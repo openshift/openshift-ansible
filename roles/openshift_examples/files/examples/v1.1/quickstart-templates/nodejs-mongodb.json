@@ -98,6 +98,9 @@
             "type": "ImageChange"
           },
           {
+            "type": "ConfigChange"
+          },
+          {
             "type": "GitHub",
             "github": {
               "secret": "${GITHUB_WEBHOOK_SECRET}"
@@ -229,6 +232,20 @@
         },
         "triggers": [
           {
+            "type": "ImageChange",
+            "imageChangeParams": {
+              "automatic": false,
+              "containerNames": [
+                "mongodb"
+              ],
+              "from": {
+                "kind": "ImageStreamTag",
+                "namespace": "openshift",
+                "name": "mongodb:2.6"
+              }
+            }
+          },
+          {
             "type": "ConfigChange"
           }
         ],
@@ -247,7 +264,7 @@
             "containers": [
               {
                 "name": "mongodb",
-                "image": "${MONGODB_IMAGE}",
+                "image": "mongodb",
                 "ports": [
                   {
                     "containerPort": 27017
@@ -336,11 +353,6 @@
       "description": "Password for the database admin user",
       "generate": "expression",
       "from": "[a-zA-Z0-9]{16}"
-    },
-    {
-      "name": "MONGODB_IMAGE",
-      "description": "Image to use for mongodb",
-      "value": "openshift/mongodb-24-centos7"
     }
   ]
 }

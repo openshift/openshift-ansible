@@ -83,7 +83,7 @@
             "from": {
               "kind": "ImageStreamTag",
               "namespace": "openshift",
-              "name": "ruby:2.0"
+              "name": "ruby:2.2"
             }
           }
         },
@@ -96,6 +96,9 @@
         "triggers": [
           {
             "type": "ImageChange"
+          },
+          {
+            "type": "ConfigChange"
           },
           {
             "type": "GitHub",
@@ -262,6 +265,20 @@
         },
         "triggers": [
           {
+            "type": "ImageChange",
+            "imageChangeParams": {
+              "automatic": false,
+              "containerNames": [
+                "postgresql"
+              ],
+              "from": {
+                "kind": "ImageStreamTag",
+                "namespace": "openshift",
+                "name": "postgresql:9.4"
+              }
+            }
+          },
+          {
             "type": "ConfigChange"
           }
         ],
@@ -280,7 +297,7 @@
             "containers": [
               {
                 "name": "postgresql",
-                "image": "${POSTGRESQL_IMAGE}",
+                "image": "postgresql",
                 "ports": [
                   {
                     "containerPort": 5432
@@ -384,14 +401,9 @@
       "value": "root"
     },
     {
-      "name": "POSTGRESQL_IMAGE",
-      "description": "Image to use for postgresql",
-      "value": "openshift/postgresql-92-centos7"      
-    },
-    {
       "name": "POSTGRESQL_MAX_CONNECTIONS",
       "description": "database max connections",
-      "value": "10"
+      "value": "100"
     },
     {
       "name": "POSTGRESQL_SHARED_BUFFERS",
