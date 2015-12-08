@@ -208,6 +208,8 @@ class OOConfig(object):
         result = {}
 
         for host in self.hosts:
+            if host.preconfigured:
+                continue
             missing_facts = []
             if host.preconfigured:
                 required_facts = PRECONFIGURED_REQUIRED_FACTS
