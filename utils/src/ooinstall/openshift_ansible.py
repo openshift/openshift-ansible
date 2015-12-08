@@ -157,9 +157,15 @@ def load_system_facts(inventory_file, os_facts_path, env_vars, verbose=False):
     status = subprocess.call(args, env=env_vars, stdout=FNULL)
     if not status == 0:
         return [], 1
-    callback_facts_file = open(CFG.settings['ansible_callback_facts_yaml'], 'r')
-    callback_facts = yaml.load(callback_facts_file)
-    callback_facts_file.close()
+
+    with open(CFG.settings['ansible_callback_facts_yaml'], 'r') as callback_facts_file:
+        try:
+            callback_facts = yaml.safe_load(callback_facts_file)
+        except yaml.YAMLError, exc:
+            print "Error in {}".format(CFG.settings['ansible_callback_facts_yaml']), exc
+            print "Try deleting and rerunning the atomic-openshift-installer"
+            sys.exit(1)
+
     return callback_facts, 0
 
 
