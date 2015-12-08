@@ -225,6 +225,44 @@ hosts:
     master: true
 """
 
+QUICKHA_CONFIG_PRECONFIGURED_LB = """
+variant: %s
+ansible_ssh_user: root
+hosts:
+  - connect_to: 10.0.0.1
+    ip: 10.0.0.1
+    hostname: master-private.example.com
+    public_ip: 24.222.0.1
+    public_hostname: master.example.com
+    master: true
+    node: true
+  - connect_to: 10.0.0.2
+    ip: 10.0.0.2
+    hostname: node1-private.example.com
+    public_ip: 24.222.0.2
+    public_hostname: node1.example.com
+    master: true
+    node: true
+  - connect_to: 10.0.0.3
+    ip: 10.0.0.3
+    hostname: node2-private.example.com
+    public_ip: 24.222.0.3
+    public_hostname: node2.example.com
+    node: true
+    master: true
+  - connect_to: 10.0.0.4
+    ip: 10.0.0.4
+    hostname: node3-private.example.com
+    public_ip: 24.222.0.4
+    public_hostname: node3.example.com
+    node: true
+  - connect_to: proxy-private.example.com
+    hostname: proxy-private.example.com
+    public_hostname: proxy.example.com
+    master_lb: true
+    preconfigured: true
+"""
+
 class UnattendedCliTests(OOCliFixture):
 
     def setUp(self):
@@ -608,6 +646,25 @@ class UnattendedCliTests(OOCliFixture):
         # This is not a valid configuration:
         self.assert_result(result, 1)
 
+    #unattended with preconfigured lb
+    @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.load_system_facts')
+    def test_quick_ha_preconfigured_lb(self, load_facts_mock, run_playbook_mock):
+        load_facts_mock.return_value = (MOCK_FACTS_QUICKHA, 0)
+        run_playbook_mock.return_value = 0
+
+        config_file = self.write_config(os.path.join(self.work_dir,
+            'ooinstall.conf'), QUICKHA_CONFIG_PRECONFIGURED_LB % 'openshift-enterprise')
+
+        self.cli_args.extend(["-c", config_file, "install"])
+        result = self.runner.invoke(cli.cli, self.cli_args)
+        self.assert_result(result, 0)
+
+        # Make sure we ran on the expected masters and nodes:
+        hosts = run_playbook_mock.call_args[0][0]
+        hosts_to_run_on = run_playbook_mock.call_args[0][1]
+        self.assertEquals(5, len(hosts))
+        self.assertEquals(5, len(hosts_to_run_on))
 
 class AttendedCliTests(OOCliFixture):
 

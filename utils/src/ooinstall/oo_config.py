@@ -14,7 +14,8 @@ PERSIST_SETTINGS = [
     'variant_version',
     'version',
     ]
-REQUIRED_FACTS = ['ip', 'public_ip', 'hostname', 'public_hostname']
+DEFAULT_REQUIRED_FACTS = ['ip', 'public_ip', 'hostname', 'public_hostname']
+PRECONFIGURED_REQUIRED_FACTS = ['hostname', 'public_hostname']
 
 
 class OOConfigFileError(Exception):
@@ -208,7 +209,12 @@ class OOConfig(object):
 
         for host in self.hosts:
             missing_facts = []
-            for required_fact in REQUIRED_FACTS:
+            if host.preconfigured:
+                required_facts = PRECONFIGURED_REQUIRED_FACTS
+            else:
+                required_facts = DEFAULT_REQUIRED_FACTS
+
+            for required_fact in required_facts:
                 if not getattr(host, required_fact):
                     missing_facts.append(required_fact)
             if len(missing_facts) > 0:

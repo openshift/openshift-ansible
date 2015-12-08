@@ -752,8 +752,8 @@ def install(ctx, force):
 
     check_hosts_config(oo_cfg, ctx.obj['unattended'])
 
-    click.echo('Gathering information from hosts...')
     print_installation_summary(oo_cfg.hosts)
+    click.echo('Gathering information from hosts...')
     callback_facts, error = openshift_ansible.default_facts(oo_cfg.hosts,
         verbose)
     if error:
