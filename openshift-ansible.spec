@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.17
+Version:        3.0.18
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -259,6 +259,16 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Dec 08 2015 Brenton Leanhardt <bleanhar@redhat.com> 3.0.18-1
+- Pass in and use first_master_ip as dnsIP for pre 3.1 nodes.
+  (abutcher@redhat.com)
+- Fix delete state (jdiaz@redhat.com)
+- Require pyOpenSSL (sdodson@redhat.com)
+- Update sync db-templates, image-streams, and quickstart-templates
+  (sdodson@redhat.com)
+- Clarify the preflight port check output (sdodson@redhat.com)
+- Fix missing dependency version locking (sdodson@redhat.com)
+
 * Tue Dec 08 2015 Brenton Leanhardt <bleanhar@redhat.com> 3.0.17-1
 - Improving output when gathering facts (bleanhar@redhat.com)
 - Bug 1287977 - Incorrect check output from atomic-openshift-installer when
