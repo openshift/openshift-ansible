@@ -267,13 +267,8 @@
   when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
 
 - name: Install cluster packages
-  yum: pkg=pcs state=present
-  when: (ansible_pkg_mgr == "yum") and openshift_master_ha | bool and openshift.master.cluster_method == 'pacemaker'
-  register: install_result
-
-- name: Install cluster packages
-  dnf: pkg=pcs state=present
-  when: (ansible_pkg_mgr == "dnf") and openshift_master_ha | bool and openshift.master.cluster_method == 'pacemaker'
+  action: "{{ansible_pkg_mgr}} pkg=pcs state=present"
+  when: openshift_master_ha | bool and openshift.master.cluster_method == 'pacemaker'
   register: install_result
 
 - name: Start and enable cluster service
