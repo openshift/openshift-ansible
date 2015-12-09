@@ -249,22 +249,14 @@
   - name: Generate session authentication key
     command: /usr/bin/openssl rand -base64 24
     register: session_auth_output
-    with_sequence: count=1
     when: openshift_master_session_auth_secrets is undefined
   - name: Generate session encryption key
     command: /usr/bin/openssl rand -base64 24
     register: session_encryption_output
-    with_sequence: count=1
     when: openshift_master_session_encryption_secrets is undefined
   - set_fact:
-      session_auth_secret: "{{ openshift_master_session_auth_secrets
-                                | default(session_auth_output.results
-                                | oo_collect(attribute='stdout')
-                                | list) }}"
-      session_encryption_secret: "{{ openshift_master_session_encryption_secrets
-                                      | default(session_encryption_output.results
-                                      | oo_collect(attribute='stdout')
-                                      | list) }}"
+      session_auth_secret: "{{ openshift_master_session_auth_secrets | default([session_auth_output.stdout]) }}"
+      session_encryption_secret: "{{ openshift_master_session_encryption_secrets | default([session_encryption_output.stdout]) }}"
 
 - name: Parse named certificates
   hosts: localhost
