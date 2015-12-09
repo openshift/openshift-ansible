@@ -79,6 +79,8 @@
         - tuned-profiles-openshift-node
         - tuned-profiles-origin-node
 
+    - user: name=hacluster state=absent
+
     - dnf: name={{ item }} state=absent
       when: ansible_pkg_mgr == "dnf" and not is_atomic | bool
       with_items:
