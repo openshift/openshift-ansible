@@ -8,7 +8,7 @@ partition, and then expanding the file system on the partition.
 
 * A machine with a disk that is not fully utilized
 
-* cloud-utils-growpart rpm (either installed or avialable via yum)
+* cloud-utils-growpart rpm (either installed or avialable via yum or dnf)
 
 * The partition you are expanding needs to be at the end of the partition list
 

@@ -2,6 +2,12 @@
 - name: Install flannel
   sudo: true
   yum: pkg=flannel state=present
+  when: ansible_pkg_mgr == "yum"
+
+- name: Install flannel
+  sudo: true
+  dnf: pkg=flannel state=present
+  when: ansible_pkg_mgr == "dnf"
 
 - name: Set flannel etcd url
   sudo: true

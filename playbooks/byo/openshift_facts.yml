@@ -1,7 +1,6 @@
 ---
 - name: Gather Cluster facts
-  hosts: all
-  gather_facts: no
+  hosts: OSEv3
   roles:
   - openshift_facts
   tasks:

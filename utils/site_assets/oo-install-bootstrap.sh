@@ -9,6 +9,13 @@ cmdlnargs="$@"
 : ${OO_INSTALL_LOG:=${TMPDIR}/INSTALLPKGNAME.log}
 [[ $TMPDIR != */ ]] && TMPDIR="${TMPDIR}/"
 
+if rpm -q dnf;
+then
+  PKG_MGR="dnf"
+else
+  PKG_MGR="yum"
+fi
+
 if [ $OO_INSTALL_CONTEXT != 'origin_vm' ]
 then
   clear
@@ -18,7 +25,7 @@ if [ -e /etc/redhat-release  ]
 then
   for i in python python-virtualenv openssh-clients gcc
   do
-    rpm -q $i  >/dev/null 2>&1 || { echo >&2 "Missing installation dependency detected.  Please run \"yum install ${i}\"."; exit 1; }
+    rpm -q $i  >/dev/null 2>&1 || { echo >&2 "Missing installation dependency detected.  Please run \"${PKG_MGR} install ${i}\"."; exit 1; }
   done
 fi
 for i in python virtualenv ssh gcc

@@ -60,7 +60,7 @@
     register: g_external_etcd_cert_stat_result
   - set_fact:
       etcd_client_certs_missing: "{{ g_external_etcd_cert_stat_result.results
-                                    | map(attribute='stat.exists')
+                                    | oo_collect(attribute='stat.exists')
                                     | list | intersect([false])}}"
       etcd_cert_subdir: openshift-master-{{ openshift.common.hostname }}
       etcd_cert_config_dir: "{{ openshift.common.config_base }}/master"
@@ -157,7 +157,7 @@
     register: g_master_cert_stat_result
   - set_fact:
       master_certs_missing: "{{ False in (g_master_cert_stat_result.results
-                                | map(attribute='stat.exists')
+                                | oo_collect(attribute='stat.exists')
                                 | list ) }}"
       master_cert_subdir: master-{{ openshift.common.hostname }}
       master_cert_config_dir: "{{ openshift.common.config_base }}/master"
@@ -204,14 +204,6 @@
       validate_checksum: yes
     with_items: masters_needing_certs
 
-- name: Inspect named certificates
-  hosts: oo_first_master
-  tasks:
-  - name: Collect certificate names
-    set_fact:
-      parsed_named_certificates: "{{ openshift_master_named_certificates | oo_parse_certificate_names(master_cert_config_dir, openshift.common.internal_hostnames) }}"
-    when: openshift_master_named_certificates is defined
-
 - name: Compute haproxy_backend_servers
   hosts: localhost
   connection: local
@@ -252,31 +244,69 @@
   - fail:
       msg: "openshift_master_session_auth_secrets and openshift_master_encryption_secrets must be equal length"
     when: (openshift_master_session_auth_secrets is defined and openshift_master_session_encryption_secrets is defined) and (openshift_master_session_auth_secrets | length != openshift_master_session_encryption_secrets | length)
+  - name: Install OpenSSL package
+    action: "{{ansible_pkg_mgr}} pkg=openssl state=present"
   - name: Generate session authentication key
     command: /usr/bin/openssl rand -base64 24
     register: session_auth_output
-    with_sequence: count=1
     when: openshift_master_session_auth_secrets is undefined
   - name: Generate session encryption key
     command: /usr/bin/openssl rand -base64 24
     register: session_encryption_output
-    with_sequence: count=1
     when: openshift_master_session_encryption_secrets is undefined
   - set_fact:
-      session_auth_secret: "{{ openshift_master_session_auth_secrets
-                                | default(session_auth_output.results
-                                | map(attribute='stdout')
-                                | list) }}"
-      session_encryption_secret: "{{ openshift_master_session_encryption_secrets
-                                      | default(session_encryption_output.results
-                                      | map(attribute='stdout')
-                                      | list) }}"
+      session_auth_secret: "{{ openshift_master_session_auth_secrets | default([session_auth_output.stdout]) }}"
+      session_encryption_secret: "{{ openshift_master_session_encryption_secrets | default([session_encryption_output.stdout]) }}"
+
+- name: Parse named certificates
+  hosts: localhost
+  vars:
+    internal_hostnames: "{{ hostvars[groups.oo_first_master.0].openshift.common.internal_hostnames }}"
+    named_certificates: "{{ hostvars[groups.oo_first_master.0].openshift_master_named_certificates | default([]) }}"
+    named_certificates_dir: "{{ hostvars[groups.oo_first_master.0].master_cert_config_dir }}/named_certificates/"
+  tasks:
+  - set_fact:
+      parsed_named_certificates: "{{ named_certificates | oo_parse_named_certificates(named_certificates_dir, internal_hostnames) }}"
+    when: named_certificates | length > 0
+
+- name: Deploy named certificates
+  hosts: oo_masters_to_config
+  vars:
+    named_certs_dir: "{{ master_cert_config_dir }}/named_certificates/"
+    named_certs_specified: "{{ openshift_master_named_certificates is defined }}"
+    overwrite_named_certs: "{{ openshift_master_overwrite_named_certificates | default(false) }}"
+  roles:
+  - role: openshift_facts
+  post_tasks:
+  - openshift_facts:
+      role: master
+      local_facts:
+        named_certificates: "{{ hostvars.localhost.parsed_named_certificates | default([]) }}"
+      additive_facts_to_overwrite:
+      - "{{ 'master.named_certificates' if overwrite_named_certs | bool else omit }}"
+  - name: Clear named certificates
+    file:
+      path: "{{ named_certs_dir }}"
+      state: absent
+    when: overwrite_named_certs | bool
+  - name: Ensure named certificate directory exists
+    file:
+      path: "{{ named_certs_dir }}"
+      state: directory
+    when: named_certs_specified | bool
+  - name: Land named certificates
+    copy: src="{{ item.certfile }}" dest="{{ named_certs_dir }}"
+    with_items: openshift_master_named_certificates
+    when: named_certs_specified | bool
+  - name: Land named certificate keys
+    copy: src="{{ item.keyfile }}" dest="{{ named_certs_dir }}"
+    with_items: openshift_master_named_certificates
+    when: named_certs_specified | bool
 
 - name: Configure master instances
   hosts: oo_masters_to_config
   serial: 1
   vars:
-    named_certificates: "{{ hostvars[groups['oo_first_master'][0]]['parsed_named_certificates'] | default([])}}"
     sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
     openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
     openshift_master_count: "{{ groups.oo_masters_to_config | length }}"
@@ -314,20 +344,8 @@
   - openshift_examples
   - role: openshift_cluster_metrics
     when: openshift.common.use_cluster_metrics | bool
-
-- name: Determine cluster dns ip
-  hosts: oo_first_master
-  tasks:
-  - name: Get master service ip
-    command: "{{ openshift.common.client_binary }} get -o template svc kubernetes --template=\\{\\{.spec.clusterIP\\}\\}"
-    register: master_service_ip_output
-    when: openshift.common.version_greater_than_3_1_or_1_1 | bool
-  - set_fact:
-      cluster_dns_ip: "{{ hostvars[groups.oo_first_master.0].openshift.dns.ip }}"
-    when: not openshift.common.version_greater_than_3_1_or_1_1 | bool
-  - set_fact:
-      cluster_dns_ip: "{{ master_service_ip_output.stdout }}"
-    when: openshift.common.version_greater_than_3_1_or_1_1 | bool
+  - role: openshift_manageiq
+    when: openshift.common.use_manageiq | bool
 
 - name: Enable cockpit
   hosts: oo_first_master
