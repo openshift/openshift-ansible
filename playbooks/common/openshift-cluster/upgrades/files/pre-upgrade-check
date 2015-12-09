@@ -111,13 +111,16 @@ def print_validation_header():
     overwhelming the user.
     """
     print """\
-At least one port name does not validate. Valid port names:
+At least one port name is invalid and must be corrected before upgrading.
+Please update or remove any resources with invalid port names.
 
-    * must be less that 16 chars
+  Valid port names must:
+
+    * be less that 16 characters
     * have at least one letter
-    * only a-z0-9-
-    * do not start or end with -
-    * Dashes may not be next to eachother ('--')
+    * contain only a-z0-9-
+    * not start or end with -
+    * not contain dashes next to each other ('--')
 """
 
 
@@ -142,9 +145,9 @@ def main():
     # Where the magic happens
     first_error = True
     for kind, path in [
+            ('deploymentconfigs', ("spec", "template", "spec", "containers")),
             ('replicationcontrollers', ("spec", "template", "spec", "containers")),
-            ('pods', ("spec", "containers")),
-            ('deploymentconfigs', ("spec", "template", "spec", "containers"))]:
+            ('pods', ("spec", "containers"))]:
         for item in list_items(kind):
             namespace = item["metadata"]["namespace"]
             item_name = item["metadata"]["name"]

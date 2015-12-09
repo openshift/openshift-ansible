@@ -1,0 +1,6 @@
+---
+- name: refresh yum cache
+  command: yum clean all
+
+- name: refresh dnf cache
+  command: dnf clean all

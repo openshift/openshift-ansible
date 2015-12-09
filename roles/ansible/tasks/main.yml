@@ -5,6 +5,13 @@
   yum:
     pkg: ansible
     state: installed
+  when: ansible_pkg_mgr == "yum"
+
+- name: Install Ansible
+  dnf:
+    pkg: ansible
+    state: installed
+  when: ansible_pkg_mgr == "dnf"
 
 - include: config.yml
   vars:

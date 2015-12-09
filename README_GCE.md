@@ -43,7 +43,11 @@ Mandatory customization variables (check the values according to your tenant):
 * zone = europe-west1-d
 * network = default
 * gce_machine_type = n1-standard-2
+* gce_machine_master_type = n1-standard-1
+* gce_machine_node_type = n1-standard-2
 * gce_machine_image = preinstalled-slave-50g-v5
+* gce_machine_master_image = preinstalled-slave-50g-v5
+* gce_machine_node_image = preinstalled-slave-50g-v5
 
 
 1. vi ~/.gce/gce.ini
@@ -56,7 +60,11 @@ gce_project_id = project_id
 zone = europe-west1-d
 network = default
 gce_machine_type = n1-standard-2
+gce_machine_master_type = n1-standard-1
+gce_machine_node_type = n1-standard-2
 gce_machine_image = preinstalled-slave-50g-v5
+gce_machine_master_image = preinstalled-slave-50g-v5
+gce_machine_node_image = preinstalled-slave-50g-v5
 
 ```
 1. Define the environment variable GCE_INI_PATH so gce.py can pick it up and bin/cluster can also read it

@@ -3,6 +3,13 @@
   yum:
     pkg: haproxy
     state: present
+  when: ansible_pkg_mgr == "yum"
+
+- name: Install haproxy
+  dnf:
+    pkg: haproxy
+    state: present
+  when: ansible_pkg_mgr == "dnf"
 
 - name: Configure haproxy
   template:

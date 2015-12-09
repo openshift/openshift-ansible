@@ -48,7 +48,39 @@
         - pcsd
 
     - yum: name={{ item }} state=absent
-      when: not is_atomic | bool
+      when: ansible_pkg_mgr == "yum" and not is_atomic | bool
+      with_items:
+        - atomic-enterprise
+        - atomic-enterprise-master
+        - atomic-enterprise-node
+        - atomic-enterprise-sdn-ovs
+        - atomic-openshift
+        - atomic-openshift-clients
+        - atomic-openshift-master
+        - atomic-openshift-node
+        - atomic-openshift-sdn-ovs
+        - corosync
+        - etcd
+        - openshift
+        - openshift-master
+        - openshift-node
+        - openshift-sdn
+        - openshift-sdn-ovs
+        - openvswitch
+        - origin
+        - origin-clients
+        - origin-master
+        - origin-node
+        - origin-sdn-ovs
+        - pacemaker
+        - pcs
+        - tuned-profiles-atomic-enterprise-node
+        - tuned-profiles-atomic-openshift-node
+        - tuned-profiles-openshift-node
+        - tuned-profiles-origin-node
+
+    - dnf: name={{ item }} state=absent
+      when: ansible_pkg_mgr == "dnf" and not is_atomic | bool
       with_items:
         - atomic-enterprise
         - atomic-enterprise-master
@@ -111,12 +143,12 @@
         - atomic-enterprise
         - origin
 
-    - shell: docker ps -a | grep Exited | grep "{{ item }}" | awk '{print $1}'
+    - shell: docker ps -a | grep Exited | egrep "{{ item }}" | awk '{print $1}'
       changed_when: False
       failed_when: False
       register: exited_containers_to_delete
       with_items:
-        - aep3/aep
+        - aep3.*/aep
         - openshift3/ose
         - openshift/origin
 
@@ -125,13 +157,13 @@
       failed_when: False
       with_items: "{{ exited_containers_to_delete.results }}"
 
-    - shell: docker images | grep {{ item }} | awk '{ print $3 }'
+    - shell: docker images | egrep {{ item }} | awk '{ print $3 }'
       changed_when: False
       failed_when: False
       register: images_to_delete
       with_items:
-        - registry.access.redhat.com/openshift3
-        - registry.access.redhat.com/aep3
+        - registry\.access\..*redhat\.com/openshift3
+        - registry\.access\..*redhat\.com/aep3
         - docker.io/openshift
 
     - shell:  "docker rmi -f {{ item.stdout_lines | join(' ') }}"
@@ -161,6 +193,7 @@
         - /etc/sysconfig/origin-master-api
         - /etc/sysconfig/origin-master-controllers
         - /etc/sysconfig/origin-node
+        - /etc/systemd/system/atomic-openshift-node.service.wants
         - /root/.kube
         - /run/openshift-sdn
         - /usr/share/openshift/examples
@@ -180,5 +213,8 @@
     - name: Reload systemd manager configuration
       command: systemctl daemon-reload
 
+- hosts: nodes
+  sudo: yes
+  tasks:
     - name: restart docker
       service: name=docker state=restarted

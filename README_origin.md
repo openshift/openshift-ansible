@@ -39,6 +39,12 @@ subscription-manager repos \
 ```
 * Configuration of router is not automated yet
 * Configuration of docker-registry is not automated yet
+* Fedora 23+ doesn't come with python2 and will need a quick bootstrap. Setup
+  your inventory as described below and run the following (substituting the
+  `$PATH_TO_INVENTORY_FILE` with the actual path to your inventory file):
+```sh
+ansible-playbook ./playbooks/adhoc/bootstrap-fedora.yml -i $PATH_TO_INVENTORY_FILE
+```
 
 ## Configuring the host inventory
 [Ansible docs](http://docs.ansible.com/intro_inventory.html)
@@ -59,6 +65,7 @@ nodes
 
 # Set variables common for all OSEv3 hosts
 [OSv3:vars]
+
 # SSH user, this user should allow ssh based auth without requiring a password
 ansible_ssh_user=root
 
@@ -75,6 +82,14 @@ osv3-master.example.com
 [nodes]
 osv3-master.example.com
 osv3-node[1:2].example.com
+
+# host group for etcd
+[etcd]
+osv3-etcd[1:3].example.com
+
+[lb]
+osv3-lb.example.com
+
 ```
 
 The hostnames above should resolve both from the hosts themselves and

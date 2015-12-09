@@ -288,25 +288,29 @@ class MultiInventory(object):
         results = self.all_inventory_results[acc_config['name']]
         results['all_hosts'] = results['_meta']['hostvars'].keys()
 
-        # Update each hostvar with the newly desired key: value from extra_*
-        for _extra in ['extra_vars', 'extra_groups']:
-            for new_var, value in acc_config.get(_extra, {}).items():
-                for data in results['_meta']['hostvars'].values():
-                    self.add_entry(data, new_var, value)
+        # Extra vars go here
+        for new_var, value in acc_config.get('extra_vars', {}).items():
+            for data in results['_meta']['hostvars'].values():
+                self.add_entry(data, new_var, value)
 
-                # Add this group
-                if _extra == 'extra_groups':
-                    results["%s_%s" % (new_var, value)] = copy.copy(results['all_hosts'])
-
-        # Clone groups goes here
-        for to_name, from_name in acc_config.get('clone_groups', {}).items():
-            if results.has_key(from_name):
-                results[to_name] = copy.copy(results[from_name])
-
-        # Clone vars goes here
+        # Clone vars go here
         for to_name, from_name in acc_config.get('clone_vars', {}).items():
             for data in results['_meta']['hostvars'].values():
                 self.add_entry(data, to_name, self.get_entry(data, from_name))
+
+        # Extra groups go here
+        for new_var, value in acc_config.get('extra_groups', {}).items():
+            for data in results['_meta']['hostvars'].values():
+                results["%s_%s" % (new_var, value)] = copy.copy(results['all_hosts'])
+
+        # Clone groups go here
+        # Build a group based on the desired key name
+        for to_name, from_name in acc_config.get('clone_groups', {}).items():
+            for name, data in results['_meta']['hostvars'].items():
+                key = '%s_%s' % (to_name, self.get_entry(data, from_name))
+                if not results.has_key(key):
+                    results[key] = []
+                results[key].append(name)
 
         # store the results back into all_inventory_results
         self.all_inventory_results[acc_config['name']] = results
