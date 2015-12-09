@@ -1,15 +1,6 @@
 ---
 - name: Install GlusterFS storage plugin dependencies
-  yum:
-    pkg: glusterfs-fuse
-    state: installed
-  when: ansible_pkg_mgr == "yum"
-
-- name: Install GlusterFS storage plugin dependencies
-  dnf:
-    pkg: glusterfs-fuse
-    state: installed
-  when: ansible_pkg_mgr == "dnf"
+  action: "{{ ansible_pkg_mgr }} name=glusterfs-fuse state=present"
 
 - name: Set sebooleans to allow gluster storage plugin access from containers
   seboolean:
