@@ -43,6 +43,11 @@ parameters:
     description: Source of legitimate ssh connections
     default: 0.0.0.0/0
 
+  num_etcd:
+    type: number
+    label: Number of etcd nodes
+    description: Number of etcd nodes
+
   num_masters:
     type: number
     label: Number of masters
@@ -58,6 +63,11 @@ parameters:
     label: Number of infrastructure nodes
     description: Number of infrastructure nodes
 
+  etcd_image:
+    type: string
+    label: Etcd image
+    description: Name of the image for the etcd servers
+
   master_image:
     type: string
     label: Master image
@@ -72,6 +82,11 @@ parameters:
     type: string
     label: Infra image
     description: Name of the image for the infra node servers
+
+  etcd_flavor:
+    type: string
+    label: Etcd flavor
+    description: Flavor of the etcd servers
 
   master_flavor:
     type: string
@@ -89,6 +104,18 @@ parameters:
     description: Flavor of the infra node servers
 
 outputs:
+
+  etcd_names:
+    description: Name of the etcds
+    value: { get_attr: [ etcd, name ] }
+
+  etcd_ips:
+    description: IPs of the etcds
+    value: { get_attr: [ etcd, private_ip ] }
+
+  etcd_floating_ips:
+    description: Floating IPs of the etcds
+    value: { get_attr: [ etcd, floating_ip ] }
 
   master_names:
     description: Name of the masters
@@ -220,6 +247,37 @@ resources:
           port_range_min: 24224
           port_range_max: 24224
 
+  etcd-secgrp:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name:
+        str_replace:
+          template: openshift-ansible-cluster_id-etcd-secgrp
+          params:
+            cluster_id: { get_param: cluster_id }
+      description:
+        str_replace:
+          template: Security group for cluster_id etcd cluster
+          params:
+            cluster_id: { get_param: cluster_id }
+      rules:
+        - direction: ingress
+          protocol: tcp
+          port_range_min: 22
+          port_range_max: 22
+          remote_ip_prefix: { get_param: ssh_incoming }
+        - direction: ingress
+          protocol: tcp
+          port_range_min: 2379
+          port_range_max: 2379
+          remote_mode: remote_group_id
+          remote_group_id: { get_resource: master-secgrp }
+        - direction: ingress
+          protocol: tcp
+          port_range_min: 2380
+          port_range_max: 2380
+          remote_mode: remote_group_id
+
   node-secgrp:
     type: OS::Neutron::SecurityGroup
     properties:
@@ -273,6 +331,36 @@ resources:
           protocol: tcp
           port_range_min: 443
           port_range_max: 443
+
+  etcd:
+    type: OS::Heat::ResourceGroup
+    properties:
+      count: { get_param: num_etcd }
+      resource_def:
+        type: heat_stack_server.yaml
+        properties:
+          name:
+            str_replace:
+              template: cluster_id-k8s_type-%index%
+              params:
+                cluster_id: { get_param: cluster_id }
+                k8s_type: etcd
+          cluster_id: { get_param: cluster_id }
+          type:       etcd
+          image:      { get_param: etcd_image }
+          flavor:     { get_param: etcd_flavor }
+          key_name:   { get_resource: keypair }
+          net:        { get_resource: net }
+          subnet:     { get_resource: subnet }
+          secgrp:
+            - { get_resource: etcd-secgrp }
+          floating_network: { get_param: floating_ip_pool }
+          net_name:
+            str_replace:
+              template: openshift-ansible-cluster_id-net
+              params:
+                cluster_id: { get_param: cluster_id }
+    depends_on: interface
 
   masters:
     type: OS::Heat::ResourceGroup

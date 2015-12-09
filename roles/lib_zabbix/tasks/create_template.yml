@@ -33,6 +33,7 @@
     key: "{{ item.key }}"
     name: "{{ item.name | default(item.key, true) }}"
     value_type: "{{ item.value_type | default('int') }}"
+    data_type: "{{ item.data_type | default('decimal') }}"
     description: "{{ item.description | default('', True) }}"
     multiplier: "{{ item.multiplier | default('', True) }}"
     units: "{{ item.units | default('', True) }}"
@@ -81,6 +82,7 @@
     key: "{{ item.key }}"
     discoveryrule_key: "{{ item.discoveryrule_key }}"
     value_type: "{{ item.value_type }}"
+    data_type: "{{ item.data_type | default('decimal') }}"
     template_name: "{{ template.name }}"
     applications: "{{ item.applications }}"
     description: "{{ item.description | default('', True) }}"
@@ -103,3 +105,27 @@
     description: "{{ item.description | default('', True) }}"
   with_items: template.ztriggerprototypes
   when: template.ztriggerprototypes is defined
+
+- name: Create Graphs
+  zbx_graph:
+    zbx_server: "{{ server }}"
+    zbx_user: "{{ user }}"
+    zbx_password: "{{ password }}"
+    name: "{{ item.name }}"
+    height: "{{ item.height }}"
+    width: "{{ item.width }}"
+    graph_items: "{{ item.graph_items }}"
+  with_items: template.zgraphs
+  when: template.zgraphs is defined
+
+- name: Create Graph Prototypes
+  zbx_graphprototype:
+    zbx_server: "{{ server }}"
+    zbx_user: "{{ user }}"
+    zbx_password: "{{ password }}"
+    name: "{{ item.name }}"
+    height: "{{ item.height }}"
+    width: "{{ item.width }}"
+    graph_items: "{{ item.graph_items }}"
+  with_items: template.zgraphprototypes
+  when: template.zgraphprototypes is defined

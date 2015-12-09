@@ -6,7 +6,7 @@ This role allows easy deployment of yum repository config files.
 Requirements
 ------------
 
-Yum
+Yum or dnf
 
 Role Variables
 --------------

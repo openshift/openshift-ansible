@@ -30,14 +30,14 @@ class Variant(object):
         self.versions = versions
 
     def latest_version(self):
-        return self.versions[-1]
+        return self.versions[0]
 
 
 # WARNING: Keep the versions ordered, most recent last:
 OSE = Variant('openshift-enterprise', 'OpenShift Enterprise',
     [
-        Version('3.0', 'enterprise'),
-        Version('3.1', 'openshift-enterprise')
+        Version('3.1', 'openshift-enterprise'),
+        Version('3.0', 'enterprise')
     ]
 )
 

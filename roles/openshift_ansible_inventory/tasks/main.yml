@@ -2,6 +2,16 @@
 - yum:
     name: "{{ item }}"
     state: present
+  when: ansible_pkg_mgr == "yum"
+  with_items:
+  - openshift-ansible-inventory
+  - openshift-ansible-inventory-aws
+  - openshift-ansible-inventory-gce
+
+- dnf:
+    name: "{{ item }}"
+    state: present
+  when: ansible_pkg_mgr == "dnf"
   with_items:
   - openshift-ansible-inventory
   - openshift-ansible-inventory-aws

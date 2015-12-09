@@ -1,8 +1,8 @@
 #!/usr/bin/env python
+# vim: expandtab:tabstop=4:shiftwidth=4
 '''
  Ansible module for zabbix actions
 '''
-# vim: expandtab:tabstop=4:shiftwidth=4
 #
 #   Zabbix action ansible module
 #
@@ -89,6 +89,9 @@ def operation_differences(zabbix_ops, user_ops):
     for zab, user in zip(zabbix_ops, user_ops):
         for key, val in user.items():
             if key == 'opconditions':
+                if len(zab[key]) != len(val):
+                    rval[key] = val
+                    break
                 for z_cond, u_cond in zip(zab[key], user[key]):
                     if not all([str(u_cond[op_key]) == z_cond[op_key] for op_key in \
                                 ['conditiontype', 'operator', 'value']]):
@@ -330,9 +333,9 @@ def get_action_operations(zapi, inc_operations):
                     condition['operator'] = 0
 
                 if condition['value'] == 'acknowledged':
-                    condition['operator'] = 1
+                    condition['value'] = 1
                 else:
-                    condition['operator'] = 0
+                    condition['value'] = 0
 
 
     return inc_operations
@@ -454,7 +457,7 @@ def main():
         if not exists(content):
             module.exit_json(changed=False, state="absent")
 
-        content = zapi.get_content(zbx_class_name, 'delete', [content['result'][0]['itemid']])
+        content = zapi.get_content(zbx_class_name, 'delete', [content['result'][0]['actionid']])
         module.exit_json(changed=True, results=content['result'], state="absent")
 
     # Create and Update

@@ -7,7 +7,8 @@ Requirements
 ------------
 
 This role assumes it's being deployed on a RHEL/Fedora based host with package
-named 'flannel' available via yum, in version superior to 0.3.
+named 'flannel' available via yum or dnf (conditionally), in version superior
+to 0.3.
 
 Role Variables
 --------------

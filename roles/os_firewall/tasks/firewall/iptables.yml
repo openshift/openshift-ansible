@@ -6,6 +6,17 @@
   with_items:
   - iptables
   - iptables-services
+  when: ansible_pkg_mgr == "yum"
+  register: install_result
+
+- name: Install iptables packages
+  dnf:
+    name: "{{ item }}"
+    state: present
+  with_items:
+  - iptables
+  - iptables-services
+  when: ansible_pkg_mgr == "dnf"
   register: install_result
 
 - name: Check if firewalld is installed

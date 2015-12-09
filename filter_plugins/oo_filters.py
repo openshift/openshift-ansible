@@ -191,7 +191,11 @@ class FilterModule(object):
                     { 'root':
                         { 'volume_size': 10, 'device_type': 'gp2',
                           'iops': 500
-                        }
+                        },
+                        'docker':
+                          { 'volume_size': 40, 'device_type': 'gp2',
+                            'iops': 500, 'ephemeral': 'true'
+                          }
                     },
                   'node':
                     { 'root':
@@ -216,7 +220,7 @@ class FilterModule(object):
         root_vol['delete_on_termination'] = True
         if root_vol['device_type'] != 'io1':
             root_vol.pop('iops', None)
-        if host_type == 'node':
+        if host_type in ['master', 'node'] and 'docker' in data[host_type]:
             docker_vol = data[host_type]['docker']
             docker_vol['device_name'] = '/dev/xvdb'
             docker_vol['delete_on_termination'] = True
@@ -227,7 +231,7 @@ class FilterModule(object):
                 docker_vol.pop('delete_on_termination', None)
                 docker_vol['ephemeral'] = 'ephemeral0'
             return [root_vol, docker_vol]
-        elif host_type == 'etcd':
+        elif host_type == 'etcd' and 'etcd' in data[host_type]:
             etcd_vol = data[host_type]['etcd']
             etcd_vol['device_name'] = '/dev/xvdb'
             etcd_vol['delete_on_termination'] = True
@@ -346,27 +350,27 @@ class FilterModule(object):
 
     @staticmethod
     # pylint: disable=too-many-branches
-    def oo_parse_certificate_names(certificates, data_dir, internal_hostnames):
+    def oo_parse_named_certificates(certificates, named_certs_dir, internal_hostnames):
         ''' Parses names from list of certificate hashes.
 
-            Ex: certificates = [{ "certfile": "/etc/origin/master/custom1.crt",
-                                  "keyfile": "/etc/origin/master/custom1.key" },
+            Ex: certificates = [{ "certfile": "/root/custom1.crt",
+                                  "keyfile": "/root/custom1.key" },
                                 { "certfile": "custom2.crt",
                                   "keyfile": "custom2.key" }]
 
-                returns [{ "certfile": "/etc/origin/master/custom1.crt",
-                           "keyfile": "/etc/origin/master/custom1.key",
+                returns [{ "certfile": "/etc/origin/master/named_certificates/custom1.crt",
+                           "keyfile": "/etc/origin/master/named_certificates/custom1.key",
                            "names": [ "public-master-host.com",
                                       "other-master-host.com" ] },
-                         { "certfile": "/etc/origin/master/custom2.crt",
-                           "keyfile": "/etc/origin/master/custom2.key",
+                         { "certfile": "/etc/origin/master/named_certificates/custom2.crt",
+                           "keyfile": "/etc/origin/master/named_certificates/custom2.key",
                            "names": [ "some-hostname.com" ] }]
         '''
         if not issubclass(type(certificates), list):
             raise errors.AnsibleFilterError("|failed expects certificates is a list")
 
-        if not issubclass(type(data_dir), unicode):
-            raise errors.AnsibleFilterError("|failed expects data_dir is unicode")
+        if not issubclass(type(named_certs_dir), unicode):
+            raise errors.AnsibleFilterError("|failed expects named_certs_dir is unicode")
 
         if not issubclass(type(internal_hostnames), list):
             raise errors.AnsibleFilterError("|failed expects internal_hostnames is list")
@@ -399,6 +403,11 @@ class FilterModule(object):
                 raise errors.AnsibleFilterError(("|failed to parse certificate '%s' or " % certificate['certfile'] +
                                                  "detected a collision with internal hostname, please specify " +
                                                  "certificate names in host inventory"))
+
+        for certificate in certificates:
+            # Update paths for configuration
+            certificate['certfile'] = os.path.join(named_certs_dir, os.path.basename(certificate['certfile']))
+            certificate['keyfile'] = os.path.join(named_certs_dir, os.path.basename(certificate['keyfile']))
         return certificates
 
     @staticmethod
@@ -474,7 +483,7 @@ class FilterModule(object):
             "oo_split": self.oo_split,
             "oo_filter_list": self.oo_filter_list,
             "oo_parse_heat_stack_outputs": self.oo_parse_heat_stack_outputs,
-            "oo_parse_certificate_names": self.oo_parse_certificate_names,
+            "oo_parse_named_certificates": self.oo_parse_named_certificates,
             "oo_haproxy_backend_masters": self.oo_haproxy_backend_masters,
             "oo_pretty_print_cluster": self.oo_pretty_print_cluster
         }

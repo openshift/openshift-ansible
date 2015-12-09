@@ -33,7 +33,7 @@
     - server.crt
     register: stat_result
   - set_fact:
-      certs_missing: "{{ stat_result.results | map(attribute='stat.exists')
+      certs_missing: "{{ stat_result.results | oo_collect(attribute='stat.exists')
                          | list | intersect([false])}}"
       node_subdir: node-{{ openshift.common.hostname }}
       config_dir: "{{ openshift.common.config_base }}/generated-configs/node-{{ openshift.common.hostname }}"
@@ -48,7 +48,7 @@
     when: groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config and (openshift.common.use_flannel | bool)
   - set_fact:
       etcd_client_flannel_certs_missing: "{{ g_external_etcd_flannel_cert_stat_result.results
-                                             | map(attribute='stat.exists')
+                                             | oo_collect(attribute='stat.exists')
                                              | list | intersect([false])}}"
       etcd_cert_subdir: openshift-node-{{ openshift.common.hostname }}
       etcd_cert_config_dir: "{{ openshift.common.config_base }}/node"
@@ -158,8 +158,10 @@
   vars:
     sync_tmpdir: "{{ hostvars.localhost.mktemp.stdout }}"
     openshift_node_master_api_url: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_url }}"
+    # TODO: Prefix flannel role variables.
     etcd_urls: "{{ hostvars[groups.oo_first_master.0].openshift.master.etcd_urls }}"
     embedded_etcd: "{{ hostvars[groups.oo_first_master.0].openshift.master.embedded_etcd }}"
+    openshift_node_first_master_ip: "{{ hostvars[groups.oo_first_master.0].openshift.common.ip }}"
   pre_tasks:
   - name: Ensure certificate directory exists
     file:

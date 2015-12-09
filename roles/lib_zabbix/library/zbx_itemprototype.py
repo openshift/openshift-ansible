@@ -116,6 +116,24 @@ def get_zabbix_type(ztype):
 
     return _vtype
 
+def get_data_type(data_type):
+    '''
+    Possible values:
+    0 - decimal;
+    1 - octal;
+    2 - hexadecimal;
+    3 - bool;
+    '''
+    vtype = 0
+    if 'octal' in data_type:
+        vtype = 1
+    elif 'hexadecimal' in data_type:
+        vtype = 2
+    elif 'bool' in data_type:
+        vtype = 3
+
+    return vtype
+
 def get_value_type(value_type):
     '''
     Possible values:
@@ -175,6 +193,7 @@ def main():
             interfaceid=dict(default=None, type='int'),
             zabbix_type=dict(default='trapper', type='str'),
             value_type=dict(default='float', type='str'),
+            data_type=dict(default='decimal', type='str'),
             delay=dict(default=60, type='int'),
             lifetime=dict(default=30, type='int'),
             state=dict(default='present', type='str'),
@@ -238,6 +257,7 @@ def main():
                   'ruleid': get_rule_id(zapi, module.params['discoveryrule_key'], template['templateid']),
                   'type': get_zabbix_type(module.params['zabbix_type']),
                   'value_type': get_value_type(module.params['value_type']),
+                  'data_type': get_data_type(module.params['data_type']),
                   'applications': get_app_ids(zapi, module.params['applications'], template['templateid']),
                   'formula': formula,
                   'multiplier': use_multiplier,
