@@ -1,4 +1,2 @@
 ---
-- yum:
-    name: tito
-    state: present
+- action: "{{ ansible_pkg_mgr }} name=tito state=present"
