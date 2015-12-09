@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.18
+Version:        3.0.19
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -259,6 +259,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Dec 09 2015 Brenton Leanhardt <bleanhar@redhat.com> 3.0.19-1
+- Fix version dependent image streams (sdodson@redhat.com)
+- atomic-openshift-installer: Error handling on yaml loading
+  (smunilla@redhat.com)
+- Betterize AWS readme (jtslear@gmail.com)
+
 * Tue Dec 08 2015 Brenton Leanhardt <bleanhar@redhat.com> 3.0.18-1
 - Pass in and use first_master_ip as dnsIP for pre 3.1 nodes.
   (abutcher@redhat.com)
