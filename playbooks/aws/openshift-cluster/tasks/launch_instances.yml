@@ -20,10 +20,6 @@
                    | default(deployment_vars[deployment_type].image, true) }}"
   when: ec2_image is not defined and not ec2_image_name
 - set_fact:
-    ec2_instance_type: "{{ lookup('env', 'ec2_instance_type')
-                    | default(deployment_vars[deployment_type].type, true) }}"
-  when: ec2_instance_type is not defined
-- set_fact:
     ec2_keypair: "{{ lookup('env', 'ec2_keypair')
                     | default(deployment_vars[deployment_type].keypair, true) }}"
   when: ec2_keypair is not defined
@@ -37,25 +33,25 @@
   when: ec2_assign_public_ip is not defined
 
 - set_fact:
-    ec2_instance_type: "{{ ec2_master_instance_type | default(deployment_vars[deployment_type].type, true) }}"
+    ec2_instance_type: "{{ ec2_master_instance_type | default(lookup('env', 'ec2_master_instance_type') | default(lookup('env', 'ec2_instance_type') | default(deployment_vars[deployment_type].type, true), true), true) }}"
     ec2_security_groups: "{{ ec2_master_security_groups
                     | default(deployment_vars[deployment_type].security_groups, true) }}"
   when: host_type == "master" and sub_host_type == "default"
 
 - set_fact:
-    ec2_instance_type: "{{ ec2_etcd_instance_type | default(deployment_vars[deployment_type].type, true) }}"
+    ec2_instance_type: "{{ ec2_etcd_instance_type | default(lookup('env', 'ec2_etcd_instance_type') | default(lookup('env', 'ec2_instance_type') | default(deployment_vars[deployment_type].type, true), true), true) }}"
     ec2_security_groups: "{{ ec2_etcd_security_groups
                     | default(deployment_vars[deployment_type].security_groups, true)}}"
   when: host_type == "etcd" and sub_host_type == "default"
 
 - set_fact:
-    ec2_instance_type: "{{ ec2_infra_instance_type | default(deployment_vars[deployment_type].type, true) }}"
+    ec2_instance_type: "{{ ec2_infra_instance_type | default(lookup('env', 'ec2_infra_instance_type') | default(lookup('env', 'ec2_instance_type') | default(deployment_vars[deployment_type].type, true), true), true) }}"
     ec2_security_groups: "{{ ec2_infra_security_groups
                     | default(deployment_vars[deployment_type].security_groups, true) }}"
   when: host_type == "node" and sub_host_type == "infra"
 
 - set_fact:
-    ec2_instance_type: "{{ ec2_node_instance_type | default(deployment_vars[deployment_type].type, true) }}"
+    ec2_instance_type: "{{ ec2_node_instance_type | default(lookup('env', 'ec2_node_instance_type') | default(lookup('env', 'ec2_instance_type') | default(deployment_vars[deployment_type].type, true), true), true) }}"
     ec2_security_groups: "{{ ec2_node_security_groups
                     | default(deployment_vars[deployment_type].security_groups, true) }}"
   when: host_type == "node" and sub_host_type == "compute"
@@ -81,7 +77,6 @@
 
 - set_fact:
     latest_ami: "{{ ami_result.results | oo_ami_selector(ec2_image_name) }}"
-    user_data: "{{ lookup('template', '../templates/user_data.j2') }}"
     volume_defs:
       etcd:
         root:
@@ -97,6 +92,10 @@
           volume_size: "{{ lookup('env', 'os_master_root_vol_size') | default(25, true) }}"
           device_type: "{{ lookup('env', 'os_master_root_vol_type') | default('gp2', true) }}"
           iops: "{{ lookup('env', 'os_master_root_vol_iops') | default(500, true) }}"
+        docker:
+          volume_size: "{{ lookup('env', 'os_docker_vol_size') | default(10, true) }}"
+          device_type: "{{ lookup('env', 'os_docker_vol_type') | default('gp2', true) }}"
+          iops: "{{ lookup('env', 'os_docker_vol_iops') | default(500, true) }}"
       node:
         root:
           volume_size: "{{ lookup('env', 'os_node_root_vol_size') | default(85, true) }}"
@@ -121,7 +120,7 @@
     count: "{{ instances | length }}"
     vpc_subnet_id: "{{ ec2_vpc_subnet | default(omit, true) }}"
     assign_public_ip: "{{ ec2_assign_public_ip | default(omit, true) }}"
-    user_data: "{{ user_data }}"
+    user_data: "{{ lookup('template', '../templates/user_data.j2') }}"
     wait: yes
     instance_tags:
       created-by: "{{ created_by }}"
@@ -190,6 +189,22 @@
   with_together:
   - instances
   - ec2.instances
+
+- name: Add new instances to nodes_to_add group if needed
+  add_host:
+    hostname: "{{ item.0 }}"
+    ansible_ssh_host: "{{ item.1.dns_name }}"
+    ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
+    ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
+    groups: nodes_to_add
+    ec2_private_ip_address: "{{ item.1.private_ip }}"
+    ec2_ip_address: "{{ item.1.public_ip }}"
+    openshift_node_labels: "{{ node_label }}"
+    logrotate_scripts: "{{ logrotate }}"
+  with_together:
+  - instances
+  - ec2.instances
+  when: oo_extend_env is defined and oo_extend_env | bool
 
 - name: Wait for ssh
   wait_for: "port=22 host={{ item.dns_name }}"

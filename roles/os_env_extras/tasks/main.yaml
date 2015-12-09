@@ -15,3 +15,10 @@
   yum:
     pkg: bash-completion
     state: installed
+  when: ansible_pkg_mgr == "yum"
+
+- name: Bash Completion
+  dnf:
+    pkg: bash-completion
+    state: installed
+  when: ansible_pkg_mgr == "dnf"

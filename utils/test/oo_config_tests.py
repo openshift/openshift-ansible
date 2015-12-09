@@ -73,6 +73,29 @@ hosts:
     node: true
 """
 
+CONFIG_BAD = """
+variant: openshift-enterprise
+ansible_ssh_user: root
+hosts:
+  - connect_to: master-private.example.com
+    ip: 10.0.0.1
+    hostname: master-private.example.com
+    public_ip: 24.222.0.1
+    public_hostname: master.example.com
+    master: true
+    node: true
+  - ip: 10.0.0.2
+    hostname: node1-private.example.com
+    public_ip: 24.222.0.2
+    public_hostname: node1.example.com
+    node: true
+  - connect_to: node2-private.example.com
+    ip: 10.0.0.3
+    hostname: node2-private.example.com
+    public_ip: 24.222.0.3
+    public_hostname: node2.example.com
+    node: true
+"""
 
 class OOInstallFixture(unittest.TestCase):
 
@@ -160,6 +183,17 @@ class OOConfigTests(OOInstallFixture):
 
         self.assertEquals('openshift-enterprise', ooconfig.settings['variant'])
         self.assertEquals('v1', ooconfig.settings['version'])
+
+    def test_load_bad_config(self):
+
+        cfg_path = self.write_config(os.path.join(self.work_dir,
+            'ooinstall.conf'), CONFIG_BAD)
+        try:
+            OOConfig(cfg_path)
+            assert False
+        except OOConfigInvalidHostError:
+            assert True
+
 
     def test_load_complete_facts(self):
         cfg_path = self.write_config(os.path.join(self.work_dir,

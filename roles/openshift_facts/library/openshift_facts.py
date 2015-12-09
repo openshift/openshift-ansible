@@ -528,9 +528,9 @@ def set_aggregate_facts(facts):
         internal_hostnames.add(facts['common']['hostname'])
         internal_hostnames.add(facts['common']['ip'])
 
+        cluster_domain = facts['common']['dns_domain']
+
         if 'master' in facts:
-            # FIXME: not sure why but facts['dns']['domain'] fails
-            cluster_domain = 'cluster.local'
             if 'cluster_hostname' in facts['master']:
                 all_hostnames.add(facts['master']['cluster_hostname'])
             if 'cluster_public_hostname' in facts['master']:
@@ -623,7 +623,7 @@ def set_deployment_facts_if_unset(facts):
             service_type = 'atomic-openshift'
             if deployment_type == 'origin':
                 service_type = 'origin'
-            elif deployment_type in ['enterprise', 'online']:
+            elif deployment_type in ['enterprise']:
                 service_type = 'openshift'
             facts['common']['service_type'] = service_type
         if 'config_base' not in facts['common']:
@@ -651,7 +651,7 @@ def set_deployment_facts_if_unset(facts):
                 if deployment_type in ['enterprise', 'online', 'openshift-enterprise']:
                     registry_url = 'openshift3/ose-${component}:${version}'
                 elif deployment_type == 'atomic-enterprise':
-                    registry_url = 'aep3/aep-${component}:${version}'
+                    registry_url = 'aep3_beta/aep-${component}:${version}'
                 facts[role]['registry_url'] = registry_url
 
     if 'master' in facts:
@@ -864,20 +864,38 @@ def apply_provider_facts(facts, provider_facts):
     return facts
 
 
-def merge_facts(orig, new):
+def merge_facts(orig, new, additive_facts_to_overwrite):
     """ Recursively merge facts dicts
 
         Args:
             orig (dict): existing facts
             new (dict): facts to update
+
+            additive_facts_to_overwrite (list): additive facts to overwrite in jinja
+                                                '.' notation ex: ['master.named_certificates']
+
         Returns:
             dict: the merged facts
     """
+    additive_facts = ['named_certificates']
     facts = dict()
     for key, value in orig.iteritems():
         if key in new:
             if isinstance(value, dict) and isinstance(new[key], dict):
-                facts[key] = merge_facts(value, new[key])
+                relevant_additive_facts = []
+                # Keep additive_facts_to_overwrite if key matches
+                for item in additive_facts_to_overwrite:
+                    if '.' in item and item.startswith(key + '.'):
+                        relevant_additive_facts.append(item)
+                facts[key] = merge_facts(value, new[key], relevant_additive_facts)
+            elif key in additive_facts and key not in [x.split('.')[-1] for x in additive_facts_to_overwrite]:
+                # Fact is additive so we'll combine orig and new.
+                if isinstance(value, list) and isinstance(new[key], list):
+                    new_fact = []
+                    for item in copy.deepcopy(value) + copy.copy(new[key]):
+                        if item not in new_fact:
+                            new_fact.append(item)
+                    facts[key] = new_fact
             else:
                 facts[key] = copy.copy(new[key])
         else:
@@ -961,13 +979,15 @@ class OpenShiftFacts(object):
             role (str): role for setting local facts
             filename (str): local facts file to use
             local_facts (dict): local facts to set
+            additive_facts_to_overwrite (list): additive facts to overwrite in jinja
+                                                '.' notation ex: ['master.named_certificates']
 
         Raises:
             OpenShiftFactsUnsupportedRoleError:
     """
-    known_roles = ['common', 'master', 'node', 'master_sdn', 'node_sdn', 'dns', 'etcd']
+    known_roles = ['common', 'master', 'node', 'master_sdn', 'node_sdn', 'etcd']
 
-    def __init__(self, role, filename, local_facts):
+    def __init__(self, role, filename, local_facts, additive_facts_to_overwrite=False):
         self.changed = False
         self.filename = filename
         if role not in self.known_roles:
@@ -976,25 +996,27 @@ class OpenShiftFacts(object):
             )
         self.role = role
         self.system_facts = ansible_facts(module)
-        self.facts = self.generate_facts(local_facts)
+        self.facts = self.generate_facts(local_facts, additive_facts_to_overwrite)
 
-    def generate_facts(self, local_facts):
+    def generate_facts(self, local_facts, additive_facts_to_overwrite):
         """ Generate facts
 
             Args:
                 local_facts (dict): local_facts for overriding generated
                                     defaults
+                additive_facts_to_overwrite (list): additive facts to overwrite in jinja
+                                                    '.' notation ex: ['master.named_certificates']
 
             Returns:
                 dict: The generated facts
         """
-        local_facts = self.init_local_facts(local_facts)
+        local_facts = self.init_local_facts(local_facts, additive_facts_to_overwrite)
         roles = local_facts.keys()
 
         defaults = self.get_defaults(roles)
         provider_facts = self.init_provider_facts()
         facts = apply_provider_facts(defaults, provider_facts)
-        facts = merge_facts(facts, local_facts)
+        facts = merge_facts(facts, local_facts, additive_facts_to_overwrite)
         facts['current_config'] = get_current_config(facts)
         facts = set_url_facts_if_unset(facts)
         facts = set_project_cfg_facts_if_unset(facts)
@@ -1031,9 +1053,10 @@ class OpenShiftFacts(object):
 
         common = dict(use_openshift_sdn=True, ip=ip_addr, public_ip=ip_addr,
                       deployment_type='origin', hostname=hostname,
-                      public_hostname=hostname)
+                      public_hostname=hostname, use_manageiq=False)
         common['client_binary'] = 'oc' if os.path.isfile('/usr/bin/oc') else 'osc'
         common['admin_binary'] = 'oadm' if os.path.isfile('/usr/bin/oadm') else 'osadm'
+        common['dns_domain'] = 'cluster.local'
         defaults['common'] = common
 
         if 'master' in roles:
@@ -1052,9 +1075,8 @@ class OpenShiftFacts(object):
 
         if 'node' in roles:
             node = dict(labels={}, annotations={}, portal_net='172.30.0.0/16',
-                        iptables_sync_period='5s')
+                        iptables_sync_period='5s', set_node_ip=False)
             defaults['node'] = node
-
         return defaults
 
     def guess_host_provider(self):
@@ -1132,11 +1154,13 @@ class OpenShiftFacts(object):
         )
         return provider_facts
 
-    def init_local_facts(self, facts=None):
+    def init_local_facts(self, facts=None, additive_facts_to_overwrite=False):
         """ Initialize the provider facts
 
             Args:
                 facts (dict): local facts to set
+                additive_facts_to_overwrite (list): additive facts to overwrite in jinja
+                                                    '.' notation ex: ['master.named_certificates']
 
             Returns:
                 dict: The result of merging the provided facts with existing
@@ -1154,7 +1178,7 @@ class OpenShiftFacts(object):
                                                   basestring):
                 facts_to_set[arg] = module.from_json(facts_to_set[arg])
 
-        new_local_facts = merge_facts(local_facts, facts_to_set)
+        new_local_facts = merge_facts(local_facts, facts_to_set, additive_facts_to_overwrite)
         for facts in new_local_facts.values():
             keys_to_delete = []
             for fact, value in facts.iteritems():
@@ -1184,6 +1208,7 @@ def main():
             role=dict(default='common', required=False,
                       choices=OpenShiftFacts.known_roles),
             local_facts=dict(default=None, type='dict', required=False),
+            additive_facts_to_overwrite=dict(default=[], type='list', required=False),
         ),
         supports_check_mode=True,
         add_file_common_args=True,
@@ -1191,9 +1216,10 @@ def main():
 
     role = module.params['role']
     local_facts = module.params['local_facts']
+    additive_facts_to_overwrite = module.params['additive_facts_to_overwrite']
     fact_file = '/etc/ansible/facts.d/openshift.fact'
 
-    openshift_facts = OpenShiftFacts(role, fact_file, local_facts)
+    openshift_facts = OpenShiftFacts(role, fact_file, local_facts, additive_facts_to_overwrite)
 
     file_params = module.params.copy()
     file_params['path'] = fact_file

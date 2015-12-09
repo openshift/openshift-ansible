@@ -1,5 +1,5 @@
 #cloud-config
-{% if type =='etcd' %}
+{% if type == 'etcd' and 'etcd' in volume_defs[type] %}
 cloud_config_modules:
 - disk_setup
 - mounts
@@ -19,7 +19,7 @@ fs_setup:
   partition: auto
 {% endif %}
 
-{% if type == 'node' %}
+{% if type in ['node', 'master'] and 'docker' in volume_defs[type] %}
 mounts:
 - [ xvdb ]
 - [ ephemeral0 ]
@@ -42,4 +42,11 @@ growpart:
   devices: ['/var']
 runcmd:
 - xfs_growfs /var
+{% endif %}
+
+{% if deployment_vars[deployment_type].sudo %}
+- path: /etc/sudoers.d/99-{{ deployment_vars[deployment_type].ssh_user }}-cloud-init-requiretty
+  permissions: 440
+  content: |
+    Defaults:{{ deployment_vars[deployment_type].ssh_user }} !requiretty
 {% endif %}

@@ -78,6 +78,10 @@ def upgrade_master_3_0_to_3_1(ansible_module, config_base, backup):
         config['kubernetesMasterConfig'].pop('apiLevels')
         changes.append('master-config.yaml: removed kubernetesMasterConfig.apiLevels')
 
+    # Add masterCA to serviceAccountConfig
+    if 'serviceAccountConfig' in config and 'masterCA' not in config['serviceAccountConfig']:
+        config['serviceAccountConfig']['masterCA'] = config['oauthConfig'].get('masterCA', 'ca.crt')
+
     # Add proxyClientInfo to master-config
     if 'proxyClientInfo' not in config['kubernetesMasterConfig']:
         config['kubernetesMasterConfig']['proxyClientInfo'] = {

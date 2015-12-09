@@ -1,0 +1,34 @@
+---
+
+- hosts: localhost
+  gather_facts: no
+  vars_files:
+  - vars.yml
+  tasks:
+  - set_fact:
+      g_ssh_user_tmp: "{{ deployment_vars[deployment_type].ssh_user }}"
+      g_sudo_tmp: "{{ deployment_vars[deployment_type].sudo }}"
+  - name: Evaluate oo_hosts_to_update
+    add_host:
+      name: "{{ item }}"
+      groups: oo_hosts_to_update
+      ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
+      ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
+    with_items: "{{ groups.nodes_to_add }}"
+
+- include: ../../common/openshift-cluster/update_repos_and_packages.yml
+
+- include: ../../common/openshift-cluster/scaleup.yml
+  vars:
+    g_etcd_group: "{{ 'tag_env-host-type_' ~ cluster_id ~ '-openshift-etcd' }}"
+    g_lb_group: "{{ 'tag_env-host-type_' ~ cluster_id ~ '-openshift-lb' }}"
+    g_masters_group: "{{ 'tag_env-host-type_' ~ cluster_id ~ '-openshift-master' }}"
+    g_new_nodes_group: 'nodes_to_add'
+    g_ssh_user: "{{ hostvars.localhost.g_ssh_user_tmp }}"
+    g_sudo: "{{ hostvars.localhost.g_sudo_tmp }}"
+    g_nodeonmaster: true
+    openshift_cluster_id: "{{ cluster_id }}"
+    openshift_debug_level: 2
+    openshift_deployment_type: "{{ deployment_type }}"
+    openshift_hostname: "{{ ec2_private_ip_address }}"
+    openshift_public_hostname: "{{ ec2_ip_address }}"

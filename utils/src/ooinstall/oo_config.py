@@ -14,7 +14,8 @@ PERSIST_SETTINGS = [
     'variant_version',
     'version',
     ]
-REQUIRED_FACTS = ['ip', 'public_ip', 'hostname', 'public_hostname']
+DEFAULT_REQUIRED_FACTS = ['ip', 'public_ip', 'hostname', 'public_hostname']
+PRECONFIGURED_REQUIRED_FACTS = ['hostname', 'public_hostname']
 
 
 class OOConfigFileError(Exception):
@@ -36,19 +37,24 @@ class Host(object):
         self.public_ip = kwargs.get('public_ip', None)
         self.public_hostname = kwargs.get('public_hostname', None)
         self.connect_to = kwargs.get('connect_to', None)
+        self.preconfigured = kwargs.get('preconfigured', None)
 
         # Should this host run as an OpenShift master:
         self.master = kwargs.get('master', False)
 
         # Should this host run as an OpenShift node:
         self.node = kwargs.get('node', False)
+
+        # Should this host run as an HAProxy:
+        self.master_lb = kwargs.get('master_lb', False)
+
         self.containerized = kwargs.get('containerized', False)
 
         if self.connect_to is None:
-            raise OOConfigInvalidHostError("You must specify either and 'ip' " \
-                                           "or 'hostname' to connect to.")
+            raise OOConfigInvalidHostError("You must specify either an ip " \
+                "or hostname as 'connect_to'")
 
-        if self.master is False and self.node is False:
+        if self.master is False and self.node is False and self.master_lb is False:
             raise OOConfigInvalidHostError(
                 "You must specify each host as either a master or a node.")
 
@@ -62,11 +68,37 @@ class Host(object):
         """ Used when exporting to yaml. """
         d = {}
         for prop in ['ip', 'hostname', 'public_ip', 'public_hostname',
-                     'master', 'node', 'containerized', 'connect_to']:
+                     'master', 'node', 'master_lb', 'containerized', 'connect_to', 'preconfigured']:
             # If the property is defined (not None or False), export it:
             if getattr(self, prop):
                 d[prop] = getattr(self, prop)
         return d
+
+    def is_etcd_member(self, all_hosts):
+        """ Will this host be a member of a standalone etcd cluster. """
+        if not self.master:
+            return False
+        masters = [host for host in all_hosts if host.master]
+        if len(masters) > 1:
+            return True
+        return False
+
+    def is_dedicated_node(self):
+        """ Will this host be a dedicated node. (not a master) """
+        return self.node and not self.master
+
+    def is_schedulable_node(self, all_hosts):
+        """ Will this host be a node marked as schedulable. """
+        if not self.node:
+            return False
+        if not self.master:
+            return True
+
+        masters = [host for host in all_hosts if host.master]
+        nodes = [host for host in all_hosts if host.node]
+        if len(masters) == len(nodes):
+            return True
+        return False
 
 
 class OOConfig(object):
@@ -177,7 +209,12 @@ class OOConfig(object):
 
         for host in self.hosts:
             missing_facts = []
-            for required_fact in REQUIRED_FACTS:
+            if host.preconfigured:
+                required_facts = PRECONFIGURED_REQUIRED_FACTS
+            else:
+                required_facts = DEFAULT_REQUIRED_FACTS
+
+            for required_fact in required_facts:
                 if not getattr(host, required_fact):
                     missing_facts.append(required_fact)
             if len(missing_facts) > 0:

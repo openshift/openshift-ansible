@@ -36,9 +36,9 @@
 
   - fail:
       msg: >
-        This upgrade is only supported for origin and openshift-enterprise
+        This upgrade is only supported for origin, openshift-enterprise, and online
         deployment types
-    when: deployment_type not in ['origin','openshift-enterprise']
+    when: deployment_type not in ['origin','openshift-enterprise', 'online']
 
   - fail:
       msg: >
@@ -517,24 +517,28 @@
     - _default_router.rc == 0
     - "'false' in _scc.stdout"
     command: >
-      {{ oc_cmd }} patch scc/privileged -p '{"allowHostPorts":true,"allowHostNetwork":true}' --loglevel=9
+      {{ oc_cmd }} patch scc/privileged -p
+      '{"allowHostPorts":true,"allowHostNetwork":true}' --api-version=v1
 
   - name: Update deployment config to 1.0.4/3.0.1 spec
     when: _default_router.rc == 0
     command: >
       {{ oc_cmd }} patch dc/router -p
       '{"spec":{"strategy":{"rollingParams":{"updatePercent":-10},"spec":{"serviceAccount":"router","serviceAccountName":"router"}}}}'
+      --api-version=v1
 
   - name: Switch to hostNetwork=true
     when: _default_router.rc == 0
     command: >
       {{ oc_cmd }} patch dc/router -p '{"spec":{"template":{"spec":{"hostNetwork":true}}}}'
+      --api-version=v1
 
   - name: Update router image to current version
     when: _default_router.rc == 0
     command: >
       {{ oc_cmd }} patch dc/router -p
       '{"spec":{"template":{"spec":{"containers":[{"name":"router","image":"{{ router_image }}"}]}}}}'
+      --api-version=v1
 
   - name: Check for default registry
     command: >
@@ -548,3 +552,4 @@
     command: >
       {{ oc_cmd }} patch dc/docker-registry -p
       '{"spec":{"template":{"spec":{"containers":[{"name":"registry","image":"{{ registry_image }}"}]}}}}'
+      --api-version=v1
