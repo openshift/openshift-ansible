@@ -105,3 +105,27 @@
     description: "{{ item.description | default('', True) }}"
   with_items: template.ztriggerprototypes
   when: template.ztriggerprototypes is defined
+
+- name: Create Graphs
+  zbx_graph:
+    zbx_server: "{{ server }}"
+    zbx_user: "{{ user }}"
+    zbx_password: "{{ password }}"
+    name: "{{ item.name }}"
+    height: "{{ item.height }}"
+    width: "{{ item.width }}"
+    graph_items: "{{ item.graph_items }}"
+  with_items: template.zgraphs
+  when: template.zgraphs is defined
+
+- name: Create Graph Prototypes
+  zbx_graphprototype:
+    zbx_server: "{{ server }}"
+    zbx_user: "{{ user }}"
+    zbx_password: "{{ password }}"
+    name: "{{ item.name }}"
+    height: "{{ item.height }}"
+    width: "{{ item.width }}"
+    graph_items: "{{ item.graph_items }}"
+  with_items: template.zgraphprototypes
+  when: template.zgraphprototypes is defined

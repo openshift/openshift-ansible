@@ -8,6 +8,13 @@
 
 - name: Ensure PyYaml is installed
   yum: pkg={{ item }} state=installed
+  when: ansible_pkg_mgr == "yum"
+  with_items:
+    - PyYAML
+
+- name: Ensure PyYaml is installed
+  dnf: pkg={{ item }} state=installed
+  when: ansible_pkg_mgr == "dnf"
   with_items:
     - PyYAML
 

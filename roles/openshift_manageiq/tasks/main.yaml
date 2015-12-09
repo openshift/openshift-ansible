@@ -1,0 +1,50 @@
+---
+- name: Copy Configuration to temporary conf
+  command: >
+    cp {{ openshift.common.config_base }}/master/admin.kubeconfig {{manage_iq_tmp_conf}}
+  changed_when: false
+
+- name: Add Managment Infrastructure project
+  command: > 
+    {{ openshift.common.admin_binary }} new-project
+    management-infra
+    --description="Management Infrastructure"
+    --config={{manage_iq_tmp_conf}}
+  register: osmiq_create_mi_project
+  failed_when: "'already exists' not in osmiq_create_mi_project.stderr and osmiq_create_mi_project.rc != 0"
+  changed_when: osmiq_create_mi_project.rc == 0
+
+- name: Create Service Account
+  shell: >
+    echo {{ manageiq_service_account | to_json | quote }} | 
+    {{ openshift.common.client_binary }} create 
+    -n management-infra 
+    --config={{manage_iq_tmp_conf}}
+    -f -
+  register: osmiq_create_service_account
+  failed_when: "'already exists' not in osmiq_create_service_account.stderr and osmiq_create_service_account.rc != 0"
+  changed_when: osmiq_create_service_account.rc == 0
+
+- name: Create Cluster Role
+  shell: >
+    echo {{ manageiq_cluster_role | to_json | quote }} |
+    {{ openshift.common.client_binary }} create 
+    --config={{manage_iq_tmp_conf}}
+    -f -
+  register: osmiq_create_cluster_role
+  failed_when: "'already exists' not in osmiq_create_cluster_role.stderr and osmiq_create_cluster_role.rc != 0"
+  changed_when: osmiq_create_cluster_role.rc == 0
+
+- name: Configure role/user permissions
+  command: >
+    {{ openshift.common.admin_binary }} {{item}}
+    --config={{manage_iq_tmp_conf}}
+  with_items: "{{manage_iq_tasks}}"
+  register: osmiq_perm_task
+  failed_when: "'already exists' not in osmiq_perm_task.stderr and osmiq_perm_task.rc != 0"
+  changed_when: osmiq_perm_task.rc == 0
+
+- name: Clean temporary configuration file
+  command: >
+    rm -f {{manage_iq_tmp_conf}}
+  changed_when: false

@@ -7,7 +7,7 @@ Requirements
 ------------
 
 This role assumes it's being deployed on a RHEL/Fedora based host with package
-named 'etcd' available via yum.
+named 'etcd' available via yum or dnf (conditionally).
 
 Role Variables
 --------------

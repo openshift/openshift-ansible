@@ -1,6 +1,11 @@
 ---
 - name: Install NFS server on Fedora/Red Hat
   yum: name=nfs-utils state=present
+  when: ansible_pkg_mgr == "yum"
+
+- name: Install NFS server on Fedora/Red Hat
+  dnf: name=nfs-utils state=present
+  when: ansible_pkg_mgr == "dnf"
 
 - name: Start rpcbind on Fedora/Red Hat
   service: name=rpcbind state=started enabled=yes

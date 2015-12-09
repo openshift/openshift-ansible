@@ -67,12 +67,12 @@ By default, a cluster is launched with the following configuration:
 - Keypair name: libra
 - Security group: public
 
-Master specific defaults:
+#### Master specific defaults:
 - Master root volume size: 10 (in GiBs)
 - Master root volume type: gp2
 - Master root volume iops: 500 (only applicable when volume type is io1)
 
-Node specific defaults:
+#### Node specific defaults:
 - Node root volume size: 10 (in GiBs)
 - Node root volume type: gp2
 - Node root volume iops: 500 (only applicable when volume type is io1)
@@ -81,9 +81,30 @@ Node specific defaults:
 - Docker volume type: gp2 (only applicable if ephemeral is false)
 - Docker volume iops: 500 (only applicable when volume type is io1)
 
-If needed, these values can be changed by setting environment variables on your system.
+### Specifying ec2 instance type.
+
+#### All instances:
 
 - export ec2_instance_type='m4.large'
+
+#### Master instances:
+
+- export ec2_master_instance_type='m4.large'
+
+#### Infra node instances:
+
+- export ec2_infra_instance_type='m4.large'
+
+#### Non-infra node instances:
+
+- export ec2_node_instance_type='m4.large'
+
+#### etcd instances:
+
+- export ec2_etcd_instance_type='m4.large'
+
+If needed, these values can be changed by setting environment variables on your system.
+
 - export ec2_image='ami-307b3658'
 - export ec2_region='us-east-1'
 - export ec2_keypair='libra'
@@ -103,6 +124,7 @@ If needed, these values can be changed by setting environment variables on your 
 Install Dependencies
 --------------------
 1. Ansible requires python-boto for aws operations:
+
 RHEL/CentOS/Fedora
 ```
   yum install -y ansible python-boto pyOpenSSL
