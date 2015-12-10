@@ -13,8 +13,15 @@
   get_url:
     url: '{{ image_url }}'
     sha256sum: '{{ image_sha256 }}'
-    dest: '{{ os_libvirt_storage_pool_path }}/{{ image_name }}'
+    dest: '{{ os_libvirt_storage_pool_path }}/{{ [image_name, image_compression] | join(".") }}'
   when: '{{ ( lookup("oo_option", "skip_image_download") | default("no", True) | lower ) in ["false", "no"] }}'
+  register: downloaded_image
+
+- name: Uncompress Base Cloud image
+  command: 'unxz -kf {{ os_libvirt_storage_pool_path }}/{{ [image_name, image_compression] | join(".") }}'
+  args:
+    creates: '{{ os_libvirt_storage_pool_path }}/{{ image_name }}'
+  when: image_compression in ["xz"] and downloaded_image.changed
 
 - name: Create the cloud-init config drive path
   file:
