@@ -1057,6 +1057,7 @@ class OpenShiftFacts(object):
         common['client_binary'] = 'oc' if os.path.isfile('/usr/bin/oc') else 'osc'
         common['admin_binary'] = 'oadm' if os.path.isfile('/usr/bin/oadm') else 'osadm'
         common['dns_domain'] = 'cluster.local'
+        common['install_examples'] = True
         defaults['common'] = common
 
         if 'master' in roles:
