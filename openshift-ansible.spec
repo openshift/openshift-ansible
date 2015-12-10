@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.20
+Version:        3.0.19
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -259,18 +259,6 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
-* Thu Dec 10 2015 Thomas Wiest <twiest@redhat.com> 3.0.20-1
-- Install base package in openshift_common for version facts
-  (abutcher@redhat.com)
-- Make the install of openshift_examples optional (jtslear@gmail.com)
-- add support for remote command actions no support for anything but custom
-  scripts at this time (jdiaz@redhat.com)
-- Remove yum / dnf duplication (sdodson@redhat.com)
-- Remove hacluster user during uninstall. (abutcher@redhat.com)
-- Simplify session secrets overrides. (abutcher@redhat.com)
-- Squash pcs install into one task. (abutcher@redhat.com)
-- Bump ansible requirement to 1.9.4 (sdodson@redhat.com)
-
 * Wed Dec 09 2015 Brenton Leanhardt <bleanhar@redhat.com> 3.0.19-1
 - Fix version dependent image streams (sdodson@redhat.com)
 - atomic-openshift-installer: Error handling on yaml loading
