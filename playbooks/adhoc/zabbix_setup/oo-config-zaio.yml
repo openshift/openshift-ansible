@@ -2,6 +2,8 @@
 ---
 - hosts: localhost
   gather_facts: no
+  connection: local
+  become: no
   vars:
     g_server: http://localhost/zabbix/api_jsonrpc.php
     g_user: Admin

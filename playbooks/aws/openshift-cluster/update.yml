@@ -1,6 +1,8 @@
 ---
 - name: Populate oo_hosts_to_update group
   hosts: localhost
+  connection: local
+  become: no
   gather_facts: no
   vars_files:
   - vars.yml

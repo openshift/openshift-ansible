@@ -1,6 +1,8 @@
 ---
 - name: 'Get current hosts who have triggers that are alerting by trigger description'
   hosts: localhost
+  connection: local
+  become: no
   gather_facts: no
   roles:
     - os_zabbix

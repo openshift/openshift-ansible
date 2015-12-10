@@ -1,6 +1,8 @@
 ---
 - hosts: localhost
   gather_facts: no
+  connection: local
+  become: no
   vars_files:
   - vars.yml
   tasks:
