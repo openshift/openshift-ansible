@@ -24,6 +24,12 @@
       use_flannel: "{{ openshift_use_flannel | default(None) }}"
       use_manageiq: "{{ openshift_use_manageiq | default(None) }}"
 
+- name: Install the base package for versioning
+  action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}{{ openshift_version | default('') }} state=present"
+
+- name: Set version facts
+  openshift_facts:
+
   # For enterprise versions < 3.1 and origin versions < 1.1 we want to set the
   # hostname by default.
 - set_fact:
