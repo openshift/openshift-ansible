@@ -6,7 +6,7 @@ apiLevels:
 apiVersion: v1
 assetConfig:
   logoutURL: ""
-  masterPublicURL: {{ openshift.master.public_api_url }}
+  masterPublicURL: {{ openshift.master.public_console_api_url }}
   publicURL: {{ openshift.master.public_console_url }}/
   servingInfo:
     bindAddress: {{ openshift.master.bind_addr }}:{{ openshift.master.console_port }}
