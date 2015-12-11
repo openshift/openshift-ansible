@@ -135,13 +135,11 @@
   template:
     src: atomic-openshift-master-api.service.j2
     dest: /usr/lib/systemd/system/{{ openshift.common.service_type }}-master-api.service
-    force: no
   when: openshift_master_ha | bool and openshift_master_cluster_method == "native"
 - name: Create the controllers service file
   template:
     src: atomic-openshift-master-controllers.service.j2
     dest: /usr/lib/systemd/system/{{ openshift.common.service_type }}-master-controllers.service
-    force: no
   when: openshift_master_ha | bool and openshift_master_cluster_method == "native"
 - name: Create the api env file
   template:
@@ -242,13 +240,10 @@
     master_api_service_status_changed = start_result | changed
   when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
 
-# TODO: fix the ugly workaround of setting ignore_errors
-#       the controllers service tries to start even if it is already started
 - name: Start and enable master controller
   service: name={{ openshift.common.service_type }}-master-controllers enabled=yes state=started
   when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
   register: start_result
-  ignore_errors: yes
 
 - set_fact:
     master_controllers_service_status_changed = start_result | changed
