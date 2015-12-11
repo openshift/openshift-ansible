@@ -58,7 +58,7 @@
 - name: Create temp directory for syncing certs
   hosts: localhost
   connection: local
-  sudo: false
+  become: no
   gather_facts: no
   tasks:
   - name: Create local temp directory for syncing certs
@@ -158,8 +158,10 @@
   vars:
     sync_tmpdir: "{{ hostvars.localhost.mktemp.stdout }}"
     openshift_node_master_api_url: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_url }}"
+    # TODO: Prefix flannel role variables.
     etcd_urls: "{{ hostvars[groups.oo_first_master.0].openshift.master.etcd_urls }}"
     embedded_etcd: "{{ hostvars[groups.oo_first_master.0].openshift.master.embedded_etcd }}"
+    openshift_node_first_master_ip: "{{ hostvars[groups.oo_first_master.0].openshift.common.ip }}"
   pre_tasks:
   - name: Ensure certificate directory exists
     file:
@@ -189,7 +191,7 @@
 - name: Delete temporary directory on localhost
   hosts: localhost
   connection: local
-  sudo: false
+  become: no
   gather_facts: no
   tasks:
   - file: name={{ mktemp.stdout }} state=absent

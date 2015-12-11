@@ -83,7 +83,7 @@
             "from": {
               "kind": "ImageStreamTag",
               "namespace": "openshift",
-              "name": "python:3.3"
+              "name": "python:3.4"
             }
           }
         },
@@ -96,6 +96,9 @@
         "triggers": [
           {
             "type": "ImageChange"
+          },
+          {
+            "type": "ConfigChange"
           },
           {
             "type": "GitHub",
@@ -231,6 +234,20 @@
         },
         "triggers": [
           {
+            "type": "ImageChange",
+            "imageChangeParams": {
+              "automatic": false,
+              "containerNames": [
+                "postgresql"
+              ],
+              "from": {
+                "kind": "ImageStreamTag",
+                "namespace": "openshift",
+                "name": "postgresql:9.4"
+              }
+            }
+          },
+          {
             "type": "ConfigChange"
           }
         ],
@@ -249,7 +266,7 @@
             "containers": [
               {
                 "name": "postgresql",
-                "image": "${POSTGRESQL_IMAGE}",
+                "image": "postgresql",
                 "ports": [
                   {
                     "containerPort": 5432
@@ -326,11 +343,6 @@
       "description": "Database user password",
       "generate": "expression",
       "from": "[a-zA-Z0-9]{16}"
-    },
-    {
-      "name": "POSTGRESQL_IMAGE",
-      "description": "Image to use for postgresql",
-      "value": "openshift/postgresql-92-centos7"      
     },
     {
       "name": "APP_CONFIG",

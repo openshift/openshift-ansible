@@ -83,7 +83,7 @@
             "from": {
               "kind": "ImageStreamTag",
               "namespace": "openshift",
-              "name": "php:5.5"
+              "name": "php:5.6"
             }
           }
         },
@@ -96,6 +96,9 @@
         "triggers": [
           {
             "type": "ImageChange"
+          },
+          {
+            "type": "ConfigChange"
           },
           {
             "type": "GitHub",
@@ -250,6 +253,20 @@
         },
         "triggers": [
           {
+            "type": "ImageChange",
+            "imageChangeParams": {
+              "automatic": false,
+              "containerNames": [
+                "mysql"
+              ],
+              "from": {
+                "kind": "ImageStreamTag",
+                "namespace": "openshift",
+                "name": "mysql:5.6"
+              }
+            }
+          },
+          {
             "type": "ConfigChange"
           }
         ],
@@ -268,7 +285,7 @@
             "containers": [
               {
                 "name": "mysql",
-                "image": "${MYSQL_IMAGE}",
+                "image": "mysql",
                 "ports": [
                   {
                     "containerPort": 3306
@@ -345,11 +362,6 @@
       "description": "Database user password",
       "generate": "expression",
       "from": "[a-zA-Z0-9]{16}"
-    },
-    {
-      "name": "MYSQL_IMAGE",
-      "description": "Image to use for mysql",
-      "value": "openshift/mysql-55-centos7"      
     },
     {
       "name": "CAKEPHP_SECRET_TOKEN",

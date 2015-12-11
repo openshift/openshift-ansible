@@ -83,7 +83,7 @@
             "from": {
               "kind": "ImageStreamTag",
               "namespace": "openshift",
-              "name": "perl:5.16"
+              "name": "perl:5.20"
             }
           }
         },
@@ -96,6 +96,9 @@
         "triggers": [
           {
             "type": "ImageChange"
+          },
+          {
+            "type": "ConfigChange"
           },
           {
             "type": "GitHub",

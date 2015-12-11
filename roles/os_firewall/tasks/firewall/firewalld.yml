@@ -1,8 +1,6 @@
 ---
 - name: Install firewalld packages
-  yum:
-    name: firewalld
-    state: present
+  action: "{{ ansible_pkg_mgr }} name=firewalld state=present"
   register: install_result
 
 - name: Check if iptables-services is installed

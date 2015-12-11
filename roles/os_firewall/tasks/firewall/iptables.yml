@@ -1,8 +1,6 @@
 ---
 - name: Install iptables packages
-  yum:
-    name: "{{ item }}"
-    state: present
+  action: "{{ ansible_pkg_mgr }} name={{ item }} state=present"
   with_items:
   - iptables
   - iptables-services

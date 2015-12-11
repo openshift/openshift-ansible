@@ -47,7 +47,7 @@
         - origin-node
         - pcsd
 
-    - yum: name={{ item }} state=absent
+    - action: "{{ ansible_pkg_mgr }} name={{ item }} state=absent"
       when: not is_atomic | bool
       with_items:
         - atomic-enterprise

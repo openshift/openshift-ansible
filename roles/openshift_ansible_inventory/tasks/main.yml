@@ -1,7 +1,5 @@
 ---
-- yum:
-    name: "{{ item }}"
-    state: present
+- action: "{{ ansible_pkg_mgr }} name={{ item}} state=present"
   with_items:
   - openshift-ansible-inventory
   - openshift-ansible-inventory-aws

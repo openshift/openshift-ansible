@@ -14,6 +14,7 @@
       cluster_id: "{{ openshift_cluster_id | default('default') }}"
       debug_level: "{{ openshift_debug_level | default(2) }}"
       hostname: "{{ openshift_hostname | default(None) }}"
+      install_examples: "{{ openshift_install_examples | default(True) }}"
       ip: "{{ openshift_ip | default(None) }}"
       public_hostname: "{{ openshift_public_hostname | default(None) }}"
       public_ip: "{{ openshift_public_ip | default(None) }}"
@@ -22,6 +23,13 @@
       deployment_type: "{{ openshift_deployment_type }}"
       use_fluentd: "{{ openshift_use_fluentd | default(None) }}"
       use_flannel: "{{ openshift_use_flannel | default(None) }}"
+      use_manageiq: "{{ openshift_use_manageiq | default(None) }}"
+
+- name: Install the base package for versioning
+  action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}{{ openshift_version | default('') }} state=present"
+
+- name: Set version facts
+  openshift_facts:
 
   # For enterprise versions < 3.1 and origin versions < 1.1 we want to set the
   # hostname by default.

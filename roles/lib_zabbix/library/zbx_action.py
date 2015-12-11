@@ -1,8 +1,8 @@
 #!/usr/bin/env python
+# vim: expandtab:tabstop=4:shiftwidth=4
 '''
  Ansible module for zabbix actions
 '''
-# vim: expandtab:tabstop=4:shiftwidth=4
 #
 #   Zabbix action ansible module
 #
@@ -29,6 +29,17 @@
 
 # pylint: disable=import-error
 from openshift_tools.monitoring.zbxapi import ZabbixAPI, ZabbixConnection, ZabbixAPIError
+
+CUSTOM_SCRIPT_ACTION = '0'
+IPMI_ACTION = '1'
+SSH_ACTION = '2'
+TELNET_ACTION = '3'
+GLOBAL_SCRIPT_ACTION = '4'
+
+EXECUTE_ON_ZABBIX_AGENT = '0'
+EXECUTE_ON_ZABBIX_SERVER = '1'
+
+OPERATION_REMOTE_COMMAND = '1'
 
 def exists(content, key='result'):
     ''' Check if key exists in content or the size of content[key] > 0
@@ -69,6 +80,40 @@ def filter_differences(zabbix_filters, user_filters):
             rval[key] = val
 
     return rval
+
+def host_in_zabbix(zab_hosts, usr_host):
+    ''' Check whether a particular user host is already in the
+        Zabbix list of hosts '''
+
+    for usr_hst_key, usr_hst_val in usr_host.items():
+        for zab_host in zab_hosts:
+            if usr_hst_key in zab_host and \
+               zab_host[usr_hst_key] == str(usr_hst_val):
+                return True
+
+    return False
+
+def hostlist_in_zabbix(zab_hosts, usr_hosts):
+    ''' Check whether user-provided list of hosts are already in
+        the Zabbix action '''
+
+    if len(zab_hosts) != len(usr_hosts):
+        return False
+
+    for usr_host in usr_hosts:
+        if not host_in_zabbix(zab_hosts, usr_host):
+            return False
+
+    return True
+
+def opcommand_diff(zab_op_cmd, usr_op_cmd):
+    ''' Check whether user-provided opcommand matches what's already
+        stored in Zabbix '''
+
+    for usr_op_cmd_key, usr_op_cmd_val in usr_op_cmd.items():
+        if zab_op_cmd[usr_op_cmd_key] != str(usr_op_cmd_val):
+            return True
+    return False
 
 # This logic is quite complex.  We are comparing two lists of dictionaries.
 # The outer for-loops allow us to descend down into both lists at the same time
@@ -115,6 +160,18 @@ def operation_differences(zabbix_ops, user_ops):
                 usr_ids = set([usr['userid'] for usr in val])
                 if usr_ids != zab_usr_ids:
                     rval[key] = val
+
+            elif key == 'opcommand':
+                if opcommand_diff(zab[key], val):
+                    rval[key] = val
+                    break
+
+            # opcommand_grp can be treated just like opcommand_hst
+            # as opcommand_grp[] is just a list of groups
+            elif key == 'opcommand_hst' or key == 'opcommand_grp':
+                if not hostlist_in_zabbix(zab[key], val):
+                    rval[key] = val
+                    break
 
             elif zab[key] != str(val):
                 rval[key] = val
@@ -288,7 +345,7 @@ def get_condition_type(event_source, inc_condition):
 def get_operation_type(inc_operation):
     ''' determine the correct operation type'''
     o_types = {'send message': 0,
-               'remote command': 1,
+               'remote command': OPERATION_REMOTE_COMMAND,
                'add host': 2,
                'remove host': 3,
                'add to host group': 4,
@@ -301,7 +358,64 @@ def get_operation_type(inc_operation):
 
     return o_types[inc_operation]
 
-def get_action_operations(zapi, inc_operations):
+def get_opcommand_type(opcommand_type):
+    ''' determine the opcommand type '''
+    oc_types = {'custom script': CUSTOM_SCRIPT_ACTION,
+                'IPMI': IPMI_ACTION,
+                'SSH': SSH_ACTION,
+                'Telnet': TELNET_ACTION,
+                'global script': GLOBAL_SCRIPT_ACTION,
+               }
+
+    return oc_types[opcommand_type]
+
+def get_execute_on(execute_on):
+    ''' determine the execution target '''
+    e_types = {'zabbix agent': EXECUTE_ON_ZABBIX_AGENT,
+               'zabbix server': EXECUTE_ON_ZABBIX_SERVER,
+              }
+
+    return e_types[execute_on]
+
+def action_remote_command(ansible_module, zapi, operation):
+    ''' Process remote command type of actions '''
+
+    if 'type' not in operation['opcommand']:
+        ansible_module.exit_json(failed=True, changed=False, state='unknown',
+                                 results="No Operation Type provided")
+
+    operation['opcommand']['type'] = get_opcommand_type(operation['opcommand']['type'])
+
+    if operation['opcommand']['type'] == CUSTOM_SCRIPT_ACTION:
+
+        if 'execute_on' in operation['opcommand']:
+            operation['opcommand']['execute_on'] = get_execute_on(operation['opcommand']['execute_on'])
+
+        # custom script still requires the target hosts/groups to be set
+        operation['opcommand_hst'] = []
+        operation['opcommand_grp'] = []
+        for usr_host in operation['target_hosts']:
+            if usr_host['target_type'] == 'zabbix server':
+                # 0 = target host local/current host
+                operation['opcommand_hst'].append({'hostid': 0})
+            elif usr_host['target_type'] == 'group':
+                group_name = usr_host['target']
+                gid = get_host_group_id_by_name(zapi, group_name)
+                operation['opcommand_grp'].append({'groupid': gid})
+            elif usr_host['target_type'] == 'host':
+                host_name = usr_host['target']
+                hid = get_host_id_by_name(zapi, host_name)
+                operation['opcommand_hst'].append({'hostid': hid})
+
+        # 'target_hosts' is just to make it easier to build zbx_actions
+        # not part of ZabbixAPI
+        del operation['target_hosts']
+    else:
+        ansible_module.exit_json(failed=True, changed=False, state='unknown',
+                                 results="Unsupported remote command type")
+
+
+def get_action_operations(ansible_module, zapi, inc_operations):
     '''Convert the operations into syntax for api'''
     for operation in inc_operations:
         operation['operationtype'] = get_operation_type(operation['operationtype'])
@@ -315,9 +429,8 @@ def get_action_operations(zapi, inc_operations):
             else:
                 operation['opmessage']['default_msg'] = 0
 
-        # NOT supported for remote commands
-        elif operation['operationtype'] == 1:
-            continue
+        elif operation['operationtype'] == OPERATION_REMOTE_COMMAND:
+            action_remote_command(ansible_module, zapi, operation)
 
         # Handle Operation conditions:
         # Currently there is only 1 available which
@@ -457,14 +570,15 @@ def main():
         if not exists(content):
             module.exit_json(changed=False, state="absent")
 
-        content = zapi.get_content(zbx_class_name, 'delete', [content['result'][0]['itemid']])
+        content = zapi.get_content(zbx_class_name, 'delete', [content['result'][0]['actionid']])
         module.exit_json(changed=True, results=content['result'], state="absent")
 
     # Create and Update
     if state == 'present':
 
         conditions = get_action_conditions(zapi, module.params['event_source'], module.params['conditions_filter'])
-        operations = get_action_operations(zapi, module.params['operations'])
+        operations = get_action_operations(module, zapi,
+                                           module.params['operations'])
         params = {'name': module.params['name'],
                   'esc_period': module.params['escalation_time'],
                   'eventsource': get_event_source(module.params['event_source']),

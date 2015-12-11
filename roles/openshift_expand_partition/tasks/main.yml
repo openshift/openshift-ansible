@@ -1,6 +1,6 @@
 ---
 - name: Ensure growpart is installed
-  yum: pkg=cloud-utils-growpart state=present
+  action: "{{ ansible_pkg_mgr }} name=cloud-utils-growpart state=present"
 
 - name: Grow the partitions
   command: "growpart {{oep_drive}} {{oep_partition}}"

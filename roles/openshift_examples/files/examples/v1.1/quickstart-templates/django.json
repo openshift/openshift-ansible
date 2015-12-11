@@ -83,7 +83,7 @@
             "from": {
               "kind": "ImageStreamTag",
               "namespace": "openshift",
-              "name": "python:3.3"
+              "name": "python:3.4"
             }
           }
         },
@@ -96,6 +96,9 @@
         "triggers": [
           {
             "type": "ImageChange"
+          },
+          {
+            "type": "ConfigChange"
           },
           {
             "type": "GitHub",

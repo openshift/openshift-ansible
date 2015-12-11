@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.16
+Version:        3.0.20
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -13,7 +13,7 @@ URL:            https://github.com/openshift/openshift-ansible
 Source0:        https://github.com/openshift/openshift-ansible/archive/%{commit}/%{name}-%{version}.tar.gz
 BuildArch:      noarch
 
-Requires:      ansible >= 1.9.3
+Requires:      ansible >= 1.9.4
 Requires:      python2
 
 %description
@@ -192,7 +192,7 @@ BuildArch:     noarch
 # ----------------------------------------------------------------------------------
 %package roles
 Summary:       Openshift and Atomic Enterprise Ansible roles
-Requires:      %{name}
+Requires:      %{name} = %{version}
 Requires:      %{name}-lookup-plugins = %{version}
 Requires:      %{name}-filter-plugins = %{version}
 BuildArch:     noarch
@@ -209,8 +209,9 @@ BuildArch:     noarch
 # ----------------------------------------------------------------------------------
 %package filter-plugins
 Summary:       Openshift and Atomic Enterprise Ansible filter plugins
-Requires:      %{name}
+Requires:      %{name} = %{version}
 BuildArch:     noarch
+Requires:      pyOpenSSL
 
 %description filter-plugins
 %{summary}.
@@ -224,7 +225,7 @@ BuildArch:     noarch
 # ----------------------------------------------------------------------------------
 %package lookup-plugins
 Summary:       Openshift and Atomic Enterprise Ansible lookup plugins
-Requires:      %{name}
+Requires:      %{name} = %{version}
 BuildArch:     noarch
 
 %description lookup-plugins
@@ -258,6 +259,109 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Dec 10 2015 Thomas Wiest <twiest@redhat.com> 3.0.20-1
+- Revert "Automatic commit of package [openshift-ansible] release [3.0.20-1]."
+  (twiest@redhat.com)
+- Automatic commit of package [openshift-ansible] release [3.0.20-1].
+  (twiest@redhat.com)
+- Install base package in openshift_common for version facts
+  (abutcher@redhat.com)
+- Make the install of openshift_examples optional (jtslear@gmail.com)
+- add support for remote command actions no support for anything but custom
+  scripts at this time (jdiaz@redhat.com)
+- Remove yum / dnf duplication (sdodson@redhat.com)
+- Remove hacluster user during uninstall. (abutcher@redhat.com)
+- Simplify session secrets overrides. (abutcher@redhat.com)
+- Squash pcs install into one task. (abutcher@redhat.com)
+- Bump ansible requirement to 1.9.4 (sdodson@redhat.com)
+
+* Wed Dec 09 2015 Brenton Leanhardt <bleanhar@redhat.com> 3.0.19-1
+- Fix version dependent image streams (sdodson@redhat.com)
+- atomic-openshift-installer: Error handling on yaml loading
+  (smunilla@redhat.com)
+- Betterize AWS readme (jtslear@gmail.com)
+
+* Tue Dec 08 2015 Brenton Leanhardt <bleanhar@redhat.com> 3.0.18-1
+- Pass in and use first_master_ip as dnsIP for pre 3.1 nodes.
+  (abutcher@redhat.com)
+- Fix delete state (jdiaz@redhat.com)
+- Require pyOpenSSL (sdodson@redhat.com)
+- Update sync db-templates, image-streams, and quickstart-templates
+  (sdodson@redhat.com)
+- Clarify the preflight port check output (sdodson@redhat.com)
+- Fix missing dependency version locking (sdodson@redhat.com)
+
+* Tue Dec 08 2015 Brenton Leanhardt <bleanhar@redhat.com> 3.0.17-1
+- Improving output when gathering facts (bleanhar@redhat.com)
+- Bug 1287977 - Incorrect check output from atomic-openshift-installer when
+  working with preconfigured load balancer (bleanhar@redhat.com)
+- Add unique AEP, OSE, and Origin BYO inventories (sdodson@redhat.com)
+- bring the docker udev workaround into openshift-ansible.git
+  (jdiaz@redhat.com)
+- Zabbix: put in a note about trigger prototype dependency
+  (mwoodson@redhat.com)
+- Zabbix: added dependency for inode disk check (mwoodson@redhat.com)
+- Zabbix: added dependency for disk check (mwoodson@redhat.com)
+- zabbix: removed ethernet graphs (mwoodson@redhat.com)
+- Zabbix: added trigger dependencies to certain master checks
+  (mwoodson@redhat.com)
+- ManageIQ Service Account: added role for ManageIQ service account
+  (efreiber@redhat.com)
+- added the pv zabbix keys (mwoodson@redhat.com)
+- Refactor dns options and facts. (abutcher@redhat.com)
+- Fix openshift_facts playbook for yum/dnf changes (jdetiber@redhat.com)
+- Configured master count should be 1 for pacemaker ha. (abutcher@redhat.com)
+- Fedora changes: (admiller@redhat.com)
+- Centralize etcd/schedulability logic for each host. (dgoodwin@redhat.com)
+- added upgrade playbook for online (sedgar@redhat.com)
+- Improved installation summary. (dgoodwin@redhat.com)
+- Fix kubernetes service ip gathering. (abutcher@redhat.com)
+- added docker registry cluster check (mwoodson@redhat.com)
+- Add warning for HA deployments with < 3 dedicated nodes.
+  (dgoodwin@redhat.com)
+- Cleanup more schedulable typos. (dgoodwin@redhat.com)
+- Fix validation for BasicAuthPasswordIdentityProvider (tschan@puzzle.ch)
+- Fix ec2 instance type lookups (jdetiber@redhat.com)
+- remove debug logging from scc/privileged patch command (jdetiber@redhat.com)
+- Set api version for oc commands (jdetiber@redhat.com)
+- 3.1 upgrade - use --api-version for patch commands (jdetiber@redhat.com)
+- Fix bug when warning on no dedicated nodes. (dgoodwin@redhat.com)
+- Suggest dedicated nodes for an HA deployment. (dgoodwin@redhat.com)
+- Error out if no load balancer specified. (dgoodwin@redhat.com)
+- Adjust requirement for 3 masters for HA deployments. (dgoodwin@redhat.com)
+- Fixing 'unscheduleable' typo (bleanhar@redhat.com)
+- Update IMAGE_PREFIX and IMAGE_VERSION values in hawkular template
+  (nakayamakenjiro@gmail.com)
+- Improved output when re-running after editing config. (dgoodwin@redhat.com)
+- Print a system summary after adding each. (dgoodwin@redhat.com)
+- Text improvements for host specification. (dgoodwin@redhat.com)
+- Assert etcd section written for HA installs. (dgoodwin@redhat.com)
+- Breakout a test fixture to reduce module size. (dgoodwin@redhat.com)
+- Pylint touchups. (dgoodwin@redhat.com)
+- Trim assertions in HA testing. (dgoodwin@redhat.com)
+- Test unattended HA quick install. (dgoodwin@redhat.com)
+- Don't prompt to continue during unattended installs. (dgoodwin@redhat.com)
+- Block re-use of master/node as load balancer in attended install.
+  (dgoodwin@redhat.com)
+- Add -q flag to remove unwantend output (such as mirror and cache information)
+  (urs.breu@ergon.ch)
+- Uninstall: only restart docker on node hosts. (abutcher@redhat.com)
+- Explicitly set schedulable when masters == nodes. (dgoodwin@redhat.com)
+- Use admin.kubeconfig for get svc ip. (abutcher@redhat.com)
+- Point enterprise metrics at registry.access.redhat.com/openshift3/metrics-
+  (sdodson@redhat.com)
+- Make sure that OpenSSL is installed before use (fsimonce@redhat.com)
+- fixes for installer wrapper scaleup (jdetiber@redhat.com)
+- addtl aws fixes (jdetiber@redhat.com)
+- Fix failure when seboolean not present (jdetiber@redhat.com)
+- fix addNodes.yml (jdetiber@redhat.com)
+- more aws support for scaleup (jdetiber@redhat.com)
+- start of aws scaleup (jdetiber@redhat.com)
+- Improve scaleup playbook (jdetiber@redhat.com)
+- Update openshift_repos to refresh package cache on changes
+  (jdetiber@redhat.com)
+- Add etcd nodes management in OpenStack (lhuard@amadeus.com)
+
 * Tue Nov 24 2015 Brenton Leanhardt <bleanhar@redhat.com> 3.0.16-1
 - Silencing pylint branch errors for now for the atomic-openshift-installer
   harness (bleanhar@redhat.com)

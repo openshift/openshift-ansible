@@ -1,7 +1,7 @@
 ---
 - name: Install NFS server
-  yum: name=nfs-utils state=present
-
+  action: "{{ ansible_pkg_mgr }} name=nfs-utils state=present"
+  
 - name: Start rpcbind
   service: name=rpcbind state=started enabled=yes
 

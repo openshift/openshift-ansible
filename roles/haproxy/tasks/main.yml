@@ -1,8 +1,6 @@
 ---
 - name: Install haproxy
-  yum:
-    pkg: haproxy
-    state: present
+  action: "{{ ansible_pkg_mgr }} name=haproxy state=present"
 
 - name: Configure haproxy
   template:

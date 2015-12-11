@@ -1,8 +1,10 @@
 ---
 # tasks file for docker
 - name: Install docker
-  yum: pkg=docker
-
+  action: "{{ ansible_pkg_mgr }} name=docker state=present"
+  
 - name: enable and start the docker service
   service: name=docker enabled=yes state=started
 
+- include: udev_workaround.yml
+  when: docker_udev_workaround | default(False)

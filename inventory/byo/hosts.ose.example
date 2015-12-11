@@ -1,0 +1,181 @@
+# This is an example of a bring your own (byo) host inventory
+
+# Create an OSEv3 group that contains the masters and nodes groups
+[OSEv3:children]
+masters
+nodes
+etcd
+lb
+
+# Set variables common for all OSEv3 hosts
+[OSEv3:vars]
+# SSH user, this user should allow ssh based auth without requiring a
+# password. If using ssh key based auth, then the key should be managed by an
+# ssh agent.
+ansible_ssh_user=root
+
+# If ansible_ssh_user is not root, ansible_sudo must be set to true and the
+# user must be configured for passwordless sudo
+#ansible_sudo=true
+
+# deployment type valid values are origin, online, atomic-enterprise, and openshift-enterprise
+deployment_type=openshift-enterprise
+
+# Install the openshift examples
+#openshift_install_examples=true
+
+# Enable cluster metrics
+#use_cluster_metrics=true
+
+# Add additional, insecure, and blocked registries to global docker configuration
+# For enterprise deployment types we ensure that registry.access.redhat.com is
+# included if you do not include it
+#cli_docker_additional_registries=registry.example.com
+#cli_docker_insecure_registries=registry.example.com
+#cli_docker_blocked_registries=registry.hacker.com
+
+# Alternate image format string. If you're not modifying the format string and
+# only need to inject your own registry you may want to consider
+# cli_docker_additional_registries instead
+#oreg_url=example.com/openshift3/ose-${component}:${version}
+
+# Additional yum repos to install
+#openshift_additional_repos=[{'id': 'ose-devel', 'name': 'ose-devel', 'baseurl': 'http://example.com/puddle/build/AtomicOpenShift/3.1/latest/RH7-RHOSE-3.0/$basearch/os', 'enabled': 1, 'gpgcheck': 0}]
+
+# htpasswd auth
+openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/htpasswd'}]
+
+# Allow all auth
+#openshift_master_identity_providers=[{'name': 'allow_all', 'login': 'true', 'challenge': 'true', 'kind': 'AllowAllPasswordIdentityProvider'}]
+
+# LDAP auth
+#openshift_master_identity_providers=[{'name': 'my_ldap_provider', 'challenge': 'true', 'login': 'true', 'kind': 'LDAPPasswordIdentityProvider', 'attributes': {'id': ['dn'], 'email': ['mail'], 'name': ['cn'], 'preferredUsername': ['uid']}, 'bindDN': '', 'bindPassword': '', 'ca': '', 'insecure': 'false', 'url': 'ldap://ldap.example.com:389/ou=users,dc=example,dc=com?uid'}]
+
+# Project Configuration
+#osm_project_request_message=''
+#osm_project_request_template=''
+#osm_mcs_allocator_range='s0:/2'
+#osm_mcs_labels_per_project=5
+#osm_uid_allocator_range='1000000000-1999999999/10000'
+
+# Configure Fluentd
+#use_fluentd=true
+
+# Enable cockpit
+#osm_use_cockpit=true
+#
+# Set cockpit plugins
+#osm_cockpit_plugins=['cockpit-kubernetes']
+
+# Native high availbility cluster method with optional load balancer.
+# If no lb group is defined installer assumes that a load balancer has
+# been preconfigured. For installation the value of
+# openshift_master_cluster_hostname must resolve to the load balancer
+# or to one or all of the masters defined in the inventory if no load
+# balancer is present.
+#openshift_master_cluster_method=native
+#openshift_master_cluster_hostname=openshift-ansible.test.example.com
+#openshift_master_cluster_public_hostname=openshift-ansible.test.example.com
+
+# Pacemaker high availability cluster method.
+# Pacemaker HA environment must be able to self provision the
+# configured VIP. For installation openshift_master_cluster_hostname
+# must resolve to the configured VIP.
+#openshift_master_cluster_method=pacemaker
+#openshift_master_cluster_password=openshift_cluster
+#openshift_master_cluster_vip=192.168.133.25
+#openshift_master_cluster_public_vip=192.168.133.25
+#openshift_master_cluster_hostname=openshift-ansible.test.example.com
+#openshift_master_cluster_public_hostname=openshift-ansible.test.example.com
+
+# Override the default controller lease ttl
+#osm_controller_lease_ttl=30
+
+# default subdomain to use for exposed routes
+#osm_default_subdomain=apps.test.example.com
+
+# additional cors origins
+#osm_custom_cors_origins=['foo.example.com', 'bar.example.com']
+
+# default project node selector
+#osm_default_node_selector='region=primary'
+
+# default storage plugin dependencies to install, by default the ceph and
+# glusterfs plugin dependencies will be installed, if available.
+#osn_storage_plugin_deps=['ceph','glusterfs']
+
+# default selectors for router and registry services
+# openshift_router_selector='region=infra'
+# openshift_registry_selector='region=infra'
+
+# Configure the multi-tenant SDN plugin (default is 'redhat/openshift-ovs-subnet')
+# os_sdn_network_plugin_name='redhat/openshift-ovs-multitenant'
+
+# Disable the OpenShift SDN plugin
+# openshift_use_openshift_sdn=False
+
+# set RPM version for debugging purposes
+#openshift_pkg_version=-3.1.0.0
+
+# Configure custom named certificates
+# NOTE: openshift_master_named_certificates is cached on masters and is an
+# additive fact, meaning that each run with a different set of certificates
+# will add the newly provided certificates to the cached set of certificates.
+# If you would like openshift_master_named_certificates to be overwritten with
+# the provided value, specify openshift_master_overwrite_named_certificates.
+#openshift_master_overwrite_named_certificates: true
+#
+# Provide local certificate paths which will be deployed to masters
+#openshift_master_named_certificates=[{"certfile": "/path/to/custom1.crt", "keyfile": "/path/to/custom1.key"}]
+#
+# Detected names may be overridden by specifying the "names" key
+#openshift_master_named_certificates=[{"certfile": "/path/to/custom1.crt", "keyfile": "/path/to/custom1.key", "names": ["public-master-host.com"]}]
+
+# Session options
+#openshift_master_session_name=ssn
+#openshift_master_session_max_seconds=3600
+
+# An authentication and encryption secret will be generated if secrets
+# are not provided. If provided, openshift_master_session_auth_secrets
+# and openshift_master_encryption_secrets must be equal length.
+#
+# Signing secrets, used to authenticate sessions using
+# HMAC. Recommended to use secrets with 32 or 64 bytes.
+#openshift_master_session_auth_secrets=['DONT+USE+THIS+SECRET+b4NV+pmZNSO']
+#
+# Encrypting secrets, used to encrypt sessions. Must be 16, 24, or 32
+# characters long, to select AES-128, AES-192, or AES-256.
+#openshift_master_session_encryption_secrets=['DONT+USE+THIS+SECRET+b4NV+pmZNSO']
+
+# configure how often node iptables rules are refreshed
+#openshift_node_iptables_sync_period=5s
+
+# Configure nodeIP in the node config
+# This is needed in cases where node traffic is desired to go over an
+# interface other than the default network interface.
+#openshift_node_set_node_ip=True
+
+# Force setting of system hostname when configuring OpenShift
+# This works around issues related to installations that do not have valid dns
+# entries for the interfaces attached to the host.
+#openshift_set_hostname=True
+
+# Configure dnsIP in the node config
+#openshift_dns_ip=172.30.0.1
+
+# host group for masters
+[masters]
+ose3-master[1:3]-ansible.test.example.com
+
+[etcd]
+ose3-etcd[1:3]-ansible.test.example.com
+
+[lb]
+ose3-lb-ansible.test.example.com
+
+# NOTE: Currently we require that masters be part of the SDN which requires that they also be nodes
+# However, in order to ensure that your masters are not burdened with running pods you should
+# make them unschedulable by adding openshift_schedulable=False any node that's also a master.
+[nodes]
+ose3-master[1:3]-ansible.test.example.com
+ose3-node[1:2]-ansible.test.example.com openshift_node_labels="{'region': 'primary', 'zone': 'default'}"

@@ -1,4 +1,2 @@
 ---
-- yum:
-    name: copr-cli
-    state: present
+- action: "{{ ansible_pkg_mgr }} name=copr-cli state=present"

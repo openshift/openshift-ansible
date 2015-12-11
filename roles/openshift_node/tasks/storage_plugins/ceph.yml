@@ -1,5 +1,3 @@
 ---
 - name: Install Ceph storage plugin dependencies
-  yum:
-    pkg: ceph-common
-    state: installed
+  action: "{{ ansible_pkg_mgr }} name=ceph-common state=present"

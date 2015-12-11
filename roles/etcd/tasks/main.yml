@@ -8,7 +8,7 @@
   when: "'ipv4' not in hostvars[inventory_hostname]['ansible_' ~ etcd_interface] or 'address' not in hostvars[inventory_hostname]['ansible_' ~ etcd_interface].ipv4"
 
 - name: Install etcd
-  yum: pkg=etcd-2.* state=present
+  action: "{{ ansible_pkg_mgr }} name=etcd-2.* state=present"
 
 - name: Validate permissions on the config dir
   file:

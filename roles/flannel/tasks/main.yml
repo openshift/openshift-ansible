@@ -1,7 +1,7 @@
 ---
 - name: Install flannel
   sudo: true
-  yum: pkg=flannel state=present
+  action: "{{ ansible_pkg_mgr }} name=flannel state=present"
 
 - name: Set flannel etcd url
   sudo: true

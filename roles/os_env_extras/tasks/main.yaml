@@ -12,6 +12,4 @@
     dest: /root/.vimrc
 
 - name: Bash Completion
-  yum:
-    pkg: bash-completion
-    state: installed
+  action: "{{ ansible_pkg_mgr }} name=bash-completion state=present"

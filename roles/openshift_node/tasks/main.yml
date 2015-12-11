@@ -1,12 +1,6 @@
 ---
 # TODO: allow for overriding default ports where possible
 - fail:
-    msg: This role requres that osn_cluster_dns_domain is set
-  when: osn_cluster_dns_domain is not defined or not osn_cluster_dns_domain
-- fail:
-    msg: This role requres that osn_cluster_dns_ip is set
-  when: osn_cluster_dns_ip is not defined or not osn_cluster_dns_ip
-- fail:
     msg: "SELinux is disabled, This deployment type requires that SELinux is enabled."
   when: (not ansible_selinux or ansible_selinux.status != 'enabled') and deployment_type in ['enterprise', 'online', 'atomic-enterprise', 'openshift-enterprise']
 
@@ -20,6 +14,10 @@
       hostname: "{{ openshift_hostname | default(none) }}"
       public_hostname: "{{ openshift_public_hostname | default(none) }}"
       deployment_type: "{{ openshift_deployment_type }}"
+      # TODO: Replace this with a lookup or filter plugin.
+      dns_ip: "{{ openshift_dns_ip
+                  | default(openshift_master_cluster_vip
+                  | default(None if openshift.common.version_greater_than_3_1_or_1_1 | bool else openshift_node_first_master_ip | default(None, true), true), true) }}"
   - role: node
     local_facts:
       annotations: "{{ openshift_node_annotations | default(none) }}"
@@ -39,12 +37,10 @@
 # We have to add tuned-profiles in the same transaction otherwise we run into depsolving
 # problems because the rpms don't pin the version properly.
 - name: Install Node package
-  yum: pkg={{ openshift.common.service_type }}-node{{ openshift_version  }},tuned-profiles-{{ openshift.common.service_type }}-node{{ openshift_version  }} state=present
-  register: node_install_result
+  action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-node{{ openshift_version  }},tuned-profiles-{{ openshift.common.service_type }}-node{{ openshift_version  }} state=present"
 
 - name: Install sdn-ovs package
-  yum: pkg={{ openshift.common.service_type }}-sdn-ovs{{ openshift_version }} state=present
-  register: sdn_install_result
+  action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-sdn-ovs{{ openshift_version }} state=present"
   when: openshift.common.use_openshift_sdn
 
 # TODO: add the validate parameter when there is a validation command to run

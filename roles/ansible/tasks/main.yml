@@ -2,9 +2,7 @@
 # Install ansible client
 
 - name: Install Ansible
-  yum:
-    pkg: ansible
-    state: installed
+  action: "{{ ansible_pkg_mgr }} name=ansible state=present"
 
 - include: config.yml
   vars:

@@ -2,6 +2,8 @@
 - name: Populate g_service_masters host group if needed
   hosts: localhost
   gather_facts: no
+  connection: local
+  become: no
   tasks:
   - fail: msg="new_cluster_state is required to be injected in this playbook"
     when: new_cluster_state is not defined

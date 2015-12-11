@@ -1,6 +1,8 @@
 ---
 - name: Populate oo_hosts_to_update group
   hosts: localhost
+  connection: local
+  become: no
   gather_facts: no
   vars_files:
   - vars.yml
@@ -16,6 +18,8 @@
 
 - name: Populate oo_masters_to_config host group
   hosts: localhost
+  connection: local
+  become: no
   gather_facts: no
   vars_files:
   - vars.yml
@@ -45,5 +49,3 @@
     openshift_use_openshift_sdn: true
     openshift_node_labels: "{{ lookup('oo_option', 'openshift_node_labels') }} "
     os_sdn_network_plugin_name: "redhat/openshift-ovs-subnet"
-    osn_cluster_dns_domain: "{{ hostvars[groups.oo_first_master.0].openshift.dns.domain }}"
-    osn_cluster_dns_ip: "{{ hostvars[groups.oo_first_master.0].cluster_dns_ip }}"

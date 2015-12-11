@@ -528,9 +528,9 @@ def set_aggregate_facts(facts):
         internal_hostnames.add(facts['common']['hostname'])
         internal_hostnames.add(facts['common']['ip'])
 
+        cluster_domain = facts['common']['dns_domain']
+
         if 'master' in facts:
-            # FIXME: not sure why but facts['dns']['domain'] fails
-            cluster_domain = 'cluster.local'
             if 'cluster_hostname' in facts['master']:
                 all_hostnames.add(facts['master']['cluster_hostname'])
             if 'cluster_public_hostname' in facts['master']:
@@ -623,7 +623,7 @@ def set_deployment_facts_if_unset(facts):
             service_type = 'atomic-openshift'
             if deployment_type == 'origin':
                 service_type = 'origin'
-            elif deployment_type in ['enterprise', 'online']:
+            elif deployment_type in ['enterprise']:
                 service_type = 'openshift'
             facts['common']['service_type'] = service_type
         if 'config_base' not in facts['common']:
@@ -985,7 +985,7 @@ class OpenShiftFacts(object):
         Raises:
             OpenShiftFactsUnsupportedRoleError:
     """
-    known_roles = ['common', 'master', 'node', 'master_sdn', 'node_sdn', 'dns', 'etcd']
+    known_roles = ['common', 'master', 'node', 'master_sdn', 'node_sdn', 'etcd']
 
     def __init__(self, role, filename, local_facts, additive_facts_to_overwrite=False):
         self.changed = False
@@ -1053,9 +1053,11 @@ class OpenShiftFacts(object):
 
         common = dict(use_openshift_sdn=True, ip=ip_addr, public_ip=ip_addr,
                       deployment_type='origin', hostname=hostname,
-                      public_hostname=hostname)
+                      public_hostname=hostname, use_manageiq=False)
         common['client_binary'] = 'oc' if os.path.isfile('/usr/bin/oc') else 'osc'
         common['admin_binary'] = 'oadm' if os.path.isfile('/usr/bin/oadm') else 'osadm'
+        common['dns_domain'] = 'cluster.local'
+        common['install_examples'] = True
         defaults['common'] = common
 
         if 'master' in roles:
@@ -1076,7 +1078,6 @@ class OpenShiftFacts(object):
             node = dict(labels={}, annotations={}, portal_net='172.30.0.0/16',
                         iptables_sync_period='5s', set_node_ip=False)
             defaults['node'] = node
-
         return defaults
 
     def guess_host_provider(self):

@@ -7,9 +7,7 @@
     - ansible_version | version_compare('1.9.0.1', 'ne')
 
 - name: Ensure PyYaml is installed
-  yum: pkg={{ item }} state=installed
-  with_items:
-    - PyYAML
+  action: "{{ ansible_pkg_mgr }} name=PyYAML state=present"
 
 - name: Gather Cluster facts
   openshift_facts:
