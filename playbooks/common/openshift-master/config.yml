@@ -40,12 +40,12 @@
           deployment_type: "{{ openshift_deployment_type }}"
       - role: master
         local_facts:
+          cluster_hostname: "{{ openshift_master_cluster_hostname | default(None) }}"
+          cluster_public_hostname: "{{ openshift_master_cluster_public_hostname | default(None) }}"
           api_port: "{{ openshift_master_api_port | default(None) }}"
           api_url: "{{ openshift_master_api_url | default(None) }}"
           api_use_ssl: "{{ openshift_master_api_use_ssl | default(None) }}"
-          public_api_url: "{{ openshift_master_public_api_url | default(openshift_master_cluster_public_hostname | default(None)) }}"
-          cluster_hostname: "{{ openshift_master_cluster_hostname | default(None) }}"
-          cluster_public_hostname: "{{ openshift_master_cluster_public_hostname | default(None) }}"
+          public_api_url: "{{ openshift_master_public_api_url | default(None) }}"
           console_path: "{{ openshift_master_console_path | default(None) }}"
           console_port: "{{ openshift_master_console_port | default(None) }}"
           console_url: "{{ openshift_master_console_url | default(None) }}"
