@@ -43,7 +43,7 @@
           api_port: "{{ openshift_master_api_port | default(None) }}"
           api_url: "{{ openshift_master_api_url | default(None) }}"
           api_use_ssl: "{{ openshift_master_api_use_ssl | default(None) }}"
-          public_api_url: "{{ openshift_master_public_api_url | default(None) }}"
+          public_api_url: "{{ openshift_master_public_api_url | default(openshift_master_cluster_public_hostname | default(None)) }}"
           cluster_hostname: "{{ openshift_master_cluster_hostname | default(None) }}"
           cluster_public_hostname: "{{ openshift_master_cluster_public_hostname | default(None) }}"
           console_path: "{{ openshift_master_console_path | default(None) }}"
