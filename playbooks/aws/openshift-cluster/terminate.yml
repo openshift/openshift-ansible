@@ -39,7 +39,6 @@
         tags:
           env: "{{ item['ec2_tag_env'] }}"
           host-type: "{{ item['ec2_tag_host-type'] }}"
-          env-host-type: "{{ item['ec2_tag_env-host-type'] }}"
           sub_host_type: "{{ item['ec2_tag_sub-host-type'] }}"
       with_items: host_vars
       when: "'oo_hosts_to_terminate' in groups"

@@ -4,6 +4,11 @@
   connection: local
   become: no
   gather_facts: no
+  vars:
+    g_etcd_hosts:   "{{ (groups['tag_host-type-etcd']|default([])) | intersect(groups['tag_env-' ~ cluster_id]) }}"
+    g_lb_hosts:     "{{ (groups['tag_host-type-lb']|default([])) | intersect(groups['tag_env-' ~ cluster_id]) }}"
+    g_master_hosts: "{{ (groups['tag_host-type-master']|default([])) | intersect(groups['tag_env-' ~ cluster_id]) }}"
+    g_node_hosts:   "{{ (groups['tag_host-type-node']|default([])) | intersect((groups['tag_env-' ~ cluster_id]|default([]))) }}"
   vars_files:
   - vars.yml
   tasks:
@@ -33,11 +38,11 @@
 
   - name: Evaluate oo_first_master
     add_host:
-      name: "{{ groups['tag_env-host-type-' ~ cluster_id ~ '-openshift-master'][0] }}"
+      name: "{{ g_master_hosts | first }}"
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
       groups: oo_first_master
-    when: "'tag_env-host-type-{{ cluster_id }}-openshift-master' in groups"
+    when: g_master_hosts is defined and g_master_hosts|length > 0
 
 #- include: config.yml
 - include: ../../common/openshift-node/config.yml

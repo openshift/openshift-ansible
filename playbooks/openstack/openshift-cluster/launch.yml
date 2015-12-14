@@ -71,7 +71,7 @@
       ansible_ssh_host: '{{ item[2] }}'
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-      groups: 'tag_env_{{ cluster_id }}, tag_host-type_etcd, tag_env-host-type_{{ cluster_id }}-openshift-etcd, tag_sub-host-type_default'
+      groups: 'tag_env_{{ cluster_id }}, tag_host-type_etcd, tag_sub-host-type_default'
     with_together:
       - parsed_outputs.etcd_names
       - parsed_outputs.etcd_ips
@@ -83,7 +83,7 @@
       ansible_ssh_host: '{{ item[2] }}'
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-      groups: 'tag_env_{{ cluster_id }}, tag_host-type_master, tag_env-host-type_{{ cluster_id }}-openshift-master, tag_sub-host-type_default'
+      groups: 'tag_env_{{ cluster_id }}, tag_host-type_master, tag_sub-host-type_default'
     with_together:
       - parsed_outputs.master_names
       - parsed_outputs.master_ips
@@ -95,7 +95,7 @@
       ansible_ssh_host: '{{ item[2] }}'
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-      groups: 'tag_env_{{ cluster_id }}, tag_host-type_node, tag_env-host-type_{{ cluster_id }}-openshift-node, tag_sub-host-type_compute'
+      groups: 'tag_env_{{ cluster_id }}, tag_host-type_node, tag_sub-host-type_compute'
     with_together:
       - parsed_outputs.node_names
       - parsed_outputs.node_ips
@@ -107,7 +107,7 @@
       ansible_ssh_host: '{{ item[2] }}'
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-      groups: 'tag_env_{{ cluster_id }}, tag_host-type_node, tag_env-host-type_{{ cluster_id }}-openshift-node, tag_sub-host-type_infra'
+      groups: 'tag_env_{{ cluster_id }}, tag_host-type_node, tag_sub-host-type_infra'
     with_together:
       - parsed_outputs.infra_names
       - parsed_outputs.infra_ips

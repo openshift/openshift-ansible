@@ -16,10 +16,10 @@
 
 - include: ../../common/openshift-cluster/config.yml
   vars:
-    g_etcd_group: "{{ 'tag_env-host-type-' ~ cluster_id ~ '-openshift-etcd' }}"
-    g_lb_group: "{{ 'tag_env-host-type-' ~ cluster_id ~ '-openshift-lb' }}"
-    g_masters_group: "{{ 'tag_env-host-type-' ~ cluster_id ~ '-openshift-master' }}"
-    g_nodes_group: "{{ 'tag_env-host-type-' ~ cluster_id ~ '-openshift-node' }}"
+    g_etcd_hosts:   "{{ (groups['tag_host-type-etcd']|default([]))   | intersect((groups['tag_env-' ~ cluster_id]|default([]))) }}"
+    g_lb_hosts:     "{{ (groups['tag_host-type-lb']|default([]))     | intersect((groups['tag_env-' ~ cluster_id]|default([]))) }}"
+    g_master_hosts: "{{ (groups['tag_host-type-master']|default([])) | intersect((groups['tag_env-' ~ cluster_id]|default([]))) }}"
+    g_node_hosts:   "{{ (groups['tag_host-type-node']|default([]))   | intersect((groups['tag_env-' ~ cluster_id]|default([]))) }}"
     g_ssh_user: "{{ hostvars.localhost.g_ssh_user_tmp }}"
     g_sudo: "{{ hostvars.localhost.g_sudo_tmp }}"
     openshift_cluster_id: "{{ cluster_id }}"

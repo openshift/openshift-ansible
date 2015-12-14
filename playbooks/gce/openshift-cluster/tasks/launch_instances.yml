@@ -19,7 +19,6 @@
       - env-{{ cluster }}
       - host-type-{{ type }}
       - sub-host-type-{{ g_sub_host_type }}
-      - env-host-type-{{ cluster }}-openshift-{{ type }}
   when: instances |length > 0
   register: gce
 

@@ -16,7 +16,7 @@
       groups: g_service_masters
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-    with_items: groups["tag_env-host-type_{{ cluster_id }}-openshift-master"] | default([])
+    with_items: "{{ g_master_hosts | default([]) }}"
 
   - name: Evaluate g_service_nodes
     add_host:
@@ -24,7 +24,7 @@
       groups: g_service_nodes
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-    with_items: groups["tag_env-host-type_{{ cluster_id }}-openshift-node"] | default([])
+    with_items: "{{ g_node_hosts | default([]) }}"
 
 - include: ../../common/openshift-node/service.yml
 - include: ../../common/openshift-master/service.yml

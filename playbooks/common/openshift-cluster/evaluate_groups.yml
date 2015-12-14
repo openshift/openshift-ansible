@@ -6,20 +6,20 @@
   gather_facts: no
   tasks:
   - fail:
-      msg: This playbook requires g_etcd_group to be set
-    when: g_etcd_group is not defined
+      msg: This playbook requires g_etcd_hosts to be set
+    when: g_etcd_hosts is not defined
 
   - fail:
-      msg: This playbook requires g_masters_group to be set
-    when: g_masters_group is not defined
+      msg: This playbook requires g_master_hosts to be set
+    when: g_master_hosts is not defined
 
   - fail:
-      msg: This playbook requires g_nodes_group or g_new_nodes_group to be set
-    when: g_nodes_group is not defined and g_new_nodes_group is not defined
+      msg: This playbook requires g_node_hosts or g_new_node_hosts to be set
+    when: g_node_hosts is not defined and g_new_node_hosts is not defined
 
   - fail:
-      msg: This playbook requires g_lb_group to be set
-    when: g_lb_group is not defined
+      msg: This playbook requires g_lb_hosts to be set
+    when: g_lb_hosts is not defined
 
   - name: Evaluate oo_etcd_to_config
     add_host:
@@ -27,7 +27,7 @@
       groups: oo_etcd_to_config
       ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
       ansible_sudo: "{{ g_sudo | default(omit) }}"
-    with_items: groups[g_etcd_group] | default([])
+    with_items: "{{ g_etcd_hosts | default([]) }}"
 
   - name: Evaluate oo_masters_to_config
     add_host:
@@ -35,11 +35,11 @@
       groups: oo_masters_to_config
       ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
       ansible_sudo: "{{ g_sudo | default(omit) }}"
-    with_items: groups[g_masters_group] | default([])
+    with_items: "{{ g_master_hosts | default([]) }}"
 
-  # Use g_new_nodes_group if it exists otherwise g_nodes_group
+  # Use g_new_node_hosts if it exists otherwise g_node_hosts
   - set_fact:
-      g_nodes_to_config: "{{ g_new_nodes_group | default(g_nodes_group | default([])) }}"
+      g_node_hosts_to_config: "{{ g_new_node_hosts | default(g_node_hosts | default([])) }}"
 
   - name: Evaluate oo_nodes_to_config
     add_host:
@@ -47,32 +47,32 @@
       groups: oo_nodes_to_config
       ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
       ansible_sudo: "{{ g_sudo | default(omit) }}"
-    with_items: groups[g_nodes_to_config] | default([])
+    with_items: "{{ g_node_hosts_to_config | default([]) }}"
 
-  # Skip adding the master to oo_nodes_to_config when g_new_nodes_group is
+  # Skip adding the master to oo_nodes_to_config when g_new_node_hosts is
   - name: Evaluate oo_nodes_to_config
     add_host:
       name: "{{ item }}"
       groups: oo_nodes_to_config
       ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
       ansible_sudo: "{{ g_sudo | default(omit) }}"
-    with_items: groups[g_masters_group] | default([])
-    when: g_nodeonmaster | default(false) == true and g_new_nodes_group is not defined
+    with_items: "{{ g_master_hosts | default([]) }}"
+    when: g_nodeonmaster | default(false) == true and g_new_node_hosts is not defined
 
   - name: Evaluate oo_first_etcd
     add_host:
-      name: "{{ groups[g_etcd_group][0] }}"
+      name: "{{ g_etcd_hosts[0] }}"
       groups: oo_first_etcd
       ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
-    when: g_etcd_group in groups and (groups[g_etcd_group] | length) > 0
+    when: g_etcd_hosts|length > 0
 
   - name: Evaluate oo_first_master
     add_host:
-      name: "{{ groups[g_masters_group][0] }}"
+      name: "{{ g_master_hosts[0] }}"
       groups: oo_first_master
       ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
       ansible_sudo: "{{ g_sudo | default(omit) }}"
-    when: g_masters_group in groups and (groups[g_masters_group] | length) > 0
+    when: g_master_hosts|length > 0
 
   - name: Evaluate oo_lb_to_config
     add_host:
@@ -80,4 +80,4 @@
       groups: oo_lb_to_config
       ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
       ansible_sudo: "{{ g_sudo | default(omit) }}"
-    with_items: groups[g_lb_group] | default([])
+    with_items: "{{ g_lb_hosts | default([]) }}"

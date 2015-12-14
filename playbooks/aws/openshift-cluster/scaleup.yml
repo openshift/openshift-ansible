@@ -22,10 +22,10 @@
 
 - include: ../../common/openshift-cluster/scaleup.yml
   vars:
-    g_etcd_group: "{{ 'tag_env-host-type_' ~ cluster_id ~ '-openshift-etcd' }}"
-    g_lb_group: "{{ 'tag_env-host-type_' ~ cluster_id ~ '-openshift-lb' }}"
-    g_masters_group: "{{ 'tag_env-host-type_' ~ cluster_id ~ '-openshift-master' }}"
-    g_new_nodes_group: 'nodes_to_add'
+    g_etcd_hosts:   "{{ (groups['tag_host-type_etcd']|default([]))   | intersect((groups['tag_env_' ~ cluster_id]|default([]))) }}"
+    g_lb_hosts:     "{{ (groups['tag_host-type_lb']|default([]))     | intersect((groups['tag_env_' ~ cluster_id]|default([]))) }}"
+    g_master_hosts: "{{ (groups['tag_host-type_master']|default([])) | intersect((groups['tag_env_' ~ cluster_id]|default([]))) }}"
+    g_new_node_hosts: "{{ groups.nodes_to_add }}"
     g_ssh_user: "{{ hostvars.localhost.g_ssh_user_tmp }}"
     g_sudo: "{{ hostvars.localhost.g_sudo_tmp }}"
     g_nodeonmaster: true

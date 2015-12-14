@@ -4,6 +4,12 @@
   become: no
   connection: local
   gather_facts: no
+  vars:
+    g_etcd_hosts:   "{{ (groups['tag_host-type_etcd']|default([])) | intersect(groups['tag_env_' ~ cluster_id]) }}"
+    g_lb_hosts:     "{{ (groups['tag_host-type_lb']|default([])) | intersect(groups['tag_env_' ~ cluster_id]) }}"
+    g_master_hosts: "{{ (groups['tag_host-type_master']|default([])) | intersect(groups['tag_env_' ~ cluster_id]) }}"
+    g_node_hosts:   "{{ (groups['tag_host-type_node']|default([])) | intersect((groups['tag_env_' ~ cluster_id]|default([]))) }}"
+
   vars_files:
   - vars.yml
   tasks:
@@ -13,9 +19,7 @@
       groups: oo_hosts_to_update
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-    with_items: (groups["tag_env-host-type_{{ cluster_id }}-openshift-master"] | default([]))
-                | union(groups["tag_env-host-type_{{ cluster_id }}-openshift-node"] | default([]))
-                | union(groups["tag_env-host-type_{{ cluster_id }}-openshift-etcd"] | default([]))
+    with_items: "{{ g_master_hosts | union(g_node_hosts) | union(g_etcd_hosts) | default([]) }}"
 
 - include: ../../common/openshift-cluster/update_repos_and_packages.yml
 

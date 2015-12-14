@@ -13,7 +13,7 @@
       groups: oo_masters_for_deploy
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user | default(ansible_ssh_user, true) }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-    with_items: groups["tag_env-host-type-{{ cluster_id }}-openshift-master"] | default([])
+    with_items: "{{ g_master_hosts | default([]) }}"
 
 - name: Deploy OpenShift Services
   hosts: oo_masters_for_deploy
