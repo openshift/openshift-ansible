@@ -1,13 +1,8 @@
 ---
 # tasks file for docker
 - name: Install docker
-  yum: pkg=docker
-  when: ansible_pkg_mgr == "yum"
-
-- name: Install docker
-  dnf: pkg=docker
-  when: ansible_pkg_mgr == "dnf"
-
+  action: "{{ ansible_pkg_mgr }} name=docker state=present"
+  
 - name: enable and start the docker service
   service: name=docker enabled=yes state=started
 

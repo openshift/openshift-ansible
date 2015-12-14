@@ -115,9 +115,10 @@ Configuration
 
 The following options can be passed via the `-o` flag of the `create` command or as environment variables:
 
-* `image_url` (default to `http://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.qcow2`): URL of the QCOW2 image to download
+* `image_url` (default to `http://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.qcow2.xz`): URL of the QCOW2 image to download
 * `image_name` (default to `CentOS-7-x86_64-GenericCloud.qcow2`): Name of the QCOW2 image to boot the VMs on
-* `image_sha256` (default to `e324e3ab1d24a1bbf035ddb365e7f9058c0b454acf48d7aa15c5519fae5998ab`): Expected SHA256 checksum of the downloaded image
+* `image_compression` (default to `xz`): Source QCOW2 compression (only xz supported at this time)
+* `image_sha256` (default to `9461006300d65172f5668d8875f2aad7b54f7ba4e9c5435d65a84a5a2d66e39b`): Expected SHA256 checksum of the downloaded image
 * `skip_image_download` (default to `no`): Skip QCOW2 image download. This requires the `image_name` QCOW2 image to be already present in `$HOME/libvirt-storage-pool-openshift-ansible`
 
 Creating a cluster

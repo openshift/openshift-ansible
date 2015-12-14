@@ -1,16 +1,6 @@
 ---
 - name: Install firewalld packages
-  yum:
-    name: firewalld
-    state: present
-  when: ansible_pkg_mgr == "yum"
-  register: install_result
-
-- name: Install firewalld packages
-  dnf:
-    name: firewalld
-    state: present
-  when: ansible_pkg_mgr == "dnf"
+  action: "{{ ansible_pkg_mgr }} name=firewalld state=present"
   register: install_result
 
 - name: Check if iptables-services is installed

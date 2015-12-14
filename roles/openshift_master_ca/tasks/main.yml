@@ -1,13 +1,6 @@
 ---
 - name: Install the base package for admin tooling
-  yum: pkg={{ openshift.common.service_type }}{{ openshift_version  }} state=present
-  when: ansible_pkg_mgr == "yum"
-  register: install_result
-
-- name: Install the base package for admin tooling
-  dnf: pkg={{ openshift.common.service_type }}{{ openshift_version  }} state=present
-  when: ansible_pkg_mgr == "dnf"
-  register: install_result
+  action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}{{ openshift_version  }} state=present"
 
 - name: Reload generated facts
   openshift_facts:

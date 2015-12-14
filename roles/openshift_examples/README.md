@@ -11,6 +11,13 @@ ansible.
 Requirements
 ------------
 
+Facts
+-----
+
+| Name                       | Default Value | Description                            |
+-----------------------------|---------------|----------------------------------------|
+| openshift_install_examples | true          | Runs the role with the below variables |
+
 Role Variables
 --------------
 
@@ -32,7 +39,7 @@ Example Playbook
 TODO
 ----
 Currently we use `oc create -f` against various files and we accept non zero return code as a success
-if (and only iff) stderr also contains the string 'already exists'. This means that if one object in the file exists already
+if (and only if) stderr also contains the string 'already exists'. This means that if one object in the file exists already
 but others fail to create you won't be aware of the failure. This also means that we do not currently support
 updating existing objects.
 

@@ -2,16 +2,7 @@
 # Install ansible client
 
 - name: Install Ansible
-  yum:
-    pkg: ansible
-    state: installed
-  when: ansible_pkg_mgr == "yum"
-
-- name: Install Ansible
-  dnf:
-    pkg: ansible
-    state: installed
-  when: ansible_pkg_mgr == "dnf"
+  action: "{{ ansible_pkg_mgr }} name=ansible state=present"
 
 - include: config.yml
   vars:

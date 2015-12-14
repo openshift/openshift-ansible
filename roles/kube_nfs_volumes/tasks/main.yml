@@ -1,11 +1,6 @@
 ---
 - name: Install pyparted (RedHat/Fedora)
-  yum: name=pyparted,python-httplib2 state=present
-  when: ansible_pkg_mgr == "yum"
-
-- name: Install pyparted (RedHat/Fedora)
-  dnf: name=pyparted,python-httplib2 state=present
-  when: ansible_pkg_mgr == "dnf"
+  action: "{{ ansible_pkg_mgr }} name=pyparted,python-httplib2 state=present"
 
 - name: partition the drives
   partitionpool: disks={{ disks }} force={{ force }} sizes={{ sizes }}

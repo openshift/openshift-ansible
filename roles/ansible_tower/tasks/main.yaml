@@ -1,6 +1,6 @@
 ---
 - name: install some useful packages
-  yum: name={{ item }}
+  action: "{{ ansible_pkg_mgr }} name={{ item }} state=present"
   with_items:
   - git
   - python-pip

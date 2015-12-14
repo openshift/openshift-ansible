@@ -1,10 +1,2 @@
 ---
-- yum:
-    name: copr-cli
-    state: present
-  when: ansible_pkg_mgr == "yum"
-
-- dnf:
-    name: copr-cli
-    state: present
-  when: ansible_pkg_mgr == "dnf"
+- action: "{{ ansible_pkg_mgr }} name=copr-cli state=present"

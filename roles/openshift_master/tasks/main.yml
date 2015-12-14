@@ -78,14 +78,7 @@
       controller_lease_ttl: "{{ osm_controller_lease_ttl | default(None) }}"
 
 - name: Install Master package
-  yum: pkg={{ openshift.common.service_type }}-master{{ openshift_version  }} state=present
-  when: ansible_pkg_mgr == "yum"
-  register: install_result
-
-- name: Install Master package
-  dnf: pkg={{ openshift.common.service_type }}-master{{ openshift_version  }} state=present
-  when: ansible_pkg_mgr == "dnf"
-  register: install_result
+  action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-master{{ openshift_version  }} state=present"
 
 - name: Re-gather package dependent master facts
   openshift_facts:
@@ -117,13 +110,8 @@
   - restart master controllers
 
 - name: Install httpd-tools if needed
-  yum: pkg=httpd-tools state=present
-  when: (ansible_pkg_mgr == "yum") and (item.kind == 'HTPasswdPasswordIdentityProvider')
-  with_items: openshift.master.identity_providers
-
-- name: Install httpd-tools if needed
-  dnf: pkg=httpd-tools state=present
-  when: (ansible_pkg_mgr == "dnf") and (item.kind == 'HTPasswdPasswordIdentityProvider')
+  action: "{{ ansible_pkg_mgr }} name=httpd-tools state=present"
+  when: (item.kind == 'HTPasswdPasswordIdentityProvider')
   with_items: openshift.master.identity_providers
 
 - name: Ensure htpasswd directory exists
@@ -147,13 +135,11 @@
   template:
     src: atomic-openshift-master-api.service.j2
     dest: /usr/lib/systemd/system/{{ openshift.common.service_type }}-master-api.service
-    force: no
   when: openshift_master_ha | bool and openshift_master_cluster_method == "native"
 - name: Create the controllers service file
   template:
     src: atomic-openshift-master-controllers.service.j2
     dest: /usr/lib/systemd/system/{{ openshift.common.service_type }}-master-controllers.service
-    force: no
   when: openshift_master_ha | bool and openshift_master_cluster_method == "native"
 - name: Create the api env file
   template:
@@ -254,20 +240,17 @@
     master_api_service_status_changed = start_result | changed
   when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
 
-# TODO: fix the ugly workaround of setting ignore_errors
-#       the controllers service tries to start even if it is already started
 - name: Start and enable master controller
   service: name={{ openshift.common.service_type }}-master-controllers enabled=yes state=started
   when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
   register: start_result
-  ignore_errors: yes
 
 - set_fact:
     master_controllers_service_status_changed = start_result | changed
   when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
 
 - name: Install cluster packages
-  action: "{{ansible_pkg_mgr}} pkg=pcs state=present"
+  action: "{{ ansible_pkg_mgr }} name=pcs state=present"
   when: openshift_master_ha | bool and openshift.master.cluster_method == 'pacemaker'
   register: install_result
 

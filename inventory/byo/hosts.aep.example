@@ -21,6 +21,9 @@ ansible_ssh_user=root
 # deployment type valid values are origin, online, atomic-enterprise, and openshift-enterprise
 deployment_type=atomic-enterprise
 
+# Install the openshift examples
+#openshift_install_examples=true
+
 # Enable cluster metrics
 #use_cluster_metrics=true
 

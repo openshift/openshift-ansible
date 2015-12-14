@@ -2,6 +2,7 @@
 - name: Launch instance(s)
   hosts: localhost
   connection: local
+  become: no
   gather_facts: no
   vars_files:
   - vars.yml
