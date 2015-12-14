@@ -56,15 +56,6 @@ class MultiInventory(object):
         else:
             self.config_file = None # expect env vars
 
-
-    def run(self):
-        '''This method checks to see if the local
-           cache is valid for the inventory.
-
-           if the cache is valid; return cache
-           else the credentials are loaded from multi_inventory.yaml or from the env
-           and we attempt to get the inventory from the provider specified.
-        '''
         # load yaml
         if self.config_file and os.path.isfile(self.config_file):
             self.config = self.load_yaml_config()
@@ -90,6 +81,15 @@ class MultiInventory(object):
 
         if self.config.has_key('cache_location'):
             self.cache_path = self.config['cache_location']
+
+    def run(self):
+        '''This method checks to see if the local
+           cache is valid for the inventory.
+
+           if the cache is valid; return cache
+           else the credentials are loaded from multi_inventory.yaml or from the env
+           and we attempt to get the inventory from the provider specified.
+        '''
 
         if self.args.get('refresh_cache', None):
             self.get_inventory()

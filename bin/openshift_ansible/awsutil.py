@@ -46,14 +46,17 @@ class AwsUtil(object):
                 self.alias_lookup[value] = key
 
     @staticmethod
-    def get_inventory(args=None):
+    def get_inventory(args=None, cached=False):
         """Calls the inventory script and returns a dictionary containing the inventory."
 
         Keyword arguments:
         args -- optional arguments to pass to the inventory script
         """
         minv = multi_inventory.MultiInventory(args)
-        minv.run()
+        if cached:
+            minv.get_inventory_from_cache()
+        else:
+            minv.run()
         return minv.result
 
     def get_environments(self):
@@ -168,11 +171,12 @@ class AwsUtil(object):
         host_type = self.resolve_host_type(host_type)
         return "tag_env-host-type_%s-%s" % (env, host_type)
 
-    def get_host_list(self, host_type=None, envs=None):
+    def get_host_list(self, host_type=None, envs=None, version=None, cached=False):
         """Get the list of hosts from the inventory using host-type and environment
         """
+        retval = set([])
         envs = envs or []
-        inv = self.get_inventory()
+        inv = self.get_inventory(cached=cached)
 
         # We prefer to deal with a list of environments
         if issubclass(type(envs), basestring):
@@ -183,29 +187,25 @@ class AwsUtil(object):
 
         if host_type and envs:
             # Both host type and environment were specified
-            retval = []
             for env in envs:
-                env_host_type_tag = self.gen_env_host_type_tag(host_type, env)
-                if env_host_type_tag in inv.keys():
-                    retval += inv[env_host_type_tag]
-            return set(retval)
+                retval.update(inv.get('tag_environment_%s' % env, []))
+            retval.intersection_update(inv.get(self.gen_host_type_tag(host_type), []))
 
-        if envs and not host_type:
+        elif envs and not host_type:
             # Just environment was specified
-            retval = []
             for env in envs:
                 env_tag = AwsUtil.gen_env_tag(env)
                 if env_tag in inv.keys():
-                    retval += inv[env_tag]
-            return set(retval)
+                    retval.update(inv.get(env_tag, []))
 
-        if host_type and not envs:
+        elif host_type and not envs:
             # Just host-type was specified
-            retval = []
             host_type_tag = self.gen_host_type_tag(host_type)
             if host_type_tag in inv.keys():
-                retval = inv[host_type_tag]
-            return set(retval)
+                retval.update(inv.get(host_type_tag, []))
 
-        # We should never reach here!
-        raise ArgumentError("Invalid combination of parameters")
+        # If version is specified then return only hosts in that version
+        if version:
+            retval.intersection_update(inv.get('oo_version_%s' % version, []))
+
+        return retval
