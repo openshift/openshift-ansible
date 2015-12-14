@@ -466,3 +466,50 @@ If you want to use default with variables that evaluate to false you have to set
 In other words, normally the `default` filter will only replace the value if it's undefined. By setting the second parameter to `true`, it will also replace the value if it defaults to a false value in python, so None, empty list, empty string, etc.
 
 This is almost always more desirable than an empty list, string, etc.
+
+=== Yum and DNF
+'''
+[cols="2v,v"]
+|===
+| **Rule**
+| Package installation MUST use ansible action module to abstract away dnf/yum.
+| Package installation MUST use name= and state=present rather than pkg= and state=installed respectively.
+|===
+[cols="2v,v"]
+|===
+| **Rule**
+| Package installation MUST use name= and state=present rather than pkg= and state=installed respectively.
+|===
+
+This is done primarily because if you're registering the result of the
+installation and you have two conditional tasks based on whether or not yum or
+dnf are in use you'll end up inadvertently overwriting the value. It also
+reduces duplication. name= and state=present are common between dnf and yum
+modules.
+
+.Bad:
+[source,yaml]
+----
+---
+# tasks.yml
+- name: Install etcd (for etcdctl)
+  yum: name=etcd state=latest"
+  when: "ansible_pkg_mgr == yum"
+  register: install_result
+
+- name: Install etcd (for etcdctl)
+  dnf: name=etcd state=latest"
+  when: "ansible_pkg_mgr == dnf"
+  register: install_result
+----
+
+
+.Good:
+[source,yaml]
+----
+---
+# tasks.yml
+- name: Install etcd (for etcdctl)
+  action: "{{ ansible_pkg_mgr }} name=etcd state=latest"
+  register: install_result
+  ----

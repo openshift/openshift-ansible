@@ -1,6 +1,3 @@
 ---
-- name: refresh yum cache
-  command: yum clean all
-
-- name: refresh dnf cache
-  command: dnf clean all
+- name: refresh cache
+  command: "{{ ansible_pkg_mgr }} clean all"

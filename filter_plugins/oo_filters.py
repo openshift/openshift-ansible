@@ -433,6 +433,7 @@ class FilterModule(object):
             '''
             for tag in tags:
                 # Skip tag_env-host-type to avoid ambiguity with tag_env
+                # Removing env-host-type tag but leaving this here
                 if tag[:17] == 'tag_env-host-type':
                     continue
                 if tag[:len(key)+4] == 'tag_' + key:

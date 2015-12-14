@@ -1,6 +1,6 @@
 ---
 - name: nickhammond.logrotate | Install logrotate
-  action: "{{ansible_pkg_mgr}} pkg=logrotate state=present"
+  action: "{{ ansible_pkg_mgr }} name=logrotate state=present"
 
 - name: nickhammond.logrotate | Setup logrotate.d scripts
   template:

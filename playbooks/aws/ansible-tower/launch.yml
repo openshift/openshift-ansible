@@ -2,6 +2,7 @@
 - name: Launch instance(s)
   hosts: localhost
   connection: local
+  become: no
   gather_facts: no
 
   vars:
@@ -71,8 +72,8 @@
 
   tasks:
 
-    - name: Yum update
-      yum: name=* state=latest
+    - name: Update All Things
+      action: "{{ ansible_pkg_mgr }} name=* state=latest"
 
 # Apply the configs, seprate so that just the configs can be run by themselves
 - include: config.yml

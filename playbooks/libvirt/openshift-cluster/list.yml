@@ -1,6 +1,8 @@
 ---
 - name: Generate oo_list_hosts group
   hosts: localhost
+  become: no
+  connection: local
   gather_facts: no
   vars_files:
   - vars.yml
@@ -21,6 +23,8 @@
 
 - name: List Hosts
   hosts: localhost
+  become: no
+  connection: local
   gather_facts: no
   vars_files:
   - vars.yml

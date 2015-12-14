@@ -8,11 +8,13 @@ deployment_vars:
   origin:
     image:
       url:    "{{ lookup('oo_option', 'image_url') |
-                  default('http://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.qcow2', True) }}"
+                  default('http://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.qcow2.xz', True) }}"
+      compression:   "{{ lookup('oo_option', 'image_compression') |
+                         default('xz', True) }}"
       name:   "{{ lookup('oo_option', 'image_name') |
                   default('CentOS-7-x86_64-GenericCloud.qcow2', True) }}"
       sha256: "{{ lookup('oo_option', 'image_sha256') |
-                  default('e324e3ab1d24a1bbf035ddb365e7f9058c0b454acf48d7aa15c5519fae5998ab', True) }}"
+                  default('9461006300d65172f5668d8875f2aad7b54f7ba4e9c5435d65a84a5a2d66e39b', True) }}"
     ssh_user: openshift
     sudo: yes
   online:

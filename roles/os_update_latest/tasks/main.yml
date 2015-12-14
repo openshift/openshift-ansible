@@ -1,8 +1,3 @@
 ---
 - name: Update all packages
-  yum: name=* state=latest
-  when: ansible_pkg_mgr == "yum"
-
-- name: Update all packages
-  dnf: name=* state=latest
-  when: ansible_pkg_mgr == "dnf"
+  action: "{{ ansible_pkg_mgr }} name=* state=latest"
