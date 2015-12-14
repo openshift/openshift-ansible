@@ -1,0 +1,78 @@
+---
+- include: evaluate_groups.yml
+# TODO: verify this is an HA environment
+# TODO: fork for pacemaker vs haproxy (based on?)
+
+- name: Validate configuration for rolling restart
+  hosts: oo_masters_to_config
+  tasks:
+  - set_fact:
+      openshift_rolling_restart_mode: "{{ openshift_rolling_restart_mode | default('services') }}"
+  - fail:
+      msg: "openshift_rolling_restart_mode must be set to either 'services' or 'system'"
+    when: openshift_rolling_restart_mode is defined and openshift_rolling_restart_mode not in ["services", "system"]
+
+# Creating a temp file on localhost, we then check each system that will
+# be rebooted to see if that file exists, if so we know we're running
+# ansible on a machine that needs a reboot, and we need to error out.
+- name: Create temp file on localhost
+  hosts: localhost
+  connection: local
+  become: no
+  gather_facts: no
+  tasks:
+  - local_action: command mktemp
+    register: mktemp
+    changed_when: False
+
+- name: Check if temp file exists on any masters
+  hosts: oo_masters_to_config
+  tasks:
+  - stat: path="{{ hostvars.localhost.mktemp.stdout }}"
+    register: exists
+
+- name: Cleanup temp file on localhost
+  hosts: localhost
+  connection: local
+  become: no
+  gather_facts: no
+  tasks:
+  - file: path="{{ hostvars.localhost.mktemp.stdout }}" state=absent
+
+- name: Fail if restarting the system where ansible is running
+  hosts: oo_masters_to_config
+  any_errors_fatal: true
+  tasks:
+  - fail: msg="Cannot run playbook on a host that will be restarted."
+    when: exists.stat.exists
+
+- name: Restart Masters
+  hosts: oo_masters_to_config
+  serial: 1
+  roles:
+  - openshift_facts
+  tasks:
+  - name: Restart master system
+    # https://github.com/ansible/ansible/issues/10616
+    shell: sleep 2 && shutdown -r now "OpenShift Ansible master rolling restart"
+    async: 1
+    poll: 0
+    ignore_errors: true
+    become: yes
+    when: openshift_rolling_restart_mode == 'system'
+  - name: Restart master services
+    service:
+      name: "{{ openshift.common.service_type }}-master-api"
+      state: restarted
+    # NOTE: no need to check openshift_master_ha here, we know it must be,
+    # thus the api service is the one we restart.
+    when: openshift_rolling_restart_mode == 'services'
+
+  - name: Wait for master API to come back online
+    become: no
+    local_action:
+      module: wait_for
+        host="{{ inventory_hostname }}"
+        state=started
+        delay=10
+        port=8443  # TODO: should this be made a master host variable?

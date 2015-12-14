@@ -1,0 +1,7 @@
+---
+- include: ../../common/openshift-cluster/restart.yml
+  vars:
+    g_etcd_hosts: "{{ groups.etcd | default([]) }}"
+    g_master_hosts: "{{ groups.masters | default([]) }}"
+    g_node_hosts: "{{ groups.nodes | default([]) }}"
+    g_lb_hosts: "{{ groups.lb | default([]) }}"
