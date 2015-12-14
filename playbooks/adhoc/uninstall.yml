@@ -47,40 +47,8 @@
         - origin-node
         - pcsd
 
-    - yum: name={{ item }} state=absent
-      when: ansible_pkg_mgr == "yum" and not is_atomic | bool
-      with_items:
-        - atomic-enterprise
-        - atomic-enterprise-master
-        - atomic-enterprise-node
-        - atomic-enterprise-sdn-ovs
-        - atomic-openshift
-        - atomic-openshift-clients
-        - atomic-openshift-master
-        - atomic-openshift-node
-        - atomic-openshift-sdn-ovs
-        - corosync
-        - etcd
-        - openshift
-        - openshift-master
-        - openshift-node
-        - openshift-sdn
-        - openshift-sdn-ovs
-        - openvswitch
-        - origin
-        - origin-clients
-        - origin-master
-        - origin-node
-        - origin-sdn-ovs
-        - pacemaker
-        - pcs
-        - tuned-profiles-atomic-enterprise-node
-        - tuned-profiles-atomic-openshift-node
-        - tuned-profiles-openshift-node
-        - tuned-profiles-origin-node
-
-    - dnf: name={{ item }} state=absent
-      when: ansible_pkg_mgr == "dnf" and not is_atomic | bool
+    - action: "{{ ansible_pkg_mgr }} name={{ item }} state=absent"
+      when: not is_atomic | bool
       with_items:
         - atomic-enterprise
         - atomic-enterprise-master

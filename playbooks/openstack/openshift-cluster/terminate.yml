@@ -1,5 +1,6 @@
 - name: Terminate instance(s)
   hosts: localhost
+  become: no
   connection: local
   gather_facts: no
   vars_files:
@@ -25,6 +26,7 @@
             default('no', True) | lower in ['no', 'false']
 
 - hosts: localhost
+  become: no
   connection: local
   gather_facts: no
   vars_files:

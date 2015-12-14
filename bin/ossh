@@ -127,7 +127,7 @@ class Ossh(object):
 
         # attempt to select the correct environment if specified
         if self.env:
-            results = filter(lambda result: result[1]['ec2_tag_environment'] == self.env, results)
+            results = filter(lambda result: result[1]['ec2_tag_env'] == self.env, results)
 
         if results:
             return results
@@ -156,7 +156,7 @@ class Ossh(object):
                     name = server_info['ec2_tag_Name']
                     ec2_id = server_info['ec2_id']
                     ip = server_info['ec2_ip_address']
-                    print '{ec2_tag_Name:<35} {ec2_tag_environment:<8} {ec2_id:<15} {ec2_ip_address:<18} {ec2_private_ip_address}'.format(**server_info)
+                    print '{ec2_tag_Name:<35} {ec2_tag_env:<8} {ec2_id:<15} {ec2_ip_address:<18} {ec2_private_ip_address}'.format(**server_info)
 
                 if limit:
                     print
@@ -169,7 +169,7 @@ class Ossh(object):
                     name = server_info['ec2_tag_Name']
                     ec2_id = server_info['ec2_id']
                     ip = server_info['ec2_ip_address']
-                    print '{ec2_tag_Name:<35} {ec2_tag_environment:<8} {ec2_id:<15} {ec2_ip_address:<18} {ec2_private_ip_address}'.format(**server_info)
+                    print '{ec2_tag_Name:<35} {ec2_tag_env:<8} {ec2_id:<15} {ec2_ip_address:<18} {ec2_private_ip_address}'.format(**server_info)
 
     def ssh(self):
         '''SSH to a specified host
@@ -195,7 +195,7 @@ class Ossh(object):
             if len(results) > 1:
                 print "Multiple results found for %s." % self.host
                 for result in results:
-                    print "{ec2_tag_Name:<35} {ec2_tag_environment:<5} {ec2_id:<10}".format(**result[1])
+                    print "{ec2_tag_Name:<35} {ec2_tag_env:<5} {ec2_id:<10}".format(**result[1])
                 return # early exit, too many results
 
             # Assume we have one and only one.

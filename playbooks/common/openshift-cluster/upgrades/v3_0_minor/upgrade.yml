@@ -11,7 +11,7 @@
     openshift_version: "{{ openshift_pkg_version | default('') }}"
   tasks:
     - name: Upgrade master packages
-      yum: pkg={{ openshift.common.service_type }}-master{{ openshift_version }} state=latest
+      action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-master{{ openshift_version }} state=latest"
     - name: Restart master services
       service: name="{{ openshift.common.service_type}}-master" state=restarted
 
@@ -21,7 +21,7 @@
     openshift_version: "{{ openshift_pkg_version | default('') }}"
   tasks:
     - name: Upgrade node packages
-      yum: pkg={{ openshift.common.service_type }}-node{{ openshift_version }} state=latest
+      action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-node{{ openshift_version }} state=latest"
     - name: Restart node services
       service: name="{{ openshift.common.service_type }}-node" state=restarted
 

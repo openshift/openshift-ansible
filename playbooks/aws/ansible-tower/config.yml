@@ -2,6 +2,8 @@
 - name: "populate oo_hosts_to_config host group if needed"
   hosts: localhost
   gather_facts: no
+  connection: local
+  become: no
   tasks:
   - name: Evaluate oo_host_group_exp if it's set
     add_host: "name={{ item }} groups=oo_hosts_to_config"

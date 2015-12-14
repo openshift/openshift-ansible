@@ -1,6 +1,6 @@
 ---
 - name: Install python-ansible-tower-cli
-  yum: name=python-ansible-tower-cli
+  action: "{{ ansible_pkg_mgr }} name=python-ansible-tower-cli state=present"
 
 - template:
     src: tower_cli.cfg.j2

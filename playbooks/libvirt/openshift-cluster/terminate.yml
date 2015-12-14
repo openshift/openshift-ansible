@@ -3,6 +3,8 @@
 
 - name: Terminate instance(s)
   hosts: localhost
+  become: no
+  connection: local
   gather_facts: no
   vars_files:
   - vars.yml
@@ -28,6 +30,8 @@
 
 - name: Terminate instance(s)
   hosts: localhost
+  become: no
+  connection: local
   gather_facts: no
   vars_files:
   - vars.yml

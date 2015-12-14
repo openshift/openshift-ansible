@@ -1,9 +1,9 @@
 ---
 - include: ../../../../common/openshift-cluster/upgrades/v3_0_minor/upgrade.yml
   vars:
-    g_etcd_group: "{{ 'etcd' }}"
-    g_masters_group: "{{ 'masters' }}"
-    g_nodes_group: "{{ 'nodes' }}"
-    g_lb_group: "{{ 'lb' }}"
+    g_etcd_hosts: "{{ groups.etcd | default([]) }}"
+    g_master_hosts: "{{ groups.masters | default([]) }}"
+    g_node_hosts: "{{ groups.nodes | default([]) }}"
+    g_lb_hosts: "{{ groups.lb | default([]) }}"
     openshift_cluster_id: "{{ cluster_id | default('default') }}"
     openshift_deployment_type: "{{ deployment_type }}"

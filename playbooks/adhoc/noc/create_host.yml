@@ -1,6 +1,8 @@
 ---
 - name: 'Create a host object in zabbix'
   hosts: localhost
+  connection: local
+  become: no
   gather_facts: no
   roles:
     - os_zabbix
@@ -23,6 +25,8 @@
 #ansible-playbook -e 'oo_desc=kwoodson test' -e 'oo_name=kwoodson test name' -e 'oo_start=1435715357' -e 'oo_stop=1435718985' -e 'oo_hostids=11549' create_maintenance.yml
 - name: 'Create a host object in zabbix'
   hosts: localhost
+  connection: local
+  become: no
   gather_facts: no
   roles:
     - os_zabbix
