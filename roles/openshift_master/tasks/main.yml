@@ -228,7 +228,7 @@
   register: start_result
 
 - set_fact:
-    master_service_status_changed = start_result | changed
+    master_service_status_changed: start_result | changed
   when: not openshift_master_ha | bool
 
 - name: Start and enable master api
@@ -237,7 +237,7 @@
   register: start_result
 
 - set_fact:
-    master_api_service_status_changed = start_result | changed
+    master_api_service_status_changed: start_result | changed
   when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
 
 - name: Start and enable master controller
@@ -246,7 +246,7 @@
   register: start_result
 
 - set_fact:
-    master_controllers_service_status_changed = start_result | changed
+    master_controllers_service_status_changed: start_result | changed
   when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
 
 - name: Install cluster packages
