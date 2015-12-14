@@ -51,6 +51,7 @@
           console_url: "{{ openshift_master_console_url | default(None) }}"
           console_use_ssl: "{{ openshift_master_console_use_ssl | default(None) }}"
           public_console_url: "{{ openshift_master_public_console_url | default(None) }}"
+          public_console_api_url: "{{ openshift_master_public_console_api_url | default(None) }}"
   - name: Check status of external etcd certificatees
     stat:
       path: "{{ openshift.common.config_base }}/master/{{ item }}"

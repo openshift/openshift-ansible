@@ -507,6 +507,10 @@ def set_url_facts_if_unset(facts):
                                                                console_public_hostname,
                                                                console_port,
                                                                console_path)
+        if 'public_console_api_url' not in facts['master']:
+            facts['master']['public_console_api_url'] = format_url(api_use_ssl,
+                                                                   api_public_hostname,
+                                                                   api_port)
     return facts
 
 def set_aggregate_facts(facts):
