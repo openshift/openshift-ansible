@@ -12,7 +12,7 @@
 
 - name: Create the master certificates if they do not already exist
   command: >
-    {{ openshift.common.admin_binary }} create-master-certs
+    {{ openshift.common.admin_binary }} {{ 'ca create-master-certs' if (openshift.common.version_greater_than_3_1_or_1_1 | bool) else 'create-master-certs' }}
       --hostnames={{ master_hostnames | join(',') }}
       --master={{ openshift.master.api_url }}
       --public-master={{ openshift.master.public_api_url }}
