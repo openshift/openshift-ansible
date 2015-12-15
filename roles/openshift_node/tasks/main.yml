@@ -131,4 +131,4 @@
   register: start_result
 
 - set_fact:
-    node_service_status_changed = start_result | changed
+    node_service_status_changed: start_result | changed
