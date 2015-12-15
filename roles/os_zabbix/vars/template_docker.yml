@@ -12,6 +12,11 @@ g_template_docker:
     - Docker Daemon
     value_type: int
 
+  - key: docker.container.dns.resolution
+    applications:
+    - Docker Daemon
+    value_type: int
+
   - key: docker.storage.is_loopback
     applications:
     - Docker Storage
@@ -60,6 +65,11 @@ g_template_docker:
   - name: 'docker.ping failed on {HOST.NAME}'
     expression: '{Template Docker:docker.ping.max(#3)}<1'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_docker_ping.asciidoc'
+    priority: high
+
+  - name: 'docker.container.dns.resolution failed on {HOST.NAME}'
+    expression: '{Template Docker:docker.container.dns.resolution.max(#3)}>0'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_docker_dns.asciidoc'
     priority: high
 
   - name: 'Docker storage is using LOOPBACK on {HOST.NAME}'
