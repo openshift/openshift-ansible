@@ -26,4 +26,4 @@
   openshift_facts:
     role: common
     local_facts:
-      is_containerized: "{{ openshift_containerized | default(None) }}"
+      is_containerized: "{{ containerized | default(None) }}"
