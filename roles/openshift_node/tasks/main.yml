@@ -50,7 +50,7 @@
     src: node.yaml.v1.j2
     backup: true
   notify:
-  - restart node
+    - restart node
 
 - name: Configure Node settings
   lineinfile:
@@ -63,65 +63,7 @@
     - regex: '^CONFIG_FILE='
       line: "CONFIG_FILE={{ openshift_node_config_file }}"
   notify:
-  - restart node
-
-- stat: path=/etc/sysconfig/docker
-  register: docker_check
-
-  # TODO: Enable secure registry when code available in origin
-- name: Secure Registry and Logs Options
-  lineinfile:
-    dest: /etc/sysconfig/docker
-    regexp: '^OPTIONS=.*$'
-    line: "OPTIONS='--insecure-registry={{ openshift.node.portal_net }} \
-{% if ansible_selinux and ansible_selinux.status == '''enabled''' %}--selinux-enabled{% endif %} \
-{% if openshift.node.docker_log_driver is defined  %} --log-driver {{ openshift.node.docker_log_driver }}  {% endif %} \
-{% if openshift.node.docker_log_options is defined %}   {{ openshift.node.docker_log_options |  oo_split() | oo_prepend_strings_in_list('--log-opt ') | join(' ')}}  {% endif %} '"
-  when: docker_check.stat.isreg
-  notify:
-    - restart docker
-
-- set_fact:
-    docker_additional_registries: "{{ lookup('oo_option', 'docker_additional_registries')
-                                      | oo_split() | union(['registry.access.redhat.com'])
-                                      | difference(['']) }}"
-  when: openshift.common.deployment_type in ['enterprise', 'openshift-enterprise', 'atomic-enterprise']
-- set_fact:
-    docker_additional_registries: "{{ lookup('oo_option', 'docker_additional_registries')
-                                      | oo_split() | difference(['']) }}"
-  when: openshift.common.deployment_type not in ['enterprise', 'openshift-enterprise', 'atomic-enterprise']
-
-- name: Add personal registries
-  lineinfile:
-    dest: /etc/sysconfig/docker
-    regexp: '^ADD_REGISTRY=.*$'
-    line: "ADD_REGISTRY='{{ docker_additional_registries
-                            | oo_prepend_strings_in_list('--add-registry ') | join(' ') }}'"
-  when: docker_check.stat.isreg and docker_additional_registries
-  notify:
-    - restart docker
-
-- name: Block registries
-  lineinfile:
-    dest: /etc/sysconfig/docker
-    regexp: '^BLOCK_REGISTRY=.*$'
-    line: "BLOCK_REGISTRY='{{ lookup('oo_option', 'docker_blocked_registries') | oo_split()
-                              | oo_prepend_strings_in_list('--block-registry ') | join(' ') }}'"
-  when: docker_check.stat.isreg and
-        lookup('oo_option', 'docker_blocked_registries') != ''
-  notify:
-    - restart docker
-
-- name: Grant access to additional insecure registries
-  lineinfile:
-    dest: /etc/sysconfig/docker
-    regexp: '^INSECURE_REGISTRY=.*'
-    line: "INSECURE_REGISTRY='{{ lookup('oo_option', 'docker_insecure_registries') | oo_split()
-                              | oo_prepend_strings_in_list('--insecure-registry ') | join(' ') }}'"
-  when: docker_check.stat.isreg and
-        lookup('oo_option', 'docker_insecure_registries') != ''
-  notify:
-    - restart docker
+    - restart node
 
 - name: Additional storage plugin configuration
   include: storage_plugins/main.yml
