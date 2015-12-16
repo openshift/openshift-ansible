@@ -16,6 +16,7 @@
           hostname: "{{ openshift_hostname | default(None) }}"
           public_hostname: "{{ openshift_public_hostname | default(None) }}"
           deployment_type: "{{ openshift_deployment_type }}"
+          use_flannel: "{{ openshift_use_flannel | default(None) }}"
       - role: node
         local_facts:
           labels: "{{ openshift_node_labels | default(None) }}"
