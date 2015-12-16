@@ -148,7 +148,7 @@
 - name: Install httpd-tools if needed
   action: "{{ ansible_pkg_mgr }} name=httpd-tools state=present"
   when: (item.kind == 'HTPasswdPasswordIdentityProvider') and
-        not openshift.common.is_containerized | bool
+        not openshift.common.is_atomic | bool
   with_items: openshift.master.identity_providers
 
 - name: Ensure htpasswd directory exists
