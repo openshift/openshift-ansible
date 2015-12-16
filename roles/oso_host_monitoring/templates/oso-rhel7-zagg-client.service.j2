@@ -42,7 +42,7 @@ ExecStart=/usr/bin/docker run --name {{ osohm_zagg_client }}                    
            -v /etc/localtime:/etc/localtime                                                  \
            -v /run/pcp:/run/pcp                                                              \
            -v /var/run/docker.sock:/var/run/docker.sock                                      \
-           -v /var/run/openvswitch/db.sock:/var/run/openvswitch/db.sock                      \
+           -v /var/run/openvswitch:/var/run/openvswitch                      \
 {% if hostvars[inventory_hostname]['ec2_tag_host-type'] == 'master' %}
            -v /etc/openshift/master/admin.kubeconfig:/etc/openshift/master/admin.kubeconfig  \
            -v /etc/openshift/master/master.etcd-client.crt:/etc/openshift/master/master.etcd-client.crt \
