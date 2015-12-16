@@ -1,14 +1,16 @@
 #!/usr/bin/env python
+'''
+Ohi = Openshift Host Inventory
+
+This script provides an easy way to look at your host inventory.
+
+This depends on multi_inventory being setup correctly.
+'''
 # vim: expandtab:tabstop=4:shiftwidth=4
 
 import argparse
-import traceback
 import sys
 import os
-import re
-import tempfile
-import time
-import subprocess
 import ConfigParser
 
 from openshift_ansible import awsutil
@@ -20,6 +22,9 @@ CONFIG_HOST_TYPE_ALIAS_SECTION = 'host_type_aliases'
 
 
 class Ohi(object):
+    '''
+        Class for managing openshift host inventory
+    '''
     def __init__(self):
         self.host_type_aliases = {}
         self.file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)))
@@ -35,6 +40,10 @@ class Ohi(object):
         self.aws = awsutil.AwsUtil(self.host_type_aliases)
 
     def run(self):
+        '''
+            Call into awsutil and retrieve the desired hosts and environments
+        '''
+
         if self.args.list_host_types:
             self.aws.print_host_types()
             return 0
@@ -43,18 +52,24 @@ class Ohi(object):
         if self.args.host_type is not None and \
            self.args.env is not None:
             # Both env and host-type specified
-            hosts = self.aws.get_host_list(host_type=self.args.host_type, \
-                                           envs=self.args.env)
+            hosts = self.aws.get_host_list(host_type=self.args.host_type,
+                                           envs=self.args.env,
+                                           version=self.args.openshift_version,
+                                           cached=self.args.cache_only)
 
         if self.args.host_type is None and \
            self.args.env is not None:
             # Only env specified
-            hosts = self.aws.get_host_list(envs=self.args.env)
+            hosts = self.aws.get_host_list(envs=self.args.env,
+                                           version=self.args.openshift_version,
+                                           cached=self.args.cache_only)
 
         if self.args.host_type is not None and \
            self.args.env is None:
             # Only host-type specified
-            hosts = self.aws.get_host_list(host_type=self.args.host_type)
+            hosts = self.aws.get_host_list(host_type=self.args.host_type,
+                                           version=self.args.openshift_version,
+                                           cached=self.args.cache_only)
 
         if hosts is None:
             # We weren't able to determine what they wanted to do
@@ -69,6 +84,9 @@ class Ohi(object):
         return 0
 
     def parse_config_file(self):
+        '''
+            Parse the config file for ohi
+        '''
         if os.path.isfile(self.config_path):
             config = ConfigParser.ConfigParser()
             config.read(self.config_path)
@@ -85,23 +103,27 @@ class Ohi(object):
 
         parser = argparse.ArgumentParser(description='OpenShift Host Inventory')
 
-        parser.add_argument('--list-host-types', default=False, action='store_true',
-                       help='List all of the host types')
+        parser.add_argument('--list-host-types', default=False, action='store_true', help='List all of the host types')
 
-        parser.add_argument('-e', '--env', action="store",
-                       help="Which environment to use")
+        parser.add_argument('-e', '--env', action="store", help="Which environment to use")
 
-        parser.add_argument('-t', '--host-type', action="store",
-                       help="Which host type to use")
+        parser.add_argument('-t', '--host-type', action="store", help="Which host type to use")
 
-        parser.add_argument('-l', '--user', action='store', default=None,
-                               help='username')
+        parser.add_argument('-l', '--user', action='store', default=None, help='username')
+
+        parser.add_argument('-c', '--cache-only', action='store_true', default=False,
+                            help='Retrieve the host inventory by cache only. Default is false.')
+
+        parser.add_argument('-o', '--openshift-version', action='store', default='2',
+                            help='Specify the openshift version. Default is 2')
 
 
         self.args = parser.parse_args()
 
-
-if __name__ == '__main__':
+def main():
+    '''
+    Ohi will do its work here
+    '''
     if len(sys.argv) == 1:
         print "\nError: No options given. Use --help to see the available options\n"
         sys.exit(0)
@@ -110,5 +132,9 @@ if __name__ == '__main__':
         ohi = Ohi()
         exitcode = ohi.run()
         sys.exit(exitcode)
-    except ArgumentError as e:
-        print "\nError: %s\n" % e.message
+    except ArgumentError as err:
+        print "\nError: %s\n" % err.message
+
+if __name__ == '__main__':
+    main()
+

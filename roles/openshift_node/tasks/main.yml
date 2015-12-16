@@ -85,11 +85,11 @@
     docker_additional_registries: "{{ lookup('oo_option', 'docker_additional_registries')
                                       | oo_split() | union(['registry.access.redhat.com'])
                                       | difference(['']) }}"
-  when: openshift.common.deployment_type == 'enterprise'
+  when: openshift.common.deployment_type in ['enterprise', 'openshift-enterprise', 'atomic-enterprise']
 - set_fact:
     docker_additional_registries: "{{ lookup('oo_option', 'docker_additional_registries')
                                       | oo_split() | difference(['']) }}"
-  when: openshift.common.deployment_type != 'enterprise'
+  when: openshift.common.deployment_type not in ['enterprise', 'openshift-enterprise', 'atomic-enterprise']
 
 - name: Add personal registries
   lineinfile:
@@ -131,4 +131,4 @@
   register: start_result
 
 - set_fact:
-    node_service_status_changed = start_result | changed
+    node_service_status_changed: start_result | changed
