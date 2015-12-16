@@ -269,6 +269,14 @@ g_template_openshift_master:
     - 'Openshift Master process not running on {HOST.NAME}'
     priority: avg
 
+  - name: 'Application creation has failed multiple times in the last hour on {HOST.NAME}'
+    expression: '{Template Openshift Master:create_app.sum(1h)}>3'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_create_app.asciidoc'
+    dependencies:
+    - 'Openshift Master process not running on {HOST.NAME}'
+    description: The application create loop has failed 4 or more times in the last hour
+    priority: avg
+
   - name: 'Openshift Master API health check is failing on {HOST.NAME}'
     expression: '{Template Openshift Master:openshift.master.api.healthz.max(#3)}<1'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'

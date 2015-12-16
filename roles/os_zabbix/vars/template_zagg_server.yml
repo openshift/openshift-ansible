@@ -7,7 +7,12 @@ g_template_zagg_server:
     - Zagg Server
     value_type: int
 
-  - key: zagg.server.processor.errors
+  - key: zagg.server.metrics.errors
+    applications:
+    - Zagg Server
+    value_type: int
+
+  - key: zagg.server.heartbeat.errors
     applications:
     - Zagg Server
     value_type: int
@@ -18,8 +23,13 @@ g_template_zagg_server:
     value_type: int
 
   ztriggers:
-  - name: 'Error sending metrics on {HOST.NAME}'
-    expression: '{Template Zagg Server:zagg.server.processor.errors.min(#3)}>0'
+  - name: 'Error processing metrics on {HOST.NAME}'
+    expression: '{Template Zagg Server:zagg.server.metrics.errors.min(#3)}>0'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/zagg_server.asciidoc'
+    priority: average
+
+  - name: 'Error processing heartbeats on {HOST.NAME}'
+    expression: '{Template Zagg Server:zagg.server.heartbeat.errors.min(#3)}>0'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/zagg_server.asciidoc'
     priority: average
 
