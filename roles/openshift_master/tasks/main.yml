@@ -258,7 +258,7 @@
     line: "{{ item.line }}"
   with_items:
     - regex: '^OPTIONS='
-      line: "OPTIONS=--loglevel={{ openshift.master.debug_level }} --listen=https://0.0.0.0:8444"
+      line: "OPTIONS=--loglevel={{ openshift.master.debug_level }} --listen=https://{{ openshift.master.bind_addr }}:{{ openshift.master.controllers_port }}"
     - regex: '^CONFIG_FILE='
       line: "CONFIG_FILE={{ openshift_master_config_file }}"
   when: openshift_master_ha | bool and openshift_master_cluster_method == "native"
