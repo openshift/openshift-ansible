@@ -25,7 +25,7 @@
     g_sudo: "{{ hostvars.localhost.g_sudo_tmp }}"
     g_nodeonmaster: true
     openshift_cluster_id: "{{ cluster_id }}"
-    openshift_debug_level: 2
+    openshift_debug_level: "{{ lookup('oo_option', 'openshift_debug_level') | default('2', True) }}"
     openshift_deployment_type: "{{ deployment_type }}"
     openshift_hostname: "{{ gce_private_ip }}"
     openshift_use_openshift_sdn: "{{ hostvars.localhost.use_sdn  }}"

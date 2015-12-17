@@ -21,7 +21,7 @@
   - role: node
     local_facts:
       annotations: "{{ openshift_node_annotations | default(none) }}"
-      debug_level: "{{ openshift_node_debug_level | default(openshift.common.debug_level) }}"
+      debug_level: "{{ lookup('oo_option', 'openshift_node_debug_level') | default(openshift.common.debug_level, True) }}"
       docker_log_driver:  "{{ lookup( 'oo_option' , 'docker_log_driver'  )  | default('',True) }}"
       docker_log_options: "{{ lookup( 'oo_option' , 'docker_log_options' )  | default('',True) }}"
       iptables_sync_period: "{{ openshift_node_iptables_sync_period | default(None) }}"
