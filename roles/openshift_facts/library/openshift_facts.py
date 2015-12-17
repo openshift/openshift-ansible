@@ -463,6 +463,7 @@ def set_url_facts_if_unset(facts):
     if 'master' in facts:
         api_use_ssl = facts['master']['api_use_ssl']
         api_port = facts['master']['api_port']
+        controllers_port = facts['master']['controllers_port']
         console_use_ssl = facts['master']['console_use_ssl']
         console_port = facts['master']['console_port']
         console_path = facts['master']['console_path']
@@ -1156,7 +1157,7 @@ class OpenShiftFacts(object):
         defaults['common'] = common
 
         if 'master' in roles:
-            master = dict(api_use_ssl=True, api_port='8443',
+            master = dict(api_use_ssl=True, api_port='8443', controllers_port='8444',
                           console_use_ssl=True, console_path='/console',
                           console_port='8443', etcd_use_ssl=True, etcd_hosts='',
                           etcd_port='4001', portal_net='172.30.0.0/16',
