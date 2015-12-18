@@ -1,4 +1,5 @@
 ---
+debug_level: 2
 openstack_infra_heat_stack:     "{{ lookup('oo_option', 'infra_heat_stack' ) |
                                     default('files/heat_stack.yaml',         True) }}"
 openstack_network_cidr:         "{{ lookup('oo_option', 'net_cidr'         ) |

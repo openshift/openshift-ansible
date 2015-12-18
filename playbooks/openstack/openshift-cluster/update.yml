@@ -1,8 +1,8 @@
 ---
 - name: Populate oo_hosts_to_update group
   hosts: localhost
-  become: no
   connection: local
+  become: no
   gather_facts: no
   vars_files:
   - vars.yml
@@ -14,7 +14,7 @@
       groups: oo_hosts_to_update
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-    with_items: "{{ master_hosts | union(node_hosts) | union(etcd_hosts) | default([]) }}"
+    with_items: "{{ g_all_hosts | default([]) }}"
 
 - include: ../../common/openshift-cluster/update_repos_and_packages.yml
 
