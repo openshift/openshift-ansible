@@ -8,6 +8,12 @@ assetConfig:
   logoutURL: ""
   masterPublicURL: {{ openshift.master.public_api_url }}
   publicURL: {{ openshift.master.public_console_url }}/
+{% if openshift.master.loggingPublicURL %}
+  loggingPublicURL: {{ openshift.master.loggingPublicURL }}
+{% endif %}
+{% if openshift.master.metricsPublicURL %}
+  metricsPublicURL: {{ openshift.master.metricsPublicURL }}
+{% endif %}
   servingInfo:
     bindAddress: {{ openshift.master.bind_addr }}:{{ openshift.master.console_port }}
     bindNetwork: tcp4
