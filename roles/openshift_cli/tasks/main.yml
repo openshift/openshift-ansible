@@ -12,6 +12,7 @@
   shell: >
     docker images | awk '{  print $1 "\:" $2 }'
   register: docker_images
+  changed_when: false
   
 - name: Pull CLI Image
   command: >
