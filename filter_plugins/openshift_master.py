@@ -463,34 +463,6 @@ class FilterModule(object):
         IdentityProviderBase.validate_idp_list(idp_list)
         return yaml.safe_dump([idp.to_dict() for idp in idp_list], default_flow_style=False)
 
-    @staticmethod
-    def validate_auth_secrets(secrets):
-        ''' validate type and length '''
-
-        if not issubclass(type(secrets), list):
-            raise errors.AnsibleFilterError("|failed expects openshift_master_session_auth_secrets is a list")
-
-        for secret in secrets:
-            if len(secret) < 32:
-                return False
-        return True
-
-    @staticmethod
-    def validate_encryption_secrets(secrets):
-        ''' validate type and length '''
-
-        if not issubclass(type(secrets), list):
-            raise errors.AnsibleFilterError("|failed expects openshift_master_session_encryption_secrets is a list")
-
-        for secret in secrets:
-            if len(secret) not in [16, 24, 32]:
-                return False
-        return True
-
     def filters(self):
         ''' returns a mapping of filters to methods '''
-        return {
-            "translate_idps": self.translate_idps,
-            "validate_auth_secrets": self.validate_auth_secrets,
-            "validate_encryption_secrets": self.validate_encryption_secrets
-        }
+        return {"translate_idps": self.translate_idps}

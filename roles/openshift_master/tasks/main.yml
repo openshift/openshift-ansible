@@ -18,14 +18,6 @@
     msg: >
       openshift_master_session_auth_secrets and openshift_master_encryption_secrets must be equal length
   when: (openshift_master_session_auth_secrets is defined and openshift_master_session_encryption_secrets is defined) and (openshift_master_session_auth_secrets | length != openshift_master_session_encryption_secrets | length)
-- fail:
-    msg: >
-      Invalid secret length in openshift_master_session_auth_secrets: secrets must be at least 32 characters
-  when: openshift_master_session_auth_secrets is defined and not openshift_master_session_auth_secrets | validate_auth_secrets | bool
-- fail:
-    msg: >
-      Invalid secret length in openshift_master_session_encryption_secrets: secrets must be 16, 24, or 32 characters
-  when: openshift_master_session_encryption_secrets is defined and not openshift_master_session_encryption_secrets | validate_encryption_secrets | bool
 
 # HA Variable Validation
 - fail:
