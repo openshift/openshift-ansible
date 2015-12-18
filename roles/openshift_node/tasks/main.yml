@@ -45,7 +45,7 @@
   when: openshift.common.use_openshift_sdn and not openshift.common.is_containerized | bool
 
 - name: Get docker images
-  command: docker images
+  shell: docker images | awk '{  print $1 "\:" $2 }'
   changed_when: false
   when: openshift.common.is_containerized | bool
   register: docker_images
@@ -56,8 +56,7 @@
   when: openshift.common.is_containerized | bool and openshift.node.node_image not in docker_images.stdout
   
 - name: Wait for node image
-  command: >
-      docker images
+  shell: docker images | awk '{  print $1 "\:" $2 }'
   register: docker_images
   until: openshift.node.node_image in docker_images.stdout
   retries: 30
@@ -72,8 +71,7 @@
     and openshift.common.use_openshift_sdn | bool
   
 - name: Wait for OpenVSwitch image
-  command: >
-      docker images
+  shell: docker images | awk '{  print $1 "\:" $2 }'
   register: docker_images
   until: openshift.node.ovs_image in docker_images.stdout
   retries: 30

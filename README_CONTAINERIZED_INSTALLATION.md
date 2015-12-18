@@ -45,23 +45,33 @@ beginning of the installation process ensuring that these settings are applied
 before attempting to pull any of the following images.
 
     Origin
-        openshift/origin
-        openshift/node (node + openshift-sdn + openvswitch rpm for client tools)
-        openshift/openvswitch (centos7 + openvswitch rpm, runs ovsdb ovsctl processes)
-        registry.access.redhat.com/rhel7/etcd
+        openshift/origin:latest
+        openshift/node:latest (OVS SDN Enabled Node)
+        openshift/openvswitch:latest
+        registry.access.redhat.com/rhel7/etcd:latest
     OpenShift Enterprise
-        openshift3/ose
-        openshift3/node
-        openshift3/openvswitch
-        registry.access.redhat.com/rhel7/etcd
+        openshift3/ose:latest
+        openshift3/node:latest
+        openshift3/openvswitch:latest
+        registry.access.redhat.com/rhel7/etcd:latest
     Atomic Enterprise Platform
-        aep3/aep
-        aep3/node
-        aep3/openvswitch
-        registry.access.redhat.com/rhel7/etcd
+        aep3/aep:latest
+        aep3/node:latest
+        aep3/openvswitch:latest
+        registry.access.redhat.com/rhel7/etcd:latest
         
   * note openshift3/* and aep3/* images come from registry.access.redhat.com and
 rely on the --additional-repository flag being set appropriately.
+
+### Overriding Default Images
+
+You may override the default image selection by specifying the following
+variables. Please include the tag.
+
+osm_image=openshift/origin:v1.1.0.1
+osn_image=openshift/node:v1.1.0.1
+ovs_image=openshift/openvswitch:v1.1.0.1
+osm_etcd_image=etcd:latest
 
 ### Starting and Stopping Containers
 

@@ -980,23 +980,23 @@ def set_container_facts_if_unset(facts):
     """
     deployment_type = facts['common']['deployment_type']
     if deployment_type in ['enterprise', 'openshift-enterprise']:
-        master_image = 'openshift3/ose'
+        master_image = 'openshift3/ose:latest'
         cli_image = master_image
-        node_image = 'openshift3/node'
-        ovs_image = 'openshift3/openvswitch'
-        etcd_image = 'registry.access.redhat.com/rhel7/etcd'
+        node_image = 'openshift3/node:latest'
+        ovs_image = 'openshift3/openvswitch:latest'
+        etcd_image = 'registry.access.redhat.com/rhel7/etcd:latest'
     elif deployment_type == 'atomic-enterprise':
-        master_image = 'aep3_beta/aep'
+        master_image = 'aep3_beta/aep:latest'
         cli_image = master_image
-        node_image = 'aep3_beta/node'
-        ovs_image = 'aep3_beta/openvswitch'
-        etcd_image = 'registry.access.redhat.com/rhel7/etcd'
+        node_image = 'aep3_beta/node:latest'
+        ovs_image = 'aep3_beta/openvswitch:latest'
+        etcd_image = 'registry.access.redhat.com/rhel7/etcd:latest'
     else:
-        master_image = 'openshift/origin'
+        master_image = 'openshift/origin:latest'
         cli_image = master_image
-        node_image = 'openshift/node'
-        ovs_image = 'openshift/openvswitch'
-        etcd_image = 'registry.access.redhat.com/rhel7/etcd'
+        node_image = 'openshift/node:latest'
+        ovs_image = 'openshift/openvswitch:latest'
+        etcd_image = 'registry.access.redhat.com/rhel7/etcd:latest'
 
     facts['common']['is_atomic'] = os.path.isfile('/run/ostree-booted')
     if 'is_containerized' not in facts['common']:
