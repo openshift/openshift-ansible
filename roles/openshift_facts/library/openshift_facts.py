@@ -690,11 +690,16 @@ def set_version_facts_if_unset(facts):
         if version is not None:
             if deployment_type == 'origin':
                 version_gt_3_1_or_1_1 = LooseVersion(version) > LooseVersion('1.0.6')
+                version_gt_3_1_1_or_1_1_1 = LooseVersion(version) > LooseVersion('1.1.1')
             else:
                 version_gt_3_1_or_1_1 = LooseVersion(version) > LooseVersion('3.0.2.900')
+                version_gt_3_1_1_or_1_1_1 = LooseVersion(version) > LooseVersion('3.1.1')
         else:
             version_gt_3_1_or_1_1 = True
+            version_gt_3_1_1_or_1_1_1 = True
         facts['common']['version_greater_than_3_1_or_1_1'] = version_gt_3_1_or_1_1
+        facts['common']['version_greater_than_3_1_1_or_1_1_1'] = version_gt_3_1_1_or_1_1_1
+
     return facts
 
 def set_sdn_facts_if_unset(facts, system_facts):
