@@ -6,13 +6,13 @@
             "description": "Application template for EAP 6 PostgreSQL applications built using S2I.",
             "iconClass": "icon-jboss",
             "tags": "eap,postgresql,javaee,java,database,jboss,xpaas",
-            "version": "1.1.0"
+            "version": "1.2.0"
         },
         "name": "eap64-postgresql-s2i"
     },
     "labels": {
         "template": "eap64-postgresql-s2i",
-        "xpaas": "1.1.0"
+        "xpaas": "1.2.0"
     },
     "parameters": [
         {
@@ -22,8 +22,14 @@
             "required": true
         },
         {
-            "description": "Custom hostname for service routes.  Leave blank for default hostname, e.g.: <application-name>.<project>.<default-domain-suffix>",
-            "name": "APPLICATION_DOMAIN",
+            "description": "Custom hostname for http service route.  Leave blank for default hostname, e.g.: <application-name>-<project>.<default-domain-suffix>",
+            "name": "HOSTNAME_HTTP",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "Custom hostname for https service route.  Leave blank for default hostname, e.g.: secure-<application-name>-<project>.<default-domain-suffix>",
+            "name": "HOSTNAME_HTTPS",
             "value": "",
             "required": false
         },
@@ -36,7 +42,7 @@
         {
             "description": "Git branch/tag reference",
             "name": "SOURCE_REPOSITORY_REF",
-            "value": "1.1",
+            "value": "1.2",
             "required": false
         },
         {
@@ -71,25 +77,25 @@
         },
         {
             "description": "The name of the secret containing the keystore file",
-            "name": "EAP_HTTPS_SECRET",
+            "name": "HTTPS_SECRET",
             "value": "eap-app-secret",
             "required": false
         },
         {
             "description": "The name of the keystore file within the secret",
-            "name": "EAP_HTTPS_KEYSTORE",
+            "name": "HTTPS_KEYSTORE",
             "value": "keystore.jks",
             "required": false
         },
         {
             "description": "The name associated with the server certificate",
-            "name": "EAP_HTTPS_NAME",
+            "name": "HTTPS_NAME",
             "value": "",
             "required": false
         },
         {
             "description": "The password for the keystore and certificate",
-            "name": "EAP_HTTPS_PASSWORD",
+            "name": "HTTPS_PASSWORD",
             "value": "",
             "required": false
         },
@@ -157,6 +163,37 @@
             "description": "Namespace in which the ImageStreams for Red Hat Middleware images are installed. These ImageStreams are normally installed in the openshift namespace. You should only need to modify this if you've installed the ImageStreams in a different namespace/project.",
             "name": "IMAGE_STREAM_NAMESPACE",
             "value": "openshift",
+            "required": true
+        },
+        {
+            "description": "The name of the secret containing the keystore file",
+            "name": "JGROUPS_ENCRYPT_SECRET",
+            "value": "eap-app-secret",
+            "required": false
+        },
+        {
+            "description": "The name of the keystore file within the secret",
+            "name": "JGROUPS_ENCRYPT_KEYSTORE",
+            "value": "jgroups.jceks",
+            "required": false
+        },
+        {
+            "description": "The name associated with the server certificate",
+            "name": "JGROUPS_ENCRYPT_NAME",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "The password for the keystore and certificate",
+            "name": "JGROUPS_ENCRYPT_PASSWORD",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "JGroups cluster password",
+            "name": "JGROUPS_CLUSTER_PASSWORD",
+            "from": "[a-zA-Z0-9]{8}",
+            "generate": "expression",
             "required": true
         }
     ],
@@ -247,7 +284,7 @@
                 }
             },
             "spec": {
-                "host": "${APPLICATION_DOMAIN}",
+                "host": "${HOSTNAME_HTTP}",
                 "to": {
                     "name": "${APPLICATION_NAME}"
                 }
@@ -267,7 +304,7 @@
                 }
             },
             "spec": {
-                "host": "${APPLICATION_DOMAIN}",
+                "host": "${HOSTNAME_HTTPS}",
                 "to": {
                     "name": "secure-${APPLICATION_NAME}"
                 },
@@ -311,7 +348,7 @@
                         "from": {
                             "kind": "ImageStreamTag",
                             "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                            "name": "jboss-eap64-openshift:1.1"
+                            "name": "jboss-eap64-openshift:1.2"
                         }
                     }
                 },
@@ -400,8 +437,22 @@
                                         "name": "eap-keystore-volume",
                                         "mountPath": "/etc/eap-secret-volume",
                                         "readOnly": true
+                                    },
+                                    {
+                                        "name": "eap-jgroups-keystore-volume",
+                                        "mountPath": "/etc/jgroups-encrypt-secret-volume",
+                                        "readOnly": true
                                     }
                                 ],
+                                "livenessProbe": {
+                                    "exec": {
+                                        "command": [
+                                            "/bin/bash",
+                                            "-c",
+                                            "/opt/eap/bin/livenessProbe.sh"
+                                        ]
+                                    }
+                                },
                                 "readinessProbe": {
                                     "exec": {
                                         "command": [
@@ -412,6 +463,11 @@
                                     }
                                 },
                                 "ports": [
+                                    {
+                                        "name": "jolokia",
+                                        "containerPort": 8778,
+                                        "protocol": "TCP"
+                                    },
                                     {
                                         "name": "http",
                                         "containerPort": 8080,
@@ -478,20 +534,20 @@
                                         }
                                     },
                                     {
-                                        "name": "EAP_HTTPS_KEYSTORE_DIR",
+                                        "name": "HTTPS_KEYSTORE_DIR",
                                         "value": "/etc/eap-secret-volume"
                                     },
                                     {
-                                        "name": "EAP_HTTPS_KEYSTORE",
-                                        "value": "${EAP_HTTPS_KEYSTORE}"
+                                        "name": "HTTPS_KEYSTORE",
+                                        "value": "${HTTPS_KEYSTORE}"
                                     },
                                     {
-                                        "name": "EAP_HTTPS_NAME",
-                                        "value": "${EAP_HTTPS_NAME}"
+                                        "name": "HTTPS_NAME",
+                                        "value": "${HTTPS_NAME}"
                                     },
                                     {
-                                        "name": "EAP_HTTPS_PASSWORD",
-                                        "value": "${EAP_HTTPS_PASSWORD}"
+                                        "name": "HTTPS_PASSWORD",
+                                        "value": "${HTTPS_PASSWORD}"
                                     },
                                     {
                                         "name": "HORNETQ_CLUSTER_PASSWORD",
@@ -504,6 +560,30 @@
                                     {
                                         "name": "HORNETQ_TOPICS",
                                         "value": "${HORNETQ_TOPICS}"
+                                    },
+                                    {
+                                        "name": "JGROUPS_ENCRYPT_SECRET",
+                                        "value": "${JGROUPS_ENCRYPT_SECRET}"
+                                    },
+                                    {
+                                        "name": "JGROUPS_ENCRYPT_KEYSTORE_DIR",
+                                        "value": "/etc/jgroups-encrypt-secret-volume"
+                                    },
+                                    {
+                                        "name": "JGROUPS_ENCRYPT_KEYSTORE",
+                                        "value": "${JGROUPS_ENCRYPT_KEYSTORE}"
+                                    },
+                                    {
+                                        "name": "JGROUPS_ENCRYPT_NAME",
+                                        "value": "${JGROUPS_ENCRYPT_NAME}"
+                                    },
+                                    {
+                                        "name": "JGROUPS_ENCRYPT_PASSWORD",
+                                        "value": "${JGROUPS_ENCRYPT_PASSWORD}"
+                                    },
+                                    {
+                                        "name": "JGROUPS_CLUSTER_PASSWORD",
+                                        "value": "${JGROUPS_CLUSTER_PASSWORD}"
                                     }
                                 ]
                             }
@@ -512,7 +592,13 @@
                             {
                                 "name": "eap-keystore-volume",
                                 "secret": {
-                                    "secretName": "${EAP_HTTPS_SECRET}"
+                                    "secretName": "${HTTPS_SECRET}"
+                                }
+                            },
+                            {
+                                "name": "eap-jgroups-keystore-volume",
+                                "secret": {
+                                    "secretName": "${JGROUPS_ENCRYPT_SECRET}"
                                 }
                             }
                         ]
