@@ -1,12 +1,19 @@
+- name: tmp dir for openshift
+  file:
+    path: /tmp/openshift
+    state: directory
+    owner: root
+    mode: 700
+
 - name: Create service account configs
   template:
     src: serviceaccount.j2
-    dest: "/tmp/{{ item }}-serviceaccount.yaml"
+    dest: "/tmp/openshift/{{ item }}-serviceaccount.yaml"
   with_items: accounts
 
 - name: Create {{ item }} service account
   command: >
-    {{ openshift.common.client_binary }} create -f "/tmp/{{ item }}-serviceaccount.yaml"
+    {{ openshift.common.client_binary }} create -f "/tmp/openshift/{{ item }}-serviceaccount.yaml"
   with_items: accounts
   register: _sa_result
   failed_when: "'serviceaccounts \"{{ item }}\" already exists' not in _sa_result.stderr and _sa_result.rc != 0"
@@ -15,14 +22,15 @@
 - name: Get current security context constraints
   shell: >
     {{ openshift.common.client_binary }} get scc privileged -o yaml
-    --output-version=v1 > /tmp/scc.yaml
+    --output-version=v1 > /tmp/openshift/scc.yaml
+  changed_when: false
 
 - name: Add security context constraint for {{ item }}
   lineinfile:
-    dest: /tmp/scc.yaml
+    dest: /tmp/openshift/scc.yaml
     line: "- system:serviceaccount:default:{{ item }}"
     insertafter: "^users:$"
   with_items: accounts
 
 - name: Apply new scc rules for service accounts
-  command: "{{ openshift.common.client_binary }} update -f /tmp/scc.yaml --api-version=v1"
+  command: "{{ openshift.common.client_binary }} update -f /tmp/openshift/scc.yaml --api-version=v1"

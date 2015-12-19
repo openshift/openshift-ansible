@@ -1,4 +1,4 @@
-Role Name
+Docker
 =========
 
 Ensures docker package is installed, and optionally raises timeout for systemd-udevd.service to 5 minutes.

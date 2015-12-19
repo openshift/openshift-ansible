@@ -27,6 +27,7 @@
 
 - name: Install the base package for versioning
   action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}{{ openshift_version | default('') }} state=present"
+  when: not openshift.common.is_containerized | bool
 
 - name: Set version facts
   openshift_facts:

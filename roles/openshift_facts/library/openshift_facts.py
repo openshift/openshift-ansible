@@ -643,6 +643,19 @@ def set_deployment_facts_if_unset(facts):
                 data_dir = '/var/lib/openshift'
             facts['common']['data_dir'] = data_dir
 
+        # remove duplicate and empty strings from registry lists
+        for cat in  ['additional', 'blocked', 'insecure']:
+            key = 'docker_{0}_registries'.format(cat)
+            if key in facts['common']:
+                facts['common'][key] = list(set(facts['common'][key]) - set(['']))
+
+
+        if deployment_type in ['enterprise', 'atomic-enterprise', 'openshift-enterprise']:
+            addtl_regs = facts['common'].get('docker_additional_registries', [])
+            ent_reg = 'registry.access.redhat.com'
+            if ent_reg not in addtl_regs:
+                facts['common']['docker_additional_registries'] = addtl_regs + [ent_reg]
+
     for role in ('master', 'node'):
         if role in facts:
             deployment_type = facts['common']['deployment_type']
@@ -710,7 +723,8 @@ def set_sdn_facts_if_unset(facts, system_facts):
     if 'common' in facts:
         use_sdn = facts['common']['use_openshift_sdn']
         if not (use_sdn == '' or isinstance(use_sdn, bool)):
-            facts['common']['use_openshift_sdn'] = bool(strtobool(str(use_sdn)))
+            use_sdn = bool(strtobool(str(use_sdn)))
+            facts['common']['use_openshift_sdn'] = use_sdn
         if 'sdn_network_plugin_name' not in facts['common']:
             plugin = 'redhat/openshift-ovs-subnet' if use_sdn else ''
             facts['common']['sdn_network_plugin_name'] = plugin
@@ -919,6 +933,7 @@ def save_local_facts(filename, facts):
             os.makedirs(fact_dir)
         with open(filename, 'w') as fact_file:
             fact_file.write(module.jsonify(facts))
+        os.chmod(filename, 0o600)
     except (IOError, OSError) as ex:
         raise OpenShiftFactsFileWriteError(
             "Could not create fact file: %s, error: %s" % (filename, ex)
@@ -952,6 +967,53 @@ def get_local_facts_from_file(filename):
             pass
 
     return local_facts
+
+
+def set_container_facts_if_unset(facts):
+    """ Set containerized facts.
+
+        Args:
+            facts (dict): existing facts
+        Returns:
+            dict: the facts dict updated with the generated containerization
+            facts
+    """
+    deployment_type = facts['common']['deployment_type']
+    if deployment_type in ['enterprise', 'openshift-enterprise']:
+        master_image = 'openshift3/ose'
+        cli_image = master_image
+        node_image = 'openshift3/node'
+        ovs_image = 'openshift3/openvswitch'
+        etcd_image = 'registry.access.redhat.com/rhel7/etcd'
+    elif deployment_type == 'atomic-enterprise':
+        master_image = 'aep3_beta/aep'
+        cli_image = master_image
+        node_image = 'aep3_beta/node'
+        ovs_image = 'aep3_beta/openvswitch'
+        etcd_image = 'registry.access.redhat.com/rhel7/etcd'
+    else:
+        master_image = 'openshift/origin'
+        cli_image = master_image
+        node_image = 'openshift/node'
+        ovs_image = 'openshift/openvswitch'
+        etcd_image = 'registry.access.redhat.com/rhel7/etcd'
+
+    facts['common']['is_atomic'] = os.path.isfile('/run/ostree-booted')
+    if 'is_containerized' not in facts['common']:
+        facts['common']['is_containerized'] = facts['common']['is_atomic']
+    if 'cli_image' not in facts['common']:
+        facts['common']['cli_image'] = cli_image
+    if 'etcd' in facts and 'etcd_image' not in facts['etcd']:
+        facts['etcd']['etcd_image'] = etcd_image
+    if 'master' in facts and 'master_image' not in facts['master']:
+        facts['master']['master_image'] = master_image
+    if 'node' in facts:
+        if 'node_image' not in facts['node']:
+            facts['node']['node_image'] = node_image
+        if 'ovs_image' not in facts['node']:
+            facts['node']['ovs_image'] = ovs_image
+
+    return facts
 
 
 class OpenShiftFactsUnsupportedRoleError(Exception):
@@ -1031,6 +1093,7 @@ class OpenShiftFacts(object):
         facts = set_version_facts_if_unset(facts)
         facts = set_aggregate_facts(facts)
         facts = set_etcd_facts_if_unset(facts)
+        facts = set_container_facts_if_unset(facts)
         return dict(openshift=facts)
 
     def get_defaults(self, roles):
@@ -1054,8 +1117,8 @@ class OpenShiftFacts(object):
         common = dict(use_openshift_sdn=True, ip=ip_addr, public_ip=ip_addr,
                       deployment_type='origin', hostname=hostname,
                       public_hostname=hostname, use_manageiq=False)
-        common['client_binary'] = 'oc' if os.path.isfile('/usr/bin/oc') else 'osc'
-        common['admin_binary'] = 'oadm' if os.path.isfile('/usr/bin/oadm') else 'osadm'
+        common['client_binary'] = 'oc'
+        common['admin_binary'] = 'oadm'
         common['dns_domain'] = 'cluster.local'
         common['install_examples'] = True
         defaults['common'] = common

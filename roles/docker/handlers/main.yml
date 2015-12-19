@@ -1,7 +1,10 @@
 ---
 
 - name: restart docker
-  service: name=docker state=restarted
+  service:
+    name: docker
+    state: restarted
+  when: not docker_service_status_changed | default(false)
 
 - name: restart udev
   service:

@@ -4,6 +4,7 @@
   - openshift-ansible-inventory
   - openshift-ansible-inventory-aws
   - openshift-ansible-inventory-gce
+  when: not openshift.common.is_containerized | bool
 
 - name:
   copy:

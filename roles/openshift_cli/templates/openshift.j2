@@ -1,0 +1,16 @@
+#!/bin/bash
+if [ ! -d ~/.kube ]; then
+   mkdir -m 0700 ~/.kube
+fi
+cmd=`basename $0`
+user=`id -u`
+group=`id -g`
+
+# docker can only split stderr and stdin when run without -t
+# https://github.com/docker/docker/issues/725
+# ansible checks various streams DO NOT CROSS THE STREAMS
+if [ -z $TERM ]; then
+  $t = '-it'
+fi
+
+docker run ${t} -a STDERR -a STDOUT -a STDIN --privileged --net=host --user=${user}:${group} -v ~/.kube:/root/.kube -v /tmp:/tmp -v {{ openshift.common.config_base}}:{{ openshift.common.config_base }} -e KUBECONFIG=/root/.kube/config --entrypoint ${cmd} --rm {{ openshift.common.cli_image }} ${@}
