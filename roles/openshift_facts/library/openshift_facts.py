@@ -835,6 +835,24 @@ def get_current_config(facts):
 
     return current_config
 
+def search_path(filename, path=None):
+    """
+    Searches PATH for a file
+
+    Args:
+      name: the filename to search for
+      path: the optional path string (default: os.environ['PATH'])
+
+    Returns:
+      The abspath to the file or None if not found.
+    """
+    path = path or os.environ['PATH']
+    for directory in path.split(os.pathsep):
+        binpath = os.path.join(directory, filename)
+        if os.path.exists(binpath):
+            return os.path.abspath(binpath)
+    return None
+
 def get_openshift_version():
     """ Get current version of openshift on the host
 
@@ -842,13 +860,11 @@ def get_openshift_version():
             version: the current openshift version
     """
     version = None
-
-    if os.path.isfile('/usr/bin/openshift'):
-        _, output, _ = module.run_command(['/usr/bin/openshift', 'version'])
+    o_path = search_path('openshift')
+    if o_path is not None:
+        _, output, _ = module.run_command([o_path, 'version'])
         versions = dict(e.split(' v') for e in output.splitlines() if ' v' in e)
         version = versions.get('openshift', '')
-
-        #TODO: acknowledge the possility of a containerized install
     return version
 
 def apply_provider_facts(facts, provider_facts):
@@ -1122,8 +1138,8 @@ class OpenShiftFacts(object):
         common = dict(use_openshift_sdn=True, ip=ip_addr, public_ip=ip_addr,
                       deployment_type='origin', hostname=hostname,
                       public_hostname=hostname, use_manageiq=True)
-        common['client_binary'] = 'oc'
-        common['admin_binary'] = 'oadm'
+        common['client_binary'] = search_path('oc')
+        common['admin_binary'] = search_path('oadm')
         common['dns_domain'] = 'cluster.local'
         common['install_examples'] = True
         defaults['common'] = common
