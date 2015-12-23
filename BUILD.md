@@ -1,7 +1,7 @@
 # openshift-ansible RPM Build instructions
 We use tito to make building and tracking revisions easy.
 
-For more information on tito, please see the [Tito home page](http://rm-rf.ca/tito "Tito home page").
+For more information on tito, please see the [Tito home page](https://github.com/dgoodwin/tito "Tito home page").
 
 
 ## Build openshift-ansible-bin
