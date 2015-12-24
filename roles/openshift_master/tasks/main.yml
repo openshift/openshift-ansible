@@ -41,6 +41,8 @@
       console_url: "{{ openshift_master_console_url | default(None) }}"
       console_use_ssl: "{{ openshift_master_console_use_ssl | default(None) }}"
       public_console_url: "{{ openshift_master_public_console_url | default(None) }}"
+      logging_public_url: "{{ openshift_master_logging_public_url | default(None) }}"
+      metrics_public_url: "{{ openshift_master_metrics_public_url | default(None) }}"
       etcd_hosts: "{{ openshift_master_etcd_hosts | default(None)}}"
       etcd_port: "{{ openshift_master_etcd_port | default(None) }}"
       etcd_use_ssl: "{{ openshift_master_etcd_use_ssl | default(None) }}"
