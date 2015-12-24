@@ -232,6 +232,7 @@
       balance: source
       servers: "{{ hostvars.localhost.haproxy_backend_servers }}"
   roles:
+  - role: openshift_facts
   - role: haproxy
     when: groups.oo_masters_to_config | length > 1
 
