@@ -18,7 +18,7 @@
 
 - stat: path=/etc/sysconfig/docker
   register: docker_check
-  
+
 - name: Set registry params
   lineinfile:
     dest: /etc/sysconfig/docker
@@ -36,7 +36,7 @@
     reg_fact_val: "{{ openshift.common.docker_insecure_registries }}"
     reg_flag: --insecure-registry
   notify:
-  - restart docker
+  - restart openshift_docker
 
 # TODO: Enable secure registry when code available in origin
 # TODO: perhaps move this to openshift_docker?
@@ -50,4 +50,4 @@
       {% if openshift.node.docker_log_options is defined %}   {{ openshift.node.docker_log_options |  oo_split() | oo_prepend_strings_in_list('--log-opt ') | join(' ')}}  {% endif %} '"
   when: docker_check.stat.isreg
   notify:
-    - restart docker
+    - restart openshift_docker
