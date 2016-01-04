@@ -1,0 +1,14 @@
+clientCert: {{ client_cert }} 
+# The key to the certificate in clientCert above
+clientKey: {{ client_key }}
+# The certificate authority's certificate for the local kubelet.  Usually the
+# same as the CA cert used to create the client Cert/Key pair.
+CACert: {{ ca_cert }} 
+# Name of the enterprise in which pods will reside
+enterpriseName: {{ enterprise }} 
+# Name of the domain in which pods will reside
+domainName: {{ domain }}
+# IP address and port number of master API server
+masterApiServer: {{ api_server }}
+# Bridge name for the docker bridge
+dockerBridgeName: {{ docker_bridge }}

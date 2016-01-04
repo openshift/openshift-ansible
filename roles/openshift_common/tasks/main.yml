@@ -4,6 +4,14 @@
   when: openshift_use_openshift_sdn | default(false) | bool and openshift_use_flannel | default(false) | bool
 
 - fail:
+   msg: Nuage sdn can not be used with openshift sdn
+  when: openshift_use_openshift_sdn | default(false) | bool and openshift_use_nuage | default(false) | bool
+
+- fail:
+   msg: Nuage sdn can not be used with flannel 
+  when: openshift_use_flannel | default(false) | bool and openshift_use_nuage | default(false) | bool
+
+- fail:
     msg: openshift_hostname must be 64 characters or less
   when: openshift_hostname is defined and openshift_hostname | length > 64
 
@@ -22,6 +30,7 @@
       deployment_type: "{{ openshift_deployment_type }}"
       use_fluentd: "{{ openshift_use_fluentd | default(None) }}"
       use_flannel: "{{ openshift_use_flannel | default(None) }}"
+      use_nuage: "{{ openshift_use_nuage | default(None) }}"
       use_manageiq: "{{ openshift_use_manageiq | default(None) }}"
 
   # For enterprise versions < 3.1 and origin versions < 1.1 we want to set the

@@ -180,6 +180,8 @@
   - openshift_node
   - role: flannel
     when: openshift.common.use_flannel | bool
+  - role: nuage_node
+    when: openshift.common.use_nuage | bool
   - role: nickhammond.logrotate
   - role: fluentd_node
     when: openshift.common.use_fluentd | bool

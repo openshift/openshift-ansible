@@ -1,0 +1,4 @@
+---
+- name: restart vrs
+  sudo: true
+  service: name=openvswitch state=restarted

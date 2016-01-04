@@ -341,6 +341,23 @@ def set_flannel_facts_if_unset(facts):
             facts['common']['use_flannel'] = use_flannel
     return facts
 
+def set_nuage_facts_if_unset(facts):
+    """ Set nuage facts if not already present in facts dict
+            dict: the facts dict updated with the nuage facts if
+            missing
+        Args:
+            facts (dict): existing facts
+        Returns:
+            dict: the facts dict updated with the nuage
+            facts if they were not already present
+
+    """
+    if 'common' in facts:
+        if 'use_nuage' not in facts['common']:
+            use_nuage = False
+            facts['common']['use_nuage'] = use_nuage
+    return facts
+
 def set_node_schedulability(facts):
     """ Set schedulable facts if not already present in facts dict
         Args:
@@ -1022,6 +1039,7 @@ class OpenShiftFacts(object):
         facts = set_project_cfg_facts_if_unset(facts)
         facts = set_fluentd_facts_if_unset(facts)
         facts = set_flannel_facts_if_unset(facts)
+        facts = set_nuage_facts_if_unset(facts)
         facts = set_node_schedulability(facts)
         facts = set_master_selectors(facts)
         facts = set_metrics_facts_if_unset(facts)
