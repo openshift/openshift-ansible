@@ -12,7 +12,7 @@
   register: start_result
 
 - set_fact:
-    docker_service_status_changed = start_result | changed
+    docker_service_status_changed: start_result | changed
 
 - include: udev_workaround.yml
   when: docker_udev_workaround | default(False)
