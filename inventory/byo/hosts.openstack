@@ -1,0 +1,37 @@
+# This is an example of a bring your own (byo) host inventory
+
+# Create an OSEv3 group that contains the masters and nodes groups
+[OSEv3:children]
+masters
+nodes
+etcd
+lb
+
+# Set variables common for all OSEv3 hosts
+[OSEv3:vars]
+ansible_ssh_user=cloud-user
+ansible_sudo=true
+
+# Debug level for all OpenShift components (Defaults to 2)
+debug_level=2
+
+deployment_type=openshift-enterprise
+
+openshift_additional_repos=[{'id': 'ose-3.1', 'name': 'ose-3.1', 'baseurl': 'http://pulp.dist.prod.ext.phx2.redhat.com/content/dist/rhel/server/7/7Server/x86_64/ose/3.1/os', 'enabled': 1, 'gpgcheck': 0}]
+
+openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '{{ openshift.common.config_base }}/htpasswd'}]
+
+#openshift_pkg_version=-3.0.0.0
+
+[masters]
+jdetiber-master.usersys.redhat.com openshift_public_hostname="{{ inventory_hostname }}" openshift_hostname="{{ ansible_default_ipv4.address }}"
+
+[etcd]
+jdetiber-etcd.usersys.redhat.com
+
+[lb]
+#ose3-lb-ansible.test.example.com
+
+[nodes]
+jdetiber-master.usersys.redhat.com openshift_public_hostname="{{ inventory_hostname }}" openshift_hostname="{{ ansible_default_ipv4.address }}"
+jdetiber-node[1:2].usersys.redhat.com openshift_public_hostname="{{ inventory_hostname }}" openshift_hostname="{{ ansible_default_ipv4.address }}" openshift_node_labels="{'region': 'primary', 'zone': 'default'}"

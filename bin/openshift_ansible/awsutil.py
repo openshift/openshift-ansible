@@ -61,7 +61,7 @@ class AwsUtil(object):
 
     def get_environments(self):
         """Searches for env tags in the inventory and returns all of the envs found."""
-        pattern = re.compile(r'^tag_env_(.*)')
+        pattern = re.compile(r'^tag_environment_(.*)')
 
         envs = []
         inv = self.get_inventory()
@@ -109,13 +109,13 @@ class AwsUtil(object):
         inst_by_env = {}
         for _, host in inv['_meta']['hostvars'].items():
             # If you don't have an environment tag, we're going to ignore you
-            if 'ec2_tag_env' not in host:
+            if 'ec2_tag_environment' not in host:
                 continue
 
-            if host['ec2_tag_env'] not in inst_by_env:
-                inst_by_env[host['ec2_tag_env']] = {}
+            if host['ec2_tag_environment'] not in inst_by_env:
+                inst_by_env[host['ec2_tag_environment']] = {}
             host_id = "%s:%s" % (host['ec2_tag_Name'], host['ec2_id'])
-            inst_by_env[host['ec2_tag_env']][host_id] = host
+            inst_by_env[host['ec2_tag_environment']][host_id] = host
 
         return inst_by_env
 
@@ -157,19 +157,13 @@ class AwsUtil(object):
     def gen_env_tag(env):
         """Generate the environment tag
         """
-        return "tag_env_%s" % env
+        return "tag_environment_%s" % env
 
     def gen_host_type_tag(self, host_type):
         """Generate the host type tag
         """
         host_type = self.resolve_host_type(host_type)
         return "tag_host-type_%s" % host_type
-
-    def gen_env_host_type_tag(self, host_type, env):
-        """Generate the environment host type tag
-        """
-        host_type = self.resolve_host_type(host_type)
-        return "tag_env-host-type_%s-%s" % (env, host_type)
 
     def get_host_list(self, host_type=None, envs=None, version=None, cached=False):
         """Get the list of hosts from the inventory using host-type and environment

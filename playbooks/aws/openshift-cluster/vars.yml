@@ -1,4 +1,5 @@
 ---
+debug_level: 2
 deployment_vars:
   origin:
     # centos-7, requires marketplace

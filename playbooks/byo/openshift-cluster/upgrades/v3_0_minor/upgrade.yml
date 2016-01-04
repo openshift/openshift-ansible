@@ -1,5 +1,7 @@
 ---
 - include: ../../../../common/openshift-cluster/upgrades/v3_0_minor/upgrade.yml
+  vars_files:
+  - ../../../../byo/openshift-cluster/cluster_hosts.yml
   vars:
     g_etcd_hosts: "{{ groups.etcd | default([]) }}"
     g_master_hosts: "{{ groups.masters | default([]) }}"

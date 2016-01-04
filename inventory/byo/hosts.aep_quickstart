@@ -1,0 +1,20 @@
+[OSEv3:children]
+masters
+nodes
+etcd
+lb
+
+[OSEv3:vars]
+ansible_ssh_user=root
+deployment_type=atomic-enterprise
+osm_use_cockpit=true
+
+[masters]
+ose3-master.example.com
+
+[nodes]
+ose3-master.example.com openshift_scheduleable=True
+
+[etcd]
+
+[lb]

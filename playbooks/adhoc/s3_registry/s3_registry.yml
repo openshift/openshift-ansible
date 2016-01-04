@@ -6,7 +6,7 @@
 # The AWS access/secret keys should be the keys of a separate user (not your main user), containing only the necessary S3 access role.
 # The 'clusterid' is the short name of your cluster.
 
-- hosts: tag_env_{{ clusterid }}:&tag_host-type_openshift-master
+- hosts: tag_clusterid_{{ clusterid }}:&tag_host-type_openshift-master
   remote_user: root
   gather_facts: False
 

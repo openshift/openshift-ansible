@@ -1,16 +1,12 @@
 ---
 - name: Populate oo_hosts_to_update group
   hosts: localhost
-  become: no
   connection: local
+  become: no
   gather_facts: no
-  vars:
-    g_etcd_hosts:   "{{ (groups['tag_host-type-etcd']|default([])) | intersect(groups['tag_env-' ~ cluster_id]) }}"
-    g_lb_hosts:     "{{ (groups['tag_host-type-lb']|default([])) | intersect(groups['tag_env-' ~ cluster_id]) }}"
-    g_master_hosts: "{{ (groups['tag_host-type-master']|default([])) | intersect(groups['tag_env-' ~ cluster_id]) }}"
-    g_node_hosts:   "{{ (groups['tag_host-type-node']|default([])) | intersect((groups['tag_env-' ~ cluster_id]|default([]))) }}"
   vars_files:
   - vars.yml
+  - cluster_hosts.yml
   tasks:
   - name: Evaluate oo_hosts_to_update
     add_host:
@@ -18,7 +14,7 @@
       groups: oo_hosts_to_update
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user | default(ansible_ssh_user, true) }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-    with_items: "{{ g_master_hosts | union(g_node_hosts) | union(g_etcd_hosts) | default([]) }}"
+    with_items: "{{ g_all_hosts | default([]) }}"
 
 - include: ../../common/openshift-cluster/update_repos_and_packages.yml
 

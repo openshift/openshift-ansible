@@ -18,6 +18,9 @@ ansible_ssh_user=root
 # user must be configured for passwordless sudo
 #ansible_sudo=true
 
+# Debug level for all Atomic Enterprise components (Defaults to 2)
+debug_level=2
+
 # deployment type valid values are origin, online, atomic-enterprise, and openshift-enterprise
 deployment_type=atomic-enterprise
 

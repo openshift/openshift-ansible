@@ -3,6 +3,7 @@ libvirt_storage_pool_path: "{{ lookup('env','HOME') }}/libvirt-storage-pool-open
 libvirt_storage_pool: 'openshift-ansible'
 libvirt_network: openshift-ansible
 libvirt_uri: 'qemu:///system'
+debug_level: 2
 
 deployment_vars:
   origin:

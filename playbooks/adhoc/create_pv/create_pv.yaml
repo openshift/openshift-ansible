@@ -3,9 +3,8 @@
 # ansible-playbook -e "cli_volume_size=1" \
 #                  -e "cli_device_name=/dev/xvdf" \
 #                  -e "cli_hosttype=master" \
-#                  -e "cli_env=ops" \
+#                  -e "cli_clusterid=ops" \
 #                  create_pv.yaml
-# FIXME: we need to change "env" to "clusterid" as that's what it really is now.
 #
 - name: Create a volume and attach it to master
   hosts: localhost
@@ -16,7 +15,7 @@
     cli_volume_type: gp2
     cli_volume_iops: ''
     oo_name: "{{ groups['tag_host-type_' ~ cli_hosttype] |
-                 intersect(groups['tag_env_' ~ cli_env]) |
+                 intersect(groups['oo_clusterid_' ~ cli_clusterid]) |
                  first }}"
   pre_tasks:
   - fail:
@@ -26,7 +25,7 @@
     - cli_volume_size
     - cli_device_name
     - cli_hosttype
-    - cli_env
+    - cli_clusterid
 
   - name: set oo_name fact
     set_fact:
@@ -57,7 +56,7 @@
     args:
       tags:
         Name: "pv-{{ hostvars[oo_name]['ec2_tag_Name'] }}"
-        env: "{{cli_env}}"
+        clusterid: "{{cli_clusterid}}"
     register: voltags
 
   - debug: var=voltags
