@@ -397,7 +397,15 @@
 
 - name: Create services
   hosts: oo_first_master
+  vars:
+    attach_registry_volume: "{{ groups.oo_nfs_to_config | length > 0 }}"
+  pre_tasks:
+  - set_fact:
+      nfs_host: "{{ groups.oo_nfs_to_config.0 }}"
+      registry_volume_path: "{{ hostvars[groups.oo_nfs_to_config.0].openshift.nfs.exports_dir + '/' + hostvars[groups.oo_nfs_to_config.0].openshift.nfs.registry_volume }}"
+    when: attach_registry_volume | bool
   roles:
   - role: openshift_router
     when: openshift.master.infra_nodes is defined
-  #- role: openshift_registry
+  - role: openshift_registry
+    when: openshift.master.infra_nodes is defined and attach_registry_volume | bool

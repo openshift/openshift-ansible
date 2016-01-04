@@ -21,6 +21,14 @@
       msg: This playbook requires g_lb_hosts to be set
     when: g_lb_hosts is not defined
 
+  - fail:
+      msg: This playbook requires g_nfs_hosts to be set
+    when: g_nfs_hosts is not defined
+
+  - fail:
+      msg: The nfs group must be limited to one host
+    when: (groups[g_nfs_hosts] | default([])) | length > 1
+
   - name: Evaluate oo_etcd_to_config
     add_host:
       name: "{{ item }}"
@@ -81,3 +89,11 @@
       ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
       ansible_sudo: "{{ g_sudo | default(omit) }}"
     with_items: "{{ g_lb_hosts | default([]) }}"
+
+  - name: Evaluate oo_nfs_to_config
+    add_host:
+      name: "{{ item }}"
+      groups: oo_nfs_to_config
+      ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
+      ansible_sudo: "{{ g_sudo | default(omit) }}"
+    with_items: "{{ g_nfs_hosts | default([]) }}"

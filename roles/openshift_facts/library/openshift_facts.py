@@ -1052,7 +1052,7 @@ class OpenShiftFacts(object):
         Raises:
             OpenShiftFactsUnsupportedRoleError:
     """
-    known_roles = ['common', 'master', 'node', 'master_sdn', 'node_sdn', 'etcd']
+    known_roles = ['common', 'master', 'node', 'master_sdn', 'node_sdn', 'etcd', 'nfs']
 
     def __init__(self, role, filename, local_facts, additive_facts_to_overwrite=False):
         self.changed = False
@@ -1146,6 +1146,12 @@ class OpenShiftFacts(object):
             node = dict(labels={}, annotations={}, portal_net='172.30.0.0/16',
                         iptables_sync_period='5s', set_node_ip=False)
             defaults['node'] = node
+
+        if 'nfs' in roles:
+            nfs = dict(exports_dir='/var/export', registry_volume='regvol',
+                       export_options='*(rw,sync,all_squash)')
+            defaults['nfs'] = nfs
+
         return defaults
 
     def guess_host_provider(self):

@@ -15,6 +15,7 @@
     g_etcd_hosts:   "{{ (groups['tag_host-type_etcd']|default([]))   | intersect((groups['tag_env_' ~ cluster_id]|default([]))) }}"
     g_lb_hosts:     "{{ (groups['tag_host-type_lb']|default([]))     | intersect((groups['tag_env_' ~ cluster_id]|default([]))) }}"
     g_master_hosts: "{{ (groups['tag_host-type_master']|default([])) | intersect((groups['tag_env_' ~ cluster_id]|default([]))) }}"
+    g_nfs_hosts:   "{{ (groups['tag_host-type_nfs']|default([]))   | intersect((groups['tag_env_' ~ cluster_id]|default([]))) }}"
     g_node_hosts:   "{{ (groups['tag_host-type_node']|default([]))   | intersect((groups['tag_env_' ~ cluster_id]|default([]))) }}"
     g_ssh_user: "{{ hostvars.localhost.g_ssh_user_tmp }}"
     g_sudo: "{{ hostvars.localhost.g_sudo_tmp }}"
