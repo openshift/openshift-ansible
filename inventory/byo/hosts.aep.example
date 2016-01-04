@@ -102,6 +102,12 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Override the default controller lease ttl
 #osm_controller_lease_ttl=30
 
+# Configure controller arguments
+#osm_controller_args={'resource-quota-sync-period': ['10s']}
+
+# Configure api server arguments
+#osm_api_server_args={'max-requests-inflight': ['400']}
+
 # default subdomain to use for exposed routes
 #osm_default_subdomain=apps.test.example.com
 
