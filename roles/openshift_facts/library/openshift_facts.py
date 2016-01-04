@@ -1121,7 +1121,7 @@ class OpenShiftFacts(object):
 
         common = dict(use_openshift_sdn=True, ip=ip_addr, public_ip=ip_addr,
                       deployment_type='origin', hostname=hostname,
-                      public_hostname=hostname, use_manageiq=False)
+                      public_hostname=hostname, use_manageiq=True)
         common['client_binary'] = 'oc'
         common['admin_binary'] = 'oadm'
         common['dns_domain'] = 'cluster.local'
