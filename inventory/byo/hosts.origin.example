@@ -181,6 +181,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_nfs_registry_volume=regvol
 #openshift_nfs_export_options='*(rw,sync,all_squash)'
 
+# Configure node kubelet arguments
+#openshift_node_kubelet_args={'max-pods': ['40'], 'image-gc-high-threshold': ['90'], 'image-gc-low-threshold': ['80']}
+
 # host group for masters
 [masters]
 ose3-master[1:3]-ansible.test.example.com
