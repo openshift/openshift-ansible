@@ -473,6 +473,7 @@ def set_url_facts_if_unset(facts):
         public_hostname = facts['common']['public_hostname']
         cluster_hostname = facts['master'].get('cluster_hostname')
         cluster_public_hostname = facts['master'].get('cluster_public_hostname')
+        api_hostname = cluster_hostname if cluster_hostname else hostname
 
         if 'etcd_urls' not in facts['master']:
             etcd_urls = []
@@ -487,7 +488,6 @@ def set_url_facts_if_unset(facts):
                                         etcd_port)]
             facts['master']['etcd_urls'] = etcd_urls
         if 'api_url' not in facts['master']:
-            api_hostname = cluster_hostname if cluster_hostname else hostname
             facts['master']['api_url'] = format_url(api_use_ssl, api_hostname,
                                                     api_port)
         if 'public_api_url' not in facts['master']:
@@ -495,6 +495,18 @@ def set_url_facts_if_unset(facts):
             facts['master']['public_api_url'] = format_url(api_use_ssl,
                                                            api_public_hostname,
                                                            api_port)
+        if 'loopback_api_url' not in facts['master']:
+            facts['master']['loopback_api_url'] = format_url(api_use_ssl, hostname, api_port)
+
+        if 'loopback_cluster_name' not in facts['master']:
+            facts['master']['loopback_cluster_name'] = "{0}:{1}".format(hostname, api_port).replace('.', '-')
+
+        if 'loopback_context_name' not in facts['master']:
+            facts['master']['loopback_context_name'] = "default/{0}/system:openshift-master".format(facts['master']['loopback_cluster_name'])
+
+        if 'loopback_user' not in facts['master']:
+            facts['master']['loopback_user'] = "system:openshift-master/{0}:{1}".format(api_hostname, api_port).replace('.', '-')
+
         if 'console_url' not in facts['master']:
             console_hostname = cluster_hostname if cluster_hostname else hostname
             facts['master']['console_url'] = format_url(console_use_ssl,
