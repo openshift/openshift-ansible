@@ -3,7 +3,7 @@ debug_level: 2
 deployment_vars:
   origin:
     # centos-7, requires marketplace
-    image: ami-96a818fe
+    image: ami-61bbf104
     image_name:
     region: us-east-1
     ssh_user: centos
