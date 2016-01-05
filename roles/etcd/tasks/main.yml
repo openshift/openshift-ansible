@@ -104,4 +104,4 @@
   register: start_result
 
 - set_fact:
-    etcd_service_status_changed = "{{ start_result | changed }}"
+    etcd_service_status_changed: "{{ start_result | changed }}"
