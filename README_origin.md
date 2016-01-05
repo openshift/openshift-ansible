@@ -59,12 +59,12 @@ option to ansible-playbook.
 # This is an example of a bring your own (byo) host inventory
 
 # Create an OSEv3 group that contains the masters and nodes groups
-[OSv3:children]
+[OSEv3:children]
 masters
 nodes
 
 # Set variables common for all OSEv3 hosts
-[OSv3:vars]
+[OSEv3:vars]
 
 # SSH user, this user should allow ssh based auth without requiring a password
 ansible_ssh_user=root
@@ -94,6 +94,8 @@ osv3-lb.example.com
 
 The hostnames above should resolve both from the hosts themselves and
 the host where ansible is running (if different).
+
+A more complete example inventory file ([hosts.origin.example](https://github.com/openshift/openshift-ansible/blob/master/inventory/byo/hosts.origin.example)) is available under the [`/inventory/byo`](https://github.com/openshift/openshift-ansible/tree/master/inventory/byo) directory.
 
 ## Running the ansible playbooks
 From the openshift-ansible checkout run:

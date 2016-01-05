@@ -105,6 +105,8 @@ ose3-node[1:2].example.com
 The hostnames above should resolve both from the hosts themselves and
 the host where ansible is running (if different).
 
+A more complete example inventory file ([hosts.ose.example](https://github.com/openshift/openshift-ansible/blob/master/inventory/byo/hosts.ose.example)) is available under the [`/inventory/byo`](https://github.com/openshift/openshift-ansible/tree/master/inventory/byo) directory.
+
 ## Running the ansible playbooks
 From the openshift-ansible checkout run:
 ```sh
