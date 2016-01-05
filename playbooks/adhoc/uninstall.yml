@@ -40,6 +40,7 @@
         - atomic-openshift-master-controllers
         - atomic-openshift-node
         - etcd
+        - haproxy
         - openshift-master
         - openshift-master-api
         - openshift-master-controllers
@@ -67,6 +68,7 @@
         - atomic-openshift-sdn-ovs
         - corosync
         - etcd
+        - haproxy
         - openshift
         - openshift-master
         - openshift-node
