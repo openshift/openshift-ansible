@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.22
+Version:        3.0.23
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -259,6 +259,18 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Jan 06 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.23-1
+- Move extra secret validations into openshift_facts. (abutcher@redhat.com)
+- Remove not is_containerized restriction on storage plugin includes.
+  (abutcher@redhat.com)
+- We can't enable manageiq for installations less than OSE 3.1 or Origin 1.1
+  (bleanhar@redhat.com)
+- Fix RHN subscription by explicitly attaching to the right pool
+  (lhuard@amadeus.com)
+- openshift_facts validation (abutcher@redhat.com)
+- Secrets validation. (abutcher@redhat.com)
+- Clean up idempotency issues with session secrets. (abutcher@redhat.com)
+
 * Wed Jan 06 2016 Kenny Woodson <kwoodson@redhat.com> 3.0.22-1
 - playbook for restarting SDN (jdiaz@redhat.com)
 - Stop haproxy and remove package during uninstall. (abutcher@redhat.com)
