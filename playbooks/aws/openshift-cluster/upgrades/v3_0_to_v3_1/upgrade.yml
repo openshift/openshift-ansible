@@ -4,8 +4,8 @@
 #  ansible-playbook playbooks/aws/openshift-cluster/upgrades/v3_0_to_v3_1/upgrade.yml -e deployment_type=online -e cluster_id=<cluster_id>
 - include: ../../../../common/openshift-cluster/upgrades/v3_0_to_v3_1/upgrade.yml
   vars_files:
-  - ../../../../aws/openshift-cluster/vars.yml
-  - ../../../../aws/openshift-cluster/cluster_hosts.yml
+  - "{{lookup('file', '../../../../aws/openshift-cluster/vars.yml')}}"
+  - "{{lookup('file', '../../../../aws/openshift-cluster/cluster_hosts.yml')}}"
   vars:
     g_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
     g_sudo: "{{ deployment_vars[deployment_type].sudo }}"
