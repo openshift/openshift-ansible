@@ -4,13 +4,17 @@
     dest: "{{ libvirt_storage_pool_path }}"
     state: directory
 
+# We need to set permissions on the directory and any items created under the directory, so we need to call the acl module with and without default set.
 - acl:
-    default: yes
+    default: "{{ item }}"
     entity: kvm
     etype: group
     name: "{{ libvirt_storage_pool_path }}"
     permissions: rwx
     state: present
+  with_items:
+    - no
+    - yes
 
 - name: Test if libvirt storage pool for openshift already exists
   command: "virsh -c {{ libvirt_uri }} pool-info {{ libvirt_storage_pool }}"
