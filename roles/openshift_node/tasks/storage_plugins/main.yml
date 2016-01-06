@@ -3,12 +3,11 @@
 # additional package dependencies
 - name: NFS storage plugin configuration
   include: nfs.yml
-  when: not openshift.common.is_containerized | bool
 
 - name: GlusterFS storage plugin configuration
   include: glusterfs.yml
-  when: "'glusterfs' in openshift.node.storage_plugin_deps and not openshift.common.is_containerized | bool "
+  when: "'glusterfs' in openshift.node.storage_plugin_deps"
 
 - name: Ceph storage plugin configuration
   include: ceph.yml
-  when: "'ceph' in openshift.node.storage_plugin_deps and not openshift.common.is_containerized | bool"
+  when: "'ceph' in openshift.node.storage_plugin_deps"
