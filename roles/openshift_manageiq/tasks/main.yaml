@@ -1,4 +1,8 @@
 ---
+- fail:
+    msg: "The openshift_manageiq role requires OpenShift Enterprise 3.1 or Origin 1.1."
+  when: not openshift.common.version_greater_than_3_1_or_1_1 | bool
+
 - name: Copy Configuration to temporary conf
   command: >
     cp {{ openshift.common.config_base }}/master/admin.kubeconfig {{manage_iq_tmp_conf}}

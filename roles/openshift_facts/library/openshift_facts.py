@@ -715,6 +715,26 @@ def set_version_facts_if_unset(facts):
 
     return facts
 
+def set_manageiq_facts_if_unset(facts):
+    """ Set manageiq facts. This currently includes common.use_manageiq.
+
+        Args:
+            facts (dict): existing facts
+        Returns:
+            dict: the facts dict updated with version facts.
+        Raises:
+            OpenShiftFactsInternalError:
+    """
+    if 'common' not in facts:
+        if 'version_greater_than_3_1_or_1_1' not in facts['common']:
+            raise OpenShiftFactsInternalError(
+                "Invalid invocation: The required facts are not set"
+            )
+
+    facts['common']['use_manageiq'] = facts['common']['version_greater_than_3_1_or_1_1']
+
+    return facts
+
 def set_sdn_facts_if_unset(facts, system_facts):
     """ Set sdn facts if not already present in facts dict
 
@@ -1021,6 +1041,11 @@ def set_container_facts_if_unset(facts):
     return facts
 
 
+class OpenShiftFactsInternalError(Exception):
+    """Origin Facts Error"""
+    pass
+
+
 class OpenShiftFactsUnsupportedRoleError(Exception):
     """Origin Facts Unsupported Role Error"""
     pass
@@ -1096,6 +1121,7 @@ class OpenShiftFacts(object):
         facts = set_sdn_facts_if_unset(facts, self.system_facts)
         facts = set_deployment_facts_if_unset(facts)
         facts = set_version_facts_if_unset(facts)
+        facts = set_manageiq_facts_if_unset(facts)
         facts = set_aggregate_facts(facts)
         facts = set_etcd_facts_if_unset(facts)
         facts = set_container_facts_if_unset(facts)
@@ -1121,7 +1147,7 @@ class OpenShiftFacts(object):
 
         common = dict(use_openshift_sdn=True, ip=ip_addr, public_ip=ip_addr,
                       deployment_type='origin', hostname=hostname,
-                      public_hostname=hostname, use_manageiq=True)
+                      public_hostname=hostname)
         common['client_binary'] = 'oc'
         common['admin_binary'] = 'oadm'
         common['dns_domain'] = 'cluster.local'
