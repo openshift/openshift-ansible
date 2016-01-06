@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.21
+Version:        3.0.22
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -259,6 +259,13 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Jan 06 2016 Kenny Woodson <kwoodson@redhat.com> 3.0.22-1
+- playbook for restarting SDN (jdiaz@redhat.com)
+- Stop haproxy and remove package during uninstall. (abutcher@redhat.com)
+- Group name as per hosts.origin.example (donovan.muller@gmail.com)
+- I believe the ami id changed since the initial documentation was created for
+  AWS deployment (rcook@redhat.com)
+
 * Tue Jan 05 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.21-1
 - Fix osm_controller_args and osm_api_server_args settings.
   (abutcher@redhat.com)
