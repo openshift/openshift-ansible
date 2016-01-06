@@ -1259,9 +1259,8 @@ class OpenShiftFacts(object):
 
         if new_local_facts != local_facts:
             self.validate_local_facts(new_local_facts)
-
+            changed = True
             if not module.check_mode:
-                changed = True
                 save_local_facts(self.filename, new_local_facts)
 
         self.changed = changed
@@ -1284,7 +1283,9 @@ class OpenShiftFacts(object):
 
     # disabling pylint errors for line-too-long since we're dealing
     # with best effort reduction of error messages here.
-    # pylint: disable=line-too-long
+    # disabling errors for too-many-branches since we require checking
+    # many conditions.
+    # pylint: disable=line-too-long, too-many-branches
     @staticmethod
     def validate_master_facts(facts, invalid_facts):
         """ Validate master facts
@@ -1302,6 +1303,13 @@ class OpenShiftFacts(object):
                 session_auth_secrets = facts['master']['session_auth_secrets']
                 if not issubclass(type(session_auth_secrets), list):
                     invalid_facts['session_auth_secrets'] = 'Expects session_auth_secrets is a list.'
+                elif 'session_encryption_secrets' not in facts['master']:
+                    invalid_facts['session_auth_secrets'] = ('openshift_master_session_encryption secrets must be set '
+                                                             'if openshift_master_session_auth_secrets is provided.')
+                elif len(session_auth_secrets) != len(facts['master']['session_encryption_secrets']):
+                    invalid_facts['session_auth_secrets'] = ('openshift_master_session_auth_secrets and '
+                                                             'openshift_master_session_encryption_secrets must be '
+                                                             'equal length.')
                 else:
                     for secret in session_auth_secrets:
                         if len(secret) < 32:
@@ -1312,6 +1320,10 @@ class OpenShiftFacts(object):
                 session_encryption_secrets = facts['master']['session_encryption_secrets']
                 if not issubclass(type(session_encryption_secrets), list):
                     invalid_facts['session_encryption_secrets'] = 'Expects session_encryption_secrets is a list.'
+                elif 'session_auth_secrets' not in facts['master']:
+                    invalid_facts['session_encryption_secrets'] = ('openshift_master_session_auth_secrets must be '
+                                                                   'set if openshift_master_session_encryption_secrets '
+                                                                   'is provided.')
                 else:
                     for secret in session_encryption_secrets:
                         if len(secret) not in [16, 24, 32]:

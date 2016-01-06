@@ -9,16 +9,6 @@
       Invalid OAuth grant method: {{ openshift_master_oauth_grant_method }}
   when: openshift_master_oauth_grant_method is defined and openshift_master_oauth_grant_method not in openshift_master_valid_grant_methods
 
-# Session Options Validation
-- fail:
-    msg: >
-      Both openshift_master_session_auth_secrets and openshift_master_session_encryption_secrets must be provided if either variable is set
-  when: (openshift_master_session_auth_secrets is defined and openshift_master_session_encryption_secrets is not defined) or (openshift_master_session_encryption_secrets is defined and openshift_master_session_auth_secrets is not defined)
-- fail:
-    msg: >
-      openshift_master_session_auth_secrets and openshift_master_encryption_secrets must be equal length
-  when: (openshift_master_session_auth_secrets is defined and openshift_master_session_encryption_secrets is defined) and (openshift_master_session_auth_secrets | length != openshift_master_session_encryption_secrets | length)
-
 # HA Variable Validation
 - fail:
     msg: "openshift_master_cluster_method must be set to either 'native' or 'pacemaker' for multi-master installations"

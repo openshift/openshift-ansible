@@ -238,15 +238,6 @@
 
 - name: Check for cached session secrets
   hosts: oo_first_master
-  pre_tasks:
-  - fail:
-      msg: >
-        Both openshift_master_session_auth_secrets and openshift_master_session_encryption_secrets must be provided if either variable is set
-    when: (openshift_master_session_auth_secrets is defined and openshift_master_session_encryption_secrets is not defined) or (openshift_master_session_encryption_secrets is defined and openshift_master_session_auth_secrets is not defined)
-  - fail:
-      msg: >
-        openshift_master_session_auth_secrets and openshift_master_encryption_secrets must be equal length
-    when: (openshift_master_session_auth_secrets is defined and openshift_master_session_encryption_secrets is defined) and (openshift_master_session_auth_secrets | length != openshift_master_session_encryption_secrets | length)
   roles:
   - role: openshift_facts
   post_tasks:
