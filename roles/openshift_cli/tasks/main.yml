@@ -46,3 +46,7 @@
     - /usr/local/bin/oc
     - /usr/local/bin/kubectl
   when: openshift.common.is_containerized | bool
+  
+- name: Reload common facts
+  openshift_facts:
+    role: common
