@@ -72,7 +72,7 @@ def delete_hosts(hosts):
                 click.echo("\"{}\" doesn't coorespond to any valid input.".format(del_idx))
     return hosts, None
 
-def collect_hosts(oo_cfg, masters_set=False, print_summary=True):
+def collect_hosts(oo_cfg, existing_env=False, masters_set=False, print_summary=True):
     """
         Collect host information from user. This will later be filled in using
         ansible.
@@ -138,6 +138,11 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
         #else:
         #    host_props['containerized'] = False
         host_props['containerized'] = False
+
+        if existing_env:
+            host_props['new_host'] = True
+        else:
+            host_props['new_host'] = False
 
         host = Host(**host_props)
 
@@ -507,7 +512,7 @@ def collect_new_nodes(oo_cfg):
 Add new nodes here
     """
     click.echo(message)
-    return collect_hosts(oo_cfg, masters_set=True, print_summary=False)
+    return collect_hosts(oo_cfg, existing_env=True, masters_set=True, print_summary=False)
 
 def get_installed_hosts(hosts, callback_facts):
     installed_hosts = []
