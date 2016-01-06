@@ -9,7 +9,6 @@
       Invalid OAuth grant method: {{ openshift_master_oauth_grant_method }}
   when: openshift_master_oauth_grant_method is defined and openshift_master_oauth_grant_method not in openshift_master_valid_grant_methods
 
-
 # HA Variable Validation
 - fail:
     msg: "openshift_master_cluster_method must be set to either 'native' or 'pacemaker' for multi-master installations"
@@ -55,9 +54,9 @@
       portal_net: "{{ openshift_master_portal_net | default(None) }}"
       session_max_seconds: "{{ openshift_master_session_max_seconds | default(None) }}"
       session_name: "{{ openshift_master_session_name | default(None) }}"
+      session_secrets_file: "{{ openshift_master_session_secrets_file | default(None) }}"
       session_auth_secrets: "{{ openshift_master_session_auth_secrets | default(None) }}"
       session_encryption_secrets: "{{ openshift_master_session_encryption_secrets | default(None) }}"
-      session_secrets_file: "{{ openshift_master_session_secrets_file | default(None) }}"
       access_token_max_seconds: "{{ openshift_master_access_token_max_seconds | default(None) }}"
       auth_token_max_seconds: "{{ openshift_master_auth_token_max_seconds | default(None) }}"
       identity_providers: "{{ openshift_master_identity_providers | default(None) }}"
@@ -221,7 +220,7 @@
   template:
     dest: "{{ openshift.master.session_secrets_file }}"
     src: sessionSecretsFile.yaml.v1.j2
-    force: no
+  when: openshift.master.session_auth_secrets is defined and openshift.master.session_encryption_secrets is defined
   notify:
   - restart master
   - restart master api

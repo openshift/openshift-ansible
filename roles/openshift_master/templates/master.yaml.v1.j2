@@ -127,7 +127,9 @@ oauthConfig:
   sessionConfig:
     sessionMaxAgeSeconds: {{ openshift.master.session_max_seconds }}
     sessionName: {{ openshift.master.session_name }}
+{% if openshift.master.session_auth_secrets is defined and openshift.master.session_encryption_secrets is defined %}
     sessionSecretsFile: {{ openshift.master.session_secrets_file }}
+{% endif %}
   tokenConfig:
     accessTokenMaxAgeSeconds: {{ openshift.master.access_token_max_seconds }}
     authorizeTokenMaxAgeSeconds: {{ openshift.master.auth_token_max_seconds }}
