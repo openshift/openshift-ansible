@@ -73,12 +73,12 @@
       g_new_version: "{{ g_aos_versions.curr_version.split('-', 1).0 if g_aos_versions.avail_version is none else g_aos_versions.avail_version.split('-', 1).0 }}"
 
   - fail:
-      msg: This playbook requires Origin 1.0.6 or later
-    when: deployment_type == 'origin' and g_aos_versions.curr_version | version_compare('1.0.6','<')
+      msg: This playbook requires Origin 1.0.6 or later and the Origin 1.1 package must be available
+    when: deployment_type == 'origin' and (g_aos_versions.curr_version | version_compare('1.0.6','<') or (g_aos_versions.avail_version is none or g_aos_versions.avail_version | version_compare('1.1','<')))
 
   - fail:
       msg: Atomic OpenShift 3.1 packages not found
-    when: g_aos_versions.curr_version | version_compare('3.0.2.900','<') and (g_aos_versions.avail_version is none or g_aos_versions.avail_version | version_compare('3.0.2.900','<'))
+     when: deployment_type == 'openshift-enterprise' and (g_aos_versions.curr_version | version_compare('3.0.2.900','<') and (g_aos_versions.avail_version is none or g_aos_versions.avail_version | version_compare('3.0.2.900','<')))
 
   - set_fact:
       pre_upgrade_complete: True
