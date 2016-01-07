@@ -730,8 +730,8 @@ def set_manageiq_facts_if_unset(facts):
             raise OpenShiftFactsInternalError(
                 "Invalid invocation: The required facts are not set"
             )
-
-    facts['common']['use_manageiq'] = facts['common']['version_greater_than_3_1_or_1_1']
+    if 'use_mangeiq' not in facts['common']:
+        facts['common']['use_manageiq'] = facts['common']['version_greater_than_3_1_or_1_1']
 
     return facts
 
