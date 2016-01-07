@@ -44,41 +44,14 @@
   action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-sdn-ovs{{ openshift_version }} state=present"
   when: openshift.common.use_openshift_sdn and not openshift.common.is_containerized | bool
 
-- name: Get docker images
-  command: docker images
-  changed_when: false
-  when: openshift.common.is_containerized | bool
-  register: docker_images
-
 - name: Pull node image
   command: >
     docker pull {{ openshift.node.node_image }}
-  when: openshift.common.is_containerized | bool and openshift.node.node_image not in docker_images.stdout
-  
-- name: Wait for node image
-  command: >
-      docker images
-  register: docker_images
-  until: openshift.node.node_image in docker_images.stdout
-  retries: 30
-  delay: 10
-  changed_when: false
   when: openshift.common.is_containerized | bool
-    
+
 - name: Pull OpenVSwitch image
   command: >
     docker pull {{ openshift.node.ovs_image }}
-  when: openshift.common.is_containerized | bool and openshift.node.ovs_image not in docker_images.stdout
-    and openshift.common.use_openshift_sdn | bool
-  
-- name: Wait for OpenVSwitch image
-  command: >
-      docker images
-  register: docker_images
-  until: openshift.node.ovs_image in docker_images.stdout
-  retries: 30
-  delay: 10
-  changed_when: false
   when: openshift.common.is_containerized | bool and openshift.common.use_openshift_sdn | bool
 
 - name: Install Node docker service file

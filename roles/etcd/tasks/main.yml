@@ -11,24 +11,8 @@
   action: "{{ ansible_pkg_mgr }} name=etcd-2.* state=present"
   when: not openshift.common.is_containerized | bool
 
-- name: Get docker images
-  command: docker images
-  changed_when: false
-  when: openshift.common.is_containerized | bool
-  register: docker_images
-
 - name: Pull etcd container
   command: docker pull {{ openshift.etcd.etcd_image }}
-  when: openshift.common.is_containerized | bool and openshift.etcd.etcd_image not in docker_images.stdout
-  
-- name: Wait for etcd image
-  command: >
-      docker images
-  register: docker_images
-  until: openshift.etcd.etcd_image in docker_images.stdout
-  retries: 30
-  delay: 10
-  changed_when: false
   when: openshift.common.is_containerized | bool
 
 - name: Install etcd container service file
