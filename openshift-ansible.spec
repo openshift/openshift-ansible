@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.24
+Version:        3.0.25
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -259,6 +259,20 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Jan 07 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.25-1
+- Bug 1296388 - The playbook still configure ManageIQ when
+  openshift_use_manageiq is false (bleanhar@redhat.com)
+- Add a banner to CLI wrapper instructing users that it's only for
+  bootstrapping (sdodson@redhat.com)
+- Rename env into clusterid and add environment in the OpenStack VMs tags
+  (lhuard@amadeus.com)
+- Fix terminate.yml on OpenStack (lhuard@amadeus.com)
+- Install gluster and ceph packages when containerized but not atomic
+  (sdodson@redhat.com)
+- Update openshift_facts config_base for Online deployments (whearn@redhat.com)
+- Fix multi-word arguments & cli wrapper stdin plumbing (sdodson@redhat.com)
+- Improve 3.1/1.1 upgrade check (jdetiber@redhat.com)
+
 * Thu Jan 07 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.24-1
 - Setting relative paths in the upgrade playbooks wasn't working
   (bleanhar@redhat.com)
