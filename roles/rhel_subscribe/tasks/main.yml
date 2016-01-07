@@ -33,4 +33,4 @@
     autosubscribe: yes
 
 - include: enterprise.yml
-  when: deployment_type == 'enterprise'
+  when: deployment_type in [ 'enterprise', 'atomic-enterprise', 'openshift-enterprise' ]

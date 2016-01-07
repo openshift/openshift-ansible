@@ -2,8 +2,24 @@
 - name: Disable all repositories
   command: subscription-manager repos --disable="*"
 
+- set_fact:
+    default_ose_version: '3.0'
+  when: deployment_type == 'enterprise'
+
+- set_fact:
+    default_ose_version: '3.1'
+  when: deployment_type in ['atomic-enterprise', 'openshift-enterprise']
+
+- set_fact:
+    ose_version: "{{ lookup('oo_option', 'ose_version') | default(default_ose_version, True) }}"
+
+- fail:
+    msg: "{{ ose_version }} is not a valid version for {{ deployment_type }} deployment type"
+  when: ( deployment_type == 'enterprise' and ose_version not in ['3.0'] ) or
+        ( deployment_type in ['atomic-enterprise', 'openshift-enterprise'] and ose_version not in ['3.1'] )
+
 - name: Enable RHEL repositories
   command: subscription-manager repos \
                --enable="rhel-7-server-rpms" \
                --enable="rhel-7-server-extras-rpms" \
-               --enable="rhel-7-server-ose-3.0-rpms"
+               --enable="rhel-7-server-ose-{{ ose_version }}-rpms"
