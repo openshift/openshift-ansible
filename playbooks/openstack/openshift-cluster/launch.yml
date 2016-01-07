@@ -29,6 +29,7 @@
 
   - name: Create or Update OpenStack Stack
     command: 'heat {{ heat_stack_action }} -f {{ openstack_infra_heat_stack }}
+             -P cluster_env={{ cluster_env }}
              -P cluster_id={{ cluster_id }}
              -P cidr={{ openstack_network_cidr }}
              -P dns_nameservers={{ openstack_network_dns | join(",") }}
