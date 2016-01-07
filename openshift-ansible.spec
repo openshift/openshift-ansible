@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.23
+Version:        3.0.24
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -259,6 +259,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Jan 07 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.24-1
+- Setting relative paths in the upgrade playbooks wasn't working
+  (bleanhar@redhat.com)
+
 * Wed Jan 06 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.23-1
 - Move extra secret validations into openshift_facts. (abutcher@redhat.com)
 - Remove not is_containerized restriction on storage plugin includes.
