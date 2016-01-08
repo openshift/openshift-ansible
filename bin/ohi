@@ -48,28 +48,18 @@ class Ohi(object):
             self.aws.print_host_types()
             return 0
 
-        hosts = None
-        if self.args.host_type is not None and \
-           self.args.env is not None:
-            # Both env and host-type specified
-            hosts = self.aws.get_host_list(host_type=self.args.host_type,
-                                           envs=self.args.env,
-                                           version=self.args.openshift_version,
-                                           cached=self.args.cache_only)
+        if self.args.v3:
+            version = '3'
+        elif self.args.all_versions:
+            version = 'all'
+        else:
+            version = '2'
 
-        if self.args.host_type is None and \
-           self.args.env is not None:
-            # Only env specified
-            hosts = self.aws.get_host_list(envs=self.args.env,
-                                           version=self.args.openshift_version,
-                                           cached=self.args.cache_only)
-
-        if self.args.host_type is not None and \
-           self.args.env is None:
-            # Only host-type specified
-            hosts = self.aws.get_host_list(host_type=self.args.host_type,
-                                           version=self.args.openshift_version,
-                                           cached=self.args.cache_only)
+        hosts = self.aws.get_host_list(clusters=self.args.cluster,
+                                       host_type=self.args.host_type,
+                                       envs=self.args.env,
+                                       version=version,
+                                       cached=self.args.cache_only)
 
         if hosts is None:
             # We weren't able to determine what they wanted to do
@@ -104,19 +94,26 @@ class Ohi(object):
         parser = argparse.ArgumentParser(description='OpenShift Host Inventory')
 
         parser.add_argument('--list-host-types', default=False, action='store_true', help='List all of the host types')
+        parser.add_argument('--list', default=False, action='store_true', help='List all hosts')
 
-        parser.add_argument('-e', '--env', action="store", help="Which environment to use")
+        parser.add_argument('-c', '--cluster', action="append", help="Which clusterid to use")
+        parser.add_argument('-e', '--env', action="append", help="Which environment to use")
 
         parser.add_argument('-t', '--host-type', action="store", help="Which host type to use")
 
         parser.add_argument('-l', '--user', action='store', default=None, help='username')
 
-        parser.add_argument('-c', '--cache-only', action='store_true', default=False,
+        parser.add_argument('--cache-only', action='store_true', default=False,
                             help='Retrieve the host inventory by cache only. Default is false.')
 
-        parser.add_argument('-o', '--openshift-version', action='store', default='2',
+        parser.add_argument('--v2', action='store_true', default=True,
                             help='Specify the openshift version. Default is 2')
 
+        parser.add_argument('--v3', action='store_true', default=False,
+                            help='Specify the openshift version.')
+
+        parser.add_argument('--all-versions', action='store_true', default=False,
+                            help='Specify the openshift version. Return all versions')
 
         self.args = parser.parse_args()
 
