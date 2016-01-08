@@ -133,6 +133,14 @@
       - parsed_outputs.node_floating_ips
       - parsed_outputs.infra_floating_ips
 
+- name: Add self in /etc/hosts because OpenStack may lack DNS
+  hosts: "tag_clusterid_{{ cluster_id }}"
+  tasks:
+  - name: Update /etc/hosts
+    lineinfile:
+      line: "{{ ansible_default_ipv4.address }} {{ ansible_nodename }}"
+      dest: /etc/hosts
+
 - include: update.yml
 
 - include: list.yml
