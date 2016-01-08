@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.26
+Version:        3.0.27
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -259,6 +259,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Jan 08 2016 Kenny Woodson <kwoodson@redhat.com> 3.0.27-1
+- Update to metadata tooling. (kwoodson@redhat.com)
+- Fix VM drive cleanup during terminate on libvirt (lhuard@amadeus.com)
+
 * Fri Jan 08 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.26-1
 - Bug 1296388 - fixing typo (bleanhar@redhat.com)
 
