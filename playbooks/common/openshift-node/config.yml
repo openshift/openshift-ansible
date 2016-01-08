@@ -215,13 +215,15 @@
                          | oo_collect('openshift.common.hostname') }}"
     openshift_node_vars: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config']) }}"
   pre_tasks:
+  # Necessary because when you're on a node that's also a master the master will be
+  # restarted after the node restarts docker and it will take up to 60 seconds for
+  # systemd to start the master again
   - name: Wait for master to become available before proceeding
     wait_for:
       host: "{{ hostvars[groups.oo_first_master.0].openshift.common.ip }}"
       port: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_port }}"
       state: started
       timeout: 180
-      delay: 10
     when: openshift.common.is_containerized | bool
   roles:
   - openshift_manage_node
