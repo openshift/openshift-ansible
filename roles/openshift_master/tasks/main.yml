@@ -87,7 +87,7 @@
   when: not openshift.common.is_containerized | bool
 
 - name: Get docker images
-  command: docker images
+  shell: docker images | awk '{  print $1 "\:" $2 }'
   changed_when: false
   when: openshift.common.is_containerized | bool
   register: docker_images
@@ -98,15 +98,14 @@
   when: openshift.common.is_containerized | bool and openshift.master.master_image not in docker_images.stdout
   
 - name: Wait for master image
-  command: >
-      docker images
+  shell: docker images | awk '{  print $1 "\:" $2 }'
   register: docker_images
   until: openshift.master.master_image in docker_images.stdout
   retries: 30
   delay: 10
   changed_when: false
   when: openshift.common.is_containerized | bool
-
+  
 - name: Install Master docker service file
   template:
     dest: "/etc/systemd/system/{{ openshift.common.service_type }}-master.service"

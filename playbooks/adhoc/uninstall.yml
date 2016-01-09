@@ -17,6 +17,7 @@
       shell: ls /run/ostree-booted
       ignore_errors: yes
       failed_when: false
+      changed_when: false
       register: ostree_output
 
       # Since we're not calling openshift_facts we'll do this for now

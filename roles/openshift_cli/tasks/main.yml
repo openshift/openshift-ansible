@@ -9,9 +9,10 @@
   when: not openshift.common.is_containerized | bool
   
 - name: List Docker images
-  command: >
-    docker images
+  shell: >
+    docker images | awk '{  print $1 "\:" $2 }'
   register: docker_images
+  changed_when: false
   
 - name: Pull CLI Image
   command: >
@@ -19,8 +20,8 @@
   when: openshift.common.is_containerized | bool and openshift.common.cli_image not in docker_images.stdout
   
 - name: Wait for CLI image
-  command: >
-      docker images
+  shell: >
+      docker images | awk '{  print $1 "\:" $2 }'
   register: docker_images
   until: openshift.common.cli_image in docker_images.stdout
   retries: 30
