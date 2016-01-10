@@ -14,3 +14,5 @@
     openshift_deployment_type: "{{ deployment_type }}"
     openshift_hostname: "{{ gce_private_ip }}"
     openshift_use_openshift_sdn: "{{ do_we_use_openshift_sdn }}"
+    openshift_router_selector: 'type=infra'
+    osm_infra_nodes: "{{ g_infra_hosts }}"

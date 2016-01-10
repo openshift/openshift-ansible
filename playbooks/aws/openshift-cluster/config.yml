@@ -12,3 +12,5 @@
     openshift_deployment_type: "{{ deployment_type }}"
     openshift_hostname: "{{ ec2_private_ip_address }}"
     openshift_public_hostname: "{{ ec2_ip_address }}"
+    openshift_router_selector: 'type=infra'
+    osm_infra_nodes: "{{ g_infra_hosts }}"
