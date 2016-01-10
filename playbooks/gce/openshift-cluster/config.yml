@@ -6,11 +6,16 @@
   - ../../gce/openshift-cluster/vars.yml
   - ../../gce/openshift-cluster/cluster_hosts.yml
   vars:
-    g_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
+    g_ssh_user: "{{ lookup('env', 'gce_ssh_user') | default(deployment_vars[deployment_type].ssh_user, true) }}"
     g_sudo: "{{ deployment_vars[deployment_type].sudo }}"
     g_nodeonmaster: true
     openshift_cluster_id: "{{ cluster_id }}"
     openshift_debug_level: "{{ debug_level }}"
     openshift_deployment_type: "{{ deployment_type }}"
     openshift_hostname: "{{ gce_private_ip }}"
-    openshift_use_openshift_sdn: "{{ do_we_use_openshift_sdn }}"
+    openshift_router_selector: 'type=infra'
+    osm_infra_nodes: "{{ g_infra_hosts }}"
+    openshift_use_openshift_sdn: "{{ lookup('oo_option', 'use_openshift_sdn') }}"
+    os_sdn_network_plugin_name: "{{ lookup('oo_option', 'sdn_network_plugin_name') }}"
+    openshift_use_flannel: "{{ lookup('oo_option', 'use_flannel') }}"
+    openshift_use_fluentd: "{{ lookup('oo_option', 'use_fluentd') }}"

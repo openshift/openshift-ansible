@@ -188,9 +188,6 @@ def normalize_gce_facts(metadata, facts):
     _, _, zone = metadata['instance']['zone'].rpartition('/')
     facts['zone'] = zone
 
-    # Default to no sdn for GCE deployments
-    facts['use_openshift_sdn'] = False
-
     # GCE currently only supports a single interface
     facts['network']['ip'] = facts['network']['interfaces'][0]['ips'][0]
     pub_ip = facts['network']['interfaces'][0]['public_ips'][0]
@@ -735,6 +732,24 @@ def set_manageiq_facts_if_unset(facts):
 
     return facts
 
+def perform_type_conversions(facts):
+    """ handle type conversion for facts """
+    known_bools = {'common': ['use_openshift_sdn', 'use_fluentd', 'use_flannel'],
+                   'node': ['schedulable', 'set_node_ip'],
+                   'master': ['api_use_ssl', 'console_use_ssl',
+                              'etcd_use_ssl', 'embedded_etcd', 'embedded_kube',
+                              'embedded_dns']}
+
+    for role, params in known_bools.iteritems():
+        if role in facts:
+            for param in params:
+                if param in facts[role]:
+                    val = facts[role][param]
+                    if not (val == '' or isinstance(val, bool)):
+                        facts[role][param] = bool(strtobool(str(val)))
+
+    return facts
+
 def set_sdn_facts_if_unset(facts, system_facts):
     """ Set sdn facts if not already present in facts dict
 
@@ -745,21 +760,6 @@ def set_sdn_facts_if_unset(facts, system_facts):
             dict: the facts dict updated with the generated sdn facts if they
                   were not already present
     """
-    if 'common' in facts:
-        use_sdn = facts['common']['use_openshift_sdn']
-        if not (use_sdn == '' or isinstance(use_sdn, bool)):
-            use_sdn = bool(strtobool(str(use_sdn)))
-            facts['common']['use_openshift_sdn'] = use_sdn
-        if 'sdn_network_plugin_name' not in facts['common']:
-            plugin = 'redhat/openshift-ovs-subnet' if use_sdn else ''
-            facts['common']['sdn_network_plugin_name'] = plugin
-
-    if 'master' in facts:
-        if 'sdn_cluster_network_cidr' not in facts['master']:
-            facts['master']['sdn_cluster_network_cidr'] = '10.1.0.0/16'
-        if 'sdn_host_subnet_length' not in facts['master']:
-            facts['master']['sdn_host_subnet_length'] = '8'
-
     if 'node' in facts and 'sdn_mtu' not in facts['node']:
         node_ip = facts['common']['ip']
 
@@ -883,10 +883,6 @@ def apply_provider_facts(facts, provider_facts):
     """
     if not provider_facts:
         return facts
-
-    use_openshift_sdn = provider_facts.get('use_openshift_sdn')
-    if isinstance(use_openshift_sdn, bool):
-        facts['common']['use_openshift_sdn'] = use_openshift_sdn
 
     common_vars = [('hostname', 'ip'), ('public_hostname', 'public_ip')]
     for h_var, ip_var in common_vars:
@@ -1078,7 +1074,7 @@ class OpenShiftFacts(object):
         Raises:
             OpenShiftFactsUnsupportedRoleError:
     """
-    known_roles = ['common', 'master', 'node', 'master_sdn', 'node_sdn', 'etcd', 'nfs']
+    known_roles = ['common', 'master', 'node', 'etcd', 'nfs']
 
     def __init__(self, role, filename, local_facts, additive_facts_to_overwrite=False):
         self.changed = False
@@ -1110,6 +1106,7 @@ class OpenShiftFacts(object):
         provider_facts = self.init_provider_facts()
         facts = apply_provider_facts(defaults, provider_facts)
         facts = merge_facts(facts, local_facts, additive_facts_to_overwrite)
+        facts = perform_type_conversions(facts)
         facts['current_config'] = get_current_config(facts)
         facts = set_url_facts_if_unset(facts)
         facts = set_project_cfg_facts_if_unset(facts)
@@ -1146,7 +1143,9 @@ class OpenShiftFacts(object):
                            self.system_facts['fqdn']]
         hostname = choose_hostname(hostname_values, ip_addr)
 
-        common = dict(use_openshift_sdn=True, ip=ip_addr, public_ip=ip_addr,
+        common = dict(use_openshift_sdn=True,
+                      sdn_network_plugin_name='redhat/openshift-ovs-subnet',
+                      ip=ip_addr, public_ip=ip_addr,
                       deployment_type='origin', hostname=hostname,
                       public_hostname=hostname)
         common['client_binary'] = 'oc'
@@ -1166,7 +1165,9 @@ class OpenShiftFacts(object):
                           session_name='ssn', session_secrets_file='',
                           access_token_max_seconds=86400,
                           auth_token_max_seconds=500,
-                          oauth_grant_method='auto')
+                          oauth_grant_method='auto',
+                          sdn_host_subnet_length='8',
+                          sdn_cluster_network_cidr='10.1.0.0/16')
             defaults['master'] = master
 
         if 'node' in roles:
