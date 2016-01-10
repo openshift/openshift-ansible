@@ -119,6 +119,8 @@ def write_host(host, inventory, schedulable=None):
         facts += ' openshift_hostname={}'.format(host.hostname)
     if host.public_hostname:
         facts += ' openshift_public_hostname={}'.format(host.public_hostname)
+    if 'OO_INSTALL_ETCD_INTERFACE' in os.environ:
+        facts += ' etcd_interface=%s' % os.environ['OO_INSTALL_ETCD_INTERFACE']
     # TODO: For not write_host is handles both master and nodes.
     # Technically only nodes will ever need this.
 
