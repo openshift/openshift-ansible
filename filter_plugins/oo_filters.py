@@ -15,6 +15,9 @@ import json
 import yaml
 from ansible.utils.unicode import to_unicode
 
+# Disabling too-many-public-methods, since filter methods are necessarily
+# public
+# pylint: disable=too-many-public-methods
 class FilterModule(object):
     ''' Custom ansible filters '''
 
@@ -48,7 +51,7 @@ class FilterModule(object):
     def oo_flatten(data):
         ''' This filter plugin will flatten a list of lists
         '''
-        if not issubclass(type(data), list):
+        if not isinstance(data, list):
             raise errors.AnsibleFilterError("|failed expects to flatten a List")
 
         return [item for sublist in data for item in sublist]
@@ -68,14 +71,14 @@ class FilterModule(object):
                 filters   = {'z': 'z'}
                 returns [1, 2, 3]
         '''
-        if not issubclass(type(data), list):
+        if not isinstance(data, list):
             raise errors.AnsibleFilterError("|failed expects to filter on a List")
 
         if not attribute:
             raise errors.AnsibleFilterError("|failed expects attribute to be set")
 
         if filters is not None:
-            if not issubclass(type(filters), dict):
+            if not isinstance(filters, dict):
                 raise errors.AnsibleFilterError("|failed expects filter to be a"
                                                 " dict")
             retval = [FilterModule.get_attr(d, attribute) for d in data if (
@@ -93,10 +96,10 @@ class FilterModule(object):
                 returns [1, 3]
         '''
 
-        if not issubclass(type(data), list):
+        if not isinstance(data, list):
             raise errors.AnsibleFilterError("|failed expects to filter on a list")
 
-        if not issubclass(type(keys), list):
+        if not isinstance(keys, list):
             raise errors.AnsibleFilterError("|failed expects first param is a list")
 
         # Gather up the values for the list of keys passed in
@@ -112,10 +115,10 @@ class FilterModule(object):
                 returns [1, 3]
         '''
 
-        if not issubclass(type(data), dict):
+        if not isinstance(data, dict):
             raise errors.AnsibleFilterError("|failed expects to filter on a dict")
 
-        if not issubclass(type(keys), list):
+        if not isinstance(keys, list):
             raise errors.AnsibleFilterError("|failed expects first param is a list")
 
         # Gather up the values for the list of keys passed in
@@ -131,7 +134,7 @@ class FilterModule(object):
                 prepend = 'apple-'
                 returns ['apple-cart', 'apple-tree']
         '''
-        if not issubclass(type(data), list):
+        if not isinstance(data, list):
             raise errors.AnsibleFilterError("|failed expects first param is a list")
         if not all(isinstance(x, basestring) for x in data):
             raise errors.AnsibleFilterError("|failed expects first param is a list"
@@ -144,7 +147,7 @@ class FilterModule(object):
         '''Take a list of dict in the form of { 'key': 'value'} and
            arrange them as a list of strings ['key=value']
         '''
-        if not issubclass(type(data), list):
+        if not isinstance(data, list):
             raise errors.AnsibleFilterError("|failed expects first param is a list")
 
         rval = []
@@ -158,7 +161,7 @@ class FilterModule(object):
         '''Take a dict in the form of { 'key': 'value', 'key': 'value' } and
            arrange them as a string 'key=value key=value'
         '''
-        if not issubclass(type(data), dict):
+        if not isinstance(data, dict):
             raise errors.AnsibleFilterError("|failed expects first param is a dict")
 
         return out_joiner.join([in_joiner.join([k, v]) for k, v in data.items()])
@@ -168,7 +171,7 @@ class FilterModule(object):
         ''' This takes a list of amis and an image name and attempts to return
             the latest ami.
         '''
-        if not issubclass(type(data), list):
+        if not isinstance(data, list):
             raise errors.AnsibleFilterError("|failed expects first param is a list")
 
         if not data:
@@ -210,7 +213,7 @@ class FilterModule(object):
                     }
                 }
         '''
-        if not issubclass(type(data), dict):
+        if not isinstance(data, dict):
             raise errors.AnsibleFilterError("|failed expects first param is a dict")
         if host_type not in ['master', 'node', 'etcd']:
             raise errors.AnsibleFilterError("|failed expects etcd, master or node"
@@ -273,14 +276,50 @@ class FilterModule(object):
                 returns [ { a: 1, b: True },
                           { a: 5, b: True } ]
         '''
-        if not issubclass(type(data), list):
+        if not isinstance(data, list):
             raise errors.AnsibleFilterError("|failed expects to filter on a list")
 
-        if not issubclass(type(filter_attr), str):
-            raise errors.AnsibleFilterError("|failed expects filter_attr is a str")
+        if not isinstance(filter_attr, basestring):
+            raise errors.AnsibleFilterError("|failed expects filter_attr is a str or unicode")
 
         # Gather up the values for the list of keys passed in
         return [x for x in data if x.has_key(filter_attr) and x[filter_attr]]
+
+    @staticmethod
+    def oo_nodes_with_label(nodes, label=None, value=None):
+        ''' Filters a list of nodes by label '''
+        if not isinstance(nodes, list):
+            raise errors.AnsibleFilterError("failed expects to filter on a list")
+        if label is None:
+            return nodes
+        elif not isinstance(label, basestring):
+            raise errors.AnsibleFilterError("failed expects label to be a string")
+        if value is not None and not isinstance(value, basestring):
+            raise errors.AnsibleFilterError("failed expects value to be a string")
+
+        def label_filter(node):
+            ''' filter function for testing if node should be returned '''
+            if not isinstance(node, dict):
+                raise errors.AnsibleFilterError("failed expects to filter on a list of dicts")
+            if 'openshift_node_labels' in node:
+                labels = node['openshift_node_labels']
+            elif 'cli_openshift_node_labels' in node:
+                labels = node['cli_openshift_node_labels']
+            elif 'openshift' in node and 'node' in node['openshift'] and 'labels' in node['openshift']['node']:
+                labels = node['openshift']['node']['labels']
+            else:
+                return False
+
+            if isinstance(labels, basestring):
+                labels = json.loads(labels)
+            if not isinstance(labels, dict):
+                raise errors.AnsibleFilterError(
+                    "failed expected node labels to be a dict or serializable to a dict"
+                )
+            return label in labels and (value is None or labels[label] == value)
+
+        return [n for n in nodes if label_filter(n)]
+
 
     @staticmethod
     def oo_parse_heat_stack_outputs(data):
@@ -367,10 +406,10 @@ class FilterModule(object):
                            "keyfile": "/etc/origin/master/named_certificates/custom2.key",
                            "names": [ "some-hostname.com" ] }]
         '''
-        if not issubclass(type(named_certs_dir), unicode):
-            raise errors.AnsibleFilterError("|failed expects named_certs_dir is unicode")
+        if not isinstance(named_certs_dir, basestring):
+            raise errors.AnsibleFilterError("|failed expects named_certs_dir is str or unicode")
 
-        if not issubclass(type(internal_hostnames), list):
+        if not isinstance(internal_hostnames, list):
             raise errors.AnsibleFilterError("|failed expects internal_hostnames is list")
 
         for certificate in certificates:
@@ -472,7 +511,7 @@ class FilterModule(object):
     def oo_generate_secret(num_bytes):
         ''' generate a session secret '''
 
-        if not issubclass(type(num_bytes), int):
+        if not isinstance(num_bytes, int):
             raise errors.AnsibleFilterError("|failed expects num_bytes is int")
 
         secret = os.urandom(num_bytes)
@@ -512,4 +551,5 @@ class FilterModule(object):
             "oo_pretty_print_cluster": self.oo_pretty_print_cluster,
             "oo_generate_secret": self.oo_generate_secret,
             "to_padded_yaml": self.to_padded_yaml,
+            "oo_nodes_with_label": self.oo_nodes_with_label,
         }
