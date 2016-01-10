@@ -9,9 +9,9 @@ deployment_rhel7_ent_base:
 
 deployment_vars:
   origin:
-    image: preinstalled-slave-50g-v5
+    image: centos-7
     machine_type: n1-standard-1
-    ssh_user: root
+    ssh_user: "{{ ansible_ssh_user }}"
     sudo: yes
   online:
     image: libra-rhel7
