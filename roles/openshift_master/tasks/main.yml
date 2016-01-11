@@ -287,6 +287,22 @@
     master_api_service_status_changed: "{{ start_result | changed }}"
   when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
 
+- name: Wait for API to become available
+  # Using curl here since the uri module requires python-httplib2 and
+  # wait_for port doesn't provide health information.
+  command: >
+    curl -k --head --silent {{ openshift.master.api_url }}
+  register: api_available_output
+  until: api_available_output.stdout.find("200 OK") != -1
+  retries: 120
+  delay: 1
+  changed_when: false
+
+- fail:
+    msg: >
+      Unable to contact master API at {{ openshift.master.api_url }}
+  when: api_available_output.stdout.find("200 OK") == -1
+
 - name: Start and enable master controller
   service: name={{ openshift.common.service_type }}-master-controllers enabled=yes state=started
   when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
