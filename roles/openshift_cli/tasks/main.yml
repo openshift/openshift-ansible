@@ -3,6 +3,7 @@
     role: common
     local_facts:
       deployment_type: "{{ openshift_deployment_type }}"
+      cli_image: "{{ osm_image | default(None) }}"
       
 - name: Install clients
   yum: pkg={{ openshift.common.service_type }}-clients state=installed
