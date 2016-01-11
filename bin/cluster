@@ -294,11 +294,8 @@ if __name__ == '__main__':
         meta_parser.add_argument('cluster_id', help='prefix for cluster VM names')
 
     meta_parser.add_argument('-t', '--deployment-type',
-                             choices=['origin', 'online', 'enterprise'],
+                             choices=['origin', 'online', 'enterprise', 'atomic-enterprise', 'openshift-enterprise'],
                              help='Deployment type. (default: origin)')
-    meta_parser.add_argument('-T', '--product-type',
-                             choices=['openshift', 'atomic-enterprise'],
-                             help='Product type. (default: openshift)')
     meta_parser.add_argument('-o', '--option', action='append',
                              help='options')
 
