@@ -88,9 +88,9 @@ kubernetesMasterConfig:
   - v1
 {% endif %}
   apiServerArguments: 
-    {{ openshift.master.api_server_args | default(None) | to_yaml }}
+    {{ openshift.master.api_server_args | default(None) | to_padded_yaml( level=2, indent=2 ) }}
   controllerArguments: 
-    {{ openshift.master.controller_args | default(None) | to_yaml }}
+    {{ openshift.master.controller_args | default(None) | to_padded_yaml( level=2, indent=2 ) }}
   masterCount: {{ openshift.master.master_count if openshift.master.cluster_method | default(None) == 'native' else 1 }}
   masterIP: {{ openshift.common.ip }}
   podEvictionTimeout: ""

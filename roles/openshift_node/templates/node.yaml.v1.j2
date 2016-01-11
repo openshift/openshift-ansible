@@ -12,7 +12,7 @@ imageConfig:
   latest: false
 kind: NodeConfig
 kubeletArguments: 
-  {{ openshift.node.kubelet_args | default(None) | to_yaml }}
+  {{ openshift.node.kubelet_args | default(None) | to_padded_yaml(level=1, indent=2) }}
 masterKubeConfig: system:node:{{ openshift.common.hostname }}.kubeconfig
 {% if openshift.common.use_openshift_sdn %}
 networkPluginName: {{ openshift.common.sdn_network_plugin_name }}
