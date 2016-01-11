@@ -82,7 +82,7 @@ deployment_type=enterprise
 # Pre-release additional repo
 openshift_additional_repos=[{'id': 'ose-devel', 'name': 'ose-devel',
 'baseurl':
-'http://buildvm-devops.usersys.redhat.com/puddle/build/OpenShiftEnterprise/3.0/latest/RH7-RHOSE-3.0/$basearch/os',
+'http://buildvm/puddle/build/OpenShiftEnterprise/3.0/latest/RH7-RHOSE-3.0/$basearch/os',
 'enabled': 1, 'gpgcheck': 0}]
 
 # Origin copr repo
