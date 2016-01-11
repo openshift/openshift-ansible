@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.27
+Version:        3.0.28
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -259,6 +259,15 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Jan 11 2016 Kenny Woodson <kwoodson@redhat.com> 3.0.28-1
+- added the rhe7-host-monitoring service file (mwoodson@redhat.com)
+- Fixing tab completion for latest metadata changes (kwoodson@redhat.com)
+- Removing some internal hostnames (bleanhar@redhat.com)
+- Fixing tab completion for latest metadata changes (kwoodson@redhat.com)
+- Make bin/cluster able to spawn OSE 3.1 clusters (lhuard@amadeus.com)
+- oso_host_monitoring role: removed the f22 and zagg client, replaced it with
+  oso-rhel7-host-monitoring container (mwoodson@redhat.com)
+
 * Fri Jan 08 2016 Kenny Woodson <kwoodson@redhat.com> 3.0.27-1
 - Update to metadata tooling. (kwoodson@redhat.com)
 - Fix VM drive cleanup during terminate on libvirt (lhuard@amadeus.com)
