@@ -7,7 +7,7 @@
   vars_files:
   - vars.yml
   tasks:
-  - set_fact: scratch_group=tag_env_{{ cluster_id }}
+  - set_fact: scratch_group=tag_clusterid_{{ cluster_id }}
     when: cluster_id != ''
   - set_fact: scratch_group=all
     when: cluster_id == ''

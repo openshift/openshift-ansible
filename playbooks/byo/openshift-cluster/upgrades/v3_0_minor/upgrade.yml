@@ -1,8 +1,11 @@
 ---
 - include: ../../../../common/openshift-cluster/upgrades/v3_0_minor/upgrade.yml
+  vars_files:
+  - "{{lookup('file', '../../../../byo/openshift-cluster/cluster_hosts.yml')}}"
   vars:
     g_etcd_hosts: "{{ groups.etcd | default([]) }}"
     g_master_hosts: "{{ groups.masters | default([]) }}"
+    g_nfs_hosts: "{{ groups.nfs | default([]) }}"
     g_node_hosts: "{{ groups.nodes | default([]) }}"
     g_lb_hosts: "{{ groups.lb | default([]) }}"
     openshift_cluster_id: "{{ cluster_id | default('default') }}"

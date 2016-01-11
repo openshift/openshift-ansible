@@ -1,3 +1,4 @@
 ---
 - name: Install Ceph storage plugin dependencies
   action: "{{ ansible_pkg_mgr }} name=ceph-common state=present"
+  when: not openshift.common.is_atomic | bool

@@ -1,4 +1,5 @@
 ---
+debug_level: 2
 openstack_infra_heat_stack:     "{{ lookup('oo_option', 'infra_heat_stack' ) |
                                     default('files/heat_stack.yaml',         True) }}"
 openstack_network_cidr:         "{{ lookup('oo_option', 'net_cidr'         ) |
@@ -19,6 +20,11 @@ openstack_flavor:
   infra:  "{{ lookup('oo_option', 'infra_flavor'     ) | default('m1.small',  True) }}"
   node:   "{{ lookup('oo_option', 'node_flavor'      ) | default('m1.medium', True) }}"
 
+deployment_rhel7_ent_base:
+  image: "{{ lookup('oo_option', 'image_name') | default('rhel-guest-image-7.2-20151102.0.x86_64', True) }}"
+  ssh_user: openshift
+  sudo: yes
+
 deployment_vars:
   origin:
     image: "{{ lookup('oo_option', 'image_name') | default('centos-70-raw', True) }}"
@@ -28,7 +34,6 @@ deployment_vars:
     image:
     ssh_user: root
     sudo: no
-  enterprise:
-    image: "{{ lookup('oo_option', 'image_name') | default('rhel-guest-image-7.1-20150224.0.x86_64', True) }}"
-    ssh_user: openshift
-    sudo: yes
+  enterprise: "{{ deployment_rhel7_ent_base }}"
+  openshift-enterprise: "{{ deployment_rhel7_ent_base }}"
+  atomic-enterprise: "{{ deployment_rhel7_ent_base }}"

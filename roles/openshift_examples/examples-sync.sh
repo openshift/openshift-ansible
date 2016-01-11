@@ -5,7 +5,7 @@
 #
 # This script should be run from openshift-ansible/roles/openshift_examples
 
-XPAAS_VERSION=ose-v1.1.0
+XPAAS_VERSION=ose-v1.2.0-1
 ORIGIN_VERSION=v1.1
 EXAMPLES_BASE=$(pwd)/files/examples/${ORIGIN_VERSION}
 find ${EXAMPLES_BASE} -name '*.json' -delete
@@ -37,6 +37,7 @@ cp dancer-ex-master/openshift/templates/* ${EXAMPLES_BASE}/quickstart-templates/
 cp cakephp-ex-master/openshift/templates/* ${EXAMPLES_BASE}/quickstart-templates/
 mv application-templates-${XPAAS_VERSION}/jboss-image-streams.json ${EXAMPLES_BASE}/xpaas-streams/
 find application-templates-${XPAAS_VERSION}/ -name '*.json' ! -wholename '*secret*' -exec mv {} ${EXAMPLES_BASE}/xpaas-templates/ \;
+wget https://raw.githubusercontent.com/jboss-fuse/application-templates/master/fis-image-streams.json          -O ${EXAMPLES_BASE}/xpaas-streams/fis-image-streams.json
 
 wget https://raw.githubusercontent.com/openshift/origin-metrics/master/metrics.yaml                            -O ${EXAMPLES_BASE}/infrastructure-templates/origin/metrics-deployer.yaml
 cp ${EXAMPLES_BASE}/infrastructure-templates/origin/metrics-*.yaml                                                ${EXAMPLES_BASE}/infrastructure-templates/enterprise/

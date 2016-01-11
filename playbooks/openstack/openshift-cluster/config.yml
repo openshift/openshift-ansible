@@ -1,23 +1,13 @@
-- hosts: localhost
-  gather_facts: no
-  become: no
-  connection: local
-  vars_files:
-  - vars.yml
-  tasks:
-  - set_fact:
-      g_ssh_user_tmp: "{{ deployment_vars[deployment_type].ssh_user }}"
-      g_sudo_tmp: "{{ deployment_vars[deployment_type].sudo }}"
-
+---
 - include: ../../common/openshift-cluster/config.yml
+  vars_files:
+  - ../../openstack/openshift-cluster/vars.yml
+  - ../../openstack/openshift-cluster/cluster_hosts.yml
   vars:
-    g_etcd_hosts:   "{{ (groups['tag_host-type_etcd']|default([]))   | intersect((groups['tag_env_' ~ cluster_id]|default([]))) }}"
-    g_lb_hosts:     "{{ (groups['tag_host-type_lb']|default([]))     | intersect((groups['tag_env_' ~ cluster_id]|default([]))) }}"
-    g_master_hosts: "{{ (groups['tag_host-type_master']|default([])) | intersect((groups['tag_env_' ~ cluster_id]|default([]))) }}"
-    g_node_hosts:   "{{ (groups['tag_host-type_node']|default([]))   | intersect((groups['tag_env_' ~ cluster_id]|default([]))) }}"
-    g_ssh_user: "{{ hostvars.localhost.g_ssh_user_tmp }}"
-    g_sudo: "{{ hostvars.localhost.g_sudo_tmp }}"
+    g_nodeonmaster: true
+    g_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
+    g_sudo: "{{ deployment_vars[deployment_type].sudo }}"
     openshift_cluster_id: "{{ cluster_id }}"
-    openshift_debug_level: 2
+    openshift_debug_level: "{{ debug_level }}"
     openshift_deployment_type: "{{ deployment_type }}"
     openshift_hostname: "{{ ansible_default_ipv4.address }}"

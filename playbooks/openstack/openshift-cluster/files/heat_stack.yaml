@@ -4,6 +4,11 @@ description: OpenShift cluster
 
 parameters:
 
+  cluster_env:
+    type: string
+    label: Cluster environment
+    description: Environment of the cluster
+
   cluster_id:
     type: string
     label: Cluster ID
@@ -345,13 +350,14 @@ resources:
               params:
                 cluster_id: { get_param: cluster_id }
                 k8s_type: etcd
-          cluster_id: { get_param: cluster_id }
-          type:       etcd
-          image:      { get_param: etcd_image }
-          flavor:     { get_param: etcd_flavor }
-          key_name:   { get_resource: keypair }
-          net:        { get_resource: net }
-          subnet:     { get_resource: subnet }
+          cluster_env: { get_param: cluster_env }
+          cluster_id:  { get_param: cluster_id }
+          type:        etcd
+          image:       { get_param: etcd_image }
+          flavor:      { get_param: etcd_flavor }
+          key_name:    { get_resource: keypair }
+          net:         { get_resource: net }
+          subnet:      { get_resource: subnet }
           secgrp:
             - { get_resource: etcd-secgrp }
           floating_network: { get_param: floating_ip_pool }
@@ -375,13 +381,14 @@ resources:
               params:
                 cluster_id: { get_param: cluster_id }
                 k8s_type: master
-          cluster_id: { get_param: cluster_id }
-          type:       master
-          image:      { get_param: master_image }
-          flavor:     { get_param: master_flavor }
-          key_name:   { get_resource: keypair }
-          net:        { get_resource: net }
-          subnet:     { get_resource: subnet }
+          cluster_env: { get_param: cluster_env }
+          cluster_id:  { get_param: cluster_id }
+          type:        master
+          image:       { get_param: master_image }
+          flavor:      { get_param: master_flavor }
+          key_name:    { get_resource: keypair }
+          net:         { get_resource: net }
+          subnet:      { get_resource: subnet }
           secgrp:
             - { get_resource: master-secgrp }
           floating_network: { get_param: floating_ip_pool }
@@ -406,14 +413,15 @@ resources:
                 cluster_id: { get_param: cluster_id }
                 k8s_type: node
                 sub_host_type: compute
-          cluster_id: { get_param: cluster_id }
-          type:       node
-          subtype:    compute
-          image:      { get_param: node_image }
-          flavor:     { get_param: node_flavor }
-          key_name:   { get_resource: keypair }
-          net:        { get_resource: net }
-          subnet:     { get_resource: subnet }
+          cluster_env: { get_param: cluster_env }
+          cluster_id:  { get_param: cluster_id }
+          type:        node
+          subtype:     compute
+          image:       { get_param: node_image }
+          flavor:      { get_param: node_flavor }
+          key_name:    { get_resource: keypair }
+          net:         { get_resource: net }
+          subnet:      { get_resource: subnet }
           secgrp:
             - { get_resource: node-secgrp }
           floating_network: { get_param: floating_ip_pool }
@@ -438,14 +446,15 @@ resources:
                 cluster_id: { get_param: cluster_id }
                 k8s_type: node
                 sub_host_type: infra
-          cluster_id: { get_param: cluster_id }
-          type:       node
-          subtype:    infra
-          image:      { get_param: infra_image }
-          flavor:     { get_param: infra_flavor }
-          key_name:   { get_resource: keypair }
-          net:        { get_resource: net }
-          subnet:     { get_resource: subnet }
+          cluster_env: { get_param: cluster_env }
+          cluster_id:  { get_param: cluster_id }
+          type:        node
+          subtype:     infra
+          image:       { get_param: infra_image }
+          flavor:      { get_param: infra_flavor }
+          key_name:    { get_resource: keypair }
+          net:         { get_resource: net }
+          subnet:      { get_resource: subnet }
           secgrp:
             - { get_resource: node-secgrp }
             - { get_resource: infra-secgrp }

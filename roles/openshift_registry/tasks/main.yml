@@ -1,6 +1,4 @@
 ---
-# This role is unused until we add options for configuring the backend storage
-
 - set_fact: _oreg_images="--images='{{ openshift.master.registry_url }}'"
 
 - set_fact: _oreg_selector="--selector='{{ openshift.master.registry_selector }}'"
@@ -12,3 +10,19 @@
     --credentials={{ openshift_master_config_dir }}/openshift-registry.kubeconfig {{ _oreg_images }}
   register: _oreg_results
   changed_when: "'service exists' not in _oreg_results.stdout"
+
+- name: Determine if nfs volume is already attached
+  command: "{{ openshift.common.client_binary }} get -o template dc/docker-registry --template=\\{\\{.spec.template.spec.volumes\\}\\}"
+  register: registry_volumes_output
+  when: attach_registry_volume | bool
+
+- set_fact:
+    volume_already_attached: "{{ 'server:' + nfs_host in registry_volumes_output.stdout and 'path:' + registry_volume_path in registry_volumes_output.stdout }}"
+  when: attach_registry_volume | bool
+
+- name: Add nfs volume to dc/docker-registry
+  command: >
+    {{ openshift.common.client_binary }} volume dc/docker-registry
+    --add --overwrite --name=registry-storage --mount-path=/registry
+    --source='{"nfs": {"server": "{{ nfs_host }}", "path": "{{ registry_volume_path }}"}}'
+  when: attach_registry_volume | bool and not volume_already_attached | bool

@@ -82,7 +82,7 @@ deployment_type=enterprise
 # Pre-release additional repo
 openshift_additional_repos=[{'id': 'ose-devel', 'name': 'ose-devel',
 'baseurl':
-'http://buildvm-devops.usersys.redhat.com/puddle/build/OpenShiftEnterprise/3.0/latest/RH7-RHOSE-3.0/$basearch/os',
+'http://buildvm/puddle/build/OpenShiftEnterprise/3.0/latest/RH7-RHOSE-3.0/$basearch/os',
 'enabled': 1, 'gpgcheck': 0}]
 
 # Origin copr repo
@@ -104,6 +104,8 @@ ose3-node[1:2].example.com
 
 The hostnames above should resolve both from the hosts themselves and
 the host where ansible is running (if different).
+
+A more complete example inventory file ([hosts.ose.example](https://github.com/openshift/openshift-ansible/blob/master/inventory/byo/hosts.ose.example)) is available under the [`/inventory/byo`](https://github.com/openshift/openshift-ansible/tree/master/inventory/byo) directory.
 
 ## Running the ansible playbooks
 From the openshift-ansible checkout run:

@@ -7,13 +7,12 @@
   vars_files:
   - vars.yml
   tasks:
-  - set_fact: scratch_group=tag_env-{{ cluster_id }}
   - add_host:
       name: "{{ item }}"
       groups: oo_hosts_to_terminate
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user | default(ansible_ssh_user, true) }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-    with_items: groups[scratch_group] | default([], true) | difference(['localhost']) | difference(groups.status_terminated | default([], true))
+    with_items: (groups['tag_clusterid-' ~ cluster_id] | default([])) | difference(['localhost'])
 
 - name: Unsubscribe VMs
   hosts: oo_hosts_to_terminate

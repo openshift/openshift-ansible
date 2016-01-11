@@ -2,6 +2,7 @@
 - name: Install flannel
   sudo: true
   action: "{{ ansible_pkg_mgr }} name=flannel state=present"
+  when: not openshift.common.is_containerized | bool
 
 - name: Set flannel etcd url
   sudo: true

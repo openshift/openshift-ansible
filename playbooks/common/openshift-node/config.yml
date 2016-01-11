@@ -16,6 +16,7 @@
           hostname: "{{ openshift_hostname | default(None) }}"
           public_hostname: "{{ openshift_public_hostname | default(None) }}"
           deployment_type: "{{ openshift_deployment_type }}"
+          use_flannel: "{{ openshift_use_flannel | default(None) }}"
       - role: node
         local_facts:
           labels: "{{ openshift_node_labels | default(None) }}"
@@ -181,6 +182,7 @@
   - role: flannel
     when: openshift.common.use_flannel | bool
   - role: nickhammond.logrotate
+    when: not openshift.common.is_containerized | bool
   - role: fluentd_node
     when: openshift.common.use_fluentd | bool
   tasks:

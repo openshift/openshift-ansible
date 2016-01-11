@@ -8,11 +8,10 @@ Custom filters for use in openshift-ansible
 from ansible import errors
 from operator import itemgetter
 import OpenSSL.crypto
-import os.path
+import os
 import pdb
 import re
 import json
-
 
 class FilterModule(object):
     ''' Custom ansible filters '''
@@ -366,9 +365,6 @@ class FilterModule(object):
                            "keyfile": "/etc/origin/master/named_certificates/custom2.key",
                            "names": [ "some-hostname.com" ] }]
         '''
-        if not issubclass(type(certificates), list):
-            raise errors.AnsibleFilterError("|failed expects certificates is a list")
-
         if not issubclass(type(named_certs_dir), unicode):
             raise errors.AnsibleFilterError("|failed expects named_certs_dir is unicode")
 
@@ -468,6 +464,16 @@ class FilterModule(object):
                 pass
         return clusters
 
+    @staticmethod
+    def oo_generate_secret(num_bytes):
+        ''' generate a session secret '''
+
+        if not issubclass(type(num_bytes), int):
+            raise errors.AnsibleFilterError("|failed expects num_bytes is int")
+
+        secret = os.urandom(num_bytes)
+        return secret.encode('base-64').strip()
+
     def filters(self):
         ''' returns a mapping of filters to methods '''
         return {
@@ -486,5 +492,6 @@ class FilterModule(object):
             "oo_parse_heat_stack_outputs": self.oo_parse_heat_stack_outputs,
             "oo_parse_named_certificates": self.oo_parse_named_certificates,
             "oo_haproxy_backend_masters": self.oo_haproxy_backend_masters,
-            "oo_pretty_print_cluster": self.oo_pretty_print_cluster
+            "oo_pretty_print_cluster": self.oo_pretty_print_cluster,
+            "oo_generate_secret": self.oo_generate_secret
         }

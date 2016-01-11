@@ -7,13 +7,12 @@
   vars_files:
   - vars.yml
   tasks:
-  - set_fact: scratch_group=tag_env_{{ cluster_id }}
   - add_host:
       name: "{{ item }}"
       groups: oo_hosts_to_terminate
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-    with_items: groups[scratch_group] | default([]) | difference(['localhost'])
+    with_items: (groups['tag_clusterid_' ~ cluster_id] | default([])) | difference(['localhost'])
 
 - name: Unsubscribe VMs
   hosts: oo_hosts_to_terminate
@@ -29,34 +28,35 @@
   connection: local
   become: no
   gather_facts: no
-  vars:
-    host_vars: "{{ hostvars
-                   | oo_select_keys(groups['oo_hosts_to_terminate']) }}"
   tasks:
     - name: Remove tags from instances
-      ec2_tag: resource={{ item.ec2_id }} region={{ item.ec2_region }} state=absent
-      args:
+      ec2_tag:
+        resource: "{{ hostvars[item]['ec2_id'] }}"
+        region: "{{ hostvars[item]['ec2_region'] }}"
+        state: absent
         tags:
-          env: "{{ item['ec2_tag_env'] }}"
-          host-type: "{{ item['ec2_tag_host-type'] }}"
-          sub_host_type: "{{ item['ec2_tag_sub-host-type'] }}"
-      with_items: host_vars
+          environment:   "{{ hostvars[item]['ec2_tag_environment'] }}"
+          clusterid:     "{{ hostvars[item]['ec2_tag_clusterid'] }}"
+          host-type:     "{{ hostvars[item]['ec2_tag_host-type'] }}"
+          sub_host_type: "{{ hostvars[item]['ec2_tag_sub-host-type'] }}"
+      with_items: groups.oo_hosts_to_terminate
       when: "'oo_hosts_to_terminate' in groups"
 
     - name: Terminate instances
       ec2:
         state: absent
-        instance_ids: ["{{ item.ec2_id }}"]
-        region: "{{ item.ec2_region }}"
+        instance_ids: ["{{ hostvars[item].ec2_id }}"]
+        region: "{{ hostvars[item].ec2_region }}"
       ignore_errors: yes
       register: ec2_term
-      with_items: host_vars
+      with_items: groups.oo_hosts_to_terminate
       when: "'oo_hosts_to_terminate' in groups"
 
     # Fail if any of the instances failed to terminate with an error other
     # than 403 Forbidden
-    - fail: msg=Terminating instance {{ item.ec2_id }} failed with message {{ item.msg }}
-      when: "'oo_hosts_to_terminate' in groups and item.failed and not item.msg | search(\"error: EC2ResponseError: 403 Forbidden\")"
+    - fail:
+        msg: "Terminating instance {{ item.ec2_id }} failed with message {{ item.msg }}"
+      when: "'oo_hosts_to_terminate' in groups and item.has_key('failed') and item.failed"
       with_items: ec2_term.results
 
     - name: Stop instance if termination failed
@@ -65,7 +65,7 @@
         instance_ids: ["{{ item.item.ec2_id }}"]
         region: "{{ item.item.ec2_region }}"
       register: ec2_stop
-      when: "'oo_hosts_to_terminate' in groups and item.failed"
+      when: "'oo_hosts_to_terminate' in groups and item.has_key('failed') and item.failed"
       with_items: ec2_term.results
 
     - name: Rename stopped instances

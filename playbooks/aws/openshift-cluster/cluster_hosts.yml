@@ -1,0 +1,22 @@
+---
+g_etcd_hosts:   "{{ (groups['tag_host-type_etcd']|default([]))
+                     | intersect((groups['tag_clusterid_' ~ cluster_id]|default([])))
+                     | intersect((groups['tag_environment_' ~ cluster_env]|default([]))) }}"
+
+g_lb_hosts:     "{{ (groups['tag_host-type_lb']|default([]))
+                     | intersect((groups['tag_clusterid_' ~ cluster_id]|default([])))
+                     | intersect((groups['tag_environment_' ~ cluster_env]|default([]))) }}"
+
+g_master_hosts: "{{ (groups['tag_host-type_master']|default([]))
+                     | intersect((groups['tag_clusterid_' ~ cluster_id]|default([])))
+                     | intersect((groups['tag_environment_' ~ cluster_env]|default([]))) }}"
+
+g_node_hosts:   "{{ (groups['tag_host-type_node']|default([]))
+                     | intersect((groups['tag_clusterid_' ~ cluster_id]|default([])))
+                     | intersect((groups['tag_environment_' ~ cluster_env]|default([]))) }}"
+
+g_nfs_hosts:    "{{ (groups['tag_host-type_nfs']|default([]))
+                   | intersect((groups['tag_environment_' ~ cluster_id]|default([]))) }}"
+
+g_all_hosts:    "{{ g_master_hosts | union(g_node_hosts) | union(g_etcd_hosts)
+                    | union(g_lb_hosts) | default([]) }}"

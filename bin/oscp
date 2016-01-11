@@ -138,7 +138,7 @@ class Oscp(object):
 
         # attempt to select the correct environment if specified
         if self.env:
-            results = filter(lambda result: result[1]['ec2_tag_env'] == self.env, results)
+            results = filter(lambda result: result[1]['oo_environment'] == self.env, results)
 
         if results:
             return results
@@ -164,10 +164,8 @@ class Oscp(object):
                     print '{0:<35} {1}'.format(key, server_info[key])
             else:
                 for host_id, server_info in results[:limit]:
-                    name = server_info['ec2_tag_Name']
-                    ec2_id = server_info['ec2_id']
-                    ip = server_info['ec2_ip_address']
-                    print '{ec2_tag_Name:<35} {ec2_tag_env:<8} {ec2_id:<15} {ec2_ip_address:<18} {ec2_private_ip_address}'.format(**server_info)
+                    print '{oo_name:<35} {oo_clusterid:<10} {oo_environment:<8} ' \
+                          '{oo_id:<15} {oo_public_ip:<18} {oo_private_ip:<18}'.format(**server_info)
 
                 if limit:
                     print
@@ -177,10 +175,9 @@ class Oscp(object):
         else:
             for env, host_ids in self.host_inventory.items():
                 for host_id, server_info in host_ids.items():
-                    name = server_info['ec2_tag_Name']
-                    ec2_id = server_info['ec2_id']
-                    ip = server_info['ec2_ip_address']
-                    print '{ec2_tag_Name:<35} {ec2_tag_env:<8} {ec2_id:<15} {ec2_ip_address:<18} {ec2_private_ip_address}'.format(**server_info)
+                    print '{oo_name:<35} {oo_clusterid:<10} {oo_environment:<8} ' \
+                          '{oo_id:<15} {oo_public_ip:<18} {oo_private_ip:<18}'.format(**server_info)
+
 
     def scp(self):
         '''scp files to or from a specified host
@@ -209,12 +206,12 @@ class Oscp(object):
             if len(results) > 1:
                 print "Multiple results found for %s." % self.host
                 for result in results:
-                    print "{ec2_tag_Name:<35} {ec2_tag_env:<5} {ec2_id:<10}".format(**result[1])
+                    print "{oo_name:<35} {oo_clusterid:<5} {oo_environment:<5} {oo_id:<10}".format(**result[1])
                 return # early exit, too many results
 
             # Assume we have one and only one.
             hostname, server_info = results[0]
-            dns = server_info['ec2_public_dns_name']
+            dns = server_info['oo_pulic_ip']
 
             host_str = "%s%s%s" % (self.user, dns, self.path)
 

@@ -5,7 +5,6 @@
   with_items:
   - osohm_zagg_web_url
   - osohm_host_monitoring
-  - osohm_zagg_client
   - osohm_docker_registry_url
   - osohm_default_zagg_server_user
   - osohm_default_zagg_server_password
@@ -37,29 +36,12 @@
   - "Restart the {{ osohm_host_monitoring }} service"
   register: systemd_host_monitoring
 
-- name: "Copy {{ osohm_zagg_client }} systemd file"
-  template:
-    src: "{{ osohm_zagg_client }}.service.j2"
-    dest: "/etc/systemd/system/{{ osohm_zagg_client }}.service"
-    owner: root
-    group: root
-    mode: 0644
-  notify:
-  - "Restart the {{ osohm_zagg_client }} service"
-  register: zagg_systemd
-
 - name: reload systemd
   command: /usr/bin/systemctl --system daemon-reload
-  when: systemd_host_monitoring | changed or zagg_systemd | changed
+  when: systemd_host_monitoring | changed
 
 - name: "Start the {{ osohm_host_monitoring }} service"
   service:
     name: "{{ osohm_host_monitoring }}"
-    state: started
-    enabled: yes
-
-- name: "Start the {{ osohm_zagg_client }} service"
-  service:
-    name: "{{ osohm_zagg_client }}"
     state: started
     enabled: yes

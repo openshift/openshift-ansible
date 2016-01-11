@@ -6,13 +6,13 @@
             "iconClass": "icon-jboss",
             "description": "Application template for EAP 6 applications built using S2I.",
             "tags": "eap,javaee,java,jboss,xpaas",
-            "version": "1.1.0"
+            "version": "1.2.0"
         },
         "name": "eap64-basic-s2i"
     },
     "labels": {
         "template": "eap64-basic-s2i",
-        "xpaas": "1.1.0"
+        "xpaas": "1.2.0"
     },
     "parameters": [
         {
@@ -22,8 +22,8 @@
             "required": true
         },
         {
-            "description": "Custom hostname for service routes.  Leave blank for default hostname, e.g.: <application-name>.<project>.<default-domain-suffix>",
-            "name": "APPLICATION_DOMAIN",
+            "description": "Custom hostname for http service route.  Leave blank for default hostname, e.g.: <application-name>-<project>.<default-domain-suffix>",
+            "name": "HOSTNAME_HTTP",
             "value": "",
             "required": false
         },
@@ -83,6 +83,13 @@
             "name": "IMAGE_STREAM_NAMESPACE",
             "value": "openshift",
             "required": true
+        },
+        {
+            "description": "JGroups cluster password",
+            "name": "JGROUPS_CLUSTER_PASSWORD",
+            "from": "[a-zA-Z0-9]{8}",
+            "generate": "expression",
+            "required": true
         }
     ],
     "objects": [
@@ -124,7 +131,7 @@
                 }
             },
             "spec": {
-                "host": "${APPLICATION_DOMAIN}",
+                "host": "${HOSTNAME_HTTP}",
                 "to": {
                     "name": "${APPLICATION_NAME}"
                 }
@@ -165,7 +172,7 @@
                         "from": {
                             "kind": "ImageStreamTag",
                             "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                            "name": "jboss-eap64-openshift:1.1"
+                            "name": "jboss-eap64-openshift:1.2"
                         }
                     }
                 },
@@ -248,6 +255,15 @@
                                 "name": "${APPLICATION_NAME}",
                                 "image": "${APPLICATION_NAME}",
                                 "imagePullPolicy": "Always",
+                                "livenessProbe": {
+                                    "exec": {
+                                        "command": [
+                                            "/bin/bash",
+                                            "-c",
+                                            "/opt/eap/bin/livenessProbe.sh"
+                                        ]
+                                    }
+                                },
                                 "readinessProbe": {
                                     "exec": {
                                         "command": [
@@ -258,6 +274,11 @@
                                     }
                                 },
                                 "ports": [
+                                    {
+                                        "name": "jolokia",
+                                        "containerPort": 8778,
+                                        "protocol": "TCP"
+                                    },
                                     {
                                         "name": "http",
                                         "containerPort": 8080,
@@ -293,6 +314,10 @@
                                     {
                                         "name": "HORNETQ_TOPICS",
                                         "value": "${HORNETQ_TOPICS}"
+                                    },
+                                    {
+                                        "name": "JGROUPS_CLUSTER_PASSWORD",
+                                        "value": "${JGROUPS_CLUSTER_PASSWORD}"
                                     }
                                 ]
                             }

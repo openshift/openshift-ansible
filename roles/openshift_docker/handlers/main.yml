@@ -1,0 +1,6 @@
+---
+
+- name: restart openshift_docker
+  service:
+    name: docker
+    state: restarted
