@@ -1,6 +1,7 @@
 ---
 - name: Install firewalld packages
   action: "{{ ansible_pkg_mgr }} name=firewalld state=present"
+  when: not openshift.common.is_containerized | bool
   register: install_result
 
 - name: Check if iptables-services is installed

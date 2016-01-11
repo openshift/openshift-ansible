@@ -8,6 +8,12 @@ assetConfig:
   logoutURL: ""
   masterPublicURL: {{ openshift.master.public_api_url }}
   publicURL: {{ openshift.master.public_console_url }}/
+{% if 'logging_public_url' in openshift.master %}
+  loggingPublicURL: {{ openshift.master.logging_public_url }}
+{% endif %}
+{% if 'metrics_public_url' in openshift.master %}
+  metricsPublicURL: {{ openshift.master.metrics_public_url }}
+{% endif %}
   servingInfo:
     bindAddress: {{ openshift.master.bind_addr }}:{{ openshift.master.console_port }}
     bindNetwork: tcp4
@@ -81,8 +87,8 @@ kubernetesMasterConfig:
   - v1beta3
   - v1
 {% endif %}
-  apiServerArguments: {{ api_server_args if api_server_args is defined else 'null' }}
-  controllerArguments: {{ controller_args if controller_args is defined else 'null' }}
+  apiServerArguments: {{ openshift.master.api_server_args | default(None) | to_json }}
+  controllerArguments: {{ openshift.master.controller_args | default(None) | to_json }}
   masterCount: {{ openshift.master.master_count if openshift.master.cluster_method | default(None) == 'native' else 1 }}
   masterIP: {{ openshift.common.ip }}
   podEvictionTimeout: ""
@@ -121,7 +127,9 @@ oauthConfig:
   sessionConfig:
     sessionMaxAgeSeconds: {{ openshift.master.session_max_seconds }}
     sessionName: {{ openshift.master.session_name }}
+{% if openshift.master.session_auth_secrets is defined and openshift.master.session_encryption_secrets is defined %}
     sessionSecretsFile: {{ openshift.master.session_secrets_file }}
+{% endif %}
   tokenConfig:
     accessTokenMaxAgeSeconds: {{ openshift.master.access_token_max_seconds }}
     authorizeTokenMaxAgeSeconds: {{ openshift.master.auth_token_max_seconds }}

@@ -6,13 +6,13 @@
             "description": "Application template for JBoss A-MQ brokers. These can be deployed as standalone or in a mesh. This template supports SSL and requires usage of OpenShift secrets.",
             "iconClass": "icon-jboss",
             "tags": "messaging,amq,jboss,xpaas",
-            "version": "1.1.0"
+            "version": "1.2.0"
         },
         "name": "amq62-ssl"
     },
     "labels": {
         "template": "amq62-ssl",
-        "xpaas": "1.1.0"
+        "xpaas": "1.2.0"
     },
     "parameters": [
         {
@@ -52,20 +52,6 @@
             "from": "[a-zA-Z0-9]{8}",
             "generate": "expression",
             "required": false
-        },
-        {
-            "description": "User name for admin user. If left empty, it will be generated.",
-            "name": "AMQ_ADMIN_USERNAME",
-            "from": "user[a-zA-Z0-9]{3}",
-            "generate": "expression",
-            "required": true
-        },
-        {
-            "description": "Password for admin user. If left empty, it will be generated.",
-            "name": "AMQ_ADMIN_PASSWORD",
-            "from": "[a-zA-Z0-9]{8}",
-            "generate": "expression",
-            "required": true
         },
         {
             "description": "Name of a secret containing SSL related files",
@@ -333,7 +319,7 @@
                             "from": {
                                 "kind": "ImageStreamTag",
                                 "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                                "name": "jboss-amq-62:1.1"
+                                "name": "jboss-amq-62:1.2"
                             }
                         }
                     },
@@ -373,11 +359,16 @@
                                         "command": [
                                             "/bin/bash",
                                             "-c",
-                                            "curl -s -L -u ${AMQ_ADMIN_USERNAME}:${AMQ_ADMIN_PASSWORD} 'http://localhost:8161/hawtio/jolokia/read/org.apache.activemq:type=Broker,brokerName=*,service=Health/CurrentStatus' | grep -q '\"CurrentStatus\" *: *\"Good\"'"
+                                            "/opt/amq/bin/readinessProbe.sh"
                                         ]
                                     }
                                 },
                                 "ports": [
+                                    {
+                                        "name": "jolokia",
+                                        "containerPort": 8778,
+                                        "protocol": "TCP"
+                                    },
                                     {
                                         "name": "amqp",
                                         "containerPort": 5672,
@@ -439,14 +430,6 @@
                                     {
                                         "name": "AMQ_TOPICS",
                                         "value": "${MQ_TOPICS}"
-                                    },
-                                    {
-                                        "name": "AMQ_ADMIN_USERNAME",
-                                        "value": "${AMQ_ADMIN_USERNAME}"
-                                    },
-                                    {
-                                        "name": "AMQ_ADMIN_PASSWORD",
-                                        "value": "${AMQ_ADMIN_PASSWORD}"
                                     },
                                     {
                                         "name": "AMQ_MESH_DISCOVERY_TYPE",

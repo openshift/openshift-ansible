@@ -81,10 +81,10 @@ deployment_type=atomic-enterprise
 
 # Pre-release registry URL; note that in the future these images 
 # may have an atomicenterprise/aep- prefix or so.
-oreg_url=rcm-img-docker01.build.eng.bos.redhat.com:5001/openshift3/ose-${component}:${version}
+oreg_url=rcm-img-docker:5001/openshift3/ose-${component}:${version}
 
 # Pre-release additional repo
-openshift_additional_repos=[{'id': 'ose-devel', 'name': 'ose-devel', 'baseurl': 'http://buildvm-devops.usersys.redhat.com/puddle/build/AtomicOpenShift/3.1/2015-10-27.1', 'enabled': 1, 'gpgcheck': 0}]
+openshift_additional_repos=[{'id': 'ose-devel', 'name': 'ose-devel', 'baseurl': 'http://buildvm/puddle/build/AtomicOpenShift/3.1/2015-10-27.1', 'enabled': 1, 'gpgcheck': 0}]
 
 # host group for masters
 [masters]
@@ -97,6 +97,8 @@ aep3-node[1:2].example.com
 
 The hostnames above should resolve both from the hosts themselves and
 the host where ansible is running (if different).
+
+A more complete example inventory file ([hosts.aep.example](https://github.com/openshift/openshift-ansible/blob/master/inventory/byo/hosts.aep.example)) is available under the [`/inventory/byo`](https://github.com/openshift/openshift-ansible/tree/master/inventory/byo) directory.
 
 ## Running the ansible playbooks
 From the openshift-ansible checkout run:

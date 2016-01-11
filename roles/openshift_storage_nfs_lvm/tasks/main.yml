@@ -1,4 +1,9 @@
 ---
+# TODO -- this may actually work on atomic hosts
+- fail:
+    msg: "openshift_storage_nfs_lvm is not compatible with atomic host"
+    when: openshift.common.is_atomic | true
+
 - name: Create lvm volumes
   lvol: vg={{osnl_volume_group}} lv={{ item }} size={{osnl_volume_size}}G
   with_sequence: start={{osnl_volume_num_start}} count={{osnl_number_of_volumes}} format={{osnl_volume_prefix}}{{osnl_volume_size}}g%04d

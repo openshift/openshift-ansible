@@ -1,4 +1,5 @@
 ---
+etcd_service: "{{ 'etcd' if not openshift.common.is_containerized else 'etcd_container' }}"
 etcd_interface: "{{ ansible_default_ipv4.interface }}"
 etcd_client_port: 2379
 etcd_peer_port: 2380

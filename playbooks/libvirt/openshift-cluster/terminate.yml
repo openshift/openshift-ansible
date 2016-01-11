@@ -9,7 +9,7 @@
   vars_files:
   - vars.yml
   tasks:
-  - set_fact: cluster_group=tag_env-{{ cluster_id }}
+  - set_fact: cluster_group=tag_clusterid-{{ cluster_id }}
   - add_host:
       name: "{{ item }}"
       groups: oo_hosts_to_terminate

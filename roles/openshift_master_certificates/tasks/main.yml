@@ -16,6 +16,8 @@
     - admin.kubeconfig
     - master.kubelet-client.crt
     - master.kubelet-client.key
+    - master.server.crt
+    - master.server.key
     - openshift-master.crt
     - openshift-master.key
     - openshift-master.kubeconfig

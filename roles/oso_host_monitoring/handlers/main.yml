@@ -4,9 +4,3 @@
     name: "{{ osohm_host_monitoring }}"
     state: restarted
     enabled: yes
-
-- name: "Restart the {{ osohm_zagg_client }} service"
-  service:
-    name: "{{ osohm_zagg_client }}"
-    state: restarted
-    enabled: yes

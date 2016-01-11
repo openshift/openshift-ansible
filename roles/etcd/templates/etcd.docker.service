@@ -1,0 +1,13 @@
+[Unit]
+Description=The Etcd Server container
+After=docker.service
+
+[Service]
+EnvironmentFile=/etc/etcd/etcd.conf
+ExecStartPre=-/usr/bin/docker rm -f {{ etcd_service }}
+ExecStart=/usr/bin/docker run --name {{ etcd_service }} --rm -v /var/lib/etcd:/var/lib/etcd:z -v /etc/etcd:/etc/etcd:z --env-file=/etc/etcd/etcd.conf --net=host --entrypoint=/usr/bin/etcd {{ openshift.etcd.etcd_image }}
+ExecStop=/usr/bin/docker stop {{ etcd_service }}
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

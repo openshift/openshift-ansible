@@ -29,6 +29,7 @@
   hosts: oo_first_master
   vars:
     openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
+    target_version: "{{ '1.1' if deployment_type == 'origin' else '3.1' }}"
   gather_facts: no
   tasks:
   # Pacemaker is currently the only supported upgrade path for multiple masters
@@ -45,8 +46,8 @@
   - fail:
       msg: >
         openshift_pkg_version is {{ openshift_pkg_version }} which is not a
-        valid version for a 3.1 upgrade
-    when: openshift_pkg_version is defined and openshift_pkg_version.split('-',1).1 | version_compare('3.0.2.900','<')
+        valid version for a {{ target_version }} upgrade
+    when: openshift_pkg_version is defined and openshift_pkg_version.split('-',1).1 | version_compare(target_version ,'<')
 
   # If this script errors out ansible will show the default stdout/stderr
   # which contains details for the user:
@@ -55,6 +56,8 @@
 
 - name: Verify upgrade can proceed
   hosts: oo_masters_to_config:oo_nodes_to_config
+  vars:
+    target_version: "{{ '1.1' if deployment_type == 'origin' else '3.1' }}"
   tasks:
   - name: Clean package cache
     command: "{{ ansible_pkg_mgr }} clean all"
@@ -77,8 +80,8 @@
     when: deployment_type == 'origin' and g_aos_versions.curr_version | version_compare('1.0.6','<')
 
   - fail:
-      msg: Atomic OpenShift 3.1 packages not found
-    when: g_aos_versions.curr_version | version_compare('3.0.2.900','<') and (g_aos_versions.avail_version is none or g_aos_versions.avail_version | version_compare('3.0.2.900','<'))
+      msg: Upgrade packages not found
+    when: (g_aos_versions.avail_version | default(g_aos_versions.curr_version, true) | version_compare(target_version, '<'))
 
   - set_fact:
       pre_upgrade_complete: True
@@ -235,6 +238,7 @@
 
   - name: Ensure python-yaml present for config upgrade
     action: "{{ ansible_pkg_mgr }} name=PyYAML state=present"
+    when: not openshift.common.is_atomic | bool
 
   - name: Upgrade master configuration
     openshift_upgrade_config:

@@ -3,6 +3,20 @@ libvirt_storage_pool_path: "{{ lookup('env','HOME') }}/libvirt-storage-pool-open
 libvirt_storage_pool: 'openshift-ansible'
 libvirt_network: openshift-ansible
 libvirt_uri: 'qemu:///system'
+debug_level: 2
+
+# Automatic download of the qcow2 image for RHEL cannot be done directly from the RedHat portal because it requires authentication.
+# The default value of image_url for enterprise and openshift-enterprise deployment types below won't work.
+deployment_rhel7_ent_base:
+  image:
+    url:    "{{ lookup('oo_option', 'image_url') |
+                default('https://access.cdn.redhat.com//content/origin/files/sha256/25/25f880767ec6bf71beb532e17f1c45231640bbfdfbbb1dffb79d2c1b328388e0/rhel-guest-image-7.2-20151102.0.x86_64.qcow2', True) }}"
+    name:   "{{ lookup('oo_option', 'image_name') |
+                default('rhel-guest-image-7.2-20151102.0.x86_64.qcow2', True) }}"
+    sha256: "{{ lookup('oo_option', 'image_sha256') |
+                default('25f880767ec6bf71beb532e17f1c45231640bbfdfbbb1dffb79d2c1b328388e0', True) }}"
+  ssh_user: openshift
+  sudo: yes
 
 deployment_vars:
   origin:
@@ -24,18 +38,6 @@ deployment_vars:
       sha256:
     ssh_user: root
     sudo: no
-  enterprise:
-    image:
-      url:    "{{ lookup('oo_option', 'image_url') |
-                  default('https://access.cdn.redhat.com//content/origin/files/sha256/ff/ff8198653cfd9c39411fc57077451ac291b3a605d305e905932fd6d5b1890bf3/rhel-guest-image-7.1-20150224.0.x86_64.qcow2', True) }}"
-      name:   "{{ lookup('oo_option', 'image_name') |
-                  default('rhel-guest-image-7.1-20150224.0.x86_64.qcow2', True) }}"
-      sha256: "{{ lookup('oo_option', 'image_sha256') |
-                  default('ff8198653cfd9c39411fc57077451ac291b3a605d305e905932fd6d5b1890bf3', True) }}"
-    ssh_user: openshift
-    sudo: yes
-#  origin:
-#    fedora:
-#      url: "http://download.fedoraproject.org/pub/fedora/linux/releases/21/Cloud/Images/x86_64/Fedora-Cloud-Base-20141203-21.x86_64.qcow2"
-#      name: Fedora-Cloud-Base-20141203-21.x86_64.qcow2
-#      sha256: 3a99bb89f33e3d4ee826c8160053cdb8a72c80cd23350b776ce73cd244467d86
+  enterprise: "{{ deployment_rhel7_ent_base }}"
+  openshift-enterprise: "{{ deployment_rhel7_ent_base }}"
+  atomic-enterprise: "{{ deployment_rhel7_ent_base }}"

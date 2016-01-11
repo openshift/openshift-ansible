@@ -1,0 +1,23 @@
+#!/bin/bash
+if [ ! -d ~/.kube ]; then
+   mkdir -m 0700 ~/.kube
+fi
+cmd=`basename $0`
+user=`id -u`
+group=`id -g`
+
+>&2 echo """
+================================================================================
+ATTENTION: You are running ${cmd} via a wrapper around 'docker run {{ openshift.common.cli_image }}'.
+This wrapper is intended only to be used to bootstrap an environment. Please
+install client tools on another host once you have granted cluster-admin
+privileges to a user. 
+{% if openshift.common.deployment_type in ['openshift-enterprise','atomic-enterprise'] %}
+See https://docs.openshift.com/enterprise/latest/cli_reference/get_started_cli.html
+{% else %}
+See https://docs.openshift.org/latest/cli_reference/get_started_cli.html
+{% endif %}
+=================================================================================
+"""
+
+docker run -i --privileged --net=host --user=${user}:${group} -v ~/.kube:/root/.kube -v /tmp:/tmp -v {{ openshift.common.config_base}}:{{ openshift.common.config_base }} -e KUBECONFIG=/root/.kube/config --entrypoint ${cmd} --rm {{ openshift.common.cli_image }} "${@}"

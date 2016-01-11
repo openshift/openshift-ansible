@@ -1,3 +1,8 @@
 ---
+- fail:
+    msg: "Update is not yet supported by this playbook on atomic hosts"
+  when: openshift.common.is_containerized | bool
+
 - name: Update all packages
   action: "{{ ansible_pkg_mgr }} name=* state=latest"
+  when: not openshift.common.is_containerized | bool

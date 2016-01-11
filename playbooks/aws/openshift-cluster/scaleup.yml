@@ -7,9 +7,6 @@
   vars_files:
   - vars.yml
   tasks:
-  - set_fact:
-      g_ssh_user_tmp: "{{ deployment_vars[deployment_type].ssh_user }}"
-      g_sudo_tmp: "{{ deployment_vars[deployment_type].sudo }}"
   - name: Evaluate oo_hosts_to_update
     add_host:
       name: "{{ item }}"
@@ -21,16 +18,16 @@
 - include: ../../common/openshift-cluster/update_repos_and_packages.yml
 
 - include: ../../common/openshift-cluster/scaleup.yml
+  vars_files:
+  - ../../aws/openshift-cluster/vars.yml
+  - ../../aws/openshift-cluster/cluster_hosts.yml
   vars:
-    g_etcd_hosts:   "{{ (groups['tag_host-type_etcd']|default([]))   | intersect((groups['tag_env_' ~ cluster_id]|default([]))) }}"
-    g_lb_hosts:     "{{ (groups['tag_host-type_lb']|default([]))     | intersect((groups['tag_env_' ~ cluster_id]|default([]))) }}"
-    g_master_hosts: "{{ (groups['tag_host-type_master']|default([])) | intersect((groups['tag_env_' ~ cluster_id]|default([]))) }}"
     g_new_node_hosts: "{{ groups.nodes_to_add }}"
-    g_ssh_user: "{{ hostvars.localhost.g_ssh_user_tmp }}"
-    g_sudo: "{{ hostvars.localhost.g_sudo_tmp }}"
+    g_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
+    g_sudo: "{{ deployment_vars[deployment_type].sudo }}"
     g_nodeonmaster: true
     openshift_cluster_id: "{{ cluster_id }}"
-    openshift_debug_level: 2
+    openshift_debug_level: "{{ debug_level }}"
     openshift_deployment_type: "{{ deployment_type }}"
     openshift_hostname: "{{ ec2_private_ip_address }}"
     openshift_public_hostname: "{{ ec2_ip_address }}"

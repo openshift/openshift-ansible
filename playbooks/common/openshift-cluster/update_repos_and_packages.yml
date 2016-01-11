@@ -4,9 +4,10 @@
     openshift_deployment_type: "{{ deployment_type }}"
   roles:
   - role: rhel_subscribe
-    when: deployment_type == "enterprise" and
+    when: deployment_type in ["enterprise", "atomic-enterprise", "openshift-enterprise"] and
           ansible_distribution == "RedHat" and
           lookup('oo_option', 'rhel_skip_subscription') | default(rhsub_skip, True) |
             default('no', True) | lower in ['no', 'false']
+          and not openshift.common.is_atomic | bool
   - openshift_repos
   - os_update_latest

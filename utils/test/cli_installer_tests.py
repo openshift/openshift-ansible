@@ -913,6 +913,25 @@ class AttendedCliTests(OOCliFixture):
         self.assertEquals('True',
             inventory.get('nodes', '10.0.0.1  openshift_schedulable'))
 
+    #interactive 3.0 install confirm no HA hints
+    @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.load_system_facts')
+    def test_ha_hint(self, load_facts_mock, run_playbook_mock):
+        load_facts_mock.return_value = (MOCK_FACTS, 0)
+        run_playbook_mock.return_value = 0
+
+        cli_input = build_input(hosts=[
+            ('10.0.0.1', True)],
+                                      ssh_user='root',
+                                      variant_num=2,
+                                      confirm_facts='y')
+        self.cli_args.append("install")
+        result = self.runner.invoke(cli.cli, self.cli_args,
+            input=cli_input)
+        self.assert_result(result, 0)
+        self.assertTrue("NOTE: Add a total of 3 or more Masters to perform an HA installation."
+            not in result.output)
+
 # TODO: test with config file, attended add node
 # TODO: test with config file, attended new node already in config file
 # TODO: test with config file, attended new node already in config file, plus manually added nodes

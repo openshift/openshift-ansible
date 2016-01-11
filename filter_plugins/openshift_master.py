@@ -463,7 +463,6 @@ class FilterModule(object):
         IdentityProviderBase.validate_idp_list(idp_list)
         return yaml.safe_dump([idp.to_dict() for idp in idp_list], default_flow_style=False)
 
-
     def filters(self):
         ''' returns a mapping of filters to methods '''
         return {"translate_idps": self.translate_idps}

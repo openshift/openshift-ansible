@@ -1,6 +1,7 @@
 ---
 - name: Install haproxy
   action: "{{ ansible_pkg_mgr }} name=haproxy state=present"
+  when: not openshift.common.is_containerized | bool
 
 - name: Configure haproxy
   template:

@@ -3,7 +3,8 @@
   <memory unit='GiB'>1</memory>
   <metadata xmlns:ansible="https://github.com/ansible/ansible">
     <ansible:tags>
-      <ansible:tag>env-{{ cluster }}</ansible:tag>
+      <ansible:tag>environment-{{ cluster_env }}</ansible:tag>
+      <ansible:tag>clusterid-{{ cluster }}</ansible:tag>
       <ansible:tag>host-type-{{ type }}</ansible:tag>
       <ansible:tag>sub-host-type-{{ g_sub_host_type }}</ansible:tag>
     </ansible:tags>

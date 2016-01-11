@@ -1,10 +1,8 @@
 ---
 - include: ../../common/openshift-cluster/scaleup.yml
+  vars_files:
+  - ../../byo/openshift-cluster/cluster_hosts.yml
   vars:
-    g_etcd_hosts: "{{ groups.etcd | default([]) }}"
-    g_master_hosts: "{{ groups.masters | default([]) }}"
-    g_new_node_hosts: "{{ groups.new_nodes | default([]) }}"
-    g_lb_hosts: "{{ groups.lb | default([]) }}"
     openshift_cluster_id: "{{ cluster_id | default('default') }}"
-    openshift_debug_level: 2
+    openshift_debug_level: "{{ debug_level | default(2) }}"
     openshift_deployment_type: "{{ deployment_type }}"

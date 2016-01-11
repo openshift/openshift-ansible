@@ -6,13 +6,12 @@
   vars_files:
   - vars.yml
   tasks:
-  - set_fact: cluster_group=tag_env_{{ cluster_id }}
   - add_host:
       name: "{{ item }}"
       groups: oo_hosts_to_terminate
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-    with_items: groups[cluster_group] | default([])
+    with_items: (groups['tag_environment_' ~ cluster_env]|default([])) | intersect(groups['tag_clusterid_' ~ cluster_id ]|default([]))
 
 - name: Unsubscribe VMs
   hosts: oo_hosts_to_terminate

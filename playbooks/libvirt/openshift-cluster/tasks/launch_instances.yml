@@ -88,7 +88,7 @@
     ansible_ssh_host: '{{ item.1 }}'
     ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
     ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-    groups: 'tag_env-{{ cluster }}, tag_host-type-{{ type }}, tag_sub-host-type-{{ g_sub_host_type }}'
+    groups: "tag_environment-{{ cluster_env }}, tag_host-type-{{ type }}, tag_sub-host-type-{{ g_sub_host_type }}, tag_clusterid-{{ cluster_id }}"
   with_together:
     - instances
     - ips
