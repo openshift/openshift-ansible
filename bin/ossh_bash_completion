@@ -26,13 +26,13 @@ complete -F _ossh ossh oscp
 
 __opssh_known_hosts(){
     if python -c 'import openshift_ansible' &>/dev/null; then
-      /usr/bin/python -c 'from openshift_ansible.multi_inventory import MultiInventory; m=MultiInventory(); m.run(); print "\n".join(["%s" % (host["oo_host-type"]) for dns, host in m.result["_meta"]["hostvars"].items() if "oo_host-type" in host])'
+      /usr/bin/python -c 'from openshift_ansible.multi_inventory import MultiInventory; m=MultiInventory(); m.run(); print "\n".join(set(["%s" % (host["oo_hosttype"]) for dns, host in m.result["_meta"]["hostvars"].items() if "oo_hosttype" in host]))'
 
     elif [[ -f /dev/shm/.ansible/tmp/multi_inventory.cache ]]; then
-      /usr/bin/python -c 'import json; loc="/dev/shm/.ansible/tmp/multi_inventory.cache"; z=json.loads(open(loc).read()); print "\n".join(["%s" % (host["oo_host-type"]) for dns, host in z["_meta"]["hostvars"].items() if "oo_host-type" in host])'
+      /usr/bin/python -c 'import json; loc="/dev/shm/.ansible/tmp/multi_inventory.cache"; z=json.loads(open(loc).read()); print "\n".join(set(["%s" % (host["oo_hosttype"]) for dns, host in z["_meta"]["hostvars"].items() if "oo_hosttype" in host]))'
 
     elif [[ -f ~/.ansible/tmp/multi_inventory.cache ]]; then
-      /usr/bin/python -c 'import json,os; loc="%s" % os.path.expanduser("/dev/shm/.ansible/tmp/multi_inventory.cache"); z=json.loads(open(loc).read()); print "\n".join(["%s" % (host["oo_host-type"]) for dns, host in z["_meta"]["hostvars"].items() if "oo_host-type" in host])'
+      /usr/bin/python -c 'import json,os; loc="%s" % os.path.expanduser("/dev/shm/.ansible/tmp/multi_inventory.cache"); z=json.loads(open(loc).read()); print "\n".join(set(["%s" % (host["oo_hosttype"]) for dns, host in z["_meta"]["hostvars"].items() if "oo_hosttype" in host]))'
 
     fi
 }
