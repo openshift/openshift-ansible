@@ -2,7 +2,7 @@
 
 _ossh_known_hosts(){
   if [[ -f ~/.ansible/tmp/multi_inventory.cache ]]; then
-    print $(/usr/bin/python -c 'import json,os; z = json.loads(open("%s"%os.path.expanduser("~/.ansible/tmp/multi_inventory.cache")).read()); print "\n".join(["%s.%s" % (host["ec2_tag_Name"],host["ec2_tag_env"]) for dns, host in z["_meta"]["hostvars"].items()])')
+    print $(/usr/bin/python -c 'import json,os; z = json.loads(open("%s"%os.path.expanduser("~/.ansible/tmp/multi_inventory.cache")).read()); print "\n".join(["%s.%s" % (host["oo_name"],host["oo_environment"]) for dns, host in z["_meta"]["hostvars"].items()])')
   fi
 }
 
