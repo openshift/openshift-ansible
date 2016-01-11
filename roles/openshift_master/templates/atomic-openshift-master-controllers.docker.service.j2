@@ -1,0 +1,25 @@
+[Unit]
+Description=Atomic OpenShift Master Controllers
+Documentation=https://github.com/openshift/origin
+After=network.target
+After={{ openshift.common.service_type }}-master-api.service
+Before={{ openshift.common.service_type }}-node.service
+Requires=docker.service
+PartOf=docker.service
+
+[Service]
+EnvironmentFile=/etc/sysconfig/{{ openshift.common.service_type }}-master-controllers
+Environment=GOTRACEBACK=crash
+ExecStartPre=-/usr/bin/docker rm -f {{ openshift.common.service_type}}-master-controllers
+ExecStart=/usr/bin/docker run --rm --privileged --net=host --name {{ openshift.common.service_type }}-master-controllers -v {{ openshift.common.data_dir }}:{{ openshift.common.data_dir }} -v /var/run/docker.sock:/var/run/docker.sock -v {{ openshift.common.config_base }}:{{ openshift.common.config_base }} {{ openshift.master.master_image }} start master controllers --config=${CONFIG_FILE} $OPTIONS
+ExecStartPost=/usr/bin/sleep 10
+ExecStop=/usr/bin/docker stop {{ openshift.common.service_type }}-master-controllers
+LimitNOFILE=131072
+LimitCORE=infinity
+WorkingDirectory={{ openshift.common.data_dir }}
+SyslogIdentifier={{ openshift.common.service_type }}-master-controllers
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+WantedBy={{ openshift.common.service_type }}-node.service

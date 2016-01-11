@@ -18,6 +18,9 @@ ansible_ssh_user=root
 # user must be configured for passwordless sudo
 #ansible_sudo=true
 
+# Debug level for all Atomic Enterprise components (Defaults to 2)
+debug_level=2
+
 # deployment type valid values are origin, online, atomic-enterprise, and openshift-enterprise
 deployment_type=atomic-enterprise
 
@@ -26,6 +29,14 @@ deployment_type=atomic-enterprise
 
 # Enable cluster metrics
 #use_cluster_metrics=true
+
+# Configure metricsPublicURL in the master config for cluster metrics
+# See: https://docs.openshift.com/enterprise/latest/install_config/cluster_metrics.html
+#openshift_master_metrics_public_url=https://hawkular-metrics.example.com/hawkular/metrics
+
+# Configure loggingPublicURL in the master config for aggregate logging
+# See: https://docs.openshift.com/enterprise/latest/install_config/aggregate_logging.html
+#openshift_master_logging_public_url=https://kibana.example.com
 
 # Add additional, insecure, and blocked registries to global docker configuration
 # For enterprise deployment types we ensure that registry.access.redhat.com is
@@ -90,6 +101,12 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 
 # Override the default controller lease ttl
 #osm_controller_lease_ttl=30
+
+# Configure controller arguments
+#osm_controller_args={'resource-quota-sync-period': ['10s']}
+
+# Configure api server arguments
+#osm_api_server_args={'max-requests-inflight': ['400']}
 
 # default subdomain to use for exposed routes
 #osm_default_subdomain=apps.test.example.com
@@ -162,6 +179,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 
 # Configure dnsIP in the node config
 #openshift_dns_ip=172.30.0.1
+
+# Configure node kubelet arguments
+#openshift_node_kubelet_args={'max-pods': ['40'], 'image-gc-high-threshold': ['90'], 'image-gc-low-threshold': ['80']}
 
 # host group for masters
 [masters]

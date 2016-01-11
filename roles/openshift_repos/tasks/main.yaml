@@ -8,23 +8,24 @@
 #       proper repos correctly.
 
 - assert:
-    that: openshift.common.deployment_type in known_openshift_deployment_types
+    that: openshift_deployment_type in known_openshift_deployment_types
 
 - name: Ensure libselinux-python is installed
   action: "{{ ansible_pkg_mgr }} name=libselinux-python state=present"
+  when: not openshift.common.is_containerized | bool
 
 - name: Create any additional repos that are defined
   template:
     src: yum_repo.j2
     dest: /etc/yum.repos.d/openshift_additional.repo
-  when: openshift_additional_repos | length > 0
+  when: openshift_additional_repos | length > 0 and not openshift.common.is_containerized | bool
   notify: refresh cache
 
 - name: Remove the additional repos if no longer defined
   file:
     dest: /etc/yum.repos.d/openshift_additional.repo
     state: absent
-  when: openshift_additional_repos | length == 0
+  when: openshift_additional_repos | length == 0 and not openshift.common.is_containerized | bool
   notify: refresh cache
 
 - name: Remove any yum repo files for other deployment types RHEL/CentOS
@@ -35,6 +36,7 @@
   - '*/repos/*'
   when: not (item | search("/files/" ~ openshift_deployment_type ~ "/repos")) and
         (ansible_os_family == "RedHat" and ansible_distribution != "Fedora")
+        and not openshift.common.is_containerized | bool
   notify: refresh cache
 
 - name: Remove any yum repo files for other deployment types Fedora
@@ -44,7 +46,8 @@
   with_fileglob:
   - '*/repos/*'
   when: not (item | search("/files/fedora-" ~ openshift_deployment_type ~ "/repos")) and
-        (ansible_distribution == "Fedora")
+        (ansible_distribution == "Fedora") 
+        and not openshift.common.is_containerized | bool
   notify: refresh cache
 
 - name: Configure gpg keys if needed
@@ -52,6 +55,7 @@
   with_fileglob:
   - "{{ openshift_deployment_type }}/gpg_keys/*"
   notify: refresh cache
+  when: not openshift.common.is_containerized | bool
 
 - name: Configure yum repositories RHEL/CentOS
   copy: src={{ item }} dest=/etc/yum.repos.d/
@@ -59,10 +63,11 @@
   - "{{ openshift_deployment_type }}/repos/*"
   notify: refresh cache
   when: (ansible_os_family == "RedHat" and ansible_distribution != "Fedora")
+        and not openshift.common.is_containerized | bool
 
 - name: Configure yum repositories Fedora
   copy: src={{ item }} dest=/etc/yum.repos.d/
   with_fileglob:
   - "fedora-{{ openshift_deployment_type }}/repos/*"
   notify: refresh cache
-  when: (ansible_distribution == "Fedora")
+  when: (ansible_distribution == "Fedora") and not openshift.common.is_containerized | bool

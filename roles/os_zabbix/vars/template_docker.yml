@@ -17,6 +17,11 @@ g_template_docker:
     - Docker Daemon
     value_type: int
 
+  - key: docker.container.existing.dns.resolution.failed
+    applications:
+    - Docker Daemon
+    value_type: int
+
   - key: docker.storage.is_loopback
     applications:
     - Docker Storage
@@ -68,9 +73,14 @@ g_template_docker:
     priority: high
 
   - name: 'docker.container.dns.resolution failed on {HOST.NAME}'
-    expression: '{Template Docker:docker.container.dns.resolution.max(#3)}>0'
+    expression: '{Template Docker:docker.container.dns.resolution.min(#3)}>0'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_docker_dns.asciidoc'
-    priority: high
+    priority: average
+
+  - name: 'docker.container.existing.dns.resolution.failed on {HOST.NAME}'
+    expression: '{Template Docker:docker.container.existing.dns.resolution.failed.min(#3)}>0'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_docker_dns.asciidoc'
+    priority: average
 
   - name: 'Docker storage is using LOOPBACK on {HOST.NAME}'
     expression: '{Template Docker:docker.storage.is_loopback.last()}<>0'

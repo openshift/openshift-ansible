@@ -1,0 +1,18 @@
+---
+- name: Populate g_service_nfs host group if needed
+  hosts: localhost
+  gather_facts: no
+  tasks:
+  - fail: msg="new_cluster_state is required to be injected in this playbook"
+    when: new_cluster_state is not defined
+
+  - name: Evaluate g_service_nfs
+    add_host: name={{ item }} groups=g_service_nfs
+    with_items: oo_host_group_exp | default([])
+
+- name: Change state on nfs instance(s)
+  hosts: g_service_nfs
+  connection: ssh
+  gather_facts: no
+  tasks:
+    - service: name=nfs-server state="{{ new_cluster_state }}"

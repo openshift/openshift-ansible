@@ -15,13 +15,13 @@ ETCD_LISTEN_PEER_URLS={{ etcd_listen_peer_urls }}
 ETCD_NAME=default
 {% endif %}
 ETCD_DATA_DIR={{ etcd_data_dir }}
-#ETCD_SNAPSHOT_COUNTER="10000"
-ETCD_HEARTBEAT_INTERVAL="500"
-ETCD_ELECTION_TIMEOUT="2500"
+#ETCD_SNAPSHOT_COUNTER=10000
+ETCD_HEARTBEAT_INTERVAL=500
+ETCD_ELECTION_TIMEOUT=2500
 ETCD_LISTEN_CLIENT_URLS={{ etcd_listen_client_urls }}
-#ETCD_MAX_SNAPSHOTS="5"
-#ETCD_MAX_WALS="5"
-#ETCD_CORS=""
+#ETCD_MAX_SNAPSHOTS=5
+#ETCD_MAX_WALS=5
+#ETCD_CORS=
 
 {% if groups[etcd_peers_group] and groups[etcd_peers_group] | length > 1 %}
 #[cluster]
@@ -29,15 +29,15 @@ ETCD_INITIAL_ADVERTISE_PEER_URLS={{ etcd_initial_advertise_peer_urls }}
 ETCD_INITIAL_CLUSTER={{ initial_cluster() }}
 ETCD_INITIAL_CLUSTER_STATE={{ etcd_initial_cluster_state }}
 ETCD_INITIAL_CLUSTER_TOKEN={{ etcd_initial_cluster_token }}
-#ETCD_DISCOVERY=""
-#ETCD_DISCOVERY_SRV=""
-#ETCD_DISCOVERY_FALLBACK="proxy"
-#ETCD_DISCOVERY_PROXY=""
+#ETCD_DISCOVERY=
+#ETCD_DISCOVERY_SRV=
+#ETCD_DISCOVERY_FALLBACK=proxy
+#ETCD_DISCOVERY_PROXY=
 {% endif %}
 ETCD_ADVERTISE_CLIENT_URLS={{ etcd_advertise_client_urls }}
 
 #[proxy]
-#ETCD_PROXY="off"
+#ETCD_PROXY=off
 
 #[security]
 {% if etcd_url_scheme == 'https' -%}

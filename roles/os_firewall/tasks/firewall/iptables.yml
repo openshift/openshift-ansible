@@ -5,6 +5,7 @@
   - iptables
   - iptables-services
   register: install_result
+  when: not openshift.common.is_atomic | bool
 
 - name: Check if firewalld is installed
   command: rpm -q firewalld

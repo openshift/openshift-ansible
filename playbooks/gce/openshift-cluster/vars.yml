@@ -1,7 +1,15 @@
 ---
 do_we_use_openshift_sdn: true
-sdn_network_plugin: redhat/openshift-ovs-subnet 
+sdn_network_plugin: redhat/openshift-ovs-subnet
+debug_level: 2
 # os_sdn_network_plugin_name can be ovssubnet or multitenant, see https://docs.openshift.org/latest/architecture/additional_concepts/sdn.html#ovssubnet-plugin-operation
+
+deployment_rhel7_ent_base:
+  image: rhel-7
+  machine_type: n1-standard-1
+  ssh_user:
+  sudo: yes
+
 deployment_vars:
   origin:
     image: preinstalled-slave-50g-v5
@@ -13,8 +21,6 @@ deployment_vars:
     machine_type: n1-standard-1
     ssh_user: root
     sudo: no
-  enterprise:
-    image: rhel-7
-    machine_type: n1-standard-1
-    ssh_user:
-    sudo: yes
+  enterprise: "{{ deployment_rhel7_ent_base }}"
+  openshift-enterprise: "{{ deployment_rhel7_ent_base }}"
+  atomic-enterprise: "{{ deployment_rhel7_ent_base }}"

@@ -4,6 +4,7 @@
 #       to make it able to enable repositories
 
 - set_fact:
+    rhel_subscription_pool: "{{ lookup('oo_option', 'rhel_subscription_pool') | default(rhsub_pool, True) | default('OpenShift Enterprise, Premium*', True) }}"
     rhel_subscription_user: "{{ lookup('oo_option', 'rhel_subscription_user') | default(rhsub_user, True) | default(omit, True) }}"
     rhel_subscription_pass: "{{ lookup('oo_option', 'rhel_subscription_pass') | default(rhsub_pass, True) | default(omit, True) }}"
     rhel_subscription_server: "{{ lookup('oo_option', 'rhel_subscription_server') | default(rhsub_server) }}"
@@ -30,7 +31,14 @@
   redhat_subscription:
     username: "{{ rhel_subscription_user }}"
     password: "{{ rhel_subscription_pass }}"
-    autosubscribe: yes
+
+- name: Retrieve the OpenShift Pool ID
+  command: subscription-manager list --available --matches="{{ rhel_subscription_pool }}" --pool-only
+  register: openshift_pool_id
+  changed_when: False
+
+- name: Attach to OpenShift Pool
+  command: subscription-manager subscribe --pool {{ openshift_pool_id.stdout_lines[0] }}
 
 - include: enterprise.yml
-  when: deployment_type == 'enterprise'
+  when: deployment_type in [ 'enterprise', 'atomic-enterprise', 'openshift-enterprise' ]

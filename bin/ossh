@@ -55,15 +55,15 @@ class Ossh(object):
     def parse_cli_args(self):
         parser = argparse.ArgumentParser(description='OpenShift Online SSH Tool.')
         parser.add_argument('-e', '--env', action="store",
-                          help="Which environment to search for the host ")
+                            help="Which environment to search for the host ")
         parser.add_argument('-d', '--debug', default=False,
-                          action="store_true", help="debug mode")
+                            action="store_true", help="debug mode")
         parser.add_argument('-v', '--verbose', default=False,
-                          action="store_true", help="Verbose?")
+                            action="store_true", help="Verbose?")
         parser.add_argument('--refresh-cache', default=False,
-                          action="store_true", help="Force a refresh on the host cache.")
+                            action="store_true", help="Force a refresh on the host cache.")
         parser.add_argument('--list', default=False,
-                          action="store_true", help="list out hosts")
+                            action="store_true", help="list out hosts")
         parser.add_argument('-c', '--command', action='store',
                             help='Command to run on remote host')
         parser.add_argument('-l', '--login_name', action='store',
@@ -127,7 +127,7 @@ class Ossh(object):
 
         # attempt to select the correct environment if specified
         if self.env:
-            results = filter(lambda result: result[1]['ec2_tag_env'] == self.env, results)
+            results = filter(lambda result: result[1]['oo_environment'] == self.env, results)
 
         if results:
             return results
@@ -153,10 +153,8 @@ class Ossh(object):
                     print '{0:<35} {1}'.format(key, server_info[key])
             else:
                 for host_id, server_info in results[:limit]:
-                    name = server_info['ec2_tag_Name']
-                    ec2_id = server_info['ec2_id']
-                    ip = server_info['ec2_ip_address']
-                    print '{ec2_tag_Name:<35} {ec2_tag_env:<8} {ec2_id:<15} {ec2_ip_address:<18} {ec2_private_ip_address}'.format(**server_info)
+                    print '{oo_name:<35} {oo_clusterid:<10} {oo_environment:<8} ' \
+                          '{oo_id:<15} {oo_public_ip:<18} {oo_private_ip:<18}'.format(**server_info)
 
                 if limit:
                     print
@@ -166,10 +164,8 @@ class Ossh(object):
         else:
             for env, host_ids in self.host_inventory.items():
                 for host_id, server_info in host_ids.items():
-                    name = server_info['ec2_tag_Name']
-                    ec2_id = server_info['ec2_id']
-                    ip = server_info['ec2_ip_address']
-                    print '{ec2_tag_Name:<35} {ec2_tag_env:<8} {ec2_id:<15} {ec2_ip_address:<18} {ec2_private_ip_address}'.format(**server_info)
+                    print '{oo_name:<35} {oo_clusterid:<10} {oo_environment:<8} ' \
+                          '{oo_id:<15} {oo_public_ip:<18} {oo_private_ip:<18}'.format(**server_info)
 
     def ssh(self):
         '''SSH to a specified host
@@ -195,12 +191,12 @@ class Ossh(object):
             if len(results) > 1:
                 print "Multiple results found for %s." % self.host
                 for result in results:
-                    print "{ec2_tag_Name:<35} {ec2_tag_env:<5} {ec2_id:<10}".format(**result[1])
+                    print "{oo_name:<35} {oo_clusterid:<5} {oo_environment:<5} {oo_id:<10}".format(**result[1])
                 return # early exit, too many results
 
             # Assume we have one and only one.
-            hostname, server_info = results[0]
-            dns = server_info['ec2_public_dns_name']
+            _, server_info = results[0]
+            dns = server_info['oo_public_ip']
 
             ssh_args.append(dns)
 

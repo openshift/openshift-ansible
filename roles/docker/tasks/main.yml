@@ -2,9 +2,17 @@
 # tasks file for docker
 - name: Install docker
   action: "{{ ansible_pkg_mgr }} name=docker state=present"
+  when: not openshift.common.is_atomic | bool
   
 - name: enable and start the docker service
-  service: name=docker enabled=yes state=started
+  service:
+    name: docker
+    enabled: yes
+    state: started
+  register: start_result
+
+- set_fact:
+    docker_service_status_changed: start_result | changed
 
 - include: udev_workaround.yml
   when: docker_udev_workaround | default(False)

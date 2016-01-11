@@ -1,19 +1,19 @@
 ---
 # By default install rhel and xpaas streams on enterprise installs
-openshift_examples_load_centos: "{{ openshift_deployment_type not in ['enterprise','openshift-enterprise','atomic-enterprise','online'] }}"
-openshift_examples_load_rhel: "{{ openshift_deployment_type in ['enterprise','openshift-enterprise','atomic-enterprise','online'] }}"
+openshift_examples_load_centos: "{{ openshift_deployment_type == 'origin' }}"
+openshift_examples_load_rhel: "{{ openshift_deployment_type != 'origin' }}"
 openshift_examples_load_db_templates: true
-openshift_examples_load_xpaas: "{{ openshift_deployment_type in ['enterprise','openshift-enterprise','atomic-enterprise','online']  }}"
+openshift_examples_load_xpaas: "{{ openshift_deployment_type != 'origin' }}"
 openshift_examples_load_quickstarts: true
 
 content_version: "{{ 'v1.1' if openshift.common.version_greater_than_3_1_or_1_1 else 'v1.0' }}"
 
-examples_base: "/usr/share/openshift/examples"
+examples_base: "{{ openshift.common.config_base if openshift.common.is_containerized else '/usr/share/openshift' }}/examples"
 image_streams_base: "{{ examples_base }}/image-streams"
 centos_image_streams: "{{ image_streams_base}}/image-streams-centos7.json"
 rhel_image_streams: "{{ image_streams_base}}/image-streams-rhel7.json"
 db_templates_base: "{{ examples_base }}/db-templates"
-xpaas_image_streams: "{{ examples_base }}/xpaas-streams/jboss-image-streams.json"
+xpaas_image_streams: "{{ examples_base }}/xpaas-streams/"
 xpaas_templates_base: "{{ examples_base }}/xpaas-templates"
 quickstarts_base: "{{ examples_base }}/quickstart-templates"
 infrastructure_origin_base: "{{ examples_base }}/infrastructure-templates/origin"

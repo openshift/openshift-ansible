@@ -19,15 +19,19 @@
       failed_when: false
       register: ostree_output
 
+      # Since we're not calling openshift_facts we'll do this for now
     - set_fact:
         is_atomic: "{{ ostree_output.rc == 0 }}"
+    - set_fact:
+        is_containerized: "{{ is_atomic or containerized | default(false) | bool }}"
 
     - name: Remove br0 interface
       shell: ovs-vsctl del-br br0
       changed_when: False
       failed_when: False
 
-    - service: name={{ item }} state=stopped
+    - name: Stop services
+      service: name={{ item }} state=stopped
       with_items:
         - atomic-enterprise-master
         - atomic-enterprise-node
@@ -36,6 +40,7 @@
         - atomic-openshift-master-controllers
         - atomic-openshift-node
         - etcd
+        - haproxy
         - openshift-master
         - openshift-master-api
         - openshift-master-controllers
@@ -46,8 +51,10 @@
         - origin-master-controllers
         - origin-node
         - pcsd
+      failed_when: false
 
-    - action: "{{ ansible_pkg_mgr }} name={{ item }} state=absent"
+    - name: Remove packages
+      action: "{{ ansible_pkg_mgr }} name={{ item }} state=absent"
       when: not is_atomic | bool
       with_items:
         - atomic-enterprise
@@ -61,6 +68,7 @@
         - atomic-openshift-sdn-ovs
         - corosync
         - etcd
+        - haproxy
         - openshift
         - openshift-master
         - openshift-node
@@ -132,14 +140,26 @@
       with_items:
         - registry\.access\..*redhat\.com/openshift3
         - registry\.access\..*redhat\.com/aep3
+        - registry\.access\..*redhat\.com/rhel7/etcd
         - docker.io/openshift
 
     - shell:  "docker rmi -f {{ item.stdout_lines | join(' ') }}"
       changed_when: False
       failed_when: False
       with_items: "{{ images_to_delete.results }}"
+    
+    - name: Remove sdn drop files
+      file: 
+        path: /run/openshift-sdn
+        state: absent
+        
+    - name: restart docker
+      service:
+        name: docker
+        state: restarted
 
-    - file: path={{ item }} state=absent
+    - name: Remove remaining files
+      file: path={{ item }} state=absent
       with_items:
         - "~{{ ansible_ssh_user }}/.kube"
         - /etc/ansible/facts.d/openshift.fact
@@ -149,7 +169,15 @@
         - /etc/openshift
         - /etc/openshift-sdn
         - /etc/origin
+        - /etc/systemd/system/atomic-openshift-master.service
+        - /etc/systemd/system/atomic-openshift-master-api.service
+        - /etc/systemd/system/atomic-openshift-master-controllers.service
+        - /etc/systemd/system/atomic-openshift-node.service
+        - /etc/systemd/system/etcd_container.service
+        - /etc/systemd/system/openvswitch.service
         - /etc/sysconfig/atomic-enterprise-master
+        - /etc/sysconfig/atomic-enterprise-master-api
+        - /etc/sysconfig/atomic-enterprise-master-controllers
         - /etc/sysconfig/atomic-enterprise-node
         - /etc/sysconfig/atomic-openshift-master
         - /etc/sysconfig/atomic-openshift-master-api

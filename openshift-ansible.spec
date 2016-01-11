@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.20
+Version:        3.0.27
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -259,6 +259,125 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Jan 08 2016 Kenny Woodson <kwoodson@redhat.com> 3.0.27-1
+- Update to metadata tooling. (kwoodson@redhat.com)
+- Fix VM drive cleanup during terminate on libvirt (lhuard@amadeus.com)
+
+* Fri Jan 08 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.26-1
+- Bug 1296388 - fixing typo (bleanhar@redhat.com)
+
+* Thu Jan 07 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.25-1
+- Bug 1296388 - The playbook still configure ManageIQ when
+  openshift_use_manageiq is false (bleanhar@redhat.com)
+- Add a banner to CLI wrapper instructing users that it's only for
+  bootstrapping (sdodson@redhat.com)
+- Rename env into clusterid and add environment in the OpenStack VMs tags
+  (lhuard@amadeus.com)
+- Fix terminate.yml on OpenStack (lhuard@amadeus.com)
+- Install gluster and ceph packages when containerized but not atomic
+  (sdodson@redhat.com)
+- Update openshift_facts config_base for Online deployments (whearn@redhat.com)
+- Fix multi-word arguments & cli wrapper stdin plumbing (sdodson@redhat.com)
+- Improve 3.1/1.1 upgrade check (jdetiber@redhat.com)
+
+* Thu Jan 07 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.24-1
+- Setting relative paths in the upgrade playbooks wasn't working
+  (bleanhar@redhat.com)
+
+* Wed Jan 06 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.23-1
+- Move extra secret validations into openshift_facts. (abutcher@redhat.com)
+- Remove not is_containerized restriction on storage plugin includes.
+  (abutcher@redhat.com)
+- We can't enable manageiq for installations less than OSE 3.1 or Origin 1.1
+  (bleanhar@redhat.com)
+- Fix RHN subscription by explicitly attaching to the right pool
+  (lhuard@amadeus.com)
+- openshift_facts validation (abutcher@redhat.com)
+- Secrets validation. (abutcher@redhat.com)
+- Clean up idempotency issues with session secrets. (abutcher@redhat.com)
+
+* Wed Jan 06 2016 Kenny Woodson <kwoodson@redhat.com> 3.0.22-1
+- playbook for restarting SDN (jdiaz@redhat.com)
+- Stop haproxy and remove package during uninstall. (abutcher@redhat.com)
+- Group name as per hosts.origin.example (donovan.muller@gmail.com)
+- I believe the ami id changed since the initial documentation was created for
+  AWS deployment (rcook@redhat.com)
+
+* Tue Jan 05 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.21-1
+- Fix osm_controller_args and osm_api_server_args settings.
+  (abutcher@redhat.com)
+- Fix error in byo cluster_hosts.yml (jdetiber@redhat.com)
+- Cleanup and fixes for cluster_id change (jdetiber@redhat.com)
+- Fix typo in etcd service status fact. (abutcher@redhat.com)
+- Removing environment and env tags. (kwoodson@redhat.com)
+- Add node kubelet args to inventory examples. (abutcher@redhat.com)
+- Adding ManageIQ service account by default (efreiber@redhat.com)
+- Fixes typo assigning docker_service_status_changed which leads to
+  misinterpretation in handler. (eric.mountain@amadeus.com)
+- Fix restart handlers. (abutcher@redhat.com)
+- Remove lb from docker hosts. (abutcher@redhat.com)
+- Install iptables, iptables-services when not is_aotmic (sdodson@redhat.com)
+- Install all xpaas streams when enabled (sdodson@redhat.com)
+- add the necessary URLs for logging and metrics
+  (git001@users.noreply.github.com)
+- Link to Tito Home Page is Broken (lloy0076@adam.com.au)
+- Conditionalize for 3.1.1/1.1.1 (abutcher@redhat.com)
+- Use notify for workaround controllers unit. (abutcher@redhat.com)
+- change dns triggers to average (jdiaz@redhat.com)
+- add item/trigger for dns tests on all currently running containers
+  (jdiaz@redhat.com)
+- Add jboss-fuse/application-templates/fis-image-streams.json
+  (sdodson@redhat.com)
+- atomic-openshift-installer: Fix broken nosetest (smunilla@redhat.com)
+- Update from jboss-openshift/application-templates ose-v1.2.0-1
+  (sdodson@redhat.com)
+- fix logic to tolerate occasional failures (jdiaz@redhat.com)
+- Clean up versions.sh (sdodson@redhat.com)
+- change ovs mount to /var/run/openvswitch will not require a container restart
+  if openvswitch service is restarted (jdiaz@redhat.com)
+- split zagg.server.processor.errors into separate heartbeat and metrics error
+  items (needed since the scripts are split now). (twiest@redhat.com)
+- quick installer tests (smunilla@redhat.com)
+- atomic-openshift-installer: Remove HA hint for 3.0 install
+  (smunilla@redhat.com)
+- Add some guards to wait for images to be pulled before moving on
+  (sdodson@redhat.com)
+- Install httpd-tools when not is_atomic (sdodson@redhat.com)
+- Properly set use_flannel fact (sbaubeau@redhat.com)
+- Fix containerized variable (sdodson@redhat.com)
+- Skip yum/dnf ops when is_containerized (sdodson@redhat.com)
+- Move all docker config into openshift_docker to minimize docker restarts
+  (sdodson@redhat.com)
+- Create nfs host group with registry volume attachment. (abutcher@redhat.com)
+- Add openshift_cli role (sdodson@redhat.com)
+- pull docker images only if not already present (jdetiber@redhat.com)
+- fixes (jdetiber@redhat.com)
+- Containerization work by @sdodson (sdodson@redhat.com)
+- Initial containerization work from @ibotty (tob@butter.sh)
+- Add zabbix values to track docker container DNS results (jdiaz@redhat.com)
+- Fix registry modification for new deployment types. (dgoodwin@redhat.com)
+- Updates to ohi to pull cache if specified.  Also require version
+  (kwoodson@redhat.com)
+- Zabbix: added trigger to monitor app create over the last hour
+  (mwoodson@redhat.com)
+- added 'Template Zagg Server' (twiest@redhat.com)
+- Fixes typo when setting facts to record whether master/node has been
+  restarted already, to decide whether notify handler should do so or not.
+  Currently, this causes random SDN network setup failures as openshift-node
+  gets restarted while the setup script is running, and the subsequent start
+  fails to configure the SDN because it thinks it's already done.
+  (eric.mountain@amadeus.com)
+- Change controllers service type to simple. (abutcher@redhat.com)
+- Updating env-host-type to host patterns (kwoodson@redhat.com)
+- Add note that Fedora 23+ is acceptable deployment target for origin
+  (admiller@redhat.com)
+- Enforce connection: local and become: no on all localhost plays
+  (jdetiber@redhat.com)
+- Use join for the uncompress command. (jsteffan@fedoraproject.org)
+- Update for latest CentOS-7-x86_64-GenericCloud.  - Use xz compressed image  -
+  Update sha256 for new image  - Update docs to reflect new settings
+  (jsteffan@fedoraproject.org)
+
 * Thu Dec 10 2015 Thomas Wiest <twiest@redhat.com> 3.0.20-1
 - Revert "Automatic commit of package [openshift-ansible] release [3.0.20-1]."
   (twiest@redhat.com)

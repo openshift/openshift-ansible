@@ -59,9 +59,23 @@ class AwsUtil(object):
             minv.run()
         return minv.result
 
+    def get_clusters(self):
+        """Searches for cluster tags in the inventory and returns all of the clusters found."""
+        pattern = re.compile(r'^oo_clusterid_(.*)')
+
+        clusters = []
+        inv = self.get_inventory()
+        for key in inv.keys():
+            matched = pattern.match(key)
+            if matched:
+                clusters.append(matched.group(1))
+
+        clusters.sort()
+        return clusters
+
     def get_environments(self):
         """Searches for env tags in the inventory and returns all of the envs found."""
-        pattern = re.compile(r'^tag_env_(.*)')
+        pattern = re.compile(r'^oo_environment_(.*)')
 
         envs = []
         inv = self.get_inventory()
@@ -75,7 +89,7 @@ class AwsUtil(object):
 
     def get_host_types(self):
         """Searches for host-type tags in the inventory and returns all host-types found."""
-        pattern = re.compile(r'^tag_host-type_(.*)')
+        pattern = re.compile(r'^oo_host-type_(.*)')
 
         host_types = []
         inv = self.get_inventory()
@@ -109,13 +123,13 @@ class AwsUtil(object):
         inst_by_env = {}
         for _, host in inv['_meta']['hostvars'].items():
             # If you don't have an environment tag, we're going to ignore you
-            if 'ec2_tag_env' not in host:
+            if 'ec2_tag_environment' not in host:
                 continue
 
-            if host['ec2_tag_env'] not in inst_by_env:
-                inst_by_env[host['ec2_tag_env']] = {}
+            if host['ec2_tag_environment'] not in inst_by_env:
+                inst_by_env[host['ec2_tag_environment']] = {}
             host_id = "%s:%s" % (host['ec2_tag_Name'], host['ec2_id'])
-            inst_by_env[host['ec2_tag_env']][host_id] = host
+            inst_by_env[host['ec2_tag_environment']][host_id] = host
 
         return inst_by_env
 
@@ -154,10 +168,22 @@ class AwsUtil(object):
         return host_type
 
     @staticmethod
+    def gen_version_tag(ver):
+        """Generate the version tag
+        """
+        return "oo_version_%s" % ver
+
+    @staticmethod
+    def gen_clusterid_tag(clu):
+        """Generate the clusterid tag
+        """
+        return "tag_clusterid_%s" % clu
+
+    @staticmethod
     def gen_env_tag(env):
         """Generate the environment tag
         """
-        return "tag_env_%s" % env
+        return "tag_environment_%s" % env
 
     def gen_host_type_tag(self, host_type):
         """Generate the host type tag
@@ -165,47 +191,44 @@ class AwsUtil(object):
         host_type = self.resolve_host_type(host_type)
         return "tag_host-type_%s" % host_type
 
-    def gen_env_host_type_tag(self, host_type, env):
-        """Generate the environment host type tag
-        """
-        host_type = self.resolve_host_type(host_type)
-        return "tag_env-host-type_%s-%s" % (env, host_type)
-
-    def get_host_list(self, host_type=None, envs=None, version=None, cached=False):
+    # This function uses all of these params to perform a filters on our host inventory.
+    # pylint: disable=too-many-arguments
+    def get_host_list(self, clusters=None, host_type=None, envs=None, version=None, cached=False):
         """Get the list of hosts from the inventory using host-type and environment
         """
         retval = set([])
         envs = envs or []
+
         inv = self.get_inventory(cached=cached)
 
-        # We prefer to deal with a list of environments
-        if issubclass(type(envs), basestring):
-            if envs == 'all':
-                envs = self.get_environments()
-            else:
-                envs = [envs]
+        retval.update(inv.get('all_hosts', []))
 
-        if host_type and envs:
-            # Both host type and environment were specified
-            for env in envs:
-                retval.update(inv.get('tag_environment_%s' % env, []))
+        if clusters:
+            cluster_hosts = set([])
+            if len(clusters) > 1:
+                for cluster in clusters:
+                    clu_tag = AwsUtil.gen_clusterid_tag(cluster)
+                    cluster_hosts.update(inv.get(clu_tag, []))
+            else:
+                cluster_hosts.update(inv.get(AwsUtil.gen_clusterid_tag(clusters[0]), []))
+
+            retval.intersection_update(cluster_hosts)
+
+        if envs:
+            env_hosts = set([])
+            if len(envs) > 1:
+                for env in envs:
+                    env_tag = AwsUtil.gen_env_tag(env)
+                    env_hosts.update(inv.get(env_tag, []))
+            else:
+                env_hosts.update(inv.get(AwsUtil.gen_env_tag(envs[0]), []))
+
+            retval.intersection_update(env_hosts)
+
+        if host_type:
             retval.intersection_update(inv.get(self.gen_host_type_tag(host_type), []))
 
-        elif envs and not host_type:
-            # Just environment was specified
-            for env in envs:
-                env_tag = AwsUtil.gen_env_tag(env)
-                if env_tag in inv.keys():
-                    retval.update(inv.get(env_tag, []))
-
-        elif host_type and not envs:
-            # Just host-type was specified
-            host_type_tag = self.gen_host_type_tag(host_type)
-            if host_type_tag in inv.keys():
-                retval.update(inv.get(host_type_tag, []))
-
-        # If version is specified then return only hosts in that version
-        if version:
-            retval.intersection_update(inv.get('oo_version_%s' % version, []))
+        if version != 'all':
+            retval.intersection_update(inv.get(AwsUtil.gen_version_tag(version), []))
 
         return retval

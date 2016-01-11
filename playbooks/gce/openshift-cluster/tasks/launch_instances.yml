@@ -16,7 +16,8 @@
     #service_account_permissions: "datastore,logging-write"
     tags:
       - created-by-{{ lookup('env', 'LOGNAME') |default(cluster, true) }}
-      - env-{{ cluster }}
+      - environment-{{ cluster_env }}
+      - clusterid-{{ cluster_id }}
       - host-type-{{ type }}
       - sub-host-type-{{ g_sub_host_type }}
   when: instances |length > 0

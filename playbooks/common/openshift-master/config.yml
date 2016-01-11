@@ -232,31 +232,36 @@
       balance: source
       servers: "{{ hostvars.localhost.haproxy_backend_servers }}"
   roles:
+  - role: openshift_facts
   - role: haproxy
     when: groups.oo_masters_to_config | length > 1
 
-- name: Generate master session keys
+- name: Check for cached session secrets
   hosts: oo_first_master
+  roles:
+  - role: openshift_facts
+  post_tasks:
+  - openshift_facts:
+      role: master
+      local_facts:
+          session_auth_secrets: "{{ openshift_master_session_auth_secrets | default(openshift.master.session_auth_secrets | default(None)) }}"
+          session_encryption_secrets: "{{ openshift_master_session_encryption_secrets | default(openshift.master.session_encryption_secrets | default(None)) }}"
+
+- name: Generate master session secrets
+  hosts: oo_first_master
+  vars:
+    g_session_secrets_present: "{{ (openshift.master.session_auth_secrets | default([]) and openshift.master.session_encryption_secrets | default([])) | length > 0 }}"
+    g_session_auth_secrets: "{{ [ 24 | oo_generate_secret ] }}"
+    g_session_encryption_secrets: "{{ [ 24 | oo_generate_secret ] }}"
+  roles:
+  - role: openshift_facts
   tasks:
-  - fail:
-      msg: "Both openshift_master_session_auth_secrets and openshift_master_session_encryption_secrets must be provided if either variable is set"
-    when: (openshift_master_session_auth_secrets is defined and openshift_master_session_encryption_secrets is not defined) or (openshift_master_session_encryption_secrets is defined and openshift_master_session_auth_secrets is not defined)
-  - fail:
-      msg: "openshift_master_session_auth_secrets and openshift_master_encryption_secrets must be equal length"
-    when: (openshift_master_session_auth_secrets is defined and openshift_master_session_encryption_secrets is defined) and (openshift_master_session_auth_secrets | length != openshift_master_session_encryption_secrets | length)
-  - name: Install OpenSSL package
-    action: "{{ ansible_pkg_mgr }} name=openssl state=present"
-  - name: Generate session authentication key
-    command: /usr/bin/openssl rand -base64 24
-    register: session_auth_output
-    when: openshift_master_session_auth_secrets is undefined
-  - name: Generate session encryption key
-    command: /usr/bin/openssl rand -base64 24
-    register: session_encryption_output
-    when: openshift_master_session_encryption_secrets is undefined
-  - set_fact:
-      session_auth_secret: "{{ openshift_master_session_auth_secrets | default([session_auth_output.stdout]) }}"
-      session_encryption_secret: "{{ openshift_master_session_encryption_secrets | default([session_encryption_output.stdout]) }}"
+  - openshift_facts:
+      role: master
+      local_facts:
+        session_auth_secrets: "{{ g_session_auth_secrets }}"
+        session_encryption_secrets: "{{ g_session_encryption_secrets }}"
+    when: not g_session_secrets_present | bool
 
 - name: Parse named certificates
   hosts: localhost
@@ -312,8 +317,8 @@
     sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
     openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
     openshift_master_count: "{{ groups.oo_masters_to_config | length }}"
-    openshift_master_session_auth_secrets: "{{ hostvars[groups['oo_first_master'][0]]['session_auth_secret'] }}"
-    openshift_master_session_encryption_secrets: "{{ hostvars[groups['oo_first_master'][0]]['session_encryption_secret'] }}"
+    openshift_master_session_auth_secrets: "{{ hostvars[groups.oo_first_master.0].openshift.master.session_auth_secrets }}"
+    openshift_master_session_encryption_secrets: "{{ hostvars[groups.oo_first_master.0].openshift.master.session_encryption_secrets }}"
   pre_tasks:
   - name: Ensure certificate directory exists
     file:
@@ -328,6 +333,7 @@
   roles:
   - openshift_master
   - role: nickhammond.logrotate
+    when: not openshift.common.is_containerized | bool
   - role: fluentd_master
     when: openshift.common.use_fluentd | bool
   post_tasks:
@@ -356,7 +362,7 @@
     cockpit_plugins: "{{ osm_cockpit_plugins | default(['cockpit-kubernetes']) }}"
   roles:
   - role: cockpit
-    when: ( deployment_type in ['atomic-enterprise','openshift-enterprise'] ) and
+    when: not openshift.common.is_containerized and ( deployment_type in ['atomic-enterprise','openshift-enterprise'] ) and
       (osm_use_cockpit | bool or osm_use_cockpit is undefined )
 
 - name: Configure flannel
@@ -394,7 +400,15 @@
 
 - name: Create services
   hosts: oo_first_master
+  vars:
+    attach_registry_volume: "{{ groups.oo_nfs_to_config | length > 0 }}"
+  pre_tasks:
+  - set_fact:
+      nfs_host: "{{ groups.oo_nfs_to_config.0 }}"
+      registry_volume_path: "{{ hostvars[groups.oo_nfs_to_config.0].openshift.nfs.exports_dir + '/' + hostvars[groups.oo_nfs_to_config.0].openshift.nfs.registry_volume }}"
+    when: attach_registry_volume | bool
   roles:
   - role: openshift_router
     when: openshift.master.infra_nodes is defined
-  #- role: openshift_registry
+  - role: openshift_registry
+    when: openshift.master.infra_nodes is defined and attach_registry_volume | bool

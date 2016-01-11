@@ -113,7 +113,7 @@
     args:
       tags:
         Name: "{{ ec2_tag_Name }}"
-        env: "{{ ec2_tag_env}}"
+        clusterid: "{{ ec2_tag_clusterid }}"
     register: voltags
 
   - name: Wait for volume to attach

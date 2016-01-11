@@ -1,0 +1,53 @@
+---
+- name: Set docker facts
+  openshift_facts:
+    role: "{{ item.role }}"
+    local_facts: "{{ item.local_facts }}"
+  with_items:
+  - role: common
+    local_facts:
+      deployment_type: "{{ openshift_deployment_type }}"
+      docker_additional_registries: "{{ docker_additional_registries }}"
+      docker_insecure_registries: "{{ docker_insecure_registries }}"
+      docker_blocked_registries: "{{ docker_blocked_registries }}"
+  - role: node
+    local_facts:
+      portal_net: "{{ openshift_master_portal_net | default(None) }}"
+      docker_log_driver:  "{{ lookup( 'oo_option' , 'docker_log_driver'  )  | default('',True) }}"
+      docker_log_options: "{{ lookup( 'oo_option' , 'docker_log_options' )  | default('',True) }}"
+
+- stat: path=/etc/sysconfig/docker
+  register: docker_check
+
+- name: Set registry params
+  lineinfile:
+    dest: /etc/sysconfig/docker
+    regexp: '^{{ item.reg_conf_var }}=.*$'
+    line: "{{ item.reg_conf_var }}='{{ item.reg_fact_val | oo_prepend_strings_in_list(item.reg_flag ~ ' ') | join(' ') }}'"
+  when: "'docker_additional_registries' in openshift.common and docker_check.stat.isreg"
+  with_items:
+  - reg_conf_var: ADD_REGISTRY
+    reg_fact_val: "{{ openshift.common.docker_additional_registries }}"
+    reg_flag: --add-registry
+  - reg_conf_var: BLOCK_REGISTRY
+    reg_fact_val: "{{ openshift.common.docker_blocked_registries }}"
+    reg_flag: --block-registry
+  - reg_conf_var: INSECURE_REGISTRY
+    reg_fact_val: "{{ openshift.common.docker_insecure_registries }}"
+    reg_flag: --insecure-registry
+  notify:
+  - restart openshift_docker
+
+# TODO: Enable secure registry when code available in origin
+# TODO: perhaps move this to openshift_docker?
+- name: Secure Registry and Logs Options
+  lineinfile:
+    dest: /etc/sysconfig/docker
+    regexp: '^OPTIONS=.*$'
+    line: "OPTIONS='--insecure-registry={{ openshift.node.portal_net }} \
+      {% if ansible_selinux and ansible_selinux.status == '''enabled''' %}--selinux-enabled{% endif %} \
+      {% if openshift.node.docker_log_driver is defined  %} --log-driver {{ openshift.node.docker_log_driver }}  {% endif %} \
+      {% if openshift.node.docker_log_options is defined %}   {{ openshift.node.docker_log_options |  oo_split() | oo_prepend_strings_in_list('--log-opt ') | join(' ')}}  {% endif %} '"
+  when: docker_check.stat.isreg
+  notify:
+    - restart openshift_docker

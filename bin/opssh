@@ -13,6 +13,8 @@ Options:
   -p PAR, --par=PAR     max number of parallel threads (OPTIONAL)
   --outdir=OUTDIR       output directory for stdout files (OPTIONAL)
   --errdir=ERRDIR       output directory for stderr files (OPTIONAL)
+  -c CLUSTER, --cluster CLUSTER
+                        which cluster to use
   -e ENV, --env ENV     which environment to use
   -t HOST_TYPE, --host-type HOST_TYPE
                         which host type to use
@@ -45,9 +47,9 @@ fi
 
 # See if ohi is installed
 if ! which ohi &>/dev/null ; then
-    echo "ERROR: can't find ohi (OpenShift Host Inventory) on your system, please either install the openshift-ansible-bin package, or add openshift-ansible/bin to your path."
+  echo "ERROR: can't find ohi (OpenShift Host Inventory) on your system, please either install the openshift-ansible-bin package, or add openshift-ansible/bin to your path."
 
-    exit 10
+  exit 10
 fi
 
 PAR=200
@@ -64,9 +66,20 @@ while [ $# -gt 0 ] ; do
             shift # get past the value of the option
             ;;
 
+        -c)
+            shift # get past the option
+            CLUSTER=$1
+            shift # get past the value of the option
+            ;;
+
         -e)
             shift # get past the option
             ENV=$1
+            shift # get past the value of the option
+            ;;
+
+        --v3)
+            OPENSHIFT_VERSION="--v3"
             shift # get past the value of the option
             ;;
 
@@ -106,20 +119,26 @@ while [ $# -gt 0 ] ; do
 done
 
 # Get host list from ohi
-if [ -n "$ENV" -a -n "$HOST_TYPE" ] ; then
-    HOSTS="$(ohi -t "$HOST_TYPE" -e "$ENV" 2>/dev/null)"
+CMD=""
+if [ -n "$CLUSTER" ] ; then
+  CMD="$CMD -c $CLUSTER"
+fi
+
+if [ -n "$ENV" ] ; then
+  CMD="$CMD -e $ENV"
+fi
+
+if [ -n "$HOST_TYPE" ] ; then
+  CMD="$CMD -t $HOST_TYPE"
+fi
+
+if [ -n "$OPENSHIFT_VERSION" ] ; then
+  CMD="$CMD $OPENSHIFT_VERSION"
+fi
+
+if [ -n "$CMD" ] ; then
+    HOSTS="$(ohi $CMD 2>/dev/null)"
     OHI_ECODE=$?
-elif [ -n "$ENV" ] ; then
-    HOSTS="$(ohi -e "$ENV" 2>/dev/null)"
-    OHI_ECODE=$?
-elif [ -n "$HOST_TYPE" ] ; then
-    HOSTS="$(ohi -t "$HOST_TYPE" 2>/dev/null)"
-    OHI_ECODE=$?
-else
-    echo
-    echo "Error: either -e or -t must be specified"
-    echo
-    exit 10
 fi
 
 if [ $OHI_ECODE -ne 0 ] ; then

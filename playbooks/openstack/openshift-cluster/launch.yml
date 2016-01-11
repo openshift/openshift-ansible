@@ -29,6 +29,7 @@
 
   - name: Create or Update OpenStack Stack
     command: 'heat {{ heat_stack_action }} -f {{ openstack_infra_heat_stack }}
+             -P cluster_env={{ cluster_env }}
              -P cluster_id={{ cluster_id }}
              -P cidr={{ openstack_network_cidr }}
              -P dns_nameservers={{ openstack_network_dns | join(",") }}
@@ -71,7 +72,7 @@
       ansible_ssh_host: '{{ item[2] }}'
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-      groups: 'tag_env_{{ cluster_id }}, tag_host-type_etcd, tag_sub-host-type_default'
+      groups: 'tag_environment_{{ cluster_env }}, tag_host-type_etcd, tag_sub-host-type_default, tag_clusterid_{{ cluster_id }}'
     with_together:
       - parsed_outputs.etcd_names
       - parsed_outputs.etcd_ips
@@ -83,7 +84,7 @@
       ansible_ssh_host: '{{ item[2] }}'
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-      groups: 'tag_env_{{ cluster_id }}, tag_host-type_master, tag_sub-host-type_default'
+      groups: 'tag_environment_{{ cluster_env }}, tag_host-type_master, tag_sub-host-type_default, tag_clusterid_{{ cluster_id }}'
     with_together:
       - parsed_outputs.master_names
       - parsed_outputs.master_ips
@@ -95,7 +96,7 @@
       ansible_ssh_host: '{{ item[2] }}'
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-      groups: 'tag_env_{{ cluster_id }}, tag_host-type_node, tag_sub-host-type_compute'
+      groups: 'tag_environment_{{ cluster_env }}, tag_host-type_node, tag_sub-host-type_compute, tag_clusterid_{{ cluster_id }}'
     with_together:
       - parsed_outputs.node_names
       - parsed_outputs.node_ips
@@ -107,7 +108,7 @@
       ansible_ssh_host: '{{ item[2] }}'
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-      groups: 'tag_env_{{ cluster_id }}, tag_host-type_node, tag_sub-host-type_infra'
+      groups: 'tag_environment_{{ cluster_env }}, tag_host-type_node, tag_sub-host-type_infra, tag_clusterid_{{ cluster_id }}'
     with_together:
       - parsed_outputs.infra_names
       - parsed_outputs.infra_ips
