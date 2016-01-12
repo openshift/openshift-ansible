@@ -38,5 +38,6 @@
     set_hostname_default: "{{ not openshift.common.version_greater_than_3_1_or_1_1 }}"
 
 - name: Set hostname
-  hostname: name={{ openshift.common.hostname }}
+  command: >
+    hostnamectl set-hostname {{ openshift.common.hostname }}
   when: openshift_set_hostname | default(set_hostname_default) | bool
