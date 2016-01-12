@@ -38,6 +38,7 @@ class Host(object):
         self.public_hostname = kwargs.get('public_hostname', None)
         self.connect_to = kwargs.get('connect_to', None)
         self.preconfigured = kwargs.get('preconfigured', None)
+        self.new_host = kwargs.get('new_host', None)
 
         # Should this host run as an OpenShift master:
         self.master = kwargs.get('master', False)
@@ -68,7 +69,8 @@ class Host(object):
         """ Used when exporting to yaml. """
         d = {}
         for prop in ['ip', 'hostname', 'public_ip', 'public_hostname',
-                     'master', 'node', 'master_lb', 'containerized', 'connect_to', 'preconfigured']:
+                     'master', 'node', 'master_lb', 'containerized',
+                     'connect_to', 'preconfigured', 'new_host']:
             # If the property is defined (not None or False), export it:
             if getattr(self, prop):
                 d[prop] = getattr(self, prop)
