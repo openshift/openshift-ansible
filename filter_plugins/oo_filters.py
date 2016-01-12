@@ -479,6 +479,9 @@ class FilterModule(object):
     @staticmethod
     def to_padded_yaml(data, level=0, indent=2, **kw):
         ''' returns a yaml snippet padded to match the indent level you specify '''
+        if data in [None, ""]:
+            return ""
+
         try:
             transformed = yaml.safe_dump(data, indent=indent, allow_unicode=True, default_flow_style=False, **kw)
             padded = "\n".join([" " * level * indent + line for line in transformed.splitlines()])
