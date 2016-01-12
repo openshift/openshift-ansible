@@ -1,8 +1,4 @@
 ---
-- fail:
-    msg: "Zabbix config is not yet supported on atomic hosts"
-  when: openshift.common.is_containerized | bool
-
 - name: Main List all templates
   zbx_template:
     zbx_server: "{{ ozb_server }}"
