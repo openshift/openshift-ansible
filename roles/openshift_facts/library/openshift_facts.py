@@ -461,53 +461,68 @@ def set_url_facts_if_unset(facts):
                   were not already present
     """
     if 'master' in facts:
-        api_use_ssl = facts['master']['api_use_ssl']
-        api_port = facts['master']['api_port']
-        controllers_port = facts['master']['controllers_port']
-        console_use_ssl = facts['master']['console_use_ssl']
-        console_port = facts['master']['console_port']
-        console_path = facts['master']['console_path']
-        etcd_use_ssl = facts['master']['etcd_use_ssl']
-        etcd_hosts = facts['master']['etcd_hosts']
-        etcd_port = facts['master']['etcd_port']
         hostname = facts['common']['hostname']
-        public_hostname = facts['common']['public_hostname']
         cluster_hostname = facts['master'].get('cluster_hostname')
         cluster_public_hostname = facts['master'].get('cluster_public_hostname')
+        public_hostname = facts['common']['public_hostname']
+        api_hostname = cluster_hostname if cluster_hostname else hostname
+        api_public_hostname = cluster_public_hostname if cluster_public_hostname else public_hostname
+        console_path = facts['master']['console_path']
+        etcd_hosts = facts['master']['etcd_hosts']
 
-        if 'etcd_urls' not in facts['master']:
-            etcd_urls = []
-            if etcd_hosts != '':
-                facts['master']['etcd_port'] = etcd_port
-                facts['master']['embedded_etcd'] = False
-                for host in etcd_hosts:
-                    etcd_urls.append(format_url(etcd_use_ssl, host,
-                                                etcd_port))
-            else:
-                etcd_urls = [format_url(etcd_use_ssl, hostname,
-                                        etcd_port)]
-            facts['master']['etcd_urls'] = etcd_urls
-        if 'api_url' not in facts['master']:
-            api_hostname = cluster_hostname if cluster_hostname else hostname
-            facts['master']['api_url'] = format_url(api_use_ssl, api_hostname,
-                                                    api_port)
-        if 'public_api_url' not in facts['master']:
-            api_public_hostname = cluster_public_hostname if cluster_public_hostname else public_hostname
-            facts['master']['public_api_url'] = format_url(api_use_ssl,
-                                                           api_public_hostname,
-                                                           api_port)
-        if 'console_url' not in facts['master']:
-            console_hostname = cluster_hostname if cluster_hostname else hostname
-            facts['master']['console_url'] = format_url(console_use_ssl,
-                                                        console_hostname,
-                                                        console_port,
-                                                        console_path)
-        if 'public_console_url' not in facts['master']:
-            console_public_hostname = cluster_public_hostname if cluster_public_hostname else public_hostname
-            facts['master']['public_console_url'] = format_url(console_use_ssl,
-                                                               console_public_hostname,
-                                                               console_port,
-                                                               console_path)
+        use_ssl = dict(
+            api=facts['master']['api_use_ssl'],
+            public_api=facts['master']['api_use_ssl'],
+            loopback_api=facts['master']['api_use_ssl'],
+            console=facts['master']['console_use_ssl'],
+            public_console=facts['master']['console_use_ssl'],
+            etcd=facts['master']['etcd_use_ssl']
+        )
+
+        ports = dict(
+            api=facts['master']['api_port'],
+            public_api=facts['master']['api_port'],
+            loopback_api=facts['master']['api_port'],
+            console=facts['master']['console_port'],
+            public_console=facts['master']['console_port'],
+            etcd=facts['master']['etcd_port'],
+        )
+
+        etcd_urls = []
+        if etcd_hosts != '':
+            facts['master']['etcd_port'] = ports['etcd']
+            facts['master']['embedded_etcd'] = False
+            for host in etcd_hosts:
+                etcd_urls.append(format_url(use_ssl['etcd'], host,
+                                            ports['etcd']))
+        else:
+            etcd_urls = [format_url(use_ssl['etcd'], hostname,
+                                    ports['etcd'])]
+
+        facts['master'].setdefault('etcd_urls', etcd_urls)
+
+        prefix_hosts = [('api', api_hostname),
+                        ('public_api', api_public_hostname),
+                        ('loopback_api', hostname)]
+
+        for prefix, host in prefix_hosts:
+            facts['master'].setdefault(prefix + '_url', format_url(use_ssl[prefix],
+                                                                   host,
+                                                                   ports[prefix]))
+
+
+        r_lhn = "{0}:{1}".format(api_hostname, ports['api']).replace('.', '-')
+        facts['master'].setdefault('loopback_cluster_name', r_lhn)
+        facts['master'].setdefault('loopback_context_name', "default/{0}/system:openshift-master".format(r_lhn))
+        facts['master'].setdefault('loopback_user', "system:openshift-master/{0}".format(r_lhn))
+
+        prefix_hosts = [('console', api_hostname), ('public_console', api_public_hostname)]
+        for prefix, host in prefix_hosts:
+            facts['master'].setdefault(prefix + '_url', format_url(use_ssl[prefix],
+                                                                   host,
+                                                                   ports[prefix],
+                                                                   console_path))
+
     return facts
 
 def set_aggregate_facts(facts):
