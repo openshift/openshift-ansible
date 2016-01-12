@@ -681,9 +681,9 @@ class AttendedCliTests(OOCliFixture):
         run_playbook_mock.return_value = 0
 
         cli_input = build_input(hosts=[
-            ('10.0.0.1', True),
-            ('10.0.0.2', False),
-            ('10.0.0.3', False)],
+            ('10.0.0.1', True, False),
+            ('10.0.0.2', False, False),
+            ('10.0.0.3', False, False)],
                                       ssh_user='root',
                                       variant_num=1,
                                       confirm_facts='y')
@@ -722,10 +722,10 @@ class AttendedCliTests(OOCliFixture):
         run_playbook_mock.return_value = 0
 
         cli_input = build_input(hosts=[
-            ('10.0.0.1', True),
-            ('10.0.0.2', False),
+            ('10.0.0.1', True, False),
+            ('10.0.0.2', False, False),
             ],
-                                      add_nodes=[('10.0.0.3', False)],
+                                      add_nodes=[('10.0.0.3', False, False)],
                                       ssh_user='root',
                                       variant_num=1,
                                       confirm_facts='y')
@@ -773,9 +773,9 @@ class AttendedCliTests(OOCliFixture):
         mock_facts['10.0.0.2']['common']['version'] = "3.0.0"
 
         cli_input = build_input(hosts=[
-            ('10.0.0.1', True),
+            ('10.0.0.1', True, False),
             ],
-                                      add_nodes=[('10.0.0.2', False)],
+                                      add_nodes=[('10.0.0.2', False, False)],
                                       ssh_user='root',
                                       variant_num=1,
                                       schedulable_masters_ok=True,
@@ -796,10 +796,10 @@ class AttendedCliTests(OOCliFixture):
         run_playbook_mock.return_value = 0
 
         cli_input = build_input(hosts=[
-            ('10.0.0.1', True),
-            ('10.0.0.2', True),
-            ('10.0.0.3', True),
-            ('10.0.0.4', False)],
+            ('10.0.0.1', True, False),
+            ('10.0.0.2', True, False),
+            ('10.0.0.3', True, False),
+            ('10.0.0.4', False, False)],
                                       ssh_user='root',
                                       variant_num=1,
                                       confirm_facts='y',
@@ -837,9 +837,9 @@ class AttendedCliTests(OOCliFixture):
         run_playbook_mock.return_value = 0
 
         cli_input = build_input(hosts=[
-            ('10.0.0.1', True),
-            ('10.0.0.2', True),
-            ('10.0.0.3', True)],
+            ('10.0.0.1', True, False),
+            ('10.0.0.2', True, False),
+            ('10.0.0.3', True, False)],
                                       ssh_user='root',
                                       variant_num=1,
                                       confirm_facts='y',
@@ -872,10 +872,10 @@ class AttendedCliTests(OOCliFixture):
         run_playbook_mock.return_value = 0
 
         cli_input = build_input(hosts=[
-                                      ('10.0.0.1', True),
-                                      ('10.0.0.2', True),
-                                      ('10.0.0.3', False),
-                                      ('10.0.0.4', True)],
+                                      ('10.0.0.1', True, False),
+                                      ('10.0.0.2', True, False),
+                                      ('10.0.0.3', False, False),
+                                      ('10.0.0.4', True, False)],
                                       ssh_user='root',
                                       variant_num=1,
                                       confirm_facts='y',
@@ -893,7 +893,7 @@ class AttendedCliTests(OOCliFixture):
         run_playbook_mock.return_value = 0
 
         cli_input = build_input(hosts=[
-            ('10.0.0.1', True)],
+            ('10.0.0.1', True, False)],
                                       ssh_user='root',
                                       variant_num=1,
                                       confirm_facts='y')
@@ -921,7 +921,7 @@ class AttendedCliTests(OOCliFixture):
         run_playbook_mock.return_value = 0
 
         cli_input = build_input(hosts=[
-            ('10.0.0.1', True)],
+            ('10.0.0.1', True, False)],
                                       ssh_user='root',
                                       variant_num=2,
                                       confirm_facts='y')
