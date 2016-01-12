@@ -14,8 +14,12 @@
   when: (openshift_master_ha | bool) and (not (master_controllers_service_status_changed | default(false) | bool)) and openshift.master.cluster_method == 'native'
 
 - name: Verify API Server
-  wait_for:
-    host: "{{ openshift.common.ip }}"
-    port: "{{ openshift.master.api_port }}"
-    state: started
-    timeout: 180
+  # Using curl here since the uri module requires python-httplib2 and
+  # wait_for port doesn't provide health information.
+  command: >
+    curl -k --head --silent {{ openshift.master.api_url }}
+  register: api_available_output
+  until: api_available_output.stdout.find("200 OK") != -1
+  retries: 120
+  delay: 1
+  changed_when: false

@@ -218,12 +218,20 @@
   # Necessary because when you're on a node that's also a master the master will be
   # restarted after the node restarts docker and it will take up to 60 seconds for
   # systemd to start the master again
-  - name: Wait for master to become available before proceeding
-    wait_for:
-      host: "{{ hostvars[groups.oo_first_master.0].openshift.common.ip }}"
-      port: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_port }}"
-      state: started
-      timeout: 180
+  - name: Wait for master API to become available before proceeding
+    # Using curl here since the uri module requires python-httplib2 and
+    # wait_for port doesn't provide health information.
+    command: >
+      curl -k --head --silent {{ openshift.master.api_url }}
+    register: api_available_output
+    until: api_available_output.stdout.find("200 OK") != -1
+    retries: 120
+    delay: 1
+    changed_when: false
     when: openshift.common.is_containerized | bool
+  - fail:
+      msg: >
+        Unable to contact master API at {{ openshift.master.api_url }}
+    when: openshift.common.is_containerized | bool and api_available_output.stdout.find("200 OK") == -1
   roles:
   - openshift_manage_node
