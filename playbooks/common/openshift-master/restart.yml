@@ -73,6 +73,7 @@
     register: active_check_output
     when: openshift.master.cluster_method == 'pacemaker'
     failed_when: active_check_output.stdout not in ['active', 'inactive']
+    changed_when: false
   - set_fact:
       is_active: "{{ active_check_output.stdout == 'active' }}"
     when: openshift.master.cluster_method == 'pacemaker'
@@ -97,6 +98,18 @@
       ansible_sudo: "{{ g_sudo | default(omit) }}"
     with_items: "{{ groups.oo_masters_to_config | default([]) }}"
     when: (hostvars[item]['current_host'] | default(false)) | bool
+
+- name: Validate pacemaker cluster
+  hosts: oo_active_masters
+  tasks:
+  - name: Retrieve pcs status
+    command: pcs status
+    register: pcs_status_output
+    changed_when: false
+  - fail:
+      msg: >
+        Pacemaker cluster validation failed. One or more nodes are not online.
+    when: not (pcs_status_output.stdout | validate_pcs_cluster(groups.oo_masters_to_config)) | bool
 
 - name: Restart masters
   hosts: oo_masters_to_config:!oo_active_masters:!oo_current_masters
