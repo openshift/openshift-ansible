@@ -72,6 +72,8 @@ class Ossh(object):
         parser.add_argument('-o', '--ssh_opts', action='store',
                             help='options to pass to SSH.\n \
                                   "-oForwardX11=yes,TCPKeepAlive=yes"')
+        parser.add_argument('-A', default=False, action="store_true",
+                            help='Forward authentication agent')
         parser.add_argument('host', nargs='?', default='')
 
         self.args = parser.parse_args()
@@ -176,6 +178,9 @@ class Ossh(object):
 
             if self.user:
                 ssh_args.append('-l%s' % self.user)
+
+            if self.args.A:
+                ssh_args.append('-A')
 
             if self.args.verbose:
                 ssh_args.append('-vvv')
