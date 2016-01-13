@@ -33,9 +33,7 @@ def is_valid_hostname(hostname):
 def validate_prompt_hostname(hostname):
     if '' == hostname or is_valid_hostname(hostname):
         return hostname
-    raise click.BadParameter('"{}" appears to be an invalid hostname. ' \
-                             'Please double-check this value i' \
-                             'and re-enter it.'.format(hostname))
+    raise click.BadParameter('Invalid hostname. Please double-check this value and re-enter it.')
 
 def get_ansible_ssh_user():
     click.clear()
