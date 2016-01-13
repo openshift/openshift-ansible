@@ -398,6 +398,9 @@
   - name: Ensure node service enabled
     service: name="{{ openshift.common.service_type }}-node" state=started enabled=yes
 
+  - name: Additional storage plugin configuration
+    include: ../../../../../roles/openshift_node/tasks/storage_plugins/main.yml
+
   - set_fact:
       node_update_complete: True
 
