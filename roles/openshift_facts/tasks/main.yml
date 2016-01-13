@@ -10,6 +10,7 @@
   shell: ls /run/ostree-booted
   ignore_errors: yes
   failed_when: false
+  changed_when: false
   register: ostree_output
 
 # Locally setup containerized facts for now
