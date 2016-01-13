@@ -3,7 +3,7 @@
 See OSE Ansible [readme](https://github.com/openshift/openshift-ansible/blob/master/README_OSE.md) for general install instructions.  Playbook has been tested on OSE 3.1/RHEL7.2 cluster
 
 
-Add the following vars to `[OSEv3:vars] section of your inventory file
+Add the following vars to `[OSEv3:vars]` section of your inventory file
 ```
 [OSEv3:vars]
 # Enable cluster metrics
