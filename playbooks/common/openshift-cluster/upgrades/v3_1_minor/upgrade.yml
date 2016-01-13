@@ -1,0 +1,137 @@
+---
+###############################################################################
+# The restart playbook should be run after this playbook completes.
+###############################################################################
+
+###############################################################################
+# Upgrade Masters
+###############################################################################
+- name: Upgrade master packages and configuration
+  hosts: oo_masters_to_config
+  vars:
+    openshift_version: "{{ openshift_pkg_version | default('') }}"
+  tasks:
+  - name: Upgrade master packages
+    command: "{{ ansible_pkg_mgr}} update -y {{ openshift.common.service_type }}-master{{ openshift_version }}"
+
+  - name: Ensure python-yaml present for config upgrade
+    action: "{{ ansible_pkg_mgr }} name=PyYAML state=present"
+    when: not openshift.common.is_atomic | bool
+
+# Currently 3.1.1 does not have any new configuration settings
+#
+#  - name: Upgrade master configuration
+#    openshift_upgrade_config:
+#      from_version: '3.0'
+#      to_version: '3.1'
+#      role: master
+#      config_base: "{{ hostvars[inventory_hostname].openshift.common.config_base }}"
+
+- name: Set master update status to complete
+  hosts: oo_masters_to_config
+  tasks:
+  - set_fact:
+      master_update_complete: True
+
+##############################################################################
+# Gate on master update complete
+##############################################################################
+- name: Gate on master update
+  hosts: localhost
+  connection: local
+  become: no
+  tasks:
+  - set_fact:
+      master_update_completed: "{{ hostvars
+                                 | oo_select_keys(groups.oo_masters_to_config)
+                                 | oo_collect('inventory_hostname', {'master_update_complete': true}) }}"
+  - set_fact:
+      master_update_failed: "{{ groups.oo_masters_to_config | difference(master_update_completed) }}"
+  - fail:
+      msg: "Upgrade cannot continue. The following masters did not finish updating: {{ master_update_failed | join(',') }}"
+    when: master_update_failed | length > 0
+
+###############################################################################
+# Upgrade Nodes
+###############################################################################
+- name: Upgrade nodes
+  hosts: oo_nodes_to_config
+  vars:
+    openshift_version: "{{ openshift_pkg_version | default('') }}"
+  roles:
+  - openshift_facts
+  tasks:
+  - name: Upgrade node packages
+    command: "{{ ansible_pkg_mgr }} update -y {{ openshift.common.service_type }}-node{{ openshift_version }}"
+
+  - name: Restart node service
+    service: name="{{ openshift.common.service_type }}-node" state=restarted
+
+  - set_fact:
+      node_update_complete: True
+
+##############################################################################
+# Gate on nodes update
+##############################################################################
+- name: Gate on nodes update
+  hosts: localhost
+  connection: local
+  become: no
+  tasks:
+  - set_fact:
+      node_update_completed: "{{ hostvars
+                                 | oo_select_keys(groups.oo_nodes_to_config)
+                                 | oo_collect('inventory_hostname', {'node_update_complete': true}) }}"
+  - set_fact:
+      node_update_failed: "{{ groups.oo_nodes_to_config | difference(node_update_completed) }}"
+  - fail:
+      msg: "Upgrade cannot continue. The following nodes did not finish updating: {{ node_update_failed | join(',') }}"
+    when: node_update_failed | length > 0
+
+###############################################################################
+# Reconcile Cluster Roles and Cluster Role Bindings
+###############################################################################
+- name: Reconcile Cluster Roles and Cluster Role Bindings
+  hosts: oo_masters_to_config
+  vars:
+    origin_reconcile_bindings: "{{ deployment_type == 'origin' and g_new_version | version_compare('1.0.6', '>') }}"
+    ent_reconcile_bindings: true
+    openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
+  tasks:
+  - name: Reconcile Cluster Roles
+    command: >
+      {{ openshift.common.admin_binary}} --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+      policy reconcile-cluster-roles --confirm
+    run_once: true
+
+  - name: Reconcile Cluster Role Bindings
+    command: >
+      {{ openshift.common.admin_binary}} --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+      policy reconcile-cluster-role-bindings
+      --exclude-groups=system:authenticated
+      --exclude-groups=system:unauthenticated
+      --exclude-users=system:anonymous
+      --additive-only=true --confirm
+    when: origin_reconcile_bindings | bool or ent_reconcile_bindings | bool
+    run_once: true
+
+  - set_fact:
+      reconcile_complete: True
+
+##############################################################################
+# Gate on reconcile
+##############################################################################
+- name: Gate on reconcile
+  hosts: localhost
+  connection: local
+  become: no
+  tasks:
+  - set_fact:
+      reconcile_completed: "{{ hostvars
+                                 | oo_select_keys(groups.oo_masters_to_config)
+                                 | oo_collect('inventory_hostname', {'reconcile_complete': true}) }}"
+  - set_fact:
+      reconcile_failed: "{{ groups.oo_masters_to_config | difference(reconcile_completed) }}"
+  - fail:
+      msg: "Upgrade cannot continue. The following masters did not finish reconciling: {{ reconcile_failed | join(',') }}"
+    when: reconcile_failed | length > 0
