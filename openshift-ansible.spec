@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.28
+Version:        3.0.29
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -259,6 +259,37 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Jan 13 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.29-1
+- 3.1.1 upgrade playbook (bleanhar@redhat.com)
+- Updated help menu for v3 flag (kwoodson@redhat.com)
+- Add wait in between api and controllers start for native ha.
+  (abutcher@redhat.com)
+- atomic-openshift-installer: Error handling for unicode hostnames
+  (smunilla@redhat.com)
+- Update api verification. (abutcher@redhat.com)
+- Add a Verify API Server handler that waits for the API server to become
+  available (sdodson@redhat.com)
+- Add -A parameter to forward ssh agent (jdiaz@redhat.com)
+- Validate pacemaker cluster members. (abutcher@redhat.com)
+- Removed atomic host check (kwoodson@redhat.com)
+- Add is_containerized inputs to nosetests. (abutcher@redhat.com)
+- Add wait for API before starting controllers w/ native ha install.
+  (abutcher@redhat.com)
+- Fix for to_padded_yaml filter (jdetiber@redhat.com)
+- - sqashed to one commit (llange@redhat.com)
+- Switch to using hostnamectl as it works on atomic and rhel7
+  (sdodson@redhat.com)
+- Update rolling restart playbook for pacemaker support. Replace fail with a
+  warn and prompt if running ansible from a host that will be rebooted. Re-
+  organize playbooks. (abutcher@redhat.com)
+- Implement simple master rolling restarts. (dgoodwin@redhat.com)
+- re-enable containerize installs (sdodson@redhat.com)
+- Set portal net in master playbook (jdetiber@redhat.com)
+- Set the cli image to match osm_image in openshift_cli role
+  (sdodson@redhat.com)
+- atomic-openshift-installer: Populate new_nodes group (smunilla@redhat.com)
+- Always pull docker images (sdodson@redhat.com)
+
 * Mon Jan 11 2016 Kenny Woodson <kwoodson@redhat.com> 3.0.28-1
 - added the rhe7-host-monitoring service file (mwoodson@redhat.com)
 - Fixing tab completion for latest metadata changes (kwoodson@redhat.com)
