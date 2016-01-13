@@ -313,6 +313,7 @@
 
 - name: Configure master instances
   hosts: oo_masters_to_config
+  any_errors_fatal: true
   serial: 1
   vars:
     sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
