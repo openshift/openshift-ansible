@@ -1,0 +1,10 @@
+---
+- name: "Load master config"
+  hosts: masters
+  vars:
+    master_config_file: "/tmp/ansible-metrics-{{ ansible_hostname }}"
+  tasks:
+    - name: "Fetch master config from remote"
+      fetch: "src=/etc/origin/master/master-config.yaml dest={{ master_config_file }} flat=yes"
+    - name: "Load config"
+      include_vars: "{{ master_config_file }}"
