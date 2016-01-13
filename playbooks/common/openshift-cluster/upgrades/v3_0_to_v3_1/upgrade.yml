@@ -398,8 +398,25 @@
   - name: Ensure node service enabled
     service: name="{{ openshift.common.service_type }}-node" state=started enabled=yes
 
-  - name: Additional storage plugin configuration
-    include: ../../../../../roles/openshift_node/tasks/storage_plugins/main.yml
+  - name: Install Ceph storage plugin dependencies
+    action: "{{ ansible_pkg_mgr }} name=ceph-common state=present"
+    when: not openshift.common.is_atomic | bool
+
+  - name: Install GlusterFS storage plugin dependencies
+    action: "{{ ansible_pkg_mgr }} name=glusterfs-fuse state=present"
+    when: not openshift.common.is_atomic | bool
+
+  - name: Set sebooleans to allow gluster storage plugin access from containers
+    seboolean:
+      name: "{{ item }}"
+      state: yes
+      persistent: yes
+    when: ansible_selinux and ansible_selinux.status == "enabled"
+    with_items:
+    - virt_use_fusefs
+    - virt_sandbox_use_fusefs
+    register: sebool_result
+    failed_when: "'state' not in sebool_result and 'msg' in sebool_result and 'SELinux boolean {{ item }} does not exist' not in sebool_result.msg"
 
   - set_fact:
       node_update_complete: True
