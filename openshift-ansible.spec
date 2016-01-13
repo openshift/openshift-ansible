@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.29
+Version:        3.0.30
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -259,6 +259,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Jan 13 2016 Joel Diaz <jdiaz@redhat.com> 3.0.30-1
+- Add -A and detail --v3 flags
+
 * Wed Jan 13 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.29-1
 - 3.1.1 upgrade playbook (bleanhar@redhat.com)
 - Updated help menu for v3 flag (kwoodson@redhat.com)
