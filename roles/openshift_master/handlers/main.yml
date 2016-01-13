@@ -2,11 +2,20 @@
 - name: restart master
   service: name={{ openshift.common.service_type }}-master state=restarted
   when: (not openshift_master_ha | bool) and (not (master_service_status_changed | default(false) | bool))
+  notify: Verify API Server
 
 - name: restart master api
   service: name={{ openshift.common.service_type }}-master-api state=restarted
   when: (openshift_master_ha | bool) and (not (master_api_service_status_changed | default(false) | bool)) and openshift.master.cluster_method == 'native'
+  notify: Verify API Server
 
 - name: restart master controllers
   service: name={{ openshift.common.service_type }}-master-controllers state=restarted
   when: (openshift_master_ha | bool) and (not (master_controllers_service_status_changed | default(false) | bool)) and openshift.master.cluster_method == 'native'
+
+- name: Verify API Server
+  wait_for:
+    host: "{{ openshift.common.ip }}"
+    port: "{{ openshift.master.api_port }}"
+    state: started
+    timeout: 180

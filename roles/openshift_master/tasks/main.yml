@@ -269,6 +269,7 @@
   service: name={{ openshift.common.service_type }}-master enabled=yes state=started
   when: not openshift_master_ha | bool
   register: start_result
+  notify: Verify API Server
 
 - name: Stop and disable non HA master when running HA
   service: name={{ openshift.common.service_type }}-master enabled=no state=stopped
@@ -282,6 +283,7 @@
   service: name={{ openshift.common.service_type }}-master-api enabled=yes state=started
   when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
   register: start_result
+  notify: Verify API Server
 
 - set_fact:
     master_api_service_status_changed: "{{ start_result | changed }}"
