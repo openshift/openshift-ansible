@@ -400,11 +400,9 @@
 
   - name: Install Ceph storage plugin dependencies
     action: "{{ ansible_pkg_mgr }} name=ceph-common state=present"
-    when: not openshift.common.is_atomic | bool
 
   - name: Install GlusterFS storage plugin dependencies
     action: "{{ ansible_pkg_mgr }} name=glusterfs-fuse state=present"
-    when: not openshift.common.is_atomic | bool
 
   - name: Set sebooleans to allow gluster storage plugin access from containers
     seboolean:
