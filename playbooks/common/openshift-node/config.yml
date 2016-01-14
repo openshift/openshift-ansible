@@ -229,9 +229,5 @@
     delay: 1
     changed_when: false
     when: openshift.common.is_containerized | bool
-  - fail:
-      msg: >
-        Unable to contact master API at {{ openshift.master.api_url }}
-    when: openshift.common.is_containerized | bool and api_available_output.stdout.find("200 OK") == -1
   roles:
   - openshift_manage_node
