@@ -13,9 +13,12 @@ This guide complies with https://www.ietf.org/rfc/rfc2119.txt[RFC2119].
 
 == Pull Requests
 
+
+
+[[All-pull-requests-MUST-pass-the-build-bot-before-they-are-merged]]
 [cols="2v,v"]
 |===
-| **Rule**
+| <<All-pull-requests-MUST-pass-the-build-bot-before-they-are-merged, Rule>>
 | All pull requests MUST pass the build bot *before* they are merged.
 |===
 
@@ -30,9 +33,10 @@ The tooling is flexible enough that exceptions can be made so that the tool the 
 === Python Source Files
 
 '''
+[[Python-source-files-MUST-contain-the-following-vim-mode-line]]
 [cols="2v,v"]
 |===
-| **Rule**
+| <<Python-source-files-MUST-contain-the-following-vim-mode-line, Rule>>
 | Python source files MUST contain the following vim mode line.
 |===
 
@@ -48,9 +52,10 @@ If mode lines for other editors are needed, please open a GitHub issue.
 === Method Signatures
 
 '''
+[[When-adding-a-new-paramemter-to-an-existing-method-a-default-value-SHOULD-be-used]]
 [cols="2v,v"]
 |===
-| **Rule**
+| <<When-adding-a-new-paramemter-to-an-existing-method-a-default-value-SHOULD-be-used, Rule>>
 | When adding a new paramemter to an existing method, a default value SHOULD be used
 |===
 The purpose of this rule is to make it so that method signatures are backwards compatible.
@@ -74,18 +79,20 @@ def add_person(first_name, last_name, age=None):
 http://www.pylint.org/[PyLint] is used in an attempt to keep the python code as clean and as managable as possible. The build bot runs each pull request through PyLint and any warnings or errors cause the build bot to fail the pull request.
 
 '''
+[[PyLint-rules-MUST-NOT-be-disabled-on-a-whole-file]]
 [cols="2v,v"]
 |===
-| **Rule**
+| <<PyLint-rules-MUST-NOT-be-disabled-on-a-whole-file, Rule>>
 | PyLint rules MUST NOT be disabled on a whole file.
 |===
 
 Instead, http://docs.pylint.org/faq.html#is-it-possible-to-locally-disable-a-particular-message[disable the PyLint check on the line where PyLint is complaining].
 
 '''
+[[PyLint-rules-MUST-NOT-be-disabled-unless-they-meet-one-of-the-following-exceptions]]
 [cols="2v,v"]
 |===
-| **Rule**
+| <<PyLint-rules-MUST-NOT-be-disabled-unless-they-meet-one-of-the-following-exceptions, Rule>>
 | PyLint rules MUST NOT be disabled unless they meet one of the following exceptions
 |===
 
@@ -95,9 +102,10 @@ Instead, http://docs.pylint.org/faq.html#is-it-possible-to-locally-disable-a-par
 1. When PyLint fails, but the code makes more sense the way it is formatted (stylistic exception). For this exception, the description of the PyLint disable MUST state why the code is more clear, AND the person reviewing the PR will decide if they agree or not. The reviewer may reject the PR if they disagree with the reason for the disable.
 
 '''
+[[All-PyLint-rule-disables-MUST-be-documented-in-the-code]]
 [cols="2v,v"]
 |===
-| **Rule**
+| <<All-PyLint-rule-disables-MUST-be-documented-in-the-code, Rule>>
 | All PyLint rule disables MUST be documented in the code.
 |===
 
@@ -124,9 +132,10 @@ metadata[line] = results.pop()
 === Yaml Files (Playbooks, Roles, Vars, etc)
 
 '''
+[[Ansible-files-SHOULD-NOT-use-JSON-use-pure-YAML-instead]]
 [cols="2v,v"]
 |===
-| **Rule**
+| <<Ansible-files-SHOULD-NOT-use-JSON-use-pure-YAML-instead, Rule>>
 | Ansible files SHOULD NOT use JSON (use pure YAML instead).
 |===
 
@@ -144,9 +153,10 @@ Every effort should be made to keep our Ansible YAML files in pure YAML.
 
 === Modules
 '''
+[[Custom-Ansible-modules-SHOULD-be-embedded-in-a-role]]
 [cols="2v,v"]
 |===
-| **Rule**
+| <<Custom-Ansible-modules-SHOULD-be-embedded-in-a-role, Rule>>
 | Custom Ansible modules SHOULD be embedded in a role.
 |===
 
@@ -177,9 +187,10 @@ The purpose of this rule is to make it easy to include custom modules in our pla
 
 
 '''
+[[Parameters-to-Ansible-modules-SHOULD-use-the-Yaml-dictionary-format-when-3-or-more-parameters-are-being-passed]]
 [cols="2v,v"]
 |===
-| **Rule**
+| <<Parameters-to-Ansible-modules-SHOULD-use-the-Yaml-dictionary-format-when-3-or-more-parameters-are-being-passed, Rule>>
 | Parameters to Ansible modules SHOULD use the Yaml dictionary format when 3 or more parameters are being passed
 |===
 
@@ -204,9 +215,10 @@ When a module has several parameters that are being passed in, it's hard to see 
 
 
 '''
+[[Parameters-to-Ansible-modules-SHOULD-use-the-Yaml-dictionary-format-when-the-line-length-exceeds-120-characters]]
 [cols="2v,v"]
 |===
-| **Rule**
+| <<Parameters-to-Ansible-modules-SHOULD-use-the-Yaml-dictionary-format-when-the-line-length-exceeds-120-characters, Rule>>
 | Parameters to Ansible modules SHOULD use the Yaml dictionary format when the line length exceeds 120 characters
 |===
 
@@ -228,9 +240,10 @@ Lines that are long quickly become a wall of text that isn't easily parsable. It
 ----
 
 '''
+[[The-Ansible-command-module-SHOULD-be-used-instead-of-the-Ansible-shell-module]]
 [cols="2v,v"]
 |===
-| **Rule**
+| <<The-Ansible-command-module-SHOULD-be-used-instead-of-the-Ansible-shell-module, Rule>>
 | The Ansible `command` module SHOULD be used instead of the Ansible `shell` module.
 |===
 .Context
@@ -251,9 +264,10 @@ The Ansible `shell` module can run most commands that can be run from a bash CLI
 ----
 
 '''
+[[The-Ansible-quote-filter-MUST-be-used-with-any-variable-passed-into-the-shell-module]]
 [cols="2v,v"]
 |===
-| **Rule**
+| <<The-Ansible-quote-filter-MUST-be-used-with-any-variable-passed-into-the-shell-module, Rule>>
 | The Ansible `quote` filter MUST be used with any variable passed into the shell module.
 |===
 .Context
@@ -279,9 +293,10 @@ It is recommended not to use the `shell` module. However, if it absolutely must 
 * http://docs.ansible.com/fail_module.html[Ansible Fail Module]
 
 '''
+[[Ansible-playbooks-MUST-begin-with-checks-for-any-variables-that-they-require]]
 [cols="2v,v"]
 |===
-| **Rule**
+| <<Ansible-playbooks-MUST-begin-with-checks-for-any-variables-that-they-require, Rule>>
 | Ansible playbooks MUST begin with checks for any variables that they require.
 |===
 
@@ -299,9 +314,10 @@ If an Ansible playbook requires certain variables to be set, it's best to check 
 ----
 
 '''
+[[Ansible-roles-tasks-main-yml-file-MUST-begin-with-checks-for-any-variables-that-they-require]]
 [cols="2v,v"]
 |===
-| **Rule**
+| <<Ansible-roles-tasks-main-yml-file-MUST-begin-with-checks-for-any-variables-that-they-require, Rule>>
 | Ansible roles tasks/main.yml file MUST begin with checks for any variables that they require.
 |===
 
@@ -318,9 +334,10 @@ If an Ansible role requires certain variables to be set, it's best to check for 
 
 === Tasks
 '''
+[[Ansible-tasks-SHOULD-NOT-be-used-in-ansible-playbooks-Instead-use-pre_tasks-and-post_tasks]]
 [cols="2v,v"]
 |===
-| **Rule**
+| <<Ansible-tasks-SHOULD-NOT-be-used-in-ansible-playbooks-Instead-use-pre_tasks-and-post_tasks, Rule>>
 | Ansible tasks SHOULD NOT be used in ansible playbooks. Instead, use pre_tasks and post_tasks.
 |===
 An Ansible play is defined as a Yaml dictionary. Because of that, ansible doesn't know if the play's tasks list or roles list was specified first. Therefore Ansible always runs tasks after roles.
@@ -370,9 +387,10 @@ Therefore, we SHOULD use pre_tasks and post_tasks to make it more clear when the
 === Roles
 
 '''
+[[All-tasks-in-a-role-SHOULD-be-tagged-with-the-role-name]]
 [cols="2v,v"]
 |===
-| **Rule**
+| <<All-tasks-in-a-role-SHOULD-be-tagged-with-the-role-name, Rule>>
 | All tasks in a role SHOULD be tagged with the role name.
 |===
 
@@ -395,9 +413,10 @@ This is very useful when developing and debugging new tasks. It can also signifi
 
 
 '''
+[[The-Ansible-roles-directory-MUST-maintain-a-flat-structure]]
 [cols="2v,v"]
 |===
-| **Rule**
+| <<The-Ansible-roles-directory-MUST-maintain-a-flat-structure, Rule>>
 | The Ansible roles directory MUST maintain a flat structure.
 |===
 
@@ -410,9 +429,10 @@ This is very useful when developing and debugging new tasks. It can also signifi
 * Make it compatible with Ansible Galaxy
 
 '''
+[[Ansible-Roles-SHOULD-be-named-like-technology_component_subcomponent]]
 [cols="2v,v"]
 |===
-| **Rule**
+| [[Ansible-Roles-SHOULD-be-named-like-technology_component_subcomponent, Rule]]
 | Ansible Roles SHOULD be named like technology_component[_subcomponent].
 |===
 
@@ -430,9 +450,10 @@ Many times the `technology` portion of the pattern will line up with a package n
 * http://jinja.pocoo.org/docs/dev/templates/#builtin-filters[Jinja2 Builtin Filters]
 
 '''
+[[The-default-filter-SHOULD-replace-empty-strings-lists-etc]]
 [cols="2v,v"]
 |===
-| **Rule**
+| <<The-default-filter-SHOULD-replace-empty-strings-lists-etc, Rule>>
 | The `default` filter SHOULD replace empty strings, lists, etc.
 |===
 
@@ -469,15 +490,17 @@ This is almost always more desirable than an empty list, string, etc.
 
 === Yum and DNF
 '''
+[[Package-installation-MUST-use-ansible-action-module-to-abstract-away-dnf-yum]]
 [cols="2v,v"]
 |===
-| **Rule**
+| <<Package-installation-MUST-use-ansible-action-module-to-abstract-away-dnf-yum, Rule>>
 | Package installation MUST use ansible action module to abstract away dnf/yum.
-| Package installation MUST use name= and state=present rather than pkg= and state=installed respectively.
 |===
+
+[[Package-installation-MUST-use-name-and-state-present-rather-than-pkg-and-state-installed-respectively]]
 [cols="2v,v"]
 |===
-| **Rule**
+| <<Package-installation-MUST-use-name-and-state-present-rather-than-pkg-and-state-installed-respectively, Rule>>
 | Package installation MUST use name= and state=present rather than pkg= and state=installed respectively.
 |===
 
