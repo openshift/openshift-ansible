@@ -202,6 +202,10 @@
         - /usr/lib/systemd/system/atomic-openshift-master-controllers.service
         - /usr/lib/systemd/system/origin-master-api.service
         - /usr/lib/systemd/system/origin-master-controllers.service
+        - /usr/local/bin/openshift
+        - /usr/local/bin/oadm
+        - /usr/local/bin/oc
+        - /usr/local/bin/kubectl
 
     # Since we are potentially removing the systemd unit files for separated
     # master-api and master-controllers services, so we need to reload the
