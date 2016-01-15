@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.32
+Version:        3.0.33
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -259,6 +259,15 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Jan 15 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.33-1
+- Configure nodes which are also masters prior to nodes in containerized
+  install. (abutcher@redhat.com)
+- Call attention to openshift_master_rolling_restart_mode variable in restart
+  prompt. (abutcher@redhat.com)
+- Added anchors for rules in style_guide.adoc in order to make it easier to
+  reference specific rules in PRs. (twiest@redhat.com)
+- Update ec2.ini (jdetiber@redhat.com)
+
 * Thu Jan 14 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.32-1
 - Uninstall remove containerized wrapper and symlinks (abutcher@redhat.com)
 
