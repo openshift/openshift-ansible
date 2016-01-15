@@ -19,9 +19,10 @@ This style guide complies with https://www.ietf.org/rfc/rfc2119.txt[RFC2119].
 * https://www.python.org/dev/peps/pep-0008/#maximum-line-length[Python Pep8 Line Length]
 
 '''
+[[All-lines-SHOULD-be-no-longer-than-80-characters]]
 [cols="2v,v"]
 |===
-| **Rule**
+| <<All-lines-SHOULD-be-no-longer-than-80-characters, Rule>>
 | All lines SHOULD be no longer than 80 characters.
 |===
 
@@ -31,9 +32,10 @@ Code readability is subjective, therefore pull-requests SHOULD still be merged, 
 
 
 '''
+[[All-lines-MUST-be-no-longer-than-120-characters]]
 [cols="2v,v"]
 |===
-| **Rule**
+| <<All-lines-MUST-be-no-longer-than-120-characters, Rule>>
 | All lines MUST be no longer than 120 characters.
 |===
 
@@ -46,9 +48,10 @@ This is a hard limit and is enforced by the build bot. This check MUST NOT be di
 
 === Ansible Yaml file extension
 '''
+[[All-Ansible-Yaml-files-MUST-have-a-yml-extension-and-NOT-YML-yaml-etc]]
 [cols="2v,v"]
 |===
-| **Rule**
+| <<All-Ansible-Yaml-files-MUST-have-a-yml-extension-and-NOT-YML-yaml-etc, Rule>>
 | All Ansible Yaml files MUST have a .yml extension (and NOT .YML, .yaml etc).
 |===
 
@@ -59,9 +62,10 @@ Example: `tasks.yml`
 
 === Ansible CLI Variables
 '''
+[[Variables-meant-to-be-passed-in-from-the-ansible-CLI-MUST-have-a-prefix-of-cli]]
 [cols="2v,v"]
 |===
-| **Rule**
+| <<Variables-meant-to-be-passed-in-from-the-ansible-CLI-MUST-have-a-prefix-of-cli, Rule>>
 | Variables meant to be passed in from the ansible CLI MUST have a prefix of cli_
 |===
 
@@ -76,9 +80,10 @@ ansible-playbook -e cli_foo=bar someplays.yml
 
 === Ansible Global Variables
 '''
+[[Global-variables-MUST-have-a-prefix-of-g]]
 [cols="2v,v"]
 |===
-| **Rule**
+| <<Global-variables-MUST-have-a-prefix-of-g, Rule>>
 | Global variables MUST have a prefix of g_
 |===
 Ansible global variables are defined as any variables outside of ansible roles. Examples include playbook variables, variables passed in on the cli, etc.
@@ -94,9 +99,10 @@ g_environment: someval
 Ansible role variables are defined as variables contained in (or passed into) a role.
 
 '''
+[[Role-variables-MUST-have-a-prefix-of-atleast-3-characters-See.below.for.specific.naming.rules]]
 [cols="2v,v"]
 |===
-| **Rule**
+| <<Role-variables-MUST-have-a-prefix-of-atleast-3-characters-See.below.for.specific.naming.rules, Rule>>
 | Role variables MUST have a prefix of atleast 3 characters. See below for specific naming rules.
 |===
 
