@@ -19,6 +19,5 @@
     enabled: yes
   register: start_result
 
-- name: Pause 30 seconds if haproxy was just started
-  pause: seconds=30
-  when: start_result | changed
+- set_fact:
+    haproxy_start_result_changed: "{{ start_result | changed }}"
