@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.34
+Version:        3.0.35
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -259,6 +259,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Jan 18 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.35-1
+- added the lib_timedate role (mwoodson@redhat.com)
+- added chrony (mwoodson@redhat.com)
+- added oso_moniotoring tools role (mwoodson@redhat.com)
+- Improve pacemaker 'is-active' check. (abutcher@redhat.com)
+
 * Mon Jan 18 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.34-1
 - clean up too-many-branches / logic (jdiaz@redhat.com)
 - atomic-openshift-installer: add containerized to inventory
