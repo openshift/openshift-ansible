@@ -1,0 +1,8 @@
+---
+galaxy_info:
+  author: OpenShift Operations
+  description: Install Openshift Monitoring tools
+  company: Red Hat, Inc
+  license: ASL 2.0
+  min_ansible_version: 1.2
+dependencies: []

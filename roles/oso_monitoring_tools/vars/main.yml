@@ -1,0 +1,12 @@
+---
+# vars file for oso_monitoring_tools
+osomt_zagg_client_config:
+  host:
+    name: "{{ osomt_host_name }}"
+  zagg:
+    url: "{{ osomt_zagg_url }}"
+    user: "{{ osomt_zagg_user }}"
+    pass: "{{ osomt_zagg_password }}"
+    ssl_verify: "{{ osomt_zagg_ssl_verify }}"
+    verbose: "{{ osomt_zagg_verbose }}"
+    debug: "{{ osomt_zagg_debug }}"
