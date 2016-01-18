@@ -154,21 +154,15 @@
       validate_checksum: yes
     with_items: nodes_needing_certs
 
-- name: Configure node instances
+- name: Deploy node certificates
   hosts: oo_nodes_to_config
   vars:
     sync_tmpdir: "{{ hostvars.localhost.mktemp.stdout }}"
-    openshift_node_master_api_url: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_url }}"
-    # TODO: Prefix flannel role variables.
-    etcd_urls: "{{ hostvars[groups.oo_first_master.0].openshift.master.etcd_urls }}"
-    embedded_etcd: "{{ hostvars[groups.oo_first_master.0].openshift.master.embedded_etcd }}"
-    openshift_node_first_master_ip: "{{ hostvars[groups.oo_first_master.0].openshift.common.ip }}"
-  pre_tasks:
+  tasks:
   - name: Ensure certificate directory exists
     file:
       path: "{{ node_cert_dir }}"
       state: directory
-
   # TODO: notify restart node
   # possibly test service started time against certificate/config file
   # timestamps in node to trigger notify
@@ -177,8 +171,44 @@
       src: "{{ sync_tmpdir }}/{{ node_subdir }}.tgz"
       dest: "{{ node_cert_dir }}"
     when: certs_missing
+
+- name: Evaluate node groups
+  hosts: localhost
+  become: no
+  tasks:
+  - name: Evaluate oo_containerized_master_nodes
+    add_host:
+      name: "{{ item }}"
+      groups: oo_containerized_master_nodes
+      ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
+      ansible_sudo: "{{ g_sudo | default(omit) }}"
+    with_items: "{{ groups.oo_nodes_to_config | default([]) }}"
+    when: hostvars[item].openshift.common.is_containerized | bool and (item in groups.oo_nodes_to_config and item in groups.oo_masters_to_config)
+
+- name: Configure node instances
+  hosts: oo_containerized_master_nodes
+  serial: 1
+  vars:
+    openshift_node_master_api_url: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_url }}"
+    openshift_node_first_master_ip: "{{ hostvars[groups.oo_first_master.0].openshift.common.ip }}"
   roles:
   - openshift_node
+
+- name: Configure node instances
+  hosts: oo_nodes_to_config:!oo_containerized_master_nodes
+  vars:
+    openshift_node_master_api_url: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_url }}"
+    openshift_node_first_master_ip: "{{ hostvars[groups.oo_first_master.0].openshift.common.ip }}"
+  roles:
+  - openshift_node
+
+- name: Additional node config
+  hosts: oo_nodes_to_config
+  vars:
+    # TODO: Prefix flannel role variables.
+    etcd_urls: "{{ hostvars[groups.oo_first_master.0].openshift.master.etcd_urls }}"
+    embedded_etcd: "{{ hostvars[groups.oo_first_master.0].openshift.master.embedded_etcd }}"
+  roles:
   - role: flannel
     when: openshift.common.use_flannel | bool
   - role: nickhammond.logrotate
@@ -215,6 +245,19 @@
                          | oo_collect('openshift.common.hostname') }}"
     openshift_node_vars: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config']) }}"
   pre_tasks:
-
+  # Necessary because when you're on a node that's also a master the master will be
+  # restarted after the node restarts docker and it will take up to 60 seconds for
+  # systemd to start the master again
+  - name: Wait for master API to become available before proceeding
+    # Using curl here since the uri module requires python-httplib2 and
+    # wait_for port doesn't provide health information.
+    command: >
+      curl -k --head --silent {{ openshift.master.api_url }}
+    register: api_available_output
+    until: api_available_output.stdout.find("200 OK") != -1
+    retries: 120
+    delay: 1
+    changed_when: false
+    when: openshift.common.is_containerized | bool
   roles:
   - openshift_manage_node

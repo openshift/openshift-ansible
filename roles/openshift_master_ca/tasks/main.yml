@@ -13,16 +13,10 @@
     path: "{{ openshift_master_config_dir }}"
     state: directory
 
-- name: Get docker images
-  command: docker images
-  changed_when: false
-  when: openshift.common.is_containerized | bool
-  register: docker_images
-
-- name: Pull required docker image
+- name: Pull master docker image
   command: >
     docker pull {{ openshift.common.cli_image }}
-  when: openshift.common.is_containerized | bool and openshift.common.cli_image not in docker_images.stdout
+  when: openshift.common.is_containerized | bool
 
 - name: Create the master certificates if they do not already exist
   command: >

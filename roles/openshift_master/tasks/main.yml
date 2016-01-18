@@ -86,25 +86,9 @@
   action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-master{{ openshift_version  }} state=present"
   when: not openshift.common.is_containerized | bool
 
-- name: Get docker images
-  command: docker images
-  changed_when: false
-  when: openshift.common.is_containerized | bool
-  register: docker_images
-
 - name: Pull master image
   command: >
     docker pull {{ openshift.master.master_image }}
-  when: openshift.common.is_containerized | bool and openshift.master.master_image not in docker_images.stdout
-  
-- name: Wait for master image
-  command: >
-      docker images
-  register: docker_images
-  until: openshift.master.master_image in docker_images.stdout
-  retries: 30
-  delay: 10
-  changed_when: false
   when: openshift.common.is_containerized | bool
 
 - name: Install Master docker service file
@@ -285,6 +269,7 @@
   service: name={{ openshift.common.service_type }}-master enabled=yes state=started
   when: not openshift_master_ha | bool
   register: start_result
+  notify: Verify API Server
 
 - name: Stop and disable non HA master when running HA
   service: name={{ openshift.common.service_type }}-master enabled=no state=stopped
@@ -302,6 +287,20 @@
 - set_fact:
     master_api_service_status_changed: "{{ start_result | changed }}"
   when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
+
+# A separate wait is required here for native HA since notifies will
+# be resolved after all tasks in the role.
+- name: Wait for API to become available
+  # Using curl here since the uri module requires python-httplib2 and
+  # wait_for port doesn't provide health information.
+  command: >
+    curl -k --head --silent {{ openshift.master.api_url }}
+  register: api_available_output
+  until: api_available_output.stdout.find("200 OK") != -1
+  retries: 120
+  delay: 1
+  changed_when: false
+  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and master_api_service_status_changed | bool
 
 - name: Start and enable master controller
   service: name={{ openshift.common.service_type }}-master-controllers enabled=yes state=started

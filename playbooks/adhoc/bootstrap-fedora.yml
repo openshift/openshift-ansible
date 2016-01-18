@@ -1,4 +1,4 @@
-- hosts: OSv3
+- hosts: OSEv3
   gather_facts: false
   tasks:
     - name: install python and deps for ansible modules

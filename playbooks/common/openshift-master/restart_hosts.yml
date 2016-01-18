@@ -1,0 +1,39 @@
+- name: Restart master system
+  # https://github.com/ansible/ansible/issues/10616
+  shell: sleep 2 && shutdown -r now "OpenShift Ansible master rolling restart"
+  async: 1
+  poll: 0
+  ignore_errors: true
+  become: yes
+# When cluster_method != pacemaker we can ensure the api_port is
+# available.
+- name: Wait for master API to come back online
+  become: no
+  local_action:
+    module: wait_for
+      host="{{ inventory_hostname }}"
+      state=started
+      delay=10
+      port="{{ openshift.master.api_port }}"
+  when: openshift.master.cluster_method != 'pacemaker'
+- name: Wait for master to start
+  become: no
+  local_action:
+    module: wait_for
+      host="{{ inventory_hostname }}"
+      state=started
+      delay=10
+      port=22
+  when: openshift.master.cluster_method == 'pacemaker'
+- name: Wait for master to become available
+  command: pcs status
+  register: pcs_status_output
+  until: pcs_status_output.stdout | validate_pcs_cluster([inventory_hostname]) | bool
+  retries: 15
+  delay: 2
+  changed_when: false
+  when: openshift.master.cluster_method == 'pacemaker'
+- fail:
+    msg: >
+      Pacemaker cluster validation failed {{ inventory hostname }} is not online.
+  when: openshift.master.cluster_method == 'pacemaker' and not (pcs_status_output.stdout | validate_pcs_cluster([inventory_hostname])) | bool

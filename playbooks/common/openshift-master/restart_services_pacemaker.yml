@@ -1,0 +1,10 @@
+- name: Restart master services
+  command: pcs resource restart master
+- name: Wait for master API to come back online
+  become: no
+  local_action:
+    module: wait_for
+      host="{{ openshift.master.cluster_hostname }}"
+      state=started
+      delay=10
+      port="{{ openshift.master.api_port }}"

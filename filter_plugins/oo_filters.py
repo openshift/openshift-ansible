@@ -12,6 +12,8 @@ import os
 import pdb
 import re
 import json
+import yaml
+from ansible.utils.unicode import to_unicode
 
 class FilterModule(object):
     ''' Custom ansible filters '''
@@ -474,6 +476,19 @@ class FilterModule(object):
         secret = os.urandom(num_bytes)
         return secret.encode('base-64').strip()
 
+    @staticmethod
+    def to_padded_yaml(data, level=0, indent=2, **kw):
+        ''' returns a yaml snippet padded to match the indent level you specify '''
+        if data in [None, ""]:
+            return ""
+
+        try:
+            transformed = yaml.safe_dump(data, indent=indent, allow_unicode=True, default_flow_style=False, **kw)
+            padded = "\n".join([" " * level * indent + line for line in transformed.splitlines()])
+            return to_unicode("\n{0}".format(padded))
+        except Exception as my_e:
+            raise errors.AnsibleFilterError('Failed to convert: %s', my_e)
+
     def filters(self):
         ''' returns a mapping of filters to methods '''
         return {
@@ -493,5 +508,6 @@ class FilterModule(object):
             "oo_parse_named_certificates": self.oo_parse_named_certificates,
             "oo_haproxy_backend_masters": self.oo_haproxy_backend_masters,
             "oo_pretty_print_cluster": self.oo_pretty_print_cluster,
-            "oo_generate_secret": self.oo_generate_secret
+            "oo_generate_secret": self.oo_generate_secret,
+            "to_padded_yaml": self.to_padded_yaml,
         }

@@ -16,6 +16,7 @@ Options:
   -c CLUSTER, --cluster CLUSTER
                         which cluster to use
   -e ENV, --env ENV     which environment to use
+  --v3                  When working with v3 environments.  v2 by default
   -t HOST_TYPE, --host-type HOST_TYPE
                         which host type to use
   --list-host-types     list all of the host types

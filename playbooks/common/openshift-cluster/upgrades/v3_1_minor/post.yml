@@ -1,0 +1,50 @@
+---
+###############################################################################
+# Post upgrade - Upgrade default router, default registry and examples
+###############################################################################
+- name: Upgrade default router and default registry
+  hosts: oo_first_master
+  vars:
+    openshift_deployment_type: "{{ deployment_type }}"
+    registry_image: "{{  openshift.master.registry_url | replace( '${component}', 'docker-registry' )  | replace ( '${version}', 'v' + g_new_version  ) }}"
+    router_image: "{{ openshift.master.registry_url | replace( '${component}', 'haproxy-router' ) | replace ( '${version}', 'v' + g_new_version ) }}"
+    oc_cmd: "{{ openshift.common.client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig"
+  roles:
+  # Create the new templates shipped in 3.1.z, existing templates are left
+  # unmodified. This prevents the subsequent role definition for
+  # openshift_examples from failing when trying to replace templates that do
+  # not already exist. We could have potentially done a replace --force to
+  # create and update in one step.
+  - openshift_examples
+  # Update the existing templates
+  - role: openshift_examples
+    openshift_examples_import_command: replace
+  pre_tasks:
+  - name: Check for default router
+    command: >
+      {{ oc_cmd }} get -n default dc/router
+    register: _default_router
+    failed_when: false
+    changed_when: false
+
+  - name: Check for default registry
+    command: >
+      {{ oc_cmd }} get -n default dc/docker-registry
+    register: _default_registry
+    failed_when: false
+    changed_when: false
+
+  - name: Update router image to current version
+    when: _default_router.rc == 0
+    command: >
+      {{ oc_cmd }} patch dc/router -p
+      '{"spec":{"template":{"spec":{"containers":[{"name":"router","image":"{{ router_image }}"}]}}}}'
+      --api-version=v1
+
+  - name: Update registry image to current version
+    when: _default_registry.rc == 0
+    command: >
+      {{ oc_cmd }} patch dc/docker-registry -p
+      '{"spec":{"template":{"spec":{"containers":[{"name":"registry","image":"{{ registry_image }}"}]}}}}'
+      --api-version=v1
+

@@ -3,3 +3,4 @@
   service:
     name: haproxy
     state: restarted
+  when: not (haproxy_start_result_changed | default(false) | bool)

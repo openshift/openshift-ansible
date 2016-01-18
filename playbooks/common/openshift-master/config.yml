@@ -51,6 +51,7 @@
           console_url: "{{ openshift_master_console_url | default(None) }}"
           console_use_ssl: "{{ openshift_master_console_use_ssl | default(None) }}"
           public_console_url: "{{ openshift_master_public_console_url | default(None) }}"
+          portal_net: "{{ openshift_master_portal_net | default(None) }}"
   - name: Check status of external etcd certificatees
     stat:
       path: "{{ openshift.common.config_base }}/master/{{ item }}"
@@ -312,6 +313,7 @@
 
 - name: Configure master instances
   hosts: oo_masters_to_config
+  any_errors_fatal: true
   serial: 1
   vars:
     sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"

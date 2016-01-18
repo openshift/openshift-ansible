@@ -2,11 +2,24 @@
 - name: restart master
   service: name={{ openshift.common.service_type }}-master state=restarted
   when: (not openshift_master_ha | bool) and (not (master_service_status_changed | default(false) | bool))
+  notify: Verify API Server
 
 - name: restart master api
   service: name={{ openshift.common.service_type }}-master-api state=restarted
   when: (openshift_master_ha | bool) and (not (master_api_service_status_changed | default(false) | bool)) and openshift.master.cluster_method == 'native'
+  notify: Verify API Server
 
 - name: restart master controllers
   service: name={{ openshift.common.service_type }}-master-controllers state=restarted
   when: (openshift_master_ha | bool) and (not (master_controllers_service_status_changed | default(false) | bool)) and openshift.master.cluster_method == 'native'
+
+- name: Verify API Server
+  # Using curl here since the uri module requires python-httplib2 and
+  # wait_for port doesn't provide health information.
+  command: >
+    curl -k --head --silent {{ openshift.master.api_url }}
+  register: api_available_output
+  until: api_available_output.stdout.find("200 OK") != -1
+  retries: 120
+  delay: 1
+  changed_when: false

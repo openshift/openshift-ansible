@@ -3,32 +3,17 @@
     role: common
     local_facts:
       deployment_type: "{{ openshift_deployment_type }}"
+      cli_image: "{{ osm_image | default(None) }}"
       
 - name: Install clients
   yum: pkg={{ openshift.common.service_type }}-clients state=installed
   when: not openshift.common.is_containerized | bool
   
-- name: List Docker images
-  command: >
-    docker images
-  register: docker_images
-  
 - name: Pull CLI Image
   command: >
     docker pull {{ openshift.common.cli_image }}
-  when: openshift.common.is_containerized | bool and openshift.common.cli_image not in docker_images.stdout
-  
-- name: Wait for CLI image
-  command: >
-      docker images
-  register: docker_images
-  until: openshift.common.cli_image in docker_images.stdout
-  retries: 30
-  delay: 10
-  changed_when: false
   when: openshift.common.is_containerized | bool
 
-  
 - name: Create /usr/local/bin/openshift cli wrapper
   template:
     src: openshift.j2

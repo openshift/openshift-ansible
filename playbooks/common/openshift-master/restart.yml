@@ -1,0 +1,143 @@
+---
+- include: ../openshift-cluster/evaluate_groups.yml
+
+- name: Validate configuration for rolling restart
+  hosts: oo_masters_to_config
+  roles:
+  - openshift_facts
+  tasks:
+  - fail:
+      msg: "openshift_rolling_restart_mode must be set to either 'services' or 'system'"
+    when: openshift_rolling_restart_mode is defined and openshift_rolling_restart_mode not in ["services", "system"]
+  - openshift_facts:
+      role: "{{ item.role }}"
+      local_facts: "{{ item.local_facts }}"
+    with_items:
+      - role: common
+        local_facts:
+          rolling_restart_mode: "{{ openshift_rolling_restart_mode | default('services') }}"
+      - role: master
+        local_facts:
+          cluster_method: "{{ openshift_master_cluster_method | default(None) }}"
+
+# Creating a temp file on localhost, we then check each system that will
+# be rebooted to see if that file exists, if so we know we're running
+# ansible on a machine that needs a reboot, and we need to error out.
+- name: Create temp file on localhost
+  hosts: localhost
+  connection: local
+  become: no
+  gather_facts: no
+  tasks:
+  - local_action: command mktemp
+    register: mktemp
+    changed_when: false
+
+- name: Check if temp file exists on any masters
+  hosts: oo_masters_to_config
+  tasks:
+  - stat: path="{{ hostvars.localhost.mktemp.stdout }}"
+    register: exists
+    changed_when: false
+
+- name: Cleanup temp file on localhost
+  hosts: localhost
+  connection: local
+  become: no
+  gather_facts: no
+  tasks:
+  - file: path="{{ hostvars.localhost.mktemp.stdout }}" state=absent
+    changed_when: false
+
+- name: Warn if restarting the system where ansible is running
+  hosts: oo_masters_to_config
+  tasks:
+  - pause:
+      prompt: >
+        Warning: Running playbook from a host that will be restarted!
+        Press CTRL+C and A to abort playbook execution. You may
+        continue by pressing ENTER but the playbook will stop
+        executing after this system has been restarted and services
+        must be verified manually. To only restart services, set
+        openshift_master_rolling_restart_mode=services in host
+        inventory and relaunch the playbook.
+    when: exists.stat.exists and openshift.common.rolling_restart_mode == 'system'
+  - set_fact:
+      current_host: "{{ exists.stat.exists }}"
+    when: openshift.common.rolling_restart_mode == 'system'
+
+- name: Determine which masters are currently active
+  hosts: oo_masters_to_config
+  tasks:
+  - name: Check master service status
+    command: >
+      systemctl is-active {{ openshift.common.service_type }}-master
+    register: active_check_output
+    when: openshift.master.cluster_method | default(None) == 'pacemaker'
+    failed_when: active_check_output.stdout not in ['active', 'inactive', 'unknown']
+    changed_when: false
+  - set_fact:
+      is_active: "{{ active_check_output.stdout == 'active' }}"
+    when: openshift.master.cluster_method | default(None) == 'pacemaker'
+
+- name: Evaluate master groups
+  hosts: localhost
+  become: no
+  tasks:
+  - name: Evaluate oo_active_masters
+    add_host:
+      name: "{{ item }}"
+      groups: oo_active_masters
+      ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
+      ansible_sudo: "{{ g_sudo | default(omit) }}"
+    with_items: "{{ groups.oo_masters_to_config | default([]) }}"
+    when: (hostvars[item]['is_active'] | default(false)) | bool
+  - name: Evaluate oo_current_masters
+    add_host:
+      name: "{{ item }}"
+      groups: oo_current_masters
+      ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
+      ansible_sudo: "{{ g_sudo | default(omit) }}"
+    with_items: "{{ groups.oo_masters_to_config | default([]) }}"
+    when: (hostvars[item]['current_host'] | default(false)) | bool
+
+- name: Validate pacemaker cluster
+  hosts: oo_active_masters
+  tasks:
+  - name: Retrieve pcs status
+    command: pcs status
+    register: pcs_status_output
+    changed_when: false
+  - fail:
+      msg: >
+        Pacemaker cluster validation failed. One or more nodes are not online.
+    when: not (pcs_status_output.stdout | validate_pcs_cluster(groups.oo_masters_to_config)) | bool
+
+- name: Restart masters
+  hosts: oo_masters_to_config:!oo_active_masters:!oo_current_masters
+  vars:
+    openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
+  serial: 1
+  tasks:
+  - include: restart_hosts.yml
+    when: openshift.common.rolling_restart_mode == 'system'
+  - include: restart_services.yml
+    when: openshift.common.rolling_restart_mode == 'services'
+
+- name: Restart active masters
+  hosts: oo_active_masters
+  serial: 1
+  tasks:
+  - include: restart_hosts_pacemaker.yml
+    when: openshift.common.rolling_restart_mode == 'system'
+  - include: restart_services_pacemaker.yml
+    when: openshift.common.rolling_restart_mode == 'services'
+
+- name: Restart current masters
+  hosts: oo_current_masters
+  serial: 1
+  tasks:
+  - include: restart_hosts.yml
+    when: openshift.common.rolling_restart_mode == 'system'
+  - include: restart_services.yml
+    when: openshift.common.rolling_restart_mode == 'services'

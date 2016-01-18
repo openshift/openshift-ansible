@@ -138,7 +138,7 @@ class OOCliFixture(OOInstallFixture):
         self.assertEquals(exp_hosts_to_run_on_len, len(hosts_to_run_on))
 
 
-#pylint: disable=too-many-arguments,too-many-branches
+#pylint: disable=too-many-arguments,too-many-branches,too-many-statements
 def build_input(ssh_user=None, hosts=None, variant_num=None,
                 add_nodes=None, confirm_facts=None, schedulable_masters_ok=None,
                 master_lb=None):
@@ -163,13 +163,19 @@ def build_input(ssh_user=None, hosts=None, variant_num=None,
     num_masters = 0
     if hosts:
         i = 0
-        for (host, is_master) in hosts:
+        for (host, is_master, is_containerized) in hosts:
             inputs.append(host)
             if is_master:
                 inputs.append('y')
                 num_masters += 1
             else:
                 inputs.append('n')
+
+            if is_containerized:
+                inputs.append('container')
+            else:
+                inputs.append('rpm')
+
             #inputs.append('rpm')
             # We should not be prompted to add more hosts if we're currently at
             # 2 masters, this is an invalid HA configuration, so this question
@@ -196,8 +202,12 @@ def build_input(ssh_user=None, hosts=None, variant_num=None,
             inputs.append('y')
         inputs.append('1')  # Add more nodes
         i = 0
-        for (host, is_master) in add_nodes:
+        for (host, is_master, is_containerized) in add_nodes:
             inputs.append(host)
+            if is_containerized:
+                inputs.append('container')
+            else:
+                inputs.append('rpm')
             #inputs.append('rpm')
             if i < len(add_nodes) - 1:
                 inputs.append('y')  # Add more hosts
