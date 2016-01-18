@@ -1,0 +1,47 @@
+- name: Populate oo_dns_hosts_to_update group
+  hosts: localhost
+  connection: local
+  become: no
+  gather_facts: no
+  vars_files:
+  - vars.yml
+  - cluster_hosts.yml
+  tasks:
+  - name: Evaluate oo_dns_hosts_to_update
+    add_host:
+      name: "{{ item }}"
+      groups: oo_dns_hosts_to_update
+      ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
+      ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
+    with_items: "{{ groups[cluster_id ~ '-dns'] }}"
+
+  - name: Evaluate oo_hosts_to_add_in_dns
+    add_host:
+      name: "{{ item }}"
+      groups: oo_hosts_to_add_in_dns
+      ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
+      ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
+    with_items: "{{ groups['tag_clusterid_' ~ cluster_id] }}"
+
+- name: Gather facts
+  hosts: oo_hosts_to_add_in_dns
+  vars_files:
+  - vars.yml
+  - cluster_hosts.yml
+
+- name: Configure the DNS
+  hosts: oo_dns_hosts_to_update
+  vars_files:
+  - vars.yml
+  - cluster_hosts.yml
+  roles:
+    - role: rhel_subscribe
+      when: deployment_type in ["enterprise", "atomic-enterprise", "openshift-enterprise"] and
+            ansible_distribution == "RedHat" and
+            lookup('oo_option', 'rhel_skip_subscription') | default(rhsub_skip, True) |
+              default('no', True) | lower in ['no', 'false']
+
+    - { role: dns,
+        dns_forwarders: "{{ openstack_network_dns }}",
+        dns_zones: [ novalocal, openstacklocal ],
+        dns_all_hosts: "{{ g_all_hosts }}" }
