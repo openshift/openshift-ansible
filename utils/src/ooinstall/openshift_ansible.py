@@ -128,6 +128,8 @@ def write_host(host, inventory, schedulable=None):
         facts += ' openshift_hostname={}'.format(host.hostname)
     if host.public_hostname:
         facts += ' openshift_public_hostname={}'.format(host.public_hostname)
+    if host.containerized:
+        facts += ' containerized={}'.format(host.containerized)
     # TODO: For not write_host is handles both master and nodes.
     # Technically only nodes will ever need this.
 
