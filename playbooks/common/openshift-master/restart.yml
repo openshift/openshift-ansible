@@ -74,7 +74,7 @@
       systemctl is-active {{ openshift.common.service_type }}-master
     register: active_check_output
     when: openshift.master.cluster_method | default(None) == 'pacemaker'
-    failed_when: active_check_output.stdout not in ['active', 'inactive']
+    failed_when: active_check_output.stdout not in ['active', 'inactive', 'unknown']
     changed_when: false
   - set_fact:
       is_active: "{{ active_check_output.stdout == 'active' }}"
