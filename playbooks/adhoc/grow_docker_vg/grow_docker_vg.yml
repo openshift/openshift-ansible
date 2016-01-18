@@ -20,7 +20,7 @@
 #   ansible-playbook -e 'cli_tag_name=ops-compute-12345' grow_docker_vg.yml
 #
 #  Notes:
-#  * By default this will do a 55GB GP2 volume.  The can be overidden with the "-e 'cli_volume_size=100'" variable
+#  * By default this will do a 200GB GP2 volume.  The can be overidden with the "-e 'cli_volume_size=100'" variable
 #  * This does a GP2 by default.  Support for Provisioned IOPS has not been added
 #  * This will assign the new volume to /dev/xvdc. This is not variablized, yet.
 #  * This can be done with NO downtime on the host
@@ -36,7 +36,7 @@
 
   vars:
     cli_volume_type: gp2
-    cli_volume_size: 55
+    cli_volume_size: 200
 #    cli_volume_iops: "{{ 30 * cli_volume_size }}"
 
   pre_tasks:

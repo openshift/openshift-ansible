@@ -1,0 +1,17 @@
+---
+# tasks file for oso_monitoring_tools
+- name: Install the Openshift Tools RPMS
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - openshift-tools-scripts-monitoring-zagg-client
+    - python-openshift-tools-monitoring-zagg
+
+- debug: var=g_zagg_client_config
+
+- name: Generate the /etc/openshift_tools/zagg_client.yaml config file
+  copy:
+    content: "{{ osomt_zagg_client_config | to_nice_yaml }}"
+    dest: /etc/openshift_tools/zagg_client.yaml
+    mode: "644"
