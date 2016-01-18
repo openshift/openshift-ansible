@@ -1,6 +1,6 @@
 # Use public servers from the pool.ntp.org project.
 # Please consider joining the pool (http://www.pool.ntp.org/join.html).
-{% for server in opschrony_ntp_servers %}
+{% for server in chrony_ntp_servers %}
 server {{ server }} iburst
 {% endfor %}
 

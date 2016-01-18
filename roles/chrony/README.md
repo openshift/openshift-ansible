@@ -10,12 +10,12 @@ Requirements
 Role Variables
 --------------
 
-opschrony_ntp_servers: a list of ntp servers to use the chrony.conf file
+chrony_ntp_servers: a list of ntp servers to use the chrony.conf file
 
 Dependencies
 ------------
 
-ops_roles/lib_timedatectl
+roles/lib_timedatectl
 
 Example Playbook
 ----------------

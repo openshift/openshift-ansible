@@ -15,4 +15,4 @@ galaxy_info:
   categories:
   - system
 dependencies:
-- ops_roles/lib_timedatectl
+- roles/lib_timedatectl
