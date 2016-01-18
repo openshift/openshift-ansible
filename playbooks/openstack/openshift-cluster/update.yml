@@ -1,4 +1,6 @@
 ---
+- include: dns.yml
+
 - name: Populate oo_hosts_to_update group
   hosts: localhost
   connection: local

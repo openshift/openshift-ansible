@@ -32,10 +32,9 @@
              --timeout 3 --enable-rollback
              -P cluster_env={{ cluster_env }}
              -P cluster_id={{ cluster_id }}
-             -P cidr={{ openstack_network_cidr }}
+             -P subnet_24_prefix={{ openstack_subnet_24_prefix }}
              -P dns_nameservers={{ openstack_network_dns | join(",") }}
              -P external_net={{ openstack_network_external_net }}
-             -P floating_ip_pool={{ openstack_floating_ip_pool }}
              -P ssh_public_key="{{ openstack_ssh_public_key }}"
              -P ssh_incoming={{ openstack_ssh_access_from }}
              -P num_etcd={{ num_etcd }}
@@ -46,10 +45,12 @@
              -P master_image={{ deployment_vars[deployment_type].image }}
              -P node_image={{ deployment_vars[deployment_type].image }}
              -P infra_image={{ deployment_vars[deployment_type].image }}
+             -P dns_image={{ deployment_vars[deployment_type].image }}
              -P etcd_flavor={{ openstack_flavor["etcd"] }}
              -P master_flavor={{ openstack_flavor["master"] }}
              -P node_flavor={{ openstack_flavor["node"] }}
              -P infra_flavor={{ openstack_flavor["infra"] }}
+             -P dns_flavor=m1.small
              openshift-ansible-{{ cluster_id }}-stack'
 
   - name: Wait for OpenStack Stack readiness
@@ -115,6 +116,14 @@
       - parsed_outputs.infra_ips
       - parsed_outputs.infra_floating_ips
 
+  - name: Add DNS groups and variables
+    add_host:
+      hostname: '{{ parsed_outputs.dns_name }}'
+      ansible_ssh_host: '{{ parsed_outputs.dns_floating_ip }}'
+      ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
+      ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
+      groups: '{{ cluster_id }}-dns'
+
   - name: Wait for ssh
     wait_for:
       host: '{{ item }}'
@@ -123,6 +132,7 @@
       - parsed_outputs.master_floating_ips
       - parsed_outputs.node_floating_ips
       - parsed_outputs.infra_floating_ips
+      - parsed_outputs.dns_floating_ip
 
   - name: Wait for user setup
     command: 'ssh -o StrictHostKeyChecking=no -o PasswordAuthentication=no -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null {{ deployment_vars[deployment_type].ssh_user }}@{{ item }} echo {{ deployment_vars[deployment_type].ssh_user }} user is setup'
@@ -134,6 +144,7 @@
       - parsed_outputs.master_floating_ips
       - parsed_outputs.node_floating_ips
       - parsed_outputs.infra_floating_ips
+      - parsed_outputs.dns_floating_ip
 
 - include: update.yml
 

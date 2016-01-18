@@ -1,0 +1,14 @@
+$TTL 1d
+@               IN      SOA     {{ ansible_hostname }} openshift (
+                                {{ ansible_date_time.epoch }}      ; Serial (To be fixed before 2039)
+                                12h     ; Refresh
+                                3m      ; Retry
+                                4w      ; Expire
+                                3h      ; TTL for negative replies
+                        )
+
+    IN NS {{ ansible_hostname }}
+{{ ansible_hostname }}  IN A  {{ ansible_default_ipv4.address }}
+{% for host in dns_all_hosts %}
+{{ hostvars[host].ansible_hostname }}  IN A  {{ hostvars[host]['ansible_default_ipv4'].address }}
+{% endfor %}

@@ -1,0 +1,7 @@
+---
+galaxy_info:
+  author: Lénaïc Huard
+  description: Deploy and configure a DNS server
+  company: Amadeus SAS
+  license: ASL 2.0
+dependencies: []
