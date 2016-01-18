@@ -2,13 +2,13 @@
 
 _ossh_known_hosts(){
     if python -c 'import openshift_ansible' &>/dev/null; then
-      print $(/usr/bin/python -c 'from openshift_ansible import multi_inventory; m=multi_inventory.MultiInventory(); m.run(); z=m.result; print "\n".join(["%s.%s" % (host["ec2_tag_Name"],host["ec2_tag_env"]) for dns, host in z["_meta"]["hostvars"].items() if all(k in host for k in ("ec2_tag_Name", "ec2_tag_env"))])')
+      print $(/usr/bin/python -c 'from openshift_ansible import multi_inventory; m=multi_inventory.MultiInventory(); m.run(); z=m.result; print "\n".join(["%s.%s" % (host["oo_name"],host["oo_environment"]) for dns, host in z["_meta"]["hostvars"].items() if all(k in host for k in ("oo_name", "oo_environment"))])')
 
     elif [[ -f /dev/shm/.ansible/tmp/multi_inventory.cache ]]; then
-      print $(/usr/bin/python -c 'import json; loc="/dev/shm/.ansible/tmp/multi_inventory.cache"; z=json.loads(open(loc).read()); print "\n".join(["%s.%s" % (host["ec2_tag_Name"],host["ec2_tag_env"]) for dns, host in z["_meta"]["hostvars"].items() if all(k in host for k in ("ec2_tag_Name", "ec2_tag_env"))])')
+      print $(/usr/bin/python -c 'import json; loc="/dev/shm/.ansible/tmp/multi_inventory.cache"; z=json.loads(open(loc).read()); print "\n".join(["%s.%s" % (host["oo_name"],host["oo_environment"]) for dns, host in z["_meta"]["hostvars"].items() if all(k in host for k in ("oo_name", "oo_environment"))])')
 
     elif [[ -f ~/.ansible/tmp/multi_inventory.cache ]]; then
-      print $(/usr/bin/python -c 'import json,os; loc="%s" % os.path.expanduser("~/.ansible/tmp/multi_inventory.cache"); z=json.loads(open(loc).read()); print "\n".join(["%s.%s" % (host["ec2_tag_Name"],host["ec2_tag_env"]) for dns, host in z["_meta"]["hostvars"].items() if all(k in host for k in ("ec2_tag_Name", "ec2_tag_env"))])')
+      print $(/usr/bin/python -c 'import json,os; loc="%s" % os.path.expanduser("~/.ansible/tmp/multi_inventory.cache"); z=json.loads(open(loc).read()); print "\n".join(["%s.%s" % (host["oo_name"],host["oo_environment"]) for dns, host in z["_meta"]["hostvars"].items() if all(k in host for k in ("oo_name", "oo_environment"))])')
 
     fi
 

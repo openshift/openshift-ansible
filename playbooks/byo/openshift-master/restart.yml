@@ -1,0 +1,4 @@
+---
+- include: ../../common/openshift-master/restart.yml
+  vars_files:
+  - ../../byo/openshift-cluster/cluster_hosts.yml

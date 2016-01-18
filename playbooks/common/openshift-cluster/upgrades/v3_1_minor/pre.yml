@@ -1,0 +1,87 @@
+---
+###############################################################################
+# Evaluate host groups and gather facts
+###############################################################################
+- name: Load openshift_facts
+  hosts: oo_masters_to_config:oo_nodes_to_config:oo_etcd_to_config:oo_lb_to_config
+  roles:
+  - openshift_facts
+
+###############################################################################
+# Pre-upgrade checks
+###############################################################################
+- name: Verify upgrade can proceed
+  hosts: oo_first_master
+  vars:
+    openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
+    target_version: "{{ '1.1.1' if deployment_type == 'origin' else '3.1.1' }}"
+  gather_facts: no
+  tasks:
+  - fail:
+      msg: >
+        This upgrade is only supported for origin, openshift-enterprise, and online
+        deployment types
+    when: deployment_type not in ['origin','openshift-enterprise', 'online']
+
+  - fail:
+      msg: >
+        openshift_pkg_version is {{ openshift_pkg_version }} which is not a
+        valid version for a {{ target_version }} upgrade
+    when: openshift_pkg_version is defined and openshift_pkg_version.split('-',1).1 | version_compare(target_version ,'<')
+
+- name: Verify upgrade can proceed
+  hosts: oo_masters_to_config:oo_nodes_to_config
+  vars:
+    target_version: "{{ '1.1.1' if deployment_type == 'origin' else '3.1.1' }}"
+  tasks:
+  - name: Clean package cache
+    command: "{{ ansible_pkg_mgr }} clean all"
+
+  - set_fact:
+      g_new_service_name: "{{ 'origin' if deployment_type =='origin' else 'atomic-openshift' }}"
+
+  - name: Determine available versions
+    script: ../files/versions.sh {{ g_new_service_name }} openshift
+    register: g_versions_result
+
+  - set_fact:
+      g_aos_versions: "{{ g_versions_result.stdout | from_yaml }}"
+
+  - set_fact:
+      g_new_version: "{{ g_aos_versions.curr_version.split('-', 1).0 if g_aos_versions.avail_version is none else g_aos_versions.avail_version.split('-', 1).0 }}"
+
+  - fail:
+      msg: This playbook requires Origin 1.1 or later
+    when: deployment_type == 'origin' and g_aos_versions.curr_version | version_compare('1.1','<')
+
+  - fail:
+      msg: This playbook requires Atomic Enterprise Platform/OpenShift Enterprise 3.1 or later
+    when: deployment_type == 'atomic-openshift' and g_aos_versions.curr_version | version_compare('3.1','<')
+
+  - fail:
+      msg: Upgrade packages not found
+    when: (g_aos_versions.avail_version | default(g_aos_versions.curr_version, true) | version_compare(target_version, '<'))
+
+  - set_fact:
+      pre_upgrade_complete: True
+
+
+##############################################################################
+# Gate on pre-upgrade checks
+##############################################################################
+- name: Gate on pre-upgrade checks
+  hosts: localhost
+  connection: local
+  become: no
+  vars:
+    pre_upgrade_hosts: "{{ groups.oo_masters_to_config | union(groups.oo_nodes_to_config) }}"
+  tasks:
+  - set_fact:
+      pre_upgrade_completed: "{{ hostvars
+                                 | oo_select_keys(pre_upgrade_hosts)
+                                 | oo_collect('inventory_hostname', {'pre_upgrade_complete': true}) }}"
+  - set_fact:
+      pre_upgrade_failed: "{{ pre_upgrade_hosts | difference(pre_upgrade_completed) }}"
+  - fail:
+      msg: "Upgrade cannot continue. The following hosts did not complete pre-upgrade checks: {{ pre_upgrade_failed | join(',') }}"
+    when: pre_upgrade_failed | length > 0

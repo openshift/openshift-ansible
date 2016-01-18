@@ -44,41 +44,14 @@
   action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-sdn-ovs{{ openshift_version }} state=present"
   when: openshift.common.use_openshift_sdn and not openshift.common.is_containerized | bool
 
-- name: Get docker images
-  command: docker images
-  changed_when: false
-  when: openshift.common.is_containerized | bool
-  register: docker_images
-
 - name: Pull node image
   command: >
     docker pull {{ openshift.node.node_image }}
-  when: openshift.common.is_containerized | bool and openshift.node.node_image not in docker_images.stdout
-  
-- name: Wait for node image
-  command: >
-      docker images
-  register: docker_images
-  until: openshift.node.node_image in docker_images.stdout
-  retries: 30
-  delay: 10
-  changed_when: false
   when: openshift.common.is_containerized | bool
-    
+
 - name: Pull OpenVSwitch image
   command: >
     docker pull {{ openshift.node.ovs_image }}
-  when: openshift.common.is_containerized | bool and openshift.node.ovs_image not in docker_images.stdout
-    and openshift.common.use_openshift_sdn | bool
-  
-- name: Wait for OpenVSwitch image
-  command: >
-      docker images
-  register: docker_images
-  until: openshift.node.ovs_image in docker_images.stdout
-  retries: 30
-  delay: 10
-  changed_when: false
   when: openshift.common.is_containerized | bool and openshift.common.use_openshift_sdn | bool
 
 - name: Install Node docker service file
@@ -129,6 +102,21 @@
 
 - name: Additional storage plugin configuration
   include: storage_plugins/main.yml
+
+# Necessary because when you're on a node that's also a master the master will be
+# restarted after the node restarts docker and it will take up to 60 seconds for
+# systemd to start the master again
+- name: Wait for master API to become available before proceeding
+  # Using curl here since the uri module requires python-httplib2 and
+  # wait_for port doesn't provide health information.
+  command: >
+    curl -k --head --silent {{ openshift_node_master_api_url }}
+  register: api_available_output
+  until: api_available_output.stdout.find("200 OK") != -1
+  retries: 120
+  delay: 1
+  changed_when: false
+  when: openshift.common.is_containerized | bool
 
 - name: Start and enable node
   service: name={{ openshift.common.service_type }}-node enabled=yes state=started

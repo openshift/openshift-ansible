@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.27
+Version:        3.0.34
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -259,6 +259,80 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Jan 18 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.34-1
+- clean up too-many-branches / logic (jdiaz@redhat.com)
+- atomic-openshift-installer: add containerized to inventory
+  (smunilla@redhat.com)
+- Add 'unknown' to possible output for the is-active check.
+  (abutcher@redhat.com)
+- Fix cluster_method conditional in master restart playbook.
+  (abutcher@redhat.com)
+- Use IdentityFile instead of PrivateKey (donovan.muller@gmail.com)
+- atomic-openshift-installer: Remove containerized install for 3.0
+  (smunilla@redhat.com)
+- Host group should be OSEv3 not OSv3 (donovan.muller@gmail.com)
+- Remove pause after haproxy start (abutcher@redhat.com)
+- Ensure nfs-utils installed for non-atomic hosts. (abutcher@redhat.com)
+
+* Fri Jan 15 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.33-1
+- Configure nodes which are also masters prior to nodes in containerized
+  install. (abutcher@redhat.com)
+- Call attention to openshift_master_rolling_restart_mode variable in restart
+  prompt. (abutcher@redhat.com)
+- Added anchors for rules in style_guide.adoc in order to make it easier to
+  reference specific rules in PRs. (twiest@redhat.com)
+- Update ec2.ini (jdetiber@redhat.com)
+
+* Thu Jan 14 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.32-1
+- Uninstall remove containerized wrapper and symlinks (abutcher@redhat.com)
+
+* Thu Jan 14 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.31-1
+- Check api prior to starting node. (abutcher@redhat.com)
+- added anchors (twiest@redhat.com)
+
+* Wed Jan 13 2016 Joel Diaz <jdiaz@redhat.com> 3.0.30-1
+- Add -A and detail --v3 flags
+
+* Wed Jan 13 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.29-1
+- 3.1.1 upgrade playbook (bleanhar@redhat.com)
+- Updated help menu for v3 flag (kwoodson@redhat.com)
+- Add wait in between api and controllers start for native ha.
+  (abutcher@redhat.com)
+- atomic-openshift-installer: Error handling for unicode hostnames
+  (smunilla@redhat.com)
+- Update api verification. (abutcher@redhat.com)
+- Add a Verify API Server handler that waits for the API server to become
+  available (sdodson@redhat.com)
+- Add -A parameter to forward ssh agent (jdiaz@redhat.com)
+- Validate pacemaker cluster members. (abutcher@redhat.com)
+- Removed atomic host check (kwoodson@redhat.com)
+- Add is_containerized inputs to nosetests. (abutcher@redhat.com)
+- Add wait for API before starting controllers w/ native ha install.
+  (abutcher@redhat.com)
+- Fix for to_padded_yaml filter (jdetiber@redhat.com)
+- - sqashed to one commit (llange@redhat.com)
+- Switch to using hostnamectl as it works on atomic and rhel7
+  (sdodson@redhat.com)
+- Update rolling restart playbook for pacemaker support. Replace fail with a
+  warn and prompt if running ansible from a host that will be rebooted. Re-
+  organize playbooks. (abutcher@redhat.com)
+- Implement simple master rolling restarts. (dgoodwin@redhat.com)
+- re-enable containerize installs (sdodson@redhat.com)
+- Set portal net in master playbook (jdetiber@redhat.com)
+- Set the cli image to match osm_image in openshift_cli role
+  (sdodson@redhat.com)
+- atomic-openshift-installer: Populate new_nodes group (smunilla@redhat.com)
+- Always pull docker images (sdodson@redhat.com)
+
+* Mon Jan 11 2016 Kenny Woodson <kwoodson@redhat.com> 3.0.28-1
+- added the rhe7-host-monitoring service file (mwoodson@redhat.com)
+- Fixing tab completion for latest metadata changes (kwoodson@redhat.com)
+- Removing some internal hostnames (bleanhar@redhat.com)
+- Fixing tab completion for latest metadata changes (kwoodson@redhat.com)
+- Make bin/cluster able to spawn OSE 3.1 clusters (lhuard@amadeus.com)
+- oso_host_monitoring role: removed the f22 and zagg client, replaced it with
+  oso-rhel7-host-monitoring container (mwoodson@redhat.com)
+
 * Fri Jan 08 2016 Kenny Woodson <kwoodson@redhat.com> 3.0.27-1
 - Update to metadata tooling. (kwoodson@redhat.com)
 - Fix VM drive cleanup during terminate on libvirt (lhuard@amadeus.com)

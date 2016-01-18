@@ -33,9 +33,7 @@ def is_valid_hostname(hostname):
 def validate_prompt_hostname(hostname):
     if '' == hostname or is_valid_hostname(hostname):
         return hostname
-    raise click.BadParameter('"{}" appears to be an invalid hostname. ' \
-                             'Please double-check this value i' \
-                             'and re-enter it.'.format(hostname))
+    raise click.BadParameter('Invalid hostname. Please double-check this value and re-enter it.')
 
 def get_ansible_ssh_user():
     click.clear()
@@ -72,7 +70,7 @@ def delete_hosts(hosts):
                 click.echo("\"{}\" doesn't coorespond to any valid input.".format(del_idx))
     return hosts, None
 
-def collect_hosts(oo_cfg, masters_set=False, print_summary=True):
+def collect_hosts(oo_cfg, existing_env=False, masters_set=False, print_summary=True):
     """
         Collect host information from user. This will later be filled in using
         ansible.
@@ -129,15 +127,18 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
                     masters_set = True
         host_props['node'] = True
 
-        #TODO: Reenable this option once container installs are out of tech preview
-        #rpm_or_container = click.prompt('Will this host be RPM or Container based (rpm/container)?',
-        #                                type=click.Choice(['rpm', 'container']),
-        #                                default='rpm')
-        #if rpm_or_container == 'container':
-        #    host_props['containerized'] = True
-        #else:
-        #    host_props['containerized'] = False
         host_props['containerized'] = False
+        if oo_cfg.settings['variant_version'] != '3.0':
+            rpm_or_container = click.prompt('Will this host be RPM or Container based (rpm/container)?',
+                                            type=click.Choice(['rpm', 'container']),
+                                            default='rpm')
+            if rpm_or_container == 'container':
+                host_props['containerized'] = True
+
+        if existing_env:
+            host_props['new_host'] = True
+        else:
+            host_props['new_host'] = False
 
         host = Host(**host_props)
 
@@ -507,7 +508,7 @@ def collect_new_nodes(oo_cfg):
 Add new nodes here
     """
     click.echo(message)
-    return collect_hosts(oo_cfg, masters_set=True, print_summary=False)
+    return collect_hosts(oo_cfg, existing_env=True, masters_set=True, print_summary=False)
 
 def get_installed_hosts(hosts, callback_facts):
     installed_hosts = []

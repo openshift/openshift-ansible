@@ -11,9 +11,7 @@ imageConfig:
   format: {{ openshift.node.registry_url }}
   latest: false
 kind: NodeConfig
-{% if openshift.node.kubelet_args is defined and openshift.node.kubelet_args %}
-kubeletArguments: {{ openshift.node.kubelet_args | to_json }}
-{% endif %}
+kubeletArguments: {{ openshift.node.kubelet_args | default(None) | to_padded_yaml(level=1) }}
 masterKubeConfig: system:node:{{ openshift.common.hostname }}.kubeconfig
 {% if openshift.common.use_openshift_sdn %}
 networkPluginName: {{ openshift.common.sdn_network_plugin_name }}

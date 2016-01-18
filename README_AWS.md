@@ -51,7 +51,7 @@ to setup a private key file to allow ansible to connect to the created hosts.
 To do so, add the the following entry to your $HOME/.ssh/config file and make it point to the private key file which allows you to login on AWS.
 ```
 Host *.compute-1.amazonaws.com
-  PrivateKey $HOME/.ssh/my_private_key.pem
+  IdentityFile $HOME/.ssh/my_private_key.pem
 ```
 
 Alternatively, you can configure your ssh-agent to hold the credentials to connect to your AWS instances.

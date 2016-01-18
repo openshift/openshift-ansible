@@ -1,0 +1,14 @@
+---
+- include: ../../../../common/openshift-cluster/evaluate_groups.yml
+  vars:
+    g_etcd_hosts: "{{ groups.etcd | default([]) }}"
+    g_master_hosts: "{{ groups.masters | default([]) }}"
+    g_nfs_hosts: "{{ groups.nfs | default([]) }}"
+    g_node_hosts: "{{ groups.nodes | default([]) }}"
+    g_lb_hosts: "{{ groups.lb | default([]) }}"
+    openshift_cluster_id: "{{ cluster_id | default('default') }}"
+    openshift_deployment_type: "{{ deployment_type }}"
+- include: ../../../../common/openshift-cluster/upgrades/v3_1_minor/pre.yml
+- include: ../../../../common/openshift-cluster/upgrades/v3_1_minor/upgrade.yml
+- include: ../../../openshift-master/restart.yml
+- include: ../../../../common/openshift-cluster/upgrades/v3_1_minor/post.yml
