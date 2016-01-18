@@ -68,14 +68,22 @@
 
 - name: Determine which masters are currently active
   hosts: oo_masters_to_config
+  any_errors_fatal: true
   tasks:
   - name: Check master service status
     command: >
       systemctl is-active {{ openshift.common.service_type }}-master
     register: active_check_output
     when: openshift.master.cluster_method | default(None) == 'pacemaker'
-    failed_when: active_check_output.stdout not in ['active', 'inactive', 'unknown']
+    failed_when: false
     changed_when: false
+  # Any master which did not report 'active' or 'inactive' is likely
+  # unhealthy.  Other possible states are 'unknown' or 'failed'.
+  - fail:
+      msg: >
+        Got invalid service state from {{ openshift.common.service_type }}-master
+        on {{ inventory_hostname }}. Please verify pacemaker cluster.
+    when: openshift.master.cluster_method | default(None) == 'pacemaker' and active_check_output.stdout not in ['active', 'inactive']
   - set_fact:
       is_active: "{{ active_check_output.stdout == 'active' }}"
     when: openshift.master.cluster_method | default(None) == 'pacemaker'
