@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.33
+Version:        3.0.34
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -259,6 +259,21 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Jan 18 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.34-1
+- clean up too-many-branches / logic (jdiaz@redhat.com)
+- atomic-openshift-installer: add containerized to inventory
+  (smunilla@redhat.com)
+- Add 'unknown' to possible output for the is-active check.
+  (abutcher@redhat.com)
+- Fix cluster_method conditional in master restart playbook.
+  (abutcher@redhat.com)
+- Use IdentityFile instead of PrivateKey (donovan.muller@gmail.com)
+- atomic-openshift-installer: Remove containerized install for 3.0
+  (smunilla@redhat.com)
+- Host group should be OSEv3 not OSv3 (donovan.muller@gmail.com)
+- Remove pause after haproxy start (abutcher@redhat.com)
+- Ensure nfs-utils installed for non-atomic hosts. (abutcher@redhat.com)
+
 * Fri Jan 15 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.33-1
 - Configure nodes which are also masters prior to nodes in containerized
   install. (abutcher@redhat.com)
