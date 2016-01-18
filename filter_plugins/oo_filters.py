@@ -14,6 +14,7 @@ import re
 import json
 import yaml
 from ansible.utils.unicode import to_unicode
+import jinja2
 
 class FilterModule(object):
     ''' Custom ansible filters '''
@@ -489,6 +490,31 @@ class FilterModule(object):
         except Exception as my_e:
             raise errors.AnsibleFilterError('Failed to convert: %s', my_e)
 
+    @staticmethod
+    def oo_combine(lhs, rhs):
+        ''' returns a dict which is the union of the two input dicts '''
+        def is_dict(obj):
+            ''' returns True if obj is a dict, False if obj is not set, throws an exception if obj is something else '''
+            if issubclass(type(obj), dict):
+                return True
+            elif obj is None or \
+                 issubclass(type(obj), jinja2.Undefined):
+                return False
+            else:
+                raise errors.AnsibleFilterError("|failed expects dict. Got " + str(type(obj)))
+
+        if not is_dict(lhs) and \
+           not is_dict(rhs):
+            return None
+        elif not is_dict(lhs):
+            return rhs
+        elif not is_dict(rhs):
+            return lhs
+        else:
+            combined = lhs.copy()
+            combined.update(rhs)
+            return combined
+
     def filters(self):
         ''' returns a mapping of filters to methods '''
         return {
@@ -510,4 +536,5 @@ class FilterModule(object):
             "oo_pretty_print_cluster": self.oo_pretty_print_cluster,
             "oo_generate_secret": self.oo_generate_secret,
             "to_padded_yaml": self.to_padded_yaml,
+            "oo_combine": self.oo_combine,
         }

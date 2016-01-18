@@ -23,6 +23,14 @@
     msg: "Pacemaker based HA is not supported at this time when used with containerized installs"
   when: openshift_master_ha | bool and openshift_master_cluster_method == "pacemaker" and openshift.common.is_containerized | bool
 
+- set_fact:
+    args_cloud:
+      cloud-provider:
+        - "openstack"
+      cloud-config:
+        - "/etc/cloud.conf"
+  when: openshift.provider.name == 'openstack'
+
 - name: Set master facts
   openshift_facts:
     role: master
@@ -74,8 +82,8 @@
       uid_allocator_range: "{{ osm_uid_allocator_range | default(None) }}"
       router_selector: "{{ openshift_router_selector | default(None) }}"
       registry_selector: "{{ openshift_registry_selector | default(None) }}"
-      api_server_args: "{{ osm_api_server_args | default(None) }}"
-      controller_args: "{{ osm_controller_args | default(None) }}"
+      api_server_args: "{{ args_cloud | oo_combine(osm_api_server_args) | default(None) }}"
+      controller_args: "{{ args_cloud | oo_combine(osm_controller_args) | default(None) }}"
       infra_nodes: "{{ num_infra | default(None) }}"
       disabled_features: "{{ osm_disabled_features | default(None) }}"
       master_count: "{{ openshift_master_count | default(None) }}"
@@ -211,6 +219,17 @@
 
 - set_fact:
     translated_identity_providers: "{{ openshift.master.identity_providers | translate_idps('v1') }}"
+
+- name: Create the OpenStack config
+  template:
+    dest: /etc/cloud.conf
+    src: cloud.conf.j2
+    mode: 0400
+  notify:
+  - restart master
+  - restart master api
+  - restart master controllers
+  when: openshift.provider.name == 'openstack'
 
 # TODO: add the validate parameter when there is a validation command to run
 - name: Create master config
