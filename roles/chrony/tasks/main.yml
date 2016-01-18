@@ -1,0 +1,30 @@
+---
+- name: remove ntp package
+  yum:
+    name: ntp
+    state: absent
+
+- name: ensure chrony package is installed
+  yum:
+    name: chrony
+    state: installed
+
+- name: Install /etc/chrony.conf
+  template:
+    src: chrony.conf.j2
+    dest: /etc/chrony.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - Restart chronyd
+
+- name: enabled timedatectl set-ntp yes
+  timedatectl:
+    ntp: True
+
+- name:
+  service:
+    name: chronyd
+    state: started
+    enabled: yes
