@@ -127,14 +127,13 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
                     masters_set = True
         host_props['node'] = True
 
-        #TODO: Reenable this option once container installs are out of tech preview
-        rpm_or_container = click.prompt('Will this host be RPM or Container based (rpm/container)?',
-                                        type=click.Choice(['rpm', 'container']),
-                                        default='rpm')
-        if rpm_or_container == 'container':
-            host_props['containerized'] = True
-        else:
-            host_props['containerized'] = False
+        host_props['containerized'] = False
+        if oo_cfg.settings['variant_version'] != '3.0':
+            rpm_or_container = click.prompt('Will this host be RPM or Container based (rpm/container)?',
+                                            type=click.Choice(['rpm', 'container']),
+                                            default='rpm')
+            if rpm_or_container == 'container':
+                host_props['containerized'] = True
 
         if existing_env:
             host_props['new_host'] = True
