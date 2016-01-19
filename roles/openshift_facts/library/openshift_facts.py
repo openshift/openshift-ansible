@@ -188,9 +188,6 @@ def normalize_gce_facts(metadata, facts):
     _, _, zone = metadata['instance']['zone'].rpartition('/')
     facts['zone'] = zone
 
-    # Default to no sdn for GCE deployments
-    facts['use_openshift_sdn'] = False
-
     # GCE currently only supports a single interface
     facts['network']['ip'] = facts['network']['interfaces'][0]['ips'][0]
     pub_ip = facts['network']['interfaces'][0]['public_ips'][0]
@@ -884,10 +881,6 @@ def apply_provider_facts(facts, provider_facts):
     if not provider_facts:
         return facts
 
-    use_openshift_sdn = provider_facts.get('use_openshift_sdn')
-    if isinstance(use_openshift_sdn, bool):
-        facts['common']['use_openshift_sdn'] = use_openshift_sdn
-
     common_vars = [('hostname', 'ip'), ('public_hostname', 'public_ip')]
     for h_var, ip_var in common_vars:
         ip_value = provider_facts['network'].get(ip_var)
@@ -1078,7 +1071,7 @@ class OpenShiftFacts(object):
         Raises:
             OpenShiftFactsUnsupportedRoleError:
     """
-    known_roles = ['common', 'master', 'node', 'master_sdn', 'node_sdn', 'etcd', 'nfs']
+    known_roles = ['common', 'master', 'node', 'etcd', 'nfs']
 
     def __init__(self, role, filename, local_facts, additive_facts_to_overwrite=False):
         self.changed = False

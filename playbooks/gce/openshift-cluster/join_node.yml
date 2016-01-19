@@ -48,6 +48,4 @@
     openshift_debug_level: 4
     openshift_deployment_type: "{{ deployment_type }}"
     openshift_hostname: "{{ ansible_default_ipv4.address }}"
-    openshift_use_openshift_sdn: true
     openshift_node_labels: "{{ lookup('oo_option', 'openshift_node_labels') }} "
-    os_sdn_network_plugin_name: "redhat/openshift-ovs-subnet"
