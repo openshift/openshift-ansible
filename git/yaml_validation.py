@@ -8,7 +8,6 @@ python yaml validator for a git commit
 import shutil
 import sys
 import os
-import glob
 import tempfile
 import subprocess
 import yaml
@@ -17,8 +16,8 @@ def get_changes(oldrev, newrev, tempdir):
     '''Get a list of git changes from oldrev to newrev'''
     proc = subprocess.Popen(['/usr/bin/git', 'diff', '--name-only', oldrev,
                              newrev, '--diff-filter=ACM'], stdout=subprocess.PIPE)
-    proc.wait()
-    files = proc.stdout.read().strip().split('\n')
+    stdout, _ = proc.communicate()
+    files = stdout.split('\n')
 
     # No file changes
     if not files:
@@ -26,9 +25,14 @@ def get_changes(oldrev, newrev, tempdir):
 
     cmd = '/usr/bin/git archive %s %s | /bin/tar x -C %s' % (newrev, " ".join(files), tempdir)
     proc = subprocess.Popen(cmd, shell=True)
-    proc.wait()
+    _, _ = proc.communicate()
 
-    return [fmod for fmod in glob.glob('%s/**/*' % tempdir) if not os.path.isdir(fmod)]
+    rfiles = []
+    for dirpath, _, fnames in os.walk(tempdir):
+        for fname in fnames:
+            rfiles.append(os.path.join(dirpath, fname))
+
+    return rfiles
 
 def main():
     '''
