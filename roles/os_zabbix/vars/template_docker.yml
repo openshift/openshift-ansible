@@ -72,10 +72,12 @@ g_template_docker:
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_docker_ping.asciidoc'
     priority: high
 
+  # Re-enable for OpenShift 3.1.1 (https://bugzilla.redhat.com/show_bug.cgi?id=1292971#c6)
   - name: 'docker.container.dns.resolution failed on {HOST.NAME}'
     expression: '{Template Docker:docker.container.dns.resolution.min(#3)}>0'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_docker_dns.asciidoc'
     priority: average
+    status: disabled
 
   - name: 'docker.container.existing.dns.resolution.failed on {HOST.NAME}'
     expression: '{Template Docker:docker.container.existing.dns.resolution.failed.min(#3)}>0'
