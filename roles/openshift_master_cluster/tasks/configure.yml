@@ -34,11 +34,10 @@
 - name: Disable stonith
   command: pcs property set stonith-enabled=false
 
-# TODO: handle case where api port is not 8443
 - name: Wait for the clustered master service to be available
   wait_for:
     host: "{{ openshift_master_cluster_vip }}"
-    port: 8443
+    port: "{{ openshift.master.api_port }}"
     state: started
     timeout: 180
     delay: 90
