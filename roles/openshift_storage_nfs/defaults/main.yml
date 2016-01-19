@@ -1,8 +1,22 @@
 ---
-exports_dir: /var/export
-registry_volume: regvol
-export_options: '*(rw,sync,all_squash)'
+openshift:
+  hosted:
+    registry:
+      storage:
+        nfs:
+          directory: "/exports"
+          options: "*(rw,root_squash)"
+        volume:
+          name: "registry"
 os_firewall_use_firewalld: False
 os_firewall_allow:
 - service: nfs
   port: "2049/tcp"
+- service: portmapper
+  port: "111/tcp"
+- service: mount lock daemon
+  port: "20048/tcp"
+- service: status
+  port: "50825/tcp"
+- service: frsrpc
+  port: "53248/tcp"
