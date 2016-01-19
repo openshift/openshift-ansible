@@ -15,11 +15,11 @@ Role Variables
 --------------
 
 From this role:
-| Name                          | Default value         |                                                  |
-|-------------------------------|-----------------------|--------------------------------------------------|
-| openshift_nfs_exports_dir     | /var/export           | Root export directory.                           |
-| openshift_nfs_registry_volume | regvol                | Registry volume within openshift_nfs_exports_dir |
-| openshift_nfs_export_options  | *(rw,sync,all_squash) | NFS options for configured exports.              |
+| Name                                            | Default value         |                                                             |
+|-------------------------------------------------|-----------------------|-------------------------------------------------------------|
+| openshift_hosted_registry_storage_nfs_directory | /exports              | Root export directory.                                      |
+| openshift_hosted_registry_storage_volume_name   | registry              | Registry volume within openshift_hosted_registry_volume_dir |
+| openshift_hosted_registry_storage_nfs_options   | *(rw,root_squash)     | NFS options for configured exports.                         |
 
 
 From openshift_common:
@@ -30,8 +30,6 @@ From openshift_common:
 
 Dependencies
 ------------
-
-
 
 Example Playbook
 ----------------
