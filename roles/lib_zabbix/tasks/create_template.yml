@@ -57,6 +57,7 @@
     expression: "{{ item.expression }}"
     priority: "{{ item.priority }}"
     url: "{{ item.url | default(None, True) }}"
+    status: "{{ item.status | default('', True) }}"
   with_items: template.ztriggers
   when: template.ztriggers is defined
 
