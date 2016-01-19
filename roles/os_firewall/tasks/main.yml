@@ -1,6 +1,6 @@
 ---
 - include: firewall/firewalld.yml
-  when: os_firewall_use_firewalld
+  when: os_firewall_enabled | bool and os_firewall_use_firewalld | bool
 
 - include: firewall/iptables.yml
-  when: not os_firewall_use_firewalld
+  when: os_firewall_enabled | bool and not os_firewall_use_firewalld | bool
