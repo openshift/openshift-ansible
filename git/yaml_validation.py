@@ -47,15 +47,15 @@ def main():
 
             print "+++++++ Received: %s" % file_mod
 
-            if not file_mod.endswith('.yml') or not file_mod.endswith('.yaml'):
+            if not file_mod.endswith('.yml') and not file_mod.endswith('.yaml'):
                 continue
 
             try:
-                yaml.load(file_mod)
+                yaml.load(open(file_mod))
                 results.append(True)
 
             except yaml.scanner.ScannerError as yerr:
-                print yerr.message
+                print yerr
                 results.append(False)
     finally:
         shutil.rmtree(tmpdir)
@@ -65,3 +65,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
