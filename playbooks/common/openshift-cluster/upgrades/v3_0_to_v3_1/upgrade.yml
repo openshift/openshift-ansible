@@ -248,7 +248,31 @@
       config_base: "{{ hostvars[inventory_hostname].openshift.common.config_base }}"
 
   - set_fact:
-      master_certs_missing: True
+      openshift_master_certs_no_etcd:
+      - admin.crt
+      - master.kubelet-client.crt
+      - "{{ 'master.proxy-client.crt' if openshift.common.version_greater_than_3_1_or_1_1 else omit }}"
+      - master.server.crt
+      - openshift-master.crt
+      - openshift-registry.crt
+      - openshift-router.crt
+      - etcd.server.crt
+      openshift_master_certs_etcd:
+      - master.etcd-client.crt
+
+  - set_fact:
+      openshift_master_certs: "{{ (openshift_master_certs_no_etcd | union(openshift_master_certs_etcd)) if (groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config) else openshift_master_certs_no_etcd }}"
+
+  - name: Check status of master certificates
+    stat:
+      path: "{{ openshift.common.config_base }}/master/{{ item }}"
+    with_items: openshift_master_certs
+    register: g_master_cert_stat_result
+
+  - set_fact:
+      master_certs_missing: "{{ False in (g_master_cert_stat_result.results
+                                | oo_collect(attribute='stat.exists')
+                                | list ) }}"
       master_cert_subdir: master-{{ openshift.common.hostname }}
       master_cert_config_dir: "{{ openshift.common.config_base }}/master"
 
@@ -262,8 +286,8 @@
                           | oo_flatten | unique }}"
     master_generated_certs_dir: "{{ openshift.common.config_base }}/generated-configs"
     masters_needing_certs: "{{ hostvars
-                               | oo_select_keys(groups.oo_masters_to_config)
-                               | difference([groups.oo_first_master.0]) }}"
+                               | oo_select_keys(groups['oo_masters_to_config'] | difference(groups['oo_first_master']))
+                               | oo_filter_list(filter_attr='master_certs_missing') }}"
     sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
     openshift_deployment_type: "{{ deployment_type }}"
   roles:
