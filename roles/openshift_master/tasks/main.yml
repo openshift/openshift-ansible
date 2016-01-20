@@ -51,6 +51,7 @@
       embedded_dns: "{{ openshift_master_embedded_dns | default(None) }}"
       dns_port: "{{ openshift_master_dns_port | default(None) }}"
       bind_addr: "{{ openshift_master_bind_addr | default(None) }}"
+      pod_eviction_timeout: "{{ openshift_master_pod_eviction_timeout | default(None) }}"
       portal_net: "{{ openshift_master_portal_net | default(None) }}"
       session_max_seconds: "{{ openshift_master_session_max_seconds | default(None) }}"
       session_name: "{{ openshift_master_session_name | default(None) }}"

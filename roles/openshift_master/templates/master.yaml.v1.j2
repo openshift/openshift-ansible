@@ -91,7 +91,7 @@ kubernetesMasterConfig:
   controllerArguments: {{ openshift.master.controller_args | default(None) | to_padded_yaml( level=2 ) }}
   masterCount: {{ openshift.master.master_count if openshift.master.cluster_method | default(None) == 'native' else 1 }}
   masterIP: {{ openshift.common.ip }}
-  podEvictionTimeout: ""
+  podEvictionTimeout: {{ openshift.master.pod_eviction_timeout | default("") }}
   proxyClientInfo:
     certFile: master.proxy-client.crt
     keyFile: master.proxy-client.key
