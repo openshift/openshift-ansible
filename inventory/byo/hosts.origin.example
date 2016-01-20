@@ -122,6 +122,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # default project node selector
 #osm_default_node_selector='region=primary'
 
+# Override the default pod eviction timeout
+#openshift_master_pod_eviction_timeout=5m
+
 # default storage plugin dependencies to install, by default the ceph and
 # glusterfs plugin dependencies will be installed, if available.
 #osn_storage_plugin_deps=['ceph','glusterfs']

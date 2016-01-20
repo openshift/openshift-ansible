@@ -47,6 +47,7 @@ ExecStart=/usr/bin/docker run --name {{ osohm_host_monitoring }}                
            -e ZAGG_SSL_VERIFY={{ osohm_zagg_verify_ssl }}                                    \
            -e OSO_CLUSTER_GROUP={{ cluster_group }}                                          \
            -e OSO_CLUSTER_ID={{ oo_clusterid }}                                              \
+           -e OSO_ENVIRONMENT={{ oo_environment }}                                           \
            -e OSO_HOST_TYPE={{ hostvars[inventory_hostname]['ec2_tag_host-type'] }}          \
            -e OSO_SUB_HOST_TYPE={{ hostvars[inventory_hostname]['ec2_tag_sub-host-type'] }}  \
            -v /etc/localtime:/etc/localtime                                                  \
