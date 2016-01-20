@@ -41,17 +41,10 @@ class Host(object):
 
         self.new_host = kwargs.get('new_host', None)
 
-        # Should this host run as an OpenShift master:
-        self.master = kwargs.get('master', False)
-
-        # Should this host run as an OpenShift node:
-        self.node = kwargs.get('node', False)
-
-        # Should this host run as an HAProxy:
-        self.master_lb = kwargs.get('master_lb', False)
-
         self.containerized = kwargs.get('containerized', False)
         self.roles = kwargs.get('roles', None)
+
+        self.install_type = kwargs.get('containerized', 'custom')
 
         if self.connect_to is None:
             raise OOConfigInvalidHostError(

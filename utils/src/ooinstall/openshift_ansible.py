@@ -18,9 +18,9 @@ def set_config(cfg):
 def generate_inventory(hosts):
     global CFG
 
-    masters = [host for host in hosts if host.master]
-    nodes = [host for host in hosts if host.node]
-    new_nodes = [host for host in hosts if host.node and host.new_host]
+    masters = [host for host in hosts if host.is_master()]
+    nodes = [host for host in hosts if host.is_node()]
+    new_nodes = [host for host in hosts if host.is_node() and host.new_host]
 
     proxy = determine_proxy_configuration(hosts)
     multiple_masters = len(masters) > 1
@@ -67,7 +67,7 @@ def generate_inventory(hosts):
         schedulable = None
 
         # If the node is also a master, we must explicitly set schedulablity:
-        if node.is_master:
+        if node.is_master():
             schedulable = node.is_schedulable_node(hosts)
         write_host(node, base_inventory, schedulable)
 
@@ -84,7 +84,7 @@ def generate_inventory(hosts):
     return base_inventory_path
 
 def determine_proxy_configuration(hosts):
-    proxy = next((host for host in hosts if host.is_master_lb), None)
+    proxy = next((host for host in hosts if host.is_master_lb()), None)
     if proxy:
         if proxy.hostname == None:
             proxy.hostname = proxy.connect_to
@@ -147,7 +147,7 @@ def write_host(host, inventory, schedulable=None):
     elif not schedulable:
         facts += ' openshift_schedulable=False'
 
-    if host.is_infra_node:
+    if host.is_infra_node():
         facts += ' region=Infra'
 
     installer_host = socket.gethostname()

@@ -11,54 +11,6 @@ class InstallType(object):
         self.storage = restrictions['storage']
         self.loadbalancer = restrictions['loadbalancer']
 
-    def meets_requirements(self, install_type, oo_cfg):
-        """
-        Check if the given oo_cfg meets the named install_type.
-        Used for checking config files passed through unattended
-        installations.
-        """
-        hosts = oo_cfg.hosts
-        try:
-            install = SUPPORTED_INSTALL_TYPES.get(install_type)
-        except KeyError:
-            # Non-supported install type
-            return
-
-        num_masters = 0
-        num_nodes = 0
-        num_storage = 0
-        num_lb = 0
-        meets_req = True
-
-        for host in hosts:
-            if host.master:
-                num_masters += 1
-            if host.node:
-                num_nodes += 1
-            if host.storage:
-                num_storage += 1
-            if host.master_lb:
-                num_lb += 1
-
-        if num_masters < install.masters.lower or \
-           num_masters > install.masters.upper:
-            meets_req = False
-
-        if num_nodes < install.nodes.lower or \
-           num_nodes > install.nodes.upper:
-            meets_req = False
-
-        if num_storage < install.storage.lower or \
-           num_storage > install.storage.upper:
-            meets_req = False
-
-        if num_lb < install.loadbalancer.lower or \
-           num_lb > install.loadbalancer.upper:
-            meets_req = False
-
-        return meets_req
-
-
 class HostRange(object):
     """
     An upper and lower limit for the number of a particular host type
@@ -72,12 +24,64 @@ class HostRange(object):
     def in_range(self, number):
         return number >= self.lower and number <= self.upper
 
+def maximum_masters(install_type, num_masters):
+    """
+    Check if the given list of hosts has enough masters for the named install_type.
+    Used for checking config files passed through unattended
+    installations.
+    """
+    try:
+        install = SUPPORTED_INSTALL_TYPES.get(install_type)
+    except KeyError:
+        # Non-supported install type
+        return False
+
+    return num_masters <= install.masters.upper
+
+
+
+def meets_requirements(install_type, hosts):
+    """
+    Check if the given list of hosts meets the named install_type.
+    Used for checking config files passed through unattended
+    installations.
+    """
+    try:
+        install = SUPPORTED_INSTALL_TYPES.get(install_type)
+    except KeyError:
+        # Non-supported install type
+        return
+
+    num_masters = 0
+    num_nodes = 0
+    num_storage = 0
+    num_lb = 0
+    meets_req = True
+
+    for host in hosts:
+        if host.is_master():
+            num_masters += 1
+        if host.is_node():
+            num_nodes += 1
+        if host.is_storage():
+            num_storage += 1
+        if host.is_master_lb():
+            num_lb += 1
+
+    if not install.masters.in_range(num_masters) or \
+       not install.nodes.in_range(num_nodes) or \
+       not install.storage.in_range(num_storage) or \
+       not install.loadbalancer.in_range(num_lb):
+        meets_req = False
+
+    return meets_req
+
 
 SUPPORTED_INSTALL_TYPES = {
     'all_in_one': InstallType('all_in_one',
                               {'masters':      HostRange(1, 1),
                                'nodes':        HostRange(1, 1),
-                               'storage':      HostRange(1, 1),
+                               'storage':      HostRange(0, 0),
                                'loadbalancer': HostRange(0, 0)}
                              ),
     'min_ha':     InstallType('min_ha',

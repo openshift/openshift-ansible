@@ -9,6 +9,8 @@ import sys
 from ooinstall import openshift_ansible
 from ooinstall import OOConfig
 from ooinstall.install_type import SUPPORTED_INSTALL_TYPES
+from ooinstall.install_type import meets_requirements
+from ooinstall.install_type import maximum_masters
 from ooinstall.oo_config import OOConfigInvalidHostError
 from ooinstall.oo_config import Host
 from ooinstall.variants import find_variant, get_variant_version_combos
@@ -134,7 +136,8 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
                 host_props['roles'].append('master')
                 num_masters += 1
 
-                if oo_cfg.settings['variant_version'] == '3.0':
+                if oo_cfg.settings['variant_version'] == '3.0' or \
+                   maximum_masters(oo_cfg.settings['install_type'], num_masters):
                     masters_set = True
         host_props['roles'].append('node')
 
@@ -161,8 +164,8 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
         # If we have one master, this is enough for an all-in-one deployment,
         # thus we can start asking if you wish to proceed. Otherwise we assume
         # you must.
-        if masters_set or num_masters != 2:
-            more_hosts = click.confirm('Do you want to add additional hosts?')
+        if masters_set or meets_requirements(oo_cfg.settings['install_type'], hosts):
+            more_hosts = click.confirm('Install requirements met. Do you want to add additional hosts?')
 
     if num_masters >= 3:
         collect_master_lb(hosts)
@@ -184,9 +187,9 @@ def print_installation_summary(hosts, version=None):
     for host in hosts:
         print_host_summary(hosts, host)
 
-    masters = [host for host in hosts if host.is_master]
-    nodes = [host for host in hosts if host.is_node]
-    dedicated_nodes = [host for host in hosts if host.is_node and not host.is_master]
+    masters = [host for host in hosts if host.is_master()]
+    nodes = [host for host in hosts if host.is_node()]
+    dedicated_nodes = [host for host in hosts if host.is_node() and not host.is_master()]
     click.echo('')
     click.echo('Total OpenShift Masters: %s' % len(masters))
     click.echo('Total OpenShift Nodes: %s' % len(nodes))
@@ -225,21 +228,21 @@ deployment."""
 
 def print_host_summary(all_hosts, host):
     click.echo("- %s" % host.connect_to)
-    if host.is_master:
+    if host.is_master():
         click.echo("  - OpenShift Master")
-    if host.is_node:
+    if host.is_node():
         if host.is_dedicated_node():
             click.echo("  - OpenShift Node (Dedicated)")
         elif host.is_schedulable_node(all_hosts):
             click.echo("  - OpenShift Node")
         else:
             click.echo("  - OpenShift Node (Unscheduled)")
-    if host.is_master_lb:
+    if host.is_master_lb():
         if host.preconfigured:
             click.echo("  - Load Balancer (Preconfigured)")
         else:
             click.echo("  - Load Balancer (HAProxy)")
-    if host.is_master:
+    if host.is_master():
         if host.is_etcd_member(all_hosts):
             click.echo("  - Etcd Member")
         else:
@@ -276,7 +279,7 @@ hostname.
 
         # Make sure this host wasn't already specified:
         for host in hosts:
-            if host.connect_to == hostname and (host.is_master or host.is_node):
+            if host.connect_to == hostname and (host.is_master() or host.is_node()):
                 raise click.BadParameter('Cannot re-use "%s" as a load balancer, '
                                          'please specify a separate host' % hostname)
         return hostname
@@ -363,14 +366,14 @@ Edit %s with the desired values and run `atomic-openshift-installer --unattended
 
 def check_hosts_config(oo_cfg, unattended):
     click.clear()
-    restrictions = SUPPORTED_INSTALL_TYPES.get(oo_cfg.install_type, None)
+    restrictions = SUPPORTED_INSTALL_TYPES.get(oo_cfg.settings['install_type'], None)
 
     if restrictions is None:
         click.echo("Unsupported install type specified. " \
                    "Choose from: {}".format(SUPPORTED_INSTALL_TYPES.keys()))
         sys.exit(1)
 
-    masters = [host for host in oo_cfg.hosts if host.is_master]
+    masters = [host for host in oo_cfg.hosts if host.is_master()]
 
     if not restrictions.masters.in_range(len(masters)):
         click.echo("Masters restriction not met, specify between {} and {}" \
@@ -378,7 +381,7 @@ def check_hosts_config(oo_cfg, unattended):
         sys.exit(1)
 
     if len(masters) > 1:
-        master_lb = [host for host in oo_cfg.hosts if host.is_master_lb]
+        master_lb = [host for host in oo_cfg.hosts if host.is_master_lb()]
         if not restrictions.loadbalancer.in_range(len(master_lb)):
             message = """
 ERROR: Incorrect specication of master load balancer in config. You must
@@ -392,12 +395,12 @@ https://docs.openshift.org/latest/install_config/install/advanced_install.html#m
             click.echo('ERROR: More than one Master load balancer specified. Only one is allowed.')
             sys.exit(1)
         else:
-            if master_lb[0].is_master or master_lb[0].is_node:
+            if master_lb[0].is_master() or master_lb[0].is_node():
                 click.echo('ERROR: The Master load balancer is configured as a master or node. Please correct this.')
                 sys.exit(1)
 
 
-    dedicated_nodes = [host for host in oo_cfg.hosts if host.is_node and not host.is_master]
+    dedicated_nodes = [host for host in oo_cfg.hosts if host.is_node() and not host.is_master()]
     if len(dedicated_nodes) == 0:
         message = """
 WARNING: No dedicated Nodes specified. By default, colocated Masters have
@@ -579,11 +582,11 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force, verbose):
 
         # present a message listing already installed hosts and remove hosts if needed
         for host in installed_hosts:
-            if host.is_master:
+            if host.is_master():
                 click.echo("{} is already an OpenShift Master".format(host))
                 # Masters stay in the list, we need to run against them when adding
                 # new nodes.
-            elif host.is_node:
+            elif host.is_node():
                 click.echo("{} is already an OpenShift Node".format(host))
                 # force is only used for reinstalls so we don't want to remove
                 # anything.
