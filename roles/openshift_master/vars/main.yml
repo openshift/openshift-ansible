@@ -1,10 +1,15 @@
 ---
 openshift_master_config_dir: "{{ openshift.common.config_base }}/master"
 openshift_master_config_file: "{{ openshift_master_config_dir }}/master-config.yaml"
+openshift_master_loopback_config: "{{ openshift_master_config_dir }}/openshift-master.kubeconfig"
+loopback_context_string: "current-context: {{ openshift.master.loopback_context_name }}"
 openshift_master_scheduler_conf: "{{ openshift_master_config_dir }}/scheduler.json"
 openshift_master_session_secrets_file: "{{ openshift_master_config_dir }}/session-secrets.yaml"
 openshift_master_policy: "{{ openshift_master_config_dir }}/policy.json"
 openshift_version: "{{ openshift_pkg_version | default('') }}"
+
+ha_svc_template_path: "{{ 'docker-cluster' if openshift.common.is_containerized | bool else 'native-cluster' }}"
+ha_svc_svc_dir: "{{ '/etc/systemd/system' if openshift.common.is_containerized | bool else '/usr/lib/systemd/system' }}"
 
 openshift_master_valid_grant_methods:
 - auto

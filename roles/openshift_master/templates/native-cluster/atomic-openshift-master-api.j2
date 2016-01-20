@@ -1,0 +1,9 @@
+OPTIONS=--loglevel={{ openshift.master.debug_level }} --listen={{ 'https' if openshift.master.api_use_ssl else 'http' }}://{{ openshift.master.bind_addr }}:{{ openshift.master.api_port }} --master={{ openshift.master.loopback_api_url }}
+CONFIG_FILE={{ openshift_master_config_file }}
+
+# Proxy configuration
+# Origin uses standard HTTP_PROXY environment variables. Be sure to set
+# NO_PROXY for your master
+#NO_PROXY=master.example.com
+#HTTP_PROXY=http://USER:PASSWORD@IPADDR:PORT
+#HTTPS_PROXY=https://USER:PASSWORD@IPADDR:PORT

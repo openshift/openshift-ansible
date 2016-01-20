@@ -6,7 +6,9 @@ os_firewall_allow:
 - service: etcd embedded
   port: 4001/tcp
 - service: api server https
-  port: 8443/tcp
+  port: "{{ openshift.master.api_port }}/tcp"
+- service: api controllers https
+  port: "{{ openshift.master.controllers_port }}/tcp"
 - service: dns tcp
   port: 53/tcp
 - service: dns udp
@@ -24,7 +26,5 @@ os_firewall_allow:
 os_firewall_deny:
 - service: api server http
   port: 8080/tcp
-- service: former web console port
-  port: 8444/tcp
 - service: former etcd peer port
   port: 7001/tcp

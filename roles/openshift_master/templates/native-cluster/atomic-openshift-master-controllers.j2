@@ -1,5 +1,5 @@
-OPTIONS=
-CONFIG_FILE={{ openshift_master_config_dir }}/master-config.yaml
+OPTIONS=--loglevel={{ openshift.master.debug_level }} --listen={{ 'https' if openshift.master.api_use_ssl else 'http' }}://{{ openshift.master.bind_addr }}:{{ openshift.master.controllers_port }}
+CONFIG_FILE={{ openshift_master_config_file }}
 
 # Proxy configuration
 # Origin uses standard HTTP_PROXY environment variables. Be sure to set

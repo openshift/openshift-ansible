@@ -51,6 +51,7 @@
       embedded_dns: "{{ openshift_master_embedded_dns | default(None) }}"
       dns_port: "{{ openshift_master_dns_port | default(None) }}"
       bind_addr: "{{ openshift_master_bind_addr | default(None) }}"
+      pod_eviction_timeout: "{{ openshift_master_pod_eviction_timeout | default(None) }}"
       portal_net: "{{ openshift_master_portal_net | default(None) }}"
       session_max_seconds: "{{ openshift_master_session_max_seconds | default(None) }}"
       session_name: "{{ openshift_master_session_name | default(None) }}"
@@ -94,12 +95,12 @@
 - name: Install Master docker service file
   template:
     dest: "/etc/systemd/system/{{ openshift.common.service_type }}-master.service"
-    src: master.docker.service.j2
+    src: docker/master.docker.service.j2
   register: install_result
   when: openshift.common.is_containerized | bool and not openshift_master_ha | bool
-  
+
 - name: Create openshift.common.data_dir
-  file: 
+  file:
     path: "{{ openshift.common.data_dir }}"
     state: directory
     mode: 0755
@@ -174,31 +175,42 @@
   when: openshift.common.is_containerized | bool
 
 # workaround for missing systemd unit files for controllers/api
-- name: Create the api service file
+- name: Create the systemd unit files
   template:
-    src: atomic-openshift-master-api{{ ha_suffix }}.service.j2
-    dest: "{{ ha_svcdir }}/{{ openshift.common.service_type }}-master-api.service"
+    src: "{{ ha_svc_template_path }}/atomic-openshift-master-{{ item }}.service.j2"
+    dest: "{{ ha_svcdir }}/{{ openshift.common.service_type }}-master-{{ item }}.service"
   when: openshift_master_ha | bool and openshift_master_cluster_method == "native"
-- name: Create the controllers service file
-  template:
-    src: atomic-openshift-master-controllers{{ ha_suffix }}.service.j2
-    dest: "{{ ha_svcdir }}/{{ openshift.common.service_type }}-master-controllers.service"
-  when: openshift_master_ha | bool and openshift_master_cluster_method == "native"
-- name: Create the api env file
-  template:
-    src: atomic-openshift-master-api.j2
-    dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-api
-    force: no
-  when: openshift_master_ha | bool and openshift_master_cluster_method == "native"
-- name: Create the controllers env file
-  template:
-    src: atomic-openshift-master-controllers.j2
-    dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-controllers
-    force: no
-  when: openshift_master_ha | bool and openshift_master_cluster_method == "native"
+  with_items:
+  - api
+  - controllers
+  register: create_unit_files
+
 - command: systemctl daemon-reload
-  when: openshift_master_ha | bool and openshift_master_cluster_method == "native"
+  when: create_unit_files | changed
 # end workaround for missing systemd unit files
+
+- name: Create the master api service env file
+  template:
+    src: "{{ ha_svc_template_path }}/atomic-openshift-master-api.j2"
+    dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-api
+  when: openshift_master_ha | bool and openshift_master_cluster_method == "native"
+  notify:
+  - restart master api
+
+- name: Create the master controllers service env file
+  template:
+    src: "{{ ha_svc_template_path }}/atomic-openshift-master-controllers.j2"
+    dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-controllers
+  when: openshift_master_ha | bool and openshift_master_cluster_method == "native"
+  notify:
+  - restart master controllers
+
+- name: Create the master service env file
+  template:
+    src: "atomic-openshift-master.j2"
+    dest: /etc/sysconfig/{{ openshift.common.service_type }}-master
+  notify:
+  - restart master
 
 - name: Create session secrets file
   template:
@@ -223,47 +235,36 @@
   - restart master api
   - restart master controllers
 
-- name: Configure master settings
-  lineinfile:
-    dest: /etc/sysconfig/{{ openshift.common.service_type }}-master
-    regexp: "{{ item.regex }}"
-    line: "{{ item.line }}"
-    create: yes
-  with_items:
-    - regex: '^OPTIONS='
-      line: "OPTIONS=--loglevel={{ openshift.master.debug_level }}"
-    - regex: '^CONFIG_FILE='
-      line: "CONFIG_FILE={{ openshift_master_config_file }}"
-  notify:
-  - restart master
+- name: Test local loopback context
+  command: >
+    {{ openshift.common.client_binary }} config view
+    --config={{ openshift_master_loopback_config }}
+  changed_when: false
+  register: loopback_config
 
-- name: Configure master api settings
-  lineinfile:
-    dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-api
-    regexp: "{{ item.regex }}"
-    line: "{{ item.line }}"
-  with_items:
-    - regex: '^OPTIONS='
-      line: "OPTIONS=--loglevel={{ openshift.master.debug_level }} --listen=https://0.0.0.0:8443 --master=https://{{ openshift.common.ip }}:8443"
-    - regex: '^CONFIG_FILE='
-      line: "CONFIG_FILE={{ openshift_master_config_file }}"
-  when: openshift_master_ha | bool and openshift_master_cluster_method == "native"
-  notify:
-  - restart master api
+- command: >
+    {{ openshift.common.client_binary }} config set-cluster
+    --certificate-authority={{ openshift_master_config_dir }}/ca.crt
+    --embed-certs=true --server={{ openshift.master.loopback_api_url }}
+    {{ openshift.master.loopback_cluster_name }}
+    --config={{ openshift_master_loopback_config }}
+  when: loopback_context_string not in loopback_config.stdout
+  register: set_loopback_cluster
 
-- name: Configure master controller settings
-  lineinfile:
-    dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-controllers
-    regexp: "{{ item.regex }}"
-    line: "{{ item.line }}"
-  with_items:
-    - regex: '^OPTIONS='
-      line: "OPTIONS=--loglevel={{ openshift.master.debug_level }} --listen=https://0.0.0.0:8444"
-    - regex: '^CONFIG_FILE='
-      line: "CONFIG_FILE={{ openshift_master_config_file }}"
-  when: openshift_master_ha | bool and openshift_master_cluster_method == "native"
-  notify:
-  - restart master controllers
+- command: >
+    {{ openshift.common.client_binary }} config set-context
+    --cluster={{ openshift.master.loopback_cluster_name }}
+    --namespace=default --user={{ openshift.master.loopback_user }}
+    {{ openshift.master.loopback_context_name }}
+    --config={{ openshift_master_loopback_config }}
+  when: set_loopback_cluster | changed
+  register: set_loopback_context
+
+- command: >
+    {{ openshift.common.client_binary }} config use-context {{ openshift.master.loopback_context_name }}
+    --config={{ openshift_master_loopback_config }}
+  when: set_loopback_context | changed
+  register: set_current_context
 
 - name: Start and enable master
   service: name={{ openshift.common.service_type }}-master enabled=yes state=started
