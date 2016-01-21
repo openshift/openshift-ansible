@@ -47,7 +47,7 @@ def main():
 
             print "+++++++ Received: %s" % file_mod
 
-            if not file_mod.endswith('.yml') and not file_mod.endswith('.yaml'):
+            if not file_mod.endswith('.yml') and not file_mod.endswith('.yaml') and not os.path.islink(file_mod):
                 continue
 
             try:
