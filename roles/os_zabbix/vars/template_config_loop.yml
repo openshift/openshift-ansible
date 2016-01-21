@@ -1,0 +1,14 @@
+---
+g_template_config_loop:
+  name: Template Config Loop
+  zitems:
+  - key: config_loop.run.exit_code
+    applications:
+    - Config Loop
+    value_type: int
+
+  ztriggers:
+  - name: 'config_loop.run.exit_code not zero on {HOST.NAME}'
+    expression: '{Template Config Loop:config_loop.run.exit_code.min(#2)}>0'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_config_loop.asciidoc'
+    priority: average
