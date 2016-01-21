@@ -85,6 +85,7 @@
     etcd_generated_certs_dir: /etc/etcd/generated_certs
     etcd_needing_client_certs: "{{ hostvars
                                    | oo_select_keys(groups['oo_masters_to_config'])
+                                   | default([])
                                    | oo_filter_list(filter_attr='etcd_client_certs_missing') }}"
     sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
   roles:
