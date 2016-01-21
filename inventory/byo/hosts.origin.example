@@ -31,6 +31,26 @@ deployment_type=origin
 # Enable cluster metrics
 #use_cluster_metrics=true
 
+# Configure logoutURL in the master config for console customization
+# See: https://docs.openshift.org/latest/install_config/web_console_customization.html#changing-the-logout-url
+#openshift_master_logout_url=http://example.com
+
+# Configure extensionScripts in the master config for console customization
+# See: https://docs.openshift.org/latest/install_config/web_console_customization.html#loading-custom-scripts-and-stylesheets
+#openshift_master_extension_scripts=['/path/to/script1.js','/path/to/script2.js']
+
+# Configure extensionStylesheets in the master config for console customization
+# See: https://docs.openshift.org/latest/install_config/web_console_customization.html#loading-custom-scripts-and-stylesheets
+#openshift_master_extension_stylesheets=['/path/to/stylesheet1.css','/path/to/stylesheet2.css']
+
+# Configure extensions in the master config for console customization
+# See: https://docs.openshift.org/latest/install_config/web_console_customization.html#serving-static-files
+#openshift_master_extensions=[{'name': 'images', 'sourceDirectory': '/path/to/my_images'}]
+
+# Configure extensions in the master config for console customization
+# See: https://docs.openshift.org/latest/install_config/web_console_customization.html#serving-static-files
+#openshift_master_oauth_template=/path/to/login-template.html
+
 # Configure metricsPublicURL in the master config for cluster metrics
 # See: https://docs.openshift.org/latest/install_config/cluster_metrics.html
 #openshift_master_metrics_public_url=https://hawkular-metrics.example.com/hawkular/metrics
