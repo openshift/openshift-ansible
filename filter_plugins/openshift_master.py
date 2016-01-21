@@ -478,8 +478,8 @@ class FilterModule(object):
                            'master3.example.com']
                returns True
         '''
-        if not issubclass(type(data), str):
-            raise errors.AnsibleFilterError("|failed expects data is a string")
+        if not issubclass(type(data), basestring):
+            raise errors.AnsibleFilterError("|failed expects data is a string or unicode")
         if not issubclass(type(masters), list):
             raise errors.AnsibleFilterError("|failed expects masters is a list")
         valid = True
