@@ -148,6 +148,9 @@ class OOConfig(object):
                 if 'Description' in self.settings:
                     self._upgrade_legacy_config()
 
+                if self.settings.get('version', None) == 'v1':
+                    self._upgrade_v1_config()
+
                 # Parse the hosts into DTO objects:
                 if 'hosts' in self.settings:
                     for host in self.settings['hosts']:
@@ -186,6 +189,19 @@ class OOConfig(object):
         # A legacy config implies openshift-enterprise 3.0:
         self.settings['variant'] = 'openshift-enterprise'
         self.settings['variant_version'] = '3.0'
+
+    def _upgrade_v1_config(self):
+        for host in self.settings['hosts']:
+            host['roles'] = []
+            print host.keys()
+            if host.get('master', False):
+                host['roles'].append('master')
+            if host.get('node', False):
+                host['roles'].append('node')
+            if host.get('master_lb', False):
+                host['roles'].append('master_lb')
+
+        self.settings['version'] = 'v2'
 
     def _set_defaults(self):
 
