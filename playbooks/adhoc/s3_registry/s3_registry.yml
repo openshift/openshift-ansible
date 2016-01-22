@@ -1,7 +1,7 @@
 ---
 # This playbook creates an S3 bucket named after your cluster and configures the docker-registry service to use the bucket as its backend storage.
 # Usage:
-#  ansible-playbook s3_registry.yml -e clusterid="mycluster"
+#  ansible-playbook s3_registry.yml -e clusterid="mycluster" -e aws_bucket="clusterid-docker" -e aws_region="us-east-1"
 #
 # The AWS access/secret keys should be the keys of a separate user (not your main user), containing only the necessary S3 access role.
 # The 'clusterid' is the short name of your cluster.
@@ -13,6 +13,8 @@
   vars:
     aws_access_key: "{{ lookup('env', 'S3_ACCESS_KEY_ID') }}"
     aws_secret_key: "{{ lookup('env', 'S3_SECRET_ACCESS_KEY') }}"
+    aws_bucket_name: "{{ aws_bucket | default(clusterid ~ '-docker') }}"
+    aws_bucket_region: "{{ aws_region | lookup('env', 'S3_REGION') | default('us-east-1') }}"
 
   tasks:
 
@@ -29,7 +31,7 @@
 
   - name: Create S3 bucket
     local_action:
-      module: s3 bucket="{{ clusterid }}-docker" mode=create
+      module: s3 bucket="{{ aws_bucket_name }}" mode=create
 
   - name: Set up registry environment variable
     command: oc env dc/docker-registry REGISTRY_CONFIGURATION_PATH=/etc/registryconfig/config.yml
