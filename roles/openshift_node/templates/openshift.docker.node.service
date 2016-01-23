@@ -2,7 +2,7 @@
 After=docker.service
 After={{ openshift.common.service_type }}-master.service
 After=openvswitch.service
-{% if openshift.common.use_openshift_sdn %}
+{% if openshift.common.use_openshift_sdn | bool %}
 Requires=openvswitch.service
 {% endif %}
 Requires=docker.service

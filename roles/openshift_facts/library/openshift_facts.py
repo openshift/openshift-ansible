@@ -304,57 +304,6 @@ def normalize_provider_facts(provider, metadata):
         facts = normalize_openstack_facts(metadata, facts)
     return facts
 
-def set_fluentd_facts_if_unset(facts):
-    """ Set fluentd facts if not already present in facts dict
-            dict: the facts dict updated with the generated fluentd facts if
-            missing
-        Args:
-            facts (dict): existing facts
-        Returns:
-            dict: the facts dict updated with the generated fluentd
-            facts if they were not already present
-
-    """
-    if 'common' in facts:
-        if 'use_fluentd' not in facts['common']:
-            use_fluentd = False
-            facts['common']['use_fluentd'] = use_fluentd
-    return facts
-
-def set_flannel_facts_if_unset(facts):
-    """ Set flannel facts if not already present in facts dict
-            dict: the facts dict updated with the flannel facts if
-            missing
-        Args:
-            facts (dict): existing facts
-        Returns:
-            dict: the facts dict updated with the flannel
-            facts if they were not already present
-
-    """
-    if 'common' in facts:
-        if 'use_flannel' not in facts['common']:
-            use_flannel = False
-            facts['common']['use_flannel'] = use_flannel
-    return facts
-
-def set_node_schedulability(facts):
-    """ Set schedulable facts if not already present in facts dict
-        Args:
-            facts (dict): existing facts
-        Returns:
-            dict: the facts dict updated with the generated schedulable
-            facts if they were not already present
-
-    """
-    if 'node' in facts:
-        if 'schedulable' not in facts['node']:
-            if 'master' in facts:
-                facts['node']['schedulable'] = False
-            else:
-                facts['node']['schedulable'] = True
-    return facts
-
 def set_master_selectors(facts):
     """ Set selectors facts if not already present in facts dict
         Args:
@@ -378,49 +327,6 @@ def set_master_selectors(facts):
                 facts['master']['registry_selector'] = selector
     return facts
 
-def set_metrics_facts_if_unset(facts):
-    """ Set cluster metrics facts if not already present in facts dict
-            dict: the facts dict updated with the generated cluster metrics facts if
-            missing
-        Args:
-            facts (dict): existing facts
-        Returns:
-            dict: the facts dict updated with the generated cluster metrics
-            facts if they were not already present
-
-    """
-    if 'common' in facts:
-        if 'use_cluster_metrics' not in facts['common']:
-            use_cluster_metrics = False
-            facts['common']['use_cluster_metrics'] = use_cluster_metrics
-    return facts
-
-def set_project_cfg_facts_if_unset(facts):
-    """ Set Project Configuration facts if not already present in facts dict
-            dict:
-        Args:
-            facts (dict): existing facts
-        Returns:
-            dict: the facts dict updated with the generated Project Configuration
-            facts if they were not already present
-
-    """
-
-    config = {
-        'default_node_selector': '',
-        'project_request_message': '',
-        'project_request_template': '',
-        'mcs_allocator_range': 's0:/2',
-        'mcs_labels_per_project': 5,
-        'uid_allocator_range': '1000000000-1999999999/10000'
-    }
-
-    if 'master' in facts:
-        for key, value in config.items():
-            if key not in facts['master']:
-                facts['master'][key] = value
-
-    return facts
 
 def set_identity_providers_if_unset(facts):
     """ Set identity_providers fact if not already present in facts dict
@@ -616,6 +522,37 @@ def set_etcd_facts_if_unset(facts):
 
     return facts
 
+def set_docker_facts_if_unset(facts):
+    """ Set Facts that vary based on deployment_type. This currently
+        includes common.service_type, common.config_base, master.registry_url,
+        node.registry_url, node.storage_plugin_deps
+
+        Args:
+            facts (dict): existing facts
+        Returns:
+            dict: the facts dict updated with the generated deployment_type
+            facts
+    """
+    if 'docker' in facts:
+        # remove duplicate and empty strings from registry lists
+        for cat in  ['additional', 'blocked', 'insecure']:
+            key = 'docker_{0}_registries'.format(cat)
+            if key in facts['docker']:
+                facts['docker'][key] = list(set(facts['docker'][key]) - set(['', ""]))
+                if len(facts['docker'][key]) == 0:
+                    del facts['docker'][key]
+
+        if 'common' in facts and 'deployment_type' in facts['common']:
+            deployment_type = facts['common']['deployment_type']
+            if deployment_type in ['enterprise', 'atomic-enterprise', 'openshift-enterprise']:
+                addtl_regs = facts['docker'].get('additional_registries', [])
+                ent_reg = 'registry.access.redhat.com'
+                if ent_reg not in addtl_regs:
+                    facts['docker']['additional_registries'] = addtl_regs + [ent_reg]
+
+    return facts
+
+
 def set_deployment_facts_if_unset(facts):
     """ Set Facts that vary based on deployment_type. This currently
         includes common.service_type, common.config_base, master.registry_url,
@@ -655,19 +592,6 @@ def set_deployment_facts_if_unset(facts):
             if not os.path.exists(data_dir) and os.path.exists('/var/lib/openshift'):
                 data_dir = '/var/lib/openshift'
             facts['common']['data_dir'] = data_dir
-
-        # remove duplicate and empty strings from registry lists
-        for cat in  ['additional', 'blocked', 'insecure']:
-            key = 'docker_{0}_registries'.format(cat)
-            if key in facts['common']:
-                facts['common'][key] = list(set(facts['common'][key]) - set(['']))
-
-
-        if deployment_type in ['enterprise', 'atomic-enterprise', 'openshift-enterprise']:
-            addtl_regs = facts['common'].get('docker_additional_registries', [])
-            ent_reg = 'registry.access.redhat.com'
-            if ent_reg not in addtl_regs:
-                facts['common']['docker_additional_registries'] = addtl_regs + [ent_reg]
 
     for role in ('master', 'node'):
         if role in facts:
@@ -758,21 +682,6 @@ def set_sdn_facts_if_unset(facts, system_facts):
             dict: the facts dict updated with the generated sdn facts if they
                   were not already present
     """
-    if 'common' in facts:
-        use_sdn = facts['common']['use_openshift_sdn']
-        if not (use_sdn == '' or isinstance(use_sdn, bool)):
-            use_sdn = bool(strtobool(str(use_sdn)))
-            facts['common']['use_openshift_sdn'] = use_sdn
-        if 'sdn_network_plugin_name' not in facts['common']:
-            plugin = 'redhat/openshift-ovs-subnet' if use_sdn else ''
-            facts['common']['sdn_network_plugin_name'] = plugin
-
-    if 'master' in facts:
-        if 'sdn_cluster_network_cidr' not in facts['master']:
-            facts['master']['sdn_cluster_network_cidr'] = '10.1.0.0/16'
-        if 'sdn_host_subnet_length' not in facts['master']:
-            facts['master']['sdn_host_subnet_length'] = '8'
-
     if 'node' in facts and 'sdn_mtu' not in facts['node']:
         node_ip = facts['common']['ip']
 
@@ -787,6 +696,7 @@ def set_sdn_facts_if_unset(facts, system_facts):
                     facts['node']['sdn_mtu'] = str(mtu - 50)
 
     return facts
+
 
 def format_url(use_ssl, hostname, port, path=''):
     """ Format url based on ssl flag, hostname, port and path
@@ -911,47 +821,6 @@ def apply_provider_facts(facts, provider_facts):
     facts['provider'] = provider_facts
     return facts
 
-
-def merge_facts(orig, new, additive_facts_to_overwrite):
-    """ Recursively merge facts dicts
-
-        Args:
-            orig (dict): existing facts
-            new (dict): facts to update
-
-            additive_facts_to_overwrite (list): additive facts to overwrite in jinja
-                                                '.' notation ex: ['master.named_certificates']
-
-        Returns:
-            dict: the merged facts
-    """
-    additive_facts = ['named_certificates']
-    facts = dict()
-    for key, value in orig.iteritems():
-        if key in new:
-            if isinstance(value, dict) and isinstance(new[key], dict):
-                relevant_additive_facts = []
-                # Keep additive_facts_to_overwrite if key matches
-                for item in additive_facts_to_overwrite:
-                    if '.' in item and item.startswith(key + '.'):
-                        relevant_additive_facts.append(item)
-                facts[key] = merge_facts(value, new[key], relevant_additive_facts)
-            elif key in additive_facts and key not in [x.split('.')[-1] for x in additive_facts_to_overwrite]:
-                # Fact is additive so we'll combine orig and new.
-                if isinstance(value, list) and isinstance(new[key], list):
-                    new_fact = []
-                    for item in copy.deepcopy(value) + copy.copy(new[key]):
-                        if item not in new_fact:
-                            new_fact.append(item)
-                    facts[key] = new_fact
-            else:
-                facts[key] = copy.copy(new[key])
-        else:
-            facts[key] = copy.deepcopy(value)
-    new_keys = set(new.keys()) - set(orig.keys())
-    for key in new_keys:
-        facts[key] = copy.deepcopy(new[key])
-    return facts
 
 
 def save_local_facts(filename, facts):
@@ -1091,7 +960,7 @@ class OpenShiftFacts(object):
         Raises:
             OpenShiftFactsUnsupportedRoleError:
     """
-    known_roles = ['common', 'master', 'node', 'etcd', 'nfs']
+    known_roles = ['common', 'master', 'node', 'etcd', 'nfs', 'docker']
 
     def __init__(self, role, filename, local_facts, additive_facts_to_overwrite=False):
         self.changed = False
@@ -1102,44 +971,104 @@ class OpenShiftFacts(object):
             )
         self.role = role
         self.system_facts = ansible_facts(module)
-        self.facts = self.generate_facts(local_facts, additive_facts_to_overwrite)
+        self.additive_facts_to_overwrite = additive_facts_to_overwrite
+        if local_facts is None:
+            provided_facts = dict()
+        else:
+            provided_facts = {self.role: local_facts}
+            provided_facts = self.clean_empty_values(provided_facts)
+            provided_facts = self.convert_types(provided_facts)
 
-    def generate_facts(self, local_facts, additive_facts_to_overwrite):
-        """ Generate facts
+        self.provided_facts = provided_facts
+
+        self.generate_facts()
+
+
+    def merge_facts_with_self(self, new_facts):
+        """ Recursively merge new_facts with self.facts """
+        self.facts = self.merge_facts(self.facts, new_facts)
+
+
+    def merge_facts(self, orig, new):
+        """ Recursively merge facts dicts
 
             Args:
-                local_facts (dict): local_facts for overriding generated
-                                    defaults
-                additive_facts_to_overwrite (list): additive facts to overwrite in jinja
-                                                    '.' notation ex: ['master.named_certificates']
+                orig (dict): existing facts
+                new (dict): facts to update
 
             Returns:
-                dict: The generated facts
+                dict: the merged facts
         """
-        local_facts = self.init_local_facts(local_facts, additive_facts_to_overwrite)
-        roles = local_facts.keys()
+        additive_facts = ['named_certificates']
+        facts = dict()
+        for key, value in orig.iteritems():
+            if key in new:
+                if isinstance(value, dict) and isinstance(new[key], dict):
+                    relevant_additive_facts = []
+                    # Keep additive_facts_to_overwrite if key matches
+                    for item in self.additive_facts_to_overwrite:
+                        if '.' in item and item.startswith(key + '.'):
+                            relevant_additive_facts.append(item)
+                    facts[key] = self.merge_facts(value, new[key])
+                elif key in additive_facts and key not in [x.split('.')[-1] for x in self.additive_facts_to_overwrite]:
+                    # Fact is additive so we'll combine orig and new.
+                    if isinstance(value, list) and isinstance(new[key], list):
+                        new_fact = []
+                        for item in copy.deepcopy(value) + copy.copy(new[key]):
+                            if item not in new_fact:
+                                new_fact.append(item)
+                        facts[key] = new_fact
+                else:
+                    facts[key] = copy.copy(new[key])
+            else:
+                facts[key] = copy.deepcopy(value)
+        new_keys = set(new.keys()) - set(orig.keys())
+        for key in new_keys:
+            facts[key] = copy.deepcopy(new[key])
+        return facts
 
-        defaults = self.get_defaults(roles)
-        provider_facts = self.init_provider_facts()
-        facts = apply_provider_facts(defaults, provider_facts)
-        facts = merge_facts(facts, local_facts, additive_facts_to_overwrite)
-        facts['current_config'] = get_current_config(facts)
-        facts = set_url_facts_if_unset(facts)
-        facts = set_project_cfg_facts_if_unset(facts)
-        facts = set_fluentd_facts_if_unset(facts)
-        facts = set_flannel_facts_if_unset(facts)
-        facts = set_node_schedulability(facts)
-        facts = set_master_selectors(facts)
-        facts = set_metrics_facts_if_unset(facts)
-        facts = set_identity_providers_if_unset(facts)
+
+    def generate_facts(self):
+        """ Generate facts """
+
+        # Initialize local facts
+        self.init_local_facts()
+
+        # Get the simple default values
+        roles = self.local_facts.keys()
+        simple_defaults = self.get_defaults(roles)
+
+        # Get the provider based default values
+        self.init_provider_facts()
+
+        # Set initial facts to the result of applying the provider facts to
+        # the simple defaults
+        self.facts = apply_provider_facts(simple_defaults, self.provider_facts)
+
+        # Apply the local facts
+        self.merge_facts_with_self(self.local_facts)
+
+        # Set the current config
+        self.facts['current_config'] = get_current_config(self.facts)
+
+        # Facts that require computing values of other facts
+        facts = set_url_facts_if_unset(self.facts)
+
         facts = set_sdn_facts_if_unset(facts, self.system_facts)
+
         facts = set_deployment_facts_if_unset(facts)
+        facts = set_master_selectors(facts)
+        facts = set_identity_providers_if_unset(facts)
+        facts = set_docker_facts_if_unset(facts)
         facts = set_version_facts_if_unset(facts)
         facts = set_manageiq_facts_if_unset(facts)
-        facts = set_aggregate_facts(facts)
-        facts = set_etcd_facts_if_unset(facts)
         facts = set_container_facts_if_unset(facts)
-        return dict(openshift=facts)
+
+        facts = set_aggregate_facts(facts)
+
+        facts = set_etcd_facts_if_unset(facts)
+        self.facts = facts
+
 
     def get_defaults(self, roles):
         """ Get default fact values
@@ -1161,36 +1090,49 @@ class OpenShiftFacts(object):
 
         common = dict(use_openshift_sdn=True, ip=ip_addr, public_ip=ip_addr,
                       deployment_type='origin', hostname=hostname,
-                      public_hostname=hostname)
-        common['client_binary'] = 'oc'
-        common['admin_binary'] = 'oadm'
-        common['dns_domain'] = 'cluster.local'
-        common['install_examples'] = True
+                      public_hostname=hostname, use_fluentd=False,
+                      use_flannel=False, use_cluster_metrics=False,
+                      client_binary='oc', admin_binary='oadm',
+                      dns_domain='cluster.local', install_examples=True,
+                      sdn_network_plugin_name='redhat/openshift-ovs-subnet')
         defaults['common'] = common
 
         if 'master' in roles:
-            master = dict(api_use_ssl=True, api_port='8443', controllers_port='8444',
-                          console_use_ssl=True, console_path='/console',
-                          console_port='8443', etcd_use_ssl=True, etcd_hosts='',
-                          etcd_port='4001', portal_net='172.30.0.0/16',
-                          embedded_etcd=True, embedded_kube=True,
-                          embedded_dns=True, dns_port='53',
+            master = dict(api_use_ssl=True, api_port='8443',
+                          controllers_port='8444', console_use_ssl=True,
+                          console_path='/console', console_port='8443',
+                          etcd_use_ssl=True, etcd_hosts='', etcd_port='4001',
+                          portal_net='172.30.0.0/16', embedded_etcd=True,
+                          embedded_kube=True, embedded_dns=True, dns_port='53',
                           bind_addr='0.0.0.0', session_max_seconds=3600,
                           session_name='ssn', session_secrets_file='',
                           access_token_max_seconds=86400,
                           auth_token_max_seconds=500,
-                          oauth_grant_method='auto')
+                          oauth_grant_method='auto',
+                          mcs_allocator_range='s0:/2',
+                          mcs_labels_per_project=5,
+                          uid_allocator_range='1000000000-1999999999/10000',
+                          sdn_cluster_network_cidr='10.1.0.0/16',
+                          sdn_host_subnet_length='8',
+                          default_node_selector='',
+                          project_request_message='',
+                          project_request_template='')
             defaults['master'] = master
 
         if 'node' in roles:
-            node = dict(labels={}, annotations={}, portal_net='172.30.0.0/16',
+            node = dict(labels={}, annotations={},
                         iptables_sync_period='5s', set_node_ip=False)
+            node['schedulable'] = False if 'master' in roles else True
             defaults['node'] = node
 
         if 'nfs' in roles:
             nfs = dict(exports_dir='/var/export', registry_volume='regvol',
                        export_options='*(rw,sync,all_squash)')
             defaults['nfs'] = nfs
+
+        if 'docker' in roles:
+            docker = dict(portal_net='172.30.0.0/16')
+            defaults['docker'] = docker
 
         return defaults
 
@@ -1267,49 +1209,90 @@ class OpenShiftFacts(object):
             provider_info.get('name'),
             provider_info.get('metadata')
         )
-        return provider_facts
+        self.provider_facts = provider_facts
 
-    def init_local_facts(self, facts=None, additive_facts_to_overwrite=False):
-        """ Initialize the provider facts
+
+    def local_facts_migration(self, facts=None):
+        """ Migrate facts on disk to newer references
 
             Args:
-                facts (dict): local facts to set
-                additive_facts_to_overwrite (list): additive facts to overwrite in jinja
-                                                    '.' notation ex: ['master.named_certificates']
+                facts (dict): local facts from disk
 
             Returns:
-                dict: The result of merging the provided facts with existing
-                      local facts
+                dict: The result of migrating older fact references to newer
+                fact references
         """
-        changed = False
-        facts_to_set = {self.role: dict()}
         if facts is not None:
-            facts_to_set[self.role] = facts
+            docker_facts = facts['docker'] if 'docker' in facts else dict()
 
-        local_facts = get_local_facts_from_file(self.filename)
+            df_map = {'node': ['docker_log_driver',
+                               'docker_log_options',
+                               'portal_net'],
+                      'common': ['docker_additional_registries',
+                                 'docker_insecure_registries',
+                                 'docker_blocked_registries']}
+            for role, fact_keys in df_map.iteritems():
+                if role in facts:
+                    for fact_key in fact_keys:
+                        if fact_key in facts[role]:
+                            new_fact_key = fact_key.replace('docker_', '')
+                            docker_facts[new_fact_key] = facts[role].pop(fact_key)
 
-        for arg in ['labels', 'annotations']:
-            if arg in facts_to_set and isinstance(facts_to_set[arg],
-                                                  basestring):
-                facts_to_set[arg] = module.from_json(facts_to_set[arg])
+        return facts
 
-        new_local_facts = merge_facts(local_facts, facts_to_set, additive_facts_to_overwrite)
-        for facts in new_local_facts.values():
-            keys_to_delete = []
-            for fact, value in facts.iteritems():
-                if value == "" or value is None:
-                    keys_to_delete.append(fact)
-            for key in keys_to_delete:
-                del facts[key]
 
-        if new_local_facts != local_facts:
+    def clean_empty_values(self, facts=None):
+        """ Removes dictionary entries that have a value of None or "" """
+        if facts is None:
+            return []
+        else:
+            clean_facts = copy.deepcopy(facts)
+            for role, role_facts in facts.iteritems():
+                for fact, value in role_facts.iteritems():
+                    if value == "" or value is None:
+                        del clean_facts[role][fact]
+            return clean_facts
+
+    def convert_types(self, facts):
+        """ Performs type conversions for known facts """
+        bool_vals = {'common': ['use_sdn']}
+        for role, fact_keys in bool_vals.iteritems():
+            if role in facts:
+                for fact in fact_keys:
+                    if fact in facts[role]:
+                        if not isinstance(facts[role][fact], bool):
+                            facts[role][fact] = bool(strtobool(str(facts[roles][fact])))
+
+        json_vals = {'node': ['labels', 'annotations']}
+        for role, fact_keys in bool_vals.iteritems():
+            if role in facts:
+                for fact in fact_keys:
+                    if fact in facts[role]:
+                        if isinstance(facts[role][fact], basestring):
+                            facts[role][fact] = module.from_json(facts[roles][fact])
+
+        return facts
+
+
+    def init_local_facts(self):
+        """ Sets self.facts from the facts provided and the locally persisted
+            facts
+        """
+
+        facts_from_disk = get_local_facts_from_file(self.filename)
+        migrated_facts = self.local_facts_migration(facts_from_disk)
+        local_facts = self.clean_empty_values(migrated_facts)
+
+        new_local_facts = self.merge_facts(local_facts, self.provided_facts)
+
+        if new_local_facts != facts_from_disk:
             self.validate_local_facts(new_local_facts)
-            changed = True
+            self.changed = True
             if not module.check_mode:
                 save_local_facts(self.filename, new_local_facts)
 
-        self.changed = changed
-        return new_local_facts
+        self.local_facts = new_local_facts
+
 
     def validate_local_facts(self, facts=None):
         """ Validate local facts
@@ -1407,7 +1390,7 @@ def main():
                                                     openshift_facts.changed)
 
     return module.exit_json(changed=changed,
-                            ansible_facts=openshift_facts.facts)
+                            ansible_facts=dict(openshift=openshift_facts.facts))
 
 # ignore pylint errors related to the module_utils import
 # pylint: disable=redefined-builtin, unused-wildcard-import, wildcard-import

@@ -183,7 +183,7 @@
       ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
       ansible_sudo: "{{ g_sudo | default(omit) }}"
     with_items: "{{ groups.oo_nodes_to_config | default([]) }}"
-    when: hostvars[item].openshift.common.is_containerized | bool and (item in groups.oo_nodes_to_config and item in groups.oo_masters_to_config)
+    when: "'item' in hostvars and hostvars[item].openshift.common.is_containerized | bool and (item in groups.oo_nodes_to_config and item in groups.oo_masters_to_config)"
 
 - name: Configure node instances
   hosts: oo_containerized_master_nodes

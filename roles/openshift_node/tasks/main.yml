@@ -70,7 +70,7 @@
 
 - name: Reload systemd units
   command: systemctl daemon-reload
-  when: openshift.common.is_containerized and ( ( install_node_result  | changed )
+  when: openshift.common.is_containerized | bool and ( ( install_node_result  | changed )
     or ( install_ovs_result | changed ) )
 
 - name: Start and enable openvswitch docker service

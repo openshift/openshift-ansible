@@ -5,7 +5,7 @@
     - ansible_version | version_compare('1.8.0', 'ge')
     - ansible_version | version_compare('1.9.0', 'ne')
     - ansible_version | version_compare('1.9.0.1', 'ne')
-    
+
 - name: Detecting Operating System
   shell: ls /run/ostree-booted
   ignore_errors: yes
@@ -16,8 +16,6 @@
 # Locally setup containerized facts for now
 - set_fact:
     l_is_atomic: "{{ ostree_output.rc == 0 }}"
-- set_fact:
-    l_is_containerized: "{{ l_is_atomic or containerized | default(false) | bool }}"
 
 - name: Ensure PyYaml is installed
   action: "{{ ansible_pkg_mgr }} name=PyYAML state=present"
