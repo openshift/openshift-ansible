@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.35
+Version:        3.0.36
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -259,6 +259,48 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Jan 25 2016 Kenny Woodson <kwoodson@redhat.com> 3.0.36-1
+- Fixing awsutil to support aliases and v3 (kwoodson@redhat.com)
+- Fail when master restart playbook finds no active masters rather than any
+  failed masters. (abutcher@redhat.com)
+- Skipping any symlinks for the yaml validation check (kwoodson@redhat.com)
+- Added template for config loop. (twiest@redhat.com)
+- Test validate_pcs_cluster input is basestring instead of str.
+  (abutcher@redhat.com)
+- Fix error when oo_masters_to_config is empty (jdetiber@redhat.com)
+- Update inventory examples for console customization (spinolacastro@gmail.com)
+- Expose console config for customization (spinolacastro@gmail.com)
+- oso_host_monitoring: added environment as a var to the host monitoring
+  systemd script (mwoodson@redhat.com)
+- Check master certificates during upgrade. (abutcher@redhat.com)
+- Use haproxy frontend port for os_firewall. (abutcher@redhat.com)
+- Fix native master api sysconfig. (abutcher@redhat.com)
+- Enable kubernetes master config of podEvictionTimeout from ansible
+  (jstuever@redhat.com)
+- Fix wrapper pathing for non-root user install. (abutcher@redhat.com)
+- Remove camel case for bin/cluster addNodes (jdetiber@redhat.com)
+- Update cluster_hosts.yml for cloud providers (jdetiber@redhat.com)
+- Removing ruby scripts and replacing with python. (kwoodson@redhat.com)
+- Fixed a logic bug and yaml load (kwoodson@redhat.com)
+- Fixing yaml validation in python.  Inputs behave differently as does glob
+  (kwoodson@redhat.com)
+- oso_monitoring: add the zabbix libs (mwoodson@redhat.com)
+- Removing removing scripts and moving to python. (kwoodson@redhat.com)
+- add ability to disable ztriggers and disable new container dns check
+  (jdiaz@redhat.com)
+- Remove default disable of SDN for GCE (jdetiber@redhat.com)
+- Fix hardcoded api_port in openshift_master_cluster (jdetiber@redhat.com)
+- Use local address for loopback kubeconfig (jdetiber@redhat.com)
+- consolidate steps and cleanup template dir (jdetiber@redhat.com)
+- v3_0_to_v3_1_upgrade: Remove is_atomic check for upgrades
+  (smunilla@redhat.com)
+- v3_0_to_v3_1_upgrade: Copy tasks rather than including from the playbook
+  (smunilla@redhat.com)
+- v3_0_to_v3_1_upgrade: Install storage packages (smunilla@redhat.com)
+- Controllers_port and firewall rules (spinolacastro@gmail.com)
+- Fix bind address/port when isn't default (spinolacastro@gmail.com)
+- Add ability to disable os_firewall (jdetiber@redhat.com)
+
 * Mon Jan 18 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.35-1
 - added the lib_timedate role (mwoodson@redhat.com)
 - added chrony (mwoodson@redhat.com)
