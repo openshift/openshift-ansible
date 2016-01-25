@@ -211,6 +211,8 @@
   roles:
   - role: flannel
     when: openshift.common.use_flannel | bool
+  - role: nuage_node
+    when: openshift.common.use_nuage | bool
   - role: nickhammond.logrotate
     when: not openshift.common.is_containerized | bool
   - role: fluentd_node
