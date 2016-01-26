@@ -41,7 +41,7 @@
       g_new_service_name: "{{ 'origin' if deployment_type =='origin' else 'atomic-openshift' }}"
 
   - name: Determine available versions
-    script: ../files/versions.sh {{ g_new_service_name }} openshift
+    script: ../files/versions.sh {{ g_new_service_name }}
     register: g_versions_result
 
   - set_fact:
