@@ -6,11 +6,11 @@ This repo contains Ansible code for OpenShift and Atomic Enterprise.
 - Install base dependencies:
   - Fedora:
   ```
-    dnf install -y ansible rubygem-thor rubygem-parseconfig util-linux pyOpenSSL libffi-devel python-cryptography
+    dnf install -y ansible-1.9.4 rubygem-thor rubygem-parseconfig util-linux pyOpenSSL libffi-devel python-cryptography
   ```
    - OSX:
   ```
-    # Install ansible and python 2
+    # Install ansible 1.9.4 and python 2
     brew install ansible python
     # Required ruby gems
     gem install thor parseconfig
