@@ -50,6 +50,7 @@ ExecStart=/usr/bin/docker run --name {{ osohm_host_monitoring }}                
            -e OSO_ENVIRONMENT={{ oo_environment }}                                           \
            -e OSO_HOST_TYPE={{ hostvars[inventory_hostname]['ec2_tag_host-type'] }}          \
            -e OSO_SUB_HOST_TYPE={{ hostvars[inventory_hostname]['ec2_tag_sub-host-type'] }}  \
+           -e OSO_MASTER_HA={{ osohm_master_ha }}                                            \
            -v /etc/localtime:/etc/localtime                                                  \
            -v /sys:/sys:ro                                                                   \
            -v /sys/fs/selinux                                                                \

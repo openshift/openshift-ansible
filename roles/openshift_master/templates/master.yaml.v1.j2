@@ -5,7 +5,7 @@ apiLevels:
 - v1
 apiVersion: v1
 assetConfig:
-  logoutURL: ""
+  logoutURL: "{{ openshift.master.logout_url | default('') }}"
   masterPublicURL: {{ openshift.master.public_api_url }}
   publicURL: {{ openshift.master.public_console_url }}/
 {% if 'logging_public_url' in openshift.master %}
@@ -13,6 +13,15 @@ assetConfig:
 {% endif %}
 {% if 'metrics_public_url' in openshift.master %}
   metricsPublicURL: {{ openshift.master.metrics_public_url }}
+{% endif %}
+{% if 'extension_scripts' in openshift.master %}
+  extensionScripts: {{ openshift.master.extension_scripts | to_padded_yaml(1, 2) }}
+{% endif %}
+{% if 'extension_stylesheets' in openshift.master %}
+  extensionStylesheets: {{ openshift.master.extension_stylesheets | to_padded_yaml(1, 2) }}
+{% endif %}
+{% if 'extensions' in openshift.master %}
+  extensions: {{ openshift.master.extensions | to_padded_yaml(1, 2) }}
 {% endif %}
   servingInfo:
     bindAddress: {{ openshift.master.bind_addr }}:{{ openshift.master.console_port }}
@@ -108,12 +117,16 @@ masterPublicURL: {{ openshift.master.public_api_url }}
 networkConfig:
   clusterNetworkCIDR: {{ openshift.master.sdn_cluster_network_cidr }}
   hostSubnetLength: {{ openshift.master.sdn_host_subnet_length }}
-{% if openshift.common.use_openshift_sdn %}
+{% if openshift.common.use_openshift_sdn or openshift.common.use_nuage %}
   networkPluginName: {{ openshift.common.sdn_network_plugin_name }}
 {% endif %}
 # serviceNetworkCIDR must match kubernetesMasterConfig.servicesSubnet
   serviceNetworkCIDR: {{ openshift.master.portal_net }}
 oauthConfig:
+{% if 'oauth_template' in openshift.master %}
+  templates:
+    login: {{ openshift.master.oauth_template }}
+{% endif %}
   assetPublicURL: {{ openshift.master.public_console_url }}/
   grantConfig:
     method: {{ openshift.master.oauth_grant_method }}

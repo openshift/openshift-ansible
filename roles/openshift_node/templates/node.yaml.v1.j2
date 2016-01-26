@@ -20,7 +20,7 @@ networkPluginName: {{ openshift.common.sdn_network_plugin_name }}
 # deprecates networkPluginName above. The two should match.
 networkConfig:
    mtu: {{ openshift.node.sdn_mtu }}
-{% if openshift.common.use_openshift_sdn %}
+{% if openshift.common.use_openshift_sdn or openshift.common.use_nuage %}
    networkPluginName: {{ openshift.common.sdn_network_plugin_name }}
 {% endif %}
 {% if openshift.node.set_node_ip | bool %}

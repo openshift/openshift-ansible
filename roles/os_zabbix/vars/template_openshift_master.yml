@@ -98,6 +98,18 @@ g_template_openshift_master:
     applications:
     - Openshift Master
 
+  - key: openshift.master.skydns.port.open
+    description: State of the SkyDNS port open and listening
+    type: int
+    applications:
+    - Openshift Master
+
+  - key: openshift.master.skydns.query
+    description: SkyDNS can be queried or not
+    type: int
+    applications:
+    - Openshift Master
+
   - key: openshift.master.etcd.create.success
     description: Show number of successful create actions
     type: int
@@ -303,6 +315,20 @@ g_template_openshift_master:
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
     dependencies:
     - 'Openshift Master process not running on {HOST.NAME}'
+    priority: high
+
+  - name: 'SkyDNS port not listening on {HOST.NAME}'
+    expression: '{Template Openshift Master:openshift.master.skydns.port.open(#3)}<1'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
+    dependencies:
+    - 'Openshift Master process not running on {HOST.NAME}'
+    priority: high
+
+  - name: 'SkyDNS query failed on {HOST.NAME}'
+    expression: '{Template Openshift Master:openshift.master.skydns.query(#3)}<1'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
+    dependencies:
+    - 'Openshift Master API health check is failing on {HOST.NAME}'
     priority: high
 
   zgraphs:
