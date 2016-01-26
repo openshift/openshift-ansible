@@ -1,4 +1,8 @@
 ---
+- name: Install openssl
+  action: "{{ ansible_pkg_mgr }} name=openssl state=present"
+  when: not openshift.common.is_atomic | bool
+
 - file:
     path: "{{ item }}"
     state: directory

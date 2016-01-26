@@ -89,7 +89,7 @@ class AwsUtil(object):
 
     def get_host_types(self):
         """Searches for host-type tags in the inventory and returns all host-types found."""
-        pattern = re.compile(r'^oo_host-type_(.*)')
+        pattern = re.compile(r'^oo_hosttype_(.*)')
 
         host_types = []
         inv = self.get_inventory()
@@ -177,19 +177,20 @@ class AwsUtil(object):
     def gen_clusterid_tag(clu):
         """Generate the clusterid tag
         """
-        return "tag_clusterid_%s" % clu
+        return "oo_clusterid_%s" % clu
 
     @staticmethod
     def gen_env_tag(env):
         """Generate the environment tag
         """
-        return "tag_environment_%s" % env
+        return "oo_environment_%s" % env
 
-    def gen_host_type_tag(self, host_type):
+    def gen_host_type_tag(self, host_type, version):
         """Generate the host type tag
         """
-        host_type = self.resolve_host_type(host_type)
-        return "tag_host-type_%s" % host_type
+        if version == '2':
+            host_type = self.resolve_host_type(host_type)
+        return "oo_hosttype_%s" % host_type
 
     # This function uses all of these params to perform a filters on our host inventory.
     # pylint: disable=too-many-arguments
@@ -226,7 +227,7 @@ class AwsUtil(object):
             retval.intersection_update(env_hosts)
 
         if host_type:
-            retval.intersection_update(inv.get(self.gen_host_type_tag(host_type), []))
+            retval.intersection_update(inv.get(self.gen_host_type_tag(host_type, version), []))
 
         if version != 'all':
             retval.intersection_update(inv.get(AwsUtil.gen_version_tag(version), []))

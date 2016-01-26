@@ -1,0 +1,37 @@
+---
+- name: Install Nuage VRS
+  sudo: true
+  yum: name={{ vrs_rpm }} state=present
+  
+- name: Set the uplink interface 
+  sudo: true
+  lineinfile: dest={{ vrs_config }} regexp=^NETWORK_UPLINK_INTF line='NETWORK_UPLINK_INTF={{ uplink_interface }}'
+
+- name: Set the Active Controller 
+  sudo: true
+  lineinfile: dest={{ vrs_config }} regexp=^ACTIVE_CONTROLLER line='ACTIVE_CONTROLLER={{ vsc_active_ip }}'
+
+- name: Set the Standby Controller 
+  sudo: true
+  lineinfile: dest={{ vrs_config }} regexp=^STANDBY_CONTROLLER line='STANDBY_CONTROLLER={{ vsc_standby_ip }}'
+  when: vsc_standby_ip is defined
+
+- name: Install plugin rpm
+  sudo: true
+  yum: name={{ plugin_rpm }} state=present
+
+- name: Copy the certificates and keys
+  sudo: true
+  copy: src="/tmp/{{ item }}" dest="{{ vsp_k8s_dir }}/{{ item }}"
+  with_items:
+        - ca.crt
+        - nuage.crt
+        - nuage.key
+        - nuage.kubeconfig 
+
+- name: Set the vsp-k8s.yaml 
+  sudo: true
+  template: src=vsp-k8s.j2 dest={{ vsp_k8s_yaml }} owner=root mode=0644 
+  notify:
+    - restart vrs
+    - restart node 

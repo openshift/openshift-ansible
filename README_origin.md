@@ -10,9 +10,7 @@
 * [Overriding detected ip addresses and hostnames](#overriding-detected-ip-addresses-and-hostnames)
 
 ## Requirements
-* ansible
-  * Tested using ansible-1.8.4-1.fc20.noarch, but should work with version 1.8+
-  * There is currently a known issue with ansible-1.9.0, you can downgrade to 1.8.4 on Fedora by installing one of the builds from Koji: http://koji.fedoraproject.org/koji/packageinfo?packageID=13842
+* ansible 1.9.4
   * Available in Fedora channels
   * Available for EL with EPEL and Optional channel
 * One or more RHEL 7.1+, CentOS 7.1+, or Fedora 23+ VMs

@@ -1,0 +1,34 @@
+---
+- name: Create directory /usr/share/nuagekubemon
+  sudo: true
+  file: path=/usr/share/nuagekubemon state=directory  
+
+- name: Create the log directory
+  sudo: true
+  file: path={{ nuagekubemon_log_dir }} state=directory
+
+- name: Install Nuage Kubemon
+  sudo: true
+  yum: name={{ nuage_kubemon_rpm }} state=present
+
+- name: Run the service account creation script
+  sudo: true
+  script: serviceaccount.sh --server={{ openshift.master.api_url }} --output-cert-dir={{ cert_output_dir }} --master-cert-dir={{ openshift_master_config_dir }}
+
+- name: Download the certs and keys
+  sudo: true
+  fetch: src={{ cert_output_dir }}/{{ item }} dest=/tmp/{{ item }} flat=yes
+  with_items:
+        - ca.crt
+        - nuage.crt
+        - nuage.key
+        - nuage.kubeconfig 
+ 
+- name: Create nuagekubemon.yaml
+  sudo: true
+  template: src=nuagekubemon.j2 dest=/usr/share/nuagekubemon/nuagekubemon.yaml owner=root mode=0644
+  notify:
+    - restart master
+    - restart master api
+    - restart master controllers
+    - restart nuagekubemon

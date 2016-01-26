@@ -5,3 +5,4 @@
 # chains with the public zone (or the zone associated with the correct
 # interfaces)
 os_firewall_use_firewalld: False
+openshift_version: "{{ openshift_pkg_version | default('') }}"

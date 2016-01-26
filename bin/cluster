@@ -68,7 +68,7 @@ class Cluster(object):
 
         self.action(args, inventory, cluster, playbook)
 
-    def addNodes(self, args):
+    def add_nodes(self, args):
         """
         Add nodes to an existing cluster for given provider
         :param args: command line arguments provided by user
@@ -76,7 +76,7 @@ class Cluster(object):
         cluster = {'cluster_id': args.cluster_id,
                    'deployment_type': self.get_deployment_type(args),
                   }
-        playbook = "playbooks/{0}/openshift-cluster/addNodes.yml".format(args.provider)
+        playbook = "playbooks/{0}/openshift-cluster/add_nodes.yml".format(args.provider)
         inventory = self.setup_provider(args.provider)
 
         cluster['num_nodes'] = args.nodes
@@ -321,13 +321,13 @@ if __name__ == '__main__':
     create_parser.set_defaults(func=cluster.create)
 
 
-    create_parser = action_parser.add_parser('addNodes', help='Add nodes to a cluster',
+    create_parser = action_parser.add_parser('add-nodes', help='Add nodes to a cluster',
                                              parents=[meta_parser])
     create_parser.add_argument('-n', '--nodes', default=1, type=int,
                                help='number of nodes to add to the cluster')
     create_parser.add_argument('-i', '--infra', default=1, type=int,
                                help='number of infra nodes to add to the cluster')
-    create_parser.set_defaults(func=cluster.addNodes)
+    create_parser.set_defaults(func=cluster.add_nodes)
 
 
     config_parser = action_parser.add_parser('config',
