@@ -24,6 +24,7 @@
       use_fluentd: "{{ openshift_use_fluentd | default(None) }}"
       use_flannel: "{{ openshift_use_flannel | default(None) }}"
       use_manageiq: "{{ openshift_use_manageiq | default(None) }}"
+      data_dir: "{{ openshift_data_dir | default(None) }}"
 
 - name: Install the base package for versioning
   action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}{{ openshift_version | default('') }} state=present"
