@@ -1,0 +1,10 @@
+---
+docker_selinux: "{{ ' --selinux-enabled' if ansible_selinux and ansible_selinux.status == 'enabled' else '' }}"
+
+docker_log_driver: "{{ ' --log-driver=' ~ openshift.docker.log_driver if openshift.docker.log_driver is defined else '' }}"
+
+docker_log_opts: "{{ (openshift.node.log_options | oo_split() | oo_prepend_strings_in_list(' --log-opt=') | join('')) if openshift.docker.log_options is defined else '' }}"
+
+docker_extra_opts: "{{ ' ' ~ openshift.docker.extra_options if openshift.docker.extra_options is defined else '' }}"
+
+docker_opts: "--insecure-registry={{ openshift.docker.portal_net }} --confirm-def-push=false{{ docker_selinux }}{{ docker_log_driver }}{{ docker_log_opts }}{{ docker_extra_opts }}"
