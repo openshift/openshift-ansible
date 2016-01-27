@@ -338,7 +338,6 @@
   roles:
   - openshift_master
   - role: nickhammond.logrotate
-    when: not openshift.common.is_atomic | bool
   - role: fluentd_master
     when: openshift.common.use_fluentd | bool
   - role: nuage_master
