@@ -11,6 +11,7 @@ from click.testing import CliRunner
 SAMPLE_CONFIG = """
 variant: %s
 ansible_ssh_user: root
+master_routingconfig_subdomain: example.com
 hosts:
   - connect_to: 10.0.0.1
     ip: 10.0.0.1
@@ -196,6 +197,8 @@ def build_input(ssh_user=None, hosts=None, variant_num=None,
             inputs.append(master_lb[0])
         inputs.append('y' if master_lb[1] else 'n')
 
+    inputs.append('example.com')
+
     # TODO: support option 2, fresh install
     if add_nodes:
         if schedulable_masters_ok:
@@ -228,4 +231,3 @@ def build_input(ssh_user=None, hosts=None, variant_num=None,
     ])
 
     return '\n'.join(inputs)
-
