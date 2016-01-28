@@ -6,7 +6,7 @@ RUN yum -y install http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.no
 
 # Not sure if all of these packages are necessary
 # only git and ansible are known requirements
-RUN yum install -y --enablerepo rhel-7-server-extras-rpms net-tools bind-utils git ansible
+RUN yum install -y --enablerepo rhel-7-server-extras-rpms net-tools bind-utils git ansible pyOpenSSL
 
 ADD ./  /opt/openshift-ansible/
 
