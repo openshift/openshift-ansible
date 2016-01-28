@@ -318,14 +318,14 @@ g_template_openshift_master:
     priority: high
 
   - name: 'SkyDNS port not listening on {HOST.NAME}'
-    expression: '{Template Openshift Master:openshift.master.skydns.port.open(#3)}<1'
+    expression: '{Template Openshift Master:openshift.master.skydns.port.open.max(#3)}<1'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
     dependencies:
     - 'Openshift Master process not running on {HOST.NAME}'
     priority: high
 
   - name: 'SkyDNS query failed on {HOST.NAME}'
-    expression: '{Template Openshift Master:openshift.master.skydns.query(#3)}<1'
+    expression: '{Template Openshift Master:openshift.master.skydns.query.max(#3)}<1'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
     dependencies:
     - 'Openshift Master API health check is failing on {HOST.NAME}'
