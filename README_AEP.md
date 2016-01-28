@@ -16,11 +16,11 @@
 * One or more RHEL 7.1 VMs
 * Either ssh key based auth for the root user or ssh key based auth for a user
   with sudo access (no password)
-* A checkout of atomic-enterprise-ansible from https://github.com/projectatomic/atomic-enterprise-ansible/
+* A checkout of openshift-ansible from https://github.com/openshift/openshift-ansible/
 
   ```sh
-  git clone https://github.com/projectatomic/atomic-enterprise-ansible.git
-  cd atomic-enterprise-ansible
+  git clone https://github.com/openshift/openshift-ansible.git
+  cd openshift-ansible
   ```
 
 ## Caveats
