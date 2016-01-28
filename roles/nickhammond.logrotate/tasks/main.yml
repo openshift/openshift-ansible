@@ -1,6 +1,7 @@
 ---
 - name: nickhammond.logrotate | Install logrotate
   action: "{{ ansible_pkg_mgr }} name=logrotate state=present"
+  when: not openshift.common.is_atomic | bool
 
 - name: nickhammond.logrotate | Setup logrotate.d scripts
   template:

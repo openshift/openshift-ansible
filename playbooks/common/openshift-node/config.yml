@@ -214,7 +214,6 @@
   - role: nuage_node
     when: openshift.common.use_nuage | bool
   - role: nickhammond.logrotate
-    when: not openshift.common.is_atomic | bool
   - role: fluentd_node
     when: openshift.common.use_fluentd | bool
   tasks:
