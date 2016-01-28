@@ -47,7 +47,12 @@ def main():
 
             print "+++++++ Received: %s" % file_mod
 
-            if not file_mod.endswith('.yml') and not file_mod.endswith('.yaml') and not os.path.islink(file_mod):
+            # if the file extensions is not yml or yaml, move along.
+            if not file_mod.endswith('.yml') and not file_mod.endswith('.yaml'):
+                continue
+
+            # We use symlinks in our repositories, ignore them.
+            if os.path.islink(file_mod):
                 continue
 
             try:
