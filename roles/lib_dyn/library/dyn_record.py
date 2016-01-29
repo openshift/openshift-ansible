@@ -97,18 +97,18 @@ author: "Russell Harrison"
 
 try:
     from dyn.tm.session import DynectSession
-    from dyn.tm.zones import get_all_zones
+#    from dyn.tm.zones import get_all_zones
     from dyn.tm.zones import Zone
     import dyn.tm.errors
-    import json
+#    import json
     import os
-    import sys
+#    import sys
     IMPORT_ERROR = False
-except ImportError as e:
-    IMPORT_ERROR = str(e)
+except ImportError as error:
+    IMPORT_ERROR = str(error)
 
 # Each of the record types use a different method for the value.
-record_params = {
+RECORD_PARAMS = {
     'A'     : {'value_param': 'address'},
     'AAAA'  : {'value_param': 'address'},
     'CNAME' : {'value_param': 'cname'},
@@ -118,48 +118,46 @@ record_params = {
 
 # You'll notice that the value_param doesn't match the key (records_key)
 # in the dict returned from Dyn when doing a dyn_node.get_all_records()
-# This is a frustrating lookup dict to allow mapping to the record_params
+# This is a frustrating lookup dict to allow mapping to the RECORD_PARAMS
 # dict so we can lookup other values in it efficiently
 
-def add_record(module, zone, type, value_key, value, ):
-    # Add a new record to the zone.
-    try:
-        getattr(self, 'add_record')
-    except:
-        module.fail_json(msg='Unable to add record: ')
-
 def get_record_type(record_key):
+    '''Get the record type represented by the keys returned from get_any_records.'''
     return record_key.replace('_records', '').upper()
 
 def get_record_key(record_type):
+    '''Get the key to look up records in the dictionary returned from get_any_records.'''
     return record_type.lower() + '_records'
 
 def get_any_records(module, node):
+    '''Get any records for a given node'''
     # Lets get a list of the A records for the node
     try:
         records = node.get_any_records()
-    except dyn.tm.errors.DynectGetError as e:
-        if 'Not in zone' in str(e):
+    except dyn.tm.errors.DynectGetError as error:
+        if 'Not in zone' in str(error):
             # The node isn't in the zone so we'll return an empty dictionary
             return {}
         else:
             # An unknown error happened so we'll need to return it.
             module.fail_json(msg='Unable to get records',
-                             error=str(e))
+                             error=str(error))
 
     # Return a dictionary of the record objects
     return records
 
 def get_record_values(records):
+    '''Get the record values for each record returned by get_any_records.'''
     # This simply returns the values from a dictionary of record objects
     ret_dict = {}
     for key in records.keys():
         record_type = get_record_type(key)
-        record_value_param = record_params[record_type]['value_param']
+        record_value_param = RECORD_PARAMS[record_type]['value_param']
         ret_dict[key] = [getattr(elem, record_value_param) for elem in records[key]]
     return ret_dict
 
 def main():
+    '''Ansible module for managing Dyn DNS records.'''
     module = AnsibleModule(
         argument_spec=dict(
             state=dict(required=True, choices=['present', 'absent', 'list']),
@@ -187,22 +185,22 @@ def main():
         dyn_session = DynectSession(module.params['customer_name'],
                                     module.params['user_name'],
                                     module.params['user_password'])
-    except dyn.tm.errors.DynectAuthError as e:
+    except dyn.tm.errors.DynectAuthError as error:
         module.fail_json(msg='Unable to authenticate with Dyn',
-                         error=str(e))
+                         error=str(error))
 
     # Retrieve zone object
     try:
         dyn_zone = Zone(module.params['zone'])
-    except dyn.tm.errors.DynectGetError as e:
-        if 'No such zone' in e:
+    except dyn.tm.errors.DynectGetError as error:
+        if 'No such zone' in str(error):
             module.fail_json(
                 msg="Not a valid zone for this account",
                 zone=module.params['zone']
             )
         else:
             module.fail_json(msg="Unable to retrieve zone",
-                             error=str(e))
+                             error=str(error))
 
 
     # To retrieve the node object we need to remove the zone name from the FQDN
@@ -221,7 +219,7 @@ def main():
         module.exit_json(changed=False,
                          records=get_record_values(
                              dyn_node_records,
-                        ))
+                         ))
 
     if module.params['state'] == 'present':
 
@@ -231,8 +229,9 @@ def main():
 
         # Check to see if the record is already in place before doing anything.
         if (dyn_node_records and
-            dyn_node_records[value_key][0].ttl == module.params['record_ttl'] and
-            module.params['record_value'] in values[value_key]):
+                dyn_node_records[value_key][0].ttl == module.params['record_ttl'] and
+                module.params['record_value'] in values[value_key]):
+
             module.exit_json(changed=False)
 
 
@@ -247,7 +246,7 @@ def main():
                             module.params['record_type'],
                             module.params['record_value'],
                             module.params['record_ttl']
-                            )
+                           )
 
         # Now publish the zone since we've updated it.
         dyn_zone.publish()
@@ -265,8 +264,8 @@ def main():
         else:
             module.exit_json(changed=False)
 
-
-
+# Ansible tends to need a wild card import so we'll use it here
+# pylint: disable=redefined-builtin, unused-wildcard-import, wildcard-import, locally-disabled
 from ansible.module_utils.basic import *
 if __name__ == '__main__':
     main()
