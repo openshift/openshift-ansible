@@ -1,38 +1,27 @@
-Role Name
+lib_dyn
 =========
 
-A brief description of the role goes here.
+A role containing the dyn_record module for managing DNS records through Dyn's
+API
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
-
-Role Variables
---------------
-
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
-
-Dependencies
-------------
-
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+The module requires the `dyn` python module for interacting with the Dyn API.
+https://github.com/dyninc/dyn-python
 
 Example Playbook
 ----------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+To make sure the `dyn_record` module is available for use include the role
+before it is used.
 
     - hosts: servers
       roles:
-         - { role: username.rolename, x: 42 }
+         - lib_dyn
 
 License
 -------
 
-BSD
+Apache
 
-Author Information
-------------------
-
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
