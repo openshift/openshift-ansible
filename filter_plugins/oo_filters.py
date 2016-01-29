@@ -311,7 +311,7 @@ class FilterModule(object):
                 return False
 
             if isinstance(labels, basestring):
-                labels = json.loads(labels)
+                labels = yaml.safe_load(labels)
             if not isinstance(labels, dict):
                 raise errors.AnsibleFilterError(
                     "failed expected node labels to be a dict or serializable to a dict"
