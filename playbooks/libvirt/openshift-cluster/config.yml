@@ -15,3 +15,4 @@
     openshift_deployment_type: "{{ deployment_type }}"
     openshift_router_selector: 'type=infra'
     openshift_infra_nodes: "{{ g_infra_hosts }}"
+    openshift_master_cluster_method: 'native'
