@@ -96,14 +96,12 @@ author: "Russell Harrison"
 '''
 
 try:
+    IMPORT_ERROR = False
     from dyn.tm.session import DynectSession
-#    from dyn.tm.zones import get_all_zones
     from dyn.tm.zones import Zone
     import dyn.tm.errors
-#    import json
     import os
-#    import sys
-    IMPORT_ERROR = False
+
 except ImportError as error:
     IMPORT_ERROR = str(error)
 
@@ -182,12 +180,9 @@ def main():
 
     # Start the Dyn session
     try:
-        # dyn_session is needed to access the other objects but rarely gets
-        # used on its own.
-        #pylint: disable=unused-variable
-        dyn_session = DynectSession(module.params['customer_name'],
-                                    module.params['user_name'],
-                                    module.params['user_password'])
+        _ = DynectSession(module.params['customer_name'],
+                          module.params['user_name'],
+                          module.params['user_password'])
     except dyn.tm.errors.DynectAuthError as error:
         module.fail_json(msg='Unable to authenticate with Dyn',
                          error=str(error))
