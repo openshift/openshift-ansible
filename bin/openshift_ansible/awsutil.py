@@ -232,4 +232,14 @@ class AwsUtil(object):
         if version != 'all':
             retval.intersection_update(inv.get(AwsUtil.gen_version_tag(version), []))
 
-        return retval
+        return list(retval)
+
+    def convert_to_ip(self, hosts, cached=False):
+        """convert a list of host names to ip addresses"""
+
+        inv = self.get_inventory(cached=cached)
+        ips = []
+        for host in hosts:
+            ips.append(inv['_meta']['hostvars'][host]['oo_public_ip'])
+
+        return ips
