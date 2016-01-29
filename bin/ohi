@@ -65,6 +65,9 @@ class Ohi(object):
             # We weren't able to determine what they wanted to do
             raise ArgumentError("Invalid combination of arguments")
 
+        if self.args.ip:
+            hosts = self.aws.convert_to_ip(hosts)
+
         for host in sorted(hosts, key=utils.normalize_dnsname):
             if self.args.user:
                 print "%s@%s" % (self.args.user, host)
@@ -111,6 +114,9 @@ class Ohi(object):
 
         parser.add_argument('--v3', action='store_true', default=False,
                             help='Specify the openshift version.')
+
+        parser.add_argument('--ip', action='store_true', default=False,
+                            help='Return ip address only.')
 
         parser.add_argument('--all-versions', action='store_true', default=False,
                             help='Specify the openshift version. Return all versions')

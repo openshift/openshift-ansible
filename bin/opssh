@@ -56,9 +56,9 @@ fi
 PAR=200
 USER=root
 TIMEOUT=0
-ARGS=()
 ENV=""
 HOST_TYPE=""
+
 while [ $# -gt 0 ] ; do
     case $1 in
         -t|--host-type)
@@ -80,7 +80,7 @@ while [ $# -gt 0 ] ; do
             ;;
 
         --v3)
-            OPENSHIFT_VERSION="--v3"
+            OPENSHIFT_VERSION="--v3 --ip"
             shift # get past the value of the option
             ;;
 
