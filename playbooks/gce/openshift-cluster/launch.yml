@@ -10,6 +10,17 @@
   - fail: msg="Deployment type not supported for gce provider yet"
     when: deployment_type == 'enterprise'
 
+  - include: ../../common/openshift-cluster/tasks/set_etcd_launch_facts.yml
+  - include: tasks/launch_instances.yml
+    vars:
+      instances: "{{ etcd_names }}"
+      cluster: "{{ cluster_id }}"
+      type: "{{ k8s_type }}"
+      g_sub_host_type: "default"
+      gce_machine_type: "{{ lookup('env', 'gce_machine_etcd_type') | default(lookup('env', 'gce_machine_type'), true) }}"
+      gce_machine_image: "{{ lookup('env', 'gce_machine_etcd_image') | default(lookup('env', 'gce_machine_image'), true) }}"
+
+
   - include: ../../common/openshift-cluster/tasks/set_master_launch_facts.yml
   - include: tasks/launch_instances.yml
     vars:
