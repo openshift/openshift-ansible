@@ -182,6 +182,9 @@ def main():
 
     # Start the Dyn session
     try:
+        # dyn_session is needed to access the other objects but rarely gets
+        # used on its own.
+        #pylint: disable=unused-variable
         dyn_session = DynectSession(module.params['customer_name'],
                                     module.params['user_name'],
                                     module.params['user_password'])
