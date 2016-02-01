@@ -6,6 +6,7 @@ PartOf=docker.service
 [Service]
 ExecStartPre=-/usr/bin/docker rm -f openvswitch
 ExecStart=/usr/bin/docker run --name openvswitch --rm --privileged --net=host --pid=host -v /lib/modules:/lib/modules -v /run:/run -v /sys:/sys:ro -v /etc/origin/openvswitch:/etc/openvswitch {{ openshift.node.ovs_image }}
+ExecStartPost=/usr/bin/sleep 5
 ExecStop=/usr/bin/docker stop openvswitch
 Restart=always
 
