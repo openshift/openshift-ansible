@@ -338,7 +338,6 @@
   roles:
   - openshift_master
   - role: nickhammond.logrotate
-    when: not openshift.common.is_containerized | bool
   - role: fluentd_master
     when: openshift.common.use_fluentd | bool
   - role: nuage_master
@@ -369,7 +368,7 @@
     cockpit_plugins: "{{ osm_cockpit_plugins | default(['cockpit-kubernetes']) }}"
   roles:
   - role: cockpit
-    when: not openshift.common.is_containerized and ( deployment_type in ['atomic-enterprise','openshift-enterprise'] ) and
+    when: not openshift.common.is_atomic and ( deployment_type in ['atomic-enterprise','openshift-enterprise'] ) and
       (osm_use_cockpit | bool or osm_use_cockpit is undefined )
 
 - name: Configure flannel

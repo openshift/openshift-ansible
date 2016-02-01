@@ -89,7 +89,6 @@
   roles:
   - etcd
   - role: nickhammond.logrotate
-    when: not openshift.common.is_containerized | bool
 
 - name: Delete temporary directory on localhost
   hosts: localhost

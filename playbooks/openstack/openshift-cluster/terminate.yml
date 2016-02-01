@@ -43,6 +43,6 @@
     register: stack_show_result
     until: stack_show_result.stdout != 'DELETE_IN_PROGRESS'
     retries: 60
-    delay: 1
+    delay: 5
     failed_when: '"Stack not found" not in stack_show_result.stderr and
                    stack_show_result.stdout != "DELETE_COMPLETE"'

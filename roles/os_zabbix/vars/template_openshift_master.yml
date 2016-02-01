@@ -20,13 +20,26 @@ g_template_openshift_master:
     - Openshift Master
 
   - key: openshift.master.api.ping
-    description: "Verify that the Openshift API is up"
+    description: "Verify that the Openshift API is up (uses the cluster API URL)"
+    type: int
+    applications:
+    - Openshift Master
+
+  - key: openshift.master.local.api.ping
+    description: "Verify that the Openshift API is up on the host (uses the API URL as the https://127.0.0.1)"
     type: int
     applications:
     - Openshift Master
 
   - key: openshift.master.api.healthz
-    description: "Checks the healthz check of the master's api: https://master_host/healthz"
+    description: "Checks the healthz check of the master's api: https://<cluster_api_url>/healthz"
+    type: int
+    data_type: bool
+    applications:
+    - Openshift Master
+
+  - key: openshift.master.local.api.healthz
+    description: "Checks the healthz check of the master's api: https://127.0.0.1/healthz"
     type: int
     data_type: bool
     applications:
@@ -292,12 +305,22 @@ g_template_openshift_master:
   - name: 'Openshift Master API health check is failing on {HOST.NAME}'
     expression: '{Template Openshift Master:openshift.master.api.healthz.max(#3)}<1'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
+    priority: high
+
+  - name: 'Openshift Master Local API health check is failing on {HOST.NAME}'
+    expression: '{Template Openshift Master:openshift.master.local.api.healthz.max(#3)}<1'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
     dependencies:
     - 'Openshift Master process not running on {HOST.NAME}'
     priority: high
 
   - name: 'Openshift Master API PING check is failing on {HOST.NAME}'
     expression: '{Template Openshift Master:openshift.master.api.ping.max(#3)}<1'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
+    priority: high
+
+  - name: 'Openshift Master Local API PING check is failing on {HOST.NAME}'
+    expression: '{Template Openshift Master:openshift.master.local.api.ping.max(#3)}<1'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
     dependencies:
     - 'Openshift Master process not running on {HOST.NAME}'
@@ -318,14 +341,14 @@ g_template_openshift_master:
     priority: high
 
   - name: 'SkyDNS port not listening on {HOST.NAME}'
-    expression: '{Template Openshift Master:openshift.master.skydns.port.open(#3)}<1'
+    expression: '{Template Openshift Master:openshift.master.skydns.port.open.max(#3)}<1'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
     dependencies:
     - 'Openshift Master process not running on {HOST.NAME}'
     priority: high
 
   - name: 'SkyDNS query failed on {HOST.NAME}'
-    expression: '{Template Openshift Master:openshift.master.skydns.query(#3)}<1'
+    expression: '{Template Openshift Master:openshift.master.skydns.query.max(#3)}<1'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
     dependencies:
     - 'Openshift Master API health check is failing on {HOST.NAME}'

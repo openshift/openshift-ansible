@@ -414,13 +414,19 @@ class FilterModule(object):
             in the following layout:
 
 "c_id": {
-  "master": [
-    { "name": "c_id-master-12345",       "public IP": "172.16.0.1", "private IP": "192.168.0.1", "subtype": "default" }]
-  "node": [
-    { "name": "c_id-node-infra-23456",   "public IP": "172.16.0.2", "private IP": "192.168.0.2", "subtype": "infra" },
-    { "name": "c_id-node-compute-23456", "public IP": "172.16.0.3", "private IP": "192.168.0.3", "subtype": "compute" },
+  "master": {
+    "default": [
+      { "name": "c_id-master-12345",       "public IP": "172.16.0.1", "private IP": "192.168.0.1" }
+    ]
+  "node": {
+    "infra": [
+      { "name": "c_id-node-infra-23456",   "public IP": "172.16.0.2", "private IP": "192.168.0.2" }
+    ],
+    "compute": [
+      { "name": "c_id-node-compute-23456", "public IP": "172.16.0.3", "private IP": "192.168.0.3" },
   ...
-  ]}
+    ]
+  }
         '''
 
         def _get_tag_value(tags, key):
@@ -430,33 +436,29 @@ class FilterModule(object):
                     returns 'value2'
             '''
             for tag in tags:
-                # Skip tag_env-host-type to avoid ambiguity with tag_env
-                # Removing env-host-type tag but leaving this here
-                if tag[:17] == 'tag_env-host-type':
-                    continue
                 if tag[:len(key)+4] == 'tag_' + key:
                     return tag[len(key)+5:]
             raise KeyError(key)
 
         def _add_host(clusters,
-                      env,
+                      clusterid,
                       host_type,
                       sub_host_type,
                       host):
             ''' Add a new host in the clusters data structure '''
-            if env not in clusters:
-                clusters[env] = {}
-            if host_type not in clusters[env]:
-                clusters[env][host_type] = {}
-            if sub_host_type not in clusters[env][host_type]:
-                clusters[env][host_type][sub_host_type] = []
-            clusters[env][host_type][sub_host_type].append(host)
+            if clusterid not in clusters:
+                clusters[clusterid] = {}
+            if host_type not in clusters[clusterid]:
+                clusters[clusterid][host_type] = {}
+            if sub_host_type not in clusters[clusterid][host_type]:
+                clusters[clusterid][host_type][sub_host_type] = []
+            clusters[clusterid][host_type][sub_host_type].append(host)
 
         clusters = {}
         for host in data:
             try:
                 _add_host(clusters=clusters,
-                          env=_get_tag_value(host['group_names'], 'env'),
+                          clusterid=_get_tag_value(host['group_names'], 'clusterid'),
                           host_type=_get_tag_value(host['group_names'], 'host-type'),
                           sub_host_type=_get_tag_value(host['group_names'], 'sub-host-type'),
                           host={'name': host['inventory_hostname'],

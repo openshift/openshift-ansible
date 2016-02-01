@@ -9,12 +9,15 @@ storage:
   s3:
     accesskey: {{ aws_access_key }}
     secretkey: {{ aws_secret_key }}
-    region: us-east-1
-    bucket: {{ clusterid }}-docker
+    region: {{ aws_bucket_region }}
+    bucket: {{ aws_bucket_name }}
     encrypt: true
     secure: true
     v4auth: true
     rootdirectory: /registry
+auth:
+  openshift:
+    realm: openshift
 middleware:
   repository:
     - name: openshift

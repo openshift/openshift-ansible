@@ -206,6 +206,7 @@
   hosts: oo_nodes_to_config
   vars:
     # TODO: Prefix flannel role variables.
+    openshift_node_master_api_url: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_url }}"
     etcd_urls: "{{ hostvars[groups.oo_first_master.0].openshift.master.etcd_urls }}"
     embedded_etcd: "{{ hostvars[groups.oo_first_master.0].openshift.master.embedded_etcd }}"
   roles:
@@ -214,7 +215,6 @@
   - role: nuage_node
     when: openshift.common.use_nuage | bool
   - role: nickhammond.logrotate
-    when: not openshift.common.is_containerized | bool
   - role: fluentd_node
     when: openshift.common.use_fluentd | bool
   tasks:

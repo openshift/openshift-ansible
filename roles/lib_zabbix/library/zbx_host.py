@@ -63,6 +63,19 @@ def get_template_ids(zapi, template_names):
             template_ids.append({'templateid': content['result'][0]['templateid']})
     return template_ids
 
+def interfaces_equal(zbx_interfaces, user_interfaces):
+    '''
+    compare interfaces from zabbix and interfaces from user
+    '''
+
+    for u_int in user_interfaces:
+        for z_int in zbx_interfaces:
+            for u_key, u_val in u_int.items():
+                if str(z_int[u_key]) != str(u_val):
+                    return False
+
+    return True
+
 def main():
     '''
     Ansible module for zabbix host
@@ -120,8 +133,9 @@ def main():
                                                'dns':  '',         # dns for host
                                                'port':  '10050',   # port for interface? 10050
                                               }]
+        hostgroup_names = list(set(module.params['hostgroup_names']))
         params = {'host': hname,
-                  'groups':  get_group_ids(zapi, module.params['hostgroup_names']),
+                  'groups':  get_group_ids(zapi, hostgroup_names),
                   'templates':  get_template_ids(zapi, module.params['template_names']),
                   'interfaces': ifs,
                  }
@@ -138,6 +152,11 @@ def main():
 
             if key == 'templates' and zab_results.has_key('parentTemplates'):
                 if zab_results['parentTemplates'] != value:
+                    differences[key] = value
+
+
+            elif key == "interfaces":
+                if not interfaces_equal(zab_results[key], value):
                     differences[key] = value
 
             elif zab_results[key] != value and zab_results[key] != str(value):
