@@ -1,0 +1,11 @@
+[Global]
+auth-url = {{ lookup('env', 'OS_AUTH_URL') }}
+username = {{ lookup('env', 'OS_USERNAME') }}
+password = {{ lookup('env', 'OS_PASSWORD') }}
+tenant-id = {{ lookup('env', 'OS_TENANT_ID') }}
+region = {{ lookup('env', 'OS_REGION_NAME') }}
+{% if openstack_uuid_load_balancer_subnet is defined %}
+
+[LoadBalancer]
+subnet-id = {{ openstack_uuid_load_balancer_subnet }}
+{% endif %}
