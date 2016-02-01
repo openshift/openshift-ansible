@@ -41,4 +41,5 @@
   command: subscription-manager subscribe --pool {{ openshift_pool_id.stdout_lines[0] }}
 
 - include: enterprise.yml
-  when: deployment_type in [ 'enterprise', 'atomic-enterprise', 'openshift-enterprise' ]
+  when: deployment_type in [ 'enterprise', 'atomic-enterprise', 'openshift-enterprise' ] and
+        not openshift.common.is_atomic | bool

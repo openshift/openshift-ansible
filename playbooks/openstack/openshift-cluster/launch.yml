@@ -29,6 +29,7 @@
 
   - name: Create or Update OpenStack Stack
     command: 'heat {{ heat_stack_action }} -f {{ openstack_infra_heat_stack }}
+             --timeout 3 --enable-rollback
              -P cluster_env={{ cluster_env }}
              -P cluster_id={{ cluster_id }}
              -P cidr={{ openstack_network_cidr }}
@@ -56,7 +57,7 @@
     register: stack_show_status_result
     until: stack_show_status_result.stdout not in ['CREATE_IN_PROGRESS', 'UPDATE_IN_PROGRESS']
     retries: 30
-    delay: 1
+    delay: 5
     failed_when: stack_show_status_result.stdout not in ['CREATE_COMPLETE', 'UPDATE_COMPLETE']
 
   - name: Read OpenStack Stack outputs

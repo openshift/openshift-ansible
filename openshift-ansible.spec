@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.36
+Version:        3.0.37
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -259,6 +259,40 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Jan 29 2016 Kenny Woodson <kwoodson@redhat.com> 3.0.37-1
+- Adding ip address option (kwoodson@redhat.com)
+- Enable cockpit when not is_atomic. (abutcher@redhat.com)
+- Explicitly restart the atomic node service after configuring it for nuage
+  (vishal.patil@nuagenetworks.net)
+- Fix for bug 1298 (vishal.patil@nuagenetworks.net)
+- fixing logic for skipping symlinks (kwoodson@redhat.com)
+- Allow to have custom bucket name and region (florian.lambert@enovance.com)
+- Add inventory example for logrotate_scripts (abutcher@redhat.com)
+- Minor readme cleanup for Bug 1271566 (bleanhar@redhat.com)
+- fix template trigger calc (jdiaz@redhat.com)
+- Configure logrotate on atomic. (abutcher@redhat.com)
+- Comparing zbx_host interfaces and removing duplicate hostgroup_names
+  (kwoodson@redhat.com)
+- Dockerfile: Require pyOpenSSL (gscrivan@redhat.com)
+- replace yum with dnf (spartacus06@gmail.com)
+- Install cockpit, logrotate and fluentd unless host is atomic.
+  (abutcher@redhat.com)
+- zabbix: added the skydns items and triggers (mwoodson@redhat.com)
+- fix pkg_version (spinolacastro@gmail.com)
+- Expose data_dir (spinolacastro@gmail.com)
+- Fix checking for update package availability (nikolai@prokoschenko.de)
+- Fix oo_pretty_print_cluster following the renaming of `env` into `clusterid`
+  (lhuard@amadeus.com)
+- Ensure openssl present for etcd_ca (jdetiber@redhat.com)
+- Update Docs and test for testing ansible version (jdetiber@redhat.com)
+- Add Nuage support to openshift ansible (vishpat@gmail.com)
+- Updating for host monitoring HA masters (kwoodson@redhat.com)
+- adhoc s3 registry - add auth part in the registry config sample
+  (gael.lambert@enovance.com)
+- Move the `is_atomic` check from `update_repos_and_packages.yml` to
+  `rhel_subscribe` (lhuard@amadeus.com)
+- Increase OpenStack stack creation/deletion timeout (lhuard@amadeus.com)
+
 * Mon Jan 25 2016 Kenny Woodson <kwoodson@redhat.com> 3.0.36-1
 - Fixing awsutil to support aliases and v3 (kwoodson@redhat.com)
 - Fail when master restart playbook finds no active masters rather than any
