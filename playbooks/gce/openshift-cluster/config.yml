@@ -4,7 +4,7 @@
   - ../../gce/openshift-cluster/vars.yml
   - ../../gce/openshift-cluster/cluster_hosts.yml
   vars:
-    g_ssh_user: "{{ lookup('env', 'gce_ssh_user') | default(deployment_vars[deployment_type].ssh_user, true) }}"
+    g_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
     g_sudo: "{{ deployment_vars[deployment_type].sudo }}"
     g_nodeonmaster: true
     openshift_cluster_id: "{{ cluster_id }}"
