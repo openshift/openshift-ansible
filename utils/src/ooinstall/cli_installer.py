@@ -45,6 +45,15 @@ passwordless sudo access.
     click.echo(message)
     return click.prompt('User for ssh access', default='root')
 
+def get_master_routingconfig_subdomain():
+    click.clear()
+    message = """
+You might want to override the default subdomain uses for exposed routes. If you don't know what
+this is, use the default value.
+"""
+    click.echo(message)
+    return click.prompt('New default subdomain (ENTER for none)', default='')
+
 def list_hosts(hosts):
     hosts_idx = range(len(hosts))
     for idx in hosts_idx:
@@ -496,6 +505,10 @@ https://docs.openshift.com/enterprise/latest/admin_guide/install/prerequisites.h
 
     if not oo_cfg.hosts:
         oo_cfg.hosts = collect_hosts(oo_cfg)
+        click.clear()
+
+    if not oo_cfg.settings.get('master_routingconfig_subdomain', None):
+        oo_cfg.settings['master_routingconfig_subdomain'] = get_master_routingconfig_subdomain()
         click.clear()
 
     return oo_cfg
