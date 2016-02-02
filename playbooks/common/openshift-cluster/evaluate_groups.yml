@@ -47,7 +47,7 @@
 
   # Use g_new_node_hosts if it exists otherwise g_node_hosts
   - set_fact:
-      g_node_hosts_to_config: "{{ g_new_node_hosts | default(g_node_hosts | default([])) }}"
+      g_node_hosts_to_config: "{{ g_new_node_hosts | default(g_node_hosts | default([], true), true) }}"
 
   - name: Evaluate oo_nodes_to_config
     add_host:

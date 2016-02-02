@@ -5,9 +5,9 @@
 - fail:
     msg: "Interface {{ item.value.etcd_interface }} not found on host {{ item.key }}"
   when: "'etcd_interface' in item.value and 'interface' not in item.value"
-  with_dict: etcd_host_int_map
+  with_dict: etcd_host_int_map | default({})
 
 - fail:
     msg: IPv4 address not found for {{ item.value.interface.device }} on host {{ item.key }}
   when: "'ipv4' not in item.value.interface or 'address' not in item.value.interface.ipv4"
-  with_dict: etcd_host_int_map
+  with_dict: etcd_host_int_map | default({})
