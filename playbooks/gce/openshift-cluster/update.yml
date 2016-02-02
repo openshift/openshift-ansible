@@ -12,7 +12,7 @@
     add_host:
       name: "{{ item }}"
       groups: oo_hosts_to_update
-      ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user | default(ansible_ssh_user, true) }}"
+      ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
     with_items: "{{ g_all_hosts | default([]) }}"
 

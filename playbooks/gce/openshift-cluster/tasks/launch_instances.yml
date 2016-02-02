@@ -1,7 +1,4 @@
 ---
-# TODO: when we are ready to go to ansible 1.9+ support only, we can update to
-# the gce task to use the disk_auto_delete parameter to avoid having to delete
-# the disk as a separate step on termination
 - name: Launch instance(s)
   gce:
     instance_names: "{{ instances }}"
@@ -41,7 +38,7 @@
   add_host:
     hostname: "{{ item.name }}"
     ansible_ssh_host: "{{ item.public_ip }}"
-    ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user | default(ansible_ssh_user, true) }}"
+    ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
     ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
     groups: "{{ item.tags | oo_prepend_strings_in_list('tag_') | join(',') }}"
     gce_public_ip: "{{ item.public_ip }}"
