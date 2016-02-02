@@ -1,0 +1,5 @@
+---
+# tasks file for lib_dyn
+
+- name: Make sure python-dyn is installed
+  yum: name=python-dyn state=present

@@ -74,4 +74,4 @@
         tags:
           Name: "{{ item.item.item.ec2_tag_Name }}-terminate"
       with_items: ec2_stop.results
-      when: "'oo_hosts_to_terminate' in groups"
+      when: ec2_stop | changed

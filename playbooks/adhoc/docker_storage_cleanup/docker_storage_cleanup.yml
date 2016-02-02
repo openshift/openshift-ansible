@@ -57,7 +57,7 @@
 
   # leaving off the '-t' for docker exec.  With it, it doesn't work with ansible and tty support
   - name: update zabbix docker items
-    command: docker exec -i oso-rhel7-zagg-client /usr/local/bin/cron-send-docker-metrics.py
+    command: docker exec -i oso-rhel7-host-monitoring /usr/local/bin/cron-send-docker-metrics.py
 
   # Get and show docker info again.
   - name: Get docker info

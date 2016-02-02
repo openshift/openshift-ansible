@@ -8,7 +8,7 @@
 - name: Import RHEL streams
   command: >
     {{ openshift.common.client_binary }} {{ openshift_examples_import_command }} -n openshift -f {{ rhel_image_streams }}
-  when: openshift_examples_load_rhel
+  when: openshift_examples_load_rhel | bool
   register: oex_import_rhel_streams
   failed_when: "'already exists' not in oex_import_rhel_streams.stderr and oex_import_rhel_streams.rc != 0"
   changed_when: false

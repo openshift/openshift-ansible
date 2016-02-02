@@ -13,3 +13,6 @@
     openshift_cluster_id: "{{ cluster_id }}"
     openshift_debug_level: "{{ debug_level }}"
     openshift_deployment_type: "{{ deployment_type }}"
+    openshift_router_selector: 'type=infra'
+    openshift_infra_nodes: "{{ g_infra_hosts }}"
+    openshift_master_cluster_method: 'native'
