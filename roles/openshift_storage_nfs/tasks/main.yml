@@ -47,6 +47,4 @@
   - nfs-server
 
 - set_fact:
-    nfs_service_status_changed: "{{ True in (start_result.results
-                                    | oo_collect(attribute='changed')
-                                    | list) }}"
+    nfs_service_status_changed: "{{ start_result | changed }}"
