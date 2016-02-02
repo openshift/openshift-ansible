@@ -14,14 +14,14 @@
   - add_host:
       name: "{{ item }}"
       groups: g_service_nodes
-      ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user | default(ansible_ssh_user, true) }}"
+      ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
     with_items: "{{ node_hosts | default([]) | difference(['localhost']) | difference(groups.status_terminated) }}"
 
   - add_host:
       name: "{{ item }}"
       groups: g_service_masters
-      ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user | default(ansible_ssh_user, true) }}"
+      ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
     with_items: "{{ master_hosts | default([]) | difference(['localhost']) | difference(groups.status_terminated) }}"
 
