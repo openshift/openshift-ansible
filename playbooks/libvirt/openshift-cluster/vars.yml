@@ -28,7 +28,7 @@ deployment_vars:
       name:   "{{ lookup('oo_option', 'image_name') |
                   default('CentOS-7-x86_64-GenericCloud.qcow2', True) }}"
       sha256: "{{ lookup('oo_option', 'image_sha256') |
-                  default('9461006300d65172f5668d8875f2aad7b54f7ba4e9c5435d65a84a5a2d66e39b', True) }}"
+                  default('c2e16bab8b5283cae77deb5bb0aad0a494cd4aabcb5dc5c71363056e88b93c0f', True) }}"
     ssh_user: openshift
     sudo: yes
   online:
