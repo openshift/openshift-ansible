@@ -167,7 +167,7 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
         if masters_set or meets_requirements(oo_cfg.settings['install_type'], hosts):
             more_hosts = click.confirm('Install requirements met. Do you want to add additional hosts?')
 
-    if num_masters >= 3:
+    if num_masters > 1:
         collect_master_lb(hosts)
 
     return hosts
@@ -269,6 +269,7 @@ environment will be fault tolerant this reference load balancer will not be.
 It can be replaced post-installation with a load balancer with the same
 hostname.
 """
+    click.clear()
     click.echo(message)
     host_props = {}
 
@@ -288,9 +289,7 @@ hostname.
                                             value_proc=validate_prompt_lb)
     install_haproxy = click.confirm('Should the reference haproxy load balancer be installed on this host?')
     host_props['preconfigured'] = not install_haproxy
-    host_props['master'] = False
-    host_props['node'] = False
-    host_props['master_lb'] = True
+    host_props['roles'] = ['master_lb']
     master_lb = Host(**host_props)
     hosts.append(master_lb)
 
@@ -395,7 +394,7 @@ https://docs.openshift.org/latest/install_config/install/advanced_install.html#m
             click.echo('ERROR: More than one Master load balancer specified. Only one is allowed.')
             sys.exit(1)
         else:
-            if master_lb[0].is_master() or master_lb[0].is_node():
+            if len(master_lb) > 0 and (master_lb[0].is_master() or master_lb[0].is_node()):
                 click.echo('ERROR: The Master load balancer is configured as a master or node. Please correct this.')
                 sys.exit(1)
 
@@ -632,21 +631,28 @@ def get_install_type():
     click.clear()
 
     message = """
-The Atomic OpenShift installer can guide you through a number of deployment types. Please choose one
-of the following:
+The Atomic OpenShift installer can guide you through installing the following cluster configurations. Please choose one:
 
-1) All-in-One: A single host acting as master and node.
-2) Minimal HA environment: Three(3) OpenShift hosts,
-                           One(1) optional auxiliary system for
-                               running a reference load balancing and storage server
-3) Recommended HA environment: Three(3) masters running a clustered etcd,
-                               Three(3) dedicated nodes for running the router,
-                                registry, logging and metrics infrastructure.
-                               The Master load balancer and storage infrastructure should be run outside of OpenShift in this case.
-4) Custom installation
+1) All-in-one: A single host acting as master and node.
 
+2) Single master, multiple nodes: A single master and X number of nodes.
+
+3) Minimal HA environment: Three(3) masters (single embedded etcd on the first master),
+                           one(1) infrastructure host for running
+                               a reference load balancing (HAProxy) and storage server (NFS),
+                           and X number of nodes.
+
+4) Recommended HA environment: Three(3) masters running a clustered etcd (each etcd colocated on a master),
+                               three(3) infrastructure nodes dedicated to running
+                                   the router, registry, logging, and metrics components,
+                               and X number of nodes.
+                               NOTE: The master load balancer and storage server must be run
+                                     outside of OpenShift in this environment.
+
+5) Custom installation: Determine your own configuration of master, node,
+                            and other infrastructure components across X hosts.
 """
-    SUPPORTED = ['all_in_one', 'min_ha', 'recommended_ha', 'custom']
+    SUPPORTED = ['all_in_one', 'single_master', 'min_ha', 'recommended_ha', 'custom']
     click.echo(message)
     type_response = click.prompt("Install type?",
                                  type=int,

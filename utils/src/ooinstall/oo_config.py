@@ -50,10 +50,6 @@ class Host(object):
             raise OOConfigInvalidHostError(
                 "You must specify either an ip or hostname as 'connect_to'.")
 
-        if self.is_master is False and self.is_node is False and self.is_master_lb is False:
-            raise OOConfigInvalidHostError(
-                "You must specify each host as either a master or a node.")
-
     def __str__(self):
         return self.connect_to
 
@@ -74,9 +70,9 @@ class Host(object):
 
     def is_etcd_member(self, all_hosts):
         """ Will this host be a member of a standalone etcd cluster. """
-        if not self.is_master:
+        if not self.is_master():
             return False
-        masters = [host for host in all_hosts if host.is_master]
+        masters = [host for host in all_hosts if host.is_master()]
         if len(masters) > 1:
             return True
         return False
@@ -91,17 +87,17 @@ class Host(object):
 
     def is_dedicated_node(self):
         """ Will this host be a dedicated node. (not a master) """
-        return self.is_node and not self.is_master
+        return self.is_node() and not self.is_master()
 
     def is_schedulable_node(self, all_hosts):
         """ Will this host be a node marked as schedulable. """
-        if not self.is_node:
+        if not self.is_node():
             return False
-        if not self.is_master:
+        if not self.is_master():
             return True
 
-        masters = [host for host in all_hosts if host.is_master]
-        nodes = [host for host in all_hosts if host.is_node]
+        masters = [host for host in all_hosts if host.is_master()]
+        nodes = [host for host in all_hosts if host.is_node()]
         if len(masters) == len(nodes):
             return True
         return False

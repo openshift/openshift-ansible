@@ -1,3 +1,5 @@
+# pylint: disable=bad-continuation,missing-docstring,no-self-use,invalid-name,too-many-instance-attributes,too-few-public-methods
+
 class InstallType(object):
     """
     An enumeration of the types and number of hosts required for recommended
@@ -36,7 +38,7 @@ def maximum_masters(install_type, num_masters):
         # Non-supported install type
         return False
 
-    return num_masters <= install.masters.upper
+    return num_masters >= install.masters.upper
 
 
 
@@ -84,6 +86,12 @@ SUPPORTED_INSTALL_TYPES = {
                                'storage':      HostRange(0, 0),
                                'loadbalancer': HostRange(0, 0)}
                              ),
+    'single_master': InstallType('min_ha',
+                                 {'masters':      HostRange(1, 1),
+                                  'nodes':        HostRange(1, HostRange.INFINITY),
+                                  'storage':      HostRange(1, 1),
+                                  'loadbalancer': HostRange(1, 1)}
+                                ),
     'min_ha':     InstallType('min_ha',
                               {'masters':      HostRange(3, 3),
                                'nodes':        HostRange(3, 3),
@@ -92,7 +100,7 @@ SUPPORTED_INSTALL_TYPES = {
                              ),
     'recommended_ha': InstallType('recommended_ha',
                                   {'masters':      HostRange(3, 3),
-                                   'nodes':        HostRange(3, HostRange.INFINITY),
+                                   'nodes':        HostRange(6, HostRange.INFINITY),
                                    'storage':      HostRange(1, 1),
                                    'loadbalancer': HostRange(1, 1)}
                                  ),
