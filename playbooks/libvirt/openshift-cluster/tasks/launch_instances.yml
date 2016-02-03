@@ -9,12 +9,20 @@
 # to create/query data about vms without having to use xml the python libvirt
 # bindings look like a good candidate for this
 
-- name: Download Base Cloud image
+- name: Download Origin Base Cloud image
   get_url:
     url: '{{ image_url }}'
     sha256sum: '{{ image_sha256 }}'
     dest: '{{ os_libvirt_storage_pool_path }}/{{ [image_name, image_compression] | join(".") }}'
-  when: '{{ ( lookup("oo_option", "skip_image_download") | default("no", True) | lower ) in ["false", "no"] }}'
+  when: '( {{ ( lookup("oo_option", "skip_image_download") | default("no", True) | lower ) in ["false", "no"] }} ) and deployment_type == "origin"'
+  register: downloaded_image
+
+- name: Download Enterprise Base Cloud image
+  get_url:
+    url: '{{ image_url }}'
+    sha256sum: '{{ image_sha256 }}'
+    dest: '{{ os_libvirt_storage_pool_path }}/{{ image_name }}'
+  when: '( {{ ( lookup("oo_option", "skip_image_download") | default("no", True) | lower ) in ["false", "no"] }} ) and deployment_type == "enterprise"'
   register: downloaded_image
 
 - name: Uncompress Base Cloud image
