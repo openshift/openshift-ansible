@@ -556,6 +556,96 @@ class FilterModule(object):
         except Exception as my_e:
             raise errors.AnsibleFilterError('Failed to convert: %s', my_e)
 
+    @staticmethod
+    def oo_openshift_env(hostvars):
+        ''' Return facts which begin with "openshift_"
+            Ex: hostvars = {'openshift_fact': 42,
+                            'theyre_taking_the_hobbits_to': 'isengard'}
+                returns  = {'openshift_fact': 42}
+        '''
+        if not issubclass(type(hostvars), dict):
+            raise errors.AnsibleFilterError("|failed expects hostvars is a dict")
+
+        facts = {}
+        regex = re.compile('^openshift_.*')
+        for key in hostvars:
+            if regex.match(key):
+                facts[key] = hostvars[key]
+        return facts
+
+    @staticmethod
+    # pylint: disable=too-many-branches
+    def oo_persistent_volumes(hostvars, groups, persistent_volumes=None):
+        """ Generate list of persistent volumes based on oo_openshift_env
+            storage options set in host variables.
+        """
+        if not issubclass(type(hostvars), dict):
+            raise errors.AnsibleFilterError("|failed expects hostvars is a dict")
+        if not issubclass(type(groups), dict):
+            raise errors.AnsibleFilterError("|failed expects groups is a dict")
+        if persistent_volumes != None and not issubclass(type(persistent_volumes), list):
+            raise errors.AnsibleFilterError("|failed expects persistent_volumes is a list")
+
+        if persistent_volumes == None:
+            persistent_volumes = []
+        for component in hostvars['openshift']['hosted']:
+            kind = hostvars['openshift']['hosted'][component]['storage']['kind']
+            create_pv = hostvars['openshift']['hosted'][component]['storage']['create_pv']
+            if kind != None and create_pv:
+                if kind == 'nfs':
+                    host = hostvars['openshift']['hosted'][component]['storage']['host']
+                    if host == None:
+                        if len(groups['oo_nfs_to_config']) > 0:
+                            host = groups['oo_nfs_to_config'][0]
+                        else:
+                            raise errors.AnsibleFilterError("|failed no storage host detected")
+                    directory = hostvars['openshift']['hosted'][component]['storage']['nfs']['directory']
+                    volume = hostvars['openshift']['hosted'][component]['storage']['volume']['name']
+                    path = directory + '/' + volume
+                    size = hostvars['openshift']['hosted'][component]['storage']['volume']['size']
+                    access_modes = hostvars['openshift']['hosted'][component]['storage']['access_modes']
+                    persistent_volume = dict(
+                        name="{0}-volume".format(volume),
+                        capacity=size,
+                        access_modes=access_modes,
+                        storage=dict(
+                            nfs=dict(
+                                server=host,
+                                path=path)))
+                    persistent_volumes.append(persistent_volume)
+                else:
+                    msg = "|failed invalid storage kind '{0}' for component '{1}'".format(
+                        kind,
+                        component)
+                    raise errors.AnsibleFilterError(msg)
+        return persistent_volumes
+
+    @staticmethod
+    def oo_persistent_volume_claims(hostvars, persistent_volume_claims=None):
+        """ Generate list of persistent volume claims based on oo_openshift_env
+            storage options set in host variables.
+        """
+        if not issubclass(type(hostvars), dict):
+            raise errors.AnsibleFilterError("|failed expects hostvars is a dict")
+        if persistent_volume_claims != None and not issubclass(type(persistent_volume_claims), list):
+            raise errors.AnsibleFilterError("|failed expects persistent_volume_claims is a list")
+
+        if persistent_volume_claims == None:
+            persistent_volume_claims = []
+        for component in hostvars['openshift']['hosted']:
+            kind = hostvars['openshift']['hosted'][component]['storage']['kind']
+            create_pv = hostvars['openshift']['hosted'][component]['storage']['create_pv']
+            if kind != None and create_pv:
+                volume = hostvars['openshift']['hosted'][component]['storage']['volume']['name']
+                size = hostvars['openshift']['hosted'][component]['storage']['volume']['size']
+                access_modes = hostvars['openshift']['hosted'][component]['storage']['access_modes']
+                persistent_volume_claim = dict(
+                    name="{0}-claim".format(volume),
+                    capacity=size,
+                    access_modes=access_modes)
+                persistent_volume_claims.append(persistent_volume_claim)
+        return persistent_volume_claims
+
     def filters(self):
         """ returns a mapping of filters to methods """
         return {
@@ -578,4 +668,7 @@ class FilterModule(object):
             "oo_generate_secret": self.oo_generate_secret,
             "to_padded_yaml": self.to_padded_yaml,
             "oo_nodes_with_label": self.oo_nodes_with_label,
+            "oo_openshift_env": self.oo_openshift_env,
+            "oo_persistent_volumes": self.oo_persistent_volumes,
+            "oo_persistent_volume_claims": self.oo_persistent_volume_claims,
         }

@@ -1,31 +1,34 @@
 ---
-- name: Set nfs facts
-  openshift_facts:
-    role: nfs
-    local_facts:
-      exports_dir: "{{ openshift_nfs_exports_dir | default(None) }}"
-      export_options: "{{ openshift_nfs_export_options | default(None) }}"
-      registry_volume: "{{ openshift_nfs_registry_volume | default(None) }}"
-
 - name: Install nfs-utils
   yum:
     pkg: nfs-utils
     state: present
 
+- name: Configure NFS
+  lineinfile:
+    dest: /etc/sysconfig/nfs
+    regexp: '^RPCNFSDARGS=.*$'
+    line: 'RPCNFSDARGS="-N 2 -N 3"'
+  register: nfs_config
+
+- name: Restart nfs-config
+  service: name=nfs-config state=restarted
+  when: nfs_config | changed
+
 - name: Ensure exports directory exists
   file:
-    path: "{{ openshift.nfs.exports_dir }}"
+    path: "{{ openshift.hosted.registry.storage.nfs.directory }}"
     state: directory
 
 - name: Ensure export directories exist
   file:
-    path: "{{ openshift.nfs.exports_dir }}/{{ item }}"
+    path: "{{ openshift.hosted.registry.storage.nfs.directory }}/{{ item }}"
     state: directory
     mode: 0777
     owner: nfsnobody
     group: nfsnobody
   with_items:
-  - "{{ openshift.nfs.registry_volume }}"
+  - "{{ openshift.hosted.registry.storage.volume.name }}"
 
 - name: Configure exports
   template:
@@ -44,6 +47,4 @@
   - nfs-server
 
 - set_fact:
-    nfs_service_status_changed: "{{ True in (start_result.results
-                                    | map(attribute='changed')
-                                    | list) }}"
+    nfs_service_status_changed: "{{ start_result | changed }}"

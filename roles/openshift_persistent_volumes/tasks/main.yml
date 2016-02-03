@@ -1,0 +1,50 @@
+---
+- name: Create temp directory for volume definitions
+  command: mktemp -d /tmp/openshift-ansible-XXXXXXX
+  register: mktemp
+  changed_when: False
+
+- name: Copy the admin client config(s)
+  command: >
+    cp {{ openshift_master_config_dir }}/admin.kubeconfig {{ mktemp.stdout }}/admin.kubeconfig
+  changed_when: False
+
+- name: Deploy PersistentVolume definitions
+  template:
+    dest: "{{ mktemp.stdout }}/persistent-volumes.yml"
+    src: persistent-volume.yml.j2
+  when: persistent_volumes | length > 0
+  changed_when: False
+
+- name: Create PersistentVolumes
+  command: >
+    {{ openshift.common.client_binary }} create
+    -f {{ mktemp.stdout }}/persistent-volumes.yml
+    --config={{ mktemp.stdout }}/admin.kubeconfig
+  register: pv_create_output
+  when: persistent_volumes | length > 0
+  failed_when: ('already exists' not in pv_create_output.stderr if pv_create_output.stderr else False) or ('created' not in pv_create_output.stdout if pv_create_output.stdout else False)
+  changed_when: ('created' in pv_create_output.stdout)
+
+- name: Deploy PersistentVolumeClaim definitions
+  template:
+    dest: "{{ mktemp.stdout }}/persistent-volume-claims.yml"
+    src: persistent-volume-claim.yml.j2
+  when: persistent_volume_claims | length > 0
+  changed_when: False
+
+- name: Create PersistentVolumeClaims
+  command: >
+    {{ openshift.common.client_binary }} create
+    -f {{ mktemp.stdout }}/persistent-volume-claims.yml
+    --config={{ mktemp.stdout }}/admin.kubeconfig
+  register: pvc_create_output
+  when: persistent_volume_claims | length > 0
+  failed_when: ('already exists' not in pvc_create_output.stderr if pvc_create_output.stderr else False) or ('created' not in pvc_create_output.stdout if pvc_create_output.stdout else False)
+  changed_when: ('created' in pvc_create_output.stdout)
+
+- name: Delete temp directory
+  file:
+    name: "{{ mktemp.stdout }}"
+    state: absent
+  changed_when: False

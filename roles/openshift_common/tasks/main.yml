@@ -39,11 +39,15 @@
   action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}{{ openshift_version | default('') }} state=present"
   when: not openshift.common.is_containerized | bool
 
-- name: Set version facts
+# This invocation also updates the version facts which are necessary
+# for setting the hostname below.
+- name: openshift_facts
   openshift_facts:
+    role: hosted
+    openshift_env: "{{ hostvars[inventory_hostname] | oo_openshift_env }}"
 
-  # For enterprise versions < 3.1 and origin versions < 1.1 we want to set the
-  # hostname by default.
+# For enterprise versions < 3.1 and origin versions < 1.1 we want to set the
+# hostname by default.
 - set_fact:
     set_hostname_default: "{{ not openshift.common.version_greater_than_3_1_or_1_1 }}"
 

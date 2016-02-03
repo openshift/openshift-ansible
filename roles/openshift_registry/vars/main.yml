@@ -1,2 +1,4 @@
 ---
 openshift_master_config_dir: "{{ openshift.common.config_base }}/master"
+oreg_images: "--images='{{ openshift.master.registry_url }}'"
+oreg_selector: "--selector='{{ openshift.master.registry_selector }}'"

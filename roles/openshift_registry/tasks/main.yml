@@ -1,28 +1,24 @@
 ---
-- set_fact: _oreg_images="--images='{{ openshift.master.registry_url }}'"
-
-- set_fact: _oreg_selector="--selector='{{ openshift.master.registry_selector }}'"
-
 - name: Deploy OpenShift Registry
   command: >
     {{ openshift.common.admin_binary }} registry
-    --create --service-account=registry {{ _oreg_selector }}
-    --credentials={{ openshift_master_config_dir }}/openshift-registry.kubeconfig {{ _oreg_images }}
-  register: _oreg_results
-  changed_when: "'service exists' not in _oreg_results.stdout"
+    --create --replicas={{ openshift.master.infra_nodes | length }}
+    --service-account=registry {{ oreg_selector }}
+    --credentials={{ openshift_master_config_dir }}/openshift-registry.kubeconfig {{ oreg_images }}
+  register: oreg_results
+  changed_when: "'service exists' not in oreg_results.stdout"
 
-- name: Determine if nfs volume is already attached
+- name: Determine if volume is already attached to dc/docker-registry
   command: "{{ openshift.common.client_binary }} get -o template dc/docker-registry --template=\\{\\{.spec.template.spec.volumes\\}\\}"
+  changed_when: false
   register: registry_volumes_output
-  when: attach_registry_volume | bool
 
 - set_fact:
-    volume_already_attached: "{{ 'server:' + nfs_host in registry_volumes_output.stdout and 'path:' + registry_volume_path in registry_volumes_output.stdout }}"
-  when: attach_registry_volume | bool
+    volume_attached: "{{ registry_volume_claim in registry_volumes_output.stdout }}"
 
-- name: Add nfs volume to dc/docker-registry
+- name: Add volume to dc/docker-registry
   command: >
     {{ openshift.common.client_binary }} volume dc/docker-registry
-    --add --overwrite --name=registry-storage --mount-path=/registry
-    --source='{"nfs": {"server": "{{ nfs_host }}", "path": "{{ registry_volume_path }}"}}'
-  when: attach_registry_volume | bool and not volume_already_attached | bool
+    --add --overwrite -t persistentVolumeClaim --claim-name={{ registry_volume_claim }}
+    --name=registry-storage
+  when: not volume_attached | bool
