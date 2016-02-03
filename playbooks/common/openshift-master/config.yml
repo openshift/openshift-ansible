@@ -407,19 +407,11 @@
   - file: name={{ g_master_mktemp.stdout }} state=absent
     changed_when: False
 
-- name: Configure service accounts
-  hosts: oo_first_master
-  vars:
-  roles:
-  - openshift_serviceaccounts
-
-- name: Create persistent volumes and services
+- name: Create persistent volumes
   hosts: oo_first_master
   vars:
     persistent_volumes: "{{ hostvars[groups.oo_first_master.0] | oo_persistent_volumes(groups) }}"
     persistent_volume_claims: "{{ hostvars[groups.oo_first_master.0] | oo_persistent_volume_claims }}"
-    attach_registry_volume: "{{ openshift.hosted.registry.storage.kind != None }}"
-    deploy_infra: "{{ openshift.master.infra_nodes | default(0) | length > 0 }}"
   pre_tasks:
   - set_fact:
       nfs_host: "{{ groups.oo_nfs_to_config.0 }}"
@@ -428,6 +420,21 @@
   roles:
   - role: openshift_persistent_volumes
     when: persistent_volumes | length > 0 or persistent_volume_claims | length > 0
+
+- name: Create hosted infrastructure services
+  hosts: oo_first_master
+  vars:
+    accounts: ["router", "registry"]
+    attach_registry_volume: "{{ openshift.hosted.registry.storage.kind != None }}"
+    deploy_infra: "{{ openshift.master.infra_nodes | default(0) | length > 0 }}"
+  roles:
+  - role: openshift_serviceaccounts
+    openshift_serviceaccounts_names:
+    - router
+    - registry
+    openshift_serviceaccounts_namespace: default
+    openshift_serviceaccounts_sccs:
+    - privileged
   - role: openshift_router
     when: deploy_infra | bool
   - role: openshift_registry
