@@ -16,11 +16,6 @@ From this role:
 |--------------------|-------------------------------------------------------|---------------------|
 |                    |                                                       |                     |
 
-From openshift_common:
-| Name                  | Default value |                                      |
-|-----------------------|---------------|--------------------------------------|
-| openshift_debug_level | 2             | Global openshift debug log verbosity |
-
 Dependencies
 ------------
 
