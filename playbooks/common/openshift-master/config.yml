@@ -362,6 +362,8 @@
 - name: Additional master configuration
   hosts: oo_first_master
   vars:
+    cockpit_plugins: "{{ osm_cockpit_plugins | default(['cockpit-kubernetes']) }}"
+    etcd_urls: "{{ openshift.master.etcd_urls }}"
     openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
     omc_cluster_hosts: "{{ groups.oo_masters_to_config | join(' ')}}"
   roles:
@@ -373,30 +375,16 @@
     when: openshift.common.use_cluster_metrics | bool
   - role: openshift_manageiq
     when: openshift.common.use_manageiq | bool
-
-- name: Enable cockpit
-  hosts: oo_first_master
-  vars:
-    cockpit_plugins: "{{ osm_cockpit_plugins | default(['cockpit-kubernetes']) }}"
-  roles:
   - role: cockpit
     when: not openshift.common.is_atomic and ( deployment_type in ['atomic-enterprise','openshift-enterprise'] ) and
       (osm_use_cockpit | bool or osm_use_cockpit is undefined )
-
-- name: Configure flannel
-  hosts: oo_first_master
-  vars:
-    etcd_urls: "{{ openshift.master.etcd_urls }}"
-  roles:
   - role: flannel_register
     when: openshift.common.use_flannel | bool
+  - role: pods
+    when: openshift.common.deployment_type == 'online'
+  - role: os_env_extras
+    when: openshift.common.deployment_type == 'online'
 
-# Additional instance config for online deployments
-- name: Additional instance config
-  hosts: oo_masters_deployment_type_online
-  roles:
-  - pods
-  - os_env_extras
 
 - name: Delete temporary directory on localhost
   hosts: localhost
@@ -407,27 +395,16 @@
   - file: name={{ g_master_mktemp.stdout }} state=absent
     changed_when: False
 
-- name: Create persistent volumes
+- name: Create persistent volumes and create hosted services
   hosts: oo_first_master
   vars:
+    attach_registry_volume: "{{ openshift.hosted.registry.storage.kind != None }}"
+    deploy_infra: "{{ openshift.master.infra_nodes | default(0) | length > 0 }}"
     persistent_volumes: "{{ hostvars[groups.oo_first_master.0] | oo_persistent_volumes(groups) }}"
     persistent_volume_claims: "{{ hostvars[groups.oo_first_master.0] | oo_persistent_volume_claims }}"
-  pre_tasks:
-  - set_fact:
-      nfs_host: "{{ groups.oo_nfs_to_config.0 }}"
-      registry_volume_path: "{{ hostvars[groups.oo_nfs_to_config.0].openshift.nfs.exports_dir + '/' + hostvars[groups.oo_nfs_to_config.0].openshift.nfs.registry_volume }}"
-    when: attach_registry_volume | bool
   roles:
   - role: openshift_persistent_volumes
     when: persistent_volumes | length > 0 or persistent_volume_claims | length > 0
-
-- name: Create hosted infrastructure services
-  hosts: oo_first_master
-  vars:
-    accounts: ["router", "registry"]
-    attach_registry_volume: "{{ openshift.hosted.registry.storage.kind != None }}"
-    deploy_infra: "{{ openshift.master.infra_nodes | default(0) | length > 0 }}"
-  roles:
   - role: openshift_serviceaccounts
     openshift_serviceaccounts_names:
     - router
@@ -439,3 +416,4 @@
     when: deploy_infra | bool
   - role: openshift_registry
     when: deploy_infra | bool and attach_registry_volume | bool
+
