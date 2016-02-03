@@ -12,5 +12,43 @@
   - openshift_docker
 
 - include: ../openshift-node/config.yml
+
+- name: Gather facts
+  hosts: oo_etcd_to_config:oo_masters_to_config:oo_nodes_to_config
+  roles:
+  - openshift_facts
+
+- name: Update master count
+  hosts: oo_masters:!oo_masters_to_config
+  serial: 1
   vars:
-    openshift_deployment_type: "{{ deployment_type }}"
+    openshift_master_count: "{{ groups.oo_masters | length }}"
+  roles:
+  - openshift_facts
+  post_tasks:
+  - name: Update master count
+    lineinfile:
+      dest: "{{ openshift.common.config_base}}/master/master-config.yaml"
+      regexp: '^  masterCount:.*$'
+      line: "  masterCount: {{ openshift_master_count }}"
+    register: master_config
+  - name: Restart master api
+    service: name={{ openshift.common.service_type }}-master-api state=restarted
+    when: master_config | changed
+    notify: Verify api server
+  - name: restart master controllers
+    service: name={{ openshift.common.service_type }}-master-controllers state=restarted
+    when: master_config | changed
+  handlers:
+  - name: Verify api server
+    command: >
+      curl -k --head --silent {{ openshift.master.api_url }}
+    register: api_available_output
+    until: api_available_output.stdout.find("200 OK") != -1
+    retries: 120
+    delay: 1
+    changed_when: false
+
+- include: ../openshift-master/config.yml
+
+- include: ../openshift-node/config.yml
