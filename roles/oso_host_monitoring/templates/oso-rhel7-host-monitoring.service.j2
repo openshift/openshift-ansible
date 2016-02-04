@@ -58,10 +58,10 @@ ExecStart=/usr/bin/docker run --name {{ osohm_host_monitoring }}                
            -v /var/run/docker.sock:/var/run/docker.sock                                      \
            -v /var/run/openvswitch:/var/run/openvswitch                                      \
 {% if hostvars[inventory_hostname]['ec2_tag_host-type'] == 'master' %}
-           -v /etc/openshift/master/admin.kubeconfig:/etc/openshift/master/admin.kubeconfig  \
-           -v /etc/openshift/master/master.etcd-client.crt:/etc/openshift/master/master.etcd-client.crt \
-           -v /etc/openshift/master/master.etcd-client.key:/etc/openshift/master/master.etcd-client.key \
-           -v /etc/openshift/master/master-config.yaml:/etc/openshift/master/master-config.yaml \
+           -v /etc/origin/master/admin.kubeconfig:/etc/origin/master/admin.kubeconfig  \
+           -v /etc/origin/master/master.etcd-client.crt:/etc/origin/master/master.etcd-client.crt \
+           -v /etc/origin/master/master.etcd-client.key:/etc/origin/master/master.etcd-client.key \
+           -v /etc/origin/master/master-config.yaml:/etc/origin/master/master-config.yaml \
 {% endif %}
            {{ osohm_docker_registry_url }}{{ osohm_host_monitoring }}
 
