@@ -1070,6 +1070,28 @@ def set_container_facts_if_unset(facts):
 
     return facts
 
+def set_installed_variant_rpm_facts(facts):
+    """ Set RPM facts of installed variant
+        Args:
+            facts (dict): existing facts
+        Returns:
+            dict: the facts dict updated with installed_variant_rpms
+                          """
+    installed_rpms = []
+    for base_rpm in ['openshift', 'atomic-openshift', 'origin']:
+        optional_rpms = ['master', 'node', 'clients', 'sdn-ovs']
+        variant_rpms = [base_rpm] + \
+                       ['{0}-{1}'.format(base_rpm, r) for r in optional_rpms] + \
+                       ['tuned-profiles-%s-node' % base_rpm]
+        for rpm in variant_rpms:
+            exit_code, _, _ = module.run_command(['rpm', '-q', rpm])
+            if exit_code == 0:
+                installed_rpms.append(rpm)
+
+    facts['common']['installed_variant_rpms'] = installed_rpms
+    return facts
+
+
 
 class OpenShiftFactsInternalError(Exception):
     """Origin Facts Error"""
@@ -1159,6 +1181,8 @@ class OpenShiftFacts(object):
         facts = set_aggregate_facts(facts)
         facts = set_etcd_facts_if_unset(facts)
         facts = set_container_facts_if_unset(facts)
+        if not facts['common']['is_containerized']:
+            facts = set_installed_variant_rpm_facts(facts)
         return dict(openshift=facts)
 
     def get_defaults(self, roles):
