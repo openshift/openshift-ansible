@@ -3,12 +3,12 @@
 - name: Install cluster metrics templates
   copy:
     src: cluster-metrics
-    dest: /etc/openshift/
+    dest: /etc/origin/
 
 - name: Create InfluxDB Services
   command: >
     {{ openshift.common.client_binary }} create -f
-    /etc/openshift/cluster-metrics/influxdb.yaml
+    /etc/origin/cluster-metrics/influxdb.yaml
   register: oex_influxdb_services
   failed_when: "'already exists' not in oex_influxdb_services.stderr and oex_influxdb_services.rc != 0"
   changed_when: false
@@ -16,7 +16,7 @@
 - name: Create Heapster Service Account
   command: >
     {{ openshift.common.client_binary }} create -f
-    /etc/openshift/cluster-metrics/heapster-serviceaccount.yaml
+    /etc/origin/cluster-metrics/heapster-serviceaccount.yaml
   register: oex_heapster_serviceaccount
   failed_when: "'already exists' not in oex_heapster_serviceaccount.stderr and oex_heapster_serviceaccount.rc != 0"
   changed_when: false
@@ -35,7 +35,7 @@
 - name: Create Heapster Services
   command: >
     {{ openshift.common.client_binary }} create -f
-    /etc/openshift/cluster-metrics/heapster.yaml
+    /etc/origin/cluster-metrics/heapster.yaml
   register: oex_heapster_services
   failed_when: "'already exists' not in oex_heapster_services.stderr and oex_heapster_services.rc != 0"
   changed_when: false
@@ -43,7 +43,7 @@
 - name: Create Grafana Services
   command: >
     {{ openshift.common.client_binary }} create -f
-    /etc/openshift/cluster-metrics/grafana.yaml
+    /etc/origin/cluster-metrics/grafana.yaml
   register: oex_grafana_services
   failed_when: "'already exists' not in oex_grafana_services.stderr and oex_grafana_services.rc != 0"
   changed_when: false
