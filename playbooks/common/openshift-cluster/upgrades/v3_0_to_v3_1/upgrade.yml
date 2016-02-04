@@ -229,12 +229,19 @@
   hosts: oo_masters_to_config
   vars:
     openshift_version: "{{ openshift_pkg_version | default('') }}"
+  roles:
+  - openshift_facts
   tasks:
   - name: Upgrade to latest available kernel
     action: "{{ ansible_pkg_mgr}} name=kernel state=latest"
 
   - name: Upgrade master packages
     command: "{{ ansible_pkg_mgr}} update -y {{ openshift.common.service_type }}-master{{ openshift_version }}"
+    when: openshift_pkg_version is not defined
+
+  - name: Upgrade packages
+    command: "{{ ansible_pkg_mgr}} install -y {{ openshift.common.installed_variant_rpms | oo_31_rpm_rename_conversion(openshift_version) | join (' ')}}"
+    when: openshift_pkg_version is defined and deployment_type == 'openshift-enterprise'
 
   - name: Ensure python-yaml present for config upgrade
     action: "{{ ansible_pkg_mgr }} name=PyYAML state=present"
@@ -415,6 +422,11 @@
   tasks:
   - name: Upgrade node packages
     command: "{{ ansible_pkg_mgr }} update -y {{ openshift.common.service_type }}-node{{ openshift_version }}"
+    when: openshift_pkg_version is not defined
+
+  - name: Upgrade packages
+    command: "{{ ansible_pkg_mgr}} install -y {{ openshift.common.installed_variant_rpms | oo_31_rpm_rename_conversion(openshift_version) | join (' ')}}"
+    when: openshift_pkg_version is defined and deployment_type == 'openshift-enterprise'
 
   - name: Restart node service
     service: name="{{ openshift.common.service_type }}-node" state=restarted
