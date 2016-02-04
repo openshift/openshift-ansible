@@ -150,7 +150,7 @@
 
   # We have to use the shell module because we can't set env vars with the command module.
   - name: "Place PV into oc"
-    shell: "KUBECONFIG=/etc/openshift/master/admin.kubeconfig oc create -f {{ pv_template | quote }}"
+    shell: "KUBECONFIG=/etc/origin/master/admin.kubeconfig oc create -f {{ pv_template | quote }}"
     register: oc_output
 
   - debug: var=oc_output
