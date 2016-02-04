@@ -15,6 +15,7 @@ deployment_rhel7_ent_base:
                 default('rhel-guest-image-7.2-20151102.0.x86_64.qcow2', True) }}"
     sha256: "{{ lookup('oo_option', 'image_sha256') |
                 default('25f880767ec6bf71beb532e17f1c45231640bbfdfbbb1dffb79d2c1b328388e0', True) }}"
+    compression: ""
   ssh_user: openshift
   sudo: yes
 
@@ -41,3 +42,5 @@ deployment_vars:
   enterprise: "{{ deployment_rhel7_ent_base }}"
   openshift-enterprise: "{{ deployment_rhel7_ent_base }}"
   atomic-enterprise: "{{ deployment_rhel7_ent_base }}"
+
+

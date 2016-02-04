@@ -13,15 +13,27 @@
   get_url:
     url: '{{ image_url }}'
     sha256sum: '{{ image_sha256 }}'
-    dest: '{{ os_libvirt_storage_pool_path }}/{{ [image_name, image_compression] | join(".") }}'
+    dest: '{{ os_libvirt_storage_pool_path }}/{{ [image_name, image_compression] | reject("equalto", "") | join(".") }}'
   when: '{{ ( lookup("oo_option", "skip_image_download") | default("no", True) | lower ) in ["false", "no"] }}'
   register: downloaded_image
 
-- name: Uncompress Base Cloud image
+- name: Uncompress xz compressed base cloud image
   command: 'unxz -kf {{ os_libvirt_storage_pool_path }}/{{ [image_name, image_compression] | join(".") }}'
   args:
     creates: '{{ os_libvirt_storage_pool_path }}/{{ image_name }}'
   when: image_compression in ["xz"] and downloaded_image.changed
+
+- name: Uncompress tgz compressed base cloud image
+  command: 'tar zxvf {{ os_libvirt_storage_pool_path }}/{{ [image_name, image_compression] | join(".") }}'
+  args:
+    creates: '{{ os_libvirt_storage_pool_path }}/{{ image_name }}'
+  when: image_compression in ["tgz"] and downloaded_image.changed
+
+- name: Uncompress gzip compressed base cloud image
+  command: 'gunzip {{ os_libvirt_storage_pool_path }}/{{ [image_name, image_compression] | join(".") }}'
+  args:
+    creates: '{{ os_libvirt_storage_pool_path }}/{{ image_name }}'
+  when: image_compression in ["gz"] and downloaded_image.changed
 
 - name: Create the cloud-init config drive path
   file:
