@@ -285,6 +285,10 @@
     master_service_status_changed: "{{ start_result | changed }}"
   when: not openshift_master_ha | bool
 
+- name: Mask master service
+  command: systemctl mask {{ openshift.common.service_type }}-master
+  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
+
 - name: Start and enable master api
   service: name={{ openshift.common.service_type }}-master-api enabled=yes state=started
   when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
