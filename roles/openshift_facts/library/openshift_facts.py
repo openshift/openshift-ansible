@@ -1194,7 +1194,7 @@ class OpenShiftFacts(object):
             master = dict(api_use_ssl=True, api_port='8443', controllers_port='8444',
                           console_use_ssl=True, console_path='/console',
                           console_port='8443', etcd_use_ssl=True, etcd_hosts='',
-                          etcd_port='4001', portal_net='172.30.0.0/16',
+                          etcd_port='4001',
                           embedded_etcd=True, embedded_kube=True,
                           embedded_dns=True, dns_port='8053',
                           bind_addr='0.0.0.0', session_max_seconds=3600,
@@ -1205,7 +1205,7 @@ class OpenShiftFacts(object):
             defaults['master'] = master
 
         if 'node' in roles:
-            node = dict(labels={}, annotations={}, portal_net='172.30.0.0/16',
+            node = dict(labels={}, annotations={},
                         iptables_sync_period='5s', set_node_ip=False)
             defaults['node'] = node
 

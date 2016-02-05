@@ -25,7 +25,13 @@
 
 - name: Set master facts
   openshift_facts:
-    role: master
+    role: "{{ item.role }}"
+    local_facts: "{{ item.local_facts }}"
+  with_items:
+  - role: common
+    local_facts:
+      portal_net: "{{ openshift_master_portal_net | default(None) }}"
+  - role: master
     local_facts:
       cluster_method: "{{ openshift_master_cluster_method | default(None) }}"
       cluster_hostname: "{{ openshift_master_cluster_hostname | default(None) }}"
@@ -57,7 +63,6 @@
       dns_port: "{{ openshift_master_dns_port | default(None) }}"
       bind_addr: "{{ openshift_master_bind_addr | default(None) }}"
       pod_eviction_timeout: "{{ openshift_master_pod_eviction_timeout | default(None) }}"
-      portal_net: "{{ openshift_master_portal_net | default(None) }}"
       session_max_seconds: "{{ openshift_master_session_max_seconds | default(None) }}"
       session_name: "{{ openshift_master_session_name | default(None) }}"
       session_secrets_file: "{{ openshift_master_session_secrets_file | default(None) }}"

@@ -178,7 +178,7 @@
   vars:
     dns_domain: "{{ openshift.common.dns_domain }}"
     kube_svc_ip: "{{ hostvars[groups.oo_first_master.0].openshift.master.kube_svc_ip }}"
-    portal_net: "{{ openshift.node.portal_net }}"
+    portal_net: "{{ openshift.common.portal_net }}"
   roles:
     - openshift_node_dns
 

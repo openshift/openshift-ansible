@@ -10,9 +10,9 @@
       docker_additional_registries: "{{ docker_additional_registries }}"
       docker_insecure_registries: "{{ docker_insecure_registries }}"
       docker_blocked_registries: "{{ docker_blocked_registries }}"
+      portal_net: "{{ openshift_master_portal_net | default(None) }}"
   - role: node
     local_facts:
-      portal_net: "{{ openshift_master_portal_net | default(None) }}"
       docker_log_driver:  "{{ lookup( 'oo_option' , 'docker_log_driver'  )  | default('',True) }}"
       docker_log_options: "{{ lookup( 'oo_option' , 'docker_log_options' )  | default('',True) }}"
 
@@ -44,7 +44,7 @@
   lineinfile:
     dest: /etc/sysconfig/docker
     regexp: '^OPTIONS=.*$'
-    line: "OPTIONS='--insecure-registry={{ openshift.node.portal_net }} \
+    line: "OPTIONS='--insecure-registry={{ openshift.common.portal_net }} \
       {% if ansible_selinux and ansible_selinux.status == '''enabled''' %}--selinux-enabled{% endif %} \
       {% if openshift.node.docker_log_driver is defined  %} --log-driver {{ openshift.node.docker_log_driver }}  {% endif %} \
       {% if openshift.node.docker_log_options is defined %}   {{ openshift.node.docker_log_options |  oo_split() | oo_prepend_strings_in_list('--log-opt ') | join(' ')}}  {% endif %} '"
