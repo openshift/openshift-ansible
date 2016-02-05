@@ -1,6 +1,6 @@
 ---
 - name: Set master facts and determine if external etcd certs need to be generated
-  hosts: oo_first_master:oo_masters_to_config
+  hosts: oo_masters_to_config
   pre_tasks:
   - name: Check for RPM generated config marker file .config_managed
     stat:
@@ -186,10 +186,6 @@
     masters_needing_certs: "{{ hostvars
                                | oo_select_keys(groups['oo_masters_to_config'] | difference(groups['oo_first_master']))
                                | oo_filter_list(filter_attr='master_certs_missing') }}"
-    master_hostnames: "{{ hostvars
-                               | oo_select_keys(groups['oo_masters_to_config'])
-                               | oo_collect('openshift.common.all_hostnames')
-                               | oo_flatten | unique }}"
     sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
   roles:
   - openshift_master_certificates
@@ -343,12 +339,12 @@
     file:
       path: "{{ openshift.common.config_base }}/master"
       state: directory
-    when: master_certs_missing and 'oo_first_master' not in group_names
+    when: master_certs_missing | bool and 'oo_first_master' not in group_names
   - name: Unarchive the tarball on the master
     unarchive:
       src: "{{ sync_tmpdir }}/{{ master_cert_subdir }}.tgz"
       dest: "{{ master_cert_config_dir }}"
-    when: master_certs_missing and 'oo_first_master' not in group_names
+    when: master_certs_missing | bool and 'oo_first_master' not in group_names
   roles:
   - openshift_master
   - role: nickhammond.logrotate
