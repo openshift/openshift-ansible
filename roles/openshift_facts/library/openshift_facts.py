@@ -549,11 +549,13 @@ def set_aggregate_facts(facts):
     """
     all_hostnames = set()
     internal_hostnames = set()
+    kube_svc_ip = first_ip(facts['common']['portal_net'])
     if 'common' in facts:
         all_hostnames.add(facts['common']['hostname'])
         all_hostnames.add(facts['common']['public_hostname'])
         all_hostnames.add(facts['common']['ip'])
         all_hostnames.add(facts['common']['public_ip'])
+        faces['common']['kube_svc_ip'] = kube_svc_ip
 
         internal_hostnames.add(facts['common']['hostname'])
         internal_hostnames.add(facts['common']['ip'])
@@ -570,10 +572,8 @@ def set_aggregate_facts(facts):
                          'kubernetes.default.svc', 'kubernetes.default.svc.' + cluster_domain]
             all_hostnames.update(svc_names)
             internal_hostnames.update(svc_names)
-            first_svc_ip = first_ip(facts['master']['portal_net'])
-            all_hostnames.add(first_svc_ip)
-            internal_hostnames.add(first_svc_ip)
-            facts['common']['kube_svc_ip'] = first_svc_ip
+            all_hostnames.add(kube_svc_ip)
+            internal_hostnames.add(kube_svc_ip)
 
         facts['common']['all_hostnames'] = list(all_hostnames)
         facts['common']['internal_hostnames'] = list(internal_hostnames)
@@ -1183,7 +1183,7 @@ class OpenShiftFacts(object):
 
         common = dict(use_openshift_sdn=True, ip=ip_addr, public_ip=ip_addr,
                       deployment_type='origin', hostname=hostname,
-                      public_hostname=hostname)
+                      public_hostname=hostname, portal_net='172.30.0.0/16')
         common['client_binary'] = 'oc'
         common['admin_binary'] = 'oadm'
         common['dns_domain'] = 'cluster.local'
