@@ -58,10 +58,26 @@ def migrate_docker_facts(facts):
         facts['docker']['hosted_registry_network'] = facts['node'].pop('portal_net')
     return facts
 
+def migrate_common_facts(facts):
+    """ Migrate facts from various roles into common """
+    params = {
+        'node': ( 'portal_net' )
+    }
+    if 'common' not in facts:
+        facts['common'] = {}
+    for role in params.keys():
+        if role in facts:
+            for param in params[role]:
+                if param in facts[role]:
+                    facts['common'][param] = facts[role].pop(param)
+    return facts
+
 def migrate_local_facts(facts):
     """ Apply migrations of local facts """
     migrated_facts = copy.deepcopy(facts)
-    return migrate_docker_facts(migrated_facts)
+    migrated_facts = migrate_docker_facts(migrated_facts)
+    migrated_facts = migrate_common_facts(migrated_facts)
+    return migrated_facts
 
 def migrate_hosted_facts(facts):
     """ Apply migrations for master facts """
@@ -586,11 +602,13 @@ def set_aggregate_facts(facts):
     """
     all_hostnames = set()
     internal_hostnames = set()
+    kube_svc_ip = first_ip(facts['common']['portal_net'])
     if 'common' in facts:
         all_hostnames.add(facts['common']['hostname'])
         all_hostnames.add(facts['common']['public_hostname'])
         all_hostnames.add(facts['common']['ip'])
         all_hostnames.add(facts['common']['public_ip'])
+        facts['common']['kube_svc_ip'] = kube_svc_ip
 
         internal_hostnames.add(facts['common']['hostname'])
         internal_hostnames.add(facts['common']['ip'])
@@ -607,9 +625,8 @@ def set_aggregate_facts(facts):
                          'kubernetes.default.svc', 'kubernetes.default.svc.' + cluster_domain]
             all_hostnames.update(svc_names)
             internal_hostnames.update(svc_names)
-            first_svc_ip = first_ip(facts['master']['portal_net'])
-            all_hostnames.add(first_svc_ip)
-            internal_hostnames.add(first_svc_ip)
+            all_hostnames.add(kube_svc_ip)
+            internal_hostnames.add(kube_svc_ip)
 
         facts['common']['all_hostnames'] = list(all_hostnames)
         facts['common']['internal_hostnames'] = list(internal_hostnames)
@@ -1519,6 +1536,7 @@ class OpenShiftFacts(object):
                                   deployment_type=deployment_type,
                                   hostname=hostname,
                                   public_hostname=hostname,
+                                  portal_net='172.30.0.0/16',
                                   client_binary='oc', admin_binary='oadm',
                                   dns_domain='cluster.local',
                                   install_examples=True,
