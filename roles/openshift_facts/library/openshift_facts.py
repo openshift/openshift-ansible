@@ -573,9 +573,11 @@ def set_aggregate_facts(facts):
             first_svc_ip = first_ip(facts['master']['portal_net'])
             all_hostnames.add(first_svc_ip)
             internal_hostnames.add(first_svc_ip)
+            facts['common']['kube_svc_ip'] = first_svc_ip
 
         facts['common']['all_hostnames'] = list(all_hostnames)
         facts['common']['internal_hostnames'] = list(internal_hostnames)
+
 
     return facts
 
@@ -1194,7 +1196,7 @@ class OpenShiftFacts(object):
                           console_port='8443', etcd_use_ssl=True, etcd_hosts='',
                           etcd_port='4001', portal_net='172.30.0.0/16',
                           embedded_etcd=True, embedded_kube=True,
-                          embedded_dns=True, dns_port='53',
+                          embedded_dns=True, dns_port='8053',
                           bind_addr='0.0.0.0', session_max_seconds=3600,
                           session_name='ssn', session_secrets_file='',
                           access_token_max_seconds=86400,

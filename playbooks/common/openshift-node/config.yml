@@ -173,6 +173,15 @@
       dest: "{{ node_cert_dir }}"
     when: certs_missing
 
+- name: Configure node dnsmasq
+  hosts: oo_nodes_to_config:!oo_containerized_master_nodes
+  vars:
+    dns_domain: "{{ openshift.common.dns_domain }}"
+    kube_svc_ip: "{{ hostvars[groups.oo_first_master.0].openshift.master.kube_svc_ip }}"
+    portal_net: "{{ openshift.node.portal_net }}"
+  roles:
+    - openshift_node_dns
+
 - name: Evaluate node groups
   hosts: localhost
   become: no

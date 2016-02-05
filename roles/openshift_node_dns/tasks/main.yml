@@ -1,0 +1,23 @@
+---
+- name: Install NetworkManager
+  action: "{{ ansible_pkg_mgr }} name=NetworkManager state=present"
+  
+- name: Switch resolver to dnsmasq
+  copy:
+    src: origin-cluster-resolver.conf
+    dest: /etc/NetworkManager/conf.d/
+    owner: root
+    group: root
+    mode: 0644
+    
+- name: Configure cluster dns
+  template:
+    src: origin-cluster-dnsmasq.conf.j2
+    dest: /etc/NetworkManager/dnsmasq.d/origin-dns.conf
+    owner: root
+    group: root
+    mode: 0644
+  
+- name: Enable Network Manager
+  service: name=NetworkManager state=started enabled=yes
+    

@@ -1,0 +1,5 @@
+---
+dns_domain: "cluster.local"
+kube_svc_ip: "172.30.0.1"
+dns_port: "53"
+portal_net: "172.30.0.0/16"
