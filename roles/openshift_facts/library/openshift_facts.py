@@ -304,23 +304,6 @@ def normalize_provider_facts(provider, metadata):
         facts = normalize_openstack_facts(metadata, facts)
     return facts
 
-def set_fluentd_facts_if_unset(facts):
-    """ Set fluentd facts if not already present in facts dict
-            dict: the facts dict updated with the generated fluentd facts if
-            missing
-        Args:
-            facts (dict): existing facts
-        Returns:
-            dict: the facts dict updated with the generated fluentd
-            facts if they were not already present
-
-    """
-    if 'common' in facts:
-        if 'use_fluentd' not in facts['common']:
-            use_fluentd = False
-            facts['common']['use_fluentd'] = use_fluentd
-    return facts
-
 def set_flannel_facts_if_unset(facts):
     """ Set flannel facts if not already present in facts dict
             dict: the facts dict updated with the flannel facts if
@@ -1145,7 +1128,6 @@ class OpenShiftFacts(object):
         facts['current_config'] = get_current_config(facts)
         facts = set_url_facts_if_unset(facts)
         facts = set_project_cfg_facts_if_unset(facts)
-        facts = set_fluentd_facts_if_unset(facts)
         facts = set_flannel_facts_if_unset(facts)
         facts = set_nuage_facts_if_unset(facts)
         facts = set_node_schedulability(facts)
