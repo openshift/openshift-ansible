@@ -74,6 +74,11 @@
 
   - set_fact:
       g_new_version: "{{ g_aos_versions.curr_version.split('-', 1).0 if g_aos_versions.avail_version is none else g_aos_versions.avail_version.split('-', 1).0 }}"
+    when: openshift_pkg_version is not defined
+
+  - set_fact:
+      g_new_version: "{{ openshift_pkg_version | replace('-','') }}"
+    when: openshift_pkg_version is defined
 
   - fail:
       msg: This playbook requires Origin 1.0.6 or later
@@ -567,46 +572,55 @@
   - role: openshift_examples
     openshift_examples_import_command: replace
   pre_tasks:
-  - name: Check for default router
+  - name: Collect all routers
     command: >
-      {{ oc_cmd }} get -n default dc/router
-    register: _default_router
+      {{ oc_cmd }} get pods --all-namespaces -l 'router' -o json
+    register: all_routers
     failed_when: false
     changed_when: false
 
+  - set_fact: haproxy_routers="{{ (all_routers.stdout | from_json)['items'] | oo_pods_match_component(openshift_deployment_type, 'haproxy-router') | oo_select_keys_from_list(['metadata']) }}"
+    when: all_routers.rc == 0
+
+  - set_fact: haproxy_routers=[]
+    when: all_routers.rc != 0
+
   - name: Check for allowHostNetwork and allowHostPorts
-    when: _default_router.rc == 0
+    when: all_routers.rc == 0
     shell: >
       {{ oc_cmd }} get -o yaml scc/privileged | /usr/bin/grep -e allowHostPorts -e allowHostNetwork
     register: _scc
 
   - name: Grant allowHostNetwork and allowHostPorts
     when:
-    - _default_router.rc == 0
+    - all_routers.rc == 0
     - "'false' in _scc.stdout"
     command: >
       {{ oc_cmd }} patch scc/privileged -p
       '{"allowHostPorts":true,"allowHostNetwork":true}' --api-version=v1
 
   - name: Update deployment config to 1.0.4/3.0.1 spec
-    when: _default_router.rc == 0
+    when: all_routers.rc == 0
     command: >
-      {{ oc_cmd }} patch dc/router -p
+      {{ oc_cmd }} patch dc/{{ item['labels']['deploymentconfig'] }} -p
       '{"spec":{"strategy":{"rollingParams":{"updatePercent":-10},"spec":{"serviceAccount":"router","serviceAccountName":"router"}}}}'
       --api-version=v1
+    with_items: haproxy_routers
 
   - name: Switch to hostNetwork=true
-    when: _default_router.rc == 0
+    when: all_routers.rc == 0
     command: >
-      {{ oc_cmd }} patch dc/router -p '{"spec":{"template":{"spec":{"hostNetwork":true}}}}'
+      {{ oc_cmd }} patch dc/{{ item['labels']['deploymentconfig'] }} -p '{"spec":{"template":{"spec":{"hostNetwork":true}}}}'
       --api-version=v1
+    with_items: haproxy_routers
 
   - name: Update router image to current version
-    when: _default_router.rc == 0
+    when: all_routers.rc == 0
     command: >
-      {{ oc_cmd }} patch dc/router -p
+      {{ oc_cmd }} patch dc/{{ item['labels']['deploymentconfig'] }} -p
       '{"spec":{"template":{"spec":{"containers":[{"name":"router","image":"{{ router_image }}"}]}}}}'
       --api-version=v1
+    with_items: haproxy_routers
 
   - name: Check for default registry
     command: >
