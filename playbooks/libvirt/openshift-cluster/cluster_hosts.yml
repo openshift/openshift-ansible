@@ -12,8 +12,6 @@ g_master_hosts:  "{{ g_all_hosts | intersect(groups['tag_host-type-master'] | de
 
 g_new_master_hosts: "{{ g_all_hosts | intersect(groups['tag_host-type-new-master'] | default([])) }}"
 
-g_all_master_hosts: "{{ (g_all_hosts | intersect(groups['tag_host-type-master'])) | union((g_all_hosts | intersect(groups['tag_host-type-new-master']))) | default([]) }}"
-
 g_node_hosts:    "{{ g_all_hosts | intersect(groups['tag_host-type-node'] | default([])) }}"
 
 g_new_node_hosts: "{{ g_all_hosts | intersect(groups['tag_host-type-new-node'] | default([])) }}"

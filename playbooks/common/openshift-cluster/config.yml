@@ -11,4 +11,6 @@
 
 - include: ../openshift-master/config.yml
 
+- include: additional_config.yml
+
 - include: ../openshift-node/config.yml

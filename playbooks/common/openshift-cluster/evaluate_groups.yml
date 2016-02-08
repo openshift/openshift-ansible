@@ -35,7 +35,7 @@
       groups: oo_masters
       ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
       ansible_sudo: "{{ g_sudo | default(omit) }}"
-    with_items: "{{ g_all_master_hosts | default([]) }}"
+    with_items: "{{ g_master_hosts | union(g_new_master_hosts) | default([]) }}"
 
   - name: Evaluate oo_etcd_to_config
     add_host:
@@ -45,20 +45,13 @@
       ansible_sudo: "{{ g_sudo | default(omit) }}"
     with_items: "{{ g_etcd_hosts | default([]) }}"
 
-  - set_fact:
-      g_master_hosts_to_config: "{{ g_new_master_hosts | default(g_master_hosts | default([], true), true) }}"
-
   - name: Evaluate oo_masters_to_config
     add_host:
       name: "{{ item }}"
       groups: oo_masters_to_config
       ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
       ansible_sudo: "{{ g_sudo | default(omit) }}"
-    with_items: "{{ g_master_hosts_to_config | default([]) }}"
-
-  # Use g_new_node_hosts if it exists otherwise g_node_hosts
-  - set_fact:
-      g_node_hosts_to_config: "{{ g_new_node_hosts | default(g_node_hosts | default([], true), true) }}"
+    with_items: "{{ g_new_master_hosts | default(g_master_hosts | default([], true), true) }}"
 
   - name: Evaluate oo_nodes_to_config
     add_host:
@@ -66,7 +59,7 @@
       groups: oo_nodes_to_config
       ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
       ansible_sudo: "{{ g_sudo | default(omit) }}"
-    with_items: "{{ g_node_hosts_to_config | default([]) }}"
+    with_items: "{{ g_new_node_hosts | default(g_node_hosts | default([], true), true) }}"
 
   # Skip adding the master to oo_nodes_to_config when g_new_node_hosts is
   - name: Evaluate oo_nodes_to_config
