@@ -343,8 +343,6 @@
   roles:
   - openshift_master
   - role: nickhammond.logrotate
-  - role: fluentd_master
-    when: openshift.common.use_fluentd | bool
   - role: nuage_master
     when: openshift.common.use_nuage | bool
   post_tasks:
