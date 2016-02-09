@@ -8,8 +8,12 @@
     g_server: http://localhost/zabbix/api_jsonrpc.php
     g_user: Admin
     g_password: zabbix
+    g_zbx_scriptrunner_user: scriptrunner
+    g_zbx_scriptrunner_bastion_host: specialhost.example.com
   roles:
   - role: os_zabbix
     ozb_server: "{{ g_server }}"
     ozb_user: "{{ g_user }}"
     ozb_password: "{{ g_password }}"
+    ozb_scriptrunner_user:  "{{ g_zbx_scriptrunner_user }}"
+    ozb_scriptrunner_bastion_host: "{{ g_zbx_scriptrunner_bastion_host }}"
