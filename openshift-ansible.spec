@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.37
+Version:        3.0.39
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -259,6 +259,56 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Feb 09 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.39-1
+- Bug 1304150 - Can't upgrade atomic-openshift to specified version
+  (bleanhar@redhat.com)
+- Mask master service when using native ha (jdetiber@redhat.com)
+- aoi: Safer check for master_routingconfig_subdomain (smunilla@redhat.com)
+- Add a DNS server on OpenStack clusters (lhuard@amadeus.com)
+- renamed /etc/openshift to /etc/origin (sten@redhat.com)
+- gitignore : .tag* (atom editor tag files) (sdodson@redhat.com)
+- Add an early check to ensure that node names resolve to an interface on the
+  host (sdodson@redhat.com)
+- Allow compression option to be set to empty for non compressed QCow images
+  Support tgz and gzip compressed images (akram@free.fr)
+- Replace status_changed bool (abutcher@redhat.com)
+- Improve docs and consistency of setting the ssh_user (jdetiber@redhat.com)
+- remove outdated comments (jdetiber@redhat.com)
+- add etcd hosts for gce playbooks (jdetiber@redhat.com)
+- GCE cloud provider updates (jdetiber@redhat.com)
+- Remove extra nfs configuration. (abutcher@redhat.com)
+- Do not apply the etcd_certificates role during node playbook.
+  (abutcher@redhat.com)
+- Add g_new_node_hosts to cluster_hosts. (abutcher@redhat.com)
+- Updating examples to use /etc/origin/master/htpasswd (jstuever@redhat.com)
+- Refactor registry storage options. (abutcher@redhat.com)
+- Additional overrides for cloud provider playbooks (jdetiber@redhat.com)
+- Bring first etcd server up before others. (dgoodwin@redhat.com)
+
+* Tue Feb 02 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.38-1
+- aoi: Ask for osm_default_subdomain in interactive mode (smunilla@redhat.com)
+- add item to hold number of stray OVS rules found/removed (jdiaz@redhat.com)
+- changed adhoc playbook to match new host monitoring container
+  (mwoodson@redhat.com)
+- Multi-master fixes for provider playbooks (jdetiber@redhat.com)
+- zabbix: added master local api items and triggers (mwoodson@redhat.com)
+- Added docs around oo_nodes_with_label (jdetiber@redhat.com)
+- fix for terminate (jdetiber@redhat.com)
+- Fix node tags for aws provider (jdetiber@redhat.com)
+- use yaml for loading lable info instead of json (jdetiber@redhat.com)
+- infra_node fixes (jdetiber@redhat.com)
+- removing extraneous comments (rharriso@redhat.com)
+- Remove commented lines and fix pylint check (rharriso@redhat.com)
+- Cleaning up the dyn ansible module for merging (rharriso@redhat.com)
+- Fix missing bool filter (sdodson@redhat.com)
+- Sync platest imagestreams (sdodson@redhat.com)
+- Fixing last pylint error (rharriso@redhat.com)
+- Fix hostname for aws cloud provider (jdetiber@redhat.com)
+- Fixing pylint errors (rharriso@redhat.com)
+- Give openvswitch container some time to start (jprovazn@redhat.com)
+- s3_registry no filter named 'lookup' (florian.lambert@enovance.com)
+- WIP adding the lib_dyn role for the dyn_record module (rharriso@redhat.com)
+
 * Fri Jan 29 2016 Kenny Woodson <kwoodson@redhat.com> 3.0.37-1
 - Adding ip address option (kwoodson@redhat.com)
 - Enable cockpit when not is_atomic. (abutcher@redhat.com)

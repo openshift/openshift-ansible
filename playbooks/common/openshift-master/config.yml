@@ -53,6 +53,11 @@
           console_use_ssl: "{{ openshift_master_console_use_ssl | default(None) }}"
           public_console_url: "{{ openshift_master_public_console_url | default(None) }}"
           portal_net: "{{ openshift_master_portal_net | default(None) }}"
+  - openshift_facts:
+      role: hosted
+      openshift_env:
+        openshift_hosted_registry_storage_kind: 'nfs'
+    when: openshift_hosted_registry_storage_kind is not defined and groups.oo_nfs_to_config is defined and groups.oo_nfs_to_config | length > 0
   - name: Check status of external etcd certificatees
     stat:
       path: "{{ openshift.common.config_base }}/master/{{ item }}"
@@ -164,6 +169,11 @@
                                 | list ) }}"
       master_cert_subdir: master-{{ openshift.common.hostname }}
       master_cert_config_dir: "{{ openshift.common.config_base }}/master"
+  - set_fact:
+      openshift_infra_nodes: "{{ hostvars | oo_select_keys(groups['nodes'])
+                                 | oo_nodes_with_label('region', 'infra')
+                                 | oo_collect('inventory_hostname') }}"
+    when: openshift_infra_nodes is not defined
 
 - name: Configure master certificates
   hosts: oo_first_master
@@ -397,24 +407,20 @@
 
 - name: Configure service accounts
   hosts: oo_first_master
-
   vars:
     accounts: ["router", "registry"]
-
   roles:
   - openshift_serviceaccounts
 
-- name: Create services
+- name: Create persistent volumes and services
   hosts: oo_first_master
   vars:
-    attach_registry_volume: "{{ groups.oo_nfs_to_config | length > 0 }}"
-  pre_tasks:
-  - set_fact:
-      nfs_host: "{{ groups.oo_nfs_to_config.0 }}"
-      registry_volume_path: "{{ hostvars[groups.oo_nfs_to_config.0].openshift.nfs.exports_dir + '/' + hostvars[groups.oo_nfs_to_config.0].openshift.nfs.registry_volume }}"
-    when: attach_registry_volume | bool
+    persistent_volumes: "{{ hostvars[groups.oo_first_master.0] | oo_persistent_volumes(groups) }}"
+    persistent_volume_claims: "{{ hostvars[groups.oo_first_master.0] | oo_persistent_volume_claims }}"
   roles:
+  - role: openshift_persistent_volumes
+    when: persistent_volumes | length > 0 or persistent_volume_claims | length > 0
   - role: openshift_router
     when: openshift.master.infra_nodes is defined
   - role: openshift_registry
-    when: openshift.master.infra_nodes is defined and attach_registry_volume | bool
+    when: openshift.master.infra_nodes is defined and openshift.hosted.registry.storage.kind != None

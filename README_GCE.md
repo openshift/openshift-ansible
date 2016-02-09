@@ -42,12 +42,17 @@ Create a gce.ini file for GCE
 Mandatory customization variables (check the values according to your tenant):
 * zone = europe-west1-d
 * network = default
-* gce_machine_type = n1-standard-2
-* gce_machine_master_type = n1-standard-1
-* gce_machine_node_type = n1-standard-2
-* gce_machine_image = preinstalled-slave-50g-v5
-* gce_machine_master_image = preinstalled-slave-50g-v5
-* gce_machine_node_image = preinstalled-slave-50g-v5
+
+Optional Variable Overrides:
+* gce_ssh_user - ssh user, defaults to the current logged in user
+* gce_machine_type = n1-standard-1 - default machine type
+* gce_machine_etcd_type = n1-standard-1 - machine type for etcd hosts
+* gce_machine_master_type = n1-standard-1 - machine type for master hosts
+* gce_machine_node_type = n1-standard-1 - machine type for node hosts
+* gce_machine_image = centos-7 - default image
+* gce_machine_etcd_image = centos-7 - image for etcd hosts
+* gce_machine_master_image = centos-7 - image for master hosts
+* gce_machine_node_image = centos-7 - image for node hosts
 
 
 1. vi ~/.gce/gce.ini
@@ -62,9 +67,9 @@ network = default
 gce_machine_type = n1-standard-2
 gce_machine_master_type = n1-standard-1
 gce_machine_node_type = n1-standard-2
-gce_machine_image = preinstalled-slave-50g-v5
-gce_machine_master_image = preinstalled-slave-50g-v5
-gce_machine_node_image = preinstalled-slave-50g-v5
+gce_machine_image = centos-7
+gce_machine_master_image = centos-7
+gce_machine_node_image = centos-7
 
 ```
 1. Define the environment variable GCE_INI_PATH so gce.py can pick it up and bin/cluster can also read it
@@ -92,9 +97,14 @@ argument will result in all gce instances being listed)
 
 Creating a cluster
 ------------------
-1. To create a cluster with one master and two nodes
+1. To create a cluster with one master, one infra node, and two compute nodes
 ```
   bin/cluster create gce <cluster-id>
+```
+1. To create a cluster with 3 masters, 3 etcd hosts, 2 infra nodes and 10
+compute nodes
+```
+  bin/cluster create gce -m 3 -e 3 -i 2 -n 10 <cluster-id>
 ```
 
 Updating a cluster
@@ -104,6 +114,16 @@ Updating a cluster
   bin/cluster update gce <cluster-id>
 ```
 
+Add additional nodes
+---------------------
+1. To add additional infra nodes
+```
+  bin/cluster add-nodes gce -i <num nodes> <cluster-id>
+```
+1. To add additional compute nodes
+```
+  bin/cluster add-nodes gce -n <num nodes> <cluster-id>
+```
 Terminating a cluster
 ---------------------
 1. To terminate the cluster

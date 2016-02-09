@@ -80,6 +80,7 @@
     when: etcd_client_flannel_certs_missing is defined and etcd_client_flannel_certs_missing
   roles:
   - role: etcd_certificates
+    when: openshift_use_flannel | default(false) | bool
   post_tasks:
   - name: Create a tarball of the etcd flannel certs
     command: >

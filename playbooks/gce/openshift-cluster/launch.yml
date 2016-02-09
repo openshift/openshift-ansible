@@ -10,6 +10,17 @@
   - fail: msg="Deployment type not supported for gce provider yet"
     when: deployment_type == 'enterprise'
 
+  - include: ../../common/openshift-cluster/tasks/set_etcd_launch_facts.yml
+  - include: tasks/launch_instances.yml
+    vars:
+      instances: "{{ etcd_names }}"
+      cluster: "{{ cluster_id }}"
+      type: "{{ k8s_type }}"
+      g_sub_host_type: "default"
+      gce_machine_type: "{{ lookup('env', 'gce_machine_etcd_type') | default(lookup('env', 'gce_machine_type'), true) }}"
+      gce_machine_image: "{{ lookup('env', 'gce_machine_etcd_image') | default(lookup('env', 'gce_machine_image'), true) }}"
+
+
   - include: ../../common/openshift-cluster/tasks/set_master_launch_facts.yml
   - include: tasks/launch_instances.yml
     vars:
@@ -43,6 +54,8 @@
       cluster: "{{ cluster_id }}"
       type: "{{ k8s_type }}"
       g_sub_host_type: "{{ sub_host_type }}"
+      gce_machine_type: "{{ lookup('env', 'gce_machine_node_type') | default(lookup('env', 'gce_machine_type'), true) }}"
+      gce_machine_image: "{{ lookup('env', 'gce_machine_node_image') | default(lookup('env', 'gce_machine_image'), true) }}"
 
   - add_host:
       name: "{{ master_names.0 }}"
@@ -50,17 +63,5 @@
     when: master_names is defined and master_names.0 is defined
 
 - include: update.yml
-#
-#- name: Deploy OpenShift Services
-#  hosts: service_master
-#  connection: ssh
-#  gather_facts: yes
-#  roles:
-#  - openshift_registry
-#  - openshift_router
-#
-#- include: ../../common/openshift-cluster/create_services.yml
-#  vars:
-#     g_svc_master: "{{ service_master }}"
 
 - include: list.yml

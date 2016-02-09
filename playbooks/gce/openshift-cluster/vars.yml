@@ -4,14 +4,14 @@ debug_level: 2
 deployment_rhel7_ent_base:
   image: rhel-7
   machine_type: n1-standard-1
-  ssh_user:
+  ssh_user: "{{ lookup('env', 'gce_ssh_user') |  default(ansible_ssh_user, true) }}"
   sudo: yes
 
 deployment_vars:
   origin:
-    image: preinstalled-slave-50g-v5
+    image: centos-7
     machine_type: n1-standard-1
-    ssh_user: root
+    ssh_user: "{{ lookup('env', 'gce_ssh_user') |  default(ansible_ssh_user, true) }}"
     sudo: yes
   online:
     image: libra-rhel7

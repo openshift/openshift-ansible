@@ -1,4 +1,3 @@
----
 - include: ../../common/openshift-cluster/config.yml
   vars_files:
   - ../../aws/openshift-cluster/vars.yml
@@ -10,5 +9,13 @@
     openshift_cluster_id: "{{ cluster_id }}"
     openshift_debug_level: "{{ debug_level }}"
     openshift_deployment_type: "{{ deployment_type }}"
-    openshift_hostname: "{{ ec2_private_ip_address }}"
     openshift_public_hostname: "{{ ec2_ip_address }}"
+    openshift_registry_selector: 'type=infra'
+    openshift_router_selector: 'type=infra'
+    openshift_infra_nodes: "{{ g_infra_hosts }}"
+    openshift_node_labels: '{"region": "{{ ec2_region }}", "type": "{{ hostvars[inventory_hostname]["ec2_tag_sub-host-type"] if inventory_hostname in groups["tag_host-type_node"] else hostvars[inventory_hostname]["ec2_tag_host-type"] }}"}'
+    openshift_master_cluster_method: 'native'
+    openshift_use_openshift_sdn: "{{ lookup('oo_option', 'use_openshift_sdn') }}"
+    os_sdn_network_plugin_name: "{{ lookup('oo_option', 'sdn_network_plugin_name') }}"
+    openshift_use_flannel: "{{ lookup('oo_option', 'use_flannel') }}"
+    openshift_use_fluentd: "{{ lookup('oo_option', 'use_fluentd') }}"

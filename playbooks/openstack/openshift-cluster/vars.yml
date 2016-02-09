@@ -2,11 +2,9 @@
 debug_level: 2
 openstack_infra_heat_stack:     "{{ lookup('oo_option', 'infra_heat_stack' ) |
                                     default('files/heat_stack.yaml',         True) }}"
-openstack_network_cidr:         "{{ lookup('oo_option', 'net_cidr'         ) |
-                                    default('192.168.' + ( ( 1048576 | random % 256 ) | string() ) + '.0/24', True) }}"
+openstack_subnet_24_prefix:     "{{ lookup('oo_option', 'subnet_24_prefix'         ) |
+                                    default('192.168.' + ( ( 1048576 | random % 256 ) | string() ), True) }}"
 openstack_network_external_net: "{{ lookup('oo_option', 'external_net'     ) |
-                                    default('external',                      True) }}"
-openstack_floating_ip_pool:     "{{ lookup('oo_option', 'floating_ip_pool' ) |
                                     default('external',                      True) }}"
 openstack_network_dns:          "{{ lookup('oo_option', 'dns'              ) |
                                     default('8.8.8.8,8.8.4.4',               True) | oo_split() }}"

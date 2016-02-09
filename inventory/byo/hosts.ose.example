@@ -74,7 +74,7 @@ deployment_type=openshift-enterprise
 #openshift_additional_repos=[{'id': 'ose-devel', 'name': 'ose-devel', 'baseurl': 'http://example.com/puddle/build/AtomicOpenShift/3.1/latest/RH7-RHOSE-3.0/$basearch/os', 'enabled': 1, 'gpgcheck': 0}]
 
 # htpasswd auth
-openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/htpasswd'}]
+openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]
 
 # Allow all auth
 #openshift_master_identity_providers=[{'name': 'allow_all', 'login': 'true', 'challenge': 'true', 'kind': 'AllowAllPasswordIdentityProvider'}]
@@ -203,12 +203,53 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Configure dnsIP in the node config
 #openshift_dns_ip=172.30.0.1
 
+# Persistent Storage Options
+#
+## Registry Storage Options
+##
+## Storage Kind
+## Specifies which storage kind will be used for the registry.
+## "nfs" is the only supported kind at this time.
+##openshift_hosted_registry_storage_kind=nfs
+##
+## Storage Host
+## This variable can be used to identify a pre-existing storage host
+## if a storage host group corresponding to the storage kind (such as
+## [nfs]) is not specified,
+##openshift_hosted_registry_storage_host=nfs.example.com
+##
+## NFS Export Options
+##openshift_hosted_registry_storage_nfs_options='*(rw,root_squash)'
+##
+## NFS Export Directory
+## Specify the root exports directory. This directory will be created
+## if specifying an [nfs] host group.
+## This variable must be supplied if using a pre-existing nfs server.
+##openshift_hosted_registry_storage_nfs_directory=/exports
+##
+## Registry Volume Name
+## Specify the storage volume name. This directory will be created
+## within openshift_hosted_registry_storage_nfs_directory if
+## specifying an [nfs] group Ex: /exports/registry
+## This variable must be supplied if using a pre-existing nfs server.
+##openshift_hosted_registry_storage_volume_name=registry
+##
+## Persistent Volume Access Mode
+##openshift_hosted_registry_storage_access_modes=['ReadWriteMany']
+
 # Configure node kubelet arguments
 #openshift_node_kubelet_args={'max-pods': ['40'], 'image-gc-high-threshold': ['90'], 'image-gc-low-threshold': ['80']}
 
 # Configure logrotate scripts
 # See: https://github.com/nickhammond/ansible-logrotate
 #logrotate_scripts=[{"name": "syslog", "path": "/var/log/cron\n/var/log/maillog\n/var/log/messages\n/var/log/secure\n/var/log/spooler\n", "options": ["daily", "rotate 7", "compress", "sharedscripts", "missingok"], "scripts": {"postrotate": "/bin/kill -HUP `cat /var/run/syslogd.pid 2> /dev/null` 2> /dev/null || true"}}]
+
+# openshift-ansible will wait indefinitely for your input when it detects that the
+# value of openshift_hostname resolves to an IP address not bound to any local
+# interfaces. This mis-configuration is problematic for any pod leveraging host
+# networking and liveness or readiness probes. 
+# Setting this variable to true will override that check.
+#openshift_override_hostname_check=true
 
 # host group for masters
 [masters]

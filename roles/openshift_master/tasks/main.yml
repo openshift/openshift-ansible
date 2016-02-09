@@ -82,7 +82,7 @@
       registry_selector: "{{ openshift_registry_selector | default(None) }}"
       api_server_args: "{{ osm_api_server_args | default(None) }}"
       controller_args: "{{ osm_controller_args | default(None) }}"
-      infra_nodes: "{{ num_infra | default(None) }}"
+      infra_nodes: "{{ openshift_infra_nodes | default(None) }}"
       disabled_features: "{{ osm_disabled_features | default(None) }}"
       master_count: "{{ openshift_master_count | default(None) }}"
       controller_lease_ttl: "{{ osm_controller_lease_ttl | default(None) }}"
@@ -284,6 +284,10 @@
 - set_fact:
     master_service_status_changed: "{{ start_result | changed }}"
   when: not openshift_master_ha | bool
+
+- name: Mask master service
+  command: systemctl mask {{ openshift.common.service_type }}-master
+  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
 
 - name: Start and enable master api
   service: name={{ openshift.common.service_type }}-master-api enabled=yes state=started

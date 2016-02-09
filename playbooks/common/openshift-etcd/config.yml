@@ -69,8 +69,32 @@
       validate_checksum: yes
     with_items: etcd_needing_server_certs
 
-- name: Configure etcd hosts
-  hosts: oo_etcd_to_config
+# Configure a first etcd host to avoid conflicts in choosing a leader
+# if other members come online too quickly.
+- name: Configure first etcd host
+  hosts: oo_first_etcd
+  vars:
+    sync_tmpdir: "{{ hostvars.localhost.g_etcd_mktemp.stdout }}"
+    etcd_url_scheme: https
+    etcd_peer_url_scheme: https
+    etcd_peers_group: oo_etcd_to_config
+  pre_tasks:
+  - name: Ensure certificate directory exists
+    file:
+      path: "{{ etcd_cert_config_dir }}"
+      state: directory
+  - name: Unarchive the tarball on the etcd host
+    unarchive:
+      src: "{{ sync_tmpdir }}/{{ etcd_cert_subdir }}.tgz"
+      dest: "{{ etcd_cert_config_dir }}"
+    when: etcd_server_certs_missing
+  roles:
+  - etcd
+  - role: nickhammond.logrotate
+
+# Configure the remaining etcd hosts, skipping the first one we dealt with above.
+- name: Configure remaining etcd hosts
+  hosts: oo_etcd_to_config:!oo_first_etcd
   vars:
     sync_tmpdir: "{{ hostvars.localhost.g_etcd_mktemp.stdout }}"
     etcd_url_scheme: https

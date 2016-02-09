@@ -14,10 +14,10 @@ parameters:
     label: Cluster ID
     description: Identifier of the cluster
 
-  cidr:
+  subnet_24_prefix:
     type: string
-    label: CIDR
-    description: CIDR of the network of the cluster
+    label: subnet /24 prefix
+    description: /24 subnet prefix of the network of the cluster (dot separated number triplet)
 
   dns_nameservers:
     type: comma_delimited_list
@@ -28,12 +28,6 @@ parameters:
     type: string
     label: External network
     description: Name of the external network
-    default: external
-
-  floating_ip_pool:
-    type: string
-    label: Floating IP pool
-    description: Floating IP pools
     default: external
 
   ssh_public_key:
@@ -88,6 +82,11 @@ parameters:
     label: Infra image
     description: Name of the image for the infra node servers
 
+  dns_image:
+    type: string
+    label: DNS image
+    description: Name of the image for the DNS server
+
   etcd_flavor:
     type: string
     label: Etcd flavor
@@ -107,6 +106,11 @@ parameters:
     type: string
     label: Infra flavor
     description: Flavor of the infra node servers
+
+  dns_flavor:
+    type: string
+    label: DNS flavor
+    description: Flavor of the DNS server
 
 outputs:
 
@@ -158,6 +162,26 @@ outputs:
     description: Floating IPs of the nodes
     value: { get_attr: [ infra_nodes, floating_ip ] }
 
+  dns_name:
+    description: Name of the DNS
+    value:
+      get_attr:
+        - dns
+        - name
+
+  dns_floating_ip:
+    description: Floating IP of the DNS
+    value:
+      get_attr:
+        - dns
+        - addresses
+        - str_replace:
+            template: openshift-ansible-cluster_id-net
+            params:
+              cluster_id: { get_param: cluster_id }
+        - 1
+        - addr
+
 resources:
 
   net:
@@ -178,8 +202,27 @@ resources:
           params:
             cluster_id: { get_param: cluster_id }
       network: { get_resource: net }
-      cidr: { get_param: cidr }
-      dns_nameservers: { get_param: dns_nameservers }
+      cidr:
+        str_replace:
+          template: subnet_24_prefix.0/24
+          params:
+            subnet_24_prefix: { get_param: subnet_24_prefix }
+      allocation_pools:
+        - start:
+            str_replace:
+              template: subnet_24_prefix.3
+              params:
+                subnet_24_prefix: { get_param: subnet_24_prefix }
+          end:
+            str_replace:
+              template: subnet_24_prefix.254
+              params:
+                subnet_24_prefix: { get_param: subnet_24_prefix }
+      dns_nameservers:
+        - str_replace:
+            template: subnet_24_prefix.2
+            params:
+              subnet_24_prefix: { get_param: subnet_24_prefix }
 
   router:
     type: OS::Neutron::Router
@@ -337,6 +380,44 @@ resources:
           port_range_min: 443
           port_range_max: 443
 
+  dns-secgrp:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name:
+        str_replace:
+          template: openshift-ansible-cluster_id-dns-secgrp
+          params:
+            cluster_id: { get_param: cluster_id }
+      description:
+        str_replace:
+          template: Security group for cluster_id cluster DNS
+          params:
+            cluster_id: { get_param: cluster_id }
+      rules:
+        - direction: ingress
+          protocol: tcp
+          port_range_min: 22
+          port_range_max: 22
+          remote_ip_prefix: { get_param: ssh_incoming }
+        - direction: ingress
+          protocol: udp
+          port_range_min: 53
+          port_range_max: 53
+          remote_mode: remote_group_id
+          remote_group_id: { get_resource: etcd-secgrp }
+        - direction: ingress
+          protocol: udp
+          port_range_min: 53
+          port_range_max: 53
+          remote_mode: remote_group_id
+          remote_group_id: { get_resource: master-secgrp }
+        - direction: ingress
+          protocol: udp
+          port_range_min: 53
+          port_range_max: 53
+          remote_mode: remote_group_id
+          remote_group_id: { get_resource: node-secgrp }
+
   etcd:
     type: OS::Heat::ResourceGroup
     properties:
@@ -360,13 +441,14 @@ resources:
           subnet:      { get_resource: subnet }
           secgrp:
             - { get_resource: etcd-secgrp }
-          floating_network: { get_param: floating_ip_pool }
+          floating_network: { get_param: external_net }
           net_name:
             str_replace:
               template: openshift-ansible-cluster_id-net
               params:
                 cluster_id: { get_param: cluster_id }
-    depends_on: interface
+    depends_on:
+      - interface
 
   masters:
     type: OS::Heat::ResourceGroup
@@ -391,13 +473,14 @@ resources:
           subnet:      { get_resource: subnet }
           secgrp:
             - { get_resource: master-secgrp }
-          floating_network: { get_param: floating_ip_pool }
+          floating_network: { get_param: external_net }
           net_name:
             str_replace:
               template: openshift-ansible-cluster_id-net
               params:
                 cluster_id: { get_param: cluster_id }
-    depends_on: interface
+    depends_on:
+      - interface
 
   compute_nodes:
     type: OS::Heat::ResourceGroup
@@ -424,13 +507,14 @@ resources:
           subnet:      { get_resource: subnet }
           secgrp:
             - { get_resource: node-secgrp }
-          floating_network: { get_param: floating_ip_pool }
+          floating_network: { get_param: external_net }
           net_name:
             str_replace:
               template: openshift-ansible-cluster_id-net
               params:
                 cluster_id: { get_param: cluster_id }
-    depends_on: interface
+    depends_on:
+      - interface
 
   infra_nodes:
     type: OS::Heat::ResourceGroup
@@ -458,10 +542,77 @@ resources:
           secgrp:
             - { get_resource: node-secgrp }
             - { get_resource: infra-secgrp }
-          floating_network: { get_param: floating_ip_pool }
+          floating_network: { get_param: external_net }
           net_name:
             str_replace:
               template: openshift-ansible-cluster_id-net
               params:
                 cluster_id: { get_param: cluster_id }
-    depends_on: interface
+    depends_on:
+      - interface
+
+  dns:
+    type: OS::Nova::Server
+    properties:
+      name:
+        str_replace:
+          template: cluster_id-dns
+          params:
+            cluster_id: { get_param: cluster_id }
+      key_name: { get_resource: keypair }
+      image:    { get_param: dns_image }
+      flavor:   { get_param: dns_flavor }
+      networks:
+        - port: { get_resource: dns-port }
+      user_data: { get_resource: dns-config }
+      user_data_format: RAW
+
+  dns-port:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_resource: net }
+      fixed_ips:
+        - subnet: { get_resource: subnet }
+          ip_address:
+            str_replace:
+              template: subnet_24_prefix.2
+              params:
+                subnet_24_prefix: { get_param: subnet_24_prefix }
+      security_groups:
+        - { get_resource: dns-secgrp }
+
+  dns-floating-ip:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network: { get_param: external_net }
+      port_id: { get_resource: dns-port }
+
+  dns-config:
+    type: OS::Heat::MultipartMime
+    properties:
+      parts:
+        - config: { get_file: user-data }
+        - config:
+            str_replace:
+              template: |
+                #cloud-config
+                write_files:
+                  - path: /etc/sysconfig/network-scripts/ifcfg-eth0
+                    content: |
+                      DEVICE="eth0"
+                      BOOTPROTO="dhcp"
+                      DNS1="$dns1"
+                      DNS2="$dns2"
+                      PEERDNS="no"
+                      ONBOOT="yes"
+                runcmd:
+                  - [ "/usr/bin/systemctl", "restart", "network" ]
+              params:
+                $dns1:
+                  get_param:
+                    - dns_nameservers
+                    - 0
+                $dns2:
+                  get_param:
+                    - dns_nameservers
+                    - 1

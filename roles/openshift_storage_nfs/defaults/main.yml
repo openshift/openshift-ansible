@@ -1,7 +1,13 @@
 ---
-exports_dir: /var/export
-registry_volume: regvol
-export_options: '*(rw,sync,all_squash)'
+openshift:
+  hosted:
+    registry:
+      storage:
+        nfs:
+          directory: "/exports"
+          options: "*(rw,root_squash)"
+        volume:
+          name: "registry"
 os_firewall_use_firewalld: False
 os_firewall_allow:
 - service: nfs

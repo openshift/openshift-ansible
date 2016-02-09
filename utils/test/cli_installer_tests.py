@@ -102,6 +102,7 @@ hosts:
 QUICKHA_CONFIG = """
 variant: %s
 ansible_ssh_user: root
+master_routingconfig_subdomain: example.com
 hosts:
   - connect_to: 10.0.0.1
     ip: 10.0.0.1
@@ -228,6 +229,7 @@ hosts:
 QUICKHA_CONFIG_PRECONFIGURED_LB = """
 variant: %s
 ansible_ssh_user: root
+master_routingconfig_subdomain: example.com
 hosts:
   - connect_to: 10.0.0.1
     ip: 10.0.0.1

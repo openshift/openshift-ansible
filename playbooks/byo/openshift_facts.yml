@@ -5,5 +5,6 @@
   - openshift_facts
   tasks:
   - openshift_facts:
+      openshift_env: "{{ hostvars[inventory_hostname] | oo_openshift_env }}"
     register: result
   - debug: var=result

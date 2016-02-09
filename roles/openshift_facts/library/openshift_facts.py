@@ -957,12 +957,12 @@ def merge_facts(orig, new, additive_facts_to_overwrite):
                 # Fact is additive so we'll combine orig and new.
                 if isinstance(value, list) and isinstance(new[key], list):
                     new_fact = []
-                    for item in copy.deepcopy(value) + copy.copy(new[key]):
+                    for item in copy.deepcopy(value) + copy.deepcopy(new[key]):
                         if item not in new_fact:
                             new_fact.append(item)
                     facts[key] = new_fact
             else:
-                facts[key] = copy.copy(new[key])
+                facts[key] = copy.deepcopy(new[key])
         else:
             facts[key] = copy.deepcopy(value)
     new_keys = set(new.keys()) - set(orig.keys())
@@ -1070,6 +1070,28 @@ def set_container_facts_if_unset(facts):
 
     return facts
 
+def set_installed_variant_rpm_facts(facts):
+    """ Set RPM facts of installed variant
+        Args:
+            facts (dict): existing facts
+        Returns:
+            dict: the facts dict updated with installed_variant_rpms
+                          """
+    installed_rpms = []
+    for base_rpm in ['openshift', 'atomic-openshift', 'origin']:
+        optional_rpms = ['master', 'node', 'clients', 'sdn-ovs']
+        variant_rpms = [base_rpm] + \
+                       ['{0}-{1}'.format(base_rpm, r) for r in optional_rpms] + \
+                       ['tuned-profiles-%s-node' % base_rpm]
+        for rpm in variant_rpms:
+            exit_code, _, _ = module.run_command(['rpm', '-q', rpm])
+            if exit_code == 0:
+                installed_rpms.append(rpm)
+
+    facts['common']['installed_variant_rpms'] = installed_rpms
+    return facts
+
+
 
 class OpenShiftFactsInternalError(Exception):
     """Origin Facts Error"""
@@ -1108,9 +1130,11 @@ class OpenShiftFacts(object):
         Raises:
             OpenShiftFactsUnsupportedRoleError:
     """
-    known_roles = ['common', 'master', 'node', 'etcd', 'nfs']
+    known_roles = ['common', 'master', 'node', 'etcd', 'hosted']
 
-    def __init__(self, role, filename, local_facts, additive_facts_to_overwrite=False):
+    # Disabling too-many-arguments, this should be cleaned up as a TODO item.
+    # pylint: disable=too-many-arguments
+    def __init__(self, role, filename, local_facts, additive_facts_to_overwrite=False, openshift_env=None):
         self.changed = False
         self.filename = filename
         if role not in self.known_roles:
@@ -1119,9 +1143,9 @@ class OpenShiftFacts(object):
             )
         self.role = role
         self.system_facts = ansible_facts(module)
-        self.facts = self.generate_facts(local_facts, additive_facts_to_overwrite)
+        self.facts = self.generate_facts(local_facts, additive_facts_to_overwrite, openshift_env)
 
-    def generate_facts(self, local_facts, additive_facts_to_overwrite):
+    def generate_facts(self, local_facts, additive_facts_to_overwrite, openshift_env):
         """ Generate facts
 
             Args:
@@ -1133,7 +1157,7 @@ class OpenShiftFacts(object):
             Returns:
                 dict: The generated facts
         """
-        local_facts = self.init_local_facts(local_facts, additive_facts_to_overwrite)
+        local_facts = self.init_local_facts(local_facts, additive_facts_to_overwrite, openshift_env)
         roles = local_facts.keys()
 
         defaults = self.get_defaults(roles)
@@ -1157,6 +1181,8 @@ class OpenShiftFacts(object):
         facts = set_aggregate_facts(facts)
         facts = set_etcd_facts_if_unset(facts)
         facts = set_container_facts_if_unset(facts)
+        if not facts['common']['is_containerized']:
+            facts = set_installed_variant_rpm_facts(facts)
         return dict(openshift=facts)
 
     def get_defaults(self, roles):
@@ -1205,10 +1231,23 @@ class OpenShiftFacts(object):
                         iptables_sync_period='5s', set_node_ip=False)
             defaults['node'] = node
 
-        if 'nfs' in roles:
-            nfs = dict(exports_dir='/var/export', registry_volume='regvol',
-                       export_options='*(rw,sync,all_squash)')
-            defaults['nfs'] = nfs
+        defaults['hosted'] = dict(
+            registry=dict(
+                storage=dict(
+                    kind=None,
+                    volume=dict(
+                        name='registry',
+                        size='5Gi'
+                    ),
+                    nfs=dict(
+                        directory='/exports',
+                        options='*(rw,root_squash)'),
+                    host=None,
+                    access_modes=['ReadWriteMany'],
+                    create_pv=True
+                )
+            )
+        )
 
         return defaults
 
@@ -1287,7 +1326,9 @@ class OpenShiftFacts(object):
         )
         return provider_facts
 
-    def init_local_facts(self, facts=None, additive_facts_to_overwrite=False):
+    # Disabling too-many-branches. This should be cleaned up as a TODO item.
+    #pylint: disable=too-many-branches
+    def init_local_facts(self, facts=None, additive_facts_to_overwrite=False, openshift_env=None):
         """ Initialize the provider facts
 
             Args:
@@ -1300,9 +1341,26 @@ class OpenShiftFacts(object):
                       local facts
         """
         changed = False
-        facts_to_set = {self.role: dict()}
+
+        facts_to_set = dict()
+
         if facts is not None:
             facts_to_set[self.role] = facts
+
+        if openshift_env != {} and openshift_env != None:
+            for fact, value in openshift_env.iteritems():
+                oo_env_facts = dict()
+                current_level = oo_env_facts
+                keys = fact.split('_')[1:]
+                if keys[0] != self.role:
+                    continue
+                for key in keys:
+                    if key == keys[-1]:
+                        current_level[key] = value
+                    elif key not in current_level:
+                        current_level[key] = dict()
+                        current_level = current_level[key]
+                facts_to_set = merge_facts(facts_to_set, oo_env_facts, [])
 
         local_facts = get_local_facts_from_file(self.filename)
 
@@ -1314,11 +1372,12 @@ class OpenShiftFacts(object):
         new_local_facts = merge_facts(local_facts, facts_to_set, additive_facts_to_overwrite)
         for facts in new_local_facts.values():
             keys_to_delete = []
-            for fact, value in facts.iteritems():
-                if value == "" or value is None:
-                    keys_to_delete.append(fact)
-            for key in keys_to_delete:
-                del facts[key]
+            if isinstance(facts, dict):
+                for fact, value in facts.iteritems():
+                    if value == "" or value is None:
+                        keys_to_delete.append(fact)
+                for key in keys_to_delete:
+                    del facts[key]
 
         if new_local_facts != local_facts:
             self.validate_local_facts(new_local_facts)
@@ -1406,6 +1465,7 @@ def main():
                       choices=OpenShiftFacts.known_roles),
             local_facts=dict(default=None, type='dict', required=False),
             additive_facts_to_overwrite=dict(default=[], type='list', required=False),
+            openshift_env=dict(default={}, type='dict', required=False)
         ),
         supports_check_mode=True,
         add_file_common_args=True,
@@ -1414,9 +1474,15 @@ def main():
     role = module.params['role']
     local_facts = module.params['local_facts']
     additive_facts_to_overwrite = module.params['additive_facts_to_overwrite']
+    openshift_env = module.params['openshift_env']
+
     fact_file = '/etc/ansible/facts.d/openshift.fact'
 
-    openshift_facts = OpenShiftFacts(role, fact_file, local_facts, additive_facts_to_overwrite)
+    openshift_facts = OpenShiftFacts(role,
+                                     fact_file,
+                                     local_facts,
+                                     additive_facts_to_overwrite,
+                                     openshift_env)
 
     file_params = module.params.copy()
     file_params['path'] = fact_file

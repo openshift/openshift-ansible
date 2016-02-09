@@ -1,0 +1,4 @@
+- name: restart bind
+  service:
+    name: named
+    state: restarted
