@@ -18,9 +18,16 @@
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
     with_items: groups[scratch_group] | default([], true) | difference(['localhost']) | difference(groups.status_terminated | default([], true))
 
-- name: List instance(s)
+- name: List Hosts
   hosts: oo_list_hosts
+
+- name: List Hosts
+  hosts: localhost
+  become: no
+  connection: local
   gather_facts: no
+  vars_files:
+  - vars.yml
   tasks:
   - debug:
-      msg: "public ip: {{ hostvars[inventory_hostname].gce_public_ip }} private ip:{{ hostvars[inventory_hostname].gce_private_ip }}"
+      msg: "{{ hostvars | oo_select_keys(groups[scratch_group] | default([])) | oo_pretty_print_cluster }}"
