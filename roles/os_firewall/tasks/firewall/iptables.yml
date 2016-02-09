@@ -1,12 +1,4 @@
 ---
-- name: Install iptables packages
-  action: "{{ ansible_pkg_mgr }} name={{ item }} state=present"
-  with_items:
-  - iptables
-  - iptables-services
-  register: install_result
-  when: not openshift.common.is_atomic | bool
-
 - name: Check if firewalld is installed
   command: rpm -q firewalld
   register: pkg_check
@@ -19,6 +11,22 @@
     state: stopped
     enabled: no
   when: pkg_check.rc == 0
+
+# TODO: submit PR upstream to add mask/unmask to service module
+- name: Mask firewalld service
+  command: systemctl mask firewalld
+  register: result
+  changed_when: "'firewalld' in result.stdout"
+  when: pkg_check.rc == 0
+  ignore_errors: yes
+
+- name: Install iptables packages
+  action: "{{ ansible_pkg_mgr }} name={{ item }} state=present"
+  with_items:
+  - iptables
+  - iptables-services
+  register: install_result
+  when: not openshift.common.is_atomic | bool
 
 - name: Reload systemd units
   command: systemctl daemon-reload
@@ -34,14 +42,6 @@
 - name: need to pause here, otherwise the iptables service starting can sometimes cause ssh to fail
   pause: seconds=10
   when: result | changed
-
-# TODO: submit PR upstream to add mask/unmask to service module
-- name: Mask firewalld service
-  command: systemctl mask firewalld
-  register: result
-  changed_when: "'firewalld' in result.stdout"
-  when: pkg_check.rc == 0
-  ignore_errors: yes
 
 - name: Add iptables allow rules
   os_firewall_manage_iptables:
