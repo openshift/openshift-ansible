@@ -33,6 +33,7 @@
       set_node_ip: "{{ openshift_set_node_ip | default(None) }}"
       node_image: "{{ osn_image | default(None) }}"
       ovs_image: "{{ osn_ovs_image | default(None) }}"
+      proxy_mode: "{{ openshift_node_proxy_mode | default('iptables') }}"
 
 # We have to add tuned-profiles in the same transaction otherwise we run into depsolving
 # problems because the rpms don't pin the version properly. This was fixed in 3.1 packaging.
