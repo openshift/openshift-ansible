@@ -98,8 +98,8 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Set cockpit plugins
 #osm_cockpit_plugins=['cockpit-kubernetes']
 
-# Native high availbility cluster method with optional load balancer.
-# If no lb group is defined installer assumes that a load balancer has
+# Native high availability cluster method with optional load balancer.
+# If no lb group is defined, the installer assumes that a load balancer has
 # been preconfigured. For installation the value of
 # openshift_master_cluster_hostname must resolve to the load balancer
 # or to one or all of the masters defined in the inventory if no load
@@ -247,7 +247,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # openshift-ansible will wait indefinitely for your input when it detects that the
 # value of openshift_hostname resolves to an IP address not bound to any local
 # interfaces. This mis-configuration is problematic for any pod leveraging host
-# networking and liveness or readiness probes. 
+# networking and liveness or readiness probes.
 # Setting this variable to true will override that check.
 #openshift_override_hostname_check=true
 
