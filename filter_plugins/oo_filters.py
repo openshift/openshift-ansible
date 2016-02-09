@@ -646,6 +646,30 @@ class FilterModule(object):
                 persistent_volume_claims.append(persistent_volume_claim)
         return persistent_volume_claims
 
+    @staticmethod
+    def oo_31_rpm_rename_conversion(rpms, openshift_version=None):
+        """ Filters a list of 3.0 rpms and return the corresponding 3.1 rpms
+            names with proper version (if provided)
+
+            If 3.1 rpms are passed in they will only be augmented with the
+            correct version.  This is important for hosts that are running both
+            Masters and Nodes.
+        """
+        if not isinstance(rpms, list):
+            raise errors.AnsibleFilterError("failed expects to filter on a list")
+        if openshift_version is not None and not isinstance(openshift_version, basestring):
+            raise errors.AnsibleFilterError("failed expects openshift_version to be a string")
+
+        rpms_31 = []
+        for rpm in rpms:
+            if not 'atomic' in rpm:
+                rpm = rpm.replace("openshift", "atomic-openshift")
+            if openshift_version:
+                rpm = rpm + openshift_version
+            rpms_31.append(rpm)
+
+        return rpms_31
+
     def filters(self):
         """ returns a mapping of filters to methods """
         return {
@@ -671,4 +695,5 @@ class FilterModule(object):
             "oo_openshift_env": self.oo_openshift_env,
             "oo_persistent_volumes": self.oo_persistent_volumes,
             "oo_persistent_volume_claims": self.oo_persistent_volume_claims,
+            "oo_31_rpm_rename_conversion": self.oo_31_rpm_rename_conversion,
         }
