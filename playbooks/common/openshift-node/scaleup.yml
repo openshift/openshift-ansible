@@ -1,0 +1,4 @@
+---
+- include: ../openshift-cluster/evaluate_groups.yml
+
+- include: ../openshift-node/config.yml

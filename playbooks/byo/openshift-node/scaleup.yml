@@ -1,5 +1,5 @@
 ---
-- include: ../../common/openshift-cluster/scaleup.yml
+- include: ../../common/openshift-node/scaleup.yml
   vars_files:
   - ../../byo/openshift-cluster/cluster_hosts.yml
   vars:

@@ -188,6 +188,10 @@
     masters_needing_certs: "{{ hostvars
                                | oo_select_keys(groups['oo_masters_to_config'] | difference(groups['oo_first_master']))
                                | oo_filter_list(filter_attr='master_certs_missing') }}"
+    master_hostnames: "{{ hostvars
+                               | oo_select_keys(groups['oo_masters_to_config'])
+                               | oo_collect('openshift.common.all_hostnames')
+                               | oo_flatten | unique }}"
     sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
   roles:
   - openshift_master_certificates

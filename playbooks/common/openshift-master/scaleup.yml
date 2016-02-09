@@ -1,5 +1,5 @@
 ---
-- include: evaluate_groups.yml
+- include: ../openshift-cluster/evaluate_groups.yml
 
 - name: Configure docker hosts
   hosts: oo_nodes_to_config
@@ -27,6 +27,7 @@
   - openshift_facts:
       role: master
       local_facts:
+        ha: "{{ openshift_master_ha | default(groups.oo_masters | length > 1) }}"
         master_count: "{{ openshift_master_count | default(groups.oo_masters | length) }}"
   - name: Update master count
     lineinfile:
