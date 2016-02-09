@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.38
+Version:        3.0.39
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -259,6 +259,32 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Feb 09 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.39-1
+- Bug 1304150 - Can't upgrade atomic-openshift to specified version
+  (bleanhar@redhat.com)
+- Mask master service when using native ha (jdetiber@redhat.com)
+- aoi: Safer check for master_routingconfig_subdomain (smunilla@redhat.com)
+- Add a DNS server on OpenStack clusters (lhuard@amadeus.com)
+- renamed /etc/openshift to /etc/origin (sten@redhat.com)
+- gitignore : .tag* (atom editor tag files) (sdodson@redhat.com)
+- Add an early check to ensure that node names resolve to an interface on the
+  host (sdodson@redhat.com)
+- Allow compression option to be set to empty for non compressed QCow images
+  Support tgz and gzip compressed images (akram@free.fr)
+- Replace status_changed bool (abutcher@redhat.com)
+- Improve docs and consistency of setting the ssh_user (jdetiber@redhat.com)
+- remove outdated comments (jdetiber@redhat.com)
+- add etcd hosts for gce playbooks (jdetiber@redhat.com)
+- GCE cloud provider updates (jdetiber@redhat.com)
+- Remove extra nfs configuration. (abutcher@redhat.com)
+- Do not apply the etcd_certificates role during node playbook.
+  (abutcher@redhat.com)
+- Add g_new_node_hosts to cluster_hosts. (abutcher@redhat.com)
+- Updating examples to use /etc/origin/master/htpasswd (jstuever@redhat.com)
+- Refactor registry storage options. (abutcher@redhat.com)
+- Additional overrides for cloud provider playbooks (jdetiber@redhat.com)
+- Bring first etcd server up before others. (dgoodwin@redhat.com)
+
 * Tue Feb 02 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.38-1
 - aoi: Ask for osm_default_subdomain in interactive mode (smunilla@redhat.com)
 - add item to hold number of stray OVS rules found/removed (jdiaz@redhat.com)
