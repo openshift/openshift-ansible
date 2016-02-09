@@ -3,3 +3,5 @@
 
 - name: Make sure python-dyn is installed
   yum: name=python-dyn state=present
+  tags:
+    - lib_dyn
