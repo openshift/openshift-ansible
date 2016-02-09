@@ -2,10 +2,10 @@
 g_template_openshift_master:
   name: Template Openshift Master
   zitems:
-  - name: create_app
+  - name: openshift.master.app.create
     applications:
     - Openshift Master
-    key: create_app
+    key: openshift.master.app.create
 
   - key: openshift.master.registry.healthz
     description: "Shows the health status of the cluster's docker registry"
@@ -288,14 +288,14 @@ g_template_openshift_master:
 
   # Put triggers that depend on other triggers here (deps must be created first)
   - name: 'Application creation has failed on {HOST.NAME}'
-    expression: '{Template Openshift Master:create_app.last(#1)}=1 and {Template Openshift Master:create_app.last(#2)}=1'
+    expression: '{Template Openshift Master:openshift.master.app.create.last(#1)}=1 and {Template Openshift Master:openshift.master.app.create.last(#2)}=1'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_create_app.asciidoc'
     dependencies:
     - 'Openshift Master process not running on {HOST.NAME}'
     priority: avg
 
   - name: 'Application creation has failed multiple times in the last hour on {HOST.NAME}'
-    expression: '{Template Openshift Master:create_app.sum(1h)}>3'
+    expression: '{Template Openshift Master:openshift.master.app.create.sum(1h)}>3'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_create_app.asciidoc'
     dependencies:
     - 'Openshift Master process not running on {HOST.NAME}'
