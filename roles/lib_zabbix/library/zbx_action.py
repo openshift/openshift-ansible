@@ -228,12 +228,12 @@ def get_user_groups(zapi, groups):
     '''get the mediatype id from the mediatype name'''
     user_groups = []
 
-    content = zapi.get_content('usergroup',
-                               'get',
-                               {'search': {'name': groups}})
-
-    for usr_grp in content['result']:
-        user_groups.append({'usrgrpid': usr_grp['usrgrpid']})
+    for group in groups:
+        content = zapi.get_content('usergroup',
+                                   'get',
+                                   {'search': {'name': group}})
+        for result in content['result']:
+            user_groups.append({'usrgrpid': result['usrgrpid']})
 
     return user_groups
 
