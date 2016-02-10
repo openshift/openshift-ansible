@@ -120,8 +120,8 @@ def opmessage_usr_diff(zab_val, user_val):
     ''' Report whether there are differences between opmessage_usr
         on zabbix and opmessage_usr supplied by user '''
 
-    zab_usr_ids = set([usr['usrid'] for usr in zab_val])
-    usr_ids = set([usr['usrid'] for usr in user_val])
+    zab_usr_ids = set([usr['userid'] for usr in zab_val])
+    usr_ids = set([usr['userid'] for usr in user_val])
     if usr_ids != zab_usr_ids:
         return True
 
