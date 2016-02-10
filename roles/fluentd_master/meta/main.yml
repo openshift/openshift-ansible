@@ -1,7 +1,7 @@
 ---
 galaxy_info:
   author: OpenShift Red Hat
-  description: OpenShift Embedded Docker Registry
+  description: Fluentd Master
   company: Red Hat, Inc.
   license: Apache License, Version 2.0
   min_ansible_version: 1.9
@@ -10,6 +10,6 @@ galaxy_info:
     versions:
     - 7
   categories:
-  - cloud
+  - monitoring
   dependencies:
   - openshift_facts

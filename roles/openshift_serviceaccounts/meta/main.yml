@@ -1,7 +1,7 @@
 ---
 galaxy_info:
-  author: OpenShift Red Hat
-  description: OpenShift Embedded Docker Registry
+  author: OpenShift Operations
+  description: OpenShift Service Accounts
   company: Red Hat, Inc.
   license: Apache License, Version 2.0
   min_ansible_version: 1.9
@@ -11,5 +11,5 @@ galaxy_info:
     - 7
   categories:
   - cloud
-  dependencies:
-  - openshift_facts
+dependencies:
+- { role: openshift_facts }
