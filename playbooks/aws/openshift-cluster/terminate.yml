@@ -18,7 +18,7 @@
   hosts: oo_hosts_to_terminate
   roles:
   - role: rhel_unsubscribe
-    when: deployment_type == "enterprise" and
+    when: deployment_type in ['atomic-enterprise', 'enterprise', 'openshift-enterprise'] and
           ansible_distribution == "RedHat" and
           lookup('oo_option', 'rhel_skip_subscription') | default(rhsub_skip, True) |
             default('no', True) | lower in ['no', 'false']
