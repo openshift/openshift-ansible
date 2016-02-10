@@ -144,7 +144,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 
 # default storage plugin dependencies to install, by default the ceph and
 # glusterfs plugin dependencies will be installed, if available.
-#osn_storage_plugin_deps=['ceph','glusterfs']
+#osn_storage_plugin_deps=['ceph','glusterfs','iscsi']
 
 # default selectors for router and registry services
 # openshift_router_selector='region=infra'
