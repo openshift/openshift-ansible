@@ -53,7 +53,20 @@ class IdentityProviderBase(object):
         self.challenge = ansible_bool(self._idp.pop('challenge', False))
         self.provider = dict(apiVersion=api_version, kind=self._idp.pop('kind'))
 
-        self._required = [['mappingMethod', 'mapping_method']]
+        mm_keys = ('mappingMethod', 'mapping_method')
+        mapping_method = None
+        for key in mm_keys:
+            if key in self._idp:
+                mapping_method = self._idp[key]
+        if mapping_method is None:
+            mapping_method = self.get_default('mappingMethod')
+        self.mapping_method = mapping_method
+
+        valid_mapping_methods = ['add', 'claim', 'generate', 'lookup']
+        if self.mapping_method not in valid_mapping_methods:
+            raise errors.AnsibleFilterError("|failed unkown mapping method "
+                                            "for provider {0}".format(self.__class__.__name__))
+        self._required = []
         self._optional = []
         self._allow_additional = True
 
@@ -75,10 +88,7 @@ class IdentityProviderBase(object):
 
     def validate(self):
         ''' validate an instance of this idp class '''
-        valid_mapping_methods = ['add', 'claim', 'generate', 'lookup']
-        if self.provider['mappingMethod'] not in valid_mapping_methods:
-            raise errors.AnsibleFilterError("|failed unkown mapping method "
-                                            "for provider {0}".format(self.__class__.__name__))
+        pass
 
     @staticmethod
     def get_default(key):
@@ -121,7 +131,8 @@ class IdentityProviderBase(object):
     def to_dict(self):
         ''' translate this idp to a dictionary '''
         return dict(name=self.name, challenge=self.challenge,
-                    login=self.login, provider=self.provider)
+                    login=self.login, mappingMethod=self.mapping_method,
+                    provider=self.provider)
 
 
 class LDAPPasswordIdentityProvider(IdentityProviderBase):
@@ -436,7 +447,9 @@ class GitHubIdentityProvider(IdentityProviderOauthBase):
         Raises:
             AnsibleFilterError:
     """
-    pass
+    def __init__(self, api_version, idp):
+        IdentityProviderOauthBase.__init__(self, api_version, idp)
+        self._optional += [['organizations']]
 
 
 class FilterModule(object):
