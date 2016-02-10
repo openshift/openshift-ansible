@@ -287,7 +287,7 @@
 
 - name: Mask master service
   command: systemctl mask {{ openshift.common.service_type }}-master
-  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
+  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and not openshift.common.is_atomic | bool
 
 - name: Start and enable master api
   service: name={{ openshift.common.service_type }}-master-api enabled=yes state=started
