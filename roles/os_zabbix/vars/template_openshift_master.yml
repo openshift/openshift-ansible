@@ -380,13 +380,6 @@ g_template_openshift_master:
     - 'Openshift Master process not running on {HOST.NAME}'
     priority: high
 
-  - name: 'Hosts not schedulable according to {HOST.NAME}'
-    expression: '{Template Openshift Master:openshift.master.nodesnotschedulable.count.last(#2)}>0'
-    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_node.asciidoc'
-    dependencies: 
-    - 'Openshift Master process not running on {HOST.NAME}'
-    priority: info
-
   zgraphs:
   - name: Openshift Master API Server Latency Pods LIST Quantiles
     width: 900
