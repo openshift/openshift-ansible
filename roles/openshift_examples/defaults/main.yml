@@ -6,7 +6,7 @@ openshift_examples_load_db_templates: true
 openshift_examples_load_xpaas: "{{ openshift_deployment_type != 'origin' }}"
 openshift_examples_load_quickstarts: true
 
-content_version: "{{ 'v1.1' if openshift.common.version_greater_than_3_1_or_1_1 else 'v1.0' }}"
+content_version: "{{ 'v1.1' if openshift.common.version_gte_3_1_or_1_1 else 'v1.0' }}"
 
 examples_base: "{{ openshift.common.config_base if openshift.common.is_containerized else '/usr/share/openshift' }}/examples"
 image_streams_base: "{{ examples_base }}/image-streams"
