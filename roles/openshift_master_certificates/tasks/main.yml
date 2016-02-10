@@ -39,7 +39,7 @@
     state: hard
   with_nested:
   - masters_needing_certs
-  - "{{ master_certificates | union(master_31_certificates) if openshift.common.version_greater_than_3_1_or_1_1 | bool else master_certificates }}"
+  - "{{ master_certificates | union(master_31_certificates) if openshift.common.version_gte_3_1_or_1_1 | bool else master_certificates }}"
 
 - name: Create the master certificates if they do not already exist
   command: >

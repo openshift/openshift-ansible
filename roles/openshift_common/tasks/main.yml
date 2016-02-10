@@ -8,7 +8,7 @@
   when: openshift_use_openshift_sdn | default(false) | bool and openshift_use_nuage | default(false) | bool
 
 - fail:
-   msg: Nuage sdn can not be used with flannel 
+   msg: Nuage sdn can not be used with flannel
   when: openshift_use_flannel | default(false) | bool and openshift_use_nuage | default(false) | bool
 
 - fail:
@@ -48,7 +48,7 @@
 # For enterprise versions < 3.1 and origin versions < 1.1 we want to set the
 # hostname by default.
 - set_fact:
-    set_hostname_default: "{{ not openshift.common.version_greater_than_3_1_or_1_1 }}"
+    set_hostname_default: "{{ not openshift.common.version_gte_3_1_or_1_1 }}"
 
 - name: Set hostname
   command: >

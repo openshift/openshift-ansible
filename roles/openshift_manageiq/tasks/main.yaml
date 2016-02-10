@@ -1,7 +1,7 @@
 ---
 - fail:
     msg: "The openshift_manageiq role requires OpenShift Enterprise 3.1 or Origin 1.1."
-  when: not openshift.common.version_greater_than_3_1_or_1_1 | bool
+  when: not openshift.common.version_gte_3_1_or_1_1 | bool
 
 - name: Copy Configuration to temporary conf
   command: >
@@ -9,7 +9,7 @@
   changed_when: false
 
 - name: Add Managment Infrastructure project
-  command: > 
+  command: >
     {{ openshift.common.admin_binary }} new-project
     management-infra
     --description="Management Infrastructure"
@@ -20,9 +20,9 @@
 
 - name: Create Service Account
   shell: >
-    echo {{ manageiq_service_account | to_json | quote }} | 
-    {{ openshift.common.client_binary }} create 
-    -n management-infra 
+    echo {{ manageiq_service_account | to_json | quote }} |
+    {{ openshift.common.client_binary }} create
+    -n management-infra
     --config={{manage_iq_tmp_conf}}
     -f -
   register: osmiq_create_service_account
@@ -32,7 +32,7 @@
 - name: Create Cluster Role
   shell: >
     echo {{ manageiq_cluster_role | to_json | quote }} |
-    {{ openshift.common.client_binary }} create 
+    {{ openshift.common.client_binary }} create
     --config={{manage_iq_tmp_conf}}
     -f -
   register: osmiq_create_cluster_role

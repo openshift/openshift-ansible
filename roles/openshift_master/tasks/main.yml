@@ -15,7 +15,7 @@
   when: openshift_master_ha | bool and ((openshift_master_cluster_method is not defined) or (openshift_master_cluster_method is defined and openshift_master_cluster_method not in ["native", "pacemaker"]))
 - fail:
     msg: "'native' high availability is not supported for the requested OpenShift version"
-  when: openshift_master_ha | bool and openshift_master_cluster_method == "native" and not openshift.common.version_greater_than_3_1_or_1_1 | bool
+  when: openshift_master_ha | bool and openshift_master_cluster_method == "native" and not openshift.common.version_gte_3_1_or_1_1 | bool
 - fail:
     msg: "openshift_master_cluster_password must be set for multi-master installations"
   when: openshift_master_ha | bool and openshift_master_cluster_method == "pacemaker" and (openshift_master_cluster_password is not defined or not openshift_master_cluster_password)

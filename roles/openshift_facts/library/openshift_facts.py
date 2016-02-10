@@ -703,7 +703,7 @@ def set_deployment_facts_if_unset(facts):
 
 def set_version_facts_if_unset(facts):
     """ Set version facts. This currently includes common.version and
-        common.version_greater_than_3_1_or_1_1.
+        common.version_gte_3_1_or_1_1.
 
         Args:
             facts (dict): existing facts
@@ -715,16 +715,20 @@ def set_version_facts_if_unset(facts):
         facts['common']['version'] = version = get_openshift_version()
         if version is not None:
             if deployment_type == 'origin':
-                version_gt_3_1_or_1_1 = LooseVersion(version) > LooseVersion('1.0.6')
-                version_gt_3_1_1_or_1_1_1 = LooseVersion(version) > LooseVersion('1.1.1')
+                version_gte_3_1_or_1_1 = LooseVersion(version) >= LooseVersion('1.1.0')
+                version_gte_3_1_1_or_1_1_1 = LooseVersion(version) >= LooseVersion('1.1.1')
+                version_gte_3_2_or_1_2 = LooseVersion(version) >= LooseVersion('1.1.2')
             else:
-                version_gt_3_1_or_1_1 = LooseVersion(version) > LooseVersion('3.0.2.900')
-                version_gt_3_1_1_or_1_1_1 = LooseVersion(version) > LooseVersion('3.1.1')
+                version_gte_3_1_or_1_1 = LooseVersion(version) >= LooseVersion('3.1.0')
+                version_gte_3_1_1_or_1_1_1 = LooseVersion(version) >= LooseVersion('3.1.1')
+                version_gte_3_2_or_1_2 = LooseVersion(version) >= LooseVersion('3.2.0')
         else:
-            version_gt_3_1_or_1_1 = True
-            version_gt_3_1_1_or_1_1_1 = True
-        facts['common']['version_greater_than_3_1_or_1_1'] = version_gt_3_1_or_1_1
-        facts['common']['version_greater_than_3_1_1_or_1_1_1'] = version_gt_3_1_1_or_1_1_1
+            version_gte_3_1_or_1_1 = True
+            version_gte_3_1_1_or_1_1_1 = True
+            version_gte_3_2_or_1_2 = True
+        facts['common']['version_gte_3_1_or_1_1'] = version_gte_3_1_or_1_1
+        facts['common']['version_gte_3_1_1_or_1_1_1'] = version_gte_3_1_1_or_1_1_1
+        facts['common']['version_gte_3_2_or_1_2'] = version_gte_3_2_or_1_2
 
     return facts
 
@@ -739,12 +743,12 @@ def set_manageiq_facts_if_unset(facts):
             OpenShiftFactsInternalError:
     """
     if 'common' not in facts:
-        if 'version_greater_than_3_1_or_1_1' not in facts['common']:
+        if 'version_gte_3_1_or_1_1' not in facts['common']:
             raise OpenShiftFactsInternalError(
                 "Invalid invocation: The required facts are not set"
             )
     if 'use_manageiq' not in facts['common']:
-        facts['common']['use_manageiq'] = facts['common']['version_greater_than_3_1_or_1_1']
+        facts['common']['use_manageiq'] = facts['common']['version_gte_3_1_or_1_1']
 
     return facts
 
