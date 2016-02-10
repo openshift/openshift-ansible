@@ -1,0 +1,4 @@
+---
+- name: Install iSCSI storage plugin dependencies
+  action: "{{ ansible_pkg_mgr }} name=iscsi-initiator-utils state=present"
+  when: not openshift.common.is_atomic | bool
