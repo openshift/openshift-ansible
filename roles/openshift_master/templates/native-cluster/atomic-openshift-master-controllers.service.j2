@@ -7,7 +7,7 @@ Before={{ openshift.common.service_type }}-node.service
 Requires=network.target
 
 [Service]
-{% if openshift.common.version_greater_than_3_1_1_or_1_1_1 | bool %}
+{% if openshift.common.version_gte_3_1_1_or_1_1_1 | bool %}
 Type=notify
 {% else %}
 Type=simple

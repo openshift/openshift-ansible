@@ -1,5 +1,5 @@
 apiLevels:
-{% if not openshift.common.version_greater_than_3_1_or_1_1 | bool %}
+{% if not openshift.common.version_gte_3_1_or_1_1 | bool %}
 - v1beta3
 {% endif %}
 - v1
@@ -91,7 +91,7 @@ kubeletClientInfo:
   port: 10250
 {% if openshift.master.embedded_kube | bool %}
 kubernetesMasterConfig:
-{% if not openshift.common.version_greater_than_3_1_or_1_1 | bool %}
+{% if not openshift.common.version_gte_3_1_or_1_1 | bool %}
   apiLevels:
   - v1beta3
   - v1
