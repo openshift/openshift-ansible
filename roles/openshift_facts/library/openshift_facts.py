@@ -712,7 +712,7 @@ def set_deployment_facts_if_unset(facts):
         deployment_type = facts['common']['deployment_type']
         if 'storage_plugin_deps' not in facts['node']:
             if deployment_type in ['openshift-enterprise', 'atomic-enterprise']:
-                facts['node']['storage_plugin_deps'] = ['ceph', 'glusterfs']
+                facts['node']['storage_plugin_deps'] = ['ceph', 'glusterfs', 'iscsi']
             else:
                 facts['node']['storage_plugin_deps'] = []
 
