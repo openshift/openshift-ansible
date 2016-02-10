@@ -224,11 +224,13 @@ def main():
         # First get a list of existing records for the node
         values = get_record_values(dyn_node_records)
         value_key = get_record_key(module.params['record_type'])
+        param_value = module.params['record_value']
 
         # Check to see if the record is already in place before doing anything.
         if (dyn_node_records and
                 dyn_node_records[value_key][0].ttl == module.params['record_ttl'] and
-                module.params['record_value'] in values[value_key]):
+                (param_value in values[value_key] or
+                 param_value + '.' in values[value_key])):
 
             module.exit_json(changed=False)
 
