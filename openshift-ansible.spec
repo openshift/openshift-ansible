@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.39
+Version:        3.0.40
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -259,6 +259,40 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Feb 11 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.40-1
+- Bug 1306665 - [metrics] update metrics-deployer template to use latest image
+  versions (bleanhar@redhat.com)
+- Add organizations attribute to github identity provider (jdetiber@redhat.com)
+- use correct dict key (jdiaz@redhat.com)
+- handle being passed an empty group list (jdiaz@redhat.com)
+- fix default value (jdetiber@redhat.com)
+- removed notscheduleable trigger, it just makes noise in its current
+  incarnation (sten@redhat.com)
+- trigger on two successive bad pid counts (jdiaz@redhat.com)
+- added nodes not ready and nodes not schedulable triggers (sten@redhat.com)
+- Enable selection of kubeproxy mode (vishal.patil@nuagenetworks.net)
+- add default storage plugins to 'origin' deployment_type
+  (rvanveelen@tremorvideo.com)
+- added nodes not ready and nodes not schedulable triggers (sten@redhat.com)
+- Don't mask master service on atomic. (abutcher@redhat.com)
+- update defaults and examples w/ iscsi plugin (rvanveelen@tremorvideo.com)
+- add iscsi storage_plugin dependency (rvanveelen@tremorvideo.com)
+- Add gte check for 3.2, update version checks to gte (jdetiber@redhat.com)
+- Specify default namespace when creating router (pat2man@gmail.com)
+- add missing connection:local (jdetiber@redhat.com)
+- consolidate oo_first_master post-config a bit, fix some roles that use
+  openshift_facts without declaring a dependency (jdetiber@redhat.com)
+- openshift_serviceaccounts updates (jdetiber@redhat.com)
+- Fix infra_node deployment (jdetiber@redhat.com)
+- changed registry checks to alert based on number of registries with problems
+  (sten@redhat.com)
+- Fix a bug with existing CNAME records (rharriso@redhat.com)
+- Fix HA typo in example AEP/OSE/Origin inventories (adellape@redhat.com)
+- Updated the key for app create (kwoodson@redhat.com)
+- Add missing atomic- and openshift-enterprise (pep@redhat.com)
+- Fix enabling iptables for latest rhel versions (jdetiber@redhat.com)
+- Make pod_eviction_timeout configurable from cli (jawed.khelil@amadeus.com)
+
 * Tue Feb 09 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.39-1
 - Bug 1304150 - Can't upgrade atomic-openshift to specified version
   (bleanhar@redhat.com)
