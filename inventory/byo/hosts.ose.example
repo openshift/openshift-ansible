@@ -89,9 +89,6 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #osm_mcs_labels_per_project=5
 #osm_uid_allocator_range='1000000000-1999999999/10000'
 
-# Configure Fluentd
-#use_fluentd=true
-
 # Enable cockpit
 #osm_use_cockpit=true
 #
