@@ -720,9 +720,9 @@ def set_version_facts_if_unset(facts):
                 version_gte_3_1_1_or_1_1_1 = LooseVersion(version) >= LooseVersion('1.1.1')
                 version_gte_3_2_or_1_2 = LooseVersion(version) >= LooseVersion('1.1.2')
             else:
-                version_gte_3_1_or_1_1 = LooseVersion(version) >= LooseVersion('3.1.0')
+                version_gte_3_1_or_1_1 = LooseVersion(version) >= LooseVersion('3.0.2.905')
                 version_gte_3_1_1_or_1_1_1 = LooseVersion(version) >= LooseVersion('3.1.1')
-                version_gte_3_2_or_1_2 = LooseVersion(version) >= LooseVersion('3.2.0')
+                version_gte_3_2_or_1_2 = LooseVersion(version) >= LooseVersion('3.1.1.901')
         else:
             version_gte_3_1_or_1_1 = True
             version_gte_3_1_1_or_1_1_1 = True
