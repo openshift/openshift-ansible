@@ -3,7 +3,7 @@ kubeConfig: {{ kube_config }}
 # name of the nuage service account, or another account with 'cluster-reader'
 # permissions
 # Openshift master config file
-openshiftMasterConfig: {{ master_config_yaml }} 
+masterConfig: {{ master_config_yaml }} 
 # URL of the VSD Architect
 vsdApiUrl: {{ vsd_api_url }} 
 # API version to query against.  Usually "v3_2"
@@ -16,4 +16,4 @@ enterpriseName: {{ enterprise }}
 # Name of the domain in which pods will reside
 domainName: {{ domain }}
 # Location where logs should be saved
-log_dir: {{ nuagekubemon_log_dir }} 
+log_dir: {{ nuage_openshift_monitor_log_dir }} 
