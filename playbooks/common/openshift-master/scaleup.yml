@@ -30,10 +30,10 @@
         ha: "{{ openshift_master_ha | default(groups.oo_masters | length > 1) }}"
         master_count: "{{ openshift_master_count | default(groups.oo_masters | length) }}"
   - name: Update master count
-    lineinfile:
+    modify_yaml:
       dest: "{{ openshift.common.config_base}}/master/master-config.yaml"
-      regexp: '^  masterCount:.*$'
-      line: "  masterCount: {{ openshift.master.master_count }}"
+      yaml_key: 'kubernetesMasterConfig.masterCount'
+      yaml_value: "{{ openshift.master.master_count }}"
     notify:
     - restart master api
     - restart master controllers
