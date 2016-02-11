@@ -342,6 +342,33 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # be used with 1.0 and 3.0.
 # openshift_node_dnsmasq=False
 
+# Global Proxy Configuration
+# These options configure HTTP_PROXY, HTTPS_PROXY, and NOPROXY environment
+# variables for docker and master services.
+#openshift_http_proxy=http://USER:PASSWORD@IPADDR:PORT
+#openshift_https_proxy=https://USER:PASSWORD@IPADDR:PORT
+#openshift_no_proxy='.hosts.example.com,some-host.com'
+#
+# Most environments don't require a proxy between openshift masters, nodes, and
+# etcd hosts. So automatically add those hostnames to the openshift_no_proxy list.
+# If all of your hosts share a common domain you may wish to disable this and 
+# specify that domain above.
+#openshift_generate_no_proxy_hosts: True
+#
+# These options configure the BuildDefaults admission controller which injects
+# environment variables into Builds. These values will default to their
+# corresponding values above but you may set them independently. See BuildDefaults
+# documentation at https://docs.openshift.org/latest/admin_guide/build_defaults_overrides.html
+#openshift_builddefaults_http_proxy=openshift_http_proxy
+#openshift_builddefaults_https_proxy=openshift_https_proxy
+#openshift_builddefaults_no_proxy=openshift_noproxy
+#openshift_builddefaults_git_http_proxy=openshift_builddefaults_http_proxy
+#openshift_builddefaults_git_https_proxy=openshift_builddefaults_https_proxy
+# Or you may optionally define your own serialized as json
+#openshift_builddefaults_json='{"BuildDefaults":{"configuration":{"apiVersion":"v1","env":[{"name":"HTTP_PROXY","value":"http://proxy.example.com.redhat.com:3128"},{"name":"NO_PROXY","value":"ose3-master.example.com"}],"gitHTTPProxy":"http://proxy.example.com:3128","kind":"BuildDefaultsConfig"}}}'
+
+
+
 # host group for masters
 [masters]
 aep3-master[1:3]-ansible.test.example.com
