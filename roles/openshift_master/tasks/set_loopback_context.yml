@@ -1,0 +1,31 @@
+---
+- name: Test local loopback context
+  command: >
+    {{ openshift.common.client_binary }} config view
+    --config={{ openshift_master_loopback_config }}
+  changed_when: false
+  register: loopback_config
+
+- command: >
+    {{ openshift.common.client_binary }} config set-cluster
+    --certificate-authority={{ openshift_master_config_dir }}/ca.crt
+    --embed-certs=true --server={{ openshift.master.loopback_api_url }}
+    {{ openshift.master.loopback_cluster_name }}
+    --config={{ openshift_master_loopback_config }}
+  when: loopback_context_string not in loopback_config.stdout
+  register: set_loopback_cluster
+
+- command: >
+    {{ openshift.common.client_binary }} config set-context
+    --cluster={{ openshift.master.loopback_cluster_name }}
+    --namespace=default --user={{ openshift.master.loopback_user }}
+    {{ openshift.master.loopback_context_name }}
+    --config={{ openshift_master_loopback_config }}
+  when: set_loopback_cluster | changed
+  register: set_loopback_context
+
+- command: >
+    {{ openshift.common.client_binary }} config use-context {{ openshift.master.loopback_context_name }}
+    --config={{ openshift_master_loopback_config }}
+  when: set_loopback_context | changed
+  register: set_current_context
