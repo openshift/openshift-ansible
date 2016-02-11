@@ -3,7 +3,8 @@ apiVersion: "v1"
 kind: "List"
 items:
 {% for claim in persistent_volume_claims %}
-- kind: "PersistentVolumeClaim"
+- apiVersion: "v1"
+  kind: "PersistentVolumeClaim"
   metadata:
     name: "{{ claim.name }}"
   spec:
