@@ -1,15 +1,15 @@
 ---
-- name: Create directory /usr/share/nuagekubemon
+- name: Create directory /usr/share/nuage-openshift-monitor
   sudo: true
-  file: path=/usr/share/nuagekubemon state=directory  
+  file: path=/usr/share/nuage-openshift-monitor state=directory  
 
 - name: Create the log directory
   sudo: true
-  file: path={{ nuagekubemon_log_dir }} state=directory
+  file: path={{ nuage_openshift_monitor_log_dir }} state=directory
 
-- name: Install Nuage Kubemon
+- name: Install Nuage Openshift Monitor 
   sudo: true
-  yum: name={{ nuage_kubemon_rpm }} state=present
+  yum: name={{ nuage_openshift_rpm }} state=present
 
 - name: Run the service account creation script
   sudo: true
@@ -24,11 +24,11 @@
         - nuage.key
         - nuage.kubeconfig 
  
-- name: Create nuagekubemon.yaml
+- name: Create nuage-openshift-monitor.yaml
   sudo: true
-  template: src=nuagekubemon.j2 dest=/usr/share/nuagekubemon/nuagekubemon.yaml owner=root mode=0644
+  template: src=nuage-openshift-monitor.j2 dest=/usr/share/nuage-openshift-monitor/nuage-openshift-monitor.yaml owner=root mode=0644
   notify:
     - restart master
     - restart master api
     - restart master controllers
-    - restart nuagekubemon
+    - restart nuage-openshift-monitor
