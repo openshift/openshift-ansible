@@ -37,7 +37,7 @@
     when: all_routers.rc == 0
     command: >
       {{ oc_cmd }} patch dc/{{ item['labels']['deploymentconfig'] }} -p
-      '{"spec":{"template":{"spec":{"containers":[{"name":"router","image":"{{ router_image }}"}]}}}}'
+      '{"spec":{"template":{"spec":{"containers":[{"name":"router","image":"{{ router_image }}","livenessProbe":{"tcpSocket":null,"httpGet":{"path": "/healthz", "port": 1936, "host": "localhost", "scheme": "HTTP"},"initialDelaySeconds":10,"timeoutSeconds":1}}]}}}}'
       --api-version=v1
     with_items: haproxy_routers
 
