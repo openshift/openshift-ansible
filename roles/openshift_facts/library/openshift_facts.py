@@ -508,10 +508,11 @@ def set_url_facts_if_unset(facts):
                                                                    ports[prefix]))
 
 
-        r_lhn = "{0}:{1}".format(api_hostname, ports['api']).replace('.', '-')
+        r_lhn = "{0}:{1}".format(hostname, ports['api']).replace('.', '-')
+        r_lhu = "system:openshift-master/{0}:{1}".format(api_hostname, ports['api']).replace('.', '-')
         facts['master'].setdefault('loopback_cluster_name', r_lhn)
         facts['master'].setdefault('loopback_context_name', "default/{0}/system:openshift-master".format(r_lhn))
-        facts['master'].setdefault('loopback_user', "system:openshift-master/{0}".format(r_lhn))
+        facts['master'].setdefault('loopback_user', r_lhu)
 
         prefix_hosts = [('console', api_hostname), ('public_console', api_public_hostname)]
         for prefix, host in prefix_hosts:
@@ -719,9 +720,9 @@ def set_version_facts_if_unset(facts):
                 version_gte_3_1_1_or_1_1_1 = LooseVersion(version) >= LooseVersion('1.1.1')
                 version_gte_3_2_or_1_2 = LooseVersion(version) >= LooseVersion('1.1.2')
             else:
-                version_gte_3_1_or_1_1 = LooseVersion(version) >= LooseVersion('3.1.0')
+                version_gte_3_1_or_1_1 = LooseVersion(version) >= LooseVersion('3.0.2.905')
                 version_gte_3_1_1_or_1_1_1 = LooseVersion(version) >= LooseVersion('3.1.1')
-                version_gte_3_2_or_1_2 = LooseVersion(version) >= LooseVersion('3.2.0')
+                version_gte_3_2_or_1_2 = LooseVersion(version) >= LooseVersion('3.1.1.901')
         else:
             version_gte_3_1_or_1_1 = True
             version_gte_3_1_1_or_1_1_1 = True
