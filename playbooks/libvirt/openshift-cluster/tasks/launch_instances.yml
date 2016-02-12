@@ -94,6 +94,16 @@
 - set_fact:
     ips: "{{ scratch_ip.results | default([]) | oo_collect('stdout') }}"
 
+- set_fact:
+    node_label:
+      type: "{{ g_sub_host_type }}"
+  when: instances | length > 0 and type == "node"
+
+- set_fact:
+    node_label:
+      type: "{{ type }}"
+  when: instances | length > 0 and type != "node"
+
 - name: Add new instances
   add_host:
     hostname: '{{ item.0 }}'
@@ -101,6 +111,7 @@
     ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
     ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
     groups: "tag_environment-{{ cluster_env }}, tag_host-type-{{ type }}, tag_sub-host-type-{{ g_sub_host_type }}, tag_clusterid-{{ cluster_id }}"
+    openshift_node_labels: "{{ node_label }}"
   with_together:
     - instances
     - ips
