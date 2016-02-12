@@ -3,7 +3,6 @@ disable_root: true
 
 hostname: {{ item[0] }}
 fqdn: {{ item[0] }}.example.com
-manage_etc_hosts: true
 
 users:
   - default
