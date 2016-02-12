@@ -1,7 +1,7 @@
 openshift_master_config_dir: "{{ openshift.common.config_base }}/master"
 ca_cert: "{{ openshift_master_config_dir }}/ca.crt"
 admin_config: "{{ openshift.common.config_base }}/master/admin.kubeconfig"
-cert_output_dir: /usr/share/nuagekubemon
-kube_config: /usr/share/nuagekubemon/nuage.kubeconfig
-kubemon_yaml: /usr/share/nuagekubemon/nuagekubemon.yaml 
+cert_output_dir: /usr/share/nuage-openshift-monitor
+kube_config: /usr/share/nuage-openshift-monitor/nuage.kubeconfig
+kubemon_yaml: /usr/share/nuage-openshift-monitor/nuage-openshift-monitor.yaml 
 master_config_yaml: "{{ openshift_master_config_dir }}/master-config.yaml" 

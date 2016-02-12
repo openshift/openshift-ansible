@@ -1,7 +1,7 @@
 ---
-- name: restart nuagekubemon
+- name: restart nuage-openshift-monitor
   sudo: true
-  service: name=nuagekubemon state=restarted
+  service: name=nuage-openshift-monitor state=restarted
 
 - name: restart master
   service: name={{ openshift.common.service_type }}-master state=restarted
