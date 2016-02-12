@@ -109,6 +109,7 @@
       {{ openshift.common.admin_binary}} --config={{ openshift.common.config_base }}/master/admin.kubeconfig
       policy reconcile-cluster-role-bindings
       --exclude-groups=system:authenticated
+      --exclude-groups=system:authenticated:oauth
       --exclude-groups=system:unauthenticated
       --exclude-users=system:anonymous
       --additive-only=true --confirm
