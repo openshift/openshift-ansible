@@ -533,11 +533,13 @@ def set_aggregate_facts(facts):
     """
     all_hostnames = set()
     internal_hostnames = set()
+    kube_svc_ip = first_ip(facts['common']['portal_net'])
     if 'common' in facts:
         all_hostnames.add(facts['common']['hostname'])
         all_hostnames.add(facts['common']['public_hostname'])
         all_hostnames.add(facts['common']['ip'])
         all_hostnames.add(facts['common']['public_ip'])
+        faces['common']['kube_svc_ip'] = kube_svc_ip
 
         internal_hostnames.add(facts['common']['hostname'])
         internal_hostnames.add(facts['common']['ip'])
@@ -554,12 +556,12 @@ def set_aggregate_facts(facts):
                          'kubernetes.default.svc', 'kubernetes.default.svc.' + cluster_domain]
             all_hostnames.update(svc_names)
             internal_hostnames.update(svc_names)
-            first_svc_ip = first_ip(facts['master']['portal_net'])
-            all_hostnames.add(first_svc_ip)
-            internal_hostnames.add(first_svc_ip)
+            all_hostnames.add(kube_svc_ip)
+            internal_hostnames.add(kube_svc_ip)
 
         facts['common']['all_hostnames'] = list(all_hostnames)
         facts['common']['internal_hostnames'] = list(internal_hostnames)
+
 
     return facts
 
@@ -1192,7 +1194,7 @@ class OpenShiftFacts(object):
 
         common = dict(use_openshift_sdn=True, ip=ip_addr, public_ip=ip_addr,
                       deployment_type='origin', hostname=hostname,
-                      public_hostname=hostname)
+                      public_hostname=hostname, portal_net='172.30.0.0/16')
         common['client_binary'] = 'oc'
         common['admin_binary'] = 'oadm'
         common['dns_domain'] = 'cluster.local'
@@ -1203,9 +1205,9 @@ class OpenShiftFacts(object):
             master = dict(api_use_ssl=True, api_port='8443', controllers_port='8444',
                           console_use_ssl=True, console_path='/console',
                           console_port='8443', etcd_use_ssl=True, etcd_hosts='',
-                          etcd_port='4001', portal_net='172.30.0.0/16',
+                          etcd_port='4001',
                           embedded_etcd=True, embedded_kube=True,
-                          embedded_dns=True, dns_port='53',
+                          embedded_dns=True, dns_port='8053',
                           bind_addr='0.0.0.0', session_max_seconds=3600,
                           session_name='ssn', session_secrets_file='',
                           access_token_max_seconds=86400,
@@ -1214,7 +1216,7 @@ class OpenShiftFacts(object):
             defaults['master'] = master
 
         if 'node' in roles:
-            node = dict(labels={}, annotations={}, portal_net='172.30.0.0/16',
+            node = dict(labels={}, annotations={},
                         iptables_sync_period='5s', set_node_ip=False)
             defaults['node'] = node
 
