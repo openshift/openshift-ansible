@@ -526,10 +526,14 @@ Add new nodes here
 def get_installed_hosts(hosts, callback_facts):
     installed_hosts = []
     for host in hosts:
-        if(host.connect_to in callback_facts.keys()
-           and 'common' in callback_facts[host.connect_to].keys()
-           and callback_facts[host.connect_to]['common'].get('version', '')
-           and callback_facts[host.connect_to]['common'].get('version', '') != 'None'):
+        if host.connect_to in callback_facts.keys() and (
+            ('common' in callback_facts[host.connect_to].keys() and
+                  callback_facts[host.connect_to]['common'].get('version', '') and
+                  callback_facts[host.connect_to]['common'].get('version', '') != 'None') \
+            or
+            ('master' in callback_facts[host.connect_to].keys() and
+                 callback_facts[host.connect_to]['master'].get('cluster_method', '') == 'native')
+            ):
             installed_hosts.append(host)
     return installed_hosts
 
