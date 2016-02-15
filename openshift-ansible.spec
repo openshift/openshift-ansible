@@ -50,8 +50,10 @@ cp -p bin/openshift_ansible.conf.example %{buildroot}/etc/openshift_ansible/open
 # Fix links
 rm -f %{buildroot}%{python_sitelib}/openshift_ansible/multi_inventory.py
 rm -f %{buildroot}%{python_sitelib}/openshift_ansible/aws
+rm -f %{buildroot}%{python_sitelib}/openshift_ansible/gce
 ln -sf %{_datadir}/ansible/inventory/multi_inventory.py %{buildroot}%{python_sitelib}/openshift_ansible/multi_inventory.py
 ln -sf %{_datadir}/ansible/inventory/aws %{buildroot}%{python_sitelib}/openshift_ansible/aws
+ln -sf %{_datadir}/ansible/inventory/gce %{buildroot}%{python_sitelib}/openshift_ansible/gce
 
 # openshift-ansible-docs install
 # -docs are currently just %doc, no install needed
