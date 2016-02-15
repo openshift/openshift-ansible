@@ -21,6 +21,6 @@
     failed_when: false
   - name: Warn user about bad openshift_hostname values
     pause:
-       prompt: "The hostname \"{{ openshift.common.hostname }}\" for \"{{ ansible_nodename }}\" doesn't resolve to an ip address owned by this host. Please set openshift_hostname variable to a hostname that when resolved on the host in question resolves to an IP address matching an interface on this host. This host will fail liveness checks for pods utilizing hostPorts, press CTRL-C to continue."
+       prompt: "The hostname \"{{ openshift.common.hostname }}\" for \"{{ ansible_nodename }}\" doesn't resolve to an ip address owned by this host. Please set openshift_hostname variable to a hostname that when resolved on the host in question resolves to an IP address matching an interface on this host. This host will fail liveness checks for pods utilizing hostPorts, press ENTER to continue or CTRL-C to abort."
        seconds: "{{ 10 if openshift_override_hostname_check | default(false) | bool else omit }}"
     when: lookupip.stdout not in ansible_all_ipv4_addresses
