@@ -10,6 +10,7 @@ PERSIST_SETTINGS = [
     'ansible_ssh_user',
     'ansible_config',
     'ansible_log_path',
+    'master_routingconfig_subdomain',
     'variant',
     'variant_version',
     'version',
