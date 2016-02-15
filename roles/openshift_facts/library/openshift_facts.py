@@ -972,14 +972,18 @@ def merge_facts(orig, new, additive_facts_to_overwrite, protected_facts_to_overw
             elif key in protected_facts and key not in [x.split('.')[-1] for x in protected_facts_to_overwrite]:
                 # The master count (int) can only increase unless it
                 # has been passed as a protected fact to overwrite.
-                if key == 'master_count' and int(value) <= int(new[key]):
-                    facts[key] = copy.deepcopy(new[key])
-                else:
-                    facts[key] = value
+                if key == 'master_count':
+                    if int(value) <= int(new[key]):
+                        facts[key] = copy.deepcopy(new[key])
+                    else:
+                        module.fail_json(msg='openshift_facts received a lower value for openshift.master.master_count')
                 # ha (bool) can not change unless it has been passed
                 # as a protected fact to overwrite.
                 if key == 'ha':
-                    facts[key] = value
+                    if bool(value) != bool(new[key]):
+                        module.fail_json(msg='openshift_facts received a different value for openshift.master.ha')
+                    else:
+                        facts[key] = value
             # No other condition has been met. Overwrite the old fact
             # with the new value.
             else:
