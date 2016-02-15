@@ -12,6 +12,6 @@ g_master_hosts:  "{{ g_all_hosts | intersect(groups['tag_host-type_master'] | de
 
 g_node_hosts:    "{{ g_all_hosts | intersect(groups['tag_host-type_node'] | default([])) }}"
 
-g_infra_hosts:   "{{ g_node_hosts | intersect(groups['tag_sub-host-type_infra']) | default([]) }}"
+g_infra_hosts:   "{{ g_node_hosts | intersect(groups['tag_sub-host-type_infra'] | default([])) }}"
 
-g_compute_hosts: "{{ g_node_hosts | intersect(groups['tag_sub-host-type_compute']) | default([]) }}"
+g_compute_hosts: "{{ g_node_hosts | intersect(groups['tag_sub-host-type_compute'] | default([])) }}"
