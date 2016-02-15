@@ -10,6 +10,7 @@
       docker_additional_registries: "{{ docker_additional_registries }}"
       docker_insecure_registries: "{{ docker_insecure_registries }}"
       docker_blocked_registries: "{{ docker_blocked_registries }}"
+      docker_options: "{{ openshift_docker_options | default('',True) }}"
   - role: node
     local_facts:
       portal_net: "{{ openshift_master_portal_net | default(None) }}"
@@ -44,10 +45,11 @@
   lineinfile:
     dest: /etc/sysconfig/docker
     regexp: '^OPTIONS=.*$'
-    line: "OPTIONS='--insecure-registry={{ openshift.node.portal_net }} \
-      {% if ansible_selinux and ansible_selinux.status == '''enabled''' %}--selinux-enabled{% endif %} \
-      {% if openshift.node.docker_log_driver is defined  %} --log-driver {{ openshift.node.docker_log_driver }}  {% endif %} \
-      {% if openshift.node.docker_log_options is defined %}   {{ openshift.node.docker_log_options |  oo_split() | oo_prepend_strings_in_list('--log-opt ') | join(' ')}}  {% endif %} '"
+    line: "OPTIONS='--insecure-registry={{ openshift.node.portal_net }}\
+      {% if ansible_selinux and ansible_selinux.status == '''enabled''' %} --selinux-enabled{% endif %}\
+      {% if openshift.node.docker_log_driver is defined  %} --log-driver {{ openshift.node.docker_log_driver }}{% endif %}\
+      {% if openshift.node.docker_log_options is defined %} {{ openshift.node.docker_log_options |  oo_split() | oo_prepend_strings_in_list('--log-opt ') | join(' ')}}{% endif %}\
+      {% if openshift.common.docker_options is defined %} {{ openshift.common.docker_options }}{% endif %}'"
   when: docker_check.stat.isreg
   notify:
     - restart openshift_docker
