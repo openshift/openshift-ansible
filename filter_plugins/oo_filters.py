@@ -697,6 +697,19 @@ class FilterModule(object):
 
         return matching_pods
 
+    @staticmethod
+    def oo_get_hosts_from_hostvars(hostvars, hosts):
+        """ Return a list of hosts from hostvars """
+        retval = []
+        for host in hosts:
+            try:
+                retval.append(hostvars[host])
+            except errors.AnsibleError as _:
+                # host does not exist
+                pass
+
+        return retval
+
     def filters(self):
         """ returns a mapping of filters to methods """
         return {
@@ -724,4 +737,5 @@ class FilterModule(object):
             "oo_persistent_volume_claims": self.oo_persistent_volume_claims,
             "oo_31_rpm_rename_conversion": self.oo_31_rpm_rename_conversion,
             "oo_pods_match_component": self.oo_pods_match_component,
+            "oo_get_hosts_from_hostvars": self.oo_get_hosts_from_hostvars,
         }
