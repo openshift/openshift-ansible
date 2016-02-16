@@ -1,18 +1,6 @@
 ---
 - include: ../openshift-cluster/evaluate_groups.yml
 
-- name: Configure docker hosts
-  hosts: oo_nodes_to_config
-  vars:
-    docker_additional_registries: "{{ lookup('oo_option', 'docker_additional_registries') | oo_split }}"
-    docker_insecure_registries: "{{ lookup('oo_option',  'docker_insecure_registries') | oo_split }}"
-    docker_blocked_registries: "{{ lookup('oo_option', 'docker_blocked_registries') | oo_split }}"
-  roles:
-  - openshift_facts
-  - openshift_docker
-
-- include: ../openshift-node/config.yml
-
 - name: Gather facts
   hosts: oo_etcd_to_config:oo_masters_to_config:oo_nodes_to_config
   roles:
@@ -51,6 +39,16 @@
     retries: 120
     delay: 1
     changed_when: false
+
+- name: Configure docker hosts
+  hosts: oo_masters_to-config:oo_nodes_to_config
+  vars:
+    docker_additional_registries: "{{ lookup('oo_option', 'docker_additional_registries') | oo_split }}"
+    docker_insecure_registries: "{{ lookup('oo_option',  'docker_insecure_registries') | oo_split }}"
+    docker_blocked_registries: "{{ lookup('oo_option', 'docker_blocked_registries') | oo_split }}"
+  roles:
+  - openshift_facts
+  - openshift_docker
 
 - include: ../openshift-master/config.yml
 
