@@ -1,6 +1,16 @@
 ---
 - include: evaluate_groups.yml
 
+- name: Configure docker hosts
+  hosts: oo_nodes_to_config
+  vars:
+    docker_additional_registries: "{{ lookup('oo_option', 'docker_additional_registries') | oo_split }}"
+    docker_insecure_registries: "{{ lookup('oo_option',  'docker_insecure_registries') | oo_split }}"
+    docker_blocked_registries: "{{ lookup('oo_option', 'docker_blocked_registries') | oo_split }}"
+  roles:
+  - openshift_facts
+  - openshift_docker
+
 - include: ../openshift-node/config.yml
   vars:
     openshift_deployment_type: "{{ deployment_type }}"
