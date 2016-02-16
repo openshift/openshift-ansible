@@ -53,6 +53,13 @@
         - pcsd
       failed_when: false
 
+    - name: Stop additional atomic services
+      service: name={{ item }} state=stopped
+      when: is_atomic | bool
+      with_items:
+        - etcd_container
+      failed_when: false
+
     - name: Remove packages
       action: "{{ ansible_pkg_mgr }} name={{ item }} state=absent"
       when: not is_atomic | bool
