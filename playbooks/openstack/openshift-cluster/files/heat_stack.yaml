@@ -294,6 +294,12 @@ resources:
           protocol: udp
           port_range_min: 24224
           port_range_max: 24224
+        - direction: ingress
+          protocol: udp
+          port_range_min: 4789
+          port_range_max: 4789
+          remote_mode: remote_group_id
+          remote_group_id: { get_resource: node-secgrp }
 
   etcd-secgrp:
     type: OS::Neutron::SecurityGroup
