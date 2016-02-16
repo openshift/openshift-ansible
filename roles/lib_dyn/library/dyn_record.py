@@ -95,6 +95,26 @@ requirements: [ dyn ]
 author: "Russell Harrison"
 '''
 
+EXAMPLES = '''
+- name: Update CNAME record
+  local_action:
+    module: dyn_record
+    state: present
+    record_fqdn: www.example.com
+    zone: example.com
+    record_type: CNAME
+    record_value: web1.example.com
+
+- name: Update A record
+  local_action:
+    module: dyn_record
+    state: present
+    record_fqdn: web1.example.com
+    zone: example.com
+    record_value: 10.0.0.10
+    record_type: A
+'''
+
 try:
     IMPORT_ERROR = False
     from dyn.tm.session import DynectSession
