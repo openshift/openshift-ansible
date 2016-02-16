@@ -20,12 +20,26 @@
   - role: openshift_examples
     openshift_examples_import_command: replace
   pre_tasks:
-  - name: Check for default router
+  - name: Collect all routers
     command: >
-      {{ oc_cmd }} get -n default dc/router
-    register: _default_router
+      {{ oc_cmd }} get pods --all-namespaces -l 'router' -o json
+    register: all_routers
     failed_when: false
     changed_when: false
+
+  - set_fact: haproxy_routers="{{ (all_routers.stdout | from_json)['items'] | oo_pods_match_component(openshift_deployment_type, 'haproxy-router') | oo_select_keys_from_list(['metadata']) }}"
+    when: all_routers.rc == 0
+
+  - set_fact: haproxy_routers=[]
+    when: all_routers.rc != 0
+
+  - name: Update router image to current version
+    when: all_routers.rc == 0
+    command: >
+      {{ oc_cmd }} patch dc/{{ item['labels']['deploymentconfig'] }} -p
+      '{"spec":{"template":{"spec":{"containers":[{"name":"router","image":"{{ router_image }}","livenessProbe":{"tcpSocket":null,"httpGet":{"path": "/healthz", "port": 1936, "host": "localhost", "scheme": "HTTP"},"initialDelaySeconds":10,"timeoutSeconds":1}}]}}}}'
+      --api-version=v1
+    with_items: haproxy_routers
 
   - name: Check for default registry
     command: >
@@ -33,13 +47,6 @@
     register: _default_registry
     failed_when: false
     changed_when: false
-
-  - name: Update router image to current version
-    when: _default_router.rc == 0
-    command: >
-      {{ oc_cmd }} patch dc/router -p
-      '{"spec":{"template":{"spec":{"containers":[{"name":"router","image":"{{ router_image }}"}]}}}}'
-      --api-version=v1
 
   - name: Update registry image to current version
     when: _default_registry.rc == 0

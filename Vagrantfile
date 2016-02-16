@@ -30,7 +30,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     libvirt.memory = 1024
     libvirt.driver = 'kvm'
     case deployment_type
-    when "enterprise"
+    when "openshift-enterprise"
+      override.vm.box = "rhel-7"
+    when "atomic-enterprise"
       override.vm.box = "rhel-7"
     when "origin"
       override.vm.box = "centos/7"

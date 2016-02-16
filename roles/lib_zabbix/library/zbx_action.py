@@ -120,8 +120,8 @@ def opmessage_usr_diff(zab_val, user_val):
     ''' Report whether there are differences between opmessage_usr
         on zabbix and opmessage_usr supplied by user '''
 
-    zab_usr_ids = set([usr['usrid'] for usr in zab_val])
-    usr_ids = set([usr['usrid'] for usr in user_val])
+    zab_usr_ids = set([usr['userid'] for usr in zab_val])
+    usr_ids = set([usr['userid'] for usr in user_val])
     if usr_ids != zab_usr_ids:
         return True
 
@@ -228,12 +228,12 @@ def get_user_groups(zapi, groups):
     '''get the mediatype id from the mediatype name'''
     user_groups = []
 
-    content = zapi.get_content('usergroup',
-                               'get',
-                               {'search': {'name': groups}})
-
-    for usr_grp in content['result']:
-        user_groups.append({'usrgrpid': usr_grp['usrgrpid']})
+    for group in groups:
+        content = zapi.get_content('usergroup',
+                                   'get',
+                                   {'search': {'name': group}})
+        for result in content['result']:
+            user_groups.append({'usrgrpid': result['usrgrpid']})
 
     return user_groups
 

@@ -3,6 +3,7 @@
   command: >
     {{ openshift.common.admin_binary }} router
     --create --replicas={{ openshift.master.infra_nodes | length }}
+    --namespace=default
     --service-account=router {{ ortr_selector }}
     --credentials={{ openshift_master_config_dir }}/openshift-router.kubeconfig {{ ortr_images }}
   register: ortr_results

@@ -15,7 +15,7 @@
   when: openshift_master_ha | bool and ((openshift_master_cluster_method is not defined) or (openshift_master_cluster_method is defined and openshift_master_cluster_method not in ["native", "pacemaker"]))
 - fail:
     msg: "'native' high availability is not supported for the requested OpenShift version"
-  when: openshift_master_ha | bool and openshift_master_cluster_method == "native" and not openshift.common.version_greater_than_3_1_or_1_1 | bool
+  when: openshift_master_ha | bool and openshift_master_cluster_method == "native" and not openshift.common.version_gte_3_1_or_1_1 | bool
 - fail:
     msg: "openshift_master_cluster_password must be set for multi-master installations"
   when: openshift_master_ha | bool and openshift_master_cluster_method == "pacemaker" and (openshift_master_cluster_password is not defined or not openshift_master_cluster_password)
@@ -240,36 +240,8 @@
   - restart master api
   - restart master controllers
 
-- name: Test local loopback context
-  command: >
-    {{ openshift.common.client_binary }} config view
-    --config={{ openshift_master_loopback_config }}
-  changed_when: false
-  register: loopback_config
-
-- command: >
-    {{ openshift.common.client_binary }} config set-cluster
-    --certificate-authority={{ openshift_master_config_dir }}/ca.crt
-    --embed-certs=true --server={{ openshift.master.loopback_api_url }}
-    {{ openshift.master.loopback_cluster_name }}
-    --config={{ openshift_master_loopback_config }}
-  when: loopback_context_string not in loopback_config.stdout
-  register: set_loopback_cluster
-
-- command: >
-    {{ openshift.common.client_binary }} config set-context
-    --cluster={{ openshift.master.loopback_cluster_name }}
-    --namespace=default --user={{ openshift.master.loopback_user }}
-    {{ openshift.master.loopback_context_name }}
-    --config={{ openshift_master_loopback_config }}
-  when: set_loopback_cluster | changed
-  register: set_loopback_context
-
-- command: >
-    {{ openshift.common.client_binary }} config use-context {{ openshift.master.loopback_context_name }}
-    --config={{ openshift_master_loopback_config }}
-  when: set_loopback_context | changed
-  register: set_current_context
+- include: set_loopback_context.yml
+  when: openshift.common.version_gte_3_2_or_1_2
 
 - name: Start and enable master
   service: name={{ openshift.common.service_type }}-master enabled=yes state=started
@@ -287,7 +259,7 @@
 
 - name: Mask master service
   command: systemctl mask {{ openshift.common.service_type }}-master
-  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
+  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and not openshift.common.is_containerized | bool
 
 - name: Start and enable master api
   service: name={{ openshift.common.service_type }}-master-api enabled=yes state=started

@@ -2,15 +2,15 @@
 debug_level: 2
 
 deployment_rhel7_ent_base:
-  image: rhel-7
-  machine_type: n1-standard-1
+  image: "{{ lookup('oo_option', 'image_name') | default('rhel-7', True) }}"
+  machine_type: "{{ lookup('oo_option', 'machine_type') | default('n1-standard-1', True) }}"
   ssh_user: "{{ lookup('env', 'gce_ssh_user') |  default(ansible_ssh_user, true) }}"
   sudo: yes
 
 deployment_vars:
   origin:
-    image: centos-7
-    machine_type: n1-standard-1
+    image: "{{ lookup('oo_option', 'image_name') | default('centos-7', True) }}"
+    machine_type: "{{ lookup('oo_option', 'machine_type') | default('n1-standard-1', True) }}"
     ssh_user: "{{ lookup('env', 'gce_ssh_user') |  default(ansible_ssh_user, true) }}"
     sudo: yes
   online:

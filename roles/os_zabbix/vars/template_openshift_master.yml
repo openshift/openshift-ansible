@@ -7,8 +7,8 @@ g_template_openshift_master:
     - Openshift Master
     key: openshift.master.app.create
 
-  - key: openshift.master.registry.healthz
-    description: "Shows the health status of the cluster's docker registry"
+  - key: openshift.master.registry.healthy_pct
+    description: "Shows the percentage of healthy registries in the cluster"
     type: int
     applications:
     - Openshift Master
@@ -201,6 +201,18 @@ g_template_openshift_master:
     applications:
     - Openshift Master Metrics
 
+  - key: openshift.master.nodesnotready.count
+    description: "This check shows how many nodes in a cluster are in NotReady state."
+    type: int
+    applications: 
+    - Openshift Master
+
+  - key: openshift.master.nodesnotschedulable.count
+    description: "This check shows how many nodes in a cluster are not schedulable."
+    type: int
+    applications:
+    - Openshift Master
+
   - key: openshift.master.apiserver.latency.summary.pods.quantile.list.5
     description: "Value from https://master/metrics.  This is the time, in miliseconds, that 50% of the pod operations have taken to completed."
     type: int
@@ -333,9 +345,16 @@ g_template_openshift_master:
     - 'Openshift Master process not running on {HOST.NAME}'
     priority: avg
 
-  - name: 'Docker Registry check failed on {HOST.NAME}'
-    expression: '{Template Openshift Master:openshift.master.registry.healthz.max(#2)}<1'
-    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
+  - name: 'One or more Docker Registries is unhealthy according to {HOST.NAME}'
+    expression: '{Template Openshift Master:openshift.master.registry.healthy_pct.last(#2)}<100 and {Template Openshift Master:openshift.master.registry.healthy_pct.max(#2)}>50'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_registry.asciidoc'
+    dependencies:
+    - 'Openshift Master process not running on {HOST.NAME}'
+    priority: avg
+
+  - name: 'Multiple Docker Registries are unhealthy according to {HOST.NAME}'
+    expression: '{Template Openshift Master:openshift.master.registry.healthy_pct.last(#2)}<51'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_registry.asciidoc'
     dependencies:
     - 'Openshift Master process not running on {HOST.NAME}'
     priority: high
@@ -352,6 +371,13 @@ g_template_openshift_master:
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
     dependencies:
     - 'Openshift Master API health check is failing on {HOST.NAME}'
+    priority: high
+
+  - name: 'Hosts not ready according to {HOST.NAME}'
+    expression: '{Template Openshift Master:openshift.master.nodesnotready.count.last(#2)}>0'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_node.asciidoc'
+    dependencies: 
+    - 'Openshift Master process not running on {HOST.NAME}'
     priority: high
 
   zgraphs:

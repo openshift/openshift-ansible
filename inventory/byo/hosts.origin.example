@@ -59,12 +59,18 @@ deployment_type=origin
 # See: https://docs.openshift.org/latest/install_config/aggregate_logging.html
 #openshift_master_logging_public_url=https://kibana.example.com
 
+# Docker Configuration
 # Add additional, insecure, and blocked registries to global docker configuration
 # For enterprise deployment types we ensure that registry.access.redhat.com is
 # included if you do not include it
 #cli_docker_additional_registries=registry.example.com
 #cli_docker_insecure_registries=registry.example.com
 #cli_docker_blocked_registries=registry.hacker.com
+# Items added, as is, to end of /etc/sysconfig/docker OPTIONS
+#openshift_docker_options="-l warn --ipv6=false"
+# Deprecated methods to set --log-driver and --log-opts flags, use openshift_docker_options instead
+#cli_docker_log_driver=json
+#cli_docker_log_options="tag=mailer"
 
 # Alternate image format string. If you're not modifying the format string and
 # only need to inject your own registry you may want to consider
@@ -94,17 +100,14 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #osm_mcs_labels_per_project=5
 #osm_uid_allocator_range='1000000000-1999999999/10000'
 
-# Configure Fluentd
-#use_fluentd=true
-
 # Enable cockpit
 #osm_use_cockpit=true
 #
 # Set cockpit plugins
 #osm_cockpit_plugins=['cockpit-kubernetes']
 
-# Native high availbility cluster method with optional load balancer.
-# If no lb group is defined installer assumes that a load balancer has
+# Native high availability cluster method with optional load balancer.
+# If no lb group is defined, the installer assumes that a load balancer has
 # been preconfigured. For installation the value of
 # openshift_master_cluster_hostname must resolve to the load balancer
 # or to one or all of the masters defined in the inventory if no load
@@ -147,7 +150,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 
 # default storage plugin dependencies to install, by default the ceph and
 # glusterfs plugin dependencies will be installed, if available.
-#osn_storage_plugin_deps=['ceph','glusterfs']
+#osn_storage_plugin_deps=['ceph','glusterfs','iscsi']
 
 # default selectors for router and registry services
 # openshift_router_selector='region=infra'
@@ -252,7 +255,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # openshift-ansible will wait indefinitely for your input when it detects that the
 # value of openshift_hostname resolves to an IP address not bound to any local
 # interfaces. This mis-configuration is problematic for any pod leveraging host
-# networking and liveness or readiness probes. 
+# networking and liveness or readiness probes.
 # Setting this variable to true will override that check.
 #openshift_override_hostname_check=true
 

@@ -526,10 +526,14 @@ Add new nodes here
 def get_installed_hosts(hosts, callback_facts):
     installed_hosts = []
     for host in hosts:
-        if(host.connect_to in callback_facts.keys()
-           and 'common' in callback_facts[host.connect_to].keys()
-           and callback_facts[host.connect_to]['common'].get('version', '')
-           and callback_facts[host.connect_to]['common'].get('version', '') != 'None'):
+        if host.connect_to in callback_facts.keys() and (
+            ('common' in callback_facts[host.connect_to].keys() and
+                  callback_facts[host.connect_to]['common'].get('version', '') and
+                  callback_facts[host.connect_to]['common'].get('version', '') != 'None') \
+            or
+            ('master' in callback_facts[host.connect_to].keys() and
+                 callback_facts[host.connect_to]['master'].get('cluster_method', '') == 'native')
+            ):
             installed_hosts.append(host)
     return installed_hosts
 
@@ -722,14 +726,30 @@ def upgrade(ctx):
         click.echo("No hosts defined in: %s" % oo_cfg.config_path)
         sys.exit(1)
 
-    # Update config to reflect the version we're targetting, we'll write
-    # to disk once ansible completes successfully, not before.
     old_variant = oo_cfg.settings['variant']
     old_version = oo_cfg.settings['variant_version']
-    if oo_cfg.settings['variant'] == 'enterprise':
-        oo_cfg.settings['variant'] = 'openshift-enterprise'
-    version = find_variant(oo_cfg.settings['variant'])[1]
-    oo_cfg.settings['variant_version'] = version.name
+
+
+    message = """
+        This tool will help you upgrade your existing OpenShift installation.
+"""
+    click.echo(message)
+    click.echo("Version {} found. Do you want to update to the latest version of {} " \
+               "or migrate to the next major release?".format(old_version, old_version))
+    resp = click.prompt("(1) Update to latest {} (2) Migrate to next relese".format(old_version))
+
+    if resp == "2":
+        # TODO: Make this a lot more flexible
+        new_version = "3.1"
+        # Update config to reflect the version we're targetting, we'll write
+        # to disk once ansible completes successfully, not before.
+        if oo_cfg.settings['variant'] == 'enterprise':
+            oo_cfg.settings['variant'] = 'openshift-enterprise'
+        version = find_variant(oo_cfg.settings['variant'])[1]
+        oo_cfg.settings['variant_version'] = version.name
+    else:
+        new_version = old_version
+
     click.echo("Openshift will be upgraded from %s %s to %s %s on the following hosts:\n" % (
         old_variant, old_version, oo_cfg.settings['variant'],
         oo_cfg.settings['variant_version']))
@@ -743,7 +763,7 @@ def upgrade(ctx):
             click.echo("Upgrade cancelled.")
             sys.exit(0)
 
-    retcode = openshift_ansible.run_upgrade_playbook(verbose)
+    retcode = openshift_ansible.run_upgrade_playbook(old_version, new_version, verbose)
     if retcode > 0:
         click.echo("Errors encountered during upgrade, please check %s." %
             oo_cfg.settings['ansible_log_path'])

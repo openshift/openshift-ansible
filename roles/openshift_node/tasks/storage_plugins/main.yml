@@ -11,3 +11,7 @@
 - name: Ceph storage plugin configuration
   include: ceph.yml
   when: "'ceph' in openshift.node.storage_plugin_deps"
+
+- name: iSCSI storage plugin configuration
+  include: iscsi.yml
+  when: "'iscsi' in openshift.node.storage_plugin_deps"

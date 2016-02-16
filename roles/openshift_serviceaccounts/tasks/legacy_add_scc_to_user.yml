@@ -1,0 +1,37 @@
+####
+#
+# OSE 3.0.z did not have 'oadm policy add-scc-to-user'.
+#
+####
+
+- name: tmp dir for openshift
+  file:
+    path: /tmp/openshift
+    state: directory
+    owner: root
+    mode: 700
+
+- name: Create service account configs
+  template:
+    src: serviceaccount.j2
+    dest: "/tmp/openshift/{{ item }}-serviceaccount.yaml"
+  with_items: openshift_serviceaccounts_names
+
+- name: Get current security context constraints
+  shell: >
+    {{ openshift.common.client_binary }} get scc privileged -o yaml
+    --output-version=v1 > /tmp/openshift/scc.yaml
+  changed_when: false
+
+- name: Add security context constraint for {{ item }}
+  lineinfile:
+    dest: /tmp/openshift/scc.yaml
+    line: "- system:serviceaccount:{{ openshift_serviceaccounts_namespace }}:{{ item.0 }}"
+    insertafter: "^users:$"
+  when: "item.1.rc == 0 and 'system:serviceaccount:{{ openshift_serviceaccounts_namespace }}:{{ item.0 }}' not in {{ (item.1.stdout | from_yaml).users }}"
+  with_nested:
+  - openshift_serviceaccounts_names
+  - scc_test.results
+
+- name: Apply new scc rules for service accounts
+  command: "{{ openshift.common.client_binary }} update -f /tmp/openshift/scc.yaml --api-version=v1"

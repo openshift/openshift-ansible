@@ -26,6 +26,12 @@ g_template_openshift_node:
     applications:
     - Openshift Node
 
+  - key: openshift.node.docker-registry.ping
+    description: Ping docker-registry from node
+    type: int
+    applications:
+    - Openshift Node
+
   ztriggers:
   - name: 'Openshift Node process not running on {HOST.NAME}'
     expression: '{Template Openshift Node:openshift.node.process.count.max(#3)}<1'
@@ -37,8 +43,8 @@ g_template_openshift_node:
     url: 'https://github.com/openshift/ops-sop/blob/node/V3/Alerts/openshift_node.asciidoc'
     priority: high
 
-  - name: 'OVS may not be running on {HOST.NAME}'
-    expression: '{Template Openshift Node:openshift.node.ovs.pids.count.last()}<>4'
+  - name: '[HEAL] OVS may not be running on {HOST.NAME}'
+    expression: '{Template Openshift Node:openshift.node.ovs.pids.count.last(#1)}<>4 and {Template Openshift Node:openshift.node.ovs.pids.count.last(#2)}<>4'
     url: 'https://github.com/openshift/ops-sop/blob/node/V3/Alerts/openshift_node.asciidoc'
     priority: high
 

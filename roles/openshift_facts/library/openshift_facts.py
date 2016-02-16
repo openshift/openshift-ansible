@@ -304,23 +304,6 @@ def normalize_provider_facts(provider, metadata):
         facts = normalize_openstack_facts(metadata, facts)
     return facts
 
-def set_fluentd_facts_if_unset(facts):
-    """ Set fluentd facts if not already present in facts dict
-            dict: the facts dict updated with the generated fluentd facts if
-            missing
-        Args:
-            facts (dict): existing facts
-        Returns:
-            dict: the facts dict updated with the generated fluentd
-            facts if they were not already present
-
-    """
-    if 'common' in facts:
-        if 'use_fluentd' not in facts['common']:
-            use_fluentd = False
-            facts['common']['use_fluentd'] = use_fluentd
-    return facts
-
 def set_flannel_facts_if_unset(facts):
     """ Set flannel facts if not already present in facts dict
             dict: the facts dict updated with the flannel facts if
@@ -525,10 +508,11 @@ def set_url_facts_if_unset(facts):
                                                                    ports[prefix]))
 
 
-        r_lhn = "{0}:{1}".format(api_hostname, ports['api']).replace('.', '-')
+        r_lhn = "{0}:{1}".format(hostname, ports['api']).replace('.', '-')
+        r_lhu = "system:openshift-master/{0}:{1}".format(api_hostname, ports['api']).replace('.', '-')
         facts['master'].setdefault('loopback_cluster_name', r_lhn)
         facts['master'].setdefault('loopback_context_name', "default/{0}/system:openshift-master".format(r_lhn))
-        facts['master'].setdefault('loopback_user', "system:openshift-master/{0}".format(r_lhn))
+        facts['master'].setdefault('loopback_user', r_lhu)
 
         prefix_hosts = [('console', api_hostname), ('public_console', api_public_hostname)]
         for prefix, host in prefix_hosts:
@@ -711,8 +695,8 @@ def set_deployment_facts_if_unset(facts):
     if 'node' in facts:
         deployment_type = facts['common']['deployment_type']
         if 'storage_plugin_deps' not in facts['node']:
-            if deployment_type in ['openshift-enterprise', 'atomic-enterprise']:
-                facts['node']['storage_plugin_deps'] = ['ceph', 'glusterfs']
+            if deployment_type in ['openshift-enterprise', 'atomic-enterprise', 'origin']:
+                facts['node']['storage_plugin_deps'] = ['ceph', 'glusterfs', 'iscsi']
             else:
                 facts['node']['storage_plugin_deps'] = []
 
@@ -720,7 +704,7 @@ def set_deployment_facts_if_unset(facts):
 
 def set_version_facts_if_unset(facts):
     """ Set version facts. This currently includes common.version and
-        common.version_greater_than_3_1_or_1_1.
+        common.version_gte_3_1_or_1_1.
 
         Args:
             facts (dict): existing facts
@@ -732,16 +716,20 @@ def set_version_facts_if_unset(facts):
         facts['common']['version'] = version = get_openshift_version()
         if version is not None:
             if deployment_type == 'origin':
-                version_gt_3_1_or_1_1 = LooseVersion(version) > LooseVersion('1.0.6')
-                version_gt_3_1_1_or_1_1_1 = LooseVersion(version) > LooseVersion('1.1.1')
+                version_gte_3_1_or_1_1 = LooseVersion(version) >= LooseVersion('1.1.0')
+                version_gte_3_1_1_or_1_1_1 = LooseVersion(version) >= LooseVersion('1.1.1')
+                version_gte_3_2_or_1_2 = LooseVersion(version) >= LooseVersion('1.1.2')
             else:
-                version_gt_3_1_or_1_1 = LooseVersion(version) > LooseVersion('3.0.2.900')
-                version_gt_3_1_1_or_1_1_1 = LooseVersion(version) > LooseVersion('3.1.1')
+                version_gte_3_1_or_1_1 = LooseVersion(version) >= LooseVersion('3.0.2.905')
+                version_gte_3_1_1_or_1_1_1 = LooseVersion(version) >= LooseVersion('3.1.1')
+                version_gte_3_2_or_1_2 = LooseVersion(version) >= LooseVersion('3.1.1.901')
         else:
-            version_gt_3_1_or_1_1 = True
-            version_gt_3_1_1_or_1_1_1 = True
-        facts['common']['version_greater_than_3_1_or_1_1'] = version_gt_3_1_or_1_1
-        facts['common']['version_greater_than_3_1_1_or_1_1_1'] = version_gt_3_1_1_or_1_1_1
+            version_gte_3_1_or_1_1 = True
+            version_gte_3_1_1_or_1_1_1 = True
+            version_gte_3_2_or_1_2 = True
+        facts['common']['version_gte_3_1_or_1_1'] = version_gte_3_1_or_1_1
+        facts['common']['version_gte_3_1_1_or_1_1_1'] = version_gte_3_1_1_or_1_1_1
+        facts['common']['version_gte_3_2_or_1_2'] = version_gte_3_2_or_1_2
 
     return facts
 
@@ -756,12 +744,12 @@ def set_manageiq_facts_if_unset(facts):
             OpenShiftFactsInternalError:
     """
     if 'common' not in facts:
-        if 'version_greater_than_3_1_or_1_1' not in facts['common']:
+        if 'version_gte_3_1_or_1_1' not in facts['common']:
             raise OpenShiftFactsInternalError(
                 "Invalid invocation: The required facts are not set"
             )
     if 'use_manageiq' not in facts['common']:
-        facts['common']['use_manageiq'] = facts['common']['version_greater_than_3_1_or_1_1']
+        facts['common']['use_manageiq'] = facts['common']['version_gte_3_1_or_1_1']
 
     return facts
 
@@ -1167,7 +1155,6 @@ class OpenShiftFacts(object):
         facts['current_config'] = get_current_config(facts)
         facts = set_url_facts_if_unset(facts)
         facts = set_project_cfg_facts_if_unset(facts)
-        facts = set_fluentd_facts_if_unset(facts)
         facts = set_flannel_facts_if_unset(facts)
         facts = set_nuage_facts_if_unset(facts)
         facts = set_node_schedulability(facts)

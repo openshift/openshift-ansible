@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.39
+Version:        3.0.43
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -50,8 +50,10 @@ cp -p bin/openshift_ansible.conf.example %{buildroot}/etc/openshift_ansible/open
 # Fix links
 rm -f %{buildroot}%{python_sitelib}/openshift_ansible/multi_inventory.py
 rm -f %{buildroot}%{python_sitelib}/openshift_ansible/aws
+rm -f %{buildroot}%{python_sitelib}/openshift_ansible/gce
 ln -sf %{_datadir}/ansible/inventory/multi_inventory.py %{buildroot}%{python_sitelib}/openshift_ansible/multi_inventory.py
 ln -sf %{_datadir}/ansible/inventory/aws %{buildroot}%{python_sitelib}/openshift_ansible/aws
+ln -sf %{_datadir}/ansible/inventory/gce %{buildroot}%{python_sitelib}/openshift_ansible/gce
 
 # openshift-ansible-docs install
 # -docs are currently just %doc, no install needed
@@ -259,6 +261,91 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Feb 16 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.43-1
+- Add default to state param (rharriso@redhat.com)
+- Add type to record_type param (rharriso@redhat.com)
+- Add types to module params (rharriso@redhat.com)
+- Adding examples to the dyn_record module (rharriso@redhat.com)
+- add item to track docker-registry pings (jdiaz@redhat.com)
+- Handle case where the user already had access to the scc
+  (bleanhar@redhat.com)
+- Refactoring the add-scc-to-user logic (bleanhar@redhat.com)
+- Apply openshift_docker to nodes during scaleup. (abutcher@redhat.com)
+- Change etcd deamon name for atomic-host (florian.lambert@enovance.com)
+
+* Tue Feb 16 2016 Joel Diaz <jdiaz@redhat.com> 3.0.42-1
+- Add gce softlink for openshift-ansible-bin
+
+* Mon Feb 15 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.41-1
+- Bug 1308411 - Fail to install OSE 3.0 for no add-scc-to-user command
+  (bleanhar@redhat.com)
+- Add openshift_docker_options to append arbitrary options to
+  /etc/sysconfig/docker OPTIONS (sdodson@redhat.com)
+- oo_filter: added custom fitler to return hosts group info
+  (mwoodson@redhat.com)
+- add gce softlink for openshift-ansible-bin RPM (jdiaz@redhat.com)
+- a-o-i: Count nativeha hosts as "installed" for scaleup (smunilla@redhat.com)
+- a-o-i: Add master_routingconfig_subdomain to PERSIST_SETTINGS
+  (smunilla@redhat.com)
+- Bug 1308412 - Fail to install containerized HA master env on RHEL7
+  (bleanhar@redhat.com)
+- Bug 1308314 - Failed to continue installation when pressing CTRL-C
+  (bleanhar@redhat.com)
+- Updating the 3.1.1 router to match the new liveness probe configuration
+  (bleanhar@redhat.com)
+- Don't automatically give additional permissions to all OAuth users on upgrade
+  (jliggitt@redhat.com)
+- Fix adhoc boostrap fedora playbook (jdetiber@redhat.com)
+- Fix libvirt cluster creation (lhuard@amadeus.com)
+- Add missing `type` node labels on OpenStack and libvirt (lhuard@amadeus.com)
+- a-o-i: Prompts to allow minor upgrades (smunilla@redhat.com)
+- conditionalize loopback config on v >= 3.2/1.2 (jdetiber@redhat.com)
+- Fixes pv/pvc creation for latest builds (jdetiber@redhat.com)
+- Bug 1302970 - update script does not patch router if name is different from
+  default (bleanhar@redhat.com)
+- Fix loopback cluster name, context name, and user (jdetiber@redhat.com)
+- Changes for new Nuage RPMS (vishal.patil@nuagenetworks.net)
+- Make the GCE image_name and the machine_type configurable from the CLI
+  (lhuard@amadeus.com)
+- Better structure the output of the list playbook (lhuard@amadeus.com)
+- Fix issue when there are no infra nodes (lhuard@amadeus.com)
+- Remove fluentd_master and fluentd_node roles. (abutcher@redhat.com)
+- Remove etcd up checks from fluentd_master. (abutcher@redhat.com)
+
+* Thu Feb 11 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.40-1
+- Bug 1306665 - [metrics] update metrics-deployer template to use latest image
+  versions (bleanhar@redhat.com)
+- Add organizations attribute to github identity provider (jdetiber@redhat.com)
+- use correct dict key (jdiaz@redhat.com)
+- handle being passed an empty group list (jdiaz@redhat.com)
+- fix default value (jdetiber@redhat.com)
+- removed notscheduleable trigger, it just makes noise in its current
+  incarnation (sten@redhat.com)
+- trigger on two successive bad pid counts (jdiaz@redhat.com)
+- added nodes not ready and nodes not schedulable triggers (sten@redhat.com)
+- Enable selection of kubeproxy mode (vishal.patil@nuagenetworks.net)
+- add default storage plugins to 'origin' deployment_type
+  (rvanveelen@tremorvideo.com)
+- added nodes not ready and nodes not schedulable triggers (sten@redhat.com)
+- Don't mask master service on atomic. (abutcher@redhat.com)
+- update defaults and examples w/ iscsi plugin (rvanveelen@tremorvideo.com)
+- add iscsi storage_plugin dependency (rvanveelen@tremorvideo.com)
+- Add gte check for 3.2, update version checks to gte (jdetiber@redhat.com)
+- Specify default namespace when creating router (pat2man@gmail.com)
+- add missing connection:local (jdetiber@redhat.com)
+- consolidate oo_first_master post-config a bit, fix some roles that use
+  openshift_facts without declaring a dependency (jdetiber@redhat.com)
+- openshift_serviceaccounts updates (jdetiber@redhat.com)
+- Fix infra_node deployment (jdetiber@redhat.com)
+- changed registry checks to alert based on number of registries with problems
+  (sten@redhat.com)
+- Fix a bug with existing CNAME records (rharriso@redhat.com)
+- Fix HA typo in example AEP/OSE/Origin inventories (adellape@redhat.com)
+- Updated the key for app create (kwoodson@redhat.com)
+- Add missing atomic- and openshift-enterprise (pep@redhat.com)
+- Fix enabling iptables for latest rhel versions (jdetiber@redhat.com)
+- Make pod_eviction_timeout configurable from cli (jawed.khelil@amadeus.com)
+
 * Tue Feb 09 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.39-1
 - Bug 1304150 - Can't upgrade atomic-openshift to specified version
   (bleanhar@redhat.com)

@@ -95,6 +95,26 @@ requirements: [ dyn ]
 author: "Russell Harrison"
 '''
 
+EXAMPLES = '''
+- name: Update CNAME record
+  local_action:
+    module: dyn_record
+    state: present
+    record_fqdn: www.example.com
+    zone: example.com
+    record_type: CNAME
+    record_value: web1.example.com
+
+- name: Update A record
+  local_action:
+    module: dyn_record
+    state: present
+    record_fqdn: web1.example.com
+    zone: example.com
+    record_value: 10.0.0.10
+    record_type: A
+'''
+
 try:
     IMPORT_ERROR = False
     from dyn.tm.session import DynectSession
@@ -158,15 +178,15 @@ def main():
     '''Ansible module for managing Dyn DNS records.'''
     module = AnsibleModule(
         argument_spec=dict(
-            state=dict(required=True, choices=['present', 'absent', 'list']),
+            state=dict(required=True, default='present', choices=['present', 'absent', 'list']),
             customer_name=dict(default=os.environ.get('DYNECT_CUSTOMER_NAME', None), type='str'),
             user_name=dict(default=os.environ.get('DYNECT_USER_NAME', None), type='str', no_log=True),
             user_password=dict(default=os.environ.get('DYNECT_PASSWORD', None), type='str', no_log=True),
-            zone=dict(required=True),
-            record_fqdn=dict(required=False),
-            record_type=dict(required=False, choices=[
+            zone=dict(required=True, type='str'),
+            record_fqdn=dict(required=False, type='str'),
+            record_type=dict(required=False, type='str', choices=[
                 'A', 'AAAA', 'CNAME', 'PTR', 'TXT']),
-            record_value=dict(required=False),
+            record_value=dict(required=False, type='str'),
             record_ttl=dict(required=False, default=0, type='int'),
         ),
         required_together=(
@@ -224,11 +244,13 @@ def main():
         # First get a list of existing records for the node
         values = get_record_values(dyn_node_records)
         value_key = get_record_key(module.params['record_type'])
+        param_value = module.params['record_value']
 
         # Check to see if the record is already in place before doing anything.
         if (dyn_node_records and
                 dyn_node_records[value_key][0].ttl == module.params['record_ttl'] and
-                module.params['record_value'] in values[value_key]):
+                (param_value in values[value_key] or
+                 param_value + '.' in values[value_key])):
 
             module.exit_json(changed=False)
 

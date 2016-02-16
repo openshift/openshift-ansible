@@ -176,6 +176,7 @@
 - name: Evaluate node groups
   hosts: localhost
   become: no
+  connection: local
   tasks:
   - name: Evaluate oo_containerized_master_nodes
     add_host:
@@ -216,8 +217,6 @@
   - role: nuage_node
     when: openshift.common.use_nuage | bool
   - role: nickhammond.logrotate
-  - role: fluentd_node
-    when: openshift.common.use_fluentd | bool
   tasks:
   - name: Create group for deployment type
     group_by: key=oo_nodes_deployment_type_{{ openshift.common.deployment_type }}

@@ -17,7 +17,7 @@
       # TODO: Replace this with a lookup or filter plugin.
       dns_ip: "{{ openshift_dns_ip
                   | default(openshift_master_cluster_vip
-                  | default(None if openshift.common.version_greater_than_3_1_or_1_1 | bool else openshift_node_first_master_ip | default(None, true), true), true) }}"
+                  | default(None if openshift.common.version_gte_3_1_or_1_1 | bool else openshift_node_first_master_ip | default(None, true), true), true) }}"
   - role: node
     local_facts:
       annotations: "{{ openshift_node_annotations | default(none) }}"
@@ -33,6 +33,7 @@
       set_node_ip: "{{ openshift_set_node_ip | default(None) }}"
       node_image: "{{ osn_image | default(None) }}"
       ovs_image: "{{ osn_ovs_image | default(None) }}"
+      proxy_mode: "{{ openshift_node_proxy_mode | default('iptables') }}"
 
 # We have to add tuned-profiles in the same transaction otherwise we run into depsolving
 # problems because the rpms don't pin the version properly. This was fixed in 3.1 packaging.

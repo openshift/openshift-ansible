@@ -670,6 +670,46 @@ class FilterModule(object):
 
         return rpms_31
 
+    @staticmethod
+    def oo_pods_match_component(pods, deployment_type, component):
+        """ Filters a list of Pods and returns the ones matching the deployment_type and component
+        """
+        if not isinstance(pods, list):
+            raise errors.AnsibleFilterError("failed expects to filter on a list")
+        if not isinstance(deployment_type, basestring):
+            raise errors.AnsibleFilterError("failed expects deployment_type to be a string")
+        if not isinstance(component, basestring):
+            raise errors.AnsibleFilterError("failed expects component to be a string")
+
+        image_prefix = 'openshift/origin-'
+        if deployment_type in ['enterprise', 'online', 'openshift-enterprise']:
+            image_prefix = 'openshift3/ose-'
+        elif deployment_type == 'atomic-enterprise':
+            image_prefix = 'aep3_beta/aep-'
+
+        matching_pods = []
+        image_regex = image_prefix + component + r'.*'
+        for pod in pods:
+            for container in pod['spec']['containers']:
+                if re.search(image_regex, container['image']):
+                    matching_pods.append(pod)
+                    break # stop here, don't add a pod more than once
+
+        return matching_pods
+
+    @staticmethod
+    def oo_get_hosts_from_hostvars(hostvars, hosts):
+        """ Return a list of hosts from hostvars """
+        retval = []
+        for host in hosts:
+            try:
+                retval.append(hostvars[host])
+            except errors.AnsibleError as _:
+                # host does not exist
+                pass
+
+        return retval
+
     def filters(self):
         """ returns a mapping of filters to methods """
         return {
@@ -696,4 +736,6 @@ class FilterModule(object):
             "oo_persistent_volumes": self.oo_persistent_volumes,
             "oo_persistent_volume_claims": self.oo_persistent_volume_claims,
             "oo_31_rpm_rename_conversion": self.oo_31_rpm_rename_conversion,
+            "oo_pods_match_component": self.oo_pods_match_component,
+            "oo_get_hosts_from_hostvars": self.oo_get_hosts_from_hostvars,
         }
