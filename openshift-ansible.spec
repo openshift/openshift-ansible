@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.42
+Version:        3.0.43
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -261,6 +261,18 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Feb 16 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.43-1
+- Add default to state param (rharriso@redhat.com)
+- Add type to record_type param (rharriso@redhat.com)
+- Add types to module params (rharriso@redhat.com)
+- Adding examples to the dyn_record module (rharriso@redhat.com)
+- add item to track docker-registry pings (jdiaz@redhat.com)
+- Handle case where the user already had access to the scc
+  (bleanhar@redhat.com)
+- Refactoring the add-scc-to-user logic (bleanhar@redhat.com)
+- Apply openshift_docker to nodes during scaleup. (abutcher@redhat.com)
+- Change etcd deamon name for atomic-host (florian.lambert@enovance.com)
+
 * Tue Feb 16 2016 Joel Diaz <jdiaz@redhat.com> 3.0.42-1
 - Add gce softlink for openshift-ansible-bin
 
