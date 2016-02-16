@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.41
+Version:        3.0.42
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -261,6 +261,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Feb 16 2016 Joel Diaz <jdiaz@redhat.com> 3.0.42-1
+- Add gce softlink for openshift-ansible-bin
+
 * Mon Feb 15 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.41-1
 - Bug 1308411 - Fail to install OSE 3.0 for no add-scc-to-user command
   (bleanhar@redhat.com)
