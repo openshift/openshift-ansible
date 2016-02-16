@@ -184,7 +184,7 @@ def main():
             user_password=dict(default=os.environ.get('DYNECT_PASSWORD', None), type='str', no_log=True),
             zone=dict(required=True, type='str'),
             record_fqdn=dict(required=False, type='str'),
-            record_type=dict(required=False, choices=[
+            record_type=dict(required=False, type='str', choices=[
                 'A', 'AAAA', 'CNAME', 'PTR', 'TXT']),
             record_value=dict(required=False, type='str'),
             record_ttl=dict(required=False, default=0, type='int'),
