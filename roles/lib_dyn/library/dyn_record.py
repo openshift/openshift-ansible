@@ -182,11 +182,11 @@ def main():
             customer_name=dict(default=os.environ.get('DYNECT_CUSTOMER_NAME', None), type='str'),
             user_name=dict(default=os.environ.get('DYNECT_USER_NAME', None), type='str', no_log=True),
             user_password=dict(default=os.environ.get('DYNECT_PASSWORD', None), type='str', no_log=True),
-            zone=dict(required=True),
-            record_fqdn=dict(required=False),
+            zone=dict(required=True, type='str'),
+            record_fqdn=dict(required=False, type='str'),
             record_type=dict(required=False, choices=[
                 'A', 'AAAA', 'CNAME', 'PTR', 'TXT']),
-            record_value=dict(required=False),
+            record_value=dict(required=False, type='str'),
             record_ttl=dict(required=False, default=0, type='int'),
         ),
         required_together=(
