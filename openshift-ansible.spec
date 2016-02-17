@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.43
+Version:        3.0.44
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -261,6 +261,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Feb 17 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.44-1
+- create registry items/triggers under Openshift Node (jdiaz@redhat.com)
+- a-o-i: Change method for counting master_lb as installed
+  (smunilla@redhat.com)
+
 * Tue Feb 16 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.43-1
 - Add default to state param (rharriso@redhat.com)
 - Add type to record_type param (rharriso@redhat.com)
