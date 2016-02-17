@@ -532,7 +532,7 @@ def get_installed_hosts(hosts, callback_facts):
                   callback_facts[host.connect_to]['common'].get('version', '') != 'None') \
             or
             ('master' in callback_facts[host.connect_to].keys() and
-                 callback_facts[host.connect_to]['master'].get('cluster_method', '') == 'native')
+                 callback_facts[host.connect_to]['master'].get('cluster_hostname', '') == host.connect_to)
             ):
             installed_hosts.append(host)
     return installed_hosts
