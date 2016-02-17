@@ -26,13 +26,29 @@ g_template_openshift_node:
     applications:
     - Openshift Node
 
-  - key: openshift.node.docker-registry.ping
-    description: Ping docker-registry from node
+  - key: openshift.node.registry-pods.healthy_pct
+    description: Shows the percentage of healthy registries in the cluster
+    type: int
+    applications:
+    - Openshift Node
+
+  - key: openshift.node.registry.service.ping
+    description: Ping docker-registry service from node
     type: int
     applications:
     - Openshift Node
 
   ztriggers:
+  - name: 'One or more Docker Registries is unhealthy according to {HOST.NAME}'
+    expression: '{Template Openshift Node:openshift.node.registry-pods.healthy_pct.last(#2)}<100 and {Template Openshift Node:openshift.node.registry-pods.healthy_pct.last(#1)}<100'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_registry.asciidoc'
+    priority: avg
+
+  - name: 'Docker Registry service is unhealthy according to {HOST.NAME}'
+    expression: '{Template Openshift Node:openshift.node.registry.service.ping.last(#2)}<1 and {Template Openshift Node:openshift.node.registry.service.ping.last(#1)}<1'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_registry.asciidoc'
+    priority: avg
+
   - name: 'Openshift Node process not running on {HOST.NAME}'
     expression: '{Template Openshift Node:openshift.node.process.count.max(#3)}<1'
     url: 'https://github.com/openshift/ops-sop/blob/node/V3/Alerts/openshift_node.asciidoc'
