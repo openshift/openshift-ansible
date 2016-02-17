@@ -18,6 +18,7 @@
       dns_ip: "{{ openshift_dns_ip
                   | default(openshift_master_cluster_vip
                   | default(None if openshift.common.version_gte_3_1_or_1_1 | bool else openshift_node_first_master_ip | default(None, true), true), true) }}"
+      imageconfig_latest: "{{ openshift_imageconfig_latest | default(False) }}"
   - role: node
     local_facts:
       annotations: "{{ openshift_node_annotations | default(none) }}"

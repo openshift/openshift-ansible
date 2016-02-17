@@ -77,6 +77,9 @@ deployment_type=origin
 # cli_docker_additional_registries instead
 #oreg_url=example.com/openshift3/ose-${component}:${version}
 
+# Allow OpenShift to use pods that are tagged "latest" when there is no exact version match
+#openshift_imageconfig_latest=true
+
 # Origin copr repo
 #openshift_additional_repos=[{'id': 'openshift-origin-copr', 'name': 'OpenShift Origin COPR', 'baseurl': 'https://copr-be.cloud.fedoraproject.org/results/maxamillion/origin-next/epel-7-$basearch/', 'enabled': 1, 'gpgcheck': 1, gpgkey: 'https://copr-be.cloud.fedoraproject.org/results/maxamillion/origin-next/pubkey.gpg'}]
 
