@@ -178,7 +178,7 @@ def main():
     '''Ansible module for managing Dyn DNS records.'''
     module = AnsibleModule(
         argument_spec=dict(
-            state=dict(required=True, default='present', choices=['present', 'absent', 'list']),
+            state=dict(default='present', choices=['present', 'absent', 'list']),
             customer_name=dict(default=os.environ.get('DYNECT_CUSTOMER_NAME', None), type='str'),
             user_name=dict(default=os.environ.get('DYNECT_USER_NAME', None), type='str', no_log=True),
             user_password=dict(default=os.environ.get('DYNECT_PASSWORD', None), type='str', no_log=True),
