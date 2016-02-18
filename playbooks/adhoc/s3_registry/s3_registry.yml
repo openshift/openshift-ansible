@@ -16,7 +16,8 @@
     aws_bucket_name: "{{ aws_bucket | default(clusterid ~ '-docker') }}"
     aws_bucket_region: "{{ aws_region | default(lookup('env', 'S3_REGION') | default('us-east-1', true)) }}"
     aws_create_bucket: "{{ aws_create | default(True) }}"
-    aws_delete_after_run: "{{ aws_delete_temp | default(True) }}"
+    aws_tmp_path: "{{ aws_tmp_pathfile | default('/root/config.yml')}}"
+    aws_delete_tmp_file: "{{ aws_delete_tmp | default(True) }}"
 
   tasks:
 
@@ -73,5 +74,5 @@
     command: oc scale --replicas=1 dc/docker-registry
 
   - name: Delete temporary config file
-    file: path=/root/config.yml state=absent
-    when: aws_delete_after_run | bool
+    file: path={{ aws_tmp_path }} state=absent
+    when: aws_delete_tmp_file | bool
