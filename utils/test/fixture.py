@@ -18,20 +18,23 @@ hosts:
     hostname: master-private.example.com
     public_ip: 24.222.0.1
     public_hostname: master.example.com
-    master: true
-    node: true
+    roles:
+    - master
+    - node
   - connect_to: 10.0.0.2
     ip: 10.0.0.2
     hostname: node1-private.example.com
     public_ip: 24.222.0.2
     public_hostname: node1.example.com
-    node: true
+    roles:
+    - node
   - connect_to: 10.0.0.3
     ip: 10.0.0.3
     hostname: node2-private.example.com
     public_ip: 24.222.0.3
     public_hostname: node2.example.com
-    node: true
+    roles:
+    - node
 """
 
 def read_yaml(config_file_path):
@@ -92,7 +95,7 @@ class OOCliFixture(OOInstallFixture):
             self.assertTrue('hostname' in host)
             self.assertTrue('public_hostname' in host)
             if 'preconfigured' not in host:
-                self.assertTrue(host['node'])
+                self.assertTrue('node' in host['roles'])
                 self.assertTrue('ip' in host)
                 self.assertTrue('public_ip' in host)
 
@@ -142,7 +145,7 @@ class OOCliFixture(OOInstallFixture):
 #pylint: disable=too-many-arguments,too-many-branches,too-many-statements
 def build_input(ssh_user=None, hosts=None, variant_num=None,
                 add_nodes=None, confirm_facts=None, schedulable_masters_ok=None,
-                master_lb=None):
+                master_lb=None, install_type=5):
     """
     Build an input string simulating a user entering values in an interactive
     attended install.
@@ -154,6 +157,7 @@ def build_input(ssh_user=None, hosts=None, variant_num=None,
 
     inputs = [
         'y',  # let's proceed
+        str(install_type),
     ]
     if ssh_user:
         inputs.append(ssh_user)
@@ -177,16 +181,21 @@ def build_input(ssh_user=None, hosts=None, variant_num=None,
             else:
                 inputs.append('rpm')
 
-            #inputs.append('rpm')
             # We should not be prompted to add more hosts if we're currently at
             # 2 masters, this is an invalid HA configuration, so this question
             # will not be asked, and the user must enter the next host:
-            if num_masters != 2:
-                if i < len(hosts) - 1:
-                    if num_masters >= 1:
-                        inputs.append('y')  # Add more hosts
-                else:
-                    inputs.append('n')  # Done adding hosts
+            #if num_masters != 2:
+            #    if i < len(hosts) - 1:
+            #        if num_masters >= 1:
+            #            inputs.append('y')  # Add more hosts
+            #    else:
+            #           inputs.append('n')  # Done adding hosts
+
+            if i < len(hosts) - 1:
+                inputs.append('y')
+            else:
+                inputs.append('n')
+
             i += 1
 
     # You can pass a single master_lb or a list if you intend for one to get rejected:

@@ -19,20 +19,23 @@ hosts:
     hostname: master-private.example.com
     public_ip: 24.222.0.1
     public_hostname: master.example.com
-    master: true
-    node: true
+    roles:
+    - master
+    - node
   - connect_to: node1-private.example.com
     ip: 10.0.0.2
     hostname: node1-private.example.com
     public_ip: 24.222.0.2
     public_hostname: node1.example.com
-    node: true
+    roles:
+    - node
   - connect_to: node2-private.example.com
     ip: 10.0.0.3
     hostname: node2-private.example.com
     public_ip: 24.222.0.3
     public_hostname: node2.example.com
-    node: true
+    roles:
+    - node
 """
 
 # Used to test automatic upgrading of config:
@@ -62,15 +65,18 @@ hosts:
     hostname: master-private.example.com
     public_ip: 24.222.0.1
     public_hostname: master.example.com
-    master: true
+    roles:
+    - master
   - connect_to: 10.0.0.2
     ip: 10.0.0.2
     hostname: 24.222.0.2
     public_ip: 24.222.0.2
-    node: true
+    roles:
+    - node
   - connect_to: 10.0.0.3
     ip: 10.0.0.3
-    node: true
+    roles:
+    - node
 """
 
 CONFIG_BAD = """
@@ -82,19 +88,22 @@ hosts:
     hostname: master-private.example.com
     public_ip: 24.222.0.1
     public_hostname: master.example.com
-    master: true
-    node: true
+    roles:
+    - master
+    - node
   - ip: 10.0.0.2
     hostname: node1-private.example.com
     public_ip: 24.222.0.2
     public_hostname: node1.example.com
-    node: true
+    roles:
+    - node
   - connect_to: node2-private.example.com
     ip: 10.0.0.3
     hostname: node2-private.example.com
     public_ip: 24.222.0.3
     public_hostname: node2.example.com
-    node: true
+    roles:
+    - node
 """
 
 class OOInstallFixture(unittest.TestCase):
@@ -134,7 +143,7 @@ class LegacyOOConfigTests(OOInstallFixture):
     def test_load_config_memory(self):
         self.assertEquals('openshift-enterprise', self.cfg.settings['variant'])
         self.assertEquals('3.0', self.cfg.settings['variant_version'])
-        self.assertEquals('v1', self.cfg.settings['version'])
+        self.assertEquals('v2', self.cfg.settings['version'])
 
         self.assertEquals(3, len(self.cfg.hosts))
         h1 = self.cfg.get_host('10.0.0.1')
@@ -182,7 +191,7 @@ class OOConfigTests(OOInstallFixture):
                           [host['ip'] for host in ooconfig.settings['hosts']])
 
         self.assertEquals('openshift-enterprise', ooconfig.settings['variant'])
-        self.assertEquals('v1', ooconfig.settings['version'])
+        self.assertEquals('v2', ooconfig.settings['version'])
 
     def test_load_bad_config(self):
 
@@ -231,7 +240,7 @@ class OOConfigTests(OOInstallFixture):
 
         self.assertTrue('ansible_ssh_user' in written_config)
         self.assertTrue('variant' in written_config)
-        self.assertEquals('v1', written_config['version'])
+        self.assertEquals('v2', written_config['version'])
 
         # Some advanced settings should not get written out if they
         # were not specified by the user:
@@ -256,7 +265,3 @@ class HostTests(OOInstallFixture):
             'public_hostname': 'a.example.com',
         }
         self.assertRaises(OOConfigInvalidHostError, Host, **yaml_props)
-
-
-
-
