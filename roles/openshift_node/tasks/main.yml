@@ -84,6 +84,9 @@
     dest: "{{ openshift_node_config_file }}"
     src: node.yaml.v1.j2
     backup: true
+    owner: root
+    group: root
+    mode: 0600
   notify:
   - restart node
 
