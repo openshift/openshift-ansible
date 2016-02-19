@@ -147,7 +147,8 @@ class OOConfig(object):
             raise OOConfigFileError('Cannot open config file "{}": {}'.format(ferr.filename,
                                                                               ferr.strerror))
         except yaml.scanner.ScannerError:
-            raise OOConfigFileError('Config file "{}" is not a valid YAML document'.format(self.config_path))
+            raise OOConfigFileError(
+                'Config file "{}" is not a valid YAML document'.format(self.config_path))
 
     def _upgrade_legacy_config(self):
         new_hosts = []
@@ -180,7 +181,8 @@ class OOConfig(object):
         if not os.path.exists(self.settings['ansible_inventory_directory']):
             os.makedirs(self.settings['ansible_inventory_directory'])
         if 'ansible_plugins_directory' not in self.settings:
-            self.settings['ansible_plugins_directory'] = resource_filename(__name__, 'ansible_plugins')
+            self.settings['ansible_plugins_directory'] = \
+                resource_filename(__name__, 'ansible_plugins')
         if 'version' not in self.settings:
             self.settings['version'] = 'v1'
 
@@ -191,7 +193,8 @@ class OOConfig(object):
         if 'ansible_ssh_user' not in self.settings:
             self.settings['ansible_ssh_user'] = ''
 
-        self.settings['ansible_inventory_path'] = '{}/hosts'.format(self.settings['ansible_inventory_directory'])
+        self.settings['ansible_inventory_path'] = \
+            '{}/hosts'.format(self.settings['ansible_inventory_directory'])
 
         # clean up any empty sets
         for setting in self.settings.keys():
