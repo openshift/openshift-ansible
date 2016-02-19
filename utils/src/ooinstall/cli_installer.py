@@ -516,6 +516,13 @@ def error_if_missing_info(oo_cfg):
     if missing_info:
         sys.exit(1)
 
+def get_proxy_hostname_and_excludes():
+    message = "Specify the hostname for your proxy? (ENTER for none)"
+    proxy_hostname = click.prompt(message)
+
+    message = "List any hosts that should be excluded from your proxy. (ENTER for none)"
+    proxy_excludes = click.prompt(message)
+    return proxy_hostname, proxy_excludes
 
 def get_missing_info_from_user(oo_cfg):
     """ Prompts the user for any information missing from the given configuration. """
@@ -560,6 +567,13 @@ https://docs.openshift.com/enterprise/latest/admin_guide/install/prerequisites.h
 
     if not oo_cfg.settings.get('master_routingconfig_subdomain', None):
         oo_cfg.settings['master_routingconfig_subdomain'] = get_master_routingconfig_subdomain()
+        click.clear()
+
+    if not oo_cfg.settings.get('openshift_http_proxy', None):
+        proxy_hostname, proxy_excludes = get_proxy_hostname_and_excludes()
+        oo_cfg.settings['openshift_http_proxy'] = proxy_hostname
+        oo_cfg.settings['openshift_https_proxy'] = proxy_hostname
+        oo_cfg.settings['openshift_no_proxy'] = proxy_excludes
         click.clear()
 
     return oo_cfg

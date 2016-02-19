@@ -11,6 +11,8 @@ PERSIST_SETTINGS = [
     'ansible_config',
     'ansible_log_path',
     'master_routingconfig_subdomain',
+    'proxy',
+    'proxy_exclude_hosts',
     'variant',
     'variant_version',
     'version',
