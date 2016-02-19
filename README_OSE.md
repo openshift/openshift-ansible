@@ -8,6 +8,7 @@
 * [Running the ansible playbooks](#running-the-ansible-playbooks)
 * [Post-ansible steps](#post-ansible-steps)
 * [Overriding detected ip addresses and hostnames](#overriding-detected-ip-addresses-and-hostnames)
+* [Parallel image pulls with Docker 1.9+] (#parallel-image-pulls-with-docker-1.9+)
 
 ## Requirements
 * ansible 1.9.4
@@ -222,3 +223,6 @@ To override the the defaults, you can set the variables in your inventory:
 ose3-master.example.com openshift_ip=1.1.1.1 openshift_hostname=ose3-master.example.com openshift_public_ip=2.2.2.2 openshift_public_hostname=ose3-master.public.example.com
 ...snip...
 ```
+
+## Parallel image pulls with Docker 1.9+
+If you are using Docker 1.9+, you may consider to enable parallel pulls, as the default is still serial pulls. Please note that there is an issue with data corruption with parallel pulls using Docker before 1.9, but starting with 1.9, the corruption issue has been resolved, so it is safe to switch to parallel pulls.
