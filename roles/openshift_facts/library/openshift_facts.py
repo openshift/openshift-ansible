@@ -718,7 +718,7 @@ def set_version_facts_if_unset(facts):
             if deployment_type == 'origin':
                 version_gte_3_1_or_1_1 = LooseVersion(version) >= LooseVersion('1.1.0')
                 version_gte_3_1_1_or_1_1_1 = LooseVersion(version) >= LooseVersion('1.1.1')
-                version_gte_3_2_or_1_2 = LooseVersion(version) >= LooseVersion('1.1.2')
+                version_gte_3_2_or_1_2 = LooseVersion(version) >= LooseVersion('1.2.0')
             else:
                 version_gte_3_1_or_1_1 = LooseVersion(version) >= LooseVersion('3.0.2.905')
                 version_gte_3_1_1_or_1_1_1 = LooseVersion(version) >= LooseVersion('3.1.1')
