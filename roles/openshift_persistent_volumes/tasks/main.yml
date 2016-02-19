@@ -23,7 +23,7 @@
     --config={{ mktemp.stdout }}/admin.kubeconfig
   register: pv_create_output
   when: persistent_volumes | length > 0
-  failed_when: ('already exists' not in pv_create_output.stderr if pv_create_output.stderr else False) or ('created' not in pv_create_output.stdout if pv_create_output.stdout else False)
+  failed_when: ('already exists' not in pv_create_output.stderr) and ('created' not in pv_create_output.stdout)
   changed_when: ('created' in pv_create_output.stdout)
 
 - name: Deploy PersistentVolumeClaim definitions
@@ -40,7 +40,7 @@
     --config={{ mktemp.stdout }}/admin.kubeconfig
   register: pvc_create_output
   when: persistent_volume_claims | length > 0
-  failed_when: ('already exists' not in pvc_create_output.stderr if pvc_create_output.stderr else False) or ('created' not in pvc_create_output.stdout if pvc_create_output.stdout else False)
+  failed_when: ('already exists' not in pvc_create_output.stderr) and ('created' not in pvc_create_output.stdout)
   changed_when: ('created' in pvc_create_output.stdout)
 
 - name: Delete temp directory
