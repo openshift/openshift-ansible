@@ -43,6 +43,16 @@ You may also want to allow access from the outside world on the following ports:
 ```
 
 
+Determine your subnet and setup the VPC
+---------------------------------------
+
+In the AWS VPC console, look up your subnet ID for the region you want to use and set it as such:
+
+- export ec2_vpc_subnet='my_vpc_subnet'
+
+Go to Your VPCs, select the VPC, and under Actions -> DNS Hostnames, set to Yes and Save.
+
+
 (Optional) Setup your $HOME/.ssh/config file
 -------------------------------------------
 In case of a cluster creation, or any other case where you don't know the machine hostname in advance, you can use `.ssh/config`
@@ -109,7 +119,6 @@ If needed, these values can be changed by setting environment variables on your 
 - export ec2_region='us-east-1'
 - export ec2_keypair='libra'
 - export ec2_security_groups="['public']"
-- export ec2_vpc_subnet='my_vpc_subnet'
 - export ec2_assign_public_ip='true'
 - export os_etcd_root_vol_size='20'
 - export os_etcd_root_vol_type='standard'
