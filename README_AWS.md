@@ -62,7 +62,7 @@ Alternatively, you can configure your ssh-agent to hold the credentials to conne
 By default, a cluster is launched with the following configuration:
 
 - Instance type: m4.large
-- AMI: ami-307b3658 (for online deployments, ami-acd999c4 for origin deployments and ami-10663b78 for enterprise deployments)
+- AMI: ami-7a9e9812 (for online deployments, ami-61bbf104 for origin deployments and ami-10663b78 for enterprise deployments)
 - Region: us-east-1
 - Keypair name: libra
 - Security group: public
