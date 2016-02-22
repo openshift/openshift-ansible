@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.44
+Version:        3.0.45
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -261,6 +261,23 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Feb 22 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.45-1
+- Do not monitor for etcd watchers (mmahut@redhat.com)
+- remove old master registry item/triggers (jdiaz@redhat.com)
+- a-o-i: Redo logic for detecting master_lb (smunilla@redhat.com)
+- Fix 1.2 version check (jdetiber@redhat.com)
+- Fix pv/c creation failed_when. (abutcher@redhat.com)
+- Rename variable to delete temporary file, add configurable path.
+  (hrosnet@redhat.com)
+- Add /var/log to containerized node mounts (sdodson@redhat.com)
+- Add extra parameters for S3 registry: delete file, create bucket.
+  (hrosnet@redhat.com)
+- Don't make config files world readable (sdodson@redhat.com)
+- Fix requiring state and providing a default (rharriso@redhat.com)
+- bind in /etc/origin/node for non-master monitoring to be able to talk with
+  master (jdiaz@redhat.com)
+- a-o-i: pylint fixes related to too-long lines (smunilla@redhat.com)
+
 * Wed Feb 17 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.44-1
 - create registry items/triggers under Openshift Node (jdiaz@redhat.com)
 - a-o-i: Change method for counting master_lb as installed
