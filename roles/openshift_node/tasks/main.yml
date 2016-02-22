@@ -128,3 +128,15 @@
 
 - set_fact:
     node_service_status_changed: "{{ start_result | changed }}"
+    
+- name: Check access to port 1936
+  script: check-1936-access.sh {{ openshift.common.hostname }}
+  register: check1936
+  failed_when: false
+  changed_when: false
+
+- name: Warn about restricted access to port 1936
+  pause:
+    prompt: "Your node {{ ansible_host }} cannot access {{ openshift.common.hostname }} on port 1936, this host will fail default router liveness checks. Press CTRL-C to abort or continue"
+    seconds: 30
+  when: check1936.rc != 0
