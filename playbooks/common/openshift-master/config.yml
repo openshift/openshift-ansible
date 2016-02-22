@@ -28,6 +28,11 @@
                                                         | default([]))
                                        | oo_collect('openshift.common.hostname')
                                        | default(none, true) }}"
+  
+  - set_fact:
+      openshift_master_debug_level: "{{ lookup('oo_option', 'openshift_master_debug_level') | default(openshift.common.debug_level, true) }}"
+    when: openshift_master_debug_level is not defined
+
   roles:
   - openshift_facts
   post_tasks:
