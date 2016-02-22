@@ -346,16 +346,16 @@ resources:
           port_range_max: 22
           remote_ip_prefix: { get_param: ssh_incoming }
         - direction: ingress
-          protocol: udp
-          port_range_min: 4789
-          port_range_max: 4789
-          remote_mode: remote_group_id
-        - direction: ingress
           protocol: tcp
           port_range_min: 10250
           port_range_max: 10250
           remote_mode: remote_group_id
           remote_group_id: { get_resource: master-secgrp }
+        - direction: ingress
+          protocol: udp
+          port_range_min: 4789
+          port_range_max: 4789
+          remote_mode: remote_group_id
 
   infra-secgrp:
     type: OS::Neutron::SecurityGroup
@@ -473,6 +473,7 @@ resources:
           subnet:      { get_resource: subnet }
           secgrp:
             - { get_resource: master-secgrp }
+            - { get_resource: node-secgrp }
           floating_network: { get_param: external_net }
           net_name:
             str_replace:
