@@ -272,11 +272,6 @@ g_template_openshift_master:
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
     priority: high
 
-  - name: 'Low number of etcd watchers on {HOST.NAME}'
-    expression: '{Template Openshift Master:openshift.master.etcd.watchers.last(#1)}<10 and {Template Openshift Master:openshift.master.etcd.watchers.last(#2)}<10'
-    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_etcd.asciidoc'
-    priority: avg
-
   - name: 'Etcd ping failed on {HOST.NAME}'
     expression: '{Template Openshift Master:openshift.master.etcd.ping.last(#1)}=0 and {Template Openshift Master:openshift.master.etcd.ping.last(#2)}=0'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_etcd.asciidoc'
