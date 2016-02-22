@@ -25,4 +25,4 @@
       --master={{ openshift.master.api_url }}
       --public-master={{ openshift.master.public_api_url }}
       --cert-dir={{ openshift_master_config_dir }} --overwrite=false
-  when: master_certs_missing
+  when: master_certs_missing | bool

@@ -5,6 +5,8 @@ g_lb_hosts:     "{{ groups.lb | default([]) }}"
 
 g_master_hosts: "{{ groups.masters | default([]) }}"
 
+g_new_master_hosts: "{{ groups.new_masters | default([]) }}"
+
 g_node_hosts:   "{{ groups.nodes | default([]) }}"
 
 g_new_node_hosts: "{{ groups.new_nodes | default([]) }}"

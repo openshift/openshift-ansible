@@ -10,8 +10,12 @@ g_nfs_hosts:     "{{ g_all_hosts | intersect(groups['tag_host-type_nfs'] | defau
 
 g_master_hosts:  "{{ g_all_hosts | intersect(groups['tag_host-type_master'] | default([])) }}"
 
+g_new_master_hosts: "{{ g_all_hosts | intersect(groups['tag_host-type_new_master'] | default([])) }}"
+
 g_node_hosts:    "{{ g_all_hosts | intersect(groups['tag_host-type_node'] | default([])) }}"
 
-g_infra_hosts:   "{{ g_node_hosts | intersect(groups['tag_sub-host-type_infra'] | default([])) }}"
+g_new_node_hosts: "{{ g_all_hosts | intersect(groups['tag_host-type_new_node'] | default([])) }}"
+
+g_infra_hosts:   "{{ g_node_hosts | intersect(groups['tag_sub-host-type_infra']) | default([]) }}"
 
 g_compute_hosts: "{{ g_node_hosts | intersect(groups['tag_sub-host-type_compute'] | default([])) }}"

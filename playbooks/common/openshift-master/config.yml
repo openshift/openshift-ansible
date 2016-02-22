@@ -57,6 +57,8 @@
           console_use_ssl: "{{ openshift_master_console_use_ssl | default(None) }}"
           public_console_url: "{{ openshift_master_public_console_url | default(None) }}"
           portal_net: "{{ openshift_master_portal_net | default(None) }}"
+          ha: "{{ openshift_master_ha | default(groups.oo_masters | length > 1) }}"
+          master_count: "{{ openshift_master_count | default(groups.oo_masters | length) }}"
   - openshift_facts:
       role: hosted
       openshift_env:
@@ -144,7 +146,7 @@
     when: etcd_client_certs_missing is defined and etcd_client_certs_missing
 
 - name: Determine if master certificates need to be generated
-  hosts: oo_masters_to_config
+  hosts: oo_first_master:oo_masters_to_config
   tasks:
   - set_fact:
       openshift_master_certs_no_etcd:
@@ -221,15 +223,6 @@
       validate_checksum: yes
     with_items: masters_needing_certs
 
-- name: Compute haproxy_backend_servers
-  hosts: localhost
-  connection: local
-  become: no
-  gather_facts: no
-  tasks:
-  - set_fact:
-      haproxy_backend_servers: "{{ hostvars | oo_select_keys(groups['oo_masters_to_config']) | oo_haproxy_backend_masters }}"
-
 - name: Configure load balancers
   hosts: oo_lb_to_config
   vars:
@@ -248,11 +241,11 @@
       mode: tcp
       option: tcplog
       balance: source
-      servers: "{{ hostvars.localhost.haproxy_backend_servers }}"
+      servers: "{{ hostvars | oo_select_keys(groups['oo_masters']) | oo_haproxy_backend_masters }}"
   roles:
   - role: openshift_facts
   - role: haproxy
-    when: groups.oo_masters_to_config | length > 1
+    when: hostvars[groups.oo_first_master.0].openshift.master.ha | bool
 
 - name: Check for cached session secrets
   hosts: oo_first_master
@@ -334,8 +327,8 @@
   serial: 1
   vars:
     sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
-    openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
-    openshift_master_count: "{{ groups.oo_masters_to_config | length }}"
+    openshift_master_ha: "{{ openshift.master.ha }}"
+    openshift_master_count: "{{ openshift.master.master_count }}"
     openshift_master_session_auth_secrets: "{{ hostvars[groups.oo_first_master.0].openshift.master.session_auth_secrets }}"
     openshift_master_session_encryption_secrets: "{{ hostvars[groups.oo_first_master.0].openshift.master.session_encryption_secrets }}"
   pre_tasks:
@@ -343,12 +336,12 @@
     file:
       path: "{{ openshift.common.config_base }}/master"
       state: directory
-    when: master_certs_missing and 'oo_first_master' not in group_names
+    when: master_certs_missing | bool and 'oo_first_master' not in group_names
   - name: Unarchive the tarball on the master
     unarchive:
       src: "{{ sync_tmpdir }}/{{ master_cert_subdir }}.tgz"
       dest: "{{ master_cert_config_dir }}"
-    when: master_certs_missing and 'oo_first_master' not in group_names
+    when: master_certs_missing | bool and 'oo_first_master' not in group_names
   roles:
   - openshift_master
   - role: nickhammond.logrotate
@@ -359,32 +352,12 @@
     group_by: key=oo_masters_deployment_type_{{ openshift.common.deployment_type }}
     changed_when: False
 
-- name: Additional master configuration
-  hosts: oo_first_master
-  vars:
-    cockpit_plugins: "{{ osm_cockpit_plugins | default(['cockpit-kubernetes']) }}"
-    etcd_urls: "{{ openshift.master.etcd_urls }}"
-    openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
-    omc_cluster_hosts: "{{ groups.oo_masters_to_config | join(' ')}}"
+# Additional instance config for online deployments
+- name: Additional instance config
+  hosts: oo_masters_deployment_type_online
   roles:
-  - role: openshift_master_cluster
-    when: openshift_master_ha | bool and openshift.master.cluster_method == "pacemaker"
-  - role: openshift_examples
-    when: openshift.common.install_examples | bool
-  - role: openshift_cluster_metrics
-    when: openshift.common.use_cluster_metrics | bool
-  - role: openshift_manageiq
-    when: openshift.common.use_manageiq | bool
-  - role: cockpit
-    when: not openshift.common.is_atomic and ( deployment_type in ['atomic-enterprise','openshift-enterprise'] ) and
-      (osm_use_cockpit | bool or osm_use_cockpit is undefined )
-  - role: flannel_register
-    when: openshift.common.use_flannel | bool
-  - role: pods
-    when: openshift.common.deployment_type == 'online'
-  - role: os_env_extras
-    when: openshift.common.deployment_type == 'online'
-
+  - pods
+  - os_env_extras
 
 - name: Delete temporary directory on localhost
   hosts: localhost
@@ -394,26 +367,3 @@
   tasks:
   - file: name={{ g_master_mktemp.stdout }} state=absent
     changed_when: False
-
-- name: Create persistent volumes and create hosted services
-  hosts: oo_first_master
-  vars:
-    attach_registry_volume: "{{ openshift.hosted.registry.storage.kind != None }}"
-    deploy_infra: "{{ openshift.master.infra_nodes | default([]) | length > 0 }}"
-    persistent_volumes: "{{ hostvars[groups.oo_first_master.0] | oo_persistent_volumes(groups) }}"
-    persistent_volume_claims: "{{ hostvars[groups.oo_first_master.0] | oo_persistent_volume_claims }}"
-  roles:
-  - role: openshift_persistent_volumes
-    when: persistent_volumes | length > 0 or persistent_volume_claims | length > 0
-  - role: openshift_serviceaccounts
-    openshift_serviceaccounts_names:
-    - router
-    - registry
-    openshift_serviceaccounts_namespace: default
-    openshift_serviceaccounts_sccs:
-    - privileged
-  - role: openshift_router
-    when: deploy_infra | bool
-  - role: openshift_registry
-    when: deploy_infra | bool and attach_registry_volume | bool
-
