@@ -528,17 +528,26 @@ Add new nodes here
 
 def get_installed_hosts(hosts, callback_facts):
     installed_hosts = []
+
+    # count nativeha lb as an installed host
+    try:
+        first_master = next(host for host in hosts if host.master)
+        lb_hostname = callback_facts[first_master.connect_to]['master'].get('cluster_hostname', '')
+        lb_host = next(host for host in hosts if host.connect_to == lb_hostname)
+        installed_hosts.append(lb_host)
+    except KeyError:
+        pass
+
+
     for host in hosts:
-        if host.connect_to in callback_facts.keys() and (
-            ('common' in callback_facts[host.connect_to].keys() and
-                  callback_facts[host.connect_to]['common'].get('version', '') and
-                  callback_facts[host.connect_to]['common'].get('version', '') != 'None') \
-            or
-            ('master' in callback_facts[host.connect_to].keys() and
-                 callback_facts[host.connect_to]['master'].get('cluster_hostname', '') == host.connect_to)
-            ):
+        if host.connect_to in callback_facts.keys() and is_installed_host(host, callback_facts):
             installed_hosts.append(host)
     return installed_hosts
+
+def is_installed_host(host, callback_facts):
+    return 'common' in callback_facts[host.connect_to].keys() and \
+           callback_facts[host.connect_to]['common'].get('version', '') and \
+           callback_facts[host.connect_to]['common'].get('version', '') != 'None'
 
 # pylint: disable=too-many-branches
 # This pylint error will be corrected shortly in separate PR.
