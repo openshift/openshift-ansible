@@ -10,6 +10,7 @@
     src: "{{ openshift_master_config_dir }}/{{ item.1 }}"
     dest: "{{ openshift_generated_configs_dir }}/{{ item.0.master_cert_subdir }}/{{ item.1 }}"
     state: hard
+    force: true
   with_nested:
   - masters_needing_certs
   -
