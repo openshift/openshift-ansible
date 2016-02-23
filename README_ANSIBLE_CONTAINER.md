@@ -13,3 +13,4 @@
   ```sh
   docker run -it --rm --privileged --net=host -v ~/.ssh:/root/.ssh -v /etc/ansible:/etc/ansible ansible
   ```
+
