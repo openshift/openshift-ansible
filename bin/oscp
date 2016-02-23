@@ -211,7 +211,7 @@ class Oscp(object):
 
             # Assume we have one and only one.
             hostname, server_info = results[0]
-            dns = server_info['oo_pulic_ip']
+            dns = server_info['oo_public_ip']
 
             host_str = "%s%s%s" % (self.user, dns, self.path)
 
