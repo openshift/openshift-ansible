@@ -13,6 +13,7 @@
   tasks:
   - name: Upgrade master packages
     command: "{{ ansible_pkg_mgr}} update -y {{ openshift.common.service_type }}-master{{ openshift_version }}"
+    when: not openshift.common.is_atomic | bool
 
   - name: Ensure python-yaml present for config upgrade
     action: "{{ ansible_pkg_mgr }} name=PyYAML state=present"
@@ -63,6 +64,7 @@
   tasks:
   - name: Upgrade node packages
     command: "{{ ansible_pkg_mgr }} update -y {{ openshift.common.service_type }}-node{{ openshift_version }}"
+    when: not openshift.common.is_atomic | bool
 
   - name: Restart node service
     service: name="{{ openshift.common.service_type }}-node" state=restarted
