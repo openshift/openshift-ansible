@@ -138,9 +138,10 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
 
         host_props['containerized'] = False
         if oo_cfg.settings['variant_version'] != '3.0':
-            rpm_or_container = click.prompt('Will this host be RPM or Container based (rpm/container)?',
-                                            type=click.Choice(['rpm', 'container']),
-                                            default='rpm')
+            rpm_or_container = \
+                click.prompt('Will this host be RPM or Container based (rpm/container)?',
+                             type=click.Choice(['rpm', 'container']),
+                             default='rpm')
             if rpm_or_container == 'container':
                 host_props['containerized'] = True
 
@@ -281,7 +282,8 @@ hostname.
 
     host_props['connect_to'] = click.prompt('Enter hostname or IP address',
                                             value_proc=validate_prompt_lb)
-    install_haproxy = click.confirm('Should the reference haproxy load balancer be installed on this host?')
+    install_haproxy = \
+        click.confirm('Should the reference haproxy load balancer be installed on this host?')
     host_props['preconfigured'] = not install_haproxy
     host_props['master'] = False
     host_props['node'] = False
@@ -375,7 +377,8 @@ def check_hosts_config(oo_cfg, unattended):
             sys.exit(1)
         elif len(master_lb) == 1:
             if master_lb[0].master or master_lb[0].node:
-                click.echo('ERROR: The Master load balancer is configured as a master or node. Please correct this.')
+                click.echo('ERROR: The Master load balancer is configured as a master or node. ' \
+                           'Please correct this.')
                 sys.exit(1)
         else:
             message = """
@@ -525,17 +528,26 @@ Add new nodes here
 
 def get_installed_hosts(hosts, callback_facts):
     installed_hosts = []
+
+    # count nativeha lb as an installed host
+    try:
+        first_master = next(host for host in hosts if host.master)
+        lb_hostname = callback_facts[first_master.connect_to]['master'].get('cluster_hostname', '')
+        lb_host = next(host for host in hosts if host.connect_to == lb_hostname)
+        installed_hosts.append(lb_host)
+    except KeyError:
+        pass
+
+
     for host in hosts:
-        if host.connect_to in callback_facts.keys() and (
-            ('common' in callback_facts[host.connect_to].keys() and
-                  callback_facts[host.connect_to]['common'].get('version', '') and
-                  callback_facts[host.connect_to]['common'].get('version', '') != 'None') \
-            or
-            ('master' in callback_facts[host.connect_to].keys() and
-                 callback_facts[host.connect_to]['master'].get('cluster_hostname', '') == host.connect_to)
-            ):
+        if host.connect_to in callback_facts.keys() and is_installed_host(host, callback_facts):
             installed_hosts.append(host)
     return installed_hosts
+
+def is_installed_host(host, callback_facts):
+    return 'common' in callback_facts[host.connect_to].keys() and \
+           callback_facts[host.connect_to]['common'].get('version', '') and \
+           callback_facts[host.connect_to]['common'].get('version', '') != 'None'
 
 # pylint: disable=too-many-branches
 # This pylint error will be corrected shortly in separate PR.

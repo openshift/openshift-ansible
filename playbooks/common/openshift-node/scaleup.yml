@@ -1,5 +1,5 @@
 ---
-- include: evaluate_groups.yml
+- include: ../openshift-cluster/evaluate_groups.yml
 
 - name: Configure docker hosts
   hosts: oo_nodes_to_config
@@ -12,5 +12,3 @@
   - openshift_docker
 
 - include: ../openshift-node/config.yml
-  vars:
-    openshift_deployment_type: "{{ deployment_type }}"

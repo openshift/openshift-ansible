@@ -718,7 +718,7 @@ def set_version_facts_if_unset(facts):
             if deployment_type == 'origin':
                 version_gte_3_1_or_1_1 = LooseVersion(version) >= LooseVersion('1.1.0')
                 version_gte_3_1_1_or_1_1_1 = LooseVersion(version) >= LooseVersion('1.1.1')
-                version_gte_3_2_or_1_2 = LooseVersion(version) >= LooseVersion('1.1.2')
+                version_gte_3_2_or_1_2 = LooseVersion(version) >= LooseVersion('1.2.0')
             else:
                 version_gte_3_1_or_1_1 = LooseVersion(version) >= LooseVersion('3.0.2.905')
                 version_gte_3_1_1_or_1_1_1 = LooseVersion(version) >= LooseVersion('3.1.1')
@@ -916,41 +916,79 @@ def apply_provider_facts(facts, provider_facts):
     facts['provider'] = provider_facts
     return facts
 
-
-def merge_facts(orig, new, additive_facts_to_overwrite):
+# Disabling pylint too many branches. This function needs refactored
+# but is a very core part of openshift_facts.
+# pylint: disable=too-many-branches
+def merge_facts(orig, new, additive_facts_to_overwrite, protected_facts_to_overwrite):
     """ Recursively merge facts dicts
 
         Args:
             orig (dict): existing facts
             new (dict): facts to update
-
             additive_facts_to_overwrite (list): additive facts to overwrite in jinja
                                                 '.' notation ex: ['master.named_certificates']
+            protected_facts_to_overwrite (list): protected facts to overwrite in jinja
+                                                 '.' notation ex: ['master.master_count']
 
         Returns:
             dict: the merged facts
     """
     additive_facts = ['named_certificates']
+    protected_facts = ['ha', 'master_count']
     facts = dict()
     for key, value in orig.iteritems():
+        # Key exists in both old and new facts.
         if key in new:
+            # Continue to recurse if old and new fact is a dictionary.
             if isinstance(value, dict) and isinstance(new[key], dict):
+                # Collect the subset of additive facts to overwrite if
+                # key matches. These will be passed to the subsequent
+                # merge_facts call.
                 relevant_additive_facts = []
-                # Keep additive_facts_to_overwrite if key matches
                 for item in additive_facts_to_overwrite:
                     if '.' in item and item.startswith(key + '.'):
                         relevant_additive_facts.append(item)
-                facts[key] = merge_facts(value, new[key], relevant_additive_facts)
+
+                # Collect the subset of protected facts to overwrite
+                # if key matches. These will be passed to the
+                # subsequent merge_facts call.
+                relevant_protected_facts = []
+                for item in protected_facts_to_overwrite:
+                    if '.' in item and item.startswith(key + '.'):
+                        relevant_protected_facts.append(item)
+                facts[key] = merge_facts(value, new[key], relevant_additive_facts, relevant_protected_facts)
+            # Key matches an additive fact and we are not overwriting
+            # it so we will append the new value to the existing value.
             elif key in additive_facts and key not in [x.split('.')[-1] for x in additive_facts_to_overwrite]:
-                # Fact is additive so we'll combine orig and new.
                 if isinstance(value, list) and isinstance(new[key], list):
                     new_fact = []
                     for item in copy.deepcopy(value) + copy.deepcopy(new[key]):
                         if item not in new_fact:
                             new_fact.append(item)
                     facts[key] = new_fact
+            # Key matches a protected fact and we are not overwriting
+            # it so we will determine if it is okay to change this
+            # fact.
+            elif key in protected_facts and key not in [x.split('.')[-1] for x in protected_facts_to_overwrite]:
+                # The master count (int) can only increase unless it
+                # has been passed as a protected fact to overwrite.
+                if key == 'master_count':
+                    if int(value) <= int(new[key]):
+                        facts[key] = copy.deepcopy(new[key])
+                    else:
+                        module.fail_json(msg='openshift_facts received a lower value for openshift.master.master_count')
+                # ha (bool) can not change unless it has been passed
+                # as a protected fact to overwrite.
+                if key == 'ha':
+                    if bool(value) != bool(new[key]):
+                        module.fail_json(msg='openshift_facts received a different value for openshift.master.ha')
+                    else:
+                        facts[key] = value
+            # No other condition has been met. Overwrite the old fact
+            # with the new value.
             else:
                 facts[key] = copy.deepcopy(new[key])
+        # Key isn't in new so add it to facts to keep it.
         else:
             facts[key] = copy.deepcopy(value)
     new_keys = set(new.keys()) - set(orig.keys())
@@ -1114,6 +1152,8 @@ class OpenShiftFacts(object):
             local_facts (dict): local facts to set
             additive_facts_to_overwrite (list): additive facts to overwrite in jinja
                                                 '.' notation ex: ['master.named_certificates']
+            protected_facts_to_overwrite (list): protected facts to overwrite in jinja
+                                                 '.' notation ex: ['master.master_count']
 
         Raises:
             OpenShiftFactsUnsupportedRoleError:
@@ -1122,7 +1162,10 @@ class OpenShiftFacts(object):
 
     # Disabling too-many-arguments, this should be cleaned up as a TODO item.
     # pylint: disable=too-many-arguments
-    def __init__(self, role, filename, local_facts, additive_facts_to_overwrite=False, openshift_env=None):
+    def __init__(self, role, filename, local_facts,
+                 additive_facts_to_overwrite=None,
+                 openshift_env=None,
+                 protected_facts_to_overwrite=None):
         self.changed = False
         self.filename = filename
         if role not in self.known_roles:
@@ -1131,27 +1174,41 @@ class OpenShiftFacts(object):
             )
         self.role = role
         self.system_facts = ansible_facts(module)
-        self.facts = self.generate_facts(local_facts, additive_facts_to_overwrite, openshift_env)
+        self.facts = self.generate_facts(local_facts,
+                                         additive_facts_to_overwrite,
+                                         openshift_env,
+                                         protected_facts_to_overwrite)
 
-    def generate_facts(self, local_facts, additive_facts_to_overwrite, openshift_env):
+    def generate_facts(self,
+                       local_facts,
+                       additive_facts_to_overwrite,
+                       openshift_env,
+                       protected_facts_to_overwrite):
         """ Generate facts
 
             Args:
-                local_facts (dict): local_facts for overriding generated
-                                    defaults
+                local_facts (dict): local_facts for overriding generated defaults
                 additive_facts_to_overwrite (list): additive facts to overwrite in jinja
                                                     '.' notation ex: ['master.named_certificates']
-
+                openshift_env (dict): openshift_env facts for overriding generated defaults
+                protected_facts_to_overwrite (list): protected facts to overwrite in jinja
+                                                     '.' notation ex: ['master.master_count']
             Returns:
                 dict: The generated facts
         """
-        local_facts = self.init_local_facts(local_facts, additive_facts_to_overwrite, openshift_env)
+        local_facts = self.init_local_facts(local_facts,
+                                            additive_facts_to_overwrite,
+                                            openshift_env,
+                                            protected_facts_to_overwrite)
         roles = local_facts.keys()
 
         defaults = self.get_defaults(roles)
         provider_facts = self.init_provider_facts()
         facts = apply_provider_facts(defaults, provider_facts)
-        facts = merge_facts(facts, local_facts, additive_facts_to_overwrite)
+        facts = merge_facts(facts,
+                            local_facts,
+                            additive_facts_to_overwrite,
+                            protected_facts_to_overwrite)
         facts['current_config'] = get_current_config(facts)
         facts = set_url_facts_if_unset(facts)
         facts = set_project_cfg_facts_if_unset(facts)
@@ -1315,13 +1372,20 @@ class OpenShiftFacts(object):
 
     # Disabling too-many-branches. This should be cleaned up as a TODO item.
     #pylint: disable=too-many-branches
-    def init_local_facts(self, facts=None, additive_facts_to_overwrite=False, openshift_env=None):
+    def init_local_facts(self, facts=None,
+                         additive_facts_to_overwrite=None,
+                         openshift_env=None,
+                         protected_facts_to_overwrite=None):
         """ Initialize the provider facts
 
             Args:
                 facts (dict): local facts to set
                 additive_facts_to_overwrite (list): additive facts to overwrite in jinja
                                                     '.' notation ex: ['master.named_certificates']
+                openshift_env (dict): openshift env facts to set
+                protected_facts_to_overwrite (list): protected facts to overwrite in jinja
+                                                     '.' notation ex: ['master.master_count']
+
 
             Returns:
                 dict: The result of merging the provided facts with existing
@@ -1347,7 +1411,10 @@ class OpenShiftFacts(object):
                     elif key not in current_level:
                         current_level[key] = dict()
                         current_level = current_level[key]
-                facts_to_set = merge_facts(facts_to_set, oo_env_facts, [])
+                facts_to_set = merge_facts(orig=facts_to_set,
+                                           new=oo_env_facts,
+                                           additive_facts_to_overwrite=[],
+                                           protected_facts_to_overwrite=[])
 
         local_facts = get_local_facts_from_file(self.filename)
 
@@ -1356,7 +1423,10 @@ class OpenShiftFacts(object):
                                                   basestring):
                 facts_to_set[arg] = module.from_json(facts_to_set[arg])
 
-        new_local_facts = merge_facts(local_facts, facts_to_set, additive_facts_to_overwrite)
+        new_local_facts = merge_facts(local_facts,
+                                      facts_to_set,
+                                      additive_facts_to_overwrite,
+                                      protected_facts_to_overwrite)
         for facts in new_local_facts.values():
             keys_to_delete = []
             if isinstance(facts, dict):
@@ -1452,7 +1522,8 @@ def main():
                       choices=OpenShiftFacts.known_roles),
             local_facts=dict(default=None, type='dict', required=False),
             additive_facts_to_overwrite=dict(default=[], type='list', required=False),
-            openshift_env=dict(default={}, type='dict', required=False)
+            openshift_env=dict(default={}, type='dict', required=False),
+            protected_facts_to_overwrite=dict(default=[], type='list', required=False),
         ),
         supports_check_mode=True,
         add_file_common_args=True,
@@ -1462,6 +1533,7 @@ def main():
     local_facts = module.params['local_facts']
     additive_facts_to_overwrite = module.params['additive_facts_to_overwrite']
     openshift_env = module.params['openshift_env']
+    protected_facts_to_overwrite = module.params['protected_facts_to_overwrite']
 
     fact_file = '/etc/ansible/facts.d/openshift.fact'
 
@@ -1469,7 +1541,8 @@ def main():
                                      fact_file,
                                      local_facts,
                                      additive_facts_to_overwrite,
-                                     openshift_env)
+                                     openshift_env,
+                                     protected_facts_to_overwrite)
 
     file_params = module.params.copy()
     file_params['path'] = fact_file

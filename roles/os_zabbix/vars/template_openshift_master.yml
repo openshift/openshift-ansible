@@ -7,12 +7,6 @@ g_template_openshift_master:
     - Openshift Master
     key: openshift.master.app.create
 
-  - key: openshift.master.registry.healthy_pct
-    description: "Shows the percentage of healthy registries in the cluster"
-    type: int
-    applications:
-    - Openshift Master
-
   - key: openshift.master.process.count
     description: Shows number of master processes running
     type: int
@@ -278,11 +272,6 @@ g_template_openshift_master:
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_master.asciidoc'
     priority: high
 
-  - name: 'Low number of etcd watchers on {HOST.NAME}'
-    expression: '{Template Openshift Master:openshift.master.etcd.watchers.last(#1)}<10 and {Template Openshift Master:openshift.master.etcd.watchers.last(#2)}<10'
-    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_etcd.asciidoc'
-    priority: avg
-
   - name: 'Etcd ping failed on {HOST.NAME}'
     expression: '{Template Openshift Master:openshift.master.etcd.ping.last(#1)}=0 and {Template Openshift Master:openshift.master.etcd.ping.last(#2)}=0'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_etcd.asciidoc'
@@ -344,20 +333,6 @@ g_template_openshift_master:
     dependencies:
     - 'Openshift Master process not running on {HOST.NAME}'
     priority: avg
-
-  - name: 'One or more Docker Registries is unhealthy according to {HOST.NAME}'
-    expression: '{Template Openshift Master:openshift.master.registry.healthy_pct.last(#2)}<100 and {Template Openshift Master:openshift.master.registry.healthy_pct.max(#2)}>50'
-    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_registry.asciidoc'
-    dependencies:
-    - 'Openshift Master process not running on {HOST.NAME}'
-    priority: avg
-
-  - name: 'Multiple Docker Registries are unhealthy according to {HOST.NAME}'
-    expression: '{Template Openshift Master:openshift.master.registry.healthy_pct.last(#2)}<51'
-    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/openshift_registry.asciidoc'
-    dependencies:
-    - 'Openshift Master process not running on {HOST.NAME}'
-    priority: high
 
   - name: 'SkyDNS port not listening on {HOST.NAME}'
     expression: '{Template Openshift Master:openshift.master.skydns.port.open.max(#3)}<1'

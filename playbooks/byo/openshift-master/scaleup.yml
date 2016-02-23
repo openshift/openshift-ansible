@@ -1,0 +1,8 @@
+---
+- include: ../../common/openshift-master/scaleup.yml
+  vars_files:
+  - ../../byo/openshift-cluster/cluster_hosts.yml
+  vars:
+    openshift_cluster_id: "{{ cluster_id | default('default') }}"
+    openshift_debug_level: "{{ debug_level | default(2) }}"
+    openshift_deployment_type: "{{ deployment_type }}"

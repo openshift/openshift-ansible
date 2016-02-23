@@ -15,6 +15,9 @@
     aws_secret_key: "{{ lookup('env', 'S3_SECRET_ACCESS_KEY') }}"
     aws_bucket_name: "{{ aws_bucket | default(clusterid ~ '-docker') }}"
     aws_bucket_region: "{{ aws_region | default(lookup('env', 'S3_REGION') | default('us-east-1', true)) }}"
+    aws_create_bucket: "{{ aws_create | default(True) }}"
+    aws_tmp_path: "{{ aws_tmp_pathfile | default('/root/config.yml')}}"
+    aws_delete_tmp_file: "{{ aws_delete_tmp | default(True) }}"
 
   tasks:
 
@@ -30,6 +33,7 @@
     command: oc scale --replicas=0 dc/docker-registry
 
   - name: Create S3 bucket
+    when: aws_create_bucket | bool
     local_action:
       module: s3 bucket="{{ aws_bucket_name }}" mode=create
 
@@ -70,4 +74,5 @@
     command: oc scale --replicas=1 dc/docker-registry
 
   - name: Delete temporary config file
-    file: path=/root/config.yml state=absent
+    file: path={{ aws_tmp_path }} state=absent
+    when: aws_delete_tmp_file | bool

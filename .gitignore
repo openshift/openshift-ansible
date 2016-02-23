@@ -18,3 +18,4 @@ multi_ec2.yaml
 multi_inventory.yaml
 .vagrant
 .tags*
+ansible.cfg

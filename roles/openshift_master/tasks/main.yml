@@ -221,6 +221,9 @@
   template:
     dest: "{{ openshift.master.session_secrets_file }}"
     src: sessionSecretsFile.yaml.v1.j2
+    owner: root
+    group: root
+    mode: 0600
   when: openshift.master.session_auth_secrets is defined and openshift.master.session_encryption_secrets is defined
   notify:
   - restart master
@@ -235,6 +238,9 @@
     dest: "{{ openshift_master_config_file }}"
     src: master.yaml.v1.j2
     backup: true
+    owner: root
+    group: root
+    mode: 0600
   notify:
   - restart master
   - restart master api
