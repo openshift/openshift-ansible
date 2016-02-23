@@ -4,7 +4,7 @@
   register: omd_get_node
   until: omd_get_node.rc == 0
   retries: 20
-  delay: 5
+  delay: 30
   changed_when: false
   with_items: openshift_nodes
 
