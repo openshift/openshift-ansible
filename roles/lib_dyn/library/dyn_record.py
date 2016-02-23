@@ -85,7 +85,7 @@ options:
       - 'Record's "Time to live".  Number of seconds the record remains cached'
       - 'in DNS servers or c(0) to use the default TTL for the zone.'
     required: false
-    default: 0
+    default: 3600
 
 notes:
   - The module makes a broad assumption that there will be only one record per "node" (FQDN).
@@ -96,18 +96,18 @@ author: "Russell Harrison"
 '''
 
 EXAMPLES = '''
+# Attempting to cname www.example.com to web1.example.com
 - name: Update CNAME record
-  local_action:
-    module: dyn_record
+  dyn_record:
     state: present
     record_fqdn: www.example.com
     zone: example.com
     record_type: CNAME
     record_value: web1.example.com
+    record_ttl: 7200
 
 - name: Update A record
-  local_action:
-    module: dyn_record
+  dyn_record:
     state: present
     record_fqdn: web1.example.com
     zone: example.com
@@ -144,7 +144,10 @@ def get_record_type(record_key):
     return record_key.replace('_records', '').upper()
 
 def get_record_key(record_type):
-    '''Get the key to look up records in the dictionary returned from get_any_records.'''
+    '''Get the key to look up records in the dictionary returned from get_any_records.
+       example:
+       'cname_records'
+    '''
     return record_type.lower() + '_records'
 
 def get_any_records(module, node):
@@ -187,7 +190,7 @@ def main():
             record_type=dict(required=False, type='str', choices=[
                 'A', 'AAAA', 'CNAME', 'PTR', 'TXT']),
             record_value=dict(required=False, type='str'),
-            record_ttl=dict(required=False, default=0, type='int'),
+            record_ttl=dict(required=False, default=3600, type='int'),
         ),
         required_together=(
             ['record_fqdn', 'record_value', 'record_ttl', 'record_type']
@@ -233,27 +236,25 @@ def main():
     # All states will need a list of the exiting records for the zone.
     dyn_node_records = get_any_records(module, dyn_node)
 
+    dyn_values = get_record_values(dyn_node_records)
+
+    # get_record_values()
+
     if module.params['state'] == 'list':
-        module.exit_json(changed=False,
-                         records=get_record_values(
-                             dyn_node_records,
-                         ))
+        module.exit_json(changed=False, records=dyn_values)
 
     if module.params['state'] == 'present':
 
         # First get a list of existing records for the node
-        values = get_record_values(dyn_node_records)
-        value_key = get_record_key(module.params['record_type'])
+        record_type_key = get_record_key(module.params['record_type'])
         param_value = module.params['record_value']
 
         # Check to see if the record is already in place before doing anything.
-        if (dyn_node_records and
-                dyn_node_records[value_key][0].ttl == module.params['record_ttl'] and
-                (param_value in values[value_key] or
-                 param_value + '.' in values[value_key])):
+        if dyn_node_records and \
+           int(dyn_node_records[record_type_key][0].ttl) == int(module.params['record_ttl']) \
+           and ((param_value in dyn_values[record_type_key]) or param_value + '.' in dyn_values[record_type_key]):
 
             module.exit_json(changed=False)
-
 
         # Working on the assumption that there is only one record per
         # node we will first delete the node if there are any records before
@@ -270,8 +271,13 @@ def main():
 
         # Now publish the zone since we've updated it.
         dyn_zone.publish()
-        module.exit_json(changed=True,
-                         msg="Created node %s in zone %s" % (dyn_node_name, module.params['zone']))
+
+        rmsg = "Created node [%s] "  % dyn_node_name
+        rmsg += "in zone: %s, "     % module.params['zone']
+        rmsg += "record_type: %s, "  % module.params['record_type']
+        rmsg += "record_value: %s, " % module.params['record_value']
+        rmsg += "record_ttl: %s"   % module.params['record_ttl']
+        module.exit_json(changed=True, msg=rmsg)
 
     if module.params['state'] == 'absent':
         # If there are any records present we'll want to delete the node.
