@@ -69,4 +69,33 @@ g_template_openshift_node:
     url: 'https://github.com/openshift/ops-sop/blob/node/V3/Alerts/openshift_node.asciidoc'
     priority: high
 
-
+  zactions:
+  - name: '[HEAL] OVS may not be running on {HOST.NAME}'
+    status: disabled
+    escalation_time: 60
+    conditions_filter:
+      calculation_type: "and/or"
+      conditions:
+      - conditiontype: maintenance status
+        operator: not in
+      - conditiontype: trigger name
+        operator: like
+        value: "[HEAL] OVS may not be running on"
+      - conditiontype: trigger value
+        operator: "="
+        value: PROBLEM
+    operations:
+    - esc_step_from: 1
+      esc_step_to: 1
+      esc_period: 0
+      operationtype: remote command
+      opcommand:
+        command: 'ssh -i /etc/openshift_tools/scriptrunner_id_rsa {{ ozb_scriptrunner_user }}@{{ ozb_scriptrunner_bastion_host }} remote-healer --host \"{HOST.NAME}\" --trigger \"{TRIGGER.NAME}\" --trigger-val \"{TRIGGER.VALUE}\"'
+        execute_on: "zabbix server"
+        type: 'custom script'
+      target_hosts:
+      - target_type: 'zabbix server'
+      opconditions:
+      - conditiontype: 'event acknowledged'
+        operator: '='
+        value: 'not acknowledged'
