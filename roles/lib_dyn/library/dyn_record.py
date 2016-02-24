@@ -13,6 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# pylint: disable=too-many-branches
 '''Ansible module to manage records in the Dyn Managed DNS service'''
 DOCUMENTATION = '''
 ---
@@ -84,8 +85,17 @@ options:
     description:
       - 'Record's "Time to live".  Number of seconds the record remains cached'
       - 'in DNS servers or c(0) to use the default TTL for the zone.'
+      - 'This option is mutually exclusive with use_zone_ttl'
     required: false
-    default: 3600
+    default: 0
+
+  use_zone_ttl:
+    description:
+      - 'Use the DYN Zone's Default TTL'
+      - 'This option is mutually exclusive with record_ttl'
+    required: false
+    default: false
+    mutually exclusive with: record_ttl
 
 notes:
   - The module makes a broad assumption that there will be only one record per "node" (FQDN).
@@ -105,6 +115,16 @@ EXAMPLES = '''
     record_type: CNAME
     record_value: web1.example.com
     record_ttl: 7200
+
+# Use the zones default TTL
+- name: Update CNAME record
+  dyn_record:
+    state: present
+    record_fqdn: www.example.com
+    zone: example.com
+    record_type: CNAME
+    record_value: web1.example.com
+    use_zone_ttl: true
 
 - name: Update A record
   dyn_record:
@@ -169,13 +189,40 @@ def get_any_records(module, node):
 
 def get_record_values(records):
     '''Get the record values for each record returned by get_any_records.'''
-    # This simply returns the values from a dictionary of record objects
+    # This simply returns the values from a record
     ret_dict = {}
     for key in records.keys():
         record_type = get_record_type(key)
-        record_value_param = RECORD_PARAMS[record_type]['value_param']
-        ret_dict[key] = [getattr(elem, record_value_param) for elem in records[key]]
+        params = [RECORD_PARAMS[record_type]['value_param'], 'ttl', 'zone', 'fqdn']
+        ret_dict[key] = []
+        properties = {}
+        for elem in records[key]:
+            for param in params:
+                properties[param] = getattr(elem, param)
+            ret_dict[key].append(properties)
+
     return ret_dict
+
+def compare_record_values(record_type_key, user_record_value, dyn_values):
+    ''' Verify the user record_value exists in dyn'''
+    rtype = get_record_type(record_type_key)
+    for record in dyn_values[record_type_key]:
+        if user_record_value in record[RECORD_PARAMS[rtype]['value_param']]:
+            return True
+
+    return False
+
+def compare_record_ttl(record_type_key, user_record_value, dyn_values, user_param_ttl):
+    ''' Verify the ttls match for the record'''
+    rtype = get_record_type(record_type_key)
+    for record in dyn_values[record_type_key]:
+        # find the right record
+        if user_record_value in record[RECORD_PARAMS[rtype]['value_param']]:
+            # Compare ttls from the records
+            if int(record['ttl']) == user_param_ttl:
+                return True
+
+    return False
 
 def main():
     '''Ansible module for managing Dyn DNS records.'''
@@ -190,16 +237,20 @@ def main():
             record_type=dict(required=False, type='str', choices=[
                 'A', 'AAAA', 'CNAME', 'PTR', 'TXT']),
             record_value=dict(required=False, type='str'),
-            record_ttl=dict(required=False, default=3600, type='int'),
+            record_ttl=dict(required=False, default=None, type='int'),
+            use_zone_ttl=dict(required=False, default=False),
         ),
         required_together=(
             ['record_fqdn', 'record_value', 'record_ttl', 'record_type']
-        )
+        ),
+        mutually_exclusive=[('record_ttl', 'use_zone_ttl')]
     )
 
     if IMPORT_ERROR:
-        module.fail_json(msg="Unable to import dyn module: https://pypi.python.org/pypi/dyn",
-                         error=IMPORT_ERROR)
+        module.fail_json(msg="Unable to import dyn module: https://pypi.python.org/pypi/dyn", error=IMPORT_ERROR)
+
+    if module.params['record_ttl'] != None and int(module.params['record_ttl']) <= 0:
+        module.fail_json(msg="Invalid Value for record TTL")
 
     # Start the Dyn session
     try:
@@ -207,22 +258,16 @@ def main():
                           module.params['user_name'],
                           module.params['user_password'])
     except dyn.tm.errors.DynectAuthError as error:
-        module.fail_json(msg='Unable to authenticate with Dyn',
-                         error=str(error))
+        module.fail_json(msg='Unable to authenticate with Dyn', error=str(error))
 
     # Retrieve zone object
     try:
         dyn_zone = Zone(module.params['zone'])
     except dyn.tm.errors.DynectGetError as error:
         if 'No such zone' in str(error):
-            module.fail_json(
-                msg="Not a valid zone for this account",
-                zone=module.params['zone']
-            )
+            module.fail_json(msg="Not a valid zone for this account", zone=module.params['zone'])
         else:
-            module.fail_json(msg="Unable to retrieve zone",
-                             error=str(error))
-
+            module.fail_json(msg="Unable to retrieve zone", error=str(error))
 
     # To retrieve the node object we need to remove the zone name from the FQDN
     dyn_node_name = module.params['record_fqdn'].replace('.' + module.params['zone'], '')
@@ -238,23 +283,44 @@ def main():
 
     dyn_values = get_record_values(dyn_node_records)
 
-    # get_record_values()
-
     if module.params['state'] == 'list':
-        module.exit_json(changed=False, records=dyn_values)
+        module.exit_json(changed=False, dyn_records=dyn_values)
 
-    if module.params['state'] == 'present':
+    elif module.params['state'] == 'absent':
+        # If there are any records present we'll want to delete the node.
+        if dyn_node_records:
+            dyn_node.delete()
+
+            # Publish the zone since we've modified it.
+            dyn_zone.publish()
+
+            module.exit_json(changed=True, msg="Removed node %s from zone %s" % (dyn_node_name, module.params['zone']))
+
+        module.exit_json(changed=False)
+
+    elif module.params['state'] == 'present':
+
+        # configure the TTL variable:
+        # if use_zone_ttl, use the default TTL of the account.
+        # if TTL == None, don't check it, set it as 0 (api default)
+        # if TTL > 0, ensure this TTL is set
+        if module.params['use_zone_ttl']:
+            user_param_ttl = dyn_zone.ttl
+        elif not module.params['record_ttl']:
+            user_param_ttl = 0
+        else:
+            user_param_ttl = module.params['record_ttl']
 
         # First get a list of existing records for the node
         record_type_key = get_record_key(module.params['record_type'])
-        param_value = module.params['record_value']
+        user_record_value = module.params['record_value']
 
         # Check to see if the record is already in place before doing anything.
-        if dyn_node_records and \
-           int(dyn_node_records[record_type_key][0].ttl) == int(module.params['record_ttl']) \
-           and ((param_value in dyn_values[record_type_key]) or param_value + '.' in dyn_values[record_type_key]):
+        if dyn_node_records and compare_record_values(record_type_key, user_record_value, dyn_values):
 
-            module.exit_json(changed=False)
+            if user_param_ttl == 0 or \
+               compare_record_ttl(record_type_key, user_record_value, dyn_values, user_param_ttl):
+                module.exit_json(changed=False, dyn_record=dyn_values)
 
         # Working on the assumption that there is only one record per
         # node we will first delete the node if there are any records before
@@ -263,32 +329,20 @@ def main():
             dyn_node.delete()
 
         # Now lets create the correct node entry.
-        dyn_zone.add_record(dyn_node_name,
-                            module.params['record_type'],
-                            module.params['record_value'],
-                            module.params['record_ttl']
-                           )
+        record = dyn_zone.add_record(dyn_node_name,
+                                     module.params['record_type'],
+                                     module.params['record_value'],
+                                     user_param_ttl
+                                    )
 
         # Now publish the zone since we've updated it.
         dyn_zone.publish()
 
         rmsg = "Created node [%s] "  % dyn_node_name
-        rmsg += "in zone: %s, "     % module.params['zone']
-        rmsg += "record_type: %s, "  % module.params['record_type']
-        rmsg += "record_value: %s, " % module.params['record_value']
-        rmsg += "record_ttl: %s"   % module.params['record_ttl']
-        module.exit_json(changed=True, msg=rmsg)
+        rmsg += "in zone: [%s]"      % module.params['zone']
+        module.exit_json(changed=True, msg=rmsg, dyn_record=get_record_values({record_type_key: [record]}))
 
-    if module.params['state'] == 'absent':
-        # If there are any records present we'll want to delete the node.
-        if dyn_node_records:
-            dyn_node.delete()
-            # Publish the zone since we've modified it.
-            dyn_zone.publish()
-            module.exit_json(changed=True,
-                             msg="Removed node %s from zone %s" % (dyn_node_name, module.params['zone']))
-        else:
-            module.exit_json(changed=False)
+    module.fail_json(msg="Unknown state: [%s]" % module.params['state'])
 
 # Ansible tends to need a wild card import so we'll use it here
 # pylint: disable=redefined-builtin, unused-wildcard-import, wildcard-import, locally-disabled
