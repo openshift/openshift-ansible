@@ -6,6 +6,12 @@ g_template_openshift_master:
     applications:
     - Openshift Master
     key: openshift.master.app.create
+  
+  - key: openshift.master.app.build.create
+    description: "check the app create with a build process"
+    type: int
+    applications:
+    - Openshift Master
 
   - key: openshift.master.process.count
     description: Shows number of master processes running
