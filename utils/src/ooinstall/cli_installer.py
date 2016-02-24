@@ -533,11 +533,12 @@ def get_installed_hosts(hosts, callback_facts):
     try:
         first_master = next(host for host in hosts if host.master)
         lb_hostname = callback_facts[first_master.connect_to]['master'].get('cluster_hostname', '')
-        lb_host = next(host for host in hosts if host.connect_to == lb_hostname)
-        installed_hosts.append(lb_host)
-    except KeyError:
-        pass
+        lb_host = \
+            next(host for host in hosts if host.ip == callback_facts[lb_hostname]['common']['ip'])
 
+        installed_hosts.append(lb_host)
+    except (KeyError, StopIteration):
+        pass
 
     for host in hosts:
         if host.connect_to in callback_facts.keys() and is_installed_host(host, callback_facts):
@@ -545,9 +546,11 @@ def get_installed_hosts(hosts, callback_facts):
     return installed_hosts
 
 def is_installed_host(host, callback_facts):
-    return 'common' in callback_facts[host.connect_to].keys() and \
+    version_found = 'common' in callback_facts[host.connect_to].keys() and \
            callback_facts[host.connect_to]['common'].get('version', '') and \
            callback_facts[host.connect_to]['common'].get('version', '') != 'None'
+
+    return version_found or host.master_lb or host.preconfigured
 
 # pylint: disable=too-many-branches
 # This pylint error will be corrected shortly in separate PR.

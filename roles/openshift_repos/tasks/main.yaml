@@ -46,19 +46,19 @@
   with_fileglob:
   - '*/repos/*'
   when: not (item | search("/files/fedora-" ~ openshift_deployment_type ~ "/repos")) and
-        (ansible_distribution == "Fedora") 
+        (ansible_distribution == "Fedora")
         and not openshift.common.is_containerized | bool
   notify: refresh cache
 
 - name: Configure gpg keys if needed
-  copy: src={{ item }} dest=/etc/pki/rpm-gpg/
+  copy: src="{{ item }}" dest=/etc/pki/rpm-gpg/
   with_fileglob:
   - "{{ openshift_deployment_type }}/gpg_keys/*"
   notify: refresh cache
   when: not openshift.common.is_containerized | bool
 
 - name: Configure yum repositories RHEL/CentOS
-  copy: src={{ item }} dest=/etc/yum.repos.d/
+  copy: src="{{ item }}" dest=/etc/yum.repos.d/
   with_fileglob:
   - "{{ openshift_deployment_type }}/repos/*"
   notify: refresh cache
@@ -66,7 +66,7 @@
         and not openshift.common.is_containerized | bool
 
 - name: Configure yum repositories Fedora
-  copy: src={{ item }} dest=/etc/yum.repos.d/
+  copy: src="{{ item }}" dest=/etc/yum.repos.d/
   with_fileglob:
   - "fedora-{{ openshift_deployment_type }}/repos/*"
   notify: refresh cache

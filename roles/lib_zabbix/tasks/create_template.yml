@@ -61,6 +61,20 @@
   with_items: template.ztriggers
   when: template.ztriggers is defined
 
+- name: Create Actions
+  zbx_action:
+    zbx_server: "{{ server }}"
+    zbx_user: "{{ user }}"
+    zbx_password: "{{ password }}"
+    state: "{{ item.state | default('present', True) }}"
+    name: "{{ item.name }}"
+    status: "{{ item.status | default('enabled', True) }}"
+    escalation_time: "{{ item.escalation_time }}"
+    conditions_filter: "{{ item.conditions_filter }}"
+    operations: "{{ item.operations }}"
+  with_items: template.zactions
+  when: template.zactions is defined
+
 - name: Create Discoveryrules
   zbx_discoveryrule:
     zbx_server: "{{ server }}"

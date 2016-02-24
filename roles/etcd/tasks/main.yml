@@ -8,7 +8,7 @@
   when: "'ipv4' not in hostvars[inventory_hostname]['ansible_' ~ etcd_interface] or 'address' not in hostvars[inventory_hostname]['ansible_' ~ etcd_interface].ipv4"
 
 - name: Install etcd
-  action: "{{ ansible_pkg_mgr }} name=etcd-2.* state=present"
+  action: "{{ ansible_pkg_mgr }} name=etcd state=present"
   when: not openshift.common.is_containerized | bool
 
 - name: Pull etcd container

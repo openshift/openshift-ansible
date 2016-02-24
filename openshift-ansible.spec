@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.45
+Version:        3.0.47
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -261,6 +261,13 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Feb 24 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.47-1
+- a-o-i: Double safety check on master_lb (smunilla@redhat.com)
+- a-o-i: Better method for identifying master_lb (smunilla@redhat.com)
+
+* Tue Feb 23 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.46-1
+- a-o-i: Exception checking around master_lb (smunilla@redhat.com)
+
 * Mon Feb 22 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.45-1
 - Do not monitor for etcd watchers (mmahut@redhat.com)
 - remove old master registry item/triggers (jdiaz@redhat.com)

@@ -29,7 +29,7 @@
 
   - name: Create or Update OpenStack Stack
     command: 'heat {{ heat_stack_action }} -f {{ openstack_infra_heat_stack }}
-             --timeout 3 --enable-rollback
+             --timeout 3
              -P cluster_env={{ cluster_env }}
              -P cluster_id={{ cluster_id }}
              -P subnet_24_prefix={{ openstack_subnet_24_prefix }}
@@ -59,7 +59,40 @@
     until: stack_show_status_result.stdout not in ['CREATE_IN_PROGRESS', 'UPDATE_IN_PROGRESS']
     retries: 30
     delay: 5
-    failed_when: stack_show_status_result.stdout not in ['CREATE_COMPLETE', 'UPDATE_COMPLETE']
+
+  - name: Display the stack resources
+    command: 'heat resource-list openshift-ansible-{{ cluster_id }}-stack'
+    register: stack_resource_list_result
+    when: stack_show_status_result.stdout not in ['CREATE_COMPLETE', 'UPDATE_COMPLETE']
+
+  - name: Display the stack status
+    command: 'heat stack-show openshift-ansible-{{ cluster_id }}-stack'
+    register: stack_show_result
+    when: stack_show_status_result.stdout not in ['CREATE_COMPLETE', 'UPDATE_COMPLETE']
+
+  - name: Delete the stack
+    command: 'heat stack-delete openshift-ansible-{{ cluster_id }}-stack'
+    when: stack_show_status_result.stdout not in ['CREATE_COMPLETE', 'UPDATE_COMPLETE']
+
+  - fail:
+      msg: |
+
+        +--------------------------------------+
+        |   ^                                  |
+        |  /!\ Failed to create the heat stack |
+        | /___\                                |
+        +--------------------------------------+
+
+        Here is the list of stack resources and their status:
+        {{ stack_resource_list_result.stdout }}
+
+        Here is the status of the stack:
+        {{ stack_show_result.stdout }}
+
+          ^   Failed to create the heat stack
+         /!\
+        /___\ Please check the `stack_status_reason` line in the above array to know why.
+    when: stack_show_status_result.stdout not in ['CREATE_COMPLETE', 'UPDATE_COMPLETE']
 
   - name: Read OpenStack Stack outputs
     command: 'heat stack-show openshift-ansible-{{ cluster_id }}-stack'

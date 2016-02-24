@@ -3,7 +3,7 @@
       {{ openshift.common.client_binary }} get node {{ item | lower }}
   register: omd_get_node
   until: omd_get_node.rc == 0
-  retries: 20
+  retries: 50
   delay: 5
   changed_when: false
   with_items: openshift_nodes
