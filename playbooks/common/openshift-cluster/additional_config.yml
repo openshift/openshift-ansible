@@ -52,4 +52,5 @@
   - role: openshift_router
     when: deploy_infra | bool
   - role: openshift_registry
+    registry_volume_claim: "{{ openshift.hosted.registry.storage.volume.name }}-claim"
     when: deploy_infra | bool and attach_registry_volume | bool
