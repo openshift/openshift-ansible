@@ -533,7 +533,9 @@ def get_installed_hosts(hosts, callback_facts):
     try:
         first_master = next(host for host in hosts if host.master)
         lb_hostname = callback_facts[first_master.connect_to]['master'].get('cluster_hostname', '')
-        lb_host = next(host for host in hosts if host.connect_to == lb_hostname)
+        lb_host = \
+            next(host for host in hosts if host.ip == callback_facts[lb_hostname]['common']['ip'])
+
         installed_hosts.append(lb_host)
     except (KeyError, StopIteration):
         pass
