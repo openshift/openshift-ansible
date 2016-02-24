@@ -1,0 +1,95 @@
+---
+# TODO:
+#   - handle updating deployed images
+#   - handle containerized installations
+#   - test/update deployment_type appropriately
+#   - anything else?
+
+###############################################################################
+# Evaluate host groups and gather facts
+###############################################################################
+- name: Evaluate host groups
+  include: ../../evaluate_groups.yml
+
+
+###############################################################################
+# Upgrade Masters
+###############################################################################
+- name: Update deployment type
+  hosts: oo_masters_to_config:oo_nodes_to_config:oo_etcd_to_config:oo_nfs_to_config:oo_lb_to_config
+  roles:
+  - openshift_facts
+  post_tasks:
+  - openshift_facts:
+      role: common
+      local_facts:
+        deployment_type: "{{ deployment_type }}"
+
+
+- name: Upgrade master packages and configuration
+  hosts: oo_masters_to_config
+  serial: 1
+  roles:
+  - openshift_facts
+  tasks:
+  - name: Upgrade master configuration
+    openshift_upgrade_config:
+      from_version: 'rhap'
+      to_version: 'ose'
+      role: master
+      config_base: "{{ hostvars[inventory_hostname].openshift.common.config_base }}"
+    notify:
+    - Restart master
+    - Restart master api
+    - Restart master controllers
+  handlers:
+  - name: Restart master
+    service:
+      name: "{{ openshift.common.service_type }}-master"
+      state: restarted
+    when: not openshift.master.ha | bool
+  - name: Restart master api
+    service:
+      name: "{{ openshift.common.service_type }}-master-api"
+      state: restarted
+    when: openshift.master.ha | bool
+  - name: Restart master controllers
+    service:
+      name: "{{ openshift.common.service_type }}-master-controllers"
+      state: restarted
+    when: openshift.master.ha | bool
+
+
+###############################################################################
+# Upgrade Nodes
+###############################################################################
+- name: Upgrade nodes
+  hosts: oo_nodes_to_config
+  roles:
+  - openshift_facts
+  tasks:
+  - name: Upgrade node configuration
+    openshift_upgrade_config:
+      from_version: 'rhap'
+      to_version: 'ose'
+      role: node
+      config_base: "{{ hostvars[inventory_hostname].openshift.common.config_base }}"
+    notify:
+    - Restart node
+  handlers:
+  - name: Restart node
+    service:
+      name: "{{ openshift.common.service_type }}-node"
+      state: restarted
+
+
+
+###############################################################################
+# Post upgrade - Update deployed images
+###############################################################################
+- name: Update deployed images
+  hosts: oo_first_master
+  vars:
+    openshift_deployment_type: "{{ deployment_type }}"
+  pre_tasks:
+  - debug: msg=todo

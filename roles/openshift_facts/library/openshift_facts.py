@@ -678,7 +678,11 @@ def set_deployment_facts_if_unset(facts):
                 if deployment_type in ['enterprise', 'online', 'openshift-enterprise']:
                     registry_url = 'openshift3/ose-${component}:${version}'
                 elif deployment_type == 'atomic-enterprise':
-                    registry_url = 'aep3_beta/aep-${component}:${version}'
+                    if facts['common']['version_gte_3_2_or_1_2']:
+                        aep_prefix = 'aep3'
+                    else:
+                        aep_prefix = 'aep3_beta'
+                    registry_url = aep_prefix + '/aep-${component}:${version}'
                 facts[role]['registry_url'] = registry_url
 
     if 'master' in facts:
@@ -1057,23 +1061,23 @@ def set_container_facts_if_unset(facts):
     """
     deployment_type = facts['common']['deployment_type']
     if deployment_type in ['enterprise', 'openshift-enterprise']:
-        master_image = 'openshift3/ose'
-        cli_image = master_image
-        node_image = 'openshift3/node'
-        ovs_image = 'openshift3/openvswitch'
-        etcd_image = 'registry.access.redhat.com/rhel7/etcd'
+        image_prefix = 'openshift3'
+        master_image_name = 'ose'
     elif deployment_type == 'atomic-enterprise':
-        master_image = 'aep3_beta/aep'
-        cli_image = master_image
-        node_image = 'aep3_beta/node'
-        ovs_image = 'aep3_beta/openvswitch'
-        etcd_image = 'registry.access.redhat.com/rhel7/etcd'
+        if facts['common']['version_gte_3_2_or_1_2']:
+            image_prefix = 'aep3'
+        else:
+            image_prefix = 'aep3_beta'
+        master_image_name = 'aep'
     else:
-        master_image = 'openshift/origin'
-        cli_image = master_image
-        node_image = 'openshift/node'
-        ovs_image = 'openshift/openvswitch'
-        etcd_image = 'registry.access.redhat.com/rhel7/etcd'
+        image_prefix = 'openshift'
+        master_image_name = 'origin'
+
+    master_image = '{0}/{1}'.format(image_prefix, master_image_name)
+    cli_image = master_image
+    node_image = '{0}/node'.format(image_prefix)
+    ovs_image = '{0}/openvswitch'.format(image_prefix)
+    etcd_image = 'registry.access.redhat.com/rhel7/etcd'
 
     facts['common']['is_atomic'] = os.path.isfile('/run/ostree-booted')
     if 'is_containerized' not in facts['common']:
@@ -1219,8 +1223,8 @@ class OpenShiftFacts(object):
         facts = set_metrics_facts_if_unset(facts)
         facts = set_identity_providers_if_unset(facts)
         facts = set_sdn_facts_if_unset(facts, self.system_facts)
-        facts = set_deployment_facts_if_unset(facts)
         facts = set_version_facts_if_unset(facts)
+        facts = set_deployment_facts_if_unset(facts)
         facts = set_manageiq_facts_if_unset(facts)
         facts = set_aggregate_facts(facts)
         facts = set_etcd_facts_if_unset(facts)
