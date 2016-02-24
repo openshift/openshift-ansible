@@ -124,7 +124,7 @@ def upgrade_ap_to_ose(role, ansible_module, config_base, backup):
         img_format = config['imageConfig']['format']
         for img_prefix in ('aep3_beta', 'aep3'):
             if img_prefix in img_format:
-                config['imageConfig']['format'] = img_format.replace(img_prefix, 'openshift3').replace('aep', 'openshift')
+                config['imageConfig']['format'] = img_format.replace(img_prefix, 'openshift3').replace('aep', 'ose')
                 changes.append("master-config.yaml: updated imageConfig.format")
                 break
 

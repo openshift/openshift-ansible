@@ -1,0 +1,22 @@
+---
+###############################################################################
+# Upgrade Nodes
+###############################################################################
+- name: Upgrade nodes
+  hosts: oo_nodes_to_config
+  roles:
+  - openshift_facts
+  post_tasks:
+  - name: Upgrade node configuration
+    openshift_upgrade_config:
+      from_version: 'rhap'
+      to_version: 'ose'
+      role: node
+      config_base: "{{ hostvars[inventory_hostname].openshift.common.config_base }}"
+    notify:
+    - Restart node
+  handlers:
+  - name: Restart node
+    service:
+      name: "{{ openshift.common.service_type }}-node"
+      state: restarted

@@ -671,6 +671,45 @@ class FilterModule(object):
         return rpms_31
 
     @staticmethod
+    def get_image_prefixes(deployment_type):
+        image_prefixes = ('openshift/origin-')
+        if deployment_type in ('enterprise', 'online', 'openshift-enterprise'):
+            image_prefixes = ('openshift3/ose-')
+        elif deployment_type == 'atomic-enterprise':
+            image_prefixes = ('aep3_beta/aep-', 'aep3/aep-')
+        return image_prefixes
+
+    @staticmethod
+    def oo_image_replace_deployment_type(image, old_dt, new_dt):
+        if not isinstance(image, basestring):
+            raise errors.AnsibleFilterError("failed expects to filter on a string)"
+
+        for image_prefix in get_image_prefixes(old_dt):
+            if image.startswith(image_prefix):
+                return image.replace(image_prefix,  get_image_prefixes(new_dt)[-1])
+
+    @staticmethod
+    def oo_dcs_match_deployment(dcs, deployment_type):
+        """ Filters a list of DCs and returns the ones containing pod specs matching the deployment_type
+        """
+        if not isinstance(dcs, list):
+            raise errors.AnsibleFilterError("failed expects to filter on a list")
+        if not isinstance(deployment_type, basestring):
+            raise errors.AnsibleFilterError("failed expects deployment_type to be a string")
+
+        matching_dcs = []
+        for image_prefix in get_image_prefixes(deployment_type):
+            image_regex = image_prefix + r'.*'
+            for dc in dcs:
+                for container in dc['spec']['template']['spec']['containers']:
+                    if re.search(image_regex, container['image']):
+                        matching_dcs.append(dc)
+                        break # stop here, don't add a dc more than once
+
+        return matching_dcs
+
+
+    @staticmethod
     def oo_pods_match_component(pods, deployment_type, component):
         """ Filters a list of Pods and returns the ones matching the deployment_type and component
         """
@@ -681,19 +720,14 @@ class FilterModule(object):
         if not isinstance(component, basestring):
             raise errors.AnsibleFilterError("failed expects component to be a string")
 
-        image_prefix = 'openshift/origin-'
-        if deployment_type in ['enterprise', 'online', 'openshift-enterprise']:
-            image_prefix = 'openshift3/ose-'
-        elif deployment_type == 'atomic-enterprise':
-            image_prefix = 'aep3_beta/aep-'
-
         matching_pods = []
-        image_regex = image_prefix + component + r'.*'
-        for pod in pods:
-            for container in pod['spec']['containers']:
-                if re.search(image_regex, container['image']):
-                    matching_pods.append(pod)
-                    break # stop here, don't add a pod more than once
+        for image_prefix in get_image_prefixes(deployment_type):
+            image_regex = image_prefix + component + r'.*'
+            for pod in pods:
+                for container in pod['spec']['containers']:
+                    if re.search(image_regex, container['image']):
+                        matching_pods.append(pod)
+                        break # stop here, don't add a pod more than once
 
         return matching_pods
 
@@ -736,6 +770,8 @@ class FilterModule(object):
             "oo_persistent_volumes": self.oo_persistent_volumes,
             "oo_persistent_volume_claims": self.oo_persistent_volume_claims,
             "oo_31_rpm_rename_conversion": self.oo_31_rpm_rename_conversion,
+            "oo_image_replace_deployment_type": self.oo_image_replace_deployment_type,
+            "oo_dcs_match_deployment": self.oo_dcs_match_deployment,
             "oo_pods_match_component": self.oo_pods_match_component,
             "oo_get_hosts_from_hostvars": self.oo_get_hosts_from_hostvars,
         }
