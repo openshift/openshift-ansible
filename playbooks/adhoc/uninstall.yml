@@ -147,6 +147,7 @@
       with_items:
         - registry\.access\..*redhat\.com/openshift3
         - registry\.access\..*redhat\.com/aep3
+        - registry\.qe\.openshift\.com/.*
         - registry\.access\..*redhat\.com/rhel7/etcd
         - docker.io/openshift
 
