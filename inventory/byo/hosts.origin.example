@@ -137,7 +137,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #osm_api_server_args={'max-requests-inflight': ['400']}
 
 # default subdomain to use for exposed routes
-#osm_default_subdomain=apps.test.example.com
+#openshift_master_default_subdomain=apps.test.example.com
 
 # additional cors origins
 #osm_custom_cors_origins=['foo.example.com', 'bar.example.com']
