@@ -23,7 +23,7 @@ deployment_vars:
   origin:
     image:
       url:    "{{ lookup('oo_option', 'image_url') |
-                  default('http://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.qcow2.xz', True) }}"
+                  default('http://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud-1510.qcow2.xz', True) }}"
       compression:   "{{ lookup('oo_option', 'image_compression') |
                          default('xz', True) }}"
       name:   "{{ lookup('oo_option', 'image_name') |
