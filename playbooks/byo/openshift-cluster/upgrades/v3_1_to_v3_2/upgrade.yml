@@ -3,6 +3,7 @@
   vars:
     g_etcd_hosts: "{{ groups.etcd | default([]) }}"
     g_master_hosts: "{{ groups.masters | default([]) }}"
+    g_new_master_hosts: []
     g_nfs_hosts: "{{ groups.nfs | default([]) }}"
     g_node_hosts: "{{ groups.nodes | default([]) }}"
     g_lb_hosts: "{{ groups.lb | default([]) }}"
