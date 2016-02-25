@@ -20,13 +20,26 @@ See https://docs.openshift.org/latest/cli_reference/get_started_cli.html
 =================================================================================
 """
 
-image=""
-if ! docker inspect -f {% raw %}'{{ .State.Status }}'{% endraw %} {{ openshift.common.service_type }}-master | grep running > /dev/null; then
->&2 echo """
+container="{{ openshift.common.service_type }}-master"
+is_running=false
+
+docker19_status=`docker inspect -f {% raw %}'{{ .State.Status }}'{% endraw %} $container`
+if [ "$docker19_status" == "<no value>"  ]; then
+    if docker inspect -f {% raw %}'{{ .State.Running }}'{% endraw %} $container | grep -i true > /dev/null; then
+        is_running=true
+    fi
+elif [ "$docker19_status" == "running"  ]; then
+   is_running=true
+fi
+
+if $is_running; then
+    image=:`docker inspect -f {% raw %}'{{ .Image }}'{% endraw %} {{ openshift.common.service_type }}-master`
+else
+    >&2 echo """
 
 Warning: {{ openshift.common.service_type }}-master service is not running.  Using the latest image.
-"""
-    image=:`docker inspect -f {% raw %}'{{ .Image }}'{% endraw %} {{ openshift.common.service_type }}-master`
+    """
+    image=:latest
 fi
 
 docker run -i --privileged --net=host --user=${user}:${group} -v ~/.kube:/root/.kube -v /tmp:/tmp -v {{ openshift.common.config_base}}:{{ openshift.common.config_base }} -e KUBECONFIG=/root/.kube/config --entrypoint ${cmd} --rm {{ openshift.common.cli_image }}${image} "${@}"
