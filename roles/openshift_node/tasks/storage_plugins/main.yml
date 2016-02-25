@@ -3,6 +3,7 @@
 # additional package dependencies
 - name: NFS storage plugin configuration
   include: nfs.yml
+  when: "'nfs' in openshift.node.storage_plugin_deps"
 
 - name: GlusterFS storage plugin configuration
   include: glusterfs.yml
