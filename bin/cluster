@@ -264,6 +264,13 @@ if __name__ == '__main__':
       providers = gce,aws,libvirt,openstack
     """
 
+    warning = ("================================================================================\n"
+               "ATTENTION: You are running a community supported utility that has not been\n"
+               "tested by Red Hat. Visit https://docs.openshift.com for supported installation\n"
+               "instructions.\n"
+               "================================================================================\n\n")
+    sys.stderr.write(warning)
+
     cluster_config = ConfigParser.SafeConfigParser({
         'cluster_ids': 'marketing,sales',
         'validate_cluster_ids': 'False',
