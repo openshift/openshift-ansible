@@ -66,11 +66,6 @@
           portal_net: "{{ openshift_master_portal_net | default(None) }}"
           ha: "{{ openshift_master_ha | default(groups.oo_masters | length > 1) }}"
           master_count: "{{ openshift_master_count | default(groups.oo_masters | length) }}"
-  - openshift_facts:
-      role: hosted
-      openshift_env:
-        openshift_hosted_registry_storage_kind: 'nfs'
-    when: openshift_hosted_registry_storage_kind is not defined and groups.oo_nfs_to_config is defined and groups.oo_nfs_to_config | length > 0
   - name: Check status of external etcd certificatees
     stat:
       path: "{{ openshift.common.config_base }}/master/{{ item }}"

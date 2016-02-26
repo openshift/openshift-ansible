@@ -1,4 +1,32 @@
 ---
+# TODO: when we migrate to ansible 2.0 this should be updated to set
+# delegate_facts: True
+# This task persists the hosted facts attributes to the first master host
+- name: Set hosted facts
+  openshift_facts:
+    role: hosted
+    openshift_env:
+      openshift_hosted_registry_storage_kind: nfs
+      openshift_hosted_registry_storage_host: "{{ hostvars[openshift_storage_delegate].openshift_hosted_registry_storage_host | default(openshift.common.hostname) }}"
+      openshift_hosted_registry_storage_nfs_options: "{{ hostvars[openshift_storage_delegate].openshift_hosted_registry_storage_nfs_options | default(None) }}"
+      openshift_hosted_registry_storage_nfs_directory: "{{ hostvars[openshift_storage_delegate].openshift_hosted_registry_storage_nfs_directory | default(None) }}"
+      openshift_hosted_registry_storage_volume_name: "{{ hostvars[openshift_storage_delegate].openshift_hosted_registry_storage_volume_name | default(None) }}"
+  delegate_to: "{{ openshift_storage_delegate }}"
+
+# TODO: when the above task starts using delegate_facts, then thjis will need
+# to be updated to set the values from groups.oo_first_master.0 instead of the
+# local facts
+# This task persists the hosted facts attributes to the nfs host
+- name: Set default hosted facts if necessary
+  openshift_facts:
+    role: hosted
+    openshift_env:
+      openshift_hosted_registry_storage_kind: nfs
+      openshift_hosted_registry_storage_host: "{{ openshift.hosted.registry.storage.host }}"
+      openshift_hosted_registry_storage_nfs_options: "{{ openshift.hosted.registry.storage.nfs.options }}"
+      openshift_hosted_registry_storage_nfs_directory: "{{ openshift.hosted.registry.storage.nfs.directory }}"
+      openshift_hosted_registry_storage_volume_name: "{{ openshift.hosted.registry.storage.volume.name }}"
+
 - name: Install nfs-utils
   yum:
     pkg: nfs-utils
