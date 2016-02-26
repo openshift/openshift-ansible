@@ -89,8 +89,8 @@
       dest: "{{ etcd_cert_config_dir }}"
     when: etcd_server_certs_missing
   roles:
-  - etcd
-  - role: nickhammond.logrotate
+  - openshift_etcd
+  - nickhammond.logrotate
 
 # Configure the remaining etcd hosts, skipping the first one we dealt with above.
 - name: Configure remaining etcd hosts
