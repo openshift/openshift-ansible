@@ -1,0 +1,14 @@
+---
+- name: Install openssl
+  action: "{{ ansible_pkg_mgr }} name=openssl state=present"
+  when: not openshift.common.is_atomic | bool
+
+- name: Create CA key
+  host: {{ groups.oo_first_master.0 }}
+  command: openssl genrsa -out {{ nuage_ca_key }} 4096
+  run_once: true
+
+- name: Create CA crt
+  host: {{ groups.oo_first_master.0 }}
+  command: openssl req -new -x509 -key {{ nuage_ca_key }} -out {{ nuage_ca_crt }} -subj "/CN=nuage-signer"
+  run_once: true
