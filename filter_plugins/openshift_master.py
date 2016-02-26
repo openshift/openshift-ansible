@@ -501,7 +501,36 @@ class FilterModule(object):
                 valid = False
         return valid
 
+    @staticmethod
+    def certificates_to_synchronize(hostvars):
+        ''' Return certificates to synchronize based on facts. '''
+        if not issubclass(type(hostvars), dict):
+            raise errors.AnsibleFilterError("|failed expects hostvars is a dict")
+        certs = ['admin.crt',
+                 'admin.key',
+                 'admin.kubeconfig',
+                 'master.kubelet-client.crt',
+                 'master.kubelet-client.key',
+                 'openshift-registry.crt',
+                 'openshift-registry.key',
+                 'openshift-registry.kubeconfig',
+                 'openshift-router.crt',
+                 'openshift-router.key',
+                 'openshift-router.kubeconfig',
+                 'serviceaccounts.private.key',
+                 'serviceaccounts.public.key']
+        if bool(hostvars['openshift']['common']['version_gte_3_1_or_1_1']):
+            certs += ['master.proxy-client.crt',
+                      'master.proxy-client.key']
+        if not bool(hostvars['openshift']['common']['version_gte_3_2_or_1_2']):
+            certs += ['openshift-master.crt',
+                      'openshift-master.key',
+                      'openshift-master.kubeconfig']
+        return certs
+
+
     def filters(self):
         ''' returns a mapping of filters to methods '''
         return {"translate_idps": self.translate_idps,
-                "validate_pcs_cluster": self.validate_pcs_cluster}
+                "validate_pcs_cluster": self.validate_pcs_cluster,
+                "certificates_to_synchronize": self.certificates_to_synchronize}
