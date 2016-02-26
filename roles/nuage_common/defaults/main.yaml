@@ -1,0 +1,4 @@
+---
+nuage_ca_dir: /use/share/nuage-openshift-monitor-cert
+nuage_ca_key: {{ nuage_ca_dir }}/nuageMonCA.key
+nuage_ca_crt: {{ nuage_ca_dir }}/nuageMonCA.crt
