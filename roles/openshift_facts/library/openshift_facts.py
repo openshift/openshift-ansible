@@ -393,6 +393,9 @@ def set_metrics_facts_if_unset(facts):
         if 'use_cluster_metrics' not in facts['common']:
             use_cluster_metrics = False
             facts['common']['use_cluster_metrics'] = use_cluster_metrics
+        if 'use_cluster_metrics_hawkular' not in facts['common']:
+            use_cluster_metrics_hawkular = False
+            facts['common']['use_cluster_metrics_hawkular'] = use_cluster_metrics_hawkular        
     return facts
 
 def set_project_cfg_facts_if_unset(facts):

@@ -1,4 +1,4 @@
-{% if openshift.common.use_cluster_metrics | bool %}
+{% if openshift.common.use_cluster_metrics | bool or openshift.common.use_cluster_metrics_hawkular | bool %}
 kubeletArguments:
   "read-only-port":
     - "10255"

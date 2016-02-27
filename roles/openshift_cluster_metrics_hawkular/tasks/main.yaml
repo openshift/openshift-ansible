@@ -1,0 +1,56 @@
+---
+
+- name: Copy Configuration to temporary conf
+  command: >
+    cp {{ openshift.common.config_base }}/master/admin.kubeconfig {{hawkular_tmp_conf}}
+  changed_when: false
+
+- name: Install cluster metrics templates
+  copy:
+    src: cluster-metrics
+    dest: "{{ openshift.common.config_base }}/"
+
+- name: Create metrics-deployer Service Account
+  shell: >
+    echo {{ deployer_service_account | to_json | quote }} |
+    {{ openshift.common.client_binary }} create
+    -n openshift-infra
+    --config={{hawkular_tmp_conf}}
+    -f -
+  register: deployer_create_service_account
+  failed_when: "'already exists' not in deployer_create_service_account.stderr and deployer_create_service_account.rc != 0"
+  changed_when: deployer_create_service_account.rc == 0
+
+- name: Create metrics-deployer Secret
+  command: >
+    {{ openshift.common.client_binary }}
+    secrets new metrics-deployer
+    nothing=/dev/null
+    -n openshift-infra
+  register: deployer_create_secret
+  failed_when: "'already exists' not in deployer_create_secret.stderr and deployer_create_secret.rc !=0"
+  changed_when: deployer_create_secret.rc == 0
+
+- name: Configure role/user permissions
+  command: >
+    {{ openshift.common.admin_binary }} {{item}}
+    --config={{hawkular_tmp_conf}}
+  with_items: "{{hawkular_tasks}}"
+  register: hawkular_perm_task
+  failed_when: "'already exists' not in hawkular_perm_task.stderr and hawkular_perm_task.rc != 0"
+  changed_when: hawkular_perm_task.rc == 0
+
+- name: Create Heapster Services
+  shell: >
+    {{ openshift.common.client_binary }} process -f
+    {{ openshift.common.config_base }}/cluster-metrics/metrics.yaml -v 
+    HAWKULAR_METRICS_HOSTNAME=hawkular-metrics.example.com,USE_PERSISTENT_STORAGE=false |
+    {{ openshift.common.client_binary }} create -n openshift-infra -f - 
+  register: oex_heapster_services
+  failed_when: "'already exists' not in oex_heapster_services.stderr and oex_heapster_services.rc != 0"
+  changed_when: false
+
+- name: Clean temporary configuration file
+  command: >
+    rm -f {{hawkular_tmp_conf}}
+  changed_when: false
