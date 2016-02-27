@@ -28,9 +28,6 @@
         - nuage.crt
         - nuage.key
         - nuage.kubeconfig 
-        - nuageMonClient.key
-        - nuageMonClient.crt
-        - nuageMonCA.crt
 
 - name: Set the vsp-openshift.yaml 
   sudo: true
