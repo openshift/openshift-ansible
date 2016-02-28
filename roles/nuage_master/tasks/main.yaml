@@ -24,6 +24,10 @@
         - nuage.key
         - nuage.kubeconfig 
 
+- name: Generate and copy the certificates
+  roles: 
+    - role: nuage_master_certificates
+
 - name: Create nuage-openshift-monitor.yaml
   sudo: true
   template: src=nuage-openshift-monitor.j2 dest=/usr/share/nuage-openshift-monitor/nuage-openshift-monitor.yaml owner=root mode=0644
