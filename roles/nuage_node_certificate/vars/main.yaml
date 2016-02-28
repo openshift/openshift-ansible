@@ -1,0 +1,4 @@
+nuage_node_crt_dir : /usr/share/vsp-openshift
+nuage_node_ca_crt_path : {{ nuage_node_crt_dir }}/nuageMonCA.crt
+nuage_node_key_path: {{ nuage_node_crt_dir }}/nuageMonServer.key
+nuage_node_crt_path: {{ nuage_node_crt_dir }}/nuageMonServer.crt
