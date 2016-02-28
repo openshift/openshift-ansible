@@ -11,8 +11,6 @@
 ###############################################################################
 - name: Upgrade master container
   hosts: oo_masters_to_config
-  roles:
-  - openshift_cli
   tasks:
   - include: rpm_upgrade.yml component=master
     when: not openshift.common.is_containerized | bool
@@ -56,8 +54,6 @@
 ###############################################################################
 - name: Upgrade nodes
   hosts: oo_nodes_to_config
-  roles:
-  - openshift_facts
   tasks:
   - include: rpm_upgrade.yml
     vars:
@@ -68,7 +64,8 @@
   - include: containerized_upgrade.yml
     when: openshift.common.is_containerized | bool
 
-  - name: Restart node service
+  # This will restart the node
+  - name: Restart openvswitch service
     service: name="{{ openshift.common.service_type }}-node" state=restarted
 
   - set_fact:
@@ -97,6 +94,8 @@
 ###############################################################################
 - name: Reconcile Cluster Roles and Cluster Role Bindings and Security Context Constraints
   hosts: oo_masters_to_config
+  roles:
+  - { role: openshift_cli, image_tag: "v{{ g_new_version }}"  }
   vars:
     origin_reconcile_bindings: "{{ deployment_type == 'origin' and g_new_version | version_compare('1.0.6', '>') }}"
     ent_reconcile_bindings: true

@@ -1,6 +1,2 @@
 - name: Update system_units
   script: ../files/ensure_system_units_have_version.sh {{ openshift.common.service_type }} {{ openshift.common.deployment_type }} {{ g_new_version }}
-
-- name: Ensure python-yaml present for config upgrade
-  action: "{{ ansible_pkg_mgr }} name=PyYAML state=present"
-  when: not openshift.common.is_atomic | bool

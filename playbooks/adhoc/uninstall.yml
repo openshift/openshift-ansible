@@ -193,6 +193,7 @@
         - /etc/sysconfig/atomic-openshift-node
         - /etc/sysconfig/openshift-master
         - /etc/sysconfig/openshift-node
+        - /etc/sysconfig/openvswitch
         - /etc/sysconfig/origin-master
         - /etc/sysconfig/origin-master-api
         - /etc/sysconfig/origin-master-controllers

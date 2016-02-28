@@ -32,7 +32,7 @@ add_image_version_to_unit () {
     fi
 }
 
-for unit_file in $(ls /etc/systemd/system/${SERVICE_TYPE}*.service | head -n1); do
+for unit_file in $(ls /etc/systemd/system/${SERVICE_TYPE}*.service); do
     unit_name=$(basename -s .service ${unit_file})
     add_image_version_to_sysconfig $VERSION $unit_name
     add_image_version_to_unit $DEPLOYMENT_TYPE $unit_file
@@ -41,7 +41,6 @@ done
 if [ -e /etc/sysconfig/openvswitch ]; then
     add_image_version_to_sysconfig $VERSION openvswitch
 else
-    # TODO: add this to config.yml
     echo IMAGE_VERSION=${VERSION} > /etc/sysconfig/openvswitch
 fi 
 if ! grep EnvironmentFile /etc/systemd/system/openvswitch.service > /dev/null; then

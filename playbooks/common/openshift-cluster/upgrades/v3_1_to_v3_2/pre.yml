@@ -7,11 +7,6 @@
   roles:
   - openshift_facts
 
-- name: Load openshift_facts
-  hosts: oo_masters_to_config:oo_nodes_to_config:oo_etcd_to_config:oo_lb_to_config
-  roles:
-  - openshift_facts
-
 - name: Evaluate additional groups for upgrade
   hosts: localhost
   connection: local
@@ -35,9 +30,9 @@
   tasks:
   - fail:
       msg: >
-        This upgrade is only supported for origin, openshift-enterprise, and online
+        This upgrade is only supported for atomic-enterprise, origin, openshift-enterprise, and online
         deployment types
-    when: deployment_type not in ['origin','openshift-enterprise', 'online']
+    when: deployment_type not in ['atomic-enterprise', 'origin','openshift-enterprise', 'online']
 
   - fail:
       msg: >
