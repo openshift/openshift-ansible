@@ -1,5 +1,4 @@
+nuage_ca_master_rest_server_key: {{ nuage_ca_master_crt_dir }}/nuageMonServer.key
+nuage_ca_master_rest_server_crt: {{ nuage_ca_master_crt_dir }}/nuageMonServer.crt 
+
 nuage_master_crt_dir : /usr/share/nuage-openshift-master
-nuage_master_serial_file_path: {{ nuage_master_crt_dir }}/nuageMonCA.serial.txt
-nuage_master_ca_crt_path : {{ nuage_master_crt_dir }}/nuageMonCA.crt
-nuage_master_key_path: {{ nuage_master_crt_dir }}/nuageMonServer.key
-nuage_master_crt_path: {{ nuage_master_crt_dir }}/nuageMonServer.crt
