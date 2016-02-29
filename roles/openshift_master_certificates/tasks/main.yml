@@ -35,4 +35,4 @@
     force: true
   with_nested:
   - masters_needing_certs
-  - "{{ hostvars[openshift.common.hostname] | certificates_to_synchronize }}"
+  - "{{ hostvars[inventory_hostname] | certificates_to_synchronize }}"
