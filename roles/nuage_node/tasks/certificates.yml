@@ -18,7 +18,7 @@
   file: path="{{ nuage_ca_master_crt_dir }}/restClient.req" state=absent
 
 - name: Copy the CA crt
-  copy: src="{{ nuage_ca_crt }}" dest="{{ nuage_ca_master_crt_dir }}/nuageMonCA.crt"
+  shell: "cp {{ nuage_ca_crt }} {{ nuage_ca_master_crt_dir }}/nuageMonCA.crt"
 
 - name: Download the certificates
   fetch: src="{{ nuage_ca_master_crt_dir }}/{{ item }}" dest="{{ item }}" 
