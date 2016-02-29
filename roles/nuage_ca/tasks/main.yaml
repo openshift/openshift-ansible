@@ -29,7 +29,7 @@
   delegate_to: "{{ nuage_ca_master }}"
 
 - name: Create the serial file
-  copy: src=serial.txt dest="{{ nuage_ca_serial_file_path }}"
+  copy: src=serial.txt dest="{{ nuage_ca_serial }}"
   run_once: true
   delegate_to: "{{ nuage_ca_master }}"
 

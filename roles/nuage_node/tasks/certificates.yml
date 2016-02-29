@@ -2,17 +2,17 @@
 - name: Create the key
   command: >
     openssl genrsa -out "{{ nuage_ca_master_plugin_key }}" 4096  
-  delegate_to: nuage_ca_master
+  delegate_to: {{ nuage_ca_master }}
 
 - name: Create the req file
   command: >
     openssl req -key "{{ nuage_ca_master_plugin_key }}" -new -out "{{ nuage_ca_master_crt_dir }}/restClient.req" -subj "/CN=nuage-client"
-  delegate_to: nuage_ca_master
+  delegate_to: {{ nuage_ca_master }}
 
 - name: Generate the crt file
   command: >
      openssl x509 -req -in "{{ nuage_ca_master_crt_dir }}/restClient.req" -CA "{{ nuage_ca_crt }}" -CAkey "{{ nuage_ca_key }}" -CAserial "{{ nuage_ca_serial }}"  -out "{{ nuage_ca_master_plugin_crt }}" -extensions clientauth -extfile "{{ nuage_ca_dir }}"/openssl.cnf 
-  delegate_to: nuage_ca_master
+  delegate_to: {{ nuage_ca_master }}
 
 - name: Remove the req file
   file: path="{{ nuage_ca_master_crt_dir }}/restClient.req" state=absent
