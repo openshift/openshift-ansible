@@ -13,3 +13,8 @@ rest_client_cert: "{{ vsp_openshift_dir }}/nuageMonClient.crt"
 rest_client_key: "{{ vsp_openshift_dir }}/nuageMonClient.key"
 rest_server_ca_cert: "{{ vsp_openshift_dir }}/nuageMonCA.crt"
 vport_mtu: "{{ nuage_interface_mtu | default('1460') }}"
+
+nuage_ca_master_plugin_key: {{ nuage_ca_master_crt_dir }}/nuageMonClient.key
+nuage_ca_master_plugin_crt: {{ nuage_ca_master_crt_dir }}/nuageMonClient.crt 
+
+nuage_plugin_crt_dir : /usr/share/vsp-openshift
