@@ -9,7 +9,8 @@ nuage_mon_rest_server_port: "{{ nuage_openshift_monitor_rest_server_port | defau
 nuage_mon_rest_server_url: "0.0.0.0:{{ nuage_mon_rest_server_port }}"
 nuage_mon_rest_server_logdir: "{{ nuage_openshift_monitor_log_dir | default('/var/log/nuage-openshift-monitor') }}"
 
-nuage_ca_master_rest_server_key: "{{ nuage_ca_master_crt_dir }}/nuageMonServer.key"
-nuage_ca_master_rest_server_crt: "{{ nuage_ca_master_crt_dir }}/nuageMonServer.crt" 
+nuage_mon_rest_server_crt_dir: "{{ nuage_ca_master_crt_dir }}/{{ ansible_nodename }}"
+nuage_ca_master_rest_server_key: "{{ nuage_mon_rest_server_crt_dir }}/nuageMonServer.key"
+nuage_ca_master_rest_server_crt: "{{ nuage_mon_rest_server_crt_dir }}/nuageMonServer.crt" 
 
 nuage_master_crt_dir : /usr/share/nuage-openshift-monitor
