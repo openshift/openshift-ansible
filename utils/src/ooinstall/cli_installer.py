@@ -762,6 +762,9 @@ def uninstall(ctx):
     oo_cfg = ctx.obj['oo_cfg']
     verbose = ctx.obj['verbose']
 
+    upgrade_mappings = {'3.0':'3.1',
+                        '3.1':'3.2'}
+
     if len(oo_cfg.hosts) == 0:
         click.echo("No hosts defined in: %s" % oo_cfg.config_path)
         sys.exit(1)
@@ -802,8 +805,7 @@ def upgrade(ctx):
     resp = click.prompt("(1) Update to latest {} (2) Migrate to next relese".format(old_version))
 
     if resp == "2":
-        # TODO: Make this a lot more flexible
-        new_version = "3.1"
+        new_version = upgrade_mappings.get(old_version)
         # Update config to reflect the version we're targetting, we'll write
         # to disk once ansible completes successfully, not before.
         if oo_cfg.settings['variant'] == 'enterprise':
