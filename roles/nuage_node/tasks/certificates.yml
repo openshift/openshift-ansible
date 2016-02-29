@@ -23,11 +23,11 @@
   delegate_to: "{{ nuage_ca_master }}"
 
 - name: Copy the CA certificate
-  synchronize: src="{{ nuage_ca_crt }}" dest="{{ nuage_plugin_crt_dir }}/nuageMonCA.crt"
+  synchronize: mode=push src="{{ nuage_ca_crt }}" dest="{{ nuage_plugin_crt_dir }}/nuageMonCA.crt"
   delegate_to: "{{ nuage_ca_master }}" 
 
 - name: Copy the plugin certificate and key
-  synchronize: src="{{ nuage_plugin_rest_client_crt_dir }}/{{ item }}" dest="{{ nuage_plugin_crt_dir }}/{{ item }}"
+  synchronize: mode=push src="{{ nuage_plugin_rest_client_crt_dir }}/{{ item }}" dest="{{ nuage_plugin_crt_dir }}/{{ item }}"
   with_items:
     - nuageMonClient.key
     - nuageMonClient.crt

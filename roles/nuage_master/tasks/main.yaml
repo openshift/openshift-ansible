@@ -11,6 +11,13 @@
   sudo: true
   yum: name={{ nuage_openshift_rpm }} state=present
 
+- name: Install zip tools
+  sudo: true
+  yum: name={{ item }} state=present
+  with_items:
+    - zip
+    - unzip
+
 - name: Run the service account creation script
   sudo: true
   script: serviceaccount.sh --server={{ openshift.master.api_url }} --output-cert-dir={{ cert_output_dir }} --master-cert-dir={{ openshift_master_config_dir }}

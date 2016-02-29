@@ -20,6 +20,13 @@
   sudo: true
   yum: name={{ plugin_rpm }} state=present
 
+- name: Install zip tools
+  sudo: true
+  yum: name={{ item }} state=present
+  with_items:
+    - zip
+    - unzip
+
 - name: Copy the certificates and keys
   sudo: true
   copy: src="/tmp/{{ item }}" dest="{{ vsp_openshift_dir }}/{{ item }}"

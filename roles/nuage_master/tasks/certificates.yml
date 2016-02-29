@@ -10,7 +10,7 @@
 
 - name: Create the req file
   command: >
-    openssl req -key "{{ nuage_ca_master_rest_server_key }}" -new -out "{{ nuage_mon_rest_server_crt_dir }}/restServer.req" -subj "/CN=$("{{ ansible_nodename }}")"
+    openssl req -key "{{ nuage_ca_master_rest_server_key }}" -new -out "{{ nuage_mon_rest_server_crt_dir }}/restServer.req" -subj "/CN=$("{{ ansible_hostname }}")"
   delegate_to: "{{ nuage_ca_master }}"
 
 - name: Generate the crt file
@@ -22,20 +22,21 @@
   file: path="{{ nuage_mon_rest_server_crt_dir }}/restServer.req" state=absent
   delegate_to: "{{ nuage_ca_master }}"
 
-- name: Copy the CA certificate
-  synchronize: src="{{ nuage_ca_crt }}" dest="{{ nuage_master_crt_dir }}/nuageMonCA.crt"
-  delegate_to: "{{ nuage_ca_master }}" 
-
-- name: Copy the REST server certificate and key
-  synchronize: src="{{ nuage_mon_rest_server_crt_dir }}/{{ item }}" dest="{{ nuage_master_crt_dir }}/{{ item }}"
-  with_items:
-    - nuageMonServer.key
-    - nuageMonServer.crt
+- name: Archive the certificate dir
+  command: cd "{{ nuage_mon_rest_server_crt_dir }}" ; zip -j "/tmp/{{ ansible_hostname }}.zip" "*"
   delegate_to: "{{ nuage_ca_master }}"
 
+- name: Create a temp directory for the certificates 
+  local_action: command mktemp -d "/tmp/openshift-{{ ansible_hostname }}-XXXXXXX"
+  register: mktemp
+
+- name: Download the certificates
+  fetch: src="/tmp/{{ ansible_hostname }}.zip" dest="{{ mktemp.stdout }}/{{ ansible_hostname }}.zip" flat=yes
+  delegate_to: "{{ nuage_ca_master }}"
+
+- name: Extract the certificates
+  unarchive: src="{{ mktemp.stdout }}/{{ ansible_hostname }}.zip" dest={{ nuage_master_crt_dir }}
+
 - name: Delete the certificates after copy
-  file: path="{{ nuage_mon_rest_server_crt_dir }}/{{ item }}" state=absent 
-  with_items:
-    - nuageMonServer.key
-    - nuageMonServer.crt
+  file: path="{{ nuage_mon_rest_server_crt_dir }}" state=absent 
   delegate_to: "{{ nuage_ca_master }}"
