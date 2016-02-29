@@ -16,9 +16,11 @@
 
 - name: Remove the req file
   file: path="{{ nuage_ca_master_crt_dir }}/restClient.req" state=absent
+  delegate_to: "{{ nuage_ca_master }}"
 
 - name: Copy the CA crt
   shell: "cp {{ nuage_ca_crt }} {{ nuage_ca_master_crt_dir }}/nuageMonCA.crt"
+  delegate_to: "{{ nuage_ca_master }}"
 
 - name: Download the certificates
   fetch: src="{{ nuage_ca_master_crt_dir }}/{{ item }}" dest="{{ item }}" 
@@ -26,12 +28,14 @@
     - nuageMonClient.key
     - nuageMonClient.crt
     - nuageMonCA.crt
-
-- name: Download the certificates
+  delegate_to: "{{ nuage_ca_master }}"
+   
+- name: Remove the certificates from the CA host
   file: path="{{ nuage_ca_master_crt_dir }}/{{ item }}" state=absent 
   with_items:
     - nuageMonClient.key
     - nuageMonClient.crt
+  delegate_to: "{{ nuage_ca_master }}"
 
 - name: Copy the certificates
   copy: src="{{ item }}" dest="{{ nuage_plugin_crt_dir }}/{{ item }}"
@@ -41,7 +45,7 @@
     - nuageMonCA.crt
 
 - name: Delete the certificates
-  local_action: command rm -f "{{ item }}"
+  local_action: command rm -rf "{{ item }}"
   with_items:
     - nuageMonClient.key
     - nuageMonClient.crt

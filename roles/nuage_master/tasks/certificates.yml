@@ -16,33 +16,15 @@
 
 - name: Remove the req file
   file: path="{{ nuage_ca_master_crt_dir }}/restServer.req" state=absent
+  delegate_to: "{{ nuage_ca_master }}"
 
-- name: Copy the CA crt
-  shell: "cp {{ nuage_ca_crt }} {{ nuage_ca_master_crt_dir }}/nuageMonCA.crt"
+- name: Copy the CA certificate
+  synchronize: src="{{ nuage_ca_crt }}" dest="{{ nuage_master_crt_dir }}/nuageMonCA.crt"
+  delegate_to: "{{ nuage_ca_master }}" 
 
-- name: Download the certificates
-  fetch: src="{{ nuage_ca_master_crt_dir }}/{{ item }}" dest="{{ item }}" 
+- name: Copy the REST server certificate and key
+  synchronize: src="{{ nuage_ca_master_crt_dir }}/{{ item }}" dest="{{ nuage_master_crt_dir }}/{{ item }}"
   with_items:
     - nuageMonServer.key
     - nuageMonServer.crt
-    - nuageMonCA.crt
-
-- name: Download the certificates
-  file: path="{{ nuage_ca_master_crt_dir }}/{{ item }}" state=absent 
-  with_items:
-    - nuageMonServer.key
-    - nuageMonServer.crt
-
-- name: Copy the certificates
-  copy: src="{{ item }}" dest="{{ nuage_master_crt_dir }}/{{ item }}"
-  with_items:
-    - nuageMonServer.key
-    - nuageMonServer.crt
-    - nuageMonCA.crt
-
-- name: Delete the certificates
-  local_action: command rm -f "{{ item }}"
-  with_items:
-    - nuageMonServer.key
-    - nuageMonServer.crt
-    - nuageMonCA.crt
+  delegate_to: "{{ nuage_ca_master }}" 
