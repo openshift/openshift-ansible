@@ -1,0 +1,95 @@
+---
+- name: Ensure docker is installed
+  action: "{{ ansible_pkg_mgr }} name={{ item }} state=present"
+  with_items:
+  - docker
+
+# Docker doesn't seem to start cleanly the first time run
+#  when loopback (not directlvm) is configured. Putting in an
+#  ignore errors, and then sleeping till it can come up cleanly
+- name: Try to start docker.  This might fail (loopback startup issue)
+  service:
+    name: docker
+    state: started
+  ignore_errors: yes
+
+- name: Pause for 1 minute
+  pause:
+    seconds: 30
+
+- name: Ensure docker is started
+  service:
+    name: docker
+    state: started
+
+- name: Determine if loopback
+  shell: docker info | grep 'Data file:.*loop'
+  register: loop_device_check
+  ignore_errors: yes
+
+- debug:
+    var: loop_device_check
+
+- name: fail if we don't detect loopback
+  fail:
+    msg:  loopback not detected! Please investigate manually.
+  when: loop_device_check.rc == 1
+
+- name: "check to see if {{ dss_docker_device }} exists"
+  command: "test -e {{ dss_docker_device }}"
+  register: docker_dev_check
+  ignore_errors: yes
+
+- debug: var=docker_dev_check
+
+- name: "fail if {{ dss_docker_device }} doesn't exist"
+  fail:
+    msg: "{{ dss_docker_device }} doesn't exist. Please investigate"
+  when: docker_dev_check.rc != 0
+
+- name: stop docker
+  service:
+    name: docker
+    state: stopped
+
+- name: delete /var/lib/docker
+  command: rm -rf /var/lib/docker
+
+- name: remove /var/lib/docker
+  command: rm -rf /var/lib/docker
+
+- name: copy the docker-storage-setup config file
+  copy:
+    content: >
+      DEVS={{ dss_docker_device }}\n
+      VG=docker_vg
+    dest: /etc/sysconfig/docker-storage-setup
+    owner: root
+    group: root
+    mode: 0664
+
+- name: docker storage setup
+  command: docker-storage-setup
+  register: docker_storage_setup_output
+
+- debug:
+    msg:  "{{ docker_storage_setup_output }}"
+
+- name: extend the vg
+  command: lvextend -l 90%VG /dev/docker_vg/docker-pool
+  register: lvextend_output
+
+- debug:
+    msg: "{{ lvextend_output }}"
+
+- name: start docker
+  service:
+    name: docker
+    state: restarted
+
+- name: docker info
+  command: docker info
+  register: dockerinfo
+
+- debug:
+    msg: "{{ dockerinfo }}"
