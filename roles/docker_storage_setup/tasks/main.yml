@@ -4,7 +4,20 @@
   with_items:
   - docker
 
-- name: start docker
+# Docker doesn't seem to start cleanly the first time run
+#  when loopback (not directlvm) is configured. Putting in an
+#  ignore errors, and then sleeping till it can come up cleanly
+- name: Try to start docker.  This might fail (loopback startup issue)
+  service:
+    name: docker
+    state: started
+  ignore_errors: yes
+
+- name: Pause for 1 minute
+  pause:
+    seconds: 30
+
+- name: Ensure docker is started
   service:
     name: docker
     state: started
