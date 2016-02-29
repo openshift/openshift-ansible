@@ -15,7 +15,7 @@
     vg: "{{ dst_vg }}"
     size: 5%VG
   register: dst_lvol_metadata
-  
+
 
 - name: Update docker_storage options
   lineinfile:
@@ -31,7 +31,7 @@
   command: systemctl daemon-reload
   notify:
   - restart docker
-  when: dst_config | changed or 
+  when: dst_config | changed or
         dst_lvg | changed or
         dst_lvol_data | changed or
         dst_lvol_metadata | changed
