@@ -29,9 +29,7 @@
         - nuage.key
         - nuage.kubeconfig 
 
-- name: Generate and copy the certificates
-  roles: 
-    - role: nuage_node_certificates
+- include: certificates.yml
 
 - name: Set the vsp-openshift.yaml 
   sudo: true
