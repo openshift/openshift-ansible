@@ -604,7 +604,7 @@ resources:
                       BOOTPROTO="dhcp"
                       DNS1="$dns1"
                       DNS2="$dns2"
-                      PEERDNS="no"
+                      PEERDNS="yes"
                       ONBOOT="yes"
                 runcmd:
                   - [ "/usr/bin/systemctl", "restart", "network" ]
