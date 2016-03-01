@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.48
+Version:        3.0.49
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -261,6 +261,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Mar 01 2016 Matt Woodson <mwoodson@redhat.com> 3.0.49-1
+- fixed error in awsutil.py (mwoodson@redhat.com)
+
 * Tue Mar 01 2016 Matt Woodson <mwoodson@redhat.com> 3.0.48-1
 - ohi: added subtype searching (mwoodson@redhat.com)
 - make heal remote actions generic for all [HEAL] triggers (jdiaz@redhat.com)
