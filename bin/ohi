@@ -34,6 +34,7 @@ class Ohi(object):
                                         'openshift_ansible', \
                                         'openshift_ansible.conf')
 
+        self.args = None
         self.parse_cli_args()
         self.parse_config_file()
 
@@ -57,6 +58,7 @@ class Ohi(object):
 
         hosts = self.aws.get_host_list(clusters=self.args.cluster,
                                        host_type=self.args.host_type,
+                                       sub_host_type=self.args.sub_host_type,
                                        envs=self.args.env,
                                        version=version,
                                        cached=self.args.cache_only)
@@ -103,6 +105,8 @@ class Ohi(object):
         parser.add_argument('-e', '--env', action="append", help="Which environment to use")
 
         parser.add_argument('-t', '--host-type', action="store", help="Which host type to use")
+
+        parser.add_argument('-s', '--sub-host-type', action="store", help="Which sub host type to use")
 
         parser.add_argument('-l', '--user', action='store', default=None, help='username')
 
