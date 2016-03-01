@@ -23,7 +23,7 @@ g_template_ops_tools:
     priority: average
 
   zactions:
-  - name: 'Remote command for [HEAL] triggers'
+  - name: 'Remote command for [Heal] triggers'
     status: enabled
     escalation_time: 60
     conditions_filter:
@@ -33,7 +33,7 @@ g_template_ops_tools:
         operator: not in
       - conditiontype: trigger name
         operator: like
-        value: "[HEAL]"
+        value: "[Heal]"
       - conditiontype: trigger value
         operator: "="
         value: PROBLEM
