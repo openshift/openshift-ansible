@@ -1,0 +1,10 @@
+nuage_ca_master: "{{ groups.oo_first_master.0 }}"
+nuage_ca_master_crt_dir: /usr/share/nuage-openshift-certificates
+
+nuage_ca_dir: /usr/share/nuage-openshift-ca
+nuage_ca_key: "{{ nuage_ca_dir }}/nuageMonCA.key"
+nuage_ca_crt: "{{ nuage_ca_dir }}/nuageMonCA.crt"
+nuage_ca_serial: "{{ nuage_ca_dir }}/nuageMonCA.serial.txt"
+
+nuage_master_mon_dir: /usr/share/nuage-openshift-monitor
+nuage_node_plugin_dir: /usr/share/vsp-openshift
