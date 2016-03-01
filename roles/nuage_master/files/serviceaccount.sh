@@ -15,6 +15,13 @@ for i in "$@"; do
         --output-cert-dir=*)
             OUTDIR="${i#*=}"
             CONFIG_FILE=${OUTDIR}/nuage.kubeconfig
+            REST_SERVER_KEY=${OUTDIR}/nuageMonServer.key
+            REST_SERVER_CERT=${OUTDIR}/nuageMonServer.crt
+            REST_CLIENT_KEY=${OUTDIR}/nuageMonClient.key
+            REST_CLIENT_CERT=${OUTDIR}/nuageMonClient.crt
+            REST_CA_KEY=${OUTDIR}/nuageMonCA.key
+            REST_CA_CERT=${OUTDIR}/nuageMonCA.crt
+            REST_CA_SERIAL=${OUTDIR}/nuageMonCA.serial.txt
         ;;
     esac
 done
@@ -59,5 +66,4 @@ oadm create-api-client-config --certificate-authority=${CA_CERT} --client-dir=${
 # Verify the finalized kubeconfig
 if ! [ $(oc whoami --config=$CONFIG_FILE) == 'system:serviceaccounts:default:nuage' ]; then
     echo "Service account creation failed!"
-    exit 1
 fi
