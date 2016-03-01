@@ -22,8 +22,12 @@
   file: path="{{ nuage_mon_rest_server_crt_dir }}/restServer.req" state=absent
   delegate_to: "{{ nuage_ca_master }}"
 
+- name: Copy nuage CA crt
+  shell: cp "{{ nuage_ca_crt }}" "{{ nuage_mon_rest_server_crt_dir }}"
+  delegate_to: "{{ nuage_ca_master }}"
+
 - name: Archive the certificate dir
-  command: cd "{{ nuage_mon_rest_server_crt_dir }}" ; zip -j "/tmp/{{ ansible_hostname }}.zip" "*"
+  shell: "cd {{ nuage_mon_rest_server_crt_dir }} && zip -j /tmp/{{ ansible_hostname }}.zip *"
   delegate_to: "{{ nuage_ca_master }}"
 
 - name: Create a temp directory for the certificates 
