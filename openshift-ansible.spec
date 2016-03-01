@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.47
+Version:        3.0.48
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -261,6 +261,70 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Mar 01 2016 Matt Woodson <mwoodson@redhat.com> 3.0.48-1
+- ohi: added subtype searching (mwoodson@redhat.com)
+- make heal remote actions generic for all [HEAL] triggers (jdiaz@redhat.com)
+- added extra steps to ensure docker starts up (mwoodson@redhat.com)
+- role_removal: docker_storage;  This is the old way, no longer used
+  (mwoodson@redhat.com)
+- role: added docker_storage_setup (mwoodson@redhat.com)
+- Use inventory_hostname for openshift master certs to sync.
+  (abutcher@redhat.com)
+- Adding a symlink to making loading the examples more convenient
+  (bleanhar@redhat.com)
+- docs: Explain a bit more how to expand Atomic Host rootfs
+  (walters@verbum.org)
+- a-o-i: Rename osm_default_subdomain (smunilla@redhat.com)
+- Updating tito config for OSE 3.2 (bleanhar@redhat.com)
+- Synchronize master kube configs (abutcher@redhat.com)
+- added os_utils, os_reboot_server role; removed containerization stuff from
+  the updated (mwoodson@redhat.com)
+- Add warnings to bin/cluster and READMEs (abutcher@redhat.com)
+- Add host subnet length example. (abutcher@redhat.com)
+- Upgrade -1510 to CentOS-7-x86_64-GenericCloud-1602. (cben@redhat.com)
+- Pin down CentOS-7-x86_64-GenericCloud-1510.qcow2.xz version, which the
+  checksum currently expects (#1384). (cben@redhat.com)
+- Change is_atomic to is_containerized (florian.lambert@enovance.com)
+- Rename variable to openshift_master_default_subdomain with backwards
+  compatibility. (jstuever@redhat.com)
+- lib_dyn: more updates to the lib_dyn module. Made the TTL more flexible
+  (mwoodson@redhat.com)
+- remote heal action for OVS down (jdiaz@redhat.com)
+- Pass registry claim to openshift_registry. (abutcher@redhat.com)
+- Refactor - increase retries instead of delay in "Wait for Node Registration"
+  (david.mat@archimiddle.com)
+- Better diagnostic messages when an OpenStack heat stack creation fails
+  (lhuard@amadeus.com)
+- made some changes to lib_dyn update (mwoodson@redhat.com)
+- Increase timeout on Wait for Node Registration (david.mat@archimiddle.com)
+- Fix typo in oscp (agrimm@redhat.com)
+- Add correct parsing of ec2_security_groups env variable
+  (david.mat@archimiddle.com)
+- changed oso_host_monitoring to use the oo_ vars (twiest@redhat.com)
+- Add quotes around src argument to support paths with spaces
+  (david.mat@archimiddle.com)
+- Add missing is_atomic condition on upgrade package
+  (florian.lambert@enovance.com)
+- configure debug_level for master and node from cli (jawed.khelil@amadeus.com)
+- remove version requirement from etcd, shouldn't be needed anymore
+  (maxamillion@fedoraproject.org)
+- Add ansible.cfg to .gitignore (jdetiber@redhat.com)
+- added node-secgroup to master_nodes (j.david.nieto@gmail.com)
+- Document setting the VPC subnet (puiterwijk@redhat.com)
+- Update the AMIs used in README_AWS (puiterwijk@redhat.com)
+- Add byo examples for network cidr and api/console ports.
+  (abutcher@redhat.com)
+- Add openshift_docker roles to master/node scaleup. (abutcher@redhat.com)
+- Fail when master.master_count descreases or master.ha changes.
+  (abutcher@redhat.com)
+- Protected facts. (abutcher@redhat.com)
+- Add modify_yaml module. (abutcher@redhat.com)
+- Re-arrange scaleup playbooks. (abutcher@redhat.com)
+- Move additional master configuration into a separate master playbook.
+  (abutcher@redhat.com)
+- Generate each master's certificates separately. (abutcher@redhat.com)
+- Add new_masters to scaleup playbook. (abutcher@redhat.com)
+
 * Wed Feb 24 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.47-1
 - a-o-i: Double safety check on master_lb (smunilla@redhat.com)
 - a-o-i: Better method for identifying master_lb (smunilla@redhat.com)
