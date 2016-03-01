@@ -31,17 +31,16 @@ class AwsUtil(object):
         host_type_aliases -- a list of aliases to common host-types (e.g. ex-node)
         """
 
+        self.alias_lookup = {}
         host_type_aliases = host_type_aliases or {}
 
         self.host_type_aliases = host_type_aliases
         self.file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)))
 
         self.setup_host_type_alias_lookup()
-        self.alias_lookup = None
 
     def setup_host_type_alias_lookup(self):
         """Sets up the alias to host-type lookup table."""
-        self.alias_lookup = {}
         for key, values in self.host_type_aliases.iteritems():
             for value in values:
                 self.alias_lookup[value] = key
