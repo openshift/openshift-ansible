@@ -783,8 +783,10 @@ def uninstall(ctx):
 
 
 @click.command()
+@click.option('--latest-minor', '-l', is_flag=True, default=False)
+@click.option('--next-major', '-n', is_flag=True, default=False)
 @click.pass_context
-def upgrade(ctx):
+def upgrade(ctx, latest_minor, next_major):
     oo_cfg = ctx.obj['oo_cfg']
     verbose = ctx.obj['verbose']
 
@@ -800,11 +802,19 @@ def upgrade(ctx):
         This tool will help you upgrade your existing OpenShift installation.
 """
     click.echo(message)
-    click.echo("Version {} found. Do you want to update to the latest version of {} " \
-               "or migrate to the next major release?".format(old_version, old_version))
-    resp = click.prompt("(1) Update to latest {} (2) Migrate to next relese".format(old_version))
 
-    if resp == "2":
+    if not (latest_minor or next_major):
+        click.echo("Version {} found. Do you want to update to the latest version of {} " \
+                   "or migrate to the next major release?".format(old_version, old_version))
+        response = click.prompt("(1) Update to latest {} " \
+                                "(2) Migrate to next release".format(old_version),
+                                type=click.Choice(['1', '2']),)
+        if response == "1":
+            latest_minor = True
+        if response == "2":
+            next_major = True
+
+    if next_major:
         new_version = upgrade_mappings.get(old_version)
         # Update config to reflect the version we're targetting, we'll write
         # to disk once ansible completes successfully, not before.
@@ -812,7 +822,8 @@ def upgrade(ctx):
             oo_cfg.settings['variant'] = 'openshift-enterprise'
         version = find_variant(oo_cfg.settings['variant'])[1]
         oo_cfg.settings['variant_version'] = version.name
-    else:
+
+    if latest_minor:
         new_version = old_version
 
     click.echo("Openshift will be upgraded from %s %s to %s %s on the following hosts:\n" % (
