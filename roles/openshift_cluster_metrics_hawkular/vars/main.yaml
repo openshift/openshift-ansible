@@ -12,3 +12,4 @@ deployer_service_account:
 
 hawkular_tmp_conf: /tmp/hawkular_admin.kubeconfig
 
+hawkular_hostname: {{ openshift.common.set_hawkular_hostname }}

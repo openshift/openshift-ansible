@@ -40,15 +40,27 @@
   failed_when: "'already exists' not in hawkular_perm_task.stderr and hawkular_perm_task.rc != 0"
   changed_when: hawkular_perm_task.rc == 0
 
-- name: Create Heapster Services
+- name: Create Enterprise Heapster Services
   shell: >
     {{ openshift.common.client_binary }} process -f
-    {{ openshift.common.config_base }}/cluster-metrics/metrics.yaml -v 
-    HAWKULAR_METRICS_HOSTNAME=hawkular-metrics.example.com,USE_PERSISTENT_STORAGE=false |
+    {{ openshift.common.config_base }}/cluster-metrics/enterprise-metrics.yaml -v 
+    HAWKULAR_METRICS_HOSTNAME={{ hawkular_hostname }} |
     {{ openshift.common.client_binary }} create -n openshift-infra -f - 
   register: oex_heapster_services
   failed_when: "'already exists' not in oex_heapster_services.stderr and oex_heapster_services.rc != 0"
   changed_when: false
+  when: deployment_type in ['atomic-enterprise', 'enterprise', 'openshift-enterprise']
+
+- name: Create Origin Heapster Services
+  shell: >
+    {{ openshift.common.client_binary }} process -f
+    {{ openshift.common.config_base }}/cluster-metrics/origin-metrics.yaml -v 
+    HAWKULAR_METRICS_HOSTNAME={{ hawkular_hostname }} |
+    {{ openshift.common.client_binary }} create -n openshift-infra -f - 
+  register: oex_heapster_services
+  failed_when: "'already exists' not in oex_heapster_services.stderr and oex_heapster_services.rc != 0"
+  changed_when: false
+  when: deployment_type in ['atomic-enterprise', 'enterprise', 'openshift-enterprise']
 
 - name: Clean temporary configuration file
   command: >
