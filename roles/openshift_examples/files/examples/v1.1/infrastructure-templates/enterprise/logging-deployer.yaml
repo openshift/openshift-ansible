@@ -86,7 +86,7 @@ parameters:
 -
   description: 'Specify version for logging components; e.g. for "openshift/origin-logging-deployer:v1.1", set version "v1.1"'
   name: IMAGE_VERSION
-  value: "3.1.0"
+  value: "3.1.1"
 -
   description: "If true, set up to use a second ES cluster for ops logs."
   name: ENABLE_OPS_CLUSTER
