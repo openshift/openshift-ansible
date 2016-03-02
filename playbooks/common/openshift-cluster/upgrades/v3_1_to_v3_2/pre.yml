@@ -71,6 +71,10 @@
       g_new_version: "{{ g_aos_versions.curr_version.split('-', 1).0 if g_aos_versions.avail_version is none else g_aos_versions.avail_version.split('-', 1).0 }}"
     when: openshift_pkg_version is not defined
 
+  - fail:
+      msg: Verifying the correct version was found
+    when: verify_upgrade_version is defined and g_new_version != verify_upgrade_version
+
   - set_fact:
       g_new_version: "{{ openshift_pkg_version | replace('-','') }}"
     when: openshift_pkg_version is defined
@@ -79,8 +83,14 @@
     script: ../files/ensure_system_units_have_version.sh {{ openshift.common.service_type }} {{ openshift.common.deployment_type }} {{ g_aos_versions.curr_version }}
     when: openshift.common.is_containerized | bool
 
-  # TODO: Remove this, used for testing
-  #- pause:
+  # Note: the version number is hardcoded here in hopes of catching potential
+  # bugs in how g_aos_versions.curr_version is set
+  - name: Verifying the correct version is installed for upgrade
+    shell: grep 3.1.1.6 {{ item }}
+    with_items:
+      - /etc/sysconfig/openvswitch
+      - /etc/sysconfig/{{ openshift.common.service_type }}*
+    when: verify_upgrade_version is defined
 
   - fail:
       msg: This playbook requires Origin 1.1 or later
@@ -100,8 +110,18 @@
     register: g_docker_version_result
     when: not openshift.common.is_atomic | bool
 
+  - name: Determine available Docker
+    shell: "rpm -q --queryformat '---\ncurr_version: %{VERSION}\navail_version: \n' docker"
+    register: g_atomic_docker_version_result
+    when: openshift.common.is_atomic | bool
+
   - set_fact:
       g_docker_version: "{{ g_docker_version_result.stdout | from_yaml }}"
+    when: not openshift.common.is_atomic | bool
+
+  - set_fact:
+      g_docker_version: "{{ g_atomic_docker_version_result.stdout | from_yaml }}"
+    when: openshift.common.is_atomic | bool
 
   - fail:
       msg: This playbook requires access to Docker 1.9 or later

@@ -9,7 +9,7 @@
 ###############################################################################
 # Upgrade Masters
 ###############################################################################
-- name: Upgrade master container
+- name: Upgrade master
   hosts: oo_masters_to_config
   tasks:
   - include: rpm_upgrade.yml component=master
@@ -101,6 +101,10 @@
     ent_reconcile_bindings: true
     openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
   tasks:
+  - name: Verifying the correct commandline tools are available
+    shell: grep {{ verify_upgrade_version }} {{ openshift.common.admin_binary}}
+    when: openshift.common.is_containerized | bool and verify_upgrade_version is defined
+
   - name: Reconcile Cluster Roles
     command: >
       {{ openshift.common.admin_binary}} --config={{ openshift.common.config_base }}/master/admin.kubeconfig
