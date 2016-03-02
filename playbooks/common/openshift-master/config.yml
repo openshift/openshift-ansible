@@ -30,7 +30,6 @@
                                        | default(none, true) }}"
   - set_fact:
       use_cluster_metrics_hawkular: "{{ lookup('oo_option', 'use_cluster_metrics_hawkular') | default(false, true) }}"
-      set_hawkular_hostname: "{{ lookup('oo_option', 'hawkular_hostname' | default ('hawkular-metrics.example.com',true) }}"
     when: use_cluster_metrics_hawkular is not defined
     
   roles:
