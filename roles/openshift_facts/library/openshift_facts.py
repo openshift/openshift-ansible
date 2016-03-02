@@ -731,6 +731,15 @@ def set_version_facts_if_unset(facts):
         facts['common']['version_gte_3_1_1_or_1_1_1'] = version_gte_3_1_1_or_1_1_1
         facts['common']['version_gte_3_2_or_1_2'] = version_gte_3_2_or_1_2
 
+        if version_gte_3_2_or_1_2:
+            examples_content_version = 'v1.2'
+        elif version_gte_3_1_or_1_1:
+            examples_content_version = 'v1.1'
+        else:
+            examples_content_version = 'v1.0'
+
+        facts['common']['examples_content_version'] = examples_content_version
+
     return facts
 
 def set_manageiq_facts_if_unset(facts):
