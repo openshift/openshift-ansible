@@ -132,7 +132,11 @@
       register: exited_containers_to_delete
       with_items:
         - aep3.*/aep
+        - aep3.*/node
+        - aep3.*/openvswitch
         - openshift3/ose
+        - openshift3/node
+        - openshift3/openvswitch
         - openshift/origin
 
     - shell: "docker rm {{ item.stdout_lines | join(' ') }}"
