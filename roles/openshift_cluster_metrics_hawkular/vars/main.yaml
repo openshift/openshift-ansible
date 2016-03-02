@@ -12,6 +12,6 @@ deployer_service_account:
 
 hawkular_tmp_conf: /tmp/hawkular_admin.kubeconfig
 
-hawkular_hostname: {{ openshift.master.metrics_public_url | default("hawkular-metrics.example.com") }} 
+hawkular_hostname: {{ openshift.master.metrics_public_url | default('hawkular-metrics.example.com') }} 
 
 hawkular_type: "{{ 'origin' if deployment_type == 'origin' else 'enterprise' }}"
