@@ -5,3 +5,6 @@
 
 - name: restart docker
   service: name=docker state=restarted
+
+- name: restart openvswitch
+  service: name=openvswitch state=restarted

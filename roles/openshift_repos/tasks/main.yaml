@@ -9,6 +9,7 @@
 
 - assert:
     that: openshift_deployment_type in known_openshift_deployment_types
+  when: not openshift.common.is_containerized | bool
 
 - name: Ensure libselinux-python is installed
   action: "{{ ansible_pkg_mgr }} name=libselinux-python state=present"
@@ -34,9 +35,9 @@
     state: absent
   with_fileglob:
   - '*/repos/*'
-  when: not (item | search("/files/" ~ openshift_deployment_type ~ "/repos")) and
-        (ansible_os_family == "RedHat" and ansible_distribution != "Fedora")
-        and not openshift.common.is_containerized | bool
+  when: not openshift.common.is_containerized | bool 
+        and not (item | search("/files/" ~ openshift_deployment_type ~ "/repos"))
+        and (ansible_os_family == "RedHat" and ansible_distribution != "Fedora")
   notify: refresh cache
 
 - name: Remove any yum repo files for other deployment types Fedora
@@ -45,9 +46,9 @@
     state: absent
   with_fileglob:
   - '*/repos/*'
-  when: not (item | search("/files/fedora-" ~ openshift_deployment_type ~ "/repos")) and
-        (ansible_distribution == "Fedora")
-        and not openshift.common.is_containerized | bool
+  when: not openshift.common.is_containerized | bool
+        and not (item | search("/files/fedora-" ~ openshift_deployment_type ~ "/repos"))
+        and (ansible_distribution == "Fedora")
   notify: refresh cache
 
 - name: Configure gpg keys if needed
