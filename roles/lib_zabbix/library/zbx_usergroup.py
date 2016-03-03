@@ -32,7 +32,7 @@ zabbix ansible module for usergroups
 # pylint: disable=too-many-branches
 
 # pylint: disable=import-error
-from openshift_tools.monitoring.zbxapi import ZabbixAPI, ZabbixConnection
+from openshift_tools.zbxapi import ZabbixAPI, ZabbixConnection
 
 def exists(content, key='result'):
     ''' Check if key exists in content or the size of content[key] > 0
