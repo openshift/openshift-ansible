@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.49
+Version:        3.0.50
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -261,6 +261,32 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Mar 03 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.50-1
+- change lib_zabbix's import to new pathing (jdiaz@redhat.com)
+- upgrade README fixes (bleanhar@redhat.com)
+- A few images weren't being uninstalled (bleanhar@redhat.com)
+- Adding support for v1.2 examples (bleanhar@redhat.com)
+- Adding templates for v1.2 (bleanhar@redhat.com)
+- Adding verify_upgrade_version variable for upgrade debugging
+  (bleanhar@redhat.com)
+- Correctly set the image tag for containerized installs (and upgrades)
+  (bleanhar@redhat.com)
+- Adding newly required variable (bleanhar@redhat.com)
+- Updating the containerized cli wrapper to work for both docker 1.8 and 1.9
+  (bleanhar@redhat.com)
+- uninstall the QE images (bleanhar@redhat.com)
+- First past at the upgrade process (bleanhar@redhat.com)
+- Check for is_containerized value when setting binary locations.
+  (abutcher@redhat.com)
+- Bug 1313169 - Ansible installer tries to enable etcd_container service even
+  though containerized=false (bleanhar@redhat.com)
+- Fix logging infra template version mismatch. (dgoodwin@redhat.com)
+- Changes required for Nuage monitor REST server
+  (vishal.patil@nuagenetworks.net)
+- disable http-server-close option (jdetiber@redhat.com)
+- change [HEAL] to [Heal] to match with v2 (jdiaz@redhat.com)
+- Increase maxconn settings for haproxy lb (jdetiber@redhat.com)
+
 * Tue Mar 01 2016 Matt Woodson <mwoodson@redhat.com> 3.0.49-1
 - fixed error in awsutil.py (mwoodson@redhat.com)
 
