@@ -74,6 +74,9 @@ cp -rp playbooks %{buildroot}%{_datadir}/ansible/%{name}/
 # openshift-ansible-roles install
 cp -rp roles %{buildroot}%{_datadir}/ansible/%{name}/
 
+# openshift-ansible-zabbix install (standalone lib_zabbix library)
+cp -rp roles/lib_zabbix/library %{buildroot}%{_datarootdir}/ansible/
+
 # openshift-ansible-filter-plugins install
 cp -rp filter_plugins %{buildroot}%{_datadir}/ansible_plugins/
 
@@ -115,6 +118,20 @@ Scripts to make it nicer when working with hosts that are defined only by metada
 /etc/bash_completion.d/*
 %config(noreplace) /etc/openshift_ansible/
 
+
+# ----------------------------------------------------------------------------------
+# openshift-ansible-zabbix subpackage
+# ----------------------------------------------------------------------------------
+%package zabbix
+Summary:       Openshift and Atomic Enterprise Ansible Zabbix library
+Requires:      python-openshift-tools-zbxapi
+BuildArch:     noarch
+
+%description zabbix
+Python library for interacting with Zabbix with Ansible.
+
+%files zabbix
+%{_datarootdir}/ansible/*
 
 # ----------------------------------------------------------------------------------
 # openshift-ansible-docs subpackage
