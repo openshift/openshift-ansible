@@ -1090,7 +1090,7 @@ def set_container_facts_if_unset(facts):
         if 'ovs_image' not in facts['node']:
             facts['node']['ovs_image'] = ovs_image
 
-    if facts['common']['is_containerized']:
+    if bool(strtobool(str(facts['common']['is_containerized']))):
         facts['common']['admin_binary'] = '/usr/local/bin/oadm'
         facts['common']['client_binary'] = '/usr/local/bin/oc'
 
