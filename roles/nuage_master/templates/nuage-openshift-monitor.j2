@@ -16,4 +16,8 @@ enterpriseName: {{ enterprise }}
 # Name of the domain in which pods will reside
 domainName: {{ domain }}
 # Location where logs should be saved
-log_dir: {{ nuage_openshift_monitor_log_dir }} 
+log_dir: {{ nuage_mon_rest_server_logdir }}
+# Monitor rest server paramters
+nuageMonServer:
+    URL: {{ nuage_mon_rest_server_url }}
+    certificateDirectory: {{ cert_output_dir }} 
