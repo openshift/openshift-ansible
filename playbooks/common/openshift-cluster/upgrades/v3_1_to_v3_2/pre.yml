@@ -56,16 +56,21 @@
 
   - name: Determine available versions
     script: ../files/rpm_versions.sh {{ g_new_service_name }}
-    register: g_versions_result
+    register: g_rpm_versions_result
+    when: not openshift.common.is_containerized | bool
+
+  - set_fact:
+      g_aos_versions: "{{ g_rpm_versions_result.stdout | from_yaml }}"
     when: not openshift.common.is_containerized | bool
 
   - name: Determine available versions
     script: ../files/openshift_container_versions.sh {{ openshift.common.service_type }}
-    register: g_versions_result
+    register: g_containerized_versions_result
     when: openshift.common.is_containerized | bool
 
   - set_fact:
-      g_aos_versions: "{{ g_versions_result.stdout | from_yaml }}"
+      g_aos_versions: "{{ g_containerized_versions_result.stdout | from_yaml }}"
+    when: openshift.common.is_containerized | bool
 
   - set_fact:
       g_new_version: "{{ g_aos_versions.curr_version.split('-', 1).0 if g_aos_versions.avail_version is none else g_aos_versions.avail_version.split('-', 1).0 }}"
