@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.50
+Version:        3.0.51
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -261,6 +261,15 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Mar 04 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.51-1
+- Bug 1314645 - Upgrade failed with "One or more undefined variables 'dict
+  object' has no attribute 'stdout'" (bleanhar@redhat.com)
+- EBS storage does not support Recycle (sedgar@redhat.com)
+- Remove cockpit and kubernetes-client packages in uninstall playbook.
+  (abutcher@redhat.com)
+- Update README_origin.md (trond.hapnes@gmail.com)
+- Add cockpit-docker package by default (nakayamakenjiro@gmail.com)
+
 * Thu Mar 03 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.50-1
 - change lib_zabbix's import to new pathing (jdiaz@redhat.com)
 - upgrade README fixes (bleanhar@redhat.com)
