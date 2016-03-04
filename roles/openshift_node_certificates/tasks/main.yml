@@ -3,6 +3,7 @@
   file:
     path: "{{ openshift_generated_configs_dir }}"
     state: directory
+    mode: 0700
   when: nodes_needing_certs | length > 0
 
 - name: Generate the node client config
