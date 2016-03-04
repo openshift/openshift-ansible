@@ -73,9 +73,14 @@
         - atomic-openshift-master
         - atomic-openshift-node
         - atomic-openshift-sdn-ovs
+        - cockpit-bridge
+        - cockpit-docker
+        - cockpit-shell
+        - cockpit-ws
         - corosync
         - etcd
         - haproxy
+        - kubernetes-client
         - openshift
         - openshift-master
         - openshift-node
