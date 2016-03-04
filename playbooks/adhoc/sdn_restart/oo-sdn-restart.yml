@@ -49,5 +49,4 @@
       name: "{{ item }}"
       state: restarted
     with_items:
-    - oso-f22-host-monitoring
-    - oso-rhel7-zagg-client
+    - oso-rhel7-host-monitoring
