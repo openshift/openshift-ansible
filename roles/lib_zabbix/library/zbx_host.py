@@ -25,7 +25,7 @@ Zabbix host ansible module
 # pylint: disable=duplicate-code
 
 # pylint: disable=import-error
-from openshift_tools.monitoring.zbxapi import ZabbixAPI, ZabbixConnection
+from openshift_tools.zbxapi import ZabbixAPI, ZabbixConnection
 
 def exists(content, key='result'):
     ''' Check if key exists in content or the size of content[key] > 0
@@ -62,6 +62,19 @@ def get_template_ids(zapi, template_names):
         if content.has_key('result'):
             template_ids.append({'templateid': content['result'][0]['templateid']})
     return template_ids
+
+def interfaces_equal(zbx_interfaces, user_interfaces):
+    '''
+    compare interfaces from zabbix and interfaces from user
+    '''
+
+    for u_int in user_interfaces:
+        for z_int in zbx_interfaces:
+            for u_key, u_val in u_int.items():
+                if str(z_int[u_key]) != str(u_val):
+                    return False
+
+    return True
 
 def main():
     '''
@@ -120,8 +133,9 @@ def main():
                                                'dns':  '',         # dns for host
                                                'port':  '10050',   # port for interface? 10050
                                               }]
+        hostgroup_names = list(set(module.params['hostgroup_names']))
         params = {'host': hname,
-                  'groups':  get_group_ids(zapi, module.params['hostgroup_names']),
+                  'groups':  get_group_ids(zapi, hostgroup_names),
                   'templates':  get_template_ids(zapi, module.params['template_names']),
                   'interfaces': ifs,
                  }
@@ -138,6 +152,11 @@ def main():
 
             if key == 'templates' and zab_results.has_key('parentTemplates'):
                 if zab_results['parentTemplates'] != value:
+                    differences[key] = value
+
+
+            elif key == "interfaces":
+                if not interfaces_equal(zab_results[key], value):
                     differences[key] = value
 
             elif zab_results[key] != value and zab_results[key] != str(value):

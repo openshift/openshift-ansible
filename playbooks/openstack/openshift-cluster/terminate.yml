@@ -1,17 +1,17 @@
 - name: Terminate instance(s)
   hosts: localhost
+  become: no
   connection: local
   gather_facts: no
   vars_files:
   - vars.yml
   tasks:
-  - set_fact: cluster_group=tag_env_{{ cluster_id }}
   - add_host:
       name: "{{ item }}"
       groups: oo_hosts_to_terminate
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-    with_items: groups[cluster_group] | default([])
+    with_items: (groups['tag_environment_' ~ cluster_env]|default([])) | intersect(groups['tag_clusterid_' ~ cluster_id ]|default([]))
 
 - name: Unsubscribe VMs
   hosts: oo_hosts_to_terminate
@@ -19,12 +19,13 @@
   - vars.yml
   roles:
   - role: rhel_unsubscribe
-    when: deployment_type == "enterprise" and
+    when: deployment_type in ['atomic-enterprise', 'enterprise', 'openshift-enterprise'] and
           ansible_distribution == "RedHat" and
           lookup('oo_option', 'rhel_skip_subscription') | default(rhsub_skip, True) |
             default('no', True) | lower in ['no', 'false']
 
 - hosts: localhost
+  become: no
   connection: local
   gather_facts: no
   vars_files:
@@ -42,6 +43,6 @@
     register: stack_show_result
     until: stack_show_result.stdout != 'DELETE_IN_PROGRESS'
     retries: 60
-    delay: 1
+    delay: 5
     failed_when: '"Stack not found" not in stack_show_result.stderr and
                    stack_show_result.stdout != "DELETE_COMPLETE"'

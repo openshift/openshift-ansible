@@ -1,7 +1,9 @@
 allowDisabledDocker: false
 apiVersion: v1
-dnsDomain: {{ osn_cluster_dns_domain }}
-dnsIP: {{ osn_cluster_dns_ip }}
+dnsDomain: {{ openshift.common.dns_domain }}
+{% if 'dns_ip' in openshift.common %}
+dnsIP: {{ openshift.common.dns_ip }}
+{% endif %}
 dockerConfig:
   execHandlerName: ""
 iptablesSyncPeriod: "{{ openshift.node.iptables_sync_period }}"
@@ -9,9 +11,7 @@ imageConfig:
   format: {{ openshift.node.registry_url }}
   latest: false
 kind: NodeConfig
-{% if openshift.node.kubelet_args is defined and openshift.node.kubelet_args %}
-kubeletArguments: {{ openshift.node.kubelet_args | to_json }}
-{% endif %}
+kubeletArguments: {{ openshift.node.kubelet_args | default(None) | to_padded_yaml(level=1) }}
 masterKubeConfig: system:node:{{ openshift.common.hostname }}.kubeconfig
 {% if openshift.common.use_openshift_sdn %}
 networkPluginName: {{ openshift.common.sdn_network_plugin_name }}
@@ -20,7 +20,7 @@ networkPluginName: {{ openshift.common.sdn_network_plugin_name }}
 # deprecates networkPluginName above. The two should match.
 networkConfig:
    mtu: {{ openshift.node.sdn_mtu }}
-{% if openshift.common.use_openshift_sdn %}
+{% if openshift.common.use_openshift_sdn or openshift.common.use_nuage %}
    networkPluginName: {{ openshift.common.sdn_network_plugin_name }}
 {% endif %}
 {% if openshift.node.set_node_ip | bool %}
@@ -35,3 +35,6 @@ servingInfo:
   keyFile: server.key
 volumeDirectory: {{ openshift.common.data_dir }}/openshift.local.volumes
 {% include 'partials/kubeletArguments.j2' %}
+proxyArguments:
+  proxy-mode:
+     - {{ openshift.node.proxy_mode }}

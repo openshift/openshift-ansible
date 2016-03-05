@@ -1,3 +1,4 @@
+:warning: **WARNING** :warning: This feature is community supported and has not been tested by Red Hat. Visit [docs.openshift.com](https://docs.openshift.com) for [OpenShift Enterprise](https://docs.openshift.com/enterprise/latest/install_config/install/index.html) or [OpenShift Origin](https://docs.openshift.org/latest/install_config/install/index.html) supported installation docs.
 
 AWS Setup Instructions
 ======================
@@ -43,6 +44,16 @@ You may also want to allow access from the outside world on the following ports:
 ```
 
 
+Determine your subnet and setup the VPC
+---------------------------------------
+
+In the AWS VPC console, look up your subnet ID for the region you want to use and set it as such:
+
+- export ec2_vpc_subnet='my_vpc_subnet'
+
+Go to Your VPCs, select the VPC, and under Actions -> DNS Hostnames, set to Yes and Save.
+
+
 (Optional) Setup your $HOME/.ssh/config file
 -------------------------------------------
 In case of a cluster creation, or any other case where you don't know the machine hostname in advance, you can use `.ssh/config`
@@ -51,7 +62,7 @@ to setup a private key file to allow ansible to connect to the created hosts.
 To do so, add the the following entry to your $HOME/.ssh/config file and make it point to the private key file which allows you to login on AWS.
 ```
 Host *.compute-1.amazonaws.com
-  PrivateKey $HOME/.ssh/my_private_key.pem
+  IdentityFile $HOME/.ssh/my_private_key.pem
 ```
 
 Alternatively, you can configure your ssh-agent to hold the credentials to connect to your AWS instances.
@@ -62,17 +73,17 @@ Alternatively, you can configure your ssh-agent to hold the credentials to conne
 By default, a cluster is launched with the following configuration:
 
 - Instance type: m4.large
-- AMI: ami-307b3658 (for online deployments, ami-acd999c4 for origin deployments and ami-10663b78 for enterprise deployments)
+- AMI: ami-7a9e9812 (for online deployments, ami-61bbf104 for origin deployments and ami-10663b78 for enterprise deployments)
 - Region: us-east-1
 - Keypair name: libra
 - Security group: public
 
-Master specific defaults:
+#### Master specific defaults:
 - Master root volume size: 10 (in GiBs)
 - Master root volume type: gp2
 - Master root volume iops: 500 (only applicable when volume type is io1)
 
-Node specific defaults:
+#### Node specific defaults:
 - Node root volume size: 10 (in GiBs)
 - Node root volume type: gp2
 - Node root volume iops: 500 (only applicable when volume type is io1)
@@ -81,16 +92,26 @@ Node specific defaults:
 - Docker volume type: gp2 (only applicable if ephemeral is false)
 - Docker volume iops: 500 (only applicable when volume type is io1)
 
-Specifying ec2 instance type.
-All instances:
+### Specifying ec2 instance type.
+
+#### All instances:
+
 - export ec2_instance_type='m4.large'
-Master instances:
+
+#### Master instances:
+
 - export ec2_master_instance_type='m4.large'
-Infra node instances:
+
+#### Infra node instances:
+
 - export ec2_infra_instance_type='m4.large'
-Non-infra node instances:
+
+#### Non-infra node instances:
+
 - export ec2_node_instance_type='m4.large'
-etcd instances:
+
+#### etcd instances:
+
 - export ec2_etcd_instance_type='m4.large'
 
 If needed, these values can be changed by setting environment variables on your system.
@@ -99,7 +120,6 @@ If needed, these values can be changed by setting environment variables on your 
 - export ec2_region='us-east-1'
 - export ec2_keypair='libra'
 - export ec2_security_groups="['public']"
-- export ec2_vpc_subnet='my_vpc_subnet'
 - export ec2_assign_public_ip='true'
 - export os_etcd_root_vol_size='20'
 - export os_etcd_root_vol_type='standard'
@@ -114,6 +134,7 @@ If needed, these values can be changed by setting environment variables on your 
 Install Dependencies
 --------------------
 1. Ansible requires python-boto for aws operations:
+
 RHEL/CentOS/Fedora
 ```
   yum install -y ansible python-boto pyOpenSSL

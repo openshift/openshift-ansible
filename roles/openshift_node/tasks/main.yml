@@ -1,12 +1,6 @@
 ---
 # TODO: allow for overriding default ports where possible
 - fail:
-    msg: This role requres that osn_cluster_dns_domain is set
-  when: osn_cluster_dns_domain is not defined or not osn_cluster_dns_domain
-- fail:
-    msg: This role requres that osn_cluster_dns_ip is set
-  when: osn_cluster_dns_ip is not defined or not osn_cluster_dns_ip
-- fail:
     msg: "SELinux is disabled, This deployment type requires that SELinux is enabled."
   when: (not ansible_selinux or ansible_selinux.status != 'enabled') and deployment_type in ['enterprise', 'online', 'atomic-enterprise', 'openshift-enterprise']
 
@@ -20,12 +14,14 @@
       hostname: "{{ openshift_hostname | default(none) }}"
       public_hostname: "{{ openshift_public_hostname | default(none) }}"
       deployment_type: "{{ openshift_deployment_type }}"
+      # TODO: Replace this with a lookup or filter plugin.
+      dns_ip: "{{ openshift_dns_ip
+                  | default(openshift_master_cluster_vip
+                  | default(None if openshift.common.version_gte_3_1_or_1_1 | bool else openshift_node_first_master_ip | default(None, true), true), true) }}"
   - role: node
     local_facts:
       annotations: "{{ openshift_node_annotations | default(none) }}"
       debug_level: "{{ openshift_node_debug_level | default(openshift.common.debug_level) }}"
-      docker_log_driver:  "{{ lookup( 'oo_option' , 'docker_log_driver'  )  | default('',True) }}"
-      docker_log_options: "{{ lookup( 'oo_option' , 'docker_log_options' )  | default('',True) }}"
       iptables_sync_period: "{{ openshift_node_iptables_sync_period | default(None) }}"
       kubelet_args: "{{ openshift_node_kubelet_args | default(None) }}"
       labels: "{{ lookup('oo_option', 'openshift_node_labels') | default( openshift_node_labels | default(none), true) }}"
@@ -35,17 +31,60 @@
       sdn_mtu: "{{ openshift_node_sdn_mtu | default(None) }}"
       storage_plugin_deps: "{{ osn_storage_plugin_deps | default(None) }}"
       set_node_ip: "{{ openshift_set_node_ip | default(None) }}"
+      node_image: "{{ osn_image | default(None) }}"
+      ovs_image: "{{ osn_ovs_image | default(None) }}"
+      proxy_mode: "{{ openshift_node_proxy_mode | default('iptables') }}"
 
 # We have to add tuned-profiles in the same transaction otherwise we run into depsolving
-# problems because the rpms don't pin the version properly.
+# problems because the rpms don't pin the version properly. This was fixed in 3.1 packaging.
 - name: Install Node package
-  yum: pkg={{ openshift.common.service_type }}-node{{ openshift_version  }},tuned-profiles-{{ openshift.common.service_type }}-node{{ openshift_version  }} state=present
-  register: node_install_result
+  action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-node{{ openshift_version  }},tuned-profiles-{{ openshift.common.service_type }}-node{{ openshift_version  }} state=present"
+  when: not openshift.common.is_containerized | bool
 
 - name: Install sdn-ovs package
-  yum: pkg={{ openshift.common.service_type }}-sdn-ovs{{ openshift_version }} state=present
-  register: sdn_install_result
-  when: openshift.common.use_openshift_sdn
+  action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-sdn-ovs{{ openshift_version }} state=present"
+  when: openshift.common.use_openshift_sdn and not openshift.common.is_containerized | bool
+
+- name: Pull node image
+  command: >
+    docker pull {{ openshift.node.node_image }}
+  when: openshift.common.is_containerized | bool
+
+- name: Pull OpenVSwitch image
+  command: >
+    docker pull {{ openshift.node.ovs_image }}
+  when: openshift.common.is_containerized | bool and openshift.common.use_openshift_sdn | bool
+
+- name: Install Node docker service file
+  template:
+    dest: "/etc/systemd/system/{{ openshift.common.service_type }}-node.service"
+    src: openshift.docker.node.service
+  register: install_node_result
+  when: openshift.common.is_containerized | bool
+
+- name: Create the openvswitch service env file
+  template:
+    src: openvswitch.sysconfig.j2
+    dest: /etc/sysconfig/openvswitch
+  when: openshift.common.is_containerized | bool
+  register: install_ovs_sysconfig
+
+- name: Install OpenvSwitch docker service file
+  template:
+    dest: "/etc/systemd/system/openvswitch.service"
+    src: openvswitch.docker.service
+  when: openshift.common.is_containerized | bool and openshift.common.use_openshift_sdn | bool
+  notify:
+  - restart openvswitch
+
+- name: Reload systemd units
+  command: systemctl daemon-reload
+  when: openshift.common.is_containerized and ( ( install_node_result  | changed )
+    or ( install_ovs_sysconfig | changed ) )
+
+- name: Start and enable openvswitch docker service
+  service: name=openvswitch.service enabled=yes state=started
+  when: openshift.common.is_containerized | bool and openshift.common.use_openshift_sdn | bool
 
 # TODO: add the validate parameter when there is a validation command to run
 - name: Create the Node config
@@ -53,6 +92,9 @@
     dest: "{{ openshift_node_config_file }}"
     src: node.yaml.v1.j2
     backup: true
+    owner: root
+    group: root
+    mode: 0600
   notify:
   - restart node
 
@@ -61,78 +103,38 @@
     dest: /etc/sysconfig/{{ openshift.common.service_type }}-node
     regexp: "{{ item.regex }}"
     line: "{{ item.line }}"
+    create: true
   with_items:
     - regex: '^OPTIONS='
       line: "OPTIONS=--loglevel={{ openshift.node.debug_level }}"
     - regex: '^CONFIG_FILE='
       line: "CONFIG_FILE={{ openshift_node_config_file }}"
+    - regex: '^IMAGE_VERSION='
+      line: "IMAGE_VERSION=v{{ openshift.common.version.split('-')[0] }}"
   notify:
   - restart node
 
-- stat: path=/etc/sysconfig/docker
-  register: docker_check
-
-  # TODO: Enable secure registry when code available in origin
-- name: Secure Registry and Logs Options
-  lineinfile:
-    dest: /etc/sysconfig/docker
-    regexp: '^OPTIONS=.*$'
-    line: "OPTIONS='--insecure-registry={{ openshift.node.portal_net }} \
-{% if ansible_selinux and ansible_selinux.status == '''enabled''' %}--selinux-enabled{% endif %} \
-{% if openshift.node.docker_log_driver is defined  %} --log-driver {{ openshift.node.docker_log_driver }}  {% endif %} \
-{% if openshift.node.docker_log_options is defined %}   {{ openshift.node.docker_log_options |  oo_split() | oo_prepend_strings_in_list('--log-opt ') | join(' ')}}  {% endif %} '"
-  when: docker_check.stat.isreg
-  notify:
-    - restart docker
-
-- set_fact:
-    docker_additional_registries: "{{ lookup('oo_option', 'docker_additional_registries')
-                                      | oo_split() | union(['registry.access.redhat.com'])
-                                      | difference(['']) }}"
-  when: openshift.common.deployment_type == 'enterprise'
-- set_fact:
-    docker_additional_registries: "{{ lookup('oo_option', 'docker_additional_registries')
-                                      | oo_split() | difference(['']) }}"
-  when: openshift.common.deployment_type != 'enterprise'
-
-- name: Add personal registries
-  lineinfile:
-    dest: /etc/sysconfig/docker
-    regexp: '^ADD_REGISTRY=.*$'
-    line: "ADD_REGISTRY='{{ docker_additional_registries
-                            | oo_prepend_strings_in_list('--add-registry ') | join(' ') }}'"
-  when: docker_check.stat.isreg and docker_additional_registries
-  notify:
-    - restart docker
-
-- name: Block registries
-  lineinfile:
-    dest: /etc/sysconfig/docker
-    regexp: '^BLOCK_REGISTRY=.*$'
-    line: "BLOCK_REGISTRY='{{ lookup('oo_option', 'docker_blocked_registries') | oo_split()
-                              | oo_prepend_strings_in_list('--block-registry ') | join(' ') }}'"
-  when: docker_check.stat.isreg and
-        lookup('oo_option', 'docker_blocked_registries') != ''
-  notify:
-    - restart docker
-
-- name: Grant access to additional insecure registries
-  lineinfile:
-    dest: /etc/sysconfig/docker
-    regexp: '^INSECURE_REGISTRY=.*'
-    line: "INSECURE_REGISTRY='{{ lookup('oo_option', 'docker_insecure_registries') | oo_split()
-                              | oo_prepend_strings_in_list('--insecure-registry ') | join(' ') }}'"
-  when: docker_check.stat.isreg and
-        lookup('oo_option', 'docker_insecure_registries') != ''
-  notify:
-    - restart docker
-
 - name: Additional storage plugin configuration
   include: storage_plugins/main.yml
+
+# Necessary because when you're on a node that's also a master the master will be
+# restarted after the node restarts docker and it will take up to 60 seconds for
+# systemd to start the master again
+- name: Wait for master API to become available before proceeding
+  # Using curl here since the uri module requires python-httplib2 and
+  # wait_for port doesn't provide health information.
+  command: >
+    curl -k --head --silent {{ openshift_node_master_api_url }}
+  register: api_available_output
+  until: api_available_output.stdout.find("200 OK") != -1
+  retries: 120
+  delay: 1
+  changed_when: false
+  when: openshift.common.is_containerized | bool
 
 - name: Start and enable node
   service: name={{ openshift.common.service_type }}-node enabled=yes state=started
   register: start_result
 
 - set_fact:
-    node_service_status_changed = start_result | changed
+    node_service_status_changed: "{{ start_result | changed }}"

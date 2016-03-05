@@ -1,8 +1,7 @@
 ---
 - name: Install haproxy
-  yum:
-    pkg: haproxy
-    state: present
+  action: "{{ ansible_pkg_mgr }} name=haproxy state=present"
+  when: not openshift.common.is_containerized | bool
 
 - name: Configure haproxy
   template:
@@ -20,6 +19,5 @@
     enabled: yes
   register: start_result
 
-- name: Pause 30 seconds if haproxy was just started
-  pause: seconds=30
-  when: start_result | changed
+- set_fact:
+    haproxy_start_result_changed: "{{ start_result | changed }}"

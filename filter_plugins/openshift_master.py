@@ -53,7 +53,20 @@ class IdentityProviderBase(object):
         self.challenge = ansible_bool(self._idp.pop('challenge', False))
         self.provider = dict(apiVersion=api_version, kind=self._idp.pop('kind'))
 
-        self._required = [['mappingMethod', 'mapping_method']]
+        mm_keys = ('mappingMethod', 'mapping_method')
+        mapping_method = None
+        for key in mm_keys:
+            if key in self._idp:
+                mapping_method = self._idp[key]
+        if mapping_method is None:
+            mapping_method = self.get_default('mappingMethod')
+        self.mapping_method = mapping_method
+
+        valid_mapping_methods = ['add', 'claim', 'generate', 'lookup']
+        if self.mapping_method not in valid_mapping_methods:
+            raise errors.AnsibleFilterError("|failed unkown mapping method "
+                                            "for provider {0}".format(self.__class__.__name__))
+        self._required = []
         self._optional = []
         self._allow_additional = True
 
@@ -75,10 +88,7 @@ class IdentityProviderBase(object):
 
     def validate(self):
         ''' validate an instance of this idp class '''
-        valid_mapping_methods = ['add', 'claim', 'generate', 'lookup']
-        if self.provider['mappingMethod'] not in valid_mapping_methods:
-            raise errors.AnsibleFilterError("|failed unkown mapping method "
-                                            "for provider {0}".format(self.__class__.__name__))
+        pass
 
     @staticmethod
     def get_default(key):
@@ -121,7 +131,8 @@ class IdentityProviderBase(object):
     def to_dict(self):
         ''' translate this idp to a dictionary '''
         return dict(name=self.name, challenge=self.challenge,
-                    login=self.login, provider=self.provider)
+                    login=self.login, mappingMethod=self.mapping_method,
+                    provider=self.provider)
 
 
 class LDAPPasswordIdentityProvider(IdentityProviderBase):
@@ -290,8 +301,8 @@ class BasicAuthPasswordIdentityProvider(IdentityProviderBase):
     def __init__(self, api_version, idp):
         IdentityProviderBase.__init__(self, api_version, idp)
         self._allow_additional = False
-        self._required += [['ca'], ['certFile', 'cert_file'], ['keyFile', 'key_file']]
-        self._optional += [['key']]
+        self._required += [['url']]
+        self._optional += [['ca'], ['certFile', 'cert_file'], ['keyFile', 'key_file']]
 
 
 class IdentityProviderOauthBase(IdentityProviderBase):
@@ -436,7 +447,9 @@ class GitHubIdentityProvider(IdentityProviderOauthBase):
         Raises:
             AnsibleFilterError:
     """
-    pass
+    def __init__(self, api_version, idp):
+        IdentityProviderOauthBase.__init__(self, api_version, idp)
+        self._optional += [['organizations']]
 
 
 class FilterModule(object):
@@ -463,7 +476,61 @@ class FilterModule(object):
         IdentityProviderBase.validate_idp_list(idp_list)
         return yaml.safe_dump([idp.to_dict() for idp in idp_list], default_flow_style=False)
 
+    @staticmethod
+    def validate_pcs_cluster(data, masters=None):
+        ''' Validates output from "pcs status", ensuring that each master
+            provided is online.
+            Ex: data = ('...',
+                        'PCSD Status:',
+                        'master1.example.com: Online',
+                        'master2.example.com: Online',
+                        'master3.example.com: Online',
+                        '...')
+                masters = ['master1.example.com',
+                           'master2.example.com',
+                           'master3.example.com']
+               returns True
+        '''
+        if not issubclass(type(data), basestring):
+            raise errors.AnsibleFilterError("|failed expects data is a string or unicode")
+        if not issubclass(type(masters), list):
+            raise errors.AnsibleFilterError("|failed expects masters is a list")
+        valid = True
+        for master in masters:
+            if "{0}: Online".format(master) not in data:
+                valid = False
+        return valid
+
+    @staticmethod
+    def certificates_to_synchronize(hostvars):
+        ''' Return certificates to synchronize based on facts. '''
+        if not issubclass(type(hostvars), dict):
+            raise errors.AnsibleFilterError("|failed expects hostvars is a dict")
+        certs = ['admin.crt',
+                 'admin.key',
+                 'admin.kubeconfig',
+                 'master.kubelet-client.crt',
+                 'master.kubelet-client.key',
+                 'openshift-registry.crt',
+                 'openshift-registry.key',
+                 'openshift-registry.kubeconfig',
+                 'openshift-router.crt',
+                 'openshift-router.key',
+                 'openshift-router.kubeconfig',
+                 'serviceaccounts.private.key',
+                 'serviceaccounts.public.key']
+        if bool(hostvars['openshift']['common']['version_gte_3_1_or_1_1']):
+            certs += ['master.proxy-client.crt',
+                      'master.proxy-client.key']
+        if not bool(hostvars['openshift']['common']['version_gte_3_2_or_1_2']):
+            certs += ['openshift-master.crt',
+                      'openshift-master.key',
+                      'openshift-master.kubeconfig']
+        return certs
+
 
     def filters(self):
         ''' returns a mapping of filters to methods '''
-        return {"translate_idps": self.translate_idps}
+        return {"translate_idps": self.translate_idps,
+                "validate_pcs_cluster": self.validate_pcs_cluster,
+                "certificates_to_synchronize": self.certificates_to_synchronize}

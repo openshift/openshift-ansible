@@ -9,6 +9,11 @@ parameters:
     label: Name
     description: Name
 
+  cluster_env:
+    type: string
+    label: Cluster environment
+    description: Environment of the cluster
+
   cluster_id:
     type: string
     label: Cluster ID
@@ -105,14 +110,9 @@ resources:
       user_data: { get_file: user-data }
       user_data_format: RAW
       metadata:
-        env: { get_param: cluster_id }
+        environment: { get_param: cluster_env }
+        clusterid: { get_param: cluster_id }
         host-type: { get_param: type }
-        env-host-type:
-          str_replace:
-            template: cluster_id-openshift-type
-            params:
-              cluster_id: { get_param: cluster_id }
-              type:       { get_param: type }
         sub-host-type:    { get_param: subtype }
 
   port:

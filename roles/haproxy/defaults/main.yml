@@ -1,4 +1,6 @@
 ---
+haproxy_frontend_port: 80
+
 haproxy_frontends:
 - name: main
   binds:
@@ -18,4 +20,4 @@ os_firewall_allow:
 - service: haproxy stats
   port: "9000/tcp"
 - service: haproxy balance
-  port: "8443/tcp"
+  port: "{{ haproxy_frontend_port }}/tcp"

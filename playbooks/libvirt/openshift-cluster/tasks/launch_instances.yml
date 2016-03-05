@@ -13,8 +13,27 @@
   get_url:
     url: '{{ image_url }}'
     sha256sum: '{{ image_sha256 }}'
-    dest: '{{ os_libvirt_storage_pool_path }}/{{ image_name }}'
+    dest: '{{ os_libvirt_storage_pool_path }}/{{ [image_name, image_compression] | reject("equalto", "") | join(".") }}'
   when: '{{ ( lookup("oo_option", "skip_image_download") | default("no", True) | lower ) in ["false", "no"] }}'
+  register: downloaded_image
+
+- name: Uncompress xz compressed base cloud image
+  command: 'unxz -kf {{ os_libvirt_storage_pool_path }}/{{ [image_name, image_compression] | join(".") }}'
+  args:
+    creates: '{{ os_libvirt_storage_pool_path }}/{{ image_name }}'
+  when: image_compression in ["xz"] and downloaded_image.changed
+
+- name: Uncompress tgz compressed base cloud image
+  command: 'tar zxvf {{ os_libvirt_storage_pool_path }}/{{ [image_name, image_compression] | join(".") }}'
+  args:
+    creates: '{{ os_libvirt_storage_pool_path }}/{{ image_name }}'
+  when: image_compression in ["tgz"] and downloaded_image.changed
+
+- name: Uncompress gzip compressed base cloud image
+  command: 'gunzip {{ os_libvirt_storage_pool_path }}/{{ [image_name, image_compression] | join(".") }}'
+  args:
+    creates: '{{ os_libvirt_storage_pool_path }}/{{ image_name }}'
+  when: image_compression in ["gz"] and downloaded_image.changed
 
 - name: Create the cloud-init config drive path
   file:
@@ -75,13 +94,24 @@
 - set_fact:
     ips: "{{ scratch_ip.results | default([]) | oo_collect('stdout') }}"
 
+- set_fact:
+    node_label:
+      type: "{{ g_sub_host_type }}"
+  when: instances | length > 0 and type == "node"
+
+- set_fact:
+    node_label:
+      type: "{{ type }}"
+  when: instances | length > 0 and type != "node"
+
 - name: Add new instances
   add_host:
     hostname: '{{ item.0 }}'
     ansible_ssh_host: '{{ item.1 }}'
     ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
     ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-    groups: 'tag_env-{{ cluster }}, tag_host-type-{{ type }}, tag_env-host-type-{{ cluster }}-openshift-{{ type }}, tag_sub-host-type-{{ g_sub_host_type }}'
+    groups: "tag_environment-{{ cluster_env }}, tag_host-type-{{ type }}, tag_sub-host-type-{{ g_sub_host_type }}, tag_clusterid-{{ cluster_id }}"
+    openshift_node_labels: "{{ node_label }}"
   with_together:
     - instances
     - ips

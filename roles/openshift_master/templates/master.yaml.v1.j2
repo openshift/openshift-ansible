@@ -1,13 +1,28 @@
 apiLevels:
-{% if not openshift.common.version_greater_than_3_1_or_1_1 | bool %}
+{% if not openshift.common.version_gte_3_1_or_1_1 | bool %}
 - v1beta3
 {% endif %}
 - v1
 apiVersion: v1
 assetConfig:
-  logoutURL: ""
+  logoutURL: "{{ openshift.master.logout_url | default('') }}"
   masterPublicURL: {{ openshift.master.public_api_url }}
   publicURL: {{ openshift.master.public_console_url }}/
+{% if 'logging_public_url' in openshift.master %}
+  loggingPublicURL: {{ openshift.master.logging_public_url }}
+{% endif %}
+{% if 'metrics_public_url' in openshift.master %}
+  metricsPublicURL: {{ openshift.master.metrics_public_url }}
+{% endif %}
+{% if 'extension_scripts' in openshift.master %}
+  extensionScripts: {{ openshift.master.extension_scripts | to_padded_yaml(1, 2) }}
+{% endif %}
+{% if 'extension_stylesheets' in openshift.master %}
+  extensionStylesheets: {{ openshift.master.extension_stylesheets | to_padded_yaml(1, 2) }}
+{% endif %}
+{% if 'extensions' in openshift.master %}
+  extensions: {{ openshift.master.extensions | to_padded_yaml(1, 2) }}
+{% endif %}
   servingInfo:
     bindAddress: {{ openshift.master.bind_addr }}:{{ openshift.master.console_port }}
     bindNetwork: tcp4
@@ -76,16 +91,16 @@ kubeletClientInfo:
   port: 10250
 {% if openshift.master.embedded_kube | bool %}
 kubernetesMasterConfig:
-{% if not openshift.common.version_greater_than_3_1_or_1_1 | bool %}
+{% if not openshift.common.version_gte_3_1_or_1_1 | bool %}
   apiLevels:
   - v1beta3
   - v1
 {% endif %}
-  apiServerArguments: {{ api_server_args if api_server_args is defined else 'null' }}
-  controllerArguments: {{ controller_args if controller_args is defined else 'null' }}
-  masterCount: {{ openshift.master.master_count }}
+  apiServerArguments: {{ openshift.master.api_server_args | default(None) | to_padded_yaml( level=2 ) }}
+  controllerArguments: {{ openshift.master.controller_args | default(None) | to_padded_yaml( level=2 ) }}
+  masterCount: {{ openshift.master.master_count if openshift.master.cluster_method | default(None) == 'native' else 1 }}
   masterIP: {{ openshift.common.ip }}
-  podEvictionTimeout: ""
+  podEvictionTimeout: {{ openshift.master.pod_eviction_timeout | default("") }}
   proxyClientInfo:
     certFile: master.proxy-client.crt
     keyFile: master.proxy-client.key
@@ -102,12 +117,16 @@ masterPublicURL: {{ openshift.master.public_api_url }}
 networkConfig:
   clusterNetworkCIDR: {{ openshift.master.sdn_cluster_network_cidr }}
   hostSubnetLength: {{ openshift.master.sdn_host_subnet_length }}
-{% if openshift.common.use_openshift_sdn %}
+{% if openshift.common.use_openshift_sdn or openshift.common.use_nuage %}
   networkPluginName: {{ openshift.common.sdn_network_plugin_name }}
 {% endif %}
 # serviceNetworkCIDR must match kubernetesMasterConfig.servicesSubnet
   serviceNetworkCIDR: {{ openshift.master.portal_net }}
 oauthConfig:
+{% if 'oauth_template' in openshift.master %}
+  templates:
+    login: {{ openshift.master.oauth_template }}
+{% endif %}
   assetPublicURL: {{ openshift.master.public_console_url }}/
   grantConfig:
     method: {{ openshift.master.oauth_grant_method }}
@@ -121,7 +140,9 @@ oauthConfig:
   sessionConfig:
     sessionMaxAgeSeconds: {{ openshift.master.session_max_seconds }}
     sessionName: {{ openshift.master.session_name }}
+{% if openshift.master.session_auth_secrets is defined and openshift.master.session_encryption_secrets is defined %}
     sessionSecretsFile: {{ openshift.master.session_secrets_file }}
+{% endif %}
   tokenConfig:
     accessTokenMaxAgeSeconds: {{ openshift.master.access_token_max_seconds }}
     authorizeTokenMaxAgeSeconds: {{ openshift.master.auth_token_max_seconds }}

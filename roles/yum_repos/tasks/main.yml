@@ -45,3 +45,4 @@
     src: yumrepo.j2
     dest: /etc/yum.repos.d/{{ item.id }}.repo
   with_items: repo_files
+  when: not openshift.common.is_containerized | bool

@@ -1,10 +1,10 @@
 ---
 - name: Gather Cluster facts
-  hosts: all
-  gather_facts: no
+  hosts: OSEv3
   roles:
   - openshift_facts
   tasks:
   - openshift_facts:
+      openshift_env: "{{ hostvars[inventory_hostname] | oo_openshift_env }}"
     register: result
   - debug: var=result

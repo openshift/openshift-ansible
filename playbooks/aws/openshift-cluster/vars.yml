@@ -1,8 +1,23 @@
 ---
+debug_level: 2
+
+deployment_rhel7_ent_base:
+  # rhel-7.1, requires cloud access subscription
+  image: ami-10663b78
+  image_name:
+  region: us-east-1
+  ssh_user: ec2-user
+  sudo: yes
+  keypair: libra
+  type: m4.large
+  security_groups: [ 'public' ]
+  vpc_subnet:
+  assign_public_ip:
+
 deployment_vars:
   origin:
     # centos-7, requires marketplace
-    image: ami-96a818fe
+    image: ami-61bbf104
     image_name:
     region: us-east-1
     ssh_user: centos
@@ -24,15 +39,6 @@ deployment_vars:
     security_groups: [ 'public' ]
     vpc_subnet:
     assign_public_ip:
-  enterprise:
-    # rhel-7.1, requires cloud access subscription
-    image: ami-10663b78
-    image_name:
-    region: us-east-1
-    ssh_user: ec2-user
-    sudo: yes
-    keypair: libra
-    type: m4.large
-    security_groups: [ 'public' ]
-    vpc_subnet:
-    assign_public_ip:
+  enterprise: "{{ deployment_rhel7_ent_base }}"
+  openshift-enterprise: "{{ deployment_rhel7_ent_base }}"
+  atomic-enterprise: "{{ deployment_rhel7_ent_base }}"

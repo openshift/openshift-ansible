@@ -258,25 +258,33 @@ g_template_os_linux:
     - Network
 
   ztriggerprototypes:
-  - name: 'Filesystem: {#OSO_FILESYS} has less than 15% free disk space on {HOST.NAME}'
-    expression: '{Template OS Linux:disc.filesys.full[{#OSO_FILESYS}].last()}>85'
-    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_filesys_full.asciidoc'
-    priority: warn
-
   - name: 'Filesystem: {#OSO_FILESYS} has less than 10% free disk space on {HOST.NAME}'
     expression: '{Template OS Linux:disc.filesys.full[{#OSO_FILESYS}].last()}>90'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_filesys_full.asciidoc'
     priority: high
 
-  - name: 'Filesystem: {#OSO_FILESYS} has less than 10% free inodes on {HOST.NAME}'
-    expression: '{Template OS Linux:disc.filesys.inodes.pused[{#OSO_FILESYS}].last()}>90'
+  # This has a dependency on the previous trigger
+  # Trigger Prototypes do not work in 2.4.  They will work in Zabbix 3.0
+  - name: 'Filesystem: {#OSO_FILESYS} has less than 15% free disk space on {HOST.NAME}'
+    expression: '{Template OS Linux:disc.filesys.full[{#OSO_FILESYS}].last()}>85'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_filesys_full.asciidoc'
     priority: warn
+    dependencies:
+    - 'Filesystem: {#OSO_FILESYS} has less than 10% free disk space on {HOST.NAME}'
 
   - name: 'Filesystem: {#OSO_FILESYS} has less than 5% free inodes on {HOST.NAME}'
     expression: '{Template OS Linux:disc.filesys.inodes.pused[{#OSO_FILESYS}].last()}>95'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_filesys_full.asciidoc'
     priority: high
+
+  # This has a dependency on the previous trigger
+  # Trigger Prototypes do not work in 2.4.  They will work in Zabbix 3.0
+  - name: 'Filesystem: {#OSO_FILESYS} has less than 10% free inodes on {HOST.NAME}'
+    expression: '{Template OS Linux:disc.filesys.inodes.pused[{#OSO_FILESYS}].last()}>90'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_filesys_full.asciidoc'
+    priority: warn
+    dependencies:
+    - 'Filesystem: {#OSO_FILESYS} has less than 5% free inodes on {HOST.NAME}'
 
   ztriggers:
   - name: 'Too many TOTAL processes on {HOST.NAME}'
@@ -304,15 +312,3 @@ g_template_os_linux:
     description: 'CPU is less than 10% idle'
     dependencies:
     - 'CPU idle less than 5% on {HOST.NAME}'
-
-  zgraphprototypes:
-  - name: Network Interface Usage
-    width: 1000
-    height: 400
-    graph_items:
-    - item_name: "Bytes per second IN on network interface {#OSO_NET_INTERFACE}"
-      item_type: prototype
-      color: red
-    - item_name: "Bytes per second OUT on network interface {#OSO_NET_INTERFACE}"
-      item_type: prototype
-      color: blue

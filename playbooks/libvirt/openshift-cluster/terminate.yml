@@ -3,11 +3,13 @@
 
 - name: Terminate instance(s)
   hosts: localhost
+  become: no
+  connection: local
   gather_facts: no
   vars_files:
   - vars.yml
   tasks:
-  - set_fact: cluster_group=tag_env-{{ cluster_id }}
+  - set_fact: cluster_group=tag_clusterid-{{ cluster_id }}
   - add_host:
       name: "{{ item }}"
       groups: oo_hosts_to_terminate
@@ -21,13 +23,15 @@
   - vars.yml
   roles:
   - role: rhel_unsubscribe
-    when: deployment_type == "enterprise" and
+    when: deployment_type in ['atomic-enterprise', 'enterprise', 'openshift-enterprise'] and
           ansible_distribution == "RedHat" and
           lookup('oo_option', 'rhel_skip_subscription') | default(rhsub_skip, True) |
             default('no', True) | lower in ['no', 'false']
 
 - name: Terminate instance(s)
   hosts: localhost
+  become: no
+  connection: local
   gather_facts: no
   vars_files:
   - vars.yml

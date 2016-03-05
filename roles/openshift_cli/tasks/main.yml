@@ -1,0 +1,28 @@
+---
+- openshift_facts:
+    role: common
+    local_facts:
+      deployment_type: "{{ openshift_deployment_type }}"
+      cli_image: "{{ osm_image | default(None) }}"
+      
+- name: Install clients
+  action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-clients state=present"
+  when: not openshift.common.is_containerized | bool
+  
+- name: Create /usr/local/bin/openshift cli wrapper
+  template:
+    src: openshift.j2
+    dest: /usr/local/bin/openshift
+    mode: 0755
+  when: openshift.common.is_containerized | bool
+  
+- name: Create client symlinks
+  file: 
+    path: "{{ item }}"
+    state: link
+    src: /usr/local/bin/openshift
+  with_items:
+    - /usr/local/bin/oadm
+    - /usr/local/bin/oc
+    - /usr/local/bin/kubectl
+  when: openshift.common.is_containerized | bool

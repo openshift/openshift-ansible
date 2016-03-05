@@ -1,8 +1,8 @@
 #!/usr/bin/env python
+# vim: expandtab:tabstop=4:shiftwidth=4
 '''
  Ansible module for zabbix actions
 '''
-# vim: expandtab:tabstop=4:shiftwidth=4
 #
 #   Zabbix action ansible module
 #
@@ -28,7 +28,18 @@
 # pylint: disable=duplicate-code
 
 # pylint: disable=import-error
-from openshift_tools.monitoring.zbxapi import ZabbixAPI, ZabbixConnection, ZabbixAPIError
+from openshift_tools.zbxapi import ZabbixAPI, ZabbixConnection, ZabbixAPIError
+
+CUSTOM_SCRIPT_ACTION = '0'
+IPMI_ACTION = '1'
+SSH_ACTION = '2'
+TELNET_ACTION = '3'
+GLOBAL_SCRIPT_ACTION = '4'
+
+EXECUTE_ON_ZABBIX_AGENT = '0'
+EXECUTE_ON_ZABBIX_SERVER = '1'
+
+OPERATION_REMOTE_COMMAND = '1'
 
 def exists(content, key='result'):
     ''' Check if key exists in content or the size of content[key] > 0
@@ -70,14 +81,91 @@ def filter_differences(zabbix_filters, user_filters):
 
     return rval
 
-# This logic is quite complex.  We are comparing two lists of dictionaries.
-# The outer for-loops allow us to descend down into both lists at the same time
-# and then walk over the key,val pairs of the incoming user dict's changes
-# or updates.  The if-statements are looking at different sub-object types and
-# comparing them.  The other suggestion on how to write this is to write a recursive
-# compare function but for the time constraints and for complexity I decided to go
-# this route.
-# pylint: disable=too-many-branches
+def opconditions_diff(zab_val, user_val):
+    ''' Report whether there are differences between opconditions on
+        zabbix and opconditions supplied by user '''
+
+    if len(zab_val) != len(user_val):
+        return True
+
+    for z_cond, u_cond in zip(zab_val, user_val):
+        if not all([str(u_cond[op_key]) == z_cond[op_key] for op_key in \
+                    ['conditiontype', 'operator', 'value']]):
+            return True
+
+    return False
+
+def opmessage_diff(zab_val, user_val):
+    ''' Report whether there are differences between opmessage on
+        zabbix and opmessage supplied by user '''
+
+    for op_msg_key, op_msg_val in user_val.items():
+        if zab_val[op_msg_key] != str(op_msg_val):
+            return True
+
+    return False
+
+def opmessage_grp_diff(zab_val, user_val):
+    ''' Report whether there are differences between opmessage_grp
+        on zabbix and opmessage_grp supplied by user '''
+
+    zab_grp_ids = set([ugrp['usrgrpid'] for ugrp in zab_val])
+    usr_grp_ids = set([ugrp['usrgrpid'] for ugrp in user_val])
+    if usr_grp_ids != zab_grp_ids:
+        return True
+
+    return False
+
+def opmessage_usr_diff(zab_val, user_val):
+    ''' Report whether there are differences between opmessage_usr
+        on zabbix and opmessage_usr supplied by user '''
+
+    zab_usr_ids = set([usr['userid'] for usr in zab_val])
+    usr_ids = set([usr['userid'] for usr in user_val])
+    if usr_ids != zab_usr_ids:
+        return True
+
+    return False
+
+def opcommand_diff(zab_op_cmd, usr_op_cmd):
+    ''' Check whether user-provided opcommand matches what's already
+        stored in Zabbix '''
+
+    for usr_op_cmd_key, usr_op_cmd_val in usr_op_cmd.items():
+        if zab_op_cmd[usr_op_cmd_key] != str(usr_op_cmd_val):
+            return True
+    return False
+
+def host_in_zabbix(zab_hosts, usr_host):
+    ''' Check whether a particular user host is already in the
+        Zabbix list of hosts '''
+
+    for usr_hst_key, usr_hst_val in usr_host.items():
+        for zab_host in zab_hosts:
+            if usr_hst_key in zab_host and \
+               zab_host[usr_hst_key] == str(usr_hst_val):
+                return True
+
+    return False
+
+def hostlist_in_zabbix(zab_hosts, usr_hosts):
+    ''' Check whether user-provided list of hosts are already in
+        the Zabbix action '''
+
+    if len(zab_hosts) != len(usr_hosts):
+        return False
+
+    for usr_host in usr_hosts:
+        if not host_in_zabbix(zab_hosts, usr_host):
+            return False
+
+    return True
+
+# We are comparing two lists of dictionaries (the one stored on zabbix and the
+# one the user is providing). For each type of operation, determine whether there
+# is a difference between what is stored on zabbix and what the user is providing.
+# If there is a difference, we take the user-provided data for what needs to
+# be stored/updated into zabbix.
 def operation_differences(zabbix_ops, user_ops):
     '''Determine the differences from user and zabbix for operations'''
 
@@ -87,37 +175,41 @@ def operation_differences(zabbix_ops, user_ops):
 
     rval = {}
     for zab, user in zip(zabbix_ops, user_ops):
-        for key, val in user.items():
-            if key == 'opconditions':
-                if len(zab[key]) != len(val):
-                    rval[key] = val
-                    break
-                for z_cond, u_cond in zip(zab[key], user[key]):
-                    if not all([str(u_cond[op_key]) == z_cond[op_key] for op_key in \
-                                ['conditiontype', 'operator', 'value']]):
-                        rval[key] = val
-                        break
-            elif key == 'opmessage':
-                # Verify each passed param matches
-                for op_msg_key, op_msg_val in val.items():
-                    if zab[key][op_msg_key] != str(op_msg_val):
-                        rval[key] = val
-                        break
+        for oper in user.keys():
+            if oper == 'opconditions' and opconditions_diff(zab[oper], \
+                                                                user[oper]):
+                rval[oper] = user[oper]
 
-            elif key == 'opmessage_grp':
-                zab_grp_ids = set([ugrp['usrgrpid'] for ugrp in zab[key]])
-                usr_grp_ids = set([ugrp['usrgrpid'] for ugrp in val])
-                if usr_grp_ids != zab_grp_ids:
-                    rval[key] = val
+            elif oper == 'opmessage' and opmessage_diff(zab[oper], \
+                                                        user[oper]):
+                rval[oper] = user[oper]
 
-            elif key == 'opmessage_usr':
-                zab_usr_ids = set([usr['userid'] for usr in zab[key]])
-                usr_ids = set([usr['userid'] for usr in val])
-                if usr_ids != zab_usr_ids:
-                    rval[key] = val
+            elif oper == 'opmessage_grp' and opmessage_grp_diff(zab[oper], \
+                                                                user[oper]):
+                rval[oper] = user[oper]
 
-            elif zab[key] != str(val):
-                rval[key] = val
+            elif oper == 'opmessage_usr' and opmessage_usr_diff(zab[oper], \
+                                                                user[oper]):
+                rval[oper] = user[oper]
+
+            elif oper == 'opcommand' and opcommand_diff(zab[oper], \
+                                                        user[oper]):
+                rval[oper] = user[oper]
+
+            # opcommand_grp can be treated just like opcommand_hst
+            # as opcommand_grp[] is just a list of groups
+            elif oper == 'opcommand_hst' or oper == 'opcommand_grp':
+                if not hostlist_in_zabbix(zab[oper], user[oper]):
+                    rval[oper] = user[oper]
+
+            # if it's any other type of operation than the ones tested above
+            # just do a direct compare
+            elif oper not in ['opconditions', 'opmessage', 'opmessage_grp',
+                              'opmessage_usr', 'opcommand', 'opcommand_hst',
+                              'opcommand_grp'] \
+                        and str(zab[oper]) != str(user[oper]):
+                rval[oper] = user[oper]
+
     return rval
 
 def get_users(zapi, users):
@@ -136,12 +228,12 @@ def get_user_groups(zapi, groups):
     '''get the mediatype id from the mediatype name'''
     user_groups = []
 
-    content = zapi.get_content('usergroup',
-                               'get',
-                               {'search': {'name': groups}})
-
-    for usr_grp in content['result']:
-        user_groups.append({'usrgrpid': usr_grp['usrgrpid']})
+    for group in groups:
+        content = zapi.get_content('usergroup',
+                                   'get',
+                                   {'search': {'name': group}})
+        for result in content['result']:
+            user_groups.append({'usrgrpid': result['usrgrpid']})
 
     return user_groups
 
@@ -288,7 +380,7 @@ def get_condition_type(event_source, inc_condition):
 def get_operation_type(inc_operation):
     ''' determine the correct operation type'''
     o_types = {'send message': 0,
-               'remote command': 1,
+               'remote command': OPERATION_REMOTE_COMMAND,
                'add host': 2,
                'remove host': 3,
                'add to host group': 4,
@@ -301,7 +393,64 @@ def get_operation_type(inc_operation):
 
     return o_types[inc_operation]
 
-def get_action_operations(zapi, inc_operations):
+def get_opcommand_type(opcommand_type):
+    ''' determine the opcommand type '''
+    oc_types = {'custom script': CUSTOM_SCRIPT_ACTION,
+                'IPMI': IPMI_ACTION,
+                'SSH': SSH_ACTION,
+                'Telnet': TELNET_ACTION,
+                'global script': GLOBAL_SCRIPT_ACTION,
+               }
+
+    return oc_types[opcommand_type]
+
+def get_execute_on(execute_on):
+    ''' determine the execution target '''
+    e_types = {'zabbix agent': EXECUTE_ON_ZABBIX_AGENT,
+               'zabbix server': EXECUTE_ON_ZABBIX_SERVER,
+              }
+
+    return e_types[execute_on]
+
+def action_remote_command(ansible_module, zapi, operation):
+    ''' Process remote command type of actions '''
+
+    if 'type' not in operation['opcommand']:
+        ansible_module.exit_json(failed=True, changed=False, state='unknown',
+                                 results="No Operation Type provided")
+
+    operation['opcommand']['type'] = get_opcommand_type(operation['opcommand']['type'])
+
+    if operation['opcommand']['type'] == CUSTOM_SCRIPT_ACTION:
+
+        if 'execute_on' in operation['opcommand']:
+            operation['opcommand']['execute_on'] = get_execute_on(operation['opcommand']['execute_on'])
+
+        # custom script still requires the target hosts/groups to be set
+        operation['opcommand_hst'] = []
+        operation['opcommand_grp'] = []
+        for usr_host in operation['target_hosts']:
+            if usr_host['target_type'] == 'zabbix server':
+                # 0 = target host local/current host
+                operation['opcommand_hst'].append({'hostid': 0})
+            elif usr_host['target_type'] == 'group':
+                group_name = usr_host['target']
+                gid = get_host_group_id_by_name(zapi, group_name)
+                operation['opcommand_grp'].append({'groupid': gid})
+            elif usr_host['target_type'] == 'host':
+                host_name = usr_host['target']
+                hid = get_host_id_by_name(zapi, host_name)
+                operation['opcommand_hst'].append({'hostid': hid})
+
+        # 'target_hosts' is just to make it easier to build zbx_actions
+        # not part of ZabbixAPI
+        del operation['target_hosts']
+    else:
+        ansible_module.exit_json(failed=True, changed=False, state='unknown',
+                                 results="Unsupported remote command type")
+
+
+def get_action_operations(ansible_module, zapi, inc_operations):
     '''Convert the operations into syntax for api'''
     for operation in inc_operations:
         operation['operationtype'] = get_operation_type(operation['operationtype'])
@@ -315,9 +464,8 @@ def get_action_operations(zapi, inc_operations):
             else:
                 operation['opmessage']['default_msg'] = 0
 
-        # NOT supported for remote commands
-        elif operation['operationtype'] == 1:
-            continue
+        elif operation['operationtype'] == OPERATION_REMOTE_COMMAND:
+            action_remote_command(ansible_module, zapi, operation)
 
         # Handle Operation conditions:
         # Currently there is only 1 available which
@@ -457,14 +605,15 @@ def main():
         if not exists(content):
             module.exit_json(changed=False, state="absent")
 
-        content = zapi.get_content(zbx_class_name, 'delete', [content['result'][0]['itemid']])
+        content = zapi.get_content(zbx_class_name, 'delete', [content['result'][0]['actionid']])
         module.exit_json(changed=True, results=content['result'], state="absent")
 
     # Create and Update
     if state == 'present':
 
         conditions = get_action_conditions(zapi, module.params['event_source'], module.params['conditions_filter'])
-        operations = get_action_operations(zapi, module.params['operations'])
+        operations = get_action_operations(module, zapi,
+                                           module.params['operations'])
         params = {'name': module.params['name'],
                   'esc_period': module.params['escalation_time'],
                   'eventsource': get_event_source(module.params['event_source']),

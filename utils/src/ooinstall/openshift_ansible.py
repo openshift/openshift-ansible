@@ -19,13 +19,15 @@ def generate_inventory(hosts):
     global CFG
     masters = [host for host in hosts if host.master]
     nodes = [host for host in hosts if host.node]
+    new_nodes = [host for host in hosts if host.node and host.new_host]
     proxy = determine_proxy_configuration(hosts)
     multiple_masters = len(masters) > 1
+    scaleup = len(new_nodes) > 0
 
     base_inventory_path = CFG.settings['ansible_inventory_path']
     base_inventory = open(base_inventory_path, 'w')
 
-    write_inventory_children(base_inventory, multiple_masters, proxy)
+    write_inventory_children(base_inventory, multiple_masters, proxy, scaleup)
 
     write_inventory_vars(base_inventory, multiple_masters, proxy)
 
@@ -58,23 +60,23 @@ def generate_inventory(hosts):
 
     base_inventory.write('\n[nodes]\n')
 
-    # TODO: It would be much better to calculate the scheduleability elsewhere
-    # and store it on the Node object.
-    if set(nodes) == set(masters):
-        for node in nodes:
-            write_host(node, base_inventory)
-    else:
-        for node in nodes:
-            # TODO: Until the Master can run the SDN itself we have to configure the Masters
-            # as Nodes too.
-            scheduleable = True
-            if node in masters:
-                scheduleable = False
-            write_host(node, base_inventory, scheduleable)
+    for node in nodes:
+        # Let the fact defaults decide if we're not a master:
+        schedulable = None
+
+        # If the node is also a master, we must explicitly set schedulablity:
+        if node.master:
+            schedulable = node.is_schedulable_node(hosts)
+        write_host(node, base_inventory, schedulable)
 
     if not getattr(proxy, 'preconfigured', True):
         base_inventory.write('\n[lb]\n')
         write_host(proxy, base_inventory)
+
+    if scaleup:
+        base_inventory.write('\n[new_nodes]\n')
+        for node in new_nodes:
+            write_host(node, base_inventory)
 
     base_inventory.close()
     return base_inventory_path
@@ -89,12 +91,14 @@ def determine_proxy_configuration(hosts):
 
     return None
 
-def write_inventory_children(base_inventory, multiple_masters, proxy):
+def write_inventory_children(base_inventory, multiple_masters, proxy, scaleup):
     global CFG
 
     base_inventory.write('\n[OSEv3:children]\n')
     base_inventory.write('masters\n')
     base_inventory.write('nodes\n')
+    if scaleup:
+        base_inventory.write('new_nodes\n')
     if multiple_masters:
         base_inventory.write('etcd\n')
     if not getattr(proxy, 'preconfigured', True):
@@ -106,13 +110,18 @@ def write_inventory_vars(base_inventory, multiple_masters, proxy):
     base_inventory.write('ansible_ssh_user={}\n'.format(CFG.settings['ansible_ssh_user']))
     if CFG.settings['ansible_ssh_user'] != 'root':
         base_inventory.write('ansible_become=true\n')
-    if multiple_masters:
+    if multiple_masters and proxy is not None:
         base_inventory.write('openshift_master_cluster_method=native\n')
         base_inventory.write("openshift_master_cluster_hostname={}\n".format(proxy.hostname))
-        base_inventory.write("openshift_master_cluster_public_hostname={}\n".format(proxy.public_hostname))
+        base_inventory.write(
+            "openshift_master_cluster_public_hostname={}\n".format(proxy.public_hostname))
+    if CFG.settings.get('master_routingconfig_subdomain', False):
+        base_inventory.write(
+            "openshift_master_default_subdomain={}\n".format(CFG.settings['master_routingconfig_subdomain']))
 
 
-def write_host(host, inventory, scheduleable=True):
+
+def write_host(host, inventory, schedulable=None):
     global CFG
 
     facts = ''
@@ -124,10 +133,20 @@ def write_host(host, inventory, scheduleable=True):
         facts += ' openshift_hostname={}'.format(host.hostname)
     if host.public_hostname:
         facts += ' openshift_public_hostname={}'.format(host.public_hostname)
+    if host.containerized:
+        facts += ' containerized={}'.format(host.containerized)
     # TODO: For not write_host is handles both master and nodes.
     # Technically only nodes will ever need this.
-    if not scheduleable:
-        facts += ' openshift_scheduleable=False'
+
+    # Distinguish between three states, no schedulability specified (use default),
+    # explicitly set to True, or explicitly set to False:
+    if schedulable is None:
+        pass
+    elif schedulable:
+        facts += ' openshift_schedulable=True'
+    elif not schedulable:
+        facts += ' openshift_schedulable=False'
+
     installer_host = socket.gethostname()
     if installer_host in [host.connect_to, host.hostname, host.public_hostname]:
         facts += ' ansible_connection=local'
@@ -154,9 +173,15 @@ def load_system_facts(inventory_file, os_facts_path, env_vars, verbose=False):
     status = subprocess.call(args, env=env_vars, stdout=FNULL)
     if not status == 0:
         return [], 1
-    callback_facts_file = open(CFG.settings['ansible_callback_facts_yaml'], 'r')
-    callback_facts = yaml.load(callback_facts_file)
-    callback_facts_file.close()
+
+    with open(CFG.settings['ansible_callback_facts_yaml'], 'r') as callback_facts_file:
+        try:
+            callback_facts = yaml.safe_load(callback_facts_file)
+        except yaml.YAMLError, exc:
+            print "Error in {}".format(CFG.settings['ansible_callback_facts_yaml']), exc
+            print "Try deleting and rerunning the atomic-openshift-installer"
+            sys.exit(1)
+
     return callback_facts, 0
 
 
@@ -181,7 +206,7 @@ def run_main_playbook(hosts, hosts_to_run_on, verbose=False):
     inventory_file = generate_inventory(hosts_to_run_on)
     if len(hosts_to_run_on) != len(hosts):
         main_playbook_path = os.path.join(CFG.ansible_playbook_directory,
-                                          'playbooks/byo/openshift-cluster/scaleup.yml')
+                                          'playbooks/byo/openshift-node/scaleup.yml')
     else:
         main_playbook_path = os.path.join(CFG.ansible_playbook_directory,
                                           'playbooks/byo/openshift-cluster/config.yml')
@@ -214,11 +239,18 @@ def run_uninstall_playbook(verbose=False):
     return run_ansible(playbook, inventory_file, facts_env, verbose)
 
 
-def run_upgrade_playbook(verbose=False):
+def run_upgrade_playbook(old_version, new_version, verbose=False):
     # TODO: do not hardcode the upgrade playbook, add ability to select the
     # right playbook depending on the type of upgrade.
-    playbook = os.path.join(CFG.settings['ansible_playbook_directory'],
-        'playbooks/byo/openshift-cluster/upgrades/v3_0_to_v3_1/upgrade.yml')
+    old_version = old_version.replace('.', '_')
+    new_version = old_version.replace('.', '_')
+    if old_version == new_version:
+        playbook = os.path.join(CFG.settings['ansible_playbook_directory'],
+            'playbooks/byo/openshift-cluster/upgrades/v{}_minor/upgrade.yml'.format(new_version))
+    else:
+        playbook = os.path.join(CFG.settings['ansible_playbook_directory'],
+            'playbooks/byo/openshift-cluster/upgrades/v{}_to_v{}/upgrade.yml'.format(old_version,
+                                                                                     new_version))
     # TODO: Upgrade inventory for upgrade?
     inventory_file = generate_inventory(CFG.hosts)
     facts_env = os.environ.copy()

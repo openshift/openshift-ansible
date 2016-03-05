@@ -14,3 +14,4 @@ galaxy_info:
   - system
 dependencies:
 - { role: openshift_repos }
+- { role: openshift_cli }

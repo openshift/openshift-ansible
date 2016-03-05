@@ -31,6 +31,7 @@ class AwsUtil(object):
         host_type_aliases -- a list of aliases to common host-types (e.g. ex-node)
         """
 
+        self.alias_lookup = {}
         host_type_aliases = host_type_aliases or {}
 
         self.host_type_aliases = host_type_aliases
@@ -40,25 +41,41 @@ class AwsUtil(object):
 
     def setup_host_type_alias_lookup(self):
         """Sets up the alias to host-type lookup table."""
-        self.alias_lookup = {}
         for key, values in self.host_type_aliases.iteritems():
             for value in values:
                 self.alias_lookup[value] = key
 
     @staticmethod
-    def get_inventory(args=None):
+    def get_inventory(args=None, cached=False):
         """Calls the inventory script and returns a dictionary containing the inventory."
 
         Keyword arguments:
         args -- optional arguments to pass to the inventory script
         """
         minv = multi_inventory.MultiInventory(args)
-        minv.run()
+        if cached:
+            minv.get_inventory_from_cache()
+        else:
+            minv.run()
         return minv.result
+
+    def get_clusters(self):
+        """Searches for cluster tags in the inventory and returns all of the clusters found."""
+        pattern = re.compile(r'^oo_clusterid_(.*)')
+
+        clusters = []
+        inv = self.get_inventory()
+        for key in inv.keys():
+            matched = pattern.match(key)
+            if matched:
+                clusters.append(matched.group(1))
+
+        clusters.sort()
+        return clusters
 
     def get_environments(self):
         """Searches for env tags in the inventory and returns all of the envs found."""
-        pattern = re.compile(r'^tag_environment_(.*)')
+        pattern = re.compile(r'^oo_environment_(.*)')
 
         envs = []
         inv = self.get_inventory()
@@ -72,7 +89,7 @@ class AwsUtil(object):
 
     def get_host_types(self):
         """Searches for host-type tags in the inventory and returns all host-types found."""
-        pattern = re.compile(r'^tag_host-type_(.*)')
+        pattern = re.compile(r'^oo_hosttype_(.*)')
 
         host_types = []
         inv = self.get_inventory()
@@ -83,6 +100,20 @@ class AwsUtil(object):
 
         host_types.sort()
         return host_types
+
+    def get_sub_host_types(self):
+        """Searches for sub-host-type tags in the inventory and returns all sub-host-types found."""
+        pattern = re.compile(r'^oo_subhosttype_(.*)')
+
+        sub_host_types = []
+        inv = self.get_inventory()
+        for key in inv.keys():
+            matched = pattern.match(key)
+            if matched:
+                sub_host_types.append(matched.group(1))
+
+        sub_host_types.sort()
+        return sub_host_types
 
     def get_security_groups(self):
         """Searches for security_groups in the inventory and returns all SGs found."""
@@ -151,61 +182,87 @@ class AwsUtil(object):
         return host_type
 
     @staticmethod
+    def gen_version_tag(ver):
+        """Generate the version tag
+        """
+        return "oo_version_%s" % ver
+
+    @staticmethod
+    def gen_clusterid_tag(clu):
+        """Generate the clusterid tag
+        """
+        return "oo_clusterid_%s" % clu
+
+    @staticmethod
     def gen_env_tag(env):
         """Generate the environment tag
         """
-        return "tag_environment_%s" % env
+        return "oo_environment_%s" % env
 
-    def gen_host_type_tag(self, host_type):
+    def gen_host_type_tag(self, host_type, version):
         """Generate the host type tag
         """
-        host_type = self.resolve_host_type(host_type)
-        return "tag_host-type_%s" % host_type
+        if version == '2':
+            host_type = self.resolve_host_type(host_type)
+        return "oo_hosttype_%s" % host_type
 
-    def gen_env_host_type_tag(self, host_type, env):
-        """Generate the environment host type tag
+    @staticmethod
+    def gen_sub_host_type_tag(sub_host_type):
+        """Generate the host type tag
         """
-        host_type = self.resolve_host_type(host_type)
-        return "tag_env-host-type_%s-%s" % (env, host_type)
+        return "oo_subhosttype_%s" % sub_host_type
 
-    def get_host_list(self, host_type=None, envs=None):
+    # This function uses all of these params to perform a filters on our host inventory.
+    # pylint: disable=too-many-arguments
+    def get_host_list(self, clusters=None, host_type=None, sub_host_type=None, envs=None, version=None, cached=False):
         """Get the list of hosts from the inventory using host-type and environment
         """
+        retval = set([])
         envs = envs or []
-        inv = self.get_inventory()
 
-        # We prefer to deal with a list of environments
-        if issubclass(type(envs), basestring):
-            if envs == 'all':
-                envs = self.get_environments()
+        inv = self.get_inventory(cached=cached)
+
+        retval.update(inv.get('all_hosts', []))
+
+        if clusters:
+            cluster_hosts = set([])
+            if len(clusters) > 1:
+                for cluster in clusters:
+                    clu_tag = AwsUtil.gen_clusterid_tag(cluster)
+                    cluster_hosts.update(inv.get(clu_tag, []))
             else:
-                envs = [envs]
+                cluster_hosts.update(inv.get(AwsUtil.gen_clusterid_tag(clusters[0]), []))
 
-        if host_type and envs:
-            # Both host type and environment were specified
-            retval = []
-            for env in envs:
-                env_host_type_tag = self.gen_env_host_type_tag(host_type, env)
-                if env_host_type_tag in inv.keys():
-                    retval += inv[env_host_type_tag]
-            return set(retval)
+            retval.intersection_update(cluster_hosts)
 
-        if envs and not host_type:
-            # Just environment was specified
-            retval = []
-            for env in envs:
-                env_tag = AwsUtil.gen_env_tag(env)
-                if env_tag in inv.keys():
-                    retval += inv[env_tag]
-            return set(retval)
+        if envs:
+            env_hosts = set([])
+            if len(envs) > 1:
+                for env in envs:
+                    env_tag = AwsUtil.gen_env_tag(env)
+                    env_hosts.update(inv.get(env_tag, []))
+            else:
+                env_hosts.update(inv.get(AwsUtil.gen_env_tag(envs[0]), []))
 
-        if host_type and not envs:
-            # Just host-type was specified
-            retval = []
-            host_type_tag = self.gen_host_type_tag(host_type)
-            if host_type_tag in inv.keys():
-                retval = inv[host_type_tag]
-            return set(retval)
+            retval.intersection_update(env_hosts)
 
-        # We should never reach here!
-        raise ArgumentError("Invalid combination of parameters")
+        if host_type:
+            retval.intersection_update(inv.get(self.gen_host_type_tag(host_type, version), []))
+
+        if sub_host_type:
+            retval.intersection_update(inv.get(self.gen_sub_host_type_tag(sub_host_type), []))
+
+        if version != 'all':
+            retval.intersection_update(inv.get(AwsUtil.gen_version_tag(version), []))
+
+        return list(retval)
+
+    def convert_to_ip(self, hosts, cached=False):
+        """convert a list of host names to ip addresses"""
+
+        inv = self.get_inventory(cached=cached)
+        ips = []
+        for host in hosts:
+            ips.append(inv['_meta']['hostvars'][host]['oo_public_ip'])
+
+        return ips

@@ -37,6 +37,13 @@
 - include_vars: template_aws.yml
   tags:
   - aws
+- include_vars: template_zagg_server.yml
+  tags:
+  - zagg_server
+
+- include_vars: template_config_loop.yml
+  tags:
+  - config_loop
 
 - name: Include Template Heartbeat
   include: ../../lib_zabbix/tasks/create_template.yml
@@ -137,3 +144,23 @@
     password: "{{ ozb_password }}"
   tags:
   - aws
+
+- name: Include Template Zagg Server
+  include: ../../lib_zabbix/tasks/create_template.yml
+  vars:
+    template: "{{ g_template_zagg_server }}"
+    server: "{{ ozb_server }}"
+    user: "{{ ozb_user }}"
+    password: "{{ ozb_password }}"
+  tags:
+  - zagg_server
+
+- name: Include Template Config Loop
+  include: ../../lib_zabbix/tasks/create_template.yml
+  vars:
+    template: "{{ g_template_config_loop }}"
+    server: "{{ ozb_server }}"
+    user: "{{ ozb_user }}"
+    password: "{{ ozb_password }}"
+  tags:
+  - config_loop

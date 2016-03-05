@@ -1,9 +1,12 @@
 ---
 - name: Call same systemctl command for openshift on all instance(s)
   hosts: localhost
+  connection: local
+  become: no
   gather_facts: no
   vars_files:
   - vars.yml
+  - cluster_hosts.yml
   tasks:
   - fail: msg="cluster_id is required to be injected in this playbook"
     when: cluster_id is not defined
@@ -14,7 +17,7 @@
       groups: g_service_masters
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-    with_items: groups["tag_env-host-type_{{ cluster_id }}-openshift-master"] | default([])
+    with_items: "{{ master_hosts | default([]) }}"
 
   - name: Evaluate g_service_nodes
     add_host:
@@ -22,7 +25,7 @@
       groups: g_service_nodes
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
-    with_items: groups["tag_env-host-type_{{ cluster_id }}-openshift-node"] | default([])
+    with_items: "{{ node_hosts | default([]) }}"
 
 - include: ../../common/openshift-node/service.yml
 - include: ../../common/openshift-master/service.yml

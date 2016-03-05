@@ -1,30 +1,21 @@
 ---
-# TODO: fix firewall related bug with GCE and origin, since GCE is overriding
-# /etc/sysconfig/iptables
-
-- hosts: localhost
-  gather_facts: no
-  vars_files:
-  - vars.yml
-  tasks:
-  - set_fact:
-      g_ssh_user_tmp: "{{ deployment_vars[deployment_type].ssh_user }}"
-      g_sudo_tmp: "{{ deployment_vars[deployment_type].sudo }}"
-      use_sdn: "{{ do_we_use_openshift_sdn }}"
-      sdn_plugin: "{{ sdn_network_plugin }}"
-
 - include: ../../common/openshift-cluster/config.yml
+  vars_files:
+  - ../../gce/openshift-cluster/vars.yml
+  - ../../gce/openshift-cluster/cluster_hosts.yml
   vars:
-    g_etcd_group: "{{ 'tag_env-host-type-' ~ cluster_id ~ '-openshift-etcd' }}"
-    g_lb_group: "{{ 'tag_env-host-type-' ~ cluster_id ~ '-openshift-lb' }}"
-    g_masters_group: "{{ 'tag_env-host-type-' ~ cluster_id ~ '-openshift-master' }}"
-    g_nodes_group: "{{ 'tag_env-host-type-' ~ cluster_id ~ '-openshift-node' }}"
-    g_ssh_user: "{{ hostvars.localhost.g_ssh_user_tmp }}"
-    g_sudo: "{{ hostvars.localhost.g_sudo_tmp }}"
+    g_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
+    g_sudo: "{{ deployment_vars[deployment_type].sudo }}"
     g_nodeonmaster: true
     openshift_cluster_id: "{{ cluster_id }}"
-    openshift_debug_level: 2
+    openshift_debug_level: "{{ debug_level }}"
     openshift_deployment_type: "{{ deployment_type }}"
     openshift_hostname: "{{ gce_private_ip }}"
-    openshift_use_openshift_sdn: "{{ hostvars.localhost.use_sdn  }}"
-    os_sdn_network_plugin_name: "{{ hostvars.localhost.sdn_plugin }}"
+    openshift_registry_selector: 'type=infra'
+    openshift_router_selector: 'type=infra'
+    openshift_infra_nodes: "{{ g_infra_hosts }}"
+    openshift_master_cluster_method: 'native'
+    openshift_use_openshift_sdn: "{{ lookup('oo_option', 'use_openshift_sdn') }}"
+    os_sdn_network_plugin_name: "{{ lookup('oo_option', 'sdn_network_plugin_name') }}"
+    openshift_use_flannel: "{{ lookup('oo_option', 'use_flannel') }}"
+    openshift_use_fluentd: "{{ lookup('oo_option', 'use_fluentd') }}"

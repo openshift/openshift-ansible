@@ -1,0 +1,50 @@
+---
+- name: Install nfs-utils
+  yum:
+    pkg: nfs-utils
+    state: present
+
+- name: Configure NFS
+  lineinfile:
+    dest: /etc/sysconfig/nfs
+    regexp: '^RPCNFSDARGS=.*$'
+    line: 'RPCNFSDARGS="-N 2 -N 3"'
+  register: nfs_config
+
+- name: Restart nfs-config
+  service: name=nfs-config state=restarted
+  when: nfs_config | changed
+
+- name: Ensure exports directory exists
+  file:
+    path: "{{ openshift.hosted.registry.storage.nfs.directory }}"
+    state: directory
+
+- name: Ensure export directories exist
+  file:
+    path: "{{ openshift.hosted.registry.storage.nfs.directory }}/{{ item }}"
+    state: directory
+    mode: 0777
+    owner: nfsnobody
+    group: nfsnobody
+  with_items:
+  - "{{ openshift.hosted.registry.storage.volume.name }}"
+
+- name: Configure exports
+  template:
+    dest: /etc/exports
+    src: exports.j2
+  notify:
+  - restart nfs-server
+
+- name: Enable and start services
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  register: start_result
+  with_items:
+  - nfs-server
+
+- set_fact:
+    nfs_service_status_changed: "{{ start_result | changed }}"

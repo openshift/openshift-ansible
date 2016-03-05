@@ -1,3 +1,5 @@
+:warning: **WARNING** :warning: This feature is community supported and has not been tested by Red Hat. Visit [docs.openshift.com](https://docs.openshift.com) for [OpenShift Enterprise](https://docs.openshift.com/enterprise/latest/install_config/install/index.html) or [OpenShift Origin](https://docs.openshift.org/latest/install_config/install/index.html) supported installation docs.
+
 OPENSTACK Setup instructions
 ============================
 
@@ -31,6 +33,7 @@ The following options are used only by `heat_stack.yaml`. They are so used only 
 
 * `image_name`: Name of the image to use to spawn VMs
 * `public_key` (default to `~/.ssh/id_rsa.pub`): filename of the ssh public key
+* `etcd_flavor` (default to `m1.small`): The ID or name of the flavor for the etcd nodes
 * `master_flavor` (default to `m1.small`): The ID or name of the flavor for the master
 * `node_flavor` (default to `m1.medium`): The ID or name of the flavor for the compute nodes
 * `infra_flavor` (default to `m1.small`): The ID or name of the flavor for the infrastructure nodes

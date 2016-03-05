@@ -10,19 +10,17 @@
 * [Overriding detected ip addresses and hostnames](#overriding-detected-ip-addresses-and-hostnames)
 
 ## Requirements
-* ansible
-  * Tested using ansible 1.9.1 and 1.9.2
-  * There is currently a known issue with ansible-1.9.0, you can downgrade to 1.8.4 on Fedora by installing one of the builds from Koji: http://koji.fedoraproject.org/koji/packageinfo?packageID=13842
+* ansible 1.9.4
   * Available in Fedora channels
   * Available for EL with EPEL and Optional channel
 * One or more RHEL 7.1 VMs
 * Either ssh key based auth for the root user or ssh key based auth for a user
   with sudo access (no password)
-* A checkout of atomic-enterprise-ansible from https://github.com/projectatomic/atomic-enterprise-ansible/
+* A checkout of openshift-ansible from https://github.com/openshift/openshift-ansible/
 
   ```sh
-  git clone https://github.com/projectatomic/atomic-enterprise-ansible.git
-  cd atomic-enterprise-ansible
+  git clone https://github.com/openshift/openshift-ansible.git
+  cd openshift-ansible
   ```
 
 ## Caveats
@@ -81,10 +79,10 @@ deployment_type=atomic-enterprise
 
 # Pre-release registry URL; note that in the future these images 
 # may have an atomicenterprise/aep- prefix or so.
-oreg_url=rcm-img-docker01.build.eng.bos.redhat.com:5001/openshift3/ose-${component}:${version}
+oreg_url=rcm-img-docker:5001/openshift3/ose-${component}:${version}
 
 # Pre-release additional repo
-openshift_additional_repos=[{'id': 'ose-devel', 'name': 'ose-devel', 'baseurl': 'http://buildvm-devops.usersys.redhat.com/puddle/build/AtomicOpenShift/3.1/2015-10-27.1', 'enabled': 1, 'gpgcheck': 0}]
+openshift_additional_repos=[{'id': 'ose-devel', 'name': 'ose-devel', 'baseurl': 'http://buildvm/puddle/build/AtomicOpenShift/3.1/2015-10-27.1', 'enabled': 1, 'gpgcheck': 0}]
 
 # host group for masters
 [masters]
@@ -97,6 +95,8 @@ aep3-node[1:2].example.com
 
 The hostnames above should resolve both from the hosts themselves and
 the host where ansible is running (if different).
+
+A more complete example inventory file ([hosts.aep.example](https://github.com/openshift/openshift-ansible/blob/master/inventory/byo/hosts.aep.example)) is available under the [`/inventory/byo`](https://github.com/openshift/openshift-ansible/tree/master/inventory/byo) directory.
 
 ## Running the ansible playbooks
 From the openshift-ansible checkout run:

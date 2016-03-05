@@ -1,20 +1,23 @@
 ---
-do_we_use_openshift_sdn: true
-sdn_network_plugin: redhat/openshift-ovs-subnet 
-# os_sdn_network_plugin_name can be ovssubnet or multitenant, see https://docs.openshift.org/latest/architecture/additional_concepts/sdn.html#ovssubnet-plugin-operation
+debug_level: 2
+
+deployment_rhel7_ent_base:
+  image: "{{ lookup('oo_option', 'image_name') | default('rhel-7', True) }}"
+  machine_type: "{{ lookup('oo_option', 'machine_type') | default('n1-standard-1', True) }}"
+  ssh_user: "{{ lookup('env', 'gce_ssh_user') |  default(ansible_ssh_user, true) }}"
+  sudo: yes
+
 deployment_vars:
   origin:
-    image: preinstalled-slave-50g-v5
-    machine_type: n1-standard-1
-    ssh_user: root
+    image: "{{ lookup('oo_option', 'image_name') | default('centos-7', True) }}"
+    machine_type: "{{ lookup('oo_option', 'machine_type') | default('n1-standard-1', True) }}"
+    ssh_user: "{{ lookup('env', 'gce_ssh_user') |  default(ansible_ssh_user, true) }}"
     sudo: yes
   online:
     image: libra-rhel7
     machine_type: n1-standard-1
     ssh_user: root
     sudo: no
-  enterprise:
-    image: rhel-7
-    machine_type: n1-standard-1
-    ssh_user:
-    sudo: yes
+  enterprise: "{{ deployment_rhel7_ent_base }}"
+  openshift-enterprise: "{{ deployment_rhel7_ent_base }}"
+  atomic-enterprise: "{{ deployment_rhel7_ent_base }}"

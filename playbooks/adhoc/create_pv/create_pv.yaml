@@ -1,20 +1,21 @@
 ---
-#example run: 
+#example run:
 # ansible-playbook -e "cli_volume_size=1" \
 #                  -e "cli_device_name=/dev/xvdf" \
 #                  -e "cli_hosttype=master" \
-#                  -e "cli_environment=ops" \
+#                  -e "cli_clusterid=ops" \
 #                  create_pv.yaml
-# FIXME: we need to change "environment" to "clusterid" as that's what it really is now.
 #
 - name: Create a volume and attach it to master
   hosts: localhost
+  connection: local
+  become: no
   gather_facts: no
   vars:
     cli_volume_type: gp2
     cli_volume_iops: ''
     oo_name: "{{ groups['tag_host-type_' ~ cli_hosttype] |
-                 intersect(groups['tag_environment_' ~ cli_environment]) |
+                 intersect(groups['oo_clusterid_' ~ cli_clusterid]) |
                  first }}"
   pre_tasks:
   - fail:
@@ -24,7 +25,7 @@
     - cli_volume_size
     - cli_device_name
     - cli_hosttype
-    - cli_environment
+    - cli_clusterid
 
   - name: set oo_name fact
     set_fact:
@@ -55,7 +56,7 @@
     args:
       tags:
         Name: "pv-{{ hostvars[oo_name]['ec2_tag_Name'] }}"
-        env: "{{cli_environment}}"
+        clusterid: "{{cli_clusterid}}"
     register: voltags
 
   - debug: var=voltags
@@ -103,7 +104,7 @@
     filesystem:
       dev: "{{ cli_device_name }}"
       fstype: ext4
-    
+
   - name: Mount the dev
     mount:
       name: "{{ pv_mntdir }}"
@@ -112,7 +113,7 @@
       state: mounted
 
   - name: chgrp g+rwXs
-    file: 
+    file:
       path: "{{ pv_mntdir }}"
       mode: 'g+rwXs'
       recurse: yes
@@ -149,11 +150,11 @@
 
   # We have to use the shell module because we can't set env vars with the command module.
   - name: "Place PV into oc"
-    shell: "KUBECONFIG=/etc/openshift/master/admin.kubeconfig oc create -f {{ pv_template | quote }}"
+    shell: "KUBECONFIG=/etc/origin/master/admin.kubeconfig oc create -f {{ pv_template | quote }}"
     register: oc_output
 
   - debug: var=oc_output
 
-  - fail: 
+  - fail:
       msg: "Failed to add {{ pv_template }} to master."
     when: oc_output.rc != 0
