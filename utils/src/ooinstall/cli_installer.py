@@ -9,7 +9,7 @@ import sys
 from ooinstall import openshift_ansible
 from ooinstall import OOConfig
 from ooinstall.oo_config import OOConfigInvalidHostError
-from ooinstall.oo_config import Host
+from ooinstall.oo_config import Host, Role
 from ooinstall.variants import find_variant, get_variant_version_combos
 from distutils.version import LooseVersion
 
@@ -121,24 +121,26 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
     click.echo(message)
 
     hosts = []
+    roles = set(['master', 'node', 'storage'])
     more_hosts = True
     num_masters = 0
     while more_hosts:
         host_props = {}
+        host_props['roles'] = []
         host_props['connect_to'] = click.prompt('Enter hostname or IP address',
                                                 value_proc=validate_prompt_hostname)
 
         if not masters_set:
             if click.confirm('Will this host be an OpenShift Master?'):
-                host_props['master'] = True
+                host_props['roles'].append('master')
                 num_masters += 1
 
-                if oo_cfg.settings['variant_version'] == '3.0':
+                if oo_cfg.deployment.variables['variant_version'] == '3.0':
                     masters_set = True
-        host_props['node'] = True
+        host_props['roles'].append('node')
 
         host_props['containerized'] = False
-        if oo_cfg.settings['variant_version'] != '3.0':
+        if oo_cfg.deployment.variables['variant_version'] != '3.0':
             rpm_or_container = \
                 click.prompt('Will this host be RPM or Container based (rpm/container)?',
                              type=click.Choice(['rpm', 'container']),
@@ -155,8 +157,9 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
 
         hosts.append(host)
 
+
         if print_summary:
-            print_installation_summary(hosts, oo_cfg.settings['variant_version'])
+            print_installation_summary(hosts, oo_cfg.deployment.variables['variant_version'])
 
         # If we have one master, this is enough for an all-in-one deployment,
         # thus we can start asking if you wish to proceed. Otherwise we assume
@@ -166,11 +169,12 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
 
     if num_masters >= 3:
         collect_master_lb(hosts)
+        roles.add('master_lb')
 
     if not existing_env:
         collect_storage_host(hosts)
 
-    return hosts
+    return hosts, roles
 
 
 def print_installation_summary(hosts, version=None):
@@ -187,9 +191,9 @@ def print_installation_summary(hosts, version=None):
     for host in hosts:
         print_host_summary(hosts, host)
 
-    masters = [host for host in hosts if host.master]
-    nodes = [host for host in hosts if host.node]
-    dedicated_nodes = [host for host in hosts if host.node and not host.master]
+    masters = [host for host in hosts if host.is_master()]
+    nodes = [host for host in hosts if host.is_node()]
+    dedicated_nodes = [host for host in hosts if host.is_node() and not host.is_master()]
     click.echo('')
     click.echo('Total OpenShift Masters: %s' % len(masters))
     click.echo('Total OpenShift Nodes: %s' % len(nodes))
@@ -229,26 +233,26 @@ deployment."""
 
 def print_host_summary(all_hosts, host):
     click.echo("- %s" % host.connect_to)
-    if host.master:
+    if host.is_master():
         click.echo("  - OpenShift Master")
-    if host.node:
+    if host.is_node():
         if host.is_dedicated_node():
             click.echo("  - OpenShift Node (Dedicated)")
         elif host.is_schedulable_node(all_hosts):
             click.echo("  - OpenShift Node")
         else:
             click.echo("  - OpenShift Node (Unscheduled)")
-    if host.master_lb:
+    if host.is_master_lb():
         if host.preconfigured:
             click.echo("  - Load Balancer (Preconfigured)")
         else:
             click.echo("  - Load Balancer (HAProxy)")
-    if host.master:
+    if host.is_master():
         if host.is_etcd_member(all_hosts):
             click.echo("  - Etcd Member")
         else:
             click.echo("  - Etcd (Embedded)")
-    if host.storage:
+    if host.is_storage():
         click.echo("  - Storage")
 
 
@@ -282,7 +286,7 @@ hostname.
 
         # Make sure this host wasn't already specified:
         for host in hosts:
-            if host.connect_to == hostname and (host.master or host.node):
+            if host.connect_to == hostname and (host.is_master() or host.is_node()):
                 raise click.BadParameter('Cannot re-use "%s" as a load balancer, '
                                          'please specify a separate host' % hostname)
         return hostname
@@ -312,14 +316,14 @@ Note: Containerized storage hosts are not currently supported.
     click.echo(message)
     host_props = {}
 
-    first_master = next(host for host in hosts if host.master)
+    first_master = next(host for host in hosts if host.is_master())
 
     hostname_or_ip = click.prompt('Enter hostname or IP address',
                                             value_proc=validate_prompt_hostname,
                                             default=first_master.connect_to)
     existing, existing_host = is_host_already_node_or_master(hostname_or_ip, hosts)
-    if existing and existing_host.node:
-        existing_host.storage = True
+    if existing and existing_host.is_node():
+        existing_host.roles.append('storage')
     else:
         host_props['connect_to'] = hostname_or_ip
         host_props['preconfigured'] = False
@@ -334,14 +338,14 @@ def is_host_already_node_or_master(hostname, hosts):
     existing_host = None
 
     for host in hosts:
-        if host.connect_to == hostname and (host.master or host.node):
+        if host.connect_to == hostname and (host.is_master() or host.is_node()):
             is_existing = True
             existing_host = host
 
     return is_existing, existing_host
 
 def confirm_hosts_facts(oo_cfg, callback_facts):
-    hosts = oo_cfg.hosts
+    hosts = oo_cfg.deployment.hosts
     click.clear()
     message = """
 A list of the facts gathered from the provided hosts follows. Because it is
@@ -417,19 +421,19 @@ Edit %s with the desired values and run `atomic-openshift-installer --unattended
 
 def check_hosts_config(oo_cfg, unattended):
     click.clear()
-    masters = [host for host in oo_cfg.hosts if host.master]
+    masters = [host for host in oo_cfg.deployment.hosts if host.is_master()]
 
     if len(masters) == 2:
         click.echo("A minimum of 3 Masters are required for HA deployments.")
         sys.exit(1)
 
     if len(masters) > 1:
-        master_lb = [host for host in oo_cfg.hosts if host.master_lb]
+        master_lb = [host for host in oo_cfg.deployment.hosts if host.is_master_lb()]
         if len(master_lb) > 1:
             click.echo('ERROR: More than one Master load balancer specified. Only one is allowed.')
             sys.exit(1)
         elif len(master_lb) == 1:
-            if master_lb[0].master or master_lb[0].node:
+            if master_lb[0].is_master() or master_lb[0].is_node():
                 click.echo('ERROR: The Master load balancer is configured as a master or node. ' \
                            'Please correct this.')
                 sys.exit(1)
@@ -443,7 +447,7 @@ https://docs.openshift.org/latest/install_config/install/advanced_install.html#m
             click.echo(message)
             sys.exit(1)
 
-    dedicated_nodes = [host for host in oo_cfg.hosts if host.node and not host.master]
+    dedicated_nodes = [host for host in oo_cfg.deployment.hosts if host.is_node() and not host.is_master()]
     if len(dedicated_nodes) == 0:
         message = """
 WARNING: No dedicated Nodes specified. By default, colocated Masters have
@@ -484,32 +488,32 @@ def confirm_continue(message):
 
 def error_if_missing_info(oo_cfg):
     missing_info = False
-    if not oo_cfg.hosts:
+    if not oo_cfg.deployment.hosts:
         missing_info = True
         click.echo('For unattended installs, hosts must be specified on the '
                    'command line or in the config file: %s' % oo_cfg.config_path)
         sys.exit(1)
 
-    if 'ansible_ssh_user' not in oo_cfg.settings:
+    if 'ansible_ssh_user' not in oo_cfg.deployment.variables:
         click.echo("Must specify ansible_ssh_user in configuration file.")
         sys.exit(1)
 
     # Lookup a variant based on the key we were given:
-    if not oo_cfg.settings['variant']:
+    if not oo_cfg.deployment.variables['variant']:
         click.echo("No variant specified in configuration file.")
         sys.exit(1)
 
     ver = None
-    if 'variant_version' in oo_cfg.settings:
-        ver = oo_cfg.settings['variant_version']
-    variant, version = find_variant(oo_cfg.settings['variant'], version=ver)
+    if 'variant_version' in oo_cfg.deployment.variables:
+        ver = oo_cfg.deployment.variables['variant_version']
+    variant, version = find_variant(oo_cfg.deployment.variables['variant'], version=ver)
     if variant is None or version is None:
-        err_variant_name = oo_cfg.settings['variant']
+        err_variant_name = oo_cfg.deployment.variables['variant']
         if ver:
             err_variant_name = "%s %s" % (err_variant_name, ver)
         click.echo("%s is not an installable variant." % err_variant_name)
         sys.exit(1)
-    oo_cfg.settings['variant_version'] = version.name
+    oo_cfg.deployment.variables['variant_version'] = version.name
 
     missing_facts = oo_cfg.calc_missing_facts()
     if len(missing_facts) > 0:
@@ -518,8 +522,22 @@ def error_if_missing_info(oo_cfg):
         for host in missing_facts:
             click.echo('Host "%s" missing facts: %s' % (host, ", ".join(missing_facts[host])))
 
+    # check that all listed host roles are included
+    listed_roles = get_host_roles_set(oo_cfg)
+    if listed_roles != set(oo_cfg.deployment.roles):
+        missing_info = True
+        click.echo('Any roles assigned to hosts must be defined: {}'.format(listed_roles))
+
     if missing_info:
         sys.exit(1)
+
+def get_host_roles_set(oo_cfg):
+    roles_set = set()
+    for host in oo_cfg.deployment.hosts:
+        for role in host.roles:
+            roles_set.add(role)
+
+    return roles_set
 
 def get_proxy_hostnames_and_excludes():
     message = """
@@ -577,30 +595,33 @@ https://docs.openshift.com/enterprise/latest/admin_guide/install/prerequisites.h
     confirm_continue(message)
     click.clear()
 
-    if oo_cfg.settings.get('ansible_ssh_user', '') == '':
-        oo_cfg.settings['ansible_ssh_user'] = get_ansible_ssh_user()
+    if not oo_cfg.deployment.variables.get('ansible_ssh_user', ''):
+        oo_cfg.deployment.variables['ansible_ssh_user'] = get_ansible_ssh_user()
         click.clear()
 
-    if oo_cfg.settings.get('variant', '') == '':
+    if not oo_cfg.deployment.variables.get('variant', ''):
         variant, version = get_variant_and_version()
-        oo_cfg.settings['variant'] = variant.name
-        oo_cfg.settings['variant_version'] = version.name
+        oo_cfg.deployment.variables['variant'] = variant.name
+        oo_cfg.deployment.variables['variant_version'] = version.name
         click.clear()
 
-    if not oo_cfg.hosts:
-        oo_cfg.hosts = collect_hosts(oo_cfg)
+    if not oo_cfg.deployment.hosts:
+        oo_cfg.deployment.hosts, roles = collect_hosts(oo_cfg)
+
+        for role in roles:
+            oo_cfg.deployment.roles.append(Role(name=role))
         click.clear()
 
-    if not oo_cfg.settings.get('master_routingconfig_subdomain', None):
-        oo_cfg.settings['master_routingconfig_subdomain'] = get_master_routingconfig_subdomain()
+    if not oo_cfg.deployment.variables.get('master_routingconfig_subdomain', None):
+        oo_cfg.deployment.variables['master_routingconfig_subdomain'] = get_master_routingconfig_subdomain()
         click.clear()
 
     if not oo_cfg.settings.get('openshift_http_proxy', None) and \
        LooseVersion(oo_cfg.settings.get('variant_version', '0.0')) >= LooseVersion('3.2'):
         http_proxy, https_proxy, proxy_excludes = get_proxy_hostnames_and_excludes()
-        oo_cfg.settings['openshift_http_proxy'] = http_proxy
-        oo_cfg.settings['openshift_https_proxy'] = https_proxy
-        oo_cfg.settings['openshift_no_proxy'] = proxy_excludes
+        oo_cfg.deployment.variables['proxy_http'] = http_proxy
+        oo_cfg.deployment.variables['proxy_https'] = https_proxy
+        oo_cfg.deployment.variables['proxy_exclude_hosts'] = proxy_excludes
         click.clear()
 
     return oo_cfg
@@ -620,7 +641,7 @@ def get_installed_hosts(hosts, callback_facts):
 
     # count nativeha lb as an installed host
     try:
-        first_master = next(host for host in hosts if host.master)
+        first_master = next(host for host in hosts if host.is_master())
         lb_hostname = callback_facts[first_master.connect_to]['master'].get('cluster_hostname', '')
         lb_host = \
             next(host for host in hosts if host.ip == callback_facts[lb_hostname]['common']['ip'])
@@ -639,17 +660,17 @@ def is_installed_host(host, callback_facts):
            callback_facts[host.connect_to]['common'].get('version', '') and \
            callback_facts[host.connect_to]['common'].get('version', '') != 'None'
 
-    return version_found or host.master_lb or host.preconfigured
+    return version_found or host.is_master_lb() or host.preconfigured
 
 # pylint: disable=too-many-branches
 # This pylint error will be corrected shortly in separate PR.
 def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force, verbose):
 
     # Copy the list of existing hosts so we can remove any already installed nodes.
-    hosts_to_run_on = list(oo_cfg.hosts)
+    hosts_to_run_on = list(oo_cfg.deployment.hosts)
 
     # Check if master or nodes already have something installed
-    installed_hosts = get_installed_hosts(oo_cfg.hosts, callback_facts)
+    installed_hosts = get_installed_hosts(oo_cfg.deployment.hosts, callback_facts)
     if len(installed_hosts) > 0:
         click.echo('Installed environment detected.')
         # This check has to happen before we start removing hosts later in this method
@@ -671,11 +692,11 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force, verbose):
 
         # present a message listing already installed hosts and remove hosts if needed
         for host in installed_hosts:
-            if host.master:
+            if host.is_master():
                 click.echo("{} is already an OpenShift Master".format(host))
                 # Masters stay in the list, we need to run against them when adding
                 # new nodes.
-            elif host.node:
+            elif host.is_node():
                 click.echo("{} is already an OpenShift Node".format(host))
                 # force is only used for reinstalls so we don't want to remove
                 # anything.
@@ -702,14 +723,14 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force, verbose):
                     new_nodes = collect_new_nodes(oo_cfg)
 
                     hosts_to_run_on.extend(new_nodes)
-                    oo_cfg.hosts.extend(new_nodes)
+                    oo_cfg.deployment.hosts.extend(new_nodes)
 
                     openshift_ansible.set_config(oo_cfg)
                     click.echo('Gathering information from hosts...')
-                    callback_facts, error = openshift_ansible.default_facts(oo_cfg.hosts, verbose)
+                    callback_facts, error = openshift_ansible.default_facts(oo_cfg.deployment.hosts, verbose)
                     if error or callback_facts is None:
                         click.echo("There was a problem fetching the required information. See " \
-                                   "{} for details.".format(oo_cfg.settings['ansible_log_path']))
+                                   "{} for details.".format(oo_cfg.deployment.variables['ansible_log_path']))
                         sys.exit(1)
                 else:
                     pass # proceeding as normal should do a clean install
@@ -775,23 +796,23 @@ def cli(ctx, unattended, configuration, ansible_playbook_directory, ansible_conf
 
     # If no playbook dir on the CLI, check the config:
     if not ansible_playbook_directory:
-        ansible_playbook_directory = oo_cfg.settings.get('ansible_playbook_directory', '')
+        ansible_playbook_directory = oo_cfg.deployment.variables.get('ansible_playbook_directory', '')
     # If still no playbook dir, check for the default location:
     if not ansible_playbook_directory and os.path.exists(DEFAULT_PLAYBOOK_DIR):
         ansible_playbook_directory = DEFAULT_PLAYBOOK_DIR
     validate_ansible_dir(ansible_playbook_directory)
-    oo_cfg.settings['ansible_playbook_directory'] = ansible_playbook_directory
+    oo_cfg.deployment.variables['ansible_playbook_directory'] = ansible_playbook_directory
     oo_cfg.ansible_playbook_directory = ansible_playbook_directory
     ctx.obj['ansible_playbook_directory'] = ansible_playbook_directory
 
     if ctx.obj['ansible_config']:
-        oo_cfg.settings['ansible_config'] = ctx.obj['ansible_config']
-    elif 'ansible_config' not in oo_cfg.settings and \
+        oo_cfg.deployment.variables['ansible_config'] = ctx.obj['ansible_config']
+    elif 'ansible_config' not in oo_cfg.deployment.variables and \
         os.path.exists(DEFAULT_ANSIBLE_CONFIG):
         # If we're installed by RPM this file should exist and we can use it as our default:
-        oo_cfg.settings['ansible_config'] = DEFAULT_ANSIBLE_CONFIG
+        oo_cfg.deployment.variables['ansible_config'] = DEFAULT_ANSIBLE_CONFIG
 
-    oo_cfg.settings['ansible_log_path'] = ctx.obj['ansible_log_path']
+    oo_cfg.deployment.variables['ansible_log_path'] = ctx.obj['ansible_log_path']
 
     ctx.obj['oo_cfg'] = oo_cfg
     openshift_ansible.set_config(oo_cfg)
@@ -803,14 +824,14 @@ def uninstall(ctx):
     oo_cfg = ctx.obj['oo_cfg']
     verbose = ctx.obj['verbose']
 
-    if len(oo_cfg.hosts) == 0:
+    if len(oo_cfg.deployment.hosts) == 0:
         click.echo("No hosts defined in: %s" % oo_cfg.config_path)
         sys.exit(1)
 
     click.echo("OpenShift will be uninstalled from the following hosts:\n")
     if not ctx.obj['unattended']:
         # Prompt interactively to confirm:
-        for host in oo_cfg.hosts:
+        for host in oo_cfg.deployment.hosts:
             click.echo("  * %s" % host.connect_to)
         proceed = click.confirm("\nDo you wish to proceed?")
         if not proceed:
@@ -843,12 +864,12 @@ def upgrade(ctx, latest_minor, next_major):
                             }
                        }
 
-    if len(oo_cfg.hosts) == 0:
+    if len(oo_cfg.deployment.hosts) == 0:
         click.echo("No hosts defined in: %s" % oo_cfg.config_path)
         sys.exit(1)
 
-    old_variant = oo_cfg.settings['variant']
-    old_version = oo_cfg.settings['variant_version']
+    old_variant = oo_cfg.deployment.variables['variant']
+    old_version = oo_cfg.deployment.variables['variant_version']
     mapping = upgrade_mappings.get(old_version)
 
     message = """
@@ -872,17 +893,17 @@ def upgrade(ctx, latest_minor, next_major):
         new_version = mapping['major_version']
         # Update config to reflect the version we're targetting, we'll write
         # to disk once ansible completes successfully, not before.
-        oo_cfg.settings['variant_version'] = new_version
-        if oo_cfg.settings['variant'] == 'enterprise':
-            oo_cfg.settings['variant'] = 'openshift-enterprise'
+        oo_cfg.deployment.variables['variant_version'] = new_version
+        if oo_cfg.deployment.variables['variant'] == 'enterprise':
+            oo_cfg.deployment.variables['variant'] = 'openshift-enterprise'
 
     if latest_minor:
         playbook = mapping['minor_playbook']
         new_version = mapping['minor_version']
 
     click.echo("Openshift will be upgraded from %s %s to %s %s on the following hosts:\n" % (
-        old_variant, old_version, oo_cfg.settings['variant'], new_version))
-    for host in oo_cfg.hosts:
+        old_variant, old_version, oo_cfg.deployment.variables['variant'], new_version))
+    for host in oo_cfg.deployment.hosts:
         click.echo("  * %s" % host.connect_to)
 
     if not ctx.obj['unattended']:
@@ -895,7 +916,7 @@ def upgrade(ctx, latest_minor, next_major):
     retcode = openshift_ansible.run_upgrade_playbook(playbook, verbose)
     if retcode > 0:
         click.echo("Errors encountered during upgrade, please check %s." %
-            oo_cfg.settings['ansible_log_path'])
+            oo_cfg.deployment.variables['ansible_log_path'])
     else:
         oo_cfg.save_to_disk()
         click.echo("Upgrade completed! Rebooting all hosts is recommended.")
@@ -917,13 +938,13 @@ def install(ctx, force, gen_inventory):
 
     check_hosts_config(oo_cfg, ctx.obj['unattended'])
 
-    print_installation_summary(oo_cfg.hosts, oo_cfg.settings.get('variant_version', None))
+    print_installation_summary(oo_cfg.deployment.hosts, oo_cfg.deployment.variables.get('variant_version', None))
     click.echo('Gathering information from hosts...')
-    callback_facts, error = openshift_ansible.default_facts(oo_cfg.hosts,
+    callback_facts, error = openshift_ansible.default_facts(oo_cfg.deployment.hosts,
         verbose)
     if error or callback_facts is None:
         click.echo("There was a problem fetching the required information. " \
-                   "Please see {} for details.".format(oo_cfg.settings['ansible_log_path']))
+                   "Please see {} for details.".format(oo_cfg.deployment.variables['ansible_log_path']))
         sys.exit(1)
 
     hosts_to_run_on, callback_facts = get_hosts_to_run_on(
@@ -958,7 +979,7 @@ If changes are needed please edit the config file above and re-run.
     if not ctx.obj['unattended']:
         confirm_continue(message)
 
-    error = openshift_ansible.run_main_playbook(inventory_file, oo_cfg.hosts,
+    error = openshift_ansible.run_main_playbook(inventory_file, oo_cfg.deployment.hosts,
                                                 hosts_to_run_on, verbose)
     if error:
         # The bootstrap script will print out the log location.
