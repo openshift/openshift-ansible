@@ -916,7 +916,7 @@ def get_openshift_version(facts, cli_image=None):
 
         if container is not None:
             exit_code, output, _ = module.run_command(['docker', 'exec', container, 'openshift', 'version'])
-            # if for some reason the container is installed by not running
+            # if for some reason the container is installed but not running
             # we'll fall back to using docker run later in this method.
             if exit_code == 0:
                 version = parse_openshift_version(output)
