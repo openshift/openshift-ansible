@@ -14,3 +14,4 @@
     name: cockpit.socket
     enabled: true
     state: started
+  when: not openshift.common.is_containerized | bool
