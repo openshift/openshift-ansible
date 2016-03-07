@@ -16,6 +16,9 @@ galaxy_info:
   - cloud
   - system
 dependencies:
-- { role: openshift_docker }
-- { role: os_firewall }
-- { role: etcd_common }
+- role: os_firewall
+- role: etcd_certificates
+  etcd_certificates_action: server
+  etcd_cert_config_dir: /etc/etcd
+  etcd_cert_prefix: ''
+  etcd_generated_certs_dir: /etc/etcd/generated_certs

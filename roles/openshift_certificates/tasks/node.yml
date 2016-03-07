@@ -1,0 +1,20 @@
+---
+- name: Check status of node certificates
+  stat:
+    path: "{{ openshift.common.config_base }}/node/{{ item }}"
+  with_items:
+  - "system:node:{{ openshift.common.hostname }}.crt"
+  - "system:node:{{ openshift.common.hostname }}.key"
+  - "system:node:{{ openshift.common.hostname }}.kubeconfig"
+  - ca.crt
+  - server.key
+  - server.crt
+  register: g_node_cert_stat_result
+
+- set_fact:
+    node_certs_missing: "{{ False in (g_node_cert_stat_result.results
+                            | oo_collect(attribute='stat.exists')
+                            | list) }}"
+
+- include: create_node_certificates.yml
+  when: node_certs_missing | bool

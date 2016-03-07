@@ -1,5 +1,5 @@
-OpenShift etcd certificates
-========================
+etcd Certificates
+=================
 
 TODO
 

@@ -1,22 +1,43 @@
+---
+- fail:
+    msg: "openshift_manage_node_master_host must be defined"
+  when: openshift_manage_node_master_host is not defined
+
+# Necessary because when you're on a node that's also a master the master will be
+# restarted after the node restarts docker and it will take up to 60 seconds for
+# systemd to start the master again
+- name: Wait for master API to become available before proceeding
+  # Using curl here since the uri module requires python-httplib2 and
+  # wait_for port doesn't provide health information.
+  command: >
+    curl --silent --cacert {{ openshift.common.config_base }}/master/ca.crt
+    {{ openshift_node_master_api_url }}/healthz/ready
+  register: api_available_output
+  until: api_available_output.stdout == 'ok'
+  retries: 120
+  delay: 1
+  changed_when: false
+  when: openshift.common.is_containerized | bool
+
 - name: Wait for Node Registration
   command: >
-      {{ openshift.common.client_binary }} get node {{ item | lower }}
+      {{ openshift.common.client_binary }} get node {{ openshift.common.hostname | lower }}
   register: omd_get_node
   until: omd_get_node.rc == 0
   retries: 50
   delay: 5
   changed_when: false
-  with_items: openshift_nodes
+  delegate_to: "{{ openshift_manage_node_master_host }}"
 
 - name: Set node schedulability
   command: >
-    {{ openshift.common.admin_binary }} manage-node {{ item.openshift.common.hostname | lower }} --schedulable={{ 'true' if item.openshift.node.schedulable | bool else 'false' }}
-  with_items:
-    -  "{{ openshift_node_vars }}"
+    {{ openshift.common.admin_binary }} manage-node {{ openshift.common.hostname | lower }}
+    --schedulable={{ 'true' if openshift.node.schedulable | bool else 'false' }}
+  delegate_to: "{{ openshift_manage_node_master_host }}"
 
 - name: Label nodes
   command: >
-    {{ openshift.common.client_binary }} label --overwrite node {{ item.openshift.common.hostname | lower }} {{ item.openshift.node.labels | oo_combine_dict  }}
-  with_items:
-    -  "{{ openshift_node_vars }}"
-  when: "'labels' in item.openshift.node and item.openshift.node.labels != {}"
+    {{ openshift.common.client_binary }} label --overwrite node {{ openshift.common.hostname | lower }}
+    {{ openshift.node.labels | oo_combine_dict }}
+  when: "'labels' in openshift.node and openshift.node.labels != {}"
+  delegate_to: "{{ openshift_manage_node_master_host }}"

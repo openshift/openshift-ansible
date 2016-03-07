@@ -17,3 +17,9 @@ openshift_master_valid_grant_methods:
 - auto
 - prompt
 - deny
+
+named_certs_dir: "{{ master_cert_config_dir }}/named_certificates/"
+named_certs_specified: "{{ openshift_master_named_certificates is defined }}"
+overwrite_named_certs: "{{ openshift_master_overwrite_named_certificates | default(false) }}"
+internal_hostnames: "{{ hostvars[openshift_certificates_ca_host].openshift.common.internal_hostnames }}"
+named_certificates: "{{ hostvars[openshift_certificates_ca_host].openshift_master_named_certificates | default([]) }}"

@@ -1,6 +1,4 @@
 ---
-etcd_peers_group: oo_etcd_to_config
-
 # etcd server vars
 etcd_conf_dir: /etc/etcd
 etcd_ca_file: "{{ etcd_conf_dir }}/ca.crt"

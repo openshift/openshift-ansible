@@ -1,5 +1,5 @@
 ---
-{% for host in groups[etcd_peers_group] %}
+{% for host in etcd_peers %}
 {% set entry=hostvars[host] %}
 {{ entry.inventory_hostname }}:
 {% if 'etcd_interface' in entry %}

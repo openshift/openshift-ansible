@@ -1,100 +1,4 @@
 ---
-- name: Gather and set facts for node hosts
-  hosts: oo_nodes_to_config
-  vars:
-    t_oo_option_node_debug_level: "{{ lookup('oo_option', 'openshift_node_debug_level') }}"
-  pre_tasks:
-  - set_fact:
-      openshift_node_debug_level: "{{ t_oo_option_node_debug_level }}"
-    when: openshift_node_debug_level is not defined and t_oo_option_node_debug_level != ""
-  roles:
-  - openshift_facts
-  tasks:
-  # Since the master is generating the node certificates before they are
-  # configured, we need to make sure to set the node properties beforehand if
-  # we do not want the defaults
-  - openshift_facts:
-      role: node
-      local_facts:
-        labels: "{{ openshift_node_labels | default(None) }}"
-        annotations: "{{ openshift_node_annotations | default(None) }}"
-        schedulable: "{{ openshift_schedulable | default(openshift_scheduleable) | default(None) }}"
-  - name: Check status of node certificates
-    stat:
-      path: "{{ openshift.common.config_base }}/node/{{ item }}"
-    with_items:
-    - "system:node:{{ openshift.common.hostname }}.crt"
-    - "system:node:{{ openshift.common.hostname }}.key"
-    - "system:node:{{ openshift.common.hostname }}.kubeconfig"
-    - ca.crt
-    - server.key
-    - server.crt
-    register: stat_result
-  - set_fact:
-      certs_missing: "{{ stat_result.results | oo_collect(attribute='stat.exists')
-                         | list | intersect([false])}}"
-      node_subdir: node-{{ openshift.common.hostname }}
-      config_dir: "{{ openshift.common.config_base }}/generated-configs/node-{{ openshift.common.hostname }}"
-      node_cert_dir: "{{ openshift.common.config_base }}/node"
-
-- name: Create temp directory for syncing certs
-  hosts: localhost
-  connection: local
-  become: no
-  gather_facts: no
-  tasks:
-  - name: Create local temp directory for syncing certs
-    local_action: command mktemp -d /tmp/openshift-ansible-XXXXXXX
-    register: mktemp
-    changed_when: False
-
-- name: Create node certificates
-  hosts: oo_first_master
-  vars:
-    nodes_needing_certs: "{{ hostvars
-                             | oo_select_keys(groups['oo_nodes_to_config']
-                                              | default([]))
-                             | oo_filter_list(filter_attr='certs_missing') }}"
-    sync_tmpdir: "{{ hostvars.localhost.mktemp.stdout }}"
-  roles:
-  - openshift_node_certificates
-  post_tasks:
-  - name: Create a tarball of the node config directories
-    command: >
-      tar -czvf {{ item.config_dir }}.tgz
-        --transform 's|system:{{ item.node_subdir }}|node|'
-        -C {{ item.config_dir }} .
-    args:
-      creates: "{{ item.config_dir }}.tgz"
-    with_items: nodes_needing_certs
-
-  - name: Retrieve the node config tarballs from the master
-    fetch:
-      src: "{{ item.config_dir }}.tgz"
-      dest: "{{ sync_tmpdir }}/"
-      flat: yes
-      fail_on_missing: yes
-      validate_checksum: yes
-    with_items: nodes_needing_certs
-
-- name: Deploy node certificates
-  hosts: oo_nodes_to_config
-  vars:
-    sync_tmpdir: "{{ hostvars.localhost.mktemp.stdout }}"
-  tasks:
-  - name: Ensure certificate directory exists
-    file:
-      path: "{{ node_cert_dir }}"
-      state: directory
-  # TODO: notify restart node
-  # possibly test service started time against certificate/config file
-  # timestamps in node to trigger notify
-  - name: Unarchive the tarball on the node
-    unarchive:
-      src: "{{ sync_tmpdir }}/{{ node_subdir }}.tgz"
-      dest: "{{ node_cert_dir }}"
-    when: certs_missing
-
 - name: Evaluate node groups
   hosts: localhost
   become: no
@@ -121,7 +25,10 @@
     openshift_docker_hosted_registry_insecure: True
     openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.master.portal_net }}"
   roles:
-  - openshift_node
+  - role: openshift_node
+    openshift_certificates_ca_host: "{{ groups.oo_first_master.0 }}"
+  - role: openshift_manage_node
+    openshift_manage_node_master_host: "{{ groups.oo_first_master.0 }}"
 
 - name: Configure node instances
   hosts: oo_nodes_to_config:!oo_containerized_master_nodes
@@ -134,97 +41,23 @@
     openshift_docker_hosted_registry_insecure: True
     openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.master.portal_net }}"
   roles:
-  - openshift_node
-
-- name: Gather and set facts for flannel certificatess
-  hosts: oo_nodes_to_config
-  tasks:
-  - name: Check status of flannel external etcd certificates
-    stat:
-      path: "{{ openshift.common.config_base }}/node/{{ item }}"
-    with_items:
-    - node.etcd-client.crt
-    - node.etcd-ca.crt
-    register: g_external_etcd_flannel_cert_stat_result
-    when: groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config and (openshift.common.use_flannel | bool)
-  - set_fact:
-      etcd_client_flannel_certs_missing: "{{ g_external_etcd_flannel_cert_stat_result.results
-                                             | oo_collect(attribute='stat.exists')
-                                             | list | intersect([false])}}"
-      etcd_cert_subdir: openshift-node-{{ openshift.common.hostname }}
-      etcd_cert_config_dir: "{{ openshift.common.config_base }}/node"
-      etcd_cert_prefix: node.etcd-
-    when: groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config and (openshift.common.use_flannel | bool)
-
-- name: Configure flannel etcd certificates
-  hosts: oo_first_etcd
-  vars:
-    etcd_generated_certs_dir: /etc/etcd/generated_certs
-    sync_tmpdir: "{{ hostvars.localhost.mktemp.stdout }}"
-  pre_tasks:
-  - set_fact:
-      etcd_needing_client_certs: "{{ hostvars
-                                   | oo_select_keys(groups['oo_nodes_to_config'])
-                                   | oo_filter_list(filter_attr='etcd_client_flannel_certs_missing') | default([]) }}"
-    when: etcd_client_flannel_certs_missing is defined and etcd_client_flannel_certs_missing
-  roles:
-  - role: etcd_certificates
-    when: openshift_use_flannel | default(false) | bool
-  post_tasks:
-  - name: Create a tarball of the etcd flannel certs
-    command: >
-      tar -czvf {{ etcd_generated_certs_dir }}/{{ item.etcd_cert_subdir }}.tgz
-        -C {{ etcd_generated_certs_dir }}/{{ item.etcd_cert_subdir }} .
-    args:
-      creates: "{{ etcd_generated_certs_dir }}/{{ item.etcd_cert_subdir }}.tgz"
-    with_items: etcd_needing_client_certs
-    when: etcd_client_flannel_certs_missing is defined and etcd_client_flannel_certs_missing
-  - name: Retrieve the etcd cert tarballs
-    fetch:
-      src: "{{ etcd_generated_certs_dir }}/{{ item.etcd_cert_subdir }}.tgz"
-      dest: "{{ sync_tmpdir }}/"
-      flat: yes
-      fail_on_missing: yes
-      validate_checksum: yes
-    with_items: etcd_needing_client_certs
-    when: etcd_client_flannel_certs_missing is defined and etcd_client_flannel_certs_missing
-
-- name: Copy the external etcd flannel certs to the nodes
-  hosts: oo_nodes_to_config
-  vars:
-    sync_tmpdir: "{{ hostvars.localhost.mktemp.stdout }}"
-  tasks:
-  - name: Ensure certificate directory exists
-    file:
-      path: "{{ openshift.common.config_base }}/node"
-      state: directory
-    when: etcd_client_flannel_certs_missing is defined and etcd_client_flannel_certs_missing
-  - name: Unarchive the tarball on the master
-    unarchive:
-      src: "{{ sync_tmpdir }}/{{ etcd_cert_subdir }}.tgz"
-      dest: "{{ etcd_cert_config_dir }}"
-    when: etcd_client_flannel_certs_missing is defined and etcd_client_flannel_certs_missing
-  - file:
-      path: "{{ etcd_cert_config_dir }}/{{ item }}"
-      owner: root
-      group: root
-      mode: 0600
-    with_items:
-    - node.etcd-client.crt
-    - node.etcd-client.key
-    - node.etcd-ca.crt
-    when: etcd_client_flannel_certs_missing is defined and etcd_client_flannel_certs_missing
-
+  - role: openshift_node
+    openshift_certificates_ca_host: "{{ groups.oo_first_master.0 }}"
+  - role: openshift_manage_node
+    openshift_manage_node_master_host: "{{ groups.oo_first_master.0 }}"
 
 - name: Additional node config
   hosts: oo_nodes_to_config
-  vars:
-    # TODO: Prefix flannel role variables.
-    openshift_node_master_api_url: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_url }}"
+  roles:
+  - role: openshift_flannel
     etcd_urls: "{{ hostvars[groups.oo_first_master.0].openshift.master.etcd_urls }}"
     embedded_etcd: "{{ hostvars[groups.oo_first_master.0].openshift.master.embedded_etcd }}"
-  roles:
-  - role: flannel
+    etcd_cert_subdir: "openshift-node-{{ openshift.common.hostname }}"
+    etcd_cert_config_dir: "{{ openshift.common.config_base }}/node"
+    etcd_certificates_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
+    etcd_certificates_hostname: "{{ openshift.common.hostname }}"
+    etcd_certificates_ip: "{{ openshift.common.ip }}"
+    etcd_peers: "{{ groups.oo_etcd_to_config }}"
     when: openshift.common.use_flannel | bool
   - role: nuage_node
     when: openshift.common.use_nuage | bool
@@ -234,45 +67,9 @@
     group_by: key=oo_nodes_deployment_type_{{ openshift.common.deployment_type }}
     changed_when: False
 
-- name: Delete temporary directory on localhost
-  hosts: localhost
-  connection: local
-  become: no
-  gather_facts: no
-  tasks:
-  - file: name={{ mktemp.stdout }} state=absent
-    changed_when: False
-
-# Additional config for online type deployments
-- name: Additional instance config
+- name: Additional instance config for online deployments
   hosts: oo_nodes_deployment_type_online
   gather_facts: no
   roles:
   - os_env_extras
   - os_env_extras_node
-
-- name: Set schedulability
-  hosts: oo_first_master
-  vars:
-    openshift_nodes: "{{ hostvars
-                         | oo_select_keys(groups['oo_nodes_to_config'])
-                         | oo_collect('openshift.common.hostname') }}"
-    openshift_node_vars: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config']) }}"
-  pre_tasks:
-  # Necessary because when you're on a node that's also a master the master will be
-  # restarted after the node restarts docker and it will take up to 60 seconds for
-  # systemd to start the master again
-  - name: Wait for master API to become available before proceeding
-    # Using curl here since the uri module requires python-httplib2 and
-    # wait_for port doesn't provide health information.
-    command: >
-      curl --silent --cacert {{ openshift.common.config_base }}/master/ca.crt
-      {{ openshift.master.api_url }}/healthz/ready
-    register: api_available_output
-    until: api_available_output.stdout == 'ok'
-    retries: 120
-    delay: 1
-    changed_when: false
-    when: openshift.common.is_containerized | bool
-  roles:
-  - openshift_manage_node
