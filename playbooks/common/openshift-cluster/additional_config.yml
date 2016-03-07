@@ -20,8 +20,6 @@
     when: openshift.common.install_examples | bool
   - role: openshift_cluster_metrics
     when: openshift.common.use_cluster_metrics | bool
-  - role: openshift_cluster_metrics_hawkular 
-    when: openshift.common.use_cluster_metrics_hawkular | bool and not openshift.common.use_cluster_metrics | bool
   - role: openshift_manageiq
     when: openshift.common.use_manageiq | bool
   - role: cockpit
@@ -56,3 +54,5 @@
   - role: openshift_registry
     registry_volume_claim: "{{ openshift.hosted.registry.storage.volume.name }}-claim"
     when: deploy_infra | bool and attach_registry_volume | bool
+  - role: openshift_metrics
+    when: openshift.common.use_openshift_metrics | bool and not openshift.common.use_cluster_metrics | bool

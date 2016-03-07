@@ -5,11 +5,6 @@
     cp {{ openshift.common.config_base }}/master/admin.kubeconfig {{hawkular_tmp_conf}}
   changed_when: false
 
-- name: Install cluster metrics templates
-  copy:
-    src: cluster-metrics
-    dest: "{{ openshift.common.config_base }}/"
-
 - name: Create metrics-deployer Service Account
   shell: >
     echo {{ deployer_service_account | to_json | quote }} |
@@ -43,8 +38,8 @@
 - name: Create Heapster Services
   shell: >
     {{ openshift.common.client_binary }} process -f
-    {{ openshift.common.config_base }}/cluster-metrics/{{ hawkular_type }}-metrics.yaml -v 
-    HAWKULAR_METRICS_HOSTNAME={{ hawkular_hostname }} |
+    /usr/share/openshift/exampes/infrastructure-templates/{{ hawkular_type }}/metrics-deployer.yaml -v 
+    HAWKULAR_METRICS_HOSTNAME={{ hawkular_hostname }},USE_PERSISTENT_STORAGE=false |
     {{ openshift.common.client_binary }} create -n openshift-infra -f - 
   register: oex_heapster_services
   failed_when: "'already exists' not in oex_heapster_services.stderr and oex_heapster_services.rc != 0"
