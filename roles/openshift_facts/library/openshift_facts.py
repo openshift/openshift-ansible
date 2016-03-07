@@ -713,7 +713,7 @@ def set_version_facts_if_unset(facts):
     """
     if 'common' in facts:
         deployment_type = facts['common']['deployment_type']
-        facts['common']['version'] = version = get_openshift_version()
+        facts['common']['version'] = version = get_openshift_version(facts)
         if version is not None:
             if deployment_type == 'origin':
                 version_gte_3_1_or_1_1 = LooseVersion(version) >= LooseVersion('1.1.0')
@@ -730,6 +730,15 @@ def set_version_facts_if_unset(facts):
         facts['common']['version_gte_3_1_or_1_1'] = version_gte_3_1_or_1_1
         facts['common']['version_gte_3_1_1_or_1_1_1'] = version_gte_3_1_1_or_1_1_1
         facts['common']['version_gte_3_2_or_1_2'] = version_gte_3_2_or_1_2
+
+        if version_gte_3_2_or_1_2:
+            examples_content_version = 'v1.2'
+        elif version_gte_3_1_or_1_1:
+            examples_content_version = 'v1.1'
+        else:
+            examples_content_version = 'v1.0'
+
+        facts['common']['examples_content_version'] = examples_content_version
 
     return facts
 
@@ -873,21 +882,64 @@ def get_current_config(facts):
 
     return current_config
 
-def get_openshift_version():
+def get_openshift_version(facts, cli_image=None):
     """ Get current version of openshift on the host
+
+        Args:
+            facts (dict): existing facts
+            optional cli_image for pulling the version number
 
         Returns:
             version: the current openshift version
     """
     version = None
 
+    # No need to run this method repeatedly on a system if we already know the
+    # version
+    if 'common' in facts:
+        if 'version' in facts['common'] and facts['common']['version'] is not None:
+            return facts['common']['version']
+
     if os.path.isfile('/usr/bin/openshift'):
         _, output, _ = module.run_command(['/usr/bin/openshift', 'version'])
-        versions = dict(e.split(' v') for e in output.splitlines() if ' v' in e)
-        version = versions.get('openshift', '')
+        version = parse_openshift_version(output)
 
-        #TODO: acknowledge the possility of a containerized install
+    if 'is_containerized' in facts['common'] and facts['common']['is_containerized']:
+        container = None
+        if 'master' in facts:
+            if 'cluster_method' in facts['master']:
+                container = facts['common']['service_type'] + '-master-api'
+            else:
+                container = facts['common']['service_type'] + '-master'
+        elif 'node' in facts:
+            container = facts['common']['service_type'] + '-node'
+
+        if container is not None:
+            exit_code, output, _ = module.run_command(['docker', 'exec', container, 'openshift', 'version'])
+            # if for some reason the container is installed by not running
+            # we'll fall back to using docker run later in this method.
+            if exit_code == 0:
+                version = parse_openshift_version(output)
+
+        if version is None and cli_image is not None:
+            # Assume we haven't installed the environment yet and we need
+            # to query the latest image
+            exit_code, output, _ = module.run_command(['docker', 'run', '--rm', cli_image, 'version'])
+            version = parse_openshift_version(output)
+
     return version
+
+def parse_openshift_version(output):
+    """ Apply provider facts to supplied facts dict
+
+        Args:
+            string: output of 'openshift version'
+        Returns:
+            string: the version number
+    """
+    versions = dict(e.split(' v') for e in output.splitlines() if ' v' in e)
+    return versions.get('openshift', '')
+
 
 def apply_provider_facts(facts, provider_facts):
     """ Apply provider facts to supplied facts dict
@@ -1090,9 +1142,11 @@ def set_container_facts_if_unset(facts):
         if 'ovs_image' not in facts['node']:
             facts['node']['ovs_image'] = ovs_image
 
-    if facts['common']['is_containerized']:
+    if bool(strtobool(str(facts['common']['is_containerized']))):
         facts['common']['admin_binary'] = '/usr/local/bin/oadm'
         facts['common']['client_binary'] = '/usr/local/bin/oc'
+        base_version = get_openshift_version(facts, cli_image).split('-')[0]
+        facts['common']['image_tag'] = "v" + base_version
 
     return facts
 

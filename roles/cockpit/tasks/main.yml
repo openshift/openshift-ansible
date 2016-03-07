@@ -5,8 +5,9 @@
     - cockpit-ws
     - cockpit-shell
     - cockpit-bridge
+    - cockpit-docker
     - "{{ cockpit_plugins }}"
-  when: not openshift.common.is_atomic | bool
+  when: not openshift.common.is_containerized | bool
 
 - name: Enable cockpit-ws
   service:

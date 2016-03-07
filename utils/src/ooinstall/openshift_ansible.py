@@ -117,7 +117,7 @@ def write_inventory_vars(base_inventory, multiple_masters, proxy):
             "openshift_master_cluster_public_hostname={}\n".format(proxy.public_hostname))
     if CFG.settings.get('master_routingconfig_subdomain', False):
         base_inventory.write(
-            "osm_default_subdomain={}\n".format(CFG.settings['master_routingconfig_subdomain']))
+            "openshift_master_default_subdomain={}\n".format(CFG.settings['master_routingconfig_subdomain']))
 
 
 

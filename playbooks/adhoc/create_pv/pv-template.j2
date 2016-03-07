@@ -10,7 +10,7 @@ spec:
     storage: {{ vol_size }}Gi
   accessModes:
     - ReadWriteOnce
-  persistentVolumeReclaimPolicy: Recycle
+  persistentVolumeReclaimPolicy: Retain
   awsElasticBlockStore:
     volumeID: aws://{{ vol_az }}/{{ vol_id }}
     fsType: ext4

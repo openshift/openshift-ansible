@@ -6,4 +6,16 @@ client_cert: "{{ vsp_openshift_dir }}/nuage.crt"
 client_key: "{{ vsp_openshift_dir }}/nuage.key"
 ca_cert: "{{ vsp_openshift_dir }}/ca.crt"
 api_server: "{{ openshift_node_master_api_url }}"
+nuage_mon_rest_server_port: "{{ nuage_openshift_monitor_rest_server_port | default('9443') }}"
+nuage_mon_rest_server_url: "https://{{ openshift_master_cluster_hostname }}:{{ nuage_mon_rest_server_port }}"
 docker_bridge: "docker0"
+rest_client_cert: "{{ vsp_openshift_dir }}/nuageMonClient.crt"
+rest_client_key: "{{ vsp_openshift_dir }}/nuageMonClient.key"
+rest_server_ca_cert: "{{ vsp_openshift_dir }}/nuageMonCA.crt"
+vport_mtu: "{{ nuage_interface_mtu | default('1460') }}"
+
+nuage_plugin_rest_client_crt_dir: "{{ nuage_ca_master_crt_dir }}/{{ ansible_nodename }}"
+nuage_ca_master_plugin_key: "{{ nuage_plugin_rest_client_crt_dir }}/nuageMonClient.key"
+nuage_ca_master_plugin_crt: "{{ nuage_plugin_rest_client_crt_dir }}/nuageMonClient.crt" 
+
+nuage_plugin_crt_dir : /usr/share/vsp-openshift

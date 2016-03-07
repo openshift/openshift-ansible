@@ -28,7 +28,7 @@
 # pylint: disable=duplicate-code
 
 # pylint: disable=import-error
-from openshift_tools.monitoring.zbxapi import ZabbixAPI, ZabbixConnection, ZabbixAPIError
+from openshift_tools.zbxapi import ZabbixAPI, ZabbixConnection, ZabbixAPIError
 
 CUSTOM_SCRIPT_ACTION = '0'
 IPMI_ACTION = '1'

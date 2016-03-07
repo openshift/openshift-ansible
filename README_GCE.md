@@ -1,3 +1,4 @@
+:warning: **WARNING** :warning: This feature is community supported and has not been tested by Red Hat. Visit [docs.openshift.com](https://docs.openshift.com) for [OpenShift Enterprise](https://docs.openshift.com/enterprise/latest/install_config/install/index.html) or [OpenShift Origin](https://docs.openshift.org/latest/install_config/install/index.html) supported installation docs.
 
 GCE Setup Instructions
 ======================

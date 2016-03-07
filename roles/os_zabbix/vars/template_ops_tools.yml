@@ -21,3 +21,34 @@ g_template_ops_tools:
     expression: '{Template Operations Tools:disc.ops.runner.command.exitcode[{#OSO_COMMAND}].last()}<>0'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_ops_runner_command.asciidoc'
     priority: average
+
+  zactions:
+  - name: 'Remote command for [Heal] triggers'
+    status: enabled
+    escalation_time: 60
+    conditions_filter:
+      calculation_type: "and/or"
+      conditions:
+      - conditiontype: maintenance status
+        operator: not in
+      - conditiontype: trigger name
+        operator: like
+        value: "[Heal]"
+      - conditiontype: trigger value
+        operator: "="
+        value: PROBLEM
+    operations:
+    - esc_step_from: 1
+      esc_step_to: 1
+      esc_period: 0
+      operationtype: remote command
+      opcommand:
+        command: 'ssh -i /etc/openshift_tools/scriptrunner_id_rsa {{ ozb_scriptrunner_user }}@{{ ozb_scriptrunner_bastion_host }} remote-healer --host \"{HOST.NAME}\" --trigger \"{TRIGGER.NAME}\" --trigger-val \"{TRIGGER.VALUE}\"'
+        execute_on: "zabbix server"
+        type: 'custom script'
+      target_hosts:
+      - target_type: 'zabbix server'
+      opconditions:
+      - conditiontype: 'event acknowledged'
+        operator: '='
+        value: 'not acknowledged'

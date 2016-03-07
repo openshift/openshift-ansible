@@ -10,5 +10,15 @@ enterpriseName: {{ enterprise }}
 domainName: {{ domain }}
 # IP address and port number of master API server
 masterApiServer: {{ api_server }}
+# REST server URL 
+nuageMonRestServer: {{ nuage_mon_rest_server_url }}
 # Bridge name for the docker bridge
 dockerBridgeName: {{ docker_bridge }}
+# Certificate for connecting to the kubemon REST API
+nuageMonClientCert: {{ rest_client_cert }}
+# Key to the certificate in restClientCert
+nuageMonClientKey: {{ rest_client_key }} 
+# CA certificate for verifying the master's rest server
+nuageMonServerCA: {{ rest_server_ca_cert }}
+# Nuage vport mtu size
+interfaceMTU: {{ vport_mtu  }}

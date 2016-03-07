@@ -70,7 +70,7 @@
       oauth_grant_method: "{{ openshift_master_oauth_grant_method | default(None) }}"
       sdn_cluster_network_cidr: "{{ osm_cluster_network_cidr | default(None) }}"
       sdn_host_subnet_length: "{{ osm_host_subnet_length | default(None) }}"
-      default_subdomain: "{{ osm_default_subdomain | default(None) }}"
+      default_subdomain: "{{ openshift_master_default_subdomain | default(osm_default_subdomain) | default(None) }}"
       custom_cors_origins: "{{ osm_custom_cors_origins | default(None) }}"
       default_node_selector: "{{ osm_default_node_selector | default(None) }}"
       project_request_message: "{{ osm_project_request_message | default(None) }}"
@@ -91,11 +91,6 @@
 - name: Install Master package
   action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-master{{ openshift_version  }} state=present"
   when: not openshift.common.is_containerized | bool
-
-- name: Pull master image
-  command: >
-    docker pull {{ openshift.master.master_image }}
-  when: openshift.common.is_containerized | bool
 
 - name: Install Master docker service file
   template:

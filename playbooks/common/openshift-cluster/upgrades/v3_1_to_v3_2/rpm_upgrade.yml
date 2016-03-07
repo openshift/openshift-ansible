@@ -1,0 +1,6 @@
+- name: Upgrade packages
+  command: "{{ ansible_pkg_mgr}} update -y {{ openshift.common.service_type }}-{{ component }}-{{ g_new_version }}"
+
+- name: Ensure python-yaml present for config upgrade
+  action: "{{ ansible_pkg_mgr }} name=PyYAML state=present"
+  when: not openshift.common.is_atomic | bool

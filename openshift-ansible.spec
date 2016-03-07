@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.47
+Version:        3.0.52
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -74,6 +74,10 @@ cp -rp playbooks %{buildroot}%{_datadir}/ansible/%{name}/
 # openshift-ansible-roles install
 cp -rp roles %{buildroot}%{_datadir}/ansible/%{name}/
 
+# openshift-ansible-zabbix install (standalone lib_zabbix library)
+mkdir -p %{buildroot}%{_datadir}/ansible/zabbix
+cp -rp roles/lib_zabbix/library/* %{buildroot}%{_datadir}/ansible/zabbix/
+
 # openshift-ansible-filter-plugins install
 cp -rp filter_plugins %{buildroot}%{_datadir}/ansible_plugins/
 
@@ -115,6 +119,20 @@ Scripts to make it nicer when working with hosts that are defined only by metada
 /etc/bash_completion.d/*
 %config(noreplace) /etc/openshift_ansible/
 
+
+# ----------------------------------------------------------------------------------
+# openshift-ansible-zabbix subpackage
+# ----------------------------------------------------------------------------------
+%package zabbix
+Summary:       Openshift and Atomic Enterprise Ansible Zabbix library
+Requires:      python-openshift-tools-zbxapi
+BuildArch:     noarch
+
+%description zabbix
+Python library for interacting with Zabbix with Ansible.
+
+%files zabbix
+%{_datadir}/ansible/zabbix
 
 # ----------------------------------------------------------------------------------
 # openshift-ansible-docs subpackage
@@ -261,6 +279,113 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Mar 07 2016 Joel Diaz <jdiaz@redhat.com> 3.0.52-1
+- fixed monitoring containers to restart (sten@redhat.com)
+- Lock down generated certs dir (sdodson@redhat.com)
+- package up lib_zabbix into its own subpackage (jdiaz@redhat.com)
+
+* Fri Mar 04 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.51-1
+- Bug 1314645 - Upgrade failed with "One or more undefined variables 'dict
+  object' has no attribute 'stdout'" (bleanhar@redhat.com)
+- EBS storage does not support Recycle (sedgar@redhat.com)
+- Remove cockpit and kubernetes-client packages in uninstall playbook.
+  (abutcher@redhat.com)
+- Update README_origin.md (trond.hapnes@gmail.com)
+- Add cockpit-docker package by default (nakayamakenjiro@gmail.com)
+
+* Thu Mar 03 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.50-1
+- change lib_zabbix's import to new pathing (jdiaz@redhat.com)
+- upgrade README fixes (bleanhar@redhat.com)
+- A few images weren't being uninstalled (bleanhar@redhat.com)
+- Adding support for v1.2 examples (bleanhar@redhat.com)
+- Adding templates for v1.2 (bleanhar@redhat.com)
+- Adding verify_upgrade_version variable for upgrade debugging
+  (bleanhar@redhat.com)
+- Correctly set the image tag for containerized installs (and upgrades)
+  (bleanhar@redhat.com)
+- Adding newly required variable (bleanhar@redhat.com)
+- Updating the containerized cli wrapper to work for both docker 1.8 and 1.9
+  (bleanhar@redhat.com)
+- uninstall the QE images (bleanhar@redhat.com)
+- First past at the upgrade process (bleanhar@redhat.com)
+- Check for is_containerized value when setting binary locations.
+  (abutcher@redhat.com)
+- Bug 1313169 - Ansible installer tries to enable etcd_container service even
+  though containerized=false (bleanhar@redhat.com)
+- Fix logging infra template version mismatch. (dgoodwin@redhat.com)
+- Changes required for Nuage monitor REST server
+  (vishal.patil@nuagenetworks.net)
+- disable http-server-close option (jdetiber@redhat.com)
+- change [HEAL] to [Heal] to match with v2 (jdiaz@redhat.com)
+- Increase maxconn settings for haproxy lb (jdetiber@redhat.com)
+
+* Tue Mar 01 2016 Matt Woodson <mwoodson@redhat.com> 3.0.49-1
+- fixed error in awsutil.py (mwoodson@redhat.com)
+
+* Tue Mar 01 2016 Matt Woodson <mwoodson@redhat.com> 3.0.48-1
+- ohi: added subtype searching (mwoodson@redhat.com)
+- make heal remote actions generic for all [HEAL] triggers (jdiaz@redhat.com)
+- added extra steps to ensure docker starts up (mwoodson@redhat.com)
+- role_removal: docker_storage;  This is the old way, no longer used
+  (mwoodson@redhat.com)
+- role: added docker_storage_setup (mwoodson@redhat.com)
+- Use inventory_hostname for openshift master certs to sync.
+  (abutcher@redhat.com)
+- Adding a symlink to making loading the examples more convenient
+  (bleanhar@redhat.com)
+- docs: Explain a bit more how to expand Atomic Host rootfs
+  (walters@verbum.org)
+- a-o-i: Rename osm_default_subdomain (smunilla@redhat.com)
+- Updating tito config for OSE 3.2 (bleanhar@redhat.com)
+- Synchronize master kube configs (abutcher@redhat.com)
+- added os_utils, os_reboot_server role; removed containerization stuff from
+  the updated (mwoodson@redhat.com)
+- Add warnings to bin/cluster and READMEs (abutcher@redhat.com)
+- Add host subnet length example. (abutcher@redhat.com)
+- Upgrade -1510 to CentOS-7-x86_64-GenericCloud-1602. (cben@redhat.com)
+- Pin down CentOS-7-x86_64-GenericCloud-1510.qcow2.xz version, which the
+  checksum currently expects (#1384). (cben@redhat.com)
+- Change is_atomic to is_containerized (florian.lambert@enovance.com)
+- Rename variable to openshift_master_default_subdomain with backwards
+  compatibility. (jstuever@redhat.com)
+- lib_dyn: more updates to the lib_dyn module. Made the TTL more flexible
+  (mwoodson@redhat.com)
+- remote heal action for OVS down (jdiaz@redhat.com)
+- Pass registry claim to openshift_registry. (abutcher@redhat.com)
+- Refactor - increase retries instead of delay in "Wait for Node Registration"
+  (david.mat@archimiddle.com)
+- Better diagnostic messages when an OpenStack heat stack creation fails
+  (lhuard@amadeus.com)
+- made some changes to lib_dyn update (mwoodson@redhat.com)
+- Increase timeout on Wait for Node Registration (david.mat@archimiddle.com)
+- Fix typo in oscp (agrimm@redhat.com)
+- Add correct parsing of ec2_security_groups env variable
+  (david.mat@archimiddle.com)
+- changed oso_host_monitoring to use the oo_ vars (twiest@redhat.com)
+- Add quotes around src argument to support paths with spaces
+  (david.mat@archimiddle.com)
+- Add missing is_atomic condition on upgrade package
+  (florian.lambert@enovance.com)
+- configure debug_level for master and node from cli (jawed.khelil@amadeus.com)
+- remove version requirement from etcd, shouldn't be needed anymore
+  (maxamillion@fedoraproject.org)
+- Add ansible.cfg to .gitignore (jdetiber@redhat.com)
+- added node-secgroup to master_nodes (j.david.nieto@gmail.com)
+- Document setting the VPC subnet (puiterwijk@redhat.com)
+- Update the AMIs used in README_AWS (puiterwijk@redhat.com)
+- Add byo examples for network cidr and api/console ports.
+  (abutcher@redhat.com)
+- Add openshift_docker roles to master/node scaleup. (abutcher@redhat.com)
+- Fail when master.master_count descreases or master.ha changes.
+  (abutcher@redhat.com)
+- Protected facts. (abutcher@redhat.com)
+- Add modify_yaml module. (abutcher@redhat.com)
+- Re-arrange scaleup playbooks. (abutcher@redhat.com)
+- Move additional master configuration into a separate master playbook.
+  (abutcher@redhat.com)
+- Generate each master's certificates separately. (abutcher@redhat.com)
+- Add new_masters to scaleup playbook. (abutcher@redhat.com)
+
 * Wed Feb 24 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.47-1
 - a-o-i: Double safety check on master_lb (smunilla@redhat.com)
 - a-o-i: Better method for identifying master_lb (smunilla@redhat.com)

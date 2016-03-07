@@ -5,7 +5,7 @@
 
 - name: Create the log directory
   sudo: true
-  file: path={{ nuage_openshift_monitor_log_dir }} state=directory
+  file: path={{ nuage_mon_rest_server_logdir }} state=directory
 
 - name: Install Nuage Openshift Monitor 
   sudo: true
@@ -23,7 +23,9 @@
         - nuage.crt
         - nuage.key
         - nuage.kubeconfig 
- 
+
+- include: certificates.yml 
+
 - name: Create nuage-openshift-monitor.yaml
   sudo: true
   template: src=nuage-openshift-monitor.j2 dest=/usr/share/nuage-openshift-monitor/nuage-openshift-monitor.yaml owner=root mode=0644

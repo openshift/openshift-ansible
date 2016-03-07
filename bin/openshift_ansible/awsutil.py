@@ -31,6 +31,7 @@ class AwsUtil(object):
         host_type_aliases -- a list of aliases to common host-types (e.g. ex-node)
         """
 
+        self.alias_lookup = {}
         host_type_aliases = host_type_aliases or {}
 
         self.host_type_aliases = host_type_aliases
@@ -40,7 +41,6 @@ class AwsUtil(object):
 
     def setup_host_type_alias_lookup(self):
         """Sets up the alias to host-type lookup table."""
-        self.alias_lookup = {}
         for key, values in self.host_type_aliases.iteritems():
             for value in values:
                 self.alias_lookup[value] = key
@@ -100,6 +100,20 @@ class AwsUtil(object):
 
         host_types.sort()
         return host_types
+
+    def get_sub_host_types(self):
+        """Searches for sub-host-type tags in the inventory and returns all sub-host-types found."""
+        pattern = re.compile(r'^oo_subhosttype_(.*)')
+
+        sub_host_types = []
+        inv = self.get_inventory()
+        for key in inv.keys():
+            matched = pattern.match(key)
+            if matched:
+                sub_host_types.append(matched.group(1))
+
+        sub_host_types.sort()
+        return sub_host_types
 
     def get_security_groups(self):
         """Searches for security_groups in the inventory and returns all SGs found."""
@@ -192,9 +206,15 @@ class AwsUtil(object):
             host_type = self.resolve_host_type(host_type)
         return "oo_hosttype_%s" % host_type
 
+    @staticmethod
+    def gen_sub_host_type_tag(sub_host_type):
+        """Generate the host type tag
+        """
+        return "oo_subhosttype_%s" % sub_host_type
+
     # This function uses all of these params to perform a filters on our host inventory.
     # pylint: disable=too-many-arguments
-    def get_host_list(self, clusters=None, host_type=None, envs=None, version=None, cached=False):
+    def get_host_list(self, clusters=None, host_type=None, sub_host_type=None, envs=None, version=None, cached=False):
         """Get the list of hosts from the inventory using host-type and environment
         """
         retval = set([])
@@ -228,6 +248,9 @@ class AwsUtil(object):
 
         if host_type:
             retval.intersection_update(inv.get(self.gen_host_type_tag(host_type, version), []))
+
+        if sub_host_type:
+            retval.intersection_update(inv.get(self.gen_sub_host_type_tag(sub_host_type), []))
 
         if version != 'all':
             retval.intersection_update(inv.get(AwsUtil.gen_version_tag(version), []))

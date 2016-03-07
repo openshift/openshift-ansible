@@ -73,9 +73,14 @@
         - atomic-openshift-master
         - atomic-openshift-node
         - atomic-openshift-sdn-ovs
+        - cockpit-bridge
+        - cockpit-docker
+        - cockpit-shell
+        - cockpit-ws
         - corosync
         - etcd
         - haproxy
+        - kubernetes-client
         - openshift
         - openshift-master
         - openshift-node
@@ -132,7 +137,11 @@
       register: exited_containers_to_delete
       with_items:
         - aep3.*/aep
+        - aep3.*/node
+        - aep3.*/openvswitch
         - openshift3/ose
+        - openshift3/node
+        - openshift3/openvswitch
         - openshift/origin
 
     - shell: "docker rm {{ item.stdout_lines | join(' ') }}"
@@ -147,6 +156,7 @@
       with_items:
         - registry\.access\..*redhat\.com/openshift3
         - registry\.access\..*redhat\.com/aep3
+        - registry\.qe\.openshift\.com/.*
         - registry\.access\..*redhat\.com/rhel7/etcd
         - docker.io/openshift
 
@@ -192,6 +202,7 @@
         - /etc/sysconfig/atomic-openshift-node
         - /etc/sysconfig/openshift-master
         - /etc/sysconfig/openshift-node
+        - /etc/sysconfig/openvswitch
         - /etc/sysconfig/origin-master
         - /etc/sysconfig/origin-master-api
         - /etc/sysconfig/origin-master-controllers

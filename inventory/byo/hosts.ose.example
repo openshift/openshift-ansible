@@ -133,7 +133,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #osm_api_server_args={'max-requests-inflight': ['400']}
 
 # default subdomain to use for exposed routes
-#osm_default_subdomain=apps.test.example.com
+#openshift_master_default_subdomain=apps.test.example.com
 
 # additional cors origins
 #osm_custom_cors_origins=['foo.example.com', 'bar.example.com']
@@ -157,6 +157,20 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 
 # Disable the OpenShift SDN plugin
 # openshift_use_openshift_sdn=False
+
+# Configure SDN cluster network CIDR block. This network block should
+# be a private block and should not conflict with existing network
+# blocks in your infrastructure that pods may require access to.
+# Can not be changed after deployment.
+#osm_cluster_network_cidr=10.1.0.0/16
+
+# Configure number of bits to allocate to each host’s subnet e.g. 8
+# would mean a /24 network on the host.
+#osm_host_subnet_length=8
+
+# Configure master API and console ports.
+#openshift_master_api_port=8443
+#openshift_master_console_port=8443
 
 # set RPM version for debugging purposes
 #openshift_pkg_version=-3.1.0.0
