@@ -762,9 +762,6 @@ def uninstall(ctx):
     oo_cfg = ctx.obj['oo_cfg']
     verbose = ctx.obj['verbose']
 
-    upgrade_mappings = {'3.0':'3.1',
-                        '3.1':'3.2'}
-
     if len(oo_cfg.hosts) == 0:
         click.echo("No hosts defined in: %s" % oo_cfg.config_path)
         sys.exit(1)
@@ -790,13 +787,28 @@ def upgrade(ctx, latest_minor, next_major):
     oo_cfg = ctx.obj['oo_cfg']
     verbose = ctx.obj['verbose']
 
+    upgrade_mappings = {
+                        '3.0':{
+                               'minor_version' :'3.0',
+                               'minor_playbook':'v3_0_minor/upgrade.yml',
+                               'major_version' :'3.1',
+                               'major_playbook':'v3_0_to_v3_1/upgrade.yml',
+                              },
+                        '3.1':{
+                               'minor_version' :'3.1',
+                               'minor_playbook':'v3_1_minor/upgrade.yml',
+                               'major_playbook':'v3_1_to_v3_2/upgrade.yml',
+                               'major_version' :'3.2',
+                            }
+                       }
+
     if len(oo_cfg.hosts) == 0:
         click.echo("No hosts defined in: %s" % oo_cfg.config_path)
         sys.exit(1)
 
     old_variant = oo_cfg.settings['variant']
     old_version = oo_cfg.settings['variant_version']
-
+    mapping = upgrade_mappings.get(old_version)
 
     message = """
         This tool will help you upgrade your existing OpenShift installation.
@@ -815,20 +827,20 @@ def upgrade(ctx, latest_minor, next_major):
             next_major = True
 
     if next_major:
-        new_version = upgrade_mappings.get(old_version)
+        playbook = mapping['major_playbook']
+        new_version = mapping['major_version']
         # Update config to reflect the version we're targetting, we'll write
         # to disk once ansible completes successfully, not before.
+        oo_cfg.settings['variant_version'] = new_version
         if oo_cfg.settings['variant'] == 'enterprise':
             oo_cfg.settings['variant'] = 'openshift-enterprise'
-        version = find_variant(oo_cfg.settings['variant'])[1]
-        oo_cfg.settings['variant_version'] = version.name
 
     if latest_minor:
-        new_version = old_version
+        playbook = mapping['minor_playbook']
+        new_version = mapping['minor_version']
 
     click.echo("Openshift will be upgraded from %s %s to %s %s on the following hosts:\n" % (
-        old_variant, old_version, oo_cfg.settings['variant'],
-        oo_cfg.settings['variant_version']))
+        old_variant, old_version, oo_cfg.settings['variant'], new_version))
     for host in oo_cfg.hosts:
         click.echo("  * %s" % host.connect_to)
 
@@ -839,7 +851,7 @@ def upgrade(ctx, latest_minor, next_major):
             click.echo("Upgrade cancelled.")
             sys.exit(0)
 
-    retcode = openshift_ansible.run_upgrade_playbook(old_version, new_version, verbose)
+    retcode = openshift_ansible.run_upgrade_playbook(playbook, verbose)
     if retcode > 0:
         click.echo("Errors encountered during upgrade, please check %s." %
             oo_cfg.settings['ansible_log_path'])
