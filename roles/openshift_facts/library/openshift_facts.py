@@ -58,10 +58,13 @@ def migrate_docker_facts(facts):
         facts['docker']['hosted_registry_network'] = facts['node'].pop('portal_net')
     return facts
 
+# TODO: We should add a generic migration function that takes source and destination
+# paths and does the right thing rather than one function for common, one for node, etc.
 def migrate_common_facts(facts):
     """ Migrate facts from various roles into common """
     params = {
-        'node': ( 'portal_net' )
+        'node': ('portal_net'),
+        'master': ('portal_net')
     }
     if 'common' not in facts:
         facts['common'] = {}
@@ -72,11 +75,26 @@ def migrate_common_facts(facts):
                     facts['common'][param] = facts[role].pop(param)
     return facts
 
+def migrate_node_facts(facts):
+    """ Migrate facts from various roles into node """
+    params = {
+        'common': ('dns_ip'),
+    }
+    if 'node' not in facts:
+        facts['node'] = {}
+    for role in params.keys():
+        if role in facts:
+            for param in params[role]:
+                if param in facts[role]:
+                    facts['node'][param] = facts[role].pop(param)
+    return facts
+
 def migrate_local_facts(facts):
     """ Apply migrations of local facts """
     migrated_facts = copy.deepcopy(facts)
     migrated_facts = migrate_docker_facts(migrated_facts)
     migrated_facts = migrate_common_facts(migrated_facts)
+    migrated_facts = migrate_node_facts(migrated_facts)
     return migrated_facts
 
 def migrate_hosted_facts(facts):
@@ -462,6 +480,27 @@ def set_metrics_facts_if_unset(facts):
         if 'use_cluster_metrics' not in facts['common']:
             use_cluster_metrics = False
             facts['common']['use_cluster_metrics'] = use_cluster_metrics
+    return facts
+
+def set_dnsmasq_facts_if_unset(facts):
+    """ Set dnsmasq facts if not already present in facts
+    Args:
+        facts (dict) existing facts
+    Returns:
+        facts (dict) updated facts with values set if not previously set
+    """
+
+    if 'common' in facts:
+        if 'use_dnsmasq' not in facts['common'] and facts['common']['version_gte_3_2_or_1_2']:
+            facts['common']['use_dnsmasq'] = True
+        else:
+            facts['common']['use_dnsmasq'] = False
+        if 'master' in facts and 'dns_port' not in facts['master']:
+            if facts['common']['use_dnsmasq']:
+                facts['master']['dns_port'] = 8053
+            else:
+                facts['master']['dns_port'] = 53
+
     return facts
 
 def set_project_cfg_facts_if_unset(facts):
@@ -1507,6 +1546,7 @@ class OpenShiftFacts(object):
         facts = build_controller_args(facts)
         facts = build_api_server_args(facts)
         facts = set_version_facts_if_unset(facts)
+        facts = set_dnsmasq_facts_if_unset(facts)
         facts = set_manageiq_facts_if_unset(facts)
         facts = set_aggregate_facts(facts)
         facts = set_etcd_facts_if_unset(facts)
@@ -1564,7 +1604,7 @@ class OpenShiftFacts(object):
                                       etcd_hosts='', etcd_port='4001',
                                       portal_net='172.30.0.0/16',
                                       embedded_etcd=True, embedded_kube=True,
-                                      embedded_dns=True, dns_port='53',
+                                      embedded_dns=True,
                                       bind_addr='0.0.0.0',
                                       session_max_seconds=3600,
                                       session_name='ssn',

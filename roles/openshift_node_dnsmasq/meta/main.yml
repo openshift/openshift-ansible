@@ -1,7 +1,7 @@
 ---
 galaxy_info:
-  author: Jhon Honce
-  description: OpenShift Node
+  author: Scott Dodson
+  description: OpenShift Node DNSMasq support
   company: Red Hat, Inc.
   license: Apache License, Version 2.0
   min_ansible_version: 1.7
@@ -12,9 +12,4 @@ galaxy_info:
   categories:
   - cloud
 dependencies:
-- role: openshift_docker
-- role: openshift_cloud_provider
 - role: openshift_common
-- role: openshift_node_dnsmasq
-  when: openshift.common.use_dnsmasq
-
