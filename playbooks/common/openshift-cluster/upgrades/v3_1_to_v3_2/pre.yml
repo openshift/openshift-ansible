@@ -40,6 +40,12 @@
         valid version for a {{ target_version }} upgrade
     when: openshift_pkg_version is defined and openshift_pkg_version.split('-',1).1 | version_compare(target_version ,'<')
 
+  - fail:
+      msg: >
+        openshift_image_tag is {{ openshift_image_tag }} which is not a
+        valid version for a {{ target_version }} upgrade
+    when: openshift_image_tag is defined and openshift_image_tag.split('v',1).1 | version_compare(target_version ,'<')
+
 - name: Verify upgrade can proceed
   hosts: oo_masters_to_config:oo_nodes_to_config
   vars:
@@ -76,13 +82,17 @@
       g_new_version: "{{ g_aos_versions.curr_version.split('-', 1).0 if g_aos_versions.avail_version is none else g_aos_versions.avail_version.split('-', 1).0 }}"
     when: openshift_pkg_version is not defined
 
-  - fail:
-      msg: Verifying the correct version was found
-    when: verify_upgrade_version is defined and g_new_version != verify_upgrade_version
-
   - set_fact:
       g_new_version: "{{ openshift_pkg_version | replace('-','') }}"
     when: openshift_pkg_version is defined
+
+  - set_fact:
+      g_new_version: "{{ openshift_image_tag | replace('v','') }}"
+    when: openshift_image_tag is defined
+
+  - fail:
+      msg: Verifying the correct version was found
+    when: verify_upgrade_version is defined and g_new_version != verify_upgrade_version
 
   - name: Update systemd units
     script: ../files/ensure_system_units_have_version.sh {{ openshift.common.service_type }} {{ openshift.common.deployment_type }} {{ g_aos_versions.curr_version }}

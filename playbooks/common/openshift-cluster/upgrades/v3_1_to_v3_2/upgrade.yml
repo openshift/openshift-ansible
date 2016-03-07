@@ -95,7 +95,7 @@
 - name: Reconcile Cluster Roles and Cluster Role Bindings and Security Context Constraints
   hosts: oo_masters_to_config
   roles:
-  - { role: openshift_cli, image_tag: "v{{ g_new_version }}"  }
+  - { role: openshift_cli, openshift_image_tag: "v{{ g_new_version }}"  }
   vars:
     origin_reconcile_bindings: "{{ deployment_type == 'origin' and g_new_version | version_compare('1.0.6', '>') }}"
     ent_reconcile_bindings: true
