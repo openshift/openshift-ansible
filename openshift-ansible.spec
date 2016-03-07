@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.51
+Version:        3.0.52
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -279,6 +279,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Mar 07 2016 Joel Diaz <jdiaz@redhat.com> 3.0.52-1
+- fixed monitoring containers to restart (sten@redhat.com)
+- Lock down generated certs dir (sdodson@redhat.com)
+- package up lib_zabbix into its own subpackage (jdiaz@redhat.com)
+
 * Fri Mar 04 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.51-1
 - Bug 1314645 - Upgrade failed with "One or more undefined variables 'dict
   object' has no attribute 'stdout'" (bleanhar@redhat.com)
