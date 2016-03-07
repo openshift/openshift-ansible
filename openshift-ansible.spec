@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.52
+Version:        3.0.53
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -279,6 +279,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Mar 07 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.53-1
+- Don't enable cockpit-ws for containerized installs (bleanhar@redhat.com)
+- Support openshift_image_tag (bleanhar@redhat.com)
+- Set g_new_master_hosts in upgrade playbooks. (abutcher@redhat.com)
+- Add setting for configuring nofile limit for haproxy (jdetiber@redhat.com)
+
 * Mon Mar 07 2016 Joel Diaz <jdiaz@redhat.com> 3.0.52-1
 - fixed monitoring containers to restart (sten@redhat.com)
 - Lock down generated certs dir (sdodson@redhat.com)
