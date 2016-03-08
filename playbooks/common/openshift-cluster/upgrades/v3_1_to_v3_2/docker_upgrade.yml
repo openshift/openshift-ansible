@@ -1,6 +1,6 @@
 ---
 - name: Upgrade Docker
-  hosts: oo_masters_to_config
+  hosts: oo_masters_to_config:oo_nodes_to_config:oo_etcd_to_config
   vars:
     openshift_version: "{{ openshift_pkg_version | default('') }}"
   tasks:
