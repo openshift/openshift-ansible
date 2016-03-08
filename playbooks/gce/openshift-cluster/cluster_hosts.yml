@@ -16,6 +16,6 @@ g_node_hosts:    "{{ g_all_hosts | intersect(groups['tag_host-type-node'] | defa
 
 g_new_node_hosts: "{{ g_all_hosts | intersect(groups['tag_host-type-new-node'] | default([])) }}"
 
-g_infra_hosts:   "{{ g_node_hosts | intersect(groups['tag_sub-host-type-infra']) | default([]) }}"
+g_infra_hosts:   "{{ g_node_hosts | intersect(groups['tag_sub-host-type-infra'] | default([])) }}"
 
 g_compute_hosts: "{{ g_node_hosts | intersect(groups['tag_sub-host-type-compute'] | default([])) }}"
