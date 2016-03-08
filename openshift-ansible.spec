@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.53
+Version:        3.0.54
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -279,6 +279,15 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Mar 08 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.54-1
+- Bug 1315563 - stdout IO redirection wasn't working as expected over SSH
+  connections (bleanhar@redhat.com)
+- Bug 1315637 - The docker wasn't upgraded on node during upgrade
+  (bleanhar@redhat.com)
+- Bug 1315564 - upgrade to ose3.2 failed on Atomic Hosts (bleanhar@redhat.com)
+- Fix issue when there are no infra nodes (lhuard@amadeus.com)
+- Stop the etcd container during uninstall (bleanhar@redhat.com)
+
 * Mon Mar 07 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.53-1
 - Don't enable cockpit-ws for containerized installs (bleanhar@redhat.com)
 - Support openshift_image_tag (bleanhar@redhat.com)
