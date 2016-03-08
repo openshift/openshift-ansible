@@ -36,6 +36,7 @@
   tasks:
   - name: Clean package cache
     command: "{{ ansible_pkg_mgr }} clean all"
+    when: not openshift.common.is_atomic | bool
 
   - set_fact:
       g_new_service_name: "{{ 'origin' if deployment_type =='origin' else 'atomic-openshift' }}"
