@@ -775,7 +775,7 @@ def set_sdn_facts_if_unset(facts, system_facts):
     if 'common' in facts:
         use_sdn = facts['common']['use_openshift_sdn']
         if not (use_sdn == '' or isinstance(use_sdn, bool)):
-            use_sdn = bool(strtobool(str(use_sdn)))
+            use_sdn = safe_get_bool(use_sdn)
             facts['common']['use_openshift_sdn'] = use_sdn
         if 'sdn_network_plugin_name' not in facts['common']:
             plugin = 'redhat/openshift-ovs-subnet' if use_sdn else ''
@@ -1097,6 +1097,15 @@ def get_local_facts_from_file(filename):
 
     return local_facts
 
+def safe_get_bool(fact):
+    """ Get a boolean fact safely.
+
+        Args:
+            facts: fact to convert
+        Returns:
+            bool: given fact as a bool
+    """
+    return bool(strtobool(str(fact)))
 
 def set_container_facts_if_unset(facts):
     """ Set containerized facts.
@@ -1142,7 +1151,7 @@ def set_container_facts_if_unset(facts):
         if 'ovs_image' not in facts['node']:
             facts['node']['ovs_image'] = ovs_image
 
-    if bool(strtobool(str(facts['common']['is_containerized']))):
+    if safe_get_bool(facts['common']['is_containerized']):
         facts['common']['admin_binary'] = '/usr/local/bin/oadm'
         facts['common']['client_binary'] = '/usr/local/bin/oc'
         base_version = get_openshift_version(facts, cli_image).split('-')[0]
