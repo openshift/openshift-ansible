@@ -3,14 +3,21 @@
 # The restart playbook should be run after this playbook completes.
 ###############################################################################
 
-- include: docker_upgrade.yml
-  when: not openshift.common.is_atomic | bool
+- name: Upgrade docker
+  hosts: oo_masters_to_config:oo_nodes_to_config:oo_etcd_to_config
+  roles:
+  - openshift_facts
+  tasks:
+  - include: docker_upgrade.yml
+    when: not openshift.common.is_atomic | bool
 
 ###############################################################################
 # Upgrade Masters
 ###############################################################################
 - name: Upgrade master
   hosts: oo_masters_to_config
+  roles:
+  - openshift_facts
   tasks:
   - include: rpm_upgrade.yml component=master
     when: not openshift.common.is_containerized | bool
@@ -54,6 +61,8 @@
 ###############################################################################
 - name: Upgrade nodes
   hosts: oo_nodes_to_config
+  roles:
+  - openshift_facts
   tasks:
   - include: rpm_upgrade.yml
     vars:

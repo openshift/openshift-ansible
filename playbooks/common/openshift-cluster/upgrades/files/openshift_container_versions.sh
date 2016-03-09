@@ -10,7 +10,7 @@ if [ ${1} == "origin" ]; then
     image_name="openshift/origin"
 elif grep aep $unit_file 2>&1 > /dev/null; then
     image_name="aep3/aep"
-elif grep ose $unit_file 2>&1 > /dev/null; then
+elif grep openshift3 $unit_file 2>&1 > /dev/null; then
     image_name="openshift3/ose"
 fi
 
