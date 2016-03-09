@@ -1,20 +1,14 @@
----
+- name: Check if Docker is installed
+  command: rpm -q docker
+  register: pkg_check
+  failed_when: pkg_check.rc > 1
+  changed_when: no
+
 - name: Upgrade Docker
-  hosts: oo_masters_to_config:oo_nodes_to_config:oo_etcd_to_config
-  vars:
-    openshift_version: "{{ openshift_pkg_version | default('') }}"
-  tasks:
-  - name: Check if Docker is installed
-    command: rpm -q docker
-    register: pkg_check
-    failed_when: pkg_check.rc > 1
-    changed_when: no
+  command: "{{ ansible_pkg_mgr}} update -y docker"
+  when: pkg_check.rc == 0 and g_docker_version.curr_version | version_compare('1.9','<')
+  register: docker_upgrade
 
-  - name: Upgrade Docker
-    command: "{{ ansible_pkg_mgr}} update -y docker"
-    when: pkg_check.rc == 0 and g_docker_version.curr_version | version_compare('1.9','<')
-    register: docker_upgrade
-
-  - name: Restart Docker
-    service: name=docker state=restarted
-    when: docker_upgrade | changed
+- name: Restart Docker
+  service: name=docker state=restarted
+  when: docker_upgrade | changed
