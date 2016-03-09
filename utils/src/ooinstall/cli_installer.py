@@ -248,6 +248,8 @@ def print_host_summary(all_hosts, host):
             click.echo("  - Etcd Member")
         else:
             click.echo("  - Etcd (Embedded)")
+    if host.storage:
+        click.echo("  - Storage")
 
 
 def collect_master_lb(hosts):
@@ -372,11 +374,15 @@ Notes:
     for h in hosts:
         if h.preconfigured == True:
             continue
-        default_facts[h.connect_to] = {}
-        h.ip = callback_facts[h.connect_to]["common"]["ip"]
-        h.public_ip = callback_facts[h.connect_to]["common"]["public_ip"]
-        h.hostname = callback_facts[h.connect_to]["common"]["hostname"]
-        h.public_hostname = callback_facts[h.connect_to]["common"]["public_hostname"]
+        try:
+            default_facts[h.connect_to] = {}
+            h.ip = callback_facts[h.connect_to]["common"]["ip"]
+            h.public_ip = callback_facts[h.connect_to]["common"]["public_ip"]
+            h.hostname = callback_facts[h.connect_to]["common"]["hostname"]
+            h.public_hostname = callback_facts[h.connect_to]["common"]["public_hostname"]
+        except KeyError:
+            click.echo("Problem fetching facts from {}".format(h.connect_to))
+            continue
 
         default_facts_lines.append(",".join([h.connect_to,
                                              h.ip,

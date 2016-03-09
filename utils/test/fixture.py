@@ -92,7 +92,7 @@ class OOCliFixture(OOInstallFixture):
             self.assertTrue('hostname' in host)
             self.assertTrue('public_hostname' in host)
             if 'preconfigured' not in host:
-                self.assertTrue(host['node'])
+                self.assertTrue('node' in host or 'storage' in host)
                 self.assertTrue('ip' in host)
                 self.assertTrue('public_ip' in host)
 
@@ -142,7 +142,7 @@ class OOCliFixture(OOInstallFixture):
 #pylint: disable=too-many-arguments,too-many-branches,too-many-statements
 def build_input(ssh_user=None, hosts=None, variant_num=None,
                 add_nodes=None, confirm_facts=None, schedulable_masters_ok=None,
-                master_lb=None):
+                master_lb=None, storage=None):
     """
     Build an input string simulating a user entering values in an interactive
     attended install.
@@ -197,7 +197,10 @@ def build_input(ssh_user=None, hosts=None, variant_num=None,
             inputs.append(master_lb[0])
         inputs.append('y' if master_lb[1] else 'n')
 
-    inputs.append('example.com')
+    if storage:
+        inputs.append(storage)
+
+    inputs.append('subdomain.example.com')
 
     # TODO: support option 2, fresh install
     if add_nodes:

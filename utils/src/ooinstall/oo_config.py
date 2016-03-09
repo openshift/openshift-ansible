@@ -59,7 +59,8 @@ class Host(object):
             raise OOConfigInvalidHostError("You must specify either an ip " \
                 "or hostname as 'connect_to'")
 
-        if self.master is False and self.node is False and self.master_lb is False:
+        if self.master is False and self.node is False and \
+           self.master_lb is False and self.storage is False:
             raise OOConfigInvalidHostError(
                 "You must specify each host as either a master or a node.")
 
