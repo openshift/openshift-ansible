@@ -1,0 +1,16 @@
+---
+- name: "Uninstall metrics"
+  hosts: masters
+  tasks:
+  - name: "Remove metrics url from  master config"
+    lineinfile: "state=absent dest=/etc/origin/master/master-config.yaml regexp='^\ \ metricsPublicURL'"
+
+  - name: "Delete metrics objects"
+    command: "{{item}}"
+    with_items:
+      - oc delete all --selector=metrics-infra
+  #    - oc delete secrets --selector=metrics-infra
+  #    - oc delete sa --selector=metrics-infra
+      - oc delete templates --selector=metrics-infra
+      - oc delete sa metrics-deployer
+      - oc delete secret metrics-deployer
