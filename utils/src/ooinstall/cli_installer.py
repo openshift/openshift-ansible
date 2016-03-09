@@ -163,8 +163,12 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
         if masters_set or num_masters != 2:
             more_hosts = click.confirm('Do you want to add additional hosts?')
 
-    if num_masters >= 3:
+    if num_masters == 1:
+        master = next((host for host in hosts if host.master), None)
+        master.storage = True
+    elif num_masters >= 3:
         collect_master_lb(hosts)
+        collect_storage_host(hosts)
 
     return hosts
 
@@ -202,8 +206,9 @@ Please add one more to proceed."""
     elif len(masters) >= 3:
         ha_message = """
 NOTE: Multiple Masters specified, this will be an HA deployment with a separate
-etcd cluster. You will be prompted to provide the FQDN of a load balancer once
-finished entering hosts."""
+etcd cluster. You will be prompted to provide the FQDN of a load balancer and
+a host for storage once finished entering hosts.
+"""
         click.echo(ha_message)
 
         dedicated_nodes_message = """
@@ -243,6 +248,8 @@ def print_host_summary(all_hosts, host):
             click.echo("  - Etcd Member")
         else:
             click.echo("  - Etcd (Embedded)")
+    if host.storage:
+        click.echo("  - Storage")
 
 
 def collect_master_lb(hosts):
@@ -291,6 +298,43 @@ hostname.
     master_lb = Host(**host_props)
     hosts.append(master_lb)
 
+def collect_storage_host(hosts):
+    """
+    Get a valid host for storage from the user and append it to the list of
+    hosts.
+    """
+    message = """
+Setting up High Availability Masters requires a storage host. Please provide a
+host that will be configured as a Registry Storage.
+"""
+    click.echo(message)
+    host_props = {}
+
+    hostname_or_ip = click.prompt('Enter hostname or IP address',
+                                            value_proc=validate_prompt_hostname)
+    existing, existing_host = is_host_already_node_or_master(hostname_or_ip, hosts)
+    if existing and existing_host.node:
+        existing_host.storage = True
+    else:
+        host_props['connect_to'] = hostname_or_ip
+        host_props['preconfigured'] = False
+        host_props['master'] = False
+        host_props['node'] = False
+        host_props['storage'] = True
+        storage = Host(**host_props)
+        hosts.append(storage)
+
+def is_host_already_node_or_master(hostname, hosts):
+    is_existing = False
+    existing_host = None
+
+    for host in hosts:
+        if host.connect_to == hostname and (host.master or host.node):
+            is_existing = True
+            existing_host = host
+
+    return is_existing, existing_host
+
 def confirm_hosts_facts(oo_cfg, callback_facts):
     hosts = oo_cfg.hosts
     click.clear()
@@ -330,11 +374,15 @@ Notes:
     for h in hosts:
         if h.preconfigured == True:
             continue
-        default_facts[h.connect_to] = {}
-        h.ip = callback_facts[h.connect_to]["common"]["ip"]
-        h.public_ip = callback_facts[h.connect_to]["common"]["public_ip"]
-        h.hostname = callback_facts[h.connect_to]["common"]["hostname"]
-        h.public_hostname = callback_facts[h.connect_to]["common"]["public_hostname"]
+        try:
+            default_facts[h.connect_to] = {}
+            h.ip = callback_facts[h.connect_to]["common"]["ip"]
+            h.public_ip = callback_facts[h.connect_to]["common"]["public_ip"]
+            h.hostname = callback_facts[h.connect_to]["common"]["hostname"]
+            h.public_hostname = callback_facts[h.connect_to]["common"]["public_hostname"]
+        except KeyError:
+            click.echo("Problem fetching facts from {}".format(h.connect_to))
+            continue
 
         default_facts_lines.append(",".join([h.connect_to,
                                              h.ip,
