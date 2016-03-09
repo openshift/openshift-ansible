@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.54
+Version:        3.0.55
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -279,6 +279,17 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Mar 09 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.55-1
+- Bug 1315564 - upgrade to ose3.2 failed on Atomic Hosts (bleanhar@redhat.com)
+- Bug 1315563 - Upgrade failed to containerized install OSE 3.1 on RHEL
+  (bleanhar@redhat.com)
+- a-o-i: Fix NFS storage tests (smunilla@redhat.com)
+- First attempt at NFS setup (smunilla@redhat.com)
+- reverting back to pre-pulling the master image (bleanhar@redhat.com)
+- Use /healthz/ready when verifying api (abutcher@redhat.com)
+- Formatting error (Viet.atx@gmail.com)
+- Introduce origin-metrics playbook (vnguyen@redhat.com)
+
 * Tue Mar 08 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.54-1
 - Bug 1315563 - stdout IO redirection wasn't working as expected over SSH
   connections (bleanhar@redhat.com)
