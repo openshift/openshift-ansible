@@ -141,8 +141,7 @@
 
   - fail:
       msg: This playbook requires access to Docker 1.9 or later
-    when: not openshift.common.is_atomic | bool
-          and (g_docker_version.avail_version | default(g_docker_version.curr_version, true) | version_compare('1.9','<'))
+    when: g_docker_version.avail_version | default(g_docker_version.curr_version, true) | version_compare('1.9','<')
 
   # TODO: add check to upgrade ostree to get latest Docker
 
