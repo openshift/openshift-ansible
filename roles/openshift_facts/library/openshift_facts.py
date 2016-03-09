@@ -396,13 +396,13 @@ def set_metrics_facts_if_unset(facts):
     return facts
 
 def set_openshift_metrics_facts_if_unset(facts):
-    """ Set cluster metrics facts if not already present in facts dict
-            dict: the facts dict updated with the generated cluster metrics facts if
+    """ Set openshift metrics facts if not already present in facts dict
+            dict: the facts dict updated with the generated openshift metrics facts if
             missing
         Args:
             facts (dict): existing facts
         Returns:
-            dict: the facts dict updated with the generated cluster metrics
+            dict: the facts dict updated with the generated openshift metrics
             facts if they were not already present
 
     """

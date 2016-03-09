@@ -38,7 +38,7 @@
 - name: Create Heapster Services
   shell: >
     {{ openshift.common.client_binary }} process -f
-    /usr/share/openshift/exampes/infrastructure-templates/{{ hawkular_type }}/metrics-deployer.yaml -v 
+    /usr/share/openshift/examples/infrastructure-templates/{{ hawkular_type }}/metrics-deployer.yaml -v 
     HAWKULAR_METRICS_HOSTNAME={{ hawkular_hostname }},USE_PERSISTENT_STORAGE=false |
     {{ openshift.common.client_binary }} create -n openshift-infra -f - 
   register: oex_heapster_services
