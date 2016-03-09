@@ -1,7 +1,7 @@
 ---
 # tasks file for docker
 - name: Install docker
-  action: "{{ ansible_pkg_mgr }} name=docker state=present"
+  action: "{{ ansible_pkg_mgr }} name=docker-1.8.2 state=present"
   when: not openshift.common.is_atomic | bool
   
 - name: enable and start the docker service
