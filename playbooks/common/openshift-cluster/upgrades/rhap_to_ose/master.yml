@@ -1,0 +1,36 @@
+---
+###############################################################################
+# Upgrade Masters
+###############################################################################
+- name: Upgrade master packages and configuration
+  hosts: oo_masters_to_config
+  serial: 1
+  roles:
+  - openshift_facts
+  post_tasks:
+  - name: Upgrade master configuration
+    openshift_upgrade_config:
+      from_version: 'rhap'
+      to_version: 'ose'
+      role: master
+      config_base: "{{ hostvars[inventory_hostname].openshift.common.config_base }}"
+    notify:
+    - Restart master
+    - Restart master api
+    - Restart master controllers
+  handlers:
+  - name: Restart master
+    service:
+      name: "{{ openshift.common.service_type }}-master"
+      state: restarted
+    when: not openshift.master.ha | bool
+  - name: Restart master api
+    service:
+      name: "{{ openshift.common.service_type }}-master-api"
+      state: restarted
+    when: openshift.master.ha | bool
+  - name: Restart master controllers
+    service:
+      name: "{{ openshift.common.service_type }}-master-controllers"
+      state: restarted
+    when: openshift.master.ha | bool

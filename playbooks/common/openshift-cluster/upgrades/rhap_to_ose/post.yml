@@ -1,0 +1,30 @@
+---
+###############################################################################
+# Post upgrade - Update deployed images
+###############################################################################
+- name: Update deployed images
+  hosts: oo_first_master
+  vars:
+    aep_deployment_type: atomic-enterprise
+    oc_cmd: "{{ openshift.common.client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig"
+  roles:
+  - openshift_facts
+  post_tasks:
+  - command: >
+      {{ oc_cmd }} get dc --all-namespaces -o json
+    register: all_dcs
+    failed_when: false
+    changed_when: false
+
+  - set_fact:
+      dcs_to_update: "{{ (all_dcs.stdout | from_json)['items']
+                          | oo_dcs_match_deployment(aep_deployment_type) }}"
+    when: all_dcs.rc == 0
+
+  - debug: var=dcs_to_update
+
+#  - name: Update the pod image
+#    command: >
+#      {{ oc_cmd }} patch dc/{{ item.labels.deploymentconfig }} -p
+#      '{"spec":{"template":{"spec":{"containers":[{"image":"{{
+#      item.labels.deploymentconfig }}"

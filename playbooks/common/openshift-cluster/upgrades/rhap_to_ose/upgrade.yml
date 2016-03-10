@@ -1,0 +1,29 @@
+---
+# TODO:
+#   - handle updating deployed images
+#   - handle containerized installations
+#   - test/update deployment_type appropriately
+#   - anything else?
+
+###############################################################################
+# Evaluate host groups and gather facts
+###############################################################################
+- name: Evaluate host groups
+  include: ../../evaluate_groups.yml
+
+- name: Update deployment type
+  hosts: oo_masters_to_config:oo_nodes_to_config:oo_etcd_to_config:oo_nfs_to_config:oo_lb_to_config
+  roles:
+  - openshift_facts
+  post_tasks:
+  - openshift_facts:
+      role: common
+      local_facts:
+        deployment_type: "{{ deployment_type }}"
+
+
+
+- include: master.yml
+- include: node.yml
+
+- include: post.yml
