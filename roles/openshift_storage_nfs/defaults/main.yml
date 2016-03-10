@@ -8,6 +8,14 @@ openshift:
           options: "*(rw,root_squash)"
         volume:
           name: "registry"
+    metrics:
+      deploy: False
+      storage:
+        nfs:
+          directory: "/exports"
+          options: "*(rw,root_squash)"
+        volume:
+          name: "metrics"
 os_firewall_use_firewalld: False
 os_firewall_allow:
 - service: nfs
