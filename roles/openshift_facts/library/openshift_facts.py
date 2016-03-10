@@ -1032,7 +1032,7 @@ def merge_facts(orig, new, additive_facts_to_overwrite, protected_facts_to_overw
                 # ha (bool) can not change unless it has been passed
                 # as a protected fact to overwrite.
                 if key == 'ha':
-                    if bool(value) != bool(new[key]):
+                    if safe_get_bool(value) != safe_get_bool(new[key]):
                         module.fail_json(msg='openshift_facts received a different value for openshift.master.ha')
                     else:
                         facts[key] = value
