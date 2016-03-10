@@ -92,6 +92,11 @@
   action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-master{{ openshift_version  }} state=present"
   when: not openshift.common.is_containerized | bool
 
+- name: Pull master image
+  command: >
+    docker pull {{ openshift.master.master_image }}:{{ openshift_version }}
+  when: openshift.common.is_containerized | bool
+
 - name: Install Master docker service file
   template:
     dest: "/etc/systemd/system/{{ openshift.common.service_type }}-master.service"
@@ -277,9 +282,9 @@
   # Using curl here since the uri module requires python-httplib2 and
   # wait_for port doesn't provide health information.
   command: >
-    curl -k --head --silent {{ openshift.master.api_url }}
+    curl -k --silent {{ openshift.master.api_url }}/healthz/ready
   register: api_available_output
-  until: api_available_output.stdout.find("200 OK") != -1
+  until: api_available_output.stdout == 'ok'
   retries: 120
   delay: 1
   changed_when: false

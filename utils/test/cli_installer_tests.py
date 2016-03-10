@@ -72,6 +72,14 @@ MOCK_FACTS_QUICKHA = {
             'public_hostname': 'proxy.example.com'
         }
     },
+    '10.1.0.1': {
+        'common': {
+            'ip': '10.1.0.1',
+            'public_ip': '10.1.0.1',
+            'hostname': 'storage-private.example.com',
+            'public_hostname': 'storage.example.com'
+        }
+    },
 }
 
 # Missing connect_to on some hosts:
@@ -137,6 +145,12 @@ hosts:
     public_ip: 24.222.0.5
     public_hostname: proxy.example.com
     master_lb: true
+  - connect_to: 10.1.0.1
+    ip: 10.1.0.1
+    hostname: storage-private.example.com
+    public_ip: 24.222.0.6
+    public_hostname: storage.example.com
+    storage: true
 """
 
 QUICKHA_2_MASTER_CONFIG = """
@@ -169,6 +183,12 @@ hosts:
     public_ip: 24.222.0.5
     public_hostname: proxy.example.com
     master_lb: true
+  - connect_to: 10.1.0.1
+    ip: 10.1.0.1
+    hostname: storage-private.example.com
+    public_ip: 24.222.0.6
+    public_hostname: storage.example.com
+    storage: true
 """
 
 QUICKHA_CONFIG_REUSED_LB = """
@@ -197,6 +217,12 @@ hosts:
     public_hostname: node2.example.com
     node: true
     master: true
+  - connect_to: 10.1.0.1
+    ip: 10.1.0.1
+    hostname: storage-private.example.com
+    public_ip: 24.222.0.6
+    public_hostname: storage.example.com
+    storage: true
 """
 
 QUICKHA_CONFIG_NO_LB = """
@@ -263,6 +289,12 @@ hosts:
     public_hostname: proxy.example.com
     master_lb: true
     preconfigured: true
+  - connect_to: 10.1.0.1
+    ip: 10.1.0.1
+    hostname: storage-private.example.com
+    public_ip: 24.222.0.6
+    public_hostname: storage.example.com
+    storage: true
 """
 
 class UnattendedCliTests(OOCliFixture):
@@ -595,8 +627,8 @@ class UnattendedCliTests(OOCliFixture):
         # Make sure we ran on the expected masters and nodes:
         hosts = run_playbook_mock.call_args[0][0]
         hosts_to_run_on = run_playbook_mock.call_args[0][1]
-        self.assertEquals(5, len(hosts))
-        self.assertEquals(5, len(hosts_to_run_on))
+        self.assertEquals(6, len(hosts))
+        self.assertEquals(6, len(hosts_to_run_on))
 
     #unattended with two masters, one node, and haproxy
     @patch('ooinstall.openshift_ansible.run_main_playbook')
@@ -665,8 +697,8 @@ class UnattendedCliTests(OOCliFixture):
         # Make sure we ran on the expected masters and nodes:
         hosts = run_playbook_mock.call_args[0][0]
         hosts_to_run_on = run_playbook_mock.call_args[0][1]
-        self.assertEquals(5, len(hosts))
-        self.assertEquals(5, len(hosts_to_run_on))
+        self.assertEquals(6, len(hosts))
+        self.assertEquals(6, len(hosts_to_run_on))
 
 class AttendedCliTests(OOCliFixture):
 
@@ -805,17 +837,18 @@ class AttendedCliTests(OOCliFixture):
                                       ssh_user='root',
                                       variant_num=1,
                                       confirm_facts='y',
-                                      master_lb=('10.0.0.5', False))
+                                      master_lb=('10.0.0.5', False),
+                                      storage='10.1.0.1',)
         self.cli_args.append("install")
         result = self.runner.invoke(cli.cli, self.cli_args,
             input=cli_input)
         self.assert_result(result, 0)
 
         self._verify_load_facts(load_facts_mock)
-        self._verify_run_playbook(run_playbook_mock, 5, 5)
+        self._verify_run_playbook(run_playbook_mock, 6, 6)
 
         written_config = read_yaml(self.config_file)
-        self._verify_config_hosts(written_config, 5)
+        self._verify_config_hosts(written_config, 6)
 
         inventory = ConfigParser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, '.ansible/hosts'))
@@ -845,17 +878,18 @@ class AttendedCliTests(OOCliFixture):
                                       ssh_user='root',
                                       variant_num=1,
                                       confirm_facts='y',
-                                      master_lb=('10.0.0.5', False))
+                                      master_lb=('10.0.0.5', False),
+                                      storage='10.1.0.1',)
         self.cli_args.append("install")
         result = self.runner.invoke(cli.cli, self.cli_args,
             input=cli_input)
         self.assert_result(result, 0)
 
         self._verify_load_facts(load_facts_mock)
-        self._verify_run_playbook(run_playbook_mock, 4, 4)
+        self._verify_run_playbook(run_playbook_mock, 5, 5)
 
         written_config = read_yaml(self.config_file)
-        self._verify_config_hosts(written_config, 4)
+        self._verify_config_hosts(written_config, 5)
 
         inventory = ConfigParser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, '.ansible/hosts'))
@@ -881,7 +915,8 @@ class AttendedCliTests(OOCliFixture):
                                       ssh_user='root',
                                       variant_num=1,
                                       confirm_facts='y',
-                                      master_lb=(['10.0.0.2', '10.0.0.5'], False))
+                                      master_lb=(['10.0.0.2', '10.0.0.5'], False),
+                                      storage='10.1.0.1')
         self.cli_args.append("install")
         result = self.runner.invoke(cli.cli, self.cli_args,
             input=cli_input)
