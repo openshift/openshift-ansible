@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.51
+Version:        3.0.55
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -74,6 +74,10 @@ cp -rp playbooks %{buildroot}%{_datadir}/ansible/%{name}/
 # openshift-ansible-roles install
 cp -rp roles %{buildroot}%{_datadir}/ansible/%{name}/
 
+# openshift-ansible-zabbix install (standalone lib_zabbix library)
+mkdir -p %{buildroot}%{_datadir}/ansible/zabbix
+cp -rp roles/lib_zabbix/library/* %{buildroot}%{_datadir}/ansible/zabbix/
+
 # openshift-ansible-filter-plugins install
 cp -rp filter_plugins %{buildroot}%{_datadir}/ansible_plugins/
 
@@ -115,6 +119,20 @@ Scripts to make it nicer when working with hosts that are defined only by metada
 /etc/bash_completion.d/*
 %config(noreplace) /etc/openshift_ansible/
 
+
+# ----------------------------------------------------------------------------------
+# openshift-ansible-zabbix subpackage
+# ----------------------------------------------------------------------------------
+%package zabbix
+Summary:       Openshift and Atomic Enterprise Ansible Zabbix library
+Requires:      python-openshift-tools-zbxapi
+BuildArch:     noarch
+
+%description zabbix
+Python library for interacting with Zabbix with Ansible.
+
+%files zabbix
+%{_datadir}/ansible/zabbix
 
 # ----------------------------------------------------------------------------------
 # openshift-ansible-docs subpackage
@@ -261,6 +279,37 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Mar 09 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.55-1
+- Bug 1315564 - upgrade to ose3.2 failed on Atomic Hosts (bleanhar@redhat.com)
+- Bug 1315563 - Upgrade failed to containerized install OSE 3.1 on RHEL
+  (bleanhar@redhat.com)
+- a-o-i: Fix NFS storage tests (smunilla@redhat.com)
+- First attempt at NFS setup (smunilla@redhat.com)
+- reverting back to pre-pulling the master image (bleanhar@redhat.com)
+- Use /healthz/ready when verifying api (abutcher@redhat.com)
+- Formatting error (Viet.atx@gmail.com)
+- Introduce origin-metrics playbook (vnguyen@redhat.com)
+
+* Tue Mar 08 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.54-1
+- Bug 1315563 - stdout IO redirection wasn't working as expected over SSH
+  connections (bleanhar@redhat.com)
+- Bug 1315637 - The docker wasn't upgraded on node during upgrade
+  (bleanhar@redhat.com)
+- Bug 1315564 - upgrade to ose3.2 failed on Atomic Hosts (bleanhar@redhat.com)
+- Fix issue when there are no infra nodes (lhuard@amadeus.com)
+- Stop the etcd container during uninstall (bleanhar@redhat.com)
+
+* Mon Mar 07 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.53-1
+- Don't enable cockpit-ws for containerized installs (bleanhar@redhat.com)
+- Support openshift_image_tag (bleanhar@redhat.com)
+- Set g_new_master_hosts in upgrade playbooks. (abutcher@redhat.com)
+- Add setting for configuring nofile limit for haproxy (jdetiber@redhat.com)
+
+* Mon Mar 07 2016 Joel Diaz <jdiaz@redhat.com> 3.0.52-1
+- fixed monitoring containers to restart (sten@redhat.com)
+- Lock down generated certs dir (sdodson@redhat.com)
+- package up lib_zabbix into its own subpackage (jdiaz@redhat.com)
+
 * Fri Mar 04 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.51-1
 - Bug 1314645 - Upgrade failed with "One or more undefined variables 'dict
   object' has no attribute 'stdout'" (bleanhar@redhat.com)

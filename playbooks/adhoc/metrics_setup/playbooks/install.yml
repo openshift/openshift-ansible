@@ -1,0 +1,36 @@
+---
+- include: master_config_facts.yml
+- name: "Install metrics" 
+  hosts: masters
+  vars:
+     metrics_public_url: "https://{{ metrics_external_service }}/hawkular/metrics"
+  tasks:
+  - name: "Add metrics url to master config"
+    lineinfile: "state=present dest=/etc/origin/master/master-config.yaml regexp='^\ \ metricsPublicURL' insertbefore='^\ \ publicURL' line='\ \ metricsPublicURL: {{ metrics_public_url }}'"
+
+  - name: "Restart master service"
+    service: name=atomic-openshift-master state=restarted
+
+  - name: "Copy metrics-deployer yaml to remote"
+    copy: "src=../files/metrics-deployer-setup.yaml dest=/tmp/metrics-deployer-setup.yaml force=yes" 
+
+  - name: "Add metrics-deployer"
+    command: "{{item}}"
+    with_items:
+      - oc project openshift-infra
+      - oc create -f /tmp/metrics-deployer-setup.yaml    
+
+  - name: "Give metrics-deployer SA permissions"
+    command: "oadm policy add-role-to-user edit system:serviceaccount:openshift-infra:metrics-deployer"
+
+  - name: "Give heapster SA permissions"
+    command: "oadm policy add-cluster-role-to-user cluster-reader system:serviceaccount:openshift-infra:heapster"
+
+  - name: "Create metrics-deployer secret"
+    command: "oc secrets new metrics-deployer nothing=/dev/null"
+
+  - name: "Copy metrics.yaml to remote"
+    copy: "src=../files/metrics.yaml dest=/tmp/metrics.yaml force=yes" 
+
+  - name: "Process yml template"
+    shell: "oc process -f /tmp/metrics.yaml -v MASTER_URL={{ masterPublicURL }},REDEPLOY=true,HAWKULAR_METRICS_HOSTNAME={{ metrics_external_service }},IMAGE_PREFIX={{ metrics_image_prefix }},IMAGE_VERSION={{ metrics_image_version }},USE_PERSISTENT_STORAGE=false | oc create -f -"

@@ -8,13 +8,13 @@ installed=$(docker exec ${installed_container_name} openshift version | grep ope
 
 if [ ${1} == "origin" ]; then
     image_name="openshift/origin"
-elif grep aep $unit_file > /dev/null; then
+elif grep aep $unit_file 2>&1 > /dev/null; then
     image_name="aep3/aep"
-elif grep ose $unit_file > /dev/null; then
+elif grep openshift3 $unit_file 2>&1 > /dev/null; then
     image_name="openshift3/ose"
 fi
 
-docker pull ${image_name} 1>&2
+docker pull ${image_name} 2>&1 > /dev/null
 available=$(docker run --rm ${image_name} version | grep openshift | awk '{ print $2 }' | cut -f1 -d"-" | tr -d 'v')
 
 echo "---"

@@ -1,0 +1,2 @@
+---
+openshift_version: "{{ openshift_image_tag | default(openshift.common.image_tag) | default('') }}"

@@ -5,7 +5,7 @@ fi
 cmd=`basename $0`
 user=`id -u`
 group=`id -g`
-image_tag={{ image_tag | default(openshift.common.image_tag) }}
+image_tag={{ openshift_version }}
 
 >&2 echo """
 ================================================================================

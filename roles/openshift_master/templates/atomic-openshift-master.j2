@@ -1,7 +1,7 @@
 OPTIONS=--loglevel={{ openshift.master.debug_level }}
 CONFIG_FILE={{ openshift_master_config_file }}
 {% if openshift.common.is_containerized %}
-IMAGE_VERSION={{ openshift.common.image_tag }}
+IMAGE_VERSION={{ openshift_version }}
 {% endif %}
 
 # Proxy configuration

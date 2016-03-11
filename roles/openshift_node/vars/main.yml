@@ -1,4 +1,4 @@
 ---
 openshift_node_config_dir: "{{ openshift.common.config_base }}/node"
 openshift_node_config_file: "{{ openshift_node_config_dir }}/node-config.yaml"
-openshift_version: "{{ openshift_pkg_version | default('') }}"
+openshift_version: "{{ openshift_pkg_version | default(openshift_image_tag) | default(openshift.common.image_tag) | default('') }}"
