@@ -1,8 +1,9 @@
 [Unit]
 After=docker.service
-Before={{ openshift.common.service_type }}-node.service
 Requires=docker.service
 PartOf=docker.service
+After=etcd_container.service
+Wants=etcd_container.service
 
 [Service]
 EnvironmentFile=/etc/sysconfig/{{ openshift.common.service_type }}-master
