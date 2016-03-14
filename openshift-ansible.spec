@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.56
+Version:        3.0.57
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -279,6 +279,18 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Mar 14 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.57-1
+- Docker stderr can break this script if ansible executes it remotely
+  (bleanhar@redhat.com)
+- Handle HA master case (bleanhar@redhat.com)
+- Bug 1315564 - Containerized installs require a running environment
+  (bleanhar@redhat.com)
+- Updating the docker registry variables to use the new name
+  (bleanhar@redhat.com)
+- Bug 1316761 - Skip the available version check if openshift_image_tag is
+  defined. (bleanhar@redhat.com)
+- Ansible module to manage secrets for openshift api (kwoodson@redhat.com)
+
 * Mon Mar 14 2016 Kenny Woodson <kwoodson@redhat.com> 3.0.56-1
 - Updating our metadata tooling to work without env (kwoodson@redhat.com)
 - improve ordering of systemd units (jdetiber@redhat.com)
