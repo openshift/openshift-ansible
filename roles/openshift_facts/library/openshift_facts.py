@@ -328,6 +328,11 @@ def normalize_provider_facts(provider, metadata):
 
     facts = dict(name=provider, metadata=metadata,
                  network=dict(interfaces=[], ipv6_enabled=False))
+    if os.path.exists('/etc/cloud.conf'):
+        for arg in ('api_server_args', 'controller_args', 'kubelet_args'):
+            facts[arg] = {'cloud-provider': [provider],
+                          'cloud-config': ['/etc/cloud.conf']}
+
     if provider == 'gce':
         facts = normalize_gce_facts(metadata, facts)
     elif provider == 'ec2':
@@ -1076,6 +1081,30 @@ def merge_facts(orig, new, additive_facts_to_overwrite, protected_facts_to_overw
     return facts
 
 
+def merge_provider_facts(facts):
+    """ Recursively merge provider facts dicts
+
+        Args:
+            facts (dict): existing facts
+        Returns:
+            dict: the facts dict updated with the provider config
+    """
+    if 'provider' not in facts:
+        return facts
+    if 'master' in facts:
+        for arg in ('api_server_args', 'controller_args'):
+            facts['master'][arg] = merge_facts(
+                facts['provider'].get(arg, {}),
+                facts['master'].get(arg, {}),
+                [], [])
+    if 'node' in facts:
+        facts['node']['kubelet_args'] = merge_facts(
+            facts['provider'].get('kubelet_args', {}),
+            facts['node'].get('kubelet_args', {}),
+            [], [])
+    return facts
+
+
 def save_local_facts(filename, facts):
     """ Save local facts
 
@@ -1305,6 +1334,7 @@ class OpenShiftFacts(object):
                             local_facts,
                             additive_facts_to_overwrite,
                             protected_facts_to_overwrite)
+        facts = merge_provider_facts(facts)
         facts['current_config'] = get_current_config(facts)
         facts = set_url_facts_if_unset(facts)
         facts = set_project_cfg_facts_if_unset(facts)
@@ -1481,7 +1511,7 @@ class OpenShiftFacts(object):
                          additive_facts_to_overwrite=None,
                          openshift_env=None,
                          protected_facts_to_overwrite=None):
-        """ Initialize the provider facts
+        """ Initialize the local facts
 
             Args:
                 facts (dict): local facts to set
