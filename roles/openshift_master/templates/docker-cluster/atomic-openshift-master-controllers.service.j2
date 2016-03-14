@@ -1,9 +1,9 @@
 [Unit]
 Description=Atomic OpenShift Master Controllers
 Documentation=https://github.com/openshift/origin
-After=network.target
+Wants={{ openshift.common.service_type }}-master-api.service
 After={{ openshift.common.service_type }}-master-api.service
-Before={{ openshift.common.service_type }}-node.service
+After=docker.service
 Requires=docker.service
 PartOf=docker.service
 
@@ -22,4 +22,3 @@ Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
-WantedBy={{ openshift.common.service_type }}-node.service

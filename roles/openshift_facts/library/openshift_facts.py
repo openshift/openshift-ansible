@@ -27,6 +27,38 @@ from distutils.version import LooseVersion
 import struct
 import socket
 
+
+def migrate_docker_facts(facts):
+    """ Apply migrations for docker facts """
+    params = {
+        'common': (
+            'additional_registries',
+            'insecure_registries',
+            'blocked_registries',
+            'options'
+        ),
+        'node': (
+            'log_driver',
+            'log_options'
+        )
+    }
+    if 'docker' not in facts:
+        facts['docker'] = {}
+    for role in params.keys():
+        if role in facts:
+            for param in params[role]:
+                old_param = 'docker_' + param
+                if old_param in facts[role]:
+                    facts['docker'][param] = facts[role].pop(old_param)
+    return facts
+
+def migrate_local_facts(facts):
+    """ Apply migrations of local facts """
+    migrated_facts = copy.deepcopy(facts)
+    return migrate_docker_facts(migrated_facts)
+
+
+
 def first_ip(network):
     """ Return the first IPv4 address in network
 
@@ -657,18 +689,13 @@ def set_deployment_facts_if_unset(facts):
                 data_dir = '/var/lib/openshift'
             facts['common']['data_dir'] = data_dir
 
-        # remove duplicate and empty strings from registry lists
-        for cat in  ['additional', 'blocked', 'insecure']:
-            key = 'docker_{0}_registries'.format(cat)
-            if key in facts['common']:
-                facts['common'][key] = list(set(facts['common'][key]) - set(['']))
-
-
+    if 'docker' in facts:
+        deployment_type = facts['common']['deployment_type']
         if deployment_type in ['enterprise', 'atomic-enterprise', 'openshift-enterprise']:
-            addtl_regs = facts['common'].get('docker_additional_registries', [])
+            addtl_regs = facts['docker'].get('additional_registries', [])
             ent_reg = 'registry.access.redhat.com'
             if ent_reg not in addtl_regs:
-                facts['common']['docker_additional_registries'] = addtl_regs + [ent_reg]
+                facts['docker']['additional_registries'] = addtl_regs + [ent_reg]
 
     for role in ('master', 'node'):
         if role in facts:
@@ -1221,7 +1248,7 @@ class OpenShiftFacts(object):
         Raises:
             OpenShiftFactsUnsupportedRoleError:
     """
-    known_roles = ['common', 'master', 'node', 'etcd', 'hosted']
+    known_roles = ['common', 'master', 'node', 'etcd', 'hosted', 'docker']
 
     # Disabling too-many-arguments, this should be cleaned up as a TODO item.
     # pylint: disable=too-many-arguments
@@ -1265,7 +1292,13 @@ class OpenShiftFacts(object):
                                             protected_facts_to_overwrite)
         roles = local_facts.keys()
 
-        defaults = self.get_defaults(roles)
+
+        if 'common' in local_facts and 'deployment_type' in local_facts['common']:
+            deployment_type = local_facts['common']['deployment_type']
+        else:
+            deployment_type = 'origin'
+
+        defaults = self.get_defaults(roles, deployment_type)
         provider_facts = self.init_provider_facts()
         facts = apply_provider_facts(defaults, provider_facts)
         facts = merge_facts(facts,
@@ -1292,7 +1325,7 @@ class OpenShiftFacts(object):
             facts = set_installed_variant_rpm_facts(facts)
         return dict(openshift=facts)
 
-    def get_defaults(self, roles):
+    def get_defaults(self, roles, deployment_type):
         """ Get default fact values
 
             Args:
@@ -1301,8 +1334,7 @@ class OpenShiftFacts(object):
             Returns:
                 dict: The generated default facts
         """
-        defaults = dict()
-
+        defaults = {}
         ip_addr = self.system_facts['default_ipv4']['address']
         exit_code, output, _ = module.run_command(['hostname', '-f'])
         hostname_f = output.strip() if exit_code == 0 else ''
@@ -1310,33 +1342,42 @@ class OpenShiftFacts(object):
                            self.system_facts['fqdn']]
         hostname = choose_hostname(hostname_values, ip_addr)
 
-        common = dict(use_openshift_sdn=True, ip=ip_addr, public_ip=ip_addr,
-                      deployment_type='origin', hostname=hostname,
-                      public_hostname=hostname)
-        common['client_binary'] = 'oc'
-        common['admin_binary'] = 'oadm'
-        common['dns_domain'] = 'cluster.local'
-        common['install_examples'] = True
-        defaults['common'] = common
+        defaults['common'] = dict(use_openshift_sdn=True, ip=ip_addr,
+                                  public_ip=ip_addr,
+                                  deployment_type=deployment_type,
+                                  hostname=hostname,
+                                  public_hostname=hostname,
+                                  client_binary='oc', admin_binary='oadm',
+                                  dns_domain='cluster.local',
+                                  install_examples=True,
+                                  debug_level=2)
 
         if 'master' in roles:
-            master = dict(api_use_ssl=True, api_port='8443', controllers_port='8444',
-                          console_use_ssl=True, console_path='/console',
-                          console_port='8443', etcd_use_ssl=True, etcd_hosts='',
-                          etcd_port='4001', portal_net='172.30.0.0/16',
-                          embedded_etcd=True, embedded_kube=True,
-                          embedded_dns=True, dns_port='53',
-                          bind_addr='0.0.0.0', session_max_seconds=3600,
-                          session_name='ssn', session_secrets_file='',
-                          access_token_max_seconds=86400,
-                          auth_token_max_seconds=500,
-                          oauth_grant_method='auto')
-            defaults['master'] = master
+            defaults['master'] = dict(api_use_ssl=True, api_port='8443',
+                                      controllers_port='8444',
+                                      console_use_ssl=True,
+                                      console_path='/console',
+                                      console_port='8443', etcd_use_ssl=True,
+                                      etcd_hosts='', etcd_port='4001',
+                                      portal_net='172.30.0.0/16',
+                                      embedded_etcd=True, embedded_kube=True,
+                                      embedded_dns=True, dns_port='53',
+                                      bind_addr='0.0.0.0',
+                                      session_max_seconds=3600,
+                                      session_name='ssn',
+                                      session_secrets_file='',
+                                      access_token_max_seconds=86400,
+                                      auth_token_max_seconds=500,
+                                      oauth_grant_method='auto')
 
         if 'node' in roles:
-            node = dict(labels={}, annotations={}, portal_net='172.30.0.0/16',
-                        iptables_sync_period='5s', set_node_ip=False)
-            defaults['node'] = node
+            defaults['node'] = dict(labels={}, annotations={},
+                                    portal_net='172.30.0.0/16',
+                                    iptables_sync_period='5s',
+                                    set_node_ip=False)
+
+        if 'docker' in roles:
+            defaults['docker'] = dict(disable_push_dockerhub=False)
 
         defaults['hosted'] = dict(
             registry=dict(
@@ -1355,6 +1396,7 @@ class OpenShiftFacts(object):
                 )
             )
         )
+
 
         return defaults
 
@@ -1481,15 +1523,23 @@ class OpenShiftFacts(object):
 
         local_facts = get_local_facts_from_file(self.filename)
 
-        for arg in ['labels', 'annotations']:
-            if arg in facts_to_set and isinstance(facts_to_set[arg],
-                                                  basestring):
-                facts_to_set[arg] = module.from_json(facts_to_set[arg])
+        migrated_facts = migrate_local_facts(local_facts)
 
-        new_local_facts = merge_facts(local_facts,
+        new_local_facts = merge_facts(migrated_facts,
                                       facts_to_set,
                                       additive_facts_to_overwrite,
                                       protected_facts_to_overwrite)
+
+        if 'docker' in new_local_facts:
+            # remove duplicate and empty strings from registry lists
+            for cat in  ['additional', 'blocked', 'insecure']:
+                key = '{0}_registries'.format(cat)
+                if key in new_local_facts['docker']:
+                    val = new_local_facts['docker'][key]
+                    if isinstance(val, basestring):
+                        val = [x.strip() for x in val.split(',')]
+                    new_local_facts['docker'][key] = list(set(val) - set(['']))
+
         for facts in new_local_facts.values():
             keys_to_delete = []
             if isinstance(facts, dict):

@@ -63,18 +63,20 @@ deployment_type=origin
 # Add additional, insecure, and blocked registries to global docker configuration
 # For enterprise deployment types we ensure that registry.access.redhat.com is
 # included if you do not include it
-#cli_docker_additional_registries=registry.example.com
-#cli_docker_insecure_registries=registry.example.com
-#cli_docker_blocked_registries=registry.hacker.com
+#openshift_docker_additional_registries=registry.example.com
+#openshift_docker_insecure_registries=registry.example.com
+#openshift_docker_blocked_registries=registry.hacker.com
+# Disable pushing to dockerhub
+#openshift_docker_disable_push_dockerhub=True
 # Items added, as is, to end of /etc/sysconfig/docker OPTIONS
 #openshift_docker_options="-l warn --ipv6=false"
 # Deprecated methods to set --log-driver and --log-opts flags, use openshift_docker_options instead
-#cli_docker_log_driver=json
-#cli_docker_log_options="tag=mailer"
+#openshift_docker_log_driver=json
+#openshift_docker_log_options="tag=mailer"
 
 # Alternate image format string. If you're not modifying the format string and
 # only need to inject your own registry you may want to consider
-# cli_docker_additional_registries instead
+# openshift_docker_additional_registries instead
 #oreg_url=example.com/openshift3/ose-${component}:${version}
 
 # Origin copr repo

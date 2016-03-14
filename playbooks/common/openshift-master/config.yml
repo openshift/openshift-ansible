@@ -1,6 +1,9 @@
 ---
 - name: Set master facts and determine if external etcd certs need to be generated
   hosts: oo_masters_to_config
+  vars:
+    t_oo_option_master_debug_level: "{{ lookup('oo_option', 'openshift_master_debug_level') }}"
+
   pre_tasks:
   - name: Check for RPM generated config marker file .config_managed
     stat:
@@ -30,9 +33,8 @@
                                        | default(none, true) }}"
 
   - set_fact:
-      openshift_master_debug_level: "{{ lookup('oo_option', 'openshift_master_debug_level') | default(openshift.common.debug_level, true) }}"
-    when: openshift_master_debug_level is not defined
-
+      openshift_master_debug_level: "{{ t_oo_option_master_debug_level }}"
+    when: openshift_master_debug_level is not defined and t_oo_option_master_debug_level != ""
   roles:
   - openshift_facts
   post_tasks:
