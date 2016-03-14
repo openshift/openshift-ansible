@@ -24,7 +24,6 @@
 - name: Verify upgrade can proceed
   hosts: oo_first_master
   vars:
-    openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
     target_version: "{{ '1.2' if deployment_type == 'origin' else '3.1.1.900' }}"
   gather_facts: no
   tasks:
@@ -48,13 +47,29 @@
 
 - name: Verify upgrade can proceed
   hosts: oo_masters_to_config
+  vars:
+    openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
   tasks:
   - name: Ensure Master is running
     service:
       name: "{{ openshift.common.service_type }}-master"
       state: started
       enabled: yes
-    when: openshift.common.is_containerized | bool
+    when: not openshift_master_ha | bool and openshift.common.is_containerized | bool
+
+  - name: Ensure HA Master is running
+    service:
+      name: "{{ openshift.common.service_type }}-master-api"
+      state: started
+      enabled: yes
+    when: openshift_master_ha | bool and openshift.common.is_containerized | bool
+
+  - name: Ensure HA Master is running
+    service:
+      name: "{{ openshift.common.service_type }}-master-controllers"
+      state: started
+      enabled: yes
+    when: openshift_master_ha | bool and openshift.common.is_containerized | bool
 
 - name: Verify upgrade can proceed
   hosts: oo_nodes_to_config
