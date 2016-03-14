@@ -775,7 +775,7 @@ def set_sdn_facts_if_unset(facts, system_facts):
     if 'common' in facts:
         use_sdn = facts['common']['use_openshift_sdn']
         if not (use_sdn == '' or isinstance(use_sdn, bool)):
-            use_sdn = bool(strtobool(str(use_sdn)))
+            use_sdn = safe_get_bool(use_sdn)
             facts['common']['use_openshift_sdn'] = use_sdn
         if 'sdn_network_plugin_name' not in facts['common']:
             plugin = 'redhat/openshift-ovs-subnet' if use_sdn else ''
@@ -904,7 +904,7 @@ def get_openshift_version(facts, cli_image=None):
         _, output, _ = module.run_command(['/usr/bin/openshift', 'version'])
         version = parse_openshift_version(output)
 
-    if 'is_containerized' in facts['common'] and facts['common']['is_containerized']:
+    if 'is_containerized' in facts['common'] and safe_get_bool(facts['common']['is_containerized']):
         container = None
         if 'master' in facts:
             if 'cluster_method' in facts['master']:
@@ -1032,7 +1032,7 @@ def merge_facts(orig, new, additive_facts_to_overwrite, protected_facts_to_overw
                 # ha (bool) can not change unless it has been passed
                 # as a protected fact to overwrite.
                 if key == 'ha':
-                    if bool(value) != bool(new[key]):
+                    if safe_get_bool(value) != safe_get_bool(new[key]):
                         module.fail_json(msg='openshift_facts received a different value for openshift.master.ha')
                     else:
                         facts[key] = value
@@ -1097,6 +1097,15 @@ def get_local_facts_from_file(filename):
 
     return local_facts
 
+def safe_get_bool(fact):
+    """ Get a boolean fact safely.
+
+        Args:
+            facts: fact to convert
+        Returns:
+            bool: given fact as a bool
+    """
+    return bool(strtobool(str(fact)))
 
 def set_container_facts_if_unset(facts):
     """ Set containerized facts.
@@ -1142,7 +1151,7 @@ def set_container_facts_if_unset(facts):
         if 'ovs_image' not in facts['node']:
             facts['node']['ovs_image'] = ovs_image
 
-    if bool(strtobool(str(facts['common']['is_containerized']))):
+    if safe_get_bool(facts['common']['is_containerized']):
         facts['common']['admin_binary'] = '/usr/local/bin/oadm'
         facts['common']['client_binary'] = '/usr/local/bin/oc'
         base_version = get_openshift_version(facts, cli_image).split('-')[0]
@@ -1279,7 +1288,7 @@ class OpenShiftFacts(object):
         facts = set_aggregate_facts(facts)
         facts = set_etcd_facts_if_unset(facts)
         facts = set_container_facts_if_unset(facts)
-        if not facts['common']['is_containerized']:
+        if not safe_get_bool(facts['common']['is_containerized']):
             facts = set_installed_variant_rpm_facts(facts)
         return dict(openshift=facts)
 
