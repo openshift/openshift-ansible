@@ -116,10 +116,9 @@
       msg: This playbook requires Atomic Enterprise Platform/OpenShift Enterprise 3.1 or later
     when: deployment_type == 'atomic-openshift' and g_aos_versions.curr_version | version_compare('3.1','<')
 
-  # TODO: this may only make sense for RPM installs.  We probably need another check for containerized installs.
   - fail:
       msg: Upgrade packages not found
-    when: (g_aos_versions.avail_version | default(g_aos_versions.curr_version, true) | version_compare(target_version, '<'))
+    when: openshift_image_tag is not defined and (g_aos_versions.avail_version | default(g_aos_versions.curr_version, true) | version_compare(target_version, '<'))
 
   - name: Determine available Docker
     script: ../files/rpm_versions.sh docker
