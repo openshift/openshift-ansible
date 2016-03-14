@@ -47,6 +47,26 @@
     when: openshift_image_tag is defined and openshift_image_tag.split('v',1).1 | version_compare(target_version ,'<')
 
 - name: Verify upgrade can proceed
+  hosts: oo_masters_to_config
+  tasks:
+  - name: Ensure Master is running
+    service:
+      name: "{{ openshift.common.service_type }}-master"
+      state: started
+      enabled: yes
+    when: openshift.common.is_containerized | bool
+
+- name: Verify upgrade can proceed
+  hosts: oo_nodes_to_config
+  tasks:
+  - name: Ensure Node is running
+    service:
+      name: "{{ openshift.common.service_type }}-node"
+      state: started
+      enabled: yes
+    when: openshift.common.is_containerized | bool
+
+- name: Verify upgrade can proceed
   hosts: oo_masters_to_config:oo_nodes_to_config
   vars:
     target_version: "{{ '1.2' if deployment_type == 'origin' else '3.1.1.900' }}"
