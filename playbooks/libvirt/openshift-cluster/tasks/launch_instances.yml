@@ -13,7 +13,7 @@
   get_url:
     url: '{{ image_url }}'
     sha256sum: '{{ image_sha256 }}'
-    dest: '{{ os_libvirt_storage_pool_path }}/{{ [image_name, image_compression] | reject("equalto", "") | join(".") }}'
+    dest: '{{ os_libvirt_storage_pool_path }}/{{ [image_name, image_compression] | difference([""]) | join(".") }}'
   when: '{{ ( lookup("oo_option", "skip_image_download") | default("no", True) | lower ) in ["false", "no"] }}'
   register: downloaded_image
 
@@ -59,8 +59,12 @@
 - name: Refresh the libvirt storage pool for openshift
   command: 'virsh -c {{ libvirt_uri }} pool-refresh {{ libvirt_storage_pool }}'
 
-- name: Create VMs drives
+- name: Create VM drives
   command: 'virsh -c {{ libvirt_uri }} vol-create-as {{ os_libvirt_storage_pool }} {{ item }}.qcow2 10G --format qcow2 --backing-vol {{ image_name }} --backing-vol-format qcow2'
+  with_items: instances
+
+- name: Create VM docker drives
+  command: 'virsh -c {{ libvirt_uri }} vol-create-as {{ os_libvirt_storage_pool }} {{ item }}-docker.qcow2 10G --format qcow2 --allocation 0'
   with_items: instances
 
 - name: Create VMs
