@@ -18,6 +18,10 @@ domainName: {{ domain }}
 # Location where logs should be saved
 log_dir: {{ nuage_mon_rest_server_logdir }}
 # Monitor rest server paramters
+# Logging level for the nuage openshift monitor
+# allowed options are: 0 => INFO, 1 => WARNING, 2 => ERROR, 3 => FATAL
+logLevel: {{ nuage_mon_log_level }}
+# Parameters related to the nuage monitor REST server
 nuageMonServer:
     URL: {{ nuage_mon_rest_server_url }}
     certificateDirectory: {{ cert_output_dir }} 
