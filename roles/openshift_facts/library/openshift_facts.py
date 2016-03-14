@@ -904,7 +904,7 @@ def get_openshift_version(facts, cli_image=None):
         _, output, _ = module.run_command(['/usr/bin/openshift', 'version'])
         version = parse_openshift_version(output)
 
-    if 'is_containerized' in facts['common'] and facts['common']['is_containerized']:
+    if 'is_containerized' in facts['common'] and safe_get_bool(facts['common']['is_containerized']):
         container = None
         if 'master' in facts:
             if 'cluster_method' in facts['master']:
@@ -1288,7 +1288,7 @@ class OpenShiftFacts(object):
         facts = set_aggregate_facts(facts)
         facts = set_etcd_facts_if_unset(facts)
         facts = set_container_facts_if_unset(facts)
-        if not facts['common']['is_containerized']:
+        if not safe_get_bool(facts['common']['is_containerized']):
             facts = set_installed_variant_rpm_facts(facts)
         return dict(openshift=facts)
 
