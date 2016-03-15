@@ -5,7 +5,7 @@
     "name": "dancer-mysql-example",
     "annotations": {
       "description": "An example Dancer application with a MySQL database",
-      "tags": "instant-app,perl,dancer,mysql",
+      "tags": "quickstart,perl,dancer,mysql",
       "iconClass": "icon-perl"
     }
   },
@@ -17,7 +17,7 @@
       "kind": "Service",
       "apiVersion": "v1",
       "metadata": {
-        "name": "dancer-mysql-example",
+        "name": "${NAME}",
         "annotations": {
           "description": "Exposes and load balances the application pods"
         }
@@ -31,7 +31,7 @@
           }
         ],
         "selector": {
-          "name": "dancer-mysql-example"
+          "name": "${NAME}"
         }
       }
     },
@@ -39,13 +39,13 @@
       "kind": "Route",
       "apiVersion": "v1",
       "metadata": {
-        "name": "dancer-mysql-example"
+        "name": "${NAME}"
       },
       "spec": {
         "host": "${APPLICATION_DOMAIN}",
         "to": {
           "kind": "Service",
-          "name": "dancer-mysql-example"
+          "name": "${NAME}"
         }
       }
     },
@@ -53,7 +53,7 @@
       "kind": "ImageStream",
       "apiVersion": "v1",
       "metadata": {
-        "name": "dancer-mysql-example",
+        "name": "${NAME}",
         "annotations": {
           "description": "Keeps track of changes in the application image"
         }
@@ -63,7 +63,7 @@
       "kind": "BuildConfig",
       "apiVersion": "v1",
       "metadata": {
-        "name": "dancer-mysql-example",
+        "name": "${NAME}",
         "annotations": {
           "description": "Defines how to build the application"
         }
@@ -90,7 +90,7 @@
         "output": {
           "to": {
             "kind": "ImageStreamTag",
-            "name": "dancer-mysql-example:latest"
+            "name": "${NAME}:latest"
           }
         },
         "triggers": [
@@ -113,7 +113,7 @@
       "kind": "DeploymentConfig",
       "apiVersion": "v1",
       "metadata": {
-        "name": "dancer-mysql-example",
+        "name": "${NAME}",
         "annotations": {
           "description": "Defines how to deploy the application server"
         }
@@ -129,7 +129,7 @@
               ],
               "from": {
                 "kind": "ImageStreamTag",
-                "name": "dancer-mysql-example:latest"
+                "name": "${NAME}:latest"
               }
             }
           },
@@ -139,13 +139,13 @@
         ],
         "replicas": 1,
         "selector": {
-          "name": "dancer-mysql-example"
+          "name": "${NAME}"
         },
         "template": {
           "metadata": {
-            "name": "dancer-mysql-example",
+            "name": "${NAME}",
             "labels": {
-              "name": "dancer-mysql-example"
+              "name": "${NAME}"
             }
           },
           "spec": {
@@ -158,6 +158,22 @@
                     "containerPort": 8080
                   }
                 ],
+                "readinessProbe": {
+                  "timeoutSeconds": 3,
+                  "initialDelaySeconds": 3,
+                  "httpGet": {
+                    "path": "/health",
+                    "port": 8080
+                  }
+                },
+                "livenessProbe": {
+                    "timeoutSeconds": 3,
+                    "initialDelaySeconds": 30,
+                    "httpGet": {
+                        "path": "/",
+                        "port": 8080
+                    }
+                },
                 "env": [
                   {
                     "name": "DATABASE_SERVICE_NAME",
@@ -183,7 +199,12 @@
                     "name": "PERL_APACHE2_RELOAD",
                     "value": "${PERL_APACHE2_RELOAD}"
                   }
-                ]
+                ],
+                "resources": {
+		      "limits": {
+			  "memory": "${MEMORY_LIMIT}"
+		      }
+                }
               }
             ]
           }
@@ -265,6 +286,20 @@
                     "containerPort": 3306
                   }
                 ],
+                "readinessProbe": {
+                  "timeoutSeconds": 1,
+                  "initialDelaySeconds": 5,
+                  "exec": {
+                    "command": [ "/bin/sh", "-i", "-c", "MYSQL_PWD='${DATABASE_PASSWORD}' mysql -h 127.0.0.1 -u ${DATABASE_USER} -D ${DATABASE_NAME} -e 'SELECT 1'" ]
+                  }
+                },
+                "livenessProbe": {
+                    "timeoutSeconds": 1,
+                    "initialDelaySeconds": 30,
+                    "tcpSocket": {
+                        "port": 3306
+                    }
+                },
                 "env": [
                   {
                     "name": "MYSQL_USER",
@@ -275,10 +310,15 @@
                     "value": "${DATABASE_PASSWORD}"
                   },
                   {
-                    "name": "MYSQL_DATABASE",
-                    "value": "${DATABASE_NAME}"
+                      "name": "MYSQL_DATABASE",
+                      "value": "${DATABASE_NAME}"
                   }
-                ]
+                ],
+                "resources": {
+                    "limits": {
+                        "memory": "${MEMORY_MYSQL_LIMIT}"
+                    }
+                }
               }
             ]
           }
@@ -288,71 +328,97 @@
   ],
   "parameters": [
     {
+      "name": "NAME",
+      "displayName": "Name",
+      "description": "The name assigned to all of the frontend objects defined in this template.",
+      "required": true,
+      "value": "dancer-mysql-example"
+    },
+    {
+      "name": "MEMORY_LIMIT",
+      "displayName": "Memory Limit",
+      "description": "Maximum amount of memory the Perl Dancer container can use.",
+      "value": "512Mi"
+    },
+    {
+      "name": "MEMORY_MYSQL_LIMIT",
+      "displayName": "Memory Limit (MySQL)",
+      "description": "Maximum amount of memory the MySQL container can use.",
+      "value": "512Mi"
+    },
+    {
       "name": "SOURCE_REPOSITORY_URL",
-      "description": "The URL of the repository with your application source code",
+      "displayName": "Git Repository URL",
+      "description": "The URL of the repository with your application source code.",
       "value": "https://github.com/openshift/dancer-ex.git"
     },
     {
       "name": "SOURCE_REPOSITORY_REF",
-      "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch"
+      "displayName": "Git Reference",
+      "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch."
     },
     {
       "name": "CONTEXT_DIR",
-      "description": "Set this to the relative path to your project if it is not in the root of your repository"
+      "displayName": "Context Directory",
+      "description": "Set this to the relative path to your project if it is not in the root of your repository."
     },
     {
       "name": "APPLICATION_DOMAIN",
+      "displayName": "Application Hostname",
       "description": "The exposed hostname that will route to the Dancer service, if left blank a value will be defaulted.",
       "value": ""
     },
     {
       "name": "GITHUB_WEBHOOK_SECRET",
-      "description": "A secret string used to configure the GitHub webhook",
+      "displayName": "GitHub Webhook Secret",
+      "description": "A secret string used to configure the GitHub webhook.",
       "generate": "expression",
       "from": "[a-zA-Z0-9]{40}"
     },
     {
       "name": "ADMIN_USERNAME",
-      "description": "administrator username",
+      "displayName": "Administrator Username",
       "generate": "expression",
       "from": "admin[A-Z0-9]{3}"
     },
     {
       "name": "ADMIN_PASSWORD",
-      "description": "administrator password",
+      "displayName": "Administrator Password",
       "generate": "expression",
       "from": "[a-zA-Z0-9]{8}"
     },
     {
       "name": "DATABASE_SERVICE_NAME",
-      "description": "Database service name",
+      "displayName": "Database Service Name",
       "value": "database"
     },
     {
       "name": "DATABASE_USER",
-      "description": "database username",
+      "displayName": "Database Username",
       "generate": "expression",
       "from": "user[A-Z0-9]{3}"
     },
     {
       "name": "DATABASE_PASSWORD",
-      "description": "database password",
+      "displayName": "Database Password",
       "generate": "expression",
       "from": "[a-zA-Z0-9]{8}"
     },
     {
       "name": "DATABASE_NAME",
-      "description": "database name",
+      "displayName": "Database Name",
       "value": "sampledb"
     },
     {
       "name": "PERL_APACHE2_RELOAD",
-      "description": "Set this to \"true\" to enable automatic reloading of modified Perl modules",
+      "displayName": "Perl Module Reload",
+      "description": "Set this to \"true\" to enable automatic reloading of modified Perl modules.",
       "value": ""
     },
     {
       "name": "SECRET_KEY_BASE",
-      "description": "Your secret key for verifying the integrity of signed cookies",
+      "displayName": "Secret Key",
+      "description": "Your secret key for verifying the integrity of signed cookies.",
       "generate": "expression",
       "from": "[a-z0-9]{127}"
     }

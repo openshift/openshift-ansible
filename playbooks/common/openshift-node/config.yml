@@ -1,10 +1,12 @@
 ---
 - name: Gather and set facts for node hosts
   hosts: oo_nodes_to_config
+  vars:
+    t_oo_option_node_debug_level: "{{ lookup('oo_option', 'openshift_node_debug_level') }}"
   pre_tasks:
   - set_fact:
-      openshift_node_debug_level: "{{ lookup('oo_option', 'openshift_node_debug_level') | default(openshift.common.debug_level, true) }}"
-    when: openshift_node_debug_level is not defined
+      openshift_node_debug_level: "{{ t_oo_option_node_debug_level }}"
+    when: openshift_node_debug_level is not defined and t_oo_option_node_debug_level != ""
   roles:
   - openshift_facts
   tasks:
