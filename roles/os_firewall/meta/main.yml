@@ -11,4 +11,5 @@ galaxy_info:
     - 7
   categories:
   - system
-dependencies: []
+dependencies:
+- { role: openshift_facts }
