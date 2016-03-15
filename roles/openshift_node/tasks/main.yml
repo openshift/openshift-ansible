@@ -11,10 +11,8 @@
   with_items:
   - role: common
     local_facts:
-      hostname: "{{ openshift_hostname | default(none) }}"
-      public_hostname: "{{ openshift_public_hostname | default(none) }}"
-      deployment_type: "{{ openshift_deployment_type }}"
       # TODO: Replace this with a lookup or filter plugin.
+      # TODO: Move this to the node role
       dns_ip: "{{ openshift_dns_ip
                   | default(openshift_master_cluster_vip
                   | default(None if openshift.common.version_gte_3_1_or_1_1 | bool else openshift_node_first_master_ip | default(None, true), true), true) }}"

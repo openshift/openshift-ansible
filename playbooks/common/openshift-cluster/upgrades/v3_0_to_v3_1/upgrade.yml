@@ -212,13 +212,10 @@
 
 - name: Update deployment type
   hosts: oo_masters_to_config:oo_nodes_to_config:oo_etcd_to_config
+  vars:
+    openshift_deployment_type: "{{ deployment_type }}"
   roles:
   - openshift_facts
-  post_tasks:
-  - openshift_facts:
-      role: common
-      local_facts:
-        deployment_type: "{{ deployment_type }}"
 
 - name: Update master facts
   hosts: oo_masters_to_config
