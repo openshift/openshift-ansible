@@ -25,6 +25,9 @@ class MultiInventoryException(Exception):
     '''Exceptions for MultiInventory class'''
     pass
 
+# pylint: disable=too-many-public-methods
+# After a refactor of too-many-branches and placing those branches into
+# their own corresponding function, we have passed the allowed amount of functions(20).
 class MultiInventory(object):
     '''
        MultiInventory class:
@@ -282,35 +285,63 @@ class MultiInventory(object):
         else:
             return data.get(keys, None)
 
+    def apply_extra_vars(self, inventory, extra_vars):
+        ''' Apply the account config extra vars '''
+        # Extra vars go here
+        for new_var, value in extra_vars.items():
+            for data in inventory.values():
+                self.add_entry(data, new_var, value)
+
+    def apply_clone_vars(self, inventory, clone_vars):
+        ''' Apply the account config clone vars '''
+        # Clone vars go here
+        for to_name, from_name in clone_vars.items():
+            for data in inventory.values():
+                self.add_entry(data, to_name, self.get_entry(data, from_name))
+
+    def apply_extra_groups(self, inventory, extra_groups):
+        ''' Apply the account config for extra groups '''
+        _ = self # Here for pylint.  wanted an instance method instead of static
+        for new_var, value in extra_groups.items():
+            for _ in inventory['_meta']['hostvars'].values():
+                inventory["%s_%s" % (new_var, value)] = copy.copy(inventory['all_hosts'])
+
+    def apply_clone_groups(self, inventory, clone_groups):
+        ''' Apply the account config for clone groups '''
+        for to_name, from_name in clone_groups.items():
+            for name, data in inventory['_meta']['hostvars'].items():
+                key = '%s_%s' % (to_name, self.get_entry(data, from_name))
+                if not inventory.has_key(key):
+                    inventory[key] = []
+                inventory[key].append(name)
+
+    def apply_group_selectors(self, inventory, group_selectors):
+        ''' Apply the account config for clone groups '''
+        _ = self # Here for pylint.  wanted an instance method instead of static
+        for selector in group_selectors:
+            if inventory.has_key(selector['from_group']):
+                inventory[selector['from_group']].sort()
+                inventory[selector['name']] = inventory[selector['from_group']][0:selector['count']]
+                for host in inventory[selector['from_group']]:
+                    if host in inventory[selector['name']]:
+                        inventory['_meta']['hostvars'][host][selector['name']] = True
+                    else:
+                        inventory['_meta']['hostvars'][host][selector['name']] = False
+
     def apply_account_config(self, acc_config):
-        ''' Apply account config settings
-        '''
+        ''' Apply account config settings '''
         results = self.all_inventory_results[acc_config['name']]
         results['all_hosts'] = results['_meta']['hostvars'].keys()
 
-        # Extra vars go here
-        for new_var, value in acc_config.get('extra_vars', {}).items():
-            for data in results['_meta']['hostvars'].values():
-                self.add_entry(data, new_var, value)
+        self.apply_extra_vars(results['_meta']['hostvars'], acc_config.get('extra_vars', {}))
 
-        # Clone vars go here
-        for to_name, from_name in acc_config.get('clone_vars', {}).items():
-            for data in results['_meta']['hostvars'].values():
-                self.add_entry(data, to_name, self.get_entry(data, from_name))
+        self.apply_clone_vars(results['_meta']['hostvars'], acc_config.get('clone_vars', {}))
 
-        # Extra groups go here
-        for new_var, value in acc_config.get('extra_groups', {}).items():
-            for data in results['_meta']['hostvars'].values():
-                results["%s_%s" % (new_var, value)] = copy.copy(results['all_hosts'])
+        self.apply_extra_groups(results, acc_config.get('extra_groups', {}))
 
-        # Clone groups go here
-        # Build a group based on the desired key name
-        for to_name, from_name in acc_config.get('clone_groups', {}).items():
-            for name, data in results['_meta']['hostvars'].items():
-                key = '%s_%s' % (to_name, self.get_entry(data, from_name))
-                if not results.has_key(key):
-                    results[key] = []
-                results[key].append(name)
+        self.apply_clone_groups(results, acc_config.get('clone_groups', {}))
+
+        self.apply_group_selectors(results, acc_config.get('group_selectors', {}))
 
         # store the results back into all_inventory_results
         self.all_inventory_results[acc_config['name']] = results
