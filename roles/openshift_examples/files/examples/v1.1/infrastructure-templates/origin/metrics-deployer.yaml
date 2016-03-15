@@ -52,8 +52,6 @@ objects:
           value: ${IMAGE_PREFIX}
         - name: IMAGE_VERSION
           value: ${IMAGE_VERSION}
-        - name: PUBLIC_MASTER_URL
-          value: ${PUBLIC_MASTER_URL}
         - name: MASTER_URL
           value: ${MASTER_URL}
         - name: REDEPLOY
@@ -79,11 +77,11 @@ objects:
         secretName: metrics-deployer
 parameters:
 -
-  description: 'Specify prefix for metrics components; e.g. for "openshift/origin-metrics-deployer:v1.1", set prefix "openshift/origin-"'
+  description: 'Specify prefix for metrics components; e.g. for "openshift/origin-metrics-deployer:latest", set prefix "openshift/origin-"'
   name: IMAGE_PREFIX
-  value: "docker.io/openshift/origin-"
+  value: "openshift/origin-"
 -
-  description: 'Specify version for metrics components; e.g. for "openshift/origin-metrics-deployer:v1.1", set version "v1.1"'
+  description: 'Specify version for metrics components; e.g. for "openshift/origin-metrics-deployer:latest", set version "latest"'
   name: IMAGE_VERSION
   value: "latest"
 -
@@ -109,7 +107,7 @@ parameters:
 -
   description: "The persistent volume size for each of the Cassandra nodes"
   name: CASSANDRA_PV_SIZE
-  value: "1Gi"
+  value: "10Gi"
 -
   description: "How many days metrics should be stored for."
   name: METRIC_DURATION

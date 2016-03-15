@@ -8,7 +8,7 @@ openshift_examples_load_quickstarts: true
 
 content_version: "{{ openshift.common.examples_content_version }}"
 
-examples_base: "{{ openshift.common.config_base if openshift.common.is_containerized else '/usr/share/openshift' }}/examples"
+examples_base: "{{ openshift.common.config_base if openshift.common.is_containerized | bool else '/usr/share/openshift' }}/examples"
 image_streams_base: "{{ examples_base }}/image-streams"
 centos_image_streams: "{{ image_streams_base}}/image-streams-centos7.json"
 rhel_image_streams: "{{ image_streams_base}}/image-streams-rhel7.json"

@@ -69,6 +69,8 @@ objects:
           value: ${ES_OPS_RECOVER_EXPECTED_NODES}
         - name: ES_OPS_RECOVER_AFTER_TIME
           value: ${ES_OPS_RECOVER_AFTER_TIME}
+        - name: FLUENTD_NODESELECTOR
+          value: ${FLUENTD_NODESELECTOR}
     dnsPolicy: ClusterFirst
     restartPolicy: Never
     serviceAccount: logging-deployer
@@ -148,4 +150,7 @@ parameters:
   description: "Timeout for *expected* ops nodes to be present when cluster is recovering from a full restart."
   name: ES_OPS_RECOVER_AFTER_TIME
   value: "5m"
-
+-
+  description: "The nodeSelector used for the Fluentd DaemonSet."
+  name: FLUENTD_NODESELECTOR
+  value: "logging-infra-fluentd=true"

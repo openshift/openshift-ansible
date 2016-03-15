@@ -14,6 +14,8 @@ CONFIG_MAIN_SECTION = 'main'
 
 class Ossh(object):
     def __init__(self):
+        self.user = None
+        self.host = None
         self.file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)))
 
         # Default the config path to /etc
@@ -54,8 +56,6 @@ class Ossh(object):
 
     def parse_cli_args(self):
         parser = argparse.ArgumentParser(description='OpenShift Online SSH Tool.')
-        parser.add_argument('-e', '--env', action="store",
-                            help="Which environment to search for the host ")
         parser.add_argument('-d', '--debug', default=False,
                             action="store_true", help="debug mode")
         parser.add_argument('-v', '--verbose', default=False,
@@ -83,91 +83,48 @@ class Ossh(object):
     def process_host(self):
         '''Determine host name and user name for SSH.
         '''
-        self.env = None
-        self.user = None
 
-        re_env = re.compile("\.(" + "|".join(self.host_inventory.keys()) + ")")
-        search = re_env.search(self.args.host)
-        if self.args.env:
-            self.env = self.args.env
-        elif search:
-            # take the first?
-            self.env = search.groups()[0]
-
-        # remove env from hostname command line arg if found
-        if search:
-            self.args.host = re_env.split(self.args.host)[0]
+        parts = self.args.host.split('@')
 
         # parse username if passed
-        if '@' in self.args.host:
-            self.user, self.host = self.args.host.split('@')
+        if len(parts) > 1:
+            self.user = parts[0]
+            self.host = parts[1]
         else:
-            self.host = self.args.host
+            self.host = parts[0]
+
             if self.args.login_name:
                 self.user = self.args.login_name
 
-    def get_hosts(self, refresh_cache=False):
-        '''Query our host inventory and return a dict where the format
-           equals:
 
-           dict['servername'] = dns_name
-        '''
+    def get_hosts(self, refresh_cache=False):
+        '''Query our host inventory and return a dict where the format '''
         if refresh_cache:
-            self.host_inventory = self.aws.build_host_dict_by_env(['--refresh-cache'])
+            self.host_inventory = self.aws.get_inventory(['--refresh-cache'])['_meta']['hostvars']
         else:
-            self.host_inventory = self.aws.build_host_dict_by_env()
+            self.host_inventory = self.aws.get_inventory()['_meta']['hostvars']
 
     def select_host(self):
         '''select host attempts to match the host specified
            on the command line with a list of hosts.
         '''
-        results = []
-        for env in self.host_inventory.keys():
-            for hostname, server_info in self.host_inventory[env].items():
-                if hostname.split(':')[0] == self.host:
-                    results.append((hostname, server_info))
-
-        # attempt to select the correct environment if specified
-        if self.env:
-            results = filter(lambda result: result[1]['oo_environment'] == self.env, results)
-
-        if results:
-            return results
+        results = None
+        if self.host_inventory.has_key(self.host):
+           results = (self.host, self.host_inventory[self.host])
         else:
             print "Could not find specified host: %s." % self.host
 
         # default - no results found.
-        return None
+        return results
 
     def list_hosts(self, limit=None):
         '''Function to print out the host inventory.
 
            Takes a single parameter to limit the number of hosts printed.
         '''
-
-        if self.env:
-            results = self.select_host()
-            if len(results) == 1:
-                hostname, server_info = results[0]
-                sorted_keys = server_info.keys()
-                sorted_keys.sort()
-                for key in sorted_keys:
-                    print '{0:<35} {1}'.format(key, server_info[key])
-            else:
-                for host_id, server_info in results[:limit]:
-                    print '{oo_name:<35} {oo_clusterid:<10} {oo_environment:<8} ' \
-                          '{oo_id:<15} {oo_public_ip:<18} {oo_private_ip:<18}'.format(**server_info)
-
-                if limit:
-                    print
-                    print 'Showing only the first %d results...' % limit
-                    print
-
-        else:
-            for env, host_ids in self.host_inventory.items():
-                for host_id, server_info in host_ids.items():
-                    print '{oo_name:<35} {oo_clusterid:<10} {oo_environment:<8} ' \
-                          '{oo_id:<15} {oo_public_ip:<18} {oo_private_ip:<18}'.format(**server_info)
+        for host_id, server_info in self.host_inventory.items():
+            print '{oo_name:<35} {oo_clusterid:<10} {oo_environment:<8} ' \
+                '{oo_id:<15} {oo_public_ip:<18} {oo_private_ip:<18}'.format(**server_info)
 
     def ssh(self):
         '''SSH to a specified host
@@ -193,17 +150,10 @@ class Ossh(object):
             if not results:
                 return # early exit, no results
 
-            if len(results) > 1:
-                print "Multiple results found for %s." % self.host
-                for result in results:
-                    print "{oo_name:<35} {oo_clusterid:<5} {oo_environment:<5} {oo_id:<10}".format(**result[1])
-                return # early exit, too many results
-
             # Assume we have one and only one.
-            _, server_info = results[0]
-            dns = server_info['oo_public_ip']
+            server_info = results[1]
 
-            ssh_args.append(dns)
+            ssh_args.append(server_info['oo_public_ip'])
 
             #last argument
             if self.args.command:

@@ -1,12 +1,12 @@
 [Unit]
 Description=Atomic OpenShift Master API
 Documentation=https://github.com/openshift/origin
-After=network.target
-After=etcd.service
+After=etcd_container.service
+Wants=etcd_container.service
 Before={{ openshift.common.service_type }}-node.service
-Requires=network.target
-Requires=docker.service
+After=docker.service
 PartOf=docker.service
+Requires=docker.service
 
 [Service]
 EnvironmentFile=/etc/sysconfig/{{ openshift.common.service_type }}-master-api
@@ -18,7 +18,7 @@ ExecStop=/usr/bin/docker stop {{ openshift.common.service_type }}-master-api
 LimitNOFILE=131072
 LimitCORE=infinity
 WorkingDirectory={{ openshift.common.data_dir }}
-SyslogIdentifier=atomic-openshift-master-api
+SyslogIdentifier={{ openshift.common.service_type }}-master-api
 Restart=always
 
 [Install]

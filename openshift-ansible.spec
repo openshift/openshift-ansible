@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.55
+Version:        3.0.58
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -279,6 +279,42 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Mar 15 2016 Kenny Woodson <kwoodson@redhat.com> 3.0.58-1
+- Group selector feature added (kwoodson@redhat.com)
+- nfs: replace yum with dnf (efreiber@redhat.com)
+- Move common common facts to openshift_facts (jdetiber@redhat.com)
+- perform oc client config tasks only once when ansible_ssh_user is root
+  (jdetiber@redhat.com)
+- OSE/Origin < 3.2/1.2 should not get Docker 1.9 (sdodson@redhat.com)
+
+* Mon Mar 14 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.57-1
+- Docker stderr can break this script if ansible executes it remotely
+  (bleanhar@redhat.com)
+- Handle HA master case (bleanhar@redhat.com)
+- Bug 1315564 - Containerized installs require a running environment
+  (bleanhar@redhat.com)
+- Updating the docker registry variables to use the new name
+  (bleanhar@redhat.com)
+- Bug 1316761 - Skip the available version check if openshift_image_tag is
+  defined. (bleanhar@redhat.com)
+- Ansible module to manage secrets for openshift api (kwoodson@redhat.com)
+
+* Mon Mar 14 2016 Kenny Woodson <kwoodson@redhat.com> 3.0.56-1
+- Updating our metadata tooling to work without env (kwoodson@redhat.com)
+- improve ordering of systemd units (jdetiber@redhat.com)
+- Docker role refactor (jdetiber@redhat.com)
+- Ensure is_containerized is cast as bool. (abutcher@redhat.com)
+- Sync latest to v1.2 (sdodson@redhat.com)
+- Sync with latest image stream and templates (sdodson@redhat.com)
+- Allow origin version to be passed in as an argument (sdodson@redhat.com)
+- Add support for Openstack integration (sbaubeau@redhat.com)
+- Expose log level on the monitor (abhat@nuagenetworks.net)
+- openshift_facts: Safe cast additional bools (smunilla@redhat.com)
+- openshift-ansible: Wrap boolean facts (smunilla@redhat.com)
+- fixed copr releasers file (twiest@redhat.com)
+- Libvirt provider fixes (jdetiber@redhat.com)
+- Support log level configuration for plugin (abhat@nuagenetworks.net)
+
 * Wed Mar 09 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.55-1
 - Bug 1315564 - upgrade to ose3.2 failed on Atomic Hosts (bleanhar@redhat.com)
 - Bug 1315563 - Upgrade failed to containerized install OSE 3.1 on RHEL

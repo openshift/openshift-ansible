@@ -1,0 +1,3 @@
+---
+- include: openstack.yml
+  when: "openshift_cloud_provider is defined and openshift_cloud_provider == 'openstack' and 'provider' in openshift and openshift.provider.name == 'openstack'"

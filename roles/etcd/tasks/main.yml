@@ -36,9 +36,13 @@
     state: stopped
     enabled: no
 
+- name: Mask system etcd when containerized
+  when: openshift.common.is_containerized | bool
+  command: systemctl mask etcd
+
 - name: Reload systemd units
   command: systemctl daemon-reload
-  when: openshift.common.is_containerized and ( install_etcd_result | changed )
+  when: openshift.common.is_containerized | bool and ( install_etcd_result | changed )
 
 - name: Validate permissions on the config dir
   file:
