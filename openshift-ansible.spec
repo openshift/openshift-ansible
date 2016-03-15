@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.57
+Version:        3.0.58
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -279,6 +279,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Mar 15 2016 Kenny Woodson <kwoodson@redhat.com> 3.0.58-1
+- Group selector feature added (kwoodson@redhat.com)
+- nfs: replace yum with dnf (efreiber@redhat.com)
+- Move common common facts to openshift_facts (jdetiber@redhat.com)
+- perform oc client config tasks only once when ansible_ssh_user is root
+  (jdetiber@redhat.com)
+- OSE/Origin < 3.2/1.2 should not get Docker 1.9 (sdodson@redhat.com)
+
 * Mon Mar 14 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.57-1
 - Docker stderr can break this script if ansible executes it remotely
   (bleanhar@redhat.com)
