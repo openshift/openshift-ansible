@@ -26,6 +26,77 @@ from distutils.util import strtobool
 from distutils.version import LooseVersion
 import struct
 import socket
+from dbus import SystemBus, Interface
+from dbus.exceptions import DBusException
+
+
+ORIGIN_DT_VALUES = {
+    'service_type': 'atomic-openshift',
+    'config_base': '/etc/origin',
+    'data_dir': '/var/lib/origin',
+    'master_image': 'openshift/origin',
+    'cli_image': 'openshift/origin',
+    'node_image': 'openshift/node',
+    'ovs_image': 'openshift/openvswitch',
+    'etcd_image': 'registry.access.redhat.com/rhel7/etcd'
+}
+
+ENT_BASE_DT_VALUES = {
+    'service_type': 'atomic-openshift',
+    'config_base': ORIGIN_DT_VALUES['config_base'],
+    'data_dir': ORIGIN_DT_VALUES['data_dir'],
+    'etcd_image': 'registry.access.redhat.com/rhel7/etcd'
+}
+
+AP_BETA_DT_VALUES = {
+    'service_type': ENT_BASE_DT_VALUES['config_base'],
+    'config_base': ENT_BASE_DT_VALUES['config_base'],
+    'data_dir': ENT_BASE_DT_VALUES['data_dir'],
+    'etcd_image': ENT_BASE_DT_VALUES['etcd_image'],
+    'master_image': 'aep3_beta/aep',
+    'cli_image': 'aep3_beta/aep',
+    'node_image': 'aep3_beta/node',
+    'ovs_image': 'aep3_beta/openvswitch',
+}
+
+AP_DT_VALUES = {
+    'service_type': ENT_BASE_DT_VALUES['config_base'],
+    'config_base': ENT_BASE_DT_VALUES['config_base'],
+    'data_dir': ENT_BASE_DT_VALUES['data_dir'],
+    'etcd_image': ENT_BASE_DT_VALUES['etcd_image'],
+    'master_image': 'aep3/aep',
+    'cli_image': 'aep3/aep',
+    'node_image': 'aep3/node',
+    'ovs_image': 'aep3/openvswitch',
+}
+
+OSE_DT_VALUES = {
+    'service_type': ENT_BASE_DT_VALUES['config_base'],
+    'config_base': ENT_BASE_DT_VALUES['config_base'],
+    'data_dir': ENT_BASE_DT_VALUES['data_dir'],
+    'etcd_image': ENT_BASE_DT_VALUES['etcd_image'],
+    'master_image': 'openshift3/ose',
+    'cli_image': 'openshift3/ose',
+    'node_image': 'openshift3/node',
+    'ovs_image': 'openshift3/openvswitch',
+}
+
+ONLINE_DT_VALUES = OSE_DT_VALUES
+
+LEGACY_ENT_DT_VALUES = {
+    'service_type': 'openshift',
+    'config_base': '/etc/openshift',
+    'data_dir': '/var/lib/openshift'
+}
+
+DEPLOYMENT_TYPE_VALUES = {
+    'origin': ORIGIN_DT_VALUES,
+    'enterprise': LEGACY_ENT_DT_VALUES,
+    'openshift-enterprise': OSE_DT_VALUES,
+    'atomic-enterprise': AP_DT_VALUES,
+    'atomic-enterprise-beta': AP_BETA_DT_VALUES,
+    'online': ONLINE_DT_VALUES
+}
 
 
 def migrate_docker_facts(facts):
@@ -56,8 +127,6 @@ def migrate_local_facts(facts):
     """ Apply migrations of local facts """
     migrated_facts = copy.deepcopy(facts)
     return migrate_docker_facts(migrated_facts)
-
-
 
 def first_ip(network):
     """ Return the first IPv4 address in network
@@ -415,47 +484,19 @@ def set_master_selectors(facts):
                 facts['master']['registry_selector'] = selector
     return facts
 
-def set_metrics_facts_if_unset(facts):
-    """ Set cluster metrics facts if not already present in facts dict
-            dict: the facts dict updated with the generated cluster metrics facts if
-            missing
-        Args:
-            facts (dict): existing facts
-        Returns:
-            dict: the facts dict updated with the generated cluster metrics
-            facts if they were not already present
+def build_kubelet_args(facts):
+    """ Build kubelet_args fact """
+    if 'node' in facts:
+        if 'kubelet_args' in facts['node']:
+            kubelet_args = facts['node']['kubelet_args']
+        else:
+            kubelet_args = {}
+        if 'read-only-port' not in kubelet_args and facts['common']['use_cluster_metrics']:
+            kubelet_args['read-only-port'] = ['10255']
+        if 'serialize-image-pulls' not in kubelet_args and facts['node']['parallel_pulls']:
+            kubelet_args['serialize-image-pulls'] = facts['node']['parallel_pulls']
 
-    """
-    if 'common' in facts:
-        if 'use_cluster_metrics' not in facts['common']:
-            use_cluster_metrics = False
-            facts['common']['use_cluster_metrics'] = use_cluster_metrics
-    return facts
-
-def set_project_cfg_facts_if_unset(facts):
-    """ Set Project Configuration facts if not already present in facts dict
-            dict:
-        Args:
-            facts (dict): existing facts
-        Returns:
-            dict: the facts dict updated with the generated Project Configuration
-            facts if they were not already present
-
-    """
-
-    config = {
-        'default_node_selector': '',
-        'project_request_message': '',
-        'project_request_template': '',
-        'mcs_allocator_range': 's0:/2',
-        'mcs_labels_per_project': 5,
-        'uid_allocator_range': '1000000000-1999999999/10000'
-    }
-
-    if 'master' in facts:
-        for key, value in config.items():
-            if key not in facts['master']:
-                facts['master'][key] = value
+        facts['node']['kubelet_args'] = kubelet_args
 
     return facts
 
@@ -655,9 +696,7 @@ def set_etcd_facts_if_unset(facts):
     return facts
 
 def set_deployment_facts_if_unset(facts):
-    """ Set Facts that vary based on deployment_type. This currently
-        includes common.service_type, common.config_base, master.registry_url,
-        node.registry_url, node.storage_plugin_deps
+    """ Set Facts that vary based on deployment_type.
 
         Args:
             facts (dict): existing facts
@@ -670,29 +709,13 @@ def set_deployment_facts_if_unset(facts):
     # pylint: disable=too-many-statements, too-many-branches
     if 'common' in facts:
         deployment_type = facts['common']['deployment_type']
-        if 'service_type' not in facts['common']:
-            service_type = 'atomic-openshift'
-            if deployment_type == 'origin':
-                service_type = 'origin'
-            elif deployment_type in ['enterprise']:
-                service_type = 'openshift'
-            facts['common']['service_type'] = service_type
-        if 'config_base' not in facts['common']:
-            config_base = '/etc/origin'
-            if deployment_type in ['enterprise']:
-                config_base = '/etc/openshift'
-            # Handle upgrade scenarios when symlinks don't yet exist:
-            if not os.path.exists(config_base) and os.path.exists('/etc/openshift'):
-                config_base = '/etc/openshift'
-            facts['common']['config_base'] = config_base
-        if 'data_dir' not in facts['common']:
-            data_dir = '/var/lib/origin'
-            if deployment_type in ['enterprise']:
-                data_dir = '/var/lib/openshift'
-            # Handle upgrade scenarios when symlinks don't yet exist:
-            if not os.path.exists(data_dir) and os.path.exists('/var/lib/openshift'):
-                data_dir = '/var/lib/openshift'
-            facts['common']['data_dir'] = data_dir
+        config_base = facts['common']['config_base']
+        data_dir = facts['common']['data_dir']
+        # Handle upgrade scenarios when symlinks don't yet exist:
+        if not os.path.exists(config_base) and os.path.exists('/etc/openshift'):
+            facts['common']['config_base'] = '/etc/openshift'
+        if not os.path.exists(data_dir) and os.path.exists('/var/lib/openshift'):
+            facts['common']['data_dir'] = '/var/lib/openshift'
 
     if 'docker' in facts:
         deployment_type = facts['common']['deployment_type']
@@ -701,17 +724,6 @@ def set_deployment_facts_if_unset(facts):
             ent_reg = 'registry.access.redhat.com'
             if ent_reg not in addtl_regs:
                 facts['docker']['additional_registries'] = addtl_regs + [ent_reg]
-
-    for role in ('master', 'node'):
-        if role in facts:
-            deployment_type = facts['common']['deployment_type']
-            if 'registry_url' not in facts[role]:
-                registry_url = 'openshift/origin-${component}:${version}'
-                if deployment_type in ['enterprise', 'online', 'openshift-enterprise']:
-                    registry_url = 'openshift3/ose-${component}:${version}'
-                elif deployment_type == 'atomic-enterprise':
-                    registry_url = 'aep3_beta/aep-${component}:${version}'
-                facts[role]['registry_url'] = registry_url
 
     if 'master' in facts:
         deployment_type = facts['common']['deployment_type']
@@ -723,74 +735,6 @@ def set_deployment_facts_if_unset(facts):
         else:
             if deployment_type == 'atomic-enterprise':
                 facts['master']['disabled_features'] = openshift_features
-
-    if 'node' in facts:
-        deployment_type = facts['common']['deployment_type']
-        if 'storage_plugin_deps' not in facts['node']:
-            if deployment_type in ['openshift-enterprise', 'atomic-enterprise', 'origin']:
-                facts['node']['storage_plugin_deps'] = ['ceph', 'glusterfs', 'iscsi']
-            else:
-                facts['node']['storage_plugin_deps'] = []
-
-    return facts
-
-def set_version_facts_if_unset(facts):
-    """ Set version facts. This currently includes common.version and
-        common.version_gte_3_1_or_1_1.
-
-        Args:
-            facts (dict): existing facts
-        Returns:
-            dict: the facts dict updated with version facts.
-    """
-    if 'common' in facts:
-        deployment_type = facts['common']['deployment_type']
-        facts['common']['version'] = version = get_openshift_version(facts)
-        if version is not None:
-            if deployment_type == 'origin':
-                version_gte_3_1_or_1_1 = LooseVersion(version) >= LooseVersion('1.1.0')
-                version_gte_3_1_1_or_1_1_1 = LooseVersion(version) >= LooseVersion('1.1.1')
-                version_gte_3_2_or_1_2 = LooseVersion(version) >= LooseVersion('1.2.0')
-            else:
-                version_gte_3_1_or_1_1 = LooseVersion(version) >= LooseVersion('3.0.2.905')
-                version_gte_3_1_1_or_1_1_1 = LooseVersion(version) >= LooseVersion('3.1.1')
-                version_gte_3_2_or_1_2 = LooseVersion(version) >= LooseVersion('3.1.1.901')
-        else:
-            version_gte_3_1_or_1_1 = True
-            version_gte_3_1_1_or_1_1_1 = True
-            version_gte_3_2_or_1_2 = True
-        facts['common']['version_gte_3_1_or_1_1'] = version_gte_3_1_or_1_1
-        facts['common']['version_gte_3_1_1_or_1_1_1'] = version_gte_3_1_1_or_1_1_1
-        facts['common']['version_gte_3_2_or_1_2'] = version_gte_3_2_or_1_2
-
-        if version_gte_3_2_or_1_2:
-            examples_content_version = 'v1.2'
-        elif version_gte_3_1_or_1_1:
-            examples_content_version = 'v1.1'
-        else:
-            examples_content_version = 'v1.0'
-
-        facts['common']['examples_content_version'] = examples_content_version
-
-    return facts
-
-def set_manageiq_facts_if_unset(facts):
-    """ Set manageiq facts. This currently includes common.use_manageiq.
-
-        Args:
-            facts (dict): existing facts
-        Returns:
-            dict: the facts dict updated with version facts.
-        Raises:
-            OpenShiftFactsInternalError:
-    """
-    if 'common' not in facts:
-        if 'version_gte_3_1_or_1_1' not in facts['common']:
-            raise OpenShiftFactsInternalError(
-                "Invalid invocation: The required facts are not set"
-            )
-    if 'use_manageiq' not in facts['common']:
-        facts['common']['use_manageiq'] = facts['common']['version_gte_3_1_or_1_1']
 
     return facts
 
@@ -913,6 +857,96 @@ def get_current_config(facts):
                 pass
 
     return current_config
+
+def get_version_output(binary, version_cmd):
+    """ runs and returns the version output for a command """
+    cmd = []
+    for item in (binary, version_cmd):
+        if isinstance(item, list):
+            cmd.extend(item)
+        else:
+            cmd.append(item)
+
+    if os.path.isfile(cmd[0]):
+        _, output, _ = module.run_command(cmd)
+    return output
+
+def docker_parse_version(binary='/usr/bin/docker'):
+    """ Parses and returns the docker version info """
+    version_info = yaml.safe_load(get_version_output(binary, 'version'))
+    result = {
+        'api_version': version_info['Server']['API version'],
+        'version': version_info['Server']['Version']
+    }
+    return result
+
+def etcd_parse_version(binary='/usr/bin/etcd'):
+    """ Parses and returns the etcd version info """
+    version_info = yaml.safe_load(get_version_output(binary, '--version'))
+    result = {'version': version_info['etcd Version']}
+    return result
+
+def openshift_parse_version(binary='/usr/bin/openshift'):
+    """ Parses and returns the openshift version info """
+    version_info = yaml.safe_load(get_version_output(binary, 'version').replace(" ", ": "))
+    result = {
+        'version': version_info['openshift'][1:],
+        'kubernetes_version': version_info['kubernetes'][1:],
+        'etcd_version': version_info['etcd']
+    }
+    return result
+
+def get_installed_package_versions():
+    """ Get current version of packages installed on the host
+
+        Returns:
+            versions(dict): dictionary of package name to package attributes
+    """
+    # TODO: support containerized versions
+    versions = {}
+
+    openshift_service_defaults = {
+        'binary': '/usr/bin/openshift',
+        'version_method': openshift_parse_version
+    }
+
+    services = {
+        'docker': {
+            'binary': '/usr/bin/docker',
+            'version_method': docker_parse_version
+        },
+        'etcd': {
+            'binary': '/usr/bin/etcd',
+            'version_method': etcd_parse_version
+        },
+        'atomic-openshift-node': openshift_service_defaults,
+        'atomic-openshift-master': openshift_service_defaults,
+        'atomic-openshift-master-api': openshift_service_defaults,
+        'origin-node': openshift_service_defaults,
+        'origin-master': openshift_service_defaults,
+        'origin-master-api': openshift_service_defaults
+    }
+
+    bus = SystemBus()
+    systemd = bus.get_object('org.freedesktop.systemd1', '/org/freedesktop/systemd1')
+    manager = Interface(systemd, dbus_interface='org.freedesktop.systemd1.Manager')
+
+    for service in services.keys():
+        try:
+            service_unit = manager.GetUnit('{0}.service'.format(service))
+            service_proxy = bus.get_object('org.freedesktop.systemd1', str(service_unit))
+            service_properties = Interface(service_proxy, dbus_interface='org.freedesktop.DBus.Properties')
+            service_load_state = service_properties.Get('org.freedesktop.systemd1.Unit', 'LoadState')
+            service_active_state = service_properties.Get('org.freedesktop.systemd1.Unit', 'ActiveState')
+            if service_load_state == 'loaded' and service_active_state == 'active':
+                versions[service] = services[service]['version_method']()
+                if service.split('-')[-1] == 'node' and 'etcd_version' in versions[service]:
+                    del versions[service]['etcd_version']
+        except DBusException:
+            pass
+
+    return versions
+
 
 def get_openshift_version(facts, cli_image=None):
     """ Get current version of openshift on the host
@@ -1327,7 +1361,13 @@ class OpenShiftFacts(object):
         else:
             deployment_type = 'origin'
 
-        defaults = self.get_defaults(roles, deployment_type)
+        if 'common' in local_facts and 'is_containerized' in local_facts['common']:
+            is_containerized = local_facts['common']['is_containerized']
+        else:
+            is_containerized = False
+
+
+        defaults = self.get_defaults(roles, deployment_type, is_containerized)
         provider_facts = self.init_provider_facts()
         facts = apply_provider_facts(defaults, provider_facts)
         facts = merge_facts(facts,
@@ -1336,18 +1376,15 @@ class OpenShiftFacts(object):
                             protected_facts_to_overwrite)
         facts = merge_provider_facts(facts)
         facts['current_config'] = get_current_config(facts)
+        facts = build_kubelet_args(facts)
         facts = set_url_facts_if_unset(facts)
-        facts = set_project_cfg_facts_if_unset(facts)
         facts = set_flannel_facts_if_unset(facts)
         facts = set_nuage_facts_if_unset(facts)
         facts = set_node_schedulability(facts)
         facts = set_master_selectors(facts)
-        facts = set_metrics_facts_if_unset(facts)
         facts = set_identity_providers_if_unset(facts)
         facts = set_sdn_facts_if_unset(facts, self.system_facts)
         facts = set_deployment_facts_if_unset(facts)
-        facts = set_version_facts_if_unset(facts)
-        facts = set_manageiq_facts_if_unset(facts)
         facts = set_aggregate_facts(facts)
         facts = set_etcd_facts_if_unset(facts)
         facts = set_container_facts_if_unset(facts)
@@ -1355,7 +1392,10 @@ class OpenShiftFacts(object):
             facts = set_installed_variant_rpm_facts(facts)
         return dict(openshift=facts)
 
-    def get_defaults(self, roles, deployment_type):
+    # disabled to avoid breaking up get_defaults into
+    # multiple methods for now.
+    # pylint: disable=too-many-statements, too-many-branches, too-many-locals
+    def get_defaults(self, roles, deployment_type, is_containerized):
         """ Get default fact values
 
             Args:
@@ -1364,7 +1404,7 @@ class OpenShiftFacts(object):
             Returns:
                 dict: The generated default facts
         """
-        defaults = {}
+        defaults = {'installed_versions': get_installed_package_versions()}
         ip_addr = self.system_facts['default_ipv4']['address']
         exit_code, output, _ = module.run_command(['hostname', '-f'])
         hostname_f = output.strip() if exit_code == 0 else ''
@@ -1372,61 +1412,122 @@ class OpenShiftFacts(object):
                            self.system_facts['fqdn']]
         hostname = choose_hostname(hostname_values, ip_addr)
 
-        defaults['common'] = dict(use_openshift_sdn=True, ip=ip_addr,
-                                  public_ip=ip_addr,
-                                  deployment_type=deployment_type,
-                                  hostname=hostname,
-                                  public_hostname=hostname,
-                                  client_binary='oc', admin_binary='oadm',
-                                  dns_domain='cluster.local',
-                                  install_examples=True,
-                                  debug_level=2)
+        is_atomic = os.path.isfile('/run/ostree-booted')
+        if not is_containerized and is_atomic:
+            is_containerized = True
+
+        # Update this to use installed_versions
+        version = get_openshift_version(dict(common=dict(is_containerized=is_containerized)))
+
+        if version is not None:
+            if deployment_type == 'origin':
+                version_gte_3_1_or_1_1 = LooseVersion(version) >= LooseVersion('1.1.0')
+                version_gte_3_1_1_or_1_1_1 = LooseVersion(version) >= LooseVersion('1.1.1')
+                version_gte_3_2_or_1_2 = LooseVersion(version) >= LooseVersion('1.2.0')
+            else:
+                version_gte_3_1_or_1_1 = LooseVersion(version) >= LooseVersion('3.0.2.905')
+                version_gte_3_1_1_or_1_1_1 = LooseVersion(version) >= LooseVersion('3.1.1')
+                version_gte_3_2_or_1_2 = LooseVersion(version) >= LooseVersion('3.1.1.901')
+        else:
+            version_gte_3_1_or_1_1 = True
+            version_gte_3_1_1_or_1_1_1 = True
+            version_gte_3_2_or_1_2 = True
+
+        if deployment_type == 'atomic-enterprise' and not version_gte_3_2_or_1_2:
+            dt_key = 'atomic-enterprise-beta'
+        else:
+            dt_key = deployment_type
+
+        admin_binary = '/usr/local/bin/oadm' if is_containerized else 'oadm'
+        client_binary = '/usr/local/bin/oc' if is_containerized else 'oc'
+
+        defaults['common'] = dict(
+            use_openshift_sdn=True, ip=ip_addr, public_ip=ip_addr,
+            deployment_type=deployment_type, hostname=hostname,
+            public_hostname=hostname, client_binary=client_binary,
+            admin_binary=admin_binary, dns_domain='cluster.local',
+            install_examples=True, debug_level=2, use_cluster_metrics=False,
+            is_atomic=is_atomic, is_containerized=is_containerized,
+            service_type=DEPLOYMENT_TYPE_VALUES[dt_key]['service_type'],
+            config_base=DEPLOYMENT_TYPE_VALUES[dt_key]['config_base'],
+            data_dir=DEPLOYMENT_TYPE_VALUES[dt_key]['data_dir'],
+            version_gte_3_1_or_1_1=version_gte_3_1_or_1_1,
+            version_gte_3_1_1_or_1_1_1=version_gte_3_1_1_or_1_1_1,
+            version_gte_3_2_or_1_2=version_gte_3_2_or_1_2,
+            use_manageiq=version_gte_3_1_or_1_1,
+            cli_image=DEPLOYMENT_TYPE_VALUES[dt_key]['cli_image']
+        )
+
+        registry_url = 'openshift/origin-${component}:${version}'
+        if deployment_type in ['enterprise', 'online', 'openshift-enterprise']:
+            registry_url = 'openshift3/ose-${component}:${version}'
+        elif deployment_type == 'atomic-enterprise':
+            if version_gte_3_2_or_1_2:
+                registry_url = 'aep3/aep-${component}:${version}'
+            else:
+                registry_url = 'aep3_beta/aep-${component}:${version}'
+
+        if 'etcd' in roles:
+            defaults['etcd'] = dict(
+                etcd_image=DEPLOYMENT_TYPE_VALUES[dt_key]['etcd_image']
+            )
 
         if 'master' in roles:
-            defaults['master'] = dict(api_use_ssl=True, api_port='8443',
-                                      controllers_port='8444',
-                                      console_use_ssl=True,
-                                      console_path='/console',
-                                      console_port='8443', etcd_use_ssl=True,
-                                      etcd_hosts='', etcd_port='4001',
-                                      portal_net='172.30.0.0/16',
-                                      embedded_etcd=True, embedded_kube=True,
-                                      embedded_dns=True, dns_port='53',
-                                      bind_addr='0.0.0.0',
-                                      session_max_seconds=3600,
-                                      session_name='ssn',
-                                      session_secrets_file='',
-                                      access_token_max_seconds=86400,
-                                      auth_token_max_seconds=500,
-                                      oauth_grant_method='auto')
+            defaults['master'] = dict(
+                api_use_ssl=True, api_port='8443', controllers_port='8444',
+                console_use_ssl=True, console_path='/console',
+                console_port='8443', etcd_use_ssl=True, etcd_hosts='',
+                etcd_port='4001', portal_net='172.30.0.0/16',
+                embedded_etcd=True, embedded_kube=True,
+                embedded_dns=True, dns_port='53', bind_addr='0.0.0.0',
+                session_max_seconds=3600, session_name='ssn',
+                session_secrets_file='', access_token_max_seconds=86400,
+                auth_token_max_seconds=500, oauth_grant_method='auto',
+                registry_url=registry_url, default_node_selector='',
+                project_request_message='', project_request_template='',
+                mcs_allocator_range='s0:/2', mcs_labels_per_project=5,
+                uid_allocator_range='1000000000-1999999999/10000',
+                master_image=DEPLOYMENT_TYPE_VALUES[dt_key]['master_image']
+            )
 
         if 'node' in roles:
-            defaults['node'] = dict(labels={}, annotations={},
-                                    portal_net='172.30.0.0/16',
-                                    iptables_sync_period='5s',
-                                    set_node_ip=False)
+            parallel_pulls = False
+            if 'docker' in defaults['installed_versions']:
+                docker_version = defaults['installed_versions']['docker']['version']
+                if LooseVersion(docker_version) >= LooseVersion('1.9'):
+                    parallel_pulls = True
+
+            defaults['node'] = dict(
+                labels={}, annotations={}, portal_net='172.30.0.0/16',
+                iptables_sync_period='5s', set_node_ip=False,
+                registry_url='registry_url',
+                node_image=DEPLOYMENT_TYPE_VALUES[dt_key]['node_image'],
+                ovs_image=DEPLOYMENT_TYPE_VALUES[dt_key]['ovs_image'],
+                storage_plugin_deps=['ceph', 'glusterfs', 'iscsi', 'nfs'],
+                parallel_pulls=parallel_pulls
+            )
 
         if 'docker' in roles:
             defaults['docker'] = dict(disable_push_dockerhub=False)
 
-        defaults['hosted'] = dict(
-            registry=dict(
-                storage=dict(
-                    kind=None,
-                    volume=dict(
-                        name='registry',
-                        size='5Gi'
-                    ),
-                    nfs=dict(
-                        directory='/exports',
-                        options='*(rw,root_squash)'),
-                    host=None,
-                    access_modes=['ReadWriteMany'],
-                    create_pv=True
+        if 'hosted' in roles:
+            defaults['hosted'] = dict(
+                registry=dict(
+                    storage=dict(
+                        kind=None,
+                        volume=dict(
+                            name='registry',
+                            size='5Gi'
+                        ),
+                        nfs=dict(
+                            directory='/exports',
+                            options='*(rw,root_squash)'),
+                        host=None,
+                        access_modes=['ReadWriteMany'],
+                        create_pv=True
+                    )
                 )
             )
-        )
-
 
         return defaults
 
@@ -1542,7 +1643,8 @@ class OpenShiftFacts(object):
                     continue
                 for key in keys:
                     if key == keys[-1]:
-                        current_level[key] = value
+                        if value is not None and value != "":
+                            current_level[key] = value
                     elif key not in current_level:
                         current_level[key] = dict()
                         current_level = current_level[key]

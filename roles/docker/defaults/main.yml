@@ -1,0 +1,4 @@
+---
+docker_additional_registries: []
+docker_blocked_registries: []
+docker_insecure_registries: []

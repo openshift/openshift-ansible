@@ -34,7 +34,6 @@ servingInfo:
   clientCA: ca.crt
   keyFile: server.key
 volumeDirectory: {{ openshift.common.data_dir }}/openshift.local.volumes
-{% include 'partials/kubeletArguments.j2' %}
 proxyArguments:
   proxy-mode:
      - {{ openshift.node.proxy_mode }}
