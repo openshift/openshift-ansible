@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.59
+Version:        3.0.60
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -279,6 +279,22 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Mar 16 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.60-1
+- Fall back to deployment_type in openshift_facts. (abutcher@redhat.com)
+- Fixing undefined variable check (kwoodson@redhat.com)
+- Fix path to cacert on /healthz/ready check (sdodson@redhat.com)
+- Load environment files in containerized installs (sdodson@redhat.com)
+- change type to value_type (zhizhang@zhizhang-laptop-nay.redhat.com)
+- change time from int to float (zhizhang@zhizhang-laptop-nay.redhat.com)
+- change the check time from 1 hour to 2 hour (zhizhang@zhizhang-laptop-
+  nay.redhat.com)
+- add item of time cost a app build and app create (zhizhang@zhizhang-laptop-
+  nay.redhat.com)
+- add trigger for app creation with build process (zhizhang@zhizhang-laptop-
+  nay.redhat.com)
+- add key of openshift.master.app.build.create (zhizhang@zhizhang-laptop-
+  nay.redhat.com)
+
 * Wed Mar 16 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.59-1
 - Only mask etcd service for containerized installls when it's installed
   (sdodson@redhat.com)
