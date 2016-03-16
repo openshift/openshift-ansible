@@ -76,3 +76,5 @@
   when: docker_check.stat.isreg
   notify:
     - restart docker
+
+- meta: flush_handlers
