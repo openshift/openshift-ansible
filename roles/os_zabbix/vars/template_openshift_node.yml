@@ -4,37 +4,37 @@ g_template_openshift_node:
   zitems:
   - key: openshift.node.process.count
     description: Shows number of OpenShift Node processes running
-    type: int
+    value_type: int
     applications:
     - Openshift Node
 
   - key: openshift.node.ovs.pids.count
     description: Shows number of ovs process ids running
-    type: int
+    value_type: int
     applications:
     - Openshift Node
 
   - key: openshift.node.ovs.ports.count
     description: Shows number of OVS ports defined
-    type: int
+    value_type: int
     applications:
     - Openshift Node
 
   - key: openshift.node.ovs.stray.rules
     description: Number of OVS stray rules found/removed
-    type: int
+    value_type: int
     applications:
     - Openshift Node
 
   - key: openshift.node.registry-pods.healthy_pct
     description: Shows the percentage of healthy registries in the cluster
-    type: int
+    value_type: int
     applications:
     - Openshift Node
 
   - key: openshift.node.registry.service.ping
     description: Ping docker-registry service from node
-    type: int
+    value_type: int
     applications:
     - Openshift Node
 
