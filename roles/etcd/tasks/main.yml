@@ -36,8 +36,12 @@
     state: stopped
     enabled: no
 
+- name: Check for etcd service presence
+  command: systemctl show etcd.service
+  register: etcd_show
+  
 - name: Mask system etcd when containerized
-  when: openshift.common.is_containerized | bool
+  when: openshift.common.is_containerized | bool and 'LoadState=not-found' not in etcd_show.stdout
   command: systemctl mask etcd
 
 - name: Reload systemd units
