@@ -1,8 +1,11 @@
 ---
-libvirt_storage_pool_path: "{{ lookup('env','HOME') }}/libvirt-storage-pool-openshift-ansible"
-libvirt_storage_pool: 'openshift-ansible'
-libvirt_network: openshift-ansible
-libvirt_uri: 'qemu:///system'
+default_pool_path: "{{ lookup('env','HOME') }}/libvirt-storage-pool-openshift-ansible"
+libvirt_storage_pool_path: "{{ lookup('oo_option', 'libvirt_storage_pool_path') | default(default_pool_path, True) }}"
+libvirt_storage_pool: "{{ lookup('oo_option', 'libvirt_storage_pool') | default('openshift-ansible', True) }}"
+libvirt_network: "{{ lookup('oo_option', 'libvirt_network') | default('openshift-ansible', True) }}"
+libvirt_instance_memory_mib: "{{ lookup('oo_option', 'libvirt_instance_memory_mib') | default(1024, True) }}"
+libvirt_instance_vcpu: "{{ lookup('oo_option', 'libvirt_instance_vcpu') | default(2, True) }}"
+libvirt_uri: "{{ lookup('oo_option', 'libvirt_uri') | default('qemu:///system', True) }}"
 debug_level: 2
 
 # Automatic download of the qcow2 image for RHEL cannot be done directly from the RedHat portal because it requires authentication.
