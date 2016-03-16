@@ -6,6 +6,24 @@ g_template_openshift_master:
     applications:
     - Openshift Master
     key: openshift.master.app.create
+  
+  - key: openshift.master.app.build.create
+    description: "check the app create with a build process"
+    type: int
+    applications:
+    - Openshift Master
+
+  - key: openshift.master.app.create.time
+    description: "check the time it takes app create with a build process"
+    type: int
+    applications:
+    - Openshift Master
+
+  - key: openshift.master.app.build.time
+    description: "check the time it takes app build"
+    type: int
+    applications:
+    - Openshift Master
 
   - key: openshift.master.process.count
     description: Shows number of master processes running
@@ -295,8 +313,23 @@ g_template_openshift_master:
     - 'Openshift Master process not running on {HOST.NAME}'
     priority: avg
 
+  - name: 'Application creation with build has failed on {HOST.NAME}'
+    expression: '{Template Openshift Master:openshift.master.app.build.create.last(#1)}=1 and {Template Openshift Master:openshift.master.app.build.create.last(#2)}=1'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_create_app.asciidoc'
+    dependencies:
+    - 'Openshift Master process not running on {HOST.NAME}'
+    priority: avg
+
   - name: 'Application creation has failed multiple times in the last hour on {HOST.NAME}'
     expression: '{Template Openshift Master:openshift.master.app.create.sum(1h)}>3'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_create_app.asciidoc'
+    dependencies:
+    - 'Openshift Master process not running on {HOST.NAME}'
+    description: The application create loop has failed 4 or more times in the last hour
+    priority: avg
+
+  - name: 'Application with build creation has failed multiple times in the last 2 hour on {HOST.NAME}'
+    expression: '{Template Openshift Master:openshift.master.app.build.create.sum(2h)}>3'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_create_app.asciidoc'
     dependencies:
     - 'Openshift Master process not running on {HOST.NAME}'

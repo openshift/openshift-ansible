@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.58
+Version:        3.0.59
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -279,6 +279,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Mar 16 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.59-1
+- Only mask etcd service for containerized installls when it's installed
+  (sdodson@redhat.com)
+- Provide cacert when performing health checks (abutcher@redhat.com)
+
 * Tue Mar 15 2016 Kenny Woodson <kwoodson@redhat.com> 3.0.58-1
 - Group selector feature added (kwoodson@redhat.com)
 - nfs: replace yum with dnf (efreiber@redhat.com)
