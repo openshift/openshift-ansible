@@ -25,7 +25,8 @@
   openshift_facts:
     role: common
     local_facts:
-      deployment_type: "{{ openshift_deployment_type }}"
+      # TODO: Deprecate deployment_type in favor of openshift_deployment_type
+      deployment_type: "{{ openshift_deployment_type | default(deployment_type) }}"
       cluster_id: "{{ openshift_cluster_id | default('default') }}"
       hostname: "{{ openshift_hostname | default(None) }}"
       ip: "{{ openshift_ip | default(None) }}"
