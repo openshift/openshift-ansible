@@ -328,8 +328,8 @@ g_template_openshift_master:
     description: The application create loop has failed 4 or more times in the last hour
     priority: avg
 
-  - name: 'Application with build creation has failed multiple times in the last hour on {HOST.NAME}'
-    expression: '{Template Openshift Master:openshift.master.app.build.create.sum(1h)}>3'
+  - name: 'Application with build creation has failed multiple times in the last 2 hour on {HOST.NAME}'
+    expression: '{Template Openshift Master:openshift.master.app.build.create.sum(2h)}>3'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_create_app.asciidoc'
     dependencies:
     - 'Openshift Master process not running on {HOST.NAME}'
