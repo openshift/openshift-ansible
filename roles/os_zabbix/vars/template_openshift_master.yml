@@ -15,13 +15,13 @@ g_template_openshift_master:
 
   - key: openshift.master.app.create.time
     description: "check the time it takes app create with a build process"
-    type: int
+    type: float
     applications:
     - Openshift Master
 
   - key: openshift.master.app.build.time
     description: "check the time it takes app build"
-    type: int
+    type: float
     applications:
     - Openshift Master
 
