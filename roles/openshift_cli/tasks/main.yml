@@ -1,8 +1,8 @@
 ---
+# TODO: move this to a new 'cli' role
 - openshift_facts:
     role: common
     local_facts:
-      deployment_type: "{{ openshift_deployment_type }}"
       cli_image: "{{ osm_image | default(None) }}"
 
 - name: Install clients

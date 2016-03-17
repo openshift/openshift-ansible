@@ -1,7 +1,31 @@
 ---
 # tasks file for docker
+
+# Avoid docker 1.9 when installing origin < 1.2 or OSE < 3.2 on RHEL/Centos and
+# See: https://bugzilla.redhat.com/show_bug.cgi?id=1304038
+
+- name: Default to latest docker for 1.2/3.2 or Fedora
+  set_fact:
+    docker_version: ''
+  when: openshift.common.version_gte_3_2_or_1_2 | bool or ansible_distribution == 'Fedora'
+
+- name: Gather latest version of docker
+  shell: >
+    yum list available -e 0 -q "docker" 2>&1 | tail -n +2 | awk '{ print $2 }' | sort -r | tr '\n' ' ' | tail -n 1
+  register: latest_docker
+  when: not openshift.common.version_gte_3_2_or_1_2 | bool and ansible_distribution != 'Fedora'
+
+- name: Check if Docker 1.9 is the latest
+  set_fact:
+    docker19_is_latest: "{{ True if '1.9' in latest_docker.stdout else False }}"
+  when: not openshift.common.version_gte_3_2_or_1_2 | bool and ansible_distribution != 'Fedora'
+
+- set_fact:
+    docker_version: "{{ '-1.8.2' if docker19_is_latest | bool else ''}}"
+  when: not openshift.common.version_gte_3_2_or_1_2 | bool and ansible_distribution != 'Fedora'
+
 - name: Install docker
-  action: "{{ ansible_pkg_mgr }} name=docker state=present"
+  action: "{{ ansible_pkg_mgr }} name=docker{{ docker_version }} state=present"
   when: not openshift.common.is_atomic | bool
 
 - name: enable and start the docker service
@@ -25,16 +49,16 @@
     dest: /etc/sysconfig/docker
     regexp: '^{{ item.reg_conf_var }}=.*$'
     line: "{{ item.reg_conf_var }}='{{ item.reg_fact_val | oo_prepend_strings_in_list(item.reg_flag ~ ' ') | join(' ') }}'"
-  when: item.reg_fact_val is defined and docker_check.stat.isreg
+  when: item.reg_fact_val != '' and  docker_check.stat.isreg
   with_items:
   - reg_conf_var: ADD_REGISTRY
-    reg_fact_val: "{{ docker_additional_registries }}"
+    reg_fact_val: "{{ docker_additional_registries | default(None, true)}}"
     reg_flag: --add-registry
   - reg_conf_var: BLOCK_REGISTRY
-    reg_fact_val: "{{ docker_blocked_registries }}"
+    reg_fact_val: "{{ docker_blocked_registries| default(None, true) }}"
     reg_flag: --block-registry
   - reg_conf_var: INSECURE_REGISTRY
-    reg_fact_val: "{{ docker_insecure_registries }}"
+    reg_fact_val: "{{ docker_insecure_registries| default(None, true) }}"
     reg_flag: --insecure-registry
   notify:
   - restart docker
@@ -52,3 +76,5 @@
   when: docker_check.stat.isreg
   notify:
     - restart docker
+
+- meta: flush_handlers

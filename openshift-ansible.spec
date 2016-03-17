@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.57
+Version:        3.0.60
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -279,6 +279,35 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Mar 16 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.60-1
+- Fall back to deployment_type in openshift_facts. (abutcher@redhat.com)
+- Fixing undefined variable check (kwoodson@redhat.com)
+- Fix path to cacert on /healthz/ready check (sdodson@redhat.com)
+- Load environment files in containerized installs (sdodson@redhat.com)
+- change type to value_type (zhizhang@zhizhang-laptop-nay.redhat.com)
+- change time from int to float (zhizhang@zhizhang-laptop-nay.redhat.com)
+- change the check time from 1 hour to 2 hour (zhizhang@zhizhang-laptop-
+  nay.redhat.com)
+- add item of time cost a app build and app create (zhizhang@zhizhang-laptop-
+  nay.redhat.com)
+- add trigger for app creation with build process (zhizhang@zhizhang-laptop-
+  nay.redhat.com)
+- add key of openshift.master.app.build.create (zhizhang@zhizhang-laptop-
+  nay.redhat.com)
+
+* Wed Mar 16 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.59-1
+- Only mask etcd service for containerized installls when it's installed
+  (sdodson@redhat.com)
+- Provide cacert when performing health checks (abutcher@redhat.com)
+
+* Tue Mar 15 2016 Kenny Woodson <kwoodson@redhat.com> 3.0.58-1
+- Group selector feature added (kwoodson@redhat.com)
+- nfs: replace yum with dnf (efreiber@redhat.com)
+- Move common common facts to openshift_facts (jdetiber@redhat.com)
+- perform oc client config tasks only once when ansible_ssh_user is root
+  (jdetiber@redhat.com)
+- OSE/Origin < 3.2/1.2 should not get Docker 1.9 (sdodson@redhat.com)
+
 * Mon Mar 14 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.57-1
 - Docker stderr can break this script if ansible executes it remotely
   (bleanhar@redhat.com)

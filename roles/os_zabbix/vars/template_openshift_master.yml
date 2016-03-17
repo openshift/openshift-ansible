@@ -6,258 +6,276 @@ g_template_openshift_master:
     applications:
     - Openshift Master
     key: openshift.master.app.create
+  
+  - key: openshift.master.app.build.create
+    description: "check the app create with a build process"
+    value_type: int
+    applications:
+    - Openshift Master
+
+  - key: openshift.master.app.create.time
+    description: "check the time it takes app create with a build process"
+    value_type: float
+    applications:
+    - Openshift Master
+
+  - key: openshift.master.app.build.time
+    description: "check the time it takes app build"
+    value_type: float
+    applications:
+    - Openshift Master
 
   - key: openshift.master.process.count
     description: Shows number of master processes running
-    type: int
+    value_type: int
     applications:
     - Openshift Master
 
   - key: openshift.master.api.ping
     description: "Verify that the Openshift API is up (uses the cluster API URL)"
-    type: int
+    value_type: int
     applications:
     - Openshift Master
 
   - key: openshift.master.local.api.ping
     description: "Verify that the Openshift API is up on the host (uses the API URL as the https://127.0.0.1)"
-    type: int
+    value_type: int
     applications:
     - Openshift Master
 
   - key: openshift.master.api.healthz
     description: "Checks the healthz check of the master's api: https://<cluster_api_url>/healthz"
-    type: int
+    value_type: int
     data_type: bool
     applications:
     - Openshift Master
 
   - key: openshift.master.local.api.healthz
     description: "Checks the healthz check of the master's api: https://127.0.0.1/healthz"
-    type: int
+    value_type: int
     data_type: bool
     applications:
     - Openshift Master
 
   - key: openshift.master.user.count
     description: Shows number of users in a cluster
-    type: int
+    value_type: int
     applications:
     - Openshift Master
 
   - key: openshift.master.pod.running.count
     description: Shows number of pods running
-    type: int
+    value_type: int
     applications:
     - Openshift Master
 
   - key: openshift.master.pod.user.running.count
     description: Shows number of user pods running (non infrastructure pods)
-    type: int
+    value_type: int
     applications:
     - Openshift Master
 
   - key: openshift.master.pod.total.count
     description: Shows total number of pods (running and non running)
-    type: int
+    value_type: int
     applications:
     - Openshift Master
 
   - key: openshift.master.node.count
     description: Shows the total number of nodes found in the Openshift Cluster
-    type: int
+    value_type: int
     applications:
     - Openshift Master
 
   - key: openshift.project.count
     description: Shows number of projects on a cluster
-    type: int
+    value_type: int
     applications:
     - Openshift Master
 
   - key: openshift.master.pv.total.count
     description: Total number of Persistent Volumes in the Openshift Cluster
-    type: int
+    value_type: int
     applications:
     - Openshift Master
 
   - key: openshift.master.pv.available.count
     description: Total number of Available Persistent Volumes in the Openshift Cluster
-    type: int
+    value_type: int
     applications:
     - Openshift Master
 
   - key: openshift.master.pv.released.count
     description: Total number of Released Persistent Volumes in the Openshift Cluster
-    type: int
+    value_type: int
     applications:
     - Openshift Master
 
   - key: openshift.master.pv.bound.count
     description: Total number of Bound Persistent Volumes in the Openshift Cluster
-    type: int
+    value_type: int
     applications:
     - Openshift Master
 
   - key: openshift.master.pv.failed.count
     description: Total number of Failed Persistent Volumes in the Openshift Cluster
-    type: int
+    value_type: int
     applications:
     - Openshift Master
 
   - key: openshift.master.skydns.port.open
     description: State of the SkyDNS port open and listening
-    type: int
+    value_type: int
     applications:
     - Openshift Master
 
   - key: openshift.master.skydns.query
     description: SkyDNS can be queried or not
-    type: int
+    value_type: int
     applications:
     - Openshift Master
 
   - key: openshift.master.etcd.create.success
     description: Show number of successful create actions
-    type: int
+    value_type: int
     applications:
     - Openshift Etcd
 
   - key: openshift.master.etcd.create.fail
     description: Show number of failed create actions
-    type: int
+    value_type: int
     applications:
     - Openshift Etcd
 
   - key: openshift.master.etcd.delete.success
     description: Show number of successful delete actions
-    type: int
+    value_type: int
     applications:
     - Openshift Etcd
 
   - key: openshift.master.etcd.delete.fail
     description: Show number of failed delete actions
-    type: int
+    value_type: int
     applications:
     - Openshift Etcd
 
   - key: openshift.master.etcd.get.success
     description: Show number of successful get actions
-    type: int
+    value_type: int
     applications:
     - Openshift Etcd
 
   - key: openshift.master.etcd.get.fail
     description: Show number of failed get actions
-    type: int
+    value_type: int
     applications:
     - Openshift Etcd
 
   - key: openshift.master.etcd.set.success
     description: Show number of successful set actions
-    type: int
+    value_type: int
     applications:
     - Openshift Etcd
 
   - key: openshift.master.etcd.set.fail
     description: Show number of failed set actions
-    type: int
+    value_type: int
     applications:
     - Openshift Etcd
 
   - key: openshift.master.etcd.update.success
     description: Show number of successful update actions
-    type: int
+    value_type: int
     applications:
     - Openshift Etcd
 
   - key: openshift.master.etcd.update.fail
     description: Show number of failed update actions
-    type: int
+    value_type: int
     applications:
     - Openshift Etcd
 
   - key: openshift.master.etcd.watchers
     description: Show number of etcd watchers
-    type: int
+    value_type: int
     applications:
     - Openshift Etcd
 
   - key: openshift.master.etcd.ping
     description: etcd ping
-    type: int
+    value_type: int
     applications:
     - Openshift Etcd
 
   - key: openshift.master.metric.ping
     description: "This check verifies that the https://master/metrics check is alive and communicating properly."
-    type: int
+    value_type: int
     applications:
     - Openshift Master Metrics
 
   - key: openshift.master.nodesnotready.count
     description: "This check shows how many nodes in a cluster are in NotReady state."
-    type: int
+    value_type: int
     applications: 
     - Openshift Master
 
   - key: openshift.master.nodesnotschedulable.count
     description: "This check shows how many nodes in a cluster are not schedulable."
-    type: int
+    value_type: int
     applications:
     - Openshift Master
 
   - key: openshift.master.apiserver.latency.summary.pods.quantile.list.5
     description: "Value from https://master/metrics.  This is the time, in miliseconds, that 50% of the pod operations have taken to completed."
-    type: int
+    value_type: int
     applications:
     - Openshift Master Metrics
 
   - key: openshift.master.apiserver.latency.summary.pods.quantile.list.9
     description: "Value from https://master/metrics.  This is the time, in miliseconds, that 90% of the pod operations have taken to completed."
-    type: int
+    value_type: int
     applications:
     - Openshift Master Metrics
 
   - key: openshift.master.apiserver.latency.summary.pods.quantile.list.99
     description: "Value from https://master/metrics.  This is the time, in miliseconds, that 99% of the pod operations have taken to completed."
-    type: int
+    value_type: int
     applications:
     - Openshift Master Metrics
 
   - key: openshift.master.apiserver.latency.summary.pods.quantile.watchlist.5
     description: "Value from https://master/metrics.  This is the time, in miliseconds, that 50% of the pod operations have taken to completed."
-    type: int
+    value_type: int
     applications:
     - Openshift Master Metrics
 
   - key: openshift.master.apiserver.latency.summary.pods.quantile.watchlist.9
     description: "Value from https://master/metrics.  This is the time, in miliseconds, that 90% of the pod operations have taken to completed."
-    type: int
+    value_type: int
     applications:
     - Openshift Master Metrics
 
   - key: openshift.master.apiserver.latency.summary.pods.quantile.watchlist.99
     description: "Value from https://master/metrics.  This is the time, in miliseconds, that 99% of the pod operations have taken to completed."
-    type: int
+    value_type: int
     applications:
     - Openshift Master Metrics
 
   - key: openshift.master.scheduler.e2e.scheduling.latency.quantile.5
     description: "Value from https://master/metrics.  This is the time, in miliseconds, that 50% of the end to end scheduling operations have taken to completed."
-    type: int
+    value_type: int
     applications:
     - Openshift Master Metrics
 
   - key: openshift.master.scheduler.e2e.scheduling.latency.quantile.9
     description: "Value from https://master/metrics.  This is the time, in miliseconds, that 90% of the end to end scheduling operations have taken to completed."
-    type: int
+    value_type: int
     applications:
     - Openshift Master Metrics
 
   - key: openshift.master.scheduler.e2e.scheduling.latency.quantile.99
     description: "Value from https://master/metrics.  This is the time, in miliseconds, that 99% of the end to end scheduling operations have taken to completed."
-    type: int
+    value_type: int
     applications:
     - Openshift Master Metrics
 
@@ -295,8 +313,23 @@ g_template_openshift_master:
     - 'Openshift Master process not running on {HOST.NAME}'
     priority: avg
 
+  - name: 'Application creation with build has failed on {HOST.NAME}'
+    expression: '{Template Openshift Master:openshift.master.app.build.create.last(#1)}=1 and {Template Openshift Master:openshift.master.app.build.create.last(#2)}=1'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_create_app.asciidoc'
+    dependencies:
+    - 'Openshift Master process not running on {HOST.NAME}'
+    priority: avg
+
   - name: 'Application creation has failed multiple times in the last hour on {HOST.NAME}'
     expression: '{Template Openshift Master:openshift.master.app.create.sum(1h)}>3'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_create_app.asciidoc'
+    dependencies:
+    - 'Openshift Master process not running on {HOST.NAME}'
+    description: The application create loop has failed 4 or more times in the last hour
+    priority: avg
+
+  - name: 'Application with build creation has failed multiple times in the last 2 hour on {HOST.NAME}'
+    expression: '{Template Openshift Master:openshift.master.app.build.create.sum(2h)}>3'
     url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/check_create_app.asciidoc'
     dependencies:
     - 'Openshift Master process not running on {HOST.NAME}'

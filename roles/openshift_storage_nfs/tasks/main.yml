@@ -1,8 +1,6 @@
 ---
 - name: Install nfs-utils
-  yum:
-    pkg: nfs-utils
-    state: present
+  action: "{{ ansible_pkg_mgr }} name=nfs-utils state=present"
 
 - name: Configure NFS
   lineinfile:

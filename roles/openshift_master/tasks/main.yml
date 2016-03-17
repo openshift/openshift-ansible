@@ -282,7 +282,8 @@
   # Using curl here since the uri module requires python-httplib2 and
   # wait_for port doesn't provide health information.
   command: >
-    curl -k --silent {{ openshift.master.api_url }}/healthz/ready
+    curl --silent --cacert {{ openshift.common.config_base }}/master/ca.crt
+    {{ openshift.master.api_url }}/healthz/ready
   register: api_available_output
   until: api_available_output.stdout == 'ok'
   retries: 120
@@ -319,6 +320,9 @@
   changed_when: false
   register: _ansible_ssh_user_gid
 
+- set_fact:
+    client_users: "{{ [ansible_ssh_user, 'root'] | unique }}"
+
 - name: Create the client config dir(s)
   file:
     path: "~{{ item }}/.kube"
@@ -326,9 +330,7 @@
     mode: 0700
     owner: "{{ item }}"
     group: "{{ 'root' if item == 'root' else _ansible_ssh_user_gid.stdout  }}"
-  with_items:
-  - root
-  - "{{ ansible_ssh_user }}"
+  with_items: client_users
 
 # TODO: Update this file if the contents of the source file are not present in
 # the dest file, will need to make sure to ignore things that could be added
@@ -336,9 +338,7 @@
   command: cp {{ openshift_master_config_dir }}/admin.kubeconfig ~{{ item }}/.kube/config
   args:
     creates: ~{{ item }}/.kube/config
-  with_items:
-  - root
-  - "{{ ansible_ssh_user }}"
+  with_items: client_users
 
 - name: Update the permissions on the admin client config(s)
   file:
@@ -347,6 +347,4 @@
     mode: 0700
     owner: "{{ item }}"
     group: "{{ 'root' if item == 'root' else _ansible_ssh_user_gid.stdout  }}"
-  with_items:
-  - root
-  - "{{ ansible_ssh_user }}"
+  with_items: client_users

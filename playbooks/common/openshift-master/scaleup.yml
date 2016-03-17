@@ -33,7 +33,8 @@
     service: name={{ openshift.common.service_type }}-master-controllers state=restarted
   - name: verify api server
     command: >
-      curl -k --silent {{ openshift.master.api_url }}/healthz/ready
+      curl --silent --cacert {{ openshift.common.config_base }}/master/ca.crt
+      {{ openshift.master.api_url }}/healthz/ready
     register: api_available_output
     until: api_available_output.stdout == 'ok'
     retries: 120
