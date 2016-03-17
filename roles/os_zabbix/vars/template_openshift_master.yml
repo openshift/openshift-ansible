@@ -13,6 +13,12 @@ g_template_openshift_master:
     applications:
     - Openshift Master
 
+  - key: openshift.master.pv.space.total
+    description: "check the total use of pv sapce"
+    value_type: int
+    applications:
+    - Openshift Master
+
   - key: openshift.master.app.create.time
     description: "check the time it takes app create with a build process"
     value_type: float
@@ -319,6 +325,13 @@ g_template_openshift_master:
     dependencies:
     - 'Openshift Master process not running on {HOST.NAME}'
     priority: avg
+   
+  - name: 'pv spaces above 100G on {HOST.NAME}'
+    expression: '{Template Openshift Master:openshift.master.pv.space.total.last()}>100'
+    url: 'https://github.com/openshift/ops-sop/blob/master/V3/Alerts/pv_space_above.asciidoc'
+    dependencies:
+    - 'Openshift Master process not running on {HOST.NAME}'
+    priority: high
 
   - name: 'Application creation has failed multiple times in the last hour on {HOST.NAME}'
     expression: '{Template Openshift Master:openshift.master.app.create.sum(1h)}>3'
