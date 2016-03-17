@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.60
+Version:        3.0.61
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -279,6 +279,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Mar 17 2016 Troy Dawson <tdawson@redhat.com> 3.0.61-1
+- Bug 1317755 - Set insecure-registry for internal registry by default
+  (jdetiber@redhat.com)
+
 * Wed Mar 16 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.60-1
 - Fall back to deployment_type in openshift_facts. (abutcher@redhat.com)
 - Fixing undefined variable check (kwoodson@redhat.com)
