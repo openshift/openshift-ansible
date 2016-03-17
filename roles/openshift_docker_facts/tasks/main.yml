@@ -13,11 +13,9 @@
       log_options: "{{ openshift_docker_log_options | default(None) }}"
       options: "{{ openshift_docker_options | default(None) }}"
       disable_push_dockerhub: "{{ openshift_disable_push_dockerhub | default(None) }}"
-  - role: node
-    local_facts:
-      portal_net: "{{ openshift_master_portal_net | default(None) }}"
+      hosted_registry_insecure: "{{ openshift_docker_hosted_registry_insecure | default(None) }}"
+      hosted_registry_network: "{{ openshift_docker_hosted_registry_network | default(None) }}"
 
-# TODO: append openshift.node.portal_net to docker_insecure_registries
 - set_fact:
     docker_additional_registries: "{{ openshift.docker.additional_registries
                                       | default(omit) }}"
@@ -27,6 +25,15 @@
                                     | default(omit) }}"
     docker_log_driver: "{{ openshift.docker.log_driver | default(omit) }}"
     docker_log_options: "{{ openshift.docker.log_options | default(omit) }}"
-    docker_options: "{{ openshift.docker.options | default(omit) }}"
     docker_push_dockerhub: "{{ openshift.docker.disable_push_dockerhub
                                | default(omit) }}"
+
+- set_fact:
+    docker_options: >
+      --insecure-registry={{ openshift.docker.hosted_registry_network }}
+      {{ openshift.docker.options | default ('') }}
+  when: openshift.docker.hosted_registry_insecure | default(False) | bool
+
+- set_fact:
+    docker_options: "{{ openshift.docker.options | default(omit) }}"
+  when: not openshift.docker.hosted_registry_insecure | default(False) | bool
