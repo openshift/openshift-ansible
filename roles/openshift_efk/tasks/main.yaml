@@ -1,7 +1,10 @@
 ---
 
   - fail: msg="This roel requires the following vars to be defined: master_url, kibana_hostname, es_cluster_size"
-    when: "kibana_hostname is not defined or es_cluster_size is not defined or master_url is not defined"
+    when: "deployer_secret_vars is not defined or 
+          kibana_hostname is not defined or
+          es_cluster_size is not defined or
+          master_url is not defined"
 
   - name: "Checking for logging project"
     command: oc get project logging
@@ -50,7 +53,7 @@
       - cleanup
 
   - name: "Creating logging deployer secret"
-    command: oc secrets new logging-deployer kibana.crt=/etc/origin/master/ca.crt kibana.key=/etc/origin/master/ca.key ca.crt=/etc/origin/master/ca.crt ca.key=/etc/origin/master/ca.key
+    command: oc secrets new logging-deployer {{ deployer_secret_vars }}
     register: secret_output
     failed_when: "secret_output.rc == 1 and 'exists' not in secret_output.stderr"
     tags:
