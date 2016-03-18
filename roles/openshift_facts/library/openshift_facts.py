@@ -1281,7 +1281,7 @@ class OpenShiftFacts(object):
         Raises:
             OpenShiftFactsUnsupportedRoleError:
     """
-    known_roles = ['common', 'master', 'node', 'etcd', 'hosted', 'docker']
+    known_roles = ['clock', 'common', 'docker', 'etcd', 'hosted', 'master', 'node']
 
     # Disabling too-many-arguments, this should be cleaned up as a TODO item.
     # pylint: disable=too-many-arguments
