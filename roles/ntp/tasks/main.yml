@@ -1,0 +1,33 @@
+---
+# tasks file for ntp
+- name: Install ntp
+  action: "{{ ansible_pkg_mgr }} name=ntp state=present"
+
+- name: Enable and (re)start the ntpd service
+  service:
+    name: ntpd
+    enabled: yes
+    state: restarted
+
+- name: Pause to give ntpd a chance to start and sync
+  pause: seconds=5
+  when: (ntp_require_clock_sync is defined) and ntp_require_clock_sync | bool
+
+- name: Restart ntpd again to recalculate sync status.
+  service:
+    name: ntpd
+    state: restarted
+  when: (ntp_require_clock_sync is defined) and ntp_require_clock_sync | bool
+
+- name: Wait for ntp to become synchronized
+  shell: ntpstat
+  ignore_errors: True
+  register: ntp_ntpstat_result
+  until: ntp_ntpstat_result.rc == 0
+  retries: 5
+  delay: 1
+  when: (ntp_require_clock_sync is defined) and ntp_require_clock_sync | bool
+
+- fail:
+    msg: "ntpd failed to synchronize clock."
+  when: (ntp_ntpstat_result is defined) and ntp_ntpstat_result.rc != 0

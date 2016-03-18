@@ -1,3 +1,13 @@
+- name: Configure ntp
+  hosts:
+    - oo_nodes_to_config
+    - oo_etcd_to_config
+  vars:
+    ntp_require_clock_sync: "{{ openshift_require_clock_sync | default(false) | bool }}"
+  roles:
+    - role: ntp
+      when: not openshift.common.is_containerized | bool and openshift_manage_clock_method is defined and
+        ( openshift_manage_clock_method == "ntpd" or openshift_manage_clock_method == "auto" )
 - name: Configure flannel
   hosts: oo_first_master
   vars:
