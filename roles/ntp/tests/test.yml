@@ -1,0 +1,10 @@
+---
+- hosts: localhost
+  remote_user: root
+
+  vars:
+    ntp_enabled: false
+    ntp_manage_config: true
+
+  roles:
+    - ansible-role-ntp
