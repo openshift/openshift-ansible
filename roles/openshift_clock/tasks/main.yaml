@@ -1,0 +1,14 @@
+---
+- name: Set clock facts
+  openshift_facts:
+    role: clock
+    local_facts:
+      enabled: "{{ openshift_clock_enabled | default(None) }}"
+
+- name: Install ntp package
+  action: "{{ ansible_pkg_mgr }} name=ntp state=present"
+  when: openshift.clock.enabled | bool and not openshift.clock.chrony_installed | bool
+
+- name: Start and enable ntpd/chronyd
+  shell: timedatectl set-ntp true
+  when: openshift.clock.enabled | bool
