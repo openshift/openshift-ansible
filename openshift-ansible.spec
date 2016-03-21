@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.62
+Version:        3.0.63
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -279,6 +279,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Mar 21 2016 Kenny Woodson <kwoodson@redhat.com> 3.0.63-1
+- Modified group selectors for muliple clusters per account
+  (kwoodson@redhat.com)
+
 * Fri Mar 18 2016 Troy Dawson <tdawson@redhat.com> 3.0.62-1
 - Yaml editor first attempt (kwoodson@redhat.com)
 - libvirt cluster variables cleanup (pep@redhat.com)
