@@ -311,13 +311,14 @@
     file:
       path: "{{ named_certs_dir }}"
       state: directory
+      mode: 0700
     when: named_certs_specified | bool
   - name: Land named certificates
     copy: src="{{ item.certfile }}" dest="{{ named_certs_dir }}"
     with_items: openshift_master_named_certificates
     when: named_certs_specified | bool
   - name: Land named certificate keys
-    copy: src="{{ item.keyfile }}" dest="{{ named_certs_dir }}"
+    copy: src="{{ item.keyfile }}" dest="{{ named_certs_dir }}" mode=0600
     with_items: openshift_master_named_certificates
     when: named_certs_specified | bool
 
