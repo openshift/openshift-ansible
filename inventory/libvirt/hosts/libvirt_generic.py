@@ -107,6 +107,14 @@ class LibvirtInventory(object):
         if self.args.host in inventory['_meta']['hostvars']:
             return inventory['_meta']['hostvars'][self.args.host]
 
+    def libvirt_domain_state(self, domain):
+        ''' Return a libvirt domain's state as a string, e.g. 'RUNNING'. '''
+        state_int, reason_int_unused = domain.state()
+        for state in 'NOSTATE RUNNING BLOCKED PAUSED SHUTDOWN SHUTOFF CRASHED PMSUSPENDED'.split():
+            if getattr(libvirt, 'VIR_DOMAIN_' + state, None) == state_int:
+                return state
+        return 'UNRECOGNIZED_%d' % state_int
+
     def get_inventory(self):
         ''' Construct the inventory '''
 
@@ -128,13 +136,14 @@ class LibvirtInventory(object):
                             libvirt_uuid=domain.UUIDString())
             domain_name = domain.name()
 
-            # TODO: add support for guests that are not in a running state
-            state, _ = domain.state()
-            # 2 is the state for a running guest
-            if state != 1:
-                continue
+            # Operating on guests in a non-RUNNING state is probably useless
+            # but silently omitting them is confusing.  This script can't
+            # indicate errors.  Best we can do is return them all and set a
+            # hostvar.
+            # Then playbooks can fail implicitly (because some hosts are unreachable),
+            # explicitly, or even try to start non-running hosts...
+            hostvars['libvirt_state'] = self.libvirt_domain_state(domain)
 
-            hostvars['libvirt_status'] = 'running'
 
             root = ET.fromstring(domain.XMLDesc())
             ansible_ns = {'ansible': 'https://github.com/ansible/ansible'}
