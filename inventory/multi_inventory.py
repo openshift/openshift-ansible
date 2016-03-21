@@ -316,17 +316,29 @@ class MultiInventory(object):
                 inventory[key].append(name)
 
     def apply_group_selectors(self, inventory, group_selectors):
-        ''' Apply the account config for clone groups '''
+        ''' Apply the account config for group selectors '''
         _ = self # Here for pylint.  wanted an instance method instead of static
-        for selector in group_selectors:
-            if inventory.has_key(selector['from_group']):
-                inventory[selector['from_group']].sort()
-                inventory[selector['name']] = inventory[selector['from_group']][0:selector['count']]
-                for host in inventory[selector['from_group']]:
-                    if host in inventory[selector['name']]:
-                        inventory['_meta']['hostvars'][host][selector['name']] = True
+        # There could be multiple clusters per account.  We need to process these selectors
+        # based upon the oo_clusterid_ variable.
+        clusterids = [group for group in inventory if "oo_clusterid_" in group]
+
+        for clusterid in clusterids:
+            for selector in group_selectors:
+                if inventory.has_key(selector['from_group']):
+                    hosts = list(set(inventory[clusterid]) & set(inventory[selector['from_group']]))
+                    hosts.sort()
+
+                    # Multiple clusters in an account
+                    if inventory.has_key(selector['name']):
+                        inventory[selector['name']].extend(hosts[0:selector['count']])
                     else:
-                        inventory['_meta']['hostvars'][host][selector['name']] = False
+                        inventory[selector['name']] = hosts[0:selector['count']]
+
+                    for host in hosts:
+                        if host in inventory[selector['name']]:
+                            inventory['_meta']['hostvars'][host][selector['name']] = True
+                        else:
+                            inventory['_meta']['hostvars'][host][selector['name']] = False
 
     def apply_account_config(self, acc_config):
         ''' Apply account config settings '''
