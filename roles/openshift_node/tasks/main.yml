@@ -31,6 +31,7 @@
       node_image: "{{ osn_image | default(None) }}"
       ovs_image: "{{ osn_ovs_image | default(None) }}"
       proxy_mode: "{{ openshift_node_proxy_mode | default('iptables') }}"
+      local_quota_per_fsgroup: "{{ openshift_node_local_quota_per_fsgroup | default(None) }}"
 
 # We have to add tuned-profiles in the same transaction otherwise we run into depsolving
 # problems because the rpms don't pin the version properly. This was fixed in 3.1 packaging.

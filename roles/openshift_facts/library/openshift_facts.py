@@ -1407,6 +1407,7 @@ class OpenShiftFacts(object):
         if 'node' in roles:
             defaults['node'] = dict(labels={}, annotations={},
                                     iptables_sync_period='5s',
+                                    local_quota_per_fsgroup="",
                                     set_node_ip=False)
 
         if 'docker' in roles:

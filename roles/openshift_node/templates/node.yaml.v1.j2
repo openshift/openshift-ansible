@@ -38,3 +38,6 @@ volumeDirectory: {{ openshift.common.data_dir }}/openshift.local.volumes
 proxyArguments:
   proxy-mode:
      - {{ openshift.node.proxy_mode }}
+volumeConfig:
+  localQuota:
+    perFSGroup: {{ openshift.node.local_quota_per_fsgroup }}
