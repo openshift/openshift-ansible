@@ -1,179 +1,107 @@
 ---
 
-  - fail: msg="This role requires the following vars to be defined: master_url, kibana_hostname, es_cluster_size"
-    when: "kibana_hostname is not defined or
-          es_cluster_size is not defined or
-          master_url is not defined"
+  - fail: msg="This role requires the following vars to be defined: openshift_hosted_logging_master_public_url, openshift_hosted_logging_hostname, penshift_hosted_logging_elasticsearchs_cluster_size"
+    when: "openshift_hosted_logging_hostname is not defined or
+          penshift_hosted_logging_elasticsearchs_cluster_size is not defined or
+          openshift_hosted_logging_master_public_url is not defined"
 
-  - name: "Checking for logging project"
-    command: oc get project logging
-    register: logging_project
-    failed_when: "'FAILED' in logging_project.stderr"
-    tags:
-      - cleanup
+  - name: Create temp directory for kubeconfig
+    command: mktemp -d /tmp/openshift-ansible-XXXXXX
+    register: mktemp
+    changed_when: False
+
+  - name: Copy the admin client config(s)
+    command: >
+      cp {{ openshift_master_config_dir }}/admin.kubeconfig {{ mktemp.stdout }}/admin.kubeconfig
+    changed_when: False
+
 
   - name: "Create logging project"
     command: oadm new-project logging
     when: logging_project.rc != 0
-    tags:
-      - build
+
+
   - name: "Changing projects"
     command: oc project logging
-    tags:
-      - cleanup
-
-  - name: "Cleanup any previous logging infrastructure"
-    command: oc delete all --selector logging-infra={{ item }}
-    with_items:
-      - kibana
-      - fluentd
-      - elasticsearch
-    ignore_errors: yes
-    tags:
-      - cleanup
-
-  - name: "Cleanup existing support infrastructure"
-    command: oc delete all,sa,oauthclient --selector logging-infra=support
-    ignore_errors: yes
-    tags:
-      - cleanup
-
-  - name: "Cleanup existing secrets"
-    command: oc delete secret logging-fluentd logging-elasticsearch logging-es-proxy logging-kibana logging-kibana-proxy logging-kibana-ops-proxy
-    ignore_errors: yes
-    register: clean_result
-    failed_when: clean_result.rc == 1 and 'not found' not in clean_result.stderr
-    tags:
-      - cleanup
-
-  - name: "Cleanup existing logging deployers"
-    command: oc delete pods --all
-    tags:
-      - cleanup
 
   - name: "Creating logging deployer secret"
-    command: oc secrets new logging-deployer {{ logging_secret_vars | default('nothing=/dev/null') }}
+    command: oc secrets new logging-deployer {{ openshift_hosted_logging_secret_vars | default('nothing=/dev/null') }}
     register: secret_output
     failed_when: "secret_output.rc == 1 and 'exists' not in secret_output.stderr"
-    tags:
-      - build
 
   - name: "Copy serviceAccount file"
     copy: dest=/tmp/logging-deployer-sa.yaml
           src={{role_path}}/files/logging-deployer-sa.yaml
           force=yes
-    tags:
-      - build
 
   - name: "Create logging-deployer service account"
     shell: oc create -f  /tmp/logging-deployer-sa.yaml
     register: deployer_output
     failed_when: "deployer_output.rc == 1 and 'exists' not in deployer_output.stderr"
-    tags:
-      - build
 
   - name: "Set permissions for logging-deployer service account"
     command: oc policy add-role-to-user edit system:serviceaccount:logging:logging-deployer
     register: permiss_output
     failed_when: "permiss_output.rc == 1 and 'exists' not in permiss_output.stderr"
-    tags:
-      - build
 
   - name: "Set permissions for fluentd"
     command: oadm policy add-scc-to-user privileged system:serviceaccount:logging:aggregated-logging-fluentd
     register: fluentd_output
     failed_when: "fluentd_output.rc == 1 and 'exists' not in fluentd_output.stderr"
-    tags:
-      - build
 
   - name: "Set additional permissions for fluentd"
     command: oadm policy add-cluster-role-to-user cluster-reader system:serviceaccount:logging:aggregated-logging-fluentd
     register: fluentd2_output
     failed_when: "fluentd2_output.rc == 1 and 'exists' not in fluentd2_output.stderr"
-    tags:
-      - build
-
-  - name: "Make sure to remove stale deployer template"
-    command: oc delete template logging-deployer-template -n openshift
-    register: delete_ouput
-    failed_when: delete_ouput.rc == 1 and 'exists' not in delete_ouput.stderr
-    tags:
-      - build
 
   - name: "Create deployer template"
     command: oc create -f /usr/share/openshift/examples/infrastructure-templates/enterprise/logging-deployer.yaml -n openshift
     register: template_output
     failed_when: "template_output.rc == 1 and 'exists' not in template_output.stderr"
-    tags:
-      - build
-
-  - name: "Clear out any previous pods"
-    command: oc delete pods --all
-    tags:
-      - build
 
   - name: "Process the deployer template with an registry other than registry.access.redhat.com"
-    shell: oc process logging-deployer-template -n openshift -v KIBANA_HOSTNAME={{ kibana_hostname | quote }},ES_CLUSTER_SIZE={{ es_cluster_size | quote }},PUBLIC_MASTER_URL={{ master_url | quote }},IMAGE_PREFIX={{ target_registry | quote }}/  | oc create -f -
-    when: target_registry is defined
-    tags:
-      - build
-
-  - name: "Process the default deployer template"
-    shell: oc process logging-deployer-template -n openshift -v KIBANA_HOSTNAME={{ kibana_hostname | quote }},ES_CLUSTER_SIZE={{ es_cluster_size | quote }},PUBLIC_MASTER_URL={{ master_url | quote }}  | oc create -f -
-    when: target_registry is not defined
-    tags:
-      - build
+    shell: oc process logging-deployer-template -n openshift -v {{ oc_process_values}} | oc create -f -
 
   - name: "Wait for image pull and deployer pod"
-    action: shell oc get pods | grep logging-deployer.*Completed
-    register: result
-    until: result.rc == 0
-    retries: 15
-    delay: 10
-    tags:
-      - build
+     shell: oc get pods | grep logging-deployer.*Completed
+     register: result
+     until: result.rc == 0
+     retries: 15
+     delay: 10
 
   - name: "Process support template"
     shell: oc process logging-support-template | oc create -f -
-    tags:
-      - build
 
   - name: "Set insecured registry"
     command: oc annotate is --all  openshift.io/image.insecureRepository=true --overwrite
     when: "target_registry is defined and insecure_registry == 'true'"
-    tags:
-      - build
 
   - name: "Scale fluentd deployment config"
     command: oc scale dc/logging-fluentd --replicas={{ fluentd_replicas | default('1') }}
-    tags:
-      - build
 
   - name: "Wait for imagestreams to become available"
-    action: shell oc get is | grep logging-fluentd
+    shell: oc get is | grep logging-fluentd
     register: result
     until: result.rc == 0
     failed_when: result.rc == 1 and 'not found' not in result.stderr
     retries: 15
     delay: 5
-    tags:
-      - build
 
   - name: "Wait for replication controllers to become available"
-    action: shell oc get rc | grep logging-fluentd-1
+    shell: oc get rc | grep logging-fluentd-1
     register: result
     until: result.rc == 0
     failed_when: result.rc == 1 and 'not found' not in result.stderr
     retries: 15
     delay: 5
-    tags:
-      - build
 
   - name: "Scale fluentd replication controller"
     command: oc scale rc/logging-fluentd-1 --replicas={{ fluentd_replicas | default('1') }}
-    tags:
-      - build
 
   - debug: msg="Logging components deployed. Note persistant volume for elasticsearch must be setup manually"
-    tags:
-      - build
+
+  - name: Delete temp directory
+  file:
+    name: "{{ mktemp.stdout }}"
+    state: absent
+  changed_when: False
