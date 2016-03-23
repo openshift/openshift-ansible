@@ -279,6 +279,29 @@ g_template_openshift_master:
     applications:
     - Openshift Master Metrics
 
+  zdiscoveryrules:
+  - name: disc.pv
+    key: disc.pv
+    lifetime: 1
+    description: "Dynamically register the Persistent Volumes"
+
+  zitemprototypes:
+  - discoveryrule_key: disc.pv
+    name: "disc.pv.count.{#OSO_PV}"
+    key: "disc.pv.count[{#OSO_PV}]"
+    value_type: int
+    description: "Number of PV's of this size"
+    applications:
+    - Openshift Master
+
+  - discoveryrule_key: disc.pv
+    name: "disc.pv.count.available.{#OSO_PV}"
+    key: "disc.pv.count.available[{#OSO_PV}]"
+    value_type: int
+    description: "Number of PV's of this size that are available"
+    applications:
+    - Openshift Master
+
   ztriggers:
   - name: 'Openshift Master process not running on {HOST.NAME}'
     expression: '{Template Openshift Master:openshift.master.process.count.max(#3)}<1'
