@@ -99,7 +99,7 @@ g_template_openshift_master:
     applications:
     - Openshift Master
 
-  - key: openshift.master.pv.space.availble
+  - key: openshift.master.pv.space.available
     description: Shows the available space of pv
     value_type: int
     applications:
