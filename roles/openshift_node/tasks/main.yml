@@ -23,7 +23,6 @@
       iptables_sync_period: "{{ openshift_node_iptables_sync_period | default(None) }}"
       kubelet_args: "{{ openshift_node_kubelet_args | default(None) }}"
       labels: "{{ lookup('oo_option', 'openshift_node_labels') | default( openshift_node_labels | default(none), true) }}"
-      portal_net: "{{ openshift_master_portal_net | default(None) }}"
       registry_url: "{{ oreg_url | default(none) }}"
       schedulable: "{{ openshift_schedulable | default(openshift_scheduleable) | default(None) }}"
       sdn_mtu: "{{ openshift_node_sdn_mtu | default(None) }}"
@@ -32,6 +31,7 @@
       node_image: "{{ osn_image | default(None) }}"
       ovs_image: "{{ osn_ovs_image | default(None) }}"
       proxy_mode: "{{ openshift_node_proxy_mode | default('iptables') }}"
+      local_quota_per_fsgroup: "{{ openshift_node_local_quota_per_fsgroup | default(None) }}"
 
 # We have to add tuned-profiles in the same transaction otherwise we run into depsolving
 # problems because the rpms don't pin the version properly. This was fixed in 3.1 packaging.

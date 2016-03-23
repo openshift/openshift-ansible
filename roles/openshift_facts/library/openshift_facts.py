@@ -50,6 +50,10 @@ def migrate_docker_facts(facts):
                 old_param = 'docker_' + param
                 if old_param in facts[role]:
                     facts['docker'][param] = facts[role].pop(old_param)
+
+    if 'node' in facts and 'portal_net' in facts['node']:
+        facts['docker']['hosted_registry_insecure'] = True
+        facts['docker']['hosted_registry_network'] = facts['node'].pop('portal_net')
     return facts
 
 def migrate_local_facts(facts):
@@ -1402,8 +1406,8 @@ class OpenShiftFacts(object):
 
         if 'node' in roles:
             defaults['node'] = dict(labels={}, annotations={},
-                                    portal_net='172.30.0.0/16',
                                     iptables_sync_period='5s',
+                                    local_quota_per_fsgroup="",
                                     set_node_ip=False)
 
         if 'docker' in roles:

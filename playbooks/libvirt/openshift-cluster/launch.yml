@@ -7,11 +7,6 @@
   vars_files:
   - vars.yml
   vars:
-    os_libvirt_storage_pool: "{{ libvirt_storage_pool | default('images') }}"
-    os_libvirt_storage_pool_path: "{{ libvirt_storage_pool_path | default('/var/lib/libvirt/images') }}"
-    os_libvirt_network: "{{ libvirt_network | default('default') }}"
-    os_libvirt_instance_memory_mib: "{{ lookup('oo_option', 'libvirt_instance_memory_mib') | default(1024) }}"
-    os_libvirt_instance_vcpu: "{{ lookup('oo_option', 'libvirt_instance_vcpu') | default(2) }}"
     image_url: "{{ deployment_vars[deployment_type].image.url }}"
     image_sha256: "{{ deployment_vars[deployment_type].image.sha256 }}"
     image_name: "{{ deployment_vars[deployment_type].image.name }}"

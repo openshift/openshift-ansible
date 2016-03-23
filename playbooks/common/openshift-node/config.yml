@@ -115,6 +115,11 @@
   vars:
     openshift_node_master_api_url: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_url }}"
     openshift_node_first_master_ip: "{{ hostvars[groups.oo_first_master.0].openshift.common.ip }}"
+    # TODO: configure these based on
+    # hostvars[groups.oo_first_master.0].openshift.hosted.registry instead of
+    # hardcoding
+    openshift_docker_hosted_registry_insecure: True
+    openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.master.portal_net }}"
   roles:
   - openshift_node
 
@@ -123,6 +128,11 @@
   vars:
     openshift_node_master_api_url: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_url }}"
     openshift_node_first_master_ip: "{{ hostvars[groups.oo_first_master.0].openshift.common.ip }}"
+    # TODO: configure these based on
+    # hostvars[groups.oo_first_master.0].openshift.hosted.registry instead of
+    # hardcoding
+    openshift_docker_hosted_registry_insecure: True
+    openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.master.portal_net }}"
   roles:
   - openshift_node
 
@@ -256,7 +266,7 @@
     # Using curl here since the uri module requires python-httplib2 and
     # wait_for port doesn't provide health information.
     command: >
-      curl --silent --cacert {{ openshift.master.config_dir }}/master/ca.crt
+      curl --silent --cacert {{ openshift.common.config_base }}/master/ca.crt
       {{ openshift.master.api_url }}/healthz/ready
     register: api_available_output
     until: api_available_output.stdout == 'ok'

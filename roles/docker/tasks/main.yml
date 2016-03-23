@@ -49,16 +49,16 @@
     dest: /etc/sysconfig/docker
     regexp: '^{{ item.reg_conf_var }}=.*$'
     line: "{{ item.reg_conf_var }}='{{ item.reg_fact_val | oo_prepend_strings_in_list(item.reg_flag ~ ' ') | join(' ') }}'"
-  when: item.reg_fact_val is defined and docker_check.stat.isreg
+  when: item.reg_fact_val != '' and  docker_check.stat.isreg
   with_items:
   - reg_conf_var: ADD_REGISTRY
-    reg_fact_val: "{{ docker_additional_registries }}"
+    reg_fact_val: "{{ docker_additional_registries | default(None, true)}}"
     reg_flag: --add-registry
   - reg_conf_var: BLOCK_REGISTRY
-    reg_fact_val: "{{ docker_blocked_registries }}"
+    reg_fact_val: "{{ docker_blocked_registries| default(None, true) }}"
     reg_flag: --block-registry
   - reg_conf_var: INSECURE_REGISTRY
-    reg_fact_val: "{{ docker_insecure_registries }}"
+    reg_fact_val: "{{ docker_insecure_registries| default(None, true) }}"
     reg_flag: --insecure-registry
   notify:
   - restart docker
@@ -76,3 +76,5 @@
   when: docker_check.stat.isreg
   notify:
     - restart docker
+
+- meta: flush_handlers
