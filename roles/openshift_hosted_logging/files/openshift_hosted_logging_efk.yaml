@@ -1,4 +1,0 @@
-- hosts: my_master_host
-  roles:
-  - role: openshift_hosted_logging
-    openshift_hosted_logging_cleanup: no
