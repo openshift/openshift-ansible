@@ -1,0 +1,6 @@
+---
+- hosts: masters[0]
+  roles:
+  - role: openshift_hosted_logging
+    openshift_hosted_logging_cleanup: no 
+
