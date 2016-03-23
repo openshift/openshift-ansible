@@ -37,3 +37,19 @@
 - set_fact:
     docker_options: "{{ openshift.docker.options | default(omit) }}"
   when: not openshift.docker.hosted_registry_insecure | default(False) | bool
+
+# Avoid docker 1.9 when installing origin < 1.2 or OSE < 3.2 on RHEL/Centos and
+# See: https://bugzilla.redhat.com/show_bug.cgi?id=1304038
+- name: Gather common package version
+  command: >
+    {{ repoquery_cmd }} --qf '%{version}' "{{ openshift.common.service_type}}"
+  register: common_version
+  failed_when: false
+  changed_when: false
+  when: not openshift.common.is_atomic | bool
+
+- name: Set docker version to be installed
+  set_fact:
+    docker_version: "{{ '1.8.2' }}"
+  when: " ( common_version.stdout | default('0.0', True) | version_compare('3.2','<') and openshift.common.service_type == 'atomic-openshift' ) or
+          ( common_version.stdout | default('0.0', True) | version_compare('1.2','<') and openshift.common.service_type == 'origin' )"
