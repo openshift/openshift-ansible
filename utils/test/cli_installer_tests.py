@@ -1,6 +1,6 @@
 # TODO: Temporarily disabled due to importing old code into openshift-ansible
 # repo. We will work on these over time.
-# pylint: disable=bad-continuation,missing-docstring,no-self-use,invalid-name
+# pylint: disable=bad-continuation,missing-docstring,no-self-use,invalid-name,too-many-lines
 
 import copy
 import os
@@ -417,8 +417,8 @@ class UnattendedCliTests(OOCliFixture):
             env_vars['ANSIBLE_CONFIG'] == cli.DEFAULT_ANSIBLE_CONFIG)
 
         # Make sure we ran on the expected masters and nodes:
-        hosts = run_playbook_mock.call_args[0][0]
-        hosts_to_run_on = run_playbook_mock.call_args[0][1]
+        hosts = run_playbook_mock.call_args[0][1]
+        hosts_to_run_on = run_playbook_mock.call_args[0][2]
         self.assertEquals(3, len(hosts))
         self.assertEquals(3, len(hosts_to_run_on))
 
@@ -625,8 +625,8 @@ class UnattendedCliTests(OOCliFixture):
         self.assert_result(result, 0)
 
         # Make sure we ran on the expected masters and nodes:
-        hosts = run_playbook_mock.call_args[0][0]
-        hosts_to_run_on = run_playbook_mock.call_args[0][1]
+        hosts = run_playbook_mock.call_args[0][1]
+        hosts_to_run_on = run_playbook_mock.call_args[0][2]
         self.assertEquals(6, len(hosts))
         self.assertEquals(6, len(hosts_to_run_on))
 
@@ -695,8 +695,8 @@ class UnattendedCliTests(OOCliFixture):
         self.assert_result(result, 0)
 
         # Make sure we ran on the expected masters and nodes:
-        hosts = run_playbook_mock.call_args[0][0]
-        hosts_to_run_on = run_playbook_mock.call_args[0][1]
+        hosts = run_playbook_mock.call_args[0][1]
+        hosts_to_run_on = run_playbook_mock.call_args[0][2]
         self.assertEquals(6, len(hosts))
         self.assertEquals(6, len(hosts_to_run_on))
 
@@ -734,12 +734,12 @@ class AttendedCliTests(OOCliFixture):
 
         inventory = ConfigParser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, '.ansible/hosts'))
-        self.assertEquals('False',
-            inventory.get('nodes', '10.0.0.1  openshift_schedulable'))
-        self.assertEquals(None,
-            inventory.get('nodes', '10.0.0.2'))
-        self.assertEquals(None,
-            inventory.get('nodes', '10.0.0.3'))
+        self.assert_inventory_host_var(inventory, 'nodes', '10.0.0.1',
+                                 'openshift_schedulable=False')
+        self.assert_inventory_host_var_unset(inventory, 'nodes', '10.0.0.2',
+                                 'openshift_schedulable')
+        self.assert_inventory_host_var_unset(inventory, 'nodes', '10.0.0.3',
+                                 'openshift_schedulable')
 
     # interactive with config file and some installed some uninstalled hosts
     @patch('ooinstall.openshift_ansible.run_main_playbook')
@@ -852,14 +852,14 @@ class AttendedCliTests(OOCliFixture):
 
         inventory = ConfigParser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, '.ansible/hosts'))
-        self.assertEquals('False',
-            inventory.get('nodes', '10.0.0.1  openshift_schedulable'))
-        self.assertEquals('False',
-            inventory.get('nodes', '10.0.0.2  openshift_schedulable'))
-        self.assertEquals('False',
-            inventory.get('nodes', '10.0.0.3  openshift_schedulable'))
-        self.assertEquals(None,
-            inventory.get('nodes', '10.0.0.4'))
+        self.assert_inventory_host_var(inventory, 'nodes', '10.0.0.1',
+                                       'openshift_schedulable=False')
+        self.assert_inventory_host_var(inventory, 'nodes', '10.0.0.2',
+                                       'openshift_schedulable=False')
+        self.assert_inventory_host_var(inventory, 'nodes', '10.0.0.3',
+                                       'openshift_schedulable=False')
+        self.assert_inventory_host_var_unset(inventory, 'nodes', '10.0.0.4',
+                                             'openshift_schedulable')
 
         self.assertTrue(inventory.has_section('etcd'))
         self.assertEquals(3, len(inventory.items('etcd')))
@@ -893,12 +893,49 @@ class AttendedCliTests(OOCliFixture):
 
         inventory = ConfigParser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, '.ansible/hosts'))
-        self.assertEquals('True',
-            inventory.get('nodes', '10.0.0.1  openshift_schedulable'))
-        self.assertEquals('True',
-            inventory.get('nodes', '10.0.0.2  openshift_schedulable'))
-        self.assertEquals('True',
-            inventory.get('nodes', '10.0.0.3  openshift_schedulable'))
+        self.assert_inventory_host_var(inventory, 'nodes', '10.0.0.1',
+                                       'openshift_schedulable=True')
+        self.assert_inventory_host_var(inventory, 'nodes', '10.0.0.2',
+                                       'openshift_schedulable=True')
+        self.assert_inventory_host_var(inventory, 'nodes', '10.0.0.3',
+                                       'openshift_schedulable=True')
+
+    # Checks the inventory (as a ConfigParser) for the given host, host
+    # variable, and expected value.
+    def assert_inventory_host_var(self, inventory, section, host, variable):
+        # Config parser splits on the first "=", so we end up with:
+        #   'hostname key1' -> 'val1 key2=val2 key3=val3'
+        #
+        # Convert to something easier to test:
+        for (a, b) in inventory.items(section):
+            full_line = "%s=%s" % (a, b)
+            tokens = full_line.split()
+            if tokens[0] == host:
+                found = False
+                for token in tokens:
+                    if token == variable:
+                        found = True
+                        continue
+                self.assertTrue("Unable to find %s in line: %s" %
+                                (variable, full_line), found)
+                return
+        self.fail("unable to find host %s in inventory" % host)
+
+    def assert_inventory_host_var_unset(self, inventory, section, host, variable):
+        # Config parser splits on the first "=", so we end up with:
+        #   'hostname key1' -> 'val1 key2=val2 key3=val3'
+        #
+        # Convert to something easier to test:
+        for (a, b) in inventory.items(section):
+            full_line = "%s=%s" % (a, b)
+            tokens = full_line.split()
+            if tokens[0] == host:
+                self.assertFalse(("%s=" % variable) in full_line,
+                                 msg='%s host variable was set: %s' %
+                                 (variable, full_line))
+                return
+        self.fail("unable to find host %s in inventory" % host)
+
 
     #interactive multimaster: attempting to use a master as the load balancer should fail:
     @patch('ooinstall.openshift_ansible.run_main_playbook')
@@ -947,8 +984,8 @@ class AttendedCliTests(OOCliFixture):
 
         inventory = ConfigParser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, '.ansible/hosts'))
-        self.assertEquals('True',
-            inventory.get('nodes', '10.0.0.1  openshift_schedulable'))
+        self.assert_inventory_host_var(inventory, 'nodes', '10.0.0.1',
+                                       'openshift_schedulable=True')
 
     #interactive 3.0 install confirm no HA hints
     @patch('ooinstall.openshift_ansible.run_main_playbook')
@@ -968,6 +1005,43 @@ class AttendedCliTests(OOCliFixture):
         self.assert_result(result, 0)
         self.assertTrue("NOTE: Add a total of 3 or more Masters to perform an HA installation."
             not in result.output)
+
+    @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.load_system_facts')
+    def test_gen_inventory(self, load_facts_mock, run_playbook_mock):
+        load_facts_mock.return_value = (MOCK_FACTS, 0)
+        run_playbook_mock.return_value = 0
+
+        cli_input = build_input(hosts=[
+            ('10.0.0.1', True, False),
+            ('10.0.0.2', False, False),
+            ('10.0.0.3', False, False)],
+                                ssh_user='root',
+                                variant_num=1,
+                                confirm_facts='y')
+        self.cli_args.append("install")
+        self.cli_args.append("--gen-inventory")
+        result = self.runner.invoke(cli.cli, self.cli_args,
+            input=cli_input)
+        self.assert_result(result, 0)
+
+        self._verify_load_facts(load_facts_mock)
+
+        # Make sure run playbook wasn't called:
+        self.assertEquals(0, len(run_playbook_mock.mock_calls))
+
+        written_config = read_yaml(self.config_file)
+        self._verify_config_hosts(written_config, 3)
+
+        inventory = ConfigParser.ConfigParser(allow_no_value=True)
+        inventory.read(os.path.join(self.work_dir, '.ansible/hosts'))
+        self.assert_inventory_host_var(inventory, 'nodes', '10.0.0.1',
+                                 'openshift_schedulable=False')
+        self.assert_inventory_host_var_unset(inventory, 'nodes', '10.0.0.2',
+                                 'openshift_schedulable')
+        self.assert_inventory_host_var_unset(inventory, 'nodes', '10.0.0.3',
+                                 'openshift_schedulable')
+
 
 # TODO: test with config file, attended add node
 # TODO: test with config file, attended new node already in config file
