@@ -1118,12 +1118,21 @@ def merge_facts(orig, new, additive_facts_to_overwrite, protected_facts_to_overw
     """
     additive_facts = ['named_certificates']
     protected_facts = ['ha', 'master_count']
+
+    # Facts we do not ever want to merge. These originate in inventory variables
+    # and typically contain JSON dicts. We don't ever want to trigger a merge
+    # here, just completely overwrite with the new if they are present there.
+    overwrite_facts = ['admission_plugin_config',
+                       'kube_admission_plugin_config']
+
     facts = dict()
     for key, value in orig.iteritems():
         # Key exists in both old and new facts.
         if key in new:
+            if key in overwrite_facts:
+                facts[key] = copy.deepcopy(new[key])
             # Continue to recurse if old and new fact is a dictionary.
-            if isinstance(value, dict) and isinstance(new[key], dict):
+            elif isinstance(value, dict) and isinstance(new[key], dict):
                 # Collect the subset of additive facts to overwrite if
                 # key matches. These will be passed to the subsequent
                 # merge_facts call.
