@@ -4,14 +4,9 @@
     command: oc get project logging
     register: logging_project
     failed_when: "'FAILED' in logging_project.stderr"
-    tags:
-      - cleanup
 
   - name: "Changing projects"
-    command: oc project logging
-    tags:
-      - cleanup
-      - build
+    command: "{{ openshift.common.client_binary }} project logging"
 
   - name: Create temp directory for kubeconfig
     command: mktemp -d /tmp/openshift-ansible-XXXXXX
@@ -25,52 +20,44 @@
 
   - name: "Changing projects"
     command: oc project logging
-    tags:
-      - cleanup
-      - build
 
 
   - name: "Cleanup any previous logging infrastructure"
-    command: oc delete --ignore-not-found all --selector logging-infra={{ item }}
+    command: "{{ openshift.common.client_binary }} delete --ignore-not-found all --selector logging-infra={{ item }}"
     with_items:
       - kibana
       - fluentd
       - elasticsearch
     ignore_errors: yes
-    tags:
-      - cleanup
-
 
   - name: "Cleanup existing support infrastructure"
-    command: oc delete --ignore-not-found all,sa,oauthclient --selector logging-infra=support
+    command: "{{ openshift.common.client_binary }} delete --ignore-not-found all,sa,oauthclient --selector logging-infra=support"
     ignore_errors: yes
-    tags:
-      - cleanup
 
   - name: "Cleanup existing secrets"
-    command: oc delete secret logging-fluentd logging-elasticsearch logging-es-proxy logging-kibana logging-kibana-proxy logging-kibana-ops-proxy
+    command: "{{ openshift.common.client_binary }} delete secret logging-fluentd logging-elasticsearch logging-es-proxy logging-kibana logging-kibana-proxy logging-kibana-ops-proxy"
     ignore_errors: yes
     register: clean_result
     failed_when: clean_result.rc == 1 and 'not found' not in clean_result.stderr
-    tags:
-      - cleanup
 
   - name: "Cleanup existing logging deployers"
-    command: oc delete pods --all
-    tags:
-      - cleanup
+    command: "{{ openshift.common.client_binary }} delete pods --all"
 
-  - name: "Make sure to remove deployer template"
-    command: oc delete template logging-deployer-template -n openshift
+
+  - name: "Cleanup logging project"
+    command: "{{ openshift.common.client_binary }} delete project logging"
+
+
+  - name: "Remove deployer template"
+    command: "{{ openshift.common.client_binary }} delete template logging-deployer-template -n openshift"
     register: delete_ouput
     failed_when: delete_ouput.rc == 1 and 'exists' not in delete_ouput.stderr
-    tags:
-      - cleanup
+
 
   - name: Delete temp directory
-  file:
-    name: "{{ mktemp.stdout }}"
-    state: absent
-  changed_when: False
+    file:
+      name: "{{ mktemp.stdout }}"
+      state: absent
+    changed_when: False
 
   - debug: msg="Success!"
