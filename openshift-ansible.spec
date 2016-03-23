@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.63
+Version:        3.0.64
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -279,6 +279,16 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Mar 23 2016 Troy Dawson <tdawson@redhat.com> 3.0.64-1
+- Latest cli updates from generated files (kwoodson@redhat.com)
+- Add /dev to node containers (sdodson@redhat.com)
+- Fix indention (whearn@redhat.com)
+- Support setting local storage perFSGroup quota in node config.
+  (dgoodwin@redhat.com)
+- Fix line break (whearn@redhat.com)
+- Lock down permissions on named certificates (elyscape@gmail.com)
+- Add namespace flag to oc create (whearn@redhat.com)
+
 * Mon Mar 21 2016 Kenny Woodson <kwoodson@redhat.com> 3.0.63-1
 - Modified group selectors for muliple clusters per account
   (kwoodson@redhat.com)
