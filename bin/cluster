@@ -34,6 +34,8 @@ class Cluster(object):
             os.environ['ANSIBLE_HOST_KEY_CHECKING'] = 'False'
             # TODO: A more secure way to proceed would consist in dynamically
             # retrieving the ssh host public keys from the IaaS interface
+        if 'ANSIBLE_SSH_PIPELINING' not in os.environ:
+            os.environ['ANSIBLE_SSH_PIPELINING'] = 'True'
 
     def get_deployment_type(self, args):
         """
@@ -284,7 +286,20 @@ if __name__ == '__main__':
     cluster = Cluster()
 
     parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawDescriptionHelpFormatter,
         description='Python wrapper to ensure proper configuration for OpenShift ansible playbooks',
+        epilog='''\
+This wrapper is overriding the following ansible variables:
+
+  * ANSIBLE_SSH_ARGS:
+      If not set in the environment, this wrapper will use the following value:
+      `-o ForwardAgent=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ControlMaster=auto -o ControlPersist=600s`
+      If set in the environment, the environment variable value is left untouched and used.
+
+  * ANSIBLE_SSH_PIPELINING:
+      If not set in the environment, this wrapper will set it to `True`.
+      If you experience issue with Ansible ssh pipelining, you can disable it by explicitely set this environment variable to `False`.
+'''
     )
     parser.add_argument('-v', '--verbose', action='count',
                         help='Multiple -v options increase the verbosity')
