@@ -222,77 +222,45 @@ class Utils(object):
 
         return True
 
-class Secret(OpenShiftCLI):
+class DeploymentConfig(OpenShiftCLI):
     ''' Class to wrap the oc command line tools
     '''
     def __init__(self,
                  namespace,
-                 secret_name=None,
+                 dname=None,
                  kubeconfig='/etc/origin/master/admin.kubeconfig',
                  verbose=False):
         ''' Constructor for OpenshiftOC '''
-        super(Secret, self).__init__(namespace, kubeconfig)
+        super(DeploymentConfig, self).__init__(namespace, kubeconfig)
         self.namespace = namespace
-        self.name = secret_name
+        self.name = dname
         self.kubeconfig = kubeconfig
         self.verbose = verbose
 
-    def get_secrets(self):
-        '''return a secret by name '''
-        return self.get('secrets', self.name)
+    def get_dc(self):
+        '''return a deploymentconfig by name '''
+        return self.get('dc', self.name)
 
-    def delete_secret(self):
+    def delete_dc(self):
         '''return all pods '''
-        return self.delete('secrets', self.name)
+        return self.delete('dc', self.name)
 
-    def secret_new(self, files=None, contents=None):
-        '''Create a secret with  all pods '''
-        if not files:
-            files = Utils.create_files_from_contents(contents)
+    def new_dc(self, dfile):
+        '''Create a deploymentconfig '''
+        return self.create(dfile)
 
-        secrets = ["%s=%s" % (os.path.basename(sfile), sfile) for sfile in files]
-        cmd = ['-n%s' % self.namespace, 'secrets', 'new', self.name]
-        cmd.extend(secrets)
+    def update_dc(self, dfile, force=False):
+        '''run update dc
 
-        return self.oc_cmd(cmd)
-
-    def update_secret(self, files, force=False):
-        '''run update secret
-
-           This receives a list of file names and converts it into a secret.
-           The secret is then written to disk and passed into the `oc replace` command.
+           This receives a list of file names and takes the first filename and calls replace.
         '''
-        secret = self.prep_secret(files)
-        if secret['returncode'] != 0:
-            return secret
-
-        sfile_path = '/tmp/%s' % self.name
-        with open(sfile_path, 'w') as sfd:
-            sfd.write(json.dumps(secret['results']))
-
-        atexit.register(Utils.cleanup, [sfile_path])
-
-        return self.replace(sfile_path, force=force)
-
-    def prep_secret(self, files=None, contents=None):
-        ''' return what the secret would look like if created
-            This is accomplished by passing -ojson.  This will most likely change in the future
-        '''
-        if not files:
-            files = Utils.create_files_from_contents(contents)
-
-        secrets = ["%s=%s" % (os.path.basename(sfile), sfile) for sfile in files]
-        cmd = ['-ojson', '-n%s' % self.namespace, 'secrets', 'new', self.name]
-        cmd.extend(secrets)
-
-        return self.oc_cmd(cmd, output=True)
-
+        return self.replace(dfile, force)
 
 
 # pylint: disable=too-many-branches
 def main():
     '''
-    ansible oc module for secrets
+    ansible oc module for deploymentconfig
     '''
 
     module = AnsibleModule(
@@ -303,23 +271,24 @@ def main():
             debug=dict(default=False, type='bool'),
             namespace=dict(default='default', type='str'),
             name=dict(default=None, type='str'),
-            files=dict(default=None, type='list'),
+            deploymentconfig_file=dict(default=None, type='str'),
+            input_type=dict(default='yaml', choices=['yaml', 'json'], type='str'),
             delete_after=dict(default=False, type='bool'),
-            contents=dict(default=None, type='list'),
+            content=dict(default=None, type='dict'),
             force=dict(default=False, type='bool'),
         ),
-        mutually_exclusive=[["contents", "files"]],
+        mutually_exclusive=[["contents", "deploymentconfig_file"]],
 
         supports_check_mode=True,
     )
-    occmd = Secret(module.params['namespace'],
-                   module.params['name'],
-                   kubeconfig=module.params['kubeconfig'],
-                   verbose=module.params['debug'])
+    occmd = DeploymentConfig(module.params['namespace'],
+                             dname=module.params['name'],
+                             kubeconfig=module.params['kubeconfig'],
+                             verbose=module.params['debug'])
 
     state = module.params['state']
 
-    api_rval = occmd.get_secrets()
+    api_rval = occmd.get_dc()
 
     #####
     # Get
@@ -339,17 +308,17 @@ def main():
         if module.check_mode:
             module.exit_json(change=False, msg='Would have performed a delete.')
 
-        api_rval = occmd.delete_secret()
+        api_rval = occmd.delete_dc()
         module.exit_json(changed=True, results=api_rval, state="absent")
 
 
     if state == 'present':
-        if module.params['files']:
-            files = module.params['files']
-        elif module.params['contents']:
-            files = Utils.create_files_from_contents(module.params['contents'])
+        if module.params['deploymentconfig_file']:
+            dfile = module.params['deploymentconfig_file']
+        elif module.params['content']:
+            dfile = Utils.create_file('dc', module.params['content'])
         else:
-            module.fail_json(msg='Either specify files or contents.')
+            module.fail_json(msg="Please specify content or deploymentconfig file.")
 
         ########
         # Create
@@ -359,38 +328,36 @@ def main():
             if module.check_mode:
                 module.exit_json(change=False, msg='Would have performed a create.')
 
-            api_rval = occmd.secret_new(module.params['files'], module.params['contents'])
+            api_rval = occmd.new_dc(dfile)
 
             # Remove files
-            if files and module.params['delete_after']:
-                Utils.cleanup(files)
+            if module.params['deploymentconfig_file'] and module.params['delete_after']:
+                Utils.cleanup([dfile])
+
+            if api_rval['returncode'] != 0:
+                module.fail_json(msg=api_rval)
 
             module.exit_json(changed=True, results=api_rval, state="present")
 
         ########
         # Update
         ########
-        secret = occmd.prep_secret(module.params['files'], module.params['contents'])
-
-        if secret['returncode'] != 0:
-            module.fail_json(msg=secret)
-
-        if Utils.check_def_equal(secret['results'], api_rval['results'][0]):
+        if Utils.check_def_equal(Utils.get_resource_file(dfile), api_rval['results'][0]):
 
             # Remove files
-            if files and module.params['delete_after']:
-                Utils.cleanup(files)
+            if module.params['deploymentconfig_file'] and module.params['delete_after']:
+                Utils.cleanup([dfile])
 
-            module.exit_json(changed=False, results=secret['results'], state="present")
+            module.exit_json(changed=False, results=api_rval['results'], state="present")
 
         if module.check_mode:
             module.exit_json(change=False, msg='Would have performed an update.')
 
-        api_rval = occmd.update_secret(files, force=module.params['force'])
+        api_rval = occmd.update_dc(dfile, force=module.params['force'])
 
         # Remove files
-        if secret and module.params['delete_after']:
-            Utils.cleanup(files)
+        if module.params['deploymentconfig_file'] and module.params['delete_after']:
+            Utils.cleanup([dfile])
 
         if api_rval['returncode'] != 0:
             module.fail_json(msg=api_rval)
