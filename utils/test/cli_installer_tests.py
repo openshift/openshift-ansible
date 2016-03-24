@@ -403,7 +403,7 @@ class UnattendedCliTests(OOCliFixture):
         self.assert_result(result, 0)
 
         load_facts_args = load_facts_mock.call_args[0]
-        self.assertEquals(os.path.join(self.work_dir, ".ansible/hosts"),
+        self.assertEquals(os.path.join(self.work_dir, "hosts"),
             load_facts_args[0])
         self.assertEquals(os.path.join(self.work_dir,
             "playbooks/byo/openshift_facts.yml"), load_facts_args[1])
@@ -441,7 +441,7 @@ class UnattendedCliTests(OOCliFixture):
 
         # Check the inventory file looks as we would expect:
         inventory = ConfigParser.ConfigParser(allow_no_value=True)
-        inventory.read(os.path.join(self.work_dir, '.ansible/hosts'))
+        inventory.read(os.path.join(self.work_dir, 'hosts'))
         self.assertEquals('bob',
             inventory.get('OSEv3:vars', 'ansible_ssh_user'))
         self.assertEquals('openshift-enterprise',
@@ -484,7 +484,7 @@ class UnattendedCliTests(OOCliFixture):
 
         # Make sure the correct value was passed to ansible:
         inventory = ConfigParser.ConfigParser(allow_no_value=True)
-        inventory.read(os.path.join(self.work_dir, '.ansible/hosts'))
+        inventory.read(os.path.join(self.work_dir, 'hosts'))
         self.assertEquals('openshift-enterprise',
             inventory.get('OSEv3:vars', 'deployment_type'))
 
@@ -512,7 +512,7 @@ class UnattendedCliTests(OOCliFixture):
         self.assertEquals('3.0', written_config['variant_version'])
 
         inventory = ConfigParser.ConfigParser(allow_no_value=True)
-        inventory.read(os.path.join(self.work_dir, '.ansible/hosts'))
+        inventory.read(os.path.join(self.work_dir, 'hosts'))
         self.assertEquals('enterprise',
             inventory.get('OSEv3:vars', 'deployment_type'))
 
@@ -733,7 +733,7 @@ class AttendedCliTests(OOCliFixture):
         self._verify_config_hosts(written_config, 3)
 
         inventory = ConfigParser.ConfigParser(allow_no_value=True)
-        inventory.read(os.path.join(self.work_dir, '.ansible/hosts'))
+        inventory.read(os.path.join(self.work_dir, 'hosts'))
         self.assert_inventory_host_var(inventory, 'nodes', '10.0.0.1',
                                  'openshift_schedulable=False')
         self.assert_inventory_host_var_unset(inventory, 'nodes', '10.0.0.2',
@@ -851,7 +851,7 @@ class AttendedCliTests(OOCliFixture):
         self._verify_config_hosts(written_config, 6)
 
         inventory = ConfigParser.ConfigParser(allow_no_value=True)
-        inventory.read(os.path.join(self.work_dir, '.ansible/hosts'))
+        inventory.read(os.path.join(self.work_dir, 'hosts'))
         self.assert_inventory_host_var(inventory, 'nodes', '10.0.0.1',
                                        'openshift_schedulable=False')
         self.assert_inventory_host_var(inventory, 'nodes', '10.0.0.2',
@@ -892,7 +892,7 @@ class AttendedCliTests(OOCliFixture):
         self._verify_config_hosts(written_config, 5)
 
         inventory = ConfigParser.ConfigParser(allow_no_value=True)
-        inventory.read(os.path.join(self.work_dir, '.ansible/hosts'))
+        inventory.read(os.path.join(self.work_dir, 'hosts'))
         self.assert_inventory_host_var(inventory, 'nodes', '10.0.0.1',
                                        'openshift_schedulable=True')
         self.assert_inventory_host_var(inventory, 'nodes', '10.0.0.2',
@@ -983,7 +983,7 @@ class AttendedCliTests(OOCliFixture):
         self._verify_config_hosts(written_config, 1)
 
         inventory = ConfigParser.ConfigParser(allow_no_value=True)
-        inventory.read(os.path.join(self.work_dir, '.ansible/hosts'))
+        inventory.read(os.path.join(self.work_dir, 'hosts'))
         self.assert_inventory_host_var(inventory, 'nodes', '10.0.0.1',
                                        'openshift_schedulable=True')
 
@@ -1034,7 +1034,7 @@ class AttendedCliTests(OOCliFixture):
         self._verify_config_hosts(written_config, 3)
 
         inventory = ConfigParser.ConfigParser(allow_no_value=True)
-        inventory.read(os.path.join(self.work_dir, '.ansible/hosts'))
+        inventory.read(os.path.join(self.work_dir, 'hosts'))
         self.assert_inventory_host_var(inventory, 'nodes', '10.0.0.1',
                                  'openshift_schedulable=False')
         self.assert_inventory_host_var_unset(inventory, 'nodes', '10.0.0.2',

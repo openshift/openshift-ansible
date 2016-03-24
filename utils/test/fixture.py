@@ -68,7 +68,7 @@ class OOCliFixture(OOInstallFixture):
     def _verify_load_facts(self, load_facts_mock):
         """ Check that we ran load facts with expected inputs. """
         load_facts_args = load_facts_mock.call_args[0]
-        self.assertEquals(os.path.join(self.work_dir, ".ansible/hosts"),
+        self.assertEquals(os.path.join(self.work_dir, "hosts"),
                           load_facts_args[0])
         self.assertEquals(os.path.join(self.work_dir,
                                        "playbooks/byo/openshift_facts.yml"),
