@@ -82,7 +82,7 @@
           "sourceStrategy": {
             "from": {
               "kind": "ImageStreamTag",
-              "namespace": "openshift",
+              "namespace": "${NAMESPACE}",
               "name": "perl:5.20"
             }
           }
@@ -202,6 +202,12 @@
       "description": "The name assigned to all of the frontend objects defined in this template.",
       "required": true,
       "value": "dancer-example"
+    },
+    {
+      "name": "NAMESPACE",
+      "displayName": "Namespace",
+      "description": "The OpenShift Namespace where the ImageStream resides.",
+      "value": "openshift"
     },
     {
       "name": "MEMORY_LIMIT",
