@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.64
+Version:        3.0.65
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -279,6 +279,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Mar 24 2016 Troy Dawson <tdawson@redhat.com> 3.0.65-1
+- Adding deployment config and refactored. (kwoodson@redhat.com)
+- ManageIQ SA: Adding image-puller role (efreiber@redhat.com)
+
 * Wed Mar 23 2016 Troy Dawson <tdawson@redhat.com> 3.0.64-1
 - Latest cli updates from generated files (kwoodson@redhat.com)
 - Add /dev to node containers (sdodson@redhat.com)
