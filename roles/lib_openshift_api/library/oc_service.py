@@ -9,9 +9,6 @@ import shutil
 import subprocess
 import yaml
 
-# The base class is here to share methods.
-# Currently there is only 1 but will grow in the future.
-# pylint: disable=too-few-public-methods
 class OpenShiftCLI(object):
     ''' Class to wrap the oc command line tools '''
     def __init__(self,
@@ -22,6 +19,37 @@ class OpenShiftCLI(object):
         self.namespace = namespace
         self.verbose = verbose
         self.kubeconfig = kubeconfig
+
+    def replace(self, fname, force=False):
+        '''return all pods '''
+        cmd = ['replace', '-f', fname]
+        if force:
+            cmd = ['replace', '--force', '-f', fname]
+        return self.oc_cmd(cmd)
+
+    def create(self, fname):
+        '''return all pods '''
+        return self.oc_cmd(['create', '-f', fname, '-n', self.namespace])
+
+    def delete(self, resource, rname):
+        '''return all pods '''
+        return self.oc_cmd(['delete', resource, rname, '-n', self.namespace])
+
+    def get(self, resource, rname=None):
+        '''return a secret by name '''
+        cmd = ['get', resource, '-o', 'json', '-n', self.namespace]
+        if rname:
+            cmd.append(rname)
+
+        rval = self.oc_cmd(cmd, output=True)
+
+        # Ensure results are retuned in an array
+        if rval.has_key('items'):
+            rval['results'] = rval['items']
+        elif not isinstance(rval['results'], list):
+            rval['results'] = [rval['results']]
+
+        return rval
 
     def oc_cmd(self, cmd, output=False):
         '''Base command for oc '''
@@ -63,20 +91,32 @@ class OpenShiftCLI(object):
 class Utils(object):
     ''' utilities for openshiftcli modules '''
     @staticmethod
+    def create_file(rname, data, ftype=None):
+        ''' create a file in tmp with name and contents'''
+        path = os.path.join('/tmp', rname)
+        with open(path, 'w') as fds:
+            if ftype == 'yaml':
+                fds.write(yaml.dump(data, default_flow_style=False))
+
+            elif ftype == 'json':
+                fds.write(json.dumps(data))
+            else:
+                fds.write(data)
+
+        # Register cleanup when module is done
+        atexit.register(Utils.cleanup, [path])
+        return path
+
+    @staticmethod
     def create_files_from_contents(data):
         '''Turn an array of dict: filename, content into a files array'''
         files = []
 
         for sfile in data:
-            path = os.path.join('/tmp', sfile['path'])
-            with open(path, 'w') as fds:
-                fds.write(sfile['content'])
+            path = Utils.create_file(sfile['path'], sfile['content'])
             files.append(path)
 
-        # Register cleanup when module is done
-        atexit.register(Utils.cleanup, files)
         return files
-
 
     @staticmethod
     def cleanup(files):
@@ -106,7 +146,6 @@ class Utils(object):
         ''' Find the specified result by name'''
         rval = None
         for result in results:
-            #print "%s == %s" % (result['metadata']['name'], name)
             if result.has_key('metadata') and result['metadata']['name'] == _name:
                 rval = result
                 break
@@ -166,7 +205,7 @@ class Utils(object):
                         print "keys are not equal in dict"
                     return False
 
-                result = Utils.check_def_equal(user_def[key], value)
+                result = Utils.check_def_equal(user_def[key], value, debug=debug)
                 if not result:
                     if debug:
                         print "dict returned false"
@@ -192,7 +231,7 @@ class Service(OpenShiftCLI):
                  kubeconfig='/etc/origin/master/admin.kubeconfig',
                  verbose=False):
         ''' Constructor for OpenshiftOC '''
-        super(Service, OpenShiftCLI).__init__(namespace, kubeconfig)
+        super(Service, self).__init__(namespace, kubeconfig)
         self.namespace = namespace
         self.name = service_name
         self.verbose = verbose
@@ -200,27 +239,15 @@ class Service(OpenShiftCLI):
 
     def create_service(self, sfile):
         ''' create the service '''
-        return self.oc_cmd(['create', '-f', sfile])
+        return self.create(sfile)
 
     def get_services(self):
         '''return a secret by name '''
-        cmd = ['get', 'services', '-o', 'json', '-n', self.namespace]
-        if self.name:
-            cmd.append(self.name)
-
-        rval = self.oc_cmd(cmd, output=True)
-
-        # Ensure results are retuned in an array
-        if rval.has_key('items'):
-            rval['results'] = rval['items']
-        elif not isinstance(rval['results'], list):
-            rval['results'] = [rval['results']]
-
-        return rval
+        return self.get('services', self.name)
 
     def delete_service(self):
         '''return all pods '''
-        return self.oc_cmd(['delete', 'service', self.name, '-n', self.namespace])
+        return self.delete('service', self.name)
 
     def update_service(self, sfile, force=False):
         '''run update service
@@ -228,14 +255,7 @@ class Service(OpenShiftCLI):
            This receives a list of file names and converts it into a secret.
            The secret is then written to disk and passed into the `oc replace` command.
         '''
-
-        cmd = ['replace', '-f', sfile]
-        if force:
-            cmd = ['replace', '--force', '-f', sfile]
-
-        atexit.register(Utils.cleanup, [sfile])
-
-        return self.oc_cmd(cmd)
+        return self.replace(sfile, force=force)
 
 
 # pylint: disable=too-many-branches
@@ -253,7 +273,9 @@ def main():
             namespace=dict(default='default', type='str'),
             name=dict(default=None, type='str'),
             service_file=dict(default=None, type='str'),
-            service_file_type=dict(default=None, type='str'),
+            input_type=dict(default='yaml',
+                            choices=['json', 'yaml'],
+                            type='str'),
             delete_after=dict(default=False, type='bool'),
             contents=dict(default=None, type='list'),
             force=dict(default=False, type='bool'),
@@ -320,7 +342,7 @@ def main():
         ########
         # Update
         ########
-        sfile_contents = Utils.get_resource_file(sfile, module.params['service_file_type'])
+        sfile_contents = Utils.get_resource_file(sfile, module.params['input_type'])
         if Utils.check_def_equal(sfile_contents, api_rval['results'][0]):
 
             # Remove files
