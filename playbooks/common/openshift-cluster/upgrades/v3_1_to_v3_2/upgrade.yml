@@ -16,14 +16,20 @@
 ###############################################################################
 - name: Upgrade master
   hosts: oo_masters_to_config
+  vars:
+    openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
+  handlers:
+  - include: ../../../../../roles/openshift_master/handlers/main.yml
   roles:
   - openshift_facts
   tasks:
   - include: rpm_upgrade.yml component=master
     when: not openshift.common.is_containerized | bool
 
-  - include: containerized_upgrade.yml
-    when: openshift.common.is_containerized | bool
+  - include_vars: ../../../../../roles/openshift_master/vars/main.yml
+
+  - name: Update systemd units
+    include: ../../../../../roles/openshift_master/tasks/systemd_units.yml openshift_version=g_aos_versions.avail_version 
 
 #  - name: Upgrade master configuration
 #    openshift_upgrade_config:
@@ -63,6 +69,8 @@
   hosts: oo_nodes_to_config
   roles:
   - openshift_facts
+  handlers:
+  - include: ../../../../../roles/openshift_node/handlers/main.yml
   tasks:
   - include: rpm_upgrade.yml
     vars:

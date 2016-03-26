@@ -1350,11 +1350,11 @@ class OpenShiftFacts(object):
         facts = set_identity_providers_if_unset(facts)
         facts = set_sdn_facts_if_unset(facts, self.system_facts)
         facts = set_deployment_facts_if_unset(facts)
+        facts = set_container_facts_if_unset(facts)
         facts = set_version_facts_if_unset(facts)
         facts = set_manageiq_facts_if_unset(facts)
         facts = set_aggregate_facts(facts)
         facts = set_etcd_facts_if_unset(facts)
-        facts = set_container_facts_if_unset(facts)
         if not safe_get_bool(facts['common']['is_containerized']):
             facts = set_installed_variant_rpm_facts(facts)
         return dict(openshift=facts)
