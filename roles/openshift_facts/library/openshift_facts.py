@@ -1167,6 +1167,7 @@ def safe_get_bool(fact):
     """
     return bool(strtobool(str(fact)))
 
+# pylint: disable=too-many-statements
 def set_container_facts_if_unset(facts):
     """ Set containerized facts.
 
@@ -1183,24 +1184,44 @@ def set_container_facts_if_unset(facts):
         node_image = 'openshift3/node'
         ovs_image = 'openshift3/openvswitch'
         etcd_image = 'registry.access.redhat.com/rhel7/etcd'
+        pod_image = 'openshift3/ose-pod'
+        router_image = 'openshift3/ose-haproxy-router'
+        registry_image = 'openshift3/ose-docker-registry'
+        deployer_image = 'openshift3/ose-deployer'
     elif deployment_type == 'atomic-enterprise':
         master_image = 'aep3_beta/aep'
         cli_image = master_image
         node_image = 'aep3_beta/node'
         ovs_image = 'aep3_beta/openvswitch'
         etcd_image = 'registry.access.redhat.com/rhel7/etcd'
+        pod_image = 'aep3_beta/aep-pod'
+        router_image = 'aep3_beta/aep-haproxy-router'
+        registry_image = 'aep3_beta/aep-docker-registry'
+        deployer_image = 'aep3_beta/aep-deployer'
     else:
         master_image = 'openshift/origin'
         cli_image = master_image
         node_image = 'openshift/node'
         ovs_image = 'openshift/openvswitch'
         etcd_image = 'registry.access.redhat.com/rhel7/etcd'
+        pod_image = 'openshift/origin-pod'
+        router_image = 'openshift/origin-haproxy-router'
+        registry_image = 'openshift/origin-docker-registry'
+        deployer_image = 'openshift/origin-deployer'
 
     facts['common']['is_atomic'] = os.path.isfile('/run/ostree-booted')
     if 'is_containerized' not in facts['common']:
         facts['common']['is_containerized'] = facts['common']['is_atomic']
     if 'cli_image' not in facts['common']:
         facts['common']['cli_image'] = cli_image
+    if 'pod_image' not in facts['common']:
+        facts['common']['pod_image'] = pod_image
+    if 'router_image' not in facts['common']:
+        facts['common']['router_image'] = router_image
+    if 'registry_image' not in facts['common']:
+        facts['common']['registry_image'] = registry_image
+    if 'deployer_image' not in facts['common']:
+        facts['common']['deployer_image'] = deployer_image
     if 'etcd' in facts and 'etcd_image' not in facts['etcd']:
         facts['etcd']['etcd_image'] = etcd_image
     if 'master' in facts and 'master_image' not in facts['master']:
