@@ -1,0 +1,41 @@
+---
+- fail:
+    msg: "openshift_clock_method must be set to either 'none', 'auto', 'ntpd', or 'chrony'"
+  when:  openshift_clock_method is defined and
+    openshift_clock_method not in ["none", "auto", "ntpd", "chrony"]
+
+- fail:
+    msg: "openshift_clock_method 'ntpd' is not compatible with atomic host"
+  when:  openshift_clock_method is defined and openshift_clock_method == 'ntpd' and
+    openshift.common.is_atomic
+
+- set_fact:
+    openshift_clock_auto_method: chrony
+  when: openshift_clock_method is defined and openshift_clock_method == "auto" and
+    openshift.common.is_atomic
+
+- set_fact:
+    openshift_clock_auto_method: ntpd
+  when: openshift_clock_method is defined and openshift_clock_method == "auto" and
+    not openshift.common.is_atomic
+
+- name: Set clock facts
+  openshift_facts:
+    role: "{{ item.role }}"
+    local_facts: "{{ item.local_facts }}"
+  with_items:
+  - role: clock
+    local_facts:
+      method: "{{ openshift_clock_auto_method | default(openshift_clock_method) | default(None) }}"
+      require_sync: "{{ openshift_clock_auto_method | default(openshift_clock_require_sync) | default(None) }}"
+      timezone: "{{ openshift_clock_timezone | default(None) }}"
+
+- set_fact:
+    ntp_enabled: true
+    ntp_timezone: "{{ openshift.clock.timezone | default(omit) }}"
+  when: openshift.clock.method is defined and openshift.clock.method == "ntpd"
+
+- set_fact:
+    chrony_enabled: true
+    chrony_timezone: "{{ openshift.common.clock_timezone | default(omit) }}"
+  when: openshift.clock.method is defined and openshift.clock.method == "chrony"

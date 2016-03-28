@@ -1,0 +1,26 @@
+---
+- name: Test if ntp is synchronized
+  shell: ntpstat
+  register: ntp_ntpstat_result
+  until: ntp_ntpstat_result | success
+  retries: 5
+  delay: 1
+  changed_when: false
+  failed_when: false
+  when: openshift.clock.method is defined and openshift.clock.method == "ntpd" and
+    openshift.clock.require_sync is defined and ( openshift.clock.require_sync | bool )
+
+- name: Restart ntpd again to recalculate sync status.
+  service:
+    name: ntpd
+    state: restarted
+  when: ntp_ntpstat_result | failed
+
+- name: Wait for ntp to become synchronized
+  shell: ntpstat
+  register: ntp_ntpstat_result
+  until: ntp_ntpstat_result | success
+  retries: 5
+  delay: 1
+  changed_when: false
+  when: ntp_ntpstat_result | failed

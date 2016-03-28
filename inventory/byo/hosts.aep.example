@@ -270,6 +270,19 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Setting this variable to true will override that check.
 #openshift_override_hostname_check=true
 
+# Specify which method to use to synchronize system clocks.
+# none   - Do not manage clocks with openshift-ansible.
+# auto   - Automatically choose method based on host type [atomic=chrony, default=ntpd].
+# ntpd   - Use ntpd (not available for atomic hosts).
+# chrony - (unavailable at this time)
+#openshift_clock_method=none
+
+# Specifify if we should fail if ntpd is selected and fails to synchronize clocks.
+#openshift_clock_require_sync=false
+
+# Specify which timezone to use for /etc/localtime when openshift_clock_method=ntpd
+#openshift_clock_timezone=America/Chicago
+
 # host group for masters
 [masters]
 aep3-master[1:3]-ansible.test.example.com
