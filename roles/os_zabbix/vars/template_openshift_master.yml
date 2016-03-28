@@ -93,6 +93,18 @@ g_template_openshift_master:
     applications:
     - Openshift Master
 
+  - key: openshift.master.pv.space.total
+    description: Shows the total space of pv
+    value_type: int
+    applications:
+    - Openshift Master
+
+  - key: openshift.master.pv.space.available
+    description: Shows the available space of pv
+    value_type: int
+    applications:
+    - Openshift Master
+
   - key: openshift.master.pv.total.count
     description: Total number of Persistent Volumes in the Openshift Cluster
     value_type: int
@@ -278,6 +290,29 @@ g_template_openshift_master:
     value_type: int
     applications:
     - Openshift Master Metrics
+
+  zdiscoveryrules:
+  - name: disc.pv
+    key: disc.pv
+    lifetime: 1
+    description: "Dynamically register the Persistent Volumes"
+
+  zitemprototypes:
+  - discoveryrule_key: disc.pv
+    name: "disc.pv.count.{#OSO_PV}"
+    key: "disc.pv.count[{#OSO_PV}]"
+    value_type: int
+    description: "Number of PV's of this size"
+    applications:
+    - Openshift Master
+
+  - discoveryrule_key: disc.pv
+    name: "disc.pv.count.available.{#OSO_PV}"
+    key: "disc.pv.count.available[{#OSO_PV}]"
+    value_type: int
+    description: "Number of PV's of this size that are available"
+    applications:
+    - Openshift Master
 
   ztriggers:
   - name: 'Openshift Master process not running on {HOST.NAME}'
