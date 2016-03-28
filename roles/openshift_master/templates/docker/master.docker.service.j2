@@ -14,4 +14,4 @@ ExecStop=/usr/bin/docker stop {{ openshift.common.service_type }}-master
 Restart=always
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=docker.service
