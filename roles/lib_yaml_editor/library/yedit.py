@@ -185,7 +185,7 @@ def main():
     rval = yamlfile.get()
     if not rval and state != 'present':
         module.fail_json(msg='Error opening file [%s].  Verify that the' + \
-                             ' file exists and that it is has correct permissions.')
+                             ' file exists, that it is has correct permissions, and is valid yaml.')
 
     if state == 'list':
         module.exit_json(changed=False, results=rval, state="list")
