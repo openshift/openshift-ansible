@@ -1,0 +1,59 @@
+---
+  - name: Create temp directory for kubeconfig
+    command: mktemp -d /tmp/openshift-ansible-XXXXXX
+    register: mktemp
+    changed_when: False
+
+  - name: Copy the admin client config(s)
+    command: >
+      cp {{ openshift_master_config_dir }}/admin.kubeconfig {{ mktemp.stdout }}/admin.kubeconfig
+    changed_when: False
+
+  - name: "Checking for logging project"
+    command: "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get project logging"
+    register: logging_project
+    failed_when: "'FAILED' in logging_project.stderr"
+
+  - name: "Changing projects"
+    command: "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig project logging"
+
+
+  - name: "Cleanup any previous logging infrastructure"
+    command: "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig delete --ignore-not-found all --selector logging-infra={{ item }}"
+    with_items:
+      - kibana
+      - fluentd
+      - elasticsearch
+    ignore_errors: yes
+
+  - name: "Cleanup existing support infrastructure"
+    command: "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig delete --ignore-not-found all,sa,oauthclient --selector logging-infra=support"
+    ignore_errors: yes
+
+  - name: "Cleanup existing secrets"
+    command: "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig delete secret logging-fluentd logging-elasticsearch logging-es-proxy logging-kibana logging-kibana-proxy logging-kibana-ops-proxy"
+    ignore_errors: yes
+    register: clean_result
+    failed_when: clean_result.rc == 1 and 'not found' not in clean_result.stderr
+
+  - name: "Cleanup existing logging deployers"
+    command: "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig delete pods --all"
+
+
+  - name: "Cleanup logging project"
+    command: "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig delete project logging"
+
+
+  - name: "Remove deployer template"
+    command: "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig delete template logging-deployer-template -n openshift"
+    register: delete_ouput
+    failed_when: delete_ouput.rc == 1 and 'exists' not in delete_ouput.stderr
+
+
+  - name: Delete temp directory
+    file:
+      name: "{{ mktemp.stdout }}"
+      state: absent
+    changed_when: False
+
+  - debug: msg="Success!"

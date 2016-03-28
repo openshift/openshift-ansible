@@ -1,0 +1,8 @@
+---
+- name: Cleanup logging deployment
+  include: "{{ role_path }}/tasks/cleanup_logging.yaml"
+  when: openshift_hosted_logging_cleanup | default(false) | bool
+
+- name: Deploy logging
+  include: "{{ role_path }}/tasks/deploy_logging.yaml"
+  when: not openshift_hosted_logging_cleanup | default(false) | bool
