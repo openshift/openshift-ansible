@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.65
+Version:        3.0.66
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -279,6 +279,21 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Mar 28 2016 Troy Dawson <tdawson@redhat.com> 3.0.66-1
+- Fixed error message to add valid yaml (kwoodson@redhat.com)
+- added admin binary varibale usage as well as specifying kubeconfig copy to be
+  used (jkwiatko@redhat.com)
+- Sync latest db-templates and qucikstart-templates (sdodson@redhat.com)
+- adding playbook (jkwiatko@redhat.com)
+- Tested of refactored code (jkwiatko@redhat.com)
+- fix some typo (zhizhang@use-tower1.ops.rhcloud.com)
+- add the total and available space item (zhizhang@use-tower1.ops.rhcloud.com)
+- add dynamic pv count (zhizhang@use-tower1.ops.rhcloud.com)
+- revised and restructured logging role (jkwiatko@redhat.com)
+- Adding openshift_efk role (jkwiatko@redhat.com)
+- Attempt to fix error validating when extraScopes and extraAuthorizeParameters
+  are not present (jdetiber@redhat.com)
+
 * Thu Mar 24 2016 Troy Dawson <tdawson@redhat.com> 3.0.65-1
 - Adding deployment config and refactored. (kwoodson@redhat.com)
 - ManageIQ SA: Adding image-puller role (efreiber@redhat.com)
