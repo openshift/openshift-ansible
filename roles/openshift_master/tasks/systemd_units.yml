@@ -18,7 +18,7 @@
   template:
     src: "{{ ha_svc_template_path }}/atomic-openshift-master-{{ item }}.service.j2"
     dest: "{{ ha_svc_svc_dir }}/{{ openshift.common.service_type }}-master-{{ item }}.service"
-  when: openshift_master_ha | bool and openshift_master_cluster_method == "native"
+  when: openshift.master.ha is defined and openshift.master.ha | bool and openshift_master_cluster_method == "native"
   with_items:
   - api
   - controllers
@@ -32,7 +32,7 @@
   template:
     src: "{{ ha_svc_template_path }}/atomic-openshift-master-api.j2"
     dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-api
-  when: openshift_master_ha | bool and openshift_master_cluster_method == "native"
+  when: openshift.master.ha is defined and openshift.master.ha | bool and openshift_master_cluster_method == "native"
   notify:
   - restart master api
 
@@ -40,7 +40,7 @@
   template:
     src: "{{ ha_svc_template_path }}/atomic-openshift-master-controllers.j2"
     dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-controllers
-  when: openshift_master_ha | bool and openshift_master_cluster_method == "native"
+  when: openshift.master.ha is defined and openshift.master.ha | bool and openshift_master_cluster_method == "native"
   notify:
   - restart master controllers
 
@@ -49,7 +49,7 @@
     dest: "/etc/systemd/system/{{ openshift.common.service_type }}-master.service"
     src: docker/master.docker.service.j2
   register: install_result
-  when: openshift.common.is_containerized | bool and not openshift_master_ha | bool
+  when: openshift.common.is_containerized | bool and openshift.master.ha is defined and not openshift.master.ha | bool
 
 - name: Create the master service env file
   template:

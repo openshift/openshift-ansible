@@ -49,29 +49,27 @@
   hosts: oo_masters_to_config
   roles:
   - openshift_facts
-  vars:
-    openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
   tasks:
   - name: Ensure Master is running
     service:
       name: "{{ openshift.common.service_type }}-master"
       state: started
       enabled: yes
-    when: not openshift_master_ha | bool and openshift.common.is_containerized | bool
+    when: openshift.master.ha is defined and not openshift.master.ha | bool and openshift.common.is_containerized | bool
 
   - name: Ensure HA Master is running
     service:
       name: "{{ openshift.common.service_type }}-master-api"
       state: started
       enabled: yes
-    when: openshift_master_ha | bool and openshift.common.is_containerized | bool
+    when: openshift.master.ha is defined and openshift.master.ha | bool and openshift.common.is_containerized | bool
 
   - name: Ensure HA Master is running
     service:
       name: "{{ openshift.common.service_type }}-master-controllers"
       state: started
       enabled: yes
-    when: openshift_master_ha | bool and openshift.common.is_containerized | bool
+    when: openshift.master.ha is defined and openshift.master.ha | bool and openshift.common.is_containerized | bool
 
 - name: Verify upgrade can proceed
   hosts: oo_nodes_to_config
@@ -89,7 +87,6 @@
   hosts: oo_masters_to_config:oo_nodes_to_config
   vars:
     target_version: "{{ '1.2' if deployment_type == 'origin' else '3.1.1.900' }}"
-    openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
   handlers:
   - include: ../../../../../roles/openshift_master/handlers/main.yml
   - include: ../../../../../roles/openshift_node/handlers/main.yml
