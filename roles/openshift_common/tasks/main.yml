@@ -28,6 +28,26 @@
       use_manageiq: "{{ openshift_use_manageiq | default(None) }}"
       data_dir: "{{ openshift_data_dir | default(None) }}"
 
+- name: Gather current version of docker
+  command: >
+    rpm -q docker --queryformat '%{version}'
+  register: installed_docker
+  failed_when: false
+  changed_when: false
+  
+- name: Gather latest version of common package
+  shell: >
+    yum list available -e 0 -q "{{ openshift.common.service_type}}" 2>&1 | tail -n +2 | awk '{ print $2 }' | sort -r | tr '\n' ' ' | tail -n 1 | cut -d '.' -f1,2
+  register: latest_package
+  failed_when: false
+  changed_when: false
+
+- name: Downgrade docker to 1.8.2 if we're installing a version older than 3.2
+  command: >
+    {{ ansible_pkg_mgr }} -y downgrade docker-1.8.2
+  notify: restart docker
+  when: " '1.9' in installed_docker.stdout and latest_package.stdout in ['3.0','3.1'] "
+
 - name: Install the base package for versioning
   action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}{{ openshift_version | default('') }} state=present"
   when: not openshift.common.is_containerized | bool
