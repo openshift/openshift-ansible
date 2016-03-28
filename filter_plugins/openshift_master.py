@@ -372,13 +372,12 @@ class OpenIDIdentityProvider(IdentityProviderOauthBase):
             raise errors.AnsibleFilterError("|failed claims for provider {0} "
                                             "must be a dictionary".format(self.__class__.__name__))
 
-        if 'extraScopes' not in self.provider['extraScopes'] and not isinstance(self.provider['extraScopes'], list):
-            raise errors.AnsibleFilterError("|failed extraScopes for provider "
-                                            "{0} must be a list".format(self.__class__.__name__))
-        if ('extraAuthorizeParameters' not in self.provider['extraAuthorizeParameters']
-                and not  isinstance(self.provider['extraAuthorizeParameters'], dict)):
-            raise errors.AnsibleFilterError("|failed extraAuthorizeParameters "
-                                            "for provider {0} must be a dictionary".format(self.__class__.__name__))
+        for var, var_type in (('extraScopes', list), ('extraAuthorizeParameters', dict)):
+            if var in self.provider and not isinstance(self.provider[var], var_type):
+                raise errors.AnsibleFilterError("|failed {1} for provider "
+                                                "{0} must be a {2}".format(self.__class__.__name__,
+                                                                           var,
+                                                                           var_type.__class__.__name__))
 
         required_claims = ['id']
         optional_claims = ['email', 'name', 'preferredUsername']
