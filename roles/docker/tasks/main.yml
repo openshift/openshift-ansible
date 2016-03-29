@@ -3,30 +3,55 @@
 
 # Avoid docker 1.9 when installing origin < 1.2 or OSE < 3.2 on RHEL/Centos and
 # See: https://bugzilla.redhat.com/show_bug.cgi?id=1304038
-
-- name: Default to latest docker for 1.2/3.2 or Fedora
+- name: Default to latest docker
   set_fact:
     docker_version: ''
-  when: openshift.common.version_gte_3_2_or_1_2 | bool or ansible_distribution == 'Fedora'
+    docker_downgrade: False
+  
+- name: Gather installed version of common package
+  shell: >
+    rpm -q {{ openshift.common.service_type }} --queryformat '%{version}' | cut -d '.' -f1,2 | grep -v 'not installed'
+  register: installed_common_version
+  failed_when: false
+  changed_when: false
+  
+- name: Gather available version of common package
+  shell: >
+    yum list available -e 0 -q "{{ openshift.common.service_type}}" 2>&1 | tail -n +2 | awk '{ print $2 }' | sort -r | tr '\n' ' ' | tail -n 1 | cut -d '.' -f1,2
+  register: available_common_version
+  failed_when: false
+  changed_when: false
 
-- name: Gather latest version of docker
+- name: Gather installed version of docker
+  shell: >
+    rpm -q docker --queryformat '%{version}' | cut -d '.' -f1,2 | grep -v 'not installed'
+  register: installed_docker_version
+  failed_when: false
+  changed_when: false
+  
+- name: Gather available version of docker
   shell: >
     yum list available -e 0 -q "docker" 2>&1 | tail -n +2 | awk '{ print $2 }' | sort -r | tr '\n' ' ' | tail -n 1
-  register: latest_docker
-  when: not openshift.common.version_gte_3_2_or_1_2 | bool and ansible_distribution != 'Fedora'
-
-- name: Check if Docker 1.9 is the latest
-  set_fact:
-    docker19_is_latest: "{{ True if '1.9' in latest_docker.stdout else False }}"
-  when: not openshift.common.version_gte_3_2_or_1_2 | bool and ansible_distribution != 'Fedora'
+  register: available_docker_version
+  failed_when: false
+  changed_when: false
 
 - set_fact:
-    docker_version: "{{ '-1.8.2' if docker19_is_latest | bool else ''}}"
-  when: not openshift.common.version_gte_3_2_or_1_2 | bool and ansible_distribution != 'Fedora'
-
+    docker_version: "{{ '1.8.2' }}"
+  when: " installed_common_version.stdout in ['3.0','3.1','1.0','1.1'] or available_common_version.stdout in ['3.0','3.1','1.0','1.1']"
+  
+- set_fact:
+    docker_downgrade: True
+  when: " docker_version < installed_docker_version.stdout and docker_version != ''"
+  
+- name: Downgrade docker
+  command: >
+    {{ ansible_pkg_mgr }} downgrade -y docker{{ '-' + docker_version if docker_version != '' else '' }}
+  when: not openshift.common.is_atomic and docker_downgrade | bool
+  
 - name: Install docker
-  action: "{{ ansible_pkg_mgr }} name=docker{{ docker_version }} state=present"
-  when: not openshift.common.is_atomic | bool
+  action: "{{ ansible_pkg_mgr }} name=docker{{ '-' + docker_version if docker_version != '' else '' }} state=present"
+  when: not openshift.common.is_atomic | bool and not docker_downgrade | bool
   
 - name: enable and start the docker service
   service:
