@@ -1492,6 +1492,19 @@ class OpenShiftFacts(object):
                                   debug_level=2)
 
         if 'master' in roles:
+            scheduler_predicates = [
+                {"name": "MatchNodeSelector"},
+                {"name": "PodFitsResources"},
+                {"name": "PodFitsPorts"},
+                {"name": "NoDiskConflict"},
+                {"name": "Region", "argument": {"serviceAffinity" : {"labels" : ["region"]}}}
+            ]
+            scheduler_priorities = [
+                {"name": "LeastRequestedPriority", "weight": 1},
+                {"name": "SelectorSpreadPriority", "weight": 1},
+                {"name": "Zone", "weight" : 2, "argument": {"serviceAntiAffinity" : {"label": "zone"}}}
+            ]
+
             defaults['master'] = dict(api_use_ssl=True, api_port='8443',
                                       controllers_port='8444',
                                       console_use_ssl=True,
@@ -1507,7 +1520,9 @@ class OpenShiftFacts(object):
                                       session_secrets_file='',
                                       access_token_max_seconds=86400,
                                       auth_token_max_seconds=500,
-                                      oauth_grant_method='auto')
+                                      oauth_grant_method='auto',
+                                      scheduler_predicates=scheduler_predicates,
+                                      scheduler_priorities=scheduler_priorities)
 
         if 'node' in roles:
             defaults['node'] = dict(labels={}, annotations={},
