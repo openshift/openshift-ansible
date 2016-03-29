@@ -26,6 +26,8 @@ from distutils.util import strtobool
 from distutils.version import LooseVersion
 import struct
 import socket
+from dbus import SystemBus, Interface
+from dbus.exceptions import DBusException
 
 
 def migrate_docker_facts(facts):
@@ -745,8 +747,9 @@ def set_version_facts_if_unset(facts):
     """
     if 'common' in facts:
         deployment_type = facts['common']['deployment_type']
-        facts['common']['version'] = version = get_openshift_version(facts)
+        version = get_openshift_version(facts)
         if version is not None:
+            facts['common']['version'] = version
             if deployment_type == 'origin':
                 version_gte_3_1_or_1_1 = LooseVersion(version) >= LooseVersion('1.1.0')
                 version_gte_3_1_1_or_1_1_1 = LooseVersion(version) >= LooseVersion('1.1.1')
@@ -965,6 +968,50 @@ def build_api_server_args(facts):
             facts = merge_facts({'master': {'api_server_args': api_server_args}}, facts, [], [])
     return facts
 
+def is_service_running(service):
+    """ Queries systemd through dbus to see if the service is running """
+    service_running = False
+    bus = SystemBus()
+    systemd = bus.get_object('org.freedesktop.systemd1', '/org/freedesktop/systemd1')
+    manager = Interface(systemd, dbus_interface='org.freedesktop.systemd1.Manager')
+    try:
+        service_unit = service if service.endswith('.service') else manager.GetUnit('{0}.service'.format(service))
+        service_proxy = bus.get_object('org.freedesktop.systemd1', str(service_unit))
+        service_properties = Interface(service_proxy, dbus_interface='org.freedesktop.DBus.Properties')
+        service_load_state = service_properties.Get('org.freedesktop.systemd1.Unit', 'LoadState')
+        service_active_state = service_properties.Get('org.freedesktop.systemd1.Unit', 'ActiveState')
+        if service_load_state == 'loaded' and service_active_state == 'active':
+            service_running = True
+    except DBusException:
+        pass
+
+    return service_running
+
+def get_version_output(binary, version_cmd):
+    """ runs and returns the version output for a command """
+    cmd = []
+    for item in (binary, version_cmd):
+        if isinstance(item, list):
+            cmd.extend(item)
+        else:
+            cmd.append(item)
+
+    if os.path.isfile(cmd[0]):
+        _, output, _ = module.run_command(cmd)
+    return output
+
+def get_docker_version_info():
+    """ Parses and returns the docker version info """
+    result = None
+    if is_service_running('docker'):
+        version_info = yaml.safe_load(get_version_output('/usr/bin/docker', 'version'))
+        if 'Server' in version_info:
+            result = {
+                'api_version': version_info['Server']['API version'],
+                'version': version_info['Server']['Version']
+            }
+    return result
+
 def get_openshift_version(facts, cli_image=None):
     """ Get current version of openshift on the host
 
@@ -1006,9 +1053,10 @@ def get_openshift_version(facts, cli_image=None):
 
         if version is None and cli_image is not None:
             # Assume we haven't installed the environment yet and we need
-            # to query the latest image
-            exit_code, output, _ = module.run_command(['docker', 'run', '--rm', cli_image, 'version'])
-            version = parse_openshift_version(output)
+            # to query the latest image, but only if docker is installed
+            if 'docker' in facts and 'version' in facts['docker']:
+                exit_code, output, _ = module.run_command(['docker', 'run', '--rm', cli_image, 'version'])
+                version = parse_openshift_version(output)
 
     return version
 
@@ -1257,8 +1305,10 @@ def set_container_facts_if_unset(facts):
     if safe_get_bool(facts['common']['is_containerized']):
         facts['common']['admin_binary'] = '/usr/local/bin/oadm'
         facts['common']['client_binary'] = '/usr/local/bin/oc'
-        base_version = get_openshift_version(facts, cli_image).split('-')[0]
-        facts['common']['image_tag'] = "v" + base_version
+        openshift_version = get_openshift_version(facts, cli_image)
+        if openshift_version is not None:
+            base_version = openshift_version.split('-')[0]
+            facts['common']['image_tag'] = "v" + base_version
 
     return facts
 
@@ -1466,7 +1516,12 @@ class OpenShiftFacts(object):
                                     set_node_ip=False)
 
         if 'docker' in roles:
-            defaults['docker'] = dict(disable_push_dockerhub=False)
+            docker = dict(disable_push_dockerhub=False)
+            version_info = get_docker_version_info()
+            if version_info is not None:
+                docker['api_version'] = version_info['api_version']
+                docker['version'] = version_info['version']
+            defaults['docker'] = docker
 
         if 'cloudprovider' in roles:
             defaults['cloudprovider'] = dict(kind=None)
