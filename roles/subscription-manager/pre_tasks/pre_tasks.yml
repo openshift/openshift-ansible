@@ -1,0 +1,37 @@
+---
+- name: Initialize Subscription Manager fact
+  set_fact:
+    rhsm_skip: false
+
+- name: Determine if Subscription Manager should be skipped or not
+  set_fact:
+    rhsm_skip: true
+  when: rhsm_method is undefined or rhsm_method is none or rhsm_method|trim == ''
+
+- name: Determine Subscription Manager method
+  fail: msg="Value for 'rhsm_method' of '{{ rhsm_method }}' is not valid, it should be one of 'hosted', 'satellite', or false/none/blank"
+  when: 
+    - rhsm_method != 'hosted' and rhsm_method != 'satellite'
+    - not rhsm_skip
+
+- name: Validate Subscription Manager host is set
+  fail: msg="Cannot determine Subscription Manager server hostname without a value for 'rhsm_server'"
+  when: 
+    - rhsm_server is undefined or rhsm_server is none or rhsm_server|trim == ''
+    - not rhsm_method == 'hosted'
+    - not rhsm_skip
+
+- name: Validate Subscription Manager organization is set
+  fail: msg="Cannot register to a Satellite server without a value for the Organization via 'rhsm_org'"
+  when: 
+    - rhsm_org is undefined or rhsm_org is none or rhsm_org|trim == ''
+    - rhsm_method == 'satellite'
+    - not rhsm_skip
+
+- name: Validate Subscription Manager authentication is defined
+  fail: msg="Cannot register without ('rhsm_username' and 'rhsm_password') or 'rhsm_activationkey' variables set"
+  when:
+    - (rhsm_username is undefined or rhsm_username is none or rhsm_username|trim == '') or (rhsm_password is undefined or rhsm_password is none or rhsm_password|trim == '')
+    - rhsm_activationkey is undefined or rhsm_activationkey is none or rhsm_activationkey|trim == ''
+    - not rhsm_skip
+
