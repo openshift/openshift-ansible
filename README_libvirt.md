@@ -10,7 +10,7 @@ This makes `libvirt` useful to develop, test and debug OpenShift and openshift-a
 Install dependencies
 --------------------
 
-1.      Install [ansible](http://www.ansible.com/)
+1.	Install [ansible](http://www.ansible.com/)
 2.	Install [dnsmasq](http://www.thekelleys.org.uk/dnsmasq/doc.html)
 3.	Install [ebtables](http://ebtables.netfilter.org/)
 4.	Install [qemu and qemu-system-x86](http://wiki.qemu.org/Main_Page)
@@ -121,6 +121,11 @@ The following options can be passed via the `-o` flag of the `create` command or
 * `image_name` (default to `CentOS-7-x86_64-GenericCloud.qcow2`): Name of the QCOW2 image to boot the VMs on
 * `image_compression` (default to `xz`): Source QCOW2 compression (only xz supported at this time)
 * `image_sha256` (default to `dd0f5e610e7c5ffacaca35ed7a78a19142a588f4543da77b61c1fb0d74400471`): Expected SHA256 checksum of the downloaded image
+* `libvirt_storage_pool` (default to `openshift-ansible`): name of the libvirt storage pool for the VM images. It will be created if it does not exist
+* `libvirt_storage_pool_path` (default to `$HOME/libvirt-storage-pool-openshift-ansible`): path to `libvirt_storage_pool`, i.e. where the VM images are stored
+* `libvirt_network` (default to `openshift-ansible`): name of the libvirt network that the VMs will use. It will be created if it does not exist
+* `libvirt_instance_memory_mib` (default to `1024`): memory of the VMs in MiB
+* `libvirt_instance_vcpu` (default to `2`): number of vCPUs of the VMs
 * `skip_image_download` (default to `no`): Skip QCOW2 image download. This requires the `image_name` QCOW2 image to be already present in `$HOME/libvirt-storage-pool-openshift-ansible`
 
 Creating a cluster

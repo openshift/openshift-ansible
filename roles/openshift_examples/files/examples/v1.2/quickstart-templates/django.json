@@ -82,7 +82,7 @@
           "sourceStrategy": {
             "from": {
               "kind": "ImageStreamTag",
-              "namespace": "openshift",
+              "namespace": "${NAMESPACE}",
               "name": "python:3.4"
             }
           }
@@ -229,6 +229,12 @@
       "description": "The name assigned to all of the frontend objects defined in this template.",
       "required": true,
       "value": "django-example"
+    },
+    {
+      "name": "NAMESPACE",
+      "displayName": "Namespace",
+      "description": "The OpenShift Namespace where the ImageStream resides.",
+      "value": "openshift"
     },
     {
       "name": "MEMORY_LIMIT",

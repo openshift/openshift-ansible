@@ -1,6 +1,6 @@
 <domain type='kvm' id='8'>
   <name>{{ item }}</name>
-  <memory unit='MiB'>{{ os_libvirt_instance_memory_mib }}</memory>
+  <memory unit='MiB'>{{ libvirt_instance_memory_mib }}</memory>
   <metadata xmlns:ansible="https://github.com/ansible/ansible">
     <ansible:tags>
       <ansible:tag>environment-{{ cluster_env }}</ansible:tag>
@@ -9,7 +9,7 @@
       <ansible:tag>sub-host-type-{{ g_sub_host_type }}</ansible:tag>
     </ansible:tags>
   </metadata>
-  <vcpu placement='static'>{{ os_libvirt_instance_vcpu }}</vcpu>
+  <vcpu placement='static'>{{ libvirt_instance_vcpu }}</vcpu>
   <os>
     <type arch='x86_64' machine='pc'>hvm</type>
     <boot dev='hd'/>
@@ -31,23 +31,23 @@
     <emulator>/usr/bin/qemu-system-x86_64</emulator>
     <disk type='file' device='disk'>
       <driver name='qemu' type='qcow2'/>
-      <source file='{{ os_libvirt_storage_pool_path }}/{{ item }}.qcow2'/>
+      <source file='{{ libvirt_storage_pool_path }}/{{ item }}.qcow2'/>
       <target dev='vda' bus='virtio'/>
     </disk>
     <disk type='file' device='disk'>
       <driver name='qemu' type='qcow2'/>
-      <source file='{{ os_libvirt_storage_pool_path }}/{{ item }}-docker.qcow2'/>
+      <source file='{{ libvirt_storage_pool_path }}/{{ item }}-docker.qcow2'/>
       <target dev='vdb' bus='virtio'/>
     </disk>
     <disk type='file' device='cdrom'>
       <driver name='qemu' type='raw'/>
-      <source file='{{ os_libvirt_storage_pool_path }}/{{ item }}_cloud-init.iso'/>
+      <source file='{{ libvirt_storage_pool_path }}/{{ item }}_cloud-init.iso'/>
       <target dev='vdc' bus='virtio'/>
       <readonly/>
     </disk>
     <controller type='usb' index='0' />
     <interface type='network'>
-      <source network='{{ os_libvirt_network }}'/>
+      <source network='{{ libvirt_network }}'/>
       <model type='virtio'/>
     </interface>
     <serial type='pty'>

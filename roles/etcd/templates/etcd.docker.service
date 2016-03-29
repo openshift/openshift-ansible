@@ -13,4 +13,4 @@ SyslogIdentifier=etcd_container
 Restart=always
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=docker.service

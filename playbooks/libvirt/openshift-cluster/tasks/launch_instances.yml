@@ -13,58 +13,58 @@
   get_url:
     url: '{{ image_url }}'
     sha256sum: '{{ image_sha256 }}'
-    dest: '{{ os_libvirt_storage_pool_path }}/{{ [image_name, image_compression] | difference([""]) | join(".") }}'
+    dest: '{{ libvirt_storage_pool_path }}/{{ [image_name, image_compression] | difference([""]) | join(".") }}'
   when: '{{ ( lookup("oo_option", "skip_image_download") | default("no", True) | lower ) in ["false", "no"] }}'
   register: downloaded_image
 
 - name: Uncompress xz compressed base cloud image
-  command: 'unxz -kf {{ os_libvirt_storage_pool_path }}/{{ [image_name, image_compression] | join(".") }}'
+  command: 'unxz -kf {{ libvirt_storage_pool_path }}/{{ [image_name, image_compression] | join(".") }}'
   args:
-    creates: '{{ os_libvirt_storage_pool_path }}/{{ image_name }}'
+    creates: '{{ libvirt_storage_pool_path }}/{{ image_name }}'
   when: image_compression in ["xz"] and downloaded_image.changed
 
 - name: Uncompress tgz compressed base cloud image
-  command: 'tar zxvf {{ os_libvirt_storage_pool_path }}/{{ [image_name, image_compression] | join(".") }}'
+  command: 'tar zxvf {{ libvirt_storage_pool_path }}/{{ [image_name, image_compression] | join(".") }}'
   args:
-    creates: '{{ os_libvirt_storage_pool_path }}/{{ image_name }}'
+    creates: '{{ libvirt_storage_pool_path }}/{{ image_name }}'
   when: image_compression in ["tgz"] and downloaded_image.changed
 
 - name: Uncompress gzip compressed base cloud image
-  command: 'gunzip {{ os_libvirt_storage_pool_path }}/{{ [image_name, image_compression] | join(".") }}'
+  command: 'gunzip {{ libvirt_storage_pool_path }}/{{ [image_name, image_compression] | join(".") }}'
   args:
-    creates: '{{ os_libvirt_storage_pool_path }}/{{ image_name }}'
+    creates: '{{ libvirt_storage_pool_path }}/{{ image_name }}'
   when: image_compression in ["gz"] and downloaded_image.changed
 
 - name: Create the cloud-init config drive path
   file:
-    dest: '{{ os_libvirt_storage_pool_path }}/{{ item }}_configdrive/'
+    dest: '{{ libvirt_storage_pool_path }}/{{ item }}_configdrive/'
     state: directory
   with_items: instances
 
 - name: Create the cloud-init config drive files
   template:
     src: '{{ item[1] }}'
-    dest: '{{ os_libvirt_storage_pool_path }}/{{ item[0] }}_configdrive/{{ item[1] }}'
+    dest: '{{ libvirt_storage_pool_path }}/{{ item[0] }}_configdrive/{{ item[1] }}'
   with_nested:
     - instances
     - [ user-data, meta-data ]
 
 - name: Create the cloud-init config drive
-  command: 'genisoimage -output {{ os_libvirt_storage_pool_path }}/{{ item }}_cloud-init.iso -volid cidata -joliet -rock user-data meta-data'
+  command: 'genisoimage -output {{ libvirt_storage_pool_path }}/{{ item }}_cloud-init.iso -volid cidata -joliet -rock user-data meta-data'
   args:
-    chdir: '{{ os_libvirt_storage_pool_path }}/{{ item }}_configdrive/'
-    creates: '{{ os_libvirt_storage_pool_path }}/{{ item }}_cloud-init.iso'
+    chdir: '{{ libvirt_storage_pool_path }}/{{ item }}_configdrive/'
+    creates: '{{ libvirt_storage_pool_path }}/{{ item }}_cloud-init.iso'
   with_items: instances
 
 - name: Refresh the libvirt storage pool for openshift
   command: 'virsh -c {{ libvirt_uri }} pool-refresh {{ libvirt_storage_pool }}'
 
 - name: Create VM drives
-  command: 'virsh -c {{ libvirt_uri }} vol-create-as {{ os_libvirt_storage_pool }} {{ item }}.qcow2 10G --format qcow2 --backing-vol {{ image_name }} --backing-vol-format qcow2'
+  command: 'virsh -c {{ libvirt_uri }} vol-create-as {{ libvirt_storage_pool }} {{ item }}.qcow2 10G --format qcow2 --backing-vol {{ image_name }} --backing-vol-format qcow2'
   with_items: instances
 
 - name: Create VM docker drives
-  command: 'virsh -c {{ libvirt_uri }} vol-create-as {{ os_libvirt_storage_pool }} {{ item }}-docker.qcow2 10G --format qcow2 --allocation 0'
+  command: 'virsh -c {{ libvirt_uri }} vol-create-as {{ libvirt_storage_pool }} {{ item }}-docker.qcow2 10G --format qcow2 --allocation 0'
   with_items: instances
 
 - name: Create VMs

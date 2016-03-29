@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.60
+Version:        3.0.66
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -279,6 +279,47 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Mar 28 2016 Troy Dawson <tdawson@redhat.com> 3.0.66-1
+- Fixed error message to add valid yaml (kwoodson@redhat.com)
+- added admin binary varibale usage as well as specifying kubeconfig copy to be
+  used (jkwiatko@redhat.com)
+- Sync latest db-templates and qucikstart-templates (sdodson@redhat.com)
+- adding playbook (jkwiatko@redhat.com)
+- Tested of refactored code (jkwiatko@redhat.com)
+- fix some typo (zhizhang@use-tower1.ops.rhcloud.com)
+- add the total and available space item (zhizhang@use-tower1.ops.rhcloud.com)
+- add dynamic pv count (zhizhang@use-tower1.ops.rhcloud.com)
+- revised and restructured logging role (jkwiatko@redhat.com)
+- Adding openshift_efk role (jkwiatko@redhat.com)
+- Attempt to fix error validating when extraScopes and extraAuthorizeParameters
+  are not present (jdetiber@redhat.com)
+
+* Thu Mar 24 2016 Troy Dawson <tdawson@redhat.com> 3.0.65-1
+- Adding deployment config and refactored. (kwoodson@redhat.com)
+- ManageIQ SA: Adding image-puller role (efreiber@redhat.com)
+
+* Wed Mar 23 2016 Troy Dawson <tdawson@redhat.com> 3.0.64-1
+- Latest cli updates from generated files (kwoodson@redhat.com)
+- Add /dev to node containers (sdodson@redhat.com)
+- Fix indention (whearn@redhat.com)
+- Support setting local storage perFSGroup quota in node config.
+  (dgoodwin@redhat.com)
+- Fix line break (whearn@redhat.com)
+- Lock down permissions on named certificates (elyscape@gmail.com)
+- Add namespace flag to oc create (whearn@redhat.com)
+
+* Mon Mar 21 2016 Kenny Woodson <kwoodson@redhat.com> 3.0.63-1
+- Modified group selectors for muliple clusters per account
+  (kwoodson@redhat.com)
+
+* Fri Mar 18 2016 Troy Dawson <tdawson@redhat.com> 3.0.62-1
+- Yaml editor first attempt (kwoodson@redhat.com)
+- libvirt cluster variables cleanup (pep@redhat.com)
+
+* Thu Mar 17 2016 Troy Dawson <tdawson@redhat.com> 3.0.61-1
+- Bug 1317755 - Set insecure-registry for internal registry by default
+  (jdetiber@redhat.com)
+
 * Wed Mar 16 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.60-1
 - Fall back to deployment_type in openshift_facts. (abutcher@redhat.com)
 - Fixing undefined variable check (kwoodson@redhat.com)
