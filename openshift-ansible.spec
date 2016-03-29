@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.66
+Version:        3.0.67
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -279,6 +279,17 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Mar 29 2016 Troy Dawson <tdawson@redhat.com> 3.0.67-1
+- The systemd unit for atomic-openshift-master wasn't not being created
+  (bleanhar@redhat.com)
+- Use openshift.master.ha instead of duplicating the logic
+  (bleanhar@redhat.com)
+- Workaround for authenticated registries (bleanhar@redhat.com)
+- First pass at systemd unit refactor (bleanhar@redhat.com)
+- fix the key name for the dynamic item of avalable (zhizhang@zhizhang-laptop-
+  nay.redhat.com)
+- make docker service want ose containerized services (sjenning@redhat.com)
+
 * Mon Mar 28 2016 Troy Dawson <tdawson@redhat.com> 3.0.66-1
 - Fixed error message to add valid yaml (kwoodson@redhat.com)
 - added admin binary varibale usage as well as specifying kubeconfig copy to be
