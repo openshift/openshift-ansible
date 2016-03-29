@@ -307,8 +307,8 @@ g_template_openshift_master:
     - Openshift Master
 
   - discoveryrule_key: disc.pv
-    name: "disc.pv.count.available.{#OSO_PV}"
-    key: "disc.pv.count.available[{#OSO_PV}]"
+    name: "disc.pv.available.{#OSO_PV}"
+    key: "disc.pv.available[{#OSO_PV}]"
     value_type: int
     description: "Number of PV's of this size that are available"
     applications:
