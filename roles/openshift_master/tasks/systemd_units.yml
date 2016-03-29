@@ -4,28 +4,38 @@
 
 - name: Init HA Service Info
   set_fact:
-    ha_svc_svc_dir: "/usr/lib/systemd/system"
+    containerized_svc_dir: "/usr/lib/systemd/system"
     ha_svc_template_path: "native-cluster"
 
 - name: Set HA Service Info for containerized installs
   set_fact:
-    ha_svc_svc_dir: "/etc/systemd/system"
+    containerized_svc_dir: "/etc/systemd/system"
     ha_svc_template_path: "docker-cluster"
   when: openshift.common.is_containerized | bool
 
-# workaround for missing systemd unit files for controllers/api
+# workaround for missing systemd unit files
 - name: Create the systemd unit files
   template:
+    src: "docker/master.docker.service.j2"
+    dest: "{{ containerized_svc_dir }}/{{ openshift.common.service_type }}-master.service"
+  when: openshift.common.is_containerized | bool and (openshift.master.ha is not defined or not openshift.master.ha | bool)
+  register: create_master_unit_file
+
+- command: systemctl daemon-reload
+  when: create_master_unit_file | changed
+
+- name: Create the ha systemd unit files
+  template:
     src: "{{ ha_svc_template_path }}/atomic-openshift-master-{{ item }}.service.j2"
-    dest: "{{ ha_svc_svc_dir }}/{{ openshift.common.service_type }}-master-{{ item }}.service"
+    dest: "{{ containerized_svc_dir }}/{{ openshift.common.service_type }}-master-{{ item }}.service"
   when: openshift.master.ha is defined and openshift.master.ha | bool and openshift_master_cluster_method == "native"
   with_items:
   - api
   - controllers
-  register: create_unit_files
+  register: create_ha_unit_files
 
 - command: systemctl daemon-reload
-  when: create_unit_files | changed
+  when: create_ha_unit_files | changed
 # end workaround for missing systemd unit files
 
 - name: Create the master api service env file
