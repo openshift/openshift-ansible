@@ -22,5 +22,5 @@ SyslogIdentifier={{ openshift.common.service_type }}-master-api
 Restart=always
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=docker.service
 WantedBy={{ openshift.common.service_type }}-node.service
