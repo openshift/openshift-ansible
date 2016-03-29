@@ -47,32 +47,34 @@
 
 - name: Verify upgrade can proceed
   hosts: oo_masters_to_config
-  vars:
-    openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
+  roles:
+  - openshift_facts
   tasks:
   - name: Ensure Master is running
     service:
       name: "{{ openshift.common.service_type }}-master"
       state: started
       enabled: yes
-    when: not openshift_master_ha | bool and openshift.common.is_containerized | bool
+    when: openshift.master.ha is defined and not openshift.master.ha | bool and openshift.common.is_containerized | bool
 
   - name: Ensure HA Master is running
     service:
       name: "{{ openshift.common.service_type }}-master-api"
       state: started
       enabled: yes
-    when: openshift_master_ha | bool and openshift.common.is_containerized | bool
+    when: openshift.master.ha is defined and openshift.master.ha | bool and openshift.common.is_containerized | bool
 
   - name: Ensure HA Master is running
     service:
       name: "{{ openshift.common.service_type }}-master-controllers"
       state: started
       enabled: yes
-    when: openshift_master_ha | bool and openshift.common.is_containerized | bool
+    when: openshift.master.ha is defined and openshift.master.ha | bool and openshift.common.is_containerized | bool
 
 - name: Verify upgrade can proceed
   hosts: oo_nodes_to_config
+  roles:
+  - openshift_facts
   tasks:
   - name: Ensure Node is running
     service:
@@ -85,6 +87,9 @@
   hosts: oo_masters_to_config:oo_nodes_to_config
   vars:
     target_version: "{{ '1.2' if deployment_type == 'origin' else '3.1.1.900' }}"
+  handlers:
+  - include: ../../../../../roles/openshift_master/handlers/main.yml
+  - include: ../../../../../roles/openshift_node/handlers/main.yml
   roles:
   - openshift_cli
   tasks:
@@ -130,9 +135,19 @@
       msg: Verifying the correct version was found
     when: verify_upgrade_version is defined and g_new_version != verify_upgrade_version
 
+  - include_vars: ../../../../../roles/openshift_master/vars/main.yml
+    when: inventory_hostname in groups.oo_masters_to_config
+
   - name: Update systemd units
-    script: ../files/ensure_system_units_have_version.sh {{ openshift.common.service_type }} {{ openshift.common.deployment_type }} {{ g_aos_versions.curr_version }}
-    when: openshift.common.is_containerized | bool
+    include: ../../../../../roles/openshift_master/tasks/systemd_units.yml openshift_version=g_aos_versions.curr_version
+    when: inventory_hostname in groups.oo_masters_to_config
+
+  - include_vars: ../../../../../roles/openshift_node/vars/main.yml
+    when: inventory_hostname in groups.oo_nodes_to_config
+
+  - name: Update systemd units
+    include: ../../../../../roles/openshift_node/tasks/systemd_units.yml openshift_version=g_aos_versions.curr_version
+    when: inventory_hostname in groups.oo_nodes_to_config
 
   # Note: the version number is hardcoded here in hopes of catching potential
   # bugs in how g_aos_versions.curr_version is set
@@ -142,6 +157,13 @@
       - /etc/sysconfig/openvswitch
       - /etc/sysconfig/{{ openshift.common.service_type }}*
     when: verify_upgrade_version is defined
+
+  - name: Verifying the image version is used in the systemd unit
+    shell: grep IMAGE_VERSION {{ item }}
+    with_items:
+      - /etc/systemd/system/openvswitch.service
+      - /etc/systemd/system/{{ openshift.common.service_type }}*.service
+    when: openshift.common.is_containerized | bool
 
   - fail:
       msg: This playbook requires Origin 1.1 or later
