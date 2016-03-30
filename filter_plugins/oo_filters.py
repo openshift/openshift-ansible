@@ -710,6 +710,22 @@ class FilterModule(object):
 
         return retval
 
+    @staticmethod
+    def oo_image_tag_to_rpm_version(version):
+        """ Convert an image tag string to an RPM version if necessary
+            Empty strings and strings that are already in rpm version format
+            are ignored.
+
+            Ex. v3.2.0.10 -> -3.2.0.10
+        """
+        if not isinstance(version, basestring):
+            raise errors.AnsibleFilterError("|failed expects a string or unicode")
+
+        if version.startswith("v"):
+            version = "-" + version.replace("v", "")
+
+        return version
+
     def filters(self):
         """ returns a mapping of filters to methods """
         return {
@@ -738,4 +754,5 @@ class FilterModule(object):
             "oo_31_rpm_rename_conversion": self.oo_31_rpm_rename_conversion,
             "oo_pods_match_component": self.oo_pods_match_component,
             "oo_get_hosts_from_hostvars": self.oo_get_hosts_from_hostvars,
+            "oo_image_tag_to_rpm_version": self.oo_image_tag_to_rpm_version,
         }
