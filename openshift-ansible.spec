@@ -6,7 +6,7 @@
 
 Name:           openshift-ansible
 Version:        3.0.47
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -261,6 +261,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Mar 30 2016 Scott Dodson <sdodson@redhat.com> 3.0.47-4
+- Ensure that deployment_type is set properly (sdodson@redhat.com)
+
 * Tue Mar 29 2016 Scott Dodson <sdodson@redhat.com> 3.0.47-3
 - Backport downgrading docker if necessary (sdodson@redhat.com)
 - OSE/Origin < 3.2/1.2 should not get Docker 1.9 (sdodson@redhat.com)
