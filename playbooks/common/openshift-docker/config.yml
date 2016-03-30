@@ -4,6 +4,7 @@
     docker_additional_registries: "{{ lookup('oo_option', 'docker_additional_registries') | oo_split }}"
     docker_insecure_registries: "{{ lookup('oo_option',  'docker_insecure_registries') | oo_split }}"
     docker_blocked_registries: "{{ lookup('oo_option', 'docker_blocked_registries') | oo_split }}"
+    openshift_deployment_type: "{{ deployment_type }}"
   roles:
   - openshift_facts
   - openshift_docker

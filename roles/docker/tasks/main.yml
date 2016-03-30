@@ -1,6 +1,12 @@
 ---
 # tasks file for docker
 
+- name: Set docker facts
+  openshift_facts:
+    role: common
+    local_facts:
+      deployment_type: "{{ openshift_deployment_type }}"
+
 # Avoid docker 1.9 when installing origin < 1.2 or OSE < 3.2 on RHEL/Centos and
 # See: https://bugzilla.redhat.com/show_bug.cgi?id=1304038
 - name: Default to latest docker
