@@ -137,9 +137,11 @@ networkConfig:
 # serviceNetworkCIDR must match kubernetesMasterConfig.servicesSubnet
   serviceNetworkCIDR: {{ openshift.master.portal_net }}
 oauthConfig:
-{% if 'oauth_template' in openshift.master %}
-  templates:
-    login: {{ openshift.master.oauth_template }}
+{% if 'oauth_always_show_provider_selection' in openshift.master %}
+  alwaysShowProviderSelection: {{ openshift.master.oauth_always_show_provider_selection }}
+{% endif %}
+{% if 'oauth_templates' in openshift.master %}
+  templates:{{ openshift.master.oauth_templates | to_padded_yaml(level=2) }}
 {% endif %}
   assetPublicURL: {{ openshift.master.public_console_url }}/
   grantConfig:

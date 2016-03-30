@@ -69,3 +69,6 @@
       admission_plugin_config: "{{openshift_master_admission_plugin_config | default(None) }}"
       kube_admission_plugin_order: "{{openshift_master_kube_admission_plugin_order | default(None) }}"
       kube_admission_plugin_config: "{{openshift_master_kube_admission_plugin_config | default(None) }}"
+      oauth_template: "{{ openshift_master_oauth_template | default(None) }}" # deprecated in origin 1.2 / OSE 3.2
+      oauth_templates: "{{ openshift_master_oauth_templates | default(None) }}"
+      oauth_always_show_provider_selection: "{{ openshift_master_oauth_always_show_provider_selection | default(None) }}"
