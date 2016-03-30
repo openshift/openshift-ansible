@@ -32,7 +32,7 @@
   changed_when: no
   register: check_if_registered
 
-- name: Set registration fact
+- name: Set registration fact if system is already registered
   set_fact:
     registered: true
   when: check_if_registered.rc == 0
@@ -44,17 +44,21 @@
     - rhsm_authentication is defined
 
 - name: Install Satellite certificate
-  command: "rpm -Uvh --force http://{{ rhsm_server }}/pub/katello-ca-consumer-latest.noarch.rpm"
+  command: "rpm -Uvh --force http://{{ rhsm_satellite }}/pub/katello-ca-consumer-latest.noarch.rpm"
   when:
     - not registered
-    - rhsm_method == 'satellite'
+    - rhsm_satellite is defined
+    - rhsm_satellite is not none
+    - rhsm_satellite|trim != ''
 
 - name: Register to Satellite using activation key
   command: "/usr/bin/subscription-manager register --activationkey={{ rhsm_activationkey }} --org={{ rhsm_org }}"
   when:
     - not registered
     - rhsm_authentication == 'key'
-    - rhsm_method == 'satellite'
+    - rhsm_satellite is defined
+    - rhsm_satellite is not none
+    - rhsm_satellite|trim != ''
 
 # This can apply to either Hosted or Satellite
 - name: Register using username and password
@@ -80,14 +84,18 @@
   command: "/usr/bin/subscription-manager repos --disable=*"
   when:
     - not registered
-    - not rhsm_authentication == "key"
+    - rhsm_repos is defined
+    - rhsm_repos is not none
+    - rhsm_repos|trim != ''
 
 - name: Enable specified repositories
   command: "/usr/bin/subscription-manager repos --enable={{ item }}"
   with_items: rhsm_repos
   when:
     - not registered
-    - not rhsm_authentication == "key"
+    - rhsm_repos is defined
+    - rhsm_repos is not none
+    - rhsm_repos|trim != ''
 
 - name: Cleaning yum repositories
   command: "yum clean all"
