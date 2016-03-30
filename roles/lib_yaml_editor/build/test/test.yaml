@@ -1,0 +1,15 @@
+#!/usr/bin/ansible-playbook
+---
+- hosts: localhost
+  gather_facts: no
+  tasks:
+  - yedit:
+      src: /home/kwoodson/git/openshift-ansible/roles/lib_yaml_editor/build/test/foo.yml
+      key: foo
+      value: barplus
+      state: present
+    register: output
+
+  - debug:
+      msg: "{{ output }}"
+

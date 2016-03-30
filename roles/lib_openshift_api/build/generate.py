@@ -1,0 +1,53 @@
+#!/usr/bin/env python
+'''
+  Generate the openshift-ansible/roles/lib_openshift_cli/library/ modules.
+'''
+
+import os
+
+# pylint: disable=anomalous-backslash-in-string
+GEN_STR = "#!usr/bin/env python\n"                                   + \
+          "#     ___ ___ _  _ ___ ___    _ _____ ___ ___\n"          + \
+          "#    / __| __| \| | __| _ \  /_\_   _| __|   \\\n"        + \
+          "#   | (_ | _|| .` | _||   / / _ \| | | _|| |) |\n"        + \
+          "#    \___|___|_|\_|___|_|_\/_/_\_\_|_|___|___/_ _____\n"  + \
+          "#   |   \ / _ \  | \| |/ _ \_   _| | __|   \_ _|_   _|\n" + \
+          "#   | |) | (_) | | .` | (_) || |   | _|| |) | |  | |\n"   + \
+          "#   |___/ \___/  |_|\_|\___/ |_|   |___|___/___| |_|\n"
+
+
+
+FILES = {'oc_obj.py': ['src/base.py',
+                       '../../lib_yaml_editor/build/src/yedit.py',
+                       'src/obj.py',
+                       'ansible/obj.py',
+                      ],
+         'oc_secret.py': ['src/base.py',
+                          '../../lib_yaml_editor/build/src/yedit.py',
+                          'src/secret.py',
+                          'ansible/secret.py',
+                         ],
+        }
+
+
+def main():
+    ''' combine the necessary files to create the ansible module '''
+    openshift_ansible = ('../library/')
+    for fname, parts in FILES.items():
+        with open(os.path.join(openshift_ansible, fname), 'w') as afd:
+            afd.seek(0)
+            afd.write(GEN_STR)
+            for fpart in parts:
+                with open(fpart) as pfd:
+                    # first line is pylint disable so skip it
+                    for idx, line in enumerate(pfd):
+                        if idx == 0 and 'skip-file' in line:
+                            continue
+
+                        afd.write(line)
+
+
+if __name__ == '__main__':
+    main()
+
+
