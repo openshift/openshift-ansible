@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.67
+Version:        3.0.68
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -279,6 +279,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Mar 30 2016 Troy Dawson <tdawson@redhat.com> 3.0.68-1
+- Moving generation of ansible module side by side with module.
+  (kwoodson@redhat.com)
+- Bug 1322338 - The upgrade should keep the option insecure-
+  registry=172.30.0.0/16 (bleanhar@redhat.com)
+
 * Tue Mar 29 2016 Troy Dawson <tdawson@redhat.com> 3.0.67-1
 - The systemd unit for atomic-openshift-master wasn't not being created
   (bleanhar@redhat.com)
