@@ -1,14 +1,14 @@
 apiVersion: v1
 kind: DeploymentConfig
 metadata:
-  creationTimestamp: 2016-03-18T19:47:45Z
+  creationTimestamp: 2016-04-01T15:23:29Z
   labels:
     router: router
   name: router
   namespace: default
-  resourceVersion: "84016"
+  resourceVersion: "1338477"
   selfLink: /oapi/v1/namespaces/default/deploymentconfigs/router
-  uid: 48f8b9d9-ed42-11e5-9903-0a9a9d4e7f2b
+  uid: b00c7eba-f81d-11e5-809b-0a581f893e3f
 spec:
   replicas: 2
   selector:
@@ -117,5 +117,4 @@ status:
   details:
     causes:
     - type: ConfigChange
-  latestVersion: 1
-
+  latestVersion: 12

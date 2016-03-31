@@ -24,7 +24,7 @@ def main():
 
     yamlfile = Yedit(module.params['src'], module.params['content'])
 
-    rval = yamlfile.get()
+    rval = yamlfile.load()
     if not rval and state != 'present':
         module.fail_json(msg='Error opening file [%s].  Verify that the' + \
                              ' file exists, that it is has correct permissions, and is valid yaml.')
@@ -51,7 +51,7 @@ def main():
             rval = yamlfile.create(module.params['key'], value)
         else:
             yamlfile.write()
-            rval = yamlfile.get()
+            rval = yamlfile.load()
         module.exit_json(changed=rval[0], results=rval[1], state="present")
 
     module.exit_json(failed=True,
