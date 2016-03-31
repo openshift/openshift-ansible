@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.68
+Version:        3.0.69
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -279,6 +279,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Mar 31 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.69-1
+- Bug 1320829 - Ensure docker installed for facts (jdetiber@redhat.com)
+- Bug 1322788 - The IMAGE_VERSION wasn't added to atomic-openshift-master-api
+  and atomic-openshift-master-controllers (bleanhar@redhat.com)
+- Fixed generate header. (kwoodson@redhat.com)
+- Bug 1322335 - The package name is wrong for rpm upgrade (bleanhar@redhat.com)
+- Add AWS cloud provider support. (abutcher@redhat.com)
+
 * Wed Mar 30 2016 Troy Dawson <tdawson@redhat.com> 3.0.68-1
 - Moving generation of ansible module side by side with module.
   (kwoodson@redhat.com)
