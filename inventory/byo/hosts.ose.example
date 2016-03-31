@@ -79,6 +79,9 @@ deployment_type=openshift-enterprise
 # openshift_docker_additional_registries instead
 #oreg_url=example.com/openshift3/ose-${component}:${version}
 
+# Allow OpenShift to use pods that are tagged "latest" when there is no exact version match
+#openshift_imageconfig_latest=true
+
 # Additional yum repos to install
 #openshift_additional_repos=[{'id': 'ose-devel', 'name': 'ose-devel', 'baseurl': 'http://example.com/puddle/build/AtomicOpenShift/3.1/latest/RH7-RHOSE-3.0/$basearch/os', 'enabled': 1, 'gpgcheck': 0}]
 

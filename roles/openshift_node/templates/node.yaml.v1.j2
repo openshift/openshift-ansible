@@ -9,7 +9,7 @@ dockerConfig:
 iptablesSyncPeriod: "{{ openshift.node.iptables_sync_period }}"
 imageConfig:
   format: {{ openshift.node.registry_url }}
-  latest: false
+  latest: {{ openshift.common.imageconfig_latest }}
 kind: NodeConfig
 kubeletArguments: {{ openshift.node.kubelet_args | default(None) | to_padded_yaml(level=1) }}
 masterKubeConfig: system:node:{{ openshift.common.hostname }}.kubeconfig
