@@ -70,6 +70,11 @@
       state: started
       enabled: yes
     when: openshift.master.ha is defined and openshift.master.ha | bool and openshift.common.is_containerized | bool
+  post_tasks:
+  - openshift_facts:
+      role: master
+      local_facts:
+        ha: "{{ groups.oo_masters_to_config | length > 1 }}"
 
 - name: Verify upgrade can proceed
   hosts: oo_nodes_to_config
