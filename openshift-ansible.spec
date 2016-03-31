@@ -6,7 +6,7 @@
 
 Name:           openshift-ansible
 Version:        3.0.47
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -261,6 +261,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Mar 31 2016 Scott Dodson <sdodson@redhat.com> 3.0.47-5
+- Remove deferred deletion when downgrading from 1.9 to 1.8
+  (sdodson@redhat.com)
+- Ensure that repos are installed before calling docker role on nodes
+  (sdodson@redhat.com)
+
 * Wed Mar 30 2016 Scott Dodson <sdodson@redhat.com> 3.0.47-4
 - Ensure that deployment_type is set properly (sdodson@redhat.com)
 
