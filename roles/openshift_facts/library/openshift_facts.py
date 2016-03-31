@@ -1434,24 +1434,24 @@ class OpenShiftFacts(object):
         if 'docker' in roles:
             defaults['docker'] = dict(disable_push_dockerhub=False)
 
-        defaults['hosted'] = dict(
-            registry=dict(
-                storage=dict(
-                    kind=None,
-                    volume=dict(
-                        name='registry',
-                        size='5Gi'
-                    ),
-                    nfs=dict(
-                        directory='/exports',
-                        options='*(rw,root_squash)'),
-                    host=None,
-                    access_modes=['ReadWriteMany'],
-                    create_pv=True
+        if 'hosted' in roles:
+            defaults['hosted'] = dict(
+                registry=dict(
+                    storage=dict(
+                        kind=None,
+                        volume=dict(
+                            name='registry',
+                            size='5Gi'
+                        ),
+                        nfs=dict(
+                            directory='/exports',
+                            options='*(rw,root_squash)'),
+                        host=None,
+                        access_modes=['ReadWriteMany'],
+                        create_pv=True
+                    )
                 )
             )
-        )
-
 
         return defaults
 
@@ -1567,7 +1567,8 @@ class OpenShiftFacts(object):
                     continue
                 for key in keys:
                     if key == keys[-1]:
-                        current_level[key] = value
+                        if value is not None and value != "":
+                            current_level[key] = value
                     elif key not in current_level:
                         current_level[key] = dict()
                         current_level = current_level[key]

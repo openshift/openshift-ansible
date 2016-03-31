@@ -37,7 +37,7 @@
   vars:
     attach_registry_volume: "{{ openshift.hosted.registry.storage.kind != None }}"
     deploy_infra: "{{ openshift.master.infra_nodes | default([]) | length > 0 }}"
-    persistent_volumes: "{{ hostvars[groups.oo_first_master.0] | oo_persistent_volumes(groups) }}"
+    persistent_volumes: "{{ hostvars[groups.oo_first_master.0] | oo_persistent_volumes }}"
     persistent_volume_claims: "{{ hostvars[groups.oo_first_master.0] | oo_persistent_volume_claims }}"
   roles:
   - role: openshift_persistent_volumes

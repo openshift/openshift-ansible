@@ -575,14 +575,12 @@ class FilterModule(object):
 
     @staticmethod
     # pylint: disable=too-many-branches
-    def oo_persistent_volumes(hostvars, groups, persistent_volumes=None):
+    def oo_persistent_volumes(hostvars, persistent_volumes=None):
         """ Generate list of persistent volumes based on oo_openshift_env
             storage options set in host variables.
         """
         if not issubclass(type(hostvars), dict):
             raise errors.AnsibleFilterError("|failed expects hostvars is a dict")
-        if not issubclass(type(groups), dict):
-            raise errors.AnsibleFilterError("|failed expects groups is a dict")
         if persistent_volumes != None and not issubclass(type(persistent_volumes), list):
             raise errors.AnsibleFilterError("|failed expects persistent_volumes is a list")
 
@@ -595,10 +593,7 @@ class FilterModule(object):
                 if kind == 'nfs':
                     host = hostvars['openshift']['hosted'][component]['storage']['host']
                     if host == None:
-                        if len(groups['oo_nfs_to_config']) > 0:
-                            host = groups['oo_nfs_to_config'][0]
-                        else:
-                            raise errors.AnsibleFilterError("|failed no storage host detected")
+                        raise errors.AnsibleFilterError("|failed no storage host detected")
                     directory = hostvars['openshift']['hosted'][component]['storage']['nfs']['directory']
                     volume = hostvars['openshift']['hosted'][component]['storage']['volume']['name']
                     path = directory + '/' + volume

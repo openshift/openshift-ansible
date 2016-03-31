@@ -22,12 +22,6 @@ From this role:
 | openshift_hosted_registry_storage_nfs_options   | *(rw,root_squash)     | NFS options for configured exports.                         |
 
 
-From openshift_common:
-| Name                          | Default Value  |                                        |
-|-------------------------------|----------------|----------------------------------------|
-| openshift_debug_level         | 2              | Global openshift debug log verbosity   |
-
-
 Dependencies
 ------------
 
