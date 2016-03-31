@@ -1,0 +1,2 @@
+---
+base_docker_image: "{{ 'centos:centos7' if openshift.common.deployment_type == 'origin' else 'rhel7' }}"
