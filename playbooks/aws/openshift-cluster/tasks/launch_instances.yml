@@ -136,8 +136,7 @@
       Name: "{{ item.0 }}"
 
 - set_fact:
-    instance_groups: "tag_created-by_{{ created_by }}, tag_clusterid_{{ cluster }}, tag_environment_{{ cluster_env }},
-                    tag_host-type_{{ host_type }}, tag_sub-host-type_{{ sub_host_type }}"
+    instance_groups: "tag_created-by_{{ created_by }}, tag_clusterid_{{ cluster }}, tag_environment_{{ cluster_env }}, tag_host-type_{{ host_type }}, tag_sub-host-type_{{ sub_host_type }}"
 
 - set_fact:
     node_label:
@@ -179,6 +178,8 @@
     ec2_ip_address: "{{ item.1.public_ip }}"
     openshift_node_labels: "{{ node_label }}"
     logrotate_scripts: "{{ logrotate }}"
+    ec2_tag_host-type: "{{ host_type }}"
+    ec2_tag_sub-host-type: "{{ sub_host_type }}"
   with_together:
   - instances
   - ec2.instances
