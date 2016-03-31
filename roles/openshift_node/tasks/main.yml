@@ -98,11 +98,20 @@
   retries: 120
   delay: 1
   changed_when: false
-  when: openshift.common.is_containerized | bool
 
 - name: Start and enable node
   service: name={{ openshift.common.service_type }}-node enabled=yes state=started
   register: node_start_result
-
+  failed_when: false
+  
+- name: Sleep 10 seconds when starting the node failed
+  pause: secs=10
+  when: node_start_result.state != 'started'
+  
+- name: Try starting the node again
+  service: name={{ openshift.common.service_type }}-node enabled=yes state=started
+  register: node_start_result
+  when: node_start_result.state != 'started'
+  
 - set_fact:
     node_service_status_changed: "{{ node_start_result | changed }}"
