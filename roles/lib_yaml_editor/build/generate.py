@@ -6,7 +6,7 @@
 import os
 
 # pylint: disable=anomalous-backslash-in-string
-GEN_STR = "#!usr/bin/env python\n"                                   + \
+GEN_STR = "#!/usr/bin/env python\n"                                  + \
           "#     ___ ___ _  _ ___ ___    _ _____ ___ ___\n"          + \
           "#    / __| __| \| | __| _ \  /_\_   _| __|   \\\n"        + \
           "#   | (_ | _|| .` | _||   / / _ \| | | _|| |) |\n"        + \
