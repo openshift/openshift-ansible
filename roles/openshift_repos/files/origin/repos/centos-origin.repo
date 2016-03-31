@@ -1,0 +1,5 @@
+[centos-openshift-origin]
+name=CentOS OpenShift Origin
+baseurl=http://mirror.centos.org/centos/7/paas/x86_64/openshift-origin/
+enabled=1
+gpgcheck=1
