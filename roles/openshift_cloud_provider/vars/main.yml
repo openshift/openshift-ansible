@@ -1,0 +1,4 @@
+---
+has_cloudprovider: "{{ 'cloudprovider' in openshift and 'kind' in openshift.cloudprovider and openshift.cloudprovider.kind != None }}"
+cloudprovider_is_aws: "{{ has_cloudprovider | bool and openshift.cloudprovider.kind == 'aws' }}"
+cloudprovider_is_openstack: "{{ has_cloudprovider | bool and openshift.cloudprovider.kind == 'openstack' }}"

@@ -1,0 +1,17 @@
+[Global]
+auth-url = {{ openshift.cloudprovider.openstack.auth_url }}
+username = {{ openshift.cloudprovider.openstack.username }}
+password = {{ openshift.cloudprovider.openstack.password }}
+{% if 'tenant_id' in openshift.cloudprovider.openstack %}
+tenant-id = {{ openshift.cloudprovider.openstack.tenant_id }}
+{% else %}
+tenant-name = {{ openshift.cloudprovider.openstack.tenant_name }}
+{% endif %}
+{% if 'region' in openshift.cloudprovider.openstack %}
+region = {{ openshift.cloudprovider.openstack.region }}
+{% endif %}
+{% if 'lb_subnet_id' in openshift.cloudprovider.openstack %}
++
++[LoadBalancer]
++subnet-id = {{ openshift.cloudprovider.openstack.lb_subnet_id }}
++{% endif %}

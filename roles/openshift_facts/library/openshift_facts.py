@@ -332,14 +332,10 @@ def normalize_provider_facts(provider, metadata):
 
     facts = dict(name=provider, metadata=metadata,
                  network=dict(interfaces=[], ipv6_enabled=False))
-    if os.path.exists('/etc/cloud.conf'):
-        for arg in ('api_server_args', 'controller_args', 'kubelet_args'):
-            facts[arg] = {'cloud-provider': [provider],
-                          'cloud-config': ['/etc/cloud.conf']}
 
     if provider == 'gce':
         facts = normalize_gce_facts(metadata, facts)
-    elif provider == 'ec2':
+    elif provider == 'aws':
         facts = normalize_aws_facts(metadata, facts)
     elif provider == 'openstack':
         facts = normalize_openstack_facts(metadata, facts)
@@ -918,6 +914,57 @@ def get_current_config(facts):
 
     return current_config
 
+def build_kubelet_args(facts):
+    """ Build node kubelet_args """
+    cloud_cfg_path = os.path.join(facts['common']['config_base'],
+                                  'cloudprovider')
+    if 'node' in facts:
+        kubelet_args = {}
+        if 'cloudprovider' in facts:
+            if facts['cloudprovider']['kind'] == 'aws':
+                kubelet_args['cloud-provider'] = ['aws']
+                kubelet_args['cloud-config'] = [cloud_cfg_path + '/aws.conf']
+            if facts['cloudprovider']['kind'] == 'openstack':
+                kubelet_args['cloud-provider'] = ['openstack']
+                kubelet_args['cloud-config'] = [cloud_cfg_path + '/openstack.conf']
+        if kubelet_args != {}:
+            facts = merge_facts({'node': {'kubelet_args': kubelet_args}}, facts, [], [])
+    return facts
+
+def build_controller_args(facts):
+    """ Build master controller_args """
+    cloud_cfg_path = os.path.join(facts['common']['config_base'],
+                                  'cloudprovider')
+    if 'master' in facts:
+        controller_args = {}
+        if 'cloudprovider' in facts:
+            if facts['cloudprovider']['kind'] == 'aws':
+                controller_args['cloud-provider'] = ['aws']
+                controller_args['cloud-config'] = [cloud_cfg_path + '/aws.conf']
+            if facts['cloudprovider']['kind'] == 'openstack':
+                controller_args['cloud-provider'] = ['openstack']
+                controller_args['cloud-config'] = [cloud_cfg_path + '/openstack.conf']
+        if controller_args != {}:
+            facts = merge_facts({'master': {'controller_args': controller_args}}, facts, [], [])
+    return facts
+
+def build_api_server_args(facts):
+    """ Build master api_server_args """
+    cloud_cfg_path = os.path.join(facts['common']['config_base'],
+                                  'cloudprovider')
+    if 'master' in facts:
+        api_server_args = {}
+        if 'cloudprovider' in facts:
+            if facts['cloudprovider']['kind'] == 'aws':
+                api_server_args['cloud-provider'] = ['aws']
+                api_server_args['cloud-config'] = [cloud_cfg_path + '/aws.conf']
+            if facts['cloudprovider']['kind'] == 'openstack':
+                api_server_args['cloud-provider'] = ['openstack']
+                api_server_args['cloud-config'] = [cloud_cfg_path + '/openstack.conf']
+        if api_server_args != {}:
+            facts = merge_facts({'master': {'api_server_args': api_server_args}}, facts, [], [])
+    return facts
+
 def get_openshift_version(facts, cli_image=None):
     """ Get current version of openshift on the host
 
@@ -1083,31 +1130,6 @@ def merge_facts(orig, new, additive_facts_to_overwrite, protected_facts_to_overw
     for key in new_keys:
         facts[key] = copy.deepcopy(new[key])
     return facts
-
-
-def merge_provider_facts(facts):
-    """ Recursively merge provider facts dicts
-
-        Args:
-            facts (dict): existing facts
-        Returns:
-            dict: the facts dict updated with the provider config
-    """
-    if 'provider' not in facts:
-        return facts
-    if 'master' in facts:
-        for arg in ('api_server_args', 'controller_args'):
-            facts['master'][arg] = merge_facts(
-                facts['provider'].get(arg, {}),
-                facts['master'].get(arg, {}),
-                [], [])
-    if 'node' in facts:
-        facts['node']['kubelet_args'] = merge_facts(
-            facts['provider'].get('kubelet_args', {}),
-            facts['node'].get('kubelet_args', {}),
-            [], [])
-    return facts
-
 
 def save_local_facts(filename, facts):
     """ Save local facts
@@ -1302,13 +1324,20 @@ class OpenShiftFacts(object):
         Raises:
             OpenShiftFactsUnsupportedRoleError:
     """
-    known_roles = ['common', 'master', 'node', 'etcd', 'hosted', 'docker']
+    known_roles = ['cloudprovider',
+                   'common',
+                   'docker',
+                   'etcd',
+                   'hosted',
+                   'master',
+                   'node']
 
     # Disabling too-many-arguments, this should be cleaned up as a TODO item.
     # pylint: disable=too-many-arguments
     def __init__(self, role, filename, local_facts,
                  additive_facts_to_overwrite=None,
                  openshift_env=None,
+                 openshift_env_structures=None,
                  protected_facts_to_overwrite=None):
         self.changed = False
         self.filename = filename
@@ -1321,12 +1350,14 @@ class OpenShiftFacts(object):
         self.facts = self.generate_facts(local_facts,
                                          additive_facts_to_overwrite,
                                          openshift_env,
+                                         openshift_env_structures,
                                          protected_facts_to_overwrite)
 
     def generate_facts(self,
                        local_facts,
                        additive_facts_to_overwrite,
                        openshift_env,
+                       openshift_env_structures,
                        protected_facts_to_overwrite):
         """ Generate facts
 
@@ -1343,6 +1374,7 @@ class OpenShiftFacts(object):
         local_facts = self.init_local_facts(local_facts,
                                             additive_facts_to_overwrite,
                                             openshift_env,
+                                            openshift_env_structures,
                                             protected_facts_to_overwrite)
         roles = local_facts.keys()
 
@@ -1359,7 +1391,6 @@ class OpenShiftFacts(object):
                             local_facts,
                             additive_facts_to_overwrite,
                             protected_facts_to_overwrite)
-        facts = merge_provider_facts(facts)
         facts['current_config'] = get_current_config(facts)
         facts = set_url_facts_if_unset(facts)
         facts = set_project_cfg_facts_if_unset(facts)
@@ -1372,6 +1403,9 @@ class OpenShiftFacts(object):
         facts = set_sdn_facts_if_unset(facts, self.system_facts)
         facts = set_deployment_facts_if_unset(facts)
         facts = set_container_facts_if_unset(facts)
+        facts = build_kubelet_args(facts)
+        facts = build_controller_args(facts)
+        facts = build_api_server_args(facts)
         facts = set_version_facts_if_unset(facts)
         facts = set_manageiq_facts_if_unset(facts)
         facts = set_aggregate_facts(facts)
@@ -1434,6 +1468,9 @@ class OpenShiftFacts(object):
         if 'docker' in roles:
             defaults['docker'] = dict(disable_push_dockerhub=False)
 
+        if 'cloudprovider' in roles:
+            defaults['cloudprovider'] = dict(kind=None)
+
         defaults['hosted'] = dict(
             registry=dict(
                 storage=dict(
@@ -1451,7 +1488,6 @@ class OpenShiftFacts(object):
                 )
             )
         )
-
 
         return defaults
 
@@ -1488,7 +1524,7 @@ class OpenShiftFacts(object):
                 metadata['instance'].pop('serviceAccounts', None)
         elif (virt_type == 'xen' and virt_role == 'guest'
               and re.match(r'.*\.amazon$', product_version)):
-            provider = 'ec2'
+            provider = 'aws'
             metadata_url = 'http://169.254.169.254/latest/meta-data/'
             metadata = get_provider_metadata(metadata_url)
         elif re.search(r'OpenStack', product_name):
@@ -1530,11 +1566,53 @@ class OpenShiftFacts(object):
         )
         return provider_facts
 
-    # Disabling too-many-branches. This should be cleaned up as a TODO item.
-    #pylint: disable=too-many-branches
+    @staticmethod
+    def split_openshift_env_fact_keys(openshift_env_fact, openshift_env_structures):
+        """ Split openshift_env facts based on openshift_env structures.
+
+            Args:
+                openshift_env_fact (string): the openshift_env fact to split
+                                             ex: 'openshift_cloudprovider_openstack_auth_url'
+                openshift_env_structures (list): a list of structures to determine fact keys
+                                                 ex: ['openshift.cloudprovider.openstack.*']
+            Returns:
+                list: a list of keys that represent the fact
+                      ex: ['openshift', 'cloudprovider', 'openstack', 'auth_url']
+        """
+        # By default, we'll split an openshift_env fact by underscores.
+        fact_keys = openshift_env_fact.split('_')
+
+        # Determine if any of the provided variable structures match the fact.
+        matching_structure = None
+        if openshift_env_structures != None:
+            for structure in openshift_env_structures:
+                if re.match(structure, openshift_env_fact):
+                    matching_structure = structure
+        # Fact didn't match any variable structures so return the default fact keys.
+        if matching_structure is None:
+            return fact_keys
+
+        final_keys = []
+        structure_keys = matching_structure.split('.')
+        for structure_key in structure_keys:
+            # Matched current key. Add to final keys.
+            if structure_key == fact_keys[structure_keys.index(structure_key)]:
+                final_keys.append(structure_key)
+            # Wildcard means we will be taking everything from here to the end of the fact.
+            elif structure_key == '*':
+                final_keys.append('_'.join(fact_keys[structure_keys.index(structure_key):]))
+            # Shouldn't have gotten here, return the fact keys.
+            else:
+                return fact_keys
+        return final_keys
+
+    # Disabling too-many-branches and too-many-locals.
+    # This should be cleaned up as a TODO item.
+    #pylint: disable=too-many-branches, too-many-locals
     def init_local_facts(self, facts=None,
                          additive_facts_to_overwrite=None,
                          openshift_env=None,
+                         openshift_env_structures=None,
                          protected_facts_to_overwrite=None):
         """ Initialize the local facts
 
@@ -1562,8 +1640,8 @@ class OpenShiftFacts(object):
             for fact, value in openshift_env.iteritems():
                 oo_env_facts = dict()
                 current_level = oo_env_facts
-                keys = fact.split('_')[1:]
-                if keys[0] != self.role:
+                keys = self.split_openshift_env_fact_keys(fact, openshift_env_structures)[1:]
+                if len(keys) > 0 and keys[0] != self.role:
                     continue
                 for key in keys:
                     if key == keys[-1]:
@@ -1691,6 +1769,7 @@ def main():
             local_facts=dict(default=None, type='dict', required=False),
             additive_facts_to_overwrite=dict(default=[], type='list', required=False),
             openshift_env=dict(default={}, type='dict', required=False),
+            openshift_env_structures=dict(default=[], type='list', required=False),
             protected_facts_to_overwrite=dict(default=[], type='list', required=False),
         ),
         supports_check_mode=True,
@@ -1701,6 +1780,7 @@ def main():
     local_facts = module.params['local_facts']
     additive_facts_to_overwrite = module.params['additive_facts_to_overwrite']
     openshift_env = module.params['openshift_env']
+    openshift_env_structures = module.params['openshift_env_structures']
     protected_facts_to_overwrite = module.params['protected_facts_to_overwrite']
 
     fact_file = '/etc/ansible/facts.d/openshift.fact'
@@ -1710,6 +1790,7 @@ def main():
                                      local_facts,
                                      additive_facts_to_overwrite,
                                      openshift_env,
+                                     openshift_env_structures,
                                      protected_facts_to_overwrite)
 
     file_params = module.params.copy()

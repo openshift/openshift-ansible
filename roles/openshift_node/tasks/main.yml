@@ -81,6 +81,21 @@
   notify:
   - restart node
 
+- name: Configure AWS Cloud Provider Settings
+  lineinfile:
+    dest: /etc/sysconfig/{{ openshift.common.service_type }}-node
+    regexp: "{{ item.regex }}"
+    line: "{{ item.line }}"
+    create: true
+  with_items:
+    - regex: '^AWS_ACCESS_KEY_ID='
+      line: "AWS_ACCESS_KEY_ID={{ openshift.cloudprovider.aws.access_key }}"
+    - regex: '^AWS_SECRET_ACCESS_KEY='
+      line: "AWS_SECRET_ACCESS_KEY={{ openshift.cloudprovider.aws.secret_key }}"
+  when: "'cloudprovider' in openshift and 'aws' in openshift.cloudprovider and openshift.cloudprovider.kind == 'aws' and 'access_key' in openshift.cloudprovider.aws and 'secret_key' in openshift.cloudprovider.aws"
+  notify:
+  - restart node
+
 - name: Additional storage plugin configuration
   include: storage_plugins/main.yml
 
