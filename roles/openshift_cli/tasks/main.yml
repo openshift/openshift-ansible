@@ -1,10 +1,4 @@
 ---
-# TODO: move this to a new 'cli' role
-- openshift_facts:
-    role: common
-    local_facts:
-      cli_image: "{{ osm_image | default(None) }}"
-
 - name: Install clients
   action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-clients state=present"
   when: not openshift.common.is_containerized | bool

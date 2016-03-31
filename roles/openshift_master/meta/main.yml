@@ -14,3 +14,4 @@ galaxy_info:
 dependencies:
 - role: openshift_cli
 - role: openshift_cloud_provider
+- role: openshift_master_facts
