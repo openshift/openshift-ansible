@@ -666,7 +666,7 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force, verbose):
                     openshift_ansible.set_config(oo_cfg)
                     click.echo('Gathering information from hosts...')
                     callback_facts, error = openshift_ansible.default_facts(oo_cfg.hosts, verbose)
-                    if error:
+                    if error or callback_facts is None:
                         click.echo("There was a problem fetching the required information. See " \
                                    "{} for details.".format(oo_cfg.settings['ansible_log_path']))
                         sys.exit(1)
@@ -878,7 +878,7 @@ def install(ctx, force):
     click.echo('Gathering information from hosts...')
     callback_facts, error = openshift_ansible.default_facts(oo_cfg.hosts,
         verbose)
-    if error:
+    if error or callback_facts is None:
         click.echo("There was a problem fetching the required information. " \
                    "Please see {} for details.".format(oo_cfg.settings['ansible_log_path']))
         sys.exit(1)
