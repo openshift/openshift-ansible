@@ -780,10 +780,27 @@ def uninstall(ctx):
 
 
 @click.command()
+@click.option('--latest-minor', '-l', is_flag=True, default=False)
+@click.option('--next-major', '-n', is_flag=True, default=False)
 @click.pass_context
-def upgrade(ctx):
+def upgrade(ctx, latest_minor, next_major):
     oo_cfg = ctx.obj['oo_cfg']
     verbose = ctx.obj['verbose']
+
+    upgrade_mappings = {
+                        '3.0':{
+                               'minor_version' :'3.0',
+                               'minor_playbook':'v3_0_minor/upgrade.yml',
+                               'major_version' :'3.1',
+                               'major_playbook':'v3_0_to_v3_1/upgrade.yml',
+                              },
+                        '3.1':{
+                               'minor_version' :'3.1',
+                               'minor_playbook':'v3_1_minor/upgrade.yml',
+                               'major_playbook':'v3_1_to_v3_2/upgrade.yml',
+                               'major_version' :'3.2',
+                            }
+                       }
 
     if len(oo_cfg.hosts) == 0:
         click.echo("No hosts defined in: %s" % oo_cfg.config_path)
@@ -791,31 +808,39 @@ def upgrade(ctx):
 
     old_variant = oo_cfg.settings['variant']
     old_version = oo_cfg.settings['variant_version']
-
+    mapping = upgrade_mappings.get(old_version)
 
     message = """
         This tool will help you upgrade your existing OpenShift installation.
 """
     click.echo(message)
-    click.echo("Version {} found. Do you want to update to the latest version of {} " \
-               "or migrate to the next major release?".format(old_version, old_version))
-    resp = click.prompt("(1) Update to latest {} (2) Migrate to next relese".format(old_version))
 
-    if resp == "2":
-        # TODO: Make this a lot more flexible
-        new_version = "3.1"
+    if not (latest_minor or next_major):
+        click.echo("Version {} found. Do you want to update to the latest version of {} " \
+                   "or migrate to the next major release?".format(old_version, old_version))
+        response = click.prompt("(1) Update to latest {} " \
+                                "(2) Migrate to next release".format(old_version),
+                                type=click.Choice(['1', '2']),)
+        if response == "1":
+            latest_minor = True
+        if response == "2":
+            next_major = True
+
+    if next_major:
+        playbook = mapping['major_playbook']
+        new_version = mapping['major_version']
         # Update config to reflect the version we're targetting, we'll write
         # to disk once ansible completes successfully, not before.
+        oo_cfg.settings['variant_version'] = new_version
         if oo_cfg.settings['variant'] == 'enterprise':
             oo_cfg.settings['variant'] = 'openshift-enterprise'
-        version = find_variant(oo_cfg.settings['variant'])[1]
-        oo_cfg.settings['variant_version'] = version.name
-    else:
-        new_version = old_version
+
+    if latest_minor:
+        playbook = mapping['minor_playbook']
+        new_version = mapping['minor_version']
 
     click.echo("Openshift will be upgraded from %s %s to %s %s on the following hosts:\n" % (
-        old_variant, old_version, oo_cfg.settings['variant'],
-        oo_cfg.settings['variant_version']))
+        old_variant, old_version, oo_cfg.settings['variant'], new_version))
     for host in oo_cfg.hosts:
         click.echo("  * %s" % host.connect_to)
 
@@ -826,7 +851,7 @@ def upgrade(ctx):
             click.echo("Upgrade cancelled.")
             sys.exit(0)
 
-    retcode = openshift_ansible.run_upgrade_playbook(old_version, new_version, verbose)
+    retcode = openshift_ansible.run_upgrade_playbook(playbook, verbose)
     if retcode > 0:
         click.echo("Errors encountered during upgrade, please check %s." %
             oo_cfg.settings['ansible_log_path'])

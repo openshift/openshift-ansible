@@ -480,7 +480,7 @@ class UnattendedCliTests(OOCliFixture):
         self.assertEquals('openshift-enterprise', written_config['variant'])
         # We didn't specify a version so the latest should have been assumed,
         # and written to disk:
-        self.assertEquals('3.1', written_config['variant_version'])
+        self.assertEquals('3.2', written_config['variant_version'])
 
         # Make sure the correct value was passed to ansible:
         inventory = ConfigParser.ConfigParser(allow_no_value=True)
@@ -960,12 +960,13 @@ class AttendedCliTests(OOCliFixture):
         cli_input = build_input(hosts=[
             ('10.0.0.1', True, False)],
                                       ssh_user='root',
-                                      variant_num=2,
+                                      variant_num=3,
                                       confirm_facts='y')
         self.cli_args.append("install")
         result = self.runner.invoke(cli.cli, self.cli_args,
             input=cli_input)
         self.assert_result(result, 0)
+        print result.output
         self.assertTrue("NOTE: Add a total of 3 or more Masters to perform an HA installation."
             not in result.output)
 
