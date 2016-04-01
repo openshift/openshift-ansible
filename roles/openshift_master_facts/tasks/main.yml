@@ -63,3 +63,5 @@
       master_count: "{{ openshift_master_count | default(None) }}"
       controller_lease_ttl: "{{ osm_controller_lease_ttl | default(None) }}"
       master_image: "{{ osm_image | default(None) }}"
+      scheduler_predicates: "{{ openshift_master_scheduler_predicates | default(None) }}"
+      scheduler_priorities: "{{ openshift_master_scheduler_priorities | default(None) }}"

@@ -8,6 +8,12 @@ openshift_master_session_secrets_file: "{{ openshift_master_config_dir }}/sessio
 openshift_master_policy: "{{ openshift_master_config_dir }}/policy.json"
 openshift_version: "{{ openshift_pkg_version | default(openshift_image_tag) | default(openshift.common.image_tag) | default('') }}"
 
+scheduler_config:
+  kind: Policy
+  apiVersion: v1
+  predicates: "{{ openshift.master.scheduler_predicates }}"
+  priorities: "{{ openshift.master.scheduler_priorities }}"
+
 openshift_master_valid_grant_methods:
 - auto
 - prompt

@@ -65,9 +65,9 @@
   - restart master controllers
 
 - name: Create the scheduler config
-  template:
+  copy:
+    content: "{{ scheduler_config | to_nice_json }}"
     dest: "{{ openshift_master_scheduler_conf }}"
-    src: scheduler.json.j2
     backup: true
   notify:
   - restart master
