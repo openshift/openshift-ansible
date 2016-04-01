@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.69
+Version:        3.0.70
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -279,6 +279,15 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Apr 01 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.70-1
+- Enable Ansible ssh pipelining to speedup deployment (lhuard@amadeus.com)
+- Allow for overriding scheduler config (jdetiber@redhat.com)
+- a-o-i: Add 3.2 to list of supported versions (smunilla@redhat.com)
+- a-o-i: Support for unattended upgrades (smunilla@redhat.com)
+- a-o-i: More flexible upgrade mappings (smunilla@redhat.com)
+- a-o-i: OSE/AEP 3.2 product option (smunilla@redhat.com)
+- a-o-i: Error out early if callback_facts is None (smunilla@redhat.com)
+
 * Thu Mar 31 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.69-1
 - Bug 1320829 - Ensure docker installed for facts (jdetiber@redhat.com)
 - Bug 1322788 - The IMAGE_VERSION wasn't added to atomic-openshift-master-api
