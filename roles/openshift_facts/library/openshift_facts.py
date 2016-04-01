@@ -1743,6 +1743,11 @@ class OpenShiftFacts(object):
                         val = [x.strip() for x in val.split(',')]
                     new_local_facts['docker'][key] = list(set(val) - set(['']))
 
+        if 'master' in new_local_facts and 'image_policy_config' in new_local_facts['master']:
+                image_policy_config = new_local_facts['master']['image_policy_config']
+                if isinstance(image_policy_config, basestring):
+                    new_local_facts['master']['image_policy_config'] = yaml.safe_load(image_policy_config)
+
         for facts in new_local_facts.values():
             keys_to_delete = []
             if isinstance(facts, dict):
@@ -1793,6 +1798,12 @@ class OpenShiftFacts(object):
                 dict: Invalid facts
         """
         if 'master' in facts:
+            # openshift.master.image_policy_config
+            if 'image_policy_config' in facts['master']:
+                image_policy_config = facts['master']['image_policy_config']
+                if not isinstance(image_policy_config, dict):
+                    invalid_facts['image_policy_config'] = 'Expects image_policy_config is a dict.'
+
             # openshift.master.session_auth_secrets
             if 'session_auth_secrets' in facts['master']:
                 session_auth_secrets = facts['master']['session_auth_secrets']

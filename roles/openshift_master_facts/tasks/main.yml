@@ -65,3 +65,4 @@
       master_image: "{{ osm_image | default(None) }}"
       scheduler_predicates: "{{ openshift_master_scheduler_predicates | default(None) }}"
       scheduler_priorities: "{{ openshift_master_scheduler_priorities | default(None) }}"
+      image_policy_config: "{{ openshift_master_image_policy_config | default(None) }}"
