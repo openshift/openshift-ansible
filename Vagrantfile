@@ -62,9 +62,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
   host_names = hosts.values.flatten.uniq
 
-  config.hostmanager.enabled = true
-  config.hostmanager.manage_host = true
-  config.hostmanager.include_offline = true
   config.ssh.insert_key = false
 
   non_atomic_box = ''
