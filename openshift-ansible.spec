@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.70
+Version:        3.0.71
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -279,6 +279,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Apr 04 2016 Troy Dawson <tdawson@redhat.com> 3.0.71-1
+- Fixed oc_edit by requiring name and content (kwoodson@redhat.com)
+- add higher severity trigger if no heartbeat for 1 hour (jdiaz@redhat.com)
+- Yedit enhancements (kwoodson@redhat.com)
+
 * Fri Apr 01 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.70-1
 - Enable Ansible ssh pipelining to speedup deployment (lhuard@amadeus.com)
 - Allow for overriding scheduler config (jdetiber@redhat.com)
