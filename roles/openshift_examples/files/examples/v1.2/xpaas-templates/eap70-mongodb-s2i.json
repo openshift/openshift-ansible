@@ -42,7 +42,7 @@
         {
             "description": "Git branch/tag reference",
             "name": "SOURCE_REPOSITORY_REF",
-            "value": "1.2",
+            "value": "1.3",
             "required": false
         },
         {
@@ -360,7 +360,7 @@
                         "from": {
                             "kind": "ImageStreamTag",
                             "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                            "name": "jboss-eap70-openshift:1.2"
+                            "name": "jboss-eap70-openshift:1.3-Beta"
                         }
                     }
                 },
@@ -437,7 +437,7 @@
                         }
                     },
                     "spec": {
-                        "serviceAccount": "eap-service-account",
+                        "serviceAccountName": "eap7-service-account",
                         "terminationGracePeriodSeconds": 60,
                         "containers": [
                             {

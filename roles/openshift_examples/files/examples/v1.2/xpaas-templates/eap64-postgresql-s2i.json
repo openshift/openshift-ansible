@@ -425,7 +425,7 @@
                         }
                     },
                     "spec": {
-                        "serviceAccount": "eap-service-account",
+                        "serviceAccountName": "eap-service-account",
                         "terminationGracePeriodSeconds": 60,
                         "containers": [
                             {
