@@ -1,17 +1,15 @@
 ## Running From Source
 
-You will need to setup a virtualenv to run from source and execute the unit tests.
+You will need to install tito and use it to build an rpm from source.
+tito is available by default in Fedora and through EPEL for RHEL or CENTOS.
 
-$ virtualenv oo-install
-$ source ./oo-install/bin/activate
-$ virtualenv --relocatable ./oo-install/
-$ python setup.py install
+$ yum install tito
+$ echo "NO_AUTO_INSTALL=openshift-ansible-zabbix" >> ~/.titorc
+$ tito build --test --rpm --install
 
-The virtualenv bin directory should now be at the start of your $PATH, and oo-install is ready to use from your shell.
+You can now run the quick installer with:
 
-You can exit the virtualenv with:
-
-$ deactivate
+$ atomic-openshift-installer
 
 ## Testing
 
