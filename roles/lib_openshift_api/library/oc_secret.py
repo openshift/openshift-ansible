@@ -15,7 +15,15 @@ import json
 import os
 import shutil
 import subprocess
+import re
+
 import yaml
+# This is here because of a bug that causes yaml
+# to incorrectly handle timezone info on timestamps
+def timestamp_constructor(_, node):
+    '''return timestamps as strings'''
+    return str(node.value)
+yaml.add_constructor(u'tag:yaml.org,2002:timestamp', timestamp_constructor)
 
 # pylint: disable=too-few-public-methods
 class OpenShiftCLI(object):
@@ -39,8 +47,14 @@ class OpenShiftCLI(object):
 
         fname = '/tmp/%s' % rname
         yed = Yedit(fname, res['results'][0])
+        changes = []
         for key, value in content.items():
-            yed.put(key, value)
+            changes.append(yed.put(key, value))
+
+        if any([not change[0] for change in changes]):
+            return {'returncode': 0, 'updated': False}
+
+        yed.write()
 
         atexit.register(Utils.cleanup, [fname])
 
@@ -83,7 +97,9 @@ class OpenShiftCLI(object):
         cmds = ['/usr/bin/oc']
         cmds.extend(cmd)
 
+        rval = {}
         results = ''
+        err = None
 
         if self.verbose:
             print ' '.join(cmds)
@@ -92,27 +108,42 @@ class OpenShiftCLI(object):
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE,
                                 env={'KUBECONFIG': self.kubeconfig})
+
         proc.wait()
+        stdout = proc.stdout.read()
+        stderr = proc.stderr.read()
+
+        rval = {"returncode": proc.returncode,
+                "results": results,
+               }
+
         if proc.returncode == 0:
             if output:
                 try:
-                    results = json.loads(proc.stdout.read())
+                    rval['results'] = json.loads(stdout)
                 except ValueError as err:
                     if "No JSON object could be decoded" in err.message:
-                        results = err.message
+                        err = err.message
 
             if self.verbose:
-                print proc.stderr.read()
-                print results
+                print stdout
+                print stderr
                 print
 
-            return {"returncode": proc.returncode, "results": results}
+            if err:
+                rval.update({"err": err,
+                             "stderr": stderr,
+                             "stdout": stdout,
+                             "cmd": cmds
+                            })
 
-        return {"returncode": proc.returncode,
-                "stderr": proc.stderr.read(),
-                "stdout": proc.stdout.read(),
-                "results": {}
-               }
+        else:
+            rval.update({"stderr": stderr,
+                         "stdout": stdout,
+                         "results": {},
+                        })
+
+        return rval
 
 class Utils(object):
     ''' utilities for openshiftcli modules '''
@@ -186,7 +217,7 @@ class Utils(object):
             contents = sfd.read()
 
         if sfile_type == 'yaml':
-            contents = yaml.load(contents)
+            contents = yaml.safe_load(contents)
         elif sfile_type == 'json':
             contents = json.loads(contents)
 
@@ -254,15 +285,16 @@ class YeditException(Exception):
 
 class Yedit(object):
     ''' Class to modify yaml files '''
+    re_valid_key = r"(((\[-?\d+\])|(\w+)).?)+$"
+    re_key = r"(?:\[(-?\d+)\])|(\w+)"
 
-    def __init__(self, filename=None, content=None):
+    def __init__(self, filename=None, content=None, content_type='yaml'):
         self.content = content
         self.filename = filename
         self.__yaml_dict = content
+        self.content_type = content_type
         if self.filename and not self.content:
-            self.get()
-        elif self.filename and self.content:
-            self.write()
+            self.load(content_type=self.content_type)
 
     @property
     def yaml_dict(self):
@@ -275,58 +307,89 @@ class Yedit(object):
         self.__yaml_dict = value
 
     @staticmethod
-    def remove_entry(data, keys):
-        ''' remove an item from a dictionary with key notation a.b.c
-            d = {'a': {'b': 'c'}}}
-            keys = a.b
-            item = c
-        '''
-        if "." in keys:
-            key, rest = keys.split(".", 1)
-            if key in data.keys():
-                Yedit.remove_entry(data[key], rest)
-        else:
-            del data[keys]
+    def remove_entry(data, key):
+        ''' remove data at location key '''
+        if not (key and re.match(Yedit.re_valid_key, key) and isinstance(data, (list, dict))):
+            return None
 
-    @staticmethod
-    def add_entry(data, keys, item):
-        ''' Add an item to a dictionary with key notation a.b.c
-            d = {'a': {'b': 'c'}}}
-            keys = a.b
-            item = c
-        '''
-        if "." in keys:
-            key, rest = keys.split(".", 1)
-            if key not in data:
-                data[key] = {}
-
-            if not isinstance(data, dict):
-                raise YeditException('Invalid add_entry called on a [%s] of type [%s].' % (data, type(data)))
+        key_indexes = re.findall(Yedit.re_key, key)
+        for arr_ind, dict_key in key_indexes[:-1]:
+            if dict_key and isinstance(data, dict):
+                data = data.get(dict_key, None)
+            elif arr_ind and isinstance(data, list) and int(arr_ind) <= len(data) - 1:
+                data = data[int(arr_ind)]
             else:
-                Yedit.add_entry(data[key], rest, item)
+                return None
 
-        else:
-            data[keys] = item
+        # process last index for remove
+        # expected list entry
+        if key_indexes[-1][0]:
+            if isinstance(data, list) and int(key_indexes[-1][0]) <= len(data) - 1:
+                del data[int(key_indexes[-1][0])]
 
+        # expected dict entry
+        elif key_indexes[-1][1]:
+            if isinstance(data, dict):
+                del data[key_indexes[-1][1]]
 
     @staticmethod
-    def get_entry(data, keys):
+    def add_entry(data, key, item=None):
         ''' Get an item from a dictionary with key notation a.b.c
             d = {'a': {'b': 'c'}}}
-            keys = a.b
+            key = a.b
             return c
         '''
-        if keys and "." in keys:
-            key, rest = keys.split(".", 1)
-            if not isinstance(data[key], dict):
-                raise YeditException('Invalid get_entry called on a [%s] of type [%s].' % (data, type(data)))
+        if not (key and re.match(Yedit.re_valid_key, key) and isinstance(data, (list, dict))):
+            return None
 
+        curr_data = data
+
+        key_indexes = re.findall(Yedit.re_key, key)
+        for arr_ind, dict_key in key_indexes[:-1]:
+            if dict_key:
+                if isinstance(data, dict) and data.has_key(dict_key):
+                    data = data[dict_key]
+                    continue
+
+                data[dict_key] = {}
+                data = data[dict_key]
+
+            elif arr_ind and isinstance(data, list) and int(arr_ind) <= len(data) - 1:
+                data = data[int(arr_ind)]
             else:
-                return Yedit.get_entry(data[key], rest)
+                return None
 
-        else:
-            return data.get(keys, None)
+        # process last index for add
+        # expected list entry
+        if key_indexes[-1][0] and isinstance(data, list) and int(key_indexes[-1][0]) <= len(data) - 1:
+            data[int(key_indexes[-1][0])] = item
 
+        # expected dict entry
+        elif key_indexes[-1][1] and isinstance(data, dict):
+            data[key_indexes[-1][1]] = item
+
+        return curr_data
+
+    @staticmethod
+    def get_entry(data, key):
+        ''' Get an item from a dictionary with key notation a.b.c
+            d = {'a': {'b': 'c'}}}
+            key = a.b
+            return c
+        '''
+        if not (key and re.match(Yedit.re_valid_key, key) and isinstance(data, (list, dict))):
+            return None
+
+        key_indexes = re.findall(Yedit.re_key, key)
+        for arr_ind, dict_key in key_indexes:
+            if dict_key and isinstance(data, dict):
+                data = data.get(dict_key, None)
+            elif arr_ind and isinstance(data, list) and int(arr_ind) <= len(data) - 1:
+                data = data[int(arr_ind)]
+            else:
+                return None
+
+        return data
 
     def write(self):
         ''' write to file '''
@@ -355,7 +418,7 @@ class Yedit(object):
 
         return False
 
-    def get(self):
+    def load(self, content_type='yaml'):
         ''' return yaml file '''
         contents = self.read()
 
@@ -364,12 +427,24 @@ class Yedit(object):
 
         # check if it is yaml
         try:
-            self.yaml_dict = yaml.load(contents)
+            if content_type == 'yaml':
+                self.yaml_dict = yaml.load(contents)
+            elif content_type == 'json':
+                self.yaml_dict = json.loads(contents)
         except yaml.YAMLError as _:
-            # Error loading yaml
+            # Error loading yaml or json
             return None
 
         return self.yaml_dict
+
+    def get(self, key):
+        ''' get a specified key'''
+        try:
+            entry = Yedit.get_entry(self.yaml_dict, key)
+        except KeyError as _:
+            entry = None
+
+        return entry
 
     def delete(self, key):
         ''' put key, value into a yaml file '''
@@ -381,8 +456,7 @@ class Yedit(object):
             return  (False, self.yaml_dict)
 
         Yedit.remove_entry(self.yaml_dict, key)
-        self.write()
-        return (True, self.get())
+        return (True, self.yaml_dict)
 
     def put(self, key, value):
         ''' put key, value into a yaml file '''
@@ -395,17 +469,15 @@ class Yedit(object):
             return (False, self.yaml_dict)
 
         Yedit.add_entry(self.yaml_dict, key, value)
-        self.write()
-        return (True, self.get())
+        return (True, self.yaml_dict)
 
     def create(self, key, value):
         ''' create the file '''
         if not self.exists():
             self.yaml_dict = {key: value}
-            self.write()
-            return (True, self.get())
+            return (True, self.yaml_dict)
 
-        return (False, self.get())
+        return (False, self.yaml_dict)
 
 class Secret(OpenShiftCLI):
     ''' Class to wrap the oc command line tools

@@ -479,84 +479,54 @@ class Yedit(object):
 
         return (False, self.yaml_dict)
 
-class OCObject(OpenShiftCLI):
-    ''' Class to wrap the oc command line tools '''
-
-    # pylint allows 5. we need 6
+class Edit(OpenShiftCLI):
+    ''' Class to wrap the oc command line tools
+    '''
     # pylint: disable=too-many-arguments
     def __init__(self,
                  kind,
                  namespace,
-                 rname=None,
+                 resource_name=None,
                  kubeconfig='/etc/origin/master/admin.kubeconfig',
                  verbose=False):
         ''' Constructor for OpenshiftOC '''
-        super(OCObject, self).__init__(namespace, kubeconfig)
-        self.kind = kind
+        super(Edit, self).__init__(namespace, kubeconfig)
         self.namespace = namespace
-        self.name = rname
+        self.kind = kind
+        self.name = resource_name
         self.kubeconfig = kubeconfig
         self.verbose = verbose
 
     def get(self):
-        '''return a deploymentconfig by name '''
-        return self._get(self.kind, rname=self.name)
+        '''return a secret by name '''
+        return self._get(self.kind, self.name)
 
-    def delete(self):
-        '''return all pods '''
-        return self._delete(self.kind, self.name)
+    def update(self, file_name, content, force=False, content_type='yaml'):
+        '''run update '''
+        if file_name:
+            if content_type == 'yaml':
+                data = yaml.load(open(file_name))
+            elif content_type == 'json':
+                data = json.loads(open(file_name).read())
 
-    def create(self, files=None, content=None):
-        '''Create a deploymentconfig '''
-        if files:
-            return self._create(files[0])
+            changes = []
+            yed = Yedit(file_name, data)
+            for key, value in content.items():
+                changes.append(yed.put(key, value))
 
-        return self._create(Utils.create_files_from_contents(content))
+            if any([not change[0] for change in changes]):
+                return {'returncode': 0, 'updated': False}
 
+            yed.write()
 
-    # pylint: disable=too-many-function-args
-    def update(self, files=None, content=None, force=False):
-        '''run update dc
+            atexit.register(Utils.cleanup, [file_name])
 
-           This receives a list of file names and takes the first filename and calls replace.
-        '''
-        if files:
-            return self._replace(files[0], force)
+            return self._replace(file_name, force=force)
 
-        return self.update_content(content, force)
-
-    def update_content(self, content, force=False):
-        '''update the dc with the content'''
         return self._replace_content(self.kind, self.name, content, force=force)
 
-    def needs_update(self, files=None, content=None, content_type='yaml'):
-        ''' check to see if we need to update '''
-        objects = self.get()
-        if objects['returncode'] != 0:
-            return objects
-
-        # pylint: disable=no-member
-        data = None
-        if files:
-            data = Utils.get_resource_file(files[0], content_type)
-
-            # if equal then no need.  So not equal is True
-            return not Utils.check_def_equal(data, objects['results'][0], True)
-        else:
-            data = content
-
-            for key, value in data.items():
-                if key == 'metadata':
-                    continue
-                if not objects['results'][0].has_key(key):
-                    return True
-                if value != objects['results'][0][key]:
-                    return True
-
-        return False
 
 
-# pylint: disable=too-many-branches
 def main():
     '''
     ansible oc module for services
@@ -566,115 +536,61 @@ def main():
         argument_spec=dict(
             kubeconfig=dict(default='/etc/origin/master/admin.kubeconfig', type='str'),
             state=dict(default='present', type='str',
-                       choices=['present', 'absent', 'list']),
+                       choices=['present']),
             debug=dict(default=False, type='bool'),
             namespace=dict(default='default', type='str'),
             name=dict(default=None, type='str'),
-            files=dict(default=None, type='list'),
             kind=dict(required=True,
                       type='str',
                       choices=['dc', 'deploymentconfig',
                                'svc', 'service',
                                'secret',
                               ]),
-            delete_after=dict(default=False, type='bool'),
+            file_name=dict(default=None, type='str'),
+            file_format=dict(default='yaml', type='str'),
             content=dict(default=None, type='dict'),
             force=dict(default=False, type='bool'),
         ),
-        mutually_exclusive=[["content", "files"]],
-
         supports_check_mode=True,
     )
-    ocobj = OCObject(module.params['kind'],
-                     module.params['namespace'],
-                     module.params['name'],
-                     kubeconfig=module.params['kubeconfig'],
-                     verbose=module.params['debug'])
+    ocedit = Edit(module.params['kind'],
+                  module.params['namespace'],
+                  module.params['name'],
+                  kubeconfig=module.params['kubeconfig'],
+                  verbose=module.params['debug'])
 
     state = module.params['state']
 
-    api_rval = ocobj.get()
+    api_rval = ocedit.get()
 
-    #####
-    # Get
-    #####
-    if state == 'list':
-        module.exit_json(changed=False, results=api_rval['results'], state="list")
-
-    if not module.params['name']:
-        module.fail_json(msg='Please specify a name when state is absent|present.')
     ########
-    # Delete
+    # Create
     ########
-    if state == 'absent':
-        if not Utils.exists(api_rval['results'], module.params['name']):
-            module.exit_json(changed=False, state="absent")
+    if not Utils.exists(api_rval['results'], module.params['name']):
+        module.fail_json(msg=api_rval)
 
-        if module.check_mode:
-            module.exit_json(change=False, msg='Would have performed a delete.')
-
-        api_rval = ocobj.delete()
-        module.exit_json(changed=True, results=api_rval, state="absent")
-
-    if state == 'present':
-        ########
-        # Create
-        ########
-        if not Utils.exists(api_rval['results'], module.params['name']):
-
-            if module.check_mode:
-                module.exit_json(change=False, msg='Would have performed a create.')
-
-            # Create it here
-            api_rval = ocobj.create(module.params['files'], module.params['content'])
-            if api_rval['returncode'] != 0:
-                module.fail_json(msg=api_rval)
-
-            # return the created object
-            api_rval = ocobj.get()
-
-            if api_rval['returncode'] != 0:
-                module.fail_json(msg=api_rval)
-
-            # Remove files
-            if module.params['files'] and module.params['delete_after']:
-                Utils.cleanup(module.params['files'])
-
-            module.exit_json(changed=True, results=api_rval, state="present")
-
-        ########
-        # Update
-        ########
-        # if a file path is passed, use it.
-        update = ocobj.needs_update(module.params['files'], module.params['content'])
-        if not isinstance(update, bool):
-            module.fail_json(msg=update)
-
-        # No changes
-        if not update:
-            if module.params['files'] and module.params['delete_after']:
-                Utils.cleanup(module.params['files'])
-
-            module.exit_json(changed=False, results=api_rval['results'][0], state="present")
-
-        if module.check_mode:
-            module.exit_json(change=False, msg='Would have performed an update.')
-
-        api_rval = ocobj.update(module.params['files'],
-                                module.params['content'],
-                                module.params['force'])
+    ########
+    # Update
+    ########
+    api_rval = ocedit.update(module.params['file_name'],
+                             module.params['content'],
+                             module.params['force'],
+                             module.params['file_format'])
 
 
-        if api_rval['returncode'] != 0:
-            module.fail_json(msg=api_rval)
+    if api_rval['returncode'] != 0:
+        module.fail_json(msg=api_rval)
 
-        # return the created object
-        api_rval = ocobj.get()
+    if api_rval.has_key('updated') and not api_rval['updated']:
+        module.exit_json(changed=False, results=api_rval, state="present")
 
-        if api_rval['returncode'] != 0:
-            module.fail_json(msg=api_rval)
+    # return the created object
+    api_rval = ocedit.get()
 
-        module.exit_json(changed=True, results=api_rval, state="present")
+    if api_rval['returncode'] != 0:
+        module.fail_json(msg=api_rval)
+
+    module.exit_json(changed=True, results=api_rval, state="present")
 
     module.exit_json(failed=True,
                      changed=False,

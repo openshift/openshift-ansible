@@ -8,7 +8,15 @@ import json
 import os
 import shutil
 import subprocess
+import re
+
 import yaml
+# This is here because of a bug that causes yaml
+# to incorrectly handle timezone info on timestamps
+def timestamp_constructor(_, node):
+    '''return timestamps as strings'''
+    return str(node.value)
+yaml.add_constructor(u'tag:yaml.org,2002:timestamp', timestamp_constructor)
 
 # pylint: disable=too-few-public-methods
 class OpenShiftCLI(object):
@@ -32,8 +40,14 @@ class OpenShiftCLI(object):
 
         fname = '/tmp/%s' % rname
         yed = Yedit(fname, res['results'][0])
+        changes = []
         for key, value in content.items():
-            yed.put(key, value)
+            changes.append(yed.put(key, value))
+
+        if any([not change[0] for change in changes]):
+            return {'returncode': 0, 'updated': False}
+
+        yed.write()
 
         atexit.register(Utils.cleanup, [fname])
 
@@ -76,7 +90,9 @@ class OpenShiftCLI(object):
         cmds = ['/usr/bin/oc']
         cmds.extend(cmd)
 
+        rval = {}
         results = ''
+        err = None
 
         if self.verbose:
             print ' '.join(cmds)
@@ -85,27 +101,42 @@ class OpenShiftCLI(object):
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE,
                                 env={'KUBECONFIG': self.kubeconfig})
+
         proc.wait()
+        stdout = proc.stdout.read()
+        stderr = proc.stderr.read()
+
+        rval = {"returncode": proc.returncode,
+                "results": results,
+               }
+
         if proc.returncode == 0:
             if output:
                 try:
-                    results = json.loads(proc.stdout.read())
+                    rval['results'] = json.loads(stdout)
                 except ValueError as err:
                     if "No JSON object could be decoded" in err.message:
-                        results = err.message
+                        err = err.message
 
             if self.verbose:
-                print proc.stderr.read()
-                print results
+                print stdout
+                print stderr
                 print
 
-            return {"returncode": proc.returncode, "results": results}
+            if err:
+                rval.update({"err": err,
+                             "stderr": stderr,
+                             "stdout": stdout,
+                             "cmd": cmds
+                            })
 
-        return {"returncode": proc.returncode,
-                "stderr": proc.stderr.read(),
-                "stdout": proc.stdout.read(),
-                "results": {}
-               }
+        else:
+            rval.update({"stderr": stderr,
+                         "stdout": stdout,
+                         "results": {},
+                        })
+
+        return rval
 
 class Utils(object):
     ''' utilities for openshiftcli modules '''
@@ -179,7 +210,7 @@ class Utils(object):
             contents = sfd.read()
 
         if sfile_type == 'yaml':
-            contents = yaml.load(contents)
+            contents = yaml.safe_load(contents)
         elif sfile_type == 'json':
             contents = json.loads(contents)
 

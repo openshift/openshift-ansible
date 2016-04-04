@@ -15,19 +15,20 @@ GEN_STR = "#!/usr/bin/env python\n"                                  + \
           "#   | |) | (_) | | .` | (_) || |   | _|| |) | |  | |\n"   + \
           "#   |___/ \___/  |_|\_|\___/ |_|   |___|___/___| |_|\n"
 
+OPENSHIFT_ANSIBLE_PATH = os.path.dirname(os.path.realpath(__file__))
+
 FILES = {'yedit.py':  ['src/base.py', 'src/yedit.py', 'ansible/yedit.py'],
         }
 
-
 def main():
     ''' combine the necessary files to create the ansible module '''
-    openshift_ansible = ('../library/')
+    library = os.path.join(OPENSHIFT_ANSIBLE_PATH, '..', 'library/')
     for fname, parts in FILES.items():
-        with open(os.path.join(openshift_ansible, fname), 'w') as afd:
+        with open(os.path.join(library, fname), 'w') as afd:
             afd.seek(0)
             afd.write(GEN_STR)
             for fpart in parts:
-                with open(fpart) as pfd:
+                with open(os.path.join(OPENSHIFT_ANSIBLE_PATH, fpart)) as pfd:
                     # first line is pylint disable so skip it
                     for idx, line in enumerate(pfd):
                         if idx == 0 and 'skip-file' in line:
