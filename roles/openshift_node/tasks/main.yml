@@ -92,7 +92,7 @@
       line: "AWS_ACCESS_KEY_ID={{ openshift.cloudprovider.aws.access_key }}"
     - regex: '^AWS_SECRET_ACCESS_KEY='
       line: "AWS_SECRET_ACCESS_KEY={{ openshift.cloudprovider.aws.secret_key }}"
-  when: "'cloudprovider' in openshift and 'aws' in openshift.cloudprovider and openshift.cloudprovider.kind == 'aws' and 'access_key' in openshift.cloudprovider.aws and 'secret_key' in openshift.cloudprovider.aws"
+  when: "'cloudprovider' in openshift and 'aws' in openshift.cloudprovider and 'kind' in openshift.cloudprovider and openshift.cloudprovider.kind == 'aws' and 'access_key' in openshift.cloudprovider.aws and 'secret_key' in openshift.cloudprovider.aws"
   notify:
   - restart node
 
