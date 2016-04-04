@@ -3,70 +3,80 @@
     "apiVersion": "v1",
     "metadata": {
         "annotations": {
-            "description": "Application template for EAP 6 PostgreSQL applications with persistent storage built using S2I.",
-            "iconClass": "icon-jboss",
-            "tags": "eap,postgresql,javaee,java,database,jboss,xpaas",
-            "version": "1.2.0"
+            "description": "Application template for SSO 7.0",
+            "iconClass" : "icon-jboss",
+            "tags" : "sso,keycloak,java,jboss,xpaas",
+            "version" : "1.3"
         },
-        "name": "eap64-postgresql-persistent-s2i"
+        "name": "sso70-basic"
     },
     "labels": {
-        "template": "eap64-postgresql-persistent-s2i",
-        "xpaas": "1.2.0"
+        "template": "sso70-basic",
+        "xpaas" : "1.3.0"
     },
     "parameters": [
         {
             "description": "The name for the application.",
             "name": "APPLICATION_NAME",
-            "value": "eap-app",
+            "value": "sso",
             "required": true
         },
         {
-            "description": "Custom hostname for http service route.  Leave blank for default hostname, e.g.: <application-name>-<project>.<default-domain-suffix>",
+            "description": "Custom hostname for http service route.  Leave blank for default hostname, e.g.: <application-name>.<project>.<default-domain-suffix>",
             "name": "HOSTNAME_HTTP",
             "value": "",
             "required": false
         },
         {
-            "description": "Custom hostname for https service route.  Leave blank for default hostname, e.g.: secure-<application-name>-<project>.<default-domain-suffix>",
+            "description": "Custom hostname for https service route.  Leave blank for default hostname, e.g.: <application-name>.<project>.<default-domain-suffix>",
             "name": "HOSTNAME_HTTPS",
             "value": "",
             "required": false
         },
         {
-            "description": "Git source URI for application",
-            "name": "SOURCE_REPOSITORY_URL",
-            "value": "https://github.com/jboss-openshift/openshift-quickstarts",
-            "required": true
-        },
-        {
-            "description": "Git branch/tag reference",
-            "name": "SOURCE_REPOSITORY_REF",
-            "value": "1.2",
+            "description": "The name of the secret containing the keystore file",
+            "name": "HTTPS_SECRET",
+            "value": "sso-app-secret",
             "required": false
         },
         {
-            "description": "Path within Git project to build; empty for root project directory.",
-            "name": "CONTEXT_DIR",
-            "value": "todolist/todolist-jdbc",
+            "description": "The name of the keystore file within the secret",
+            "name": "HTTPS_KEYSTORE",
+            "value": "keystore.jks",
             "required": false
         },
         {
-            "description": "Database JNDI name used by application to resolve the datasource, e.g. java:/jboss/datasources/postgresql",
-            "name": "DB_JNDI",
-            "value": "java:jboss/datasources/TodoListDS",
+            "description": "The name associated with the server certificate",
+            "name": "HTTPS_NAME",
+            "value": "jboss",
             "required": false
         },
         {
-            "description": "Database name",
-            "name": "DB_DATABASE",
-            "value": "root",
-            "required": true
+            "description": "The password for the keystore and certificate",
+            "name": "HTTPS_PASSWORD",
+            "value": "mykeystorepass",
+            "required": false
         },
         {
-            "description": "Size of persistent storage for database volume.",
-            "name": "VOLUME_CAPACITY",
-            "value": "512Mi",
+            "description": "Sets xa-pool/min-pool-size for the configured datasource.",
+            "name": "DB_MIN_POOL_SIZE",
+	    "required": false
+        },
+        {
+            "description": "Sets xa-pool/max-pool-size for the configured datasource.",
+            "name": "DB_MAX_POOL_SIZE",
+            "required": false
+        },
+        {
+            "description": "Sets transaction-isolation for the configured datasource.",
+            "name": "DB_TX_ISOLATION",
+            "required": false
+        },
+        {
+            "description": "HornetQ cluster admin password",
+            "name": "HORNETQ_CLUSTER_PASSWORD",
+            "from": "[a-zA-Z0-9]{8}",
+            "generate": "expression",
             "required": true
         },
         {
@@ -83,96 +93,6 @@
         },
         {
             "description": "The name of the secret containing the keystore file",
-            "name": "HTTPS_SECRET",
-            "value": "eap-app-secret",
-            "required": false
-        },
-        {
-            "description": "The name of the keystore file within the secret",
-            "name": "HTTPS_KEYSTORE",
-            "value": "keystore.jks",
-            "required": false
-        },
-        {
-            "description": "The name associated with the server certificate",
-            "name": "HTTPS_NAME",
-            "value": "",
-            "required": false
-        },
-        {
-            "description": "The password for the keystore and certificate",
-            "name": "HTTPS_PASSWORD",
-            "value": "",
-            "required": false
-        },
-        {
-            "description": "Sets xa-pool/min-pool-size for the configured datasource.",
-            "name": "DB_MIN_POOL_SIZE",
-            "required": false
-        },
-        {
-            "description": "Sets xa-pool/max-pool-size for the configured datasource.",
-            "name": "DB_MAX_POOL_SIZE",
-            "required": false
-        },
-        {
-            "description": "Sets transaction-isolation for the configured datasource.",
-            "name": "DB_TX_ISOLATION",
-            "required": false
-        },
-        {
-            "description": "The maximum number of client connections allowed. This also sets the maximum number of prepared transactions.",
-            "name": "POSTGRESQL_MAX_CONNECTIONS",
-            "required": false
-        },
-        {
-            "description": "Configures how much memory is dedicated to PostgreSQL for caching data.",
-            "name": "POSTGRESQL_SHARED_BUFFERS",
-            "required": false
-        },
-        {
-            "description": "HornetQ cluster admin password",
-            "name": "HORNETQ_CLUSTER_PASSWORD",
-            "from": "[a-zA-Z0-9]{8}",
-            "generate": "expression",
-            "required": true
-        },
-        {
-            "description": "Database user name",
-            "name": "DB_USERNAME",
-            "from": "user[a-zA-Z0-9]{3}",
-            "generate": "expression",
-            "required": true
-        },
-        {
-            "description": "Database user password",
-            "name": "DB_PASSWORD",
-            "from": "[a-zA-Z0-9]{8}",
-            "generate": "expression",
-            "required": true
-        },
-        {
-            "description": "GitHub trigger secret",
-            "name": "GITHUB_WEBHOOK_SECRET",
-            "from": "[a-zA-Z0-9]{8}",
-            "generate": "expression",
-            "required": true
-        },
-        {
-            "description": "Generic build trigger secret",
-            "name": "GENERIC_WEBHOOK_SECRET",
-            "from": "[a-zA-Z0-9]{8}",
-            "generate": "expression",
-            "required": true
-        },
-        {
-            "description": "Namespace in which the ImageStreams for Red Hat Middleware images are installed. These ImageStreams are normally installed in the openshift namespace. You should only need to modify this if you've installed the ImageStreams in a different namespace/project.",
-            "name": "IMAGE_STREAM_NAMESPACE",
-            "value": "openshift",
-            "required": true
-        },
-        {
-            "description": "The name of the secret containing the keystore file",
             "name": "JGROUPS_ENCRYPT_SECRET",
             "value": "eap-app-secret",
             "required": false
@@ -186,13 +106,13 @@
         {
             "description": "The name associated with the server certificate",
             "name": "JGROUPS_ENCRYPT_NAME",
-            "value": "",
+            "value": "secret-key",
             "required": false
         },
         {
             "description": "The password for the keystore and certificate",
             "name": "JGROUPS_ENCRYPT_PASSWORD",
-            "value": "",
+            "value": "password",
             "required": false
         },
         {
@@ -200,6 +120,12 @@
             "name": "JGROUPS_CLUSTER_PASSWORD",
             "from": "[a-zA-Z0-9]{8}",
             "generate": "expression",
+            "required": true
+        },
+        {
+            "description": "Namespace in which the ImageStreams for Red Hat Middleware images are installed. These ImageStreams are normally installed in the openshift namespace. You should only need to modify this if you've installed the ImageStreams in a different namespace/project.",
+            "name": "IMAGE_STREAM_NAMESPACE",
+            "value": "openshift",
             "required": true
         }
     ],
@@ -263,11 +189,11 @@
                     }
                 ],
                 "selector": {
-                    "deploymentConfig": "${APPLICATION_NAME}-postgresql"
+                    "deploymentConfig": "${APPLICATION_NAME}-basic"
                 }
             },
             "metadata": {
-                "name": "${APPLICATION_NAME}-postgresql",
+                "name": "${APPLICATION_NAME}-basic",
                 "labels": {
                     "application": "${APPLICATION_NAME}"
                 },
@@ -320,74 +246,6 @@
             }
         },
         {
-            "kind": "ImageStream",
-            "apiVersion": "v1",
-            "metadata": {
-                "name": "${APPLICATION_NAME}",
-                "labels": {
-                    "application": "${APPLICATION_NAME}"
-                }
-            }
-        },
-        {
-            "kind": "BuildConfig",
-            "apiVersion": "v1",
-            "metadata": {
-                "name": "${APPLICATION_NAME}",
-                "labels": {
-                    "application": "${APPLICATION_NAME}"
-                }
-            },
-            "spec": {
-                "source": {
-                    "type": "Git",
-                    "git": {
-                        "uri": "${SOURCE_REPOSITORY_URL}",
-                        "ref": "${SOURCE_REPOSITORY_REF}"
-                    },
-                    "contextDir": "${CONTEXT_DIR}"
-                },
-                "strategy": {
-                    "type": "Source",
-                    "sourceStrategy": {
-                        "forcePull": true,
-                        "from": {
-                            "kind": "ImageStreamTag",
-                            "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                            "name": "jboss-eap64-openshift:1.2"
-                        }
-                    }
-                },
-                "output": {
-                    "to": {
-                        "kind": "ImageStreamTag",
-                        "name": "${APPLICATION_NAME}:latest"
-                    }
-                },
-                "triggers": [
-                    {
-                        "type": "GitHub",
-                        "github": {
-                            "secret": "${GITHUB_WEBHOOK_SECRET}"
-                        }
-                    },
-                    {
-                        "type": "Generic",
-                        "generic": {
-                            "secret": "${GENERIC_WEBHOOK_SECRET}"
-                        }
-                    },
-                    {
-                        "type": "ImageChange",
-                        "imageChange": {}
-                    },
-                    {
-                        "type": "ConfigChange"
-                    }
-                ]
-            }
-        },
-        {
             "kind": "DeploymentConfig",
             "apiVersion": "v1",
             "metadata": {
@@ -408,9 +266,10 @@
                             "containerNames": [
                                 "${APPLICATION_NAME}"
                             ],
-                            "from": {
-                                "kind": "ImageStream",
-                                "name": "${APPLICATION_NAME}"
+                             "from": {
+                                "kind": "ImageStreamTag",
+                                "namespace": "${IMAGE_STREAM_NAMESPACE}",
+                                "name": "redhat-sso70-openshift:1.3-TP" 
                             }
                         }
                     },
@@ -431,7 +290,7 @@
                         }
                     },
                     "spec": {
-                        "serviceAccountName": "eap-service-account",
+                        "serviceAccountName": "sso-service-account",
                         "terminationGracePeriodSeconds": 60,
                         "containers": [
                             {
@@ -483,38 +342,9 @@
                                         "name": "https",
                                         "containerPort": 8443,
                                         "protocol": "TCP"
-                                    },
-                                    {
-                                        "name": "ping",
-                                        "containerPort": 8888,
-                                        "protocol": "TCP"
                                     }
                                 ],
                                 "env": [
-                                    {
-                                        "name": "DB_SERVICE_PREFIX_MAPPING",
-                                        "value": "${APPLICATION_NAME}-postgresql=DB"
-                                    },
-                                    {
-                                        "name": "DB_JNDI",
-                                        "value": "${DB_JNDI}"
-                                    },
-                                    {
-                                        "name": "DB_USERNAME",
-                                        "value": "${DB_USERNAME}"
-                                    },
-                                    {
-                                        "name": "DB_PASSWORD",
-                                        "value": "${DB_PASSWORD}"
-                                    },
-                                    {
-                                        "name": "DB_DATABASE",
-                                        "value": "${DB_DATABASE}"
-                                    },
-                                    {
-                                        "name": "TX_DATABASE_PREFIX_MAPPING",
-                                        "value": "${APPLICATION_NAME}-postgresql=DB"
-                                    },
                                     {
                                         "name": "DB_MIN_POOL_SIZE",
                                         "value": "${DB_MIN_POOL_SIZE}"
@@ -540,19 +370,19 @@
                                         }
                                     },
                                     {
-                                        "name": "HTTPS_KEYSTORE_DIR",
+                                        "name": "EAP_HTTPS_KEYSTORE_DIR",
                                         "value": "/etc/eap-secret-volume"
                                     },
                                     {
-                                        "name": "HTTPS_KEYSTORE",
+                                        "name": "EAP_HTTPS_KEYSTORE",
                                         "value": "${HTTPS_KEYSTORE}"
                                     },
                                     {
-                                        "name": "HTTPS_NAME",
+                                        "name": "EAP_HTTPS_NAME",
                                         "value": "${HTTPS_NAME}"
                                     },
                                     {
-                                        "name": "HTTPS_PASSWORD",
+                                        "name": "EAP_HTTPS_PASSWORD",
                                         "value": "${HTTPS_PASSWORD}"
                                     },
                                     {
@@ -608,125 +438,6 @@
                                 }
                             }
                         ]
-                    }
-                }
-            }
-        },
-        {
-            "kind": "DeploymentConfig",
-            "apiVersion": "v1",
-            "metadata": {
-                "name": "${APPLICATION_NAME}-postgresql",
-                "labels": {
-                    "application": "${APPLICATION_NAME}"
-                }
-            },
-            "spec": {
-                "strategy": {
-                    "type": "Recreate"
-                },
-                "triggers": [
-                    {
-                        "type": "ImageChange",
-                        "imageChangeParams": {
-                            "automatic": true,
-                            "containerNames": [
-                                "${APPLICATION_NAME}-postgresql"
-                            ],
-                            "from": {
-                                "kind": "ImageStreamTag",
-                                "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                                "name": "postgresql:latest"
-                            }
-                        }
-                    },
-                    {
-                        "type": "ConfigChange"
-                    }
-                ],
-                "replicas": 1,
-                "selector": {
-                    "deploymentConfig": "${APPLICATION_NAME}-postgresql"
-                },
-                "template": {
-                    "metadata": {
-                        "name": "${APPLICATION_NAME}-postgresql",
-                        "labels": {
-                            "deploymentConfig": "${APPLICATION_NAME}-postgresql",
-                            "application": "${APPLICATION_NAME}"
-                        }
-                    },
-                    "spec": {
-                        "terminationGracePeriodSeconds": 60,
-                        "containers": [
-                            {
-                                "name": "${APPLICATION_NAME}-postgresql",
-                                "image": "postgresql",
-                                "imagePullPolicy": "Always",
-                                "ports": [
-                                    {
-                                        "containerPort": 5432,
-                                        "protocol": "TCP"
-                                    }
-                                ],
-                                "volumeMounts": [
-                                    {
-                                        "mountPath": "/var/lib/pgsql/data",
-                                        "name": "${APPLICATION_NAME}-postgresql-pvol"
-                                    }
-                                ],
-                                "env": [
-                                    {
-                                        "name": "POSTGRESQL_USER",
-                                        "value": "${DB_USERNAME}"
-                                    },
-                                    {
-                                        "name": "POSTGRESQL_PASSWORD",
-                                        "value": "${DB_PASSWORD}"
-                                    },
-                                    {
-                                        "name": "POSTGRESQL_DATABASE",
-                                        "value": "${DB_DATABASE}"
-                                    },
-                                    {
-                                        "name": "POSTGRESQL_MAX_CONNECTIONS",
-                                        "value": "${POSTGRESQL_MAX_CONNECTIONS}"
-                                    },
-                                    {
-                                        "name": "POSTGRESQL_SHARED_BUFFERS",
-                                        "value": "${POSTGRESQL_SHARED_BUFFERS}"
-                                    }
-                                ]
-                            }
-                        ],
-                        "volumes": [
-                            {
-                                "name": "${APPLICATION_NAME}-postgresql-pvol",
-                                "persistentVolumeClaim": {
-                                    "claimName": "${APPLICATION_NAME}-postgresql-claim"
-                                }
-                            }
-                        ]
-                    }
-                }
-            }
-        },
-        {
-            "apiVersion": "v1",
-            "kind": "PersistentVolumeClaim",
-            "metadata": {
-                "name": "${APPLICATION_NAME}-postgresql-claim",
-                "labels": {
-                    "application": "${APPLICATION_NAME}"
-                }
-            },
-            "spec": {
-                "accessModes": [
-                    "ReadWriteOnce"
-                ],
-                "resources": {
-                    "requests": {
-                        "storage": "${VOLUME_CAPACITY}"
                     }
                 }
             }

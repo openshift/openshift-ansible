@@ -356,7 +356,7 @@
                         }
                     },
                     "spec": {
-                        "serviceAccount": "decisionserver-service-account",
+                        "serviceAccountName": "decisionserver-service-account",
                         "terminationGracePeriodSeconds": 60,
                         "containers": [
                             {
