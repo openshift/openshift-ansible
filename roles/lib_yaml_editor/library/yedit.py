@@ -29,8 +29,8 @@ class YeditException(Exception):
 
 class Yedit(object):
     ''' Class to modify yaml files '''
-    re_valid_key = r"(((\[-?\d+\])|(\w+)).?)+$"
-    re_key = r"(?:\[(-?\d+)\])|(\w+)"
+    re_valid_key = r"(((\[-?\d+\])|([a-zA-Z-./]+)).?)+$"
+    re_key = r"(?:\[(-?\d+)\])|([a-zA-Z-./]+)"
 
     def __init__(self, filename=None, content=None, content_type='yaml'):
         self.content = content
@@ -70,11 +70,13 @@ class Yedit(object):
         if key_indexes[-1][0]:
             if isinstance(data, list) and int(key_indexes[-1][0]) <= len(data) - 1:
                 del data[int(key_indexes[-1][0])]
+                return True
 
         # expected dict entry
         elif key_indexes[-1][1]:
             if isinstance(data, dict):
                 del data[key_indexes[-1][1]]
+                return True
 
     @staticmethod
     def add_entry(data, key, item=None):
@@ -191,7 +193,7 @@ class Yedit(object):
         return entry
 
     def delete(self, key):
-        ''' put key, value into a yaml file '''
+        ''' remove key from a dict'''
         try:
             entry = Yedit.get_entry(self.yaml_dict, key)
         except KeyError as _:
@@ -199,11 +201,14 @@ class Yedit(object):
         if not entry:
             return  (False, self.yaml_dict)
 
-        Yedit.remove_entry(self.yaml_dict, key)
+        result = Yedit.remove_entry(self.yaml_dict, key)
+        if not result:
+            return (False, self.yaml_dict)
+
         return (True, self.yaml_dict)
 
     def put(self, key, value):
-        ''' put key, value into a yaml file '''
+        ''' put key, value into a dict '''
         try:
             entry = Yedit.get_entry(self.yaml_dict, key)
         except KeyError as _:
@@ -212,11 +217,14 @@ class Yedit(object):
         if entry == value:
             return (False, self.yaml_dict)
 
-        Yedit.add_entry(self.yaml_dict, key, value)
+        result = Yedit.add_entry(self.yaml_dict, key, value)
+        if not result:
+            return (False, self.yaml_dict)
+
         return (True, self.yaml_dict)
 
     def create(self, key, value):
-        ''' create the file '''
+        ''' create a yaml file '''
         if not self.exists():
             self.yaml_dict = {key: value}
             return (True, self.yaml_dict)
@@ -268,13 +276,16 @@ def main():
 
         if rval:
             rval = yamlfile.put(module.params['key'], value)
+            if rval[0]:
+                yamlfile.write()
             module.exit_json(changed=rval[0], results=rval[1], state="present")
 
         if not module.params['content']:
             rval = yamlfile.create(module.params['key'], value)
         else:
-            yamlfile.write()
             rval = yamlfile.load()
+        yamlfile.write()
+
         module.exit_json(changed=rval[0], results=rval[1], state="present")
 
     module.exit_json(failed=True,

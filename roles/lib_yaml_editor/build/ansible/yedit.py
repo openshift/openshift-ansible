@@ -45,13 +45,16 @@ def main():
 
         if rval:
             rval = yamlfile.put(module.params['key'], value)
+            if rval[0]:
+                yamlfile.write()
             module.exit_json(changed=rval[0], results=rval[1], state="present")
 
         if not module.params['content']:
             rval = yamlfile.create(module.params['key'], value)
         else:
-            yamlfile.write()
             rval = yamlfile.load()
+        yamlfile.write()
+
         module.exit_json(changed=rval[0], results=rval[1], state="present")
 
     module.exit_json(failed=True,
