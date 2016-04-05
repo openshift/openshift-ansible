@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.71
+Version:        3.0.72
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -279,6 +279,13 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Apr 05 2016 Troy Dawson <tdawson@redhat.com> 3.0.72-1
+- when docker is installed, make it 1.8.2 to avoid issues (mwoodson@redhat.com)
+- Downgrade to docker 1.8.2 if installing OSE < 3.2 (sdodson@redhat.com)
+- Pacemaker is unsupported for 3.2 (bleanhar@redhat.com)
+- Fixing regexp.  Periods are no longer allowed (kwoodson@redhat.com)
+- We require docker 1.9 for the 3.2 upgrade (bleanhar@redhat.com)
+
 * Mon Apr 04 2016 Troy Dawson <tdawson@redhat.com> 3.0.71-1
 - Fixed oc_edit by requiring name and content (kwoodson@redhat.com)
 - add higher severity trigger if no heartbeat for 1 hour (jdiaz@redhat.com)
