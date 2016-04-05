@@ -862,8 +862,10 @@ def upgrade(ctx, latest_minor, next_major):
 
 @click.command()
 @click.option('--force', '-f', is_flag=True, default=False)
+@click.option('--gen-inventory', is_flag=True, default=False,
+              help="Generate an ansible inventory file and exit.")
 @click.pass_context
-def install(ctx, force):
+def install(ctx, force, gen_inventory):
     oo_cfg = ctx.obj['oo_cfg']
     verbose = ctx.obj['verbose']
 
@@ -886,7 +888,6 @@ def install(ctx, force):
     hosts_to_run_on, callback_facts = get_hosts_to_run_on(
         oo_cfg, callback_facts, ctx.obj['unattended'], force, verbose)
 
-    click.echo('Writing config to: %s' % oo_cfg.config_path)
 
     # We already verified this is not the case for unattended installs, so this can
     # only trigger for live CLI users:
@@ -896,7 +897,18 @@ def install(ctx, force):
     if len(oo_cfg.calc_missing_facts()) > 0:
         confirm_hosts_facts(oo_cfg, callback_facts)
 
+    # Write quick installer config file to disk:
     oo_cfg.save_to_disk()
+    # Write ansible inventory file to disk:
+    inventory_file = openshift_ansible.generate_inventory(hosts_to_run_on)
+
+    click.echo()
+    click.echo('Wrote atomic-openshift-installer config: %s' % oo_cfg.config_path)
+    click.echo("Wrote ansible inventory: %s" % inventory_file)
+    click.echo()
+
+    if gen_inventory:
+        sys.exit(0)
 
     click.echo('Ready to run installation process.')
     message = """
@@ -905,8 +917,8 @@ If changes are needed please edit the config file above and re-run.
     if not ctx.obj['unattended']:
         confirm_continue(message)
 
-    error = openshift_ansible.run_main_playbook(oo_cfg.hosts,
-                                                   hosts_to_run_on, verbose)
+    error = openshift_ansible.run_main_playbook(inventory_file, oo_cfg.hosts,
+                                                hosts_to_run_on, verbose)
     if error:
         # The bootstrap script will print out the log location.
         message = """

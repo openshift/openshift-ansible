@@ -213,9 +213,8 @@ def default_facts(hosts, verbose=False):
     return load_system_facts(inventory_file, os_facts_path, facts_env, verbose)
 
 
-def run_main_playbook(hosts, hosts_to_run_on, verbose=False):
+def run_main_playbook(inventory_file, hosts, hosts_to_run_on, verbose=False):
     global CFG
-    inventory_file = generate_inventory(hosts_to_run_on)
     if len(hosts_to_run_on) != len(hosts):
         main_playbook_path = os.path.join(CFG.ansible_playbook_directory,
                                           'playbooks/byo/openshift-node/scaleup.yml')
