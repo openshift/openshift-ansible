@@ -25,6 +25,7 @@
   hosts: oo_first_master
   vars:
     target_version: "{{ '1.2' if deployment_type == 'origin' else '3.1.1.900' }}"
+    g_pacemaker_upgrade_url_segment: "{{ 'org/latest' if deployment_type =='origin' else '.com/enterprise/3.1' }}"
   gather_facts: no
   tasks:
   - fail:
@@ -32,6 +33,12 @@
         This upgrade is only supported for atomic-enterprise, origin, openshift-enterprise, and online
         deployment types
     when: deployment_type not in ['atomic-enterprise', 'origin','openshift-enterprise', 'online']
+
+  - fail:
+      msg: >
+        This upgrade does not support Pacemaker:
+        https://docs.openshift.{{ g_pacemaker_upgrade_url_segment }}/install_config/upgrading/pacemaker_to_native_ha.html
+    when: openshift.master.cluster_method == 'pacemaker'
 
   - fail:
       msg: >
