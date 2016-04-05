@@ -1,4 +1,5 @@
 ---
+
 - name: Initializing Subscription Manager authenticaiton method
   set_fact:
     rhsm_authentication: false
@@ -61,6 +62,7 @@
     - rhsm_satellite|trim != ''
 
 # This can apply to either Hosted or Satellite
+
 - name: Register using username and password
   command: "/usr/bin/subscription-manager register --username={{ rhsm_username }} --password={{ rhsm_password }}"
   when:
@@ -72,12 +74,15 @@
   when:
     - not registered
     - rhsm_authentication != "key"
+    - rhsm_pool is undefined or rhsm_pool is none or rhsm_pool|trim == ''
 
 - name: Attach to a specific pool
   command: "/usr/bin/subscription-manager attach --pool={{ rhsm_pool }}"
   when:
-    - rhsm_pool is defined and rhsm_pool is not none and rhsm_pool|trim != ''
-    - and not registered
+    - rhsm_pool is defined
+    - rhsm_pool is not none
+    - rhsm_pool|trim != ''
+    - not registered
     - rhsm_authentication != "key"
 
 - name: Disable all repositories
