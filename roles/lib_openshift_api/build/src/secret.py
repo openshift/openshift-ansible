@@ -32,7 +32,7 @@ class Secret(OpenShiftCLI):
         cmd = ['-n%s' % self.namespace, 'secrets', 'new', self.name]
         cmd.extend(secrets)
 
-        return self.oc_cmd(cmd)
+        return self.openshift_cmd(cmd)
 
     def update(self, files, force=False):
         '''run update secret
@@ -63,6 +63,6 @@ class Secret(OpenShiftCLI):
         cmd = ['-ojson', '-n%s' % self.namespace, 'secrets', 'new', self.name]
         cmd.extend(secrets)
 
-        return self.oc_cmd(cmd, output=True)
+        return self.openshift_cmd(cmd, output=True)
 
 
