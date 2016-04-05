@@ -21,7 +21,7 @@
   ignore_errors: yes
 
 - name: Install iptables packages
-  action: "{{ ansible_pkg_mgr }} name={{ item }} state=present"
+  action: "{{ ansible_pkg_mgr }} name={{ item }} state=latest"
   with_items:
   - iptables
   - iptables-services
