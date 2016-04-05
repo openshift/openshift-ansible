@@ -18,7 +18,9 @@ Default: none
 
 ### rhsm_password
 
-Subscription Manager password. Required for RHSM Hosted. Can be optionally used for Satellite, but it may be better to use **rhsm_activationkey** for this.
+Subscription Manager password. Required for RHSM Hosted. Can be optionally used for Satellite, but it may be better to use **rhsm_activationkey** for this. 
+
+NOTE: This variable is prompted for at the start of the playbook run. This is for security purposes so the password is not left in the command history. If specified on the command-line or set in a variable file it will be ignored and the value captured from the prompt will overwrite it instead.
 
 Default: none
 
@@ -50,7 +52,25 @@ rhsm_repos='["rhel-7-server-rpms", "rhel-7-server-ose-3.1-rpms", "rhel-7-server-
 
 Default: none
 
-## Pre-tasks
+## Calling This Role
+Calling this role requires adding a **vars_prompt**, **pre_tasks**, and **roles** section of a play
+
+### vars_prompt
+Unfortunately **vars_prompt** can only be used at the play level before role tasks are executed, so this is the only place it can go. See http://stackoverflow.com/questions/25466675/ansible-to-conditionally-prompt-for-a-variable
+
+Add a prompt to capture **rhsm_password**
+
+```
+- hosts: localhost
+  vars_prompt:
+  # Unfortunately vars_prompt can only be used at the play level before role tasks, so this is the only place it can go. See http://stackoverflow.com/questions/25466675/ansible-to-conditionally-prompt-for-a-variable
+    - name: "rhsm_password"
+      prompt: "Subscription Manager password (enter blank if using rhsm_activationkey or to disable registration)"
+      confirm: yes
+      private: yes
+```
+
+### pre-tasks
 
 A number of variable checks are performed before any tasks to ensure the proper parameters are set. To include these checks call the pre_task yaml before any roles:
 
@@ -59,7 +79,7 @@ A number of variable checks are performed before any tasks to ensure the proper 
   - include: roles/subscription-manager/pre_tasks/pre_tasks.yml 
 ```
 
-## Tasks
+### roles
 
 The bulk of the work is performed in the main.yml for this role. The pre-task play will set a variable which can be checked to contitionally include this role as such:
 
@@ -73,7 +93,7 @@ The bulk of the work is performed in the main.yml for this role. The pre-task pl
 To register to RHSM Hosted with username and password:
 
 ```
-ansible-playbook -i inventory/ose-provision ose-provision.yml -e "rhsm_username=vvaldez rhsm_password=hunter2"
+ansible-playbook -i inventory/ose-provision ose-provision.yml -e "rhsm_username=vvaldez"
 ```
 
 To register to a Satellite server with an activation key:
@@ -82,4 +102,4 @@ To register to a Satellite server with an activation key:
 ansible-playbook -i inventory/ose-provision ose-provision.yml -e "rhsm_satellite=satellite.example.com rhsm_org=example_org rhsm_activationkey=rhel-7-ose-3-1"
 ```
 
-To ignore any Subscription Manager activities, simply do not set any parameters.
+To ignore any Subscription Manager activities, simply do not set any parameters. When prompted for the password, hit **Enter** to set a blank password.

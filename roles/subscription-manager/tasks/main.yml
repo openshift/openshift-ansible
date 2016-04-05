@@ -1,5 +1,12 @@
 ---
-
+- name: Initialize rhsm_password variable if vars_prompt was used
+  set_fact:
+    rhsm_password: "{{ hostvars.localhost.rhsm_password }}"
+  when:
+      - rhsm_password is defined
+      - rhsm_password is not none
+      - rhsm_password|trim != ''
+  
 - name: Initializing Subscription Manager authenticaiton method
   set_fact:
     rhsm_authentication: false
@@ -19,8 +26,12 @@
   set_fact:
     rhsm_authentication: "password"
   when:
-    - rhsm_username is defined and rhsm_username is not none and rhsm_username|trim != ''
-    - rhsm_password is defined and rhsm_password is not none and rhsm_password|trim != ''
+    - rhsm_username is defined
+    - rhsm_username is not none
+    - rhsm_username|trim != ''
+    - rhsm_password is defined
+    - rhsm_password is not none
+    - rhsm_password|trim != ''
     - not rhsm_authentication
 
 - name: Initializing registration status
@@ -62,18 +73,17 @@
     - rhsm_satellite|trim != ''
 
 # This can apply to either Hosted or Satellite
-
 - name: Register using username and password
   command: "/usr/bin/subscription-manager register --username={{ rhsm_username }} --password={{ rhsm_password }}"
+  no_log: true
   when:
     - not registered
-    - rhsm_authentication != "key"
+    - rhsm_authentication == "password"
 
 - name: Auto-attach to Subscription Manager Pool
   command: "/usr/bin/subscription-manager attach --auto"
   when:
     - not registered
-    - rhsm_authentication != "key"
     - rhsm_pool is undefined or rhsm_pool is none or rhsm_pool|trim == ''
 
 - name: Attach to a specific pool
@@ -83,7 +93,6 @@
     - rhsm_pool is not none
     - rhsm_pool|trim != ''
     - not registered
-    - rhsm_authentication != "key"
 
 - name: Disable all repositories
   command: "/usr/bin/subscription-manager repos --disable=*"
