@@ -9,8 +9,12 @@ import sys
 import yaml
 
 from ansible import errors
-from ansible.runner.filter_plugins.core import bool as ansible_bool
 
+# pylint: disable=no-name-in-module,import-error
+try:
+    from ansible.runner.filter_plugins.core import bool as ansible_bool
+except ImportError:
+    from ansible.plugins.filter.core import bool as ansible_bool
 
 class IdentityProviderBase(object):
     """ IdentityProviderBase
