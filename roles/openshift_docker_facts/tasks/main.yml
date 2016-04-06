@@ -46,10 +46,24 @@
   register: common_version
   failed_when: false
   changed_when: false
-  when: not openshift.common.is_atomic | bool
+  when: not openshift.common.is_containerized | bool
+
+- set_fact:
+    l_common_version: "{{ openshift.common.image_tag | default('0.0', True) | oo_image_tag_to_rpm_version }}"
+  when: openshift.common.is_containerized | bool
+
+- set_fact:
+    l_common_version: "{{ common_version.stdout | default('0.0', True) }}"
+  when: not openshift.common.is_containerized | bool
 
 - name: Set docker version to be installed
   set_fact:
     docker_version: "{{ '1.8.2' }}"
-  when: " ( common_version.stdout | default('0.0', True) | version_compare('3.2','<') and openshift.common.service_type == 'atomic-openshift' ) or
-          ( common_version.stdout | default('0.0', True) | version_compare('1.1.4','<') and openshift.common.service_type == 'origin' )"
+  when: " ( l_common_version | version_compare('3.2','<') and openshift.common.service_type == 'atomic-openshift' ) or
+          ( l_common_version | version_compare('1.1.4','<') and openshift.common.service_type == 'origin' )"
+
+- name: Set docker version to be installed
+  set_fact:
+    docker_version: "{{ '1.9.1' }}"
+  when: " ( l_common_version | version_compare('3.2','>') and openshift.common.service_type == 'atomic-openshift' ) or
+          ( l_common_version | version_compare('1.2','>') and openshift.common.service_type == 'origin' )"

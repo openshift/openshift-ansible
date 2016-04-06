@@ -7,22 +7,27 @@
   register: docker_version_result
   changed_when: false
 
-- name: Downgrade docker if necessary
-  command: "{{ ansible_pkg_mgr }} downgrade -y docker-{{ docker_version }}"
-  register: docker_downgrade_result
-  when: not docker_version_result | skipped and docker_version_result.stdout | default('0.0', True) | version_compare(docker_version, 'gt')
-
-- name: Install docker
-  action: "{{ ansible_pkg_mgr }} name=docker{{ '-' + docker_version if docker_version != '' else '' }} state=present"
-  when: not openshift.common.is_atomic | bool and not docker_downgrade_result | changed
-
 - stat: path=/etc/sysconfig/docker-storage
   register: docker_storage_check
 
 - name: Remove deferred deletion for downgrades from 1.9
   command: >
     sed -i 's/--storage-opt dm.use_deferred_deletion=true//' /etc/sysconfig/docker-storage
-  when: docker_downgrade_result | changed and docker_storage_check.stat.exists | bool and docker_version_result.stdout | default('0.0', True) | version_compare('1.9', '>=') and docker_version | version_compare('1.9', '<')
+  when: docker_storage_check.stat.exists | bool and not docker_version_result | skipped and docker_version_result.stdout | default('0.0', True) | version_compare('1.9', '>=') and docker_version | version_compare('1.9', '<')
+
+- name: Downgrade docker if necessary
+  command: "{{ ansible_pkg_mgr }} downgrade -y docker-{{ docker_version }}"
+  register: docker_downgrade_result
+  when: not docker_version_result | skipped and docker_version_result.stdout | default('0.0', True) | version_compare(docker_version, 'gt')
+
+- name: Install docker
+  action: "{{ ansible_pkg_mgr }} name=docker{{ '-' + docker_version if docker_version is defined and docker_version != '' else '' }} state=present"
+  when: not openshift.common.is_atomic | bool and not docker_version_result | skipped and docker_version_result.stdout | default('0.0', True) | version_compare(docker_version, 'lt')
+
+# We're getting ready to start docker.  This is a workaround for cases where it
+# seems a package install/upgrade/downgrade has rebooted docker and crashed it.
+- name: Reset docker service state
+  command: systemctl reset-failed docker.service
 
 - name: enable and start the docker service
   service:

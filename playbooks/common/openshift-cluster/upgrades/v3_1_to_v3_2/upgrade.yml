@@ -1,5 +1,19 @@
 ---
+###############################################################################
+# The restart playbook should be run after this playbook completes.
+###############################################################################
+
+- name: Upgrade docker
+  hosts: oo_masters_to_config:oo_nodes_to_config:oo_etcd_to_config
+  roles:
+  - openshift_facts
+  tasks:
+  - include: docker_upgrade.yml
+    when: not openshift.common.is_atomic | bool
+
 # This is a workaround for authenticated registries
+# This has to happen after the docker upgrade due to a bug in docker 1.8.2's
+# --add-registry implementation
 - name: Download new images
   hosts: oo_nodes_to_config
   roles:
@@ -27,18 +41,6 @@
       docker pull {{ item }}:v{{ g_new_version }}
     with_items:
     - "{{ openshift.master.master_image }}"
-
-###############################################################################
-# The restart playbook should be run after this playbook completes.
-###############################################################################
-
-- name: Upgrade docker
-  hosts: oo_masters_to_config:oo_nodes_to_config:oo_etcd_to_config
-  roles:
-  - openshift_facts
-  tasks:
-  - include: docker_upgrade.yml
-    when: not openshift.common.is_atomic | bool
 
 ###############################################################################
 # Upgrade Masters
