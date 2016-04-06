@@ -230,6 +230,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # characters long, to select AES-128, AES-192, or AES-256.
 #openshift_master_session_encryption_secrets=['DONT+USE+THIS+SECRET+b4NV+pmZNSO']
 
+# Image Policy Config options
+#openshift_master_image_policy_config={'disableScheduledImport': true, 'maxImagesBulkImportedPerRepository': 3}
+
 # configure how often node iptables rules are refreshed
 #openshift_node_iptables_sync_period=5s
 
