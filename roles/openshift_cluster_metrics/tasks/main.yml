@@ -28,7 +28,6 @@
     cluster-reader
     system:serviceaccount:default:heapster
   register: oex_cluster_header_role
-  register: oex_cluster_header_role
   failed_when: "'already exists' not in oex_cluster_header_role.stderr and oex_cluster_header_role.rc != 0"
   changed_when: false
 
