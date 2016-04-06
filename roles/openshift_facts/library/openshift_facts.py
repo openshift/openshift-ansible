@@ -943,12 +943,13 @@ def build_kubelet_args(facts):
     if 'node' in facts:
         kubelet_args = {}
         if 'cloudprovider' in facts:
-            if facts['cloudprovider']['kind'] == 'aws':
-                kubelet_args['cloud-provider'] = ['aws']
-                kubelet_args['cloud-config'] = [cloud_cfg_path + '/aws.conf']
-            if facts['cloudprovider']['kind'] == 'openstack':
-                kubelet_args['cloud-provider'] = ['openstack']
-                kubelet_args['cloud-config'] = [cloud_cfg_path + '/openstack.conf']
+            if 'kind' in facts['cloudprovider']:
+                if facts['cloudprovider']['kind'] == 'aws':
+                    kubelet_args['cloud-provider'] = ['aws']
+                    kubelet_args['cloud-config'] = [cloud_cfg_path + '/aws.conf']
+                if facts['cloudprovider']['kind'] == 'openstack':
+                    kubelet_args['cloud-provider'] = ['openstack']
+                    kubelet_args['cloud-config'] = [cloud_cfg_path + '/openstack.conf']
         if kubelet_args != {}:
             facts = merge_facts({'node': {'kubelet_args': kubelet_args}}, facts, [], [])
     return facts
@@ -960,12 +961,13 @@ def build_controller_args(facts):
     if 'master' in facts:
         controller_args = {}
         if 'cloudprovider' in facts:
-            if facts['cloudprovider']['kind'] == 'aws':
-                controller_args['cloud-provider'] = ['aws']
-                controller_args['cloud-config'] = [cloud_cfg_path + '/aws.conf']
-            if facts['cloudprovider']['kind'] == 'openstack':
-                controller_args['cloud-provider'] = ['openstack']
-                controller_args['cloud-config'] = [cloud_cfg_path + '/openstack.conf']
+            if 'kind' in facts['cloudprovider']:
+                if facts['cloudprovider']['kind'] == 'aws':
+                    controller_args['cloud-provider'] = ['aws']
+                    controller_args['cloud-config'] = [cloud_cfg_path + '/aws.conf']
+                if facts['cloudprovider']['kind'] == 'openstack':
+                    controller_args['cloud-provider'] = ['openstack']
+                    controller_args['cloud-config'] = [cloud_cfg_path + '/openstack.conf']
         if controller_args != {}:
             facts = merge_facts({'master': {'controller_args': controller_args}}, facts, [], [])
     return facts
@@ -977,12 +979,13 @@ def build_api_server_args(facts):
     if 'master' in facts:
         api_server_args = {}
         if 'cloudprovider' in facts:
-            if facts['cloudprovider']['kind'] == 'aws':
-                api_server_args['cloud-provider'] = ['aws']
-                api_server_args['cloud-config'] = [cloud_cfg_path + '/aws.conf']
-            if facts['cloudprovider']['kind'] == 'openstack':
-                api_server_args['cloud-provider'] = ['openstack']
-                api_server_args['cloud-config'] = [cloud_cfg_path + '/openstack.conf']
+            if 'kind' in facts['cloudprovider']:
+                if facts['cloudprovider']['kind'] == 'aws':
+                    api_server_args['cloud-provider'] = ['aws']
+                    api_server_args['cloud-config'] = [cloud_cfg_path + '/aws.conf']
+                if facts['cloudprovider']['kind'] == 'openstack':
+                    api_server_args['cloud-provider'] = ['openstack']
+                    api_server_args['cloud-config'] = [cloud_cfg_path + '/openstack.conf']
         if api_server_args != {}:
             facts = merge_facts({'master': {'api_server_args': api_server_args}}, facts, [], [])
     return facts
