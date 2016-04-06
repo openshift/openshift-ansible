@@ -10,7 +10,7 @@
 - name: Downgrade docker if necessary
   command: "{{ ansible_pkg_mgr }} downgrade -y docker-{{ docker_version }}"
   register: docker_downgrade_result
-  when: not docker_version_result | skipped and docker_version_result | default('0.0', True) | version_compare(docker_version, 'gt')
+  when: not docker_version_result | skipped and docker_version_result.stdout | default('0.0', True) | version_compare(docker_version, 'gt')
 
 - name: Install docker
   action: "{{ ansible_pkg_mgr }} name=docker{{ '-' + docker_version if docker_version != '' else '' }} state=present"
@@ -23,7 +23,7 @@
 - name: Remove deferred deletion for downgrades from 1.9
   command: >
     sed -i 's/--storage-opt dm.use_deferred_deletion=true//' /etc/sysconfig/docker-storage
-  when: docker_downgrade_result | changed and docker_check.stat.exists | bool and docker_version_result | default('0.0', True) | version_compare('1.9', '>=') and docker_version | version_compare('1.9', '<')
+  when: docker_downgrade_result | changed and docker_check.stat.exists | bool and docker_version_result.stdout | default('0.0', True) | version_compare('1.9', '>=') and docker_version | version_compare('1.9', '<')
 
 - name: enable and start the docker service
   service:
