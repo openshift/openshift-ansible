@@ -28,3 +28,5 @@ os_firewall_deny:
   port: 8080/tcp
 - service: former etcd peer port
   port: 7001/tcp
+
+openshift_version: "{{ openshift_pkg_version | default(openshift_image_tag) | default(openshift.common.image_tag) | default('') }}"

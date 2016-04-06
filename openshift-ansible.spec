@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.66
+Version:        3.0.72
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -279,6 +279,52 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Apr 05 2016 Troy Dawson <tdawson@redhat.com> 3.0.72-1
+- when docker is installed, make it 1.8.2 to avoid issues (mwoodson@redhat.com)
+- Downgrade to docker 1.8.2 if installing OSE < 3.2 (sdodson@redhat.com)
+- Pacemaker is unsupported for 3.2 (bleanhar@redhat.com)
+- Fixing regexp.  Periods are no longer allowed (kwoodson@redhat.com)
+- We require docker 1.9 for the 3.2 upgrade (bleanhar@redhat.com)
+
+* Mon Apr 04 2016 Troy Dawson <tdawson@redhat.com> 3.0.71-1
+- Fixed oc_edit by requiring name and content (kwoodson@redhat.com)
+- add higher severity trigger if no heartbeat for 1 hour (jdiaz@redhat.com)
+- Yedit enhancements (kwoodson@redhat.com)
+
+* Fri Apr 01 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.70-1
+- Enable Ansible ssh pipelining to speedup deployment (lhuard@amadeus.com)
+- Allow for overriding scheduler config (jdetiber@redhat.com)
+- a-o-i: Add 3.2 to list of supported versions (smunilla@redhat.com)
+- a-o-i: Support for unattended upgrades (smunilla@redhat.com)
+- a-o-i: More flexible upgrade mappings (smunilla@redhat.com)
+- a-o-i: OSE/AEP 3.2 product option (smunilla@redhat.com)
+- a-o-i: Error out early if callback_facts is None (smunilla@redhat.com)
+
+* Thu Mar 31 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.69-1
+- Bug 1320829 - Ensure docker installed for facts (jdetiber@redhat.com)
+- Bug 1322788 - The IMAGE_VERSION wasn't added to atomic-openshift-master-api
+  and atomic-openshift-master-controllers (bleanhar@redhat.com)
+- Fixed generate header. (kwoodson@redhat.com)
+- Bug 1322335 - The package name is wrong for rpm upgrade (bleanhar@redhat.com)
+- Add AWS cloud provider support. (abutcher@redhat.com)
+
+* Wed Mar 30 2016 Troy Dawson <tdawson@redhat.com> 3.0.68-1
+- Moving generation of ansible module side by side with module.
+  (kwoodson@redhat.com)
+- Bug 1322338 - The upgrade should keep the option insecure-
+  registry=172.30.0.0/16 (bleanhar@redhat.com)
+
+* Tue Mar 29 2016 Troy Dawson <tdawson@redhat.com> 3.0.67-1
+- The systemd unit for atomic-openshift-master wasn't not being created
+  (bleanhar@redhat.com)
+- Use openshift.master.ha instead of duplicating the logic
+  (bleanhar@redhat.com)
+- Workaround for authenticated registries (bleanhar@redhat.com)
+- First pass at systemd unit refactor (bleanhar@redhat.com)
+- fix the key name for the dynamic item of avalable (zhizhang@zhizhang-laptop-
+  nay.redhat.com)
+- make docker service want ose containerized services (sjenning@redhat.com)
+
 * Mon Mar 28 2016 Troy Dawson <tdawson@redhat.com> 3.0.66-1
 - Fixed error message to add valid yaml (kwoodson@redhat.com)
 - added admin binary varibale usage as well as specifying kubeconfig copy to be

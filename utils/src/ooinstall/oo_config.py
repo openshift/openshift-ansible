@@ -198,7 +198,7 @@ class OOConfig(object):
             self.settings['ansible_ssh_user'] = ''
 
         self.settings['ansible_inventory_path'] = \
-            '{}/hosts'.format(self.settings['ansible_inventory_directory'])
+            '{}/hosts'.format(os.path.dirname(self.config_path))
 
         # clean up any empty sets
         for setting in self.settings.keys():

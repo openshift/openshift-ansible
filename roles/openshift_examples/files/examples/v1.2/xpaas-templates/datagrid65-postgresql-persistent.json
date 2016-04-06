@@ -403,7 +403,7 @@
                         }
                     },
                     "spec": {
-                        "serviceAccount": "datagrid-service-account",
+                        "serviceAccountName": "datagrid-service-account",
                         "terminationGracePeriodSeconds": 60,
                         "containers": [
                             {

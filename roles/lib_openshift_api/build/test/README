@@ -1,0 +1,5 @@
+After generate.py has run, the ansible modules will be placed under ../../../openshift-ansible/roles/lib_openshift_api/library.
+
+
+To run the tests you need to run them like this:
+./services.yml -M ../../library

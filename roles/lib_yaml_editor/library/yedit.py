@@ -1,10 +1,27 @@
 #!/usr/bin/env python
+#     ___ ___ _  _ ___ ___    _ _____ ___ ___
+#    / __| __| \| | __| _ \  /_\_   _| __|   \
+#   | (_ | _|| .` | _||   / / _ \| | | _|| |) |
+#    \___|___|_|\_|___|_|_\/_/_\_\_|_|___|___/_ _____
+#   |   \ / _ \  | \| |/ _ \_   _| | __|   \_ _|_   _|
+#   | |) | (_) | | .` | (_) || |   | _|| |) | |  | |
+#   |___/ \___/  |_|\_|\___/ |_|   |___|___/___| |_|
+
 '''
-module for openshift cloud secrets
+module for managing yaml files
 '''
 
 import os
+import re
+
 import yaml
+# This is here because of a bug that causes yaml
+# to incorrectly handle timezone info on timestamps
+def timestamp_constructor(_, node):
+    ''' return timestamps as strings'''
+    return str(node.value)
+yaml.add_constructor(u'tag:yaml.org,2002:timestamp', timestamp_constructor)
+
 
 class YeditException(Exception):
     ''' Exception class for Yedit '''
@@ -12,11 +29,16 @@ class YeditException(Exception):
 
 class Yedit(object):
     ''' Class to modify yaml files '''
+    re_valid_key = r"(((\[-?\d+\])|([a-zA-Z-./]+)).?)+$"
+    re_key = r"(?:\[(-?\d+)\])|([a-zA-Z-./]+)"
 
-    def __init__(self, filename):
+    def __init__(self, filename=None, content=None, content_type='yaml'):
+        self.content = content
         self.filename = filename
-        self.__yaml_dict = None
-        self.get()
+        self.__yaml_dict = content
+        self.content_type = content_type
+        if self.filename and not self.content:
+            self.load(content_type=self.content_type)
 
     @property
     def yaml_dict(self):
@@ -29,63 +51,99 @@ class Yedit(object):
         self.__yaml_dict = value
 
     @staticmethod
-    def remove_entry(data, keys):
-        ''' remove an item from a dictionary with key notation a.b.c
-            d = {'a': {'b': 'c'}}}
-            keys = a.b
-            item = c
-        '''
-        if "." in keys:
-            key, rest = keys.split(".", 1)
-            if key in data.keys():
-                Yedit.remove_entry(data[key], rest)
-        else:
-            del data[keys]
+    def remove_entry(data, key):
+        ''' remove data at location key '''
+        if not (key and re.match(Yedit.re_valid_key, key) and isinstance(data, (list, dict))):
+            return None
 
-    @staticmethod
-    def add_entry(data, keys, item):
-        ''' Add an item to a dictionary with key notation a.b.c
-            d = {'a': {'b': 'c'}}}
-            keys = a.b
-            item = c
-        '''
-        if "." in keys:
-            key, rest = keys.split(".", 1)
-            if key not in data:
-                data[key] = {}
-
-            if not isinstance(data, dict):
-                raise YeditException('Invalid add_entry called on a [%s] of type [%s].' % (data, type(data)))
+        key_indexes = re.findall(Yedit.re_key, key)
+        for arr_ind, dict_key in key_indexes[:-1]:
+            if dict_key and isinstance(data, dict):
+                data = data.get(dict_key, None)
+            elif arr_ind and isinstance(data, list) and int(arr_ind) <= len(data) - 1:
+                data = data[int(arr_ind)]
             else:
-                Yedit.add_entry(data[key], rest, item)
+                return None
 
-        else:
-            data[keys] = item
+        # process last index for remove
+        # expected list entry
+        if key_indexes[-1][0]:
+            if isinstance(data, list) and int(key_indexes[-1][0]) <= len(data) - 1:
+                del data[int(key_indexes[-1][0])]
+                return True
 
+        # expected dict entry
+        elif key_indexes[-1][1]:
+            if isinstance(data, dict):
+                del data[key_indexes[-1][1]]
+                return True
 
     @staticmethod
-    def get_entry(data, keys):
+    def add_entry(data, key, item=None):
         ''' Get an item from a dictionary with key notation a.b.c
             d = {'a': {'b': 'c'}}}
-            keys = a.b
+            key = a.b
             return c
         '''
-        if keys and "." in keys:
-            key, rest = keys.split(".", 1)
-            if not isinstance(data[key], dict):
-                raise YeditException('Invalid get_entry called on a [%s] of type [%s].' % (data, type(data)))
+        if not (key and re.match(Yedit.re_valid_key, key) and isinstance(data, (list, dict))):
+            return None
 
+        curr_data = data
+
+        key_indexes = re.findall(Yedit.re_key, key)
+        for arr_ind, dict_key in key_indexes[:-1]:
+            if dict_key:
+                if isinstance(data, dict) and data.has_key(dict_key):
+                    data = data[dict_key]
+                    continue
+
+                data[dict_key] = {}
+                data = data[dict_key]
+
+            elif arr_ind and isinstance(data, list) and int(arr_ind) <= len(data) - 1:
+                data = data[int(arr_ind)]
             else:
-                return Yedit.get_entry(data[key], rest)
+                return None
 
-        else:
-            return data.get(keys, None)
+        # process last index for add
+        # expected list entry
+        if key_indexes[-1][0] and isinstance(data, list) and int(key_indexes[-1][0]) <= len(data) - 1:
+            data[int(key_indexes[-1][0])] = item
 
+        # expected dict entry
+        elif key_indexes[-1][1] and isinstance(data, dict):
+            data[key_indexes[-1][1]] = item
+
+        return curr_data
+
+    @staticmethod
+    def get_entry(data, key):
+        ''' Get an item from a dictionary with key notation a.b.c
+            d = {'a': {'b': 'c'}}}
+            key = a.b
+            return c
+        '''
+        if not (key and re.match(Yedit.re_valid_key, key) and isinstance(data, (list, dict))):
+            return None
+
+        key_indexes = re.findall(Yedit.re_key, key)
+        for arr_ind, dict_key in key_indexes:
+            if dict_key and isinstance(data, dict):
+                data = data.get(dict_key, None)
+            elif arr_ind and isinstance(data, list) and int(arr_ind) <= len(data) - 1:
+                data = data[int(arr_ind)]
+            else:
+                return None
+
+        return data
 
     def write(self):
         ''' write to file '''
+        if not self.filename:
+            raise YeditException('Please specify a filename.')
+
         with open(self.filename, 'w') as yfd:
-            yfd.write(yaml.dump(self.yaml_dict, default_flow_style=False))
+            yfd.write(yaml.safe_dump(self.yaml_dict, default_flow_style=False))
 
     def read(self):
         ''' write to file '''
@@ -105,7 +163,8 @@ class Yedit(object):
             return True
 
         return False
-    def get(self):
+
+    def load(self, content_type='yaml'):
         ''' return yaml file '''
         contents = self.read()
 
@@ -114,15 +173,27 @@ class Yedit(object):
 
         # check if it is yaml
         try:
-            self.yaml_dict = yaml.load(contents)
+            if content_type == 'yaml':
+                self.yaml_dict = yaml.load(contents)
+            elif content_type == 'json':
+                self.yaml_dict = json.loads(contents)
         except yaml.YAMLError as _:
-            # Error loading yaml
+            # Error loading yaml or json
             return None
 
         return self.yaml_dict
 
+    def get(self, key):
+        ''' get a specified key'''
+        try:
+            entry = Yedit.get_entry(self.yaml_dict, key)
+        except KeyError as _:
+            entry = None
+
+        return entry
+
     def delete(self, key):
-        ''' put key, value into a yaml file '''
+        ''' remove key from a dict'''
         try:
             entry = Yedit.get_entry(self.yaml_dict, key)
         except KeyError as _:
@@ -130,12 +201,14 @@ class Yedit(object):
         if not entry:
             return  (False, self.yaml_dict)
 
-        Yedit.remove_entry(self.yaml_dict, key)
-        self.write()
-        return (True, self.get())
+        result = Yedit.remove_entry(self.yaml_dict, key)
+        if not result:
+            return (False, self.yaml_dict)
+
+        return (True, self.yaml_dict)
 
     def put(self, key, value):
-        ''' put key, value into a yaml file '''
+        ''' put key, value into a dict '''
         try:
             entry = Yedit.get_entry(self.yaml_dict, key)
         except KeyError as _:
@@ -144,19 +217,19 @@ class Yedit(object):
         if entry == value:
             return (False, self.yaml_dict)
 
-        Yedit.add_entry(self.yaml_dict, key, value)
-        self.write()
-        return (True, self.get())
+        result = Yedit.add_entry(self.yaml_dict, key, value)
+        if not result:
+            return (False, self.yaml_dict)
+
+        return (True, self.yaml_dict)
 
     def create(self, key, value):
-        ''' create the file '''
+        ''' create a yaml file '''
         if not self.exists():
             self.yaml_dict = {key: value}
-            self.write()
-            return (True, self.get())
+            return (True, self.yaml_dict)
 
-        return (False, self.get())
-
+        return (False, self.yaml_dict)
 
 def main():
     '''
@@ -168,21 +241,21 @@ def main():
             state=dict(default='present', type='str',
                        choices=['present', 'absent', 'list']),
             debug=dict(default=False, type='bool'),
-
             src=dict(default=None, type='str'),
+            content=dict(default=None, type='dict'),
             key=dict(default=None, type='str'),
             value=dict(default=None, type='str'),
             value_format=dict(default='yaml', choices=['yaml', 'json'], type='str'),
         ),
-        mutually_exclusive=[["contents", "files"]],
+        #mutually_exclusive=[["src", "content"]],
 
         supports_check_mode=True,
     )
     state = module.params['state']
 
-    yamlfile = Yedit(module.params['src'])
+    yamlfile = Yedit(module.params['src'], module.params['content'])
 
-    rval = yamlfile.get()
+    rval = yamlfile.load()
     if not rval and state != 'present':
         module.fail_json(msg='Error opening file [%s].  Verify that the' + \
                              ' file exists, that it is has correct permissions, and is valid yaml.')
@@ -203,9 +276,16 @@ def main():
 
         if rval:
             rval = yamlfile.put(module.params['key'], value)
+            if rval[0]:
+                yamlfile.write()
             module.exit_json(changed=rval[0], results=rval[1], state="present")
 
-        rval = yamlfile.create(module.params['key'], value)
+        if not module.params['content']:
+            rval = yamlfile.create(module.params['key'], value)
+        else:
+            rval = yamlfile.load()
+        yamlfile.write()
+
         module.exit_json(changed=rval[0], results=rval[1], state="present")
 
     module.exit_json(failed=True,

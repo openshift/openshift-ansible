@@ -2,7 +2,7 @@
 - name: Ensure docker is installed
   action: "{{ ansible_pkg_mgr }} name={{ item }} state=present"
   with_items:
-  - docker
+  - docker-1.8.2
 
 # Docker doesn't seem to start cleanly the first time run
 #  when loopback (not directlvm) is configured. Putting in an

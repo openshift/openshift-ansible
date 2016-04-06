@@ -68,7 +68,7 @@ class OOCliFixture(OOInstallFixture):
     def _verify_load_facts(self, load_facts_mock):
         """ Check that we ran load facts with expected inputs. """
         load_facts_args = load_facts_mock.call_args[0]
-        self.assertEquals(os.path.join(self.work_dir, ".ansible/hosts"),
+        self.assertEquals(os.path.join(self.work_dir, "hosts"),
                           load_facts_args[0])
         self.assertEquals(os.path.join(self.work_dir,
                                        "playbooks/byo/openshift_facts.yml"),
@@ -81,8 +81,8 @@ class OOCliFixture(OOInstallFixture):
 
     def _verify_run_playbook(self, run_playbook_mock, exp_hosts_len, exp_hosts_to_run_on_len):
         """ Check that we ran playbook with expected inputs. """
-        hosts = run_playbook_mock.call_args[0][0]
-        hosts_to_run_on = run_playbook_mock.call_args[0][1]
+        hosts = run_playbook_mock.call_args[0][1]
+        hosts_to_run_on = run_playbook_mock.call_args[0][2]
         self.assertEquals(exp_hosts_len, len(hosts))
         self.assertEquals(exp_hosts_to_run_on_len, len(hosts_to_run_on))
 
@@ -133,8 +133,8 @@ class OOCliFixture(OOInstallFixture):
         self._verify_run_playbook(run_playbook_mock, exp_hosts_len, exp_hosts_to_run_on_len)
 
         # Make sure we ran on the expected masters and nodes:
-        hosts = run_playbook_mock.call_args[0][0]
-        hosts_to_run_on = run_playbook_mock.call_args[0][1]
+        hosts = run_playbook_mock.call_args[0][1]
+        hosts_to_run_on = run_playbook_mock.call_args[0][2]
         self.assertEquals(exp_hosts_len, len(hosts))
         self.assertEquals(exp_hosts_to_run_on_len, len(hosts_to_run_on))
 

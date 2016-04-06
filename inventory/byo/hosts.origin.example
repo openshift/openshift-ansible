@@ -95,6 +95,30 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # LDAP auth
 #openshift_master_identity_providers=[{'name': 'my_ldap_provider', 'challenge': 'true', 'login': 'true', 'kind': 'LDAPPasswordIdentityProvider', 'attributes': {'id': ['dn'], 'email': ['mail'], 'name': ['cn'], 'preferredUsername': ['uid']}, 'bindDN': '', 'bindPassword': '', 'ca': '', 'insecure': 'false', 'url': 'ldap://ldap.example.com:389/ou=users,dc=example,dc=com?uid'}]
 
+# Cloud Provider Configuration
+#
+# Note: You may make use of environment variables rather than store
+# sensitive configuration within the ansible inventory.
+# For example:
+#openshift_cloudprovider_aws_access_key="{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+#openshift_cloudprovider_aws_secret_key="{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+#
+# AWS
+#openshift_cloudprovider_kind=aws
+# Note: IAM profiles may be used instead of storing API credentials on disk.
+#openshift_cloudprovider_aws_access_key=aws_access_key_id
+#openshift_cloudprovider_aws_secret_key=aws_secret_access_key
+#
+# Openstack
+#openshift_cloudprovider_kind=openstack
+#openshift_cloudprovider_openstack_auth_url=http://openstack.example.com:35357/v2.0/
+#openshift_cloudprovider_openstack_username=username
+#openshift_cloudprovider_openstack_password=password
+#openshift_cloudprovider_openstack_tenand_id=tenant_id
+#openshift_cloudprovider_openstack_tenant_name=tenant_name
+#openshift_cloudprovider_openstack_region=region
+#openshift_cloudprovider_openstack_lb_subnet_id=subnet_id
+
 # Project Configuration
 #osm_project_request_message=''
 #osm_project_request_template=''

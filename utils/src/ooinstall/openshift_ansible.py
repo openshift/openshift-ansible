@@ -213,9 +213,8 @@ def default_facts(hosts, verbose=False):
     return load_system_facts(inventory_file, os_facts_path, facts_env, verbose)
 
 
-def run_main_playbook(hosts, hosts_to_run_on, verbose=False):
+def run_main_playbook(inventory_file, hosts, hosts_to_run_on, verbose=False):
     global CFG
-    inventory_file = generate_inventory(hosts_to_run_on)
     if len(hosts_to_run_on) != len(hosts):
         main_playbook_path = os.path.join(CFG.ansible_playbook_directory,
                                           'playbooks/byo/openshift-node/scaleup.yml')
@@ -251,18 +250,10 @@ def run_uninstall_playbook(verbose=False):
     return run_ansible(playbook, inventory_file, facts_env, verbose)
 
 
-def run_upgrade_playbook(old_version, new_version, verbose=False):
-    # TODO: do not hardcode the upgrade playbook, add ability to select the
-    # right playbook depending on the type of upgrade.
-    old_version = old_version.replace('.', '_')
-    new_version = old_version.replace('.', '_')
-    if old_version == new_version:
-        playbook = os.path.join(CFG.settings['ansible_playbook_directory'],
-            'playbooks/byo/openshift-cluster/upgrades/v{}_minor/upgrade.yml'.format(new_version))
-    else:
-        playbook = os.path.join(CFG.settings['ansible_playbook_directory'],
-            'playbooks/byo/openshift-cluster/upgrades/v{}_to_v{}/upgrade.yml'.format(old_version,
-                                                                                     new_version))
+def run_upgrade_playbook(playbook, verbose=False):
+    playbook = os.path.join(CFG.settings['ansible_playbook_directory'],
+            'playbooks/byo/openshift-cluster/upgrades/{}'.format(playbook))
+
     # TODO: Upgrade inventory for upgrade?
     inventory_file = generate_inventory(CFG.hosts)
     facts_env = os.environ.copy()

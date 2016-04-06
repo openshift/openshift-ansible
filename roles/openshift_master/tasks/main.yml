@@ -23,71 +23,6 @@
     msg: "Pacemaker based HA is not supported at this time when used with containerized installs"
   when: openshift_master_ha | bool and openshift_master_cluster_method == "pacemaker" and openshift.common.is_containerized | bool
 
-- name: Set master facts
-  openshift_facts:
-    role: master
-    local_facts:
-      cluster_method: "{{ openshift_master_cluster_method | default(None) }}"
-      cluster_hostname: "{{ openshift_master_cluster_hostname | default(None) }}"
-      cluster_public_hostname: "{{ openshift_master_cluster_public_hostname | default(None) }}"
-      debug_level: "{{ openshift_master_debug_level | default(openshift.common.debug_level) }}"
-      api_port: "{{ openshift_master_api_port | default(None) }}"
-      api_url: "{{ openshift_master_api_url | default(None) }}"
-      api_use_ssl: "{{ openshift_master_api_use_ssl | default(None) }}"
-      public_api_url: "{{ openshift_master_public_api_url | default(None) }}"
-      console_path: "{{ openshift_master_console_path | default(None) }}"
-      console_port: "{{ openshift_master_console_port | default(None) }}"
-      console_url: "{{ openshift_master_console_url | default(None) }}"
-      console_use_ssl: "{{ openshift_master_console_use_ssl | default(None) }}"
-      public_console_url: "{{ openshift_master_public_console_url | default(None) }}"
-      logging_public_url: "{{ openshift_master_logging_public_url | default(None) }}"
-      metrics_public_url: "{{ openshift_master_metrics_public_url | default(None) }}"
-      logout_url: "{{ openshift_master_logout_url | default(None) }}"
-      extension_scripts: "{{ openshift_master_extension_scripts | default(None) }}"
-      extension_stylesheets: "{{ openshift_master_extension_stylesheets | default(None) }}"
-      extensions: "{{ openshift_master_extensions | default(None) }}"
-      oauth_template: "{{ openshift_master_oauth_template | default(None) }}"
-      etcd_hosts: "{{ openshift_master_etcd_hosts | default(None) }}"
-      etcd_port: "{{ openshift_master_etcd_port | default(None) }}"
-      etcd_use_ssl: "{{ openshift_master_etcd_use_ssl | default(None) }}"
-      etcd_urls: "{{ openshift_master_etcd_urls | default(None) }}"
-      embedded_etcd: "{{ openshift_master_embedded_etcd | default(None) }}"
-      embedded_kube: "{{ openshift_master_embedded_kube | default(None) }}"
-      embedded_dns: "{{ openshift_master_embedded_dns | default(None) }}"
-      dns_port: "{{ openshift_master_dns_port | default(None) }}"
-      bind_addr: "{{ openshift_master_bind_addr | default(None) }}"
-      pod_eviction_timeout: "{{ openshift_master_pod_eviction_timeout | default(None) }}"
-      portal_net: "{{ openshift_master_portal_net | default(None) }}"
-      session_max_seconds: "{{ openshift_master_session_max_seconds | default(None) }}"
-      session_name: "{{ openshift_master_session_name | default(None) }}"
-      session_secrets_file: "{{ openshift_master_session_secrets_file | default(None) }}"
-      session_auth_secrets: "{{ openshift_master_session_auth_secrets | default(None) }}"
-      session_encryption_secrets: "{{ openshift_master_session_encryption_secrets | default(None) }}"
-      access_token_max_seconds: "{{ openshift_master_access_token_max_seconds | default(None) }}"
-      auth_token_max_seconds: "{{ openshift_master_auth_token_max_seconds | default(None) }}"
-      identity_providers: "{{ openshift_master_identity_providers | default(None) }}"
-      registry_url: "{{ oreg_url | default(None) }}"
-      oauth_grant_method: "{{ openshift_master_oauth_grant_method | default(None) }}"
-      sdn_cluster_network_cidr: "{{ osm_cluster_network_cidr | default(None) }}"
-      sdn_host_subnet_length: "{{ osm_host_subnet_length | default(None) }}"
-      default_subdomain: "{{ openshift_master_default_subdomain | default(osm_default_subdomain) | default(None) }}"
-      custom_cors_origins: "{{ osm_custom_cors_origins | default(None) }}"
-      default_node_selector: "{{ osm_default_node_selector | default(None) }}"
-      project_request_message: "{{ osm_project_request_message | default(None) }}"
-      project_request_template: "{{ osm_project_request_template | default(None) }}"
-      mcs_allocator_range: "{{ osm_mcs_allocator_range | default(None) }}"
-      mcs_labels_per_project: "{{ osm_mcs_labels_per_project | default(None) }}"
-      uid_allocator_range: "{{ osm_uid_allocator_range | default(None) }}"
-      router_selector: "{{ openshift_router_selector | default(None) }}"
-      registry_selector: "{{ openshift_registry_selector | default(None) }}"
-      api_server_args: "{{ osm_api_server_args | default(None) }}"
-      controller_args: "{{ osm_controller_args | default(None) }}"
-      infra_nodes: "{{ openshift_infra_nodes | default(None) }}"
-      disabled_features: "{{ osm_disabled_features | default(None) }}"
-      master_count: "{{ openshift_master_count | default(None) }}"
-      controller_lease_ttl: "{{ osm_controller_lease_ttl | default(None) }}"
-      master_image: "{{ osm_image | default(None) }}"
-
 - name: Install Master package
   action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-master{{ openshift_version  }} state=present"
   when: not openshift.common.is_containerized | bool
@@ -96,13 +31,6 @@
   command: >
     docker pull {{ openshift.master.master_image }}:{{ openshift_version }}
   when: openshift.common.is_containerized | bool
-
-- name: Install Master docker service file
-  template:
-    dest: "/etc/systemd/system/{{ openshift.common.service_type }}-master.service"
-    src: docker/master.docker.service.j2
-  register: install_result
-  when: openshift.common.is_containerized | bool and not openshift_master_ha | bool
 
 - name: Create openshift.common.data_dir
   file:
@@ -137,9 +65,9 @@
   - restart master controllers
 
 - name: Create the scheduler config
-  template:
+  copy:
+    content: "{{ scheduler_config | to_nice_json }}"
     dest: "{{ openshift_master_scheduler_conf }}"
-    src: scheduler.json.j2
     backup: true
   notify:
   - restart master
@@ -168,54 +96,8 @@
   when: item.kind == 'HTPasswdPasswordIdentityProvider'
   with_items: openshift.master.identity_providers
 
-- name: Init HA Service Info
-  set_fact:
-    ha_suffix: ""
-    ha_svcdir: "/usr/lib/systemd/system"
-
-- name: Set HA Service Info for containerized installs
-  set_fact:
-    ha_suffix: ".docker"
-    ha_svcdir: "/etc/systemd/system"
-  when: openshift.common.is_containerized | bool
-
-# workaround for missing systemd unit files for controllers/api
-- name: Create the systemd unit files
-  template:
-    src: "{{ ha_svc_template_path }}/atomic-openshift-master-{{ item }}.service.j2"
-    dest: "{{ ha_svcdir }}/{{ openshift.common.service_type }}-master-{{ item }}.service"
-  when: openshift_master_ha | bool and openshift_master_cluster_method == "native"
-  with_items:
-  - api
-  - controllers
-  register: create_unit_files
-
-- command: systemctl daemon-reload
-  when: create_unit_files | changed
-# end workaround for missing systemd unit files
-
-- name: Create the master api service env file
-  template:
-    src: "{{ ha_svc_template_path }}/atomic-openshift-master-api.j2"
-    dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-api
-  when: openshift_master_ha | bool and openshift_master_cluster_method == "native"
-  notify:
-  - restart master api
-
-- name: Create the master controllers service env file
-  template:
-    src: "{{ ha_svc_template_path }}/atomic-openshift-master-controllers.j2"
-    dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-controllers
-  when: openshift_master_ha | bool and openshift_master_cluster_method == "native"
-  notify:
-  - restart master controllers
-
-- name: Create the master service env file
-  template:
-    src: "atomic-openshift-master.j2"
-    dest: /etc/sysconfig/{{ openshift.common.service_type }}-master
-  notify:
-  - restart master
+- name: Install the systemd units
+  include: systemd_units.yml
 
 - name: Create session secrets file
   template:

@@ -666,7 +666,7 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force, verbose):
                     openshift_ansible.set_config(oo_cfg)
                     click.echo('Gathering information from hosts...')
                     callback_facts, error = openshift_ansible.default_facts(oo_cfg.hosts, verbose)
-                    if error:
+                    if error or callback_facts is None:
                         click.echo("There was a problem fetching the required information. See " \
                                    "{} for details.".format(oo_cfg.settings['ansible_log_path']))
                         sys.exit(1)
@@ -780,10 +780,27 @@ def uninstall(ctx):
 
 
 @click.command()
+@click.option('--latest-minor', '-l', is_flag=True, default=False)
+@click.option('--next-major', '-n', is_flag=True, default=False)
 @click.pass_context
-def upgrade(ctx):
+def upgrade(ctx, latest_minor, next_major):
     oo_cfg = ctx.obj['oo_cfg']
     verbose = ctx.obj['verbose']
+
+    upgrade_mappings = {
+                        '3.0':{
+                               'minor_version' :'3.0',
+                               'minor_playbook':'v3_0_minor/upgrade.yml',
+                               'major_version' :'3.1',
+                               'major_playbook':'v3_0_to_v3_1/upgrade.yml',
+                              },
+                        '3.1':{
+                               'minor_version' :'3.1',
+                               'minor_playbook':'v3_1_minor/upgrade.yml',
+                               'major_playbook':'v3_1_to_v3_2/upgrade.yml',
+                               'major_version' :'3.2',
+                            }
+                       }
 
     if len(oo_cfg.hosts) == 0:
         click.echo("No hosts defined in: %s" % oo_cfg.config_path)
@@ -791,31 +808,39 @@ def upgrade(ctx):
 
     old_variant = oo_cfg.settings['variant']
     old_version = oo_cfg.settings['variant_version']
-
+    mapping = upgrade_mappings.get(old_version)
 
     message = """
         This tool will help you upgrade your existing OpenShift installation.
 """
     click.echo(message)
-    click.echo("Version {} found. Do you want to update to the latest version of {} " \
-               "or migrate to the next major release?".format(old_version, old_version))
-    resp = click.prompt("(1) Update to latest {} (2) Migrate to next relese".format(old_version))
 
-    if resp == "2":
-        # TODO: Make this a lot more flexible
-        new_version = "3.1"
+    if not (latest_minor or next_major):
+        click.echo("Version {} found. Do you want to update to the latest version of {} " \
+                   "or migrate to the next major release?".format(old_version, old_version))
+        response = click.prompt("(1) Update to latest {} " \
+                                "(2) Migrate to next release".format(old_version),
+                                type=click.Choice(['1', '2']),)
+        if response == "1":
+            latest_minor = True
+        if response == "2":
+            next_major = True
+
+    if next_major:
+        playbook = mapping['major_playbook']
+        new_version = mapping['major_version']
         # Update config to reflect the version we're targetting, we'll write
         # to disk once ansible completes successfully, not before.
+        oo_cfg.settings['variant_version'] = new_version
         if oo_cfg.settings['variant'] == 'enterprise':
             oo_cfg.settings['variant'] = 'openshift-enterprise'
-        version = find_variant(oo_cfg.settings['variant'])[1]
-        oo_cfg.settings['variant_version'] = version.name
-    else:
-        new_version = old_version
+
+    if latest_minor:
+        playbook = mapping['minor_playbook']
+        new_version = mapping['minor_version']
 
     click.echo("Openshift will be upgraded from %s %s to %s %s on the following hosts:\n" % (
-        old_variant, old_version, oo_cfg.settings['variant'],
-        oo_cfg.settings['variant_version']))
+        old_variant, old_version, oo_cfg.settings['variant'], new_version))
     for host in oo_cfg.hosts:
         click.echo("  * %s" % host.connect_to)
 
@@ -826,7 +851,7 @@ def upgrade(ctx):
             click.echo("Upgrade cancelled.")
             sys.exit(0)
 
-    retcode = openshift_ansible.run_upgrade_playbook(old_version, new_version, verbose)
+    retcode = openshift_ansible.run_upgrade_playbook(playbook, verbose)
     if retcode > 0:
         click.echo("Errors encountered during upgrade, please check %s." %
             oo_cfg.settings['ansible_log_path'])
@@ -837,8 +862,10 @@ def upgrade(ctx):
 
 @click.command()
 @click.option('--force', '-f', is_flag=True, default=False)
+@click.option('--gen-inventory', is_flag=True, default=False,
+              help="Generate an ansible inventory file and exit.")
 @click.pass_context
-def install(ctx, force):
+def install(ctx, force, gen_inventory):
     oo_cfg = ctx.obj['oo_cfg']
     verbose = ctx.obj['verbose']
 
@@ -853,7 +880,7 @@ def install(ctx, force):
     click.echo('Gathering information from hosts...')
     callback_facts, error = openshift_ansible.default_facts(oo_cfg.hosts,
         verbose)
-    if error:
+    if error or callback_facts is None:
         click.echo("There was a problem fetching the required information. " \
                    "Please see {} for details.".format(oo_cfg.settings['ansible_log_path']))
         sys.exit(1)
@@ -861,7 +888,6 @@ def install(ctx, force):
     hosts_to_run_on, callback_facts = get_hosts_to_run_on(
         oo_cfg, callback_facts, ctx.obj['unattended'], force, verbose)
 
-    click.echo('Writing config to: %s' % oo_cfg.config_path)
 
     # We already verified this is not the case for unattended installs, so this can
     # only trigger for live CLI users:
@@ -871,7 +897,18 @@ def install(ctx, force):
     if len(oo_cfg.calc_missing_facts()) > 0:
         confirm_hosts_facts(oo_cfg, callback_facts)
 
+    # Write quick installer config file to disk:
     oo_cfg.save_to_disk()
+    # Write ansible inventory file to disk:
+    inventory_file = openshift_ansible.generate_inventory(hosts_to_run_on)
+
+    click.echo()
+    click.echo('Wrote atomic-openshift-installer config: %s' % oo_cfg.config_path)
+    click.echo("Wrote ansible inventory: %s" % inventory_file)
+    click.echo()
+
+    if gen_inventory:
+        sys.exit(0)
 
     click.echo('Ready to run installation process.')
     message = """
@@ -880,8 +917,8 @@ If changes are needed please edit the config file above and re-run.
     if not ctx.obj['unattended']:
         confirm_continue(message)
 
-    error = openshift_ansible.run_main_playbook(oo_cfg.hosts,
-                                                   hosts_to_run_on, verbose)
+    error = openshift_ansible.run_main_playbook(inventory_file, oo_cfg.hosts,
+                                                hosts_to_run_on, verbose)
     if error:
         # The bootstrap script will print out the log location.
         message = """

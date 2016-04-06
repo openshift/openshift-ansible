@@ -1,4 +1,33 @@
 ---
+# This is a workaround for authenticated registries
+- name: Download new images
+  hosts: oo_nodes_to_config
+  roles:
+  - openshift_facts
+  tasks:
+  - name: Pull Images
+    command: >
+      docker pull {{ item }}:v{{ g_new_version }}
+    with_items:
+    - "{{ openshift.node.node_image }}"
+    - "{{ openshift.node.ovs_image }}"
+    - "{{ openshift.common.pod_image }}"
+    - "{{ openshift.common.router_image }}"
+    - "{{ openshift.common.registry_image }}"
+    - "{{ openshift.common.deployer_image }}"
+
+# This is a workaround for authenticated registries
+- name: Download new images
+  hosts: oo_masters_to_config
+  roles:
+  - openshift_facts
+  tasks:
+  - name: Pull Images
+    command: >
+      docker pull {{ item }}:v{{ g_new_version }}
+    with_items:
+    - "{{ openshift.master.master_image }}"
+
 ###############################################################################
 # The restart playbook should be run after this playbook completes.
 ###############################################################################
@@ -16,14 +45,18 @@
 ###############################################################################
 - name: Upgrade master
   hosts: oo_masters_to_config
+  handlers:
+  - include: ../../../../../roles/openshift_master/handlers/main.yml
   roles:
   - openshift_facts
   tasks:
   - include: rpm_upgrade.yml component=master
     when: not openshift.common.is_containerized | bool
 
-  - include: containerized_upgrade.yml
-    when: openshift.common.is_containerized | bool
+  - include_vars: ../../../../../roles/openshift_master/vars/main.yml
+
+  - name: Update systemd units
+    include: ../../../../../roles/openshift_master/tasks/systemd_units.yml openshift_version=v{{ g_aos_versions.avail_version }}
 
 #  - name: Upgrade master configuration
 #    openshift_upgrade_config:
@@ -63,6 +96,8 @@
   hosts: oo_nodes_to_config
   roles:
   - openshift_facts
+  handlers:
+  - include: ../../../../../roles/openshift_node/handlers/main.yml
   tasks:
   - include: rpm_upgrade.yml
     vars:
@@ -108,7 +143,8 @@
   vars:
     origin_reconcile_bindings: "{{ deployment_type == 'origin' and g_new_version | version_compare('1.0.6', '>') }}"
     ent_reconcile_bindings: true
-    openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
+    openshift_docker_hosted_registry_insecure: True
+    openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.master.portal_net }}"
   tasks:
   - name: Verifying the correct commandline tools are available
     shell: grep {{ verify_upgrade_version }} {{ openshift.common.admin_binary}}

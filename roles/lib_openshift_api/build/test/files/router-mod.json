@@ -1,0 +1,30 @@
+{
+    "kind": "Service",
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "router",
+        "namespace": "default",
+        "labels": {
+            "router": "router"
+        }
+    },
+    "spec": {
+        "ports": [
+            {
+                "name": "81-tcp",
+                "protocol": "TCP",
+                "port": 81,
+                "targetPort": 81
+            }
+        ],
+        "selector": {
+            "router": "router"
+        },
+        "type": "ClusterIP",
+        "sessionAffinity": "None"
+    },
+    "status": {
+        "loadBalancer": {}
+    }
+}
+

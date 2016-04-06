@@ -598,6 +598,10 @@ resources:
               template: |
                 #cloud-config
                 write_files:
+                  - path: /etc/sudoers.d/00-openshift-no-requiretty
+                    permissions: 440
+                    content: |
+                      Defaults:openshift !requiretty
                   - path: /etc/sysconfig/network-scripts/ifcfg-eth0
                     content: |
                       DEVICE="eth0"

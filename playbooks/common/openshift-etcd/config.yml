@@ -103,7 +103,7 @@
       dest: "{{ etcd_cert_config_dir }}"
     when: etcd_server_certs_missing
   roles:
-  - etcd
+  - openshift_etcd
   - role: nickhammond.logrotate
 
 - name: Delete temporary directory on localhost
