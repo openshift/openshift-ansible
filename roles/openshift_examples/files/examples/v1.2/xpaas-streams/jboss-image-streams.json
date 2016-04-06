@@ -114,6 +114,47 @@
                             "sampleRef": "6.4.x",
                             "version": "1.2"
                         }
+                    },
+                    {
+                        "name": "1.3",
+                        "annotations": {
+                            "description": "JBoss EAP 6.4 S2I images.",
+                            "iconClass": "icon-jboss",
+                            "tags": "builder,eap,javaee,java,jboss,xpaas",
+                            "supports":"eap:6.4,javaee:6,java:8,xpaas:1.3",
+                            "sampleRepo": "https://github.com/jboss-developer/jboss-eap-quickstarts.git",
+                            "sampleContextDir": "kitchensink",
+                            "sampleRef": "6.4.x",
+                            "version": "1.3"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "ImageStream",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "jboss-eap70-openshift"
+            },
+            "spec": {
+                "tags": [
+                    {
+                        "name": "1.3-Beta",
+                        "annotations": {
+                            "description": "JBoss EAP 7.0 Beta S2I images.",
+                            "iconClass": "icon-jboss",
+                            "tags": "builder,eap,javaee,java,jboss,xpaas",
+                            "supports":"eap:7.0,javaee:7,java:8,xpaas:1.3",
+                            "sampleRepo": "https://github.com/jboss-developer/jboss-eap-quickstarts.git",
+                            "sampleContextDir": "kitchensink",
+                            "sampleRef": "7.0.x",
+                            "version": "1.3"
+                        },
+                        "from": {
+                          "Kind": "DockerImage",
+                          "Name": "registry.access.redhat.com/jboss-eap-7-beta/eap70-openshift:1.3"
+                        }
                     }
                 ]
             }
@@ -138,44 +179,6 @@
                             "sampleContextDir": "decisionserver/hellorules",
                             "sampleRef": "1.2",
                             "version": "1.2"
-                        }
-                    },
-                    {
-                        "name": "1.3",
-                        "annotations": {
-                            "description": "Decision Server 6.2 S2I images.",
-                            "iconClass": "icon-jboss",
-                            "tags": "builder,decisionserver,java,xpaas",
-                            "supports":"decisionserver:6.2,java:8,xpaas:1.3",
-                            "sampleRepo": "https://github.com/jboss-openshift/openshift-quickstarts.git",
-                            "sampleContextDir": "decisionserver/hellorules",
-                            "sampleRef": "master",
-                            "version": "1.3"
-                        }
-                    }
-                ]
-            }
-        },
-        {
-            "kind": "ImageStream",
-            "apiVersion": "v1",
-            "metadata": {
-                "name": "jboss-processserver62-openshift"
-            },
-            "spec": {
-                "dockerImageRepository": "registry.access.redhat.com/jboss-processserver-6/processserver62-openshift",
-                "tags": [
-                    {
-                        "name": "1.3",
-                        "annotations": {
-                            "description": "Intelligent Process Server 6.2 S2I images.",
-                            "iconClass": "icon-jboss",
-                            "tags": "builder,processserver,java,xpaas",
-                            "supports":"processserver:6.2,java:8,xpaas:1.3",
-                            "sampleRepo": "https://github.com/jboss-openshift/openshift-quickstarts.git",
-                            "sampleContextDir": "processserver/library",
-                            "sampleRef": "master",
-                            "version": "1.3"
                         }
                     }
                 ]
@@ -230,6 +233,34 @@
                             "tags": "messaging,amq,jboss,xpaas",
                             "supports":"amq:6.2,messaging,xpaas:1.2",
                             "version": "1.2"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "ImageStream",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "redhat-sso70-openshift",
+                 "annotations": {
+                    "description": "Red Hat SSO 7.0"
+                }
+            },
+            "spec": {
+                "tags": [
+                    {
+                        "name": "1.3-TP",
+                        "annotations": {
+                            "description": "Red Hat SSO 7.0 Tech Preview",
+                            "iconClass": "icon-jboss",
+                            "tags": "sso,keycloak,redhat",
+                            "supports":"sso:7.0,xpaas:1.3",
+                            "version": "1.3"
+                        },
+                        "from": {
+                          "Kind": "DockerImage",
+                          "Name": "registry.access.redhat.com/redhat-sso-7-tech-preview/sso70-openshift:1.3"
                         }
                     }
                 ]

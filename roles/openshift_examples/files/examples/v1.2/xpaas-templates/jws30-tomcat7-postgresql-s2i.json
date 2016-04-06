@@ -389,7 +389,7 @@
                         }
                     },
                     "spec": {
-                        "serviceAccount": "jws-service-account",
+                        "serviceAccountName": "jws-service-account",
                         "terminationGracePeriodSeconds": 60,
                         "containers": [
                             {

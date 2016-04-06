@@ -3,7 +3,7 @@
     "apiVersion": "v1",
     "metadata": {
         "annotations": {
-            "description": "Application template for EAP 6 MongDB applications with persistent storage built using S2I.",
+            "description": "Application template for EAP 6 MongoDB applications with persistent storage built using S2I.",
             "iconClass": "icon-jboss",
             "tags": "eap,mongodb,javaee,java,database,jboss,xpaas",
             "version": "1.2.0"
@@ -443,7 +443,7 @@
                         }
                     },
                     "spec": {
-                        "serviceAccount": "eap-service-account",
+                        "serviceAccountName": "eap-service-account",
                         "terminationGracePeriodSeconds": 60,
                         "containers": [
                             {

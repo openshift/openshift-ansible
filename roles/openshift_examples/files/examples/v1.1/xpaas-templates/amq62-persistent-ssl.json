@@ -340,7 +340,7 @@
                         }
                     },
                     "spec": {
-                        "serviceAccount": "amq-service-account",
+                        "serviceAccountName": "amq-service-account",
                         "terminationGracePeriodSeconds": 60,
                         "containers": [
                             {
