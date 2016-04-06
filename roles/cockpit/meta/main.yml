@@ -13,3 +13,4 @@ galaxy_info:
   - cloud
 dependencies:
   - { role: os_firewall }
+  - { role: openshift_docker }
