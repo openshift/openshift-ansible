@@ -1,17 +1,23 @@
 FROM rhel7
 
-MAINTAINER Aaron Weitekamp <aweiteka@redhat.com>
+MAINTAINER Troy Dawson <tdawson@redhat.com>
 
-RUN yum -y install http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+LABEL Name="openshift3/installer"
+LABEL Vendor="Red Hat" License=GPLv2+
+LABEL Version="v3.1.1.901"
+LABEL Release="6"
+LABEL BZComponent="aos3-installation-docker"
+LABEL Architecture="x86_64"
 
-# Not sure if all of these packages are necessary
-# only git and ansible are known requirements
-RUN yum install -y --enablerepo rhel-7-server-extras-rpms net-tools bind-utils git ansible pyOpenSSL
+RUN INSTALL_PKGS="atomic-openshift-utils" && \
+    yum install -y --enablerepo=rhel-7-server-ose-3.2-rpms $INSTALL_PKGS && \
+    rpm -V $INSTALL_PKGS && \
+    yum clean all
 
-ADD ./  /opt/openshift-ansible/
+# Expect user to mount a workdir for container output (installer.cfg, hosts inventory, ansible log)
+VOLUME /var/lib/openshift-installer/
+WORKDIR /var/lib/openshift-installer/
 
-ENTRYPOINT ["/usr/bin/ansible-playbook"]
+RUN mkdir -p /var/lib/openshift-installer/
 
-CMD ["/opt/openshift-ansible/playbooks/byo/config.yml"]
-
-LABEL RUN docker run -it --rm --privileged --net=host -v ~/.ssh:/root/.ssh -v /etc/ansible:/etc/ansible --name NAME -e NAME=NAME -e IMAGE=IMAGE IMAGE
+ENTRYPOINT ["/usr/bin/atomic-openshift-installer", "-c", "/var/lib/openshift-installer/installer.cfg", "--ansible-log-path", "/var/lib/openshift-installer/ansible.log"]
