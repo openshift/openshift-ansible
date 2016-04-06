@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.72
+Version:        3.0.73
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -279,6 +279,23 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Apr 06 2016 Troy Dawson <tdawson@redhat.com> 3.0.73-1
+- Replace unused Dockerfile with one used for official builds.
+  (dgoodwin@redhat.com)
+- Update for zbx_user refresh (kwoodson@redhat.com)
+- Docker 1.9 is actually cool starting in origin 1.1.4 (sdodson@redhat.com)
+- Unmask services (bleanhar@redhat.com)
+- XPAAS v1.3 for OSE 3.2 (sdodson@redhat.com)
+- XPAAS 1.3 content for OSE 3.1 (sdodson@redhat.com)
+- Bug 1322788 - The IMAGE_VERSION wasn't added to atomic-openshift-master-api
+  and atomic-openshift-master-controllers (bleanhar@redhat.com)
+- Bug 1323123 - upgrade failed to containerized OSE on RHEL Host without ose3.2
+  repo (bleanhar@redhat.com)
+- Write inventory to same directory as quick install config.
+  (dgoodwin@redhat.com)
+- Add --gen-inventory command to atomic-openshift-installer.
+  (dgoodwin@redhat.com)
+
 * Tue Apr 05 2016 Troy Dawson <tdawson@redhat.com> 3.0.72-1
 - when docker is installed, make it 1.8.2 to avoid issues (mwoodson@redhat.com)
 - Downgrade to docker 1.8.2 if installing OSE < 3.2 (sdodson@redhat.com)
