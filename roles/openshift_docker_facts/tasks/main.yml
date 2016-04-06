@@ -52,4 +52,4 @@
   set_fact:
     docker_version: "{{ '1.8.2' }}"
   when: " ( common_version.stdout | default('0.0', True) | version_compare('3.2','<') and openshift.common.service_type == 'atomic-openshift' ) or
-          ( common_version.stdout | default('0.0', True) | version_compare('1.2','<') and openshift.common.service_type == 'origin' )"
+          ( common_version.stdout | default('0.0', True) | version_compare('1.1.4','<') and openshift.common.service_type == 'origin' )"
