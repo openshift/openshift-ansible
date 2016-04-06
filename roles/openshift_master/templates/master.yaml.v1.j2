@@ -1,3 +1,10 @@
+admissionConfig:
+{% if 'admission_plugin_order' in openshift.master %}
+  pluginOrderOverride:{{ openshift.master.admission_plugin_order | to_padded_yaml(level=2) }}
+{% endif %}
+{% if 'admission_plugin_config' in openshift.master %}
+  pluginConfig:{{ openshift.master.admission_plugin_config | to_padded_yaml(level=2) }}
+{% endif %}
 apiLevels:
 {% if not openshift.common.version_gte_3_1_or_1_1 | bool %}
 - v1beta3
@@ -96,6 +103,13 @@ kubernetesMasterConfig:
   - v1beta3
   - v1
 {% endif %}
+  admissionConfig:
+{% if 'kube_admission_plugin_order' in openshift.master %}
+    pluginOrderOverride:{{ openshift.master.kube_admission_plugin_order | to_padded_yaml(level=3) }}
+{% endif %}
+{% if 'kube_admission_plugin_config' in openshift.master %}
+    pluginConfig:{{ openshift.master.kube_admission_plugin_config | to_padded_yaml(level=3) }}
+{% endif %}
   apiServerArguments: {{ openshift.master.api_server_args | default(None) | to_padded_yaml( level=2 ) }}
   controllerArguments: {{ openshift.master.controller_args | default(None) | to_padded_yaml( level=2 ) }}
   masterCount: {{ openshift.master.master_count if openshift.master.cluster_method | default(None) == 'native' else 1 }}
@@ -123,9 +137,11 @@ networkConfig:
 # serviceNetworkCIDR must match kubernetesMasterConfig.servicesSubnet
   serviceNetworkCIDR: {{ openshift.master.portal_net }}
 oauthConfig:
-{% if 'oauth_template' in openshift.master %}
-  templates:
-    login: {{ openshift.master.oauth_template }}
+{% if 'oauth_always_show_provider_selection' in openshift.master %}
+  alwaysShowProviderSelection: {{ openshift.master.oauth_always_show_provider_selection }}
+{% endif %}
+{% if 'oauth_templates' in openshift.master %}
+  templates:{{ openshift.master.oauth_templates | to_padded_yaml(level=2) }}
 {% endif %}
   assetPublicURL: {{ openshift.master.public_console_url }}/
   grantConfig:
