@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.73
+Version:        3.0.74
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -279,6 +279,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Apr 06 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.74-1
+- Add support for configuring oauth templates. (dgoodwin@redhat.com)
+- Add support for templating master admissionConfig. (dgoodwin@redhat.com)
+
 * Wed Apr 06 2016 Troy Dawson <tdawson@redhat.com> 3.0.73-1
 - Replace unused Dockerfile with one used for official builds.
   (dgoodwin@redhat.com)
