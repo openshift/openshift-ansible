@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.74
+Version:        3.0.75
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -279,6 +279,13 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Apr 07 2016 Troy Dawson <tdawson@redhat.com> 3.0.75-1
+- First attempt at oadm router module (kwoodson@redhat.com)
+- Remove openshift_common dep from openshift_storage_nfs (abutcher@redhat.com)
+- Add cloudprovider config dir to docker options. (abutcher@redhat.com)
+- Check for kind in cloudprovider facts prior to accessing.
+  (abutcher@redhat.com)
+
 * Wed Apr 06 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.74-1
 - Add support for configuring oauth templates. (dgoodwin@redhat.com)
 - Add support for templating master admissionConfig. (dgoodwin@redhat.com)
