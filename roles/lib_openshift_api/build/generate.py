@@ -33,6 +33,11 @@ FILES = {'oc_obj.py': ['src/base.py',
                         'src/edit.py',
                         'ansible/edit.py',
                        ],
+         'oadm_router.py': ['src/base.py',
+                            '../../lib_yaml_editor/build/src/yedit.py',
+                            'src/router.py',
+                            'ansible/router.py',
+                           ],
         }
 
 
