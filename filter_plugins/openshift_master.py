@@ -527,9 +527,30 @@ class FilterModule(object):
                       'openshift-master.kubeconfig']
         return certs
 
+    @staticmethod
+    def oo_htpasswd_users_from_file(file_contents):
+        ''' return a dictionary of htpasswd users from htpasswd file contents '''
+        htpasswd_entries = {}
+        if not isinstance(file_contents, basestring):
+            raise errors.AnsibleFilterError("failed, expects to filter on a string")
+        for line in file_contents.splitlines():
+            user = None
+            passwd = None
+            if len(line) == 0:
+                continue
+            if ':' in line:
+                user, passwd = line.split(':', 1)
+
+            if user is None or len(user) == 0 or passwd is None or len(passwd) == 0:
+                error_msg = "failed, expects each line to be a colon separated string representing the user and passwd"
+                raise errors.AnsibleFilterError(error_msg)
+            htpasswd_entries[user] = passwd
+        return htpasswd_entries
+
 
     def filters(self):
         ''' returns a mapping of filters to methods '''
         return {"translate_idps": self.translate_idps,
                 "validate_pcs_cluster": self.validate_pcs_cluster,
-                "certificates_to_synchronize": self.certificates_to_synchronize}
+                "certificates_to_synchronize": self.certificates_to_synchronize,
+                "oo_htpasswd_users_from_file": self.oo_htpasswd_users_from_file}

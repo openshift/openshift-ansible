@@ -92,12 +92,26 @@ deployment_type=origin
 
 # htpasswd auth
 openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]
+# Defining htpasswd users
+#openshift_master_htpasswd_users={'user1': '<pre-hashed password>', 'user2': '<pre-hashed password>'
+# or
+#openshift_master_htpasswd_file=<path to local pre-generated htpasswd file>
 
 # Allow all auth
 #openshift_master_identity_providers=[{'name': 'allow_all', 'login': 'true', 'challenge': 'true', 'kind': 'AllowAllPasswordIdentityProvider'}]
 
 # LDAP auth
 #openshift_master_identity_providers=[{'name': 'my_ldap_provider', 'challenge': 'true', 'login': 'true', 'kind': 'LDAPPasswordIdentityProvider', 'attributes': {'id': ['dn'], 'email': ['mail'], 'name': ['cn'], 'preferredUsername': ['uid']}, 'bindDN': '', 'bindPassword': '', 'ca': '', 'insecure': 'false', 'url': 'ldap://ldap.example.com:389/ou=users,dc=example,dc=com?uid'}]
+# Configuring the ldap ca certificate
+#openshift_master_ldap_ca=<ca text>
+# or
+#openshift_master_ldap_ca_file=<path to local ca file to use>
+
+# Available variables for configuring certificates for other identity providers:
+#openshift_master_openid_ca
+#openshift_master_openid_ca_file
+#openshift_master_request_header_ca
+#openshift_master_request_header_ca_file
 
 # Cloud Provider Configuration
 #
