@@ -21,23 +21,22 @@ From this role:
 | openshift_hosted_registry_storage_volume_name   | registry              | Registry volume within openshift_hosted_registry_volume_dir |
 | openshift_hosted_registry_storage_nfs_options   | *(rw,root_squash)     | NFS options for configured exports.                         |
 
-
-From openshift_common:
-| Name                          | Default Value  |                                        |
-|-------------------------------|----------------|----------------------------------------|
-| openshift_debug_level         | 2              | Global openshift debug log verbosity   |
-
-
 Dependencies
 ------------
+
+* os_firewall
+* openshift_facts
+* openshift_repos
 
 Example Playbook
 ----------------
 
+```
 - name: Configure nfs hosts
   hosts: oo_nfs_to_config
   roles:
   - role: openshift_storage_nfs
+```
 
 License
 -------
