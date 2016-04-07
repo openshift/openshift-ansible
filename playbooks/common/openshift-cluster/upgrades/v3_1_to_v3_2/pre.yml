@@ -38,7 +38,7 @@
       msg: >
         This upgrade does not support Pacemaker:
         https://docs.openshift.{{ g_pacemaker_upgrade_url_segment }}/install_config/upgrading/pacemaker_to_native_ha.html
-    when: openshift.master.cluster_method == 'pacemaker'
+    when: openshift.master.cluster_method is defined and openshift.master.cluster_method == 'pacemaker'
 
   - fail:
       msg: >
