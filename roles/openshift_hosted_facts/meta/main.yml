@@ -1,7 +1,7 @@
 ---
 galaxy_info:
   author: Andrew Butcher
-  description: OpenShift Persistent Volumes
+  description: OpenShift Hosted Facts
   company: Red Hat, Inc.
   license: Apache License, Version 2.0
   min_ansible_version: 1.9
@@ -9,6 +9,7 @@ galaxy_info:
   - name: EL
     versions:
     - 7
+  categories:
+  - cloud
 dependencies:
-- role: openshift_common
-- role: openshift_hosted_facts
+- role: openshift_facts
