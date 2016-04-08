@@ -3,9 +3,7 @@
   set_fact:
     rhsm_password: "{{ hostvars.localhost.rhsm_password }}"
   when:
-      - rhsm_password is defined
-      - rhsm_password is not none
-      - rhsm_password|trim != ''
+    - rhsm_password is not defined or rhsm_password is none or rhsm_password|trim == ''
   
 - name: "Initializing Subscription Manager authenticaiton method"
   set_fact:
