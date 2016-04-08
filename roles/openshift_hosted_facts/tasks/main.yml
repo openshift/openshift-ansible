@@ -2,8 +2,6 @@
 - name: Set hosted facts
   openshift_facts:
     role: hosted
-    openshift_env: "{{ item | oo_openshift_env }}"
-  no_log: true
-  with_items:
-  - "{{ hostvars[inventory_hostname] }}"
-  - "{{ hostvars }}"
+    openshift_env: "{{ hostvars[inventory_hostname]
+                       | oo_merge_dicts(hostvars)
+                       | oo_openshift_env }}"

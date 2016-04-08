@@ -57,6 +57,19 @@ class FilterModule(object):
         return [item for sublist in data for item in sublist]
 
     @staticmethod
+    def oo_merge_dicts(first_dict, second_dict):
+        """ Merge two dictionaries where second_dict values take precedence.
+            Ex: first_dict={'a': 1, 'b': 2}
+                second_dict={'b': 3, 'c': 4}
+                returns {'a': 1, 'b': 3, 'c': 4}
+        """
+        if not isinstance(first_dict, dict) or not isinstance(second_dict, dict):
+            raise errors.AnsibleFilterError("|failed expects to merge two dicts")
+        merged = first_dict.copy()
+        merged.update(second_dict)
+        return merged
+
+    @staticmethod
     def oo_collect(data, attribute=None, filters=None):
         """ This takes a list of dict and collects all attributes specified into a
             list. If filter is specified then we will include all items that
@@ -755,4 +768,5 @@ class FilterModule(object):
             "oo_pods_match_component": self.oo_pods_match_component,
             "oo_get_hosts_from_hostvars": self.oo_get_hosts_from_hostvars,
             "oo_image_tag_to_rpm_version": self.oo_image_tag_to_rpm_version,
+            "oo_merge_dicts": self.oo_merge_dicts
         }
