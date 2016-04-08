@@ -11,37 +11,6 @@
   - include: docker_upgrade.yml
     when: not openshift.common.is_atomic | bool
 
-# This is a workaround for authenticated registries
-# This has to happen after the docker upgrade due to a bug in docker 1.8.2's
-# --add-registry implementation
-- name: Download new images
-  hosts: oo_nodes_to_config
-  roles:
-  - openshift_facts
-  tasks:
-  - name: Pull Images
-    command: >
-      docker pull {{ item }}:v{{ g_new_version }}
-    with_items:
-    - "{{ openshift.node.node_image }}"
-    - "{{ openshift.node.ovs_image }}"
-    - "{{ openshift.common.pod_image }}"
-    - "{{ openshift.common.router_image }}"
-    - "{{ openshift.common.registry_image }}"
-    - "{{ openshift.common.deployer_image }}"
-
-# This is a workaround for authenticated registries
-- name: Download new images
-  hosts: oo_masters_to_config
-  roles:
-  - openshift_facts
-  tasks:
-  - name: Pull Images
-    command: >
-      docker pull {{ item }}:v{{ g_new_version }}
-    with_items:
-    - "{{ openshift.master.master_image }}"
-
 ###############################################################################
 # Upgrade Masters
 ###############################################################################
