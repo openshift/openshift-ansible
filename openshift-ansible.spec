@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.75
+Version:        3.0.76
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -279,6 +279,13 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Apr 08 2016 Troy Dawson <tdawson@redhat.com> 3.0.76-1
+- a-o-i: Support openshift_image_tag (smunilla@redhat.com)
+- Bug 1324729 - Import xPaas image streams failed during 3.2 installation
+  (bleanhar@redhat.com)
+- Test docker_version_result.stdout when determining if docker should be
+  installed/downgraded. (abutcher@redhat.com)
+
 * Thu Apr 07 2016 Troy Dawson <tdawson@redhat.com> 3.0.75-1
 - First attempt at oadm router module (kwoodson@redhat.com)
 - Remove openshift_common dep from openshift_storage_nfs (abutcher@redhat.com)
