@@ -10,6 +10,7 @@
     router_image: "{{ openshift.master.registry_url | replace( '${component}', 'haproxy-router' ) | replace ( '${version}', 'v' + g_new_version ) }}"
     oc_cmd: "{{ openshift.common.client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig"
   roles:
+  - openshift_manageiq
   # Create the new templates shipped in 3.2, existing templates are left
   # unmodified. This prevents the subsequent role definition for
   # openshift_examples from failing when trying to replace templates that do

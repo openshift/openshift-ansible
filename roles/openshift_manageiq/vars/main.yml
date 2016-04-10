@@ -30,3 +30,6 @@ manage_iq_tasks:
     - policy add-scc-to-user privileged system:serviceaccount:management-infra:management-admin
     - policy add-cluster-role-to-user system:image-puller system:serviceaccount:management-infra:inspector-admin
     - policy add-scc-to-user privileged system:serviceaccount:management-infra:inspector-admin
+
+manage_iq_openshift_3_2_tasks:
+    - policy add-cluster-role-to-user system:image-auditor system:serviceaccount:management-infra:management-admin
