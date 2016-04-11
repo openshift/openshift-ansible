@@ -105,8 +105,12 @@
   - include: ../../../../../roles/openshift_master/handlers/main.yml
   - include: ../../../../../roles/openshift_node/handlers/main.yml
   roles:
+  # We want the cli role to evaluate so that the containerized oc/oadm wrappers
+  # are modified to use the correct image tag.  However, this can trigger a
+  # docker restart if new configuration is laid down which would immediately
+  # pull the latest image and defeat the purpose of these tasks.
   - openshift_cli
-  tasks:
+  pre_tasks:
   - name: Clean package cache
     command: "{{ ansible_pkg_mgr }} clean all"
     when: not openshift.common.is_atomic | bool
