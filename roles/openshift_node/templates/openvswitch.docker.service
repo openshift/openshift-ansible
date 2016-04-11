@@ -11,6 +11,7 @@ ExecStartPost=/usr/bin/sleep 5
 ExecStop=/usr/bin/docker stop openvswitch
 SyslogIdentifier=openvswitch
 Restart=always
+RestartSec=5s
 
 [Install]
 WantedBy=docker.service

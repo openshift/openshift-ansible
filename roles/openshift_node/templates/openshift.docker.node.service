@@ -17,6 +17,7 @@ ExecStartPost=/usr/bin/sleep 10
 ExecStop=/usr/bin/docker stop {{ openshift.common.service_type }}-node
 SyslogIdentifier={{ openshift.common.service_type }}-node
 Restart=always
+RestartSec=5s
 
 [Install]
 WantedBy=docker.service
