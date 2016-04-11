@@ -56,6 +56,13 @@ def migrate_docker_facts(facts):
     if 'node' in facts and 'portal_net' in facts['node']:
         facts['docker']['hosted_registry_insecure'] = True
         facts['docker']['hosted_registry_network'] = facts['node'].pop('portal_net')
+
+    # log_options was originally meant to be a comma separated string, but
+    # we now prefer an actual list, with backward compatability:
+    if 'log_options' in facts['docker'] and \
+            isinstance(facts['docker']['log_options'], basestring):
+        facts['docker']['log_options'] = facts['docker']['log_options'].split(",")
+
     return facts
 
 # TODO: We should add a generic migration function that takes source and destination
@@ -1852,6 +1859,10 @@ class OpenShiftFacts(object):
                     if isinstance(val, basestring):
                         val = [x.strip() for x in val.split(',')]
                     new_local_facts['docker'][key] = list(set(val) - set(['']))
+            # Convert legacy log_options comma sep string to a list if present:
+            if 'log_options' in new_local_facts['docker'] and \
+                    isinstance(new_local_facts['docker']['log_options'], basestring):
+                new_local_facts['docker']['log_options'] = new_local_facts['docker']['log_options'].split(',')
 
         new_local_facts = self.remove_empty_facts(new_local_facts)
 
@@ -1875,7 +1886,7 @@ class OpenShiftFacts(object):
             if isinstance(facts[fact], dict):
                 facts[fact] = self.remove_empty_facts(facts[fact])
             else:
-                if value == "" or value is None:
+                if value == "" or value == [""] or value is None:
                     facts_to_remove.append(fact)
         for fact in facts_to_remove:
             del facts[fact]

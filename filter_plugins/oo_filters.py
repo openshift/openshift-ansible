@@ -259,8 +259,11 @@ class FilterModule(object):
 
     @staticmethod
     def oo_split(string, separator=','):
-        """ This splits the input string into a list
+        """ This splits the input string into a list. If the input string is
+        already a list we will return it as is.
         """
+        if isinstance(string, list):
+            return string
         return string.split(separator)
 
     @staticmethod
