@@ -59,6 +59,10 @@ deployment_type=origin
 # See: https://docs.openshift.org/latest/install_config/aggregate_logging.html
 #openshift_master_logging_public_url=https://kibana.example.com
 
+# Configure imagePolicyConfig in the master config
+# See: https://godoc.org/github.com/openshift/origin/pkg/cmd/server/api#ImagePolicyConfig
+#openshift_master_image_policy_config={"maxImagesBulkImportedPerRepository": 3, "disableScheduledImport": true}
+
 # Docker Configuration
 # Add additional, insecure, and blocked registries to global docker configuration
 # For enterprise deployment types we ensure that registry.access.redhat.com is
