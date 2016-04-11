@@ -151,6 +151,10 @@
 
   - fail:
       msg: Verifying the correct version was found
+    when: g_aos_versions.curr_version == ""
+
+  - fail:
+      msg: Verifying the correct version was found
     when: verify_upgrade_version is defined and g_new_version != verify_upgrade_version
 
   - include_vars: ../../../../../roles/openshift_master/vars/main.yml
