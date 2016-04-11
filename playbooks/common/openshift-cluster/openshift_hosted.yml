@@ -1,0 +1,5 @@
+- name: Create Hosted Resources
+  hosts: oo_first_master
+  roles:
+  - role: openshift_hosted
+    openshift_hosted_router_registryurl: "{{ hostvars[groups.oo_first_master.0].openshift.master.registry_url }}"

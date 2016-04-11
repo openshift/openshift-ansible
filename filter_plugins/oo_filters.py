@@ -299,6 +299,69 @@ class FilterModule(object):
         return [x for x in data if x.has_key(filter_attr) and x[filter_attr]]
 
     @staticmethod
+    def oo_oc_nodes_matching_selector(nodes, selector):
+        """ Filters a list of nodes by selector.
+
+            Examples:
+                nodes = [{"kind": "Node", "metadata": {"name": "node1.example.com",
+                          "labels": {"kubernetes.io/hostname": "node1.example.com",
+                          "color": "green"}}},
+                         {"kind": "Node", "metadata": {"name": "node2.example.com",
+                          "labels": {"kubernetes.io/hostname": "node2.example.com",
+                          "color": "red"}}}]
+                selector = 'color=green'
+                returns = ['node1.example.com']
+            Args:
+                nodes (list[dict]): list of node definitions
+                selector (str): "label=value" node selector to filter `nodes` by
+            Returns:
+                list[str]: nodes filtered by selector
+        """
+        if not isinstance(nodes, list):
+            raise errors.AnsibleFilterError("failed expects nodes to be a list, got {0}".format(type(nodes)))
+        if not isinstance(selector, basestring):
+            raise errors.AnsibleFilterError("failed expects selector to be a string")
+        if not re.match('.*=.*', selector):
+            raise errors.AnsibleFilterError("failed selector does not match \"label=value\" format")
+        label = selector.split('=')[0]
+        value = selector.split('=')[1]
+        return FilterModule.oo_oc_nodes_with_label(nodes, label, value)
+
+    @staticmethod
+    def oo_oc_nodes_with_label(nodes, label, value):
+        """ Filters a list of nodes by label, value.
+
+            Examples:
+                nodes = [{"kind": "Node", "metadata": {"name": "node1.example.com",
+                          "labels": {"kubernetes.io/hostname": "node1.example.com",
+                          "color": "green"}}},
+                         {"kind": "Node", "metadata": {"name": "node2.example.com",
+                          "labels": {"kubernetes.io/hostname": "node2.example.com",
+                          "color": "red"}}}]
+                label = 'color'
+                value = 'green'
+                returns = ['node1.example.com']
+            Args:
+                nodes (list[dict]): list of node definitions
+                label (str): label to filter `nodes` by
+                value (str): value of `label` to filter `nodes` by
+            Returns:
+                list[str]: nodes filtered by selector
+        """
+        if not isinstance(nodes, list):
+            raise errors.AnsibleFilterError("failed expects nodes to be a list")
+        if not isinstance(label, basestring):
+            raise errors.AnsibleFilterError("failed expects label to be a string")
+        if not isinstance(value, basestring):
+            raise errors.AnsibleFilterError("failed expects value to be a string")
+        matching_nodes = []
+        for node in nodes:
+            if label in node['metadata']['labels']:
+                if node['metadata']['labels'][label] == value:
+                    matching_nodes.append(node['metadata']['name'])
+        return matching_nodes
+
+    @staticmethod
     def oo_nodes_with_label(nodes, label, value=None):
         """ Filters a list of nodes by label and value (if provided)
 
@@ -601,36 +664,38 @@ class FilterModule(object):
 
         if persistent_volumes == None:
             persistent_volumes = []
-        for component in hostvars['openshift']['hosted']:
-            kind = hostvars['openshift']['hosted'][component]['storage']['kind']
-            create_pv = hostvars['openshift']['hosted'][component]['storage']['create_pv']
-            if kind != None and create_pv:
-                if kind == 'nfs':
-                    host = hostvars['openshift']['hosted'][component]['storage']['host']
-                    if host == None:
-                        if len(groups['oo_nfs_to_config']) > 0:
-                            host = groups['oo_nfs_to_config'][0]
+        if 'hosted' in hostvars['openshift']:
+            for component in hostvars['openshift']['hosted']:
+                if 'storage' in hostvars['openshift']['hosted'][component]:
+                    kind = hostvars['openshift']['hosted'][component]['storage']['kind']
+                    create_pv = hostvars['openshift']['hosted'][component]['storage']['create_pv']
+                    if kind != None and create_pv:
+                        if kind == 'nfs':
+                            host = hostvars['openshift']['hosted'][component]['storage']['host']
+                            if host == None:
+                                if len(groups['oo_nfs_to_config']) > 0:
+                                    host = groups['oo_nfs_to_config'][0]
+                                else:
+                                    raise errors.AnsibleFilterError("|failed no storage host detected")
+                            directory = hostvars['openshift']['hosted'][component]['storage']['nfs']['directory']
+                            volume = hostvars['openshift']['hosted'][component]['storage']['volume']['name']
+                            path = directory + '/' + volume
+                            size = hostvars['openshift']['hosted'][component]['storage']['volume']['size']
+                            access_modes = hostvars['openshift']['hosted'][component]['storage']['access_modes']
+                            persistent_volume = dict(
+                                name="{0}-volume".format(volume),
+                                capacity=size,
+                                access_modes=access_modes,
+                                storage=dict(
+                                    nfs=dict(
+                                        server=host,
+                                        path=path)))
+                            persistent_volumes.append(persistent_volume)
                         else:
-                            raise errors.AnsibleFilterError("|failed no storage host detected")
-                    directory = hostvars['openshift']['hosted'][component]['storage']['nfs']['directory']
-                    volume = hostvars['openshift']['hosted'][component]['storage']['volume']['name']
-                    path = directory + '/' + volume
-                    size = hostvars['openshift']['hosted'][component]['storage']['volume']['size']
-                    access_modes = hostvars['openshift']['hosted'][component]['storage']['access_modes']
-                    persistent_volume = dict(
-                        name="{0}-volume".format(volume),
-                        capacity=size,
-                        access_modes=access_modes,
-                        storage=dict(
-                            nfs=dict(
-                                server=host,
-                                path=path)))
-                    persistent_volumes.append(persistent_volume)
-                else:
-                    msg = "|failed invalid storage kind '{0}' for component '{1}'".format(
-                        kind,
-                        component)
-                    raise errors.AnsibleFilterError(msg)
+                            msg = "|failed invalid storage kind '{0}' for component '{1}'".format(
+                                kind,
+                                component)
+                            raise errors.AnsibleFilterError(msg)
         return persistent_volumes
 
     @staticmethod
@@ -645,18 +710,20 @@ class FilterModule(object):
 
         if persistent_volume_claims == None:
             persistent_volume_claims = []
-        for component in hostvars['openshift']['hosted']:
-            kind = hostvars['openshift']['hosted'][component]['storage']['kind']
-            create_pv = hostvars['openshift']['hosted'][component]['storage']['create_pv']
-            if kind != None and create_pv:
-                volume = hostvars['openshift']['hosted'][component]['storage']['volume']['name']
-                size = hostvars['openshift']['hosted'][component]['storage']['volume']['size']
-                access_modes = hostvars['openshift']['hosted'][component]['storage']['access_modes']
-                persistent_volume_claim = dict(
-                    name="{0}-claim".format(volume),
-                    capacity=size,
-                    access_modes=access_modes)
-                persistent_volume_claims.append(persistent_volume_claim)
+        if 'hosted' in hostvars['openshift']:
+            for component in hostvars['openshift']['hosted']:
+                if 'storage' in hostvars['openshift']['hosted'][component]:
+                    kind = hostvars['openshift']['hosted'][component]['storage']['kind']
+                    create_pv = hostvars['openshift']['hosted'][component]['storage']['create_pv']
+                    if kind != None and create_pv:
+                        volume = hostvars['openshift']['hosted'][component]['storage']['volume']['name']
+                        size = hostvars['openshift']['hosted'][component]['storage']['volume']['size']
+                        access_modes = hostvars['openshift']['hosted'][component]['storage']['access_modes']
+                        persistent_volume_claim = dict(
+                            name="{0}-claim".format(volume),
+                            capacity=size,
+                            access_modes=access_modes)
+                        persistent_volume_claims.append(persistent_volume_claim)
         return persistent_volume_claims
 
     @staticmethod
@@ -768,5 +835,7 @@ class FilterModule(object):
             "oo_pods_match_component": self.oo_pods_match_component,
             "oo_get_hosts_from_hostvars": self.oo_get_hosts_from_hostvars,
             "oo_image_tag_to_rpm_version": self.oo_image_tag_to_rpm_version,
-            "oo_merge_dicts": self.oo_merge_dicts
+            "oo_merge_dicts": self.oo_merge_dicts,
+            "oo_oc_nodes_matching_selector": self.oo_oc_nodes_matching_selector,
+            "oo_oc_nodes_with_label": self.oo_oc_nodes_with_label
         }
