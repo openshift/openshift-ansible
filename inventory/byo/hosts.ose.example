@@ -89,6 +89,13 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_master_identity_providers=[{'name': 'allow_all', 'login': 'true', 'challenge': 'true', 'kind': 'AllowAllPasswordIdentityProvider'}]
 
 # LDAP auth
+#
+# When setting this value at install time for containerized installs make sure
+# that the referenced ca file exists under /etc/origin.  For new containerized
+# installations this directory will have to be created manually.  For RPM
+# installations the ca file can be stored anywhere the running Master service
+# can read it.
+#
 #openshift_master_identity_providers=[{'name': 'my_ldap_provider', 'challenge': 'true', 'login': 'true', 'kind': 'LDAPPasswordIdentityProvider', 'attributes': {'id': ['dn'], 'email': ['mail'], 'name': ['cn'], 'preferredUsername': ['uid']}, 'bindDN': '', 'bindPassword': '', 'ca': '', 'insecure': 'false', 'url': 'ldap://ldap.example.com:389/ou=users,dc=example,dc=com?uid'}]
 
 # Cloud Provider Configuration
@@ -116,8 +123,11 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_cloudprovider_openstack_lb_subnet_id=subnet_id
 
 # Project Configuration
+#
 #osm_project_request_message=''
 #osm_project_request_template=''
+#
+# The following settings should not be changed post installation.
 #osm_mcs_allocator_range='s0:/2'
 #osm_mcs_labels_per_project=5
 #osm_uid_allocator_range='1000000000-1999999999/10000'
@@ -134,23 +144,27 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # openshift_master_cluster_hostname must resolve to the load balancer
 # or to one or all of the masters defined in the inventory if no load
 # balancer is present.
+#
+# Changing these settings post-installation requires manual intervention
 #openshift_master_cluster_method=native
 #openshift_master_cluster_hostname=openshift-ansible.test.example.com
 #openshift_master_cluster_public_hostname=openshift-ansible.test.example.com
+#
+# Override the default controller lease ttl
+#osm_controller_lease_ttl=30
 
 # Pacemaker high availability cluster method.
 # Pacemaker HA environment must be able to self provision the
 # configured VIP. For installation openshift_master_cluster_hostname
 # must resolve to the configured VIP.
+#
+# Pacemaker HA is deprecated as of OpenShift Enterprise 3.2 and Origin 1.2
 #openshift_master_cluster_method=pacemaker
 #openshift_master_cluster_password=openshift_cluster
 #openshift_master_cluster_vip=192.168.133.25
 #openshift_master_cluster_public_vip=192.168.133.25
 #openshift_master_cluster_hostname=openshift-ansible.test.example.com
 #openshift_master_cluster_public_hostname=openshift-ansible.test.example.com
-
-# Override the default controller lease ttl
-#osm_controller_lease_ttl=30
 
 # Configure controller arguments
 #osm_controller_args={'resource-quota-sync-period': ['10s']}
@@ -159,12 +173,18 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #osm_api_server_args={'max-requests-inflight': ['400']}
 
 # default subdomain to use for exposed routes
+#
+# Changing this value post installation will have no affect on preexisting
+# routes.
 #openshift_master_default_subdomain=apps.test.example.com
 
 # additional cors origins
 #osm_custom_cors_origins=['foo.example.com', 'bar.example.com']
 
 # default project node selector
+#
+# Changing this value post installation will have no affect on preexisting
+# proejcts.
 #osm_default_node_selector='region=primary'
 
 # Override the default pod eviction timeout
@@ -175,23 +195,35 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #osn_storage_plugin_deps=['ceph','glusterfs']
 
 # default selectors for router and registry services
+#
+# Changing this value post installation will have no affect on preexisting
+# services.
 # openshift_router_selector='region=infra'
 # openshift_registry_selector='region=infra'
 
 # Configure the multi-tenant SDN plugin (default is 'redhat/openshift-ovs-subnet')
+#
+# Changing this post installation requires manual intervention:
+# https://docs.openshift.com/enterprise/3.1/install_config/configuring_sdn.html#migrating-between-sdn-plugins
+# https://docs.openshift.org/latest/install_config/configuring_sdn.html#migrating-between-sdn-plugins
+#
 # os_sdn_network_plugin_name='redhat/openshift-ovs-multitenant'
 
 # Disable the OpenShift SDN plugin
+#
 # openshift_use_openshift_sdn=False
 
 # Configure SDN cluster network CIDR block. This network block should
 # be a private block and should not conflict with existing network
 # blocks in your infrastructure that pods may require access to.
-# Can not be changed after deployment.
+#
+# This setting can not be changed after deployment.
 #osm_cluster_network_cidr=10.1.0.0/16
 
 # Configure number of bits to allocate to each host’s subnet e.g. 8
 # would mean a /24 network on the host.
+#
+# This setting can not be changed after deployment.
 #osm_host_subnet_length=8
 
 # Configure master API and console ports.
@@ -200,6 +232,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 
 # set RPM version for debugging purposes
 #openshift_pkg_version=-3.1.0.0
+
+# Explicitly set the tag that should be used for containerized installs
+#openshift_image_tag=v3.1.1.6
 
 # Configure custom named certificates
 # NOTE: openshift_master_named_certificates is cached on masters and is an
@@ -225,10 +260,16 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #
 # Signing secrets, used to authenticate sessions using
 # HMAC. Recommended to use secrets with 32 or 64 bytes.
+#
+# Changing this post deployment will invalidate all currently logged in
+# sessions.
 #openshift_master_session_auth_secrets=['DONT+USE+THIS+SECRET+b4NV+pmZNSO']
 #
 # Encrypting secrets, used to encrypt sessions. Must be 16, 24, or 32
 # characters long, to select AES-128, AES-192, or AES-256.
+#
+# Changing this post deployment will invalidate all currently logged in
+# sessions.
 #openshift_master_session_encryption_secrets=['DONT+USE+THIS+SECRET+b4NV+pmZNSO']
 
 # configure how often node iptables rules are refreshed
