@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.76
+Version:        3.0.77
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -279,6 +279,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Apr 11 2016 Troy Dawson <tdawson@redhat.com> 3.0.77-1
+- Fix a docker-storage sysconfig bug. (dgoodwin@redhat.com)
+- update bootstrap-fedora to include python2-firewall for F24+
+  (maxamillion@fedoraproject.org)
+- Merge openshift_env hostvars. (abutcher@redhat.com)
+- Add openshift_hosted_facts role and remove hosted facts from
+  openshift_common. (abutcher@redhat.com)
+
 * Fri Apr 08 2016 Troy Dawson <tdawson@redhat.com> 3.0.76-1
 - a-o-i: Support openshift_image_tag (smunilla@redhat.com)
 - Bug 1324729 - Import xPaas image streams failed during 3.2 installation
