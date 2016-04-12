@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.77
+Version:        3.0.78
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -279,6 +279,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Apr 12 2016 Troy Dawson <tdawson@redhat.com> 3.0.78-1
+- Add support for creating secure router. (abutcher@redhat.com)
+
 * Mon Apr 11 2016 Troy Dawson <tdawson@redhat.com> 3.0.77-1
 - Fix a docker-storage sysconfig bug. (dgoodwin@redhat.com)
 - update bootstrap-fedora to include python2-firewall for F24+
