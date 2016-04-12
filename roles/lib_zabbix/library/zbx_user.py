@@ -97,6 +97,7 @@ def main():
             last_name=dict(default=None, type='str'),
             user_type=dict(default=None, type='str'),
             password=dict(default=None, type='str'),
+            refresh=dict(default=None, type='int'),
             update_password=dict(default=False, type='bool'),
             user_groups=dict(default=[], type='list'),
             state=dict(default='present', type='str'),
@@ -137,6 +138,7 @@ def main():
                   'usrgrps': get_usergroups(zapi, module.params['user_groups']),
                   'name': module.params['first_name'],
                   'surname': module.params['last_name'],
+                  'refresh': module.params['refresh'],
                   'type': get_usertype(module.params['user_type']),
                  }
 

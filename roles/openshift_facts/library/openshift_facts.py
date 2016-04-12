@@ -63,7 +63,16 @@ def migrate_local_facts(facts):
     migrated_facts = copy.deepcopy(facts)
     return migrate_docker_facts(migrated_facts)
 
-
+def migrate_hosted_facts(facts):
+    """ Apply migrations for master facts """
+    if 'master' in facts:
+        if 'router_selector' in facts['master']:
+            if 'hosted' not in facts:
+                facts['hosted'] = {}
+            if 'router' not in facts['hosted']:
+                facts['hosted']['router'] = {}
+            facts['hosted']['router']['selector'] = facts['master'].pop('router_selector')
+    return facts
 
 def first_ip(network):
     """ Return the first IPv4 address in network
@@ -394,7 +403,7 @@ def set_node_schedulability(facts):
                 facts['node']['schedulable'] = True
     return facts
 
-def set_master_selectors(facts):
+def set_selectors(facts):
     """ Set selectors facts if not already present in facts dict
         Args:
             facts (dict): existing facts
@@ -403,16 +412,21 @@ def set_master_selectors(facts):
             facts if they were not already present
 
     """
+    deployment_type = facts['common']['deployment_type']
+    if deployment_type == 'online':
+        selector = "type=infra"
+    else:
+        selector = "region=infra"
+
+    if 'hosted' not in facts:
+        facts['hosted'] = {}
+    if 'router' not in facts['hosted']:
+        facts['hosted']['router'] = {}
+    if 'selector' not in facts['hosted']['router'] or facts['hosted']['router']['selector'] in [None, 'None']:
+        facts['hosted']['router']['selector'] = selector
+
     if 'master' in facts:
         if 'infra_nodes' in facts['master']:
-            deployment_type = facts['common']['deployment_type']
-            if deployment_type == 'online':
-                selector = "type=infra"
-            else:
-                selector = "region=infra"
-
-            if 'router_selector' not in facts['master']:
-                facts['master']['router_selector'] = selector
             if 'registry_selector' not in facts['master']:
                 facts['master']['registry_selector'] = selector
     return facts
@@ -837,6 +851,25 @@ def set_sdn_facts_if_unset(facts, system_facts):
 
     return facts
 
+def migrate_oauth_template_facts(facts):
+    """
+    Migrate an old oauth template fact to a newer format if it's present.
+
+    The legacy 'oauth_template' fact was just a filename, and assumed you were
+    setting the 'login' template.
+
+    The new pluralized 'oauth_templates' fact is a dict mapping the template
+    name to a filename.
+
+    Simplify the code after this by merging the old fact into the new.
+    """
+    if 'master' in facts and 'oauth_template' in facts['master']:
+        if 'oauth_templates' not in facts['master']:
+            facts['master']['oauth_templates'] = {"login": facts['master']['oauth_template']}
+        elif 'login' not in facts['master']['oauth_templates']:
+            facts['master']['oauth_templates']['login'] = facts['master']['oauth_template']
+    return facts
+
 def format_url(use_ssl, hostname, port, path=''):
     """ Format url based on ssl flag, hostname, port and path
 
@@ -924,12 +957,13 @@ def build_kubelet_args(facts):
     if 'node' in facts:
         kubelet_args = {}
         if 'cloudprovider' in facts:
-            if facts['cloudprovider']['kind'] == 'aws':
-                kubelet_args['cloud-provider'] = ['aws']
-                kubelet_args['cloud-config'] = [cloud_cfg_path + '/aws.conf']
-            if facts['cloudprovider']['kind'] == 'openstack':
-                kubelet_args['cloud-provider'] = ['openstack']
-                kubelet_args['cloud-config'] = [cloud_cfg_path + '/openstack.conf']
+            if 'kind' in facts['cloudprovider']:
+                if facts['cloudprovider']['kind'] == 'aws':
+                    kubelet_args['cloud-provider'] = ['aws']
+                    kubelet_args['cloud-config'] = [cloud_cfg_path + '/aws.conf']
+                if facts['cloudprovider']['kind'] == 'openstack':
+                    kubelet_args['cloud-provider'] = ['openstack']
+                    kubelet_args['cloud-config'] = [cloud_cfg_path + '/openstack.conf']
         if kubelet_args != {}:
             facts = merge_facts({'node': {'kubelet_args': kubelet_args}}, facts, [], [])
     return facts
@@ -941,12 +975,13 @@ def build_controller_args(facts):
     if 'master' in facts:
         controller_args = {}
         if 'cloudprovider' in facts:
-            if facts['cloudprovider']['kind'] == 'aws':
-                controller_args['cloud-provider'] = ['aws']
-                controller_args['cloud-config'] = [cloud_cfg_path + '/aws.conf']
-            if facts['cloudprovider']['kind'] == 'openstack':
-                controller_args['cloud-provider'] = ['openstack']
-                controller_args['cloud-config'] = [cloud_cfg_path + '/openstack.conf']
+            if 'kind' in facts['cloudprovider']:
+                if facts['cloudprovider']['kind'] == 'aws':
+                    controller_args['cloud-provider'] = ['aws']
+                    controller_args['cloud-config'] = [cloud_cfg_path + '/aws.conf']
+                if facts['cloudprovider']['kind'] == 'openstack':
+                    controller_args['cloud-provider'] = ['openstack']
+                    controller_args['cloud-config'] = [cloud_cfg_path + '/openstack.conf']
         if controller_args != {}:
             facts = merge_facts({'master': {'controller_args': controller_args}}, facts, [], [])
     return facts
@@ -958,12 +993,13 @@ def build_api_server_args(facts):
     if 'master' in facts:
         api_server_args = {}
         if 'cloudprovider' in facts:
-            if facts['cloudprovider']['kind'] == 'aws':
-                api_server_args['cloud-provider'] = ['aws']
-                api_server_args['cloud-config'] = [cloud_cfg_path + '/aws.conf']
-            if facts['cloudprovider']['kind'] == 'openstack':
-                api_server_args['cloud-provider'] = ['openstack']
-                api_server_args['cloud-config'] = [cloud_cfg_path + '/openstack.conf']
+            if 'kind' in facts['cloudprovider']:
+                if facts['cloudprovider']['kind'] == 'aws':
+                    api_server_args['cloud-provider'] = ['aws']
+                    api_server_args['cloud-config'] = [cloud_cfg_path + '/aws.conf']
+                if facts['cloudprovider']['kind'] == 'openstack':
+                    api_server_args['cloud-provider'] = ['openstack']
+                    api_server_args['cloud-config'] = [cloud_cfg_path + '/openstack.conf']
         if api_server_args != {}:
             facts = merge_facts({'master': {'api_server_args': api_server_args}}, facts, [], [])
     return facts
@@ -1118,12 +1154,21 @@ def merge_facts(orig, new, additive_facts_to_overwrite, protected_facts_to_overw
     """
     additive_facts = ['named_certificates']
     protected_facts = ['ha', 'master_count']
+
+    # Facts we do not ever want to merge. These originate in inventory variables
+    # and typically contain JSON dicts. We don't ever want to trigger a merge
+    # here, just completely overwrite with the new if they are present there.
+    overwrite_facts = ['admission_plugin_config',
+                       'kube_admission_plugin_config']
+
     facts = dict()
     for key, value in orig.iteritems():
         # Key exists in both old and new facts.
         if key in new:
+            if key in overwrite_facts:
+                facts[key] = copy.deepcopy(new[key])
             # Continue to recurse if old and new fact is a dictionary.
-            if isinstance(value, dict) and isinstance(new[key], dict):
+            elif isinstance(value, dict) and isinstance(new[key], dict):
                 # Collect the subset of additive facts to overwrite if
                 # key matches. These will be passed to the subsequent
                 # merge_facts call.
@@ -1441,13 +1486,14 @@ class OpenShiftFacts(object):
                             local_facts,
                             additive_facts_to_overwrite,
                             protected_facts_to_overwrite)
+        facts = migrate_oauth_template_facts(facts)
         facts['current_config'] = get_current_config(facts)
         facts = set_url_facts_if_unset(facts)
         facts = set_project_cfg_facts_if_unset(facts)
         facts = set_flannel_facts_if_unset(facts)
         facts = set_nuage_facts_if_unset(facts)
         facts = set_node_schedulability(facts)
-        facts = set_master_selectors(facts)
+        facts = set_selectors(facts)
         facts = set_metrics_facts_if_unset(facts)
         facts = set_identity_providers_if_unset(facts)
         facts = set_sdn_facts_if_unset(facts, self.system_facts)
@@ -1541,23 +1587,25 @@ class OpenShiftFacts(object):
         if 'cloudprovider' in roles:
             defaults['cloudprovider'] = dict(kind=None)
 
-        defaults['hosted'] = dict(
-            registry=dict(
-                storage=dict(
-                    kind=None,
-                    volume=dict(
-                        name='registry',
-                        size='5Gi'
-                    ),
-                    nfs=dict(
-                        directory='/exports',
-                        options='*(rw,root_squash)'),
-                    host=None,
-                    access_modes=['ReadWriteMany'],
-                    create_pv=True
-                )
+        if 'hosted' in roles or self.role == 'hosted':
+            defaults['hosted'] = dict(
+                registry=dict(
+                    storage=dict(
+                        kind=None,
+                        volume=dict(
+                            name='registry',
+                            size='5Gi'
+                        ),
+                        nfs=dict(
+                            directory='/exports',
+                            options='*(rw,root_squash)'),
+                        host=None,
+                        access_modes=['ReadWriteMany'],
+                        create_pv=True
+                    )
+                ),
+                router=dict()
             )
-        )
 
         return defaults
 

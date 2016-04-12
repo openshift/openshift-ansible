@@ -62,7 +62,7 @@ class OCObject(OpenShiftCLI):
             data = Utils.get_resource_file(files[0], content_type)
 
             # if equal then no need.  So not equal is True
-            return not Utils.check_def_equal(data, objects['results'][0], True)
+            return not Utils.check_def_equal(data, objects['results'][0], skip_keys=None, debug=False)
         else:
             data = content
 

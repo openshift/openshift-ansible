@@ -2,14 +2,12 @@
 - name: Set cloud provider facts
   openshift_facts:
     role: cloudprovider
-    openshift_env: "{{ item | oo_openshift_env }}"
+    openshift_env: "{{ hostvars[inventory_hostname]
+                       | oo_merge_dicts(hostvars)
+                       | oo_openshift_env }}"
     openshift_env_structures:
     - 'openshift.cloudprovider.aws.*'
     - 'openshift.cloudprovider.openstack.*'
-  no_log: true
-  with_items:
-  - "{{ hostvars[inventory_hostname] }}"
-  - "{{ hostvars }}"
 
 - name: Create cloudprovider config dir
   file:

@@ -130,7 +130,9 @@ def write_inventory_vars(base_inventory, multiple_masters, proxy):
     if CFG.settings.get('master_routingconfig_subdomain', False):
         base_inventory.write(
             "openshift_master_default_subdomain={}\n".format(CFG.settings['master_routingconfig_subdomain']))
-
+    if CFG.settings.get('variant_version', None) == '3.1':
+        #base_inventory.write('openshift_image_tag=v{}\n'.format(CFG.settings.get('variant_version')))
+        base_inventory.write('openshift_image_tag=v{}\n'.format('3.1.1.6'))
 
 
 def write_host(host, inventory, schedulable=None):

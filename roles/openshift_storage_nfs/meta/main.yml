@@ -10,6 +10,6 @@ galaxy_info:
     versions:
     - 7
 dependencies:
-- { role: os_firewall }
-- { role: openshift_common }
-- { role: openshift_repos }
+- role: os_firewall
+- role: openshift_hosted_facts
+- role: openshift_repos

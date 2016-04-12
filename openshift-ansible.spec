@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.72
+Version:        3.0.78
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -279,6 +279,52 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Apr 12 2016 Troy Dawson <tdawson@redhat.com> 3.0.78-1
+- Add support for creating secure router. (abutcher@redhat.com)
+
+* Mon Apr 11 2016 Troy Dawson <tdawson@redhat.com> 3.0.77-1
+- Fix a docker-storage sysconfig bug. (dgoodwin@redhat.com)
+- update bootstrap-fedora to include python2-firewall for F24+
+  (maxamillion@fedoraproject.org)
+- Merge openshift_env hostvars. (abutcher@redhat.com)
+- Add openshift_hosted_facts role and remove hosted facts from
+  openshift_common. (abutcher@redhat.com)
+
+* Fri Apr 08 2016 Troy Dawson <tdawson@redhat.com> 3.0.76-1
+- a-o-i: Support openshift_image_tag (smunilla@redhat.com)
+- Bug 1324729 - Import xPaas image streams failed during 3.2 installation
+  (bleanhar@redhat.com)
+- Test docker_version_result.stdout when determining if docker should be
+  installed/downgraded. (abutcher@redhat.com)
+
+* Thu Apr 07 2016 Troy Dawson <tdawson@redhat.com> 3.0.75-1
+- First attempt at oadm router module (kwoodson@redhat.com)
+- Remove openshift_common dep from openshift_storage_nfs (abutcher@redhat.com)
+- Add cloudprovider config dir to docker options. (abutcher@redhat.com)
+- Check for kind in cloudprovider facts prior to accessing.
+  (abutcher@redhat.com)
+
+* Wed Apr 06 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.74-1
+- Add support for configuring oauth templates. (dgoodwin@redhat.com)
+- Add support for templating master admissionConfig. (dgoodwin@redhat.com)
+
+* Wed Apr 06 2016 Troy Dawson <tdawson@redhat.com> 3.0.73-1
+- Replace unused Dockerfile with one used for official builds.
+  (dgoodwin@redhat.com)
+- Update for zbx_user refresh (kwoodson@redhat.com)
+- Docker 1.9 is actually cool starting in origin 1.1.4 (sdodson@redhat.com)
+- Unmask services (bleanhar@redhat.com)
+- XPAAS v1.3 for OSE 3.2 (sdodson@redhat.com)
+- XPAAS 1.3 content for OSE 3.1 (sdodson@redhat.com)
+- Bug 1322788 - The IMAGE_VERSION wasn't added to atomic-openshift-master-api
+  and atomic-openshift-master-controllers (bleanhar@redhat.com)
+- Bug 1323123 - upgrade failed to containerized OSE on RHEL Host without ose3.2
+  repo (bleanhar@redhat.com)
+- Write inventory to same directory as quick install config.
+  (dgoodwin@redhat.com)
+- Add --gen-inventory command to atomic-openshift-installer.
+  (dgoodwin@redhat.com)
+
 * Tue Apr 05 2016 Troy Dawson <tdawson@redhat.com> 3.0.72-1
 - when docker is installed, make it 1.8.2 to avoid issues (mwoodson@redhat.com)
 - Downgrade to docker 1.8.2 if installing OSE < 3.2 (sdodson@redhat.com)

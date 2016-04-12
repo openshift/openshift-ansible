@@ -34,3 +34,5 @@
 - include: additional_config.yml
 
 - include: ../openshift-node/config.yml
+
+- include: openshift_hosted.yml
