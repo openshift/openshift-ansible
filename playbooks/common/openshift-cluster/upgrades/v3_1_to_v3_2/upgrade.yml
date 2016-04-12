@@ -1,33 +1,4 @@
 ---
-# This is a workaround for authenticated registries
-- name: Download new images
-  hosts: oo_nodes_to_config
-  roles:
-  - openshift_facts
-  tasks:
-  - name: Pull Images
-    command: >
-      docker pull {{ item }}:v{{ g_new_version }}
-    with_items:
-    - "{{ openshift.node.node_image }}"
-    - "{{ openshift.node.ovs_image }}"
-    - "{{ openshift.common.pod_image }}"
-    - "{{ openshift.common.router_image }}"
-    - "{{ openshift.common.registry_image }}"
-    - "{{ openshift.common.deployer_image }}"
-
-# This is a workaround for authenticated registries
-- name: Download new images
-  hosts: oo_masters_to_config
-  roles:
-  - openshift_facts
-  tasks:
-  - name: Pull Images
-    command: >
-      docker pull {{ item }}:v{{ g_new_version }}
-    with_items:
-    - "{{ openshift.master.master_image }}"
-
 ###############################################################################
 # The restart playbook should be run after this playbook completes.
 ###############################################################################
@@ -39,6 +10,20 @@
   tasks:
   - include: docker_upgrade.yml
     when: not openshift.common.is_atomic | bool
+
+# The cli image is used by openshift_facts to determine the currently installed
+# version.  We need to explicitly pull the latest image to handle cases where
+# the locally cached 'latest' tag is older the g_new_version.
+- name: Download cli image
+  hosts: oo_masters_to_config:oo_nodes_to_config
+  roles:
+  - openshift_facts
+  tasks:
+  - name: Pull Images
+    command: >
+      docker pull {{ item }}:latest
+    with_items:
+    - "{{ openshift.common.cli_image }}"
 
 ###############################################################################
 # Upgrade Masters

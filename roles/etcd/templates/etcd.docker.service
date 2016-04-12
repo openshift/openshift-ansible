@@ -11,6 +11,7 @@ ExecStart=/usr/bin/docker run --name {{ etcd_service }} --rm -v /var/lib/etcd:/v
 ExecStop=/usr/bin/docker stop {{ etcd_service }}
 SyslogIdentifier=etcd_container
 Restart=always
+RestartSec=5s
 
 [Install]
 WantedBy=docker.service

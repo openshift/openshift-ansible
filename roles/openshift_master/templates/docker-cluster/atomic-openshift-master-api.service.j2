@@ -20,6 +20,7 @@ LimitCORE=infinity
 WorkingDirectory={{ openshift.common.data_dir }}
 SyslogIdentifier={{ openshift.common.service_type }}-master-api
 Restart=always
+RestartSec=5s
 
 [Install]
 WantedBy=docker.service

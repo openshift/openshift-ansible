@@ -19,6 +19,7 @@ LimitCORE=infinity
 WorkingDirectory={{ openshift.common.data_dir }}
 SyslogIdentifier={{ openshift.common.service_type }}-master-controllers
 Restart=on-failure
+RestartSec=5s
 
 [Install]
 WantedBy=docker.service
