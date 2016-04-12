@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.78
+Version:        3.0.79
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -279,6 +279,21 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Apr 12 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.79-1
+- Bug 1324728 - Ansible should not downgrade docker when installing 3.2
+  containerized env (bleanhar@redhat.com)
+- Fixing non-HA master restart conditional (bleanhar@redhat.com)
+- Fetching the current version a little more carefully (bleanhar@redhat.com)
+- Make sure Docker is restarted after we have correctly configured the
+  containerized systemd units (bleanhar@redhat.com)
+- use RestartSec to avoid default rate limit in systemd (bleanhar@redhat.com)
+- Convert image_tag on masters (smunilla@redhat.com)
+- Installs and upgrades from authenticated registries are not supported for now
+  (bleanhar@redhat.com)
+- Handle cases where the pacemaker variables aren't set (bleanhar@redhat.com)
+- Containerized installs on RHEL were downgrading docker unnecessarily
+  (bleanhar@redhat.com)
+
 * Tue Apr 12 2016 Troy Dawson <tdawson@redhat.com> 3.0.78-1
 - Add support for creating secure router. (abutcher@redhat.com)
 
