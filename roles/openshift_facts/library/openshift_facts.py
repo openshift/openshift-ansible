@@ -1048,7 +1048,7 @@ def get_docker_version_info():
             }
     return result
 
-def get_openshift_version(facts, cli_image=None):
+def get_openshift_version(facts):
     """ Get current version of openshift on the host
 
         Args:
@@ -1070,32 +1070,14 @@ def get_openshift_version(facts, cli_image=None):
         _, output, _ = module.run_command(['/usr/bin/openshift', 'version'])
         version = parse_openshift_version(output)
 
+    # openshift_facts runs before openshift_docker_facts.  However, it will be
+    # called again and set properly throughout the playbook run.  This could be
+    # refactored to simply set the openshift.common.version in the
+    # openshift_docker_facts role but it would take reworking some assumptions
+    # on how get_openshift_version is called.
     if 'is_containerized' in facts['common'] and safe_get_bool(facts['common']['is_containerized']):
-        container = None
-        if 'master' in facts:
-            if 'cluster_method' in facts['master']:
-                container = facts['common']['service_type'] + '-master-api'
-            else:
-                container = facts['common']['service_type'] + '-master'
-        elif 'node' in facts:
-            container = facts['common']['service_type'] + '-node'
-
-	# Try to get the version fromthe available cli image _before_ resorting
-	# to exec'ing in to the running container.  This is to be more fault
-	# tolerant in environments where the container is not running.
-        if version is None and cli_image is not None:
-            # Assume we haven't installed the environment yet and we need
-            # to query the latest image, but only if docker is installed
-            if 'docker' in facts and 'version' in facts['docker']:
-                exit_code, output, _ = module.run_command(['docker', 'run', '--rm', cli_image, 'version'])
-                version = parse_openshift_version(output)
-
-        if version is None and container is not None:
-            exit_code, output, _ = module.run_command(['docker', 'exec', container, 'openshift', 'version'])
-            # if for some reason the container is installed but not running
-            # we'll fall back to using docker run later in this method.
-            if exit_code == 0:
-                version = parse_openshift_version(output)
+        if 'docker' in facts and 'openshift_version' in facts['docker']:
+            version = facts['docker']['openshift_version']
 
     return version
 
@@ -1359,10 +1341,6 @@ def set_container_facts_if_unset(facts):
     if safe_get_bool(facts['common']['is_containerized']):
         facts['common']['admin_binary'] = '/usr/local/bin/oadm'
         facts['common']['client_binary'] = '/usr/local/bin/oc'
-        openshift_version = get_openshift_version(facts, cli_image)
-        if openshift_version is not None and openshift_version is not "":
-            base_version = openshift_version.split('-')[0]
-            facts['common']['image_tag'] = "v" + base_version
 
     return facts
 
