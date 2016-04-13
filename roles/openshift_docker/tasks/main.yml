@@ -6,15 +6,15 @@
   command: >
     docker run --rm {{ openshift.common.cli_image }}:latest version
   register: cli_image_version
-  when: openshift.common.is_containerized | bool and openshift_image_tag is not defined
+  when: openshift.common.is_containerized is defined and openshift.common.is_containerized | bool and openshift_image_tag is not defined
 
 - set_fact:
     l_image_tag: "{{ cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0] }}"
-  when: openshift.common.is_containerized | bool and openshift_image_tag is not defined
+  when: openshift.common.is_containerized is defined and openshift.common.is_containerized | bool and openshift_image_tag is not defined
 
 - set_fact:
     l_image_tag: "{{ openshift_image_tag }}"
-  when: openshift.common.is_containerized | bool and openshift_image_tag is defined
+  when: openshift.common.is_containerized is defined and openshift.common.is_containerized | bool and openshift_image_tag is defined
 
 - name: Set post docker install facts
   openshift_facts:
@@ -25,4 +25,4 @@
     local_facts:
       openshift_image_tag: "{{ l_image_tag }}"
       openshift_version: "{{ l_image_tag if l_image_tag is defined else '' | oo_image_tag_to_rpm_version }}"
-  when: openshift.common.is_containerized | bool
+  when: openshift.common.is_containerized is defined and openshift.common.is_containerized | bool
