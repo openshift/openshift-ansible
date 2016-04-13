@@ -1066,36 +1066,40 @@ def get_openshift_version(facts, cli_image=None):
         if 'version' in facts['common'] and facts['common']['version'] is not None:
             return facts['common']['version']
 
-    if os.path.isfile('/usr/bin/openshift'):
-        _, output, _ = module.run_command(['/usr/bin/openshift', 'version'])
-        version = parse_openshift_version(output)
-
+    # If this is a containerized host, we need to get the openshift version
+    # from within a relevant container. It is possible that docker is not yet
+    # installed however (but will be later), so we can safely skip parsing the
+    # version if that is the case, facts will re-run later.
     if 'is_containerized' in facts['common'] and safe_get_bool(facts['common']['is_containerized']):
-        container = None
-        if 'master' in facts:
-            if 'cluster_method' in facts['master']:
-                container = facts['common']['service_type'] + '-master-api'
-            else:
-                container = facts['common']['service_type'] + '-master'
-        elif 'node' in facts:
-            container = facts['common']['service_type'] + '-node'
+        if 'docker' in facts and 'version' in facts['docker']:
+            container = None
+            if 'master' in facts:
+                if 'cluster_method' in facts['master']:
+                    container = facts['common']['service_type'] + '-master-api'
+                else:
+                    container = facts['common']['service_type'] + '-master'
+            elif 'node' in facts:
+                container = facts['common']['service_type'] + '-node'
 
-	# Try to get the version fromthe available cli image _before_ resorting
-	# to exec'ing in to the running container.  This is to be more fault
-	# tolerant in environments where the container is not running.
-        if version is None and cli_image is not None:
-            # Assume we haven't installed the environment yet and we need
-            # to query the latest image, but only if docker is installed
-            if 'docker' in facts and 'version' in facts['docker']:
+            # Try to get the version from the available cli image _before_ resorting
+            # to exec'ing in to the running container.  This is to be more fault
+            # tolerant in environments where the container is not running.
+            if version is None and cli_image is not None:
+                # Assume we haven't installed the environment yet and we need
+                # to query the latest image.
                 exit_code, output, _ = module.run_command(['docker', 'run', '--rm', cli_image, 'version'])
                 version = parse_openshift_version(output)
 
-        if version is None and container is not None:
-            exit_code, output, _ = module.run_command(['docker', 'exec', container, 'openshift', 'version'])
-            # if for some reason the container is installed but not running
-            # we'll fall back to using docker run later in this method.
-            if exit_code == 0:
-                version = parse_openshift_version(output)
+            if version is None and container is not None:
+                exit_code, output, _ = module.run_command(['docker', 'exec', container, 'openshift', 'version'])
+                # if for some reason the container is installed but not running
+                # we'll fall back to using docker run later in this method.
+                if exit_code == 0:
+                    version = parse_openshift_version(output)
+    elif os.path.isfile('/usr/bin/openshift'):
+        _, output, _ = module.run_command(['/usr/bin/openshift', 'version'])
+        version = parse_openshift_version(output)
+
 
     return version
 

@@ -28,6 +28,8 @@
 # seems a package install/upgrade/downgrade has rebooted docker and crashed it.
 - name: Reset docker service state
   command: systemctl reset-failed docker.service
+  # This will error if the package was just installed and the service is not loaded.
+  ignore_errors: yes
 
 - name: enable and start the docker service
   service:
