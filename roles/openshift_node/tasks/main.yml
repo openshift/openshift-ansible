@@ -40,7 +40,7 @@
   when: not openshift.common.is_containerized | bool
 
 - name: Install sdn-ovs package
-  action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-sdn-ovs{{ openshift_version | oo_image_tag_to_rpm_version(include_dash=True) }} state=present"
+  action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-sdn-ovs{{ openshift_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }} state=present"
   when: openshift.common.use_openshift_sdn and not openshift.common.is_containerized | bool
 
 - name: Pull node image
