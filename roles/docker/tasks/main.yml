@@ -24,12 +24,21 @@
   action: "{{ ansible_pkg_mgr }} name=docker{{ '-' + docker_version if docker_version is defined and docker_version != '' else '' }} state=present"
   when: not openshift.common.is_atomic | bool and not docker_version_result | skipped and docker_version_result.stdout | default('0.0', True) | version_compare(docker_version, 'lt')
 
+# Enable docker and record if it was changed, if it was changed then we have no
+# need to reset-failed.
+- name: Enable the docker service
+  service:
+    name: docker
+    enabled: yes
+  register: docker_enabled
+
 # We're getting ready to start docker.  This is a workaround for cases where it
 # seems a package install/upgrade/downgrade has rebooted docker and crashed it.
 - name: Reset docker service state
   command: systemctl reset-failed docker.service
+  when: not docker_enabled | changed
 
-- name: enable and start the docker service
+- name: Start the docker service
   service:
     name: docker
     enabled: yes
