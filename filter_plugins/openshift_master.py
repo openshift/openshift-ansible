@@ -57,7 +57,7 @@ class IdentityProviderBase(object):
         mapping_method = None
         for key in mm_keys:
             if key in self._idp:
-                mapping_method = self._idp[key]
+                mapping_method = self._idp.pop(key)
         if mapping_method is None:
             mapping_method = self.get_default('mappingMethod')
         self.mapping_method = mapping_method
