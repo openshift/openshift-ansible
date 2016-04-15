@@ -1154,7 +1154,7 @@ def merge_facts(orig, new, additive_facts_to_overwrite, protected_facts_to_overw
             if key in inventory_json_facts:
                 # Watchout for JSON facts that sometimes load as strings.
                 # (can happen if the JSON contains a boolean)
-                if isinstance(new[key], str):
+                if isinstance(new[key], basestring):
                     facts[key] = yaml.safe_load(new[key])
                 else:
                     facts[key] = copy.deepcopy(new[key])
