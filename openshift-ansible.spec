@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.79
+Version:        3.0.80
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -279,6 +279,16 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Apr 15 2016 Troy Dawson <tdawson@redhat.com> 3.0.80-1
+- Refactor docker failed state cleanup (sdodson@redhat.com)
+- Support mixed RPM/container installs (bleanhar@redhat.com)
+- The openshift_docker role must set the version facts for containerized
+  installs (bleanhar@redhat.com)
+- start it, check for failure, reset it, start again (sdodson@redhat.com)
+- Enable docker before potentially resetting the failure (sdodson@redhat.com)
+- Fix mappingMethod option in identity provider. (abutcher@redhat.com)
+- Support setting imagePolicyConfig JSON in inventory. (dgoodwin@redhat.com)
+
 * Tue Apr 12 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.79-1
 - Bug 1324728 - Ansible should not downgrade docker when installing 3.2
   containerized env (bleanhar@redhat.com)
