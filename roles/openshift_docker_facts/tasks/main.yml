@@ -49,7 +49,7 @@
   when: not openshift.common.is_containerized | bool
 
 - set_fact:
-    l_common_version: "{{ openshift.common.image_tag | default('0.0', True) | oo_image_tag_to_rpm_version }}"
+    l_common_version: "{{ openshift_version | default('0.0', True) | oo_image_tag_to_rpm_version }}"
   when: openshift.common.is_containerized | bool
 
 - set_fact:
