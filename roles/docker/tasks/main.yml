@@ -24,29 +24,23 @@
   action: "{{ ansible_pkg_mgr }} name=docker{{ '-' + docker_version if docker_version is defined and docker_version != '' else '' }} state=present"
   when: not openshift.common.is_atomic | bool and not docker_version_result | skipped and docker_version_result.stdout | default('0.0', True) | version_compare(docker_version, 'lt')
 
+# If docker were enabled and started before we downgraded it may have entered a
+# failed state. Check for that and clear it if necessary.
+- name: Check that docker hasn't entered failed state
+  command: systemctl show docker
+  register: docker_state
+  changed_when: False
+
+- name: Reset docker service state
+  command: systemctl reset-failed docker.service
+  when: " 'ActiveState=failed' in docker_state.stdout "
+
 - name: Start the docker service
   service:
     name: docker
     enabled: yes
     state: started
   register: start_result
-  ignore_errors: yes
-
-# If docker were enabled and started before we downgraded it there's a real possibility
-# that it's marked failed, so if our first attempt to start it fails reset the failure
-# and start it again.
-- name: Reset docker service state
-  command: systemctl reset-failed docker.service
-  when: start_result | failed
-  register: reset_failed
-
-- name: Start the docker service if it had failed
-  service:
-    name: docker
-    enabled: yes
-    state: started
-  register: start_result
-  when: reset_failed | changed
 
 - set_fact:
     docker_service_status_changed: start_result | changed
