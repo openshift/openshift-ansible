@@ -1048,7 +1048,7 @@ def get_docker_version_info():
             }
     return result
 
-def get_openshift_version(facts, cli_image=None):
+def get_openshift_version(facts):
     """ Get current version of openshift on the host
 
         Args:
@@ -1070,29 +1070,14 @@ def get_openshift_version(facts, cli_image=None):
         _, output, _ = module.run_command(['/usr/bin/openshift', 'version'])
         version = parse_openshift_version(output)
 
+    # openshift_facts runs before openshift_docker_facts.  However, it will be
+    # called again and set properly throughout the playbook run.  This could be
+    # refactored to simply set the openshift.common.version in the
+    # openshift_docker_facts role but it would take reworking some assumptions
+    # on how get_openshift_version is called.
     if 'is_containerized' in facts['common'] and safe_get_bool(facts['common']['is_containerized']):
-        container = None
-        if 'master' in facts:
-            if 'cluster_method' in facts['master']:
-                container = facts['common']['service_type'] + '-master-api'
-            else:
-                container = facts['common']['service_type'] + '-master'
-        elif 'node' in facts:
-            container = facts['common']['service_type'] + '-node'
-
-        if container is not None:
-            exit_code, output, _ = module.run_command(['docker', 'exec', container, 'openshift', 'version'])
-            # if for some reason the container is installed but not running
-            # we'll fall back to using docker run later in this method.
-            if exit_code == 0:
-                version = parse_openshift_version(output)
-
-        if version is None and cli_image is not None:
-            # Assume we haven't installed the environment yet and we need
-            # to query the latest image, but only if docker is installed
-            if 'docker' in facts and 'version' in facts['docker']:
-                exit_code, output, _ = module.run_command(['docker', 'run', '--rm', cli_image, 'version'])
-                version = parse_openshift_version(output)
+        if 'docker' in facts and 'openshift_version' in facts['docker']:
+            version = facts['docker']['openshift_version']
 
     return version
 
@@ -1156,17 +1141,23 @@ def merge_facts(orig, new, additive_facts_to_overwrite, protected_facts_to_overw
     protected_facts = ['ha', 'master_count']
 
     # Facts we do not ever want to merge. These originate in inventory variables
-    # and typically contain JSON dicts. We don't ever want to trigger a merge
+    # and contain JSON dicts. We don't ever want to trigger a merge
     # here, just completely overwrite with the new if they are present there.
-    overwrite_facts = ['admission_plugin_config',
-                       'kube_admission_plugin_config']
+    inventory_json_facts = ['admission_plugin_config',
+                            'kube_admission_plugin_config',
+                            'image_policy_config']
 
     facts = dict()
     for key, value in orig.iteritems():
         # Key exists in both old and new facts.
         if key in new:
-            if key in overwrite_facts:
-                facts[key] = copy.deepcopy(new[key])
+            if key in inventory_json_facts:
+                # Watchout for JSON facts that sometimes load as strings.
+                # (can happen if the JSON contains a boolean)
+                if isinstance(new[key], str):
+                    facts[key] = yaml.safe_load(new[key])
+                else:
+                    facts[key] = copy.deepcopy(new[key])
             # Continue to recurse if old and new fact is a dictionary.
             elif isinstance(value, dict) and isinstance(new[key], dict):
                 # Collect the subset of additive facts to overwrite if
@@ -1350,10 +1341,6 @@ def set_container_facts_if_unset(facts):
     if safe_get_bool(facts['common']['is_containerized']):
         facts['common']['admin_binary'] = '/usr/local/bin/oadm'
         facts['common']['client_binary'] = '/usr/local/bin/oc'
-        openshift_version = get_openshift_version(facts, cli_image)
-        if openshift_version is not None:
-            base_version = openshift_version.split('-')[0]
-            facts['common']['image_tag'] = "v" + base_version
 
     return facts
 

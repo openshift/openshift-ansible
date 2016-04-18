@@ -33,7 +33,7 @@
 # versions or image tags.  openshift_common's usage requires that it be a RPM
 # version and openshift_cli expects it to be an image tag.
 - name: Install the base package for versioning
-  action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}{{ openshift_version | default('') | oo_image_tag_to_rpm_version }} state=present"
+  action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}{{ openshift_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }} state=present"
   when: not openshift.common.is_containerized | bool
 
 - name: Set version facts

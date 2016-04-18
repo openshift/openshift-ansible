@@ -1,0 +1,28 @@
+---
+# It's important that we don't explicitly pull this image here.  Otherwise we
+# could result in upgrading a preinstalled environment.  We'll have to set
+# openshift_image_tag correctly for upgrades.
+- name: Set version when containerized
+  command: >
+    docker run --rm {{ openshift.common.cli_image }}:latest version
+  register: cli_image_version
+  when: openshift.common.is_containerized is defined and openshift.common.is_containerized | bool and openshift_image_tag is not defined
+
+- set_fact:
+    l_image_tag: "{{ cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0] }}"
+  when: openshift.common.is_containerized is defined and openshift.common.is_containerized | bool and openshift_image_tag is not defined
+
+- set_fact:
+    l_image_tag: "{{ openshift_image_tag }}"
+  when: openshift.common.is_containerized is defined and openshift.common.is_containerized | bool and openshift_image_tag is defined
+
+- name: Set post docker install facts
+  openshift_facts:
+    role: "{{ item.role }}"
+    local_facts: "{{ item.local_facts }}"
+  with_items:
+  - role: docker
+    local_facts:
+      openshift_image_tag: "{{ l_image_tag }}"
+      openshift_version: "{{ l_image_tag if l_image_tag is defined else '' | oo_image_tag_to_rpm_version }}"
+  when: openshift.common.is_containerized is defined and openshift.common.is_containerized | bool
