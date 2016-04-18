@@ -37,6 +37,14 @@ MOCK_FACTS = {
             'public_hostname': 'node2.example.com'
         }
     },
+    '10.1.0.1': {
+        'common': {
+            'ip': '10.1.0.1',
+            'public_ip': '10.1.0.1',
+            'hostname': 'storage-private.example.com',
+            'public_hostname': 'storage.example.com'
+        }
+    },
 }
 
 MOCK_FACTS_QUICKHA = {
@@ -250,6 +258,12 @@ hosts:
     public_hostname: node2.example.com
     node: true
     master: true
+  - connect_to: 10.1.0.1
+    ip: 10.1.0.1
+    hostname: storage-private.example.com
+    public_ip: 24.222.0.6
+    public_hostname: storage.example.com
+    storage: true
 """
 
 QUICKHA_CONFIG_PRECONFIGURED_LB = """
@@ -720,17 +734,18 @@ class AttendedCliTests(OOCliFixture):
             ('10.0.0.3', False, False)],
                                       ssh_user='root',
                                       variant_num=1,
-                                      confirm_facts='y')
+                                      confirm_facts='y',
+                                      storage='10.1.0.1',)
         self.cli_args.append("install")
         result = self.runner.invoke(cli.cli, self.cli_args,
             input=cli_input)
         self.assert_result(result, 0)
 
         self._verify_load_facts(load_facts_mock)
-        self._verify_run_playbook(run_playbook_mock, 3, 3)
+        self._verify_run_playbook(run_playbook_mock, 4, 4)
 
         written_config = read_yaml(self.config_file)
-        self._verify_config_hosts(written_config, 3)
+        self._verify_config_hosts(written_config, 4)
 
         inventory = ConfigParser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, 'hosts'))
@@ -762,7 +777,8 @@ class AttendedCliTests(OOCliFixture):
                                       add_nodes=[('10.0.0.3', False, False)],
                                       ssh_user='root',
                                       variant_num=1,
-                                      confirm_facts='y')
+                                      confirm_facts='y',
+                                      storage='10.0.0.1',)
         self.cli_args.append("install")
         result = self.runner.invoke(cli.cli,
                                     self.cli_args,
@@ -813,7 +829,8 @@ class AttendedCliTests(OOCliFixture):
                                       ssh_user='root',
                                       variant_num=1,
                                       schedulable_masters_ok=True,
-                                      confirm_facts='y')
+                                      confirm_facts='y',
+                                      storage='10.0.0.1',)
 
         self._verify_get_hosts_to_run_on(mock_facts, load_facts_mock,
                                          run_playbook_mock,
@@ -970,7 +987,8 @@ class AttendedCliTests(OOCliFixture):
             ('10.0.0.1', True, False)],
                                       ssh_user='root',
                                       variant_num=1,
-                                      confirm_facts='y')
+                                      confirm_facts='y',
+                                      storage='10.0.0.1')
         self.cli_args.append("install")
         result = self.runner.invoke(cli.cli, self.cli_args,
             input=cli_input)
@@ -998,7 +1016,8 @@ class AttendedCliTests(OOCliFixture):
             ('10.0.0.1', True, False)],
                                       ssh_user='root',
                                       variant_num=3,
-                                      confirm_facts='y')
+                                      confirm_facts='y',
+                                      storage='10.1.0.1',)
         self.cli_args.append("install")
         result = self.runner.invoke(cli.cli, self.cli_args,
             input=cli_input)
@@ -1019,7 +1038,8 @@ class AttendedCliTests(OOCliFixture):
             ('10.0.0.3', False, False)],
                                 ssh_user='root',
                                 variant_num=1,
-                                confirm_facts='y')
+                                confirm_facts='y',
+                                storage='10.1.0.1',)
         self.cli_args.append("install")
         self.cli_args.append("--gen-inventory")
         result = self.runner.invoke(cli.cli, self.cli_args,
@@ -1032,7 +1052,7 @@ class AttendedCliTests(OOCliFixture):
         self.assertEquals(0, len(run_playbook_mock.mock_calls))
 
         written_config = read_yaml(self.config_file)
-        self._verify_config_hosts(written_config, 3)
+        self._verify_config_hosts(written_config, 4)
 
         inventory = ConfigParser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, 'hosts'))

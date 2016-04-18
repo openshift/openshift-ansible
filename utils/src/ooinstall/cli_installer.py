@@ -163,11 +163,10 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
         if masters_set or num_masters != 2:
             more_hosts = click.confirm('Do you want to add additional hosts?')
 
-    if num_masters == 1:
-        master = next((host for host in hosts if host.master), None)
-        master.storage = True
-    elif num_masters >= 3:
+    if num_masters >= 3:
         collect_master_lb(hosts)
+
+    if not existing_env:
         collect_storage_host(hosts)
 
     return hosts
@@ -306,12 +305,17 @@ def collect_storage_host(hosts):
     message = """
 Setting up High Availability Masters requires a storage host. Please provide a
 host that will be configured as a Registry Storage.
+
+Note: Containerized storage hosts are not currently supported.
 """
     click.echo(message)
     host_props = {}
 
+    first_master = next(host for host in hosts if host.master)
+
     hostname_or_ip = click.prompt('Enter hostname or IP address',
-                                            value_proc=validate_prompt_hostname)
+                                            value_proc=validate_prompt_hostname,
+                                            default=first_master)
     existing, existing_host = is_host_already_node_or_master(hostname_or_ip, hosts)
     if existing and existing_host.node:
         existing_host.storage = True
