@@ -95,6 +95,7 @@ def migrate_local_facts(facts):
     migrated_facts = migrate_docker_facts(migrated_facts)
     migrated_facts = migrate_common_facts(migrated_facts)
     migrated_facts = migrate_node_facts(migrated_facts)
+    migrated_facts = migrate_hosted_facts(migrated_facts)
     return migrated_facts
 
 def migrate_hosted_facts(facts):
