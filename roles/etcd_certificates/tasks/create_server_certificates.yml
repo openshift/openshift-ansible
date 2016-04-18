@@ -12,13 +12,13 @@
     -config {{ etcd_openssl_conf }}
     -out {{ etcd_cert_prefix }}server.csr
     -reqexts {{ etcd_req_ext }} -batch -nodes
-    -subj /CN={{ etcd_certificates_hostname }}
+    -subj /CN={{ etcd_hostname }}
   args:
     chdir: "{{ etcd_generated_certs_dir }}/{{ etcd_cert_subdir }}"
     creates: "{{ etcd_generated_certs_dir ~ '/' ~  etcd_cert_subdir ~ '/'
                  ~ etcd_cert_prefix ~ 'server.csr' }}"
   environment:
-    SAN: "IP:{{ etcd_host_int_map[inventory_hostname].interface.ipv4.address }}"
+    SAN: "IP:{{ etcd_ip }}"
   delegate_to: "{{ etcd_certificates_ca_host }}"
 
 - name: Sign and create the server crt
@@ -37,7 +37,7 @@
       creates: "{{ etcd_generated_certs_dir ~ '/' ~  etcd_cert_subdir ~ '/'
                  ~ etcd_cert_prefix ~ 'server.crt' }}"
     environment:
-      SAN: "IP:{{ etcd_host_int_map[inventory_hostname].interface.ipv4.address }}"
+      SAN: "IP:{{ etcd_ip }}"
   delegate_to: "{{ etcd_certificates_ca_host }}"
 
 - name: Create the peer csr
@@ -46,13 +46,13 @@
     -config {{ etcd_openssl_conf }}
     -out {{ etcd_cert_prefix }}peer.csr
     -reqexts {{ etcd_req_ext }} -batch -nodes
-    -subj /CN={{ etcd_certificates_hostname }}
+    -subj /CN={{ etcd_hostname }}
   args:
     chdir: "{{ etcd_generated_certs_dir }}/{{ etcd_cert_subdir }}"
     creates: "{{ etcd_generated_certs_dir ~ '/' ~  etcd_cert_subdir ~ '/'
                  ~ etcd_cert_prefix ~ 'peer.csr' }}"
   environment:
-    SAN: "IP:{{ etcd_host_int_map[inventory_hostname].interface.ipv4.address }}"
+    SAN: "IP:{{ etcd_ip }}"
   delegate_to: "{{ etcd_certificates_ca_host }}"
 
 - name: Sign and create the peer crt
@@ -66,7 +66,7 @@
     creates: "{{ etcd_generated_certs_dir ~ '/' ~  etcd_cert_subdir ~ '/'
                  ~ etcd_cert_prefix ~ 'peer.crt' }}"
   environment:
-    SAN: "IP:{{ etcd_host_int_map[inventory_hostname].interface.ipv4.address }}"
+    SAN: "IP:{{ etcd_ip }}"
   delegate_to: "{{ etcd_certificates_ca_host }}"
 
 - file:

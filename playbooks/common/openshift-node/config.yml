@@ -55,9 +55,9 @@
     etcd_cert_subdir: "openshift-node-{{ openshift.common.hostname }}"
     etcd_cert_config_dir: "{{ openshift.common.config_base }}/node"
     etcd_certificates_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
-    etcd_certificates_hostname: "{{ openshift.common.hostname }}"
-    etcd_certificates_ip: "{{ openshift.common.ip }}"
     etcd_peers: "{{ groups.oo_etcd_to_config }}"
+    etcd_hostname: "{{ openshift.common.hostname }}"
+    etcd_ip: "{{ openshift.common.ip }}"
     when: openshift.common.use_flannel | bool
   - role: nuage_node
     when: openshift.common.use_nuage | bool

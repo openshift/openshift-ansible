@@ -11,13 +11,13 @@
     -config {{ etcd_openssl_conf }}
     -out {{ etcd_cert_prefix }}client.csr
     -reqexts {{ etcd_req_ext }} -batch -nodes
-    -subj /CN={{ etcd_certificates_hostname }}
+    -subj /CN={{ etcd_hostname }}
   args:
     chdir: "{{ etcd_generated_certs_dir }}/{{ etcd_cert_subdir }}"
     creates: "{{ etcd_generated_certs_dir ~ '/' ~  etcd_cert_subdir ~ '/'
                  ~ etcd_cert_prefix ~ 'client.csr' }}"
   environment:
-    SAN: "IP:{{ etcd_certificates_ip }}"
+    SAN: "IP:{{ etcd_ip }}"
   delegate_to: "{{ etcd_certificates_ca_host }}"
 
 - name: Sign and create the client crt
@@ -36,7 +36,7 @@
       creates: "{{ etcd_generated_certs_dir ~ '/' ~  etcd_cert_subdir ~ '/'
                    ~ etcd_cert_prefix ~ 'client.crt' }}"
     environment:
-      SAN: "IP:{{ etcd_certificates_ip }}"
+      SAN: "IP:{{ etcd_ip }}"
   delegate_to: "{{ etcd_certificates_ca_host }}"
 
 - file:

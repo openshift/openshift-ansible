@@ -4,8 +4,7 @@
   vars:
     etcd_certificates_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
     etcd_certificates_etcd_hosts: "{{ groups.oo_etcd_to_config | default([], true) }}"
-    etcd_certificates_hostname: "{{ openshift.common.hostname }}"
-    etcd_peers: "{{ groups.oo_etcd_to_config }}"
+    etcd_peers: "{{ groups.oo_etcd_to_config | default([], true) }}"
   roles:
   - role: openshift_etcd
   - role: nickhammond.logrotate
