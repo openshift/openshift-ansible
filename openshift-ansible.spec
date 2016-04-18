@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.80
+Version:        3.0.81
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -279,6 +279,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Apr 18 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.81-1
+- IMAGE_PREFIX=openshift3/ for enterprise logging/metrics (sdodson@redhat.com)
+- a-o-i: Don't assume storage on 1st master (smunilla@redhat.com)
+- Bug 1320829 - Handle OSE 3.0 installs (bleanhar@redhat.com)
+
 * Fri Apr 15 2016 Troy Dawson <tdawson@redhat.com> 3.0.80-1
 - Refactor docker failed state cleanup (sdodson@redhat.com)
 - Support mixed RPM/container installs (bleanhar@redhat.com)
