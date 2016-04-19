@@ -800,7 +800,7 @@ class FilterModule(object):
         """
         if not isinstance(version, basestring):
             raise errors.AnsibleFilterError(
-                "| {} failed expects a string or unicode".format(version))
+                "| {0} failed expects a string or unicode".format(version))
 
         if version.startswith("v"):
             version = version.replace("v", "")
