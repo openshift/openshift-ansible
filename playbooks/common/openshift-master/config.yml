@@ -367,13 +367,6 @@
     group_by: key=oo_masters_deployment_type_{{ openshift.common.deployment_type }}
     changed_when: False
 
-# Additional instance config for online deployments
-- name: Additional instance config
-  hosts: oo_masters_deployment_type_online
-  roles:
-  - pods
-  - os_env_extras
-
 - name: Delete temporary directory on localhost
   hosts: localhost
   connection: local
