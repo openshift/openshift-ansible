@@ -44,32 +44,14 @@ mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{python_sitelib}/openshift_ansible
 mkdir -p %{buildroot}/etc/bash_completion.d
 mkdir -p %{buildroot}/etc/openshift_ansible
-cp -p bin/{ossh,oscp,opssh,opscp,ohi} %{buildroot}%{_bindir}
-cp -pP bin/openshift_ansible/* %{buildroot}%{python_sitelib}/openshift_ansible
-cp -p bin/ossh_bash_completion %{buildroot}/etc/bash_completion.d
-cp -p bin/openshift_ansible.conf.example %{buildroot}/etc/openshift_ansible/openshift_ansible.conf
 # Fix links
-rm -f %{buildroot}%{python_sitelib}/openshift_ansible/multi_inventory.py
 rm -f %{buildroot}%{python_sitelib}/openshift_ansible/aws
 rm -f %{buildroot}%{python_sitelib}/openshift_ansible/gce
-ln -sf %{_datadir}/ansible/inventory/multi_inventory.py %{buildroot}%{python_sitelib}/openshift_ansible/multi_inventory.py
-ln -sf %{_datadir}/ansible/inventory/aws %{buildroot}%{python_sitelib}/openshift_ansible/aws
-ln -sf %{_datadir}/ansible/inventory/gce %{buildroot}%{python_sitelib}/openshift_ansible/gce
 
 # openshift-ansible-docs install
 # Install example inventory into docs/examples
 mkdir -p docs/example-inventories
 cp inventory/byo/* docs/example-inventories/
-
-# openshift-ansible-inventory install
-mkdir -p %{buildroot}/etc/ansible
-mkdir -p %{buildroot}%{_datadir}/ansible/inventory
-mkdir -p %{buildroot}%{_datadir}/ansible/inventory/aws
-mkdir -p %{buildroot}%{_datadir}/ansible/inventory/gce
-cp -p inventory/multi_inventory.py %{buildroot}%{_datadir}/ansible/inventory
-cp -p inventory/multi_inventory.yaml.example %{buildroot}/etc/ansible/multi_inventory.yaml
-cp -p inventory/aws/hosts/ec2.py %{buildroot}%{_datadir}/ansible/inventory/aws
-cp -p inventory/gce/hosts/gce.py %{buildroot}%{_datadir}/ansible/inventory/gce
 
 # openshift-ansible-playbooks install
 cp -rp playbooks %{buildroot}%{_datadir}/ansible/%{name}/
@@ -98,28 +80,6 @@ popd
 %dir %{_datadir}/ansible/%{name}
 
 # ----------------------------------------------------------------------------------
-# openshift-ansible-bin subpackage
-# ----------------------------------------------------------------------------------
-%package bin
-Summary:       Openshift and Atomic Enterprise Ansible Scripts for working with metadata hosts
-Requires:      %{name} = %{version}
-Requires:      %{name}-inventory = %{version}
-Requires:      %{name}-playbooks = %{version}
-BuildRequires: python2-devel
-BuildArch:     noarch
-
-%description bin
-Scripts to make it nicer when working with hosts that are defined only by metadata.
-
-%files bin
-%{_bindir}/*
-%exclude %{_bindir}/atomic-openshift-installer
-%{python_sitelib}/openshift_ansible/
-/etc/bash_completion.d/*
-%config(noreplace) /etc/openshift_ansible/
-
-
-# ----------------------------------------------------------------------------------
 # openshift-ansible-docs subpackage
 # ----------------------------------------------------------------------------------
 %package docs
@@ -132,47 +92,6 @@ BuildArch:     noarch
 
 %files docs
 %doc  docs
-
-# ----------------------------------------------------------------------------------
-# openshift-ansible-inventory subpackage
-# ----------------------------------------------------------------------------------
-%package inventory
-Summary:       Openshift and Atomic Enterprise Ansible Inventories
-Requires:      %{name} = %{version}
-BuildArch:     noarch
-
-%description inventory
-Ansible Inventories used with the openshift-ansible scripts and playbooks.
-
-%files inventory
-%config(noreplace) /etc/ansible/*
-%dir %{_datadir}/ansible/inventory
-%{_datadir}/ansible/inventory/multi_inventory.py*
-
-%package inventory-aws
-Summary:       Openshift and Atomic Enterprise Ansible Inventories for AWS
-Requires:      %{name}-inventory = %{version}
-Requires:      python-boto
-BuildArch:     noarch
-
-%description inventory-aws
-Ansible Inventories for AWS used with the openshift-ansible scripts and playbooks.
-
-%files inventory-aws
-%{_datadir}/ansible/inventory/aws/ec2.py*
-
-%package inventory-gce
-Summary:       Openshift and Atomic Enterprise Ansible Inventories for GCE
-Requires:      %{name}-inventory = %{version}
-Requires:      python-libcloud >= 0.13
-BuildArch:     noarch
-
-%description inventory-gce
-Ansible Inventories for GCE used with the openshift-ansible scripts and playbooks.
-
-%files inventory-gce
-%{_datadir}/ansible/inventory/gce/gce.py*
-
 
 # ----------------------------------------------------------------------------------
 # openshift-ansible-playbooks subpackage
