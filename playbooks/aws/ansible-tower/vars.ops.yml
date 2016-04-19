@@ -1,9 +1,0 @@
----
-oo_env_long: operations
-oo_zabbix_hostgroups: ['OPS Environment']
-oo_vpc_subnet_id: subnet-4f0bdd38  # USE OPS
-oo_assign_public_ip: yes
-oo_security_group_ids:
-  - sg-02c2f267 # Libra (vpc)
-  - sg-7fc4f41a # ops (vpc)
-  - sg-4dc26829 # ops_tower (vpc)
