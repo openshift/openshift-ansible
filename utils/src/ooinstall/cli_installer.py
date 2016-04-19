@@ -517,6 +517,17 @@ def error_if_missing_info(oo_cfg):
         sys.exit(1)
 
 def get_proxy_hostname_and_excludes():
+    message = """
+If a proxy is needed to reach HTTP and HTTPS traffic please enter the name below.
+This proxy will be configured by default for all processes needing to reach systems outside
+the cluster.
+
+More advanced configuration is possible if using ansible directly:
+
+https://docs.openshift.com/enterprise/latest/install_config/http_proxies.html
+"""
+    click.echo(message)
+
     message = "Specify the hostname for your proxy? (ENTER for none)"
     proxy_hostname = click.prompt(message)
 
