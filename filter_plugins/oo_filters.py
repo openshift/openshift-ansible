@@ -799,7 +799,8 @@ class FilterModule(object):
             Ex. v3.2.0.10 -> -3.2.0.10
         """
         if not isinstance(version, basestring):
-            raise errors.AnsibleFilterError("|failed expects a string or unicode")
+            raise errors.AnsibleFilterError(
+                "| {0} failed expects a string or unicode".format(version))
 
         if version.startswith("v"):
             version = version.replace("v", "")
