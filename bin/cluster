@@ -316,7 +316,7 @@ This wrapper is overriding the following ansible variables:
         meta_parser.add_argument('cluster_id', help='prefix for cluster VM names')
 
     meta_parser.add_argument('-t', '--deployment-type',
-                             choices=['origin', 'online', 'enterprise', 'atomic-enterprise', 'openshift-enterprise'],
+                             choices=['origin', 'atomic-enterprise', 'openshift-enterprise'],
                              help='Deployment type. (default: origin)')
     meta_parser.add_argument('-o', '--option', action='append',
                              help='options')

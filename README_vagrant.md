@@ -42,7 +42,7 @@ vagrant provision
 Environment Variables
 ---------------------
 The following environment variables can be overriden:
-- ``OPENSHIFT_DEPLOYMENT_TYPE`` (defaults to origin, choices: origin, enterprise, online)
+- ``OPENSHIFT_DEPLOYMENT_TYPE`` (defaults to origin, choices: origin, openshift-enterprise)
 - ``OPENSHIFT_NUM_NODES`` (the number of nodes to create, defaults to 2)
 
 Note that if ``OPENSHIFT_DEPLOYMENT_TYPE`` is ``enterprise`` you should also specify environment variables related to ``subscription-manager`` which are used by the ``rhel_subscribe`` role:

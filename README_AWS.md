@@ -178,9 +178,9 @@ Terminating a cluster
 Specifying a deployment type
 ---------------------------
 The --deployment-type flag can be passed to bin/cluster to specify the deployment type
-1. To launch an online cluster (requires access to private repositories and amis):
+1. To launch an OpenShift Enterprise cluster (requires a valid subscription):
 ```
-  bin/cluster create aws --deployment-type=online <cluster-id>
+  bin/cluster create aws --deployment-type=openshift-enterprise <cluster-id>
 ```
 Note: If no deployment type is specified, then the default is origin.
 
