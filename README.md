@@ -21,8 +21,8 @@ This repo contains Ansible code for OpenShift and Atomic Enterprise.
   - [local VMs](README_libvirt.md)
 
 - Bring your own host deployments:
-  - [OpenShift Enterprise](README_OSE.md)
-  - [OpenShift Origin](README_origin.md)
+  - [OpenShift Enterprise](https://docs.openshift.com/enterprise/latest/install_config/install/advanced_install.html)
+  - [OpenShift Origin](https://docs.openshift.org/latest/install_config/install/advanced_install.html)
   - [Atomic Enterprise](README_AEP.md)
 
 - Build
