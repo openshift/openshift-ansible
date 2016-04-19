@@ -5,7 +5,7 @@
     "name": "mysql-persistent",
     "creationTimestamp": null,
     "annotations": {
-      "description": "MySQL database service, with persistent storage. Scaling to more than one replica is not supported",
+      "description": "MySQL database service, with persistent storage.  Scaling to more than one replica is not supported.  You must have persistent volumes available in your cluster to use this template.",
       "iconClass": "icon-mysql-database",
       "tags": "database,mysql"
     }
@@ -221,7 +221,7 @@
       "name": "VOLUME_CAPACITY",
       "displayName": "Volume Capacity",
       "description": "Volume space available for data, e.g. 512Mi, 2Gi.",
-      "value": "512Mi",
+      "value": "1Gi",
       "required": true
     }
   ],
