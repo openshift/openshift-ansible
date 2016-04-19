@@ -1,5 +1,0 @@
----
-# From the origin rpm there exists instructions on how to
-# setup origin properly.  The following steps come from there
-- name: Change root to be in the Docker group
-  user: name=root groups=dockerroot append=yes

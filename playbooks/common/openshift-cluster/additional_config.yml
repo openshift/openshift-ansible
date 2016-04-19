@@ -27,10 +27,6 @@
       (osm_use_cockpit | bool or osm_use_cockpit is undefined )
   - role: flannel_register
     when: openshift.common.use_flannel | bool
-  - role: pods
-    when: openshift.common.deployment_type == 'online'
-  - role: os_env_extras
-    when: openshift.common.deployment_type == 'online'
 
 - name: Create persistent volumes and create hosted services
   hosts: oo_first_master

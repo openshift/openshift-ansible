@@ -1,6 +1,0 @@
----
-- name: Transfer the fedora_apache pod template
-  file: path=/usr/local/etc/pods state=directory
-
-- name: Transfer the fedora_apache pod template
-  copy: directory_mode=on src=pods/ dest=/usr/local/etc/pods/
