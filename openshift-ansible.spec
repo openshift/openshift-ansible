@@ -15,6 +15,7 @@ BuildArch:      noarch
 
 Requires:      ansible >= 1.9.4
 Requires:      python2
+Requires:      openshift-ansible-docs = %{version}-%{release}
 
 %description
 Openshift and Atomic Enterprise Ansible
@@ -56,7 +57,9 @@ ln -sf %{_datadir}/ansible/inventory/aws %{buildroot}%{python_sitelib}/openshift
 ln -sf %{_datadir}/ansible/inventory/gce %{buildroot}%{python_sitelib}/openshift_ansible/gce
 
 # openshift-ansible-docs install
-# -docs are currently just %doc, no install needed
+# Install example inventory into docs/examples
+mkdir -p docs/example-inventories
+cp inventory/byo/* docs/example-inventories/
 
 # openshift-ansible-inventory install
 mkdir -p %{buildroot}/etc/ansible
