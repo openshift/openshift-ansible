@@ -50,7 +50,7 @@
   - include_vars: ../../../../../roles/openshift_master/vars/main.yml
 
   - name: Update systemd units
-    include: ../../../../../roles/openshift_master/tasks/systemd_units.yml openshift_version=v{{ g_aos_versions.avail_version }}
+    include: ../../../../../roles/openshift_master/tasks/systemd_units.yml openshift_version=v{{ g_new_version }}
 
 #  - name: Upgrade master configuration
 #    openshift_upgrade_config:
@@ -130,6 +130,7 @@
 ###############################################################################
 # Reconcile Cluster Roles, Cluster Role Bindings and Security Context Constraints
 ###############################################################################
+
 - name: Reconcile Cluster Roles and Cluster Role Bindings and Security Context Constraints
   hosts: oo_masters_to_config
   roles:
