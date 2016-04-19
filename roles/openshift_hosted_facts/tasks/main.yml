@@ -1,10 +1,4 @@
 ---
-- name: Set legacy hosted facts
-  openshift_facts:
-    role: hosted
-    openshift_env:
-      openshift_hosted_router_selector: "{{ openshift_router_selector | default(None) }}"
-
 - name: Set hosted facts
   openshift_facts:
     role: hosted

@@ -650,7 +650,9 @@ class FilterModule(object):
 
     @staticmethod
     def oo_openshift_env(hostvars):
-        ''' Return facts which begin with "openshift_"
+        ''' Return facts which begin with "openshift_" and translate
+            legacy facts to their openshift_env counterparts.
+
             Ex: hostvars = {'openshift_fact': 42,
                             'theyre_taking_the_hobbits_to': 'isengard'}
                 returns  = {'openshift_fact': 42}
@@ -663,6 +665,11 @@ class FilterModule(object):
         for key in hostvars:
             if regex.match(key):
                 facts[key] = hostvars[key]
+
+        migrations = {'openshift_router_selector': 'openshift_hosted_router_selector'}
+        for old_fact, new_fact in migrations.iteritems():
+            if old_fact in facts and new_fact not in facts:
+                facts[new_fact] = facts[old_fact]
         return facts
 
     @staticmethod
