@@ -75,7 +75,7 @@ deployment_type=openshift-enterprise
 #openshift_docker_options="-l warn --ipv6=false"
 # Deprecated methods to set --log-driver and --log-opts flags, use openshift_docker_options instead
 #openshift_docker_log_driver=json
-#openshift_docker_log_options="tag=mailer"
+#openshift_docker_log_options=["tag=mailer"]
 
 
 # Alternate image format string. If you're not modifying the format string and

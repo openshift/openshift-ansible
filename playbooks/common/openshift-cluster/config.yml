@@ -4,7 +4,7 @@
 - include: validate_hostnames.yml
 
 - name: Set oo_options
-  hosts: oo_hosts_to_config
+  hosts: oo_all_hosts
   tasks:
   - set_fact:
       openshift_docker_additional_registries: "{{ lookup('oo_option', 'docker_additional_registries') }}"
