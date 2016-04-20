@@ -311,6 +311,16 @@ class FilterModule(object):
                           "color": "red"}}}]
                 selector = 'color=green'
                 returns = ['node1.example.com']
+
+                nodes = [{"kind": "Node", "metadata": {"name": "node1.example.com",
+                          "labels": {"kubernetes.io/hostname": "node1.example.com",
+                          "color": "green"}}},
+                         {"kind": "Node", "metadata": {"name": "node2.example.com",
+                          "labels": {"kubernetes.io/hostname": "node2.example.com",
+                          "color": "red"}}}]
+                selector = 'color=green,color=red'
+                returns = ['node1.example.com','node2.example.com']
+
             Args:
                 nodes (list[dict]): list of node definitions
                 selector (str): "label=value" node selector to filter `nodes` by
@@ -323,9 +333,15 @@ class FilterModule(object):
             raise errors.AnsibleFilterError("failed expects selector to be a string")
         if not re.match('.*=.*', selector):
             raise errors.AnsibleFilterError("failed selector does not match \"label=value\" format")
-        label = selector.split('=')[0]
-        value = selector.split('=')[1]
-        return FilterModule.oo_oc_nodes_with_label(nodes, label, value)
+        node_lists = []
+        for node_selector in ''.join(selector.split()).split(','):
+            label = node_selector.split('=')[0]
+            value = node_selector.split('=')[1]
+            node_lists.append(FilterModule.oo_oc_nodes_with_label(nodes, label, value))
+        nodes = set(node_lists[0])
+        for node_list in node_lists[1:]:
+            nodes.intersection_update(node_list)
+        return list(nodes)
 
     @staticmethod
     def oo_oc_nodes_with_label(nodes, label, value):
@@ -634,7 +650,9 @@ class FilterModule(object):
 
     @staticmethod
     def oo_openshift_env(hostvars):
-        ''' Return facts which begin with "openshift_"
+        ''' Return facts which begin with "openshift_" and translate
+            legacy facts to their openshift_env counterparts.
+
             Ex: hostvars = {'openshift_fact': 42,
                             'theyre_taking_the_hobbits_to': 'isengard'}
                 returns  = {'openshift_fact': 42}
@@ -647,6 +665,11 @@ class FilterModule(object):
         for key in hostvars:
             if regex.match(key):
                 facts[key] = hostvars[key]
+
+        migrations = {'openshift_router_selector': 'openshift_hosted_router_selector'}
+        for old_fact, new_fact in migrations.iteritems():
+            if old_fact in facts and new_fact not in facts:
+                facts[new_fact] = facts[old_fact]
         return facts
 
     @staticmethod

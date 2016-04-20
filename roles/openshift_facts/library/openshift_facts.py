@@ -95,6 +95,7 @@ def migrate_local_facts(facts):
     migrated_facts = migrate_docker_facts(migrated_facts)
     migrated_facts = migrate_common_facts(migrated_facts)
     migrated_facts = migrate_node_facts(migrated_facts)
+    migrated_facts = migrate_hosted_facts(migrated_facts)
     return migrated_facts
 
 def migrate_hosted_facts(facts):
@@ -1852,14 +1853,7 @@ class OpenShiftFacts(object):
                         val = [x.strip() for x in val.split(',')]
                     new_local_facts['docker'][key] = list(set(val) - set(['']))
 
-        for facts in new_local_facts.values():
-            keys_to_delete = []
-            if isinstance(facts, dict):
-                for fact, value in facts.iteritems():
-                    if value == "" or value is None:
-                        keys_to_delete.append(fact)
-                for key in keys_to_delete:
-                    del facts[key]
+        new_local_facts = self.remove_empty_facts(new_local_facts)
 
         if new_local_facts != local_facts:
             self.validate_local_facts(new_local_facts)
@@ -1869,6 +1863,23 @@ class OpenShiftFacts(object):
 
         self.changed = changed
         return new_local_facts
+
+    def remove_empty_facts(self, facts=None):
+        """ Remove empty facts
+
+            Args:
+                facts (dict): facts to clean
+        """
+        facts_to_remove = []
+        for fact, value in facts.iteritems():
+            if isinstance(facts[fact], dict):
+                facts[fact] = self.remove_empty_facts(facts[fact])
+            else:
+                if value == "" or value is None:
+                    facts_to_remove.append(fact)
+        for fact in facts_to_remove:
+            del facts[fact]
+        return facts
 
     def validate_local_facts(self, facts=None):
         """ Validate local facts

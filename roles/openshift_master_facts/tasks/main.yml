@@ -54,7 +54,6 @@
       mcs_allocator_range: "{{ osm_mcs_allocator_range | default(None) }}"
       mcs_labels_per_project: "{{ osm_mcs_labels_per_project | default(None) }}"
       uid_allocator_range: "{{ osm_uid_allocator_range | default(None) }}"
-      router_selector: "{{ openshift_router_selector | default(None) }}"
       registry_selector: "{{ openshift_registry_selector | default(None) }}"
       api_server_args: "{{ osm_api_server_args | default(None) }}"
       controller_args: "{{ osm_controller_args | default(None) }}"

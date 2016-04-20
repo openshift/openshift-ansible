@@ -11,7 +11,7 @@
     openshift_deployment_type: "{{ deployment_type }}"
     openshift_public_hostname: "{{ ec2_ip_address }}"
     openshift_registry_selector: 'type=infra'
-    openshift_router_selector: 'type=infra'
+    openshift_hosted_router_selector: 'type=infra'
     openshift_infra_nodes: "{{ g_infra_hosts }}"
     openshift_node_labels: '{"region": "{{ ec2_region }}", "type": "{{ hostvars[inventory_hostname]["ec2_tag_sub-host-type"] if inventory_hostname in groups["tag_host-type_node"] else hostvars[inventory_hostname]["ec2_tag_host-type"] }}"}'
     openshift_master_cluster_method: 'native'
