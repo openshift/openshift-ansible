@@ -15,3 +15,6 @@ nuage_ca_master_rest_server_key: "{{ nuage_mon_rest_server_crt_dir }}/nuageMonSe
 nuage_ca_master_rest_server_crt: "{{ nuage_mon_rest_server_crt_dir }}/nuageMonServer.crt" 
 
 nuage_master_crt_dir : /usr/share/nuage-openshift-monitor
+nuage_master_cspadminpasswd: ''
+nuage_master_adminsusername: 'admin'
+nuage_master_adminuserpasswd: 'admin'
