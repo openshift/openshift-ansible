@@ -1,0 +1,59 @@
+---
+
+  - fail: msg="Please maker sure the following required variables are defined: metrics_hostname, metrics_pv_size"
+    when: metrics_hostname is not defined or
+          metrics_pv_size is not defined
+
+  - name: "Change to openshift-infra"
+    command: oc project openshift-infra
+
+  - name: "Check for available PV"
+    shell: oc get pv | grep Available
+    register: pv_out
+    ignore_erros: yes
+
+  - fail: msg="Please ensure you have a Persistant volume created and available for Cassandra"
+    when: pv_out.rc == 1
+
+  - name: "annotate openshift-infra to box infrastructure on infra nodes"
+    command: "oc annotate --overwrite namespace openshift-infra openshift.io/node-selector={{ openshift_infra_selector }}"
+    when: openshift_infra_selector is defined
+
+  - name: "copy sa file"
+    copy: dest=/tmp/metrics-deployer-sa.yaml
+          src={{role_path}}/files/metrics-deployer-sa.yaml
+          force=yes
+
+  - name: "copy metrics file"
+    copy: dest=/tmp/metrics.yaml
+          src={{ role_path }}/files/metrics.yaml
+          force=yes
+
+  - name: "delete existing metrics service accounts"
+    command: oc delete --ignore-not-found sa hawkular cassandra heapster metrics-deployer
+
+  - name: "Create metrics service account"
+    shell: "oc create -f /tmp/metrics-deployer-sa.yaml"
+    register: sa_out
+    failed_when: "sa_out.rc == 1 and 'exists' not in sa_out.stderr"
+
+  - name: "Give sa account privileges to deploy components"
+    command: oadm policy add-role-to-user edit system:serviceaccount:openshift-infra:metrics-deployer
+    register: deployer_priv_out
+    failed_when: deployer_priv_out.rc == 1
+
+  - name: "Give heapster sa privileges to access metrics"
+    command: oadm policy add-cluster-role-to-user cluster-reader system:serviceaccount:openshift-infra:heapster
+
+  - name: "creating deployer secret"
+    command: "oc secrets new metrics-deployer {{ metrics_secret_vars | default('nothing=/dev/null') }}"
+    register: secret_out
+    failed_when: "secret_out.rc == 1 and 'exists' not in secret_out.stderr"
+
+  - name: "Create metrics-deployer template with custom registry"
+    shell: "oc process -f /tmp/metrics.yaml -v HAWKULAR_METRICS_HOSTNAME={{ metrics_hostname | quote }} -v CASSANDRA_PV_SIZE={{ metrics_pv_size | quote }},REDEPLOY=true,IMAGE_VERSION={{ img_version | quote }},IMAGE_PREFIX={{ target_registry | quote }}/openshift3/ | oc create -f -"
+    when: target_registry is defined
+
+  - name: "Create metrics-deployer template with default registry"
+    shell: "oc process -f /tmp/metrics.yaml -v HAWKULAR_METRICS_HOSTNAME={{ metrics_hostname | quote }} -v CASSANDRA_PV_SIZE={{ metrics_pv_size | quote }},IMAGE_VERSION={{ img_version | quote }},REDEPLOY=true | oc create -f -"
+    when: target_registry is not defined
