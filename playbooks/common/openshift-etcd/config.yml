@@ -22,6 +22,8 @@
       etcd_cert_subdir: etcd-{{ openshift.common.hostname }}
       etcd_cert_config_dir: /etc/etcd
       etcd_cert_prefix:
+      etcd_hostname: "{{ openshift.common.hostname }}"
+      etcd_ip: "{{ openshift.common.ip }}"
 
 - name: Create temp directory for syncing certs
   hosts: localhost
@@ -43,7 +45,7 @@
                                   | oo_filter_list(filter_attr='etcd_server_certs_missing') }}"
     sync_tmpdir: "{{ hostvars.localhost.g_etcd_mktemp.stdout }}"
   roles:
-  - etcd_certificates
+  - openshift_etcd_certificates
   post_tasks:
   - name: Create a tarball of the etcd certs
     command: >
@@ -69,7 +71,7 @@
     sync_tmpdir: "{{ hostvars.localhost.g_etcd_mktemp.stdout }}"
     etcd_url_scheme: https
     etcd_peer_url_scheme: https
-    etcd_peers_group: oo_etcd_to_config
+    etcd_peers: "{{ groups.oo_etcd_to_config | default([], true) }}"
   pre_tasks:
   - name: Ensure certificate directory exists
     file:
@@ -91,7 +93,7 @@
     sync_tmpdir: "{{ hostvars.localhost.g_etcd_mktemp.stdout }}"
     etcd_url_scheme: https
     etcd_peer_url_scheme: https
-    etcd_peers_group: oo_etcd_to_config
+    etcd_peers: "{{ groups.oo_etcd_to_config | default([], true) }}"
   pre_tasks:
   - name: Ensure certificate directory exists
     file:

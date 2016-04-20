@@ -105,7 +105,7 @@
                                    | oo_filter_list(filter_attr='etcd_client_certs_missing') }}"
     sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
   roles:
-  - etcd_certificates
+  - openshift_etcd_certificates
   post_tasks:
   - name: Create a tarball of the etcd certs
     command: >

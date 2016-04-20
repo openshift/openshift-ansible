@@ -154,6 +154,8 @@
       etcd_cert_subdir: openshift-node-{{ openshift.common.hostname }}
       etcd_cert_config_dir: "{{ openshift.common.config_base }}/node"
       etcd_cert_prefix: node.etcd-
+      etcd_hostname: "{{ openshift.common.hostname }}"
+      etcd_ip: "{{ openshift.common.ip }}"
     when: groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config and (openshift.common.use_flannel | bool)
 
 - name: Configure flannel etcd certificates
@@ -168,7 +170,7 @@
                                    | oo_filter_list(filter_attr='etcd_client_flannel_certs_missing') | default([]) }}"
     when: etcd_client_flannel_certs_missing is defined and etcd_client_flannel_certs_missing
   roles:
-  - role: etcd_certificates
+  - role: openshift_etcd_certificates
     when: openshift_use_flannel | default(false) | bool
   post_tasks:
   - name: Create a tarball of the etcd flannel certs
