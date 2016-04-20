@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.81
+Version:        3.0.82
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -183,6 +183,29 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Apr 20 2016 Troy Dawson <tdawson@redhat.com> 3.0.82-1
+- Use a JSON list for docker log options. (dgoodwin@redhat.com)
+- Fix legacy cli_docker_* vars not migrating. (dgoodwin@redhat.com)
+- Fix use of older image tag version during upgrade. (dgoodwin@redhat.com)
+- Remove etcd_interface variable. Remove openshift_docker dependency from the
+  etcd role. (abutcher@redhat.com)
+- Use openshift_hostname/openshift_ip values for etcd configuration and
+  certificates. (abutcher@redhat.com)
+- added new openshift-metrics service (j.david.nieto@gmail.com)
+- Translate legacy facts within the oo_openshift_env filter.
+  (abutcher@redhat.com)
+- Remove empty facts from nested dictionaries. (abutcher@redhat.com)
+- Fix router selector fact migration and match multiple selectors when counting
+  nodes. (abutcher@redhat.com)
+- Fixing the spec for PR 1734 (bleanhar@redhat.com)
+- Add openshift_node_dnsmasq (sdodson@redhat.com)
+- Promote portal_net to openshift.common, add kube_svc_ip (sdodson@redhat.com)
+- Add example inventories to docs, install docs by default (sdodson@redhat.com)
+- Fix use of JSON inventory vars with raw booleans. (dgoodwin@redhat.com)
+- cleanup roles after roles move to openshift-tools (jdiaz@redhat.com)
+- Reference Setup for Origin and Ose from up-to-date docs.openshift.[com|org]
+  instead of local README_[origin|OSE].md (jchaloup@redhat.com)
+
 * Mon Apr 18 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.81-1
 - IMAGE_PREFIX=openshift3/ for enterprise logging/metrics (sdodson@redhat.com)
 - a-o-i: Don't assume storage on 1st master (smunilla@redhat.com)
