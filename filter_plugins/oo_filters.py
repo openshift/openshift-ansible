@@ -48,6 +48,18 @@ class FilterModule(object):
         return ptr
 
     @staticmethod
+    def oo_index(data, item, default=None):
+        """ Return the index of item in list
+        """
+        if not isinstance(data, list) and default is None:
+            raise errors.AnsibleFilterError("|failed expects data is a list")
+        try:
+            index = data.index(item)
+        except:
+            index = default
+        return index
+
+    @staticmethod
     def oo_flatten(data):
         """ This filter plugin will flatten a list of lists
         """
@@ -264,7 +276,7 @@ class FilterModule(object):
         return string.split(separator)
 
     @staticmethod
-    def oo_haproxy_backend_masters(hosts):
+    def oo_haproxy_backend_masters(hosts, port):
         """ This takes an array of dicts and returns an array of dicts
             to be used as a backend for the haproxy role
         """
@@ -272,8 +284,7 @@ class FilterModule(object):
         for idx, host_info in enumerate(hosts):
             server = dict(name="master%s" % idx)
             server_ip = host_info['openshift']['common']['ip']
-            server_port = host_info['openshift']['master']['api_port']
-            server['address'] = "%s:%s" % (server_ip, server_port)
+            server['address'] = "%s:%s" % (server_ip, port)
             server['opts'] = 'check'
             servers.append(server)
         return servers
@@ -840,5 +851,6 @@ class FilterModule(object):
             "oo_image_tag_to_rpm_version": self.oo_image_tag_to_rpm_version,
             "oo_merge_dicts": self.oo_merge_dicts,
             "oo_oc_nodes_matching_selector": self.oo_oc_nodes_matching_selector,
-            "oo_oc_nodes_with_label": self.oo_oc_nodes_with_label
+            "oo_oc_nodes_with_label": self.oo_oc_nodes_with_label,
+            "oo_index": self.oo_index,
         }

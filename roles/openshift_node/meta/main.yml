@@ -13,6 +13,9 @@ galaxy_info:
   - cloud
 dependencies:
 - role: openshift_docker
+- role: openshift_node_facts
+- role: openshift_certificates
+  openshift_certificates_action: node
 - role: openshift_cloud_provider
 - role: openshift_common
 - role: openshift_node_dnsmasq

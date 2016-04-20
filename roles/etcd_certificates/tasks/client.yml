@@ -1,42 +1,19 @@
 ---
-- name: Ensure generated_certs directory present
-  file:
-    path: "{{ etcd_generated_certs_dir }}/{{ item.etcd_cert_subdir }}"
-    state: directory
-    mode: 0700
-  with_items: etcd_needing_client_certs
+- name: Check status of external etcd certificatees
+  stat:
+    path: "{{ etcd_cert_config_dir }}/{{ item }}"
+  with_items:
+  - "{{ etcd_cert_prefix }}client.crt"
+  - "{{ etcd_cert_prefix }}client.key"
+  - "{{ etcd_cert_prefix }}ca.crt"
+  register: g_external_etcd_cert_stat_result
+  when: etcd_certificates_etcd_hosts | default([]) | length > 0
 
-- name: Create the client csr
-  command: >
-    openssl req -new -keyout {{ item.etcd_cert_prefix }}client.key
-    -config {{ etcd_openssl_conf }}
-    -out {{ item.etcd_cert_prefix }}client.csr
-    -reqexts {{ etcd_req_ext }} -batch -nodes
-    -subj /CN={{ item.openshift.common.hostname }}
-  args:
-    chdir: "{{ etcd_generated_certs_dir }}/{{ item.etcd_cert_subdir }}"
-    creates: "{{ etcd_generated_certs_dir ~ '/' ~  item.etcd_cert_subdir ~ '/'
-                 ~ item.etcd_cert_prefix ~ 'client.csr' }}"
-  environment:
-    SAN: "IP:{{ item.openshift.common.ip }}"
-  with_items: etcd_needing_client_certs
+- set_fact:
+    etcd_client_certs_missing: "{{ False in (g_external_etcd_cert_stat_result.results
+                                   | oo_collect(attribute='stat.exists')
+                                   | list) }}"
+  when: etcd_certificates_etcd_hosts | default([]) | length > 0
 
-- name: Sign and create the client crt
-  command: >
-    openssl ca -name {{ etcd_ca_name }} -config {{ etcd_openssl_conf }}
-    -out {{ item.etcd_cert_prefix }}client.crt
-    -in {{ item.etcd_cert_prefix }}client.csr
-    -batch
-  args:
-    chdir: "{{ etcd_generated_certs_dir }}/{{ item.etcd_cert_subdir }}"
-    creates: "{{ etcd_generated_certs_dir ~ '/' ~  item.etcd_cert_subdir ~ '/'
-                 ~ item.etcd_cert_prefix ~ 'client.crt' }}"
-  environment:
-    SAN: "IP:{{ item.openshift.common.ip }}"
-  with_items: etcd_needing_client_certs
-
-- file:
-    src: "{{ etcd_ca_cert }}"
-    dest: "{{ etcd_generated_certs_dir}}/{{ item.etcd_cert_subdir }}/{{ item.etcd_cert_prefix }}ca.crt"
-    state: hard
-  with_items: etcd_needing_client_certs
+- include: create_client_certificates.yml
+  when: etcd_certificates_etcd_hosts | default([]) | length > 0 and etcd_client_certs_missing | bool

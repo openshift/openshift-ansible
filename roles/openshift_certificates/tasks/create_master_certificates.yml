@@ -1,0 +1,87 @@
+---
+- name: Ensure the generated_configs directory present
+  file:
+    path: "{{ openshift_generated_configs_dir }}/{{ master_cert_subdir }}"
+    state: directory
+    mode: 0700
+  delegate_to: "{{ openshift_certificates_ca_host }}"
+
+- file:
+    src: "{{ openshift_master_config_dir }}/{{ item }}"
+    dest: "{{ openshift_generated_configs_dir }}/{{ master_cert_subdir }}/{{ item }}"
+    state: hard
+  with_items:
+  - ca.crt
+  - ca.key
+  - ca.serial.txt
+  delegate_to: "{{ openshift_certificates_ca_host }}"
+
+- name: Create the master certificates if they do not already exist
+  command: >
+    {{ openshift.common.admin_binary }} create-master-certs
+      --hostnames={{ openshift.common.all_hostnames | join(',') }}
+      --master={{ openshift.master.api_url }}
+      --public-master={{ openshift.master.public_api_url }}
+      --cert-dir={{ openshift_generated_configs_dir }}/{{ master_cert_subdir }}
+      --overwrite=false
+  delegate_to: "{{ openshift_certificates_ca_host }}"
+
+- file:
+    src: "{{ openshift_master_config_dir }}/{{ item }}"
+    dest: "{{ openshift_generated_configs_dir }}/{{ master_cert_subdir }}/{{ item }}"
+    state: hard
+    force: true
+  with_items:
+  - "{{ hostvars[inventory_hostname] | certificates_to_synchronize }}"
+  delegate_to: "{{ openshift_certificates_ca_host }}"
+
+- name: Remove generated etcd client certs when using external etcd
+  file:
+    path: "{{ master_generated_certs_dir }}/{{ master_cert_subdir }}/{{ item }}"
+    state: absent
+  when: openshift_master_etcd_hosts | length > 0
+  with_items:
+  - master.etcd-client.crt
+  - master.etcd-client.key
+  delegate_to: "{{ openshift_certificates_ca_host }}"
+
+- name: Create local temp directory for syncing certs
+  local_action: command mktemp -d /tmp/openshift-ansible-XXXXXXX
+  register: g_master_mktemp
+  changed_when: False
+  delegate_to: localhost
+
+- name: Create a tarball of the master certs
+  command: >
+    tar -czvf {{ master_generated_certs_dir }}/{{ master_cert_subdir }}.tgz
+      -C {{ master_generated_certs_dir }}/{{ master_cert_subdir }} .
+  args:
+    creates: "{{ master_generated_certs_dir }}/{{ master_cert_subdir }}.tgz"
+  when: "'oo_first_master' not in group_names"
+  delegate_to: "{{ openshift_certificates_ca_host }}"
+
+- name: Retrieve the master cert tarball from the master
+  fetch:
+    src: "{{ master_generated_certs_dir }}/{{ master_cert_subdir }}.tgz"
+    dest: "{{ g_master_mktemp.stdout }}/"
+    flat: yes
+    fail_on_missing: yes
+    validate_checksum: yes
+  when: "'oo_first_master' not in group_names"
+  delegate_to: "{{ openshift_certificates_ca_host }}"
+
+- name: Ensure certificate directory exists
+  file:
+    path: "{{ openshift.common.config_base }}/master"
+    state: directory
+  when: "'oo_first_master' not in group_names"
+
+- name: Unarchive the tarball on the master
+  unarchive:
+    src: "{{ g_master_mktemp.stdout }}/{{ master_cert_subdir }}.tgz"
+    dest: "{{ master_cert_config_dir }}"
+  when: "'oo_first_master' not in group_names"
+
+- file: name={{ g_master_mktemp.stdout }} state=absent
+  changed_when: False
+  delegate_to: localhost

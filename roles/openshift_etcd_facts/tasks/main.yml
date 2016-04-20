@@ -1,0 +1,11 @@
+---
+- openshift_facts:
+    role: "{{ item.role }}"
+    local_facts: "{{ item.local_facts }}"
+  with_items:
+    - role: etcd
+      local_facts:
+        etcd_image: "{{ osm_etcd_image | default(None) }}"
+
+- set_fact:
+    etcd_cert_subdir: etcd-{{ openshift.common.hostname }}

@@ -1,16 +1,7 @@
-- name: Configure flannel
-  hosts: oo_first_master
-  vars:
-    etcd_urls: "{{ openshift.master.etcd_urls }}"
-  roles:
-  - role: flannel_register
-    when: openshift.common.use_flannel | bool
-
 - name: Additional master configuration
   hosts: oo_first_master
   vars:
     cockpit_plugins: "{{ osm_cockpit_plugins | default(['cockpit-kubernetes']) }}"
-    etcd_urls: "{{ openshift.master.etcd_urls }}"
     openshift_master_ha: "{{ groups.oo_masters | length > 1 }}"
     omc_cluster_hosts: "{{ groups.oo_masters | join(' ')}}"
   roles:
@@ -25,7 +16,8 @@
   - role: cockpit
     when: not openshift.common.is_atomic and ( deployment_type in ['atomic-enterprise','openshift-enterprise'] ) and
       (osm_use_cockpit | bool or osm_use_cockpit is undefined )
-  - role: flannel_register
+  - role: openshift_flannel_register
+    etcd_urls: "{{ openshift.master.etcd_urls }}"
     when: openshift.common.use_flannel | bool
   - role: pods
     when: openshift.common.deployment_type == 'online'

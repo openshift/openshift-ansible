@@ -1,0 +1,70 @@
+---
+- name: "Create openshift_generated_configs_dir if it doesn't exist"
+  file:
+    path: "{{ openshift_generated_configs_dir }}"
+    state: directory
+    mode: 0700
+  delegate_to: "{{ openshift_certificates_ca_host }}"
+
+- name: Generate the node client config
+  command: >
+    {{ openshift.common.admin_binary }} create-api-client-config
+      --certificate-authority={{ openshift_master_ca_cert }}
+      --client-dir={{ openshift_node_generated_config_dir }}
+      --groups=system:nodes
+      --master={{ hostvars[openshift_certificates_ca_host].openshift.master.api_url }}
+      --signer-cert={{ openshift_master_ca_cert }}
+      --signer-key={{ openshift_master_ca_key }}
+      --signer-serial={{ openshift_master_ca_serial }}
+      --user=system:node:{{ openshift.common.hostname }}
+  args:
+    creates: "{{ openshift_node_generated_config_dir }}"
+  delegate_to: "{{ openshift_certificates_ca_host }}"
+
+- name: Generate the node server certificate
+  command: >
+    {{ openshift.common.admin_binary }} ca create-server-cert
+      --cert={{ openshift_node_generated_config_dir }}/server.crt
+      --key={{ openshift_node_generated_config_dir }}/server.key
+      --overwrite=true
+      --hostnames={{ openshift.common.all_hostnames |join(",") }}
+      --signer-cert={{ openshift_master_ca_cert }}
+      --signer-key={{ openshift_master_ca_key }}
+      --signer-serial={{ openshift_master_ca_serial }}
+  args:
+    creates: "{{ openshift_node_generated_config_dir }}/server.crt"
+  delegate_to: "{{ openshift_certificates_ca_host }}"
+
+- name: Create local temp directory for syncing certs
+  local_action: command mktemp -d /tmp/openshift-ansible-XXXXXXX
+  register: node_cert_mktemp
+  changed_when: False
+  delegate_to: localhost
+
+- name: Create a tarball of the node config directories
+  command: >
+    tar -czvf {{ openshift_node_generated_config_dir }}.tgz
+      --transform 's|system:{{ openshift_node_cert_subdir }}|node|'
+      -C {{ openshift_node_generated_config_dir }} .
+  args:
+    creates: "{{ openshift_node_generated_config_dir }}.tgz"
+  delegate_to: "{{ openshift_certificates_ca_host }}"
+
+- name: Retrieve the node config tarballs from the master
+  fetch:
+    src: "{{ openshift_node_generated_config_dir }}.tgz"
+    dest: "{{ node_cert_mktemp.stdout }}/"
+    flat: yes
+    fail_on_missing: yes
+    validate_checksum: yes
+  delegate_to: "{{ openshift_certificates_ca_host }}"
+
+- name: Ensure certificate directory exists
+  file:
+    path: "{{ openshift_node_cert_dir }}"
+    state: directory
+
+- name: Unarchive the tarball on the node
+  unarchive:
+    src: "{{ node_cert_mktemp.stdout }}/{{ openshift_node_cert_subdir }}.tgz"
+    dest: "{{ openshift_node_cert_dir }}"

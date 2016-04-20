@@ -1,0 +1,94 @@
+- name: Ensure generated_certs directory present
+  file:
+    path: "{{ etcd_generated_certs_dir }}/{{ etcd_cert_subdir }}"
+    state: directory
+    mode: 0700
+  delegate_to: "{{ etcd_certificates_ca_host }}"
+
+- name: Create the client csr
+  command: >
+    openssl req -new -keyout {{ etcd_cert_prefix }}client.key
+    -config {{ etcd_openssl_conf }}
+    -out {{ etcd_cert_prefix }}client.csr
+    -reqexts {{ etcd_req_ext }} -batch -nodes
+    -subj /CN={{ etcd_hostname }}
+  args:
+    chdir: "{{ etcd_generated_certs_dir }}/{{ etcd_cert_subdir }}"
+    creates: "{{ etcd_generated_certs_dir ~ '/' ~  etcd_cert_subdir ~ '/'
+                 ~ etcd_cert_prefix ~ 'client.csr' }}"
+  environment:
+    SAN: "IP:{{ etcd_ip }}"
+  delegate_to: "{{ etcd_certificates_ca_host }}"
+
+- name: Sign and create the client crt
+  command: "{{ item.command }}"
+  args: "{{ item.args | default({}) }}"
+  environment: "{{ item.environment | default({}) }}"
+  with_items:
+  - command: "sleep {{ etcd_certificates_etcd_hosts | default([inventory_hostname]) | oo_index(inventory_hostname, 0) }}"
+  - command: >
+      openssl ca -name {{ etcd_ca_name }} -config {{ etcd_openssl_conf }}
+      -out {{ etcd_cert_prefix }}client.crt
+      -in {{ etcd_cert_prefix }}client.csr
+      -batch
+    args:
+      chdir: "{{ etcd_generated_certs_dir }}/{{ etcd_cert_subdir }}"
+      creates: "{{ etcd_generated_certs_dir ~ '/' ~  etcd_cert_subdir ~ '/'
+                   ~ etcd_cert_prefix ~ 'client.crt' }}"
+    environment:
+      SAN: "IP:{{ etcd_ip }}"
+  delegate_to: "{{ etcd_certificates_ca_host }}"
+
+- file:
+    src: "{{ etcd_ca_cert }}"
+    dest: "{{ etcd_generated_certs_dir}}/{{ etcd_cert_subdir }}/{{ etcd_cert_prefix }}ca.crt"
+    state: hard
+  delegate_to: "{{ etcd_certificates_ca_host }}"
+
+- name: Create local temp directory for syncing certs
+  local_action: command mktemp -d /tmp/etcd_certificates-XXXXXXX
+  register: g_etcd_client_mktemp
+  changed_when: False
+  delegate_to: localhost
+
+- name: Create a tarball of the etcd certs
+  command: >
+    tar -czvf {{ etcd_generated_certs_dir }}/{{ etcd_cert_subdir }}.tgz
+      -C {{ etcd_generated_certs_dir }}/{{ etcd_cert_subdir }} .
+  args:
+    creates: "{{ etcd_generated_certs_dir }}/{{ etcd_cert_subdir }}.tgz"
+  delegate_to: "{{ etcd_certificates_ca_host }}"
+
+- name: Retrieve the etcd cert tarballs
+  fetch:
+    src: "{{ etcd_generated_certs_dir }}/{{ etcd_cert_subdir }}.tgz"
+    dest: "{{ g_etcd_client_mktemp.stdout }}/"
+    flat: yes
+    fail_on_missing: yes
+    validate_checksum: yes
+  delegate_to: "{{ etcd_certificates_ca_host }}"
+
+- name: Ensure certificate directory exists
+  file:
+    path: "{{ etcd_cert_config_dir }}"
+    state: directory
+
+- name: Unarchive etcd cert tarballs
+  unarchive:
+    src: "{{ g_etcd_client_mktemp.stdout }}/{{ etcd_cert_subdir }}.tgz"
+    dest: "{{ etcd_cert_config_dir }}"
+
+- file:
+    path: "{{ etcd_cert_config_dir }}/{{ item }}"
+    owner: root
+    group: root
+    mode: 0600
+  with_items:
+  - "{{ etcd_cert_prefix }}client.crt"
+  - "{{ etcd_cert_prefix }}client.key"
+  - "{{ etcd_cert_prefix }}ca.crt"
+
+- name: Delete temporary directory
+  file: name={{ g_etcd_client_mktemp.stdout }} state=absent
+  changed_when: False
+  delegate_to: localhost

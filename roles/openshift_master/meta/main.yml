@@ -13,7 +13,15 @@ galaxy_info:
   - cloud
 dependencies:
 - role: openshift_docker
-- role: openshift_cli
-- role: openshift_cloud_provider
 - role: openshift_master_facts
 - role: openshift_hosted_facts
+- role: openshift_common
+- role: openshift_cli
+- role: etcd_certificates
+  etcd_certificates_action: client
+  etcd_generated_certs_dir: /etc/etcd/generated_certs
+  etcd_cert_prefix: master.etcd-
+  when: openshift.master.ha | bool
+- role: openshift_certificates
+  openshift_certificates_action: master
+- role: openshift_cloud_provider

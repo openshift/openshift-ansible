@@ -12,16 +12,18 @@
 # HA Variable Validation
 - fail:
     msg: "openshift_master_cluster_method must be set to either 'native' or 'pacemaker' for multi-master installations"
-  when: openshift_master_ha | bool and ((openshift_master_cluster_method is not defined) or (openshift_master_cluster_method is defined and openshift_master_cluster_method not in ["native", "pacemaker"]))
+  when: openshift.master.ha | bool and ((openshift_master_cluster_method is not defined) or (openshift_master_cluster_method is defined and openshift_master_cluster_method not in ["native", "pacemaker"]))
 - fail:
     msg: "'native' high availability is not supported for the requested OpenShift version"
-  when: openshift_master_ha | bool and openshift_master_cluster_method == "native" and not openshift.common.version_gte_3_1_or_1_1 | bool
+  when: openshift.master.ha | bool and openshift_master_cluster_method == "native" and not openshift.common.version_gte_3_1_or_1_1 | bool
 - fail:
     msg: "openshift_master_cluster_password must be set for multi-master installations"
-  when: openshift_master_ha | bool and openshift_master_cluster_method == "pacemaker" and (openshift_master_cluster_password is not defined or not openshift_master_cluster_password)
+  when: openshift.master.ha | bool and openshift_master_cluster_method == "pacemaker" and (openshift_master_cluster_password is not defined or not openshift_master_cluster_password)
 - fail:
     msg: "Pacemaker based HA is not supported at this time when used with containerized installs"
-  when: openshift_master_ha | bool and openshift_master_cluster_method == "pacemaker" and openshift.common.is_containerized | bool
+  when: openshift.master.ha | bool and openshift_master_cluster_method == "pacemaker" and openshift.common.is_containerized | bool
+
+- include: named_certificates.yml
 
 - name: Install Master package
   action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-master{{ openshift_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }} state=present"
@@ -133,30 +135,30 @@
 
 - name: Start and enable master
   service: name={{ openshift.common.service_type }}-master enabled=yes state=started
-  when: not openshift_master_ha | bool
+  when: not openshift.master.ha | bool
   register: start_result
   notify: Verify API Server
 
 - name: Stop and disable non HA master when running HA
   service: name={{ openshift.common.service_type }}-master enabled=no state=stopped
-  when: openshift_master_ha | bool
+  when: openshift.master.ha | bool
 
 - set_fact:
     master_service_status_changed: "{{ start_result | changed }}"
-  when: not openshift_master_ha | bool
+  when: not openshift.master.ha | bool
 
 - name: Mask master service
   command: systemctl mask {{ openshift.common.service_type }}-master
-  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and not openshift.common.is_containerized | bool
+  when: openshift.master.ha | bool and openshift.master.cluster_method == 'native' and not openshift.common.is_containerized | bool
 
 - name: Start and enable master api
   service: name={{ openshift.common.service_type }}-master-api enabled=yes state=started
-  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
+  when: openshift.master.ha | bool and openshift.master.cluster_method == 'native'
   register: start_result
 
 - set_fact:
     master_api_service_status_changed: "{{ start_result | changed }}"
-  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
+  when: openshift.master.ha | bool and openshift.master.cluster_method == 'native'
 
 # A separate wait is required here for native HA since notifies will
 # be resolved after all tasks in the role.
@@ -171,26 +173,26 @@
   retries: 120
   delay: 1
   changed_when: false
-  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and master_api_service_status_changed | bool
+  when: openshift.master.ha | bool and openshift.master.cluster_method == 'native' and master_api_service_status_changed | bool
 
 - name: Start and enable master controller
   service: name={{ openshift.common.service_type }}-master-controllers enabled=yes state=started
-  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
+  when: openshift.master.ha | bool and openshift.master.cluster_method == 'native'
   register: start_result
 
 - set_fact:
     master_controllers_service_status_changed: "{{ start_result | changed }}"
-  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
+  when: openshift.master.ha | bool and openshift.master.cluster_method == 'native'
 
 - name: Install cluster packages
   action: "{{ ansible_pkg_mgr }} name=pcs state=present"
-  when: openshift_master_ha | bool and openshift.master.cluster_method == 'pacemaker'
+  when: openshift.master.ha | bool and openshift.master.cluster_method == 'pacemaker'
     and not openshift.common.is_containerized | bool
   register: install_result
 
 - name: Start and enable cluster service
   service: name=pcsd enabled=yes state=started
-  when: openshift_master_ha | bool and openshift.master.cluster_method == 'pacemaker'
+  when: openshift.master.ha | bool and openshift.master.cluster_method == 'pacemaker'
     and not openshift.common.is_containerized | bool
 
 - name: Set the cluster user password

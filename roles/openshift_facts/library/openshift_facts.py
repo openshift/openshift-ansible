@@ -1467,6 +1467,7 @@ class OpenShiftFacts(object):
                    'docker',
                    'etcd',
                    'hosted',
+                   'loadbalancer',
                    'master',
                    'node']
 
@@ -1614,6 +1615,13 @@ class OpenShiftFacts(object):
                                       oauth_grant_method='auto',
                                       scheduler_predicates=scheduler_predicates,
                                       scheduler_priorities=scheduler_priorities)
+
+        if 'loadbalancer' in roles:
+            loadbalancer = dict(frontend_port='8443',
+                                default_maxconn='20000',
+                                global_maxconn='20000',
+                                limit_nofile='100000')
+            defaults['loadbalancer'] = loadbalancer
 
         if 'node' in roles:
             defaults['node'] = dict(labels={}, annotations={},
