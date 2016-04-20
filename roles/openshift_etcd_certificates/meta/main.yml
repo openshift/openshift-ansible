@@ -1,7 +1,7 @@
 ---
 galaxy_info:
-  author: Jason DeTiberus
-  description: OpenShift etcd
+  author: Andrew Butcher
+  description: OpenShift etcd Certificates
   company: Red Hat, Inc.
   license: Apache License, Version 2.0
   min_ansible_version: 1.9
@@ -13,6 +13,4 @@ galaxy_info:
   - cloud
 dependencies:
 - role: openshift_etcd_facts
-- role: openshift_docker
-  when: openshift.common.is_containerized | bool
-- role: etcd
+- role: etcd_certificates
