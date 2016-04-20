@@ -1,7 +1,7 @@
 - include_vars: ../../../../../roles/openshift_node/vars/main.yml
 
 - name: Update systemd units
-  include: ../../../../../roles/openshift_node/tasks/systemd_units.yml openshift_version=v{{ g_aos_versions.avail_version }}
+  include: ../../../../../roles/openshift_node/tasks/systemd_units.yml openshift_version=v{{ g_new_version }}
 
 - name: Verifying the correct version was configured
   shell: grep {{ verify_upgrade_version }} {{ item }}

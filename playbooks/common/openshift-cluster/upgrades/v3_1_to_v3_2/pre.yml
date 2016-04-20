@@ -161,14 +161,14 @@
     when: inventory_hostname in groups.oo_masters_to_config
 
   - name: Update systemd units
-    include: ../../../../../roles/openshift_master/tasks/systemd_units.yml openshift_version=v{{ g_aos_versions.curr_version }}
+    include: ../../../../../roles/openshift_master/tasks/systemd_units.yml openshift_version=v{{ g_new_version }}
     when: inventory_hostname in groups.oo_masters_to_config
 
   - include_vars: ../../../../../roles/openshift_node/vars/main.yml
     when: inventory_hostname in groups.oo_nodes_to_config
 
   - name: Update systemd units
-    include: ../../../../../roles/openshift_node/tasks/systemd_units.yml openshift_version=v{{g_aos_versions.curr_version}}
+    include: ../../../../../roles/openshift_node/tasks/systemd_units.yml openshift_version=v{{ g_new_version }}
     when: inventory_hostname in groups.oo_nodes_to_config
 
   # Note: the version number is hardcoded here in hopes of catching potential
