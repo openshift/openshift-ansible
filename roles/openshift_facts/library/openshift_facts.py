@@ -1634,6 +1634,22 @@ class OpenShiftFacts(object):
 
         if 'hosted' in roles or self.role == 'hosted':
             defaults['hosted'] = dict(
+                metrics=dict(
+                    deploy=False,
+                    storage=dict(
+                        kind=None,
+                        volume=dict(
+                            name='metrics',
+                            size='10Gi'
+                        ),
+                        nfs=dict(
+                            directory='/exports',
+                            options='*(rw,root_squash)'),
+                        host=None,
+                        access_modes=['ReadWriteMany'],
+                        create_pv=True
+                    )
+                ),
                 registry=dict(
                     storage=dict(
                         kind=None,
