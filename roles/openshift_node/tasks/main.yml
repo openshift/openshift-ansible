@@ -9,13 +9,6 @@
     role: "{{ item.role }}"
     local_facts: "{{ item.local_facts }}"
   with_items:
-  - role: common
-    local_facts:
-      # TODO: Replace this with a lookup or filter plugin.
-      # TODO: Move this to the node role
-      dns_ip: "{{ openshift_dns_ip
-                  | default(openshift_master_cluster_vip
-                  | default(None if openshift.common.version_gte_3_1_or_1_1 | bool else openshift_node_first_master_ip | default(None, true), true), true) }}"
   - role: node
     local_facts:
       annotations: "{{ openshift_node_annotations | default(none) }}"
@@ -32,6 +25,7 @@
       ovs_image: "{{ osn_ovs_image | default(None) }}"
       proxy_mode: "{{ openshift_node_proxy_mode | default('iptables') }}"
       local_quota_per_fsgroup: "{{ openshift_node_local_quota_per_fsgroup | default(None) }}"
+      dns_ip: "{{ openshift_dns_ip | default(none) | get_dns_ip(hostvars[inventory_hostname])}}"
 
 # We have to add tuned-profiles in the same transaction otherwise we run into depsolving
 # problems because the rpms don't pin the version properly. This was fixed in 3.1 packaging.

@@ -232,6 +232,9 @@
         - /usr/local/bin/oadm
         - /usr/local/bin/oc
         - /usr/local/bin/kubectl
+        - /etc/NetworkManager/dispatcher.d/99-origin-dns.sh
+        - /etc/dnsmasq.d/origin-dns.conf
+        - /etc/dnsmasq.d/origin-upstream-dns.conf
 
     # Since we are potentially removing the systemd unit files for separated
     # master-api and master-controllers services, so we need to reload the
@@ -244,3 +247,5 @@
   tasks:
     - name: restart docker
       service: name=docker state=restarted
+    - name: restart NetworkManager
+      service: name=NetworkManager state=restarted
