@@ -1644,6 +1644,8 @@ class OpenShiftFacts(object):
             defaults['hosted'] = dict(
                 metrics=dict(
                     deploy=False,
+                    duration=7,
+                    resolution=10,
                     storage=dict(
                         kind=None,
                         volume=dict(
