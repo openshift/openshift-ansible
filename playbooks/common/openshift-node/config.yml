@@ -119,7 +119,7 @@
     # hostvars[groups.oo_first_master.0].openshift.hosted.registry instead of
     # hardcoding
     openshift_docker_hosted_registry_insecure: True
-    openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.master.portal_net }}"
+    openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"
   roles:
   - openshift_node
 
@@ -132,7 +132,7 @@
     # hostvars[groups.oo_first_master.0].openshift.hosted.registry instead of
     # hardcoding
     openshift_docker_hosted_registry_insecure: True
-    openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.master.portal_net }}"
+    openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"
   roles:
   - openshift_node
 
