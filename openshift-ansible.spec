@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.82
+Version:        3.0.83
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -183,6 +183,16 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Apr 21 2016 Troy Dawson <tdawson@redhat.com> 3.0.83-1
+- a-o-i: Correct bug with default storage host (smunilla@redhat.com)
+- Only add new sccs (bleanhar@redhat.com)
+- Fix bug after portal_net move from master to common role.
+  (dgoodwin@redhat.com)
+- Sync latest content (sdodson@redhat.com)
+- Use xpaas 1.3.0-1, use enterprise content for metrics (sdodson@redhat.com)
+- Support configurable admin user and password for the enterprise Prefix
+  changes for admin and password with nuage_master (abhat@nuagenetworks.net)
+
 * Wed Apr 20 2016 Troy Dawson <tdawson@redhat.com> 3.0.82-1
 - Use a JSON list for docker log options. (dgoodwin@redhat.com)
 - Fix legacy cli_docker_* vars not migrating. (dgoodwin@redhat.com)
