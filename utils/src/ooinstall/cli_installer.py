@@ -315,7 +315,7 @@ Note: Containerized storage hosts are not currently supported.
 
     hostname_or_ip = click.prompt('Enter hostname or IP address',
                                             value_proc=validate_prompt_hostname,
-                                            default=first_master)
+                                            default=first_master.connect_to)
     existing, existing_host = is_host_already_node_or_master(hostname_or_ip, hosts)
     if existing and existing_host.node:
         existing_host.storage = True
