@@ -40,7 +40,7 @@
       "kind": "Route",
       "apiVersion": "v1",
       "metadata": {
-        "name": "jenkins",
+        "name": "${JENKINS_SERVICE_NAME}",
         "creationTimestamp": null
       },
       "spec": {
