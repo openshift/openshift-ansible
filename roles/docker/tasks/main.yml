@@ -22,7 +22,7 @@
 
 - name: Install docker
   action: "{{ ansible_pkg_mgr }} name=docker{{ '-' + docker_version if docker_version is defined and docker_version != '' else '' }} state=present"
-  when: not openshift.common.is_atomic | bool and not docker_version_result | skipped and docker_version_result.stdout | default('0.0', True) | version_compare(docker_version, 'lt')
+  when: not openshift.common.is_atomic | bool and docker_downgrade_result | skipped
 
 # If docker were enabled and started before we downgraded it may have entered a
 # failed state. Check for that and clear it if necessary.
