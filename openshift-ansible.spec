@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.83
+Version:        3.0.84
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -183,6 +183,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Apr 22 2016 Troy Dawson <tdawson@redhat.com> 3.0.84-1
+- Fix for docker not present (jdetiber@redhat.com)
+- Reconcile roles in additive-only mode on upgrade (jliggitt@redhat.com)
+- Set etcd_hostname and etcd_ip for masters w/ external etcd.
+  (abutcher@redhat.com)
+
 * Thu Apr 21 2016 Troy Dawson <tdawson@redhat.com> 3.0.83-1
 - a-o-i: Correct bug with default storage host (smunilla@redhat.com)
 - Only add new sccs (bleanhar@redhat.com)
