@@ -1327,6 +1327,23 @@ def get_local_facts_from_file(filename):
 
     return local_facts
 
+def sort_unique(alist):
+    """ Sorts and de-dupes a list
+
+        Args:
+            list: a list
+        Returns:
+            list: a sorted de-duped list
+    """
+
+    alist.sort()
+    out = list()
+    for i in alist:
+        if i not in out:
+            out.append(i)
+
+    return out
+
 def safe_get_bool(fact):
     """ Get a boolean fact safely.
 
@@ -1363,6 +1380,7 @@ def set_proxy_facts(facts):
                     common['no_proxy'].extend(common['no_proxy_internal_hostnames'].split(','))
                 common['no_proxy'].append('.' + common['dns_domain'])
                 common['no_proxy'].append(common['hostname'])
+                common['no_proxy'] = sort_unique(common['no_proxy'])
         facts['common'] = common
 
     if 'builddefaults' in facts:
