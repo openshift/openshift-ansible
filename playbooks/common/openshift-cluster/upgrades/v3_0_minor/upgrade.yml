@@ -42,10 +42,10 @@
 - name: Update cluster policy
   hosts: oo_first_master
   tasks:
-    - name: oadm policy reconcile-cluster-roles --confirm
+    - name: oadm policy reconcile-cluster-roles --additive-only=true --confirm
       command: >
         {{ openshift.common.admin_binary}} --config={{ openshift.common.config_base }}/master/admin.kubeconfig
-        policy reconcile-cluster-roles --confirm
+        policy reconcile-cluster-roles --additive-only=true --confirm
 
 - name: Upgrade default router
   hosts: oo_first_master

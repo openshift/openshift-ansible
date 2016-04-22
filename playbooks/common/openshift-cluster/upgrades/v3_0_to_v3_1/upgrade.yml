@@ -490,7 +490,7 @@
   - name: Reconcile Cluster Roles
     command: >
       {{ openshift.common.admin_binary}} --config={{ openshift.common.config_base }}/master/admin.kubeconfig
-      policy reconcile-cluster-roles --confirm
+      policy reconcile-cluster-roles --additive-only=true --confirm
     run_once: true
 
   - name: Reconcile Cluster Role Bindings
