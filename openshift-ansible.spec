@@ -214,7 +214,7 @@ Atomic OpenShift Utilities includes
 - Fix router selector fact migration and match multiple selectors when counting
   nodes. (abutcher@redhat.com)
 - Fixing the spec for PR 1734 (bleanhar@redhat.com)
-- Add openshift_node_dnsmasq (sdodson@redhat.com)
+- Add openshift_use_dnsmasq (sdodson@redhat.com)
 - Promote portal_net to openshift.common, add kube_svc_ip (sdodson@redhat.com)
 - Add example inventories to docs, install docs by default (sdodson@redhat.com)
 - Fix use of JSON inventory vars with raw booleans. (dgoodwin@redhat.com)

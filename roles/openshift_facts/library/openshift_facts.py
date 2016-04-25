@@ -1327,6 +1327,23 @@ def get_local_facts_from_file(filename):
 
     return local_facts
 
+def sort_unique(alist):
+    """ Sorts and de-dupes a list
+
+        Args:
+            list: a list
+        Returns:
+            list: a sorted de-duped list
+    """
+
+    alist.sort()
+    out = list()
+    for i in alist:
+        if i not in out:
+            out.append(i)
+
+    return out
+
 def safe_get_bool(fact):
     """ Get a boolean fact safely.
 
@@ -1336,6 +1353,58 @@ def safe_get_bool(fact):
             bool: given fact as a bool
     """
     return bool(strtobool(str(fact)))
+
+def set_proxy_facts(facts):
+    """ Set global proxy facts and promote defaults from http_proxy, https_proxy,
+        no_proxy to the more specific builddefaults and builddefaults_git vars.
+           1. http_proxy, https_proxy, no_proxy
+           2. builddefaults_*
+           3. builddefaults_git_*
+
+        Args:
+            facts(dict): existing facts
+        Returns:
+            facts(dict): Updated facts with missing values
+    """
+    if 'common' in facts:
+        common = facts['common']
+        if 'http_proxy' in common or 'https_proxy' in common:
+            if 'generate_no_proxy_hosts' in common and \
+                    common['generate_no_proxy_hosts']:
+                if 'no_proxy' in common and \
+                    isinstance(common['no_proxy'], basestring):
+                    common['no_proxy'] = common['no_proxy'].split(",")
+                else:
+                    common['no_proxy'] = []
+                if 'no_proxy_internal_hostnames' in common:
+                    common['no_proxy'].extend(common['no_proxy_internal_hostnames'].split(','))
+                common['no_proxy'].append('.' + common['dns_domain'])
+                common['no_proxy'].append(common['hostname'])
+                common['no_proxy'] = sort_unique(common['no_proxy'])
+        facts['common'] = common
+
+    if 'builddefaults' in facts:
+        facts['master']['admission_plugin_config'] = dict()
+        builddefaults = facts['builddefaults']
+        common = facts['common']
+        if 'http_proxy' not in builddefaults and 'http_proxy' in common:
+            builddefaults['http_proxy'] = common['http_proxy']
+        if 'https_proxy' not in builddefaults and 'https_proxy' in common:
+            builddefaults['https_proxy'] = common['https_proxy']
+        if 'no_proxy' not in builddefaults and 'no_proxy' in common:
+            builddefaults['no_proxy'] = common['no_proxy']
+        if 'git_http_proxy' not in builddefaults and 'http_proxy' in builddefaults:
+            builddefaults['git_http_proxy'] = builddefaults['http_proxy']
+        if 'git_https_proxy' not in builddefaults and 'https_proxy' in builddefaults:
+            builddefaults['git_https_proxy'] = builddefaults['https_proxy']
+        if 'admission_plugin_config' not in builddefaults:
+            builddefaults['admission_plugin_config'] = dict()
+        if 'config' in builddefaults and ('http_proxy' in builddefaults or \
+                'https_proxy' in builddefaults):
+            facts['master']['admission_plugin_config'].update(builddefaults['config'])
+        facts['builddefaults'] = builddefaults
+
+    return facts
 
 # pylint: disable=too-many-statements
 def set_container_facts_if_unset(facts):
@@ -1470,7 +1539,8 @@ class OpenShiftFacts(object):
         Raises:
             OpenShiftFactsUnsupportedRoleError:
     """
-    known_roles = ['cloudprovider',
+    known_roles = ['builddefaults',
+                   'cloudprovider',
                    'common',
                    'docker',
                    'etcd',
@@ -1558,6 +1628,7 @@ class OpenShiftFacts(object):
         facts = set_manageiq_facts_if_unset(facts)
         facts = set_aggregate_facts(facts)
         facts = set_etcd_facts_if_unset(facts)
+        facts = set_proxy_facts(facts)
         if not safe_get_bool(facts['common']['is_containerized']):
             facts = set_installed_variant_rpm_facts(facts)
         return dict(openshift=facts)
@@ -1644,6 +1715,8 @@ class OpenShiftFacts(object):
             defaults['hosted'] = dict(
                 metrics=dict(
                     deploy=False,
+                    duration=7,
+                    resolution=10,
                     storage=dict(
                         kind=None,
                         volume=dict(
