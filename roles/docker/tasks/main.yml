@@ -69,6 +69,21 @@
     reg_flag: --insecure-registry
   notify:
   - restart docker
+  
+- name: Set Proxy Settings
+  lineinfile:
+    dest: /etc/sysconfig/docker
+    regexp: '^{{ item.reg_conf_var }}=.*$'
+    line: "{{ item.reg_conf_var }}='{{ item.reg_fact_val }}'"
+  with_items:
+    - reg_conf_var: HTTP_PROXY
+      reg_fact_val: "{{ docker_http_proxy | default('') }}"
+    - reg_conf_var: HTTPS_PROXY
+      reg_fact_val: "{{ docker_https_proxy | default('') }}"
+    - reg_conf_var: NO_PROXY
+      reg_fact_val: "{{ docker_no_proxy | default('') | join(',') }}"
+  notify:
+    - restart docker
 
 - name: Set various docker options
   lineinfile:
