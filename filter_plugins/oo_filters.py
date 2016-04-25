@@ -6,6 +6,7 @@ Custom filters for use in openshift-ansible
 """
 
 from ansible import errors
+from collections import Mapping
 from operator import itemgetter
 import OpenSSL.crypto
 import os
@@ -128,14 +129,14 @@ class FilterModule(object):
                 returns [1, 3]
         """
 
-        if not isinstance(data, dict):
-            raise errors.AnsibleFilterError("|failed expects to filter on a dict")
+        if not isinstance(data, Mapping):
+            raise errors.AnsibleFilterError("|failed expects to filter on a dict or object")
 
         if not isinstance(keys, list):
             raise errors.AnsibleFilterError("|failed expects first param is a list")
 
         # Gather up the values for the list of keys passed in
-        retval = [data[key] for key in keys if data.has_key(key)]
+        retval = [data[key] for key in keys if key in data]
 
         return retval
 
@@ -299,7 +300,7 @@ class FilterModule(object):
             raise errors.AnsibleFilterError("|failed expects filter_attr is a str or unicode")
 
         # Gather up the values for the list of keys passed in
-        return [x for x in data if x.has_key(filter_attr) and x[filter_attr]]
+        return [x for x in data if filter_attr in x and x[filter_attr]]
 
     @staticmethod
     def oo_oc_nodes_matching_selector(nodes, selector):
