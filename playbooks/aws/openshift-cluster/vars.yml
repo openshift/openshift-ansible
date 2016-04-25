@@ -7,7 +7,7 @@ deployment_rhel7_ent_base:
   image_name:
   region: us-east-1
   ssh_user: ec2-user
-  sudo: yes
+  become: yes
   keypair: libra
   type: m4.large
   security_groups: [ 'public' ]
@@ -21,7 +21,7 @@ deployment_vars:
     image_name:
     region: us-east-1
     ssh_user: centos
-    sudo: yes
+    become: yes
     keypair: libra
     type: m4.large
     security_groups: [ 'public' ]
@@ -33,7 +33,7 @@ deployment_vars:
     image_name: openshift-rhel7_*
     region: us-east-1
     ssh_user: root
-    sudo: no
+    become: no
     keypair: libra
     type: m4.large
     security_groups: [ 'public' ]

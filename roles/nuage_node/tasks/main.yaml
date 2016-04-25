@@ -1,27 +1,27 @@
 ---
 - name: Install Nuage VRS
-  sudo: true
+  become: yes
   yum: name={{ vrs_rpm }} state=present
   
 - name: Set the uplink interface 
-  sudo: true
+  become: yes
   lineinfile: dest={{ vrs_config }} regexp=^NETWORK_UPLINK_INTF line='NETWORK_UPLINK_INTF={{ uplink_interface }}'
 
 - name: Set the Active Controller 
-  sudo: true
+  become: yes
   lineinfile: dest={{ vrs_config }} regexp=^ACTIVE_CONTROLLER line='ACTIVE_CONTROLLER={{ vsc_active_ip }}'
 
 - name: Set the Standby Controller 
-  sudo: true
+  become: yes
   lineinfile: dest={{ vrs_config }} regexp=^STANDBY_CONTROLLER line='STANDBY_CONTROLLER={{ vsc_standby_ip }}'
   when: vsc_standby_ip is defined
 
 - name: Install plugin rpm
-  sudo: true
+  become: yes
   yum: name={{ plugin_rpm }} state=present
 
 - name: Copy the certificates and keys
-  sudo: true
+  become: yes
   copy: src="/tmp/{{ item }}" dest="{{ vsp_openshift_dir }}/{{ item }}"
   with_items:
         - ca.crt
@@ -32,7 +32,7 @@
 - include: certificates.yml
 
 - name: Set the vsp-openshift.yaml 
-  sudo: true
+  become: yes
   template: src=vsp-openshift.j2 dest={{ vsp_openshift_yaml }} owner=root mode=0644 
   notify:
     - restart vrs

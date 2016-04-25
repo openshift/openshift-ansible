@@ -1,6 +1,6 @@
 ---
 - name: restart nuage-openshift-monitor
-  sudo: true
+  become: yes
   service: name=nuage-openshift-monitor state=restarted
 
 - name: restart master

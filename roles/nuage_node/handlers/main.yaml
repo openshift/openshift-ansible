@@ -1,8 +1,8 @@
 ---
 - name: restart vrs
-  sudo: true
+  become: yes
   service: name=openvswitch state=restarted
 
 - name: restart node
-  sudo: true
+  become: yes
   service: name={{ openshift.common.service_type }}-node state=restarted

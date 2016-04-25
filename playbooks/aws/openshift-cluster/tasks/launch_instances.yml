@@ -173,7 +173,7 @@
     hostname: "{{ item.0 }}"
     ansible_ssh_host: "{{ item.1.dns_name }}"
     ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
-    ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
+    ansible_become: "{{ deployment_vars[deployment_type].sudo }}"
     groups: "{{ instance_groups }}"
     ec2_private_ip_address: "{{ item.1.private_ip }}"
     ec2_ip_address: "{{ item.1.public_ip }}"
@@ -188,7 +188,7 @@
     hostname: "{{ item.0 }}"
     ansible_ssh_host: "{{ item.1.dns_name }}"
     ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
-    ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
+    ansible_become: "{{ deployment_vars[deployment_type].sudo }}"
     groups: nodes_to_add
     ec2_private_ip_address: "{{ item.1.private_ip }}"
     ec2_ip_address: "{{ item.1.public_ip }}"

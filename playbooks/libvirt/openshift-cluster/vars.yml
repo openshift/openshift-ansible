@@ -20,7 +20,7 @@ deployment_rhel7_ent_base:
                 default('25f880767ec6bf71beb532e17f1c45231640bbfdfbbb1dffb79d2c1b328388e0', True) }}"
     compression: ""
   ssh_user: openshift
-  sudo: yes
+  become: yes
 
 deployment_vars:
   origin:
@@ -34,14 +34,14 @@ deployment_vars:
       sha256: "{{ lookup('oo_option', 'image_sha256') |
                   default('dd0f5e610e7c5ffacaca35ed7a78a19142a588f4543da77b61c1fb0d74400471', True) }}"
     ssh_user: openshift
-    sudo: yes
+    become: yes
   online:
     image:
       url:
       name:
       sha256:
     ssh_user: root
-    sudo: no
+    become: no
   enterprise: "{{ deployment_rhel7_ent_base }}"
   openshift-enterprise: "{{ deployment_rhel7_ent_base }}"
   atomic-enterprise: "{{ deployment_rhel7_ent_base }}"

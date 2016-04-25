@@ -10,7 +10,7 @@ lb
 # Set variables common for all OSEv3 hosts
 [OSEv3:vars]
 ansible_ssh_user=cloud-user
-ansible_sudo=true
+ansible_become=yes
 
 # Debug level for all OpenShift components (Defaults to 2)
 debug_level=2

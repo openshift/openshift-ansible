@@ -97,7 +97,7 @@
       name: "{{ item }}"
       groups: oo_active_masters
       ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
-      ansible_sudo: "{{ g_sudo | default(omit) }}"
+      ansible_become: "{{ g_sudo | default(omit) }}"
     with_items: "{{ groups.oo_masters_to_config | default([]) }}"
     when: (hostvars[item]['is_active'] | default(false)) | bool
   - name: Evaluate oo_current_masters
@@ -105,7 +105,7 @@
       name: "{{ item }}"
       groups: oo_current_masters
       ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
-      ansible_sudo: "{{ g_sudo | default(omit) }}"
+      ansible_become: "{{ g_sudo | default(omit) }}"
     with_items: "{{ groups.oo_masters_to_config | default([]) }}"
     when: (hostvars[item]['current_host'] | default(false)) | bool
 

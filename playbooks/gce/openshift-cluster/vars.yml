@@ -5,19 +5,19 @@ deployment_rhel7_ent_base:
   image: "{{ lookup('oo_option', 'image_name') | default('rhel-7', True) }}"
   machine_type: "{{ lookup('oo_option', 'machine_type') | default('n1-standard-1', True) }}"
   ssh_user: "{{ lookup('env', 'gce_ssh_user') |  default(ansible_ssh_user, true) }}"
-  sudo: yes
+  become: yes
 
 deployment_vars:
   origin:
     image: "{{ lookup('oo_option', 'image_name') | default('centos-7', True) }}"
     machine_type: "{{ lookup('oo_option', 'machine_type') | default('n1-standard-1', True) }}"
     ssh_user: "{{ lookup('env', 'gce_ssh_user') |  default(ansible_ssh_user, true) }}"
-    sudo: yes
+    become: yes
   online:
     image: libra-rhel7
     machine_type: n1-standard-1
     ssh_user: root
-    sudo: no
+    become: no
   enterprise: "{{ deployment_rhel7_ent_base }}"
   openshift-enterprise: "{{ deployment_rhel7_ent_base }}"
   atomic-enterprise: "{{ deployment_rhel7_ent_base }}"
