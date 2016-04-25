@@ -57,6 +57,7 @@
 
   - name: Add secrets to registry service account
     command: oc secrets add serviceaccount/registry secrets/dockerregistry
+    run_once: true
     when: "'dockerregistry' not in serviceaccount.stdout"
 
   - name: Determine if deployment config contains secrets
