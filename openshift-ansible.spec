@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.84
+Version:        3.0.85
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -183,6 +183,23 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Apr 25 2016 Troy Dawson <tdawson@redhat.com> 3.0.85-1
+- Fix backward compat for osm_default_subdomain (jdetiber@redhat.com)
+- Replace deprecated sudo with become. (abutcher@redhat.com)
+- Fix image version handling for v1.2.0-rc1 (sdodson@redhat.com)
+- Pod must be recreated for the upgrade (bleanhar@redhat.com)
+- openshift_etcd_facts should rely on openshift_facts not openshift_common
+  (jdetiber@redhat.com)
+- Sort and de-dupe no_proxy list (sdodson@redhat.com)
+- openshift-metrics: adding duration and resolution options
+  (efreiber@redhat.com)
+- Changed service account creation to ansible (vishal.patil@nuagenetworks.net)
+- As per https://github.com/openshift/openshift-
+  ansible/issues/1795#issuecomment-213873564, renamed openshift_node_dnsmasq to
+  openshift_use_dnsmasq where applicable. Fixes 1795 (donovan@switchbit.io)
+- Add global proxy configuration (sdodson@redhat.com)
+- remove duplicate register: (tob@butter.sh)
+
 * Fri Apr 22 2016 Troy Dawson <tdawson@redhat.com> 3.0.84-1
 - Fix for docker not present (jdetiber@redhat.com)
 - Reconcile roles in additive-only mode on upgrade (jliggitt@redhat.com)
