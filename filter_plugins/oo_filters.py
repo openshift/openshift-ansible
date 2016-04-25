@@ -820,15 +820,18 @@ class FilterModule(object):
     def oo_image_tag_to_rpm_version(version, include_dash=False):
         """ Convert an image tag string to an RPM version if necessary
             Empty strings and strings that are already in rpm version format
-            are ignored.
+            are ignored. Also remove non semantic version components.
 
             Ex. v3.2.0.10 -> -3.2.0.10
+                v1.2.0-rc1 -> -1.2.0
         """
         if not isinstance(version, basestring):
             raise errors.AnsibleFilterError("|failed expects a string or unicode")
-
+        # TODO: Do we need to make this actually convert v1.2.0-rc1 into 1.2.0-0.rc1
+        # We'd need to be really strict about how we build the RPM Version+Release
         if version.startswith("v"):
             version = version.replace("v", "")
+            version = version.split('-')[0]
 
             if include_dash:
                 version = "-" + version
