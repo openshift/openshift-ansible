@@ -35,9 +35,9 @@
   - set_fact:
       openshift_master_debug_level: "{{ t_oo_option_master_debug_level }}"
     when: openshift_master_debug_level is not defined and t_oo_option_master_debug_level != ""
-    
+
   - set_fact:
-      openshift_master_default_subdomain: "{{ lookup('oo_option', 'openshift_master_default_subdomain') | default(None) }}"
+      openshift_master_default_subdomain: "{{ lookup('oo_option', 'openshift_master_default_subdomain') | default(None, true) }}"
     when: openshift_master_default_subdomain is not defined
   - set_fact:
       openshift_hosted_metrics_deploy: "{{ lookup('oo_option', 'openshift_hosted_metrics_deploy') | default(false, true) }}"
@@ -48,7 +48,6 @@
   - set_fact:
       openshift_hosted_metrics_resolution: "{{ lookup('oo_option', 'openshift_hosted_metrics_resolution') | default(10) }}"
     when: openshift_hosted_metrics_resolution is not defined
-    
   roles:
   - openshift_facts
   post_tasks:
