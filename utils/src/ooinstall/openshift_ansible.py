@@ -121,7 +121,7 @@ def write_inventory_vars(base_inventory, multiple_masters, proxy):
     base_inventory.write('\n[OSEv3:vars]\n')
     base_inventory.write('ansible_ssh_user={}\n'.format(CFG.settings['ansible_ssh_user']))
     if CFG.settings['ansible_ssh_user'] != 'root':
-        base_inventory.write('ansible_become=true\n')
+        base_inventory.write('ansible_become=yes\n')
     if multiple_masters and proxy is not None:
         base_inventory.write('openshift_master_cluster_method=native\n')
         base_inventory.write("openshift_master_cluster_hostname={}\n".format(proxy.hostname))
@@ -169,7 +169,7 @@ def write_host(host, inventory, schedulable=None):
             if no_pwd_sudo == 1:
                 print 'The atomic-openshift-installer requires sudo access without a password.'
                 sys.exit(1)
-            facts += ' ansible_become=true'
+            facts += ' ansible_become=yes'
 
     inventory.write('{} {}\n'.format(host.connect_to, facts))
 

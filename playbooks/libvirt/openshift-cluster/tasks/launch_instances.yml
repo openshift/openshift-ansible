@@ -113,7 +113,7 @@
     hostname: '{{ item.0 }}'
     ansible_ssh_host: '{{ item.1 }}'
     ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
-    ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
+    ansible_become: "{{ deployment_vars[deployment_type].sudo }}"
     groups: "tag_environment-{{ cluster_env }}, tag_host-type-{{ type }}, tag_sub-host-type-{{ g_sub_host_type }}, tag_clusterid-{{ cluster_id }}"
     openshift_node_labels: "{{ node_label }}"
   with_together:

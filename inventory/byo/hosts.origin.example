@@ -15,9 +15,9 @@ nfs
 # ssh agent.
 ansible_ssh_user=root
 
-# If ansible_ssh_user is not root, ansible_sudo must be set to true and the
+# If ansible_ssh_user is not root, ansible_become must be set to true and the
 # user must be configured for passwordless sudo
-#ansible_sudo=true
+#ansible_become=yes
 
 # Debug level for all OpenShift components (Defaults to 2)
 debug_level=2
