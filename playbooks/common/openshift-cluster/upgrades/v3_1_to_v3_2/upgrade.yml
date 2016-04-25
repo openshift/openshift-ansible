@@ -88,23 +88,13 @@
 ###############################################################################
 - name: Upgrade nodes
   hosts: oo_nodes_to_config
+  serial: 1
   roles:
   - openshift_facts
   handlers:
   - include: ../../../../../roles/openshift_node/handlers/main.yml
   tasks:
-  - include: rpm_upgrade.yml
-    vars:
-       component: "node"
-       openshift_version: "{{ openshift_pkg_version | default('') }}"
-    when: not openshift.common.is_containerized | bool
-
-  - include: containerized_upgrade.yml
-    when: openshift.common.is_containerized | bool
-
-  # This will restart the node
-  - name: Restart openvswitch service
-    service: name="{{ openshift.common.service_type }}-node" state=restarted
+  - include: node_upgrade.yml
 
   - set_fact:
       node_update_complete: True

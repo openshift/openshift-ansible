@@ -4,3 +4,6 @@
 - name: Ensure python-yaml present for config upgrade
   action: "{{ ansible_pkg_mgr }} name=PyYAML state=present"
   when: not openshift.common.is_atomic | bool
+
+- name: Restart node service
+  service: name="{{ openshift.common.service_type }}-node" state=restarted

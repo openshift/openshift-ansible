@@ -1,0 +1,24 @@
+- name: Prepare for Node evacuation
+  command: >
+    {{ openshift.common.admin_binary }} manage-node {{ openshift.common.hostname | lower }} --schedulable=false
+  delegate_to: "{{ groups.oo_first_master.0 }}"
+
+- name: Evacuate Node for Kubelet upgrade
+  command: >
+    {{ openshift.common.admin_binary }} manage-node {{ openshift.common.hostname | lower }} --evacuate --force
+  delegate_to: "{{ groups.oo_first_master.0 }}"
+
+- include: rpm_upgrade.yml
+  vars:
+     component: "node"
+     openshift_version: "{{ openshift_pkg_version | default('') }}"
+  when: not openshift.common.is_containerized | bool
+
+- include: containerized_upgrade.yml
+  when: openshift.common.is_containerized | bool
+
+- name: Set node schedulability
+  command: >
+    {{ openshift.common.admin_binary }} manage-node {{ openshift.common.hostname | lower }} --schedulable=true
+  delegate_to: "{{ groups.oo_first_master.0 }}"
+  when: openshift.node.schedulable | bool
