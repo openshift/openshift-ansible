@@ -75,6 +75,7 @@
     dest: /etc/sysconfig/docker
     regexp: '^{{ item.reg_conf_var }}=.*$'
     line: "{{ item.reg_conf_var }}='{{ item.reg_fact_val }}'"
+    state: "{{ 'present' if item.reg_fact_val != '' else 'absent'}}"
   with_items:
     - reg_conf_var: HTTP_PROXY
       reg_fact_val: "{{ docker_http_proxy | default('') }}"

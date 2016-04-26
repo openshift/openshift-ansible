@@ -11,13 +11,12 @@ AWS_SECRET_ACCESS_KEY={{ openshift.cloudprovider.aws.secret_key }}
 
 # Proxy configuration
 # See https://docs.openshift.com/enterprise/latest/install_config/install/advanced_install.html#configuring-global-proxy
-{% if 'http_proxy' in openshift.common or 'https_proxy' in openshift.common %}
+{% if 'http_proxy' in openshift.common %}
 HTTP_PROXY='{{ openshift.common.http_proxy | default('') }}'
-HTTPS_PROXY='{{ openshift.common.https_proxy | default('')}}'
-NO_PROXY='{{ openshift.common.no_proxy | default('') | join(',') }},{{ openshift.common.portal_net }},{{ openshift.master.sdn_cluster_network_cidr }}'
-{% else %}
-#HTTP_PROXY=http://user:pass@proxy.example.com
-#HTTPS_PROXY=http://user:pass@proxy.example.com
-#NO_PROXY='.hosts.example.com'
 {% endif %}
-
+{% if 'https_proxy' in openshift.common %}
+HTTPS_PROXY='{{ openshift.common.https_proxy | default('')}}'
+{% endif %}
+{% if 'no_proxy' in openshift.common %}
+NO_PROXY='{{ openshift.common.no_proxy | default('') | join(',') }},{{ openshift.common.portal_net }},{{ openshift.master.sdn_cluster_network_cidr }}'
+{% endif %}
