@@ -50,6 +50,10 @@
     when: openshift_hosted_metrics_resolution is not defined
   roles:
   - openshift_facts
+  # TODO: Remove openshift_common from this roles list once
+  # openshift_master_certificates uses delegate_to and is applied to
+  # all masters rather than just the first.
+  - openshift_common
   post_tasks:
   - openshift_facts:
       role: master
