@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.85
+Version:        3.0.86
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -183,6 +183,19 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Apr 26 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.86-1
+- Don't set empty HTTP_PROXY, HTTPS_PROXY, NO_PROXY values (sdodson@redhat.com)
+- a-o-i tests: Update attended tests for proxy (smunilla@redhat.com)
+- Move portal_net from openshift_common to openshift_facts.
+  (abutcher@redhat.com)
+- Apply openshift_common to all masters prior to creating certificates for
+  portal_net. (abutcher@redhat.com)
+- Access portal_net in common facts. (abutcher@redhat.com)
+- Add support for setting identity provider custom values (jdetiber@redhat.com)
+- port filter_plugins to ansible2 (tob@butter.sh)
+- a-o-i: Update prompt when asking for proxy (smunilla@redhat.com)
+- a-o-i: UI additions for proxies (smunilla@redhat.com)
+
 * Mon Apr 25 2016 Troy Dawson <tdawson@redhat.com> 3.0.85-1
 - Fix backward compat for osm_default_subdomain (jdetiber@redhat.com)
 - Replace deprecated sudo with become. (abutcher@redhat.com)
