@@ -27,7 +27,6 @@
       use_nuage: "{{ openshift_use_nuage | default(None) }}"
       use_manageiq: "{{ openshift_use_manageiq | default(None) }}"
       data_dir: "{{ openshift_data_dir | default(None) }}"
-      portal_net: "{{ openshift_portal_net | default(openshift_master_portal_net) | default(None) }}"
       use_dnsmasq: "{{ openshift_use_dnsmasq | default(None) }}"
 
 # Using oo_image_tag_to_rpm_version here is a workaround for how
