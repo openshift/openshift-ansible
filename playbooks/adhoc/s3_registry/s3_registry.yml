@@ -8,7 +8,16 @@
 #
 # This playbook should be limited to one openshift master
 
-- hosts: tag_clusterid_{{ clusterid }}:&tag_host-type_openshift-master[0]
+- hosts: tag_clusterid_{{ clusterid }}:&tag_host-type_openshift-master
+  remote_user: root
+  tasks:
+  - add_host:
+      name: hostvars[item].name
+      group: oo_first_master
+    with_items: "{{ play_hosts[0] }}"
+
+
+- hosts: oo_first_master
   remote_user: root
   gather_facts: False
 
