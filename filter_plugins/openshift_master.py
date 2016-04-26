@@ -12,8 +12,10 @@ from ansible import errors
 
 # pylint: disable=no-name-in-module,import-error
 try:
+    # ansible-2.0
     from ansible.runner.filter_plugins.core import bool as ansible_bool
 except ImportError:
+    # ansible-1.9.x
     from ansible.plugins.filter.core import bool as ansible_bool
 
 class IdentityProviderBase(object):
