@@ -33,6 +33,7 @@
       docker pull {{ item }}:latest
     with_items:
     - "{{ openshift.common.cli_image }}"
+    when: openshift.common.is_containerized | bool
 
 ###############################################################################
 # Upgrade Masters
