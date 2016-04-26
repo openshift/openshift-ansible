@@ -1692,7 +1692,8 @@ class OpenShiftFacts(object):
                                       auth_token_max_seconds=500,
                                       oauth_grant_method='auto',
                                       scheduler_predicates=scheduler_predicates,
-                                      scheduler_priorities=scheduler_priorities)
+                                      scheduler_priorities=scheduler_priorities,
+                                      dynamic_provisioning_enabled=True)
 
         if 'node' in roles:
             defaults['node'] = dict(labels={}, annotations={},
