@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.86
+Version:        3.0.87
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -183,6 +183,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Apr 27 2016 Troy Dawson <tdawson@redhat.com> 3.0.87-1
+- a-o-i-: Allow empty proxy (smunilla@redhat.com)
+- a-o-i: Populate groups for openshift_facts (smunilla@redhat.com)
+- Replace sudo with become when accessing deployment_vars.
+  (abutcher@redhat.com)
+- Port lookup plugins to ansible v2. (abutcher@redhat.com)
+- Add masterConfig.volumeConfig.dynamicProvisioningEnabled (sdodson@redhat.com)
+
 * Tue Apr 26 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.86-1
 - Don't set empty HTTP_PROXY, HTTPS_PROXY, NO_PROXY values (sdodson@redhat.com)
 - a-o-i tests: Update attended tests for proxy (smunilla@redhat.com)
