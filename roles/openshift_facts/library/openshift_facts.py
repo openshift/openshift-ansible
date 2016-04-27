@@ -1276,7 +1276,12 @@ def merge_facts(orig, new, additive_facts_to_overwrite, protected_facts_to_overw
             facts[key] = copy.deepcopy(value)
     new_keys = set(new.keys()) - set(orig.keys())
     for key in new_keys:
-        facts[key] = copy.deepcopy(new[key])
+        # Watchout for JSON facts that sometimes load as strings.
+        # (can happen if the JSON contains a boolean)
+        if key in inventory_json_facts and isinstance(new[key], basestring):
+            facts[key] = yaml.safe_load(new[key])
+        else:
+            facts[key] = copy.deepcopy(new[key])
     return facts
 
 def save_local_facts(filename, facts):
