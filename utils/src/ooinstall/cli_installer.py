@@ -533,10 +533,14 @@ https://docs.openshift.com/enterprise/latest/install_config/http_proxies.html
     click.echo(message)
 
     message = "Specify the hostname for your proxy? (ENTER for none)"
-    proxy_hostname = click.prompt(message)
+    proxy_hostname = click.prompt(message, default='')
 
-    message = "List any hosts that should be excluded from your proxy. (ENTER for none)"
-    proxy_excludes = click.prompt(message)
+    if proxy_hostname:
+        message = "List any hosts that should be excluded from your proxy. (ENTER for none)"
+        proxy_excludes = click.prompt(message, default='')
+    else:
+        proxy_excludes = ''
+
     return proxy_hostname, proxy_excludes
 
 def get_missing_info_from_user(oo_cfg):
