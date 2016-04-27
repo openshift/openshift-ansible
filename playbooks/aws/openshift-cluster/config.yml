@@ -4,7 +4,7 @@
   - ../../aws/openshift-cluster/cluster_hosts.yml
   vars:
     g_ssh_user:     "{{ deployment_vars[deployment_type].ssh_user }}"
-    g_sudo:         "{{ deployment_vars[deployment_type].sudo }}"
+    g_sudo:         "{{ deployment_vars[deployment_type].become }}"
     g_nodeonmaster: true
     openshift_cluster_id: "{{ cluster_id }}"
     openshift_debug_level: "{{ debug_level }}"
