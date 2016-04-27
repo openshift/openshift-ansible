@@ -5,7 +5,7 @@
   when:
     - rhsm_password is not defined or rhsm_password is none or rhsm_password|trim == ''
   
-- name: "Initializing Subscription Manager authenticaiton method"
+- name: "Initializing Subscription Manager authentication method"
   set_fact:
     rhsm_authentication: false
 
