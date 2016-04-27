@@ -1,4 +1,14 @@
 ---
+- name: Cluster hosts
+  hosts: localhost
+  connection: local
+  become: no
+  gather_facts: no
+  tasks:
+  - include_vars: openshift-cluster/cluster_hosts.yml
+
+- include: ../common/openshift-cluster/evaluate_groups.yml
+
 - name: Gather Cluster facts
   hosts: OSEv3
   roles:
