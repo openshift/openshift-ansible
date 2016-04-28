@@ -15,7 +15,8 @@
     changed_when: False
 
   - name: "Create logging project"
-    command: {{ openshift.common.admin_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig new-project logging
+    command: >
+      {{ openshift.common.admin_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig new-project logging
 
   - name: "Changing projects"
     command:  "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig project logging"
