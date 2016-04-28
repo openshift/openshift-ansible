@@ -1,8 +1,0 @@
----
-- name: modify ansible.cfg
-  lineinfile:
-    dest: /etc/ansible/ansible.cfg
-    backrefs: yes
-    regexp: "^#?({{ item.option }})( *)="
-    line: '\1\2= {{ item.value }}'
-  with_items: cfg_options

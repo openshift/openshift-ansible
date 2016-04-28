@@ -19,31 +19,26 @@
   openshift_facts:
     role: common
     local_facts:
-      cluster_id: "{{ openshift_cluster_id | default('default') }}"
       debug_level: "{{ openshift_debug_level | default(2) }}"
-      hostname: "{{ openshift_hostname | default(None) }}"
       install_examples: "{{ openshift_install_examples | default(True) }}"
-      ip: "{{ openshift_ip | default(None) }}"
-      public_hostname: "{{ openshift_public_hostname | default(None) }}"
-      public_ip: "{{ openshift_public_ip | default(None) }}"
       use_openshift_sdn: "{{ openshift_use_openshift_sdn | default(None) }}"
       sdn_network_plugin_name: "{{ os_sdn_network_plugin_name | default(None) }}"
-      deployment_type: "{{ openshift_deployment_type }}"
       use_flannel: "{{ openshift_use_flannel | default(None) }}"
       use_nuage: "{{ openshift_use_nuage | default(None) }}"
       use_manageiq: "{{ openshift_use_manageiq | default(None) }}"
       data_dir: "{{ openshift_data_dir | default(None) }}"
+      use_dnsmasq: "{{ openshift_use_dnsmasq | default(None) }}"
 
+# Using oo_image_tag_to_rpm_version here is a workaround for how
+# openshift_version is set.  That value is computed based on either RPM
+# versions or image tags.  openshift_common's usage requires that it be a RPM
+# version and openshift_cli expects it to be an image tag.
 - name: Install the base package for versioning
-  action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}{{ openshift_version | default('') }} state=present"
+  action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}{{ openshift_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }} state=present"
   when: not openshift.common.is_containerized | bool
 
-# This invocation also updates the version facts which are necessary
-# for setting the hostname below.
-- name: openshift_facts
+- name: Set version facts
   openshift_facts:
-    role: hosted
-    openshift_env: "{{ hostvars[inventory_hostname] | oo_openshift_env }}"
 
 # For enterprise versions < 3.1 and origin versions < 1.1 we want to set the
 # hostname by default.

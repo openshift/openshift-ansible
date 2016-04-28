@@ -1,0 +1,105 @@
+---
+  - fail: msg="This role requires the following vars to be defined. openshift_hosted_logging_master_public_url, openshift_hosted_logging_hostname, openshift_hosted_logging_elasticsearch_cluster_size"
+    when: "openshift_hosted_logging_hostname is not defined or
+          openshift_hosted_logging_elasticsearch_cluster_size is not defined or
+          openshift_hosted_logging_master_public_url is not defined"
+
+  - name: Create temp directory for kubeconfig
+    command: mktemp -d /tmp/openshift-ansible-XXXXXX
+    register: mktemp
+    changed_when: False
+
+  - name: Copy the admin client config(s)
+    command: >
+      cp {{ openshift_master_config_dir }}/admin.kubeconfig {{ mktemp.stdout }}/admin.kubeconfig
+    changed_when: False
+
+  - name: "Create logging project"
+    command: {{ openshift.common.admin_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig new-project logging
+
+  - name: "Changing projects"
+    command:  "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig project logging"
+
+  - name: "Creating logging deployer secret"
+    command: " {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig secrets new logging-deployer {{ openshift_hosted_logging_secret_vars | default('nothing=/dev/null') }}"
+    register: secret_output
+    failed_when: "secret_output.rc == 1 and 'exists' not in secret_output.stderr"
+
+  - name: "Copy serviceAccount file"
+    copy: dest=/tmp/logging-deployer-sa.yaml
+          src={{role_path}}/files/logging-deployer-sa.yaml
+          force=yes
+
+  - name: "Create logging-deployer service account"
+    command:  "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig create -f  /tmp/logging-deployer-sa.yaml"
+    register: deployer_output
+    failed_when: "deployer_output.rc == 1 and 'exists' not in deployer_output.stderr"
+
+  - name: "Set permissions for logging-deployer service account"
+    command:  "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig policy add-role-to-user edit system:serviceaccount:logging:logging-deployer"
+    register: permiss_output
+    failed_when: "permiss_output.rc == 1 and 'exists' not in permiss_output.stderr"
+
+  - name: "Set permissions for fluentd"
+    command: {{ openshift.common.admin_binary}} policy add-scc-to-user privileged system:serviceaccount:logging:aggregated-logging-fluentd
+    register: fluentd_output
+    failed_when: "fluentd_output.rc == 1 and 'exists' not in fluentd_output.stderr"
+
+  - name: "Set additional permissions for fluentd"
+    command: {{ openshift.common.admin_binary}} policy add-cluster-role-to-user cluster-reader system:serviceaccount:logging:aggregated-logging-fluentd
+    register: fluentd2_output
+    failed_when: "fluentd2_output.rc == 1 and 'exists' not in fluentd2_output.stderr"
+
+  - name: "Create deployer template"
+    command:  "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig create -f /usr/share/openshift/examples/infrastructure-templates/enterprise/logging-deployer.yaml -n openshift"
+    register: template_output
+    failed_when: "template_output.rc == 1 and 'exists' not in template_output.stderr"
+
+  - name: "Process the deployer template"
+    shell:  "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig process logging-deployer-template -n openshift -v {{ oc_process_values }} |  {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig create -f -"
+
+  - name: "Wait for image pull and deployer pod"
+    shell:  "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get pods | grep logging-deployer.*Completed"
+    register: result
+    until: result.rc == 0
+    retries: 15
+    delay: 10
+
+  - name: "Process support template"
+    shell:  "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig process logging-support-template |  {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig create -f -"
+
+  - name: "Set insecured registry"
+    command:  "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig annotate is --all  openshift.io/image.insecureRepository=true --overwrite"
+    when: "target_registry is defined and insecure_registry == 'true'"
+
+  - name: "Wait for imagestreams to become available"
+    shell:  "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get is | grep logging-fluentd"
+    register: result
+    until: result.rc == 0
+    failed_when: result.rc == 1 and 'not found' not in result.stderr
+    retries: 20
+    delay: 10
+
+  - name: "Wait for replication controllers to become available"
+    shell:  "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get rc | grep logging-fluentd-1"
+    register: result
+    until: result.rc == 0
+    failed_when: result.rc == 1 and 'not found' not in result.stderr
+    retries: 20
+    delay: 10
+
+
+  - name: "Scale fluentd deployment config"
+    command:  "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig scale dc/logging-fluentd --replicas={{ fluentd_replicas | default('1') }}"
+
+
+  - name: "Scale fluentd replication controller"
+    command:  "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig scale rc/logging-fluentd-1 --replicas={{ fluentd_replicas | default('1') }}"
+
+  - debug: msg="Logging components deployed. Note persistant volume for elasticsearch must be setup manually"
+
+  - name: Delete temp directory
+    file:
+      name: "{{ mktemp.stdout }}"
+      state: absent
+    changed_when: False

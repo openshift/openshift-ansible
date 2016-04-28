@@ -1,17 +1,11 @@
 ---
-- openshift_facts:
-    role: common
-    local_facts:
-      deployment_type: "{{ openshift_deployment_type }}"
-      cli_image: "{{ osm_image | default(None) }}"
-      
 - name: Install clients
   action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-clients state=present"
   when: not openshift.common.is_containerized | bool
-  
+
 - name: Pull CLI Image
   command: >
-    docker pull {{ openshift.common.cli_image }}
+    docker pull {{ openshift.common.cli_image }}:{{ openshift_version }}
   when: openshift.common.is_containerized | bool
 
 - name: Create /usr/local/bin/openshift cli wrapper
@@ -20,9 +14,9 @@
     dest: /usr/local/bin/openshift
     mode: 0755
   when: openshift.common.is_containerized | bool
-  
+
 - name: Create client symlinks
-  file: 
+  file:
     path: "{{ item }}"
     state: link
     src: /usr/local/bin/openshift

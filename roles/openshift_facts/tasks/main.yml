@@ -15,7 +15,7 @@
 - set_fact:
     l_is_atomic: "{{ ostree_output.rc == 0 }}"
 - set_fact:
-    l_is_containerized: "{{ l_is_atomic or containerized | default(false) | bool }}"
+    l_is_containerized: "{{ (l_is_atomic | bool) or (containerized | default(false) | bool) }}"
 
 - name: Ensure PyYaml is installed
   action: "{{ ansible_pkg_mgr }} name=PyYAML state=present"
@@ -25,4 +25,27 @@
   openshift_facts:
     role: common
     local_facts:
-      is_containerized: "{{ containerized | default(None) }}"
+      # TODO: Deprecate deployment_type in favor of openshift_deployment_type
+      deployment_type: "{{ openshift_deployment_type | default(deployment_type) }}"
+      cluster_id: "{{ openshift_cluster_id | default('default') }}"
+      hostname: "{{ openshift_hostname | default(None) }}"
+      ip: "{{ openshift_ip | default(None) }}"
+      is_containerized: "{{ l_is_containerized | default(None) }}"
+      public_hostname: "{{ openshift_public_hostname | default(None) }}"
+      public_ip: "{{ openshift_public_ip | default(None) }}"
+      portal_net: "{{ openshift_portal_net | default(openshift_master_portal_net) | default(None) }}"
+
+# had to be done outside of the above because hostname isn't yet set
+- name: Gather hostnames for proxy configuration
+  openshift_facts:
+    role: common
+    local_facts:
+      http_proxy: "{{ openshift_http_proxy | default(None) }}"
+      https_proxy: "{{ openshift_https_proxy | default(None) }}"
+      no_proxy: "{{ openshift_no_proxy | default(None) }}"
+      generate_no_proxy_hosts: "{{ openshift_generate_no_proxy_hosts | default(True) }}"
+      no_proxy_internal_hostnames: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config'] 
+                                                   | union(groups['oo_masters_to_config']) 
+                                                   | union(groups['oo_etcd_to_config'] | default([]))) 
+                                               | oo_collect('openshift.common.hostname') | default([]) | join (',')
+                                               }}"

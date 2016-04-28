@@ -4,7 +4,6 @@
 This playbook currently performs the
 following steps.
 
-**TODO: update for current steps**
  * Upgrade and restart master services
  * Upgrade and restart node services
  * Modifies the subset of the configuration necessary

@@ -1,0 +1,27 @@
+---
+- name: Check for NetworkManager service
+  command: >
+    systemctl show NetworkManager
+  register: nm_show
+  
+- name: Set fact using_network_manager
+  set_fact:
+    network_manager_active: "{{ True if 'ActiveState=active' in nm_show.stdout else False }}"
+    
+- name: Install dnsmasq
+  action: "{{ ansible_pkg_mgr }} name=dnsmasq state=installed"
+  when: not openshift.common.is_atomic | bool
+  
+- name: Install dnsmasq configuration
+  template:
+    src: origin-dns.conf.j2
+    dest: /etc/dnsmasq.d/origin-dns.conf
+
+# Dynamic NetworkManager based dispatcher
+- include: ./network-manager.yml
+  when: network_manager_active | bool
+  
+# Relies on ansible in order to configure static config
+- include: ./no-network-manager.yml
+  when: not network_manager_active | bool
+  

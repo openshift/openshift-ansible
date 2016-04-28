@@ -13,7 +13,7 @@
       name: "{{ item }}"
       groups: oo_hosts_to_update
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
-      ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
+      ansible_become: "{{ deployment_vars[deployment_type].become }}"
     with_items: "{{ g_all_hosts | default([]) }}"
 
 - include: ../../common/openshift-cluster/update_repos_and_packages.yml

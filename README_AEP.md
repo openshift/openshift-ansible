@@ -71,8 +71,8 @@ nodes
 # SSH user, this user should allow ssh based auth without requiring a password
 ansible_ssh_user=root
 
-# If ansible_ssh_user is not root, ansible_sudo must be set to true
-#ansible_sudo=true
+# If ansible_ssh_user is not root, ansible_become must be set to true
+#ansible_become=yes
 
 # See DEPLOYMENT_TYPES.md
 deployment_type=atomic-enterprise

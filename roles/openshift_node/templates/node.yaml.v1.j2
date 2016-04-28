@@ -1,8 +1,8 @@
 allowDisabledDocker: false
 apiVersion: v1
 dnsDomain: {{ openshift.common.dns_domain }}
-{% if 'dns_ip' in openshift.common %}
-dnsIP: {{ openshift.common.dns_ip }}
+{% if 'dns_ip' in openshift.node %}
+dnsIP: {{ openshift.node.dns_ip }}
 {% endif %}
 dockerConfig:
   execHandlerName: ""
@@ -38,3 +38,6 @@ volumeDirectory: {{ openshift.common.data_dir }}/openshift.local.volumes
 proxyArguments:
   proxy-mode:
      - {{ openshift.node.proxy_mode }}
+volumeConfig:
+  localQuota:
+    perFSGroup: {{ openshift.node.local_quota_per_fsgroup }}

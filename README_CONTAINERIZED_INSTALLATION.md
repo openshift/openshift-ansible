@@ -84,9 +84,13 @@ _/usr/share/openshift/examples_ because that is read-only on Atomic Host.
 
 ### Storage Requirements
 
-Atomic Host installs normally have a very small root filesystem. However the
-etcd, master, and node containers will persist data in /var/lib. Please ensure
-that you have enough space on the root filesystem.
+Atomic Host installs by default have a small root filesystem. However
+the etcd, master, and node containers will persist data in
+`/var/lib`. Please ensure that you have enough space on the root
+filesystem.  This is usually handled by
+[docker-storage-setup](https://github.com/projectatomic/docker-storage-setup/);
+set e.g. `ROOT_SIZE=20G` in `/etc/sysconfig/docker-storage-setup` in
+early host boot, such as inside a `cloud-init` boot hook.
 
 ### OpenvSwitch SDN Initialization
 

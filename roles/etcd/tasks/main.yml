@@ -1,59 +1,67 @@
 ---
-- fail:
-    msg: Interface {{ etcd_interface }} not found
-  when: "'ansible_' ~ etcd_interface not in hostvars[inventory_hostname]"
-
-- fail:
-    msg: IPv4 address not found for {{ etcd_interface }}
-  when: "'ipv4' not in hostvars[inventory_hostname]['ansible_' ~ etcd_interface] or 'address' not in hostvars[inventory_hostname]['ansible_' ~ etcd_interface].ipv4"
+- name: Set hostname and ip facts
+  set_fact:
+    # Store etcd_hostname and etcd_ip such that they will be available
+    # in hostvars. Defaults for these variables are set in etcd_common.
+    etcd_hostname: "{{ etcd_hostname }}"
+    etcd_ip: "{{ etcd_ip }}"
 
 - name: Install etcd
   action: "{{ ansible_pkg_mgr }} name=etcd state=present"
-  when: not openshift.common.is_containerized | bool
+  when: not etcd_is_containerized | bool
 
 - name: Pull etcd container
   command: docker pull {{ openshift.etcd.etcd_image }}
-  when: openshift.common.is_containerized | bool
+  when: etcd_is_containerized | bool
 
 - name: Install etcd container service file
   template:
     dest: "/etc/systemd/system/etcd_container.service"
     src: etcd.docker.service
   register: install_etcd_result
-  when: openshift.common.is_containerized | bool
+  when: etcd_is_containerized | bool
 
 - name: Ensure etcd datadir exists
-  when: openshift.common.is_containerized | bool
+  when: etcd_is_containerized | bool
   file:
     path: "{{ etcd_data_dir }}"
     state: directory
     mode: 0700
 
 - name: Disable system etcd when containerized
-  when: openshift.common.is_containerized | bool
+  when: etcd_is_containerized | bool
   service:
     name: etcd
     state: stopped
     enabled: no
 
+- name: Check for etcd service presence
+  command: systemctl show etcd.service
+  register: etcd_show
+  changed_when: false
+
+- name: Mask system etcd when containerized
+  when: etcd_is_containerized | bool and 'LoadState=not-found' not in etcd_show.stdout
+  command: systemctl mask etcd
+
 - name: Reload systemd units
   command: systemctl daemon-reload
-  when: openshift.common.is_containerized and ( install_etcd_result | changed )
+  when: etcd_is_containerized | bool and ( install_etcd_result | changed )
 
 - name: Validate permissions on the config dir
   file:
     path: "{{ etcd_conf_dir }}"
     state: directory
-    owner: "{{ 'etcd' if not openshift.common.is_containerized | bool else omit }}"
-    group: "{{ 'etcd' if not openshift.common.is_containerized | bool else omit }}"
+    owner: "{{ 'etcd' if not etcd_is_containerized | bool else omit }}"
+    group: "{{ 'etcd' if not etcd_is_containerized | bool else omit }}"
     mode: 0700
 
 - name: Validate permissions on certificate files
   file:
     path: "{{ item }}"
     mode: 0600
-    owner: "{{ 'etcd' if not openshift.common.is_containerized | bool else omit }}"
-    group: "{{ 'etcd' if not openshift.common.is_containerized | bool else omit }}"
+    owner: "{{ 'etcd' if not etcd_is_containerized | bool else omit }}"
+    group: "{{ 'etcd' if not etcd_is_containerized | bool else omit }}"
   when: etcd_url_scheme == 'https'
   with_items:
   - "{{ etcd_ca_file }}"
@@ -64,8 +72,8 @@
   file:
     path: "{{ item }}"
     mode: 0600
-    owner: "{{ 'etcd' if not openshift.common.is_containerized | bool else omit }}"
-    group: "{{ 'etcd' if not openshift.common.is_containerized | bool else omit }}"
+    owner: "{{ 'etcd' if not etcd_is_containerized | bool else omit }}"
+    group: "{{ 'etcd' if not etcd_is_containerized | bool else omit }}"
   when: etcd_peer_url_scheme == 'https'
   with_items:
   - "{{ etcd_peer_ca_file }}"

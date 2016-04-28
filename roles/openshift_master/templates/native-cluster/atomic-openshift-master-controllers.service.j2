@@ -1,10 +1,10 @@
 [Unit]
 Description=Atomic OpenShift Master Controllers
 Documentation=https://github.com/openshift/origin
-After=network.target
+After=network-online.target
 After={{ openshift.common.service_type }}-master-api.service
-Before={{ openshift.common.service_type }}-node.service
-Requires=network.target
+Wants={{ openshift.common.service_type }}-master-api.service
+Requires=network-online.target
 
 [Service]
 {% if openshift.common.version_gte_3_1_1_or_1_1_1 | bool %}
@@ -20,7 +20,7 @@ LimitCORE=infinity
 WorkingDirectory={{ openshift.common.data_dir }}
 SyslogIdentifier={{ openshift.common.service_type }}-master-controllers
 Restart=on-failure
+RestartSec=5s
 
 [Install]
 WantedBy=multi-user.target
-WantedBy={{ openshift.common.service_type }}-node.service

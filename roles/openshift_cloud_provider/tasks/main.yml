@@ -1,0 +1,22 @@
+---
+- name: Set cloud provider facts
+  openshift_facts:
+    role: cloudprovider
+    openshift_env: "{{ hostvars[inventory_hostname]
+                       | oo_merge_dicts(hostvars)
+                       | oo_openshift_env }}"
+    openshift_env_structures:
+    - 'openshift.cloudprovider.aws.*'
+    - 'openshift.cloudprovider.openstack.*'
+
+- name: Create cloudprovider config dir
+  file:
+    path: "{{ openshift.common.config_base }}/cloudprovider"
+    state: directory
+  when: has_cloudprovider | bool
+
+- include: openstack.yml
+  when: cloudprovider_is_openstack | bool
+
+- include: aws.yml
+  when: cloudprovider_is_aws | bool

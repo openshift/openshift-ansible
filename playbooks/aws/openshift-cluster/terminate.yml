@@ -11,7 +11,7 @@
       name: "{{ item }}"
       groups: oo_hosts_to_terminate
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
-      ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
+      ansible_become: "{{ deployment_vars[deployment_type].become }}"
     with_items: (groups['tag_clusterid_' ~ cluster_id] | default([])) | difference(['localhost'])
 
 - name: Unsubscribe VMs

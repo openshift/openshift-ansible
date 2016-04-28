@@ -3,7 +3,7 @@
 global
     chroot      /var/lib/haproxy
     pidfile     /var/run/haproxy.pid
-    maxconn     4000
+    maxconn     {{ haproxy_global_maxconn | default('4000') }}
     user        haproxy
     group       haproxy
     daemon
@@ -20,7 +20,7 @@ defaults
     log                     global
     option                  httplog
     option                  dontlognull
-    option http-server-close
+#    option http-server-close
     option forwardfor       except 127.0.0.0/8
     option                  redispatch
     retries                 3
@@ -31,7 +31,7 @@ defaults
     timeout server          300s
     timeout http-keep-alive 10s
     timeout check           10s
-    maxconn                 3000
+    maxconn                 {{ haproxy_default_maxconn | default('3000') }}
 
 listen stats :9000
     mode http

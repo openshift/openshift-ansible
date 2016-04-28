@@ -350,7 +350,6 @@ resources:
           port_range_min: 10250
           port_range_max: 10250
           remote_mode: remote_group_id
-          remote_group_id: { get_resource: master-secgrp }
         - direction: ingress
           protocol: udp
           port_range_min: 4789
@@ -598,6 +597,10 @@ resources:
               template: |
                 #cloud-config
                 write_files:
+                  - path: /etc/sudoers.d/00-openshift-no-requiretty
+                    permissions: 440
+                    content: |
+                      Defaults:openshift !requiretty
                   - path: /etc/sysconfig/network-scripts/ifcfg-eth0
                     content: |
                       DEVICE="eth0"

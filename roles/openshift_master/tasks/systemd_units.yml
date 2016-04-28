@@ -1,0 +1,69 @@
+# This file is included both in the openshift_master role and in the upgrade
+# playbooks.  For that reason the ha_svc variables are use set_fact instead of
+# the vars directory on the role.
+
+- name: Init HA Service Info
+  set_fact:
+    containerized_svc_dir: "/usr/lib/systemd/system"
+    ha_svc_template_path: "native-cluster"
+
+- name: Set HA Service Info for containerized installs
+  set_fact:
+    containerized_svc_dir: "/etc/systemd/system"
+    ha_svc_template_path: "docker-cluster"
+  when: openshift.common.is_containerized | bool
+
+# workaround for missing systemd unit files
+- name: Create the systemd unit files
+  template:
+    src: "docker/master.docker.service.j2"
+    dest: "{{ containerized_svc_dir }}/{{ openshift.common.service_type }}-master.service"
+  when: openshift.common.is_containerized | bool and (openshift.master.ha is not defined or not openshift.master.ha | bool)
+  register: create_master_unit_file
+
+- command: systemctl daemon-reload
+  when: create_master_unit_file | changed
+
+- name: Create the ha systemd unit files
+  template:
+    src: "{{ ha_svc_template_path }}/atomic-openshift-master-{{ item }}.service.j2"
+    dest: "{{ containerized_svc_dir }}/{{ openshift.common.service_type }}-master-{{ item }}.service"
+  when: openshift.master.ha is defined and openshift.master.ha | bool and openshift_master_cluster_method == "native"
+  with_items:
+  - api
+  - controllers
+  register: create_ha_unit_files
+
+- command: systemctl daemon-reload
+  when: create_ha_unit_files | changed
+# end workaround for missing systemd unit files
+
+- name: Create the master api service env file
+  template:
+    src: "{{ ha_svc_template_path }}/atomic-openshift-master-api.j2"
+    dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-api
+  when: openshift.master.ha is defined and openshift.master.ha | bool and openshift_master_cluster_method == "native"
+  notify:
+  - restart master api
+
+- name: Create the master controllers service env file
+  template:
+    src: "{{ ha_svc_template_path }}/atomic-openshift-master-controllers.j2"
+    dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-controllers
+  when: openshift.master.ha is defined and openshift.master.ha | bool and openshift_master_cluster_method == "native"
+  notify:
+  - restart master controllers
+
+- name: Install Master docker service file
+  template:
+    dest: "/etc/systemd/system/{{ openshift.common.service_type }}-master.service"
+    src: docker/master.docker.service.j2
+  register: install_result
+  when: openshift.common.is_containerized | bool and openshift.master.ha is defined and not openshift.master.ha | bool
+
+- name: Create the master service env file
+  template:
+    src: "atomic-openshift-master.j2"
+    dest: /etc/sysconfig/{{ openshift.common.service_type }}-master
+  notify:
+  - restart master

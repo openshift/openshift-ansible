@@ -1,9 +1,22 @@
 OPTIONS=--loglevel={{ openshift.master.debug_level }} --listen={{ 'https' if openshift.master.api_use_ssl else 'http' }}://{{ openshift.master.bind_addr }}:{{ openshift.master.api_port }} --master={{ openshift.master.loopback_api_url }}
 CONFIG_FILE={{ openshift_master_config_file }}
+{% if openshift.common.is_containerized | bool %}
+IMAGE_VERSION={{ openshift_version }}
+{% endif %}
+
+{% if 'cloudprovider' in openshift and 'aws' in openshift.cloudprovider and 'kind' in openshift.cloudprovider and openshift.cloudprovider.kind == 'aws' and 'access_key' in openshift.cloudprovider.aws and 'secret_key' in openshift.cloudprovider.aws %}
+AWS_ACCESS_KEY_ID={{ openshift.cloudprovider.aws.access_key }}
+AWS_SECRET_ACCESS_KEY={{ openshift.cloudprovider.aws.secret_key }}
+{% endif %}
 
 # Proxy configuration
-# Origin uses standard HTTP_PROXY environment variables. Be sure to set
-# NO_PROXY for your master
-#NO_PROXY=master.example.com
-#HTTP_PROXY=http://USER:PASSWORD@IPADDR:PORT
-#HTTPS_PROXY=https://USER:PASSWORD@IPADDR:PORT
+# See https://docs.openshift.com/enterprise/latest/install_config/install/advanced_install.html#configuring-global-proxy
+{% if 'http_proxy' in openshift.common %}
+HTTP_PROXY='{{ openshift.common.http_proxy | default('') }}'
+{% endif %}
+{% if 'https_proxy' in openshift.common %}
+HTTPS_PROXY='{{ openshift.common.https_proxy | default('')}}'
+{% endif %}
+{% if 'no_proxy' in openshift.common %}
+NO_PROXY='{{ openshift.common.no_proxy | default('') | join(',') }},{{ openshift.common.portal_net }},{{ openshift.master.sdn_cluster_network_cidr }}'
+{% endif %}

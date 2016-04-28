@@ -9,7 +9,8 @@
 - name: create the service account
   shell: >
        echo {{ lookup('template', '../templates/serviceaccount.j2')
-               | from_yaml | to_json | quote }} | {{ openshift.common.client_binary }}  create -f -
+       | from_yaml | to_json | quote }} | {{ openshift.common.client_binary }}
+       -n {{ openshift_serviceaccounts_namespace }} create -f -
   when: item.1.rc != 0
   with_together:
   - openshift_serviceaccounts_names

@@ -1,0 +1,5 @@
+---
+etcd_is_containerized: "{{ openshift.common.is_containerized }}"
+etcd_is_atomic: "{{ openshift.common.is_atomic }}"
+etcd_hostname: "{{ openshift.common.hostname }}"
+etcd_ip: "{{ openshift.common.ip }}"

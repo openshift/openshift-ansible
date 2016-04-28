@@ -1,0 +1,15 @@
+---
+builddefaults_yaml:
+  BuildDefaults:
+    configuration:
+      apiVersion: v1
+      kind: BuildDefaultsConfig
+      gitHTTPProxy: "{{ openshift.builddefaults.git_http_proxy | default('', true) }}"
+      gitHTTPSProxy: "{{ openshift.builddefaults.git_https_proxy | default('', true) }}"
+      env:
+      - name: HTTP_PROXY
+        value: "{{ openshift.builddefaults.http_proxy | default('', true) }}"
+      - name: HTTPS_PROXY
+        value: "{{ openshift.builddefaults.https_proxy | default('', true) }}"
+      - name: NO_PROXY
+        value: "{{ openshift.builddefaults.no_proxy | default('', true) | join(',') }}"

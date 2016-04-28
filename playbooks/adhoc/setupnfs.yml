@@ -1,7 +1,7 @@
 ---
 ### This playbook is old and we are currently not using NFS.
 - hosts: tag_Name_nfs-v3-stg
-  sudo: no
+  become: no
   remote_user: root
   gather_facts: no
   roles:

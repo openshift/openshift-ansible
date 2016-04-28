@@ -36,6 +36,7 @@ class Variant(object):
 # WARNING: Keep the versions ordered, most recent last:
 OSE = Variant('openshift-enterprise', 'OpenShift Enterprise',
     [
+        Version('3.2', 'openshift-enterprise'),
         Version('3.1', 'openshift-enterprise'),
         Version('3.0', 'enterprise')
     ]
@@ -43,6 +44,7 @@ OSE = Variant('openshift-enterprise', 'OpenShift Enterprise',
 
 AEP = Variant('atomic-enterprise', 'Atomic Enterprise Platform',
     [
+        Version('3.2', 'atomic-enterprise'),
         Version('3.1', 'atomic-enterprise')
     ]
 )
@@ -74,4 +76,3 @@ def get_variant_version_combos():
         for ver in variant.versions:
             combos.append((variant, ver))
     return combos
-

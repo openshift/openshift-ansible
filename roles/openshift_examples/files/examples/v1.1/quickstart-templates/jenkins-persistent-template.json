@@ -82,8 +82,7 @@
       },
       "spec": {
         "strategy": {
-          "type": "Recreate",
-          "resources": {}
+            "type": "Recreate"
         },
         "triggers": [
           {
@@ -96,7 +95,7 @@
               "from": {
                 "kind": "ImageStreamTag",
                 "name": "jenkins:latest",
-                "namespace": "openshift"
+                "namespace": "${NAMESPACE}"
               },
               "lastTriggeredImage": ""
             }
@@ -121,13 +120,33 @@
               {
                 "name": "jenkins",
                 "image": "${JENKINS_IMAGE}",
+                "readinessProbe": {
+                  "timeoutSeconds": 3,
+                  "initialDelaySeconds": 3,
+                  "httpGet": {
+                    "path": "/login",
+                    "port": 8080
+                  }
+                },
+                "livenessProbe": {
+                    "timeoutSeconds": 3,
+                    "initialDelaySeconds": 30,
+                    "httpGet": {
+                        "path": "/login",
+                        "port": 8080
+                    }
+                },
                 "env": [
                   {
                     "name": "JENKINS_PASSWORD",
                     "value": "${JENKINS_PASSWORD}"
                   }
                 ],
-                "resources": {},
+                "resources": {
+		    "limits": {
+			"memory": "${MEMORY_LIMIT}"
+		    }
+		},
                 "volumeMounts": [
                   {
                     "name": "${JENKINS_SERVICE_NAME}-data",
@@ -160,19 +179,34 @@
   ],
   "parameters": [
     {
+      "name": "MEMORY_LIMIT",
+      "displayName": "Memory Limit",
+      "description": "Maximum amount of memory the container can use.",
+      "value": "512Mi"
+    },
+    {
+      "name": "NAMESPACE",
+      "displayName": "Namespace",
+      "description": "The OpenShift Namespace where the ImageStream resides.",
+      "value": "openshift"
+    },
+    {
       "name": "JENKINS_SERVICE_NAME",
-      "description": "Jenkins service name",
+      "displayName": "Jenkins Service Name",
+      "description": "The name of the OpenShift Service exposed for the Jenkins container.",
       "value": "jenkins"
     },
     {
       "name": "JENKINS_PASSWORD",
-      "description": "Password for the Jenkins user",
+      "displayName": "Jenkins Password",
+      "description": "Password for the Jenkins user.",
       "generate": "expression",
       "value": "password"
     },
     {
       "name": "VOLUME_CAPACITY",
-      "description": "Volume space available for data, e.g. 512Mi, 2Gi",
+      "displayName": "Volume Capacity",
+      "description": "Volume space available for data, e.g. 512Mi, 2Gi.",
       "value": "512Mi",
       "required": true
     }

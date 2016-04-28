@@ -1,10 +1,10 @@
 [Unit]
 Description=Atomic OpenShift Master API
 Documentation=https://github.com/openshift/origin
-After=network.target
+After=network-online.target
 After=etcd.service
 Before={{ openshift.common.service_type }}-node.service
-Requires=network.target
+Requires=network-online.target
 
 [Service]
 Type=notify
@@ -15,6 +15,7 @@ LimitNOFILE=131072
 LimitCORE=infinity
 WorkingDirectory={{ openshift.common.data_dir }}
 SyslogIdentifier=atomic-openshift-master-api
+RestartSec=5s
 
 [Install]
 WantedBy=multi-user.target

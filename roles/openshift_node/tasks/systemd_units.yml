@@ -1,0 +1,40 @@
+# This file is included both in the openshift_master role and in the upgrade
+# playbooks.
+
+- name: Install Node docker service file
+  template:
+    dest: "/etc/systemd/system/{{ openshift.common.service_type }}-node.service"
+    src: openshift.docker.node.service
+  register: install_node_result
+  when: openshift.common.is_containerized | bool
+
+- name: Create the openvswitch service env file
+  template:
+    src: openvswitch.sysconfig.j2
+    dest: /etc/sysconfig/openvswitch
+  when: openshift.common.is_containerized | bool
+  register: install_ovs_sysconfig
+
+- name: Install OpenvSwitch docker service file
+  template:
+    dest: "/etc/systemd/system/openvswitch.service"
+    src: openvswitch.docker.service
+  when: openshift.common.is_containerized | bool and openshift.common.use_openshift_sdn | bool
+  notify:
+  - restart openvswitch
+
+- name: Configure Node settings
+  lineinfile:
+    dest: /etc/sysconfig/{{ openshift.common.service_type }}-node
+    regexp: "{{ item.regex }}"
+    line: "{{ item.line }}"
+    create: true
+  with_items:
+    - regex: '^OPTIONS='
+      line: "OPTIONS=--loglevel={{ openshift.node.debug_level }}"
+    - regex: '^CONFIG_FILE='
+      line: "CONFIG_FILE={{ openshift_node_config_file }}"
+    - regex: '^IMAGE_VERSION='
+      line: "IMAGE_VERSION={{ openshift_version }}"
+  notify:
+  - restart node

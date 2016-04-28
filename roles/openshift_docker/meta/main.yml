@@ -12,5 +12,6 @@ galaxy_info:
   categories:
   - cloud
 dependencies:
-- { role: openshift_common }
-- { role: docker }
+- role: openshift_repos
+- role: openshift_docker_facts
+- role: docker

@@ -9,8 +9,14 @@ import sys
 import yaml
 
 from ansible import errors
-from ansible.runner.filter_plugins.core import bool as ansible_bool
 
+# pylint: disable=no-name-in-module,import-error
+try:
+    # ansible-2.0
+    from ansible.runner.filter_plugins.core import bool as ansible_bool
+except ImportError:
+    # ansible-1.9.x
+    from ansible.plugins.filter.core import bool as ansible_bool
 
 class IdentityProviderBase(object):
     """ IdentityProviderBase
@@ -57,7 +63,7 @@ class IdentityProviderBase(object):
         mapping_method = None
         for key in mm_keys:
             if key in self._idp:
-                mapping_method = self._idp[key]
+                mapping_method = self._idp.pop(key)
         if mapping_method is None:
             mapping_method = self.get_default('mappingMethod')
         self.mapping_method = mapping_method
@@ -372,13 +378,12 @@ class OpenIDIdentityProvider(IdentityProviderOauthBase):
             raise errors.AnsibleFilterError("|failed claims for provider {0} "
                                             "must be a dictionary".format(self.__class__.__name__))
 
-        if 'extraScopes' not in self.provider['extraScopes'] and not isinstance(self.provider['extraScopes'], list):
-            raise errors.AnsibleFilterError("|failed extraScopes for provider "
-                                            "{0} must be a list".format(self.__class__.__name__))
-        if ('extraAuthorizeParameters' not in self.provider['extraAuthorizeParameters']
-                and not  isinstance(self.provider['extraAuthorizeParameters'], dict)):
-            raise errors.AnsibleFilterError("|failed extraAuthorizeParameters "
-                                            "for provider {0} must be a dictionary".format(self.__class__.__name__))
+        for var, var_type in (('extraScopes', list), ('extraAuthorizeParameters', dict)):
+            if var in self.provider and not isinstance(self.provider[var], var_type):
+                raise errors.AnsibleFilterError("|failed {1} for provider "
+                                                "{0} must be a {2}".format(self.__class__.__name__,
+                                                                           var,
+                                                                           var_type.__class__.__name__))
 
         required_claims = ['id']
         optional_claims = ['email', 'name', 'preferredUsername']
@@ -501,7 +506,57 @@ class FilterModule(object):
                 valid = False
         return valid
 
+    @staticmethod
+    def certificates_to_synchronize(hostvars):
+        ''' Return certificates to synchronize based on facts. '''
+        if not issubclass(type(hostvars), dict):
+            raise errors.AnsibleFilterError("|failed expects hostvars is a dict")
+        certs = ['admin.crt',
+                 'admin.key',
+                 'admin.kubeconfig',
+                 'master.kubelet-client.crt',
+                 'master.kubelet-client.key',
+                 'openshift-registry.crt',
+                 'openshift-registry.key',
+                 'openshift-registry.kubeconfig',
+                 'openshift-router.crt',
+                 'openshift-router.key',
+                 'openshift-router.kubeconfig',
+                 'serviceaccounts.private.key',
+                 'serviceaccounts.public.key']
+        if bool(hostvars['openshift']['common']['version_gte_3_1_or_1_1']):
+            certs += ['master.proxy-client.crt',
+                      'master.proxy-client.key']
+        if not bool(hostvars['openshift']['common']['version_gte_3_2_or_1_2']):
+            certs += ['openshift-master.crt',
+                      'openshift-master.key',
+                      'openshift-master.kubeconfig']
+        return certs
+
+    @staticmethod
+    def oo_htpasswd_users_from_file(file_contents):
+        ''' return a dictionary of htpasswd users from htpasswd file contents '''
+        htpasswd_entries = {}
+        if not isinstance(file_contents, basestring):
+            raise errors.AnsibleFilterError("failed, expects to filter on a string")
+        for line in file_contents.splitlines():
+            user = None
+            passwd = None
+            if len(line) == 0:
+                continue
+            if ':' in line:
+                user, passwd = line.split(':', 1)
+
+            if user is None or len(user) == 0 or passwd is None or len(passwd) == 0:
+                error_msg = "failed, expects each line to be a colon separated string representing the user and passwd"
+                raise errors.AnsibleFilterError(error_msg)
+            htpasswd_entries[user] = passwd
+        return htpasswd_entries
+
+
     def filters(self):
         ''' returns a mapping of filters to methods '''
         return {"translate_idps": self.translate_idps,
-                "validate_pcs_cluster": self.validate_pcs_cluster}
+                "validate_pcs_cluster": self.validate_pcs_cluster,
+                "certificates_to_synchronize": self.certificates_to_synchronize,
+                "oo_htpasswd_users_from_file": self.oo_htpasswd_users_from_file}

@@ -62,7 +62,7 @@ Both of them are mounted into `/exports/openshift` directory.  Both directories 
 exported via NFS.  json files are created in /root.
 
     - hosts: nfsservers
-      sudo: no
+      become: no
       remote_user: root
       gather_facts: no
       roles:
@@ -87,7 +87,7 @@ exported via NFS.  json files are created in /root.
 * Create an ansible playbook, say `setupnfs.yaml`:
     ```
     - hosts: nfsservers
-      sudo: no
+      become: no
       remote_user: root
       gather_facts: no
       roles:

@@ -1,0 +1,2 @@
+---
+openshift_version: "{{ openshift_image_tag | default(openshift.docker.openshift_image_tag | default('')) }}"

@@ -21,17 +21,17 @@ openstack_flavor:
 deployment_rhel7_ent_base:
   image: "{{ lookup('oo_option', 'image_name') | default('rhel-guest-image-7.2-20151102.0.x86_64', True) }}"
   ssh_user: openshift
-  sudo: yes
+  become: yes
 
 deployment_vars:
   origin:
     image: "{{ lookup('oo_option', 'image_name') | default('centos-70-raw', True) }}"
     ssh_user: openshift
-    sudo: yes
+    become: yes
   online:
     image:
     ssh_user: root
-    sudo: no
+    become: no
   enterprise: "{{ deployment_rhel7_ent_base }}"
   openshift-enterprise: "{{ deployment_rhel7_ent_base }}"
   atomic-enterprise: "{{ deployment_rhel7_ent_base }}"

@@ -14,7 +14,7 @@
       name: "{{ item }}"
       groups: oo_hosts_to_terminate
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
-      ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
+      ansible_become: "{{ deployment_vars[deployment_type].become }}"
     with_items: groups[cluster_group] | default([])
 
 - name: Unsubscribe VMs
@@ -45,10 +45,16 @@
     - groups['oo_hosts_to_terminate']
     - [ destroy, undefine ]
 
-  - name: Delete VMs drives
+  - name: Delete VM drives
     command: 'virsh -c {{ libvirt_uri }} vol-delete --pool {{ libvirt_storage_pool }} {{ item }}.qcow2'
     args:
       removes: '{{ libvirt_storage_pool_path }}/{{ item }}.qcow2'
+    with_items: groups['oo_hosts_to_terminate']
+
+  - name: Delete VM docker drives
+    command: 'virsh -c {{ libvirt_uri }} vol-delete --pool {{ libvirt_storage_pool }} {{ item }}-docker.qcow2'
+    args:
+      removes: '{{ libvirt_storage_pool_path }}/{{ item }}-docker.qcow2'
     with_items: groups['oo_hosts_to_terminate']
 
   - name: Delete the VM cloud-init image

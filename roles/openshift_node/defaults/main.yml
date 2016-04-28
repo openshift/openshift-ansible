@@ -13,3 +13,4 @@ os_firewall_allow:
 - service: OpenShift OVS sdn
   port: 4789/udp
   when: openshift.node.use_openshift_sdn | bool
+openshift_version: "{{ openshift_pkg_version | default(openshift_image_tag | default(openshift.docker.openshift_image_tag | default(''))) }}"

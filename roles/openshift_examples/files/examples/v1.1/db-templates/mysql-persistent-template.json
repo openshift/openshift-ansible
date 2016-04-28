@@ -65,8 +65,7 @@
       },
       "spec": {
         "strategy": {
-          "type": "Recreate",
-          "resources": {}
+          "type": "Recreate"
         },
         "triggers": [
           {
@@ -79,7 +78,7 @@
               "from": {
                 "kind": "ImageStreamTag",
                 "name": "mysql:latest",
-                "namespace": "openshift"
+                "namespace": "${NAMESPACE}"
               },
               "lastTriggeredImage": ""
             }
@@ -110,6 +109,21 @@
                     "protocol": "TCP"
                   }
                 ],
+                "readinessProbe": {
+                  "timeoutSeconds": 1,
+                  "initialDelaySeconds": 5,
+                  "exec": {
+                    "command": [ "/bin/sh", "-i", "-c",
+                      "MYSQL_PWD=\"$MYSQL_PASSWORD\" mysql -h 127.0.0.1 -u $MYSQL_USER -D $MYSQL_DATABASE -e 'SELECT 1'"]
+                  }
+                },
+                "livenessProbe": {
+                  "timeoutSeconds": 1,
+                  "initialDelaySeconds": 30,
+                  "tcpSocket": {
+                    "port": 3306
+                  }
+                },
                 "env": [
                   {
                     "name": "MYSQL_USER",
@@ -124,7 +138,11 @@
                     "value": "${MYSQL_DATABASE}"
                   }
                 ],
-                "resources": {},
+                "resources": {
+                  "limits": {
+                    "memory": "${MEMORY_LIMIT}"
+                  }
+                },
                 "volumeMounts": [
                   {
                     "name": "${DATABASE_SERVICE_NAME}-data",
@@ -158,34 +176,51 @@
   ],
   "parameters": [
     {
+      "name": "MEMORY_LIMIT",
+      "displayName": "Memory Limit",
+      "description": "Maximum amount of memory the container can use.",
+      "value": "512Mi"
+    },
+    {
+      "name": "NAMESPACE",
+      "displayName": "Namespace",
+      "description": "The OpenShift Namespace where the ImageStream resides.",
+      "value": "openshift"
+    },
+    {
       "name": "DATABASE_SERVICE_NAME",
-      "description": "Database service name",
+      "displayName": "Database Service Name",
+      "description": "The name of the OpenShift Service exposed for the database.",
       "value": "mysql",
       "required": true
     },
     {
       "name": "MYSQL_USER",
-      "description": "Username for MySQL user that will be used for accessing the database",
+      "displayName": "MySQL User",
+      "description": "Username for MySQL user that will be used for accessing the database.",
       "generate": "expression",
       "from": "user[A-Z0-9]{3}",
       "required": true
     },
     {
       "name": "MYSQL_PASSWORD",
-      "description": "Password for the MySQL user",
+      "displayName": "MySQL Password",
+      "description": "Password for the MySQL user.",
       "generate": "expression",
       "from": "[a-zA-Z0-9]{16}",
       "required": true
     },
     {
       "name": "MYSQL_DATABASE",
-      "description": "Database name",
+      "displayName": "MySQL Database Name",
+      "description": "Name of the MySQL database accessed.",
       "value": "sampledb",
       "required": true
     },
     {
       "name": "VOLUME_CAPACITY",
-      "description": "Volume space available for data, e.g. 512Mi, 2Gi",
+      "displayName": "Volume Capacity",
+      "description": "Volume space available for data, e.g. 512Mi, 2Gi.",
       "value": "512Mi",
       "required": true
     }

@@ -16,7 +16,7 @@
       name: "{{ item }}"
       groups: g_service_masters
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
-      ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
+      ansible_become: "{{ deployment_vars[deployment_type].become }}"
     with_items: "{{ master_hosts | default([]) }}"
 
   - name: Evaluate g_service_nodes
@@ -24,7 +24,7 @@
       name: "{{ item }}"
       groups: g_service_nodes
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
-      ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
+      ansible_become: "{{ deployment_vars[deployment_type].become }}"
     with_items: "{{ node_hosts | default([]) }}"
 
 - include: ../../common/openshift-node/service.yml

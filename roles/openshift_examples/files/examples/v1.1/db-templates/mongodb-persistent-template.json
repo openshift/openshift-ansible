@@ -65,8 +65,7 @@
       },
       "spec": {
         "strategy": {
-          "type": "Recreate",
-          "resources": {}
+          "type": "Recreate"
         },
         "triggers": [
           {
@@ -79,7 +78,7 @@
               "from": {
                 "kind": "ImageStreamTag",
                 "name": "mongodb:latest",
-                "namespace": "openshift"
+                "namespace": "${NAMESPACE}"
               },
               "lastTriggeredImage": ""
             }
@@ -104,19 +103,26 @@
               {
                 "name": "mongodb",
                 "image": "mongodb",
-                "readinessProbe": {
-                    "tcpSocket":{
-                        "port": 27017
-                    },
-                    "initialDelaySeconds": 15,
-                    "timeoutSeconds": 1
-                },
                 "ports": [
                   {
                     "containerPort": 27017,
                     "protocol": "TCP"
                   }
                 ],
+                "readinessProbe": {
+                  "timeoutSeconds": 1,
+                  "initialDelaySeconds": 3,
+                  "exec": {
+                    "command": [ "/bin/sh", "-i", "-c", "mongostat --host 127.0.0.1 -u admin -p $MONGODB_ADMIN_PASSWORD -n 1 --noheaders"]
+                  }
+                },
+                "livenessProbe": {
+                  "timeoutSeconds": 1,
+                  "initialDelaySeconds": 30,
+                  "tcpSocket": {
+                    "port": 27017
+                  }
+                },
                 "env": [
                   {
                     "name": "MONGODB_USER",
@@ -135,7 +141,11 @@
                     "value": "${MONGODB_ADMIN_PASSWORD}"
                   }
                 ],
-                "resources": {},
+                "resources": {
+                  "limits": {
+                    "memory": "${MEMORY_LIMIT}"
+                  }
+                },
                 "volumeMounts": [
                   {
                     "name": "${DATABASE_SERVICE_NAME}-data",
@@ -169,41 +179,59 @@
   ],
   "parameters": [
     {
+      "name": "MEMORY_LIMIT",
+      "displayName": "Memory Limit",
+      "description": "Maximum amount of memory the container can use.",
+      "value": "512Mi"
+    },
+    {
+      "name": "NAMESPACE",
+      "displayName": "Namespace",
+      "description": "The OpenShift Namespace where the ImageStream resides.",
+      "value": "openshift"
+    },
+    {
       "name": "DATABASE_SERVICE_NAME",
-      "description": "Database service name",
+      "displayName": "Database Service Name",
+      "description": "The name of the OpenShift Service exposed for the database.",
       "value": "mongodb",
       "required": true
     },
     {
       "name": "MONGODB_USER",
-      "description": "Username for MongoDB user that will be used for accessing the database",
+      "displayName": "MongoDB User",
+      "description": "Username for MongoDB user that will be used for accessing the database.",
       "generate": "expression",
       "from": "user[A-Z0-9]{3}",
       "required": true
     },
     {
       "name": "MONGODB_PASSWORD",
-      "description": "Password for the MongoDB user",
+      "displayName": "MongoDB Password",
+      "description": "Password for the MongoDB user.",
       "generate": "expression",
       "from": "[a-zA-Z0-9]{16}",
       "required": true
     },
     {
       "name": "MONGODB_DATABASE",
-      "description": "Database name",
+      "displayName": "MongoDB Database Name",
+      "description": "Name of the MongoDB database accessed.",
       "value": "sampledb",
       "required": true
     },
     {
       "name": "MONGODB_ADMIN_PASSWORD",
-      "description": "Password for the database admin user",
+      "displayName": "MongoDB Admin Password",
+      "description": "Password for the database admin user.",
       "generate": "expression",
       "from": "[a-zA-Z0-9]{16}",
       "required": true
     },
     {
       "name": "VOLUME_CAPACITY",
-      "description": "Volume space available for data, e.g. 512Mi, 2Gi",
+      "displayName": "Volume Capacity",
+      "description": "Volume space available for data, e.g. 512Mi, 2Gi.",
       "value": "512Mi",
       "required": true
     }

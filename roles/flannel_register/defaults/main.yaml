@@ -1,5 +1,5 @@
 ---
-flannel_network: "{{ openshift.master.portal_net | default('172.30.0.0/16', true) }}"
+flannel_network: "{{ openshift.common.portal_net | default('172.30.0.0/16', true) }}"
 flannel_min_network: 172.30.5.0
 flannel_subnet_len: 24
 flannel_etcd_key: /openshift.com/network

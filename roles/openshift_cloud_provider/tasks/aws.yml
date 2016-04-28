@@ -1,0 +1,6 @@
+- name: Create cloud config
+  ini_file:
+    dest: "{{ openshift.common.config_base }}/cloudprovider/aws.conf"
+    section: Global
+    option: Zone
+    value: "{{ openshift.provider.zone }}"

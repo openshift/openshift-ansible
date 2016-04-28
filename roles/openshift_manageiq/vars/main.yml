@@ -15,6 +15,12 @@ manageiq_service_account:
     metadata:
       name: management-admin
 
+manageiq_image_inspector_service_account:
+    apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      name: inspector-admin
+
 manage_iq_tmp_conf: /tmp/manageiq_admin.kubeconfig
 
 manage_iq_tasks:
@@ -22,3 +28,5 @@ manage_iq_tasks:
     - policy add-role-to-user -n management-infra management-infra-admin -z management-admin
     - policy add-cluster-role-to-user cluster-reader system:serviceaccount:management-infra:management-admin
     - policy add-scc-to-user privileged system:serviceaccount:management-infra:management-admin
+    - policy add-cluster-role-to-user system:image-puller system:serviceaccount:management-infra:inspector-admin
+    - policy add-scc-to-user privileged system:serviceaccount:management-infra:inspector-admin

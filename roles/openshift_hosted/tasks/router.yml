@@ -1,0 +1,65 @@
+---
+- fail:
+    msg: "Both 'certfile' and 'keyfile' keys must be specified when supplying the openshift_hosted_router_certificate variable."
+  when: openshift_hosted_router_certificate is defined and ('certfile' not in openshift_hosted_router_certificate or 'keyfile' not in openshift_hosted_router_certificate)
+
+- name: Read router certificate and key
+  slurp:
+    src: "{{ item }}"
+  register: openshift_router_certificate_output
+  with_items:
+  - "{{ openshift_hosted_router_certificate.certfile }}"
+  - "{{ openshift_hosted_router_certificate.keyfile }}"
+  delegate_to: localhost
+  when: openshift_hosted_router_certificate is defined
+
+- name: Persist certificate contents
+  openshift_facts:
+    role: hosted
+    openshift_env:
+      openshift_hosted_router_certificate_contents: "{% for certificate in openshift_router_certificate_output.results -%}{{ certificate.content | b64decode }}{% endfor -%}"
+  when: openshift_hosted_router_certificate is defined
+
+- name: Create PEM certificate
+  copy:
+    content: "{{ openshift.hosted.router.certificate.contents }}"
+    dest: "{{ openshift_master_config_dir }}/openshift-router.pem"
+    mode: 0600
+  when: openshift.hosted.router.certificate | default(None) != None
+
+- name: Retrieve list of openshift nodes
+  command: >
+    {{ openshift.common.client_binary }} --api-version='v1' -o json
+    get nodes -n default --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+  register: openshift_hosted_router_nodes_json
+  changed_when: false
+  when: openshift.hosted.router.replicas | default(None) == None
+
+- name: Collect nodes matching router selector
+  set_fact:
+    openshift_hosted_router_nodes: >
+      {{ (openshift_hosted_router_nodes_json.stdout|from_json)['items']
+         | oo_oc_nodes_matching_selector(openshift.hosted.router.selector) }}
+  when: openshift.hosted.router.replicas | default(None) == None
+
+- name: Create OpenShift router
+  command: >
+    {{ openshift.common.admin_binary }} router --create
+    {% if openshift.hosted.router.replicas | default(None) != None -%}
+    --replicas={{ openshift.hosted.router.replicas }}
+    {% else -%}
+    --replicas={{ openshift_hosted_router_nodes | length }}
+    {% endif %}
+    {% if openshift.hosted.router.certificate | default(None) != None -%}
+    --default-cert={{ openshift_master_config_dir }}/openshift-router.pem
+    {% endif -%}
+    --namespace=default
+    --service-account=router
+    --selector='{{ openshift.hosted.router.selector }}'
+    --credentials={{ openshift_master_config_dir }}/openshift-router.kubeconfig
+    {% if openshift.hosted.router.registryurl | default(None)!= None -%}
+    --images='{{ openshift.hosted.router.registryurl }}'
+    {% endif -%}
+  register: openshift_hosted_router_results
+  changed_when: "'service exists' not in openshift_hosted_router_results.stdout"
+  when: openshift.hosted.router.replicas | default(None) != None or (openshift_hosted_router_nodes is defined and openshift_hosted_router_nodes | length > 0)

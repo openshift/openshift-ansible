@@ -21,13 +21,14 @@ def generate_inventory(hosts):
     nodes = [host for host in hosts if host.node]
     new_nodes = [host for host in hosts if host.node and host.new_host]
     proxy = determine_proxy_configuration(hosts)
+    storage = determine_storage_configuration(hosts)
     multiple_masters = len(masters) > 1
     scaleup = len(new_nodes) > 0
 
     base_inventory_path = CFG.settings['ansible_inventory_path']
     base_inventory = open(base_inventory_path, 'w')
 
-    write_inventory_children(base_inventory, multiple_masters, proxy, scaleup)
+    write_inventory_children(base_inventory, multiple_masters, proxy, storage, scaleup)
 
     write_inventory_vars(base_inventory, multiple_masters, proxy)
 
@@ -37,10 +38,10 @@ def generate_inventory(hosts):
     base_inventory.write('deployment_type={}\n'.format(ver.ansible_key))
 
     if 'OO_INSTALL_ADDITIONAL_REGISTRIES' in os.environ:
-        base_inventory.write('cli_docker_additional_registries={}\n'
+        base_inventory.write('openshift_docker_additional_registries={}\n'
           .format(os.environ['OO_INSTALL_ADDITIONAL_REGISTRIES']))
     if 'OO_INSTALL_INSECURE_REGISTRIES' in os.environ:
-        base_inventory.write('cli_docker_insecure_registries={}\n'
+        base_inventory.write('openshift_docker_insecure_registries={}\n'
           .format(os.environ['OO_INSTALL_INSECURE_REGISTRIES']))
     if 'OO_INSTALL_PUDDLE_REPO' in os.environ:
         # We have to double the '{' here for literals
@@ -73,10 +74,15 @@ def generate_inventory(hosts):
         base_inventory.write('\n[lb]\n')
         write_host(proxy, base_inventory)
 
+
     if scaleup:
         base_inventory.write('\n[new_nodes]\n')
         for node in new_nodes:
             write_host(node, base_inventory)
+
+    if storage:
+        base_inventory.write('\n[nfs]\n')
+        write_host(storage, base_inventory)
 
     base_inventory.close()
     return base_inventory_path
@@ -87,11 +93,15 @@ def determine_proxy_configuration(hosts):
         if proxy.hostname == None:
             proxy.hostname = proxy.connect_to
             proxy.public_hostname = proxy.connect_to
-        return proxy
 
-    return None
+    return proxy
 
-def write_inventory_children(base_inventory, multiple_masters, proxy, scaleup):
+def determine_storage_configuration(hosts):
+    storage = next((host for host in hosts if host.storage), None)
+
+    return storage
+
+def write_inventory_children(base_inventory, multiple_masters, proxy, storage, scaleup):
     global CFG
 
     base_inventory.write('\n[OSEv3:children]\n')
@@ -103,13 +113,15 @@ def write_inventory_children(base_inventory, multiple_masters, proxy, scaleup):
         base_inventory.write('etcd\n')
     if not getattr(proxy, 'preconfigured', True):
         base_inventory.write('lb\n')
+    if storage:
+        base_inventory.write('nfs\n')
 
 def write_inventory_vars(base_inventory, multiple_masters, proxy):
     global CFG
     base_inventory.write('\n[OSEv3:vars]\n')
     base_inventory.write('ansible_ssh_user={}\n'.format(CFG.settings['ansible_ssh_user']))
     if CFG.settings['ansible_ssh_user'] != 'root':
-        base_inventory.write('ansible_become=true\n')
+        base_inventory.write('ansible_become=yes\n')
     if multiple_masters and proxy is not None:
         base_inventory.write('openshift_master_cluster_method=native\n')
         base_inventory.write("openshift_master_cluster_hostname={}\n".format(proxy.hostname))
@@ -117,8 +129,11 @@ def write_inventory_vars(base_inventory, multiple_masters, proxy):
             "openshift_master_cluster_public_hostname={}\n".format(proxy.public_hostname))
     if CFG.settings.get('master_routingconfig_subdomain', False):
         base_inventory.write(
-            "osm_default_subdomain={}\n".format(CFG.settings['master_routingconfig_subdomain']))
-
+            "openshift_master_default_subdomain={}\n".format(
+                                                    CFG.settings['master_routingconfig_subdomain']))
+    if CFG.settings.get('variant_version', None) == '3.1':
+        #base_inventory.write('openshift_image_tag=v{}\n'.format(CFG.settings.get('variant_version')))
+        base_inventory.write('openshift_image_tag=v{}\n'.format('3.1.1.6'))
 
 
 def write_host(host, inventory, schedulable=None):
@@ -155,7 +170,7 @@ def write_host(host, inventory, schedulable=None):
             if no_pwd_sudo == 1:
                 print 'The atomic-openshift-installer requires sudo access without a password.'
                 sys.exit(1)
-            facts += ' ansible_become=true'
+            facts += ' ansible_become=yes'
 
     inventory.write('{} {}\n'.format(host.connect_to, facts))
 
@@ -201,9 +216,8 @@ def default_facts(hosts, verbose=False):
     return load_system_facts(inventory_file, os_facts_path, facts_env, verbose)
 
 
-def run_main_playbook(hosts, hosts_to_run_on, verbose=False):
+def run_main_playbook(inventory_file, hosts, hosts_to_run_on, verbose=False):
     global CFG
-    inventory_file = generate_inventory(hosts_to_run_on)
     if len(hosts_to_run_on) != len(hosts):
         main_playbook_path = os.path.join(CFG.ansible_playbook_directory,
                                           'playbooks/byo/openshift-node/scaleup.yml')
@@ -239,18 +253,10 @@ def run_uninstall_playbook(verbose=False):
     return run_ansible(playbook, inventory_file, facts_env, verbose)
 
 
-def run_upgrade_playbook(old_version, new_version, verbose=False):
-    # TODO: do not hardcode the upgrade playbook, add ability to select the
-    # right playbook depending on the type of upgrade.
-    old_version = old_version.replace('.', '_')
-    new_version = old_version.replace('.', '_')
-    if old_version == new_version:
-        playbook = os.path.join(CFG.settings['ansible_playbook_directory'],
-            'playbooks/byo/openshift-cluster/upgrades/v{}_minor/upgrade.yml'.format(new_version))
-    else:
-        playbook = os.path.join(CFG.settings['ansible_playbook_directory'],
-            'playbooks/byo/openshift-cluster/upgrades/v{}_to_v{}/upgrade.yml'.format(old_version,
-                                                                                     new_version))
+def run_upgrade_playbook(playbook, verbose=False):
+    playbook = os.path.join(CFG.settings['ansible_playbook_directory'],
+            'playbooks/byo/openshift-cluster/upgrades/{}'.format(playbook))
+
     # TODO: Upgrade inventory for upgrade?
     inventory_file = generate_inventory(CFG.hosts)
     facts_env = os.environ.copy()

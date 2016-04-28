@@ -10,7 +10,7 @@
 - hosts:
     - OSEv3:children
 
-  sudo: yes
+  become: yes
 
   tasks:
     - name: Detecting Operating System
@@ -53,9 +53,17 @@
         - pcsd
       failed_when: false
 
+    - name: unmask services
+      command: systemctl unmask "{{ item }}"
+      changed_when: False
+      failed_when: False
+      with_items:
+        - etcd
+        - firewalld
+
     - name: Stop additional atomic services
       service: name={{ item }} state=stopped
-      when: is_atomic | bool
+      when: is_containerized | bool
       with_items:
         - etcd_container
       failed_when: false
@@ -73,9 +81,14 @@
         - atomic-openshift-master
         - atomic-openshift-node
         - atomic-openshift-sdn-ovs
+        - cockpit-bridge
+        - cockpit-docker
+        - cockpit-shell
+        - cockpit-ws
         - corosync
         - etcd
         - haproxy
+        - kubernetes-client
         - openshift
         - openshift-master
         - openshift-node
@@ -132,7 +145,11 @@
       register: exited_containers_to_delete
       with_items:
         - aep3.*/aep
+        - aep3.*/node
+        - aep3.*/openvswitch
         - openshift3/ose
+        - openshift3/node
+        - openshift3/openvswitch
         - openshift/origin
 
     - shell: "docker rm {{ item.stdout_lines | join(' ') }}"
@@ -147,6 +164,7 @@
       with_items:
         - registry\.access\..*redhat\.com/openshift3
         - registry\.access\..*redhat\.com/aep3
+        - registry\.qe\.openshift\.com/.*
         - registry\.access\..*redhat\.com/rhel7/etcd
         - docker.io/openshift
 
@@ -192,6 +210,7 @@
         - /etc/sysconfig/atomic-openshift-node
         - /etc/sysconfig/openshift-master
         - /etc/sysconfig/openshift-node
+        - /etc/sysconfig/openvswitch
         - /etc/sysconfig/origin-master
         - /etc/sysconfig/origin-master-api
         - /etc/sysconfig/origin-master-controllers
@@ -213,6 +232,9 @@
         - /usr/local/bin/oadm
         - /usr/local/bin/oc
         - /usr/local/bin/kubectl
+        - /etc/NetworkManager/dispatcher.d/99-origin-dns.sh
+        - /etc/dnsmasq.d/origin-dns.conf
+        - /etc/dnsmasq.d/origin-upstream-dns.conf
 
     # Since we are potentially removing the systemd unit files for separated
     # master-api and master-controllers services, so we need to reload the
@@ -221,7 +243,9 @@
       command: systemctl daemon-reload
 
 - hosts: nodes
-  sudo: yes
+  become: yes
   tasks:
     - name: restart docker
       service: name=docker state=restarted
+    - name: restart NetworkManager
+      service: name=NetworkManager state=restarted
