@@ -1,6 +1,12 @@
 ---
-- include: firewall/firewalld.yml
-  when: os_firewall_enabled | bool and os_firewall_use_firewalld | bool
+- name: Debug where we come from
+  debug:
+    msg: "I'm coming from {{ some_var_name }}"
 
-- include: firewall/iptables.yml
-  when: os_firewall_enabled | bool and not os_firewall_use_firewalld | bool
+- name: Run firewalld playbook
+  include: firewall/firewalld.yml
+  when: "{{ os_firewall_enabled }} | bool and {{ os_firewall_use_firewalld }} | bool"
+
+- name: Run iptables playbook
+  include: firewall/iptables.yml
+  when: "{{ os_firewall_enabled }} | bool and not {{ os_firewall_use_firewalld }} | bool"

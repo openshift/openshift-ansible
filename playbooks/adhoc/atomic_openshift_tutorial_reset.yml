@@ -8,7 +8,7 @@
 - hosts:
     - OSEv3:children
 
-  become: yes
+  become: true
 
   tasks:
     - shell: docker ps -a -q | xargs docker stop

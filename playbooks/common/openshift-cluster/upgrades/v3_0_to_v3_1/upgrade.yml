@@ -308,7 +308,7 @@
       state: absent
     when: groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config
     with_nested:
-    - masters_needing_certs
+    - "{{ masters_needing_certs }}"
     - - master.etcd-client.crt
       - master.etcd-client.key
 
@@ -316,7 +316,7 @@
     command: >
       tar -czvf {{ master_generated_certs_dir }}/{{ item.master_cert_subdir }}.tgz
         -C {{ master_generated_certs_dir }}/{{ item.master_cert_subdir }} .
-    with_items: masters_needing_certs
+    with_items: "{{ masters_needing_certs }}"
 
   - name: Retrieve the master cert tarball from the master
     fetch:
@@ -325,7 +325,7 @@
       flat: yes
       fail_on_missing: yes
       validate_checksum: yes
-    with_items: masters_needing_certs
+    with_items: "{{ masters_needing_certs }}"
 
 
 - name: Sync generated certs, update service config and restart master services

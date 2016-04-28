@@ -17,6 +17,8 @@ This returns, by order of priority:
 * if none of the above conditions are met, empty string is returned
 '''
 
+from ansible.plugins.lookup import LookupBase
+from ansible import template
 
 import os
 

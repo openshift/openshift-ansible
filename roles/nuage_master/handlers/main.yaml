@@ -1,6 +1,6 @@
 ---
 - name: restart nuage-openshift-monitor
-  become: yes
+  become: true
   service: name=nuage-openshift-monitor state=restarted
 
 - name: restart master

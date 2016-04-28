@@ -34,14 +34,14 @@ deployment_vars:
       sha256: "{{ lookup('oo_option', 'image_sha256') |
                   default('dd0f5e610e7c5ffacaca35ed7a78a19142a588f4543da77b61c1fb0d74400471', True) }}"
     ssh_user: openshift
-    become: yes
+    become: true
   online:
     image:
       url:
       name:
       sha256:
     ssh_user: root
-    become: no
+    become: false
   enterprise: "{{ deployment_rhel7_ent_base }}"
   openshift-enterprise: "{{ deployment_rhel7_ent_base }}"
   atomic-enterprise: "{{ deployment_rhel7_ent_base }}"

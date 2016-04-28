@@ -35,7 +35,7 @@
       groups: oo_all_hosts
       ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
       ansible_become: "{{ g_sudo | default(omit) }}"
-    with_items: g_all_hosts | default([])
+    with_items: "{{ g_all_hosts | default([]) }}"
 
   - name: Evaluate oo_masters
     add_host:
@@ -43,7 +43,7 @@
       groups: oo_masters
       ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
       ansible_become: "{{ g_sudo | default(omit) }}"
-    with_items: "{{ g_master_hosts | union(g_new_master_hosts) | default([]) }}"
+    with_items: "{{ g_master_hosts | union((g_new_master_hosts | default([]))) }}"
 
   - name: Evaluate oo_etcd_to_config
     add_host:

@@ -28,9 +28,9 @@
     src: "{{ etcd_ca_dir }}/fragments"
     dest: "{{ etcd_openssl_conf }}"
 
-- command: touch {{ etcd_ca_db }}
-  args:
-    creates: "{{ etcd_ca_db }}"
+- file:
+    path: "{{ etcd_ca_db }}"
+    state: touch
 
 - copy:
     dest: "{{ etcd_ca_serial }}"

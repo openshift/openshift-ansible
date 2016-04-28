@@ -15,6 +15,9 @@ galaxy_info:
   categories:
   - cloud
   - system
+# TODO: figure out dependency level variable inheritence
 dependencies:
-- { role: os_firewall }
-- { role: etcd_common }
+- role: os_firewall
+#  os_firewall_use_firewalld: False
+- role: etcd_common
+#  os_firewall_use_firewalld: False

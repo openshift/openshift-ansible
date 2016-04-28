@@ -42,7 +42,8 @@
     state: started
   register: start_result
 
-- set_fact:
+- name: Set Docker service fact
+  set_fact:
     docker_service_status_changed: start_result | changed
 
 - include: udev_workaround.yml

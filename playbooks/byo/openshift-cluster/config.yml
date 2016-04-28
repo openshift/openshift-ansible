@@ -1,8 +1,14 @@
 ---
 - include: ../../common/openshift-cluster/config.yml
-  vars_files:
-  - ../../byo/openshift-cluster/cluster_hosts.yml
   vars:
+    g_etcd_hosts:   "{{ groups.etcd | default([]) }}"
+    g_lb_hosts:     "{{ groups.lb | default([]) }}"
+    g_master_hosts: "{{ groups.masters | default([]) }}"
+    g_node_hosts:   "{{ groups.nodes | default([]) }}"
+    g_new_node_hosts: "{{ groups.new_nodes | default([]) }}"
+    g_nfs_hosts:   "{{ groups.nfs | default([]) }}"
+    g_all_hosts:    "{{ g_master_hosts | union(g_node_hosts) | union(g_etcd_hosts)
+                        | union(g_lb_hosts) | default([]) }}"
     openshift_cluster_id: "{{ cluster_id | default('default') }}"
     openshift_debug_level: "{{ debug_level | default(2) }}"
     openshift_deployment_type: "{{ deployment_type }}"
