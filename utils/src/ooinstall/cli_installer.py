@@ -520,7 +520,7 @@ def error_if_missing_info(oo_cfg):
     if missing_info:
         sys.exit(1)
 
-def get_proxy_hostname_and_excludes():
+def get_proxy_hostnames_and_excludes():
     message = """
 If a proxy is needed to reach HTTP and HTTPS traffic please enter the name below.
 This proxy will be configured by default for all processes needing to reach systems outside
@@ -532,16 +532,22 @@ https://docs.openshift.com/enterprise/latest/install_config/http_proxies.html
 """
     click.echo(message)
 
-    message = "Specify the hostname for your proxy? (ENTER for none)"
-    proxy_hostname = click.prompt(message, default='')
+    message = "Specify your http proxy ? (ENTER for none)"
+    http_proxy_hostname = click.prompt(message, default='')
 
-    if proxy_hostname:
-        message = "List any hosts that should be excluded from your proxy. (ENTER for none)"
+    message = "Specify your https proxy ? (ENTER for none)"
+    https_proxy_hostname = click.prompt(message, default=http_proxy_hostname)
+
+    if http_proxy_hostname or https_proxy_hostname:
+        message = """
+All hosts in your openshift inventory will automatically be added to the NO_PROXY value.
+Please provide any additional hosts to be added to NO_PROXY. (ENTER for none)
+"""
         proxy_excludes = click.prompt(message, default='')
     else:
         proxy_excludes = ''
 
-    return proxy_hostname, proxy_excludes
+    return http_proxy_hostname, https_proxy_hostname, proxy_excludes
 
 def get_missing_info_from_user(oo_cfg):
     """ Prompts the user for any information missing from the given configuration. """
@@ -589,9 +595,9 @@ https://docs.openshift.com/enterprise/latest/admin_guide/install/prerequisites.h
         click.clear()
 
     if not oo_cfg.settings.get('openshift_http_proxy', None):
-        proxy_hostname, proxy_excludes = get_proxy_hostname_and_excludes()
-        oo_cfg.settings['openshift_http_proxy'] = proxy_hostname
-        oo_cfg.settings['openshift_https_proxy'] = proxy_hostname
+        http_proxy, https_proxy, proxy_excludes = get_proxy_hostnames_and_excludes()
+        oo_cfg.settings['openshift_http_proxy'] = http_proxy
+        oo_cfg.settings['openshift_https_proxy'] = https_proxy
         oo_cfg.settings['openshift_no_proxy'] = proxy_excludes
         click.clear()
 
