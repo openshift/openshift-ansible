@@ -1,3 +1,5 @@
 ---
 os_firewall_enabled: True
 os_firewall_use_firewalld: True
+os_firewall_allow: []
+os_firewall_deny: []

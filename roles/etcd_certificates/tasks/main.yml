@@ -1,6 +1,6 @@
 ---
 - include: client.yml
-  when: etcd_needing_client_certs is defined and etcd_needing_client_certs
+  when: etcd_needing_client_certs | default([]) | length > 0
 
 - include: server.yml
-  when: etcd_needing_server_certs is defined and etcd_needing_server_certs
+  when: etcd_needing_server_certs | default([]) | length > 0

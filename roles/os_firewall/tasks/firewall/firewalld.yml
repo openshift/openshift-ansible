@@ -52,29 +52,25 @@
     port: "{{ item.port }}"
     permanent: false
     state: enabled
-  with_items: os_firewall_allow
-  when: os_firewall_allow is defined
+  with_items: "{{ os_firewall_allow }}"
 
 - name: Persist firewalld allow rules
   firewalld:
     port: "{{ item.port }}"
     permanent: true
     state: enabled
-  with_items: os_firewall_allow
-  when: os_firewall_allow is defined
+  with_items: "{{ os_firewall_allow }}"
 
 - name: Remove firewalld allow rules
   firewalld:
     port: "{{ item.port }}"
     permanent: false
     state: disabled
-  with_items: os_firewall_deny
-  when: os_firewall_deny is defined
+  with_items: "{{ os_firewall_deny }}"
 
 - name: Persist removal of firewalld allow rules
   firewalld:
     port: "{{ item.port }}"
     permanent: true
     state: disabled
-  with_items: os_firewall_deny
-  when: os_firewall_deny is defined
+  with_items: "{{ os_firewall_deny }}"

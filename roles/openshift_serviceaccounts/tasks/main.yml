@@ -1,7 +1,7 @@
 - name: test if service accounts exists
   command: >
       {{ openshift.common.client_binary }} get sa {{ item }} -n {{ openshift_serviceaccounts_namespace }}
-  with_items: openshift_serviceaccounts_names
+  with_items: "{{ openshift_serviceaccounts_names }}"
   failed_when: false
   changed_when: false
   register: account_test
@@ -13,8 +13,8 @@
        -n {{ openshift_serviceaccounts_namespace }} create -f -
   when: item.1.rc != 0
   with_together:
-  - openshift_serviceaccounts_names
-  - account_test.results
+  - "{{ openshift_serviceaccounts_names }}"
+  - "{{ account_test.results }}"
 
 - name: test if scc needs to be updated
   command: >
@@ -22,7 +22,7 @@
   changed_when: false
   failed_when: false
   register: scc_test
-  with_items: openshift_serviceaccounts_sccs
+  with_items: "{{ openshift_serviceaccounts_sccs }}"
 
 - name: Grant the user access to the privileged scc
   command: >
@@ -30,8 +30,8 @@
       privileged system:serviceaccount:{{ openshift_serviceaccounts_namespace }}:{{ item.0 }}
   when: "openshift.common.version_gte_3_1_or_1_1 and item.1.rc == 0 and 'system:serviceaccount:{{ openshift_serviceaccounts_namespace }}:{{ item.0 }}' not in {{ (item.1.stdout | from_yaml).users }}"
   with_nested:
-  - openshift_serviceaccounts_names
-  - scc_test.results
+  - "{{ openshift_serviceaccounts_names }}"
+  - "{{ scc_test.results }}"
 
 - include: legacy_add_scc_to_user.yml
   when: not openshift.common.version_gte_3_1_or_1_1

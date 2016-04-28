@@ -49,8 +49,7 @@
     action: add
     protocol: "{{ item.port.split('/')[1] }}"
     port: "{{ item.port.split('/')[0] }}"
-  with_items: os_firewall_allow
-  when: os_firewall_allow is defined
+  with_items: "{{ os_firewall_allow }}"
 
 - name: Remove iptables rules
   os_firewall_manage_iptables:
@@ -58,5 +57,4 @@
     action: remove
     protocol: "{{ item.port.split('/')[1] }}"
     port: "{{ item.port.split('/')[0] }}"
-  with_items: os_firewall_deny
-  when: os_firewall_deny is defined
+  with_items: "{{ os_firewall_deny }}"

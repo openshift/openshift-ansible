@@ -78,14 +78,14 @@
   action: "{{ ansible_pkg_mgr }} name=httpd-tools state=present"
   when: (item.kind == 'HTPasswdPasswordIdentityProvider') and
         not openshift.common.is_atomic | bool
-  with_items: openshift.master.identity_providers
+  with_items: "{{ openshift.master.identity_providers }}"
 
 - name: Ensure htpasswd directory exists
   file:
     path: "{{ item.filename | dirname }}"
     state: directory
   when: item.kind == 'HTPasswdPasswordIdentityProvider'
-  with_items: openshift.master.identity_providers
+  with_items: "{{ openshift.master.identity_providers }}"
 
 - name: Create the htpasswd file if needed
   template:
@@ -94,7 +94,7 @@
     mode: 0600
     backup: yes
   when: item.kind == 'HTPasswdPasswordIdentityProvider'
-  with_items: openshift.master.identity_providers
+  with_items: "{{ openshift.master.identity_providers }}"
 
 - name: Create the ldap ca file if needed
   copy:
@@ -103,7 +103,7 @@
     mode: 0600
     backup: yes
   when: openshift.master.ldap_ca is defined and item.kind == 'LDAPPasswordIdentityProvider'
-  with_items: openshift.master.identity_providers
+  with_items: "{{ openshift.master.identity_providers }}"
 
 - name: Create the openid ca file if needed
   copy:
@@ -112,7 +112,7 @@
     mode: 0600
     backup: yes
   when: openshift.master.openid_ca is defined and item.kind == 'OpenIDIdentityProvider' and item.ca | default('') != ''
-  with_items: openshift.master.identity_providers
+  with_items: "{{ openshift.master.identity_providers }}"
 
 - name: Create the request header ca file if needed
   copy:
@@ -121,7 +121,7 @@
     mode: 0600
     backup: yes
   when: openshift.master.request_header_ca is defined and item.kind == 'RequestHeaderIdentityProvider' and item.clientCA | default('') != ''
-  with_items: openshift.master.identity_providers
+  with_items: "{{ openshift.master.identity_providers }}"
 
 - name: Install the systemd units
   include: systemd_units.yml
@@ -239,7 +239,7 @@
     mode: 0700
     owner: "{{ item }}"
     group: "{{ 'root' if item == 'root' else _ansible_ssh_user_gid.stdout  }}"
-  with_items: client_users
+  with_items: "{{ client_users }}"
 
 # TODO: Update this file if the contents of the source file are not present in
 # the dest file, will need to make sure to ignore things that could be added
@@ -247,7 +247,7 @@
   command: cp {{ openshift_master_config_dir }}/admin.kubeconfig ~{{ item }}/.kube/config
   args:
     creates: ~{{ item }}/.kube/config
-  with_items: client_users
+  with_items: "{{ client_users }}"
 
 - name: Update the permissions on the admin client config(s)
   file:
@@ -256,4 +256,4 @@
     mode: 0700
     owner: "{{ item }}"
     group: "{{ 'root' if item == 'root' else _ansible_ssh_user_gid.stdout  }}"
-  with_items: client_users
+  with_items: "{{ client_users }}"

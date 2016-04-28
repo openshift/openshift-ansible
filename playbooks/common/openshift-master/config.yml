@@ -120,7 +120,7 @@
         -C {{ etcd_generated_certs_dir }}/{{ item.etcd_cert_subdir }} .
     args:
       creates: "{{ etcd_generated_certs_dir }}/{{ item.etcd_cert_subdir }}.tgz"
-    with_items: etcd_needing_client_certs
+    with_items: "{{ etcd_needing_client_certs | default([]) }}"
   - name: Retrieve the etcd cert tarballs
     fetch:
       src: "{{ etcd_generated_certs_dir }}/{{ item.etcd_cert_subdir }}.tgz"
@@ -128,7 +128,7 @@
       flat: yes
       fail_on_missing: yes
       validate_checksum: yes
-    with_items: etcd_needing_client_certs
+    with_items: "{{ etcd_needing_client_certs | default([]) }}"
 
 - name: Copy the external etcd certs to the masters
   hosts: oo_masters_to_config
@@ -178,7 +178,7 @@
   - name: Check status of master certificates
     stat:
       path: "{{ openshift.common.config_base }}/master/{{ item }}"
-    with_items: openshift_master_certs
+    with_items: "{{ openshift_master_certs }}"
     register: g_master_cert_stat_result
   - set_fact:
       master_certs_missing: "{{ False in (g_master_cert_stat_result.results
@@ -213,7 +213,7 @@
       state: absent
     when: groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config
     with_nested:
-    - masters_needing_certs
+    - "{{ masters_needing_certs | default([]) }}"
     - - master.etcd-client.crt
       - master.etcd-client.key
 
@@ -223,7 +223,7 @@
         -C {{ master_generated_certs_dir }}/{{ item.master_cert_subdir }} .
     args:
       creates: "{{ master_generated_certs_dir }}/{{ item.master_cert_subdir }}.tgz"
-    with_items: masters_needing_certs
+    with_items: "{{ masters_needing_certs | default([]) }}"
 
   - name: Retrieve the master cert tarball from the master
     fetch:
@@ -232,7 +232,7 @@
       flat: yes
       fail_on_missing: yes
       validate_checksum: yes
-    with_items: masters_needing_certs
+    with_items: "{{ masters_needing_certs | default([]) }}"
 
 - name: Configure load balancers
   hosts: oo_lb_to_config
