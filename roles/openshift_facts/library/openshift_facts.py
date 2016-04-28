@@ -1389,9 +1389,9 @@ def set_proxy_facts(facts):
         facts['common'] = common
 
     if 'builddefaults' in facts:
-        facts['master']['admission_plugin_config'] = dict()
         builddefaults = facts['builddefaults']
         common = facts['common']
+        # Copy values from common to builddefaults
         if 'http_proxy' not in builddefaults and 'http_proxy' in common:
             builddefaults['http_proxy'] = common['http_proxy']
         if 'https_proxy' not in builddefaults and 'https_proxy' in common:
@@ -1402,11 +1402,14 @@ def set_proxy_facts(facts):
             builddefaults['git_http_proxy'] = builddefaults['http_proxy']
         if 'git_https_proxy' not in builddefaults and 'https_proxy' in builddefaults:
             builddefaults['git_https_proxy'] = builddefaults['https_proxy']
-        if 'admission_plugin_config' not in builddefaults:
-            builddefaults['admission_plugin_config'] = dict()
+        # If we're actually defining a proxy config then create kube_admission_plugin_config
+        # if it doesn't exist, then merge builddefaults[config] structure
+        # into kube_admission_plugin_config
+        if 'kube_admission_plugin_config' not in facts['master']:
+            facts['master']['kube_admission_plugin_config'] = dict()
         if 'config' in builddefaults and ('http_proxy' in builddefaults or \
                 'https_proxy' in builddefaults):
-            facts['master']['admission_plugin_config'].update(builddefaults['config'])
+            facts['master']['kube_admission_plugin_config'].update(builddefaults['config'])
         facts['builddefaults'] = builddefaults
 
     return facts
