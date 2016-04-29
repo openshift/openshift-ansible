@@ -24,6 +24,6 @@
   with_items:
   - role: docker
     local_facts:
-      openshift_image_tag: "{{ l_image_tag }}"
+      openshift_image_tag: "{{ l_image_tag | default(None) }}"
       openshift_version: "{{ l_image_tag.split('-')[0] if l_image_tag is defined else '' | oo_image_tag_to_rpm_version }}"
   when: openshift.common.is_containerized is defined and openshift.common.is_containerized | bool
