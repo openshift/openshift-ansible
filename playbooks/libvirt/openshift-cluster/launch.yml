@@ -12,9 +12,6 @@
     image_name: "{{ deployment_vars[deployment_type].image.name }}"
     image_compression: "{{ deployment_vars[deployment_type].image.compression }}"
   tasks:
-  - fail: msg="Deployment type not supported for libvirt provider yet"
-    when: deployment_type == 'online'
-
   - include: tasks/configure_libvirt.yml
 
   - include: ../../common/openshift-cluster/tasks/set_etcd_launch_facts.yml

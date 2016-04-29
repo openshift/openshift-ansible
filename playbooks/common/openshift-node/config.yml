@@ -245,14 +245,6 @@
   - file: name={{ mktemp.stdout }} state=absent
     changed_when: False
 
-# Additional config for online type deployments
-- name: Additional instance config
-  hosts: oo_nodes_deployment_type_online
-  gather_facts: no
-  roles:
-  - os_env_extras
-  - os_env_extras_node
-
 - name: Set schedulability
   hosts: oo_first_master
   vars:

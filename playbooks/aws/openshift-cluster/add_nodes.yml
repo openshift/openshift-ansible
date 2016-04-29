@@ -6,14 +6,9 @@
   gather_facts: no
   vars_files:
   - vars.yml
-  - ["vars.{{ deployment_type }}.{{ cluster_id }}.yml", vars.defaults.yml]
   vars:
     oo_extend_env: True
   tasks:
-  - fail:
-      msg: Deployment type not supported for aws provider yet
-    when: deployment_type == 'enterprise'
-
   - include: ../../common/openshift-cluster/tasks/set_node_launch_facts.yml
     vars:
       type: "compute"
