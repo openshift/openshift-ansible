@@ -1,6 +1,0 @@
----
-- name: "Restart the {{ osohm_host_monitoring }} service"
-  service:
-    name: "{{ osohm_host_monitoring }}"
-    state: restarted
-    enabled: yes

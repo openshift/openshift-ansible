@@ -2,10 +2,11 @@
 ###############################################################################
 # Evaluate host groups and gather facts
 ###############################################################################
-- name: Load openshift_facts
+- name: Load openshift_facts and update repos
   hosts: oo_masters_to_config:oo_nodes_to_config:oo_etcd_to_config:oo_lb_to_config
   roles:
   - openshift_facts
+  - openshift_repos
 
 - name: Evaluate additional groups for upgrade
   hosts: localhost
@@ -100,7 +101,7 @@
   vars:
     target_version: "{{ '1.2' if deployment_type == 'origin' else '3.1.1.900' }}"
     openshift_docker_hosted_registry_insecure: True
-    openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.master.portal_net }}"
+    openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"
   handlers:
   - include: ../../../../../roles/openshift_master/handlers/main.yml
   - include: ../../../../../roles/openshift_node/handlers/main.yml
@@ -161,14 +162,14 @@
     when: inventory_hostname in groups.oo_masters_to_config
 
   - name: Update systemd units
-    include: ../../../../../roles/openshift_master/tasks/systemd_units.yml openshift_version=v{{ g_aos_versions.curr_version }}
+    include: ../../../../../roles/openshift_master/tasks/systemd_units.yml openshift_version=v{{ g_new_version }}
     when: inventory_hostname in groups.oo_masters_to_config
 
   - include_vars: ../../../../../roles/openshift_node/vars/main.yml
     when: inventory_hostname in groups.oo_nodes_to_config
 
   - name: Update systemd units
-    include: ../../../../../roles/openshift_node/tasks/systemd_units.yml openshift_version=v{{g_aos_versions.curr_version}}
+    include: ../../../../../roles/openshift_node/tasks/systemd_units.yml openshift_version=v{{ g_new_version }}
     when: inventory_hostname in groups.oo_nodes_to_config
 
   # Note: the version number is hardcoded here in hopes of catching potential

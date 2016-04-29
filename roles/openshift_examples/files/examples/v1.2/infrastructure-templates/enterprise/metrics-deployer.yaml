@@ -79,7 +79,7 @@ parameters:
 -
   description: 'Specify prefix for metrics components; e.g. for "openshift/origin-metrics-deployer:latest", set prefix "openshift/origin-"'
   name: IMAGE_PREFIX
-  value: "openshift/origin-"
+  value: "registry.access.redhat.com/openshift3/"
 -
   description: 'Specify version for metrics components; e.g. for "openshift/origin-metrics-deployer:latest", set version "latest"'
   name: IMAGE_VERSION

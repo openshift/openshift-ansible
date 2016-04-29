@@ -17,14 +17,36 @@ This returns, by order of priority:
 * if none of the above conditions are met, empty string is returned
 '''
 
-from ansible.utils import template
+
 import os
+
+# pylint: disable=no-name-in-module,import-error,unused-argument,unused-variable,super-init-not-called,too-few-public-methods,missing-docstring
+try:
+    # ansible-2.0
+    from ansible.plugins.lookup import LookupBase
+except ImportError:
+    # ansible-1.9.x
+    class LookupBase(object):
+        def __init__(self, basedir=None, runner=None, **kwargs):
+            self.runner = runner
+            self.basedir = self.runner.basedir
+            def get_basedir(self, variables):
+                return self.basedir
+
+# pylint: disable=no-name-in-module,import-error
+try:
+    # ansible-2.0
+    from ansible import template
+except ImportError:
+    # ansible 1.9.x
+    from ansible.utils import template
+
 
 # Reason: disable too-few-public-methods because the `run` method is the only
 #     one required by the Ansible API
 # Status: permanently disabled
 # pylint: disable=too-few-public-methods
-class LookupModule(object):
+class LookupModule(LookupBase):
     ''' oo_option lookup plugin main class '''
 
     # Reason: disable unused-argument because Ansible is calling us with many

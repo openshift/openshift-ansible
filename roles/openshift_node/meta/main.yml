@@ -15,3 +15,6 @@ dependencies:
 - role: openshift_docker
 - role: openshift_cloud_provider
 - role: openshift_common
+- role: openshift_node_dnsmasq
+  when: openshift.common.use_dnsmasq
+

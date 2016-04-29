@@ -39,7 +39,7 @@
     hostname: "{{ item.name }}"
     ansible_ssh_host: "{{ item.public_ip }}"
     ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
-    ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
+    ansible_become: "{{ deployment_vars[deployment_type].become }}"
     groups: "{{ item.tags | oo_prepend_strings_in_list('tag_') | join(',') }}"
     gce_public_ip: "{{ item.public_ip }}"
     gce_private_ip: "{{ item.private_ip }}"

@@ -4,12 +4,13 @@
 # openshift_image_tag correctly for upgrades.
 - name: Set version when containerized
   command: >
-    docker run --rm {{ openshift.common.cli_image }}:latest version
+    docker run --rm {{ openshift.common.cli_image }} version
   register: cli_image_version
   when: openshift.common.is_containerized is defined and openshift.common.is_containerized | bool and openshift_image_tag is not defined
 
 - set_fact:
-    l_image_tag: "{{ cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0] }}"
+    l_image_tag: "{{ cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0:2] | join('-') if openshift.common.deployment_type == 'origin' else
+                     cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0] }}"
   when: openshift.common.is_containerized is defined and openshift.common.is_containerized | bool and openshift_image_tag is not defined
 
 - set_fact:
@@ -24,5 +25,5 @@
   - role: docker
     local_facts:
       openshift_image_tag: "{{ l_image_tag }}"
-      openshift_version: "{{ l_image_tag if l_image_tag is defined else '' | oo_image_tag_to_rpm_version }}"
+      openshift_version: "{{ l_image_tag.split('-')[0] if l_image_tag is defined else '' | oo_image_tag_to_rpm_version }}"
   when: openshift.common.is_containerized is defined and openshift.common.is_containerized | bool

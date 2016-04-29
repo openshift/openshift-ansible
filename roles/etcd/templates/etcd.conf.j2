@@ -1,15 +1,15 @@
 {% macro initial_cluster() -%}
-{% for host in groups[etcd_peers_group] -%}
+{% for host in etcd_peers -%}
 {% if loop.last -%}
-{{ host }}={{ etcd_peer_url_scheme }}://{{ etcd_host_int_map[host].interface.ipv4.address }}:{{ etcd_peer_port }}
+{{ hostvars[host].etcd_hostname }}={{ etcd_peer_url_scheme }}://{{ hostvars[host].etcd_ip }}:{{ etcd_peer_port }}
 {%- else -%}
-{{ host }}={{ etcd_peer_url_scheme }}://{{ etcd_host_int_map[host].interface.ipv4.address }}:{{ etcd_peer_port }},
+{{ hostvars[host].etcd_hostname }}={{ etcd_peer_url_scheme }}://{{ hostvars[host].etcd_ip }}:{{ etcd_peer_port }},
 {%- endif -%}
 {% endfor -%}
 {% endmacro -%}
 
-{% if groups[etcd_peers_group] and groups[etcd_peers_group] | length > 1 %}
-ETCD_NAME={{ inventory_hostname }}
+{% if etcd_peers | default([]) | length > 1 %}
+ETCD_NAME={{ etcd_hostname }}
 ETCD_LISTEN_PEER_URLS={{ etcd_listen_peer_urls }}
 {% else %}
 ETCD_NAME=default
@@ -23,7 +23,7 @@ ETCD_LISTEN_CLIENT_URLS={{ etcd_listen_client_urls }}
 #ETCD_MAX_WALS=5
 #ETCD_CORS=
 
-{% if groups[etcd_peers_group] and groups[etcd_peers_group] | length > 1 %}
+{% if etcd_peers | default([]) | length > 1 %}
 #[cluster]
 ETCD_INITIAL_ADVERTISE_PEER_URLS={{ etcd_initial_advertise_peer_urls }}
 ETCD_INITIAL_CLUSTER={{ initial_cluster() }}

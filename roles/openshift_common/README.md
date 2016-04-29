@@ -20,6 +20,7 @@ Role Variables
 | openshift_ip              | UNDEF             | Internal IP address to use for this host    |
 | openshift_public_hostname | UNDEF             | Public hostname to use for this host        |
 | openshift_public_ip       | UNDEF             | Public IP address to use for this host      |
+| openshift_portal_net      | UNDEF             | Service IP CIDR |
 
 Dependencies
 ------------

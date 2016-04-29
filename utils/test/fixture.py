@@ -201,6 +201,9 @@ def build_input(ssh_user=None, hosts=None, variant_num=None,
         inputs.append(storage)
 
     inputs.append('subdomain.example.com')
+    inputs.append('proxy.example.com')
+    inputs.append('proxy-private.example.com')
+    inputs.append('exclude.example.com')
 
     # TODO: support option 2, fresh install
     if add_nodes:

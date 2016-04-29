@@ -163,11 +163,10 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
         if masters_set or num_masters != 2:
             more_hosts = click.confirm('Do you want to add additional hosts?')
 
-    if num_masters == 1:
-        master = next((host for host in hosts if host.master), None)
-        master.storage = True
-    elif num_masters >= 3:
+    if num_masters >= 3:
         collect_master_lb(hosts)
+
+    if not existing_env:
         collect_storage_host(hosts)
 
     return hosts
@@ -306,12 +305,17 @@ def collect_storage_host(hosts):
     message = """
 Setting up High Availability Masters requires a storage host. Please provide a
 host that will be configured as a Registry Storage.
+
+Note: Containerized storage hosts are not currently supported.
 """
     click.echo(message)
     host_props = {}
 
+    first_master = next(host for host in hosts if host.master)
+
     hostname_or_ip = click.prompt('Enter hostname or IP address',
-                                            value_proc=validate_prompt_hostname)
+                                            value_proc=validate_prompt_hostname,
+                                            default=first_master.connect_to)
     existing, existing_host = is_host_already_node_or_master(hostname_or_ip, hosts)
     if existing and existing_host.node:
         existing_host.storage = True
@@ -516,6 +520,34 @@ def error_if_missing_info(oo_cfg):
     if missing_info:
         sys.exit(1)
 
+def get_proxy_hostnames_and_excludes():
+    message = """
+If a proxy is needed to reach HTTP and HTTPS traffic please enter the name below.
+This proxy will be configured by default for all processes needing to reach systems outside
+the cluster.
+
+More advanced configuration is possible if using ansible directly:
+
+https://docs.openshift.com/enterprise/latest/install_config/http_proxies.html
+"""
+    click.echo(message)
+
+    message = "Specify your http proxy ? (ENTER for none)"
+    http_proxy_hostname = click.prompt(message, default='')
+
+    message = "Specify your https proxy ? (ENTER for none)"
+    https_proxy_hostname = click.prompt(message, default=http_proxy_hostname)
+
+    if http_proxy_hostname or https_proxy_hostname:
+        message = """
+All hosts in your openshift inventory will automatically be added to the NO_PROXY value.
+Please provide any additional hosts to be added to NO_PROXY. (ENTER for none)
+"""
+        proxy_excludes = click.prompt(message, default='')
+    else:
+        proxy_excludes = ''
+
+    return http_proxy_hostname, https_proxy_hostname, proxy_excludes
 
 def get_missing_info_from_user(oo_cfg):
     """ Prompts the user for any information missing from the given configuration. """
@@ -560,6 +592,13 @@ https://docs.openshift.com/enterprise/latest/admin_guide/install/prerequisites.h
 
     if not oo_cfg.settings.get('master_routingconfig_subdomain', None):
         oo_cfg.settings['master_routingconfig_subdomain'] = get_master_routingconfig_subdomain()
+        click.clear()
+
+    if not oo_cfg.settings.get('openshift_http_proxy', None):
+        http_proxy, https_proxy, proxy_excludes = get_proxy_hostnames_and_excludes()
+        oo_cfg.settings['openshift_http_proxy'] = http_proxy
+        oo_cfg.settings['openshift_https_proxy'] = https_proxy
+        oo_cfg.settings['openshift_no_proxy'] = proxy_excludes
         click.clear()
 
     return oo_cfg

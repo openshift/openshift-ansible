@@ -1,8 +1,8 @@
 allowDisabledDocker: false
 apiVersion: v1
 dnsDomain: {{ openshift.common.dns_domain }}
-{% if 'dns_ip' in openshift.common %}
-dnsIP: {{ openshift.common.dns_ip }}
+{% if 'dns_ip' in openshift.node %}
+dnsIP: {{ openshift.node.dns_ip }}
 {% endif %}
 dockerConfig:
   execHandlerName: ""

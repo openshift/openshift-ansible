@@ -56,12 +56,54 @@ def migrate_docker_facts(facts):
     if 'node' in facts and 'portal_net' in facts['node']:
         facts['docker']['hosted_registry_insecure'] = True
         facts['docker']['hosted_registry_network'] = facts['node'].pop('portal_net')
+
+    # log_options was originally meant to be a comma separated string, but
+    # we now prefer an actual list, with backward compatability:
+    if 'log_options' in facts['docker'] and \
+            isinstance(facts['docker']['log_options'], basestring):
+        facts['docker']['log_options'] = facts['docker']['log_options'].split(",")
+
+    return facts
+
+# TODO: We should add a generic migration function that takes source and destination
+# paths and does the right thing rather than one function for common, one for node, etc.
+def migrate_common_facts(facts):
+    """ Migrate facts from various roles into common """
+    params = {
+        'node': ('portal_net'),
+        'master': ('portal_net')
+    }
+    if 'common' not in facts:
+        facts['common'] = {}
+    for role in params.keys():
+        if role in facts:
+            for param in params[role]:
+                if param in facts[role]:
+                    facts['common'][param] = facts[role].pop(param)
+    return facts
+
+def migrate_node_facts(facts):
+    """ Migrate facts from various roles into node """
+    params = {
+        'common': ('dns_ip'),
+    }
+    if 'node' not in facts:
+        facts['node'] = {}
+    for role in params.keys():
+        if role in facts:
+            for param in params[role]:
+                if param in facts[role]:
+                    facts['node'][param] = facts[role].pop(param)
     return facts
 
 def migrate_local_facts(facts):
     """ Apply migrations of local facts """
     migrated_facts = copy.deepcopy(facts)
-    return migrate_docker_facts(migrated_facts)
+    migrated_facts = migrate_docker_facts(migrated_facts)
+    migrated_facts = migrate_common_facts(migrated_facts)
+    migrated_facts = migrate_node_facts(migrated_facts)
+    migrated_facts = migrate_hosted_facts(migrated_facts)
+    return migrated_facts
 
 def migrate_hosted_facts(facts):
     """ Apply migrations for master facts """
@@ -448,6 +490,27 @@ def set_metrics_facts_if_unset(facts):
             facts['common']['use_cluster_metrics'] = use_cluster_metrics
     return facts
 
+def set_dnsmasq_facts_if_unset(facts):
+    """ Set dnsmasq facts if not already present in facts
+    Args:
+        facts (dict) existing facts
+    Returns:
+        facts (dict) updated facts with values set if not previously set
+    """
+
+    if 'common' in facts:
+        if 'use_dnsmasq' not in facts['common'] and facts['common']['version_gte_3_2_or_1_2']:
+            facts['common']['use_dnsmasq'] = True
+        else:
+            facts['common']['use_dnsmasq'] = False
+        if 'master' in facts and 'dns_port' not in facts['master']:
+            if facts['common']['use_dnsmasq']:
+                facts['master']['dns_port'] = 8053
+            else:
+                facts['master']['dns_port'] = 53
+
+    return facts
+
 def set_project_cfg_facts_if_unset(facts):
     """ Set Project Configuration facts if not already present in facts dict
             dict:
@@ -586,11 +649,13 @@ def set_aggregate_facts(facts):
     """
     all_hostnames = set()
     internal_hostnames = set()
+    kube_svc_ip = first_ip(facts['common']['portal_net'])
     if 'common' in facts:
         all_hostnames.add(facts['common']['hostname'])
         all_hostnames.add(facts['common']['public_hostname'])
         all_hostnames.add(facts['common']['ip'])
         all_hostnames.add(facts['common']['public_ip'])
+        facts['common']['kube_svc_ip'] = kube_svc_ip
 
         internal_hostnames.add(facts['common']['hostname'])
         internal_hostnames.add(facts['common']['ip'])
@@ -607,9 +672,8 @@ def set_aggregate_facts(facts):
                          'kubernetes.default.svc', 'kubernetes.default.svc.' + cluster_domain]
             all_hostnames.update(svc_names)
             internal_hostnames.update(svc_names)
-            first_svc_ip = first_ip(facts['master']['portal_net'])
-            all_hostnames.add(first_svc_ip)
-            internal_hostnames.add(first_svc_ip)
+            all_hostnames.add(kube_svc_ip)
+            internal_hostnames.add(kube_svc_ip)
 
         facts['common']['all_hostnames'] = list(all_hostnames)
         facts['common']['internal_hostnames'] = list(internal_hostnames)
@@ -1154,7 +1218,7 @@ def merge_facts(orig, new, additive_facts_to_overwrite, protected_facts_to_overw
             if key in inventory_json_facts:
                 # Watchout for JSON facts that sometimes load as strings.
                 # (can happen if the JSON contains a boolean)
-                if isinstance(new[key], str):
+                if isinstance(new[key], basestring):
                     facts[key] = yaml.safe_load(new[key])
                 else:
                     facts[key] = copy.deepcopy(new[key])
@@ -1212,7 +1276,12 @@ def merge_facts(orig, new, additive_facts_to_overwrite, protected_facts_to_overw
             facts[key] = copy.deepcopy(value)
     new_keys = set(new.keys()) - set(orig.keys())
     for key in new_keys:
-        facts[key] = copy.deepcopy(new[key])
+        # Watchout for JSON facts that sometimes load as strings.
+        # (can happen if the JSON contains a boolean)
+        if key in inventory_json_facts and isinstance(new[key], basestring):
+            facts[key] = yaml.safe_load(new[key])
+        else:
+            facts[key] = copy.deepcopy(new[key])
     return facts
 
 def save_local_facts(filename, facts):
@@ -1263,6 +1332,23 @@ def get_local_facts_from_file(filename):
 
     return local_facts
 
+def sort_unique(alist):
+    """ Sorts and de-dupes a list
+
+        Args:
+            list: a list
+        Returns:
+            list: a sorted de-duped list
+    """
+
+    alist.sort()
+    out = list()
+    for i in alist:
+        if i not in out:
+            out.append(i)
+
+    return out
+
 def safe_get_bool(fact):
     """ Get a boolean fact safely.
 
@@ -1272,6 +1358,61 @@ def safe_get_bool(fact):
             bool: given fact as a bool
     """
     return bool(strtobool(str(fact)))
+
+def set_proxy_facts(facts):
+    """ Set global proxy facts and promote defaults from http_proxy, https_proxy,
+        no_proxy to the more specific builddefaults and builddefaults_git vars.
+           1. http_proxy, https_proxy, no_proxy
+           2. builddefaults_*
+           3. builddefaults_git_*
+
+        Args:
+            facts(dict): existing facts
+        Returns:
+            facts(dict): Updated facts with missing values
+    """
+    if 'common' in facts:
+        common = facts['common']
+        if 'http_proxy' in common or 'https_proxy' in common:
+            if 'generate_no_proxy_hosts' in common and \
+                    common['generate_no_proxy_hosts']:
+                if 'no_proxy' in common and \
+                    isinstance(common['no_proxy'], basestring):
+                    common['no_proxy'] = common['no_proxy'].split(",")
+                else:
+                    common['no_proxy'] = []
+                if 'no_proxy_internal_hostnames' in common:
+                    common['no_proxy'].extend(common['no_proxy_internal_hostnames'].split(','))
+                common['no_proxy'].append('.' + common['dns_domain'])
+                common['no_proxy'].append(common['hostname'])
+                common['no_proxy'] = sort_unique(common['no_proxy'])
+        facts['common'] = common
+
+    if 'builddefaults' in facts:
+        builddefaults = facts['builddefaults']
+        common = facts['common']
+        # Copy values from common to builddefaults
+        if 'http_proxy' not in builddefaults and 'http_proxy' in common:
+            builddefaults['http_proxy'] = common['http_proxy']
+        if 'https_proxy' not in builddefaults and 'https_proxy' in common:
+            builddefaults['https_proxy'] = common['https_proxy']
+        if 'no_proxy' not in builddefaults and 'no_proxy' in common:
+            builddefaults['no_proxy'] = common['no_proxy']
+        if 'git_http_proxy' not in builddefaults and 'http_proxy' in builddefaults:
+            builddefaults['git_http_proxy'] = builddefaults['http_proxy']
+        if 'git_https_proxy' not in builddefaults and 'https_proxy' in builddefaults:
+            builddefaults['git_https_proxy'] = builddefaults['https_proxy']
+        # If we're actually defining a proxy config then create kube_admission_plugin_config
+        # if it doesn't exist, then merge builddefaults[config] structure
+        # into kube_admission_plugin_config
+        if 'kube_admission_plugin_config' not in facts['master']:
+            facts['master']['kube_admission_plugin_config'] = dict()
+        if 'config' in builddefaults and ('http_proxy' in builddefaults or \
+                'https_proxy' in builddefaults):
+            facts['master']['kube_admission_plugin_config'].update(builddefaults['config'])
+        facts['builddefaults'] = builddefaults
+
+    return facts
 
 # pylint: disable=too-many-statements
 def set_container_facts_if_unset(facts):
@@ -1406,7 +1547,8 @@ class OpenShiftFacts(object):
         Raises:
             OpenShiftFactsUnsupportedRoleError:
     """
-    known_roles = ['cloudprovider',
+    known_roles = ['builddefaults',
+                   'cloudprovider',
                    'common',
                    'docker',
                    'etcd',
@@ -1490,9 +1632,11 @@ class OpenShiftFacts(object):
         facts = build_controller_args(facts)
         facts = build_api_server_args(facts)
         facts = set_version_facts_if_unset(facts)
+        facts = set_dnsmasq_facts_if_unset(facts)
         facts = set_manageiq_facts_if_unset(facts)
         facts = set_aggregate_facts(facts)
         facts = set_etcd_facts_if_unset(facts)
+        facts = set_proxy_facts(facts)
         if not safe_get_bool(facts['common']['is_containerized']):
             facts = set_installed_variant_rpm_facts(facts)
         return dict(openshift=facts)
@@ -1519,6 +1663,7 @@ class OpenShiftFacts(object):
                                   deployment_type=deployment_type,
                                   hostname=hostname,
                                   public_hostname=hostname,
+                                  portal_net='172.30.0.0/16',
                                   client_binary='oc', admin_binary='oadm',
                                   dns_domain='cluster.local',
                                   install_examples=True,
@@ -1546,7 +1691,7 @@ class OpenShiftFacts(object):
                                       etcd_hosts='', etcd_port='4001',
                                       portal_net='172.30.0.0/16',
                                       embedded_etcd=True, embedded_kube=True,
-                                      embedded_dns=True, dns_port='53',
+                                      embedded_dns=True,
                                       bind_addr='0.0.0.0',
                                       session_max_seconds=3600,
                                       session_name='ssn',
@@ -1555,7 +1700,8 @@ class OpenShiftFacts(object):
                                       auth_token_max_seconds=500,
                                       oauth_grant_method='auto',
                                       scheduler_predicates=scheduler_predicates,
-                                      scheduler_priorities=scheduler_priorities)
+                                      scheduler_priorities=scheduler_priorities,
+                                      dynamic_provisioning_enabled=True)
 
         if 'node' in roles:
             defaults['node'] = dict(labels={}, annotations={},
@@ -1576,6 +1722,24 @@ class OpenShiftFacts(object):
 
         if 'hosted' in roles or self.role == 'hosted':
             defaults['hosted'] = dict(
+                metrics=dict(
+                    deploy=False,
+                    duration=7,
+                    resolution=10,
+                    storage=dict(
+                        kind=None,
+                        volume=dict(
+                            name='metrics',
+                            size='10Gi'
+                        ),
+                        nfs=dict(
+                            directory='/exports',
+                            options='*(rw,root_squash)'),
+                        host=None,
+                        access_modes=['ReadWriteMany'],
+                        create_pv=True
+                    )
+                ),
                 registry=dict(
                     storage=dict(
                         kind=None,
@@ -1777,15 +1941,12 @@ class OpenShiftFacts(object):
                     if isinstance(val, basestring):
                         val = [x.strip() for x in val.split(',')]
                     new_local_facts['docker'][key] = list(set(val) - set(['']))
+            # Convert legacy log_options comma sep string to a list if present:
+            if 'log_options' in new_local_facts['docker'] and \
+                    isinstance(new_local_facts['docker']['log_options'], basestring):
+                new_local_facts['docker']['log_options'] = new_local_facts['docker']['log_options'].split(',')
 
-        for facts in new_local_facts.values():
-            keys_to_delete = []
-            if isinstance(facts, dict):
-                for fact, value in facts.iteritems():
-                    if value == "" or value is None:
-                        keys_to_delete.append(fact)
-                for key in keys_to_delete:
-                    del facts[key]
+        new_local_facts = self.remove_empty_facts(new_local_facts)
 
         if new_local_facts != local_facts:
             self.validate_local_facts(new_local_facts)
@@ -1795,6 +1956,23 @@ class OpenShiftFacts(object):
 
         self.changed = changed
         return new_local_facts
+
+    def remove_empty_facts(self, facts=None):
+        """ Remove empty facts
+
+            Args:
+                facts (dict): facts to clean
+        """
+        facts_to_remove = []
+        for fact, value in facts.iteritems():
+            if isinstance(facts[fact], dict):
+                facts[fact] = self.remove_empty_facts(facts[fact])
+            else:
+                if value == "" or value == [""] or value is None:
+                    facts_to_remove.append(fact)
+        for fact in facts_to_remove:
+            del facts[fact]
+        return facts
 
     def validate_local_facts(self, facts=None):
         """ Validate local facts

@@ -105,7 +105,7 @@
       name: "{{ item }}"
       groups: oo_containerized_master_nodes
       ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
-      ansible_sudo: "{{ g_sudo | default(omit) }}"
+      ansible_become: "{{ g_sudo | default(omit) }}"
     with_items: "{{ groups.oo_nodes_to_config | default([]) }}"
     when: hostvars[item].openshift.common.is_containerized | bool and (item in groups.oo_nodes_to_config and item in groups.oo_masters_to_config)
 
@@ -119,7 +119,7 @@
     # hostvars[groups.oo_first_master.0].openshift.hosted.registry instead of
     # hardcoding
     openshift_docker_hosted_registry_insecure: True
-    openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.master.portal_net }}"
+    openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"
   roles:
   - openshift_node
 
@@ -132,7 +132,7 @@
     # hostvars[groups.oo_first_master.0].openshift.hosted.registry instead of
     # hardcoding
     openshift_docker_hosted_registry_insecure: True
-    openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.master.portal_net }}"
+    openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"
   roles:
   - openshift_node
 
@@ -154,6 +154,8 @@
       etcd_cert_subdir: openshift-node-{{ openshift.common.hostname }}
       etcd_cert_config_dir: "{{ openshift.common.config_base }}/node"
       etcd_cert_prefix: node.etcd-
+      etcd_hostname: "{{ openshift.common.hostname }}"
+      etcd_ip: "{{ openshift.common.ip }}"
     when: groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config and (openshift.common.use_flannel | bool)
 
 - name: Configure flannel etcd certificates
@@ -168,7 +170,7 @@
                                    | oo_filter_list(filter_attr='etcd_client_flannel_certs_missing') | default([]) }}"
     when: etcd_client_flannel_certs_missing is defined and etcd_client_flannel_certs_missing
   roles:
-  - role: etcd_certificates
+  - role: openshift_etcd_certificates
     when: openshift_use_flannel | default(false) | bool
   post_tasks:
   - name: Create a tarball of the etcd flannel certs

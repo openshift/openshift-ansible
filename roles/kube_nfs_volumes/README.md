@@ -94,7 +94,7 @@ partitions.
 * Create an ansible playbook, say `setupnfs.yaml`:
     ```
     - hosts: nfsservers
-      sudo: yes
+      become: yes
       roles:
          - role: kube_nfs_volumes
            disks: "/dev/sdb,/dev/sdc"

@@ -12,7 +12,7 @@
       name: "{{ item }}"
       groups: oo_hosts_to_update
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
-      ansible_sudo: "{{ deployment_vars[deployment_type].sudo }}"
+      ansible_become: "{{ deployment_vars[deployment_type].become }}"
     with_items: "{{ groups.nodes_to_add }}"
 
 - include: ../../common/openshift-cluster/update_repos_and_packages.yml
@@ -24,7 +24,7 @@
   vars:
     g_new_node_hosts: "{{ groups.nodes_to_add }}"
     g_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
-    g_sudo: "{{ deployment_vars[deployment_type].sudo }}"
+    g_sudo: "{{ deployment_vars[deployment_type].become }}"
     g_nodeonmaster: true
     openshift_cluster_id: "{{ cluster_id }}"
     openshift_debug_level: "{{ debug_level }}"

@@ -123,7 +123,7 @@ kubernetesMasterConfig:
     keyFile: master.proxy-client.key
   schedulerConfigFile: {{ openshift_master_scheduler_conf }}
   servicesNodePortRange: ""
-  servicesSubnet: {{ openshift.master.portal_net }}
+  servicesSubnet: {{ openshift.common.portal_net }}
   staticNodeNames: {{ openshift_node_ips | default([], true) }}
 {% endif %}
 masterClients:
@@ -138,7 +138,7 @@ networkConfig:
   networkPluginName: {{ openshift.common.sdn_network_plugin_name }}
 {% endif %}
 # serviceNetworkCIDR must match kubernetesMasterConfig.servicesSubnet
-  serviceNetworkCIDR: {{ openshift.master.portal_net }}
+  serviceNetworkCIDR: {{ openshift.common.portal_net }}
 oauthConfig:
 {% if 'oauth_always_show_provider_selection' in openshift.master %}
   alwaysShowProviderSelection: {{ openshift.master.oauth_always_show_provider_selection }}
@@ -209,3 +209,5 @@ servingInfo:
 {% endfor %}
 {% endfor %}
 {% endif %}
+volumeConfig:
+  dynamicProvisioningEnabled: {{ openshift.master.dynamic_provisioning_enabled }}

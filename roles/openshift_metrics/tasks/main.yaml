@@ -1,0 +1,57 @@
+---
+- name: Copy Configuration to temporary conf
+  command: >
+    cp {{ openshift.common.config_base }}/master/admin.kubeconfig {{hawkular_tmp_conf}}
+  changed_when: false
+
+- name: Create metrics-deployer Service Account
+  shell: >
+    echo {{ deployer_service_account | to_json | quote }} |
+    {{ openshift.common.client_binary }} create
+    -n openshift-infra
+    --config={{hawkular_tmp_conf}}
+    -f -
+  register: deployer_create_service_account
+  failed_when: "'already exists' not in deployer_create_service_account.stderr and deployer_create_service_account.rc != 0"
+  changed_when: deployer_create_service_account.rc == 0
+
+- name: Create metrics-deployer Secret
+  command: >
+    {{ openshift.common.client_binary }}
+    secrets new metrics-deployer
+    nothing=/dev/null
+    --config={{hawkular_tmp_conf}}
+    -n openshift-infra
+  register: deployer_create_secret
+  failed_when: "'already exists' not in deployer_create_secret.stderr and deployer_create_secret.rc !=0"
+  changed_when: deployer_create_secret.rc == 0
+
+- name: Configure role/user permissions
+  command: >
+    {{ openshift.common.admin_binary }} {{item}}
+    --config={{hawkular_tmp_conf}}
+  with_items: "{{hawkular_permission_oc_commands}}"
+  register: hawkular_perm_task
+  failed_when: "'already exists' not in hawkular_perm_task.stderr and hawkular_perm_task.rc != 0"
+  changed_when: hawkular_perm_task.rc == 0
+
+- name: Check openshift_master_default_subdomain
+  fail: 
+    msg: "Default subdomain should be defined"
+  when: openshift.master.default_subdomain is not defined
+
+- name: Create Heapster and Hawkular/Cassandra Services
+  shell: >
+   {{ openshift.common.client_binary }} process -f \
+   /usr/share/openshift/examples/infrastructure-templates/{{ hawkular_type }}/metrics-deployer.yaml -v \
+    HAWKULAR_METRICS_HOSTNAME=hawkular-metrics.{{ openshift.master.default_subdomain }} USE_PERSISTENT_STORAGE={{ hawkular_persistence }} \
+    METRIC_DURATION={{ openshift.hosted.metrics.duration }} METRIC_RESOLUTION={{ openshift.hosted.metrics.resolution }} |
+    {{ openshift.common.client_binary }} create -n openshift-infra --config={{hawkular_tmp_conf}} -f -
+  register: oex_heapster_services
+  failed_when: "'already exists' not in oex_heapster_services.stderr and oex_heapster_services.rc != 0"
+  changed_when: false
+
+- name: Clean temporary config file
+  command: >
+    rm -rf {{hawkular_tmp_conf}}
+  changed_when: false

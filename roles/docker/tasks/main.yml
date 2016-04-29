@@ -22,7 +22,7 @@
 
 - name: Install docker
   action: "{{ ansible_pkg_mgr }} name=docker{{ '-' + docker_version if docker_version is defined and docker_version != '' else '' }} state=present"
-  when: not openshift.common.is_atomic | bool and not docker_version_result | skipped and docker_version_result.stdout | default('0.0', True) | version_compare(docker_version, 'lt')
+  when: not openshift.common.is_atomic | bool and docker_downgrade_result | skipped
 
 # If docker were enabled and started before we downgraded it may have entered a
 # failed state. Check for that and clear it if necessary.
@@ -69,6 +69,22 @@
     reg_flag: --insecure-registry
   notify:
   - restart docker
+  
+- name: Set Proxy Settings
+  lineinfile:
+    dest: /etc/sysconfig/docker
+    regexp: '^{{ item.reg_conf_var }}=.*$'
+    line: "{{ item.reg_conf_var }}='{{ item.reg_fact_val }}'"
+    state: "{{ 'present' if item.reg_fact_val != '' else 'absent'}}"
+  with_items:
+    - reg_conf_var: HTTP_PROXY
+      reg_fact_val: "{{ docker_http_proxy | default('') }}"
+    - reg_conf_var: HTTPS_PROXY
+      reg_fact_val: "{{ docker_https_proxy | default('') }}"
+    - reg_conf_var: NO_PROXY
+      reg_fact_val: "{{ docker_no_proxy | default('') | join(',') }}"
+  notify:
+    - restart docker
 
 - name: Set various docker options
   lineinfile:

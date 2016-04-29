@@ -32,6 +32,7 @@
     {{ openshift.common.client_binary }} --api-version='v1' -o json
     get nodes -n default --config={{ openshift.common.config_base }}/master/admin.kubeconfig
   register: openshift_hosted_router_nodes_json
+  changed_when: false
   when: openshift.hosted.router.replicas | default(None) == None
 
 - name: Collect nodes matching router selector

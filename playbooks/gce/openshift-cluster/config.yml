@@ -5,14 +5,14 @@
   - ../../gce/openshift-cluster/cluster_hosts.yml
   vars:
     g_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
-    g_sudo: "{{ deployment_vars[deployment_type].sudo }}"
+    g_sudo: "{{ deployment_vars[deployment_type].become }}"
     g_nodeonmaster: true
     openshift_cluster_id: "{{ cluster_id }}"
     openshift_debug_level: "{{ debug_level }}"
     openshift_deployment_type: "{{ deployment_type }}"
     openshift_hostname: "{{ gce_private_ip }}"
     openshift_registry_selector: 'type=infra'
-    openshift_router_selector: 'type=infra'
+    openshift_hosted_router_selector: 'type=infra'
     openshift_infra_nodes: "{{ g_infra_hosts }}"
     openshift_master_cluster_method: 'native'
     openshift_use_openshift_sdn: "{{ lookup('oo_option', 'use_openshift_sdn') }}"

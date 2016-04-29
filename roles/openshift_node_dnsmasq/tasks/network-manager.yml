@@ -1,0 +1,9 @@
+---
+- name: Install network manager dispatch script
+  copy:
+    src: networkmanager/99-origin-dns.sh
+    dest: /etc/NetworkManager/dispatcher.d/
+    mode: 0755
+  notify: restart NetworkManager
+
+- meta: flush_handlers

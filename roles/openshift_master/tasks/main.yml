@@ -88,12 +88,39 @@
   with_items: openshift.master.identity_providers
 
 - name: Create the htpasswd file if needed
-  copy:
+  template:
     dest: "{{ item.filename }}"
-    content: ""
+    src: htpasswd.j2
     mode: 0600
-    force: no
+    backup: yes
   when: item.kind == 'HTPasswdPasswordIdentityProvider'
+  with_items: openshift.master.identity_providers
+
+- name: Create the ldap ca file if needed
+  copy:
+    dest: "{{ item.ca if 'ca' in item and '/' in item.ca else openshift_master_config_dir ~ '/' ~ item.ca | default('ldap_ca.crt') }}"
+    content: "{{ openshift.master.ldap_ca }}"
+    mode: 0600
+    backup: yes
+  when: openshift.master.ldap_ca is defined and item.kind == 'LDAPPasswordIdentityProvider'
+  with_items: openshift.master.identity_providers
+
+- name: Create the openid ca file if needed
+  copy:
+    dest: "{{ item.ca if 'ca' in item and '/' in item.ca else openshift_master_config_dir ~ '/' ~ item.ca | default('openid_ca.crt') }}"
+    content: "{{ openshift.master.openid_ca }}"
+    mode: 0600
+    backup: yes
+  when: openshift.master.openid_ca is defined and item.kind == 'OpenIDIdentityProvider' and item.ca | default('') != ''
+  with_items: openshift.master.identity_providers
+
+- name: Create the request header ca file if needed
+  copy:
+    dest: "{{ item.clientCA if 'clientCA' in item and '/' in item.clientCA else openshift_master_config_dir ~ '/' ~ item.clientCA | default('request_header_ca.crt') }}"
+    content: "{{ openshift.master.request_header_ca }}"
+    mode: 0600
+    backup: yes
+  when: openshift.master.request_header_ca is defined and item.kind == 'RequestHeaderIdentityProvider' and item.clientCA | default('') != ''
   with_items: openshift.master.identity_providers
 
 - name: Install the systemd units

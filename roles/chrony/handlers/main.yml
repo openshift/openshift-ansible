@@ -1,5 +1,0 @@
----
-- name: Restart chronyd
-  service:
-    name: chronyd
-    state: restarted

@@ -1,4 +1,7 @@
 openshift_master_config_dir: "{{ openshift.common.config_base }}/master"
+openshift_master_ca_cert: "{{ openshift_master_config_dir }}/ca.crt"
+openshift_master_ca_key: "{{ openshift_master_config_dir }}/ca.key"
+openshift_master_ca_serial: "{{ openshift_master_config_dir }}/ca.serial.txt"
 ca_cert: "{{ openshift_master_config_dir }}/ca.crt"
 admin_config: "{{ openshift.common.config_base }}/master/admin.kubeconfig"
 cert_output_dir: /usr/share/nuage-openshift-monitor
@@ -15,3 +18,17 @@ nuage_ca_master_rest_server_key: "{{ nuage_mon_rest_server_crt_dir }}/nuageMonSe
 nuage_ca_master_rest_server_crt: "{{ nuage_mon_rest_server_crt_dir }}/nuageMonServer.crt" 
 
 nuage_master_crt_dir : /usr/share/nuage-openshift-monitor
+nuage_service_account: system:serviceaccount:default:nuage
+
+nuage_service_account_config:
+    apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      name: nuage 
+
+nuage_tasks:
+    - policy add-cluster-role-to-user cluster-reader {{ nuage_service_account }} 
+
+nuage_master_cspadminpasswd: ''
+nuage_master_adminusername: 'admin'
+nuage_master_adminuserpasswd: 'admin'

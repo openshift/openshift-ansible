@@ -45,7 +45,7 @@ space on /dev/xvda, and the file system will be expanded to fill the new
 partition space.
 
     - hosts: mynodes
-      sudo: no
+      become: no
       remote_user: root
       gather_facts: no
       roles:
@@ -68,7 +68,7 @@ partition space.
 * Create an ansible playbook, say `expandvar.yaml`:
     ```
     - hosts: mynodes
-      sudo: no
+      become: no
       remote_user: root
       gather_facts: no
       roles:

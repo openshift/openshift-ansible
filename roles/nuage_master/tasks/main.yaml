@@ -1,22 +1,20 @@
 ---
 - name: Create directory /usr/share/nuage-openshift-monitor
-  sudo: true
+  become: yes
   file: path=/usr/share/nuage-openshift-monitor state=directory  
 
 - name: Create the log directory
-  sudo: true
+  become: yes
   file: path={{ nuage_mon_rest_server_logdir }} state=directory
 
 - name: Install Nuage Openshift Monitor 
-  sudo: true
+  become: yes
   yum: name={{ nuage_openshift_rpm }} state=present
 
-- name: Run the service account creation script
-  sudo: true
-  script: serviceaccount.sh --server={{ openshift.master.api_url }} --output-cert-dir={{ cert_output_dir }} --master-cert-dir={{ openshift_master_config_dir }}
+- include: serviceaccount.yml
 
 - name: Download the certs and keys
-  sudo: true
+  become: yes
   fetch: src={{ cert_output_dir }}/{{ item }} dest=/tmp/{{ item }} flat=yes
   with_items:
         - ca.crt
@@ -27,7 +25,7 @@
 - include: certificates.yml 
 
 - name: Create nuage-openshift-monitor.yaml
-  sudo: true
+  become: yes
   template: src=nuage-openshift-monitor.j2 dest=/usr/share/nuage-openshift-monitor/nuage-openshift-monitor.yaml owner=root mode=0644
   notify:
     - restart master

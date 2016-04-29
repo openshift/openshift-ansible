@@ -5,7 +5,7 @@
     "name": "jenkins-persistent",
     "creationTimestamp": null,
     "annotations": {
-      "description": "Jenkins service, with persistent storage.",
+      "description": "Jenkins service, with persistent storage.  You must have persistent volumes available in your cluster to use this template.",
       "iconClass": "icon-jenkins",
       "tags": "instant-app,jenkins"
     }
@@ -207,7 +207,7 @@
       "name": "VOLUME_CAPACITY",
       "displayName": "Volume Capacity",
       "description": "Volume space available for data, e.g. 512Mi, 2Gi.",
-      "value": "512Mi",
+      "value": "1Gi",
       "required": true
     }
   ],

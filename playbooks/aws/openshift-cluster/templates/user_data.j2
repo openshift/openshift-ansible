@@ -44,7 +44,7 @@ runcmd:
 - xfs_growfs /var
 {% endif %}
 
-{% if deployment_vars[deployment_type].sudo %}
+{% if deployment_vars[deployment_type].become %}
 - path: /etc/sudoers.d/99-{{ deployment_vars[deployment_type].ssh_user }}-cloud-init-requiretty
   permissions: 440
   content: |

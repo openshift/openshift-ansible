@@ -50,7 +50,7 @@
   - include_vars: ../../../../../roles/openshift_master/vars/main.yml
 
   - name: Update systemd units
-    include: ../../../../../roles/openshift_master/tasks/systemd_units.yml openshift_version=v{{ g_aos_versions.avail_version }}
+    include: ../../../../../roles/openshift_master/tasks/systemd_units.yml openshift_version=v{{ g_new_version }}
 
 #  - name: Upgrade master configuration
 #    openshift_upgrade_config:
@@ -88,23 +88,13 @@
 ###############################################################################
 - name: Upgrade nodes
   hosts: oo_nodes_to_config
+  serial: 1
   roles:
   - openshift_facts
   handlers:
   - include: ../../../../../roles/openshift_node/handlers/main.yml
   tasks:
-  - include: rpm_upgrade.yml
-    vars:
-       component: "node"
-       openshift_version: "{{ openshift_pkg_version | default('') }}"
-    when: not openshift.common.is_containerized | bool
-
-  - include: containerized_upgrade.yml
-    when: openshift.common.is_containerized | bool
-
-  # This will restart the node
-  - name: Restart openvswitch service
-    service: name="{{ openshift.common.service_type }}-node" state=restarted
+  - include: node_upgrade.yml
 
   - set_fact:
       node_update_complete: True
@@ -130,6 +120,7 @@
 ###############################################################################
 # Reconcile Cluster Roles, Cluster Role Bindings and Security Context Constraints
 ###############################################################################
+
 - name: Reconcile Cluster Roles and Cluster Role Bindings and Security Context Constraints
   hosts: oo_masters_to_config
   roles:
@@ -138,7 +129,7 @@
     origin_reconcile_bindings: "{{ deployment_type == 'origin' and g_new_version | version_compare('1.0.6', '>') }}"
     ent_reconcile_bindings: true
     openshift_docker_hosted_registry_insecure: True
-    openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.master.portal_net }}"
+    openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"
   tasks:
   - name: Verifying the correct commandline tools are available
     shell: grep {{ verify_upgrade_version }} {{ openshift.common.admin_binary}}
@@ -147,7 +138,7 @@
   - name: Reconcile Cluster Roles
     command: >
       {{ openshift.common.admin_binary}} --config={{ openshift.common.config_base }}/master/admin.kubeconfig
-      policy reconcile-cluster-roles --confirm
+      policy reconcile-cluster-roles --additive-only=true --confirm
     run_once: true
 
   - name: Reconcile Cluster Role Bindings
@@ -164,7 +155,7 @@
 
   - name: Reconcile Security Context Constraints
     command: >
-      {{ openshift.common.admin_binary}} policy reconcile-sccs --confirm
+      {{ openshift.common.admin_binary}} policy reconcile-sccs --confirm --additive-only=true
     run_once: true
 
   - set_fact:

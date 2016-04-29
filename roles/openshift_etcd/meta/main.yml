@@ -12,7 +12,7 @@ galaxy_info:
   categories:
   - cloud
 dependencies:
-- role: openshift_facts
+- role: openshift_etcd_facts
 - role: openshift_docker
   when: openshift.common.is_containerized | bool
 - role: etcd
