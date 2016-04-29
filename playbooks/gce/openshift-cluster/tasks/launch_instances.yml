@@ -17,6 +17,11 @@
       - clusterid-{{ cluster_id }}
       - host-type-{{ type }}
       - sub-host-type-{{ g_sub_host_type }}
+    metadata:
+      startup-script: |
+        #!/bin/bash
+        echo "Defaults:{{ deployment_vars[deployment_type].ssh_user }} !requiretty" > /etc/sudoers.d/99-{{ deployment_vars[deployment_type].ssh_user }}
+
   when: instances |length > 0
   register: gce
 
