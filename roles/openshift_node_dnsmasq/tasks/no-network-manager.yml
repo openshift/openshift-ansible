@@ -1,2 +1,2 @@
 ---
-- fail: msg="Not implemented"
+- fail: msg="Currently, NetworkManager must be installed and enabled prior to installation."
