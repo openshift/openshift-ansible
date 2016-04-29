@@ -60,6 +60,7 @@
   changed_when: osmiq_perm_task.rc == 0
 
 - name: Clean temporary configuration file
-  command: >
-    rm -f {{manage_iq_tmp_conf}}
-  changed_when: false
+  file:
+    path: "{{ manage_iq_temp_conf }}"
+    state: absent
+  when: "{{ manage_iq_temp_conf}} is defined"

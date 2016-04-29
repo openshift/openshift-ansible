@@ -53,7 +53,7 @@
         -C {{ etcd_generated_certs_dir }}/{{ item.etcd_cert_subdir }} .
     args:
       creates: "{{ etcd_generated_certs_dir }}/{{ item.etcd_cert_subdir }}.tgz"
-    with_items: etcd_needing_server_certs
+    with_items: "{{ etcd_needing_server_certs }}"
   - name: Retrieve the etcd cert tarballs
     fetch:
       src: "{{ etcd_generated_certs_dir }}/{{ item.etcd_cert_subdir }}.tgz"
@@ -61,7 +61,7 @@
       flat: yes
       fail_on_missing: yes
       validate_checksum: yes
-    with_items: etcd_needing_server_certs
+    with_items: "{{ etcd_needing_server_certs }}"
 
 # Configure a first etcd host to avoid conflicts in choosing a leader
 # if other members come online too quickly.

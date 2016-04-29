@@ -1,6 +1,6 @@
 ---
 - hosts: all
-  sudo: True
+  become: true
   roles:
     - ansible-logrotate
     - role: ansible-logrotate

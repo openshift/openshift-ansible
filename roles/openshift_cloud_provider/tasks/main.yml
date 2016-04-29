@@ -3,11 +3,12 @@
   openshift_facts:
     role: cloudprovider
     openshift_env: "{{ hostvars[inventory_hostname]
-                       | oo_merge_dicts(hostvars)
+                       | oo_merge_dicts(vars)
                        | oo_openshift_env }}"
     openshift_env_structures:
     - 'openshift.cloudprovider.aws.*'
     - 'openshift.cloudprovider.openstack.*'
+  when: has_cloudprovider | bool
 
 - name: Create cloudprovider config dir
   file:

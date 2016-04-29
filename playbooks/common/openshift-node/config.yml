@@ -66,7 +66,7 @@
         -C {{ item.config_dir }} .
     args:
       creates: "{{ item.config_dir }}.tgz"
-    with_items: nodes_needing_certs
+    with_items: "{{ nodes_needing_certs }}"
 
   - name: Retrieve the node config tarballs from the master
     fetch:
@@ -75,7 +75,7 @@
       flat: yes
       fail_on_missing: yes
       validate_checksum: yes
-    with_items: nodes_needing_certs
+    with_items: "{{ nodes_needing_certs }}"
 
 - name: Deploy node certificates
   hosts: oo_nodes_to_config
