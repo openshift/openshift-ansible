@@ -267,7 +267,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # will add the newly provided certificates to the cached set of certificates.
 # If you would like openshift_master_named_certificates to be overwritten with
 # the provided value, specify openshift_master_overwrite_named_certificates.
-#openshift_master_overwrite_named_certificates: true
+#openshift_master_overwrite_named_certificates=true
 #
 # Provide local certificate paths which will be deployed to masters
 #openshift_master_named_certificates=[{"certfile": "/path/to/custom1.crt", "keyfile": "/path/to/custom1.key"}]
