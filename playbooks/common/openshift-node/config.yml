@@ -118,7 +118,7 @@
     # TODO: configure these based on
     # hostvars[groups.oo_first_master.0].openshift.hosted.registry instead of
     # hardcoding
-    openshift_docker_hosted_registry_insecure: True
+    openshift_docker_hosted_registry_insecure: "{{ openshift.docker.hosted_registry_insecure | default(True) }}"
     openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"
   roles:
   - openshift_node
@@ -131,7 +131,7 @@
     # TODO: configure these based on
     # hostvars[groups.oo_first_master.0].openshift.hosted.registry instead of
     # hardcoding
-    openshift_docker_hosted_registry_insecure: True
+    openshift_docker_hosted_registry_insecure: "{{ openshift.docker.hosted_registry_insecure | default(True) }}"
     openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"
   roles:
   - openshift_node
