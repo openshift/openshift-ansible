@@ -24,6 +24,18 @@
   command: systemctl daemon-reload
   when: install_result | changed
 
+- name: Determine if firewalld service masked
+  command: >
+    systemctl is-enabled firewalld
+  register: os_firewall_firewalld_masked_output
+  changed_when: false
+  failed_when: false
+
+- name: Unmask firewalld service
+  command: >
+    systemctl unmask firewalld
+  when: os_firewall_firewalld_masked_output.stdout == "masked"
+
 - name: Start and enable firewalld service
   service:
     name: firewalld
