@@ -32,6 +32,24 @@
   command: systemctl daemon-reload
   when: install_result | changed
 
+- name: Determine if iptables service masked
+  command: >
+    systemctl is-enabled {{ item }}
+  with_items:
+  - iptables
+  - ip6tables
+  register: os_firewall_iptables_masked_output
+  changed_when: false
+  failed_when: false
+
+- name: Unmask iptables service
+  command: >
+    systemctl unmask {{ item }}
+  with_items:
+  - iptables
+  - ip6tables
+  when: "'masked' in os_firewall_iptables_masked_output.results | map(attribute='stdout')"
+
 - name: Start and enable iptables service
   service:
     name: iptables
