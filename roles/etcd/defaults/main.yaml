@@ -15,7 +15,6 @@ etcd_listen_client_urls: "{{ etcd_url_scheme }}://{{ etcd_ip }}:{{ etcd_client_p
 
 etcd_data_dir: /var/lib/etcd/
 
-os_firewall_use_firewalld: False
 os_firewall_allow:
 - service: etcd
   port: "{{etcd_client_port}}/tcp"
