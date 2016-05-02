@@ -1,6 +1,6 @@
 ---
 - include: master_config_facts.yml
-- name: "Install metrics" 
+- name: "Configure metrics" 
   hosts: masters
   vars:
      metrics_public_url: "https://{{ metrics_external_service }}/hawkular/metrics"
@@ -11,6 +11,9 @@
   - name: "Restart master service"
     service: name={{deployment_type}}-master-api state=restarted
 
+- name: "Install metrics"
+  hosts: masters[0]
+  tasks:
   - name: "Copy metrics-deployer yaml to remote"
     copy: "src=../files/metrics-deployer-setup.yaml dest=/tmp/metrics-deployer-setup.yaml force=yes" 
 
