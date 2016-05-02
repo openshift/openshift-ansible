@@ -6,12 +6,13 @@ OpenShift Metrics Installation
 Requirements
 ------------
 It requires subdomain fqdn to be set.
-If persistence is enabled, then it also requires NFS 
+If persistence is enabled, then it also requires NFS.
 
 Role Variables
 --------------
 
 From this role:
+
 | Name                                            | Default value         |                                                             |
 |-------------------------------------------------|-----------------------|-------------------------------------------------------------|
 | openshift_hosted_metrics_deploy                 | False                 | If metrics should be deployed                               |
@@ -24,6 +25,7 @@ From this role:
 
 
 From openshift_common:
+
 | Name                                  | Default Value  |                                        |
 |---------------------------------------|----------------|----------------------------------------|
 | openshift_master_default_subdomain    | null           | Subdomain FQDN (Mandatory)             |
@@ -37,10 +39,12 @@ openshift_examples
 Example Playbook
 ----------------
 
+```
 - name: Configure openshift-metrics
   hosts: oo_first_master
   roles:
   - role: openshift_metrics
+```
 
 License
 -------
