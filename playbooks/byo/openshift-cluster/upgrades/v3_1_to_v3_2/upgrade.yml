@@ -7,8 +7,33 @@
     g_nfs_hosts: "{{ groups.nfs | default([]) }}"
     g_node_hosts: "{{ groups.nodes | default([]) }}"
     g_lb_hosts: "{{ groups.lb | default([]) }}"
+    g_all_hosts: "{{ groups.masters | default([]) | union(groups.nodes | default([])) | union(groups.etcd | default([]))
+                    | union(groups.lb | default([])) | union(groups.nfs | default([])) }}"
     openshift_cluster_id: "{{ cluster_id | default('default') }}"
     openshift_deployment_type: "{{ deployment_type }}"
+
+- name: Set oo_options
+  hosts: oo_all_hosts
+  tasks:
+  - set_fact:
+      openshift_docker_additional_registries: "{{ lookup('oo_option', 'docker_additional_registries') }}"
+    when: openshift_docker_additional_registries is not defined
+  - set_fact:
+      openshift_docker_insecure_registries: "{{ lookup('oo_option',  'docker_insecure_registries') }}"
+    when: openshift_docker_insecure_registries is not defined
+  - set_fact:
+      openshift_docker_blocked_registries: "{{ lookup('oo_option', 'docker_blocked_registries') }}"
+    when: openshift_docker_blocked_registries is not defined
+  - set_fact:
+      openshift_docker_options: "{{ lookup('oo_option', 'docker_options') }}"
+    when: openshift_docker_options is not defined
+  - set_fact:
+      openshift_docker_log_driver: "{{ lookup('oo_option', 'docker_log_driver') }}"
+    when: openshift_docker_log_driver is not defined
+  - set_fact:
+      openshift_docker_log_options: "{{ lookup('oo_option', 'docker_log_options') }}"
+    when: openshift_docker_log_options is not defined
+
 - include: ../../../../common/openshift-cluster/upgrades/v3_1_to_v3_2/pre.yml
   vars:
     openshift_deployment_type: "{{ deployment_type }}"

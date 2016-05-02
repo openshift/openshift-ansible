@@ -69,7 +69,7 @@
     reg_flag: --insecure-registry
   notify:
   - restart docker
-  
+
 - name: Set Proxy Settings
   lineinfile:
     dest: /etc/sysconfig/docker
