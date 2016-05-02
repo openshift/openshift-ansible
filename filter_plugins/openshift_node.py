@@ -26,7 +26,7 @@ class FilterModule(object):
         if openshift_dns_ip != None:
             return openshift_dns_ip
 
-        if bool(hostvars['openshift']['common']['version_gte_3_2_or_1_2']):
+        if bool(hostvars['openshift']['common']['use_dnsmasq']):
             return hostvars['ansible_default_ipv4']['address']
         elif bool(hostvars['openshift']['common']['version_gte_3_1_or_1_1']):
             if 'openshift_master_cluster_vip' in hostvars:
