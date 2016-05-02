@@ -46,7 +46,6 @@ EOF
     for ns in ${DHCP4_DOMAIN_NAME_SERVERS}; do
        echo "server=${ns}" >> /etc/dnsmasq.d/origin-upstream-dns.conf
     done
-    echo "listen-address=${def_route_ip}" >> /etc/dnsmasq.d/origin-upstream-dns.conf
     systemctl restart dnsmasq
 
     sed -i 's/^nameserver.*$/nameserver '"${def_route_ip}"'/g' /etc/resolv.conf
