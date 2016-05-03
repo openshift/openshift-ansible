@@ -141,7 +141,7 @@ RHEL/CentOS/Fedora
 ```
 OSX:
 ```
-  pip install -U boto
+  pip install -U pyopenssl boto
 ```
 
 
