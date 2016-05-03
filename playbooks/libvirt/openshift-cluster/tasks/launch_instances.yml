@@ -1,7 +1,7 @@
 ---
 # TODO: Add support for choosing base image based on deployment_type and os
 # wanted (os wanted needs support added in bin/cluster with sane defaults:
-# fedora/centos for origin, rhel for online/enterprise)
+# fedora/centos for origin, rhel for enterprise)
 
 # TODO: create a role to encapsulate some of this complexity, possibly also
 # create a module to manage the storage tasks, network tasks, and possibly

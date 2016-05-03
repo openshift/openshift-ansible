@@ -1,5 +1,5 @@
 ---
-- name: Create openshift_generated_configs_dir if it doesn't exist
+- name: Create openshift_generated_configs_dir if it doesn\'t exist
   file:
     path: "{{ openshift_generated_configs_dir }}"
     state: directory
@@ -19,7 +19,7 @@
       --user=system:node:{{ item.openshift.common.hostname }}
   args:
     creates: "{{ openshift_generated_configs_dir }}/node-{{ item.openshift.common.hostname }}"
-  with_items: nodes_needing_certs
+  with_items: "{{ nodes_needing_certs | default([]) }}"
 
 - name: Generate the node server certificate
   command: >
@@ -33,4 +33,4 @@
       --signer-serial={{ openshift_master_ca_serial }}
   args:
     creates: "{{ openshift_generated_configs_dir }}/node-{{ item.openshift.common.hostname }}/server.crt"
-  with_items: nodes_needing_certs
+  with_items: "{{ nodes_needing_certs | default([]) }}"

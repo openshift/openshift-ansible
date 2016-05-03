@@ -7,10 +7,6 @@
   vars_files:
   - vars.yml
   tasks:
-  - fail:
-      msg: "Deployment type not supported for OpenStack provider yet"
-    when: deployment_type == 'online'
-
   # TODO: Write an Ansible module for dealing with HEAT stacks
   #       Dealing with the outputs is currently terrible
 

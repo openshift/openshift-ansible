@@ -4,14 +4,14 @@
     path: "{{ openshift_generated_configs_dir }}/{{ item.master_cert_subdir }}"
     state: directory
     mode: 0700
-  with_items: masters_needing_certs
+  with_items: "{{ masters_needing_certs | default([]) }}"
 
 - file:
     src: "{{ openshift_master_config_dir }}/{{ item.1 }}"
     dest: "{{ openshift_generated_configs_dir }}/{{ item.0.master_cert_subdir }}/{{ item.1 }}"
     state: hard
   with_nested:
-  - masters_needing_certs
+  - "{{ masters_needing_certs | default([]) }}"
   -
     - ca.crt
     - ca.key
@@ -26,7 +26,7 @@
       --cert-dir={{ openshift_generated_configs_dir }}/{{ item.master_cert_subdir }}
       --overwrite=false
   when: item.master_certs_missing | bool
-  with_items: masters_needing_certs
+  with_items: "{{ masters_needing_certs | default([]) }}"
 
 - file:
     src: "{{ openshift_master_config_dir }}/{{ item.1 }}"
@@ -34,5 +34,5 @@
     state: hard
     force: true
   with_nested:
-  - masters_needing_certs
+  - "{{ masters_needing_certs | default([]) }}"
   - "{{ hostvars[inventory_hostname] | certificates_to_synchronize }}"

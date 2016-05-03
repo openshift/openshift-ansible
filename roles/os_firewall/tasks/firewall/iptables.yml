@@ -32,6 +32,24 @@
   command: systemctl daemon-reload
   when: install_result | changed
 
+- name: Determine if iptables service masked
+  command: >
+    systemctl is-enabled {{ item }}
+  with_items:
+  - iptables
+  - ip6tables
+  register: os_firewall_iptables_masked_output
+  changed_when: false
+  failed_when: false
+
+- name: Unmask iptables service
+  command: >
+    systemctl unmask {{ item }}
+  with_items:
+  - iptables
+  - ip6tables
+  when: "'masked' in os_firewall_iptables_masked_output.results | map(attribute='stdout')"
+
 - name: Start and enable iptables service
   service:
     name: iptables
@@ -49,8 +67,7 @@
     action: add
     protocol: "{{ item.port.split('/')[1] }}"
     port: "{{ item.port.split('/')[0] }}"
-  with_items: os_firewall_allow
-  when: os_firewall_allow is defined
+  with_items: "{{ os_firewall_allow }}"
 
 - name: Remove iptables rules
   os_firewall_manage_iptables:
@@ -58,5 +75,4 @@
     action: remove
     protocol: "{{ item.port.split('/')[1] }}"
     port: "{{ item.port.split('/')[0] }}"
-  with_items: os_firewall_deny
-  when: os_firewall_deny is defined
+  with_items: "{{ os_firewall_deny }}"
