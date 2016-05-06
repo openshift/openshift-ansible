@@ -13,6 +13,14 @@ os_firewall_allow:
   port: "{{ openshift.master.dns_port }}/tcp"
 - service: skydns udp
   port: "{{ openshift.master.dns_port }}/udp"
+# On HA masters version_gte facts are not properly set so open port 53
+# whenever we're not certain of the need
+- service: legacy skydns tcp
+  port: "53/tcp"
+  when: "{{ 'version' not in openshift.common or openshift.common.version == None }}"
+- service: legacy skydns udp
+  port: "53/udp"
+  when: "{{ 'version' not in openshift.common or openshift.common.version == None }}"
 - service: Fluentd td-agent tcp
   port: 24224/tcp
 - service: Fluentd td-agent udp
