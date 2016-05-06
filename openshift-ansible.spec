@@ -6,7 +6,7 @@
 
 Name:           openshift-ansible
 Version:        3.0.87
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -183,6 +183,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri May 06 2016 Scott Dodson <sdodson@redhat.com> 3.0.87-2
+- Open port 53 whenever we're unsure of version (sdodson@redhat.com)
+- Fix unsafe boolean handling on use_dnsmasq (sdodson@redhat.com)
+
 * Wed Apr 27 2016 Troy Dawson <tdawson@redhat.com> 3.0.87-1
 - a-o-i-: Allow empty proxy (smunilla@redhat.com)
 - a-o-i: Populate groups for openshift_facts (smunilla@redhat.com)
