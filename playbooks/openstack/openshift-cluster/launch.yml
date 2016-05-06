@@ -46,7 +46,7 @@
              -P master_flavor={{ openstack_flavor["master"] }}
              -P node_flavor={{ openstack_flavor["node"] }}
              -P infra_flavor={{ openstack_flavor["infra"] }}
-             -P dns_flavor=m1.small
+             -P dns_flavor={{ openshift_flavor["dns"] }}
              openshift-ansible-{{ cluster_id }}-stack'
 
   - name: Wait for OpenStack Stack readiness
