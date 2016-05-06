@@ -499,12 +499,12 @@ def set_dnsmasq_facts_if_unset(facts):
     """
 
     if 'common' in facts:
-        if 'use_dnsmasq' not in facts['common'] and facts['common']['version_gte_3_2_or_1_2']:
+        if 'use_dnsmasq' not in facts['common'] and safe_get_bool(facts['common']['version_gte_3_2_or_1_2']):
             facts['common']['use_dnsmasq'] = True
         else:
             facts['common']['use_dnsmasq'] = False
         if 'master' in facts and 'dns_port' not in facts['master']:
-            if facts['common']['use_dnsmasq']:
+            if safe_get_bool(facts['common']['use_dnsmasq']):
                 facts['master']['dns_port'] = 8053
             else:
                 facts['master']['dns_port'] = 53
