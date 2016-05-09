@@ -148,15 +148,15 @@
     register: g_external_etcd_flannel_cert_stat_result
     when: groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config and (openshift.common.use_flannel | bool)
   - set_fact:
-      etcd_client_flannel_certs_missing: "{{ g_external_etcd_flannel_cert_stat_result.results
+      etcd_client_flannel_certs_missing: "{{ False in g_external_etcd_flannel_cert_stat_result.results
                                              | oo_collect(attribute='stat.exists')
-                                             | list | intersect([false])}}"
+                                             | list }}"
       etcd_cert_subdir: openshift-node-{{ openshift.common.hostname }}
       etcd_cert_config_dir: "{{ openshift.common.config_base }}/node"
       etcd_cert_prefix: node.etcd-
       etcd_hostname: "{{ openshift.common.hostname }}"
       etcd_ip: "{{ openshift.common.ip }}"
-    when: groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config and (openshift.common.use_flannel | bool)
+    when: groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config | length > 0 and (openshift.common.use_flannel | bool)
 
 - name: Configure flannel etcd certificates
   hosts: oo_first_etcd
@@ -166,9 +166,8 @@
   pre_tasks:
   - set_fact:
       etcd_needing_client_certs: "{{ hostvars
-                                   | oo_select_keys(groups['oo_nodes_to_config'])
-                                   | oo_filter_list(filter_attr='etcd_client_flannel_certs_missing') | default([]) }}"
-    when: etcd_client_flannel_certs_missing is defined and etcd_client_flannel_certs_missing
+                                     | oo_select_keys(groups['oo_nodes_to_config'])
+                                     | oo_filter_list('etcd_client_flannel_certs_missing') | default([]) }}"
   roles:
   - role: openshift_etcd_certificates
     when: openshift_use_flannel | default(false) | bool
@@ -179,8 +178,7 @@
         -C {{ etcd_generated_certs_dir }}/{{ item.etcd_cert_subdir }} .
     args:
       creates: "{{ etcd_generated_certs_dir }}/{{ item.etcd_cert_subdir }}.tgz"
-    with_items: "{{ etcd_needing_client_certs | default([]) }}"
-    when: etcd_client_flannel_certs_missing is defined and etcd_client_flannel_certs_missing
+    with_items: etcd_needing_client_certs | default([])
   - name: Retrieve the etcd cert tarballs
     fetch:
       src: "{{ etcd_generated_certs_dir }}/{{ item.etcd_cert_subdir }}.tgz"
@@ -188,8 +186,7 @@
       flat: yes
       fail_on_missing: yes
       validate_checksum: yes
-    with_items: "{{ etcd_needing_client_certs | default([]) }}"
-    when: etcd_client_flannel_certs_missing is defined and etcd_client_flannel_certs_missing
+    with_items: etcd_needing_client_certs | default([])
 
 - name: Copy the external etcd flannel certs to the nodes
   hosts: oo_nodes_to_config
@@ -200,12 +197,12 @@
     file:
       path: "{{ openshift.common.config_base }}/node"
       state: directory
-    when: etcd_client_flannel_certs_missing is defined and etcd_client_flannel_certs_missing
+    when: etcd_client_flannel_certs_missing | default(false) | bool
   - name: Unarchive the tarball on the master
     unarchive:
       src: "{{ sync_tmpdir }}/{{ etcd_cert_subdir }}.tgz"
       dest: "{{ etcd_cert_config_dir }}"
-    when: etcd_client_flannel_certs_missing is defined and etcd_client_flannel_certs_missing
+    when: etcd_client_flannel_certs_missing | default(false) | bool
   - file:
       path: "{{ etcd_cert_config_dir }}/{{ item }}"
       owner: root
@@ -215,7 +212,7 @@
     - node.etcd-client.crt
     - node.etcd-client.key
     - node.etcd-ca.crt
-    when: etcd_client_flannel_certs_missing is defined and etcd_client_flannel_certs_missing
+    when: etcd_client_flannel_certs_missing | default(false) | bool
 
 
 - name: Additional node config
