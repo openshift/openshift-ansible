@@ -40,8 +40,3 @@ dependencies:
     port: 5404/udp
   - service: Corosync UDP
     port: 5405/udp
-  os_firewall_deny:
-  - service: api server http
-    port: 8080/tcp
-  - service: former etcd peer port
-    port: 7001/tcp
