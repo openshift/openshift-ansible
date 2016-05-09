@@ -110,8 +110,8 @@
   # are modified to use the correct image tag.  However, this can trigger a
   # docker restart if new configuration is laid down which would immediately
   # pull the latest image and defeat the purpose of these tasks.
-  - openshift_cli
-  pre_tasks:
+  - openshift_docker
+  tasks:
   - name: Clean package cache
     command: "{{ ansible_pkg_mgr }} clean all"
     when: not openshift.common.is_atomic | bool
@@ -150,6 +150,8 @@
       g_new_version: "{{ openshift_image_tag | replace('v','') }}"
     when: openshift_image_tag is defined
 
+  - debug: var=g_new_version
+
   - fail:
       msg: Verifying the correct version was found
     when: g_aos_versions.curr_version == ""
@@ -161,16 +163,16 @@
   - include_vars: ../../../../../roles/openshift_master/vars/main.yml
     when: inventory_hostname in groups.oo_masters_to_config
 
-  - name: Update systemd units
-    include: ../../../../../roles/openshift_master/tasks/systemd_units.yml openshift_version=v{{ g_new_version }}
-    when: inventory_hostname in groups.oo_masters_to_config
+    #  - name: Update systemd units
+    #    include: ../../../../../roles/openshift_master/tasks/systemd_units.yml openshift_version=v{{ g_new_version }}
+    #    when: inventory_hostname in groups.oo_masters_to_config
 
   - include_vars: ../../../../../roles/openshift_node/vars/main.yml
     when: inventory_hostname in groups.oo_nodes_to_config
 
-  - name: Update systemd units
-    include: ../../../../../roles/openshift_node/tasks/systemd_units.yml openshift_version=v{{ g_new_version }}
-    when: inventory_hostname in groups.oo_nodes_to_config
+    #  - name: Update systemd units
+    #    include: ../../../../../roles/openshift_node/tasks/systemd_units.yml openshift_version=v{{ g_new_version }}
+    #    when: inventory_hostname in groups.oo_nodes_to_config
 
   # Note: the version number is hardcoded here in hopes of catching potential
   # bugs in how g_aos_versions.curr_version is set
@@ -181,12 +183,12 @@
       - /etc/sysconfig/{{ openshift.common.service_type }}*
     when: verify_upgrade_version is defined
 
-  - name: Verifying the image version is used in the systemd unit
-    shell: grep IMAGE_VERSION {{ item }}
-    with_items:
-      - /etc/systemd/system/openvswitch.service
-      - /etc/systemd/system/{{ openshift.common.service_type }}*.service
-    when: openshift.common.is_containerized | bool
+    #  - name: Verifying the image version is used in the systemd unit
+    #    shell: grep IMAGE_VERSION {{ item }}
+    #    with_items:
+    #      - /etc/systemd/system/openvswitch.service
+    #      - /etc/systemd/system/{{ openshift.common.service_type }}*.service
+    #    when: openshift.common.is_containerized | bool
 
   - fail:
       msg: This playbook requires Origin 1.1 or later
