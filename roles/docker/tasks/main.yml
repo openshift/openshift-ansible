@@ -16,7 +16,7 @@
   when: docker_storage_check.stat.exists | bool and not docker_version_result | skipped and docker_version_result.stdout | default('0.0', True) | version_compare('1.9', '>=') and docker_version | version_compare('1.9', '<')
 
 - name: Downgrade docker if necessary
-  command: "{{ ansible_pkg_mgr }} downgrade -y docker-{{ docker_version }}"
+  command: "{{ ansible_pkg_mgr }} swap -y docker-* docker-*{{ docker_version }}"
   register: docker_downgrade_result
   when: not docker_version_result | skipped and docker_version_result.stdout | default('0.0', True) | version_compare(docker_version, 'gt')
 
