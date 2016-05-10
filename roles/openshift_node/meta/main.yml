@@ -17,4 +17,5 @@ dependencies:
 - role: openshift_common
 - role: openshift_node_dnsmasq
   when: openshift.common.use_dnsmasq
+- role: os_firewall
 
