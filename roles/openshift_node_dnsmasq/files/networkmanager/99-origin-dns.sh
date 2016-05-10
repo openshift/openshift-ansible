@@ -31,7 +31,8 @@ if [[ $2 =~ ^(up|dhcp4-change)$ ]]; then
   def_route=$(/sbin/ip route list match 0.0.0.0/0 | awk '{print $3 }')
   def_route_int=$(/sbin/ip route get to ${def_route} | awk '{print $3}')
   def_route_ip=$(/sbin/ip route get to ${def_route} | awk '{print $5}')
-  if [[ ${DEVICE_IFACE} == ${def_route_int} ]]; then
+  if [[ ${DEVICE_IFACE} == ${def_route_int} && \
+       -n "${IP4_NAMESERVERS}" ]]; then
     if [ ! -f /etc/dnsmasq.d/origin-dns.conf ]; then
       cat << EOF > /etc/dnsmasq.d/origin-dns.conf
 strict-order
@@ -42,8 +43,8 @@ server=/30.172.in-addr.arpa/172.30.0.1
 EOF
     fi
     # zero out our upstream servers list and feed it into dnsmasq
-    echo '' > /etc/dnsmasq.d/origin-upstream-dns.conf
-    for ns in ${DHCP4_DOMAIN_NAME_SERVERS}; do
+    echo -n > /etc/dnsmasq.d/origin-upstream-dns.conf
+    for ns in ${IP4_NAMESERVERS}; do
        echo "server=${ns}" >> /etc/dnsmasq.d/origin-upstream-dns.conf
     done
     systemctl restart dnsmasq
