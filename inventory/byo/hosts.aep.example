@@ -367,7 +367,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # etcd hosts. So automatically add those hostnames to the openshift_no_proxy list.
 # If all of your hosts share a common domain you may wish to disable this and 
 # specify that domain above.
-#openshift_generate_no_proxy_hosts: True
+#openshift_generate_no_proxy_hosts=True
 #
 # These options configure the BuildDefaults admission controller which injects
 # environment variables into Builds. These values will default to their

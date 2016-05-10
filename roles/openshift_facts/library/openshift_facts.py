@@ -1374,18 +1374,19 @@ def set_proxy_facts(facts):
     if 'common' in facts:
         common = facts['common']
         if 'http_proxy' in common or 'https_proxy' in common:
+            if 'no_proxy' in common and \
+                isinstance(common['no_proxy'], basestring):
+                common['no_proxy'] = common['no_proxy'].split(",")
+            elif 'no_proxy' not in common:
+                common['no_proxy'] = []
             if 'generate_no_proxy_hosts' in common and \
-                    common['generate_no_proxy_hosts']:
-                if 'no_proxy' in common and \
-                    isinstance(common['no_proxy'], basestring):
-                    common['no_proxy'] = common['no_proxy'].split(",")
-                else:
-                    common['no_proxy'] = []
+                safe_get_bool(common['generate_no_proxy_hosts']):
                 if 'no_proxy_internal_hostnames' in common:
                     common['no_proxy'].extend(common['no_proxy_internal_hostnames'].split(','))
                 common['no_proxy'].append('.' + common['dns_domain'])
-                common['no_proxy'].append(common['hostname'])
-                common['no_proxy'] = sort_unique(common['no_proxy'])
+            # We always add ourselves no matter what
+            common['no_proxy'].append(common['hostname'])
+            common['no_proxy'] = sort_unique(common['no_proxy'])
         facts['common'] = common
 
     if 'builddefaults' in facts:
