@@ -732,21 +732,22 @@ class FilterModule(object):
         if 'hosted' in hostvars['openshift']:
             for component in hostvars['openshift']['hosted']:
                 if 'storage' in hostvars['openshift']['hosted'][component]:
-                    kind = hostvars['openshift']['hosted'][component]['storage']['kind']
-                    create_pv = hostvars['openshift']['hosted'][component]['storage']['create_pv']
+                    params = hostvars['openshift']['hosted'][component]['storage']
+                    kind = params['kind']
+                    create_pv = params['create_pv']
                     if kind != None and create_pv:
                         if kind == 'nfs':
-                            host = hostvars['openshift']['hosted'][component]['storage']['host']
+                            host = params['host']
                             if host == None:
                                 if len(groups['oo_nfs_to_config']) > 0:
                                     host = groups['oo_nfs_to_config'][0]
                                 else:
                                     raise errors.AnsibleFilterError("|failed no storage host detected")
-                            directory = hostvars['openshift']['hosted'][component]['storage']['nfs']['directory']
-                            volume = hostvars['openshift']['hosted'][component]['storage']['volume']['name']
+                            directory = params['nfs']['directory']
+                            volume = params['volume']['name']
                             path = directory + '/' + volume
-                            size = hostvars['openshift']['hosted'][component]['storage']['volume']['size']
-                            access_modes = hostvars['openshift']['hosted'][component]['storage']['access_modes']
+                            size = params['volume']['size']
+                            access_modes = params['access_modes']
                             persistent_volume = dict(
                                 name="{0}-volume".format(volume),
                                 capacity=size,
@@ -755,6 +756,21 @@ class FilterModule(object):
                                     nfs=dict(
                                         server=host,
                                         path=path)))
+                            persistent_volumes.append(persistent_volume)
+                        elif kind == 'openstack':
+                            volume = params['volume']['name']
+                            size = params['volume']['size']
+                            access_modes = params['access_modes']
+                            filesystem = params['openstack']['filesystem']
+                            volume_id = params['openstack']['volumeID']
+                            persistent_volume = dict(
+                                name="{0}-volume".format(volume),
+                                capacity=size,
+                                access_modes=access_modes,
+                                storage=dict(
+                                    cinder=dict(
+                                        fsType=filesystem,
+                                        volumeID=volume_id)))
                             persistent_volumes.append(persistent_volume)
                         else:
                             msg = "|failed invalid storage kind '{0}' for component '{1}'".format(
