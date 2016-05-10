@@ -49,6 +49,7 @@
     docker_blocked_registries: "{{ lookup('oo_option', 'docker_blocked_registries') | oo_split }}"
   roles:
   - openshift_facts
+  - docker
   - openshift_docker
 
 - include: ../openshift-master/config.yml

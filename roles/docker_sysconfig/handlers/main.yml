@@ -1,0 +1,7 @@
+---
+
+- name: restart docker
+  service:
+    name: docker
+    state: restarted
+  when: not docker_service_status_changed | default(false) | bool

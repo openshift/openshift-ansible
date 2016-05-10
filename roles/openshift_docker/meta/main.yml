@@ -14,4 +14,4 @@ galaxy_info:
 dependencies:
 - role: openshift_repos
 - role: openshift_docker_facts
-- role: docker
+- role: docker_sysconfig
