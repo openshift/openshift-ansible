@@ -43,6 +43,7 @@
   - include: ../../../../../roles/openshift_master/handlers/main.yml
   roles:
   - openshift_facts
+  - { role: openshift_cli, openshift_image_tag: "v{{ g_new_version }}" }
   tasks:
   - include: rpm_upgrade.yml component=master
     when: not openshift.common.is_containerized | bool
