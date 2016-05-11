@@ -100,8 +100,8 @@
   hosts: oo_masters_to_config:oo_nodes_to_config
   vars:
     target_version: "{{ '1.2' if deployment_type == 'origin' else '3.1.1.900' }}"
-    openshift_docker_hosted_registry_insecure: True
-    openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"
+    docker_hosted_registry_insecure: "{{ openshift_docker_hosted_registry_insecure | default(True) }}"
+    docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"
   handlers:
   - include: ../../../../../roles/openshift_master/handlers/main.yml
   - include: ../../../../../roles/openshift_node/handlers/main.yml
