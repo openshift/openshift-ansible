@@ -510,7 +510,7 @@ def error_if_missing_info(oo_cfg):
         sys.exit(1)
 
     # Lookup a variant based on the key we were given:
-    if not oo_cfg.settings['variant']:
+    if oo_cfg.settings.get('variant', None) is None:
         click.echo("No variant specified in configuration file.")
         sys.exit(1)
 
@@ -885,7 +885,12 @@ def upgrade(ctx, latest_minor, next_major):
         sys.exit(0)
 
     old_version = oo_cfg.settings['variant_version']
-    mapping = UPGRADE_MAPPINGS.get(old_version)
+
+    try:
+        mapping = UPGRADE_MAPPINGS.get(old_version)
+    except KeyError as e:
+        click.echo("No upgrade mapping for {}.".format(e))
+        sys.exit(1)
 
     message = """
         This tool will help you upgrade your existing OpenShift installation.
@@ -919,6 +924,10 @@ def upgrade(ctx, latest_minor, next_major):
             sys.exit(0)
         playbook = mapping['major_playbook']
         new_version = mapping['major_version']
+
+        if not playbook:
+            click.echo('No major update available')
+            sys.exit(0)
         # Update config to reflect the version we're targetting, we'll write
         # to disk once ansible completes successfully, not before.
         oo_cfg.settings['variant_version'] = new_version
