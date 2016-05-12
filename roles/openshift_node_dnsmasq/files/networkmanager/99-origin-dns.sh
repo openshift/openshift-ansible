@@ -43,9 +43,19 @@ EOF
     fi
     # zero out our upstream servers list and feed it into dnsmasq
     echo '' > /etc/dnsmasq.d/origin-upstream-dns.conf
-    for ns in ${DHCP4_DOMAIN_NAME_SERVERS}; do
-       echo "server=${ns}" >> /etc/dnsmasq.d/origin-upstream-dns.conf
-    done
+
+    if [ -n "${DHCP4_DOMAIN_NAME_SERVERS}" ]; then
+        for ns in ${DHCP4_DOMAIN_NAME_SERVERS}; do
+            echo "server=${ns}" >> /etc/dnsmasq.d/origin-upstream-dns.conf
+        done
+    fi
+
+    if [ -n "${IP4_NAMESERVERS}" ]; then
+        for ns in ${IP4_NAMESERVERS}; do
+            echo "server=${ns}" >> /etc/dnsmasq.d/origin-upstream-dns.conf
+        done
+    fi
+
     systemctl restart dnsmasq
 
     sed -i 's/^nameserver.*$/nameserver '"${def_route_ip}"'/g' /etc/resolv.conf
