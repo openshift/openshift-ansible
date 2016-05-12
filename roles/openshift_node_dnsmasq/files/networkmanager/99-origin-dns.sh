@@ -8,10 +8,12 @@
 # a pod would fail.
 #
 # To use this,
-# Drop this script in /etc/NetworkManager/dispatcher.d/
-# systemctl restart NetworkManager
-# Configure node-config.yaml to set dnsIP: to the ip address of this
-# node
+# - If this host is also a master, reconfigure master dnsConfig to listen on
+#   8053 to avoid conflicts on port 53 and open port 8053 in the firewall
+# - Drop this script in /etc/NetworkManager/dispatcher.d/
+# - systemctl restart NetworkManager
+# - Configure node-config.yaml to set dnsIP: to the ip address of this
+#   node
 #
 # Test it:
 # host kubernetes.default.svc.cluster.local
