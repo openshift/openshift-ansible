@@ -28,7 +28,3 @@ nuage_service_account_config:
 
 nuage_tasks:
     - policy add-cluster-role-to-user cluster-reader {{ nuage_service_account }} 
-
-nuage_master_cspadminpasswd: ''
-nuage_master_adminusername: 'admin'
-nuage_master_adminuserpasswd: 'admin'

@@ -1,7 +1,0 @@
----
-# TODO: Upstream kubernetes only supports iptables currently, if this changes,
-# then these variable should be moved to defaults
-# TODO: it might be possible to still use firewalld if we wire up the created
-# chains with the public zone (or the zone associated with the correct
-# interfaces)
-os_firewall_use_firewalld: False

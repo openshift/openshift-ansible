@@ -14,5 +14,5 @@
   gather_facts: no
   tasks:
   - include_vars: ../../byo/openshift-cluster/cluster_hosts.yml
-
-- include: ../../common/openshift-master/restart.yml
+  
+- include: ../../common/openshift-cluster/enable_dnsmasq.yml

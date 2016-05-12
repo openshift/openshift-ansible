@@ -1,18 +1,46 @@
 - name: Install Bind
   action: "{{ ansible_pkg_mgr }} name=bind"
+  when: not openshift.common.is_containerized | bool
+
+- name: Create docker build dir
+  file: path=/tmp/dockerbuild state=directory
+  when: openshift.common.is_containerized | bool
+
+- name: Install dockerfile
+  template:
+    dest: "/tmp/dockerbuild/Dockerfile"
+    src: Dockerfile
+  register: install_result
+  when: openshift.common.is_containerized | bool
+
+- name: Build Bind image
+  docker_image: path="/tmp/dockerbuild" name="bind" state=present
+  when: openshift.common.is_containerized | bool
+
+- name: Install bind service file
+  template:
+    dest: "/etc/systemd/system/named.service"
+    src: named.service.j2
+  register: install_result
+  when: openshift.common.is_containerized | bool
+
+- name: reload systemd
+  command: /usr/bin/systemctl --system daemon-reload
+  when: openshift.common.is_containerized | bool and install_result | changed
+
+- name: Create bind zone dir
+  file: path=/var/named state=directory
+  when: openshift.common.is_containerized | bool
 
 - name: Configure Bind
   template:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
-    validate: "{{ item.validate }}"
   with_items:
     - src: openshift-cluster.zone
       dest: /var/named/openshift-cluster.zone
-      validate: "named-checkzone {{ dns_zones[0] }} %s"
     - src: named.conf
       dest: /etc/named.conf
-      validate: "named-checkconf %s"
   notify: restart bind
 
 - name: Enable Bind

@@ -1,5 +1,9 @@
 ---
 os_firewall_enabled: True
-os_firewall_use_firewalld: True
+# TODO: Upstream kubernetes only supports iptables currently
+# TODO: it might be possible to still use firewalld if we wire up the created
+# chains with the public zone (or the zone associated with the correct
+# interfaces)
+os_firewall_use_firewalld: False
 os_firewall_allow: []
 os_firewall_deny: []

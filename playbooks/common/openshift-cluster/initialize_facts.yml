@@ -1,0 +1,7 @@
+---
+- name: Initialize host facts
+  hosts: OSEv3
+  roles:
+  - openshift_facts
+  tasks:
+  - openshift_facts:

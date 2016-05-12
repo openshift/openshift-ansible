@@ -2,8 +2,8 @@
 - name: Set cloud provider facts
   openshift_facts:
     role: cloudprovider
-    openshift_env: "{{ hostvars[inventory_hostname]
-                       | oo_merge_dicts(hostvars)
+    openshift_env: "{{ hostvars
+                       | oo_merge_hostvars(vars, inventory_hostname)
                        | oo_openshift_env }}"
     openshift_env_structures:
     - 'openshift.cloudprovider.aws.*'

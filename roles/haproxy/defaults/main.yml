@@ -15,7 +15,6 @@ haproxy_backends:
     address: 127.0.0.1:9000
     opts: check
 
-os_firewall_use_firewalld: False
 os_firewall_allow:
 - service: haproxy stats
   port: "9000/tcp"

@@ -1,6 +1,8 @@
 ---
 - include: evaluate_groups.yml
 
+- include: initialize_facts.yml
+
 - include: validate_hostnames.yml
 
 - name: Set oo_options
