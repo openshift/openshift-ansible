@@ -59,6 +59,16 @@
   failed_when: "'already exists' not in osmiq_perm_task.stderr and osmiq_perm_task.rc != 0"
   changed_when: osmiq_perm_task.rc == 0
 
+- name: Configure 3_2 role/user permissions
+  command: >
+    {{ openshift.common.admin_binary }} {{item}}
+    --config={{manage_iq_tmp_conf}}
+  with_items: "{{manage_iq_openshift_3_2_tasks}}"
+  register: osmiq_perm_3_2_task
+  failed_when: osmiq_perm_3_2_task.rc != 0
+  changed_when: osmiq_perm_3_2_task.rc == 0
+  when: openshift.common.version_gte_3_2_or_1_2 | bool
+
 - name: Clean temporary configuration file
   command: >
     rm -f {{manage_iq_tmp_conf}}
