@@ -76,3 +76,4 @@
       oauth_always_show_provider_selection: "{{ openshift_master_oauth_always_show_provider_selection | default(None) }}"
       image_policy_config: "{{ openshift_master_image_policy_config | default(None) }}"
       dynamic_provisioning_enabled: "{{ openshift_master_dynamic_provisioning_enabled | default(None) }}"
+      max_requests_inflight: "{{ openshift_master_max_requests_inflight | default(None) }}"
