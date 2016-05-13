@@ -27,6 +27,8 @@
   hosts: oo_masters_to_config:oo_nodes_to_config
   roles:
   - { role: openshift_docker_facts }
+  vars:
+    docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"
   tasks:
   - name: Pull Images
     command: >
