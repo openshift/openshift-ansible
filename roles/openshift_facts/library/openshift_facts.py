@@ -19,8 +19,8 @@ EXAMPLES = '''
 
 import ConfigParser
 import copy
+import io
 import os
-import StringIO
 import yaml
 from distutils.util import strtobool
 from distutils.version import LooseVersion
@@ -689,7 +689,7 @@ def set_etcd_facts_if_unset(facts):
 
     If anything goes wrong parsing these, the fact will not be set.
     """
-    if 'master' in facts and facts['master']['embedded_etcd']:
+    if 'master' in facts and safe_get_bool(facts['master']['embedded_etcd']):
         etcd_facts = facts['etcd'] if 'etcd' in facts else dict()
 
         if 'etcd_data_dir' not in etcd_facts:
@@ -716,8 +716,8 @@ def set_etcd_facts_if_unset(facts):
         # Read ETCD_DATA_DIR from /etc/etcd/etcd.conf:
         try:
             # Add a fake section for parsing:
-            ini_str = '[root]\n' + open('/etc/etcd/etcd.conf', 'r').read()
-            ini_fp = StringIO.StringIO(ini_str)
+            ini_str = unicode('[root]\n' + open('/etc/etcd/etcd.conf', 'r').read(), 'utf-8')
+            ini_fp = io.StringIO(ini_str)
             config = ConfigParser.RawConfigParser()
             config.readfp(ini_fp)
             etcd_data_dir = config.get('root', 'ETCD_DATA_DIR')
