@@ -164,7 +164,7 @@
             "containers": [
               {
                 "name": "nodejs-mongodb-example",
-                "image": "nodejs-mongodb-example",
+                "image": " ",
                 "ports": [
                   {
                     "containerPort": 8080
@@ -258,7 +258,7 @@
           {
             "type": "ImageChange",
             "imageChangeParams": {
-              "automatic": false,
+              "automatic": true,
               "containerNames": [
                 "mongodb"
               ],
@@ -288,7 +288,7 @@
             "containers": [
               {
                 "name": "mongodb",
-                "image": "mongodb",
+                "image": " ",
                 "ports": [
                   {
                     "containerPort": 27017
@@ -330,6 +330,20 @@
                     "limits": {
                         "memory": "${MEMORY_MONGODB_LIMIT}"
                     }
+                },
+                "volumeMounts": [
+                  {
+                    "name": "${DATABASE_SERVICE_NAME}-data",
+                    "mountPath": "/var/lib/mongodb/data"
+                  }
+                ]
+              }
+            ],
+            "volumes": [
+              {
+                "name": "${DATABASE_SERVICE_NAME}-data",
+                "emptyDir": {
+                  "medium": ""
                 }
               }
             ]
