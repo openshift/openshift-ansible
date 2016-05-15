@@ -105,6 +105,10 @@ items:
             value: ${IMAGE_PREFIX}
           - name: IMAGE_VERSION
             value: ${IMAGE_VERSION}
+          - name: IMAGE_PULL_SECRET
+            value: ${IMAGE_PULL_SECRET}
+          - name: INSECURE_REGISTRY
+            value: ${INSECURE_REGISTRY}
           - name: ENABLE_OPS_CLUSTER
             value: ${ENABLE_OPS_CLUSTER}
           - name: KIBANA_HOSTNAME
@@ -173,14 +177,6 @@ items:
         secret:
           secretName: logging-deployer
   parameters:
-  -
-    description: 'Specify prefix for logging components; e.g. for "openshift/origin-logging-deployer:v1.1", set prefix "openshift/origin-"'
-    name: IMAGE_PREFIX
-    value: "docker.io/openshift/origin-"
-  -
-    description: 'Specify version for logging components; e.g. for "openshift/origin-logging-deployer:v1.1", set version "v1.1"'
-    name: IMAGE_VERSION
-    value: "latest"
   -
     description: "If true, set up to use a second ES cluster for ops logs."
     name: ENABLE_OPS_CLUSTER
@@ -288,3 +284,19 @@ items:
     description: "The mode that the deployer runs in."
     name: MODE
     value: "install"
+  -
+    description: 'Specify prefix for logging components; e.g. for "openshift/origin-logging-deployer:v1.1", set prefix "openshift/origin-"'
+    name: IMAGE_PREFIX
+    value: "docker.io/openshift/origin-"
+  -
+    description: 'Specify version for logging components; e.g. for "openshift/origin-logging-deployer:v1.1", set version "v1.1"'
+    name: IMAGE_VERSION
+    value: "latest"
+  -
+    description: 'Specify the name of an existing pull secret to be used for pulling component images from an authenticated registry.'
+    name: IMAGE_PULL_SECRET
+  -
+    description: 'Allow the registry for logging component images to be non-secure (not secured with a certificate signed by a known CA)'
+    name: INSECURE_REGISTRY
+    value: "false"
+
