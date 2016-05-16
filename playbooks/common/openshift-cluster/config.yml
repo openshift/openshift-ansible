@@ -31,6 +31,8 @@
 
 - include: ../openshift-nfs/config.yml
 
+- include: ../openshift-loadbalancer/config.yml
+
 - include: ../openshift-master/config.yml
 
 - include: additional_config.yml

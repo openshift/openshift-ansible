@@ -1,5 +1,5 @@
-HAProxy
-=======
+OpenShift HAProxy Loadbalancer
+==============================
 
 TODO
 
