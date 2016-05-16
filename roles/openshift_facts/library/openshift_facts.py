@@ -1712,7 +1712,7 @@ class OpenShiftFacts(object):
                                     set_node_ip=False)
 
         if 'docker' in roles:
-            docker = dict(disable_push_dockerhub=False)
+            docker = dict(disable_push_dockerhub=False, hosted_registry_insecure=True)
             version_info = get_docker_version_info()
             if version_info is not None:
                 docker['api_version'] = version_info['api_version']
