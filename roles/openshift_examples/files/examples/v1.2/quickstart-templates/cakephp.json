@@ -155,7 +155,7 @@
             "containers": [
               {
                 "name": "cakephp-example",
-                "image": "cakephp-example",
+                "image": " ",
                 "ports": [
                   {
                     "containerPort": 8080

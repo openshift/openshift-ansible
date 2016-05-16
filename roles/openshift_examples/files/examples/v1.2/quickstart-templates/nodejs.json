@@ -164,7 +164,7 @@
             "containers": [
               {
                 "name": "nodejs-example",
-                "image": "nodejs-example",
+                "image": " ",
                 "ports": [
                   {
                     "containerPort": 8080

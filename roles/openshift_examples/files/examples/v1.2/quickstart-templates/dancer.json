@@ -155,7 +155,7 @@
             "containers": [
               {
                 "name": "dancer-example",
-                "image": "dancer-example",
+                "image": " ",
                 "ports": [
                   {
                     "containerPort": 8080
