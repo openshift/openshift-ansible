@@ -27,6 +27,8 @@
   hosts: oo_masters_to_config:oo_nodes_to_config
   roles:
   - { role: openshift_docker_facts }
+  vars:
+    docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"
   tasks:
   - name: Pull Images
     command: >
@@ -128,8 +130,8 @@
   vars:
     origin_reconcile_bindings: "{{ deployment_type == 'origin' and g_new_version | version_compare('1.0.6', '>') }}"
     ent_reconcile_bindings: true
-    openshift_docker_hosted_registry_insecure: True
-    openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"
+    docker_hosted_registry_insecure: "{{ openshift_docker_hosted_registry_insecure | default(True) }}"
+    docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"
   tasks:
   - name: Verifying the correct commandline tools are available
     shell: grep {{ verify_upgrade_version }} {{ openshift.common.admin_binary}}

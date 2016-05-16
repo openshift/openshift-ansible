@@ -204,6 +204,11 @@
                                | oo_collect('openshift.common.all_hostnames')
                                | oo_flatten | unique }}"
     sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
+    # TODO: configure these based on
+    # hostvars[groups.oo_first_master.0].openshift.hosted.registry instead of
+    # hardcoding
+    docker_hosted_registry_insecure: "{{ openshift_docker_hosted_registry_insecure | default(True) }}"
+    docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"
   roles:
   - openshift_master_certificates
   post_tasks:
@@ -346,6 +351,11 @@
     openshift_master_count: "{{ openshift.master.master_count }}"
     openshift_master_session_auth_secrets: "{{ hostvars[groups.oo_first_master.0].openshift.master.session_auth_secrets }}"
     openshift_master_session_encryption_secrets: "{{ hostvars[groups.oo_first_master.0].openshift.master.session_encryption_secrets }}"
+    # TODO: configure these based on
+    # hostvars[groups.oo_first_master.0].openshift.hosted.registry instead of
+    # hardcoding
+    docker_hosted_registry_insecure: "{{ openshift_docker_hosted_registry_insecure | default(True) }}"
+    docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"
   pre_tasks:
   - name: Ensure certificate directory exists
     file:
