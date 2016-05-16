@@ -42,8 +42,8 @@
       https_proxy: "{{ openshift_https_proxy | default(None) }}"
       no_proxy: "{{ openshift_no_proxy | default(None) }}"
       generate_no_proxy_hosts: "{{ openshift_generate_no_proxy_hosts | default(True) }}"
-      no_proxy_internal_hostnames: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config']
-                                                   | union(groups['oo_masters_to_config'])
+      no_proxy_internal_hostnames: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config'] | default([]) 
+                                                   | union(groups['oo_masters_to_config'] | default([]) ) 
                                                    | union(groups['oo_etcd_to_config'] | default([])))
                                                | oo_collect('openshift.common.hostname') | default([]) | join (',')
                                                }}"

@@ -1,4 +1,8 @@
 ---
+- include: ../common/openshift-cluster/evaluate_groups.yml
+  vars_files:
+  - ../../byo/openshift-cluster/cluster_hosts.yml
+  
 - hosts: all
   vars:
     openshift_deployment_type: "{{ deployment_type }}"
