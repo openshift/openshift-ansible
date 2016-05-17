@@ -38,6 +38,7 @@ popd
 mkdir -p %{buildroot}%{_datadir}/%{name}
 mkdir -p %{buildroot}%{_datadir}/ansible/%{name}
 mkdir -p %{buildroot}%{_datadir}/ansible_plugins
+cp -rp library %{buildroot}%{_datadir}/ansible/%{name}/
 
 # openshift-ansible-bin install
 mkdir -p %{buildroot}%{_bindir}
@@ -78,6 +79,8 @@ popd
 %files
 %doc LICENSE.md README*
 %dir %{_datadir}/ansible/%{name}
+%{_datadir}/ansible/%{name}/library
+%ghost %{_datadir}/ansible/%{name}/playbooks/common/openshift-master/library.rpmmoved
 
 # ----------------------------------------------------------------------------------
 # openshift-ansible-docs subpackage
@@ -110,11 +113,30 @@ BuildArch:     noarch
 %files playbooks
 %{_datadir}/ansible/%{name}/playbooks
 
+# We moved playbooks/common/openshift-master/library up to the top and replaced
+# it with a symlink. RPM doesn't handle this so we have to do some pre-transaction
+# magic. See https://fedoraproject.org/wiki/Packaging:Directory_Replacement
+%pretrans playbooks -p <lua>
+-- Define the path to directory being replaced below.
+-- DO NOT add a trailing slash at the end.
+path = "/usr/share/ansible/openshift-ansible/playbooks/common/openshift-master/library"
+st = posix.stat(path)
+if st and st.type == "directory" then
+  status = os.rename(path, path .. ".rpmmoved")
+  if not status then
+    suffix = 0
+    while not status do
+      suffix = suffix + 1
+      status = os.rename(path .. ".rpmmoved", path .. ".rpmmoved." .. suffix)
+    end
+    os.rename(path, path .. ".rpmmoved")
+  end
+end
 
+%package roles
 # ----------------------------------------------------------------------------------
 # openshift-ansible-roles subpackage
 # ----------------------------------------------------------------------------------
-%package roles
 Summary:       Openshift and Atomic Enterprise Ansible roles
 Requires:      %{name} = %{version}
 Requires:      %{name}-lookup-plugins = %{version}
