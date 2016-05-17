@@ -12,7 +12,7 @@
   - add_host:
       name: "{{ item }}"
       groups: l_oo_all_hosts
-    with_items: "{{ g_all_hosts }}"
+    with_items: g_all_hosts
 
 - hosts: l_oo_all_hosts
   gather_facts: no
