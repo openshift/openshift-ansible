@@ -2,11 +2,6 @@
 # It's important that we don't explicitly pull this image here.  Otherwise we
 # could result in upgrading a preinstalled environment.  We'll have to set
 # openshift_image_tag correctly for upgrades.
-
-- set_fact:
-    upgrading: False
-  when: upgrading is not defined
-
 - set_fact:
     is_containerized: "{{ openshift.common.is_containerized | default(False) | bool }}"
     # Does the host already have an image tag fact, used to determine if it's a new node
