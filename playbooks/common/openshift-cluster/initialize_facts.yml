@@ -1,7 +1,10 @@
 ---
 - name: Initialize host facts
-  hosts: OSEv3
+  hosts: oo_all_hosts
   roles:
   - openshift_facts
   tasks:
   - openshift_facts:
+      role: common
+      local_facts:
+        hostname: "{{ openshift_hostname | default(None) }}"
