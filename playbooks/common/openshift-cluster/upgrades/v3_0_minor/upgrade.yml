@@ -36,7 +36,8 @@
 - name: Ensure AOS 3.0.2 or Origin 1.0.6
   hosts: oo_first_master
   tasks:
-    fail: This playbook requires Origin 1.0.6 or Atomic OpenShift 3.0.2 or later
+  - fail:
+      msg: "This playbook requires Origin 1.0.6 or Atomic OpenShift 3.0.2 or later"
     when: _new_version.stdout | version_compare('1.0.6','<') or ( _new_version.stdout | version_compare('3.0','>=' and _new_version.stdout | version_compare('3.0.2','<') )
 
 - name: Update cluster policy

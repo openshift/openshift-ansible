@@ -112,6 +112,17 @@
 - name: Start and enable node
   service: name={{ openshift.common.service_type }}-node enabled=yes state=started
   register: node_start_result
+  ignore_errors: yes
+  
+- name: Check logs on failure
+  command: journalctl -xe
+  register: node_failure
+  when: node_start_result | failed
+  
+- name: Dump failure information
+  debug: var=node_failure
+  when: node_start_result | failed
+  
 
 - set_fact:
     node_service_status_changed: "{{ node_start_result | changed }}"
