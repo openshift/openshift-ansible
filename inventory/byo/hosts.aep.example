@@ -24,6 +24,14 @@ debug_level=2
 # deployment type valid values are origin, online, atomic-enterprise, and openshift-enterprise
 deployment_type=atomic-enterprise
 
+# Skip subscription via rhel_subscription / subscription-manager
+# This can be set globally and/or overriden per host
+#openshift_rhel_skip_subscription=false
+
+# By default the installer attempts to update the system before installing
+# and configuring. Set openshift_skip_pkg_update=true to prevent that update
+#openshift_skip_pkg_update=false
+
 # Install the openshift examples
 #openshift_install_examples=true
 
