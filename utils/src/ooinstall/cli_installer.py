@@ -11,6 +11,7 @@ from ooinstall import OOConfig
 from ooinstall.oo_config import OOConfigInvalidHostError
 from ooinstall.oo_config import Host
 from ooinstall.variants import find_variant, get_variant_version_combos
+from distutils.version import LooseVersion
 
 DEFAULT_ANSIBLE_CONFIG = '/usr/share/atomic-openshift-utils/ansible.cfg'
 DEFAULT_PLAYBOOK_DIR = '/usr/share/ansible/openshift-ansible/'
@@ -594,7 +595,8 @@ https://docs.openshift.com/enterprise/latest/admin_guide/install/prerequisites.h
         oo_cfg.settings['master_routingconfig_subdomain'] = get_master_routingconfig_subdomain()
         click.clear()
 
-    if not oo_cfg.settings.get('openshift_http_proxy', None):
+    if not oo_cfg.settings.get('openshift_http_proxy', None) and \
+       LooseVersion(oo_cfg.settings.get('variant_version', '0.0')) >= LooseVersion('3.2'):
         http_proxy, https_proxy, proxy_excludes = get_proxy_hostnames_and_excludes()
         oo_cfg.settings['openshift_http_proxy'] = http_proxy
         oo_cfg.settings['openshift_https_proxy'] = https_proxy
