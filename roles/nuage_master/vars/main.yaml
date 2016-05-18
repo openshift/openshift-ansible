@@ -17,6 +17,8 @@ nuage_mon_rest_server_crt_dir: "{{ nuage_ca_master_crt_dir }}/{{ ansible_nodenam
 nuage_ca_master_rest_server_key: "{{ nuage_mon_rest_server_crt_dir }}/nuageMonServer.key"
 nuage_ca_master_rest_server_crt: "{{ nuage_mon_rest_server_crt_dir }}/nuageMonServer.crt" 
 
+nuage_mon_rest_server_host: "{{ openshift.master.cluster_hostname | default(openshift.common.hostname) }}"
+
 nuage_master_crt_dir : /usr/share/nuage-openshift-monitor
 nuage_service_account: system:serviceaccount:default:nuage
 
