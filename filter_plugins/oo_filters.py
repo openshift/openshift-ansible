@@ -7,10 +7,12 @@ Custom filters for use in openshift-ansible
 
 from ansible import errors
 from collections import Mapping
+from distutils.version import LooseVersion
 from operator import itemgetter
 import OpenSSL.crypto
 import os
 import pdb
+import pkg_resources
 import re
 import json
 import yaml
@@ -69,6 +71,42 @@ class FilterModule(object):
         merged = first_dict.copy()
         merged.update(second_dict)
         return merged
+
+    @staticmethod
+    def oo_merge_hostvars(hostvars, variables, inventory_hostname):
+        """ Merge host and play variables.
+
+            When ansible version is greater than or equal to 2.0.0,
+            merge hostvars[inventory_hostname] with variables (ansible vars)
+            otherwise merge hostvars with hostvars['inventory_hostname'].
+
+            Ex: hostvars={'master1.example.com': {'openshift_variable': '3'},
+                          'openshift_other_variable': '7'}
+                variables={'openshift_other_variable': '6'}
+                inventory_hostname='master1.example.com'
+                returns {'openshift_variable': '3', 'openshift_other_variable': '7'}
+
+                hostvars=<ansible.vars.hostvars.HostVars object> (Mapping)
+                variables={'openshift_other_variable': '6'}
+                inventory_hostname='master1.example.com'
+                returns {'openshift_variable': '3', 'openshift_other_variable': '6'}
+        """
+        if not isinstance(hostvars, Mapping):
+            raise errors.AnsibleFilterError("|failed expects hostvars is dictionary or object")
+        if not isinstance(variables, dict):
+            raise errors.AnsibleFilterError("|failed expects variables is a dictionary")
+        if not isinstance(inventory_hostname, basestring):
+            raise errors.AnsibleFilterError("|failed expects inventory_hostname is a string")
+        # pylint: disable=no-member
+        ansible_version = pkg_resources.get_distribution("ansible").version
+        merged_hostvars = {}
+        if LooseVersion(ansible_version) >= LooseVersion('2.0.0'):
+            merged_hostvars = FilterModule.oo_merge_dicts(hostvars[inventory_hostname],
+                                                          variables)
+        else:
+            merged_hostvars = FilterModule.oo_merge_dicts(hostvars[inventory_hostname],
+                                                          hostvars)
+        return merged_hostvars
 
     @staticmethod
     def oo_collect(data, attribute=None, filters=None):
@@ -694,21 +732,22 @@ class FilterModule(object):
         if 'hosted' in hostvars['openshift']:
             for component in hostvars['openshift']['hosted']:
                 if 'storage' in hostvars['openshift']['hosted'][component]:
-                    kind = hostvars['openshift']['hosted'][component]['storage']['kind']
-                    create_pv = hostvars['openshift']['hosted'][component]['storage']['create_pv']
+                    params = hostvars['openshift']['hosted'][component]['storage']
+                    kind = params['kind']
+                    create_pv = params['create_pv']
                     if kind != None and create_pv:
                         if kind == 'nfs':
-                            host = hostvars['openshift']['hosted'][component]['storage']['host']
+                            host = params['host']
                             if host == None:
                                 if len(groups['oo_nfs_to_config']) > 0:
                                     host = groups['oo_nfs_to_config'][0]
                                 else:
                                     raise errors.AnsibleFilterError("|failed no storage host detected")
-                            directory = hostvars['openshift']['hosted'][component]['storage']['nfs']['directory']
-                            volume = hostvars['openshift']['hosted'][component]['storage']['volume']['name']
+                            directory = params['nfs']['directory']
+                            volume = params['volume']['name']
                             path = directory + '/' + volume
-                            size = hostvars['openshift']['hosted'][component]['storage']['volume']['size']
-                            access_modes = hostvars['openshift']['hosted'][component]['storage']['access_modes']
+                            size = params['volume']['size']
+                            access_modes = params['access_modes']
                             persistent_volume = dict(
                                 name="{0}-volume".format(volume),
                                 capacity=size,
@@ -717,6 +756,21 @@ class FilterModule(object):
                                     nfs=dict(
                                         server=host,
                                         path=path)))
+                            persistent_volumes.append(persistent_volume)
+                        elif kind == 'openstack':
+                            volume = params['volume']['name']
+                            size = params['volume']['size']
+                            access_modes = params['access_modes']
+                            filesystem = params['openstack']['filesystem']
+                            volume_id = params['openstack']['volumeID']
+                            persistent_volume = dict(
+                                name="{0}-volume".format(volume),
+                                capacity=size,
+                                access_modes=access_modes,
+                                storage=dict(
+                                    cinder=dict(
+                                        fsType=filesystem,
+                                        volumeID=volume_id)))
                             persistent_volumes.append(persistent_volume)
                         else:
                             msg = "|failed invalid storage kind '{0}' for component '{1}'".format(
@@ -870,5 +924,6 @@ class FilterModule(object):
             "oo_image_tag_to_rpm_version": self.oo_image_tag_to_rpm_version,
             "oo_merge_dicts": self.oo_merge_dicts,
             "oo_oc_nodes_matching_selector": self.oo_oc_nodes_matching_selector,
-            "oo_oc_nodes_with_label": self.oo_oc_nodes_with_label
+            "oo_oc_nodes_with_label": self.oo_oc_nodes_with_label,
+            "oo_merge_hostvars": self.oo_merge_hostvars,
         }

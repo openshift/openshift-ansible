@@ -166,7 +166,7 @@
             "containers": [
               {
                 "name": "cakephp-mysql-example",
-                "image": "cakephp-mysql-example",
+                "image": " ",
                 "ports": [
                   {
                     "containerPort": 8080
@@ -276,7 +276,7 @@
           {
             "type": "ImageChange",
             "imageChangeParams": {
-              "automatic": false,
+              "automatic": true,
               "containerNames": [
                 "mysql"
               ],
@@ -303,13 +303,25 @@
             }
           },
           "spec": {
+            "volumes": [
+              {
+                "name": "data",
+                "emptyDir": {}
+              }
+            ],
             "containers": [
               {
                 "name": "mysql",
-                "image": "mysql",
+                "image": " ",
                 "ports": [
                   {
                     "containerPort": 3306
+                  }
+                ],
+                "volumeMounts": [
+                  {
+                    "name": "data",
+                    "mountPath": "/var/lib/mysql/data"
                   }
                 ],
                 "readinessProbe": {

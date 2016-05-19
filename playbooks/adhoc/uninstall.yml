@@ -60,6 +60,7 @@
       with_items:
         - etcd
         - firewalld
+        - atomic-openshift-master
 
     - name: Stop additional atomic services
       service: name={{ item }} state=stopped

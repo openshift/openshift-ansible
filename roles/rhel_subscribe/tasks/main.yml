@@ -37,8 +37,19 @@
   register: openshift_pool_id
   changed_when: False
 
+- name: Determine if OpenShift Pool Already Attached
+  command: subscription-manager list --consumed --matches="{{ rhel_subscription_pool }}" --pool-only
+  register: openshift_pool_attached
+  changed_when: False
+  when: openshift_pool_id.stdout == ''
+
+- fail:
+    msg: "Unable to find pool matching {{ rhel_subscription_pool }} in available or consumed pools"
+  when: openshift_pool_id.stdout == '' and openshift_pool_attached is defined and openshift_pool_attached.stdout == ''
+
 - name: Attach to OpenShift Pool
   command: subscription-manager subscribe --pool {{ openshift_pool_id.stdout_lines[0] }}
+  when: openshift_pool_id.stdout != ''
 
 - include: enterprise.yml
   when: deployment_type in [ 'enterprise', 'atomic-enterprise', 'openshift-enterprise' ] and

@@ -19,3 +19,4 @@ multi_inventory.yaml
 .vagrant
 .tags*
 ansible.cfg
+*.retry

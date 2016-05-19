@@ -19,8 +19,8 @@ EXAMPLES = '''
 
 import ConfigParser
 import copy
+import io
 import os
-import StringIO
 import yaml
 from distutils.util import strtobool
 from distutils.version import LooseVersion
@@ -499,12 +499,12 @@ def set_dnsmasq_facts_if_unset(facts):
     """
 
     if 'common' in facts:
-        if 'use_dnsmasq' not in facts['common'] and facts['common']['version_gte_3_2_or_1_2']:
+        if 'use_dnsmasq' not in facts['common'] and safe_get_bool(facts['common']['version_gte_3_2_or_1_2']):
             facts['common']['use_dnsmasq'] = True
         else:
             facts['common']['use_dnsmasq'] = False
         if 'master' in facts and 'dns_port' not in facts['master']:
-            if facts['common']['use_dnsmasq']:
+            if safe_get_bool(facts['common']['use_dnsmasq']):
                 facts['master']['dns_port'] = 8053
             else:
                 facts['master']['dns_port'] = 53
@@ -689,7 +689,7 @@ def set_etcd_facts_if_unset(facts):
 
     If anything goes wrong parsing these, the fact will not be set.
     """
-    if 'master' in facts and facts['master']['embedded_etcd']:
+    if 'master' in facts and safe_get_bool(facts['master']['embedded_etcd']):
         etcd_facts = facts['etcd'] if 'etcd' in facts else dict()
 
         if 'etcd_data_dir' not in etcd_facts:
@@ -716,8 +716,8 @@ def set_etcd_facts_if_unset(facts):
         # Read ETCD_DATA_DIR from /etc/etcd/etcd.conf:
         try:
             # Add a fake section for parsing:
-            ini_str = '[root]\n' + open('/etc/etcd/etcd.conf', 'r').read()
-            ini_fp = StringIO.StringIO(ini_str)
+            ini_str = unicode('[root]\n' + open('/etc/etcd/etcd.conf', 'r').read(), 'utf-8')
+            ini_fp = io.StringIO(ini_str)
             config = ConfigParser.RawConfigParser()
             config.readfp(ini_fp)
             etcd_data_dir = config.get('root', 'ETCD_DATA_DIR')
@@ -1374,18 +1374,19 @@ def set_proxy_facts(facts):
     if 'common' in facts:
         common = facts['common']
         if 'http_proxy' in common or 'https_proxy' in common:
+            if 'no_proxy' in common and \
+                isinstance(common['no_proxy'], basestring):
+                common['no_proxy'] = common['no_proxy'].split(",")
+            elif 'no_proxy' not in common:
+                common['no_proxy'] = []
             if 'generate_no_proxy_hosts' in common and \
-                    common['generate_no_proxy_hosts']:
-                if 'no_proxy' in common and \
-                    isinstance(common['no_proxy'], basestring):
-                    common['no_proxy'] = common['no_proxy'].split(",")
-                else:
-                    common['no_proxy'] = []
+                safe_get_bool(common['generate_no_proxy_hosts']):
                 if 'no_proxy_internal_hostnames' in common:
                     common['no_proxy'].extend(common['no_proxy_internal_hostnames'].split(','))
                 common['no_proxy'].append('.' + common['dns_domain'])
-                common['no_proxy'].append(common['hostname'])
-                common['no_proxy'] = sort_unique(common['no_proxy'])
+            # We always add ourselves no matter what
+            common['no_proxy'].append(common['hostname'])
+            common['no_proxy'] = sort_unique(common['no_proxy'])
         facts['common'] = common
 
     if 'builddefaults' in facts:
@@ -1701,7 +1702,8 @@ class OpenShiftFacts(object):
                                       oauth_grant_method='auto',
                                       scheduler_predicates=scheduler_predicates,
                                       scheduler_priorities=scheduler_priorities,
-                                      dynamic_provisioning_enabled=True)
+                                      dynamic_provisioning_enabled=True,
+                                      max_requests_inflight=500)
 
         if 'node' in roles:
             defaults['node'] = dict(labels={}, annotations={},
@@ -1710,7 +1712,7 @@ class OpenShiftFacts(object):
                                     set_node_ip=False)
 
         if 'docker' in roles:
-            docker = dict(disable_push_dockerhub=False)
+            docker = dict(disable_push_dockerhub=False, hosted_registry_insecure=True)
             version_info = get_docker_version_info()
             if version_info is not None:
                 docker['api_version'] = version_info['api_version']
@@ -1735,6 +1737,9 @@ class OpenShiftFacts(object):
                         nfs=dict(
                             directory='/exports',
                             options='*(rw,root_squash)'),
+                        openstack=dict(
+                            filesystem='ext4',
+                            volumeID='123'),
                         host=None,
                         access_modes=['ReadWriteMany'],
                         create_pv=True

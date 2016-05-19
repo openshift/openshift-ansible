@@ -158,7 +158,7 @@
             "containers": [
               {
                 "name": "django-psql-example",
-                "image": "django-psql-example",
+                "image": " ",
                 "ports": [
                   {
                     "containerPort": 8080
@@ -260,7 +260,7 @@
           {
             "type": "ImageChange",
             "imageChangeParams": {
-              "automatic": false,
+              "automatic": true,
               "containerNames": [
                 "postgresql"
               ],
@@ -287,10 +287,16 @@
             }
           },
           "spec": {
+            "volumes": [
+              {
+                "name": "data",
+                "emptyDir": {}
+              }
+            ],
             "containers": [
               {
                 "name": "postgresql",
-                "image": "postgresql",
+                "image": " ",
                 "ports": [
                   {
                     "containerPort": 5432
@@ -308,6 +314,12 @@
                   {
                     "name": "POSTGRESQL_DATABASE",
                     "value": "${DATABASE_NAME}"
+                  }
+                ],
+                "volumeMounts": [
+                  {
+                    "name": "data",
+                    "mountPath": "/var/lib/pgsql/data"
                   }
                 ],
                 "readinessProbe": {

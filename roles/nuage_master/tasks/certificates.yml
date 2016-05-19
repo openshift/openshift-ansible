@@ -10,7 +10,7 @@
 
 - name: Create the req file
   command: >
-    openssl req -key "{{ nuage_ca_master_rest_server_key }}" -new -out "{{ nuage_mon_rest_server_crt_dir }}/restServer.req" -subj "/CN={{ ansible_nodename }}"
+    openssl req -key "{{ nuage_ca_master_rest_server_key }}" -new -out "{{ nuage_mon_rest_server_crt_dir }}/restServer.req" -subj "/CN={{ nuage_mon_rest_server_host }}"
   delegate_to: "{{ nuage_ca_master }}"
 
 - name: Generate the crt file

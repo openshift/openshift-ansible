@@ -4,7 +4,7 @@
     path: "{{ etcd_generated_certs_dir }}/{{ item.etcd_cert_subdir }}"
     state: directory
     mode: 0700
-  with_items: "{{ etcd_needing_client_certs | default([]) }}"
+  with_items: etcd_needing_client_certs | default([])
 
 - name: Create the client csr
   command: >
@@ -19,7 +19,7 @@
                  ~ item.etcd_cert_prefix ~ 'client.csr' }}"
   environment:
     SAN: "IP:{{ item.etcd_ip }}"
-  with_items: "{{ etcd_needing_client_certs | default([]) }}"
+  with_items: etcd_needing_client_certs | default([])
 
 - name: Sign and create the client crt
   command: >
@@ -33,10 +33,10 @@
                  ~ item.etcd_cert_prefix ~ 'client.crt' }}"
   environment:
     SAN: "IP:{{ item.etcd_ip }}"
-  with_items: "{{ etcd_needing_client_certs | default([]) }}"
+  with_items: etcd_needing_client_certs | default([])
 
 - file:
     src: "{{ etcd_ca_cert }}"
     dest: "{{ etcd_generated_certs_dir}}/{{ item.etcd_cert_subdir }}/{{ item.etcd_cert_prefix }}ca.crt"
     state: hard
-  with_items: "{{ etcd_needing_client_certs | default([]) }}"
+  with_items: etcd_needing_client_certs | default([])

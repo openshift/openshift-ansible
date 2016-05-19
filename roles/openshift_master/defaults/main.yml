@@ -1,32 +1,4 @@
 ---
 openshift_node_ips: []
-
 # TODO: update setting these values based on the facts
-os_firewall_allow:
-- service: etcd embedded
-  port: 4001/tcp
-- service: api server https
-  port: "{{ openshift.master.api_port }}/tcp"
-- service: api controllers https
-  port: "{{ openshift.master.controllers_port }}/tcp"
-- service: skydns tcp
-  port: "{{ openshift.master.dns_port }}/tcp"
-- service: skydns udp
-  port: "{{ openshift.master.dns_port }}/udp"
-- service: Fluentd td-agent tcp
-  port: 24224/tcp
-- service: Fluentd td-agent udp
-  port: 24224/udp
-- service: pcsd
-  port: 2224/tcp
-- service: Corosync UDP
-  port: 5404/udp
-- service: Corosync UDP
-  port: 5405/udp
-os_firewall_deny:
-- service: api server http
-  port: 8080/tcp
-- service: former etcd peer port
-  port: 7001/tcp
-
 openshift_version: "{{ openshift_pkg_version | default(openshift_image_tag | default(openshift.docker.openshift_image_tag | default(''))) }}"

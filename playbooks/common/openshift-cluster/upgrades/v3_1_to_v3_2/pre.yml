@@ -100,8 +100,8 @@
   hosts: oo_masters_to_config:oo_nodes_to_config
   vars:
     target_version: "{{ '1.2' if deployment_type == 'origin' else '3.1.1.900' }}"
-    openshift_docker_hosted_registry_insecure: True
     openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"
+    upgrading: True
   handlers:
   - include: ../../../../../roles/openshift_master/handlers/main.yml
   - include: ../../../../../roles/openshift_node/handlers/main.yml
@@ -110,7 +110,7 @@
   # are modified to use the correct image tag.  However, this can trigger a
   # docker restart if new configuration is laid down which would immediately
   # pull the latest image and defeat the purpose of these tasks.
-  - openshift_cli
+  - { role: openshift_cli }
   pre_tasks:
   - name: Clean package cache
     command: "{{ ansible_pkg_mgr }} clean all"

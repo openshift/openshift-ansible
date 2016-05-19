@@ -1,8 +1,9 @@
 ---
+- name: restart openvswitch
+  service: name=openvswitch state=restarted
+  when: not (ovs_service_status_changed | default(false) | bool)
+
 - name: restart node
   service: name={{ openshift.common.service_type }}-node state=restarted
   when: not (node_service_status_changed | default(false) | bool)
 
-- name: restart openvswitch
-  service: name=openvswitch state=restarted
-  when: not (ovs_service_status_changed | default(false) | bool)

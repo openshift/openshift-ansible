@@ -1,6 +1,4 @@
 ---
-- include: evaluate_groups.yml
-
 - name: Gather and set facts for node hosts
   hosts: oo_nodes_to_config
   roles:

@@ -1,0 +1,15 @@
+[Unit]
+Requires=docker.service
+After=docker.service
+PartOf=docker.service
+
+[Service]
+Type=simple
+TimeoutStartSec=5m
+ExecStartPre=/usr/bin/docker run --rm -v /etc/named.conf:/etc/named.conf -v /var/named:/var/named:z bind named-checkconf -z /etc/named.conf
+ExecStartPre=-/usr/bin/docker rm -f bind
+ExecStart=/usr/bin/docker run --name bind -p 53:53/udp -v /var/log:/var/log -v /etc/named.conf:/etc/named.conf -v /var/named:/var/named:z bind
+ExecStop=/usr/bin/docker stop bind
+
+[Install]
+WantedBy=docker.service

@@ -196,7 +196,7 @@ servingInfo:
   certFile: master.server.crt
   clientCA: ca.crt
   keyFile: master.server.key
-  maxRequestsInFlight: 500
+  maxRequestsInFlight: {{ openshift.master.max_requests_inflight }}
   requestTimeoutSeconds: 3600
 {% if openshift.master.named_certificates %}
   namedCertificates:

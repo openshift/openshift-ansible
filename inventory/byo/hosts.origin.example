@@ -192,6 +192,13 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Override the default pod eviction timeout
 #openshift_master_pod_eviction_timeout=5m
 
+# Override the default oauth tokenConfig settings:
+# openshift_master_access_token_max_seconds=86400
+# openshift_master_auth_token_max_seconds=500
+
+# Override master servingInfo.maxRequestsInFlight
+#openshift_master_max_requests_inflight=500
+
 # default storage plugin dependencies to install, by default the ceph and
 # glusterfs plugin dependencies will be installed, if available.
 #osn_storage_plugin_deps=['ceph','glusterfs','iscsi']
@@ -313,8 +320,21 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 ##
 ## Storage Kind
 ## Specifies which storage kind will be used for the registry.
-## nfs is the only supported kind at this time.
+## "nfs" and "openstack" are supported kinds at this time.
 ##openshift_hosted_registry_storage_kind=nfs
+##
+## Persistent Volume Access Mode
+## When using the 'openstack' storage kind, this has to be 'ReadWriteOnce'
+##openshift_hosted_registry_storage_access_modes=['ReadWriteMany']
+##
+## Registry Volume Name
+## Specify the storage volume name. This directory will be created
+## within openshift_hosted_registry_storage_nfs_directory if
+## specifying an [nfs] group. Ex. /exports/registry
+## This variable must be supplied if using a pre-existing nfs server.
+##openshift_hosted_registry_storage_volume_name=registry
+##
+## NFS Specific Options
 ##
 ## Storage Host
 ## This variable can be used to identify a pre-existing storage host
@@ -331,18 +351,22 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 ## This variable must be supplied if using a pre-existing nfs server.
 ##openshift_hosted_registry_storage_nfs_directory=/exports
 ##
-## Registry Volume Name
-## Specify the storage volume name. This directory will be created
-## within openshift_hosted_registry_storage_nfs_directory if
-## specifying an [nfs] group. Ex: /exports/registry
-## This variable must be supplied if using a pre-existing nfs server.
-##openshift_hosted_registry_storage_volume_name=registry
+## Openstack Specific Options
 ##
-## Persistent Volume Access Mode
-##openshift_hosted_registry_storage_access_modes=['ReadWriteMany']
+## Openstack Volume ID
+## Specify the identifier of the volume to use for the registry.
+## At this time, the volume has to be created manually by the administrator.
+##openshift_hosted_registry_storage_openstack_volumeID=3a650b4f-c8c5-4e0a-8ca5-eaee11f16c57
+##
+## Openstack Volume Size
+##openshift_hosted_registry_storage_volume_size=10Gi
+##
+## Openstack Volume Filesystem
+## Specify the filesystem that will be used when formatting the volume
+##openshift_hosted_registry_storage_openstack_filesystem=ext4
 
 # Configure node kubelet arguments
-#openshift_node_kubelet_args={'max-pods': ['40'], 'image-gc-high-threshold': ['90'], 'image-gc-low-threshold': ['80']}
+#openshift_node_kubelet_args={'max-pods': ['110'], 'image-gc-high-threshold': ['90'], 'image-gc-low-threshold': ['80']}
 
 # Configure logrotate scripts
 # See: https://github.com/nickhammond/ansible-logrotate
@@ -370,9 +394,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #
 # Most environments don't require a proxy between openshift masters, nodes, and
 # etcd hosts. So automatically add those hostnames to the openshift_no_proxy list.
-# If all of your hosts share a common domain you may wish to disable this and 
+# If all of your hosts share a common domain you may wish to disable this and
 # specify that domain above.
-#openshift_generate_no_proxy_hosts: True
+#openshift_generate_no_proxy_hosts=True
 #
 # These options configure the BuildDefaults admission controller which injects
 # environment variables into Builds. These values will default to their

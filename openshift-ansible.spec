@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.87
+Version:        3.0.90
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -38,6 +38,7 @@ popd
 mkdir -p %{buildroot}%{_datadir}/%{name}
 mkdir -p %{buildroot}%{_datadir}/ansible/%{name}
 mkdir -p %{buildroot}%{_datadir}/ansible_plugins
+cp -rp library %{buildroot}%{_datadir}/ansible/%{name}/
 
 # openshift-ansible-bin install
 mkdir -p %{buildroot}%{_bindir}
@@ -78,6 +79,8 @@ popd
 %files
 %doc LICENSE.md README*
 %dir %{_datadir}/ansible/%{name}
+%{_datadir}/ansible/%{name}/library
+%ghost %{_datadir}/ansible/%{name}/playbooks/common/openshift-master/library.rpmmoved
 
 # ----------------------------------------------------------------------------------
 # openshift-ansible-docs subpackage
@@ -110,11 +113,30 @@ BuildArch:     noarch
 %files playbooks
 %{_datadir}/ansible/%{name}/playbooks
 
+# We moved playbooks/common/openshift-master/library up to the top and replaced
+# it with a symlink. RPM doesn't handle this so we have to do some pre-transaction
+# magic. See https://fedoraproject.org/wiki/Packaging:Directory_Replacement
+%pretrans playbooks -p <lua>
+-- Define the path to directory being replaced below.
+-- DO NOT add a trailing slash at the end.
+path = "/usr/share/ansible/openshift-ansible/playbooks/common/openshift-master/library"
+st = posix.stat(path)
+if st and st.type == "directory" then
+  status = os.rename(path, path .. ".rpmmoved")
+  if not status then
+    suffix = 0
+    while not status do
+      suffix = suffix + 1
+      status = os.rename(path .. ".rpmmoved", path .. ".rpmmoved." .. suffix)
+    end
+    os.rename(path, path .. ".rpmmoved")
+  end
+end
 
+%package roles
 # ----------------------------------------------------------------------------------
 # openshift-ansible-roles subpackage
 # ----------------------------------------------------------------------------------
-%package roles
 Summary:       Openshift and Atomic Enterprise Ansible roles
 Requires:      %{name} = %{version}
 Requires:      %{name}-lookup-plugins = %{version}
@@ -183,6 +205,94 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon May 16 2016 Troy Dawson <tdawson@redhat.com> 3.0.90-1
+- Fixes for openshift_docker_hosted_registry_insecure var.
+  (dgoodwin@redhat.com)
+- Move latest to v1.2 (sdodson@redhat.com)
+- Sync latest content (sdodson@redhat.com)
+- Update default max-pods parameter (mwysocki@redhat.com)
+- Allow overriding servingInfo.maxRequestsInFlight via
+  openshift_master_max_requests_inflight. (abutcher@redhat.com)
+- update logging and metrics deployer templates (lmeyer@redhat.com)
+- Update default max-pods parameter (maci.stgn@gmail.com)
+- Block upgrading w/ ansible v2. (abutcher@redhat.com)
+- Fixed openvswitch not upgrading. (dgoodwin@redhat.com)
+- Do not upgrade containers to latest avail during a normal config run.
+  (dgoodwin@redhat.com)
+- Update StringIO import for py2/3 compat. (abutcher@redhat.com)
+- Fix mistaken quotes on proxy sysconfig variables. (dgoodwin@redhat.com)
+- Sync comments with origin pr (sdodson@redhat.com)
+- Use IP4_NAMESERVERS rather than DHCP4_DOMAIN_NAME_SERVERS
+  (sdodson@redhat.com)
+- Remove vars_files on play includes for upgrade playbooks.
+  (abutcher@redhat.com)
+- Document oauth token config inventory vars. (dgoodwin@redhat.com)
+- Why is the node failing to start (sdodson@redhat.com)
+- Move os_firewall out of openshift_common (sdodson@redhat.com)
+- Remove old unused firewall rules (sdodson@redhat.com)
+- Fix firewall rules (sdodson@redhat.com)
+- Remove double evaluate_groups include. (abutcher@redhat.com)
+- a-o-i: Write proxy variables (smunilla@redhat.com)
+- Add support for Openstack based persistent volumes (sbaubeau@redhat.com)
+- Fixes for flannel configuration. (abutcher@redhat.com)
+- Initialize facts for all hosts. (abutcher@redhat.com)
+- Fix version (sdodson@redhat.com)
+- Fix cli_docker_additional_registries being erased during upgrade.
+  (dgoodwin@redhat.com)
+- Unmask atomic-openshift-master on uninstall (sdodson@redhat.com)
+- Add *.retry to gitignore. (abutcher@redhat.com)
+- Move modify_yaml up into top level library directory (sdodson@redhat.com)
+- Enable dnsmasq on all hosts (sdodson@redhat.com)
+- Fixed the credentials (vishal.patil@nuagenetworks.net)
+- Remove vars_files on play includes for byo, scaleup and restart playbooks.
+  (abutcher@redhat.com)
+- Ensure ansible version greater than 1.9.4 (abutcher@redhat.com)
+- Add oo_merge_hostvars filter for merging host & play variables.
+  (abutcher@redhat.com)
+- Replace hostvars with vars for openshift env facts when ansible >= v2.
+  (abutcher@redhat.com)
+- Add system:image-auditor role to ManageIQ SA (mtayer@redhat.com)
+- Added extra install dependency on OSX (leenders.gert@gmail.com)
+- Check and unmask iptables/firewalld. (abutcher@redhat.com)
+- Default os_firewall_use_firewalld to false in os_firewall and remove
+  overrides. (abutcher@redhat.com)
+- listen on all interfaces (sdodson@redhat.com)
+- Fix configuration of dns_ip (sdodson@redhat.com)
+- Fix markdown in roles/openshift_metrics/README.md (cben@redhat.com)
+- use stat module instead of shell module and ls to check for rpm-ostree
+  (jdetiber@redhat.com)
+-  fix openstack template (sjenning@redhat.com)
+- Remove duplicate oauth_template fact. (abutcher@redhat.com)
+- Cleanup various deprecation warnings. (abutcher@redhat.com)
+- Make NetworkManager failure friendlier (sdodson@redhat.com)
+- README Updates (detiber@gmail.com)
+- Remove deprecated online playbooks/roles (jdetiber@redhat.com)
+- fix up variable references remove "online" support from bin/cluster
+  (jdetiber@redhat.com)
+- Remove Ops specific ansible-tower aws playbooks (jdetiber@redhat.com)
+- Fix inventory syntaxe (florian.lambert@enovance.com)
+- Add openshift_docker_hosted_registry_insecure option (andrew@andrewklau.com)
+- additional fixes (jdetiber@redhat.com)
+- Fix templating issue with logging role (jdetiber@redhat.com)
+- BuildDefaults are a kube admission controller not an openshift admission
+  controller (sdodson@redhat.com)
+- a-o-i: More friendly proxy questions (smunilla@redhat.com)
+- update tenand_id typo in example file (jialiu@redhat.com)
+- Update hosts.ose.example (jialiu@redhat.com)
+- update tenand_id typo in example file (jialiu@redhat.com)
+- Update repos per inventory before upgrading (sdodson@redhat.com)
+- Fix openshift_generate_no_proxy_hosts boolean (sdodson@redhat.com)
+- Fix openshift_generate_no_proxy_hosts examples (sdodson@redhat.com)
+- Fix inventory properties with raw booleans, again... (dgoodwin@redhat.com)
+- Allow containerized deployment of dns role (jprovazn@redhat.com)
+
+* Mon May 09 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.89-1
+- Use yum swap to downgrade docker (sdodson@redhat.com)
+
+* Fri May 06 2016 Brenton Leanhardt <bleanhar@redhat.com> 3.0.88-1
+- Open port 53 whenever we're unsure of version (sdodson@redhat.com)
+- Fix unsafe boolean handling on use_dnsmasq (sdodson@redhat.com)
+
 * Wed Apr 27 2016 Troy Dawson <tdawson@redhat.com> 3.0.87-1
 - a-o-i-: Allow empty proxy (smunilla@redhat.com)
 - a-o-i: Populate groups for openshift_facts (smunilla@redhat.com)

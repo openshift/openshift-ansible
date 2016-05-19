@@ -10,5 +10,6 @@
   register: docker_upgrade
 
 - name: Restart Docker
-  service: name=docker state=restarted
+  command: systemctl restart docker
   when: docker_upgrade | changed
+
