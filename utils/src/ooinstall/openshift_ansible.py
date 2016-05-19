@@ -17,10 +17,13 @@ ROLES_TO_GROUPS_MAP = {
     'storage': 'nfs'
 }
 
+
+
 VARIABLES_MAP = {
-    'ansible_ssh_user':'ansible_ssh_user',
-    'ansible_config':'ansible_config',
-    'ansible_log_path':'ansible_log_path',
+    'ansible_ssh_user': 'ansible_ssh_user',
+    'ansible_config': 'ansible_config',
+    'ansible_log_path': 'ansible_log_path',
+    'deployment_type': 'deployment_type',
     'master_routingconfig_subdomain':'openshift_master_default_subdomain',
     'proxy_http':'openshift_http_proxy',
     'proxy_https': 'openshift_https_proxy',
@@ -41,7 +44,7 @@ def generate_inventory(hosts):
     multiple_masters = len(masters) > 1
     scaleup = len(new_nodes) > 0
 
-    base_inventory_path = CFG.deployment.variables['ansible_inventory_path']
+    base_inventory_path = CFG.settings['ansible_inventory_path']
     base_inventory = open(base_inventory_path, 'w')
 
     write_inventory_children(base_inventory, multiple_masters, proxy, scaleup)
@@ -49,8 +52,8 @@ def generate_inventory(hosts):
     write_inventory_vars(base_inventory, multiple_masters, proxy)
 
     # Find the correct deployment type for ansible:
-    ver = find_variant(CFG.deployment.variables['variant'],
-        version=CFG.deployment.variables.get('variant_version', None))[1]
+    ver = find_variant(CFG.settings['variant'],
+        version=CFG.settings.get('variant_version', None))[1]
     base_inventory.write('deployment_type={}\n'.format(ver.ansible_key))
 
     if 'OO_INSTALL_ADDITIONAL_REGISTRIES' in os.environ:
@@ -122,7 +125,7 @@ def write_inventory_children(base_inventory, multiple_masters, proxy, scaleup):
 
     base_inventory.write('\n[OSEv3:children]\n')
     for role in CFG.deployment.roles:
-        child = ROLES_TO_GROUPS_MAP.get(role.name, role.name)
+        child = ROLES_TO_GROUPS_MAP.get(role, role)
         base_inventory.write('{}\n'.format(child))
 
     if scaleup:
@@ -136,21 +139,34 @@ def write_inventory_vars(base_inventory, multiple_masters, proxy):
     global CFG
     base_inventory.write('\n[OSEv3:vars]\n')
 
+    for variable, value in CFG.settings.iteritems():
+        inventory_var = VARIABLES_MAP.get(variable, None)
+        if value:
+            base_inventory.write('{}={}\n'.format(inventory_var, value))
+
     for variable, value in CFG.deployment.variables.iteritems():
         inventory_var = VARIABLES_MAP.get(variable, variable)
         if value:
             base_inventory.write('{}={}\n'.format(inventory_var, value))
 
-    if CFG.deployment.variables['ansible_ssh_user'] != 'root':
+    for _, role_obj in CFG.deployment.roles.iteritems():
+        if role_obj.variables:
+            for variable, value in role_obj.variables.iteritems():
+                inventory_var = VARIABLES_MAP.get(variable, variable)
+                if value:
+                    base_inventory.write('{}={}\n'.format(inventory_var, value))
+
+    if CFG.settings['ansible_ssh_user'] != 'root':
         base_inventory.write('ansible_become=yes\n')
+
     if multiple_masters and proxy is not None:
         base_inventory.write('openshift_master_cluster_method=native\n')
         base_inventory.write("openshift_master_cluster_hostname={}\n".format(proxy.hostname))
         base_inventory.write(
             "openshift_master_cluster_public_hostname={}\n".format(proxy.public_hostname))
 
-    if CFG.deployment.variables.get('variant_version', None) == '3.1':
-        #base_inventory.write('openshift_image_tag=v{}\n'.format(CFG.deployment.variables.get('variant_version')))
+    if CFG.settings.get('variant_version', None) == '3.1':
+        #base_inventory.write('openshift_image_tag=v{}\n'.format(CFG.settings.get('variant_version')))
         base_inventory.write('openshift_image_tag=v{}\n'.format('3.1.1.6'))
 
     if CFG.settings.get('openshift_http_proxy', ''):
@@ -215,11 +231,11 @@ def load_system_facts(inventory_file, os_facts_path, env_vars, verbose=False):
     if not status == 0:
         return [], 1
 
-    with open(CFG.deployment.variables['ansible_callback_facts_yaml'], 'r') as callback_facts_file:
+    with open(CFG.settings['ansible_callback_facts_yaml'], 'r') as callback_facts_file:
         try:
             callback_facts = yaml.safe_load(callback_facts_file)
         except yaml.YAMLError, exc:
-            print "Error in {}".format(CFG.deployment.variables['ansible_callback_facts_yaml']), exc
+            print "Error in {}".format(CFG.settings['ansible_callback_facts_yaml']), exc
             print "Try deleting and rerunning the atomic-openshift-installer"
             sys.exit(1)
 
@@ -232,13 +248,13 @@ def default_facts(hosts, verbose=False):
     os_facts_path = '{}/playbooks/byo/openshift_facts.yml'.format(CFG.ansible_playbook_directory)
 
     facts_env = os.environ.copy()
-    facts_env["OO_INSTALL_CALLBACK_FACTS_YAML"] = CFG.deployment.variables['ansible_callback_facts_yaml']
-    facts_env["ANSIBLE_CALLBACK_PLUGINS"] = CFG.deployment.variables['ansible_plugins_directory']
+    facts_env["OO_INSTALL_CALLBACK_FACTS_YAML"] = CFG.settings['ansible_callback_facts_yaml']
+    facts_env["ANSIBLE_CALLBACK_PLUGINS"] = CFG.settings['ansible_plugins_directory']
     facts_env["OPENSHIFT_MASTER_CLUSTER_METHOD"] = 'native'
-    if 'ansible_log_path' in CFG.deployment.variables:
-        facts_env["ANSIBLE_LOG_PATH"] = CFG.deployment.variables['ansible_log_path']
-    if 'ansible_config' in CFG.deployment.variables:
-        facts_env['ANSIBLE_CONFIG'] = CFG.deployment.variables['ansible_config']
+    if 'ansible_log_path' in CFG.settings:
+        facts_env["ANSIBLE_LOG_PATH"] = CFG.settings['ansible_log_path']
+    if 'ansible_config' in CFG.settings:
+        facts_env['ANSIBLE_CONFIG'] = CFG.settings['ansible_config']
     return load_system_facts(inventory_file, os_facts_path, facts_env, verbose)
 
 
@@ -251,10 +267,10 @@ def run_main_playbook(inventory_file, hosts, hosts_to_run_on, verbose=False):
         main_playbook_path = os.path.join(CFG.ansible_playbook_directory,
                                           'playbooks/byo/openshift-cluster/config.yml')
     facts_env = os.environ.copy()
-    if 'ansible_log_path' in CFG.deployment.variables:
-        facts_env['ANSIBLE_LOG_PATH'] = CFG.deployment.variables['ansible_log_path']
-    if 'ansible_config' in CFG.deployment.variables:
-        facts_env['ANSIBLE_CONFIG'] = CFG.deployment.variables['ansible_config']
+    if 'ansible_log_path' in CFG.settings:
+        facts_env['ANSIBLE_LOG_PATH'] = CFG.settings['ansible_log_path']
+    if 'ansible_config' in CFG.settings:
+        facts_env['ANSIBLE_CONFIG'] = CFG.settings['ansible_config']
     return run_ansible(main_playbook_path, inventory_file, facts_env, verbose)
 
 
@@ -268,26 +284,26 @@ def run_ansible(playbook, inventory, env_vars, verbose=False):
 
 
 def run_uninstall_playbook(verbose=False):
-    playbook = os.path.join(CFG.deployment.variables['ansible_playbook_directory'],
+    playbook = os.path.join(CFG.settings['ansible_playbook_directory'],
         'playbooks/adhoc/uninstall.yml')
     inventory_file = generate_inventory(CFG.hosts)
     facts_env = os.environ.copy()
-    if 'ansible_log_path' in CFG.deployment.variables:
-        facts_env['ANSIBLE_LOG_PATH'] = CFG.deployment.variables['ansible_log_path']
-    if 'ansible_config' in CFG.deployment.variables:
-        facts_env['ANSIBLE_CONFIG'] = CFG.deployment.variables['ansible_config']
+    if 'ansible_log_path' in CFG.settings:
+        facts_env['ANSIBLE_LOG_PATH'] = CFG.settings['ansible_log_path']
+    if 'ansible_config' in CFG.settings:
+        facts_env['ANSIBLE_CONFIG'] = CFG.settings['ansible_config']
     return run_ansible(playbook, inventory_file, facts_env, verbose)
 
 
 def run_upgrade_playbook(playbook, verbose=False):
-    playbook = os.path.join(CFG.deployment.variables['ansible_playbook_directory'],
+    playbook = os.path.join(CFG.settings['ansible_playbook_directory'],
             'playbooks/byo/openshift-cluster/upgrades/{}'.format(playbook))
 
     # TODO: Upgrade inventory for upgrade?
     inventory_file = generate_inventory(CFG.hosts)
     facts_env = os.environ.copy()
-    if 'ansible_log_path' in CFG.deployment.variables:
-        facts_env['ANSIBLE_LOG_PATH'] = CFG.deployment.variables['ansible_log_path']
-    if 'ansible_config' in CFG.deployment.variables:
-        facts_env['ANSIBLE_CONFIG'] = CFG.deployment.variables['ansible_config']
+    if 'ansible_log_path' in CFG.settings:
+        facts_env['ANSIBLE_LOG_PATH'] = CFG.settings['ansible_log_path']
+    if 'ansible_config' in CFG.settings:
+        facts_env['ANSIBLE_CONFIG'] = CFG.settings['ansible_config']
     return run_ansible(playbook, inventory_file, facts_env, verbose)

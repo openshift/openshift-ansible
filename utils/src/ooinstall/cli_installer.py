@@ -135,12 +135,12 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
                 host_props['roles'].append('master')
                 num_masters += 1
 
-                if oo_cfg.deployment.variables['variant_version'] == '3.0':
+                if oo_cfg.settings['variant_version'] == '3.0':
                     masters_set = True
         host_props['roles'].append('node')
 
         host_props['containerized'] = False
-        if oo_cfg.deployment.variables['variant_version'] != '3.0':
+        if oo_cfg.settings['variant_version'] != '3.0':
             rpm_or_container = \
                 click.prompt('Will this host be RPM or Container based (rpm/container)?',
                              type=click.Choice(['rpm', 'container']),
@@ -159,7 +159,7 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
 
 
         if print_summary:
-            print_installation_summary(hosts, oo_cfg.deployment.variables['variant_version'])
+            print_installation_summary(hosts, oo_cfg.settings['variant_version'])
 
         # If we have one master, this is enough for an all-in-one deployment,
         # thus we can start asking if you wish to proceed. Otherwise we assume
@@ -296,9 +296,7 @@ hostname.
     install_haproxy = \
         click.confirm('Should the reference haproxy load balancer be installed on this host?')
     host_props['preconfigured'] = not install_haproxy
-    host_props['master'] = False
-    host_props['node'] = False
-    host_props['master_lb'] = True
+    host_props['roles'] = ['master_lb']
     master_lb = Host(**host_props)
     hosts.append(master_lb)
 
@@ -429,6 +427,7 @@ def check_hosts_config(oo_cfg, unattended):
 
     if len(masters) > 1:
         master_lb = [host for host in oo_cfg.deployment.hosts if host.is_master_lb()]
+
         if len(master_lb) > 1:
             click.echo('ERROR: More than one Master load balancer specified. Only one is allowed.')
             sys.exit(1)
@@ -494,26 +493,26 @@ def error_if_missing_info(oo_cfg):
                    'command line or in the config file: %s' % oo_cfg.config_path)
         sys.exit(1)
 
-    if 'ansible_ssh_user' not in oo_cfg.deployment.variables:
+    if 'ansible_ssh_user' not in oo_cfg.settings:
         click.echo("Must specify ansible_ssh_user in configuration file.")
         sys.exit(1)
 
     # Lookup a variant based on the key we were given:
-    if not oo_cfg.deployment.variables['variant']:
+    if not oo_cfg.settings['variant']:
         click.echo("No variant specified in configuration file.")
         sys.exit(1)
 
     ver = None
-    if 'variant_version' in oo_cfg.deployment.variables:
-        ver = oo_cfg.deployment.variables['variant_version']
-    variant, version = find_variant(oo_cfg.deployment.variables['variant'], version=ver)
+    if 'variant_version' in oo_cfg.settings:
+        ver = oo_cfg.settings['variant_version']
+    variant, version = find_variant(oo_cfg.settings['variant'], version=ver)
     if variant is None or version is None:
-        err_variant_name = oo_cfg.deployment.variables['variant']
+        err_variant_name = oo_cfg.settings['variant']
         if ver:
             err_variant_name = "%s %s" % (err_variant_name, ver)
         click.echo("%s is not an installable variant." % err_variant_name)
         sys.exit(1)
-    oo_cfg.deployment.variables['variant_version'] = version.name
+    oo_cfg.settings['variant_version'] = version.name
 
     missing_facts = oo_cfg.calc_missing_facts()
     if len(missing_facts) > 0:
@@ -524,9 +523,10 @@ def error_if_missing_info(oo_cfg):
 
     # check that all listed host roles are included
     listed_roles = get_host_roles_set(oo_cfg)
-    if listed_roles != set(oo_cfg.deployment.roles):
+    configured_roles = set([role for role in oo_cfg.deployment.roles])
+    if listed_roles != configured_roles:
         missing_info = True
-        click.echo('Any roles assigned to hosts must be defined: {}'.format(listed_roles))
+        click.echo('Any roles assigned to hosts must be defined: {} vs {}'.format(listed_roles, configured_roles))
 
     if missing_info:
         sys.exit(1)
@@ -595,24 +595,27 @@ https://docs.openshift.com/enterprise/latest/admin_guide/install/prerequisites.h
     confirm_continue(message)
     click.clear()
 
-    if not oo_cfg.deployment.variables.get('ansible_ssh_user', ''):
-        oo_cfg.deployment.variables['ansible_ssh_user'] = get_ansible_ssh_user()
+    if not oo_cfg.settings.get('ansible_ssh_user', ''):
+        oo_cfg.settings['ansible_ssh_user'] = get_ansible_ssh_user()
         click.clear()
 
-    if not oo_cfg.deployment.variables.get('variant', ''):
+    if not oo_cfg.settings.get('variant', ''):
         variant, version = get_variant_and_version()
-        oo_cfg.deployment.variables['variant'] = variant.name
-        oo_cfg.deployment.variables['variant_version'] = version.name
+        oo_cfg.settings['variant'] = variant.name
+        oo_cfg.settings['variant_version'] = version.name
         click.clear()
 
     if not oo_cfg.deployment.hosts:
         oo_cfg.deployment.hosts, roles = collect_hosts(oo_cfg)
 
         for role in roles:
-            oo_cfg.deployment.roles.append(Role(name=role))
+            oo_cfg.deployment.roles[role] = Role(name = role, variables = {})
         click.clear()
 
-    if not oo_cfg.deployment.variables.get('master_routingconfig_subdomain', None):
+#if oo_cfg.deployment.roles['master'].variables and \
+#       not 'master_routingconfig_subdomain' in oo_cfg.deployment.roles['master'].variables.keys():
+    if not 'master_routingconfig_subdomain' in oo_cfg.deployment.variables:
+        #oo_cfg.deployment.roles['master'].variables['master_routingconfig_subdomain'] = get_master_routingconfig_subdomain()
         oo_cfg.deployment.variables['master_routingconfig_subdomain'] = get_master_routingconfig_subdomain()
         click.clear()
 
@@ -627,6 +630,18 @@ https://docs.openshift.com/enterprise/latest/admin_guide/install/prerequisites.h
     return oo_cfg
 
 
+def get_role_variable(oo_cfg, role_name, variable_name):
+    try:
+        target_role = next(role for role in oo_cfg.deployment.roles if role.name is role_name)
+        target_variable = target_role.variables[variable_name]
+        return target_variable
+    except (StopIteration, KeyError):
+        return None
+
+def set_role_variable(oo_cfg, role_name, variable_name, variable_value):
+    target_role = next(role for role in oo_cfg.deployment.roles if role.name is role_name)
+    target_role[variable_name] = variable_value
+
 def collect_new_nodes(oo_cfg):
     click.clear()
     click.echo('*** New Node Configuration ***')
@@ -634,7 +649,8 @@ def collect_new_nodes(oo_cfg):
 Add new nodes here
     """
     click.echo(message)
-    return collect_hosts(oo_cfg, existing_env=True, masters_set=True, print_summary=False)
+    new_nodes, _ = collect_hosts(oo_cfg, existing_env=True, masters_set=True, print_summary=False)
+    return new_nodes
 
 def get_installed_hosts(hosts, callback_facts):
     installed_hosts = []
@@ -660,7 +676,7 @@ def is_installed_host(host, callback_facts):
            callback_facts[host.connect_to]['common'].get('version', '') and \
            callback_facts[host.connect_to]['common'].get('version', '') != 'None'
 
-    return version_found or host.is_master_lb() or host.preconfigured
+    return version_found
 
 # pylint: disable=too-many-branches
 # This pylint error will be corrected shortly in separate PR.
@@ -730,7 +746,7 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force, verbose):
                     callback_facts, error = openshift_ansible.default_facts(oo_cfg.deployment.hosts, verbose)
                     if error or callback_facts is None:
                         click.echo("There was a problem fetching the required information. See " \
-                                   "{} for details.".format(oo_cfg.deployment.variables['ansible_log_path']))
+                                   "{} for details.".format(oo_cfg.settings['ansible_log_path']))
                         sys.exit(1)
                 else:
                     pass # proceeding as normal should do a clean install
@@ -796,23 +812,23 @@ def cli(ctx, unattended, configuration, ansible_playbook_directory, ansible_conf
 
     # If no playbook dir on the CLI, check the config:
     if not ansible_playbook_directory:
-        ansible_playbook_directory = oo_cfg.deployment.variables.get('ansible_playbook_directory', '')
+        ansible_playbook_directory = oo_cfg.settings.get('ansible_playbook_directory', '')
     # If still no playbook dir, check for the default location:
     if not ansible_playbook_directory and os.path.exists(DEFAULT_PLAYBOOK_DIR):
         ansible_playbook_directory = DEFAULT_PLAYBOOK_DIR
     validate_ansible_dir(ansible_playbook_directory)
-    oo_cfg.deployment.variables['ansible_playbook_directory'] = ansible_playbook_directory
+    oo_cfg.settings['ansible_playbook_directory'] = ansible_playbook_directory
     oo_cfg.ansible_playbook_directory = ansible_playbook_directory
     ctx.obj['ansible_playbook_directory'] = ansible_playbook_directory
 
     if ctx.obj['ansible_config']:
-        oo_cfg.deployment.variables['ansible_config'] = ctx.obj['ansible_config']
-    elif 'ansible_config' not in oo_cfg.deployment.variables and \
+        oo_cfg.settings['ansible_config'] = ctx.obj['ansible_config']
+    elif 'ansible_config' not in oo_cfg.settings and \
         os.path.exists(DEFAULT_ANSIBLE_CONFIG):
         # If we're installed by RPM this file should exist and we can use it as our default:
-        oo_cfg.deployment.variables['ansible_config'] = DEFAULT_ANSIBLE_CONFIG
+        oo_cfg.settings['ansible_config'] = DEFAULT_ANSIBLE_CONFIG
 
-    oo_cfg.deployment.variables['ansible_log_path'] = ctx.obj['ansible_log_path']
+    oo_cfg.settings['ansible_log_path'] = ctx.obj['ansible_log_path']
 
     ctx.obj['oo_cfg'] = oo_cfg
     openshift_ansible.set_config(oo_cfg)
@@ -868,8 +884,8 @@ def upgrade(ctx, latest_minor, next_major):
         click.echo("No hosts defined in: %s" % oo_cfg.config_path)
         sys.exit(1)
 
-    old_variant = oo_cfg.deployment.variables['variant']
-    old_version = oo_cfg.deployment.variables['variant_version']
+    old_variant = oo_cfg.settings['variant']
+    old_version = oo_cfg.settings['variant_version']
     mapping = upgrade_mappings.get(old_version)
 
     message = """
@@ -893,16 +909,16 @@ def upgrade(ctx, latest_minor, next_major):
         new_version = mapping['major_version']
         # Update config to reflect the version we're targetting, we'll write
         # to disk once ansible completes successfully, not before.
-        oo_cfg.deployment.variables['variant_version'] = new_version
-        if oo_cfg.deployment.variables['variant'] == 'enterprise':
-            oo_cfg.deployment.variables['variant'] = 'openshift-enterprise'
+        oo_cfg.settings['variant_version'] = new_version
+        if oo_cfg.settings['variant'] == 'enterprise':
+            oo_cfg.settings['variant'] = 'openshift-enterprise'
 
     if latest_minor:
         playbook = mapping['minor_playbook']
         new_version = mapping['minor_version']
 
     click.echo("Openshift will be upgraded from %s %s to %s %s on the following hosts:\n" % (
-        old_variant, old_version, oo_cfg.deployment.variables['variant'], new_version))
+        old_variant, old_version, oo_cfg.settings['variant'], new_version))
     for host in oo_cfg.deployment.hosts:
         click.echo("  * %s" % host.connect_to)
 
@@ -916,7 +932,7 @@ def upgrade(ctx, latest_minor, next_major):
     retcode = openshift_ansible.run_upgrade_playbook(playbook, verbose)
     if retcode > 0:
         click.echo("Errors encountered during upgrade, please check %s." %
-            oo_cfg.deployment.variables['ansible_log_path'])
+            oo_cfg.settings['ansible_log_path'])
     else:
         oo_cfg.save_to_disk()
         click.echo("Upgrade completed! Rebooting all hosts is recommended.")
@@ -938,13 +954,14 @@ def install(ctx, force, gen_inventory):
 
     check_hosts_config(oo_cfg, ctx.obj['unattended'])
 
-    print_installation_summary(oo_cfg.deployment.hosts, oo_cfg.deployment.variables.get('variant_version', None))
+    print_installation_summary(oo_cfg.deployment.hosts, oo_cfg.settings.get('variant_version', None))
     click.echo('Gathering information from hosts...')
     callback_facts, error = openshift_ansible.default_facts(oo_cfg.deployment.hosts,
         verbose)
+
     if error or callback_facts is None:
         click.echo("There was a problem fetching the required information. " \
-                   "Please see {} for details.".format(oo_cfg.deployment.variables['ansible_log_path']))
+                   "Please see {} for details.".format(oo_cfg.settings['ansible_log_path']))
         sys.exit(1)
 
     hosts_to_run_on, callback_facts = get_hosts_to_run_on(
@@ -961,6 +978,7 @@ def install(ctx, force, gen_inventory):
 
     # Write quick installer config file to disk:
     oo_cfg.save_to_disk()
+
     # Write ansible inventory file to disk:
     inventory_file = openshift_ansible.generate_inventory(hosts_to_run_on)
 
@@ -981,6 +999,7 @@ If changes are needed please edit the config file above and re-run.
 
     error = openshift_ansible.run_main_playbook(inventory_file, oo_cfg.deployment.hosts,
                                                 hosts_to_run_on, verbose)
+
     if error:
         # The bootstrap script will print out the log location.
         message = """

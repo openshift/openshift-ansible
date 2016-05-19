@@ -10,28 +10,36 @@ from click.testing import CliRunner
 # Substitute in a product name before use:
 SAMPLE_CONFIG = """
 variant: %s
+variant_version: 3.2
 ansible_ssh_user: root
 master_routingconfig_subdomain: example.com
-hosts:
-  - connect_to: 10.0.0.1
-    ip: 10.0.0.1
-    hostname: master-private.example.com
-    public_ip: 24.222.0.1
-    public_hostname: master.example.com
-    master: true
-    node: true
-  - connect_to: 10.0.0.2
-    ip: 10.0.0.2
-    hostname: node1-private.example.com
-    public_ip: 24.222.0.2
-    public_hostname: node1.example.com
-    node: true
-  - connect_to: 10.0.0.3
-    ip: 10.0.0.3
-    hostname: node2-private.example.com
-    public_ip: 24.222.0.3
-    public_hostname: node2.example.com
-    node: true
+deployment:
+    hosts:
+      - connect_to: 10.0.0.1
+        ip: 10.0.0.1
+        hostname: master-private.example.com
+        public_ip: 24.222.0.1
+        public_hostname: master.example.com
+        roles:
+            - master
+            - node
+      - connect_to: 10.0.0.2
+        ip: 10.0.0.2
+        hostname: node1-private.example.com
+        public_ip: 24.222.0.2
+        public_hostname: node1.example.com
+        roles:
+            - node
+      - connect_to: 10.0.0.3
+        ip: 10.0.0.3
+        hostname: node2-private.example.com
+        public_ip: 24.222.0.3
+        public_hostname: node2.example.com
+        roles:
+            - node
+    roles:
+        master:
+        node:
 """
 
 def read_yaml(config_file_path):
@@ -87,12 +95,13 @@ class OOCliFixture(OOInstallFixture):
         self.assertEquals(exp_hosts_to_run_on_len, len(hosts_to_run_on))
 
     def _verify_config_hosts(self, written_config, host_count):
-        self.assertEquals(host_count, len(written_config['hosts']))
-        for host in written_config['hosts']:
+        self.assertEquals(host_count, len(written_config['deployment']['hosts']))
+        for host in written_config['deployment']['hosts']:
             self.assertTrue('hostname' in host)
             self.assertTrue('public_hostname' in host)
             if 'preconfigured' not in host:
-                self.assertTrue('node' in host or 'storage' in host)
+                if 'roles' in host:
+                    self.assertTrue('node' in host['roles'] or 'storage' in host['roles'])
                 self.assertTrue('ip' in host)
                 self.assertTrue('public_ip' in host)
 

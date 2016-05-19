@@ -4,21 +4,23 @@ import os
 import yaml
 from pkg_resources import resource_filename
 
-PERSIST_SETTINGS = [
+CONFIG_PERSIST_SETTINGS = [
+    'ansible_ssh_user',
+    'ansible_callback_facts_yaml',
+    'ansible_config',
+    'ansible_inventory_path',
+    'ansible_log_path',
     'deployment',
     'version',
+    'variant',
+    'variant_version',
     ]
 
 DEPLOYMENT_PERSIST_SETTINGS = [
-    'ansible_ssh_user',
-    'ansible_config',
-    'ansible_log_path',
     'master_routingconfig_subdomain',
     'proxy_http',
     'proxy_https',
     'proxy_exclude_hosts',
-    'variant',
-    'variant_version',
 ]
 
 DEFAULT_REQUIRED_FACTS = ['ip', 'public_ip', 'hostname', 'public_hostname']
@@ -45,22 +47,17 @@ class Host(object):
         self.connect_to = kwargs.get('connect_to', None)
 
         self.preconfigured = kwargs.get('preconfigured', None)
-        self.schedulable = kwargs.get('preconfigured', None)
+        self.schedulable = kwargs.get('schedulable', None)
         self.new_host = kwargs.get('new_host', None)
         self.containerized = kwargs.get('containerized', False)
         self.node_labels = kwargs.get('node_labels', '')
 
         # allowable roles: master, node, etcd, storage, master_lb, new
-        self.roles = kwargs.get('roles', {})
+        self.roles = kwargs.get('roles', [])
 
         if self.connect_to is None:
             raise OOConfigInvalidHostError(
                 "You must specify either an ip or hostname as 'connect_to'")
-
-        if not any(['master', 'node', 'master_lb', 'storage'] for role in self.roles):
-            raise OOConfigInvalidHostError(
-                "You must specify each host as either a master, node, " \
-                "load balancer, or storage host.")
 
     def __str__(self):
         return self.connect_to
@@ -121,9 +118,9 @@ class Host(object):
 
 class Role(object):
     """ A role that will be applied to a host. """
-    def __init__(self, **kwargs):
-        self.name = kwargs.get('name', '')
-        self.variables = kwargs.get('variables', {})
+    def __init__(self, name, variables):
+        self.name = name
+        self.variables = variables
 
     def __str__(self):
         return self.name
@@ -134,7 +131,7 @@ class Role(object):
     def to_dict(self):
         """ Used when exporting to yaml. """
         d = {}
-        for prop in ['variables']:
+        for prop in ['name', 'variables']:
             # If the property is defined (not None or False), export it:
             if getattr(self, prop):
                 d[prop] = getattr(self, prop)
@@ -144,7 +141,7 @@ class Role(object):
 class Deployment(object):
     def __init__(self, **kwargs):
         self.hosts = kwargs.get('hosts', [])
-        self.roles = kwargs.get('roles', [])
+        self.roles = kwargs.get('roles', {})
         self.variables = kwargs.get('variables', {})
 
 
@@ -160,10 +157,11 @@ class OOConfig(object):
         else:
             self.config_path = os.path.normpath(self.default_dir +
                                                 self.default_file)
-        self.deployment = Deployment(hosts=[], roles=[], variables={})
+        self.deployment = Deployment(hosts=[], roles={}, variables={})
         self.settings = {}
         self._read_config()
         self._set_defaults()
+
 
     def _read_config(self):
         try:
@@ -176,8 +174,20 @@ class OOConfig(object):
                 if 'Description' in self.settings:
                     self._upgrade_legacy_config()
 
-                host_list = loaded_config['deployment']['hosts']
-                role_list = loaded_config['deployment']['roles']
+                try:
+                    host_list = loaded_config['deployment']['hosts']
+                    role_list = loaded_config['deployment']['roles']
+                except KeyError as e:
+                    print "Error loading config, no such key: {}".format(e)
+                    os._exit(0)
+
+
+
+                for setting in CONFIG_PERSIST_SETTINGS:
+                    try:
+                        self.settings[setting] = str(loaded_config[setting])
+                    except KeyError:
+                        continue
 
                 for setting in DEPLOYMENT_PERSIST_SETTINGS:
                     try:
@@ -191,8 +201,9 @@ class OOConfig(object):
                     self.deployment.hosts.append(Host(**host))
 
                 # Parse the roles into Objects
-                for role in role_list:
-                    self.deployment.hosts.append(Role(**role))
+                for name, variables in role_list.iteritems():
+                    self.deployment.roles.update({name: Role(name, variables)})
+
 
         except IOError, ferr:
             raise OOConfigFileError('Cannot open config file "{}": {}'.format(ferr.filename,
@@ -221,8 +232,8 @@ class OOConfig(object):
                 del self.settings[s]
 
         # A legacy config implies openshift-enterprise 3.0:
-        self.deployment.variables['variant'] = 'openshift-enterprise'
-        self.deployment.variables['variant_version'] = '3.0'
+        self.settings['variant'] = 'openshift-enterprise'
+        self.settings['variant_version'] = '3.0'
 
     def _upgrade_v1_config(self):
         #TODO write code to upgrade old config
@@ -230,31 +241,30 @@ class OOConfig(object):
 
     def _set_defaults(self):
 
-        if 'ansible_inventory_directory' not in self.deployment.variables:
-            self.deployment.variables['ansible_inventory_directory'] = \
-                self._default_ansible_inv_dir()
-        if not os.path.exists(self.deployment.variables['ansible_inventory_directory']):
-            os.makedirs(self.deployment.variables['ansible_inventory_directory'])
-        if 'ansible_plugins_directory' not in self.deployment.variables:
-            self.deployment.variables['ansible_plugins_directory'] = \
+        if 'ansible_inventory_directory' not in self.settings:
+            self.settings['ansible_inventory_directory'] = self._default_ansible_inv_dir()
+        if not os.path.exists(self.settings['ansible_inventory_directory']):
+            os.makedirs(self.settings['ansible_inventory_directory'])
+        if 'ansible_plugins_directory' not in self.settings:
+            self.settings['ansible_plugins_directory'] = \
                 resource_filename(__name__, 'ansible_plugins')
         if 'version' not in self.settings:
-            self.settings['version'] = 'v1'
+            self.settings['version'] = 'v2'
 
-        if 'ansible_callback_facts_yaml' not in self.deployment.variables:
-            self.deployment.variables['ansible_callback_facts_yaml'] = '%s/callback_facts.yaml' % \
-                self.deployment.variables['ansible_inventory_directory']
+        if 'ansible_callback_facts_yaml' not in self.settings:
+            self.settings['ansible_callback_facts_yaml'] = '%s/callback_facts.yaml' % \
+                self.settings['ansible_inventory_directory']
 
-        if 'ansible_ssh_user' not in self.deployment.variables:
-            self.deployment.variables['ansible_ssh_user'] = ''
+        if 'ansible_ssh_user' not in self.settings:
+            self.settings['ansible_ssh_user'] = ''
 
-        self.deployment.variables['ansible_inventory_path'] = \
+        self.settings['ansible_inventory_path'] = \
             '{}/hosts'.format(os.path.dirname(self.config_path))
 
         # clean up any empty sets
-        for setting in self.deployment.variables.keys():
-            if not self.deployment.variables[setting]:
-                self.deployment.variables.pop(setting)
+        for setting in self.settings.keys():
+            if not self.settings[setting]:
+                self.settings.pop(setting)
 
     def _default_ansible_inv_dir(self):
         return os.path.normpath(
@@ -290,34 +300,32 @@ class OOConfig(object):
     def persist_settings(self):
         p_settings = {}
 
-        for setting in PERSIST_SETTINGS:
+        for setting in CONFIG_PERSIST_SETTINGS:
             if setting in self.settings and self.settings[setting]:
                 p_settings[setting] = self.settings[setting]
 
+
         p_settings['deployment'] = {}
         p_settings['deployment']['hosts'] = []
-        p_settings['deployment']['roles'] = []
+        p_settings['deployment']['roles'] = {}
 
         for setting in DEPLOYMENT_PERSIST_SETTINGS:
-            if self.deployment.variables[setting]:
+            if setting in self.deployment.variables:
                 p_settings['deployment'][setting] = self.deployment.variables[setting]
 
         for host in self.deployment.hosts:
             p_settings['deployment']['hosts'].append(host.to_dict())
 
         try:
-            p_settings['deployment']['variant'] = self.deployment.variables['variant']
+            p_settings['variant'] = self.settings['variant']
+            p_settings['variant_version'] = self.settings['variant_version']
 
-            p_settings['deployment']['variant_version'] = \
-                self.deployment.variables['variant_version']
-
-            if self.deployment.variables['ansible_inventory_directory'] != \
-                    self._default_ansible_inv_dir():
-                p_settings['ansible_inventory_directory'] = \
-                    self.deployment.variables['ansible_inventory_directory']
+            if self.settings['ansible_inventory_directory'] != self._default_ansible_inv_dir():
+                p_settings['ansible_inventory_directory'] = self.settings['ansible_inventory_directory']
         except KeyError as e:
-            print e
+            print "Error persisting settings: {}".format(e)
             os._exit(0)
+
 
         return p_settings
 
