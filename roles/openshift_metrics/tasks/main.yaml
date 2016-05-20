@@ -44,7 +44,7 @@
   shell: >
    {{ openshift.common.client_binary }} process -f \
    /usr/share/openshift/examples/infrastructure-templates/{{ hawkular_type }}/metrics-deployer.yaml -v \
-    HAWKULAR_METRICS_HOSTNAME=hawkular-metrics.{{ openshift.master.default_subdomain }},USE_PERSISTENT_STORAGE={{ hawkular_persistence }},METRIC_DURATION={{ openshift.hosted.metrics.duration }},METRIC_RESOLUTION={{ openshift.hosted.metrics.resolution }} \
+    HAWKULAR_METRICS_HOSTNAME=hawkular-metrics.{{ openshift.master.default_subdomain }},USE_PERSISTENT_STORAGE={{ hawkular_persistence }},METRIC_DURATION={{ openshift.hosted.metrics.duration }},METRIC_RESOLUTION={{ openshift.hosted.metrics.resolution }}s \
     | {{ openshift.common.client_binary }} create -n openshift-infra --config={{hawkular_tmp_conf}} -f -
   register: oex_heapster_services
   failed_when: "'already exists' not in oex_heapster_services.stderr and oex_heapster_services.rc != 0"
