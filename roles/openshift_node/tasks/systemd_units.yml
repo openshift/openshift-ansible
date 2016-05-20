@@ -1,6 +1,13 @@
 # This file is included both in the openshift_master role and in the upgrade
 # playbooks.
 
+- name: Install Node dependencies docker service file
+  template:
+    dest: "/etc/systemd/system/{{ openshift.common.service_type }}-node-dep.service"
+    src: openshift.docker.node.dep.service
+  register: install_node_dep_result
+  when: openshift.common.is_containerized | bool
+
 - name: Install Node docker service file
   template:
     dest: "/etc/systemd/system/{{ openshift.common.service_type }}-node.service"

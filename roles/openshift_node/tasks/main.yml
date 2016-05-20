@@ -52,8 +52,9 @@
 
 - name: Reload systemd units
   command: systemctl daemon-reload
-  when: openshift.common.is_containerized | bool and ( ( install_node_result  | changed )
-    or ( install_ovs_sysconfig | changed ) )
+  when: openshift.common.is_containerized | bool and (install_node_result | changed or install_ovs_sysconfig | changed or install_node_dep_result | changed)
+  notify:
+  - restart node
 
 - name: Start and enable openvswitch docker service
   service: name=openvswitch.service enabled=yes state=started
@@ -113,16 +114,15 @@
   service: name={{ openshift.common.service_type }}-node enabled=yes state=started
   register: node_start_result
   ignore_errors: yes
-  
+
 - name: Check logs on failure
   command: journalctl -xe
   register: node_failure
   when: node_start_result | failed
-  
+
 - name: Dump failure information
   debug: var=node_failure
   when: node_start_result | failed
-  
 
 - set_fact:
     node_service_status_changed: "{{ node_start_result | changed }}"
