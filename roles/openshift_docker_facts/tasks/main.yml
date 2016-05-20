@@ -32,9 +32,7 @@
     docker_no_proxy: "{{ openshift.common.no_proxy | default(omit) }}"
 
 - set_fact:
-    docker_options: >
-      --insecure-registry={{ openshift.docker.hosted_registry_network }}
-      {{ openshift.docker.options | default ('') }}
+    docker_options: "--insecure-registry={{ openshift.docker.hosted_registry_network }} {{ openshift.docker.options | default ('') }}"
   when: openshift.docker.hosted_registry_insecure | default(False) | bool and openshift.docker.hosted_registry_network is defined
 
 - set_fact:
