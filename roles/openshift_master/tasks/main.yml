@@ -1,6 +1,8 @@
 ---
 # TODO: add ability to configure certificates given either a local file to
 #       point to or certificate contents, set in default cert locations.
+- debug: var=openshift_version
+- fail:
 
 # Authentication Variable Validation
 # TODO: validate the different identity provider kinds as well

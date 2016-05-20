@@ -156,6 +156,29 @@
     - master.etcd-ca.crt
     when: etcd_client_certs_missing is defined and etcd_client_certs_missing
 
+# Must be run before generating master certs which involved openshift_cli role and needs
+# to pull down the correct docker container:
+- name: Determine openshift_version to install on first master
+  hosts: oo_first_master
+  any_errors_fatal: true
+  tasks:
+  - debug: var=openshift.common
+  - debug: var=openshift_image_tag
+  - debug: var=openshift_release
+  - name: Determine version to configure if containerized and release specified
+    set_fact:
+      openshift_version: "{{ openshift_release }}"
+    when: openshift.common.is_containerized | bool and openshift_release is defined
+  - name: Determine version to configure if containerized and image tag specified
+    set_fact:
+      openshift_version: "{{ openshift_image_tag.split('v',1)[1] }}"
+    when: openshift.common.is_containerized | bool and openshift_image_tag is defined
+  - name: Determine version to configure if already installed
+    set_fact:
+      openshift_version: "{{ openshift.common.version }}"
+    when: openshift.common.is_containerized | bool and openshift.common.version is defined
+  - debug: var=openshift_version
+
 - name: Determine if master certificates need to be generated
   hosts: oo_first_master:oo_masters_to_config
   tasks:
@@ -337,8 +360,8 @@
     with_items: openshift_master_named_certificates
     when: named_certs_specified | bool
 
-- name: Configure master instances
-  hosts: oo_masters_to_config
+- name: Configure first master instances
+  hosts: oo_first_master
   any_errors_fatal: true
   serial: 1
   vars:
@@ -353,7 +376,50 @@
                                                     | union(groups['oo_etcd_to_config'] | default([])))
                                                 | oo_collect('openshift.common.hostname') | default([]) | join (',')
                                                 }}"
-    when: "{{ (openshift_http_proxy is defined or openshift_https_proxy is defined) and 
+    openshift_version: "{{ g_openshift_version_requested }}"
+    when: "{{ (openshift_http_proxy is defined or openshift_https_proxy is defined) and
+            openshift_generate_no_proxy_hosts | default(True) | bool }}"
+  pre_tasks:
+  - name: Ensure certificate directory exists
+    file:
+      path: "{{ openshift.common.config_base }}/master"
+      state: directory
+    when: master_certs_missing | bool and 'oo_first_master' not in group_names
+  - name: Unarchive the tarball on the master
+    unarchive:
+      src: "{{ sync_tmpdir }}/{{ master_cert_subdir }}.tgz"
+      dest: "{{ master_cert_config_dir }}"
+    when: master_certs_missing | bool and 'oo_first_master' not in group_names
+  - debug: var=openshift_version
+  roles:
+  - openshift_master
+  - role: nickhammond.logrotate
+  - role: nuage_master
+    when: openshift.common.use_nuage | bool
+  post_tasks:
+  - name: Create group for deployment type
+    group_by: key=oo_masters_deployment_type_{{ openshift.common.deployment_type }}
+    changed_when: False
+
+# TODO: This is a copy paste of the oo_first_master, how do we reconcile the code but change openshift_version?
+- name: Configure remaining master instances
+  hosts: oo_masters_to_config[1:]
+  any_errors_fatal: true
+  serial: 1
+  vars:
+    sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
+    openshift_master_ha: "{{ openshift.master.ha }}"
+    openshift_master_count: "{{ openshift.master.master_count }}"
+    openshift_master_session_auth_secrets: "{{ hostvars[groups.oo_first_master.0].openshift.master.session_auth_secrets }}"
+    openshift_master_session_encryption_secrets: "{{ hostvars[groups.oo_first_master.0].openshift.master.session_encryption_secrets }}"
+    openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"
+    openshift_no_proxy_internal_hostnames: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config']
+                                                    | union(groups['oo_masters_to_config'])
+                                                    | union(groups['oo_etcd_to_config'] | default([])))
+                                                | oo_collect('openshift.common.hostname') | default([]) | join (',')
+                                                }}"
+    openshift_version: "{{ g_openshift_version_requested }}"
+    when: "{{ (openshift_http_proxy is defined or openshift_https_proxy is defined) and
             openshift_generate_no_proxy_hosts | default(True) | bool }}"
   pre_tasks:
   - name: Ensure certificate directory exists

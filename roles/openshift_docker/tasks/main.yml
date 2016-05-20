@@ -17,6 +17,8 @@
   register: cli_image_version
   when: is_containerized | bool and openshift_image_tag is not defined and (upgrading | bool or not has_image_tag_fact | bool)
 
+- debug: var=cli_image_version
+
 # Use the pre-existing image tag from system facts if present, and we're not upgrading.
 # Ignores explicit openshift_image_tag if it's in the inventory, as this isn't an upgrade.
 - set_fact:

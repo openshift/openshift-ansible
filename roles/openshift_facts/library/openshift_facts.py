@@ -1133,15 +1133,9 @@ def get_openshift_version(facts):
     if os.path.isfile('/usr/bin/openshift'):
         _, output, _ = module.run_command(['/usr/bin/openshift', 'version'])
         version = parse_openshift_version(output)
-
-    # openshift_facts runs before openshift_docker_facts.  However, it will be
-    # called again and set properly throughout the playbook run.  This could be
-    # refactored to simply set the openshift.common.version in the
-    # openshift_docker_facts role but it would take reworking some assumptions
-    # on how get_openshift_version is called.
-    if 'is_containerized' in facts['common'] and safe_get_bool(facts['common']['is_containerized']):
-        if 'docker' in facts and 'openshift_version' in facts['docker']:
-            version = facts['docker']['openshift_version']
+    elif os.path.isfile('/usr/local/bin/openshift'):
+        _, output, _ = module.run_command(['/usr/local/bin/openshift', 'version'])
+        version = parse_openshift_version(output)
 
     return version
 

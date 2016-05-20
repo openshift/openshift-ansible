@@ -1,9 +1,6 @@
 ---
 - debug: var=openshift_version
-- debug: var=openshift_release
-- debug: var=openshift_image_tag
 - debug: var=openshift.common
-- debug: var=openshift.docker
 
 - name: Install clients
   action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-clients state=present"
@@ -11,7 +8,7 @@
 
 - name: Pull CLI Image
   command: >
-    docker pull {{ openshift.common.cli_image }}:{{ openshift_version }}
+    docker pull {{ openshift.common.cli_image }}:v{{ openshift_version }}
   when: openshift.common.is_containerized | bool
 
 - name: Create /usr/local/bin/openshift cli wrapper
