@@ -1,4 +1,10 @@
 ---
+- debug: var=openshift_version
+- debug: var=openshift_release
+- debug: var=openshift_image_tag
+- debug: var=openshift.common
+- debug: var=openshift.docker
+
 - name: Install clients
   action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-clients state=present"
   when: not openshift.common.is_containerized | bool

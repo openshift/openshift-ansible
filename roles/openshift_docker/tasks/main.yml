@@ -8,6 +8,9 @@
     # in non-upgrade scenarios:
     has_image_tag_fact: "{{ hostvars[inventory_hostname].openshift.docker.openshift_image_tag is defined }}"
 
+- debug: var=openshift_image_tag
+- debug: var=openshift_release
+
 - name: Set version when containerized
   command: >
     docker run --rm {{ openshift.common.cli_image }} version
