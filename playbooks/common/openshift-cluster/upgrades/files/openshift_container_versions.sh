@@ -2,7 +2,7 @@
 
 # Here we don't really care if this is a master, api, controller or node image.
 # We just need to know the version of one of them.
-unit_file=$(ls /etc/systemd/system/${1}*.service | head -n1)
+unit_file=$(ls /etc/systemd/system/${1}*.service | grep -v node-dep | head -n1)
 
 if [ ${1} == "origin" ]; then
     image_name="openshift/origin"
