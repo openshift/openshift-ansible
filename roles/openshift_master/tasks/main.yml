@@ -139,7 +139,7 @@
   - restart master api
 
 - set_fact:
-    translated_identity_providers: "{{ openshift.master.identity_providers | translate_idps('v1') }}"
+    translated_identity_providers: "{{ openshift.master.identity_providers | translate_idps('v1', openshift.common.version, openshift.common.deployment_type) }}"
 
 # TODO: add the validate parameter when there is a validation command to run
 - name: Create master config
