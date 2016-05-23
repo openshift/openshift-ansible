@@ -173,12 +173,12 @@
       changed_when: False
       failed_when: False
       with_items: "{{ images_to_delete.results }}"
-    
+
     - name: Remove sdn drop files
-      file: 
+      file:
         path: /run/openshift-sdn
         state: absent
-        
+
     - name: restart docker
       service:
         name: docker
@@ -199,6 +199,7 @@
         - /etc/systemd/system/atomic-openshift-master-api.service
         - /etc/systemd/system/atomic-openshift-master-controllers.service
         - /etc/systemd/system/atomic-openshift-node.service
+        - /etc/systemd/system/atomic-openshift-node-dep.service
         - /etc/systemd/system/etcd_container.service
         - /etc/systemd/system/openvswitch.service
         - /etc/sysconfig/atomic-enterprise-master
@@ -210,6 +211,7 @@
         - /etc/sysconfig/atomic-openshift-master-controllers
         - /etc/sysconfig/atomic-openshift-node
         - /etc/sysconfig/openshift-master
+        - /etc/sysconfig/openshift-node
         - /etc/sysconfig/openshift-node
         - /etc/sysconfig/openvswitch
         - /etc/sysconfig/origin-master
