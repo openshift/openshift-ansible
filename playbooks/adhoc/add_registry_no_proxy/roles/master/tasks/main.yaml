@@ -1,0 +1,11 @@
+---
+- replace: dest=/etc/sysconfig/atomic-openshift-master-api regexp='.cluster.local,.local' replace='.cluster.local,{{ hostvars['localhost']['registry_ip'] }},.local' backup=yes
+  notify:
+  - restart master-api
+
+- replace: dest=/etc/sysconfig/atomic-openshift-master-controllers regexp='.cluster.local,.local' replace='.cluster.local,{{ hostvars['localhost']['registry_ip'] }},.local' backup=yes
+  notify:
+  - restart master-controllers
+
+- replace: dest=/etc/sysconfig/atomic-openshift-master regexp='.cluster.local,.local' replace='.cluster.local,{{ hostvars['localhost']['registry_ip'] }},.local' backup=yes
+

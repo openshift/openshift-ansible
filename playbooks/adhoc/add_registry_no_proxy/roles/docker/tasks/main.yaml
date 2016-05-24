@@ -1,0 +1,5 @@
+---
+
+- replace: dest=/etc/sysconfig/docker regexp='.cluster.local,.local' replace='.cluster.local,{{ hostvars['localhost']['registry_ip'] }},.local' backup=yes
+  notify:
+  - restart docker
