@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.90
+Version:        3.0.91
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -205,6 +205,40 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue May 24 2016 Troy Dawson <tdawson@redhat.com> 3.0.91-1
+- Removed the echo line and replaced it with inline comment. To keep 99-origin-
+  dns.sh from adding a new line in /etc/resolv.conf everytime the
+  NetworkManager dispatcher script is executed. (jnordell@redhat.com)
+- Extend multiple login provider check to include origin. (abutcher@redhat.com)
+- Allow multiple login providers post 3.2. (abutcher@redhat.com)
+- Make rhel_subscribe role able to subscribe for OSE 3.2 (lhuard@amadeus.com)
+- Ensure yum-utils installed. (abutcher@redhat.com)
+- Remove newline from docker_options template string. (abutcher@redhat.com)
+- Use systemctl restart docker instead of ansible service.
+  (dgoodwin@redhat.com)
+- Use cluster hostname while generating certificate on the master nodes
+  (vishal.patil@nuagenetworks.net)
+- Fix playbooks/openshift-master/library move to symlink (sdodson@redhat.com)
+- Task "Update router image to current version" failed, if router not in
+  default namespace (jkroepke@users.noreply.github.com)
+- docker-current was missing from the containerized atomic-openshift-
+  node.service file (maci.stgn@gmail.com)
+- fixed issue with blank spaces instead commas as variables template separators
+  (j.david.nieto@gmail.com)
+- Refactor where we compute no_proxy hostnames (sdodson@redhat.com)
+- Fix for ansible v2 (sdodson@redhat.com)
+- Fix rhel_subscribe (sdodson@redhat.com)
+- remove interpolated g_all_hosts with_items arg from upgrade playbooks
+  (cboggs@rallydev.com)
+- Set openshift.common.hostname early in playbook execution.
+  (abutcher@redhat.com)
+- Fix 'recursive loop detected in template string' for upgrading variable.
+  (abutcher@redhat.com)
+- a-o-i: No proxy questions for 3.0/3.1 (smunilla@redhat.com)
+- Fix minor upgrades in 3.1 (sdodson@redhat.com)
+- Don't pull cli image when we're not containerized (sdodson@redhat.com)
+- Check consumed pools prior to attaching. (abutcher@redhat.com)
+
 * Mon May 16 2016 Troy Dawson <tdawson@redhat.com> 3.0.90-1
 - Fixes for openshift_docker_hosted_registry_insecure var.
   (dgoodwin@redhat.com)
