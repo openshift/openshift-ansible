@@ -1,0 +1,23 @@
+version: 0.1
+log:
+  level: debug
+http:
+  addr: :5000
+storage:
+  cache:
+    layerinfo: inmemory
+  swift:
+    authurl: {{ os_auth_url }}
+    container: {{ os_container }}
+    username: {{ os_username }}
+    password: {{ os_password }}
+    tenantid: {{ os_tenant_id }}
+    insecureskipverify: true
+auth:
+  openshift:
+    realm: openshift
+middleware:
+  repository:
+    - name: openshift
+      options:
+        pullthrough: true
