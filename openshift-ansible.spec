@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.92
+Version:        3.0.93
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -205,6 +205,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue May 24 2016 Troy Dawson <tdawson@redhat.com> 3.0.93-1
+- Fixup spec file (tdawson@redhat.com)
+
 * Tue May 24 2016 Troy Dawson <tdawson@redhat.com> 3.0.92-1
 -  Conditionally bind mount /usr/bin/docker-current when it is present (#1941)
   (sdodson@redhat.com)
