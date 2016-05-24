@@ -4,7 +4,20 @@
 # openshift_image_tag correctly for upgrades.
 - set_fact:
     is_containerized: "{{ openshift.common.is_containerized | default(False) | bool }}"
-    # Does the host already have an image tag fact, used to determine if it's a new node
-    # in non-upgrade scenarios:
-    has_image_tag_fact: "{{ hostvars[inventory_hostname].openshift.docker.openshift_image_tag is defined }}"
+
+# If no openshift_version provided, figure out what to use:
+# TODO: May want to move this to another role.
+- name: Lookup latest OpenShift version if none specified
+  command: >
+    docker run --rm {{ openshift.common.cli_image }}:latest version
+  register: cli_image_version
+  when: is_containerized | bool and openshift_version is not defined
+
+- debug: var=cli_image_version
+
+- set_fact:
+    openshift_version: "{{ cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0:2][1:] | join('-') if openshift.common.deployment_type == 'origin' else cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0][1:] }}"
+  when: is_containerized | bool and openshift_version is not defined
+
+- debug: var=openshift_version
 

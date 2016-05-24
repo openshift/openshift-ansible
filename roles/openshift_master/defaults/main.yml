@@ -1,4 +1,4 @@
 ---
 openshift_node_ips: []
 # TODO: update setting these values based on the facts
-openshift_version: "{{ openshift_pkg_version | default(openshift_image_tag | default(openshift.docker.openshift_image_tag | default(''))) }}"
+#openshift_version: "{{ openshift_pkg_version | default(openshift_image_tag | default(openshift.docker.openshift_image_tag | default(''))) }}"

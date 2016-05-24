@@ -175,8 +175,8 @@
     when: openshift.common.is_containerized | bool and openshift_image_tag is defined
   - name: Determine version to configure if already installed
     set_fact:
-      openshift_version: "{{ openshift.common.version }}"
-    when: openshift.common.is_containerized | bool and openshift.common.version is defined
+      openshift_version: "{{ openshift.common.version_requested }}"
+    when: openshift.common.is_containerized | bool and openshift.common.version_requested is defined
   - debug: var=openshift_version
 
 - name: Determine if master certificates need to be generated
@@ -376,7 +376,7 @@
                                                     | union(groups['oo_etcd_to_config'] | default([])))
                                                 | oo_collect('openshift.common.hostname') | default([]) | join (',')
                                                 }}"
-    openshift_version: "{{ g_openshift_version_requested }}"
+                                                #openshift_version: "{{ g_openshift_version_requested }}"
     when: "{{ (openshift_http_proxy is defined or openshift_https_proxy is defined) and
             openshift_generate_no_proxy_hosts | default(True) | bool }}"
   pre_tasks:
