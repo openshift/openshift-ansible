@@ -200,6 +200,11 @@
         - /etc/systemd/system/atomic-openshift-master-controllers.service
         - /etc/systemd/system/atomic-openshift-node.service
         - /etc/systemd/system/atomic-openshift-node-dep.service
+        - /etc/systemd/system/origin-master.service
+        - /etc/systemd/system/origin-master-api.service
+        - /etc/systemd/system/origin-master-controllers.service
+        - /etc/systemd/system/origin-node.service
+        - /etc/systemd/system/origin-node-dep.service
         - /etc/systemd/system/etcd_container.service
         - /etc/systemd/system/openvswitch.service
         - /etc/sysconfig/atomic-enterprise-master
@@ -210,9 +215,15 @@
         - /etc/sysconfig/atomic-openshift-master-api
         - /etc/sysconfig/atomic-openshift-master-controllers
         - /etc/sysconfig/atomic-openshift-node
+        - /etc/sysconfig/atomic-openshift-node-dep
+        - /etc/sysconfig/origin-master
+        - /etc/sysconfig/origin-master-api
+        - /etc/sysconfig/origin-master-controllers
+        - /etc/sysconfig/origin-node
+        - /etc/sysconfig/origin-node-dep
         - /etc/sysconfig/openshift-master
         - /etc/sysconfig/openshift-node
-        - /etc/sysconfig/openshift-node
+        - /etc/sysconfig/openshift-node-dep
         - /etc/sysconfig/openvswitch
         - /etc/sysconfig/origin-master
         - /etc/sysconfig/origin-master-api
