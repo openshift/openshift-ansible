@@ -2,7 +2,6 @@
 # TODO: add ability to configure certificates given either a local file to
 #       point to or certificate contents, set in default cert locations.
 - debug: var=openshift_version
-- fail:
 
 # Authentication Variable Validation
 # TODO: validate the different identity provider kinds as well
@@ -31,7 +30,7 @@
 
 - name: Pull master image
   command: >
-    docker pull {{ openshift.master.master_image }}:{{ openshift_version }}
+    docker pull {{ openshift.master.master_image }}:v{{ openshift_version }}
   when: openshift.common.is_containerized | bool
 
 - name: Create openshift.common.data_dir

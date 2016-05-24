@@ -360,7 +360,7 @@
     with_items: openshift_master_named_certificates
     when: named_certs_specified | bool
 
-- name: Configure first master instances
+- name: Configure first master instance
   hosts: oo_first_master
   any_errors_fatal: true
   serial: 1
@@ -400,6 +400,7 @@
   - name: Create group for deployment type
     group_by: key=oo_masters_deployment_type_{{ openshift.common.deployment_type }}
     changed_when: False
+  - fail:
 
 # TODO: This is a copy paste of the oo_first_master, how do we reconcile the code but change openshift_version?
 - name: Configure remaining master instances
