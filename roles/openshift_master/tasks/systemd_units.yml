@@ -42,6 +42,7 @@
   template:
     src: "{{ ha_svc_template_path }}/atomic-openshift-master-api.j2"
     dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-api
+    backup: true
   when: openshift.master.ha is defined and openshift.master.ha | bool and openshift_master_cluster_method == "native"
   notify:
   - restart master api
@@ -50,6 +51,7 @@
   template:
     src: "{{ ha_svc_template_path }}/atomic-openshift-master-controllers.j2"
     dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-controllers
+    backup: true
   when: openshift.master.ha is defined and openshift.master.ha | bool and openshift_master_cluster_method == "native"
   notify:
   - restart master controllers
@@ -65,5 +67,6 @@
   template:
     src: "atomic-openshift-master.j2"
     dest: /etc/sysconfig/{{ openshift.common.service_type }}-master
+    backup: true
   notify:
   - restart master
