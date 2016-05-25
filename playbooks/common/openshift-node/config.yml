@@ -109,11 +109,26 @@
     with_items: "{{ groups.oo_nodes_to_config | default([]) }}"
     when: hostvars[item].openshift.common.is_containerized | bool and (item in groups.oo_nodes_to_config and item in groups.oo_masters_to_config)
 
+- name: Determine openshift_version to install on nodes
+  hosts: oo_nodes_to_config
+  any_errors_fatal: true
+  tasks:
+  - debug: var=hostvars[groups.oo_first_master.0].openshift.common.version
+  - debug: var=openshift.common.version
+  - name: Set openshift_version to match first master for new node
+    set_fact:
+      openshift_version: "{{ hostvars[groups.oo_first_master.0].openshift.common.version }}"
+    when: openshift.common.version is not defined
+  - name: Set openshift_version to currently installed version
+    set_fact:
+      openshift_version: "{{ openshift.common.version }}"
+    when: openshift.common.version is defined
+  - debug: var=openshift_version
+
 - name: Configure node instances
   hosts: oo_containerized_master_nodes
   serial: 1
   vars:
-    openshift_version: "{{ hostvars[groups.oo_first_master.0].openshift.common.version }}"
     openshift_node_master_api_url: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_url }}"
     openshift_node_first_master_ip: "{{ hostvars[groups.oo_first_master.0].openshift.common.ip }}"
     openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"
@@ -124,15 +139,12 @@
                                                 }}"
     when: "{{ (openshift_http_proxy is defined or openshift_https_proxy is defined) and
             openshift_generate_no_proxy_hosts | default(True) | bool }}"
-  pre_tasks:
-  - debug: var=hostvars[groups.oo_first_master.0].openshift.common.version
   roles:
   - openshift_node
 
 - name: Configure node instances
   hosts: oo_nodes_to_config:!oo_containerized_master_nodes
   vars:
-    openshift_version: "{{ hostvars[groups.oo_first_master.0].openshift.common.version }}"
     openshift_node_master_api_url: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_url }}"
     openshift_node_first_master_ip: "{{ hostvars[groups.oo_first_master.0].openshift.common.ip }}"
     openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"

@@ -158,6 +158,7 @@
 
 # Must be run before generating master certs which involved openshift_cli role and needs
 # to pull down the correct docker container:
+# TODO: Handle rpm installs here
 - name: Determine openshift_version to install on first master
   hosts: oo_first_master
   any_errors_fatal: true
@@ -366,7 +367,6 @@
   serial: 1
   vars:
     sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
-    openshift_version: "{{ g_openshift_version_requested }}"
     openshift_master_ha: "{{ openshift.master.ha }}"
     openshift_master_count: "{{ openshift.master.master_count }}"
     openshift_master_session_auth_secrets: "{{ hostvars[groups.oo_first_master.0].openshift.master.session_auth_secrets }}"
