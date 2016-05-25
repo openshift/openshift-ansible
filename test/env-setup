@@ -1,8 +1,0 @@
-#!/bin/bash
-
-CUR_PATH=$(pwd)
-
-PREFIX_PYTHONPATH=$CUR_PATH/inventory/:$CUR_PATH/roles/lib_yaml_editor/library
-
-
-export PYTHONPATH=$PREFIX_PYTHONPATH:$PYTHONPATH
