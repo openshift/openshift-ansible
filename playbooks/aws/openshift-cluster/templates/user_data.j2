@@ -3,8 +3,10 @@
 mounts:
 - [ xvdb ]
 - [ ephemeral0 ]
+{% endif %}
 
 write_files:
+{% if type in ['node', 'master'] and 'docker' in volume_defs[type] %}
 - content: |
     DEVS=/dev/xvdb
     VG=docker_vg
@@ -12,8 +14,7 @@ write_files:
   owner: root:root
   permissions: '0644'
 {% endif %}
-
-{% if deployment_vars[deployment_type].become %}
+{% if deployment_vars[deployment_type].become | bool %}
 - path: /etc/sudoers.d/99-{{ deployment_vars[deployment_type].ssh_user }}-cloud-init-requiretty
   permissions: 440
   content: |

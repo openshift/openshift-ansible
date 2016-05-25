@@ -17,7 +17,7 @@ deployment_rhel7_ent_base:
 deployment_vars:
   origin:
     # centos-7, requires marketplace
-    image: "{{ lookup('oo_option', 'ec2_image') | default('ami-61bbf104', True) }}"
+    image: "{{ lookup('oo_option', 'ec2_image') | default('ami-6d1c2007', True) }}"
     image_name: "{{ lookup('oo_option', 'ec2_image_name') | default(None, True) }}"
     region: "{{ lookup('oo_option', 'ec2_region') | default('us-east-1', True) }}"
     ssh_user: centos
