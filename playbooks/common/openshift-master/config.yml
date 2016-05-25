@@ -175,8 +175,8 @@
     when: openshift.common.is_containerized | bool and openshift_image_tag is defined
   - name: Determine version to configure if already installed
     set_fact:
-      openshift_version: "{{ openshift.common.version_requested }}"
-    when: openshift.common.is_containerized | bool and openshift.common.version_requested is defined
+      openshift_version: "{{ openshift.common.version }}"
+    when: openshift.common.is_containerized | bool and openshift.common.version is defined
   - debug: var=openshift_version
 
 - name: Determine if master certificates need to be generated
@@ -366,6 +366,7 @@
   serial: 1
   vars:
     sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
+    openshift_version: "{{ g_openshift_version_requested }}"
     openshift_master_ha: "{{ openshift.master.ha }}"
     openshift_master_count: "{{ openshift.master.master_count }}"
     openshift_master_session_auth_secrets: "{{ hostvars[groups.oo_first_master.0].openshift.master.session_auth_secrets }}"
@@ -376,7 +377,6 @@
                                                     | union(groups['oo_etcd_to_config'] | default([])))
                                                 | oo_collect('openshift.common.hostname') | default([]) | join (',')
                                                 }}"
-    openshift_version: "{{ g_openshift_version_requested }}"
     when: "{{ (openshift_http_proxy is defined or openshift_https_proxy is defined) and
             openshift_generate_no_proxy_hosts | default(True) | bool }}"
   pre_tasks:
@@ -400,7 +400,6 @@
   - name: Create group for deployment type
     group_by: key=oo_masters_deployment_type_{{ openshift.common.deployment_type }}
     changed_when: False
-  - fail:
 
 # TODO: This is a copy paste of the oo_first_master, how do we reconcile the code but change openshift_version?
 - name: Configure remaining master instances
@@ -409,6 +408,7 @@
   serial: 1
   vars:
     sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
+    openshift_version: "{{ oo_first_master.openshift.common.version.split('-')[0] }}"
     openshift_master_ha: "{{ openshift.master.ha }}"
     openshift_master_count: "{{ openshift.master.master_count }}"
     openshift_master_session_auth_secrets: "{{ hostvars[groups.oo_first_master.0].openshift.master.session_auth_secrets }}"
@@ -419,7 +419,6 @@
                                                     | union(groups['oo_etcd_to_config'] | default([])))
                                                 | oo_collect('openshift.common.hostname') | default([]) | join (',')
                                                 }}"
-    openshift_version: "{{ g_openshift_version_requested }}"
     when: "{{ (openshift_http_proxy is defined or openshift_https_proxy is defined) and
             openshift_generate_no_proxy_hosts | default(True) | bool }}"
   pre_tasks:

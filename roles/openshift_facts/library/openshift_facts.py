@@ -826,7 +826,7 @@ def set_version_facts_if_unset(facts):
     if 'common' in facts:
         deployment_type = facts['common']['deployment_type']
         version = get_openshift_version(facts)
-        if version is not None:
+        if version:
             facts['common']['version'] = version
             if deployment_type == 'origin':
                 version_gte_3_1_or_1_1 = LooseVersion(version) >= LooseVersion('1.1.0')
@@ -1150,7 +1150,11 @@ def parse_openshift_version(output):
             string: the version number
     """
     versions = dict(e.split(' v') for e in output.splitlines() if ' v' in e)
-    return versions.get('openshift', '')
+    ver = versions.get('openshift', '')
+    # Remove trailing build number and commit hash from older versions, we need to return a straight
+    # w.x.y.z version here for use as openshift_version throughout the playbooks/roles. (i.e. 3.1.1.6-64-g80b61da)
+    ver = ver.split('-')[0]
+    return ver
 
 
 def apply_provider_facts(facts, provider_facts):

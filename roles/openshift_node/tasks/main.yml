@@ -1,4 +1,5 @@
 ---
+- debug: var=openshift_version
 # TODO: allow for overriding default ports where possible
 - fail:
     msg: "SELinux is disabled, This deployment type requires that SELinux is enabled."
@@ -39,12 +40,12 @@
 
 - name: Pull node image
   command: >
-    docker pull {{ openshift.node.node_image }}:{{ openshift_version }}
+    docker pull {{ openshift.node.node_image }}:v{{ openshift_version }}
   when: openshift.common.is_containerized | bool
 
 - name: Pull OpenVSwitch image
   command: >
-    docker pull {{ openshift.node.ovs_image }}:{{ openshift_version }}
+    docker pull {{ openshift.node.ovs_image }}:v{{ openshift_version }}
   when: openshift.common.is_containerized | bool and openshift.common.use_openshift_sdn | bool
 
 - name: Install the systemd units
