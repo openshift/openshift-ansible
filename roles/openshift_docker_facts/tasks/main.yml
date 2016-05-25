@@ -74,7 +74,7 @@
   set_fact:
     docker_version: "{{ '1.9.1' }}"
   when: " l_common_version != '0.0' and
-          (( l_common_version | version_compare('3.2','>') and openshift.common.service_type == 'atomic-openshift' ) or
-          ( l_common_version | version_compare('1.2','>') and openshift.common.service_type == 'origin' ))"
+          (( l_common_version | version_compare('3.2','>=') and openshift.common.service_type == 'atomic-openshift' ) or
+          ( l_common_version | version_compare('1.2','>=') and openshift.common.service_type == 'origin' ))"
 
 - debug: var=docker_version
