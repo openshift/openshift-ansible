@@ -19,5 +19,17 @@
     openshift_version: "{{ cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0:2][1:] | join('-') if openshift.common.deployment_type == 'origin' else cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0][1:] }}"
   when: is_containerized | bool and openshift_version is not defined
 
+# If we got an openshift_version like "3.2", lookup the latest 3.2 container version
+# and use that value instead.
+- name: Lookup specific OpenShift version if generic release specified
+  command: >
+    docker run --rm {{ openshift.common.cli_image }}:v{{ openshift_version }} version
+  register: cli_image_version
+  when: is_containerized | bool and openshift_version is defined and openshift_version.split('.') | length == 2
+
+- set_fact:
+    openshift_version: "{{ cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0:2][1:] | join('-') if openshift.common.deployment_type == 'origin' else cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0][1:] }}"
+  when: is_containerized | bool and openshift_version is defined and openshift_version.split('.') | length == 2
+
 - debug: var=openshift_version
 
