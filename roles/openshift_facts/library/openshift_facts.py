@@ -1549,6 +1549,7 @@ class OpenShiftFacts(object):
             OpenShiftFactsUnsupportedRoleError:
     """
     known_roles = ['builddefaults',
+                   'clock',
                    'cloudprovider',
                    'common',
                    'docker',
@@ -1718,6 +1719,16 @@ class OpenShiftFacts(object):
                 docker['api_version'] = version_info['api_version']
                 docker['version'] = version_info['version']
             defaults['docker'] = docker
+
+        if 'clock' in roles:
+            exit_code, _, _ = module.run_command(['rpm', '-q', 'chrony'])
+            if exit_code == 0:
+                chrony_installed = True
+            else:
+                chrony_installed = False
+            defaults['clock'] = dict(
+                enabled=True,
+                chrony_installed=chrony_installed)
 
         if 'cloudprovider' in roles:
             defaults['cloudprovider'] = dict(kind=None)
