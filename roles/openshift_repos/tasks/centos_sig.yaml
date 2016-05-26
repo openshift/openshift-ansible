@@ -1,0 +1,6 @@
+---
+- name: Install the CentOS PaaS SIG release packages
+  action: "{{ ansible_pkg_mgr }} name={{ item }} state=present"
+  with_items:
+  - centos-release-paas-common
+  - centos-release-openshift-origin
