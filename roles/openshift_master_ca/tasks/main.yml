@@ -1,6 +1,9 @@
 ---
+
+- debug: msg="{{ openshift_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }}"
+
 - name: Install the base package for admin tooling
-  action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}{{ openshift_version  }} state=present"
+  action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}{{ openshift_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }} state=present"
   when: not openshift.common.is_containerized | bool
   register: install_result
 

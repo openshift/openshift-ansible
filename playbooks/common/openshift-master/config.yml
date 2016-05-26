@@ -158,7 +158,6 @@
 
 # Must be run before generating master certs which involved openshift_cli role and needs
 # to pull down the correct docker container:
-# TODO: Handle rpm installs here
 - name: Determine openshift_version to install on first master
   hosts: oo_first_master
   any_errors_fatal: true
@@ -170,14 +169,21 @@
     set_fact:
       openshift_version: "{{ openshift_release }}"
     when: openshift.common.is_containerized | bool and openshift_release is defined
-  - name: Determine version to configure if containerized and image tag specified
+# TODO: what should we do for rpm installs and openshift_release here?
+  - name: Determine container version to configure when openshift_image_tag specified
     set_fact:
       openshift_version: "{{ openshift_image_tag.split('v',1)[1] }}"
     when: openshift.common.is_containerized | bool and openshift_image_tag is defined
-  - name: Determine version to configure if already installed
+  - name: Determine rpm version to configure when openshift_pkg_version specified
+    set_fact:
+      # Expects a leading "-" in inventory, strip it off here, and ignore a trailing release,
+      # openshift_version should always just be "3.2" or "3.2.0.44"
+      openshift_version: "{{ openshift_pkg_version[1:].split('-')[0] }}"
+    when: not openshift.common.is_containerized | bool and openshift_pkg_version is defined
+  - name: Use openshift.common.version fact as version to configure if already installed
     set_fact:
       openshift_version: "{{ openshift.common.version }}"
-    when: openshift.common.is_containerized | bool and openshift.common.version is defined
+    when: openshift.common.version is defined
   - debug: var=openshift_version
 
 - name: Determine if master certificates need to be generated

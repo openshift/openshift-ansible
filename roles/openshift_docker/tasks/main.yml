@@ -2,12 +2,34 @@
 # It's important that we don't explicitly pull this image here.  Otherwise we
 # could result in upgrading a preinstalled environment.  We'll have to set
 # openshift_image_tag correctly for upgrades.
+
+# Determine openshift_version if none is set for this host, or if a generic "3.2"
+# is set, determine the more specific version number by either installing the latest
+# rpm, or pulling the v3.2 container and checking the resulting versions.
+
 - set_fact:
     is_containerized: "{{ openshift.common.is_containerized | default(False) | bool }}"
 
-# If no openshift_version provided, figure out what to use:
-# TODO: May want to move this to another role.
-- name: Lookup latest OpenShift version if none specified
+- debug: var=openshift_version
+
+# RPM openshift_version setup:
+- debug: msg="{{ openshift_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }}"
+- name: Lookup latest OpenShift rpm version if none specified
+  action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}{{ openshift_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }} state=present"
+  when: not is_containerized | bool and openshift_version is not defined
+
+- name: Reload facts to pick up version
+  openshift_facts:
+  when: not is_containerized | bool and openshift_version is not defined
+
+- set_fact:
+    openshift_version: "{{ openshift.common.version }}"
+  when: not is_containerized | bool and openshift_version is not defined
+
+# TODO: What to do if openshift_version = 3.2 for rpm based installs?
+
+# Containerized openshift_version setup:
+- name: Lookup latest containerized OpenShift version if none specified
   command: >
     docker run --rm {{ openshift.common.cli_image }}:latest version
   register: cli_image_version

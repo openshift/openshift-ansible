@@ -125,6 +125,8 @@
     register: g_rpm_versions_result
     when: not openshift.common.is_containerized | bool
 
+  - debug: var=g_rpm_versions_result
+
   - set_fact:
       g_aos_versions: "{{ g_rpm_versions_result.stdout | from_yaml }}"
     when: not openshift.common.is_containerized | bool
