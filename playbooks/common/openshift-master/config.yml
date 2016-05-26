@@ -171,9 +171,11 @@
       - etcd.server.crt
       openshift_master_certs_etcd:
       - master.etcd-client.crt
+      openshift_master_certs_3_1_or_1_1:
+       - master.proxy-client.crt
 
   - set_fact:
-      openshift_master_certs: "{{ (openshift_master_certs_no_etcd | union(openshift_master_certs_etcd)) if (groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config) else openshift_master_certs_no_etcd }}"
+      openshift_master_certs: "{{ (openshift_master_certs_no_etcd | union(openshift_master_certs_etcd)) if (groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config) else openshift_master_certs_no_etcd | union(openshift_master_certs_3_1_or_1_1) if openshift.common.version_gte_3_1_or_1_1 else openshift_master_certs_no_etcd}}"
 
   - name: Check status of master certificates
     stat:
