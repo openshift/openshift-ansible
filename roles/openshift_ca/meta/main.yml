@@ -1,10 +1,10 @@
 ---
 galaxy_info:
   author: Jason DeTiberus
-  description:
+  description: OpenShift CA
   company: Red Hat, Inc.
   license: Apache License, Version 2.0
-  min_ansible_version: 1.8
+  min_ansible_version: 1.9.4
   platforms:
   - name: EL
     versions:
@@ -13,5 +13,5 @@ galaxy_info:
   - cloud
   - system
 dependencies:
-- { role: openshift_repos }
-- { role: openshift_cli }
+- role: openshift_repos
+- role: openshift_cli

@@ -19,23 +19,6 @@
         labels: "{{ openshift_node_labels | default(None) }}"
         annotations: "{{ openshift_node_annotations | default(None) }}"
         schedulable: "{{ openshift_schedulable | default(openshift_scheduleable) | default(None) }}"
-  - name: Check status of node certificates
-    stat:
-      path: "{{ openshift.common.config_base }}/node/{{ item }}"
-    with_items:
-    - "system:node:{{ openshift.common.hostname }}.crt"
-    - "system:node:{{ openshift.common.hostname }}.key"
-    - "system:node:{{ openshift.common.hostname }}.kubeconfig"
-    - ca.crt
-    - server.key
-    - server.crt
-    register: stat_result
-  - set_fact:
-      certs_missing: "{{ stat_result.results | oo_collect(attribute='stat.exists')
-                         | list | intersect([false])}}"
-      node_subdir: node-{{ openshift.common.hostname }}
-      config_dir: "{{ openshift.common.config_base }}/generated-configs/node-{{ openshift.common.hostname }}"
-      node_cert_dir: "{{ openshift.common.config_base }}/node"
 
 - name: Create temp directory for syncing certs
   hosts: localhost
@@ -47,53 +30,6 @@
     local_action: command mktemp -d /tmp/openshift-ansible-XXXXXXX
     register: mktemp
     changed_when: False
-
-- name: Create node certificates
-  hosts: oo_first_master
-  vars:
-    nodes_needing_certs: "{{ hostvars
-                             | oo_select_keys(groups['oo_nodes_to_config']
-                                              | default([]))
-                             | oo_filter_list(filter_attr='certs_missing') }}"
-    sync_tmpdir: "{{ hostvars.localhost.mktemp.stdout }}"
-  roles:
-  - openshift_node_certificates
-  post_tasks:
-  - name: Create a tarball of the node config directories
-    command: >
-      tar -czvf {{ item.config_dir }}.tgz
-        --transform 's|system:{{ item.node_subdir }}|node|'
-        -C {{ item.config_dir }} .
-    args:
-      creates: "{{ item.config_dir }}.tgz"
-    with_items: "{{ nodes_needing_certs | default([]) }}"
-
-  - name: Retrieve the node config tarballs from the master
-    fetch:
-      src: "{{ item.config_dir }}.tgz"
-      dest: "{{ sync_tmpdir }}/"
-      flat: yes
-      fail_on_missing: yes
-      validate_checksum: yes
-    with_items: "{{ nodes_needing_certs | default([]) }}"
-
-- name: Deploy node certificates
-  hosts: oo_nodes_to_config
-  vars:
-    sync_tmpdir: "{{ hostvars.localhost.mktemp.stdout }}"
-  tasks:
-  - name: Ensure certificate directory exists
-    file:
-      path: "{{ node_cert_dir }}"
-      state: directory
-  # TODO: notify restart node
-  # possibly test service started time against certificate/config file
-  # timestamps in node to trigger notify
-  - name: Unarchive the tarball on the node
-    unarchive:
-      src: "{{ sync_tmpdir }}/{{ node_subdir }}.tgz"
-      dest: "{{ node_cert_dir }}"
-    when: certs_missing
 
 - name: Evaluate node groups
   hosts: localhost
@@ -124,7 +60,8 @@
     when: "{{ (openshift_http_proxy is defined or openshift_https_proxy is defined) and 
             openshift_generate_no_proxy_hosts | default(True) | bool }}"
   roles:
-  - openshift_node
+  - role: openshift_node
+    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
 
 - name: Configure node instances
   hosts: oo_nodes_to_config:!oo_containerized_master_nodes
@@ -140,7 +77,8 @@
     when: "{{ (openshift_http_proxy is defined or openshift_https_proxy is defined) and 
             openshift_generate_no_proxy_hosts | default(True) | bool }}"
   roles:
-  - openshift_node
+  - role: openshift_node
+    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
 
 - name: Gather and set facts for flannel certificatess
   hosts: oo_nodes_to_config
