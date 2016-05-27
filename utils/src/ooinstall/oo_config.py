@@ -1,6 +1,7 @@
 # pylint: disable=bad-continuation,missing-docstring,no-self-use,invalid-name,too-many-instance-attributes,too-few-public-methods
 
 import os
+import sys
 import yaml
 from pkg_resources import resource_filename
 
@@ -179,9 +180,7 @@ class OOConfig(object):
                     role_list = loaded_config['deployment']['roles']
                 except KeyError as e:
                     print "Error loading config, no such key: {}".format(e)
-                    os._exit(0)
-
-
+                    sys.exit(0)
 
                 for setting in CONFIG_PERSIST_SETTINGS:
                     try:
@@ -324,7 +323,7 @@ class OOConfig(object):
                 p_settings['ansible_inventory_directory'] = self.settings['ansible_inventory_directory']
         except KeyError as e:
             print "Error persisting settings: {}".format(e)
-            os._exit(0)
+            sys.exit(0)
 
 
         return p_settings

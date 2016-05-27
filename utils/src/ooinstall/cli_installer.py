@@ -1,6 +1,6 @@
 # TODO: Temporarily disabled due to importing old code into openshift-ansible
 # repo. We will work on these over time.
-# pylint: disable=bad-continuation,missing-docstring,no-self-use,invalid-name,no-value-for-parameter
+# pylint: disable=bad-continuation,missing-docstring,no-self-use,invalid-name,no-value-for-parameter,too-many-lines
 
 import click
 import os
@@ -446,7 +446,8 @@ https://docs.openshift.org/latest/install_config/install/advanced_install.html#m
             click.echo(message)
             sys.exit(1)
 
-    dedicated_nodes = [host for host in oo_cfg.deployment.hosts if host.is_node() and not host.is_master()]
+    dedicated_nodes = [host for host in oo_cfg.deployment.hosts \
+                        if host.is_node() and not host.is_master()]
     if len(dedicated_nodes) == 0:
         message = """
 WARNING: No dedicated Nodes specified. By default, colocated Masters have
@@ -526,7 +527,7 @@ def error_if_missing_info(oo_cfg):
     configured_roles = set([role for role in oo_cfg.deployment.roles])
     if listed_roles != configured_roles:
         missing_info = True
-        click.echo('Any roles assigned to hosts must be defined: {} vs {}'.format(listed_roles, configured_roles))
+        click.echo('Any roles assigned to hosts must be defined.')
 
     if missing_info:
         sys.exit(1)
@@ -609,14 +610,12 @@ https://docs.openshift.com/enterprise/latest/admin_guide/install/prerequisites.h
         oo_cfg.deployment.hosts, roles = collect_hosts(oo_cfg)
 
         for role in roles:
-            oo_cfg.deployment.roles[role] = Role(name = role, variables = {})
+            oo_cfg.deployment.roles[role] = Role(name=role, variables={})
         click.clear()
 
-#if oo_cfg.deployment.roles['master'].variables and \
-#       not 'master_routingconfig_subdomain' in oo_cfg.deployment.roles['master'].variables.keys():
     if not 'master_routingconfig_subdomain' in oo_cfg.deployment.variables:
-        #oo_cfg.deployment.roles['master'].variables['master_routingconfig_subdomain'] = get_master_routingconfig_subdomain()
-        oo_cfg.deployment.variables['master_routingconfig_subdomain'] = get_master_routingconfig_subdomain()
+        oo_cfg.deployment.variables['master_routingconfig_subdomain'] = \
+                                                            get_master_routingconfig_subdomain()
         click.clear()
 
     if not oo_cfg.settings.get('openshift_http_proxy', None) and \

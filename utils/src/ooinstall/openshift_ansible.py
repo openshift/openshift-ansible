@@ -169,15 +169,25 @@ def write_inventory_vars(base_inventory, multiple_masters, proxy):
         #base_inventory.write('openshift_image_tag=v{}\n'.format(CFG.settings.get('variant_version')))
         base_inventory.write('openshift_image_tag=v{}\n'.format('3.1.1.6'))
 
-    if CFG.settings.get('openshift_http_proxy', ''):
+    write_proxy_settings(base_inventory)
+
+
+def write_proxy_settings(base_inventory):
+    try:
         base_inventory.write("openshift_http_proxy={}\n".format(
                                                             CFG.settings['openshift_http_proxy']))
-    if CFG.settings.get('openshift_https_proxy', ''):
+    except KeyError:
+        pass
+    try:
         base_inventory.write("openshift_https_proxy={}\n".format(
                                                             CFG.settings['openshift_https_proxy']))
-    if CFG.settings.get('openshift_no_proxy', ''):
+    except KeyError:
+        pass
+    try:
         base_inventory.write("openshift_no_proxy={}\n".format(
                                                             CFG.settings['openshift_no_proxy']))
+    except KeyError:
+        pass
 
 
 def write_host(host, inventory, schedulable=None):
