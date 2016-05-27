@@ -1,6 +1,0 @@
-#[main]
-#inventory = /usr/share/ansible/inventory/multi_inventory.py
-
-#[host_type_aliases]
-#host-type-one = aliasa,aliasb
-#host-type-two = aliasfortwo
