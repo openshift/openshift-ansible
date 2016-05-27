@@ -1,7 +1,7 @@
 ---
 galaxy_info:
   author: Jason DeTiberus
-  description: HAProxy
+  description: OpenShift haproxy loadbalancer
   company: Red Hat, Inc.
   license: Apache License, Version 2.0
   min_ansible_version: 1.9
@@ -10,5 +10,6 @@ galaxy_info:
     versions:
     - 7
 dependencies:
-- { role: os_firewall }
-- { role: openshift_repos }
+- role: openshift_facts
+- role: os_firewall
+- role: openshift_repos
