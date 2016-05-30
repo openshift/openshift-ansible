@@ -881,13 +881,12 @@ class FilterModule(object):
         """
         if not isinstance(version, basestring):
             raise errors.AnsibleFilterError("|failed expects a string or unicode")
-        # TODO: Do we need to make this actually convert v1.2.0-rc1 into 1.2.0-0.rc1
-        # We'd need to be really strict about how we build the RPM Version+Release
         if version.startswith("v"):
             version = version[1:]
+            # Strip release from requested version, we no longer support this.
             version = version.split('-')[0]
 
-        if include_dash and not version.startswith("-"):
+        if include_dash and version and not version.startswith("-"):
             version = "-" + version
 
         return version
