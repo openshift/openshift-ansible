@@ -11,9 +11,24 @@
     is_containerized: "{{ openshift.common.is_containerized | default(False) | bool }}"
 
 - debug: var=openshift_version
+- debug: var=openshift_release
+- debug: var=openshift_pkg_version
+- debug: var=openshift_image_tag
 
 # RPM openshift_version setup:
-- debug: msg="{{ openshift_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }}"
+# TODO: support openshift_release here:
+- name: Determine rpm version to configure when openshift_pkg_version specified
+  set_fact:
+    # Expects a leading "-" in inventory, strip it off here, and ignore a trailing release,
+    # openshift_version should always just be "3.2" or "3.2.0.44"
+    openshift_version: "{{ openshift_pkg_version[1:].split('-')[0] }}"
+  when: not is_containerized | bool and openshift_pkg_version is defined and openshift_version is not defined
+
+- name: Use openshift.common.version fact as version to configure if already installed
+  set_fact:
+    openshift_version: "{{ openshift.common.version }}"
+  when: openshift.common.version is defined and openshift_version is not defined
+
 - name: Lookup latest OpenShift rpm version if none specified
   action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}{{ openshift_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }} state=present"
   when: not is_containerized | bool and openshift_version is not defined
@@ -26,9 +41,18 @@
     openshift_version: "{{ openshift.common.version }}"
   when: not is_containerized | bool and openshift_version is not defined
 
-# TODO: What to do if openshift_version = 3.2 for rpm based installs?
 
 # Containerized openshift_version setup:
+- name: Determine version to configure if containerized and release specified
+  set_fact:
+    openshift_version: "{{ openshift_release }}"
+  when: is_containerized | bool and openshift_release is defined and openshift_version is not defined
+
+- name: Determine container version to configure when openshift_image_tag specified
+  set_fact:
+    openshift_version: "{{ openshift_image_tag.split('v',1)[1] }}"
+  when: is_containerized | bool and openshift_image_tag is defined and openshift_version is not defined
+
 - name: Lookup latest containerized OpenShift version if none specified
   command: >
     docker run --rm {{ openshift.common.cli_image }}:latest version
@@ -52,6 +76,7 @@
 - set_fact:
     openshift_version: "{{ cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0:2][1:] | join('-') if openshift.common.deployment_type == 'origin' else cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0][1:] }}"
   when: is_containerized | bool and openshift_version is defined and openshift_version.split('.') | length == 2
+
 
 - debug: var=openshift_version
 

@@ -29,3 +29,7 @@
     - /usr/local/bin/oc
     - /usr/local/bin/kubectl
   when: openshift.common.is_containerized | bool
+
+- name: Reload facts to pick up installed OpenShift version
+  openshift_facts:
+
