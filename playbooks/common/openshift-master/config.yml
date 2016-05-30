@@ -158,10 +158,12 @@
 
 # Must be run before generating master certs which involved openshift_cli role and needs
 # to pull down the correct docker container:
-- name: Determine openshift_version to install on first master
+- name: Determine openshift_version to configure on first master
   hosts: oo_first_master
   any_errors_fatal: true
-  tasks:
+  # We do initial seeding of openshift_version if possible with these tasks. The openshift_docker role
+  # will make absolutely sure it's set to a specific version after this.
+  pre_tasks:
   - debug: var=openshift.common
   - debug: var=openshift_image_tag
   - debug: var=openshift_release
@@ -185,6 +187,24 @@
       openshift_version: "{{ openshift.common.version }}"
     when: openshift.common.version is defined
   - debug: var=openshift_version
+  roles:
+  - openshift_docker
+
+# Re-use pre-existing version fact if present, if not use the first master's
+# openshift_version calculated above.
+- name: Determine openshift_version to configure on remaining masters
+  hosts: oo_masters_to_config[1:]
+  any_errors_fatal: true
+  tasks:
+  - set_fact:
+      openshift_version: "{{ hostvars[groups.oo_first_master.0].openshift_version }}"
+    when: openshift.common.version is not defined
+  - set_fact:
+      openshift_version: "{{ openshift.common.version }}"
+    when: openshift.common.version is defined
+  - debug: var=openshift_version
+  post_tasks:
+  - fail:
 
 - name: Determine if master certificates need to be generated
   hosts: oo_first_master:oo_masters_to_config
