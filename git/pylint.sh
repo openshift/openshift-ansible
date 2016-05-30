@@ -7,6 +7,7 @@ ANSIBLE_UPSTREAM_FILES=(
     'inventory/libvirt/hosts/libvirt_generic.py'
     'inventory/openstack/hosts/nova.py'
     'lookup_plugins/sequence.py'
+    'playbooks/gce/openshift-cluster/library/gce.py'
   )
 
 OLDREV=$1

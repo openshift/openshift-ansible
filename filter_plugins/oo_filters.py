@@ -306,7 +306,7 @@ class FilterModule(object):
         return string.split(separator)
 
     @staticmethod
-    def oo_haproxy_backend_masters(hosts):
+    def oo_haproxy_backend_masters(hosts, port):
         """ This takes an array of dicts and returns an array of dicts
             to be used as a backend for the haproxy role
         """
@@ -314,8 +314,7 @@ class FilterModule(object):
         for idx, host_info in enumerate(hosts):
             server = dict(name="master%s" % idx)
             server_ip = host_info['openshift']['common']['ip']
-            server_port = host_info['openshift']['master']['api_port']
-            server['address'] = "%s:%s" % (server_ip, server_port)
+            server['address'] = "%s:%s" % (server_ip, port)
             server['opts'] = 'check'
             servers.append(server)
         return servers

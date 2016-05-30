@@ -12,10 +12,11 @@ galaxy_info:
   categories:
   - cloud
 dependencies:
+- role: openshift_clock
 - role: openshift_docker
+- role: openshift_node_certificates
 - role: openshift_cloud_provider
 - role: openshift_common
 - role: openshift_node_dnsmasq
   when: openshift.common.use_dnsmasq
 - role: os_firewall
-

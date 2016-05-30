@@ -1,7 +1,20 @@
+- hosts: localhost
+  gather_facts: no
+  tasks:
+  - include_vars: vars.yml
+  - include_vars: cluster_hosts.yml
+  - add_host:
+      name: "{{ item }}"
+      groups: l_oo_all_hosts
+    with_items: g_all_hosts
+
+- hosts: l_oo_all_hosts
+  gather_facts: no
+  tasks:
+  - include_vars: vars.yml
+  - include_vars: cluster_hosts.yml
+
 - include: ../../common/openshift-cluster/config.yml
-  vars_files:
-  - ../../aws/openshift-cluster/vars.yml
-  - ../../aws/openshift-cluster/cluster_hosts.yml
   vars:
     g_ssh_user:     "{{ deployment_vars[deployment_type].ssh_user }}"
     g_sudo:         "{{ deployment_vars[deployment_type].become }}"
@@ -21,3 +34,4 @@
     os_sdn_network_plugin_name: "{{ lookup('oo_option', 'sdn_network_plugin_name') }}"
     openshift_use_flannel: "{{ lookup('oo_option', 'use_flannel') }}"
     openshift_use_fluentd: "{{ lookup('oo_option', 'use_fluentd') }}"
+    openshift_use_dnsmasq: false

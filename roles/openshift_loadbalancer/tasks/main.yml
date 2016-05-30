@@ -1,0 +1,73 @@
+---
+- name: Set haproxy frontend port
+  openshift_facts:
+    role: loadbalancer
+    local_facts:
+      frontend_port: "{{ openshift_master_api_port | default(None) }}"
+
+- name: Set loadbalancer facts
+  openshift_facts:
+    role: loadbalancer
+    local_facts:
+      limit_nofile: "{{ openshift_loadbalancer_limit_nofile | default(None) }}"
+      default_maxconn: "{{ openshift_loadbalancer_default_maxconn | default(None) }}"
+      global_maxconn: "{{ openshift_loadbalancer_global_maxconn | default(None) }}"
+      frontends:
+      - name: atomic-openshift-api
+        mode: tcp
+        options:
+        - tcplog
+        binds:
+        - "*:{{ openshift.loadbalancer.frontend_port }}"
+        default_backend: atomic-openshift-api
+      backends:
+      - name: atomic-openshift-api
+        mode: tcp
+        option: tcplog
+        balance: source
+        servers: "{{ hostvars
+                     | oo_select_keys(groups['oo_masters'])
+                     | oo_haproxy_backend_masters(openshift.loadbalancer.frontend_port) }}"
+
+- name: Install haproxy
+  action: "{{ ansible_pkg_mgr }} name=haproxy state=present"
+  when: not openshift.common.is_containerized | bool
+
+- name: Configure systemd service directory for haproxy
+  file:
+    path: /etc/systemd/system/haproxy.service.d
+    state: directory
+  when: "'limit_nofile' in openshift.loadbalancer"
+
+- name: Configure the nofile limits for haproxy
+  ini_file:
+    dest: /etc/systemd/system/haproxy.service.d/limits.conf
+    section: Service
+    option: LimitNOFILE
+    value: "{{ openshift.loadbalancer.limit_nofile }}"
+  when: "'limit_nofile' in openshift.loadbalancer"
+  notify: restart haproxy
+  register: nofile_limit_result
+
+- name: Reload systemd if needed
+  command: systemctl daemon-reload
+  when: nofile_limit_result | changed
+
+- name: Configure haproxy
+  template:
+    src: haproxy.cfg.j2
+    dest: /etc/haproxy/haproxy.cfg
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart haproxy
+
+- name: Enable and start haproxy
+  service:
+    name: haproxy
+    state: started
+    enabled: yes
+  register: start_result
+
+- set_fact:
+    haproxy_start_result_changed: "{{ start_result | changed }}"

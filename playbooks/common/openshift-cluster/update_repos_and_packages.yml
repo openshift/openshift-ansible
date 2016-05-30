@@ -1,4 +1,6 @@
 ---
+- include: evaluate_groups.yml
+
 - hosts: oo_hosts_to_update
   vars:
     openshift_deployment_type: "{{ deployment_type }}"

@@ -1,0 +1,56 @@
+---
+- fail:
+    msg: "openshift_ca_host variable must be defined for this role"
+  when: openshift_ca_host is not defined
+
+- name: Install the base package for admin tooling
+  action: >
+    {{ ansible_pkg_mgr }}
+    name={{ openshift.common.service_type }}{{ openshift_version  }}
+    state=present
+  when: not openshift.common.is_containerized | bool
+  register: install_result
+  delegate_to: "{{ openshift_ca_host }}"
+  run_once: true
+
+- name: Reload generated facts
+  openshift_facts:
+  when: install_result | changed
+  delegate_to: "{{ openshift_ca_host }}"
+  run_once: true
+
+- name: Create openshift_ca_config_dir if it does not exist
+  file:
+    path: "{{ openshift_ca_config_dir }}"
+    state: directory
+  delegate_to: "{{ openshift_ca_host }}"
+  run_once: true
+
+- name: Determine if CA must be created
+  stat:
+    path: "{{ openshift_ca_config_dir }}/{{ item }}"
+  register: g_master_ca_stat_result
+  with_items:
+  - ca.crt
+  - ca.key
+  delegate_to: "{{ openshift_ca_host }}"
+  run_once: true
+
+- set_fact:
+    master_ca_missing: "{{ False in (g_master_ca_stat_result.results
+                           | oo_collect(attribute='stat.exists')
+                           | list) }}"
+  delegate_to: "{{ openshift_ca_host }}"
+  run_once: true
+
+- name: Create the master certificates if they do not already exist
+  command: >
+    {{ openshift.common.admin_binary }} create-master-certs
+      --hostnames={{ openshift_master_hostnames | join(',') }}
+      --master={{ openshift.master.api_url }}
+      --public-master={{ openshift.master.public_api_url }}
+      --cert-dir={{ openshift_ca_config_dir }}
+      --overwrite=false
+  when: hostvars[openshift_ca_host].master_ca_missing | bool
+  delegate_to: "{{ openshift_ca_host }}"
+  run_once: true
