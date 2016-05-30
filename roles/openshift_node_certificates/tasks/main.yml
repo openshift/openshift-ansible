@@ -1,95 +1,36 @@
 ---
-- name: Check status of node certificates
-  stat:
-    path: "{{ openshift.common.config_base }}/node/{{ item }}"
-  with_items:
-  - "system:node:{{ openshift.common.hostname }}.crt"
-  - "system:node:{{ openshift.common.hostname }}.key"
-  - "system:node:{{ openshift.common.hostname }}.kubeconfig"
-  - ca.crt
-  - server.key
-  - server.crt
-  register: g_node_cert_stat_result
-
-- set_fact:
-    node_certs_missing: "{{ False in (g_node_cert_stat_result.results
-                            | oo_collect(attribute='stat.exists')
-                            | list) }}"
-
-- name: Create openshift_generated_configs_dir if it does not exist
+- name: Create openshift_generated_configs_dir if it doesn\'t exist
   file:
     path: "{{ openshift_generated_configs_dir }}"
     state: directory
     mode: 0700
-  when: node_certs_missing | bool
-  delegate_to: "{{ openshift_ca_host }}"
+  when: nodes_needing_certs | length > 0
 
 - name: Generate the node client config
   command: >
     {{ openshift.common.admin_binary }} create-api-client-config
-      --certificate-authority={{ openshift_ca_cert }}
-      --client-dir={{ openshift_node_generated_config_dir }}
+      --certificate-authority={{ openshift_master_ca_cert }}
+      --client-dir={{ openshift_generated_configs_dir }}/node-{{ item.openshift.common.hostname }}
       --groups=system:nodes
-      --master={{ hostvars[openshift_ca_host].openshift.master.api_url }}
-      --signer-cert={{ openshift_ca_cert }}
-      --signer-key={{ openshift_ca_key }}
-      --signer-serial={{ openshift_ca_serial }}
-      --user=system:node:{{ openshift.common.hostname }}
+      --master={{ openshift.master.api_url }}
+      --signer-cert={{ openshift_master_ca_cert }}
+      --signer-key={{ openshift_master_ca_key }}
+      --signer-serial={{ openshift_master_ca_serial }}
+      --user=system:node:{{ item.openshift.common.hostname }}
   args:
-    creates: "{{ openshift_node_generated_config_dir }}"
-  when: node_certs_missing | bool
-  delegate_to: "{{ openshift_ca_host }}"
+    creates: "{{ openshift_generated_configs_dir }}/node-{{ item.openshift.common.hostname }}"
+  with_items: "{{ nodes_needing_certs | default([]) }}"
 
 - name: Generate the node server certificate
   command: >
     {{ openshift.common.admin_binary }} ca create-server-cert
-      --cert={{ openshift_node_generated_config_dir }}/server.crt
-      --key={{ openshift_generated_configs_dir }}/node-{{ openshift.common.hostname }}/server.key
+      --cert={{ openshift_generated_configs_dir }}/node-{{ item.openshift.common.hostname }}/server.crt
+      --key={{ openshift_generated_configs_dir }}/node-{{ item.openshift.common.hostname }}/server.key
       --overwrite=true
-      --hostnames={{ openshift.common.all_hostnames |join(",") }}
-      --signer-cert={{ openshift_ca_cert }}
-      --signer-key={{ openshift_ca_key }}
-      --signer-serial={{ openshift_ca_serial }}
+      --hostnames={{ item.openshift.common.all_hostnames |join(",") }}
+      --signer-cert={{ openshift_master_ca_cert }}
+      --signer-key={{ openshift_master_ca_key }}
+      --signer-serial={{ openshift_master_ca_serial }}
   args:
-    creates: "{{ openshift_node_generated_config_dir }}/server.crt"
-  when: node_certs_missing | bool
-  delegate_to: "{{ openshift_ca_host}}"
-
-- name: Create local temp directory for syncing certs
-  local_action: command mktemp -d /tmp/openshift-ansible-XXXXXXX
-  register: node_cert_mktemp
-  changed_when: False
-  when: node_certs_missing | bool
-  delegate_to: localhost
-
-- name: Create a tarball of the node config directories
-  command: >
-    tar -czvf {{ openshift_node_generated_config_dir }}.tgz
-    --transform 's|system:{{ openshift_node_cert_subdir }}|node|'
-    -C {{ openshift_node_generated_config_dir }} .
-  args:
-    creates: "{{ openshift_node_generated_config_dir }}.tgz"
-  when: node_certs_missing | bool
-  delegate_to: "{{ openshift_ca_host }}"
-
-- name: Retrieve the node config tarballs from the master
-  fetch:
-    src: "{{ openshift_node_generated_config_dir }}.tgz"
-    dest: "{{ node_cert_mktemp.stdout }}/"
-    flat: yes
-    fail_on_missing: yes
-    validate_checksum: yes
-  when: node_certs_missing | bool
-  delegate_to: "{{ openshift_ca_host }}"
-
-- name: Ensure certificate directory exists
-  file:
-    path: "{{ openshift_node_cert_dir }}"
-    state: directory
-  when: node_certs_missing | bool
-
-- name: Unarchive the tarball on the node
-  unarchive:
-    src: "{{ node_cert_mktemp.stdout }}/{{ openshift_node_cert_subdir }}.tgz"
-    dest: "{{ openshift_node_cert_dir }}"
-  when: node_certs_missing | bool
+    creates: "{{ openshift_generated_configs_dir }}/node-{{ item.openshift.common.hostname }}/server.crt"
+  with_items: "{{ nodes_needing_certs | default([]) }}"

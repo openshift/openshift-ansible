@@ -1,5 +1,5 @@
-OpenShift/Atomic Enterprise Node Certificates
-=============================================
+OpenShift Master CA
+========================
 
 TODO
 
