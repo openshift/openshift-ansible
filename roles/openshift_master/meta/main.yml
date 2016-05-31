@@ -15,7 +15,6 @@ dependencies:
 - role: openshift_clock
 - role: openshift_docker
 - role: openshift_cli
-- role: openshift_master_certificates
 - role: openshift_cloud_provider
 - role: openshift_builddefaults
 - role: openshift_master_facts
