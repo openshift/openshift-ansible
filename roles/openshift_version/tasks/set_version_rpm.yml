@@ -1,0 +1,23 @@
+---
+# TODO: support openshift_release here?
+- name: Set rpm version to configure if openshift_pkg_version specified
+  set_fact:
+    # Expects a leading "-" in inventory, strip it off here, and ignore a trailing release,
+    # openshift_version should always just be "3.2" or "3.2.0.44"
+    openshift_version: "{{ openshift_pkg_version[1:].split('-')[0] }}"
+  when: openshift_pkg_version is defined
+
+# We do not have as fine grained control over version to install presently with rpms,
+# we just assume the user has configured the correct repos and install the rpm requested.
+- name: Install latest rpm available in configured repos to check version
+  action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}{{ openshift_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }} state=present"
+  when: openshift_version is not defined
+
+- name: Reload facts to pick up version
+  openshift_facts:
+  when: openshift_version is not defined
+
+- name: Set rpm version to configure to latest available in repos
+  set_fact:
+    openshift_version: "{{ openshift.common.version }}"
+  when: openshift_version is not defined

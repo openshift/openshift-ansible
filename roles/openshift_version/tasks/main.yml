@@ -1,0 +1,29 @@
+---
+# Determine the openshift_version to configure if none has been specified or set previously.
+
+- set_fact:
+    is_containerized: "{{ openshift.common.is_containerized | default(False) | bool }}"
+
+- debug: var=openshift_version
+- debug: var=openshift_release
+- debug: var=openshift_pkg_version
+- debug: var=openshift_image_tag
+
+# Here we protect the version already installed unless something has already set
+# an openshift_version to configure.
+- name: Use openshift.common.version fact as version to configure if already installed
+  set_fact:
+    openshift_version: "{{ openshift.common.version }}"
+  when: openshift.common.version is defined and openshift_version is not defined
+
+- name: Set openshift_version for rpm installation
+  include: set_version_rpm.yml
+  when: not is_containerized and openshift_version is not defined
+
+- name: Set openshift_version for containerized installation
+  include: set_version_containerized.yml
+  when: is_containerized and openshift_version is not defined
+
+- debug: var=openshift_version
+
+
