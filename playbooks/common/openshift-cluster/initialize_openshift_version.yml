@@ -5,7 +5,7 @@
   roles:
   # Using the CLI role here to install the CLI tool/wrapper, and set the
   # openshift.common.version fact which other hosts can then reference.
-  - openshift_cli
+  - openshift_version
   pre_tasks:
   - debug: var=openshift.common.version
   - debug: var=openshift_version
@@ -19,14 +19,13 @@
 - name: Set openshift_version for all hosts
   hosts: oo_all_hosts
   tasks:
-  - debug: var=hostvars[groups.oo_first_master.0].openshift.common.version
+  - debug: var=hostvars[groups.oo_first_master.0].openshift_version
   - debug: var=openshift.common.version
   - debug: var=openshift_version
-    # TODO: Should we use the first master's "openshift_version" var instead of a fact? Could go to just openshift_docker role above, and skip CLI config this early.
   - set_fact:
-      openshift_version: "{{ openshift.common.version if openshift.common.version is defined else hostvars[groups.oo_first_master.0].openshift.common.version.split('-')[0] }}"
+      openshift_version: "{{ openshift.common.version if openshift.common.version is defined else hostvars[groups.oo_first_master.0].openshift_version }}"
     when: inventory_hostname != groups.oo_first_master.0
-  - debug: var=hostvars[groups.oo_first_master.0].openshift.common.version
+  - debug: var=hostvars[groups.oo_first_master.0].openshift_version
   - debug: var=openshift.common.version
   - debug: var=openshift_version
 
