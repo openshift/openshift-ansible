@@ -109,22 +109,6 @@
     with_items: "{{ groups.oo_nodes_to_config | default([]) }}"
     when: hostvars[item].openshift.common.is_containerized | bool and (item in groups.oo_nodes_to_config and item in groups.oo_masters_to_config)
 
-- name: Determine openshift_version to install on nodes
-  hosts: oo_nodes_to_config
-  any_errors_fatal: true
-  tasks:
-  - debug: var=hostvars[groups.oo_first_master.0].openshift.common.version
-  - debug: var=openshift.common.version
-  - name: Set openshift_version to match first master for new node
-    set_fact:
-      openshift_version: "{{ hostvars[groups.oo_first_master.0].openshift.common.version }}"
-    when: openshift.common.version is not defined
-  - name: Set openshift_version to currently installed version
-    set_fact:
-      openshift_version: "{{ openshift.common.version }}"
-    when: openshift.common.version is defined
-  - debug: var=openshift_version
-
 - name: Configure node instances
   hosts: oo_containerized_master_nodes
   serial: 1
