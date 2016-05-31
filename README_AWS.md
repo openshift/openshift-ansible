@@ -35,12 +35,12 @@ By default, a cluster is launched into the `public` security group. Make sure yo
 You may also want to allow access from the outside world on the following ports:
 
 ```
-• 22    - ssh
-• 80    - Web Apps
-• 443   - Web Apps (https)
-• 4789  - SDN / VXLAN
-• 8443  - OpenShift Console
-• 10250 - kubelet
+• 22/TCP    - ssh
+• 80/TCP    - Web Apps
+• 443/TCP   - Web Apps (https)
+• 4789/UDP  - SDN / VXLAN
+• 8443/TCP  - OpenShift Console
+• 10250/TCP - kubelet
 ```
 
 
