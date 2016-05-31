@@ -210,6 +210,7 @@
   until: api_available_output.stdout == 'ok'
   retries: 120
   delay: 1
+  run_once: true
   changed_when: false
   when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and master_api_service_status_changed | bool
 
