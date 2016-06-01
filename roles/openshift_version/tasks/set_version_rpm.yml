@@ -5,7 +5,7 @@
     # Expects a leading "-" in inventory, strip it off here, and ignore a trailing release,
     # openshift_version should always just be "3.2" or "3.2.0.44"
     openshift_version: "{{ openshift_pkg_version[1:].split('-')[0] }}"
-  when: openshift_pkg_version is defined
+  when: openshift_pkg_version is defined and openshift_version is not defined
 
 # We do not have as fine grained control over version to install presently with rpms,
 # we just assume the user has configured the correct repos and install the rpm requested.

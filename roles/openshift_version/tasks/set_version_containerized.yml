@@ -2,7 +2,7 @@
 - name: Set containerized version to configure if openshift_image_tag specified
   set_fact:
     openshift_version: "{{ openshift_image_tag.split('v',1)[1] }}"
-  when: openshift_image_tag is defined
+  when: openshift_image_tag is defined and openshift_version is not defined
 
 - name: Set containerized version to configure if openshift_release specified
   set_fact:
@@ -21,6 +21,9 @@
     openshift_version: "{{ cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0:2][1:] | join('-') if openshift.common.deployment_type == 'origin' else cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0][1:] }}"
   when: openshift_version is not defined
 
+- debug: msg="{{ openshift_version }}"
+#- debug: var=openshift_version.split('.')
+
 # If we got an openshift_version like "3.2", lookup the latest 3.2 container version
 # and use that value instead.
 - name: Set precise containerized version to configure if openshift_release specified
@@ -32,3 +35,4 @@
 - set_fact:
     openshift_version: "{{ cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0:2][1:] | join('-') if openshift.common.deployment_type == 'origin' else cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0][1:] }}"
   when: openshift_version is defined and openshift_version.split('.') | length == 2
+

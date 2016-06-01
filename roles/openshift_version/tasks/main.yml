@@ -18,11 +18,11 @@
 
 - name: Set openshift_version for rpm installation
   include: set_version_rpm.yml
-  when: not is_containerized and openshift_version is not defined
+  when: not is_containerized
 
 - name: Set openshift_version for containerized installation
   include: set_version_containerized.yml
-  when: is_containerized and openshift_version is not defined
+  when: is_containerized
 
 - debug: var=openshift_version
 
