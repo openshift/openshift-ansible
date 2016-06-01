@@ -1,16 +1,2 @@
 ---
-os_firewall_allow:
-- service: Kubernetes kubelet
-  port: 10250/tcp
-- service: http
-  port: 80/tcp
-- service: https
-  port: 443/tcp
-- service: Openshift kubelet ReadOnlyPort
-  port: 10255/tcp
-- service: Openshift kubelet ReadOnlyPort udp
-  port: 10255/udp
-- service: OpenShift OVS sdn
-  port: 4789/udp
-  when: openshift.node.use_openshift_sdn | bool
 openshift_version: "{{ openshift_pkg_version | default(openshift_image_tag | default(openshift.docker.openshift_image_tag | default(''))) }}"
