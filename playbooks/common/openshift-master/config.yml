@@ -321,13 +321,13 @@
     openshift_master_session_auth_secrets: "{{ hostvars[groups.oo_first_master.0].openshift.master.session_auth_secrets }}"
     openshift_master_session_encryption_secrets: "{{ hostvars[groups.oo_first_master.0].openshift.master.session_encryption_secrets }}"
     openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"
-    openshift_no_proxy_internal_hostnames: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config']
-                                                    | union(groups['oo_masters_to_config'])
-                                                    | union(groups['oo_etcd_to_config'] | default([])))
-                                                | oo_collect('openshift.common.hostname') | default([]) | join (',')
-                                                }}"
-    when: "{{ (openshift_http_proxy is defined or openshift_https_proxy is defined) and 
-            openshift_generate_no_proxy_hosts | default(True) | bool }}"
+#    openshift_no_proxy_internal_hostnames: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config']
+#                                                    | union(groups['oo_masters_to_config'])
+#                                                    | union(groups['oo_etcd_to_config'] | default([])))
+#                                                | oo_collect('openshift.common.hostname') | default([]) | join (',')
+#                                                }}"
+#    when: "{{ (openshift_http_proxy is defined or openshift_https_proxy is defined) and
+#            openshift_generate_no_proxy_hosts | default(True) | bool }}"
   pre_tasks:
   - name: Ensure certificate directory exists
     file:
