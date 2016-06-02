@@ -6,13 +6,13 @@
             "description": "Application template for JBoss A-MQ brokers. These can be deployed as standalone and use persistent storage for saving messages. This template doesn't feature SSL support.",
             "iconClass": "icon-jboss",
             "tags": "messaging,amq,jboss,xpaas",
-            "version": "1.2.0"
+            "version": "1.3.1"
         },
         "name": "amq62-persistent"
     },
     "labels": {
         "template": "amq62-persistent",
-        "xpaas": "1.2.0"
+        "xpaas": "1.3.1"
     },
     "parameters": [
         {
@@ -20,6 +20,12 @@
             "name": "APPLICATION_NAME",
             "value": "broker",
             "required": true
+        },
+        {
+            "description": "Split the data directory for each node in a mesh.",
+            "name": "AMQ_SPLIT",
+            "value": "false",
+            "required": false
         },
         {
             "description": "Protocols to configure, separated by commas.  Allowed values are: `openwire`, `amqp`, `stomp` and `mqtt`.",
@@ -57,6 +63,12 @@
             "name": "MQ_PASSWORD",
             "from": "[a-zA-Z0-9]{8}",
             "generate": "expression",
+            "required": false
+        },
+        {
+            "description": "The discovery agent type to use for discovering mesh endpoints.  'dns' will use OpenShift's DNS service to resolve endpoints.  'kube' will use Kubernetes REST API to resolve service endpoints.  If using 'kube' the service account for the pod must have the 'view' role, which can be added via 'oc policy add-role-to-user view system:serviceaccount:<namespace>:default' where <namespace> is the project namespace.",
+            "name": "AMQ_MESH_DISCOVERY_TYPE",
+            "value": "kube",
             "required": false
         },
         {
@@ -180,7 +192,10 @@
             },
             "spec": {
                 "strategy": {
-                    "type": "Recreate"
+                    "type": "Rolling",
+                    "rollingParams": {
+                        "maxSurge": 0
+                    }
                 },
                 "triggers": [
                     {
@@ -193,7 +208,7 @@
                             "from": {
                                 "kind": "ImageStreamTag",
                                 "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                                "name": "jboss-amq-62:1.2"
+                                "name": "jboss-amq-62:1.3"
                             }
                         }
                     },
@@ -222,7 +237,7 @@
                                 "imagePullPolicy": "Always",
                                 "volumeMounts": [
                                     {
-                                        "mountPath": "/opt/amq/data/kahadb",
+                                        "mountPath": "/opt/amq/data",
                                         "name": "${APPLICATION_NAME}-amq-pvol"
                                     }
                                 ],
@@ -284,6 +299,26 @@
                                         "value": "${MQ_TOPICS}"
                                     },
                                     {
+                                        "name": "AMQ_SPLIT",
+                                        "value": "${AMQ_SPLIT}"
+                                    },
+                                    {
+                                        "name": "AMQ_MESH_DISCOVERY_TYPE",
+                                        "value": "${AMQ_MESH_DISCOVERY_TYPE}"
+                                    },
+                                    {
+                                        "name": "AMQ_MESH_SERVICE_NAME",
+                                        "value": "${APPLICATION_NAME}-amq-tcp"
+                                    },
+                                    {
+                                        "name": "AMQ_MESH_SERVICE_NAMESPACE",
+                                        "valueFrom": {
+                                            "fieldRef": {
+                                                "fieldPath": "metadata.namespace"
+                                            }
+                                        }
+                                    },
+                                    {
                                         "name": "AMQ_STORAGE_USAGE_LIMIT",
                                         "value": "${AMQ_STORAGE_USAGE_LIMIT}"
                                     }
@@ -313,7 +348,7 @@
             },
             "spec": {
                 "accessModes": [
-                    "ReadWriteOnce"
+                    "ReadWriteMany"
                 ],
                 "resources": {
                     "requests": {
