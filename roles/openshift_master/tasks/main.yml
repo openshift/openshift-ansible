@@ -93,7 +93,7 @@
     src: htpasswd.j2
     mode: 0600
     backup: yes
-  when: item.kind == 'HTPasswdPasswordIdentityProvider'
+  when: item.kind == 'HTPasswdPasswordIdentityProvider' and openshift.master.manage_htpasswd | bool
   with_items: "{{ openshift.master.identity_providers }}"
 
 - name: Create the ldap ca file if needed
