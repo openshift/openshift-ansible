@@ -7,9 +7,24 @@
     deploy_infra: "{{ openshift.master.infra_nodes | default([]) | length > 0 }}"
     persistent_volumes: "{{ hostvars[groups.oo_first_master.0] | oo_persistent_volumes(groups) }}"
     persistent_volume_claims: "{{ hostvars[groups.oo_first_master.0] | oo_persistent_volume_claims }}"
+    openshift_projects:
+      default:
+        default_node_selector: "{{ openshift_hosted_router_selector
+                                   | default(openshift_hosted_infra_selector
+                                             | default(omit)) }}"
+      openshift-infra:
+        default_node_selector: "{{ openshift_hosted_metrics_selector
+                                   | default(openshift_hosted_infra_selector
+                                             | default(omit)) }}"
+      logging:
+        default_node_selector: "{{ openshift_hosted_logging_selector
+                                   | default(openshift_hosted_infra_selector
+                                             | default(omit)) }}"
   roles:
   - role: openshift_persistent_volumes
     when: persistent_volumes | length > 0 or persistent_volume_claims | length > 0
+  - role: openshift_projects
+    openshift_projects: "{{ openshift_additional_projects | default({}) | oo_dict_merge(openshift_projects) }}"
   - role: openshift_serviceaccounts
     openshift_serviceaccounts_names:
     - router
