@@ -72,11 +72,8 @@ deployment_type=openshift-enterprise
 # Disable pushing to dockerhub
 #openshift_docker_disable_push_dockerhub=True
 # Items added, as is, to end of /etc/sysconfig/docker OPTIONS
+# Default value: "--log-driver=json-file --log-opt max-size=50m"
 #openshift_docker_options="-l warn --ipv6=false"
-# Deprecated methods to set --log-driver and --log-opts flags, use openshift_docker_options instead
-#openshift_docker_log_driver=json
-#openshift_docker_log_options=["tag=mailer"]
-
 
 # Alternate image format string. If you're not modifying the format string and
 # only need to inject your own registry you may want to consider
