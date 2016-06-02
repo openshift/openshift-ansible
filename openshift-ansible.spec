@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.95
+Version:        3.0.96
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -205,6 +205,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Jun 02 2016 Scott Dodson <sdodson@redhat.com> 3.0.96-1
+- Run rhel_subscribe on l_oo_all_hosts rather than all (sdodson@redhat.com)
+
 * Wed Jun 01 2016 Scott Dodson <sdodson@redhat.com> 3.0.95-1
 - pylint (smunilla@redhat.com)
 - Updates based on feedback from detiber (smunilla@redhat.com)
