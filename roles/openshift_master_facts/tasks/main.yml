@@ -61,7 +61,6 @@
       registry_selector: "{{ openshift_registry_selector | default(None) }}"
       api_server_args: "{{ osm_api_server_args | default(None) }}"
       controller_args: "{{ osm_controller_args | default(None) }}"
-      infra_nodes: "{{ openshift_infra_nodes | default(None) }}"
       disabled_features: "{{ osm_disabled_features | default(None) }}"
       master_count: "{{ openshift_master_count | default(None) }}"
       controller_lease_ttl: "{{ osm_controller_lease_ttl | default(None) }}"

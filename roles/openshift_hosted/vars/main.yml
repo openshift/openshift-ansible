@@ -1,2 +1,3 @@
 ---
 openshift_master_config_dir: "{{ openshift.common.config_base }}/master"
+registry_config_secret_name: registry-config

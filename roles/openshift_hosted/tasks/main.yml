@@ -12,8 +12,8 @@
     cp {{ openshift_master_config_dir }}/admin.kubeconfig {{ openshift_hosted_kubeconfig }}
   changed_when: False
 
-- include: router.yml
-- include: registry.yml
+- include: router/router.yml
+- include: registry/registry.yml
 
 - name: Delete temp directory
   file:

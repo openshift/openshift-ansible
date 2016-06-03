@@ -707,7 +707,8 @@ class FilterModule(object):
             if regex.match(key):
                 facts[key] = hostvars[key]
 
-        migrations = {'openshift_router_selector': 'openshift_hosted_router_selector'}
+        migrations = {'openshift_router_selector': 'openshift_hosted_router_selector',
+                      'openshift_registry_selector': 'openshift_hosted_registry_selector'}
         for old_fact, new_fact in migrations.iteritems():
             if old_fact in facts and new_fact not in facts:
                 facts[new_fact] = facts[old_fact]
@@ -771,7 +772,7 @@ class FilterModule(object):
                                         fsType=filesystem,
                                         volumeID=volume_id)))
                             persistent_volumes.append(persistent_volume)
-                        else:
+                        elif kind != 'object':
                             msg = "|failed invalid storage kind '{0}' for component '{1}'".format(
                                 kind,
                                 component)

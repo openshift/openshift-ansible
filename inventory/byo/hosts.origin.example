@@ -241,7 +241,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Registry selector (optional)
 # Registry will only be created if nodes matching this label are present.
 # Default value: 'region=infra'
-#openshift_registry_selector='region=infra'
+#openshift_hosted_registry_selector='region=infra'
 
 # Configure the multi-tenant SDN plugin (default is 'redhat/openshift-ovs-subnet')
 # os_sdn_network_plugin_name='redhat/openshift-ovs-multitenant'

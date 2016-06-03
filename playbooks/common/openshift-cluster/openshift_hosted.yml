@@ -3,11 +3,9 @@
   tags:
   - hosted
   vars:
-    attach_registry_volume: "{{ openshift.hosted.registry.storage.kind != None }}"
-    deploy_infra: "{{ openshift.master.infra_nodes | default([]) | length > 0 }}"
     persistent_volumes: "{{ hostvars[groups.oo_first_master.0] | oo_persistent_volumes(groups) }}"
     persistent_volume_claims: "{{ hostvars[groups.oo_first_master.0] | oo_persistent_volume_claims }}"
-    openshift_projects:
+    l_projects:
       default:
         default_node_selector: "{{ openshift_hosted_router_selector
                                    | default(openshift_hosted_infra_selector
@@ -24,7 +22,7 @@
   - role: openshift_persistent_volumes
     when: persistent_volumes | length > 0 or persistent_volume_claims | length > 0
   - role: openshift_projects
-    openshift_projects: "{{ openshift_additional_projects | default({}) | oo_dict_merge(openshift_projects) }}"
+    openshift_projects: "{{ openshift_additional_projects | default({}) | oo_merge_dicts(l_projects) }}"
   - role: openshift_serviceaccounts
     openshift_serviceaccounts_names:
     - router
@@ -32,9 +30,6 @@
     openshift_serviceaccounts_namespace: default
     openshift_serviceaccounts_sccs:
     - privileged
-  - role: openshift_registry
-    registry_volume_claim: "{{ openshift.hosted.registry.storage.volume.name }}-claim"
-    when: deploy_infra | bool and attach_registry_volume | bool
   - role: openshift_metrics
     when: openshift.hosted.metrics.deploy | bool
 
@@ -44,6 +39,6 @@
   - hosted
   pre_tasks:
   - set_fact:
-      openshift_hosted_router_registryurl: "{{ hostvars[groups.oo_first_master.0].openshift.master.registry_url }}"
+      openshift_hosted_registry_registryurl: "{{ hostvars[groups.oo_first_master.0].openshift.master.registry_url }}"
   roles:
   - role: openshift_hosted
