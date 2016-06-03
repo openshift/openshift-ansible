@@ -67,12 +67,12 @@
 
   - name: "Create deployer template"
     command: >
-      {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig create -f /usr/share/openshift/examples/infrastructure-templates/enterprise/logging-deployer.yaml -n openshift
+      {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig create -f /usr/share/openshift/examples/infrastructure-templates/enterprise/logging-deployer.yaml
     register: template_output
     failed_when: "template_output.rc == 1 and 'exists' not in template_output.stderr"
 
   - name: "Process the deployer template"
-    shell:  "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig process logging-deployer-template -n openshift -v {{ oc_process_values }} |  {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig create -f -"
+    shell:  "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig process logging-deployer-template -v {{ oc_process_values }} |  {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig create -f -"
 
   - name: "Wait for image pull and deployer pod"
     shell:  "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get pods | grep logging-deployer.*Completed"
