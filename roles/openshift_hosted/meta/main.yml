@@ -12,5 +12,23 @@ galaxy_info:
   categories:
   - cloud
 dependencies:
-- openshift_common
-- openshift_hosted_facts
+- role: openshift_common
+- role: openshift_hosted_facts
+- role: openshift_projects
+- role: openshift_serviceaccounts
+  openshift_serviceaccounts_names:
+  - router
+  openshift_serviceaccounts_namespace: default
+  openshift_serviceaccounts_sccs:
+  - hostnetwork
+  when: openshift.common.version_gte_3_2_or_1_2
+- role: openshift_serviceaccounts
+  openshift_serviceaccounts_names:
+  - router
+  - registry
+  openshift_serviceaccounts_namespace: default
+  openshift_serviceaccounts_sccs:
+  - privileged
+  when: not openshift.common.version_gte_3_2_or_1_2
+- role: openshift_metrics
+  when: openshift.hosted.metrics.deploy | bool
