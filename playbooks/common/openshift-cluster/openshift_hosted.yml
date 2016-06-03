@@ -1,5 +1,7 @@
 - name: Create persistent volumes
   hosts: oo_first_master
+  tags:
+  - hosted
   vars:
     persistent_volumes: "{{ hostvars[groups.oo_first_master.0] | oo_persistent_volumes(groups) }}"
     persistent_volume_claims: "{{ hostvars[groups.oo_first_master.0] | oo_persistent_volume_claims }}"
@@ -9,6 +11,8 @@
 
 - name: Create Hosted Resources
   hosts: oo_first_master
+  tags:
+  - hosted
   pre_tasks:
   - set_fact:
       openshift_hosted_router_registryurl: "{{ hostvars[groups.oo_first_master.0].openshift.master.registry_url }}"
