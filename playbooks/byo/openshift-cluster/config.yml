@@ -3,6 +3,8 @@
   connection: local
   become: no
   gather_facts: no
+  tags:
+  - always
   tasks:
   - include_vars: ../../byo/openshift-cluster/cluster_hosts.yml
   - add_host:
@@ -12,6 +14,8 @@
 
 - hosts: l_oo_all_hosts
   gather_facts: no
+  tags:
+  - always
   tasks:
   - include_vars: ../../byo/openshift-cluster/cluster_hosts.yml
 

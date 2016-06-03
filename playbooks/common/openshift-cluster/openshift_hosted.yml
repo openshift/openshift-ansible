@@ -1,5 +1,7 @@
 - name: Create persistent volumes and create hosted services
   hosts: oo_first_master
+  tags:
+  - hosted
   vars:
     attach_registry_volume: "{{ openshift.hosted.registry.storage.kind != None }}"
     deploy_infra: "{{ openshift.master.infra_nodes | default([]) | length > 0 }}"
@@ -23,6 +25,8 @@
 
 - name: Create Hosted Resources
   hosts: oo_first_master
+  tags:
+  - hosted
   pre_tasks:
   - set_fact:
       openshift_hosted_router_registryurl: "{{ hostvars[groups.oo_first_master.0].openshift.master.registry_url }}"
