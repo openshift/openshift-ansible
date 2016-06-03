@@ -15,3 +15,6 @@
       dest: "/tmp/records.yaml"
       force: yes
     delegate_to: localhost
+
+  - name: "Updating hostname facts"
+    setup: filter=ansible_hostname
