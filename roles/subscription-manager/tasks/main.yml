@@ -62,7 +62,7 @@
     - rhsm_satellite|trim != ''
 
 - name: "Register to Satellite using activation key"
-  command: "/usr/bin/subscription-manager register --activationkey={{ rhsm_activationkey }} --org={{ rhsm_org }}"
+  command: "/usr/bin/subscription-manager register --activationkey={{ rhsm_activationkey }} --org='{{ rhsm_org }}'"
   when:
     - not registered
     - rhsm_authentication == 'key'
