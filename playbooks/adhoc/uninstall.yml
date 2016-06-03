@@ -25,11 +25,6 @@
     - set_fact:
         is_containerized: "{{ is_atomic or containerized | default(false) | bool }}"
 
-    - name: Remove br0 interface
-      shell: ovs-vsctl del-br br0
-      changed_when: False
-      failed_when: False
-
     - name: Stop services
       service: name={{ item }} state=stopped
       with_items:
@@ -108,81 +103,11 @@
         - tuned-profiles-openshift-node
         - tuned-profiles-origin-node
 
-    - name: Remove linux interfaces
-      shell: ip link del "{{ item }}"
-      changed_when: False
-      failed_when: False
-      with_items:
-        - lbr0
-        - vlinuxbr
-        - vovsbr
-
     - shell: systemctl reset-failed
       changed_when: False
 
     - shell: systemctl daemon-reload
       changed_when: False
-
-    - shell: find /var/lib/origin/openshift.local.volumes -type d -exec umount {} \; 2>/dev/null || true
-      changed_when: False
-
-    - shell: find /var/lib/atomic-enterprise/openshift.local.volumes -type d -exec umount {} \; 2>/dev/null || true
-      changed_when: False
-
-    - shell: find /var/lib/openshift/openshift.local.volumes -type d -exec umount {} \; 2>/dev/null || true
-      changed_when: False
-
-    - shell: docker rm -f "{{ item }}"-master "{{ item }}"-node
-      changed_when: False
-      failed_when: False
-      with_items:
-        - openshift-enterprise
-        - atomic-enterprise
-        - origin
-
-    - shell: docker ps -a | grep Exited | egrep "{{ item }}" | awk '{print $1}'
-      changed_when: False
-      failed_when: False
-      register: exited_containers_to_delete
-      with_items:
-        - aep3.*/aep
-        - aep3.*/node
-        - aep3.*/openvswitch
-        - openshift3/ose
-        - openshift3/node
-        - openshift3/openvswitch
-        - openshift/origin
-
-    - shell: "docker rm {{ item.stdout_lines | join(' ') }}"
-      changed_when: False
-      failed_when: False
-      with_items: "{{ exited_containers_to_delete.results }}"
-
-    - shell: docker images | egrep {{ item }} | awk '{ print $3 }'
-      changed_when: False
-      failed_when: False
-      register: images_to_delete
-      with_items:
-        - registry\.access\..*redhat\.com/openshift3
-        - registry\.access\..*redhat\.com/aep3
-        - registry\.qe\.openshift\.com/.*
-        - registry\.access\..*redhat\.com/rhel7/etcd
-        - docker.io/openshift
-
-    - shell:  "docker rmi -f {{ item.stdout_lines | join(' ') }}"
-      changed_when: False
-      failed_when: False
-      with_items: "{{ images_to_delete.results }}"
-
-    - name: Remove sdn drop files
-      file:
-        path: /run/openshift-sdn
-        state: absent
-
-    - name: restart docker
-      service:
-        name: docker
-        state: restarted
 
     - name: Remove remaining files
       file: path={{ item }} state=absent
@@ -259,7 +184,76 @@
 - hosts: nodes
   become: yes
   tasks:
+    - name: Remove br0 interface
+      shell: ovs-vsctl del-br br0
+      changed_when: False
+      failed_when: False
+    - name: Remove linux interfaces
+      shell: ip link del "{{ item }}"
+      changed_when: False
+      failed_when: False
+      with_items:
+        - lbr0
+        - vlinuxbr
+        - vovsbr
     - name: restart docker
       service: name=docker state=restarted
+      
     - name: restart NetworkManager
       service: name=NetworkManager state=restarted
+      
+    - shell: find /var/lib/origin/openshift.local.volumes -type d -exec umount {} \; 2>/dev/null || true
+      changed_when: False
+
+    - shell: find /var/lib/atomic-enterprise/openshift.local.volumes -type d -exec umount {} \; 2>/dev/null || true
+      changed_when: False
+
+    - shell: find /var/lib/openshift/openshift.local.volumes -type d -exec umount {} \; 2>/dev/null || true
+      changed_when: False
+
+    - shell: docker rm -f "{{ item }}"-master "{{ item }}"-node
+      changed_when: False
+      failed_when: False
+      with_items:
+        - openshift-enterprise
+        - atomic-enterprise
+        - origin
+
+    - shell: docker ps -a | grep Exited | egrep "{{ item }}" | awk '{print $1}'
+      changed_when: False
+      failed_when: False
+      register: exited_containers_to_delete
+      with_items:
+        - aep3.*/aep
+        - aep3.*/node
+        - aep3.*/openvswitch
+        - openshift3/ose
+        - openshift3/node
+        - openshift3/openvswitch
+        - openshift/origin
+
+    - shell: "docker rm {{ item.stdout_lines | join(' ') }}"
+      changed_when: False
+      failed_when: False
+      with_items: "{{ exited_containers_to_delete.results }}"
+
+    - shell: docker images | egrep {{ item }} | awk '{ print $3 }'
+      changed_when: False
+      failed_when: False
+      register: images_to_delete
+      with_items:
+        - registry\.access\..*redhat\.com/openshift3
+        - registry\.access\..*redhat\.com/aep3
+        - registry\.qe\.openshift\.com/.*
+        - registry\.access\..*redhat\.com/rhel7/etcd
+        - docker.io/openshift
+
+    - shell:  "docker rmi -f {{ item.stdout_lines | join(' ') }}"
+      changed_when: False
+      failed_when: False
+      with_items: "{{ images_to_delete.results }}"
+
+    - name: Remove sdn drop files
+      file:
+        path: /run/openshift-sdn
+        state: absent
