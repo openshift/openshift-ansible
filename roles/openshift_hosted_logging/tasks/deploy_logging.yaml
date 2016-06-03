@@ -14,9 +14,16 @@
       cp {{ openshift_master_config_dir }}/admin.kubeconfig {{ mktemp.stdout }}/admin.kubeconfig
     changed_when: False
 
+  - name: Check for logging project already exists
+    command: >
+      {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get project logging -o jsonpath='{.metadata.name}'
+    register: logging_project_result
+    ignore_errors: True
+
   - name: "Create logging project"
     command: >
       {{ openshift.common.admin_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig new-project logging
+    when: logging_project_result.stdout == ""
 
   - name: "Changing projects"
     command: >
