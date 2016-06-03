@@ -1,7 +1,5 @@
 - name: Create persistent volumes and create hosted services
   hosts: oo_first_master
-  tags:
-  - hosted
   vars:
     persistent_volumes: "{{ hostvars[groups.oo_first_master.0] | oo_persistent_volumes(groups) }}"
     persistent_volume_claims: "{{ hostvars[groups.oo_first_master.0] | oo_persistent_volume_claims }}"
@@ -26,17 +24,23 @@
   - role: openshift_serviceaccounts
     openshift_serviceaccounts_names:
     - router
+    openshift_serviceaccounts_namespace: default
+    openshift_serviceaccounts_sccs:
+    - hostnetwork
+    when: openshift.common.version_gte_3_2_or_1_2
+  - role: openshift_serviceaccounts
+    openshift_serviceaccounts_names:
+    - router
     - registry
     openshift_serviceaccounts_namespace: default
     openshift_serviceaccounts_sccs:
     - privileged
+    when: not openshift.common.version_gte_3_2_or_1_2
   - role: openshift_metrics
     when: openshift.hosted.metrics.deploy | bool
 
 - name: Create Hosted Resources
   hosts: oo_first_master
-  tags:
-  - hosted
   pre_tasks:
   - set_fact:
       openshift_hosted_registry_registryurl: "{{ hostvars[groups.oo_first_master.0].openshift.master.registry_url }}"
