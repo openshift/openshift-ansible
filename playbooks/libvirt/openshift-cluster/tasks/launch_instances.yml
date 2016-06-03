@@ -83,7 +83,7 @@
   with_items: instances
 
 - name: Wait for the VMs to get an IP
-  shell: 'virsh -c {{ libvirt_uri }} net-dhcp-leases openshift-ansible | egrep -c ''{{ instances | join("|") }}'''
+  shell: 'virsh -c {{ libvirt_uri }} net-dhcp-leases {{ libvirt_network }} | egrep -c ''{{ instances | join("|") }}'''
   register: nb_allocated_ips
   until: nb_allocated_ips.stdout == '{{ instances | length }}'
   retries: 60
@@ -91,7 +91,7 @@
   when: instances | length != 0
 
 - name: Collect IP addresses of the VMs
-  shell: 'virsh -c {{ libvirt_uri }} net-dhcp-leases openshift-ansible | awk ''$6 == "{{ item }}" {gsub(/\/.*/, "", $5); print $5}'''
+  shell: 'virsh -c {{ libvirt_uri }} net-dhcp-leases {{ libvirt_network }} | awk ''$6 == "{{ item }}" {gsub(/\/.*/, "", $5); print $5}'''
   register: scratch_ip
   with_items: instances
 
