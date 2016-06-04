@@ -73,6 +73,8 @@
 
   - name: "Process the deployer template"
     shell:  "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig process logging-deployer-template -v {{ oc_process_values }} |  {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig create -f -"
+    register: process_deployer
+    failed_when: process_deployer.rc == 1 and 'already exists' not in process_deployer.stderr
 
   - name: "Wait for image pull and deployer pod"
     shell:  "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get pods | grep logging-deployer.*Completed"
@@ -83,6 +85,8 @@
 
   - name: "Process support template"
     shell:  "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig process logging-support-template |  {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig create -f -"
+    register: process_support
+    failed_when: process_support.rc == 1 and 'already exists' not in process_support.stderr
 
   - name: "Set insecured registry"
     command:  "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig annotate is --all  openshift.io/image.insecureRepository=true --overwrite"
