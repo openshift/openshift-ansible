@@ -58,6 +58,8 @@ objects:
           value: ${REDEPLOY}
         - name: USE_PERSISTENT_STORAGE
           value: ${USE_PERSISTENT_STORAGE}
+        - name: DYNAMICALLY_PROVISION_STORAGE
+          value: ${DYNAMICALLY_PROVISION_STORAGE}
         - name: HAWKULAR_METRICS_HOSTNAME
           value: ${HAWKULAR_METRICS_HOSTNAME}
         - name: CASSANDRA_NODES
@@ -100,6 +102,10 @@ parameters:
   description: "Set to true for persistent storage, set to false to use non persistent storage"
   name: USE_PERSISTENT_STORAGE
   value: "true"
+-
+  description: "Set to true to dynamcially provision storage, set to false to use a pre-created persistent storage volume"
+  name: DYNAMICALLY_PROVISION_STORAGE
+  value: "false"
 -
   description: "The number of Cassandra Nodes to deploy for the initial cluster"
   name: CASSANDRA_NODES
