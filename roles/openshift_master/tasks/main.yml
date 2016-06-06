@@ -29,7 +29,7 @@
 
 - name: Pull master image
   command: >
-    docker pull {{ openshift.master.master_image }}:{{ openshift_version }}
+    docker pull {{ openshift.master.master_image }}{{ ':' + openshift_version if openshift_version is defined and openshift_version != '' else '' }}
   when: openshift.common.is_containerized | bool
 
 - name: Create openshift.common.data_dir
