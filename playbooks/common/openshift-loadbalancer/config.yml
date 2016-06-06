@@ -1,0 +1,7 @@
+---
+- name: Configure load balancers
+  hosts: oo_lb_to_config
+  vars:
+    haproxy_frontend_port: "{{ openshift_master_api_port | default(8443) }}"
+  roles:
+  - role: openshift_loadbalancer

@@ -164,9 +164,14 @@
   register: start_result
   notify: Verify API Server
 
-- name: Stop and disable non HA master when running HA
+- name: Check for non-HA master service presence
+  command: systemctl show {{ openshift.common.service_type }}-master.service
+  register: master_svc_show
+  changed_when: false
+
+- name: Stop and disable non-HA master when running HA
   service: name={{ openshift.common.service_type }}-master enabled=no state=stopped
-  when: openshift_master_ha | bool
+  when: openshift_master_ha | bool and 'LoadState=not-found' not in master_svc_show.stdout
 
 - set_fact:
     master_service_status_changed: "{{ start_result | changed }}"

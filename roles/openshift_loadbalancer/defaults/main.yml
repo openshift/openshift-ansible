@@ -1,0 +1,16 @@
+---
+haproxy_frontend_port: 8443
+
+haproxy_frontends:
+- name: main
+  binds:
+  - "*:8443"
+  default_backend: default
+
+haproxy_backends:
+- name: default
+  balance: roundrobin
+  servers:
+  - name: web01
+    address: 127.0.0.1:9000
+    opts: check

@@ -1,0 +1,20 @@
+---
+galaxy_info:
+  author: Jason DeTiberus
+  description: OpenShift haproxy loadbalancer
+  company: Red Hat, Inc.
+  license: Apache License, Version 2.0
+  min_ansible_version: 1.9
+  platforms:
+  - name: EL
+    versions:
+    - 7
+dependencies:
+- role: openshift_facts
+- role: os_firewall
+  os_firewall_allow:
+  - service: haproxy stats
+    port: "9000/tcp"
+  - service: haproxy balance
+    port: "{{ haproxy_frontend_port }}/tcp"
+- role: openshift_repos

@@ -54,3 +54,11 @@
   command: >
     rm -rf {{hawkular_tmp_conf}}
   changed_when: false
+
+- name: "Wait for image pull and deployer pod"
+  shell:  "{{ openshift.common.client_binary }} get pods -n openshift-infra | grep metrics-deployer.*Completed"
+  register: result
+  until: result.rc == 0
+  retries: 60
+  delay: 10
+

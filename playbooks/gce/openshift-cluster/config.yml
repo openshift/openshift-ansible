@@ -1,8 +1,23 @@
 ---
+- hosts: localhost
+  gather_facts: no
+  tasks:
+  - include_vars: vars.yml
+  - include_vars: cluster_hosts.yml
+  - add_host:
+      name: "{{ item }}"
+      groups: l_oo_all_hosts
+      ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
+      ansible_become: "{{ deployment_vars[deployment_type].become }}"
+    with_items: g_all_hosts
+
+- hosts: l_oo_all_hosts
+  gather_facts: no
+  tasks:
+  - include_vars: vars.yml
+  - include_vars: cluster_hosts.yml
+
 - include: ../../common/openshift-cluster/config.yml
-  vars_files:
-  - ../../gce/openshift-cluster/vars.yml
-  - ../../gce/openshift-cluster/cluster_hosts.yml
   vars:
     g_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
     g_sudo: "{{ deployment_vars[deployment_type].become }}"

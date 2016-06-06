@@ -150,6 +150,7 @@
     groups: "{{ instance_groups }}"
     ec2_private_ip_address: "{{ item.1.private_ip }}"
     ec2_ip_address: "{{ item.1.public_ip }}"
+    ec2_tag_sub-host-type: "{{ sub_host_type }}"
     openshift_node_labels: "{{ node_label }}"
     logrotate_scripts: "{{ logrotate }}"
   with_together:

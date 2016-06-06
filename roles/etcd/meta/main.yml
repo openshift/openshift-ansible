@@ -16,5 +16,10 @@ galaxy_info:
   - cloud
   - system
 dependencies:
-- { role: os_firewall }
-- { role: etcd_common }
+- role: os_firewall
+  os_firewall_allow:
+  - service: etcd
+    port: "{{etcd_client_port}}/tcp"
+  - service: etcd peering
+    port: "{{ etcd_peer_port }}/tcp"
+- role: etcd_common

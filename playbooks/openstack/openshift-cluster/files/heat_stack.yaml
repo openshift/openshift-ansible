@@ -591,11 +591,17 @@ resources:
     type: OS::Heat::MultipartMime
     properties:
       parts:
-        - config: { get_file: user-data }
         - config:
             str_replace:
               template: |
                 #cloud-config
+                disable_root: true
+
+                system_info:
+                  default_user:
+                    name: openshift
+                    sudo: ["ALL=(ALL) NOPASSWD: ALL"]
+
                 write_files:
                   - path: /etc/sudoers.d/00-openshift-no-requiretty
                     permissions: 440
