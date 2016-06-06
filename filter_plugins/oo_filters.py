@@ -772,7 +772,7 @@ class FilterModule(object):
                                         fsType=filesystem,
                                         volumeID=volume_id)))
                             persistent_volumes.append(persistent_volume)
-                        elif kind != 'object':
+                        elif not (kind == 'object' or kind == 'dynamic'):
                             msg = "|failed invalid storage kind '{0}' for component '{1}'".format(
                                 kind,
                                 component)

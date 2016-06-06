@@ -1,0 +1,110 @@
+---
+- fail:
+    msg: This role required openshift_master_default_subdomain or openshift_master_metrics_url be set
+  when: openshift.master.metrics_public_url | default(openshift_master_metrics_public_url | default(openshift.master.default_subdomain | default(openshift_master_default_subdomain | default(none)))) is none
+
+- set_fact:
+    # Prefer the master facts over bare variables if present, prefer
+    # metrics_public_url over creating a default using default_subdomain
+    metrics_hostname: "{{ openshift.master.metrics_public_url
+                          | default(openshift_master_metris_public_url
+                          | default('hawkular-metrics.' ~ (openshift.master.default_subdomain
+                          | default(openshift_master_default_subdomain )))) }}"
+    metrics_persistence: "{{ openshift.hosted.metrics.storage.kind is not none }}"
+    metrics_dynamic_vol: "{{ openshift.hosted.metrics.storage.kind == 'dynamic' }}"
+    metrics_template_dir: "/usr/share/openshift/examples/infrastructure-templates/{{ 'origin' if deployment_type == 'origin' else 'enterprise' }}"
+    cassandra_nodes: "{{ ',CASSANDRA_NODES=' ~ openshift.hosted.metrics.cassandra.nodes if 'cassandra' in openshift.hosted.metrics and 'nodes' in openshift.hosted.metrics.cassandra else '' }}"
+    cassandra_pv_size: "{{ ',CASSANDRA_PV_SIZE=' ~ openshift.hosted.metrics.storage.volume.size if openshift.hosted.metrics.storage.volume.size | default(none) is not none else '' }}"
+
+
+
+- name: Test if metrics-deployer service account exists
+  command: >
+    {{ openshift.common.client_binary }}
+    --config={{ openshift_hosted_kubeconfig }}
+    --namespace=openshift-infra
+    get serviceaccount metrics-deployer -o json
+  register: serviceaccount
+  changed_when: false
+  failed_when: false
+
+- name: Create metrics-deployer Service Account
+  shell: >
+    echo {{ metrics_deployer_sa | to_json | quote }} |
+    {{ openshift.common.client_binary }}
+    --config={{ openshift_hosted_kubeconfig }}
+    --namespace openshift-infra
+    create -f -
+  when: serviceaccount.rc == 1
+
+- name: Test edit permissions
+  command: >
+    {{ openshift.common.client_binary }}
+    --config={{ openshift_hosted_kubeconfig }}
+    --namespace openshift-infra
+    get rolebindings -o jsonpath='{.items[?(@.metadata.name == "edit")].userNames}'
+  register: edit_rolebindings
+  changed_when: false
+
+- name: Add edit permission to the openshift-infra project to metrics-deployer SA
+  command: >
+    {{ openshift.common.admin_binary }}
+    --config={{ openshift_hosted_kubeconfig }}
+    --namespace openshift-infra
+    policy add-role-to-user edit
+    system:serviceaccount:openshift-infra:metrics-deployer
+  when: "'system:serviceaccount:openshift-infra:metrics-deployer' not in edit_rolebindings.stdout"
+
+- name: Test cluster-reader permissions
+  command: >
+    {{ openshift.common.client_binary }}
+    --config={{ openshift_hosted_kubeconfig }}
+    --namespace openshift-infra
+    get clusterrolebindings -o jsonpath='{.items[?(@.metadata.name == "cluster-reader")].userNames}'
+  register: cluster_reader_clusterrolebindings
+  changed_when: false
+
+- name: Add cluster-reader permission to the openshift-infra project to heapster SA
+  command: >
+    {{ openshift.common.admin_binary }}
+    --config={{ openshift_hosted_kubeconfig }}
+    --namespace openshift-infra
+    policy add-cluster-role-to-user cluster-reader
+    system:serviceaccount:openshift-infra:heapster
+  when: "'system:serviceaccount:openshift-infra:heapster' not in cluster_reader_clusterrolebindings.stdout"
+
+# TODO: extend this to allow user passed in certs or generating cert with
+# OpenShift CA
+- name: Create metrics-deployer secret
+  command: >
+    {{ openshift.common.client_binary }}
+    --config={{ openshift_hosted_kubeconfig }}
+    --namespace openshift-infra
+    secrets new metrics-deployer nothing=/dev/null
+  register: metrics_deployer_secret
+  changed_when: metrics_deployer_secret.rc == 0
+  failed_when: "metrics_deployer_secret.rc == 1 and 'already exists' not in metrics_deployer_secret.stderr"
+
+- name: Deploy Metrics
+  shell: >
+    {{ openshift.common.client_binary }} process -f
+    {{ metrics_template_dir }}/metrics-deployer.yaml -v
+    HAWKULAR_METRICS_HOSTNAME={{ metrics_hostname }},USE_PERSISTENT_STORAGE={{
+    metrics_persistence | string | lower }},METRIC_DURATION={{ openshift.hosted.metrics.duration }},METRIC_RESOLUTION={{ openshift.hosted.metrics.resolution }},IMAGE_PREFIX={{ openshift.hosted.metrics.deployer.prefix }},IMAGE_VERSION={{ openshift.hosted.metrics.deployer.version }},DYNAMICALLY_PROVISION_STORAGE={{ metrics_dynamic_vol | string | lower }}{{ cassandra_nodes }}{{ cassandra_pv_size }}
+    | {{ openshift.common.client_binary }} --namespace openshift-infra
+    --config={{ openshift_hosted_kubeconfig }}
+    create -f -
+  register: deploy_metrics
+  failed_when: "'already exists' not in deploy_metrics.stderr and deploy_metrics.rc != 0"
+  changed_when: deploy_metrics.rc == 0
+
+- name: "Wait for image pull and deployer pod"
+  shell: >
+    {{ openshift.common.client_binary }}
+    --namespace openshift-infra
+    --config={{ openshift_hosted_kubeconfig }}
+    get pods | grep metrics-deployer.*Completed
+  register: result
+  until: result.rc == 0
+  retries: 60
+  delay: 10
