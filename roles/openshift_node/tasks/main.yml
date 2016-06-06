@@ -40,12 +40,12 @@
 
 - name: Pull node image
   command: >
-    docker pull {{ openshift.node.node_image }}:{{ openshift_version }}
+    docker pull {{ openshift.node.node_image }}{{ ':' + openshift_version if openshift_version is defined and openshift_version != '' else '' }}
   when: openshift.common.is_containerized | bool
 
 - name: Pull OpenVSwitch image
   command: >
-    docker pull {{ openshift.node.ovs_image }}:{{ openshift_version }}
+    docker pull {{ openshift.node.ovs_image }}{{ ':' + openshift_version if openshift_version is defined and openshift_version != '' else '' }}
   when: openshift.common.is_containerized | bool and openshift.common.use_openshift_sdn | bool
 
 - name: Install the systemd units
