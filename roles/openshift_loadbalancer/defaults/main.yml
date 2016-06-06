@@ -1,10 +1,10 @@
 ---
-haproxy_frontend_port: 80
+haproxy_frontend_port: 8443
 
 haproxy_frontends:
 - name: main
   binds:
-  - "*:80"
+  - "*:8443"
   default_backend: default
 
 haproxy_backends:
@@ -14,9 +14,3 @@ haproxy_backends:
   - name: web01
     address: 127.0.0.1:9000
     opts: check
-
-os_firewall_allow:
-- service: haproxy stats
-  port: "9000/tcp"
-- service: haproxy balance
-  port: "{{ haproxy_frontend_port }}/tcp"

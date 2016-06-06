@@ -14,9 +14,3 @@ etcd_advertise_client_urls: "{{ etcd_url_scheme }}://{{ etcd_ip }}:{{ etcd_clien
 etcd_listen_client_urls: "{{ etcd_url_scheme }}://{{ etcd_ip }}:{{ etcd_client_port }}"
 
 etcd_data_dir: /var/lib/etcd/
-
-os_firewall_allow:
-- service: etcd
-  port: "{{etcd_client_port}}/tcp"
-- service: etcd peering
-  port: "{{ etcd_peer_port }}/tcp"
