@@ -42,6 +42,7 @@
       auth_token_max_seconds: "{{ openshift_master_auth_token_max_seconds | default(None) }}"
       identity_providers: "{{ openshift_master_identity_providers | default(None) }}"
       htpasswd_users: "{{ openshift_master_htpasswd_users | default(lookup('file', openshift_master_htpasswd_file) | oo_htpasswd_users_from_file if openshift_master_htpasswd_file is defined else None) }}"
+      manage_htpasswd: "{{ openshift_master_manage_htpasswd | default(true) }}"
       ldap_ca: "{{ openshift_master_ldap_ca | default(lookup('file', openshift_master_ldap_ca_file) if openshift_master_ldap_ca_file is defined else None) }}"
       openid_ca: "{{ openshift_master_openid_ca | default(lookup('file', openshift_master_openid_ca_file) if openshift_master_openid_ca_file is defined else None) }}"
       request_header_ca: "{{ openshift_master_request_header_ca | default(lookup('file', openshift_master_request_header_ca_file) if openshift_master_request_header_ca_file is defined else None) }}"
