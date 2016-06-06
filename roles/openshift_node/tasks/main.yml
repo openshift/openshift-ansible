@@ -124,5 +124,18 @@
   debug: var=node_failure
   when: node_start_result | failed
 
+- name: Load OpenShift ca certificate into ca-trust
+  command: cp {{ openshift.common.config_base }}/node/ca.crt /etc/pki/ca-trust/source/anchors/openshift-ca.crt
+  register: openshift_ca_trust
+  args:
+    creates: "/etc/pki/ca-trust/source/anchors/openshift-ca.crt"
+
+- name: Update CA Trust
+  command: >
+    update-ca-trust
+  when: openshift_ca_trust.changed
+  notify:
+  - restart docker
+
 - set_fact:
     node_service_status_changed: "{{ node_start_result | changed }}"
