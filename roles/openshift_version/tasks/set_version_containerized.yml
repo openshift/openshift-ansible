@@ -22,7 +22,6 @@
   when: openshift_version is not defined
 
 - debug: msg="{{ openshift_version }}"
-#- debug: var=openshift_version.split('.')
 
 # If we got an openshift_version like "3.2", lookup the latest 3.2 container version
 # and use that value instead.

@@ -3,14 +3,10 @@
 - name: Determine openshift_version to configure on first master
   hosts: oo_first_master
   roles:
-  # Using the CLI role here to install the CLI tool/wrapper, and set the
-  # openshift.common.version fact which other hosts can then reference.
   - openshift_version
   pre_tasks:
-  - debug: var=openshift.common.version
   - debug: var=openshift_version
   post_tasks:
-  - debug: var=openshift.common.version
   - debug: var=openshift_version
 
 # NOTE: We set this even on etcd hosts as they may also later run as masters,
