@@ -316,13 +316,6 @@
   serial: 1
   vars:
     sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
-
-    # Do not pass a version if this is first master. (openshift_version will sort it out)
-    # For subsequent masters we pass either pre-existing version for the master (if already installed),
-    # otherwise the first master version.
-    openshift_version: "{{ openshift.common.version if openshift.common.version is defined else oo_first_master.openshift.common.version.split('-')[0] }}"
-    when: inventory_hostname != groups.oo_first_master.0
-
     openshift_master_ha: "{{ openshift.master.ha }}"
     openshift_master_count: "{{ openshift.master.master_count }}"
     openshift_master_session_auth_secrets: "{{ hostvars[groups.oo_first_master.0].openshift.master.session_auth_secrets }}"
