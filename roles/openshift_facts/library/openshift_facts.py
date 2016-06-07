@@ -1727,7 +1727,7 @@ class OpenShiftFacts(object):
                 metrics=dict(
                     deploy=False,
                     duration=7,
-                    resolution=10,
+                    resolution='10s',
                     storage=dict(
                         kind=None,
                         volume=dict(
