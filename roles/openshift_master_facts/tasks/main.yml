@@ -17,7 +17,7 @@
       console_use_ssl: "{{ openshift_master_console_use_ssl | default(None) }}"
       public_console_url: "{{ openshift_master_public_console_url | default(None) }}"
       logging_public_url: "{{ openshift_master_logging_public_url | default(None) }}"
-      metrics_public_url: "{{ openshift_master_metrics_public_url | default(None) }}"
+      metrics_public_url: "{{ openshift_master_metrics_public_url | default('https://hawkular-metrics.'+osm_default_subdomain+'/hawkular/metrics',true) }}"
       logout_url: "{{ openshift_master_logout_url | default(None) }}"
       extension_scripts: "{{ openshift_master_extension_scripts | default(None) }}"
       extension_stylesheets: "{{ openshift_master_extension_stylesheets | default(None) }}"
