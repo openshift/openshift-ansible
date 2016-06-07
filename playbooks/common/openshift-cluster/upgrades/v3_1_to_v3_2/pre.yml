@@ -22,10 +22,10 @@
 ###############################################################################
 # Pre-upgrade checks
 ###############################################################################
-- name: Verify upgrade can proceed
+- name: Verify upgrade can proceed on first master
   hosts: oo_first_master
   vars:
-    target_version: "{{ '1.2' if deployment_type == 'origin' else '3.1.1.900' }}"
+    target_version: "{{ '1.2' if deployment_type == 'origin' else '3.2' }}"
     g_pacemaker_upgrade_url_segment: "{{ 'org/latest' if deployment_type =='origin' else '.com/enterprise/3.1' }}"
   gather_facts: no
   tasks:
@@ -41,6 +41,11 @@
         https://docs.openshift.{{ g_pacemaker_upgrade_url_segment }}/install_config/upgrading/pacemaker_to_native_ha.html
     when: openshift.master.cluster_method is defined and openshift.master.cluster_method == 'pacemaker'
 
+  # Error out in situations where the user has older versions specified in their
+  # inventory in any of the openshift_release, openshift_image_tag, and
+  # openshift_pkg_version variables. These must be removed or updated to proceed
+  # with upgrade.
+  # TODO: Should we block if you're *over* the next major release version as well?
   - fail:
       msg: >
         openshift_pkg_version is {{ openshift_pkg_version }} which is not a
@@ -53,11 +58,22 @@
         valid version for a {{ target_version }} upgrade
     when: openshift_image_tag is defined and openshift_image_tag.split('v',1).1 | version_compare(target_version ,'<')
 
-- name: Verify upgrade can proceed
+  - fail:
+      msg: >
+        openshift_release is {{ openshift_release }} which is not a
+        valid release for a {{ target_version }} upgrade
+    when: openshift_release is defined and not openshift_release | version_compare(target_version ,'=')
+
+- include: ../../../../common/openshift-cluster/initialize_openshift_version.yml
+  vars:
+    openshift_release: "3.2"
+
+- name: Verify upgrade can proceed on masters
   hosts: oo_masters_to_config
   roles:
   - openshift_facts
   tasks:
+  - fail:
   - openshift_facts:
       role: master
       local_facts:
@@ -84,7 +100,7 @@
       enabled: yes
     when: openshift.master.ha is defined and openshift.master.ha | bool and openshift.common.is_containerized | bool
 
-- name: Verify upgrade can proceed
+- name: Verify upgrade can proceed on nodes
   hosts: oo_nodes_to_config
   roles:
   - openshift_facts
