@@ -29,7 +29,7 @@
 
 - name: Pull master image
   command: >
-    docker pull {{ openshift.master.master_image }}:{{ openshift_version }}
+    docker pull {{ openshift.master.master_image }}{{ ':' + openshift_version if openshift_version is defined and openshift_version != '' else '' }}
   when: openshift.common.is_containerized | bool
 
 - name: Create openshift.common.data_dir
@@ -172,14 +172,9 @@
   register: start_result
   notify: Verify API Server
 
-- name: Check for non-HA master service presence
-  command: systemctl show {{ openshift.common.service_type }}-master.service
-  register: master_svc_show
-  changed_when: false
-
-- name: Stop and disable non-HA master when running HA
+- name: Stop and disable non HA master when running HA
   service: name={{ openshift.common.service_type }}-master enabled=no state=stopped
-  when: openshift_master_ha | bool and 'LoadState=not-found' not in master_svc_show.stdout
+  when: openshift_master_ha | bool
 
 - set_fact:
     master_service_status_changed: "{{ start_result | changed }}"

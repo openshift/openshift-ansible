@@ -1,41 +1,42 @@
 ---
-# tasks file for docker
-
-- name: Get current installed version if docker_version is specified
+# Going forward we require Docker 1.10 or greater. If the user has a lesser version installed they must run a separate upgrade process.
+- name: Get current installed Docker version
   command: "{{ repoquery_cmd }} --installed --qf '%{version}' docker"
-  when:  not openshift.common.is_atomic | bool and docker_version != ''
-  register: docker_version_result
+  when:  not openshift.common.is_atomic | bool
+  register: curr_docker_version
   changed_when: false
+
+# TODO: The use of upgrading var will be removed in the coming upgrade refactor. This is a temporary
+# fix to wory around the fact that right now, this role is called during upgrade, before we're
+# ready to upgrade Docker.
+- name: Fail if Docker upgrade is required
+  fail:
+    msg: "Docker {{ curr_docker_version.stdout }} must be upgraded to Docker 1.10 or greater"
+  when: not upgrading | bool and not curr_docker_version | skipped and curr_docker_version.stdout | default('0.0', True) | version_compare('1.10', '<')
+
+- name: Get latest available version of Docker
+  command: >
+    {{ repoquery_cmd }} --qf '%{version}' "docker"
+  register: avail_docker_version
+  failed_when: false
+  changed_when: false
+  when: not openshift.common.is_atomic | bool
+
+- name: Verify Docker >= 1.10 is available
+  fail:
+    msg: "Docker {{ avail_docker_version.stdout }} is available, but 1.10 or greater is required"
+  when: not avail_docker_version | skipped and avail_docker_version.stdout | default('0.0', True) | version_compare('1.10', '<')
 
 - stat: path=/etc/sysconfig/docker-storage
   register: docker_storage_check
 
-- name: Remove deferred deletion for downgrades from 1.9
-  command: >
-    sed -i 's/--storage-opt dm.use_deferred_deletion=true//' /etc/sysconfig/docker-storage
-  when: docker_storage_check.stat.exists | bool and not docker_version_result | skipped and docker_version_result.stdout | default('0.0', True) | version_compare('1.9', '>=') and docker_version | version_compare('1.9', '<')
+# Make sure Docker is installed, but does not update a running version.
+# Docker upgrades are handled by a separate playbook.
+- name: Install Docker
+  action: "{{ ansible_pkg_mgr }} name=docker state=present"
+  when: not openshift.common.is_atomic | bool
 
-- name: Downgrade docker if necessary
-  command: "{{ ansible_pkg_mgr }} swap -y docker-* docker-*{{ docker_version }}"
-  register: docker_downgrade_result
-  when: not docker_version_result | skipped and docker_version_result.stdout | default('0.0', True) | version_compare(docker_version, 'gt')
-
-- name: Install docker
-  action: "{{ ansible_pkg_mgr }} name=docker{{ '-' + docker_version if docker_version is defined and docker_version != '' else '' }} state=present"
-  when: not openshift.common.is_atomic | bool and docker_downgrade_result | skipped
-
-# If docker were enabled and started before we downgraded it may have entered a
-# failed state. Check for that and clear it if necessary.
-- name: Check that docker hasn't entered failed state
-  command: systemctl show docker
-  register: docker_state
-  changed_when: False
-
-- name: Reset docker service state
-  command: systemctl reset-failed docker.service
-  when: " 'ActiveState=failed' in docker_state.stdout "
-
-- name: Start the docker service
+- name: Start the Docker service
   service:
     name: docker
     enabled: yes
@@ -86,7 +87,7 @@
   notify:
     - restart docker
 
-- name: Set various docker options
+- name: Set various Docker options
   lineinfile:
     dest: /etc/sysconfig/docker
     regexp: '^OPTIONS=.*$'
