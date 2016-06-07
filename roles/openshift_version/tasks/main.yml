@@ -26,4 +26,8 @@
 
 - debug: var=openshift_version
 
+# At this point we know openshift_version is set appropriately. Now we set
+# openshift_image_tag and openshift_pkg_version, so all roles can always assume
+# each of this variables *will* be set correctly and can use them per their
+# intended purpose.
 

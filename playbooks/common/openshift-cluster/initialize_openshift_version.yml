@@ -19,7 +19,7 @@
   - debug: var=openshift.common.version
   - debug: var=openshift_version
   - set_fact:
-      openshift_version: "{{ openshift.common.version if openshift.common.version is defined else hostvars[groups.oo_first_master.0].openshift_version }}"
+      openshift_version: "{{ openshift.common.version if (openshift.common.version is defined and openshift_version is not defined) else hostvars[groups.oo_first_master.0].openshift_version }}"
     when: inventory_hostname != groups.oo_first_master.0
   - debug: var=hostvars[groups.oo_first_master.0].openshift_version
   - debug: var=openshift.common.version
