@@ -9,12 +9,12 @@
 - debug: var=openshift_pkg_version
 - debug: var=openshift_image_tag
 
-# Here we protect the version already installed unless something has already set
-# an openshift_version to configure.
+# Protect the installed version by default unless explicitly told not to, or given an
+# openshift_version already.
 - name: Use openshift.common.version fact as version to configure if already installed
   set_fact:
     openshift_version: "{{ openshift.common.version }}"
-  when: openshift.common.version is defined and openshift_version is not defined
+  when: openshift.common.version is defined and openshift_version is not defined and openshift_protect_installed_version
 
 - name: Set openshift_version for rpm installation
   include: set_version_rpm.yml

@@ -13,14 +13,16 @@
 # and we don't want to install wrong version of docker and have to downgrade
 # later.
 - name: Set openshift_version for all hosts
-  hosts: oo_all_hosts
-  tasks:
+  hosts: oo_all_hosts:!oo_first_master
+  vars:
+    openshift_version: "{{ hostvars[groups.oo_first_master.0].openshift_version }}"
+  roles:
+  - openshift_version
+  pre_tasks:
   - debug: var=hostvars[groups.oo_first_master.0].openshift_version
   - debug: var=openshift.common.version
   - debug: var=openshift_version
-  - set_fact:
-      openshift_version: "{{ openshift.common.version if (openshift.common.version is defined and openshift_version is not defined) else hostvars[groups.oo_first_master.0].openshift_version }}"
-    when: inventory_hostname != groups.oo_first_master.0
+  post_tasks:
   - debug: var=hostvars[groups.oo_first_master.0].openshift_version
   - debug: var=openshift.common.version
   - debug: var=openshift_version

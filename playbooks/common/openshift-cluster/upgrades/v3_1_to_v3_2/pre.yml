@@ -66,9 +66,11 @@
 
 - include: ../../../../common/openshift-cluster/initialize_openshift_version.yml
   vars:
-    # Force the openshift_version role to 3.2, it will convert this to a more specific variable and
-    # make sure the openshift_image_tag and openshift_pkg_version are all set appropriately.
-    openshift_version: "3.2"
+    # Request openshift_release 3.2 and let the openshift_version role handle converting this
+    # to a more specific version, respecting openshift_image_tag and openshift_pkg_version if
+    # defined, and overriding the normal behavior of protecting the installed version
+    openshift_release: "3.2"
+    openshift_protect_installed_version: False
 
 - name: Verify upgrade can proceed on masters
   hosts: oo_masters_to_config
