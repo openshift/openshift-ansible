@@ -1,6 +1,4 @@
 ---
-haproxy_frontend_port: 8443
-
 haproxy_frontends:
 - name: main
   binds:
