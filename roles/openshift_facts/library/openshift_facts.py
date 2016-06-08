@@ -1785,11 +1785,14 @@ def set_container_facts_if_unset(facts):
         facts['etcd']['etcd_image'] = etcd_image
     if 'master' in facts and 'master_image' not in facts['master']:
         facts['master']['master_image'] = master_image
+        facts['master']['master_system_image'] = master_image
     if 'node' in facts:
         if 'node_image' not in facts['node']:
             facts['node']['node_image'] = node_image
+            facts['node']['node_system_image'] = node_image
         if 'ovs_image' not in facts['node']:
             facts['node']['ovs_image'] = ovs_image
+            facts['node']['ovs_system_image'] = ovs_image
 
     if safe_get_bool(facts['common']['is_containerized']):
         facts['common']['admin_binary'] = '/usr/local/bin/oadm'

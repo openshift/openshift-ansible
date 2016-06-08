@@ -131,6 +131,10 @@
 - name: Install the systemd units
   include: systemd_units.yml
 
+- name: Install Master system container
+  include: system_container.yml
+  when: openshift.common.is_containerized | bool and openshift.common.is_master_system_container | bool
+
 - name: Create session secrets file
   template:
     dest: "{{ openshift.master.session_secrets_file }}"

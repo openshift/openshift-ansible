@@ -1,0 +1,19 @@
+---
+- name: Pre-pull node system container image
+  command: >
+    atomic pull --storage=ostree {{ openshift.common.system_images_registry }}/{{ openshift.node.node_system_image }}:{{ openshift_image_tag }}
+  register: pull_result
+  changed_when: "'Pulling layer' in pull_result.stdout"
+
+- name: Uninstall Node system container package
+  command: >
+    atomic uninstall {{ openshift.common.service_type }}-node
+  failed_when: False
+  when: openshift.common.version != openshift_version | bool
+
+- name: Install Node system container package
+  command: >
+    atomic install --system --name={{ openshift.common.service_type }}-node {{ openshift.common.system_images_registry }}/{{ openshift.node.node_system_image }}:{{ openshift_image_tag }}
+  register: install_node_result
+  changed_when: "'Extracting' in pull_result.stdout"
+  when: openshift.common.version != openshift_version | bool
