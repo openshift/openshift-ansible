@@ -52,7 +52,7 @@
   - name: Update registry image to current version
     when: _default_registry.rc == 0
     command: >
-      {{ oc_cmd }} patch dc/docker-registry -p -n default
+      {{ oc_cmd }} patch dc/docker-registry -n default -p
       '{"spec":{"template":{"spec":{"containers":[{"name":"registry","image":"{{ registry_image }}"}]}}}}'
       --api-version=v1
 

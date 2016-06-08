@@ -1,5 +1,5 @@
 kh_kv: "KIBANA_HOSTNAME={{ openshift_hosted_logging_hostname | quote }}"
-es_cs_kv: "ES_CLUSTER_SIZE={{ openshift_hosted_logging_elasticsearch_cluster_size | quote }}"
+es_cs_kv: "ES_CLUSTER_SIZE={{ openshift_hosted_logging_elasticsearch_cluster_size | string | quote }}"
 pmu_kv: "PUBLIC_MASTER_URL={{ openshift_hosted_logging_master_public_url | quote }}"
 ip_kv: "{{ 'IMAGE_PREFIX=' ~ target_registry | quote if target_registry is defined else '' }}"
 oc_process_values: "{{ kh_kv }},{{ es_cs_kv }},{{ pmu_kv }},{{ ip_kv }}"

@@ -17,7 +17,7 @@
   
 - include: ../common/openshift-cluster/evaluate_groups.yml 
   
-- hosts: all
+- hosts: l_oo_all_hosts
   vars:
     openshift_deployment_type: "{{ deployment_type }}"
   roles:

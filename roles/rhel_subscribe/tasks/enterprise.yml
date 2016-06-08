@@ -16,7 +16,7 @@
 - fail:
     msg: "{{ ose_version }} is not a valid version for {{ deployment_type }} deployment type"
   when: ( deployment_type == 'enterprise' and ose_version not in ['3.0'] ) or
-        ( deployment_type in ['atomic-enterprise', 'openshift-enterprise'] and ose_version not in ['3.1'] )
+        ( deployment_type in ['atomic-enterprise', 'openshift-enterprise'] and ose_version not in ['3.1', '3.2'] )
 
 - name: Enable RHEL repositories
   command: subscription-manager repos \

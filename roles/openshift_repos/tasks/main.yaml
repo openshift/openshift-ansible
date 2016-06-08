@@ -35,7 +35,7 @@
     state: absent
   with_fileglob:
   - '*/repos/*'
-  when: not openshift.common.is_containerized | bool 
+  when: not openshift.common.is_containerized | bool
         and not (item | search("/files/" ~ openshift_deployment_type ~ "/repos"))
         and (ansible_os_family == "RedHat" and ansible_distribution != "Fedora")
   notify: refresh cache
@@ -52,14 +52,18 @@
   notify: refresh cache
 
 - name: Configure gpg keys if needed
-  copy: src="{{ item }}" dest=/etc/pki/rpm-gpg/
+  copy:
+    src: "{{ item }}"
+    dest: /etc/pki/rpm-gpg/
   with_fileglob:
   - "{{ openshift_deployment_type }}/gpg_keys/*"
   notify: refresh cache
   when: not openshift.common.is_containerized | bool
 
 - name: Configure yum repositories RHEL/CentOS
-  copy: src="{{ item }}" dest=/etc/yum.repos.d/
+  copy:
+    src: "{{ item }}"
+    dest: /etc/yum.repos.d/
   with_fileglob:
   - "{{ openshift_deployment_type }}/repos/*"
   notify: refresh cache
@@ -67,8 +71,14 @@
         and not openshift.common.is_containerized | bool
 
 - name: Configure yum repositories Fedora
-  copy: src="{{ item }}" dest=/etc/yum.repos.d/
+  copy:
+    src: "{{ item }}"
+    dest: /etc/yum.repos.d/
   with_fileglob:
   - "fedora-{{ openshift_deployment_type }}/repos/*"
   notify: refresh cache
   when: (ansible_distribution == "Fedora") and not openshift.common.is_containerized | bool
+
+- name: Configure the CentOS PaaS SIG repos if needed
+  include: centos_sig.yaml
+  when: not openshift.common.is_containerized | bool and deployment_type == 'origin' and ansible_distribution == 'CentOS'

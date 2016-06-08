@@ -91,8 +91,16 @@
   template:
     dest: "{{ item.filename }}"
     src: htpasswd.j2
-    mode: 0600
     backup: yes
+  when: item.kind == 'HTPasswdPasswordIdentityProvider' and openshift.master.manage_htpasswd | bool
+  with_items: "{{ openshift.master.identity_providers }}"
+
+- name: Ensure htpasswd file exists
+  copy:
+    dest: "{{ item.filename }}"
+    force: no
+    content: ""
+    mode: 0600
   when: item.kind == 'HTPasswdPasswordIdentityProvider'
   with_items: "{{ openshift.master.identity_providers }}"
 
@@ -139,7 +147,7 @@
   - restart master api
 
 - set_fact:
-    translated_identity_providers: "{{ openshift.master.identity_providers | translate_idps('v1') }}"
+    translated_identity_providers: "{{ openshift.master.identity_providers | translate_idps('v1', openshift.common.version, openshift.common.deployment_type) }}"
 
 # TODO: add the validate parameter when there is a validation command to run
 - name: Create master config
@@ -164,9 +172,14 @@
   register: start_result
   notify: Verify API Server
 
-- name: Stop and disable non HA master when running HA
+- name: Check for non-HA master service presence
+  command: systemctl show {{ openshift.common.service_type }}-master.service
+  register: master_svc_show
+  changed_when: false
+
+- name: Stop and disable non-HA master when running HA
   service: name={{ openshift.common.service_type }}-master enabled=no state=stopped
-  when: openshift_master_ha | bool
+  when: openshift_master_ha | bool and 'LoadState=not-found' not in master_svc_show.stdout
 
 - set_fact:
     master_service_status_changed: "{{ start_result | changed }}"

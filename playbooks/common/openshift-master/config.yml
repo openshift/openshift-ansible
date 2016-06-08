@@ -235,33 +235,6 @@
       validate_checksum: yes
     with_items: "{{ masters_needing_certs | default([]) }}"
 
-- name: Configure load balancers
-  hosts: oo_lb_to_config
-  vars:
-    sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
-    haproxy_limit_nofile: 100000
-    haproxy_global_maxconn: 20000
-    haproxy_default_maxconn: 20000
-    haproxy_frontend_port: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_port }}"
-    haproxy_frontends:
-    - name: atomic-openshift-api
-      mode: tcp
-      options:
-      - tcplog
-      binds:
-      - "*:{{ hostvars[groups.oo_first_master.0].openshift.master.api_port }}"
-      default_backend: atomic-openshift-api
-    haproxy_backends:
-    - name: atomic-openshift-api
-      mode: tcp
-      option: tcplog
-      balance: source
-      servers: "{{ hostvars | oo_select_keys(groups['oo_masters']) | oo_haproxy_backend_masters }}"
-  roles:
-  - role: openshift_facts
-  - role: haproxy
-    when: hostvars[groups.oo_first_master.0].openshift.master.ha | bool
-
 - name: Check for cached session secrets
   hosts: oo_first_master
   roles:

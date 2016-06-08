@@ -38,21 +38,53 @@
   when: create_ha_unit_files | changed
 # end workaround for missing systemd unit files
 
+- name: Preserve Master API Proxy Config options
+  command: grep PROXY /etc/sysconfig/{{ openshift.common.service_type }}-master-api
+  register: master_api_proxy
+  when: openshift.master.ha is defined and openshift.master.ha | bool and openshift_master_cluster_method == "native"
+  failed_when: false
+  changed_when: false
+
 - name: Create the master api service env file
   template:
     src: "{{ ha_svc_template_path }}/atomic-openshift-master-api.j2"
     dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-api
+    backup: true
   when: openshift.master.ha is defined and openshift.master.ha | bool and openshift_master_cluster_method == "native"
   notify:
   - restart master api
+
+- name: Restore Master API Proxy Config Options
+  when: openshift.master.ha is defined and openshift.master.ha | bool and openshift_master_cluster_method == "native"
+      and master_api_proxy.rc == 0 and 'http_proxy' not in openshift.common and 'https_proxy' not in openshift.common
+  lineinfile:
+    dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-api
+    line: "{{ item }}"
+  with_items: "{{ master_api_proxy.stdout_lines | default([]) }}"
+
+- name: Preserve Master Controllers Proxy Config options
+  command: grep PROXY /etc/sysconfig/{{ openshift.common.service_type }}-master-api
+  register: master_controllers_proxy
+  when: openshift.master.ha is defined and openshift.master.ha | bool and openshift_master_cluster_method == "native"
+  failed_when: false
+  changed_when: false
 
 - name: Create the master controllers service env file
   template:
     src: "{{ ha_svc_template_path }}/atomic-openshift-master-controllers.j2"
     dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-controllers
+    backup: true
   when: openshift.master.ha is defined and openshift.master.ha | bool and openshift_master_cluster_method == "native"
   notify:
   - restart master controllers
+
+- name: Restore Master Controllers Proxy Config Options
+  lineinfile:
+    dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-controllers
+    line: "{{ item }}"
+  with_items: "{{ master_controllers_proxy.stdout_lines | default([]) }}"
+  when: openshift.master.ha is defined and openshift.master.ha | bool and openshift_master_cluster_method == "native"
+        and master_controllers_proxy.rc == 0 and 'http_proxy' not in openshift.common and 'https_proxy' not in openshift.common 
 
 - name: Install Master docker service file
   template:
@@ -61,9 +93,23 @@
   register: install_result
   when: openshift.common.is_containerized | bool and openshift.master.ha is defined and not openshift.master.ha | bool
 
+- name: Preserve Master Proxy Config options
+  command: grep PROXY /etc/sysconfig/{{ openshift.common.service_type }}-master
+  register: master_proxy
+  failed_when: false
+  changed_when: false
+
 - name: Create the master service env file
   template:
     src: "atomic-openshift-master.j2"
     dest: /etc/sysconfig/{{ openshift.common.service_type }}-master
+    backup: true
   notify:
   - restart master
+
+- name: Restore Master Proxy Config Options
+  lineinfile:
+    dest: /etc/sysconfig/{{ openshift.common.service_type }}-master
+    line: "{{ item }}"
+  with_items: "{{ master_proxy.stdout_lines | default([]) }}"
+  when: master_proxy.rc == 0 and 'http_proxy' not in openshift.common and 'https_proxy' not in openshift.common

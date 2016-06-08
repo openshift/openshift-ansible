@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.90
+Version:        3.0.97
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -205,6 +205,94 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Jun 06 2016 Scott Dodson <sdodson@redhat.com> 3.0.97-1
+- Only run node specific bits on nodes (sdodson@redhat.com)
+- Update main.yaml (detiber@gmail.com)
+- Hardcoded values in "launch_instances" - isue # 1970 (daniel@dumdan.com)
+- XPAAS v1.3.1 content for Origin 1.1 / OSE 3.1 (sdodson@redhat.com)
+- XPAAS v1.3.1 release for Origin 1.2 / OSE 3.2 (sdodson@redhat.com)
+- Configure default docker logging options. (abutcher@redhat.com)
+- Run rhel_subscribe on l_oo_all_hosts rather than all (sdodson@redhat.com)
+- Fix error with stopping services that may not exist. (dgoodwin@redhat.com)
+- Add haproxy_frontend_port to vars for openshift-loadbalancer.
+  (abutcher@redhat.com)
+- Move os_firewall_allow from defaults to role dependencies.
+  (abutcher@redhat.com)
+- Ensure registry url evaluated when creating router. (abutcher@redhat.com)
+- Document protocol in readme aws. (abutcher@redhat.com)
+- Revert openshift-certificates changes. (abutcher@redhat.com)
+- wait metrics-deployer complete (need to configure nodes before hosted
+  services) (you@example.com)
+- switch to using sig release packages (jdetiber@redhat.com)
+- temporarily disable gpg checking until we have a way to cleanly enable it
+  (jdetiber@redhat.com)
+- Switch to using CentOS SIG repos for Origin installs (jdetiber@redhat.com)
+- Separate master and haproxy config playbooks. (abutcher@redhat.com)
+- Cleanup bin, test and roles/openshift_ansible_inventory following move to
+  openshift-tools (abutcher@redhat.com)
+- Catch more uninstall targets (sdodson@redhat.com)
+- Adding openshift_clock parameters to example inventory files
+  (jstuever@redhat.com)
+- Enable openshift_clock role for openshift_master, openshift_node, and
+  openshift_etcd (jstuever@redhat.com)
+- Add openshift_clock role to manage system clocks (jstuever@redhat.com)
+- Allow clock role in openshift_facts (jstuever@redhat.com)
+- Consolidate ca/master/node certificates roles into openshift_certificates.
+  (abutcher@redhat.com)
+- allow for overriding dns_flavor for openstack provider (jdetiber@redhat.com)
+- add user-data file back to openstack provisioner (jdetiber@redhat.com)
+- g_all_hosts with templated with_items causes errors with ansible 1.9.4 under
+  some conditions (jdetiber@redhat.com)
+- openstack_fixes (jdetiber@redhat.com)
+- libvirt_fixes (jdetiber@redhat.com)
+- gce fixes (jdetiber@redhat.com)
+- aws provider fixes (jdetiber@redhat.com)
+- Call evaluate_groups from update_repos_and_packages (jdetiber@redhat.com)
+
+* Thu May 26 2016 Scott Dodson <sdodson@redhat.com> 3.0.94-1
+- Use grep to decide when to add our comment (sdodson@redhat.com)
+
+* Tue May 24 2016 Troy Dawson <tdawson@redhat.com> 3.0.93-1
+- Fixup spec file (tdawson@redhat.com)
+
+* Tue May 24 2016 Troy Dawson <tdawson@redhat.com> 3.0.92-1
+-  Conditionally bind mount /usr/bin/docker-current when it is present (#1941)
+  (sdodson@redhat.com)
+
+* Tue May 24 2016 Troy Dawson <tdawson@redhat.com> 3.0.91-1
+- Removed the echo line and replaced it with inline comment. To keep 99-origin-
+  dns.sh from adding a new line in /etc/resolv.conf everytime the
+  NetworkManager dispatcher script is executed. (jnordell@redhat.com)
+- Extend multiple login provider check to include origin. (abutcher@redhat.com)
+- Allow multiple login providers post 3.2. (abutcher@redhat.com)
+- Make rhel_subscribe role able to subscribe for OSE 3.2 (lhuard@amadeus.com)
+- Ensure yum-utils installed. (abutcher@redhat.com)
+- Remove newline from docker_options template string. (abutcher@redhat.com)
+- Use systemctl restart docker instead of ansible service.
+  (dgoodwin@redhat.com)
+- Use cluster hostname while generating certificate on the master nodes
+  (vishal.patil@nuagenetworks.net)
+- Fix playbooks/openshift-master/library move to symlink (sdodson@redhat.com)
+- Task "Update router image to current version" failed, if router not in
+  default namespace (jkroepke@users.noreply.github.com)
+- docker-current was missing from the containerized atomic-openshift-
+  node.service file (maci.stgn@gmail.com)
+- fixed issue with blank spaces instead commas as variables template separators
+  (j.david.nieto@gmail.com)
+- Refactor where we compute no_proxy hostnames (sdodson@redhat.com)
+- Fix for ansible v2 (sdodson@redhat.com)
+- Fix rhel_subscribe (sdodson@redhat.com)
+- remove interpolated g_all_hosts with_items arg from upgrade playbooks
+  (cboggs@rallydev.com)
+- Set openshift.common.hostname early in playbook execution.
+  (abutcher@redhat.com)
+- Fix 'recursive loop detected in template string' for upgrading variable.
+  (abutcher@redhat.com)
+- a-o-i: No proxy questions for 3.0/3.1 (smunilla@redhat.com)
+- Fix minor upgrades in 3.1 (sdodson@redhat.com)
+- Don't pull cli image when we're not containerized (sdodson@redhat.com)
+- Check consumed pools prior to attaching. (abutcher@redhat.com)
+
 * Mon May 16 2016 Troy Dawson <tdawson@redhat.com> 3.0.90-1
 - Fixes for openshift_docker_hosted_registry_insecure var.
   (dgoodwin@redhat.com)

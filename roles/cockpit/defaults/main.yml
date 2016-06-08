@@ -1,4 +1,0 @@
----
-os_firewall_allow:
-- service: cockpit-ws
-  port: 9090/tcp

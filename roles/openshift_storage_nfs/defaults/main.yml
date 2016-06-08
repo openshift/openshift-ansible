@@ -16,6 +16,3 @@ openshift:
           options: "*(rw,root_squash)"
         volume:
           name: "metrics"
-os_firewall_allow:
-- service: nfs
-  port: "2049/tcp"

@@ -25,11 +25,6 @@
     - set_fact:
         is_containerized: "{{ is_atomic or containerized | default(false) | bool }}"
 
-    - name: Remove br0 interface
-      shell: ovs-vsctl del-br br0
-      changed_when: False
-      failed_when: False
-
     - name: Stop services
       service: name={{ item }} state=stopped
       with_items:
@@ -108,6 +103,91 @@
         - tuned-profiles-openshift-node
         - tuned-profiles-origin-node
 
+    - shell: systemctl reset-failed
+      changed_when: False
+
+    - shell: systemctl daemon-reload
+      changed_when: False
+
+    - name: Remove remaining files
+      file: path={{ item }} state=absent
+      with_items:
+        - "~{{ ansible_ssh_user }}/.kube"
+        - /etc/ansible/facts.d/openshift.fact
+        - /etc/atomic-enterprise
+        - /etc/corosync
+        - /etc/etcd
+        - /etc/openshift
+        - /etc/openshift-sdn
+        - /etc/origin
+        - /etc/systemd/system/atomic-openshift-master.service
+        - /etc/systemd/system/atomic-openshift-master-api.service
+        - /etc/systemd/system/atomic-openshift-master-controllers.service
+        - /etc/systemd/system/atomic-openshift-node.service
+        - /etc/systemd/system/atomic-openshift-node-dep.service
+        - /etc/systemd/system/origin-master.service
+        - /etc/systemd/system/origin-master-api.service
+        - /etc/systemd/system/origin-master-controllers.service
+        - /etc/systemd/system/origin-node.service
+        - /etc/systemd/system/origin-node-dep.service
+        - /etc/systemd/system/etcd_container.service
+        - /etc/systemd/system/openvswitch.service
+        - /etc/sysconfig/atomic-enterprise-master
+        - /etc/sysconfig/atomic-enterprise-master-api
+        - /etc/sysconfig/atomic-enterprise-master-controllers
+        - /etc/sysconfig/atomic-enterprise-node
+        - /etc/sysconfig/atomic-openshift-master
+        - /etc/sysconfig/atomic-openshift-master-api
+        - /etc/sysconfig/atomic-openshift-master-controllers
+        - /etc/sysconfig/atomic-openshift-node
+        - /etc/sysconfig/atomic-openshift-node-dep
+        - /etc/sysconfig/origin-master
+        - /etc/sysconfig/origin-master-api
+        - /etc/sysconfig/origin-master-controllers
+        - /etc/sysconfig/origin-node
+        - /etc/sysconfig/origin-node-dep
+        - /etc/sysconfig/openshift-master
+        - /etc/sysconfig/openshift-node
+        - /etc/sysconfig/openshift-node-dep
+        - /etc/sysconfig/openvswitch
+        - /etc/sysconfig/origin-master
+        - /etc/sysconfig/origin-master-api
+        - /etc/sysconfig/origin-master-controllers
+        - /etc/sysconfig/origin-node
+        - /etc/systemd/system/atomic-openshift-node.service.wants
+        - /root/.kube
+        - /run/openshift-sdn
+        - /usr/share/openshift/examples
+        - /var/lib/atomic-enterprise
+        - /var/lib/etcd
+        - /var/lib/openshift
+        - /var/lib/origin
+        - /var/lib/pacemaker
+        - /usr/lib/systemd/system/atomic-openshift-master-api.service
+        - /usr/lib/systemd/system/atomic-openshift-master-controllers.service
+        - /usr/lib/systemd/system/origin-master-api.service
+        - /usr/lib/systemd/system/origin-master-controllers.service
+        - /usr/local/bin/openshift
+        - /usr/local/bin/oadm
+        - /usr/local/bin/oc
+        - /usr/local/bin/kubectl
+        - /etc/NetworkManager/dispatcher.d/99-origin-dns.sh
+        - /etc/dnsmasq.d/origin-dns.conf
+        - /etc/dnsmasq.d/origin-upstream-dns.conf
+
+    # Since we are potentially removing the systemd unit files for separated
+    # master-api and master-controllers services, so we need to reload the
+    # systemd configuration manager
+    - name: Reload systemd manager configuration
+      command: systemctl daemon-reload
+
+- hosts: nodes
+  become: yes
+  tasks:
+    - name: Remove br0 interface
+      shell: ovs-vsctl del-br br0
+      changed_when: False
+      failed_when: False
     - name: Remove linux interfaces
       shell: ip link del "{{ item }}"
       changed_when: False
@@ -116,13 +196,12 @@
         - lbr0
         - vlinuxbr
         - vovsbr
-
-    - shell: systemctl reset-failed
-      changed_when: False
-
-    - shell: systemctl daemon-reload
-      changed_when: False
-
+    - name: restart docker
+      service: name=docker state=restarted
+      
+    - name: restart NetworkManager
+      service: name=NetworkManager state=restarted
+      
     - shell: find /var/lib/origin/openshift.local.volumes -type d -exec umount {} \; 2>/dev/null || true
       changed_when: False
 
@@ -173,80 +252,8 @@
       changed_when: False
       failed_when: False
       with_items: "{{ images_to_delete.results }}"
-    
+
     - name: Remove sdn drop files
-      file: 
+      file:
         path: /run/openshift-sdn
         state: absent
-        
-    - name: restart docker
-      service:
-        name: docker
-        state: restarted
-
-    - name: Remove remaining files
-      file: path={{ item }} state=absent
-      with_items:
-        - "~{{ ansible_ssh_user }}/.kube"
-        - /etc/ansible/facts.d/openshift.fact
-        - /etc/atomic-enterprise
-        - /etc/corosync
-        - /etc/etcd
-        - /etc/openshift
-        - /etc/openshift-sdn
-        - /etc/origin
-        - /etc/systemd/system/atomic-openshift-master.service
-        - /etc/systemd/system/atomic-openshift-master-api.service
-        - /etc/systemd/system/atomic-openshift-master-controllers.service
-        - /etc/systemd/system/atomic-openshift-node.service
-        - /etc/systemd/system/etcd_container.service
-        - /etc/systemd/system/openvswitch.service
-        - /etc/sysconfig/atomic-enterprise-master
-        - /etc/sysconfig/atomic-enterprise-master-api
-        - /etc/sysconfig/atomic-enterprise-master-controllers
-        - /etc/sysconfig/atomic-enterprise-node
-        - /etc/sysconfig/atomic-openshift-master
-        - /etc/sysconfig/atomic-openshift-master-api
-        - /etc/sysconfig/atomic-openshift-master-controllers
-        - /etc/sysconfig/atomic-openshift-node
-        - /etc/sysconfig/openshift-master
-        - /etc/sysconfig/openshift-node
-        - /etc/sysconfig/openvswitch
-        - /etc/sysconfig/origin-master
-        - /etc/sysconfig/origin-master-api
-        - /etc/sysconfig/origin-master-controllers
-        - /etc/sysconfig/origin-node
-        - /etc/systemd/system/atomic-openshift-node.service.wants
-        - /root/.kube
-        - /run/openshift-sdn
-        - /usr/share/openshift/examples
-        - /var/lib/atomic-enterprise
-        - /var/lib/etcd
-        - /var/lib/openshift
-        - /var/lib/origin
-        - /var/lib/pacemaker
-        - /usr/lib/systemd/system/atomic-openshift-master-api.service
-        - /usr/lib/systemd/system/atomic-openshift-master-controllers.service
-        - /usr/lib/systemd/system/origin-master-api.service
-        - /usr/lib/systemd/system/origin-master-controllers.service
-        - /usr/local/bin/openshift
-        - /usr/local/bin/oadm
-        - /usr/local/bin/oc
-        - /usr/local/bin/kubectl
-        - /etc/NetworkManager/dispatcher.d/99-origin-dns.sh
-        - /etc/dnsmasq.d/origin-dns.conf
-        - /etc/dnsmasq.d/origin-upstream-dns.conf
-
-    # Since we are potentially removing the systemd unit files for separated
-    # master-api and master-controllers services, so we need to reload the
-    # systemd configuration manager
-    - name: Reload systemd manager configuration
-      command: systemctl daemon-reload
-
-- hosts: nodes
-  become: yes
-  tasks:
-    - name: restart docker
-      service: name=docker state=restarted
-    - name: restart NetworkManager
-      service: name=NetworkManager state=restarted

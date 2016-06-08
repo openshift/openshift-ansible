@@ -52,6 +52,8 @@ EOF
     systemctl restart dnsmasq
 
     sed -i 's/^nameserver.*$/nameserver '"${def_route_ip}"'/g' /etc/resolv.conf
-    echo "# nameserver updated by /etc/NetworkManager/dispatcher.d/99-origin-dns.sh" >> /etc/resolv.conf
+    if ! grep -q '99-origin-dns.sh' /etc/resolv.conf; then
+      echo "# nameserver updated by /etc/NetworkManager/dispatcher.d/99-origin-dns.sh" >> /etc/resolv.conf
+    fi
   fi
 fi

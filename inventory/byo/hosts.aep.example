@@ -72,10 +72,8 @@ deployment_type=atomic-enterprise
 # Disable pushing to dockerhub
 #openshift_docker_disable_push_dockerhub=True
 # Items added, as is, to end of /etc/sysconfig/docker OPTIONS
+# Default value: "--log-driver=json-file --log-opt max-size=50m"
 #openshift_docker_options="-l warn --ipv6=false"
-# Deprecated methods to set --log-driver and --log-opts flags, use openshift_docker_options instead
-#openshift_docker_log_driver=json
-#openshift_docker_log_options=["tag=mailer"]
 
 # Alternate image format string. If you're not modifying the format string and
 # only need to inject your own registry you may want to consider
@@ -394,20 +392,23 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_generate_no_proxy_hosts=True
 #
 # These options configure the BuildDefaults admission controller which injects
-# environment variables into Builds. These values will default to their
-# corresponding values above but you may set them independently. See BuildDefaults
+# environment variables into Builds. These values will default to the global proxy
+# config values. You only need to set these if they differ from the global settings
+# above. See BuildDefaults
 # documentation at https://docs.openshift.org/latest/admin_guide/build_defaults_overrides.html
-#openshift_builddefaults_http_proxy=openshift_http_proxy
-#openshift_builddefaults_https_proxy=openshift_https_proxy
-#openshift_builddefaults_no_proxy=openshift_noproxy
-#openshift_builddefaults_git_http_proxy=openshift_builddefaults_http_proxy
-#openshift_builddefaults_git_https_proxy=openshift_builddefaults_https_proxy
+#openshift_builddefaults_http_proxy=http://USER:PASSWORD@HOST:PORT
+#openshift_builddefaults_https_proxy=https://USER:PASSWORD@HOST:PORT
+#openshift_builddefaults_no_proxy=build_defaults
+#openshift_builddefaults_git_http_proxy=http://USER:PASSWORD@HOST:PORT
+#openshift_builddefaults_git_https_proxy=https://USER:PASSWORD@HOST:PORT
 # Or you may optionally define your own serialized as json
 #openshift_builddefaults_json='{"BuildDefaults":{"configuration":{"apiVersion":"v1","env":[{"name":"HTTP_PROXY","value":"http://proxy.example.com.redhat.com:3128"},{"name":"NO_PROXY","value":"ose3-master.example.com"}],"gitHTTPProxy":"http://proxy.example.com:3128","kind":"BuildDefaultsConfig"}}}'
 
 # masterConfig.volumeConfig.dynamicProvisioningEnabled, configurable as of 1.2/3.2, enabled by default
 #openshift_master_dynamic_provisioning_enabled=False
 
+# Configure usage of openshift_clock role.
+#openshift_clock_enabled=true
 
 # host group for masters
 [masters]
