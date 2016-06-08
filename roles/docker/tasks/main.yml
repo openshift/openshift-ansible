@@ -20,7 +20,7 @@
   register: avail_docker_version
   failed_when: false
   changed_when: false
-  when: not openshift.common.is_atomic | bool
+  when: not curr_docker_version.stdout | default('0.0', True) | version_compare('1.10', '>=') and not openshift.common.is_atomic | bool
 
 - name: Verify Docker >= 1.10 is available
   fail:
