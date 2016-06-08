@@ -1,23 +1,22 @@
 ---
   - name: Setting master(s) hostname
-    hostname: name="{% for thishost in groups['openshift_masters'] %}{% if inventory_hostname == thishost %}master{{ counter }}.{{ dns_domain }}{% endif %}{% set counter = counter + 1 %}{% endfor %}"
-    when: "'openshift_masters' in group_names"
+    hostname: name="{% for thishost in groups['masters'] %}{% if inventory_hostname == thishost %}master{{ counter }}.{{ dns_domain }}{% endif %}{% set counter = counter + 1 %}{% endfor %}"
+    when: "'masters' in group_names"
 
   - name: Setting facts for masters
-    set_fact: ansible_hostname="{% for thishost in groups['openshift_masters'] %}{% if inventory_hostname == thishost %}master{{ counter }}{% endif %}{% set counter = counter + 1 %}{% endfor %}"
-    when: "'openshift_masters' in group_names"
+    set_fact: ansible_hostname="{% for thishost in groups['masters'] %}{% if inventory_hostname == thishost %}master{{ counter }}{% endif %}{% set counter = counter + 1 %}{% endfor %}"
+    when: "'masters' in group_names"
 
   - name: Setting node(s) hostname
-    hostname: name="{% for thishost in groups['openshift_nodes'] %}{% if inventory_hostname == thishost %}node{{ counter }}.{{ dns_domain }}{% endif %}{% set counter = counter + 1 %}{% endfor %}"
-    when: "'openshift_nodes' in group_names"
+    hostname: name="{% for thishost in groups['nodes'] %}{% if inventory_hostname == thishost %}node{{ counter }}.{{ dns_domain }}{% endif %}{% set counter = counter + 1 %}{% endfor %}"
+    when: "'nodes' in group_names"
 
   - name: Setting facts for nodes
-    set_fact: ansible_hostname="{% for thishost in groups['openshift_nodes'] %}{% if inventory_hostname == thishost %}node{{ counter }}{% endif %}{% set counter = counter + 1 %}{% endfor %}"
-    when: "'openshift_nodes' in group_names"
+    set_fact: ansible_hostname="{% for thishost in groups['nodes'] %}{% if inventory_hostname == thishost %}node{{ counter }}{% endif %}{% set counter = counter + 1 %}{% endfor %}"
+    when: "'nodes' in group_names"
 
   - name: "Templating records"
     become: false
-    remote_user: cloud-user
     template:
       src: "{{ role_path }}/templates/records.template.yaml"
       dest: "/tmp/records.yaml"

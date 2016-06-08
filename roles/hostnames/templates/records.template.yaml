@@ -3,12 +3,12 @@ dns_records_add:
   - view: private
     zone: {{ dns_domain }}
     entries:
-{% for mst in groups['openshift_masters'] %}
+{% for mst in groups['masters'] %}
     - type: A
       hostname: {{ hostvars[mst]['ansible_hostname'] }}
       ip: {{ hostvars[mst]['dns_private_ip'] }}
 {% endfor %}
-{% for node in groups['openshift_nodes'] %}
+{% for node in groups['nodes'] %}
     - type: A
       hostname: {{ hostvars[node]['ansible_hostname'] }}
       ip: {{ hostvars[node]['dns_private_ip'] }}
@@ -16,12 +16,12 @@ dns_records_add:
   - view: public
     zone: {{ dns_domain}}
     entries:
-{% for mst in groups['openshift_masters']%}
+{% for mst in groups['masters']%}
     - type: A
       hostname: {{ hostvars[mst]['ansible_hostname'] }}
       ip: {{ hostvars[mst]['dns_public_ip'] }}
 {% endfor %}
-{% for node in groups['openshift_nodes'] %}
+{% for node in groups['nodes'] %}
     - type: A
       hostname: {{ hostvars[node]['ansible_hostname'] }}
       ip: {{ hostvars[node]['dns_public_ip'] }}
