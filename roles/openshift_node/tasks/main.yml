@@ -26,6 +26,7 @@
       proxy_mode: "{{ openshift_node_proxy_mode | default('iptables') }}"
       local_quota_per_fsgroup: "{{ openshift_node_local_quota_per_fsgroup | default(None) }}"
       dns_ip: "{{ openshift_dns_ip | default(none) | get_dns_ip(hostvars[inventory_hostname])}}"
+      profile: "{{ openshift_node_profile | default(none) }}"
 
 # We have to add tuned-profiles in the same transaction otherwise we run into depsolving
 # problems because the rpms don't pin the version properly. This was fixed in 3.1 packaging.
@@ -88,6 +89,16 @@
     - regex: '^AWS_SECRET_ACCESS_KEY='
       line: "AWS_SECRET_ACCESS_KEY={{ openshift.cloudprovider.aws.secret_key }}"
   when: "'cloudprovider' in openshift and 'aws' in openshift.cloudprovider and 'kind' in openshift.cloudprovider and openshift.cloudprovider.kind == 'aws' and 'access_key' in openshift.cloudprovider.aws and 'secret_key' in openshift.cloudprovider.aws"
+  notify:
+  - restart node
+
+- name: Configure OPENSHIFT_PROFILE if needed
+  lineinfile:
+    dest: /etc/sysconfig/{{ openshift.common.service_type }}-node
+    regexp: "^OPENSHIFT_PROFILE="
+    line: "OPENSHIFT_PROFILE={{ openshift.node.profile }}"
+    create: true
+  when: "'profile' in openshift.node"
   notify:
   - restart node
 
