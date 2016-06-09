@@ -92,8 +92,16 @@
   template:
     dest: "{{ item.filename }}"
     src: htpasswd.j2
-    mode: 0600
     backup: yes
+  when: item.kind == 'HTPasswdPasswordIdentityProvider' and openshift.master.manage_htpasswd | bool
+  with_items: "{{ openshift.master.identity_providers }}"
+
+- name: Ensure htpasswd file exists
+  copy:
+    dest: "{{ item.filename }}"
+    force: no
+    content: ""
+    mode: 0600
   when: item.kind == 'HTPasswdPasswordIdentityProvider'
   with_items: "{{ openshift.master.identity_providers }}"
 

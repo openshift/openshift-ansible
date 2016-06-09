@@ -1573,7 +1573,15 @@ class OpenShiftFacts(object):
                 "Role %s is not supported by this module" % role
             )
         self.role = role
-        self.system_facts = ansible_facts(module)
+
+        try:
+            # ansible-2.1
+            # pylint: disable=too-many-function-args
+            self.system_facts = ansible_facts(module, ['hardware', 'network', 'virtual', 'facter'])
+        except TypeError:
+            # ansible-1.9.x,ansible-2.0.x
+            self.system_facts = ansible_facts(module)
+
         self.facts = self.generate_facts(local_facts,
                                          additive_facts_to_overwrite,
                                          openshift_env,

@@ -72,7 +72,7 @@
     openshift_release: "3.2"
     openshift_protect_installed_version: False
 
-- name: Verify upgrade can proceed on masters
+- name: Verify master processes
   hosts: oo_masters_to_config
   roles:
   - openshift_facts
@@ -103,7 +103,7 @@
       enabled: yes
     when: openshift.master.ha is defined and openshift.master.ha | bool and openshift.common.is_containerized | bool
 
-- name: Verify upgrade can proceed on nodes
+- name: Verify node processes
   hosts: oo_nodes_to_config
   roles:
   - openshift_facts
@@ -115,7 +115,7 @@
       enabled: yes
     when: openshift.common.is_containerized | bool
 
-- name: Verify upgrade can proceed on masters and nodes
+- name: Verify upgrade targets
   hosts: oo_masters_to_config:oo_nodes_to_config
   vars:
     target_version: "{{ '1.2' if deployment_type == 'origin' else '3.2' }}"

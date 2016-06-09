@@ -54,7 +54,7 @@
   - script: ../files/pre-upgrade-check
 
 
-- name: Verify upgrade can proceed
+- name: Verify upgrade targets
   hosts: oo_masters_to_config:oo_nodes_to_config
   vars:
     target_version: "{{ '1.1' if deployment_type == 'origin' else '3.1' }}"

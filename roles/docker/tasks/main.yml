@@ -85,6 +85,7 @@
       reg_fact_val: "{{ docker_no_proxy | default('') | join(',') }}"
   notify:
     - restart docker
+  when: "{{ 'http_proxy' in openshift.common or 'https_proxy' in openshift.common and docker_check.stat.isreg }}"
 
 - name: Set various docker options
   lineinfile:
