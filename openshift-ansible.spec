@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.0
+Version:        3.2.1
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -205,6 +205,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Jun 09 2016 Scott Dodson <sdodson@redhat.com> 3.2.1-1
+- Restore mistakenly reverted code. (dgoodwin@redhat.com)
+- Bug 1338726 - never abort install if the latest version of docker is already
+  installed (bleanhar@redhat.com)
+- Fix Docker 1.10 problems with empty tags and trailing : (dgoodwin@redhat.com)
+- Docker 1.10 Upgrade (dgoodwin@redhat.com)
+- Ansible 2.1 support. (abutcher@redhat.com)
+
 * Thu Jun 09 2016 Scott Dodson <sdodson@redhat.com> 3.2.0-1
 - Add openshift_loadbalancer_facts role to set lb facts prior to running
   dependencies. (abutcher@redhat.com)
