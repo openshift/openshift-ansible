@@ -1,0 +1,76 @@
+# This is an example of a bring your own (byo) host inventory
+
+# Create an OSEv3 group that contains the masters and nodes groups
+[OSEv3:children]
+masters
+nodes
+etcd
+lb
+
+# Set variables common for all OSEv3 hosts
+[OSEv3:vars]
+ansible_ssh_user=root
+#ansible_sudo=true
+
+#os_firewall_enabled=false
+osm_use_cockpit=false
+
+# Debug level for all OpenShift components (Defaults to 2)
+debug_level=2
+
+deployment_type=openshift-enterprise
+
+openshift_additional_repos=[{'id': 'ose-devel', 'name': 'ose-devel', 'baseurl': 'http://download.lab.bos.redhat.com/rcm-guest/puddles/RHAOS/AtomicOpenShift/3.2/latest/x86_64/os', 'enabled': 1, 'gpgcheck': 0}]
+#openshift_additional_repos=[{'id': 'ose-devel', 'name': 'ose-devel', 'baseurl': 'http://buildvm-devops.usersys.redhat.com/puddle/build/AtomicOpenShift/3.1/latest/RH7-RHAOS-3.1/x86_64/os', 'enabled': 1, 'gpgcheck': 0}]
+#openshift_additional_repos=[{'id': 'ose-3-1', 'name': 'OSE 3.1', 'baseurl': 'http://pulp.dist.prod.ext.phx2.redhat.com/content/dist/rhel/server/7/7Server/x86_64/ose/3.1/os', 'enabled': 1, 'gpgcheck': 0}]
+
+openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]
+#openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}, {'name': 'my_ldap_provider', 'challenge': 'true', 'login': 'false', 'kind': 'LDAPPasswordIdentityProvider', 'attributes': {'id': ['dn'], 'email': ['mail'], 'name': ['cn'], 'preferredUsername': ['uid']}, 'bindDN': '', 'bindPassword': '', 'ca': 'my_ldap_ca.crt', 'insecure': 'false', 'url': 'ldap://ldap.example.com:389/ou=users,dc=example,dc=com?uid'}]
+#openshift_master_identity_providers=[{'name': 'github', 'kind': 'GitHubIdentityProvider', 'login': 'true', 'challenge': 'false', 'mapping_method': 'lookup','client_id': 'CLIENTID', 'client_secret': 'SECRET'}]
+#openshift_master_ldap_ca='thisismycacontents'
+#openshift_master_ldap_ca='-----BEGIN CERTIFICATE-----\nMIIDsDCCAxmgAwIBAgIBATANBgkqhkiG9w0BAQUFADCBnTELMAkGA1UEBhMCVVMxFzAVBgNVBAgTDk5vcnRoIENhcm9saW5hMRAwDgYDVQQHEwdSYWxlaWdoMRYwFAYDVQQKEw1SZWQgSGF0LCBJbmMuMQswCQYDVQQLEwJJUzEWMBQGA1UEAxMNUmVkIEhhdCBJUyBDQTEmMCQGCSqGSIb3DQEJARYXc3lzYWRtaW4tcmR1QHJlZGhhdC5jb20wHhcNMDkwOTE2MTg0NTI1WhcNMTkwOTE0MTg0NTI1WjCBnTELMAkGA1UEBhMCVVMxFzAVBgNVBAgTDk5vcnRoIENhcm9saW5hMRAwDgYDVQQHEwdSYWxlaWdoMRYwFAYDVQQKEw1SZWQgSGF0LCBJbmMuMQswCQYDVQQLEwJJUzEWMBQGA1UEAxMNUmVkIEhhdCBJUyBDQTEmMCQGCSqGSIb3DQEJARYXc3lzYWRtaW4tcmR1QHJlZGhhdC5jb20wgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAN/HDWGiL8BarUWDIjNC6uxCXqYNQkwcmhILX+cl+YuDDArFL1pYVrith228gF3dSUU5X7kIOmPkkjNheRkbnas61X+ni3+KWvbX3q+h5VMxKX2cA1U+R3jLuXqYjF+N2gkPyPvxeoDuEncKAItw+mK/r+4LWBb5nFzek7hP3017AgMBAAGjgf0wgfowHQYDVR0OBBYEFA2sGXDtBKdeeKv+i6g06yEmwVY1MIHKBgNVHSMEgcIwgb+AFA2sGXDtBKdeeKv+i6g06yEmwVY1oYGjpIGgMIGdMQswCQYDVQQGEwJVUzEXMBUGA1UECBMOTm9ydGggQ2Fyb2xpbmExEDAOBgNVBAcTB1JhbGVpZ2gxFjAUBgNVBAoTDVJlZCBIYXQsIEluYy4xCzAJBgNVBAsTAklTMRYwFAYDVQQDEw1SZWQgSGF0IElTIENBMSYwJAYJKoZIhvcNAQkBFhdzeXNhZG1pbi1yZHVAcmVkaGF0LmNvbYIBATAMBgNVHRMEBTADAQH/MA0GCSqGSIb3DQEBBQUAA4GBAFBgO5y3JcPXH/goumNBW7rr8m9EFZmQyK5gT1Ljv5qaCSZwxkAomhriv04pmb1y8yjrK5OY3WwgaRaAWRHp4/hn2HWaRvx3S+gwLM7p8V1pWnbSFJOXF3kbuC41voMIMqAFfHKidKN/yrjJg/1ahIjSt11lMUvRJ4TNT+pk5VnB\n-----END CERTIFICATE-----'
+#openshift_master_htpasswd_users={'test1': '$apr1$69Aepxif$wTYJ.Qjee6pzFwbhQiwHK/', 'test2': '$apr1$69Aepxif$wTYJ.Qjee6pzFwbhQiwHK/'}
+
+openshift_master_cluster_method=native
+openshift_master_cluster_hostname=openshift-ansible.test.example.com
+openshift_master_cluster_public_hostname=openshift-ansible.test.example.com
+
+#openshift_pkg_version=-3.0.0.0
+
+#cli_docker_additional_registries=brew-pulp-docker01.web.prod.ext.phx2.redhat.com:8888
+#cli_docker_insecure_registries=brew-pulp-docker01.web.prod.ext.phx2.redhat.com:8888
+openshift_docker_additional_registries=brew-pulp-docker01.web.prod.ext.phx2.redhat.com:8888
+openshift_docker_insecure_registries=brew-pulp-docker01.web.prod.ext.phx2.redhat.com:8888
+#openshift_docker_additional_registries=192.168.133.1:5000,brew-pulp-docker01.web.prod.ext.phx2.redhat.com:8888
+#openshift_docker_insecure_registries=192.168.133.1:5000
+#oreg_url=example.com/openshift3/ose-${component}:${version}
+#openshift_docker_options="-l warn --ipv6=false"
+#openshift_docker_log_driver=journald
+#openshift_docker_log_options="env=prod"
+
+#[masters:vars]
+#containerized=yes
+
+[masters]
+ose3-master[1:3]-ansible.test.example.com
+
+[nfs]
+ose3-lb-ansible.test.example.com
+
+#[etcd:vars]
+#containerized=yes
+
+[etcd]
+#ose3-etcd[1:3]-ansible.test.example.com
+ose3-master[1:3]-ansible.test.example.com
+
+[lb]
+ose3-lb-ansible.test.example.com
+
+#[nodes:vars]
+#containerized=yes
+
+[nodes]
+ose3-master[1:3]-ansible.test.example.com openshift_schedulable=False
+ose3-node1-ansible.test.example.com openshift_node_labels="{'region': 'primary', 'zone': 'default'}"
+ose3-node2-ansible.test.example.com openshift_node_labels="{'region': 'infra', 'zone': 'default'}"

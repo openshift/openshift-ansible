@@ -30,5 +30,3 @@ dependencies:
   openshift_serviceaccounts_sccs:
   - privileged
   when: not openshift.common.version_gte_3_2_or_1_2
-- role: openshift_metrics
-  when: openshift.hosted.metrics.deploy | bool
