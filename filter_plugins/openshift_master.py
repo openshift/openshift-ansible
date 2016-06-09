@@ -13,11 +13,15 @@ from distutils.version import LooseVersion
 
 # pylint: disable=no-name-in-module,import-error
 try:
-    # ansible-2.0
-    from ansible.runner.filter_plugins.core import bool as ansible_bool
+    # ansible-2.1
+    from ansible.plugins.filter.core import to_bool as ansible_bool
 except ImportError:
-    # ansible-1.9.x
-    from ansible.plugins.filter.core import bool as ansible_bool
+    try:
+        #ansible-2.0.x
+        from ansible.runner.filter_plugins.core import bool as ansible_bool
+    except ImportError:
+        # ansible-1.9.x
+        from ansible.plugins.filter.core import bool as ansible_bool
 
 class IdentityProviderBase(object):
     """ IdentityProviderBase
