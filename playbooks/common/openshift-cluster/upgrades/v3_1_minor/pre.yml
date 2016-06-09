@@ -29,7 +29,7 @@
         valid version for a {{ target_version }} upgrade
     when: openshift_pkg_version is defined and openshift_pkg_version.split('-',1).1 | version_compare(target_version ,'<')
 
-- name: Verify upgrade can proceed
+- name: Verify upgrade targets
   hosts: oo_masters_to_config:oo_nodes_to_config
   vars:
     target_version: "{{ '1.1.1' if deployment_type == 'origin' else '3.1.1' }}"
