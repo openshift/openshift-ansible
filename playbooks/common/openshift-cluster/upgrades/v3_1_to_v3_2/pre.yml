@@ -77,7 +77,6 @@
   roles:
   - openshift_facts
   tasks:
-  - fail:
   - openshift_facts:
       role: master
       local_facts:
@@ -116,22 +115,20 @@
       enabled: yes
     when: openshift.common.is_containerized | bool
 
-- name: Verify upgrade can proceed
+- name: Verify upgrade can proceed on masters and nodes
   hosts: oo_masters_to_config:oo_nodes_to_config
   vars:
-    target_version: "{{ '1.2' if deployment_type == 'origin' else '3.1.1.900' }}"
+    target_version: "{{ '1.2' if deployment_type == 'origin' else '3.2' }}"
     openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"
-    upgrading: True
-  handlers:
-  - include: ../../../../../roles/openshift_master/handlers/main.yml
-  - include: ../../../../../roles/openshift_node/handlers/main.yml
-  roles:
-  # We want the cli role to evaluate so that the containerized oc/oadm wrappers
-  # are modified to use the correct image tag.  However, this can trigger a
-  # docker restart if new configuration is laid down which would immediately
-  # pull the latest image and defeat the purpose of these tasks.
-  - { role: openshift_cli }
   pre_tasks:
+  - fail:
+      msg: Verify OpenShift is already installed
+    when: openshift.common.version is not defined
+
+  - fail:
+      msg: Verify the correct version was found
+    when: verify_upgrade_version is defined and openshift_version != verify_upgrade_version
+
   - name: Clean package cache
     command: "{{ ansible_pkg_mgr }} clean all"
     when: not openshift.common.is_atomic | bool
@@ -140,60 +137,17 @@
       g_new_service_name: "{{ 'origin' if deployment_type =='origin' else 'atomic-openshift' }}"
     when: not openshift.common.is_containerized | bool
 
-  - name: Determine available versions
-    script: ../files/rpm_versions.sh {{ g_new_service_name }}
-    register: g_rpm_versions_result
-    when: not openshift.common.is_containerized | bool
-
-  - debug: var=g_rpm_versions_result
-
-  - set_fact:
-      g_aos_versions: "{{ g_rpm_versions_result.stdout | from_yaml }}"
-    when: not openshift.common.is_containerized | bool
-
-  - name: Determine available versions
-    script: ../files/openshift_container_versions.sh {{ openshift.common.service_type }}
-    register: g_containerized_versions_result
+  - name: Verify containers are available for upgrade
+    command: >
+      docker pull {{ openshift.common.cli_image }}:v{{ openshift_version }}
     when: openshift.common.is_containerized | bool
 
-  - set_fact:
-      g_aos_versions: "{{ g_containerized_versions_result.stdout | from_yaml }}"
-    when: openshift.common.is_containerized | bool
+  - name: Verify RPMs are available for upgrade
+    command: >
+      yum list available -e 0 -q "{{ g_new_service_name }}" 2>&1 | tail -n +2 | grep -v 'el7ose' | awk '{ print $2 }' | sort -r | tr '\n' ' ')
+    when: not openshift.common.is_containerized | bool
 
-  - set_fact:
-      g_new_version: "{{ g_aos_versions.curr_version.split('-', 1).0 if g_aos_versions.avail_version is none else g_aos_versions.avail_version.split('-', 1).0 }}"
-    when: openshift_pkg_version is not defined
-
-  - set_fact:
-      g_new_version: "{{ openshift_pkg_version | replace('-','') }}"
-    when: openshift_pkg_version is defined
-
-  - set_fact:
-      g_new_version: "{{ openshift_image_tag | replace('v','') }}"
-    when: openshift_image_tag is defined
-
-  - fail:
-      msg: Verifying the correct version was found
-    when: g_aos_versions.curr_version == ""
-
-  - fail:
-      msg: Verifying the correct version was found
-    when: verify_upgrade_version is defined and g_new_version != verify_upgrade_version
-
-  - include_vars: ../../../../../roles/openshift_master/vars/main.yml
-    when: inventory_hostname in groups.oo_masters_to_config
-
-  - name: Update systemd units
-    include: ../../../../../roles/openshift_master/tasks/systemd_units.yml openshift_version=v{{ g_new_version }}
-    when: inventory_hostname in groups.oo_masters_to_config
-
-  - include_vars: ../../../../../roles/openshift_node/vars/main.yml
-    when: inventory_hostname in groups.oo_nodes_to_config
-
-  - name: Update systemd units
-    include: ../../../../../roles/openshift_node/tasks/systemd_units.yml openshift_version=v{{ g_new_version }}
-    when: inventory_hostname in groups.oo_nodes_to_config
-
+  # TODO: Are these two grep checks necessary anymore?
   # Note: the version number is hardcoded here in hopes of catching potential
   # bugs in how g_aos_versions.curr_version is set
   - name: Verifying the correct version is installed for upgrade
@@ -208,19 +162,15 @@
     with_items:
       - /etc/systemd/system/openvswitch.service
       - /etc/systemd/system/{{ openshift.common.service_type }}*.service
-    when: openshift.common.is_containerized | bool
+    when: openshift.common.is_containerized | bool and verify_upgrade_version is defined
 
   - fail:
-      msg: This playbook requires Origin 1.1 or later
-    when: deployment_type == 'origin' and g_aos_versions.curr_version | version_compare('1.1','<')
+      msg: This upgrade playbook must be run on Origin 1.1 or later
+    when: deployment_type == 'origin' and openshift.common.version | version_compare('1.1','<')
 
   - fail:
-      msg: This playbook requires Atomic Enterprise Platform/OpenShift Enterprise 3.1 or later
-    when: deployment_type == 'atomic-openshift' and g_aos_versions.curr_version | version_compare('3.1','<')
-
-  - fail:
-      msg: Upgrade packages not found
-    when: openshift_image_tag is not defined and (g_aos_versions.avail_version | default(g_aos_versions.curr_version, true) | version_compare(target_version, '<'))
+      msg: This upgrade playbook must be run on OpenShift Enterprise 3.1 or later
+    when: deployment_type == 'atomic-openshift' and openshift.common.version | version_compare('3.1','<')
 
   - name: Determine available Docker
     script: ../files/rpm_versions.sh docker
@@ -240,6 +190,7 @@
       g_docker_version: "{{ g_atomic_docker_version_result.stdout | from_yaml }}"
     when: openshift.common.is_atomic | bool
 
+  # TODO: Update to 1.10 once branch merges
   - fail:
       msg: This playbook requires access to Docker 1.9 or later
     when: g_docker_version.avail_version | default(g_docker_version.curr_version, true) | version_compare('1.9','<')
