@@ -17,6 +17,7 @@
     with_items:
     - role: docker
       local_facts:
+        docker_version: '1.9'
         openshift_image_tag: "v{{ g_new_version }}"
         openshift_version: "{{ g_new_version }}"
 
