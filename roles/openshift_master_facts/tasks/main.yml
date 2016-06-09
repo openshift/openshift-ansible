@@ -61,7 +61,6 @@
       registry_selector: "{{ openshift_registry_selector | default(None) }}"
       api_server_args: "{{ osm_api_server_args | default(None) }}"
       controller_args: "{{ osm_controller_args | default(None) }}"
-      infra_nodes: "{{ openshift_infra_nodes | default(None) }}"
       disabled_features: "{{ osm_disabled_features | default(None) }}"
       master_count: "{{ openshift_master_count | default(None) }}"
       controller_lease_ttl: "{{ osm_controller_lease_ttl | default(None) }}"
@@ -78,3 +77,4 @@
       image_policy_config: "{{ openshift_master_image_policy_config | default(None) }}"
       dynamic_provisioning_enabled: "{{ openshift_master_dynamic_provisioning_enabled | default(None) }}"
       max_requests_inflight: "{{ openshift_master_max_requests_inflight | default(None) }}"
+      profile: "{{ openshift_master_profile | default(none) }}"

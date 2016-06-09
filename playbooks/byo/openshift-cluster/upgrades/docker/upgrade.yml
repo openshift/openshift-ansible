@@ -1,0 +1,29 @@
+# Playbook to upgrade Docker to the max allowable version for an OpenShift cluster.
+#
+# Currently only supports upgrading 1.9.x to >= 1.10.x.
+- hosts: localhost
+  connection: local
+  become: no
+  gather_facts: no
+  tasks:
+  - include_vars: ../../cluster_hosts.yml
+  - add_host:
+      name: "{{ item }}"
+      groups: l_oo_all_hosts
+    with_items: g_all_hosts | default([])
+    changed_when: false
+
+- hosts: l_oo_all_hosts
+  gather_facts: no
+  tasks:
+  - include_vars: ../../cluster_hosts.yml
+
+- include: ../../../../common/openshift-cluster/evaluate_groups.yml
+  vars:
+    # Do not allow adding hosts during upgrade.
+    g_new_master_hosts: []
+    g_new_node_hosts: []
+    openshift_cluster_id: "{{ cluster_id | default('default') }}"
+    openshift_deployment_type: "{{ deployment_type }}"
+
+- include: docker_upgrade.yml

@@ -1,0 +1,105 @@
+---
+- fail:
+    msg: >
+      openshift_hosted_registry_storage_s3_accesskey and
+      openshift_hosted_registry_storage_s3_secretkey are required
+  when: openshift.hosted.registry.storage.s3.accesskey | default(none) is none or openshift.hosted.registry.storage.s3.secretkey | default(none) is none
+
+- fail:
+    msg: >
+      openshift_hosted_registry_storage_s3_bucket and
+      openshift_hosted_registry_storage_s3_region are required
+  when: openshift.hosted.registry.storage.s3.bucket | default(none) is none or openshift.hosted.registry.storage.s3.region | default(none) is none
+
+# Currently this is relying on the boto config (or env vars) on the master host, it
+# should be a local_action and use separate credentials for creating the
+# bucket (vs the ones for accessing the bucket)
+- name: Create the S3 bucket
+  become: no
+  local_action:
+    module: s3
+    bucket: "{{ openshift.hosted.registry.storage.s3.bucket }}"
+    region: "{{ openshift.hosted.registry.storage.s3.region }}"
+    mode: create
+  when: openshift.hosted.registry.storage.s3.create | default(false) | bool
+
+- name: Test if docker registry config secret exists
+  command: >
+    {{ openshift.common.client_binary }}
+    --config={{ openshift_hosted_kubeconfig }}
+    --namespace={{ openshift.hosted.registry.namespace | default('default') }}
+    get secrets {{ registry_config_secret_name }} -o json
+  register: secrets
+  changed_when: false
+  failed_when: false
+
+- set_fact:
+    registry_config: "{{ lookup('template', '../templates/registry_config.j2') | b64encode }}"
+
+- set_fact:
+    registry_config_secret: "{{ lookup('template', '../templates/registry_config_secret.j2') | from_yaml }}"
+
+# TODO: update config secret if different
+#       need to make sure update will not update backend storage. since that
+#       is destructive
+- name: Create registry config secret
+  shell: >
+    echo '{{ registry_config_secret |to_json }}' |
+    {{ openshift.common.client_binary }}
+    --config={{ openshift_hosted_kubeconfig }}
+    --namespace={{ openshift.hosted.registry.namespace | default('default') }}
+    create -f -
+  when: secrets.rc == 1
+
+- name: Determine if service account contains secrets
+  command: >
+    {{ openshift.common.client_binary }}
+    --config={{ openshift_hosted_kubeconfig }}
+    --namespace={{ openshift.hosted.registry.namespace | default('default') }}
+    get serviceaccounts registry
+    -o jsonpath='{.secrets[?(@.name=="{{ registry_config_secret_name }}")].name}'
+  register: serviceaccount
+  changed_when: false
+
+- name: Add secrets to registry service account
+  command: >
+    {{ openshift.common.client_binary }}
+    --config={{ openshift_hosted_kubeconfig }}
+    --namespace={{ openshift.hosted.registry.namespace | default('default') }}
+    secrets add serviceaccount/registry secrets/{{ registry_config_secret_name }}
+  when: serviceaccount.stdout == ''
+
+- name: Determine if deployment config contains secrets
+  command: >
+    {{ openshift.common.client_binary }}
+    --config={{ openshift_hosted_kubeconfig }}
+    --namespace={{ openshift.hosted.registry.namespace | default('default') }}
+    set volumes dc/docker-registry --list
+  register: volume
+  changed_when: false
+
+- name: Add secrets to registry deployment config
+  command: >
+    {{ openshift.common.client_binary }}
+    --config={{ openshift_hosted_kubeconfig }}
+    --namespace={{ openshift.hosted.registry.namespace | default('default') }}
+    set volumes dc/docker-registry --add --name=docker-config -m /etc/registry
+    --type=secret --secret-name={{ registry_config_secret_name }}
+  when: registry_config_secret_name not in volume.stdout
+
+- name: Determine if registry environment variable needs to be created
+  command: >
+    {{ openshift.common.client_binary }}
+    --config={{ openshift_hosted_kubeconfig }}
+    --namespace={{ openshift.hosted.registry.namespace | default('default') }}
+    set env --list dc/docker-registry
+  register: oc_env
+  changed_when: false
+
+- name: Add registry environment variable
+  command: >
+    {{ openshift.common.client_binary }}
+    --config={{ openshift_hosted_kubeconfig }}
+    --namespace={{ openshift.hosted.registry.namespace | default('default') }}
+    set env dc/docker-registry REGISTRY_CONFIGURATION_PATH=/etc/registry/config.yml
+  when: "'REGISTRY_CONFIGURATION_PATH' not in oc_env.stdout"

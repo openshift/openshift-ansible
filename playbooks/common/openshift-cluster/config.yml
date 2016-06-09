@@ -1,12 +1,20 @@
 ---
 - include: evaluate_groups.yml
+  tags:
+  - always
 
 - include: initialize_facts.yml
+  tags:
+  - always
 
 - include: validate_hostnames.yml
+  tags:
+  - node
 
 - name: Set oo_options
   hosts: oo_all_hosts
+  tags:
+  - always
   tasks:
   - set_fact:
       openshift_docker_additional_registries: "{{ lookup('oo_option', 'docker_additional_registries') }}"
@@ -28,15 +36,29 @@
     when: openshift_docker_log_options is not defined
 
 - include: ../openshift-etcd/config.yml
+  tags:
+  - etcd
 
 - include: ../openshift-nfs/config.yml
+  tags:
+  - nfs
 
 - include: ../openshift-loadbalancer/config.yml
+  tags:
+  - loadbalancer
 
 - include: ../openshift-master/config.yml
+  tags:
+  - master
 
 - include: additional_config.yml
+  tags:
+  - master
 
 - include: ../openshift-node/config.yml
+  tags:
+  - node
 
 - include: openshift_hosted.yml
+  tags:
+  - hosted

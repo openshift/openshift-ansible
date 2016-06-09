@@ -1,2 +1,12 @@
 ---
 openshift_master_config_dir: "{{ openshift.common.config_base }}/master"
+registry_config_secret_name: registry-config
+
+metrics_deployer_sa:
+  apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    name: metrics-deployer
+  secrets:
+  - name: metrics-deployer
+

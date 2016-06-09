@@ -1,0 +1,45 @@
+---
+- name: Create temp directory for kubeconfig
+  command: mktemp -d /tmp/openshift-ansible-XXXXXX
+  register: mktemp
+  changed_when: False
+
+- name: Copy the admin client config(s)
+  command: >
+    cp {{ openshift_master_config_dir }}/admin.kubeconfig {{ mktemp.stdout }}/admin.kubeconfig
+  changed_when: False
+
+- name: test if project exists
+  command: >
+    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig
+    get projects {{ item.key }} -o json
+  with_dict: "{{ openshift_projects }}"
+  failed_when: false
+  changed_when: false
+  register: project_test
+
+- name: create the projects
+  command: >
+    {{ openshift.common.admin_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig
+    new-project {{ item.item.key }}
+    {{ '--node-selector=' ~ item.item.value.default_node_selector if 'default_node_selector' in item.item.value and item.item.value.default_node_selector != omit else '' }}
+  when: item.rc == 1
+  with_items:
+  - "{{ project_test.results }}"
+
+- name: update the default node selector if necessary
+  command: >
+    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig
+    annotate namespace {{ item.item.key }}
+    openshift.io/node-selector='{{ item.item.value.default_node_selector }}' --overwrite
+  when: "{{ item.rc == 0 and item.item.value.default_node_selector | default(omit) != omit
+            and item.item.value.default_node_selector | default(omit) != (item.stdout | from_json).metadata.annotations['openshift.io/node-selector'] | default(omit) }}"
+  with_items:
+  - "{{ project_test.results }}"
+  register: annotate_project
+
+- name: Delete temp directory
+  file:
+    name: "{{ mktemp.stdout }}"
+    state: absent
+  changed_when: False

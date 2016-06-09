@@ -114,6 +114,12 @@ def migrate_hosted_facts(facts):
             if 'router' not in facts['hosted']:
                 facts['hosted']['router'] = {}
             facts['hosted']['router']['selector'] = facts['master'].pop('router_selector')
+        if 'registry_selector' in facts['master']:
+            if 'hosted' not in facts:
+                facts['hosted'] = {}
+            if 'registry' not in facts['hosted']:
+                facts['hosted']['registry'] = {}
+            facts['hosted']['registry']['selector'] = facts['master'].pop('registry_selector')
     return facts
 
 def first_ip(network):
@@ -466,11 +472,11 @@ def set_selectors(facts):
         facts['hosted']['router'] = {}
     if 'selector' not in facts['hosted']['router'] or facts['hosted']['router']['selector'] in [None, 'None']:
         facts['hosted']['router']['selector'] = selector
+    if 'registry' not in facts['hosted']:
+        facts['hosted']['registry'] = {}
+    if 'selector' not in facts['hosted']['registry'] or facts['hosted']['registry']['selector'] in [None, 'None']:
+        facts['hosted']['registry']['selector'] = selector
 
-    if 'master' in facts:
-        if 'infra_nodes' in facts['master']:
-            if 'registry_selector' not in facts['master']:
-                facts['master']['registry_selector'] = selector
     return facts
 
 def set_metrics_facts_if_unset(facts):
@@ -1749,7 +1755,7 @@ class OpenShiftFacts(object):
                 metrics=dict(
                     deploy=False,
                     duration=7,
-                    resolution=10,
+                    resolution='10s',
                     storage=dict(
                         kind=None,
                         volume=dict(

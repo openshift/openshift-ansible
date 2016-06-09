@@ -46,7 +46,7 @@
       openshift_hosted_metrics_duration: "{{ lookup('oo_option', 'openshift_hosted_metrics_duration') | default(7) }}"
     when: openshift_hosted_metrics_duration is not defined
   - set_fact:
-      openshift_hosted_metrics_resolution: "{{ lookup('oo_option', 'openshift_hosted_metrics_resolution') | default(10) }}"
+      openshift_hosted_metrics_resolution: "{{ lookup('oo_option', 'openshift_hosted_metrics_resolution') | default('10s') }}"
     when: openshift_hosted_metrics_resolution is not defined
   roles:
   - openshift_facts
@@ -186,11 +186,6 @@
                                 | list ) }}"
       master_cert_subdir: master-{{ openshift.common.hostname }}
       master_cert_config_dir: "{{ openshift.common.config_base }}/master"
-  - set_fact:
-      openshift_infra_nodes: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config'])
-                                 | oo_nodes_with_label('region', 'infra')
-                                 | oo_collect('inventory_hostname') }}"
-    when: openshift_infra_nodes is not defined and groups.oo_nodes_to_config | default([]) | length > 0
 
 - name: Configure master certificates
   hosts: oo_first_master
@@ -321,13 +316,13 @@
     openshift_master_session_auth_secrets: "{{ hostvars[groups.oo_first_master.0].openshift.master.session_auth_secrets }}"
     openshift_master_session_encryption_secrets: "{{ hostvars[groups.oo_first_master.0].openshift.master.session_encryption_secrets }}"
     openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"
-    openshift_no_proxy_internal_hostnames: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config']
-                                                    | union(groups['oo_masters_to_config'])
-                                                    | union(groups['oo_etcd_to_config'] | default([])))
-                                                | oo_collect('openshift.common.hostname') | default([]) | join (',')
-                                                }}"
-    when: "{{ (openshift_http_proxy is defined or openshift_https_proxy is defined) and 
-            openshift_generate_no_proxy_hosts | default(True) | bool }}"
+#    openshift_no_proxy_internal_hostnames: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config']
+#                                                    | union(groups['oo_masters_to_config'])
+#                                                    | union(groups['oo_etcd_to_config'] | default([])))
+#                                                | oo_collect('openshift.common.hostname') | default([]) | join (',')
+#                                                }}"
+#    when: "{{ (openshift_http_proxy is defined or openshift_https_proxy is defined) and
+#            openshift_generate_no_proxy_hosts | default(True) | bool }}"
   pre_tasks:
   - name: Ensure certificate directory exists
     file:
