@@ -28,17 +28,17 @@
     state: directory
     mode: 0700
 
-- name: Disable system etcd when containerized
-  when: etcd_is_containerized | bool
-  service:
-    name: etcd
-    state: stopped
-    enabled: no
-
 - name: Check for etcd service presence
   command: systemctl show etcd.service
   register: etcd_show
   changed_when: false
+
+- name: Disable system etcd when containerized
+  when: etcd_is_containerized | bool and 'LoadState=not-found' not in etcd_show.stdout
+  service:
+    name: etcd
+    state: stopped
+    enabled: no
 
 - name: Mask system etcd when containerized
   when: etcd_is_containerized | bool and 'LoadState=not-found' not in etcd_show.stdout
