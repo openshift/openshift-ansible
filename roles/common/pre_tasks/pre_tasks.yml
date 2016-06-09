@@ -1,4 +1,4 @@
 ---
 - name: Generate Environment ID
-  shell: echo "$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 8)"
+  shell: echo "$(date +%s)"
   register: env_random_id
