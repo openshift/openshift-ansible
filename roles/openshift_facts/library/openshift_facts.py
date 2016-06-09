@@ -1138,6 +1138,9 @@ def get_openshift_version(facts):
         # and is falsely acting like openshift is already installed
         _, output, _ = module.run_command(['/usr/local/bin/openshift', 'version'])
         version = parse_openshift_version(output)
+    elif 'node' in facts and 'common' in facts and 'is_containerized' in facts['common']:
+        _, output, _ = module.run_command(['docker', 'run', '--rm', facts['common']['cli_image'], 'version'])
+        version = parse_openshift_version(output)
 
     return version
 
