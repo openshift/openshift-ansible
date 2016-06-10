@@ -7,9 +7,10 @@
     # Prefer the master facts over bare variables if present, prefer
     # metrics_public_url over creating a default using default_subdomain
     metrics_hostname: "{{ openshift.master.metrics_public_url
-                          | default(openshift_master_metris_public_url
+                          | default(openshift_master_metrics_public_url
                           | default('hawkular-metrics.' ~ (openshift.master.default_subdomain
-                          | default(openshift_master_default_subdomain )))) }}"
+                          | default(openshift_master_default_subdomain ))))
+                          | oo_hostname_from_url }}"
     metrics_persistence: "{{ openshift.hosted.metrics.storage.kind is not none }}"
     metrics_dynamic_vol: "{{ openshift.hosted.metrics.storage.kind == 'dynamic' }}"
     metrics_template_dir: "/usr/share/openshift/examples/infrastructure-templates/{{ 'origin' if deployment_type == 'origin' else 'enterprise' }}"

@@ -17,6 +17,7 @@ import re
 import json
 import yaml
 from ansible.utils.unicode import to_unicode
+from urlparse import urlparse
 
 # Disabling too-many-public-methods, since filter methods are necessarily
 # public
@@ -893,6 +894,18 @@ class FilterModule(object):
 
         return version
 
+    @staticmethod
+    def oo_hostname_from_url(url):
+        if not isinstance(url, basestring):
+            raise errors.AnsibleFilterError("|failed expects a string or unicode")
+        parse_result = urlparse(url)
+        if parse_result.netloc != '':
+            return parse_result.netloc
+        else:
+            # netloc wasn't parsed, assume url was missing scheme and path
+            return parse_result.path
+
+
     def filters(self):
         """ returns a mapping of filters to methods """
         return {
@@ -925,5 +938,6 @@ class FilterModule(object):
             "oo_merge_dicts": self.oo_merge_dicts,
             "oo_oc_nodes_matching_selector": self.oo_oc_nodes_matching_selector,
             "oo_oc_nodes_with_label": self.oo_oc_nodes_with_label,
+            "oo_hostname_from_url": self.oo_hostname_from_url,
             "oo_merge_hostvars": self.oo_merge_hostvars,
         }
