@@ -59,7 +59,7 @@
       - "{{ openshift.common.service_type }}-master-api"
       - "{{ openshift.common.service_type }}-master-controllers"
       - "{{ openshift.common.service_type }}-node"
-      - etcd
+      - etcd_container
       - openvswitch
     failed_when: false
     when: docker_upgrade is defined and docker_upgrade | bool and openshift.common.is_containerized | bool
@@ -77,7 +77,7 @@
   - name: Restart containerized services
     service: name={{ item }} state=started
     with_items:
-      - etcd
+      - etcd_container
       - openvswitch
       - "{{ openshift.common.service_type }}-master"
       - "{{ openshift.common.service_type }}-master-api"
