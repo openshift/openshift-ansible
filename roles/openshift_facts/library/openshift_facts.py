@@ -1139,10 +1139,20 @@ def get_openshift_version(facts):
         _, output, _ = module.run_command(['/usr/local/bin/openshift', 'version'])
         version = parse_openshift_version(output)
     elif 'node' in facts and 'common' in facts and 'is_containerized' in facts['common']:
-        _, output, _ = module.run_command(['docker', 'run', '--rm', facts['common']['cli_image'], 'version'])
-        version = parse_openshift_version(output)
+        version = get_containerized_node_openshift_version(facts)
 
     return version
+
+def get_containerized_node_openshift_version(facts):
+    node_svc = "%s-node" % facts['common']['service_type']
+    rc, _, _ = module.run_command(['systemctl', 'is-active', node_svc])
+    if rc > 0:
+        # Node service not running or doesn't exist:
+        return None
+    # Node service running, exec in and get the version:
+    _, output, _ = module.run_command(['docker', 'exec', '-ti', node_svc, 'openshift', 'version'])
+    return parse_openshift_version(output)
+
 
 def parse_openshift_version(output):
     """ Apply provider facts to supplied facts dict

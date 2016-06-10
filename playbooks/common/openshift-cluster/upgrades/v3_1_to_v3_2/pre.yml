@@ -109,7 +109,6 @@
   - openshift_facts
   - openshift_docker_facts
   tasks:
-  - debug: var=openshift.docker.openshift_version
   - name: Ensure Node is running
     service:
       name: "{{ openshift.common.service_type }}-node"
