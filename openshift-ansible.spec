@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.97
+Version:        3.3.0
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -205,6 +205,24 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Jun 09 2016 Scott Dodson <sdodson@redhat.com> 3.3.0-1
+- Restore mistakenly reverted code. (dgoodwin@redhat.com)
+- Add openshift_loadbalancer_facts role to set lb facts prior to running
+  dependencies. (abutcher@redhat.com)
+- Bug 1338726 - never abort install if the latest version of docker is already
+  installed (bleanhar@redhat.com)
+- Preserve proxy config if it's undefined (sdodson@redhat.com)
+- At least backup things (sdodson@redhat.com)
+- Use unique play names to make things easier to debug (sdodson@redhat.com)
+- Ansible 2.1 support. (abutcher@redhat.com)
+- add skydns port 8053 to openstack master sec group (jawed.khelil@amadeus.com)
+- fix dns openstack flavor instead of openshift flavor
+  (jawed.khelil@amadeus.com)
+- Fix Docker 1.10 problems with empty tags and trailing : (dgoodwin@redhat.com)
+- ensure htpasswd file exists (tob@butter.sh)
+- Docker 1.10 Upgrade (dgoodwin@redhat.com)
+- Add flag to manage htpasswd, or not. (tob@butter.sh)
+
 * Mon Jun 06 2016 Scott Dodson <sdodson@redhat.com> 3.0.97-1
 - Only run node specific bits on nodes (sdodson@redhat.com)
 - Update main.yaml (detiber@gmail.com)

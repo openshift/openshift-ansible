@@ -59,22 +59,3 @@
     l_common_version: "{{ common_version.stdout | default('0.0', True) }}"
   when: not openshift.common.is_containerized | bool
 
-- debug: var=l_common_version
-
-# TODO: hardcoding specific docker versions here is not going to be maintainable...
-# Don't define a docker version if we don't yet know what version we're going to install.
-- name: Set docker version to be installed
-  set_fact:
-    docker_version: "{{ '1.8.2' }}"
-  when: " l_common_version != '0.0' and
-          (( l_common_version | version_compare('3.2','<') and openshift.common.service_type in ['openshift', 'atomic-openshift'] ) or
-          ( l_common_version | version_compare('1.1.4','<') and openshift.common.service_type == 'origin' ))"
-
-- name: Set docker version to be installed
-  set_fact:
-    docker_version: "{{ '1.9.1' }}"
-  when: " l_common_version != '0.0' and
-          (( l_common_version | version_compare('3.2','>=') and openshift.common.service_type == 'atomic-openshift' ) or
-          ( l_common_version | version_compare('1.2','>=') and openshift.common.service_type == 'origin' ))"
-
-- debug: var=docker_version

@@ -5,7 +5,7 @@ fi
 cmd=`basename $0`
 user=`id -u`
 group=`id -g`
-image_tag=v{{ openshift_version }}
+image_tag="v{{ openshift_version }}"
 
 >&2 echo """
 ================================================================================
@@ -21,4 +21,8 @@ See https://docs.openshift.org/latest/cli_reference/get_started_cli.html
 =================================================================================
 """
 
-docker run -i --privileged --net=host --user=${user}:${group} -v ~/.kube:/root/.kube -v /tmp:/tmp -v {{ openshift.common.config_base}}:{{ openshift.common.config_base }} -e KUBECONFIG=/root/.kube/config --entrypoint ${cmd} --rm {{ openshift.common.cli_image }}:${image_tag} "${@}"
+if [ -n "$image_tag" ]; then
+    image_tag=":$image_tag"
+fi
+
+docker run -i --privileged --net=host --user=${user}:${group} -v ~/.kube:/root/.kube -v /tmp:/tmp -v {{ openshift.common.config_base}}:{{ openshift.common.config_base }} -e KUBECONFIG=/root/.kube/config --entrypoint ${cmd} --rm {{ openshift.common.cli_image }}${image_tag} "${@}"
