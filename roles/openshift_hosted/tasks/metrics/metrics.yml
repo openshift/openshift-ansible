@@ -17,8 +17,6 @@
     cassandra_nodes: "{{ ',CASSANDRA_NODES=' ~ openshift.hosted.metrics.cassandra.nodes if 'cassandra' in openshift.hosted.metrics and 'nodes' in openshift.hosted.metrics.cassandra else '' }}"
     cassandra_pv_size: "{{ ',CASSANDRA_PV_SIZE=' ~ openshift.hosted.metrics.storage.volume.size if openshift.hosted.metrics.storage.volume.size | default(none) is not none else '' }}"
 
-
-
 - name: Test if metrics-deployer service account exists
   command: >
     {{ openshift.common.client_binary }}
@@ -99,13 +97,15 @@
   failed_when: "'already exists' not in deploy_metrics.stderr and deploy_metrics.rc != 0"
   changed_when: deploy_metrics.rc == 0
 
-- name: "Wait for image pull and deployer pod"
-  shell: >
-    {{ openshift.common.client_binary }}
-    --namespace openshift-infra
-    --config={{ openshift_hosted_kubeconfig }}
-    get pods | grep metrics-deployer.*Completed
-  register: result
-  until: result.rc == 0
-  retries: 60
-  delay: 10
+# TODO: re-enable this once the metrics deployer validation issue is fixed
+# when using dynamically provisioned volumes
+#- name: "Wait for image pull and deployer pod"
+#  shell: >
+#    {{ openshift.common.client_binary }}
+#    --namespace openshift-infra
+#    --config={{ openshift_hosted_kubeconfig }}
+#    get pods | grep metrics-deployer.*Completed
+#  register: result
+#  until: result.rc == 0
+#  retries: 60
+#  delay: 10
