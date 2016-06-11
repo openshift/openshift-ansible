@@ -43,6 +43,8 @@
 - name: Mask system etcd when containerized
   when: etcd_is_containerized | bool and 'LoadState=not-found' not in etcd_show.stdout
   command: systemctl mask etcd
+  register: mask_etcd
+  changed_when: "'Created symlink' in mask_etcd.stdout"
 
 - name: Reload systemd units
   command: systemctl daemon-reload
