@@ -144,10 +144,25 @@
       docker pull {{ openshift.common.cli_image }}:v{{ openshift_version }}
     when: openshift.common.is_containerized | bool
 
-  - name: Verify RPMs are available for upgrade
-    command: >
-      yum list available -e 0 -q "{{ g_new_service_name }}" 2>&1 | tail -n +2 | grep -v 'el7ose' | awk '{ print $2 }' | sort -r | tr '\n' ' ')
+  - set_fact:
+      repoquery_cmd: "{{ 'dnf repoquery --latest-limit 1 -d 0' if ansible_pkg_mgr == 'dnf' else 'repoquery' }}"
     when: not openshift.common.is_containerized | bool
+
+  - name: Check latest available OpenShift RPM version
+    command: >
+      {{ repoquery_cmd }} --qf '%{version}' "{{ openshift.common.service_type }}"
+    failed_when: false
+    changed_when: false
+    register: avail_openshift_version
+    when: not openshift.common.is_containerized | bool
+
+  - debug: var=avail_openshift_version
+
+  - name: Verify OpenShift 3.2 RPMs are available for upgrade
+    fail:
+      msg: "OpenShift {{ avail_openshift_version.stdout }} is available, but 3.2 or greater is required"
+    when: not openshift.common.is_containerized | bool and not avail_openshift_version | skipped and avail_openshift_version.stdout | default('0.0', True) | version_compare('3.2', '<')
+
 
   # TODO: Are these two grep checks necessary anymore?
   # Note: the version number is hardcoded here in hopes of catching potential
