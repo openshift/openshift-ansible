@@ -3,13 +3,13 @@
 # The restart playbook should be run after this playbook completes.
 ###############################################################################
 
-- include: ../../../../byo/openshift-cluster/upgrades/docker/docker_upgrade.yml
-
-- name: Update Docker facts
+- name: Upgrade docker
   hosts: oo_masters_to_config:oo_nodes_to_config:oo_etcd_to_config
   roles:
   - openshift_facts
   tasks:
+  - include: docker_upgrade.yml
+    when: not openshift.common.is_atomic | bool
   - name: Set post docker install facts
     openshift_facts:
       role: "{{ item.role }}"
