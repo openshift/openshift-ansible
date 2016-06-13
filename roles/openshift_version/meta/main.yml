@@ -14,4 +14,6 @@ galaxy_info:
 dependencies:
 - role: openshift_repos
 - role: openshift_docker_facts
+  when: openshift.common.is_containerized | default(False) | bool
 - role: docker
+  when: openshift.common.is_containerized | default(False) | bool
