@@ -11,16 +11,19 @@
       openshift_hosted_registry_storage_s3_region are required
   when: openshift.hosted.registry.storage.s3.bucket | default(none) is none or openshift.hosted.registry.storage.s3.region | default(none) is none
 
+
+
 # Currently this is relying on the boto config (or env vars) on the master host, it
 # should be a local_action and use separate credentials for creating the
 # bucket (vs the ones for accessing the bucket)
+# Requires ansible 2.0+
 - name: Create the S3 bucket
   become: no
   local_action:
-    module: s3
-    bucket: "{{ openshift.hosted.registry.storage.s3.bucket }}"
+    module: s3_bucket
+    name: "{{ openshift.hosted.registry.storage.s3.bucket }}"
     region: "{{ openshift.hosted.registry.storage.s3.region }}"
-    mode: create
+    state: present
   when: openshift.hosted.registry.storage.s3.create | default(false) | bool
 
 - name: Test if docker registry config secret exists
