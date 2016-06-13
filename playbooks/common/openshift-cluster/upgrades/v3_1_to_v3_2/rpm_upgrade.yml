@@ -1,5 +1,6 @@
+# TODO: Use a specific version here once we're setting openshift_pkg_version reliably in the openshift_version module.
 - name: Upgrade packages
-  command: "{{ ansible_pkg_mgr}} update -y {{ openshift.common.service_type }}-{{ component }}-{{ g_new_version }}"
+  command: "{{ ansible_pkg_mgr}} update -y {{ openshift.common.service_type }}-{{ component }}"
 
 - name: Ensure python-yaml present for config upgrade
   action: "{{ ansible_pkg_mgr }} name=PyYAML state=present"
