@@ -71,7 +71,6 @@
     # defined, and overriding the normal behavior of protecting the installed version
     openshift_release: "3.2"
     openshift_protect_installed_version: False
-    upgrading: true
 
 - name: Verify master processes
   hosts: oo_masters_to_config
