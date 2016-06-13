@@ -9,11 +9,6 @@
     openshift_version: "{{ openshift_version }}"
   when: openshift_version is defined
 
-- debug: var=openshift_version
-- debug: var=openshift_release
-- debug: var=openshift_pkg_version
-- debug: var=openshift_image_tag
-
 # Protect the installed version by default unless explicitly told not to, or given an
 # openshift_version already.
 - name: Use openshift.common.version fact as version to configure if already installed
@@ -21,13 +16,20 @@
     openshift_version: "{{ openshift.common.version }}"
   when: openshift.common.version is defined and openshift_version is not defined and openshift_protect_installed_version
 
+- debug: var=is_containerized
+- debug: var=openshift_version
+- debug: msg="{{ openshift_version is defined }}"
+- debug: var=openshift_release
+- debug: var=openshift_pkg_version
+- debug: var=openshift_image_tag
+
 - name: Set openshift_version for rpm installation
   include: set_version_rpm.yml
-  when: not is_containerized
+  when: not is_containerized | bool
 
 - name: Set openshift_version for containerized installation
   include: set_version_containerized.yml
-  when: is_containerized
+  when: is_containerized | bool
 
 - debug: var=openshift_version
 

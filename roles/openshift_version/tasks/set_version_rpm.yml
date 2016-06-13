@@ -7,6 +7,8 @@
     openshift_version: "{{ openshift_pkg_version[1:].split('-')[0] }}"
   when: openshift_pkg_version is defined and openshift_version is not defined
 
+- debug: var=openshift_version
+
 - name: Gather common package version
   command: >
     {{ repoquery_cmd }} --qf '%{version}' "{{ openshift.common.service_type}}"

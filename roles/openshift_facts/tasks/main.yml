@@ -41,4 +41,3 @@
       no_proxy: "{{ openshift_no_proxy | default(None) }}"
       generate_no_proxy_hosts: "{{ openshift_generate_no_proxy_hosts | default(True) }}"
       no_proxy_internal_hostnames: "{{ openshift_no_proxy_internal_hostnames | default(None) }}"
-      version_requested: "{{ openshift_version  | default(None) }}"
