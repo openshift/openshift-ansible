@@ -4,13 +4,14 @@
   when: openshift_hosted_router_certificate is defined and ('certfile' not in openshift_hosted_router_certificate or 'keyfile' not in openshift_hosted_router_certificate)
 
 - name: Read router certificate and key
-  slurp:
+  become: no
+  local_action:
+    module: slurp
     src: "{{ item }}"
   register: openshift_router_certificate_output
   with_items:
   - "{{ openshift_hosted_router_certificate.certfile }}"
   - "{{ openshift_hosted_router_certificate.keyfile }}"
-  delegate_to: localhost
   when: openshift_hosted_router_certificate is defined
 
 - name: Persist certificate contents
