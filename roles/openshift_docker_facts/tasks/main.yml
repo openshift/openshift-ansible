@@ -43,7 +43,7 @@
 # See: https://bugzilla.redhat.com/show_bug.cgi?id=1304038
 - name: Gather common package version
   command: >
-    {{ repoquery_cmd }} --qf '%{version}' "{{ openshift.common.service_type}}"
+    {{ repoquery_cmd }} --installed --qf '%{version}' "{{ openshift.common.service_type}}"
   register: common_version
   failed_when: false
   changed_when: false
