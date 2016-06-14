@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.2
+Version:        3.2.3
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -205,6 +205,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jun 14 2016 Scott Dodson <sdodson@redhat.com> 3.2.3-1
+- Fix no proxy hostnames during upgrade. (dgoodwin@redhat.com)
+- Attempt to fix containerized node start failure with Docker 1.10.
+  (dgoodwin@redhat.com)
+
 * Mon Jun 13 2016 Scott Dodson <sdodson@redhat.com> 3.2.2-1
 - Fix docker 1.10 upgrade on embedded etcd masters. (dgoodwin@redhat.com)
 
