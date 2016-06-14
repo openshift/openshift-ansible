@@ -8,6 +8,18 @@
   - openshift_facts
   - openshift_repos
 
+- name: Set openshift_no_proxy_internal_hostnames
+  hosts: oo_masters_to_config:oo_nodes_to_config
+  tasks:
+  - set_fact:
+      openshift_no_proxy_internal_hostnames: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config']
+                                                    | union(groups['oo_masters_to_config'])
+                                                    | union(groups['oo_etcd_to_config'] | default([])))
+                                                | oo_collect('openshift.common.hostname') | default([]) | join (',')
+                                                }}"
+    when: "{{ (openshift_http_proxy is defined or openshift_https_proxy is defined) and
+            openshift_generate_no_proxy_hosts | default(True) | bool }}"
+
 - name: Evaluate additional groups for upgrade
   hosts: localhost
   connection: local
