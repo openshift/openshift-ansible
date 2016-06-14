@@ -31,10 +31,30 @@
   include: set_version_containerized.yml
   when: is_containerized | bool
 
-- debug: var=openshift_version
-
 # At this point we know openshift_version is set appropriately. Now we set
 # openshift_image_tag and openshift_pkg_version, so all roles can always assume
 # each of this variables *will* be set correctly and can use them per their
 # intended purpose.
+
+- set_fact:
+    openshift_image_tag: v{{ openshift_version }}
+  when: openshift_image_tag is not defined
+
+- set_fact:
+    openshift_pkg_version: -{{ openshift_version }}
+  when: openshift_pkg_version is not defined
+
+# TODO: fail if any of these is unset or looks wrong:
+- debug: var=openshift_version
+- debug: var=openshift_pkg_version
+- debug: var=openshift_image_tag
+
+- fail: openshift_version role was unable to set openshift_version
+  when: openshift_version is not defined
+
+- fail: openshift_version role was unable to set openshift_image_tag
+  when: openshift_image_tag is not defined
+
+- fail: openshift_version role was unable to set openshift_pkg_version
+  when: openshift_pkg_version is not defined
 

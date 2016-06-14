@@ -6,10 +6,9 @@
   action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-clients state=present"
   when: not openshift.common.is_containerized | bool
 
-# TODO: handle no openshift_version set?
 - name: Pull CLI Image
   command: >
-    docker pull {{ openshift.common.cli_image }}{{ ':v' + openshift_version if openshift_version is defined and openshift_version != '' else '' }}
+    docker pull {{ openshift.common.cli_image }}:{{ openshift_image_tag }}
   when: openshift.common.is_containerized | bool
 
 - name: Create /usr/local/bin/openshift cli wrapper

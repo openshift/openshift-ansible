@@ -140,7 +140,7 @@
 
   - name: Verify containers are available for upgrade
     command: >
-      docker pull {{ openshift.common.cli_image }}:v{{ openshift_version }}
+      docker pull {{ openshift.common.cli_image }}:{{ openshift_image_tag }}
     when: openshift.common.is_containerized | bool
 
   - set_fact:

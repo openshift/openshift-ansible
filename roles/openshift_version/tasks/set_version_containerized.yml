@@ -1,7 +1,9 @@
 ---
 - name: Set containerized version to configure if openshift_image_tag specified
   set_fact:
-    openshift_version: "{{ openshift_image_tag.split('v',1)[1] }}"
+    # Expects a leading "v" in inventory, strip it off here:
+    # openshift_version should always just be "3.2" or "3.2.0.44"
+    openshift_version: "{{ openshift_image_tag[1:].split('-')[0] }}"
   when: openshift_image_tag is defined and openshift_version is not defined
 
 - name: Set containerized version to configure if openshift_release specified

@@ -2,7 +2,7 @@
 # TODO: support openshift_release here?
 - name: Set rpm version to configure if openshift_pkg_version specified
   set_fact:
-    # Expects a leading "-" in inventory, strip it off here, and ignore a trailing release,
+    # Expects a leading "-" in inventory, strip it off here, and remove trailing release,
     # openshift_version should always just be "3.2" or "3.2.0.44"
     openshift_version: "{{ openshift_pkg_version[1:].split('-')[0] }}"
   when: openshift_pkg_version is defined and openshift_version is not defined

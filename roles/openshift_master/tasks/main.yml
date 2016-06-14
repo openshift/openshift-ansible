@@ -1,7 +1,6 @@
 ---
 # TODO: add ability to configure certificates given either a local file to
 #       point to or certificate contents, set in default cert locations.
-- debug: var=openshift_version
 
 # Authentication Variable Validation
 # TODO: validate the different identity provider kinds as well
@@ -25,12 +24,12 @@
   when: openshift_master_ha | bool and openshift_master_cluster_method == "pacemaker" and openshift.common.is_containerized | bool
 
 - name: Install Master package
-  action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-master{{ openshift_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }} state=present"
+  action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-master{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }} state=present"
   when: not openshift.common.is_containerized | bool
 
 - name: Pull master image
   command: >
-    docker pull {{ openshift.master.master_image }}{{ ':v' + openshift_version if openshift_version is defined and openshift_version != '' else '' }}
+    docker pull {{ openshift.master.master_image }}:{{ openshift_image_tag }}
   when: openshift.common.is_containerized | bool
 
 - name: Create openshift.common.data_dir
