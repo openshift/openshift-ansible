@@ -1,0 +1,12 @@
+---
+galaxy_info:
+  author: OpenShift
+  description: docker ca-trust
+  company: Red Hat, Inc
+  license: ASL 2.0
+  min_ansible_version: 1.2
+  platforms:
+  - name: EL
+    versions:
+    - 7
+dependencies: []

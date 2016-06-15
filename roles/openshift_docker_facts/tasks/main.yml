@@ -15,6 +15,7 @@
       disable_push_dockerhub: "{{ openshift_disable_push_dockerhub | default(None) }}"
       hosted_registry_insecure: "{{ openshift_docker_hosted_registry_insecure | default(None) }}"
       hosted_registry_network: "{{ openshift_docker_hosted_registry_network | default(None) }}"
+      ca_certs: "{{ openshift_docker_ca_certs | default(None) }}"
 
 - set_fact:
     docker_additional_registries: "{{ openshift.docker.additional_registries
@@ -30,6 +31,7 @@
     docker_http_proxy: "{{ openshift.common.http_proxy | default(omit) }}"
     docker_https_proxy: "{{ openshift.common.https_proxy | default(omit) }}"
     docker_no_proxy: "{{ openshift.common.no_proxy | default(omit) }}"
+    docker_ca_certs: "{{ openshift.docker.ca_certs | default(omit) }}"
 
 - set_fact:
     docker_options: "--insecure-registry={{ openshift.docker.hosted_registry_network }} {{ openshift.docker.options | default ('') }}"

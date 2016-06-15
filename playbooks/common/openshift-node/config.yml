@@ -59,6 +59,9 @@
                                                 }}"
     when: "{{ (openshift_http_proxy is defined or openshift_https_proxy is defined) and
             openshift_generate_no_proxy_hosts | default(True) | bool }}"
+    openshift_docker_ca_certs:
+    - id: openshift
+      cert: "{{ openshift.common.config_base }}/node/ca.crt"
   roles:
   - role: openshift_clock
   - role: openshift_docker
@@ -98,6 +101,9 @@
                                                 }}"
     when: "{{ (openshift_http_proxy is defined or openshift_https_proxy is defined) and
             openshift_generate_no_proxy_hosts | default(True) | bool }}"
+    openshift_docker_ca_certs:
+    - id: openshift
+      cert: "{{ openshift.common.config_base }}/node/ca.crt"
   roles:
   - role: openshift_clock
   - role: openshift_docker
