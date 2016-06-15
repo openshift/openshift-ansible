@@ -22,6 +22,7 @@
 - debug: var=openshift_release
 - debug: var=openshift_pkg_version
 - debug: var=openshift_image_tag
+- debug: var=openshift.common.version
 
 - name: Set openshift_version for rpm installation
   include: set_version_rpm.yml

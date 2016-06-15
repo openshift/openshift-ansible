@@ -2,7 +2,6 @@
 - name: Set containerized version to configure if openshift_image_tag specified
   set_fact:
     # Expects a leading "v" in inventory, strip it off here:
-    # openshift_version should always just be "3.2" or "3.2.0.44"
     openshift_version: "{{ openshift_image_tag[1:].split('-')[0] }}"
   when: openshift_image_tag is defined and openshift_version is not defined
 
@@ -19,11 +18,25 @@
 
 - debug: var=cli_image_version
 
+# Origin latest = released version (i.e. 1.2.0)
 - set_fact:
-    openshift_version: "{{ cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0:2][1:] | join('-') if openshift.common.deployment_type == 'origin' else cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0][1:] }}"
-  when: openshift_version is not defined
+    openshift_version: "{{ cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0][1:] }}"
+  when: openshift_version is not defined and openshift.common.deployment_type == 'origin' and cli_image_version.stdout_lines[0].split('-') | length == 0
+
+
+# Origin latest = pre-release version (i.e. v1.3.0-alpha.1-321-gb095e3a)
+- set_fact:
+    openshift_version: "{{ (cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0:2] | join('-'))[1:] }}"
+  when: openshift_version is not defined and openshift.common.deployment_type == 'origin' and cli_image_version.stdout_lines[0].split('-') | length > 1
+
+# OSE
+- set_fact:
+    openshift_version: "{{ cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0][1:] }}"
+  when: openshift_version is not defined and openshift.common.deployment_type != 'origin'
 
 - debug: msg="{{ openshift_version }}"
+
+
 
 # If we got an openshift_version like "3.2", lookup the latest 3.2 container version
 # and use that value instead.
