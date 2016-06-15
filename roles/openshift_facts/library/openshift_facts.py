@@ -1133,7 +1133,10 @@ def get_openshift_version(facts):
     if os.path.isfile('/usr/bin/openshift'):
         _, output, _ = module.run_command(['/usr/bin/openshift', 'version'])
         version = parse_openshift_version(output)
-    elif 'node' in facts and 'common' in facts and 'is_containerized' in facts['common']:
+    # TODO: it probably makes more sense to read this from sysconfig service env files,
+    # these control the running versions when containerized, and would work even if the service
+    # is dead for some reason.
+    elif 'common' in facts and 'is_containerized' in facts['common']:
         version = get_containerized_node_openshift_version(facts)
 
     return version
@@ -1147,6 +1150,23 @@ def get_containerized_node_openshift_version(facts):
     # Node service running, exec in and get the version:
     _, output, _ = module.run_command(['docker', 'exec', '-ti', node_svc, 'openshift', 'version'])
     return parse_openshift_version(output)
+
+    # If containerized, see if we can determine the installed version via the systemd environment files:
+    node_env = '/etc/sysconfig/%s-node' % facts['common']['service_type']
+    if not os.path.exists(node_env):
+        return None
+
+    with open(node_env) as f:
+        for line in f:
+            if line.startwith("IMAGE_VERSION="):
+                tag = line[len("IMAGE_VERSION="):]
+                # Remove leading "v" and any trailing release info, we just want
+                # a version number here:
+                version = tag[1:].split("-")[0]
+                return version
+    return None
+
+
 
 
 def parse_openshift_version(output):
