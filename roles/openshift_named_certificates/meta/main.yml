@@ -1,7 +1,7 @@
 ---
 galaxy_info:
-  author: Jason DeTiberus
-  description: OpenShift Master Certificates
+  author: Andrew Butcher
+  description: OpenShift Named Certificates
   company: Red Hat, Inc.
   license: Apache License, Version 2.0
   min_ansible_version: 2.1
@@ -13,5 +13,4 @@ galaxy_info:
   - cloud
   - system
 dependencies:
-- role: openshift_master_facts
-- role: openshift_ca
+- role: openshift_facts
