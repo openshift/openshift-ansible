@@ -288,11 +288,11 @@
     - /usr/local/bin/oc
     - /usr/local/bin/kubectl
 
-    # Since we are potentially removing the systemd unit files for separated
-    # master-api and master-controllers services, so we need to reload the
-    # systemd configuration manager
-    - name: Reload systemd manager configuration
-      command: systemctl daemon-reload
+  # Since we are potentially removing the systemd unit files for separated
+  # master-api and master-controllers services, so we need to reload the
+  # systemd configuration manager
+  - name: Reload systemd manager configuration
+    command: systemctl daemon-reload
 
 - hosts: etcd
   become: yes
