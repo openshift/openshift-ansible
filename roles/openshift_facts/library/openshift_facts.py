@@ -1133,11 +1133,6 @@ def get_openshift_version(facts):
     if os.path.isfile('/usr/bin/openshift'):
         _, output, _ = module.run_command(['/usr/bin/openshift', 'version'])
         version = parse_openshift_version(output)
-    elif os.path.isfile('/usr/local/bin/openshift'):
-        # TODO: this should probably make sure the actual image is already present, this can take awhile if it has to pull
-        # and is falsely acting like openshift is already installed
-        _, output, _ = module.run_command(['/usr/local/bin/openshift', 'version'])
-        version = parse_openshift_version(output)
     elif 'node' in facts and 'common' in facts and 'is_containerized' in facts['common']:
         version = get_containerized_node_openshift_version(facts)
 
