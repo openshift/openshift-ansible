@@ -1159,7 +1159,7 @@ def get_containerized_node_openshift_version(facts):
 
     with open(node_env) as f:
         for line in f:
-            if line.startwith("IMAGE_VERSION="):
+            if line.startswith("IMAGE_VERSION="):
                 tag = line[len("IMAGE_VERSION="):]
                 # Remove leading "v" and any trailing release info, we just want
                 # a version number here:
