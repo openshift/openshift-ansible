@@ -45,7 +45,6 @@
     openshift_pkg_version: -{{ openshift_version }}
   when: openshift_pkg_version is not defined
 
-# TODO: fail if any of these is unset or looks wrong:
 - debug: var=openshift_version
 - debug: var=openshift_pkg_version
 - debug: var=openshift_image_tag

@@ -18,21 +18,14 @@
 
 - debug: var=cli_image_version
 
-# Origin latest = released version (i.e. 1.2.0)
-- set_fact:
-    openshift_version: "{{ cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0][1:] }}"
-  when: openshift_version is not defined and openshift.common.deployment_type == 'origin' and cli_image_version.stdout_lines[0].split('-') | length == 0
-
-
 # Origin latest = pre-release version (i.e. v1.3.0-alpha.1-321-gb095e3a)
 - set_fact:
     openshift_version: "{{ (cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0:2] | join('-'))[1:] }}"
   when: openshift_version is not defined and openshift.common.deployment_type == 'origin' and cli_image_version.stdout_lines[0].split('-') | length > 1
 
-# OSE
 - set_fact:
     openshift_version: "{{ cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0][1:] }}"
-  when: openshift_version is not defined and openshift.common.deployment_type != 'origin'
+  when: openshift_version is not defined
 
 - debug: msg="{{ openshift_version }}"
 
