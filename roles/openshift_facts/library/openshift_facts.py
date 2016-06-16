@@ -1776,6 +1776,8 @@ class OpenShiftFacts(object):
             defaults['hosted'] = dict(
                 metrics=dict(
                     deploy=False,
+                    deployer_prefix='registry.access.redhat.com/openshift3/',
+                    deployer_version='3.3.0',
                     duration=7,
                     resolution='10s',
                     storage=dict(
@@ -1791,7 +1793,7 @@ class OpenShiftFacts(object):
                             filesystem='ext4',
                             volumeID='123'),
                         host=None,
-                        access_modes=['ReadWriteMany'],
+                        access_modes=['ReadWriteOnce'],
                         create_pv=True
                     )
                 ),
