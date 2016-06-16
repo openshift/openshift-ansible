@@ -1,4 +1,4 @@
-# TODO: Use a specific version here once we're setting openshift_pkg_version reliably in the openshift_version module.
+# We verified latest rpm available is suitable, so just yum update.
 - name: Upgrade packages
   command: "{{ ansible_pkg_mgr}} update -y {{ openshift.common.service_type }}-{{ component }}"
 

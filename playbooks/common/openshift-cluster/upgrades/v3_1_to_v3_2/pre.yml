@@ -206,10 +206,9 @@
       g_docker_version: "{{ g_atomic_docker_version_result.stdout | from_yaml }}"
     when: openshift.common.is_atomic | bool
 
-  # TODO: Update to 1.10 once branch merges
   - fail:
-      msg: This playbook requires access to Docker 1.9 or later
-    when: g_docker_version.avail_version | default(g_docker_version.curr_version, true) | version_compare('1.9','<')
+      msg: This playbook requires access to Docker 1.10 or later
+    when: g_docker_version.avail_version | default(g_docker_version.curr_version, true) | version_compare('1.10','<')
 
   # TODO: add check to upgrade ostree to get latest Docker
 

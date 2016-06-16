@@ -1113,7 +1113,9 @@ def get_docker_version_info():
     return result
 
 def get_openshift_version(facts):
-    """ Get current version of openshift on the host
+    """ Get current version of openshift on the host.
+
+        Checks a variety of ways ranging from fastest to slowest.
 
         Args:
             facts (dict): existing facts
@@ -1139,18 +1141,17 @@ def get_openshift_version(facts):
     elif 'common' in facts and 'is_containerized' in facts['common']:
         version = get_containerized_node_openshift_version(facts)
 
+    # Handle containerized masters that have not yet been configured as a node.
+    # This can be very slow and may get re-run multiple times, so we only use this
+    # if other methods failed to find a version.
+    if not version and os.path.isfile('/usr/local/bin/openshift'):
+        _, output, _ = module.run_command(['/usr/local/bin/openshift', 'version'])
+        version = parse_openshift_version(output)
+
     return version
 
-def get_containerized_node_openshift_version(facts):
-    node_svc = "%s-node" % facts['common']['service_type']
-    rc, _, _ = module.run_command(['systemctl', 'is-active', node_svc])
-    if rc > 0:
-        # Node service not running or doesn't exist:
-        return None
-    # Node service running, exec in and get the version:
-    _, output, _ = module.run_command(['docker', 'exec', '-ti', node_svc, 'openshift', 'version'])
-    return parse_openshift_version(output)
 
+def get_containerized_node_openshift_version(facts):
     # If containerized, see if we can determine the installed version via the systemd environment files:
     node_env = '/etc/sysconfig/%s-node' % facts['common']['service_type']
     if not os.path.exists(node_env):
@@ -1165,8 +1166,6 @@ def get_containerized_node_openshift_version(facts):
                 version = tag[1:].split("-")[0]
                 return version
     return None
-
-
 
 
 def parse_openshift_version(output):
