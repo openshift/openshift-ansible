@@ -1161,7 +1161,7 @@ def get_containerized_openshift_version(facts):
         with open(env_file) as f:
             for line in f:
                 if line.startswith("IMAGE_VERSION="):
-                    tag = line[len("IMAGE_VERSION="):]
+                    tag = line[len("IMAGE_VERSION="):].strip()
                     # Remove leading "v" and any trailing release info, we just want
                     # a version number here:
                     version = tag[1:].split("-")[0]
