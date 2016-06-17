@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.3
+Version:        3.2.4
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -205,6 +205,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Jun 17 2016 Scott Dodson <sdodson@redhat.com> 3.2.4-1
+- Sync metrics templates (sdodson@redhat.com)
+- Add 30 second pause before retrying to start the node (sdodson@redhat.com)
+- Stop dumping debug output, re-try startng the node once (sdodson@redhat.com)
+
 * Tue Jun 14 2016 Scott Dodson <sdodson@redhat.com> 3.2.3-1
 - Fix no proxy hostnames during upgrade. (dgoodwin@redhat.com)
 - Attempt to fix containerized node start failure with Docker 1.10.
