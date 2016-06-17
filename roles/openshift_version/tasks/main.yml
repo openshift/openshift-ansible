@@ -1,6 +1,13 @@
 ---
 # Determine the openshift_version to configure if none has been specified or set previously.
 
+# Block attempts to install origin without specifying some kind of version information.
+# This is because the latest tags for origin are usually alpha builds, which should not
+# be used by default. Users must indicate what they want.
+- fail:
+    msg: "Must specify openshift_release, openshift_image_tag, or openshift_pkg_version in inventory to install origin. (suggestion: add openshift_release=\"1.2\" to inventory)"
+  when: openshift.common.deployment_type == 'origin' and openshift_release is not defined and openshift_pkg_version is not defined and openshift_image_tag is not defined
+
 - set_fact:
     is_containerized: "{{ openshift.common.is_containerized | default(False) | bool }}"
 
