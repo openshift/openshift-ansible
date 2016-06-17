@@ -19,6 +19,7 @@
   # Update the existing templates
   - role: openshift_examples
     openshift_examples_import_command: replace
+    registry_url: "{{ openshift.master.registry_url }}"
   pre_tasks:
   - name: Collect all routers
     command: >
