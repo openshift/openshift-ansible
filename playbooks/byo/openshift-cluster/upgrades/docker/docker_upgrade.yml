@@ -4,26 +4,27 @@
   roles:
   - openshift_facts
   tasks:
+  - fail:
+      msg: Cannot upgrade Docker on Atomic operating systems.
+    when: openshift.common.is_atomic | bool
+
   - name: Determine available Docker version
     script: ../../../../common/openshift-cluster/upgrades/files/rpm_versions.sh docker
     register: g_docker_version_result
-    when: not openshift.common.is_atomic | bool
 
   - name: Check if Docker is installed
     command: rpm -q docker
     register: pkg_check
     failed_when: pkg_check.rc > 1
     changed_when: no
-    when: not openshift.common.is_atomic | bool
 
   - set_fact:
       g_docker_version: "{{ g_docker_version_result.stdout | from_yaml }}"
-    when: not openshift.common.is_atomic | bool
 
   - name: Set fact if docker requires an upgrade
     set_fact:
       docker_upgrade: true
-    when: not openshift.common.is_atomic | bool and pkg_check.rc == 0 and g_docker_version.curr_version | version_compare('1.10','<')
+    when: pkg_check.rc == 0 and g_docker_version.curr_version | version_compare('1.10','<')
 
   - fail:
       msg: This playbook requires access to Docker 1.10 or later
