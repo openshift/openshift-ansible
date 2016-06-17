@@ -1,15 +1,15 @@
 ---
 # Determine the openshift_version to configure if none has been specified or set previously.
 
+- set_fact:
+    is_containerized: "{{ openshift.common.is_containerized | default(False) | bool }}"
+
 # Block attempts to install origin without specifying some kind of version information.
 # This is because the latest tags for origin are usually alpha builds, which should not
 # be used by default. Users must indicate what they want.
 - fail:
-    msg: "Must specify openshift_release, openshift_image_tag, or openshift_pkg_version in inventory to install origin. (suggestion: add openshift_release=\"1.2\" to inventory)"
-  when: openshift.common.deployment_type == 'origin' and openshift_release is not defined and openshift_pkg_version is not defined and openshift_image_tag is not defined
-
-- set_fact:
-    is_containerized: "{{ openshift.common.is_containerized | default(False) | bool }}"
+    msg: "Must specify openshift_release or openshift_image_tag in inventory to install origin. (suggestion: add openshift_release=\"1.2\" to inventory)"
+  when: is_containerized | bool and openshift.common.deployment_type == 'origin' and openshift_release is not defined and openshift_image_tag is not defined
 
 # Make sure we copy this to a fact if given a var:
 - set_fact:
@@ -65,3 +65,8 @@
 - fail: openshift_version role was unable to set openshift_pkg_version
   when: openshift_pkg_version is not defined
 
+# We can't map an openshift_release to full rpm version like we can with containers, make sure
+# the rpm version we looked up matches the release requested and error out if not.
+- fail:
+    msg: "Detected openshift version {{ openshift_version }} does not match requested openshift_release {{ openshift_release }}. You may need to adjust your yum repositories or specify an exact openshift_pkg_version."
+  when: not is_containerized | bool and openshift_release is defined and not openshift_version | oo_startswith(openshift_release) | bool
