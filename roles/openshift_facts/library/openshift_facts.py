@@ -1139,7 +1139,7 @@ def get_openshift_version(facts):
     # these control the running versions when containerized, and would work even if the service
     # is dead for some reason.
     elif 'common' in facts and 'is_containerized' in facts['common']:
-        version = get_containerized_node_openshift_version(facts)
+        version = get_containerized_openshift_version(facts)
 
     # Handle containerized masters that have not yet been configured as a node.
     # This can be very slow and may get re-run multiple times, so we only use this
@@ -1151,20 +1151,21 @@ def get_openshift_version(facts):
     return version
 
 
-def get_containerized_node_openshift_version(facts):
+def get_containerized_openshift_version(facts):
     # If containerized, see if we can determine the installed version via the systemd environment files:
-    node_env = '/etc/sysconfig/%s-node' % facts['common']['service_type']
-    if not os.path.exists(node_env):
-        return None
+    for filename in ['/etc/sysconfig/%s-master', '/etc/sysconfig/%s-node']:
+        env_file = filename % facts['common']['service_type']
+        if not os.path.exists(env_file):
+            continue
 
-    with open(node_env) as f:
-        for line in f:
-            if line.startswith("IMAGE_VERSION="):
-                tag = line[len("IMAGE_VERSION="):]
-                # Remove leading "v" and any trailing release info, we just want
-                # a version number here:
-                version = tag[1:].split("-")[0]
-                return version
+        with open(env_file) as f:
+            for line in f:
+                if line.startswith("IMAGE_VERSION="):
+                    tag = line[len("IMAGE_VERSION="):]
+                    # Remove leading "v" and any trailing release info, we just want
+                    # a version number here:
+                    version = tag[1:].split("-")[0]
+                    return version
     return None
 
 
