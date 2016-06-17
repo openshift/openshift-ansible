@@ -1,27 +1,26 @@
 ---
-  - name: Setting master(s) hostname
-    hostname: name="{% for thishost in groups['masters'] %}{% if inventory_hostname == thishost %}master{{ counter }}.{{ dns_domain }}{% endif %}{% set counter = counter + 1 %}{% endfor %}"
-    when: "'masters' in group_names"
+- name: Setting Hostname Fact
+  set_fact:
+    new_hostname: "{{ custom_hostname | default(inventory_hostname) }}"
 
-  - name: Setting facts for masters
-    set_fact: ansible_hostname="{% for thishost in groups['masters'] %}{% if inventory_hostname == thishost %}master{{ counter }}{% endif %}{% set counter = counter + 1 %}{% endfor %}"
-    when: "'masters' in group_names"
+- name: Setting FQDN Fact
+  set_fact:
+    new_fqdn: "{{ new_hostname }}.{{ dns_domain }}"
 
-  - name: Setting node(s) hostname
-    hostname: name="{% for thishost in groups['nodes'] %}{% if inventory_hostname == thishost %}node{{ counter }}.{{ dns_domain }}{% endif %}{% set counter = counter + 1 %}{% endfor %}"
-    when: "'nodes' in group_names"
+- name: Setting hostname and DNS domain
+  hostname: name="{{ new_fqdn }}"
 
-  - name: Setting facts for nodes
-    set_fact: ansible_hostname="{% for thishost in groups['nodes'] %}{% if inventory_hostname == thishost %}node{{ counter }}{% endif %}{% set counter = counter + 1 %}{% endfor %}"
-    when: "'nodes' in group_names"
+- name: Check for cloud.cfg
+  stat: path=/etc/cloud/cloud.cfg
+  register: cloud_cfg
 
-  - name: "Templating records"
-    become: false
-    template:
-      src: "{{ role_path }}/templates/records.template.yaml"
-      dest: "/tmp/records.yaml"
-      force: yes
-    delegate_to: localhost
-
-  - name: "Updating hostname facts"
-    setup: filter=ansible_hostname
+- name: Prevent cloud-init updates of hostname/fqdn (if applicable)
+  lineinfile: 
+    dest: /etc/cloud/cloud.cfg 
+    state: present
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  with_items:
+    - { regexp: '^ - set_hostname', line: '# - set_hostname' }
+    - { regexp: '^ - update_hostname', line: '# - update_hostname' }
+  when: cloud_cfg.stat.exists == True
