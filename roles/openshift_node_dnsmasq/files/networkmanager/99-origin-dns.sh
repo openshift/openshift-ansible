@@ -39,6 +39,7 @@ if [[ $2 =~ ^(up|dhcp4-change)$ ]]; then
       cat << EOF > /etc/dnsmasq.d/origin-dns.conf
 strict-order
 no-resolv
+no-negcache
 domain-needed
 server=/cluster.local/172.30.0.1
 server=/30.172.in-addr.arpa/172.30.0.1

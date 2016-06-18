@@ -1,4 +1,14 @@
 strict-order
 no-resolv
+no-negcache
 domain-needed
 server=/{{ openshift.common.dns_domain }}/{{ openshift.common.kube_svc_ip }}
+{% if openshift_node_dnsmasq_max_ttl is defined %}
+max-cache-ttl={{ openshift_node_dnsmasq_max_ttl }}
+{% endif %}
+{% if openshift_node_dnsmasq_max_cache_size is defined %}
+max-cache-size={{ openshift_node_dnsmasq_max_cache_size }}
+{% endif %}
+{% if openshift_node_dnsmasq_forward_max is defined %}
+dns-forward-max={{ openhshift_node_dnsmasq_forward_max }}
+{% endif %}
