@@ -59,6 +59,8 @@ auth:
 middleware:
   repository:
   - name: openshift
+    options:
+      pullthrough: false
 {% if openshift.hosted.registry.storage.provider == 's3' and 'cloudfront' in openshift.hosted.registry.storage.s3 %}
   storage:
   - name: cloudfront
