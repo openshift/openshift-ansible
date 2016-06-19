@@ -4,11 +4,11 @@ no-negcache
 domain-needed
 server=/{{ openshift.common.dns_domain }}/{{ openshift.common.kube_svc_ip }}
 {% if openshift_node_dnsmasq_max_ttl | default("") != "" %}
-max-cache-ttl={{ openshift_node_dnsmasq_max_ttl }}
+max-cache-ttl={{ openshift_node_dnsmasq_max_ttl | default("") }}
 {% endif %}
-{% if openshift_node_dnsmasq_max_cache_size | default("") != "" %}
-max-cache-size={{ openshift_node_dnsmasq_max_cache_size }}
+{% if openshift_node_dnsmasq_cache_size | default("") != "" %}
+cache-size={{ openshift_node_dnsmasq_cache_size | default("") }}
 {% endif %}
 {% if openshift_node_dnsmasq_forward_max | default("") != "" %}
-dns-forward-max={{ openhshift_node_dnsmasq_forward_max }}
+dns-forward-max={{ openshift_node_dnsmasq_forward_max | default("") }}
 {% endif %}
