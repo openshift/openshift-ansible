@@ -16,6 +16,7 @@ storage:
     secure: true
     v4auth: true
     rootdirectory: /registry
+    chunksize: "{{ openshift.hosted.registry.storage.s3.chunksize | default(5242880) }}"
 {% elif openshift.hosted.registry.storage.provider == 'azure_blob' %}
   azure:
     accountname: {{ openshift.hosted.registry.storage.azure_blob.accountname }}
