@@ -1,0 +1,117 @@
+---
+- fail:
+    msg: This role required openshift_master_default_subdomain or openshift_master_logging_url be set
+  when: openshift.master.logging_public_url | default(openshift_master_logging_public_url | default(openshift.master.default_subdomain | default(openshift_master_default_subdomain | default(none)))) is none
+
+- set_fact:
+    # Prefer the master facts over bare variables if present, prefer
+    # logging_public_url over creating a default using default_subdomain
+    logging_hostname: "{{ openshift.master.logging_public_url
+                          | default(openshift_master_logging_public_url
+                          | default('hawkular-logging.' ~ (openshift.master.default_subdomain
+                          | default(openshift_master_default_subdomain ))))
+                          | oo_hostname_from_url }}"
+    logging_persistence: "{{ openshift.hosted.logging.storage.kind is not none }}"
+    logging_dynamic_vol: "{{ openshift.hosted.logging.storage.kind == 'dynamic' }}"
+    logging_template_dir: "/usr/share/openshift/examples/infrastructure-templates/{{ 'origin' if deployment_type == 'origin' else 'enterprise' }}"
+    elasticsearch_nodes: "{{ ',ES_CLUSTER_SIZE=' ~ openshift.hosted.logging.elasticsearch.nodes if 'elasticsearch' in openshift.hosted.logging and 'nodes' in openshift.hosted.logging.elasticsearch else '' }}"
+    elasticsearch_pv_size: "{{ ',ES_PVC_SIZE=' ~ openshift.hosted.logging.storage.volume.size if openshift.hosted.logging.storage.volume.size | default(none) is not none else '' }}"
+
+- name: Test if logging-deployer service account exists
+  command: >
+    {{ openshift.common.client_binary }}
+    --config={{ openshift_hosted_kubeconfig }}
+    --namespace=logging
+    get serviceaccount logging-deployer -o json
+  register: serviceaccount
+  changed_when: false
+  failed_when: false
+
+- name: Create logging-deployer Service Account
+  shell: >
+    echo {{ logging_deployer_sa | to_json | quote }} |
+    {{ openshift.common.client_binary }}
+    --config={{ openshift_hosted_kubeconfig }}
+    --namespace logging
+    create -f -
+  when: serviceaccount.rc == 1
+
+- name: Test edit permissions
+  command: >
+    {{ openshift.common.client_binary }}
+    --config={{ openshift_hosted_kubeconfig }}
+    --namespace logging
+    get rolebindings -o jsonpath='{.items[?(@.metadata.name == "edit")].userNames}'
+  register: edit_rolebindings
+  changed_when: false
+
+- name: Add edit permission to the logging project to logging-deployer SA
+  command: >
+    {{ openshift.common.admin_binary }}
+    --config={{ openshift_hosted_kubeconfig }}
+    --namespace logging
+    policy add-role-to-user edit
+    system:serviceaccount:logging:logging-deployer
+  when: "'system:serviceaccount:logging:logging-deployer' not in edit_rolebindings.stdout"
+
+- name: Test cluster-reader permissions
+  command: >
+    {{ openshift.common.client_binary }}
+    --config={{ openshift_hosted_kubeconfig }}
+    --namespace logging
+    get clusterrolebindings -o jsonpath='{.items[?(@.metadata.name == "cluster-reader")].userNames}'
+  register: cluster_reader_clusterrolebindings
+  changed_when: false
+
+- name: Add cluster-reader permission to the logging project to heapster SA
+  command: >
+    {{ openshift.common.admin_binary }}
+    --config={{ openshift_hosted_kubeconfig }}
+    --namespace logging
+    policy add-cluster-role-to-user cluster-reader
+    system:serviceaccount:logging:aggregated-logging-fluentd`
+  when: "'system:serviceaccount:logging:aggregated-logging-fluentd' not in cluster_reader_clusterrolebindings.stdout"
+
+# TODO: test scc before adding
+- name: Add the privileged scc for fluentd serviceaccount
+  command: >
+    oadm policy add-scc-to-user privileged
+    system:serviceaccount:logging:aggregated-logging-fluentd
+
+# TODO: extend this to allow user passed in certs or generating cert with
+# OpenShift CA
+- name: Create logging-deployer secret
+  command: >
+    {{ openshift.common.client_binary }}
+    --config={{ openshift_hosted_kubeconfig }}
+    --namespace logging
+    secrets new logging-deployer nothing=/dev/null
+  register: logging_deployer_secret
+  changed_when: logging_deployer_secret.rc == 0
+  failed_when: "logging_deployer_secret.rc == 1 and 'already exists' not in logging_deployer_secret.stderr"
+
+- name: Deploy Logging
+  shell: >
+    {{ openshift.common.client_binary }} process -f
+    {{ logging_template_dir }}/logging-deployer.yaml -v
+    KIBANA_HOSTNAME={{ logging_hostname }},USE_PERSISTENT_STORAGE={{
+    logging_persistence | string | lower }},IMAGE_PREFIX={{ openshift.hosted.logging.deployer.prefix }},IMAGE_VERSION={{ openshift.hosted.logging.deployer.version }},DYNAMICALLY_PROVISION_STORAGE={{ logging_dynamic_vol | string | lower }}{{ elasticsearch_nodes }}{{ elasticsearch_pv_size }}
+    | {{ openshift.common.client_binary }} --namespace logging
+    --config={{ openshift_hosted_kubeconfig }}
+    create -f -
+  register: deploy_logging
+  failed_when: "'already exists' not in deploy_logging.stderr and deploy_logging.rc != 0"
+  changed_when: deploy_logging.rc == 0
+
+# TODO: re-enable this once the logging deployer validation issue is fixed
+# when using dynamically provisioned volumes
+#- name: "Wait for image pull and deployer pod"
+#  shell: >
+#    {{ openshift.common.client_binary }}
+#    --namespace logging
+#    --config={{ openshift_hosted_kubeconfig }}
+#    get pods | grep logging-deployer.*Completed
+#  register: result
+#  until: result.rc == 0
+#  retries: 60
+#  delay: 10
