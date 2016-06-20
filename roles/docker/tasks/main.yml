@@ -2,10 +2,42 @@
 - stat: path=/etc/sysconfig/docker-storage
   register: docker_storage_check
 
+- debug: var=docker_version
+
+- name: Get current installed Docker version
+  command: "{{ repoquery_cmd }} --installed --qf '%{version}' docker"
+  when:  docker_version is defined and not openshift.common.is_atomic | bool
+  register: curr_docker_version
+  changed_when: false
+
+- name: Get latest available version of Docker
+  command: >
+    {{ repoquery_cmd }} --qf '%{version}' "docker"
+  register: avail_docker_version
+  failed_when: false
+  changed_when: false
+  when: docker_version is defined and not openshift.common.is_atomic | bool
+
+# TODO: Should we use docker_version defaulted to 1.10 here?
+
+# If a docker_version was requested, sanity check that we can install or upgrade to it, and
+# no downgrade is required.
+- name: Fail if Docker version requested but downgrade is required
+  fail:
+    msg: "Docker {{ curr_docker_version.stdout }} is installed, but version {{ docker_version }} was requested."
+  when: not curr_docker_version | skipped and curr_docker_version.stdout | default('0.0', True) | version_compare(docker_version, '>')
+
+# This involves an extremely slow migration process, users should instead run the
+# Docker 1.10 upgrade playbook to accomplish this.
+- name: Error out if attempting to upgrade Docker across the 1.10 boundary
+  fail:
+    msg: "Cannot upgrade Docker to >= 1.10, please use the Docker upgrade playbook for this."
+  when: not curr_docker_version | skipped and curr_docker_version.stdout | default('0.0', True) | version_compare('1.10', '<') and docker_version | version_compare('1.10', '>=')
+
 # Make sure Docker is installed, but does not update a running version.
 # Docker upgrades are handled by a separate playbook.
 - name: Install Docker
-  action: "{{ ansible_pkg_mgr }} name=docker state=present"
+  action: "{{ ansible_pkg_mgr }} name=docker{{ '-' + docker_version if docker_version is defined else '' }} state=present"
   when: not openshift.common.is_atomic | bool
 
 - name: Start the Docker service
@@ -59,6 +91,9 @@
   notify:
     - restart docker
   when: "{{ 'http_proxy' in openshift.common or 'https_proxy' in openshift.common and docker_check.stat.isreg }}"
+
+- debug: var=openshift.docker.options
+- debug: var=docker_options
 
 - name: Set various Docker options
   lineinfile:
