@@ -34,7 +34,8 @@
 - set_fact:
     docker_options: "--insecure-registry={{ openshift.docker.hosted_registry_network }} {{ openshift.docker.options | default ('') }}"
   when: openshift.docker.hosted_registry_insecure | default(False) | bool and openshift.docker.hosted_registry_network is defined
+  register: hosted_registry_options
 
 - set_fact:
     docker_options: "{{ openshift.docker.options | default(omit) }}"
-  when: not openshift.docker.hosted_registry_insecure | default(False) | bool
+  when: hosted_registry_options | skipped
