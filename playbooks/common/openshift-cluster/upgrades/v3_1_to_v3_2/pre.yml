@@ -2,10 +2,12 @@
 ###############################################################################
 # Evaluate host groups and gather facts
 ###############################################################################
-- name: Load openshift_facts and update repos
+
+- include: ../../common/openshift-cluster/initialize_facts.yml
+
+- name: Update repos
   hosts: oo_masters_to_config:oo_nodes_to_config:oo_etcd_to_config:oo_lb_to_config
   roles:
-  - openshift_facts
   - openshift_repos
 
 - name: Evaluate additional groups for upgrade
