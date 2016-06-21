@@ -1,0 +1,52 @@
+---
+# We need docker service up to remove all the images, but these services will keep
+# trying to re-start and thus re-pull the images we're trying to delete.
+- name: stop containerized services
+  service: name={{ item }} state=stopped
+  with_items:
+    - "{{ openshift.common.service_type }}-master"
+    - "{{ openshift.common.service_type }}-master-api"
+    - "{{ openshift.common.service_type }}-master-controllers"
+    - "{{ openshift.common.service_type }}-node"
+    - etcd_container
+    - openvswitch
+  failed_when: false
+  when: docker_upgrade is defined and docker_upgrade | bool and openshift.common.is_containerized | bool
+
+- name: remove all containers and images
+  script: nuke_images.sh docker
+  register: nuke_images_result
+  when: docker_upgrade is defined and docker_upgrade | bool
+
+# todo: should we use the docker role to actually do the upgrade?
+- name: upgrade to specified docker version
+  action: "{{ ansible_pkg_mgr }} name=docker{{ '-' + docker_version }} state=present"
+  register: docker_upgrade_result
+  when: docker_upgrade is defined and docker_upgrade | bool and docker_version is defined
+
+- name: upgrade to latest docker version
+  action: "{{ ansible_pkg_mgr }} name=docker state=latest"
+  register: docker_upgrade_result
+  when: docker_upgrade is defined and docker_upgrade | bool and docker_version is not defined
+
+- name: restart containerized services
+  service: name={{ item }} state=started
+  with_items:
+    - etcd_container
+    - openvswitch
+    - "{{ openshift.common.service_type }}-master"
+    - "{{ openshift.common.service_type }}-master-api"
+    - "{{ openshift.common.service_type }}-master-controllers"
+    - "{{ openshift.common.service_type }}-node"
+  failed_when: false
+  when: docker_upgrade is defined and docker_upgrade | bool and openshift.common.is_containerized | bool
+
+- name: wait for master api to come back online
+  become: no
+  local_action:
+    module: wait_for
+      host="{{ inventory_hostname }}"
+      state=started
+      delay=10
+      port="{{ openshift.master.api_port }}"
+  when: docker_upgrade is defined and docker_upgrade | bool and inventory_hostname in groups.oo_masters_to_config

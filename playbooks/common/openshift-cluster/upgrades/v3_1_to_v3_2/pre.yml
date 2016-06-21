@@ -3,7 +3,7 @@
 # Evaluate host groups and gather facts
 ###############################################################################
 
-- include: ../../common/openshift-cluster/initialize_facts.yml
+- include: ../../initialize_facts.yml
 
 - name: Update repos
   hosts: oo_masters_to_config:oo_nodes_to_config:oo_etcd_to_config:oo_lb_to_config

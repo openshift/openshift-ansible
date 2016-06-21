@@ -3,19 +3,6 @@
 # The restart playbook should be run after this playbook completes.
 ###############################################################################
 
-- name: Upgrade docker
-  hosts: oo_masters_to_config:oo_nodes_to_config:oo_etcd_to_config
-  roles:
-  - openshift_facts
-  tasks:
-  - include: docker_upgrade.yml
-    when: not openshift.common.is_atomic | bool
-  - name: Set post docker install facts
-    openshift_facts:
-      role: "{{ item.role }}"
-    with_items:
-    - role: docker
-
 ###############################################################################
 # Upgrade Masters
 ###############################################################################
@@ -68,36 +55,51 @@
 ###############################################################################
 # Upgrade Nodes
 ###############################################################################
-- name: Upgrade nodes
-  hosts: oo_nodes_to_config
+
+# Here we handle all tasks that might require a node evac. (upgrading docker, and the node service)
+- name: Perform upgrades that may require node evacuation
+  hosts: oo_masters_to_config:oo_etcd_to_config:oo_nodes_to_config
   serial: 1
+  any_errors_fatal: true
   roles:
   - openshift_facts
   handlers:
   - include: ../../../../../roles/openshift_node/handlers/main.yml
   tasks:
-  - include: node_upgrade.yml
+  # TODO: To better handle re-trying failed upgrades, it would be nice to check if the node
+  # or docker actually needs an upgrade before proceeding.
+  - name: Mark unschedulable if host is a node
+    command: >
+      {{ openshift.common.admin_binary }} manage-node {{ openshift.common.hostname | lower }} --schedulable=false
+    delegate_to: "{{ groups.oo_first_master.0 }}"
+    when: inventory_hostname in groups.oo_nodes_to_config
 
-  - set_fact:
-      node_update_complete: True
+  - name: Evacuate Node for Kubelet upgrade
+    command: >
+      {{ openshift.common.admin_binary }} manage-node {{ openshift.common.hostname | lower }} --evacuate --force
+    delegate_to: "{{ groups.oo_first_master.0 }}"
+    when: inventory_hostname in groups.oo_nodes_to_config
 
-##############################################################################
-# Gate on nodes update
-##############################################################################
-- name: Gate on nodes update
-  hosts: localhost
-  connection: local
-  become: no
-  tasks:
-  - set_fact:
-      node_update_completed: "{{ hostvars
-                                 | oo_select_keys(groups.oo_nodes_to_config)
-                                 | oo_collect('inventory_hostname', {'node_update_complete': true}) }}"
-  - set_fact:
-      node_update_failed: "{{ groups.oo_nodes_to_config | difference(node_update_completed) }}"
-  - fail:
-      msg: "Upgrade cannot continue. The following nodes did not finish updating: {{ node_update_failed | join(',') }}"
-    when: node_update_failed | length > 0
+  - include: ../docker/upgrade_check.yml
+
+  - include: ../docker/upgrade.yml
+    when: docker_upgrade is defined and docker_upgrade | bool
+
+  - include: rpm_upgrade.yml
+    vars:
+       component: "node"
+       openshift_version: "{{ openshift_pkg_version | default('') }}"
+    when: inventory_hostname in groups.oo_nodes_to_config and not openshift.common.is_containerized | bool
+
+  - include: containerized_node_upgrade.yml
+    when: inventory_hostname in groups.oo_nodes_to_config and openshift.common.is_containerized | bool
+
+  - name: Set node schedulability
+    command: >
+      {{ openshift.common.admin_binary }} manage-node {{ openshift.common.hostname | lower }} --schedulable=true
+    delegate_to: "{{ groups.oo_first_master.0 }}"
+    when: inventory_hostname in groups.oo_nodes_to_config and openshift.node.schedulable | bool
+
 
 ###############################################################################
 # Reconcile Cluster Roles, Cluster Role Bindings and Security Context Constraints
