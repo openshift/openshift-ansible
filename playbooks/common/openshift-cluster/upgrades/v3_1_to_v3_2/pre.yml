@@ -58,6 +58,10 @@
         valid version for a {{ target_version }} upgrade
     when: openshift_image_tag is defined and openshift_image_tag.split('v',1).1 | version_compare(target_version ,'<')
 
+  - set_fact:
+      openshift_release: "{{ openshift_release[1:] }}"
+    when: openshift_release is defined and openshift_release[0] == 'v'
+
   - fail:
       msg: >
         openshift_release is {{ openshift_release }} which is not a
