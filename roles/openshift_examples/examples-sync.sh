@@ -41,7 +41,7 @@ wget https://raw.githubusercontent.com/jboss-fuse/application-templates/master/f
 
 wget https://raw.githubusercontent.com/openshift/origin-metrics/master/metrics.yaml                            -O ${EXAMPLES_BASE}/infrastructure-templates/origin/metrics-deployer.yaml
 wget https://raw.githubusercontent.com/openshift/origin-metrics/enterprise/metrics.yaml                        -O ${EXAMPLES_BASE}/infrastructure-templates/enterprise/metrics-deployer.yaml
-wget https://raw.githubusercontent.com/openshift/origin-aggregated-logging/master/deployment/deployer.yaml     -O ${EXAMPLES_BASE}/infrastructure-templates/origin/logging-deployer.yaml
+wget https://raw.githubusercontent.com/openshift/origin-aggregated-logging/master/deployer/deployer.yaml     -O ${EXAMPLES_BASE}/infrastructure-templates/origin/logging-deployer.yaml
 wget https://raw.githubusercontent.com/openshift/origin-aggregated-logging/enterprise/deployment/deployer.yaml -O ${EXAMPLES_BASE}/infrastructure-templates/enterprise/logging-deployer.yaml
 
 popd
