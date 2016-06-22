@@ -54,6 +54,8 @@ objects:
           value: ${IMAGE_VERSION}
         - name: MASTER_URL
           value: ${MASTER_URL}
+        - name: MODE
+          value: ${MODE}
         - name: REDEPLOY
           value: ${REDEPLOY}
         - name: USE_PERSISTENT_STORAGE
@@ -66,6 +68,8 @@ objects:
           value: ${CASSANDRA_PV_SIZE}
         - name: METRIC_DURATION
           value: ${METRIC_DURATION}
+        - name: METRIC_RESOLUTION
+          value: ${METRIC_RESOLUTION}
     dnsPolicy: ClusterFirst
     restartPolicy: Never
     serviceAccount: metrics-deployer
@@ -83,7 +87,7 @@ parameters:
 -
   description: 'Specify version for metrics components; e.g. for "openshift/origin-metrics-deployer:latest", set version "latest"'
   name: IMAGE_VERSION
-  value: "3.2.0"
+  value: "3.2.1"
 -
   description: "Internal URL for the master, for authentication retrieval"
   name: MASTER_URL
@@ -112,3 +116,7 @@ parameters:
   description: "How many days metrics should be stored for."
   name: METRIC_DURATION
   value: "7"
+-
+  description: "How often metrics should be gathered. Defaults value of '10s' for 10 seconds"
+  name: METRIC_RESOLUTION
+  value: "10s"
