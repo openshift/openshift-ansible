@@ -163,7 +163,6 @@
 
   - set_fact:
       repoquery_cmd: "{{ 'dnf repoquery --latest-limit 1 -d 0' if ansible_pkg_mgr == 'dnf' else 'repoquery' }}"
-    when: not openshift.common.is_containerized | bool
 
   - name: Check latest available OpenShift RPM version
     command: >
