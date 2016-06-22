@@ -77,6 +77,18 @@
   when:
     - not registered
     - rhsm_authentication == "password"
+    - rhsm_org is not defined or rhsm_org is none or rhsm_org|trim == ''
+
+# This can apply to either Hosted or Satellite
+- name: "Register using username, password and organization"
+  command: "/usr/bin/subscription-manager register --username={{ rhsm_username }} --password={{ rhsm_password }} --org={{ rhsm_org }}"
+  no_log: true
+  when:
+    - not registered
+    - rhsm_authentication == "password"
+    - rhsm_org is defined
+    - rhsm_org is not none
+    - rhsm_org|trim != ''
 
 - name: "Auto-attach to Subscription Manager Pool"
   command: "/usr/bin/subscription-manager attach --auto"
