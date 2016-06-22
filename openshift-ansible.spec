@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.4
+Version:        3.2.5
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -205,6 +205,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Jun 22 2016 Scott Dodson <sdodson@redhat.com> 3.2.5-1
+- Update the rest of the templates (sdodson@redhat.com)
+- Update logging and metrics templates (sdodson@redhat.com)
+- Separate uninstall plays by group. (abutcher@redhat.com)
+
 * Fri Jun 17 2016 Scott Dodson <sdodson@redhat.com> 3.2.4-1
 - Sync metrics templates (sdodson@redhat.com)
 - Add 30 second pause before retrying to start the node (sdodson@redhat.com)
