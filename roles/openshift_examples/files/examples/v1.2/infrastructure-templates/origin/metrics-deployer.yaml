@@ -34,9 +34,11 @@ objects:
   metadata:
     generateName: metrics-deployer-
   spec:
+    securityContext: {}
     containers:
     - image: ${IMAGE_PREFIX}metrics-deployer:${IMAGE_VERSION}
       name: deployer
+      securityContext: {}
       volumeMounts:
       - name: secret
         mountPath: /secret
@@ -48,6 +50,10 @@ objects:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: IMAGE_PREFIX
           value: ${IMAGE_PREFIX}
         - name: IMAGE_VERSION

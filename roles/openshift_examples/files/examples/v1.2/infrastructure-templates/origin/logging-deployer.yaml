@@ -10,7 +10,8 @@ items:
       description: "Template for creating the deployer account and roles needed for the aggregated logging deployer. Create as cluster-admin."
       tags: "infrastructure"
   objects:
-  - apiVersion: v1
+  -
+    apiVersion: v1
     kind: ServiceAccount
     name: logging-deployer
     metadata:
@@ -19,8 +20,6 @@ items:
         logging-infra: deployer
         provider: openshift
         component: deployer
-    secrets:
-    - name: logging-deployer
   -
     apiVersion: v1
     kind: ServiceAccount
@@ -67,18 +66,39 @@ items:
       - watch
       - delete
       - update
+  -
+    apiVersion: v1
+    kind: RoleBinding
+    metadata:
+      name: logging-deployer-edit-role
+    roleRef:
+      kind: ClusterRole
+      name: edit
+    subjects:
+    - kind: ServiceAccount
+      name: logging-deployer
+  -
+    apiVersion: v1
+    kind: RoleBinding
+    metadata:
+      name: logging-deployer-dsadmin-role
+    roleRef:
+      kind: ClusterRole
+      name: daemonset-admin
+    subjects:
+    - kind: ServiceAccount
+      name: logging-deployer
 -
   apiVersion: "v1"
   kind: "Template"
   metadata:
     name: logging-deployer-template
     annotations:
-      description: "Template for running the aggregated logging deployer in a pod. Requires empowered 'logging-deployer' service account and 'logging-deployer' secret."
+      description: "Template for running the aggregated logging deployer in a pod. Requires empowered 'logging-deployer' service account."
       tags: "infrastructure"
   labels:
     logging-infra: deployer
     provider: openshift
-    component: deployer
   objects:
   -
     apiVersion: v1
@@ -91,9 +111,6 @@ items:
         imagePullPolicy: Always
         name: deployer
         volumeMounts:
-        - name: secret
-          mountPath: /secret
-          readOnly: true
         - name: empty
           mountPath: /etc/deploy
         env:
@@ -125,6 +142,8 @@ items:
             value: ${ES_PVC_SIZE}
           - name: ES_PVC_PREFIX
             value: ${ES_PVC_PREFIX}
+          - name: ES_PVC_DYNAMIC
+            value: ${ES_PVC_DYNAMIC}
           - name: ES_CLUSTER_SIZE
             value: ${ES_CLUSTER_SIZE}
           - name: ES_NODE_QUORUM
@@ -141,6 +160,8 @@ items:
             value: ${ES_OPS_PVC_SIZE}
           - name: ES_OPS_PVC_PREFIX
             value: ${ES_OPS_PVC_PREFIX}
+          - name: ES_OPS_PVC_DYNAMIC
+            value: ${ES_OPS_PVC_DYNAMIC}
           - name: ES_OPS_CLUSTER_SIZE
             value: ${ES_OPS_CLUSTER_SIZE}
           - name: ES_OPS_NODE_QUORUM
@@ -173,113 +194,7 @@ items:
       volumes:
       - name: empty
         emptyDir: {}
-      - name: secret
-        secret:
-          secretName: logging-deployer
   parameters:
-  -
-    description: "If true, set up to use a second ES cluster for ops logs."
-    name: ENABLE_OPS_CLUSTER
-    value: "false"
-  -
-    description: "External hostname where clients will reach kibana"
-    name: KIBANA_HOSTNAME
-    required: true
-  -
-    description: "External hostname at which admins will visit the ops Kibana."
-    name: KIBANA_OPS_HOSTNAME
-    value: kibana-ops.example.com
-  -
-    description: "External URL for the master, for OAuth purposes"
-    name: PUBLIC_MASTER_URL
-    required: true
-  -
-    description: "Internal URL for the master, for authentication retrieval"
-    name: MASTER_URL
-    value: "https://kubernetes.default.svc.cluster.local"
-  -
-    description: "How many instances of ElasticSearch to deploy."
-    name: ES_CLUSTER_SIZE
-    required: true
-  -
-    description: "Amount of RAM to reserve per ElasticSearch instance."
-    name: ES_INSTANCE_RAM
-    value: "8G"
-  -
-    description: "Size of the PersistentVolumeClaim to create per ElasticSearch instance, e.g. 100G. If empty, no PVCs will be created and emptyDir volumes are used instead."
-    name: ES_PVC_SIZE
-  -
-    description: "Prefix for the names of PersistentVolumeClaims to be created; a number will be appended per instance. If they don't already exist, they will be created with size ES_PVC_SIZE."
-    name: ES_PVC_PREFIX
-    value: "logging-es-"
-  -
-    description: "Number of nodes required to elect a master (ES minimum_master_nodes). By default, derived from ES_CLUSTER_SIZE / 2 + 1."
-    name: ES_NODE_QUORUM
-  -
-    description: "Number of nodes required to be present before the cluster will recover from a full restart. By default, one fewer than ES_CLUSTER_SIZE."
-    name: ES_RECOVER_AFTER_NODES
-  -
-    description: "Number of nodes desired to be present before the cluster will recover from a full restart. By default, ES_CLUSTER_SIZE."
-    name: ES_RECOVER_EXPECTED_NODES
-  -
-    description: "Timeout for *expected* nodes to be present when cluster is recovering from a full restart."
-    name: ES_RECOVER_AFTER_TIME
-    value: "5m"
-  -
-    description: "How many ops instances of ElasticSearch to deploy. By default, ES_CLUSTER_SIZE."
-    name: ES_OPS_CLUSTER_SIZE
-  -
-    description: "Amount of RAM to reserve per ops ElasticSearch instance."
-    name: ES_OPS_INSTANCE_RAM
-    value: "8G"
-  -
-    description: "Size of the PersistentVolumeClaim to create per ElasticSearch ops instance, e.g. 100G. If empty, no PVCs will be created and emptyDir volumes are used instead."
-    name: ES_OPS_PVC_SIZE
-  -
-    description: "Prefix for the names of PersistentVolumeClaims to be created; a number will be appended per instance. If they don't already exist, they will be created with size ES_OPS_PVC_SIZE."
-    name: ES_OPS_PVC_PREFIX
-    value: "logging-es-ops-"
-  -
-    description: "Number of ops nodes required to elect a master (ES minimum_master_nodes). By default, derived from ES_CLUSTER_SIZE / 2 + 1."
-    name: ES_OPS_NODE_QUORUM
-  -
-    description: "Number of ops nodes required to be present before the cluster will recover from a full restart. By default, one fewer than ES_OPS_CLUSTER_SIZE."
-    name: ES_OPS_RECOVER_AFTER_NODES
-  -
-    description: "Number of ops nodes desired to be present before the cluster will recover from a full restart. By default, ES_OPS_CLUSTER_SIZE."
-    name: ES_OPS_RECOVER_EXPECTED_NODES
-  -
-    description: "Timeout for *expected* ops nodes to be present when cluster is recovering from a full restart."
-    name: ES_OPS_RECOVER_AFTER_TIME
-    value: "5m"
-  -
-    description: "The nodeSelector used for the Fluentd DaemonSet."
-    name: FLUENTD_NODESELECTOR
-    value: "logging-infra-fluentd=true"
-  -
-    description: "Node selector Elasticsearch cluster (label=value)."
-    name: ES_NODESELECTOR
-    value: ""
-  -
-    description: "Node selector Elasticsearch operations cluster (label=value)."
-    name: ES_OPS_NODESELECTOR
-    value: ""
-  -
-    description: "Node selector Kibana cluster (label=value)."
-    name: KIBANA_NODESELECTOR
-    value: ""
-  -
-    description: "Node selector Kibana operations cluster (label=value)."
-    name: KIBANA_OPS_NODESELECTOR
-    value: ""
-  -
-    description: "Node selector Curator (label=value)."
-    name: CURATOR_NODESELECTOR
-    value: ""
-  -
-    description: "Node selector operations Curator (label=value)."
-    name: CURATOR_OPS_NODESELECTOR
-    value: ""
   -
     description: "The mode that the deployer runs in."
     name: MODE
@@ -293,10 +208,119 @@ items:
     name: IMAGE_VERSION
     value: "latest"
   -
-    description: 'Specify the name of an existing pull secret to be used for pulling component images from an authenticated registry.'
+    description: "(Deprecated) Specify the name of an existing pull secret to be used for pulling component images from an authenticated registry."
     name: IMAGE_PULL_SECRET
   -
-    description: 'Allow the registry for logging component images to be non-secure (not secured with a certificate signed by a known CA)'
+    description: "(Deprecated) Allow the registry for logging component images to be non-secure (not secured with a certificate signed by a known CA)"
     name: INSECURE_REGISTRY
     value: "false"
+  -
+    description: "(Deprecated) If true, set up to use a second ES cluster for ops logs."
+    name: ENABLE_OPS_CLUSTER
+    value: "false"
+  -
+    description: "(Deprecated) External hostname where clients will reach kibana"
+    name: KIBANA_HOSTNAME
+    value: "kibana.example.com"
+  -
+    description: "(Deprecated) External hostname at which admins will visit the ops Kibana."
+    name: KIBANA_OPS_HOSTNAME
+    value: kibana-ops.example.com
+  -
+    description: "(Deprecated) External URL for the master, for OAuth purposes"
+    name: PUBLIC_MASTER_URL
+    value: "https://localhost:8443"
+  -
+    description: "(Deprecated) Internal URL for the master, for authentication retrieval"
+    name: MASTER_URL
+    value: "https://kubernetes.default.svc.cluster.local"
+  -
+    description: "(Deprecated) How many instances of ElasticSearch to deploy."
+    name: ES_CLUSTER_SIZE
+    value: "1"
+  -
+    description: "(Deprecated) Amount of RAM to reserve per ElasticSearch instance."
+    name: ES_INSTANCE_RAM
+    value: "8G"
+  -
+    description: "(Deprecated) Size of the PersistentVolumeClaim to create per ElasticSearch instance, e.g. 100G. If empty, no PVCs will be created and emptyDir volumes are used instead."
+    name: ES_PVC_SIZE
+  -
+    description: "(Deprecated) Prefix for the names of PersistentVolumeClaims to be created; a number will be appended per instance. If they don't already exist, they will be created with size ES_PVC_SIZE."
+    name: ES_PVC_PREFIX
+    value: "logging-es-"
+  -
+    description: '(Deprecated) Set to "true" to request dynamic provisioning (if enabled for your cluster) of a PersistentVolume for the ES PVC. '
+    name: ES_PVC_DYNAMIC
+  -
+    description: "(Deprecated) Number of nodes required to elect a master (ES minimum_master_nodes). By default, derived from ES_CLUSTER_SIZE / 2 + 1."
+    name: ES_NODE_QUORUM
+  -
+    description: "(Deprecated) Number of nodes required to be present before the cluster will recover from a full restart. By default, one fewer than ES_CLUSTER_SIZE."
+    name: ES_RECOVER_AFTER_NODES
+  -
+    description: "(Deprecated) Number of nodes desired to be present before the cluster will recover from a full restart. By default, ES_CLUSTER_SIZE."
+    name: ES_RECOVER_EXPECTED_NODES
+  -
+    description: "(Deprecated) Timeout for *expected* nodes to be present when cluster is recovering from a full restart."
+    name: ES_RECOVER_AFTER_TIME
+    value: "5m"
+  -
+    description: "(Deprecated) How many ops instances of ElasticSearch to deploy. By default, ES_CLUSTER_SIZE."
+    name: ES_OPS_CLUSTER_SIZE
+  -
+    description: "(Deprecated) Amount of RAM to reserve per ops ElasticSearch instance."
+    name: ES_OPS_INSTANCE_RAM
+    value: "8G"
+  -
+    description: "(Deprecated) Size of the PersistentVolumeClaim to create per ElasticSearch ops instance, e.g. 100G. If empty, no PVCs will be created and emptyDir volumes are used instead."
+    name: ES_OPS_PVC_SIZE
+  -
+    description: "(Deprecated) Prefix for the names of PersistentVolumeClaims to be created; a number will be appended per instance. If they don't already exist, they will be created with size ES_OPS_PVC_SIZE."
+    name: ES_OPS_PVC_PREFIX
+    value: "logging-es-ops-"
+  -
+    description: '(Deprecated) Set to "true" to request dynamic provisioning (if enabled for your cluster) of a PersistentVolume for the ES ops PVC. '
+    name: ES_OPS_PVC_DYNAMIC
+  -
+    description: "(Deprecated) Number of ops nodes required to elect a master (ES minimum_master_nodes). By default, derived from ES_CLUSTER_SIZE / 2 + 1."
+    name: ES_OPS_NODE_QUORUM
+  -
+    description: "(Deprecated) Number of ops nodes required to be present before the cluster will recover from a full restart. By default, one fewer than ES_OPS_CLUSTER_SIZE."
+    name: ES_OPS_RECOVER_AFTER_NODES
+  -
+    description: "(Deprecated) Number of ops nodes desired to be present before the cluster will recover from a full restart. By default, ES_OPS_CLUSTER_SIZE."
+    name: ES_OPS_RECOVER_EXPECTED_NODES
+  -
+    description: "(Deprecated) Timeout for *expected* ops nodes to be present when cluster is recovering from a full restart."
+    name: ES_OPS_RECOVER_AFTER_TIME
+    value: "5m"
+  -
+    description: "(Deprecated) The nodeSelector used for the Fluentd DaemonSet."
+    name: FLUENTD_NODESELECTOR
+    value: "logging-infra-fluentd=true"
+  -
+    description: "(Deprecated) Node selector Elasticsearch cluster (label=value)."
+    name: ES_NODESELECTOR
+    value: ""
+  -
+    description: "(Deprecated) Node selector Elasticsearch operations cluster (label=value)."
+    name: ES_OPS_NODESELECTOR
+    value: ""
+  -
+    description: "(Deprecated) Node selector Kibana cluster (label=value)."
+    name: KIBANA_NODESELECTOR
+    value: ""
+  -
+    description: "(Deprecated) Node selector Kibana operations cluster (label=value)."
+    name: KIBANA_OPS_NODESELECTOR
+    value: ""
+  -
+    description: "(Deprecated) Node selector Curator (label=value)."
+    name: CURATOR_NODESELECTOR
+    value: ""
+  -
+    description: "(Deprecated) Node selector operations Curator (label=value)."
+    name: CURATOR_OPS_NODESELECTOR
+    value: ""
 
