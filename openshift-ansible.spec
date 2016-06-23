@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.5
+Version:        3.2.6
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -205,6 +205,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Jun 23 2016 Scott Dodson <sdodson@redhat.com> 3.2.6-1
+- Add MODE to metrics deployer (sdodson@redhat.com)
+
 * Wed Jun 22 2016 Scott Dodson <sdodson@redhat.com> 3.2.5-1
 - Update the rest of the templates (sdodson@redhat.com)
 - Update logging and metrics templates (sdodson@redhat.com)
