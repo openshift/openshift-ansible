@@ -12,35 +12,10 @@
   },
   "objects": [
     {
-      "kind": "Service",
-      "apiVersion": "v1",
-      "metadata": {
-        "name": "${JENKINS_SERVICE_NAME}",
-        "creationTimestamp": null
-      },
-      "spec": {
-        "ports": [
-          {
-            "name": "web",
-            "protocol": "TCP",
-            "port": 8080,
-            "targetPort": 8080,
-            "nodePort": 0
-          }
-        ],
-        "selector": {
-          "name": "${JENKINS_SERVICE_NAME}"
-        },
-        "portalIP": "",
-        "type": "ClusterIP",
-        "sessionAffinity": "None"
-      }
-    },
-    {
       "kind": "Route",
       "apiVersion": "v1",
       "metadata": {
-        "name": "jenkins",
+        "name": "${JENKINS_SERVICE_NAME}",
         "creationTimestamp": null
       },
       "spec": {
@@ -82,7 +57,7 @@
       },
       "spec": {
         "strategy": {
-            "type": "Recreate"
+          "type": "Recreate"
         },
         "triggers": [
           {
@@ -94,7 +69,7 @@
               ],
               "from": {
                 "kind": "ImageStreamTag",
-                "name": "jenkins:latest",
+                "name": "${JENKINS_IMAGE_STREAM_TAG}",
                 "namespace": "${NAMESPACE}"
               },
               "lastTriggeredImage": ""
@@ -119,7 +94,7 @@
             "containers": [
               {
                 "name": "jenkins",
-                "image": "JENKINS_IMAGE",
+                "image": " ",
                 "readinessProbe": {
                   "timeoutSeconds": 3,
                   "initialDelaySeconds": 3,
@@ -143,10 +118,10 @@
                   }
                 ],
                 "resources": {
-		    "limits": {
-			"memory": "${MEMORY_LIMIT}"
-		    }
-		},
+                  "limits": {
+                    "memory": "${MEMORY_LIMIT}"
+                  }
+                },
                 "volumeMounts": [
                   {
                     "name": "${JENKINS_SERVICE_NAME}-data",
@@ -175,21 +150,34 @@
           }
         }
       }
+    },
+    {
+      "kind": "Service",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${JENKINS_SERVICE_NAME}",
+        "creationTimestamp": null
+      },
+      "spec": {
+        "ports": [
+          {
+            "name": "web",
+            "protocol": "TCP",
+            "port": 8080,
+            "targetPort": 8080,
+            "nodePort": 0
+          }
+        ],
+        "selector": {
+          "name": "${JENKINS_SERVICE_NAME}"
+        },
+        "portalIP": "",
+        "type": "ClusterIP",
+        "sessionAffinity": "None"
+      }
     }
   ],
   "parameters": [
-    {
-      "name": "MEMORY_LIMIT",
-      "displayName": "Memory Limit",
-      "description": "Maximum amount of memory the container can use.",
-      "value": "512Mi"
-    },
-    {
-      "name": "NAMESPACE",
-      "displayName": "Namespace",
-      "description": "The OpenShift Namespace where the ImageStream resides.",
-      "value": "openshift"
-    },
     {
       "name": "JENKINS_SERVICE_NAME",
       "displayName": "Jenkins Service Name",
@@ -204,11 +192,29 @@
       "value": "password"
     },
     {
+      "name": "MEMORY_LIMIT",
+      "displayName": "Memory Limit",
+      "description": "Maximum amount of memory the container can use.",
+      "value": "512Mi"
+    },
+    {
       "name": "VOLUME_CAPACITY",
       "displayName": "Volume Capacity",
       "description": "Volume space available for data, e.g. 512Mi, 2Gi.",
       "value": "1Gi",
       "required": true
+    },
+    {
+      "name": "NAMESPACE",
+      "displayName": "Jenkins ImageStream Namespace",
+      "description": "The OpenShift Namespace where the Jenkins ImageStream resides.",
+      "value": "openshift"
+    },
+    {
+      "name": "JENKINS_IMAGE_STREAM_TAG",
+      "displayName": "Jenkins ImageStreamTag",
+      "description": "Name of the ImageStreamTag to be used for the Jenkins image.",
+      "value": "jenkins:latest"
     }
   ],
   "labels": {

@@ -7,253 +7,367 @@
 #    images
 #    RPMs
 ---
-- hosts:
-    - OSEv3:children
-
+- hosts: OSEv3:children
   become: yes
-
   tasks:
-    - name: Detecting Operating System
-      shell: ls /run/ostree-booted
-      ignore_errors: yes
-      failed_when: false
-      register: ostree_output
+  - name: Detecting Operating System
+    shell: ls /run/ostree-booted
+    ignore_errors: yes
+    failed_when: false
+    register: ostree_output
 
-      # Since we're not calling openshift_facts we'll do this for now
-    - set_fact:
-        is_atomic: "{{ ostree_output.rc == 0 }}"
-    - set_fact:
-        is_containerized: "{{ is_atomic or containerized | default(false) | bool }}"
-
-    - name: Stop services
-      service: name={{ item }} state=stopped
-      with_items:
-        - atomic-enterprise-master
-        - atomic-enterprise-node
-        - atomic-openshift-master
-        - atomic-openshift-master-api
-        - atomic-openshift-master-controllers
-        - atomic-openshift-node
-        - etcd
-        - haproxy
-        - openshift-master
-        - openshift-master-api
-        - openshift-master-controllers
-        - openshift-node
-        - openvswitch
-        - origin-master
-        - origin-master-api
-        - origin-master-controllers
-        - origin-node
-        - pcsd
-      failed_when: false
-
-    - name: unmask services
-      command: systemctl unmask "{{ item }}"
-      changed_when: False
-      failed_when: False
-      with_items:
-        - etcd
-        - firewalld
-        - atomic-openshift-master
-
-    - name: Stop additional atomic services
-      service: name={{ item }} state=stopped
-      when: is_containerized | bool
-      with_items:
-        - etcd_container
-      failed_when: false
-
-    - name: Remove packages
-      action: "{{ ansible_pkg_mgr }} name={{ item }} state=absent"
-      when: not is_atomic | bool
-      with_items:
-        - atomic-enterprise
-        - atomic-enterprise-master
-        - atomic-enterprise-node
-        - atomic-enterprise-sdn-ovs
-        - atomic-openshift
-        - atomic-openshift-clients
-        - atomic-openshift-master
-        - atomic-openshift-node
-        - atomic-openshift-sdn-ovs
-        - cockpit-bridge
-        - cockpit-docker
-        - cockpit-shell
-        - cockpit-ws
-        - corosync
-        - etcd
-        - haproxy
-        - kubernetes-client
-        - openshift
-        - openshift-master
-        - openshift-node
-        - openshift-sdn
-        - openshift-sdn-ovs
-        - openvswitch
-        - origin
-        - origin-clients
-        - origin-master
-        - origin-node
-        - origin-sdn-ovs
-        - pacemaker
-        - pcs
-        - tuned-profiles-atomic-enterprise-node
-        - tuned-profiles-atomic-openshift-node
-        - tuned-profiles-openshift-node
-        - tuned-profiles-origin-node
-
-    - shell: systemctl reset-failed
-      changed_when: False
-
-    - shell: systemctl daemon-reload
-      changed_when: False
-
-    - name: Remove remaining files
-      file: path={{ item }} state=absent
-      with_items:
-        - "~{{ ansible_ssh_user }}/.kube"
-        - /etc/ansible/facts.d/openshift.fact
-        - /etc/atomic-enterprise
-        - /etc/corosync
-        - /etc/etcd
-        - /etc/openshift
-        - /etc/openshift-sdn
-        - /etc/origin
-        - /etc/systemd/system/atomic-openshift-master.service
-        - /etc/systemd/system/atomic-openshift-master-api.service
-        - /etc/systemd/system/atomic-openshift-master-controllers.service
-        - /etc/systemd/system/atomic-openshift-node.service
-        - /etc/systemd/system/atomic-openshift-node-dep.service
-        - /etc/systemd/system/origin-master.service
-        - /etc/systemd/system/origin-master-api.service
-        - /etc/systemd/system/origin-master-controllers.service
-        - /etc/systemd/system/origin-node.service
-        - /etc/systemd/system/origin-node-dep.service
-        - /etc/systemd/system/etcd_container.service
-        - /etc/systemd/system/openvswitch.service
-        - /etc/sysconfig/atomic-enterprise-master
-        - /etc/sysconfig/atomic-enterprise-master-api
-        - /etc/sysconfig/atomic-enterprise-master-controllers
-        - /etc/sysconfig/atomic-enterprise-node
-        - /etc/sysconfig/atomic-openshift-master
-        - /etc/sysconfig/atomic-openshift-master-api
-        - /etc/sysconfig/atomic-openshift-master-controllers
-        - /etc/sysconfig/atomic-openshift-node
-        - /etc/sysconfig/atomic-openshift-node-dep
-        - /etc/sysconfig/origin-master
-        - /etc/sysconfig/origin-master-api
-        - /etc/sysconfig/origin-master-controllers
-        - /etc/sysconfig/origin-node
-        - /etc/sysconfig/origin-node-dep
-        - /etc/sysconfig/openshift-master
-        - /etc/sysconfig/openshift-node
-        - /etc/sysconfig/openshift-node-dep
-        - /etc/sysconfig/openvswitch
-        - /etc/sysconfig/origin-master
-        - /etc/sysconfig/origin-master-api
-        - /etc/sysconfig/origin-master-controllers
-        - /etc/sysconfig/origin-node
-        - /etc/systemd/system/atomic-openshift-node.service.wants
-        - /root/.kube
-        - /run/openshift-sdn
-        - /usr/share/openshift/examples
-        - /var/lib/atomic-enterprise
-        - /var/lib/etcd
-        - /var/lib/openshift
-        - /var/lib/origin
-        - /var/lib/pacemaker
-        - /usr/lib/systemd/system/atomic-openshift-master-api.service
-        - /usr/lib/systemd/system/atomic-openshift-master-controllers.service
-        - /usr/lib/systemd/system/origin-master-api.service
-        - /usr/lib/systemd/system/origin-master-controllers.service
-        - /usr/local/bin/openshift
-        - /usr/local/bin/oadm
-        - /usr/local/bin/oc
-        - /usr/local/bin/kubectl
-        - /etc/NetworkManager/dispatcher.d/99-origin-dns.sh
-        - /etc/dnsmasq.d/origin-dns.conf
-        - /etc/dnsmasq.d/origin-upstream-dns.conf
-
-    # Since we are potentially removing the systemd unit files for separated
-    # master-api and master-controllers services, so we need to reload the
-    # systemd configuration manager
-    - name: Reload systemd manager configuration
-      command: systemctl daemon-reload
+  # Since we're not calling openshift_facts we'll do this for now
+  - set_fact:
+      is_atomic: "{{ ostree_output.rc == 0 }}"
+  - set_fact:
+      is_containerized: "{{ is_atomic or containerized | default(false) | bool }}"
 
 - hosts: nodes
   become: yes
   tasks:
-    - name: Remove br0 interface
-      shell: ovs-vsctl del-br br0
-      changed_when: False
-      failed_when: False
-    - name: Remove linux interfaces
-      shell: ip link del "{{ item }}"
-      changed_when: False
-      failed_when: False
-      with_items:
-        - lbr0
-        - vlinuxbr
-        - vovsbr
-    - name: restart docker
-      service: name=docker state=restarted
-      
-    - name: restart NetworkManager
-      service: name=NetworkManager state=restarted
-      
-    - shell: find /var/lib/origin/openshift.local.volumes -type d -exec umount {} \; 2>/dev/null || true
-      changed_when: False
+  - name: Stop services
+    service: name={{ item }} state=stopped
+    with_items:
+    - atomic-enterprise-node
+    - atomic-openshift-node
+    - openshift-node
+    - openvswitch
+    - origin-node
+    failed_when: false
 
-    - shell: find /var/lib/atomic-enterprise/openshift.local.volumes -type d -exec umount {} \; 2>/dev/null || true
-      changed_when: False
+  - name: unmask services
+    command: systemctl unmask "{{ item }}"
+    changed_when: False
+    failed_when: False
+    with_items:
+    - firewalld
 
-    - shell: find /var/lib/openshift/openshift.local.volumes -type d -exec umount {} \; 2>/dev/null || true
-      changed_when: False
+  - name: Remove packages
+    action: "{{ ansible_pkg_mgr }} name={{ item }} state=absent"
+    when: not is_atomic | bool
+    with_items:
+    - atomic-enterprise
+    - atomic-enterprise-node
+    - atomic-enterprise-sdn-ovs
+    - atomic-openshift
+    - atomic-openshift-clients
+    - atomic-openshift-node
+    - atomic-openshift-sdn-ovs
+    - cockpit-bridge
+    - cockpit-docker
+    - cockpit-shell
+    - cockpit-ws
+    - kubernetes-client
+    - openshift
+    - openshift-node
+    - openshift-sdn
+    - openshift-sdn-ovs
+    - openvswitch
+    - origin
+    - origin-clients
+    - origin-node
+    - origin-sdn-ovs
+    - tuned-profiles-atomic-enterprise-node
+    - tuned-profiles-atomic-openshift-node
+    - tuned-profiles-openshift-node
+    - tuned-profiles-origin-node
 
-    - shell: docker rm -f "{{ item }}"-master "{{ item }}"-node
-      changed_when: False
-      failed_when: False
-      with_items:
-        - openshift-enterprise
-        - atomic-enterprise
-        - origin
+  - shell: systemctl reset-failed
+    changed_when: False
 
-    - shell: docker ps -a | grep Exited | egrep "{{ item }}" | awk '{print $1}'
-      changed_when: False
-      failed_when: False
-      register: exited_containers_to_delete
-      with_items:
-        - aep3.*/aep
-        - aep3.*/node
-        - aep3.*/openvswitch
-        - openshift3/ose
-        - openshift3/node
-        - openshift3/openvswitch
-        - openshift/origin
+  - shell: systemctl daemon-reload
+    changed_when: False
 
-    - shell: "docker rm {{ item.stdout_lines | join(' ') }}"
-      changed_when: False
-      failed_when: False
-      with_items: "{{ exited_containers_to_delete.results }}"
+  - name: Remove br0 interface
+    shell: ovs-vsctl del-br br0
+    changed_when: False
+    failed_when: False
 
-    - shell: docker images | egrep {{ item }} | awk '{ print $3 }'
-      changed_when: False
-      failed_when: False
-      register: images_to_delete
-      with_items:
-        - registry\.access\..*redhat\.com/openshift3
-        - registry\.access\..*redhat\.com/aep3
-        - registry\.qe\.openshift\.com/.*
-        - registry\.access\..*redhat\.com/rhel7/etcd
-        - docker.io/openshift
+  - name: Remove linux interfaces
+    shell: ip link del "{{ item }}"
+    changed_when: False
+    failed_when: False
+    with_items:
+    - lbr0
+    - vlinuxbr
+    - vovsbr
 
-    - shell:  "docker rmi -f {{ item.stdout_lines | join(' ') }}"
-      changed_when: False
-      failed_when: False
-      with_items: "{{ images_to_delete.results }}"
+  - name: restart docker
+    service: name=docker state=restarted
 
-    - name: Remove sdn drop files
-      file:
-        path: /run/openshift-sdn
-        state: absent
+  - name: restart NetworkManager
+    service: name=NetworkManager state=restarted
+
+  - shell: find /var/lib/origin/openshift.local.volumes -type d -exec umount {} \; 2>/dev/null || true
+    changed_when: False
+
+  - shell: find /var/lib/atomic-enterprise/openshift.local.volumes -type d -exec umount {} \; 2>/dev/null || true
+    changed_when: False
+
+  - shell: find /var/lib/openshift/openshift.local.volumes -type d -exec umount {} \; 2>/dev/null || true
+    changed_when: False
+
+  - shell: docker rm -f "{{ item }}"-master "{{ item }}"-node
+    changed_when: False
+    failed_when: False
+    with_items:
+    - openshift-enterprise
+    - atomic-enterprise
+    - origin
+
+  - shell: docker ps -a | grep Exited | egrep "{{ item }}" | awk '{print $1}'
+    changed_when: False
+    failed_when: False
+    register: exited_containers_to_delete
+    with_items:
+    - aep3.*/aep
+    - aep3.*/node
+    - aep3.*/openvswitch
+    - openshift3/ose
+    - openshift3/node
+    - openshift3/openvswitch
+    - openshift/origin
+
+  - shell: "docker rm {{ item.stdout_lines | join(' ') }}"
+    changed_when: False
+    failed_when: False
+    with_items: "{{ exited_containers_to_delete.results }}"
+
+  - shell: docker images | egrep {{ item }} | awk '{ print $3 }'
+    changed_when: False
+    failed_when: False
+    register: images_to_delete
+    with_items:
+    - registry\.access\..*redhat\.com/openshift3
+    - registry\.access\..*redhat\.com/aep3
+    - registry\.qe\.openshift\.com/.*
+    - registry\.access\..*redhat\.com/rhel7/etcd
+    - docker.io/openshift
+
+  - shell:  "docker rmi -f {{ item.stdout_lines | join(' ') }}"
+    changed_when: False
+    failed_when: False
+    with_items: "{{ images_to_delete.results }}"
+
+  - name: Remove sdn drop files
+    file:
+      path: /run/openshift-sdn
+      state: absent
+
+  - name: Remove remaining files
+    file: path={{ item }} state=absent
+    with_items:
+    - /etc/ansible/facts.d/openshift.fact
+    - /etc/atomic-enterprise
+    - /etc/openshift
+    - /etc/openshift-sdn
+    - /etc/origin
+    - /etc/systemd/system/atomic-openshift-node.service
+    - /etc/systemd/system/atomic-openshift-node-dep.service
+    - /etc/systemd/system/origin-node.service
+    - /etc/systemd/system/origin-node-dep.service
+    - /etc/systemd/system/openvswitch.service
+    - /etc/sysconfig/atomic-enterprise-node
+    - /etc/sysconfig/atomic-openshift-node
+    - /etc/sysconfig/atomic-openshift-node-dep
+    - /etc/sysconfig/origin-node
+    - /etc/sysconfig/origin-node-dep
+    - /etc/sysconfig/openshift-node
+    - /etc/sysconfig/openshift-node-dep
+    - /etc/sysconfig/openvswitch
+    - /etc/sysconfig/origin-node
+    - /etc/systemd/system/atomic-openshift-node.service.wants
+    - /run/openshift-sdn
+    - /var/lib/atomic-enterprise
+    - /var/lib/openshift
+    - /var/lib/origin
+    - /etc/NetworkManager/dispatcher.d/99-origin-dns.sh
+    - /etc/dnsmasq.d/origin-dns.conf
+    - /etc/dnsmasq.d/origin-upstream-dns.conf
+
+- hosts: masters
+  become: yes
+  tasks:
+  - name: Stop services
+    service: name={{ item }} state=stopped
+    with_items:
+    - atomic-enterprise-master
+    - atomic-openshift-master
+    - atomic-openshift-master-api
+    - atomic-openshift-master-controllers
+    - openshift-master
+    - openshift-master-api
+    - openshift-master-controllers
+    - origin-master
+    - origin-master-api
+    - origin-master-controllers
+    - pcsd
+    failed_when: false
+
+  - name: unmask services
+    command: systemctl unmask "{{ item }}"
+    changed_when: False
+    failed_when: False
+    with_items:
+    - firewalld
+    - atomic-openshift-master
+
+  - name: Remove packages
+    action: "{{ ansible_pkg_mgr }} name={{ item }} state=absent"
+    when: not is_atomic | bool
+    with_items:
+    - atomic-enterprise
+    - atomic-enterprise-master
+    - atomic-openshift
+    - atomic-openshift-clients
+    - atomic-openshift-master
+    - cockpit-bridge
+    - cockpit-docker
+    - cockpit-shell
+    - cockpit-ws
+    - corosync
+    - kubernetes-client
+    - openshift
+    - openshift-master
+    - origin
+    - origin-clients
+    - origin-master
+    - pacemaker
+    - pcs
+
+  - shell: systemctl reset-failed
+    changed_when: False
+
+  - shell: systemctl daemon-reload
+    changed_when: False
+
+  - name: Remove remaining files
+    file: path={{ item }} state=absent
+    with_items:
+    - "~{{ ansible_ssh_user }}/.kube"
+    - /etc/ansible/facts.d/openshift.fact
+    - /etc/atomic-enterprise
+    - /etc/corosync
+    - /etc/openshift
+    - /etc/openshift-sdn
+    - /etc/origin
+    - /etc/systemd/system/atomic-openshift-master.service
+    - /etc/systemd/system/atomic-openshift-master-api.service
+    - /etc/systemd/system/atomic-openshift-master-controllers.service
+    - /etc/systemd/system/origin-master.service
+    - /etc/systemd/system/origin-master-api.service
+    - /etc/systemd/system/origin-master-controllers.service
+    - /etc/systemd/system/openvswitch.service
+    - /etc/sysconfig/atomic-enterprise-master
+    - /etc/sysconfig/atomic-enterprise-master-api
+    - /etc/sysconfig/atomic-enterprise-master-controllers
+    - /etc/sysconfig/atomic-openshift-master
+    - /etc/sysconfig/atomic-openshift-master-api
+    - /etc/sysconfig/atomic-openshift-master-controllers
+    - /etc/sysconfig/origin-master
+    - /etc/sysconfig/origin-master-api
+    - /etc/sysconfig/origin-master-controllers
+    - /etc/sysconfig/openshift-master
+    - /etc/sysconfig/openvswitch
+    - /etc/sysconfig/origin-master
+    - /etc/sysconfig/origin-master-api
+    - /etc/sysconfig/origin-master-controllers
+    - /root/.kube
+    - /usr/share/openshift/examples
+    - /var/lib/atomic-enterprise
+    - /var/lib/openshift
+    - /var/lib/origin
+    - /var/lib/pacemaker
+    - /var/lib/pcsd
+    - /usr/lib/systemd/system/atomic-openshift-master-api.service
+    - /usr/lib/systemd/system/atomic-openshift-master-controllers.service
+    - /usr/lib/systemd/system/origin-master-api.service
+    - /usr/lib/systemd/system/origin-master-controllers.service
+    - /usr/local/bin/openshift
+    - /usr/local/bin/oadm
+    - /usr/local/bin/oc
+    - /usr/local/bin/kubectl
+
+  # Since we are potentially removing the systemd unit files for separated
+  # master-api and master-controllers services, so we need to reload the
+  # systemd configuration manager
+  - name: Reload systemd manager configuration
+    command: systemctl daemon-reload
+
+- hosts: etcd
+  become: yes
+  tasks:
+  - name: Stop services
+    service: name={{ item }} state=stopped
+    with_items:
+    - etcd
+    failed_when: false
+
+  - name: unmask services
+    command: systemctl unmask "{{ item }}"
+    changed_when: False
+    failed_when: False
+    with_items:
+    - etcd
+    - firewalld
+
+  - name: Stop additional atomic services
+    service: name={{ item }} state=stopped
+    when: is_containerized | bool
+    with_items:
+    - etcd_container
+    failed_when: false
+
+  - name: Remove packages
+    action: "{{ ansible_pkg_mgr }} name={{ item }} state=absent"
+    when: not is_atomic | bool
+    with_items:
+    - etcd
+
+  - shell: systemctl reset-failed
+    changed_when: False
+
+  - shell: systemctl daemon-reload
+    changed_when: False
+
+  - name: Remove remaining files
+    file: path={{ item }} state=absent
+    with_items:
+    - /etc/ansible/facts.d/openshift.fact
+    - /etc/etcd
+    - /etc/systemd/system/etcd_container.service
+    - /var/lib/etcd
+
+- hosts: lb
+  become: yes
+  tasks:
+  - name: Stop services
+    service: name={{ item }} state=stopped
+    with_items:
+    - haproxy
+    failed_when: false
+
+  - name: unmask services
+    command: systemctl unmask "{{ item }}"
+    changed_when: False
+    failed_when: False
+    with_items:
+    - firewalld
+
+  - name: Remove packages
+    action: "{{ ansible_pkg_mgr }} name={{ item }} state=absent"
+    when: not is_atomic | bool
+    with_items:
+    - haproxy
+
+  - shell: systemctl reset-failed
+    changed_when: False
+
+  - shell: systemctl daemon-reload
+    changed_when: False
+
+  - name: Remove remaining files
+    file: path={{ item }} state=absent
+    with_items:
+    - /etc/ansible/facts.d/openshift.fact
+    - /var/lib/haproxy
