@@ -97,7 +97,11 @@ parameters:
   name: HAWKULAR_METRICS_HOSTNAME
   required: true
 -
-  description: "If set to true the deployer will try and delete all the existing components before trying to redeploy."
+  description: "Can be set to: 'deploy' to perform an initial deployment; 'refresh' to delete and redeploy all components but to keep persisted data and routes; 'redeploy' to delete and redeploy everything (losing all data in the process)
+  name: MODE
+  value: "deploy"
+-
+  description: "(Deprecated) Turns 'deploy' mode into 'redeploy' mode, deleting and redeploying everything (losing all data in the process)"
   name: REDEPLOY
   value: "false"
 -
