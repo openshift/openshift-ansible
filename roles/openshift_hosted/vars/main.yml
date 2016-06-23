@@ -10,3 +10,42 @@ metrics_deployer_sa:
   secrets:
   - name: metrics-deployer
 
+logging_deployer_sa:
+  apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    name: logging-deployer
+  secrets:
+  - name: logging-deployer
+
+aggregated_logging_kibana_sa:
+  apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    name: aggregated-logging-kibana
+  secrets:
+  - name: aggregated-logging-kibana
+  
+aggregated_logging_elasticsearch_sa:
+  apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    name: aggregated-logging-elasticsearch
+  secrets:
+  - name: aggregated-logging-elasticsearch
+
+aggregated_logging_fluentd_sa:
+  apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    name: aggregated-logging-fluentd
+  secrets:
+  - name: aggregated-logging-fluentd
+
+aggregated_logging_curator_sa:
+  apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    name: aggregated-logging-curator
+  secrets:
+  - name: aggregated-logging-curator
