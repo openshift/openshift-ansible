@@ -80,7 +80,10 @@
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: inventory_hostname in groups.oo_nodes_to_config
 
+  # Only check if docker upgrade is required if docker_upgrade is not
+  # already set to False.
   - include: ../docker/upgrade_check.yml
+    when: docker_upgrade is not defined or docker_upgrade | bool
 
   - include: ../docker/upgrade.yml
     when: docker_upgrade is defined and docker_upgrade | bool

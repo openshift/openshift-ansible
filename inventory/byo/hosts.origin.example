@@ -93,6 +93,13 @@ openshift_release=v1.2
 # Default value: "--log-driver=json-file --log-opt max-size=50m"
 #openshift_docker_options="-l warn --ipv6=false"
 
+# Specify exact version of Docker to configure or upgrade to.
+# Downgrades are not supported and will error out. Be careful when upgrading docker from < 1.10 to > 1.10.
+# docker_version="1.10.3"
+
+# Skip upgrading Docker during an OpenShift upgrade, leaves the current Docker version alone.
+# docker_upgrade=False
+
 # Alternate image format string. If you're not modifying the format string and
 # only need to inject your own registry you may want to consider
 # openshift_docker_additional_registries instead
