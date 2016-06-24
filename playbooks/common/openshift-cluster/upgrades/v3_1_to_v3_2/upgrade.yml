@@ -4,7 +4,7 @@
 ###############################################################################
 
 - name: Upgrade docker
-  hosts: oo_masters_to_config:oo_nodes_to_config:oo_etcd_to_config
+  hosts: oo_masters_to_config:oo_nodes_to_config
   roles:
   - openshift_facts
   tasks:
@@ -19,6 +19,15 @@
       local_facts:
         openshift_image_tag: "v{{ g_new_version }}"
         openshift_version: "{{ g_new_version }}"
+
+- name: Upgrade docker
+  hosts: oo_etcd_to_config
+  roles:
+  - openshift_facts
+  tasks:
+  # Upgrade docker when host is not atomic and host is not a non-containerized etcd node
+  - include: docker_upgrade.yml
+    when: not openshift.common.is_atomic | bool and not ('oo_etcd_to_config' in group_names and not openshift.common.is_containerized)
 
 # The cli image is used by openshift_docker_facts to determine the currently installed
 # version.  We need to explicitly pull the latest image to handle cases where

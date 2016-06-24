@@ -212,6 +212,9 @@
       msg: Upgrade packages not found
     when: openshift_image_tag is not defined and (g_aos_versions.avail_version | default(g_aos_versions.curr_version, true) | version_compare(target_version, '<'))
 
+- name: Verify docker upgrade targets
+  hosts: oo_masters_to_config:oo_nodes_to_config:oo_etcd_to_config
+  tasks:
   - name: Determine available Docker
     script: ../files/rpm_versions.sh docker
     register: g_docker_version_result
