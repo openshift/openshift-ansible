@@ -25,14 +25,14 @@
   register: logging_project
   changed_when: false
   failed_when: false
-  
+
 - name: Create logging project
   command: >
     {{ openshift.common.admin_binary }}
     --config={{ openshift_hosted_kubeconfig }}
     new-project logging --node-selector=""
   when: logging_project.rc == 1
-    
+
 - name: Test if logging-deployer secret exists
   command: >
     {{ openshift.common.client_binary }}
@@ -50,7 +50,7 @@
     --namespace=logging
     secrets new logging-deployer nothing=/dev/null
   when: secret.rc == 1
-  
+
 # This is a really weak check, need to collaborate with the logging team
 # to come up with a better way to make this idempotent
 - name: Check for logging-deployer SA
@@ -62,13 +62,13 @@
   register: logging_sa
   changed_when: false
   failed_when: false
-  
+
 - name: Create deployer service account and roles
   shell: >
     {{ openshift.common.client_binary }}
     --config={{ openshift_hosted_kubeconfig }}
     --namespace=openshift
-    process logging-deployer-account-template | 
+    process logging-deployer-account-template |
     {{ openshift.common.client_binary }}
     --config={{ openshift_hosted_kubeconfig }}
     apply -n logging -f -
@@ -80,14 +80,14 @@
     --config={{ openshift_hosted_kubeconfig }}
     --namespace logging
     policy add-role-to-user edit --serviceaccount logging-deployer
-    
+
 - name: Add daemonset-admin role to sa
   command: >
     {{ openshift.common.client_binary }}
     --config={{ openshift_hosted_kubeconfig }}
     --namespace logging
     policy add-role-to-user daemonset-admin --serviceaccount logging-deployer
-  
+
 - name: Add edit permission to the logging project to logging-deployer SA
   command: >
     {{ openshift.common.admin_binary }}
@@ -110,7 +110,7 @@
   command: >
     oadm policy  add-cluster-role-to-user cluster-reader
     system:serviceaccount:logging:aggregated-logging-fluentd
-    
+
 - name: Create logging-deployer-template
   command: >
     {{ openshift.common.client_binary }} \
@@ -127,8 +127,8 @@
     --param ES_PVC_DYNAMIC=true \
     --param MODE="reinstall" \
     --param FLUENTD_NODESELECTOR="logging-infra-fluentd=true" \
-    --param ES_NODESELECTOR="node_type=infra" \
-    --param KIBANA_NODESELECTOR="node_type=infra"
+    --param ES_NODESELECTOR="node-type=infra" \
+    --param KIBANA_NODESELECTOR="node-type=infra"
 
 - name: Label nodes for fluentd
   command: >
