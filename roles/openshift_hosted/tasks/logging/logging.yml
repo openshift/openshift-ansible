@@ -126,9 +126,6 @@
     --param ES_PVC_PREFIX="logging-dynamic" \
     --param ES_PVC_DYNAMIC=true \
     --param MODE="reinstall" \
-    --param FLUENTD_NODESELECTOR="logging-infra-fluentd=true" \
-    --param ES_NODESELECTOR="node-type=infra" \
-    --param KIBANA_NODESELECTOR="node-type=infra"
 
 - name: Label nodes for fluentd
   command: >
