@@ -54,6 +54,7 @@
 - include: additional_config.yml
   tags:
   - master
+  - hosted
 
 - include: ../openshift-node/config.yml
   tags:
