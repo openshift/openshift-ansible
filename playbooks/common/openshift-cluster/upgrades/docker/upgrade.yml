@@ -11,16 +11,15 @@
     - etcd_container
     - openvswitch
   failed_when: false
-  when: docker_upgrade | bool and openshift.common.is_containerized | bool
+  when: openshift.common.is_containerized | bool
 
 - name: Remove all containers and images
   script: nuke_images.sh docker
   register: nuke_images_result
-  when: docker_upgrade | bool and docker_upgrade_nuke_images is defined and docker_upgrade_nuke_images | bool
+  when: docker_upgrade_nuke_images is defined and docker_upgrade_nuke_images | bool
 
 - name: Upgrade Docker
   action: "{{ ansible_pkg_mgr }} name=docker{{ '-' + docker_version }} state=present"
-  when: docker_upgrade | bool
 
 - name: Restart containerized services
   service: name={{ item }} state=started
@@ -32,7 +31,7 @@
     - "{{ openshift.common.service_type }}-master-controllers"
     - "{{ openshift.common.service_type }}-node"
   failed_when: false
-  when: docker_upgrade | bool and openshift.common.is_containerized | bool
+  when: openshift.common.is_containerized | bool
 
 - name: Wait for master API to come back online
   become: no
@@ -42,4 +41,4 @@
       state=started
       delay=10
       port="{{ openshift.master.api_port }}"
-  when: docker_upgrade | bool and inventory_hostname in groups.oo_masters_to_config
+  when: inventory_hostname in groups.oo_masters_to_config

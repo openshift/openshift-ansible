@@ -86,7 +86,7 @@
     when: docker_upgrade is not defined or docker_upgrade | bool
 
   - include: ../docker/upgrade.yml
-    when: docker_upgrade | bool
+    when: l_docker_upgrade is defined and l_docker_upgrade | bool
 
   - include: rpm_upgrade.yml
     vars:
