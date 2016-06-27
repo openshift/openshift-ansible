@@ -12,7 +12,7 @@
 - name: Fail if Docker upgrade is required
   fail:
     msg: "Docker {{ curr_docker_version.stdout }} must be upgraded to Docker 1.10 or greater"
-  when: not upgrading | bool and not curr_docker_version | skipped and curr_docker_version.stdout | default('0.0', True) | version_compare('1.10', '<')
+  when: not upgrading | bool and not curr_docker_version | skipped and not curr_docker_version.stdout == "" and curr_docker_version.stdout | default('0.0', True) | version_compare('1.10', '<')
 
 - name: Get latest available version of Docker
   command: >
