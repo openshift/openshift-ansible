@@ -6,7 +6,7 @@
 - include: ../../../../byo/openshift-cluster/upgrades/docker/docker_upgrade.yml
 
 - name: Update Docker facts
-  hosts: oo_masters_to_config:oo_nodes_to_config:oo_etcd_to_config
+  hosts: oo_masters_to_config:oo_nodes_to_config
   roles:
   - openshift_facts
   tasks:
