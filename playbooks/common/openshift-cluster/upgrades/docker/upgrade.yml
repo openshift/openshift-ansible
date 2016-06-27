@@ -1,7 +1,7 @@
 ---
 # We need docker service up to remove all the images, but these services will keep
 # trying to re-start and thus re-pull the images we're trying to delete.
-- name: stop containerized services
+- name: Stop containerized services
   service: name={{ item }} state=stopped
   with_items:
     - "{{ openshift.common.service_type }}-master"
@@ -11,25 +11,18 @@
     - etcd_container
     - openvswitch
   failed_when: false
-  when: docker_upgrade is defined and docker_upgrade | bool and openshift.common.is_containerized | bool
+  when: docker_upgrade | bool and openshift.common.is_containerized | bool
 
-- name: remove all containers and images
+- name: Remove all containers and images
   script: nuke_images.sh docker
   register: nuke_images_result
-  when: docker_upgrade is defined and docker_upgrade | bool
+  when: docker_upgrade | bool and docker_upgrade_nuke_images is defined and docker_upgrade_nuke_images | bool
 
-# todo: should we use the docker role to actually do the upgrade?
-- name: upgrade to specified docker version
+- name: Upgrade Docker
   action: "{{ ansible_pkg_mgr }} name=docker{{ '-' + docker_version }} state=present"
-  register: docker_upgrade_result
-  when: docker_upgrade is defined and docker_upgrade | bool and docker_version is defined
+  when: docker_upgrade | bool
 
-- name: upgrade to latest docker version
-  action: "{{ ansible_pkg_mgr }} name=docker state=latest"
-  register: docker_upgrade_result
-  when: docker_upgrade is defined and docker_upgrade | bool and docker_version is not defined
-
-- name: restart containerized services
+- name: Restart containerized services
   service: name={{ item }} state=started
   with_items:
     - etcd_container
@@ -39,9 +32,9 @@
     - "{{ openshift.common.service_type }}-master-controllers"
     - "{{ openshift.common.service_type }}-node"
   failed_when: false
-  when: docker_upgrade is defined and docker_upgrade | bool and openshift.common.is_containerized | bool
+  when: docker_upgrade | bool and openshift.common.is_containerized | bool
 
-- name: wait for master api to come back online
+- name: Wait for master API to come back online
   become: no
   local_action:
     module: wait_for
@@ -49,4 +42,4 @@
       state=started
       delay=10
       port="{{ openshift.master.api_port }}"
-  when: docker_upgrade is defined and docker_upgrade | bool and inventory_hostname in groups.oo_masters_to_config
+  when: docker_upgrade | bool and inventory_hostname in groups.oo_masters_to_config

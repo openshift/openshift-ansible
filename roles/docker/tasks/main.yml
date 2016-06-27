@@ -37,7 +37,7 @@
 # Make sure Docker is installed, but does not update a running version.
 # Docker upgrades are handled by a separate playbook.
 - name: Install Docker
-  action: "{{ ansible_pkg_mgr }} name=docker{{ '-' + docker_version if docker_version is defined else '' }} state=present"
+  action: "{{ ansible_pkg_mgr }} name=docker{{ '-' + docker_version if docker_version is defined and not docker_protect_installed_version | bool else '' }} state=present"
   when: not openshift.common.is_atomic | bool
 
 - name: Start the Docker service

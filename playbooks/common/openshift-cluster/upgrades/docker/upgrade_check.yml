@@ -39,12 +39,17 @@
     docker_upgrade: False
   when: docker_upgrade is not defined or docker_upgrade | bool
 
-- name: Flag for upgrade if Docker version does not equal latest
-  set_fact:
-    docker_upgrade: true
-  when: docker_version is not defined and pkg_check.rc == 0 and curr_docker_version.stdout | version_compare(avail_docker_version.stdout,'<')
+# Make sure a docker_verison is set if none was requested:
+- set_fact:
+    docker_version: avail_docker_version.stdout
+  when: docker_version is not defined
 
-- name: Flag for upgrade if Docker version does not equal requested version
+- name: Flag for Docker upgrade if necessary
   set_fact:
-    docker_upgrade: true
+    docker_upgrade: True
   when: docker_version is defined and pkg_check.rc == 0 and curr_docker_version.stdout | version_compare(docker_version,'<')
+
+- name: Flag to delete all images prior to upgrade if crossing Docker 1.10 boundary
+  set_fact:
+      docker_upgrade_nuke_images: True
+  when: docker_upgrade_nuke_images is not defined and docker_upgrade | bool and curr_docker_version.stdout | version_compare('1.10','<') and docker_version | version_compare('1.10','>=')

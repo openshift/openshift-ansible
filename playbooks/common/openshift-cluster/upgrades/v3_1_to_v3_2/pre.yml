@@ -89,6 +89,10 @@
     # defined, and overriding the normal behavior of protecting the installed version
     openshift_release: "3.2"
     openshift_protect_installed_version: False
+    # Docker role (a dependency) should be told not to do anything to installed version
+    # of docker, we handle this separately during upgrade. (the inventory may have a
+    # docker_version defined, we don't want to actually do it until later)
+    docker_protect_installed_version: True
 
 - name: Verify master processes
   hosts: oo_masters_to_config
