@@ -266,7 +266,7 @@
 - name: Backup etcd
   hosts: etcd_hosts_to_backup
   vars:
-    embedded_etcd: "{{ openshift.master.embedded_etcd }}"
+    embedded_etcd: "{{ hostvars[groups.oo_first_master.0].openshift.master.embedded_etcd }}"
     timestamp: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
   roles:
   - openshift_facts
