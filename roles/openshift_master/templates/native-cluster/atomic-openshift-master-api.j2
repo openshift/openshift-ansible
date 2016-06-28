@@ -9,6 +9,12 @@ AWS_ACCESS_KEY_ID={{ openshift.cloudprovider.aws.access_key }}
 AWS_SECRET_ACCESS_KEY={{ openshift.cloudprovider.aws.secret_key }}
 {% endif %}
 
+{% if 'api_env_vars' in openshift.master -%}
+{% for key, value in openshift.master.api_env_vars.items() -%}
+{{ key }}={{ value }}
+{% endfor -%}
+{% endif -%}
+
 # Proxy configuration
 # See https://docs.openshift.com/enterprise/latest/install_config/install/advanced_install.html#configuring-global-proxy
 {% if 'http_proxy' in openshift.common %}

@@ -209,6 +209,9 @@
       msg: This upgrade playbook must be run on OpenShift Enterprise 3.1 or later
     when: deployment_type == 'atomic-openshift' and openshift.common.version | version_compare('3.1','<')
 
+- name: Verify docker upgrade targets
+  hosts: oo_masters_to_config:oo_nodes_to_config:oo_etcd_to_config
+  tasks:
   - name: Determine available Docker
     script: ../files/rpm_versions.sh docker
     register: g_docker_version_result
@@ -263,7 +266,7 @@
 - name: Backup etcd
   hosts: etcd_hosts_to_backup
   vars:
-    embedded_etcd: "{{ openshift.master.embedded_etcd }}"
+    embedded_etcd: "{{ hostvars[groups.oo_first_master.0].openshift.master.embedded_etcd }}"
     timestamp: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
   roles:
   - openshift_facts

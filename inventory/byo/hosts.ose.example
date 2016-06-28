@@ -434,6 +434,15 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Configure usage of openshift_clock role.
 #openshift_clock_enabled=true
 
+# OpenShift Per-Service Environment Variables
+# Environment variables are added to /etc/sysconfig files for
+# each OpenShift service: node, master (api and controllers).
+# API and controllers environment variables are merged in single
+# master environments.
+#openshift_master_api_env_vars={"ENABLE_HTTP2": "true"}
+#openshift_master_controllers_env_vars={"ENABLE_HTTP2": "true"}
+#openshift_node_env_vars={"ENABLE_HTTP2": "true"}
+
 # host group for masters
 [masters]
 ose3-master[1:3]-ansible.test.example.com
