@@ -47,5 +47,5 @@
 - name: Flag to delete all images prior to upgrade if crossing Docker 1.10 boundary
   set_fact:
       docker_upgrade_nuke_images: True
-  when: docker_upgrade_nuke_images is not defined and curr_docker_version.stdout | version_compare('1.10','<') and docker_version | version_compare('1.10','>=')
+  when: l_docker_upgrade | bool and docker_upgrade_nuke_images is not defined and curr_docker_version.stdout | version_compare('1.10','<') and docker_version | version_compare('1.10','>=')
 

@@ -5,7 +5,7 @@
 
 - include: ../../initialize_facts.yml
 
-- name: Update repos
+- name: Update repos and initialize facts on all hosts
   hosts: oo_masters_to_config:oo_nodes_to_config:oo_etcd_to_config:oo_lb_to_config
   roles:
   - openshift_repos
@@ -164,9 +164,6 @@
     command: >
       docker pull {{ openshift.common.cli_image }}:{{ openshift_image_tag }}
     when: openshift.common.is_containerized | bool
-
-  - set_fact:
-      repoquery_cmd: "{{ 'dnf repoquery --latest-limit 1 -d 0' if ansible_pkg_mgr == 'dnf' else 'repoquery' }}"
 
   - name: Check latest available OpenShift RPM version
     command: >
