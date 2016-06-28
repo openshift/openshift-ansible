@@ -1,6 +1,7 @@
 ---
 - name: Set etcd facts needed for generating certs
   hosts: oo_etcd_to_config
+  any_errors_fatal: true
   roles:
   - openshift_facts
   tasks:
