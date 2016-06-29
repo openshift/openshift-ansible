@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.7
+Version:        3.2.8
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -205,6 +205,16 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Jun 29 2016 Scott Dodson <sdodson@redhat.com> 3.2.8-1
+- Enable additional 'virt_sandbox_use_nfs' seboolean as per documentation:
+  (george.goh@redhat.com)
+- Switch to repoquery, enable plugins for satellite support
+  (sdodson@redhat.com)
+- Don't upgrade docker on non-containerized etcd. (abutcher@redhat.com)
+- Access embedded_etcd variable from oo_first_master hostvars.
+  (abutcher@redhat.com)
+- Fix case where no version of docker is installed (sdodson@redhat.com)
+
 * Thu Jun 23 2016 Scott Dodson <sdodson@redhat.com> 3.2.7-1
 - Add missing quote in metrics deployer template. (dgoodwin@redhat.com)
 
