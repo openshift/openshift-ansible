@@ -15,7 +15,7 @@
 - include: router/router.yml
 - include: registry/registry.yml
 - include: metrics/metrics.yml
-- include: logging/logging.yml
+  #- include: logging/logging.yml
 
 - name: Delete temp directory
   file:
