@@ -1,7 +1,11 @@
 #!/bin/bash
-
-installed=$(yum list installed -e 0 -q "$@" 2>&1 | tail -n +2 | awk '{ print $2 }' | sort -r | tr '\n' ' ')
-available=$(yum list available -e 0 -q "$@" 2>&1 | tail -n +2 | grep -v 'el7ose' | awk '{ print $2 }' | sort -r | tr '\n' ' ')
+if [ `which dnf 2> /dev/null` ]; then
+  installed=$(dnf repoquery --installed --latest-limit 1 -d 0 --qf '%{version}-%{release}' "${@}" 2> /dev/null)
+  installed=$(dnf repoquery --available --latest-limit 1 -d 0 --qf '%{version}-%{release}' "${@}" 2> /dev/null)
+else
+  installed=$(repoquery --plugins --pkgnarrow=installed --qf '%{version}-%{release}' "${@}" 2> /dev/null)
+  available=$(repoquery --plugins --pkgnarrow=available --qf '%{version}-%{release}' "${@}" 2> /dev/null)
+fi
 
 echo "---"
 echo "curr_version: ${installed}"
