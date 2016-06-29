@@ -9,3 +9,10 @@
     state: yes
     persistent: yes
   when: ansible_selinux and ansible_selinux.status == "enabled"
+
+- name: Set seboolean to allow nfs storage plugin access from containers(sandbox)
+  seboolean:
+    name: virt_sandbox_use_nfs
+    state: yes
+    persistent: yes
+  when: ansible_selinux and ansible_selinux.status == "enabled"
