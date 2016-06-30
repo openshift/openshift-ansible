@@ -7,7 +7,7 @@
   when: deployment_type == 'enterprise'
 
 - set_fact:
-    default_ose_version: '3.1'
+    default_ose_version: '3.2'
   when: deployment_type in ['atomic-enterprise', 'openshift-enterprise']
 
 - set_fact:
