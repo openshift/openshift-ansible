@@ -1,11 +1,12 @@
 # TODO: Temporarily disabled due to importing old code into openshift-ansible
 # repo. We will work on these over time.
-# pylint: disable=bad-continuation,missing-docstring,no-self-use,invalid-name,no-value-for-parameter
+# pylint: disable=bad-continuation,missing-docstring,no-self-use,invalid-name,no-value-for-parameter,too-many-lines
 
 import click
 import os
 import re
 import sys
+import yum
 from ooinstall import openshift_ansible
 from ooinstall import OOConfig
 from ooinstall.oo_config import OOConfigInvalidHostError
@@ -15,6 +16,21 @@ from distutils.version import LooseVersion
 
 DEFAULT_ANSIBLE_CONFIG = '/usr/share/atomic-openshift-utils/ansible.cfg'
 DEFAULT_PLAYBOOK_DIR = '/usr/share/ansible/openshift-ansible/'
+
+UPGRADE_MAPPINGS = {
+                    '3.0':{
+                           'minor_version' :'3.0',
+                           'minor_playbook':'v3_0_minor/upgrade.yml',
+                           'major_version' :'3.1',
+                           'major_playbook':'v3_0_to_v3_1/upgrade.yml',
+                          },
+                    '3.1':{
+                           'minor_version' :'3.1',
+                           'minor_playbook':'v3_1_minor/upgrade.yml',
+                           'major_playbook':'v3_1_to_v3_2/upgrade.yml',
+                           'major_version' :'3.2',
+                        }
+                   }
 
 def validate_ansible_dir(path):
     if not path:
@@ -641,6 +657,11 @@ def is_installed_host(host, callback_facts):
 
     return version_found or host.master_lb or host.preconfigured
 
+def get_installer_version():
+    yum_base = yum.YumBase()
+    installer_packages = yum_base.rpmdb.searchNevra('atomic-openshift-utils')
+    return installer_packages[0].version
+
 # pylint: disable=too-many-branches
 # This pylint error will be corrected shortly in separate PR.
 def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force, verbose):
@@ -819,7 +840,6 @@ def uninstall(ctx):
 
     openshift_ansible.run_uninstall_playbook(verbose)
 
-
 @click.command()
 @click.option('--latest-minor', '-l', is_flag=True, default=False)
 @click.option('--next-major', '-n', is_flag=True, default=False)
@@ -828,20 +848,7 @@ def upgrade(ctx, latest_minor, next_major):
     oo_cfg = ctx.obj['oo_cfg']
     verbose = ctx.obj['verbose']
 
-    upgrade_mappings = {
-                        '3.0':{
-                               'minor_version' :'3.0',
-                               'minor_playbook':'v3_0_minor/upgrade.yml',
-                               'major_version' :'3.1',
-                               'major_playbook':'v3_0_to_v3_1/upgrade.yml',
-                              },
-                        '3.1':{
-                               'minor_version' :'3.1',
-                               'minor_playbook':'v3_1_minor/upgrade.yml',
-                               'major_playbook':'v3_1_to_v3_2/upgrade.yml',
-                               'major_version' :'3.2',
-                            }
-                       }
+
 
     if len(oo_cfg.hosts) == 0:
         click.echo("No hosts defined in: %s" % oo_cfg.config_path)
@@ -849,7 +856,7 @@ def upgrade(ctx, latest_minor, next_major):
 
     old_variant = oo_cfg.settings['variant']
     old_version = oo_cfg.settings['variant_version']
-    mapping = upgrade_mappings.get(old_version)
+    mapping = UPGRADE_MAPPINGS.get(old_version)
 
     message = """
         This tool will help you upgrade your existing OpenShift installation.
@@ -870,6 +877,18 @@ def upgrade(ctx, latest_minor, next_major):
     if next_major:
         playbook = mapping['major_playbook']
         new_version = mapping['major_version']
+
+        installer_version = get_installer_version()
+        if LooseVersion(installer_version) < LooseVersion(new_version):
+            message = """
+The version of the atomic-openshift-utils package must match
+the version of OpenShift to be installed.
+"""
+            click.echo(message)
+            click.echo("atomic-openshift-installer version {} " \
+                       "trying to upgrade to {}".format(installer_version, new_version))
+            sys.exit(0)
+
         # Update config to reflect the version we're targetting, we'll write
         # to disk once ansible completes successfully, not before.
         oo_cfg.settings['variant_version'] = new_version
@@ -887,8 +906,7 @@ def upgrade(ctx, latest_minor, next_major):
 
     if not ctx.obj['unattended']:
         # Prompt interactively to confirm:
-        proceed = click.confirm("\nDo you wish to proceed?")
-        if not proceed:
+        if not click.confirm("\nDo you wish to proceed?"):
             click.echo("Upgrade cancelled.")
             sys.exit(0)
 

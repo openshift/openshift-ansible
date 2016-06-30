@@ -494,7 +494,7 @@ class UnattendedCliTests(OOCliFixture):
         self.assertEquals('openshift-enterprise', written_config['variant'])
         # We didn't specify a version so the latest should have been assumed,
         # and written to disk:
-        self.assertEquals('3.2', written_config['variant_version'])
+        self.assertEquals('3.1', written_config['variant_version'])
 
         # Make sure the correct value was passed to ansible:
         inventory = ConfigParser.ConfigParser(allow_no_value=True)
@@ -1015,7 +1015,7 @@ class AttendedCliTests(OOCliFixture):
         cli_input = build_input(hosts=[
             ('10.0.0.1', True, False)],
                                       ssh_user='root',
-                                      variant_num=3,
+                                      variant_num=2,
                                       confirm_facts='y',
                                       storage='10.1.0.1',)
         self.cli_args.append("install")
