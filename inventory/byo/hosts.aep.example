@@ -140,6 +140,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #osm_mcs_labels_per_project=5
 #osm_uid_allocator_range='1000000000-1999999999/10000'
 
+# Configure additional projects
+#openshift_additional_projects={'my-project': {'default_node_selector': 'label=value'}}
+
 # Enable cockpit
 #osm_use_cockpit=true
 #
@@ -220,10 +223,15 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # based on the number of nodes matching the openshift router selector.
 #openshift_hosted_router_replicas=2
 #
+# Router force subdomain (optional)
+# A router path format to force on all routes used by this router
+# (will ignore the route host value)
+#openshift_hosted_router_force_subdomain='${name}-${namespace}.apps.example.com'
+#
 # Router certificate (optional)
 # Provide local certificate paths which will be configured as the
 # router's default certificate.
-#openshift_hosted_router_certificate={"certfile": "/path/to/router.crt", "keyfile": "/path/to/router.key"}
+#openshift_hosted_router_certificate={"certfile": "/path/to/router.crt", "keyfile": "/path/to/router.key", "cafile": "/path/to/router-ca.crt"}
 
 # Openshift Registry Options
 #
@@ -239,7 +247,54 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Registry selector (optional)
 # Registry will only be created if nodes matching this label are present.
 # Default value: 'region=infra'
-#openshift_registry_selector='region=infra'
+#openshift_hosted_registry_selector='region=infra'
+#
+# Registry replicas (optional)
+# Unless specified, openshift-ansible will calculate the replica count
+# based on the number of nodes matching the openshift registry selector.
+#openshift_hosted_registry_replicas=2
+
+# Registry Storage Options
+#
+# NFS Host Group
+# An NFS volume will be created with path "nfs_directory/volume_name"
+# on the host within the [nfs] host group.  For example, the volume
+# path using these options would be "/exports/registry"
+#openshift_hosted_registry_storage_kind=nfs
+#openshift_hosted_registry_storage_access_modes=['ReadWriteMany']
+#openshift_hosted_registry_storage_nfs_directory=/exports
+#openshift_hosted_registry_storage_nfs_options='*(rw,root_squash)'
+#openshift_hosted_registry_storage_volume_name=registry
+#openshift_hosted_registry_storage_volume_size=10Gi
+#
+# External NFS Host
+# NFS volume must already exist with path "nfs_directory/_volume_name" on
+# the storage_host. For example, the remote volume path using these
+# options would be "nfs.example.com:/exports/registry"
+#openshift_hosted_registry_storage_kind=nfs
+#openshift_hosted_registry_storage_access_modes=['ReadWriteMany']
+#openshift_hosted_registry_storage_host=nfs.example.com
+#openshift_hosted_registry_storage_nfs_directory=/exports
+#openshift_hosted_registry_storage_volume_name=registry
+#openshift_hosted_registry_storage_volume_size=10Gi
+#
+# Openstack
+# Volume must already exist.
+#openshift_hosted_registry_storage_kind=openstack
+#openshift_hosted_registry_storage_access_modes=['ReadWriteOnce']
+#openshift_hosted_registry_storage_openstack_filesystem=ext4
+#openshift_hosted_registry_storage_openstack_volumeID=3a650b4f-c8c5-4e0a-8ca5-eaee11f16c57
+#openshift_hosted_registry_storage_volume_size=10Gi
+#
+# AWS S3
+# S3 bucket must already exist.
+#openshift_hosted_registry_storage_kind=object
+#openshift_hosted_registry_storage_provider=s3
+#openshift_hosted_registry_storage_s3_accesskey=aws_access_key_id
+#openshift_hosted_registry_storage_s3_secretkey=aws_secret_access_key
+#openshift_hosted_registry_storage_s3_bucket=bucket_name
+#openshift_hosted_registry_storage_s3_region=bucket_region
+#openshift_hosted_registry_storage_s3_chunksize=26214400
 
 # Configure the multi-tenant SDN plugin (default is 'redhat/openshift-ovs-subnet')
 # os_sdn_network_plugin_name='redhat/openshift-ovs-multitenant'
@@ -309,57 +364,6 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 
 # Configure dnsIP in the node config
 #openshift_dns_ip=172.30.0.1
-
-# Persistent Storage Options
-#
-## Registry Storage Options
-##
-## Storage Kind
-## Specifies which storage kind will be used for the registry.
-## "nfs" and "openstack" are supported kinds at this time.
-##openshift_hosted_registry_storage_kind=nfs
-##
-## Persistent Volume Access Mode
-## When using the 'openstack' storage kind, this has to be 'ReadWriteOnce'
-##openshift_hosted_registry_storage_access_modes=['ReadWriteMany']
-##
-## Registry Volume Name
-## Specify the storage volume name. This directory will be created
-## within openshift_hosted_registry_storage_nfs_directory if
-## specifying an [nfs] group. Ex. /exports/registry
-## This variable must be supplied if using a pre-existing nfs server.
-##openshift_hosted_registry_storage_volume_name=registry
-##
-## NFS Specific Options
-##
-## Storage Host
-## This variable can be used to identify a pre-existing storage host
-## if a storage host group corresponding to the storage kind (such as
-## [nfs]) is not specified,
-##openshift_hosted_registry_storage_host=nfs.example.com
-##
-## NFS Export Options
-##openshift_hosted_registry_storage_nfs_options='*(rw,root_squash)'
-##
-## NFS Export Directory
-## Specify the root exports directory. This directory will be created
-## if specifying an [nfs] host group.
-## This variable must be supplied if using a pre-existing nfs server.
-##openshift_hosted_registry_storage_nfs_directory=/exports
-##
-## Openstack Specific Options
-##
-## Openstack Volume ID
-## Specify the identifier of the volume to use for the registry.
-## At this time, the volume has to be created manually by the administrator.
-##openshift_hosted_registry_storage_openstack_volumeID=3a650b4f-c8c5-4e0a-8ca5-eaee11f16c57
-##
-## Openstack Volume Size
-##openshift_hosted_registry_storage_volume_size=10Gi
-##
-## Openstack Volume Filesystem
-## Specify the filesystem that will be used when formatting the volume
-##openshift_hosted_registry_storage_openstack_filesystem=ext4
 
 # Configure node kubelet arguments
 #openshift_node_kubelet_args={'max-pods': ['110'], 'image-gc-high-threshold': ['90'], 'image-gc-low-threshold': ['80']}
