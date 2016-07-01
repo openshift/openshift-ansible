@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.8
+Version:        3.2.9
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -205,6 +205,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Jul 01 2016 Scott Dodson <sdodson@redhat.com> 3.2.9-1
+- Update image streams with SCL 2.2 components (sdodson@redhat.com)
+- Set any_errors_fatal for initialize facts play. (abutcher@redhat.com)
+- Set any_errors_fatal for etcd facts play. (abutcher@redhat.com)
+
 * Wed Jun 29 2016 Scott Dodson <sdodson@redhat.com> 3.2.8-1
 - Enable additional 'virt_sandbox_use_nfs' seboolean as per documentation:
   (george.goh@redhat.com)
