@@ -17,6 +17,7 @@
   template:
     src: origin-dns.conf.j2
     dest: /etc/dnsmasq.d/origin-dns.conf
+  notify: restart dnsmasq
 
 - name: Deploy additional dnsmasq.conf
   template:
