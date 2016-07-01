@@ -36,6 +36,7 @@ class Variant(object):
 # WARNING: Keep the versions ordered, most recent first:
 OSE = Variant('openshift-enterprise', 'OpenShift Enterprise',
     [
+        Version('3.3', 'openshift-enterprise'),
         Version('3.2', 'openshift-enterprise'),
         Version('3.1', 'openshift-enterprise'),
         Version('3.0', 'enterprise')
