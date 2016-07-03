@@ -82,11 +82,11 @@ deployment_type=origin
 #oreg_url=example.com/openshift3/ose-${component}:${version}
 
 # Origin copr repo
-#openshift_additional_repos=[{'id': 'openshift-origin-copr', 'name': 'OpenShift Origin COPR', 'baseurl': 'https://copr-be.cloud.fedoraproject.org/results/maxamillion/origin-next/epel-7-$basearch/', 'enabled': 1, 'gpgcheck': 1, gpgkey: 'https://copr-be.cloud.fedoraproject.org/results/maxamillion/origin-next/pubkey.gpg'}]
+#openshift_additional_repos=[{'id': 'openshift-origin-copr', 'name': 'OpenShift Origin COPR', 'baseurl': 'https://copr-be.cloud.fedoraproject.org/results/maxamillion/origin-next/epel-7-$basearch/', 'enabled': 1, 'gpgcheck': 1, 'gpgkey': 'https://copr-be.cloud.fedoraproject.org/results/maxamillion/origin-next/pubkey.gpg'}]
 
 # Origin Fedora copr repo
 # Use this if you are installing on Fedora
-#openshift_additional_repos=[{'id': 'fedora-openshift-origin-copr', 'name': 'OpenShift Origin COPR for Fedora', 'baseurl': 'https://copr-be.cloud.fedoraproject.org/results/maxamillion/fedora-openshift/fedora-$releasever-$basearch/', 'enabled': 1, 'gpgcheck': 1, gpgkey: 'https://copr-be.cloud.fedoraproject.org/results/maxamillion/fedora-openshift/pubkey.gpg'}]
+#openshift_additional_repos=[{'id': 'fedora-openshift-origin-copr', 'name': 'OpenShift Origin COPR for Fedora', 'baseurl': 'https://copr-be.cloud.fedoraproject.org/results/maxamillion/fedora-openshift/fedora-$releasever-$basearch/', 'enabled': 1, 'gpgcheck': 1, 'gpgkey': 'https://copr-be.cloud.fedoraproject.org/results/maxamillion/fedora-openshift/pubkey.gpg'}]
 
 # htpasswd auth
 openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]
