@@ -34,7 +34,7 @@
 - name: Use openshift.common.version fact as version to configure if already installed
   set_fact:
     openshift_version: "{{ openshift.common.version }}"
-  when: openshift.common.version is defined and openshift_version is not defined and openshift_protect_installed_version
+  when: openshift.common.version is defined and openshift_version is not defined and openshift_protect_installed_version | bool
 
 - debug: var=is_containerized
 - debug: var=openshift_version
