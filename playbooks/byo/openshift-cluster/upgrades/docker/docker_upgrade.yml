@@ -5,7 +5,7 @@
   - openshift_facts
   tasks:
   - set_fact:
-      repoquery_cmd: "{{ 'dnf repoquery --latest-limit 1 -d 0' if ansible_pkg_mgr == 'dnf' else 'repoquery' }}"
+      repoquery_cmd: "{{ 'dnf repoquery --latest-limit 1 -d 0' if ansible_pkg_mgr == 'dnf' else 'repoquery --plugins' }}"
 
   - fail:
       msg: Cannot upgrade Docker on Atomic operating systems.
