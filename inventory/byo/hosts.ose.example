@@ -400,7 +400,10 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # and configure node's dnsIP to point at the node's local dnsmasq instance. Defaults
 # to True for Origin 1.2 and OSE 3.2. False for 1.1 / 3.1 installs, this cannot
 # be used with 1.0 and 3.0.
-# openshift_use_dnsmasq=False
+#openshift_use_dnsmasq=False
+# Define an additional dnsmasq.conf file to deploy to /etc/dnsmasq.d/openshift-ansible.conf
+# This is useful for POC environments where DNS may not actually be available yet.
+#openshift_node_dnsmasq_additional_config_file=/home/bob/ose-dnsmasq.conf
 
 # Global Proxy Configuration
 # These options configure HTTP_PROXY, HTTPS_PROXY, and NOPROXY environment

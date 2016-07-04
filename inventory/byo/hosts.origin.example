@@ -106,11 +106,11 @@ openshift_release=v1.2
 #oreg_url=example.com/openshift3/ose-${component}:${version}
 
 # Origin copr repo
-#openshift_additional_repos=[{'id': 'openshift-origin-copr', 'name': 'OpenShift Origin COPR', 'baseurl': 'https://copr-be.cloud.fedoraproject.org/results/maxamillion/origin-next/epel-7-$basearch/', 'enabled': 1, 'gpgcheck': 1, gpgkey: 'https://copr-be.cloud.fedoraproject.org/results/maxamillion/origin-next/pubkey.gpg'}]
+#openshift_additional_repos=[{'id': 'openshift-origin-copr', 'name': 'OpenShift Origin COPR', 'baseurl': 'https://copr-be.cloud.fedoraproject.org/results/maxamillion/origin-next/epel-7-$basearch/', 'enabled': 1, 'gpgcheck': 1, 'gpgkey': 'https://copr-be.cloud.fedoraproject.org/results/maxamillion/origin-next/pubkey.gpg'}]
 
 # Origin Fedora copr repo
 # Use this if you are installing on Fedora
-#openshift_additional_repos=[{'id': 'fedora-openshift-origin-copr', 'name': 'OpenShift Origin COPR for Fedora', 'baseurl': 'https://copr-be.cloud.fedoraproject.org/results/maxamillion/fedora-openshift/fedora-$releasever-$basearch/', 'enabled': 1, 'gpgcheck': 1, gpgkey: 'https://copr-be.cloud.fedoraproject.org/results/maxamillion/fedora-openshift/pubkey.gpg'}]
+#openshift_additional_repos=[{'id': 'fedora-openshift-origin-copr', 'name': 'OpenShift Origin COPR for Fedora', 'baseurl': 'https://copr-be.cloud.fedoraproject.org/results/maxamillion/fedora-openshift/fedora-$releasever-$basearch/', 'enabled': 1, 'gpgcheck': 1, 'gpgkey': 'https://copr-be.cloud.fedoraproject.org/results/maxamillion/fedora-openshift/pubkey.gpg'}]
 
 # htpasswd auth
 openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]
@@ -405,7 +405,10 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # and configure node's dnsIP to point at the node's local dnsmasq instance. Defaults
 # to True for Origin 1.2 and OSE 3.2. False for 1.1 / 3.1 installs, this cannot
 # be used with 1.0 and 3.0.
-# openshift_use_dnsmasq=False
+#openshift_use_dnsmasq=False
+# Define an additional dnsmasq.conf file to deploy to /etc/dnsmasq.d/openshift-ansible.conf
+# This is useful for POC environments where DNS may not actually be available yet.
+#openshift_node_dnsmasq_additional_config_file=/home/bob/ose-dnsmasq.conf
 
 # Global Proxy Configuration
 # These options configure HTTP_PROXY, HTTPS_PROXY, and NOPROXY environment
