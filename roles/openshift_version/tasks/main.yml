@@ -69,13 +69,16 @@
 - debug: var=openshift_pkg_version
 - debug: var=openshift_image_tag
 
-- fail: openshift_version role was unable to set openshift_version
+- fail:
+    msg: openshift_version role was unable to set openshift_version
   when: openshift_version is not defined
 
-- fail: openshift_version role was unable to set openshift_image_tag
+- fail:
+    msg: openshift_version role was unable to set openshift_image_tag
   when: openshift_image_tag is not defined
 
-- fail: openshift_version role was unable to set openshift_pkg_version
+- fail:
+    msg: openshift_version role was unable to set openshift_pkg_version
   when: openshift_pkg_version is not defined
 
 # We can't map an openshift_release to full rpm version like we can with containers, make sure
