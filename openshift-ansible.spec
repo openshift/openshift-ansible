@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.0
+Version:        3.3.1
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -205,6 +205,59 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jul 05 2016 Scott Dodson <sdodson@redhat.com> 3.3.1-1
+- Add v1.3 examples (sdodson@redhat.com)
+- Change the examples content sync directory (sdodson@redhat.com)
+- Add gte_3_3 (sdodson@redhat.com)
+- Adds quotes to gpgkey element in byo/config.yml (smerrill@covermymeds.com)
+- Restart dnsmasq encase it was already running (sdodson@redhat.com)
+- Add support for supplying a dnsmasq.conf file (sdodson@redhat.com)
+- Update image streams with SCL 2.2 components (sdodson@redhat.com)
+- Bump rhel subscribe default version. (abutcher@redhat.com)
+- Revert "Speed up copying OpenShift examples" (abutcher@afrolegs.com)
+- Switch to repoquery, enable plugins for satellite support
+  (sdodson@redhat.com)
+- update conditional expression to save steps (lxia@redhat.com)
+- Enable additional 'virt_sandbox_use_nfs' seboolean as per documentation:
+  (george.goh@redhat.com)
+- Set any_errors_fatal for initialize facts play. (abutcher@redhat.com)
+- Set any_errors_fatal for etcd facts play. (abutcher@redhat.com)
+- Speed up copying OpenShift examples (tbielawa@redhat.com)
+- Check if last rule is DROP when inserting iptables rules.
+  (abutcher@redhat.com)
+- Don't upgrade docker on non-containerized etcd. (abutcher@redhat.com)
+- Access embedded_etcd variable from oo_first_master hostvars.
+  (abutcher@redhat.com)
+- Add missing quote in metrics deployer template. (dgoodwin@redhat.com)
+- Allow flag to uninstall playbook to preserve images. (dgoodwin@redhat.com)
+- Add MODE to metrics deployer (sdodson@redhat.com)
+- NetworkManager service never changes (tbielawa@redhat.com)
+- Update the rest of the templates (sdodson@redhat.com)
+- Update logging and metrics templates (sdodson@redhat.com)
+- Block Docker 1.10 upgrade playbook when run against an Atomic OS.
+  (dgoodwin@redhat.com)
+- If registry_url != registry.access.redhat.com then modify image streams
+  (sdodson@redhat.com)
+- Add 30 second pause before retrying to start the node (sdodson@redhat.com)
+- Stop dumping debug output, re-try startng the node once (sdodson@redhat.com)
+- Fix uninstall.yml indentation for deamon-reload
+  (florian.lambert@enovance.com)
+- Fix no proxy hostnames during upgrade. (dgoodwin@redhat.com)
+- Attempt to fix containerized node start failure with Docker 1.10.
+  (dgoodwin@redhat.com)
+- also volume-mount /etc/sysconfig/docker (tob@butter.sh)
+- Separate uninstall plays by group. (abutcher@redhat.com)
+- Add per-service environment variables. (abutcher@redhat.com)
+- - Prevent the script to override n number of the time the same nameserver -
+  Prevent the script to echo blank values from IP4_NAMESERVERS variable
+  (william17.burton@gmail.com)
+- Make a note about Requires: docker (sdodson@redhat.com)
+- Remove Docker 1.10 requirement temporarily. (dgoodwin@redhat.com)
+- Fix docker 1.10 upgrade on embedded etcd masters. (dgoodwin@redhat.com)
+- Add lower case proxy variables (pascal.bach@siemens.com)
+- default unit in openshift_facts (you@example.com)
+- add unit in seconds for metrics resolution (you@example.com)
+
 * Thu Jun 09 2016 Scott Dodson <sdodson@redhat.com> 3.3.0-1
 - Restore mistakenly reverted code. (dgoodwin@redhat.com)
 - Add openshift_loadbalancer_facts role to set lb facts prior to running
