@@ -79,6 +79,9 @@ deployment_type=openshift-enterprise
 # only need to inject your own registry you may want to consider
 # openshift_docker_additional_registries instead
 #oreg_url=example.com/openshift3/ose-${component}:${version}
+# If oreg_url points to a registry other than registry.access.redhat.com we can
+# modify image streams to point at that registry by setting the following to true
+#openshift_examples_modify_imagestreams=True
 
 # Additional yum repos to install
 #openshift_additional_repos=[{'id': 'ose-devel', 'name': 'ose-devel', 'baseurl': 'http://example.com/puddle/build/AtomicOpenShift/3.1/latest/RH7-RHOSE-3.0/$basearch/os', 'enabled': 1, 'gpgcheck': 0}]
@@ -376,7 +379,10 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # and configure node's dnsIP to point at the node's local dnsmasq instance. Defaults
 # to True for Origin 1.2 and OSE 3.2. False for 1.1 / 3.1 installs, this cannot
 # be used with 1.0 and 3.0.
-# openshift_use_dnsmasq=False
+#openshift_use_dnsmasq=False
+# Define an additional dnsmasq.conf file to deploy to /etc/dnsmasq.d/openshift-ansible.conf
+# This is useful for POC environments where DNS may not actually be available yet.
+#openshift_node_dnsmasq_additional_config_file=/home/bob/ose-dnsmasq.conf
 
 # Global Proxy Configuration
 # These options configure HTTP_PROXY, HTTPS_PROXY, and NOPROXY environment
@@ -409,6 +415,15 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 
 # Configure usage of openshift_clock role.
 #openshift_clock_enabled=true
+
+# OpenShift Per-Service Environment Variables
+# Environment variables are added to /etc/sysconfig files for
+# each OpenShift service: node, master (api and controllers).
+# API and controllers environment variables are merged in single
+# master environments.
+#openshift_master_api_env_vars={"ENABLE_HTTP2": "true"}
+#openshift_master_controllers_env_vars={"ENABLE_HTTP2": "true"}
+#openshift_node_env_vars={"ENABLE_HTTP2": "true"}
 
 # host group for masters
 [masters]

@@ -47,11 +47,14 @@ EOF
     # zero out our upstream servers list and feed it into dnsmasq
     echo -n > /etc/dnsmasq.d/origin-upstream-dns.conf
     for ns in ${IP4_NAMESERVERS}; do
-       echo "server=${ns}" >> /etc/dnsmasq.d/origin-upstream-dns.conf
+      if [[ ! -z $ns ]]; then
+        echo "server=${ns}" >> /etc/dnsmasq.d/origin-upstream-dns.conf
+      fi
     done
     systemctl restart dnsmasq
 
-    sed -i 's/^nameserver.*$/nameserver '"${def_route_ip}"'/g' /etc/resolv.conf
+    sed -i '0,/^nameserver/ s/^nameserver.*$/nameserver '"${def_route_ip}"'/g' /etc/resolv.conf
+
     if ! grep -q '99-origin-dns.sh' /etc/resolv.conf; then
       echo "# nameserver updated by /etc/NetworkManager/dispatcher.d/99-origin-dns.sh" >> /etc/resolv.conf
     fi

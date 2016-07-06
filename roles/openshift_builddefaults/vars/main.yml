@@ -13,3 +13,9 @@ builddefaults_yaml:
         value: "{{ openshift.builddefaults.https_proxy | default('', true) }}"
       - name: NO_PROXY
         value: "{{ openshift.builddefaults.no_proxy | default('', true) | join(',') }}"
+      - name: http_proxy
+        value: "{{ openshift.builddefaults.http_proxy | default('', true) }}"
+      - name: https_proxy
+        value: "{{ openshift.builddefaults.https_proxy | default('', true) }}"
+      - name: no_proxy
+        value: "{{ openshift.builddefaults.no_proxy | default('', true) | join(',') }}"
