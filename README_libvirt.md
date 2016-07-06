@@ -22,6 +22,7 @@ Install dependencies
 8.	[Grant libvirt access to your user¹](https://libvirt.org/aclpolkit.html)
 9.	Check that your `$HOME` is accessible to the qemu user²
 10.	Configure dns resolution on the host³
+11.	Install libselinux-python
 
 #### ¹ Depending on your distribution, libvirt access may be denied by default or may require a password at each access.
 
