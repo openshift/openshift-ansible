@@ -79,6 +79,9 @@ deployment_type=atomic-enterprise
 # only need to inject your own registry you may want to consider
 # openshift_docker_additional_registries instead
 #oreg_url=example.com/aep3/aep-${component}:${version}
+# If oreg_url points to a registry other than registry.access.redhat.com we can
+# modify image streams to point at that registry by setting the following to true
+#openshift_examples_modify_imagestreams=True
 
 # Additional yum repos to install
 #openshift_additional_repos=[{'id': 'aep-devel', 'name': 'aep-devel', 'baseurl': 'http://example.com/puddle/build/AtomicOpenShift/3.1/latest/RH7-RHOSE-3.0/$basearch/os', 'enabled': 1, 'gpgcheck': 0}]
@@ -409,6 +412,15 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 
 # Configure usage of openshift_clock role.
 #openshift_clock_enabled=true
+
+# OpenShift Per-Service Environment Variables
+# Environment variables are added to /etc/sysconfig files for
+# each OpenShift service: node, master (api and controllers).
+# API and controllers environment variables are merged in single
+# master environments.
+#openshift_master_api_env_vars={"ENABLE_HTTP2": "true"}
+#openshift_master_controllers_env_vars={"ENABLE_HTTP2": "true"}
+#openshift_node_env_vars={"ENABLE_HTTP2": "true"}
 
 # host group for masters
 [masters]

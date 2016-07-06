@@ -37,14 +37,14 @@ class IpTablesSaveError(IpTablesError):
 
 
 class IpTablesCreateChainError(IpTablesError):
-    def __init__(self, chain, msg, cmd, exit_code, output): # pylint: disable=too-many-arguments, line-too-long
+    def __init__(self, chain, msg, cmd, exit_code, output): # pylint: disable=too-many-arguments, line-too-long, redefined-outer-name
         super(IpTablesCreateChainError, self).__init__(msg, cmd, exit_code,
                                                        output)
         self.chain = chain
 
 
 class IpTablesCreateJumpRuleError(IpTablesError):
-    def __init__(self, chain, msg, cmd, exit_code, output): # pylint: disable=too-many-arguments, line-too-long
+    def __init__(self, chain, msg, cmd, exit_code, output): # pylint: disable=too-many-arguments, line-too-long, redefined-outer-name
         super(IpTablesCreateJumpRuleError, self).__init__(msg, cmd, exit_code,
                                                           output)
         self.chain = chain
@@ -152,11 +152,11 @@ class IpTablesManager(object): # pylint: disable=too-many-instance-attributes
                             continue
                         last_rule_target = rule[1]
 
-                # Naively assume that if the last row is a REJECT rule, then
-                # we can add insert our rule right before it, otherwise we
+                # Naively assume that if the last row is a REJECT or DROP rule,
+                # then we can insert our rule right before it, otherwise we
                 # assume that we can just append the rule.
                 if (last_rule_num and last_rule_target
-                        and last_rule_target == 'REJECT'):
+                        and last_rule_target in ['REJECT', 'DROP']):
                     # insert rule
                     cmd = self.cmd + ['-I', self.jump_rule_chain,
                                       str(last_rule_num)]

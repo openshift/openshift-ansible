@@ -2,7 +2,10 @@
 
 #OpenShift Ansible
 
-This repo contains Ansible code for OpenShift
+This repo contains Ansible code for OpenShift. This repo and the origin RPMs
+that it installs currently require a package that provides `docker`. Currently
+the RPMs provided from dockerproject.org do not provide this requirement, though
+they may in the future.
 
 ##Setup
 - Install base dependencies:

@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.9
+Version:        3.3.1
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -205,60 +205,75 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
-* Fri Jul 01 2016 Scott Dodson <sdodson@redhat.com> 3.2.9-1
+* Tue Jul 05 2016 Scott Dodson <sdodson@redhat.com> 3.3.1-1
+- Add v1.3 examples (sdodson@redhat.com)
+- Change the examples content sync directory (sdodson@redhat.com)
+- Add gte_3_3 (sdodson@redhat.com)
+- Adds quotes to gpgkey element in byo/config.yml (smerrill@covermymeds.com)
+- Restart dnsmasq encase it was already running (sdodson@redhat.com)
+- Add support for supplying a dnsmasq.conf file (sdodson@redhat.com)
 - Update image streams with SCL 2.2 components (sdodson@redhat.com)
-- Set any_errors_fatal for initialize facts play. (abutcher@redhat.com)
-- Set any_errors_fatal for etcd facts play. (abutcher@redhat.com)
-
-* Wed Jun 29 2016 Scott Dodson <sdodson@redhat.com> 3.2.8-1
-- Enable additional 'virt_sandbox_use_nfs' seboolean as per documentation:
-  (george.goh@redhat.com)
+- Bump rhel subscribe default version. (abutcher@redhat.com)
+- Revert "Speed up copying OpenShift examples" (abutcher@afrolegs.com)
 - Switch to repoquery, enable plugins for satellite support
   (sdodson@redhat.com)
+- update conditional expression to save steps (lxia@redhat.com)
+- Enable additional 'virt_sandbox_use_nfs' seboolean as per documentation:
+  (george.goh@redhat.com)
+- Set any_errors_fatal for initialize facts play. (abutcher@redhat.com)
+- Set any_errors_fatal for etcd facts play. (abutcher@redhat.com)
+- Speed up copying OpenShift examples (tbielawa@redhat.com)
+- Check if last rule is DROP when inserting iptables rules.
+  (abutcher@redhat.com)
 - Don't upgrade docker on non-containerized etcd. (abutcher@redhat.com)
 - Access embedded_etcd variable from oo_first_master hostvars.
   (abutcher@redhat.com)
-- Fix case where no version of docker is installed (sdodson@redhat.com)
-
-* Thu Jun 23 2016 Scott Dodson <sdodson@redhat.com> 3.2.7-1
 - Add missing quote in metrics deployer template. (dgoodwin@redhat.com)
-
-* Thu Jun 23 2016 Scott Dodson <sdodson@redhat.com> 3.2.6-1
+- Allow flag to uninstall playbook to preserve images. (dgoodwin@redhat.com)
 - Add MODE to metrics deployer (sdodson@redhat.com)
-
-* Wed Jun 22 2016 Scott Dodson <sdodson@redhat.com> 3.2.5-1
+- NetworkManager service never changes (tbielawa@redhat.com)
 - Update the rest of the templates (sdodson@redhat.com)
 - Update logging and metrics templates (sdodson@redhat.com)
-- Separate uninstall plays by group. (abutcher@redhat.com)
-
-* Fri Jun 17 2016 Scott Dodson <sdodson@redhat.com> 3.2.4-1
-- Sync metrics templates (sdodson@redhat.com)
+- Block Docker 1.10 upgrade playbook when run against an Atomic OS.
+  (dgoodwin@redhat.com)
+- If registry_url != registry.access.redhat.com then modify image streams
+  (sdodson@redhat.com)
 - Add 30 second pause before retrying to start the node (sdodson@redhat.com)
 - Stop dumping debug output, re-try startng the node once (sdodson@redhat.com)
-
-* Tue Jun 14 2016 Scott Dodson <sdodson@redhat.com> 3.2.3-1
+- Fix uninstall.yml indentation for deamon-reload
+  (florian.lambert@enovance.com)
 - Fix no proxy hostnames during upgrade. (dgoodwin@redhat.com)
 - Attempt to fix containerized node start failure with Docker 1.10.
   (dgoodwin@redhat.com)
-
-* Mon Jun 13 2016 Scott Dodson <sdodson@redhat.com> 3.2.2-1
+- also volume-mount /etc/sysconfig/docker (tob@butter.sh)
+- Separate uninstall plays by group. (abutcher@redhat.com)
+- Add per-service environment variables. (abutcher@redhat.com)
+- - Prevent the script to override n number of the time the same nameserver -
+  Prevent the script to echo blank values from IP4_NAMESERVERS variable
+  (william17.burton@gmail.com)
+- Make a note about Requires: docker (sdodson@redhat.com)
+- Remove Docker 1.10 requirement temporarily. (dgoodwin@redhat.com)
 - Fix docker 1.10 upgrade on embedded etcd masters. (dgoodwin@redhat.com)
+- Add lower case proxy variables (pascal.bach@siemens.com)
+- default unit in openshift_facts (you@example.com)
+- add unit in seconds for metrics resolution (you@example.com)
 
-* Thu Jun 09 2016 Scott Dodson <sdodson@redhat.com> 3.2.1-1
+* Thu Jun 09 2016 Scott Dodson <sdodson@redhat.com> 3.3.0-1
 - Restore mistakenly reverted code. (dgoodwin@redhat.com)
-- Bug 1338726 - never abort install if the latest version of docker is already
-  installed (bleanhar@redhat.com)
-- Fix Docker 1.10 problems with empty tags and trailing : (dgoodwin@redhat.com)
-- Docker 1.10 Upgrade (dgoodwin@redhat.com)
-- Ansible 2.1 support. (abutcher@redhat.com)
-
-* Thu Jun 09 2016 Scott Dodson <sdodson@redhat.com> 3.2.0-1
 - Add openshift_loadbalancer_facts role to set lb facts prior to running
   dependencies. (abutcher@redhat.com)
+- Bug 1338726 - never abort install if the latest version of docker is already
+  installed (bleanhar@redhat.com)
 - Preserve proxy config if it's undefined (sdodson@redhat.com)
 - At least backup things (sdodson@redhat.com)
 - Use unique play names to make things easier to debug (sdodson@redhat.com)
+- Ansible 2.1 support. (abutcher@redhat.com)
+- add skydns port 8053 to openstack master sec group (jawed.khelil@amadeus.com)
+- fix dns openstack flavor instead of openshift flavor
+  (jawed.khelil@amadeus.com)
+- Fix Docker 1.10 problems with empty tags and trailing : (dgoodwin@redhat.com)
 - ensure htpasswd file exists (tob@butter.sh)
+- Docker 1.10 Upgrade (dgoodwin@redhat.com)
 - Add flag to manage htpasswd, or not. (tob@butter.sh)
 
 * Mon Jun 06 2016 Scott Dodson <sdodson@redhat.com> 3.0.97-1

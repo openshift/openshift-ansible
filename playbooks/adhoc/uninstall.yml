@@ -143,11 +143,13 @@
     - registry\.qe\.openshift\.com/.*
     - registry\.access\..*redhat\.com/rhel7/etcd
     - docker.io/openshift
+    when: openshift_uninstall_images | default(True) | bool
 
   - shell:  "docker rmi -f {{ item.stdout_lines | join(' ') }}"
     changed_when: False
     failed_when: False
     with_items: "{{ images_to_delete.results }}"
+    when: openshift_uninstall_images | default(True) | bool
 
   - name: Remove sdn drop files
     file:
@@ -288,11 +290,11 @@
     - /usr/local/bin/oc
     - /usr/local/bin/kubectl
 
-    # Since we are potentially removing the systemd unit files for separated
-    # master-api and master-controllers services, so we need to reload the
-    # systemd configuration manager
-    - name: Reload systemd manager configuration
-      command: systemctl daemon-reload
+  # Since we are potentially removing the systemd unit files for separated
+  # master-api and master-controllers services, so we need to reload the
+  # systemd configuration manager
+  - name: Reload systemd manager configuration
+    command: systemctl daemon-reload
 
 - hosts: etcd
   become: yes

@@ -109,5 +109,6 @@
   vars:
     openshift_examples_import_command: "update"
     openshift_deployment_type: "{{ deployment_type }}"
+    registry_url: "{{ openshift.master.registry_url }}"
   roles:
     - openshift_examples
