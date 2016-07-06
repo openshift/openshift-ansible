@@ -52,7 +52,6 @@ AEP = Variant('atomic-enterprise', 'Atomic Enterprise Platform',
 origin = Variant('origin', 'OpenShift Origin',
     [
         Version('1.2', 'origin'),
-        Version('1.1', 'origin')
     ]
 )
 
