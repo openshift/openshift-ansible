@@ -1,6 +1,20 @@
 ---
+- name: Install CentOS OpenShift Origin Repo on RHEL
+  copy:
+    src: rhel-origin/repos/CentOS-OpenShift-Origin.repo
+    dest: /etc/yum.repos.d/CentOS-OpenShift-Origin.repo
+  when: ansible_distribution != 'CentOS'
+
+- name: Install CentOS extras gpg key for RHEL
+  copy:
+    src: rhel-origin/RPM-GPG-KEY-CentOS-SIG-PaaS
+    dest: /etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-SIG-PaaS
+    mode: 0644
+  when: ansible_distribution != 'CentOS'
+
 - name: Install the CentOS PaaS SIG release packages
   action: "{{ ansible_pkg_mgr }} name={{ item }} state=present"
   with_items:
   - centos-release-paas-common
   - centos-release-openshift-origin
+  when: ansible_distribution == 'CentOS'
