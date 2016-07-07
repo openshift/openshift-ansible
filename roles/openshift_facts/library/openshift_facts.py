@@ -1736,6 +1736,7 @@ class OpenShiftFacts(object):
             if version_info is not None:
                 docker['api_version'] = version_info['api_version']
                 docker['version'] = version_info['version']
+                docker['gte_1_10'] = LooseVersion(version_info['version']) >= LooseVersion('1.10')
             defaults['docker'] = docker
 
         if 'clock' in roles:
