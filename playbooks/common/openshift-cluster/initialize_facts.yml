@@ -11,6 +11,3 @@
         hostname: "{{ openshift_hostname | default(None) }}"
   - set_fact:
       openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"
-  - set_fact:
-      repoquery_cmd: "{{ 'dnf repoquery --latest-limit 1 -d 0' if ansible_pkg_mgr == 'dnf' else 'repoquery --plugins' }}"
-
