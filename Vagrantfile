@@ -64,6 +64,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       }
       ansible.extra_vars = {
         deployment_type: deployment_type,
+        containerized: true
       }
       ansible.playbook = "playbooks/byo/vagrant.yml"
     end
