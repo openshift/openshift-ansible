@@ -1142,9 +1142,6 @@ def get_openshift_version(facts):
     if os.path.isfile('/usr/bin/openshift'):
         _, output, _ = module.run_command(['/usr/bin/openshift', 'version'])
         version = parse_openshift_version(output)
-    # TODO: it probably makes more sense to read this from sysconfig service env files,
-    # these control the running versions when containerized, and would work even if the service
-    # is dead for some reason.
     elif 'common' in facts and 'is_containerized' in facts['common']:
         version = get_containerized_openshift_version(facts)
 

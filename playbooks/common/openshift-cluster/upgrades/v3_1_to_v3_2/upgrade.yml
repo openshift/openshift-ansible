@@ -67,7 +67,8 @@
   - include: ../../../../../roles/openshift_node/handlers/main.yml
   tasks:
   # TODO: To better handle re-trying failed upgrades, it would be nice to check if the node
-  # or docker actually needs an upgrade before proceeding.
+  # or docker actually needs an upgrade before proceeding. Perhaps best to save this until
+  # we merge upgrade functionality into the base roles and a normal config.yml playbook run.
   - name: Mark unschedulable if host is a node
     command: >
       {{ openshift.common.admin_binary }} manage-node {{ openshift.common.hostname | lower }} --schedulable=false

@@ -16,8 +16,6 @@
   changed_when: false
   when: docker_version is defined and not openshift.common.is_atomic | bool
 
-# TODO: Should we use docker_version defaulted to 1.10 here?
-
 # If a docker_version was requested, sanity check that we can install or upgrade to it, and
 # no downgrade is required.
 - name: Fail if Docker version requested but downgrade is required

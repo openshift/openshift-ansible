@@ -1,5 +1,4 @@
 ---
-# TODO: support openshift_release here?
 - name: Set rpm version to configure if openshift_pkg_version specified
   set_fact:
     # Expects a leading "-" in inventory, strip it off here, and remove trailing release,
