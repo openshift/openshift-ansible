@@ -14,12 +14,14 @@ rhel-7-server-extras-rpms, and rhel-7-server-ose-3.0-rpms repos.
 Role Variables
 --------------
 From this role:
+
 | Name                                     | Default value         |                                                        |
 |------------------------------------------|-----------------------|--------------------------------------------------------|
 | openshift_node_debug_level               | openshift_debug_level | Verbosity of the debug logs for node |
 | oreg_url                                 | UNDEF (Optional)      | Default docker registry to use                         |
 
 From openshift_common:
+
 | Name                          |  Default Value      |                     |
 |-------------------------------|---------------------|---------------------|
 | openshift_debug_level         | 2                   | Global openshift debug log verbosity |
