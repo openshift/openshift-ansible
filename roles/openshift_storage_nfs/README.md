@@ -15,6 +15,7 @@ Role Variables
 --------------
 
 From this role:
+
 | Name                                            | Default value         |                                                             |
 |-------------------------------------------------|-----------------------|-------------------------------------------------------------|
 | openshift_hosted_registry_storage_nfs_directory | /exports              | Root export directory.                                      |

@@ -1,0 +1,12 @@
+---
+- fail:
+    msg: >
+      openshift_hosted_registry_storage_s3_accesskey and
+      openshift_hosted_registry_storage_s3_secretkey are required
+  when: openshift.hosted.registry.storage.s3.accesskey | default(none) is none or openshift.hosted.registry.storage.s3.secretkey | default(none) is none
+
+- fail:
+    msg: >
+      openshift_hosted_registry_storage_s3_bucket and
+      openshift_hosted_registry_storage_s3_region are required
+  when: openshift.hosted.registry.storage.s3.bucket | default(none) is none or openshift.hosted.registry.storage.s3.region | default(none) is none

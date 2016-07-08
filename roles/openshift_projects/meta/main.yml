@@ -1,7 +1,7 @@
 ---
 galaxy_info:
-  author: OpenShift Red Hat
-  description: OpenShift Embedded Docker Registry
+  author: Jason DeTiberus
+  description: OpenShift Projects
   company: Red Hat, Inc.
   license: Apache License, Version 2.0
   min_ansible_version: 1.9
@@ -12,4 +12,4 @@ galaxy_info:
   categories:
   - cloud
 dependencies:
-- role: openshift_hosted_facts
+- { role: openshift_facts }

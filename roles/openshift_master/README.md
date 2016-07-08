@@ -13,6 +13,7 @@ Role Variables
 --------------
 
 From this role:
+
 | Name                                | Default value         |                                                  |
 |-------------------------------------|-----------------------|--------------------------------------------------|
 | openshift_master_debug_level        | openshift_debug_level | Verbosity of the debug logs for master |
@@ -26,6 +27,7 @@ From this role:
 | openshift_master_public_console_url | UNDEF                 | |
 
 From openshift_common:
+
 | Name                          | Default Value  |                                        |
 |-------------------------------|----------------|----------------------------------------|
 | openshift_debug_level         | 2              | Global openshift debug log verbosity   |

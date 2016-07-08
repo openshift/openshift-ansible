@@ -1,0 +1,70 @@
+version: 0.1
+log:
+  level: debug
+http:
+  addr: :5000
+storage:
+  cache:
+    blobdescriptor: inmemory
+{% if openshift.hosted.registry.storage.provider == 's3' %}
+  s3:
+    accesskey: {{ openshift.hosted.registry.storage.s3.accesskey }}
+    secretkey: {{ openshift.hosted.registry.storage.s3.secretkey }}
+    region: {{ openshift.hosted.registry.storage.s3.region }}
+    bucket: {{ openshift.hosted.registry.storage.s3.bucket }}
+    encrypt: false
+    secure: true
+    v4auth: true
+    rootdirectory: /registry
+    chunksize: "{{ openshift.hosted.registry.storage.s3.chunksize | default(26214400) }}"
+{% elif openshift.hosted.registry.storage.provider == 'azure_blob' %}
+  azure:
+    accountname: {{ openshift.hosted.registry.storage.azure_blob.accountname }}
+    accountkey: {{ openshift.hosted.registry.storage.azure_blob.accountkey }}
+    container: {{ openshift.hosted.registry.storage.azure_blob.container }}
+    realm: {{ openshift.hosted.registry.storage.azure_blob.realm }}
+{% elif openshift.hosted.registry.storage.provider == 'swift' %}
+  swift:
+    authurl: {{ openshift.hosted.registry.storage.swift.authurl }}
+    username: {{ openshift.hosted.registry.storage.swift.username }}
+    password: {{ openshift.hosted.registry.storage.swift.password }}
+    container: {{ openshift.hosted.registry.storage.swift.container }}
+{%   if 'region' in openshift.hosted.registry.storage.swift %}
+    region: {{ openshift.hosted.registry.storage.swift.region }}
+{%   endif -%}
+{%   if 'tenant' in openshift.hosted.registry.storage.swift %}
+    tenant: {{ openshift.hosted.registry.storage.swift.tenant }}
+{%   endif -%}
+{%   if 'tenantid' in openshift.hosted.registry.storage.swift %}
+    tenantid: {{ openshift.hosted.registry.storage.swift.tenantid }}
+{%   endif -%}
+{%   if 'domain' in openshift.hosted.registry.storage.swift %}
+    domain: {{ openshift.hosted.registry.storage.swift.domain }}
+{%   endif -%}
+{%   if 'domainid' in openshift.hosted.registry.storage.swift %}
+    domainid: {{ openshift.hosted.registry.storage.swift.domainid }}
+{%   endif -%}
+{% elif openshift.hosted.registry.storage.provider == 'gcs' %}
+  gcs:
+    bucket: {{ openshift.hosted.registry.storage.gcs.bucket }}
+{%   if 'keyfile' in openshift.hosted.registry.storage.gcs %}
+    keyfile: {{ openshift.hosted.registry.storage.gcs.keyfile }}
+{%   endif -%}
+{%   if 'rootdirectory' in openshift.hosted.registry.storage.gcs %}
+    rootdirectory: {{ openshift.hosted.registry.storage.gcs.rootdirectory }}
+{%   endif -%}
+{% endif -%}
+auth:
+  openshift:
+    realm: openshift
+middleware:
+  repository:
+  - name: openshift
+{% if openshift.hosted.registry.storage.provider == 's3' and 'cloudfront' in openshift.hosted.registry.storage.s3 %}
+  storage:
+  - name: cloudfront
+    options:
+      baseurl: {{ openshift.hosted.registry.storage.s3.cloudfront.baseurl }}
+      privatekey: {{ openshift.hosted.registry.storage.s3.cloudfront.privatekeyfile }}
+      keypairid: {{ openshift.hosted.registry.storage.s3.cloudfront.keypairid }}
+{% endif -%}
