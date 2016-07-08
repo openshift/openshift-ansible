@@ -82,13 +82,13 @@ objects:
         secretName: logging-deployer
 parameters:
 -
-  description: 'Specify image prefix for logging components; e.g. for "registry.access.redhat.com/openshift3/logging-deployment:3.2.0", set prefix "registry.access.redhat.com/openshift3/"'
+  description: 'Specify image prefix for logging components; e.g. for "registry.access.redhat.com/openshift3/logging-deployment:3.2.1", set prefix "registry.access.redhat.com/openshift3/"'
   name: IMAGE_PREFIX
   value: registry.access.redhat.com/openshift3/
 -
-  description: 'Specify version for logging components; e.g. for "registry.access.redhat.com/openshift3/logging-deployment:3.2.0", set version "3.2.0"'
+  description: 'Specify version for logging components; e.g. for "registry.access.redhat.com/openshift3/logging-deployment:3.2.1", set version "3.2.1"'
   name: IMAGE_VERSION
-  value: "3.2.0"
+  value: "3.2.1"
 -
   description: "If true, set up to use a second ES cluster for ops logs."
   name: ENABLE_OPS_CLUSTER
