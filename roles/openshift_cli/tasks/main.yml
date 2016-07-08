@@ -1,7 +1,4 @@
 ---
-- debug: var=openshift_version
-- debug: var=openshift.common
-
 - name: Install clients
   action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-clients state=present"
   when: not openshift.common.is_containerized | bool

@@ -36,14 +36,6 @@
     openshift_version: "{{ openshift.common.version }}"
   when: openshift.common.version is defined and openshift_version is not defined and openshift_protect_installed_version | bool
 
-- debug: var=is_containerized
-- debug: var=openshift_version
-- debug: msg="{{ openshift_version is defined }}"
-- debug: var=openshift_release
-- debug: var=openshift_pkg_version
-- debug: var=openshift_image_tag
-- debug: var=openshift.common.version
-
 - name: Set openshift_version for rpm installation
   include: set_version_rpm.yml
   when: not is_containerized | bool
@@ -64,10 +56,6 @@
 - set_fact:
     openshift_pkg_version: -{{ openshift_version }}
   when: openshift_pkg_version is not defined
-
-- debug: var=openshift_version
-- debug: var=openshift_pkg_version
-- debug: var=openshift_image_tag
 
 - fail:
     msg: openshift_version role was unable to set openshift_version

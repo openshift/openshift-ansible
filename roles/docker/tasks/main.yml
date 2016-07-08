@@ -2,8 +2,6 @@
 - stat: path=/etc/sysconfig/docker-storage
   register: docker_storage_check
 
-- debug: var=docker_version
-
 - name: Get current installed Docker version
   command: "{{ repoquery_cmd }} --installed --qf '%{version}' docker"
   when:  docker_version is defined and not openshift.common.is_atomic | bool
@@ -91,9 +89,6 @@
   notify:
     - restart docker
   when: "{{ 'http_proxy' in openshift.common or 'https_proxy' in openshift.common and docker_check.stat.isreg }}"
-
-- debug: var=openshift.docker.options
-- debug: var=docker_options
 
 - name: Set various Docker options
   lineinfile:

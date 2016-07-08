@@ -4,10 +4,6 @@
   hosts: oo_first_master
   roles:
   - openshift_version
-  pre_tasks:
-  - debug: var=openshift_version
-  post_tasks:
-  - debug: var=openshift_version
 
 # NOTE: We set this even on etcd hosts as they may also later run as masters,
 # and we don't want to install wrong version of docker and have to downgrade
@@ -18,12 +14,3 @@
     openshift_version: "{{ hostvars[groups.oo_first_master.0].openshift_version }}"
   roles:
   - openshift_version
-  pre_tasks:
-  - debug: var=hostvars[groups.oo_first_master.0].openshift_version
-  - debug: var=openshift.common.version
-  - debug: var=openshift_version
-  post_tasks:
-  - debug: var=hostvars[groups.oo_first_master.0].openshift_version
-  - debug: var=openshift.common.version
-  - debug: var=openshift_version
-

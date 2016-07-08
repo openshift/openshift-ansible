@@ -173,8 +173,6 @@
     register: avail_openshift_version
     when: not openshift.common.is_containerized | bool
 
-  - debug: var=avail_openshift_version
-
   - name: Verify OpenShift 3.2 RPMs are available for upgrade
     fail:
       msg: "OpenShift {{ avail_openshift_version.stdout }} is available, but 3.2 or greater is required"

@@ -16,8 +16,6 @@
   register: cli_image_version
   when: openshift_version is not defined
 
-- debug: var=cli_image_version
-
 # Origin latest = pre-release version (i.e. v1.3.0-alpha.1-321-gb095e3a)
 - set_fact:
     openshift_version: "{{ (cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0:2] | join('-'))[1:] }}"
@@ -26,10 +24,6 @@
 - set_fact:
     openshift_version: "{{ cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0][1:] }}"
   when: openshift_version is not defined
-
-- debug: msg="{{ openshift_version }}"
-
-
 
 # If we got an openshift_version like "3.2", lookup the latest 3.2 container version
 # and use that value instead.
