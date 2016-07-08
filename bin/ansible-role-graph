@@ -1,0 +1,59 @@
+#!/usr/bin/env python
+
+import click
+from glob import glob
+import graphviz as gv
+import os
+import sys
+import yaml
+
+''' Generate a directed graph of ansible role dependencies.
+
+    Usage: ./ansible-role-graph --format pdf --engine dot --roles-path ~/openshift-ansible/roles/
+'''
+
+@click.command()
+@click.option('--format', '-f', 'output_format',
+              default='pdf',
+              help=('The output format to use. Valid output formats include '
+                    '"pdf" (default), "png" and "svg".'))
+@click.option('--engine', '-e',
+              default='dot',
+              help=('The graphviz engine type. Valid engines include "dot" '
+                    '(default), "fdp", and "sfdp".'))
+@click.option('--show/--dont-show', '-s/-n', 'show',
+              default=True,
+              help='Open the generated graph. Graph will be opened by default.')
+@click.option('--roles-path', '-r', 'roles_path',
+              default='./roles/',
+              help='Path to ansible roles directory. Defaults to "./roles/"')
+@click.help_option('--help', '-h')
+def generate_role_graph(output_format, engine, show, roles_path):
+    dot = gv.Digraph(engine=engine, format=output_format)
+
+    meta_files = glob(os.path.abspath(roles_path) + '/*/meta/main.yml')
+    if len(meta_files) == 0:
+        print("Unable to locate roles within {0}".format(os.path.abspath(roles_path)))
+        sys.exit(1)
+
+    for path in meta_files:
+        dependent_role = path.split('roles')[1].split('/')[1]
+        dot.node(dependent_role)
+        with open(path, 'r') as f:
+            meta_config = yaml.load(f.read())
+            if 'dependencies' in meta_config:
+                for dependency in meta_config['dependencies']:
+                    if 'role' in dependency:
+                        depended_role = dependency['role']
+                    else:
+                        depended_role = dependency
+                    dot.node(depended_role)
+                    dot.edge(dependent_role, depended_role)
+
+    if not show:
+        print(("Generated graph. "
+               "Open with: xdg-open generated-ansible-role-graph.{0}".format(output_format)))
+    dot.render('generated-ansible-role-graph', view=show)
+
+if __name__ == '__main__':
+    generate_role_graph()
