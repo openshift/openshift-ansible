@@ -5,7 +5,7 @@
   - openshift_facts
   tasks:
   - shell:
-      getent ahostsv4 {{ openshift.common.hostname }} | head -n 1 | awk '{ print $1 }'
+      getent ahostsv4 {{ openshift.common.hostname }} | grep -v "127.0.0.1" | head -n 1 | awk '{ print $1 }'
     register: lookupip
     changed_when: false
     failed_when: false
