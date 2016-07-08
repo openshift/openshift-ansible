@@ -78,7 +78,3 @@
   - "fedora-{{ openshift_deployment_type }}/repos/*"
   notify: refresh cache
   when: (ansible_distribution == "Fedora") and not openshift.common.is_containerized | bool
-
-- name: Configure the CentOS PaaS SIG repos if needed
-  include: centos_sig.yaml
-  when: not openshift.common.is_containerized | bool and deployment_type == 'origin' and ansible_distribution == 'CentOS'

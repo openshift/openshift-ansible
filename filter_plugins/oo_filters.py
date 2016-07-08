@@ -340,85 +340,6 @@ class FilterModule(object):
         return [x for x in data if filter_attr in x and x[filter_attr]]
 
     @staticmethod
-    def oo_oc_nodes_matching_selector(nodes, selector):
-        """ Filters a list of nodes by selector.
-
-            Examples:
-                nodes = [{"kind": "Node", "metadata": {"name": "node1.example.com",
-                          "labels": {"kubernetes.io/hostname": "node1.example.com",
-                          "color": "green"}}},
-                         {"kind": "Node", "metadata": {"name": "node2.example.com",
-                          "labels": {"kubernetes.io/hostname": "node2.example.com",
-                          "color": "red"}}}]
-                selector = 'color=green'
-                returns = ['node1.example.com']
-
-                nodes = [{"kind": "Node", "metadata": {"name": "node1.example.com",
-                          "labels": {"kubernetes.io/hostname": "node1.example.com",
-                          "color": "green"}}},
-                         {"kind": "Node", "metadata": {"name": "node2.example.com",
-                          "labels": {"kubernetes.io/hostname": "node2.example.com",
-                          "color": "red"}}}]
-                selector = 'color=green,color=red'
-                returns = ['node1.example.com','node2.example.com']
-
-            Args:
-                nodes (list[dict]): list of node definitions
-                selector (str): "label=value" node selector to filter `nodes` by
-            Returns:
-                list[str]: nodes filtered by selector
-        """
-        if not isinstance(nodes, list):
-            raise errors.AnsibleFilterError("failed expects nodes to be a list, got {0}".format(type(nodes)))
-        if not isinstance(selector, basestring):
-            raise errors.AnsibleFilterError("failed expects selector to be a string")
-        if not re.match('.*=.*', selector):
-            raise errors.AnsibleFilterError("failed selector does not match \"label=value\" format")
-        node_lists = []
-        for node_selector in ''.join(selector.split()).split(','):
-            label = node_selector.split('=')[0]
-            value = node_selector.split('=')[1]
-            node_lists.append(FilterModule.oo_oc_nodes_with_label(nodes, label, value))
-        nodes = set(node_lists[0])
-        for node_list in node_lists[1:]:
-            nodes.intersection_update(node_list)
-        return list(nodes)
-
-    @staticmethod
-    def oo_oc_nodes_with_label(nodes, label, value):
-        """ Filters a list of nodes by label, value.
-
-            Examples:
-                nodes = [{"kind": "Node", "metadata": {"name": "node1.example.com",
-                          "labels": {"kubernetes.io/hostname": "node1.example.com",
-                          "color": "green"}}},
-                         {"kind": "Node", "metadata": {"name": "node2.example.com",
-                          "labels": {"kubernetes.io/hostname": "node2.example.com",
-                          "color": "red"}}}]
-                label = 'color'
-                value = 'green'
-                returns = ['node1.example.com']
-            Args:
-                nodes (list[dict]): list of node definitions
-                label (str): label to filter `nodes` by
-                value (str): value of `label` to filter `nodes` by
-            Returns:
-                list[str]: nodes filtered by selector
-        """
-        if not isinstance(nodes, list):
-            raise errors.AnsibleFilterError("failed expects nodes to be a list")
-        if not isinstance(label, basestring):
-            raise errors.AnsibleFilterError("failed expects label to be a string")
-        if not isinstance(value, basestring):
-            raise errors.AnsibleFilterError("failed expects value to be a string")
-        matching_nodes = []
-        for node in nodes:
-            if label in node['metadata']['labels']:
-                if node['metadata']['labels'][label] == value:
-                    matching_nodes.append(node['metadata']['name'])
-        return matching_nodes
-
-    @staticmethod
     def oo_nodes_with_label(nodes, label, value=None):
         """ Filters a list of nodes by label and value (if provided)
 
@@ -707,7 +628,8 @@ class FilterModule(object):
             if regex.match(key):
                 facts[key] = hostvars[key]
 
-        migrations = {'openshift_router_selector': 'openshift_hosted_router_selector'}
+        migrations = {'openshift_router_selector': 'openshift_hosted_router_selector',
+                      'openshift_registry_selector': 'openshift_hosted_registry_selector'}
         for old_fact, new_fact in migrations.iteritems():
             if old_fact in facts and new_fact not in facts:
                 facts[new_fact] = facts[old_fact]
@@ -771,7 +693,7 @@ class FilterModule(object):
                                         fsType=filesystem,
                                         volumeID=volume_id)))
                             persistent_volumes.append(persistent_volume)
-                        else:
+                        elif kind != 'object':
                             msg = "|failed invalid storage kind '{0}' for component '{1}'".format(
                                 kind,
                                 component)
@@ -922,7 +844,5 @@ class FilterModule(object):
             "oo_get_hosts_from_hostvars": self.oo_get_hosts_from_hostvars,
             "oo_image_tag_to_rpm_version": self.oo_image_tag_to_rpm_version,
             "oo_merge_dicts": self.oo_merge_dicts,
-            "oo_oc_nodes_matching_selector": self.oo_oc_nodes_matching_selector,
-            "oo_oc_nodes_with_label": self.oo_oc_nodes_with_label,
             "oo_merge_hostvars": self.oo_merge_hostvars,
         }
