@@ -24,11 +24,11 @@
   register: scc_test
   with_items: "{{ openshift_serviceaccounts_sccs }}"
 
-- name: Grant the user access to the privileged scc
+- name: Grant the user access to the appropriate scc
   command: >
       {{ openshift.common.admin_binary }} policy add-scc-to-user
-      privileged system:serviceaccount:{{ openshift_serviceaccounts_namespace }}:{{ item.0 }}
-  when: "openshift.common.version_gte_3_1_or_1_1 and item.1.rc == 0 and 'system:serviceaccount:{{ openshift_serviceaccounts_namespace }}:{{ item.0 }}' not in {{ (item.1.stdout | from_yaml).users }}"
+      {{ item.1.item }} system:serviceaccount:{{ openshift_serviceaccounts_namespace }}:{{ item.0 }}
+  when: "openshift.common.version_gte_3_1_or_1_1 and item.1.rc == 0 and 'system:serviceaccount:{{ openshift_serviceaccounts_namespace }}:{{ item.0 }}' not in {{ (item.1.stdout | from_yaml).users | default([]) }}"
   with_nested:
   - "{{ openshift_serviceaccounts_names }}"
   - "{{ scc_test.results }}"
