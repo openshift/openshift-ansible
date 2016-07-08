@@ -103,6 +103,9 @@ openshift_release=v3.2
 # only need to inject your own registry you may want to consider
 # openshift_docker_additional_registries instead
 #oreg_url=example.com/aep3/aep-${component}:${version}
+# If oreg_url points to a registry other than registry.access.redhat.com we can
+# modify image streams to point at that registry by setting the following to true
+#openshift_examples_modify_imagestreams=True
 
 # Additional yum repos to install
 #openshift_additional_repos=[{'id': 'aep-devel', 'name': 'aep-devel', 'baseurl': 'http://example.com/puddle/build/AtomicOpenShift/3.1/latest/RH7-RHOSE-3.0/$basearch/os', 'enabled': 1, 'gpgcheck': 0}]

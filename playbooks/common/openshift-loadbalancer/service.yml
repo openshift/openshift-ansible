@@ -17,4 +17,4 @@
   connection: ssh
   gather_facts: no
   tasks:
-    - service: name=hapoxy state="{{ new_cluster_state }}"
+    - service: name=haproxy state="{{ new_cluster_state }}"

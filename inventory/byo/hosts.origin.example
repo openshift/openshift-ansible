@@ -104,6 +104,10 @@ openshift_release=v1.2
 # only need to inject your own registry you may want to consider
 # openshift_docker_additional_registries instead
 #oreg_url=example.com/openshift3/ose-${component}:${version}
+# If oreg_url points to a registry other than registry.access.redhat.com we can
+# modify image streams to point at that registry by setting the following to true
+#openshift_examples_modify_imagestreams=True
+
 
 # Origin copr repo
 #openshift_additional_repos=[{'id': 'openshift-origin-copr', 'name': 'OpenShift Origin COPR', 'baseurl': 'https://copr-be.cloud.fedoraproject.org/results/maxamillion/origin-next/epel-7-$basearch/', 'enabled': 1, 'gpgcheck': 1, 'gpgkey': 'https://copr-be.cloud.fedoraproject.org/results/maxamillion/origin-next/pubkey.gpg'}]
