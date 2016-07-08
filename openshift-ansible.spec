@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.10
+Version:        3.2.11
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -205,6 +205,20 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Jul 08 2016 Scott Dodson <sdodson@redhat.com> 3.2.11-1
+- Fix up some broken markdown formatting (mostly tables) (tbielawa@redhat.com)
+- Rename things to avoid conflicts with paas sig release rpms
+  (sdodson@redhat.com)
+- Don't special case origin on centos (sdodson@redhat.com)
+- Various hosted component improvements (abutcher@redhat.com)
+- Clean up some deprecation warnings (tbielawa@redhat.com)
+- Add CentOS PaaS SIG repos for RHEL (sdodson@redhat.com)
+- Make /var/lib/origin mounted rslave (sdodson@redhat.com)
+- fix "hapoxy" typo in loadbalancer playbook (Mathias.Merscher@dg-i.net)
+- Fix bin/cluster libvirt related error (jdetiber@redhat.com)
+- Add libselinux-python as a dependency for the installation process
+  (frederic.boulet@gmail.com)
+
 * Tue Jul 05 2016 Scott Dodson <sdodson@redhat.com> 3.2.10-1
 - Reset versions for 3.2 branch
 - Fix dnf variant of rpm_versions.sh (sdodson@redhat.com)
