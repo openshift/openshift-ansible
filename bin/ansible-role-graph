@@ -6,6 +6,7 @@ import graphviz as gv
 import os
 import sys
 import yaml
+import random
 
 ''' Generate a directed graph of ansible role dependencies.
 
@@ -14,13 +15,13 @@ import yaml
 
 @click.command()
 @click.option('--format', '-f', 'output_format',
-              default='pdf',
-              help=('The output format to use. Valid output formats include '
-                    '"pdf" (default), "png" and "svg".'))
+              default='pdf', type=click.Choice(['pdf', 'png', 'svf']),
+              help=('The output format to use. Default: pdf'))
 @click.option('--engine', '-e',
-              default='dot',
-              help=('The graphviz engine type. Valid engines include "dot" '
-                    '(default), "fdp", and "sfdp".'))
+              default='dot', type=click.Choice(['dot', 'fdp', 'sfdp']),
+              help=('The graphviz engine type. Default: dot'))
+@click.option('--colorize', '-c', is_flag=True,
+              help='Colorize dep chains on a role by role basis')
 @click.option('--show/--dont-show', '-s/-n', 'show',
               default=True,
               help='Open the generated graph. Graph will be opened by default.')
@@ -28,8 +29,12 @@ import yaml
               default='./roles/',
               help='Path to ansible roles directory. Defaults to "./roles/"')
 @click.help_option('--help', '-h')
-def generate_role_graph(output_format, engine, show, roles_path):
+def generate_role_graph(output_format, engine, colorize, show, roles_path):
     dot = gv.Digraph(engine=engine, format=output_format)
+    dot.attr('node', fontname='Helvetica')
+    dot.body.append(r'label = "\n\nOpenShift-Ansible Role Dep Chains"')
+    dot.body.append(r'fontname = "Helvetica"')
+    dot.body.append('fontsize=20')
 
     meta_files = glob(os.path.abspath(roles_path) + '/*/meta/main.yml')
     if len(meta_files) == 0:
@@ -42,17 +47,25 @@ def generate_role_graph(output_format, engine, show, roles_path):
         with open(path, 'r') as f:
             meta_config = yaml.load(f.read())
             if 'dependencies' in meta_config:
+                i = random.randrange(1, 10)
                 for dependency in meta_config['dependencies']:
                     if 'role' in dependency:
                         depended_role = dependency['role']
                     else:
                         depended_role = dependency
                     dot.node(depended_role)
-                    dot.edge(dependent_role, depended_role)
+                    if colorize:
+                        # Colors from: http://www.graphviz.org/doc/info/colors.html#brewer
+                        # Random color 'i' per dep chain
+                        attrs = {'color': "/paired10/%s" % i}
+                    else:
+                        attrs = {}
+                    dot.edge(dependent_role, depended_role, **attrs)
 
     if not show:
         print(("Generated graph. "
                "Open with: xdg-open generated-ansible-role-graph.{0}".format(output_format)))
+
     dot.render('generated-ansible-role-graph', view=show)
 
 if __name__ == '__main__':
