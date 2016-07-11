@@ -13,3 +13,5 @@ galaxy_info:
   - cloud
 dependencies:
 - role: openshift_version
+- role: openshift_docker_facts
+- role: docker
