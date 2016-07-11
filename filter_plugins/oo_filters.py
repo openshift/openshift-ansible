@@ -891,10 +891,6 @@ class FilterModule(object):
 
         return version
 
-    @staticmethod
-    def oo_startswith(input, prefix):
-        return input.startswith(prefix)
-
     def filters(self):
         """ returns a mapping of filters to methods """
         return {
@@ -928,5 +924,4 @@ class FilterModule(object):
             "oo_oc_nodes_matching_selector": self.oo_oc_nodes_matching_selector,
             "oo_oc_nodes_with_label": self.oo_oc_nodes_with_label,
             "oo_merge_hostvars": self.oo_merge_hostvars,
-            "oo_startswith": self.oo_startswith,
         }

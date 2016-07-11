@@ -73,4 +73,4 @@
 # the rpm version we looked up matches the release requested and error out if not.
 - fail:
     msg: "Detected openshift version {{ openshift_version }} does not match requested openshift_release {{ openshift_release }}. You may need to adjust your yum repositories or specify an exact openshift_pkg_version."
-  when: not is_containerized | bool and openshift_release is defined and not openshift_version | oo_startswith(openshift_release) | bool
+  when: not is_containerized | bool and openshift_release is defined and not openshift_version.startswith(openshift_release) | bool
