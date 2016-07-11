@@ -1,4 +1,13 @@
 ---
+- name: Check that ansible default interface is under NM Control
+  command: nmcli c s {{ ansible_default_ipv4.interface }}
+  register: nmcli_c_s
+  failed_when: false
+  changed_when: false
+
+- fail: msg="The default interface must be NetworkManager managed, please set NM_CONTROLLED=yes in /etc/sysconfig/network-manager/ifcfg-{{ ansible_default_ipv4.interface }} and restart NetworkManager"
+  when: nmcli_c_s.rc != 0
+
 - name: Install network manager dispatch script
   copy:
     src: networkmanager/99-origin-dns.sh
