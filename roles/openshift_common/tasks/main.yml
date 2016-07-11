@@ -46,7 +46,3 @@
     hostnamectl set-hostname {{ openshift.common.hostname }}
   when: openshift_set_hostname | default(set_hostname_default) | bool
 
-- name: Set repoquery command
-  set_fact:
-    repoquery_cmd: "{{ 'dnf repoquery --latest-limit 1 -d 0' if ansible_pkg_mgr == 'dnf' else 'repoquery --plugins' }}"
-
