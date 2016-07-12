@@ -57,6 +57,10 @@ cp inventory/byo/* docs/example-inventories/
 # openshift-ansible-playbooks install
 cp -rp playbooks %{buildroot}%{_datadir}/ansible/%{name}/
 
+# BZ1330091
+find -L %{buildroot}%{_datadir}/ansible/%{name}/playbooks -name lookup_plugins -type l -delete
+find -L %{buildroot}%{_datadir}/ansible/%{name}/playbooks -name filter_plugins -type l -delete
+
 # openshift-ansible-roles install
 cp -rp roles %{buildroot}%{_datadir}/ansible/%{name}/
 
