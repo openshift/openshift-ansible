@@ -16,7 +16,7 @@
 #  * You may need to re-deploy docker images after this is run (like monitoring)
 
 - name: Fix docker to have a provisioned iops drive
-  hosts: "{{ cli_name }}"
+  hosts: "{{ cli_host }}"
   user: root
   connection: ssh
   gather_facts: no
