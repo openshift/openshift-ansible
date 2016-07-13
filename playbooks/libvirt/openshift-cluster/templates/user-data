@@ -5,7 +5,7 @@ hostname: {{ item[0] }}
 fqdn: {{ item[0] }}.example.com
 
 mounts:
-- [ vdb ]
+- [ sdb ]
 
 users:
   - default
@@ -26,12 +26,18 @@ write_files:
     permissions: 440
     content: |
         Defaults:openshift !requiretty
-  - content: |
-      DEVS=/dev/vdb
-      VG=docker_vg
-    path: /etc/sysconfig/docker-storage-setup
+  - path: /etc/sysconfig/docker-storage-setup
     owner: root:root
     permissions: '0644'
+    content: |
+      DEVS=/dev/sdb
+      VG=docker_vg
+      EXTRA_DOCKER_STORAGE_OPTIONS='--storage-opt dm.blkdiscard=true'
+  - path: /etc/systemd/system/fstrim.timer.d/hourly.conf
+    content: |
+      [Timer]
+      OnCalendar=hourly
 
 runcmd:
   - NETWORK_CONFIG=/etc/sysconfig/network-scripts/ifcfg-eth0; if ! grep DHCP_HOSTNAME ${NETWORK_CONFIG}; then echo 'DHCP_HOSTNAME="{{ item[0] }}.example.com"' >> ${NETWORK_CONFIG}; fi; pkill -9 dhclient; service network restart
+  - systemctl enable --now fstrim.timer
