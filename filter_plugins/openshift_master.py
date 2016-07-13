@@ -512,10 +512,9 @@ class FilterModule(object):
                  'openshift-router.key',
                  'openshift-router.kubeconfig',
                  'serviceaccounts.private.key',
-                 'serviceaccounts.public.key']
-        if bool(hostvars['openshift']['common']['version_gte_3_1_or_1_1']):
-            certs += ['master.proxy-client.crt',
-                      'master.proxy-client.key']
+                 'serviceaccounts.public.key',
+                 'master.proxy-client.crt',
+                 'master.proxy-client.key']
         if not bool(hostvars['openshift']['common']['version_gte_3_2_or_1_2']):
             certs += ['openshift-master.crt',
                       'openshift-master.key',

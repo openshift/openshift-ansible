@@ -163,7 +163,7 @@
       openshift_master_certs_no_etcd:
       - admin.crt
       - master.kubelet-client.crt
-      - "{{ 'master.proxy-client.crt' if openshift.common.version_gte_3_1_or_1_1 else omit }}"
+      - master.proxy-client.crt
       - master.server.crt
       - openshift-master.crt
       - openshift-registry.crt

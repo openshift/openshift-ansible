@@ -803,7 +803,7 @@ def set_deployment_facts_if_unset(facts):
 
 def set_version_facts_if_unset(facts):
     """ Set version facts. This currently includes common.version and
-        common.version_gte_3_1_or_1_1.
+        common.version_gte_3_2_or_1_2.
 
         Args:
             facts (dict): existing facts
@@ -816,22 +816,14 @@ def set_version_facts_if_unset(facts):
         if version is not None:
             facts['common']['version'] = version
             if deployment_type == 'origin':
-                version_gte_3_1_or_1_1 = LooseVersion(version) >= LooseVersion('1.1.0')
-                version_gte_3_1_1_or_1_1_1 = LooseVersion(version) >= LooseVersion('1.1.1')
                 version_gte_3_2_or_1_2 = LooseVersion(version) >= LooseVersion('1.2.0')
                 version_gte_3_3_or_1_3 = LooseVersion(version) >= LooseVersion('1.3.0')
             else:
-                version_gte_3_1_or_1_1 = LooseVersion(version) >= LooseVersion('3.0.2.905')
-                version_gte_3_1_1_or_1_1_1 = LooseVersion(version) >= LooseVersion('3.1.1')
                 version_gte_3_2_or_1_2 = LooseVersion(version) >= LooseVersion('3.1.1.901')
                 version_gte_3_3_or_1_3 = LooseVersion(version) >= LooseVersion('3.3.0')
         else:
-            version_gte_3_1_or_1_1 = True
-            version_gte_3_1_1_or_1_1_1 = True
             version_gte_3_2_or_1_2 = True
             version_gte_3_3_or_1_3 = False
-        facts['common']['version_gte_3_1_or_1_1'] = version_gte_3_1_or_1_1
-        facts['common']['version_gte_3_1_1_or_1_1_1'] = version_gte_3_1_1_or_1_1_1
         facts['common']['version_gte_3_2_or_1_2'] = version_gte_3_2_or_1_2
         facts['common']['version_gte_3_3_or_1_3'] = version_gte_3_3_or_1_3
 
@@ -840,32 +832,8 @@ def set_version_facts_if_unset(facts):
             examples_content_version = 'v1.3'
         elif version_gte_3_2_or_1_2:
             examples_content_version = 'v1.2'
-        elif version_gte_3_1_or_1_1:
-            examples_content_version = 'v1.1'
-        else:
-            examples_content_version = 'v1.0'
 
         facts['common']['examples_content_version'] = examples_content_version
-
-    return facts
-
-def set_manageiq_facts_if_unset(facts):
-    """ Set manageiq facts. This currently includes common.use_manageiq.
-
-        Args:
-            facts (dict): existing facts
-        Returns:
-            dict: the facts dict updated with version facts.
-        Raises:
-            OpenShiftFactsInternalError:
-    """
-    if 'common' not in facts:
-        if 'version_gte_3_1_or_1_1' not in facts['common']:
-            raise OpenShiftFactsInternalError(
-                "Invalid invocation: The required facts are not set"
-            )
-    if 'use_manageiq' not in facts['common']:
-        facts['common']['use_manageiq'] = facts['common']['version_gte_3_1_or_1_1']
 
     return facts
 
@@ -1628,7 +1596,6 @@ class OpenShiftFacts(object):
         facts = build_api_server_args(facts)
         facts = set_version_facts_if_unset(facts)
         facts = set_dnsmasq_facts_if_unset(facts)
-        facts = set_manageiq_facts_if_unset(facts)
         facts = set_aggregate_facts(facts)
         facts = set_etcd_facts_if_unset(facts)
         facts = set_proxy_facts(facts)
@@ -1662,7 +1629,8 @@ class OpenShiftFacts(object):
                                   client_binary='oc', admin_binary='oadm',
                                   dns_domain='cluster.local',
                                   install_examples=True,
-                                  debug_level=2)
+                                  debug_level=2,
+                                  use_manageiq=True)
 
         if 'master' in roles:
             scheduler_predicates = [
