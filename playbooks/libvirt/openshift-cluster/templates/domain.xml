@@ -30,22 +30,22 @@
   <devices>
     <emulator>/usr/bin/qemu-system-x86_64</emulator>
     <disk type='file' device='disk'>
-      <driver name='qemu' type='qcow2'/>
+      <driver name='qemu' type='qcow2' discard='unmap'/>
       <source file='{{ libvirt_storage_pool_path }}/{{ item }}.qcow2'/>
-      <target dev='vda' bus='virtio'/>
+      <target dev='sda' bus='scsi'/>
     </disk>
     <disk type='file' device='disk'>
-      <driver name='qemu' type='qcow2'/>
+      <driver name='qemu' type='qcow2' discard='unmap'/>
       <source file='{{ libvirt_storage_pool_path }}/{{ item }}-docker.qcow2'/>
-      <target dev='vdb' bus='virtio'/>
+      <target dev='sdb' bus='scsi'/>
     </disk>
     <disk type='file' device='cdrom'>
       <driver name='qemu' type='raw'/>
       <source file='{{ libvirt_storage_pool_path }}/{{ item }}_cloud-init.iso'/>
-      <target dev='vdc' bus='virtio'/>
+      <target dev='sdc' bus='scsi'/>
       <readonly/>
     </disk>
-    <controller type='usb' index='0' />
+    <controller type='scsi' model='virtio-scsi' />
     <interface type='network'>
       <source network='{{ libvirt_network }}'/>
       <model type='virtio'/>
@@ -56,17 +56,6 @@
     <console type='pty'>
       <target type='serial' port='0'/>
     </console>
-    <channel type='spicevmc'>
-      <target type='virtio' name='com.redhat.spice.0'/>
-    </channel>
-    <input type='tablet' bus='usb' />
-    <input type='mouse' bus='ps2'/>
-    <graphics type='spice' autoport='yes' />
-    <video>
-      <model type='qxl' ram='65536' vram='65536' vgamem='16384' heads='1'/>
-    </video>
-    <redirdev bus='usb' type='spicevmc'>
-    </redirdev>
     <memballoon model='virtio'>
     </memballoon>
   </devices>
