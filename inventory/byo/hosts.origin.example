@@ -301,6 +301,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_hosted_registry_storage_s3_bucket=bucket_name
 #openshift_hosted_registry_storage_s3_region=bucket_region
 #openshift_hosted_registry_storage_s3_chunksize=26214400
+#openshift_hosted_registry_pullthrough=true
 
 # Configure the multi-tenant SDN plugin (default is 'redhat/openshift-ovs-subnet')
 # os_sdn_network_plugin_name='redhat/openshift-ovs-multitenant'
