@@ -1573,7 +1573,7 @@ class OpenShiftFacts(object):
                    'node']
 
     # Disabling too-many-arguments, this should be cleaned up as a TODO item.
-    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments,no-value-for-parameter
     def __init__(self, role, filename, local_facts,
                  additive_facts_to_overwrite=None,
                  openshift_env=None,
