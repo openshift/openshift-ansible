@@ -5,6 +5,8 @@
   failed_when: false
   changed_when: false
 
+- debug: var=nmcli_c_s
+
 - fail: msg="The default interface must be NetworkManager managed, please set NM_CONTROLLED=yes in /etc/sysconfig/network-manager/ifcfg-{{ ansible_default_ipv4.interface }} and restart NetworkManager"
   when: nmcli_c_s.rc != 0
 
