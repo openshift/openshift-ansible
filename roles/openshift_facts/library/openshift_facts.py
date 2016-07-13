@@ -7,16 +7,6 @@
 
 """Ansible module for retrieving and setting openshift related facts"""
 
-DOCUMENTATION = '''
----
-module: openshift_facts
-short_description: Cluster Facts
-author: Jason DeTiberus
-requirements: [ ]
-'''
-EXAMPLES = '''
-'''
-
 import ConfigParser
 import copy
 import io
@@ -28,6 +18,17 @@ import struct
 import socket
 from dbus import SystemBus, Interface
 from dbus.exceptions import DBusException
+
+
+DOCUMENTATION = '''
+---
+module: openshift_facts
+short_description: Cluster Facts
+author: Jason DeTiberus
+requirements: [ ]
+'''
+EXAMPLES = '''
+'''
 
 
 def migrate_docker_facts(facts):
@@ -499,10 +500,8 @@ def set_dnsmasq_facts_if_unset(facts):
     """
 
     if 'common' in facts:
-        if 'use_dnsmasq' not in facts['common'] and safe_get_bool(facts['common']['version_gte_3_2_or_1_2']):
-            facts['common']['use_dnsmasq'] = True
-        else:
-            facts['common']['use_dnsmasq'] = False
+        facts['common']['use_dnsmasq'] = bool('use_dnsmasq' not in facts['common'] and
+                                              safe_get_bool(facts['common']['version_gte_3_2_or_1_2']))
         if 'master' in facts and 'dns_port' not in facts['master']:
             if safe_get_bool(facts['common']['use_dnsmasq']):
                 facts['master']['dns_port'] = 8053
@@ -1143,7 +1142,7 @@ def get_openshift_version(facts):
         _, output, _ = module.run_command(['/usr/bin/openshift', 'version'])
         version = parse_openshift_version(output)
     elif 'common' in facts and 'is_containerized' in facts['common']:
-        version = get_containerized_openshift_version(facts)
+        version = get_container_openshift_version(facts)
 
     # Handle containerized masters that have not yet been configured as a node.
     # This can be very slow and may get re-run multiple times, so we only use this
@@ -1155,15 +1154,18 @@ def get_openshift_version(facts):
     return version
 
 
-def get_containerized_openshift_version(facts):
-    # If containerized, see if we can determine the installed version via the systemd environment files:
+def get_container_openshift_version(facts):
+    """
+    If containerized, see if we can determine the installed version via the
+    systemd environment files.
+    """
     for filename in ['/etc/sysconfig/%s-master', '/etc/sysconfig/%s-node']:
-        env_file = filename % facts['common']['service_type']
-        if not os.path.exists(env_file):
+        env_path = filename % facts['common']['service_type']
+        if not os.path.exists(env_path):
             continue
 
-        with open(env_file) as f:
-            for line in f:
+        with open(env_path) as env_file:
+            for line in env_file:
                 if line.startswith("IMAGE_VERSION="):
                     tag = line[len("IMAGE_VERSION="):].strip()
                     # Remove leading "v" and any trailing release info, we just want
@@ -1218,7 +1220,7 @@ def apply_provider_facts(facts, provider_facts):
 
 # Disabling pylint too many branches. This function needs refactored
 # but is a very core part of openshift_facts.
-# pylint: disable=too-many-branches
+# pylint: disable=too-many-branches,too-many-nested-blocks
 def merge_facts(orig, new, additive_facts_to_overwrite, protected_facts_to_overwrite):
     """ Recursively merge facts dicts
 
@@ -1766,10 +1768,7 @@ class OpenShiftFacts(object):
 
         if 'clock' in roles:
             exit_code, _, _ = module.run_command(['rpm', '-q', 'chrony'])
-            if exit_code == 0:
-                chrony_installed = True
-            else:
-                chrony_installed = False
+            chrony_installed = bool(exit_code == 0)
             defaults['clock'] = dict(
                 enabled=True,
                 chrony_installed=chrony_installed)
@@ -2153,7 +2152,7 @@ def main():
                             ansible_facts=openshift_facts.facts)
 
 # ignore pylint errors related to the module_utils import
-# pylint: disable=redefined-builtin, unused-wildcard-import, wildcard-import
+# pylint: disable=redefined-builtin, unused-wildcard-import, wildcard-import, wrong-import-position
 # import module snippets
 from ansible.module_utils.basic import *
 from ansible.module_utils.facts import *

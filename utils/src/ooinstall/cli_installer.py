@@ -1,17 +1,17 @@
 # TODO: Temporarily disabled due to importing old code into openshift-ansible
 # repo. We will work on these over time.
-# pylint: disable=bad-continuation,missing-docstring,no-self-use,invalid-name,no-value-for-parameter
+# pylint: disable=bad-continuation,missing-docstring,no-self-use,invalid-name,no-value-for-parameter,too-many-lines
 
-import click
 import os
 import re
 import sys
+from distutils.version import LooseVersion
+import click
 from ooinstall import openshift_ansible
 from ooinstall import OOConfig
 from ooinstall.oo_config import OOConfigInvalidHostError
 from ooinstall.oo_config import Host
 from ooinstall.variants import find_variant, get_variant_version_combos
-from distutils.version import LooseVersion
 
 DEFAULT_ANSIBLE_CONFIG = '/usr/share/atomic-openshift-utils/ansible.cfg'
 DEFAULT_PLAYBOOK_DIR = '/usr/share/ansible/openshift-ansible/'
@@ -32,7 +32,7 @@ def is_valid_hostname(hostname):
     return all(allowed.match(x) for x in hostname.split("."))
 
 def validate_prompt_hostname(hostname):
-    if '' == hostname or is_valid_hostname(hostname):
+    if hostname == '' or is_valid_hostname(hostname):
         return hostname
     raise click.BadParameter('Invalid hostname. Please double-check this value and re-enter it.')
 
@@ -60,6 +60,7 @@ def list_hosts(hosts):
     for idx in hosts_idx:
         click.echo('   {}: {}'.format(idx, hosts[idx]))
 
+# pylint: disable=redefined-variable-type
 def delete_hosts(hosts):
     while True:
         list_hosts(hosts)
@@ -146,10 +147,7 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
             if rpm_or_container == 'container':
                 host_props['containerized'] = True
 
-        if existing_env:
-            host_props['new_host'] = True
-        else:
-            host_props['new_host'] = False
+        host_props['new_host'] = existing_env
 
         host = Host(**host_props)
 
@@ -377,7 +375,7 @@ Notes:
     default_facts_lines = []
     default_facts = {}
     for h in hosts:
-        if h.preconfigured == True:
+        if h.preconfigured:
             continue
         try:
             default_facts[h.connect_to] = {}
@@ -824,6 +822,7 @@ def uninstall(ctx):
 @click.option('--latest-minor', '-l', is_flag=True, default=False)
 @click.option('--next-major', '-n', is_flag=True, default=False)
 @click.pass_context
+#pylint: disable=bad-builtin,too-many-statements
 def upgrade(ctx, latest_minor, next_major):
     oo_cfg = ctx.obj['oo_cfg']
     verbose = ctx.obj['verbose']
@@ -883,7 +882,7 @@ def upgrade(ctx, latest_minor, next_major):
     if next_major:
         if 'major_playbook' not in mapping:
             click.echo("No major upgrade supported for %s %s with this version "\
-                       "of atomic-openshift-utils." % (variant, version))
+                       "of atomic-openshift-utils." % (variant, old_version))
             sys.exit(0)
         playbook = mapping['major_playbook']
         new_version = mapping['major_version']
