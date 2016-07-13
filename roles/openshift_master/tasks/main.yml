@@ -27,6 +27,9 @@
   action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-master{{ openshift_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }} state=present"
   when: not openshift.common.is_containerized | bool
 
+- name: Install bash completion for oc tools
+  action: "{{ ansible_pkg_mgr }} name=bash-completion state=present"
+
 - name: Pull master image
   command: >
     docker pull {{ openshift.master.master_image }}{{ ':' + openshift_version if openshift_version is defined and openshift_version != '' else '' }}
