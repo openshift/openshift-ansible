@@ -1220,7 +1220,7 @@ def apply_provider_facts(facts, provider_facts):
 
 # Disabling pylint too many branches. This function needs refactored
 # but is a very core part of openshift_facts.
-# pylint: disable=too-many-branches,too-many-nested-blocks
+# pylint: disable=too-many-branches
 def merge_facts(orig, new, additive_facts_to_overwrite, protected_facts_to_overwrite):
     """ Recursively merge facts dicts
 
@@ -2152,7 +2152,7 @@ def main():
                             ansible_facts=openshift_facts.facts)
 
 # ignore pylint errors related to the module_utils import
-# pylint: disable=redefined-builtin, unused-wildcard-import, wildcard-import, wrong-import-position
+# pylint: disable=redefined-builtin, unused-wildcard-import, wildcard-import
 # import module snippets
 from ansible.module_utils.basic import *
 from ansible.module_utils.facts import *

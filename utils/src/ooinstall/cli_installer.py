@@ -60,7 +60,6 @@ def list_hosts(hosts):
     for idx in hosts_idx:
         click.echo('   {}: {}'.format(idx, hosts[idx]))
 
-# pylint: disable=redefined-variable-type
 def delete_hosts(hosts):
     while True:
         list_hosts(hosts)
