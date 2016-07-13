@@ -560,7 +560,7 @@ def set_identity_providers_if_unset(facts):
                 name='allow_all', challenge=True, login=True,
                 kind='AllowAllPasswordIdentityProvider'
             )
-            if deployment_type in ['enterprise', 'atomic-enterprise', 'openshift-enterprise']:
+            if deployment_type == 'openshift-enterprise':
                 identity_provider = dict(
                     name='deny_all', challenge=True, login=True,
                     kind='DenyAllPasswordIdentityProvider'
@@ -760,21 +760,15 @@ def set_deployment_facts_if_unset(facts):
             service_type = 'atomic-openshift'
             if deployment_type == 'origin':
                 service_type = 'origin'
-            elif deployment_type in ['enterprise']:
-                service_type = 'openshift'
             facts['common']['service_type'] = service_type
         if 'config_base' not in facts['common']:
             config_base = '/etc/origin'
-            if deployment_type in ['enterprise']:
-                config_base = '/etc/openshift'
             # Handle upgrade scenarios when symlinks don't yet exist:
             if not os.path.exists(config_base) and os.path.exists('/etc/openshift'):
                 config_base = '/etc/openshift'
             facts['common']['config_base'] = config_base
         if 'data_dir' not in facts['common']:
             data_dir = '/var/lib/origin'
-            if deployment_type in ['enterprise']:
-                data_dir = '/var/lib/openshift'
             # Handle upgrade scenarios when symlinks don't yet exist:
             if not os.path.exists(data_dir) and os.path.exists('/var/lib/openshift'):
                 data_dir = '/var/lib/openshift'
@@ -782,7 +776,7 @@ def set_deployment_facts_if_unset(facts):
 
     if 'docker' in facts:
         deployment_type = facts['common']['deployment_type']
-        if deployment_type in ['enterprise', 'atomic-enterprise', 'openshift-enterprise']:
+        if deployment_type == 'openshift-enterprise':
             addtl_regs = facts['docker'].get('additional_registries', [])
             ent_reg = 'registry.access.redhat.com'
             if ent_reg not in addtl_regs:
@@ -793,27 +787,14 @@ def set_deployment_facts_if_unset(facts):
             deployment_type = facts['common']['deployment_type']
             if 'registry_url' not in facts[role]:
                 registry_url = 'openshift/origin-${component}:${version}'
-                if deployment_type in ['enterprise', 'online', 'openshift-enterprise']:
+                if deployment_type in ['online', 'openshift-enterprise']:
                     registry_url = 'openshift3/ose-${component}:${version}'
-                elif deployment_type == 'atomic-enterprise':
-                    registry_url = 'aep3_beta/aep-${component}:${version}'
                 facts[role]['registry_url'] = registry_url
-
-    if 'master' in facts:
-        deployment_type = facts['common']['deployment_type']
-        openshift_features = ['Builder', 'S2IBuilder', 'WebConsole']
-        if 'disabled_features' in facts['master']:
-            if deployment_type == 'atomic-enterprise':
-                curr_disabled_features = set(facts['master']['disabled_features'])
-                facts['master']['disabled_features'] = list(curr_disabled_features.union(openshift_features))
-        else:
-            if deployment_type == 'atomic-enterprise':
-                facts['master']['disabled_features'] = openshift_features
 
     if 'node' in facts:
         deployment_type = facts['common']['deployment_type']
         if 'storage_plugin_deps' not in facts['node']:
-            if deployment_type in ['openshift-enterprise', 'atomic-enterprise', 'origin']:
+            if deployment_type in ['openshift-enterprise', 'origin']:
                 facts['node']['storage_plugin_deps'] = ['ceph', 'glusterfs', 'iscsi']
             else:
                 facts['node']['storage_plugin_deps'] = []
@@ -1439,7 +1420,7 @@ def set_container_facts_if_unset(facts):
             facts
     """
     deployment_type = facts['common']['deployment_type']
-    if deployment_type in ['enterprise', 'openshift-enterprise']:
+    if deployment_type == 'openshift-enterprise':
         master_image = 'openshift3/ose'
         cli_image = master_image
         node_image = 'openshift3/node'
@@ -1449,16 +1430,6 @@ def set_container_facts_if_unset(facts):
         router_image = 'openshift3/ose-haproxy-router'
         registry_image = 'openshift3/ose-docker-registry'
         deployer_image = 'openshift3/ose-deployer'
-    elif deployment_type == 'atomic-enterprise':
-        master_image = 'aep3_beta/aep'
-        cli_image = master_image
-        node_image = 'aep3_beta/node'
-        ovs_image = 'aep3_beta/openvswitch'
-        etcd_image = 'registry.access.redhat.com/rhel7/etcd'
-        pod_image = 'aep3_beta/aep-pod'
-        router_image = 'aep3_beta/aep-haproxy-router'
-        registry_image = 'aep3_beta/aep-docker-registry'
-        deployer_image = 'aep3_beta/aep-deployer'
     else:
         master_image = 'openshift/origin'
         cli_image = master_image

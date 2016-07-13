@@ -32,8 +32,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     case deployment_type
     when "openshift-enterprise"
       override.vm.box = "rhel-7"
-    when "atomic-enterprise"
-      override.vm.box = "rhel-7"
     when "origin"
       override.vm.box = "centos/7"
       override.vm.box_download_checksum = "b2a9f7421e04e73a5acad6fbaf4e9aba78b5aeabf4230eebacc9942e577c1e05"

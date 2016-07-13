@@ -56,7 +56,7 @@
     when: deployment_type == 'origin' and g_aos_versions.curr_version | version_compare('1.1','<')
 
   - fail:
-      msg: This playbook requires Atomic Enterprise Platform/OpenShift Enterprise 3.1 or later
+      msg: This playbook requires OpenShift Enterprise 3.1 or later
     when: deployment_type == 'atomic-openshift' and g_aos_versions.curr_version | version_compare('3.1','<')
 
   - fail:

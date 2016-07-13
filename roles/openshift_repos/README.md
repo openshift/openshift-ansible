@@ -6,16 +6,16 @@ Configures repositories for an OpenShift installation
 Requirements
 ------------
 
-A RHEL 7.1 host pre-configured with access to the rhel-7-server-rpms,
-rhel-7-server-extra-rpms, and rhel-7-server-ose-3.0-rpms repos.
+A RHEL 7 host pre-configured with access to the rhel-7-server-rpms,
+rhel-7-server-extra-rpms, and rhel-7-server-ose-3.2-rpms repos.
 
 Role Variables
 --------------
 
-| Name                          | Default value |                                              |
-|-------------------------------|---------------|----------------------------------------------|
-| openshift_deployment_type     | None          | Possible values enterprise, origin, online   |
-| openshift_additional_repos    | {}            | TODO                                         |
+| Name                       | Default value |                                                        |
+|----------------------------|---------------|--------------------------------------------------------|
+| openshift_deployment_type  | None          | Possible values openshift-enterprise, origin, online   |
+| openshift_additional_repos | {}            | TODO                                                   |
 
 Dependencies
 ------------

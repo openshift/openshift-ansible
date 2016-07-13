@@ -29,6 +29,4 @@ deployment_vars:
     image: "{{ lookup('oo_option', 'image_name') | default('centos-70-raw', True) }}"
     ssh_user: openshift
     become: yes
-  enterprise: "{{ deployment_rhel7_ent_base }}"
   openshift-enterprise: "{{ deployment_rhel7_ent_base }}"
-  atomic-enterprise: "{{ deployment_rhel7_ent_base }}"
