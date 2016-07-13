@@ -88,7 +88,7 @@ class IdentityProviderBase(object):
 
         multiple_logins_unsupported = False
         if len(login_providers) > 1:
-            if deployment_type in ['enterprise', 'online', 'atomic-enterprise', 'openshift-enterprise']:
+            if deployment_type in ['online', 'openshift-enterprise']:
                 if LooseVersion(openshift_version) < LooseVersion('3.2'):
                     multiple_logins_unsupported = True
             if deployment_type in ['origin']:
@@ -496,31 +496,6 @@ class FilterModule(object):
         return yaml.safe_dump([idp.to_dict() for idp in idp_list], default_flow_style=False)
 
     @staticmethod
-    def validate_pcs_cluster(data, masters=None):
-        ''' Validates output from "pcs status", ensuring that each master
-            provided is online.
-            Ex: data = ('...',
-                        'PCSD Status:',
-                        'master1.example.com: Online',
-                        'master2.example.com: Online',
-                        'master3.example.com: Online',
-                        '...')
-                masters = ['master1.example.com',
-                           'master2.example.com',
-                           'master3.example.com']
-               returns True
-        '''
-        if not issubclass(type(data), basestring):
-            raise errors.AnsibleFilterError("|failed expects data is a string or unicode")
-        if not issubclass(type(masters), list):
-            raise errors.AnsibleFilterError("|failed expects masters is a list")
-        valid = True
-        for master in masters:
-            if "{0}: Online".format(master) not in data:
-                valid = False
-        return valid
-
-    @staticmethod
     def certificates_to_synchronize(hostvars):
         ''' Return certificates to synchronize based on facts. '''
         if not issubclass(type(hostvars), dict):
@@ -537,10 +512,9 @@ class FilterModule(object):
                  'openshift-router.key',
                  'openshift-router.kubeconfig',
                  'serviceaccounts.private.key',
-                 'serviceaccounts.public.key']
-        if bool(hostvars['openshift']['common']['version_gte_3_1_or_1_1']):
-            certs += ['master.proxy-client.crt',
-                      'master.proxy-client.key']
+                 'serviceaccounts.public.key',
+                 'master.proxy-client.crt',
+                 'master.proxy-client.key']
         if not bool(hostvars['openshift']['common']['version_gte_3_2_or_1_2']):
             certs += ['openshift-master.crt',
                       'openshift-master.key',
@@ -571,6 +545,5 @@ class FilterModule(object):
     def filters(self):
         ''' returns a mapping of filters to methods '''
         return {"translate_idps": self.translate_idps,
-                "validate_pcs_cluster": self.validate_pcs_cluster,
                 "certificates_to_synchronize": self.certificates_to_synchronize,
                 "oo_htpasswd_users_from_file": self.oo_htpasswd_users_from_file}

@@ -13,7 +13,7 @@ ATTENTION: You are running ${cmd} via a wrapper around 'docker run {{ openshift.
 This wrapper is intended only to be used to bootstrap an environment. Please
 install client tools on another host once you have granted cluster-admin
 privileges to a user.
-{% if openshift.common.deployment_type in ['openshift-enterprise','atomic-enterprise'] %}
+{% if openshift.common.deployment_type == 'openshift-enterprise' %}
 See https://docs.openshift.com/enterprise/latest/cli_reference/get_started_cli.html
 {% else %}
 See https://docs.openshift.org/latest/cli_reference/get_started_cli.html

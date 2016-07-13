@@ -28,7 +28,7 @@
   template:
     src: "{{ ha_svc_template_path }}/atomic-openshift-master-{{ item }}.service.j2"
     dest: "{{ containerized_svc_dir }}/{{ openshift.common.service_type }}-master-{{ item }}.service"
-  when: openshift.master.ha is defined and openshift.master.ha | bool and openshift_master_cluster_method == "native"
+  when: openshift.master.ha is defined and openshift.master.ha | bool
   with_items:
   - api
   - controllers
@@ -41,7 +41,7 @@
 - name: Preserve Master API Proxy Config options
   command: grep PROXY /etc/sysconfig/{{ openshift.common.service_type }}-master-api
   register: master_api_proxy
-  when: openshift.master.ha is defined and openshift.master.ha | bool and openshift_master_cluster_method == "native"
+  when: openshift.master.ha is defined and openshift.master.ha | bool
   failed_when: false
   changed_when: false
 
@@ -50,12 +50,12 @@
     src: "{{ ha_svc_template_path }}/atomic-openshift-master-api.j2"
     dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-api
     backup: true
-  when: openshift.master.ha is defined and openshift.master.ha | bool and openshift_master_cluster_method == "native"
+  when: openshift.master.ha is defined and openshift.master.ha | bool
   notify:
   - restart master api
 
 - name: Restore Master API Proxy Config Options
-  when: openshift.master.ha is defined and openshift.master.ha | bool and openshift_master_cluster_method == "native"
+  when: openshift.master.ha is defined and openshift.master.ha | bool
       and master_api_proxy.rc == 0 and 'http_proxy' not in openshift.common and 'https_proxy' not in openshift.common
   lineinfile:
     dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-api
@@ -65,7 +65,7 @@
 - name: Preserve Master Controllers Proxy Config options
   command: grep PROXY /etc/sysconfig/{{ openshift.common.service_type }}-master-api
   register: master_controllers_proxy
-  when: openshift.master.ha is defined and openshift.master.ha | bool and openshift_master_cluster_method == "native"
+  when: openshift.master.ha is defined and openshift.master.ha | bool
   failed_when: false
   changed_when: false
 
@@ -74,7 +74,7 @@
     src: "{{ ha_svc_template_path }}/atomic-openshift-master-controllers.j2"
     dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-controllers
     backup: true
-  when: openshift.master.ha is defined and openshift.master.ha | bool and openshift_master_cluster_method == "native"
+  when: openshift.master.ha is defined and openshift.master.ha | bool
   notify:
   - restart master controllers
 
@@ -83,8 +83,8 @@
     dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-controllers
     line: "{{ item }}"
   with_items: "{{ master_controllers_proxy.stdout_lines | default([]) }}"
-  when: openshift.master.ha is defined and openshift.master.ha | bool and openshift_master_cluster_method == "native"
-        and master_controllers_proxy.rc == 0 and 'http_proxy' not in openshift.common and 'https_proxy' not in openshift.common 
+  when: openshift.master.ha is defined and openshift.master.ha | bool
+        and master_controllers_proxy.rc == 0 and 'http_proxy' not in openshift.common and 'https_proxy' not in openshift.common
 
 - name: Install Master docker service file
   template:

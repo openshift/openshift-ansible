@@ -6,8 +6,6 @@ unit_file=$(ls /etc/systemd/system/${1}*.service | grep -v node-dep | head -n1)
 
 if [ ${1} == "origin" ]; then
     image_name="openshift/origin"
-elif grep aep $unit_file 2>&1 > /dev/null; then
-    image_name="aep3/node"
 elif grep openshift3 $unit_file 2>&1 > /dev/null; then
     image_name="openshift3/node"
 fi

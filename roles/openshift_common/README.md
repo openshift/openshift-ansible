@@ -1,7 +1,7 @@
-OpenShift/Atomic Enterprise Common
+OpenShift Common
 ===================================
 
-OpenShift/Atomic Enterprise common installation and configuration tasks.
+OpenShift common installation and configuration tasks.
 
 Requirements
 ------------

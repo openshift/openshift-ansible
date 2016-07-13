@@ -1,4 +1,4 @@
-OpenShift/Atomic Enterprise Node Certificates
+OpenShift Node Certificates
 =============================================
 
 TODO

@@ -44,8 +44,8 @@ Indicates the version of configuration this file was written with. Current imple
 
 The OpenShift variant to install. Currently valid options are:
 
+ * origin
  * openshift-enterprise
- * atomic-enterprise
 
 ### variant_version (optional)
 
@@ -53,7 +53,7 @@ Default: Latest version for your chosen variant.
 
 A version which must be valid for your selected variant. If not specified the latest will be assumed.
 
-Examples: 3.0, 3.1, etc.
+Examples: 3.1, 3.2, etc.
 
 ### hosts
 

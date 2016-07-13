@@ -6,9 +6,6 @@ admissionConfig:
   pluginConfig:{{ openshift.master.admission_plugin_config | to_padded_yaml(level=2) }}
 {% endif %}
 apiLevels:
-{% if not openshift.common.version_gte_3_1_or_1_1 | bool %}
-- v1beta3
-{% endif %}
 - v1
 apiVersion: v1
 assetConfig:
@@ -101,11 +98,6 @@ kubeletClientInfo:
   port: 10250
 {% if openshift.master.embedded_kube | bool %}
 kubernetesMasterConfig:
-{% if not openshift.common.version_gte_3_1_or_1_1 | bool %}
-  apiLevels:
-  - v1beta3
-  - v1
-{% endif %}
   admissionConfig:
 {% if 'kube_admission_plugin_order' in openshift.master %}
     pluginOrderOverride:{{ openshift.master.kube_admission_plugin_order | to_padded_yaml(level=3) }}
@@ -115,7 +107,7 @@ kubernetesMasterConfig:
 {% endif %}
   apiServerArguments: {{ openshift.master.api_server_args | default(None) | to_padded_yaml( level=2 ) }}
   controllerArguments: {{ openshift.master.controller_args | default(None) | to_padded_yaml( level=2 ) }}
-  masterCount: {{ openshift.master.master_count if openshift.master.cluster_method | default(None) == 'native' else 1 }}
+  masterCount: {{ openshift.master.master_count | default(1) }}
   masterIP: {{ openshift.common.ip }}
   podEvictionTimeout: {{ openshift.master.pod_eviction_timeout | default("") }}
   proxyClientInfo:

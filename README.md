@@ -26,7 +26,6 @@ they may in the future.
 - Bring your own host deployments:
   - [OpenShift Enterprise](https://docs.openshift.com/enterprise/latest/install_config/install/advanced_install.html)
   - [OpenShift Origin](https://docs.openshift.org/latest/install_config/install/advanced_install.html)
-  - [Atomic Enterprise](README_AEP.md)
 
 - Build
   - [How to build the openshift-ansible rpms](BUILD.md)

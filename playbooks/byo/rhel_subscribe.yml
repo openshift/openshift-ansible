@@ -14,15 +14,15 @@
   gather_facts: no
   tasks:
   - include_vars: openshift-cluster/cluster_hosts.yml
-  
-- include: ../common/openshift-cluster/evaluate_groups.yml 
-  
+
+- include: ../common/openshift-cluster/evaluate_groups.yml
+
 - hosts: l_oo_all_hosts
   vars:
     openshift_deployment_type: "{{ deployment_type }}"
   roles:
   - role: rhel_subscribe
-    when: deployment_type in ['atomic-enterprise', 'enterprise', 'openshift-enterprise'] and
+    when: deployment_type == 'openshift-enterprise' and
           ansible_distribution == "RedHat" and
           lookup('oo_option', 'rhel_skip_subscription') | default(rhsub_skip, True) |
           default('no', True) | lower in ['no', 'false']

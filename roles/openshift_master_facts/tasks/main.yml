@@ -1,9 +1,12 @@
 ---
+- fail:
+    msg: Pacemaker is no longer a supported option for clustering masters
+  when: openshift_master_cluster_method | default(none) == 'pacemaker'
+
 - name: Set master facts
   openshift_facts:
     role: master
     local_facts:
-      cluster_method: "{{ openshift_master_cluster_method | default(None) }}"
       cluster_hostname: "{{ openshift_master_cluster_hostname | default(None) }}"
       cluster_public_hostname: "{{ openshift_master_cluster_public_hostname | default(None) }}"
       debug_level: "{{ openshift_master_debug_level | default(openshift.common.debug_level) }}"
@@ -62,6 +65,7 @@
       api_server_args: "{{ osm_api_server_args | default(None) }}"
       controller_args: "{{ osm_controller_args | default(None) }}"
       disabled_features: "{{ osm_disabled_features | default(None) }}"
+      ha: "{{ openshift_master_ha | default(None) }}"
       master_count: "{{ openshift_master_count | default(None) }}"
       controller_lease_ttl: "{{ osm_controller_lease_ttl | default(None) }}"
       master_image: "{{ osm_image | default(None) }}"

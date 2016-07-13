@@ -28,6 +28,4 @@ deployment_vars:
     vpc_subnet: "{{ lookup('oo_option', 'ec2_vpc_subnet') | default(omit, True) }}"
     assign_public_ip: "{{ lookup('oo_option', 'ec2_assign_public_ip') | default(omit, True) }}"
 
-  enterprise: "{{ deployment_rhel7_ent_base }}"
   openshift-enterprise: "{{ deployment_rhel7_ent_base }}"
-  atomic-enterprise: "{{ deployment_rhel7_ent_base }}"
