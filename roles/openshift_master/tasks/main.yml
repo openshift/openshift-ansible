@@ -24,7 +24,7 @@
   when: openshift_master_ha | bool and openshift_master_cluster_method == "pacemaker" and openshift.common.is_containerized | bool
 
 - name: Install Master package
-  action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-master{{ openshift_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }} state=present"
+  action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-master-{{ openshift_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }} state=present"
   when: not openshift.common.is_containerized | bool
 
 - name: Pull master image
