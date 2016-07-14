@@ -1,7 +1,7 @@
 ---
 galaxy_info:
-  author: Jason DeTiberus
-  description: OpenShift Docker
+  author: Devan Goodwin
+  description: Determines the version of OpenShift to install or upgrade to
   company: Red Hat, Inc.
   license: Apache License, Version 2.0
   min_ansible_version: 1.9
@@ -12,6 +12,7 @@ galaxy_info:
   categories:
   - cloud
 dependencies:
-- role: openshift_version
+- role: openshift_repos
 - role: openshift_docker_facts
 - role: docker
+  when: openshift.common.is_containerized | default(False) | bool

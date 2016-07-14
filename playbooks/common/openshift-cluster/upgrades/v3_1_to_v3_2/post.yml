@@ -6,8 +6,8 @@
   hosts: oo_first_master
   vars:
     openshift_deployment_type: "{{ deployment_type }}"
-    registry_image: "{{  openshift.master.registry_url | replace( '${component}', 'docker-registry' )  | replace ( '${version}', 'v' + g_new_version  ) }}"
-    router_image: "{{ openshift.master.registry_url | replace( '${component}', 'haproxy-router' ) | replace ( '${version}', 'v' + g_new_version ) }}"
+    registry_image: "{{  openshift.master.registry_url | replace( '${component}', 'docker-registry' )  | replace ( '${version}', openshift_image_tag ) }}"
+    router_image: "{{ openshift.master.registry_url | replace( '${component}', 'haproxy-router' ) | replace ( '${version}', openshift_image_tag ) }}"
     oc_cmd: "{{ openshift.common.client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig"
   roles:
   - openshift_manageiq

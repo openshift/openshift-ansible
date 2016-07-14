@@ -24,6 +24,23 @@ debug_level=2
 # deployment type valid values are origin, online, atomic-enterprise, and openshift-enterprise
 deployment_type=openshift-enterprise
 
+# Specify the generic release of OpenShift to install. This is used mainly just during installation, after which we
+# rely on the version running on the first master. Works best for containerized installs where we can usually
+# use this to lookup the latest exact version of the container images, which is the tag actually used to configure
+# the cluster. For RPM installations we just verify the version detected in your configured repos matches this
+# release.
+openshift_release=v3.2
+
+# Specify an exact container image tag to install or configure.
+# WARNING: This value will be used for all hosts in containerized environments, even those that have another version installed.
+# This could potentially trigger an upgrade and downtime, so be careful with modifying this value after the cluster is set up.
+#openshift_image_tag=v3.2.0.46
+
+# Specify an exact rpm version to install or configure.
+# WARNING: This value will be used for all hosts in RPM based environments, even those that have another version installed.
+# This could potentially trigger an upgrade and downtime, so be careful with modifying this value after the cluster is set up.
+#openshift_pkg_version=-3.2.0.46
+
 # Install the openshift examples
 #openshift_install_examples=true
 
@@ -74,6 +91,13 @@ deployment_type=openshift-enterprise
 # Items added, as is, to end of /etc/sysconfig/docker OPTIONS
 # Default value: "--log-driver=json-file --log-opt max-size=50m"
 #openshift_docker_options="-l warn --ipv6=false"
+
+# Specify exact version of Docker to configure or upgrade to.
+# Downgrades are not supported and will error out. Be careful when upgrading docker from < 1.10 to > 1.10.
+# docker_version="1.10.3"
+
+# Skip upgrading Docker during an OpenShift upgrade, leaves the current Docker version alone.
+# docker_upgrade=False
 
 # Alternate image format string. If you're not modifying the format string and
 # only need to inject your own registry you may want to consider

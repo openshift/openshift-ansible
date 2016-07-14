@@ -1,17 +1,17 @@
 # TODO: Temporarily disabled due to importing old code into openshift-ansible
 # repo. We will work on these over time.
-# pylint: disable=bad-continuation,missing-docstring,no-self-use,invalid-name,no-value-for-parameter
+# pylint: disable=bad-continuation,missing-docstring,no-self-use,invalid-name,no-value-for-parameter,too-many-lines
 
-import click
 import os
 import re
 import sys
+from distutils.version import LooseVersion
+import click
 from ooinstall import openshift_ansible
 from ooinstall import OOConfig
 from ooinstall.oo_config import OOConfigInvalidHostError
 from ooinstall.oo_config import Host
 from ooinstall.variants import find_variant, get_variant_version_combos
-from distutils.version import LooseVersion
 
 DEFAULT_ANSIBLE_CONFIG = '/usr/share/atomic-openshift-utils/ansible.cfg'
 DEFAULT_PLAYBOOK_DIR = '/usr/share/ansible/openshift-ansible/'
@@ -32,7 +32,7 @@ def is_valid_hostname(hostname):
     return all(allowed.match(x) for x in hostname.split("."))
 
 def validate_prompt_hostname(hostname):
-    if '' == hostname or is_valid_hostname(hostname):
+    if hostname == '' or is_valid_hostname(hostname):
         return hostname
     raise click.BadParameter('Invalid hostname. Please double-check this value and re-enter it.')
 
@@ -146,10 +146,7 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
             if rpm_or_container == 'container':
                 host_props['containerized'] = True
 
-        if existing_env:
-            host_props['new_host'] = True
-        else:
-            host_props['new_host'] = False
+        host_props['new_host'] = existing_env
 
         host = Host(**host_props)
 
@@ -377,7 +374,7 @@ Notes:
     default_facts_lines = []
     default_facts = {}
     for h in hosts:
-        if h.preconfigured == True:
+        if h.preconfigured:
             continue
         try:
             default_facts[h.connect_to] = {}
@@ -824,50 +821,68 @@ def uninstall(ctx):
 @click.option('--latest-minor', '-l', is_flag=True, default=False)
 @click.option('--next-major', '-n', is_flag=True, default=False)
 @click.pass_context
+#pylint: disable=bad-builtin,too-many-statements
 def upgrade(ctx, latest_minor, next_major):
     oo_cfg = ctx.obj['oo_cfg']
     verbose = ctx.obj['verbose']
 
+    # major/minor fields are optional, as we don't always support minor/major
+    # upgrade for what you're currently running.
     upgrade_mappings = {
-                        '3.0':{
-                               'minor_version' :'3.0',
-                               'minor_playbook':'v3_0_minor/upgrade.yml',
-                               'major_version' :'3.1',
-                               'major_playbook':'v3_0_to_v3_1/upgrade.yml',
-                              },
                         '3.1':{
-                               'minor_version' :'3.1',
-                               'minor_playbook':'v3_1_minor/upgrade.yml',
                                'major_playbook':'v3_1_to_v3_2/upgrade.yml',
                                'major_version' :'3.2',
-                            }
+                            },
+                        '3.2':{
+                               'minor_playbook':'v3_1_to_v3_2/upgrade.yml',
+# Uncomment these when we're ready to support 3.3.
+#                               'major_version' :'3.3',
+#                               'major_playbook':'v3_1_to_v3_2/upgrade.yml',
+                            },
                        }
 
     if len(oo_cfg.hosts) == 0:
         click.echo("No hosts defined in: %s" % oo_cfg.config_path)
         sys.exit(1)
 
-    old_variant = oo_cfg.settings['variant']
+    variant = oo_cfg.settings['variant']
+    if find_variant(variant)[0] is None:
+        click.echo("%s is not a supported variant for upgrade." % variant)
+        sys.exit(0)
+
     old_version = oo_cfg.settings['variant_version']
     mapping = upgrade_mappings.get(old_version)
 
     message = """
         This tool will help you upgrade your existing OpenShift installation.
+        Currently running: %s %s
 """
-    click.echo(message)
+    click.echo(message % (variant, old_version))
 
+    # Map the dynamic upgrade options to the playbook to run for each.
+    # Index offset by 1.
+    # List contains tuples of booleans for (latest_minor, next_major)
+    selections = []
     if not (latest_minor or next_major):
-        click.echo("Version {} found. Do you want to update to the latest version of {} " \
-                   "or migrate to the next major release?".format(old_version, old_version))
-        response = click.prompt("(1) Update to latest {} " \
-                                "(2) Migrate to next release".format(old_version),
-                                type=click.Choice(['1', '2']),)
-        if response == "1":
-            latest_minor = True
-        if response == "2":
-            next_major = True
+        i = 0
+        if 'minor_playbook' in mapping:
+            click.echo("(%s) Update to latest %s" % (i + 1, old_version))
+            selections.append((True, False))
+            i += 1
+        if 'major_playbook' in mapping:
+            click.echo("(%s) Upgrade to next release: %s" % (i + 1, mapping['major_version']))
+            selections.append((False, True))
+            i += 1
+
+        response = click.prompt("\nChoose an option from above",
+                                type=click.Choice(list(map(str, range(1, len(selections) + 1)))))
+        latest_minor, next_major = selections[int(response) - 1]
 
     if next_major:
+        if 'major_playbook' not in mapping:
+            click.echo("No major upgrade supported for %s %s with this version "\
+                       "of atomic-openshift-utils." % (variant, old_version))
+            sys.exit(0)
         playbook = mapping['major_playbook']
         new_version = mapping['major_version']
         # Update config to reflect the version we're targetting, we'll write
@@ -877,11 +892,15 @@ def upgrade(ctx, latest_minor, next_major):
             oo_cfg.settings['variant'] = 'openshift-enterprise'
 
     if latest_minor:
+        if 'minor_playbook' not in mapping:
+            click.echo("No minor upgrade supported for %s %s with this version "\
+                       "of atomic-openshift-utils." % (variant, old_version))
+            sys.exit(0)
         playbook = mapping['minor_playbook']
-        new_version = mapping['minor_version']
+        new_version = old_version
 
-    click.echo("Openshift will be upgraded from %s %s to %s %s on the following hosts:\n" % (
-        old_variant, old_version, oo_cfg.settings['variant'], new_version))
+    click.echo("Openshift will be upgraded from %s %s to latest %s %s on the following hosts:\n" % (
+        variant, old_version, oo_cfg.settings['variant'], new_version))
     for host in oo_cfg.hosts:
         click.echo("  * %s" % host.connect_to)
 

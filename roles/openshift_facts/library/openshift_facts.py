@@ -7,16 +7,6 @@
 
 """Ansible module for retrieving and setting openshift related facts"""
 
-DOCUMENTATION = '''
----
-module: openshift_facts
-short_description: Cluster Facts
-author: Jason DeTiberus
-requirements: [ ]
-'''
-EXAMPLES = '''
-'''
-
 import ConfigParser
 import copy
 import io
@@ -28,6 +18,17 @@ import struct
 import socket
 from dbus import SystemBus, Interface
 from dbus.exceptions import DBusException
+
+
+DOCUMENTATION = '''
+---
+module: openshift_facts
+short_description: Cluster Facts
+author: Jason DeTiberus
+requirements: [ ]
+'''
+EXAMPLES = '''
+'''
 
 
 def migrate_docker_facts(facts):
@@ -505,10 +506,8 @@ def set_dnsmasq_facts_if_unset(facts):
     """
 
     if 'common' in facts:
-        if 'use_dnsmasq' not in facts['common'] and safe_get_bool(facts['common']['version_gte_3_2_or_1_2']):
-            facts['common']['use_dnsmasq'] = True
-        else:
-            facts['common']['use_dnsmasq'] = False
+        facts['common']['use_dnsmasq'] = bool('use_dnsmasq' not in facts['common'] and
+                                              safe_get_bool(facts['common']['version_gte_3_2_or_1_2']))
         if 'master' in facts and 'dns_port' not in facts['master']:
             if safe_get_bool(facts['common']['use_dnsmasq']):
                 facts['master']['dns_port'] = 8053
@@ -832,7 +831,7 @@ def set_version_facts_if_unset(facts):
     if 'common' in facts:
         deployment_type = facts['common']['deployment_type']
         version = get_openshift_version(facts)
-        if version is not None:
+        if version:
             facts['common']['version'] = version
             if deployment_type == 'origin':
                 version_gte_3_1_or_1_1 = LooseVersion(version) >= LooseVersion('1.1.0')
@@ -1126,7 +1125,9 @@ def get_docker_version_info():
     return result
 
 def get_openshift_version(facts):
-    """ Get current version of openshift on the host
+    """ Get current version of openshift on the host.
+
+        Checks a variety of ways ranging from fastest to slowest.
 
         Args:
             facts (dict): existing facts
@@ -1146,17 +1147,39 @@ def get_openshift_version(facts):
     if os.path.isfile('/usr/bin/openshift'):
         _, output, _ = module.run_command(['/usr/bin/openshift', 'version'])
         version = parse_openshift_version(output)
+    elif 'common' in facts and 'is_containerized' in facts['common']:
+        version = get_container_openshift_version(facts)
 
-    # openshift_facts runs before openshift_docker_facts.  However, it will be
-    # called again and set properly throughout the playbook run.  This could be
-    # refactored to simply set the openshift.common.version in the
-    # openshift_docker_facts role but it would take reworking some assumptions
-    # on how get_openshift_version is called.
-    if 'is_containerized' in facts['common'] and safe_get_bool(facts['common']['is_containerized']):
-        if 'docker' in facts and 'openshift_version' in facts['docker']:
-            version = facts['docker']['openshift_version']
+    # Handle containerized masters that have not yet been configured as a node.
+    # This can be very slow and may get re-run multiple times, so we only use this
+    # if other methods failed to find a version.
+    if not version and os.path.isfile('/usr/local/bin/openshift'):
+        _, output, _ = module.run_command(['/usr/local/bin/openshift', 'version'])
+        version = parse_openshift_version(output)
 
     return version
+
+
+def get_container_openshift_version(facts):
+    """
+    If containerized, see if we can determine the installed version via the
+    systemd environment files.
+    """
+    for filename in ['/etc/sysconfig/%s-master', '/etc/sysconfig/%s-node']:
+        env_path = filename % facts['common']['service_type']
+        if not os.path.exists(env_path):
+            continue
+
+        with open(env_path) as env_file:
+            for line in env_file:
+                if line.startswith("IMAGE_VERSION="):
+                    tag = line[len("IMAGE_VERSION="):].strip()
+                    # Remove leading "v" and any trailing release info, we just want
+                    # a version number here:
+                    version = tag[1:].split("-")[0]
+                    return version
+    return None
+
 
 def parse_openshift_version(output):
     """ Apply provider facts to supplied facts dict
@@ -1167,7 +1190,11 @@ def parse_openshift_version(output):
             string: the version number
     """
     versions = dict(e.split(' v') for e in output.splitlines() if ' v' in e)
-    return versions.get('openshift', '')
+    ver = versions.get('openshift', '')
+    # Remove trailing build number and commit hash from older versions, we need to return a straight
+    # w.x.y.z version here for use as openshift_version throughout the playbooks/roles. (i.e. 3.1.1.6-64-g80b61da)
+    ver = ver.split('-')[0]
+    return ver
 
 
 def apply_provider_facts(facts, provider_facts):
@@ -1747,10 +1774,7 @@ class OpenShiftFacts(object):
 
         if 'clock' in roles:
             exit_code, _, _ = module.run_command(['rpm', '-q', 'chrony'])
-            if exit_code == 0:
-                chrony_installed = True
-            else:
-                chrony_installed = False
+            chrony_installed = bool(exit_code == 0)
             defaults['clock'] = dict(
                 enabled=True,
                 chrony_installed=chrony_installed)

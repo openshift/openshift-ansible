@@ -29,12 +29,8 @@
       data_dir: "{{ openshift_data_dir | default(None) }}"
       use_dnsmasq: "{{ openshift_use_dnsmasq | default(None) }}"
 
-# Using oo_image_tag_to_rpm_version here is a workaround for how
-# openshift_version is set.  That value is computed based on either RPM
-# versions or image tags.  openshift_common's usage requires that it be a RPM
-# version and openshift_cli expects it to be an image tag.
 - name: Install the base package for versioning
-  action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}{{ openshift_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }} state=present"
+  action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }} state=present"
   when: not openshift.common.is_containerized | bool
 
 - name: Set version facts
@@ -49,3 +45,4 @@
   command: >
     hostnamectl set-hostname {{ openshift.common.hostname }}
   when: openshift_set_hostname | default(set_hostname_default) | bool
+
