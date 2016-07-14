@@ -50,6 +50,11 @@
 
   - set_fact:
       g_new_version: "{{ g_aos_versions.curr_version.split('-', 1).0 if g_aos_versions.avail_version is none else g_aos_versions.avail_version.split('-', 1).0 }}"
+    when: openshift_pkg_version is not defined
+
+  - set_fact:
+      g_new_version: "{{ openshift_pkg_version | replace('-','') }}"
+    when: openshift_pkg_version is defined
 
   - fail:
       msg: This playbook requires Origin 1.1 or later
