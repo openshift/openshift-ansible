@@ -10,6 +10,7 @@ Role Variables
 --------------
 
 From this role:
+
 | Name                     | Default value |                                                                                     |
 |--------------------------|---------------|-------------------------------------------------------------------------------------|
 | persistent_volumes       | []            | List of persistent volume dictionaries, keys: name, capacity, access_modes, storage |
@@ -17,6 +18,7 @@ From this role:
 
 
 From openshift_common:
+
 | Name                          | Default Value  |                                        |
 |-------------------------------|----------------|----------------------------------------|
 | openshift_debug_level         | 2              | Global openshift debug log verbosity   |
@@ -29,6 +31,7 @@ Dependencies
 Example Playbook
 ----------------
 
+```
 - name: Create persistent volumes/claims
   hosts: oo_first_master
   vars:
@@ -48,6 +51,8 @@ Example Playbook
       - "ReadWriteMany"
   roles:
   - role: openshift_persistent_volumes
+```
+
 
 License
 -------

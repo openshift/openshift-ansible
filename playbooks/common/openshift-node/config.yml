@@ -184,7 +184,7 @@
         -C {{ etcd_generated_certs_dir }}/{{ item.etcd_cert_subdir }} .
     args:
       creates: "{{ etcd_generated_certs_dir }}/{{ item.etcd_cert_subdir }}.tgz"
-    with_items: etcd_needing_client_certs | default([])
+    with_items: "{{ etcd_needing_client_certs | default([]) }}"
   - name: Retrieve the etcd cert tarballs
     fetch:
       src: "{{ etcd_generated_certs_dir }}/{{ item.etcd_cert_subdir }}.tgz"
@@ -192,7 +192,7 @@
       flat: yes
       fail_on_missing: yes
       validate_checksum: yes
-    with_items: etcd_needing_client_certs | default([])
+    with_items: "{{ etcd_needing_client_certs | default([]) }}"
 
 - name: Copy the external etcd flannel certs to the nodes
   hosts: oo_nodes_to_config

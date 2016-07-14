@@ -186,11 +186,6 @@
                                 | list ) }}"
       master_cert_subdir: master-{{ openshift.common.hostname }}
       master_cert_config_dir: "{{ openshift.common.config_base }}/master"
-  - set_fact:
-      openshift_infra_nodes: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config'])
-                                 | oo_nodes_with_label('region', 'infra')
-                                 | oo_collect('inventory_hostname') }}"
-    when: openshift_infra_nodes is not defined and groups.oo_nodes_to_config | default([]) | length > 0
 
 - name: Configure master certificates
   hosts: oo_first_master

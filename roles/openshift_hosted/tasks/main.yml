@@ -1,3 +1,22 @@
 ---
+- name: Create temp directory for kubeconfig
+  command: mktemp -d /tmp/openshift-ansible-XXXXXX
+  register: mktemp
+  changed_when: False
 
-- include: router.yml
+- set_fact:
+    openshift_hosted_kubeconfig: "{{ mktemp.stdout }}/admin.kubeconfig"
+
+- name: Copy the admin client config(s)
+  command: >
+    cp {{ openshift_master_config_dir }}/admin.kubeconfig {{ openshift_hosted_kubeconfig }}
+  changed_when: False
+
+- include: router/router.yml
+- include: registry/registry.yml
+
+- name: Delete temp directory
+  file:
+    name: "{{ mktemp.stdout }}"
+    state: absent
+  changed_when: False

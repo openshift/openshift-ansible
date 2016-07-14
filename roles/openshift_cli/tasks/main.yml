@@ -29,3 +29,6 @@
 - name: Reload facts to pick up installed OpenShift version
   openshift_facts:
 
+- name: Install bash completion for oc tools
+  action: "{{ ansible_pkg_mgr }} name=bash-completion state=present"
+  when: not openshift.common.is_containerized | bool
