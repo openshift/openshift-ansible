@@ -17,6 +17,10 @@
   when: openshift_release is defined and openshift_release[0] == 'v'
 
 - set_fact:
+    openshift_release: "{{ openshift_release | string }}"
+  when: openshift_release is defined
+
+- set_fact:
     openshift_image_tag: "{{ 'v' + openshift_image_tag }}"
   when: openshift_image_tag is defined and openshift_image_tag[0] != 'v'
 
@@ -26,7 +30,7 @@
 
 # Make sure we copy this to a fact if given a var:
 - set_fact:
-    openshift_version: "{{ openshift_version }}"
+    openshift_version: "{{ openshift_version | string }}"
   when: openshift_version is defined
 
 # Protect the installed version by default unless explicitly told not to, or given an
