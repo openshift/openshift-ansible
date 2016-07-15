@@ -830,11 +830,11 @@ def upgrade(ctx, latest_minor, next_major):
     # upgrade for what you're currently running.
     upgrade_mappings = {
                         '3.1':{
-                               'major_playbook':'v3_1_to_v3_2/upgrade.yml',
+                               'major_playbook':'v3_2/upgrade.yml',
                                'major_version' :'3.2',
                             },
                         '3.2':{
-                               'minor_playbook':'v3_1_to_v3_2/upgrade.yml',
+                               'minor_playbook':'v3_2/upgrade.yml',
 # Uncomment these when we're ready to support 3.3.
 #                               'major_version' :'3.3',
 #                               'major_playbook':'v3_1_to_v3_2/upgrade.yml',
