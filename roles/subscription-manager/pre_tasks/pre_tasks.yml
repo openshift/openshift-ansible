@@ -1,12 +1,8 @@
 ---
 - name: "Set password fact"
   set_fact:
-    rhsm_password: "{{ rhsm_password }}"
+    rhsm_password: "{{ rhsm_password | default(None) }}"
   no_log: true
-  when:
-    - rhsm_password is defined
-    - rhsm_password is not none
-    - rhsm_password|trim != ''
 
 - name: "Initialize Subscription Manager fact"
   set_fact:
