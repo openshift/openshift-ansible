@@ -37,7 +37,7 @@
 # Docker 1.10 upgrade playbook to accomplish this.
 - name: Error out if attempting to upgrade Docker across the 1.10 boundary
   fail:
-    msg: "Cannot upgrade Docker to >= 1.10, please use the Docker upgrade playbook for this."
+    msg: "Cannot upgrade Docker to >= 1.10, please upgrade or remove Docker manually, or use the Docker upgrade playbook if OpenShift is already installed."
   when: not curr_docker_version | skipped and curr_docker_version.stdout != '' and curr_docker_version.stdout | version_compare('1.10', '<') and docker_version is defined and docker_version | version_compare('1.10', '>=') and not docker_protect_installed_version | bool
 
 # Make sure Docker is installed, but does not update a running version.
