@@ -44,6 +44,6 @@
     - regex: '^CONFIG_FILE='
       line: "CONFIG_FILE={{ openshift_node_config_file }}"
     - regex: '^IMAGE_VERSION='
-      line: "IMAGE_VERSION={{ openshift_version }}"
+      line: "IMAGE_VERSION={{ openshift_image_tag }}"
   notify:
   - restart node

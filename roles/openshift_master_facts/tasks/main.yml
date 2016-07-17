@@ -79,3 +79,4 @@
       max_requests_inflight: "{{ openshift_master_max_requests_inflight | default(None) }}"
       api_env_vars: "{{ openshift_master_api_env_vars | default(None) }}"
       controllers_env_vars: "{{ openshift_master_controllers_env_vars | default(None) }}"
+      audit_config: "{{ openshift_master_audit_config | default(None) }}"

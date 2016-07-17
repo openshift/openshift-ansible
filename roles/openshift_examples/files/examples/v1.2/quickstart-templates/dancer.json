@@ -84,7 +84,13 @@
               "kind": "ImageStreamTag",
               "namespace": "${NAMESPACE}",
               "name": "perl:5.20"
-            }
+            },
+            "env":  [
+              {
+                  "name": "CPAN_MIRROR",
+                  "value": "${CPAN_MIRROR}"
+              }
+            ]
           }
         },
         "output": {
@@ -207,18 +213,21 @@
       "name": "NAMESPACE",
       "displayName": "Namespace",
       "description": "The OpenShift Namespace where the ImageStream resides.",
+      "required": true,
       "value": "openshift"
     },
     {
       "name": "MEMORY_LIMIT",
       "displayName": "Memory Limit",
       "description": "Maximum amount of memory the container can use.",
+      "required": true,
       "value": "512Mi"
     },
     {
       "name": "SOURCE_REPOSITORY_URL",
       "displayName": "Git Repository URL",
       "description": "The URL of the repository with your application source code.",
+      "required": true,
       "value": "https://github.com/openshift/dancer-ex.git"
     },
     {
@@ -255,6 +264,12 @@
       "name": "PERL_APACHE2_RELOAD",
       "displayName": "Perl Module Reload",
       "description": "Set this to \"true\" to enable automatic reloading of modified Perl modules.",
+      "value": ""
+    },
+    {
+      "name": "CPAN_MIRROR",
+      "displayName": "Custom CPAN Mirror URL",
+      "description": "The custom CPAN mirror URL",
       "value": ""
     }
   ]

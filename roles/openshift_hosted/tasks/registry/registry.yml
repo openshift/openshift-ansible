@@ -9,7 +9,7 @@
   when: openshift.hosted.registry.replicas | default(none) is none
 
 - set_fact:
-    replicas: "{{ openshift.hosted.registry.replicas | default((openshift_hosted_registry_nodes_json.stdout | from_json)['items'] | length) }}"
+    replicas: "{{ openshift.hosted.registry.replicas | default(((openshift_hosted_registry_nodes_json.stdout | from_json)['items'] | length) if openshift.hosted.registry.storage.kind | default(none) is not none else 1) }}"
 
 - name: Create OpenShift registry
   command: >

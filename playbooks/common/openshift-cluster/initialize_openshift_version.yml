@@ -1,0 +1,16 @@
+---
+# NOTE: requires openshift_facts be run
+- name: Determine openshift_version to configure on first master
+  hosts: oo_first_master
+  roles:
+  - openshift_version
+
+# NOTE: We set this even on etcd hosts as they may also later run as masters,
+# and we don't want to install wrong version of docker and have to downgrade
+# later.
+- name: Set openshift_version for all hosts
+  hosts: oo_all_hosts:!oo_first_master
+  vars:
+    openshift_version: "{{ hostvars[groups.oo_first_master.0].openshift_version }}"
+  roles:
+  - openshift_version

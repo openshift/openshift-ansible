@@ -1,0 +1,18 @@
+---
+- name: Set rpm version to configure if openshift_pkg_version specified
+  set_fact:
+    # Expects a leading "-" in inventory, strip it off here, and remove trailing release,
+    openshift_version: "{{ openshift_pkg_version[1:].split('-')[0] }}"
+  when: openshift_pkg_version is defined and openshift_version is not defined
+
+- name: Gather common package version
+  command: >
+    {{ repoquery_cmd }} --qf '%{version}' "{{ openshift.common.service_type}}"
+  register: common_version
+  failed_when: false
+  changed_when: false
+  when: openshift_version is not defined
+
+- set_fact:
+    openshift_version: "{{ common_version.stdout | default('0.0', True) }}"
+  when: openshift_version is not defined
