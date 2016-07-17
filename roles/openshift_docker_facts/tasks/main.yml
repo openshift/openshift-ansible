@@ -34,26 +34,8 @@
 - set_fact:
     docker_options: "--insecure-registry={{ openshift.docker.hosted_registry_network }} {{ openshift.docker.options | default ('') }}"
   when: openshift.docker.hosted_registry_insecure | default(False) | bool and openshift.docker.hosted_registry_network is defined
+  register: hosted_registry_options
 
 - set_fact:
     docker_options: "{{ openshift.docker.options | default(omit) }}"
-  when: not openshift.docker.hosted_registry_insecure | default(False) | bool
-
-# Avoid docker 1.9 when installing origin < 1.2 or OSE < 3.2 on RHEL/Centos and
-# See: https://bugzilla.redhat.com/show_bug.cgi?id=1304038
-- name: Gather common package version
-  command: >
-    {{ repoquery_cmd }} --qf '%{version}' "{{ openshift.common.service_type}}"
-  register: common_version
-  failed_when: false
-  changed_when: false
-  when: not openshift.common.is_containerized | bool
-
-- set_fact:
-    l_common_version: "{{ openshift_version | default('0.0', True) | oo_image_tag_to_rpm_version }}"
-  when: openshift.common.is_containerized | bool
-
-- set_fact:
-    l_common_version: "{{ common_version.stdout | default('0.0', True) }}"
-  when: not openshift.common.is_containerized | bool
-
+  when: hosted_registry_options | skipped

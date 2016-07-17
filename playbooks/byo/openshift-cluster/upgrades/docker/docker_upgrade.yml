@@ -1,106 +1,47 @@
 
-- name: Check for appropriate Docker versions for 1.9.x to 1.10.x upgrade
+- name: Check for appropriate Docker versions
   hosts: oo_masters_to_config:oo_nodes_to_config:oo_etcd_to_config
   roles:
   - openshift_facts
   tasks:
+  - set_fact:
+      repoquery_cmd: "{{ 'dnf repoquery --latest-limit 1 -d 0' if ansible_pkg_mgr == 'dnf' else 'repoquery --plugins' }}"
+
   - fail:
       msg: Cannot upgrade Docker on Atomic operating systems.
     when: openshift.common.is_atomic | bool
 
-  - name: Determine available Docker version
-    script: ../../../../common/openshift-cluster/upgrades/files/rpm_versions.sh docker
-    register: g_docker_version_result
+  - include: ../../../../common/openshift-cluster/upgrades/docker/upgrade_check.yml
+    when: docker_upgrade is not defined or docker_upgrade | bool
 
-  - name: Check if Docker is installed
-    command: rpm -q docker
-    register: pkg_check
-    failed_when: pkg_check.rc > 1
-    changed_when: no
-
-  - set_fact:
-      g_docker_version: "{{ g_docker_version_result.stdout | from_yaml }}"
-
-  - name: Set fact if docker requires an upgrade
-    set_fact:
-      docker_upgrade: true
-    when: pkg_check.rc == 0 and g_docker_version.curr_version | version_compare('1.10','<')
-
-  - fail:
-      msg: This playbook requires access to Docker 1.10 or later
-    when: g_docker_version.avail_version | default(g_docker_version.curr_version, true) | version_compare('1.10','<')
 
 # If a node fails, halt everything, the admin will need to clean up and we
 # don't want to carry on, potentially taking out every node. The playbook can safely be re-run
-# and will not take any action on a node already running 1.10+.
+# and will not take any action on a node already running the requested docker version.
 - name: Evacuate and upgrade nodes
   hosts: oo_masters_to_config:oo_nodes_to_config:oo_etcd_to_config
   serial: 1
   any_errors_fatal: true
   tasks:
-  - debug: var=docker_upgrade
-
   - name: Prepare for Node evacuation
     command: >
       {{ openshift.common.admin_binary }} manage-node {{ openshift.common.hostname | lower }} --schedulable=false
     delegate_to: "{{ groups.oo_first_master.0 }}"
-    when: docker_upgrade is defined and docker_upgrade | bool and inventory_hostname in groups.oo_nodes_to_config
+    when: l_docker_upgrade is defined and l_docker_upgrade | bool and inventory_hostname in groups.oo_nodes_to_config
 
-# TODO: skip all node evac stuff for non-nodes (i.e. separate containerized etcd hosts)
   - name: Evacuate Node for Kubelet upgrade
     command: >
       {{ openshift.common.admin_binary }} manage-node {{ openshift.common.hostname | lower }} --evacuate --force
     delegate_to: "{{ groups.oo_first_master.0 }}"
-    when: docker_upgrade is defined and docker_upgrade | bool and inventory_hostname in groups.oo_nodes_to_config
+    when: l_docker_upgrade is defined and l_docker_upgrade | bool and inventory_hostname in groups.oo_nodes_to_config
 
-  - name: Stop containerized services
-    service: name={{ item }} state=stopped
-    with_items:
-      - "{{ openshift.common.service_type }}-master"
-      - "{{ openshift.common.service_type }}-master-api"
-      - "{{ openshift.common.service_type }}-master-controllers"
-      - "{{ openshift.common.service_type }}-node"
-      - etcd_container
-      - openvswitch
-    failed_when: false
-    when: docker_upgrade is defined and docker_upgrade | bool and openshift.common.is_containerized | bool
-
-  - name: Remove all containers and images
-    script: files/nuke_images.sh docker
-    register: nuke_images_result
-    when: docker_upgrade is defined and docker_upgrade | bool
-
-  - name: Upgrade Docker
-    command: "{{ ansible_pkg_mgr}} update -y docker"
-    register: docker_upgrade_result
-    when: docker_upgrade is defined and docker_upgrade | bool
-
-  - name: Restart containerized services
-    service: name={{ item }} state=started
-    with_items:
-      - etcd_container
-      - openvswitch
-      - "{{ openshift.common.service_type }}-master"
-      - "{{ openshift.common.service_type }}-master-api"
-      - "{{ openshift.common.service_type }}-master-controllers"
-      - "{{ openshift.common.service_type }}-node"
-    failed_when: false
-    when: docker_upgrade is defined and docker_upgrade | bool and openshift.common.is_containerized | bool
-
-  - name: Wait for master API to come back online
-    become: no
-    local_action:
-      module: wait_for
-        host="{{ inventory_hostname }}"
-        state=started
-        delay=10
-        port="{{ openshift.master.api_port }}"
-    when: docker_upgrade is defined and docker_upgrade | bool and inventory_hostname in groups.oo_masters_to_config
+  - include: ../../../../common/openshift-cluster/upgrades/docker/upgrade.yml
+    when: l_docker_upgrade is defined and l_docker_upgrade | bool
 
   - name: Set node schedulability
     command: >
       {{ openshift.common.admin_binary }} manage-node {{ openshift.common.hostname | lower }} --schedulable=true
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: openshift.node.schedulable | bool
-    when: docker_upgrade is defined and docker_upgrade | bool and inventory_hostname in groups.oo_nodes_to_config and openshift.node.schedulable | bool
+    when: l_docker_upgrade is defined and l_docker_upgrade | bool and inventory_hostname in groups.oo_nodes_to_config and openshift.node.schedulable | bool
 

@@ -1,4 +1,3 @@
 ---
 openshift_cluster_id: 'default'
 openshift_debug_level: 2
-openshift_version: "{{ openshift_pkg_version | default('') }}"

@@ -39,6 +39,9 @@ assetConfig:
     maxRequestsInFlight: 0
     requestTimeoutSeconds: 0
 {% if openshift_master_ha | bool %}
+{% if openshift.master.audit_config | default(none) is not none and openshift.common.version_gte_3_2_or_1_2 | bool %}
+auditConfig:{{ openshift.master.audit_config | to_padded_yaml(level=1) }}
+{% endif %}
 controllerLeaseTTL: {{ openshift.master.controller_lease_ttl | default('30') }}
 {% endif %}
 controllers: '*'

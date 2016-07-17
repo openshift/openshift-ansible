@@ -57,6 +57,10 @@ cp inventory/byo/* docs/example-inventories/
 # openshift-ansible-playbooks install
 cp -rp playbooks %{buildroot}%{_datadir}/ansible/%{name}/
 
+# BZ1330091
+find -L %{buildroot}%{_datadir}/ansible/%{name}/playbooks -name lookup_plugins -type l -delete
+find -L %{buildroot}%{_datadir}/ansible/%{name}/playbooks -name filter_plugins -type l -delete
+
 # openshift-ansible-roles install
 cp -rp roles %{buildroot}%{_datadir}/ansible/%{name}/
 
@@ -65,6 +69,16 @@ cp -rp filter_plugins %{buildroot}%{_datadir}/ansible_plugins/
 
 # openshift-ansible-lookup-plugins install
 cp -rp lookup_plugins %{buildroot}%{_datadir}/ansible_plugins/
+
+# create symlinks from /usr/share/ansible/plugins/lookup ->
+# /usr/share/ansible_plugins/lookup_plugins
+pushd %{buildroot}%{_datadir}
+mkdir -p ansible/plugins
+pushd ansible/plugins
+ln -s ../../ansible_plugins/lookup_plugins lookup
+ln -s ../../ansible_plugins/filter_plugins filter
+popd
+popd
 
 # atomic-openshift-utils install
 pushd utils
@@ -164,6 +178,7 @@ Requires:      pyOpenSSL
 
 %files filter-plugins
 %{_datadir}/ansible_plugins/filter_plugins
+%{_datadir}/ansible/plugins/filter
 
 
 # ----------------------------------------------------------------------------------
@@ -179,6 +194,7 @@ BuildArch:     noarch
 
 %files lookup-plugins
 %{_datadir}/ansible_plugins/lookup_plugins
+%{_datadir}/ansible/plugins/lookup
 
 # ----------------------------------------------------------------------------------
 # atomic-openshift-utils subpackage

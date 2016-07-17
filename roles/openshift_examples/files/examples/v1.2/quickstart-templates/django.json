@@ -84,7 +84,13 @@
               "kind": "ImageStreamTag",
               "namespace": "${NAMESPACE}",
               "name": "python:3.4"
-            }
+            },
+            "env": [
+              {
+                  "name": "PIP_INDEX_URL",
+                  "value": "${PIP_INDEX_URL}"
+              }
+            ]
           }
         },
         "output": {
@@ -233,18 +239,21 @@
     {
       "name": "NAMESPACE",
       "displayName": "Namespace",
+      "required": true,
       "description": "The OpenShift Namespace where the ImageStream resides.",
       "value": "openshift"
     },
     {
       "name": "MEMORY_LIMIT",
       "displayName": "Memory Limit",
+      "required": true,
       "description": "Maximum amount of memory the container can use.",
       "value": "512Mi"
     },
     {
       "name": "SOURCE_REPOSITORY_URL",
       "displayName": "Git Repository URL",
+      "required": true,
       "description": "The URL of the repository with your application source code.",
       "value": "https://github.com/openshift/django-ex.git"
     },
@@ -303,6 +312,12 @@
       "description": "Set this to a long random string.",
       "generate": "expression",
       "from": "[\\w]{50}"
+    },
+    {
+      "name": "PIP_INDEX_URL",
+      "displayName": "Custom PyPi Index URL",
+      "description": "The custom PyPi index URL",
+      "value": ""
     }
   ]
 }
