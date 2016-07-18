@@ -76,6 +76,14 @@ MOCK_FACTS_QUICKHA = {
         'common': {
             'ip': '10.0.0.4',
             'public_ip': '10.0.0.4',
+            'hostname': 'node3-private.example.com',
+            'public_hostname': 'node3.example.com'
+        }
+    },
+    '10.0.0.5': {
+        'common': {
+            'ip': '10.0.0.5',
+            'public_ip': '10.0.0.5',
             'hostname': 'proxy-private.example.com',
             'public_hostname': 'proxy.example.com'
         }
@@ -94,221 +102,279 @@ MOCK_FACTS_QUICKHA = {
 BAD_CONFIG = """
 variant: %s
 ansible_ssh_user: root
-hosts:
-  - connect_to: 10.0.0.1
-    ip: 10.0.0.1
-    hostname: master-private.example.com
-    public_ip: 24.222.0.1
-    public_hostname: master.example.com
-    master: true
-    node: true
-  - ip: 10.0.0.2
-    hostname: node1-private.example.com
-    public_ip: 24.222.0.2
-    public_hostname: node1.example.com
-    node: true
-  - connect_to: 10.0.0.3
-    ip: 10.0.0.3
-    hostname: node2-private.example.com
-    public_ip: 24.222.0.3
-    public_hostname: node2.example.com
-    node: true
+deployment:
+    hosts:
+      - connect_to: 10.0.0.1
+        ip: 10.0.0.1
+        hostname: master-private.example.com
+        public_ip: 24.222.0.1
+        public_hostname: master.example.com
+        roles:
+            - master
+            - node
+      - ip: 10.0.0.2
+        hostname: node1-private.example.com
+        public_ip: 24.222.0.2
+        public_hostname: node1.example.com
+        roles:
+            - node
+      - connect_to: 10.0.0.3
+        ip: 10.0.0.3
+        hostname: node2-private.example.com
+        public_ip: 24.222.0.3
+        public_hostname: node2.example.com
+        roles:
+            - node
+    roles:
+        master:
+        node:
 """
 
 QUICKHA_CONFIG = """
 variant: %s
 ansible_ssh_user: root
-master_routingconfig_subdomain: example.com
-hosts:
-  - connect_to: 10.0.0.1
-    ip: 10.0.0.1
-    hostname: master-private.example.com
-    public_ip: 24.222.0.1
-    public_hostname: master.example.com
-    master: true
-    node: true
-  - connect_to: 10.0.0.2
-    ip: 10.0.0.2
-    hostname: node1-private.example.com
-    public_ip: 24.222.0.2
-    public_hostname: node1.example.com
-    master: true
-    node: true
-  - connect_to: 10.0.0.3
-    ip: 10.0.0.3
-    hostname: node2-private.example.com
-    public_ip: 24.222.0.3
-    public_hostname: node2.example.com
-    node: true
-    master: true
-  - connect_to: 10.0.0.4
-    ip: 10.0.0.4
-    hostname: node3-private.example.com
-    public_ip: 24.222.0.4
-    public_hostname: node3.example.com
-    node: true
-  - connect_to: 10.0.0.5
-    ip: 10.0.0.5
-    hostname: proxy-private.example.com
-    public_ip: 24.222.0.5
-    public_hostname: proxy.example.com
-    master_lb: true
-  - connect_to: 10.1.0.1
-    ip: 10.1.0.1
-    hostname: storage-private.example.com
-    public_ip: 24.222.0.6
-    public_hostname: storage.example.com
-    storage: true
+deployment:
+    hosts:
+      - connect_to: 10.0.0.1
+        ip: 10.0.0.1
+        hostname: master-private.example.com
+        public_ip: 24.222.0.1
+        public_hostname: master.example.com
+        roles:
+            - master
+            - node
+      - connect_to: 10.0.0.2
+        ip: 10.0.0.2
+        hostname: node1-private.example.com
+        public_ip: 24.222.0.2
+        public_hostname: node1.example.com
+        roles:
+            - master
+            - node
+      - connect_to: 10.0.0.3
+        ip: 10.0.0.3
+        hostname: node2-private.example.com
+        public_ip: 24.222.0.3
+        public_hostname: node2.example.com
+        roles:
+            - master
+            - node
+      - connect_to: 10.0.0.4
+        ip: 10.0.0.4
+        hostname: node3-private.example.com
+        public_ip: 24.222.0.4
+        public_hostname: node3.example.com
+        roles:
+            - node
+      - connect_to: 10.0.0.5
+        ip: 10.0.0.5
+        hostname: proxy-private.example.com
+        public_ip: 24.222.0.5
+        public_hostname: proxy.example.com
+        roles:
+            - master_lb
+      - connect_to: 10.1.0.1
+        ip: 10.1.0.1
+        hostname: storage-private.example.com
+        public_ip: 24.222.0.6
+        public_hostname: storage.example.com
+        roles:
+            - storage
+    roles:
+        master:
+        master_lb:
+        node:
+        storage:
 """
 
 QUICKHA_2_MASTER_CONFIG = """
 variant: %s
 ansible_ssh_user: root
-hosts:
-  - connect_to: 10.0.0.1
-    ip: 10.0.0.1
-    hostname: master-private.example.com
-    public_ip: 24.222.0.1
-    public_hostname: master.example.com
-    master: true
-    node: true
-  - connect_to: 10.0.0.2
-    ip: 10.0.0.2
-    hostname: node1-private.example.com
-    public_ip: 24.222.0.2
-    public_hostname: node1.example.com
-    master: true
-    node: true
-  - connect_to: 10.0.0.4
-    ip: 10.0.0.4
-    hostname: node3-private.example.com
-    public_ip: 24.222.0.4
-    public_hostname: node3.example.com
-    node: true
-  - connect_to: 10.0.0.5
-    ip: 10.0.0.5
-    hostname: proxy-private.example.com
-    public_ip: 24.222.0.5
-    public_hostname: proxy.example.com
-    master_lb: true
-  - connect_to: 10.1.0.1
-    ip: 10.1.0.1
-    hostname: storage-private.example.com
-    public_ip: 24.222.0.6
-    public_hostname: storage.example.com
-    storage: true
+deployment:
+    hosts:
+      - connect_to: 10.0.0.1
+        ip: 10.0.0.1
+        hostname: master-private.example.com
+        public_ip: 24.222.0.1
+        public_hostname: master.example.com
+        roles:
+            - master
+            - node
+      - connect_to: 10.0.0.2
+        ip: 10.0.0.2
+        hostname: node1-private.example.com
+        public_ip: 24.222.0.2
+        public_hostname: node1.example.com
+        roles:
+            - master
+            - node
+      - connect_to: 10.0.0.4
+        ip: 10.0.0.4
+        hostname: node3-private.example.com
+        public_ip: 24.222.0.4
+        public_hostname: node3.example.com
+        roles:
+            - node
+      - connect_to: 10.0.0.5
+        ip: 10.0.0.5
+        hostname: proxy-private.example.com
+        public_ip: 24.222.0.5
+        public_hostname: proxy.example.com
+        roles:
+            - master_lb
+      - connect_to: 10.1.0.1
+        ip: 10.1.0.1
+        hostname: storage-private.example.com
+        public_ip: 24.222.0.6
+        public_hostname: storage.example.com
+        roles:
+            - storage
+    roles:
+        master:
+        master_lb:
+        node:
+        storage:
 """
 
 QUICKHA_CONFIG_REUSED_LB = """
 variant: %s
 ansible_ssh_user: root
-hosts:
-  - connect_to: 10.0.0.1
-    ip: 10.0.0.1
-    hostname: master-private.example.com
-    public_ip: 24.222.0.1
-    public_hostname: master.example.com
-    master: true
-    node: true
-  - connect_to: 10.0.0.2
-    ip: 10.0.0.2
-    hostname: node1-private.example.com
-    public_ip: 24.222.0.2
-    public_hostname: node1.example.com
-    master: true
-    node: true
-    master_lb: true
-  - connect_to: 10.0.0.3
-    ip: 10.0.0.3
-    hostname: node2-private.example.com
-    public_ip: 24.222.0.3
-    public_hostname: node2.example.com
-    node: true
-    master: true
-  - connect_to: 10.1.0.1
-    ip: 10.1.0.1
-    hostname: storage-private.example.com
-    public_ip: 24.222.0.6
-    public_hostname: storage.example.com
-    storage: true
+deployment:
+    hosts:
+      - connect_to: 10.0.0.1
+        ip: 10.0.0.1
+        hostname: master-private.example.com
+        public_ip: 24.222.0.1
+        public_hostname: master.example.com
+        roles:
+            - master
+            - node
+      - connect_to: 10.0.0.2
+        ip: 10.0.0.2
+        hostname: node1-private.example.com
+        public_ip: 24.222.0.2
+        public_hostname: node1.example.com
+        roles:
+            - master
+            - node
+            - master_lb
+      - connect_to: 10.0.0.3
+        ip: 10.0.0.3
+        hostname: node2-private.example.com
+        public_ip: 24.222.0.3
+        public_hostname: node2.example.com
+        roles:
+            - master
+            - node
+      - connect_to: 10.1.0.1
+        ip: 10.1.0.1
+        hostname: storage-private.example.com
+        public_ip: 24.222.0.6
+        public_hostname: storage.example.com
+        roles:
+            - storage
+    roles:
+        master:
+        node:
+        storage:
 """
 
 QUICKHA_CONFIG_NO_LB = """
 variant: %s
 ansible_ssh_user: root
-hosts:
-  - connect_to: 10.0.0.1
-    ip: 10.0.0.1
-    hostname: master-private.example.com
-    public_ip: 24.222.0.1
-    public_hostname: master.example.com
-    master: true
-    node: true
-  - connect_to: 10.0.0.2
-    ip: 10.0.0.2
-    hostname: node1-private.example.com
-    public_ip: 24.222.0.2
-    public_hostname: node1.example.com
-    master: true
-    node: true
-  - connect_to: 10.0.0.3
-    ip: 10.0.0.3
-    hostname: node2-private.example.com
-    public_ip: 24.222.0.3
-    public_hostname: node2.example.com
-    node: true
-    master: true
-  - connect_to: 10.1.0.1
-    ip: 10.1.0.1
-    hostname: storage-private.example.com
-    public_ip: 24.222.0.6
-    public_hostname: storage.example.com
-    storage: true
+deployment:
+    hosts:
+      - connect_to: 10.0.0.1
+        ip: 10.0.0.1
+        hostname: master-private.example.com
+        public_ip: 24.222.0.1
+        public_hostname: master.example.com
+        roles:
+            - master
+            - node
+      - connect_to: 10.0.0.2
+        ip: 10.0.0.2
+        hostname: node1-private.example.com
+        public_ip: 24.222.0.2
+        public_hostname: node1.example.com
+        roles:
+            - master
+            - node
+      - connect_to: 10.0.0.3
+        ip: 10.0.0.3
+        hostname: node2-private.example.com
+        public_ip: 24.222.0.3
+        public_hostname: node2.example.com
+        roles:
+            - master
+            - node
+      - connect_to: 10.1.0.1
+        ip: 10.1.0.1
+        hostname: storage-private.example.com
+        public_ip: 24.222.0.6
+        public_hostname: storage.example.com
+        roles:
+            - storage
+    roles:
+        master:
+        node:
+        storage:
 """
 
 QUICKHA_CONFIG_PRECONFIGURED_LB = """
 variant: %s
 ansible_ssh_user: root
-master_routingconfig_subdomain: example.com
-hosts:
-  - connect_to: 10.0.0.1
-    ip: 10.0.0.1
-    hostname: master-private.example.com
-    public_ip: 24.222.0.1
-    public_hostname: master.example.com
-    master: true
-    node: true
-  - connect_to: 10.0.0.2
-    ip: 10.0.0.2
-    hostname: node1-private.example.com
-    public_ip: 24.222.0.2
-    public_hostname: node1.example.com
-    master: true
-    node: true
-  - connect_to: 10.0.0.3
-    ip: 10.0.0.3
-    hostname: node2-private.example.com
-    public_ip: 24.222.0.3
-    public_hostname: node2.example.com
-    node: true
-    master: true
-  - connect_to: 10.0.0.4
-    ip: 10.0.0.4
-    hostname: node3-private.example.com
-    public_ip: 24.222.0.4
-    public_hostname: node3.example.com
-    node: true
-  - connect_to: proxy-private.example.com
-    hostname: proxy-private.example.com
-    public_hostname: proxy.example.com
-    master_lb: true
-    preconfigured: true
-  - connect_to: 10.1.0.1
-    ip: 10.1.0.1
-    hostname: storage-private.example.com
-    public_ip: 24.222.0.6
-    public_hostname: storage.example.com
-    storage: true
+deployment:
+    hosts:
+      - connect_to: 10.0.0.1
+        ip: 10.0.0.1
+        hostname: master-private.example.com
+        public_ip: 24.222.0.1
+        public_hostname: master.example.com
+        roles:
+            - master
+            - node
+      - connect_to: 10.0.0.2
+        ip: 10.0.0.2
+        hostname: node1-private.example.com
+        public_ip: 24.222.0.2
+        public_hostname: node1.example.com
+        roles:
+            - master
+            - node
+      - connect_to: 10.0.0.3
+        ip: 10.0.0.3
+        hostname: node2-private.example.com
+        public_ip: 24.222.0.3
+        public_hostname: node2.example.com
+        roles:
+            - master
+            - node
+      - connect_to: 10.0.0.4
+        ip: 10.0.0.4
+        hostname: node3-private.example.com
+        public_ip: 24.222.0.4
+        public_hostname: node3.example.com
+        roles:
+            - node
+      - connect_to: proxy-private.example.com
+        hostname: proxy-private.example.com
+        public_hostname: proxy.example.com
+        preconfigured: true
+        roles:
+            - master_lb
+      - connect_to: 10.1.0.1
+        ip: 10.1.0.1
+        hostname: storage-private.example.com
+        public_ip: 24.222.0.6
+        public_hostname: storage.example.com
+        roles:
+            - storage
+    roles:
+        master:
+        master_lb:
+        node:
+        storage:
 """
 
 class UnattendedCliTests(OOCliFixture):
@@ -439,10 +505,7 @@ class UnattendedCliTests(OOCliFixture):
     @patch('ooinstall.openshift_ansible.run_main_playbook')
     @patch('ooinstall.openshift_ansible.load_system_facts')
     def test_inventory_write(self, load_facts_mock, run_playbook_mock):
-
-        # Add an ssh user so we can verify it makes it to the inventory file:
-        merged_config = "%s\n%s" % (SAMPLE_CONFIG % 'openshift-enterprise',
-            "ansible_ssh_user: bob")
+        merged_config = SAMPLE_CONFIG % 'openshift-enterprise'
         load_facts_mock.return_value = (MOCK_FACTS, 0)
         run_playbook_mock.return_value = 0
 
@@ -456,7 +519,7 @@ class UnattendedCliTests(OOCliFixture):
         # Check the inventory file looks as we would expect:
         inventory = ConfigParser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, 'hosts'))
-        self.assertEquals('bob',
+        self.assertEquals('root',
             inventory.get('OSEv3:vars', 'ansible_ssh_user'))
         self.assertEquals('openshift-enterprise',
             inventory.get('OSEv3:vars', 'deployment_type'))

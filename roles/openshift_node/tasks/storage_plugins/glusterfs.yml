@@ -3,14 +3,30 @@
   action: "{{ ansible_pkg_mgr }} name=glusterfs-fuse state=present"
   when: not openshift.common.is_atomic | bool
 
-- name: Set sebooleans to allow gluster storage plugin access from containers
+- name: Check for existence of virt_use_fusefs seboolean
+  command: getsebool virt_use_fusefs
+  register: virt_use_fusefs_output
+  when: ansible_selinux and ansible_selinux.status == "enabled"
+  failed_when: false
+  changed_when: false
+
+- name: Set seboolean to allow gluster storage plugin access from containers
   seboolean:
-    name: "{{ item }}"
+    name: virt_use_fusefs
     state: yes
     persistent: yes
+  when: ansible_selinux and ansible_selinux.status == "enabled" and virt_use_fusefs_output.rc == 0
+
+- name: Check for existence of virt_sandbox_use_fusefs seboolean
+  command: getsebool virt_sandbox_use_fusefs
+  register: virt_sandbox_use_fusefs_output
   when: ansible_selinux and ansible_selinux.status == "enabled"
-  with_items:
-  - virt_use_fusefs
-  - virt_sandbox_use_fusefs
-  register: sebool_result
-  failed_when: "'state' not in sebool_result and 'msg' in sebool_result and 'SELinux boolean {{ item }} does not exist' not in sebool_result.msg"
+  failed_when: false
+  changed_when: false
+
+- name: Set seboolean to allow gluster storage plugin access from containers(sandbox)
+  seboolean:
+    name: virt_sandbox_use_fusefs
+    state: yes
+    persistent: yes
+  when: ansible_selinux and ansible_selinux.status == "enabled" and virt_sandbox_use_fusefs_output.rc == 0

@@ -24,10 +24,10 @@
   failed_when: false
 
 - set_fact:
-    registry_config: "{{ lookup('template', '../templates/registry_config.j2') | b64encode }}"
+    registry_config: "{{ lookup('template', 'registry_config.j2') | b64encode }}"
 
 - set_fact:
-    registry_config_secret: "{{ lookup('template', '../templates/registry_config_secret.j2') | from_yaml }}"
+    registry_config_secret: "{{ lookup('template', 'registry_config_secret.j2') | from_yaml }}"
 
 - set_fact:
     same_storage_provider: "{{ (secrets.stdout|from_json)['metadata']['annotations']['provider'] | default(none) == openshift.hosted.registry.storage.provider }}"
@@ -111,4 +111,4 @@
     --config={{ openshift_hosted_kubeconfig }}
     --namespace={{ openshift.hosted.registry.namespace | default('default') }}
     deploy dc/docker-registry --latest
-  when: secrets.rc == 0 and update_config_secret.rc == 0 and same_storage_provider | bool
+  when: secrets.rc == 0 and not update_config_secret | skipped and update_config_secret.rc == 0 and same_storage_provider | bool

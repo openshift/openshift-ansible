@@ -12,27 +12,35 @@ from ooinstall.oo_config import OOConfig, Host, OOConfigInvalidHostError
 
 SAMPLE_CONFIG = """
 variant: openshift-enterprise
+variant_version: 3.2
 ansible_ssh_user: root
-hosts:
-  - connect_to: master-private.example.com
-    ip: 10.0.0.1
-    hostname: master-private.example.com
-    public_ip: 24.222.0.1
-    public_hostname: master.example.com
-    master: true
-    node: true
-  - connect_to: node1-private.example.com
-    ip: 10.0.0.2
-    hostname: node1-private.example.com
-    public_ip: 24.222.0.2
-    public_hostname: node1.example.com
-    node: true
-  - connect_to: node2-private.example.com
-    ip: 10.0.0.3
-    hostname: node2-private.example.com
-    public_ip: 24.222.0.3
-    public_hostname: node2.example.com
-    node: true
+deployment:
+    hosts:
+      - connect_to: master-private.example.com
+        ip: 10.0.0.1
+        hostname: master-private.example.com
+        public_ip: 24.222.0.1
+        public_hostname: master.example.com
+        roles:
+            - master
+            - node
+      - connect_to: node1-private.example.com
+        ip: 10.0.0.2
+        hostname: node1-private.example.com
+        public_ip: 24.222.0.2
+        public_hostname: node1.example.com
+        roles:
+            - node
+      - connect_to: node2-private.example.com
+        ip: 10.0.0.3
+        hostname: node2-private.example.com
+        public_ip: 24.222.0.3
+        public_hostname: node2.example.com
+        roles:
+            - node
+    roles:
+        master:
+        node:
 """
 
 # Used to test automatic upgrading of config:
@@ -56,45 +64,59 @@ validated_facts:
 
 
 CONFIG_INCOMPLETE_FACTS = """
-hosts:
-  - connect_to: 10.0.0.1
-    ip: 10.0.0.1
-    hostname: master-private.example.com
-    public_ip: 24.222.0.1
-    public_hostname: master.example.com
-    master: true
-  - connect_to: 10.0.0.2
-    ip: 10.0.0.2
-    hostname: 24.222.0.2
-    public_ip: 24.222.0.2
-    node: true
-  - connect_to: 10.0.0.3
-    ip: 10.0.0.3
-    node: true
+deployment:
+    hosts:
+      - connect_to: 10.0.0.1
+        ip: 10.0.0.1
+        hostname: master-private.example.com
+        public_ip: 24.222.0.1
+        public_hostname: master.example.com
+        roles:
+            - master
+      - connect_to: 10.0.0.2
+        ip: 10.0.0.2
+        hostname: 24.222.0.2
+        public_ip: 24.222.0.2
+        roles:
+            - node
+      - connect_to: 10.0.0.3
+        ip: 10.0.0.3
+        roles:
+            - node
+    roles:
+        master:
+        node:
 """
 
 CONFIG_BAD = """
 variant: openshift-enterprise
 ansible_ssh_user: root
-hosts:
-  - connect_to: master-private.example.com
-    ip: 10.0.0.1
-    hostname: master-private.example.com
-    public_ip: 24.222.0.1
-    public_hostname: master.example.com
-    master: true
-    node: true
-  - ip: 10.0.0.2
-    hostname: node1-private.example.com
-    public_ip: 24.222.0.2
-    public_hostname: node1.example.com
-    node: true
-  - connect_to: node2-private.example.com
-    ip: 10.0.0.3
-    hostname: node2-private.example.com
-    public_ip: 24.222.0.3
-    public_hostname: node2.example.com
-    node: true
+deployment:
+    hosts:
+      - connect_to: master-private.example.com
+        ip: 10.0.0.1
+        hostname: master-private.example.com
+        public_ip: 24.222.0.1
+        public_hostname: master.example.com
+        roles:
+            - master
+            - node
+      - ip: 10.0.0.2
+        hostname: node1-private.example.com
+        public_ip: 24.222.0.2
+        public_hostname: node1.example.com
+        roles:
+            - node
+      - connect_to: node2-private.example.com
+        ip: 10.0.0.3
+        hostname: node2-private.example.com
+        public_ip: 24.222.0.3
+        public_hostname: node2.example.com
+        roles:
+            - node
+    roles:
+        master:
+        node:
 """
 
 class OOInstallFixture(unittest.TestCase):
@@ -123,47 +145,6 @@ class OOInstallFixture(unittest.TestCase):
         return path
 
 
-class LegacyOOConfigTests(OOInstallFixture):
-
-    def setUp(self):
-        OOInstallFixture.setUp(self)
-        self.cfg_path = self.write_config(os.path.join(self.work_dir,
-            'ooinstall.conf'), LEGACY_CONFIG)
-        self.cfg = OOConfig(self.cfg_path)
-
-    def test_load_config_memory(self):
-        self.assertEquals('openshift-enterprise', self.cfg.settings['variant'])
-        self.assertEquals('3.0', self.cfg.settings['variant_version'])
-        self.assertEquals('v1', self.cfg.settings['version'])
-
-        self.assertEquals(3, len(self.cfg.hosts))
-        h1 = self.cfg.get_host('10.0.0.1')
-        self.assertEquals('10.0.0.1', h1.ip)
-        self.assertEquals('24.222.0.1', h1.public_ip)
-        self.assertEquals('master-private.example.com', h1.hostname)
-        self.assertEquals('master.example.com', h1.public_hostname)
-
-        h2 = self.cfg.get_host('10.0.0.2')
-        self.assertEquals('10.0.0.2', h2.ip)
-        self.assertEquals('24.222.0.2', h2.public_ip)
-        self.assertEquals('node1-private.example.com', h2.hostname)
-        self.assertEquals('node1.example.com', h2.public_hostname)
-
-        h3 = self.cfg.get_host('10.0.0.3')
-        self.assertEquals('10.0.0.3', h3.ip)
-        self.assertEquals('24.222.0.3', h3.public_ip)
-        self.assertEquals('node2-private.example.com', h3.hostname)
-        self.assertEquals('node2.example.com', h3.public_hostname)
-
-        self.assertFalse('masters' in self.cfg.settings)
-        self.assertFalse('nodes' in self.cfg.settings)
-        self.assertFalse('Description' in self.cfg.settings)
-        self.assertFalse('Name' in self.cfg.settings)
-        self.assertFalse('Subscription' in self.cfg.settings)
-        self.assertFalse('Vendor' in self.cfg.settings)
-        self.assertFalse('Version' in self.cfg.settings)
-        self.assertFalse('validates_facts' in self.cfg.settings)
-
 
 class OOConfigTests(OOInstallFixture):
 
@@ -173,16 +154,16 @@ class OOConfigTests(OOInstallFixture):
             'ooinstall.conf'), SAMPLE_CONFIG)
         ooconfig = OOConfig(cfg_path)
 
-        self.assertEquals(3, len(ooconfig.hosts))
-        self.assertEquals("master-private.example.com", ooconfig.hosts[0].connect_to)
-        self.assertEquals("10.0.0.1", ooconfig.hosts[0].ip)
-        self.assertEquals("master-private.example.com", ooconfig.hosts[0].hostname)
+        self.assertEquals(3, len(ooconfig.deployment.hosts))
+        self.assertEquals("master-private.example.com", ooconfig.deployment.hosts[0].connect_to)
+        self.assertEquals("10.0.0.1", ooconfig.deployment.hosts[0].ip)
+        self.assertEquals("master-private.example.com", ooconfig.deployment.hosts[0].hostname)
 
         self.assertEquals(["10.0.0.1", "10.0.0.2", "10.0.0.3"],
-                          [host['ip'] for host in ooconfig.settings['hosts']])
+                          [host.ip for host in ooconfig.deployment.hosts])
 
         self.assertEquals('openshift-enterprise', ooconfig.settings['variant'])
-        self.assertEquals('v1', ooconfig.settings['version'])
+        self.assertEquals('v2', ooconfig.settings['version'])
 
     def test_load_bad_config(self):
 
@@ -222,8 +203,10 @@ class OOConfigTests(OOInstallFixture):
         written_config = yaml.safe_load(f.read())
         f.close()
 
-        self.assertEquals(3, len(written_config['hosts']))
-        for h in written_config['hosts']:
+
+
+        self.assertEquals(3, len(written_config['deployment']['hosts']))
+        for h in written_config['deployment']['hosts']:
             self.assertTrue('ip' in h)
             self.assertTrue('public_ip' in h)
             self.assertTrue('hostname' in h)
@@ -231,7 +214,7 @@ class OOConfigTests(OOInstallFixture):
 
         self.assertTrue('ansible_ssh_user' in written_config)
         self.assertTrue('variant' in written_config)
-        self.assertEquals('v1', written_config['version'])
+        self.assertEquals('v2', written_config['version'])
 
         # Some advanced settings should not get written out if they
         # were not specified by the user:
@@ -256,7 +239,3 @@ class HostTests(OOInstallFixture):
             'public_hostname': 'a.example.com',
         }
         self.assertRaises(OOConfigInvalidHostError, Host, **yaml_props)
-
-
-
-
