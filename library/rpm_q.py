@@ -3,7 +3,12 @@
 
 # (c) 2015, Tobias Florek <tob@butter.sh>
 # Licensed under the terms of the MIT License
+"""
+An ansible module to query the RPM database. For use, when yum/dnf are not
+available.
+"""
 
+# pylint: disable=redefined-builtin,wildcard-import,unused-wildcard-import
 from ansible.module_utils.basic import *
 
 DOCUMENTATION = """
@@ -28,8 +33,6 @@ EXAMPLES = """
 - rpm_q: name=ansible state=absent
 """
 
-import os
-
 RPM_BINARY = '/bin/rpm'
 
 def main():
@@ -48,6 +51,7 @@ def main():
     name = module.params['name']
     state = module.params['state']
 
+    # pylint: disable=invalid-name
     rc, out, err = module.run_command([RPM_BINARY, '-q', name])
 
     installed = out.rstrip('\n').split('\n')
