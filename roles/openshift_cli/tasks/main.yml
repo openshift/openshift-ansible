@@ -6,6 +6,8 @@
 - name: Pull CLI Image
   command: >
     docker pull {{ openshift.common.cli_image }}:{{ openshift_image_tag }}
+  register: pull_result
+  changed_when: "'Downloaded newer image' in pull_result.stdout"
   when: openshift.common.is_containerized | bool
 
 - name: Create /usr/local/bin/openshift cli wrapper
