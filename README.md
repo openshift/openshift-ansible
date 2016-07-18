@@ -11,11 +11,11 @@ they may in the future.
 - Install base dependencies:
   - Fedora:
   ```
-    dnf install -y ansible-1.9.4 pyOpenSSL python-cryptography
+    dnf install -y ansible-2.1.0.0 pyOpenSSL python-cryptography
   ```
    - OSX:
   ```
-    # Install ansible 1.9.4 and python 2
+    # Install ansible 2.1.0.0 and python 2
     brew install ansible python
   ```
 - Setup for a specific cloud:
