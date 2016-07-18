@@ -4,6 +4,28 @@
     msg: "Unsupported ansible version: {{ ansible_version }} found"
   when: not ansible_version.full | version_compare('1.9.4', 'ge')
 
+- name: Get yum package version
+  command: rpm -q yum
+  when: ansible_os_family == 'RedHat' and ansible_distribution != 'Fedora'
+  changed_when: false
+  register: yum_version
+
+- name: Get yum-utils package version
+  command: rpm -q yum-utils
+  when: ansible_os_family == 'RedHat' and ansible_distribution != 'Fedora'
+  changed_when: false
+  register: yum_utils_version
+
+- name: Verify yum version is greater than or equal to 3.4.3-132
+  fail:
+    msg: "Please upgrade yum to version 3.4.3-132 or greater. The installed version is known to have issues with the Ansible yum module."
+  when: ansible_os_family == 'RedHat' and ansible_distribution != 'Fedora' and yum_version.stdout | replace('yum-', '') | version_compare('3.4.3-132', 'lt')
+
+- name: Verify yum-utils version is greater than or equal to 1.1.31-34
+  fail:
+    msg: "Please upgrade yum-utils to version 1.1.31-34 or greater. The installed version is known to have issues with the Ansible yum module."
+  when: ansible_os_family == 'RedHat' and ansible_distribution != 'Fedora' and yum_utils_version.stdout | replace('yum-utils-', '') | version_compare('1.1.31-34', 'lt')
+
 - name: Detecting Operating System
   stat:
     path: /run/ostree-booted
