@@ -1,25 +1,31 @@
-# TODO: Temporarily disabled due to importing old code into openshift-ansible
-# repo. We will work on these over time.
 # pylint: disable=bad-continuation,missing-docstring,no-self-use,invalid-name,too-many-instance-attributes,too-few-public-methods
 
 import os
+import sys
 import yaml
 from pkg_resources import resource_filename
 
-PERSIST_SETTINGS = [
+CONFIG_PERSIST_SETTINGS = [
     'ansible_ssh_user',
+    'ansible_callback_facts_yaml',
     'ansible_config',
+    'ansible_inventory_path',
     'ansible_log_path',
-    'master_routingconfig_subdomain',
-    'proxy',
-    'proxy_exclude_hosts',
+    'deployment',
+    'version',
     'variant',
     'variant_version',
-    'version',
     ]
+
+DEPLOYMENT_PERSIST_SETTINGS = [
+    'master_routingconfig_subdomain',
+    'proxy_http',
+    'proxy_https',
+    'proxy_exclude_hosts',
+]
+
 DEFAULT_REQUIRED_FACTS = ['ip', 'public_ip', 'hostname', 'public_hostname']
 PRECONFIGURED_REQUIRED_FACTS = ['hostname', 'public_hostname']
-
 
 class OOConfigFileError(Exception):
     """The provided config file path can't be read/written
@@ -40,31 +46,19 @@ class Host(object):
         self.public_ip = kwargs.get('public_ip', None)
         self.public_hostname = kwargs.get('public_hostname', None)
         self.connect_to = kwargs.get('connect_to', None)
+
         self.preconfigured = kwargs.get('preconfigured', None)
+        self.schedulable = kwargs.get('schedulable', None)
         self.new_host = kwargs.get('new_host', None)
-
-        # Should this host run as an OpenShift master:
-        self.master = kwargs.get('master', False)
-
-        # Should this host run as an OpenShift node:
-        self.node = kwargs.get('node', False)
-
-        # Should this host run as an HAProxy:
-        self.master_lb = kwargs.get('master_lb', False)
-
-        # Should this host run as an HAProxy:
-        self.storage = kwargs.get('storage', False)
-
         self.containerized = kwargs.get('containerized', False)
+        self.node_labels = kwargs.get('node_labels', '')
+
+        # allowable roles: master, node, etcd, storage, master_lb, new
+        self.roles = kwargs.get('roles', [])
 
         if self.connect_to is None:
-            raise OOConfigInvalidHostError("You must specify either an ip " \
-                "or hostname as 'connect_to'")
-
-        if self.master is False and self.node is False and \
-           self.master_lb is False and self.storage is False:
             raise OOConfigInvalidHostError(
-                "You must specify each host as either a master or a node.")
+                "You must specify either an ip or hostname as 'connect_to'")
 
     def __str__(self):
         return self.connect_to
@@ -75,39 +69,81 @@ class Host(object):
     def to_dict(self):
         """ Used when exporting to yaml. """
         d = {}
-        for prop in ['ip', 'hostname', 'public_ip', 'public_hostname',
-                     'master', 'node', 'master_lb', 'storage', 'containerized',
-                     'connect_to', 'preconfigured', 'new_host']:
+
+        for prop in ['ip', 'hostname', 'public_ip', 'public_hostname', 'connect_to',
+                     'preconfigured', 'containerized', 'schedulable', 'roles', 'node_labels']:
             # If the property is defined (not None or False), export it:
             if getattr(self, prop):
                 d[prop] = getattr(self, prop)
         return d
 
+    def is_master(self):
+        return 'master' in self.roles
+
+    def is_node(self):
+        return 'node' in self.roles
+
+    def is_master_lb(self):
+        return 'master_lb' in self.roles
+
+    def is_storage(self):
+        return 'storage' in self.roles
+
+
     def is_etcd_member(self, all_hosts):
         """ Will this host be a member of a standalone etcd cluster. """
-        if not self.master:
+        if not self.is_master():
             return False
-        masters = [host for host in all_hosts if host.master]
+        masters = [host for host in all_hosts if host.is_master()]
         if len(masters) > 1:
             return True
         return False
 
     def is_dedicated_node(self):
         """ Will this host be a dedicated node. (not a master) """
-        return self.node and not self.master
+        return self.is_node() and not self.is_master()
 
     def is_schedulable_node(self, all_hosts):
         """ Will this host be a node marked as schedulable. """
-        if not self.node:
+        if not self.is_node():
             return False
-        if not self.master:
+        if not self.is_master():
             return True
 
-        masters = [host for host in all_hosts if host.master]
-        nodes = [host for host in all_hosts if host.node]
+        masters = [host for host in all_hosts if host.is_master()]
+        nodes = [host for host in all_hosts if host.is_node()]
         if len(masters) == len(nodes):
             return True
         return False
+
+
+class Role(object):
+    """ A role that will be applied to a host. """
+    def __init__(self, name, variables):
+        self.name = name
+        self.variables = variables
+
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return self.name
+
+    def to_dict(self):
+        """ Used when exporting to yaml. """
+        d = {}
+        for prop in ['name', 'variables']:
+            # If the property is defined (not None or False), export it:
+            if getattr(self, prop):
+                d[prop] = getattr(self, prop)
+        return d
+
+
+class Deployment(object):
+    def __init__(self, **kwargs):
+        self.hosts = kwargs.get('hosts', [])
+        self.roles = kwargs.get('roles', {})
+        self.variables = kwargs.get('variables', {})
 
 
 class OOConfig(object):
@@ -122,32 +158,51 @@ class OOConfig(object):
         else:
             self.config_path = os.path.normpath(self.default_dir +
                                                 self.default_file)
+        self.deployment = Deployment(hosts=[], roles={}, variables={})
         self.settings = {}
         self._read_config()
         self._set_defaults()
 
+
     def _read_config(self):
-        self.hosts = []
         try:
             if os.path.exists(self.config_path):
-                cfgfile = open(self.config_path, 'r')
-                self.settings = yaml.safe_load(cfgfile.read())
-                cfgfile.close()
+                with open(self.config_path, 'r') as cfgfile:
+                    loaded_config = yaml.safe_load(cfgfile.read())
 
                 # Use the presence of a Description as an indicator this is
                 # a legacy config file:
                 if 'Description' in self.settings:
                     self._upgrade_legacy_config()
 
-                # Parse the hosts into DTO objects:
-                if 'hosts' in self.settings:
-                    for host in self.settings['hosts']:
-                        self.hosts.append(Host(**host))
+                try:
+                    host_list = loaded_config['deployment']['hosts']
+                    role_list = loaded_config['deployment']['roles']
+                except KeyError as e:
+                    print "Error loading config, no such key: {}".format(e)
+                    sys.exit(0)
 
-                # Watchout for the variant_version coming in as a float:
-                if 'variant_version' in self.settings:
-                    self.settings['variant_version'] = \
-                        str(self.settings['variant_version'])
+                for setting in CONFIG_PERSIST_SETTINGS:
+                    try:
+                        self.settings[setting] = str(loaded_config[setting])
+                    except KeyError:
+                        continue
+
+                for setting in DEPLOYMENT_PERSIST_SETTINGS:
+                    try:
+                        self.deployment.variables[setting] = \
+                            str(loaded_config['deployment'][setting])
+                    except KeyError:
+                        continue
+
+                # Parse the hosts into DTO objects:
+                for host in host_list:
+                    self.deployment.hosts.append(Host(**host))
+
+                # Parse the roles into Objects
+                for name, variables in role_list.iteritems():
+                    self.deployment.roles.update({name: Role(name, variables)})
+
 
         except IOError, ferr:
             raise OOConfigFileError('Cannot open config file "{}": {}'.format(ferr.filename,
@@ -179,18 +234,21 @@ class OOConfig(object):
         self.settings['variant'] = 'openshift-enterprise'
         self.settings['variant_version'] = '3.0'
 
+    def _upgrade_v1_config(self):
+        #TODO write code to upgrade old config
+        return
+
     def _set_defaults(self):
 
         if 'ansible_inventory_directory' not in self.settings:
-            self.settings['ansible_inventory_directory'] = \
-                self._default_ansible_inv_dir()
+            self.settings['ansible_inventory_directory'] = self._default_ansible_inv_dir()
         if not os.path.exists(self.settings['ansible_inventory_directory']):
             os.makedirs(self.settings['ansible_inventory_directory'])
         if 'ansible_plugins_directory' not in self.settings:
             self.settings['ansible_plugins_directory'] = \
                 resource_filename(__name__, 'ansible_plugins')
         if 'version' not in self.settings:
-            self.settings['version'] = 'v1'
+            self.settings['version'] = 'v2'
 
         if 'ansible_callback_facts_yaml' not in self.settings:
             self.settings['ansible_callback_facts_yaml'] = '%s/callback_facts.yaml' % \
@@ -219,7 +277,7 @@ class OOConfig(object):
         """
         result = {}
 
-        for host in self.hosts:
+        for host in self.deployment.hosts:
             missing_facts = []
             if host.preconfigured:
                 required_facts = PRECONFIGURED_REQUIRED_FACTS
@@ -240,17 +298,33 @@ class OOConfig(object):
 
     def persist_settings(self):
         p_settings = {}
-        for setting in PERSIST_SETTINGS:
+
+        for setting in CONFIG_PERSIST_SETTINGS:
             if setting in self.settings and self.settings[setting]:
                 p_settings[setting] = self.settings[setting]
-        p_settings['hosts'] = []
-        for host in self.hosts:
-            p_settings['hosts'].append(host.to_dict())
 
-        if self.settings['ansible_inventory_directory'] != \
-                self._default_ansible_inv_dir():
-            p_settings['ansible_inventory_directory'] = \
-                self.settings['ansible_inventory_directory']
+
+        p_settings['deployment'] = {}
+        p_settings['deployment']['hosts'] = []
+        p_settings['deployment']['roles'] = {}
+
+        for setting in DEPLOYMENT_PERSIST_SETTINGS:
+            if setting in self.deployment.variables:
+                p_settings['deployment'][setting] = self.deployment.variables[setting]
+
+        for host in self.deployment.hosts:
+            p_settings['deployment']['hosts'].append(host.to_dict())
+
+        try:
+            p_settings['variant'] = self.settings['variant']
+            p_settings['variant_version'] = self.settings['variant_version']
+
+            if self.settings['ansible_inventory_directory'] != self._default_ansible_inv_dir():
+                p_settings['ansible_inventory_directory'] = self.settings['ansible_inventory_directory']
+        except KeyError as e:
+            print "Error persisting settings: {}".format(e)
+            sys.exit(0)
+
 
         return p_settings
 
@@ -261,7 +335,7 @@ class OOConfig(object):
         return self.yaml()
 
     def get_host(self, name):
-        for host in self.hosts:
+        for host in self.deployment.hosts:
             if host.connect_to == name:
                 return host
         return None
