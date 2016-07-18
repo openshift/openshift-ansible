@@ -3,16 +3,30 @@
   action: "{{ ansible_pkg_mgr }} name=nfs-utils state=present"
   when: not openshift.common.is_atomic | bool
 
+- name: Check for existence of virt_use_nfs seboolean
+  command: getsebool virt_use_nfs
+  register: virt_use_nfs_output
+  when: ansible_selinux and ansible_selinux.status == "enabled"
+  failed_when: false
+  changed_when: false
+
 - name: Set seboolean to allow nfs storage plugin access from containers
   seboolean:
     name: virt_use_nfs
     state: yes
     persistent: yes
+  when: ansible_selinux and ansible_selinux.status == "enabled" and virt_use_nfs_output.rc == 0
+
+- name: Check for existence of virt_sandbox_use_nfs seboolean
+  command: getsebool virt_sandbox_use_nfs
+  register: virt_sandbox_use_nfs_output
   when: ansible_selinux and ansible_selinux.status == "enabled"
+  failed_when: false
+  changed_when: false
 
 - name: Set seboolean to allow nfs storage plugin access from containers(sandbox)
   seboolean:
     name: virt_sandbox_use_nfs
     state: yes
     persistent: yes
-  when: ansible_selinux and ansible_selinux.status == "enabled"
+  when: ansible_selinux and ansible_selinux.status == "enabled" and virt_sandbox_use_nfs_output.rc == 0
