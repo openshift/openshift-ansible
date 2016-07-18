@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.12
+Version:        3.2.13
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,16 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Jul 18 2016 Scott Dodson <sdodson@redhat.com> 3.2.13-1
+- Temporarily link registry config templates for ansible 1.9.x support.
+  (abutcher@redhat.com)
+- Remove relative lookup for registry config and check for skipped update in
+  registry redeploy conditional. (abutcher@redhat.com)
+- Arbitrary Installer yaml (smunilla@redhat.com)
+- Check for existence of sebooleans prior to setting. (abutcher@redhat.com)
+- Automatic commit of package [openshift-ansible] release [3.3.2-1].
+  (sdodson@redhat.com)
+
 * Sun Jul 17 2016 Scott Dodson <sdodson@redhat.com> 3.2.12-1
 - Convert openshift_release and openshift_version to strings for startswith
   (sdodson@redhat.com)
