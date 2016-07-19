@@ -660,7 +660,7 @@ class FilterModule(object):
                         if kind == 'nfs':
                             host = params['host']
                             if host == None:
-                                if len(groups['oo_nfs_to_config']) > 0:
+                                if 'oo_nfs_to_config' in groups and len(groups['oo_nfs_to_config']) > 0:
                                     host = groups['oo_nfs_to_config'][0]
                                 else:
                                     raise errors.AnsibleFilterError("|failed no storage host detected")
