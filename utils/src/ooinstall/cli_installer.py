@@ -512,13 +512,6 @@ def error_if_missing_info(oo_cfg):
         sys.exit(1)
     oo_cfg.settings['variant_version'] = version.name
 
-    missing_facts = oo_cfg.calc_missing_facts()
-    if len(missing_facts) > 0:
-        missing_info = True
-        click.echo('For unattended installs, facts must be provided for all masters/nodes:')
-        for host in missing_facts:
-            click.echo('Host "%s" missing facts: %s' % (host, ", ".join(missing_facts[host])))
-
     # check that all listed host roles are included
     listed_roles = get_host_roles_set(oo_cfg)
     configured_roles = set([role for role in oo_cfg.deployment.roles])
@@ -991,7 +984,7 @@ def install(ctx, force, gen_inventory):
     # TODO: if there are *new* nodes and this is a live install, we may need the  user
     # to confirm the settings for new nodes. Look into this once we're distinguishing
     # between new and pre-existing nodes.
-    if len(oo_cfg.calc_missing_facts()) > 0:
+    if not ctx.obj['unattended'] and len(oo_cfg.calc_missing_facts()) > 0:
         confirm_hosts_facts(oo_cfg, callback_facts)
 
     # Write quick installer config file to disk:
