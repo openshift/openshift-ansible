@@ -32,7 +32,7 @@
     content: "{{ openshift.hosted.router.certificate.contents }}"
     dest: "{{ openshift_master_config_dir }}/openshift-router.pem"
     mode: 0600
-  when: openshift.hosted.router.certificate | default(none) is not none
+  when: "'certificate' in openshift.hosted.router and 'contents' in openshift.hosted.router.certificate"
 
 - name: Retrieve list of openshift nodes matching router selector
   command: >
@@ -53,7 +53,7 @@
     {% if replicas > 1 -%}
     --replicas={{ replicas }}
     {% endif -%}
-    {% if openshift.hosted.router.certificate | default(none) is not none -%}
+    {% if 'certificate' in openshift.hosted.router and 'contents' in openshift.hosted.router.certificate -%}
     --default-cert={{ openshift_master_config_dir }}/openshift-router.pem
     {% endif -%}
     --namespace={{ openshift.hosted.router.namespace | default('default') }}
