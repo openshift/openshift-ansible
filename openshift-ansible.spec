@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.13
+Version:        3.2.14
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Jul 20 2016 Scott Dodson <sdodson@redhat.com> 3.2.14-1
+- a-o-i: Write Role variable groups (smunilla@redhat.com)
+- a-o-i: Looser facts requirements for unattended (smunilla@redhat.com)
+
 * Mon Jul 18 2016 Scott Dodson <sdodson@redhat.com> 3.2.13-1
 - Temporarily link registry config templates for ansible 1.9.x support.
   (abutcher@redhat.com)
