@@ -164,7 +164,8 @@ def write_inventory_vars(base_inventory, multiple_masters, proxy):
 
     for name, role_obj in CFG.deployment.roles.iteritems():
         if role_obj.variables:
-            base_inventory.write("{}:vars".format(name))
+            group_name = ROLES_TO_GROUPS_MAP.get(name, name)
+            base_inventory.write("\n[{}:vars]\n".format(group_name))
             for variable, value in role_obj.variables.iteritems():
                 inventory_var = VARIABLES_MAP.get(variable, variable)
                 if value:
