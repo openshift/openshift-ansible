@@ -15,7 +15,7 @@
       groups: oo_hosts_to_terminate
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_become: "{{ deployment_vars[deployment_type].become }}"
-    with_items: groups[cluster_group] | default([])
+    with_items: '{{ groups[cluster_group] | default([]) }}'
 
 - name: Unsubscribe VMs
   hosts: oo_hosts_to_terminate
@@ -42,30 +42,30 @@
       command: '{{ item[1] }}'
       uri: '{{ libvirt_uri }}'
     with_nested:
-    - groups['oo_hosts_to_terminate']
+    - "{{ groups['oo_hosts_to_terminate'] }}"
     - [ destroy, undefine ]
 
   - name: Delete VM drives
     command: 'virsh -c {{ libvirt_uri }} vol-delete --pool {{ libvirt_storage_pool }} {{ item }}.qcow2'
     args:
       removes: '{{ libvirt_storage_pool_path }}/{{ item }}.qcow2'
-    with_items: groups['oo_hosts_to_terminate']
+    with_items: "{{ groups['oo_hosts_to_terminate'] }}"
 
   - name: Delete VM docker drives
     command: 'virsh -c {{ libvirt_uri }} vol-delete --pool {{ libvirt_storage_pool }} {{ item }}-docker.qcow2'
     args:
       removes: '{{ libvirt_storage_pool_path }}/{{ item }}-docker.qcow2'
-    with_items: groups['oo_hosts_to_terminate']
+    with_items: "{{ groups['oo_hosts_to_terminate'] }}"
 
   - name: Delete the VM cloud-init image
     file:
       path: '{{ libvirt_storage_pool_path }}/{{ item }}_cloud-init.iso'
       state: absent
-    with_items: groups['oo_hosts_to_terminate']
+    with_items: "{{ groups['oo_hosts_to_terminate'] }}"
 
   - name: Remove the cloud-init config directory
     file:
       path: '{{ libvirt_storage_pool_path }}/{{ item }}_configdrive/'
       state: absent
-    with_items: groups['oo_hosts_to_terminate']
+    with_items: "{{ groups['oo_hosts_to_terminate'] }}"
 
