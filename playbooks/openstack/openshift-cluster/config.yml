@@ -1,4 +1,6 @@
 ---
+- include: ../../common/openshift-cluster/verify_ansible_version.yml
+
 - hosts: localhost
   gather_facts: no
   tasks:
