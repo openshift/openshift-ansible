@@ -1,4 +1,19 @@
 ---
+- name: Ensure CA certificate exists on openshift_ca_host
+  stat:
+    path: "{{ openshift_ca_cert }}"
+  register: g_ca_cert_stat_result
+  delegate_to: "{{ openshift_ca_host }}"
+  run_once: true
+
+- fail:
+    msg: >
+      CA certificate {{ openshift_ca_cert }} doesn't exist on CA host
+      {{ openshift_ca_host }}. Apply 'openshift_ca' role to
+      {{ openshift_ca_host }}.
+  when: not g_ca_cert_stat_result.stat.exists | bool
+  run_once: true
+
 - name: Check status of node certificates
   stat:
     path: "{{ openshift.common.config_base }}/node/{{ item }}"
