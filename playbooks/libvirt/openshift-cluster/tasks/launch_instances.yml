@@ -39,14 +39,14 @@
   file:
     dest: '{{ libvirt_storage_pool_path }}/{{ item }}_configdrive/'
     state: directory
-  with_items: instances
+  with_items: '{{ instances }}'
 
 - name: Create the cloud-init config drive files
   template:
     src: '{{ item[1] }}'
     dest: '{{ libvirt_storage_pool_path }}/{{ item[0] }}_configdrive/{{ item[1] }}'
   with_nested:
-    - instances
+    - '{{ instances }}'
     - [ user-data, meta-data ]
 
 - name: Create the cloud-init config drive
@@ -54,18 +54,18 @@
   args:
     chdir: '{{ libvirt_storage_pool_path }}/{{ item }}_configdrive/'
     creates: '{{ libvirt_storage_pool_path }}/{{ item }}_cloud-init.iso'
-  with_items: instances
+  with_items: '{{ instances }}'
 
 - name: Refresh the libvirt storage pool for openshift
   command: 'virsh -c {{ libvirt_uri }} pool-refresh {{ libvirt_storage_pool }}'
 
 - name: Create VM drives
   command: 'virsh -c {{ libvirt_uri }} vol-create-as {{ libvirt_storage_pool }} {{ item }}.qcow2 10G --format qcow2 --backing-vol {{ image_name }} --backing-vol-format qcow2'
-  with_items: instances
+  with_items: '{{ instances }}'
 
 - name: Create VM docker drives
   command: 'virsh -c {{ libvirt_uri }} vol-create-as {{ libvirt_storage_pool }} {{ item }}-docker.qcow2 10G --format qcow2 --allocation 0'
-  with_items: instances
+  with_items: '{{ instances }}'
 
 - name: Create VMs
   virt:
@@ -73,14 +73,14 @@
     command: define
     xml: "{{ lookup('template', '../templates/domain.xml') }}"
     uri: '{{ libvirt_uri }}'
-  with_items: instances
+  with_items: '{{ instances }}'
 
 - name: Start VMs
   virt:
     name: '{{ item }}'
     state: running
     uri: '{{ libvirt_uri }}'
-  with_items: instances
+  with_items: '{{ instances }}'
 
 - name: Wait for the VMs to get an IP
   shell: 'virsh -c {{ libvirt_uri }} net-dhcp-leases {{ libvirt_network }} | egrep -c ''{{ instances | join("|") }}'''
@@ -93,7 +93,7 @@
 - name: Collect IP addresses of the VMs
   shell: 'virsh -c {{ libvirt_uri }} net-dhcp-leases {{ libvirt_network }} | awk ''$6 == "{{ item }}" {gsub(/\/.*/, "", $5); print $5}'''
   register: scratch_ip
-  with_items: instances
+  with_items: '{{ instances }}'
 
 - set_fact:
     ips: "{{ scratch_ip.results | default([]) | oo_collect('stdout') }}"
@@ -117,14 +117,14 @@
     groups: "tag_environment-{{ cluster_env }}, tag_host-type-{{ type }}, tag_sub-host-type-{{ g_sub_host_type }}, tag_clusterid-{{ cluster_id }}"
     openshift_node_labels: "{{ node_label }}"
   with_together:
-    - instances
-    - ips
+    - '{{ instances }}'
+    - '{{ ips }}'
 
 - name: Wait for ssh
   wait_for:
     host: '{{ item }}'
     port: 22
-  with_items: ips
+  with_items: '{{ ips }}'
 
 - name: Wait for openshift user setup
   command: 'ssh -o StrictHostKeyChecking=no -o PasswordAuthentication=no -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null openshift@{{ item.1 }} echo openshift user is setup'
@@ -133,5 +133,5 @@
   retries: 30
   delay: 1
   with_together:
-  - instances
-  - ips
+  - '{{ instances }}'
+  - '{{ ips }}'
