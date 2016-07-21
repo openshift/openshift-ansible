@@ -315,6 +315,9 @@ class OOConfig(object):
         for host in self.deployment.hosts:
             p_settings['deployment']['hosts'].append(host.to_dict())
 
+        for name, role in self.deployment.roles.iteritems():
+            p_settings['deployment']['roles'][name] = role.variables
+
         try:
             p_settings['variant'] = self.settings['variant']
             p_settings['variant_version'] = self.settings['variant_version']
