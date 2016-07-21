@@ -9,6 +9,7 @@ from ansible import errors
 from collections import Mapping
 from distutils.version import LooseVersion
 from operator import itemgetter
+import datetime
 import OpenSSL.crypto
 import os
 import pdb
@@ -813,6 +814,85 @@ class FilterModule(object):
 
         return version
 
+    @staticmethod
+    def oo_collate_certificate_files(files):
+        """ Collate and certificate files by checksum """
+        unique_certs = {}
+
+        for cert_file in files:
+            if cert_file['checksum'] in unique_certs:
+                unique_certs[cert_file['checksum']].append(cert_file)
+            else:
+                unique_certs[cert_file['checksum']] = [cert_file]
+
+        return unique_certs
+
+    @staticmethod
+    def oo_get_unique_certificate_files(files):
+        """ Return a list of unique certificate file paths
+
+        * `files` should be as output from oo_collate_certificate_files
+
+        """
+        return [v[0]['path'] for _, v in files.iteritems()]
+
+    @staticmethod
+    def oo_parse_subject_expirys(certs_and_expirys):
+        """
+        Returns a hash of {'file_path': {expiry, subject}, 'file_path': {...}, ...}
+
+        """
+        subject_expirys = {}
+
+        for cae in certs_and_expirys:
+            subject_expirys[cae['item']] = {
+                'expiry': cae['stdout_lines'][0],
+                'subject': cae['stdout_lines'][1],
+            }
+
+        return subject_expirys
+
+    @staticmethod
+    def oo_check_expiry(subject_expirys, warning_days=14):
+        """Check the expiration date of discovered certificates, sort into
+        healthy, expiring soon, and expired lists.
+
+        """
+        expire_window = datetime.timedelta(days=warning_days)
+        # Collect 'em all up here
+        check_results = {}
+        expired_certs = []
+        expiring_certs = []
+        healthy_certs = []
+        check_results['expired_certs'] = expired_certs
+        check_results['expiring_certs'] = expiring_certs
+        check_results['healthy_certs'] = healthy_certs
+
+        now = datetime.datetime.now()
+
+        for k, val in subject_expirys.iteritems():
+            expiration = val['expiry']
+            expiration_date = datetime.datetime.strptime(expiration, '%b %d %H:%M:%S %Y %Z')
+            time_remaining = expiration_date - now
+
+            expire_check_result = {
+                'cert': k,
+                'expiry': val['expiry'],
+                'subject': val['subject'],
+                'days_remaining': time_remaining.days,
+            }
+            if expiration_date < now:
+                # This already expired, must warn
+                expired_certs.append(expire_check_result)
+            elif time_remaining < expire_window:
+                # WARN about this upcoming expirations
+                expiring_certs.append(expire_check_result)
+            else:
+                # Not expired or about to expire
+                healthy_certs.append(expire_check_result)
+
+        return check_results
+
     def filters(self):
         """ returns a mapping of filters to methods """
         return {
@@ -844,4 +924,8 @@ class FilterModule(object):
             "oo_image_tag_to_rpm_version": self.oo_image_tag_to_rpm_version,
             "oo_merge_dicts": self.oo_merge_dicts,
             "oo_merge_hostvars": self.oo_merge_hostvars,
+            "oo_collate_certificate_files": self.oo_collate_certificate_files,
+            "oo_get_unique_certificate_files": self.oo_get_unique_certificate_files,
+            "oo_parse_subject_expirys": self.oo_parse_subject_expirys,
+            "oo_check_expiry": self.oo_check_expiry,
         }
