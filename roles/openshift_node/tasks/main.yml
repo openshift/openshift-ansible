@@ -41,11 +41,15 @@
 - name: Pull node image
   command: >
     docker pull {{ openshift.node.node_image }}:{{ openshift_image_tag }}
+  register: pull_result
+  changed_when: "'Downloaded newer image' in pull_result.stdout"
   when: openshift.common.is_containerized | bool
 
 - name: Pull OpenVSwitch image
   command: >
     docker pull {{ openshift.node.ovs_image }}:{{ openshift_image_tag }}
+  register: pull_result
+  changed_when: "'Downloaded newer image' in pull_result.stdout"
   when: openshift.common.is_containerized | bool and openshift.common.use_openshift_sdn | bool
 
 - name: Install the systemd units
@@ -129,12 +133,12 @@
   service: name={{ openshift.common.service_type }}-node enabled=yes state=started
   register: node_start_result
   ignore_errors: yes
-  
+
 - name: Wait 30 seconds for docker initialization whenever node has failed
   pause:
     seconds: 30
   when: node_start_result | failed
-  
+
 - name: Start and enable node again
   service: name={{ openshift.common.service_type }}-node enabled=yes state=started
   register: node_start_result
