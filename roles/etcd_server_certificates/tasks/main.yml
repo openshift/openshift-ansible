@@ -7,11 +7,14 @@
   - "{{ etcd_cert_prefix }}peer.crt"
   - "{{ etcd_cert_prefix }}ca.crt"
   register: g_etcd_server_cert_stat_result
+  when: not etcd_certificates_redeploy | default(false) | bool
 
 - set_fact:
-    etcd_server_certs_missing: "{{ False in (g_etcd_server_cert_stat_result.results
-                                   | oo_collect(attribute='stat.exists')
-                                   | list) }}"
+    etcd_server_certs_missing: "{{ true if etcd_certificates_redeploy | default(false) | bool
+                                   else (False in (g_etcd_server_cert_stat_result.results
+                                                   | default({})
+                                                   | oo_collect(attribute='stat.exists')
+                                                   | list)) }}"
 
 - name: Ensure generated_certs directory present
   file:
@@ -69,6 +72,8 @@
   when: etcd_server_certs_missing | bool
   delegate_to: "{{ etcd_ca_host }}"
 
+# Certificates must be signed serially in order to avoid competing
+# for the serial file.
 - name: Sign and create the peer crt
   delegated_serial_command:
     command: >
@@ -136,3 +141,35 @@
   changed_when: False
   when: etcd_server_certs_missing | bool
   delegate_to: localhost
+
+- name: Validate permissions on certificate files
+  file:
+    path: "{{ item }}"
+    mode: 0600
+    owner: "{{ 'etcd' if not etcd_is_containerized | bool else omit }}"
+    group: "{{ 'etcd' if not etcd_is_containerized | bool else omit }}"
+  when: etcd_url_scheme == 'https'
+  with_items:
+  - "{{ etcd_ca_file }}"
+  - "{{ etcd_cert_file }}"
+  - "{{ etcd_key_file }}"
+
+- name: Validate permissions on peer certificate files
+  file:
+    path: "{{ item }}"
+    mode: 0600
+    owner: "{{ 'etcd' if not etcd_is_containerized | bool else omit }}"
+    group: "{{ 'etcd' if not etcd_is_containerized | bool else omit }}"
+  when: etcd_peer_url_scheme == 'https'
+  with_items:
+  - "{{ etcd_peer_ca_file }}"
+  - "{{ etcd_peer_cert_file }}"
+  - "{{ etcd_peer_key_file }}"
+
+- name: Validate permissions on the config dir
+  file:
+    path: "{{ etcd_conf_dir }}"
+    state: directory
+    owner: "{{ 'etcd' if not etcd_is_containerized | bool else omit }}"
+    group: "{{ 'etcd' if not etcd_is_containerized | bool else omit }}"
+    mode: 0700

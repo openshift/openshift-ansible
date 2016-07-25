@@ -17,4 +17,6 @@
   tasks:
   - include_vars: ../../byo/openshift-cluster/cluster_hosts.yml
   
-- include: ../../common/openshift-cluster/enable_dnsmasq.yml
+- include: ../../common/openshift-cluster/redeploy-certificates.yml
+  vars:
+    openshift_deployment_type: "{{ deployment_type }}"

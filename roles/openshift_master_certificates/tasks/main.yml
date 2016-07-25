@@ -21,18 +21,22 @@
   with_items:
   - "{{ openshift_master_certs }}"
   register: g_master_cert_stat_result
+  when: not openshift_certificates_redeploy | default(false) | bool
 
 - set_fact:
-    master_certs_missing: "{{ False in (g_master_cert_stat_result.results
-                              | oo_collect(attribute='stat.exists')
-                              | list) }}"
+    master_certs_missing: "{{ true if openshift_certificates_redeploy | default(false) | bool
+                              else (False in (g_master_cert_stat_result.results
+                                              | default({})
+                                              | oo_collect(attribute='stat.exists')
+                                              | list)) }}"
+
 
 - name: Ensure the generated_configs directory present
   file:
     path: "{{ openshift_master_generated_config_dir }}"
     state: directory
     mode: 0700
-  when: master_certs_missing | bool
+  when: master_certs_missing | bool and inventory_hostname != openshift_ca_host
   delegate_to: "{{ openshift_ca_host }}"
 
 - file:
@@ -43,7 +47,7 @@
   - ca.crt
   - ca.key
   - ca.serial.txt
-  when: master_certs_missing | bool
+  when: master_certs_missing | bool and inventory_hostname != openshift_ca_host
   delegate_to: "{{ openshift_ca_host }}"
 
 - name: Create the master certificates if they do not already exist
@@ -57,7 +61,7 @@
     --public-master={{ openshift.master.public_api_url }}
     --cert-dir={{ openshift_master_generated_config_dir }}
     --overwrite=false
-  when: master_certs_missing | bool
+  when: master_certs_missing | bool and inventory_hostname != openshift_ca_host
   delegate_to: "{{ openshift_ca_host }}"
 
 - file:
@@ -67,7 +71,7 @@
     force: true
   with_items:
   - "{{ hostvars[inventory_hostname] | certificates_to_synchronize }}"
-  when: master_certs_missing | bool
+  when: master_certs_missing | bool and inventory_hostname != openshift_ca_host
   delegate_to: "{{ openshift_ca_host }}"
 
 - name: Remove generated etcd client certs when using external etcd
@@ -124,3 +128,39 @@
   when: master_certs_missing | bool
   delegate_to: localhost
   become: no
+
+- name: Lookup default group for ansible_ssh_user
+  command: "/usr/bin/id -g {{ ansible_ssh_user }}"
+  changed_when: false
+  register: _ansible_ssh_user_gid
+
+- set_fact:
+    client_users: "{{ [ansible_ssh_user, 'root'] | unique }}"
+
+- name: Create the client config dir(s)
+  file:
+    path: "~{{ item }}/.kube"
+    state: directory
+    mode: 0700
+    owner: "{{ item }}"
+    group: "{{ 'root' if item == 'root' else _ansible_ssh_user_gid.stdout  }}"
+  with_items: "{{ client_users }}"
+
+# TODO: Update this file if the contents of the source file are not present in
+# the dest file, will need to make sure to ignore things that could be added
+- name: Copy the admin client config(s)
+  copy:
+    src: "{{ openshift_master_config_dir }}/admin.kubeconfig"
+    dest: "~{{ item }}/.kube/config"
+    remote_src: yes
+    force: "{{ openshift_certificates_redeploy | default(false) }}"
+  with_items: "{{ client_users }}"
+
+- name: Update the permissions on the admin client config(s)
+  file:
+    path: "~{{ item }}/.kube/config"
+    state: file
+    mode: 0700
+    owner: "{{ item }}"
+    group: "{{ 'root' if item == 'root' else _ansible_ssh_user_gid.stdout  }}"
+  with_items: "{{ client_users }}"
