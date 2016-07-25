@@ -19,8 +19,6 @@
   - role: openshift_examples
     registry_url: "{{ openshift.master.registry_url }}"
     when: openshift.common.install_examples | bool
-  - role: openshift_cluster_metrics
-    when: openshift.common.use_cluster_metrics | bool
   - role: openshift_manageiq
     when: openshift.common.use_manageiq | bool
   - role: cockpit

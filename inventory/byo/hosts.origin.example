@@ -45,9 +45,6 @@ openshift_release=v1.2
 # Install the openshift examples
 #openshift_install_examples=true
 
-# Enable cluster metrics
-#use_cluster_metrics=true
-
 # Configure logoutURL in the master config for console customization
 # See: https://docs.openshift.org/latest/install_config/web_console_customization.html#changing-the-logout-url
 #openshift_master_logout_url=http://example.com
