@@ -15,7 +15,7 @@ The table below outlines the defaults per `deployment_type`.
 | **Image Streams**                                               | centos                                   | rhel + xpaas                           | N/A                              | rhel                             |
 
 
-**NOTE** `enterprise` deloyment type is used for OpenShift Enterprise version
+**NOTE** `enterprise` deployment type is used for OpenShift Enterprise version
 3.0.x OpenShift Enterprise deployments utilizing version 3.1 and later will
 make use of the new `openshift-enterprise` deployment type.  Additional work to
 migrate between the two will be forthcoming.
