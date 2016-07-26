@@ -16,6 +16,7 @@ From this role:
 | Name                                            | Default value         |                                                             |
 |-------------------------------------------------|-----------------------|-------------------------------------------------------------|
 | openshift_hosted_metrics_deploy                 | `False`               | If metrics should be deployed                               |
+| hawkular_metrics_hostname                       | `hawkular-metrics.<default_subdomain>` | Metrics hostanme                       |
 | openshift_hosted_metrics_storage_nfs_directory  | `/exports`            | Root export directory.                                      |
 | openshift_hosted_metrics_storage_volume_name    | `metrics`             | Metrics volume within openshift_hosted_metrics_volume_dir   |
 | openshift_hosted_metrics_storage_volume_size    | `10Gi`                | Metrics volume size                                         |

@@ -1,0 +1,1 @@
+hawkular_metrics_hostname: "hawkular-metrics.{{ openshift.master.default_subdomain }}"
