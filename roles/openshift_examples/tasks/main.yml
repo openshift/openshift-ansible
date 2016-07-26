@@ -58,6 +58,18 @@
   failed_when: "'already exists' not in oex_import_infrastructure.stderr and oex_import_infrastructure.rc != 0"
   changed_when: false
 
+- name: Remove old xPaas template files
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ xpaas_templates }}/sso70-basic.json"
+
+- name: Remove old xPaas templates from openshift namespace
+  command: oc delete -n openshift {{ item }}
+  with_items:
+    - sso70-basic
+
 - name: Import xPaas image streams
   command: >
     {{ openshift.common.client_binary }} {{ openshift_examples_import_command }} -n openshift -f {{ xpaas_image_streams }}
