@@ -46,6 +46,12 @@
             "required": false
         },
         {
+            "description": "List of packages that are allowed to be serialized for use in ObjectMessage, separated by commas. If your app doesn't use ObjectMessages, leave this blank. This is a security enforcement. For the rationale, see http://activemq.apache.org/objectmessage.html",
+            "name": "MQ_SERIALIZABLE_PACKAGES",
+            "value": "",
+            "required": false
+        },
+        {
             "description": "Size of persistent storage for database volume.",
             "name": "VOLUME_CAPACITY",
             "value": "512Mi",
@@ -297,6 +303,10 @@
                                     {
                                         "name": "AMQ_TOPICS",
                                         "value": "${MQ_TOPICS}"
+                                    },
+                                    {
+                                        "name": "MQ_SERIALIZABLE_PACKAGES",
+                                        "value": "${MQ_SERIALIZABLE_PACKAGES}"
                                     },
                                     {
                                         "name": "AMQ_SPLIT",

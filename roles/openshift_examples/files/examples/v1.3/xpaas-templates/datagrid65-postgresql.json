@@ -6,13 +6,13 @@
             "iconClass": "icon-jboss",
             "description": "Application template for JDG 6.5 and PostgreSQL applications built using.",
             "tags": "datagrid,jboss,xpaas",
-            "version": "1.2.0"
+            "version": "1.3.2"
         },
         "name": "datagrid65-postgresql"
     },
     "labels": {
         "template": "datagrid65-postgresql",
-        "xpaas": "1.2.0"
+        "xpaas": "1.3.2"
     },
     "parameters": [
         {
@@ -695,6 +695,10 @@
                                     },
                                     {
                                         "name": "POSTGRESQL_MAX_CONNECTIONS",
+                                        "value": "${POSTGRESQL_MAX_CONNECTIONS}"
+                                    },
+                                    {
+                                        "name": "POSTGRESQL_MAX_PREPARED_TRANSACTIONS",
                                         "value": "${POSTGRESQL_MAX_CONNECTIONS}"
                                     },
                                     {
