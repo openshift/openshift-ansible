@@ -199,7 +199,7 @@
 - name: Deploy named certificates
   hosts: oo_masters_to_config
   vars:
-    named_certs_dir: "{{ master_cert_config_dir }}/named_certificates/"
+    named_certs_dir: "{{ openshift.common.config_base }}/master/named_certificates/"
     named_certs_specified: "{{ openshift_master_named_certificates is defined }}"
     overwrite_named_certs: "{{ openshift_master_overwrite_named_certificates | default(false) }}"
   roles:
@@ -224,11 +224,11 @@
     when: named_certs_specified | bool
   - name: Land named certificates
     copy: src="{{ item.certfile }}" dest="{{ named_certs_dir }}"
-    with_items: openshift_master_named_certificates
+    with_items: "{{ openshift_master_named_certificates }}"
     when: named_certs_specified | bool
   - name: Land named certificate keys
     copy: src="{{ item.keyfile }}" dest="{{ named_certs_dir }}" mode=0600
-    with_items: openshift_master_named_certificates
+    with_items: "{{ openshift_master_named_certificates }}"
     when: named_certs_specified | bool
 
 - name: Configure masters
