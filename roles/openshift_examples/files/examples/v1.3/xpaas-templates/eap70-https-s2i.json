@@ -6,13 +6,13 @@
             "iconClass": "icon-jboss",
             "description": "Application template for EAP 7 applications built using S2I.",
             "tags": "eap,javaee,java,jboss,xpaas",
-            "version": "1.3.1"
+            "version": "1.3.2"
         },
         "name": "eap70-https-s2i"
     },
     "labels": {
         "template": "eap70-https-s2i",
-        "xpaas": "1.3.1"
+        "xpaas": "1.3.2"
     },
     "parameters": [
         {
@@ -64,6 +64,12 @@
             "required": false
         },
         {
+            "description": "The name of the service account to use for the deployment.  The service account should be configured to allow useage of the secret(s) specified by HTTPS_SECRET and JGROUPS_ENCRYPT_SECRET.",
+            "name": "SERVICE_ACCOUNT_NAME",
+            "value": "eap7-service-account",
+            "required": true
+        },
+        {
             "description": "The name of the secret containing the keystore file",
             "name": "HTTPS_SECRET",
             "value": "eap7-app-secret",
@@ -73,6 +79,12 @@
             "description": "The name of the keystore file within the secret",
             "name": "HTTPS_KEYSTORE",
             "value": "keystore.jks",
+            "required": false
+        },
+        {
+            "description": "The type of the keystore file (JKS or JCEKS)",
+            "name": "HTTPS_KEYSTORE_TYPE",
+            "value": "",
             "required": false
         },
         {
@@ -144,6 +156,12 @@
             "from": "[a-zA-Z0-9]{8}",
             "generate": "expression",
             "required": true
+        },
+        {
+            "description": "Controls whether exploded deployment content should be automatically deployed",
+            "name": "AUTO_DEPLOY_EXPLODED",
+            "value": "false",
+            "required": false
         }
     ],
     "objects": [
@@ -273,7 +291,7 @@
                         "from": {
                             "kind": "ImageStreamTag",
                             "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                            "name": "jboss-eap70-openshift:1.3"
+                            "name": "jboss-eap70-openshift:1.4"
                         }
                     }
                 },
@@ -328,8 +346,8 @@
                                 "${APPLICATION_NAME}"
                             ],
                             "from": {
-                                "kind": "ImageStream",
-                                "name": "${APPLICATION_NAME}"
+                                "kind": "ImageStreamTag",
+                                "name": "${APPLICATION_NAME}:latest"
                             }
                         }
                     },
@@ -350,8 +368,8 @@
                         }
                     },
                     "spec": {
-                        "serviceAccountName": "eap7-service-account",
-                        "terminationGracePeriodSeconds": 60,
+                        "serviceAccountName": "${SERVICE_ACCOUNT_NAME}",
+                        "terminationGracePeriodSeconds": 75,
                         "containers": [
                             {
                                 "name": "${APPLICATION_NAME}",
@@ -369,6 +387,17 @@
                                         "readOnly": true
                                     }
                                 ],
+                                "lifecycle": {
+                                    "preStop": {
+                                        "exec": {
+                                            "command": [
+                                                "/opt/eap/bin/jboss-cli.sh",
+                                                "-c",
+                                                ":shutdown(timeout=60)"
+                                            ]
+                                        }
+                                    }
+                                },
                                 "livenessProbe": {
                                     "exec": {
                                         "command": [
@@ -431,6 +460,10 @@
                                         "value": "${HTTPS_KEYSTORE}"
                                     },
                                     {
+                                        "name": "HTTPS_KEYSTORE_TYPE",
+                                        "value": "${HTTPS_KEYSTORE_TYPE}"
+                                    },
+                                    {
                                         "name": "HTTPS_NAME",
                                         "value": "${HTTPS_NAME}"
                                     },
@@ -473,6 +506,10 @@
                                     {
                                         "name": "JGROUPS_CLUSTER_PASSWORD",
                                         "value": "${JGROUPS_CLUSTER_PASSWORD}"
+                                    },
+                                    {
+                                        "name": "AUTO_DEPLOY_EXPLODED",
+                                        "value": "${AUTO_DEPLOY_EXPLODED}"
                                     }
                                 ]
                             }
