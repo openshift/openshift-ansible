@@ -20,6 +20,8 @@ xpaas_templates_base: "{{ examples_base }}/xpaas-templates"
 quickstarts_base: "{{ examples_base }}/quickstart-templates"
 infrastructure_origin_base: "{{ examples_base }}/infrastructure-templates/origin"
 infrastructure_enterprise_base: "{{ examples_base }}/infrastructure-templates/enterprise"
+cockpit_ui_base: "{{ examples_base }}/infrastructure-templates/enterprise"
+
 
 openshift_examples_import_command: "create"
 registry_url: ""

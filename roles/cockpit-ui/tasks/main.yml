@@ -1,0 +1,19 @@
+---
+- name: Expose registry with route
+  command: oc expose service docker-registry
+
+- name: Install Cockpit template
+  command: oc create -f registry-console.yaml -n default
+
+- name: Create passthrough route for Registry
+  command: oc create route passthrough --service registry-console --port registry-console -n default
+
+- name: Deploy Registry
+  command: oc new-app -n default --template=registry-console -p OPENSHIFT_OAUTH_PROVIDER_URL="{{ openshift_https_proxy }}:8443",REGISTRY_HOST=$(oc get route docker-registry -n default --template='{{ .spec.host }}'),COCKPIT_KUBE_URL=$(oc get route registry-console -n default --template='https://{{ .spec.host }}')
+
+- name: Enable cockpit-ui
+  service:
+    name: cockpit.socket
+    enabled: true
+    state: started
+  when: not openshift.common.is_containerized | bool
