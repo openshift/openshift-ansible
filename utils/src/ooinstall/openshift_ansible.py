@@ -191,6 +191,7 @@ def write_proxy_settings(base_inventory):
         pass
 
 
+# pylint: disable=too-many-branches
 def write_host(host, inventory, schedulable=None):
     global CFG
 
@@ -205,6 +206,9 @@ def write_host(host, inventory, schedulable=None):
         facts += ' openshift_public_hostname={}'.format(host.public_hostname)
     if host.containerized:
         facts += ' containerized={}'.format(host.containerized)
+    if host.other_variables:
+        for variable, value in host.other_variables.iteritems():
+            facts += " {}={}".format(variable, value)
 
     # Distinguish between three states, no schedulability specified (use default),
     # explicitly set to True, or explicitly set to False:
