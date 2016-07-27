@@ -117,6 +117,7 @@ def write_inventory_children(base_inventory, multiple_masters, proxy, scaleup):
     if not getattr(proxy, 'preconfigured', True):
         base_inventory.write('lb\n')
 
+# pylint: disable=too-many-branches
 def write_inventory_vars(base_inventory, multiple_masters, proxy):
     global CFG
     base_inventory.write('\n[OSEv3:vars]\n')
@@ -211,6 +212,8 @@ def write_host(host, inventory, schedulable=None):
     if host.other_variables:
         for variable, value in host.other_variables.iteritems():
             facts += " {}={}".format(variable, value)
+    if host.node_labels:
+        facts += ' openshift_node_labels="{}"'.format(host.node_labels)
 
     # Distinguish between three states, no schedulability specified (use default),
     # explicitly set to True, or explicitly set to False:
