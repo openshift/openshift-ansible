@@ -211,6 +211,8 @@ def write_host(host, inventory, schedulable=None):
     if host.other_variables:
         for variable, value in host.other_variables.iteritems():
             facts += " {}={}".format(variable, value)
+    if host.node_labels:
+        facts += ' openshift_node_labels="{}"'.format(host.node_labels)
 
     # Distinguish between three states, no schedulability specified (use default),
     # explicitly set to True, or explicitly set to False:
