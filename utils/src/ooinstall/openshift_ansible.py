@@ -207,6 +207,8 @@ def write_host(host, inventory, schedulable=None):
         facts += ' openshift_public_hostname={}'.format(host.public_hostname)
     if host.containerized:
         facts += ' containerized={}'.format(host.containerized)
+    if host.node_labels:
+        facts += ' openshift_node_labels="{}"'.format(host.node_labels)
 
     # Distinguish between three states, no schedulability specified (use default),
     # explicitly set to True, or explicitly set to False:
