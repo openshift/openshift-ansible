@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.2
+Version:        3.3.3
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,49 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Jul 27 2016 Troy Dawson <tdawson@redhat.com> 3.3.3-1
+- Template named certificates with_items. (abutcher@redhat.com)
+- Replace master_cert_config_dir with common config_base fact.
+  (abutcher@redhat.com)
+- remove outdated openshift_cluster_metrics role (jdetiber@redhat.com)
+- Fix "deloyment" typo in deployment types doc (lxia@redhat.com)
+- Add missing nuke_images.sh symlink. (dgoodwin@redhat.com)
+- a-o-i: Persist Roles Variables (smunilla@redhat.com)
+- Default nodes matching selectors when not collected. (abutcher@redhat.com)
+- Copy openshift binaries instead of using wrapper script.
+  (dgoodwin@redhat.com)
+- Correct relative include for ansible version check. (abutcher@redhat.com)
+- Fix libvirt provider for Ansible 2.1.0.0 (lhuard@amadeus.com)
+- Re-arrange master and node role dependencies. (abutcher@redhat.com)
+- Refactor openshift certificates roles. (abutcher@redhat.com)
+- Check ansible version prior to evaluating cluster hosts and groups.
+  (abutcher@redhat.com)
+- Stop reporting changes when docker pull is already up to date.
+  (dgoodwin@redhat.com)
+- a-o-i: Write Role variable groups (smunilla@redhat.com)
+- Slight modification to error when using mismatched openshift_release.
+  (dgoodwin@redhat.com)
+- fix "databcase" typo in example roles (lxia@redhat.com)
+- Secure router only when openshift.hosted.router.certificate.contents exists.
+  (abutcher@redhat.com)
+- Add jenkinstemplate (sdodson@redhat.com)
+- Fix bugs with origin 1.2 rpm based upgrades. (dgoodwin@redhat.com)
+- Sync latest image streams and templates (sdodson@redhat.com)
+- Ensure 'oo_nfs_to_config' in groups prior to checking group length when nfs
+  host unset. (abutcher@redhat.com)
+- We have proper ansible support and requirements in place now, de-revert this
+  commit (tbielawa@redhat.com)
+- Skip docker upgrades on Atomic. (dgoodwin@redhat.com)
+- Resolve some deprecation warnings. (abutcher@redhat.com)
+- a-o-i: Looser facts requirements for unattended (smunilla@redhat.com)
+- Temporarily link registry config templates for ansible 1.9.x support.
+  (abutcher@redhat.com)
+- Remove relative lookup for registry config and check for skipped update in
+  registry redeploy conditional. (abutcher@redhat.com)
+- Arbitrary Installer yaml (smunilla@redhat.com)
+- Check for existence of sebooleans prior to setting. (abutcher@redhat.com)
+- Require ansible-2.1 (abutcher@redhat.com)
+
 * Sun Jul 17 2016 Scott Dodson <sdodson@redhat.com> 3.3.2-1
 - Convert openshift_release and openshift_version to strings for startswith
   (sdodson@redhat.com)
