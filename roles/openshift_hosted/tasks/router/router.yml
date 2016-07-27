@@ -1,7 +1,7 @@
 ---
 - fail:
     msg: "'certfile', 'keyfile' and 'cafile' keys must be specified when supplying the openshift_hosted_router_certificate variable."
-  when: openshift_hosted_router_certificate is defined and ('certfile' not in openshift_hosted_router_certificate or 'keyfile' not in openshift_hosted_router_certificate or 'cafile' not in openshift_hosted_router_certificate) 
+  when: openshift_hosted_router_certificate is defined and ('certfile' not in openshift_hosted_router_certificate or 'keyfile' not in openshift_hosted_router_certificate or 'cafile' not in openshift_hosted_router_certificate)
 
 - name: Read router certificate and key
   become: no
@@ -68,3 +68,4 @@
   register: openshift_hosted_router_results
   changed_when: "'service exists' not in openshift_hosted_router_results.stdout"
   failed_when: "openshift_hosted_router_results.rc != 0 and 'service exists' not in openshift_hosted_router_results.stdout and 'deployment_config' not in openshift_hosted_router_results.stderr and 'service' not in openshift_hosted_router_results.stderr"
+  when: replicas | int > 0
