@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.14
+Version:        3.2.15
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,13 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Jul 27 2016 Scott Dodson <sdodson@redhat.com> 3.2.15-1
+- Disable too many branches pylint (sdodson@redhat.com)
+- a-o-i: write missing openshift_node_labels (dkorn@redhat.com)
+- a-o-i: Support for arbitrary host-level variables (smunilla@redhat.com)
+- a-o-i: Move inventory vars to the correct location (smunilla@redhat.com)
+- a-o-i: Persist Roles Variables (smunilla@redhat.com)
+
 * Wed Jul 20 2016 Scott Dodson <sdodson@redhat.com> 3.2.14-1
 - a-o-i: Write Role variable groups (smunilla@redhat.com)
 - a-o-i: Looser facts requirements for unattended (smunilla@redhat.com)

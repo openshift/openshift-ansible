@@ -49,23 +49,7 @@ def generate_inventory(hosts):
 
     write_inventory_vars(base_inventory, multiple_masters, proxy)
 
-    # Find the correct deployment type for ansible:
-    ver = find_variant(CFG.settings['variant'],
-        version=CFG.settings.get('variant_version', None))[1]
-    base_inventory.write('deployment_type={}\n'.format(ver.ansible_key))
 
-    if 'OO_INSTALL_ADDITIONAL_REGISTRIES' in os.environ:
-        base_inventory.write('openshift_docker_additional_registries={}\n'
-          .format(os.environ['OO_INSTALL_ADDITIONAL_REGISTRIES']))
-    if 'OO_INSTALL_INSECURE_REGISTRIES' in os.environ:
-        base_inventory.write('openshift_docker_insecure_registries={}\n'
-          .format(os.environ['OO_INSTALL_INSECURE_REGISTRIES']))
-    if 'OO_INSTALL_PUDDLE_REPO' in os.environ:
-        # We have to double the '{' here for literals
-        base_inventory.write("openshift_additional_repos=[{{'id': 'ose-devel', "
-            "'name': 'ose-devel', "
-            "'baseurl': '{}', "
-            "'enabled': 1, 'gpgcheck': 0}}]\n".format(os.environ['OO_INSTALL_PUDDLE_REPO']))
 
     base_inventory.write('\n[masters]\n')
     for master in masters:
@@ -133,6 +117,7 @@ def write_inventory_children(base_inventory, multiple_masters, proxy, scaleup):
     if not getattr(proxy, 'preconfigured', True):
         base_inventory.write('lb\n')
 
+# pylint: disable=too-many-branches
 def write_inventory_vars(base_inventory, multiple_masters, proxy):
     global CFG
     base_inventory.write('\n[OSEv3:vars]\n')
@@ -161,6 +146,24 @@ def write_inventory_vars(base_inventory, multiple_masters, proxy):
         base_inventory.write('openshift_image_tag=v{}\n'.format('3.1.1.6'))
 
     write_proxy_settings(base_inventory)
+
+    # Find the correct deployment type for ansible:
+    ver = find_variant(CFG.settings['variant'],
+        version=CFG.settings.get('variant_version', None))[1]
+    base_inventory.write('deployment_type={}\n'.format(ver.ansible_key))
+
+    if 'OO_INSTALL_ADDITIONAL_REGISTRIES' in os.environ:
+        base_inventory.write('openshift_docker_additional_registries={}\n'
+          .format(os.environ['OO_INSTALL_ADDITIONAL_REGISTRIES']))
+    if 'OO_INSTALL_INSECURE_REGISTRIES' in os.environ:
+        base_inventory.write('openshift_docker_insecure_registries={}\n'
+          .format(os.environ['OO_INSTALL_INSECURE_REGISTRIES']))
+    if 'OO_INSTALL_PUDDLE_REPO' in os.environ:
+        # We have to double the '{' here for literals
+        base_inventory.write("openshift_additional_repos=[{{'id': 'ose-devel', "
+            "'name': 'ose-devel', "
+            "'baseurl': '{}', "
+            "'enabled': 1, 'gpgcheck': 0}}]\n".format(os.environ['OO_INSTALL_PUDDLE_REPO']))
 
     for name, role_obj in CFG.deployment.roles.iteritems():
         if role_obj.variables:
@@ -191,6 +194,7 @@ def write_proxy_settings(base_inventory):
         pass
 
 
+# pylint: disable=too-many-branches
 def write_host(host, inventory, schedulable=None):
     global CFG
 
@@ -205,6 +209,11 @@ def write_host(host, inventory, schedulable=None):
         facts += ' openshift_public_hostname={}'.format(host.public_hostname)
     if host.containerized:
         facts += ' containerized={}'.format(host.containerized)
+    if host.other_variables:
+        for variable, value in host.other_variables.iteritems():
+            facts += " {}={}".format(variable, value)
+    if host.node_labels:
+        facts += ' openshift_node_labels="{}"'.format(host.node_labels)
 
     # Distinguish between three states, no schedulability specified (use default),
     # explicitly set to True, or explicitly set to False:

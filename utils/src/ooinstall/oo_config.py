@@ -56,6 +56,8 @@ class Host(object):
         # allowable roles: master, node, etcd, storage, master_lb, new
         self.roles = kwargs.get('roles', [])
 
+        self.other_variables = kwargs.get('other_variables', {})
+
         if self.connect_to is None:
             raise OOConfigInvalidHostError(
                 "You must specify either an ip or hostname as 'connect_to'")
@@ -71,7 +73,8 @@ class Host(object):
         d = {}
 
         for prop in ['ip', 'hostname', 'public_ip', 'public_hostname', 'connect_to',
-                     'preconfigured', 'containerized', 'schedulable', 'roles', 'node_labels']:
+                     'preconfigured', 'containerized', 'schedulable', 'roles', 'node_labels',
+                     'other_variables']:
             # If the property is defined (not None or False), export it:
             if getattr(self, prop):
                 d[prop] = getattr(self, prop)
@@ -314,6 +317,9 @@ class OOConfig(object):
 
         for host in self.deployment.hosts:
             p_settings['deployment']['hosts'].append(host.to_dict())
+
+        for name, role in self.deployment.roles.iteritems():
+            p_settings['deployment']['roles'][name] = role.variables
 
         try:
             p_settings['variant'] = self.settings['variant']
