@@ -9,7 +9,22 @@
   when: openshift.hosted.registry.replicas | default(none) is none
 
 - set_fact:
-    replicas: "{{ openshift.hosted.registry.replicas | default(((openshift_hosted_registry_nodes_json.stdout | default('{\"items\":[]}') | from_json)['items'] | length) if openshift.hosted.registry.storage.kind | default(none) is not none else 1) }}"
+    l_node_count: "{{ (openshift_hosted_registry_nodes_json.stdout | default('{\"items\":[]}') | from_json)['items'] | length }}"
+
+# Determine the default number of registry/router replicas to use if no count
+# has been specified.
+# If no registry nodes defined, the default should be 0.
+- set_fact:
+    l_default_replicas: 0
+  when: l_node_count | int == 0
+
+# If registry nodes are defined and the registry storage kind is defined, default should be the number of registry nodes, otherwise just 1:
+- set_fact:
+    l_default_replicas: "{{ l_node_count if openshift.hosted.registry.storage.kind | default(none) is not none else 1 }}"
+  when: l_node_count | int > 0
+
+- set_fact:
+    replicas: "{{ openshift.hosted.registry.replicas | default(l_default_replicas) }}"
 
 - name: Create OpenShift registry
   command: >
@@ -32,9 +47,10 @@
   register: openshift_hosted_registry_results
   changed_when: "'service exists' not in openshift_hosted_registry_results.stdout"
   failed_when: "openshift_hosted_registry_results.rc != 0 and 'service exists' not in openshift_hosted_registry_results.stdout and 'deployment_config' not in openshift_hosted_registry_results.stderr and 'service' not in openshift_hosted_registry_results.stderr"
+  when: replicas | int > 0
 
 - include: storage/object_storage.yml
-  when: openshift.hosted.registry.storage.kind | default(none) == 'object'
+  when: replicas | int > 0 and openshift.hosted.registry.storage.kind | default(none) == 'object'
 
 - include: storage/persistent_volume.yml
-  when: openshift.hosted.registry.storage.kind | default(none) in ['nfs', 'openstack']
+  when: replicas | int > 0 and openshift.hosted.registry.storage.kind | default(none) in ['nfs', 'openstack']
