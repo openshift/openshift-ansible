@@ -20,6 +20,24 @@ EXAMPLES = '''
     yaml_value: 2
 '''
 
+
+# pylint: disable=missing-docstring
+def set_key(yaml_data, yaml_key, yaml_value):
+    changes = []
+    ptr = yaml_data
+    for key in yaml_key.split('.'):
+        if key not in ptr and key != yaml_key.split('.')[-1]:
+            ptr[key] = {}
+            ptr = ptr[key]
+        elif key == yaml_key.split('.')[-1]:
+            if (key in ptr and module.safe_eval(ptr[key]) != yaml_value) or (key not in ptr):
+                ptr[key] = yaml_value
+                changes.append((yaml_key, yaml_value))
+        else:
+            ptr = ptr[key]
+    return changes
+
+
 def main():
     ''' Modify key (supplied in jinja2 dot notation) in yaml file, setting
         the key to the desired value.
@@ -53,22 +71,12 @@ def main():
     yaml.add_representer(type(None), none_representer)
 
     try:
-        changes = []
 
         yaml_file = open(dest)
         yaml_data = yaml.safe_load(yaml_file.read())
         yaml_file.close()
 
-        ptr = yaml_data
-        for key in yaml_key.split('.'):
-            if key not in ptr and key != yaml_key.split('.')[-1]:
-                ptr[key] = {}
-            elif key == yaml_key.split('.')[-1]:
-                if (key in ptr and module.safe_eval(ptr[key]) != yaml_value) or (key not in ptr):
-                    ptr[key] = yaml_value
-                    changes.append((yaml_key, yaml_value))
-            else:
-                ptr = ptr[key]
+        changes = set_key(yaml_data, yaml_key, yaml_value)
 
         if len(changes) > 0:
             if backup:
