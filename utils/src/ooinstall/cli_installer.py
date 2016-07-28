@@ -322,9 +322,7 @@ Note: Containerized storage hosts are not currently supported.
     else:
         host_props['connect_to'] = hostname_or_ip
         host_props['preconfigured'] = False
-        host_props['master'] = False
-        host_props['node'] = False
-        host_props['storage'] = True
+        host_props['roles'] = ['storage']
         storage = Host(**host_props)
         hosts.append(storage)
 
