@@ -17,6 +17,9 @@
   - include: rpm_upgrade.yml component=master
     when: not openshift.common.is_containerized | bool
 
+  - include: "{{ master_config_hook }}"
+    when: master_config_hook is defined
+
   - include_vars: ../../../../roles/openshift_master/vars/main.yml
 
   - name: Update systemd units
@@ -90,6 +93,8 @@
 
   - include: docker/upgrade.yml
     when: l_docker_upgrade is defined and l_docker_upgrade | bool and not openshift.common.is_atomic | bool
+  - include: "{{ node_config_hook }}"
+    when: node_config_hook is defined
 
   - include: rpm_upgrade.yml
     vars:

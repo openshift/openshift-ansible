@@ -61,5 +61,7 @@
 - include: ../../../../common/openshift-cluster/upgrades/upgrade.yml
   vars:
     openshift_deployment_type: "{{ deployment_type }}"
+    master_config_hook: "v3_3/master_config_upgrade.yml"
+    node_config_hook: "v3_3/node_config_upgrade.yml"
 - include: ../../../openshift-master/restart.yml
 - include: ../../../../common/openshift-cluster/upgrades/post.yml
