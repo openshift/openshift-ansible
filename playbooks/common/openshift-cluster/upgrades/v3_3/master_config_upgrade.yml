@@ -1,0 +1,40 @@
+---
+- modify_yaml:
+    dest: "{{ openshift.common.config_base}}/master/master-config.yaml"
+    yaml_key: 'masterClients.externalKubernetesClientConnectionOverrides.acceptContentTypes'
+    yaml_value: 'application/vnd.kubernetes.protobuf,application/json'
+
+- modify_yaml:
+    dest: "{{ openshift.common.config_base}}/master/master-config.yaml"
+    yaml_key: 'masterClients.externalKubernetesClientConnectionOverrides.contentType'
+    yaml_value: 'application/vnd.kubernetes.protobuf'
+
+- modify_yaml:
+    dest: "{{ openshift.common.config_base}}/master/master-config.yaml"
+    yaml_key: 'masterClients.externalKubernetesClientConnectionOverrides.burst'
+    yaml_value: 400
+
+- modify_yaml:
+    dest: "{{ openshift.common.config_base}}/master/master-config.yaml"
+    yaml_key: 'masterClients.externalKubernetesClientConnectionOverrides.ops'
+    yaml_value: 200
+
+- modify_yaml:
+    dest: "{{ openshift.common.config_base}}/master/master-config.yaml"
+    yaml_key: 'masterClients.openshiftLoopbackClientConnectionOverrides.acceptContentTypes'
+    yaml_value: 'application/vnd.kubernetes.protobuf,application/json'
+
+- modify_yaml:
+    dest: "{{ openshift.common.config_base}}/master/master-config.yaml"
+    yaml_key: 'masterClients.openshiftLoopbackClientConnectionOverrides.contentType'
+    yaml_value: 'application/vnd.kubernetes.protobuf'
+
+- modify_yaml:
+    dest: "{{ openshift.common.config_base}}/master/master-config.yaml"
+    yaml_key: 'masterClients.openshiftLoopbackClientConnectionOverrides.burst'
+    yaml_value: 600
+
+- modify_yaml:
+    dest: "{{ openshift.common.config_base}}/master/master-config.yaml"
+    yaml_key: 'masterClients.openshiftLoopbackClientConnectionOverrides.ops'
+    yaml_value: 300
