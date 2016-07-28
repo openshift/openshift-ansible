@@ -131,7 +131,21 @@ kubernetesMasterConfig:
 {% endif %}
 masterClients:
 {# TODO: allow user to set externalKubernetesKubeConfig #}
+{% if openshift.common.version_gte_3_3_or_1_3 | bool %}
+  externalKubernetesClientConnectionOverrides:
+    acceptContentTypes: application/vnd.kubernetes.protobuf,application/json
+    contentType: application/vnd.kubernetes.protobuf
+    burst: 400
+    ops: 200
+{% endif %}
   externalKubernetesKubeConfig: ""
+{% if openshift.common.version_gte_3_3_or_1_3 | bool %}
+  openshiftLoopbackClientConnectionOverrides:
+    acceptContentTypes: application/vnd.kubernetes.protobuf,application/json
+    contentType: application/vnd.kubernetes.protobuf
+    burst: 600
+    ops: 300
+{% endif %}
   openshiftLoopbackKubeConfig: openshift-master.kubeconfig
 masterPublicURL: {{ openshift.master.public_api_url }}
 networkConfig:
