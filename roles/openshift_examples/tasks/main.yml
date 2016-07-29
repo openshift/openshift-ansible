@@ -12,8 +12,10 @@
 # RHEL and Centos image streams are mutually exclusive
 - name: Import RHEL streams
   command: >
-    {{ openshift.common.client_binary }} {{ openshift_examples_import_command }} -n openshift -f {{ rhel_image_streams }}
+    {{ openshift.common.client_binary }} {{ openshift_examples_import_command }} -n openshift -f {{ item }}
   when: openshift_examples_load_rhel | bool
+  with_items:
+    - "{{ rhel_image_streams }}"
   register: oex_import_rhel_streams
   failed_when: "'already exists' not in oex_import_rhel_streams.stderr and oex_import_rhel_streams.rc != 0"
   changed_when: false
