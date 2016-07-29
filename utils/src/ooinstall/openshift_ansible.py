@@ -1,5 +1,3 @@
-# TODO: Temporarily disabled due to importing old code into openshift-ansible
-# repo. We will work on these over time.
 # pylint: disable=bad-continuation,missing-docstring,no-self-use,invalid-name,global-statement,global-variable-not-assigned
 
 import socket
@@ -14,7 +12,9 @@ CFG = None
 ROLES_TO_GROUPS_MAP = {
     'master': 'masters',
     'node': 'nodes',
-    'storage': 'nfs'
+    'etcd': 'etcd',
+    'storage': 'nfs',
+    'master_lb': 'lb'
 }
 
 VARIABLES_MAP = {
@@ -34,75 +34,52 @@ def set_config(cfg):
 
 def generate_inventory(hosts):
     global CFG
+
     masters = [host for host in hosts if host.is_master()]
-    nodes = [host for host in hosts if host.is_node()]
-    new_nodes = [host for host in hosts if host.is_node() and host.new_host]
-    proxy = determine_proxy_configuration(hosts)
-    storage = determine_storage_configuration(hosts)
     multiple_masters = len(masters) > 1
+
+    new_nodes = [host for host in hosts if host.is_node() and host.new_host]
     scaleup = len(new_nodes) > 0
+
+    lb = determine_lb_configuration(hosts)
 
     base_inventory_path = CFG.settings['ansible_inventory_path']
     base_inventory = open(base_inventory_path, 'w')
 
-    write_inventory_children(base_inventory, multiple_masters, proxy, scaleup)
+    write_inventory_children(base_inventory, scaleup)
 
-    write_inventory_vars(base_inventory, multiple_masters, proxy)
+    write_inventory_vars(base_inventory, multiple_masters, lb)
 
 
-
-    base_inventory.write('\n[masters]\n')
-    for master in masters:
-        write_host(master, base_inventory)
-
-    if len(masters) > 1:
-        base_inventory.write('\n[etcd]\n')
-        for master in masters:
-            write_host(master, base_inventory)
-
-    base_inventory.write('\n[nodes]\n')
-
-    for node in nodes:
-        # Let the fact defaults decide if we're not a master:
-        schedulable = None
-
-        # If the node is also a master, we must explicitly set schedulablity:
-        if node.is_master():
-            schedulable = node.is_schedulable_node(hosts)
-        write_host(node, base_inventory, schedulable)
-
-    if not getattr(proxy, 'preconfigured', True):
-        base_inventory.write('\n[lb]\n')
-        write_host(proxy, base_inventory)
-
+    #write_inventory_hosts
+    for role in CFG.deployment.roles:
+        # write group block
+        group = ROLES_TO_GROUPS_MAP.get(role, role)
+        base_inventory.write("\n[{}]\n".format(group))
+        # write each host
+        group_hosts = [host for host in hosts if role in host.roles]
+        for host in group_hosts:
+            schedulable = host.is_schedulable_node(hosts)
+            write_host(host, role, base_inventory, schedulable)
 
     if scaleup:
         base_inventory.write('\n[new_nodes]\n')
         for node in new_nodes:
-            write_host(node, base_inventory)
-
-    if storage:
-        base_inventory.write('\n[nfs]\n')
-        write_host(storage, base_inventory)
+            write_host(node, 'new_nodes', base_inventory)
 
     base_inventory.close()
     return base_inventory_path
 
-def determine_proxy_configuration(hosts):
-    proxy = next((host for host in hosts if host.is_master_lb()), None)
-    if proxy:
-        if proxy.hostname == None:
-            proxy.hostname = proxy.connect_to
-            proxy.public_hostname = proxy.connect_to
+def determine_lb_configuration(hosts):
+    lb = next((host for host in hosts if host.is_master_lb()), None)
+    if lb:
+        if lb.hostname == None:
+            lb.hostname = lb.connect_to
+            lb.public_hostname = lb.connect_to
 
-    return proxy
+    return lb
 
-def determine_storage_configuration(hosts):
-    storage = next((host for host in hosts if host.is_storage()), None)
-
-    return storage
-
-def write_inventory_children(base_inventory, multiple_masters, proxy, scaleup):
+def write_inventory_children(base_inventory, scaleup):
     global CFG
 
     base_inventory.write('\n[OSEv3:children]\n')
@@ -112,13 +89,10 @@ def write_inventory_children(base_inventory, multiple_masters, proxy, scaleup):
 
     if scaleup:
         base_inventory.write('new_nodes\n')
-    if multiple_masters:
-        base_inventory.write('etcd\n')
-    if not getattr(proxy, 'preconfigured', True):
-        base_inventory.write('lb\n')
+
 
 # pylint: disable=too-many-branches
-def write_inventory_vars(base_inventory, multiple_masters, proxy):
+def write_inventory_vars(base_inventory, multiple_masters, lb):
     global CFG
     base_inventory.write('\n[OSEv3:vars]\n')
 
@@ -135,11 +109,11 @@ def write_inventory_vars(base_inventory, multiple_masters, proxy):
     if CFG.settings['ansible_ssh_user'] != 'root':
         base_inventory.write('ansible_become=yes\n')
 
-    if multiple_masters and proxy is not None:
+    if multiple_masters and lb is not None:
         base_inventory.write('openshift_master_cluster_method=native\n')
-        base_inventory.write("openshift_master_cluster_hostname={}\n".format(proxy.hostname))
+        base_inventory.write("openshift_master_cluster_hostname={}\n".format(lb.hostname))
         base_inventory.write(
-            "openshift_master_cluster_public_hostname={}\n".format(proxy.public_hostname))
+            "openshift_master_cluster_public_hostname={}\n".format(lb.public_hostname))
 
     if CFG.settings.get('variant_version', None) == '3.1':
         #base_inventory.write('openshift_image_tag=v{}\n'.format(CFG.settings.get('variant_version')))
@@ -195,8 +169,11 @@ def write_proxy_settings(base_inventory):
 
 
 # pylint: disable=too-many-branches
-def write_host(host, inventory, schedulable=None):
+def write_host(host, role, inventory, schedulable=None):
     global CFG
+
+    if host.preconfigured:
+        return
 
     facts = ''
     if host.ip:
@@ -215,14 +192,13 @@ def write_host(host, inventory, schedulable=None):
     if host.node_labels:
         facts += ' openshift_node_labels="{}"'.format(host.node_labels)
 
+
     # Distinguish between three states, no schedulability specified (use default),
     # explicitly set to True, or explicitly set to False:
-    if schedulable is None:
+    if role != 'node' or schedulable is None:
         pass
-    elif schedulable:
-        facts += ' openshift_schedulable=True'
-    elif not schedulable:
-        facts += ' openshift_schedulable=False'
+    else:
+        facts += " openshift_schedulable={}".format(schedulable)
 
     installer_host = socket.gethostname()
     if installer_host in [host.connect_to, host.hostname, host.public_hostname]:
