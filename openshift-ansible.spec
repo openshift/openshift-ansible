@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.3
+Version:        3.3.4
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,20 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Jul 29 2016 Troy Dawson <tdawson@redhat.com> 3.3.4-1
+- a-o-i: Set roles on standalone storage (smunilla@redhat.com)
+- Disable too many branches pylint (sdodson@redhat.com)
+- a-o-i: write missing openshift_node_labels (dkorn@redhat.com)
+- a-o-i: Support for arbitrary host-level variables (smunilla@redhat.com)
+- Beautiful -v output from ansible (jamespic@gmail.com)
+- a-o-i: Move inventory vars to the correct location (smunilla@redhat.com)
+- Fix registry/router being created despite no infra nodes.
+  (dgoodwin@redhat.com)
+- Document openshift_portal_net (sdodson@redhat.com)
+- Stagger the start of master services. (abutcher@redhat.com)
+- make rpm-q module pylint warning-free (tob@butter.sh)
+- add rpm_q module to query rpm database (tob@butter.sh)
+
 * Wed Jul 27 2016 Troy Dawson <tdawson@redhat.com> 3.3.3-1
 - Template named certificates with_items. (abutcher@redhat.com)
 - Replace master_cert_config_dir with common config_base fact.
