@@ -8,10 +8,10 @@
             "tags": "eap,javaee,java,jboss,xpaas,sso,keycloak",
             "version": "1.3.2"
         },
-        "name": "eap64-sso-s2i"
+        "name": "eap70-sso-s2i"
     },
     "labels": {
-        "template": "eap64-sso-s2i",
+        "template": "eap70-sso-s2i",
         "xpaas": "1.3.2"
     },
     "parameters": [
@@ -66,13 +66,13 @@
         {
             "description": "The name of the service account to use for the deployment.  The service account should be configured to allow useage of the secret(s) specified by HTTPS_SECRET and JGROUPS_ENCRYPT_SECRET.",
             "name": "SERVICE_ACCOUNT_NAME",
-            "value": "eap-service-account",
+            "value": "eap7-service-account",
             "required": true
         },
         {
             "description": "The name of the secret containing the keystore file",
             "name": "HTTPS_SECRET",
-            "value": "eap-app-secret",
+            "value": "eap7-app-secret",
             "required": true
         },
         {
@@ -129,7 +129,7 @@
         {
             "description": "The name of the secret containing the keystore file",
             "name": "JGROUPS_ENCRYPT_SECRET",
-            "value": "eap-app-secret",
+            "value": "eap7-app-secret",
             "required": false
         },
         {
@@ -170,7 +170,7 @@
             "required": true
         },
         {
-            "description": "The URL for the interal SSO service, where secure-sso is the kubernetes service exposed by the SSO server.  This is used to create the application client(s) (see SSO_USERNAME).  This can also be the same as SSO_URL.",
+            "description": "The URL for the interal SSO service, where secure-sso (the default) is the kubernetes service exposed by the SSO server.  This is used to create the application client(s) (see SSO_USERNAME).  This can also be the same as SSO_URL.",
             "name": "SSO_SERVICE_URL",
             "value": "https://secure-sso:8443/auth",
             "required": false
@@ -194,7 +194,7 @@
             "required": false
         },
         {
-            "description": "SSO Public Key. Public key is recommended to be passed into the template to avoid man-in-the-middle security vulnerability.  This can be retrieved from the SSO server, for the specified realm.",
+            "description": "SSO Public Key. Public key is recommended to be passed into the template to avoid man-in-the-middle security vulnerability",
             "name": "SSO_PUBLIC_KEY",
             "value": "",
             "required": false
@@ -214,7 +214,7 @@
         {
             "description": "The name of the secret containing the keystore file",
             "name": "SSO_SAML_KEYSTORE_SECRET",
-            "value": "eap-app-secret",
+            "value": "eap7-app-secret",
             "required": false
         },
         {
@@ -275,7 +275,7 @@
         {
             "description": "The name of the secret containing the truststore file (e.g. truststore-secret). Used for volume secretName",
             "name": "SSO_TRUSTSTORE_SECRET",
-            "value": "eap-app-secret",
+            "value": "eap7-app-secret",
             "required": false
         }
    ],
@@ -406,7 +406,7 @@
                         "from": {
                             "kind": "ImageStreamTag",
                             "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                            "name": "jboss-eap64-openshift:1.4"
+                            "name": "jboss-eap70-openshift:1.4"
                         },
                         "env": [
                             {
@@ -494,7 +494,7 @@
                     },
                     "spec": {
                         "serviceAccountName": "${SERVICE_ACCOUNT_NAME}",
-                        "terminationGracePeriodSeconds": 60,
+                        "terminationGracePeriodSeconds": 75,
                         "containers": [
                             {
                                 "name": "${APPLICATION_NAME}",
@@ -522,6 +522,17 @@
                                         "readOnly": true
                                     }
                                 ],
+                                "lifecycle": {
+                                    "preStop": {
+                                        "exec": {
+                                            "command": [
+                                                "/opt/eap/bin/jboss-cli.sh",
+                                                "-c",
+                                                ":shutdown(timeout=60)"
+                                            ]
+                                        }
+                                    }
+                                },
                                 "livenessProbe": {
                                     "exec": {
                                         "command": [
@@ -582,7 +593,7 @@
                                     {
                                         "name": "HOSTNAME_HTTPS",
                                         "value": "${HOSTNAME_HTTPS}"
-                                    },
+                                    }, 
                                     {
                                         "name": "HTTPS_KEYSTORE_DIR",
                                         "value": "/etc/eap-secret-volume"
