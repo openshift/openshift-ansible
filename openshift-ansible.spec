@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.15
+Version:        3.2.16
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,16 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Jul 29 2016 Scott Dodson <sdodson@redhat.com> 3.2.16-1
+- a-o-i: Set roles on standalone storage (smunilla@redhat.com)
+- Fix xpaas_templates_base (sdodson@redhat.com)
+- Add dotnet image stream to enterprise installs (sdodson@redhat.com)
+- Fix haproxy logs (sdodson@redhat.com)
+- Fix registry/router being created despite no infra nodes.
+  (dgoodwin@redhat.com)
+- xPaaS v1.3.2 release (sdodson@redhat.com)
+- Remove old sso70-basic templates (sdodson@redhat.com)
+
 * Wed Jul 27 2016 Scott Dodson <sdodson@redhat.com> 3.2.15-1
 - Disable too many branches pylint (sdodson@redhat.com)
 - a-o-i: write missing openshift_node_labels (dkorn@redhat.com)
