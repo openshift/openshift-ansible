@@ -815,9 +815,9 @@ class AttendedCliTests(OOCliFixture):
         self.assert_inventory_host_var(inventory, 'nodes', '10.0.0.1',
                                  'openshift_schedulable=False')
         self.assert_inventory_host_var_unset(inventory, 'nodes', '10.0.0.2',
-                                 'openshift_schedulable')
+                                 'openshift_schedulable=True')
         self.assert_inventory_host_var_unset(inventory, 'nodes', '10.0.0.3',
-                                 'openshift_schedulable')
+                                 'openshift_schedulable=True')
 
     # interactive with config file and some installed some uninstalled hosts
     @patch('ooinstall.openshift_ansible.run_main_playbook')
@@ -939,7 +939,7 @@ class AttendedCliTests(OOCliFixture):
         self.assert_inventory_host_var(inventory, 'nodes', '10.0.0.3',
                                        'openshift_schedulable=False')
         self.assert_inventory_host_var_unset(inventory, 'nodes', '10.0.0.4',
-                                             'openshift_schedulable')
+                                             'openshift_schedulable=True')
 
         self.assertTrue(inventory.has_section('etcd'))
         self.assertEquals(3, len(inventory.items('etcd')))
@@ -1122,9 +1122,9 @@ class AttendedCliTests(OOCliFixture):
         self.assert_inventory_host_var(inventory, 'nodes', '10.0.0.1',
                                  'openshift_schedulable=False')
         self.assert_inventory_host_var_unset(inventory, 'nodes', '10.0.0.2',
-                                 'openshift_schedulable')
+                                 'openshift_schedulable=True')
         self.assert_inventory_host_var_unset(inventory, 'nodes', '10.0.0.3',
-                                 'openshift_schedulable')
+                                 'openshift_schedulable=True')
 
 
 # TODO: test with config file, attended add node
