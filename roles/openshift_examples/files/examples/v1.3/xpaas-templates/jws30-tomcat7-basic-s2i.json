@@ -215,8 +215,8 @@
                                 "${APPLICATION_NAME}"
                             ],
                             "from": {
-                                "kind": "ImageStream",
-                                "name": "${APPLICATION_NAME}"
+                                "kind": "ImageStreamTag",
+                                "name": "${APPLICATION_NAME}:latest"
                             }
                         }
                     },

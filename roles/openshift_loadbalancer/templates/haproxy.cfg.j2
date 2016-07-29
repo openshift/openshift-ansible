@@ -7,6 +7,7 @@ global
     user        haproxy
     group       haproxy
     daemon
+    log         /dev/log local0 info
 
     # turn on stats unix socket
     stats socket /var/lib/haproxy/stats
