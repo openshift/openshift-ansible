@@ -827,21 +827,25 @@ def uninstall(ctx):
     oo_cfg = ctx.obj['oo_cfg']
     verbose = ctx.obj['verbose']
 
-    if len(oo_cfg.deployment.hosts) == 0:
+    if hasattr(oo_cfg, 'deployment'):
+        hosts = oo_cfg.deployment.hosts
+    elif hasattr(oo_cfg, 'hosts'):
+        hosts = oo_cfg.hosts
+    else:
         click.echo("No hosts defined in: %s" % oo_cfg.config_path)
         sys.exit(1)
 
     click.echo("OpenShift will be uninstalled from the following hosts:\n")
     if not ctx.obj['unattended']:
         # Prompt interactively to confirm:
-        for host in oo_cfg.deployment.hosts:
+        for host in hosts:
             click.echo("  * %s" % host.connect_to)
         proceed = click.confirm("\nDo you wish to proceed?")
         if not proceed:
             click.echo("Uninstall cancelled.")
             sys.exit(0)
 
-    openshift_ansible.run_uninstall_playbook(verbose)
+    openshift_ansible.run_uninstall_playbook(hosts, verbose)
 
 
 @click.command()
