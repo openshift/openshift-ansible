@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.4
+Version:        3.3.5
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,20 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Aug 01 2016 Troy Dawson <tdawson@redhat.com> 3.3.5-1
+- Update for issue#2244 (kunallimaye@gmail.com)
+- Update for issue-2244 (kunallimaye@gmail.com)
+- a-o-i: Remove AEP, OSE 3.0, and OSE 3.2 choices (smunilla@redhat.com)
+- Move role dependencies to playbooks. (abutcher@redhat.com)
+- Fix xpaas_templates_base (sdodson@redhat.com)
+- a-o-i: Better inventory group handling (smunilla@redhat.com)
+- Add dotnet image stream to enterprise installs (sdodson@redhat.com)
+- Fix haproxy logs (sdodson@redhat.com)
+- update bootstrap-fedora playbook with new python crypto deps
+  (maxamillion@fedoraproject.org)
+- Remove old sso70-basic templates (sdodson@redhat.com)
+- xPaaS v1.3.2 release (sdodson@redhat.com)
+
 * Fri Jul 29 2016 Troy Dawson <tdawson@redhat.com> 3.3.4-1
 - a-o-i: Set roles on standalone storage (smunilla@redhat.com)
 - Disable too many branches pylint (sdodson@redhat.com)
