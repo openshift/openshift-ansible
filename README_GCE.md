@@ -87,7 +87,8 @@ Install Dependencies
 ```
 
 > Installation using Mac OSX requires pycrypto library
-> $ pip install pycrypto
+>
+> <kbd>$ pip install pycrypto</kbd>
 
 Test The Setup
 --------------
