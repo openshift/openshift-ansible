@@ -7,6 +7,7 @@
   vars_files:
   - vars.yml
   tasks:
+  - include: tasks/create_security_group.yml
   - include: ../../common/openshift-cluster/tasks/set_etcd_launch_facts.yml
   - include: tasks/launch_instances.yml
     vars:

@@ -1,0 +1,127 @@
+---
+- name: Create security group for ose
+  ec2_group:
+    name: ec2_security_groups
+    description: ose traffic security group
+    rules:
+      - proto: tcp
+        from_port: 80
+        to_port: 80
+        cidr_ip: 0.0.0.0/0
+      - proto: tcp
+        from_port: 22
+        to_port: 22
+        cidr_ip: 0.0.0.0/0
+      - proto: tcp
+        from_port: 53
+        to_port: 53
+        cidr_ip: 0.0.0.0/0
+      - proto: tcp
+        from_port: 8053
+        to_port: 8053
+        cidr_ip: 0.0.0.0/0
+      - proto: tcp
+        from_port: 443
+        to_port: 443
+        cidr_ip: 0.0.0.0/0
+      - proto: tcp
+        from_port: 1936
+        to_port: 1936
+        cidr_ip: 0.0.0.0/0
+      - proto: tcp
+        from_port: 4001
+        to_port: 4001
+        cidr_ip: 0.0.0.0/0
+      - proto: tcp
+        from_port: 2379
+        to_port: 2380
+        cidr_ip: 0.0.0.0/0
+      - proto: tcp
+        from_port: 4789
+        to_port: 4789
+        cidr_ip: 0.0.0.0/0
+      - proto: tcp
+        from_port: 8443
+        to_port: 8443
+        cidr_ip: 0.0.0.0/0
+      - proto: tcp
+        from_port: 10250
+        to_port: 10250
+        cidr_ip: 0.0.0.0/0
+      - proto: tcp
+        from_port: 24224
+        to_port: 24224
+        cidr_ip: 0.0.0.0/0
+      - proto: udp
+        from_port: 53
+        to_port: 53
+        cidr_ip: 0.0.0.0/0
+      - proto: udp
+        from_port: 4789
+        to_port: 4789
+        cidr_ip: 0.0.0.0/0
+      - proto: udp
+        from_port: 24224
+        to_port: 24224
+        cidr_ip: 0.0.0.0/0
+    rules_egress:
+      - proto: tcp
+        from_port: 80
+        to_port: 80
+        cidr_ip: 0.0.0.0/0
+      - proto: tcp
+        from_port: 22
+        to_port: 22
+        cidr_ip: 0.0.0.0/0
+      - proto: tcp
+        from_port: 53
+        to_port: 53
+        cidr_ip: 0.0.0.0/0
+      - proto: tcp
+        from_port: 8053
+        to_port: 8053
+        cidr_ip: 0.0.0.0/0
+      - proto: tcp
+        from_port: 443
+        to_port: 443
+        cidr_ip: 0.0.0.0/0
+      - proto: tcp
+        from_port: 1936
+        to_port: 1936
+        cidr_ip: 0.0.0.0/0
+      - proto: tcp
+        from_port: 4001
+        to_port: 4001
+        cidr_ip: 0.0.0.0/0
+      - proto: tcp
+        from_port: 2379
+        to_port: 2380
+        cidr_ip: 0.0.0.0/0
+      - proto: tcp
+        from_port: 4789
+        to_port: 4789
+        cidr_ip: 0.0.0.0/0
+      - proto: tcp
+        from_port: 8443
+        to_port: 8443
+        cidr_ip: 0.0.0.0/0
+      - proto: tcp
+        from_port: 10250
+        to_port: 10250
+        cidr_ip: 0.0.0.0/0
+      - proto: tcp
+        from_port: 24224
+        to_port: 24224
+        cidr_ip: 0.0.0.0/0
+      - proto: udp
+        from_port: 53
+        to_port: 53
+        cidr_ip: 0.0.0.0/0
+      - proto: udp
+        from_port: 4789
+        to_port: 4789
+        cidr_ip: 0.0.0.0/0
+      - proto: udp
+        from_port: 24224
+        to_port: 24224
+        cidr_ip: 0.0.0.0/0
