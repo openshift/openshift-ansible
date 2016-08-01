@@ -85,8 +85,9 @@ Install Dependencies
 ```
   yum install -y ansible python-libcloud
 ```
+
 > Installation using Mac OSX requires pycrypto library
-> $ pip install pycrypto    
+> $ pip install pycrypto
 
 Test The Setup
 --------------
