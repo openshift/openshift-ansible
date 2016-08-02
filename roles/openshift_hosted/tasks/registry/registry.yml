@@ -4,12 +4,12 @@
     {{ openshift.common.client_binary }} --api-version='v1' -o json
     get nodes -n default --config={{ openshift_hosted_kubeconfig }}
     --selector={{ openshift.hosted.registry.selector | default('') }}
-  register: openshift_hosted_registry_nodes_json
+  register: registry_nodes_json
   changed_when: false
   when: openshift.hosted.registry.replicas | default(none) is none
 
 - set_fact:
-    l_node_count: "{{ (openshift_hosted_registry_nodes_json.stdout | default('{\"items\":[]}') | from_json)['items'] | length }}"
+    l_node_count: "{{ (registry_nodes_json.stdout | default('{\"items\":[]}') | from_json)['items'] | length }}"
 
 # Determine the default number of registry/router replicas to use if no count
 # has been specified.
