@@ -8,7 +8,8 @@
   register: mktemp
   changed_when: False
 
-- set_fact:
+- name: Record kubeconfig tmp dir
+  set_fact:
     openshift_metrics_kubeconfig: "{{ mktemp.stdout }}/admin.kubeconfig"
 
 - name: Copy the admin client config(s)
@@ -32,108 +33,51 @@
                           | default('hawkular-metrics.' ~ (openshift.master.default_subdomain
                           | default(openshift_master_default_subdomain )))
                           | oo_hostname_from_url }}"
-    metrics_persistence: "{{ openshift.hosted.metrics.storage_kind | default(none) is not none }}"
+    metrics_persistence: True
+    #"{{ openshift.hosted.metrics.storage_kind | default(none) is not none }}"
     metrics_dynamic_vol: "{{ openshift.hosted.metrics.storage_kind | default(none) == 'dynamic' }}"
     metrics_template_dir: "/usr/share/openshift/examples/infrastructure-templates/{{ 'origin' if deployment_type == 'origin' else 'enterprise' }}"
     cassandra_nodes: "{{ ',CASSANDRA_NODES=' ~ openshift.hosted.metrics.cassandra_nodes if 'cassandra' in openshift.hosted.metrics else '' }}"
     cassandra_pv_size: "{{ ',CASSANDRA_PV_SIZE=' ~ openshift.hosted.metrics.storage_volume_size if openshift.hosted.metrics.storage_volume_size | default(none) is not none else '' }}"
 
-- name: Test if metrics-deployer service account exists
-  command: >
+
+- name: Check for existing metrics pods
+  shell: >
     {{ openshift.common.client_binary }}
     --config={{ openshift_metrics_kubeconfig }}
-    --namespace=openshift-infra
-    get serviceaccount metrics-deployer -o json
-  register: serviceaccount
-  changed_when: false
+    --namespace openshift-infra
+    get pods -l {{ item }} | grep -q Running
+  register: metrics_pods_status
+  with_items:
+    - metrics-infra=hawkular-metrics
+    - metrics-infra=heapster
+    - metrics-infra=hawkular-cassandra
   failed_when: false
-
-- name: Create metrics-deployer Service Account
-  shell: >
-    echo {{ metrics_deployer_sa | to_json | quote }} |
-    {{ openshift.common.client_binary }}
-    --config={{ openshift_metrics_kubeconfig }}
-    --namespace openshift-infra
-    create -f -
-  when: serviceaccount.rc == 1
-
-- name: Test edit permissions
-  command: >
-    {{ openshift.common.client_binary }}
-    --config={{ openshift_metrics_kubeconfig }}
-    --namespace openshift-infra
-    get rolebindings -o jsonpath='{.items[?(@.metadata.name == "edit")].userNames}'
-  register: edit_rolebindings
   changed_when: false
 
-- name: Add edit permission to the openshift-infra project to metrics-deployer SA
-  command: >
-    {{ openshift.common.admin_binary }}
-    --config={{ openshift_metrics_kubeconfig }}
-    --namespace openshift-infra
-    policy add-role-to-user edit
-    system:serviceaccount:openshift-infra:metrics-deployer
-  when: "'system:serviceaccount:openshift-infra:metrics-deployer' not in edit_rolebindings.stdout"
-
-- name: Test cluster-reader permissions
-  command: >
+- name: Check for previous deployer
+  shell: >
     {{ openshift.common.client_binary }}
     --config={{ openshift_metrics_kubeconfig }}
     --namespace openshift-infra
-    get clusterrolebindings -o jsonpath='{.items[?(@.metadata.name == "cluster-reader")].userNames}'
-  register: cluster_reader_clusterrolebindings
+    get pods -l metrics-infra=deployer --sort-by='{.metadata.creationTimestamp}' | tail -1 | grep metrics-deployer-
+  register: metrics_deployer_status
+  failed_when: false
   changed_when: false
 
-- name: Add cluster-reader permission to the openshift-infra project to heapster SA
-  command: >
-    {{ openshift.common.admin_binary }}
-    --config={{ openshift_metrics_kubeconfig }}
-    --namespace openshift-infra
-    policy add-cluster-role-to-user cluster-reader
-    system:serviceaccount:openshift-infra:heapster
-  when: "'system:serviceaccount:openshift-infra:heapster' not in cluster_reader_clusterrolebindings.stdout"
+- name: Record current deployment status
+  set_fact:
+    greenfield: "{{ not metrics_deployer_status.rc == 0 }}"
+    failed_error: "{{ True if 'Error' in metrics_deployer_status.stdout else False }}"
+    metrics_running: "{{ metrics_pods_status.results | oo_collect(attribute='rc') == [0,0,0] }}"
 
-# TODO: extend this to allow user passed in certs or generating cert with
-# OpenShift CA
-- name: Create metrics-deployer secret
-  command: >
-    {{ openshift.common.client_binary }}
-    --config={{ openshift_metrics_kubeconfig }}
-    --namespace openshift-infra
-    secrets new metrics-deployer nothing=/dev/null
-  register: metrics_deployer_secret
-  changed_when: metrics_deployer_secret.rc == 0
-  failed_when: "metrics_deployer_secret.rc == 1 and 'already exists' not in metrics_deployer_secret.stderr"
+- name: Set deployment mode
+  set_fact:
+    deployment_mode: "{{ 'refresh' if (failed_error | bool or metrics_upgrade | bool) else 'deploy' }}"
 
-- debug: var=openshift.hosted.metrics.deployer_prefix
-- debug: var=openshift.hosted.metrics.deployer_version
-
-
-- name: Deploy Metrics
-  shell: >
-    {{ openshift.common.client_binary }} process -f
-    {{ metrics_template_dir }}/metrics-deployer.yaml -v
-    HAWKULAR_METRICS_HOSTNAME={{ metrics_hostname }},USE_PERSISTENT_STORAGE={{
-    metrics_persistence | string | lower }},METRIC_DURATION={{ openshift.hosted.metrics.duration }},METRIC_RESOLUTION={{ openshift.hosted.metrics.resolution }},IMAGE_PREFIX={{ openshift.hosted.metrics.deployer_prefix }},IMAGE_VERSION={{ openshift.hosted.metrics.deployer_version }}
-    | {{ openshift.common.client_binary }} --namespace openshift-infra
-    --config={{ openshift_metrics_kubeconfig }}
-    create -f -
-  register: deploy_metrics
-  failed_when: "'already exists' not in deploy_metrics.stderr and deploy_metrics.rc != 0"
-  changed_when: deploy_metrics.rc == 0
-
-# TODO: re-enable this once the metrics deployer validation issue is fixed
-# when using dynamically provisioned volumes
-- name: "Wait for image pull and deployer pod"
-  shell: >
-    {{ openshift.common.client_binary }}
-    --namespace openshift-infra
-    --config={{ openshift_metrics_kubeconfig }}
-    get pods | grep metrics-deployer.*Completed
-  register: result
-  until: result.rc == 0
-  retries: 60
-  delay: 10
+# TODO: handle non greenfield deployments in the future
+- include: install.yml
+  when: greenfield
 
 - name: Delete temp directory
   file:
