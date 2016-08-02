@@ -19,7 +19,7 @@
 
 - name: Generate master instance private ips 
   set_fact:
-    scratch_name: "{{ private_subnet }}.{{ 255 | random }}"
+    scratch_name: "{{ private_subnet }}.{{ 255 | random(1,1) }}"
   register: node_ips_output
   with_sequence: count={{ number_nodes }}
 

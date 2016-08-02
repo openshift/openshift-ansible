@@ -6,7 +6,7 @@
 - name: Create security group for ose
   ec2_group:
     name: "{{ security_group }}"
-    description: ose traffic security group
+    description: "{{ security_group }}" 
     rules:
       - proto: tcp
         from_port: 80
