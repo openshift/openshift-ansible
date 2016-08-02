@@ -1,7 +1,11 @@
 ---
+- name: Create security group name from environment
+  set_fact:
+    security_group: "{{ lookup('oo_option', 'ec2_security_groups') | default([ 'public' ], True) }}"
+
 - name: Create security group for ose
   ec2_group:
-    name: ec2_security_groups
+    name: "{{ security_group }}"
     description: ose traffic security group
     rules:
       - proto: tcp
@@ -125,3 +129,7 @@
         from_port: 24224
         to_port: 24224
         cidr_ip: 0.0.0.0/0
+  register: sec_group
+
+- name: debug security groups
+  debug: var=sec_group

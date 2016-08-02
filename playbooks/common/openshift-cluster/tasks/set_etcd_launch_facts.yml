@@ -11,3 +11,14 @@
     etcd_names: "{{ etcd_names_output.results | default([])
                     | oo_collect('ansible_facts')
                     | oo_collect('scratch_name') }}"
+
+- name: Generate etcd instance private ips·
+  set_fact:
+    scratch_name: "{{ private_subnet }}.{{ 255 | random }}" 
+  register: etcd_ips_output
+  with_sequence: count={{ num_etcd }}
+
+- set_fact:
+    etcd_ips: "{{ etcd_ips_output.results | default([])
+                   | oo_collect('ansible_facts')
+                   | oo_collect('scratch_name') }}" 
