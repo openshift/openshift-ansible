@@ -83,7 +83,7 @@
   register: enis
   with_items: "{{ private_ips }}"
 
-- name: debug enis
+- name: show created ENI(s)
   debug: var=enis
 
 - name: Allocate eip for each new eni
@@ -96,7 +96,7 @@
   register: eips
   with_items: "{{ enis.results }}"
 
-- name: output the IP
+- name: show created EIP(s)
   debug: var=eips
 
 - name: Launch instance(s)
@@ -121,6 +121,13 @@
   with_together:
     - "{{ instances }}"
     - "{{ enis.results }}"
+
+- name: enable the delete on termination flag so that ENI(s) are removed when the ec2 instance is terminated
+  ec2_eni:
+    eni_id: "{{ item.interface.id }}"
+    delete_on_termination: true
+  with_items: "{{ enis.results }}"
+  when: enis.changed == true
 
 - set_fact:
     instance_groups: >
@@ -157,12 +164,6 @@
             - missingok
           scripts:
             postrotate: "/bin/kill -HUP `cat /var/run/syslogd.pid 2> /dev/null` 2> /dev/null || true"
-
-- name: debug instances
-  debug: var=instances
-
-- name: debug ec2
-  debug: var=ec2.results[0]
 
 - name: Add new instances groups and variables
   add_host:
