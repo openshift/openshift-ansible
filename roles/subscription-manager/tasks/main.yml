@@ -121,5 +121,6 @@
     - rhsm_repos is not none
     - rhsm_repos|trim != ''
 
-- name: "Enable specified repositories"
-  command: "/bin/yum-config-manager --save --setopt=rhel-7-fast-datapath-htb-rpms.skip_if_unavailable=true"
+- include: enterprise.yml
+  when: deployment_type in [ 'enterprise', 'atomic-enterprise', 'openshift-enterprise' ] and 
+                not openshift.common.is_atomic | bool
