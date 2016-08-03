@@ -345,15 +345,20 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # NOTE: openshift_master_named_certificates is cached on masters and is an
 # additive fact, meaning that each run with a different set of certificates
 # will add the newly provided certificates to the cached set of certificates.
+#
+# An optional CA may be specified for each named certificate. CAs will
+# be added to the OpenShift CA bundle which allows for the named
+# certificate to be served for internal cluster communication.
+#
 # If you would like openshift_master_named_certificates to be overwritten with
 # the provided value, specify openshift_master_overwrite_named_certificates.
 #openshift_master_overwrite_named_certificates=true
 #
 # Provide local certificate paths which will be deployed to masters
-#openshift_master_named_certificates=[{"certfile": "/path/to/custom1.crt", "keyfile": "/path/to/custom1.key"}]
+#openshift_master_named_certificates=[{"certfile": "/path/to/custom1.crt", "keyfile": "/path/to/custom1.key", "cafile": "/path/to/custom-ca1.crt"}]
 #
 # Detected names may be overridden by specifying the "names" key
-#openshift_master_named_certificates=[{"certfile": "/path/to/custom1.crt", "keyfile": "/path/to/custom1.key", "names": ["public-master-host.com"]}]
+#openshift_master_named_certificates=[{"certfile": "/path/to/custom1.crt", "keyfile": "/path/to/custom1.key", "names": ["public-master-host.com"], "cafile": "/path/to/custom-ca1.crt"}]
 
 # Session options
 #openshift_master_session_name=ssn
