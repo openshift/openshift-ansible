@@ -5,7 +5,7 @@
 
 - name: Generate node instance names(s)
   set_fact:
-    scratch_name: "{{ cluster_id }}-{{ k8s_type }}-{{ sub_host_type }}-{{ '%05x' | format(1048576 | random) }}"
+    scratch_name: "{{ k8s_type }}-{{ sub_host_type }}-{{ '%05x' | format(1048576 | random) }}.{{ cluster_id }}"
   register: node_names_output
   with_sequence: count={{ number_nodes }}
 
@@ -15,7 +15,6 @@
                     | oo_collect('scratch_name') }}"
 
 - debug: var=node_names
-
 
 - name: Generate master instance private ips 
   set_fact:

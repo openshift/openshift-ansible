@@ -129,6 +129,34 @@
   with_items: "{{ enis.results }}"
   when: enis.changed == true
 
+- name: create dns names based on eips and dns_names fact
+  route53:
+    command: create
+    zone: "{{ zone }}"
+    record: "{{ item.1 }}.{{ zone }}"
+    type: A
+    ttl: 60
+    value: "{{ item.0.public_ip }}"
+    wait: yes
+  with_together:
+    - "{{eips.results}}"
+    - "{{instances}}"
+  when: eips.results is defined
+
+- name: create wildcard dns entries for infra nodes
+  route53:
+    command: create
+    zone: "{{ zone }}"
+    record: "*.apps-{{item.1}}.{{ cluster_id }}.{{zone}}"
+    type: A
+    ttl: 60
+    value: "{{ item.0.public_ip }}"
+    wait: yes
+  with_together:
+    - "{{eips.results}}"
+    - "{{eips.results | length}}"
+  when: host_type == "node" and sub_host_type == "infra"
+
 - set_fact:
     instance_groups: >
       tag_created-by_{{ created_by }}, tag_clusterid_{{ cluster }},
