@@ -1,0 +1,5 @@
+---
+- openshift_facts:
+    role: etcd
+    local_facts:
+      etcd_image: "{{ osm_etcd_image | default(None) }}"
