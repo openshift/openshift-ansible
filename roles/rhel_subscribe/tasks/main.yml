@@ -5,7 +5,6 @@
 
 - set_fact:
     rhel_subscription_pool: "{{ lookup('oo_option', 'rhel_subscription_pool') | default(rhsub_pool, True) | default('OpenShift Enterprise, Premium*', True) }}"
-    rhel_subscription_pool_id: "{{ lookup('oo_option', 'rhel_subscription_pool_id') | default(rhsub_pool_id, True) | default('OpenShift Enterprise, Premium*', True) }}"
     rhel_subscription_user: "{{ lookup('oo_option', 'rhel_subscription_user') | default(rhsub_user, True) | default(omit, True) }}"
     rhel_subscription_pass: "{{ lookup('oo_option', 'rhel_subscription_pass') | default(rhsub_pass, True) | default(omit, True) }}"
     rhel_subscription_server: "{{ lookup('oo_option', 'rhel_subscription_server') | default(rhsub_server) }}"
@@ -37,25 +36,20 @@
   command: subscription-manager list --available --matches="{{ rhel_subscription_pool }}" --pool-only
   register: openshift_pool_id
   changed_when: False
-  when: rhel_subscription_pass is not defined
-
-- name: Set openshift pool id
-  set_fact:
-    openshift_pool_id: "{{ rhel_subscription_pool_id }}"
 
 - name: Determine if OpenShift Pool Already Attached
   command: subscription-manager list --consumed --matches="{{ rhel_subscription_pool }}" --pool-only
   register: openshift_pool_attached
   changed_when: False
-  when: openshift_pool_id == ''
+  when: openshift_pool_id.stdout == ''
 
 - fail:
     msg: "Unable to find pool matching {{ rhel_subscription_pool }} in available or consumed pools"
   when: openshift_pool_id.stdout == '' and openshift_pool_attached is defined and openshift_pool_attached.stdout == ''
 
 - name: Attach to OpenShift Pool
-  command: subscription-manager subscribe --pool {{ openshift_pool_id }}
-  when: openshift_pool_id != ''
+  command: subscription-manager subscribe --pool {{ openshift_pool_id.stdout_lines[0] }}
+  when: openshift_pool_id.stdout != ''
 
 - include: enterprise.yml
   when: deployment_type in [ 'enterprise', 'atomic-enterprise', 'openshift-enterprise' ] and
