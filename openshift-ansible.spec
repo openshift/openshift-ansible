@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.5
+Version:        3.3.6
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Aug 03 2016 Troy Dawson <tdawson@redhat.com> 3.3.6-1
+- Rename router and registry node list variables. (abutcher@redhat.com)
+- a-o-i: Fix broken uninstall (smunilla@redhat.com)
+- Refactor etcd certificates roles. (abutcher@redhat.com)
+
 * Mon Aug 01 2016 Troy Dawson <tdawson@redhat.com> 3.3.5-1
 - Update for issue#2244 (kunallimaye@gmail.com)
 - Update for issue-2244 (kunallimaye@gmail.com)
