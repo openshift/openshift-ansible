@@ -279,10 +279,10 @@ def run_ansible(playbook, inventory, env_vars, verbose=False):
     return subprocess.call(args, env=env_vars)
 
 
-def run_uninstall_playbook(verbose=False):
+def run_uninstall_playbook(hosts, verbose=False):
     playbook = os.path.join(CFG.settings['ansible_playbook_directory'],
         'playbooks/adhoc/uninstall.yml')
-    inventory_file = generate_inventory(CFG.hosts)
+    inventory_file = generate_inventory(hosts)
     facts_env = os.environ.copy()
     if 'ansible_log_path' in CFG.settings:
         facts_env['ANSIBLE_LOG_PATH'] = CFG.settings['ansible_log_path']
