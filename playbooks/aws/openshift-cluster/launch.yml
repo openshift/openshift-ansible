@@ -7,9 +7,12 @@
   vars_files:
   - vars.yml
   tasks:
+  - include: tasks/create_security_group.yml
+
   - include: ../../common/openshift-cluster/tasks/set_etcd_launch_facts.yml
   - include: tasks/launch_instances.yml
     vars:
+      private_ips: "{{etcd_ips}}"
       instances: "{{ etcd_names }}"
       cluster: "{{ cluster_id }}"
       type: "{{ k8s_type }}"
@@ -18,6 +21,7 @@
   - include: ../../common/openshift-cluster/tasks/set_master_launch_facts.yml
   - include: tasks/launch_instances.yml
     vars:
+      private_ips: "{{master_ips}}"
       instances: "{{ master_names }}"
       cluster: "{{ cluster_id }}"
       type: "{{ k8s_type }}"
@@ -29,6 +33,7 @@
       count: "{{ num_nodes }}"
   - include: tasks/launch_instances.yml
     vars:
+      private_ips: "{{node_ips}}"
       instances: "{{ node_names }}"
       cluster: "{{ cluster_id }}"
       type: "{{ k8s_type }}"
@@ -40,6 +45,7 @@
       count: "{{ num_infra }}"
   - include: tasks/launch_instances.yml
     vars:
+      private_ips: "{{node_ips}}"
       instances: "{{ node_names }}"
       cluster: "{{ cluster_id }}"
       type: "{{ k8s_type }}"

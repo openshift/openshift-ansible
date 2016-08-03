@@ -42,6 +42,13 @@
       with_items: groups.oo_hosts_to_terminate
       when: "'oo_hosts_to_terminate' in groups"
 
+    - name: Remove eip(s)
+      ec2_eip:
+        state: absent
+        ip: "{{ hostvars[item]['ec2_ip_address'] }}"
+      with_items: groups.oo_hosts_to_terminate
+      when: "'oo_hosts_to_terminate' in groups"
+
     - name: Terminate instances
       ec2:
         state: absent
