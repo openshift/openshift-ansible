@@ -2,6 +2,8 @@
 - name: Install openssl
   action: "{{ ansible_pkg_mgr }} name=openssl state=present"
   when: not etcd_is_atomic | bool
+  delegate_to: "{{ etcd_ca_host }}"
+  run_once: true
 
 - file:
     path: "{{ item }}"
@@ -13,29 +15,41 @@
   - "{{ etcd_ca_new_certs_dir }}"
   - "{{ etcd_ca_crl_dir }}"
   - "{{ etcd_ca_dir }}/fragments"
+  delegate_to: "{{ etcd_ca_host }}"
+  run_once: true
 
 - command: cp /etc/pki/tls/openssl.cnf ./
   args:
     chdir: "{{ etcd_ca_dir }}/fragments"
     creates: "{{ etcd_ca_dir }}/fragments/openssl.cnf"
+  delegate_to: "{{ etcd_ca_host }}"
+  run_once: true
 
 - template:
     dest: "{{ etcd_ca_dir }}/fragments/openssl_append.cnf"
     src: openssl_append.j2
     backup: true
+  delegate_to: "{{ etcd_ca_host }}"
+  run_once: true
 
 - assemble:
     src: "{{ etcd_ca_dir }}/fragments"
     dest: "{{ etcd_openssl_conf }}"
+  delegate_to: "{{ etcd_ca_host }}"
+  run_once: true
 
 - command: touch {{ etcd_ca_db }}
   args:
     creates: "{{ etcd_ca_db }}"
+  delegate_to: "{{ etcd_ca_host }}"
+  run_once: true
 
 - copy:
     dest: "{{ etcd_ca_serial }}"
     content: "01"
     force: no
+  delegate_to: "{{ etcd_ca_host }}"
+  run_once: true
 
 - command: >
     openssl req -config {{ etcd_openssl_conf }} -newkey rsa:4096
@@ -48,3 +62,5 @@
     creates: "{{ etcd_ca_cert }}"
   environment:
     SAN: 'etcd-signer'
+  delegate_to: "{{ etcd_ca_host }}"
+  run_once: true

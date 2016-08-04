@@ -4,40 +4,11 @@ galaxy_info:
   description: Master
   company: Red Hat, Inc.
   license: Apache License, Version 2.0
-  min_ansible_version: 1.7
+  min_ansible_version: 2.1
   platforms:
   - name: EL
     versions:
     - 7
   categories:
   - cloud
-dependencies:
-- role: openshift_clock
-- role: openshift_docker
-- role: openshift_cli
-- role: openshift_cloud_provider
-- role: openshift_builddefaults
-- role: openshift_master_facts
-- role: openshift_hosted_facts
-- role: os_firewall
-  os_firewall_allow:
-  - service: etcd embedded
-    port: 4001/tcp
-  - service: api server https
-    port: "{{ openshift.master.api_port }}/tcp"
-  - service: api controllers https
-    port: "{{ openshift.master.controllers_port }}/tcp"
-  - service: skydns tcp
-    port: "{{ openshift.master.dns_port }}/tcp"
-  - service: skydns udp
-    port: "{{ openshift.master.dns_port }}/udp"
-  - service: Fluentd td-agent tcp
-    port: 24224/tcp
-  - service: Fluentd td-agent udp
-    port: 24224/udp
-  - service: pcsd
-    port: 2224/tcp
-  - service: Corosync UDP
-    port: 5404/udp
-  - service: Corosync UDP
-    port: 5405/udp
+dependencies: []

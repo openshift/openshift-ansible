@@ -10,7 +10,7 @@
 * [Overriding detected ip addresses and hostnames](#overriding-detected-ip-addresses-and-hostnames)
 
 ## Requirements
-* ansible 1.9.4
+* ansible 2.1.0.0
   * Available in Fedora channels
   * Available for EL with EPEL and Optional channel
 * One or more RHEL 7.1 VMs

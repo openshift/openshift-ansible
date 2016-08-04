@@ -45,9 +45,6 @@ openshift_release=v1.2
 # Install the openshift examples
 #openshift_install_examples=true
 
-# Enable cluster metrics
-#use_cluster_metrics=true
-
 # Configure logoutURL in the master config for console customization
 # See: https://docs.openshift.org/latest/install_config/web_console_customization.html#changing-the-logout-url
 #openshift_master_logout_url=http://example.com
@@ -339,11 +336,13 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Disable the OpenShift SDN plugin
 # openshift_use_openshift_sdn=False
 
-# Configure SDN cluster network CIDR block. This network block should
-# be a private block and should not conflict with existing network
-# blocks in your infrastructure that pods may require access to.
-# Can not be changed after deployment.
+# Configure SDN cluster network and kubernetes service CIDR blocks. These
+# network blocks should be private and should not conflict with network blocks
+# in your infrastructure that pods may require access to. Can not be changed
+# after deployment.
 #osm_cluster_network_cidr=10.1.0.0/16
+#openshift_portal_net=172.30.0.0/16
+
 
 # Configure number of bits to allocate to each host’s subnet e.g. 8
 # would mean a /24 network on the host.
@@ -360,15 +359,20 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # NOTE: openshift_master_named_certificates is cached on masters and is an
 # additive fact, meaning that each run with a different set of certificates
 # will add the newly provided certificates to the cached set of certificates.
+#
+# An optional CA may be specified for each named certificate. CAs will
+# be added to the OpenShift CA bundle which allows for the named
+# certificate to be served for internal cluster communication.
+#
 # If you would like openshift_master_named_certificates to be overwritten with
 # the provided value, specify openshift_master_overwrite_named_certificates.
 #openshift_master_overwrite_named_certificates=true
 #
 # Provide local certificate paths which will be deployed to masters
-#openshift_master_named_certificates=[{"certfile": "/path/to/custom1.crt", "keyfile": "/path/to/custom1.key"}]
+#openshift_master_named_certificates=[{"certfile": "/path/to/custom1.crt", "keyfile": "/path/to/custom1.key", "cafile": "/path/to/custom-ca1.crt"}]
 #
 # Detected names may be overridden by specifying the "names" key
-#openshift_master_named_certificates=[{"certfile": "/path/to/custom1.crt", "keyfile": "/path/to/custom1.key", "names": ["public-master-host.com"]}]
+#openshift_master_named_certificates=[{"certfile": "/path/to/custom1.crt", "keyfile": "/path/to/custom1.key", "names": ["public-master-host.com"], "cafile": "/path/to/custom-ca1.crt"}]
 
 # Session options
 #openshift_master_session_name=ssn

@@ -87,7 +87,7 @@
     # Request openshift_release 3.2 and let the openshift_version role handle converting this
     # to a more specific version, respecting openshift_image_tag and openshift_pkg_version if
     # defined, and overriding the normal behavior of protecting the installed version
-    openshift_release: "3.2"
+    openshift_release: "{{ '1.2' if deployment_type == 'origin' else '3.2' }}"
     openshift_protect_installed_version: False
     # Docker role (a dependency) should be told not to do anything to installed version
     # of docker, we handle this separately during upgrade. (the inventory may have a
@@ -163,6 +163,8 @@
   - name: Verify containers are available for upgrade
     command: >
       docker pull {{ openshift.common.cli_image }}:{{ openshift_image_tag }}
+    register: pull_result
+    changed_when: "'Downloaded newer image' in pull_result.stdout"
     when: openshift.common.is_containerized | bool
 
   - name: Check latest available OpenShift RPM version
@@ -176,8 +178,12 @@
   - name: Verify OpenShift 3.2 RPMs are available for upgrade
     fail:
       msg: "OpenShift {{ avail_openshift_version.stdout }} is available, but 3.2 or greater is required"
-    when: not openshift.common.is_containerized | bool and not avail_openshift_version | skipped and avail_openshift_version.stdout | default('0.0', True) | version_compare('3.2', '<')
+    when: deployment_type != 'origin' and not openshift.common.is_containerized | bool and not avail_openshift_version | skipped and avail_openshift_version.stdout | default('0.0', True) | version_compare(openshift_release, '<')
 
+  - name: Verify Origin 1.2 RPMs are available for upgrade
+    fail:
+      msg: "OpenShift {{ avail_openshift_version.stdout }} is available, but 1.2 or greater is required"
+    when: deployment_type == 'origin' and not openshift.common.is_containerized | bool and not avail_openshift_version | skipped and avail_openshift_version.stdout | default('0.0', True) | version_compare(openshift_release, '<')
 
   # TODO: Are these two grep checks necessary anymore?
   # Note: the version number is hardcoded here in hopes of catching potential

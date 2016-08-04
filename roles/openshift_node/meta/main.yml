@@ -4,32 +4,11 @@ galaxy_info:
   description: OpenShift Node
   company: Red Hat, Inc.
   license: Apache License, Version 2.0
-  min_ansible_version: 1.7
+  min_ansible_version: 2.1
   platforms:
   - name: EL
     versions:
     - 7
   categories:
   - cloud
-dependencies:
-- role: openshift_clock
-- role: openshift_docker
-- role: openshift_cloud_provider
-- role: openshift_common
-- role: openshift_node_dnsmasq
-  when: openshift.common.use_dnsmasq
-- role: os_firewall
-  os_firewall_allow:
-  - service: Kubernetes kubelet
-    port: 10250/tcp
-  - service: http
-    port: 80/tcp
-  - service: https
-    port: 443/tcp
-  - service: Openshift kubelet ReadOnlyPort
-    port: 10255/tcp
-  - service: Openshift kubelet ReadOnlyPort udp
-    port: 10255/udp
-  - service: OpenShift OVS sdn
-    port: 4789/udp
-    when: openshift.node.use_openshift_sdn | bool
+dependencies: []

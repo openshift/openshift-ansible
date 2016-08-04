@@ -34,18 +34,9 @@ class Variant(object):
 
 
 # WARNING: Keep the versions ordered, most recent first:
-OSE = Variant('openshift-enterprise', 'OpenShift Enterprise',
+OSE = Variant('openshift-enterprise', 'OpenShift Container Platform',
     [
         Version('3.2', 'openshift-enterprise'),
-        Version('3.1', 'openshift-enterprise'),
-        Version('3.0', 'enterprise')
-    ]
-)
-
-AEP = Variant('atomic-enterprise', 'Atomic Enterprise Platform',
-    [
-        Version('3.2', 'atomic-enterprise'),
-        Version('3.1', 'atomic-enterprise')
     ]
 )
 
@@ -56,8 +47,8 @@ origin = Variant('origin', 'OpenShift Origin',
 )
 
 # Ordered list of variants we can install, first is the default.
-SUPPORTED_VARIANTS = (OSE, AEP, origin)
-DISPLAY_VARIANTS = (OSE, AEP)
+SUPPORTED_VARIANTS = (OSE, origin)
+DISPLAY_VARIANTS = (OSE, )
 
 def find_variant(name, version=None):
     """

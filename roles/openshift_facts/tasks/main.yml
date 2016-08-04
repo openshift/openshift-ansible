@@ -1,9 +1,4 @@
 ---
-- name: Verify Ansible version is greater than or equal to 1.9.4
-  fail:
-    msg: "Unsupported ansible version: {{ ansible_version }} found"
-  when: not ansible_version.full | version_compare('1.9.4', 'ge')
-
 - name: Detecting Operating System
   stat:
     path: /run/ostree-booted

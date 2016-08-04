@@ -13,7 +13,7 @@ URL:            https://github.com/openshift/openshift-ansible
 Source0:        https://github.com/openshift/openshift-ansible/archive/%{commit}/%{name}-%{version}.tar.gz
 BuildArch:      noarch
 
-Requires:      ansible >= 1.9.4
+Requires:      ansible >= 2.1.0.0
 Requires:      python2
 Requires:      openshift-ansible-docs = %{version}-%{release}
 
@@ -297,12 +297,24 @@ Atomic OpenShift Utilities includes
 - Use proper startswith. (dgoodwin@redhat.com)
 - Sync latest image stream content (sdodson@redhat.com)
 - Role dependency cleanup (abutcher@redhat.com)
+- Fix up some broken markdown formatting (mostly tables) (tbielawa@redhat.com)
+- Rename things to avoid conflicts with paas sig release rpms
+  (sdodson@redhat.com)
 - Remove/update TODOs. (dgoodwin@redhat.com)
 - Remove all debug used during devel of openshift_version.
   (dgoodwin@redhat.com)
 - Update quick upgrade to remove unsupported options. (dgoodwin@redhat.com)
+- Don't special case origin on centos (sdodson@redhat.com)
+- Various hosted component improvements (abutcher@redhat.com)
 - Move repoquery fact definition to openshift_common. (dgoodwin@redhat.com)
+- Clean up some deprecation warnings (tbielawa@redhat.com)
+- Add CentOS PaaS SIG repos for RHEL (sdodson@redhat.com)
 - Remove Origin 1.1 as an option (smunilla@redhat.com)
+- Make /var/lib/origin mounted rslave (sdodson@redhat.com)
+- fix "hapoxy" typo in loadbalancer playbook (Mathias.Merscher@dg-i.net)
+- Fix dnf variant of rpm_versions.sh (sdodson@redhat.com)
+- Make image stream munging optional (sdodson@redhat.com)
+- Add aos-3.3 to tito releasers.conf (sdodson@redhat.com)
 - Add symlinks for node templates. (dgoodwin@redhat.com)
 - Fixes for Ansible 2.1. (dgoodwin@redhat.com)
 - Update repoquery_cmd definitions to match latest in master.
@@ -367,6 +379,7 @@ Atomic OpenShift Utilities includes
 - Drop unused and broken "when" in vars section. (dgoodwin@redhat.com)
 - Do not install rpm for version in openshift_version role.
   (dgoodwin@redhat.com)
+- Fix bin/cluster libvirt related error (jdetiber@redhat.com)
 - Update openshift_version author info. (dgoodwin@redhat.com)
 - Fix installing release 3.1 not converting to precise version.
   (dgoodwin@redhat.com)
@@ -400,28 +413,10 @@ Atomic OpenShift Utilities includes
   (dgoodwin@redhat.com)
 - Debug output. (dgoodwin@redhat.com)
 - cleanup broken symlinks - lookup_plugins filter_plugins (tdawson@redhat.com)
-
-* Fri Jul 08 2016 Scott Dodson <sdodson@redhat.com> 3.2.11-1
-- Fix up some broken markdown formatting (mostly tables) (tbielawa@redhat.com)
-- Rename things to avoid conflicts with paas sig release rpms
-  (sdodson@redhat.com)
-- Don't special case origin on centos (sdodson@redhat.com)
-- Various hosted component improvements (abutcher@redhat.com)
-- Clean up some deprecation warnings (tbielawa@redhat.com)
-- Add CentOS PaaS SIG repos for RHEL (sdodson@redhat.com)
-- Make /var/lib/origin mounted rslave (sdodson@redhat.com)
-- fix "hapoxy" typo in loadbalancer playbook (Mathias.Merscher@dg-i.net)
-- Fix bin/cluster libvirt related error (jdetiber@redhat.com)
 - Add libselinux-python as a dependency for the installation process
   (frederic.boulet@gmail.com)
 
-* Tue Jul 05 2016 Scott Dodson <sdodson@redhat.com> 3.2.10-1
-- Reset versions for 3.2 branch
-- Fix dnf variant of rpm_versions.sh (sdodson@redhat.com)
-- Make image stream munging optional (sdodson@redhat.com)
-- Add aos-3.3 to tito releasers.conf (sdodson@redhat.com)
-- Automatic commit of package [openshift-ansible] release [3.3.1-1].
-  (sdodson@redhat.com)
+* Tue Jul 05 2016 Scott Dodson <sdodson@redhat.com> 3.3.1-1
 - Add v1.3 examples (sdodson@redhat.com)
 - Change the examples content sync directory (sdodson@redhat.com)
 - Add gte_3_3 (sdodson@redhat.com)

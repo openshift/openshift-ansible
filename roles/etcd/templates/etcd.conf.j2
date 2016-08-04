@@ -1,5 +1,5 @@
 {% macro initial_cluster() -%}
-{% for host in etcd_peers -%}
+{% for host in etcd_peers | default([]) -%}
 {% if loop.last -%}
 {{ hostvars[host].etcd_hostname }}={{ etcd_peer_url_scheme }}://{{ hostvars[host].etcd_ip }}:{{ etcd_peer_port }}
 {%- else -%}
