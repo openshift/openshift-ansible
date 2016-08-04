@@ -947,6 +947,7 @@ def format_url(use_ssl, hostname, port, path=''):
     try:
         url = urlparse.urlunparse((scheme, netloc, path, '', '', ''))
     except AttributeError:
+        # pylint: disable=undefined-variable
         url = urlunparse((scheme, netloc, path, '', '', ''))
     return url
 
@@ -1603,11 +1604,13 @@ class OpenShiftFacts(object):
 
         try:
             # ansible-2.1
-            # pylint: disable=too-many-function-args
+            # pylint: disable=too-many-function-args,invalid-name
             self.system_facts = ansible_facts(module, ['hardware', 'network', 'virtual', 'facter'])
-        except TypeError:
-            # ansible-1.9.x,ansible-2.0.x
-            self.system_facts = ansible_facts(module)
+            for (k, v) in self.system_facts.items():
+                self.system_facts["ansible_%s" % k.replace('-', '_')] = v
+        except UnboundLocalError:
+            # ansible-2.2
+            self.system_facts = get_all_facts(module)['ansible_facts']
 
         self.facts = self.generate_facts(local_facts,
                                          additive_facts_to_overwrite,
@@ -1688,11 +1691,11 @@ class OpenShiftFacts(object):
                 dict: The generated default facts
         """
         defaults = {}
-        ip_addr = self.system_facts['default_ipv4']['address']
+        ip_addr = self.system_facts['ansible_default_ipv4']['address']
         exit_code, output, _ = module.run_command(['hostname', '-f'])
         hostname_f = output.strip() if exit_code == 0 else ''
-        hostname_values = [hostname_f, self.system_facts['nodename'],
-                           self.system_facts['fqdn']]
+        hostname_values = [hostname_f, self.system_facts['ansible_nodename'],
+                           self.system_facts['ansible_fqdn']]
         hostname = choose_hostname(hostname_values, ip_addr)
 
         defaults['common'] = dict(use_openshift_sdn=True, ip=ip_addr,
@@ -1825,10 +1828,10 @@ class OpenShiftFacts(object):
                 dict: The generated default facts for the detected provider
         """
         # TODO: cloud provider facts should probably be submitted upstream
-        product_name = self.system_facts['product_name']
-        product_version = self.system_facts['product_version']
-        virt_type = self.system_facts['virtualization_type']
-        virt_role = self.system_facts['virtualization_role']
+        product_name = self.system_facts['ansible_product_name']
+        product_version = self.system_facts['ansible_product_version']
+        virt_type = self.system_facts['ansible_virtualization_type']
+        virt_role = self.system_facts['ansible_virtualization_role']
         provider = None
         metadata = None
 
@@ -2111,11 +2114,15 @@ def main():
             additive_facts_to_overwrite=dict(default=[], type='list', required=False),
             openshift_env=dict(default={}, type='dict', required=False),
             openshift_env_structures=dict(default=[], type='list', required=False),
-            protected_facts_to_overwrite=dict(default=[], type='list', required=False),
+            protected_facts_to_overwrite=dict(default=[], type='list', required=False)
         ),
         supports_check_mode=True,
         add_file_common_args=True,
     )
+
+    module.params['gather_subset'] = ['hardware', 'network', 'virtual', 'facter']
+    module.params['gather_timeout'] = 10
+    module.params['filter'] = '*'
 
     role = module.params['role']
     local_facts = module.params['local_facts']
