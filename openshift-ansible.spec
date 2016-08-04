@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.17
+Version:        3.2.18
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,81 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Aug 04 2016 Scott Dodson <sdodson@redhat.com> 3.2.18-1
+- a-o-i: Rename OSE in Install Menu (smunilla@redhat.com)
+- a-o-i: Allow Arbitrary Deployment Variables (smunilla@redhat.com)
+- Add knobs for disabling router/registry management. (abutcher@redhat.com)
+- Restore missing etcd_image fact. (abutcher@redhat.com)
+- Rename router and registry node list variables. (abutcher@redhat.com)
+- a-o-i: Fix broken uninstall (smunilla@redhat.com)
+- Refactor etcd certificates roles. (abutcher@redhat.com)
+- Add options for specifying named ca certificates to be added to the openshift
+  ca bundle. (abutcher@redhat.com)
+- oo_collect can be ran against dicts where key isn't present.
+  (abutcher@redhat.com)
+- Update for issue#2244 (kunallimaye@gmail.com)
+- Update for issue-2244 (kunallimaye@gmail.com)
+- a-o-i: Remove AEP, OSE 3.0, and OSE 3.2 choices (smunilla@redhat.com)
+- Move role dependencies to playbooks. (abutcher@redhat.com)
+- Fix xpaas_templates_base (sdodson@redhat.com)
+- a-o-i: Better inventory group handling (smunilla@redhat.com)
+- Add dotnet image stream to enterprise installs (sdodson@redhat.com)
+- Don't set a networkPluginName in 3.3 installs (sdodson@redhat.com)
+- Fix haproxy logs (sdodson@redhat.com)
+- update bootstrap-fedora playbook with new python crypto deps
+  (maxamillion@fedoraproject.org)
+- a-o-i: Set roles on standalone storage (smunilla@redhat.com)
+- Disable too many branches pylint (sdodson@redhat.com)
+- a-o-i: write missing openshift_node_labels (dkorn@redhat.com)
+- a-o-i: Support for arbitrary host-level variables (smunilla@redhat.com)
+- Beautiful -v output from ansible (jamespic@gmail.com)
+- a-o-i: Move inventory vars to the correct location (smunilla@redhat.com)
+- Automatic commit of package [openshift-ansible] release [3.3.3-1].
+  (tdawson@redhat.com)
+- Fix registry/router being created despite no infra nodes.
+  (dgoodwin@redhat.com)
+- Document openshift_portal_net (sdodson@redhat.com)
+- Remove old sso70-basic templates (sdodson@redhat.com)
+- xPaaS v1.3.2 release (sdodson@redhat.com)
+- Template named certificates with_items. (abutcher@redhat.com)
+- Replace master_cert_config_dir with common config_base fact.
+  (abutcher@redhat.com)
+- remove outdated openshift_cluster_metrics role (jdetiber@redhat.com)
+- Fix "deloyment" typo in deployment types doc (lxia@redhat.com)
+- Stagger the start of master services. (abutcher@redhat.com)
+- Add missing nuke_images.sh symlink. (dgoodwin@redhat.com)
+- a-o-i: Persist Roles Variables (smunilla@redhat.com)
+- Default nodes matching selectors when not collected. (abutcher@redhat.com)
+- Copy openshift binaries instead of using wrapper script.
+  (dgoodwin@redhat.com)
+- Correct relative include for ansible version check. (abutcher@redhat.com)
+- Fix libvirt provider for Ansible 2.1.0.0 (lhuard@amadeus.com)
+- Re-arrange master and node role dependencies. (abutcher@redhat.com)
+- Refactor openshift certificates roles. (abutcher@redhat.com)
+- Check ansible version prior to evaluating cluster hosts and groups.
+  (abutcher@redhat.com)
+- Stop reporting changes when docker pull is already up to date.
+  (dgoodwin@redhat.com)
+- a-o-i: Write Role variable groups (smunilla@redhat.com)
+- Slight modification to error when using mismatched openshift_release.
+  (dgoodwin@redhat.com)
+- fix "databcase" typo in example roles (lxia@redhat.com)
+- Secure router only when openshift.hosted.router.certificate.contents exists.
+  (abutcher@redhat.com)
+- Add jenkinstemplate (sdodson@redhat.com)
+- Fix bugs with origin 1.2 rpm based upgrades. (dgoodwin@redhat.com)
+- Sync latest image streams and templates (sdodson@redhat.com)
+- Ensure 'oo_nfs_to_config' in groups prior to checking group length when nfs
+  host unset. (abutcher@redhat.com)
+- We have proper ansible support and requirements in place now, de-revert this
+  commit (tbielawa@redhat.com)
+- Skip docker upgrades on Atomic. (dgoodwin@redhat.com)
+- Resolve some deprecation warnings. (abutcher@redhat.com)
+- a-o-i: Looser facts requirements for unattended (smunilla@redhat.com)
+- make rpm-q module pylint warning-free (tob@butter.sh)
+- add rpm_q module to query rpm database (tob@butter.sh)
+- Require ansible-2.1 (abutcher@redhat.com)
+
 * Thu Aug 04 2016 Scott Dodson <sdodson@redhat.com> 3.2.17-1
 - a-o-i: Better inventory group handling (smunilla@redhat.com)
 - Add knobs for disabling router/registry management. (abutcher@redhat.com)
