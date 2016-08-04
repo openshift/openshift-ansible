@@ -38,7 +38,6 @@
     master_ca_missing: "{{ False in (g_master_ca_stat_result.results
                            | oo_collect(attribute='stat.exists')
                            | list) }}"
-  delegate_to: "{{ openshift_ca_host }}"
   run_once: true
 
 - name: Create the master certificates if they do not already exist
@@ -52,6 +51,6 @@
     --public-master={{ openshift.master.public_api_url }}
     --cert-dir={{ openshift_ca_config_dir }}
     --overwrite=false
-  when: hostvars[openshift_ca_host].master_ca_missing | bool
+  when: master_ca_missing | bool
   delegate_to: "{{ openshift_ca_host }}"
   run_once: true
