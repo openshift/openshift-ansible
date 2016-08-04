@@ -14,7 +14,7 @@
 
 - name: Generate etcd instance private ips·
   set_fact:
-    scratch_name: "{{ private_subnet }}.{{ 255 | random(1,1) }}" 
+    scratch_name: "{{ private_subnet }}.{{ item | int + 60 }}" 
   register: etcd_ips_output
   with_sequence: count={{ num_etcd }}
 

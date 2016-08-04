@@ -16,13 +16,30 @@
 
 - debug: var=node_names
 
-- name: Generate master instance private ips 
+- name: Generate compute node instance private ips
   set_fact:
-    scratch_name: "{{ private_subnet }}.{{ 255 | random(1,1) }}"
+    scratch_name: "{{ private_subnet }}.{{ item | int + 40 }}"
   register: node_ips_output
   with_sequence: count={{ number_nodes }}
+  when: sub_host_type == 'compute'
 
-- set_fact:
+- name: Saving output as node_ips
+  set_fact:
     node_ips: "{{ node_ips_output.results | default([])
                    | oo_collect('ansible_facts')
                    | oo_collect('scratch_name') }}"
+  when: sub_host_type == 'compute'
+
+- name: Generate infra node instance private ips·
+  set_fact:
+    scratch_name: "{{ private_subnet }}.{{ item | int + 80 }}"
+  register: node_ips_output
+  with_sequence: count={{ number_nodes }}
+  when: sub_host_type == 'infra'
+
+- name: Saving output as node_ips
+  set_fact:
+    node_ips: "{{ node_ips_output.results | default([])
+                   | oo_collect('ansible_facts')
+                   | oo_collect('scratch_name') }}"
+  when: sub_host_type == 'infra'
