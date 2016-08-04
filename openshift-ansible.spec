@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.16
+Version:        3.2.17
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Aug 04 2016 Scott Dodson <sdodson@redhat.com> 3.2.17-1
+- a-o-i: Better inventory group handling (smunilla@redhat.com)
+- Add knobs for disabling router/registry management. (abutcher@redhat.com)
+- a-o-i: Allow Arbitrary Deployment Variables (smunilla@redhat.com)
+- a-o-i: Fix broken uninstall (smunilla@redhat.com)
+
 * Fri Jul 29 2016 Scott Dodson <sdodson@redhat.com> 3.2.16-1
 - a-o-i: Set roles on standalone storage (smunilla@redhat.com)
 - Fix xpaas_templates_base (sdodson@redhat.com)
