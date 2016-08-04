@@ -262,6 +262,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Provide local certificate paths which will be configured as the
 # router's default certificate.
 #openshift_hosted_router_certificate={"certfile": "/path/to/router.crt", "keyfile": "/path/to/router.key", "cafile": "/path/to/router-ca.crt"}
+#
+# Disable management of the OpenShift Router
+#openshift_hosted_manage_router=false
 
 # Openshift Registry Options
 #
@@ -283,6 +286,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Unless specified, openshift-ansible will calculate the replica count
 # based on the number of nodes matching the openshift registry selector.
 #openshift_hosted_registry_replicas=2
+#
+# Disable management of the OpenShift Registry
+#openshift_hosted_manage_registry=false
 
 # Registry Storage Options
 #
