@@ -50,7 +50,9 @@
   when: replicas | int > 0
 
 - include: storage/object_storage.yml
+  static: no
   when: replicas | int > 0 and openshift.hosted.registry.storage.kind | default(none) == 'object'
 
 - include: storage/persistent_volume.yml
+  static: no
   when: replicas | int > 0 and openshift.hosted.registry.storage.kind | default(none) in ['nfs', 'openstack']
