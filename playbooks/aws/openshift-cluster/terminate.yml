@@ -69,6 +69,19 @@
       ignore_errors: yes
       when: "'oo_hosts_to_terminate' in groups"
 
+    - name: remove DNS entries for any wildcard A records
+      route53:
+        command: delete
+        zone: "{{zone}}"
+        type: A
+        ttl: 60
+        record: "master-1.{{ hostvars[item]['ec2_tag_clusterid'] }}.{{ zone }}"
+        value: "{{ hostvars[item]['ec2_ip_address'] }}"
+      with_items: "{{ groups.oo_hosts_to_terminate }}"
+      ignore_errors: yes 
+      when: "'oo_hosts_to_terminate' in groups"
+
+
     - name: Remove eip(s)
       ec2_eip:
         state: absent
