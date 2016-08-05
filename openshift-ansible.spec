@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.6
+Version:        3.3.7
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,20 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Aug 05 2016 Troy Dawson <tdawson@redhat.com> 3.3.7-1
+- Call relocated openshift-loadbalancer playbook in master scaleup.
+  (abutcher@redhat.com)
+- [openshift_ca] correct check for missing CA. (abutcher@redhat.com)
+- a-o-i: Rename OSE in Install Menu (smunilla@redhat.com)
+- a-o-i: Allow Arbitrary Deployment Variables (smunilla@redhat.com)
+- Add knobs for disabling router/registry management. (abutcher@redhat.com)
+- Restore missing etcd_image fact. (abutcher@redhat.com)
+- Add options for specifying named ca certificates to be added to the openshift
+  ca bundle. (abutcher@redhat.com)
+- oo_collect can be ran against dicts where key isn't present.
+  (abutcher@redhat.com)
+- Don't set a networkPluginName in 3.3 installs (sdodson@redhat.com)
+
 * Wed Aug 03 2016 Troy Dawson <tdawson@redhat.com> 3.3.6-1
 - Rename router and registry node list variables. (abutcher@redhat.com)
 - a-o-i: Fix broken uninstall (smunilla@redhat.com)
