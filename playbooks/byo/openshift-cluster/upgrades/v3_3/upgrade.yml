@@ -52,8 +52,8 @@
 - hosts: l_oo_all_hosts
   tasks:
   - set_fact:
-      openshift_upgrade_target: "{{ '1.2' if deployment_type == 'origin' else '3.2' }}"
-      openshift_upgrade_min: "{{ '1.1' if deployment_type == 'origin' else '3.1' }}"
+      openshift_upgrade_target: "{{ '1.3' if deployment_type == 'origin' else '3.3' }}"
+      openshift_upgrade_min: "{{ '1.2' if deployment_type == 'origin' else '3.2' }}"
 
 - include: ../../../../common/openshift-cluster/upgrades/pre.yml
   vars:
@@ -61,5 +61,7 @@
 - include: ../../../../common/openshift-cluster/upgrades/upgrade.yml
   vars:
     openshift_deployment_type: "{{ deployment_type }}"
+    master_config_hook: "v3_3/master_config_upgrade.yml"
+    node_config_hook: "v3_3/node_config_upgrade.yml"
 - include: ../../../openshift-master/restart.yml
 - include: ../../../../common/openshift-cluster/upgrades/post.yml
