@@ -231,6 +231,8 @@ class Cluster(object):
             verbose, inventory, ansible_extra_vars, playbook
         )
 
+        print command
+
         if args.profile:
             command = 'ANSIBLE_CALLBACK_PLUGINS=ansible-profile/callback_plugins ' + command
 

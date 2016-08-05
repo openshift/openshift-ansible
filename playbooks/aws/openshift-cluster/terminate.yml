@@ -6,6 +6,7 @@
   gather_facts: no
   vars_files:
   - vars.yml
+
   tasks:
   - add_host:
       name: "{{ item }}"
@@ -29,6 +30,8 @@
   become: no
   gather_facts: no
   tasks:
+    - debug: var=hostvars
+
     - name: Remove tags from instances
       ec2_tag:
         resource: "{{ hostvars[item]['ec2_id'] }}"
@@ -39,7 +42,51 @@
           clusterid:     "{{ hostvars[item]['ec2_tag_clusterid'] }}"
           host-type:     "{{ hostvars[item]['ec2_tag_host-type'] }}"
           sub_host_type: "{{ hostvars[item]['ec2_tag_sub-host-type'] }}"
-      with_items: groups.oo_hosts_to_terminate
+      with_items: "{{ groups.oo_hosts_to_terminate }}"
+      when: "'oo_hosts_to_terminate' in groups"
+
+    - name: remove DNS entries
+      route53:
+        command: delete
+        zone: "{{zone}}"
+        type: A
+        ttl: 60
+        record: "{{ hostvars[item]['ec2_tag_Name'] }}.{{ zone }}"
+        value: "{{ hostvars[item]['ec2_ip_address'] }}"
+      with_items: "{{ groups.oo_hosts_to_terminate }}"
+      ignore_errors: yes
+      when: "'oo_hosts_to_terminate' in groups"
+
+    - name: remove DNS entries for any wildcard A records
+      route53:
+        command: delete
+        zone: "{{zone}}"
+        type: A
+        ttl: 60
+        record: "*.apps-1.{{ hostvars[item]['ec2_tag_clusterid'] }}.{{ zone }}"
+        value: "{{ hostvars[item]['ec2_ip_address'] }}"
+      with_items: "{{ groups.oo_hosts_to_terminate }}"
+      ignore_errors: yes
+      when: "'oo_hosts_to_terminate' in groups"
+
+    - name: remove DNS entries for any wildcard A records
+      route53:
+        command: delete
+        zone: "{{zone}}"
+        type: A
+        ttl: 60
+        record: "master-1.{{ hostvars[item]['ec2_tag_clusterid'] }}.{{ zone }}"
+        value: "{{ hostvars[item]['ec2_ip_address'] }}"
+      with_items: "{{ groups.oo_hosts_to_terminate }}"
+      ignore_errors: yes 
+      when: "'oo_hosts_to_terminate' in groups"
+
+
+    - name: Remove eip(s)
+      ec2_eip:
+        state: absent
+        ip: "{{ hostvars[item]['ec2_ip_address'] }}"
+      with_items: "{{ groups.oo_hosts_to_terminate }}"
       when: "'oo_hosts_to_terminate' in groups"
 
     - name: Terminate instances
@@ -49,7 +96,7 @@
         region: "{{ hostvars[item].ec2_region }}"
       ignore_errors: yes
       register: ec2_term
-      with_items: groups.oo_hosts_to_terminate
+      with_items: "{{ groups.oo_hosts_to_terminate }}"
       when: "'oo_hosts_to_terminate' in groups"
 
     # Fail if any of the instances failed to terminate with an error other
@@ -57,7 +104,7 @@
     - fail:
         msg: "Terminating instance {{ item.ec2_id }} failed with message {{ item.msg }}"
       when: "'oo_hosts_to_terminate' in groups and item.has_key('failed') and item.failed"
-      with_items: ec2_term.results
+      with_items: "{{ ec2_term.results }}"
 
     - name: Stop instance if termination failed
       ec2:
@@ -66,12 +113,18 @@
         region: "{{ item.item.ec2_region }}"
       register: ec2_stop
       when: "'oo_hosts_to_terminate' in groups and item.has_key('failed') and item.failed"
-      with_items: ec2_term.results
+      with_items: "{{ ec2_term.results }}"
 
     - name: Rename stopped instances
       ec2_tag: resource={{ item.item.item.ec2_id }} region={{ item.item.item.ec2_region }} state=present
       args:
         tags:
           Name: "{{ item.item.item.ec2_tag_Name }}-terminate"
-      with_items: ec2_stop.results
+      with_items: "{{ ec2_stop.results }}"
       when: ec2_stop | changed
+
+    - name: Remove security group
+      ec2_group:
+        name: "{{ lookup('oo_option', 'ec2_security_groups') | default([ 'public' ], True) }}"
+        description: "{{ lookup('oo_option', 'ec2_security_groups') | default([ 'public' ], True) }}"
+        state: absent

@@ -74,17 +74,39 @@
 - set_fact:
     volumes: "{{ volume_defs | oo_ec2_volume_definition(host_type, docker_vol_ephemeral | bool) }}"
 
+- name: allocate eni for each new private ip
+  ec2_eni:
+    private_ip_address: "{{ item }}"
+    subnet_id: "{{ deployment_vars[deployment_type].vpc_subnet }}"
+    security_groups: "{{ sec_group.group_id }}"
+    state: present
+  register: enis
+  with_items: "{{ private_ips }}"
+
+- name: show created ENI(s)
+  debug: var=enis
+
+- name: Allocate eip for each new eni
+  ec2_eip: 
+    device_id: "{{ item.interface.id }}"
+    release_on_disassociation: yes
+    in_vpc: yes
+    reuse_existing_ip_allowed: yes
+    state: present
+  register: eips
+  with_items: "{{ enis.results }}"
+
+- name: show created EIP(s)
+  debug: var=eips
+
 - name: Launch instance(s)
   ec2:
     state: present
     region: "{{ deployment_vars[deployment_type].region }}"
     keypair: "{{ deployment_vars[deployment_type].keypair }}"
-    group: "{{ deployment_vars[deployment_type].security_groups }}"
     instance_type: "{{ ec2_instance_type }}"
     image: "{{ deployment_vars[deployment_type].image }}"
-    count: "{{ instances | length }}"
-    vpc_subnet_id: "{{ deployment_vars[deployment_type].vpc_subnet }}"
-    assign_public_ip: "{{ deployment_vars[deployment_type].assign_public_ip }}"
+    network_interface: '{{ item.1.interface.id }}'
     user_data: "{{ lookup('template', '../templates/user_data.j2') }}"
     wait: yes
     instance_tags:
@@ -93,17 +115,61 @@
       environment: "{{ cluster_env }}"
       host-type: "{{ host_type }}"
       sub-host-type: "{{ sub_host_type }}"
+      Name: "{{ item.0 }}"
     volumes: "{{ volumes }}"
   register: ec2
-
-- name: Add Name tag to instances
-  ec2_tag: resource={{ item.1.id }} region={{ deployment_vars[deployment_type].region }} state=present
   with_together:
-  - instances
-  - ec2.instances
-  args:
-    tags:
-      Name: "{{ item.0 }}"
+    - "{{ instances }}"
+    - "{{ enis.results }}"
+
+- name: enable the delete on termination flag so that ENI(s) are removed when the ec2 instance is terminated
+  ec2_eni:
+    eni_id: "{{ item.interface.id }}"
+    delete_on_termination: true
+  with_items: "{{ enis.results }}"
+  when: enis.changed == true
+
+- name: create dns names based on eips and instance names
+  route53:
+    command: create
+    zone: "{{ zone }}"
+    record: "{{ item.1 }}.{{ zone }}"
+    type: A
+    ttl: 60
+    value: "{{ item.0.public_ip }}"
+    wait: yes
+  with_together:
+    - "{{eips.results}}"
+    - "{{instances}}"
+  when: eips.results is defined
+
+- name: create wildcard dns entries for infra nodes
+  route53:
+    command: create
+    zone: "{{ zone }}"
+    record: "*.apps-{{ item.1 }}.{{ cluster_id }}.{{ zone }}"
+    type: A
+    ttl: 60
+    value: "{{ item.0.public_ip }}"
+    wait: yes
+  with_together:
+    - "{{eips.results}}"
+    - "{{eips.results | length}}"
+  when: host_type == "node" and sub_host_type == "infra"
+
+- name: create master dns entries for infra nodes
+  route53:
+    command: create
+    zone: "{{ zone }}"
+    record: "master-{{ item.1 }}.{{ cluster_id }}.{{ zone }}"
+    type: A
+    ttl: 60
+    value: "{{ item.0.public_ip }}"
+    wait: yes
+  with_together:
+    - "{{eips.results}}"
+    - "{{eips.results | length}}"
+  when: host_type == "master"
 
 - set_fact:
     instance_groups: >
@@ -144,45 +210,48 @@
 - name: Add new instances groups and variables
   add_host:
     hostname: "{{ item.0 }}"
-    ansible_ssh_host: "{{ item.1.dns_name }}"
+    ansible_ssh_host: "{{ item.1.public_ip }}"
     ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
     ansible_become: "{{ deployment_vars[deployment_type].become }}"
     groups: "{{ instance_groups }}"
-    ec2_private_ip_address: "{{ item.1.private_ip }}"
+    ec2_private_ip_address: "{{ item.1.item }}"
     ec2_ip_address: "{{ item.1.public_ip }}"
     ec2_tag_sub-host-type: "{{ sub_host_type }}"
     openshift_node_labels: "{{ node_label }}"
     logrotate_scripts: "{{ logrotate }}"
   with_together:
-  - instances
-  - ec2.instances
+  - "{{ instances }}"
+  - "{{ eips.results }}"
+  when: eips.results is defined
 
 - name: Add new instances to nodes_to_add group if needed
   add_host:
     hostname: "{{ item.0 }}"
-    ansible_ssh_host: "{{ item.1.dns_name }}"
+    ansible_ssh_host: "{{ item.1.public_ip }}"
     ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
     ansible_become: "{{ deployment_vars[deployment_type].become }}"
     groups: nodes_to_add
-    ec2_private_ip_address: "{{ item.1.private_ip }}"
+    ec2_private_ip_address: "{{ item.1.item }}"
     ec2_ip_address: "{{ item.1.public_ip }}"
     openshift_node_labels: "{{ node_label }}"
     logrotate_scripts: "{{ logrotate }}"
   with_together:
-  - instances
-  - ec2.instances
-  when: oo_extend_env is defined and oo_extend_env | bool
+  - "{{ instances }}"
+  - "{{ eips.results }}"
+  when: eips.results is defined and oo_extend_env is defined and oo_extend_env | bool
 
 - name: Wait for ssh
-  wait_for: "port=22 host={{ item.dns_name }}"
-  with_items: ec2.instances
+  wait_for: "port=22 host={{ item.public_ip }}"
+  with_items: "{{ eips.results }}"
+  when: eips.results is defined
 
 - name: Wait for user setup
-  command: "ssh -o StrictHostKeyChecking=no -o PasswordAuthentication=no -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null {{ hostvars[item.0].ansible_ssh_user }}@{{ item.1.dns_name }} echo {{ hostvars[item.0].ansible_ssh_user }} user is setup"
+  command: "ssh -o StrictHostKeyChecking=no -o PasswordAuthentication=no -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null {{ hostvars[item.0].ansible_ssh_user }}@{{ item.1.public_ip }} echo {{ hostvars[item.0].ansible_ssh_user }} user is setup"
   register: result
   until: result.rc == 0
   retries: 20
   delay: 10
   with_together:
-  - instances
-  - ec2.instances
+  - "{{ instances }}"
+  - "{{ eips.results }}"
+  when: eipsresults is defined

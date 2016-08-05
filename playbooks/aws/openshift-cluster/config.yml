@@ -33,6 +33,11 @@
       type: "{{ hostvars[inventory_hostname]['ec2_tag_sub-host-type'] if inventory_hostname in groups['tag_host-type_node'] else hostvars[inventory_hostname]['ec2_tag_host-type'] }}"
     openshift_master_cluster_method: 'native'
     openshift_use_openshift_sdn: "{{ lookup('oo_option', 'use_openshift_sdn') }}"
+    openshift_master_identity_providers: "[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]"
+    # Defining htpasswd users
+    openshift_master_htpasswd_users: {'andrew': '$apr1$0aZ/aa/d$azp3k9Ru7JQcdiB8.XLQm0', 'marina': '$apr1$I6fRsfIu$/lgUEJ7LwE29lUdLugZZT.'}
+    openshift_master_cluster_public_hostname: 'master-1.{{cluster_id}}.{{zone}}'
+    openshift_master_default_subdomain: "apps-1.{{ cluster_id }}.{{ zone }}"
     os_sdn_network_plugin_name: "{{ lookup('oo_option', 'sdn_network_plugin_name') }}"
     openshift_use_flannel: "{{ lookup('oo_option', 'use_flannel') }}"
     openshift_use_fluentd: "{{ lookup('oo_option', 'use_fluentd') }}"
