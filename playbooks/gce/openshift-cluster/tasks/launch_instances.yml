@@ -1,7 +1,7 @@
 ---
 - name: Launch instance(s)
   gce:
-    instance_names: "{{ instances }}"
+    instance_names: "{{ instances|join(',') }}"
     machine_type: "{{ gce_machine_type | default(deployment_vars[deployment_type].machine_type, true) }}"
     image: "{{ gce_machine_image | default(deployment_vars[deployment_type].image, true) }}"
     service_account_email: "{{ lookup('env', 'gce_service_account_email_address') }}"
