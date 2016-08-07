@@ -202,7 +202,6 @@ def write_host(host, role, inventory, schedulable=None):
 
     installer_host = socket.gethostname()
     if installer_host in [host.connect_to, host.hostname, host.public_hostname]:
-        facts += ' ansible_connection=local'
         if os.geteuid() != 0:
             no_pwd_sudo = subprocess.call(['sudo', '-n', 'echo', 'openshift'])
             if no_pwd_sudo == 1:
