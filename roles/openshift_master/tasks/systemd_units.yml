@@ -16,7 +16,7 @@
 # workaround for missing systemd unit files
 - name: Create the systemd unit files
   template:
-    src: "docker/master.docker.service.j2"
+    src: "master_docker/master.docker.service.j2"
     dest: "{{ containerized_svc_dir }}/{{ openshift.common.service_type }}-master.service"
   when: openshift.common.is_containerized | bool and (openshift.master.ha is not defined or not openshift.master.ha | bool)
   register: create_master_unit_file
@@ -84,12 +84,12 @@
     line: "{{ item }}"
   with_items: "{{ master_controllers_proxy.stdout_lines | default([]) }}"
   when: openshift.master.ha is defined and openshift.master.ha | bool and openshift_master_cluster_method == "native"
-        and master_controllers_proxy.rc == 0 and 'http_proxy' not in openshift.common and 'https_proxy' not in openshift.common 
+        and master_controllers_proxy.rc == 0 and 'http_proxy' not in openshift.common and 'https_proxy' not in openshift.common
 
 - name: Install Master docker service file
   template:
     dest: "/etc/systemd/system/{{ openshift.common.service_type }}-master.service"
-    src: docker/master.docker.service.j2
+    src: master_docker/master.docker.service.j2
   register: install_result
   when: openshift.common.is_containerized | bool and openshift.master.ha is defined and not openshift.master.ha | bool
 

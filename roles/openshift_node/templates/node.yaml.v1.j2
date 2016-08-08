@@ -12,6 +12,13 @@ imageConfig:
   latest: false
 kind: NodeConfig
 kubeletArguments: {{ openshift.node.kubelet_args | default(None) | to_padded_yaml(level=1) }}
+{% if openshift.common.version_gte_3_3_or_1_3 | bool %}
+masterClientConnectionOverrides:
+  acceptContentTypes: application/vnd.kubernetes.protobuf,application/json
+  contentType: application/vnd.kubernetes.protobuf
+  burst: 40
+  ops: 20
+{% endif %}
 masterKubeConfig: system:node:{{ openshift.common.hostname }}.kubeconfig
 {% if openshift.common.use_openshift_sdn | bool and not openshift.common.version_gte_3_3_or_1_3 | bool %}
 networkPluginName: {{ openshift.common.sdn_network_plugin_name }}

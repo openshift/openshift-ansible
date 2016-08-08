@@ -1,4 +1,4 @@
-# v3.2 Major and Minor Upgrade Playbook
+# v3.3 Major and Minor Upgrade Playbook
 
 ## Overview
 This playbook currently performs the
@@ -15,4 +15,4 @@ following steps.
  * Updates image streams and quickstarts
 
 ## Usage
-ansible-playbook -i ~/ansible-inventory openshift-ansible/playbooks/byo/openshift-cluster/upgrades/v3_2/upgrade.yml
+ansible-playbook -i ~/ansible-inventory openshift-ansible/playbooks/byo/openshift-cluster/upgrades/v3_3/upgrade.yml
