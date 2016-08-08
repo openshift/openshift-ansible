@@ -93,6 +93,7 @@
 
 - name: Create local temp directory for syncing certs
   local_action: command mktemp -d /tmp/etcd_certificates-XXXXXXX
+  become: no
   register: g_etcd_server_mktemp
   changed_when: False
   when: etcd_server_certs_missing | bool
@@ -131,6 +132,7 @@
 
 - name: Delete temporary directory
   file: name={{ g_etcd_server_mktemp.stdout }} state=absent
+  become: no
   changed_when: False
   when: etcd_server_certs_missing | bool
   delegate_to: localhost
