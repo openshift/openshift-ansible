@@ -11,27 +11,4 @@ galaxy_info:
     - 7
   categories:
   - cloud
-dependencies:
-- role: openshift_cli
-- role: openshift_hosted_facts
-- role: openshift_projects
-  # TODO: Move standard project definitions to openshift_hosted/vars/main.yml
-  # Vars are not accessible in meta/main.yml in ansible-1.9.x
-  openshift_projects: "{{ openshift_additional_projects | default({}) | oo_merge_dicts({'default':{'default_node_selector':''},'openshift-infra':{'default_node_selector':''},'logging':{'default_node_selector':''}}) }}"
-- role: openshift_serviceaccounts
-  openshift_serviceaccounts_names:
-  - router
-  openshift_serviceaccounts_namespace: default
-  openshift_serviceaccounts_sccs:
-  - hostnetwork
-  when: openshift.common.version_gte_3_2_or_1_2
-- role: openshift_serviceaccounts
-  openshift_serviceaccounts_names:
-  - router
-  - registry
-  openshift_serviceaccounts_namespace: default
-  openshift_serviceaccounts_sccs:
-  - privileged
-  when: not openshift.common.version_gte_3_2_or_1_2
-- role: openshift_metrics
-  when: openshift.hosted.metrics.deploy | bool
+dependencies: []

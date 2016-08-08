@@ -17,11 +17,9 @@ CONFIG_PERSIST_SETTINGS = [
     'variant_version',
     ]
 
-DEPLOYMENT_PERSIST_SETTINGS = [
-    'master_routingconfig_subdomain',
-    'proxy_http',
-    'proxy_https',
-    'proxy_exclude_hosts',
+DEPLOYMENT_VARIABLES_BLACKLIST = [
+    'hosts',
+    'roles',
 ]
 
 DEFAULT_REQUIRED_FACTS = ['ip', 'public_ip', 'hostname', 'public_hostname']
@@ -191,10 +189,11 @@ class OOConfig(object):
                     except KeyError:
                         continue
 
-                for setting in DEPLOYMENT_PERSIST_SETTINGS:
+                for setting in loaded_config['deployment']:
                     try:
-                        self.deployment.variables[setting] = \
-                            str(loaded_config['deployment'][setting])
+                        if setting not in DEPLOYMENT_VARIABLES_BLACKLIST:
+                            self.deployment.variables[setting] = \
+                                str(loaded_config['deployment'][setting])
                     except KeyError:
                         continue
 
@@ -306,20 +305,19 @@ class OOConfig(object):
             if setting in self.settings and self.settings[setting]:
                 p_settings[setting] = self.settings[setting]
 
-
         p_settings['deployment'] = {}
         p_settings['deployment']['hosts'] = []
         p_settings['deployment']['roles'] = {}
-
-        for setting in DEPLOYMENT_PERSIST_SETTINGS:
-            if setting in self.deployment.variables:
-                p_settings['deployment'][setting] = self.deployment.variables[setting]
 
         for host in self.deployment.hosts:
             p_settings['deployment']['hosts'].append(host.to_dict())
 
         for name, role in self.deployment.roles.iteritems():
             p_settings['deployment']['roles'][name] = role.variables
+
+        for setting in self.deployment.variables:
+            if setting not in DEPLOYMENT_VARIABLES_BLACKLIST:
+                p_settings['deployment'][setting] = self.deployment.variables[setting]
 
         try:
             p_settings['variant'] = self.settings['variant']

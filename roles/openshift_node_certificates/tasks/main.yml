@@ -42,6 +42,9 @@
 - name: Generate the node client config
   command: >
     {{ openshift.common.admin_binary }} create-api-client-config
+      {% for named_ca_certificate in hostvars[openshift_ca_host].openshift.master.named_certificates | default([]) | oo_collect('cafile') %}
+      --certificate-authority {{ named_ca_certificate }}
+      {% endfor %}
       --certificate-authority={{ openshift_ca_cert }}
       --client-dir={{ openshift_node_generated_config_dir }}
       --groups=system:nodes

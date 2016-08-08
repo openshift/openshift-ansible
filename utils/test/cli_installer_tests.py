@@ -573,7 +573,7 @@ class UnattendedCliTests(OOCliFixture):
         run_playbook_mock.return_value = 0
 
         config = SAMPLE_CONFIG % 'openshift-enterprise'
-        config = '%s\n%s' % (config, 'variant_version: 3.0')
+        config = '%s\n%s' % (config, 'variant_version: 3.2')
         config_file = self.write_config(os.path.join(self.work_dir,
             'ooinstall.conf'), config)
 
@@ -586,11 +586,11 @@ class UnattendedCliTests(OOCliFixture):
         self.assertEquals('openshift-enterprise', written_config['variant'])
         # Make sure our older version was preserved:
         # and written to disk:
-        self.assertEquals('3.0', written_config['variant_version'])
+        self.assertEquals('3.2', written_config['variant_version'])
 
         inventory = ConfigParser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, 'hosts'))
-        self.assertEquals('enterprise',
+        self.assertEquals('openshift-enterprise',
             inventory.get('OSEv3:vars', 'deployment_type'))
 
     @patch('ooinstall.openshift_ansible.run_ansible')
@@ -815,9 +815,9 @@ class AttendedCliTests(OOCliFixture):
         self.assert_inventory_host_var(inventory, 'nodes', '10.0.0.1',
                                  'openshift_schedulable=False')
         self.assert_inventory_host_var_unset(inventory, 'nodes', '10.0.0.2',
-                                 'openshift_schedulable')
+                                 'openshift_schedulable=True')
         self.assert_inventory_host_var_unset(inventory, 'nodes', '10.0.0.3',
-                                 'openshift_schedulable')
+                                 'openshift_schedulable=True')
 
     # interactive with config file and some installed some uninstalled hosts
     @patch('ooinstall.openshift_ansible.run_main_playbook')
@@ -939,7 +939,7 @@ class AttendedCliTests(OOCliFixture):
         self.assert_inventory_host_var(inventory, 'nodes', '10.0.0.3',
                                        'openshift_schedulable=False')
         self.assert_inventory_host_var_unset(inventory, 'nodes', '10.0.0.4',
-                                             'openshift_schedulable')
+                                             'openshift_schedulable=True')
 
         self.assertTrue(inventory.has_section('etcd'))
         self.assertEquals(3, len(inventory.items('etcd')))
@@ -1068,26 +1068,6 @@ class AttendedCliTests(OOCliFixture):
         self.assert_inventory_host_var(inventory, 'nodes', '10.0.0.1',
                                        'openshift_schedulable=True')
 
-    #interactive 3.0 install confirm no HA hints
-    @patch('ooinstall.openshift_ansible.run_main_playbook')
-    @patch('ooinstall.openshift_ansible.load_system_facts')
-    def test_ha_hint(self, load_facts_mock, run_playbook_mock):
-        load_facts_mock.return_value = (MOCK_FACTS, 0)
-        run_playbook_mock.return_value = 0
-
-        cli_input = build_input(hosts=[
-            ('10.0.0.1', True, False)],
-                                      ssh_user='root',
-                                      variant_num=3,
-                                      confirm_facts='y',
-                                      storage='10.1.0.1',)
-        self.cli_args.append("install")
-        result = self.runner.invoke(cli.cli, self.cli_args,
-            input=cli_input)
-        self.assert_result(result, 0)
-        print result.output
-        self.assertTrue("NOTE: Add a total of 3 or more Masters to perform an HA installation."
-            not in result.output)
 
     @patch('ooinstall.openshift_ansible.run_main_playbook')
     @patch('ooinstall.openshift_ansible.load_system_facts')
@@ -1122,9 +1102,9 @@ class AttendedCliTests(OOCliFixture):
         self.assert_inventory_host_var(inventory, 'nodes', '10.0.0.1',
                                  'openshift_schedulable=False')
         self.assert_inventory_host_var_unset(inventory, 'nodes', '10.0.0.2',
-                                 'openshift_schedulable')
+                                 'openshift_schedulable=True')
         self.assert_inventory_host_var_unset(inventory, 'nodes', '10.0.0.3',
-                                 'openshift_schedulable')
+                                 'openshift_schedulable=True')
 
 
 # TODO: test with config file, attended add node

@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.3
+Version:        3.3.8
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,57 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Aug 08 2016 Troy Dawson <tdawson@redhat.com> 3.3.8-1
+- Fix little mistake in openshift_master_htpasswd_users value .
+  (jmferrer@paradigmatecnologico.com)
+
+* Fri Aug 05 2016 Troy Dawson <tdawson@redhat.com> 3.3.7-1
+- Call relocated openshift-loadbalancer playbook in master scaleup.
+  (abutcher@redhat.com)
+- [openshift_ca] correct check for missing CA. (abutcher@redhat.com)
+- a-o-i: Rename OSE in Install Menu (smunilla@redhat.com)
+- a-o-i: Allow Arbitrary Deployment Variables (smunilla@redhat.com)
+- Add knobs for disabling router/registry management. (abutcher@redhat.com)
+- Restore missing etcd_image fact. (abutcher@redhat.com)
+- Add options for specifying named ca certificates to be added to the openshift
+  ca bundle. (abutcher@redhat.com)
+- oo_collect can be ran against dicts where key isn't present.
+  (abutcher@redhat.com)
+- Don't set a networkPluginName in 3.3 installs (sdodson@redhat.com)
+
+* Wed Aug 03 2016 Troy Dawson <tdawson@redhat.com> 3.3.6-1
+- Rename router and registry node list variables. (abutcher@redhat.com)
+- a-o-i: Fix broken uninstall (smunilla@redhat.com)
+- Refactor etcd certificates roles. (abutcher@redhat.com)
+
+* Mon Aug 01 2016 Troy Dawson <tdawson@redhat.com> 3.3.5-1
+- Update for issue#2244 (kunallimaye@gmail.com)
+- Update for issue-2244 (kunallimaye@gmail.com)
+- a-o-i: Remove AEP, OSE 3.0, and OSE 3.2 choices (smunilla@redhat.com)
+- Move role dependencies to playbooks. (abutcher@redhat.com)
+- Fix xpaas_templates_base (sdodson@redhat.com)
+- a-o-i: Better inventory group handling (smunilla@redhat.com)
+- Add dotnet image stream to enterprise installs (sdodson@redhat.com)
+- Fix haproxy logs (sdodson@redhat.com)
+- update bootstrap-fedora playbook with new python crypto deps
+  (maxamillion@fedoraproject.org)
+- Remove old sso70-basic templates (sdodson@redhat.com)
+- xPaaS v1.3.2 release (sdodson@redhat.com)
+
+* Fri Jul 29 2016 Troy Dawson <tdawson@redhat.com> 3.3.4-1
+- a-o-i: Set roles on standalone storage (smunilla@redhat.com)
+- Disable too many branches pylint (sdodson@redhat.com)
+- a-o-i: write missing openshift_node_labels (dkorn@redhat.com)
+- a-o-i: Support for arbitrary host-level variables (smunilla@redhat.com)
+- Beautiful -v output from ansible (jamespic@gmail.com)
+- a-o-i: Move inventory vars to the correct location (smunilla@redhat.com)
+- Fix registry/router being created despite no infra nodes.
+  (dgoodwin@redhat.com)
+- Document openshift_portal_net (sdodson@redhat.com)
+- Stagger the start of master services. (abutcher@redhat.com)
+- make rpm-q module pylint warning-free (tob@butter.sh)
+- add rpm_q module to query rpm database (tob@butter.sh)
+
 * Wed Jul 27 2016 Troy Dawson <tdawson@redhat.com> 3.3.3-1
 - Template named certificates with_items. (abutcher@redhat.com)
 - Replace master_cert_config_dir with common config_base fact.

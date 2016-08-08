@@ -60,8 +60,30 @@
     when: "{{ (openshift_http_proxy is defined or openshift_https_proxy is defined) and
             openshift_generate_no_proxy_hosts | default(True) | bool }}"
   roles:
-  - role: openshift_node
+  - role: openshift_clock
+  - role: openshift_docker
+  - role: openshift_node_certificates
     openshift_ca_host: "{{ groups.oo_first_master.0 }}"
+  - role: openshift_cloud_provider
+  - role: openshift_common
+  - role: openshift_node_dnsmasq
+    when: openshift.common.use_dnsmasq
+  - role: os_firewall
+    os_firewall_allow:
+    - service: Kubernetes kubelet
+      port: 10250/tcp
+    - service: http
+      port: 80/tcp
+    - service: https
+      port: 443/tcp
+    - service: Openshift kubelet ReadOnlyPort
+      port: 10255/tcp
+    - service: Openshift kubelet ReadOnlyPort udp
+      port: 10255/udp
+    - service: OpenShift OVS sdn
+      port: 4789/udp
+      when: openshift.node.use_openshift_sdn | bool
+  - role: openshift_node
 
 - name: Configure node instances
   hosts: oo_nodes_to_config:!oo_containerized_master_nodes
@@ -77,97 +99,42 @@
     when: "{{ (openshift_http_proxy is defined or openshift_https_proxy is defined) and
             openshift_generate_no_proxy_hosts | default(True) | bool }}"
   roles:
-  - role: openshift_node
+  - role: openshift_clock
+  - role: openshift_docker
+  - role: openshift_node_certificates
     openshift_ca_host: "{{ groups.oo_first_master.0 }}"
-
-- name: Gather and set facts for flannel certificatess
-  hosts: oo_nodes_to_config
-  tasks:
-  - name: Check status of flannel external etcd certificates
-    stat:
-      path: "{{ openshift.common.config_base }}/node/{{ item }}"
-    with_items:
-    - node.etcd-client.crt
-    - node.etcd-ca.crt
-    register: g_external_etcd_flannel_cert_stat_result
-    when: groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config and (openshift.common.use_flannel | bool)
-  - set_fact:
-      etcd_client_flannel_certs_missing: "{{ False in g_external_etcd_flannel_cert_stat_result.results
-                                             | oo_collect(attribute='stat.exists')
-                                             | list }}"
-      etcd_cert_subdir: openshift-node-{{ openshift.common.hostname }}
-      etcd_cert_config_dir: "{{ openshift.common.config_base }}/node"
-      etcd_cert_prefix: node.etcd-
-      etcd_hostname: "{{ openshift.common.hostname }}"
-      etcd_ip: "{{ openshift.common.ip }}"
-    when: groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config | length > 0 and (openshift.common.use_flannel | bool)
-
-- name: Configure flannel etcd certificates
-  hosts: oo_first_etcd
-  vars:
-    etcd_generated_certs_dir: /etc/etcd/generated_certs
-    sync_tmpdir: "{{ hostvars.localhost.mktemp.stdout }}"
-  pre_tasks:
-  - set_fact:
-      etcd_needing_client_certs: "{{ hostvars
-                                     | oo_select_keys(groups['oo_nodes_to_config'])
-                                     | oo_filter_list('etcd_client_flannel_certs_missing') | default([]) }}"
-  roles:
-  - role: openshift_etcd_certificates
-    when: openshift_use_flannel | default(false) | bool
-  post_tasks:
-  - name: Create a tarball of the etcd flannel certs
-    command: >
-      tar -czvf {{ etcd_generated_certs_dir }}/{{ item.etcd_cert_subdir }}.tgz
-        -C {{ etcd_generated_certs_dir }}/{{ item.etcd_cert_subdir }} .
-    args:
-      creates: "{{ etcd_generated_certs_dir }}/{{ item.etcd_cert_subdir }}.tgz"
-    with_items: "{{ etcd_needing_client_certs | default([]) }}"
-  - name: Retrieve the etcd cert tarballs
-    fetch:
-      src: "{{ etcd_generated_certs_dir }}/{{ item.etcd_cert_subdir }}.tgz"
-      dest: "{{ sync_tmpdir }}/"
-      flat: yes
-      fail_on_missing: yes
-      validate_checksum: yes
-    with_items: "{{ etcd_needing_client_certs | default([]) }}"
-
-- name: Copy the external etcd flannel certs to the nodes
-  hosts: oo_nodes_to_config
-  vars:
-    sync_tmpdir: "{{ hostvars.localhost.mktemp.stdout }}"
-  tasks:
-  - name: Ensure certificate directory exists
-    file:
-      path: "{{ openshift.common.config_base }}/node"
-      state: directory
-    when: etcd_client_flannel_certs_missing | default(false) | bool
-  - name: Unarchive the tarball on the master
-    unarchive:
-      src: "{{ sync_tmpdir }}/{{ etcd_cert_subdir }}.tgz"
-      dest: "{{ etcd_cert_config_dir }}"
-    when: etcd_client_flannel_certs_missing | default(false) | bool
-  - file:
-      path: "{{ etcd_cert_config_dir }}/{{ item }}"
-      owner: root
-      group: root
-      mode: 0600
-    with_items:
-    - node.etcd-client.crt
-    - node.etcd-client.key
-    - node.etcd-ca.crt
-    when: etcd_client_flannel_certs_missing | default(false) | bool
-
+  - role: openshift_cloud_provider
+  - role: openshift_common
+  - role: openshift_node_dnsmasq
+    when: openshift.common.use_dnsmasq
+  - role: os_firewall
+    os_firewall_allow:
+    - service: Kubernetes kubelet
+      port: 10250/tcp
+    - service: http
+      port: 80/tcp
+    - service: https
+      port: 443/tcp
+    - service: Openshift kubelet ReadOnlyPort
+      port: 10255/tcp
+    - service: Openshift kubelet ReadOnlyPort udp
+      port: 10255/udp
+    - service: OpenShift OVS sdn
+      port: 4789/udp
+      when: openshift.node.use_openshift_sdn | bool
+  - role: openshift_node
 
 - name: Additional node config
   hosts: oo_nodes_to_config
   vars:
-    # TODO: Prefix flannel role variables.
     openshift_node_master_api_url: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_url }}"
-    etcd_urls: "{{ hostvars[groups.oo_first_master.0].openshift.master.etcd_urls }}"
-    embedded_etcd: "{{ hostvars[groups.oo_first_master.0].openshift.master.embedded_etcd }}"
   roles:
   - role: flannel
+    etcd_urls: "{{ hostvars[groups.oo_first_master.0].openshift.master.etcd_urls }}"
+    embedded_etcd: "{{ hostvars[groups.oo_first_master.0].openshift.master.embedded_etcd }}"
+    etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
+    etcd_cert_subdir: "openshift-node-{{ openshift.common.hostname }}"
+    etcd_cert_config_dir: "{{ openshift.common.config_base }}/node"
     when: openshift.common.use_flannel | bool
   - role: nuage_node
     when: openshift.common.use_nuage | bool
@@ -201,7 +168,12 @@
     # Using curl here since the uri module requires python-httplib2 and
     # wait_for port doesn't provide health information.
     command: >
-      curl --silent --cacert {{ openshift.common.config_base }}/master/ca.crt
+      curl --silent
+      {% if openshift.common.version_gte_3_2_or_1_2 | bool %}
+      --cacert {{ openshift.common.config_base }}/master/ca-bundle.crt
+      {% else %}
+      --cacert {{ openshift.common.config_base }}/master/ca.crt
+      {% endif %}
       {{ openshift.master.api_url }}/healthz/ready
     register: api_available_output
     until: api_available_output.stdout == 'ok'

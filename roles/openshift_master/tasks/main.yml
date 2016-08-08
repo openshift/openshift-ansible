@@ -180,7 +180,10 @@
   changed_when: false
 
 - name: Stop and disable non-HA master when running HA
-  service: name={{ openshift.common.service_type }}-master enabled=no state=stopped
+  service:
+    name: "{{ openshift.common.service_type }}-master"
+    enabled: no
+    state: stopped
   when: openshift_master_ha | bool and 'LoadState=not-found' not in master_svc_show.stdout
 
 - set_fact:
@@ -191,9 +194,24 @@
   command: systemctl mask {{ openshift.common.service_type }}-master
   when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and not openshift.common.is_containerized | bool
 
-- name: Start and enable master api
-  service: name={{ openshift.common.service_type }}-master-api enabled=yes state=started
+- name: Start and enable master api on first master
+  service:
+    name: "{{ openshift.common.service_type }}-master-api"
+    enabled: yes
+    state: started
+  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and inventory_hostname == openshift_master_hosts[0]
+  register: start_result
+
+- pause:
+    seconds: 15
   when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
+
+- name: Start and enable master api all masters
+  service:
+    name: "{{ openshift.common.service_type }}-master-api"
+    enabled: yes
+    state: started
+  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and inventory_hostname != openshift_master_hosts[0]
   register: start_result
 
 - set_fact:
@@ -206,7 +224,12 @@
   # Using curl here since the uri module requires python-httplib2 and
   # wait_for port doesn't provide health information.
   command: >
-    curl --silent --cacert {{ openshift.common.config_base }}/master/ca.crt
+    curl --silent
+    {% if openshift.common.version_gte_3_2_or_1_2 | bool %}
+    --cacert {{ openshift.common.config_base }}/master/ca-bundle.crt
+    {% else %}
+    --cacert {{ openshift.common.config_base }}/master/ca.crt
+    {% endif %}
     {{ openshift.master.api_url }}/healthz/ready
   register: api_available_output
   until: api_available_output.stdout == 'ok'
@@ -216,9 +239,24 @@
   changed_when: false
   when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and master_api_service_status_changed | bool
 
-- name: Start and enable master controller
-  service: name={{ openshift.common.service_type }}-master-controllers enabled=yes state=started
+- name: Start and enable master controller on first master
+  service:
+    name: "{{ openshift.common.service_type }}-master-controllers"
+    enabled: yes
+    state: started
+  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and inventory_hostname == openshift_master_hosts[0]
+  register: start_result
+
+- pause:
+    seconds: 15
   when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
+
+- name: Start and enable master controller on all masters
+  service:
+    name: "{{ openshift.common.service_type }}-master-controllers"
+    enabled: yes
+    state: started
+  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and inventory_hostname != openshift_master_hosts[0]
   register: start_result
 
 - set_fact:

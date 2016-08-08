@@ -4,7 +4,7 @@ galaxy_info:
   description: flannel management
   company: Red Hat, Inc.
   license: Apache License, Version 2.0
-  min_ansible_version: 1.2
+  min_ansible_version: 2.1
   platforms:
   - name: EL
     versions:
@@ -13,4 +13,6 @@ galaxy_info:
   - cloud
   - system
 dependencies:
-- { role: openshift_facts }
+- role: openshift_facts
+- role: openshift_etcd_client_certificates
+  etcd_cert_prefix: flannel.etcd-

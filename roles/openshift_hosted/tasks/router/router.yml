@@ -39,12 +39,12 @@
     {{ openshift.common.client_binary }} --api-version='v1' -o json
     get nodes -n default --config={{ openshift_hosted_kubeconfig }}
     --selector={{ openshift.hosted.router.selector | default('') }}
-  register: openshift_hosted_router_nodes_json
+  register: router_nodes_json
   changed_when: false
   when: openshift.hosted.router.replicas | default(none) is none
 
 - set_fact:
-    replicas: "{{ openshift.hosted.router.replicas | default((openshift_hosted_router_nodes_json.stdout | default('{\"items\":[]}') | from_json)['items'] | length) }}"
+    replicas: "{{ openshift.hosted.router.replicas | default((router_nodes_json.stdout | default('{\"items\":[]}') | from_json)['items'] | length) }}"
 
 - name: Create OpenShift router
   command: >

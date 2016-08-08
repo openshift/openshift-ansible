@@ -121,7 +121,7 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
     click.echo(message)
 
     hosts = []
-    roles = set(['master', 'node', 'storage'])
+    roles = set(['master', 'node', 'storage', 'etcd'])
     more_hosts = True
     num_masters = 0
     while more_hosts:
@@ -133,6 +133,7 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
         if not masters_set:
             if click.confirm('Will this host be an OpenShift Master?'):
                 host_props['roles'].append('master')
+                host_props['roles'].append('etcd')
                 num_masters += 1
 
                 if oo_cfg.settings['variant_version'] == '3.0':
@@ -322,9 +323,7 @@ Note: Containerized storage hosts are not currently supported.
     else:
         host_props['connect_to'] = hostname_or_ip
         host_props['preconfigured'] = False
-        host_props['master'] = False
-        host_props['node'] = False
-        host_props['storage'] = True
+        host_props['roles'] = ['storage']
         storage = Host(**host_props)
         hosts.append(storage)
 
@@ -775,6 +774,7 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force, verbose):
     default="/tmp/ansible.log")
 @click.option('-v', '--verbose',
     is_flag=True, default=False)
+@click.help_option('--help', '-h')
 #pylint: disable=too-many-arguments
 #pylint: disable=line-too-long
 # Main CLI entrypoint, not much we can do about too many arguments.
@@ -829,21 +829,25 @@ def uninstall(ctx):
     oo_cfg = ctx.obj['oo_cfg']
     verbose = ctx.obj['verbose']
 
-    if len(oo_cfg.deployment.hosts) == 0:
+    if hasattr(oo_cfg, 'deployment'):
+        hosts = oo_cfg.deployment.hosts
+    elif hasattr(oo_cfg, 'hosts'):
+        hosts = oo_cfg.hosts
+    else:
         click.echo("No hosts defined in: %s" % oo_cfg.config_path)
         sys.exit(1)
 
     click.echo("OpenShift will be uninstalled from the following hosts:\n")
     if not ctx.obj['unattended']:
         # Prompt interactively to confirm:
-        for host in oo_cfg.deployment.hosts:
+        for host in hosts:
             click.echo("  * %s" % host.connect_to)
         proceed = click.confirm("\nDo you wish to proceed?")
         if not proceed:
             click.echo("Uninstall cancelled.")
             sys.exit(0)
 
-    openshift_ansible.run_uninstall_playbook(verbose)
+    openshift_ansible.run_uninstall_playbook(hosts, verbose)
 
 
 @click.command()

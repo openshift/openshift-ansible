@@ -28,6 +28,7 @@
     path: "{{ openshift_ca_config_dir }}/{{ item }}"
   register: g_master_ca_stat_result
   with_items:
+  - ca-bundle.crt
   - ca.crt
   - ca.key
   delegate_to: "{{ openshift_ca_host }}"
@@ -37,17 +38,19 @@
     master_ca_missing: "{{ False in (g_master_ca_stat_result.results
                            | oo_collect(attribute='stat.exists')
                            | list) }}"
-  delegate_to: "{{ openshift_ca_host }}"
   run_once: true
 
 - name: Create the master certificates if they do not already exist
   command: >
     {{ openshift.common.admin_binary }} create-master-certs
-      --hostnames={{ openshift_master_hostnames | join(',') }}
-      --master={{ openshift.master.api_url }}
-      --public-master={{ openshift.master.public_api_url }}
-      --cert-dir={{ openshift_ca_config_dir }}
-      --overwrite=false
-  when: hostvars[openshift_ca_host].master_ca_missing | bool
+    {% for named_ca_certificate in openshift.master.named_certificates | default([]) | oo_collect('cafile') %}
+    --certificate-authority {{ named_ca_certificate }}
+    {% endfor %}
+    --hostnames={{ openshift_master_hostnames | join(',') }}
+    --master={{ openshift.master.api_url }}
+    --public-master={{ openshift.master.public_api_url }}
+    --cert-dir={{ openshift_ca_config_dir }}
+    --overwrite=false
+  when: master_ca_missing | bool
   delegate_to: "{{ openshift_ca_host }}"
   run_once: true
