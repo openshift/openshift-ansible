@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.7
+Version:        3.3.8
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Aug 08 2016 Troy Dawson <tdawson@redhat.com> 3.3.8-1
+- Fix little mistake in openshift_master_htpasswd_users value .
+  (jmferrer@paradigmatecnologico.com)
+
 * Fri Aug 05 2016 Troy Dawson <tdawson@redhat.com> 3.3.7-1
 - Call relocated openshift-loadbalancer playbook in master scaleup.
   (abutcher@redhat.com)
