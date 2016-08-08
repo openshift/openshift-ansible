@@ -774,6 +774,7 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force, verbose):
     default="/tmp/ansible.log")
 @click.option('-v', '--verbose',
     is_flag=True, default=False)
+@click.help_option('--help', '-h')
 #pylint: disable=too-many-arguments
 #pylint: disable=line-too-long
 # Main CLI entrypoint, not much we can do about too many arguments.
