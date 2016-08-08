@@ -4,8 +4,10 @@
 
 import os
 import yaml
+from ansible.plugins.callback import CallbackBase
 
-class CallbackModule(object):
+# pylint: disable=super-init-not-called
+class CallbackModule(CallbackBase):
 
     def __init__(self):
         ######################
@@ -21,68 +23,71 @@ class CallbackModule(object):
         self.hosts_yaml = os.open(self.hosts_yaml_name, os.O_CREAT |
             os.O_WRONLY)
 
-    def on_any(self, *args, **kwargs):
+    def v2_on_any(self, *args, **kwargs):
         pass
 
-    def runner_on_failed(self, host, res, ignore_errors=False):
+    def v2_runner_on_failed(self, res, ignore_errors=False):
         pass
 
-    def runner_on_ok(self, host, res):
-        if res['invocation']['module_args'] == 'var=result':
-            facts = res['var']['result']['ansible_facts']['openshift']
+    # pylint: disable=protected-access
+    def v2_runner_on_ok(self, res):
+        abridged_result = res._result.copy()
+        # Collect facts result from playbooks/byo/openshift_facts.yml
+        if 'result' in abridged_result:
+            facts = abridged_result['result']['ansible_facts']['openshift']
             hosts_yaml = {}
-            hosts_yaml[host] = facts
+            hosts_yaml[res._host.get_name()] = facts
             os.write(self.hosts_yaml, yaml.safe_dump(hosts_yaml))
 
-    def runner_on_skipped(self, host, item=None):
+    def v2_runner_on_skipped(self, res):
         pass
 
-    def runner_on_unreachable(self, host, res):
+    def v2_runner_on_unreachable(self, res):
         pass
 
-    def runner_on_no_hosts(self):
+    def v2_runner_on_no_hosts(self, task):
         pass
 
-    def runner_on_async_poll(self, host, res):
+    def v2_runner_on_async_poll(self, res):
         pass
 
-    def runner_on_async_ok(self, host, res):
+    def v2_runner_on_async_ok(self, res):
         pass
 
-    def runner_on_async_failed(self, host, res):
+    def v2_runner_on_async_failed(self, res):
         pass
 
-    def playbook_on_start(self):
+    def v2_playbook_on_start(self, playbook):
         pass
 
-    def playbook_on_notify(self, host, handler):
+    def v2_playbook_on_notify(self, res, handler):
         pass
 
-    def playbook_on_no_hosts_matched(self):
+    def v2_playbook_on_no_hosts_matched(self):
         pass
 
-    def playbook_on_no_hosts_remaining(self):
+    def v2_playbook_on_no_hosts_remaining(self):
         pass
 
-    def playbook_on_task_start(self, name, is_conditional):
+    def v2_playbook_on_task_start(self, name, is_conditional):
         pass
 
     #pylint: disable=too-many-arguments
-    def playbook_on_vars_prompt(self, varname, private=True, prompt=None,
+    def v2_playbook_on_vars_prompt(self, varname, private=True, prompt=None,
         encrypt=None, confirm=False, salt_size=None, salt=None, default=None):
         pass
 
-    def playbook_on_setup(self):
+    def v2_playbook_on_setup(self):
         pass
 
-    def playbook_on_import_for_host(self, host, imported_file):
+    def v2_playbook_on_import_for_host(self, res, imported_file):
         pass
 
-    def playbook_on_not_import_for_host(self, host, missing_file):
+    def v2_playbook_on_not_import_for_host(self, res, missing_file):
         pass
 
-    def playbook_on_play_start(self, name):
+    def v2_playbook_on_play_start(self, play):
         pass
 
-    def playbook_on_stats(self, stats):
+    def v2_playbook_on_stats(self, stats):
         pass
