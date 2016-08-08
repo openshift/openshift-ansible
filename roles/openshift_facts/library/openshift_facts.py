@@ -477,6 +477,14 @@ def set_selectors(facts):
         facts['hosted']['registry'] = {}
     if 'selector' not in facts['hosted']['registry'] or facts['hosted']['registry']['selector'] in [None, 'None']:
         facts['hosted']['registry']['selector'] = selector
+    if 'metrics' not in facts['hosted']:
+        facts['hosted']['metrics'] = {}
+    if 'selector' not in facts['hosted']['metrics'] or facts['hosted']['metrics']['selector'] in [None, 'None']:
+        facts['hosted']['metrics']['selector'] = None
+    if 'logging' not in facts['hosted']:
+        facts['hosted']['logging'] = {}
+    if 'selector' not in facts['hosted']['logging'] or facts['hosted']['logging']['selector'] in [None, 'None']:
+        facts['hosted']['logging']['selector'] = None
 
     return facts
 
