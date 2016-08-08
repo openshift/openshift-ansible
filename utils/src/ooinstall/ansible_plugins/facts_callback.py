@@ -1,6 +1,6 @@
 # TODO: Temporarily disabled due to importing old code into openshift-ansible
 # repo. We will work on these over time.
-# pylint: disable=bad-continuation,missing-docstring,no-self-use,invalid-name,no-value-for-parameter
+# pylint: disable=bad-continuation,missing-docstring,no-self-use,invalid-name,no-value-for-parameter,protected-access
 
 import os
 import yaml
@@ -27,9 +27,25 @@ class CallbackModule(object):
     def runner_on_failed(self, host, res, ignore_errors=False):
         pass
 
-    def runner_on_ok(self, host, res):
-        if res['invocation']['module_args'] == 'var=result':
-            facts = res['var']['result']['ansible_facts']['openshift']
+    ###########################
+    # This is ugly stoopid too.
+    # The signature for runner_on_ok is different between ansible 2.x
+    # and earlier versions.  If there is only 1 arg, then we're in
+    # 2.x land and have to do ugly things like access to protected
+    # members such as _result.
+    def runner_on_ok(self, *args):
+        facts = {}
+        if len(args) == 1:
+            res = args[0]
+            host = res._host.get_name()
+            if 'result' in res._result:
+                facts = res._result['result']['ansible_facts']['openshift']
+        else:
+            res = args[1]
+            host = args[0]
+            if res['invocation']['module_args'] == 'var=result':
+                facts = res['var']['result']['ansible_facts']['openshift']
+        if facts:
             hosts_yaml = {}
             hosts_yaml[host] = facts
             os.write(self.hosts_yaml, yaml.safe_dump(hosts_yaml))
