@@ -34,7 +34,12 @@
     path: "/etc/yum.repos.d/{{ item | basename }}"
     state: absent
   with_fileglob:
-  - '*/repos/*'
+  - "fedora-openshift-enterprise/repos/*"
+  - "fedora-origin/repos/*"
+  - "online/repos/*"
+  - "openshift-enterprise/repos/*"
+  - "origin/repos/*"
+  - "removed/repos/*"
   when: not openshift.common.is_containerized | bool
         and not (item | search("/files/" ~ openshift_deployment_type ~ "/repos"))
         and (ansible_os_family == "RedHat" and ansible_distribution != "Fedora")
@@ -42,10 +47,15 @@
 
 - name: Remove any yum repo files for other deployment types Fedora
   file:
-    path: "/etc/yum.repos.d/{{ item | basename }}"
+    path: "{{ item | basename }}"
     state: absent
   with_fileglob:
-  - '*/repos/*'
+  - "fedora-openshift-enterprise/repos/*"
+  - "fedora-origin/repos/*"
+  - "online/repos/*"
+  - "openshift-enterprise/repos/*"
+  - "origin/repos/*"
+  - "removed/repos/*"
   when: not openshift.common.is_containerized | bool
         and not (item | search("/files/fedora-" ~ openshift_deployment_type ~ "/repos"))
         and (ansible_distribution == "Fedora")
