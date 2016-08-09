@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.19
+Version:        3.2.20
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,18 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Aug 09 2016 Scott Dodson <sdodson@redhat.com> 3.2.20-1
+- Enable 'NoVolumeZoneConflict' policy for scheduler (abutcher@redhat.com)
+- a-o-i: Update nosetests for ansible_ssh_user (smunilla@redhat.com)
+- move ansible_ssh_user to deployment, remove ansible_config and
+  ansible_log_path (ghuang@redhat.com)
+- Labeling nodes only (ghuang@redhat.com)
+- Move storage includes up to main. (abutcher@redhat.com)
+- Support gathering ansible 2.1/2.2 system facts (abutcher@redhat.com)
+- Try/except urlparse calls. (abutcher@redhat.com)
+- with_fileglob no longer supports wildcard prefixes. (abutcher@redhat.com)
+- make the improved log formatter work with ansible 2.1 (rmeggins@redhat.com)
+
 * Mon Aug 08 2016 Scott Dodson <sdodson@redhat.com> 3.2.19-1
 - Set become=no for etcd server certificates temporary directory.
   (abutcher@redhat.com)
