@@ -1708,6 +1708,7 @@ class OpenShiftFacts(object):
                 {"name": "PodFitsResources"},
                 {"name": "PodFitsPorts"},
                 {"name": "NoDiskConflict"},
+                {"name": "NoVolumeZoneConflict"},
                 {"name": "Region", "argument": {"serviceAffinity" : {"labels" : ["region"]}}}
             ]
             scheduler_priorities = [
