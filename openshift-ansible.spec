@@ -330,8 +330,7 @@ Atomic OpenShift Utilities includes
   registry redeploy conditional. (abutcher@redhat.com)
 - Arbitrary Installer yaml (smunilla@redhat.com)
 - Check for existence of sebooleans prior to setting. (abutcher@redhat.com)
-- Automatic commit of package [openshift-ansible] release [3.3.2-1].
-  (sdodson@redhat.com)
+- Require ansible-2.1 (abutcher@redhat.com)
 
 * Sun Jul 17 2016 Scott Dodson <sdodson@redhat.com> 3.2.12-1
 - Convert openshift_release and openshift_version to strings for startswith

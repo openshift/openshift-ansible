@@ -5,9 +5,9 @@ For more information on tito, please see the [Tito home page](https://github.com
 
 
 ## Build openshift-ansible-bin
-- Change into openshift-ansible/bin
+- Change into openshift-ansible
 ```
-cd openshift-ansible/bin
+cd openshift-ansible
 ```
 - Build a test package (no tagging needed)
 ```

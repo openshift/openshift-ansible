@@ -7,7 +7,7 @@ import unittest
 
 sys.path = [os.path.abspath(os.path.dirname(__file__) + "/../library/")] + sys.path
 
-# pylint: disable=import-error,wrong-import-position
+# pylint: disable=import-error
 from modify_yaml import set_key
 
 class ModifyYamlTests(unittest.TestCase):

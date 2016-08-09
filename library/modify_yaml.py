@@ -21,6 +21,7 @@ EXAMPLES = '''
 '''
 
 
+# pylint: disable=missing-docstring
 def set_key(yaml_data, yaml_key, yaml_value):
     changes = []
     ptr = yaml_data

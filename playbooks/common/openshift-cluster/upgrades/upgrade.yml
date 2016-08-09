@@ -32,6 +32,31 @@
 #      role: master
 #      config_base: "{{ hostvars[inventory_hostname].openshift.common.config_base }}"
 
+  - name: Check for ca-bundle.crt
+    stat:
+      path: "{{ openshift.common.config_base }}/master/ca-bundle.crt"
+    register: ca_bundle_stat
+    failed_when: false
+
+  - name: Check for ca.crt
+    stat:
+      path: "{{ openshift.common.config_base }}/master/ca.crt"
+    register: ca_crt_stat
+    failed_when: false
+
+  - name: Migrate ca.crt to ca-bundle.crt
+    command: mv ca.crt ca-bundle.crt
+    args:
+      chdir: "{{ openshift.common.config_base }}/master"
+    when: ca_crt_stat.stat.isreg and not ca_bundle_stat.stat.exists
+
+  - name: Link ca.crt to ca-bundle.crt
+    file:
+      src: "{{ openshift.common.config_base }}/master/ca-bundle.crt"
+      path: "{{ openshift.common.config_base }}/master/ca.crt"
+      state: link
+    when: ca_crt_stat.stat.isreg and not ca_bundle_stat.stat.exists
+
 - name: Set master update status to complete
   hosts: oo_masters_to_config
   tasks:
