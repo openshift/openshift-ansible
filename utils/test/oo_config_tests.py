@@ -13,8 +13,8 @@ from ooinstall.oo_config import OOConfig, Host, OOConfigInvalidHostError
 SAMPLE_CONFIG = """
 variant: openshift-enterprise
 variant_version: 3.2
-ansible_ssh_user: root
 deployment:
+    ansible_ssh_user: root
     hosts:
       - connect_to: master-private.example.com
         ip: 10.0.0.1
@@ -65,6 +65,7 @@ validated_facts:
 
 CONFIG_INCOMPLETE_FACTS = """
 deployment:
+    ansible_ssh_user: root
     hosts:
       - connect_to: 10.0.0.1
         ip: 10.0.0.1
@@ -90,8 +91,8 @@ deployment:
 
 CONFIG_BAD = """
 variant: openshift-enterprise
-ansible_ssh_user: root
 deployment:
+    ansible_ssh_user: root
     hosts:
       - connect_to: master-private.example.com
         ip: 10.0.0.1
@@ -212,7 +213,7 @@ class OOConfigTests(OOInstallFixture):
             self.assertTrue('hostname' in h)
             self.assertTrue('public_hostname' in h)
 
-        self.assertTrue('ansible_ssh_user' in written_config)
+        self.assertTrue('ansible_ssh_user' in written_config['deployment'])
         self.assertTrue('variant' in written_config)
         self.assertEquals('v2', written_config['version'])
 
