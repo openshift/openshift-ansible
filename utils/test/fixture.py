@@ -11,9 +11,9 @@ from click.testing import CliRunner
 SAMPLE_CONFIG = """
 variant: %s
 variant_version: 3.2
-ansible_ssh_user: root
 master_routingconfig_subdomain: example.com
 deployment:
+    ansible_ssh_user: root
     hosts:
       - connect_to: 10.0.0.1
         ip: 10.0.0.1

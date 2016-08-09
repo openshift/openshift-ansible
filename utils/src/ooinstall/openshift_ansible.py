@@ -19,8 +19,6 @@ ROLES_TO_GROUPS_MAP = {
 
 VARIABLES_MAP = {
     'ansible_ssh_user': 'ansible_ssh_user',
-    'ansible_config': 'ansible_config',
-    'ansible_log_path': 'ansible_log_path',
     'deployment_type': 'deployment_type',
     'master_routingconfig_subdomain':'openshift_master_default_subdomain',
     'proxy_http':'openshift_http_proxy',
@@ -106,7 +104,7 @@ def write_inventory_vars(base_inventory, multiple_masters, lb):
         if value:
             base_inventory.write('{}={}\n'.format(inventory_var, value))
 
-    if CFG.settings['ansible_ssh_user'] != 'root':
+    if CFG.deployment.variables['ansible_ssh_user'] != 'root':
         base_inventory.write('ansible_become=yes\n')
 
     if multiple_masters and lb is not None:
@@ -190,7 +188,8 @@ def write_host(host, role, inventory, schedulable=None):
         for variable, value in host.other_variables.iteritems():
             facts += " {}={}".format(variable, value)
     if host.node_labels:
-        facts += ' openshift_node_labels="{}"'.format(host.node_labels)
+        if role == 'node':
+            facts += ' openshift_node_labels="{}"'.format(host.node_labels)
 
 
     # Distinguish between three states, no schedulability specified (use default),
