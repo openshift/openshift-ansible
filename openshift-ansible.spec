@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.18
+Version:        3.2.19
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,28 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Aug 08 2016 Scott Dodson <sdodson@redhat.com> 3.2.19-1
+- Set become=no for etcd server certificates temporary directory.
+  (abutcher@redhat.com)
+- BUILD.md lies (jmainguy@redhat.com)
+- Migrate ca.crt to ca-bundle.crt (sdodson@redhat.com)
+- Upgrade configs for protobuf support. (dgoodwin@redhat.com)
+- Fixed a bug in modify_yaml module. (dgoodwin@redhat.com)
+- Convert ansible facts callback to v2. (abutcher@redhat.com)
+- Automatic commit of package [openshift-ansible] release [3.3.8-1].
+  (tdawson@redhat.com)
+- Fix little mistake in openshift_master_htpasswd_users value .
+  (jmferrer@paradigmatecnologico.com)
+- Automatic commit of package [openshift-ansible] release [3.3.7-1].
+  (tdawson@redhat.com)
+- Call relocated openshift-loadbalancer playbook in master scaleup.
+  (abutcher@redhat.com)
+- [openshift_ca] correct check for missing CA. (abutcher@redhat.com)
+- Upgrade configs for protobuf support. (dgoodwin@redhat.com)
+- Fixed a bug in modify_yaml module. (dgoodwin@redhat.com)
+- Add 3.3 protobuf config stanzas for master/node config. (dgoodwin@redhat.com)
+- Introduce 1.3/3.3 upgrade path. (dgoodwin@redhat.com)
+
 * Thu Aug 04 2016 Scott Dodson <sdodson@redhat.com> 3.2.18-1
 - a-o-i: Rename OSE in Install Menu (smunilla@redhat.com)
 - a-o-i: Allow Arbitrary Deployment Variables (smunilla@redhat.com)
