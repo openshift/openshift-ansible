@@ -190,7 +190,8 @@ def write_host(host, role, inventory, schedulable=None):
         for variable, value in host.other_variables.iteritems():
             facts += " {}={}".format(variable, value)
     if host.node_labels:
-        facts += ' openshift_node_labels="{}"'.format(host.node_labels)
+        if role == 'node':
+            facts += ' openshift_node_labels="{}"'.format(host.node_labels)
 
 
     # Distinguish between three states, no schedulability specified (use default),
