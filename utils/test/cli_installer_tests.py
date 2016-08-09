@@ -101,8 +101,8 @@ MOCK_FACTS_QUICKHA = {
 # Missing connect_to on some hosts:
 BAD_CONFIG = """
 variant: %s
-ansible_ssh_user: root
 deployment:
+    ansible_ssh_user: root
     hosts:
       - connect_to: 10.0.0.1
         ip: 10.0.0.1
@@ -132,8 +132,8 @@ deployment:
 
 QUICKHA_CONFIG = """
 variant: %s
-ansible_ssh_user: root
 deployment:
+    ansible_ssh_user: root
     hosts:
       - connect_to: 10.0.0.1
         ip: 10.0.0.1
@@ -189,8 +189,8 @@ deployment:
 
 QUICKHA_2_MASTER_CONFIG = """
 variant: %s
-ansible_ssh_user: root
 deployment:
+    ansible_ssh_user: root
     hosts:
       - connect_to: 10.0.0.1
         ip: 10.0.0.1
@@ -238,8 +238,8 @@ deployment:
 
 QUICKHA_CONFIG_REUSED_LB = """
 variant: %s
-ansible_ssh_user: root
 deployment:
+    ansible_ssh_user: root
     hosts:
       - connect_to: 10.0.0.1
         ip: 10.0.0.1
@@ -281,8 +281,8 @@ deployment:
 
 QUICKHA_CONFIG_NO_LB = """
 variant: %s
-ansible_ssh_user: root
 deployment:
+    ansible_ssh_user: root
     hosts:
       - connect_to: 10.0.0.1
         ip: 10.0.0.1
@@ -323,8 +323,8 @@ deployment:
 
 QUICKHA_CONFIG_PRECONFIGURED_LB = """
 variant: %s
-ansible_ssh_user: root
 deployment:
+    ansible_ssh_user: root
     hosts:
       - connect_to: 10.0.0.1
         ip: 10.0.0.1
