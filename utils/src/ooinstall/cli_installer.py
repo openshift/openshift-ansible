@@ -490,7 +490,7 @@ def error_if_missing_info(oo_cfg):
                    'command line or in the config file: %s' % oo_cfg.config_path)
         sys.exit(1)
 
-    if 'ansible_ssh_user' not in oo_cfg.settings:
+    if 'ansible_ssh_user' not in oo_cfg.deployment.variables:
         click.echo("Must specify ansible_ssh_user in configuration file.")
         sys.exit(1)
 
@@ -586,7 +586,8 @@ https://docs.openshift.com/enterprise/latest/admin_guide/install/prerequisites.h
     click.clear()
 
     if not oo_cfg.settings.get('ansible_ssh_user', ''):
-        oo_cfg.settings['ansible_ssh_user'] = get_ansible_ssh_user()
+        oo_cfg.deployment.variables['ansible_ssh_user'] = \
+                                                            get_ansible_ssh_user()
         click.clear()
 
     if not oo_cfg.settings.get('variant', ''):
