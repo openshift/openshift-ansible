@@ -80,6 +80,7 @@
     subnet_id: "{{ deployment_vars[deployment_type].vpc_subnet }}"
     security_groups: "{{ sec_group.group_id }}"
     state: present
+    region: "{{ deployment_vars[deployment_type].region }}"
   register: enis
   with_items: "{{ private_ips }}"
 
@@ -93,6 +94,7 @@
     in_vpc: yes
     reuse_existing_ip_allowed: yes
     state: present
+    region: "{{ deployment_vars[deployment_type].region }}"
   register: eips
   with_items: "{{ enis.results }}"
 
@@ -126,6 +128,7 @@
   ec2_eni:
     eni_id: "{{ item.interface.id }}"
     delete_on_termination: true
+    region: "{{ deployment_vars[deployment_type].region }}"
   with_items: "{{ enis.results }}"
   when: enis.changed == true
 

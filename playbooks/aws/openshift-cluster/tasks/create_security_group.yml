@@ -6,7 +6,8 @@
 - name: Create security group for ose
   ec2_group:
     name: "{{ security_group }}"
-    description: "{{ security_group }}" 
+    description: "{{ security_group }}"
+    region: "{{ deployment_vars[deployment_type].region }}"
     rules:
       - proto: tcp
         from_port: 80
