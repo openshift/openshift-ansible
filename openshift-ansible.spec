@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.8
+Version:        3.3.9
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,27 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Aug 10 2016 Troy Dawson <tdawson@redhat.com> 3.3.9-1
+- Enable 'NoVolumeZoneConflict' policy for scheduler (abutcher@redhat.com)
+- a-o-i: Update nosetests for ansible_ssh_user (smunilla@redhat.com)
+- move ansible_ssh_user to deployment, remove ansible_config and
+  ansible_log_path (ghuang@redhat.com)
+- Labeling nodes only (ghuang@redhat.com)
+- Set become=no for etcd server certificates temporary directory.
+  (abutcher@redhat.com)
+- Move storage includes up to main. (abutcher@redhat.com)
+- Support gathering ansible 2.1/2.2 system facts (abutcher@redhat.com)
+- Try/except urlparse calls. (abutcher@redhat.com)
+- with_fileglob no longer supports wildcard prefixes. (abutcher@redhat.com)
+- BUILD.md lies (jmainguy@redhat.com)
+- Migrate ca.crt to ca-bundle.crt (sdodson@redhat.com)
+- Upgrade configs for protobuf support. (dgoodwin@redhat.com)
+- Fixed a bug in modify_yaml module. (dgoodwin@redhat.com)
+- make the improved log formatter work with ansible 2.1 (rmeggins@redhat.com)
+- Convert ansible facts callback to v2. (abutcher@redhat.com)
+- Add 3.3 protobuf config stanzas for master/node config. (dgoodwin@redhat.com)
+- Introduce 1.3/3.3 upgrade path. (dgoodwin@redhat.com)
+
 * Mon Aug 08 2016 Troy Dawson <tdawson@redhat.com> 3.3.8-1
 - Fix little mistake in openshift_master_htpasswd_users value .
   (jmferrer@paradigmatecnologico.com)
