@@ -18,8 +18,12 @@
   register: nuke_images_result
   when: docker_upgrade_nuke_images is defined and docker_upgrade_nuke_images | bool
 
+- service: name=docker state=stopped
+
 - name: Upgrade Docker
   action: "{{ ansible_pkg_mgr }} name=docker{{ '-' + docker_version }} state=present"
+
+- service: name=docker state=started
 
 - name: Restart containerized services
   service: name={{ item }} state=started
