@@ -58,6 +58,10 @@ auth:
   openshift:
     realm: openshift
 middleware:
+{% if openshift.common.version_gte_3_3_or_1_3 | bool %}
+  registry:
+  - name: openshift
+{% endif -%}
   repository:
   - name: openshift
     options:
@@ -69,4 +73,7 @@ middleware:
       baseurl: {{ openshift.hosted.registry.storage.s3.cloudfront.baseurl }}
       privatekey: {{ openshift.hosted.registry.storage.s3.cloudfront.privatekeyfile }}
       keypairid: {{ openshift.hosted.registry.storage.s3.cloudfront.keypairid }}
+{% elif openshift.common.version_gte_3_3_or_1_3 | bool %}
+  storage:
+  - name: openshift
 {% endif -%}
