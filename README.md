@@ -1,3 +1,4 @@
+[![Build Status](https://ci.openshift.redhat.com/jenkins/buildStatus/icon?job=openshift-ansible)](https://ci.openshift.redhat.com/jenkins/job/openshift-ansible/)
 [![Join the chat at https://gitter.im/openshift/openshift-ansible](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/openshift/openshift-ansible)
 
 #OpenShift Ansible
