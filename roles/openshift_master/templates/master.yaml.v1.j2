@@ -136,7 +136,7 @@ masterClients:
     acceptContentTypes: application/vnd.kubernetes.protobuf,application/json
     contentType: application/vnd.kubernetes.protobuf
     burst: 400
-    ops: 200
+    qps: 200
 {% endif %}
   externalKubernetesKubeConfig: ""
 {% if openshift.common.version_gte_3_3_or_1_3 | bool %}
@@ -144,7 +144,7 @@ masterClients:
     acceptContentTypes: application/vnd.kubernetes.protobuf,application/json
     contentType: application/vnd.kubernetes.protobuf
     burst: 600
-    ops: 300
+    qps: 300
 {% endif %}
   openshiftLoopbackKubeConfig: openshift-master.kubeconfig
 masterPublicURL: {{ openshift.master.public_api_url }}
