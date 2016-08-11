@@ -185,10 +185,12 @@
 - name: Verify docker upgrade targets
   hosts: oo_masters_to_config:oo_nodes_to_config:oo_etcd_to_config
   tasks:
-  - name: Determine available Docker
-    script: ../files/rpm_versions.sh docker
-    register: g_docker_version_result
-    when: not openshift.common.is_atomic | bool
+  # Only check if docker upgrade is required if docker_upgrade is not
+  # already set to False.
+  - include: docker/upgrade_check.yml
+    when: docker_upgrade is not defined or docker_upgrade | bool and not openshift.common.is_atomic | bool
+
+  # Additional checks for Atomic hosts:
 
   - name: Determine available Docker
     shell: "rpm -q --queryformat '---\ncurr_version: %{VERSION}\navail_version: \n' docker"
@@ -196,18 +198,12 @@
     when: openshift.common.is_atomic | bool
 
   - set_fact:
-      g_docker_version: "{{ g_docker_version_result.stdout | from_yaml }}"
-    when: not openshift.common.is_atomic | bool
-
-  - set_fact:
-      g_docker_version: "{{ g_atomic_docker_version_result.stdout | from_yaml }}"
+      l_docker_version: "{{ g_atomic_docker_version_result.stdout | from_yaml }}"
     when: openshift.common.is_atomic | bool
 
   - fail:
       msg: This playbook requires access to Docker 1.10 or later
-    when: g_docker_version.avail_version | default(g_docker_version.curr_version, true) | version_compare('1.10','<')
-
-  # TODO: add check to upgrade ostree to get latest Docker
+    when: openshift.common.is_atomic | bool and l_docker_version.avail_version | default(l_docker_version.curr_version, true) | version_compare('1.10','<')
 
   - set_fact:
       pre_upgrade_complete: True

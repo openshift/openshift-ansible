@@ -16,6 +16,21 @@ from ooinstall.variants import find_variant, get_variant_version_combos
 DEFAULT_ANSIBLE_CONFIG = '/usr/share/atomic-openshift-utils/ansible.cfg'
 DEFAULT_PLAYBOOK_DIR = '/usr/share/ansible/openshift-ansible/'
 
+UPGRADE_MAPPINGS = {
+                    '3.0':{
+                           'minor_version' :'3.0',
+                           'minor_playbook':'v3_0_minor/upgrade.yml',
+                           'major_version' :'3.1',
+                           'major_playbook':'v3_0_to_v3_1/upgrade.yml',
+                          },
+                    '3.1':{
+                           'minor_version' :'3.1',
+                           'minor_playbook':'v3_1_minor/upgrade.yml',
+                           'major_playbook':'v3_1_to_v3_2/upgrade.yml',
+                           'major_version' :'3.2',
+                        }
+                   }
+
 def validate_ansible_dir(path):
     if not path:
         raise click.BadParameter('An ansible path must be provided')
@@ -598,6 +613,7 @@ https://docs.openshift.com/enterprise/latest/admin_guide/install/prerequisites.h
 
     if not oo_cfg.deployment.hosts:
         oo_cfg.deployment.hosts, roles = collect_hosts(oo_cfg)
+        set_infra_nodes(oo_cfg.deployment.hosts)
 
         for role in roles:
             oo_cfg.deployment.roles[role] = Role(name=role, variables={})
@@ -655,7 +671,7 @@ def get_installed_hosts(hosts, callback_facts):
     except (KeyError, StopIteration):
         pass
 
-    for host in hosts:
+    for host in [h for h in hosts if h.is_master() or h.is_node()]:
         if host.connect_to in callback_facts.keys() and is_installed_host(host, callback_facts):
             installed_hosts.append(host)
     return installed_hosts
@@ -741,6 +757,16 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force, verbose):
                     pass # proceeding as normal should do a clean install
 
     return hosts_to_run_on, callback_facts
+
+def set_infra_nodes(hosts):
+    if all(host.is_master() for host in hosts):
+        infra_list = hosts
+    else:
+        nodes_list = [host for host in hosts if host.is_node()]
+        infra_list = nodes_list[:2]
+
+    for host in infra_list:
+        host.node_labels = "{'region': 'infra'}"
 
 
 @click.group()
@@ -860,21 +886,6 @@ def upgrade(ctx, latest_minor, next_major):
     oo_cfg = ctx.obj['oo_cfg']
     verbose = ctx.obj['verbose']
 
-    # major/minor fields are optional, as we don't always support minor/major
-    # upgrade for what you're currently running.
-    upgrade_mappings = {
-                        '3.1':{
-                               'major_playbook':'v3_2/upgrade.yml',
-                               'major_version' :'3.2',
-                            },
-                        '3.2':{
-                               'minor_playbook':'v3_2/upgrade.yml',
-# Uncomment these when we're ready to support 3.3.
-#                               'major_version' :'3.3',
-#                               'major_playbook':'v3_1_to_v3_2/upgrade.yml',
-                            },
-                       }
-
     if len(oo_cfg.deployment.hosts) == 0:
         click.echo("No hosts defined in: %s" % oo_cfg.config_path)
         sys.exit(1)
@@ -885,7 +896,7 @@ def upgrade(ctx, latest_minor, next_major):
         sys.exit(0)
 
     old_version = oo_cfg.settings['variant_version']
-    mapping = upgrade_mappings.get(old_version)
+    mapping = UPGRADE_MAPPINGS.get(old_version)
 
     message = """
         This tool will help you upgrade your existing OpenShift installation.
@@ -940,8 +951,7 @@ def upgrade(ctx, latest_minor, next_major):
 
     if not ctx.obj['unattended']:
         # Prompt interactively to confirm:
-        proceed = click.confirm("\nDo you wish to proceed?")
-        if not proceed:
+        if not click.confirm("\nDo you wish to proceed?"):
             click.echo("Upgrade cancelled.")
             sys.exit(0)
 

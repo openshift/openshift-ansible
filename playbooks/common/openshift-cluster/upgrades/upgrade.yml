@@ -3,6 +3,34 @@
 # The restart playbook should be run after this playbook completes.
 ###############################################################################
 
+# Separate step so we can execute in parallel and clear out anything unused
+# before we get into the serialized upgrade process which will then remove
+# remaining images if possible.
+- name: Cleanup unused Docker images
+  hosts: oo_masters_to_config:oo_nodes_to_config:oo_etcd_to_config
+  tasks:
+  - name: Check Docker image count
+    shell: "docker images -aq | wc -l"
+    register: docker_image_count
+    when: docker_upgrade_nuke_images is defined and docker_upgrade_nuke_images | bool
+
+  - debug: var=docker_image_count.stdout
+    when: docker_upgrade_nuke_images is defined and docker_upgrade_nuke_images | bool
+
+  - name: Remove unused Docker images for Docker 1.10+ migration
+    shell: "docker rmi `docker images -aq`"
+    # Will fail on images still in use:
+    failed_when: false
+    when: docker_upgrade_nuke_images is defined and docker_upgrade_nuke_images | bool
+
+  - name: Check Docker image count
+    shell: "docker images -aq | wc -l"
+    register: docker_image_count
+    when: docker_upgrade_nuke_images is defined and docker_upgrade_nuke_images | bool
+
+  - debug: var=docker_image_count.stdout
+    when: docker_upgrade_nuke_images is defined and docker_upgrade_nuke_images | bool
+
 ###############################################################################
 # Upgrade Masters
 ###############################################################################
@@ -110,11 +138,6 @@
       {{ openshift.common.admin_binary }} manage-node {{ openshift.common.hostname | lower }} --evacuate --force
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: inventory_hostname in groups.oo_nodes_to_config
-
-  # Only check if docker upgrade is required if docker_upgrade is not
-  # already set to False.
-  - include: docker/upgrade_check.yml
-    when: docker_upgrade is not defined or docker_upgrade | bool and not openshift.common.is_atomic | bool
 
   - include: docker/upgrade.yml
     when: l_docker_upgrade is defined and l_docker_upgrade | bool and not openshift.common.is_atomic | bool

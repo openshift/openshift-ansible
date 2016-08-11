@@ -1,4 +1,19 @@
 ---
+- name: Ensure CA certificate exists on etcd_ca_host
+  stat:
+    path: "{{ etcd_ca_cert }}"
+  register: g_ca_cert_stat_result
+  delegate_to: "{{ etcd_ca_host }}"
+  run_once: true
+
+- fail:
+    msg: >
+      CA certificate {{ etcd_ca_cert }} doesn't exist on CA host
+      {{ etcd_ca_host }}. Apply 'etcd_ca' role to
+      {{ etcd_ca_host }}.
+  when: not g_ca_cert_stat_result.stat.exists | bool
+  run_once: true
+
 - name: Check status of external etcd certificatees
   stat:
     path: "{{ etcd_cert_config_dir }}/{{ item }}"
@@ -7,11 +22,14 @@
   - "{{ etcd_cert_prefix }}client.key"
   - "{{ etcd_cert_prefix }}ca.crt"
   register: g_external_etcd_cert_stat_result
+  when: not etcd_certificates_redeploy | default(false) | bool
 
 - set_fact:
-    etcd_client_certs_missing: "{{ False in (g_external_etcd_cert_stat_result.results
-                                   | oo_collect(attribute='stat.exists')
-                                   | list) }}"
+    etcd_client_certs_missing: "{{ true if etcd_certificates_redeploy | default(false) | bool
+                                   else (False in (g_external_etcd_cert_stat_result.results
+                                                   | default({})
+                                                   | oo_collect(attribute='stat.exists')
+                                                   | list)) }}"
 
 - name: Ensure generated_certs directory present
   file:
