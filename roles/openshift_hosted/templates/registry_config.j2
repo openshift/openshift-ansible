@@ -66,8 +66,11 @@ middleware:
   - name: openshift
     options:
       pullthrough: {{ openshift.hosted.registry.pullthrough | default(true) }}
-{% if openshift.hosted.registry.storage.provider == 's3' and 'cloudfront' in openshift.hosted.registry.storage.s3 %}
+  repository:
+    - name: openshift
   storage:
+    - name: openshift
+{% if openshift.hosted.registry.storage.provider == 's3' and 'cloudfront' in openshift.hosted.registry.storage.s3 %}
   - name: cloudfront
     options:
       baseurl: {{ openshift.hosted.registry.storage.s3.cloudfront.baseurl }}
