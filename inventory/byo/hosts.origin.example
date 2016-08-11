@@ -343,7 +343,6 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #osm_cluster_network_cidr=10.1.0.0/16
 #openshift_portal_net=172.30.0.0/16
 
-
 # Configure number of bits to allocate to each host’s subnet e.g. 8
 # would mean a /24 network on the host.
 #osm_host_subnet_length=8
@@ -355,7 +354,21 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # set RPM version for debugging purposes
 #openshift_pkg_version=-1.1
 
-# Configure custom named certificates
+# Configure custom ca certificate
+#openshift_master_ca_certificate={'certfile': '/path/to/ca.crt', 'keyfile': '/path/to/ca.key'}
+#
+# NOTE: CA certificate will not be replaced with existing clusters.
+# This option may only be specified when creating a new cluster or
+# when redeploying cluster certificates with the redeploy-certificates
+# playbook. If replacing the CA certificate in an existing cluster
+# with a custom ca certificate, the following variable must also be
+# set.
+#openshift_certificates_redeploy_ca=true
+
+# Configure custom named certificates (SNI certificates)
+#
+# https://docs.openshift.org/latest/install_config/certificate_customization.html
+#
 # NOTE: openshift_master_named_certificates is cached on masters and is an
 # additive fact, meaning that each run with a different set of certificates
 # will add the newly provided certificates to the cached set of certificates.

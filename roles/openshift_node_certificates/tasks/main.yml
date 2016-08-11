@@ -25,11 +25,14 @@
   - server.key
   - server.crt
   register: g_node_cert_stat_result
+  when: not openshift_certificates_redeploy | default(false) | bool
 
 - set_fact:
-    node_certs_missing: "{{ False in (g_node_cert_stat_result.results
-                            | oo_collect(attribute='stat.exists')
-                            | list) }}"
+    node_certs_missing: "{{ true if openshift_certificates_redeploy | default(false) | bool
+                            else (False in (g_node_cert_stat_result.results
+                                            | default({})
+                                            | oo_collect(attribute='stat.exists')
+                                            | list)) }}"
 
 - name: Create openshift_generated_configs_dir if it does not exist
   file:
