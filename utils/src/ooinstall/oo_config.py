@@ -165,6 +165,7 @@ class OOConfig(object):
         self._set_defaults()
 
 
+# pylint: disable=too-many-branches
     def _read_config(self):
         try:
             if os.path.exists(self.config_path):
@@ -175,6 +176,10 @@ class OOConfig(object):
                 # a legacy config file:
                 if 'Description' in self.settings:
                     self._upgrade_legacy_config()
+
+
+                if loaded_config.get('version', '') == 'v1':
+                    loaded_config = self._upgrade_v1_config(loaded_config)
 
                 try:
                     host_list = loaded_config['deployment']['hosts']
@@ -236,9 +241,36 @@ class OOConfig(object):
         self.settings['variant'] = 'openshift-enterprise'
         self.settings['variant_version'] = '3.0'
 
-    def _upgrade_v1_config(self):
-        #TODO write code to upgrade old config
-        return
+    def _upgrade_v1_config(self, config):
+        new_config_data = {}
+        new_config_data['deployment'] = {}
+        new_config_data['deployment']['hosts'] = []
+        new_config_data['deployment']['roles'] = {}
+        new_config_data['deployment']['variables'] = {}
+
+        role_list = {}
+
+        if config.get('ansible_ssh_user', False):
+            new_config_data['deployment']['ansible_ssh_user'] = config['ansible_ssh_user']
+
+        for host in config['hosts']:
+            host_props = {}
+            host_props['roles'] = []
+            host_props['connect_to'] = host['connect_to']
+
+            for prop in ['ip', 'public_ip', 'hostname', 'public_hostname', 'containerized', 'preconfigured']:
+                host_props[prop] = host.get(prop, None)
+
+            for role in ['master', 'node', 'master_lb', 'storage', 'etcd']:
+                if host.get(role, False):
+                    host_props['roles'].append(role)
+                    role_list[role] = ''
+
+            new_config_data['deployment']['hosts'].append(host_props)
+
+        new_config_data['deployment']['roles'] = role_list
+
+        return new_config_data
 
     def _set_defaults(self):
 

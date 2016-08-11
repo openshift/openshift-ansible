@@ -12,6 +12,7 @@ SAMPLE_CONFIG = """
 variant: %s
 variant_version: 3.3
 master_routingconfig_subdomain: example.com
+version: v2
 deployment:
     ansible_ssh_user: root
     hosts:

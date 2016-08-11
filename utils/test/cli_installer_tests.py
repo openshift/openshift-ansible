@@ -101,6 +101,7 @@ MOCK_FACTS_QUICKHA = {
 # Missing connect_to on some hosts:
 BAD_CONFIG = """
 variant: %s
+version: v2
 deployment:
     ansible_ssh_user: root
     hosts:
