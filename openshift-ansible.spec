@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.20
+Version:        3.2.21
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,20 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Aug 11 2016 Scott Dodson <sdodson@redhat.com> 3.2.21-1
+- Support for redeploying certificates. (abutcher@redhat.com)
+- qps typo (deads@redhat.com)
+- a-o-i: Automatically Label Nodes as Infra (smunilla@redhat.com)
+- Improvements for Docker 1.10+ upgrade image nuking. (dgoodwin@redhat.com)
+- a-o-i: Restrict installed host check (smunilla@redhat.com)
+- Automatic commit of package [openshift-ansible] release [3.3.9-1].
+  (tdawson@redhat.com)
+- Shutdown Docker before upgrading the rpm. (dgoodwin@redhat.com)
+- Restrict the middleware stanza contains 'registry' and 'storage' at least on
+  3.3 (ghuang@redhat.com)
+- docker-registry's middleware stanza should contain 'registry' and 'storage'
+  by default (ghuang@redhat.com)
+
 * Tue Aug 09 2016 Scott Dodson <sdodson@redhat.com> 3.2.20-1
 - Enable 'NoVolumeZoneConflict' policy for scheduler (abutcher@redhat.com)
 - a-o-i: Update nosetests for ansible_ssh_user (smunilla@redhat.com)
