@@ -613,6 +613,7 @@ https://docs.openshift.com/enterprise/latest/admin_guide/install/prerequisites.h
 
     if not oo_cfg.deployment.hosts:
         oo_cfg.deployment.hosts, roles = collect_hosts(oo_cfg)
+        set_infra_nodes(oo_cfg.deployment.hosts)
 
         for role in roles:
             oo_cfg.deployment.roles[role] = Role(name=role, variables={})
@@ -756,6 +757,16 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force, verbose):
                     pass # proceeding as normal should do a clean install
 
     return hosts_to_run_on, callback_facts
+
+def set_infra_nodes(hosts):
+    if all(host.is_master() for host in hosts):
+        infra_list = hosts
+    else:
+        nodes_list = [host for host in hosts if host.is_node()]
+        infra_list = nodes_list[:2]
+
+    for host in infra_list:
+        host.node_labels = "{'region': 'infra'}"
 
 
 @click.group()
