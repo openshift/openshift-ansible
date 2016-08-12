@@ -683,7 +683,7 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force, verbose):
     hosts_to_run_on = list(oo_cfg.deployment.hosts)
 
     # Check if master or nodes already have something installed
-    installed_hosts, uninstalled_hosts= get_installed_hosts(oo_cfg.deployment.hosts, callback_facts)
+    installed_hosts, uninstalled_hosts = get_installed_hosts(oo_cfg.deployment.hosts, callback_facts)
     if len(installed_hosts) > 0:
         click.echo('Installed environment detected.')
         # This check has to happen before we start removing hosts later in this method
