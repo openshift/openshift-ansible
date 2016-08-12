@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.21
+Version:        3.2.22
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Aug 11 2016 Scott Dodson <sdodson@redhat.com> 3.2.22-1
+- Reference tmpdir from first master hostvars when evacuating nodes.
+  (abutcher@redhat.com)
+
 * Thu Aug 11 2016 Scott Dodson <sdodson@redhat.com> 3.2.21-1
 - Support for redeploying certificates. (abutcher@redhat.com)
 - qps typo (deads@redhat.com)
