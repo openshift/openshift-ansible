@@ -1,5 +1,3 @@
-# TODO: Temporarily disabled due to importing old code into openshift-ansible
-# repo. We will work on these over time.
 # pylint: disable=bad-continuation,missing-docstring,no-self-use,invalid-name,no-value-for-parameter,too-many-lines
 
 import os
@@ -884,7 +882,6 @@ def uninstall(ctx):
 #pylint: disable=bad-builtin,too-many-statements
 def upgrade(ctx, latest_minor, next_major):
     oo_cfg = ctx.obj['oo_cfg']
-    verbose = ctx.obj['verbose']
 
     if len(oo_cfg.deployment.hosts) == 0:
         click.echo("No hosts defined in: %s" % oo_cfg.config_path)
@@ -955,7 +952,9 @@ def upgrade(ctx, latest_minor, next_major):
             click.echo("Upgrade cancelled.")
             sys.exit(0)
 
-    retcode = openshift_ansible.run_upgrade_playbook(playbook, verbose)
+    retcode = openshift_ansible.run_upgrade_playbook(oo_cfg.deployment.hosts,
+                                                     playbook,
+                                                     ctx.obj['verbose'])
     if retcode > 0:
         click.echo("Errors encountered during upgrade, please check %s." %
             oo_cfg.settings['ansible_log_path'])
