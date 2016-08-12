@@ -1,4 +1,8 @@
 ---
+- name: Install etcd
+  action: "{{ ansible_pkg_mgr }} name=etcd state=present"
+  when: not etcd_is_containerized | bool
+
 - name: Check status of etcd certificates
   stat:
     path: "{{ etcd_cert_config_dir }}/{{ item }}"
