@@ -20,3 +20,9 @@ write_files:
   content: |
     Defaults:{{ deployment_vars[deployment_type].ssh_user }} !requiretty
 {% endif %}
+{% if type in ['node'] and sub_host_type in ['infra'] and openshift_persist_registry is defined and openshift_persist_registry | bool %}
+runcmd:
+  - mkdir -p /mnt/registry
+  - chown 1001:root /mnt/registry
+{% endif %}
+
