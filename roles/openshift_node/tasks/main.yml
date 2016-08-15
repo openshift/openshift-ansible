@@ -41,11 +41,15 @@
 - name: Pull node image
   command: >
     docker pull {{ openshift.node.node_image }}:{{ openshift_image_tag }}
+  register: pull_result
+  changed_when: "'Downloaded newer image' in pull_result.stdout"
   when: openshift.common.is_containerized | bool
 
 - name: Pull OpenVSwitch image
   command: >
     docker pull {{ openshift.node.ovs_image }}:{{ openshift_image_tag }}
+  register: pull_result
+  changed_when: "'Downloaded newer image' in pull_result.stdout"
   when: openshift.common.is_containerized | bool and openshift.common.use_openshift_sdn | bool
 
 - name: Install the systemd units
@@ -102,8 +106,20 @@
   notify:
   - restart node
 
-- name: Additional storage plugin configuration
-  include: storage_plugins/main.yml
+- name: NFS storage plugin configuration
+  include: storage_plugins/nfs.yml
+
+- name: GlusterFS storage plugin configuration
+  include: storage_plugins/glusterfs.yml
+  when: "'glusterfs' in openshift.node.storage_plugin_deps"
+
+- name: Ceph storage plugin configuration
+  include: storage_plugins/ceph.yml
+  when: "'ceph' in openshift.node.storage_plugin_deps"
+
+- name: iSCSI storage plugin configuration
+  include: storage_plugins/iscsi.yml
+  when: "'iscsi' in openshift.node.storage_plugin_deps"
 
 # Necessary because when you're on a node that's also a master the master will be
 # restarted after the node restarts docker and it will take up to 60 seconds for
@@ -129,12 +145,12 @@
   service: name={{ openshift.common.service_type }}-node enabled=yes state=started
   register: node_start_result
   ignore_errors: yes
-  
+
 - name: Wait 30 seconds for docker initialization whenever node has failed
   pause:
     seconds: 30
   when: node_start_result | failed
-  
+
 - name: Start and enable node again
   service: name={{ openshift.common.service_type }}-node enabled=yes state=started
   register: node_start_result

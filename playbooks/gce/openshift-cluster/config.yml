@@ -9,7 +9,7 @@
       groups: l_oo_all_hosts
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_become: "{{ deployment_vars[deployment_type].become }}"
-    with_items: g_all_hosts
+    with_items: "{{ g_all_hosts | default([]) }}"
 
 - hosts: l_oo_all_hosts
   gather_facts: no

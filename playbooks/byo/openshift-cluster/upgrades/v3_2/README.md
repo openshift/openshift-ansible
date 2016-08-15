@@ -1,10 +1,12 @@
-# v3.1 to v3.2 upgrade playbook
+# v3.2 Major and Minor Upgrade Playbook
 
 ## Overview
 This playbook currently performs the
 following steps.
 
  * Upgrade and restart master services
+ * Unschedule node.
+ * Upgrade and restart docker
  * Upgrade and restart node services
  * Modifies the subset of the configuration necessary
  * Applies the latest cluster policies
@@ -13,4 +15,4 @@ following steps.
  * Updates image streams and quickstarts
 
 ## Usage
-ansible-playbook -i ~/ansible-inventory openshift-ansible/playbooks/byo/openshift-cluster/upgrades/v3_1_to_v3_2/upgrade.yml
+ansible-playbook -i ~/ansible-inventory openshift-ansible/playbooks/byo/openshift-cluster/upgrades/v3_2/upgrade.yml

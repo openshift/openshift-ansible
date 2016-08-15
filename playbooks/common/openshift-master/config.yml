@@ -1,5 +1,5 @@
 ---
-- name: Set master facts and determine if external etcd certs need to be generated
+- name: Set master facts
   hosts: oo_masters_to_config
   vars:
     t_oo_option_master_debug_level: "{{ lookup('oo_option', 'openshift_master_debug_level') }}"
@@ -73,23 +73,6 @@
       openshift_env:
         openshift_hosted_registry_storage_kind: 'nfs'
     when: openshift_hosted_registry_storage_kind is not defined and groups.oo_nfs_to_config is defined and groups.oo_nfs_to_config | length > 0
-  - name: Check status of external etcd certificatees
-    stat:
-      path: "{{ openshift.common.config_base }}/master/{{ item }}"
-    with_items:
-    - master.etcd-client.crt
-    - master.etcd-ca.crt
-    register: g_external_etcd_cert_stat_result
-  - set_fact:
-      etcd_client_certs_missing: "{{ g_external_etcd_cert_stat_result.results
-                                    | oo_collect(attribute='stat.exists')
-                                    | list | intersect([false])}}"
-      etcd_cert_subdir: openshift-master-{{ openshift.common.hostname }}
-      etcd_cert_config_dir: "{{ openshift.common.config_base }}/master"
-      etcd_cert_prefix: master.etcd-
-      etcd_hostname: "{{ openshift.common.hostname }}"
-      etcd_ip: "{{ openshift.common.ip }}"
-    when: groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config
 
 - name: Create temp directory for syncing certs
   hosts: localhost
@@ -101,133 +84,6 @@
     local_action: command mktemp -d /tmp/openshift-ansible-XXXXXXX
     register: g_master_mktemp
     changed_when: False
-
-- name: Configure etcd certificates
-  hosts: oo_first_etcd
-  vars:
-    etcd_generated_certs_dir: /etc/etcd/generated_certs
-    etcd_needing_client_certs: "{{ hostvars
-                                   | oo_select_keys(groups['oo_masters_to_config'])
-                                   | default([])
-                                   | oo_filter_list(filter_attr='etcd_client_certs_missing') }}"
-    sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
-  roles:
-  - openshift_etcd_certificates
-  post_tasks:
-  - name: Create a tarball of the etcd certs
-    command: >
-      tar -czvf {{ etcd_generated_certs_dir }}/{{ item.etcd_cert_subdir }}.tgz
-        -C {{ etcd_generated_certs_dir }}/{{ item.etcd_cert_subdir }} .
-    args:
-      creates: "{{ etcd_generated_certs_dir }}/{{ item.etcd_cert_subdir }}.tgz"
-    with_items: "{{ etcd_needing_client_certs | default([]) }}"
-  - name: Retrieve the etcd cert tarballs
-    fetch:
-      src: "{{ etcd_generated_certs_dir }}/{{ item.etcd_cert_subdir }}.tgz"
-      dest: "{{ sync_tmpdir }}/"
-      flat: yes
-      fail_on_missing: yes
-      validate_checksum: yes
-    with_items: "{{ etcd_needing_client_certs | default([]) }}"
-
-- name: Copy the external etcd certs to the masters
-  hosts: oo_masters_to_config
-  vars:
-    sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
-  tasks:
-  - name: Ensure certificate directory exists
-    file:
-      path: "{{ openshift.common.config_base }}/master"
-      state: directory
-    when: etcd_client_certs_missing is defined and etcd_client_certs_missing
-  - name: Unarchive the tarball on the master
-    unarchive:
-      src: "{{ sync_tmpdir }}/{{ etcd_cert_subdir }}.tgz"
-      dest: "{{ etcd_cert_config_dir }}"
-    when: etcd_client_certs_missing is defined and etcd_client_certs_missing
-  - file:
-      path: "{{ etcd_cert_config_dir }}/{{ item }}"
-      owner: root
-      group: root
-      mode: 0600
-    with_items:
-    - master.etcd-client.crt
-    - master.etcd-client.key
-    - master.etcd-ca.crt
-    when: etcd_client_certs_missing is defined and etcd_client_certs_missing
-
-- name: Determine if master certificates need to be generated
-  hosts: oo_first_master:oo_masters_to_config
-  tasks:
-  - set_fact:
-      openshift_master_certs_no_etcd:
-      - admin.crt
-      - master.kubelet-client.crt
-      - "{{ 'master.proxy-client.crt' if openshift.common.version_gte_3_1_or_1_1 else omit }}"
-      - master.server.crt
-      - openshift-master.crt
-      - openshift-registry.crt
-      - openshift-router.crt
-      - etcd.server.crt
-      openshift_master_certs_etcd:
-      - master.etcd-client.crt
-
-  - set_fact:
-      openshift_master_certs: "{{ (openshift_master_certs_no_etcd | union(openshift_master_certs_etcd)) if (groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config) else openshift_master_certs_no_etcd }}"
-
-  - name: Check status of master certificates
-    stat:
-      path: "{{ openshift.common.config_base }}/master/{{ item }}"
-    with_items: "{{ openshift_master_certs }}"
-    register: g_master_cert_stat_result
-  - set_fact:
-      master_certs_missing: "{{ False in (g_master_cert_stat_result.results
-                                | oo_collect(attribute='stat.exists')
-                                | list ) }}"
-      master_cert_subdir: master-{{ openshift.common.hostname }}
-      master_cert_config_dir: "{{ openshift.common.config_base }}/master"
-
-- name: Configure master certificates
-  hosts: oo_first_master
-  vars:
-    master_generated_certs_dir: "{{ openshift.common.config_base }}/generated-configs"
-    masters_needing_certs: "{{ hostvars
-                               | oo_select_keys(groups['oo_masters_to_config'] | difference(groups['oo_first_master']))
-                               | oo_filter_list(filter_attr='master_certs_missing') }}"
-    master_hostnames: "{{ hostvars
-                               | oo_select_keys(groups['oo_masters_to_config'])
-                               | oo_collect('openshift.common.all_hostnames')
-                               | oo_flatten | unique }}"
-    sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
-  roles:
-  - openshift_master_certificates
-  post_tasks:
-  - name: Remove generated etcd client certs when using external etcd
-    file:
-      path: "{{ master_generated_certs_dir }}/{{ item.0.master_cert_subdir }}/{{ item.1 }}"
-      state: absent
-    when: groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config
-    with_nested:
-    - "{{ masters_needing_certs | default([]) }}"
-    - - master.etcd-client.crt
-      - master.etcd-client.key
-
-  - name: Create a tarball of the master certs
-    command: >
-      tar -czvf {{ master_generated_certs_dir }}/{{ item.master_cert_subdir }}.tgz
-        -C {{ master_generated_certs_dir }}/{{ item.master_cert_subdir }} .
-    args:
-      creates: "{{ master_generated_certs_dir }}/{{ item.master_cert_subdir }}.tgz"
-    with_items: "{{ masters_needing_certs | default([]) }}"
-
-  - name: Retrieve the master cert tarball from the master
-    fetch:
-      src: "{{ master_generated_certs_dir }}/{{ item.master_cert_subdir }}.tgz"
-      dest: "{{ sync_tmpdir }}/"
-      flat: yes
-      fail_on_missing: yes
-      validate_checksum: yes
-    with_items: "{{ masters_needing_certs | default([]) }}"
 
 - name: Check for cached session secrets
   hosts: oo_first_master
@@ -243,7 +99,7 @@
 - name: Generate master session secrets
   hosts: oo_first_master
   vars:
-    g_session_secrets_present: "{{ (openshift.master.session_auth_secrets | default([]) and openshift.master.session_encryption_secrets | default([])) | length > 0 }}"
+    g_session_secrets_present: "{{ (openshift.master.session_auth_secrets | default([])) | length > 0 and (openshift.master.session_encryption_secrets | default([])) | length > 0 }}"
     g_session_auth_secrets: "{{ [ 24 | oo_generate_secret ] }}"
     g_session_encryption_secrets: "{{ [ 24 | oo_generate_secret ] }}"
   roles:
@@ -256,58 +112,9 @@
         session_encryption_secrets: "{{ g_session_encryption_secrets }}"
     when: not g_session_secrets_present | bool
 
-- name: Parse named certificates
-  hosts: localhost
-  connection: local
-  become: no
-  vars:
-    internal_hostnames: "{{ hostvars[groups.oo_first_master.0].openshift.common.internal_hostnames }}"
-    named_certificates: "{{ hostvars[groups.oo_first_master.0].openshift_master_named_certificates | default([]) }}"
-    named_certificates_dir: "{{ hostvars[groups.oo_first_master.0].master_cert_config_dir }}/named_certificates/"
-  tasks:
-  - set_fact:
-      parsed_named_certificates: "{{ named_certificates | oo_parse_named_certificates(named_certificates_dir, internal_hostnames) }}"
-    when: named_certificates | length > 0
-
-- name: Deploy named certificates
-  hosts: oo_masters_to_config
-  vars:
-    named_certs_dir: "{{ master_cert_config_dir }}/named_certificates/"
-    named_certs_specified: "{{ openshift_master_named_certificates is defined }}"
-    overwrite_named_certs: "{{ openshift_master_overwrite_named_certificates | default(false) }}"
-  roles:
-  - role: openshift_facts
-  post_tasks:
-  - openshift_facts:
-      role: master
-      local_facts:
-        named_certificates: "{{ hostvars.localhost.parsed_named_certificates | default([]) }}"
-      additive_facts_to_overwrite:
-      - "{{ 'master.named_certificates' if overwrite_named_certs | bool else omit }}"
-  - name: Clear named certificates
-    file:
-      path: "{{ named_certs_dir }}"
-      state: absent
-    when: overwrite_named_certs | bool
-  - name: Ensure named certificate directory exists
-    file:
-      path: "{{ named_certs_dir }}"
-      state: directory
-      mode: 0700
-    when: named_certs_specified | bool
-  - name: Land named certificates
-    copy: src="{{ item.certfile }}" dest="{{ named_certs_dir }}"
-    with_items: openshift_master_named_certificates
-    when: named_certs_specified | bool
-  - name: Land named certificate keys
-    copy: src="{{ item.keyfile }}" dest="{{ named_certs_dir }}" mode=0600
-    with_items: openshift_master_named_certificates
-    when: named_certs_specified | bool
-
 - name: Configure masters
   hosts: oo_masters_to_config
   any_errors_fatal: true
-  serial: 1
   vars:
     sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
     openshift_master_ha: "{{ openshift.master.ha }}"
@@ -319,21 +126,52 @@
                                                     | union(groups['oo_etcd_to_config'] | default([])))
                                                 | oo_collect('openshift.common.hostname') | default([]) | join (',')
                                                 }}"
-    when: "{{ (openshift_http_proxy is defined or openshift_https_proxy is defined) and
-            openshift_generate_no_proxy_hosts | default(True) | bool }}"
-  pre_tasks:
-  - name: Ensure certificate directory exists
-    file:
-      path: "{{ openshift.common.config_base }}/master"
-      state: directory
-    when: master_certs_missing | bool and 'oo_first_master' not in group_names
-  - name: Unarchive the tarball on the master
-    unarchive:
-      src: "{{ sync_tmpdir }}/{{ master_cert_subdir }}.tgz"
-      dest: "{{ master_cert_config_dir }}"
-    when: master_certs_missing | bool and 'oo_first_master' not in group_names
   roles:
-  - openshift_master
+  - role: openshift_master_facts
+  - role: openshift_hosted_facts
+  - role: openshift_master_certificates
+    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
+    openshift_master_etcd_hosts: "{{ hostvars
+                                     | oo_select_keys(groups['oo_etcd_to_config'] | default([]))
+                                     | oo_collect('openshift.common.hostname')
+                                     | default(none, true) }}"
+    openshift_master_hostnames: "{{ hostvars
+                                    | oo_select_keys(groups['oo_masters_to_config'] | default([]))
+                                    | oo_collect('openshift.common.all_hostnames')
+                                    | oo_flatten | unique }}"
+  - role: openshift_etcd_client_certificates
+    etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
+    etcd_cert_subdir: "openshift-master-{{ openshift.common.hostname }}"
+    etcd_cert_config_dir: "{{ openshift.common.config_base }}/master"
+    etcd_cert_prefix: "master.etcd-"
+    when: groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config
+  - role: openshift_clock
+  - role: openshift_cloud_provider
+  - role: openshift_builddefaults
+  - role: os_firewall
+    os_firewall_allow:
+    - service: etcd embedded
+      port: 4001/tcp
+    - service: api server https
+      port: "{{ openshift.master.api_port }}/tcp"
+    - service: api controllers https
+      port: "{{ openshift.master.controllers_port }}/tcp"
+    - service: skydns tcp
+      port: "{{ openshift.master.dns_port }}/tcp"
+    - service: skydns udp
+      port: "{{ openshift.master.dns_port }}/udp"
+    - service: Fluentd td-agent tcp
+      port: 24224/tcp
+    - service: Fluentd td-agent udp
+      port: 24224/udp
+    - service: pcsd
+      port: 2224/tcp
+    - service: Corosync UDP
+      port: 5404/udp
+    - service: Corosync UDP
+      port: 5405/udp
+  - role: openshift_master
+    openshift_master_hosts: "{{ groups.oo_masters_to_config }}"
   - role: nickhammond.logrotate
   - role: nuage_master
     when: openshift.common.use_nuage | bool

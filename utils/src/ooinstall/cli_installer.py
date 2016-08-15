@@ -16,6 +16,21 @@ from ooinstall.variants import find_variant, get_variant_version_combos
 DEFAULT_ANSIBLE_CONFIG = '/usr/share/atomic-openshift-utils/ansible.cfg'
 DEFAULT_PLAYBOOK_DIR = '/usr/share/ansible/openshift-ansible/'
 
+UPGRADE_MAPPINGS = {
+                    '3.0':{
+                           'minor_version' :'3.0',
+                           'minor_playbook':'v3_0_minor/upgrade.yml',
+                           'major_version' :'3.1',
+                           'major_playbook':'v3_0_to_v3_1/upgrade.yml',
+                          },
+                    '3.1':{
+                           'minor_version' :'3.1',
+                           'minor_playbook':'v3_1_minor/upgrade.yml',
+                           'major_playbook':'v3_1_to_v3_2/upgrade.yml',
+                           'major_version' :'3.2',
+                        }
+                   }
+
 def validate_ansible_dir(path):
     if not path:
         raise click.BadParameter('An ansible path must be provided')
@@ -490,7 +505,7 @@ def error_if_missing_info(oo_cfg):
                    'command line or in the config file: %s' % oo_cfg.config_path)
         sys.exit(1)
 
-    if 'ansible_ssh_user' not in oo_cfg.settings:
+    if 'ansible_ssh_user' not in oo_cfg.deployment.variables:
         click.echo("Must specify ansible_ssh_user in configuration file.")
         sys.exit(1)
 
@@ -586,7 +601,8 @@ https://docs.openshift.com/enterprise/latest/admin_guide/install/prerequisites.h
     click.clear()
 
     if not oo_cfg.settings.get('ansible_ssh_user', ''):
-        oo_cfg.settings['ansible_ssh_user'] = get_ansible_ssh_user()
+        oo_cfg.deployment.variables['ansible_ssh_user'] = \
+                                                            get_ansible_ssh_user()
         click.clear()
 
     if not oo_cfg.settings.get('variant', ''):
@@ -597,6 +613,7 @@ https://docs.openshift.com/enterprise/latest/admin_guide/install/prerequisites.h
 
     if not oo_cfg.deployment.hosts:
         oo_cfg.deployment.hosts, roles = collect_hosts(oo_cfg)
+        set_infra_nodes(oo_cfg.deployment.hosts)
 
         for role in roles:
             oo_cfg.deployment.roles[role] = Role(name=role, variables={})
@@ -642,22 +659,14 @@ Add new nodes here
 
 def get_installed_hosts(hosts, callback_facts):
     installed_hosts = []
-
-    # count nativeha lb as an installed host
-    try:
-        first_master = next(host for host in hosts if host.is_master())
-        lb_hostname = callback_facts[first_master.connect_to]['master'].get('cluster_hostname', '')
-        lb_host = \
-            next(host for host in hosts if host.ip == callback_facts[lb_hostname]['common']['ip'])
-
-        installed_hosts.append(lb_host)
-    except (KeyError, StopIteration):
-        pass
-
-    for host in hosts:
-        if host.connect_to in callback_facts.keys() and is_installed_host(host, callback_facts):
-            installed_hosts.append(host)
-    return installed_hosts
+    uninstalled_hosts = []
+    for host in [h for h in hosts if h.is_master() or h.is_node()]:
+        if host.connect_to in callback_facts.keys():
+            if is_installed_host(host, callback_facts):
+                installed_hosts.append(host)
+            else:
+                uninstalled_hosts.append(host)
+    return installed_hosts, uninstalled_hosts
 
 def is_installed_host(host, callback_facts):
     version_found = 'common' in callback_facts[host.connect_to].keys() and \
@@ -674,7 +683,7 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force, verbose):
     hosts_to_run_on = list(oo_cfg.deployment.hosts)
 
     # Check if master or nodes already have something installed
-    installed_hosts = get_installed_hosts(oo_cfg.deployment.hosts, callback_facts)
+    installed_hosts, uninstalled_hosts = get_installed_hosts(oo_cfg.deployment.hosts, callback_facts)
     if len(installed_hosts) > 0:
         click.echo('Installed environment detected.')
         # This check has to happen before we start removing hosts later in this method
@@ -708,13 +717,15 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force, verbose):
                     hosts_to_run_on.remove(host)
 
         # Handle the cases where we know about uninstalled systems
-        new_hosts = set(hosts_to_run_on) - set(installed_hosts)
-        if len(new_hosts) > 0:
-            for new_host in new_hosts:
-                click.echo("{} is currently uninstalled".format(new_host))
-
+        if len(uninstalled_hosts) > 0:
+            for uninstalled_host in uninstalled_hosts:
+                click.echo("{} is currently uninstalled".format(uninstalled_host))
             # Fall through
-            click.echo('Adding additional nodes...')
+            click.echo('\nUninstalled hosts have been detected in your environment. ' \
+                       'Please make sure your environment was installed successfully ' \
+                       'before adding new nodes. If you want a fresh install, use ' \
+                       '`atomic-openshift-installer install --force`')
+            sys.exit(1)
         else:
             if unattended:
                 if not force:
@@ -740,6 +751,16 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force, verbose):
                     pass # proceeding as normal should do a clean install
 
     return hosts_to_run_on, callback_facts
+
+def set_infra_nodes(hosts):
+    if all(host.is_master() for host in hosts):
+        infra_list = hosts
+    else:
+        nodes_list = [host for host in hosts if host.is_node()]
+        infra_list = nodes_list[:2]
+
+    for host in infra_list:
+        host.node_labels = "{'region': 'infra'}"
 
 
 @click.group()
@@ -774,6 +795,7 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force, verbose):
     default="/tmp/ansible.log")
 @click.option('-v', '--verbose',
     is_flag=True, default=False)
+@click.help_option('--help', '-h')
 #pylint: disable=too-many-arguments
 #pylint: disable=line-too-long
 # Main CLI entrypoint, not much we can do about too many arguments.
@@ -856,22 +878,6 @@ def uninstall(ctx):
 #pylint: disable=bad-builtin,too-many-statements
 def upgrade(ctx, latest_minor, next_major):
     oo_cfg = ctx.obj['oo_cfg']
-    verbose = ctx.obj['verbose']
-
-    # major/minor fields are optional, as we don't always support minor/major
-    # upgrade for what you're currently running.
-    upgrade_mappings = {
-                        '3.1':{
-                               'major_playbook':'v3_2/upgrade.yml',
-                               'major_version' :'3.2',
-                            },
-                        '3.2':{
-                               'minor_playbook':'v3_2/upgrade.yml',
-# Uncomment these when we're ready to support 3.3.
-#                               'major_version' :'3.3',
-#                               'major_playbook':'v3_1_to_v3_2/upgrade.yml',
-                            },
-                       }
 
     if len(oo_cfg.deployment.hosts) == 0:
         click.echo("No hosts defined in: %s" % oo_cfg.config_path)
@@ -883,7 +889,7 @@ def upgrade(ctx, latest_minor, next_major):
         sys.exit(0)
 
     old_version = oo_cfg.settings['variant_version']
-    mapping = upgrade_mappings.get(old_version)
+    mapping = UPGRADE_MAPPINGS.get(old_version)
 
     message = """
         This tool will help you upgrade your existing OpenShift installation.
@@ -938,12 +944,13 @@ def upgrade(ctx, latest_minor, next_major):
 
     if not ctx.obj['unattended']:
         # Prompt interactively to confirm:
-        proceed = click.confirm("\nDo you wish to proceed?")
-        if not proceed:
+        if not click.confirm("\nDo you wish to proceed?"):
             click.echo("Upgrade cancelled.")
             sys.exit(0)
 
-    retcode = openshift_ansible.run_upgrade_playbook(playbook, verbose)
+    retcode = openshift_ansible.run_upgrade_playbook(oo_cfg.deployment.hosts,
+                                                     playbook,
+                                                     ctx.obj['verbose'])
     if retcode > 0:
         click.echo("Errors encountered during upgrade, please check %s." %
             oo_cfg.settings['ansible_log_path'])

@@ -1,0 +1,10 @@
+---
+- hosts: localhost
+  connection: local
+  become: no
+  gather_facts: no
+  tasks:
+  - name: Verify Ansible version is greater than or equal to 2.1.0.0
+    fail:
+      msg: "Unsupported ansible version: {{ ansible_version.full }} found"
+    when: not ansible_version.full | version_compare('2.1.0.0', 'ge')

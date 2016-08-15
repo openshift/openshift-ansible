@@ -1,0 +1,67 @@
+---
+- include: ../../../../common/openshift-cluster/verify_ansible_version.yml
+
+- hosts: localhost
+  connection: local
+  become: no
+  gather_facts: no
+  tasks:
+  - include_vars: ../../../../byo/openshift-cluster/cluster_hosts.yml
+  - add_host:
+      name: "{{ item }}"
+      groups: l_oo_all_hosts
+    with_items: g_all_hosts | default([])
+
+- hosts: l_oo_all_hosts
+  gather_facts: no
+  tasks:
+  - include_vars: ../../../../byo/openshift-cluster/cluster_hosts.yml
+
+- include: ../../../../common/openshift-cluster/evaluate_groups.yml
+  vars:
+    # Do not allow adding hosts during upgrade.
+    g_new_master_hosts: []
+    g_new_node_hosts: []
+    openshift_cluster_id: "{{ cluster_id | default('default') }}"
+    openshift_deployment_type: "{{ deployment_type }}"
+
+- name: Set oo_options
+  hosts: oo_all_hosts
+  tasks:
+  - set_fact:
+      openshift_docker_additional_registries: "{{ lookup('oo_option', 'docker_additional_registries') }}"
+    when: openshift_docker_additional_registries is not defined
+  - set_fact:
+      openshift_docker_insecure_registries: "{{ lookup('oo_option',  'docker_insecure_registries') }}"
+    when: openshift_docker_insecure_registries is not defined
+  - set_fact:
+      openshift_docker_blocked_registries: "{{ lookup('oo_option', 'docker_blocked_registries') }}"
+    when: openshift_docker_blocked_registries is not defined
+  - set_fact:
+      openshift_docker_options: "{{ lookup('oo_option', 'docker_options') }}"
+    when: openshift_docker_options is not defined
+  - set_fact:
+      openshift_docker_log_driver: "{{ lookup('oo_option', 'docker_log_driver') }}"
+    when: openshift_docker_log_driver is not defined
+  - set_fact:
+      openshift_docker_log_options: "{{ lookup('oo_option', 'docker_log_options') }}"
+    when: openshift_docker_log_options is not defined
+
+
+# Configure the upgrade target for the common upgrade tasks:
+- hosts: l_oo_all_hosts
+  tasks:
+  - set_fact:
+      openshift_upgrade_target: "{{ '1.3' if deployment_type == 'origin' else '3.3' }}"
+      openshift_upgrade_min: "{{ '1.2' if deployment_type == 'origin' else '3.2' }}"
+
+- include: ../../../../common/openshift-cluster/upgrades/pre.yml
+  vars:
+    openshift_deployment_type: "{{ deployment_type }}"
+- include: ../../../../common/openshift-cluster/upgrades/upgrade.yml
+  vars:
+    openshift_deployment_type: "{{ deployment_type }}"
+    master_config_hook: "v3_3/master_config_upgrade.yml"
+    node_config_hook: "v3_3/node_config_upgrade.yml"
+- include: ../../../openshift-master/restart.yml
+- include: ../../../../common/openshift-cluster/upgrades/post.yml

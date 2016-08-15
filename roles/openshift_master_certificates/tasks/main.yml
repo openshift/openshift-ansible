@@ -1,38 +1,166 @@
 ---
+- set_fact:
+    openshift_master_certs_no_etcd:
+    - admin.crt
+    - master.kubelet-client.crt
+    - "{{ 'master.proxy-client.crt' if openshift.common.version_gte_3_1_or_1_1 else omit }}"
+    - master.server.crt
+    - openshift-master.crt
+    - openshift-registry.crt
+    - openshift-router.crt
+    - etcd.server.crt
+    openshift_master_certs_etcd:
+    - master.etcd-client.crt
+
+- set_fact:
+    openshift_master_certs: "{{ (openshift_master_certs_no_etcd | union(openshift_master_certs_etcd )) if openshift_master_etcd_hosts | length > 0 else openshift_master_certs_no_etcd }}"
+
+- name: Check status of master certificates
+  stat:
+    path: "{{ openshift_master_config_dir }}/{{ item }}"
+  with_items:
+  - "{{ openshift_master_certs }}"
+  register: g_master_cert_stat_result
+  when: not openshift_certificates_redeploy | default(false) | bool
+
+- set_fact:
+    master_certs_missing: "{{ true if openshift_certificates_redeploy | default(false) | bool
+                              else (False in (g_master_cert_stat_result.results
+                                              | default({})
+                                              | oo_collect(attribute='stat.exists')
+                                              | list)) }}"
+
+
 - name: Ensure the generated_configs directory present
   file:
-    path: "{{ openshift_generated_configs_dir }}/{{ item.master_cert_subdir }}"
+    path: "{{ openshift_master_generated_config_dir }}"
     state: directory
     mode: 0700
-  with_items: "{{ masters_needing_certs | default([]) }}"
+  when: master_certs_missing | bool and inventory_hostname != openshift_ca_host
+  delegate_to: "{{ openshift_ca_host }}"
 
 - file:
-    src: "{{ openshift_master_config_dir }}/{{ item.1 }}"
-    dest: "{{ openshift_generated_configs_dir }}/{{ item.0.master_cert_subdir }}/{{ item.1 }}"
+    src: "{{ openshift_master_config_dir }}/{{ item }}"
+    dest: "{{ openshift_master_generated_config_dir }}/{{ item }}"
     state: hard
-  with_nested:
-  - "{{ masters_needing_certs | default([]) }}"
-  -
-    - ca.crt
-    - ca.key
-    - ca.serial.txt
+  with_items:
+  - ca.crt
+  - ca.key
+  - ca.serial.txt
+  when: master_certs_missing | bool and inventory_hostname != openshift_ca_host
+  delegate_to: "{{ openshift_ca_host }}"
 
 - name: Create the master certificates if they do not already exist
   command: >
     {{ openshift.common.admin_binary }} create-master-certs
-      --hostnames={{ item.openshift.common.all_hostnames | join(',') }}
-      --master={{ item.openshift.master.api_url }}
-      --public-master={{ item.openshift.master.public_api_url }}
-      --cert-dir={{ openshift_generated_configs_dir }}/{{ item.master_cert_subdir }}
-      --overwrite=false
-  when: item.master_certs_missing | bool
-  with_items: "{{ masters_needing_certs | default([]) }}"
+    {% for named_ca_certificate in openshift.master.named_certificates | default([]) | oo_collect('cafile') %}
+    --certificate-authority {{ named_ca_certificate }}
+    {% endfor %}
+    --hostnames={{ openshift.common.all_hostnames | join(',') }}
+    --master={{ openshift.master.api_url }}
+    --public-master={{ openshift.master.public_api_url }}
+    --cert-dir={{ openshift_master_generated_config_dir }}
+    --overwrite=false
+  when: master_certs_missing | bool and inventory_hostname != openshift_ca_host
+  delegate_to: "{{ openshift_ca_host }}"
 
 - file:
-    src: "{{ openshift_master_config_dir }}/{{ item.1 }}"
-    dest: "{{ openshift_generated_configs_dir }}/{{ item.0.master_cert_subdir }}/{{ item.1 }}"
+    src: "{{ openshift_master_config_dir }}/{{ item }}"
+    dest: "{{ openshift_master_generated_config_dir }}/{{ item }}"
     state: hard
     force: true
-  with_nested:
-  - "{{ masters_needing_certs | default([]) }}"
+  with_items:
   - "{{ hostvars[inventory_hostname] | certificates_to_synchronize }}"
+  when: master_certs_missing | bool and inventory_hostname != openshift_ca_host
+  delegate_to: "{{ openshift_ca_host }}"
+
+- name: Remove generated etcd client certs when using external etcd
+  file:
+    path: "{{ openshift_master_generated_config_dir }}/{{ item }}"
+    state: absent
+  when: openshift_master_etcd_hosts | length > 0
+  with_items:
+  - master.etcd-client.crt
+  - master.etcd-client.key
+  delegate_to: "{{ openshift_ca_host }}"
+
+- name: Create local temp directory for syncing certs
+  local_action: command mktemp -d /tmp/openshift-ansible-XXXXXXX
+  register: g_master_mktemp
+  changed_when: False
+  when: master_certs_missing | bool
+  delegate_to: localhost
+  become: no
+
+- name: Create a tarball of the master certs
+  command: >
+    tar -czvf {{ openshift_master_generated_config_dir }}.tgz
+      -C {{ openshift_master_generated_config_dir }} .
+  args:
+    creates: "{{ openshift_master_generated_config_dir }}.tgz"
+  when: master_certs_missing | bool and inventory_hostname != openshift_ca_host
+  delegate_to: "{{ openshift_ca_host }}"
+
+- name: Retrieve the master cert tarball from the master
+  fetch:
+    src: "{{ openshift_master_generated_config_dir }}.tgz"
+    dest: "{{ g_master_mktemp.stdout }}/"
+    flat: yes
+    fail_on_missing: yes
+    validate_checksum: yes
+  when: master_certs_missing | bool and inventory_hostname != openshift_ca_host
+  delegate_to: "{{ openshift_ca_host }}"
+
+- name: Ensure certificate directory exists
+  file:
+    path: "{{ openshift_master_config_dir }}"
+    state: directory
+  when: master_certs_missing | bool and inventory_hostname != openshift_ca_host
+
+- name: Unarchive the tarball on the master
+  unarchive:
+    src: "{{ g_master_mktemp.stdout }}/{{ openshift_master_cert_subdir }}.tgz"
+    dest: "{{ openshift_master_config_dir }}"
+  when: master_certs_missing | bool and inventory_hostname != openshift_ca_host
+
+- file: name={{ g_master_mktemp.stdout }} state=absent
+  changed_when: False
+  when: master_certs_missing | bool
+  delegate_to: localhost
+  become: no
+
+- name: Lookup default group for ansible_ssh_user
+  command: "/usr/bin/id -g {{ ansible_ssh_user }}"
+  changed_when: false
+  register: _ansible_ssh_user_gid
+
+- set_fact:
+    client_users: "{{ [ansible_ssh_user, 'root'] | unique }}"
+
+- name: Create the client config dir(s)
+  file:
+    path: "~{{ item }}/.kube"
+    state: directory
+    mode: 0700
+    owner: "{{ item }}"
+    group: "{{ 'root' if item == 'root' else _ansible_ssh_user_gid.stdout  }}"
+  with_items: "{{ client_users }}"
+
+# TODO: Update this file if the contents of the source file are not present in
+# the dest file, will need to make sure to ignore things that could be added
+- name: Copy the admin client config(s)
+  copy:
+    src: "{{ openshift_master_config_dir }}/admin.kubeconfig"
+    dest: "~{{ item }}/.kube/config"
+    remote_src: yes
+    force: "{{ openshift_certificates_redeploy | default(false) }}"
+  with_items: "{{ client_users }}"
+
+- name: Update the permissions on the admin client config(s)
+  file:
+    path: "~{{ item }}/.kube/config"
+    state: file
+    mode: 0700
+    owner: "{{ item }}"
+    group: "{{ 'root' if item == 'root' else _ansible_ssh_user_gid.stdout  }}"
+  with_items: "{{ client_users }}"

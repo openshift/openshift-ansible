@@ -17,7 +17,12 @@
   # Using curl here since the uri module requires python-httplib2 and
   # wait_for port doesn't provide health information.
   command: >
-    curl --silent --cacert {{ openshift.common.config_base }}/master/ca.crt
+    curl --silent
+    {% if openshift.common.version_gte_3_2_or_1_2 | bool %}
+    --cacert {{ openshift.common.config_base }}/master/ca-bundle.crt
+    {% else %}
+    --cacert {{ openshift.common.config_base }}/master/ca.crt
+    {% endif %}
     {{ openshift.master.api_url }}/healthz/ready
   register: api_available_output
   until: api_available_output.stdout == 'ok'

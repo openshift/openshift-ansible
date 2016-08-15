@@ -19,6 +19,9 @@
     <apic/>
     <pae/>
   </features>
+  <cpu mode='host-model'>
+    <model fallback='allow'/>
+  </cpu>
   <clock offset='utc'>
     <timer name='rtc' tickpolicy='catchup'/>
     <timer name='pit' tickpolicy='delay'/>

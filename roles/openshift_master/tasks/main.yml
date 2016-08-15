@@ -30,6 +30,8 @@
 - name: Pull master image
   command: >
     docker pull {{ openshift.master.master_image }}:{{ openshift_image_tag }}
+  register: pull_result
+  changed_when: "'Downloaded newer image' in pull_result.stdout"
   when: openshift.common.is_containerized | bool
 
 - name: Create openshift.common.data_dir
@@ -178,7 +180,10 @@
   changed_when: false
 
 - name: Stop and disable non-HA master when running HA
-  service: name={{ openshift.common.service_type }}-master enabled=no state=stopped
+  service:
+    name: "{{ openshift.common.service_type }}-master"
+    enabled: no
+    state: stopped
   when: openshift_master_ha | bool and 'LoadState=not-found' not in master_svc_show.stdout
 
 - set_fact:
@@ -189,9 +194,24 @@
   command: systemctl mask {{ openshift.common.service_type }}-master
   when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and not openshift.common.is_containerized | bool
 
-- name: Start and enable master api
-  service: name={{ openshift.common.service_type }}-master-api enabled=yes state=started
+- name: Start and enable master api on first master
+  service:
+    name: "{{ openshift.common.service_type }}-master-api"
+    enabled: yes
+    state: started
+  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and inventory_hostname == openshift_master_hosts[0]
+  register: start_result
+
+- pause:
+    seconds: 15
   when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
+
+- name: Start and enable master api all masters
+  service:
+    name: "{{ openshift.common.service_type }}-master-api"
+    enabled: yes
+    state: started
+  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and inventory_hostname != openshift_master_hosts[0]
   register: start_result
 
 - set_fact:
@@ -204,18 +224,39 @@
   # Using curl here since the uri module requires python-httplib2 and
   # wait_for port doesn't provide health information.
   command: >
-    curl --silent --cacert {{ openshift.common.config_base }}/master/ca.crt
+    curl --silent
+    {% if openshift.common.version_gte_3_2_or_1_2 | bool %}
+    --cacert {{ openshift.common.config_base }}/master/ca-bundle.crt
+    {% else %}
+    --cacert {{ openshift.common.config_base }}/master/ca.crt
+    {% endif %}
     {{ openshift.master.api_url }}/healthz/ready
   register: api_available_output
   until: api_available_output.stdout == 'ok'
   retries: 120
   delay: 1
+  run_once: true
   changed_when: false
   when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and master_api_service_status_changed | bool
 
-- name: Start and enable master controller
-  service: name={{ openshift.common.service_type }}-master-controllers enabled=yes state=started
+- name: Start and enable master controller on first master
+  service:
+    name: "{{ openshift.common.service_type }}-master-controllers"
+    enabled: yes
+    state: started
+  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and inventory_hostname == openshift_master_hosts[0]
+  register: start_result
+
+- pause:
+    seconds: 15
   when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
+
+- name: Start and enable master controller on all masters
+  service:
+    name: "{{ openshift.common.service_type }}-master-controllers"
+    enabled: yes
+    state: started
+  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and inventory_hostname != openshift_master_hosts[0]
   register: start_result
 
 - set_fact:
@@ -236,37 +277,3 @@
 - name: Set the cluster user password
   shell: echo {{ openshift_master_cluster_password | quote }} | passwd --stdin hacluster
   when: install_result | changed
-
-- name: Lookup default group for ansible_ssh_user
-  command: "/usr/bin/id -g {{ ansible_ssh_user }}"
-  changed_when: false
-  register: _ansible_ssh_user_gid
-
-- set_fact:
-    client_users: "{{ [ansible_ssh_user, 'root'] | unique }}"
-
-- name: Create the client config dir(s)
-  file:
-    path: "~{{ item }}/.kube"
-    state: directory
-    mode: 0700
-    owner: "{{ item }}"
-    group: "{{ 'root' if item == 'root' else _ansible_ssh_user_gid.stdout  }}"
-  with_items: "{{ client_users }}"
-
-# TODO: Update this file if the contents of the source file are not present in
-# the dest file, will need to make sure to ignore things that could be added
-- name: Copy the admin client config(s)
-  command: cp {{ openshift_master_config_dir }}/admin.kubeconfig ~{{ item }}/.kube/config
-  args:
-    creates: ~{{ item }}/.kube/config
-  with_items: "{{ client_users }}"
-
-- name: Update the permissions on the admin client config(s)
-  file:
-    path: "~{{ item }}/.kube/config"
-    state: file
-    mode: 0700
-    owner: "{{ item }}"
-    group: "{{ 'root' if item == 'root' else _ansible_ssh_user_gid.stdout  }}"
-  with_items: "{{ client_users }}"

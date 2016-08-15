@@ -1,0 +1,1 @@
+../files/nuke_images.sh

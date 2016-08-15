@@ -1,4 +1,6 @@
 ---
+- include: ../common/openshift-cluster/verify_ansible_version.yml
+
 - hosts: localhost
   connection: local
   become: no
@@ -8,7 +10,7 @@
   - add_host:
       name: "{{ item }}"
       groups: l_oo_all_hosts
-    with_items: g_all_hosts
+    with_items: "{{ g_all_hosts }}"
 
 - hosts: l_oo_all_hosts
   gather_facts: no

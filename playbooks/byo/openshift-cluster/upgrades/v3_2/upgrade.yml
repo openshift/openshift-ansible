@@ -1,4 +1,6 @@
 ---
+- include: ../../../../common/openshift-cluster/verify_ansible_version.yml
+
 - hosts: localhost
   connection: local
   become: no
@@ -45,11 +47,19 @@
       openshift_docker_log_options: "{{ lookup('oo_option', 'docker_log_options') }}"
     when: openshift_docker_log_options is not defined
 
-- include: ../../../../common/openshift-cluster/upgrades/v3_1_to_v3_2/pre.yml
+
+# Configure the upgrade target for the common upgrade tasks:
+- hosts: l_oo_all_hosts
+  tasks:
+  - set_fact:
+      openshift_upgrade_target: "{{ '1.2' if deployment_type == 'origin' else '3.2' }}"
+      openshift_upgrade_min: "{{ '1.1' if deployment_type == 'origin' else '3.1' }}"
+
+- include: ../../../../common/openshift-cluster/upgrades/pre.yml
   vars:
     openshift_deployment_type: "{{ deployment_type }}"
-- include: ../../../../common/openshift-cluster/upgrades/v3_1_to_v3_2/upgrade.yml
+- include: ../../../../common/openshift-cluster/upgrades/upgrade.yml
   vars:
     openshift_deployment_type: "{{ deployment_type }}"
 - include: ../../../openshift-master/restart.yml
-- include: ../../../../common/openshift-cluster/upgrades/v3_1_to_v3_2/post.yml
+- include: ../../../../common/openshift-cluster/upgrades/post.yml

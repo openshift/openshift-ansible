@@ -33,15 +33,6 @@ except ImportError:
             def get_basedir(self, variables):
                 return self.basedir
 
-# pylint: disable=no-name-in-module,import-error
-try:
-    # ansible-2.0
-    from ansible import template
-except ImportError:
-    # ansible 1.9.x
-    from ansible.utils import template
-
-
 # Reason: disable too-few-public-methods because the `run` method is the only
 #     one required by the Ansible API
 # Status: permanently disabled
@@ -65,28 +56,16 @@ class LookupModule(LookupBase):
     #     which is not used
     # Status: permanently disabled unless Ansible API evolves
     # pylint: disable=unused-argument
-    def run(self, terms, inject=None, **kwargs):
+    def run(self, terms, variables, **kwargs):
         ''' Main execution path '''
-
-        try:
-            terms = template.template(self.basedir, terms, inject)
-        # Reason: disable broad-except to really ignore any potential exception
-        #         This is inspired by the upstream "env" lookup plugin:
-        #         https://github.com/ansible/ansible/blob/devel/v1/ansible/runner/lookup_plugins/env.py#L29
-        # pylint: disable=broad-except
-        except Exception:
-            pass
-
-        if isinstance(terms, basestring):
-            terms = [terms]
 
         ret = []
 
         for term in terms:
             option_name = term.split()[0]
             cli_key = 'cli_' + option_name
-            if inject and cli_key in inject:
-                ret.append(inject[cli_key])
+            if 'vars' in variables and cli_key in variables['vars']:
+                ret.append(variables['vars'][cli_key])
             elif option_name in os.environ:
                 ret.append(os.environ[option_name])
             else:

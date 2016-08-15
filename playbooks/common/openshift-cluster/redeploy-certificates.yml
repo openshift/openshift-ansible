@@ -1,0 +1,245 @@
+---
+- include: evaluate_groups.yml
+
+- include: initialize_facts.yml
+
+- include: initialize_openshift_version.yml
+
+- name: Load openshift_facts
+  hosts: oo_etcd_to_config:oo_masters_to_config:oo_nodes_to_config
+  roles:
+  - openshift_facts
+
+- name: Redeploy etcd certificates
+  hosts: oo_etcd_to_config
+  any_errors_fatal: true
+  vars:
+    etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
+    etcd_conf_dir: /etc/etcd
+    etcd_generated_certs_dir: "{{ etcd_conf_dir }}/generated_certs"
+
+  pre_tasks:
+  - stat:
+      path: "{{ etcd_generated_certs_dir }}"
+    register: etcd_generated_certs_dir_stat
+  - name: Backup etcd certificates
+    command: >
+      tar -czvf /etc/etcd/etcd-certificate-backup-{{ ansible_date_time.epoch }}.tgz
+      {{ etcd_conf_dir }}/ca.crt
+      {{ etcd_conf_dir }}/ca
+      {{ etcd_generated_certs_dir }}
+    when: etcd_generated_certs_dir_stat.stat.exists
+    delegate_to: "{{ etcd_ca_host }}"
+    run_once: true
+  - name: Remove existing etcd certificates
+    file:
+      path: "{{ item }}"
+      state: absent
+    with_items:
+    - "{{ etcd_conf_dir }}/ca.crt"
+    - "{{ etcd_conf_dir }}/ca"
+    - "{{ etcd_generated_certs_dir }}"
+  roles:
+  - role: openshift_etcd_server_certificates
+    etcd_peers: "{{ groups.oo_etcd_to_config | default([], true) }}"
+    etcd_certificates_etcd_hosts: "{{ groups.oo_etcd_to_config | default([], true) }}"
+    etcd_certificates_redeploy: true
+
+- name: Redeploy master certificates
+  hosts: oo_masters_to_config
+  any_errors_fatal: true
+  vars:
+    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
+    openshift_master_count: "{{ openshift.master.master_count | default(groups.oo_masters | length) }}"
+  pre_tasks:
+  - stat:
+      path: "{{ openshift_generated_configs_dir }}"
+    register: openshift_generated_configs_dir_stat
+  - name: Backup generated certificate and config directories
+    command: >
+      tar -czvf /etc/origin/master-node-cert-config-backup-{{ ansible_date_time.epoch }}.tgz
+      {{ openshift_generated_configs_dir }}
+      {{ openshift.common.config_base }}/master
+    when: openshift_generated_configs_dir_stat.stat.exists
+    delegate_to: "{{ openshift_ca_host }}"
+    run_once: true
+  - name: Remove generated certificate directories
+    file:
+      path: "{{ item }}"
+      state: absent
+    with_items:
+    - "{{ openshift_generated_configs_dir }}"
+  - name: Remove generated certificates
+    file:
+      path: "{{ openshift.common.config_base }}/master/{{ item }}"
+      state: absent
+    with_items:
+    - "{{ hostvars[inventory_hostname] | certificates_to_synchronize(include_keys=false) }}"
+    - "etcd.server.crt"
+    - "etcd.server.key"
+    - "master.etcd-client.crt"
+    - "master.etcd-client.key"
+    - "master.server.crt"
+    - "master.server.key"
+    - "openshift-master.crt"
+    - "openshift-master.key"
+    - "openshift-master.kubeconfig"
+  - name: Remove CA certificate
+    file:
+      path: "{{ openshift.common.config_base }}/master/{{ item }}"
+      state: absent
+    when: openshift_certificates_redeploy_ca | default(false) | bool
+    with_items:
+    - "ca.crt"
+    - "ca.key"
+    - "ca.serial.txt"
+    - "ca-bundle.crt"
+  roles:
+  - role: openshift_master_certificates
+    openshift_master_etcd_hosts: "{{ hostvars
+                                     | oo_select_keys(groups['oo_etcd_to_config'] | default([]))
+                                     | oo_collect('openshift.common.hostname')
+                                     | default(none, true) }}"
+    openshift_master_hostnames: "{{ hostvars
+                                    | oo_select_keys(groups['oo_masters_to_config'] | default([]))
+                                    | oo_collect('openshift.common.all_hostnames')
+                                    | oo_flatten | unique }}"
+    openshift_certificates_redeploy: true
+  - role: openshift_etcd_client_certificates
+    etcd_certificates_redeploy: true
+    etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
+    etcd_cert_subdir: "openshift-master-{{ openshift.common.hostname }}"
+    etcd_cert_config_dir: "{{ openshift.common.config_base }}/master"
+    etcd_cert_prefix: "master.etcd-"
+    when: groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config
+
+- name: Redeploy node certificates
+  hosts: oo_nodes_to_config
+  any_errors_fatal: true
+  pre_tasks:
+  - name: Remove CA certificate
+    file:
+      path: "{{ item }}"
+      state: absent
+    with_items:
+    - "{{ openshift.common.config_base }}/node/ca.crt"
+  roles:
+  - role: openshift_node_certificates
+    openshift_node_master_api_url: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_url }}"
+    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
+    openshift_certificates_redeploy: true
+
+- name: Restart etcd
+  hosts: oo_etcd_to_config
+  tasks:
+  - name: restart etcd
+    service: name=etcd state=restarted
+
+- name: Stop master services
+  hosts: oo_masters_to_config
+  vars:
+    openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
+  tasks:
+  - name: stop master
+    service: name={{ openshift.common.service_type }}-master state=stopped
+    when: not openshift_master_ha | bool
+  - name: stop master api
+    service: name={{ openshift.common.service_type }}-master-api state=stopped
+    when: openshift_master_ha | bool and openshift_master_cluster_method == 'native'
+  - name: stop master controllers
+    service: name={{ openshift.common.service_type }}-master-controllers state=stopped
+    when: openshift_master_ha | bool and openshift_master_cluster_method == 'native'
+
+- name: Start master services
+  hosts: oo_masters_to_config
+  serial: 1
+  vars:
+    openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
+  tasks:
+  - name: start master
+    service: name={{ openshift.common.service_type }}-master state=started
+    when: not openshift_master_ha | bool
+  - name: start master api
+    service: name={{ openshift.common.service_type }}-master-api state=started
+    when: openshift_master_ha | bool and openshift_master_cluster_method == 'native'
+  - name: start master controllers
+    service: name={{ openshift.common.service_type }}-master-controllers state=started
+    when: openshift_master_ha | bool and openshift_master_cluster_method == 'native'
+
+- name: Restart masters (pacemaker)
+  hosts: oo_first_master
+  vars:
+    openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
+  tasks:
+  - name: restart master
+    command: pcs resource restart master
+    when: openshift_master_ha | bool and openshift_master_cluster_method == 'pacemaker'
+
+- name: Restart nodes
+  hosts: oo_nodes_to_config
+  tasks:
+  - name: restart node
+    service: name={{ openshift.common.service_type }}-node state=restarted
+
+- name: Copy admin client config(s)
+  hosts: oo_first_master
+  tasks:
+  - name: Create temp directory for kubeconfig
+    command: mktemp -d /tmp/openshift-ansible-XXXXXX
+    register: mktemp
+    changed_when: False
+
+  - name: Copy admin client config(s)
+    command: >
+      cp {{ openshift.common.config_base }}/master//admin.kubeconfig {{ mktemp.stdout }}/admin.kubeconfig
+    changed_when: False
+
+- name: Serially evacuate all nodes to trigger redeployments
+  hosts: oo_nodes_to_config
+  serial: 1
+  any_errors_fatal: true
+  tasks:
+  - name: Determine if node is currently scheduleable
+    command: >
+      {{ openshift.common.client_binary }} --config={{ hostvars[groups.oo_first_master.0].mktemp.stdout }}/admin.kubeconfig
+      get node {{ openshift.common.hostname | lower }} -o json
+    register: node_output
+    when: openshift_certificates_redeploy_ca | default(false) | bool
+    delegate_to: "{{ groups.oo_first_master.0 }}"
+    changed_when: false
+
+  - set_fact:
+      was_schedulable: "{{ 'unschedulable' not in (node_output.stdout | from_json).spec }}"
+    when: openshift_certificates_redeploy_ca | default(false) | bool
+
+  - name: Prepare for node evacuation
+    command: >
+      {{ openshift.common.admin_binary }} --config={{ hostvars[groups.oo_first_master.0].mktemp.stdout }}/admin.kubeconfig
+      manage-node {{ openshift.common.hostname | lower }}
+      --schedulable=false
+    delegate_to: "{{ groups.oo_first_master.0 }}"
+    when: openshift_certificates_redeploy_ca | default(false) | bool and was_schedulable | bool
+
+  - name: Evacuate node
+    command: >
+      {{ openshift.common.admin_binary }} --config={{ hostvars[groups.oo_first_master.0].mktemp.stdout }}/admin.kubeconfig
+      manage-node {{ openshift.common.hostname | lower }}
+      --evacuate --force
+    delegate_to: "{{ groups.oo_first_master.0 }}"
+    when: openshift_certificates_redeploy_ca | default(false) | bool and was_schedulable | bool
+
+  - name: Set node schedulability
+    command: >
+      {{ openshift.common.admin_binary }} --config={{ hostvars[groups.oo_first_master.0].mktemp.stdout }}/admin.kubeconfig
+      manage-node {{ openshift.common.hostname | lower }} --schedulable=true
+    delegate_to: "{{ groups.oo_first_master.0 }}"
+    when: openshift_certificates_redeploy_ca | default(false) | bool and was_schedulable | bool
+
+- name: Delete temporary directory
+  hosts: oo_first_master
+  tasks:
+  - name: Delete temp directory
+    file:
+      name: "{{ mktemp.stdout }}"
+      state: absent
+    changed_when: False

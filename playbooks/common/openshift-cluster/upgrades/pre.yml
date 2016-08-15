@@ -1,0 +1,311 @@
+---
+###############################################################################
+# Evaluate host groups and gather facts
+###############################################################################
+
+- include: ../initialize_facts.yml
+
+- name: Update repos and initialize facts on all hosts
+  hosts: oo_masters_to_config:oo_nodes_to_config:oo_etcd_to_config:oo_lb_to_config
+  roles:
+  - openshift_repos
+
+- name: Set openshift_no_proxy_internal_hostnames
+  hosts: oo_masters_to_config:oo_nodes_to_config
+  tasks:
+  - set_fact:
+      openshift_no_proxy_internal_hostnames: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config']
+                                                    | union(groups['oo_masters_to_config'])
+                                                    | union(groups['oo_etcd_to_config'] | default([])))
+                                                | oo_collect('openshift.common.hostname') | default([]) | join (',')
+                                                }}"
+    when: "{{ (openshift_http_proxy is defined or openshift_https_proxy is defined) and
+            openshift_generate_no_proxy_hosts | default(True) | bool }}"
+
+- name: Evaluate additional groups for upgrade
+  hosts: localhost
+  connection: local
+  become: no
+  tasks:
+  - name: Evaluate etcd_hosts_to_backup
+    add_host:
+      name: "{{ item }}"
+      groups: etcd_hosts_to_backup
+    with_items: groups.oo_etcd_to_config if groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config | length > 0 else groups.oo_first_master
+
+###############################################################################
+# Pre-upgrade checks
+###############################################################################
+- name: Verify upgrade can proceed on first master
+  hosts: oo_first_master
+  vars:
+    g_pacemaker_upgrade_url_segment: "{{ 'org/latest' if deployment_type =='origin' else '.com/enterprise/3.1' }}"
+  gather_facts: no
+  tasks:
+  - fail:
+      msg: >
+        This upgrade is only supported for atomic-enterprise, origin, openshift-enterprise, and online
+        deployment types
+    when: deployment_type not in ['atomic-enterprise', 'origin','openshift-enterprise', 'online']
+
+  - fail:
+      msg: >
+        This upgrade does not support Pacemaker:
+        https://docs.openshift.{{ g_pacemaker_upgrade_url_segment }}/install_config/upgrading/pacemaker_to_native_ha.html
+    when: openshift.master.cluster_method is defined and openshift.master.cluster_method == 'pacemaker'
+
+  # Error out in situations where the user has older versions specified in their
+  # inventory in any of the openshift_release, openshift_image_tag, and
+  # openshift_pkg_version variables. These must be removed or updated to proceed
+  # with upgrade.
+  # TODO: Should we block if you're *over* the next major release version as well?
+  - fail:
+      msg: >
+        openshift_pkg_version is {{ openshift_pkg_version }} which is not a
+        valid version for a {{ openshift_upgrade_target }} upgrade
+    when: openshift_pkg_version is defined and openshift_pkg_version.split('-',1).1 | version_compare(openshift_upgrade_target ,'<')
+
+  - fail:
+      msg: >
+        openshift_image_tag is {{ openshift_image_tag }} which is not a
+        valid version for a {{ openshift_upgrade_target }} upgrade
+    when: openshift_image_tag is defined and openshift_image_tag.split('v',1).1 | version_compare(openshift_upgrade_target ,'<')
+
+  - set_fact:
+      openshift_release: "{{ openshift_release[1:] }}"
+    when: openshift_release is defined and openshift_release[0] == 'v'
+
+  - fail:
+      msg: >
+        openshift_release is {{ openshift_release }} which is not a
+        valid release for a {{ openshift_upgrade_target }} upgrade
+    when: openshift_release is defined and not openshift_release | version_compare(openshift_upgrade_target ,'=')
+
+- include: ../../../common/openshift-cluster/initialize_openshift_version.yml
+  vars:
+    # Request specific openshift_release and let the openshift_version role handle converting this
+    # to a more specific version, respecting openshift_image_tag and openshift_pkg_version if
+    # defined, and overriding the normal behavior of protecting the installed version
+    openshift_release: "{{ openshift_upgrade_target }}"
+    openshift_protect_installed_version: False
+    # Docker role (a dependency) should be told not to do anything to installed version
+    # of docker, we handle this separately during upgrade. (the inventory may have a
+    # docker_version defined, we don't want to actually do it until later)
+    docker_protect_installed_version: True
+
+- name: Verify master processes
+  hosts: oo_masters_to_config
+  roles:
+  - openshift_facts
+  tasks:
+  - openshift_facts:
+      role: master
+      local_facts:
+        ha: "{{ groups.oo_masters_to_config | length > 1 }}"
+
+  - name: Ensure Master is running
+    service:
+      name: "{{ openshift.common.service_type }}-master"
+      state: started
+      enabled: yes
+    when: openshift.master.ha is defined and not openshift.master.ha | bool and openshift.common.is_containerized | bool
+
+  - name: Ensure HA Master is running
+    service:
+      name: "{{ openshift.common.service_type }}-master-api"
+      state: started
+      enabled: yes
+    when: openshift.master.ha is defined and openshift.master.ha | bool and openshift.common.is_containerized | bool
+
+  - name: Ensure HA Master is running
+    service:
+      name: "{{ openshift.common.service_type }}-master-controllers"
+      state: started
+      enabled: yes
+    when: openshift.master.ha is defined and openshift.master.ha | bool and openshift.common.is_containerized | bool
+
+- name: Verify node processes
+  hosts: oo_nodes_to_config
+  roles:
+  - openshift_facts
+  - openshift_docker_facts
+  tasks:
+  - name: Ensure Node is running
+    service:
+      name: "{{ openshift.common.service_type }}-node"
+      state: started
+      enabled: yes
+    when: openshift.common.is_containerized | bool
+
+- name: Verify upgrade targets
+  hosts: oo_masters_to_config:oo_nodes_to_config
+  vars:
+    openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"
+  pre_tasks:
+  - fail:
+      msg: Verify OpenShift is already installed
+    when: openshift.common.version is not defined
+
+  - fail:
+      msg: Verify the correct version was found
+    when: verify_upgrade_version is defined and openshift_version != verify_upgrade_version
+
+  - name: Clean package cache
+    command: "{{ ansible_pkg_mgr }} clean all"
+    when: not openshift.common.is_atomic | bool
+
+  - set_fact:
+      g_new_service_name: "{{ 'origin' if deployment_type =='origin' else 'atomic-openshift' }}"
+    when: not openshift.common.is_containerized | bool
+
+  - name: Verify containers are available for upgrade
+    command: >
+      docker pull {{ openshift.common.cli_image }}:{{ openshift_image_tag }}
+    register: pull_result
+    changed_when: "'Downloaded newer image' in pull_result.stdout"
+    when: openshift.common.is_containerized | bool
+
+  - name: Check latest available OpenShift RPM version
+    command: >
+      {{ repoquery_cmd }} --qf '%{version}' "{{ openshift.common.service_type }}"
+    failed_when: false
+    changed_when: false
+    register: avail_openshift_version
+    when: not openshift.common.is_containerized | bool
+
+  - name: Verify OpenShift RPMs are available for upgrade
+    fail:
+      msg: "OpenShift {{ avail_openshift_version.stdout }} is available, but {{ openshift_upgrade_target }} or greater is required"
+    when: not openshift.common.is_containerized | bool and not avail_openshift_version | skipped and avail_openshift_version.stdout | default('0.0', True) | version_compare(openshift_release, '<')
+
+  - fail:
+      msg: "This upgrade playbook must be run against OpenShift {{ openshift_upgrade_min }} or later"
+    when: deployment_type == 'origin' and openshift.common.version | version_compare(openshift_upgrade_min,'<')
+
+- name: Verify docker upgrade targets
+  hosts: oo_masters_to_config:oo_nodes_to_config:oo_etcd_to_config
+  tasks:
+  # Only check if docker upgrade is required if docker_upgrade is not
+  # already set to False.
+  - include: docker/upgrade_check.yml
+    when: docker_upgrade is not defined or docker_upgrade | bool and not openshift.common.is_atomic | bool
+
+  # Additional checks for Atomic hosts:
+
+  - name: Determine available Docker
+    shell: "rpm -q --queryformat '---\ncurr_version: %{VERSION}\navail_version: \n' docker"
+    register: g_atomic_docker_version_result
+    when: openshift.common.is_atomic | bool
+
+  - set_fact:
+      l_docker_version: "{{ g_atomic_docker_version_result.stdout | from_yaml }}"
+    when: openshift.common.is_atomic | bool
+
+  - fail:
+      msg: This playbook requires access to Docker 1.10 or later
+    when: openshift.common.is_atomic | bool and l_docker_version.avail_version | default(l_docker_version.curr_version, true) | version_compare('1.10','<')
+
+  - set_fact:
+      pre_upgrade_complete: True
+
+
+##############################################################################
+# Gate on pre-upgrade checks
+##############################################################################
+- name: Gate on pre-upgrade checks
+  hosts: localhost
+  connection: local
+  become: no
+  vars:
+    pre_upgrade_hosts: "{{ groups.oo_masters_to_config | union(groups.oo_nodes_to_config) }}"
+  tasks:
+  - set_fact:
+      pre_upgrade_completed: "{{ hostvars
+                                 | oo_select_keys(pre_upgrade_hosts)
+                                 | oo_collect('inventory_hostname', {'pre_upgrade_complete': true}) }}"
+  - set_fact:
+      pre_upgrade_failed: "{{ pre_upgrade_hosts | difference(pre_upgrade_completed) }}"
+  - fail:
+      msg: "Upgrade cannot continue. The following hosts did not complete pre-upgrade checks: {{ pre_upgrade_failed | join(',') }}"
+    when: pre_upgrade_failed | length > 0
+
+###############################################################################
+# Backup etcd
+###############################################################################
+- name: Backup etcd
+  hosts: etcd_hosts_to_backup
+  vars:
+    embedded_etcd: "{{ hostvars[groups.oo_first_master.0].openshift.master.embedded_etcd }}"
+    timestamp: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
+  roles:
+  - openshift_facts
+  tasks:
+  # Ensure we persist the etcd role for this host in openshift_facts
+  - openshift_facts:
+      role: etcd
+      local_facts: {}
+    when: "'etcd' not in openshift"
+
+  - stat: path=/var/lib/openshift
+    register: var_lib_openshift
+
+  - stat: path=/var/lib/origin
+    register: var_lib_origin
+
+  - name: Create origin symlink if necessary
+    file: src=/var/lib/openshift/ dest=/var/lib/origin state=link
+    when: var_lib_openshift.stat.exists == True and var_lib_origin.stat.exists == False
+
+  # TODO: replace shell module with command and update later checks
+  # We assume to be using the data dir for all backups.
+  - name: Check available disk space for etcd backup
+    shell: df --output=avail -k {{ openshift.common.data_dir }} | tail -n 1
+    register: avail_disk
+
+  # TODO: replace shell module with command and update later checks
+  - name: Check current embedded etcd disk usage
+    shell: du -k {{ openshift.etcd.etcd_data_dir }} | tail -n 1 | cut -f1
+    register: etcd_disk_usage
+    when: embedded_etcd | bool
+
+  - name: Abort if insufficient disk space for etcd backup
+    fail:
+      msg: >
+        {{ etcd_disk_usage.stdout }} Kb disk space required for etcd backup,
+        {{ avail_disk.stdout }} Kb available.
+    when: (embedded_etcd | bool) and (etcd_disk_usage.stdout|int > avail_disk.stdout|int)
+
+  - name: Install etcd (for etcdctl)
+    action: "{{ ansible_pkg_mgr }} name=etcd state=latest"
+    when: not openshift.common.is_atomic | bool
+
+  - name: Generate etcd backup
+    command: >
+      etcdctl backup --data-dir={{ openshift.etcd.etcd_data_dir }}
+      --backup-dir={{ openshift.common.data_dir }}/etcd-backup-{{ timestamp }}
+
+  - set_fact:
+      etcd_backup_complete: True
+
+  - name: Display location of etcd backup
+    debug:
+      msg: "Etcd backup created in {{ openshift.common.data_dir }}/etcd-backup-{{ timestamp }}"
+
+
+##############################################################################
+# Gate on etcd backup
+##############################################################################
+- name: Gate on etcd backup
+  hosts: localhost
+  connection: local
+  become: no
+  tasks:
+  - set_fact:
+      etcd_backup_completed: "{{ hostvars
+                                 | oo_select_keys(groups.etcd_hosts_to_backup)
+                                 | oo_collect('inventory_hostname', {'etcd_backup_complete': true}) }}"
+  - set_fact:
+      etcd_backup_failed: "{{ groups.etcd_hosts_to_backup | difference(etcd_backup_completed) }}"
+  - fail:
+      msg: "Upgrade cannot continue. The following hosts did not complete etcd backup: {{ etcd_backup_failed | join(',') }}"
+    when: etcd_backup_failed | length > 0

@@ -521,7 +521,7 @@ class FilterModule(object):
         return valid
 
     @staticmethod
-    def certificates_to_synchronize(hostvars):
+    def certificates_to_synchronize(hostvars, include_keys=True):
         ''' Return certificates to synchronize based on facts. '''
         if not issubclass(type(hostvars), dict):
             raise errors.AnsibleFilterError("|failed expects hostvars is a dict")
@@ -535,9 +535,10 @@ class FilterModule(object):
                  'openshift-registry.kubeconfig',
                  'openshift-router.crt',
                  'openshift-router.key',
-                 'openshift-router.kubeconfig',
-                 'serviceaccounts.private.key',
-                 'serviceaccounts.public.key']
+                 'openshift-router.kubeconfig']
+        if bool(include_keys):
+            certs += ['serviceaccounts.private.key',
+                      'serviceaccounts.public.key']
         if bool(hostvars['openshift']['common']['version_gte_3_1_or_1_1']):
             certs += ['master.proxy-client.crt',
                       'master.proxy-client.key']
