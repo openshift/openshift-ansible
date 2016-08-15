@@ -721,9 +721,9 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force, verbose):
             for uninstalled_host in uninstalled_hosts:
                 click.echo("{} is currently uninstalled".format(uninstalled_host))
             # Fall through
-            click.echo('\nUninstalled hosts has been detected in your environment. ' \
-                       'Please make sure your environment was been installed successfully ' \
-                       'before adding nodes. If you want a fresh install, use ' \
+            click.echo('\nUninstalled hosts have been detected in your environment. ' \
+                       'Please make sure your environment was installed successfully ' \
+                       'before adding new nodes. If you want a fresh install, use ' \
                        '`atomic-openshift-installer install --force`')
             sys.exit(1)
         else:
