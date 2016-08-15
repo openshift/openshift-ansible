@@ -237,7 +237,11 @@ class RequestHeaderIdentityProvider(IdentityProviderBase):
         self._required += [['headers']]
         self._optional += [['challengeURL', 'challenge_url'],
                            ['loginURL', 'login_url'],
-                           ['clientCA', 'client_ca']]
+                           ['clientCA', 'client_ca'],
+                           ['clientCommonNames', 'client_common_names'],
+                           ['emailHeaders', 'email_headers'],
+                           ['nameHeaders', 'name_headers'],
+                           ['preferredUsernameHeaders', 'preferred_username_headers']]
 
     def validate(self):
         ''' validate this idp instance '''
