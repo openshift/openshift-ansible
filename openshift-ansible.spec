@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.22
+Version:        3.2.23
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,15 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Aug 15 2016 Scott Dodson <sdodson@redhat.com> 3.2.23-1
+- a-o-i: Fix broken tests from installed hosts check (smunilla@redhat.com)
+- Update 3.2 upgrade mappings, remove 3.0 -> 3.1 mappings (sdodson@redhat.com)
+- a-o-i: fix bz#1329455 (ghuang@redhat.com)
+- Add nfs group to OSEv3:vars (sdodson@redhat.com)
+- Ensure etcd user exists in etcd_server_certificates by installing etcd.
+  (abutcher@redhat.com)
+- a-o-i: Fix broken upgrades (smunilla@redhat.com)
+
 * Thu Aug 11 2016 Scott Dodson <sdodson@redhat.com> 3.2.22-1
 - Reference tmpdir from first master hostvars when evacuating nodes.
   (abutcher@redhat.com)
