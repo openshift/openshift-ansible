@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.10
+Version:        3.3.11
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Aug 15 2016 Troy Dawson <tdawson@redhat.com> 3.3.11-1
+- Ensure etcd user exists in etcd_server_certificates by installing etcd.
+  (abutcher@redhat.com)
+- a-o-i: Fix broken upgrades (smunilla@redhat.com)
+
 * Fri Aug 12 2016 Troy Dawson <tdawson@redhat.com> 3.3.10-1
 - Reference tmpdir from first master hostvars when evacuating nodes.
   (abutcher@redhat.com)
