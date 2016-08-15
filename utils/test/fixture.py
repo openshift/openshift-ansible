@@ -137,15 +137,19 @@ class OOCliFixture(OOInstallFixture):
             written_config = read_yaml(config_file)
             self._verify_config_hosts(written_config, exp_hosts_len)
 
-        self.assert_result(result, 0)
-        self._verify_load_facts(load_facts_mock)
-        self._verify_run_playbook(run_playbook_mock, exp_hosts_len, exp_hosts_to_run_on_len)
+        if "Uninstalled" in result.output:
+            # verify we exited on seeing uninstalled hosts
+            self.assertEqual(result.exit_code, 1)
+        else:
+            self.assert_result(result, 0)
+            self._verify_load_facts(load_facts_mock)
+            self._verify_run_playbook(run_playbook_mock, exp_hosts_len, exp_hosts_to_run_on_len)
 
-        # Make sure we ran on the expected masters and nodes:
-        hosts = run_playbook_mock.call_args[0][1]
-        hosts_to_run_on = run_playbook_mock.call_args[0][2]
-        self.assertEquals(exp_hosts_len, len(hosts))
-        self.assertEquals(exp_hosts_to_run_on_len, len(hosts_to_run_on))
+            # Make sure we ran on the expected masters and nodes:
+            hosts = run_playbook_mock.call_args[0][1]
+            hosts_to_run_on = run_playbook_mock.call_args[0][2]
+            self.assertEquals(exp_hosts_len, len(hosts))
+            self.assertEquals(exp_hosts_to_run_on_len, len(hosts_to_run_on))
 
 
 #pylint: disable=too-many-arguments,too-many-branches,too-many-statements
