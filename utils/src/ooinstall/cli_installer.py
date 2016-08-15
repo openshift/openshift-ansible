@@ -1,3 +1,5 @@
+# TODO: Temporarily disabled due to importing old code into openshift-ansible
+# repo. We will work on these over time.
 # pylint: disable=bad-continuation,missing-docstring,no-self-use,invalid-name,no-value-for-parameter,too-many-lines
 
 import os
@@ -663,22 +665,14 @@ Add new nodes here
 
 def get_installed_hosts(hosts, callback_facts):
     installed_hosts = []
-
-    # count nativeha lb as an installed host
-    try:
-        first_master = next(host for host in hosts if host.is_master())
-        lb_hostname = callback_facts[first_master.connect_to]['master'].get('cluster_hostname', '')
-        lb_host = \
-            next(host for host in hosts if host.ip == callback_facts[lb_hostname]['common']['ip'])
-
-        installed_hosts.append(lb_host)
-    except (KeyError, StopIteration):
-        pass
-
+    uninstalled_hosts = []
     for host in [h for h in hosts if h.is_master() or h.is_node()]:
-        if host.connect_to in callback_facts.keys() and is_installed_host(host, callback_facts):
-            installed_hosts.append(host)
-    return installed_hosts
+        if host.connect_to in callback_facts.keys(): 
+            if is_installed_host(host, callback_facts):
+                installed_hosts.append(host)
+            else:
+                uninstalled_hosts.append(host)
+    return installed_hosts, uninstalled_hosts
 
 def is_installed_host(host, callback_facts):
     version_found = 'common' in callback_facts[host.connect_to].keys() and \
@@ -695,7 +689,7 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force, verbose):
     hosts_to_run_on = list(oo_cfg.deployment.hosts)
 
     # Check if master or nodes already have something installed
-    installed_hosts = get_installed_hosts(oo_cfg.deployment.hosts, callback_facts)
+    installed_hosts, uninstalled_hosts = get_installed_hosts(oo_cfg.deployment.hosts, callback_facts)
     if len(installed_hosts) > 0:
         click.echo('Installed environment detected.')
         # This check has to happen before we start removing hosts later in this method
@@ -729,13 +723,15 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force, verbose):
                     hosts_to_run_on.remove(host)
 
         # Handle the cases where we know about uninstalled systems
-        new_hosts = set(hosts_to_run_on) - set(installed_hosts)
-        if len(new_hosts) > 0:
-            for new_host in new_hosts:
-                click.echo("{} is currently uninstalled".format(new_host))
-
+        if len(uninstalled_hosts) > 0:
+            for uninstalled_host in uninstalled_hosts:
+                click.echo("{} is currently uninstalled".format(uninstalled_host))
             # Fall through
-            click.echo('Adding additional nodes...')
+            click.echo('\nUninstalled hosts have been detected in your environment. ' \
+                       'Please make sure your environment was installed successfully ' \
+                       'before adding new nodes. If you want a fresh install, use ' \
+                       '`atomic-openshift-installer install --force`')
+            sys.exit(1)
         else:
             if unattended:
                 if not force:
