@@ -26,6 +26,12 @@ UPGRADE_MAPPINGS = {
                            'minor_playbook':'v3_1_minor/upgrade.yml',
                            'major_playbook':'v3_1_to_v3_2/upgrade.yml',
                            'major_version' :'3.2',
+                        },
+                    '3.2':{
+                           'minor_version' :'3.2',
+                           'minor_playbook':'v3_2/upgrade.yml',
+                           'major_playbook':'v3_2/upgrade.yml',
+                           'major_version' :'3.3',
                         }
                    }
 
