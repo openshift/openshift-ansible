@@ -557,7 +557,7 @@ class UnattendedCliTests(OOCliFixture):
         self.assertEquals('openshift-enterprise', written_config['variant'])
         # We didn't specify a version so the latest should have been assumed,
         # and written to disk:
-        self.assertEquals('3.2', written_config['variant_version'])
+        self.assertEquals('3.3', written_config['variant_version'])
 
         # Make sure the correct value was passed to ansible:
         inventory = ConfigParser.ConfigParser(allow_no_value=True)
@@ -573,7 +573,7 @@ class UnattendedCliTests(OOCliFixture):
         run_playbook_mock.return_value = 0
 
         config = SAMPLE_CONFIG % 'openshift-enterprise'
-        config = '%s\n%s' % (config, 'variant_version: 3.2')
+        config = '%s\n%s' % (config, 'variant_version: 3.3')
         config_file = self.write_config(os.path.join(self.work_dir,
             'ooinstall.conf'), config)
 
@@ -586,7 +586,7 @@ class UnattendedCliTests(OOCliFixture):
         self.assertEquals('openshift-enterprise', written_config['variant'])
         # Make sure our older version was preserved:
         # and written to disk:
-        self.assertEquals('3.2', written_config['variant_version'])
+        self.assertEquals('3.3', written_config['variant_version'])
 
         inventory = ConfigParser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, 'hosts'))

@@ -46,8 +46,16 @@ origin = Variant('origin', 'OpenShift Origin',
     ]
 )
 
+LEGACY = Variant('openshift-enterprise', 'OpenShift Container Platform',
+    [
+        Version('3.2', 'openshift-enterprise'),
+        Version('3.1', 'openshift-enterprise'),
+        Version('3.0', 'openshift-enterprise'),
+    ]
+)
+
 # Ordered list of variants we can install, first is the default.
-SUPPORTED_VARIANTS = (OSE, origin)
+SUPPORTED_VARIANTS = (OSE, origin, LEGACY)
 DISPLAY_VARIANTS = (OSE, )
 
 def find_variant(name, version=None):

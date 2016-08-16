@@ -10,7 +10,7 @@ from click.testing import CliRunner
 # Substitute in a product name before use:
 SAMPLE_CONFIG = """
 variant: %s
-variant_version: 3.2
+variant_version: 3.3
 master_routingconfig_subdomain: example.com
 deployment:
     ansible_ssh_user: root

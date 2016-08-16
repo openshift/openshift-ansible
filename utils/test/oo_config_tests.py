@@ -12,7 +12,7 @@ from ooinstall.oo_config import OOConfig, Host, OOConfigInvalidHostError
 
 SAMPLE_CONFIG = """
 variant: openshift-enterprise
-variant_version: 3.2
+variant_version: 3.3
 deployment:
     ansible_ssh_user: root
     hosts:
