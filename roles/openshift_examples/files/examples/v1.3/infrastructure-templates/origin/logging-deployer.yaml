@@ -323,4 +323,3 @@ items:
     description: "(Deprecated) Node selector operations Curator (label=value)."
     name: CURATOR_OPS_NODESELECTOR
     value: ""
-

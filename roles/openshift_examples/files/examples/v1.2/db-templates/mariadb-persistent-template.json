@@ -2,12 +2,11 @@
   "kind": "Template",
   "apiVersion": "v1",
   "metadata": {
-    "name": "mongodb-persistent",
-    "creationTimestamp": null,
+    "name": "mariadb-persistent",
     "annotations": {
-      "description": "MongoDB database service, with persistent storage.  Scaling to more than one replica is not supported.  You must have persistent volumes available in your cluster to use this template.",
-      "iconClass": "icon-mongodb",
-      "tags": "database,mongodb"
+      "description": "MariaDB database service, with persistent storage.  Scaling to more than one replica is not supported.  You must have persistent volumes available in your cluster to use this template.",
+      "iconClass": "icon-mariadb",
+      "tags": "database,mariadb"
     }
   },
   "objects": [
@@ -15,28 +14,18 @@
       "kind": "Service",
       "apiVersion": "v1",
       "metadata": {
-        "name": "${DATABASE_SERVICE_NAME}",
-        "creationTimestamp": null
+        "name": "${DATABASE_SERVICE_NAME}"
       },
       "spec": {
         "ports": [
           {
-            "name": "mongo",
-            "protocol": "TCP",
-            "port": 27017,
-            "targetPort": 27017,
-            "nodePort": 0
+            "name": "mariadb",
+            "port": 3306
           }
         ],
         "selector": {
           "name": "${DATABASE_SERVICE_NAME}"
-        },
-        "portalIP": "",
-        "type": "ClusterIP",
-        "sessionAffinity": "None"
-      },
-      "status": {
-        "loadBalancer": {}
+        }
       }
     },
     {
@@ -60,8 +49,7 @@
       "kind": "DeploymentConfig",
       "apiVersion": "v1",
       "metadata": {
-        "name": "${DATABASE_SERVICE_NAME}",
-        "creationTimestamp": null
+        "name": "${DATABASE_SERVICE_NAME}"
       },
       "spec": {
         "strategy": {
@@ -73,14 +61,13 @@
             "imageChangeParams": {
               "automatic": true,
               "containerNames": [
-                "mongodb"
+                "mariadb"
               ],
               "from": {
                 "kind": "ImageStreamTag",
-                "name": "mongodb:3.2",
+                "name": "mariadb:10.1",
                 "namespace": "${NAMESPACE}"
-              },
-              "lastTriggeredImage": ""
+              }
             }
           },
           {
@@ -93,7 +80,6 @@
         },
         "template": {
           "metadata": {
-            "creationTimestamp": null,
             "labels": {
               "name": "${DATABASE_SERVICE_NAME}"
             }
@@ -101,44 +87,40 @@
           "spec": {
             "containers": [
               {
-                "name": "mongodb",
+                "name": "mariadb",
                 "image": " ",
                 "ports": [
                   {
-                    "containerPort": 27017,
-                    "protocol": "TCP"
+                    "containerPort": 3306
                   }
                 ],
                 "readinessProbe": {
                   "timeoutSeconds": 1,
-                  "initialDelaySeconds": 3,
+                  "initialDelaySeconds": 5,
                   "exec": {
-                    "command": [ "/bin/sh", "-i", "-c", "mongo 127.0.0.1:27017/$MONGODB_DATABASE -u $MONGODB_USER -p $MONGODB_PASSWORD --eval=\"quit()\""]
+                    "command": [ "/bin/sh", "-i", "-c",
+                      "MYSQL_PWD=\"$MYSQL_PASSWORD\" mysql -h 127.0.0.1 -u $MYSQL_USER -D $MYSQL_DATABASE -e 'SELECT 1'"]
                   }
                 },
                 "livenessProbe": {
                   "timeoutSeconds": 1,
                   "initialDelaySeconds": 30,
                   "tcpSocket": {
-                    "port": 27017
+                    "port": 3306
                   }
                 },
                 "env": [
                   {
-                    "name": "MONGODB_USER",
-                    "value": "${MONGODB_USER}"
+                    "name": "MYSQL_USER",
+                    "value": "${MYSQL_USER}"
                   },
                   {
-                    "name": "MONGODB_PASSWORD",
-                    "value": "${MONGODB_PASSWORD}"
+                    "name": "MYSQL_PASSWORD",
+                    "value": "${MYSQL_PASSWORD}"
                   },
                   {
-                    "name": "MONGODB_DATABASE",
-                    "value": "${MONGODB_DATABASE}"
-                  },
-                  {
-                    "name": "MONGODB_ADMIN_PASSWORD",
-                    "value": "${MONGODB_ADMIN_PASSWORD}"
+                    "name": "MYSQL_DATABASE",
+                    "value": "${MYSQL_DATABASE}"
                   }
                 ],
                 "resources": {
@@ -149,16 +131,10 @@
                 "volumeMounts": [
                   {
                     "name": "${DATABASE_SERVICE_NAME}-data",
-                    "mountPath": "/var/lib/mongodb/data"
+                    "mountPath": "/var/lib/mysql/data"
                   }
                 ],
-                "terminationMessagePath": "/dev/termination-log",
-                "imagePullPolicy": "IfNotPresent",
-                "capabilities": {},
-                "securityContext": {
-                  "capabilities": {},
-                  "privileged": false
-                }
+                "imagePullPolicy": "IfNotPresent"
               }
             ],
             "volumes": [
@@ -168,13 +144,10 @@
                   "claimName": "${DATABASE_SERVICE_NAME}"
                 }
               }
-            ],
-            "restartPolicy": "Always",
-            "dnsPolicy": "ClusterFirst"
+            ]
           }
         }
-      },
-      "status": {}
+      }
     }
   ],
   "parameters": [
@@ -182,7 +155,8 @@
       "name": "MEMORY_LIMIT",
       "displayName": "Memory Limit",
       "description": "Maximum amount of memory the container can use.",
-      "value": "512Mi"
+      "value": "512Mi",
+      "required": true
     },
     {
       "name": "NAMESPACE",
@@ -194,38 +168,30 @@
       "name": "DATABASE_SERVICE_NAME",
       "displayName": "Database Service Name",
       "description": "The name of the OpenShift Service exposed for the database.",
-      "value": "mongodb",
+      "value": "mariadb",
       "required": true
     },
     {
-      "name": "MONGODB_USER",
-      "displayName": "MongoDB Connection Username",
-      "description": "Username for MongoDB user that will be used for accessing the database.",
+      "name": "MYSQL_USER",
+      "displayName": "MariaDB Connection Username",
+      "description": "Username for MariaDB user that will be used for accessing the database.",
       "generate": "expression",
       "from": "user[A-Z0-9]{3}",
       "required": true
     },
     {
-      "name": "MONGODB_PASSWORD",
-      "displayName": "MongoDB Connection Password",
-      "description": "Password for the MongoDB connection user.",
+      "name": "MYSQL_PASSWORD",
+      "displayName": "MariaDB Connection Password",
+      "description": "Password for the MariaDB connection user.",
       "generate": "expression",
       "from": "[a-zA-Z0-9]{16}",
       "required": true
     },
     {
-      "name": "MONGODB_DATABASE",
-      "displayName": "MongoDB Database Name",
-      "description": "Name of the MongoDB database accessed.",
+      "name": "MYSQL_DATABASE",
+      "displayName": "MariaDB Database Name",
+      "description": "Name of the MariaDB database accessed.",
       "value": "sampledb",
-      "required": true
-    },
-    {
-      "name": "MONGODB_ADMIN_PASSWORD",
-      "displayName": "MongoDB Admin Password",
-      "description": "Password for the database admin user.",
-      "generate": "expression",
-      "from": "[a-zA-Z0-9]{16}",
       "required": true
     },
     {
@@ -237,7 +203,6 @@
     }
   ],
   "labels": {
-    "template": "mongodb-persistent-template"
-  },
-  "message": "You can connect to the database using MongoDB connection URL mongodb://${MONGODB_USER}:${MONGODB_PASSWORD}@${DATABASE_SERVICE_NAME}/${MONGODB_DATABASE}"
+    "template": "mariadb-persistent-template"
+  }
 }
