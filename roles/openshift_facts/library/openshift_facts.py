@@ -1747,7 +1747,7 @@ class OpenShiftFacts(object):
 
         if 'node' in roles:
             defaults['node'] = dict(labels={}, annotations={},
-                                    iptables_sync_period='5s',
+                                    iptables_sync_period='30s',
                                     local_quota_per_fsgroup="",
                                     set_node_ip=False)
 
