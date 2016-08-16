@@ -722,7 +722,7 @@ class UnattendedCliTests(OOCliFixture):
 
         # This is an invalid config:
         self.assert_result(result, 1)
-        self.assertTrue("A minimum of 3 Masters are required" in result.output)
+        self.assertTrue("A minimum of 3 masters are required" in result.output)
 
     #unattended with three masters, one node, but no load balancer specified:
     @patch('ooinstall.openshift_ansible.run_main_playbook')
