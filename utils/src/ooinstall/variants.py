@@ -37,7 +37,6 @@ class Variant(object):
 OSE = Variant('openshift-enterprise', 'OpenShift Container Platform',
     [
         Version('3.3', 'openshift-enterprise'),
-        Version('3.2', 'openshift-enterprise'),
     ]
 )
 
