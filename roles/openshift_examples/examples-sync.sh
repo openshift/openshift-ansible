@@ -5,7 +5,7 @@
 #
 # This script should be run from openshift-ansible/roles/openshift_examples
 
-XPAAS_VERSION=ose-v1.3.2
+XPAAS_VERSION=ose-v1.3.3
 ORIGIN_VERSION=${1:-v1.3}
 EXAMPLES_BASE=$(pwd)/files/examples/${ORIGIN_VERSION}
 find ${EXAMPLES_BASE} -name '*.json' -delete
