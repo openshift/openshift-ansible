@@ -110,6 +110,52 @@
     when: master_update_failed | length > 0
 
 ###############################################################################
+# Reconcile Cluster Roles, Cluster Role Bindings and Security Context Constraints
+###############################################################################
+
+- name: Reconcile Cluster Roles and Cluster Role Bindings and Security Context Constraints
+  hosts: oo_masters_to_config
+  roles:
+  - { role: openshift_cli }
+  vars:
+    origin_reconcile_bindings: "{{ deployment_type == 'origin' and openshift_version | version_compare('1.0.6', '>') }}"
+    ent_reconcile_bindings: true
+    openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"
+    # Similar to pre.yml, we don't want to upgrade docker during the openshift_cli role,
+    # it will be updated when we perform node upgrade.
+    docker_protect_installed_version: True
+  tasks:
+  - name: Verifying the correct commandline tools are available
+    shell: grep {{ verify_upgrade_version }} {{ openshift.common.admin_binary}}
+    when: openshift.common.is_containerized | bool and verify_upgrade_version is defined
+
+  - name: Reconcile Cluster Roles
+    command: >
+      {{ openshift.common.admin_binary}} --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+      policy reconcile-cluster-roles --additive-only=true --confirm
+    run_once: true
+
+  - name: Reconcile Cluster Role Bindings
+    command: >
+      {{ openshift.common.admin_binary}} --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+      policy reconcile-cluster-role-bindings
+      --exclude-groups=system:authenticated
+      --exclude-groups=system:authenticated:oauth
+      --exclude-groups=system:unauthenticated
+      --exclude-users=system:anonymous
+      --additive-only=true --confirm
+    when: origin_reconcile_bindings | bool or ent_reconcile_bindings | bool
+    run_once: true
+
+  - name: Reconcile Security Context Constraints
+    command: >
+      {{ openshift.common.admin_binary}} policy reconcile-sccs --confirm --additive-only=true
+    run_once: true
+
+  - set_fact:
+      reconcile_complete: True
+
+###############################################################################
 # Upgrade Nodes
 ###############################################################################
 
@@ -159,49 +205,6 @@
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: inventory_hostname in groups.oo_nodes_to_config and openshift.node.schedulable | bool
 
-
-###############################################################################
-# Reconcile Cluster Roles, Cluster Role Bindings and Security Context Constraints
-###############################################################################
-
-- name: Reconcile Cluster Roles and Cluster Role Bindings and Security Context Constraints
-  hosts: oo_masters_to_config
-  roles:
-  - { role: openshift_cli }
-  vars:
-    origin_reconcile_bindings: "{{ deployment_type == 'origin' and openshift_version | version_compare('1.0.6', '>') }}"
-    ent_reconcile_bindings: true
-    openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"
-  tasks:
-  - name: Verifying the correct commandline tools are available
-    shell: grep {{ verify_upgrade_version }} {{ openshift.common.admin_binary}}
-    when: openshift.common.is_containerized | bool and verify_upgrade_version is defined
-
-  - name: Reconcile Cluster Roles
-    command: >
-      {{ openshift.common.admin_binary}} --config={{ openshift.common.config_base }}/master/admin.kubeconfig
-      policy reconcile-cluster-roles --additive-only=true --confirm
-    run_once: true
-
-  - name: Reconcile Cluster Role Bindings
-    command: >
-      {{ openshift.common.admin_binary}} --config={{ openshift.common.config_base }}/master/admin.kubeconfig
-      policy reconcile-cluster-role-bindings
-      --exclude-groups=system:authenticated
-      --exclude-groups=system:authenticated:oauth
-      --exclude-groups=system:unauthenticated
-      --exclude-users=system:anonymous
-      --additive-only=true --confirm
-    when: origin_reconcile_bindings | bool or ent_reconcile_bindings | bool
-    run_once: true
-
-  - name: Reconcile Security Context Constraints
-    command: >
-      {{ openshift.common.admin_binary}} policy reconcile-sccs --confirm --additive-only=true
-    run_once: true
-
-  - set_fact:
-      reconcile_complete: True
 
 ##############################################################################
 # Gate on reconcile
