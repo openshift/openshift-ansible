@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.23
+Version:        3.2.24
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Aug 16 2016 Scott Dodson <sdodson@redhat.com> 3.2.24-1
+- Sync remaining content (sdodson@redhat.com)
+- XPaas 1.3.3 (sdodson@redhat.com)
+
 * Mon Aug 15 2016 Scott Dodson <sdodson@redhat.com> 3.2.23-1
 - a-o-i: Fix broken tests from installed hosts check (smunilla@redhat.com)
 - Update 3.2 upgrade mappings, remove 3.0 -> 3.1 mappings (sdodson@redhat.com)
