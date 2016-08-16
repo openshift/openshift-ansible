@@ -13,10 +13,11 @@
     {{ openshift.common.admin_binary }} manage-node {{ item.openshift.common.hostname | lower }} --schedulable={{ 'true' if item.openshift.node.schedulable | bool else 'false' }}
   with_items:
     -  "{{ openshift_node_vars }}"
+  when: item.openshift.common.hostname is defined
 
 - name: Label nodes
   command: >
     {{ openshift.common.client_binary }} label --overwrite node {{ item.openshift.common.hostname | lower }} {{ item.openshift.node.labels | oo_combine_dict  }}
   with_items:
     -  "{{ openshift_node_vars }}"
-  when: "'labels' in item.openshift.node and item.openshift.node.labels != {}"
+  when: item.openshift.common.hostname is defined and 'labels' in item.openshift.node and item.openshift.node.labels != {}

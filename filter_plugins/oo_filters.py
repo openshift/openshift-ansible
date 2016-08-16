@@ -39,7 +39,6 @@ class FilterModule(object):
             the value.
 
             If the key isn't present, None is returned.
-
             Ex: data = {'a': {'b': {'c': 5}}}
                 attribute = "a.b.c"
                 returns 5
@@ -56,6 +55,7 @@ class FilterModule(object):
                 break
 
         return ptr
+
 
     @staticmethod
     def oo_flatten(data):
@@ -146,6 +146,7 @@ class FilterModule(object):
             retval = [FilterModule.get_attr(d, attribute) for d in data]
 
         retval = [val for val in retval if val != None]
+
         return retval
 
     @staticmethod
