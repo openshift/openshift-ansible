@@ -77,7 +77,7 @@
       ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
       ansible_become: "{{ g_sudo | default(omit) }}"
     with_items: "{{ g_master_hosts | default([]) }}"
-    when: g_nodeonmaster | default(false) == true and g_new_node_hosts is not defined
+    when: g_nodeonmaster | default(false) == true and g_new_node_hosts | length == 0
 
   - name: Evaluate oo_first_etcd
     add_host:
