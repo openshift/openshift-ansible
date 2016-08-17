@@ -30,8 +30,23 @@
 
 - name: Configure exports
   template:
-    dest: /etc/exports
+    dest: /etc/exports.d/openshift-ansible.exports
     src: exports.j2
+  notify:
+  - restart nfs-server
+
+# Now that we're putting our exports in our own file clean up the old ones
+- name: register exports
+  command: cat /etc/exports.d/openshift-ansible.exports
+  register: exports_out
+
+- name: remove exports from /etc/exports
+  lineinfile:
+    dest: /etc/exports
+    line: "{{ item }}"
+    state: absent
+  with_items: "{{ exports_out.stdout_lines | default([]) }}"
+  when: exports_out.rc == 0
   notify:
   - restart nfs-server
 
