@@ -639,32 +639,29 @@ def set_aggregate_facts(facts):
     internal_hostnames = set()
     kube_svc_ip = first_ip(facts['common']['portal_net'])
     if 'common' in facts:
-        all_hostnames.add(facts['common']['hostname'])
-        all_hostnames.add(facts['common']['public_hostname'])
-        all_hostnames.add(facts['common']['ip'])
-        all_hostnames.add(facts['common']['public_ip'])
-        facts['common']['kube_svc_ip'] = kube_svc_ip
-
         internal_hostnames.add(facts['common']['hostname'])
         internal_hostnames.add(facts['common']['ip'])
         internal_hostnames.add('localhost')
         internal_hostnames.add('127.0.0.1')
 
+        all_hostnames.add(facts['common']['public_hostname'])
+        all_hostnames.add(facts['common']['public_ip'])
+        facts['common']['kube_svc_ip'] = kube_svc_ip
+
         cluster_domain = facts['common']['dns_domain']
 
         if 'master' in facts:
             if 'cluster_hostname' in facts['master']:
-                all_hostnames.add(facts['master']['cluster_hostname'])
+                internal_hostnames.add(facts['master']['cluster_hostname'])
             if 'cluster_public_hostname' in facts['master']:
                 all_hostnames.add(facts['master']['cluster_public_hostname'])
             svc_names = ['openshift', 'openshift.default', 'openshift.default.svc',
                          'openshift.default.svc.' + cluster_domain, 'kubernetes', 'kubernetes.default',
                          'kubernetes.default.svc', 'kubernetes.default.svc.' + cluster_domain]
-            all_hostnames.update(svc_names)
             internal_hostnames.update(svc_names)
-            all_hostnames.add(kube_svc_ip)
             internal_hostnames.add(kube_svc_ip)
 
+        all_hostnames.update(internal_hostnames)
         facts['common']['all_hostnames'] = list(all_hostnames)
         facts['common']['internal_hostnames'] = list(internal_hostnames)
 
