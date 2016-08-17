@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.11
+Version:        3.3.12
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,27 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Aug 17 2016 Troy Dawson <tdawson@redhat.com> 3.3.12-1
+- Fixes to typos, grammar, and product branding in cli_installer
+  (tpoitras@redhat.com)
+- Reconcile roles after master upgrade, but before nodes. (dgoodwin@redhat.com)
+- a-o-i: Fix nosetests after removing 3.2 from installer (smunilla@redhat.com)
+- Bug 1367323 - the "OpenShift Container Platform 3.2" variant is still listed
+  when quick install ose-3.3 (smunilla@redhat.com)
+- Bug 1367199 - iptablesSyncPeriod should default to 30s OOTB
+  (smunilla@redhat.com)
+- Sync remaining content (sdodson@redhat.com)
+- XPaas 1.3.3 (sdodson@redhat.com)
+- a-o-i: Fix broken tests from installed hosts check (smunilla@redhat.com)
+- Add clientCommonNames to RequestHeaderProvider optional items
+  (sdodson@redhat.com)
+- a-o-i: Mapping for 3.2 Upgrades (smunilla@redhat.com)
+- a-o-i: fix bz#1329455 (ghuang@redhat.com)
+- Add nfs group to OSEv3:vars (sdodson@redhat.com)
+- fixing openshift key error in case of node failure during run (ssh issue)
+  (jawed.khelil@amadeus.com)
+- add 3.3 to installer (rmeggins@redhat.com)
+
 * Mon Aug 15 2016 Troy Dawson <tdawson@redhat.com> 3.3.11-1
 - Ensure etcd user exists in etcd_server_certificates by installing etcd.
   (abutcher@redhat.com)
