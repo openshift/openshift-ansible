@@ -39,7 +39,7 @@ UPGRADE_MAPPINGS = {
 
 def validate_ansible_dir(path):
     if not path:
-        raise click.BadParameter('An ansible path must be provided')
+        raise click.BadParameter('An Ansible path must be provided')
     return path
     # if not os.path.exists(path)):
     #     raise click.BadParameter("Path \"{}\" doesn't exist".format(path))
@@ -60,8 +60,8 @@ def validate_prompt_hostname(hostname):
 def get_ansible_ssh_user():
     click.clear()
     message = """
-This installation process will involve connecting to remote hosts via ssh.  Any
-account may be used however if a non-root account is used it must have
+This installation process involves connecting to remote hosts via ssh. Any
+account may be used. However, if a non-root account is used, then it must have
 passwordless sudo access.
 """
     click.echo(message)
@@ -70,8 +70,7 @@ passwordless sudo access.
 def get_master_routingconfig_subdomain():
     click.clear()
     message = """
-You might want to override the default subdomain uses for exposed routes. If you don't know what
-this is, use the default value.
+You might want to override the default subdomain used for exposed routes. If you don't know what this is, use the default value.
 """
     click.echo(message)
     return click.prompt('New default subdomain (ENTER for none)', default='')
@@ -96,15 +95,15 @@ def delete_hosts(hosts):
                 response = del_idx.lower()
                 if response in ['y', 'n']:
                     return hosts, response
-                click.echo("\"{}\" doesn't coorespond to any valid input.".format(del_idx))
+                click.echo("\"{}\" doesn't correspond to any valid input.".format(del_idx))
             except AttributeError:
-                click.echo("\"{}\" doesn't coorespond to any valid input.".format(del_idx))
+                click.echo("\"{}\" doesn't correspond to any valid input.".format(del_idx))
     return hosts, None
 
 def collect_hosts(oo_cfg, existing_env=False, masters_set=False, print_summary=True):
     """
         Collect host information from user. This will later be filled in using
-        ansible.
+        Ansible.
 
         Returns: a list of host information collected from the user
     """
@@ -113,28 +112,28 @@ def collect_hosts(oo_cfg, existing_env=False, masters_set=False, print_summary=T
     message = """
 You must now specify the hosts that will compose your OpenShift cluster.
 
-Please enter an IP or hostname to connect to for each system in the cluster.
-You will then be prompted to identify what role you would like this system to
+Please enter an IP address or hostname to connect to for each system in the
+cluster. You will then be prompted to identify what role you want this system to
 serve in the cluster.
 
-OpenShift Masters serve the API and web console and coordinate the jobs to run
-across the environment.  If desired you can specify multiple Master systems for
-an HA deployment, in which case you will be prompted to identify a *separate*
-system to act as the load balancer for your cluster after all Masters and Nodes
-are defined.
+OpenShift masters serve the API and web console and coordinate the jobs to run
+across the environment. Optionally, you can specify multiple master systems for
+a high-availability (HA) deployment. If you choose an HA deployment, then you
+are prompted to identify a *separate* system to act as the load balancer for
+your cluster once you define all masters and nodes.
 
-If only one Master is specified, an etcd instance embedded within the OpenShift
-Master service will be used as the datastore.  This can be later replaced with a
-separate etcd instance if desired.  If multiple Masters are specified, a
-separate etcd cluster will be configured with each Master serving as a member.
+If only one master is specified, an etcd instance is embedded within the
+OpenShift master service to use as the datastore. This can be later replaced
+with a separate etcd instance, if required. If multiple masters are specified,
+then a separate etcd cluster is configured with each master serving as a member.
 
-Any Masters configured as part of this installation process will also be
-configured as Nodes.  This is so that the Master will be able to proxy to Pods
-from the API.  By default this Node will be unschedulable but this can be changed
-after installation with 'oadm manage-node'.
+Any masters configured as part of this installation process are also 
+configured as nodes. This enables the master to proxy to pods
+from the API. By default, this node is unschedulable, but this can be changed
+after installation with the 'oadm manage-node' command.
 
-OpenShift Nodes provide the runtime environments for containers.  They will
-host the required services to be managed by the Master.
+OpenShift nodes provide the runtime environments for containers. They host the
+required services to be managed by the master.
 
 http://docs.openshift.com/enterprise/latest/architecture/infrastructure_components/kubernetes_infrastructure.html#master
 http://docs.openshift.com/enterprise/latest/architecture/infrastructure_components/kubernetes_infrastructure.html#node
@@ -152,7 +151,7 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
                                                 value_proc=validate_prompt_hostname)
 
         if not masters_set:
-            if click.confirm('Will this host be an OpenShift Master?'):
+            if click.confirm('Will this host be an OpenShift master?'):
                 host_props['roles'].append('master')
                 host_props['roles'].append('etcd')
                 num_masters += 1
@@ -181,7 +180,7 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
             print_installation_summary(hosts, oo_cfg.settings['variant_version'])
 
         # If we have one master, this is enough for an all-in-one deployment,
-        # thus we can start asking if you wish to proceed. Otherwise we assume
+        # thus we can start asking if you want to proceed. Otherwise we assume
         # you must.
         if masters_set or num_masters != 2:
             more_hosts = click.confirm('Do you want to add additional hosts?')
@@ -214,12 +213,12 @@ def print_installation_summary(hosts, version=None):
     nodes = [host for host in hosts if host.is_node()]
     dedicated_nodes = [host for host in hosts if host.is_node() and not host.is_master()]
     click.echo('')
-    click.echo('Total OpenShift Masters: %s' % len(masters))
-    click.echo('Total OpenShift Nodes: %s' % len(nodes))
+    click.echo('Total OpenShift masters: %s' % len(masters))
+    click.echo('Total OpenShift nodes: %s' % len(nodes))
 
     if len(masters) == 1 and version != '3.0':
         ha_hint_message = """
-NOTE: Add a total of 3 or more Masters to perform an HA installation."""
+NOTE: Add a total of 3 or more masters to perform an HA installation."""
         click.echo(ha_hint_message)
     elif len(masters) == 2:
         min_masters_message = """
@@ -228,19 +227,19 @@ Please add one more to proceed."""
         click.echo(min_masters_message)
     elif len(masters) >= 3:
         ha_message = """
-NOTE: Multiple Masters specified, this will be an HA deployment with a separate
+NOTE: Multiple masters specified, this will be an HA deployment with a separate
 etcd cluster. You will be prompted to provide the FQDN of a load balancer and
 a host for storage once finished entering hosts.
 """
         click.echo(ha_message)
 
         dedicated_nodes_message = """
-WARNING: Dedicated Nodes are recommended for an HA deployment. If no dedicated
-Nodes are specified, each configured Master will be marked as a schedulable
-Node."""
+WARNING: Dedicated nodes are recommended for an HA deployment. If no dedicated
+nodes are specified, each configured master will be marked as a schedulable
+node."""
 
         min_ha_nodes_message = """
-WARNING: A minimum of 3 dedicated Nodes are recommended for an HA
+WARNING: A minimum of 3 dedicated nodes are recommended for an HA
 deployment."""
         if len(dedicated_nodes) == 0:
             click.echo(dedicated_nodes_message)
@@ -253,14 +252,14 @@ deployment."""
 def print_host_summary(all_hosts, host):
     click.echo("- %s" % host.connect_to)
     if host.is_master():
-        click.echo("  - OpenShift Master")
+        click.echo("  - OpenShift master")
     if host.is_node():
         if host.is_dedicated_node():
-            click.echo("  - OpenShift Node (Dedicated)")
+            click.echo("  - OpenShift node (Dedicated)")
         elif host.is_schedulable_node(all_hosts):
-            click.echo("  - OpenShift Node")
+            click.echo("  - OpenShift node")
         else:
-            click.echo("  - OpenShift Node (Unscheduled)")
+            click.echo("  - OpenShift node (Unscheduled)")
     if host.is_master_lb():
         if host.preconfigured:
             click.echo("  - Load Balancer (Preconfigured)")
@@ -284,14 +283,14 @@ def collect_master_lb(hosts):
     this is an invalid configuration.
     """
     message = """
-Setting up High Availability Masters requires a load balancing solution.
-Please provide a the FQDN of a host that will be configured as a proxy. This
+Setting up high-availability masters requires a load balancing solution.
+Please provide the FQDN of a host that will be configured as a proxy. This
 can be either an existing load balancer configured to balance all masters on
 port 8443 or a new host that will have HAProxy installed on it.
 
-If the host provided does is not yet configured, a reference haproxy load
-balancer will be installed.  It's important to note that while the rest of the
-environment will be fault tolerant this reference load balancer will not be.
+If the host provided is not yet configured, a reference HAProxy load
+balancer will be installed. It's important to note that while the rest of the
+environment will be fault-tolerant, this reference load balancer will not be.
 It can be replaced post-installation with a load balancer with the same
 hostname.
 """
@@ -313,7 +312,7 @@ hostname.
     host_props['connect_to'] = click.prompt('Enter hostname or IP address',
                                             value_proc=validate_prompt_lb)
     install_haproxy = \
-        click.confirm('Should the reference haproxy load balancer be installed on this host?')
+        click.confirm('Should the reference HAProxy load balancer be installed on this host?')
     host_props['preconfigured'] = not install_haproxy
     host_props['roles'] = ['master_lb']
     master_lb = Host(**host_props)
@@ -325,7 +324,7 @@ def collect_storage_host(hosts):
     hosts.
     """
     message = """
-Setting up High Availability Masters requires a storage host. Please provide a
+Setting up high-availability masters requires a storage host. Please provide a
 host that will be configured as a Registry Storage.
 
 Note: Containerized storage hosts are not currently supported.
@@ -363,15 +362,15 @@ def confirm_hosts_facts(oo_cfg, callback_facts):
     hosts = oo_cfg.deployment.hosts
     click.clear()
     message = """
-A list of the facts gathered from the provided hosts follows. Because it is
-often the case that the hostname for a system inside the cluster is different
-from the hostname that is resolveable from command line or web clients
-these settings cannot be validated automatically.
+The following is a list of the facts gathered from the provided hosts. The
+hostname for a system inside the cluster is often different from the hostname
+that is resolveable from command-line or web clients, therefore these settings
+cannot be validated automatically.
 
-For some cloud providers the installer is able to gather metadata exposed in
-the instance so reasonable defaults will be provided.
+For some cloud providers, the installer is able to gather metadata exposed in
+the instance, so reasonable defaults will be provided.
 
-Plese confirm that they are correct before moving forward.
+Please confirm that they are correct before moving forward.
 
 """
     notes = """
@@ -385,7 +384,7 @@ Notes:
  * The public IP should be the externally accessible IP associated with the instance
  * The hostname should resolve to the internal IP from the instances
    themselves.
- * The public hostname should resolve to the external ip from hosts outside of
+ * The public hostname should resolve to the external IP from hosts outside of
    the cloud.
 """
 
@@ -439,24 +438,24 @@ def check_hosts_config(oo_cfg, unattended):
     masters = [host for host in oo_cfg.deployment.hosts if host.is_master()]
 
     if len(masters) == 2:
-        click.echo("A minimum of 3 Masters are required for HA deployments.")
+        click.echo("A minimum of 3 masters are required for HA deployments.")
         sys.exit(1)
 
     if len(masters) > 1:
         master_lb = [host for host in oo_cfg.deployment.hosts if host.is_master_lb()]
 
         if len(master_lb) > 1:
-            click.echo('ERROR: More than one Master load balancer specified. Only one is allowed.')
+            click.echo('ERROR: More than one master load balancer specified. Only one is allowed.')
             sys.exit(1)
         elif len(master_lb) == 1:
             if master_lb[0].is_master() or master_lb[0].is_node():
-                click.echo('ERROR: The Master load balancer is configured as a master or node. ' \
+                click.echo('ERROR: The master load balancer is configured as a master or node. ' \
                            'Please correct this.')
                 sys.exit(1)
         else:
             message = """
 ERROR: No master load balancer specified in config. You must provide the FQDN
-of a load balancer to balance the API (port 8443) on all Master hosts.
+of a load balancer to balance the API (port 8443) on all master hosts.
 
 https://docs.openshift.org/latest/install_config/install/advanced_install.html#multiple-masters
 """
@@ -467,8 +466,8 @@ https://docs.openshift.org/latest/install_config/install/advanced_install.html#m
                         if host.is_node() and not host.is_master()]
     if len(dedicated_nodes) == 0:
         message = """
-WARNING: No dedicated Nodes specified. By default, colocated Masters have
-their Nodes set to unschedulable.  If you proceed all nodes will be labelled
+WARNING: No dedicated nodes specified. By default, colocated masters have
+their nodes set to unschedulable.  If you proceed all nodes will be labelled
 as schedulable.
 """
         if unattended:
@@ -552,11 +551,10 @@ def get_host_roles_set(oo_cfg):
 
 def get_proxy_hostnames_and_excludes():
     message = """
-If a proxy is needed to reach HTTP and HTTPS traffic please enter the name below.
-This proxy will be configured by default for all processes needing to reach systems outside
-the cluster.
+If a proxy is needed to reach HTTP and HTTPS traffic, please enter the name below.
+This proxy will be configured by default for all processes that need to reach systems outside the cluster.
 
-More advanced configuration is possible if using ansible directly:
+More advanced configuration is possible if using Ansible directly:
 
 https://docs.openshift.com/enterprise/latest/install_config/http_proxies.html
 """
@@ -570,7 +568,7 @@ https://docs.openshift.com/enterprise/latest/install_config/http_proxies.html
 
     if http_proxy_hostname or https_proxy_hostname:
         message = """
-All hosts in your openshift inventory will automatically be added to the NO_PROXY value.
+All hosts in your OpenShift inventory will automatically be added to the NO_PROXY value.
 Please provide any additional hosts to be added to NO_PROXY. (ENTER for none)
 """
         proxy_excludes = click.prompt(message, default='')
@@ -594,10 +592,10 @@ Please confirm that following prerequisites have been met:
   repositories.
 * All systems have run docker-storage-setup (part of the Red Hat docker RPM).
 * All systems have working DNS that resolves not only from the perspective of
-  the installer but also from within the cluster.
+  the installer, but also from within the cluster.
 
-When the process completes you will have a default configuration for Masters
-and Nodes.  For ongoing environment maintenance it's recommended that the
+When the process completes you will have a default configuration for masters
+and nodes.  For ongoing environment maintenance it's recommended that the
 official Ansible playbooks be used.
 
 For more information on installation prerequisites please see:
@@ -712,11 +710,11 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force, verbose):
         # present a message listing already installed hosts and remove hosts if needed
         for host in installed_hosts:
             if host.is_master():
-                click.echo("{} is already an OpenShift Master".format(host))
+                click.echo("{} is already an OpenShift master".format(host))
                 # Masters stay in the list, we need to run against them when adding
                 # new nodes.
             elif host.is_node():
-                click.echo("{} is already an OpenShift Node".format(host))
+                click.echo("{} is already an OpenShift node".format(host))
                 # force is only used for reinstalls so we don't want to remove
                 # anything.
                 if not force:
@@ -869,7 +867,7 @@ def uninstall(ctx):
         # Prompt interactively to confirm:
         for host in hosts:
             click.echo("  * %s" % host.connect_to)
-        proceed = click.confirm("\nDo you wish to proceed?")
+        proceed = click.confirm("\nDo you want to proceed?")
         if not proceed:
             click.echo("Uninstall cancelled.")
             sys.exit(0)
@@ -930,7 +928,7 @@ def upgrade(ctx, latest_minor, next_major):
         playbook = mapping['major_playbook']
         new_version = mapping['major_version']
         # Update config to reflect the version we're targetting, we'll write
-        # to disk once ansible completes successfully, not before.
+        # to disk once Ansible completes successfully, not before.
         oo_cfg.settings['variant_version'] = new_version
         if oo_cfg.settings['variant'] == 'enterprise':
             oo_cfg.settings['variant'] = 'openshift-enterprise'
@@ -943,14 +941,14 @@ def upgrade(ctx, latest_minor, next_major):
         playbook = mapping['minor_playbook']
         new_version = old_version
 
-    click.echo("Openshift will be upgraded from %s %s to latest %s %s on the following hosts:\n" % (
+    click.echo("OpenShift will be upgraded from %s %s to latest %s %s on the following hosts:\n" % (
         variant, old_version, oo_cfg.settings['variant'], new_version))
     for host in oo_cfg.deployment.hosts:
         click.echo("  * %s" % host.connect_to)
 
     if not ctx.obj['unattended']:
         # Prompt interactively to confirm:
-        if not click.confirm("\nDo you wish to proceed?"):
+        if not click.confirm("\nDo you want to proceed?"):
             click.echo("Upgrade cancelled.")
             sys.exit(0)
 
@@ -968,7 +966,7 @@ def upgrade(ctx, latest_minor, next_major):
 @click.command()
 @click.option('--force', '-f', is_flag=True, default=False)
 @click.option('--gen-inventory', is_flag=True, default=False,
-              help="Generate an ansible inventory file and exit.")
+              help="Generate an Ansible inventory file and exit.")
 @click.pass_context
 def install(ctx, force, gen_inventory):
     oo_cfg = ctx.obj['oo_cfg']
@@ -1006,12 +1004,12 @@ def install(ctx, force, gen_inventory):
     # Write quick installer config file to disk:
     oo_cfg.save_to_disk()
 
-    # Write ansible inventory file to disk:
+    # Write Ansible inventory file to disk:
     inventory_file = openshift_ansible.generate_inventory(hosts_to_run_on)
 
     click.echo()
     click.echo('Wrote atomic-openshift-installer config: %s' % oo_cfg.config_path)
-    click.echo("Wrote ansible inventory: %s" % inventory_file)
+    click.echo("Wrote Ansible inventory: %s" % inventory_file)
     click.echo()
 
     if gen_inventory:
@@ -1030,7 +1028,7 @@ If changes are needed please edit the config file above and re-run.
     if error:
         # The bootstrap script will print out the log location.
         message = """
-An error was detected.  After resolving the problem please relaunch the
+An error was detected. After resolving the problem please relaunch the
 installation process.
 """
         click.echo(message)
@@ -1040,7 +1038,7 @@ installation process.
 The installation was successful!
 
 If this is your first time installing please take a look at the Administrator
-Guide for advanced options related to routing, storage, authentication and much
+Guide for advanced options related to routing, storage, authentication, and 
 more:
 
 http://docs.openshift.com/enterprise/latest/admin_guide/overview.html
