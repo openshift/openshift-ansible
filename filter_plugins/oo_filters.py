@@ -734,7 +734,8 @@ class FilterModule(object):
                 if 'storage' in hostvars['openshift']['hosted'][component]:
                     kind = hostvars['openshift']['hosted'][component]['storage']['kind']
                     create_pv = hostvars['openshift']['hosted'][component]['storage']['create_pv']
-                    if kind != None and create_pv:
+                    create_pvc = hostvars['openshift']['hosted'][component]['storage']['create_pvc']
+                    if kind != None and create_pv and create_pvc:
                         volume = hostvars['openshift']['hosted'][component]['storage']['volume']['name']
                         size = hostvars['openshift']['hosted'][component]['storage']['volume']['size']
                         access_modes = hostvars['openshift']['hosted'][component]['storage']['access_modes']

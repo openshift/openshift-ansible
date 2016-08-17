@@ -1802,7 +1802,8 @@ class OpenShiftFacts(object):
                             volumeID='123'),
                         host=None,
                         access_modes=['ReadWriteOnce'],
-                        create_pv=True
+                        create_pv=True,
+                        create_pvc=False
                     )
                 ),
                 registry=dict(
@@ -1817,7 +1818,8 @@ class OpenShiftFacts(object):
                             options='*(rw,root_squash)'),
                         host=None,
                         access_modes=['ReadWriteMany'],
-                        create_pv=True
+                        create_pv=True,
+                        create_pvc=True
                     )
                 ),
                 router=dict()
