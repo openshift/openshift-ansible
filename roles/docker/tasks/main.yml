@@ -67,7 +67,7 @@
     dest: /etc/sysconfig/docker
     regexp: '^{{ item.reg_conf_var }}=.*$'
     line: "{{ item.reg_conf_var }}='{{ item.reg_fact_val | oo_prepend_strings_in_list(item.reg_flag ~ ' ') | join(' ') }}'"
-  when: item.reg_fact_val != '' and  docker_check.stat.isreg
+  when: item.reg_fact_val != '' and  (docker_check.stat.isreg is define and docker_check.stat.isreg)
   with_items:
   - reg_conf_var: ADD_REGISTRY
     reg_fact_val: "{{ docker_additional_registries | default(None, true)}}"
@@ -96,7 +96,8 @@
       reg_fact_val: "{{ docker_no_proxy | default('') | join(',') }}"
   notify:
     - restart docker
-  when: "{{ 'http_proxy' in openshift.common or 'https_proxy' in openshift.common and docker_check.stat.isreg }}"
+  when:
+    - (docker_check.stat.isreg is define and docker_check.stat.isreg) and "{{ 'http_proxy' in openshift.common or 'https_proxy' in openshift.common }}"
 
 - name: Set various Docker options
   lineinfile:
@@ -108,7 +109,7 @@
       {% if docker_log_options is defined %} {{ docker_log_options |  oo_split() | oo_prepend_strings_in_list('--log-opt ') | join(' ')}}{% endif %}\
       {% if docker_options is defined %} {{ docker_options }}{% endif %}\
       {% if docker_disable_push_dockerhub is defined %} --confirm-def-push={{ docker_disable_push_dockerhub | bool }}{% endif %}'"
-  when: docker_check.stat.isreg
+  when: docker_check.stat.isreg is define and docker_check.stat.isreg
   notify:
     - restart docker
 
