@@ -647,6 +647,8 @@ def set_aggregate_facts(facts):
 
         internal_hostnames.add(facts['common']['hostname'])
         internal_hostnames.add(facts['common']['ip'])
+        internal_hostnames.add('localhost')
+        internal_hostnames.add('127.0.0.1')
 
         cluster_domain = facts['common']['dns_domain']
 
