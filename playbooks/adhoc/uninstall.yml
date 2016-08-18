@@ -338,7 +338,7 @@
     - /etc/ansible/facts.d/openshift.fact
     - /etc/etcd
     - /etc/systemd/system/etcd_container.service
-    - /var/lib/etcd
+    - /var/lib/etcd/*
 
 - hosts: lb
   become: yes
