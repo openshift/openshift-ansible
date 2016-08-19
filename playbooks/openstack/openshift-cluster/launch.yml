@@ -33,6 +33,7 @@
              -P external_net={{ openstack_network_external_net }}
              -P ssh_public_key="{{ openstack_ssh_public_key }}"
              -P ssh_incoming={{ openstack_ssh_access_from }}
+             -P node_port_incoming={{ openstack_node_port_access_from }}
              -P num_etcd={{ num_etcd }}
              -P num_masters={{ num_masters }}
              -P num_nodes={{ num_nodes }}

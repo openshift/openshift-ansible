@@ -12,6 +12,8 @@ openstack_ssh_public_key:       "{{ lookup('file', lookup('oo_option', 'public_k
                                     default('~/.ssh/id_rsa.pub',             True)) }}"
 openstack_ssh_access_from:      "{{ lookup('oo_option', 'ssh_from')          |
                                     default('0.0.0.0/0',                     True) }}"
+openstack_node_port_access_from: "{{ lookup('oo_option', 'node_port_from')   |
+                                    default('0.0.0.0/0',                     True) }}"
 openstack_flavor:
   dns:    "{{ lookup('oo_option', 'dns_flavor'       ) | default('m1.small',  True) }}"
   etcd:   "{{ lookup('oo_option', 'etcd_flavor'      ) | default('m1.small',  True) }}"
