@@ -1784,8 +1784,6 @@ class OpenShiftFacts(object):
             defaults['hosted'] = dict(
                 metrics=dict(
                     deploy=False,
-                    deployer_prefix='registry.access.redhat.com/openshift3/',
-                    deployer_version='3.3.0',
                     duration=7,
                     resolution='10s',
                     storage=dict(

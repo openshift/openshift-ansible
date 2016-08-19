@@ -71,7 +71,7 @@
   set_fact:
     deployer_cmd: "{{ openshift.common.client_binary }} process -f \
       {{ metrics_template_dir }}/metrics-deployer.yaml -v \
-      HAWKULAR_METRICS_HOSTNAME={{ metrics_hostname }},USE_PERSISTENT_STORAGE={{metrics_persistence | string | lower }},METRIC_DURATION={{ openshift.hosted.metrics.duration }},METRIC_RESOLUTION={{ openshift.hosted.metrics.resolution }},IMAGE_PREFIX={{ openshift.hosted.metrics.deployer_prefix }},IMAGE_VERSION={{ openshift.hosted.metrics.deployer_version }},MODE={{ deployment_mode }} \
+      HAWKULAR_METRICS_HOSTNAME={{ metrics_hostname }},USE_PERSISTENT_STORAGE={{metrics_persistence | string | lower }},METRIC_DURATION={{ openshift.hosted.metrics.duration }},METRIC_RESOLUTION={{ openshift.hosted.metrics.resolution }}{{ image_prefix }}{{ image_version }},MODE={{ deployment_mode }} \
         | {{ openshift.common.client_binary }} --namespace openshift-infra \
         --config={{ openshift_metrics_kubeconfig }} \
         create -f -"
