@@ -13,6 +13,7 @@ from ooinstall.oo_config import OOConfig, Host, OOConfigInvalidHostError
 SAMPLE_CONFIG = """
 variant: openshift-enterprise
 variant_version: 3.3
+version: v2
 deployment:
     ansible_ssh_user: root
     hosts:
@@ -43,27 +44,9 @@ deployment:
         node:
 """
 
-# Used to test automatic upgrading of config:
-LEGACY_CONFIG = """
-Description: This is the configuration file for the OpenShift Ansible-Based Installer.
-Name: OpenShift Ansible-Based Installer Configuration
-Subscription: {type: none}
-Vendor: OpenShift Community
-Version: 0.0.1
-ansible_config: /tmp/notreal/ansible.cfg
-ansible_inventory_directory: /tmp/notreal/.config/openshift/.ansible
-ansible_log_path: /tmp/ansible.log
-ansible_plugins_directory: /tmp/notreal/.python-eggs/ooinstall-3.0.0-py2.7.egg-tmp/ooinstall/ansible_plugins
-masters: [10.0.0.1]
-nodes: [10.0.0.2, 10.0.0.3]
-validated_facts:
-  10.0.0.1: {hostname: master-private.example.com, ip: 10.0.0.1, public_hostname: master.example.com, public_ip: 24.222.0.1}
-  10.0.0.2: {hostname: node1-private.example.com, ip: 10.0.0.2, public_hostname: node1.example.com, public_ip: 24.222.0.2}
-  10.0.0.3: {hostname: node2-private.example.com, ip: 10.0.0.3, public_hostname: node2.example.com, public_ip: 24.222.0.3}
-"""
-
 
 CONFIG_INCOMPLETE_FACTS = """
+version: v2
 deployment:
     ansible_ssh_user: root
     hosts:
@@ -91,6 +74,7 @@ deployment:
 
 CONFIG_BAD = """
 variant: openshift-enterprise
+version: v2
 deployment:
     ansible_ssh_user: root
     hosts:
