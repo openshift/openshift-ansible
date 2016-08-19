@@ -27,7 +27,7 @@ objects:
         spec:
           containers:
             - name: registry-console
-              image: cockpit/kubernetes
+              image: ${IMAGE_NAME}:${IMAGE_VERSION}
               ports:
                 - containerPort: 9090
                   protocol: TCP
@@ -57,8 +57,6 @@ objects:
                   value: "${OPENSHIFT_OAUTH_CLIENT_ID}"
                 - name: KUBERNETES_INSECURE
                   value: "false"
-                - name: KUBERNETES_CA_DATA
-                  value: "${KUBERNETES_CA_DATA}"
                 - name: COCKPIT_KUBE_INSECURE
                   value: "false"
                 - name: REGISTRY_ONLY
@@ -121,9 +119,6 @@ parameters:
   - description: "Oauth client id"
     name: OPENSHIFT_OAUTH_CLIENT_ID
     value: "cockpit-oauth-client"
-  - description: "PEM Encoded certificate to use for CA verification. Overrides service account CA."
-    name: KUBERNETES_CA_DATA
-    value: ""
   - description: "The integrated registry hostname exposed via route, e.g. registry.example.com"
     name: REGISTRY_HOST
     required: true
