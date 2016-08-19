@@ -48,6 +48,8 @@
              -P infra_flavor={{ openstack_flavor["infra"] }}
              -P dns_flavor={{ openstack_flavor["dns"] }}
              openshift-ansible-{{ cluster_id }}-stack'
+    args:
+      chdir: '{{ playbook_dir }}'
 
   - name: Wait for OpenStack Stack readiness
     shell: 'heat stack-show openshift-ansible-{{ cluster_id }}-stack | awk ''$2 == "stack_status" {print $4}'''
@@ -107,9 +109,9 @@
       openshift_node_labels:
         type: "etcd"
     with_together:
-      - parsed_outputs.etcd_names
-      - parsed_outputs.etcd_ips
-      - parsed_outputs.etcd_floating_ips
+      - '{{ parsed_outputs.etcd_names }}'
+      - '{{ parsed_outputs.etcd_ips }}'
+      - '{{ parsed_outputs.etcd_floating_ips }}'
 
   - name: Add new master instances groups and variables
     add_host:
@@ -121,9 +123,9 @@
       openshift_node_labels:
         type: "master"
     with_together:
-      - parsed_outputs.master_names
-      - parsed_outputs.master_ips
-      - parsed_outputs.master_floating_ips
+      - '{{ parsed_outputs.master_names }}'
+      - '{{ parsed_outputs.master_ips }}'
+      - '{{ parsed_outputs.master_floating_ips }}'
 
   - name: Add new node instances groups and variables
     add_host:
@@ -135,9 +137,9 @@
       openshift_node_labels:
         type: "compute"
     with_together:
-      - parsed_outputs.node_names
-      - parsed_outputs.node_ips
-      - parsed_outputs.node_floating_ips
+      - '{{ parsed_outputs.node_names }}'
+      - '{{ parsed_outputs.node_ips }}'
+      - '{{ parsed_outputs.node_floating_ips }}'
 
   - name: Add new infra instances groups and variables
     add_host:
@@ -149,9 +151,9 @@
       openshift_node_labels:
         type: "infra"
     with_together:
-      - parsed_outputs.infra_names
-      - parsed_outputs.infra_ips
-      - parsed_outputs.infra_floating_ips
+      - '{{ parsed_outputs.infra_names }}'
+      - '{{ parsed_outputs.infra_ips }}'
+      - '{{ parsed_outputs.infra_floating_ips }}'
 
   - name: Add DNS groups and variables
     add_host:
@@ -166,10 +168,10 @@
       host: '{{ item }}'
       port: 22
     with_flattened:
-      - parsed_outputs.master_floating_ips
-      - parsed_outputs.node_floating_ips
-      - parsed_outputs.infra_floating_ips
-      - parsed_outputs.dns_floating_ip
+      - '{{ parsed_outputs.master_floating_ips }}'
+      - '{{ parsed_outputs.node_floating_ips }}'
+      - '{{ parsed_outputs.infra_floating_ips }}'
+      - '{{ parsed_outputs.dns_floating_ip }}'
 
   - name: Wait for user setup
     command: 'ssh -o StrictHostKeyChecking=no -o PasswordAuthentication=no -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null {{ deployment_vars[deployment_type].ssh_user }}@{{ item }} echo {{ deployment_vars[deployment_type].ssh_user }} user is setup'
@@ -178,10 +180,10 @@
     retries: 30
     delay: 1
     with_flattened:
-      - parsed_outputs.master_floating_ips
-      - parsed_outputs.node_floating_ips
-      - parsed_outputs.infra_floating_ips
-      - parsed_outputs.dns_floating_ip
+      - '{{ parsed_outputs.master_floating_ips }}'
+      - '{{ parsed_outputs.node_floating_ips }}'
+      - '{{ parsed_outputs.infra_floating_ips }}'
+      - '{{ parsed_outputs.dns_floating_ip }}'
 
 - include: update.yml
 
