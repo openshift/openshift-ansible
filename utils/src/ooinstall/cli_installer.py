@@ -127,7 +127,7 @@ OpenShift master service to use as the datastore. This can be later replaced
 with a separate etcd instance, if required. If multiple masters are specified,
 then a separate etcd cluster is configured with each master serving as a member.
 
-Any masters configured as part of this installation process are also 
+Any masters configured as part of this installation process are also
 configured as nodes. This enables the master to proxy to pods
 from the API. By default, this node is unschedulable, but this can be changed
 after installation with the 'oadm manage-node' command.
@@ -604,9 +604,8 @@ https://docs.openshift.com/enterprise/latest/admin_guide/install/prerequisites.h
     confirm_continue(message)
     click.clear()
 
-    if not oo_cfg.settings.get('ansible_ssh_user', ''):
-        oo_cfg.deployment.variables['ansible_ssh_user'] = \
-                                                            get_ansible_ssh_user()
+    if not oo_cfg.deployment.variables.get('ansible_ssh_user', False):
+        oo_cfg.deployment.variables['ansible_ssh_user'] = get_ansible_ssh_user()
         click.clear()
 
     if not oo_cfg.settings.get('variant', ''):
@@ -1038,7 +1037,7 @@ installation process.
 The installation was successful!
 
 If this is your first time installing please take a look at the Administrator
-Guide for advanced options related to routing, storage, authentication, and 
+Guide for advanced options related to routing, storage, authentication, and
 more:
 
 http://docs.openshift.com/enterprise/latest/admin_guide/overview.html
