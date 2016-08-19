@@ -42,6 +42,12 @@ parameters:
     description: Source of legitimate ssh connections
     default: 0.0.0.0/0
 
+  node_port_incoming:
+    type: string
+    label: Source of node port connections
+    description: Authorized sources targetting node ports
+    default: 0.0.0.0/0
+
   num_etcd:
     type: number
     label: Number of etcd nodes
@@ -393,6 +399,11 @@ resources:
           port_range_min: 4789
           port_range_max: 4789
           remote_mode: remote_group_id
+        - direction: ingress
+          protocol: tcp
+          port_range_min: 30000
+          port_range_max: 32767
+          remote_ip_prefix: { get_param: node_port_incoming }
 
   infra-secgrp:
     type: OS::Neutron::SecurityGroup

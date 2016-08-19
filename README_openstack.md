@@ -43,6 +43,7 @@ The following options are used only by `heat_stack.yaml`. They are so used only 
 * `external_net` (default to `external`): Name of the external network to connect to
 * `floating_ip_pool` (default to `external`): comma separated list of floating IP pools
 * `ssh_from` (default to `0.0.0.0/0`): IPs authorized to connect to the VMs via ssh
+* `node_port_from` (default to `0.0.0.0/0`): IPs authorized to connect to the services exposed via nodePort
 
 
 Creating a cluster
