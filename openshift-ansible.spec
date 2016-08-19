@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.12
+Version:        3.3.13
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Aug 19 2016 Troy Dawson <tdawson@redhat.com> 3.3.13-1
+- Fix warnings in OpenStack provider with ansible 2.1 (lhuard@amadeus.com)
+- Mount /sys rw (sdodson@redhat.com)
+- Update uninstall.yml (sdodson@redhat.com)
+- Fix padding on registry config (sdodson@redhat.com)
+
 * Wed Aug 17 2016 Troy Dawson <tdawson@redhat.com> 3.3.12-1
 - Fixes to typos, grammar, and product branding in cli_installer
   (tpoitras@redhat.com)
