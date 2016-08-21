@@ -1,4 +1,21 @@
 ---
 - name: Generate Environment ID
-  shell: echo "$(date +%s)"
-  register: env_random_id
+  set_fact:
+    env_random_id: "{{ ansible_date_time.epoch }}"
+  run_once: true
+  delegate_to: localhost
+
+- name: Set default Environment ID
+  set_fact:
+    default_env_id: "casl-{{ lookup('env','OS_USERNAME') }}-{{ env_random_id }}"
+  delegate_to: localhost
+
+- name: Setting Common Facts
+  set_fact:
+    env_id: "{{ env_id | default(default_env_id) }}"
+  delegate_to: localhost
+
+- name: Updating DNS domain to include env_id (if not empty)
+  set_fact:
+    full_dns_domain: "{{ (env_id|trim == '') | ternary(dns_domain, env_id + '.' + dns_domain) }}"
+  delegate_to: localhost

@@ -1,11 +1,11 @@
 ---
 - name: Setting Hostname Fact
   set_fact:
-    new_hostname: "{{ custom_hostname | default(inventory_hostname) }}"
+    new_hostname: "{{ custom_hostname | default(inventory_hostname_short) }}"
 
 - name: Setting FQDN Fact
   set_fact:
-    new_fqdn: "{{ new_hostname }}.{{ dns_domain }}"
+    new_fqdn: "{{ new_hostname }}.{{ full_dns_domain }}"
 
 - name: Setting hostname and DNS domain
   hostname: name="{{ new_fqdn }}"
