@@ -338,7 +338,10 @@
     - /etc/ansible/facts.d/openshift.fact
     - /etc/etcd
     - /etc/systemd/system/etcd_container.service
-    - /var/lib/etcd/*
+
+  - name: Remove etcd data
+    shell: rm -rf /var/lib/etcd/*
+    failed_when: false
 
 - hosts: lb
   become: yes
