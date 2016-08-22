@@ -5,10 +5,11 @@
 - name: Determine if volume is already attached to dc/docker-registry
   command: "{{ openshift.common.client_binary }} get -o template dc/docker-registry --template=\\{\\{.spec.template.spec.volumes\\}\\} --output-version=v1"
   changed_when: false
+  failed_when: false
   register: registry_volumes_output
 
 - set_fact:
-    volume_attached: "{{ registry_volume_claim in registry_volumes_output.stdout }}"
+    volume_attached: "{{ registry_volume_claim in (registry_volumes_output).stdout | default(['']) }}"
 
 - name: Add volume to dc/docker-registry
   command: >
