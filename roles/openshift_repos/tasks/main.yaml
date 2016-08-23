@@ -37,12 +37,12 @@
   - "fedora-openshift-enterprise/repos/*"
   - "fedora-origin/repos/*"
   - "online/repos/*"
+  - "openshift-enterprise/repos/*"
   - "origin/repos/*"
   - "removed/repos/*"
   when: not openshift.common.is_containerized | bool
         and not (item | search("/files/" ~ openshift_deployment_type ~ "/repos"))
         and (ansible_os_family == "RedHat" and ansible_distribution != "Fedora")
-        and not openshift_deployment_type == 'openshift-enterprise'
   notify: refresh cache
 
 - name: Remove any yum repo files for other deployment types Fedora
@@ -53,12 +53,12 @@
   - "fedora-openshift-enterprise/repos/*"
   - "fedora-origin/repos/*"
   - "online/repos/*"
+  - "openshift-enterprise/repos/*"
   - "origin/repos/*"
   - "removed/repos/*"
   when: not openshift.common.is_containerized | bool
         and not (item | search("/files/fedora-" ~ openshift_deployment_type ~ "/repos"))
         and (ansible_distribution == "Fedora")
-        and not openshift_deployment_type == 'openshift-enterprise'
   notify: refresh cache
 
 - name: Configure gpg keys if needed
