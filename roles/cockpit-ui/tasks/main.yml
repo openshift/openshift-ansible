@@ -1,15 +1,47 @@
 ---
-- name: Expose registry with route
-  command: oc expose service docker-registry
+- name: Expose docker-registry
+  command: >
+    {{ openshift.common.client_binary }} expose service docker-registry -n default
+  register: expose_docker_registry
+  changed_when: "'already exists' not in expose_docker_registry.stderr"
+  failed_when: "'already exists' not in expose_docker_registry.stderr and expose_docker_registry.rc != 0"
 
-- name: Install Cockpit template
-  command: oc create -f registry-console.yaml -n default
+- name: Create passthrough route for registry-console
+  command: >
+    {{ openshift.common.client_binary }} create route passthrough
+    --service registry-console
+    --port registry-console
+    -n default
+  register: create_registry_console_route
+  changed_when: "'already exists' not in create_registry_console_route.stderr"
+  failed_when: "'already exists' not in create_registry_console_route.stderr and create_registry_console_route.rc != 0"
 
-- name: Create passthrough route for Registry
-  command: oc create route passthrough --service registry-console --port registry-console -n default
+- name: Retrieve docker-registry route
+  command: "{{ openshift.common.client_binary }} get route docker-registry -n default --template='{{ '{{' }} .spec.host {{ '}}' }}'"
+  register: docker_registry_route
+  failed_when: false
+  changed_when: false
 
-- name: Deploy Registry
-  command: oc new-app -n default --template=registry-console -p OPENSHIFT_OAUTH_PROVIDER_URL="{{ openshift_https_proxy }}:8443",REGISTRY_HOST=$(oc get route docker-registry -n default --template='{{ .spec.host }}'),COCKPIT_KUBE_URL=$(oc get route registry-console -n default --template='https://{{ .spec.host }}')
+- name: Retrieve cockpit kube url
+  command: "{{ openshift.common.client_binary }} get route registry-console -n default --template='https://{{ '{{' }} .spec.host {{ '}}' }}'"
+  register: registry_console_cockpit_kube_url
+  failed_when: false
+  changed_when: false
+
+- set_fact:
+    cockpit_image_prefix: "{{ '-p IMAGE_PREFIX=' ~ openshift_cockpit_deployer_prefix | default('') }}"
+
+- name: Deploy registry-console
+  command: >
+    {{ openshift.common.client_binary }} new-app --template=registry-console
+    {{ cockpit_image_prefix }}
+    -p OPENSHIFT_OAUTH_PROVIDER_URL="{{ openshift.master.public_api_url }}"
+    -p REGISTRY_HOST="{{ docker_registry_route.stdout }}"
+    -p COCKPIT_KUBE_URL="{{ registry_console_cockpit_kube_url.stdout }}"
+    -n default
+  register: deploy_registry_console
+  changed_when: "'already exists' not in deploy_registry_console.stderr"
+  failed_when: "'already exists' not in deploy_registry_console.stderr and deploy_registry_console.rc != 0"
 
 - name: Enable cockpit-ui
   service:
