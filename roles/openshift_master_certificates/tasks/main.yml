@@ -164,3 +164,29 @@
     owner: "{{ item }}"
     group: "{{ 'root' if item == 'root' else _ansible_ssh_user_gid.stdout  }}"
   with_items: "{{ client_users }}"
+
+# Ensure ca-bundle exists for 3.2+ configuration
+- name: Check for ca-bundle.crt
+  stat:
+    path: "{{ openshift.common.config_base }}/master/ca-bundle.crt"
+  register: ca_bundle_stat
+  failed_when: false
+
+- name: Check for ca.crt
+  stat:
+    path: "{{ openshift.common.config_base }}/master/ca.crt"
+  register: ca_crt_stat
+  failed_when: false
+
+- name: Migrate ca.crt to ca-bundle.crt
+  command: mv ca.crt ca-bundle.crt
+  args:
+    chdir: "{{ openshift.common.config_base }}/master"
+  when: ca_crt_stat.stat.isreg and not ca_bundle_stat.stat.exists
+
+- name: Link ca.crt to ca-bundle.crt
+  file:
+    src: "{{ openshift.common.config_base }}/master/ca-bundle.crt"
+    path: "{{ openshift.common.config_base }}/master/ca.crt"
+    state: link
+  when: ca_crt_stat.stat.isreg and not ca_bundle_stat.stat.exists
