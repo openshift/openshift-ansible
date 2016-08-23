@@ -188,7 +188,7 @@
   - include: docker/upgrade.yml
     when: l_docker_upgrade is defined and l_docker_upgrade | bool and not openshift.common.is_atomic | bool
   - include: "{{ node_config_hook }}"
-    when: node_config_hook is defined
+    when: node_config_hook is defined and inventory_hostname in groups.oo_nodes_to_config
 
   - include: rpm_upgrade.yml
     vars:
