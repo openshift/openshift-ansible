@@ -165,22 +165,34 @@ class OOConfig(object):
         self._set_defaults()
 
 
+# pylint: disable=too-many-branches
     def _read_config(self):
+        def _print_read_config_error(error, path='the configuration file'):
+            message = """
+Error loading config. {}.
+
+See https://docs.openshift.com/enterprise/latest/install_config/install/quick_install.html#defining-an-installation-configuration-file
+for information on creating a configuration file or delete {} and re-run the installer.
+"""
+            print message.format(error, path)
+
         try:
             if os.path.exists(self.config_path):
                 with open(self.config_path, 'r') as cfgfile:
                     loaded_config = yaml.safe_load(cfgfile.read())
 
-                # Use the presence of a Description as an indicator this is
-                # a legacy config file:
-                if 'Description' in self.settings:
-                    self._upgrade_legacy_config()
+                if not 'version' in loaded_config:
+                    _print_read_config_error('Legacy configuration file found', self.config_path)
+                    sys.exit(0)
+
+                if loaded_config.get('version', '') == 'v1':
+                    loaded_config = self._upgrade_v1_config(loaded_config)
 
                 try:
                     host_list = loaded_config['deployment']['hosts']
                     role_list = loaded_config['deployment']['roles']
                 except KeyError as e:
-                    print "Error loading config, no such key: {}".format(e)
+                    _print_read_config_error("No such key: {}".format(e), self.config_path)
                     sys.exit(0)
 
                 for setting in CONFIG_PERSIST_SETTINGS:
@@ -213,32 +225,36 @@ class OOConfig(object):
             raise OOConfigFileError(
                 'Config file "{}" is not a valid YAML document'.format(self.config_path))
 
-    def _upgrade_legacy_config(self):
-        new_hosts = []
-        remove_settings = ['validated_facts', 'Description', 'Name',
-            'Subscription', 'Vendor', 'Version', 'masters', 'nodes']
+    def _upgrade_v1_config(self, config):
+        new_config_data = {}
+        new_config_data['deployment'] = {}
+        new_config_data['deployment']['hosts'] = []
+        new_config_data['deployment']['roles'] = {}
+        new_config_data['deployment']['variables'] = {}
 
-        if 'validated_facts' in self.settings:
-            for key, value in self.settings['validated_facts'].iteritems():
-                value['connect_to'] = key
-                if 'masters' in self.settings and key in self.settings['masters']:
-                    value['master'] = True
-                if 'nodes' in self.settings and key in self.settings['nodes']:
-                    value['node'] = True
-                new_hosts.append(value)
-        self.settings['hosts'] = new_hosts
+        role_list = {}
 
-        for s in remove_settings:
-            if s in self.settings:
-                del self.settings[s]
+        if config.get('ansible_ssh_user', False):
+            new_config_data['deployment']['ansible_ssh_user'] = config['ansible_ssh_user']
 
-        # A legacy config implies openshift-enterprise 3.0:
-        self.settings['variant'] = 'openshift-enterprise'
-        self.settings['variant_version'] = '3.0'
+        for host in config['hosts']:
+            host_props = {}
+            host_props['roles'] = []
+            host_props['connect_to'] = host['connect_to']
 
-    def _upgrade_v1_config(self):
-        #TODO write code to upgrade old config
-        return
+            for prop in ['ip', 'public_ip', 'hostname', 'public_hostname', 'containerized', 'preconfigured']:
+                host_props[prop] = host.get(prop, None)
+
+            for role in ['master', 'node', 'master_lb', 'storage', 'etcd']:
+                if host.get(role, False):
+                    host_props['roles'].append(role)
+                    role_list[role] = ''
+
+            new_config_data['deployment']['hosts'].append(host_props)
+
+        new_config_data['deployment']['roles'] = role_list
+
+        return new_config_data
 
     def _set_defaults(self):
 
