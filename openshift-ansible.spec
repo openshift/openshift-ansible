@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.13
+Version:        3.3.14
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,29 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Aug 23 2016 Scott Dodson <sdodson@redhat.com> 3.3.14-1
+- a-o-i: Fix ansible_ssh_user question (smunilla@redhat.com)
+- Don't run node config upgrade hook if host is not a node.
+  (dgoodwin@redhat.com)
+- Link ca to ca-bundle when ca-bundle does not exist. (abutcher@redhat.com)
+- Better error if no OpenShift RPMs are available. (dgoodwin@redhat.com)
+- Revert "Due to problems with with_fileglob lets avoid using it for now"
+  (sdodson@redhat.com)
+- Replace some virsh commands by native virt_XXX ansible module
+  (lhuard@amadeus.com)
+- Add warning at end of 3.3 upgrade if pluginOrderOverride is found.
+  (dgoodwin@redhat.com)
+- a-o-i: Remove Legacy Config Upgrade (smunilla@redhat.com)
+- Fix etcd uninstall (sdodson@redhat.com)
+- Bug 1358951 - Error loading config, no such key: 'deployment' when using
+  previously valid answers file (smunilla@redhat.com)
+- Fix standalone Docker upgrade missing symlink. (dgoodwin@redhat.com)
+- Open OpenStack security group for the service node port range
+  (lhuard@amadeus.com)
+- Fix the “node on master” feature (lhuard@amadeus.com)
+- Due to problems with with_fileglob lets avoid using it for now
+  (sdodson@redhat.com)
+
 * Fri Aug 19 2016 Troy Dawson <tdawson@redhat.com> 3.3.13-1
 - Fix warnings in OpenStack provider with ansible 2.1 (lhuard@amadeus.com)
 - Mount /sys rw (sdodson@redhat.com)
