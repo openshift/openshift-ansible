@@ -43,3 +43,5 @@ coverage.xml
 
 # Sphinx documentation
 docs/_build/
+oo-install
+oo-installenv

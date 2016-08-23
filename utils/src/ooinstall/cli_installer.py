@@ -13,6 +13,17 @@ from ooinstall.oo_config import OOConfigInvalidHostError
 from ooinstall.oo_config import Host, Role
 from ooinstall.variants import find_variant, get_variant_version_combos
 
+import logging
+installer_log = logging.getLogger('installer')
+installer_log.setLevel(logging.CRITICAL)
+installer_file_handler = logging.FileHandler('/tmp/installer.txt')
+installer_file_handler.setFormatter(
+    logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+# Example output:
+#   2016-08-23 07:34:58,480 - installer - DEBUG - Going to 'load_system_facts'
+installer_file_handler.setLevel(logging.DEBUG)
+installer_log.addHandler(installer_file_handler)
+
 DEFAULT_ANSIBLE_CONFIG = '/usr/share/atomic-openshift-utils/ansible.cfg'
 DEFAULT_PLAYBOOK_DIR = '/usr/share/ansible/openshift-ansible/'
 
@@ -798,11 +809,14 @@ def set_infra_nodes(hosts):
     default="/tmp/ansible.log")
 @click.option('-v', '--verbose',
     is_flag=True, default=False)
+@click.option('-d', '--debug',
+    help="Enable installer debugging (/tmp/installer.log)",
+    is_flag=True, default=False)
 @click.help_option('--help', '-h')
 #pylint: disable=too-many-arguments
 #pylint: disable=line-too-long
 # Main CLI entrypoint, not much we can do about too many arguments.
-def cli(ctx, unattended, configuration, ansible_playbook_directory, ansible_config, ansible_log_path, verbose):
+def cli(ctx, unattended, configuration, ansible_playbook_directory, ansible_config, ansible_log_path, verbose, debug):
     """
     atomic-openshift-installer makes the process for installing OSE or AEP
     easier by interactively gathering the data needed to run on each host.
@@ -810,6 +824,14 @@ def cli(ctx, unattended, configuration, ansible_playbook_directory, ansible_conf
 
     Further reading: https://docs.openshift.com/enterprise/latest/install_config/install/quick_install.html
     """
+    if debug:
+        # DEFAULT log level threshold is set to CRITICAL (the
+        # highest), anything below that (we only use debug/warning
+        # presently) is not logged. If '-d' is given though, we'll
+        # lower the threshold to debug (almost everything gets through)
+        installer_log.setLevel(logging.DEBUG)
+        installer_log.debug("Quick Installer debugging initialized")
+
     ctx.obj = {}
     ctx.obj['unattended'] = unattended
     ctx.obj['configuration'] = configuration
@@ -990,7 +1012,6 @@ def install(ctx, force, gen_inventory):
 
     hosts_to_run_on, callback_facts = get_hosts_to_run_on(
         oo_cfg, callback_facts, ctx.obj['unattended'], force, verbose)
-
 
     # We already verified this is not the case for unattended installs, so this can
     # only trigger for live CLI users:

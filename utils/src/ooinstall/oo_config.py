@@ -5,6 +5,9 @@ import sys
 import yaml
 from pkg_resources import resource_filename
 
+import logging
+installer_log = logging.getLogger('installer')
+
 CONFIG_PERSIST_SETTINGS = [
     'ansible_ssh_user',
     'ansible_callback_facts_yaml',
@@ -24,6 +27,15 @@ DEPLOYMENT_VARIABLES_BLACKLIST = [
 
 DEFAULT_REQUIRED_FACTS = ['ip', 'public_ip', 'hostname', 'public_hostname']
 PRECONFIGURED_REQUIRED_FACTS = ['hostname', 'public_hostname']
+
+def print_read_config_error(error, path='the configuration file'):
+            message = """
+Error loading config. {}.
+
+See https://docs.openshift.com/enterprise/latest/install_config/install/quick_install.html#defining-an-installation-configuration-file
+for information on creating a configuration file or delete {} and re-run the installer.
+"""
+            print message.format(error, path)
 
 class OOConfigFileError(Exception):
     """The provided config file path can't be read/written
@@ -164,25 +176,20 @@ class OOConfig(object):
         self._read_config()
         self._set_defaults()
 
-
-# pylint: disable=too-many-branches
+    # pylint: disable=too-many-branches
+    #         Lots of different checks ran in a single method, could
+    #         use a little refactoring-love some time
     def _read_config(self):
-        def _print_read_config_error(error, path='the configuration file'):
-            message = """
-Error loading config. {}.
-
-See https://docs.openshift.com/enterprise/latest/install_config/install/quick_install.html#defining-an-installation-configuration-file
-for information on creating a configuration file or delete {} and re-run the installer.
-"""
-            print message.format(error, path)
-
+        installer_log.debug("Attempting to read the OO Config")
         try:
+            installer_log.debug("Attempting to see if the provided config file exists: %s", self.config_path)
             if os.path.exists(self.config_path):
+                installer_log.debug("We think the config file exists: %s", self.config_path)
                 with open(self.config_path, 'r') as cfgfile:
                     loaded_config = yaml.safe_load(cfgfile.read())
 
                 if not 'version' in loaded_config:
-                    _print_read_config_error('Legacy configuration file found', self.config_path)
+                    print_read_config_error('Legacy configuration file found', self.config_path)
                     sys.exit(0)
 
                 if loaded_config.get('version', '') == 'v1':
@@ -192,14 +199,31 @@ for information on creating a configuration file or delete {} and re-run the ins
                     host_list = loaded_config['deployment']['hosts']
                     role_list = loaded_config['deployment']['roles']
                 except KeyError as e:
-                    _print_read_config_error("No such key: {}".format(e), self.config_path)
+                    print_read_config_error("No such key: {}".format(e), self.config_path)
+                    print "Error loading config, required key missing: {}".format(e)
                     sys.exit(0)
 
                 for setting in CONFIG_PERSIST_SETTINGS:
-                    try:
-                        self.settings[setting] = str(loaded_config[setting])
-                    except KeyError:
-                        continue
+                    persisted_value = loaded_config.get(setting)
+                    if persisted_value is not None:
+                        self.settings[setting] = str(persisted_value)
+
+                # We've loaded any persisted configs, let's verify any
+                # paths which are required for a correct and complete
+                # install
+
+                # - ansible_callback_facts_yaml - Settings from a
+                #   pervious run. If the file doesn't exist then we
+                #   will just warn about it for now and recollect the
+                #   facts.
+                if self.settings.get('ansible_callback_facts_yaml', None) is not None:
+                    if not os.path.exists(self.settings['ansible_callback_facts_yaml']):
+                        # Cached callback facts file does not exist
+                        installer_log.warning("The specified 'ansible_callback_facts_yaml'"
+                                              "file does not exist (%s)",
+                                              self.settings['ansible_callback_facts_yaml'])
+                        installer_log.debug("Remote system facts will be collected again later")
+                        self.settings.pop('ansible_callback_facts_yaml')
 
                 for setting in loaded_config['deployment']:
                     try:
@@ -224,6 +248,8 @@ for information on creating a configuration file or delete {} and re-run the ins
         except yaml.scanner.ScannerError:
             raise OOConfigFileError(
                 'Config file "{}" is not a valid YAML document'.format(self.config_path))
+        installer_log.debug("Parsed the config file")
+
 
     def _upgrade_v1_config(self, config):
         new_config_data = {}
@@ -257,11 +283,21 @@ for information on creating a configuration file or delete {} and re-run the ins
         return new_config_data
 
     def _set_defaults(self):
+        installer_log.debug("Setting defaults, current OOConfig settings: %s", self.settings)
 
         if 'ansible_inventory_directory' not in self.settings:
             self.settings['ansible_inventory_directory'] = self._default_ansible_inv_dir()
+
         if not os.path.exists(self.settings['ansible_inventory_directory']):
+            installer_log.debug("'ansible_inventory_directory' does not exist, "
+                                "creating it now (%s)",
+                                self.settings['ansible_inventory_directory'])
             os.makedirs(self.settings['ansible_inventory_directory'])
+        else:
+            installer_log.debug("We think this 'ansible_inventory_directory' "
+                                "is OK: %s",
+                                self.settings['ansible_inventory_directory'])
+
         if 'ansible_plugins_directory' not in self.settings:
             self.settings['ansible_plugins_directory'] = \
                 resource_filename(__name__, 'ansible_plugins')
@@ -269,8 +305,14 @@ for information on creating a configuration file or delete {} and re-run the ins
             self.settings['version'] = 'v2'
 
         if 'ansible_callback_facts_yaml' not in self.settings:
+            installer_log.debug("No 'ansible_callback_facts_yaml' in self.settings")
             self.settings['ansible_callback_facts_yaml'] = '%s/callback_facts.yaml' % \
                 self.settings['ansible_inventory_directory']
+            installer_log.debug("Value: %s", self.settings['ansible_callback_facts_yaml'])
+        else:
+            installer_log.debug("'ansible_callback_facts_yaml' already set "
+                                "in self.settings: %s",
+                                self.settings['ansible_callback_facts_yaml'])
 
         if 'ansible_ssh_user' not in self.settings:
             self.settings['ansible_ssh_user'] = ''
@@ -282,6 +324,8 @@ for information on creating a configuration file or delete {} and re-run the ins
         for setting in self.settings.keys():
             if not self.settings[setting]:
                 self.settings.pop(setting)
+
+        installer_log.debug("Updated OOConfig settings: %s", self.settings)
 
     def _default_ansible_inv_dir(self):
         return os.path.normpath(

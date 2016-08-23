@@ -11,6 +11,9 @@ to be specified by the user, and to point the generic variants to the latest
 version.
 """
 
+import logging
+installer_log = logging.getLogger('installer')
+
 
 class Version(object):
     def __init__(self, name, ansible_key):
