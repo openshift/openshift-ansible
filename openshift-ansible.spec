@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.14
+Version:        3.3.15
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,28 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Aug 24 2016 Scott Dodson <sdodson@redhat.com> 3.3.15-1
+- simplify repo configuration (jdetiber@redhat.com)
+- don't set virt_sandbox_use_nfs on Fedora, it was replaced by virt_use_nfs
+  (maxamillion@fedoraproject.org)
+- Correct flannel cert variables. (abutcher@redhat.com)
+- Make note about ansible/install logs messing up ci tests
+  (tbielawa@redhat.com)
+- remove fedora origin copr (it's in mainline fedora now), some dnf/yum clean
+  up (maxamillion@fedoraproject.org)
+- Move nested print_read_config_error function into it's own function
+  (tbielawa@redhat.com)
+- Makefile includes ci-pyflakes target now (tbielawa@redhat.com)
+- Fix BZ1368296 by quietly recollecting facts if the cache is removed
+  (tbielawa@redhat.com)
+- Correct masterCA config typo. (abutcher@redhat.com)
+- don't gather facts when bootstrapping ansible for Fedora hosts
+  (maxamillion@fedoraproject.org)
+- a-o-i: Add variant and variant_version to migration (smunilla@redhat.com)
+- Fix upgrade failure when master-config does not have pluginOrderOverride.
+  (dgoodwin@redhat.com)
+- Add externalIPNetworkCIDRs to config (smunilla@redhat.com)
+
 * Tue Aug 23 2016 Scott Dodson <sdodson@redhat.com> 3.3.14-1
 - a-o-i: Fix ansible_ssh_user question (smunilla@redhat.com)
 - Don't run node config upgrade hook if host is not a node.
