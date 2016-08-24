@@ -6,6 +6,8 @@ import sys
 import os
 import yaml
 from ooinstall.variants import find_variant
+import logging
+installer_log = logging.getLogger('installer')
 
 CFG = None
 
@@ -216,17 +218,21 @@ def load_system_facts(inventory_file, os_facts_path, env_vars, verbose=False):
     """
     Retrieves system facts from the remote systems.
     """
+    installer_log.debug("Inside load_system_facts")
     FNULL = open(os.devnull, 'w')
     args = ['ansible-playbook', '-v'] if verbose \
         else ['ansible-playbook']
     args.extend([
         '--inventory-file={}'.format(inventory_file),
         os_facts_path])
+    installer_log.debug("Going to subprocess out to ansible now with these args: %s", ' '.join(args))
     status = subprocess.call(args, env=env_vars, stdout=FNULL)
     if not status == 0:
+        installer_log.debug("Exit status from subprocess was not 0")
         return [], 1
 
     with open(CFG.settings['ansible_callback_facts_yaml'], 'r') as callback_facts_file:
+        installer_log.debug("Going to try to read this file: %s", CFG.settings['ansible_callback_facts_yaml'])
         try:
             callback_facts = yaml.safe_load(callback_facts_file)
         except yaml.YAMLError, exc:
@@ -239,6 +245,7 @@ def load_system_facts(inventory_file, os_facts_path, env_vars, verbose=False):
 
 def default_facts(hosts, verbose=False):
     global CFG
+    installer_log.debug("Current global CFG vars here: %s", CFG)
     inventory_file = generate_inventory(hosts)
     os_facts_path = '{}/playbooks/byo/openshift_facts.yml'.format(CFG.ansible_playbook_directory)
 
@@ -250,6 +257,9 @@ def default_facts(hosts, verbose=False):
         facts_env["ANSIBLE_LOG_PATH"] = CFG.settings['ansible_log_path']
     if 'ansible_config' in CFG.settings:
         facts_env['ANSIBLE_CONFIG'] = CFG.settings['ansible_config']
+
+    installer_log.debug("facts_env: %s", facts_env)
+    installer_log.debug("Going to 'load_system_facts' next")
     return load_system_facts(inventory_file, os_facts_path, facts_env, verbose)
 
 
