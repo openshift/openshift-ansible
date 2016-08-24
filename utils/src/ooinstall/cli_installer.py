@@ -8,7 +8,7 @@ import sys
 from distutils.version import LooseVersion
 import click
 from ooinstall import openshift_ansible
-from ooinstall import OOConfig
+from ooinstall.oo_config import OOConfig
 from ooinstall.oo_config import OOConfigInvalidHostError
 from ooinstall.oo_config import Host, Role
 from ooinstall.variants import find_variant, get_variant_version_combos

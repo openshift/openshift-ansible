@@ -29,13 +29,14 @@ DEFAULT_REQUIRED_FACTS = ['ip', 'public_ip', 'hostname', 'public_hostname']
 PRECONFIGURED_REQUIRED_FACTS = ['hostname', 'public_hostname']
 
 def print_read_config_error(error, path='the configuration file'):
-            message = """
+    message = """
 Error loading config. {}.
 
 See https://docs.openshift.com/enterprise/latest/install_config/install/quick_install.html#defining-an-installation-configuration-file
 for information on creating a configuration file or delete {} and re-run the installer.
 """
-            print message.format(error, path)
+    print message.format(error, path)
+
 
 class OOConfigFileError(Exception):
     """The provided config file path can't be read/written
