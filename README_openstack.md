@@ -17,7 +17,12 @@ Install Dependencies
 * `python-neutronclient`
 * `python-heatclient`
 
-On RHEL / CentOS / Fedora:
+On Fedora:
+```
+  dnf install -y ansible python-novaclient python-neutronclient python-heatclient
+```
+
+On RHEL / CentOS:
 ```
   yum install -y ansible python-novaclient python-neutronclient python-heatclient
 ```
