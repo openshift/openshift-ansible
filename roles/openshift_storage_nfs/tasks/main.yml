@@ -20,13 +20,14 @@
 
 - name: Ensure export directories exist
   file:
-    path: "{{ openshift.hosted.registry.storage.nfs.directory }}/{{ item }}"
+    path: "{{ item.storage.nfs.directory }}/{{ item.storage.volume.name }}"
     state: directory
     mode: 0777
     owner: nfsnobody
     group: nfsnobody
   with_items:
-  - "{{ openshift.hosted.registry.storage.volume.name }}"
+  - "{{ openshift.hosted.registry }}"
+  - "{{ openshift.hosted.metrics }}"
 
 - name: Configure exports
   template:
