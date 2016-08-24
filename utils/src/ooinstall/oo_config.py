@@ -237,6 +237,12 @@ for information on creating a configuration file or delete {} and re-run the ins
         if config.get('ansible_ssh_user', False):
             new_config_data['deployment']['ansible_ssh_user'] = config['ansible_ssh_user']
 
+        if config.get('variant', False):
+            new_config_data['variant'] = config['variant']
+
+        if config.get('variant_version', False):
+            new_config_data['variant_version'] = config['variant_version']
+
         for host in config['hosts']:
             host_props = {}
             host_props['roles'] = []
