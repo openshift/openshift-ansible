@@ -1,0 +1,48 @@
+---
+- include: evaluate_groups.yml
+
+### Collect information about remote certificates
+- hosts: oo_first_master
+  become: yes
+  gather_facts: no
+  vars:
+    cert_expiry_days_warning: 30
+  tasks:
+  - name: Locate all certificate files
+    find:
+      paths:
+        - "/etc/origin/"
+        - "/etc/etcd/"
+      patterns: "*.crt"
+      get_checksum: yes
+      recurse: yes
+    register: files
+    changed_when: false
+
+  - name: Group certs by checksum to keep results unique
+    set_fact: collated_certs="{{ files.files | oo_collate_certificate_files }}"
+
+  - name: Get a list of unique certs
+    set_fact: unique_cert_paths="{{ collated_certs | oo_get_unique_certificate_files }}"
+
+  - name: Get the Subject and Expiry for the certs
+    shell: >
+      openssl x509 -in "{{ item }}" -noout -text | grep -oP '((?<=Not After : )(.*)|(?<=Subject: )(.*))'
+    with_items:
+      - "{{ unique_cert_paths }}"
+    register: expirys
+    changed_when: false
+
+  - name: Check for helathy, expired, and expiring certs
+    set_fact: certs_check_results="{{ expirys.results | oo_parse_subject_expirys | oo_check_expiry(warning_days=cert_expiry_days_warning)}}"
+
+  - name: Reminder of what the warning threshold is set to
+    debug:
+      msg: "Certificate expiration warning window is {{ cert_expiry_days_warning }} days"
+    run_once: true
+
+  - name: Notify admin if any certificates are within the expiration window
+    fail:
+      msg: "On host '{{ inventory_hostname }}' the cert {{ item.cert }} with CommonName {{ item.subject }} expires in {{ item.days_remaining }} days ({{ item.expiry }})"
+    with_items:
+      - "{{ certs_check_results.expiring_certs }}"
