@@ -173,7 +173,7 @@ oauthConfig:
 {% if openshift.common.version_gte_3_2_or_1_2 | bool %}
   masterCA: ca-bundle.crt
 {% else %}
-  masterCA: ca.rt
+  masterCA: ca.crt
 {% endif %}
   masterPublicURL: {{ openshift.master.public_api_url }}
   masterURL: {{ openshift.master.api_url }}
@@ -210,7 +210,7 @@ serviceAccountConfig:
 {% if openshift.common.version_gte_3_2_or_1_2 | bool %}
   masterCA: ca-bundle.crt
 {% else %}
-  masterCA: ca.rt
+  masterCA: ca.crt
 {% endif %}
   privateKeyFile: serviceaccounts.private.key
   publicKeyFiles:
