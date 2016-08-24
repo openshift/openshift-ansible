@@ -550,6 +550,9 @@ class FilterModule(object):
             certs += ['openshift-master.crt',
                       'openshift-master.key',
                       'openshift-master.kubeconfig']
+        if bool(hostvars['openshift']['common']['version_gte_3_3_or_1_3']):
+            certs += ['service-signer.crt',
+                      'service-signer.key']
         return certs
 
     @staticmethod

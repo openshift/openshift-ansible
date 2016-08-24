@@ -44,6 +44,13 @@ auditConfig:{{ openshift.master.audit_config | to_padded_yaml(level=1) }}
 {% endif %}
 controllerLeaseTTL: {{ openshift.master.controller_lease_ttl | default('30') }}
 {% endif %}
+{% if openshift.common.version_gte_3_3_or_1_3 | bool %}
+controllerConfig:
+  serviceServingCert:
+    signer:
+      certFile: service-signer.crt
+      keyFile: service-signer.key
+{% endif %}
 controllers: '*'
 corsAllowedOrigins:
 {% for origin in ['127.0.0.1', 'localhost', openshift.common.ip, openshift.common.public_ip] | union(openshift.common.all_hostnames) | unique %}
