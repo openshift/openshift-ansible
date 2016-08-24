@@ -6,6 +6,10 @@ Run the command:
 
 to run an array of unittests locally.
 
+You will get errors if the log files already exist and can not be
+written to by the current user (`/tmp/ansible.log` and
+`/tmp/installer.txt`). *We're working on it.*
+
 # Running From Source
 
 You will need to setup a **virtualenv** to run from source:
