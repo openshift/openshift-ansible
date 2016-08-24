@@ -66,6 +66,7 @@
       grep pluginOrderOverride {{ openshift.common.config_base }}/master/master-config.yaml
     register: grep_plugin_order_override
     when: openshift.common.version_gte_3_3_or_1_3 | bool
+    failed_when: false
   - name: Warn if pluginOrderOverride is in use in master-config.yaml
     debug: msg="WARNING pluginOrderOverride is being deprecated in master-config.yaml, please see https://docs.openshift.com/enterprise/latest/architecture/additional_concepts/admission_controllers.html for more information."
     when: not grep_plugin_order_override | skipped and grep_plugin_order_override.rc == 0
