@@ -65,6 +65,12 @@ ci-list-deps:
 	@echo "#############################################"
 	. $(NAME)env/bin/activate && pip freeze
 
+ci-pyflakes:
+	@echo "#################################################"
+	@echo "# Running Pyflakes Compliance Tests in virtualenv"
+	@echo "#################################################"
+	. $(NAME)env/bin/activate && pyflakes src/ooinstall/*.py
+
 ci-pep8:
 	@echo "#############################################"
 	@echo "# Running PEP8 Compliance Tests in virtualenv"
@@ -79,5 +85,5 @@ ci-pep8-real:
 	. $(NAME)env/bin/activate && pep8 --ignore=E501,E121,E124 src/$(SHORTNAME)/
 
 
-ci: clean virtualenv ci-list-deps ci-pylint ci-pep8 ci-unittests
+ci: clean virtualenv ci-list-deps ci-pylint ci-pep8 ci-unittests ci-pyflakes
 	:
