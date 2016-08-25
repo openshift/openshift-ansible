@@ -22,15 +22,17 @@ ROLES_TO_GROUPS_MAP = {
 VARIABLES_MAP = {
     'ansible_ssh_user': 'ansible_ssh_user',
     'deployment_type': 'deployment_type',
-    'master_routingconfig_subdomain':'openshift_master_default_subdomain',
-    'proxy_http':'openshift_http_proxy',
+    'master_routingconfig_subdomain': 'openshift_master_default_subdomain',
+    'proxy_http': 'openshift_http_proxy',
     'proxy_https': 'openshift_https_proxy',
     'proxy_exclude_hosts': 'openshift_no_proxy',
 }
 
+
 def set_config(cfg):
     global CFG
     CFG = cfg
+
 
 def generate_inventory(hosts):
     global CFG
@@ -50,8 +52,7 @@ def generate_inventory(hosts):
 
     write_inventory_vars(base_inventory, multiple_masters, lb)
 
-
-    #write_inventory_hosts
+    # write_inventory_hosts
     for role in CFG.deployment.roles:
         # write group block
         group = ROLES_TO_GROUPS_MAP.get(role, role)
@@ -70,14 +71,16 @@ def generate_inventory(hosts):
     base_inventory.close()
     return base_inventory_path
 
+
 def determine_lb_configuration(hosts):
     lb = next((host for host in hosts if host.is_master_lb()), None)
     if lb:
-        if lb.hostname == None:
+        if lb.hostname is None:
             lb.hostname = lb.connect_to
             lb.public_hostname = lb.connect_to
 
     return lb
+
 
 def write_inventory_children(base_inventory, scaleup):
     global CFG
@@ -116,28 +119,28 @@ def write_inventory_vars(base_inventory, multiple_masters, lb):
             "openshift_master_cluster_public_hostname={}\n".format(lb.public_hostname))
 
     if CFG.settings.get('variant_version', None) == '3.1':
-        #base_inventory.write('openshift_image_tag=v{}\n'.format(CFG.settings.get('variant_version')))
+        # base_inventory.write('openshift_image_tag=v{}\n'.format(CFG.settings.get('variant_version')))
         base_inventory.write('openshift_image_tag=v{}\n'.format('3.1.1.6'))
 
     write_proxy_settings(base_inventory)
 
     # Find the correct deployment type for ansible:
     ver = find_variant(CFG.settings['variant'],
-        version=CFG.settings.get('variant_version', None))[1]
+                       version=CFG.settings.get('variant_version', None))[1]
     base_inventory.write('deployment_type={}\n'.format(ver.ansible_key))
 
     if 'OO_INSTALL_ADDITIONAL_REGISTRIES' in os.environ:
         base_inventory.write('openshift_docker_additional_registries={}\n'
-          .format(os.environ['OO_INSTALL_ADDITIONAL_REGISTRIES']))
+                             .format(os.environ['OO_INSTALL_ADDITIONAL_REGISTRIES']))
     if 'OO_INSTALL_INSECURE_REGISTRIES' in os.environ:
         base_inventory.write('openshift_docker_insecure_registries={}\n'
-          .format(os.environ['OO_INSTALL_INSECURE_REGISTRIES']))
+                             .format(os.environ['OO_INSTALL_INSECURE_REGISTRIES']))
     if 'OO_INSTALL_PUDDLE_REPO' in os.environ:
         # We have to double the '{' here for literals
         base_inventory.write("openshift_additional_repos=[{{'id': 'ose-devel', "
-            "'name': 'ose-devel', "
-            "'baseurl': '{}', "
-            "'enabled': 1, 'gpgcheck': 0}}]\n".format(os.environ['OO_INSTALL_PUDDLE_REPO']))
+                             "'name': 'ose-devel', "
+                             "'baseurl': '{}', "
+                             "'enabled': 1, 'gpgcheck': 0}}]\n".format(os.environ['OO_INSTALL_PUDDLE_REPO']))
 
     for name, role_obj in CFG.deployment.roles.iteritems():
         if role_obj.variables:
@@ -153,17 +156,17 @@ def write_inventory_vars(base_inventory, multiple_masters, lb):
 def write_proxy_settings(base_inventory):
     try:
         base_inventory.write("openshift_http_proxy={}\n".format(
-                                                            CFG.settings['openshift_http_proxy']))
+            CFG.settings['openshift_http_proxy']))
     except KeyError:
         pass
     try:
         base_inventory.write("openshift_https_proxy={}\n".format(
-                                                            CFG.settings['openshift_https_proxy']))
+            CFG.settings['openshift_https_proxy']))
     except KeyError:
         pass
     try:
         base_inventory.write("openshift_no_proxy={}\n".format(
-                                                            CFG.settings['openshift_no_proxy']))
+            CFG.settings['openshift_no_proxy']))
     except KeyError:
         pass
 
@@ -192,7 +195,6 @@ def write_host(host, role, inventory, schedulable=None):
     if host.node_labels:
         if role == 'node':
             facts += ' openshift_node_labels="{}"'.format(host.node_labels)
-
 
     # Distinguish between three states, no schedulability specified (use default),
     # explicitly set to True, or explicitly set to False:
@@ -290,7 +292,7 @@ def run_ansible(playbook, inventory, env_vars, verbose=False):
 
 def run_uninstall_playbook(hosts, verbose=False):
     playbook = os.path.join(CFG.settings['ansible_playbook_directory'],
-        'playbooks/adhoc/uninstall.yml')
+                            'playbooks/adhoc/uninstall.yml')
     inventory_file = generate_inventory(hosts)
     facts_env = os.environ.copy()
     if 'ansible_log_path' in CFG.settings:
@@ -302,7 +304,7 @@ def run_uninstall_playbook(hosts, verbose=False):
 
 def run_upgrade_playbook(hosts, playbook, verbose=False):
     playbook = os.path.join(CFG.settings['ansible_playbook_directory'],
-            'playbooks/byo/openshift-cluster/upgrades/{}'.format(playbook))
+                            'playbooks/byo/openshift-cluster/upgrades/{}'.format(playbook))
 
     # TODO: Upgrade inventory for upgrade?
     inventory_file = generate_inventory(hosts)
