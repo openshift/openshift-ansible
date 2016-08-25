@@ -75,15 +75,7 @@ ci-pep8:
 	@echo "#############################################"
 	@echo "# Running PEP8 Compliance Tests in virtualenv"
 	@echo "#############################################"
-	@echo "Skipping PEP8 tests until we clean them up"
-# . $(NAME)env/bin/activate && pep8 --ignore=E501,E121,E124 src/$(SHORTNAME)/
-
-ci-pep8-real:
-	@echo "#############################################"
-	@echo "# Running PEP8 Compliance Tests in virtualenv"
-	@echo "#############################################"
 	. $(NAME)env/bin/activate && pep8 --ignore=E501,E121,E124 src/$(SHORTNAME)/
 
-
-ci: clean virtualenv ci-list-deps ci-pylint ci-pep8 ci-unittests ci-pyflakes
+ci: clean virtualenv ci-list-deps ci-pep8 ci-pylint ci-pyflakes ci-unittests
 	:
