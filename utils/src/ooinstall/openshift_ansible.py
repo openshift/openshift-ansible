@@ -25,9 +25,6 @@ VARIABLES_MAP = {
     'variant_subtype': 'deployment_subtype',
     'master_routingconfig_subdomain': 'openshift_master_default_subdomain',
     'proxy_http': 'openshift_http_proxy',
-    'variant_subtype': 'deployment_subtype',
-    'master_routingconfig_subdomain':'openshift_master_default_subdomain',
-    'proxy_http':'openshift_http_proxy',
     'proxy_https': 'openshift_https_proxy',
     'proxy_exclude_hosts': 'openshift_no_proxy',
 }

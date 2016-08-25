@@ -797,7 +797,7 @@ def set_deployment_facts_if_unset(facts):
                 curr_disabled_features = set(facts['master']['disabled_features'])
                 facts['master']['disabled_features'] = list(curr_disabled_features.union(openshift_features))
         else:
-            if deployment_type == 'atomic-enterprise':
+            if facts['common']['deployment_subtype'] == 'registry':
                 facts['master']['disabled_features'] = openshift_features
 
     if 'node' in facts:
