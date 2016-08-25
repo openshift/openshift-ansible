@@ -41,7 +41,6 @@
 - name: Configure origin yum repositories RHEL/CentOS
   copy:
     src: origin/repos/openshift-ansible-centos-paas-sig.repo
-    src: "{{ item }}"
     dest: /etc/yum.repos.d/
   notify: refresh cache
   when: ansible_os_family == "RedHat" and ansible_distribution != "Fedora"
