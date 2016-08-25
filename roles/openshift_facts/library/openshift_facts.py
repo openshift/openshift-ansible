@@ -477,6 +477,14 @@ def set_selectors(facts):
         facts['hosted']['registry'] = {}
     if 'selector' not in facts['hosted']['registry'] or facts['hosted']['registry']['selector'] in [None, 'None']:
         facts['hosted']['registry']['selector'] = selector
+    if 'metrics' not in facts['hosted']:
+        facts['hosted']['metrics'] = {}
+    if 'selector' not in facts['hosted']['metrics'] or facts['hosted']['metrics']['selector'] in [None, 'None']:
+        facts['hosted']['metrics']['selector'] = None
+    if 'logging' not in facts['hosted']:
+        facts['hosted']['logging'] = {}
+    if 'selector' not in facts['hosted']['logging'] or facts['hosted']['logging']['selector'] in [None, 'None']:
+        facts['hosted']['logging']['selector'] = None
 
     return facts
 
@@ -1791,8 +1799,9 @@ class OpenShiftFacts(object):
                             filesystem='ext4',
                             volumeID='123'),
                         host=None,
-                        access_modes=['ReadWriteMany'],
-                        create_pv=True
+                        access_modes=['ReadWriteOnce'],
+                        create_pv=True,
+                        create_pvc=False
                     )
                 ),
                 registry=dict(
@@ -1807,7 +1816,8 @@ class OpenShiftFacts(object):
                             options='*(rw,root_squash)'),
                         host=None,
                         access_modes=['ReadWriteMany'],
-                        create_pv=True
+                        create_pv=True,
+                        create_pvc=True
                     )
                 ),
                 router=dict()

@@ -151,6 +151,6 @@ parameters:
   name: HEAPSTER_NODE_ID
   value: "nodename"
 -
-  description: "How often metrics should be gathered. Defaults value of '10s' for 10 seconds"
+  description: "How often metrics should be gathered. Defaults value of '15s' for 15 seconds"
   name: METRIC_RESOLUTION
-  value: "10s"
+  value: "15s"

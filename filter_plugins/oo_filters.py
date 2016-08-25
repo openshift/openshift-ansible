@@ -17,6 +17,7 @@ import re
 import json
 import yaml
 from ansible.utils.unicode import to_unicode
+from urlparse import urlparse
 
 # Disabling too-many-public-methods, since filter methods are necessarily
 # public
@@ -709,7 +710,7 @@ class FilterModule(object):
                                         fsType=filesystem,
                                         volumeID=volume_id)))
                             persistent_volumes.append(persistent_volume)
-                        elif kind != 'object':
+                        elif not (kind == 'object' or kind == 'dynamic'):
                             msg = "|failed invalid storage kind '{0}' for component '{1}'".format(
                                 kind,
                                 component)
@@ -733,7 +734,8 @@ class FilterModule(object):
                 if 'storage' in hostvars['openshift']['hosted'][component]:
                     kind = hostvars['openshift']['hosted'][component]['storage']['kind']
                     create_pv = hostvars['openshift']['hosted'][component]['storage']['create_pv']
-                    if kind != None and create_pv:
+                    create_pvc = hostvars['openshift']['hosted'][component]['storage']['create_pvc']
+                    if kind != None and create_pv and create_pvc:
                         volume = hostvars['openshift']['hosted'][component]['storage']['volume']['name']
                         size = hostvars['openshift']['hosted'][component]['storage']['volume']['size']
                         access_modes = hostvars['openshift']['hosted'][component]['storage']['access_modes']
@@ -829,6 +831,22 @@ class FilterModule(object):
 
         return version
 
+    @staticmethod
+    def oo_hostname_from_url(url):
+        """ Returns the hostname contained in a URL
+
+            Ex: https://ose3-master.example.com/v1/api -> ose3-master.example.com
+        """
+        if not isinstance(url, basestring):
+            raise errors.AnsibleFilterError("|failed expects a string or unicode")
+        parse_result = urlparse(url)
+        if parse_result.netloc != '':
+            return parse_result.netloc
+        else:
+            # netloc wasn't parsed, assume url was missing scheme and path
+            return parse_result.path
+
+
     def filters(self):
         """ returns a mapping of filters to methods """
         return {
@@ -859,5 +877,6 @@ class FilterModule(object):
             "oo_get_hosts_from_hostvars": self.oo_get_hosts_from_hostvars,
             "oo_image_tag_to_rpm_version": self.oo_image_tag_to_rpm_version,
             "oo_merge_dicts": self.oo_merge_dicts,
+            "oo_hostname_from_url": self.oo_hostname_from_url,
             "oo_merge_hostvars": self.oo_merge_hostvars,
         }
