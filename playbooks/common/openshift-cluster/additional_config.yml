@@ -1,11 +1,3 @@
-- name: Configure flannel
-  hosts: oo_first_master
-  vars:
-    etcd_urls: "{{ openshift.master.etcd_urls }}"
-  roles:
-  - role: flannel_register
-    when: openshift.common.use_flannel | bool
-
 - name: Additional master configuration
   hosts: oo_first_master
   vars:
@@ -26,5 +18,3 @@
       (osm_use_cockpit | bool or osm_use_cockpit is undefined )
   - role: flannel_register
     when: openshift.common.use_flannel | bool
-
-
