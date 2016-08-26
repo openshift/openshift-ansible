@@ -9,7 +9,7 @@ XPAAS_VERSION=ose-v1.3.3
 ORIGIN_VERSION=${1:-v1.3}
 EXAMPLES_BASE=$(pwd)/files/examples/${ORIGIN_VERSION}
 find ${EXAMPLES_BASE} -name '*.json' -delete
-find ${EXAMPLES_BASE} -name '*.yaml' -delete
+find ${EXAMPLES_BASE} -name '*.yaml' -delete -exclude registry-console.json
 TEMP=`mktemp -d`
 pushd $TEMP
 
@@ -29,7 +29,6 @@ unzip cakephp-ex-master.zip
 unzip application-templates-master.zip
 cp origin-master/examples/db-templates/* ${EXAMPLES_BASE}/db-templates/
 cp origin-master/examples/jenkins/jenkins-*template.json ${EXAMPLES_BASE}/quickstart-templates/
-cp origin-master/examples/jenkins/pipeline/jenkinstemplate.json ${EXAMPLES_BASE}/quickstart-templates/
 cp origin-master/examples/image-streams/* ${EXAMPLES_BASE}/image-streams/
 cp django-ex-master/openshift/templates/* ${EXAMPLES_BASE}/quickstart-templates/
 cp rails-ex-master/openshift/templates/* ${EXAMPLES_BASE}/quickstart-templates/
