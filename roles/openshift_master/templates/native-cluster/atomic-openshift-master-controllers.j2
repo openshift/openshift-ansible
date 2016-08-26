@@ -4,9 +4,9 @@ CONFIG_FILE={{ openshift_master_config_file }}
 IMAGE_VERSION={{ openshift_image_tag }}
 {% endif %}
 
-{% if 'cloudprovider' in openshift and 'aws' in openshift.cloudprovider and 'kind' in openshift.cloudprovider and openshift.cloudprovider.kind == 'aws' and 'access_key' in openshift.cloudprovider.aws and 'secret_key' in openshift.cloudprovider.aws %}
-AWS_ACCESS_KEY_ID={{ openshift.cloudprovider.aws.access_key }}
-AWS_SECRET_ACCESS_KEY={{ openshift.cloudprovider.aws.secret_key }}
+{% if openshift_cloudprovider_kind | default('') == 'aws' and openshift_cloudprovider_aws_access_key is defined and openshift_cloudprovider_aws_access_key is defined %}
+AWS_ACCESS_KEY_ID={{ openshift_cloudprovider_aws_access_key }}
+AWS_SECRET_ACCESS_KEY={{ openshift_cloudprovider_aws_secret_key }}
 {% endif %}
 
 {% if 'controllers_env_vars' in openshift.master -%}
