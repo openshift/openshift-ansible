@@ -6,8 +6,8 @@ import os
 import re
 import sys
 import logging
-import setuptools.version
 import click
+from pkg_resources import parse_version
 from ooinstall import openshift_ansible
 from ooinstall.oo_config import OOConfig
 from ooinstall.oo_config import OOConfigInvalidHostError
@@ -631,9 +631,9 @@ https://docs.openshift.com/enterprise/latest/admin_guide/install/prerequisites.h
         oo_cfg.deployment.variables['master_routingconfig_subdomain'] = get_master_routingconfig_subdomain()
         click.clear()
 
-    current_version = setuptools.version.pkg_resources.parse_version(
+    current_version = parse_version(
         oo_cfg.settings.get('variant_version', '0.0'))
-    min_version = setuptools.version.pkg_resources.parse_version('3.2')
+    min_version = parse_version('3.2')
     if not oo_cfg.settings.get('openshift_http_proxy', None) and \
        current_version >= min_version:
         http_proxy, https_proxy, proxy_excludes = get_proxy_hostnames_and_excludes()
