@@ -35,13 +35,17 @@ clean:
 	@rm -fR build dist rpm-build MANIFEST htmlcov .coverage cover ooinstall.egg-info oo-install
 	@rm -fR $(NAME)env
 
+viewcover:
+	xdg-open cover/index.html
+
 virtualenv:
 	@echo "#############################################"
 	@echo "# Creating a virtualenv"
 	@echo "#############################################"
 	virtualenv $(NAME)env
 	. $(NAME)env/bin/activate && pip install -r requirements.txt
-	. $(NAME)env/bin/activate && pip install pep8 nose coverage mock flake8 PyYAML click
+	. $(NAME)env/bin/activate && pip install setuptools --upgrade
+	. $(NAME)env/bin/activate && pip install enum configparser pylint pep8 nose coverage mock flake8 PyYAML click
 
 #       If there are any special things to install do it here
 #       . $(NAME)env/bin/activate && INSTALL STUFF
@@ -50,14 +54,14 @@ ci-unittests:
 	@echo "#############################################"
 	@echo "# Running Unit Tests in virtualenv"
 	@echo "#############################################"
-#	. $(NAME)env/bin/activate && nosetests -v --with-cover --cover-html --cover-min-percentage=80 --cover-package=$(TESTPACKAGE) test/
-	. $(NAME)env/bin/activate && nosetests -v test/
+	. $(NAME)env/bin/activate && nosetests -v --with-coverage --cover-html --cover-min-percentage=70 --cover-package=$(SHORTNAME) test/
+	@echo "VIEW CODE COVERAGE REPORT WITH 'xdg-open cover/index.html' or run 'make viewcover'"
 
 ci-pylint:
 	@echo "#############################################"
 	@echo "# Running PyLint Tests in virtualenv"
 	@echo "#############################################"
-	python -m pylint --rcfile ../git/.pylintrc src/ooinstall/cli_installer.py src/ooinstall/oo_config.py src/ooinstall/openshift_ansible.py src/ooinstall/variants.py
+	. $(NAME)env/bin/activate && python -m pylint --rcfile ../git/.pylintrc src/ooinstall/cli_installer.py src/ooinstall/oo_config.py src/ooinstall/openshift_ansible.py src/ooinstall/variants.py
 
 ci-list-deps:
 	@echo "#############################################"

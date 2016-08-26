@@ -5,7 +5,8 @@
 import os
 import re
 import sys
-from distutils.version import LooseVersion
+import logging
+import setuptools.version
 import click
 from ooinstall import openshift_ansible
 from ooinstall.oo_config import OOConfig
@@ -13,7 +14,6 @@ from ooinstall.oo_config import OOConfigInvalidHostError
 from ooinstall.oo_config import Host, Role
 from ooinstall.variants import find_variant, get_variant_version_combos
 
-import logging
 installer_log = logging.getLogger('installer')
 installer_log.setLevel(logging.CRITICAL)
 installer_file_handler = logging.FileHandler('/tmp/installer.txt')
@@ -96,27 +96,6 @@ def list_hosts(hosts):
     hosts_idx = range(len(hosts))
     for idx in hosts_idx:
         click.echo('   {}: {}'.format(idx, hosts[idx]))
-
-
-def delete_hosts(hosts):
-    while True:
-        list_hosts(hosts)
-        del_idx = click.prompt('Select host to delete, y/Y to confirm, '
-                               'or n/N to add more hosts', default='n')
-        try:
-            del_idx = int(del_idx)
-            hosts.remove(hosts[del_idx])
-        except IndexError:
-            click.echo("\"{}\" doesn't match any hosts listed.".format(del_idx))
-        except ValueError:
-            try:
-                response = del_idx.lower()
-                if response in ['y', 'n']:
-                    return hosts, response
-                click.echo("\"{}\" doesn't correspond to any valid input.".format(del_idx))
-            except AttributeError:
-                click.echo("\"{}\" doesn't correspond to any valid input.".format(del_idx))
-    return hosts, None
 
 
 def collect_hosts(oo_cfg, existing_env=False, masters_set=False, print_summary=True):
@@ -652,8 +631,11 @@ https://docs.openshift.com/enterprise/latest/admin_guide/install/prerequisites.h
         oo_cfg.deployment.variables['master_routingconfig_subdomain'] = get_master_routingconfig_subdomain()
         click.clear()
 
+    current_version = setuptools.version.pkg_resources.parse_version(
+        oo_cfg.settings.get('variant_version', '0.0'))
+    min_version = setuptools.version.pkg_resources.parse_version('3.2')
     if not oo_cfg.settings.get('openshift_http_proxy', None) and \
-       LooseVersion(oo_cfg.settings.get('variant_version', '0.0')) >= LooseVersion('3.2'):
+       current_version >= min_version:
         http_proxy, https_proxy, proxy_excludes = get_proxy_hostnames_and_excludes()
         oo_cfg.deployment.variables['proxy_http'] = http_proxy
         oo_cfg.deployment.variables['proxy_https'] = https_proxy
@@ -920,7 +902,7 @@ def uninstall(ctx):
 @click.option('--latest-minor', '-l', is_flag=True, default=False)
 @click.option('--next-major', '-n', is_flag=True, default=False)
 @click.pass_context
-# pylint: disable=bad-builtin,too-many-statements
+# pylint: disable=too-many-statements
 def upgrade(ctx, latest_minor, next_major):
     oo_cfg = ctx.obj['oo_cfg']
 
