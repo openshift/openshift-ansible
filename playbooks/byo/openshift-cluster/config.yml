@@ -26,3 +26,4 @@
     openshift_cluster_id: "{{ cluster_id | default('default') }}"
     openshift_debug_level: "{{ debug_level | default(2) }}"
     openshift_deployment_type: "{{ deployment_type }}"
+    openshift_deployment_subtype: "{{ deployment_subtype | default(none) }}"

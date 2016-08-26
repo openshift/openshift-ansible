@@ -16,10 +16,11 @@ installer_log = logging.getLogger('installer')
 
 
 class Version(object):
-    def __init__(self, name, ansible_key):
+    def __init__(self, name, ansible_key, subtype=''):
         self.name = name  # i.e. 3.0, 3.1
 
         self.ansible_key = ansible_key
+        self.subtype = subtype
 
 
 class Variant(object):
@@ -43,6 +44,12 @@ OSE = Variant('openshift-enterprise', 'OpenShift Container Platform',
               ]
 )
 
+REG = Variant('openshift-enterprise', 'Registry',
+              [
+                  Version('3.2', 'openshift-enterprise', 'registry'),
+              ]
+)
+
 origin = Variant('origin', 'OpenShift Origin',
                  [
                      Version('1.2', 'origin'),
@@ -58,8 +65,8 @@ LEGACY = Variant('openshift-enterprise', 'OpenShift Container Platform',
 )
 
 # Ordered list of variants we can install, first is the default.
-SUPPORTED_VARIANTS = (OSE, origin, LEGACY)
-DISPLAY_VARIANTS = (OSE, )
+SUPPORTED_VARIANTS = (OSE, REG, origin, LEGACY)
+DISPLAY_VARIANTS = (OSE, REG,)
 
 
 def find_variant(name, version=None):

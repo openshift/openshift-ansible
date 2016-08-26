@@ -638,6 +638,7 @@ https://docs.openshift.com/enterprise/latest/admin_guide/install/prerequisites.h
         variant, version = get_variant_and_version()
         oo_cfg.settings['variant'] = variant.name
         oo_cfg.settings['variant_version'] = version.name
+        oo_cfg.settings['variant_subtype'] = version.subtype
         click.clear()
 
     if not oo_cfg.deployment.hosts:

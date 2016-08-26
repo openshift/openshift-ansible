@@ -1,3 +1,4 @@
+---
 - name: Create persistent volumes
   hosts: oo_first_master
   tags:
@@ -43,3 +44,5 @@
   - role: openshift_hosted
   - role: openshift_metrics
     when: openshift.hosted.metrics.deploy | bool
+  - role: cockpit-ui
+    when: ( openshift.common.deployment_subtype == 'registry' )

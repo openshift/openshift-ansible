@@ -797,7 +797,7 @@ def set_deployment_facts_if_unset(facts):
                 curr_disabled_features = set(facts['master']['disabled_features'])
                 facts['master']['disabled_features'] = list(curr_disabled_features.union(openshift_features))
         else:
-            if deployment_type == 'atomic-enterprise':
+            if facts['common']['deployment_subtype'] == 'registry':
                 facts['master']['disabled_features'] = openshift_features
 
     if 'node' in facts:
@@ -1657,7 +1657,12 @@ class OpenShiftFacts(object):
         else:
             deployment_type = 'origin'
 
-        defaults = self.get_defaults(roles, deployment_type)
+        if 'common' in local_facts and 'deployment_subtype' in local_facts['common']:
+            deployment_subtype = local_facts['common']['deployment_subtype']
+        else:
+            deployment_subtype = 'basic'
+
+        defaults = self.get_defaults(roles, deployment_type, deployment_subtype)
         provider_facts = self.init_provider_facts()
         facts = apply_provider_facts(defaults, provider_facts)
         facts = merge_facts(facts,
@@ -1689,7 +1694,7 @@ class OpenShiftFacts(object):
             facts = set_installed_variant_rpm_facts(facts)
         return dict(openshift=facts)
 
-    def get_defaults(self, roles, deployment_type):
+    def get_defaults(self, roles, deployment_type, deployment_subtype):
         """ Get default fact values
 
             Args:
@@ -1709,6 +1714,7 @@ class OpenShiftFacts(object):
         defaults['common'] = dict(use_openshift_sdn=True, ip=ip_addr,
                                   public_ip=ip_addr,
                                   deployment_type=deployment_type,
+                                  deployment_subtype=deployment_subtype,
                                   hostname=hostname,
                                   public_hostname=hostname,
                                   portal_net='172.30.0.0/16',

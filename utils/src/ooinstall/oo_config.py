@@ -17,6 +17,7 @@ CONFIG_PERSIST_SETTINGS = [
     'deployment',
     'version',
     'variant',
+    'variant_subtype',
     'variant_version',
 ]
 

@@ -22,6 +22,7 @@ ROLES_TO_GROUPS_MAP = {
 VARIABLES_MAP = {
     'ansible_ssh_user': 'ansible_ssh_user',
     'deployment_type': 'deployment_type',
+    'variant_subtype': 'deployment_subtype',
     'master_routingconfig_subdomain': 'openshift_master_default_subdomain',
     'proxy_http': 'openshift_http_proxy',
     'proxy_https': 'openshift_https_proxy',
@@ -128,6 +129,8 @@ def write_inventory_vars(base_inventory, multiple_masters, lb):
     ver = find_variant(CFG.settings['variant'],
                        version=CFG.settings.get('variant_version', None))[1]
     base_inventory.write('deployment_type={}\n'.format(ver.ansible_key))
+    if getattr(ver, 'variant_subtype', False):
+        base_inventory.write('deployment_subtype={}\n'.format(ver.deployment_subtype))
 
     if 'OO_INSTALL_ADDITIONAL_REGISTRIES' in os.environ:
         base_inventory.write('openshift_docker_additional_registries={}\n'.format(
