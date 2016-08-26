@@ -1,4 +1,3 @@
-setuptools==17.1.1
 enum
 configparser
 pylint

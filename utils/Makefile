@@ -43,6 +43,7 @@ virtualenv:
 	@echo "# Creating a virtualenv"
 	@echo "#############################################"
 	virtualenv $(NAME)env
+	. $(NAME)env/bin/activate && pip install setuptools==17.1.1
 	. $(NAME)env/bin/activate && pip install -r requirements.txt
 #       If there are any special things to install do it here
 #       . $(NAME)env/bin/activate && INSTALL STUFF
