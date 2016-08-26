@@ -93,13 +93,11 @@ openshift_release=v1.2
 # Skip upgrading Docker during an OpenShift upgrade, leaves the current Docker version alone.
 # docker_upgrade=False
 
-# Alternate image format string. If you're not modifying the format string and
-# only need to inject your own registry you may want to consider
-# openshift_docker_additional_registries instead
+# Alternate image format string, useful if you've got your own registry mirror
 #oreg_url=example.com/openshift3/ose-${component}:${version}
 # If oreg_url points to a registry other than registry.access.redhat.com we can
 # modify image streams to point at that registry by setting the following to true
-#openshift_examples_modify_imagestreams=True
+#openshift_examples_modify_imagestreams=true
 
 
 # Origin copr repo
