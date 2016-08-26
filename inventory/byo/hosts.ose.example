@@ -325,6 +325,10 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_hosted_registry_storage_s3_chunksize=26214400
 #openshift_hosted_registry_pullthrough=true
 
+# Metrics deployment
+#
+# Deploy metrics
+#openshift_hosted_metrics_deploy=True
 # Metrics Storage Options
 #
 # NFS Host Group
