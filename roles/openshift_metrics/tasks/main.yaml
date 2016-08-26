@@ -33,10 +33,9 @@
                           | default('hawkular-metrics.' ~ (openshift.master.default_subdomain
                           | default(openshift_master_default_subdomain )))
                           | oo_hostname_from_url }}"
-    metrics_persistence: True
-    #"{{ openshift.hosted.metrics.storage_kind | default(none) is not none }}"
+    metrics_persistence: "{{ openshift.hosted.metrics.storage_kind | default(none) is not none }}"
     metrics_dynamic_vol: "{{ openshift.hosted.metrics.storage_kind | default(none) == 'dynamic' }}"
-    metrics_template_dir: "/usr/share/openshift/examples/infrastructure-templates/{{ 'origin' if deployment_type == 'origin' else 'enterprise' }}"
+    metrics_template_dir: "{{ openshift.common.config_base if openshift.common.is_containerized | bool else '/usr/share/openshift' }}/examples/infrastructure-templates/{{ 'origin' if deployment_type == 'origin' else 'enterprise' }}"
     cassandra_nodes: "{{ ',CASSANDRA_NODES=' ~ openshift.hosted.metrics.cassandra_nodes if 'cassandra' in openshift.hosted.metrics else '' }}"
     cassandra_pv_size: "{{ ',CASSANDRA_PV_SIZE=' ~ openshift.hosted.metrics.storage_volume_size if openshift.hosted.metrics.storage_volume_size | default(none) is not none else '' }}"
     image_prefix: "{{ ',IMAGE_PREFIX=' ~ openshift.hosted.metrics.deployer_prefix if 'deployer_prefix' in openshift.hosted.metrics else '' }}"
