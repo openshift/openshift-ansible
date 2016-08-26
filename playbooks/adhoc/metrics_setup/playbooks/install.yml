@@ -16,21 +16,30 @@
 
   - name: "Add metrics-deployer"
     command: "{{item}}"
+    run_once: true
+    register: output
+    failed_when: ('already exists' not in output.stderr) and (output.rc != 0)
     with_items:
       - oc project openshift-infra
       - oc create -f /tmp/metrics-deployer-setup.yaml    
 
   - name: "Give metrics-deployer SA permissions"
     command: "oadm policy add-role-to-user edit system:serviceaccount:openshift-infra:metrics-deployer"
+    run_once: true
 
   - name: "Give heapster SA permissions"
     command: "oadm policy add-cluster-role-to-user cluster-reader system:serviceaccount:openshift-infra:heapster"
+    run_once: true
 
   - name: "Create metrics-deployer secret"
     command: "oc secrets new metrics-deployer nothing=/dev/null"
+    register: output
+    failed_when: ('already exists' not in output.stderr) and (output.rc != 0)
+    run_once: true
 
   - name: "Copy metrics.yaml to remote"
     copy: "src=../files/metrics.yaml dest=/tmp/metrics.yaml force=yes" 
 
   - name: "Process yml template"
     shell: "oc process -f /tmp/metrics.yaml -v MASTER_URL={{ masterPublicURL }},REDEPLOY=true,HAWKULAR_METRICS_HOSTNAME={{ metrics_external_service }},IMAGE_PREFIX={{ metrics_image_prefix }},IMAGE_VERSION={{ metrics_image_version }},USE_PERSISTENT_STORAGE=false | oc create -f -"
+    run_once: true
