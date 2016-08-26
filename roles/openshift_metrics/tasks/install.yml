@@ -74,7 +74,7 @@
       HAWKULAR_METRICS_HOSTNAME={{ metrics_hostname }},USE_PERSISTENT_STORAGE={{metrics_persistence | string | lower }},METRIC_DURATION={{ openshift.hosted.metrics.duration }},METRIC_RESOLUTION={{ openshift.hosted.metrics.resolution }}{{ image_prefix }}{{ image_version }},MODE={{ deployment_mode }} \
         | {{ openshift.common.client_binary }} --namespace openshift-infra \
         --config={{ openshift_metrics_kubeconfig }} \
-        create -f -"
+        create -o name -f -"
 
 - name: Deploy Metrics
   shell: "{{ deployer_cmd }}"
