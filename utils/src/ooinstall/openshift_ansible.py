@@ -4,9 +4,10 @@ import socket
 import subprocess
 import sys
 import os
+import logging
 import yaml
 from ooinstall.variants import find_variant
-import logging
+
 installer_log = logging.getLogger('installer')
 
 CFG = None
@@ -229,7 +230,7 @@ def load_system_facts(inventory_file, os_facts_path, env_vars, verbose=False):
         os_facts_path])
     installer_log.debug("Going to subprocess out to ansible now with these args: %s", ' '.join(args))
     status = subprocess.call(args, env=env_vars, stdout=FNULL)
-    if not status == 0:
+    if status != 0:
         installer_log.debug("Exit status from subprocess was not 0")
         return [], 1
 
