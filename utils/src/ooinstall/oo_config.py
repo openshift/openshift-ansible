@@ -18,7 +18,7 @@ CONFIG_PERSIST_SETTINGS = [
     'version',
     'variant',
     'variant_version',
-    ]
+]
 
 DEPLOYMENT_VARIABLES_BLACKLIST = [
     'hosts',
@@ -27,6 +27,7 @@ DEPLOYMENT_VARIABLES_BLACKLIST = [
 
 DEFAULT_REQUIRED_FACTS = ['ip', 'public_ip', 'hostname', 'public_hostname']
 PRECONFIGURED_REQUIRED_FACTS = ['hostname', 'public_hostname']
+
 
 def print_read_config_error(error, path='the configuration file'):
     message = """
@@ -102,7 +103,6 @@ class Host(object):
 
     def is_storage(self):
         return 'storage' in self.roles
-
 
     def is_etcd_member(self, all_hosts):
         """ Will this host be a member of a standalone etcd cluster. """
@@ -189,7 +189,7 @@ class OOConfig(object):
                 with open(self.config_path, 'r') as cfgfile:
                     loaded_config = yaml.safe_load(cfgfile.read())
 
-                if not 'version' in loaded_config:
+                if 'version' not in loaded_config:
                     print_read_config_error('Legacy configuration file found', self.config_path)
                     sys.exit(0)
 
@@ -242,7 +242,6 @@ class OOConfig(object):
                 for name, variables in role_list.iteritems():
                     self.deployment.roles.update({name: Role(name, variables)})
 
-
         except IOError, ferr:
             raise OOConfigFileError('Cannot open config file "{}": {}'.format(ferr.filename,
                                                                               ferr.strerror))
@@ -250,7 +249,6 @@ class OOConfig(object):
             raise OOConfigFileError(
                 'Config file "{}" is not a valid YAML document'.format(self.config_path))
         installer_log.debug("Parsed the config file")
-
 
     def _upgrade_v1_config(self, config):
         new_config_data = {}
@@ -395,7 +393,6 @@ class OOConfig(object):
         except KeyError as e:
             print "Error persisting settings: {}".format(e)
             sys.exit(0)
-
 
         return p_settings
 
