@@ -17,6 +17,8 @@
   - name: "Add metrics-deployer"
     command: "{{item}}"
     run_once: true
+    register: output
+    failed_when: ('already exists' not in output.stderr) and (output.rc != 0)
     with_items:
       - oc project openshift-infra
       - oc create -f /tmp/metrics-deployer-setup.yaml    
@@ -31,6 +33,8 @@
 
   - name: "Create metrics-deployer secret"
     command: "oc secrets new metrics-deployer nothing=/dev/null"
+    register: output
+    failed_when: ('already exists' not in output.stderr) and (output.rc != 0)
     run_once: true
 
   - name: "Copy metrics.yaml to remote"
