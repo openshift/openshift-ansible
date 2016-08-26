@@ -65,10 +65,6 @@ openshift_release=v1.2
 # See: https://docs.openshift.org/latest/install_config/web_console_customization.html#serving-static-files
 #openshift_master_oauth_template=/path/to/login-template.html
 
-# Configure metricsPublicURL in the master config for cluster metrics
-# See: https://docs.openshift.org/latest/install_config/cluster_metrics.html
-#openshift_master_metrics_public_url=https://hawkular-metrics.example.com/hawkular/metrics
-
 # Configure loggingPublicURL in the master config for aggregate logging
 # See: https://docs.openshift.org/latest/install_config/aggregate_logging.html
 #openshift_master_logging_public_url=https://kibana.example.com
@@ -325,6 +321,49 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_hosted_registry_storage_s3_region=bucket_region
 #openshift_hosted_registry_storage_s3_chunksize=26214400
 #openshift_hosted_registry_pullthrough=true
+
+# Metrics deployment
+# See: https://docs.openshift.com/enterprise/latest/install_config/cluster_metrics.html
+#
+# By default metrics are not automatically deployed, set this to enable them
+# openshift_hosted_metrics_deploy=true
+#
+# Storage Options
+# If openshift_hosted_metrics_storage_kind is unset then metrics will be stored
+# in an EmptyDir volume and will be deleted when the cassandra pod terminates.
+# Storage options A & B currently support only one cassandra pod which is
+# generally enough for up to 1000 pods. Additional volumes can be created
+# manually after the fact and metrics scaled per the docs.
+#
+# Option A - NFS Host Group
+# An NFS volume will be created with path "nfs_directory/volume_name"
+# on the host within the [nfs] host group.  For example, the volume
+# path using these options would be "/exports/metrics"
+#openshift_hosted_metrics_storage_kind=nfs
+#openshift_hosted_metrics_storage_access_modes=['ReadWriteOnce']
+#openshift_hosted_metrics_storage_nfs_directory=/exports
+#openshift_hosted_metrics_storage_nfs_options='*(rw,root_squash)'
+#openshift_hosted_metrics_storage_volume_name=metrics
+#openshift_hosted_metrics_storage_volume_size=10Gi
+#
+# Option B - External NFS Host
+# NFS volume must already exist with path "nfs_directory/_volume_name" on
+# the storage_host. For example, the remote volume path using these
+# options would be "nfs.example.com:/exports/metrics"
+#openshift_hosted_metrics_storage_kind=nfs
+#openshift_hosted_metrics_storage_access_modes=['ReadWriteOnce']
+#openshift_hosted_metrics_storage_host=nfs.example.com
+#openshift_hosted_metrics_storage_nfs_directory=/exports
+#openshift_hosted_metrics_storage_volume_name=metrics
+#openshift_hosted_metrics_storage_volume_size=10Gi
+#
+# Option C - Dynamic -- If openshift supports dynamic volume provisioning for
+# your cloud platform use this.
+#openshift_hosted_metrics_storage_kind=dynamic
+#
+# Override metricsPublicURL in the master config for cluster metrics
+# Defaults to https://hawkular-metrics.{{openshift_master_default_subdomain}}/hawkular/metrics
+#openshift_master_metrics_public_url=https://hawkular-metrics.example.com/hawkular/metrics
 
 # Configure the multi-tenant SDN plugin (default is 'redhat/openshift-ovs-subnet')
 # os_sdn_network_plugin_name='redhat/openshift-ovs-multitenant'
