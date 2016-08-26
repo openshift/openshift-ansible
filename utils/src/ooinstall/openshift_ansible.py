@@ -130,11 +130,11 @@ def write_inventory_vars(base_inventory, multiple_masters, lb):
     base_inventory.write('deployment_type={}\n'.format(ver.ansible_key))
 
     if 'OO_INSTALL_ADDITIONAL_REGISTRIES' in os.environ:
-        base_inventory.write('openshift_docker_additional_registries={}\n'
-                             .format(os.environ['OO_INSTALL_ADDITIONAL_REGISTRIES']))
+        base_inventory.write('openshift_docker_additional_registries={}\n'.format(
+            os.environ['OO_INSTALL_ADDITIONAL_REGISTRIES']))
     if 'OO_INSTALL_INSECURE_REGISTRIES' in os.environ:
-        base_inventory.write('openshift_docker_insecure_registries={}\n'
-                             .format(os.environ['OO_INSTALL_INSECURE_REGISTRIES']))
+        base_inventory.write('openshift_docker_insecure_registries={}\n'.format(
+            os.environ['OO_INSTALL_INSECURE_REGISTRIES']))
     if 'OO_INSTALL_PUDDLE_REPO' in os.environ:
         # We have to double the '{' here for literals
         base_inventory.write("openshift_additional_repos=[{{'id': 'ose-devel', "
