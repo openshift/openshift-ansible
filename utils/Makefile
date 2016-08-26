@@ -44,9 +44,6 @@ virtualenv:
 	@echo "#############################################"
 	virtualenv $(NAME)env
 	. $(NAME)env/bin/activate && pip install -r requirements.txt
-	. $(NAME)env/bin/activate && pip install setuptools --upgrade
-	. $(NAME)env/bin/activate && pip install enum configparser pylint pep8 nose coverage mock flake8 PyYAML click backports.functools_lru_cache
-
 #       If there are any special things to install do it here
 #       . $(NAME)env/bin/activate && INSTALL STUFF
 
