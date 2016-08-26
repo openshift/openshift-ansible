@@ -1,1 +1,12 @@
-
+setuptools==17.1.1
+enum
+configparser
+pylint
+pep8
+nose
+coverage
+mock
+flake8
+PyYAML
+click
+backports.functools_lru_cache
