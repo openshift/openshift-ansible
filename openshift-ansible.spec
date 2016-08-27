@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.15
+Version:        3.3.16
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,48 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Aug 27 2016 Scott Dodson <sdodson@redhat.com> 3.3.16-1
+- Sync image stream data (sdodson@redhat.com)
+- Update metrics example inventories (sdodson@redhat.com)
+- Preserve AWS options in sysconfig files. (dgoodwin@redhat.com)
+- Fix metrics for containerized installs (sdodson@redhat.com)
+- Cleanup items botched during rebase (sdodson@redhat.com)
+- add check for server and account already exist (mangirdas@judeikis.lt)
+- add run_once to repeatable actions (mangirdas@judeikis.lt)
+- Remove atomic check and cockpit.socket (smunilla@redhat.com)
+- Re-organize registry-console deployment. (abutcher@redhat.com)
+- Add registry console template (aweiteka@redhat.com)
+- Add support for Atomic Registry Installs (smunilla@redhat.com)
+- Apply indentation changes to some other lines (tbielawa@redhat.com)
+- Don't use openshift_env for cloud provider facts. (abutcher@redhat.com)
+- Enable PEP8 tests by default in the 'make ci' target now
+  (tbielawa@redhat.com)
+- Fix PEP8 errors in cli_installer.py (tbielawa@redhat.com)
+- Fix PEP8 in openshift_ansible.py (tbielawa@redhat.com)
+- Fix PEP8 in oo_config.py (tbielawa@redhat.com)
+- Fix PEP8 in variants.py (tbielawa@redhat.com)
+- Fix PEP8 in facts_callback.py (tbielawa@redhat.com)
+- fix duplicate src field (jdetiber@redhat.com)
+- Refactor volume directory creation (sdodson@redhat.com)
+- Rely on IMAGE_PREFIX and IMAGE_VERSION defaults from the templates themselves
+  (sdodson@redhat.com)
+- Add metrics exports to nfs role, move exports to /etc/exports.d/openshift-
+  ansible.exports (sdodson@redhat.com)
+- Add ability to disable pvc creation (sdodson@redhat.com)
+- Fix registry volume (sdodson@redhat.com)
+- add selectors for metrics and logging (sdodson@redhat.com)
+- Add logic to detect existing installs (sdodson@redhat.com)
+- Deploy metrics after our router (sdodson@redhat.com)
+- Add Enterprise 3.3 template (sdodson@redhat.com)
+- Pull in keynote demo changes (sdodson@redhat.com)
+- [tags] add some support for running a subset of config via tags
+  (jdetiber@redhat.com)
+- [metrics] add filter to clean up hostname for use in metrics deployment
+  (jdetiber@redhat.com)
+- enable service-serving-cert-signer by default (abutcher@redhat.com)
+- Fix review comments (mkumatag@in.ibm.com)
+- Remove duplicate flannel registration (mkumatag@in.ibm.com)
+
 * Wed Aug 24 2016 Scott Dodson <sdodson@redhat.com> 3.3.15-1
 - simplify repo configuration (jdetiber@redhat.com)
 - don't set virt_sandbox_use_nfs on Fedora, it was replaced by virt_use_nfs
