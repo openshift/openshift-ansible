@@ -555,8 +555,12 @@ def get_host_roles_set(oo_cfg):
 
 def get_proxy_hostnames_and_excludes():
     message = """
-If a proxy is needed to reach HTTP and HTTPS traffic, please enter the name below.
-This proxy will be configured by default for all processes that need to reach systems outside the cluster.
+If a proxy is needed to reach HTTP and HTTPS traffic, please enter the
+name below. This proxy will be configured by default for all processes
+that need to reach systems outside the cluster. An example proxy value
+would be:
+
+    http://proxy.example.com:8080/
 
 More advanced configuration is possible if using Ansible directly:
 
@@ -567,6 +571,8 @@ https://docs.openshift.com/enterprise/latest/install_config/http_proxies.html
     message = "Specify your http proxy ? (ENTER for none)"
     http_proxy_hostname = click.prompt(message, default='')
 
+    # TODO: Fix this prompt message and behavior. 'ENTER' will default
+    # to the http_proxy_hostname if one was provided
     message = "Specify your https proxy ? (ENTER for none)"
     https_proxy_hostname = click.prompt(message, default=http_proxy_hostname)
 
@@ -632,11 +638,23 @@ https://docs.openshift.com/enterprise/latest/admin_guide/install/prerequisites.h
         oo_cfg.deployment.variables['master_routingconfig_subdomain'] = get_master_routingconfig_subdomain()
         click.clear()
 
+    # Are any proxy vars already presisted?
+    proxy_vars = ['proxy_exclude_hosts', 'proxy_https', 'proxy_http']
+    # Empty list if NO proxy vars were presisted
+    saved_proxy_vars = [pv for pv in proxy_vars
+                        if oo_cfg.deployment.variables.get(pv, 'UNSET') is not 'UNSET']
+
+    installer_log.debug("Evaluated proxy settings, found %s presisted values",
+                        len(saved_proxy_vars))
     current_version = parse_version(
         oo_cfg.settings.get('variant_version', '0.0'))
     min_version = parse_version('3.2')
-    if not oo_cfg.settings.get('openshift_http_proxy', None) and \
-       current_version >= min_version:
+
+    # No proxy vars were saved and we are running a version which
+    # recognizes proxy parameters. We must prompt the user for values
+    # if this conditional is true.
+    if not saved_proxy_vars and current_version >= min_version:
+        installer_log.debug("Prompting user to enter proxy values")
         http_proxy, https_proxy, proxy_excludes = get_proxy_hostnames_and_excludes()
         oo_cfg.deployment.variables['proxy_http'] = http_proxy
         oo_cfg.deployment.variables['proxy_https'] = https_proxy
