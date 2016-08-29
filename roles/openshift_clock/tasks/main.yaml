@@ -3,7 +3,7 @@
   openshift_facts:
     role: clock
     local_facts:
-      enabled: "{{ openshift_clock_enabled | default(None) }}"
+      enabled: "{{ openshift_clock_enabled | default(True) }}"
 
 - name: Install ntp package
   action: "{{ ansible_pkg_mgr }} name=ntp state=present"
