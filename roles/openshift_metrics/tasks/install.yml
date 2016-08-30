@@ -95,7 +95,7 @@
     get {{ deploy_metrics.stdout }}
   register: deploy_result
   until: "{{ 'Completed' in deploy_result.stdout }}"
-  failed_when: "{{ 'Completed' not in deploy_result.stdout }}"
+  failed_when: False
   retries: 60
   delay: 10
 
