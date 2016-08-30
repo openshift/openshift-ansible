@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.25
+Version:        3.2.26
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Aug 30 2016 Scott Dodson <sdodson@redhat.com> 3.2.26-1
+- Correct masterCA config typo. (abutcher@redhat.com)
+
 * Mon Aug 29 2016 Scott Dodson <sdodson@redhat.com> 3.2.25-1
 - Preserve AWS options in sysconfig files. (dgoodwin@redhat.com)
 - Fix padding on registry config (sdodson@redhat.com)
