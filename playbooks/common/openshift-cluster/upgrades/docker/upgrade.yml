@@ -39,6 +39,10 @@
 
 - service: name=docker state=started
 
+- name: Update docker facts
+  openshift_facts:
+    role: docker
+
 - name: Restart containerized services
   service: name={{ item }} state=started
   with_items:
