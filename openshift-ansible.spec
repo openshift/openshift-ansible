@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.17
+Version:        3.3.18
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Aug 30 2016 Scott Dodson <sdodson@redhat.com> 3.3.18-1
+- Enable dynamic storage (sdodson@redhat.com)
+- Change how we set master's metricsPublicURL (sdodson@redhat.com)
+- update kubelet argument example with references to new pods-per-core and new
+  max-pods threshold for 3.3 (jeder@redhat.com)
+- update kubelet argument example with references to new pods-per-core and new
+  max-pods threshold for 3.3 (jeder@redhat.com)
+
 * Mon Aug 29 2016 Scott Dodson <sdodson@redhat.com> 3.3.17-1
 - Reload units after node container service modified. (dgoodwin@redhat.com)
 - Fix flannel check (mkumatag@in.ibm.com)
