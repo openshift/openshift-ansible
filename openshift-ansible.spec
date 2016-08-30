@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.16
+Version:        3.3.17
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,13 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Aug 29 2016 Scott Dodson <sdodson@redhat.com> 3.3.17-1
+- Reload units after node container service modified. (dgoodwin@redhat.com)
+- Fix flannel check (mkumatag@in.ibm.com)
+- Default to port 80 when deploying cockpit-ui (smunilla@redhat.com)
+- Set cloudprovider kind with openshift_facts. (abutcher@redhat.com)
+- Fix openstack cloudprovider template conditional. (abutcher@redhat.com)
+
 * Sat Aug 27 2016 Scott Dodson <sdodson@redhat.com> 3.3.16-1
 - Sync image stream data (sdodson@redhat.com)
 - Update metrics example inventories (sdodson@redhat.com)
