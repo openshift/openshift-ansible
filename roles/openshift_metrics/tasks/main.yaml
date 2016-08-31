@@ -1,7 +1,7 @@
 ---
 - fail:
-    msg: This role required openshift_master_default_subdomain or openshift_master_metrics_url be set
-  when: openshift.master.metrics_public_url | default(openshift_master_metrics_public_url | default(openshift.master.default_subdomain | default(openshift_master_default_subdomain | default(none)))) is none
+    msg: This role required openshift_master_default_subdomain or openshift_hosted_metrics_public_url be set
+  when: openshift.master.metrics_public_url | default(openshift_hosted_metrics_public_url | default(openshift.master.default_subdomain | default(openshift_master_default_subdomain | default(none)))) is none
 
 - name: Create temp directory for kubeconfig
   command: mktemp -d /tmp/openshift-ansible-XXXXXX
