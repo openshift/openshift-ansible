@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.24
+Version:        3.2.27
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,18 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Aug 31 2016 Scott Dodson <sdodson@redhat.com> 3.2.27-1
+- Reload docker facts after upgrading docker (sdodson@redhat.com)
+- Reload units after node container service modified. (dgoodwin@redhat.com)
+
+* Tue Aug 30 2016 Scott Dodson <sdodson@redhat.com> 3.2.26-1
+- Correct masterCA config typo. (abutcher@redhat.com)
+
+* Mon Aug 29 2016 Scott Dodson <sdodson@redhat.com> 3.2.25-1
+- Preserve AWS options in sysconfig files. (dgoodwin@redhat.com)
+- Fix padding on registry config (sdodson@redhat.com)
+- Mount /sys rw (sdodson@redhat.com)
+
 * Tue Aug 16 2016 Scott Dodson <sdodson@redhat.com> 3.2.24-1
 - Sync remaining content (sdodson@redhat.com)
 - XPaas 1.3.3 (sdodson@redhat.com)
