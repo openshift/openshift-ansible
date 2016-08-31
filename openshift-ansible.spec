@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.18
+Version:        3.3.19
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Aug 31 2016 Troy Dawson <tdawson@redhat.com> 3.3.19-1
+- update flannel_subnet_len default value (mkumatag@in.ibm.com)
+- Reload docker facts after upgrading docker (sdodson@redhat.com)
+
 * Tue Aug 30 2016 Scott Dodson <sdodson@redhat.com> 3.3.18-1
 - Enable dynamic storage (sdodson@redhat.com)
 - Change how we set master's metricsPublicURL (sdodson@redhat.com)
