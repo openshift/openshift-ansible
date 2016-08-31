@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.27
+Version:        3.2.28
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,13 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Aug 31 2016 Scott Dodson <sdodson@redhat.com> 3.2.28-1
+- Fix review comments (mkumatag@in.ibm.com)
+- Remove duplicate flannel registration (mkumatag@in.ibm.com)
+- Correct flannel cert variables. (abutcher@redhat.com)
+- Link ca to ca-bundle when ca-bundle does not exist. (abutcher@redhat.com)
+- Fix flannel check (mkumatag@in.ibm.com)
+
 * Wed Aug 31 2016 Scott Dodson <sdodson@redhat.com> 3.2.27-1
 - Reload docker facts after upgrading docker (sdodson@redhat.com)
 - Reload units after node container service modified. (dgoodwin@redhat.com)
