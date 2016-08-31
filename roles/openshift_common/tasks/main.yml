@@ -1,7 +1,7 @@
 ---
 - fail:
-    msg: Flannel can not be used with openshift sdn
-  when: openshift_use_openshift_sdn | default(false) | bool and openshift_use_flannel | default(false) | bool
+    msg: Flannel can not be used with openshift sdn, set openshift_use_openshift_sdn=false if you want to use flannel
+  when: openshift_use_openshift_sdn | default(true) | bool and openshift_use_flannel | default(false) | bool
 
 - fail:
    msg: Nuage sdn can not be used with openshift sdn
