@@ -45,3 +45,4 @@ coverage.xml
 docs/_build/
 oo-install
 oo-installenv
+cover

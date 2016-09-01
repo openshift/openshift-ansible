@@ -2,10 +2,11 @@
 
 import os
 import sys
+import logging
 import yaml
 from pkg_resources import resource_filename
 
-import logging
+
 installer_log = logging.getLogger('installer')
 
 CONFIG_PERSIST_SETTINGS = [
@@ -326,6 +327,10 @@ class OOConfig(object):
         self.settings['ansible_inventory_path'] = \
             '{}/hosts'.format(os.path.dirname(self.config_path))
 
+        # pylint: disable=consider-iterating-dictionary
+        # Disabled because we shouldn't alter the container we're
+        # iterating over
+        #
         # clean up any empty sets
         for setting in self.settings.keys():
             if not self.settings[setting]:
