@@ -309,3 +309,10 @@
   - fail:
       msg: "Upgrade cannot continue. The following hosts did not complete etcd backup: {{ etcd_backup_failed | join(',') }}"
     when: etcd_backup_failed | length > 0
+
+- name: Exit upgrade if dry-run specified
+  hosts: oo_first_master
+  tasks:
+  - fail:
+      msg: "Pre-upgrade checks completed, exiting due to openshift_upgrade_dry_run variable."
+    when: openshift_upgrade_dry_run is defined and openshift_upgrade_dry_run | bool
