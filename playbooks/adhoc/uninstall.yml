@@ -72,6 +72,10 @@
     - tuned-profiles-openshift-node
     - tuned-profiles-origin-node
 
+  - name: Remove flannel package
+    action: "{{ ansible_pkg_mgr }} name=flannel state=absent"
+    when: openshift_use_flannel | default(false) | bool
+
   - shell: systemctl reset-failed
     changed_when: False
 
@@ -289,6 +293,7 @@
     - /usr/local/bin/oadm
     - /usr/local/bin/oc
     - /usr/local/bin/kubectl
+    - /etc/flannel
 
   # Since we are potentially removing the systemd unit files for separated
   # master-api and master-controllers services, so we need to reload the
