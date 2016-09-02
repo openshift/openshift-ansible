@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.20
+Version:        3.3.21
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Sep 02 2016 Scott Dodson <sdodson@redhat.com> 3.3.21-1
+- Fix ops/qps typo (jliggitt@redhat.com)
+- Update image stream data (sdodson@redhat.com)
+
 * Wed Aug 31 2016 Scott Dodson <sdodson@redhat.com> 3.3.20-1
 - Restore network plugin configuration (sdodson@redhat.com)
 - Remove openshift_master_metrics_public_url (abutcher@redhat.com)
