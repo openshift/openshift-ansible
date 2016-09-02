@@ -16,7 +16,7 @@
 
 - modify_yaml:
     dest: "{{ openshift.common.config_base}}/master/master-config.yaml"
-    yaml_key: 'masterClients.externalKubernetesClientConnectionOverrides.ops'
+    yaml_key: 'masterClients.externalKubernetesClientConnectionOverrides.qps'
     yaml_value: 200
 
 - modify_yaml:
@@ -36,5 +36,5 @@
 
 - modify_yaml:
     dest: "{{ openshift.common.config_base}}/master/master-config.yaml"
-    yaml_key: 'masterClients.openshiftLoopbackClientConnectionOverrides.ops'
+    yaml_key: 'masterClients.openshiftLoopbackClientConnectionOverrides.qps'
     yaml_value: 300
