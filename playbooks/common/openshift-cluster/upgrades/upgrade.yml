@@ -173,6 +173,18 @@
   # TODO: To better handle re-trying failed upgrades, it would be nice to check if the node
   # or docker actually needs an upgrade before proceeding. Perhaps best to save this until
   # we merge upgrade functionality into the base roles and a normal config.yml playbook run.
+  - name: Determine if node is currently scheduleable
+    command: >
+      {{ openshift.common.client_binary }} get node {{ openshift.common.hostname | lower }} -o json
+    register: node_output
+    delegate_to: "{{ groups.oo_first_master.0 }}"
+    changed_when: false
+    when: inventory_hostname in groups.oo_nodes_to_config
+
+  - set_fact:
+      was_schedulable: "{{ 'unschedulable' not in (node_output.stdout | from_json).spec }}"
+    when: inventory_hostname in groups.oo_nodes_to_config
+
   - name: Mark unschedulable if host is a node
     command: >
       {{ openshift.common.admin_binary }} manage-node {{ openshift.common.hostname | lower }} --schedulable=false
@@ -203,7 +215,7 @@
     command: >
       {{ openshift.common.admin_binary }} manage-node {{ openshift.common.hostname | lower }} --schedulable=true
     delegate_to: "{{ groups.oo_first_master.0 }}"
-    when: inventory_hostname in groups.oo_nodes_to_config and openshift.node.schedulable | bool
+    when: inventory_hostname in groups.oo_nodes_to_config and was_schedulable | bool
 
 
 ##############################################################################
