@@ -177,6 +177,24 @@
   - set_fact:
       reconcile_complete: True
 
+##############################################################################
+# Gate on reconcile
+##############################################################################
+- name: Gate on reconcile
+  hosts: localhost
+  connection: local
+  become: no
+  tasks:
+  - set_fact:
+      reconcile_completed: "{{ hostvars
+                                 | oo_select_keys(groups.oo_masters_to_config)
+                                 | oo_collect('inventory_hostname', {'reconcile_complete': true}) }}"
+  - set_fact:
+      reconcile_failed: "{{ groups.oo_masters_to_config | difference(reconcile_completed) }}"
+  - fail:
+      msg: "Upgrade cannot continue. The following masters did not finish reconciling: {{ reconcile_failed | join(',') }}"
+    when: reconcile_failed | length > 0
+
 ###############################################################################
 # Upgrade Nodes
 ###############################################################################
@@ -242,20 +260,3 @@
     when: inventory_hostname in groups.oo_nodes_to_config and was_schedulable | bool
 
 
-##############################################################################
-# Gate on reconcile
-##############################################################################
-- name: Gate on reconcile
-  hosts: localhost
-  connection: local
-  become: no
-  tasks:
-  - set_fact:
-      reconcile_completed: "{{ hostvars
-                                 | oo_select_keys(groups.oo_masters_to_config)
-                                 | oo_collect('inventory_hostname', {'reconcile_complete': true}) }}"
-  - set_fact:
-      reconcile_failed: "{{ groups.oo_masters_to_config | difference(reconcile_completed) }}"
-  - fail:
-      msg: "Upgrade cannot continue. The following masters did not finish reconciling: {{ reconcile_failed | join(',') }}"
-    when: reconcile_failed | length > 0
