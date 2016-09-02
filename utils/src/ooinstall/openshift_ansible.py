@@ -42,7 +42,7 @@ def generate_inventory(hosts):
     masters = [host for host in hosts if host.is_master()]
     multiple_masters = len(masters) > 1
 
-    new_nodes = [host for host in hosts if host.is_node() and host.new_host]
+    new_nodes = [host for host in hosts if host.is_new_node()]
     scaleup = len(new_nodes) > 0
 
     lb = determine_lb_configuration(hosts)
@@ -177,6 +177,14 @@ def write_proxy_settings(base_inventory):
 
 # pylint: disable=too-many-branches
 def write_host(host, role, inventory, schedulable=None):
+    """Write out a line for a host in an ansible inventory file
+
+For example, in a [nodes] section:
+
+    192.169.14  openshift_ip=10.0.0.14 openshift_public_ip=10.0.0.14 \
+        openshift_hostname=node.redhat.com openshift_public_hostname=node.redhat.com \
+        openshift_node_labels="{'region': 'infra'}" openshift_schedulable=True
+"""
     global CFG
 
     if host.preconfigured:
@@ -194,11 +202,13 @@ def write_host(host, role, inventory, schedulable=None):
     if host.containerized:
         facts += ' containerized={}'.format(host.containerized)
     if host.other_variables:
-        for variable, value in host.other_variables.iteritems():
-            facts += " {}={}".format(variable, value)
-    if host.node_labels:
-        if role == 'node':
-            facts += ' openshift_node_labels="{}"'.format(host.node_labels)
+        # Use a sorted list of keys to keep the function output
+        # deterministic
+        other_var_keys = sorted(host.other_variables.keys())
+        for var in other_var_keys:
+            facts += " {}={}".format(var, host.other_variables[var])
+    if host.node_labels and role == 'node':
+        facts += ' openshift_node_labels="{}"'.format(host.node_labels)
 
     # Distinguish between three states, no schedulability specified (use default),
     # explicitly set to True, or explicitly set to False:

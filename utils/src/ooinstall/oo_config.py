@@ -3,6 +3,8 @@
 import os
 import sys
 import logging
+import socket
+import subprocess
 import yaml
 from pkg_resources import resource_filename
 
@@ -29,6 +31,30 @@ DEPLOYMENT_VARIABLES_BLACKLIST = [
 
 DEFAULT_REQUIRED_FACTS = ['ip', 'public_ip', 'hostname', 'public_hostname']
 PRECONFIGURED_REQUIRED_FACTS = ['hostname', 'public_hostname']
+
+
+def local_sudo_without_password():
+    """Check if the user running the quick installer has sudo access on
+the local machine without requiring a password
+
+* :return bool result: True if sudo does not require a password, False
+  otherwise
+"""
+    no_pwd_sudo = subprocess.call(['sudo', '-n', 'echo', 'openshift'])
+    if no_pwd_sudo == 1:
+        return False
+    else:
+        return True
+
+
+def add_fact(facts, inventory_name, fact_value):
+    """Conditionally add the fact `inventory_name=fact_value` to the
+`facts` list if the fact value is set
+
+Return the (maybe modified) list of facts"""
+    if fact_value:
+        facts.append('{}={}'.format(inventory_name, fact_value))
+    return facts
 
 
 def print_read_config_error(error, path='the configuration file'):
@@ -100,6 +126,9 @@ class Host(object):
     def is_node(self):
         return 'node' in self.roles
 
+    def is_new_node(self):
+        return self.is_node() and self.new_host
+
     def is_master_lb(self):
         return 'master_lb' in self.roles
 
@@ -131,6 +160,60 @@ class Host(object):
         if len(masters) == len(nodes):
             return True
         return False
+
+    def inventory_string(self, role, schedulable=None):
+        """Write out a line for this host in an ansible inventory file
+
+* :param string role: The role this host is being evaluated for
+* :param bool schedulable: Run pods on this host?
+* :return string inventory_string: The formatted inventory string representing this host
+
+For example, in a [nodes] section:
+
+    192.169.14  openshift_ip=10.0.0.14 openshift_public_ip=10.0.0.14 \
+        openshift_hostname=node.redhat.com openshift_public_hostname=node.redhat.com \
+        openshift_node_labels="{'region': 'infra'}" openshift_schedulable=True
+
+        """
+        facts = []
+        facts.append(self.connect_to + ' ')
+
+        add_fact(facts, 'openshift_ip', self.ip)
+        add_fact(facts, 'openshift_public_ip', self.public_ip)
+        add_fact(facts, 'openshift_hostname', self.hostname)
+        add_fact(facts, 'openshift_public_hostname', self.public_hostname)
+        add_fact(facts, 'containerized', self.containerized)
+
+        if self.other_variables:
+            # Use a sorted list of keys to keep the function output
+            # deterministic
+            other_var_keys = sorted(self.other_variables.keys())
+            for var in other_var_keys:
+                facts.append("{}={}".format(var, self.other_variables[var]))
+
+        if self.node_labels and role == 'node':
+            add_fact(facts, 'openshift_node_labels', self.node_labels)
+
+        # Distinguish between three states, no schedulability specified (use default),
+        # explicitly set to True, or explicitly set to False:
+        if role != 'node' or schedulable is None:
+            pass
+        else:
+            facts.append("openshift_schedulable={}".format(schedulable))
+
+        installer_host = socket.gethostname()
+        # Is this host the localhost?
+        if installer_host in [self.connect_to, self.hostname, self.public_hostname]:
+            add_fact(facts, 'ansible_connection', 'local')
+            # Root user doesn't have to worry about sudo
+            if os.geteuid() != 0:
+                if local_sudo_without_password():
+                    add_fact(facts, 'ansible_become', 'yes')
+                else:
+                    print 'The atomic-openshift-installer requires sudo access without a password.'
+                    sys.exit(1)
+
+        return ' '.join(facts) + '\n'
 
 
 class Role(object):
