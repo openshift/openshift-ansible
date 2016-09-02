@@ -625,7 +625,7 @@ class FilterModule(object):
             padded = "\n".join([" " * level * indent + line for line in transformed.splitlines()])
             return to_unicode("\n{0}".format(padded))
         except Exception as my_e:
-            raise errors.AnsibleFilterError('Failed to convert: %s', my_e)
+            raise errors.AnsibleFilterError('Failed to convert: %s' % my_e)
 
     @staticmethod
     def oo_openshift_env(hostvars):
