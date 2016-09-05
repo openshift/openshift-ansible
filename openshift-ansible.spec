@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.21
+Version:        3.3.22
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sun Sep 04 2016 Scott Dodson <sdodson@redhat.com> 3.3.22-1
+- Secure registry for atomic registry deployment (deployment_subtype=registry).
+  (abutcher@redhat.com)
+- Record schedulability of node prior to upgrade and re-set it to that
+  (sdodson@redhat.com)
+
 * Fri Sep 02 2016 Scott Dodson <sdodson@redhat.com> 3.3.21-1
 - Fix ops/qps typo (jliggitt@redhat.com)
 - Update image stream data (sdodson@redhat.com)
