@@ -16,6 +16,7 @@ import pkg_resources
 import re
 import json
 import yaml
+from ansible.parsing.yaml.dumper import AnsibleDumper
 from ansible.utils.unicode import to_unicode
 from urlparse import urlparse
 
@@ -621,7 +622,9 @@ class FilterModule(object):
             return ""
 
         try:
-            transformed = yaml.safe_dump(data, indent=indent, allow_unicode=True, default_flow_style=False, **kw)
+            transformed = yaml.dump(data, indent=indent, allow_unicode=True,
+                                    default_flow_style=False,
+                                    Dumper=AnsibleDumper, **kw)
             padded = "\n".join([" " * level * indent + line for line in transformed.splitlines()])
             return to_unicode("\n{0}".format(padded))
         except Exception as my_e:
