@@ -8,15 +8,15 @@ storage:
     blobdescriptor: inmemory
 {% if openshift.hosted.registry.storage.provider == 's3' %}
   s3:
-    accesskey: {{ openshift.hosted.registry.storage.s3.accesskey }}
-    secretkey: {{ openshift.hosted.registry.storage.s3.secretkey }}
-    region: {{ openshift.hosted.registry.storage.s3.region }}
-    bucket: {{ openshift.hosted.registry.storage.s3.bucket }}
+    accesskey: {{ openshift_hosted_registry_storage_s3_accesskey }}
+    secretkey: {{ openshift_hosted_registry_storage_s3_secretkey }}
+    region: {{ openshift_hosted_registry_storage_s3_region }}
+    bucket: {{ openshift_hosted_registry_storage_s3_bucket }}
     encrypt: false
     secure: true
     v4auth: true
     rootdirectory: /registry
-    chunksize: "{{ openshift.hosted.registry.storage.s3.chunksize | default(26214400) }}"
+    chunksize: "{{ openshift_hosted_registry_storage_s3_chunksize | default(26214400) }}"
 {% elif openshift.hosted.registry.storage.provider == 'azure_blob' %}
   azure:
     accountname: {{ openshift.hosted.registry.storage.azure_blob.accountname }}
@@ -66,13 +66,13 @@ middleware:
   - name: openshift
     options:
       pullthrough: {{ openshift.hosted.registry.pullthrough | default(true) }}
-{% if openshift.hosted.registry.storage.provider == 's3' and 'cloudfront' in openshift.hosted.registry.storage.s3 %}
+{% if openshift.hosted.registry.storage.provider == 's3' and openshift_hosted_registry_storage_s3_cloudfront is defined %}
   storage:
   - name: cloudfront
     options:
-      baseurl: {{ openshift.hosted.registry.storage.s3.cloudfront.baseurl }}
-      privatekey: {{ openshift.hosted.registry.storage.s3.cloudfront.privatekeyfile }}
-      keypairid: {{ openshift.hosted.registry.storage.s3.cloudfront.keypairid }}
+      baseurl: {{ openshift_hosted_registry_storage_s3_cloudfront_baseurl }}
+      privatekey: {{ openshift_hosted_registry_storage_s3_cloudfront_privatekeyfile }}
+      keypairid: {{ openshift_hosted_registry_storage_s3_cloudfront_keypairid }}
 {% elif openshift.common.version_gte_3_3_or_1_3 | bool %}
   storage:
   - name: openshift
