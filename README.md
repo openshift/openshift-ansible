@@ -7,6 +7,15 @@ that it installs currently require a package that provides `docker`. Currently
 the RPMs provided from dockerproject.org do not provide this requirement, though
 they may in the future.
 
+##Branches
+The master branch tracks our current work and should be compatible with both
+Origin master branch and the current Origin stable release, currently that's
+v1.3 and v1.2. Enterprise branches exist where we coordinate with internal Red
+Hat Quality Assurance teams. Fixes and backwards compatible feature improvements
+are often backported to the more current enterprise branches.  The enterprise
+branches should also be compatible with the corresponding Origin release for
+users who are looking for more conservative rate of change.
+
 ##Setup
 - Install base dependencies:
   - Fedora:
