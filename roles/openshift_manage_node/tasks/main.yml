@@ -1,6 +1,22 @@
+---
+- name: Create temp directory for kubeconfig
+  command: mktemp -d /tmp/openshift-ansible-XXXXXX
+  register: mktemp
+  changed_when: False
+
+- set_fact:
+    openshift_manage_node_kubeconfig: "{{ mktemp.stdout }}/admin.kubeconfig"
+
+- name: Copy the admin client config(s)
+  command: >
+    cp {{ openshift.common.config_base }}/master/admin.kubeconfig {{ openshift_manage_node_kubeconfig }}
+  changed_when: False
+
 - name: Wait for Node Registration
   command: >
-      {{ openshift.common.client_binary }} get node {{ item | lower }}
+    {{ openshift.common.client_binary }} get node {{ item | lower }}
+    --config={{ openshift_manage_node_kubeconfig }}
+    -n default
   register: omd_get_node
   until: omd_get_node.rc == 0
   retries: 50
@@ -10,14 +26,24 @@
 
 - name: Set node schedulability
   command: >
-    {{ openshift.common.admin_binary }} manage-node {{ item.openshift.common.hostname | lower }} --schedulable={{ 'true' if item.openshift.node.schedulable | bool else 'false' }}
+    {{ openshift.common.admin_binary }} manage-node {{ hostvars[item].openshift.common.hostname | lower }} --schedulable={{ 'true' if hostvars[item].openshift.node.schedulable | bool else 'false' }}
+    --config={{ openshift_manage_node_kubeconfig }}
+    -n default
   with_items:
-    -  "{{ openshift_node_vars }}"
-  when: item.openshift.common.hostname is defined
+    -  "{{ openshift_nodes }}"
+  when: hostvars[item].openshift.common.hostname is defined
 
 - name: Label nodes
   command: >
-    {{ openshift.common.client_binary }} label --overwrite node {{ item.openshift.common.hostname | lower }} {{ item.openshift.node.labels | oo_combine_dict  }}
+    {{ openshift.common.client_binary }} label --overwrite node {{ hostvars[item].openshift.common.hostname | lower }} {{ hostvars[item].openshift.node.labels | oo_combine_dict  }}
+    --config={{ openshift_manage_node_kubeconfig }}
+    -n default
   with_items:
-    -  "{{ openshift_node_vars }}"
-  when: item.openshift.common.hostname is defined and 'labels' in item.openshift.node and item.openshift.node.labels != {}
+    -  "{{ openshift_nodes }}"
+  when: hostvars[item].openshift.common.hostname is defined and 'labels' in hostvars[item].openshift.node and hostvars[item].openshift.node.labels != {}
+
+- name: Delete temp directory
+  file:
+    name: "{{ mktemp.stdout }}"
+    state: absent
+  changed_when: False
