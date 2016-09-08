@@ -40,7 +40,7 @@
 
   - name: "Create templates for logging accounts and the deployer"
     command: >
-      {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig create -f /usr/share/openshift/examples/infrastructure-templates/enterprise/logging-deployer.yaml
+      {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig create -f {{ examples_base }}/infrastructure-templates/{{ 'enterprise' if openshift_deployment_type == 'openshift-enterprise' else 'origin' }}/logging-deployer.yaml
     register: template_output
     failed_when: "template_output.rc == 1 and 'exists' not in template_output.stderr"
 
