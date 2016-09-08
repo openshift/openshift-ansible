@@ -156,9 +156,7 @@
 - name: Set schedulability
   hosts: oo_first_master
   vars:
-    openshift_nodes: "{{ hostvars
-                         | oo_select_keys(groups['oo_nodes_to_config'])
-                         | oo_collect('openshift.common.hostname') }}"
+    openshift_nodes: "{{ groups.oo_nodes_to_config | default([]) }}"
   pre_tasks:
   # Necessary because when you're on a node that's also a master the master will be
   # restarted after the node restarts docker and it will take up to 60 seconds for
