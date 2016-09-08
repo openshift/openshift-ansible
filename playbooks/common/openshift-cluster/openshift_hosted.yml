@@ -19,6 +19,21 @@
       openshift_hosted_router_registryurl: "{{ hostvars[groups.oo_first_master.0].openshift.master.registry_url }}"
       openshift_hosted_registry_registryurl: "{{ hostvars[groups.oo_first_master.0].openshift.master.registry_url }}"
     when: "'master' in hostvars[groups.oo_first_master.0].openshift and 'registry_url' in hostvars[groups.oo_first_master.0].openshift.master"
+  - set_fact:
+      openshift_hosted_metrics_deploy: "{{ lookup('oo_option', 'openshift_hosted_metrics_deploy') | default(true, true) }}"
+    when: openshift_hosted_metrics_deploy is not defined
+  - set_fact:
+      openshift_hosted_metrics_duration: "{{ lookup('oo_option', 'openshift_hosted_metrics_duration') | default(7) }}"
+    when: openshift_hosted_metrics_duration is not defined
+  - set_fact:
+      openshift_hosted_metrics_resolution: "{{ lookup('oo_option', 'openshift_hosted_metrics_resolution') | default('10s', true) }}"
+    when: openshift_hosted_metrics_resolution is not defined
+  - set_fact:
+      openshift_hosted_metrics_deployer_prefix: "{{ lookup('oo_option', 'openshift_hosted_metrics_deployer_prefix') | default('openshift') }}"
+    when: openshift_hosted_metrics_deployer_prefix is not defined
+  - set_fact:
+      openshift_hosted_metrics_deployer_version: "{{ lookup('oo_option', 'openshift_hosted_metrics_deployer_version') | default('latest') }}"
+    when: openshift_hosted_metrics_deployer_version is not defined
   roles:
   - role: openshift_cli
   - role: openshift_hosted_facts
@@ -43,7 +58,7 @@
     when: not openshift.common.version_gte_3_2_or_1_2
   - role: openshift_hosted
   - role: openshift_metrics
-    when: openshift.hosted.metrics.deploy | bool
+    when: openshift_hosted_metrics_deploy | bool
   - role: cockpit-ui
     when: openshift.common.deployment_subtype == 'registry'
 
@@ -87,7 +102,7 @@
       {{ openshift.common.client_binary }} get service docker-registry
       --template='{{ '{{' }} .spec.clusterIP {{ '}}' }}'
       --config={{ openshift_hosted_kubeconfig }}
-      -n default      
+      -n default
     register: docker_registry_service_ip
     when: openshift.common.deployment_subtype == 'registry'
     changed_when: false

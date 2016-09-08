@@ -1789,7 +1789,6 @@ class OpenShiftFacts(object):
         if 'hosted' in roles or self.role == 'hosted':
             defaults['hosted'] = dict(
                 metrics=dict(
-                    deploy=False,
                     duration=7,
                     resolution='10s',
                     storage=dict(
