@@ -526,9 +526,9 @@ class FilterModule(object):
                 raise errors.AnsibleFilterError(("|failed to parse certificate '%s', " % certificate['certfile'] +
                                                  "please specify certificate names in host inventory"))
 
+            certificate['names'] = list(set(certificate['names']))
             if 'cafile' not in certificate:
                 certificate['names'] = [name for name in certificate['names'] if name not in internal_hostnames]
-                certificate['names'] = list(set(certificate['names']))
                 if not certificate['names']:
                     raise errors.AnsibleFilterError(("|failed to parse certificate '%s' or " % certificate['certfile'] +
                                                      "detected a collision with internal hostname, please specify " +
