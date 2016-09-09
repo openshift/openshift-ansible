@@ -211,6 +211,8 @@
   - include: containerized_node_upgrade.yml
     when: inventory_hostname in groups.oo_nodes_to_config and openshift.common.is_containerized | bool
 
+  - meta: flush_handlers
+
   - name: Set node schedulability
     command: >
       {{ openshift.common.admin_binary }} manage-node {{ openshift.common.hostname | lower }} --schedulable=true
