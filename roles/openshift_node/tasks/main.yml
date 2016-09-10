@@ -34,6 +34,10 @@
   action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-node{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }},tuned-profiles-{{ openshift.common.service_type }}-node{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }} state=present"
   when: not openshift.common.is_containerized | bool
 
+- name: Set atomic-guest tuned profile
+  command: "tuned-adm profile atomic-guest"
+  when: openshift.common.is_atomic | bool
+
 - name: Install sdn-ovs package
   action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-sdn-ovs{{ openshift_pkg_version | oo_image_tag_to_rpm_version(include_dash=True) }} state=present"
   when: openshift.common.use_openshift_sdn and not openshift.common.is_containerized | bool
