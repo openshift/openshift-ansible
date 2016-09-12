@@ -24,5 +24,5 @@ cockpit_ui_base: "{{ examples_base }}/infrastructure-templates/enterprise"
 
 
 openshift_examples_import_command: "create"
-registry_url: ""
+registry_url: "{{ openshift.master.registry_url }}"
 registry_host: "{{ registry_url.split('/')[0] if '.' in registry_url.split('/')[0] else '' }}"

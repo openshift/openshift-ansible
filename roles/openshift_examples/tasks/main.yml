@@ -127,3 +127,7 @@
   register: oex_import_xpaas_templates
   failed_when: "'already exists' not in oex_import_xpaas_templates.stderr and oex_import_xpaas_templates.rc != 0"
   changed_when: false
+
+- name: Mark image streams as insecure if necessary
+  command: "{{ openshift.common.client_binary }} annotate is --all  openshift.io/image.insecureRepository=true --overwrite -n openshift"
+  when: registry_host is defined and openshift.common.docker_insecure_registries is defined and registry_host in openshift.common.docker_insecure_registries
