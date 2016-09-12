@@ -73,7 +73,7 @@
         valid release for a {{ openshift_upgrade_target }} upgrade
     when: openshift_release is defined and not openshift_release | version_compare(openshift_upgrade_target ,'=')
 
-- include: ../../../common/openshift-cluster/initialize_openshift_version.yml
+- include: ../initialize_openshift_version.yml
   vars:
     # Request specific openshift_release and let the openshift_version role handle converting this
     # to a more specific version, respecting openshift_image_tag and openshift_pkg_version if

@@ -1,0 +1,9 @@
+---
+- include: ../../../../common/openshift-cluster/upgrades/init.yml
+
+# Configure the upgrade target for the common upgrade tasks:
+- hosts: l_oo_all_hosts
+  tasks:
+  - set_fact:
+      openshift_upgrade_target: "{{ '1.3' if deployment_type == 'origin' else '3.3' }}"
+      openshift_upgrade_min: "{{ '1.2' if deployment_type == 'origin' else '3.2' }}"
