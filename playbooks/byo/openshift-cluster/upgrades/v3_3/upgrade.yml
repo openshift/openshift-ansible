@@ -12,7 +12,7 @@
       openshift_upgrade_min: "{{ '1.2' if deployment_type == 'origin' else '3.2' }}"
 
 # Pre-upgrade
-- include: ../initialize_facts.yml
+- include: ../../../../common/openshift-cluster/initialize_facts.yml
 
 - name: Update repos and initialize facts on all hosts
   hosts: oo_masters_to_config:oo_nodes_to_config:oo_etcd_to_config:oo_lb_to_config
@@ -33,7 +33,7 @@
 
 - include: ../../../../common/openshift-cluster/upgrades/pre/verify_inventory_vars.yml
 
-- include: ../initialize_openshift_version.yml
+- include: ../../../../common/openshift-cluster/initialize_openshift_version.yml
   vars:
     # Request specific openshift_release and let the openshift_version role handle converting this
     # to a more specific version, respecting openshift_image_tag and openshift_pkg_version if
@@ -45,7 +45,7 @@
     # docker_version defined, we don't want to actually do it until later)
     docker_protect_installed_version: True
 
-- include: ../../../../common/openshift-cluster/upgrades/pre/verify_control_plane_running
+- include: ../../../../common/openshift-cluster/upgrades/pre/verify_control_plane_running.yml
 
 - include: ../../../../common/openshift-cluster/upgrades/pre/verify_upgrade_targets.yml
 
@@ -55,15 +55,29 @@
 
 - include: ../../../../common/openshift-cluster/upgrades/pre/backup_etcd.yml
 
-  #  vars:
-  #    openshift_deployment_type: "{{ deployment_type }}"
+- name: Exit upgrade if dry-run specified
+  hosts: oo_all_hosts
+  tasks:
+  - fail:
+      msg: "Pre-upgrade checks completed, exiting due to openshift_upgrade_dry_run variable."
+    when: openshift_upgrade_dry_run is defined and openshift_upgrade_dry_run | bool
 
-- include: ../../../../common/openshift-cluster/upgrades/upgrade.yml
+# Separate step so we can execute in parallel and clear out anything unused
+# before we get into the serialized upgrade process which will then remove
+# remaining images if possible.
+- name: Cleanup unused Docker images
+  hosts: oo_masters_to_config:oo_nodes_to_config:oo_etcd_to_config
+  tasks:
+  - include: ../../../../common/openshift-cluster/upgrades/cleanup_unused_images.yml
+
+- include: ../../../../common/openshift-cluster/upgrades/upgrade_control_plane.yml
   vars:
-    openshift_deployment_type: "{{ deployment_type }}"
     master_config_hook: "v3_3/master_config_upgrade.yml"
+
+- include: ../../../../common/openshift-cluster/upgrades/upgrade_nodes.yml
+  vars:
     node_config_hook: "v3_3/node_config_upgrade.yml"
 
 - include: ../../../openshift-master/restart.yml
 
-- include: ../../../../common/openshift-cluster/upgrades/post.yml
+- include: ../../../../common/openshift-cluster/upgrades/post_control_plane.yml

@@ -11,3 +11,5 @@
         hostname: "{{ openshift_hostname | default(None) }}"
   - set_fact:
       openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"
+  - set_fact:
+      openshift_deployment_type: "{{ deployment_type }}"

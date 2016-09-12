@@ -6,7 +6,7 @@
   become: no
   gather_facts: no
   tasks:
-  - include_vars: ../../../../byo/openshift-cluster/cluster_hosts.yml
+  - include_vars: ../../../byo/openshift-cluster/cluster_hosts.yml
   - add_host:
       name: "{{ item }}"
       groups: l_oo_all_hosts
