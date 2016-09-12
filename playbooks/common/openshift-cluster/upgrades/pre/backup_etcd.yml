@@ -70,9 +70,6 @@
       msg: "Etcd backup created in {{ openshift.common.data_dir }}/etcd-backup-{{ timestamp }}"
 
 
-##############################################################################
-# Gate on etcd backup
-##############################################################################
 - name: Gate on etcd backup
   hosts: localhost
   connection: local

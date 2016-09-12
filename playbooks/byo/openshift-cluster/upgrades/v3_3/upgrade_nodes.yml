@@ -17,7 +17,7 @@
 - include: ../initialize_facts.yml
 
 - name: Update repos and initialize facts on all hosts
-  hosts: oo_nodes_to_config
+  hosts: oo_masters_to_config:oo_nodes_to_config:oo_etcd_to_config:oo_lb_to_config
   roles:
   - openshift_repos
 
@@ -54,3 +54,9 @@
 - include: ../../../../common/openshift-cluster/upgrades/pre/verify_docker_upgrade_targets.yml
 
 - include: ../../../../common/openshift-cluster/upgrades/pre/gate_checks.yml
+
+- name: Verify masters are already upgraded
+  hosts: oo_masters_to_config
+  tasks:
+  - fail: msg="Master running {{ openshift.common.version }} must be upgraded to {{ openshift_version }} before node upgrade can be run."
+    when: openshift.common.version != openshift_version

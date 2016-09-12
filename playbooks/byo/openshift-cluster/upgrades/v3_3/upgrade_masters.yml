@@ -17,7 +17,7 @@
 - include: ../initialize_facts.yml
 
 - name: Update repos and initialize facts on all hosts
-  hosts: oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config
+  hosts: oo_masters_to_config:oo_nodes_to_config:oo_etcd_to_config:oo_lb_to_config
   roles:
   - openshift_repos
 
