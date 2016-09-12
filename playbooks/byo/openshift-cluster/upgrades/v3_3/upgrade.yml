@@ -1,4 +1,7 @@
 ---
+#
+# Full Control Plane + Nodes Upgrade
+#
 - include: ../../../../common/openshift-cluster/upgrades/init.yml
 
 # Configure the upgrade target for the common upgrade tasks:
@@ -8,13 +11,59 @@
       openshift_upgrade_target: "{{ '1.3' if deployment_type == 'origin' else '3.3' }}"
       openshift_upgrade_min: "{{ '1.2' if deployment_type == 'origin' else '3.2' }}"
 
-- include: ../../../../common/openshift-cluster/upgrades/pre.yml
+# Pre-upgrade
+- include: ../initialize_facts.yml
+
+- name: Update repos and initialize facts on all hosts
+  hosts: oo_masters_to_config:oo_nodes_to_config:oo_etcd_to_config:oo_lb_to_config
+  roles:
+  - openshift_repos
+
+- name: Set openshift_no_proxy_internal_hostnames
+  hosts: oo_masters_to_config:oo_nodes_to_config
+  tasks:
+  - set_fact:
+      openshift_no_proxy_internal_hostnames: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config']
+                                                    | union(groups['oo_masters_to_config'])
+                                                    | union(groups['oo_etcd_to_config'] | default([])))
+                                                | oo_collect('openshift.common.hostname') | default([]) | join (',')
+                                                }}"
+    when: "{{ (openshift_http_proxy is defined or openshift_https_proxy is defined) and
+            openshift_generate_no_proxy_hosts | default(True) | bool }}"
+
+- include: ../../../../common/openshift-cluster/upgrades/pre/verify_inventory_vars.yml
+
+- include: ../initialize_openshift_version.yml
   vars:
-    openshift_deployment_type: "{{ deployment_type }}"
+    # Request specific openshift_release and let the openshift_version role handle converting this
+    # to a more specific version, respecting openshift_image_tag and openshift_pkg_version if
+    # defined, and overriding the normal behavior of protecting the installed version
+    openshift_release: "{{ openshift_upgrade_target }}"
+    openshift_protect_installed_version: False
+    # Docker role (a dependency) should be told not to do anything to installed version
+    # of docker, we handle this separately during upgrade. (the inventory may have a
+    # docker_version defined, we don't want to actually do it until later)
+    docker_protect_installed_version: True
+
+- include: ../../../../common/openshift-cluster/upgrades/pre/verify_control_plane_running
+
+- include: ../../../../common/openshift-cluster/upgrades/pre/verify_upgrade_targets.yml
+
+- include: ../../../../common/openshift-cluster/upgrades/pre/verify_docker_upgrade_targets.yml
+
+- include: ../../../../common/openshift-cluster/upgrades/pre/gate_checks.yml
+
+- include: ../../../../common/openshift-cluster/upgrades/pre/backup_etcd.yml
+
+  #  vars:
+  #    openshift_deployment_type: "{{ deployment_type }}"
+
 - include: ../../../../common/openshift-cluster/upgrades/upgrade.yml
   vars:
     openshift_deployment_type: "{{ deployment_type }}"
     master_config_hook: "v3_3/master_config_upgrade.yml"
     node_config_hook: "v3_3/node_config_upgrade.yml"
+
 - include: ../../../openshift-master/restart.yml
+
 - include: ../../../../common/openshift-cluster/upgrades/post.yml
