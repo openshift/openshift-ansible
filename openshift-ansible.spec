@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.28
+Version:        3.2.29
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Sep 13 2016 Scott Dodson <sdodson@redhat.com> 3.2.29-1
+- Record schedulability of node prior to upgrade and re-set it to that
+  (sdodson@redhat.com)
+- Update image stream data (sdodson@redhat.com)
+- Define proxy settings for node services (sdodson@redhat.com)
+
 * Wed Aug 31 2016 Scott Dodson <sdodson@redhat.com> 3.2.28-1
 - Fix review comments (mkumatag@in.ibm.com)
 - Remove duplicate flannel registration (mkumatag@in.ibm.com)
