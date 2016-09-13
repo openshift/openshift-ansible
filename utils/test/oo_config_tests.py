@@ -1,16 +1,15 @@
-# TODO: Temporarily disabled due to importing old code into openshift-ansible
-# repo. We will work on these over time.
-# pylint: disable=bad-continuation,missing-docstring,no-self-use,invalid-name
-
+# pylint: disable=missing-docstring
 import cStringIO
 import os
-import unittest
-import tempfile
 import shutil
-import yaml
+import tempfile
+import unittest
 
-from ooinstall.oo_config import OOConfig, Host, OOConfigInvalidHostError
 import ooinstall.openshift_ansible
+import yaml
+from ooinstall.models import Host, InvalidHostError
+from ooinstall.oo_config import OOConfig
+
 
 SAMPLE_CONFIG = """
 variant: openshift-enterprise
@@ -120,7 +119,8 @@ class OOInstallFixture(unittest.TestCase):
             else:
                 os.remove(path)
 
-    def write_config(self, path, config_str):
+    @staticmethod
+    def write_config(path, config_str):
         """
         Write given config to a temporary file which will be cleaned
         up in teardown.
@@ -138,7 +138,8 @@ class OOConfigTests(OOInstallFixture):
     def test_load_config(self):
 
         cfg_path = self.write_config(os.path.join(self.work_dir,
-            'ooinstall.conf'), SAMPLE_CONFIG)
+                                                  'ooinstall.conf'),
+                                     SAMPLE_CONFIG)
         ooconfig = OOConfig(cfg_path)
 
         self.assertEquals(3, len(ooconfig.deployment.hosts))
@@ -155,17 +156,19 @@ class OOConfigTests(OOInstallFixture):
     def test_load_bad_config(self):
 
         cfg_path = self.write_config(os.path.join(self.work_dir,
-            'ooinstall.conf'), CONFIG_BAD)
+                                                  'ooinstall.conf'),
+                                     CONFIG_BAD)
         try:
             OOConfig(cfg_path)
             assert False
-        except OOConfigInvalidHostError:
+        except InvalidHostError:
             assert True
 
 
     def test_load_complete_facts(self):
         cfg_path = self.write_config(os.path.join(self.work_dir,
-            'ooinstall.conf'), SAMPLE_CONFIG)
+                                                  'ooinstall.conf'),
+                                     SAMPLE_CONFIG)
         ooconfig = OOConfig(cfg_path)
         missing_host_facts = ooconfig.calc_missing_facts()
         self.assertEquals(0, len(missing_host_facts))
@@ -173,7 +176,8 @@ class OOConfigTests(OOInstallFixture):
     # Test missing optional facts the user must confirm:
     def test_load_host_incomplete_facts(self):
         cfg_path = self.write_config(os.path.join(self.work_dir,
-            'ooinstall.conf'), CONFIG_INCOMPLETE_FACTS)
+                                                  'ooinstall.conf'),
+                                     CONFIG_INCOMPLETE_FACTS)
         ooconfig = OOConfig(cfg_path)
         missing_host_facts = ooconfig.calc_missing_facts()
         self.assertEquals(2, len(missing_host_facts))
@@ -182,22 +186,20 @@ class OOConfigTests(OOInstallFixture):
 
     def test_write_config(self):
         cfg_path = self.write_config(os.path.join(self.work_dir,
-            'ooinstall.conf'), SAMPLE_CONFIG)
+                                                  'ooinstall.conf'),
+                                     SAMPLE_CONFIG)
         ooconfig = OOConfig(cfg_path)
         ooconfig.save_to_disk()
 
-        f = open(cfg_path, 'r')
-        written_config = yaml.safe_load(f.read())
-        f.close()
-
-
+        with open(cfg_path, 'r') as cfgfile:
+            written_config = yaml.safe_load(cfgfile.read())
 
         self.assertEquals(3, len(written_config['deployment']['hosts']))
-        for h in written_config['deployment']['hosts']:
-            self.assertTrue('ip' in h)
-            self.assertTrue('public_ip' in h)
-            self.assertTrue('hostname' in h)
-            self.assertTrue('public_hostname' in h)
+        for host in written_config['deployment']['hosts']:
+            self.assertTrue('ip' in host)
+            self.assertTrue('public_ip' in host)
+            self.assertTrue('hostname' in host)
+            self.assertTrue('public_hostname' in host)
 
         self.assertTrue('ansible_ssh_user' in written_config['deployment'])
         self.assertTrue('variant' in written_config)
@@ -210,22 +212,22 @@ class OOConfigTests(OOInstallFixture):
 
 class HostTests(OOInstallFixture):
 
-    def test_load_host_no_ip_or_hostname(self):
+    def test_load_host_no_ip_hostname(self):
         yaml_props = {
             'public_ip': '192.168.0.1',
             'public_hostname': 'a.example.com',
             'master': True
         }
-        self.assertRaises(OOConfigInvalidHostError, Host, **yaml_props)
+        self.assertRaises(InvalidHostError, Host, **yaml_props)
 
-    def test_load_host_no_master_or_node_specified(self):
+    def test_load_host_no_master_node(self):
         yaml_props = {
             'ip': '192.168.0.1',
             'hostname': 'a.example.com',
             'public_ip': '192.168.0.1',
             'public_hostname': 'a.example.com',
         }
-        self.assertRaises(OOConfigInvalidHostError, Host, **yaml_props)
+        self.assertRaises(InvalidHostError, Host, **yaml_props)
 
     def test_inventory_file_quotes_node_labels(self):
         """Verify a host entry wraps openshift_node_labels value in double quotes"""

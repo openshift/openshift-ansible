@@ -5,6 +5,7 @@ import sys
 import logging
 import yaml
 from pkg_resources import resource_filename
+from ooinstall.models import Role, Host, Deployment
 
 
 installer_log = logging.getLogger('installer')
@@ -59,123 +60,6 @@ class OOConfigFileError(Exception):
     pass
 
 
-class OOConfigInvalidHostError(Exception):
-    """ Host in config is missing both ip and hostname. """
-    pass
-
-
-class Host(object):
-    """ A system we will or have installed OpenShift on. """
-    def __init__(self, **kwargs):
-        self.ip = kwargs.get('ip', None)
-        self.hostname = kwargs.get('hostname', None)
-        self.public_ip = kwargs.get('public_ip', None)
-        self.public_hostname = kwargs.get('public_hostname', None)
-        self.connect_to = kwargs.get('connect_to', None)
-
-        self.preconfigured = kwargs.get('preconfigured', None)
-        self.schedulable = kwargs.get('schedulable', None)
-        self.new_host = kwargs.get('new_host', None)
-        self.containerized = kwargs.get('containerized', False)
-        self.node_labels = kwargs.get('node_labels', '')
-
-        # allowable roles: master, node, etcd, storage, master_lb
-        self.roles = kwargs.get('roles', [])
-
-        self.other_variables = kwargs.get('other_variables', {})
-
-        if self.connect_to is None:
-            raise OOConfigInvalidHostError(
-                "You must specify either an ip or hostname as 'connect_to'")
-
-    def __str__(self):
-        return self.connect_to
-
-    def __repr__(self):
-        return self.connect_to
-
-    def to_dict(self):
-        """ Used when exporting to yaml. """
-        d = {}
-
-        for prop in ['ip', 'hostname', 'public_ip', 'public_hostname', 'connect_to',
-                     'preconfigured', 'containerized', 'schedulable', 'roles', 'node_labels', ]:
-            # If the property is defined (not None or False), export it:
-            if getattr(self, prop):
-                d[prop] = getattr(self, prop)
-        for variable, value in self.other_variables.iteritems():
-            d[variable] = value
-
-        return d
-
-    def is_master(self):
-        return 'master' in self.roles
-
-    def is_node(self):
-        return 'node' in self.roles
-
-    def is_master_lb(self):
-        return 'master_lb' in self.roles
-
-    def is_storage(self):
-        return 'storage' in self.roles
-
-    def is_etcd_member(self, all_hosts):
-        """ Will this host be a member of a standalone etcd cluster. """
-        if not self.is_master():
-            return False
-        masters = [host for host in all_hosts if host.is_master()]
-        if len(masters) > 1:
-            return True
-        return False
-
-    def is_dedicated_node(self):
-        """ Will this host be a dedicated node. (not a master) """
-        return self.is_node() and not self.is_master()
-
-    def is_schedulable_node(self, all_hosts):
-        """ Will this host be a node marked as schedulable. """
-        if not self.is_node():
-            return False
-        if not self.is_master():
-            return True
-
-        masters = [host for host in all_hosts if host.is_master()]
-        nodes = [host for host in all_hosts if host.is_node()]
-        if len(masters) == len(nodes):
-            return True
-        return False
-
-
-class Role(object):
-    """ A role that will be applied to a host. """
-    def __init__(self, name, variables):
-        self.name = name
-        self.variables = variables
-
-    def __str__(self):
-        return self.name
-
-    def __repr__(self):
-        return self.name
-
-    def to_dict(self):
-        """ Used when exporting to yaml. """
-        d = {}
-        for prop in ['name', 'variables']:
-            # If the property is defined (not None or False), export it:
-            if getattr(self, prop):
-                d[prop] = getattr(self, prop)
-        return d
-
-
-class Deployment(object):
-    def __init__(self, **kwargs):
-        self.hosts = kwargs.get('hosts', [])
-        self.roles = kwargs.get('roles', {})
-        self.variables = kwargs.get('variables', {})
-
-
 class OOConfig(object):
     default_dir = os.path.normpath(
         os.environ.get('XDG_CONFIG_HOME',
@@ -199,7 +83,8 @@ class OOConfig(object):
     def _read_config(self):
         installer_log.debug("Attempting to read the OO Config")
         try:
-            installer_log.debug("Attempting to see if the provided config file exists: %s", self.config_path)
+            installer_log.debug("Attempting to see if the provided config file exists: %s",
+                                self.config_path)
             if os.path.exists(self.config_path):
                 installer_log.debug("We think the config file exists: %s", self.config_path)
                 with open(self.config_path, 'r') as cfgfile:
@@ -292,7 +177,8 @@ class OOConfig(object):
             host_props['roles'] = []
             host_props['connect_to'] = host['connect_to']
 
-            for prop in ['ip', 'public_ip', 'hostname', 'public_hostname', 'containerized', 'preconfigured']:
+            for prop in ['ip', 'public_ip', 'hostname', 'public_hostname',
+                         'containerized', 'preconfigured']:
                 host_props[prop] = host.get(prop, None)
 
             for role in ['master', 'node', 'master_lb', 'storage', 'etcd']:
@@ -325,7 +211,8 @@ class OOConfig(object):
         if 'ansible_plugins_directory' not in self.settings:
             self.settings['ansible_plugins_directory'] = \
                 resource_filename(__name__, 'ansible_plugins')
-            installer_log.debug("We think the ansible plugins directory should be: %s (it is not already set)",
+            installer_log.debug("We think the ansible plugins directory should be: %s "
+                                "(it is not already set)",
                                 self.settings['ansible_plugins_directory'])
         else:
             installer_log.debug("The ansible plugins directory is already set: %s",
@@ -344,20 +231,11 @@ class OOConfig(object):
                                 "in self.settings: %s",
                                 self.settings['ansible_callback_facts_yaml'])
 
-        if 'ansible_ssh_user' not in self.settings:
-            self.settings['ansible_ssh_user'] = ''
-
         self.settings['ansible_inventory_path'] = \
             '{}/hosts'.format(os.path.dirname(self.config_path))
 
-        # pylint: disable=consider-iterating-dictionary
-        # Disabled because we shouldn't alter the container we're
-        # iterating over
-        #
-        # clean up any empty sets
-        for setting in self.settings.keys():
-            if not self.settings[setting]:
-                self.settings.pop(setting)
+        # remove empty sets
+        self.settings = dict((k, v) for k, v in self.settings.iteritems() if v)
 
         installer_log.debug("Updated OOConfig settings: %s", self.settings)
 
@@ -418,7 +296,8 @@ class OOConfig(object):
             p_settings['variant_version'] = self.settings['variant_version']
 
             if self.settings['ansible_inventory_directory'] != self._default_ansible_inv_dir():
-                p_settings['ansible_inventory_directory'] = self.settings['ansible_inventory_directory']
+                p_settings['ansible_inventory_directory'] = \
+                    self.settings['ansible_inventory_directory']
         except KeyError as e:
             print "Error persisting settings: {}".format(e)
             sys.exit(0)
