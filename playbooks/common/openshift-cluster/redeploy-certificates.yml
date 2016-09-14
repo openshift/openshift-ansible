@@ -133,7 +133,9 @@
   hosts: oo_etcd_to_config
   tasks:
   - name: restart etcd
-    service: name=etcd state=restarted
+    service:
+      name: "{{ 'etcd' if not openshift.common.is_containerized | bool else 'etcd_container' }}"
+      state: restarted
 
 - name: Stop master services
   hosts: oo_masters_to_config
