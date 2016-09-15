@@ -38,9 +38,18 @@
   delegate_to: "{{ etcd_ca_host }}"
   run_once: true
 
-- command: touch {{ etcd_ca_db }}
-  args:
-    creates: "{{ etcd_ca_db }}"
+- name: Check etcd_ca_db exist
+  stat: path="{{ etcd_ca_db }}"
+  register: etcd_ca_db_check
+  changed_when: false
+  delegate_to: "{{ etcd_ca_host }}"
+  run_once: true
+
+- name: Touch etcd_ca_db file
+  file:
+    path: "{{ etcd_ca_db }}"
+    state: touch
+  when: etcd_ca_db_check.stat.isreg is not defined
   delegate_to: "{{ etcd_ca_host }}"
   run_once: true
 

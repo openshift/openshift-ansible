@@ -16,6 +16,7 @@ import pkg_resources
 import re
 import json
 import yaml
+from ansible.parsing.yaml.dumper import AnsibleDumper
 from ansible.utils.unicode import to_unicode
 from urlparse import urlparse
 
@@ -528,9 +529,9 @@ class FilterModule(object):
                 raise errors.AnsibleFilterError(("|failed to parse certificate '%s', " % certificate['certfile'] +
                                                  "please specify certificate names in host inventory"))
 
+            certificate['names'] = list(set(certificate['names']))
             if 'cafile' not in certificate:
                 certificate['names'] = [name for name in certificate['names'] if name not in internal_hostnames]
-                certificate['names'] = list(set(certificate['names']))
                 if not certificate['names']:
                     raise errors.AnsibleFilterError(("|failed to parse certificate '%s' or " % certificate['certfile'] +
                                                      "detected a collision with internal hostname, please specify " +
@@ -621,11 +622,13 @@ class FilterModule(object):
             return ""
 
         try:
-            transformed = yaml.safe_dump(data, indent=indent, allow_unicode=True, default_flow_style=False, **kw)
+            transformed = yaml.dump(data, indent=indent, allow_unicode=True,
+                                    default_flow_style=False,
+                                    Dumper=AnsibleDumper, **kw)
             padded = "\n".join([" " * level * indent + line for line in transformed.splitlines()])
             return to_unicode("\n{0}".format(padded))
         except Exception as my_e:
-            raise errors.AnsibleFilterError('Failed to convert: %s', my_e)
+            raise errors.AnsibleFilterError('Failed to convert: %s' % my_e)
 
     @staticmethod
     def oo_openshift_env(hostvars):
