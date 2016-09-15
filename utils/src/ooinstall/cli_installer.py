@@ -791,7 +791,7 @@ def set_infra_nodes(hosts):
     if all(host.is_master() for host in hosts):
         infra_list = hosts
     else:
-        nodes_list = [host for host in hosts if host.is_node()]
+        nodes_list = [host for host in hosts if host.is_schedulable_node(hosts)]
         infra_list = nodes_list[:2]
 
     for host in infra_list:
