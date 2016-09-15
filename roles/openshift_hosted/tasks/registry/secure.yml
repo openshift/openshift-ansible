@@ -13,6 +13,8 @@
   command: >
     {{ openshift.common.client_binary }} get service docker-registry
     --template='{{ '{{' }} .spec.clusterIP {{ '}}' }}'
+    --config={{ openshift_hosted_kubeconfig }}
+    -n default
   register: docker_registry_service_ip
   changed_when: false
 
@@ -74,6 +76,8 @@
     {{ openshift.common.client_binary }} env dc/docker-registry
     REGISTRY_HTTP_TLS_CERTIFICATE=/etc/secrets/registry.crt
     REGISTRY_HTTP_TLS_KEY=/etc/secrets/registry.key
+    --config={{ openshift_hosted_kubeconfig }}
+    -n default
 
 # These commands are on a single line to preserve patch json.
 - name: Update registry liveness probe from HTTP to HTTPS
