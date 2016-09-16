@@ -1731,6 +1731,7 @@ class OpenShiftFacts(object):
                 {"name": "NoDiskConflict"},
                 {"name": "NoVolumeZoneConflict"},
                 {"name": "MaxEBSVolumeCount"},
+                {"name": "MaxGCEPDVolumeCount"},
                 {"name": "Region", "argument": {"serviceAffinity" : {"labels" : ["region"]}}}
             ]
             scheduler_priorities = [
