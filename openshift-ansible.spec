@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.22
+Version:        3.3.23
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,28 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Sep 16 2016 Scott Dodson <sdodson@redhat.com> 3.3.23-1
+- Only prompt for proxy vars if none are set and our version recognizes them
+  (tbielawa@redhat.com)
+- Change test requirements file name (tbielawa@redhat.com)
+- Try installing setuptools before the rest of the requirements
+  (tbielawa@redhat.com)
+- Switch to using a requirements.txt file and ensure that setuptools is pinned
+  to the latest version available on RHEL7 (tbielawa@redhat.com)
+- Try using parse_version from pkg_resources instead (tbielawa@redhat.com)
+- Add missing pip requirement to virtualenv (tbielawa@redhat.com)
+- Fix PyLint errors discovered when upgrading to newer version
+  (tbielawa@redhat.com)
+- Iterate over node inventory hostnames instead of openshift.common.hostname
+  within openshift_manage_node role. (abutcher@redhat.com)
+- Don't loop over hostvars when setting node schedulability.
+  (abutcher@redhat.com)
+- Copy admin kubeconfig in openshift_manage_node role. (abutcher@redhat.com)
+- Define proxy settings for node services (sdodson@redhat.com)
+- Persist net.ipv4.ip_forward sysctl entry for openshift nodes
+  (tbielawa@redhat.com)
+- a-o-i: Do not display version number in quick installer (smunilla@redhat.com)
+
 * Sun Sep 04 2016 Scott Dodson <sdodson@redhat.com> 3.3.22-1
 - Secure registry for atomic registry deployment (deployment_subtype=registry).
   (abutcher@redhat.com)
