@@ -5,15 +5,15 @@
 import os
 import re
 import sys
-from distutils.version import LooseVersion
+import logging
 import click
+from pkg_resources import parse_version
 from ooinstall import openshift_ansible
 from ooinstall.oo_config import OOConfig
 from ooinstall.oo_config import OOConfigInvalidHostError
 from ooinstall.oo_config import Host, Role
 from ooinstall.variants import find_variant, get_variant_version_combos
 
-import logging
 installer_log = logging.getLogger('installer')
 installer_log.setLevel(logging.CRITICAL)
 installer_file_handler = logging.FileHandler('/tmp/installer.txt')
@@ -96,27 +96,6 @@ def list_hosts(hosts):
     hosts_idx = range(len(hosts))
     for idx in hosts_idx:
         click.echo('   {}: {}'.format(idx, hosts[idx]))
-
-
-def delete_hosts(hosts):
-    while True:
-        list_hosts(hosts)
-        del_idx = click.prompt('Select host to delete, y/Y to confirm, '
-                               'or n/N to add more hosts', default='n')
-        try:
-            del_idx = int(del_idx)
-            hosts.remove(hosts[del_idx])
-        except IndexError:
-            click.echo("\"{}\" doesn't match any hosts listed.".format(del_idx))
-        except ValueError:
-            try:
-                response = del_idx.lower()
-                if response in ['y', 'n']:
-                    return hosts, response
-                click.echo("\"{}\" doesn't correspond to any valid input.".format(del_idx))
-            except AttributeError:
-                click.echo("\"{}\" doesn't correspond to any valid input.".format(del_idx))
-    return hosts, None
 
 
 def collect_hosts(oo_cfg, existing_env=False, masters_set=False, print_summary=True):
@@ -504,8 +483,7 @@ def get_variant_and_version(multi_master=False):
     i = 1
     combos = get_variant_version_combos()
     for (variant, version) in combos:
-        message = "%s\n(%s) %s %s" % (message, i, variant.description,
-                                      version.name)
+        message = "%s\n(%s) %s" % (message, i, variant.description)
         i = i + 1
     message = "%s\n" % message
 
@@ -576,8 +554,12 @@ def get_host_roles_set(oo_cfg):
 
 def get_proxy_hostnames_and_excludes():
     message = """
-If a proxy is needed to reach HTTP and HTTPS traffic, please enter the name below.
-This proxy will be configured by default for all processes that need to reach systems outside the cluster.
+If a proxy is needed to reach HTTP and HTTPS traffic, please enter the
+name below. This proxy will be configured by default for all processes
+that need to reach systems outside the cluster. An example proxy value
+would be:
+
+    http://proxy.example.com:8080/
 
 More advanced configuration is possible if using Ansible directly:
 
@@ -588,6 +570,8 @@ https://docs.openshift.com/enterprise/latest/install_config/http_proxies.html
     message = "Specify your http proxy ? (ENTER for none)"
     http_proxy_hostname = click.prompt(message, default='')
 
+    # TODO: Fix this prompt message and behavior. 'ENTER' will default
+    # to the http_proxy_hostname if one was provided
     message = "Specify your https proxy ? (ENTER for none)"
     https_proxy_hostname = click.prompt(message, default=http_proxy_hostname)
 
@@ -653,8 +637,23 @@ https://docs.openshift.com/enterprise/latest/admin_guide/install/prerequisites.h
         oo_cfg.deployment.variables['master_routingconfig_subdomain'] = get_master_routingconfig_subdomain()
         click.clear()
 
-    if not oo_cfg.settings.get('openshift_http_proxy', None) and \
-       LooseVersion(oo_cfg.settings.get('variant_version', '0.0')) >= LooseVersion('3.2'):
+    # Are any proxy vars already presisted?
+    proxy_vars = ['proxy_exclude_hosts', 'proxy_https', 'proxy_http']
+    # Empty list if NO proxy vars were presisted
+    saved_proxy_vars = [pv for pv in proxy_vars
+                        if oo_cfg.deployment.variables.get(pv, 'UNSET') is not 'UNSET']
+
+    installer_log.debug("Evaluated proxy settings, found %s presisted values",
+                        len(saved_proxy_vars))
+    current_version = parse_version(
+        oo_cfg.settings.get('variant_version', '0.0'))
+    min_version = parse_version('3.2')
+
+    # No proxy vars were saved and we are running a version which
+    # recognizes proxy parameters. We must prompt the user for values
+    # if this conditional is true.
+    if not saved_proxy_vars and current_version >= min_version:
+        installer_log.debug("Prompting user to enter proxy values")
         http_proxy, https_proxy, proxy_excludes = get_proxy_hostnames_and_excludes()
         oo_cfg.deployment.variables['proxy_http'] = http_proxy
         oo_cfg.deployment.variables['proxy_https'] = https_proxy
@@ -921,7 +920,7 @@ def uninstall(ctx):
 @click.option('--latest-minor', '-l', is_flag=True, default=False)
 @click.option('--next-major', '-n', is_flag=True, default=False)
 @click.pass_context
-# pylint: disable=bad-builtin,too-many-statements
+# pylint: disable=too-many-statements
 def upgrade(ctx, latest_minor, next_major):
     oo_cfg = ctx.obj['oo_cfg']
 
