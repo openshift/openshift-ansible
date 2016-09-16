@@ -11,7 +11,7 @@ they may in the future.
 
 The master branch tracks our current work and should be compatible with both
 Origin master branch and the most recent Origin stable release. Currently that's
-v1.3 and v1.2.x. In addition to the master branch we maintain stable branches
+v1.4 and v1.3.x. In addition to the master branch we maintain stable branches
 corresponding to upstream Origin releases, ie: release-1.2. The most recent of
 branch will often receive minor feature backports and fixes. Older branches will
 receive only critical fixes.
