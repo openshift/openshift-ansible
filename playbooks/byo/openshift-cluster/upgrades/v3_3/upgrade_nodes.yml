@@ -14,18 +14,18 @@
       openshift_upgrade_min: "{{ '1.2' if deployment_type == 'origin' else '3.2' }}"
 
 # Pre-upgrade
-- include: ../../../../common/openshift-cluster/initialize_facts.yml
+- include: ../../../../common/openshift-cluster/upgrades/initialize_nodes_to_upgrade.yml
 
 - name: Update repos on nodes
-  hosts: oo_masters_to_config:oo_nodes_to_config:oo_etcd_to_config:oo_lb_to_config
+  hosts: oo_masters_to_config:oo_nodes_to_upgrade:oo_etcd_to_config:oo_lb_to_config
   roles:
   - openshift_repos
 
 - name: Set openshift_no_proxy_internal_hostnames
-  hosts: oo_masters_to_config:oo_nodes_to_config
+  hosts: oo_masters_to_config:oo_nodes_to_upgrade
   tasks:
   - set_fact:
-      openshift_no_proxy_internal_hostnames: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config']
+      openshift_no_proxy_internal_hostnames: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_upgrade']
                                                     | union(groups['oo_masters_to_config'])
                                                     | union(groups['oo_etcd_to_config'] | default([])))
                                                 | oo_collect('openshift.common.hostname') | default([]) | join (',')
@@ -72,7 +72,7 @@
 # before we get into the serialized upgrade process which will then remove
 # remaining images if possible.
 - name: Cleanup unused Docker images
-  hosts: oo_nodes_to_config
+  hosts: oo_nodes_to_upgrade
   tasks:
   - include: ../../../../common/openshift-cluster/upgrades/cleanup_unused_images.yml
 

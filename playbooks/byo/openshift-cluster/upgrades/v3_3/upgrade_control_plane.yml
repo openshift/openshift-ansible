@@ -21,7 +21,6 @@
       openshift_upgrade_min: "{{ '1.2' if deployment_type == 'origin' else '3.2' }}"
 
 # Pre-upgrade
-- include: ../../../../common/openshift-cluster/initialize_facts.yml
 
 - name: Update repos on control plane hosts
   hosts: oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config
@@ -29,7 +28,7 @@
   - openshift_repos
 
 - name: Set openshift_no_proxy_internal_hostnames
-  hosts: oo_masters_to_config:oo_nodes_to_config
+  hosts: oo_masters_to_config:oo_nodes_to_upgrade
   tasks:
   - set_fact:
       openshift_no_proxy_internal_hostnames: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config']

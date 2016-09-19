@@ -46,3 +46,5 @@
   - set_fact:
       openshift_docker_log_options: "{{ lookup('oo_option', 'docker_log_options') }}"
     when: openshift_docker_log_options is not defined
+
+- include: ../initialize_facts.yml

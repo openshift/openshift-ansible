@@ -1,6 +1,6 @@
 ---
 - name: Verify docker upgrade targets
-  hosts: oo_masters_to_config:oo_nodes_to_config:oo_etcd_to_config
+  hosts: oo_masters_to_config:oo_nodes_to_upgrade:oo_etcd_to_config
   tasks:
   # Only check if docker upgrade is required if docker_upgrade is not
   # already set to False.
