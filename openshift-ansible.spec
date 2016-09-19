@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.23
+Version:        3.3.24
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Sep 19 2016 Scott Dodson <sdodson@redhat.com> 3.3.24-1
+- Add portal_net and sdn_cluster_network_cidr to node NO_PROXY
+  (sdodson@redhat.com)
+
 * Fri Sep 16 2016 Scott Dodson <sdodson@redhat.com> 3.3.23-1
 - Only prompt for proxy vars if none are set and our version recognizes them
   (tbielawa@redhat.com)
