@@ -22,6 +22,7 @@
   - set_fact:
       is_containerized: "{{ is_atomic or containerized | default(false) | bool }}"
 
+# Stop services on all hosts prior to removing files.
 - hosts: nodes
   become: yes
   tasks:
@@ -35,6 +36,46 @@
     - origin-node
     failed_when: false
 
+- hosts: masters
+  become: yes
+  tasks:
+  - name: Stop services
+    service: name={{ item }} state=stopped
+    with_items:
+    - atomic-enterprise-master
+    - atomic-openshift-master
+    - atomic-openshift-master-api
+    - atomic-openshift-master-controllers
+    - openshift-master
+    - openshift-master-api
+    - openshift-master-controllers
+    - origin-master
+    - origin-master-api
+    - origin-master-controllers
+    - pcsd
+    failed_when: false
+
+- hosts: etcd
+  become: yes
+  tasks:
+  - name: Stop services
+    service: name={{ item }} state=stopped
+    with_items:
+    - etcd
+    failed_when: false
+
+- hosts: lb
+  become: yes
+  tasks:
+  - name: Stop services
+    service: name={{ item }} state=stopped
+    with_items:
+    - haproxy
+    failed_when: false
+
+- hosts: nodes
+  become: yes
+  tasks:
   - name: unmask services
     command: systemctl unmask "{{ item }}"
     changed_when: False
@@ -197,22 +238,6 @@
 - hosts: masters
   become: yes
   tasks:
-  - name: Stop services
-    service: name={{ item }} state=stopped
-    with_items:
-    - atomic-enterprise-master
-    - atomic-openshift-master
-    - atomic-openshift-master-api
-    - atomic-openshift-master-controllers
-    - openshift-master
-    - openshift-master-api
-    - openshift-master-controllers
-    - origin-master
-    - origin-master-api
-    - origin-master-controllers
-    - pcsd
-    failed_when: false
-
   - name: unmask services
     command: systemctl unmask "{{ item }}"
     changed_when: False
@@ -307,12 +332,6 @@
 - hosts: etcd
   become: yes
   tasks:
-  - name: Stop services
-    service: name={{ item }} state=stopped
-    with_items:
-    - etcd
-    failed_when: false
-
   - name: unmask services
     command: systemctl unmask "{{ item }}"
     changed_when: False
@@ -358,12 +377,6 @@
 - hosts: lb
   become: yes
   tasks:
-  - name: Stop services
-    service: name={{ item }} state=stopped
-    with_items:
-    - haproxy
-    failed_when: false
-
   - name: unmask services
     command: systemctl unmask "{{ item }}"
     changed_when: False
