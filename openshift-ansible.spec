@@ -91,7 +91,8 @@ popd
 
 # Base openshift-ansible files
 %files
-%doc LICENSE.md README*
+%doc README*
+%license LICENSE
 %dir %{_datadir}/ansible/%{name}
 %{_datadir}/ansible/%{name}/library
 %ghost %{_datadir}/ansible/%{name}/playbooks/common/openshift-master/library.rpmmoved
