@@ -65,7 +65,7 @@
     openshift_hosted_logging_elasticsearch_ops_pvc_prefix: "{{ 'logging-es' if openshift.hosted.logging.storage_kind | default(none) is not none else '' }}"
 
   - role: cockpit-ui
-    when: openshift.common.deployment_subtype == 'registry'
+    when: openshift.common.version_gte_3_3_or_1_3 | bool
 
 - name: Configure all masters for logging
   serial: 1
@@ -94,19 +94,19 @@
   - name: Create temp directory for kubeconfig
     command: mktemp -d /tmp/openshift-ansible-XXXXXX
     register: mktemp
-    when: openshift.common.deployment_subtype == 'registry'
+    when: openshift.common.version_gte_3_3_or_1_3 | bool
     changed_when: false
     delegate_to: "{{ groups.oo_first_master.0 }}"
     run_once: true
   - set_fact:
       openshift_hosted_kubeconfig: "{{ mktemp.stdout }}/admin.kubeconfig"
-    when: openshift.common.deployment_subtype == 'registry'
+    when: openshift.common.version_gte_3_3_or_1_3 | bool
     delegate_to: "{{ groups.oo_first_master.0 }}"
     run_once: true
   - name: Copy the admin client config(s)
     command: >
       cp {{ openshift.common.config_base }}/master/admin.kubeconfig {{ openshift_hosted_kubeconfig }}
-    when: openshift.common.deployment_subtype == 'registry'
+    when: openshift.common.version_gte_3_3_or_1_3 | bool
     changed_when: false
     delegate_to: "{{ groups.oo_first_master.0 }}"
     run_once: true
@@ -117,7 +117,7 @@
       --config={{ openshift_hosted_kubeconfig }}
       -n default
     register: docker_registry_route
-    when: openshift.common.deployment_subtype == 'registry'
+    when: openshift.common.version_gte_3_3_or_1_3 | bool
     changed_when: false
     delegate_to: "{{ groups.oo_first_master.0 }}"
     run_once: true
@@ -128,7 +128,7 @@
       --config={{ openshift_hosted_kubeconfig }}
       -n default
     register: docker_registry_service_ip
-    when: openshift.common.deployment_subtype == 'registry'
+    when: openshift.common.version_gte_3_3_or_1_3 | bool
     changed_when: false
     delegate_to: "{{ groups.oo_first_master.0 }}"
     run_once: true
@@ -140,7 +140,7 @@
     - "{{ docker_registry_service_ip.stdout }}:5000"
     - "{{ docker_registry_route.stdout }}"
     - "docker-registry.default.svc.cluster.local:5000"
-    when: openshift.common.deployment_subtype == 'registry'
+    when: openshift.common.version_gte_3_3_or_1_3 | bool
   - name: Copy CA to registry CA directories
     copy:
       src: "{{ openshift.common.config_base }}/node/ca.crt"
@@ -151,14 +151,14 @@
     - "{{ docker_registry_service_ip.stdout }}:5000"
     - "{{ docker_registry_route.stdout }}"
     - "docker-registry.default.svc.cluster.local:5000"
-    when: openshift.common.deployment_subtype == 'registry'
+    when: openshift.common.version_gte_3_3_or_1_3 | bool
     notify:
     - Restart docker
   - name: Delete temp directory
     file:
       name: "{{ mktemp.stdout }}"
       state: absent
-    when: openshift.common.deployment_subtype == 'registry'
+    when: openshift.common.version_gte_3_3_or_1_3 | bool
     changed_when: False
     delegate_to: "{{ groups.oo_first_master.0 }}"
     run_once: true
