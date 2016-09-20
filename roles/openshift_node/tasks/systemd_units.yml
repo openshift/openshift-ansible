@@ -60,7 +60,7 @@
     - regex: '^HTTPS_PROXY='
       line: "HTTPS_PROXY={{ openshift.common.https_proxy }}"
     - regex: '^NO_PROXY='
-      line: "NO_PROXY={{ openshift.common.no_proxy | join(',') }},{{ openshift.common.portal_net }},{{ openshift.master.sdn_cluster_network_cidr }}"
+      line: "NO_PROXY={{ openshift.common.no_proxy | join(',') }},{{ openshift.common.portal_net }},{{ hostvars[groups.oo_first_master.0].openshift.master.sdn_cluster_network_cidr }}"
   when: "{{ openshift.common.http_proxy is defined and openshift.common.http_proxy != '' }}"
   notify:
   - restart node
