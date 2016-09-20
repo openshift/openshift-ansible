@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.30
+Version:        3.2.31
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Sep 20 2016 Scott Dodson <sdodson@redhat.com> 3.2.31-1
+- Split openshift_builddefaults_no_proxy if it's not a list
+  (sdodson@redhat.com)
+- Fix references to openshift.master.sdn_cluster_network_cidr in node roles
+  (sdodson@redhat.com)
+
 * Mon Sep 19 2016 Scott Dodson <sdodson@redhat.com> 3.2.30-1
 - Add portal_net and sdn_cluster_network_cidr to node NO_PROXY
   (sdodson@redhat.com)
