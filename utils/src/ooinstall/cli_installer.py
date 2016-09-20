@@ -483,8 +483,7 @@ def get_variant_and_version(multi_master=False):
     i = 1
     combos = get_variant_version_combos()
     for (variant, version) in combos:
-        message = "%s\n(%s) %s %s" % (message, i, variant.description,
-                                      version.name)
+        message = "%s\n(%s) %s" % (message, i, variant.description)
         i = i + 1
     message = "%s\n" % message
 
@@ -791,7 +790,7 @@ def set_infra_nodes(hosts):
     if all(host.is_master() for host in hosts):
         infra_list = hosts
     else:
-        nodes_list = [host for host in hosts if host.is_node()]
+        nodes_list = [host for host in hosts if host.is_schedulable_node(hosts)]
         infra_list = nodes_list[:2]
 
     for host in infra_list:

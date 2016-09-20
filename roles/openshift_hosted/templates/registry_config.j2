@@ -15,7 +15,7 @@ storage:
     encrypt: false
     secure: true
     v4auth: true
-    rootdirectory: /registry
+    rootdirectory: {{ openshift_hosted_registry_storage_s3_rootdirectory | default('/registry') }}
     chunksize: "{{ openshift_hosted_registry_storage_s3_chunksize | default(26214400) }}"
 {% elif openshift.hosted.registry.storage.provider == 'azure_blob' %}
   azure:
@@ -66,7 +66,9 @@ middleware:
   - name: openshift
     options:
       pullthrough: {{ openshift.hosted.registry.pullthrough | default(true) }}
-{% if openshift.hosted.registry.storage.provider == 's3' and openshift_hosted_registry_storage_s3_cloudfront is defined %}
+      acceptschema2: {{ openshift.hosted.registry.acceptschema2 | default(false) }}
+      enforcequota: {{ openshift.hosted.registry.enforcequota | default(false) }}
+{% if openshift.hosted.registry.storage.provider == 's3' and 'cloudfront' in openshift.hosted.registry.storage.s3 %}
   storage:
   - name: cloudfront
     options:

@@ -52,6 +52,14 @@
     openshift_ca_host: "{{ groups.oo_first_master.0 }}"
     openshift_master_count: "{{ openshift.master.master_count | default(groups.oo_masters | length) }}"
   pre_tasks:
+  # set_fact task copied from playbooks/common/openshift-master/config.yml
+  # so that openshift_master_default_subdomain has a default value of ""
+  # (emptry string). openshift_master_default_subdomain must have a default
+  # value for openshift_master_facts to set metrics_public_url.
+  # TODO: clean this up.
+  - set_fact:
+      openshift_master_default_subdomain: "{{ lookup('oo_option', 'openshift_master_default_subdomain') | default(None, true) }}"
+    when: openshift_master_default_subdomain is not defined
   - stat:
       path: "{{ openshift_generated_configs_dir }}"
     register: openshift_generated_configs_dir_stat
@@ -133,7 +141,9 @@
   hosts: oo_etcd_to_config
   tasks:
   - name: restart etcd
-    service: name=etcd state=restarted
+    service:
+      name: "{{ 'etcd' if not openshift.common.is_containerized | bool else 'etcd_container' }}"
+      state: restarted
 
 - name: Stop master services
   hosts: oo_masters_to_config
