@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.25
+Version:        3.3.26
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Sep 21 2016 Scott Dodson <sdodson@redhat.com> 3.3.26-1
+- Add option for specifying s3 registry storage root directory.
+  (abutcher@redhat.com)
+
 * Tue Sep 20 2016 Scott Dodson <sdodson@redhat.com> 3.3.25-1
 - Split openshift_builddefaults_no_proxy if it's not a list
   (sdodson@redhat.com)
