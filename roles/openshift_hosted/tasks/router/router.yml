@@ -70,6 +70,10 @@
     {% if openshift.hosted.router.registryurl | default(none) is not none -%}
     --images='{{ openshift.hosted.router.registryurl }}'
     {% endif -%}
+    {% if openshift.hosted.router.name | default(none) is not none -%}
+    {{ openshift.hosted.router.name }}
+    {% endif -%}
+    
   register: openshift_hosted_router_results
   changed_when: "'service exists' not in openshift_hosted_router_results.stdout"
   failed_when: "openshift_hosted_router_results.rc != 0 and 'service exists' not in openshift_hosted_router_results.stdout and 'deployment_config' not in openshift_hosted_router_results.stderr and 'service' not in openshift_hosted_router_results.stderr"
