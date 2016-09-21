@@ -363,6 +363,8 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #
 # Override metricsPublicURL in the master config for cluster metrics
 # Defaults to https://hawkular-metrics.{{openshift_master_default_subdomain}}/hawkular/metrics
+# Currently, you may only alter the hostname portion of the url, alterting the
+# `/hawkular/metrics` path will break installation of metrics.
 #openshift_hosted_metrics_public_url=https://hawkular-metrics.example.com/hawkular/metrics
 
 
