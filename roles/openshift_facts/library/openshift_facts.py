@@ -1036,6 +1036,8 @@ def build_kubelet_args(facts):
                 if facts['cloudprovider']['kind'] == 'openstack':
                     kubelet_args['cloud-provider'] = ['openstack']
                     kubelet_args['cloud-config'] = [cloud_cfg_path + '/openstack.conf']
+                if facts['cloudprovider']['kind'] == 'gce':
+                    kubelet_args['cloud-provider'] = ['gce']
         if kubelet_args != {}:
             facts = merge_facts({'node': {'kubelet_args': kubelet_args}}, facts, [], [])
     return facts
@@ -1054,6 +1056,8 @@ def build_controller_args(facts):
                 if facts['cloudprovider']['kind'] == 'openstack':
                     controller_args['cloud-provider'] = ['openstack']
                     controller_args['cloud-config'] = [cloud_cfg_path + '/openstack.conf']
+                if facts['cloudprovider']['kind'] == 'gce':
+                    controller_args['cloud-provider'] = ['gce']
         if controller_args != {}:
             facts = merge_facts({'master': {'controller_args': controller_args}}, facts, [], [])
     return facts
@@ -1072,6 +1076,8 @@ def build_api_server_args(facts):
                 if facts['cloudprovider']['kind'] == 'openstack':
                     api_server_args['cloud-provider'] = ['openstack']
                     api_server_args['cloud-config'] = [cloud_cfg_path + '/openstack.conf']
+                if facts['cloudprovider']['kind'] == 'gce':
+                    api_server_args['cloud-provider'] = ['gce']
         if api_server_args != {}:
             facts = merge_facts({'master': {'api_server_args': api_server_args}}, facts, [], [])
     return facts
