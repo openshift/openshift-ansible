@@ -202,6 +202,10 @@
   when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and inventory_hostname == openshift_master_hosts[0]
   register: start_result
 
+- set_fact:
+    master_api_service_status_changed: "{{ start_result | changed }}"
+  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and inventory_hostname == openshift_master_hosts[0]
+
 - pause:
     seconds: 15
   when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
@@ -216,7 +220,7 @@
 
 - set_fact:
     master_api_service_status_changed: "{{ start_result | changed }}"
-  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
+  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and inventory_hostname != openshift_master_hosts[0]
 
 # A separate wait is required here for native HA since notifies will
 # be resolved after all tasks in the role.
