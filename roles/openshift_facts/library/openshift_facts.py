@@ -1214,7 +1214,7 @@ def apply_provider_facts(facts, provider_facts):
 
         facts['common'][h_var] = choose_hostname(
             [provider_facts['network'].get(h_var)],
-            facts['common'][ip_var]
+            facts['common'][h_var]
         )
 
     facts['provider'] = provider_facts

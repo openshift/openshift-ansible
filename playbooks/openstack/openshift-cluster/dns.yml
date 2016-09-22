@@ -48,5 +48,5 @@
 
     - { role: dns,
         dns_forwarders: "{{ openstack_network_dns }}",
-        dns_zones: [ novalocal, openstacklocal ],
+        dns_zones: [ example.com ],
         dns_all_hosts: "{{ g_all_hosts }}" }
