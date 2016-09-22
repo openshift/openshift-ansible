@@ -546,7 +546,7 @@ class FilterModule(object):
         return certificates
 
     @staticmethod
-    def oo_pretty_print_cluster(data):
+    def oo_pretty_print_cluster(data, prefix='tag_'):
         """ Read a subset of hostvars and build a summary of the cluster
             in the following layout:
 
@@ -573,8 +573,8 @@ class FilterModule(object):
                     returns 'value2'
             """
             for tag in tags:
-                if tag[:len(key)+4] == 'tag_' + key:
-                    return tag[len(key)+5:]
+                if tag[:len(prefix)+len(key)] == prefix + key:
+                    return tag[len(prefix)+len(key)+1:]
             raise KeyError(key)
 
         def _add_host(clusters,
