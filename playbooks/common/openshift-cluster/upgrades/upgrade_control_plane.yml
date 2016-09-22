@@ -111,9 +111,9 @@
     origin_reconcile_bindings: "{{ deployment_type == 'origin' and openshift_version | version_compare('1.0.6', '>') }}"
     ent_reconcile_bindings: true
     openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"
-    # Similar to pre.yml, we don't want to upgrade docker during the openshift_cli role,
-    # it will be updated when we perform node upgrade.
-    docker_protect_installed_version: True
+    # Another spot where we assume docker is running and do not want to accidentally trigger an unsafe
+    # restart.
+    skip_docker_role: True
   tasks:
   - name: Verifying the correct commandline tools are available
     shell: grep {{ verify_upgrade_version }} {{ openshift.common.admin_binary}}

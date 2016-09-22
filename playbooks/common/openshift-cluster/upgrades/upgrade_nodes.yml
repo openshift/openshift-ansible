@@ -7,10 +7,11 @@
   any_errors_fatal: true
   roles:
   - openshift_facts
+  - docker
   handlers:
   - include: ../../../../roles/openshift_node/handlers/main.yml
     static: yes
-  tasks:
+  pre_tasks:
   # TODO: To better handle re-trying failed upgrades, it would be nice to check if the node
   # or docker actually needs an upgrade before proceeding. Perhaps best to save this until
   # we merge upgrade functionality into the base roles and a normal config.yml playbook run.
@@ -37,7 +38,7 @@
       {{ openshift.common.admin_binary }} manage-node {{ openshift.node.nodename | lower }} --evacuate --force
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: inventory_hostname in groups.oo_nodes_to_upgrade
-
+  tasks:
   - include: docker/upgrade.yml
     when: l_docker_upgrade is defined and l_docker_upgrade | bool and not openshift.common.is_atomic | bool
 
