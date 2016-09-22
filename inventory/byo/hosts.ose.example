@@ -148,6 +148,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_cloudprovider_openstack_tenant_name=tenant_name
 #openshift_cloudprovider_openstack_region=region
 #openshift_cloudprovider_openstack_lb_subnet_id=subnet_id
+#
+# GCE
+#openshift_cloudprovider_kind=gce
 
 # Project Configuration
 #osm_project_request_message=''
