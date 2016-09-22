@@ -32,6 +32,12 @@
       {{ openshift.common.admin_binary }} manage-node {{ openshift.node.nodename | lower }} --schedulable=false
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: inventory_hostname in groups.oo_nodes_to_upgrade
+    # NOTE: There is a transient "object has been modified" error here, allow a couple
+    # retries for a more reliable upgrade.
+    register: node_unsched
+    until: node_unsched.rc == 0
+    retries: 3
+    delay: 1
 
   - name: Evacuate Node for Kubelet upgrade
     command: >
@@ -61,3 +67,9 @@
       {{ openshift.common.admin_binary }} manage-node {{ openshift.node.nodename | lower }} --schedulable=true
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: inventory_hostname in groups.oo_nodes_to_upgrade and was_schedulable | bool
+    register: node_sched
+    until: node_sched.rc == 0
+    retries: 3
+    delay: 1
+
+
