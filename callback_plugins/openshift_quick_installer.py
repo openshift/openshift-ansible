@@ -79,6 +79,10 @@ class CallbackModule(DEFAULT_MODULE.CallbackModule):
         self.plays_count = len(playbook.get_plays())
         self.plays_total_ran = 0
 
+        if self._display.verbosity > 1:
+            from os.path import basename
+            self.banner("PLAYBOOK: %s" % basename(playbook._file_name))
+
     def v2_playbook_on_play_start(self, play):
         """Each play calls this once before running any tasks
 
@@ -111,6 +115,24 @@ character to indicate a task has been started.
         """
         sys.stdout.write('.')
 
+        args = ''
+        # args can be specified as no_log in several places: in the task or in
+        # the argument spec.  We can check whether the task is no_log but the
+        # argument spec can't be because that is only run on the target
+        # machine and we haven't run it thereyet at this time.
+        #
+        # So we give people a config option to affect display of the args so
+        # that they can secure this if they feel that their stdout is insecure
+        # (shoulder surfing, logging stdout straight to a file, etc).
+        if not task.no_log and C.DISPLAY_ARGS_TO_STDOUT:
+            args = ', '.join(('%s=%s' % a for a in task.args.items()))
+            args = ' %s' % args
+        self.banner("TASK [%s%s]" % (task.get_name().strip(), args))
+        if self._display.verbosity >= 2:
+            path = task.get_path()
+            if path:
+                self._display.display("task path: %s" % path, color=C.COLOR_DEBUG, log_only=True)
+
     # pylint: disable=unused-argument,no-self-use
     def v2_playbook_on_handler_task_start(self, task):
         """Print out task header for handlers
@@ -119,6 +141,8 @@ Rather than print out a header for every handler, we print a dot
 character to indicate a handler task has been started.
 """
         sys.stdout.write('.')
+
+        self.banner("RUNNING HANDLER [%s]" % task.get_name().strip())
 
     # pylint: disable=unused-argument,no-self-use
     def v2_playbook_on_cleanup_task_start(self, task):
@@ -129,28 +153,90 @@ character to indicate a handler task has been started.
 """
         sys.stdout.write('.')
 
+        self.banner("CLEANUP TASK [%s]" % task.get_name().strip())
+
     def v2_playbook_on_include(self, included_file):
         """Print out paths to statically included files"""
-        pass
+        msg = 'included: %s for %s' % (included_file._filename, ", ".join([h.name for h in included_file._hosts]))
+        self._display.display(msg, color=C.COLOR_SKIP, log_only=True)
 
     def v2_runner_on_ok(self, result):
-        """This prints out task results in a fancy format"""
-        pass
+        """This prints out task results in a fancy format
+
+The only thing we change here is adding `log_only=True` to the
+.display() call
+        """
+        delegated_vars = result._result.get('_ansible_delegated_vars', None)
+        self._clean_results(result._result, result._task.action)
+        if result._task.action in ('include', 'include_role'):
+            return
+        elif result._result.get('changed', False):
+            if delegated_vars:
+                msg = "changed: [%s -> %s]" % (result._host.get_name(), delegated_vars['ansible_host'])
+            else:
+                msg = "changed: [%s]" % result._host.get_name()
+            color = C.COLOR_CHANGED
+        else:
+            if delegated_vars:
+                msg = "ok: [%s -> %s]" % (result._host.get_name(), delegated_vars['ansible_host'])
+            else:
+                msg = "ok: [%s]" % result._host.get_name()
+            color = C.COLOR_OK
+
+        if result._task.loop and 'results' in result._result:
+            self._process_items(result)
+        else:
+
+            if (self._display.verbosity > 0 or '_ansible_verbose_always' in result._result) and not '_ansible_verbose_override' in result._result:
+                msg += " => %s" % (self._dump_results(result._result),)
+            self._display.display(msg, color=color, log_only=True)
+
+        self._handle_warnings(result._result)
 
     def v2_runner_item_on_ok(self, result):
         """Print out task results for you're iterating"""
-        pass
+        delegated_vars = result._result.get('_ansible_delegated_vars', None)
+        if result._task.action in ('include', 'include_role'):
+            return
+        elif result._result.get('changed', False):
+            msg = 'changed'
+            color = C.COLOR_CHANGED
+        else:
+            msg = 'ok'
+            color = C.COLOR_OK
+
+        if delegated_vars:
+            msg += ": [%s -> %s]" % (result._host.get_name(), delegated_vars['ansible_host'])
+        else:
+            msg += ": [%s]" % result._host.get_name()
+
+        msg += " => (item=%s)" % (self._get_item(result._result),)
+
+        if (self._display.verbosity > 0 or '_ansible_verbose_always' in result._result) and not '_ansible_verbose_override' in result._result:
+            msg += " => %s" % self._dump_results(result._result)
+        self._display.display(msg, color=color, log_only=True)
 
     def v2_runner_item_on_skipped(self, result):
         """Print out task results when an item is skipped"""
-        pass
+        if C.DISPLAY_SKIPPED_HOSTS:
+            msg = "skipping: [%s] => (item=%s) " % (result._host.get_name(), self._get_item(result._result))
+            if (self._display.verbosity > 0 or '_ansible_verbose_always' in result._result) and not '_ansible_verbose_override' in result._result:
+                msg += " => %s" % self._dump_results(result._result)
+            self._display.display(msg, color=C.COLOR_SKIP, log_only=True)
 
     def v2_runner_on_skipped(self, result):
         """Print out task results when a task (or something else?) is skipped"""
-        pass
+        if C.DISPLAY_SKIPPED_HOSTS:
+            if result._task.loop and 'results' in result._result:
+                self._process_items(result)
+            else:
+                msg = "skipping: [%s]" % result._host.get_name()
+                if (self._display.verbosity > 0 or '_ansible_verbose_always' in result._result) and not '_ansible_verbose_override' in result._result:
+                    msg += " => %s" % self._dump_results(result._result)
+                self._display.display(msg, color=C.COLOR_SKIP, log_only=True)
 
     def v2_playbook_on_notify(self, res, handler):
         """What happens when a task result is 'changed' and the task has a
 'notify' list attached.
         """
-        pass
+        self._display.display("skipping: no hosts matched", color=C.COLOR_SKIP, log_only=True)
