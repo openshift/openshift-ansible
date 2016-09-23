@@ -82,8 +82,8 @@
     shell:  "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get pods | grep logging-deployer.*Completed"
     register: result
     until: result.rc == 0
-    retries: 15
-    delay: 10
+    retries: 20
+    delay: 15
 
   - name: "Process imagestream template"
     shell:  "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig new-app logging-imagestream-template {{ oc_new_app_values }}"
@@ -102,7 +102,7 @@
     until: result.rc == 0
     failed_when: result.rc == 1 and 'not found' not in result.stderr
     retries: 20
-    delay: 10
+    delay: 5
 
   - name: "Wait for component pods to be running"
     shell:  "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get pods -l component={{ item }} | grep Running"
@@ -114,7 +114,7 @@
     until: result.rc == 0
     failed_when: result.rc == 1 or 'Error' in result.stderr
     retries: 20
-    delay: 10
+    delay: 15
 
   - name: "Wait for ops component pods to be running"
     shell:  "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get pods -l component={{ item }} | grep Running"
@@ -127,7 +127,7 @@
     until: result.rc == 0
     failed_when: result.rc == 1 or 'Error' in result.stderr
     retries: 20
-    delay: 10
+    delay: 15
 
   - name: "Wait for fluentd DaemonSet to exist"
     shell:  "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get daemonset logging-fluentd"
@@ -135,7 +135,7 @@
     until: result.rc == 0
     failed_when: result.rc == 1 or 'Error' in result.stderr
     retries: 20
-    delay: 10
+    delay: 5
 
   - name: "Deploy fluentd by labeling the node"
     shell:  "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig label node --overwrite=true {{ '-l openshift_hosted_logging_fluentd_nodeselector' if openshift_hosted_logging_fluentd_nodeselector is defined else '--all' }} {{ openshift_hosted_logging_fluentd_nodeselector_label if openshift_hosted_logging_fluentd_nodeselector_label is defined else 'logging-infra-fluentd=true' }}"
@@ -146,7 +146,7 @@
     until: result.rc == 0
     failed_when: result.rc == 1 or 'Error' in result.stderr
     retries: 20
-    delay: 10
+    delay: 15
 
   - debug:
       msg: "Logging components deployed. Note persistent volume for elasticsearch must be setup manually"
