@@ -86,12 +86,14 @@
       -o jsonpath='{.status.availableReplicas}'
       --config={{ openshift_hosted_kubeconfig }}
       -n default
+    delegate_to: "{{ groups.oo_first_master.0}}"
     register: l_docker_registry_available_replicas
     until: l_docker_registry_available_replicas.stdout | default("0") != "0"
     retries: 30
     delay: 1
     failed_when: false
     changed_when: false
+    run_once: true
 
   - name: Wait for registry-console deployment
     command: >
@@ -99,12 +101,14 @@
       -o jsonpath='{.status.availableReplicas}'
       --config={{ openshift_hosted_kubeconfig }}
       -n default
+    delegate_to: "{{ groups.oo_first_master.0 }}"
     register: l_registry_console_available_replicas
     until: l_registry_console_available_replicas.stdout | default("0") != "0"
     retries: 30
     delay: 1
     failed_when: false
     changed_when: false
+    run_once: true
 
   - name: Restart docker
     service:
