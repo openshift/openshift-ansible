@@ -44,6 +44,7 @@ try:
 except ImportError:  # < ansible 2.1
     BASECLASS = DEFAULT_MODULE.CallbackModule
 
+from ansible import constants as C
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -60,6 +61,18 @@ class CallbackModule(DEFAULT_MODULE.CallbackModule):
     CALLBACK_NEEDS_WHITELIST = False
     plays_count = 0
     plays_total_ran = 0
+
+    def banner(self, msg, color=None):
+        '''
+        Prints a header-looking line with stars taking up to 80 columns
+        of width (3 columns, minimum)
+        '''
+        msg = msg.strip()
+        star_len = (79 - len(msg))
+        if star_len < 0:
+            star_len = 3
+        stars = "*" * star_len
+        self._display.display("\n%s %s" % (msg, stars), color=color, log_only=True)
 
     def v2_playbook_on_start(self, playbook):
         """This is basically the start of it all"""
@@ -79,6 +92,14 @@ in the `play` object.
         print("")
         print("Play %s/%s (%s)" % (self.plays_total_ran, self.plays_count, play.get_name()))
 
+        name = play.get_name().strip()
+        if not name:
+            msg = "PLAY"
+        else:
+            msg = "PLAY [%s]" % name
+
+        self.banner(msg)
+
     # pylint: disable=unused-argument,no-self-use
     def v2_playbook_on_task_start(self, task, is_conditional):
         """This prints out the task header. For example:
@@ -89,6 +110,28 @@ Rather than print out all that for every task, we print a dot
 character to indicate a task has been started.
         """
         sys.stdout.write('.')
+
+    # pylint: disable=unused-argument,no-self-use
+    def v2_playbook_on_handler_task_start(self, task):
+        """Print out task header for handlers
+
+Rather than print out a header for every handler, we print a dot
+character to indicate a handler task has been started.
+"""
+        sys.stdout.write('.')
+
+    # pylint: disable=unused-argument,no-self-use
+    def v2_playbook_on_cleanup_task_start(self, task):
+        """Print out a task header for cleanup tasks
+
+Rather than print out a header for every handler, we print a dot
+character to indicate a handler task has been started.
+"""
+        sys.stdout.write('.')
+
+    def v2_playbook_on_include(self, included_file):
+        """Print out paths to statically included files"""
+        pass
 
     def v2_runner_on_ok(self, result):
         """This prints out task results in a fancy format"""
@@ -107,9 +150,7 @@ character to indicate a task has been started.
         pass
 
     def v2_playbook_on_notify(self, res, handler):
-        """Printer for handlers
-
-Rather than print out a header for every handler, we print a dot
-character to indicate a handler task has been started.
+        """What happens when a task result is 'changed' and the task has a
+'notify' list attached.
         """
-        sys.stdout.write('.')
+        pass
