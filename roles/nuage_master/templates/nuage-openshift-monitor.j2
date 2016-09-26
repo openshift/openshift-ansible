@@ -30,4 +30,11 @@ logLevel: {{ nuage_mon_log_level }}
 # Parameters related to the nuage monitor REST server
 nuageMonServer:
     URL: {{ nuage_mon_rest_server_url }}
-    certificateDirectory: {{ cert_output_dir }} 
+    certificateDirectory: {{ cert_output_dir }}
+# etcd config required for HA
+etcdClientConfig:
+    ca: {{ etcd_ca_dir }}/{{ "ca.crt" if (openshift.master.embedded_etcd | bool) else "master.etcd-ca.crt" }}
+    certFile: {{ etcd_conf_dir }}/master.etcd-client.crt
+    keyFile: {{ etcd_conf_dir }}/master.etcd-client.key
+    urls:
+        - {{ openshift.common.hostname }}:{{ openshift.master.etcd_port }}

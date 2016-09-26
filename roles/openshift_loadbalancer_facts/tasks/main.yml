@@ -20,6 +20,14 @@
         binds:
         - "*:{{ openshift.loadbalancer.frontend_port }}"
         default_backend: atomic-openshift-api
+      - name: nuage-monitor 
+        mode: tcp
+        options:
+        - tcplog
+        binds:
+        - "*:{{ nuage_mon_rest_server_port }}"
+        default_backend: nuage-monitor
+        when: openshift.common.use_nuage | bool
       backends:
       - name: atomic-openshift-api
         mode: tcp
@@ -28,3 +36,11 @@
         servers: "{{ hostvars
                      | oo_select_keys(groups['oo_masters'])
                      | oo_haproxy_backend_masters(openshift.loadbalancer.frontend_port) }}"
+      - name: nuage-monitor
+        mode: tcp
+        option: tcplog
+        balance: source
+        servers: "{{ hostvars
+                     | oo_select_keys(groups['oo_masters'])
+                     | oo_haproxy_backend_masters(nuage_mon_rest_server_port) }}"
+        when: openshift.common.use_nuage | bool
