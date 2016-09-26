@@ -197,7 +197,7 @@
   # we merge upgrade functionality into the base roles and a normal config.yml playbook run.
   - name: Determine if node is currently scheduleable
     command: >
-      {{ openshift.common.client_binary }} get node {{ openshift.common.hostname | lower }} -o json
+      {{ openshift.common.client_binary }} get node {{ openshift.node.nodename }} -o json
     register: node_output
     delegate_to: "{{ groups.oo_first_master.0 }}"
     changed_when: false
@@ -209,13 +209,13 @@
 
   - name: Mark unschedulable if host is a node
     command: >
-      {{ openshift.common.admin_binary }} manage-node {{ openshift.common.hostname | lower }} --schedulable=false
+      {{ openshift.common.admin_binary }} manage-node {{ openshift.node.nodename }} --schedulable=false
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: inventory_hostname in groups.oo_nodes_to_config
 
   - name: Evacuate Node for Kubelet upgrade
     command: >
-      {{ openshift.common.admin_binary }} manage-node {{ openshift.common.hostname | lower }} --evacuate --force
+      {{ openshift.common.admin_binary }} manage-node {{ openshift.node.nodename }} --evacuate --force
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: inventory_hostname in groups.oo_nodes_to_config
 
@@ -237,7 +237,7 @@
 
   - name: Set node schedulability
     command: >
-      {{ openshift.common.admin_binary }} manage-node {{ openshift.common.hostname | lower }} --schedulable=true
+      {{ openshift.common.admin_binary }} manage-node {{ openshift.node.nodename }} --schedulable=true
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: inventory_hostname in groups.oo_nodes_to_config and was_schedulable | bool
 
