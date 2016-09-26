@@ -13,7 +13,7 @@
       log_options: "{{ openshift_docker_log_options | default(None) }}"
       options: "{{ openshift_docker_options | default(None) }}"
       disable_push_dockerhub: "{{ openshift_disable_push_dockerhub | default(None) }}"
-      hosted_registry_insecure: "{{ openshift_docker_hosted_registry_insecure | default(openshift.common.deployment_subtype != 'registry') }}"
+      hosted_registry_insecure: "{{ openshift_docker_hosted_registry_insecure | default(False) }}"
       hosted_registry_network: "{{ openshift_docker_hosted_registry_network | default(None) }}"
 
 - set_fact:
