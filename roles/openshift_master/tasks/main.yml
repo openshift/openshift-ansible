@@ -185,7 +185,7 @@
     name: "{{ openshift.common.service_type }}-master"
     enabled: no
     state: stopped
-  when: openshift_master_ha | bool and ( 'LoadState=not-found' not in master_svc_show.stdout or master_svc_show.rc != 0 )
+  when: openshift_master_ha | bool and master_svc_show.rc == 0 and 'LoadState=not-found' not in master_svc_show.stdout
 
 - set_fact:
     master_service_status_changed: "{{ start_result | changed }}"

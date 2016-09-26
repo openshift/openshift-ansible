@@ -37,14 +37,14 @@
   failed_when: false
 
 - name: Disable system etcd when containerized
-  when: etcd_is_containerized | bool and ('LoadState=not-found' not in etcd_show.stdout or etcd_show.rc != 0)
+  when: etcd_is_containerized | bool and etcd_show.rc == 0 and 'LoadState=not-found' not in etcd_show.stdout
   service:
     name: etcd
     state: stopped
     enabled: no
 
 - name: Mask system etcd when containerized
-  when: etcd_is_containerized | bool and ('LoadState=not-found' not in etcd_show.stdout or etcd_show.rc != 0)
+  when: etcd_is_containerized | bool and etcd_show.rc == 0 and 'LoadState=not-found' not in etcd_show.stdout
   command: systemctl mask etcd
 
 - name: Reload systemd units
