@@ -1,3 +1,5 @@
+# pylint: disable=invalid-name,protected-access,import-error,line-too-long
+
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -11,8 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""
-This file is a stdout callback plugin for the OpenShift Quick
+"""This file is a stdout callback plugin for the OpenShift Quick
 Installer. The purpose of this callback plugin is to reduce the amount
 of produced output for customers and enable simpler progress checking.
 
@@ -24,13 +25,21 @@ What's different:
 * The Tasks and Handlers in each play (and included roles) are printed
   as a series of .'s following the play progress line.
 
+* Many of these methods include copy and paste code from the upstream
+  default.py callback. We do that to give us control over the stdout
+  output while allowing Ansible to handle the file logging
+  normally. The biggest changes here are that we are manually setting
+  `log_only` to True in the Display.display method and we redefine the
+  Display.banner method locally so we can set log_only on that call as
+  well.
+
 """
 
 from __future__ import (absolute_import, print_function)
 import imp
 import os
 import sys
-
+from ansible import constants as C
 ANSIBLE_PATH = imp.find_module('ansible')[1]
 DEFAULT_PATH = os.path.join(ANSIBLE_PATH, 'plugins/callback/default.py')
 DEFAULT_MODULE = imp.load_source(
@@ -44,7 +53,6 @@ try:
 except ImportError:  # < ansible 2.1
     BASECLASS = DEFAULT_MODULE.CallbackModule
 
-from ansible import constants as C
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -63,9 +71,11 @@ class CallbackModule(DEFAULT_MODULE.CallbackModule):
     plays_total_ran = 0
 
     def banner(self, msg, color=None):
-        '''
-        Prints a header-looking line with stars taking up to 80 columns
+        '''Prints a header-looking line with stars taking up to 80 columns
         of width (3 columns, minimum)
+
+        Overrides the upstream banner method so that display is called
+        with log_only=True
         '''
         msg = msg.strip()
         star_len = (79 - len(msg))
@@ -88,9 +98,8 @@ class CallbackModule(DEFAULT_MODULE.CallbackModule):
 
 We could print the number of tasks here as well by using
 `play.get_tasks()` but that is not accurate when a play includes a
-role. Only the tasks directly assigned to a play are directly exposed
-in the `play` object.
-
+role. Only the tasks directly assigned to a play are exposed in the
+`play` object.
         """
         self.plays_total_ran += 1
         print("")
@@ -187,14 +196,14 @@ The only thing we change here is adding `log_only=True` to the
             self._process_items(result)
         else:
 
-            if (self._display.verbosity > 0 or '_ansible_verbose_always' in result._result) and not '_ansible_verbose_override' in result._result:
+            if (self._display.verbosity > 0 or '_ansible_verbose_always' in result._result) and '_ansible_verbose_override' not in result._result:
                 msg += " => %s" % (self._dump_results(result._result),)
             self._display.display(msg, color=color, log_only=True)
 
         self._handle_warnings(result._result)
 
     def v2_runner_item_on_ok(self, result):
-        """Print out task results for you're iterating"""
+        """Print out task results for items you're iterating over"""
         delegated_vars = result._result.get('_ansible_delegated_vars', None)
         if result._task.action in ('include', 'include_role'):
             return
@@ -212,7 +221,7 @@ The only thing we change here is adding `log_only=True` to the
 
         msg += " => (item=%s)" % (self._get_item(result._result),)
 
-        if (self._display.verbosity > 0 or '_ansible_verbose_always' in result._result) and not '_ansible_verbose_override' in result._result:
+        if (self._display.verbosity > 0 or '_ansible_verbose_always' in result._result) and '_ansible_verbose_override' not in result._result:
             msg += " => %s" % self._dump_results(result._result)
         self._display.display(msg, color=color, log_only=True)
 
@@ -220,7 +229,7 @@ The only thing we change here is adding `log_only=True` to the
         """Print out task results when an item is skipped"""
         if C.DISPLAY_SKIPPED_HOSTS:
             msg = "skipping: [%s] => (item=%s) " % (result._host.get_name(), self._get_item(result._result))
-            if (self._display.verbosity > 0 or '_ansible_verbose_always' in result._result) and not '_ansible_verbose_override' in result._result:
+            if (self._display.verbosity > 0 or '_ansible_verbose_always' in result._result) and '_ansible_verbose_override' not in result._result:
                 msg += " => %s" % self._dump_results(result._result)
             self._display.display(msg, color=C.COLOR_SKIP, log_only=True)
 
@@ -231,7 +240,7 @@ The only thing we change here is adding `log_only=True` to the
                 self._process_items(result)
             else:
                 msg = "skipping: [%s]" % result._host.get_name()
-                if (self._display.verbosity > 0 or '_ansible_verbose_always' in result._result) and not '_ansible_verbose_override' in result._result:
+                if (self._display.verbosity > 0 or '_ansible_verbose_always' in result._result) and '_ansible_verbose_override' not in result._result:
                     msg += " => %s" % self._dump_results(result._result)
                 self._display.display(msg, color=C.COLOR_SKIP, log_only=True)
 

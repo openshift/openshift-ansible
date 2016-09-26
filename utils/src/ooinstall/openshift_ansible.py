@@ -286,9 +286,10 @@ def run_main_playbook(inventory_file, hosts, hosts_to_run_on, verbose=False):
     facts_env = os.environ.copy()
     if 'ansible_log_path' in CFG.settings:
         facts_env['ANSIBLE_LOG_PATH'] = CFG.settings['ansible_log_path']
+
+    # override the ansible config for our main playbook run
     if 'ansible_quiet_config' in CFG.settings:
         facts_env['ANSIBLE_CONFIG'] = CFG.settings['ansible_quiet_config']
-    # facts_env["ANSIBLE_CALLBACK_PLUGINS"] = CFG.settings['ansible_plugins_directory']
 
     return run_ansible(main_playbook_path, inventory_file, facts_env, verbose)
 

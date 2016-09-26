@@ -12,7 +12,6 @@ installer_log = logging.getLogger('installer')
 CONFIG_PERSIST_SETTINGS = [
     'ansible_ssh_user',
     'ansible_callback_facts_yaml',
-    'ansible_config',
     'ansible_inventory_path',
     'ansible_log_path',
     'deployment',
