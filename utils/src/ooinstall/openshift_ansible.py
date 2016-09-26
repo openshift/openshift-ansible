@@ -37,12 +37,10 @@ def set_config(cfg):
 
 
 def generate_inventory(hosts):
-    global CFG
-
     masters = [host for host in hosts if host.is_master()]
     multiple_masters = len(masters) > 1
 
-    new_nodes = [host for host in hosts if host.is_node() and host.new_host]
+    new_nodes = [host for host in hosts if host.is_new_node()]
     scaleup = len(new_nodes) > 0
 
     lb = determine_lb_configuration(hosts)
@@ -85,8 +83,6 @@ def determine_lb_configuration(hosts):
 
 
 def write_inventory_children(base_inventory, scaleup):
-    global CFG
-
     base_inventory.write('\n[OSEv3:children]\n')
     for role in CFG.deployment.roles:
         child = ROLES_TO_GROUPS_MAP.get(role, role)
@@ -98,7 +94,6 @@ def write_inventory_children(base_inventory, scaleup):
 
 # pylint: disable=too-many-branches
 def write_inventory_vars(base_inventory, multiple_masters, lb):
-    global CFG
     base_inventory.write('\n[OSEv3:vars]\n')
 
     for variable, value in CFG.settings.iteritems():
@@ -177,8 +172,14 @@ def write_proxy_settings(base_inventory):
 
 # pylint: disable=too-many-branches
 def write_host(host, role, inventory, schedulable=None):
-    global CFG
+    """Write out a line for a host in an ansible inventory file
 
+For example, in a [nodes] section:
+
+    192.169.14  openshift_ip=10.0.0.14 openshift_public_ip=10.0.0.14 \
+        openshift_hostname=node.redhat.com openshift_public_hostname=node.redhat.com \
+        openshift_node_labels="{'region': 'infra'}" openshift_schedulable=True
+"""
     if host.preconfigured:
         return
 
@@ -194,11 +195,13 @@ def write_host(host, role, inventory, schedulable=None):
     if host.containerized:
         facts += ' containerized={}'.format(host.containerized)
     if host.other_variables:
-        for variable, value in host.other_variables.iteritems():
-            facts += " {}={}".format(variable, value)
-    if host.node_labels:
-        if role == 'node':
-            facts += ' openshift_node_labels="{}"'.format(host.node_labels)
+        # Use a sorted list of keys to keep the function output
+        # deterministic
+        other_var_keys = sorted(host.other_variables.keys())
+        for var in other_var_keys:
+            facts += " {}={}".format(var, host.other_variables[var])
+    if host.node_labels and role == 'node':
+        facts += ' openshift_node_labels="{}"'.format(host.node_labels)
 
     # Distinguish between three states, no schedulability specified (use default),
     # explicitly set to True, or explicitly set to False:
@@ -250,7 +253,6 @@ def load_system_facts(inventory_file, os_facts_path, env_vars, verbose=False):
 
 
 def default_facts(hosts, verbose=False):
-    global CFG
     installer_log.debug("Current global CFG vars here: %s", CFG)
     inventory_file = generate_inventory(hosts)
     os_facts_path = '{}/playbooks/byo/openshift_facts.yml'.format(CFG.ansible_playbook_directory)
@@ -270,7 +272,6 @@ def default_facts(hosts, verbose=False):
 
 
 def run_main_playbook(inventory_file, hosts, hosts_to_run_on, verbose=False):
-    global CFG
     if len(hosts_to_run_on) != len(hosts):
         main_playbook_path = os.path.join(CFG.ansible_playbook_directory,
                                           'playbooks/byo/openshift-node/scaleup.yml')

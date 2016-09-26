@@ -2,6 +2,7 @@
 # repo. We will work on these over time.
 # pylint: disable=bad-continuation,missing-docstring,no-self-use,invalid-name
 
+import cStringIO
 import os
 import unittest
 import tempfile
@@ -9,6 +10,7 @@ import shutil
 import yaml
 
 from ooinstall.oo_config import OOConfig, Host, OOConfigInvalidHostError
+import ooinstall.openshift_ansible
 
 SAMPLE_CONFIG = """
 variant: openshift-enterprise
@@ -224,3 +226,41 @@ class HostTests(OOInstallFixture):
             'public_hostname': 'a.example.com',
         }
         self.assertRaises(OOConfigInvalidHostError, Host, **yaml_props)
+
+    def test_new_write_inventory_same_as_legacy(self):
+        """Verify the original write_host function produces the same output as the new method"""
+        yaml_props = {
+            'ip': '192.168.0.1',
+            'hostname': 'a.example.com',
+            'connect_to': 'a-private.example.com',
+            'public_ip': '192.168.0.1',
+            'public_hostname': 'a.example.com',
+            'new_host': True,
+            'roles': ['node'],
+            'other_variables': {
+                'zzz': 'last',
+                'foo': 'bar',
+                'aaa': 'first',
+            },
+        }
+
+        new_node = Host(**yaml_props)
+        inventory = cStringIO.StringIO()
+
+        # This is what the original 'write_host' function will
+        # generate. write_host has no return value, it just writes
+        # directly to the file 'inventory' which in this test-case is
+        # a StringIO object
+        ooinstall.openshift_ansible.write_host(
+            new_node,
+            'node',
+            inventory,
+            schedulable=True)
+        legacy_inventory_line = inventory.getvalue()
+
+        # This is what the new method in the Host class generates
+        new_inventory_line = new_node.inventory_string('node', schedulable=True)
+
+        self.assertEqual(
+            legacy_inventory_line,
+            new_inventory_line)
