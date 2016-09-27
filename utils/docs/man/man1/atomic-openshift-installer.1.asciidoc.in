@@ -7,7 +7,7 @@ atomic-openshift-installer(1)
 
 NAME
 ----
-atomic-openshift-installer - Interactive OpenShift Container Platform installer
+atomic-openshift-installer - Interactive OpenShift Container Platform (OCP) installer
 
 
 SYNOPSIS
@@ -18,8 +18,8 @@ atomic-openshift-installer [OPTIONS] COMMAND [OPTS]
 DESCRIPTION
 -----------
 
-**atomic-openshift-installer** makes the process for installing OSE or
-AEP easier by interactively gathering the data needed to run on each
+**atomic-openshift-installer** makes the process for installing OCP
+easier by interactively gathering the data needed to run on each
 host. It can also be run in unattended mode if provided with a
 configuration file.
 
@@ -42,12 +42,12 @@ Provide an alternate 'PATH' to an 'installer.cfg.yml' file.
 
 *-a* 'DIRECTORY', *--ansible-playbook-directory* 'DIRECTORY'::
 
-Manually set the 'DIRECTORY' to look for Ansible playbooks in.
+Manually set the 'DIRECTORY' in which to look for Ansible playbooks.
 
 
 *--ansible-log-path* 'PATH'::
 
-Specify the 'PATH' of the directory to save Ansible logs in.
+Specify the 'PATH' of the directory in which to save Ansible logs.
 
 
 *-v*, *--verbose*::
@@ -82,10 +82,10 @@ sections.
 INSTALL
 -------
 
-The **install** command will guide you throgh steps required to
-install an OpenShift Container Platform. After all of the required
-information has been collected (target hosts, storage options,
-high-availability) the installation will begin.
+The **install** command will guide you through steps required to
+install an OCP cluster. After all of the required information has been
+collected (target hosts, storage options, high-availability), the
+installation will begin.
 
 *-f*, *--force*::
 
@@ -101,15 +101,15 @@ the inventory file is '~/.config/openshift/hosts'.
 UNINSTALL
 ---------
 
-The **uninstall** command will uninstall OpenShift Container Platform
-from your target hosts. This command has no additional options.
+The **uninstall** command will uninstall OCP from your target
+hosts. This command has no additional options.
 
 
 UPGRADE
 -------
 
 The **upgrade** command will upgrade a cluster of hosts to a newer
-version of the OpenShift Container Platform.
+version of OCP.
 
 *-l*, *--latest-minor*::
 
