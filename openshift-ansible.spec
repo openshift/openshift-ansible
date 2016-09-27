@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.32
+Version:        3.2.33
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Sep 27 2016 Scott Dodson <sdodson@redhat.com> 3.2.33-1
+- Always deduplicate detected certificate names (elyscape@gmail.com)
+
 * Mon Sep 26 2016 Scott Dodson <sdodson@redhat.com> 3.2.32-1
 - tweak logic (jdetiber@redhat.com)
 - test fix for systemd changes (sdodson@redhat.com)
