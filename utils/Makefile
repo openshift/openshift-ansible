@@ -25,6 +25,12 @@ NAME := oo-install
 TESTPACKAGE := oo-install
 SHORTNAME := ooinstall
 
+# This doesn't evaluate until it's called. The -D argument is the
+# directory of the target file ($@), kinda like `dirname`.
+ASCII2MAN = a2x -D $(dir $@) -d manpage -f manpage $<
+MANPAGES := docs/man/man1/atomic-openshift-installer.1
+VERSION := 1.3
+
 sdist: clean
 	python setup.py sdist
 	rm -fR $(SHORTNAME).egg-info
@@ -34,6 +40,21 @@ clean:
 	@find . -type f \( -name "*~" -or -name "#*" \) -delete
 	@rm -fR build dist rpm-build MANIFEST htmlcov .coverage cover ooinstall.egg-info oo-install
 	@rm -fR $(NAME)env
+
+
+# To force a rebuild of the docs run 'touch' on any *.in file under
+# docs/man/man1/
+docs: $(MANPAGES)
+
+# Regenerate %.1.asciidoc if %.1.asciidoc.in has been modified more
+# recently than %.1.asciidoc.
+%.1.asciidoc: %.1.asciidoc.in
+	sed "s/%VERSION%/$(VERSION)/" $< > $@
+
+# Regenerate %.1 if %.1.asciidoc or VERSION has been modified more
+# recently than %.1. (Implicitly runs the %.1.asciidoc recipe)
+%.1: %.1.asciidoc
+	$(ASCII2MAN)
 
 viewcover:
 	xdg-open cover/index.html
