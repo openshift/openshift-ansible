@@ -136,11 +136,6 @@ resources:
         disable_root: true
 
         hostname: { get_param: name }
-        fqdn:
-          str_replace:
-            template: name.example.com
-            params:
-              name: { get_param: name }
 
         system_info:
           default_user:
