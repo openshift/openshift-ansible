@@ -19,6 +19,10 @@
 
 - name: Create tar of OpenShift examples
   local_action: command tar -C "{{ role_path }}/files/examples/{{ content_version }}/" -cvf "{{ copy_examples_mktemp.stdout }}/openshift-examples.tar" .
+  args:
+    # Disables the following warning:
+    # Consider using unarchive module rather than running tar
+    warn: no
   become: False
   register: copy_examples_tar
 
