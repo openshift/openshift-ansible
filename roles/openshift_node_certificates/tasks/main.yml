@@ -91,6 +91,9 @@
     -C {{ openshift_node_generated_config_dir }} .
   args:
     creates: "{{ openshift_node_generated_config_dir }}.tgz"
+    # Disables the following warning:
+    # Consider using unarchive module rather than running tar
+    warn: no
   when: node_certs_missing | bool
   delegate_to: "{{ openshift_ca_host }}"
 
