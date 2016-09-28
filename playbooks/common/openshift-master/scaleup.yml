@@ -40,6 +40,10 @@
       --cacert {{ openshift.common.config_base }}/master/ca.crt
       {% endif %}
       {{ openshift.master.api_url }}/healthz/ready
+    args:
+      # Disables the following warning:
+      # Consider using get_url or uri module rather than running curl
+      warn: no
     register: api_available_output
     until: api_available_output.stdout == 'ok'
     retries: 120

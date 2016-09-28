@@ -114,6 +114,9 @@
       -C {{ etcd_generated_certs_dir }}/{{ etcd_cert_subdir }} .
   args:
     creates: "{{ etcd_generated_certs_dir }}/{{ etcd_cert_subdir }}.tgz"
+    # Disables the following warning:
+    # Consider using unarchive module rather than running tar
+    warn: no
   when: etcd_server_certs_missing | bool
   delegate_to: "{{ etcd_ca_host }}"
 
