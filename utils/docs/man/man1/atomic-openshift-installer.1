@@ -2,12 +2,12 @@
 .\"     Title: atomic-openshift-installer
 .\"    Author: [see the "AUTHOR" section]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 09/27/2016
+.\"      Date: 09/28/2016
 .\"    Manual: atomic-openshift-installer
 .\"    Source: atomic-openshift-utils 1.3
 .\"  Language: English
 .\"
-.TH "ATOMIC\-OPENSHIFT\-I" "1" "09/27/2016" "atomic\-openshift\-utils 1\&.3" "atomic\-openshift\-installer"
+.TH "ATOMIC\-OPENSHIFT\-I" "1" "09/28/2016" "atomic\-openshift\-utils 1\&.3" "atomic\-openshift\-installer"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -28,13 +28,13 @@
 .\" * MAIN CONTENT STARTS HERE *
 .\" -----------------------------------------------------------------
 .SH "NAME"
-atomic-openshift-installer \- Interactive OpenShift Container Platform installer
+atomic-openshift-installer \- Interactive OpenShift Container Platform (OCP) installer
 .SH "SYNOPSIS"
 .sp
 atomic\-openshift\-installer [OPTIONS] COMMAND [OPTS]
 .SH "DESCRIPTION"
 .sp
-\fBatomic\-openshift\-installer\fR makes the process for installing OSE or AEP easier by interactively gathering the data needed to run on each host\&. It can also be run in unattended mode if provided with a configuration file\&.
+\fBatomic\-openshift\-installer\fR makes the process for installing OCP easier by interactively gathering the data needed to run on each host\&. It can also be run in unattended mode if provided with a configuration file\&.
 .SH "OPTIONS"
 .sp
 The following options are common to all commands\&.
@@ -59,14 +59,14 @@ file\&.
 .RS 4
 Manually set the
 \fIDIRECTORY\fR
-to look for Ansible playbooks in\&.
+in which to look for Ansible playbooks\&.
 .RE
 .PP
 \fB\-\-ansible\-log\-path\fR \fIPATH\fR
 .RS 4
 Specify the
 \fIPATH\fR
-of the directory to save Ansible logs in\&.
+of the directory in which to save Ansible logs\&.
 .RE
 .PP
 \fB\-v\fR, \fB\-\-verbose\fR
@@ -124,7 +124,7 @@ Show the usage help and exit\&.
 The options specific to each command are described in the following sections\&.
 .SH "INSTALL"
 .sp
-The \fBinstall\fR command will guide you throgh steps required to install an OpenShift Container Platform\&. After all of the required information has been collected (target hosts, storage options, high\-availability) the installation will begin\&.
+The \fBinstall\fR command will guide you through steps required to install an OCP cluster\&. After all of the required information has been collected (target hosts, storage options, high\-availability), the installation will begin\&.
 .PP
 \fB\-f\fR, \fB\-\-force\fR
 .RS 4
@@ -138,10 +138,10 @@ Generate an Ansible inventory file and exit\&. The default location for the inve
 .RE
 .SH "UNINSTALL"
 .sp
-The \fBuninstall\fR command will uninstall OpenShift Container Platform from your target hosts\&. This command has no additional options\&.
+The \fBuninstall\fR command will uninstall OCP from your target hosts\&. This command has no additional options\&.
 .SH "UPGRADE"
 .sp
-The \fBupgrade\fR command will upgrade a cluster of hosts to a newer version of the OpenShift Container Platform\&.
+The \fBupgrade\fR command will upgrade a cluster of hosts to a newer version of OCP\&.
 .PP
 \fB\-l\fR, \fB\-\-latest\-minor\fR
 .RS 4
