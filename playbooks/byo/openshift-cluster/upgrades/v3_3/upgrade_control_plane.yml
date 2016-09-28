@@ -12,9 +12,13 @@
 # You can run the upgrade_nodes.yml playbook after this to upgrade these components separately.
 #
 - include: ../../../../common/openshift-cluster/upgrades/init.yml
+  tags:
+  - pre_upgrade
 
 # Configure the upgrade target for the common upgrade tasks:
 - hosts: l_oo_all_hosts
+  tags:
+  - pre_upgrade
   tasks:
   - set_fact:
       openshift_upgrade_target: "{{ '1.3' if deployment_type == 'origin' else '3.3' }}"
@@ -24,11 +28,15 @@
 
 - name: Update repos on control plane hosts
   hosts: oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config
+  tags:
+  - pre_upgrade
   roles:
   - openshift_repos
 
 - name: Set openshift_no_proxy_internal_hostnames
   hosts: oo_masters_to_config:oo_nodes_to_upgrade
+  tags:
+  - pre_upgrade
   tasks:
   - set_fact:
       openshift_no_proxy_internal_hostnames: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config']
@@ -40,8 +48,12 @@
             openshift_generate_no_proxy_hosts | default(True) | bool }}"
 
 - include: ../../../../common/openshift-cluster/upgrades/pre/verify_inventory_vars.yml
+  tags:
+  - pre_upgrade
 
 - include: ../../../../common/openshift-cluster/initialize_openshift_version.yml
+  tags:
+  - pre_upgrade
   vars:
     # Request specific openshift_release and let the openshift_version role handle converting this
     # to a more specific version, respecting openshift_image_tag and openshift_pkg_version if
@@ -56,19 +68,22 @@
     skip_docker_role: True
 
 - include: ../../../../common/openshift-cluster/upgrades/pre/verify_control_plane_running.yml
+  tags:
+  - pre_upgrade
 
 - include: ../../../../common/openshift-cluster/upgrades/pre/verify_upgrade_targets.yml
+  tags:
+  - pre_upgrade
 
 - include: ../../../../common/openshift-cluster/upgrades/pre/verify_docker_upgrade_targets.yml
+  tags:
+  - pre_upgrade
 
 - include: ../../../../common/openshift-cluster/upgrades/pre/gate_checks.yml
+  tags:
+  - pre_upgrade
 
-- name: Exit upgrade if dry-run specified
-  hosts: oo_all_hosts
-  tasks:
-  - fail:
-      msg: "Pre-upgrade checks completed, exiting due to openshift_upgrade_dry_run variable."
-    when: openshift_upgrade_dry_run is defined and openshift_upgrade_dry_run | bool
+# Pre-upgrade completed, nothing after this should be tagged pre_upgrade.
 
 # Separate step so we can execute in parallel and clear out anything unused
 # before we get into the serialized upgrade process which will then remove

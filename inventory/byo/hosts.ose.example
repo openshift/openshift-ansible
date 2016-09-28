@@ -99,9 +99,6 @@ openshift_release=v3.2
 # modify image streams to point at that registry by setting the following to true
 #openshift_examples_modify_imagestreams=true
 
-# Perform only pre-upgrade checks, and exit.
-# openshift_upgrade_dry_run=true
-
 # Additional yum repos to install
 #openshift_additional_repos=[{'id': 'ose-devel', 'name': 'ose-devel', 'baseurl': 'http://example.com/puddle/build/AtomicOpenShift/3.1/latest/RH7-RHOSE-3.0/$basearch/os', 'enabled': 1, 'gpgcheck': 0}]
 

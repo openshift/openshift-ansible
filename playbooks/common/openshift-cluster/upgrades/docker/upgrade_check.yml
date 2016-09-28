@@ -1,7 +1,7 @@
 ---
 
 # This snippet determines if a Docker upgrade is required by checking the inventory
-# variables, the available packages, and sets l_docker_version to True if so.
+# variables, the available packages, and sets l_docker_upgrade to True if so.
 
 - set_fact:
     docker_upgrade: True
