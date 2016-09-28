@@ -138,7 +138,9 @@
     delay: 10
 
   - name: "Deploy fluentd by labeling the node"
+    register: fluentd_label_output
     shell:  "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig label node {{ openshift_hostname }} {{ openshift_hosted_logging_fluentd_nodeselector if openshift_hosted_logging_fluentd_nodeselector is defined else 'logging-infra-fluentd=true' }}"
+    failed_when: "fluentd_label_output.rc == 1 and 'already has a value (true)' not in fluentd_label_output.stderr"
 
   - name: "Wait for fluentd to be running"
     shell:  "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get pods -l component=fluentd | grep Running"
