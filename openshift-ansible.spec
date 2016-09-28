@@ -87,6 +87,8 @@ pushd utils
 mv -f %{buildroot}%{_bindir}/oo-install %{buildroot}%{_bindir}/atomic-openshift-installer
 mkdir -p %{buildroot}%{_datadir}/atomic-openshift-utils/
 cp etc/ansible.cfg %{buildroot}%{_datadir}/atomic-openshift-utils/ansible.cfg
+mkdir -p %{buildroot}%{_mandir}/man1/
+cp -v docs/man/man1/atomic-openshift-installer.1 %{buildroot}%{_mandir}/man1/
 popd
 
 # Base openshift-ansible files
@@ -219,7 +221,7 @@ Atomic OpenShift Utilities includes
 %{python_sitelib}/ooinstall*
 %{_bindir}/atomic-openshift-installer
 %{_datadir}/atomic-openshift-utils/ansible.cfg
-
+%{_mandir}/man1/*
 
 %changelog
 * Mon Sep 26 2016 Scott Dodson <sdodson@redhat.com> 3.4.2-1
@@ -2384,4 +2386,3 @@ Atomic OpenShift Utilities includes
 
 * Mon Oct 19 2015 Troy Dawson <tdawson@redhat.com> 3.0.2-1
 - Initial Package
-
