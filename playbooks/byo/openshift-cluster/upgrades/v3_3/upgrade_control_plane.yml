@@ -63,8 +63,6 @@
 
 - include: ../../../../common/openshift-cluster/upgrades/pre/gate_checks.yml
 
-- include: ../../../../common/openshift-cluster/upgrades/pre/backup_etcd.yml
-
 - name: Exit upgrade if dry-run specified
   hosts: oo_all_hosts
   tasks:
