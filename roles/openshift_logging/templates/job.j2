@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    logging-infra: support
+  generateName: jks-cert-gen-
+spec:
+  containers:
+  - name: jks-cert-gen
+    image: {{openshift_logging_image_prefix}}logging-deployer:{{openshift_logging_image_version}}
+    imagePullPolicy: Always
+    command: ["sh",  "generate-jks.sh"]
+    securityContext:
+      privileged: true
+    volumeMounts:
+    - mountPath: /opt/deploy
+      name: certmount
+    env:
+    - name: PROJECT
+      value: {{openshift_logging_namespace}}
+  restartPolicy: Never
+  serviceAccount: aggregated-logging-fluentd
+  volumes:
+  - hostPath:
+      path: "{{generated_certs_dir}}"
+    name: certmount

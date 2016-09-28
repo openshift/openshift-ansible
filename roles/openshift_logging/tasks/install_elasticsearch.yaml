@@ -1,0 +1,105 @@
+---
+- name: Generate PersistentVolumeClaims
+  include: "{{ role_path}}/tasks/generate_pvcs.yaml"
+  vars:
+    es_pvc_names: "{{openshift_logging_facts.elasticsearch.pvcs.keys()}}"
+    es_dc_names: "{{openshift_logging_facts.elasticsearch.deploymentconfigs.keys()}}"
+  when:
+   - "{{ openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | length < openshift_logging_es_cluster_size }}"
+
+- name: Init pool of DeploymentConfig names for Elasticsearch
+  set_fact: es_dc_pool={{es_dc_pool | default([]) + [deploy_name]}}
+  vars:
+    component: es
+    es_cluster_name: "{{component}}"
+    deploy_name_prefix: "logging-{{component}}"
+    deploy_name: "{{deploy_name_prefix}}-{{'abcdefghijklmnopqrstuvwxyz0123456789'|random_word(8)}}"
+  with_sequence: count={{(openshift_logging_es_cluster_size - openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | length) | abs}}
+  when:
+   - "{{ openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | length < openshift_logging_es_cluster_size }}"
+  check_mode: no
+
+
+- name: Generate Elasticsearch DeploymentConfig
+  template: src=es.j2 dest={{mktemp.stdout}}/templates/logging-{{deploy_name}}-dc.yaml
+  vars:
+    component: es
+    logging_component: elasticsearch
+    deploy_name_prefix: "logging-{{component}}"
+    image: "{{openshift_logging_image_prefix}}logging-elasticsearch:{{openshift_logging_image_version}}"
+    es_cluster_name: "{{component}}"
+    es_cpu_limit: "{{openshift_logging_es_cpu_limit }}"
+    es_memory_limit: "{{openshift_logging_es_memory_limit}}"
+    volume_names: "{{es_pvc_pool | default([])}}"
+    pvc_claim: "{{(volume_names | length > item.0) | ternary(volume_names[item.0], None)}}"
+    deploy_name: "{{item.1}}"
+  with_indexed_items:
+    - "{{es_dc_pool | default([])}}"
+  check_mode: no
+  when:
+    - "{{ openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | length < openshift_logging_es_cluster_size }}"
+
+# --------- Tasks for Operation clusters ---------
+
+- name: Validate Elasticsearch cluster size for Ops
+  fail: msg="The openshift_logging_es_ops_cluster_size may not be scaled down more than 1 less (or 0) the number of Elasticsearch nodes already deployed"
+  vars:
+    es_dcs: "{{openshift_logging_facts.elasticsearch_ops.deploymentconfigs}}"
+    cluster_size: "{{openshift_logging_es_ops_cluster_size}}"
+  when:
+    - openshift_logging_use_ops
+    - "{{es_dcs | length - openshift_logging_es_ops_cluster_size | abs > 1}}"
+  check_mode: no
+
+- name: Generate PersistentVolumeClaims for Ops
+  include: "{{ role_path}}/tasks/generate_pvcs.yaml"
+  vars:
+    es_pvc_names: "{{openshift_logging_facts.elasticsearch_ops.pvcs.keys()}}"
+    es_dc_names: "{{openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys()}}"
+    openshift_logging_es_pvc_prefix: "{{openshift_logging_es_ops_pvc_prefix}}"
+    openshift_logging_es_cluster_size: "{{openshift_logging_es_ops_cluster_size}}"
+    openshift_logging_es_pvc_size: "{{openshift_logging_es_ops_pvc_size}}"
+    openshift_logging_es_pvc_dynamic: "{{openshift_logging_es_ops_pvc_dynamic}}"
+    openshift_logging_es_pv_selector: "{{openshift_logging_es_ops_pv_selector}}"
+  when:
+    - openshift_logging_use_ops
+    - "{{ openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys() | length < openshift_logging_es_ops_cluster_size }}"
+  check_mode: no
+
+- name: Init pool of DeploymentConfig names for Elasticsearch for Ops
+  set_fact: es_dc_pool_ops={{es_dc_pool_ops | default([]) + [deploy_name]}}
+  vars:
+    component: es-ops
+    es_cluster_name: "{{component}}"
+    deploy_name_prefix: "logging-{{component}}"
+    deploy_name: "{{deploy_name_prefix}}-{{'abcdefghijklmnopqrstuvwxyz0123456789'|random_word(8)}}"
+    cluster_size: "{{openshift_logging_es_ops_cluster_size}}"
+  with_sequence: count={{openshift_logging_es_ops_cluster_size - openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys() | length}}
+  when:
+    - openshift_logging_use_ops
+    - "{{ openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys() | length < openshift_logging_es_ops_cluster_size }}"
+  check_mode: no
+
+- name: Generate Elasticsearch DeploymentConfig for Ops
+  template: src=es.j2 dest={{mktemp.stdout}}/templates/logging-{{deploy_name}}-dc.yaml
+  vars:
+    component: es-ops
+    logging_component: elasticsearch
+    deploy_name_prefix: "logging-{{component}}"
+    image: "{{openshift_logging_image_prefix}}logging-elasticsearch:{{openshift_logging_image_version}}"
+    volume_names: "{{es_pvc_pool | default([])}}"
+    pvc_claim: "{{(volume_names | length > item.0) | ternary(volume_names[item.0], None)}}"
+    deploy_name: "{{item.1}}"
+    es_cluster_name: "{{component}}"
+    es_cpu_limit: "{{openshift_logging_es_ops_cpu_limit }}"
+    es_memory_limit: "{{openshift_logging_es_ops_memory_limit}}"
+    es_node_quorum: "{{es_ops_node_quorum}}"
+    es_recover_after_nodes: "{{es_ops_recover_after_nodes}}"
+    es_recover_expected_nodes: "{{es_ops_recover_expected_nodes}}"
+    openshift_logging_es_recover_after_time: "{{openshift_logging_es_ops_recover_after_time}}"
+  with_indexed_items:
+    - "{{es_dc_pool_ops | default([])}}"
+  when:
+    - openshift_logging_use_ops
+    - "{{ openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys() | length < openshift_logging_es_ops_cluster_size }}"
+  check_mode: no

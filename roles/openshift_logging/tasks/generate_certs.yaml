@@ -1,0 +1,168 @@
+---
+# we will ensure our secrets and configmaps are set up here first
+- name: Checking for ca.key
+  stat: path="{{generated_certs_dir}}/ca.key"
+  register: ca_key_file
+  check_mode: no
+
+- name: Checking for ca.crt
+  stat: path="{{generated_certs_dir}}/ca.crt"
+  register: ca_cert_file
+  check_mode: no
+
+- name: Checking for ca.serial.txt
+  stat: path="{{generated_certs_dir}}/ca.serial.txt"
+  register: ca_serial_file
+  check_mode: no
+
+- name: Generate certificates
+  command: >
+    {{ openshift.common.admin_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig ca create-signer-cert
+    --key={{generated_certs_dir}}/ca.key --cert={{generated_certs_dir}}/ca.crt
+    --serial={{generated_certs_dir}}/ca.serial.txt --name=logging-signer-test
+  check_mode: no
+  when:
+    - not ca_key_file.stat.exists
+    - not ca_cert_file.stat.exists
+    - not ca_serial_file.stat.exists
+
+- name: Checking for signing.conf
+  stat: path="{{generated_certs_dir}}/signing.conf"
+  register: signing_conf_file
+  check_mode: no
+
+- block:
+  - copy: src=signing.conf dest={{generated_certs_dir}}/signing.conf
+    check_mode: no
+
+  - lineinfile: "dest={{generated_certs_dir}}/signing.conf regexp='# Top dir$' line='dir                     = {{generated_certs_dir}}               # Top dir'"
+    check_mode: no
+  when:
+    - not signing_conf_file.stat.exists
+
+- include: procure_server_certs.yaml
+  loop_control:
+    loop_var: cert_info
+  with_items:
+    - procure_component: kibana
+    - procure_component: kibana-ops
+    - procure_component: kibana-internal
+      hostnames: "kibana, kibana-ops, {{openshift_logging_kibana_hostname}}, {{openshift_logging_kibana_ops_hostname}}"
+
+# - include: procure_server_certs.yaml
+#   vars:
+#     - procure_component: kibana
+
+# - include: procure_server_certs.yaml
+#   vars:
+#     - procure_component: kibana-ops
+
+# - include: procure_server_certs.yaml
+#   vars:
+#     - procure_component: kibana-internal
+#     - hostnames: "kibana, kibana-ops, {{openshift_logging_kibana_hostname}}, {{openshift_logging_kibana_ops_hostname}}"
+
+- name: Copy proxy TLS configuration file
+  copy: src=server-tls.json dest={{generated_certs_dir}}/server-tls.json
+  when: server_tls_json is undefined
+  check_mode: no
+
+- name: Copy proxy TLS configuration file
+  copy: content="{{server_tls_json}}" dest={{generated_certs_dir}}/server-tls.json
+  when: server_tls_json is defined
+  check_mode: no
+
+- name: Checking for ca.db
+  stat: path="{{generated_certs_dir}}/ca.db"
+  register: ca_db_file
+  check_mode: no
+
+- copy: content="" dest={{generated_certs_dir}}/ca.db
+  check_mode: no
+  when:
+    - not ca_db_file.stat.exists
+
+- name: Checking for ca.crt.srl
+  stat: path="{{generated_certs_dir}}/ca.crt.srl"
+  register: ca_cert_srl_file
+  check_mode: no
+
+- copy: content="" dest={{generated_certs_dir}}/ca.crt.srl
+  check_mode: no
+  when:
+    - not ca_cert_srl_file.stat.exists
+
+- name: Generate PEM certs
+  include: generate_pems.yaml component={{node_name}}
+  with_items:
+    - system.logging.fluentd
+    - system.logging.kibana
+    - system.logging.curator
+    - system.admin
+  loop_control:
+    loop_var: node_name
+
+- shell: certs=""; for cert in $(echo logging-es{,-ops}); do certs=$certs,dns:$cert; done; echo $certs
+  register: elasticsearch_certs
+  check_mode: no
+
+- shell: certs=""; for cert in $(echo logging-es{,-ops}{,-cluster}{,.logging.svc.cluster.local}); do certs=$certs,dns:$cert; done; echo $certs
+  register: logging_es_certs
+  check_mode: no
+
+#- shell: index=2; certs=""; for cert in $(echo logging-es{,-ops}); do certs=$certs,DNS.$index=$cert; index=$(($index+1)); done; echo $certs
+#  register: elasticsearch_certs
+#  check_mode: no
+
+#- shell: index=2; certs=""; for cert in $(echo logging-es{,-ops}{,-cluster}{,.logging.svc.cluster.local}); do certs=$certs,DNS.$index=$cert; index=$(($index+1)); done; echo $certs
+#  register: logging_es_certs
+#  check_mode: no
+
+- name: Generate PKCS12 chains
+#  include: generate_pkcs12.yaml component='system.admin'
+  include: generate_jks_chain.yaml component='system.admin'
+
+- name: Generate PKCS12 chains
+#  include: generate_pkcs12.yaml component={{node.name}} oid={{node.oid | default(False)}} chain_certs={{node.certs}}
+  include: generate_jks_chain.yaml component={{node.name}} oid={{node.oid | default(False)}} chain_certs={{node.certs}}
+  with_items:
+    - {name: 'elasticsearch', oid: True, certs: '{{elasticsearch_certs.stdout}}'}
+    - {name: 'logging-es', certs: '{{logging_es_certs.stdout}}'}
+  loop_control:
+    loop_var: node
+# This should be handled within the ES image instead... ---
+#- name: Copy jks script
+#  copy:
+#    src: generate-jks.sh
+#    dest: "{{etcd_generated_certs_dir}}/logging"
+
+#- name: Generate JKS chains
+#  template:
+#    src: job.j2
+#    dest: "{{mktemp.stdout}}/jks_job.yaml"
+
+#- name: kick off job
+#  shell: >
+#    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig create -f {{mktemp.stdout}}/jks_job.yaml -n {{logging_namespace}}
+#  register: podoutput
+
+#- shell: >
+#    echo {{podoutput.stdout}} | awk -v podname='\\\".*\\\"' '{print $2}'
+#  register: podname
+
+#- action: shell >
+#    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig oc get pod/{{podname.stdout}} -o go-template='{{ '{{' }}index .status "phase"{{ '}}' }}' -n {{logging_namespace}}
+#  register: result
+#  until: result.stdout.find("Succeeded") != -1
+#  retries: 5
+#  delay: 10
+# --- This should be handled within the ES image instead...
+- name: Generate proxy session
+  shell: tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 200
+  register: session_secret
+  check_mode: no
+
+- name: Generate oauth client secret
+  shell: tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 64
+  register: oauth_secret
+  check_mode: no
