@@ -80,7 +80,7 @@ ci-pylint:
 	@echo "#############################################"
 	@echo "# Running PyLint Tests in virtualenv"
 	@echo "#############################################"
-	. $(NAME)env/bin/activate && python -m pylint --rcfile ../git/.pylintrc src/ooinstall/cli_installer.py src/ooinstall/oo_config.py src/ooinstall/openshift_ansible.py src/ooinstall/variants.py
+	. $(NAME)env/bin/activate && python -m pylint --rcfile ../git/.pylintrc src/ooinstall/cli_installer.py src/ooinstall/oo_config.py src/ooinstall/openshift_ansible.py src/ooinstall/variants.py ../callback_plugins/openshift_quick_installer.py
 
 ci-list-deps:
 	@echo "#############################################"
@@ -93,12 +93,14 @@ ci-pyflakes:
 	@echo "# Running Pyflakes Compliance Tests in virtualenv"
 	@echo "#################################################"
 	. $(NAME)env/bin/activate && pyflakes src/ooinstall/*.py
+	. $(NAME)env/bin/activate && pyflakes ../callback_plugins/openshift_quick_installer.py
 
 ci-pep8:
 	@echo "#############################################"
 	@echo "# Running PEP8 Compliance Tests in virtualenv"
 	@echo "#############################################"
 	. $(NAME)env/bin/activate && pep8 --ignore=E501,E121,E124 src/$(SHORTNAME)/
+	. $(NAME)env/bin/activate && pep8 --ignore=E501,E121,E124 ../callback_plugins/openshift_quick_installer.py
 
 ci: clean virtualenv ci-list-deps ci-pep8 ci-pylint ci-pyflakes ci-unittests
 	:

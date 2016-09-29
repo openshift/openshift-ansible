@@ -12,7 +12,6 @@ installer_log = logging.getLogger('installer')
 CONFIG_PERSIST_SETTINGS = [
     'ansible_ssh_user',
     'ansible_callback_facts_yaml',
-    'ansible_config',
     'ansible_inventory_path',
     'ansible_log_path',
     'deployment',
@@ -308,6 +307,12 @@ class OOConfig(object):
         if 'ansible_plugins_directory' not in self.settings:
             self.settings['ansible_plugins_directory'] = \
                 resource_filename(__name__, 'ansible_plugins')
+            installer_log.debug("We think the ansible plugins directory should be: %s (it is not already set)",
+                                self.settings['ansible_plugins_directory'])
+        else:
+            installer_log.debug("The ansible plugins directory is already set: %s",
+                                self.settings['ansible_plugins_directory'])
+
         if 'version' not in self.settings:
             self.settings['version'] = 'v2'
 
