@@ -33,6 +33,7 @@
                           | default('hawkular-metrics.' ~ (openshift.master.default_subdomain
                           | default(openshift_master_default_subdomain )))
                           | oo_hostname_from_url }}"
+    metrics_write_access: "{{ openshift_hosted_metrics_write_access | default('False') }}"
     metrics_persistence: "{{ openshift.hosted.metrics.storage_kind | default(none) is not none }}"
     metrics_dynamic_vol: "{{ openshift.hosted.metrics.storage_kind | default(none) == 'dynamic' }}"
     metrics_template_dir: "{{ openshift.common.config_base if openshift.common.is_containerized | bool else '/usr/share/openshift' }}/examples/infrastructure-templates/{{ 'origin' if deployment_type == 'origin' else 'enterprise' }}"

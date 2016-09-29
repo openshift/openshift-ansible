@@ -17,6 +17,7 @@ From this role:
 |-------------------------------------------------|-----------------------|-------------------------------------------------------------|
 | openshift_hosted_metrics_deploy                 | `False`               | If metrics should be deployed                               |
 | openshift_hosted_metrics_public_url             | null                  | Hawkular metrics public url                                 |
+| openshift_hosted_metrics_write_access           | `False`               | Hawkular metrics public url allow write access              |
 | openshift_hosted_metrics_storage_nfs_directory  | `/exports`            | Root export directory.                                      |
 | openshift_hosted_metrics_storage_volume_name    | `metrics`             | Metrics volume within openshift_hosted_metrics_volume_dir   |
 | openshift_hosted_metrics_storage_volume_size    | `10Gi`                | Metrics volume size                                         |
