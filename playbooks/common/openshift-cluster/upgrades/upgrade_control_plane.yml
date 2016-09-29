@@ -111,7 +111,6 @@
 # Create service signer cert when missing. Service signer certificate
 # is added to master config in the master config hook for v3_3.
 - include: create_service_signer_cert.yml
-  when: not (hostvars[groups.oo_first_master.0].service_signer_cert_stat.stat.exists | bool)
 
 - name: Upgrade master config and systemd units
   hosts: oo_masters_to_config
