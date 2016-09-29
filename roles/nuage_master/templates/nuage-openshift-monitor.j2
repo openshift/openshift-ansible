@@ -33,8 +33,8 @@ nuageMonServer:
     certificateDirectory: {{ cert_output_dir }}
 # etcd config required for HA
 etcdClientConfig:
-    ca: {{ etcd_ca_dir }}/{{ "ca.crt" if (openshift.master.embedded_etcd | bool) else "master.etcd-ca.crt" }}
-    certFile: {{ etcd_conf_dir }}/master.etcd-client.crt
-    keyFile: {{ etcd_conf_dir }}/master.etcd-client.key
+    ca: {{ openshift_master_config_dir }}/{{ "ca.crt" if (openshift.master.embedded_etcd | bool) else "master.etcd-ca.crt" }}
+    certFile: {{ openshift_master_config_dir }}/master.etcd-client.crt
+    keyFile: {{ openshift_master_config_dir }}/master.etcd-client.key
     urls:
-        - {{ openshift.common.hostname }}:{{ openshift.master.etcd_port }}
+        - {{ openshift.master.etcd_urls }}
