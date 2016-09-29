@@ -73,9 +73,16 @@ class Cluster(object):
             cluster['openshift_cloudprovider_openstack_auth_url']    = os.getenv('OS_AUTH_URL')
             cluster['openshift_cloudprovider_openstack_username']    = os.getenv('OS_USERNAME')
             cluster['openshift_cloudprovider_openstack_password']    = os.getenv('OS_PASSWORD')
-            cluster['openshift_cloudprovider_openstack_tenant_id']   = os.getenv('OS_PROJECT_ID',os.getenv('OS_TENANT_ID'))
-            cluster['openshift_cloudprovider_openstack_tenant_name'] = os.getenv('OS_PROJECT_NAME',os.getenv('OS_TENANT_NAME'))
-            cluster['openshift_cloudprovider_openstack_region']      = os.getenv('OS_REGION_NAME')
+            if 'OS_USER_DOMAIN_ID' in os.environ:
+                cluster['openshift_cloudprovider_openstack_domain_id']   = os.getenv('OS_USER_DOMAIN_ID')
+            if 'OS_USER_DOMAIN_NAME' in os.environ:
+                cluster['openshift_cloudprovider_openstack_domain_name'] = os.getenv('OS_USER_DOMAIN_NAME')
+            if 'OS_PROJECT_ID' in os.environ or 'OS_TENANT_ID' in os.environ:
+                cluster['openshift_cloudprovider_openstack_tenant_id']   = os.getenv('OS_PROJECT_ID',os.getenv('OS_TENANT_ID'))
+            if 'OS_PROJECT_NAME' is os.environ or 'OS_TENANT_NAME' in os.environ:
+                cluster['openshift_cloudprovider_openstack_tenant_name'] = os.getenv('OS_PROJECT_NAME',os.getenv('OS_TENANT_NAME'))
+            if 'OS_REGION_NAME' in os.environ:
+                cluster['openshift_cloudprovider_openstack_region']      = os.getenv('OS_REGION_NAME')
 
         self.action(args, inventory, cluster, playbook)
 
