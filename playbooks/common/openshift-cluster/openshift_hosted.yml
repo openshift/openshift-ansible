@@ -19,6 +19,12 @@
       openshift_hosted_router_registryurl: "{{ hostvars[groups.oo_first_master.0].openshift.master.registry_url }}"
       openshift_hosted_registry_registryurl: "{{ hostvars[groups.oo_first_master.0].openshift.master.registry_url }}"
     when: "'master' in hostvars[groups.oo_first_master.0].openshift and 'registry_url' in hostvars[groups.oo_first_master.0].openshift.master"
+  - set_fact:
+      logging_hostname: "{{ openshift_hosted_logging_hostname | default('kibana.' ~ (openshift.master.default_subdomain | default('router.default.svc.cluster.local', true))) }}"
+      logging_ops_hostname: "{{ openshift_hosted_logging_ops_hostname | default('kibana-ops.' ~ (openshift.master.default_subdomain | default('router.default.svc.cluster.local', true))) }}"
+      logging_master_public_url: "{{ openshift_hosted_logging_master_public_url | default(openshift.master.public_api_url) }}"
+      logging_elasticsearch_cluster_size: "{{ openshift_hosted_logging_elasticsearch_cluster_size | default(1) }}"
+      logging_elasticsearch_ops_cluster_size: "{{ openshift_hosted_logging_elasticsearch_ops_cluster_size | default(1) }}"
   roles:
   - role: openshift_cli
   - role: openshift_hosted_facts
@@ -44,8 +50,41 @@
   - role: openshift_hosted
   - role: openshift_metrics
     when: openshift.hosted.metrics.deploy | bool
+  - role: openshift_hosted_logging
+    when: openshift.hosted.logging.deploy | bool
+    openshift_hosted_logging_hostname: "{{ logging_hostname }}"
+    openshift_hosted_logging_ops_hostname: "{{ logging_ops_hostname }}"
+    openshift_hosted_logging_master_public_url: "{{ logging_master_public_url }}"
+    openshift_hosted_logging_elasticsearch_cluster_size: "{{ logging_elasticsearch_cluster_size }}"
+    openshift_hosted_logging_elasticsearch_pvc_dynamic: "{{ 'true' if openshift.hosted.logging.storage_kind | default(none) == 'dynamic' else 'false' }}"
+    openshift_hosted_logging_elasticsearch_pvc_size: "{{ openshift.hosted.logging.storage.volume.size if openshift.hosted.logging.storage_kind | default(none) == 'dynamic' else ''  }}"
+    openshift_hosted_logging_elasticsearch_pvc_prefix: "{{ 'logging-es' if openshift.hosted.logging.storage_kind | default(none) is not none else '' }}"
+    openshift_hosted_logging_elasticsearch_ops_cluster_size: "{{ logging_elasticsearch_ops_cluster_size }}"
+    openshift_hosted_logging_elasticsearch_ops_pvc_dynamic: "{{ 'true' if openshift.hosted.logging.storage_kind | default(none) == 'dynamic' else 'false' }}"
+    openshift_hosted_logging_elasticsearch_ops_pvc_size: "{{ openshift.hosted.logging.storage.volume.size if openshift.hosted.logging.storage_kind | default(none) == 'dynamic' else ''  }}"
+    openshift_hosted_logging_elasticsearch_ops_pvc_prefix: "{{ 'logging-es' if openshift.hosted.logging.storage_kind | default(none) is not none else '' }}"
+
   - role: cockpit-ui
     when: openshift.common.deployment_subtype == 'registry'
+
+- name: Configure all masters for logging
+  serial: 1
+  handlers:
+  - include: ../../../roles/openshift_master/handlers/main.yml
+    static: yes
+  hosts: oo_masters
+  tasks:
+  - openshift_facts:
+      role: master
+      local_facts:
+        logging_public_url: "https://{{ openshift_hosted_logging_hostname | default('kibana.' ~ openshift_master_default_subdomain) }}"
+    when: openshift.hosted.logging.deploy | default(openshift.common.version_gte_3_3_or_1_3)
+  - modify_yaml:
+      dest: "{{ openshift.common.config_base }}/master/master-config.yaml"
+      yaml_key: assetConfig.loggingPublicURL
+      yaml_value: "{{ openshift.master.logging_public_url }}"
+    notify: restart master
+    when: openshift.hosted.logging.deploy | default(openshift.common.version_gte_3_3_or_1_3)
 
 - name: Configure CA certificate for secure registry
   hosts: oo_nodes_to_config
@@ -87,7 +126,7 @@
       {{ openshift.common.client_binary }} get service docker-registry
       --template='{{ '{{' }} .spec.clusterIP {{ '}}' }}'
       --config={{ openshift_hosted_kubeconfig }}
-      -n default      
+      -n default
     register: docker_registry_service_ip
     when: openshift.common.deployment_subtype == 'registry'
     changed_when: false

@@ -65,10 +65,6 @@ openshift_release=v1.2
 # See: https://docs.openshift.org/latest/install_config/web_console_customization.html#serving-static-files
 #openshift_master_oauth_template=/path/to/login-template.html
 
-# Configure loggingPublicURL in the master config for aggregate logging
-# See: https://docs.openshift.org/latest/install_config/aggregate_logging.html
-#openshift_master_logging_public_url=https://kibana.example.com
-
 # Configure imagePolicyConfig in the master config
 # See: https://godoc.org/github.com/openshift/origin/pkg/cmd/server/api#ImagePolicyConfig
 #openshift_master_image_policy_config={"maxImagesBulkImportedPerRepository": 3, "disableScheduledImport": true}
@@ -372,6 +368,55 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Currently, you may only alter the hostname portion of the url, alterting the
 # `/hawkular/metrics` path will break installation of metrics.
 #openshift_hosted_metrics_public_url=https://hawkular-metrics.example.com/hawkular/metrics
+
+# Logging deployment
+#
+# Currently logging deployment is disabled by default, enable it by setting this
+#openshift_hosted_logging_deploy=true
+#
+# Logging storage config
+# Option A - NFS Host Group
+# An NFS volume will be created with path "nfs_directory/volume_name"
+# on the host within the [nfs] host group.  For example, the volume
+# path using these options would be "/exports/logging"
+#openshift_hosted_logging_storage_kind=nfs
+#openshift_hosted_logging_storage_access_modes=['ReadWriteOnce']
+#openshift_hosted_logging_storage_nfs_directory=/exports
+#openshift_hosted_logging_storage_nfs_options='*(rw,root_squash)'
+#openshift_hosted_logging_storage_volume_name=logging
+#openshift_hosted_logging_storage_volume_size=10Gi
+#
+# Option B - External NFS Host
+# NFS volume must already exist with path "nfs_directory/_volume_name" on
+# the storage_host. For example, the remote volume path using these
+# options would be "nfs.example.com:/exports/logging"
+#openshift_hosted_logging_storage_kind=nfs
+#openshift_hosted_logging_storage_access_modes=['ReadWriteOnce']
+#openshift_hosted_logging_storage_host=nfs.example.com
+#openshift_hosted_logging_storage_nfs_directory=/exports
+#openshift_hosted_logging_storage_volume_name=logging
+#openshift_hosted_logging_storage_volume_size=10Gi
+#
+# Option C - Dynamic -- If openshift supports dynamic volume provisioning for
+# your cloud platform use this.
+#openshift_hosted_logging_storage_kind=dynamic
+#
+# Option D - none -- Logging will use emptydir volumes which are destroyed when
+# pods are deleted
+#
+# Other Logging Options -- Common items you may wish to reconfigure, for the complete
+# list of options please see roles/openshift_hosted_logging/README.md
+#
+# Configure loggingPublicURL in the master config for aggregate logging, defaults
+# to https://kibana.{{ openshift_master_default_subdomain }}
+#openshift_master_logging_public_url=https://kibana.example.com
+# Configure the number of elastic search nodes, unless you're using dynamic provisioning
+# this value must be 1
+#openshift_hosted_logging_elasticsearch_cluster_size=1
+#openshift_hosted_logging_hostname=logging.apps.example.com
+# Configure the prefix and version for the deployer image
+#openshift_hosted_logging_deployer_prefix=registry.example.com:8888/openshift3/
+#openshift_hosted_logging_deployer_version=3.3.0
 
 # Configure the multi-tenant SDN plugin (default is 'redhat/openshift-ovs-subnet')
 # os_sdn_network_plugin_name='redhat/openshift-ovs-multitenant'
