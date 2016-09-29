@@ -1078,7 +1078,6 @@ more:
 http://docs.openshift.com/enterprise/latest/admin_guide/overview.html
 """
         click.echo(message)
-        click.pause()
 
 cli.add_command(install)
 cli.add_command(upgrade)

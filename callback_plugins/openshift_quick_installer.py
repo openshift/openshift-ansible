@@ -40,6 +40,7 @@ import imp
 import os
 import sys
 from ansible import constants as C
+from ansible.utils.color import colorize, hostcolor
 ANSIBLE_PATH = imp.find_module('ansible')[1]
 DEFAULT_PATH = os.path.join(ANSIBLE_PATH, 'plugins/callback/default.py')
 DEFAULT_MODULE = imp.load_source(
@@ -249,3 +250,42 @@ The only thing we change here is adding `log_only=True` to the
 'notify' list attached.
         """
         self._display.display("skipping: no hosts matched", color=C.COLOR_SKIP, log_only=True)
+
+    def v2_playbook_on_stats(self, stats):
+        """Print the final playbook run stats"""
+        self._display.display("", screen_only=True)
+        self.banner("PLAY RECAP")
+
+        hosts = sorted(stats.processed.keys())
+        for h in hosts:
+            t = stats.summarize(h)
+
+            self._display.display(
+                u"%s : %s %s %s %s" % (
+                    hostcolor(h, t),
+                    colorize(u'ok', t['ok'], C.COLOR_OK),
+                    colorize(u'changed', t['changed'], C.COLOR_CHANGED),
+                    colorize(u'unreachable', t['unreachable'], C.COLOR_UNREACHABLE),
+                    colorize(u'failed', t['failures'], C.COLOR_ERROR)),
+                screen_only=True
+            )
+
+            self._display.display(
+                u"%s : %s %s %s %s" % (
+                    hostcolor(h, t, False),
+                    colorize(u'ok', t['ok'], None),
+                    colorize(u'changed', t['changed'], None),
+                    colorize(u'unreachable', t['unreachable'], None),
+                    colorize(u'failed', t['failures'], None)),
+                log_only=True
+            )
+
+        self._display.display("", screen_only=True)
+        self._display.display("", screen_only=True)
+
+        # Some plays are conditional and won't run (such as load
+        # balancers) if they aren't required. Let the user know about
+        # this to avoid potential confusion.
+        if self.plays_total_ran != self.plays_count:
+            print("Installation Complete: Note: Play count is an estimate and some were skipped because your install does not require them")
+            self._display.display("", screen_only=True)
