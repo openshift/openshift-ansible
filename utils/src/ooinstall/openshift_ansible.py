@@ -7,6 +7,7 @@ import os
 import logging
 import yaml
 from ooinstall.variants import find_variant
+from ooinstall.utils import debug_env
 
 installer_log = logging.getLogger('installer')
 
@@ -225,6 +226,9 @@ def load_system_facts(inventory_file, os_facts_path, env_vars, verbose=False):
     Retrieves system facts from the remote systems.
     """
     installer_log.debug("Inside load_system_facts")
+    installer_log.debug("load_system_facts will run with Ansible/Openshift environment variables:")
+    debug_env(env_vars)
+
     FNULL = open(os.devnull, 'w')
     args = ['ansible-playbook', '-v'] if verbose \
         else ['ansible-playbook']
@@ -232,6 +236,8 @@ def load_system_facts(inventory_file, os_facts_path, env_vars, verbose=False):
         '--inventory-file={}'.format(inventory_file),
         os_facts_path])
     installer_log.debug("Going to subprocess out to ansible now with these args: %s", ' '.join(args))
+    installer_log.debug("Subprocess will run with Ansible/Openshift environment variables:")
+    debug_env(env_vars)
     status = subprocess.call(args, env=env_vars, stdout=FNULL)
     if status != 0:
         installer_log.debug("Exit status from subprocess was not 0")
@@ -280,17 +286,23 @@ def run_main_playbook(inventory_file, hosts, hosts_to_run_on, verbose=False):
     facts_env = os.environ.copy()
     if 'ansible_log_path' in CFG.settings:
         facts_env['ANSIBLE_LOG_PATH'] = CFG.settings['ansible_log_path']
-    if 'ansible_config' in CFG.settings:
-        facts_env['ANSIBLE_CONFIG'] = CFG.settings['ansible_config']
+    if 'ansible_quiet_config' in CFG.settings:
+        facts_env['ANSIBLE_CONFIG'] = CFG.settings['ansible_quiet_config']
+    # facts_env["ANSIBLE_CALLBACK_PLUGINS"] = CFG.settings['ansible_plugins_directory']
+
     return run_ansible(main_playbook_path, inventory_file, facts_env, verbose)
 
 
 def run_ansible(playbook, inventory, env_vars, verbose=False):
+    installer_log.debug("run_ansible will run with Ansible/Openshift environment variables:")
+    debug_env(env_vars)
+
     args = ['ansible-playbook', '-v'] if verbose \
         else ['ansible-playbook']
     args.extend([
         '--inventory-file={}'.format(inventory),
         playbook])
+    installer_log.debug("Going to subprocess out to ansible now with these args: %s", ' '.join(args))
     return subprocess.call(args, env=env_vars)
 
 

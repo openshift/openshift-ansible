@@ -25,6 +25,7 @@ installer_file_handler.setLevel(logging.DEBUG)
 installer_log.addHandler(installer_file_handler)
 
 DEFAULT_ANSIBLE_CONFIG = '/usr/share/atomic-openshift-utils/ansible.cfg'
+QUIET_ANSIBLE_CONFIG = '/usr/share/atomic-openshift-utils/ansible-quiet.cfg'
 DEFAULT_PLAYBOOK_DIR = '/usr/share/ansible/openshift-ansible/'
 
 UPGRADE_MAPPINGS = {
@@ -882,6 +883,8 @@ def cli(ctx, unattended, configuration, ansible_playbook_directory, ansible_conf
          os.path.exists(DEFAULT_ANSIBLE_CONFIG):
         # If we're installed by RPM this file should exist and we can use it as our default:
         oo_cfg.settings['ansible_config'] = DEFAULT_ANSIBLE_CONFIG
+
+    oo_cfg.settings['ansible_quiet_config'] = QUIET_ANSIBLE_CONFIG
 
     oo_cfg.settings['ansible_log_path'] = ctx.obj['ansible_log_path']
 
