@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.28
+Version:        3.3.29
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Sep 30 2016 Scott Dodson <sdodson@redhat.com> 3.3.29-1
+- Add GCE cloud provider kind. (abutcher@redhat.com)
+
 * Tue Sep 27 2016 Scott Dodson <sdodson@redhat.com> 3.3.28-1
 - Always deduplicate detected certificate names (elyscape@gmail.com)
 - Fix deployer template for enterprise (sdodson@redhat.com)
