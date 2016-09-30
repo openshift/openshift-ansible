@@ -36,7 +36,6 @@ HOST_VARIABLES_MAP = {
     'public_ip': 'openshift_public_ip',
     'hostname': 'openshift_hostname',
     'public_hostname': 'openshift_public_hostname',
-    'node_labels': 'openshift_node_labels',
     'containerized': 'containerized',
 }
 
@@ -199,6 +198,9 @@ def write_host(host, role, inventory, schedulable=None):
     if host.other_variables:
         for variable, value in host.other_variables.iteritems():
             facts += " {}={}".format(variable, value)
+
+    if host.node_labels and role == 'node':
+        facts += ' openshift_node_labels="{}"'.format(host.node_labels)
 
     # Distinguish between three states, no schedulability specified (use default),
     # explicitly set to True, or explicitly set to False:
