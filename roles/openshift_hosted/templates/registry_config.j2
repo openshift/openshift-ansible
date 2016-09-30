@@ -4,6 +4,8 @@ log:
 http:
   addr: :5000
 storage:
+  delete:
+    enabled: true
   cache:
     blobdescriptor: inmemory
 {% if openshift.hosted.registry.storage.provider == 's3' %}
