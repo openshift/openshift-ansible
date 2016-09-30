@@ -124,3 +124,14 @@
   when: node_certs_missing | bool
   delegate_to: localhost
   become: no
+
+- name: Copy OpenShift CA to system CA trust
+  copy:
+    src: "{{ item.cert }}"
+    dest: "/etc/pki/ca-trust/source/anchors/{{ item.id }}-{{ item.cert | basename }}"
+    remote_src: yes
+  with_items:
+  - id: openshift
+    cert: "{{ openshift_node_cert_dir }}/ca.crt"
+  notify:
+  - update ca trust

@@ -53,7 +53,6 @@
 
 - include: secure.yml
   static: no
-  when: openshift.common.deployment_subtype == 'registry'
 
 - include: storage/object_storage.yml
   static: no

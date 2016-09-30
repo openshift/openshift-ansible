@@ -1,5 +1,15 @@
 ---
-- name: Determine if registry certificates must be created
+- name: Create passthrough route for docker-registry
+  command: >
+    {{ openshift.common.client_binary }} create route passthrough
+    --service docker-registry
+    --config={{ openshift_hosted_kubeconfig }}
+    -n default
+  register: create_docker_registry_route
+  changed_when: "'already exists' not in create_docker_registry_route.stderr"
+  failed_when: "'already exists' not in create_docker_registry_route.stderr and create_docker_registry_route.rc != 0"
+
+- name: Determine if registry certificate must be created
   stat:
     path: "{{ openshift_master_config_dir }}/{{ item }}"
   with_items:
@@ -12,7 +22,7 @@
 - name: Retrieve registry service IP
   command: >
     {{ openshift.common.client_binary }} get service docker-registry
-    --template='{{ '{{' }} .spec.clusterIP {{ '}}' }}'
+    -o jsonpath='{.spec.clusterIP}'
     --config={{ openshift_hosted_kubeconfig }}
     -n default
   register: docker_registry_service_ip
@@ -45,8 +55,8 @@
 
 - name: "Add the secret to the registry's pod service accounts"
   command: >
-    {{ openshift.common.client_binary }} secrets link {{ item }} registry-certificates
-    --config={{ openshift_hosted_kubeconfig }}
+    {{ openshift.common.client_binary }} secrets add {{ item }} registry-certificates
+    --config={{ openshift_hosted_kubeconfig  }}
     -n default
   with_items:
   - registry
@@ -55,12 +65,12 @@
 - name: Determine if registry-certificates secret volume attached
   command: >
     {{ openshift.common.client_binary }} get dc/docker-registry
-    --template='{{ '{{' }} range .spec.template.spec.volumes {{ '}}' }}{{ '{{' }} .secret.secretName {{ '}}' }}{{ '{{' }} end {{ '}}' }}'
+    -o jsonpath='{.spec.template.spec.volumes[*].secret.secretName}'
     --config={{ openshift_hosted_kubeconfig }}
     -n default
   register: docker_registry_volumes
   changed_when: false
-  failed_when: false
+  failed_when: "'secretName is not found' not in docker_registry_volumes.stdout and docker_registry_volumes.rc != 0"
 
 - name: Attach registry-certificates secret volume
   command: >
@@ -71,17 +81,48 @@
    -n default
   when: "'registry-certificates' not in docker_registry_volumes.stdout"
 
-- name: Set registry environment variables for TLS certificate
+- name: Determine if registry environment variables must be set
+  command: >
+    {{ openshift.common.client_binary }} env dc/docker-registry
+    --list
+    --config={{ openshift_hosted_kubeconfig }}
+    -n default
+  register: docker_registry_env
+  changed_when: false
+
+- name: Configure certificates in registry deplomentConfig
   command: >
     {{ openshift.common.client_binary }} env dc/docker-registry
     REGISTRY_HTTP_TLS_CERTIFICATE=/etc/secrets/registry.crt
     REGISTRY_HTTP_TLS_KEY=/etc/secrets/registry.key
     --config={{ openshift_hosted_kubeconfig }}
     -n default
+  when: "'REGISTRY_HTTP_TLS_CERTIFICATE=/etc/secrets/registry.crt' not in docker_registry_env.stdout or 'REGISTRY_HTTP_TLS_KEY=/etc/secrets/registry.key' not in docker_registry_env.stdout"
 
-# These commands are on a single line to preserve patch json.
+- name: Determine if registry liveness probe scheme is HTTPS
+  command: >
+    {{ openshift.common.client_binary }} get dc/docker-registry
+    -o jsonpath='{.spec.template.spec.containers[*].livenessProbe.httpGet.scheme}'
+    --config={{ openshift_hosted_kubeconfig }}
+    -n default
+  register: docker_registry_liveness_probe
+  changed_when: false
+
+# This command is on a single line to preserve patch json.
 - name: Update registry liveness probe from HTTP to HTTPS
   command: "{{ openshift.common.client_binary }} patch dc/docker-registry --api-version=v1 -p '{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":\"registry\",\"livenessProbe\":{\"httpGet\":{\"scheme\":\"HTTPS\"}}}]}}}}' --config={{ openshift_hosted_kubeconfig }} -n default"
+  when: "'HTTPS' not in docker_registry_liveness_probe.stdout"
 
+- name: Determine if registry readiness probe scheme is HTTPS
+  command: >
+    {{ openshift.common.client_binary }} get dc/docker-registry
+    -o jsonpath='{.spec.template.spec.containers[*].readinessProbe.httpGet.scheme}'
+    --config={{ openshift_hosted_kubeconfig }}
+    -n default
+  register: docker_registry_readiness_probe
+  changed_when: false
+
+# This command is on a single line to preserve patch json.
 - name: Update registry readiness probe from HTTP to HTTPS
   command: "{{ openshift.common.client_binary }} patch dc/docker-registry --api-version=v1 -p '{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":\"registry\",\"readinessProbe\":{\"httpGet\":{\"scheme\":\"HTTPS\"}}}]}}}}' --config={{ openshift_hosted_kubeconfig }} -n default"
+  when: "'HTTPS' not in docker_registry_readiness_probe.stdout"

@@ -36,7 +36,7 @@
 - name: Retrieve docker-registry route
   command: >
     {{ openshift.common.client_binary }} get route docker-registry
-    --template='{{ '{{' }} .spec.host {{ '}}' }}'
+    -o jsonpath='{.spec.host}'
     --config={{ openshift_hosted_kubeconfig }}
     -n default
   register: docker_registry_route
@@ -45,7 +45,7 @@
 - name: Retrieve cockpit kube url
   command: >
     {{ openshift.common.client_binary }} get route registry-console
-    --template='https://{{ '{{' }} .spec.host {{ '}}' }}'
+    -o jsonpath='https://{.spec.host}'
     -n default
   register: registry_console_cockpit_kube_url
   changed_when: false

@@ -60,12 +60,12 @@
     when: "{{ (openshift_http_proxy is defined or openshift_https_proxy is defined) and
             openshift_generate_no_proxy_hosts | default(True) | bool }}"
   roles:
+  - role: openshift_common
   - role: openshift_clock
   - role: openshift_docker
   - role: openshift_node_certificates
     openshift_ca_host: "{{ groups.oo_first_master.0 }}"
   - role: openshift_cloud_provider
-  - role: openshift_common
   - role: openshift_node_dnsmasq
     when: openshift.common.use_dnsmasq
   - role: os_firewall
@@ -99,12 +99,12 @@
     when: "{{ (openshift_http_proxy is defined or openshift_https_proxy is defined) and
             openshift_generate_no_proxy_hosts | default(True) | bool }}"
   roles:
+  - role: openshift_common
   - role: openshift_clock
   - role: openshift_docker
   - role: openshift_node_certificates
     openshift_ca_host: "{{ groups.oo_first_master.0 }}"
   - role: openshift_cloud_provider
-  - role: openshift_common
   - role: openshift_node_dnsmasq
     when: openshift.common.use_dnsmasq
   - role: os_firewall
