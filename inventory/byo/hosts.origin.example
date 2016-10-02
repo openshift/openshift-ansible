@@ -441,6 +441,13 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # your nodes, pods, or service CIDRs for security reasons.
 #openshift_master_external_ip_network_cidrs=['0.0.0.0/0']
 
+# IngressIPNetworkCIDR controls the range to assign ingress IPs from for
+# services of type LoadBalancer on bare metal. If empty, ingress IPs will not
+# be assigned. It may contain a single CIDR that will be allocated from. For
+# security reasons, you should ensure that this range does not overlap with
+# the CIDRs reserved for external IPs, nodes, pods, or services.
+#openshift_master_ingress_ip_network_cidrs=['0.0.0.0/0']
+
 # Configure number of bits to allocate to each host’s subnet e.g. 8
 # would mean a /24 network on the host.
 #osm_host_subnet_length=8
