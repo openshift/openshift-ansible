@@ -25,13 +25,13 @@
   tasks:
   - name: Prepare for Node evacuation
     command: >
-      {{ openshift.common.admin_binary }} manage-node {{ openshift.common.hostname | lower }} --schedulable=false
+      {{ openshift.common.admin_binary }} manage-node {{ openshift.node.nodename }} --schedulable=false
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: l_docker_upgrade is defined and l_docker_upgrade | bool and inventory_hostname in groups.oo_nodes_to_config
 
   - name: Evacuate Node for Kubelet upgrade
     command: >
-      {{ openshift.common.admin_binary }} manage-node {{ openshift.common.hostname | lower }} --evacuate --force
+      {{ openshift.common.admin_binary }} manage-node {{ openshift.node.nodename }} --evacuate --force
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: l_docker_upgrade is defined and l_docker_upgrade | bool and inventory_hostname in groups.oo_nodes_to_config
 
@@ -40,7 +40,7 @@
 
   - name: Set node schedulability
     command: >
-      {{ openshift.common.admin_binary }} manage-node {{ openshift.common.hostname | lower }} --schedulable=true
+      {{ openshift.common.admin_binary }} manage-node {{ openshift.node.nodename }} --schedulable=true
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: openshift.node.schedulable | bool
     when: l_docker_upgrade is defined and l_docker_upgrade | bool and inventory_hostname in groups.oo_nodes_to_config and openshift.node.schedulable | bool

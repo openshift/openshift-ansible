@@ -20,3 +20,4 @@ multi_inventory.yaml
 .tags*
 ansible.cfg
 *.retry
+.vscode/*

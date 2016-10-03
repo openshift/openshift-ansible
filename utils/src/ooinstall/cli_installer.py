@@ -25,6 +25,7 @@ installer_file_handler.setLevel(logging.DEBUG)
 installer_log.addHandler(installer_file_handler)
 
 DEFAULT_ANSIBLE_CONFIG = '/usr/share/atomic-openshift-utils/ansible.cfg'
+QUIET_ANSIBLE_CONFIG = '/usr/share/atomic-openshift-utils/ansible-quiet.cfg'
 DEFAULT_PLAYBOOK_DIR = '/usr/share/ansible/openshift-ansible/'
 
 UPGRADE_MAPPINGS = {
@@ -790,7 +791,7 @@ def set_infra_nodes(hosts):
     if all(host.is_master() for host in hosts):
         infra_list = hosts
     else:
-        nodes_list = [host for host in hosts if host.is_node()]
+        nodes_list = [host for host in hosts if host.is_schedulable_node(hosts)]
         infra_list = nodes_list[:2]
 
     for host in infra_list:
@@ -815,12 +816,6 @@ def set_infra_nodes(hosts):
               # callback=validate_ansible_dir,
               default=DEFAULT_PLAYBOOK_DIR,
               envvar='OO_ANSIBLE_PLAYBOOK_DIRECTORY')
-@click.option('--ansible-config',
-              type=click.Path(file_okay=True,
-                              dir_okay=False,
-                              writable=True,
-                              readable=True),
-              default=None)
 @click.option('--ansible-log-path',
               type=click.Path(file_okay=True,
                               dir_okay=False,
@@ -836,7 +831,7 @@ def set_infra_nodes(hosts):
 # pylint: disable=too-many-arguments
 # pylint: disable=line-too-long
 # Main CLI entrypoint, not much we can do about too many arguments.
-def cli(ctx, unattended, configuration, ansible_playbook_directory, ansible_config, ansible_log_path, verbose, debug):
+def cli(ctx, unattended, configuration, ansible_playbook_directory, ansible_log_path, verbose, debug):
     """
     atomic-openshift-installer makes the process for installing OSE or AEP
     easier by interactively gathering the data needed to run on each host.
@@ -855,7 +850,6 @@ def cli(ctx, unattended, configuration, ansible_playbook_directory, ansible_conf
     ctx.obj = {}
     ctx.obj['unattended'] = unattended
     ctx.obj['configuration'] = configuration
-    ctx.obj['ansible_config'] = ansible_config
     ctx.obj['ansible_log_path'] = ansible_log_path
     ctx.obj['verbose'] = verbose
 
@@ -876,12 +870,12 @@ def cli(ctx, unattended, configuration, ansible_playbook_directory, ansible_conf
     oo_cfg.ansible_playbook_directory = ansible_playbook_directory
     ctx.obj['ansible_playbook_directory'] = ansible_playbook_directory
 
-    if ctx.obj['ansible_config']:
-        oo_cfg.settings['ansible_config'] = ctx.obj['ansible_config']
-    elif 'ansible_config' not in oo_cfg.settings and \
-         os.path.exists(DEFAULT_ANSIBLE_CONFIG):
+    if os.path.exists(DEFAULT_ANSIBLE_CONFIG):
         # If we're installed by RPM this file should exist and we can use it as our default:
         oo_cfg.settings['ansible_config'] = DEFAULT_ANSIBLE_CONFIG
+
+    if os.path.exists(QUIET_ANSIBLE_CONFIG):
+        oo_cfg.settings['ansible_quiet_config'] = QUIET_ANSIBLE_CONFIG
 
     oo_cfg.settings['ansible_log_path'] = ctx.obj['ansible_log_path']
 
@@ -1084,7 +1078,6 @@ more:
 http://docs.openshift.com/enterprise/latest/admin_guide/overview.html
 """
         click.echo(message)
-        click.pause()
 
 cli.add_command(install)
 cli.add_command(upgrade)

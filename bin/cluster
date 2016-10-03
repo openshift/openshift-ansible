@@ -68,6 +68,22 @@ class Cluster(object):
         cluster['num_etcd'] = args.etcd
         cluster['cluster_env'] = args.env
 
+        if args.cloudprovider and args.provider == 'openstack':
+            cluster['openshift_cloudprovider_kind'] = 'openstack'
+            cluster['openshift_cloudprovider_openstack_auth_url']    = os.getenv('OS_AUTH_URL')
+            cluster['openshift_cloudprovider_openstack_username']    = os.getenv('OS_USERNAME')
+            cluster['openshift_cloudprovider_openstack_password']    = os.getenv('OS_PASSWORD')
+            if 'OS_USER_DOMAIN_ID' in os.environ:
+                cluster['openshift_cloudprovider_openstack_domain_id']   = os.getenv('OS_USER_DOMAIN_ID')
+            if 'OS_USER_DOMAIN_NAME' in os.environ:
+                cluster['openshift_cloudprovider_openstack_domain_name'] = os.getenv('OS_USER_DOMAIN_NAME')
+            if 'OS_PROJECT_ID' in os.environ or 'OS_TENANT_ID' in os.environ:
+                cluster['openshift_cloudprovider_openstack_tenant_id']   = os.getenv('OS_PROJECT_ID',os.getenv('OS_TENANT_ID'))
+            if 'OS_PROJECT_NAME' is os.environ or 'OS_TENANT_NAME' in os.environ:
+                cluster['openshift_cloudprovider_openstack_tenant_name'] = os.getenv('OS_PROJECT_NAME',os.getenv('OS_TENANT_NAME'))
+            if 'OS_REGION_NAME' in os.environ:
+                cluster['openshift_cloudprovider_openstack_region']      = os.getenv('OS_REGION_NAME')
+
         self.action(args, inventory, cluster, playbook)
 
     def add_nodes(self, args):
@@ -332,6 +348,8 @@ This wrapper is overriding the following ansible variables:
 
     create_parser = action_parser.add_parser('create', help='Create a cluster',
                                              parents=[meta_parser])
+    create_parser.add_argument('-c', '--cloudprovider', action='store_true',
+                               help='Enable the cloudprovider')
     create_parser.add_argument('-m', '--masters', default=1, type=int,
                                help='number of masters to create in cluster')
     create_parser.add_argument('-n', '--nodes', default=2, type=int,

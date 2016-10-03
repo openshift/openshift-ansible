@@ -70,6 +70,4 @@
   when: openshift.common.version_gte_3_2_or_1_2 | bool
 
 - name: Clean temporary configuration file
-  command: >
-    rm -f {{manage_iq_tmp_conf}}
-  changed_when: false
+  file: path={{manage_iq_tmp_conf}} state=absent

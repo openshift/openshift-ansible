@@ -2,6 +2,11 @@
 auth-url = {{ openshift_cloudprovider_openstack_auth_url }}
 username = {{ openshift_cloudprovider_openstack_username }}
 password = {{ openshift_cloudprovider_openstack_password }}
+{% if openshift_cloudprovider_openstack_domain_id is defined %}
+domain-id = {{ openshift_cloudprovider_openstack_domain_id }}
+{% elif openshift_cloudprovider_openstack_domain_name is defined %}
+domain-name = {{ openshift_cloudprovider_openstack_domain_name }}
+{% endif %}
 {% if openshift_cloudprovider_openstack_tenant_id is defined %}
 tenant-id = {{ openshift_cloudprovider_openstack_tenant_id }}
 {% else %}

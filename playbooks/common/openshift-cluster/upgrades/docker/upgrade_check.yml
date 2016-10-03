@@ -28,7 +28,7 @@
 - fail:
     msg: This playbook requires access to Docker 1.10 or later
   # Disable the 1.10 requirement if the user set a specific Docker version
-  when: avail_docker_version.stdout | version_compare('1.10','<') and docker_version is not defined
+  when: docker_version is not defined and (docker_upgrade is not defined or docker_upgrade | bool == True) and (avail_docker_version.stdout == "" or avail_docker_version.stdout | version_compare('1.10','<'))
 
 # Default l_docker_upgrade to False, we'll set to True if an upgrade is required:
 - set_fact:

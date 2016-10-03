@@ -16,8 +16,17 @@ import pkg_resources
 import re
 import json
 import yaml
-from ansible.utils.unicode import to_unicode
+from ansible.parsing.yaml.dumper import AnsibleDumper
 from urlparse import urlparse
+
+try:
+    # ansible-2.2
+    # ansible.utils.unicode.to_unicode is deprecated in ansible-2.2,
+    # ansible.module_utils._text.to_text should be used instead.
+    from ansible.module_utils._text import to_text
+except ImportError:
+    # ansible-2.1
+    from ansible.utils.unicode import to_unicode as to_text
 
 # Disabling too-many-public-methods, since filter methods are necessarily
 # public
@@ -545,7 +554,7 @@ class FilterModule(object):
         return certificates
 
     @staticmethod
-    def oo_pretty_print_cluster(data):
+    def oo_pretty_print_cluster(data, prefix='tag_'):
         """ Read a subset of hostvars and build a summary of the cluster
             in the following layout:
 
@@ -572,8 +581,8 @@ class FilterModule(object):
                     returns 'value2'
             """
             for tag in tags:
-                if tag[:len(key)+4] == 'tag_' + key:
-                    return tag[len(key)+5:]
+                if tag[:len(prefix)+len(key)] == prefix + key:
+                    return tag[len(prefix)+len(key)+1:]
             raise KeyError(key)
 
         def _add_host(clusters,
@@ -621,11 +630,13 @@ class FilterModule(object):
             return ""
 
         try:
-            transformed = yaml.safe_dump(data, indent=indent, allow_unicode=True, default_flow_style=False, **kw)
+            transformed = yaml.dump(data, indent=indent, allow_unicode=True,
+                                    default_flow_style=False,
+                                    Dumper=AnsibleDumper, **kw)
             padded = "\n".join([" " * level * indent + line for line in transformed.splitlines()])
-            return to_unicode("\n{0}".format(padded))
+            return to_text("\n{0}".format(padded))
         except Exception as my_e:
-            raise errors.AnsibleFilterError('Failed to convert: %s', my_e)
+            raise errors.AnsibleFilterError('Failed to convert: %s' % my_e)
 
     @staticmethod
     def oo_openshift_env(hostvars):
@@ -732,13 +743,14 @@ class FilterModule(object):
         if 'hosted' in hostvars['openshift']:
             for component in hostvars['openshift']['hosted']:
                 if 'storage' in hostvars['openshift']['hosted'][component]:
-                    kind = hostvars['openshift']['hosted'][component]['storage']['kind']
-                    create_pv = hostvars['openshift']['hosted'][component]['storage']['create_pv']
-                    create_pvc = hostvars['openshift']['hosted'][component]['storage']['create_pvc']
-                    if kind != None and create_pv and create_pvc:
-                        volume = hostvars['openshift']['hosted'][component]['storage']['volume']['name']
-                        size = hostvars['openshift']['hosted'][component]['storage']['volume']['size']
-                        access_modes = hostvars['openshift']['hosted'][component]['storage']['access_modes']
+                    params = hostvars['openshift']['hosted'][component]['storage']
+                    kind = params['kind']
+                    create_pv = params['create_pv']
+                    create_pvc = params['create_pvc']
+                    if kind not in [None, 'object'] and create_pv and create_pvc:
+                        volume = params['volume']['name']
+                        size = params['volume']['size']
+                        access_modes = params['access_modes']
                         persistent_volume_claim = dict(
                             name="{0}-claim".format(volume),
                             capacity=size,

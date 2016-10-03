@@ -7,6 +7,7 @@ import os
 import logging
 import yaml
 from ooinstall.variants import find_variant
+from ooinstall.utils import debug_env
 
 installer_log = logging.getLogger('installer')
 
@@ -28,6 +29,14 @@ VARIABLES_MAP = {
     'proxy_http': 'openshift_http_proxy',
     'proxy_https': 'openshift_https_proxy',
     'proxy_exclude_hosts': 'openshift_no_proxy',
+}
+
+HOST_VARIABLES_MAP = {
+    'ip': 'openshift_ip',
+    'public_ip': 'openshift_public_ip',
+    'hostname': 'openshift_hostname',
+    'public_hostname': 'openshift_public_hostname',
+    'containerized': 'containerized',
 }
 
 
@@ -175,7 +184,6 @@ def write_proxy_settings(base_inventory):
         pass
 
 
-# pylint: disable=too-many-branches
 def write_host(host, role, inventory, schedulable=None):
     global CFG
 
@@ -183,22 +191,16 @@ def write_host(host, role, inventory, schedulable=None):
         return
 
     facts = ''
-    if host.ip:
-        facts += ' openshift_ip={}'.format(host.ip)
-    if host.public_ip:
-        facts += ' openshift_public_ip={}'.format(host.public_ip)
-    if host.hostname:
-        facts += ' openshift_hostname={}'.format(host.hostname)
-    if host.public_hostname:
-        facts += ' openshift_public_hostname={}'.format(host.public_hostname)
-    if host.containerized:
-        facts += ' containerized={}'.format(host.containerized)
+    for prop in HOST_VARIABLES_MAP:
+        if getattr(host, prop):
+            facts += ' {}={}'.format(HOST_VARIABLES_MAP.get(prop), getattr(host, prop))
+
     if host.other_variables:
         for variable, value in host.other_variables.iteritems():
             facts += " {}={}".format(variable, value)
-    if host.node_labels:
-        if role == 'node':
-            facts += ' openshift_node_labels="{}"'.format(host.node_labels)
+
+    if host.node_labels and role == 'node':
+        facts += ' openshift_node_labels="{}"'.format(host.node_labels)
 
     # Distinguish between three states, no schedulability specified (use default),
     # explicitly set to True, or explicitly set to False:
@@ -225,6 +227,9 @@ def load_system_facts(inventory_file, os_facts_path, env_vars, verbose=False):
     Retrieves system facts from the remote systems.
     """
     installer_log.debug("Inside load_system_facts")
+    installer_log.debug("load_system_facts will run with Ansible/Openshift environment variables:")
+    debug_env(env_vars)
+
     FNULL = open(os.devnull, 'w')
     args = ['ansible-playbook', '-v'] if verbose \
         else ['ansible-playbook']
@@ -232,6 +237,8 @@ def load_system_facts(inventory_file, os_facts_path, env_vars, verbose=False):
         '--inventory-file={}'.format(inventory_file),
         os_facts_path])
     installer_log.debug("Going to subprocess out to ansible now with these args: %s", ' '.join(args))
+    installer_log.debug("Subprocess will run with Ansible/Openshift environment variables:")
+    debug_env(env_vars)
     status = subprocess.call(args, env=env_vars, stdout=FNULL)
     if status != 0:
         installer_log.debug("Exit status from subprocess was not 0")
@@ -280,17 +287,24 @@ def run_main_playbook(inventory_file, hosts, hosts_to_run_on, verbose=False):
     facts_env = os.environ.copy()
     if 'ansible_log_path' in CFG.settings:
         facts_env['ANSIBLE_LOG_PATH'] = CFG.settings['ansible_log_path']
-    if 'ansible_config' in CFG.settings:
-        facts_env['ANSIBLE_CONFIG'] = CFG.settings['ansible_config']
+
+    # override the ansible config for our main playbook run
+    if 'ansible_quiet_config' in CFG.settings:
+        facts_env['ANSIBLE_CONFIG'] = CFG.settings['ansible_quiet_config']
+
     return run_ansible(main_playbook_path, inventory_file, facts_env, verbose)
 
 
 def run_ansible(playbook, inventory, env_vars, verbose=False):
+    installer_log.debug("run_ansible will run with Ansible/Openshift environment variables:")
+    debug_env(env_vars)
+
     args = ['ansible-playbook', '-v'] if verbose \
         else ['ansible-playbook']
     args.extend([
         '--inventory-file={}'.format(inventory),
         playbook])
+    installer_log.debug("Going to subprocess out to ansible now with these args: %s", ' '.join(args))
     return subprocess.call(args, env=env_vars)
 
 
