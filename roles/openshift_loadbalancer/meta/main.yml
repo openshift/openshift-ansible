@@ -10,11 +10,11 @@ galaxy_info:
     versions:
     - 7
 dependencies:
-- role: openshift_loadbalancer_facts
+- role: openshift_facts
 - role: os_firewall
   os_firewall_allow:
   - service: haproxy stats
     port: "9000/tcp"
   - service: haproxy balance
-    port: "{{ openshift.loadbalancer.frontend_port }}/tcp"
+    port: "{{ openshift_master_api_port | default(8443) }}/tcp"
 - role: openshift_repos

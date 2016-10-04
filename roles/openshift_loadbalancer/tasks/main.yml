@@ -7,15 +7,13 @@
   file:
     path: /etc/systemd/system/haproxy.service.d
     state: directory
-  when: "'limit_nofile' in openshift.loadbalancer"
 
 - name: Configure the nofile limits for haproxy
   ini_file:
     dest: /etc/systemd/system/haproxy.service.d/limits.conf
     section: Service
     option: LimitNOFILE
-    value: "{{ openshift.loadbalancer.limit_nofile }}"
-  when: "'limit_nofile' in openshift.loadbalancer"
+    value: "{{ openshift_loadbalancer_limit_nofile | default(100000) }}"
   notify: restart haproxy
   register: nofile_limit_result
 
