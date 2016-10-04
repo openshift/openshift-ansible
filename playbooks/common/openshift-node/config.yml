@@ -45,7 +45,7 @@
     with_items: "{{ groups.oo_nodes_to_config | default([]) }}"
     when: hostvars[item].openshift.common is defined and hostvars[item].openshift.common.is_containerized | bool and (item in groups.oo_nodes_to_config and item in groups.oo_masters_to_config)
 
-- name: Configure node instances
+- name: Configure containerized nodes
   hosts: oo_containerized_master_nodes
   serial: 1
   vars:
@@ -60,12 +60,12 @@
     when: "{{ (openshift_http_proxy is defined or openshift_https_proxy is defined) and
             openshift_generate_no_proxy_hosts | default(True) | bool }}"
   roles:
+  - role: openshift_common
   - role: openshift_clock
   - role: openshift_docker
   - role: openshift_node_certificates
     openshift_ca_host: "{{ groups.oo_first_master.0 }}"
   - role: openshift_cloud_provider
-  - role: openshift_common
   - role: openshift_node_dnsmasq
     when: openshift.common.use_dnsmasq
   - role: os_firewall
@@ -85,7 +85,7 @@
       when: openshift.node.use_openshift_sdn | bool
   - role: openshift_node
 
-- name: Configure node instances
+- name: Configure nodes
   hosts: oo_nodes_to_config:!oo_containerized_master_nodes
   vars:
     openshift_node_master_api_url: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_url }}"
@@ -99,12 +99,12 @@
     when: "{{ (openshift_http_proxy is defined or openshift_https_proxy is defined) and
             openshift_generate_no_proxy_hosts | default(True) | bool }}"
   roles:
+  - role: openshift_common
   - role: openshift_clock
   - role: openshift_docker
   - role: openshift_node_certificates
     openshift_ca_host: "{{ groups.oo_first_master.0 }}"
   - role: openshift_cloud_provider
-  - role: openshift_common
   - role: openshift_node_dnsmasq
     when: openshift.common.use_dnsmasq
   - role: os_firewall
@@ -153,7 +153,7 @@
   - file: name={{ mktemp.stdout }} state=absent
     changed_when: False
 
-- name: Set schedulability
+- name: Set node schedulability
   hosts: oo_first_master
   vars:
     openshift_nodes: "{{ groups.oo_nodes_to_config | default([]) }}"
@@ -172,6 +172,10 @@
       --cacert {{ openshift.common.config_base }}/master/ca.crt
       {% endif %}
       {{ openshift.master.api_url }}/healthz/ready
+    args:
+      # Disables the following warning:
+      # Consider using get_url or uri module rather than running curl
+      warn: no
     register: api_available_output
     until: api_available_output.stdout == 'ok'
     retries: 120

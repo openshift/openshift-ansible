@@ -149,6 +149,7 @@ def hostname_valid(hostname):
     if (not hostname or
             hostname.startswith('localhost') or
             hostname.endswith('localdomain') or
+            hostname.endswith('novalocal') or
             len(hostname.split('.')) < 2):
         return False
 
@@ -918,6 +919,14 @@ def set_sdn_facts_if_unset(facts, system_facts):
 
     return facts
 
+def set_nodename(facts):
+    if 'node' in facts and 'common' in facts:
+        if 'cloudprovider' in facts and facts['cloudprovider']['kind'] == 'openstack':
+            facts['node']['nodename'] = facts['provider']['metadata']['hostname'].replace('.novalocal', '')
+        else:
+            facts['node']['nodename'] = facts['common']['hostname'].lower()
+    return facts
+
 def migrate_oauth_template_facts(facts):
     """
     Migrate an old oauth template fact to a newer format if it's present.
@@ -1220,7 +1229,7 @@ def apply_provider_facts(facts, provider_facts):
 
         facts['common'][h_var] = choose_hostname(
             [provider_facts['network'].get(h_var)],
-            facts['common'][ip_var]
+            facts['common'][h_var]
         )
 
     facts['provider'] = provider_facts
@@ -1701,6 +1710,7 @@ class OpenShiftFacts(object):
         facts = set_proxy_facts(facts)
         if not safe_get_bool(facts['common']['is_containerized']):
             facts = set_installed_variant_rpm_facts(facts)
+        facts = set_nodename(facts)
         return dict(openshift=facts)
 
     def get_defaults(self, roles, deployment_type, deployment_subtype):
@@ -1739,6 +1749,8 @@ class OpenShiftFacts(object):
                 {"name": "PodFitsPorts"},
                 {"name": "NoDiskConflict"},
                 {"name": "NoVolumeZoneConflict"},
+                {"name": "MaxEBSVolumeCount"},
+                {"name": "MaxGCEPDVolumeCount"},
                 {"name": "Region", "argument": {"serviceAffinity" : {"labels" : ["region"]}}}
             ]
             scheduler_priorities = [
@@ -1809,10 +1821,25 @@ class OpenShiftFacts(object):
                         ),
                         nfs=dict(
                             directory='/exports',
-                            options='*(rw,root_squash)'),
-                        openstack=dict(
-                            filesystem='ext4',
-                            volumeID='123'),
+                            options='*(rw,root_squash)'
+                        ),
+                        host=None,
+                        access_modes=['ReadWriteOnce'],
+                        create_pv=True,
+                        create_pvc=False
+                    )
+                ),
+                logging=dict(
+                    storage=dict(
+                        kind=None,
+                        volume=dict(
+                            name='logging-es',
+                            size='10Gi'
+                        ),
+                        nfs=dict(
+                            directory='/exports',
+                            options='*(rw,root_squash)'
+                        ),
                         host=None,
                         access_modes=['ReadWriteOnce'],
                         create_pv=True,

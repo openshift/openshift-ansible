@@ -34,6 +34,10 @@
   action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-node{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }},tuned-profiles-{{ openshift.common.service_type }}-node{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }} state=present"
   when: not openshift.common.is_containerized | bool
 
+- name: Set atomic-guest tuned profile
+  command: "tuned-adm profile atomic-guest"
+  when: openshift.common.is_atomic | bool
+
 - name: Install sdn-ovs package
   action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-sdn-ovs{{ openshift_pkg_version | oo_image_tag_to_rpm_version(include_dash=True) }} state=present"
   when: openshift.common.use_openshift_sdn and not openshift.common.is_containerized | bool
@@ -89,9 +93,9 @@
     create: true
   with_items:
     - regex: '^AWS_ACCESS_KEY_ID='
-      line: "AWS_ACCESS_KEY_ID={{ openshift_cloudprovider_aws_access_key }}"
+      line: "AWS_ACCESS_KEY_ID={{ openshift_cloudprovider_aws_access_key | default('') }}"
     - regex: '^AWS_SECRET_ACCESS_KEY='
-      line: "AWS_SECRET_ACCESS_KEY={{ openshift_cloudprovider_aws_secret_key }}"
+      line: "AWS_SECRET_ACCESS_KEY={{ openshift_cloudprovider_aws_secret_key | default('') }}"
   when: "openshift_cloudprovider_kind is defined and openshift_cloudprovider_kind == 'aws' and openshift_cloudprovider_aws_access_key is defined and openshift_cloudprovider_aws_secret_key is defined"
   notify:
   - restart node
@@ -130,6 +134,10 @@
   command: >
     curl --silent --cacert {{ openshift.common.config_base }}/node/ca.crt
     {{ openshift_node_master_api_url }}/healthz/ready
+  args:
+    # Disables the following warning:
+    # Consider using get_url or uri module rather than running curl
+    warn: no
   register: api_available_output
   until: api_available_output.stdout == 'ok'
   retries: 120

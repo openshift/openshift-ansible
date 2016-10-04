@@ -13,4 +13,8 @@ galaxy_info:
   - cloud
   - system
 dependencies:
-- { role: nuage_ca }
+- role: nuage_ca
+- role: os_firewall
+  os_firewall_allow:
+  - service: openshift-monitor 
+    port: "{{ nuage_mon_rest_server_port }}/tcp"

@@ -22,6 +22,7 @@
   - set_fact:
       is_containerized: "{{ is_atomic or containerized | default(false) | bool }}"
 
+# Stop services on all hosts prior to removing files.
 - hosts: nodes
   become: yes
   tasks:
@@ -35,6 +36,46 @@
     - origin-node
     failed_when: false
 
+- hosts: masters
+  become: yes
+  tasks:
+  - name: Stop services
+    service: name={{ item }} state=stopped
+    with_items:
+    - atomic-enterprise-master
+    - atomic-openshift-master
+    - atomic-openshift-master-api
+    - atomic-openshift-master-controllers
+    - openshift-master
+    - openshift-master-api
+    - openshift-master-controllers
+    - origin-master
+    - origin-master-api
+    - origin-master-controllers
+    - pcsd
+    failed_when: false
+
+- hosts: etcd
+  become: yes
+  tasks:
+  - name: Stop services
+    service: name={{ item }} state=stopped
+    with_items:
+    - etcd
+    failed_when: false
+
+- hosts: lb
+  become: yes
+  tasks:
+  - name: Stop services
+    service: name={{ item }} state=stopped
+    with_items:
+    - haproxy
+    failed_when: false
+
+- hosts: nodes
+  become: yes
+  tasks:
   - name: unmask services
     command: systemctl unmask "{{ item }}"
     changed_when: False
@@ -72,6 +113,10 @@
     - tuned-profiles-openshift-node
     - tuned-profiles-origin-node
 
+  - name: Remove flannel package
+    action: "{{ ansible_pkg_mgr }} name=flannel state=absent"
+    when: openshift_use_flannel | default(false) | bool and not is_atomic | bool
+
   - shell: systemctl reset-failed
     changed_when: False
 
@@ -91,12 +136,6 @@
     - lbr0
     - vlinuxbr
     - vovsbr
-
-  - name: restart docker
-    service: name=docker state=restarted
-
-  - name: restart NetworkManager
-    service: name=NetworkManager state=restarted
 
   - shell: find /var/lib/origin/openshift.local.volumes -type d -exec umount {} \; 2>/dev/null || true
     changed_when: False
@@ -161,51 +200,44 @@
     with_items:
     - /etc/ansible/facts.d/openshift.fact
     - /etc/atomic-enterprise
+    - /etc/dnsmasq.d/origin-dns.conf
+    - /etc/dnsmasq.d/origin-upstream-dns.conf
+    - /etc/NetworkManager/dispatcher.d/99-origin-dns.sh
     - /etc/openshift
     - /etc/openshift-sdn
     - /etc/origin
-    - /etc/systemd/system/atomic-openshift-node.service
-    - /etc/systemd/system/atomic-openshift-node-dep.service
-    - /etc/systemd/system/origin-node.service
-    - /etc/systemd/system/origin-node-dep.service
-    - /etc/systemd/system/openvswitch.service
     - /etc/sysconfig/atomic-enterprise-node
     - /etc/sysconfig/atomic-openshift-node
     - /etc/sysconfig/atomic-openshift-node-dep
-    - /etc/sysconfig/origin-node
-    - /etc/sysconfig/origin-node-dep
     - /etc/sysconfig/openshift-node
     - /etc/sysconfig/openshift-node-dep
     - /etc/sysconfig/openvswitch
     - /etc/sysconfig/origin-node
+    - /etc/sysconfig/origin-node
+    - /etc/sysconfig/origin-node-dep
+    - /etc/systemd/system/atomic-openshift-node-dep.service
+    - /etc/systemd/system/atomic-openshift-node.service
     - /etc/systemd/system/atomic-openshift-node.service.wants
+    - /etc/systemd/system/docker.service.d/docker-sdn-ovs.conf
+    - /etc/systemd/system/openvswitch.service
+    - /etc/systemd/system/origin-node-dep.service
+    - /etc/systemd/system/origin-node.service
+    - /etc/systemd/system/origin-node.service.wants
     - /run/openshift-sdn
     - /var/lib/atomic-enterprise
     - /var/lib/openshift
     - /var/lib/origin
-    - /etc/NetworkManager/dispatcher.d/99-origin-dns.sh
-    - /etc/dnsmasq.d/origin-dns.conf
-    - /etc/dnsmasq.d/origin-upstream-dns.conf
+
+  - name: restart docker
+    service: name=docker state=restarted
+
+  - name: restart NetworkManager
+    service: name=NetworkManager state=restarted
+
 
 - hosts: masters
   become: yes
   tasks:
-  - name: Stop services
-    service: name={{ item }} state=stopped
-    with_items:
-    - atomic-enterprise-master
-    - atomic-openshift-master
-    - atomic-openshift-master-api
-    - atomic-openshift-master-controllers
-    - openshift-master
-    - openshift-master-api
-    - openshift-master-controllers
-    - origin-master
-    - origin-master-api
-    - origin-master-controllers
-    - pcsd
-    failed_when: false
-
   - name: unmask services
     command: systemctl unmask "{{ item }}"
     changed_when: False
@@ -289,6 +321,7 @@
     - /usr/local/bin/oadm
     - /usr/local/bin/oc
     - /usr/local/bin/kubectl
+    - /etc/flannel
 
   # Since we are potentially removing the systemd unit files for separated
   # master-api and master-controllers services, so we need to reload the
@@ -299,12 +332,6 @@
 - hosts: etcd
   become: yes
   tasks:
-  - name: Stop services
-    service: name={{ item }} state=stopped
-    with_items:
-    - etcd
-    failed_when: false
-
   - name: unmask services
     command: systemctl unmask "{{ item }}"
     changed_when: False
@@ -339,19 +366,17 @@
     - /etc/etcd
     - /etc/systemd/system/etcd_container.service
 
+  # Intenationally using rm command over file module because if someone had mounted a filesystem
+  # at /var/lib/etcd then the contents was not removed correctly
   - name: Remove etcd data
     shell: rm -rf /var/lib/etcd/*
+    args:
+      warn: no
     failed_when: false
 
 - hosts: lb
   become: yes
   tasks:
-  - name: Stop services
-    service: name={{ item }} state=stopped
-    with_items:
-    - haproxy
-    failed_when: false
-
   - name: unmask services
     command: systemctl unmask "{{ item }}"
     changed_when: False

@@ -13,7 +13,7 @@
 
 - include: initialize_openshift_version.yml
 
-- name: Set oo_options
+- name: Set oo_option facts
   hosts: oo_all_hosts
   tags:
   - always

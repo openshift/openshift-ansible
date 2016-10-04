@@ -4,6 +4,8 @@ log:
 http:
   addr: :5000
 storage:
+  delete:
+    enabled: true
   cache:
     blobdescriptor: inmemory
 {% if openshift.hosted.registry.storage.provider == 's3' %}
@@ -66,6 +68,8 @@ middleware:
   - name: openshift
     options:
       pullthrough: {{ openshift.hosted.registry.pullthrough | default(true) }}
+      acceptschema2: {{ openshift.hosted.registry.acceptschema2 | default(false) }}
+      enforcequota: {{ openshift.hosted.registry.enforcequota | default(false) }}
 {% if openshift.hosted.registry.storage.provider == 's3' and 'cloudfront' in openshift.hosted.registry.storage.s3 %}
   storage:
   - name: cloudfront

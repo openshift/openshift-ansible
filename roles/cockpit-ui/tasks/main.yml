@@ -36,7 +36,7 @@
 - name: Retrieve docker-registry route
   command: >
     {{ openshift.common.client_binary }} get route docker-registry
-    --template='{{ '{{' }} .spec.host {{ '}}' }}'
+    -o jsonpath='{.spec.host}'
     --config={{ openshift_hosted_kubeconfig }}
     -n default
   register: docker_registry_route
@@ -45,18 +45,15 @@
 - name: Retrieve cockpit kube url
   command: >
     {{ openshift.common.client_binary }} get route registry-console
-    --template='https://{{ '{{' }} .spec.host {{ '}}' }}'
+    -o jsonpath='https://{.spec.host}'
     -n default
   register: registry_console_cockpit_kube_url
   changed_when: false
 
-- set_fact:
-    cockpit_image_prefix: "{{ '-p IMAGE_PREFIX=' ~ openshift_cockpit_deployer_prefix | default('') }}"
-
 - name: Deploy registry-console
   command: >
     {{ openshift.common.client_binary }} new-app --template=registry-console
-    {{ cockpit_image_prefix }}
+    {% if openshift_cockpit_deployer_prefix is defined  %}-p IMAGE_PREFIX="{{ openshift_cockpit_deployer_prefix }}"{% endif %}
     -p OPENSHIFT_OAUTH_PROVIDER_URL="{{ openshift.master.public_api_url }}"
     -p REGISTRY_HOST="{{ docker_registry_route.stdout }}"
     -p COCKPIT_KUBE_URL="{{ registry_console_cockpit_kube_url.stdout }}"

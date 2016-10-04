@@ -11,7 +11,7 @@
 - name: Error out if Docker pre-installed but too old
   fail:
     msg: "Docker {{ curr_docker_version.stdout }} is installed, but >= 1.9.1 is required."
-  when: not curr_docker_version | skipped and curr_docker_version.stdout != '' and curr_docker_version.stdout | version_compare('1.9.1', '<') and not docker_version is defined and not docker_protect_installed_version | bool
+  when: not curr_docker_version | skipped and curr_docker_version.stdout != '' and curr_docker_version.stdout | version_compare('1.9.1', '<') and not docker_version is defined
 
 - name: Error out if requested Docker is too old
   fail:
@@ -31,19 +31,19 @@
 - name: Fail if Docker version requested but downgrade is required
   fail:
     msg: "Docker {{ curr_docker_version.stdout }} is installed, but version {{ docker_version }} was requested."
-  when: not curr_docker_version | skipped and curr_docker_version.stdout != '' and docker_version is defined and curr_docker_version.stdout | version_compare(docker_version, '>') and not docker_protect_installed_version | bool
+  when: not curr_docker_version | skipped and curr_docker_version.stdout != '' and docker_version is defined and curr_docker_version.stdout | version_compare(docker_version, '>')
 
 # This involves an extremely slow migration process, users should instead run the
 # Docker 1.10 upgrade playbook to accomplish this.
 - name: Error out if attempting to upgrade Docker across the 1.10 boundary
   fail:
     msg: "Cannot upgrade Docker to >= 1.10, please upgrade or remove Docker manually, or use the Docker upgrade playbook if OpenShift is already installed."
-  when: not curr_docker_version | skipped and curr_docker_version.stdout != '' and curr_docker_version.stdout | version_compare('1.10', '<') and docker_version is defined and docker_version | version_compare('1.10', '>=') and not docker_protect_installed_version | bool
+  when: not curr_docker_version | skipped and curr_docker_version.stdout != '' and curr_docker_version.stdout | version_compare('1.10', '<') and docker_version is defined and docker_version | version_compare('1.10', '>=')
 
 # Make sure Docker is installed, but does not update a running version.
 # Docker upgrades are handled by a separate playbook.
 - name: Install Docker
-  action: "{{ ansible_pkg_mgr }} name=docker{{ '-' + docker_version if docker_version is defined and not docker_protect_installed_version | bool else '' }} state=present"
+  action: "{{ ansible_pkg_mgr }} name=docker{{ '-' + docker_version if docker_version is defined else '' }} state=present"
   when: not openshift.common.is_atomic | bool
 
 - name: Start the Docker service
@@ -67,7 +67,7 @@
     dest: /etc/sysconfig/docker
     regexp: '^{{ item.reg_conf_var }}=.*$'
     line: "{{ item.reg_conf_var }}='{{ item.reg_fact_val | oo_prepend_strings_in_list(item.reg_flag ~ ' ') | join(' ') }}'"
-  when: item.reg_fact_val != '' and  docker_check.stat.isreg
+  when: item.reg_fact_val != '' and docker_check.stat.isreg is defined and docker_check.stat.isreg
   with_items:
   - reg_conf_var: ADD_REGISTRY
     reg_fact_val: "{{ docker_additional_registries | default(None, true)}}"
@@ -96,7 +96,8 @@
       reg_fact_val: "{{ docker_no_proxy | default('') | join(',') }}"
   notify:
     - restart docker
-  when: "{{ 'http_proxy' in openshift.common or 'https_proxy' in openshift.common and docker_check.stat.isreg }}"
+  when:
+    - docker_check.stat.isreg is defined and docker_check.stat.isreg and '"http_proxy" in openshift.common or "https_proxy" in openshift.common'
 
 - name: Set various Docker options
   lineinfile:
@@ -108,7 +109,7 @@
       {% if docker_log_options is defined %} {{ docker_log_options |  oo_split() | oo_prepend_strings_in_list('--log-opt ') | join(' ')}}{% endif %}\
       {% if docker_options is defined %} {{ docker_options }}{% endif %}\
       {% if docker_disable_push_dockerhub is defined %} --confirm-def-push={{ docker_disable_push_dockerhub | bool }}{% endif %}'"
-  when: docker_check.stat.isreg
+  when: docker_check.stat.isreg is defined and docker_check.stat.isreg
   notify:
     - restart docker
 

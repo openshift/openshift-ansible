@@ -12,7 +12,6 @@ installer_log = logging.getLogger('installer')
 CONFIG_PERSIST_SETTINGS = [
     'ansible_ssh_user',
     'ansible_callback_facts_yaml',
-    'ansible_config',
     'ansible_inventory_path',
     'ansible_log_path',
     'deployment',
@@ -24,6 +23,19 @@ CONFIG_PERSIST_SETTINGS = [
 
 DEPLOYMENT_VARIABLES_BLACKLIST = [
     'hosts',
+    'roles',
+]
+
+HOST_VARIABLES_BLACKLIST = [
+    'ip',
+    'public_ip',
+    'hostname',
+    'public_hostname',
+    'node_labels',
+    'containerized',
+    'preconfigured',
+    'schedulable',
+    'other_variables',
     'roles',
 ]
 
@@ -67,7 +79,7 @@ class Host(object):
         self.containerized = kwargs.get('containerized', False)
         self.node_labels = kwargs.get('node_labels', '')
 
-        # allowable roles: master, node, etcd, storage, master_lb, new
+        # allowable roles: master, node, etcd, storage, master_lb
         self.roles = kwargs.get('roles', [])
 
         self.other_variables = kwargs.get('other_variables', {})
@@ -87,11 +99,13 @@ class Host(object):
         d = {}
 
         for prop in ['ip', 'hostname', 'public_ip', 'public_hostname', 'connect_to',
-                     'preconfigured', 'containerized', 'schedulable', 'roles', 'node_labels',
-                     'other_variables']:
+                     'preconfigured', 'containerized', 'schedulable', 'roles', 'node_labels', ]:
             # If the property is defined (not None or False), export it:
             if getattr(self, prop):
                 d[prop] = getattr(self, prop)
+        for variable, value in self.other_variables.iteritems():
+            d[variable] = value
+
         return d
 
     def is_master(self):
@@ -203,7 +217,6 @@ class OOConfig(object):
                     role_list = loaded_config['deployment']['roles']
                 except KeyError as e:
                     print_read_config_error("No such key: {}".format(e), self.config_path)
-                    print "Error loading config, required key missing: {}".format(e)
                     sys.exit(0)
 
                 for setting in CONFIG_PERSIST_SETTINGS:
@@ -238,6 +251,10 @@ class OOConfig(object):
 
                 # Parse the hosts into DTO objects:
                 for host in host_list:
+                    host['other_variables'] = {}
+                    for variable, value in host.iteritems():
+                        if variable not in HOST_VARIABLES_BLACKLIST:
+                            host['other_variables'][variable] = value
                     self.deployment.hosts.append(Host(**host))
 
                 # Parse the roles into Objects
@@ -308,6 +325,12 @@ class OOConfig(object):
         if 'ansible_plugins_directory' not in self.settings:
             self.settings['ansible_plugins_directory'] = \
                 resource_filename(__name__, 'ansible_plugins')
+            installer_log.debug("We think the ansible plugins directory should be: %s (it is not already set)",
+                                self.settings['ansible_plugins_directory'])
+        else:
+            installer_log.debug("The ansible plugins directory is already set: %s",
+                                self.settings['ansible_plugins_directory'])
+
         if 'version' not in self.settings:
             self.settings['version'] = 'v2'
 
