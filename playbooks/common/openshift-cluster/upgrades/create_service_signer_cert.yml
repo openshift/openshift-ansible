@@ -9,6 +9,7 @@
     local_action: command mktemp -d /tmp/openshift-ansible-XXXXXXX
     register: local_cert_sync_tmpdir
     changed_when: false
+    when: not (hostvars[groups.oo_first_master.0].service_signer_cert_stat.stat.exists | bool)
 
 - name: Create service signer certificate
   hosts: oo_first_master
@@ -17,6 +18,7 @@
     command: mktemp -d /tmp/openshift-ansible-XXXXXXX
     register: remote_cert_create_tmpdir
     changed_when: false
+    when: not (hostvars[groups.oo_first_master.0].service_signer_cert_stat.stat.exists | bool)
 
   - name: Create service signer certificate
     command: >
@@ -27,6 +29,7 @@
       --serial=service-signer.serial.txt
     args:
       chdir: "{{ remote_cert_create_tmpdir.stdout }}/"
+    when: not (hostvars[groups.oo_first_master.0].service_signer_cert_stat.stat.exists | bool)
 
   - name: Retrieve service signer certificate
     fetch:
@@ -38,12 +41,14 @@
     with_items:
     - "service-signer.crt"
     - "service-signer.key"
+    when: not (hostvars[groups.oo_first_master.0].service_signer_cert_stat.stat.exists | bool)
 
   - name: Delete remote temp directory
     file:
       name: "{{ remote_cert_create_tmpdir.stdout }}"
       state: absent
     changed_when: false
+    when: not (hostvars[groups.oo_first_master.0].service_signer_cert_stat.stat.exists | bool)
 
 - name: Deploy service signer certificate
   hosts: oo_masters_to_config
@@ -55,6 +60,7 @@
     with_items:
     - "service-signer.crt"
     - "service-signer.key"
+    when: not (hostvars[groups.oo_first_master.0].service_signer_cert_stat.stat.exists | bool)
 
 - name: Delete local temp directory
   hosts: localhost
@@ -67,3 +73,4 @@
       name: "{{ local_cert_sync_tmpdir.stdout }}"
       state: absent
     changed_when: false
+    when: not (hostvars[groups.oo_first_master.0].service_signer_cert_stat.stat.exists | bool)

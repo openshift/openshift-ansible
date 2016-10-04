@@ -1,0 +1,75 @@
+---
+- name: Evacuate and upgrade nodes
+  hosts: oo_nodes_to_upgrade
+  # This var must be set with -e on invocation, as it is not a per-host inventory var
+  # and is evaluated early. Values such as "20%" can also be used.
+  serial: "{{ openshift_upgrade_nodes_serial | default(1) }}"
+  any_errors_fatal: true
+  roles:
+  - openshift_facts
+  - docker
+  handlers:
+  - include: ../../../../roles/openshift_node/handlers/main.yml
+    static: yes
+  pre_tasks:
+  # TODO: To better handle re-trying failed upgrades, it would be nice to check if the node
+  # or docker actually needs an upgrade before proceeding. Perhaps best to save this until
+  # we merge upgrade functionality into the base roles and a normal config.yml playbook run.
+  - name: Determine if node is currently scheduleable
+    command: >
+      {{ openshift.common.client_binary }} get node {{ openshift.node.nodename | lower }} -o json
+    register: node_output
+    delegate_to: "{{ groups.oo_first_master.0 }}"
+    changed_when: false
+    when: inventory_hostname in groups.oo_nodes_to_upgrade
+
+  - set_fact:
+      was_schedulable: "{{ 'unschedulable' not in (node_output.stdout | from_json).spec }}"
+    when: inventory_hostname in groups.oo_nodes_to_upgrade
+
+  - name: Mark unschedulable if host is a node
+    command: >
+      {{ openshift.common.admin_binary }} manage-node {{ openshift.node.nodename | lower }} --schedulable=false
+    delegate_to: "{{ groups.oo_first_master.0 }}"
+    when: inventory_hostname in groups.oo_nodes_to_upgrade
+    # NOTE: There is a transient "object has been modified" error here, allow a couple
+    # retries for a more reliable upgrade.
+    register: node_unsched
+    until: node_unsched.rc == 0
+    retries: 3
+    delay: 1
+
+  - name: Evacuate Node for Kubelet upgrade
+    command: >
+      {{ openshift.common.admin_binary }} manage-node {{ openshift.node.nodename | lower }} --evacuate --force
+    delegate_to: "{{ groups.oo_first_master.0 }}"
+    when: inventory_hostname in groups.oo_nodes_to_upgrade
+  tasks:
+  - include: docker/upgrade.yml
+    when: l_docker_upgrade is defined and l_docker_upgrade | bool and not openshift.common.is_atomic | bool
+
+  - include: "{{ node_config_hook }}"
+    when: node_config_hook is defined and inventory_hostname in groups.oo_nodes_to_upgrade
+
+  - include: rpm_upgrade.yml
+    vars:
+       component: "node"
+       openshift_version: "{{ openshift_pkg_version | default('') }}"
+    when: inventory_hostname in groups.oo_nodes_to_upgrade and not openshift.common.is_containerized | bool
+
+  - include: containerized_node_upgrade.yml
+    when: inventory_hostname in groups.oo_nodes_to_upgrade and openshift.common.is_containerized | bool
+
+  - meta: flush_handlers
+
+  - name: Set node schedulability
+    command: >
+      {{ openshift.common.admin_binary }} manage-node {{ openshift.node.nodename | lower }} --schedulable=true
+    delegate_to: "{{ groups.oo_first_master.0 }}"
+    when: inventory_hostname in groups.oo_nodes_to_upgrade and was_schedulable | bool
+    register: node_sched
+    until: node_sched.rc == 0
+    retries: 3
+    delay: 1
+
+

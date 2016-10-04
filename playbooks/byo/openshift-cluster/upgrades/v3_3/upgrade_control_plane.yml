@@ -1,6 +1,15 @@
 ---
 #
-# Full Control Plane + Nodes Upgrade
+# Control Plane Upgrade Playbook
+#
+# Upgrades masters and Docker (only on standalone etcd hosts)
+#
+# This upgrade does not include:
+# - node service running on masters
+# - docker running on masters
+# - node service running on dedicated nodes
+#
+# You can run the upgrade_nodes.yml playbook after this to upgrade these components separately.
 #
 - include: ../../../../common/openshift-cluster/upgrades/init.yml
   tags:
@@ -17,12 +26,8 @@
 
 # Pre-upgrade
 
-- include: ../../../../common/openshift-cluster/upgrades/initialize_nodes_to_upgrade.yml
-  tags:
-  - pre_upgrade
-
-- name: Update repos and initialize facts on all hosts
-  hosts: oo_masters_to_config:oo_nodes_to_upgrade:oo_etcd_to_config:oo_lb_to_config
+- name: Update repos on control plane hosts
+  hosts: oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config
   tags:
   - pre_upgrade
   roles:
@@ -84,18 +89,12 @@
 # before we get into the serialized upgrade process which will then remove
 # remaining images if possible.
 - name: Cleanup unused Docker images
-  hosts: oo_masters_to_config:oo_nodes_to_upgrade:oo_etcd_to_config
+  hosts: oo_masters_to_config:oo_etcd_to_config
   tasks:
   - include: ../../../../common/openshift-cluster/upgrades/cleanup_unused_images.yml
 
 - include: ../../../../common/openshift-cluster/upgrades/upgrade_control_plane.yml
   vars:
     master_config_hook: "v3_3/master_config_upgrade.yml"
-
-- include: ../../../../common/openshift-cluster/upgrades/upgrade_nodes.yml
-  vars:
-    node_config_hook: "v3_3/node_config_upgrade.yml"
-
-- include: ../../../openshift-master/restart.yml
 
 - include: ../../../../common/openshift-cluster/upgrades/post_control_plane.yml
