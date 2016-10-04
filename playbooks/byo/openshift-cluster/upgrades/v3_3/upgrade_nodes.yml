@@ -1,6 +1,8 @@
 ---
 #
-# Full Control Plane + Nodes Upgrade
+# Node Upgrade Playbook
+#
+# Upgrades nodes only, but requires the control plane to have already been upgraded.
 #
 - include: ../../../../common/openshift-cluster/upgrades/init.yml
   tags:
@@ -16,17 +18,16 @@
       openshift_upgrade_min: "{{ '1.2' if deployment_type == 'origin' else '3.2' }}"
 
 # Pre-upgrade
-
 - include: ../../../../common/openshift-cluster/upgrades/initialize_nodes_to_upgrade.yml
   tags:
   - pre_upgrade
 
-- name: Update repos and initialize facts on all hosts
+- name: Update repos on nodes
   hosts: oo_masters_to_config:oo_nodes_to_upgrade:oo_etcd_to_config:oo_lb_to_config
-  tags:
-  - pre_upgrade
   roles:
   - openshift_repos
+  tags:
+  - pre_upgrade
 
 - name: Set openshift_no_proxy_internal_hostnames
   hosts: oo_masters_to_config:oo_nodes_to_upgrade
@@ -34,7 +35,7 @@
   - pre_upgrade
   tasks:
   - set_fact:
-      openshift_no_proxy_internal_hostnames: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config']
+      openshift_no_proxy_internal_hostnames: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_upgrade']
                                                     | union(groups['oo_masters_to_config'])
                                                     | union(groups['oo_etcd_to_config'] | default([])))
                                                 | oo_collect('openshift.common.hostname') | default([]) | join (',')
@@ -62,6 +63,14 @@
     # docker is configured and running.
     skip_docker_role: True
 
+- name: Verify masters are already upgraded
+  hosts: oo_masters_to_config
+  tags:
+  - pre_upgrade
+  tasks:
+  - fail: msg="Master running {{ openshift.common.version }} must be upgraded to {{ openshift_version }} before node upgrade can be run."
+    when: openshift.common.version != openshift_version
+
 - include: ../../../../common/openshift-cluster/upgrades/pre/verify_control_plane_running.yml
   tags:
   - pre_upgrade
@@ -84,18 +93,10 @@
 # before we get into the serialized upgrade process which will then remove
 # remaining images if possible.
 - name: Cleanup unused Docker images
-  hosts: oo_masters_to_config:oo_nodes_to_upgrade:oo_etcd_to_config
+  hosts: oo_nodes_to_upgrade
   tasks:
   - include: ../../../../common/openshift-cluster/upgrades/cleanup_unused_images.yml
-
-- include: ../../../../common/openshift-cluster/upgrades/upgrade_control_plane.yml
-  vars:
-    master_config_hook: "v3_3/master_config_upgrade.yml"
 
 - include: ../../../../common/openshift-cluster/upgrades/upgrade_nodes.yml
   vars:
     node_config_hook: "v3_3/node_config_upgrade.yml"
-
-- include: ../../../openshift-master/restart.yml
-
-- include: ../../../../common/openshift-cluster/upgrades/post_control_plane.yml

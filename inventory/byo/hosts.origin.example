@@ -95,7 +95,6 @@ openshift_release=v1.2
 # modify image streams to point at that registry by setting the following to true
 #openshift_examples_modify_imagestreams=true
 
-
 # Origin copr repo
 #openshift_additional_repos=[{'id': 'openshift-origin-copr', 'name': 'OpenShift Origin COPR', 'baseurl': 'https://copr-be.cloud.fedoraproject.org/results/maxamillion/origin-next/epel-7-$basearch/', 'enabled': 1, 'gpgcheck': 1, 'gpgkey': 'https://copr-be.cloud.fedoraproject.org/results/maxamillion/origin-next/pubkey.gpg'}]
 
@@ -440,6 +439,13 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # allowed CIDRs. You should ensure this range does not overlap with
 # your nodes, pods, or service CIDRs for security reasons.
 #openshift_master_external_ip_network_cidrs=['0.0.0.0/0']
+
+# IngressIPNetworkCIDR controls the range to assign ingress IPs from for
+# services of type LoadBalancer on bare metal. If empty, ingress IPs will not
+# be assigned. It may contain a single CIDR that will be allocated from. For
+# security reasons, you should ensure that this range does not overlap with
+# the CIDRs reserved for external IPs, nodes, pods, or services.
+#openshift_master_ingress_ip_network_cidr=172.46.0.0/16
 
 # Configure number of bits to allocate to each host’s subnet e.g. 8
 # would mean a /24 network on the host.

@@ -751,7 +751,9 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force, verbose):
                     hosts_to_run_on.remove(host)
 
         # Handle the cases where we know about uninstalled systems
-        if len(uninstalled_hosts) > 0:
+        # TODO: This logic is getting hard to understand.
+        # we should revise all this to be cleaner.
+        if not force and len(uninstalled_hosts) > 0:
             for uninstalled_host in uninstalled_hosts:
                 click.echo("{} is currently uninstalled".format(uninstalled_host))
             # Fall through

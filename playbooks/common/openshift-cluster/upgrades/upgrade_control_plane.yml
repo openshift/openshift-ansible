@@ -1,39 +1,93 @@
 ---
 ###############################################################################
-# The restart playbook should be run after this playbook completes.
-###############################################################################
-
-# Separate step so we can execute in parallel and clear out anything unused
-# before we get into the serialized upgrade process which will then remove
-# remaining images if possible.
-- name: Cleanup unused Docker images
-  hosts: oo_masters_to_config:oo_nodes_to_config:oo_etcd_to_config
-  tasks:
-  - name: Check Docker image count
-    shell: "docker images -aq | wc -l"
-    register: docker_image_count
-    when: docker_upgrade_nuke_images is defined and docker_upgrade_nuke_images | bool
-
-  - debug: var=docker_image_count.stdout
-    when: docker_upgrade_nuke_images is defined and docker_upgrade_nuke_images | bool
-
-  - name: Remove unused Docker images for Docker 1.10+ migration
-    shell: "docker rmi `docker images -aq`"
-    # Will fail on images still in use:
-    failed_when: false
-    when: docker_upgrade_nuke_images is defined and docker_upgrade_nuke_images | bool
-
-  - name: Check Docker image count
-    shell: "docker images -aq | wc -l"
-    register: docker_image_count
-    when: docker_upgrade_nuke_images is defined and docker_upgrade_nuke_images | bool
-
-  - debug: var=docker_image_count.stdout
-    when: docker_upgrade_nuke_images is defined and docker_upgrade_nuke_images | bool
-
-###############################################################################
 # Upgrade Masters
 ###############################################################################
+- name: Evaluate additional groups for upgrade
+  hosts: localhost
+  connection: local
+  become: no
+  tasks:
+  - name: Evaluate etcd_hosts_to_backup
+    add_host:
+      name: "{{ item }}"
+      groups: etcd_hosts_to_backup
+    with_items: groups.oo_etcd_to_config if groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config | length > 0 else groups.oo_first_master
+
+- name: Backup etcd
+  hosts: etcd_hosts_to_backup
+  vars:
+    embedded_etcd: "{{ hostvars[groups.oo_first_master.0].openshift.master.embedded_etcd }}"
+    timestamp: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
+  roles:
+  - openshift_facts
+  tasks:
+  # Ensure we persist the etcd role for this host in openshift_facts
+  - openshift_facts:
+      role: etcd
+      local_facts: {}
+    when: "'etcd' not in openshift"
+
+  - stat: path=/var/lib/openshift
+    register: var_lib_openshift
+
+  - stat: path=/var/lib/origin
+    register: var_lib_origin
+
+  - name: Create origin symlink if necessary
+    file: src=/var/lib/openshift/ dest=/var/lib/origin state=link
+    when: var_lib_openshift.stat.exists == True and var_lib_origin.stat.exists == False
+
+  # TODO: replace shell module with command and update later checks
+  # We assume to be using the data dir for all backups.
+  - name: Check available disk space for etcd backup
+    shell: df --output=avail -k {{ openshift.common.data_dir }} | tail -n 1
+    register: avail_disk
+
+  # TODO: replace shell module with command and update later checks
+  - name: Check current embedded etcd disk usage
+    shell: du -k {{ openshift.etcd.etcd_data_dir }} | tail -n 1 | cut -f1
+    register: etcd_disk_usage
+    when: embedded_etcd | bool
+
+  - name: Abort if insufficient disk space for etcd backup
+    fail:
+      msg: >
+        {{ etcd_disk_usage.stdout }} Kb disk space required for etcd backup,
+        {{ avail_disk.stdout }} Kb available.
+    when: (embedded_etcd | bool) and (etcd_disk_usage.stdout|int > avail_disk.stdout|int)
+
+  - name: Install etcd (for etcdctl)
+    action: "{{ ansible_pkg_mgr }} name=etcd state=latest"
+    when: not openshift.common.is_atomic | bool
+
+  - name: Generate etcd backup
+    command: >
+      etcdctl backup --data-dir={{ openshift.etcd.etcd_data_dir }}
+      --backup-dir={{ openshift.common.data_dir }}/etcd-backup-{{ timestamp }}
+
+  - set_fact:
+      etcd_backup_complete: True
+
+  - name: Display location of etcd backup
+    debug:
+      msg: "Etcd backup created in {{ openshift.common.data_dir }}/etcd-backup-{{ timestamp }}"
+
+
+- name: Gate on etcd backup
+  hosts: localhost
+  connection: local
+  become: no
+  tasks:
+  - set_fact:
+      etcd_backup_completed: "{{ hostvars
+                                 | oo_select_keys(groups.etcd_hosts_to_backup)
+                                 | oo_collect('inventory_hostname', {'etcd_backup_complete': true}) }}"
+  - set_fact:
+      etcd_backup_failed: "{{ groups.etcd_hosts_to_backup | difference(etcd_backup_completed) }}"
+  - fail:
+      msg: "Upgrade cannot continue. The following hosts did not complete etcd backup: {{ etcd_backup_failed | join(',') }}"
+    when: etcd_backup_failed | length > 0
+
 - name: Upgrade master packages
   hosts: oo_masters_to_config
   handlers:
@@ -57,7 +111,6 @@
 # Create service signer cert when missing. Service signer certificate
 # is added to master config in the master config hook for v3_3.
 - include: create_service_signer_cert.yml
-  when: not (hostvars[groups.oo_first_master.0].service_signer_cert_stat.stat.exists | bool)
 
 - name: Upgrade master config and systemd units
   hosts: oo_masters_to_config
@@ -143,9 +196,9 @@
     origin_reconcile_bindings: "{{ deployment_type == 'origin' and openshift_version | version_compare('1.0.6', '>') }}"
     ent_reconcile_bindings: true
     openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"
-    # Similar to pre.yml, we don't want to upgrade docker during the openshift_cli role,
-    # it will be updated when we perform node upgrade.
-    docker_protect_installed_version: True
+    # Another spot where we assume docker is running and do not want to accidentally trigger an unsafe
+    # restart.
+    skip_docker_role: True
   tasks:
   - name: Verifying the correct commandline tools are available
     shell: grep {{ verify_upgrade_version }} {{ openshift.common.admin_binary}}
@@ -177,71 +230,6 @@
   - set_fact:
       reconcile_complete: True
 
-###############################################################################
-# Upgrade Nodes
-###############################################################################
-
-# Here we handle all tasks that might require a node evac. (upgrading docker, and the node service)
-- name: Perform upgrades that may require node evacuation
-  hosts: oo_masters_to_config:oo_etcd_to_config:oo_nodes_to_config
-  serial: 1
-  any_errors_fatal: true
-  roles:
-  - openshift_facts
-  handlers:
-  - include: ../../../../roles/openshift_node/handlers/main.yml
-    static: yes
-  tasks:
-  # TODO: To better handle re-trying failed upgrades, it would be nice to check if the node
-  # or docker actually needs an upgrade before proceeding. Perhaps best to save this until
-  # we merge upgrade functionality into the base roles and a normal config.yml playbook run.
-  - name: Determine if node is currently scheduleable
-    command: >
-      {{ openshift.common.client_binary }} get node {{ openshift.node.nodename }} -o json
-    register: node_output
-    delegate_to: "{{ groups.oo_first_master.0 }}"
-    changed_when: false
-    when: inventory_hostname in groups.oo_nodes_to_config
-
-  - set_fact:
-      was_schedulable: "{{ 'unschedulable' not in (node_output.stdout | from_json).spec }}"
-    when: inventory_hostname in groups.oo_nodes_to_config
-
-  - name: Mark unschedulable if host is a node
-    command: >
-      {{ openshift.common.admin_binary }} manage-node {{ openshift.node.nodename }} --schedulable=false
-    delegate_to: "{{ groups.oo_first_master.0 }}"
-    when: inventory_hostname in groups.oo_nodes_to_config
-
-  - name: Evacuate Node for Kubelet upgrade
-    command: >
-      {{ openshift.common.admin_binary }} manage-node {{ openshift.node.nodename }} --evacuate --force
-    delegate_to: "{{ groups.oo_first_master.0 }}"
-    when: inventory_hostname in groups.oo_nodes_to_config
-
-  - include: docker/upgrade.yml
-    when: l_docker_upgrade is defined and l_docker_upgrade | bool and not openshift.common.is_atomic | bool
-  - include: "{{ node_config_hook }}"
-    when: node_config_hook is defined and inventory_hostname in groups.oo_nodes_to_config
-
-  - include: rpm_upgrade.yml
-    vars:
-       component: "node"
-       openshift_version: "{{ openshift_pkg_version | default('') }}"
-    when: inventory_hostname in groups.oo_nodes_to_config and not openshift.common.is_containerized | bool
-
-  - include: containerized_node_upgrade.yml
-    when: inventory_hostname in groups.oo_nodes_to_config and openshift.common.is_containerized | bool
-
-  - meta: flush_handlers
-
-  - name: Set node schedulability
-    command: >
-      {{ openshift.common.admin_binary }} manage-node {{ openshift.node.nodename }} --schedulable=true
-    delegate_to: "{{ groups.oo_first_master.0 }}"
-    when: inventory_hostname in groups.oo_nodes_to_config and was_schedulable | bool
-
-
 ##############################################################################
 # Gate on reconcile
 ##############################################################################
@@ -259,3 +247,13 @@
   - fail:
       msg: "Upgrade cannot continue. The following masters did not finish reconciling: {{ reconcile_failed | join(',') }}"
     when: reconcile_failed | length > 0
+
+- name: Upgrade Docker on dedicated containerized etcd hosts
+  hosts: oo_etcd_to_config:!oo_nodes_to_upgrade
+  serial: 1
+  any_errors_fatal: true
+  roles:
+  - openshift_facts
+  tasks:
+  - include: docker/upgrade.yml
+    when: l_docker_upgrade is defined and l_docker_upgrade | bool and not openshift.common.is_atomic | bool
