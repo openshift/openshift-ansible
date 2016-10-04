@@ -53,6 +53,7 @@
 
 - include: secure.yml
   static: no
+  when: replicas | int > 0
 
 - include: storage/object_storage.yml
   static: no
