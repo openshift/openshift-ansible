@@ -1,7 +1,9 @@
 ---
+- fail: msg="Cannot use containerized=true for load balancer hosts."
+  when: openshift.common.is_containerized | bool
+
 - name: Install haproxy
   action: "{{ ansible_pkg_mgr }} name=haproxy state=present"
-  when: not openshift.common.is_containerized | bool
 
 - name: Configure systemd service directory for haproxy
   file:
