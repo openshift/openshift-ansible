@@ -1,5 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+# pylint: disable=line-too-long,invalid-name
+
+"""For details on this module see DOCUMENTATION (below)"""
 
 # etcd config file
 import ConfigParser
@@ -66,18 +69,23 @@ EXAMPLES = '''
 '''
 
 
-######################################################################
-# etcd does not begin their config file with an opening [section] as
-# required by the Python ConfigParser module. We hack around it by
-# slipping one in ourselves prior to parsing.
+# We only need this for one thing, we don't care if it doesn't have
+# that many public methods
 #
-# Source: Alex Martelli - http://stackoverflow.com/a/2819788/6490583
+# pylint: disable=too-few-public-methods
 class FakeSecHead(object):
+    """etcd does not begin their config file with an opening [section] as
+required by the Python ConfigParser module. We hack around it by
+slipping one in ourselves prior to parsing.
+
+Source: Alex Martelli - http://stackoverflow.com/a/2819788/6490583
+    """
     def __init__(self, fp):
         self.fp = fp
         self.sechead = '[ETCD]\n'
 
     def readline(self):
+        """Make this look like a file-type object"""
         if self.sechead:
             try:
                 return self.sechead
@@ -86,14 +94,15 @@ class FakeSecHead(object):
         else:
             return self.fp.readline()
 
+
 ######################################################################
 
 def filter_paths(path_list):
-    # `path_list` - A list of file paths to check. Only files which
-    # exist will be returned
-    return filter(
-        lambda p: os.path.exists(os.path.realpath(p)),
-        path_list)
+    """`path_list` - A list of file paths to check. Only files which exist
+will be returned
+    """
+    return [p for p in path_list if os.path.exists(os.path.realpath(p))]
+
 
 def load_and_handle_cert(cert_string, now, base64decode=False):
     """Load a certificate, split off the good parts, and return some
@@ -131,6 +140,7 @@ A 3-tuple of the form: (certificate_common_name, certificate_expiry_date, certif
 
     return (cert_subject, cert_expiry_date, time_remaining)
 
+
 def classify_cert(cert_meta, now, time_remaining, expire_window, cert_list):
     """Given metadata about a certificate under examination, classify it
     into one of three categories, 'ok', 'warning', and 'expired'.
@@ -163,7 +173,8 @@ Return:
     cert_list.append(cert_meta)
     return cert_list
 
-def tabulate_summary(certificates, kubeconfigs):
+
+def tabulate_summary(certificates, kubeconfigs, etcd_certs):
     """Calculate the summary text for when the module finishes
 running. This includes counds of each classification and what have
 you.
@@ -172,24 +183,25 @@ Params:
 
 - `certificates` (list of dicts) - Processed `expire_check_result`
   dicts with filled in `health` keys for system certificates.
-- `kubeconfigs` (list of dicts) - Processed `expire_check_result`
-  dicts with filled in `health` keys for embedded kubeconfig
-  certificates.
-
+- `kubeconfigs` - as above for kubeconfigs
+- `etcd_certs` - as above for etcd certs
 Return:
-- `summary_results` (dict) - Counts of each cert/kubeconfig
-  classification and total items examined.
+
+- `summary_results` (dict) - Counts of each cert type classification
+  and total items examined.
     """
+    items = certificates + kubeconfigs + etcd_certs
+
     summary_results = {
         'system_certificates': len(certificates),
         'kubeconfig_certificates': len(kubeconfigs),
-        'total': len(certificates + kubeconfigs),
+        'etcd_certificates': len(etcd_certs),
+        'total': len(items),
         'ok': 0,
         'warning': 0,
         'expired': 0
     }
 
-    items = certificates + kubeconfigs
     summary_results['expired'] = len([c for c in items if c['health'] == 'expired'])
     summary_results['warning'] = len([c for c in items if c['health'] == 'warning'])
     summary_results['ok'] = len([c for c in items if c['health'] == 'ok'])
@@ -198,7 +210,15 @@ Return:
 
 
 ######################################################################
+# This is our module MAIN function after all, so there's bound to be a
+# lot of code bundled up into one block
+#
+# pylint: disable=too-many-locals,too-many-locals,too-many-statements
 def main():
+    """This module examines certificates (in various forms) which compose
+an OpenShift Container Platform cluster
+    """
+
     module = AnsibleModule(
         argument_spec=dict(
             config_base=dict(
@@ -223,7 +243,7 @@ def main():
         os.path.join(openshift_base_config_path, "master/master-config.yaml")
     )
     openshift_node_config_path = os.path.normpath(
-            os.path.join(openshift_base_config_path, "node/node-config.yaml")
+        os.path.join(openshift_base_config_path, "node/node-config.yaml")
     )
     openshift_cert_check_paths = [
         openshift_master_config_path,
@@ -246,6 +266,14 @@ def main():
         ),
     ]
 
+    # etcd, where do you hide your certs? Used when parsing etcd.conf
+    etcd_cert_params = [
+        "ETCD_CA_FILE",
+        "ETCD_CERT_FILE",
+        "ETCD_PEER_CA_FILE",
+        "ETCD_PEER_CERT_FILE",
+    ]
+
     # Expiry checking stuff
     now = datetime.datetime.now()
     # todo, catch exception for invalid input and return a fail_json
@@ -262,15 +290,15 @@ def main():
     check_results['meta']['warn_after_date'] = str(now + expire_window)
     check_results['meta']['show_all'] = str(module.params['show_all'])
     # All the analyzed certs accumulate here
-    certs = []
+    ocp_certs = []
 
     ######################################################################
     # Sure, why not? Let's enable check mode.
     if module.check_mode:
-        check_results['certs'] = []
+        check_results['ocp_certs'] = []
         module.exit_json(
             check_results=check_results,
-            msg="Checked 0 certificates. Expired/Warning/OK: 0/0/0. Warning window: %s days" % module.params['warning_days'],
+            msg="Checked 0 total certificates. Expired/Warning/OK: 0/0/0. Warning window: %s days" % module.params['warning_days'],
             rc=0,
             changed=False
         )
@@ -307,7 +335,7 @@ def main():
                     'health': None,
                 }
 
-                classify_cert(expire_check_result, now, time_remaining, expire_window, certs)
+                classify_cert(expire_check_result, now, time_remaining, expire_window, ocp_certs)
 
     ######################################################################
     # /Check for OpenShift Container Platform specific certs
@@ -326,33 +354,36 @@ def main():
         # this host is a node.
         with open(openshift_node_config_path, 'r') as fp:
             cfg = yaml.load(fp)
-            # OK, the config file exists, therefore this is a
-            # node. Nodes have their own kubeconfig files to
-            # communicate with the master API. Let's read the relative
-            # path to that file from the node config.
-            node_masterKubeConfig = cfg['masterKubeConfig']
-            # As before, the path to the 'masterKubeConfig' file is
-            # relative to `fp`
-            cfg_path = os.path.dirname(fp.name)
-            node_kubeconfig = os.path.join(cfg_path, node_masterKubeConfig)
+
+        # OK, the config file exists, therefore this is a
+        # node. Nodes have their own kubeconfig files to
+        # communicate with the master API. Let's read the relative
+        # path to that file from the node config.
+        node_masterKubeConfig = cfg['masterKubeConfig']
+        # As before, the path to the 'masterKubeConfig' file is
+        # relative to `fp`
+        cfg_path = os.path.dirname(fp.name)
+        node_kubeconfig = os.path.join(cfg_path, node_masterKubeConfig)
+
         with open(node_kubeconfig, 'r') as fp:
             # Read in the nodes kubeconfig file and grab the good stuff
             cfg = yaml.load(fp)
-            c = cfg['users'][0]['user']['client-certificate-data']
-            (cert_subject,
-             cert_expiry_date,
-             time_remaining) = load_and_handle_cert(c, now, base64decode=True)
 
-            expire_check_result = {
-                'cert_cn': cert_subject,
-                'path': fp.name,
-                'expiry': cert_expiry_date,
-                'days_remaining': time_remaining.days,
-                'health': None,
-            }
+        c = cfg['users'][0]['user']['client-certificate-data']
+        (cert_subject,
+         cert_expiry_date,
+         time_remaining) = load_and_handle_cert(c, now, base64decode=True)
 
-            classify_cert(expire_check_result, now, time_remaining, expire_window, kubeconfigs)
-    except Exception:
+        expire_check_result = {
+            'cert_cn': cert_subject,
+            'path': fp.name,
+            'expiry': cert_expiry_date,
+            'days_remaining': time_remaining.days,
+            'health': None,
+        }
+
+        classify_cert(expire_check_result, now, time_remaining, expire_window, kubeconfigs)
+    except IOError:
         # This is not a node
         pass
 
@@ -360,15 +391,60 @@ def main():
         with open(kube, 'r') as fp:
             # TODO: Maybe consider catching exceptions here?
             cfg = yaml.load(fp)
-            # Per conversation, "the kubeconfigs you care about:
-            # admin, router, registry should all be single
-            # value". Following that advice we only grab the data for
-            # the user at index 0 in the 'users' list. There should
-            # not be more than one user.
-            c = cfg['users'][0]['user']['client-certificate-data']
+
+        # Per conversation, "the kubeconfigs you care about:
+        # admin, router, registry should all be single
+        # value". Following that advice we only grab the data for
+        # the user at index 0 in the 'users' list. There should
+        # not be more than one user.
+        c = cfg['users'][0]['user']['client-certificate-data']
+        (cert_subject,
+         cert_expiry_date,
+         time_remaining) = load_and_handle_cert(c, now, base64decode=True)
+
+        expire_check_result = {
+            'cert_cn': cert_subject,
+            'path': fp.name,
+            'expiry': cert_expiry_date,
+            'days_remaining': time_remaining.days,
+            'health': None,
+        }
+
+        classify_cert(expire_check_result, now, time_remaining, expire_window, kubeconfigs)
+
+    ######################################################################
+    # /Check service Kubeconfigs
+    ######################################################################
+
+    ######################################################################
+    # Check etcd certs
+    ######################################################################
+    # Some values may be duplicated, make this a set for now so we
+    # unique them all
+    etcd_certs_to_check = set([])
+    etcd_certs = []
+    etcd_cert_params.append('dne')
+    try:
+        with open('/etc/etcd/etcd.conf', 'r') as fp:
+            etcd_config = ConfigParser.ConfigParser()
+            etcd_config.readfp(FakeSecHead(fp))
+
+        for param in etcd_cert_params:
+            try:
+                etcd_certs_to_check.add(etcd_config.get('ETCD', param))
+            except ConfigParser.NoOptionError:
+                # That parameter does not exist, oh well...
+                pass
+    except IOError:
+        # No etcd to see here, move along
+        pass
+
+    for etcd_cert in filter_paths(etcd_certs_to_check):
+        with open(etcd_cert, 'r') as fp:
+            c = fp.read()
             (cert_subject,
              cert_expiry_date,
-             time_remaining) = load_and_handle_cert(c, now, base64decode=True)
+             time_remaining) = load_and_handle_cert(c, now)
 
             expire_check_result = {
                 'cert_cn': cert_subject,
@@ -378,15 +454,15 @@ def main():
                 'health': None,
             }
 
-            classify_cert(expire_check_result, now, time_remaining, expire_window, kubeconfigs)
-
+            classify_cert(expire_check_result, now, time_remaining, expire_window, etcd_certs)
 
     ######################################################################
-    # /Check service Kubeconfigs
+    # /Check etcd certs
     ######################################################################
-    res = tabulate_summary(certs, kubeconfigs)
 
-    msg = "Checked {count} certificates and kubeconfigs. Expired/Warning/OK: {exp}/{warn}/{ok}. Warning window: {window} days".format(
+    res = tabulate_summary(ocp_certs, kubeconfigs, etcd_certs)
+
+    msg = "Checked {count} total certificates. Expired/Warning/OK: {exp}/{warn}/{ok}. Warning window: {window} days".format(
         count=res['total'],
         exp=res['expired'],
         warn=res['warning'],
@@ -398,18 +474,22 @@ def main():
     # warning certificates. If show_all is true then we will print all
     # the certificates examined.
     if not module.params['show_all']:
-        check_results['certs'] = filter(lambda ctr: ctr['health'] in ['expired', 'warning'], certs)
-        check_results['kubeconfigs'] = filter(lambda ctr: ctr['health'] in ['expired', 'warning'], kubeconfigs)
+        check_results['ocp_certs'] = [crt for crt in ocp_certs if crt['health'] in ['expired', 'warning']]
+        check_results['kubeconfigs'] = [crt for crt in kubeconfigs if crt['health'] in ['expired', 'warning']]
+        check_results['etcd'] = [crt for crt in etcd_certs if crt['health'] in ['expired', 'warning']]
     else:
-        check_results['certs'] = certs
+        check_results['ocp_certs'] = ocp_certs
         check_results['kubeconfigs'] = kubeconfigs
+        check_results['etcd'] = etcd_certs
 
     # Sort the final results to report in order of ascending safety
     # time. That is to say, the certificates which will expire sooner
     # will be at the front of the list and certificates which will
     # expire later are at the end.
-    check_results['certs'] = sorted(check_results['certs'], cmp=lambda x, y: cmp(x['days_remaining'], y['days_remaining']))
+    check_results['ocp_certs'] = sorted(check_results['ocp_certs'], cmp=lambda x, y: cmp(x['days_remaining'], y['days_remaining']))
     check_results['kubeconfigs'] = sorted(check_results['kubeconfigs'], cmp=lambda x, y: cmp(x['days_remaining'], y['days_remaining']))
+    check_results['etcd'] = sorted(check_results['etcd'], cmp=lambda x, y: cmp(x['days_remaining'], y['days_remaining']))
+
     # This module will never change anything, but we might want to
     # change the return code parameter if there is some catastrophic
     # error we noticed earlier
@@ -422,7 +502,9 @@ def main():
     )
 
 ######################################################################
-# import module snippets
+# It's just the way we do things in Ansible. So disable this warning
+#
+# pylint: disable=wrong-import-position,import-error
 from ansible.module_utils.basic import AnsibleModule
 if __name__ == '__main__':
     main()
