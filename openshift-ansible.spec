@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.2
+Version:        3.4.3
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,96 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Oct 04 2016 Scott Dodson <sdodson@redhat.com> 3.4.3-1
+- Check if openshift_master_ingress_ip_network_cidr is defined
+  (Mathias.Merscher@dg-i.net)
+- allow networkConfig.ingressIPNetworkCIDRs to be configured
+  (Mathias.Merscher@dg-i.net)
+- Filterize haproxy frontends/backends and add method for providing additional
+  frontends/backends. (abutcher@redhat.com)
+- a-o-i: Force option should allow reinstall (smunilla@redhat.com)
+- a-o-i: Fix openshift_node_labels (smunilla@redhat.com)
+- Enable registry support for image pruning (andrew@andrewklau.com)
+- Default openshift_hosted_{logging,metrics}_deploy to false.
+  (abutcher@redhat.com)
+- README_CONTAINERIZED_INSTALLATION: fixed link markdown
+  (jakub.kramarz@freshmail.pl)
+- README_AWS: makes links consistent and working again
+  (jakub.kramarz@freshmail.pl)
+- a-o-i: Allow better setting of host level variables (smunilla@redhat.com)
+- Further secure registry improvements (abutcher@redhat.com)
+- Delgate handlers to first master (smunilla@redhat.com)
+- Secure registry improvements. (abutcher@redhat.com)
+- Install Registry by Default (smunilla@redhat.com)
+- Update play names for consistency. (abutcher@redhat.com)
+- Addressed review comments (vishal.patil@nuagenetworks.net)
+- Configure ops cluster storage to match normal cluster storage
+  (sdodson@redhat.com)
+- Fix bug with service signer cert on upgrade. (dgoodwin@redhat.com)
+- Add messages to let the user know if some plays were skipped, but it's ok.
+  Also, remove the final 'press a key to continue' prompt.
+  (tbielawa@redhat.com)
+- Set named certificate destinations as basenames of provided paths.
+  (abutcher@redhat.com)
+- 'fix' unittests by removing the users ability to specify an ansible config
+  (tbielawa@redhat.com)
+- Copy and paste more methods (tbielawa@redhat.com)
+- Silence/dot-print more actions in the callback (tbielawa@redhat.com)
+- Fix conflicts in spec file (tbielawa@redhat.com)
+- Use pre_upgrade tag instread of a dry run variable. (dgoodwin@redhat.com)
+- Move etcd backup from pre-upgrade to upgrade itself. (dgoodwin@redhat.com)
+- Allow a couple retries when unscheduling/rescheduling nodes in upgrade.
+  (dgoodwin@redhat.com)
+- Skip the docker role in early upgrade stages. (dgoodwin@redhat.com)
+- Allow filtering nodes to upgrade by label. (dgoodwin@redhat.com)
+- Allow customizing node upgrade serial value. (dgoodwin@redhat.com)
+- Split upgrade for control plane/nodes. (dgoodwin@redhat.com)
+- Set the DomainName or DomainID in the OpenStack cloud provider
+  (lhuard@amadeus.com)
+- Use ansible.module_utils._text.to_text instead of
+  ansible.utils.unicode.to_unicode. (abutcher@redhat.com)
+- Suppress more warnings. (abutcher@redhat.com)
+- Add gitHTTPProxy and gitHTTPSProxy to advanced config json option
+  (sdodson@redhat.com)
+- Don't set IMAGE_PREFIX if openshift_cockpit_deployer_prefix is empty
+  (Robert.Bohne@ConSol.de)
+- Update spec file to install manpage (tbielawa@redhat.com)
+- Verify masters are upgraded before proceeding with node only upgrade.
+  (dgoodwin@redhat.com)
+- Attempt to tease apart pre upgrade for masters/nodes. (dgoodwin@redhat.com)
+- Split upgrade entry points into control plane/node. (dgoodwin@redhat.com)
+- Reunite upgrade reconciliation gating with the play it gates on.
+  (dgoodwin@redhat.com)
+- Drop atomic-enterprise as a valid deployment type in upgrade.
+  (dgoodwin@redhat.com)
+- Stop guarding against pacemaker in upgrade, no longer necessary.
+  (dgoodwin@redhat.com)
+- Support openshift_upgrade_dry_run=true for pre-upgrade checks only.
+  (dgoodwin@redhat.com)
+- Make rhel_subscribe role default to OpenShift Container Platform 3.3
+  (lhuard@amadeus.com)
+- Addresses most comments from @adellape (tbielawa@redhat.com)
+- Changes for Nuage HA (vishal.patil@nuagenetworks.net)
+- Fix deployer template for enterprise (sdodson@redhat.com)
+- Add a manpage for atomic-openshift-installer (tbielawa@redhat.com)
+- Remove the DNS VM on OpenStack (lhuard@amadeus.com)
+- tweak logic (jdetiber@redhat.com)
+- test fix for systemd changes (sdodson@redhat.com)
+- Set default_subdomain properly for logging (sdodson@redhat.com)
+- Adjust wait for loops (sdodson@redhat.com)
+- Add storage for logging (sdodson@redhat.com)
+- Fix some bugs in OpenShift Hosted Logging role (contact@stephane-klein.info)
+- Add some sample inventory stuff, will update this later (sdodson@redhat.com)
+- Label all nodes for fluentd (sdodson@redhat.com)
+- Rename openshift_hosted_logging_image_{prefix,version} to match metrics
+  (sdodson@redhat.com)
+- Fix deployer template for enterprise (sdodson@redhat.com)
+- Add logging to install playbooks (sdodson@redhat.com)
+- Fix OpenStack cloud provider (lhuard@amadeus.com)
+- Add rhaos-3.4-rhel-7 releaser to tito (sdodson@redhat.com)
+- Fix the nodeName of the OpenShift nodes on OpenStack (lhuard@amadeus.com)
+- Fix GCE Launch (brad@nolab.org)
+
 * Mon Sep 26 2016 Scott Dodson <sdodson@redhat.com> 3.4.2-1
 - Add an issue template (sdodson@redhat.com)
 - Add openshift_hosted_router_name (andrew@andrewklau.com)
