@@ -4,6 +4,8 @@
 
 """For details on this module see DOCUMENTATION (below)"""
 
+# router/registry cert grabbing
+import subprocess
 # etcd config file
 import ConfigParser
 # Expiration parsing
@@ -14,7 +16,6 @@ import os
 import yaml
 # Certificate loading
 import OpenSSL.crypto
-
 
 DOCUMENTATION = '''
 ---
@@ -126,8 +127,59 @@ A 3-tuple of the form: (certificate_common_name, certificate_expiry_date, certif
     cert_loaded = OpenSSL.crypto.load_certificate(
         OpenSSL.crypto.FILETYPE_PEM, _cert_string)
 
+    ######################################################################
+    # Read just the first name from the cert - DISABLED while testing
+    # out the 'get all possible names' function (below)
+    #
     # Strip the subject down to just the value of the first name
-    cert_subject = cert_loaded.get_subject().get_components()[0][1]
+    # cert_subject = cert_loaded.get_subject().get_components()[0][1]
+
+    ######################################################################
+    # Read all possible names from the cert
+    cert_subjects = []
+    for name, value in cert_loaded.get_subject().get_components():
+        cert_subjects.append('{}:{}'.format(name, value))
+
+    # To read SANs from a cert we must read the subjectAltName
+    # extension from the X509 Object. What makes this more difficult
+    # is that pyOpenSSL does not give extensions as a list, nor does
+    # it provide a count of all loaded extensions.
+    #
+    # Rather, extensions are REQUESTED by index. We must iterate over
+    # all extensions until we find the one called 'subjectAltName'. If
+    # we don't find that extension we'll eventually request an
+    # extension at an index where no extension exists (IndexError is
+    # raised). When that happens we know that the cert has no SANs so
+    # we break out of the loop.
+    i = 0
+    checked_all_extensions = False
+    while not checked_all_extensions:
+        try:
+            # Read the extension at index 'i'
+            ext = cert_loaded.get_extension(i)
+        except IndexError:
+            # We tried to read an extension but it isn't there, that
+            # means we ran out of extensions to check. Abort
+            san = None
+            checked_all_extensions = True
+        else:
+            # We were able to load the extension at index 'i'
+            if ext.get_short_name() == 'subjectAltName':
+                san = ext
+                checked_all_extensions = True
+            else:
+                # Try reading the next extension
+                i += 1
+
+    if san is not None:
+        # The X509Extension object for subjectAltName prints as a
+        # string with the alt names separated by a comma and a
+        # space. Split the string by ', ' and then add our new names
+        # to the list of existing names
+        cert_subjects.extend(str(san).split(', '))
+
+    cert_subject = ', '.join(cert_subjects)
+    ######################################################################
 
     # Grab the expiration date
     cert_expiry = cert_loaded.get_notAfter()
@@ -174,7 +226,7 @@ Return:
     return cert_list
 
 
-def tabulate_summary(certificates, kubeconfigs, etcd_certs):
+def tabulate_summary(certificates, kubeconfigs, etcd_certs, router_certs, registry_certs):
     """Calculate the summary text for when the module finishes
 running. This includes counds of each classification and what have
 you.
@@ -190,12 +242,14 @@ Return:
 - `summary_results` (dict) - Counts of each cert type classification
   and total items examined.
     """
-    items = certificates + kubeconfigs + etcd_certs
+    items = certificates + kubeconfigs + etcd_certs + router_certs + registry_certs
 
     summary_results = {
         'system_certificates': len(certificates),
         'kubeconfig_certificates': len(kubeconfigs),
         'etcd_certificates': len(etcd_certs),
+        'router_certs': len(router_certs),
+        'registry_certs': len(registry_certs),
         'total': len(items),
         'ok': 0,
         'warning': 0,
@@ -213,7 +267,7 @@ Return:
 # This is our module MAIN function after all, so there's bound to be a
 # lot of code bundled up into one block
 #
-# pylint: disable=too-many-locals,too-many-locals,too-many-statements
+# pylint: disable=too-many-locals,too-many-locals,too-many-statements,too-many-branches
 def main():
     """This module examines certificates (in various forms) which compose
 an OpenShift Container Platform cluster
@@ -250,21 +304,19 @@ an OpenShift Container Platform cluster
         openshift_node_config_path,
     ]
 
-    # Paths for Kubeconfigs. Additional kubeconfigs are conditionally checked later in the code
-    kubeconfig_paths = [
-        os.path.normpath(
-            os.path.join(openshift_base_config_path, "master/admin.kubeconfig")
-        ),
-        os.path.normpath(
-            os.path.join(openshift_base_config_path, "master/openshift-master.kubeconfig")
-        ),
-        os.path.normpath(
-            os.path.join(openshift_base_config_path, "master/openshift-node.kubeconfig")
-        ),
-        os.path.normpath(
-            os.path.join(openshift_base_config_path, "master/openshift-router.kubeconfig")
-        ),
-    ]
+    # Paths for Kubeconfigs. Additional kubeconfigs are conditionally
+    # checked later in the code
+    master_kube_configs = ['admin', 'openshift-master',
+                           'openshift-node', 'openshift-router',
+                           'openshift-registry']
+
+    kubeconfig_paths = []
+    for m_kube_config in master_kube_configs:
+        kubeconfig_paths.append(
+            os.path.normpath(
+                os.path.join(openshift_base_config_path, "master/%s.kubeconfig" % m_kube_config)
+            )
+        )
 
     # etcd, where do you hide your certs? Used when parsing etcd.conf
     etcd_cert_params = [
@@ -460,7 +512,80 @@ an OpenShift Container Platform cluster
     # /Check etcd certs
     ######################################################################
 
-    res = tabulate_summary(ocp_certs, kubeconfigs, etcd_certs)
+    ######################################################################
+    # Check router/registry certs
+    #
+    # These are saved as secrets in etcd. That means that we can not
+    # simply read a file to grab the data. Instead we're going to
+    # subprocess out to the 'oc get' command. On non-masters this
+    # command will fail, that is expected so we catch that exception.
+    ######################################################################
+    router_certs = []
+    registry_certs = []
+
+    ######################################################################
+    # First the router certs
+    try:
+        router_secrets_raw = subprocess.Popen('oc get secret router-certs -o yaml'.split(),
+                                              stdout=subprocess.PIPE)
+        router_ds = yaml.load(router_secrets_raw.communicate()[0])
+        router_c = router_ds['data']['tls.crt']
+        router_path = router_ds['metadata']['selfLink']
+    except TypeError:
+        # YAML couldn't load the result, this is not a master
+        pass
+    else:
+        (cert_subject,
+         cert_expiry_date,
+         time_remaining) = load_and_handle_cert(router_c, now, base64decode=True)
+
+        expire_check_result = {
+            'cert_cn': cert_subject,
+            'path': router_path,
+            'expiry': cert_expiry_date,
+            'days_remaining': time_remaining.days,
+            'health': None,
+        }
+
+        classify_cert(expire_check_result, now, time_remaining, expire_window, router_certs)
+
+    check_results['router'] = router_certs
+
+    ######################################################################
+    # Now for registry
+    # registry_secrets = subprocess.call('oc get secret registry-certificates -o yaml'.split())
+    # out = subprocess.PIPE
+    try:
+        registry_secrets_raw = subprocess.Popen('oc get secret registry-certificates -o yaml'.split(),
+                                                stdout=subprocess.PIPE)
+        registry_ds = yaml.load(registry_secrets_raw.communicate()[0])
+        registry_c = registry_ds['data']['registry.crt']
+        registry_path = registry_ds['metadata']['selfLink']
+    except TypeError:
+        # YAML couldn't load the result, this is not a master
+        pass
+    else:
+        (cert_subject,
+         cert_expiry_date,
+         time_remaining) = load_and_handle_cert(registry_c, now, base64decode=True)
+
+        expire_check_result = {
+            'cert_cn': cert_subject,
+            'path': registry_path,
+            'expiry': cert_expiry_date,
+            'days_remaining': time_remaining.days,
+            'health': None,
+        }
+
+        classify_cert(expire_check_result, now, time_remaining, expire_window, registry_certs)
+
+    check_results['registry'] = registry_certs
+
+    ######################################################################
+    # /Check router/registry certs
+    ######################################################################
+
+    res = tabulate_summary(ocp_certs, kubeconfigs, etcd_certs, router_certs, registry_certs)
 
     msg = "Checked {count} total certificates. Expired/Warning/OK: {exp}/{warn}/{ok}. Warning window: {window} days".format(
         count=res['total'],
