@@ -842,7 +842,7 @@ class AttendedCliTests(OOCliFixture):
     # interactive with config file and some installed some uninstalled hosts
     @patch('ooinstall.openshift_ansible.run_main_playbook')
     @patch('ooinstall.openshift_ansible.load_system_facts')
-    def test_add_nodes(self, load_facts_mock, run_playbook_mock):
+    def test_scaleup_hint(self, load_facts_mock, run_playbook_mock):
 
         # Modify the mock facts to return a version indicating OpenShift
         # is already installed on our master, and the first node.
@@ -866,13 +866,12 @@ class AttendedCliTests(OOCliFixture):
         result = self.runner.invoke(cli.cli,
                                     self.cli_args,
                                     input=cli_input)
-        self.assert_result(result, 0)
 
-        self._verify_load_facts(load_facts_mock)
-        self._verify_run_playbook(run_playbook_mock, 3, 2)
+        # This is testing the install workflow so we want to make sure we
+        # exit with the appropriate hint.
+        self.assertTrue('scaleup' in result.output)
+        self.assert_result(result, 1)
 
-        written_config = read_yaml(self.config_file)
-        self._verify_config_hosts(written_config, 3)
 
     @patch('ooinstall.openshift_ansible.run_main_playbook')
     @patch('ooinstall.openshift_ansible.load_system_facts')
@@ -897,30 +896,30 @@ class AttendedCliTests(OOCliFixture):
         written_config = read_yaml(config_file)
         self._verify_config_hosts(written_config, 3)
 
-    #interactive with config file and all installed hosts
-    @patch('ooinstall.openshift_ansible.run_main_playbook')
-    @patch('ooinstall.openshift_ansible.load_system_facts')
-    def test_get_hosts_to_run_on(self, load_facts_mock, run_playbook_mock):
-        mock_facts = copy.deepcopy(MOCK_FACTS)
-        mock_facts['10.0.0.1']['common']['version'] = "3.0.0"
-        mock_facts['10.0.0.2']['common']['version'] = "3.0.0"
-
-        cli_input = build_input(hosts=[
-            ('10.0.0.1', True, False),
-            ],
-                                      add_nodes=[('10.0.0.2', False, False)],
-                                      ssh_user='root',
-                                      variant_num=1,
-                                      schedulable_masters_ok=True,
-                                      confirm_facts='y',
-                                      storage='10.0.0.1',)
-
-        self._verify_get_hosts_to_run_on(mock_facts, load_facts_mock,
-                                         run_playbook_mock,
-                                         cli_input,
-                                         exp_hosts_len=2,
-                                         exp_hosts_to_run_on_len=2,
-                                         force=False)
+#    #interactive with config file and all installed hosts
+#    @patch('ooinstall.openshift_ansible.run_main_playbook')
+#    @patch('ooinstall.openshift_ansible.load_system_facts')
+#    def test_get_hosts_to_run_on(self, load_facts_mock, run_playbook_mock):
+#        mock_facts = copy.deepcopy(MOCK_FACTS)
+#        mock_facts['10.0.0.1']['common']['version'] = "3.0.0"
+#        mock_facts['10.0.0.2']['common']['version'] = "3.0.0"
+#
+#        cli_input = build_input(hosts=[
+#            ('10.0.0.1', True, False),
+#            ],
+#                                      add_nodes=[('10.0.0.2', False, False)],
+#                                      ssh_user='root',
+#                                      variant_num=1,
+#                                      schedulable_masters_ok=True,
+#                                      confirm_facts='y',
+#                                      storage='10.0.0.1',)
+#
+#        self._verify_get_hosts_to_run_on(mock_facts, load_facts_mock,
+#                                         run_playbook_mock,
+#                                         cli_input,
+#                                         exp_hosts_len=2,
+#                                         exp_hosts_to_run_on_len=2,
+#                                         force=False)
 
     #interactive multimaster: one more node than master
     @patch('ooinstall.openshift_ansible.run_main_playbook')

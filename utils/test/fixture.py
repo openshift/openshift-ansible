@@ -138,8 +138,8 @@ class OOCliFixture(OOInstallFixture):
             written_config = read_yaml(config_file)
             self._verify_config_hosts(written_config, exp_hosts_len)
 
-        if "Uninstalled" in result.output:
-            # verify we exited on seeing uninstalled hosts
+        if "If you want to force reinstall" in result.output:
+            # verify we exited on seeing installed hosts
             self.assertEqual(result.exit_code, 1)
         else:
             self.assert_result(result, 0)
@@ -156,7 +156,7 @@ class OOCliFixture(OOInstallFixture):
 #pylint: disable=too-many-arguments,too-many-branches,too-many-statements
 def build_input(ssh_user=None, hosts=None, variant_num=None,
                 add_nodes=None, confirm_facts=None, schedulable_masters_ok=None,
-                master_lb=None, storage=None):
+                master_lb=('', False), storage=None):
     """
     Build an input string simulating a user entering values in an interactive
     attended install.
@@ -204,11 +204,11 @@ def build_input(ssh_user=None, hosts=None, variant_num=None,
             i += 1
 
     # You can pass a single master_lb or a list if you intend for one to get rejected:
-    if master_lb:
-        if isinstance(master_lb[0], list) or isinstance(master_lb[0], tuple):
-            inputs.extend(master_lb[0])
-        else:
-            inputs.append(master_lb[0])
+    if isinstance(master_lb[0], list) or isinstance(master_lb[0], tuple):
+        inputs.extend(master_lb[0])
+    else:
+        inputs.append(master_lb[0])
+    if master_lb[0]:
         inputs.append('y' if master_lb[1] else 'n')
 
     if storage:
@@ -248,6 +248,7 @@ def build_input(ssh_user=None, hosts=None, variant_num=None,
     inputs.extend([
         confirm_facts,
         'y',  # lets do this
+        'y',
     ])
 
     return '\n'.join(inputs)

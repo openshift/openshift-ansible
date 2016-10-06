@@ -436,3 +436,11 @@ class OOConfig(object):
             if host.connect_to == name:
                 return host
         return None
+
+    def get_host_roles_set(self):
+        roles_set = set()
+        for host in self.deployment.hosts:
+            for role in host.roles:
+                roles_set.add(role)
+
+        return roles_set
