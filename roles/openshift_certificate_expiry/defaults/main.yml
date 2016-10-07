@@ -1,0 +1,6 @@
+---
+config_base: "/etc/origin"
+warning_days: 30
+show_all: false
+generate_report: false
+result_dir: "/tmp"

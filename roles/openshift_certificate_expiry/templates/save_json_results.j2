@@ -1,0 +1,5 @@
+{
+{% for host in play_hosts %}
+"{{host}}": {{ hostvars[host].check_results.check_results | to_nice_json(indent=2) }}{% if not loop.last %},{% endif %}
+{% endfor %}
+}

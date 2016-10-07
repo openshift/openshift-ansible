@@ -1,0 +1,23 @@
+---
+- name: Check cert expirys on host
+  openshift_cert_expiry:
+    warning_days: 1500
+  register: check_results
+
+- name: Generate html
+  become: no
+  run_once: yes
+  template:
+    src: cert-expiry-table.html.j2
+    dest: /tmp/cert-table.html
+  delegate_to: localhost
+  when: generate_report
+
+- name: Generate JSON
+  become: no
+  run_once: yes
+  template:
+    src: save_json_results.j2
+    dest: /tmp/cert-expiry-results.json
+  delegate_to: localhost
+  when: save_json_results
