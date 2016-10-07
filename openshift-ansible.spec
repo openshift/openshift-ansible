@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.4
+Version:        3.4.5
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Oct 07 2016 Scott Dodson <sdodson@redhat.com> 3.4.5-1
+- [a-o-i] -v disables quiet ansible config. (abutcher@redhat.com)
+
 * Fri Oct 07 2016 Troy Dawson <tdawson@redhat.com> 3.4.4-1
 - note different product versions (jeder@redhat.com)
 - Error out if containerized=true for lb host. (dgoodwin@redhat.com)
