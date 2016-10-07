@@ -37,4 +37,7 @@ etcdClientConfig:
     certFile: {{ openshift_master_config_dir }}/master.etcd-client.crt
     keyFile: {{ openshift_master_config_dir }}/master.etcd-client.key
     urls:
-        - {{ openshift.master.etcd_urls }}
+{% for etcd_url in openshift.master.etcd_urls %}
+        - {{ etcd_url }}
+{% endfor %}
+
