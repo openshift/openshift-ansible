@@ -332,8 +332,6 @@ Atomic OpenShift Utilities includes
 - Add logging to install playbooks (sdodson@redhat.com)
 - Fix OpenStack cloud provider (lhuard@amadeus.com)
 - Add rhaos-3.4-rhel-7 releaser to tito (sdodson@redhat.com)
-- Automatic commit of package [openshift-ansible] release [3.4.2-1].
-  (sdodson@redhat.com)
 - Fix the nodeName of the OpenShift nodes on OpenStack (lhuard@amadeus.com)
 - Add an issue template (sdodson@redhat.com)
 - Add openshift_hosted_router_name (andrew@andrewklau.com)
@@ -414,8 +412,6 @@ Atomic OpenShift Utilities includes
   (sdodson@redhat.com)
 - Persist net.ipv4.ip_forward sysctl entry for openshift nodes
   (tbielawa@redhat.com)
-- Automatic commit of package [openshift-ansible] release [3.4.1-1].
-  (sdodson@redhat.com)
 - Add flannel package removal in uninstallation playbook (mkumatag@in.ibm.com)
 - This fixes an issue in AWS where the master node was not part of the nodes in
   an unschedulable way (mdanter@gmail.com)

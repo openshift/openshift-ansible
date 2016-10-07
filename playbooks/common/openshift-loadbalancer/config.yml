@@ -1,5 +1,16 @@
 ---
 - name: Configure load balancers
   hosts: oo_lb_to_config
+  vars:
+    openshift_loadbalancer_frontends: "{{ (openshift_master_api_port | default(8443)
+                                           | oo_openshift_loadbalancer_frontends(hostvars | oo_select_keys(groups['oo_masters']),
+                                                                                 openshift_use_nuage | default(false),
+                                                                                 nuage_mon_rest_server_port | default(none)))
+                                           + openshift_loadbalancer_additional_frontends | default([]) }}"
+    openshift_loadbalancer_backends: "{{ (openshift_master_api_port | default(8443)
+                                          | oo_openshift_loadbalancer_backends(hostvars | oo_select_keys(groups['oo_masters']),
+                                                                               openshift_use_nuage | default(false),
+                                                                               nuage_mon_rest_server_port | default(none)))
+                                          + openshift_loadbalancer_additional_backends | default([]) }}"
   roles:
   - role: openshift_loadbalancer

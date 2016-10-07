@@ -7,6 +7,7 @@ Custom filters for use in openshift-ansible
 
 from ansible import errors
 from collections import Mapping
+from distutils.util import strtobool
 from distutils.version import LooseVersion
 from operator import itemgetter
 import OpenSSL.crypto
@@ -858,6 +859,35 @@ class FilterModule(object):
             # netloc wasn't parsed, assume url was missing scheme and path
             return parse_result.path
 
+    @staticmethod
+    def oo_openshift_loadbalancer_frontends(api_port, servers_hostvars, use_nuage=False, nuage_rest_port=None):
+        loadbalancer_frontends = [{'name': 'atomic-openshift-api',
+                                   'mode': 'tcp',
+                                   'options': ['tcplog'],
+                                   'binds': ["*:{0}".format(api_port)],
+                                   'default_backend': 'atomic-openshift-api'}]
+        if bool(strtobool(str(use_nuage))) and nuage_rest_port is not None:
+            loadbalancer_frontends.append({'name': 'nuage-monitor',
+                                           'mode': 'tcp',
+                                           'options': ['tcplog'],
+                                           'binds': ["*:{0}".format(nuage_rest_port)],
+                                           'default_backend': 'nuage-monitor'})
+        return loadbalancer_frontends
+
+    @staticmethod
+    def oo_openshift_loadbalancer_backends(api_port, servers_hostvars, use_nuage=False, nuage_rest_port=None):
+        loadbalancer_backends = [{'name': 'atomic-openshift-api',
+                                  'mode': 'tcp',
+                                  'option': 'tcplog',
+                                  'balance': 'source',
+                                  'servers': FilterModule.oo_haproxy_backend_masters(servers_hostvars, api_port)}]
+        if bool(strtobool(str(use_nuage))) and nuage_rest_port is not None:
+            loadbalancer_backends.append({'name': 'nuage-monitor',
+                                          'mode': 'tcp',
+                                          'option': 'tcplog',
+                                          'balance': 'source',
+                                          'servers': FilterModule.oo_haproxy_backend_masters(servers_hostvars, nuage_rest_port)})
+        return loadbalancer_backends
 
     def filters(self):
         """ returns a mapping of filters to methods """
@@ -891,4 +921,6 @@ class FilterModule(object):
             "oo_merge_dicts": self.oo_merge_dicts,
             "oo_hostname_from_url": self.oo_hostname_from_url,
             "oo_merge_hostvars": self.oo_merge_hostvars,
+            "oo_openshift_loadbalancer_frontends": self.oo_openshift_loadbalancer_frontends,
+            "oo_openshift_loadbalancer_backends": self.oo_openshift_loadbalancer_backends
         }
