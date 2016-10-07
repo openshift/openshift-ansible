@@ -11,6 +11,8 @@
   - role: openshift_examples
     registry_url: "{{ openshift.master.registry_url }}"
     when: openshift.common.install_examples | bool
+  - role: openshift_hosted_templates
+    registry_url: "{{ openshift.master.registry_url }}"
   - role: openshift_manageiq
     when: openshift.common.use_manageiq | bool
   - role: cockpit
