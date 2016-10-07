@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.30
+Version:        3.3.31
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,29 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Oct 07 2016 Scott Dodson <sdodson@redhat.com> 3.3.31-1
+- note different product versions (jeder@redhat.com)
+- Error out if containerized=true for lb host. (dgoodwin@redhat.com)
+- Update v1.3 content (sdodson@redhat.com)
+- Removes an unused file (jtslear@gmail.com)
+- Update v1.3 content (sdodson@redhat.com)
+- Add v1.4 content (sdodson@redhat.com)
+- Set master facts for first master in node scaleup. (abutcher@redhat.com)
+- Fix default port typo. (abutcher@redhat.com)
+- Add example openid/request header providers and explain certificate
+  variables. (abutcher@redhat.com)
+- Move openshift.common.debug.level to openshift_facts. (abutcher@redhat.com)
+- Automatic commit of package [openshift-ansible] release [3.4.3-1].
+  (sdodson@redhat.com)
+- Don't secure registry or deploy registry console when infra replics == 0
+  (abutcher@redhat.com)
+- Filterize haproxy frontends/backends and add method for providing additional
+  frontends/backends. (abutcher@redhat.com)
+- Addressed review comments (vishal.patil@nuagenetworks.net)
+- Changes for Nuage HA (vishal.patil@nuagenetworks.net)
+- the example line fails on releases prior to 3.3, so put a comment there.
+  (jeder@redhat.com)
+
 * Tue Oct 04 2016 Scott Dodson <sdodson@redhat.com> 3.3.30-1
 - Check if openshift_master_ingress_ip_network_cidr is defined
   (Mathias.Merscher@dg-i.net)
@@ -332,8 +355,6 @@ Atomic OpenShift Utilities includes
 - Add logging to install playbooks (sdodson@redhat.com)
 - Fix OpenStack cloud provider (lhuard@amadeus.com)
 - Add rhaos-3.4-rhel-7 releaser to tito (sdodson@redhat.com)
-- Automatic commit of package [openshift-ansible] release [3.4.2-1].
-  (sdodson@redhat.com)
 - Fix the nodeName of the OpenShift nodes on OpenStack (lhuard@amadeus.com)
 - Add an issue template (sdodson@redhat.com)
 - Add openshift_hosted_router_name (andrew@andrewklau.com)
@@ -414,8 +435,6 @@ Atomic OpenShift Utilities includes
   (sdodson@redhat.com)
 - Persist net.ipv4.ip_forward sysctl entry for openshift nodes
   (tbielawa@redhat.com)
-- Automatic commit of package [openshift-ansible] release [3.4.1-1].
-  (sdodson@redhat.com)
 - Add flannel package removal in uninstallation playbook (mkumatag@in.ibm.com)
 - This fixes an issue in AWS where the master node was not part of the nodes in
   an unschedulable way (mdanter@gmail.com)

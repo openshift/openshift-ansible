@@ -19,7 +19,6 @@
   openshift_facts:
     role: common
     local_facts:
-      debug_level: "{{ openshift_debug_level | default(2) }}"
       install_examples: "{{ openshift_install_examples | default(True) }}"
       use_openshift_sdn: "{{ openshift_use_openshift_sdn | default(None) }}"
       sdn_network_plugin_name: "{{ os_sdn_network_plugin_name | default(None) }}"
