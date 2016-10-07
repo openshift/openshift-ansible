@@ -1,6 +1,8 @@
 ---
 config_base: "/etc/origin"
 warning_days: 30
-show_all: false
-generate_report: false
-result_dir: "/tmp"
+show_all: no
+generate_html_report: no
+html_report_path: "/tmp/cert-expiry-report.html"
+save_json_results: no
+json_results_path: "/tmp/cert-expiry-report.json"

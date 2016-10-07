@@ -22,16 +22,22 @@ Requirements
 Role Variables
 --------------
 
-From this role:
+Core variables in this role:
 
-| Name                     | Default value | Description                                                                         |
-|--------------------------|---------------|-------------------------------------------------------------------------------------|
-| `config_base`            | `/etc/origin` | Base openshift config directory                                                     |
-| `warning_days`           | `30`          | Flag certificates which will expire in this many days from now                      |
-| `show_all`               | `False`       | Include healthy (non-expired and non-warning) certificates in results               |
-| `generate_report`        | `False`       | Generate an HTML report of the expiry check results                                 |
-| `save_json_results`      | `False`       | Save expiry check results as a json file                                            |
-| `result_dir`             | `/tmp`        | Directory in which to put check results and generated reports                       |
+| Name                     | Default value                  | Description                                                           |
+|--------------------------|--------------------------------|-----------------------------------------------------------------------|
+| `config_base`            | `/etc/origin`                  | Base openshift config directory                                       |
+| `warning_days`           | `30`                           | Flag certificates which will expire in this many days from now        |
+| `show_all`               | `no`                           | Include healthy (non-expired and non-warning) certificates in results |
+
+Optional report/result saving variables in this role:
+
+| Name                     | Default value                  | Description                                                           |
+|--------------------------|--------------------------------|-----------------------------------------------------------------------|
+| `generate_html_report`   | `no`                           | Generate an HTML report of the expiry check results                   |
+| `html_report_path`       | `/tmp/cert-expiry-report.html` | The full path to save the HTML report as                              |
+| `save_json_results`      | `no`                           | Save expiry check results as a json file                              |
+| `json_results_path`      | `/tmp/cert-expiry-report.json` | The full path to save the json report as                              |
 
 
 Dependencies
@@ -42,14 +48,126 @@ Dependencies
 Example Playbook
 ----------------
 
-```
+Default behavior:
+
+```yaml
+---
 - name: Check cert expirys
   hosts: all
   become: yes
   gather_facts: no
   roles:
-  - role: openshift_certificate_expiry
+    - role: openshift_certificate_expiry
 ```
+
+Generate HTML and JSON artifacts in their default paths:
+
+```yaml
+---
+- name: Check cert expirys
+  hosts: all
+  become: yes
+  gather_facts: no
+  vars:
+    generate_html_report: yes
+    save_json_results: yes
+  roles:
+    - role: openshift_certificate_expiry
+```
+
+Change the expiration warning window to 1500 days (good for testing
+the module out)
+
+```yaml
+---
+- name: Check cert expirys
+  hosts: all
+  become: yes
+  gather_facts: no
+  vars:
+    warning_days: 1500
+  roles:
+    - role: openshift_certificate_expiry
+```
+
+
+Example JSON Output
+-------------------
+
+Example is abbreviated to save space:
+
+```json
+{
+    "192.168.124.148": {
+        "etcd": [
+            {
+                "cert_cn": "CN:etcd-signer@1474563722",
+                "days_remaining": 350,
+                "expiry": "2017-09-22 17:02:25",
+                "health": "warning",
+                "path": "/etc/etcd/ca.crt"
+            },
+        ],
+        "kubeconfigs": [
+            {
+                "cert_cn": "O:system:nodes, CN:system:node:m01.example.com",
+                "days_remaining": 715,
+                "expiry": "2018-09-22 17:08:57",
+                "health": "warning",
+                "path": "/etc/origin/node/system:node:m01.example.com.kubeconfig"
+            },
+            {
+                "cert_cn": "O:system:cluster-admins, CN:system:admin",
+                "days_remaining": 715,
+                "expiry": "2018-09-22 17:04:40",
+                "health": "warning",
+                "path": "/etc/origin/master/admin.kubeconfig"
+            }
+        ],
+        "meta": {
+            "checked_at_time": "2016-10-07 15:26:47.608192",
+            "show_all": "True",
+            "warn_after_date": "2020-11-15 15:26:47.608192",
+            "warning_days": 1500
+        },
+        "ocp_certs": [
+            {
+                "cert_cn": "CN:172.30.0.1, DNS:kubernetes, DNS:kubernetes.default, DNS:kubernetes.default.svc, DNS:kubernetes.default.svc.cluster.local, DNS:m01.example.com, DNS:openshift, DNS:openshift.default, DNS:openshift.default.svc, DNS:openshift.default.svc.cluster.local, DNS:172.30.0.1, DNS:192.168.124.148, IP Address:172.30.0.1, IP Address:192.168.124.148",
+                "days_remaining": 715,
+                "expiry": "2018-09-22 17:04:39",
+                "health": "warning",
+                "path": "/etc/origin/master/master.server.crt"
+            },
+            {
+                "cert_cn": "CN:openshift-signer@1474563878",
+                "days_remaining": 1810,
+                "expiry": "2021-09-21 17:04:38",
+                "health": "ok",
+                "path": "/etc/origin/node/ca.crt"
+            }
+        ],
+        "registry": [
+            {
+                "cert_cn": "CN:172.30.101.81, DNS:docker-registry-default.router.default.svc.cluster.local, DNS:docker-registry.default.svc.cluster.local, DNS:172.30.101.81, IP Address:172.30.101.81",
+                "days_remaining": 728,
+                "expiry": "2018-10-05 18:54:29",
+                "health": "warning",
+                "path": "/api/v1/namespaces/default/secrets/registry-certificates"
+            }
+        ],
+        "router": [
+            {
+                "cert_cn": "CN:router.default.svc, DNS:router.default.svc, DNS:router.default.svc.cluster.local",
+                "days_remaining": 715,
+                "expiry": "2018-09-22 17:48:23",
+                "health": "warning",
+                "path": "/api/v1/namespaces/default/secrets/router-certs"
+            }
+        ]
+    }
+}
+```
+
 
 
 License

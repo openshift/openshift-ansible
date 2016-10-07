@@ -1,23 +1,25 @@
 ---
 - name: Check cert expirys on host
   openshift_cert_expiry:
-    warning_days: 1500
+    warning_days: "{{ warning_days|int }}"
+    config_base: "{{ config_base }}"
+    show_all: "{{ show_all|bool }}"
   register: check_results
 
-- name: Generate html
+- name: Generate expiration report HTML
   become: no
   run_once: yes
   template:
     src: cert-expiry-table.html.j2
-    dest: /tmp/cert-table.html
+    dest: "{{ html_report_path }}"
   delegate_to: localhost
-  when: generate_report
+  when: "{{ generate_html_report|bool }}"
 
-- name: Generate JSON
+- name: Generate expiration results JSON
   become: no
   run_once: yes
   template:
     src: save_json_results.j2
-    dest: /tmp/cert-expiry-results.json
+    dest: "{{ json_results_path }}"
   delegate_to: localhost
-  when: save_json_results
+  when: "{{ save_json_results|bool }}"

@@ -82,7 +82,7 @@ ci-pylint:
 	@echo "#############################################"
 	@echo "# Running PyLint Tests in virtualenv"
 	@echo "#############################################"
-	. $(NAME)env/bin/activate && python -m pylint --rcfile ../git/.pylintrc src/ooinstall/cli_installer.py src/ooinstall/oo_config.py src/ooinstall/openshift_ansible.py src/ooinstall/variants.py ../callback_plugins/openshift_quick_installer.py ../library/openshift_cert_expiry.py
+	. $(NAME)env/bin/activate && python -m pylint --rcfile ../git/.pylintrc src/ooinstall/cli_installer.py src/ooinstall/oo_config.py src/ooinstall/openshift_ansible.py src/ooinstall/variants.py ../callback_plugins/openshift_quick_installer.py ../roles/openshift_certificate_expiry/library/openshift_cert_expiry.py
 
 ci-list-deps:
 	@echo "#############################################"
@@ -96,7 +96,7 @@ ci-pyflakes:
 	@echo "#################################################"
 	. $(NAME)env/bin/activate && pyflakes src/ooinstall/*.py
 	. $(NAME)env/bin/activate && pyflakes ../callback_plugins/openshift_quick_installer.py
-	. $(NAME)env/bin/activate && pyflakes ../library/openshift_cert_expiry.py
+	. $(NAME)env/bin/activate && pyflakes ../roles/openshift_certificate_expiry/library/openshift_cert_expiry.py
 
 ci-pep8:
 	@echo "#############################################"
@@ -106,7 +106,7 @@ ci-pep8:
 	. $(NAME)env/bin/activate && pep8 --ignore=$(PEPEXCLUDES) ../callback_plugins/openshift_quick_installer.py
 # This one excludes E402 because it is an ansible module and the
 # boilerplate import statement is expected to be at the bottom
-	. $(NAME)env/bin/activate && pep8 --ignore=$(PEPEXCLUDES),E402 ../library/openshift_cert_expiry.py
+	. $(NAME)env/bin/activate && pep8 --ignore=$(PEPEXCLUDES),E402 ../roles/openshift_certificate_expiry/library/openshift_cert_expiry.py
 
 ci: clean virtualenv ci-list-deps ci-pep8 ci-pylint ci-pyflakes ci-unittests
 	:

@@ -281,11 +281,11 @@ an OpenShift Container Platform cluster
                 type='str'),
             warning_days=dict(
                 required=False,
-                default=int(30),
+                default=30,
                 type='int'),
             show_all=dict(
                 required=False,
-                default="False",
+                default=False,
                 type='bool')
         ),
         supports_check_mode=True,
@@ -549,8 +549,6 @@ an OpenShift Container Platform cluster
 
         classify_cert(expire_check_result, now, time_remaining, expire_window, router_certs)
 
-    check_results['router'] = router_certs
-
     ######################################################################
     # Now for registry
     # registry_secrets = subprocess.call('oc get secret registry-certificates -o yaml'.split())
@@ -579,8 +577,6 @@ an OpenShift Container Platform cluster
 
         classify_cert(expire_check_result, now, time_remaining, expire_window, registry_certs)
 
-    check_results['registry'] = registry_certs
-
     ######################################################################
     # /Check router/registry certs
     ######################################################################
@@ -602,10 +598,15 @@ an OpenShift Container Platform cluster
         check_results['ocp_certs'] = [crt for crt in ocp_certs if crt['health'] in ['expired', 'warning']]
         check_results['kubeconfigs'] = [crt for crt in kubeconfigs if crt['health'] in ['expired', 'warning']]
         check_results['etcd'] = [crt for crt in etcd_certs if crt['health'] in ['expired', 'warning']]
+        check_results['registry'] = [crt for crt in registry_certs if crt['health'] in ['expired', 'warning']]
+        check_results['router'] = [crt for crt in router_certs if crt['health'] in ['expired', 'warning']]
     else:
         check_results['ocp_certs'] = ocp_certs
         check_results['kubeconfigs'] = kubeconfigs
         check_results['etcd'] = etcd_certs
+        check_results['registry'] = registry_certs
+        check_results['router'] = router_certs
+
 
     # Sort the final results to report in order of ascending safety
     # time. That is to say, the certificates which will expire sooner
