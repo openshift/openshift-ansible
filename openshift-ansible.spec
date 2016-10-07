@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.31
+Version:        3.3.32
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Oct 07 2016 Scott Dodson <sdodson@redhat.com> 3.3.32-1
+- [a-o-i] -v disables quiet ansible config. (abutcher@redhat.com)
+
 * Fri Oct 07 2016 Scott Dodson <sdodson@redhat.com> 3.3.31-1
 - note different product versions (jeder@redhat.com)
 - Error out if containerized=true for lb host. (dgoodwin@redhat.com)
@@ -261,8 +264,6 @@ Atomic OpenShift Utilities includes
 - Add example openid/request header providers and explain certificate
   variables. (abutcher@redhat.com)
 - Move openshift.common.debug.level to openshift_facts. (abutcher@redhat.com)
-- Automatic commit of package [openshift-ansible] release [3.4.3-1].
-  (sdodson@redhat.com)
 - Don't secure registry or deploy registry console when infra replics == 0
   (abutcher@redhat.com)
 - Filterize haproxy frontends/backends and add method for providing additional
