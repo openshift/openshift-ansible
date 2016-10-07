@@ -876,7 +876,7 @@ def cli(ctx, unattended, configuration, ansible_playbook_directory, ansible_log_
         # If we're installed by RPM this file should exist and we can use it as our default:
         oo_cfg.settings['ansible_config'] = DEFAULT_ANSIBLE_CONFIG
 
-    if os.path.exists(QUIET_ANSIBLE_CONFIG):
+    if not verbose and os.path.exists(QUIET_ANSIBLE_CONFIG):
         oo_cfg.settings['ansible_quiet_config'] = QUIET_ANSIBLE_CONFIG
 
     oo_cfg.settings['ansible_log_path'] = ctx.obj['ansible_log_path']

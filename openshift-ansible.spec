@@ -261,8 +261,6 @@ Atomic OpenShift Utilities includes
 - Add example openid/request header providers and explain certificate
   variables. (abutcher@redhat.com)
 - Move openshift.common.debug.level to openshift_facts. (abutcher@redhat.com)
-- Automatic commit of package [openshift-ansible] release [3.4.3-1].
-  (sdodson@redhat.com)
 - Don't secure registry or deploy registry console when infra replics == 0
   (abutcher@redhat.com)
 - Filterize haproxy frontends/backends and add method for providing additional
