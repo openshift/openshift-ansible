@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.5
+Version:        3.4.6
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Oct 10 2016 Troy Dawson <tdawson@redhat.com> 3.4.6-1
+- Retry failed master startup once (ironcladlou@gmail.com)
+- [logging] Fix openshift_hosted_logging_fluentd_nodeselector
+  (sdodson@redhat.com)
+- Changes for etcd servers (vishal.patil@nuagenetworks.net)
+
 * Fri Oct 07 2016 Scott Dodson <sdodson@redhat.com> 3.4.5-1
 - [a-o-i] -v disables quiet ansible config. (abutcher@redhat.com)
 
