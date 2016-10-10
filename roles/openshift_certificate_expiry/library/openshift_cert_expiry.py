@@ -97,7 +97,6 @@ Source: Alex Martelli - http://stackoverflow.com/a/2819788/6490583
 
 
 ######################################################################
-
 def filter_paths(path_list):
     """`path_list` - A list of file paths to check. Only files which exist
 will be returned
@@ -339,7 +338,7 @@ an OpenShift Container Platform cluster
     check_results['meta'] = {}
     check_results['meta']['warning_days'] = warning_days
     check_results['meta']['checked_at_time'] = str(now)
-    check_results['meta']['warn_after_date'] = str(now + expire_window)
+    check_results['meta']['warn_before_date'] = str(now + expire_window)
     check_results['meta']['show_all'] = str(module.params['show_all'])
     # All the analyzed certs accumulate here
     ocp_certs = []
@@ -551,8 +550,6 @@ an OpenShift Container Platform cluster
 
     ######################################################################
     # Now for registry
-    # registry_secrets = subprocess.call('oc get secret registry-certificates -o yaml'.split())
-    # out = subprocess.PIPE
     try:
         registry_secrets_raw = subprocess.Popen('oc get secret registry-certificates -o yaml'.split(),
                                                 stdout=subprocess.PIPE)
@@ -607,11 +604,11 @@ an OpenShift Container Platform cluster
         check_results['registry'] = registry_certs
         check_results['router'] = router_certs
 
-
     # Sort the final results to report in order of ascending safety
     # time. That is to say, the certificates which will expire sooner
     # will be at the front of the list and certificates which will
-    # expire later are at the end.
+    # expire later are at the end. Router and registry certs should be
+    # limited to just 1 result, so don't bother sorting those.
     check_results['ocp_certs'] = sorted(check_results['ocp_certs'], cmp=lambda x, y: cmp(x['days_remaining'], y['days_remaining']))
     check_results['kubeconfigs'] = sorted(check_results['kubeconfigs'], cmp=lambda x, y: cmp(x['days_remaining'], y['days_remaining']))
     check_results['etcd'] = sorted(check_results['etcd'], cmp=lambda x, y: cmp(x['days_remaining'], y['days_remaining']))

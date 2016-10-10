@@ -1,9 +1,9 @@
 ---
 - name: Check cert expirys on host
   openshift_cert_expiry:
-    warning_days: "{{ warning_days|int }}"
-    config_base: "{{ config_base }}"
-    show_all: "{{ show_all|bool }}"
+    warning_days: "{{ openshift_certificate_expiry_warning_days|int }}"
+    config_base: "{{ openshift_certificate_expiry_config_base }}"
+    show_all: "{{ openshift_certificate_expiry_show_all|bool }}"
   register: check_results
 
 - name: Generate expiration report HTML
@@ -11,15 +11,15 @@
   run_once: yes
   template:
     src: cert-expiry-table.html.j2
-    dest: "{{ html_report_path }}"
+    dest: "{{ openshift_certificate_expiry_html_report_path }}"
   delegate_to: localhost
-  when: "{{ generate_html_report|bool }}"
+  when: "{{ openshift_certificate_expiry_generate_html_report|bool }}"
 
 - name: Generate expiration results JSON
   become: no
   run_once: yes
   template:
     src: save_json_results.j2
-    dest: "{{ json_results_path }}"
+    dest: "{{ openshift_certificate_expiry_json_results_path }}"
   delegate_to: localhost
-  when: "{{ save_json_results|bool }}"
+  when: "{{ openshift_certificate_expiry_save_json_results|bool }}"
