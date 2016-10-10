@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.32
+Version:        3.3.33
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,16 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Oct 10 2016 Scott Dodson <sdodson@redhat.com> 3.3.33-1
+- Apply same pattern to HA master services (sdodson@redhat.com)
+- Improve how we handle containerized node failure on first startup
+  (sdodson@redhat.com)
+- Retry failed master startup once (ironcladlou@gmail.com)
+- [logging] Fix openshift_hosted_logging_fluentd_nodeselector
+  (sdodson@redhat.com)
+- Changes for etcd servers (vishal.patil@nuagenetworks.net)
+- Check that OpenStack hostnames are resolvable (lhuard@amadeus.com)
+
 * Fri Oct 07 2016 Scott Dodson <sdodson@redhat.com> 3.3.32-1
 - [a-o-i] -v disables quiet ansible config. (abutcher@redhat.com)
 
