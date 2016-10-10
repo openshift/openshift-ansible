@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.33
+Version:        3.3.34
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Oct 10 2016 Scott Dodson <sdodson@redhat.com> 3.3.34-1
+- Set HTTPS_PROXY in example builddefaults_json (sdodson@redhat.com)
+
 * Mon Oct 10 2016 Scott Dodson <sdodson@redhat.com> 3.3.33-1
 - Apply same pattern to HA master services (sdodson@redhat.com)
 - Improve how we handle containerized node failure on first startup
