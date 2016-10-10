@@ -255,7 +255,6 @@ Atomic OpenShift Utilities includes
 * Fri Oct 07 2016 Scott Dodson <sdodson@redhat.com> 3.3.31-1
 - note different product versions (jeder@redhat.com)
 - Error out if containerized=true for lb host. (dgoodwin@redhat.com)
-- Update v1.3 content (sdodson@redhat.com)
 - Removes an unused file (jtslear@gmail.com)
 - Update v1.3 content (sdodson@redhat.com)
 - Add v1.4 content (sdodson@redhat.com)
@@ -457,7 +456,6 @@ Atomic OpenShift Utilities includes
 - Fix errors in docker role (mkumatag@in.ibm.com)
 - Allow overriding the Docker 1.10 requirement for upgrade.
   (dgoodwin@redhat.com)
-- Fix GCE Launch (brad@nolab.org)
 - skip if the objects already exist (rmeggins@redhat.com)
 - create and process the logging deployer template in the current project,
   logging (rmeggins@redhat.com)
