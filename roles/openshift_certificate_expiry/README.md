@@ -50,7 +50,7 @@ Default behavior:
 ```yaml
 ---
 - name: Check cert expirys
-  hosts: all
+  hosts: nodes:masters:etcd
   become: yes
   gather_facts: no
   roles:
@@ -62,7 +62,7 @@ Generate HTML and JSON artifacts in their default paths:
 ```yaml
 ---
 - name: Check cert expirys
-  hosts: all
+  hosts: nodes:masters:etcd
   become: yes
   gather_facts: no
   vars:
@@ -78,7 +78,7 @@ the module out):
 ```yaml
 ---
 - name: Check cert expirys
-  hosts: all
+  hosts: nodes:masters:etcd
   become: yes
   gather_facts: no
   vars:
@@ -93,7 +93,7 @@ the module out) and save the results as a JSON file:
 ```yaml
 ---
 - name: Check cert expirys
-  hosts: all
+  hosts: nodes:masters:etcd
   become: yes
   gather_facts: no
   vars:
@@ -196,6 +196,34 @@ The example below is abbreviated to save space:
         "expired": 0
     }
 }
+```
+
+The `summary` from the json data can be easily checked for
+warnings/expirations using a variety of command-line tools.
+
+For exampe, using `grep` we can look for the word `summary` and print
+out the 2 lines **after** the match (`-A2`):
+
+```
+$ grep -A2 summary /tmp/cert-expiry-report.json
+    "summary": {
+        "warning": 16,
+        "expired": 0
+```
+
+If available, the [jq](https://stedolan.github.io/jq/) tool can also
+be used to pick out specific values. Example 1 and 2 below show how to
+select just one value, either `warning` or `expired`. Example 3 shows
+how to select both values at once:
+
+```
+$ jq '.summary.warning' /tmp/cert-expiry-report.json
+16
+$ jq '.summary.expired' /tmp/cert-expiry-report.json
+0
+$ jq '.summary.warning,.summary.expired' /tmp/cert-expiry-report.json
+16
+0
 ```
 
 
