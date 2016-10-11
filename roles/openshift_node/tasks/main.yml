@@ -112,6 +112,8 @@
 
 - name: NFS storage plugin configuration
   include: storage_plugins/nfs.yml
+  tags:
+    - nfs
 
 - name: GlusterFS storage plugin configuration
   include: storage_plugins/glusterfs.yml
