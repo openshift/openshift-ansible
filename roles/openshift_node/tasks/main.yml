@@ -152,17 +152,9 @@
 - name: Start and enable node
   service: name={{ openshift.common.service_type }}-node enabled=yes state=started
   register: node_start_result
-  ignore_errors: yes
-
-- name: Wait 30 seconds for docker initialization whenever node has failed
-  pause:
-    seconds: 30
-  when: node_start_result | failed
-
-- name: Start and enable node again
-  service: name={{ openshift.common.service_type }}-node enabled=yes state=started
-  register: node_start_result
-  when: node_start_result | failed
+  until: not node_start_result | failed
+  retries: 1
+  delay: 30
 
 - set_fact:
     node_service_status_changed: "{{ node_start_result | changed }}"
