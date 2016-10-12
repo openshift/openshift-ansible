@@ -13,8 +13,8 @@ storage:
     accesskey: {{ openshift.hosted.registry.storage.s3.accesskey }}
     secretkey: {{ openshift.hosted.registry.storage.s3.secretkey }}
     region: {{ openshift.hosted.registry.storage.s3.region }}
-{%   if openshift.hosted.registry.storage.s3.regionendpoint %}
-    regionendpoint: {{ aws_bucket_region_endpoint }}
+{%   if 'regionendpoint' in openshift.hosted.registry.storage.s3 %}
+    regionendpoint: {{ openshift.hosted.registry.storage.s3.regionendpoint }}
 {%   endif -%}
     bucket: {{ openshift.hosted.registry.storage.s3.bucket }}
     encrypt: false

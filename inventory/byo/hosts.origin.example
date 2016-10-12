@@ -352,7 +352,8 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_hosted_registry_acceptschema2=true
 #openshift_hosted_registry_enforcequota=true
 #
-# Any S3 service (Minio, ExoScale, ...)
+# Any S3 service (Minio, ExoScale, ...): Basically the same as above
+# but with regionendpoint configured
 # S3 bucket must already exist.
 #openshift_hosted_registry_storage_kind=object
 #openshift_hosted_registry_storage_provider=s3
