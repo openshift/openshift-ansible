@@ -1,8 +1,8 @@
 # Overview
 
 Users may now deploy containerized versions of OpenShift Origin, OpenShift
-Enterprise, or Atomic Enterprise Platform on Atomic
-Host[https://projectatomic.io] or RHEL, Centos, and Fedora. This includes
+Enterprise, or Atomic Enterprise Platform on [Atomic
+Host](https://projectatomic.io) or RHEL, Centos, and Fedora. This includes
 OpenvSwitch based SDN.
 
 

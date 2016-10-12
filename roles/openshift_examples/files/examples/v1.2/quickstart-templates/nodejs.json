@@ -83,7 +83,7 @@
             "from": {
               "kind": "ImageStreamTag",
               "namespace": "${NAMESPACE}",
-              "name": "nodejs:0.10"
+              "name": "nodejs:4"
             },
             "env":  [
               {

@@ -15,7 +15,7 @@
   template:
     src: serviceaccount.j2
     dest: "/tmp/openshift/{{ item }}-serviceaccount.yaml"
-  with_items: openshift_serviceaccounts_names
+  with_items: '{{ openshift_serviceaccounts_names }}'
 
 - name: Get current security context constraints
   shell: >
@@ -30,8 +30,8 @@
     insertafter: "^users:$"
   when: "item.1.rc == 0 and 'system:serviceaccount:{{ openshift_serviceaccounts_namespace }}:{{ item.0 }}' not in {{ (item.1.stdout | from_yaml).users }}"
   with_nested:
-  - openshift_serviceaccounts_names
-  - scc_test.results
+  - '{{ openshift_serviceaccounts_names }}'
+  - '{{ scc_test.results }}'
 
 - name: Apply new scc rules for service accounts
   command: "{{ openshift.common.client_binary }} update -f /tmp/openshift/scc.yaml --api-version=v1"

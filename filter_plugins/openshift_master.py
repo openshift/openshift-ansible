@@ -237,7 +237,11 @@ class RequestHeaderIdentityProvider(IdentityProviderBase):
         self._required += [['headers']]
         self._optional += [['challengeURL', 'challenge_url'],
                            ['loginURL', 'login_url'],
-                           ['clientCA', 'client_ca']]
+                           ['clientCA', 'client_ca'],
+                           ['clientCommonNames', 'client_common_names'],
+                           ['emailHeaders', 'email_headers'],
+                           ['nameHeaders', 'name_headers'],
+                           ['preferredUsernameHeaders', 'preferred_username_headers']]
 
     def validate(self):
         ''' validate this idp instance '''
@@ -521,7 +525,7 @@ class FilterModule(object):
         return valid
 
     @staticmethod
-    def certificates_to_synchronize(hostvars):
+    def certificates_to_synchronize(hostvars, include_keys=True):
         ''' Return certificates to synchronize based on facts. '''
         if not issubclass(type(hostvars), dict):
             raise errors.AnsibleFilterError("|failed expects hostvars is a dict")
@@ -535,9 +539,10 @@ class FilterModule(object):
                  'openshift-registry.kubeconfig',
                  'openshift-router.crt',
                  'openshift-router.key',
-                 'openshift-router.kubeconfig',
-                 'serviceaccounts.private.key',
-                 'serviceaccounts.public.key']
+                 'openshift-router.kubeconfig']
+        if bool(include_keys):
+            certs += ['serviceaccounts.private.key',
+                      'serviceaccounts.public.key']
         if bool(hostvars['openshift']['common']['version_gte_3_1_or_1_1']):
             certs += ['master.proxy-client.crt',
                       'master.proxy-client.key']
@@ -545,6 +550,9 @@ class FilterModule(object):
             certs += ['openshift-master.crt',
                       'openshift-master.key',
                       'openshift-master.kubeconfig']
+        if bool(hostvars['openshift']['common']['version_gte_3_3_or_1_3']):
+            certs += ['service-signer.crt',
+                      'service-signer.key']
         return certs
 
     @staticmethod

@@ -1,5 +1,5 @@
 ---
-- name: Set master facts
+- name: Gather and set facts for master hosts
   hosts: oo_masters_to_config
   vars:
     t_oo_option_master_debug_level: "{{ lookup('oo_option', 'openshift_master_debug_level') }}"
@@ -48,6 +48,12 @@
   - set_fact:
       openshift_hosted_metrics_resolution: "{{ lookup('oo_option', 'openshift_hosted_metrics_resolution') | default('10s', true) }}"
     when: openshift_hosted_metrics_resolution is not defined
+  - set_fact:
+      openshift_hosted_metrics_deployer_prefix: "{{ lookup('oo_option', 'openshift_hosted_metrics_deployer_prefix') | default('openshift') }}"
+    when: openshift_hosted_metrics_deployer_prefix is not defined
+  - set_fact:
+      openshift_hosted_metrics_deployer_version: "{{ lookup('oo_option', 'openshift_hosted_metrics_deployer_version') | default('latest') }}"
+    when: openshift_hosted_metrics_deployer_prefix is not defined
   roles:
   - openshift_facts
   post_tasks:
@@ -85,7 +91,7 @@
     register: g_master_mktemp
     changed_when: False
 
-- name: Check for cached session secrets
+- name: Determine if session secrets must be generated
   hosts: oo_first_master
   roles:
   - role: openshift_facts

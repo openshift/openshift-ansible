@@ -6,6 +6,7 @@ import os
 import yaml
 from ansible.plugins.callback import CallbackBase
 
+
 # pylint: disable=super-init-not-called
 class CallbackModule(CallbackBase):
 
@@ -19,9 +20,9 @@ class CallbackModule(CallbackBase):
             self.hosts_yaml_name = os.environ['OO_INSTALL_CALLBACK_FACTS_YAML']
         except KeyError:
             raise ValueError('The OO_INSTALL_CALLBACK_FACTS_YAML environment '
-                'variable must be set.')
+                             'variable must be set.')
         self.hosts_yaml = os.open(self.hosts_yaml_name, os.O_CREAT |
-            os.O_WRONLY)
+                                  os.O_WRONLY)
 
     def v2_on_any(self, *args, **kwargs):
         pass
@@ -72,9 +73,9 @@ class CallbackModule(CallbackBase):
     def v2_playbook_on_task_start(self, name, is_conditional):
         pass
 
-    #pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments
     def v2_playbook_on_vars_prompt(self, varname, private=True, prompt=None,
-        encrypt=None, confirm=False, salt_size=None, salt=None, default=None):
+                                   encrypt=None, confirm=False, salt_size=None, salt=None, default=None):
         pass
 
     def v2_playbook_on_setup(self):

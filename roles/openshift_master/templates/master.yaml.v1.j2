@@ -44,6 +44,13 @@ auditConfig:{{ openshift.master.audit_config | to_padded_yaml(level=1) }}
 {% endif %}
 controllerLeaseTTL: {{ openshift.master.controller_lease_ttl | default('30') }}
 {% endif %}
+{% if openshift.common.version_gte_3_3_or_1_3 | bool %}
+controllerConfig:
+  serviceServingCert:
+    signer:
+      certFile: service-signer.crt
+      keyFile: service-signer.key
+{% endif %}
 controllers: '*'
 corsAllowedOrigins:
 {% for origin in ['127.0.0.1', 'localhost', openshift.common.ip, openshift.common.public_ip] | union(openshift.common.all_hostnames) | unique %}
@@ -131,7 +138,21 @@ kubernetesMasterConfig:
 {% endif %}
 masterClients:
 {# TODO: allow user to set externalKubernetesKubeConfig #}
+{% if openshift.common.version_gte_3_3_or_1_3 | bool %}
+  externalKubernetesClientConnectionOverrides:
+    acceptContentTypes: application/vnd.kubernetes.protobuf,application/json
+    contentType: application/vnd.kubernetes.protobuf
+    burst: 400
+    qps: 200
+{% endif %}
   externalKubernetesKubeConfig: ""
+{% if openshift.common.version_gte_3_3_or_1_3 | bool %}
+  openshiftLoopbackClientConnectionOverrides:
+    acceptContentTypes: application/vnd.kubernetes.protobuf,application/json
+    contentType: application/vnd.kubernetes.protobuf
+    burst: 600
+    qps: 300
+{% endif %}
   openshiftLoopbackKubeConfig: openshift-master.kubeconfig
 masterPublicURL: {{ openshift.master.public_api_url }}
 networkConfig:
@@ -142,6 +163,10 @@ networkConfig:
 {% endif %}
 # serviceNetworkCIDR must match kubernetesMasterConfig.servicesSubnet
   serviceNetworkCIDR: {{ openshift.common.portal_net }}
+  externalIPNetworkCIDRs: {{ openshift_master_external_ip_network_cidrs | default(["0.0.0.0/0"]) | to_padded_yaml(1,2) }}
+{% if openshift_master_ingress_ip_network_cidr is defined %}
+  ingressIPNetworkCIDR: {{ openshift_master_ingress_ip_network_cidr }}
+{% endif %}
 oauthConfig:
 {% if 'oauth_always_show_provider_selection' in openshift.master %}
   alwaysShowProviderSelection: {{ openshift.master.oauth_always_show_provider_selection }}
@@ -159,7 +184,7 @@ oauthConfig:
 {% if openshift.common.version_gte_3_2_or_1_2 | bool %}
   masterCA: ca-bundle.crt
 {% else %}
-  masterCA: ca.rt
+  masterCA: ca.crt
 {% endif %}
   masterPublicURL: {{ openshift.master.public_api_url }}
   masterURL: {{ openshift.master.api_url }}
@@ -196,7 +221,7 @@ serviceAccountConfig:
 {% if openshift.common.version_gte_3_2_or_1_2 | bool %}
   masterCA: ca-bundle.crt
 {% else %}
-  masterCA: ca.rt
+  masterCA: ca.crt
 {% endif %}
   privateKeyFile: serviceaccounts.private.key
   publicKeyFiles:

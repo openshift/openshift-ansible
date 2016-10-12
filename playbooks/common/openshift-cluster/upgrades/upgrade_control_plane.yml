@@ -1,0 +1,259 @@
+---
+###############################################################################
+# Upgrade Masters
+###############################################################################
+- name: Evaluate additional groups for upgrade
+  hosts: localhost
+  connection: local
+  become: no
+  tasks:
+  - name: Evaluate etcd_hosts_to_backup
+    add_host:
+      name: "{{ item }}"
+      groups: etcd_hosts_to_backup
+    with_items: groups.oo_etcd_to_config if groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config | length > 0 else groups.oo_first_master
+
+- name: Backup etcd
+  hosts: etcd_hosts_to_backup
+  vars:
+    embedded_etcd: "{{ hostvars[groups.oo_first_master.0].openshift.master.embedded_etcd }}"
+    timestamp: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
+  roles:
+  - openshift_facts
+  tasks:
+  # Ensure we persist the etcd role for this host in openshift_facts
+  - openshift_facts:
+      role: etcd
+      local_facts: {}
+    when: "'etcd' not in openshift"
+
+  - stat: path=/var/lib/openshift
+    register: var_lib_openshift
+
+  - stat: path=/var/lib/origin
+    register: var_lib_origin
+
+  - name: Create origin symlink if necessary
+    file: src=/var/lib/openshift/ dest=/var/lib/origin state=link
+    when: var_lib_openshift.stat.exists == True and var_lib_origin.stat.exists == False
+
+  # TODO: replace shell module with command and update later checks
+  # We assume to be using the data dir for all backups.
+  - name: Check available disk space for etcd backup
+    shell: df --output=avail -k {{ openshift.common.data_dir }} | tail -n 1
+    register: avail_disk
+
+  # TODO: replace shell module with command and update later checks
+  - name: Check current embedded etcd disk usage
+    shell: du -k {{ openshift.etcd.etcd_data_dir }} | tail -n 1 | cut -f1
+    register: etcd_disk_usage
+    when: embedded_etcd | bool
+
+  - name: Abort if insufficient disk space for etcd backup
+    fail:
+      msg: >
+        {{ etcd_disk_usage.stdout }} Kb disk space required for etcd backup,
+        {{ avail_disk.stdout }} Kb available.
+    when: (embedded_etcd | bool) and (etcd_disk_usage.stdout|int > avail_disk.stdout|int)
+
+  - name: Install etcd (for etcdctl)
+    action: "{{ ansible_pkg_mgr }} name=etcd state=latest"
+    when: not openshift.common.is_atomic | bool
+
+  - name: Generate etcd backup
+    command: >
+      etcdctl backup --data-dir={{ openshift.etcd.etcd_data_dir }}
+      --backup-dir={{ openshift.common.data_dir }}/etcd-backup-{{ timestamp }}
+
+  - set_fact:
+      etcd_backup_complete: True
+
+  - name: Display location of etcd backup
+    debug:
+      msg: "Etcd backup created in {{ openshift.common.data_dir }}/etcd-backup-{{ timestamp }}"
+
+
+- name: Gate on etcd backup
+  hosts: localhost
+  connection: local
+  become: no
+  tasks:
+  - set_fact:
+      etcd_backup_completed: "{{ hostvars
+                                 | oo_select_keys(groups.etcd_hosts_to_backup)
+                                 | oo_collect('inventory_hostname', {'etcd_backup_complete': true}) }}"
+  - set_fact:
+      etcd_backup_failed: "{{ groups.etcd_hosts_to_backup | difference(etcd_backup_completed) }}"
+  - fail:
+      msg: "Upgrade cannot continue. The following hosts did not complete etcd backup: {{ etcd_backup_failed | join(',') }}"
+    when: etcd_backup_failed | length > 0
+
+- name: Upgrade master packages
+  hosts: oo_masters_to_config
+  handlers:
+  - include: ../../../../roles/openshift_master/handlers/main.yml
+    static: yes
+  roles:
+  - openshift_facts
+  tasks:
+  - include: rpm_upgrade.yml component=master
+    when: not openshift.common.is_containerized | bool
+
+- name: Determine if service signer cert must be created
+  hosts: oo_first_master
+  tasks:
+  - name: Determine if service signer certificate must be created
+    stat:
+      path: "{{ openshift.common.config_base }}/master/service-signer.crt"
+    register: service_signer_cert_stat
+    changed_when: false
+
+# Create service signer cert when missing. Service signer certificate
+# is added to master config in the master config hook for v3_3.
+- include: create_service_signer_cert.yml
+
+- name: Upgrade master config and systemd units
+  hosts: oo_masters_to_config
+  handlers:
+  - include: ../../../../roles/openshift_master/handlers/main.yml
+    static: yes
+  roles:
+  - openshift_facts
+  tasks:
+  - include: "{{ master_config_hook }}"
+    when: master_config_hook is defined
+
+  - include_vars: ../../../../roles/openshift_master/vars/main.yml
+
+  - name: Update systemd units
+    include: ../../../../roles/openshift_master/tasks/systemd_units.yml
+
+#  - name: Upgrade master configuration
+#    openshift_upgrade_config:
+#      from_version: '3.1'
+#       to_version: '3.2'
+#      role: master
+#      config_base: "{{ hostvars[inventory_hostname].openshift.common.config_base }}"
+
+  - name: Check for ca-bundle.crt
+    stat:
+      path: "{{ openshift.common.config_base }}/master/ca-bundle.crt"
+    register: ca_bundle_stat
+    failed_when: false
+
+  - name: Check for ca.crt
+    stat:
+      path: "{{ openshift.common.config_base }}/master/ca.crt"
+    register: ca_crt_stat
+    failed_when: false
+
+  - name: Migrate ca.crt to ca-bundle.crt
+    command: mv ca.crt ca-bundle.crt
+    args:
+      chdir: "{{ openshift.common.config_base }}/master"
+    when: ca_crt_stat.stat.isreg and not ca_bundle_stat.stat.exists
+
+  - name: Link ca.crt to ca-bundle.crt
+    file:
+      src: "{{ openshift.common.config_base }}/master/ca-bundle.crt"
+      path: "{{ openshift.common.config_base }}/master/ca.crt"
+      state: link
+    when: ca_crt_stat.stat.isreg and not ca_bundle_stat.stat.exists
+
+- name: Set master update status to complete
+  hosts: oo_masters_to_config
+  tasks:
+  - set_fact:
+      master_update_complete: True
+
+##############################################################################
+# Gate on master update complete
+##############################################################################
+- name: Gate on master update
+  hosts: localhost
+  connection: local
+  become: no
+  tasks:
+  - set_fact:
+      master_update_completed: "{{ hostvars
+                                 | oo_select_keys(groups.oo_masters_to_config)
+                                 | oo_collect('inventory_hostname', {'master_update_complete': true}) }}"
+  - set_fact:
+      master_update_failed: "{{ groups.oo_masters_to_config | difference(master_update_completed) }}"
+  - fail:
+      msg: "Upgrade cannot continue. The following masters did not finish updating: {{ master_update_failed | join(',') }}"
+    when: master_update_failed | length > 0
+
+###############################################################################
+# Reconcile Cluster Roles, Cluster Role Bindings and Security Context Constraints
+###############################################################################
+
+- name: Reconcile Cluster Roles and Cluster Role Bindings and Security Context Constraints
+  hosts: oo_masters_to_config
+  roles:
+  - { role: openshift_cli }
+  vars:
+    origin_reconcile_bindings: "{{ deployment_type == 'origin' and openshift_version | version_compare('1.0.6', '>') }}"
+    ent_reconcile_bindings: true
+    openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"
+    # Another spot where we assume docker is running and do not want to accidentally trigger an unsafe
+    # restart.
+    skip_docker_role: True
+  tasks:
+  - name: Verifying the correct commandline tools are available
+    shell: grep {{ verify_upgrade_version }} {{ openshift.common.admin_binary}}
+    when: openshift.common.is_containerized | bool and verify_upgrade_version is defined
+
+  - name: Reconcile Cluster Roles
+    command: >
+      {{ openshift.common.admin_binary}} --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+      policy reconcile-cluster-roles --additive-only=true --confirm
+    run_once: true
+
+  - name: Reconcile Cluster Role Bindings
+    command: >
+      {{ openshift.common.admin_binary}} --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+      policy reconcile-cluster-role-bindings
+      --exclude-groups=system:authenticated
+      --exclude-groups=system:authenticated:oauth
+      --exclude-groups=system:unauthenticated
+      --exclude-users=system:anonymous
+      --additive-only=true --confirm
+    when: origin_reconcile_bindings | bool or ent_reconcile_bindings | bool
+    run_once: true
+
+  - name: Reconcile Security Context Constraints
+    command: >
+      {{ openshift.common.admin_binary}} policy reconcile-sccs --confirm --additive-only=true
+    run_once: true
+
+  - set_fact:
+      reconcile_complete: True
+
+##############################################################################
+# Gate on reconcile
+##############################################################################
+- name: Gate on reconcile
+  hosts: localhost
+  connection: local
+  become: no
+  tasks:
+  - set_fact:
+      reconcile_completed: "{{ hostvars
+                                 | oo_select_keys(groups.oo_masters_to_config)
+                                 | oo_collect('inventory_hostname', {'reconcile_complete': true}) }}"
+  - set_fact:
+      reconcile_failed: "{{ groups.oo_masters_to_config | difference(reconcile_completed) }}"
+  - fail:
+      msg: "Upgrade cannot continue. The following masters did not finish reconciling: {{ reconcile_failed | join(',') }}"
+    when: reconcile_failed | length > 0
+
+- name: Upgrade Docker on dedicated containerized etcd hosts
+  hosts: oo_etcd_to_config:!oo_nodes_to_upgrade
+  serial: 1
+  any_errors_fatal: true
+  roles:
+  - openshift_facts
+  tasks:
+  - include: docker/upgrade.yml
+    when: l_docker_upgrade is defined and l_docker_upgrade | bool and not openshift.common.is_atomic | bool

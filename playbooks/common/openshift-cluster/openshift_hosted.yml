@@ -1,5 +1,8 @@
+---
 - name: Create persistent volumes
   hosts: oo_first_master
+  tags:
+  - hosted
   vars:
     persistent_volumes: "{{ hostvars[groups.oo_first_master.0] | oo_persistent_volumes(groups) }}"
     persistent_volume_claims: "{{ hostvars[groups.oo_first_master.0] | oo_persistent_volume_claims }}"
@@ -9,11 +12,19 @@
 
 - name: Create Hosted Resources
   hosts: oo_first_master
+  tags:
+  - hosted
   pre_tasks:
   - set_fact:
       openshift_hosted_router_registryurl: "{{ hostvars[groups.oo_first_master.0].openshift.master.registry_url }}"
       openshift_hosted_registry_registryurl: "{{ hostvars[groups.oo_first_master.0].openshift.master.registry_url }}"
     when: "'master' in hostvars[groups.oo_first_master.0].openshift and 'registry_url' in hostvars[groups.oo_first_master.0].openshift.master"
+  - set_fact:
+      logging_hostname: "{{ openshift_hosted_logging_hostname | default('kibana.' ~ (openshift.master.default_subdomain | default('router.default.svc.cluster.local', true))) }}"
+      logging_ops_hostname: "{{ openshift_hosted_logging_ops_hostname | default('kibana-ops.' ~ (openshift.master.default_subdomain | default('router.default.svc.cluster.local', true))) }}"
+      logging_master_public_url: "{{ openshift_hosted_logging_master_public_url | default(openshift.master.public_api_url) }}"
+      logging_elasticsearch_cluster_size: "{{ openshift_hosted_logging_elasticsearch_cluster_size | default(1) }}"
+      logging_elasticsearch_ops_cluster_size: "{{ openshift_hosted_logging_elasticsearch_ops_cluster_size | default(1) }}"
   roles:
   - role: openshift_cli
   - role: openshift_hosted_facts
@@ -36,6 +47,22 @@
     openshift_serviceaccounts_sccs:
     - privileged
     when: not openshift.common.version_gte_3_2_or_1_2
-  - role: openshift_metrics
-    when: openshift.hosted.metrics.deploy | bool
   - role: openshift_hosted
+  - role: openshift_metrics
+    when: openshift_hosted_metrics_deploy | default(false) | bool
+  - role: openshift_hosted_logging
+    when: openshift_hosted_logging_deploy | default(false) | bool
+    openshift_hosted_logging_hostname: "{{ logging_hostname }}"
+    openshift_hosted_logging_ops_hostname: "{{ logging_ops_hostname }}"
+    openshift_hosted_logging_master_public_url: "{{ logging_master_public_url }}"
+    openshift_hosted_logging_elasticsearch_cluster_size: "{{ logging_elasticsearch_cluster_size }}"
+    openshift_hosted_logging_elasticsearch_pvc_dynamic: "{{ 'true' if openshift.hosted.logging.storage_kind | default(none) == 'dynamic' else 'false' }}"
+    openshift_hosted_logging_elasticsearch_pvc_size: "{{ openshift.hosted.logging.storage.volume.size if openshift.hosted.logging.storage_kind | default(none) == 'dynamic' else ''  }}"
+    openshift_hosted_logging_elasticsearch_pvc_prefix: "{{ 'logging-es' if openshift.hosted.logging.storage_kind | default(none) is not none else '' }}"
+    openshift_hosted_logging_elasticsearch_ops_cluster_size: "{{ logging_elasticsearch_ops_cluster_size }}"
+    openshift_hosted_logging_elasticsearch_ops_pvc_dynamic: "{{ 'true' if openshift.hosted.logging.storage_kind | default(none) == 'dynamic' else 'false' }}"
+    openshift_hosted_logging_elasticsearch_ops_pvc_size: "{{ openshift.hosted.logging.storage.volume.size if openshift.hosted.logging.storage_kind | default(none) == 'dynamic' else ''  }}"
+    openshift_hosted_logging_elasticsearch_ops_pvc_prefix: "{{ 'logging-es' if openshift.hosted.logging.storage_kind | default(none) is not none else '' }}"
+
+  - role: cockpit-ui
+    when: ( openshift.common.version_gte_3_3_or_1_3  | bool ) and ( openshift_hosted_manage_registry | default(true) | bool )

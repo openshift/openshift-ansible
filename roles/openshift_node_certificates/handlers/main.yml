@@ -1,0 +1,10 @@
+---
+- name: update ca trust
+  command: update-ca-trust
+  notify:
+  - restart docker after updating ca trust
+
+- name: restart docker after updating ca trust
+  service:
+    name: docker
+    state: restarted

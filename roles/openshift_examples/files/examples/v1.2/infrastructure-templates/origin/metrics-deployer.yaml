@@ -68,6 +68,8 @@ objects:
           value: ${IGNORE_PREFLIGHT}
         - name: USE_PERSISTENT_STORAGE
           value: ${USE_PERSISTENT_STORAGE}
+        - name: DYNAMICALLY_PROVISION_STORAGE
+          value: ${DYNAMICALLY_PROVISION_STORAGE}
         - name: HAWKULAR_METRICS_HOSTNAME
           value: ${HAWKULAR_METRICS_HOSTNAME}
         - name: CASSANDRA_NODES
@@ -76,6 +78,8 @@ objects:
           value: ${CASSANDRA_PV_SIZE}
         - name: METRIC_DURATION
           value: ${METRIC_DURATION}
+        - name: USER_WRITE_ACCESS
+          value: ${USER_WRITE_ACCESS}
         - name: HEAPSTER_NODE_ID
           value: ${HEAPSTER_NODE_ID}
         - name: METRIC_RESOLUTION
@@ -123,6 +127,10 @@ parameters:
   name: USE_PERSISTENT_STORAGE
   value: "true"
 -
+  description: "Set to true to dynamically provision storage, set to false to use use pre-created persistent volumes"
+  name: DYNAMICALLY_PROVISION_STORAGE
+  value: "false"
+-
   description: "The number of Cassandra Nodes to deploy for the initial cluster"
   name: CASSANDRA_NODES
   value: "1"
@@ -134,6 +142,10 @@ parameters:
   description: "How many days metrics should be stored for."
   name: METRIC_DURATION
   value: "7"
+-
+  description: "If a user accounts should be allowed to write metrics."
+  name: USER_WRITE_ACCESS
+  value: "false"
 -
   description: "The identifier used when generating metric ids in Hawkular"
   name: HEAPSTER_NODE_ID

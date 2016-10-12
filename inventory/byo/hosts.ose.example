@@ -6,6 +6,7 @@ masters
 nodes
 etcd
 lb
+nfs
 
 # Set variables common for all OSEv3 hosts
 [OSEv3:vars]
@@ -64,14 +65,6 @@ openshift_release=v3.2
 # See: https://docs.openshift.org/latest/install_config/web_console_customization.html#serving-static-files
 #openshift_master_oauth_template=/path/to/login-template.html
 
-# Configure metricsPublicURL in the master config for cluster metrics
-# See: https://docs.openshift.com/enterprise/latest/install_config/cluster_metrics.html
-#openshift_master_metrics_public_url=https://hawkular-metrics.example.com/hawkular/metrics
-
-# Configure loggingPublicURL in the master config for aggregate logging
-# See: https://docs.openshift.com/enterprise/latest/install_config/aggregate_logging.html
-#openshift_master_logging_public_url=https://kibana.example.com
-#
 # Configure imagePolicyConfig in the master config
 # See: https://godoc.org/github.com/openshift/origin/pkg/cmd/server/api#ImagePolicyConfig
 #openshift_master_image_policy_config={"maxImagesBulkImportedPerRepository": 3, "disableScheduledImport": true}
@@ -96,13 +89,11 @@ openshift_release=v3.2
 # Skip upgrading Docker during an OpenShift upgrade, leaves the current Docker version alone.
 # docker_upgrade=False
 
-# Alternate image format string. If you're not modifying the format string and
-# only need to inject your own registry you may want to consider
-# openshift_docker_additional_registries instead
+# Alternate image format string, useful if you've got your own registry mirror
 #oreg_url=example.com/openshift3/ose-${component}:${version}
 # If oreg_url points to a registry other than registry.access.redhat.com we can
 # modify image streams to point at that registry by setting the following to true
-#openshift_examples_modify_imagestreams=True
+#openshift_examples_modify_imagestreams=true
 
 # Additional yum repos to install
 #openshift_additional_repos=[{'id': 'ose-devel', 'name': 'ose-devel', 'baseurl': 'http://example.com/puddle/build/AtomicOpenShift/3.1/latest/RH7-RHOSE-3.0/$basearch/os', 'enabled': 1, 'gpgcheck': 0}]
@@ -118,17 +109,46 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_master_identity_providers=[{'name': 'allow_all', 'login': 'true', 'challenge': 'true', 'kind': 'AllowAllPasswordIdentityProvider'}]
 
 # LDAP auth
-#openshift_master_identity_providers=[{'name': 'my_ldap_provider', 'challenge': 'true', 'login': 'true', 'kind': 'LDAPPasswordIdentityProvider', 'attributes': {'id': ['dn'], 'email': ['mail'], 'name': ['cn'], 'preferredUsername': ['uid']}, 'bindDN': '', 'bindPassword': '', 'ca': '', 'insecure': 'false', 'url': 'ldap://ldap.example.com:389/ou=users,dc=example,dc=com?uid'}]
-# Configuring the ldap ca certificate
+#openshift_master_identity_providers=[{'name': 'my_ldap_provider', 'challenge': 'true', 'login': 'true', 'kind': 'LDAPPasswordIdentityProvider', 'attributes': {'id': ['dn'], 'email': ['mail'], 'name': ['cn'], 'preferredUsername': ['uid']}, 'bindDN': '', 'bindPassword': '', 'ca': 'my-ldap-ca.crt', 'insecure': 'false', 'url': 'ldap://ldap.example.com:389/ou=users,dc=example,dc=com?uid'}]
+#
+# Configure LDAP CA certificate
+# Specify either the ASCII contents of the certificate or the path to
+# the local file that will be copied to the remote host. CA
+# certificate contents will be copied to master systems and saved
+# within /etc/origin/master/ with a filename matching the "ca" key set
+# within the LDAPPasswordIdentityProvider.
+#
 #openshift_master_ldap_ca=<ca text>
 # or
 #openshift_master_ldap_ca_file=<path to local ca file to use>
 
-# Available variables for configuring certificates for other identity providers:
-#openshift_master_openid_ca
-#openshift_master_openid_ca_file
-#openshift_master_request_header_ca
-#openshift_master_request_header_ca_file
+# OpenID auth
+#openshift_master_identity_providers=[{"name": "openid_auth", "login": "true", "challenge": "false", "kind": "OpenIDIdentityProvider", "client_id": "my_client_id", "client_secret": "my_client_secret", "claims": {"id": ["sub"], "preferredUsername": ["preferred_username"], "name": ["name"], "email": ["email"]}, "urls": {"authorize": "https://myidp.example.com/oauth2/authorize", "token": "https://myidp.example.com/oauth2/token"}, "ca": "my-openid-ca-bundle.crt"}]
+#
+# Configure OpenID CA certificate
+# Specify either the ASCII contents of the certificate or the path to
+# the local file that will be copied to the remote host. CA
+# certificate contents will be copied to master systems and saved
+# within /etc/origin/master/ with a filename matching the "ca" key set
+# within the OpenIDIdentityProvider.
+#
+#openshift_master_openid_ca=<ca text>
+# or
+#openshift_master_openid_ca_file=<path to local ca file to use>
+
+# Request header auth
+#openshift_master_identity_providers=[{"name": "my_request_header_provider", "challenge": "true", "login": "true", "kind": "RequestHeaderIdentityProvider", "challengeURL": "https://www.example.com/challenging-proxy/oauth/authorize?${query}", "loginURL": "https://www.example.com/login-proxy/oauth/authorize?${query}", "clientCA": "my-request-header-ca.crt", "clientCommonNames": ["my-auth-proxy"], "headers": ["X-Remote-User", "SSO-User"], "emailHeaders": ["X-Remote-User-Email"], "nameHeaders": ["X-Remote-User-Display-Name"], "preferredUsernameHeaders": ["X-Remote-User-Login"]}]
+#
+# Configure request header CA certificate
+# Specify either the ASCII contents of the certificate or the path to
+# the local file that will be copied to the remote host. CA
+# certificate contents will be copied to master systems and saved
+# within /etc/origin/master/ with a filename matching the "clientCA"
+# key set within the RequestHeaderIdentityProvider.
+#
+#openshift_master_request_header_ca=<ca text>
+# or
+#openshift_master_request_header_ca_file=<path to local ca file to use>
 
 # Cloud Provider Configuration
 #
@@ -149,10 +169,15 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_cloudprovider_openstack_auth_url=http://openstack.example.com:35357/v2.0/
 #openshift_cloudprovider_openstack_username=username
 #openshift_cloudprovider_openstack_password=password
+#openshift_cloudprovider_openstack_domain_id=domain_id
+#openshift_cloudprovider_openstack_domain_name=domain_name
 #openshift_cloudprovider_openstack_tenant_id=tenant_id
 #openshift_cloudprovider_openstack_tenant_name=tenant_name
 #openshift_cloudprovider_openstack_region=region
 #openshift_cloudprovider_openstack_lb_subnet_id=subnet_id
+#
+# GCE
+#openshift_cloudprovider_kind=gce
 
 # Project Configuration
 #osm_project_request_message=''
@@ -322,7 +347,104 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_hosted_registry_storage_s3_bucket=bucket_name
 #openshift_hosted_registry_storage_s3_region=bucket_region
 #openshift_hosted_registry_storage_s3_chunksize=26214400
+#openshift_hosted_registry_storage_s3_rootdirectory=/registry
 #openshift_hosted_registry_pullthrough=true
+#openshift_hosted_registry_acceptschema2=true
+#openshift_hosted_registry_enforcequota=true
+
+# Metrics deployment
+# See: https://docs.openshift.com/enterprise/latest/install_config/cluster_metrics.html
+#
+# By default metrics are not automatically deployed, set this to enable them
+# openshift_hosted_metrics_deploy=true
+#
+# Storage Options
+# If openshift_hosted_metrics_storage_kind is unset then metrics will be stored
+# in an EmptyDir volume and will be deleted when the cassandra pod terminates.
+# Storage options A & B currently support only one cassandra pod which is
+# generally enough for up to 1000 pods. Additional volumes can be created
+# manually after the fact and metrics scaled per the docs.
+#
+# Option A - NFS Host Group
+# An NFS volume will be created with path "nfs_directory/volume_name"
+# on the host within the [nfs] host group.  For example, the volume
+# path using these options would be "/exports/metrics"
+#openshift_hosted_metrics_storage_kind=nfs
+#openshift_hosted_metrics_storage_access_modes=['ReadWriteOnce']
+#openshift_hosted_metrics_storage_nfs_directory=/exports
+#openshift_hosted_metrics_storage_nfs_options='*(rw,root_squash)'
+#openshift_hosted_metrics_storage_volume_name=metrics
+#openshift_hosted_metrics_storage_volume_size=10Gi
+#
+# Option B - External NFS Host
+# NFS volume must already exist with path "nfs_directory/_volume_name" on
+# the storage_host. For example, the remote volume path using these
+# options would be "nfs.example.com:/exports/metrics"
+#openshift_hosted_metrics_storage_kind=nfs
+#openshift_hosted_metrics_storage_access_modes=['ReadWriteOnce']
+#openshift_hosted_metrics_storage_host=nfs.example.com
+#openshift_hosted_metrics_storage_nfs_directory=/exports
+#openshift_hosted_metrics_storage_volume_name=metrics
+#openshift_hosted_metrics_storage_volume_size=10Gi
+#
+# Option C - Dynamic -- If openshift supports dynamic volume provisioning for
+# your cloud platform use this.
+#openshift_hosted_metrics_storage_kind=dynamic
+#
+# Override metricsPublicURL in the master config for cluster metrics
+# Defaults to https://hawkular-metrics.{{openshift_master_default_subdomain}}/hawkular/metrics
+# Currently, you may only alter the hostname portion of the url, alterting the
+# `/hawkular/metrics` path will break installation of metrics.
+#openshift_hosted_metrics_public_url=https://hawkular-metrics.example.com/hawkular/metrics
+
+# Logging deployment
+#
+# Currently logging deployment is disabled by default, enable it by setting this
+#openshift_hosted_logging_deploy=true
+#
+# Logging storage config
+# Option A - NFS Host Group
+# An NFS volume will be created with path "nfs_directory/volume_name"
+# on the host within the [nfs] host group.  For example, the volume
+# path using these options would be "/exports/logging"
+#openshift_hosted_logging_storage_kind=nfs
+#openshift_hosted_logging_storage_access_modes=['ReadWriteOnce']
+#openshift_hosted_logging_storage_nfs_directory=/exports
+#openshift_hosted_logging_storage_nfs_options='*(rw,root_squash)'
+#openshift_hosted_logging_storage_volume_name=logging
+#openshift_hosted_logging_storage_volume_size=10Gi
+#
+# Option B - External NFS Host
+# NFS volume must already exist with path "nfs_directory/_volume_name" on
+# the storage_host. For example, the remote volume path using these
+# options would be "nfs.example.com:/exports/logging"
+#openshift_hosted_logging_storage_kind=nfs
+#openshift_hosted_logging_storage_access_modes=['ReadWriteOnce']
+#openshift_hosted_logging_storage_host=nfs.example.com
+#openshift_hosted_logging_storage_nfs_directory=/exports
+#openshift_hosted_logging_storage_volume_name=logging
+#openshift_hosted_logging_storage_volume_size=10Gi
+#
+# Option C - Dynamic -- If openshift supports dynamic volume provisioning for
+# your cloud platform use this.
+#openshift_hosted_logging_storage_kind=dynamic
+#
+# Option D - none -- Logging will use emptydir volumes which are destroyed when
+# pods are deleted
+#
+# Other Logging Options -- Common items you may wish to reconfigure, for the complete
+# list of options please see roles/openshift_hosted_logging/README.md
+#
+# Configure loggingPublicURL in the master config for aggregate logging, defaults
+# to https://kibana.{{ openshift_master_default_subdomain }}
+#openshift_master_logging_public_url=https://kibana.example.com
+# Configure the number of elastic search nodes, unless you're using dynamic provisioning
+# this value must be 1
+#openshift_hosted_logging_elasticsearch_cluster_size=1
+#openshift_hosted_logging_hostname=logging.apps.example.com
+# Configure the prefix and version for the deployer image
+#openshift_hosted_logging_deployer_prefix=registry.example.com:8888/openshift3/
+#openshift_hosted_logging_deployer_version=3.3.0
 
 # Configure the multi-tenant SDN plugin (default is 'redhat/openshift-ovs-subnet')
 # os_sdn_network_plugin_name='redhat/openshift-ovs-multitenant'
@@ -338,6 +460,22 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_portal_net=172.30.0.0/16
 
 
+# ExternalIPNetworkCIDRs controls what values are acceptable for the
+# service external IP field. If empty, no externalIP may be set. It
+# may contain a list of CIDRs which are checked for access. If a CIDR
+# is prefixed with !, IPs in that CIDR will be rejected. Rejections
+# will be applied first, then the IP checked against one of the
+# allowed CIDRs. You should ensure this range does not overlap with
+# your nodes, pods, or service CIDRs for security reasons.
+#openshift_master_external_ip_network_cidrs=['0.0.0.0/0']
+
+# IngressIPNetworkCIDR controls the range to assign ingress IPs from for
+# services of type LoadBalancer on bare metal. If empty, ingress IPs will not
+# be assigned. It may contain a single CIDR that will be allocated from. For
+# security reasons, you should ensure that this range does not overlap with
+# the CIDRs reserved for external IPs, nodes, pods, or services.
+#openshift_master_ingress_ip_network_cidr=172.46.0.0/16
+
 # Configure number of bits to allocate to each host’s subnet e.g. 8
 # would mean a /24 network on the host.
 #osm_host_subnet_length=8
@@ -349,7 +487,21 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # set RPM version for debugging purposes
 #openshift_pkg_version=-3.1.0.0
 
-# Configure custom named certificates
+# Configure custom ca certificate
+#openshift_master_ca_certificate={'certfile': '/path/to/ca.crt', 'keyfile': '/path/to/ca.key'}
+#
+# NOTE: CA certificate will not be replaced with existing clusters.
+# This option may only be specified when creating a new cluster or
+# when redeploying cluster certificates with the redeploy-certificates
+# playbook. If replacing the CA certificate in an existing cluster
+# with a custom ca certificate, the following variable must also be
+# set.
+#openshift_certificates_redeploy_ca=true
+
+# Configure custom named certificates (SNI certificates)
+#
+# https://docs.openshift.com/enterprise/latest/install_config/certificate_customization.html
+#
 # NOTE: openshift_master_named_certificates is cached on masters and is an
 # additive fact, meaning that each run with a different set of certificates
 # will add the newly provided certificates to the cached set of certificates.
@@ -400,8 +552,8 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Configure dnsIP in the node config
 #openshift_dns_ip=172.30.0.1
 
-# Configure node kubelet arguments
-#openshift_node_kubelet_args={'max-pods': ['110'], 'image-gc-high-threshold': ['90'], 'image-gc-low-threshold': ['80']}
+# Configure node kubelet arguments. pods-per-core is valid in OpenShift Origin 1.3 or OpenShift Container Platform 3.3 and later.
+#openshift_node_kubelet_args={'pods-per-core': ['10'], 'max-pods': ['250'], 'image-gc-high-threshold': ['90'], 'image-gc-low-threshold': ['80']}
 
 # Configure logrotate scripts
 # See: https://github.com/nickhammond/ansible-logrotate
@@ -447,8 +599,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_builddefaults_git_http_proxy=http://USER:PASSWORD@HOST:PORT
 #openshift_builddefaults_git_https_proxy=https://USER:PASSWORD@HOST:PORT
 # Or you may optionally define your own serialized as json
-#openshift_builddefaults_json='{"BuildDefaults":{"configuration":{"apiVersion":"v1","env":[{"name":"HTTP_PROXY","value":"http://proxy.example.com.redhat.com:3128"},{"name":"NO_PROXY","value":"ose3-master.example.com"}],"gitHTTPProxy":"http://proxy.example.com:3128","kind":"BuildDefaultsConfig"}}}'
-
+#openshift_builddefaults_json='{"BuildDefaults":{"configuration":{"kind":"BuildDefaultsConfig","apiVersion":"v1","gitHTTPSProxy":"http://proxy.example.com.redhat.com:3128","gitHTTPProxy":"http://proxy.example.com.redhat.com:3128","env":[{"name":"HTTP_PROXY","value":"http://proxy.example.com.redhat.com:3128"},{"name":"HTTPS_PROXY","value":"http://proxy.example.com.redhat.com:3128"},{"name":"NO_PROXY","value":"ose3-master.example.com"}]}}'
 # masterConfig.volumeConfig.dynamicProvisioningEnabled, configurable as of 1.2/3.2, enabled by default
 #openshift_master_dynamic_provisioning_enabled=False
 
@@ -474,8 +625,10 @@ ose3-master[1:3]-ansible.test.example.com
 [etcd]
 ose3-etcd[1:3]-ansible.test.example.com
 
+# NOTE: Containerized load balancer hosts are not yet supported, if using a global
+# containerized=true host variable we must set to false.
 [lb]
-ose3-lb-ansible.test.example.com
+ose3-lb-ansible.test.example.com containerized=false
 
 # NOTE: Currently we require that masters be part of the SDN which requires that they also be nodes
 # However, in order to ensure that your masters are not burdened with running pods you should

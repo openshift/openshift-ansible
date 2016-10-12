@@ -17,16 +17,16 @@
     persistent: yes
   when: ansible_selinux and ansible_selinux.status == "enabled" and virt_use_nfs_output.rc == 0
 
-- name: Check for existence of virt_sandbox_use_nfs seboolean
+- name: Check for existence of virt_sandbox_use_nfs seboolean (RHEL)
   command: getsebool virt_sandbox_use_nfs
   register: virt_sandbox_use_nfs_output
-  when: ansible_selinux and ansible_selinux.status == "enabled"
+  when: ansible_distribution != "Fedora" and ansible_selinux and ansible_selinux.status == "enabled"
   failed_when: false
   changed_when: false
 
-- name: Set seboolean to allow nfs storage plugin access from containers(sandbox)
+- name: Set seboolean to allow nfs storage plugin access from containers(sandbox) (RHEL)
   seboolean:
     name: virt_sandbox_use_nfs
     state: yes
     persistent: yes
-  when: ansible_selinux and ansible_selinux.status == "enabled" and virt_sandbox_use_nfs_output.rc == 0
+  when: ansible_distribution != "Fedora" and ansible_selinux and ansible_selinux.status == "enabled" and virt_sandbox_use_nfs_output.rc == 0

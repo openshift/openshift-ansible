@@ -8,3 +8,6 @@ nuage_ca_serial: "{{ nuage_ca_dir }}/nuageMonCA.serial.txt"
 
 nuage_master_mon_dir: /usr/share/nuage-openshift-monitor
 nuage_node_plugin_dir: /usr/share/vsp-openshift
+
+nuage_mon_rest_server_port: "{{ nuage_openshift_monitor_rest_server_port | default('9443') }}"
+

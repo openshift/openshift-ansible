@@ -7,4 +7,4 @@
   template:
     dest: "{{ openshift.common.config_base }}/cloudprovider/openstack.conf"
     src: openstack.conf.j2
-  when: "'auth_url' in openshift.cloudprovider.openstack and 'username' in openshift.cloudprovider.openstack and 'password' in openshift.cloudprovider.openstack and ('tenant_id' in openshift.cloudprovider.openstack or 'tenant_name' in openshift.cloudprovider.openstack)"
+  when: "openshift_cloudprovider_openstack_auth_url is defined and openshift_cloudprovider_openstack_username is defined and openshift_cloudprovider_openstack_password is defined and (openshift_cloudprovider_openstack_tenant_id is defined or openshift_cloudprovider_openstack_tenant_name is defined)"

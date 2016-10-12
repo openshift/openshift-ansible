@@ -4,6 +4,8 @@ log:
 http:
   addr: :5000
 storage:
+  delete:
+    enabled: true
   cache:
     blobdescriptor: inmemory
 {% if openshift.hosted.registry.storage.provider == 's3' %}
@@ -15,7 +17,7 @@ storage:
     encrypt: false
     secure: true
     v4auth: true
-    rootdirectory: /registry
+    rootdirectory: {{ openshift.hosted.registry.storage.s3.rootdirectory | default('/registry') }}
     chunksize: "{{ openshift.hosted.registry.storage.s3.chunksize | default(26214400) }}"
 {% elif openshift.hosted.registry.storage.provider == 'azure_blob' %}
   azure:
@@ -58,10 +60,16 @@ auth:
   openshift:
     realm: openshift
 middleware:
+{% if openshift.common.version_gte_3_3_or_1_3 | bool %}
+  registry:
+  - name: openshift
+{% endif %}
   repository:
   - name: openshift
     options:
       pullthrough: {{ openshift.hosted.registry.pullthrough | default(true) }}
+      acceptschema2: {{ openshift.hosted.registry.acceptschema2 | default(false) }}
+      enforcequota: {{ openshift.hosted.registry.enforcequota | default(false) }}
 {% if openshift.hosted.registry.storage.provider == 's3' and 'cloudfront' in openshift.hosted.registry.storage.s3 %}
   storage:
   - name: cloudfront
@@ -69,4 +77,7 @@ middleware:
       baseurl: {{ openshift.hosted.registry.storage.s3.cloudfront.baseurl }}
       privatekey: {{ openshift.hosted.registry.storage.s3.cloudfront.privatekeyfile }}
       keypairid: {{ openshift.hosted.registry.storage.s3.cloudfront.keypairid }}
+{% elif openshift.common.version_gte_3_3_or_1_3 | bool %}
+  storage:
+  - name: openshift
 {% endif -%}

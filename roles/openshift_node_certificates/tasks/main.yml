@@ -25,11 +25,14 @@
   - server.key
   - server.crt
   register: g_node_cert_stat_result
+  when: not openshift_certificates_redeploy | default(false) | bool
 
 - set_fact:
-    node_certs_missing: "{{ False in (g_node_cert_stat_result.results
-                            | oo_collect(attribute='stat.exists')
-                            | list) }}"
+    node_certs_missing: "{{ true if openshift_certificates_redeploy | default(false) | bool
+                            else (False in (g_node_cert_stat_result.results
+                                            | default({})
+                                            | oo_collect(attribute='stat.exists')
+                                            | list)) }}"
 
 - name: Create openshift_generated_configs_dir if it does not exist
   file:
@@ -88,6 +91,9 @@
     -C {{ openshift_node_generated_config_dir }} .
   args:
     creates: "{{ openshift_node_generated_config_dir }}.tgz"
+    # Disables the following warning:
+    # Consider using unarchive module rather than running tar
+    warn: no
   when: node_certs_missing | bool
   delegate_to: "{{ openshift_ca_host }}"
 
@@ -118,3 +124,14 @@
   when: node_certs_missing | bool
   delegate_to: localhost
   become: no
+
+- name: Copy OpenShift CA to system CA trust
+  copy:
+    src: "{{ item.cert }}"
+    dest: "/etc/pki/ca-trust/source/anchors/{{ item.id }}-{{ item.cert | basename }}"
+    remote_src: yes
+  with_items:
+  - id: openshift
+    cert: "{{ openshift_node_cert_dir }}/ca.crt"
+  notify:
+  - update ca trust

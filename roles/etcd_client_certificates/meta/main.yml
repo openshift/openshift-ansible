@@ -13,4 +13,4 @@ galaxy_info:
   - cloud
   - system
 dependencies:
-- role: etcd_ca
+- role: etcd_common

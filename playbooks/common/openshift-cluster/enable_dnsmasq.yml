@@ -8,11 +8,12 @@
   post_tasks:
   - fail: msg="This playbook requires a master version of at least Origin 1.1 or OSE 3.1"
     when: not openshift.common.version_gte_3_1_1_or_1_1_1 | bool
-  
+
 - name: Reconfigure masters to listen on our new dns_port
   hosts: oo_masters_to_config
   handlers:
   - include: ../../../roles/openshift_master/handlers/main.yml
+    static: yes
   vars:
     os_firewall_allow:
     - service: skydns tcp
@@ -43,6 +44,7 @@
   hosts: oo_nodes_to_config
   handlers:
   - include: ../../../roles/openshift_node/handlers/main.yml
+    static: yes
   pre_tasks:
   - openshift_facts:
       role: "{{ item.role }}"

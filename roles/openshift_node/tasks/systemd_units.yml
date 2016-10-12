@@ -40,10 +40,33 @@
     create: true
   with_items:
     - regex: '^OPTIONS='
-      line: "OPTIONS=--loglevel={{ openshift.node.debug_level }}"
+      line: "OPTIONS=--loglevel={{ openshift.node.debug_level | default(2) }}"
     - regex: '^CONFIG_FILE='
       line: "CONFIG_FILE={{ openshift_node_config_file }}"
     - regex: '^IMAGE_VERSION='
       line: "IMAGE_VERSION={{ openshift_image_tag }}"
+  notify:
+  - restart node
+
+- name: Configure Proxy Settings
+  lineinfile:
+    dest: /etc/sysconfig/{{ openshift.common.service_type }}-node
+    regexp: "{{ item.regex }}"
+    line: "{{ item.line }}"
+    create: true
+  with_items:
+    - regex: '^HTTP_PROXY='
+      line: "HTTP_PROXY={{ openshift.common.http_proxy | default('') }}"
+    - regex: '^HTTPS_PROXY='
+      line: "HTTPS_PROXY={{ openshift.common.https_proxy | default('') }}"
+    - regex: '^NO_PROXY='
+      line: "NO_PROXY={{ openshift.common.no_proxy | default([]) | join(',') }},{{ openshift.common.portal_net }},{{ hostvars[groups.oo_first_master.0].openshift.master.sdn_cluster_network_cidr }}"
+  when: ('http_proxy' in openshift.common and openshift.common.http_proxy != '')
+  notify:
+  - restart node
+
+- name: Reload systemd units
+  command: systemctl daemon-reload
+  when: openshift.common.is_containerized | bool and (install_node_result | changed or install_ovs_sysconfig | changed or install_node_dep_result | changed)
   notify:
   - restart node

@@ -1,4 +1,4 @@
-:warning: **WARNING** :warning: This feature is community supported and has not been tested by Red Hat. Visit [docs.openshift.com](https://docs.openshift.com) for [OpenShift Enterprise](https://docs.openshift.com/enterprise/latest/install_config/install/index.html) or [OpenShift Origin](https://docs.openshift.org/latest/install_config/install/index.html) supported installation docs.
+:warning: **WARNING** :warning: This feature is community supported and has not been tested by Red Hat. Visit [docs.openshift.com](https://docs.openshift.com) for [OpenShift Enterprise](https://docs.openshift.com/enterprise/latest/install_config/install/planning.html) or [OpenShift Origin](https://docs.openshift.org/latest/install_config/install/planning.html) supported installation docs.
 
 AWS Setup Instructions
 ======================
@@ -135,7 +135,12 @@ Install Dependencies
 --------------------
 1. Ansible requires python-boto for aws operations:
 
-RHEL/CentOS/Fedora
+Fedora
+```
+  dnf install -y ansible python-boto pyOpenSSL
+```
+
+RHEL/CentOS
 ```
   yum install -y ansible python-boto pyOpenSSL
 ```
@@ -191,5 +196,5 @@ You should now be ready to follow the **What's Next?** section of the advanced i
 
 Refer to the advanced installation guide for your deployment type:
 
-* [OpenShift Enterprise](https://docs.openshift.com/enterprise/3.0/install_config/install/advanced_install.html#what-s-next)
+* [OpenShift Enterprise](https://docs.openshift.com/enterprise/latest/install_config/install/advanced_install.html#what-s-next)
 * [OpenShift Origin](https://docs.openshift.org/latest/install_config/install/advanced_install.html#what-s-next)

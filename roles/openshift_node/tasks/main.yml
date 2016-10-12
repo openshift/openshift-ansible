@@ -34,6 +34,10 @@
   action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-node{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }},tuned-profiles-{{ openshift.common.service_type }}-node{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }} state=present"
   when: not openshift.common.is_containerized | bool
 
+- name: Set atomic-guest tuned profile
+  command: "tuned-adm profile atomic-guest"
+  when: openshift.common.is_atomic | bool
+
 - name: Install sdn-ovs package
   action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-sdn-ovs{{ openshift_pkg_version | oo_image_tag_to_rpm_version(include_dash=True) }} state=present"
   when: openshift.common.use_openshift_sdn and not openshift.common.is_containerized | bool
@@ -55,11 +59,11 @@
 - name: Install the systemd units
   include: systemd_units.yml
 
-- name: Reload systemd units
-  command: systemctl daemon-reload
-  when: openshift.common.is_containerized | bool and (install_node_result | changed or install_ovs_sysconfig | changed or install_node_dep_result | changed)
-  notify:
-  - restart node
+# The atomic-openshift-node service will set this parameter on
+# startup, but if the network service is restarted this setting is
+# lost. Reference: https://bugzilla.redhat.com/show_bug.cgi?id=1372388
+- name: Persist net.ipv4.ip_forward sysctl entry
+  sysctl: name="net.ipv4.ip_forward" value=1 sysctl_set=yes state=present reload=yes
 
 - name: Start and enable openvswitch docker service
   service: name=openvswitch.service enabled=yes state=started
@@ -89,10 +93,10 @@
     create: true
   with_items:
     - regex: '^AWS_ACCESS_KEY_ID='
-      line: "AWS_ACCESS_KEY_ID={{ openshift.cloudprovider.aws.access_key }}"
+      line: "AWS_ACCESS_KEY_ID={{ openshift_cloudprovider_aws_access_key | default('') }}"
     - regex: '^AWS_SECRET_ACCESS_KEY='
-      line: "AWS_SECRET_ACCESS_KEY={{ openshift.cloudprovider.aws.secret_key }}"
-  when: "'cloudprovider' in openshift and 'aws' in openshift.cloudprovider and 'kind' in openshift.cloudprovider and openshift.cloudprovider.kind == 'aws' and 'access_key' in openshift.cloudprovider.aws and 'secret_key' in openshift.cloudprovider.aws"
+      line: "AWS_SECRET_ACCESS_KEY={{ openshift_cloudprovider_aws_secret_key | default('') }}"
+  when: "openshift_cloudprovider_kind is defined and openshift_cloudprovider_kind == 'aws' and openshift_cloudprovider_aws_access_key is defined and openshift_cloudprovider_aws_secret_key is defined"
   notify:
   - restart node
 
@@ -106,8 +110,20 @@
   notify:
   - restart node
 
-- name: Additional storage plugin configuration
-  include: storage_plugins/main.yml
+- name: NFS storage plugin configuration
+  include: storage_plugins/nfs.yml
+
+- name: GlusterFS storage plugin configuration
+  include: storage_plugins/glusterfs.yml
+  when: "'glusterfs' in openshift.node.storage_plugin_deps"
+
+- name: Ceph storage plugin configuration
+  include: storage_plugins/ceph.yml
+  when: "'ceph' in openshift.node.storage_plugin_deps"
+
+- name: iSCSI storage plugin configuration
+  include: storage_plugins/iscsi.yml
+  when: "'iscsi' in openshift.node.storage_plugin_deps"
 
 # Necessary because when you're on a node that's also a master the master will be
 # restarted after the node restarts docker and it will take up to 60 seconds for
@@ -118,6 +134,10 @@
   command: >
     curl --silent --cacert {{ openshift.common.config_base }}/node/ca.crt
     {{ openshift_node_master_api_url }}/healthz/ready
+  args:
+    # Disables the following warning:
+    # Consider using get_url or uri module rather than running curl
+    warn: no
   register: api_available_output
   until: api_available_output.stdout == 'ok'
   retries: 120
@@ -132,17 +152,9 @@
 - name: Start and enable node
   service: name={{ openshift.common.service_type }}-node enabled=yes state=started
   register: node_start_result
-  ignore_errors: yes
-
-- name: Wait 30 seconds for docker initialization whenever node has failed
-  pause:
-    seconds: 30
-  when: node_start_result | failed
-
-- name: Start and enable node again
-  service: name={{ openshift.common.service_type }}-node enabled=yes state=started
-  register: node_start_result
-  when: node_start_result | failed
+  until: not node_start_result | failed
+  retries: 1
+  delay: 30
 
 - set_fact:
     node_service_status_changed: "{{ node_start_result | changed }}"

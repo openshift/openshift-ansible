@@ -1,5 +1,5 @@
 <network>
-  <name>openshift-ansible</name>
+  <name>{{ libvirt_network }}</name>
   <forward mode='nat'>
     <nat>
       <port start='1024' end='65535'/>

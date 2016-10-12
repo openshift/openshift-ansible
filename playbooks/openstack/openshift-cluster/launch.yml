@@ -33,6 +33,7 @@
              -P external_net={{ openstack_network_external_net }}
              -P ssh_public_key="{{ openstack_ssh_public_key }}"
              -P ssh_incoming={{ openstack_ssh_access_from }}
+             -P node_port_incoming={{ openstack_node_port_access_from }}
              -P num_etcd={{ num_etcd }}
              -P num_masters={{ num_masters }}
              -P num_nodes={{ num_nodes }}
@@ -41,13 +42,13 @@
              -P master_image={{ deployment_vars[deployment_type].image }}
              -P node_image={{ deployment_vars[deployment_type].image }}
              -P infra_image={{ deployment_vars[deployment_type].image }}
-             -P dns_image={{ deployment_vars[deployment_type].image }}
              -P etcd_flavor={{ openstack_flavor["etcd"] }}
              -P master_flavor={{ openstack_flavor["master"] }}
              -P node_flavor={{ openstack_flavor["node"] }}
              -P infra_flavor={{ openstack_flavor["infra"] }}
-             -P dns_flavor={{ openstack_flavor["dns"] }}
              openshift-ansible-{{ cluster_id }}-stack'
+    args:
+      chdir: '{{ playbook_dir }}'
 
   - name: Wait for OpenStack Stack readiness
     shell: 'heat stack-show openshift-ansible-{{ cluster_id }}-stack | awk ''$2 == "stack_status" {print $4}'''
@@ -103,13 +104,13 @@
       ansible_ssh_host: '{{ item[2] }}'
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_become: "{{ deployment_vars[deployment_type].become }}"
-      groups: 'tag_environment_{{ cluster_env }}, tag_host-type_etcd, tag_sub-host-type_default, tag_clusterid_{{ cluster_id }}'
+      groups: 'meta-environment_{{ cluster_env }}, meta-host-type_etcd, meta-sub-host-type_default, meta-clusterid_{{ cluster_id }}'
       openshift_node_labels:
         type: "etcd"
     with_together:
-      - parsed_outputs.etcd_names
-      - parsed_outputs.etcd_ips
-      - parsed_outputs.etcd_floating_ips
+      - '{{ parsed_outputs.etcd_names }}'
+      - '{{ parsed_outputs.etcd_ips }}'
+      - '{{ parsed_outputs.etcd_floating_ips }}'
 
   - name: Add new master instances groups and variables
     add_host:
@@ -117,13 +118,13 @@
       ansible_ssh_host: '{{ item[2] }}'
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_become: "{{ deployment_vars[deployment_type].become }}"
-      groups: 'tag_environment_{{ cluster_env }}, tag_host-type_master, tag_sub-host-type_default, tag_clusterid_{{ cluster_id }}'
+      groups: 'meta-environment_{{ cluster_env }}, meta-host-type_master, meta-sub-host-type_default, meta-clusterid_{{ cluster_id }}'
       openshift_node_labels:
         type: "master"
     with_together:
-      - parsed_outputs.master_names
-      - parsed_outputs.master_ips
-      - parsed_outputs.master_floating_ips
+      - '{{ parsed_outputs.master_names }}'
+      - '{{ parsed_outputs.master_ips }}'
+      - '{{ parsed_outputs.master_floating_ips }}'
 
   - name: Add new node instances groups and variables
     add_host:
@@ -131,13 +132,13 @@
       ansible_ssh_host: '{{ item[2] }}'
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_become: "{{ deployment_vars[deployment_type].become }}"
-      groups: 'tag_environment_{{ cluster_env }}, tag_host-type_node, tag_sub-host-type_compute, tag_clusterid_{{ cluster_id }}'
+      groups: 'meta-environment_{{ cluster_env }}, meta-host-type_node, meta-sub-host-type_compute, meta-clusterid_{{ cluster_id }}'
       openshift_node_labels:
         type: "compute"
     with_together:
-      - parsed_outputs.node_names
-      - parsed_outputs.node_ips
-      - parsed_outputs.node_floating_ips
+      - '{{ parsed_outputs.node_names }}'
+      - '{{ parsed_outputs.node_ips }}'
+      - '{{ parsed_outputs.node_floating_ips }}'
 
   - name: Add new infra instances groups and variables
     add_host:
@@ -145,31 +146,22 @@
       ansible_ssh_host: '{{ item[2] }}'
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_become: "{{ deployment_vars[deployment_type].become }}"
-      groups: 'tag_environment_{{ cluster_env }}, tag_host-type_node, tag_sub-host-type_infra, tag_clusterid_{{ cluster_id }}'
+      groups: 'meta-environment_{{ cluster_env }}, meta-host-type_node, meta-sub-host-type_infra, meta-clusterid_{{ cluster_id }}'
       openshift_node_labels:
         type: "infra"
     with_together:
-      - parsed_outputs.infra_names
-      - parsed_outputs.infra_ips
-      - parsed_outputs.infra_floating_ips
-
-  - name: Add DNS groups and variables
-    add_host:
-      hostname: '{{ parsed_outputs.dns_name }}'
-      ansible_ssh_host: '{{ parsed_outputs.dns_floating_ip }}'
-      ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
-      ansible_become: "{{ deployment_vars[deployment_type].become }}"
-      groups: '{{ cluster_id }}-dns'
+      - '{{ parsed_outputs.infra_names }}'
+      - '{{ parsed_outputs.infra_ips }}'
+      - '{{ parsed_outputs.infra_floating_ips }}'
 
   - name: Wait for ssh
     wait_for:
       host: '{{ item }}'
       port: 22
     with_flattened:
-      - parsed_outputs.master_floating_ips
-      - parsed_outputs.node_floating_ips
-      - parsed_outputs.infra_floating_ips
-      - parsed_outputs.dns_floating_ip
+      - '{{ parsed_outputs.master_floating_ips }}'
+      - '{{ parsed_outputs.node_floating_ips }}'
+      - '{{ parsed_outputs.infra_floating_ips }}'
 
   - name: Wait for user setup
     command: 'ssh -o StrictHostKeyChecking=no -o PasswordAuthentication=no -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null {{ deployment_vars[deployment_type].ssh_user }}@{{ item }} echo {{ deployment_vars[deployment_type].ssh_user }} user is setup'
@@ -178,10 +170,9 @@
     retries: 30
     delay: 1
     with_flattened:
-      - parsed_outputs.master_floating_ips
-      - parsed_outputs.node_floating_ips
-      - parsed_outputs.infra_floating_ips
-      - parsed_outputs.dns_floating_ip
+      - '{{ parsed_outputs.master_floating_ips }}'
+      - '{{ parsed_outputs.node_floating_ips }}'
+      - '{{ parsed_outputs.infra_floating_ips }}'
 
 - include: update.yml
 

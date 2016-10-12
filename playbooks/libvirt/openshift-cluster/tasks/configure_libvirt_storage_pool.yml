@@ -6,22 +6,25 @@
 
 # We need to set permissions on the directory and any items created under the directory, so we need to call the acl module with and without default set.
 - acl:
-    default: "{{ item }}"
+    default: '{{ item.default }}'
     entity: kvm
     etype: group
     name: "{{ libvirt_storage_pool_path }}"
-    permissions: rwx
+    permissions: '{{ item.permissions }}'
     state: present
   with_items:
-    - no
-    - yes
+    - default: no
+      permissions: x
+    - default: yes
+      permissions: rwx
 
-- name: Test if libvirt storage pool for openshift already exists
-  command: "virsh -c {{ libvirt_uri }} pool-info {{ libvirt_storage_pool }}"
-  register: pool_info_result
-  changed_when: False
-  failed_when: "pool_info_result.rc != 0 and 'no storage pool with matching name' not in pool_info_result.stderr"
-
-- name: Create the libvirt storage pool for openshift
-  command: 'virsh -c {{ libvirt_uri }} pool-create-as {{ libvirt_storage_pool }} dir --target {{ libvirt_storage_pool_path }}'
-  when: pool_info_result.rc == 1
+- name: Create the libvirt storage pool for OpenShift
+  virt_pool:
+    name: '{{ libvirt_storage_pool }}'
+    state: '{{ item }}'
+    autostart: 'yes'
+    xml: "{{ lookup('template', 'storage-pool.xml') }}"
+    uri: '{{ libvirt_uri }}'
+  with_items:
+    - present
+    - active
