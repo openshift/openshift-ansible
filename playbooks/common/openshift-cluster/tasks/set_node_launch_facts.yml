@@ -5,7 +5,7 @@
 
 - name: Generate node instance names(s)
   set_fact:
-    scratch_name: "{{ cluster_id }}-{{ k8s_type }}-{{ sub_host_type }}-{{ '%05x' | format(1048576 | random) }}"
+    scratch_name: "{{ k8s_type }}-{{ sub_host_type }}-{{ '%05x' | format(1048576 | random) }}.{{ cluster_id }}"
   register: node_names_output
   with_sequence: count={{ number_nodes }}
 
@@ -13,3 +13,33 @@
     node_names: "{{ node_names_output.results | default([])
                     | oo_collect('ansible_facts')
                     | oo_collect('scratch_name') }}"
+
+- debug: var=node_names
+
+- name: Generate compute node instance private ips
+  set_fact:
+    scratch_name: "{{ private_subnet }}.{{ item | int + 40 }}"
+  register: node_ips_output
+  with_sequence: count={{ number_nodes }}
+  when: sub_host_type == 'compute'
+
+- name: Saving output as node_ips
+  set_fact:
+    node_ips: "{{ node_ips_output.results | default([])
+                   | oo_collect('ansible_facts')
+                   | oo_collect('scratch_name') }}"
+  when: sub_host_type == 'compute'
+
+- name: Generate infra node instance private ips·
+  set_fact:
+    scratch_name: "{{ private_subnet }}.{{ item | int + 80 }}"
+  register: node_ips_output
+  with_sequence: count={{ number_nodes }}
+  when: sub_host_type == 'infra'
+
+- name: Saving output as node_ips
+  set_fact:
+    node_ips: "{{ node_ips_output.results | default([])
+                   | oo_collect('ansible_facts')
+                   | oo_collect('scratch_name') }}"
+  when: sub_host_type == 'infra'

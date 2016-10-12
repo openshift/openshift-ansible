@@ -3,11 +3,22 @@
 
 - name: Generate master instance names(s)
   set_fact:
-    scratch_name: "{{ cluster_id }}-{{ k8s_type }}-{{ '%05x' | format(1048576 | random) }}"
+    scratch_name: "{{ k8s_type }}-{{ '%05x' | format(1048576 | random) }}.{{ cluster_id }}"
   register: master_names_output
   with_sequence: count={{ num_masters }}
 
 - set_fact:
     master_names: "{{ master_names_output.results | default([])
+                      | oo_collect('ansible_facts')
+                      | oo_collect('scratch_name') }}"
+
+- name: Generate master instance private ips
+  set_fact:
+    scratch_name: "{{ private_subnet }}.{{ item | int + 20 }}"
+  register: master_ips_output
+  with_sequence: count={{ num_masters }}
+
+- set_fact:
+    master_ips: "{{ master_ips_output.results | default([])
                       | oo_collect('ansible_facts')
                       | oo_collect('scratch_name') }}"
