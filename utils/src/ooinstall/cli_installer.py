@@ -44,9 +44,9 @@ UPGRADE_MAPPINGS = {
     '3.2': {
         'minor_version': '3.2',
         'minor_playbook': 'v3_2/upgrade.yml',
-        'major_playbook': 'v3_2/upgrade.yml',
+        'major_playbook': 'v3_3/upgrade.yml',
         'major_version': '3.3',
-    }
+    },
 }
 
 
@@ -930,7 +930,12 @@ def upgrade(ctx, latest_minor, next_major):
         sys.exit(0)
 
     old_version = oo_cfg.settings['variant_version']
-    mapping = UPGRADE_MAPPINGS.get(old_version)
+
+    try:
+        mapping = UPGRADE_MAPPINGS[old_version]
+    except KeyError:
+        click.echo('No upgrades available for %s %s' % (variant, old_version))
+        sys.exit(0)
 
     message = """
         This tool will help you upgrade your existing OpenShift installation.
