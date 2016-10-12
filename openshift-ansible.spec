@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.6
+Version:        3.4.7
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,15 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Oct 12 2016 Troy Dawson <tdawson@redhat.com> 3.4.7-1
+- set defaults for debug_level in template and task (jhcook@gmail.com)
+- Set HTTPS_PROXY in example builddefaults_json (sdodson@redhat.com)
+- Fix config and namespace for registry volume detection (sdodson@redhat.com)
+- Apply same pattern to HA master services (sdodson@redhat.com)
+- Improve how we handle containerized node failure on first startup
+  (sdodson@redhat.com)
+- Check that OpenStack hostnames are resolvable (lhuard@amadeus.com)
+
 * Mon Oct 10 2016 Troy Dawson <tdawson@redhat.com> 3.4.6-1
 - Retry failed master startup once (ironcladlou@gmail.com)
 - [logging] Fix openshift_hosted_logging_fluentd_nodeselector
