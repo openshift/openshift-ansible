@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.34
+Version:        3.3.35
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Oct 12 2016 Scott Dodson <sdodson@redhat.com> 3.3.35-1
+- Stop restarting node after upgrading master rpms. (dgoodwin@redhat.com)
+- Fix upgrade mappings in quick installer (smunilla@redhat.com)
+- set defaults for debug_level in template and task (jhcook@gmail.com)
+- Fix config and namespace for registry volume detection (sdodson@redhat.com)
+
 * Mon Oct 10 2016 Scott Dodson <sdodson@redhat.com> 3.3.34-1
 - Set HTTPS_PROXY in example builddefaults_json (sdodson@redhat.com)
 
