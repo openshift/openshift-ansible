@@ -67,7 +67,7 @@
     openshift_ca_host: "{{ groups.oo_first_master.0 }}"
   - role: openshift_cloud_provider
   - role: openshift_node_dnsmasq
-    when: openshift.common.use_dnsmasq
+    when: openshift.common.use_dnsmasq | bool
   - role: os_firewall
     os_firewall_allow:
     - service: Kubernetes kubelet
@@ -106,7 +106,7 @@
     openshift_ca_host: "{{ groups.oo_first_master.0 }}"
   - role: openshift_cloud_provider
   - role: openshift_node_dnsmasq
-    when: openshift.common.use_dnsmasq
+    when: openshift.common.use_dnsmasq | bool
   - role: os_firewall
     os_firewall_allow:
     - service: Kubernetes kubelet
