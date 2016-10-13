@@ -1,4 +1,4 @@
-# pylint: disable=invalid-name,protected-access,import-error,line-too-long
+# pylint: disable=invalid-name,protected-access,import-error,line-too-long,attribute-defined-outside-init
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -111,6 +111,8 @@ role. Only the tasks directly assigned to a play are exposed in the
             msg = "PLAY"
         else:
             msg = "PLAY [%s]" % name
+
+        self._play = play
 
         self.banner(msg)
 
