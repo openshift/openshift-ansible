@@ -7,7 +7,13 @@
 
 """Ansible module for retrieving and setting openshift related facts"""
 
-import ConfigParser
+try:
+    # python2
+    import ConfigParser
+except ImportError:
+    # python3
+    import configparser as ConfigParser
+
 import copy
 import io
 import os
@@ -203,9 +209,9 @@ def query_metadata(metadata_url, headers=None, expect_json=False):
     if info['status'] != 200:
         raise OpenShiftFactsMetadataUnavailableError("Metadata unavailable")
     if expect_json:
-        return module.from_json(result.read())
+        return module.from_json(to_native(result.read()))
     else:
-        return [line.strip() for line in result.readlines()]
+        return [to_native(line.strip()) for line in result.readlines()]
 
 
 def walk_metadata(metadata_url, headers=None, expect_json=False):
@@ -313,7 +319,7 @@ def normalize_aws_facts(metadata, facts):
     ):
         int_info = dict()
         var_map = {'ips': 'local-ipv4s', 'public_ips': 'public-ipv4s'}
-        for ips_var, int_var in var_map.iteritems():
+        for ips_var, int_var in iteritems(var_map):
             ips = interface.get(int_var)
             if isinstance(ips, basestring):
                 int_info[ips_var] = [ips]
@@ -913,7 +919,7 @@ def set_sdn_facts_if_unset(facts, system_facts):
         # default MTU if interface MTU cannot be detected
         facts['node']['sdn_mtu'] = '1450'
 
-        for val in system_facts.itervalues():
+        for val in itervalues(system_facts):
             if isinstance(val, dict) and 'mtu' in val:
                 mtu = val['mtu']
 
@@ -1266,7 +1272,7 @@ def merge_facts(orig, new, additive_facts_to_overwrite, protected_facts_to_overw
                             'image_policy_config']
 
     facts = dict()
-    for key, value in orig.iteritems():
+    for key, value in iteritems(orig):
         # Key exists in both old and new facts.
         if key in new:
             if key in inventory_json_facts:
@@ -2015,7 +2021,7 @@ class OpenShiftFacts(object):
             facts_to_set[self.role] = facts
 
         if openshift_env != {} and openshift_env != None:
-            for fact, value in openshift_env.iteritems():
+            for fact, value in iteritems(openshift_env):
                 oo_env_facts = dict()
                 current_level = oo_env_facts
                 keys = self.split_openshift_env_fact_keys(fact, openshift_env_structures)[1:]
@@ -2073,7 +2079,7 @@ class OpenShiftFacts(object):
                 facts (dict): facts to clean
         """
         facts_to_remove = []
-        for fact, value in facts.iteritems():
+        for fact, value in iteritems(facts):
             if isinstance(facts[fact], dict):
                 facts[fact] = self.remove_empty_facts(facts[fact])
             else:
@@ -2204,6 +2210,9 @@ def main():
 from ansible.module_utils.basic import *
 from ansible.module_utils.facts import *
 from ansible.module_utils.urls import *
+from ansible.module_utils.six import iteritems, itervalues
+from ansible.module_utils._text import to_native
+from ansible.module_utils.six import b
 
 if __name__ == '__main__':
     main()
