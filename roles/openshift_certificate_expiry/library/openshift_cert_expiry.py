@@ -36,7 +36,7 @@ description:
   - C(days_remaining) - The number of days until the certificate expires.
   - C(expiry) - The date the certificate expires on.
   - C(path) - The full path to the certificate on the examined host.
-version_added: "0.0"
+version_added: "1.0"
 options:
   config_base:
     description:
@@ -125,13 +125,6 @@ A 3-tuple of the form: (certificate_common_name, certificate_expiry_date, certif
 
     cert_loaded = OpenSSL.crypto.load_certificate(
         OpenSSL.crypto.FILETYPE_PEM, _cert_string)
-
-    ######################################################################
-    # Read just the first name from the cert - DISABLED while testing
-    # out the 'get all possible names' function (below)
-    #
-    # Strip the subject down to just the value of the first name
-    # cert_subject = cert_loaded.get_subject().get_components()[0][1]
 
     ######################################################################
     # Read all possible names from the cert
@@ -227,7 +220,7 @@ Return:
 
 def tabulate_summary(certificates, kubeconfigs, etcd_certs, router_certs, registry_certs):
     """Calculate the summary text for when the module finishes
-running. This includes counds of each classification and what have
+running. This includes counts of each classification and what have
 you.
 
 Params:
@@ -236,6 +229,7 @@ Params:
   dicts with filled in `health` keys for system certificates.
 - `kubeconfigs` - as above for kubeconfigs
 - `etcd_certs` - as above for etcd certs
+
 Return:
 
 - `summary_results` (dict) - Counts of each cert type classification
@@ -290,7 +284,7 @@ an OpenShift Container Platform cluster
         supports_check_mode=True,
     )
 
-    # Basic scaffolding for OpenShift spcific certs
+    # Basic scaffolding for OpenShift specific certs
     openshift_base_config_path = module.params['config_base']
     openshift_master_config_path = os.path.normpath(
         os.path.join(openshift_base_config_path, "master/master-config.yaml")
@@ -316,6 +310,10 @@ an OpenShift Container Platform cluster
                 os.path.join(openshift_base_config_path, "master/%s.kubeconfig" % m_kube_config)
             )
         )
+
+    # Validate some paths we have the ability to do ahead of time
+    openshift_cert_check_paths = filter_paths(openshift_cert_check_paths)
+    kubeconfig_paths = filter_paths(kubeconfig_paths)
 
     # etcd, where do you hide your certs? Used when parsing etcd.conf
     etcd_cert_params = [

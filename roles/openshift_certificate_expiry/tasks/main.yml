@@ -15,7 +15,12 @@
   delegate_to: localhost
   when: "{{ openshift_certificate_expiry_generate_html_report|bool }}"
 
-- name: Generate expiration results JSON
+- name: Generate the result JSON string
+  run_once: yes
+  set_fact: json_result_string="{{ hostvars|oo_cert_expiry_results_to_json(play_hosts) }}"
+  when: "{{ openshift_certificate_expiry_save_json_results|bool }}"
+
+- name: Generate results JSON file
   become: no
   run_once: yes
   template:
