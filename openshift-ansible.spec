@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.7
+Version:        3.4.8
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Oct 14 2016 Troy Dawson <tdawson@redhat.com> 3.4.8-1
+- update handling of use_dnsmasq (jdetiber@redhat.com)
+- Fix standalone docker upgrade playbook skipping nodes. (dgoodwin@redhat.com)
+- Fix missing play assignment in a-o-i callback plugin (tbielawa@redhat.com)
+- Stop restarting node after upgrading master rpms. (dgoodwin@redhat.com)
+- Fix upgrade mappings in quick installer (smunilla@redhat.com)
+- nfs: Handle seboolean aliases not just in Fedora (walters@verbum.org)
+
 * Wed Oct 12 2016 Troy Dawson <tdawson@redhat.com> 3.4.7-1
 - set defaults for debug_level in template and task (jhcook@gmail.com)
 - Set HTTPS_PROXY in example builddefaults_json (sdodson@redhat.com)
