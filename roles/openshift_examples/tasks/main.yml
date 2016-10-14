@@ -17,6 +17,8 @@
   register: copy_examples_mktemp
   run_once: True
 
+- debug: var=content_version
+
 - name: Create tar of OpenShift examples
   local_action: command tar -C "{{ role_path }}/files/examples/{{ content_version }}/" -cvf "{{ copy_examples_mktemp.stdout }}/openshift-examples.tar" .
   args:
