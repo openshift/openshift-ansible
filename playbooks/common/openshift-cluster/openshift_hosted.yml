@@ -51,7 +51,7 @@
   - role: openshift_metrics
     when: openshift_hosted_metrics_deploy | default(false) | bool
   - role: openshift_hosted_logging
-    when: openshift_hosted_logging_deploy | default(false) | bool
+    when: openshift_hosted_logging_deploy | default(true) | bool
     openshift_hosted_logging_hostname: "{{ logging_hostname }}"
     openshift_hosted_logging_ops_hostname: "{{ logging_ops_hostname }}"
     openshift_hosted_logging_master_public_url: "{{ logging_master_public_url }}"
