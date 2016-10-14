@@ -15,7 +15,7 @@ storage:
     region: {{ openshift.hosted.registry.storage.s3.region }}
 {%   if 'regionendpoint' in openshift.hosted.registry.storage.s3 %}
     regionendpoint: {{ openshift.hosted.registry.storage.s3.regionendpoint }}
-{%   endif -%}
+{%   endif %}
     bucket: {{ openshift.hosted.registry.storage.s3.bucket }}
     encrypt: false
     secure: true
