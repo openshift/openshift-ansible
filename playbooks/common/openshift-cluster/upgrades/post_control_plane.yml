@@ -41,7 +41,7 @@
       {{ oc_cmd }} patch dc/{{ item['labels']['deploymentconfig'] }} -n {{ item['namespace'] }} -p
       '{"spec":{"template":{"spec":{"containers":[{"name":"router","image":"{{ router_image }}","livenessProbe":{"tcpSocket":null,"httpGet":{"path": "/healthz", "port": 1936, "host": "localhost", "scheme": "HTTP"},"initialDelaySeconds":10,"timeoutSeconds":1}}]}}}}'
       --api-version=v1
-    with_items: haproxy_routers
+    with_items: "{{ haproxy_routers }}"
 
   - name: Check for default registry
     command: >
