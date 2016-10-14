@@ -10,7 +10,7 @@
 
   - name: Evaluate g_service_nodes
     add_host: name={{ item }} groups=g_service_nodes
-    with_items: oo_host_group_exp | default([])
+    with_items: "{{ oo_host_group_exp | default([]) }}"
 
 - name: Change state on node instance(s)
   hosts: g_service_nodes

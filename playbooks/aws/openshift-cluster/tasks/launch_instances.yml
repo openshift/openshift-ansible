@@ -99,8 +99,8 @@
 - name: Add Name tag to instances
   ec2_tag: resource={{ item.1.id }} region={{ deployment_vars[deployment_type].region }} state=present
   with_together:
-  - instances
-  - ec2.instances
+  - "{{ instances }}"
+  - "{{ ec2.instances }}"
   args:
     tags:
       Name: "{{ item.0 }}"
@@ -154,8 +154,8 @@
     openshift_node_labels: "{{ node_label }}"
     logrotate_scripts: "{{ logrotate }}"
   with_together:
-  - instances
-  - ec2.instances
+  - "{{ instances }}"
+  - "{{ ec2.instances }}"
 
 - name: Add new instances to nodes_to_add group if needed
   add_host:
@@ -169,13 +169,13 @@
     openshift_node_labels: "{{ node_label }}"
     logrotate_scripts: "{{ logrotate }}"
   with_together:
-  - instances
-  - ec2.instances
+  - "{{ instances }}"
+  - "{{ ec2.instances }}"
   when: oo_extend_env is defined and oo_extend_env | bool
 
 - name: Wait for ssh
   wait_for: "port=22 host={{ item.dns_name }}"
-  with_items: ec2.instances
+  with_items: "{{ ec2.instances }}"
 
 - name: Wait for user setup
   command: "ssh -o StrictHostKeyChecking=no -o PasswordAuthentication=no -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null {{ hostvars[item.0].ansible_ssh_user }}@{{ item.1.dns_name }} echo {{ hostvars[item.0].ansible_ssh_user }} user is setup"
@@ -184,5 +184,5 @@
   retries: 20
   delay: 10
   with_together:
-  - instances
-  - ec2.instances
+  - "{{ instances }}"
+  - "{{ ec2.instances }}"
