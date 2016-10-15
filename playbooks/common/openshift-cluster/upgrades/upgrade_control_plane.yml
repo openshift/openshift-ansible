@@ -88,17 +88,6 @@
       msg: "Upgrade cannot continue. The following hosts did not complete etcd backup: {{ etcd_backup_failed | join(',') }}"
     when: etcd_backup_failed | length > 0
 
-- name: Upgrade master packages
-  hosts: oo_masters_to_config
-  handlers:
-  - include: ../../../../roles/openshift_master/handlers/main.yml
-    static: yes
-  roles:
-  - openshift_facts
-  tasks:
-  - include: rpm_upgrade.yml component=master
-    when: not openshift.common.is_containerized | bool
-
 - name: Determine if service signer cert must be created
   hosts: oo_first_master
   tasks:
@@ -111,6 +100,17 @@
 # Create service signer cert when missing. Service signer certificate
 # is added to master config in the master config hook for v3_3.
 - include: create_service_signer_cert.yml
+
+- name: Upgrade master packages
+  hosts: oo_masters_to_config
+  handlers:
+  - include: ../../../../roles/openshift_master/handlers/main.yml
+    static: yes
+  roles:
+  - openshift_facts
+  tasks:
+  - include: rpm_upgrade.yml component=master
+    when: not openshift.common.is_containerized | bool
 
 - name: Upgrade master config and systemd units
   hosts: oo_masters_to_config
