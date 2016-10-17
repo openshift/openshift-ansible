@@ -12,11 +12,11 @@
 
 - name: create filesystem
   filesystem: fstype=ext4 dev=/dev/{{ item.name }}
-  with_items: partition_pool
+  with_items: "{{ partition_pool }}"
 
 - name: mount
   mount: name={{mount_dir}}/{{ item.name }} src=/dev/{{ item.name }} state=mounted fstype=ext4 passno=2
-  with_items: partition_pool
+  with_items: "{{ partition_pool }}"
 
 - include: nfs.yml
 
@@ -28,4 +28,4 @@
     body_format: json
     status_code: 201
     HEADER_Authorization: "Bearer {{ kubernetes_token }}"
-  with_items: partition_pool
+  with_items: "{{ partition_pool }}"

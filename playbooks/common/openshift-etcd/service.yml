@@ -10,7 +10,7 @@
 
   - name: Evaluate g_service_etcd
     add_host: name={{ item }} groups=g_service_etcd
-    with_items: oo_host_group_exp | default([])
+    with_items: "{{ oo_host_group_exp | default([]) }}"
 
 - name: Change etcd state on etcd instance(s)
   hosts: g_service_etcd

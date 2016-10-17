@@ -16,7 +16,7 @@
       groups: oo_list_hosts
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_become: "{{ deployment_vars[deployment_type].become }}"
-    with_items: groups[scratch_group] | default([], true) | difference(['localhost']) | difference(groups.status_terminated | default([], true))
+    with_items: "{{ groups[scratch_group] | default([], true) | difference(['localhost']) | difference(groups.status_terminated | default([], true)) }}"
 
 - name: List Hosts
   hosts: oo_list_hosts
