@@ -236,7 +236,7 @@ class FilterModule(object):
         if not isinstance(data, dict):
             raise errors.AnsibleFilterError("|failed expects first param is a dict")
 
-        return out_joiner.join([in_joiner.join([k, v]) for k, v in data.items()])
+        return out_joiner.join([in_joiner.join([k, str(v)]) for k, v in data.items()])
 
     @staticmethod
     def oo_ami_selector(data, image_name):
