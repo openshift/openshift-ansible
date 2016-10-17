@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.35
+Version:        3.3.36
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,23 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Oct 17 2016 Scott Dodson <sdodson@redhat.com> 3.3.36-1
+- formatting updates in template (tobias@tobru.ch)
+- Do not error on node labels set too non-string values. (manuel@hutter.io)
+- Use inventory variables rather than facts (sdodson@redhat.com)
+- Resume restarting node after upgrading node rpms. (dgoodwin@redhat.com)
+- upgrade: Don't check avail docker version if not already installed.
+  (dgoodwin@redhat.com)
+- Automatic commit of package [openshift-ansible] release [3.4.8-1].
+  (tdawson@redhat.com)
+- revise docs (tobias@tobru.ch)
+- update handling of use_dnsmasq (jdetiber@redhat.com)
+- Fix standalone docker upgrade playbook skipping nodes. (dgoodwin@redhat.com)
+- Fix missing play assignment in a-o-i callback plugin (tbielawa@redhat.com)
+- adjustments in docs and j2 template (tobias@tobru.ch)
+- add regionendpoint parameter for registry s3 (tobias.brunner@vshn.ch)
+- nfs: Handle seboolean aliases not just in Fedora (walters@verbum.org)
+
 * Wed Oct 12 2016 Scott Dodson <sdodson@redhat.com> 3.3.35-1
 - Stop restarting node after upgrading master rpms. (dgoodwin@redhat.com)
 - Fix upgrade mappings in quick installer (smunilla@redhat.com)
