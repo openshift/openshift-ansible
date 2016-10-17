@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.8
+Version:        3.4.9
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,17 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Oct 17 2016 Troy Dawson <tdawson@redhat.com> 3.4.9-1
+- formatting updates in template (tobias@tobru.ch)
+- Do not error on node labels set too non-string values. (manuel@hutter.io)
+- Use inventory variables rather than facts (sdodson@redhat.com)
+- Resume restarting node after upgrading node rpms. (dgoodwin@redhat.com)
+- upgrade: Don't check avail docker version if not already installed.
+  (dgoodwin@redhat.com)
+- revise docs (tobias@tobru.ch)
+- adjustments in docs and j2 template (tobias@tobru.ch)
+- add regionendpoint parameter for registry s3 (tobias.brunner@vshn.ch)
+
 * Fri Oct 14 2016 Troy Dawson <tdawson@redhat.com> 3.4.8-1
 - update handling of use_dnsmasq (jdetiber@redhat.com)
 - Fix standalone docker upgrade playbook skipping nodes. (dgoodwin@redhat.com)
