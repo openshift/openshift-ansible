@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.36
+Version:        3.3.37
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,13 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Oct 17 2016 Scott Dodson <sdodson@redhat.com> 3.3.37-1
+- Get rid of openshift_node_config_file entirely (sdodson@redhat.com)
+- [logging] Fix NFS volume binding (sdodson@redhat.com)
+- Build full node config path in systemd_units tasks. (abutcher@redhat.com)
+- Default [] (abutcher@redhat.com)
+- Template with_items for upstream ansible-2.2 compat. (abutcher@redhat.com)
+
 * Mon Oct 17 2016 Scott Dodson <sdodson@redhat.com> 3.3.36-1
 - formatting updates in template (tobias@tobru.ch)
 - Do not error on node labels set too non-string values. (manuel@hutter.io)
