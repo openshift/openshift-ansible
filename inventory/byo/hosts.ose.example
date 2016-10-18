@@ -324,6 +324,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # the storage_host. For example, the remote volume path using these
 # options would be "nfs.example.com:/exports/registry"
 #openshift_hosted_registry_storage_kind=nfs
+# In case the pv & pvc does not exists let openshift create it for you
+#openshift_hosted_registry_storage_create_pv=true
+#openshift_hosted_registry_storage_create_pvc=true
 #openshift_hosted_registry_storage_access_modes=['ReadWriteMany']
 #openshift_hosted_registry_storage_host=nfs.example.com
 #openshift_hosted_registry_storage_nfs_directory=/exports
@@ -397,6 +400,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # the storage_host. For example, the remote volume path using these
 # options would be "nfs.example.com:/exports/metrics"
 #openshift_hosted_metrics_storage_kind=nfs
+# In case the pv & pvc does not exists let openshift create it for you
+#openshift_hosted_metrics_storage_create_pv=true
+#openshift_hosted_metrics_storage_create_pvc=true
 #openshift_hosted_metrics_storage_access_modes=['ReadWriteOnce']
 #openshift_hosted_metrics_storage_host=nfs.example.com
 #openshift_hosted_metrics_storage_nfs_directory=/exports
@@ -435,6 +441,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # the storage_host. For example, the remote volume path using these
 # options would be "nfs.example.com:/exports/logging"
 #openshift_hosted_logging_storage_kind=nfs
+# In case the pv & pvc does not exists let openshift create it for you
+#openshift_hosted_logging_storage_create_pv=true
+#openshift_hosted_logging_storage_create_pvc=true
 #openshift_hosted_logging_storage_access_modes=['ReadWriteOnce']
 #openshift_hosted_logging_storage_host=nfs.example.com
 #openshift_hosted_logging_storage_nfs_directory=/exports
