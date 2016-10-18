@@ -20,7 +20,7 @@
 
 - name: Create projects
   command: >
-    {{ openshift.common.admin_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig
+    {{ openshift.common.client_binary }} adm --config={{ mktemp.stdout }}/admin.kubeconfig
     new-project {{ item.item.key }}
     {% if item.item.value.default_node_selector | default(none) != none %}
     {{ '--node-selector=' ~ item.item.value.default_node_selector }}
