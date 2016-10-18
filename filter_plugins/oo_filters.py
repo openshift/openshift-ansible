@@ -234,7 +234,7 @@ class FilterModule(object):
            arrange them as a string 'key=value key=value'
         """
         if not isinstance(data, dict):
-            raise errors.AnsibleFilterError("|failed expects first param is a dict")
+            raise errors.AnsibleFilterError("|failed expects first param is a dict [oo_combine_dict]. Got %s. Type: %s" % (str(data), str(type(data))))
 
         return out_joiner.join([in_joiner.join([k, str(v)]) for k, v in data.items()])
 
@@ -286,7 +286,7 @@ class FilterModule(object):
                 }
         """
         if not isinstance(data, dict):
-            raise errors.AnsibleFilterError("|failed expects first param is a dict")
+            raise errors.AnsibleFilterError("|failed expects first param is a dict [oo_ec2_volume_def]. Got %s. Type: %s" % (str(data), str(type(data))))
         if host_type not in ['master', 'node', 'etcd']:
             raise errors.AnsibleFilterError("|failed expects etcd, master or node"
                                             " as the host type")

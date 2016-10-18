@@ -1035,12 +1035,23 @@ def get_current_config(facts):
     return current_config
 
 def build_kubelet_args(facts):
-    """ Build node kubelet_args """
-    cloud_cfg_path = os.path.join(facts['common']['config_base'],
-                                  'cloudprovider')
+    """Build node kubelet_args
+
+In the node-config.yaml file, kubeletArgument sub-keys have their
+values provided as a list. Hence the gratuitous use of ['foo'] below.
+    """
+    cloud_cfg_path = os.path.join(
+        facts['common']['config_base'],
+        'cloudprovider')
+
+    # We only have to do this stuff on hosts that are nodes
     if 'node' in facts:
+        # Any changes to the kubeletArguments parameter are stored
+        # here first.
         kubelet_args = {}
+
         if 'cloudprovider' in facts:
+            # EVERY cloud is special <3
             if 'kind' in facts['cloudprovider']:
                 if facts['cloudprovider']['kind'] == 'aws':
                     kubelet_args['cloud-provider'] = ['aws']
@@ -1050,6 +1061,28 @@ def build_kubelet_args(facts):
                     kubelet_args['cloud-config'] = [cloud_cfg_path + '/openstack.conf']
                 if facts['cloudprovider']['kind'] == 'gce':
                     kubelet_args['cloud-provider'] = ['gce']
+
+        # Automatically add node-labels to the kubeletArguments
+        # parameter. See BZ1359848 for additional details.
+        #
+        # Ref: https://bugzilla.redhat.com/show_bug.cgi?id=1359848
+        if 'labels' in facts['node'] and isinstance(facts['node']['labels'], dict):
+            # tl;dr: os_node_labels="{'foo': 'bar', 'a': 'b'}" turns
+            # into ['foo=bar', 'a=b']
+            #
+            # On the openshift_node_labels inventory variable we loop
+            # over each key-value tuple (from .items()) and join the
+            # key to the value with an '=' character, this produces a
+            # list.
+            #
+            # map() seems to be returning an itertools.imap object
+            # instead of a list. We cast it to a list ourselves.
+            labels_str = list(map(lambda x: '='.join(x), facts['node']['labels'].items()))
+            if labels_str != '':
+                kubelet_args['node-labels'] = labels_str
+
+        # If we've added items to the kubelet_args dict then we need
+        # to merge the new items back into the main facts object.
         if kubelet_args != {}:
             facts = merge_facts({'node': {'kubelet_args': kubelet_args}}, facts, [], [])
     return facts

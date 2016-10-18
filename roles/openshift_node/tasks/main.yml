@@ -9,6 +9,10 @@
     role: "{{ item.role }}"
     local_facts: "{{ item.local_facts }}"
   with_items:
+  # Reset node labels to an empty dictionary.
+  - role: node
+    local_facts:
+      labels: {}
   - role: node
     local_facts:
       annotations: "{{ openshift_node_annotations | default(none) }}"
