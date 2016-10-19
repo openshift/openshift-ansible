@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.37
+Version:        3.3.38
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Oct 19 2016 Scott Dodson <sdodson@redhat.com> 3.3.38-1
+- Override __init__ in default callback to avoid infinite loop.
+  (abutcher@redhat.com)
+- Switch from "oadm" to "oc adm" and fix bug in binary sync.
+  (dgoodwin@redhat.com)
+
 * Mon Oct 17 2016 Scott Dodson <sdodson@redhat.com> 3.3.37-1
 - Get rid of openshift_node_config_file entirely (sdodson@redhat.com)
 - [logging] Fix NFS volume binding (sdodson@redhat.com)
