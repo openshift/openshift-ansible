@@ -270,6 +270,5 @@ def main():
 
 # import module snippets
 from ansible.module_utils.basic import *
-from ansible.module_utils.splitter import *
 
 main()
