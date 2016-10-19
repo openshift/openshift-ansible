@@ -8,7 +8,7 @@
     cp {{ openshift.common.config_base }}/master/admin.kubeconfig {{manage_iq_tmp_conf}}
   changed_when: false
 
-- name: Add Managment Infrastructure project
+- name: Add Management Infrastructure project
   command: >
     {{ openshift.common.admin_binary }} new-project
     management-infra

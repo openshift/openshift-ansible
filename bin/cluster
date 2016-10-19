@@ -314,7 +314,7 @@ This wrapper is overriding the following ansible variables:
 
   * ANSIBLE_SSH_PIPELINING:
       If not set in the environment, this wrapper will set it to `True`.
-      If you experience issue with Ansible ssh pipelining, you can disable it by explicitely set this environment variable to `False`.
+      If you experience issues with Ansible SSH pipelining, you can disable it by explicitly setting this environment variable to `False`.
 '''
     )
     parser.add_argument('-v', '--verbose', action='count',
