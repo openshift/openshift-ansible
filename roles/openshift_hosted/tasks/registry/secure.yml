@@ -33,7 +33,7 @@
 
 - name: Create registry certificates if they do not exist
   command: >
-    {{ openshift.common.admin_binary }} ca create-server-cert
+    {{ openshift.common.client_binary }} adm ca create-server-cert
     --signer-cert=/etc/origin/master/ca.crt
     --signer-key=/etc/origin/master/ca.key
     --signer-serial=/etc/origin/master/ca.serial.txt

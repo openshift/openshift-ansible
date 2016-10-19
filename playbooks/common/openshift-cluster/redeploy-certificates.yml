@@ -224,7 +224,7 @@
 
   - name: Prepare for node evacuation
     command: >
-      {{ openshift.common.admin_binary }} --config={{ hostvars[groups.oo_first_master.0].mktemp.stdout }}/admin.kubeconfig
+      {{ openshift.common.client_binary }} adm --config={{ hostvars[groups.oo_first_master.0].mktemp.stdout }}/admin.kubeconfig
       manage-node {{ openshift.node.nodename }}
       --schedulable=false
     delegate_to: "{{ groups.oo_first_master.0 }}"
@@ -232,7 +232,7 @@
 
   - name: Evacuate node
     command: >
-      {{ openshift.common.admin_binary }} --config={{ hostvars[groups.oo_first_master.0].mktemp.stdout }}/admin.kubeconfig
+      {{ openshift.common.client_binary }} adm --config={{ hostvars[groups.oo_first_master.0].mktemp.stdout }}/admin.kubeconfig
       manage-node {{ openshift.node.nodename }}
       --evacuate --force
     delegate_to: "{{ groups.oo_first_master.0 }}"
@@ -240,7 +240,7 @@
 
   - name: Set node schedulability
     command: >
-      {{ openshift.common.admin_binary }} --config={{ hostvars[groups.oo_first_master.0].mktemp.stdout }}/admin.kubeconfig
+      {{ openshift.common.client_binary }} adm --config={{ hostvars[groups.oo_first_master.0].mktemp.stdout }}/admin.kubeconfig
       manage-node {{ openshift.node.nodename }} --schedulable=true
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: openshift_certificates_redeploy_ca | default(false) | bool and was_schedulable | bool

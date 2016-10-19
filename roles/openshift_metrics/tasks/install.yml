@@ -30,7 +30,7 @@
 
 - name: Add edit permission to the openshift-infra project to metrics-deployer SA
   command: >
-    {{ openshift.common.admin_binary }}
+    {{ openshift.common.client_binary }} adm
     --config={{ openshift_metrics_kubeconfig }}
     --namespace openshift-infra
     policy add-role-to-user edit
@@ -48,7 +48,7 @@
 
 - name: Add cluster-reader permission to the openshift-infra project to heapster SA
   command: >
-    {{ openshift.common.admin_binary }}
+    {{ openshift.common.client_binary }} adm
     --config={{ openshift_metrics_kubeconfig }}
     --namespace openshift-infra
     policy add-cluster-role-to-user cluster-reader
