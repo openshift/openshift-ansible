@@ -26,7 +26,7 @@
 
 - name: Grant the user access to the appropriate scc
   command: >
-      {{ openshift.common.admin_binary }} policy add-scc-to-user
+      {{ openshift.common.client_binary }} adm policy add-scc-to-user
       {{ item.1.item }} system:serviceaccount:{{ openshift_serviceaccounts_namespace }}:{{ item.0 }}
   when: "openshift.common.version_gte_3_1_or_1_1 and item.1.rc == 0 and 'system:serviceaccount:{{ openshift_serviceaccounts_namespace }}:{{ item.0 }}' not in {{ (item.1.stdout | from_yaml).users | default([]) }}"
   with_nested:

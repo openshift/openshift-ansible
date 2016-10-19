@@ -30,7 +30,7 @@
 
 - name: Create OpenShift registry
   command: >
-    {{ openshift.common.admin_binary }} registry --create
+    {{ openshift.common.client_binary }} adm registry --create
     --config={{ openshift_hosted_kubeconfig }}
     {% if replicas > 1 -%}
     --replicas={{ replicas }}
