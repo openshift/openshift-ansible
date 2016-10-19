@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.34
+Version:        3.2.35
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Oct 19 2016 Scott Dodson <sdodson@redhat.com> 3.2.35-1
+- Get rid of openshift_node_config_file entirely (sdodson@redhat.com)
+- Build full node config path in systemd_units tasks. (abutcher@redhat.com)
+- Default [] (abutcher@afrolegs.com)
+- Template with_items for upstream ansible-2.2 compat. (abutcher@redhat.com)
+
 * Tue Oct 18 2016 Scott Dodson <sdodson@redhat.com> 3.2.34-1
 - upgrade: Don't check avail docker version if not already installed.
   (dgoodwin@redhat.com)
