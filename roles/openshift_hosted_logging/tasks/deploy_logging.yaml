@@ -25,7 +25,7 @@
 
   - name: "Create logging project"
     command: >
-      {{ openshift.common.admin_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig new-project logging
+      {{ openshift.common.client_binary }} adm --config={{ mktemp.stdout }}/admin.kubeconfig new-project logging
     when: logging_project_result.stdout == ""
 
   - name: "Changing projects"
@@ -51,19 +51,19 @@
 
   - name: "Set permissions for logging-deployer service account"
     command: >
-      {{ openshift.common.admin_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig policy add-cluster-role-to-user oauth-editor system:serviceaccount:logging:logging-deployer
+      {{ openshift.common.client_binary }} adm --config={{ mktemp.stdout }}/admin.kubeconfig policy add-cluster-role-to-user oauth-editor system:serviceaccount:logging:logging-deployer
     register: permiss_output
     failed_when: "permiss_output.rc == 1 and 'exists' not in permiss_output.stderr"
 
   - name: "Set permissions for fluentd"
     command: >
-      {{ openshift.common.admin_binary}} policy add-scc-to-user privileged system:serviceaccount:logging:aggregated-logging-fluentd
+      {{ openshift.common.client_binary }} adm policy add-scc-to-user privileged system:serviceaccount:logging:aggregated-logging-fluentd
     register: fluentd_output
     failed_when: "fluentd_output.rc == 1 and 'exists' not in fluentd_output.stderr"
 
   - name: "Set additional permissions for fluentd"
     command: >
-      {{ openshift.common.admin_binary}} policy add-cluster-role-to-user cluster-reader system:serviceaccount:logging:aggregated-logging-fluentd
+      {{ openshift.common.client_binary }} adm policy add-cluster-role-to-user cluster-reader system:serviceaccount:logging:aggregated-logging-fluentd
     register: fluentd2_output
     failed_when: "fluentd2_output.rc == 1 and 'exists' not in fluentd2_output.stderr"
 

@@ -22,7 +22,7 @@
 
   - name: Create service signer certificate
     command: >
-      {{ openshift.common.admin_binary }} ca create-signer-cert
+      {{ openshift.common.client_binary }} adm ca create-signer-cert
       --cert=service-signer.crt
       --key=service-signer.key
       --name=openshift-service-serving-signer
