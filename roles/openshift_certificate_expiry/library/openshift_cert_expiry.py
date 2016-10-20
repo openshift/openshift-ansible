@@ -531,6 +531,9 @@ an OpenShift Container Platform cluster
     except TypeError:
         # YAML couldn't load the result, this is not a master
         pass
+    except OSError:
+        # The OC command doesn't exist here. Move along.
+        pass
     else:
         (cert_subject,
          cert_expiry_date,
@@ -556,6 +559,9 @@ an OpenShift Container Platform cluster
         registry_path = registry_ds['metadata']['selfLink']
     except TypeError:
         # YAML couldn't load the result, this is not a master
+        pass
+    except OSError:
+        # The OC command doesn't exist here. Move along.
         pass
     else:
         (cert_subject,
