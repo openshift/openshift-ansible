@@ -137,6 +137,7 @@
     etcd_cert_config_dir: "{{ openshift.common.config_base }}/node"
     when: openshift.common.use_flannel | bool
   - role: nuage_node
+    serial: 1
     when: openshift.common.use_nuage | bool
   - role: nickhammond.logrotate
   tasks:
