@@ -180,7 +180,6 @@
     openshift_master_hosts: "{{ groups.oo_masters_to_config }}"
   - role: nickhammond.logrotate
   - role: nuage_master
-    serial: 1
     when: openshift.common.use_nuage | bool
   post_tasks:
   - name: Create group for deployment type
