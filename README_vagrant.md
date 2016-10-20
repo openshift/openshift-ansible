@@ -41,7 +41,7 @@ vagrant provision
 
 Environment Variables
 ---------------------
-The following environment variables can be overriden:
+The following environment variables can be overridden:
 - ``OPENSHIFT_DEPLOYMENT_TYPE`` (defaults to origin, choices: origin, openshift-enterprise)
 - ``OPENSHIFT_NUM_NODES`` (the number of nodes to create, defaults to 2)
 

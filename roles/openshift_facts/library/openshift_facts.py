@@ -59,7 +59,7 @@ def migrate_docker_facts(facts):
         facts['docker']['hosted_registry_network'] = facts['node'].pop('portal_net')
 
     # log_options was originally meant to be a comma separated string, but
-    # we now prefer an actual list, with backward compatability:
+    # we now prefer an actual list, with backward compatibility:
     if 'log_options' in facts['docker'] and \
             isinstance(facts['docker']['log_options'], basestring):
         facts['docker']['log_options'] = facts['docker']['log_options'].split(",")

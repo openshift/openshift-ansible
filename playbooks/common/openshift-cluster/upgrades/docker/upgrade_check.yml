@@ -36,7 +36,7 @@
 - set_fact:
     l_docker_upgrade: False
 
-# Make sure a docker_verison is set if none was requested:
+# Make sure a docker_version is set if none was requested:
 - set_fact:
     docker_version: "{{ avail_docker_version.stdout }}"
   when: pkg_check.rc == 0 and docker_version is not defined

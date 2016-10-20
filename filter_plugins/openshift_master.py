@@ -75,7 +75,7 @@ class IdentityProviderBase(object):
 
         valid_mapping_methods = ['add', 'claim', 'generate', 'lookup']
         if self.mapping_method not in valid_mapping_methods:
-            raise errors.AnsibleFilterError("|failed unkown mapping method "
+            raise errors.AnsibleFilterError("|failed unknown mapping method "
                                             "for provider {0}".format(self.__class__.__name__))
         self._required = []
         self._optional = []
