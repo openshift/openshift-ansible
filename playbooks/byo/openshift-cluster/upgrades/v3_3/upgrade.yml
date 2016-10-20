@@ -92,10 +92,9 @@
   vars:
     master_config_hook: "v3_3/master_config_upgrade.yml"
 
+- include: ../../../../common/openshift-cluster/upgrades/post_control_plane.yml
+
 - include: ../../../../common/openshift-cluster/upgrades/upgrade_nodes.yml
   vars:
     node_config_hook: "v3_3/node_config_upgrade.yml"
 
-- include: ../../../openshift-master/restart.yml
-
-- include: ../../../../common/openshift-cluster/upgrades/post_control_plane.yml
