@@ -13,7 +13,6 @@ galaxy_info:
   - cloud
   - system
 dependencies:
-  - role: etcd_common
   - role: nuage_ca
   - role: nuage_common
   - role: openshift_etcd_client_certificates
