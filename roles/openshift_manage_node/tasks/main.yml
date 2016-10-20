@@ -26,7 +26,7 @@
 
 - name: Set node schedulability
   command: >
-    {{ openshift.common.admin_binary }} manage-node {{ hostvars[item].openshift.node.nodename }} --schedulable={{ 'true' if hostvars[item].openshift.node.schedulable | bool else 'false' }}
+    {{ openshift.common.client_binary }} adm manage-node {{ hostvars[item].openshift.node.nodename }} --schedulable={{ 'true' if hostvars[item].openshift.node.schedulable | bool else 'false' }}
     --config={{ openshift_manage_node_kubeconfig }}
     -n default
   with_items: "{{ openshift_nodes }}"

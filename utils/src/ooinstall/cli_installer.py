@@ -969,7 +969,7 @@ def upgrade(ctx, latest_minor, next_major):
             sys.exit(0)
         playbook = mapping['major_playbook']
         new_version = mapping['major_version']
-        # Update config to reflect the version we're targetting, we'll write
+        # Update config to reflect the version we're targeting, we'll write
         # to disk once Ansible completes successfully, not before.
         oo_cfg.settings['variant_version'] = new_version
         if oo_cfg.settings['variant'] == 'enterprise':

@@ -1,5 +1,5 @@
 ---
-# TODO: does not handle a non-existant cluster gracefully
+# TODO: does not handle a non-existent cluster gracefully
 
 - name: Terminate instance(s)
   hosts: localhost

@@ -60,7 +60,7 @@ options:
       - Example 3: size=200G:1,100G:2 says that the ratio of space occupied by 200 GiB
         partitions and 100GiB partition is 1:2. Therefore, on 1 TiB disk, 1/3
         (300 GiB) should be occupied by 200 GiB partitions. Only one fits there,
-        so only one is created (we always round nr. of partitions *down*). Teh rest
+        so only one is created (we always round nr. of partitions *down*). The rest
         (800 GiB) is split into eight 100 GiB partitions, even though it's more
         than 2/3 of total space - free space is always allocated as much as possible.
       - size=200G:1,100G:2 = 1x 200 GiB and 8x 100 GiB partitions (on 1 TiB disk).

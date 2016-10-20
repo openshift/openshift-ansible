@@ -57,7 +57,7 @@
 
 - name: Create the policy file if it does not already exist
   command: >
-    {{ openshift.common.admin_binary }} create-bootstrap-policy-file
+    {{ openshift.common.client_binary }} adm create-bootstrap-policy-file
       --filename={{ openshift_master_policy }}
   args:
     creates: "{{ openshift_master_policy }}"
