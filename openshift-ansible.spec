@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.5
+Version:        3.4.11
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,70 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Oct 21 2016 Troy Dawson <tdawson@redhat.com> 3.4.11-1
+- trouble creating service signer while running upgrade dockerized
+  (henning.fjellheim@nb.no)
+- Don't freak out if the oc command doesn't exist. (tbielawa@redhat.com)
+- Make the json template filter-driven. (tbielawa@redhat.com)
+- Add JSON result CLI parsing notes to the README (tbielawa@redhat.com)
+- The JSON result saving template now includes a summary of expired/warned
+  certs for easier parsing. (tbielawa@redhat.com)
+- Clean up lint and other little things (polish++) (tbielawa@redhat.com)
+- Fix playbooks, update readme, update default vars (tbielawa@redhat.com)
+- Refactor into a role (tbielawa@redhat.com)
+- Get router/registry certs. Collect common names and subjectAltNames
+  (tbielawa@redhat.com)
+- Support etcd certs now. Fix lint. Generate HTML report. (tbielawa@redhat.com)
+- Try to make boiler plate for cert expiry checking (tbielawa@redhat.com)
+- Override __init__ in default callback to avoid infinite loop.
+  (abutcher@redhat.com)
+- Drop pacemaker restart logic. (dgoodwin@redhat.com)
+- Fix typos (rhcarvalho@gmail.com)
+- Switch from "oadm" to "oc adm" and fix bug in binary sync.
+  (dgoodwin@redhat.com)
+- Remove uneeded import of ansible.module_utils.splitter (misc@redhat.com)
+
+* Wed Oct 19 2016 Troy Dawson <tdawson@redhat.com> 3.4.10-1
+- Get rid of openshift_node_config_file entirely (sdodson@redhat.com)
+- [logging] Fix NFS volume binding (sdodson@redhat.com)
+- Build full node config path in systemd_units tasks. (abutcher@redhat.com)
+- Default [] (abutcher@afrolegs.com)
+- Template with_items for upstream ansible-2.2 compat. (abutcher@redhat.com)
+
+* Mon Oct 17 2016 Troy Dawson <tdawson@redhat.com> 3.4.9-1
+- formatting updates in template (tobias@tobru.ch)
+- Do not error on node labels set too non-string values. (manuel@hutter.io)
+- Use inventory variables rather than facts (sdodson@redhat.com)
+- Resume restarting node after upgrading node rpms. (dgoodwin@redhat.com)
+- upgrade: Don't check avail docker version if not already installed.
+  (dgoodwin@redhat.com)
+- revise docs (tobias@tobru.ch)
+- adjustments in docs and j2 template (tobias@tobru.ch)
+- add regionendpoint parameter for registry s3 (tobias.brunner@vshn.ch)
+
+* Fri Oct 14 2016 Troy Dawson <tdawson@redhat.com> 3.4.8-1
+- update handling of use_dnsmasq (jdetiber@redhat.com)
+- Fix standalone docker upgrade playbook skipping nodes. (dgoodwin@redhat.com)
+- Fix missing play assignment in a-o-i callback plugin (tbielawa@redhat.com)
+- Stop restarting node after upgrading master rpms. (dgoodwin@redhat.com)
+- Fix upgrade mappings in quick installer (smunilla@redhat.com)
+- nfs: Handle seboolean aliases not just in Fedora (walters@verbum.org)
+
+* Wed Oct 12 2016 Troy Dawson <tdawson@redhat.com> 3.4.7-1
+- set defaults for debug_level in template and task (jhcook@gmail.com)
+- Set HTTPS_PROXY in example builddefaults_json (sdodson@redhat.com)
+- Fix config and namespace for registry volume detection (sdodson@redhat.com)
+- Apply same pattern to HA master services (sdodson@redhat.com)
+- Improve how we handle containerized node failure on first startup
+  (sdodson@redhat.com)
+- Check that OpenStack hostnames are resolvable (lhuard@amadeus.com)
+
+* Mon Oct 10 2016 Troy Dawson <tdawson@redhat.com> 3.4.6-1
+- Retry failed master startup once (ironcladlou@gmail.com)
+- [logging] Fix openshift_hosted_logging_fluentd_nodeselector
+  (sdodson@redhat.com)
+- Changes for etcd servers (vishal.patil@nuagenetworks.net)
+
 * Fri Oct 07 2016 Scott Dodson <sdodson@redhat.com> 3.4.5-1
 - [a-o-i] -v disables quiet ansible config. (abutcher@redhat.com)
 

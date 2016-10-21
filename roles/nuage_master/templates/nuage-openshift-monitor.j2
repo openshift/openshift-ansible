@@ -23,7 +23,7 @@ enterpriseAdminUser: {{ nuage_master_adminusername }}
 enterpriseAdminPassword: {{ nuage_master_adminuserpasswd }}
 # Location where logs should be saved
 log_dir: {{ nuage_mon_rest_server_logdir }}
-# Monitor rest server paramters
+# Monitor rest server parameters
 # Logging level for the nuage openshift monitor
 # allowed options are: 0 => INFO, 1 => WARNING, 2 => ERROR, 3 => FATAL
 logLevel: {{ nuage_mon_log_level }}
@@ -37,4 +37,7 @@ etcdClientConfig:
     certFile: {{ openshift_master_config_dir }}/master.etcd-client.crt
     keyFile: {{ openshift_master_config_dir }}/master.etcd-client.key
     urls:
-        - {{ openshift.master.etcd_urls }}
+{% for etcd_url in openshift.master.etcd_urls %}
+        - {{ etcd_url }}
+{% endfor %}
+

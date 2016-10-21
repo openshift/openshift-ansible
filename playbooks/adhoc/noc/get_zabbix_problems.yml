@@ -33,7 +33,7 @@
     - add_host:
         name: "{{ item }}"
         groups: problem_hosts_group
-      with_items: problem_hosts
+      with_items: "{{ problem_hosts }}"
 
 - name: "Run on problem hosts"
   hosts: problem_hosts_group

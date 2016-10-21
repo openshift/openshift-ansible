@@ -14,7 +14,7 @@
   copy:
     content: |
       [Service]
-      #Need blank ExecStart to "clear" pre-exising one
+      #Need blank ExecStart to "clear" pre-existing one
       ExecStart=
       {{ udevw_udev_start_cmd.stdout }} --event-timeout=300
     dest: "{{ udevw_udevd_dir }}/override.conf"

@@ -73,6 +73,7 @@ COMMANDS
 * **install**
 * **uninstall**
 * **upgrade**
+* **scaleup**
 
 The options specific to each command are described in the following
 sections.
@@ -122,6 +123,11 @@ Upgrade to the latest major version. For example, if you are running
 version **3.2** then this could upgrade you to **3.3**.
 
 
+SCALEUP
+-------
+
+The **scaleup** command is used to add new nodes to an existing cluster.
+This command has no additional options.
 
 FILES
 -----

@@ -45,6 +45,9 @@ class CallbackModule(DEFAULT_MODULE.CallbackModule):  # pylint: disable=too-few-
     CALLBACK_TYPE = 'stdout'
     CALLBACK_NAME = 'default'
 
+    def __init__(self, *args, **kwargs):
+        BASECLASS.__init__(self, *args, **kwargs)
+
     def _dump_results(self, result):
         '''Return the text to output for a result.'''
         result['_ansible_verbose_always'] = True

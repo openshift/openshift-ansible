@@ -49,11 +49,11 @@
     gce_public_ip: "{{ item.public_ip }}"
     gce_private_ip: "{{ item.private_ip }}"
     openshift_node_labels: "{{ node_label }}"
-  with_items: gce.instance_data | default([], true)
+  with_items: "{{ gce.instance_data | default([], true) }}"
 
 - name: Wait for ssh
   wait_for: port=22 host={{ item.public_ip }}
-  with_items: gce.instance_data | default([], true)
+  with_items: "{{ gce.instance_data | default([], true) }}"
 
 - name: Wait for user setup
   command: "ssh -o StrictHostKeyChecking=no -o PasswordAuthentication=no -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null {{ hostvars[item.name].ansible_ssh_user }}@{{ item.public_ip }} echo {{ hostvars[item.name].ansible_ssh_user }} user is setup"
@@ -61,4 +61,4 @@
   until: result.rc == 0
   retries: 30
   delay: 5
-  with_items: gce.instance_data | default([], true)
+  with_items: "{{ gce.instance_data | default([], true) }}"

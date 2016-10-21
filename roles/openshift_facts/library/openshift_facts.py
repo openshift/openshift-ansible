@@ -59,7 +59,7 @@ def migrate_docker_facts(facts):
         facts['docker']['hosted_registry_network'] = facts['node'].pop('portal_net')
 
     # log_options was originally meant to be a comma separated string, but
-    # we now prefer an actual list, with backward compatability:
+    # we now prefer an actual list, with backward compatibility:
     if 'log_options' in facts['docker'] and \
             isinstance(facts['docker']['log_options'], basestring):
         facts['docker']['log_options'] = facts['docker']['log_options'].split(",")
@@ -364,12 +364,15 @@ def normalize_openstack_facts(metadata, facts):
     facts['network']['ip'] = local_ipv4
     facts['network']['public_ip'] = metadata['ec2_compat']['public-ipv4']
 
-    # TODO: verify local hostname makes sense and is resolvable
-    facts['network']['hostname'] = metadata['hostname']
-
-    # TODO: verify that public hostname makes sense and is resolvable
-    pub_h = metadata['ec2_compat']['public-hostname']
-    facts['network']['public_hostname'] = pub_h
+    for f_var, h_var, ip_var in [('hostname',        'hostname',        'local-ipv4'),
+                                 ('public_hostname', 'public-hostname', 'public-ipv4')]:
+        try:
+            if socket.gethostbyname(metadata['ec2_compat'][h_var]) == metadata['ec2_compat'][ip_var]:
+                facts['network'][f_var] = metadata['ec2_compat'][h_var]
+            else:
+                facts['network'][f_var] = metadata['ec2_compat'][ip_var]
+        except socket.gaierror:
+            facts['network'][f_var] = metadata['ec2_compat'][ip_var]
 
     return facts
 
@@ -498,8 +501,8 @@ def set_dnsmasq_facts_if_unset(facts):
     """
 
     if 'common' in facts:
-        facts['common']['use_dnsmasq'] = bool('use_dnsmasq' not in facts['common'] and
-                                              safe_get_bool(facts['common']['version_gte_3_2_or_1_2']))
+        if 'use_dnsmasq' not in facts['common']:
+            facts['common']['use_dnsmasq'] = bool(safe_get_bool(facts['common']['version_gte_3_2_or_1_2']))
         if 'master' in facts and 'dns_port' not in facts['master']:
             if safe_get_bool(facts['common']['use_dnsmasq']):
                 facts['master']['dns_port'] = 8053

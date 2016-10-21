@@ -22,11 +22,11 @@
 
   - name: Create service signer certificate
     command: >
-      {{ openshift.common.admin_binary }} ca create-signer-cert
-      --cert=service-signer.crt
-      --key=service-signer.key
-      --name=openshift-service-serving-signer
-      --serial=service-signer.serial.txt
+      {{ openshift.common.client_binary }} adm ca create-signer-cert
+      --cert="{{ remote_cert_create_tmpdir.stdout }}/"service-signer.crt
+      --key="{{ remote_cert_create_tmpdir.stdout }}/"service-signer.key
+      --name="{{ remote_cert_create_tmpdir.stdout }}/"openshift-service-serving-signer
+      --serial="{{ remote_cert_create_tmpdir.stdout }}/"service-signer.serial.txt
     args:
       chdir: "{{ remote_cert_create_tmpdir.stdout }}/"
     when: not (hostvars[groups.oo_first_master.0].service_signer_cert_stat.stat.exists | bool)

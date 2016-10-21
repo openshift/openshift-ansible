@@ -76,7 +76,7 @@ def add_person(first_name, last_name, age=None):
 
 
 === PyLint
-http://www.pylint.org/[PyLint] is used in an attempt to keep the python code as clean and as managable as possible. The build bot runs each pull request through PyLint and any warnings or errors cause the build bot to fail the pull request.
+http://www.pylint.org/[PyLint] is used in an attempt to keep the python code as clean and as manageable as possible. The build bot runs each pull request through PyLint and any warnings or errors cause the build bot to fail the pull request.
 
 '''
 [[PyLint-rules-MUST-NOT-be-disabled-on-a-whole-file]]

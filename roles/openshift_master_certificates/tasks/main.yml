@@ -52,7 +52,7 @@
 
 - name: Create the master certificates if they do not already exist
   command: >
-    {{ openshift.common.admin_binary }} create-master-certs
+    {{ openshift.common.client_binary }} adm create-master-certs
     {% for named_ca_certificate in openshift.master.named_certificates | default([]) | oo_collect('cafile') %}
     --certificate-authority {{ named_ca_certificate }}
     {% endfor %}
