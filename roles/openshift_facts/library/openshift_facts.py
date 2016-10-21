@@ -1751,6 +1751,7 @@ class OpenShiftFacts(object):
                 {"name": "PodFitsPorts"},
                 {"name": "NoDiskConflict"},
                 {"name": "NoVolumeZoneConflict"},
+                {"name": "VolumeZonePredicate"},
                 {"name": "MaxEBSVolumeCount"},
                 {"name": "MaxGCEPDVolumeCount"},
                 {"name": "Region", "argument": {"serviceAffinity" : {"labels" : ["region"]}}}
