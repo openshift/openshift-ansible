@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.10
+Version:        3.4.11
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,29 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Oct 21 2016 Troy Dawson <tdawson@redhat.com> 3.4.11-1
+- trouble creating service signer while running upgrade dockerized
+  (henning.fjellheim@nb.no)
+- Don't freak out if the oc command doesn't exist. (tbielawa@redhat.com)
+- Make the json template filter-driven. (tbielawa@redhat.com)
+- Add JSON result CLI parsing notes to the README (tbielawa@redhat.com)
+- The JSON result saving template now includes a summary of expired/warned
+  certs for easier parsing. (tbielawa@redhat.com)
+- Clean up lint and other little things (polish++) (tbielawa@redhat.com)
+- Fix playbooks, update readme, update default vars (tbielawa@redhat.com)
+- Refactor into a role (tbielawa@redhat.com)
+- Get router/registry certs. Collect common names and subjectAltNames
+  (tbielawa@redhat.com)
+- Support etcd certs now. Fix lint. Generate HTML report. (tbielawa@redhat.com)
+- Try to make boiler plate for cert expiry checking (tbielawa@redhat.com)
+- Override __init__ in default callback to avoid infinite loop.
+  (abutcher@redhat.com)
+- Drop pacemaker restart logic. (dgoodwin@redhat.com)
+- Fix typos (rhcarvalho@gmail.com)
+- Switch from "oadm" to "oc adm" and fix bug in binary sync.
+  (dgoodwin@redhat.com)
+- Remove uneeded import of ansible.module_utils.splitter (misc@redhat.com)
+
 * Wed Oct 19 2016 Troy Dawson <tdawson@redhat.com> 3.4.10-1
 - Get rid of openshift_node_config_file entirely (sdodson@redhat.com)
 - [logging] Fix NFS volume binding (sdodson@redhat.com)
