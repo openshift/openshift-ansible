@@ -15,7 +15,7 @@
 
 - name: Generate the crt file
   command: >
-     openssl x509 -req -in "{{ nuage_plugin_rest_client_crt_dir }}/restClient.req" -CA "{{ nuage_ca_crt }}" -CAkey "{{ nuage_ca_key }}" -CAserial "{{ nuage_ca_serial }}"  -out "{{ nuage_ca_master_plugin_crt }}" -extensions clientauth -extfile "{{ nuage_ca_dir }}"/openssl.cnf 
+    openssl x509 -req -in "{{ nuage_plugin_rest_client_crt_dir }}/restClient.req" -CA "{{ nuage_ca_crt }}" -CAkey "{{ nuage_ca_key }}" -CAserial "{{ nuage_ca_serial }}"  -out "{{ nuage_ca_master_plugin_crt }}" -extensions clientauth -extfile "{{ nuage_ca_dir }}"/openssl.cnf -days {{ nuage_mon_cert_validity_period }}
   delegate_to: "{{ nuage_ca_master }}"
 
 - name: Remove the req file
