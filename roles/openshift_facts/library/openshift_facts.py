@@ -149,7 +149,6 @@ def hostname_valid(hostname):
     if (not hostname or
             hostname.startswith('localhost') or
             hostname.endswith('localdomain') or
-            hostname.endswith('novalocal') or
             len(hostname.split('.')) < 2):
         return False
 
@@ -917,14 +916,6 @@ def set_sdn_facts_if_unset(facts, system_facts):
                 if 'ipv4' in val and val['ipv4'].get('address') == node_ip:
                     facts['node']['sdn_mtu'] = str(mtu - 50)
 
-    return facts
-
-def set_nodename(facts):
-    if 'node' in facts and 'common' in facts:
-        if 'cloudprovider' in facts and facts['cloudprovider']['kind'] == 'openstack':
-            facts['node']['nodename'] = facts['provider']['metadata']['hostname'].replace('.novalocal', '')
-        else:
-            facts['node']['nodename'] = facts['common']['hostname'].lower()
     return facts
 
 def migrate_oauth_template_facts(facts):
@@ -1709,7 +1700,6 @@ class OpenShiftFacts(object):
         facts = set_proxy_facts(facts)
         if not safe_get_bool(facts['common']['is_containerized']):
             facts = set_installed_variant_rpm_facts(facts)
-        facts = set_nodename(facts)
         return dict(openshift=facts)
 
     def get_defaults(self, roles, deployment_type, deployment_subtype):
