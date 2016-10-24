@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.35
+Version:        3.2.36
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Oct 24 2016 Scott Dodson <sdodson@redhat.com> 3.2.36-1
+- Enable dnsmasq service (sdodson@redhat.com)
+- Override __init__ in default callback to avoid infinite loop.
+  (abutcher@redhat.com)
+- Use ansible.module_utils._text.to_text instead of
+  ansible.utils.unicode.to_unicode. (abutcher@redhat.com)
+- Suppress more warnings. (abutcher@redhat.com)
+
 * Wed Oct 19 2016 Scott Dodson <sdodson@redhat.com> 3.2.35-1
 - Get rid of openshift_node_config_file entirely (sdodson@redhat.com)
 - Build full node config path in systemd_units tasks. (abutcher@redhat.com)
