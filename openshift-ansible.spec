@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.11
+Version:        3.4.12
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,13 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Oct 24 2016 Troy Dawson <tdawson@redhat.com> 3.4.12-1
+- Move infrastructure templates into openshift_hosted_templates role.
+  (abutcher@redhat.com)
+- Unit tests for the debug_env logger thing (tbielawa@redhat.com)
+- a-o-i: Separate install and scaleup workflows (smunilla@redhat.com)
+- Reference full vars for registry object storage. (abutcher@redhat.com)
+
 * Fri Oct 21 2016 Troy Dawson <tdawson@redhat.com> 3.4.11-1
 - trouble creating service signer while running upgrade dockerized
   (henning.fjellheim@nb.no)
