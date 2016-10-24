@@ -29,6 +29,12 @@
   when: openshift_node_dnsmasq_additional_config_file is defined
   notify: restart dnsmasq
 
+- name: Enable dnsmasq
+  service:
+    name: dnsmasq
+    enabled: yes
+    state: started
+
 # Dynamic NetworkManager based dispatcher
 - include: ./network-manager.yml
   when: network_manager_active | bool
