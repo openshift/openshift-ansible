@@ -83,9 +83,9 @@
     create: true
   with_items:
     - regex: '^AWS_ACCESS_KEY_ID='
-      line: "AWS_ACCESS_KEY_ID={{ openshift_cloudprovider_aws_access_key }}"
+      line: "AWS_ACCESS_KEY_ID={{ openshift_cloudprovider_aws_access_key | default('') }}"
     - regex: '^AWS_SECRET_ACCESS_KEY='
-      line: "AWS_SECRET_ACCESS_KEY={{ openshift_cloudprovider_aws_secret_key }}"
+      line: "AWS_SECRET_ACCESS_KEY={{ openshift_cloudprovider_aws_secret_key | default('') }}"
   when: "openshift_cloudprovider_kind is defined and openshift_cloudprovider_kind == 'aws' and openshift_cloudprovider_aws_access_key is defined and openshift_cloudprovider_aws_secret_key is defined"
   notify:
   - restart node
@@ -124,6 +124,10 @@
   command: >
     curl --silent --cacert {{ openshift.common.config_base }}/node/ca.crt
     {{ openshift_node_master_api_url }}/healthz/ready
+  args:
+    # Disables the following warning:
+    # Consider using get_url or uri module rather than running curl
+    warn: no
   register: api_available_output
   until: api_available_output.stdout == 'ok'
   retries: 120

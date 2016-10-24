@@ -56,12 +56,12 @@
     create: true
   with_items:
     - regex: '^HTTP_PROXY='
-      line: "HTTP_PROXY={{ openshift.common.http_proxy }}"
+      line: "HTTP_PROXY={{ openshift.common.http_proxy | default('') }}"
     - regex: '^HTTPS_PROXY='
-      line: "HTTPS_PROXY={{ openshift.common.https_proxy }}"
+      line: "HTTPS_PROXY={{ openshift.common.https_proxy | default('') }}"
     - regex: '^NO_PROXY='
-      line: "NO_PROXY={{ openshift.common.no_proxy | join(',') }},{{ openshift.common.portal_net }},{{ hostvars[groups.oo_first_master.0].openshift.master.sdn_cluster_network_cidr }}"
-  when: "{{ openshift.common.http_proxy is defined and openshift.common.http_proxy != '' }}"
+      line: "NO_PROXY={{ openshift.common.no_proxy | default([]) | join(',') }},{{ openshift.common.portal_net }},{{ hostvars[groups.oo_first_master.0].openshift.master.sdn_cluster_network_cidr }}"
+  when: ('http_proxy' in openshift.common and openshift.common.http_proxy != '')
   notify:
   - restart node
 
