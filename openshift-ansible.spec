@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.38
+Version:        3.3.39
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Oct 24 2016 Scott Dodson <sdodson@redhat.com> 3.3.39-1
+- Bump enterprise logging and metrics to 3.3.1 (sdodson@redhat.com)
+- Enable dnsmasq service (sdodson@redhat.com)
+- Revert "Fix the nodeName of the OpenShift nodes on OpenStack"
+  (sdodson@redhat.com)
+- Revert "Fix OpenStack cloud provider" (sdodson@redhat.com)
+- Revert "Check that OpenStack hostnames are resolvable" (sdodson@redhat.com)
+
 * Wed Oct 19 2016 Scott Dodson <sdodson@redhat.com> 3.3.38-1
 - Override __init__ in default callback to avoid infinite loop.
   (abutcher@redhat.com)
