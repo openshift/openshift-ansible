@@ -17,7 +17,7 @@
       cp {{ openshift_master_config_dir }}/admin.kubeconfig {{ mktemp.stdout }}/admin.kubeconfig
     changed_when: False
 
-  - name: Check for logging project already exists
+  - name: "Check for logging project already exists"
     command: >
       {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get project logging -o jsonpath='{.metadata.name}'
     register: logging_project_result
@@ -40,9 +40,13 @@
 
   - name: "Create templates for logging accounts and the deployer"
     command: >
-      {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig create -f {{ examples_base }}/infrastructure-templates/{{ 'enterprise' if openshift_deployment_type == 'openshift-enterprise' else 'origin' }}/logging-deployer.yaml
-    register: template_output
-    failed_when: "template_output.rc == 1 and 'exists' not in template_output.stderr"
+      {{ openshift.common.client_binary }} create
+      -f {{ hosted_base }}/logging-deployer.yaml
+      --config={{ mktemp.stdout }}/admin.kubeconfig
+      -n logging
+    register: logging_import_template
+    failed_when: "'already exists' not in logging_import_template.stderr and logging_import_template.rc != 0"
+    changed_when: "'created' in logging_import_template.stdout"
 
   - name: "Process the logging accounts template"
     shell:  "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig process logging-deployer-account-template |  {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig create -f -"

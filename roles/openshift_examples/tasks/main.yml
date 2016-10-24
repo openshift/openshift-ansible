@@ -106,22 +106,6 @@
   failed_when: "'already exists' not in oex_import_quickstarts.stderr and oex_import_quickstarts.rc != 0"
   changed_when: false
 
-- name: Import origin infrastructure-templates
-  command: >
-    {{ openshift.common.client_binary }} {{ openshift_examples_import_command }} -n openshift -f {{ infrastructure_origin_base }}
-  when: openshift_examples_load_centos | bool
-  register: oex_import_infrastructure
-  failed_when: "'already exists' not in oex_import_infrastructure.stderr and oex_import_infrastructure.rc != 0"
-  changed_when: false
-
-- name: Import enterprise infrastructure-templates
-  command: >
-    {{ openshift.common.client_binary }} {{ openshift_examples_import_command }} -n openshift -f {{ infrastructure_enterprise_base }}
-  when: openshift_examples_load_rhel | bool
-  register: oex_import_infrastructure
-  failed_when: "'already exists' not in oex_import_infrastructure.stderr and oex_import_infrastructure.rc != 0"
-  changed_when: false
-
 - name: Remove old xPaas template files
   file:
     path: "{{ item }}"
