@@ -901,10 +901,24 @@ def set_sdn_facts_if_unset(facts, system_facts):
             facts['common']['sdn_network_plugin_name'] = plugin
 
     if 'master' in facts:
-        if 'sdn_cluster_network_cidr' not in facts['master']:
-            facts['master']['sdn_cluster_network_cidr'] = '10.1.0.0/16'
-        if 'sdn_host_subnet_length' not in facts['master']:
-            facts['master']['sdn_host_subnet_length'] = '8'
+        # set defaults for sdn_cluster_network_cidr and sdn_host_subnet_length
+        # these might be overridden if they exist in the master config file
+        facts['master']['sdn_cluster_network_cidr'] = '10.128.0.0/14'
+        facts['master']['sdn_host_subnet_length'] = '9'
+
+        master_cfg_path = os.path.join(facts['common']['config_base'],
+                                       'master/master-config.yaml')
+        if os.path.isfile(master_cfg_path):
+            with open(master_cfg_path, 'r') as master_cfg_f:
+                config = yaml.safe_load(master_cfg_f.read())
+
+            if 'networkConfig' in config:
+                if 'clusterNetworkCIDR' in config['networkConfig']:
+                    facts['master']['sdn_cluster_network_cidr'] = \
+                        config['networkConfig']['clusterNetworkCIDR']
+                if 'hostSubnetLength' in config['networkConfig']:
+                    facts['master']['sdn_host_subnet_length'] = \
+                        config['networkConfig']['hostSubnetLength']
 
     if 'node' in facts and 'sdn_mtu' not in facts['node']:
         node_ip = facts['common']['ip']
@@ -1771,8 +1785,8 @@ class OpenShiftFacts(object):
         facts = set_node_schedulability(facts)
         facts = set_selectors(facts)
         facts = set_identity_providers_if_unset(facts)
-        facts = set_sdn_facts_if_unset(facts, self.system_facts)
         facts = set_deployment_facts_if_unset(facts)
+        facts = set_sdn_facts_if_unset(facts, self.system_facts)
         facts = set_container_facts_if_unset(facts)
         facts = build_kubelet_args(facts)
         facts = build_controller_args(facts)
