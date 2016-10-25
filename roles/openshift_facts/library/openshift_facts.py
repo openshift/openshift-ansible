@@ -1380,8 +1380,11 @@ def save_local_facts(filename, facts):
     """
     try:
         fact_dir = os.path.dirname(filename)
-        if not os.path.exists(fact_dir):
-            os.makedirs(fact_dir)
+        try:
+            os.makedirs(fact_dir)  # try to make the directory
+        except OSError as exception:
+            if exception.errno != errno.EEXIST:  # but it is okay if it is already there
+                raise  # pass any other exceptions up the chain
         with open(filename, 'w') as fact_file:
             fact_file.write(module.jsonify(facts))
         os.chmod(filename, 0o600)
