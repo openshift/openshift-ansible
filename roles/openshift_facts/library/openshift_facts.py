@@ -1036,6 +1036,8 @@ def build_kubelet_args(facts):
                 if facts['cloudprovider']['kind'] == 'openstack':
                     kubelet_args['cloud-provider'] = ['openstack']
                     kubelet_args['cloud-config'] = [cloud_cfg_path + '/openstack.conf']
+                if facts['cloudprovider']['kind'] == 'gce':
+                    kubelet_args['cloud-provider'] = ['gce']
         if kubelet_args != {}:
             facts = merge_facts({'node': {'kubelet_args': kubelet_args}}, facts, [], [])
     return facts
@@ -1054,6 +1056,8 @@ def build_controller_args(facts):
                 if facts['cloudprovider']['kind'] == 'openstack':
                     controller_args['cloud-provider'] = ['openstack']
                     controller_args['cloud-config'] = [cloud_cfg_path + '/openstack.conf']
+                if facts['cloudprovider']['kind'] == 'gce':
+                    controller_args['cloud-provider'] = ['gce']
         if controller_args != {}:
             facts = merge_facts({'master': {'controller_args': controller_args}}, facts, [], [])
     return facts
@@ -1072,6 +1076,8 @@ def build_api_server_args(facts):
                 if facts['cloudprovider']['kind'] == 'openstack':
                     api_server_args['cloud-provider'] = ['openstack']
                     api_server_args['cloud-config'] = [cloud_cfg_path + '/openstack.conf']
+                if facts['cloudprovider']['kind'] == 'gce':
+                    api_server_args['cloud-provider'] = ['gce']
         if api_server_args != {}:
             facts = merge_facts({'master': {'api_server_args': api_server_args}}, facts, [], [])
     return facts
@@ -1433,6 +1439,9 @@ def set_proxy_facts(facts):
             builddefaults['http_proxy'] = common['http_proxy']
         if 'https_proxy' not in builddefaults and 'https_proxy' in common:
             builddefaults['https_proxy'] = common['https_proxy']
+        # make no_proxy into a list if it's not
+        if 'no_proxy' in builddefaults and isinstance(builddefaults['no_proxy'], basestring):
+            builddefaults['no_proxy'] = builddefaults['no_proxy'].split(",")
         if 'no_proxy' not in builddefaults and 'no_proxy' in common:
             builddefaults['no_proxy'] = common['no_proxy']
         if 'git_http_proxy' not in builddefaults and 'http_proxy' in builddefaults:
