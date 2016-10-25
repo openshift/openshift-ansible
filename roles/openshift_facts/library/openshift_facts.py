@@ -55,7 +55,6 @@ def migrate_docker_facts(facts):
                     facts['docker'][param] = facts[role].pop(old_param)
 
     if 'node' in facts and 'portal_net' in facts['node']:
-        facts['docker']['hosted_registry_insecure'] = True
         facts['docker']['hosted_registry_network'] = facts['node'].pop('portal_net')
 
     # log_options was originally meant to be a comma separated string, but
@@ -1138,6 +1137,24 @@ def get_docker_version_info():
             }
     return result
 
+def get_hosted_registry_insecure():
+    """ Parses OPTIONS from /etc/sysconfig/docker to determine if the
+        registry is currently insecure.
+    """
+    hosted_registry_insecure = None
+    if os.path.exists('/etc/sysconfig/docker'):
+        try:
+            ini_str = unicode('[root]\n' + open('/etc/sysconfig/docker', 'r').read(), 'utf-8')
+            ini_fp = io.StringIO(ini_str)
+            config = ConfigParser.RawConfigParser()
+            config.readfp(ini_fp)
+            options = config.get('root', 'OPTIONS')
+            if 'insecure-registry' in options:
+                hosted_registry_insecure = True
+        except:
+            pass
+    return hosted_registry_insecure
+
 def get_openshift_version(facts):
     """ Get current version of openshift on the host.
 
@@ -1790,13 +1807,15 @@ class OpenShiftFacts(object):
 
         if 'docker' in roles:
             docker = dict(disable_push_dockerhub=False,
-                          hosted_registry_insecure=True,
                           options='--log-driver=json-file --log-opt max-size=50m')
             version_info = get_docker_version_info()
             if version_info is not None:
                 docker['api_version'] = version_info['api_version']
                 docker['version'] = version_info['version']
                 docker['gte_1_10'] = LooseVersion(version_info['version']) >= LooseVersion('1.10')
+            hosted_registry_insecure = get_hosted_registry_insecure()
+            if hosted_registry_insecure is not None:
+                docker['hosted_registry_insecure'] = hosted_registry_insecure
             defaults['docker'] = docker
 
         if 'clock' in roles:
