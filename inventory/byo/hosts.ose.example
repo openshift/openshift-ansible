@@ -509,10 +509,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # NOTE: CA certificate will not be replaced with existing clusters.
 # This option may only be specified when creating a new cluster or
 # when redeploying cluster certificates with the redeploy-certificates
-# playbook. If replacing the CA certificate in an existing cluster
-# with a custom ca certificate, the following variable must also be
-# set.
-#openshift_certificates_redeploy_ca=true
+# playbook.
 
 # Configure custom named certificates (SNI certificates)
 #

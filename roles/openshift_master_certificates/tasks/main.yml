@@ -38,11 +38,21 @@
   when: master_certs_missing | bool and inventory_hostname != openshift_ca_host
   delegate_to: "{{ openshift_ca_host }}"
 
+- find:
+    paths: "{{ openshift_master_config_dir }}/legacy-ca/"
+    patterns: ".*-ca.crt"
+    use_regex: true
+  register: g_master_legacy_ca_result
+  delegate_to: "{{ openshift_ca_host }}"
+
 - name: Create the master server certificate
   command: >
     {{ hostvars[openshift_ca_host].openshift.common.client_binary }} adm ca create-server-cert
     {% for named_ca_certificate in openshift.master.named_certificates | default([]) | oo_collect('cafile') %}
     --certificate-authority {{ named_ca_certificate }}
+    {% endfor %}
+    {% for legacy_ca_certificate in g_master_legacy_ca_result.files | default([]) | oo_collect('path') %}
+    --certificate-authority {{ legacy_ca_certificate }}
     {% endfor %}
     --hostnames={{ hostvars[item].openshift.common.all_hostnames | join(',') }}
     --cert={{ openshift_generated_configs_dir }}/master-{{ hostvars[item].openshift.common.hostname }}/master.server.crt
