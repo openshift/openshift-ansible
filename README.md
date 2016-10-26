@@ -26,6 +26,12 @@ not practical to start over at 1.0.
   ```
     dnf install -y ansible-2.1.0.0 pyOpenSSL python-cryptography
   ```
+  - RHEL 7:
+  ```
+  yum install http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+  rpm --import http://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7
+  yum install ansible1.9-1.9.4-2.el7 rubygem-thor rubygem-parseconfig util-linux pyOpenSSL libffi-devel python-cryptography
+  ```
    - OSX:
   ```
     # Install ansible 2.1.0.0 and python 2
