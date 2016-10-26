@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.40
+Version:        3.3.41
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Oct 26 2016 Scott Dodson <sdodson@redhat.com> 3.3.41-1
+- Default hosted_registry_insecure true when insecure registry present in
+  existing /etc/sysconfig/docker. (abutcher@redhat.com)
+
 * Tue Oct 25 2016 Scott Dodson <sdodson@redhat.com> 3.3.40-1
 - [upgrades] Fix containerized node (sdodson@redhat.com)
 
