@@ -1,20 +1,4 @@
 ---
-- include: evaluate_groups.yml
-  tags:
-  - always
-
-- include: initialize_facts.yml
-  tags:
-  - always
-
-- include: validate_hostnames.yml
-  tags:
-  - node
-
-- include: initialize_openshift_version.yml
-  tags:
-  - always
-
 - name: Set oo_option facts
   hosts: oo_all_hosts
   tags:

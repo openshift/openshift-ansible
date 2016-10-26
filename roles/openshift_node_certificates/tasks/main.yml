@@ -42,20 +42,30 @@
   when: node_certs_missing | bool
   delegate_to: "{{ openshift_ca_host }}"
 
+- find:
+    paths: "{{ openshift.common.config_base }}/master/legacy-ca/"
+    patterns: ".*-ca.crt"
+    use_regex: true
+  register: g_master_legacy_ca_result
+  delegate_to: "{{ openshift_ca_host }}"
+
 - name: Generate the node client config
   command: >
     {{ hostvars[openshift_ca_host].openshift.common.client_binary }} adm create-api-client-config
-      {% for named_ca_certificate in hostvars[openshift_ca_host].openshift.master.named_certificates | default([]) | oo_collect('cafile') %}
-      --certificate-authority {{ named_ca_certificate }}
-      {% endfor %}
-      --certificate-authority={{ openshift_ca_cert }}
-      --client-dir={{ openshift_generated_configs_dir }}/node-{{ hostvars[item].openshift.common.hostname }}
-      --groups=system:nodes
-      --master={{ hostvars[openshift_ca_host].openshift.master.api_url }}
-      --signer-cert={{ openshift_ca_cert }}
-      --signer-key={{ openshift_ca_key }}
-      --signer-serial={{ openshift_ca_serial }}
-      --user=system:node:{{ hostvars[item].openshift.common.hostname }}
+    {% for named_ca_certificate in hostvars[openshift_ca_host].openshift.master.named_certificates | default([]) | oo_collect('cafile') %}
+    --certificate-authority {{ named_ca_certificate }}
+    {% endfor %}
+    {% for legacy_ca_certificate in g_master_legacy_ca_result.files | default([]) | oo_collect('path') %}
+    --certificate-authority {{ legacy_ca_certificate }}
+    {% endfor %}
+    --certificate-authority={{ openshift_ca_cert }}
+    --client-dir={{ openshift_generated_configs_dir }}/node-{{ hostvars[item].openshift.common.hostname }}
+    --groups=system:nodes
+    --master={{ hostvars[openshift_ca_host].openshift.master.api_url }}
+    --signer-cert={{ openshift_ca_cert }}
+    --signer-key={{ openshift_ca_key }}
+    --signer-serial={{ openshift_ca_serial }}
+    --user=system:node:{{ hostvars[item].openshift.common.hostname }}
   args:
     creates: "{{ openshift_generated_configs_dir }}/node-{{ hostvars[item].openshift.common.hostname }}"
   with_items: "{{ hostvars

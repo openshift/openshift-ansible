@@ -102,7 +102,11 @@ imagePolicyConfig:{{ openshift.master.image_policy_config | to_padded_yaml(level
 kind: MasterConfig
 kubeletClientInfo:
 {# TODO: allow user specified kubelet port #}
+{% if openshift.common.version_gte_3_2_or_1_2 | bool %}
+  ca: ca-bundle.crt
+{% else %}
   ca: ca.crt
+{% endif %}
   certFile: master.kubelet-client.crt
   keyFile: master.kubelet-client.key
   port: 10250
@@ -221,7 +225,11 @@ servingInfo:
   bindAddress: {{ openshift.master.bind_addr }}:{{ openshift.master.api_port }}
   bindNetwork: tcp4
   certFile: master.server.crt
+{% if openshift.common.version_gte_3_2_or_1_2 | bool %}
+  clientCA: ca-bundle.crt
+{% else %}
   clientCA: ca.crt
+{% endif %}
   keyFile: master.server.key
   maxRequestsInFlight: {{ openshift.master.max_requests_inflight }}
   requestTimeoutSeconds: 3600

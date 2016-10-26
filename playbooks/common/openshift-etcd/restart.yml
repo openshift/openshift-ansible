@@ -1,0 +1,9 @@
+---
+- name: Restart etcd
+  hosts: oo_etcd_to_config
+  serial: 1
+  tasks:
+    - name: restart etcd
+      service:
+        name: "{{ 'etcd' if not openshift.common.is_containerized | bool else 'etcd_container' }}"
+        state: restarted
