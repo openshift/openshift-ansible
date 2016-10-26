@@ -65,4 +65,4 @@
     openshift_hosted_logging_elasticsearch_ops_pvc_prefix: "{{ 'logging-es' if openshift_hosted_logging_storage_kind | default(none) =='dynamic' else '' }}"
 
   - role: cockpit-ui
-    when: ( openshift.common.version_gte_3_3_or_1_3  | bool ) and ( openshift_hosted_manage_registry | default(true) | bool )
+    when: ( openshift.common.version_gte_3_3_or_1_3  | bool ) and ( openshift_hosted_manage_registry | default(true) | bool ) and not (openshift.docker.hosted_registry_insecure | default(false) | bool)
