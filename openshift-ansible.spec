@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.12
+Version:        3.4.13
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,19 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Oct 26 2016 Troy Dawson <tdawson@redhat.com> 3.4.13-1
+- [upgrades] Fix containerized node (sdodson@redhat.com)
+- Add support for 3.4 upgrade. (dgoodwin@redhat.com)
+- Update link to latest versions upgrade README (ebballon@gmail.com)
+- Bump logging and metrics deployers to 3.3.1 and 3.4.0 (sdodson@redhat.com)
+- Remove Vagrantfile (jdetiber@redhat.com)
+- Enable dnsmasq service (sdodson@redhat.com)
+- Default infra template modification based on
+  openshift_examples_modify_imagestreams (abutcher@redhat.com)
+- Added a parameter for cert validity (vishal.patil@nuagenetworks.net)
+- Fix and reorder control plane service restart. (dgoodwin@redhat.com)
+- Add node-labels to kubeletArguments (tbielawa@redhat.com)
+
 * Mon Oct 24 2016 Troy Dawson <tdawson@redhat.com> 3.4.12-1
 - Move infrastructure templates into openshift_hosted_templates role.
   (abutcher@redhat.com)
