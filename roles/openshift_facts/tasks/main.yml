@@ -10,12 +10,19 @@
 - set_fact:
     l_is_containerized: "{{ (l_is_atomic | bool) or (containerized | default(false) | bool) }}"
 
-- name: Ensure PyYaml is installed
-  action: "{{ ansible_pkg_mgr }} name=PyYAML state=present"
+- name: Ensure required packages are installed
+  action: "{{ ansible_pkg_mgr }} name={{ item }} state=present"
+  with_items:
+    - PyYAML
+    - yum-utils
+    - dbus-python
+    - libselinux-python
+    - libsemanage-python
+    - NetworkManager
   when: not l_is_atomic | bool
 
-- name: Ensure yum-utils is installed
-  action: "{{ ansible_pkg_mgr }} name=yum-utils state=present"
+- name: Enable NetworkManager
+  service: name=NetworkManager enabled=yes state=started
   when: not l_is_atomic | bool
 
 - name: Gather Cluster facts and set is_containerized if needed
