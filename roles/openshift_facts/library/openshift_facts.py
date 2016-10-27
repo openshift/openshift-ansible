@@ -2027,7 +2027,7 @@ class OpenShiftFacts(object):
 
         if 'docker' in roles:
             docker = dict(disable_push_dockerhub=False,
-                          options='--log-driver=json-file --log-opt max-size=50m')
+                          options='--log-driver=journald')
             # NOTE: This is a workaround for a dnf output racecondition that can occur in
             # some situations. See https://bugzilla.redhat.com/show_bug.cgi?id=918184
             if self.system_facts['ansible_pkg_mgr'] == 'dnf':
