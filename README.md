@@ -22,11 +22,16 @@ not practical to start over at 1.0.
 
 ##Setup
 - Install base dependencies:
+  - Requirements:
+    - Ansible >= 2.1.0 though 2.2 is preferred for performance reasons.
+    - Jinja >= 2.7
+
   - Fedora:
   ```
     dnf install -y ansible-2.1.0.0 pyOpenSSL python-cryptography
   ```
-   - OSX:
+
+  - OSX:
   ```
     # Install ansible 2.1.0.0 and python 2
     brew install ansible python
