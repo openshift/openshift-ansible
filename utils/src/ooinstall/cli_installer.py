@@ -170,10 +170,13 @@ http://docs.openshift.com/enterprise/latest/architecture/infrastructure_componen
         if masters_set or num_masters != 2:
             more_hosts = click.confirm('Do you want to add additional hosts?')
 
-    master_lb = collect_master_lb(hosts)
-    if master_lb:
-        hosts.append(master_lb)
-        roles.add('master_lb')
+    if num_masters > 2:
+        master_lb = collect_master_lb(hosts)
+        if master_lb:
+            hosts.append(master_lb)
+            roles.add('master_lb')
+    else:
+        set_cluster_hostname(oo_cfg)
 
     if not existing_env:
         collect_storage_host(hosts)
@@ -300,8 +303,7 @@ hostname.
         return hostname
 
     lb_hostname = click.prompt('Enter hostname or IP address',
-                               value_proc=validate_prompt_lb,
-                               default='')
+                               value_proc=validate_prompt_lb)
     if lb_hostname:
         host_props['connect_to'] = lb_hostname
         install_haproxy = \
@@ -312,6 +314,20 @@ hostname.
     else:
         return None
 
+def set_cluster_hostname(oo_cfg):
+    message = """
+You have chosen to install a single master cluster (non-HA).
+
+In a single master cluster, the cluster host name (Ansible variable openshift_master_cluster_public_hostname) is set by default to the host name of the single master. In a multiple master (HA) cluster, the FQDN of a host must be provided that will be configured as a proxy. This could be either an existing load balancer configured to balance all masters on
+port 8443 or a new host that would have HAProxy installed on it.
+
+(Optional)
+If you want to override the cluster host name now to something other than the default (the host name of the single master), or if you think you might add masters later to become an HA cluster and want to future proof your cluster host name choice, please provide a FQDN. Otherwise, press ENTER to continue and accept the default.
+"""
+    click.echo(message)
+    cluster_hostname = click.prompt('Enter hostname or IP address',
+                                    default='')
+    oo_cfg.deployment.variables['openshift_master_cluster_hostname'] = cluster_hostname
 
 def collect_storage_host(hosts):
     """
