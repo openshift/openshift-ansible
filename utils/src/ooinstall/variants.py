@@ -52,7 +52,7 @@ REG = Variant('openshift-enterprise', 'Registry',
 
 origin = Variant('origin', 'OpenShift Origin',
                  [
-                     Version('1.2', 'origin'),
+                     Version('1.4', 'origin'),
                  ]
 )
 
