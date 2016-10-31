@@ -27,7 +27,7 @@
         embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
 
 - name: Backup etcd
-  include: etcd_backup.yml
+  include: ./etcd/backup.yml
 
 - name: Upgrade master packages
   hosts: oo_masters_to_config
