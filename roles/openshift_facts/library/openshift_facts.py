@@ -1206,7 +1206,7 @@ def get_openshift_version(facts):
     # version
     if 'common' in facts:
         if 'version' in facts['common'] and facts['common']['version'] is not None:
-            return facts['common']['version']
+            return chomp_commit_offset(facts['common']['version'])
 
     if os.path.isfile('/usr/bin/openshift'):
         _, output, _ = module.run_command(['/usr/bin/openshift', 'version'])
@@ -1221,7 +1221,27 @@ def get_openshift_version(facts):
         _, output, _ = module.run_command(['/usr/local/bin/openshift', 'version'])
         version = parse_openshift_version(output)
 
-    return version
+    return chomp_commit_offset(version)
+
+
+def chomp_commit_offset(version):
+    """Chomp any "+git.foo" commit offset string from the given `version`
+    and return the modified version string.
+
+Ex:
+- chomp_commit_offset(None)                 => None
+- chomp_commit_offset(1337)                 => "1337"
+- chomp_commit_offset("v3.4.0.15+git.derp") => "v3.4.0.15"
+- chomp_commit_offset("v3.4.0.15")          => "v3.4.0.15"
+- chomp_commit_offset("v1.3.0+52492b4")     => "v1.3.0"
+    """
+    if version is None:
+        return version
+    else:
+        # Stringify, just in case it's a Number type. Split by '+' and
+        # return the first split. No concerns about strings without a
+        # '+', .split() returns an array of the original string.
+        return str(version).split('+')[0]
 
 
 def get_container_openshift_version(facts):
