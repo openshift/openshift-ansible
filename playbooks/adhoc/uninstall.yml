@@ -338,6 +338,7 @@
     failed_when: False
     with_items:
     - etcd
+    - etcd3
     - firewalld
 
   - name: Stop additional atomic services
@@ -352,6 +353,7 @@
     when: not is_atomic | bool
     with_items:
     - etcd
+    - etcd3
 
   - shell: systemctl reset-failed
     changed_when: False
