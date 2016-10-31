@@ -8,6 +8,9 @@ LABEL Version="v3.1.1.901"
 LABEL Release="6"
 LABEL BZComponent="aos3-installation-docker"
 LABEL Architecture="x86_64"
+LABEL io.k8s.description="Ansible code and playbooks for installing Openshift Container Platform." \
+      io.k8s.display-name="Openshift Installer" \
+      io.openshift.tags="openshift,installer"
 
 RUN INSTALL_PKGS="atomic-openshift-utils" && \
     yum install -y --enablerepo=rhel-7-server-ose-3.2-rpms $INSTALL_PKGS && \
