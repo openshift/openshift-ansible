@@ -1,4 +1,10 @@
 ---
+- name: Set cloud provider facts
+  openshift_facts:
+    role: cloudprovider
+    local_facts:
+      kind: "{{ openshift_cloudprovider_kind | default(None) }}"
+
 - name: Create cloudprovider config dir
   file:
     path: "{{ openshift.common.config_base }}/cloudprovider"
