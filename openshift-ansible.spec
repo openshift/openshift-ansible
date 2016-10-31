@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.14
+Version:        3.4.15
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Oct 31 2016 Troy Dawson <tdawson@redhat.com> 3.4.15-1
+- Bump documented openshift_release for 1.4/3.4. (dgoodwin@redhat.com)
+- Add requirements, fix a small formatting issue.
+  (erinn.looneytriggs@gmail.com)
+
 * Fri Oct 28 2016 Troy Dawson <tdawson@redhat.com> 3.4.14-1
 - Change HA master controller service to restart always. (dgoodwin@redhat.com)
 - Default hosted_registry_insecure true when insecure registry present in
