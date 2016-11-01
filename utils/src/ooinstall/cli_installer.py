@@ -7,7 +7,8 @@ import sys
 import click
 from pkg_resources import parse_version
 from ooinstall import openshift_ansible, utils
-from ooinstall.oo_config import Host, OOConfig, OOConfigInvalidHostError, Role
+from ooinstall.oo_config import OOConfig
+from ooinstall.models import Host, Role, InvalidHostError
 from ooinstall.variants import find_variant, get_variant_version_combos
 
 INSTALLER_LOG = logging.getLogger('installer')
@@ -870,8 +871,8 @@ def cli(ctx, unattended, configuration, ansible_playbook_directory, ansible_log_
 
     try:
         oo_cfg = OOConfig(ctx.obj['configuration'])
-    except OOConfigInvalidHostError as err:
-        click.echo(err)
+    except InvalidHostError as error:
+        click.echo(error)
         sys.exit(1)
 
     # If no playbook dir on the CLI, check the config:

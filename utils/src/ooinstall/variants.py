@@ -1,7 +1,3 @@
-# TODO: Temporarily disabled due to importing old code into openshift-ansible
-# repo. We will work on these over time.
-# pylint: disable=bad-continuation,missing-docstring,no-self-use,invalid-name,too-few-public-methods
-
 """
 Defines the supported variants and versions the installer supports, and metadata
 required to run Ansible correctly.
@@ -11,29 +7,47 @@ to be specified by the user, and to point the generic variants to the latest
 version.
 """
 
-import logging
-installer_log = logging.getLogger('installer')
 
-
+# pylint: disable=too-few-public-methods
 class Version(object):
+    """
+    Defines a deploy_type for use by the ansible playbooks.
+
+    Attributes:
+        name (str): The major and minor version for the deployment type.mro
+                    e.g. 3.0, 3.1
+        ansible_key (str): What will become deployment_type in the ansible inventory
+        subtype (str): A marker for disabling features or running additional
+                       configuration for a deployment.
+    """
     def __init__(self, name, ansible_key, subtype=''):
-        self.name = name  # i.e. 3.0, 3.1
+        self.name = name
 
         self.ansible_key = ansible_key
         self.subtype = subtype
 
 
 class Variant(object):
+    """
+    A wrapper for similar Versions
+
+    Attributes:
+        name (str): Supported variant name.
+        description (str): A friendly name for the variant.
+        versions (list): A collection of Versions. In order for this to
+                         function correctly, the Versions must be ordered
+                         from newest to oldest.
+    """
     def __init__(self, name, description, versions):
-        # Supported variant name:
         self.name = name
-
-        # Friendly name for the variant:
         self.description = description
-
         self.versions = versions
 
     def latest_version(self):
+        """
+        Returns the first entry in the versions collection, which
+        if it is properly ordered, should be the newest.
+        """
         return self.versions[0]
 
 
@@ -42,19 +56,19 @@ OSE = Variant('openshift-enterprise', 'OpenShift Container Platform',
               [
                   Version('3.4', 'openshift-enterprise'),
               ]
-)
+             )
 
 REG = Variant('openshift-enterprise', 'Registry',
               [
                   Version('3.4', 'openshift-enterprise', 'registry'),
               ]
-)
+             )
 
-origin = Variant('origin', 'OpenShift Origin',
+ORIGIN = Variant('origin', 'OpenShift Origin',
                  [
                      Version('1.4', 'origin'),
                  ]
-)
+                )
 
 LEGACY = Variant('openshift-enterprise', 'OpenShift Container Platform',
                  [
@@ -63,10 +77,10 @@ LEGACY = Variant('openshift-enterprise', 'OpenShift Container Platform',
                      Version('3.1', 'openshift-enterprise'),
                      Version('3.0', 'openshift-enterprise'),
                  ]
-)
+                )
 
 # Ordered list of variants we can install, first is the default.
-SUPPORTED_VARIANTS = (OSE, REG, origin, LEGACY)
+SUPPORTED_VARIANTS = (OSE, REG, ORIGIN, LEGACY)
 DISPLAY_VARIANTS = (OSE, REG,)
 
 
@@ -81,14 +95,18 @@ def find_variant(name, version=None):
         if prod.name == name:
             if version is None:
                 return (prod, prod.latest_version())
-            for v in prod.versions:
-                if v.name == version:
-                    return (prod, v)
+            for ver in prod.versions:
+                if ver.name == version:
+                    return (prod, ver)
 
     return (None, None)
 
 
 def get_variant_version_combos():
+    """
+    Returns a list of Variants to display to the user in
+    interactive mode.
+    """
     combos = []
     for variant in DISPLAY_VARIANTS:
         for ver in variant.versions:
