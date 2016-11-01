@@ -24,17 +24,21 @@
   when: pkg_check.rc == 0
   ignore_errors: yes
 
-- name: Install iptables packages
-  action: "{{ ansible_pkg_mgr }} name={{ item }} state=present"
-  with_items:
-  - iptables
-  - iptables-services
-  register: install_result
+- name: Install latest iptables package
+  action: "{{ ansible_pkg_mgr }} name=iptables state=latest"
+  register: install_iptables_result
+  when: not openshift.common.is_atomic | bool
+
+# Separate task due to version failures when non-latest iptables is installed,
+# but iptables-services isn't.
+- name: Install latest iptables-services packages
+  action: "{{ ansible_pkg_mgr }} name=iptables-services state=latest"
+  register: install_iptables_services_result
   when: not openshift.common.is_atomic | bool
 
 - name: Reload systemd units
   command: systemctl daemon-reload
-  when: install_result | changed
+  when: install_iptables_result | changed or install_iptables_services_result | changed
 
 - name: Determine if iptables service masked
   command: >
