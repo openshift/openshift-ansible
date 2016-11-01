@@ -18,7 +18,7 @@
     mode: 0660
     owner: root
     group: root
-    changed_when: false
+  changed_when: false
 
 - name: Configure the nofile limits for haproxy
   ini_file:
