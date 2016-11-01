@@ -1,0 +1,31 @@
+---
+- name: Verify master processes
+  hosts: oo_masters_to_config
+  roles:
+  - openshift_facts
+  tasks:
+  - openshift_facts:
+      role: master
+      local_facts:
+        ha: "{{ groups.oo_masters_to_config | length > 1 }}"
+
+  - name: Ensure Master is running
+    service:
+      name: "{{ openshift.common.service_type }}-master"
+      state: started
+      enabled: yes
+    when: openshift.master.ha is defined and not openshift.master.ha | bool and openshift.common.is_containerized | bool
+
+  - name: Ensure HA Master is running
+    service:
+      name: "{{ openshift.common.service_type }}-master-api"
+      state: started
+      enabled: yes
+    when: openshift.master.ha is defined and openshift.master.ha | bool and openshift.common.is_containerized | bool
+
+  - name: Ensure HA Master is running
+    service:
+      name: "{{ openshift.common.service_type }}-master-controllers"
+      state: started
+      enabled: yes
+    when: openshift.master.ha is defined and openshift.master.ha | bool and openshift.common.is_containerized | bool

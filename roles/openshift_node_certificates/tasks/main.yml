@@ -44,7 +44,7 @@
 
 - name: Generate the node client config
   command: >
-    {{ openshift.common.admin_binary }} create-api-client-config
+    {{ openshift.common.client_binary }} adm create-api-client-config
       {% for named_ca_certificate in hostvars[openshift_ca_host].openshift.master.named_certificates | default([]) | oo_collect('cafile') %}
       --certificate-authority {{ named_ca_certificate }}
       {% endfor %}
@@ -63,7 +63,7 @@
 
 - name: Generate the node server certificate
   command: >
-    {{ openshift.common.admin_binary }} ca create-server-cert
+    {{ openshift.common.client_binary }} adm ca create-server-cert
       --cert={{ openshift_node_generated_config_dir }}/server.crt
       --key={{ openshift_generated_configs_dir }}/node-{{ openshift.common.hostname }}/server.key
       --overwrite=true
@@ -91,6 +91,9 @@
     -C {{ openshift_node_generated_config_dir }} .
   args:
     creates: "{{ openshift_node_generated_config_dir }}.tgz"
+    # Disables the following warning:
+    # Consider using unarchive module rather than running tar
+    warn: no
   when: node_certs_missing | bool
   delegate_to: "{{ openshift_ca_host }}"
 
@@ -121,3 +124,14 @@
   when: node_certs_missing | bool
   delegate_to: localhost
   become: no
+
+- name: Copy OpenShift CA to system CA trust
+  copy:
+    src: "{{ item.cert }}"
+    dest: "/etc/pki/ca-trust/source/anchors/{{ item.id }}-{{ item.cert | basename }}"
+    remote_src: yes
+  with_items:
+  - id: openshift
+    cert: "{{ openshift_node_cert_dir }}/ca.crt"
+  notify:
+  - update ca trust

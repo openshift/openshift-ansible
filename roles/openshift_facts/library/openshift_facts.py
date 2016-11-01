@@ -55,11 +55,10 @@ def migrate_docker_facts(facts):
                     facts['docker'][param] = facts[role].pop(old_param)
 
     if 'node' in facts and 'portal_net' in facts['node']:
-        facts['docker']['hosted_registry_insecure'] = True
         facts['docker']['hosted_registry_network'] = facts['node'].pop('portal_net')
 
     # log_options was originally meant to be a comma separated string, but
-    # we now prefer an actual list, with backward compatability:
+    # we now prefer an actual list, with backward compatibility:
     if 'log_options' in facts['docker'] and \
             isinstance(facts['docker']['log_options'], basestring):
         facts['docker']['log_options'] = facts['docker']['log_options'].split(",")
@@ -149,6 +148,7 @@ def hostname_valid(hostname):
     if (not hostname or
             hostname.startswith('localhost') or
             hostname.endswith('localdomain') or
+            hostname.endswith('novalocal') or
             len(hostname.split('.')) < 2):
         return False
 
@@ -363,12 +363,15 @@ def normalize_openstack_facts(metadata, facts):
     facts['network']['ip'] = local_ipv4
     facts['network']['public_ip'] = metadata['ec2_compat']['public-ipv4']
 
-    # TODO: verify local hostname makes sense and is resolvable
-    facts['network']['hostname'] = metadata['hostname']
-
-    # TODO: verify that public hostname makes sense and is resolvable
-    pub_h = metadata['ec2_compat']['public-hostname']
-    facts['network']['public_hostname'] = pub_h
+    for f_var, h_var, ip_var in [('hostname',        'hostname',        'local-ipv4'),
+                                 ('public_hostname', 'public-hostname', 'public-ipv4')]:
+        try:
+            if socket.gethostbyname(metadata['ec2_compat'][h_var]) == metadata['ec2_compat'][ip_var]:
+                facts['network'][f_var] = metadata['ec2_compat'][h_var]
+            else:
+                facts['network'][f_var] = metadata['ec2_compat'][ip_var]
+        except socket.gaierror:
+            facts['network'][f_var] = metadata['ec2_compat'][ip_var]
 
     return facts
 
@@ -497,8 +500,8 @@ def set_dnsmasq_facts_if_unset(facts):
     """
 
     if 'common' in facts:
-        facts['common']['use_dnsmasq'] = bool('use_dnsmasq' not in facts['common'] and
-                                              safe_get_bool(facts['common']['version_gte_3_2_or_1_2']))
+        if 'use_dnsmasq' not in facts['common']:
+            facts['common']['use_dnsmasq'] = bool(safe_get_bool(facts['common']['version_gte_3_2_or_1_2']))
         if 'master' in facts and 'dns_port' not in facts['master']:
             if safe_get_bool(facts['common']['use_dnsmasq']):
                 facts['master']['dns_port'] = 8053
@@ -918,6 +921,14 @@ def set_sdn_facts_if_unset(facts, system_facts):
 
     return facts
 
+def set_nodename(facts):
+    if 'node' in facts and 'common' in facts:
+        if 'cloudprovider' in facts and facts['cloudprovider']['kind'] == 'openstack':
+            facts['node']['nodename'] = facts['provider']['metadata']['hostname'].replace('.novalocal', '')
+        else:
+            facts['node']['nodename'] = facts['common']['hostname'].lower()
+    return facts
+
 def migrate_oauth_template_facts(facts):
     """
     Migrate an old oauth template fact to a newer format if it's present.
@@ -1023,12 +1034,23 @@ def get_current_config(facts):
     return current_config
 
 def build_kubelet_args(facts):
-    """ Build node kubelet_args """
-    cloud_cfg_path = os.path.join(facts['common']['config_base'],
-                                  'cloudprovider')
+    """Build node kubelet_args
+
+In the node-config.yaml file, kubeletArgument sub-keys have their
+values provided as a list. Hence the gratuitous use of ['foo'] below.
+    """
+    cloud_cfg_path = os.path.join(
+        facts['common']['config_base'],
+        'cloudprovider')
+
+    # We only have to do this stuff on hosts that are nodes
     if 'node' in facts:
+        # Any changes to the kubeletArguments parameter are stored
+        # here first.
         kubelet_args = {}
+
         if 'cloudprovider' in facts:
+            # EVERY cloud is special <3
             if 'kind' in facts['cloudprovider']:
                 if facts['cloudprovider']['kind'] == 'aws':
                     kubelet_args['cloud-provider'] = ['aws']
@@ -1038,6 +1060,28 @@ def build_kubelet_args(facts):
                     kubelet_args['cloud-config'] = [cloud_cfg_path + '/openstack.conf']
                 if facts['cloudprovider']['kind'] == 'gce':
                     kubelet_args['cloud-provider'] = ['gce']
+
+        # Automatically add node-labels to the kubeletArguments
+        # parameter. See BZ1359848 for additional details.
+        #
+        # Ref: https://bugzilla.redhat.com/show_bug.cgi?id=1359848
+        if 'labels' in facts['node'] and isinstance(facts['node']['labels'], dict):
+            # tl;dr: os_node_labels="{'foo': 'bar', 'a': 'b'}" turns
+            # into ['foo=bar', 'a=b']
+            #
+            # On the openshift_node_labels inventory variable we loop
+            # over each key-value tuple (from .items()) and join the
+            # key to the value with an '=' character, this produces a
+            # list.
+            #
+            # map() seems to be returning an itertools.imap object
+            # instead of a list. We cast it to a list ourselves.
+            labels_str = list(map(lambda x: '='.join(x), facts['node']['labels'].items()))
+            if labels_str != '':
+                kubelet_args['node-labels'] = labels_str
+
+        # If we've added items to the kubelet_args dict then we need
+        # to merge the new items back into the main facts object.
         if kubelet_args != {}:
             facts = merge_facts({'node': {'kubelet_args': kubelet_args}}, facts, [], [])
     return facts
@@ -1126,6 +1170,24 @@ def get_docker_version_info():
             }
     return result
 
+def get_hosted_registry_insecure():
+    """ Parses OPTIONS from /etc/sysconfig/docker to determine if the
+        registry is currently insecure.
+    """
+    hosted_registry_insecure = None
+    if os.path.exists('/etc/sysconfig/docker'):
+        try:
+            ini_str = unicode('[root]\n' + open('/etc/sysconfig/docker', 'r').read(), 'utf-8')
+            ini_fp = io.StringIO(ini_str)
+            config = ConfigParser.RawConfigParser()
+            config.readfp(ini_fp)
+            options = config.get('root', 'OPTIONS')
+            if 'insecure-registry' in options:
+                hosted_registry_insecure = True
+        except:
+            pass
+    return hosted_registry_insecure
+
 def get_openshift_version(facts):
     """ Get current version of openshift on the host.
 
@@ -1144,7 +1206,7 @@ def get_openshift_version(facts):
     # version
     if 'common' in facts:
         if 'version' in facts['common'] and facts['common']['version'] is not None:
-            return facts['common']['version']
+            return chomp_commit_offset(facts['common']['version'])
 
     if os.path.isfile('/usr/bin/openshift'):
         _, output, _ = module.run_command(['/usr/bin/openshift', 'version'])
@@ -1159,7 +1221,27 @@ def get_openshift_version(facts):
         _, output, _ = module.run_command(['/usr/local/bin/openshift', 'version'])
         version = parse_openshift_version(output)
 
-    return version
+    return chomp_commit_offset(version)
+
+
+def chomp_commit_offset(version):
+    """Chomp any "+git.foo" commit offset string from the given `version`
+    and return the modified version string.
+
+Ex:
+- chomp_commit_offset(None)                 => None
+- chomp_commit_offset(1337)                 => "1337"
+- chomp_commit_offset("v3.4.0.15+git.derp") => "v3.4.0.15"
+- chomp_commit_offset("v3.4.0.15")          => "v3.4.0.15"
+- chomp_commit_offset("v1.3.0+52492b4")     => "v1.3.0"
+    """
+    if version is None:
+        return version
+    else:
+        # Stringify, just in case it's a Number type. Split by '+' and
+        # return the first split. No concerns about strings without a
+        # '+', .split() returns an array of the original string.
+        return str(version).split('+')[0]
 
 
 def get_container_openshift_version(facts):
@@ -1220,7 +1302,7 @@ def apply_provider_facts(facts, provider_facts):
 
         facts['common'][h_var] = choose_hostname(
             [provider_facts['network'].get(h_var)],
-            facts['common'][ip_var]
+            facts['common'][h_var]
         )
 
     facts['provider'] = provider_facts
@@ -1335,8 +1417,11 @@ def save_local_facts(filename, facts):
     """
     try:
         fact_dir = os.path.dirname(filename)
-        if not os.path.exists(fact_dir):
-            os.makedirs(fact_dir)
+        try:
+            os.makedirs(fact_dir)  # try to make the directory
+        except OSError as exception:
+            if exception.errno != errno.EEXIST:  # but it is okay if it is already there
+                raise  # pass any other exceptions up the chain
         with open(filename, 'w') as fact_file:
             fact_file.write(module.jsonify(facts))
         os.chmod(filename, 0o600)
@@ -1600,7 +1685,6 @@ class OpenShiftFacts(object):
                    'docker',
                    'etcd',
                    'hosted',
-                   'loadbalancer',
                    'master',
                    'node']
 
@@ -1701,6 +1785,7 @@ class OpenShiftFacts(object):
         facts = set_proxy_facts(facts)
         if not safe_get_bool(facts['common']['is_containerized']):
             facts = set_installed_variant_rpm_facts(facts)
+        facts = set_nodename(facts)
         return dict(openshift=facts)
 
     def get_defaults(self, roles, deployment_type, deployment_subtype):
@@ -1778,13 +1863,15 @@ class OpenShiftFacts(object):
 
         if 'docker' in roles:
             docker = dict(disable_push_dockerhub=False,
-                          hosted_registry_insecure=True,
                           options='--log-driver=json-file --log-opt max-size=50m')
             version_info = get_docker_version_info()
             if version_info is not None:
                 docker['api_version'] = version_info['api_version']
                 docker['version'] = version_info['version']
                 docker['gte_1_10'] = LooseVersion(version_info['version']) >= LooseVersion('1.10')
+            hosted_registry_insecure = get_hosted_registry_insecure()
+            if hosted_registry_insecure is not None:
+                docker['hosted_registry_insecure'] = hosted_registry_insecure
             defaults['docker'] = docker
 
         if 'clock' in roles:
@@ -1811,10 +1898,25 @@ class OpenShiftFacts(object):
                         ),
                         nfs=dict(
                             directory='/exports',
-                            options='*(rw,root_squash)'),
-                        openstack=dict(
-                            filesystem='ext4',
-                            volumeID='123'),
+                            options='*(rw,root_squash)'
+                        ),
+                        host=None,
+                        access_modes=['ReadWriteOnce'],
+                        create_pv=True,
+                        create_pvc=False
+                    )
+                ),
+                logging=dict(
+                    storage=dict(
+                        kind=None,
+                        volume=dict(
+                            name='logging-es',
+                            size='10Gi'
+                        ),
+                        nfs=dict(
+                            directory='/exports',
+                            options='*(rw,root_squash)'
+                        ),
                         host=None,
                         access_modes=['ReadWriteOnce'],
                         create_pv=True,
@@ -1839,13 +1941,6 @@ class OpenShiftFacts(object):
                 ),
                 router=dict()
             )
-
-        if 'loadbalancer' in roles:
-            loadbalancer = dict(frontend_port='8443',
-                                default_maxconn='20000',
-                                global_maxconn='20000',
-                                limit_nofile='100000')
-            defaults['loadbalancer'] = loadbalancer
 
         return defaults
 

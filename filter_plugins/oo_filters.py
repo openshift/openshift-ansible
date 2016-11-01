@@ -7,6 +7,7 @@ Custom filters for use in openshift-ansible
 
 from ansible import errors
 from collections import Mapping
+from distutils.util import strtobool
 from distutils.version import LooseVersion
 from operator import itemgetter
 import OpenSSL.crypto
@@ -17,8 +18,16 @@ import re
 import json
 import yaml
 from ansible.parsing.yaml.dumper import AnsibleDumper
-from ansible.utils.unicode import to_unicode
 from urlparse import urlparse
+
+try:
+    # ansible-2.2
+    # ansible.utils.unicode.to_unicode is deprecated in ansible-2.2,
+    # ansible.module_utils._text.to_text should be used instead.
+    from ansible.module_utils._text import to_text
+except ImportError:
+    # ansible-2.1
+    from ansible.utils.unicode import to_unicode as to_text
 
 # Disabling too-many-public-methods, since filter methods are necessarily
 # public
@@ -225,9 +234,9 @@ class FilterModule(object):
            arrange them as a string 'key=value key=value'
         """
         if not isinstance(data, dict):
-            raise errors.AnsibleFilterError("|failed expects first param is a dict")
+            raise errors.AnsibleFilterError("|failed expects first param is a dict [oo_combine_dict]. Got %s. Type: %s" % (str(data), str(type(data))))
 
-        return out_joiner.join([in_joiner.join([k, v]) for k, v in data.items()])
+        return out_joiner.join([in_joiner.join([k, str(v)]) for k, v in data.items()])
 
     @staticmethod
     def oo_ami_selector(data, image_name):
@@ -277,7 +286,7 @@ class FilterModule(object):
                 }
         """
         if not isinstance(data, dict):
-            raise errors.AnsibleFilterError("|failed expects first param is a dict")
+            raise errors.AnsibleFilterError("|failed expects first param is a dict [oo_ec2_volume_def]. Got %s. Type: %s" % (str(data), str(type(data))))
         if host_type not in ['master', 'node', 'etcd']:
             raise errors.AnsibleFilterError("|failed expects etcd, master or node"
                                             " as the host type")
@@ -626,7 +635,7 @@ class FilterModule(object):
                                     default_flow_style=False,
                                     Dumper=AnsibleDumper, **kw)
             padded = "\n".join([" " * level * indent + line for line in transformed.splitlines()])
-            return to_unicode("\n{0}".format(padded))
+            return to_text("\n{0}".format(padded))
         except Exception as my_e:
             raise errors.AnsibleFilterError('Failed to convert: %s' % my_e)
 
@@ -850,6 +859,35 @@ class FilterModule(object):
             # netloc wasn't parsed, assume url was missing scheme and path
             return parse_result.path
 
+    @staticmethod
+    def oo_openshift_loadbalancer_frontends(api_port, servers_hostvars, use_nuage=False, nuage_rest_port=None):
+        loadbalancer_frontends = [{'name': 'atomic-openshift-api',
+                                   'mode': 'tcp',
+                                   'options': ['tcplog'],
+                                   'binds': ["*:{0}".format(api_port)],
+                                   'default_backend': 'atomic-openshift-api'}]
+        if bool(strtobool(str(use_nuage))) and nuage_rest_port is not None:
+            loadbalancer_frontends.append({'name': 'nuage-monitor',
+                                           'mode': 'tcp',
+                                           'options': ['tcplog'],
+                                           'binds': ["*:{0}".format(nuage_rest_port)],
+                                           'default_backend': 'nuage-monitor'})
+        return loadbalancer_frontends
+
+    @staticmethod
+    def oo_openshift_loadbalancer_backends(api_port, servers_hostvars, use_nuage=False, nuage_rest_port=None):
+        loadbalancer_backends = [{'name': 'atomic-openshift-api',
+                                  'mode': 'tcp',
+                                  'option': 'tcplog',
+                                  'balance': 'source',
+                                  'servers': FilterModule.oo_haproxy_backend_masters(servers_hostvars, api_port)}]
+        if bool(strtobool(str(use_nuage))) and nuage_rest_port is not None:
+            loadbalancer_backends.append({'name': 'nuage-monitor',
+                                          'mode': 'tcp',
+                                          'option': 'tcplog',
+                                          'balance': 'source',
+                                          'servers': FilterModule.oo_haproxy_backend_masters(servers_hostvars, nuage_rest_port)})
+        return loadbalancer_backends
 
     def filters(self):
         """ returns a mapping of filters to methods """
@@ -883,4 +921,6 @@ class FilterModule(object):
             "oo_merge_dicts": self.oo_merge_dicts,
             "oo_hostname_from_url": self.oo_hostname_from_url,
             "oo_merge_hostvars": self.oo_merge_hostvars,
+            "oo_openshift_loadbalancer_frontends": self.oo_openshift_loadbalancer_frontends,
+            "oo_openshift_loadbalancer_backends": self.oo_openshift_loadbalancer_backends
         }

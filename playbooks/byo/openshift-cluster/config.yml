@@ -1,7 +1,8 @@
 ---
 - include: ../../common/openshift-cluster/verify_ansible_version.yml
 
-- hosts: localhost
+- name: Create initial host groups for localhost
+  hosts: localhost
   connection: local
   become: no
   gather_facts: no
@@ -14,7 +15,8 @@
       groups: l_oo_all_hosts
     with_items: "{{ g_all_hosts | default([]) }}"
 
-- hosts: l_oo_all_hosts
+- name: Create initial host groups for all hosts
+  hosts: l_oo_all_hosts
   gather_facts: no
   tags:
   - always

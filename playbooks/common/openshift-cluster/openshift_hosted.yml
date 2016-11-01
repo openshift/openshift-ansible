@@ -19,6 +19,12 @@
       openshift_hosted_router_registryurl: "{{ hostvars[groups.oo_first_master.0].openshift.master.registry_url }}"
       openshift_hosted_registry_registryurl: "{{ hostvars[groups.oo_first_master.0].openshift.master.registry_url }}"
     when: "'master' in hostvars[groups.oo_first_master.0].openshift and 'registry_url' in hostvars[groups.oo_first_master.0].openshift.master"
+  - set_fact:
+      logging_hostname: "{{ openshift_hosted_logging_hostname | default('kibana.' ~ (openshift.master.default_subdomain | default('router.default.svc.cluster.local', true))) }}"
+      logging_ops_hostname: "{{ openshift_hosted_logging_ops_hostname | default('kibana-ops.' ~ (openshift.master.default_subdomain | default('router.default.svc.cluster.local', true))) }}"
+      logging_master_public_url: "{{ openshift_hosted_logging_master_public_url | default(openshift.master.public_api_url) }}"
+      logging_elasticsearch_cluster_size: "{{ openshift_hosted_logging_elasticsearch_cluster_size | default(1) }}"
+      logging_elasticsearch_ops_cluster_size: "{{ openshift_hosted_logging_elasticsearch_ops_cluster_size | default(1) }}"
   roles:
   - role: openshift_cli
   - role: openshift_hosted_facts
@@ -43,88 +49,20 @@
     when: not openshift.common.version_gte_3_2_or_1_2
   - role: openshift_hosted
   - role: openshift_metrics
-    when: openshift.hosted.metrics.deploy | bool
-  - role: cockpit-ui
-    when: openshift.common.deployment_subtype == 'registry'
+    when: openshift_hosted_metrics_deploy | default(false) | bool
+  - role: openshift_hosted_logging
+    when: openshift_hosted_logging_deploy | default(false) | bool
+    openshift_hosted_logging_hostname: "{{ logging_hostname }}"
+    openshift_hosted_logging_ops_hostname: "{{ logging_ops_hostname }}"
+    openshift_hosted_logging_master_public_url: "{{ logging_master_public_url }}"
+    openshift_hosted_logging_elasticsearch_cluster_size: "{{ logging_elasticsearch_cluster_size }}"
+    openshift_hosted_logging_elasticsearch_pvc_dynamic: "{{ 'true' if openshift_hosted_logging_storage_kind | default(none) == 'dynamic' else '' }}"
+    openshift_hosted_logging_elasticsearch_pvc_size: "{{ openshift.hosted.logging.storage.volume.size if openshift_hosted_logging_storage_kind | default(none) in ['dynamic','nfs'] else ''  }}"
+    openshift_hosted_logging_elasticsearch_pvc_prefix: "{{ 'logging-es' if openshift_hosted_logging_storage_kind | default(none) == 'dynamic' else '' }}"
+    openshift_hosted_logging_elasticsearch_ops_cluster_size: "{{ logging_elasticsearch_ops_cluster_size }}"
+    openshift_hosted_logging_elasticsearch_ops_pvc_dynamic: "{{ 'true' if openshift_hosted_logging_storage_kind | default(none) == 'dynamic' else '' }}"
+    openshift_hosted_logging_elasticsearch_ops_pvc_size: "{{ openshift.hosted.logging.storage.volume.size if openshift_hosted_logging_storage_kind | default(none) in ['dynamic','nfs' ] else ''  }}"
+    openshift_hosted_logging_elasticsearch_ops_pvc_prefix: "{{ 'logging-es' if openshift_hosted_logging_storage_kind | default(none) =='dynamic' else '' }}"
 
-- name: Configure CA certificate for secure registry
-  hosts: oo_nodes_to_config
-  tags:
-  - hosted
-  tasks:
-  - name: Create temp directory for kubeconfig
-    command: mktemp -d /tmp/openshift-ansible-XXXXXX
-    register: mktemp
-    when: openshift.common.deployment_subtype == 'registry'
-    changed_when: false
-    delegate_to: "{{ groups.oo_first_master.0 }}"
-    run_once: true
-  - set_fact:
-      openshift_hosted_kubeconfig: "{{ mktemp.stdout }}/admin.kubeconfig"
-    when: openshift.common.deployment_subtype == 'registry'
-    delegate_to: "{{ groups.oo_first_master.0 }}"
-    run_once: true
-  - name: Copy the admin client config(s)
-    command: >
-      cp {{ openshift.common.config_base }}/master/admin.kubeconfig {{ openshift_hosted_kubeconfig }}
-    when: openshift.common.deployment_subtype == 'registry'
-    changed_when: false
-    delegate_to: "{{ groups.oo_first_master.0 }}"
-    run_once: true
-  - name: Retrieve docker-registry route
-    command: >
-      {{ openshift.common.client_binary }} get route docker-registry
-      --template='{{ '{{' }} .spec.host {{ '}}' }}'
-      --config={{ openshift_hosted_kubeconfig }}
-      -n default
-    register: docker_registry_route
-    when: openshift.common.deployment_subtype == 'registry'
-    changed_when: false
-    delegate_to: "{{ groups.oo_first_master.0 }}"
-    run_once: true
-  - name: Retrieve registry service IP
-    command: >
-      {{ openshift.common.client_binary }} get service docker-registry
-      --template='{{ '{{' }} .spec.clusterIP {{ '}}' }}'
-      --config={{ openshift_hosted_kubeconfig }}
-      -n default      
-    register: docker_registry_service_ip
-    when: openshift.common.deployment_subtype == 'registry'
-    changed_when: false
-    delegate_to: "{{ groups.oo_first_master.0 }}"
-    run_once: true
-  - name: Create registry CA directories
-    file:
-      path: "/etc/docker/certs.d/{{ item }}"
-      state: directory
-    with_items:
-    - "{{ docker_registry_service_ip.stdout }}:5000"
-    - "{{ docker_registry_route.stdout }}"
-    - "docker-registry.default.svc.cluster.local:5000"
-    when: openshift.common.deployment_subtype == 'registry'
-  - name: Copy CA to registry CA directories
-    copy:
-      src: "{{ openshift.common.config_base }}/node/ca.crt"
-      dest: "/etc/docker/certs.d/{{ item }}"
-      remote_src: yes
-      force: yes
-    with_items:
-    - "{{ docker_registry_service_ip.stdout }}:5000"
-    - "{{ docker_registry_route.stdout }}"
-    - "docker-registry.default.svc.cluster.local:5000"
-    when: openshift.common.deployment_subtype == 'registry'
-    notify:
-    - Restart docker
-  - name: Delete temp directory
-    file:
-      name: "{{ mktemp.stdout }}"
-      state: absent
-    when: openshift.common.deployment_subtype == 'registry'
-    changed_when: False
-    delegate_to: "{{ groups.oo_first_master.0 }}"
-    run_once: true
-  handlers:
-  - name: Restart docker
-    service:
-      name: docker
-      state: restarted
+  - role: cockpit-ui
+    when: ( openshift.common.version_gte_3_3_or_1_3  | bool ) and ( openshift_hosted_manage_registry | default(true) | bool ) and not (openshift.docker.hosted_registry_insecure | default(false) | bool)

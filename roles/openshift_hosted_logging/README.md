@@ -17,7 +17,8 @@
 - openshift_hosted_logging_elasticsearch_pvc_dynamic: Set to `true` to have created PersistentVolumeClaims annotated such that their backing storage can be dynamically provisioned (if that is available for your cluster).
 - openshift_hosted_logging_elasticsearch_storage_group: Number of a supplemental group ID for access to Elasticsearch storage volumes; backing volumes should allow access by this group ID (defaults to 65534).
 - openshift_hosted_logging_elasticsearch_nodeselector: Specify the nodeSelector that Elasticsearch should be use (label=value)
-- openshift_hosted_logging_fluentd_nodeselector: The nodeSelector to use for the Fluentd DaemonSet. Defaults to "logging-infra-fluentd=true".
+- openshift_hosted_logging_fluentd_nodeselector: The nodeSelector used to determine which nodes to apply the `openshift_hosted_logging_fluentd_nodeselector_label` label to.
+- openshift_hosted_logging_fluentd_nodeselector_label: The label applied to nodes included in the Fluentd DaemonSet. Defaults to "logging-infra-fluentd=true".
 - openshift_hosted_logging_kibana_nodeselector: Specify the nodeSelector that Kibana should be use (label=value)
 - openshift_hosted_logging_curator_nodeselector: Specify the nodeSelector that Curator should be use (label=value)
 - openshift_hosted_logging_enable_ops_cluster: If "true", configure a second ES cluster and Kibana for ops logs.

@@ -83,8 +83,13 @@ class BinarySyncer(object):
 
     def _sync_symlink(self, binary_name, link_to):
         """ Ensure the given binary name exists and links to the expected binary. """
+
+        # The symlink we are creating:
         link_path = os.path.join(self.bin_dir, binary_name)
-        link_dest = os.path.join(self.bin_dir, binary_name)
+
+        # The expected file we should be linking to:
+        link_dest = os.path.join(self.bin_dir, link_to)
+
         if not os.path.exists(link_path) or \
                 not os.path.islink(link_path) or \
                 os.path.realpath(link_path) != os.path.realpath(link_dest):

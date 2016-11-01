@@ -28,6 +28,8 @@
   with_items:
   - "{{ openshift.hosted.registry }}"
   - "{{ openshift.hosted.metrics }}"
+  - "{{ openshift.hosted.logging }}"
+
 
 - name: Configure exports
   template:

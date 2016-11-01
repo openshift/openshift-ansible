@@ -1,5 +1,6 @@
 ---
-- hosts: localhost
+- name: Verify Ansible version is greater than or equal to 2.1.0.0
+  hosts: localhost
   connection: local
   become: no
   gather_facts: no

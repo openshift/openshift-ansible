@@ -4,5 +4,5 @@ cluster. Additional notes for the associated upgrade playbooks are
 provided in their respective directories.
 
 # Upgrades available
-- [OpenShift Enterprise 3.0 to latest minor release](v3_0_minor/README.md)
-- [OpenShift Enterprise 3.0 to 3.1](v3_0_to_v3_1/README.md)
+- [OpenShift Enterprise 3.2 to 3.3](v3_3/README.md)
+- [OpenShift Enterprise 3.1 to 3.2](v3_2/README.md)

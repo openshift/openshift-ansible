@@ -12,6 +12,15 @@
     cp {{ openshift_master_config_dir }}/admin.kubeconfig {{ openshift_hosted_kubeconfig }}
   changed_when: False
 
+- name: Determine if docker-registry service exists
+  command: >
+    {{ openshift.common.client_binary }} get svc/docker-registry
+    --config={{ openshift_hosted_kubeconfig }}
+    -n default
+  register: check_docker_registry_exists
+  failed_when: false
+  changed_when: false
+
 - name: Create passthrough route for docker-registry
   command: >
     {{ openshift.common.client_binary }} create route passthrough
@@ -21,6 +30,7 @@
   register: create_docker_registry_route
   changed_when: "'already exists' not in create_docker_registry_route.stderr"
   failed_when: "'already exists' not in create_docker_registry_route.stderr and create_docker_registry_route.rc != 0"
+  when: check_docker_registry_exists.rc == 0
 
 - name: Create passthrough route for registry-console
   command: >
@@ -32,31 +42,31 @@
   register: create_registry_console_route
   changed_when: "'already exists' not in create_registry_console_route.stderr"
   failed_when: "'already exists' not in create_registry_console_route.stderr and create_registry_console_route.rc != 0"
+  when: check_docker_registry_exists.rc == 0
 
 - name: Retrieve docker-registry route
   command: >
     {{ openshift.common.client_binary }} get route docker-registry
-    --template='{{ '{{' }} .spec.host {{ '}}' }}'
+    -o jsonpath='{.spec.host}'
     --config={{ openshift_hosted_kubeconfig }}
     -n default
   register: docker_registry_route
   changed_when: false
+  when: check_docker_registry_exists.rc == 0
 
 - name: Retrieve cockpit kube url
   command: >
     {{ openshift.common.client_binary }} get route registry-console
-    --template='https://{{ '{{' }} .spec.host {{ '}}' }}'
+    -o jsonpath='https://{.spec.host}'
     -n default
   register: registry_console_cockpit_kube_url
   changed_when: false
-
-- set_fact:
-    cockpit_image_prefix: "{{ '-p IMAGE_PREFIX=' ~ openshift_cockpit_deployer_prefix | default('') }}"
+  when: check_docker_registry_exists.rc == 0
 
 - name: Deploy registry-console
   command: >
     {{ openshift.common.client_binary }} new-app --template=registry-console
-    {{ cockpit_image_prefix }}
+    {% if openshift_cockpit_deployer_prefix is defined  %}-p IMAGE_PREFIX="{{ openshift_cockpit_deployer_prefix }}"{% endif %}
     -p OPENSHIFT_OAUTH_PROVIDER_URL="{{ openshift.master.public_api_url }}"
     -p REGISTRY_HOST="{{ docker_registry_route.stdout }}"
     -p COCKPIT_KUBE_URL="{{ registry_console_cockpit_kube_url.stdout }}"
@@ -65,6 +75,7 @@
   register: deploy_registry_console
   changed_when: "'already exists' not in deploy_registry_console.stderr"
   failed_when: "'already exists' not in deploy_registry_console.stderr and deploy_registry_console.rc != 0"
+  when: check_docker_registry_exists.rc == 0
 
 - name: Delete temp directory
   file:

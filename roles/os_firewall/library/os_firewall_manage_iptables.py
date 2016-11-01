@@ -50,8 +50,8 @@ class IpTablesCreateJumpRuleError(IpTablesError):
         self.chain = chain
 
 
-# TODO: impliment rollbacks for any events that where successful and an
-# exception was thrown later. for example, when the chain is created
+# TODO: implement rollbacks for any events that were successful and an
+# exception was thrown later. For example, when the chain is created
 # successfully, but the add/remove rule fails.
 class IpTablesManager(object): # pylint: disable=too-many-instance-attributes
     def __init__(self, module):

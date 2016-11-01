@@ -46,8 +46,8 @@
 
   - name: "Remove deployer template"
     command: "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig delete template logging-deployer-template -n openshift"
-    register: delete_ouput
-    failed_when: delete_ouput.rc == 1 and 'exists' not in delete_ouput.stderr
+    register: delete_output
+    failed_when: delete_output.rc == 1 and 'exists' not in delete_output.stderr
 
 
   - name: Delete temp directory

@@ -13,5 +13,5 @@
   lineinfile: dest=/etc/exports
               regexp="^{{ mount_dir }}/{{ item.name }} "
               line="{{ mount_dir }}/{{ item.name }} {{nfs_export_options}}"
-  with_items: partition_pool
+  with_items: "{{ partition_pool }}"
   notify: restart nfs

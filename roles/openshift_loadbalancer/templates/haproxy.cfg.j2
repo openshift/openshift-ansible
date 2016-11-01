@@ -3,7 +3,7 @@
 global
     chroot      /var/lib/haproxy
     pidfile     /var/run/haproxy.pid
-    maxconn     {{ openshift.loadbalancer.global_maxconn }}
+    maxconn     {{ openshift_loadbalancer_global_maxconn | default(20000) }}
     user        haproxy
     group       haproxy
     daemon
@@ -32,14 +32,14 @@ defaults
     timeout server          300s
     timeout http-keep-alive 10s
     timeout check           10s
-    maxconn                 {{ openshift.loadbalancer.default_maxconn }}
+    maxconn                 {{ openshift_loadbalancer_default_maxconn | default(20000) }}
 
 listen stats :9000
     mode http
     stats enable
     stats uri /
 
-{% for frontend in openshift.loadbalancer.frontends %}
+{% for frontend in openshift_loadbalancer_frontends %}
 frontend  {{ frontend.name }}
 {% for bind in frontend.binds %}
     bind {{ bind }}
@@ -60,7 +60,7 @@ frontend  {{ frontend.name }}
 {% endif %}
 {% endfor %}
 
-{% for backend in openshift.loadbalancer.backends %}
+{% for backend in openshift_loadbalancer_backends %}
 backend {{ backend.name }}
     balance {{ backend.balance }}
 {% if 'mode' in backend %}

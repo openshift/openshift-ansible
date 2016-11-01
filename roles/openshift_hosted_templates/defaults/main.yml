@@ -1,0 +1,10 @@
+---
+hosted_base: "{{ openshift.common.config_base if openshift.common.is_containerized | bool else '/usr/share/openshift' }}/hosted"
+hosted_deployment_type: "{{ 'origin' if openshift_deployment_type == 'origin' else 'enterprise' }}"
+
+content_version: "{{ openshift.common.examples_content_version }}"
+
+registry_url: ""
+registry_host: "{{ registry_url.split('/')[0] if '.' in registry_url.split('/')[0] else '' }}"
+
+openshift_hosted_templates_import_command: 'create'

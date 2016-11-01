@@ -1,0 +1,76 @@
+---
+###############################################################################
+# Post upgrade - Upgrade default router, default registry and examples
+###############################################################################
+- name: Upgrade default router and default registry
+  hosts: oo_first_master
+  vars:
+    openshift_deployment_type: "{{ deployment_type }}"
+    registry_image: "{{  openshift.master.registry_url | replace( '${component}', 'docker-registry' )  | replace ( '${version}', openshift_image_tag ) }}"
+    router_image: "{{ openshift.master.registry_url | replace( '${component}', 'haproxy-router' ) | replace ( '${version}', openshift_image_tag ) }}"
+    oc_cmd: "{{ openshift.common.client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig"
+  roles:
+  - openshift_manageiq
+  # Create the new templates shipped in 3.2, existing templates are left
+  # unmodified. This prevents the subsequent role definition for
+  # openshift_examples from failing when trying to replace templates that do
+  # not already exist. We could have potentially done a replace --force to
+  # create and update in one step.
+  - openshift_examples
+  - openshift_hosted_templates
+  # Update the existing templates
+  - role: openshift_examples
+    registry_url: "{{ openshift.master.registry_url }}"
+    openshift_examples_import_command: replace
+  - role: openshift_hosted_templates
+    registry_url: "{{ openshift.master.registry_url }}"
+    openshift_hosted_templates_import_command: replace
+  pre_tasks:
+  - name: Collect all routers
+    command: >
+      {{ oc_cmd }} get pods --all-namespaces -l 'router' -o json
+    register: all_routers
+    failed_when: false
+    changed_when: false
+
+  - set_fact: haproxy_routers="{{ (all_routers.stdout | from_json)['items'] | oo_pods_match_component(openshift_deployment_type, 'haproxy-router') | oo_select_keys_from_list(['metadata']) }}"
+    when: all_routers.rc == 0
+
+  - set_fact: haproxy_routers=[]
+    when: all_routers.rc != 0
+
+  - name: Update router image to current version
+    when: all_routers.rc == 0
+    command: >
+      {{ oc_cmd }} patch dc/{{ item['labels']['deploymentconfig'] }} -n {{ item['namespace'] }} -p
+      '{"spec":{"template":{"spec":{"containers":[{"name":"router","image":"{{ router_image }}","livenessProbe":{"tcpSocket":null,"httpGet":{"path": "/healthz", "port": 1936, "host": "localhost", "scheme": "HTTP"},"initialDelaySeconds":10,"timeoutSeconds":1}}]}}}}'
+      --api-version=v1
+    with_items: "{{ haproxy_routers }}"
+
+  - name: Check for default registry
+    command: >
+      {{ oc_cmd }} get -n default dc/docker-registry
+    register: _default_registry
+    failed_when: false
+    changed_when: false
+
+  - name: Update registry image to current version
+    when: _default_registry.rc == 0
+    command: >
+      {{ oc_cmd }} patch dc/docker-registry -n default -p
+      '{"spec":{"template":{"spec":{"containers":[{"name":"registry","image":"{{ registry_image }}"}]}}}}'
+      --api-version=v1
+
+# Check for warnings to be printed at the end of the upgrade:
+- name: Check for warnings
+  hosts: oo_masters_to_config
+  tasks:
+  # Check if any masters are using pluginOrderOverride and warn if so, only for 1.3/3.3 and beyond:
+  - command: >
+      grep pluginOrderOverride {{ openshift.common.config_base }}/master/master-config.yaml
+    register: grep_plugin_order_override
+    when: openshift.common.version_gte_3_3_or_1_3 | bool
+    failed_when: false
+  - name: Warn if pluginOrderOverride is in use in master-config.yaml
+    debug: msg="WARNING pluginOrderOverride is being deprecated in master-config.yaml, please see https://docs.openshift.com/enterprise/latest/architecture/additional_concepts/admission_controllers.html for more information."
+    when: not grep_plugin_order_override | skipped and grep_plugin_order_override.rc == 0
