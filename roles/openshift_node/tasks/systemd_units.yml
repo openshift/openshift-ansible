@@ -24,11 +24,26 @@
   notify:
   - restart openvswitch
 
+# May be a temporary workaround.
+# https://bugzilla.redhat.com/show_bug.cgi?id=1331590
+- name: Create OpenvSwitch service.d directory
+  file: path=/etc/systemd/system/openvswitch.service.d/ state=directory
+  when: openshift.common.use_openshift_sdn | default(true) | bool
+
+- name: Install OpenvSwitch service OOM fix
+  template:
+    dest: "/etc/systemd/system/openvswitch.service.d/01-avoid-oom.conf"
+    src: openvswitch-avoid-oom.conf
+  when: openshift.common.use_openshift_sdn | default(true) | bool
+  register: install_oom_fix_result
+  notify:
+  - restart openvswitch
+
 - name: Install OpenvSwitch docker service file
   template:
     dest: "/etc/systemd/system/openvswitch.service"
     src: openvswitch.docker.service
-  when: openshift.common.is_containerized | bool and openshift.common.use_openshift_sdn | bool
+  when: openshift.common.is_containerized | bool and openshift.common.use_openshift_sdn | default(true) | bool
   notify:
   - restart openvswitch
 
@@ -67,6 +82,6 @@
 
 - name: Reload systemd units
   command: systemctl daemon-reload
-  when: openshift.common.is_containerized | bool and (install_node_result | changed or install_ovs_sysconfig | changed or install_node_dep_result | changed)
+  when: (openshift.common.is_containerized | bool and (install_node_result | changed or install_ovs_sysconfig | changed or install_node_dep_result | changed)) or install_oom_fix_result | changed
   notify:
   - restart node
