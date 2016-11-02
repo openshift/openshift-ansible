@@ -25,7 +25,7 @@ etcd_ca_new_certs_dir: "{{ etcd_ca_dir }}/certs"
 etcd_ca_db: "{{ etcd_ca_dir }}/index.txt"
 etcd_ca_serial: "{{ etcd_ca_dir }}/serial"
 etcd_ca_crl_number: "{{ etcd_ca_dir }}/crlnumber"
-etcd_ca_default_days: 365
+etcd_ca_default_days: 1825
 
 # etcd server & certificate vars
 etcd_hostname: "{{ inventory_hostname }}"
