@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.41
+Version:        3.3.42
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Nov 02 2016 Scott Dodson <sdodson@redhat.com> 3.3.42-1
+- Deploy an OOM systemd override for openvswitch. (dgoodwin@redhat.com)
+- Update installation summary for etcd members (smunilla@redhat.com)
+- Change HA master controller service to restart always. (dgoodwin@redhat.com)
+- Fix changed_when (sdodson@redhat.com)
+- Touch all ini_file files before using them (sdodson@redhat.com)
+- Fix and reorder control plane service restart. (dgoodwin@redhat.com)
+
 * Wed Oct 26 2016 Scott Dodson <sdodson@redhat.com> 3.3.41-1
 - Default hosted_registry_insecure true when insecure registry present in
   existing /etc/sysconfig/docker. (abutcher@redhat.com)
