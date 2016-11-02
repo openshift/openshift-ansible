@@ -675,8 +675,10 @@ def get_installed_hosts(hosts, callback_facts):
     for host in [h for h in hosts if h.is_master() or h.is_node()]:
         if host.connect_to in callback_facts.keys():
             if is_installed_host(host, callback_facts):
+                INSTALLER_LOG.debug("%s is already installed", str(host))
                 installed_hosts.append(host)
             else:
+                INSTALLER_LOG.debug("%s is not installed", str(host))
                 uninstalled_hosts.append(host)
     return installed_hosts, uninstalled_hosts
 
@@ -709,6 +711,17 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force):
     installed_hosts, uninstalled_hosts = get_installed_hosts(oo_cfg.deployment.hosts,
                                                              callback_facts)
     nodes = [host for host in oo_cfg.deployment.hosts if host.is_node()]
+    not_balancers = [host for host in oo_cfg.deployment.hosts if not host.is_master_lb()]
+
+    in_hosts = [str(h) for h in installed_hosts]
+    un_hosts = [str(h) for h in uninstalled_hosts]
+    all_hosts = [str(h) for h in oo_cfg.deployment.hosts]
+    no_bals = [str(h) for h in not_balancers]
+
+    INSTALLER_LOG.debug("installed hosts: %s", ", ".join(in_hosts))
+    INSTALLER_LOG.debug("uninstalled hosts: %s", ", ".join(un_hosts))
+    INSTALLER_LOG.debug("deployment hosts: %s", ", ".join(all_hosts))
+    INSTALLER_LOG.debug("not balancers: %s", ", ".join(no_bals))
 
     # Case (1): All uninstalled hosts
     if len(uninstalled_hosts) == len(nodes):
@@ -716,7 +729,7 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force):
         hosts_to_run_on = list(oo_cfg.deployment.hosts)
     else:
         # Case (2): All installed hosts
-        if len(installed_hosts) == len(list(oo_cfg.deployment.hosts)):
+        if len(installed_hosts) == len(not_balancers):
             message = """
 All specified hosts in specified environment are installed.
 """
@@ -727,6 +740,16 @@ A mix of installed and uninstalled hosts have been detected in your environment.
 Please make sure your environment was installed successfully before adding new nodes.
 """
 
+            # Still inside the case 2/3 else condition
+            mixed_msg = """
+\tInstalled hosts:
+\t\t{inst_hosts}
+
+\tUninstalled hosts:
+\t\t{uninst_hosts}""".format(inst_hosts=", ".join(in_hosts), uninst_hosts=", ".join(un_hosts))
+            click.echo(mixed_msg)
+
+        # Out of the case 2/3 if/else
         click.echo(message)
 
         if not unattended:
