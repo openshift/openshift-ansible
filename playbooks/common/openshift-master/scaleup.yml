@@ -33,7 +33,7 @@
     service: name={{ openshift.common.service_type }}-master-controllers state=restarted
   - name: verify api server
     command: >
-      curl --silent
+      curl --silent --tlsv1.2
       {% if openshift.common.version_gte_3_2_or_1_2 | bool %}
       --cacert {{ openshift.common.config_base }}/master/ca-bundle.crt
       {% else %}
