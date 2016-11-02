@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.36
+Version:        3.2.37
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Nov 02 2016 Scott Dodson <sdodson@redhat.com> 3.2.37-1
+- Fix changed_when (sdodson@redhat.com)
+- Touch all ini_file files before using them (sdodson@redhat.com)
+- Deploy an OOM systemd override for openvswitch. (dgoodwin@redhat.com)
+
 * Mon Oct 24 2016 Scott Dodson <sdodson@redhat.com> 3.2.36-1
 - Enable dnsmasq service (sdodson@redhat.com)
 - Override __init__ in default callback to avoid infinite loop.
