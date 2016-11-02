@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.42
+Version:        3.3.43
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Nov 02 2016 Scott Dodson <sdodson@redhat.com> 3.3.43-1
+- Drop pacemaker restart logic. (dgoodwin@redhat.com)
+
 * Wed Nov 02 2016 Scott Dodson <sdodson@redhat.com> 3.3.42-1
 - Deploy an OOM systemd override for openvswitch. (dgoodwin@redhat.com)
 - Update installation summary for etcd members (smunilla@redhat.com)
