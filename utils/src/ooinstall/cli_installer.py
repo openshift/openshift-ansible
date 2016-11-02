@@ -108,11 +108,6 @@ a high-availability (HA) deployment. If you choose an HA deployment, then you
 are prompted to identify a *separate* system to act as the load balancer for
 your cluster once you define all masters and nodes.
 
-If only one master is specified, an etcd instance is embedded within the
-OpenShift master service to use as the datastore. This can be later replaced
-with a separate etcd instance, if required. If multiple masters are specified,
-then a separate etcd cluster is configured with each master serving as a member.
-
 Any masters configured as part of this installation process are also
 configured as nodes. This enables the master to proxy to pods
 from the API. By default, this node is unschedulable, but this can be changed
@@ -253,11 +248,8 @@ def print_host_summary(all_hosts, host):
             click.echo("  - Load Balancer (Preconfigured)")
         else:
             click.echo("  - Load Balancer (HAProxy)")
-    if host.is_master():
-        if host.is_etcd_member(all_hosts):
-            click.echo("  - Etcd Member")
-        else:
-            click.echo("  - Etcd (Embedded)")
+    if host.is_etcd():
+        click.echo("  - Etcd")
     if host.is_storage():
         click.echo("  - Storage")
     if host.new_host:
