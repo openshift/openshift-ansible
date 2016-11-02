@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.15
+Version:        3.4.16
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,18 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Nov 02 2016 Scott Dodson <sdodson@redhat.com> 3.4.16-1
+- Fix HA environments incorrectly detecting mixed installed environments
+  (tbielawa@redhat.com)
+- Deploy an OOM systemd override for openvswitch. (dgoodwin@redhat.com)
+- Only restart dnsmasq if the DNS servers have changed (tbielawa@redhat.com)
+- Update installation summary for etcd members (smunilla@redhat.com)
+- Fix changed_when (sdodson@redhat.com)
+- add io labels (tdawson@redhat.com)
+- Touch all ini_file files before using them (sdodson@redhat.com)
+- Remove commit offset strings from parsed versions (tbielawa@redhat.com)
+- Update variant_version (smunilla@redhat.com)
+
 * Mon Oct 31 2016 Troy Dawson <tdawson@redhat.com> 3.4.15-1
 - Bump documented openshift_release for 1.4/3.4. (dgoodwin@redhat.com)
 - Add requirements, fix a small formatting issue.
