@@ -99,6 +99,8 @@
   - include: rpm_upgrade.yml component=master
     when: not openshift.common.is_containerized | bool
 
+# Create service signer cert when missing. Service signer certificate
+# is added to master config in the master config hook for v3_3.
 - name: Determine if service signer cert must be created
   hosts: oo_first_master
   tasks:
@@ -108,8 +110,6 @@
     register: service_signer_cert_stat
     changed_when: false
 
-# Create service signer cert when missing. Service signer certificate
-# is added to master config in the master config hook for v3_3.
 - include: create_service_signer_cert.yml
 
 - name: Upgrade master config and systemd units
@@ -127,13 +127,6 @@
 
   - name: Update systemd units
     include: ../../../../roles/openshift_master/tasks/systemd_units.yml
-
-#  - name: Upgrade master configuration
-#    openshift_upgrade_config:
-#      from_version: '3.1'
-#       to_version: '3.2'
-#      role: master
-#      config_base: "{{ hostvars[inventory_hostname].openshift.common.config_base }}"
 
   - name: Check for ca-bundle.crt
     stat:
@@ -183,6 +176,10 @@
   - fail:
       msg: "Upgrade cannot continue. The following masters did not finish updating: {{ master_update_failed | join(',') }}"
     when: master_update_failed | length > 0
+
+# We are now ready to restart master services (or entire system
+# depending on openshift_rolling_restart_mode):
+- include: ../../openshift-master/restart.yml
 
 ###############################################################################
 # Reconcile Cluster Roles, Cluster Role Bindings and Security Context Constraints
