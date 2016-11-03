@@ -43,6 +43,16 @@ UPGRADE_MAPPINGS = {
         'major_playbook': 'v3_3/upgrade.yml',
         'major_version': '3.3',
     },
+    '3.3': {
+        'minor_version': '3.3',
+        'minor_playbook': 'v3_3/upgrade.yml',
+        'major_playbook': 'v3_4/upgrade.yml',
+        'major_version': '3.4',
+    },
+    '3.4': {
+        'minor_version': '3.4',
+        'minor_playbook': 'v3_4/upgrade.yml',
+    },
 }
 
 
@@ -306,6 +316,7 @@ hostname.
     else:
         return None
 
+
 def set_cluster_hostname(oo_cfg):
     message = """
 You have chosen to install a single master cluster (non-HA).
@@ -320,6 +331,7 @@ If you want to override the cluster host name now to something other than the de
     cluster_hostname = click.prompt('Enter hostname or IP address',
                                     default='')
     oo_cfg.deployment.variables['openshift_master_cluster_hostname'] = cluster_hostname
+
 
 def collect_storage_host(hosts):
     """
