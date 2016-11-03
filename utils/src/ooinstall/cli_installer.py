@@ -306,6 +306,7 @@ hostname.
     else:
         return None
 
+
 def set_cluster_hostname(oo_cfg):
     message = """
 You have chosen to install a single master cluster (non-HA).
@@ -320,6 +321,7 @@ If you want to override the cluster host name now to something other than the de
     cluster_hostname = click.prompt('Enter hostname or IP address',
                                     default='')
     oo_cfg.deployment.variables['openshift_master_cluster_hostname'] = cluster_hostname
+
 
 def collect_storage_host(hosts):
     """
