@@ -265,14 +265,14 @@
 
 - name: Install cluster packages
   action: "{{ ansible_pkg_mgr }} name=pcs state=present"
-  when: "{{ openshift_master_ha | bool and openshift.master.cluster_method == 'pacemaker' }}"
-    and not openshift.common.is_containerized | bool
+  when: "{{ openshift_master_ha | bool and openshift.master.cluster_method == 'pacemaker'
+            and not openshift.common.is_containerized | bool }}"
   register: install_result
 
 - name: Start and enable cluster service
   service: name=pcsd enabled=yes state=started
-  when: "{{ openshift_master_ha | bool and openshift.master.cluster_method == 'pacemaker' }}"
-    and not openshift.common.is_containerized | bool
+  when: "{{ openshift_master_ha | bool and openshift.master.cluster_method == 'pacemaker'
+            and not openshift.common.is_containerized | bool }}"
 
 - name: Set the cluster user password
   shell: echo {{ openshift_master_cluster_password | quote }} | passwd --stdin hacluster

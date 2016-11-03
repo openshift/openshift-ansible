@@ -82,7 +82,6 @@
       port: 10255/udp
     - service: OpenShift OVS sdn
       port: 4789/udp
-      when: "{{ openshift.node.use_openshift_sdn | bool }}"
   - role: openshift_node
 
 - name: Configure node instances
@@ -121,7 +120,6 @@
       port: 10255/udp
     - service: OpenShift OVS sdn
       port: 4789/udp
-      when: "{{ openshift.node.use_openshift_sdn | bool }}"
   - role: openshift_node
 
 - name: Additional node config
