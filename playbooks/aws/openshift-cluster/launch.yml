@@ -48,7 +48,7 @@
   - add_host:
       name: "{{ master_names.0 }}"
       groups: service_master
-    when: master_names is defined and master_names.0 is defined
+    when: "{{ master_names is defined and master_names.0 is defined }}"
 
 - include: update.yml
 - include: list.yml

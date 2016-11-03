@@ -57,7 +57,7 @@
   - name: fail if we don't detect loopback
     fail:
       msg:  loopback not detected! Please investigate manually.
-    when: loop_device_check.rc == 1
+    when: "{{ loop_device_check.rc == 1 }}"
 
   - name: stop zagg client monitoring container
     service:
@@ -92,7 +92,7 @@
   - name: fail if /dev/xvdb already exists
     fail:
       msg: /dev/xvdb already exists.  Please investigate
-    when: xvdb_check.rc == 0
+    when: "{{ xvdb_check.rc == 0 }}"
 
   - name: Create a volume and attach it
     delegate_to: localhost

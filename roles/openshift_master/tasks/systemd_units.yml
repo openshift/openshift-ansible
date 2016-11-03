@@ -11,18 +11,18 @@
   set_fact:
     containerized_svc_dir: "/etc/systemd/system"
     ha_svc_template_path: "docker-cluster"
-  when: openshift.common.is_containerized | bool
+  when: "{{ openshift.common.is_containerized | bool }}"
 
 # workaround for missing systemd unit files
 - name: Create the systemd unit files
   template:
     src: "master_docker/master.docker.service.j2"
     dest: "{{ containerized_svc_dir }}/{{ openshift.common.service_type }}-master.service"
-  when: openshift.common.is_containerized | bool and (openshift.master.ha is not defined or not openshift.master.ha | bool)
+  when: "{{ openshift.common.is_containerized | bool and (openshift.master.ha is not defined or not openshift.master.ha | bool) }}"
   register: create_master_unit_file
 
 - command: systemctl daemon-reload
-  when: create_master_unit_file | changed
+  when: "{{ create_master_unit_file | changed }}"
 
 - name: Create the ha systemd unit files
   template:
@@ -35,7 +35,7 @@
   register: create_ha_unit_files
 
 - command: systemctl daemon-reload
-  when: create_ha_unit_files | changed
+  when: "{{ create_ha_unit_files | changed }}"
 # end workaround for missing systemd unit files
 
 - name: Preserve Master API Proxy Config options
@@ -123,7 +123,7 @@
     dest: "/etc/systemd/system/{{ openshift.common.service_type }}-master.service"
     src: master_docker/master.docker.service.j2
   register: install_result
-  when: openshift.common.is_containerized | bool and openshift.master.ha is defined and not openshift.master.ha | bool
+  when: "{{ openshift.common.is_containerized | bool and openshift.master.ha is defined and not openshift.master.ha | bool }}"
 
 - name: Preserve Master Proxy Config options
   command: grep PROXY /etc/sysconfig/{{ openshift.common.service_type }}-master
@@ -150,11 +150,11 @@
     dest: /etc/sysconfig/{{ openshift.common.service_type }}-master
     line: "{{ item }}"
   with_items: "{{ master_proxy.stdout_lines | default([]) }}"
-  when: master_proxy.rc == 0 and 'http_proxy' not in openshift.common and 'https_proxy' not in openshift.common
+  when: "{{ master_proxy.rc == 0 and 'http_proxy' not in openshift.common and 'https_proxy' not in openshift.common }}"
 
 - name: Restore Master AWS Options
   lineinfile:
     dest: /etc/sysconfig/{{ openshift.common.service_type }}-master
     line: "{{ item }}"
   with_items: "{{ master_aws.stdout_lines | default([]) }}"
-  when: master_aws.rc == 0 and not (openshift_cloudprovider_kind is defined and openshift_cloudprovider_kind == 'aws' and openshift_cloudprovider_aws_access_key is defined and openshift_cloudprovider_aws_secret_key is defined)
+  when: "{{ master_aws.rc == 0 and not (openshift_cloudprovider_kind is defined and openshift_cloudprovider_kind == 'aws' and openshift_cloudprovider_aws_access_key is defined and openshift_cloudprovider_aws_secret_key is defined) }}"

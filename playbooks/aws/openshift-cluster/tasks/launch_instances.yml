@@ -29,10 +29,10 @@
 
 - set_fact:
     ec2_instance_type: "{{ deployment_vars[deployment_type].type }}"
-  when: ec2_instance_type is not defined
+  when: "{{ ec2_instance_type is not defined }}"
 - set_fact:
     ec2_security_groups: "{{ deployment_vars[deployment_type].security_groups }}"
-  when: ec2_security_groups is not defined
+  when: "{{ ec2_security_groups is not defined }}"
 
 - name: Find amis for deployment_type
   ec2_ami_find:
@@ -42,7 +42,7 @@
   register: ami_result
 
 - fail: msg="Could not find requested ami"
-  when: not ami_result.results
+  when: "{{ not ami_result.results }}"
 
 - set_fact:
     latest_ami: "{{ ami_result.results | oo_ami_selector(deployment_vars[deployment_type].image_name) }}"
@@ -171,7 +171,7 @@
   with_together:
   - "{{ instances }}"
   - "{{ ec2.instances }}"
-  when: oo_extend_env is defined and oo_extend_env | bool
+  when: "{{ oo_extend_env is defined and oo_extend_env | bool }}"
 
 - name: Wait for ssh
   wait_for: "port=22 host={{ item.dns_name }}"

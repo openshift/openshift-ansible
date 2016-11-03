@@ -1,7 +1,7 @@
 ---
 - name: Install haproxy
   action: "{{ ansible_pkg_mgr }} name=haproxy state=present"
-  when: not openshift.common.is_containerized | bool
+  when: "{{ not openshift.common.is_containerized | bool }}"
 
 - name: Configure systemd service directory for haproxy
   file:
@@ -31,7 +31,7 @@
 
 - name: Reload systemd if needed
   command: systemctl daemon-reload
-  when: nofile_limit_result | changed
+  when: "{{ nofile_limit_result | changed }}"
 
 - name: Configure haproxy
   template:

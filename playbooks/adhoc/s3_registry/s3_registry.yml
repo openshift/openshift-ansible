@@ -22,7 +22,7 @@
   tasks:
 
   - name: Check for AWS creds
-    fail: 
+    fail:
       msg: "Couldn't find {{ item }} creds in ENV"
     when: "{{ item }} == ''"
     with_items:
@@ -33,7 +33,7 @@
     command: oc scale --replicas=0 dc/docker-registry
 
   - name: Create S3 bucket
-    when: aws_create_bucket | bool
+    when: "{{ aws_create_bucket | bool }}"
     local_action:
       module: s3 bucket="{{ aws_bucket_name }}" mode=create
 
@@ -75,4 +75,4 @@
 
   - name: Delete temporary config file
     file: path={{ aws_tmp_path }} state=absent
-    when: aws_delete_tmp_file | bool
+    when: "{{ aws_delete_tmp_file | bool }}"

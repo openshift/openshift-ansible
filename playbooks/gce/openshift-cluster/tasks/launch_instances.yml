@@ -22,7 +22,7 @@
         #!/bin/bash
         echo "Defaults:{{ deployment_vars[deployment_type].ssh_user }} !requiretty" > /etc/sudoers.d/99-{{ deployment_vars[deployment_type].ssh_user }}
 
-  when: instances |length > 0
+  when: "{{ instances |length > 0 }}"
   register: gce
 
 - set_fact:

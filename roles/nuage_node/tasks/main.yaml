@@ -2,19 +2,19 @@
 - name: Install Nuage VRS
   become: yes
   yum: name={{ vrs_rpm }} state=present
-  
-- name: Set the uplink interface 
+
+- name: Set the uplink interface
   become: yes
   lineinfile: dest={{ vrs_config }} regexp=^NETWORK_UPLINK_INTF line='NETWORK_UPLINK_INTF={{ uplink_interface }}'
 
-- name: Set the Active Controller 
+- name: Set the Active Controller
   become: yes
   lineinfile: dest={{ vrs_config }} regexp=^ACTIVE_CONTROLLER line='ACTIVE_CONTROLLER={{ vsc_active_ip }}'
 
-- name: Set the Standby Controller 
+- name: Set the Standby Controller
   become: yes
   lineinfile: dest={{ vrs_config }} regexp=^STANDBY_CONTROLLER line='STANDBY_CONTROLLER={{ vsc_standby_ip }}'
-  when: vsc_standby_ip is defined
+  when: "{{ vsc_standby_ip is defined }}"
 
 - name: Install plugin rpm
   become: yes
@@ -27,13 +27,13 @@
         - ca.crt
         - nuage.crt
         - nuage.key
-        - nuage.kubeconfig 
+        - nuage.kubeconfig
 
 - include: certificates.yml
 
-- name: Set the vsp-openshift.yaml 
+- name: Set the vsp-openshift.yaml
   become: yes
-  template: src=vsp-openshift.j2 dest={{ vsp_openshift_yaml }} owner=root mode=0644 
+  template: src=vsp-openshift.j2 dest={{ vsp_openshift_yaml }} owner=root mode=0644
   notify:
     - restart vrs
-    - restart node 
+    - restart node

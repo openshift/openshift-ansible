@@ -8,7 +8,7 @@
   - vars.yml
   tasks:
   - fail: msg="Deployment type not supported for gce provider yet"
-    when: deployment_type == 'enterprise'
+    when: "{{ deployment_type == 'enterprise' }}"
 
   - include: ../../common/openshift-cluster/tasks/set_etcd_launch_facts.yml
   - include: tasks/launch_instances.yml
@@ -60,7 +60,7 @@
   - add_host:
       name: "{{ master_names.0 }}"
       groups: service_master
-    when: master_names is defined and master_names.0 is defined
+    when: "{{ master_names is defined and master_names.0 is defined }}"
 
 - include: update.yml
 

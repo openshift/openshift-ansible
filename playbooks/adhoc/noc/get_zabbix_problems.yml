@@ -40,4 +40,4 @@
   gather_facts: no
   tasks:
     - command: "{{ oo_cmd }}"
-      when: oo_cmd is defined
+      when: "{{ oo_cmd is defined }}"

@@ -157,4 +157,4 @@
 
   - fail:
       msg: "Failed to add {{ pv_template }} to master."
-    when: oc_output.rc != 0
+    when: "{{ oc_output.rc != 0 }}"
