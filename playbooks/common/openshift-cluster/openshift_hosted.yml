@@ -13,7 +13,7 @@
   - set_fact:
       openshift_hosted_router_registryurl: "{{ hostvars[groups.oo_first_master.0].openshift.master.registry_url }}"
       openshift_hosted_registry_registryurl: "{{ hostvars[groups.oo_first_master.0].openshift.master.registry_url }}"
-    when: "'master' in hostvars[groups.oo_first_master.0].openshift and 'registry_url' in hostvars[groups.oo_first_master.0].openshift.master"
+    when: "{{ 'master' in hostvars[groups.oo_first_master.0].openshift and 'registry_url' in hostvars[groups.oo_first_master.0].openshift.master }}"
   roles:
   - role: openshift_cli
   - role: openshift_hosted_facts

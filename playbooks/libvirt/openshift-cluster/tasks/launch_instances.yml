@@ -21,19 +21,19 @@
   command: 'unxz -kf {{ libvirt_storage_pool_path }}/{{ [image_name, image_compression] | join(".") }}'
   args:
     creates: '{{ libvirt_storage_pool_path }}/{{ image_name }}'
-  when: image_compression in ["xz"] and downloaded_image.changed
+  when: "{{ image_compression in ['xz'] and downloaded_image.changed }}"
 
 - name: Uncompress tgz compressed base cloud image
   command: 'tar zxvf {{ libvirt_storage_pool_path }}/{{ [image_name, image_compression] | join(".") }}'
   args:
     creates: '{{ libvirt_storage_pool_path }}/{{ image_name }}'
-  when: image_compression in ["tgz"] and downloaded_image.changed
+  when: "{{ image_compression in ['tgz'] and downloaded_image.changed }}"
 
 - name: Uncompress gzip compressed base cloud image
   command: 'gunzip {{ libvirt_storage_pool_path }}/{{ [image_name, image_compression] | join(".") }}'
   args:
     creates: '{{ libvirt_storage_pool_path }}/{{ image_name }}'
-  when: image_compression in ["gz"] and downloaded_image.changed
+  when: "{{ image_compression in ['gz'] and downloaded_image.changed }}"
 
 - name: Create the cloud-init config drive path
   file:
@@ -101,12 +101,12 @@
 - set_fact:
     node_label:
       type: "{{ g_sub_host_type }}"
-  when: instances | length > 0 and type == "node"
+  when: "{{ instances | length > 0 and type == 'node' }}"
 
 - set_fact:
     node_label:
       type: "{{ type }}"
-  when: instances | length > 0 and type != "node"
+  when: "{{ instances | length > 0 and type != 'node' }}"
 
 - name: Add new instances
   add_host:

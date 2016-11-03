@@ -103,7 +103,7 @@
     --config={{ openshift_hosted_kubeconfig }}
     --namespace={{ openshift.hosted.registry.namespace | default('default') }}
     set env dc/docker-registry REGISTRY_CONFIGURATION_PATH=/etc/registry/config.yml
-  when: "'REGISTRY_CONFIGURATION_PATH' not in oc_env.stdout"
+  when: "{{ 'REGISTRY_CONFIGURATION_PATH' not in oc_env.stdout }}"
 
 - name: Redeploy registry
   command: >

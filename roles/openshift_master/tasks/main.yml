@@ -12,16 +12,16 @@
 # HA Variable Validation
 - fail:
     msg: "openshift_master_cluster_method must be set to either 'native' or 'pacemaker' for multi-master installations"
-  when: openshift_master_ha | bool and ((openshift_master_cluster_method is not defined) or (openshift_master_cluster_method is defined and openshift_master_cluster_method not in ["native", "pacemaker"]))
+  when: "{{ openshift_master_ha | bool and ((openshift_master_cluster_method is not defined) or (openshift_master_cluster_method is defined and openshift_master_cluster_method not in ['native', 'pacemaker'])) }}"
 - fail:
     msg: "'native' high availability is not supported for the requested OpenShift version"
-  when: openshift_master_ha | bool and openshift_master_cluster_method == "native" and not openshift.common.version_gte_3_1_or_1_1 | bool
+  when: "{{ openshift_master_ha | bool and openshift_master_cluster_method == 'native' and not openshift.common.version_gte_3_1_or_1_1 | bool }}"
 - fail:
     msg: "openshift_master_cluster_password must be set for multi-master installations"
-  when: openshift_master_ha | bool and openshift_master_cluster_method == "pacemaker" and (openshift_master_cluster_password is not defined or not openshift_master_cluster_password)
+  when: "{{ openshift_master_ha | bool and openshift_master_cluster_method == 'pacemaker' and (openshift_master_cluster_password is not defined or not openshift_master_cluster_password) }}"
 - fail:
     msg: "Pacemaker based HA is not supported at this time when used with containerized installs"
-  when: openshift_master_ha | bool and openshift_master_cluster_method == "pacemaker" and openshift.common.is_containerized | bool
+  when: "{{ openshift_master_ha | bool and openshift_master_cluster_method == 'pacemaker' and openshift.common.is_containerized | bool }}"
 
 - name: Install Master package
   action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-master{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }} state=present"
@@ -78,8 +78,7 @@
 
 - name: Install httpd-tools if needed
   action: "{{ ansible_pkg_mgr }} name=httpd-tools state=present"
-  when: "{{ (item.kind == 'HTPasswdPasswordIdentityProvider') and }}"
-        not openshift.common.is_atomic | bool
+  when: "{{ (item.kind == 'HTPasswdPasswordIdentityProvider') and not openshift.common.is_atomic | bool }}"
   with_items: "{{ openshift.master.identity_providers }}"
 
 - name: Ensure htpasswd directory exists

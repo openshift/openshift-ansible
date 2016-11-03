@@ -7,7 +7,7 @@
   file:
     path: /etc/systemd/system/haproxy.service.d
     state: directory
-  when: "'limit_nofile' in openshift.loadbalancer"
+  when: "{{ 'limit_nofile' in openshift.loadbalancer }}"
 
 # Work around ini_file create option in 2.2 which defaults to no
 - name: Create limits.conf file
@@ -25,7 +25,7 @@
     section: Service
     option: LimitNOFILE
     value: "{{ openshift.loadbalancer.limit_nofile }}"
-  when: "'limit_nofile' in openshift.loadbalancer"
+  when: "{{ 'limit_nofile' in openshift.loadbalancer }}"
   notify: restart haproxy
   register: nofile_limit_result
 

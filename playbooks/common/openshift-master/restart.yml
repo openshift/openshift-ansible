@@ -8,7 +8,7 @@
   tasks:
   - fail:
       msg: "openshift_rolling_restart_mode must be set to either 'services' or 'system'"
-    when: openshift_rolling_restart_mode is defined and openshift_rolling_restart_mode not in ["services", "system"]
+    when: "{{ openshift_rolling_restart_mode is defined and openshift_rolling_restart_mode not in ['services', 'system'] }}"
   - openshift_facts:
       role: "{{ item.role }}"
       local_facts: "{{ item.local_facts }}"

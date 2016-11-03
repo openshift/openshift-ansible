@@ -244,7 +244,7 @@
   - openshift_facts:
       role: etcd
       local_facts: {}
-    when: "'etcd' not in openshift"
+    when: "{{ 'etcd' not in openshift }}"
 
   - stat: path=/var/lib/openshift
     register: var_lib_openshift
