@@ -27,15 +27,6 @@ Releases are tagged periodically from active branches and are versioned 3.x
 corresponding to Origin releases 1.x. We unfortunately started with 3.0 and it's
 not practical to start over at 1.0.
 
-## Directory structure
-
-- [bin/cluster](https://github.com/openshift/openshift-ansible/tree/master/bin/cluster) - Python script to easily create clusters
-- [docs/](https://github.com/openshift/openshift-ansible/tree/master/docs) - documentation for the project
-- [filter_plugins/](https://github.com/openshift/openshift-ansible/tree/master/filter_plugins) - custom filters used to manipulate data in Ansible
-- [inventory/](https://github.com/openshift/openshift-ansible/tree/master/inventory) - Ansible dynamic inventory scripts
-- [playbooks/](https://github.com/openshift/openshift-ansible/tree/master/playbooks) - host-type Ansible playbooks (launch, config, destroy, vars)
-- [roles/](https://github.com/openshift/openshift-ansible/tree/master/roles) - shareable Ansible tasks
-
 ## Setup
 
 1. Install base dependencies:
@@ -60,11 +51,6 @@ not practical to start over at 1.0.
       - [OpenShift Enterprise](https://docs.openshift.com/enterprise/latest/install_config/install/advanced_install.html)
       - [OpenShift Origin](https://docs.openshift.org/latest/install_config/install/advanced_install.html)
 
-- Build
-  - [How to build the openshift-ansible rpms](BUILD.md)
-
 ## Contributing
 
-- [Best Practices Guide](https://github.com/openshift/openshift-ansible/blob/master/docs/best_practices_guide.adoc)
-- [Core Concepts](https://github.com/openshift/openshift-ansible/blob/master/docs/core_concepts_guide.adoc)
-- [Style Guide](https://github.com/openshift/openshift-ansible/blob/master/docs/style_guide.adoc)
+See the [contribution guide](CONTRIBUTING.md).
