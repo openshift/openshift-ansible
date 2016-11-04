@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.37
+Version:        3.2.38
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,16 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Nov 04 2016 Scott Dodson <sdodson@redhat.com> 3.2.38-1
+- Restart API service always as well. (dgoodwin@redhat.com)
+- Bump etcd_ca_default_days to 5 years. (abutcher@redhat.com)
+- Fix multi-line and needless whens in lists. (abutcher@redhat.com)
+- round 2 (jdetiber@redhat.com)
+- round 1 (jdetiber@redhat.com)
+- Set cloudprovider kind with openshift_facts. (abutcher@redhat.com)
+- fix openshift_cloudprovider_openstack_lb_subnet_id in openstack.conf.j2
+  (ghuang@redhat.com)
+
 * Wed Nov 02 2016 Scott Dodson <sdodson@redhat.com> 3.2.37-1
 - Fix changed_when (sdodson@redhat.com)
 - Touch all ini_file files before using them (sdodson@redhat.com)
