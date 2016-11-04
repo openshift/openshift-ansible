@@ -1,0 +1,14 @@
+---
+# This is just a placeholder playbook. Our aim is to make it:
+# 1. Build one or more Docker images with a certain interesting state;
+# 2. Ensure one or more containers (with random names) are running with the
+#    latest build of the image;
+# 3. Run the byo OpenShift installation playbook targeting the container.
+- hosts: localhost
+  gather_facts: no
+  tasks:
+  - name: waste some time
+    pause:
+      seconds: 1
+  - name: test ping
+    ping:
