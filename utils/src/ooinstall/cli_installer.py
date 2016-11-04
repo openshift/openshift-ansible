@@ -739,17 +739,17 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force):
     installed_hosts, uninstalled_hosts = get_installed_hosts(oo_cfg.deployment.hosts,
                                                              callback_facts)
     nodes = [host for host in oo_cfg.deployment.hosts if host.is_node()]
-    not_balancers = [host for host in oo_cfg.deployment.hosts if not host.is_master_lb()]
+    masters_and_nodes = [host for host in oo_cfg.deployment.hosts if host.is_master() or host.is_node()]
 
     in_hosts = [str(h) for h in installed_hosts]
     un_hosts = [str(h) for h in uninstalled_hosts]
     all_hosts = [str(h) for h in oo_cfg.deployment.hosts]
-    no_bals = [str(h) for h in not_balancers]
+    m_and_n = [str(h) for h in masters_and_nodes]
 
     INSTALLER_LOG.debug("installed hosts: %s", ", ".join(in_hosts))
     INSTALLER_LOG.debug("uninstalled hosts: %s", ", ".join(un_hosts))
     INSTALLER_LOG.debug("deployment hosts: %s", ", ".join(all_hosts))
-    INSTALLER_LOG.debug("not balancers: %s", ", ".join(no_bals))
+    INSTALLER_LOG.debug("masters and nodes: %s", ", ".join(m_and_n))
 
     # Case (1): All uninstalled hosts
     if len(uninstalled_hosts) == len(nodes):
@@ -757,7 +757,7 @@ def get_hosts_to_run_on(oo_cfg, callback_facts, unattended, force):
         hosts_to_run_on = list(oo_cfg.deployment.hosts)
     else:
         # Case (2): All installed hosts
-        if len(installed_hosts) == len(not_balancers):
+        if len(installed_hosts) == len(masters_and_nodes):
             message = """
 All specified hosts in specified environment are installed.
 """
