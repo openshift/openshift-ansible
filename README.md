@@ -2,19 +2,23 @@
 
 # OpenShift Ansible
 
-This repo contains Ansible code for OpenShift. This repo and the origin RPMs
-that it installs currently require a package that provides `docker`. Currently
-the RPMs provided from dockerproject.org do not provide this requirement, though
-they may in the future.
+This repo contains [Ansible](https://www.ansible.com/) code for
+[OpenShift](https://www.openshift.com/). This repo and the origin RPMs that it
+installs currently require a package that provides `docker`. Currently the RPMs
+provided from dockerproject.org do not provide this requirement, though they may
+in the future.
 
 ## Branches and tags
 
-The master branch tracks our current work and should be compatible with both
-Origin master branch and the most recent Origin stable release. Currently that's
-v1.4 and v1.3.x. In addition to the master branch we maintain stable branches
-corresponding to upstream Origin releases, ie: release-1.2. The most recent of
-branch will often receive minor feature backports and fixes. Older branches will
-receive only critical fixes.
+The [master branch](https://github.com/openshift/openshift-ansible/tree/master)
+tracks our current work and should be compatible with both [Origin master
+branch](https://github.com/openshift/origin/tree/master) and the [most recent
+Origin stable release](https://github.com/openshift/origin/releases). Currently
+that's v1.4 and v1.3.x. In addition to the master branch, we maintain stable
+branches corresponding to upstream Origin releases, e.g.:
+[release-1.2](https://github.com/openshift/openshift-ansible/tree/release-1.2).
+The most recent branch will often receive minor feature backports and fixes.
+Older branches will receive only critical fixes.
 
 Releases are tagged periodically from active branches and are versioned 3.x
 corresponding to Origin releases 1.x. We unfortunately started with 3.0 and it's
