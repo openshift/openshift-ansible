@@ -2,11 +2,14 @@
 
 # OpenShift Ansible
 
-This repo contains [Ansible](https://www.ansible.com/) code for
-[OpenShift](https://www.openshift.com/). This repo and the origin RPMs that it
-installs currently require a package that provides `docker`. Currently the RPMs
-provided from dockerproject.org do not provide this requirement, though they may
-in the future.
+This repository contains [Ansible](https://www.ansible.com/) code to install,
+upgrade and manage [OpenShift](https://www.openshift.com/) clusters.
+
+**Note**: the Ansible playbooks in this repository require an RPM package that
+provides `docker`. Currently, the RPMs from
+[dockerproject.org](https://dockerproject.org/) do not provide this requirement,
+though they may in the future. This limitation is being tracked by
+[#2720](https://github.com/openshift/openshift-ansible/issues/2720).
 
 ## Branches and tags
 
