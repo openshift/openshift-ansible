@@ -19,9 +19,9 @@
                     {
                         "name": "latest",
                         "annotations": {
-                          "description": ".Net Core 1.0 S2I image.",
+                          "description": "Build and run .NET Core 1.0 applications",
                           "iconClass": "icon-dotnet",
-                          "tags": "builder,.net,dotnet,dotnetcore,rh-dotnetcore10",
+                          "tags": "builder,.net,dotnet,dotnetcore",
                           "supports":"dotnet",
                           "sampleRepo": "https://github.com/redhat-developer/s2i-dotnetcore.git",
                           "sampleContextDir": "1.0/test/asp-net-hello-world"
@@ -34,7 +34,7 @@
                     {
                         "name": "1.0",
                         "annotations": {
-                            "description": ".Net Core 1.0 S2I image.",
+                            "description": "Build and run .NET Core 1.0 applications",
                             "iconClass": "icon-dotnet",
                             "tags": "builder,.net,dotnet,dotnetcore,rh-dotnetcore10",
                             "supports":"dotnet:1.0,dotnet",
