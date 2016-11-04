@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.16
+Version:        3.4.17
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,18 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Nov 04 2016 Scott Dodson <sdodson@redhat.com> 3.4.17-1
+- Fix indentation for flannel etcd vars (smunilla@redhat.com)
+- Update hosted_templates (sdodson@redhat.com)
+- remove console exclusions (sdodson@redhat.com)
+- Restart API service always as well. (dgoodwin@redhat.com)
+- Update v1.4 content (sdodson@redhat.com)
+- Update quick installer upgrade mappings for 3.4 (smunilla@redhat.com)
+- Update flannel etcd vars for 0.5.5 (smunilla@redhat.com)
+- Where we use curl force it to use tlsv1.2 (sdodson@redhat.com)
+- Bump etcd_ca_default_days to 5 years. (abutcher@redhat.com)
+- Update master_lb vs cluster_hostname workflow (smunilla@redhat.com)
+
 * Wed Nov 02 2016 Scott Dodson <sdodson@redhat.com> 3.4.16-1
 - Fix HA environments incorrectly detecting mixed installed environments
   (tbielawa@redhat.com)
