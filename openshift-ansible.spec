@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.44
+Version:        3.3.46
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Nov 04 2016 Scott Dodson <sdodson@redhat.com> 3.3.46-1
+- trouble creating service signer while running upgrade dockerized
+  (henning.fjellheim@nb.no)
+
+* Fri Nov 04 2016 Scott Dodson <sdodson@redhat.com> 3.3.45-1
+- Restart API service always as well. (dgoodwin@redhat.com)
+- Bump etcd_ca_default_days to 5 years. (abutcher@redhat.com)
+
 * Wed Nov 02 2016 Scott Dodson <sdodson@redhat.com> 3.3.44-1
 - Reference full vars for registry object storage. (abutcher@redhat.com)
 
