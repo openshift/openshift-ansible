@@ -29,25 +29,28 @@ not practical to start over at 1.0.
 
 ## Setup
 
-- Install base dependencies:
-  - Requirements:
-    - Ansible >= 2.1.0 though 2.2 is preferred for performance reasons.
+1. Install base dependencies:
+
+    ***
+    Requirements:
+    - Ansible >= 2.1.0 (>= 2.2 is preferred for performance reasons)
     - Jinja >= 2.7
+    ***
 
-  - Fedora:
+    Fedora:
     ```
-    dnf install -y ansible-2.1.0.0 pyOpenSSL python-cryptography
+    dnf install -y ansible pyOpenSSL python-cryptography
     ```
 
-- Setup for a specific cloud:
+2. Setup for a specific cloud:
+
   - [AWS](http://github.com/openshift/openshift-ansible/blob/master/README_AWS.md)
   - [GCE](http://github.com/openshift/openshift-ansible/blob/master/README_GCE.md)
   - [local VMs](http://github.com/openshift/openshift-ansible/blob/master/README_libvirt.md)
-
-- Bring your own host deployments:
-  - [OpenShift Enterprise](https://docs.openshift.com/enterprise/latest/install_config/install/advanced_install.html)
-  - [OpenShift Origin](https://docs.openshift.org/latest/install_config/install/advanced_install.html)
-  - [Atomic Enterprise](http://github.com/openshift/openshift-ansible/blob/master/README_AEP.md)
+  - Bring your own host deployments:
+      - [OpenShift Enterprise](https://docs.openshift.com/enterprise/latest/install_config/install/advanced_install.html)
+      - [OpenShift Origin](https://docs.openshift.org/latest/install_config/install/advanced_install.html)
+      - [Atomic Enterprise](http://github.com/openshift/openshift-ansible/blob/master/README_AEP.md)
 
 - Build
   - [How to build the openshift-ansible rpms](BUILD.md)
