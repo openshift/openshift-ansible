@@ -11,11 +11,11 @@
     backrefs: yes
     regexp: "{{ item.regexp }}"
     line: "{{ item.line }}"
-    with_items:
-      - { regexp: "^(FLANNEL_ETCD=)", line: '\1{{ etcd_hosts|join(",") }}' }
-      - { regexp: "^(FLANNEL_ETCD_ENDPOINTS=)", line: '\1{{ etcd_hosts|join(",") }}' }
-      - { regexp: "^(FLANNEL_ETCD_KEY=)", line: '\1{{ flannel_etcd_key }}' }
-      - { regexp: "^(FLANNEL_ETCD_KEY_PREFIX=)", line: '\1{{ flannel_etcd_key }}' }
+  with_items:
+    - { regexp: "^(FLANNEL_ETCD=)", line: '\1{{ etcd_hosts|join(",") }}' }
+    - { regexp: "^(FLANNEL_ETCD_ENDPOINTS=)", line: '\1{{ etcd_hosts|join(",") }}' }
+    - { regexp: "^(FLANNEL_ETCD_KEY=)", line: '\1{{ flannel_etcd_key }}' }
+    - { regexp: "^(FLANNEL_ETCD_KEY_PREFIX=)", line: '\1{{ flannel_etcd_key }}' }
 
 - name: Set flannel options
   become: yes
