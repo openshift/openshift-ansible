@@ -19,10 +19,10 @@
   - vars.yml
   roles:
   - role: rhel_unsubscribe
-    when: deployment_type in ['atomic-enterprise', 'enterprise', 'openshift-enterprise'] and
+    when: "{{ deployment_type in ['atomic-enterprise', 'enterprise', 'openshift-enterprise'] and
           ansible_distribution == "RedHat" and
           lookup('oo_option', 'rhel_skip_subscription') | default(rhsub_skip, True) |
-            default('no', True) | lower in ['no', 'false']
+            default('no', True) | lower in ['no', 'false'] }}"
 
 - hosts: localhost
   become: no
@@ -39,7 +39,7 @@
 
   - name: Wait for the completion of the OpenStack Stack deletion
     shell: 'heat stack-show openshift-ansible-{{ cluster_id }}-stack | awk ''$2 == "stack_status" {print $4}'''
-    when: stack_delete_result.changed
+    when: "{{ stack_delete_result.changed }}"
     register: stack_show_result
     until: stack_show_result.stdout != 'DELETE_IN_PROGRESS'
     retries: 60

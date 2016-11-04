@@ -44,7 +44,7 @@
   - name: fail if we don't detect loopback
     fail:
       msg:  loopback not detected! Please investigate manually.
-    when: loop_device_check.rc == 1
+    when: "{{ loop_device_check.rc == 1 }}"
 
   - name: stop zagg client monitoring container
     service:
@@ -68,7 +68,7 @@
   - name: "fail if {{ cli_docker_device }} doesn't exist"
     fail:
       msg: "{{ cli_docker_device }} doesn't exist. Please investigate"
-    when: docker_dev_check.rc != 0
+    when: "{{ docker_dev_check.rc != 0 }}"
 
   - name: stop docker
     service:

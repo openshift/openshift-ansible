@@ -8,20 +8,20 @@
 - name: Create a temp directory for the template xml file
   command: "mktemp -d /tmp/openshift-ansible-XXXXXXX"
   register: mktemp
-  when: net_info_result.rc == 1
+  when: "{{ net_info_result.rc == 1 }}"
 
 - name: Create network xml file
   template:
     src: templates/network.xml
     dest: "{{ mktemp.stdout }}/network.xml"
-  when: net_info_result.rc == 1
+  when: "{{ net_info_result.rc == 1 }}"
 
 - name: Create libvirt network for openshift
   command: "virsh -c {{ libvirt_uri }} net-create {{ mktemp.stdout }}/network.xml"
-  when: net_info_result.rc == 1
+  when: "{{ net_info_result.rc == 1 }}"
 
 - name: Remove the temp directory
   file:
     path: "{{ mktemp.stdout }}"
     state: absent
-  when: net_info_result.rc == 1
+  when: "{{ net_info_result.rc == 1 }}"

@@ -11,7 +11,7 @@
   tasks:
   - fail:
       msg: Deployment type not supported for gce provider yet
-    when: deployment_type == 'enterprise'
+    when: "{{ deployment_type == 'enterprise' }}"
 
   - include: ../../common/openshift-cluster/tasks/set_node_launch_facts.yml
     vars:

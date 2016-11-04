@@ -12,7 +12,7 @@
   - vars.yml
   tasks:
   - fail: msg="cluster_id is required to be injected in this playbook"
-    when: cluster_id is not defined
+    when: "{{ cluster_id is not defined }}"
 
   - name: Evaluate g_service_masters
     add_host:

@@ -24,4 +24,4 @@
 
 - name: Create the libvirt storage pool for openshift
   command: 'virsh -c {{ libvirt_uri }} pool-create-as {{ libvirt_storage_pool }} dir --target {{ libvirt_storage_pool_path }}'
-  when: pool_info_result.rc == 1
+  when: "{{ pool_info_result.rc == 1 }}"

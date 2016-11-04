@@ -22,7 +22,7 @@
   tasks:
 
   - name: Check for AWS creds
-    fail: 
+    fail:
       msg: "Couldn't find {{ item }} creds in ENV"
     when: "{{ item }} == ''"
     with_items:
@@ -33,7 +33,7 @@
     command: oc scale --replicas=0 dc/docker-registry
 
   - name: Create S3 bucket
-    when: aws_create_bucket | bool
+    when: "{{ aws_create_bucket | bool }}"
     local_action:
       module: s3 bucket="{{ aws_bucket_name }}" mode=create
 
@@ -49,7 +49,7 @@
 
   - name: Create registry secrets
     command: oc secrets new dockerregistry /root/config.yml
-    when: "'dockerregistry' not in secrets.stdout"
+    when: "{{ 'dockerregistry' not in secrets.stdout }}"
 
   - name: Determine if service account contains secrets
     command: oc describe serviceaccount/registry
@@ -57,7 +57,7 @@
 
   - name: Add secrets to registry service account
     command: oc secrets add serviceaccount/registry secrets/dockerregistry
-    when: "'dockerregistry' not in serviceaccount.stdout"
+    when: "{{ 'dockerregistry' not in serviceaccount.stdout }}"
 
   - name: Determine if deployment config contains secrets
     command: oc volume dc/docker-registry --list
@@ -65,7 +65,7 @@
 
   - name: Add secrets to registry deployment config
     command: oc volume dc/docker-registry --add --name=dockersecrets -m /etc/registryconfig --type=secret --secret-name=dockerregistry
-    when: "'dockersecrets' not in dc.stdout"
+    when: "{{ 'dockersecrets' not in dc.stdout }}"
 
   - name: Wait for deployment config to take effect before scaling up
     pause: seconds=30
@@ -75,4 +75,4 @@
 
   - name: Delete temporary config file
     file: path={{ aws_tmp_path }} state=absent
-    when: aws_delete_tmp_file | bool
+    when: "{{ aws_delete_tmp_file | bool }}"

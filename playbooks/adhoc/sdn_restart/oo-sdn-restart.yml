@@ -7,11 +7,11 @@
 - name: Check vars
   hosts: localhost
   gather_facts: false
- 
+
   pre_tasks:
   - fail:
       msg: "Playbook requires host to be set"
-    when: host is not defined or host == ''
+    when: "{{ host is not defined or host == '' }}"
 
 - name: Restart openshift/docker (and monitoring containers)
   hosts: oo_version_3:&oo_name_{{ host }}

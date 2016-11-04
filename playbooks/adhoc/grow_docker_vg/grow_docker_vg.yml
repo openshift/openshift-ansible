@@ -66,7 +66,7 @@
   - name: fail if we don't detect devicemapper
     fail:
       msg:  The "Storage Driver" in "docker info" is not set to "devicemapper"! Please investigate manually.
-    when: device_mapper_check.rc == 1
+    when: "{{ device_mapper_check.rc == 1 }}"
 
   # docker-storage-setup creates a docker-pool as the lvm.  I am using docker-pool lvm to test
   # and find the volume group.
@@ -81,7 +81,7 @@
   - name: fail if we don't find a docker volume group
     fail:
       msg:  Unable to find docker volume group. Please investigate manually.
-    when: docker_vg_name.stdout_lines|length != 1
+    when: "{{ docker_vg_name.stdout_lines|length != 1 }}"
 
   # docker-storage-setup creates a docker-pool as the lvm.  I am using docker-pool lvm to test
   # and find the physical volume.
@@ -96,7 +96,7 @@
   - name: fail if we don't find a docker physical volume
     fail:
       msg:  Unable to find docker physical volume. Please investigate manually.
-    when: docker_pv_name.stdout_lines|length != 1
+    when: "{{ docker_pv_name.stdout_lines|length != 1 }}"
 
 
   - name: get list of volumes from AWS
@@ -125,7 +125,7 @@
   - name: fail if /dev/xvdc already exists
     fail:
       msg: /dev/xvdc already exists.  Please investigate
-    when: xvdc_check.rc == 0
+    when: "{{ xvdc_check.rc == 0 }}"
 
   - name: Create a volume and attach it
     delegate_to: localhost
@@ -143,7 +143,7 @@
   - name: Fail when problems creating volumes and attaching
     fail:
       msg: "Failed to create or attach volume msg: {{ create_volume.msg }}"
-    when: create_volume.msg is defined
+    when: "{{ create_volume.msg is defined }}"
 
   - name: tag the vol with a name
     delegate_to: localhost

@@ -8,9 +8,9 @@
   - vars.yml
   tasks:
   - set_fact: scratch_group=tag_clusterid-{{ cluster_id }}
-    when: cluster_id != ''
+    when: "{{ cluster_id != '' }}"
   - set_fact: scratch_group=all
-    when: cluster_id == ''
+    when: "{{ cluster_id == '' }}"
   - add_host:
       name: "{{ item }}"
       groups: oo_list_hosts

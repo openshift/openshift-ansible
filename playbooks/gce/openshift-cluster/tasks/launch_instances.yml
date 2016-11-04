@@ -22,7 +22,7 @@
         #!/bin/bash
         echo "Defaults:{{ deployment_vars[deployment_type].ssh_user }} !requiretty" > /etc/sudoers.d/99-{{ deployment_vars[deployment_type].ssh_user }}
 
-  when: instances |length > 0
+  when: "{{ instances |length > 0 }}"
   register: gce
 
 - set_fact:
@@ -30,14 +30,14 @@
       # There doesn't seem to be a way to get the region directly, so parse it out of the zone.
       region: "{{ gce.zone | regex_replace('^(.*)-.*$', '\\\\1') }}"
       type: "{{ g_sub_host_type }}"
-  when: instances |length > 0 and type == "node"
+  when: "{{ instances |length > 0 and type == 'node' }}"
 
 - set_fact:
     node_label:
       # There doesn't seem to be a way to get the region directly, so parse it out of the zone.
       region: "{{ gce.zone | regex_replace('^(.*)-.*$', '\\\\1') }}"
       type: "{{ type }}"
-  when: instances |length > 0 and type != "node"
+  when: "{{ instances |length > 0 and type != 'node' }}"
 
 - name: Add new instances to groups and set variables needed
   add_host:

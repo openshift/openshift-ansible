@@ -8,7 +8,7 @@
   tasks:
   - fail:
       msg: "openshift_rolling_restart_mode must be set to either 'services' or 'system'"
-    when: openshift_rolling_restart_mode is defined and openshift_rolling_restart_mode not in ["services", "system"]
+    when: "{{ openshift_rolling_restart_mode is defined and openshift_rolling_restart_mode not in ['services', 'system'] }}"
   - openshift_facts:
       role: "{{ item.role }}"
       local_facts: "{{ item.local_facts }}"
@@ -61,10 +61,10 @@
         must be verified manually. To only restart services, set
         openshift_master_rolling_restart_mode=services in host
         inventory and relaunch the playbook.
-    when: exists.stat.exists and openshift.common.rolling_restart_mode == 'system'
+    when: "{{ exists.stat.exists and openshift.common.rolling_restart_mode == 'system' }}"
   - set_fact:
       current_host: "{{ exists.stat.exists }}"
-    when: openshift.common.rolling_restart_mode == 'system'
+    when: "{{ openshift.common.rolling_restart_mode == 'system' }}"
 
 - name: Determine which masters are currently active
   hosts: oo_masters_to_config
@@ -74,12 +74,12 @@
     command: >
       systemctl is-active {{ openshift.common.service_type }}-master
     register: active_check_output
-    when: openshift.master.cluster_method | default(None) == 'pacemaker'
+    when: "{{ openshift.master.cluster_method | default(None) == 'pacemaker' }}"
     failed_when: false
     changed_when: false
   - set_fact:
       is_active: "{{ active_check_output.stdout == 'active' }}"
-    when: openshift.master.cluster_method | default(None) == 'pacemaker'
+    when: "{{ openshift.master.cluster_method | default(None) == 'pacemaker' }}"
 
 - name: Evaluate master groups
   hosts: localhost
@@ -99,7 +99,7 @@
       ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
       ansible_become: "{{ g_sudo | default(omit) }}"
     with_items: "{{ groups.oo_masters_to_config | default([]) }}"
-    when: (hostvars[item]['is_active'] | default(false)) | bool
+    when: "{{ (hostvars[item]['is_active'] | default(false)) | bool }}"
   - name: Evaluate oo_current_masters
     add_host:
       name: "{{ item }}"
@@ -107,7 +107,7 @@
       ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
       ansible_become: "{{ g_sudo | default(omit) }}"
     with_items: "{{ groups.oo_masters_to_config | default([]) }}"
-    when: (hostvars[item]['current_host'] | default(false)) | bool
+    when: "{{ (hostvars[item]['current_host'] | default(false)) | bool }}"
 
 - name: Validate pacemaker cluster
   hosts: oo_active_masters
@@ -119,7 +119,7 @@
   - fail:
       msg: >
         Pacemaker cluster validation failed. One or more nodes are not online.
-    when: not (pcs_status_output.stdout | validate_pcs_cluster(groups.oo_masters_to_config)) | bool
+    when: "{{ not (pcs_status_output.stdout | validate_pcs_cluster(groups.oo_masters_to_config)) | bool }}"
 
 - name: Restart masters
   hosts: oo_masters_to_config:!oo_active_masters:!oo_current_masters
@@ -128,24 +128,24 @@
   serial: 1
   tasks:
   - include: restart_hosts.yml
-    when: openshift.common.rolling_restart_mode == 'system'
+    when: "{{ openshift.common.rolling_restart_mode == 'system' }}"
   - include: restart_services.yml
-    when: openshift.common.rolling_restart_mode == 'services'
+    when: "{{ openshift.common.rolling_restart_mode == 'services' }}"
 
 - name: Restart active masters
   hosts: oo_active_masters
   serial: 1
   tasks:
   - include: restart_hosts_pacemaker.yml
-    when: openshift.common.rolling_restart_mode == 'system'
+    when: "{{ openshift.common.rolling_restart_mode == 'system' }}"
   - include: restart_services_pacemaker.yml
-    when: openshift.common.rolling_restart_mode == 'services'
+    when: "{{ openshift.common.rolling_restart_mode == 'services' }}"
 
 - name: Restart current masters
   hosts: oo_current_masters
   serial: 1
   tasks:
   - include: restart_hosts.yml
-    when: openshift.common.rolling_restart_mode == 'system'
+    when: "{{ openshift.common.rolling_restart_mode == 'system' }}"
   - include: restart_services.yml
-    when: openshift.common.rolling_restart_mode == 'services'
+    when: "{{ openshift.common.rolling_restart_mode == 'services' }}"
