@@ -25,6 +25,7 @@ On Fedora:
 On RHEL / CentOS:
 ```
   yum install -y ansible python-novaclient python-neutronclient python-heatclient
+  sudo pip install shade
 ```
 
 Configuration
