@@ -25,7 +25,7 @@
 
   - name: Create or Update OpenStack Stack
     command: 'heat {{ heat_stack_action }} -f {{ openstack_infra_heat_stack }}
-             --timeout 3
+             --timeout {{ openstack_heat_timeout }}
              -P cluster_env={{ cluster_env }}
              -P cluster_id={{ cluster_id }}
              -P subnet_24_prefix={{ openstack_subnet_24_prefix }}
