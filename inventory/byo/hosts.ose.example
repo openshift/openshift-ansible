@@ -472,7 +472,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # network blocks should be private and should not conflict with network blocks
 # in your infrastructure that pods may require access to. Can not be changed
 # after deployment.
-#osm_cluster_network_cidr=10.1.0.0/16
+#osm_cluster_network_cidr=10.128.0.0/14
 #openshift_portal_net=172.30.0.0/16
 
 
@@ -492,9 +492,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # the CIDRs reserved for external IPs, nodes, pods, or services.
 #openshift_master_ingress_ip_network_cidr=172.46.0.0/16
 
-# Configure number of bits to allocate to each host’s subnet e.g. 8
-# would mean a /24 network on the host.
-#osm_host_subnet_length=8
+# Configure number of bits to allocate to each host’s subnet e.g. 9
+# would mean a /23 network on the host.
+#osm_host_subnet_length=9
 
 # Configure master API and console ports.
 #openshift_master_api_port=8443
