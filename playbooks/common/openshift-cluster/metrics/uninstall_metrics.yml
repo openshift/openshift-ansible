@@ -1,0 +1,11 @@
+---
+- hosts: oo_first_master
+  tasks:
+  - name: "Remove metrics url from  master config"
+    lineinfile: "state=absent dest=/etc/origin/master/master-config.yaml regexp='^\ \ metricsPublicURL'"
+
+  - name: "Delete metrics objects"
+    command: "{{item}}"
+    with_items:
+      - oc delete all,secrets,templates,sa -l metrics-infra --namespace openshift-infra --ignore-not-found
+        
