@@ -363,15 +363,12 @@ def normalize_openstack_facts(metadata, facts):
     facts['network']['ip'] = local_ipv4
     facts['network']['public_ip'] = metadata['ec2_compat']['public-ipv4']
 
-    for f_var, h_var, ip_var in [('hostname',        'hostname',        'local-ipv4'),
-                                 ('public_hostname', 'public-hostname', 'public-ipv4')]:
-        try:
-            if socket.gethostbyname(metadata['ec2_compat'][h_var]) == metadata['ec2_compat'][ip_var]:
-                facts['network'][f_var] = metadata['ec2_compat'][h_var]
-            else:
-                facts['network'][f_var] = metadata['ec2_compat'][ip_var]
-        except socket.gaierror:
-            facts['network'][f_var] = metadata['ec2_compat'][ip_var]
+    # TODO: verify local hostname makes sense and is resolvable
+    facts['network']['hostname'] = metadata['hostname']
+
+    # TODO: verify that public hostname makes sense and is resolvable
+    pub_h = metadata['ec2_compat']['public-hostname']
+    facts['network']['public_hostname'] = pub_h
 
     return facts
 
