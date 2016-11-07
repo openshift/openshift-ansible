@@ -16,3 +16,6 @@
 
 - include: aws.yml
   when: cloudprovider_is_aws | bool
+
+- include: gce.yml
+  when: cloudprovider_is_gce | bool
