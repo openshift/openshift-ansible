@@ -1,6 +1,6 @@
 
 - name: Check for appropriate Docker versions
-  hosts: oo_masters_to_config:oo_nodes_to_upgrade:oo_etcd_to_config
+  hosts: oo_masters_to_config:oo_nodes_to_config:oo_etcd_to_config
   roles:
   - openshift_facts
   tasks:
@@ -19,19 +19,19 @@
 # don't want to carry on, potentially taking out every node. The playbook can safely be re-run
 # and will not take any action on a node already running the requested docker version.
 - name: Evacuate and upgrade nodes
-  hosts: oo_masters_to_config:oo_nodes_to_upgrade:oo_etcd_to_config
+  hosts: oo_masters_to_config:oo_nodes_to_config:oo_etcd_to_config
   serial: 1
   any_errors_fatal: true
   tasks:
   - name: Prepare for Node evacuation
     command: >
-      {{ openshift.common.client_binary }} adm manage-node {{ openshift.node.nodename }} --schedulable=false
+      {{ openshift.common.client_binary }} adm manage-node {{ openshift.common.hostname | lower }} --schedulable=false
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: l_docker_upgrade is defined and l_docker_upgrade | bool and inventory_hostname in groups.oo_nodes_to_upgrade
 
   - name: Evacuate Node for Kubelet upgrade
     command: >
-      {{ openshift.common.client_binary }} adm manage-node {{ openshift.node.nodename }} --evacuate --force
+      {{ openshift.common.client_binary }} adm manage-node {{ openshift.common.hostname | lower }} --evacuate --force
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: l_docker_upgrade is defined and l_docker_upgrade | bool and inventory_hostname in groups.oo_nodes_to_upgrade
 
@@ -40,7 +40,7 @@
 
   - name: Set node schedulability
     command: >
-      {{ openshift.common.client_binary }} adm manage-node {{ openshift.node.nodename }} --schedulable=true
+      {{ openshift.common.client_binary }} adm manage-node {{ openshift.common.hostname | lower }} --schedulable=true
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: openshift.node.schedulable | bool
     when: l_docker_upgrade is defined and l_docker_upgrade | bool and inventory_hostname in groups.oo_nodes_to_upgrade and openshift.node.schedulable | bool

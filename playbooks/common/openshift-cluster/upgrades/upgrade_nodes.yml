@@ -17,7 +17,7 @@
   # we merge upgrade functionality into the base roles and a normal config.yml playbook run.
   - name: Determine if node is currently scheduleable
     command: >
-      {{ openshift.common.client_binary }} get node {{ openshift.node.nodename | lower }} -o json
+      {{ openshift.common.client_binary }} get node {{ openshift.common.hostname | lower }} -o json
     register: node_output
     delegate_to: "{{ groups.oo_first_master.0 }}"
     changed_when: false
@@ -29,7 +29,7 @@
 
   - name: Mark unschedulable if host is a node
     command: >
-      {{ openshift.common.client_binary }} adm manage-node {{ openshift.node.nodename | lower }} --schedulable=false
+      {{ openshift.common.client_binary }} adm manage-node {{ openshift.common.hostname | lower }} --schedulable=false
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: inventory_hostname in groups.oo_nodes_to_upgrade
     # NOTE: There is a transient "object has been modified" error here, allow a couple
@@ -41,7 +41,7 @@
 
   - name: Evacuate Node for Kubelet upgrade
     command: >
-      {{ openshift.common.client_binary }} adm manage-node {{ openshift.node.nodename | lower }} --evacuate --force
+      {{ openshift.common.client_binary }} adm manage-node {{ openshift.common.hostname | lower }} --evacuate --force
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: inventory_hostname in groups.oo_nodes_to_upgrade
   tasks:
@@ -64,12 +64,10 @@
 
   - name: Set node schedulability
     command: >
-      {{ openshift.common.client_binary }} adm manage-node {{ openshift.node.nodename | lower }} --schedulable=true
+      {{ openshift.common.client_binary }} adm manage-node {{ openshift.common.hostname | lower }} --schedulable=true
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: inventory_hostname in groups.oo_nodes_to_upgrade and was_schedulable | bool
     register: node_sched
     until: node_sched.rc == 0
     retries: 3
     delay: 1
-
-
