@@ -6,7 +6,7 @@ import unittest
 import logging
 import sys
 import copy
-from ooinstall.utils import debug_env
+from ooinstall.utils import debug_env, is_valid_hostname
 import mock
 
 
@@ -70,3 +70,31 @@ class TestUtils(unittest.TestCase):
             self.assertItemsEqual(
                 self.expected,
                 _il.debug.call_args_list)
+
+    ######################################################################
+    def test_utils_is_valid_hostname_invalid(self):
+        """Verify is_valid_hostname can detect None or too-long hostnames"""
+        # A hostname that's empty, None, or more than 255 chars is invalid
+        empty_hostname = ''
+        res = is_valid_hostname(empty_hostname)
+        self.assertFalse(res)
+
+        none_hostname = None
+        res = is_valid_hostname(none_hostname)
+        self.assertFalse(res)
+
+        too_long_hostname = "a" * 256
+        res = is_valid_hostname(too_long_hostname)
+        self.assertFalse(res)
+
+    def test_utils_is_valid_hostname_ends_with_dot(self):
+        """Verify is_valid_hostname can parse hostnames with trailing periods"""
+        hostname = "foo.example.com."
+        res = is_valid_hostname(hostname)
+        self.assertTrue(res)
+
+    def test_utils_is_valid_hostname_normal_hostname(self):
+        """Verify is_valid_hostname can parse regular hostnames"""
+        hostname = "foo.example.com"
+        res = is_valid_hostname(hostname)
+        self.assertTrue(res)
