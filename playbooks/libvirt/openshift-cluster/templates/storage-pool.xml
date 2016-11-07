@@ -1,0 +1,6 @@
+<pool type='dir'>
+  <name>{{ libvirt_storage_pool }}</name>
+  <target>
+    <path>{{ libvirt_storage_pool_path }}</path>
+  </target>
+</pool>

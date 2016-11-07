@@ -1,0 +1,13 @@
+---
+- name: Verify node processes
+  hosts: oo_nodes_to_config
+  roles:
+  - openshift_facts
+  - openshift_docker_facts
+  tasks:
+  - name: Ensure Node is running
+    service:
+      name: "{{ openshift.common.service_type }}-node"
+      state: started
+      enabled: yes
+    when: openshift.common.is_containerized | bool

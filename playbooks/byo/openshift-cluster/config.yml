@@ -1,10 +1,13 @@
 ---
 - include: ../../common/openshift-cluster/verify_ansible_version.yml
 
-- hosts: localhost
+- name: Create initial host groups for localhost
+  hosts: localhost
   connection: local
   become: no
   gather_facts: no
+  tags:
+  - always
   tasks:
   - include_vars: ../../byo/openshift-cluster/cluster_hosts.yml
   - add_host:
@@ -12,8 +15,11 @@
       groups: l_oo_all_hosts
     with_items: "{{ g_all_hosts | default([]) }}"
 
-- hosts: l_oo_all_hosts
+- name: Create initial host groups for all hosts
+  hosts: l_oo_all_hosts
   gather_facts: no
+  tags:
+  - always
   tasks:
   - include_vars: ../../byo/openshift-cluster/cluster_hosts.yml
 
@@ -22,3 +28,4 @@
     openshift_cluster_id: "{{ cluster_id | default('default') }}"
     openshift_debug_level: "{{ debug_level | default(2) }}"
     openshift_deployment_type: "{{ deployment_type }}"
+    openshift_deployment_subtype: "{{ deployment_subtype | default(none) }}"

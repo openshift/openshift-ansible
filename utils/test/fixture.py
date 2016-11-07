@@ -10,10 +10,11 @@ from click.testing import CliRunner
 # Substitute in a product name before use:
 SAMPLE_CONFIG = """
 variant: %s
-variant_version: 3.2
-ansible_ssh_user: root
+variant_version: 3.3
 master_routingconfig_subdomain: example.com
+version: v2
 deployment:
+    ansible_ssh_user: root
     hosts:
       - connect_to: 10.0.0.1
         ip: 10.0.0.1
@@ -137,21 +138,25 @@ class OOCliFixture(OOInstallFixture):
             written_config = read_yaml(config_file)
             self._verify_config_hosts(written_config, exp_hosts_len)
 
-        self.assert_result(result, 0)
-        self._verify_load_facts(load_facts_mock)
-        self._verify_run_playbook(run_playbook_mock, exp_hosts_len, exp_hosts_to_run_on_len)
+        if "If you want to force reinstall" in result.output:
+            # verify we exited on seeing installed hosts
+            self.assertEqual(result.exit_code, 1)
+        else:
+            self.assert_result(result, 0)
+            self._verify_load_facts(load_facts_mock)
+            self._verify_run_playbook(run_playbook_mock, exp_hosts_len, exp_hosts_to_run_on_len)
 
-        # Make sure we ran on the expected masters and nodes:
-        hosts = run_playbook_mock.call_args[0][1]
-        hosts_to_run_on = run_playbook_mock.call_args[0][2]
-        self.assertEquals(exp_hosts_len, len(hosts))
-        self.assertEquals(exp_hosts_to_run_on_len, len(hosts_to_run_on))
+            # Make sure we ran on the expected masters and nodes:
+            hosts = run_playbook_mock.call_args[0][1]
+            hosts_to_run_on = run_playbook_mock.call_args[0][2]
+            self.assertEquals(exp_hosts_len, len(hosts))
+            self.assertEquals(exp_hosts_to_run_on_len, len(hosts_to_run_on))
 
 
 #pylint: disable=too-many-arguments,too-many-branches,too-many-statements
 def build_input(ssh_user=None, hosts=None, variant_num=None,
                 add_nodes=None, confirm_facts=None, schedulable_masters_ok=None,
-                master_lb=None, storage=None):
+                master_lb=('', False), storage=None):
     """
     Build an input string simulating a user entering values in an interactive
     attended install.
@@ -199,11 +204,11 @@ def build_input(ssh_user=None, hosts=None, variant_num=None,
             i += 1
 
     # You can pass a single master_lb or a list if you intend for one to get rejected:
-    if master_lb:
-        if isinstance(master_lb[0], list) or isinstance(master_lb[0], tuple):
-            inputs.extend(master_lb[0])
-        else:
-            inputs.append(master_lb[0])
+    if isinstance(master_lb[0], list) or isinstance(master_lb[0], tuple):
+        inputs.extend(master_lb[0])
+    else:
+        inputs.append(master_lb[0])
+    if master_lb[0]:
         inputs.append('y' if master_lb[1] else 'n')
 
     if storage:
@@ -243,6 +248,7 @@ def build_input(ssh_user=None, hosts=None, variant_num=None,
     inputs.extend([
         confirm_facts,
         'y',  # lets do this
+        'y',
     ])
 
     return '\n'.join(inputs)

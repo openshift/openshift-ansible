@@ -55,11 +55,10 @@ def migrate_docker_facts(facts):
                     facts['docker'][param] = facts[role].pop(old_param)
 
     if 'node' in facts and 'portal_net' in facts['node']:
-        facts['docker']['hosted_registry_insecure'] = True
         facts['docker']['hosted_registry_network'] = facts['node'].pop('portal_net')
 
     # log_options was originally meant to be a comma separated string, but
-    # we now prefer an actual list, with backward compatability:
+    # we now prefer an actual list, with backward compatibility:
     if 'log_options' in facts['docker'] and \
             isinstance(facts['docker']['log_options'], basestring):
         facts['docker']['log_options'] = facts['docker']['log_options'].split(",")
@@ -149,6 +148,7 @@ def hostname_valid(hostname):
     if (not hostname or
             hostname.startswith('localhost') or
             hostname.endswith('localdomain') or
+            hostname.endswith('novalocal') or
             len(hostname.split('.')) < 2):
         return False
 
@@ -363,12 +363,15 @@ def normalize_openstack_facts(metadata, facts):
     facts['network']['ip'] = local_ipv4
     facts['network']['public_ip'] = metadata['ec2_compat']['public-ipv4']
 
-    # TODO: verify local hostname makes sense and is resolvable
-    facts['network']['hostname'] = metadata['hostname']
-
-    # TODO: verify that public hostname makes sense and is resolvable
-    pub_h = metadata['ec2_compat']['public-hostname']
-    facts['network']['public_hostname'] = pub_h
+    for f_var, h_var, ip_var in [('hostname',        'hostname',        'local-ipv4'),
+                                 ('public_hostname', 'public-hostname', 'public-ipv4')]:
+        try:
+            if socket.gethostbyname(metadata['ec2_compat'][h_var]) == metadata['ec2_compat'][ip_var]:
+                facts['network'][f_var] = metadata['ec2_compat'][h_var]
+            else:
+                facts['network'][f_var] = metadata['ec2_compat'][ip_var]
+        except socket.gaierror:
+            facts['network'][f_var] = metadata['ec2_compat'][ip_var]
 
     return facts
 
@@ -477,6 +480,14 @@ def set_selectors(facts):
         facts['hosted']['registry'] = {}
     if 'selector' not in facts['hosted']['registry'] or facts['hosted']['registry']['selector'] in [None, 'None']:
         facts['hosted']['registry']['selector'] = selector
+    if 'metrics' not in facts['hosted']:
+        facts['hosted']['metrics'] = {}
+    if 'selector' not in facts['hosted']['metrics'] or facts['hosted']['metrics']['selector'] in [None, 'None']:
+        facts['hosted']['metrics']['selector'] = None
+    if 'logging' not in facts['hosted']:
+        facts['hosted']['logging'] = {}
+    if 'selector' not in facts['hosted']['logging'] or facts['hosted']['logging']['selector'] in [None, 'None']:
+        facts['hosted']['logging']['selector'] = None
 
     return facts
 
@@ -489,8 +500,8 @@ def set_dnsmasq_facts_if_unset(facts):
     """
 
     if 'common' in facts:
-        facts['common']['use_dnsmasq'] = bool('use_dnsmasq' not in facts['common'] and
-                                              safe_get_bool(facts['common']['version_gte_3_2_or_1_2']))
+        if 'use_dnsmasq' not in facts['common']:
+            facts['common']['use_dnsmasq'] = bool(safe_get_bool(facts['common']['version_gte_3_2_or_1_2']))
         if 'master' in facts and 'dns_port' not in facts['master']:
             if safe_get_bool(facts['common']['use_dnsmasq']):
                 facts['master']['dns_port'] = 8053
@@ -789,7 +800,7 @@ def set_deployment_facts_if_unset(facts):
                 curr_disabled_features = set(facts['master']['disabled_features'])
                 facts['master']['disabled_features'] = list(curr_disabled_features.union(openshift_features))
         else:
-            if deployment_type == 'atomic-enterprise':
+            if facts['common']['deployment_subtype'] == 'registry':
                 facts['master']['disabled_features'] = openshift_features
 
     if 'node' in facts:
@@ -890,10 +901,24 @@ def set_sdn_facts_if_unset(facts, system_facts):
             facts['common']['sdn_network_plugin_name'] = plugin
 
     if 'master' in facts:
-        if 'sdn_cluster_network_cidr' not in facts['master']:
-            facts['master']['sdn_cluster_network_cidr'] = '10.1.0.0/16'
-        if 'sdn_host_subnet_length' not in facts['master']:
-            facts['master']['sdn_host_subnet_length'] = '8'
+        # set defaults for sdn_cluster_network_cidr and sdn_host_subnet_length
+        # these might be overridden if they exist in the master config file
+        facts['master']['sdn_cluster_network_cidr'] = '10.128.0.0/14'
+        facts['master']['sdn_host_subnet_length'] = '9'
+
+        master_cfg_path = os.path.join(facts['common']['config_base'],
+                                       'master/master-config.yaml')
+        if os.path.isfile(master_cfg_path):
+            with open(master_cfg_path, 'r') as master_cfg_f:
+                config = yaml.safe_load(master_cfg_f.read())
+
+            if 'networkConfig' in config:
+                if 'clusterNetworkCIDR' in config['networkConfig']:
+                    facts['master']['sdn_cluster_network_cidr'] = \
+                        config['networkConfig']['clusterNetworkCIDR']
+                if 'hostSubnetLength' in config['networkConfig']:
+                    facts['master']['sdn_host_subnet_length'] = \
+                        config['networkConfig']['hostSubnetLength']
 
     if 'node' in facts and 'sdn_mtu' not in facts['node']:
         node_ip = facts['common']['ip']
@@ -908,6 +933,14 @@ def set_sdn_facts_if_unset(facts, system_facts):
                 if 'ipv4' in val and val['ipv4'].get('address') == node_ip:
                     facts['node']['sdn_mtu'] = str(mtu - 50)
 
+    return facts
+
+def set_nodename(facts):
+    if 'node' in facts and 'common' in facts:
+        if 'cloudprovider' in facts and facts['cloudprovider']['kind'] == 'openstack':
+            facts['node']['nodename'] = facts['provider']['metadata']['hostname'].replace('.novalocal', '')
+        else:
+            facts['node']['nodename'] = facts['common']['hostname'].lower()
     return facts
 
 def migrate_oauth_template_facts(facts):
@@ -944,7 +977,12 @@ def format_url(use_ssl, hostname, port, path=''):
     netloc = hostname
     if (use_ssl and port != '443') or (not use_ssl and port != '80'):
         netloc += ":%s" % port
-    return urlparse.urlunparse((scheme, netloc, path, '', '', ''))
+    try:
+        url = urlparse.urlunparse((scheme, netloc, path, '', '', ''))
+    except AttributeError:
+        # pylint: disable=undefined-variable
+        url = urlunparse((scheme, netloc, path, '', '', ''))
+    return url
 
 def get_current_config(facts):
     """ Get current openshift config
@@ -1010,12 +1048,23 @@ def get_current_config(facts):
     return current_config
 
 def build_kubelet_args(facts):
-    """ Build node kubelet_args """
-    cloud_cfg_path = os.path.join(facts['common']['config_base'],
-                                  'cloudprovider')
+    """Build node kubelet_args
+
+In the node-config.yaml file, kubeletArgument sub-keys have their
+values provided as a list. Hence the gratuitous use of ['foo'] below.
+    """
+    cloud_cfg_path = os.path.join(
+        facts['common']['config_base'],
+        'cloudprovider')
+
+    # We only have to do this stuff on hosts that are nodes
     if 'node' in facts:
+        # Any changes to the kubeletArguments parameter are stored
+        # here first.
         kubelet_args = {}
+
         if 'cloudprovider' in facts:
+            # EVERY cloud is special <3
             if 'kind' in facts['cloudprovider']:
                 if facts['cloudprovider']['kind'] == 'aws':
                     kubelet_args['cloud-provider'] = ['aws']
@@ -1023,6 +1072,31 @@ def build_kubelet_args(facts):
                 if facts['cloudprovider']['kind'] == 'openstack':
                     kubelet_args['cloud-provider'] = ['openstack']
                     kubelet_args['cloud-config'] = [cloud_cfg_path + '/openstack.conf']
+                if facts['cloudprovider']['kind'] == 'gce':
+                    kubelet_args['cloud-provider'] = ['gce']
+                    kubelet_args['cloud-config'] = [cloud_cfg_path + '/gce.conf']
+
+        # Automatically add node-labels to the kubeletArguments
+        # parameter. See BZ1359848 for additional details.
+        #
+        # Ref: https://bugzilla.redhat.com/show_bug.cgi?id=1359848
+        if 'labels' in facts['node'] and isinstance(facts['node']['labels'], dict):
+            # tl;dr: os_node_labels="{'foo': 'bar', 'a': 'b'}" turns
+            # into ['foo=bar', 'a=b']
+            #
+            # On the openshift_node_labels inventory variable we loop
+            # over each key-value tuple (from .items()) and join the
+            # key to the value with an '=' character, this produces a
+            # list.
+            #
+            # map() seems to be returning an itertools.imap object
+            # instead of a list. We cast it to a list ourselves.
+            labels_str = list(map(lambda x: '='.join(x), facts['node']['labels'].items()))
+            if labels_str != '':
+                kubelet_args['node-labels'] = labels_str
+
+        # If we've added items to the kubelet_args dict then we need
+        # to merge the new items back into the main facts object.
         if kubelet_args != {}:
             facts = merge_facts({'node': {'kubelet_args': kubelet_args}}, facts, [], [])
     return facts
@@ -1041,6 +1115,9 @@ def build_controller_args(facts):
                 if facts['cloudprovider']['kind'] == 'openstack':
                     controller_args['cloud-provider'] = ['openstack']
                     controller_args['cloud-config'] = [cloud_cfg_path + '/openstack.conf']
+                if facts['cloudprovider']['kind'] == 'gce':
+                    controller_args['cloud-provider'] = ['gce']
+                    kubelet_args['cloud-config'] = [cloud_cfg_path + '/gce.conf']
         if controller_args != {}:
             facts = merge_facts({'master': {'controller_args': controller_args}}, facts, [], [])
     return facts
@@ -1059,6 +1136,9 @@ def build_api_server_args(facts):
                 if facts['cloudprovider']['kind'] == 'openstack':
                     api_server_args['cloud-provider'] = ['openstack']
                     api_server_args['cloud-config'] = [cloud_cfg_path + '/openstack.conf']
+                if facts['cloudprovider']['kind'] == 'gce':
+                    api_server_args['cloud-provider'] = ['gce']
+                    kubelet_args['cloud-config'] = [cloud_cfg_path + '/gce.conf']
         if api_server_args != {}:
             facts = merge_facts({'master': {'api_server_args': api_server_args}}, facts, [], [])
     return facts
@@ -1107,6 +1187,24 @@ def get_docker_version_info():
             }
     return result
 
+def get_hosted_registry_insecure():
+    """ Parses OPTIONS from /etc/sysconfig/docker to determine if the
+        registry is currently insecure.
+    """
+    hosted_registry_insecure = None
+    if os.path.exists('/etc/sysconfig/docker'):
+        try:
+            ini_str = unicode('[root]\n' + open('/etc/sysconfig/docker', 'r').read(), 'utf-8')
+            ini_fp = io.StringIO(ini_str)
+            config = ConfigParser.RawConfigParser()
+            config.readfp(ini_fp)
+            options = config.get('root', 'OPTIONS')
+            if 'insecure-registry' in options:
+                hosted_registry_insecure = True
+        except:
+            pass
+    return hosted_registry_insecure
+
 def get_openshift_version(facts):
     """ Get current version of openshift on the host.
 
@@ -1125,7 +1223,7 @@ def get_openshift_version(facts):
     # version
     if 'common' in facts:
         if 'version' in facts['common'] and facts['common']['version'] is not None:
-            return facts['common']['version']
+            return chomp_commit_offset(facts['common']['version'])
 
     if os.path.isfile('/usr/bin/openshift'):
         _, output, _ = module.run_command(['/usr/bin/openshift', 'version'])
@@ -1140,7 +1238,27 @@ def get_openshift_version(facts):
         _, output, _ = module.run_command(['/usr/local/bin/openshift', 'version'])
         version = parse_openshift_version(output)
 
-    return version
+    return chomp_commit_offset(version)
+
+
+def chomp_commit_offset(version):
+    """Chomp any "+git.foo" commit offset string from the given `version`
+    and return the modified version string.
+
+Ex:
+- chomp_commit_offset(None)                 => None
+- chomp_commit_offset(1337)                 => "1337"
+- chomp_commit_offset("v3.4.0.15+git.derp") => "v3.4.0.15"
+- chomp_commit_offset("v3.4.0.15")          => "v3.4.0.15"
+- chomp_commit_offset("v1.3.0+52492b4")     => "v1.3.0"
+    """
+    if version is None:
+        return version
+    else:
+        # Stringify, just in case it's a Number type. Split by '+' and
+        # return the first split. No concerns about strings without a
+        # '+', .split() returns an array of the original string.
+        return str(version).split('+')[0]
 
 
 def get_container_openshift_version(facts):
@@ -1201,7 +1319,7 @@ def apply_provider_facts(facts, provider_facts):
 
         facts['common'][h_var] = choose_hostname(
             [provider_facts['network'].get(h_var)],
-            facts['common'][ip_var]
+            facts['common'][h_var]
         )
 
     facts['provider'] = provider_facts
@@ -1316,8 +1434,11 @@ def save_local_facts(filename, facts):
     """
     try:
         fact_dir = os.path.dirname(filename)
-        if not os.path.exists(fact_dir):
-            os.makedirs(fact_dir)
+        try:
+            os.makedirs(fact_dir)  # try to make the directory
+        except OSError as exception:
+            if exception.errno != errno.EEXIST:  # but it is okay if it is already there
+                raise  # pass any other exceptions up the chain
         with open(filename, 'w') as fact_file:
             fact_file.write(module.jsonify(facts))
         os.chmod(filename, 0o600)
@@ -1420,6 +1541,9 @@ def set_proxy_facts(facts):
             builddefaults['http_proxy'] = common['http_proxy']
         if 'https_proxy' not in builddefaults and 'https_proxy' in common:
             builddefaults['https_proxy'] = common['https_proxy']
+        # make no_proxy into a list if it's not
+        if 'no_proxy' in builddefaults and isinstance(builddefaults['no_proxy'], basestring):
+            builddefaults['no_proxy'] = builddefaults['no_proxy'].split(",")
         if 'no_proxy' not in builddefaults and 'no_proxy' in common:
             builddefaults['no_proxy'] = common['no_proxy']
         if 'git_http_proxy' not in builddefaults and 'http_proxy' in builddefaults:
@@ -1578,7 +1702,6 @@ class OpenShiftFacts(object):
                    'docker',
                    'etcd',
                    'hosted',
-                   'loadbalancer',
                    'master',
                    'node']
 
@@ -1599,11 +1722,13 @@ class OpenShiftFacts(object):
 
         try:
             # ansible-2.1
-            # pylint: disable=too-many-function-args
+            # pylint: disable=too-many-function-args,invalid-name
             self.system_facts = ansible_facts(module, ['hardware', 'network', 'virtual', 'facter'])
-        except TypeError:
-            # ansible-1.9.x,ansible-2.0.x
-            self.system_facts = ansible_facts(module)
+            for (k, v) in self.system_facts.items():
+                self.system_facts["ansible_%s" % k.replace('-', '_')] = v
+        except UnboundLocalError:
+            # ansible-2.2
+            self.system_facts = get_all_facts(module)['ansible_facts']
 
         self.facts = self.generate_facts(local_facts,
                                          additive_facts_to_overwrite,
@@ -1642,7 +1767,12 @@ class OpenShiftFacts(object):
         else:
             deployment_type = 'origin'
 
-        defaults = self.get_defaults(roles, deployment_type)
+        if 'common' in local_facts and 'deployment_subtype' in local_facts['common']:
+            deployment_subtype = local_facts['common']['deployment_subtype']
+        else:
+            deployment_subtype = 'basic'
+
+        defaults = self.get_defaults(roles, deployment_type, deployment_subtype)
         provider_facts = self.init_provider_facts()
         facts = apply_provider_facts(defaults, provider_facts)
         facts = merge_facts(facts,
@@ -1658,8 +1788,8 @@ class OpenShiftFacts(object):
         facts = set_node_schedulability(facts)
         facts = set_selectors(facts)
         facts = set_identity_providers_if_unset(facts)
-        facts = set_sdn_facts_if_unset(facts, self.system_facts)
         facts = set_deployment_facts_if_unset(facts)
+        facts = set_sdn_facts_if_unset(facts, self.system_facts)
         facts = set_container_facts_if_unset(facts)
         facts = build_kubelet_args(facts)
         facts = build_controller_args(facts)
@@ -1672,9 +1802,10 @@ class OpenShiftFacts(object):
         facts = set_proxy_facts(facts)
         if not safe_get_bool(facts['common']['is_containerized']):
             facts = set_installed_variant_rpm_facts(facts)
+        facts = set_nodename(facts)
         return dict(openshift=facts)
 
-    def get_defaults(self, roles, deployment_type):
+    def get_defaults(self, roles, deployment_type, deployment_subtype):
         """ Get default fact values
 
             Args:
@@ -1684,16 +1815,17 @@ class OpenShiftFacts(object):
                 dict: The generated default facts
         """
         defaults = {}
-        ip_addr = self.system_facts['default_ipv4']['address']
+        ip_addr = self.system_facts['ansible_default_ipv4']['address']
         exit_code, output, _ = module.run_command(['hostname', '-f'])
         hostname_f = output.strip() if exit_code == 0 else ''
-        hostname_values = [hostname_f, self.system_facts['nodename'],
-                           self.system_facts['fqdn']]
+        hostname_values = [hostname_f, self.system_facts['ansible_nodename'],
+                           self.system_facts['ansible_fqdn']]
         hostname = choose_hostname(hostname_values, ip_addr)
 
         defaults['common'] = dict(use_openshift_sdn=True, ip=ip_addr,
                                   public_ip=ip_addr,
                                   deployment_type=deployment_type,
+                                  deployment_subtype=deployment_subtype,
                                   hostname=hostname,
                                   public_hostname=hostname,
                                   portal_net='172.30.0.0/16',
@@ -1708,6 +1840,9 @@ class OpenShiftFacts(object):
                 {"name": "PodFitsResources"},
                 {"name": "PodFitsPorts"},
                 {"name": "NoDiskConflict"},
+                {"name": "NoVolumeZoneConflict"},
+                {"name": "MaxEBSVolumeCount"},
+                {"name": "MaxGCEPDVolumeCount"},
                 {"name": "Region", "argument": {"serviceAffinity" : {"labels" : ["region"]}}}
             ]
             scheduler_priorities = [
@@ -1739,19 +1874,21 @@ class OpenShiftFacts(object):
 
         if 'node' in roles:
             defaults['node'] = dict(labels={}, annotations={},
-                                    iptables_sync_period='5s',
+                                    iptables_sync_period='30s',
                                     local_quota_per_fsgroup="",
                                     set_node_ip=False)
 
         if 'docker' in roles:
             docker = dict(disable_push_dockerhub=False,
-                          hosted_registry_insecure=True,
                           options='--log-driver=json-file --log-opt max-size=50m')
             version_info = get_docker_version_info()
             if version_info is not None:
                 docker['api_version'] = version_info['api_version']
                 docker['version'] = version_info['version']
                 docker['gte_1_10'] = LooseVersion(version_info['version']) >= LooseVersion('1.10')
+            hosted_registry_insecure = get_hosted_registry_insecure()
+            if hosted_registry_insecure is not None:
+                docker['hosted_registry_insecure'] = hosted_registry_insecure
             defaults['docker'] = docker
 
         if 'clock' in roles:
@@ -1778,13 +1915,29 @@ class OpenShiftFacts(object):
                         ),
                         nfs=dict(
                             directory='/exports',
-                            options='*(rw,root_squash)'),
-                        openstack=dict(
-                            filesystem='ext4',
-                            volumeID='123'),
+                            options='*(rw,root_squash)'
+                        ),
                         host=None,
-                        access_modes=['ReadWriteMany'],
-                        create_pv=True
+                        access_modes=['ReadWriteOnce'],
+                        create_pv=True,
+                        create_pvc=False
+                    )
+                ),
+                logging=dict(
+                    storage=dict(
+                        kind=None,
+                        volume=dict(
+                            name='logging-es',
+                            size='10Gi'
+                        ),
+                        nfs=dict(
+                            directory='/exports',
+                            options='*(rw,root_squash)'
+                        ),
+                        host=None,
+                        access_modes=['ReadWriteOnce'],
+                        create_pv=True,
+                        create_pvc=False
                     )
                 ),
                 registry=dict(
@@ -1799,18 +1952,12 @@ class OpenShiftFacts(object):
                             options='*(rw,root_squash)'),
                         host=None,
                         access_modes=['ReadWriteMany'],
-                        create_pv=True
+                        create_pv=True,
+                        create_pvc=True
                     )
                 ),
                 router=dict()
             )
-
-        if 'loadbalancer' in roles:
-            loadbalancer = dict(frontend_port='8443',
-                                default_maxconn='20000',
-                                global_maxconn='20000',
-                                limit_nofile='100000')
-            defaults['loadbalancer'] = loadbalancer
 
         return defaults
 
@@ -1821,10 +1968,10 @@ class OpenShiftFacts(object):
                 dict: The generated default facts for the detected provider
         """
         # TODO: cloud provider facts should probably be submitted upstream
-        product_name = self.system_facts['product_name']
-        product_version = self.system_facts['product_version']
-        virt_type = self.system_facts['virtualization_type']
-        virt_role = self.system_facts['virtualization_role']
+        product_name = self.system_facts['ansible_product_name']
+        product_version = self.system_facts['ansible_product_version']
+        virt_type = self.system_facts['ansible_virtualization_type']
+        virt_role = self.system_facts['ansible_virtualization_role']
         provider = None
         metadata = None
 
@@ -2107,11 +2254,15 @@ def main():
             additive_facts_to_overwrite=dict(default=[], type='list', required=False),
             openshift_env=dict(default={}, type='dict', required=False),
             openshift_env_structures=dict(default=[], type='list', required=False),
-            protected_facts_to_overwrite=dict(default=[], type='list', required=False),
+            protected_facts_to_overwrite=dict(default=[], type='list', required=False)
         ),
         supports_check_mode=True,
         add_file_common_args=True,
     )
+
+    module.params['gather_subset'] = ['hardware', 'network', 'virtual', 'facter']
+    module.params['gather_timeout'] = 10
+    module.params['filter'] = '*'
 
     role = module.params['role']
     local_facts = module.params['local_facts']

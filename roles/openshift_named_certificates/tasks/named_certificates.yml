@@ -1,0 +1,32 @@
+---
+- name: Clear named certificates
+  file:
+    path: "{{ named_certs_dir }}"
+    state: absent
+  when: overwrite_named_certs | bool
+
+- name: Ensure named certificate directory exists
+  file:
+    path: "{{ named_certs_dir }}"
+    state: directory
+    mode: 0700
+
+- name: Land named certificates
+  copy:
+    src: "{{ item.certfile }}"
+    dest: "{{ named_certs_dir }}"
+  with_items: "{{ openshift_master_named_certificates | default([]) }}"
+
+- name: Land named certificate keys
+  copy:
+    src: "{{ item.keyfile }}"
+    dest: "{{ named_certs_dir }}"
+    mode: 0600
+  with_items: "{{ openshift_master_named_certificates | default([]) }}"
+
+- name: Land named CA certificates
+  copy:
+    src: "{{ item }}"
+    dest: "{{ named_certs_dir }}"
+    mode: 0600
+  with_items: "{{ openshift_master_named_certificates | default([]) | oo_collect('cafile') }}"

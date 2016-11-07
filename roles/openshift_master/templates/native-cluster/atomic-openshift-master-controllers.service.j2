@@ -19,7 +19,7 @@ LimitNOFILE=131072
 LimitCORE=infinity
 WorkingDirectory={{ openshift.common.data_dir }}
 SyslogIdentifier={{ openshift.common.service_type }}-master-controllers
-Restart=on-failure
+Restart=always
 RestartSec=5s
 
 [Install]

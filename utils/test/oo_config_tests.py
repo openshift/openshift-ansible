@@ -2,6 +2,7 @@
 # repo. We will work on these over time.
 # pylint: disable=bad-continuation,missing-docstring,no-self-use,invalid-name
 
+import cStringIO
 import os
 import unittest
 import tempfile
@@ -9,12 +10,14 @@ import shutil
 import yaml
 
 from ooinstall.oo_config import OOConfig, Host, OOConfigInvalidHostError
+import ooinstall.openshift_ansible
 
 SAMPLE_CONFIG = """
 variant: openshift-enterprise
-variant_version: 3.2
-ansible_ssh_user: root
+variant_version: 3.3
+version: v2
 deployment:
+    ansible_ssh_user: root
     hosts:
       - connect_to: master-private.example.com
         ip: 10.0.0.1
@@ -43,28 +46,11 @@ deployment:
         node:
 """
 
-# Used to test automatic upgrading of config:
-LEGACY_CONFIG = """
-Description: This is the configuration file for the OpenShift Ansible-Based Installer.
-Name: OpenShift Ansible-Based Installer Configuration
-Subscription: {type: none}
-Vendor: OpenShift Community
-Version: 0.0.1
-ansible_config: /tmp/notreal/ansible.cfg
-ansible_inventory_directory: /tmp/notreal/.config/openshift/.ansible
-ansible_log_path: /tmp/ansible.log
-ansible_plugins_directory: /tmp/notreal/.python-eggs/ooinstall-3.0.0-py2.7.egg-tmp/ooinstall/ansible_plugins
-masters: [10.0.0.1]
-nodes: [10.0.0.2, 10.0.0.3]
-validated_facts:
-  10.0.0.1: {hostname: master-private.example.com, ip: 10.0.0.1, public_hostname: master.example.com, public_ip: 24.222.0.1}
-  10.0.0.2: {hostname: node1-private.example.com, ip: 10.0.0.2, public_hostname: node1.example.com, public_ip: 24.222.0.2}
-  10.0.0.3: {hostname: node2-private.example.com, ip: 10.0.0.3, public_hostname: node2.example.com, public_ip: 24.222.0.3}
-"""
-
 
 CONFIG_INCOMPLETE_FACTS = """
+version: v2
 deployment:
+    ansible_ssh_user: root
     hosts:
       - connect_to: 10.0.0.1
         ip: 10.0.0.1
@@ -90,8 +76,9 @@ deployment:
 
 CONFIG_BAD = """
 variant: openshift-enterprise
-ansible_ssh_user: root
+version: v2
 deployment:
+    ansible_ssh_user: root
     hosts:
       - connect_to: master-private.example.com
         ip: 10.0.0.1
@@ -212,7 +199,7 @@ class OOConfigTests(OOInstallFixture):
             self.assertTrue('hostname' in h)
             self.assertTrue('public_hostname' in h)
 
-        self.assertTrue('ansible_ssh_user' in written_config)
+        self.assertTrue('ansible_ssh_user' in written_config['deployment'])
         self.assertTrue('variant' in written_config)
         self.assertEquals('v2', written_config['version'])
 
@@ -239,3 +226,81 @@ class HostTests(OOInstallFixture):
             'public_hostname': 'a.example.com',
         }
         self.assertRaises(OOConfigInvalidHostError, Host, **yaml_props)
+
+    def test_inventory_file_quotes_node_labels(self):
+        """Verify a host entry wraps openshift_node_labels value in double quotes"""
+        yaml_props = {
+            'ip': '192.168.0.1',
+            'hostname': 'a.example.com',
+            'connect_to': 'a-private.example.com',
+            'public_ip': '192.168.0.1',
+            'public_hostname': 'a.example.com',
+            'new_host': True,
+            'roles': ['node'],
+            'node_labels': {
+                'region': 'infra'
+            },
+
+        }
+
+        new_node = Host(**yaml_props)
+        inventory = cStringIO.StringIO()
+        # This is what the 'write_host' function generates. write_host
+        # has no return value, it just writes directly to the file
+        # 'inventory' which in this test-case is a StringIO object
+        ooinstall.openshift_ansible.write_host(
+            new_node,
+            'node',
+            inventory,
+            schedulable=True)
+        # read the value of what was written to the inventory "file"
+        legacy_inventory_line = inventory.getvalue()
+
+        # Given the `yaml_props` above we should see a line like this:
+        #     openshift_node_labels="{'region': 'infra'}"
+        node_labels_expected = '''openshift_node_labels="{'region': 'infra'}"'''  # Quotes around the hash
+        node_labels_bad = '''openshift_node_labels={'region': 'infra'}'''  # No quotes around the hash
+
+        # The good line is present in the written inventory line
+        self.assertIn(node_labels_expected, legacy_inventory_line)
+        # An unquoted version is not present
+        self.assertNotIn(node_labels_bad, legacy_inventory_line)
+
+
+    # def test_new_write_inventory_same_as_legacy(self):
+    #     """Verify the original write_host function produces the same output as the new method"""
+    #     yaml_props = {
+    #         'ip': '192.168.0.1',
+    #         'hostname': 'a.example.com',
+    #         'connect_to': 'a-private.example.com',
+    #         'public_ip': '192.168.0.1',
+    #         'public_hostname': 'a.example.com',
+    #         'new_host': True,
+    #         'roles': ['node'],
+    #         'other_variables': {
+    #             'zzz': 'last',
+    #             'foo': 'bar',
+    #             'aaa': 'first',
+    #         },
+    #     }
+
+    #     new_node = Host(**yaml_props)
+    #     inventory = cStringIO.StringIO()
+
+    #     # This is what the original 'write_host' function will
+    #     # generate. write_host has no return value, it just writes
+    #     # directly to the file 'inventory' which in this test-case is
+    #     # a StringIO object
+    #     ooinstall.openshift_ansible.write_host(
+    #         new_node,
+    #         'node',
+    #         inventory,
+    #         schedulable=True)
+    #     legacy_inventory_line = inventory.getvalue()
+
+    #     # This is what the new method in the Host class generates
+    #     new_inventory_line = new_node.inventory_string('node', schedulable=True)
+
+    #     self.assertEqual(
+    #         legacy_inventory_line,
+    #         new_inventory_line)

@@ -1,0 +1,9 @@
+- name: Update systemd units
+  include: ../../../../roles/openshift_node/tasks/systemd_units.yml openshift_version={{ openshift_image_tag }}
+
+- name: Verifying the correct version was configured
+  shell: grep {{ verify_upgrade_version }} {{ item }}
+  with_items:
+    - /etc/sysconfig/openvswitch
+    - /etc/sysconfig/{{ openshift.common.service_type }}*
+  when: verify_upgrade_version is defined

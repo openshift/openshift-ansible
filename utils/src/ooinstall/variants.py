@@ -11,12 +11,16 @@ to be specified by the user, and to point the generic variants to the latest
 version.
 """
 
+import logging
+installer_log = logging.getLogger('installer')
+
 
 class Version(object):
-    def __init__(self, name, ansible_key):
+    def __init__(self, name, ansible_key, subtype=''):
         self.name = name  # i.e. 3.0, 3.1
 
         self.ansible_key = ansible_key
+        self.subtype = subtype
 
 
 class Variant(object):
@@ -34,30 +38,37 @@ class Variant(object):
 
 
 # WARNING: Keep the versions ordered, most recent first:
-OSE = Variant('openshift-enterprise', 'OpenShift Enterprise',
-    [
-        Version('3.2', 'openshift-enterprise'),
-        Version('3.1', 'openshift-enterprise'),
-        Version('3.0', 'enterprise')
-    ]
+OSE = Variant('openshift-enterprise', 'OpenShift Container Platform',
+              [
+                  Version('3.4', 'openshift-enterprise'),
+              ]
 )
 
-AEP = Variant('atomic-enterprise', 'Atomic Enterprise Platform',
-    [
-        Version('3.2', 'atomic-enterprise'),
-        Version('3.1', 'atomic-enterprise')
-    ]
+REG = Variant('openshift-enterprise', 'Registry',
+              [
+                  Version('3.4', 'openshift-enterprise', 'registry'),
+              ]
 )
 
 origin = Variant('origin', 'OpenShift Origin',
-    [
-        Version('1.2', 'origin'),
-    ]
+                 [
+                     Version('1.4', 'origin'),
+                 ]
+)
+
+LEGACY = Variant('openshift-enterprise', 'OpenShift Container Platform',
+                 [
+                     Version('3.3', 'openshift-enterprise'),
+                     Version('3.2', 'openshift-enterprise'),
+                     Version('3.1', 'openshift-enterprise'),
+                     Version('3.0', 'openshift-enterprise'),
+                 ]
 )
 
 # Ordered list of variants we can install, first is the default.
-SUPPORTED_VARIANTS = (OSE, AEP, origin)
-DISPLAY_VARIANTS = (OSE, AEP)
+SUPPORTED_VARIANTS = (OSE, REG, origin, LEGACY)
+DISPLAY_VARIANTS = (OSE, REG,)
+
 
 def find_variant(name, version=None):
     """
@@ -75,6 +86,7 @@ def find_variant(name, version=None):
                     return (prod, v)
 
     return (None, None)
+
 
 def get_variant_version_combos():
     combos = []

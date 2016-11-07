@@ -2,30 +2,56 @@
 
 import os
 import sys
+import logging
 import yaml
 from pkg_resources import resource_filename
+
+
+installer_log = logging.getLogger('installer')
 
 CONFIG_PERSIST_SETTINGS = [
     'ansible_ssh_user',
     'ansible_callback_facts_yaml',
-    'ansible_config',
     'ansible_inventory_path',
     'ansible_log_path',
     'deployment',
     'version',
     'variant',
+    'variant_subtype',
     'variant_version',
-    ]
+]
 
-DEPLOYMENT_PERSIST_SETTINGS = [
-    'master_routingconfig_subdomain',
-    'proxy_http',
-    'proxy_https',
-    'proxy_exclude_hosts',
+DEPLOYMENT_VARIABLES_BLACKLIST = [
+    'hosts',
+    'roles',
+]
+
+HOST_VARIABLES_BLACKLIST = [
+    'ip',
+    'public_ip',
+    'hostname',
+    'public_hostname',
+    'node_labels',
+    'containerized',
+    'preconfigured',
+    'schedulable',
+    'other_variables',
+    'roles',
 ]
 
 DEFAULT_REQUIRED_FACTS = ['ip', 'public_ip', 'hostname', 'public_hostname']
 PRECONFIGURED_REQUIRED_FACTS = ['hostname', 'public_hostname']
+
+
+def print_read_config_error(error, path='the configuration file'):
+    message = """
+Error loading config. {}.
+
+See https://docs.openshift.com/enterprise/latest/install_config/install/quick_install.html#defining-an-installation-configuration-file
+for information on creating a configuration file or delete {} and re-run the installer.
+"""
+    print message.format(error, path)
+
 
 class OOConfigFileError(Exception):
     """The provided config file path can't be read/written
@@ -53,7 +79,7 @@ class Host(object):
         self.containerized = kwargs.get('containerized', False)
         self.node_labels = kwargs.get('node_labels', '')
 
-        # allowable roles: master, node, etcd, storage, master_lb, new
+        # allowable roles: master, node, etcd, storage, master_lb
         self.roles = kwargs.get('roles', [])
 
         self.other_variables = kwargs.get('other_variables', {})
@@ -73,11 +99,13 @@ class Host(object):
         d = {}
 
         for prop in ['ip', 'hostname', 'public_ip', 'public_hostname', 'connect_to',
-                     'preconfigured', 'containerized', 'schedulable', 'roles', 'node_labels',
-                     'other_variables']:
+                     'preconfigured', 'containerized', 'schedulable', 'roles', 'node_labels', ]:
             # If the property is defined (not None or False), export it:
             if getattr(self, prop):
                 d[prop] = getattr(self, prop)
+        for variable, value in self.other_variables.iteritems():
+            d[variable] = value
+
         return d
 
     def is_master(self):
@@ -92,6 +120,9 @@ class Host(object):
     def is_storage(self):
         return 'storage' in self.roles
 
+    def is_etcd(self):
+        """ Does this host have the etcd role """
+        return 'etcd' in self.roles
 
     def is_etcd_member(self, all_hosts):
         """ Will this host be a member of a standalone etcd cluster. """
@@ -166,46 +197,73 @@ class OOConfig(object):
         self._read_config()
         self._set_defaults()
 
-
+    # pylint: disable=too-many-branches
+    #         Lots of different checks ran in a single method, could
+    #         use a little refactoring-love some time
     def _read_config(self):
+        installer_log.debug("Attempting to read the OO Config")
         try:
+            installer_log.debug("Attempting to see if the provided config file exists: %s", self.config_path)
             if os.path.exists(self.config_path):
+                installer_log.debug("We think the config file exists: %s", self.config_path)
                 with open(self.config_path, 'r') as cfgfile:
                     loaded_config = yaml.safe_load(cfgfile.read())
 
-                # Use the presence of a Description as an indicator this is
-                # a legacy config file:
-                if 'Description' in self.settings:
-                    self._upgrade_legacy_config()
+                if 'version' not in loaded_config:
+                    print_read_config_error('Legacy configuration file found', self.config_path)
+                    sys.exit(0)
+
+                if loaded_config.get('version', '') == 'v1':
+                    loaded_config = self._upgrade_v1_config(loaded_config)
 
                 try:
                     host_list = loaded_config['deployment']['hosts']
                     role_list = loaded_config['deployment']['roles']
                 except KeyError as e:
-                    print "Error loading config, no such key: {}".format(e)
+                    print_read_config_error("No such key: {}".format(e), self.config_path)
                     sys.exit(0)
 
                 for setting in CONFIG_PERSIST_SETTINGS:
-                    try:
-                        self.settings[setting] = str(loaded_config[setting])
-                    except KeyError:
-                        continue
+                    persisted_value = loaded_config.get(setting)
+                    if persisted_value is not None:
+                        self.settings[setting] = str(persisted_value)
 
-                for setting in DEPLOYMENT_PERSIST_SETTINGS:
+                # We've loaded any persisted configs, let's verify any
+                # paths which are required for a correct and complete
+                # install
+
+                # - ansible_callback_facts_yaml - Settings from a
+                #   pervious run. If the file doesn't exist then we
+                #   will just warn about it for now and recollect the
+                #   facts.
+                if self.settings.get('ansible_callback_facts_yaml', None) is not None:
+                    if not os.path.exists(self.settings['ansible_callback_facts_yaml']):
+                        # Cached callback facts file does not exist
+                        installer_log.warning("The specified 'ansible_callback_facts_yaml'"
+                                              "file does not exist (%s)",
+                                              self.settings['ansible_callback_facts_yaml'])
+                        installer_log.debug("Remote system facts will be collected again later")
+                        self.settings.pop('ansible_callback_facts_yaml')
+
+                for setting in loaded_config['deployment']:
                     try:
-                        self.deployment.variables[setting] = \
-                            str(loaded_config['deployment'][setting])
+                        if setting not in DEPLOYMENT_VARIABLES_BLACKLIST:
+                            self.deployment.variables[setting] = \
+                                str(loaded_config['deployment'][setting])
                     except KeyError:
                         continue
 
                 # Parse the hosts into DTO objects:
                 for host in host_list:
+                    host['other_variables'] = {}
+                    for variable, value in host.iteritems():
+                        if variable not in HOST_VARIABLES_BLACKLIST:
+                            host['other_variables'][variable] = value
                     self.deployment.hosts.append(Host(**host))
 
                 # Parse the roles into Objects
                 for name, variables in role_list.iteritems():
                     self.deployment.roles.update({name: Role(name, variables)})
-
 
         except IOError, ferr:
             raise OOConfigFileError('Cannot open config file "{}": {}'.format(ferr.filename,
@@ -213,49 +271,82 @@ class OOConfig(object):
         except yaml.scanner.ScannerError:
             raise OOConfigFileError(
                 'Config file "{}" is not a valid YAML document'.format(self.config_path))
+        installer_log.debug("Parsed the config file")
 
-    def _upgrade_legacy_config(self):
-        new_hosts = []
-        remove_settings = ['validated_facts', 'Description', 'Name',
-            'Subscription', 'Vendor', 'Version', 'masters', 'nodes']
+    def _upgrade_v1_config(self, config):
+        new_config_data = {}
+        new_config_data['deployment'] = {}
+        new_config_data['deployment']['hosts'] = []
+        new_config_data['deployment']['roles'] = {}
+        new_config_data['deployment']['variables'] = {}
 
-        if 'validated_facts' in self.settings:
-            for key, value in self.settings['validated_facts'].iteritems():
-                value['connect_to'] = key
-                if 'masters' in self.settings and key in self.settings['masters']:
-                    value['master'] = True
-                if 'nodes' in self.settings and key in self.settings['nodes']:
-                    value['node'] = True
-                new_hosts.append(value)
-        self.settings['hosts'] = new_hosts
+        role_list = {}
 
-        for s in remove_settings:
-            if s in self.settings:
-                del self.settings[s]
+        if config.get('ansible_ssh_user', False):
+            new_config_data['deployment']['ansible_ssh_user'] = config['ansible_ssh_user']
 
-        # A legacy config implies openshift-enterprise 3.0:
-        self.settings['variant'] = 'openshift-enterprise'
-        self.settings['variant_version'] = '3.0'
+        if config.get('variant', False):
+            new_config_data['variant'] = config['variant']
 
-    def _upgrade_v1_config(self):
-        #TODO write code to upgrade old config
-        return
+        if config.get('variant_version', False):
+            new_config_data['variant_version'] = config['variant_version']
+
+        for host in config['hosts']:
+            host_props = {}
+            host_props['roles'] = []
+            host_props['connect_to'] = host['connect_to']
+
+            for prop in ['ip', 'public_ip', 'hostname', 'public_hostname', 'containerized', 'preconfigured']:
+                host_props[prop] = host.get(prop, None)
+
+            for role in ['master', 'node', 'master_lb', 'storage', 'etcd']:
+                if host.get(role, False):
+                    host_props['roles'].append(role)
+                    role_list[role] = ''
+
+            new_config_data['deployment']['hosts'].append(host_props)
+
+        new_config_data['deployment']['roles'] = role_list
+
+        return new_config_data
 
     def _set_defaults(self):
+        installer_log.debug("Setting defaults, current OOConfig settings: %s", self.settings)
 
         if 'ansible_inventory_directory' not in self.settings:
             self.settings['ansible_inventory_directory'] = self._default_ansible_inv_dir()
+
         if not os.path.exists(self.settings['ansible_inventory_directory']):
+            installer_log.debug("'ansible_inventory_directory' does not exist, "
+                                "creating it now (%s)",
+                                self.settings['ansible_inventory_directory'])
             os.makedirs(self.settings['ansible_inventory_directory'])
+        else:
+            installer_log.debug("We think this 'ansible_inventory_directory' "
+                                "is OK: %s",
+                                self.settings['ansible_inventory_directory'])
+
         if 'ansible_plugins_directory' not in self.settings:
             self.settings['ansible_plugins_directory'] = \
                 resource_filename(__name__, 'ansible_plugins')
+            installer_log.debug("We think the ansible plugins directory should be: %s (it is not already set)",
+                                self.settings['ansible_plugins_directory'])
+        else:
+            installer_log.debug("The ansible plugins directory is already set: %s",
+                                self.settings['ansible_plugins_directory'])
+
         if 'version' not in self.settings:
             self.settings['version'] = 'v2'
 
         if 'ansible_callback_facts_yaml' not in self.settings:
+            installer_log.debug("No 'ansible_callback_facts_yaml' in self.settings")
             self.settings['ansible_callback_facts_yaml'] = '%s/callback_facts.yaml' % \
                 self.settings['ansible_inventory_directory']
+            installer_log.debug("Value: %s", self.settings['ansible_callback_facts_yaml'])
+        else:
+            installer_log.debug("'ansible_callback_facts_yaml' already set "
+                                "in self.settings: %s",
+                                self.settings['ansible_callback_facts_yaml'])
 
         if 'ansible_ssh_user' not in self.settings:
             self.settings['ansible_ssh_user'] = ''
@@ -263,10 +354,16 @@ class OOConfig(object):
         self.settings['ansible_inventory_path'] = \
             '{}/hosts'.format(os.path.dirname(self.config_path))
 
+        # pylint: disable=consider-iterating-dictionary
+        # Disabled because we shouldn't alter the container we're
+        # iterating over
+        #
         # clean up any empty sets
         for setting in self.settings.keys():
             if not self.settings[setting]:
                 self.settings.pop(setting)
+
+        installer_log.debug("Updated OOConfig settings: %s", self.settings)
 
     def _default_ansible_inv_dir(self):
         return os.path.normpath(
@@ -306,20 +403,19 @@ class OOConfig(object):
             if setting in self.settings and self.settings[setting]:
                 p_settings[setting] = self.settings[setting]
 
-
         p_settings['deployment'] = {}
         p_settings['deployment']['hosts'] = []
         p_settings['deployment']['roles'] = {}
-
-        for setting in DEPLOYMENT_PERSIST_SETTINGS:
-            if setting in self.deployment.variables:
-                p_settings['deployment'][setting] = self.deployment.variables[setting]
 
         for host in self.deployment.hosts:
             p_settings['deployment']['hosts'].append(host.to_dict())
 
         for name, role in self.deployment.roles.iteritems():
             p_settings['deployment']['roles'][name] = role.variables
+
+        for setting in self.deployment.variables:
+            if setting not in DEPLOYMENT_VARIABLES_BLACKLIST:
+                p_settings['deployment'][setting] = self.deployment.variables[setting]
 
         try:
             p_settings['variant'] = self.settings['variant']
@@ -330,7 +426,6 @@ class OOConfig(object):
         except KeyError as e:
             print "Error persisting settings: {}".format(e)
             sys.exit(0)
-
 
         return p_settings
 
@@ -345,3 +440,11 @@ class OOConfig(object):
             if host.connect_to == name:
                 return host
         return None
+
+    def get_host_roles_set(self):
+        roles_set = set()
+        for host in self.deployment.hosts:
+            for role in host.roles:
+                roles_set.add(role)
+
+        return roles_set

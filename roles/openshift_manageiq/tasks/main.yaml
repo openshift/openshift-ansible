@@ -8,9 +8,9 @@
     cp {{ openshift.common.config_base }}/master/admin.kubeconfig {{manage_iq_tmp_conf}}
   changed_when: false
 
-- name: Add Managment Infrastructure project
+- name: Add Management Infrastructure project
   command: >
-    {{ openshift.common.admin_binary }} new-project
+    {{ openshift.common.client_binary }} adm new-project
     management-infra
     --description="Management Infrastructure"
     --config={{manage_iq_tmp_conf}}
@@ -52,7 +52,7 @@
 
 - name: Configure role/user permissions
   command: >
-    {{ openshift.common.admin_binary }} {{item}}
+    {{ openshift.common.client_binary }} adm {{item}}
     --config={{manage_iq_tmp_conf}}
   with_items: "{{manage_iq_tasks}}"
   register: osmiq_perm_task
@@ -61,7 +61,7 @@
 
 - name: Configure 3_2 role/user permissions
   command: >
-    {{ openshift.common.admin_binary }} {{item}}
+    {{ openshift.common.client_binary }} adm {{item}}
     --config={{manage_iq_tmp_conf}}
   with_items: "{{manage_iq_openshift_3_2_tasks}}"
   register: osmiq_perm_3_2_task
@@ -70,6 +70,4 @@
   when: openshift.common.version_gte_3_2_or_1_2 | bool
 
 - name: Clean temporary configuration file
-  command: >
-    rm -f {{manage_iq_tmp_conf}}
-  changed_when: false
+  file: path={{manage_iq_tmp_conf}} state=absent

@@ -39,16 +39,16 @@
     {{ openshift.common.client_binary }} --api-version='v1' -o json
     get nodes -n default --config={{ openshift_hosted_kubeconfig }}
     --selector={{ openshift.hosted.router.selector | default('') }}
-  register: openshift_hosted_router_nodes_json
+  register: router_nodes_json
   changed_when: false
   when: openshift.hosted.router.replicas | default(none) is none
 
 - set_fact:
-    replicas: "{{ openshift.hosted.router.replicas | default((openshift_hosted_router_nodes_json.stdout | default('{\"items\":[]}') | from_json)['items'] | length) }}"
+    replicas: "{{ openshift.hosted.router.replicas | default((router_nodes_json.stdout | default('{\"items\":[]}') | from_json)['items'] | length) }}"
 
 - name: Create OpenShift router
   command: >
-    {{ openshift.common.admin_binary }} router --create
+    {{ openshift.common.client_binary }} adm router --create
     --config={{ openshift_hosted_kubeconfig }}
     {% if replicas > 1 -%}
     --replicas={{ replicas }}
@@ -70,6 +70,10 @@
     {% if openshift.hosted.router.registryurl | default(none) is not none -%}
     --images='{{ openshift.hosted.router.registryurl }}'
     {% endif -%}
+    {% if openshift.hosted.router.name | default(none) is not none -%}
+    {{ openshift.hosted.router.name }}
+    {% endif -%}
+
   register: openshift_hosted_router_results
   changed_when: "'service exists' not in openshift_hosted_router_results.stdout"
   failed_when: "openshift_hosted_router_results.rc != 0 and 'service exists' not in openshift_hosted_router_results.stdout and 'deployment_config' not in openshift_hosted_router_results.stderr and 'service' not in openshift_hosted_router_results.stderr"

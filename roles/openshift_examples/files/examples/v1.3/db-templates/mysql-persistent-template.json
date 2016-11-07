@@ -65,7 +65,7 @@
               ],
               "from": {
                 "kind": "ImageStreamTag",
-                "name": "mysql:latest",
+                "name": "mysql:${MYSQL_VERSION}",
                 "namespace": "${NAMESPACE}"
               }
             }
@@ -173,7 +173,7 @@
     },
     {
       "name": "MYSQL_USER",
-      "displayName": "MySQL User",
+      "displayName": "MySQL Connection Username",
       "description": "Username for MySQL user that will be used for accessing the database.",
       "generate": "expression",
       "from": "user[A-Z0-9]{3}",
@@ -181,8 +181,8 @@
     },
     {
       "name": "MYSQL_PASSWORD",
-      "displayName": "MySQL Password",
-      "description": "Password for the MySQL user.",
+      "displayName": "MySQL Connection Password",
+      "description": "Password for the MySQL connection user.",
       "generate": "expression",
       "from": "[a-zA-Z0-9]{16}",
       "required": true
@@ -199,6 +199,13 @@
       "displayName": "Volume Capacity",
       "description": "Volume space available for data, e.g. 512Mi, 2Gi.",
       "value": "1Gi",
+      "required": true
+    },
+    {
+      "name": "MYSQL_VERSION",
+      "displayName": "Version of MySQL Image",
+      "description": "Version of MySQL image to be used (5.5, 5.6 or latest).",
+      "value": "5.6",
       "required": true
     }
   ],

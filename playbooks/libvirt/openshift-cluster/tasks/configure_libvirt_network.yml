@@ -1,27 +1,11 @@
 ---
-- name: Test if libvirt network for openshift already exists
-  command: "virsh -c {{ libvirt_uri }} net-info {{ libvirt_network }}"
-  register: net_info_result
-  changed_when: False
-  failed_when: "net_info_result.rc != 0 and 'no network with matching name' not in net_info_result.stderr"
-
-- name: Create a temp directory for the template xml file
-  command: "mktemp -d /tmp/openshift-ansible-XXXXXXX"
-  register: mktemp
-  when: net_info_result.rc == 1
-
-- name: Create network xml file
-  template:
-    src: templates/network.xml
-    dest: "{{ mktemp.stdout }}/network.xml"
-  when: net_info_result.rc == 1
-
-- name: Create libvirt network for openshift
-  command: "virsh -c {{ libvirt_uri }} net-create {{ mktemp.stdout }}/network.xml"
-  when: net_info_result.rc == 1
-
-- name: Remove the temp directory
-  file:
-    path: "{{ mktemp.stdout }}"
-    state: absent
-  when: net_info_result.rc == 1
+- name: Create the libvirt network for OpenShift
+  virt_net:
+    name: '{{ libvirt_network }}'
+    state: '{{ item }}'
+    autostart: 'yes'
+    xml: "{{ lookup('template', 'network.xml') }}"
+    uri: '{{ libvirt_uri }}'
+  with_items:
+    - present
+    - active

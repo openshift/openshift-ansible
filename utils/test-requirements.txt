@@ -1,0 +1,12 @@
+enum
+configparser
+pylint
+pep8
+nose
+coverage
+mock
+flake8
+PyYAML
+click
+backports.functools_lru_cache
+pyOpenSSL

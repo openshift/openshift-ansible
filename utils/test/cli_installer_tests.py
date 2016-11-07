@@ -101,8 +101,9 @@ MOCK_FACTS_QUICKHA = {
 # Missing connect_to on some hosts:
 BAD_CONFIG = """
 variant: %s
-ansible_ssh_user: root
+version: v2
 deployment:
+    ansible_ssh_user: root
     hosts:
       - connect_to: 10.0.0.1
         ip: 10.0.0.1
@@ -132,8 +133,9 @@ deployment:
 
 QUICKHA_CONFIG = """
 variant: %s
-ansible_ssh_user: root
+version: v2
 deployment:
+    ansible_ssh_user: root
     hosts:
       - connect_to: 10.0.0.1
         ip: 10.0.0.1
@@ -189,8 +191,9 @@ deployment:
 
 QUICKHA_2_MASTER_CONFIG = """
 variant: %s
-ansible_ssh_user: root
+version: v2
 deployment:
+    ansible_ssh_user: root
     hosts:
       - connect_to: 10.0.0.1
         ip: 10.0.0.1
@@ -238,8 +241,9 @@ deployment:
 
 QUICKHA_CONFIG_REUSED_LB = """
 variant: %s
-ansible_ssh_user: root
+version: v2
 deployment:
+    ansible_ssh_user: root
     hosts:
       - connect_to: 10.0.0.1
         ip: 10.0.0.1
@@ -281,8 +285,9 @@ deployment:
 
 QUICKHA_CONFIG_NO_LB = """
 variant: %s
-ansible_ssh_user: root
+version: v2
 deployment:
+    ansible_ssh_user: root
     hosts:
       - connect_to: 10.0.0.1
         ip: 10.0.0.1
@@ -323,8 +328,9 @@ deployment:
 
 QUICKHA_CONFIG_PRECONFIGURED_LB = """
 variant: %s
-ansible_ssh_user: root
+version: v2
 deployment:
+    ansible_ssh_user: root
     hosts:
       - connect_to: 10.0.0.1
         ip: 10.0.0.1
@@ -557,7 +563,7 @@ class UnattendedCliTests(OOCliFixture):
         self.assertEquals('openshift-enterprise', written_config['variant'])
         # We didn't specify a version so the latest should have been assumed,
         # and written to disk:
-        self.assertEquals('3.2', written_config['variant_version'])
+        self.assertEquals('3.3', written_config['variant_version'])
 
         # Make sure the correct value was passed to ansible:
         inventory = ConfigParser.ConfigParser(allow_no_value=True)
@@ -573,7 +579,7 @@ class UnattendedCliTests(OOCliFixture):
         run_playbook_mock.return_value = 0
 
         config = SAMPLE_CONFIG % 'openshift-enterprise'
-        config = '%s\n%s' % (config, 'variant_version: 3.0')
+        config = '%s\n%s' % (config, 'variant_version: 3.3')
         config_file = self.write_config(os.path.join(self.work_dir,
             'ooinstall.conf'), config)
 
@@ -586,89 +592,103 @@ class UnattendedCliTests(OOCliFixture):
         self.assertEquals('openshift-enterprise', written_config['variant'])
         # Make sure our older version was preserved:
         # and written to disk:
-        self.assertEquals('3.0', written_config['variant_version'])
+        self.assertEquals('3.3', written_config['variant_version'])
 
         inventory = ConfigParser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, 'hosts'))
-        self.assertEquals('enterprise',
+        self.assertEquals('openshift-enterprise',
             inventory.get('OSEv3:vars', 'deployment_type'))
 
-    @patch('ooinstall.openshift_ansible.run_ansible')
-    @patch('ooinstall.openshift_ansible.load_system_facts')
-    def test_no_ansible_config_specified(self, load_facts_mock, run_ansible_mock):
-        load_facts_mock.return_value = (MOCK_FACTS, 0)
-        run_ansible_mock.return_value = 0
+    # 2016-09-26 - tbielawa - COMMENTING OUT these tests FOR NOW while
+    # we wait to see if anyone notices that we took away their ability
+    # to set the ansible_config parameter in the command line options
+    # and in the installer config file.
+    #
+    # We have removed the ability to set the ansible config file
+    # manually so that our new quieter output mode is the default and
+    # only output mode.
+    #
+    # RE: https://trello.com/c/DSwwizwP - atomic-openshift-install
+    # should only output relevant information.
 
-        config = SAMPLE_CONFIG % 'openshift-enterprise'
+    # @patch('ooinstall.openshift_ansible.run_ansible')
+    # @patch('ooinstall.openshift_ansible.load_system_facts')
+    # def test_no_ansible_config_specified(self, load_facts_mock, run_ansible_mock):
+    #     load_facts_mock.return_value = (MOCK_FACTS, 0)
+    #     run_ansible_mock.return_value = 0
 
-        self._ansible_config_test(load_facts_mock, run_ansible_mock,
-            config, None, None)
+    #     config = SAMPLE_CONFIG % 'openshift-enterprise'
 
-    @patch('ooinstall.openshift_ansible.run_ansible')
-    @patch('ooinstall.openshift_ansible.load_system_facts')
-    def test_ansible_config_specified_cli(self, load_facts_mock, run_ansible_mock):
-        load_facts_mock.return_value = (MOCK_FACTS, 0)
-        run_ansible_mock.return_value = 0
+    #     self._ansible_config_test(load_facts_mock, run_ansible_mock,
+    #         config, None, None)
 
-        config = SAMPLE_CONFIG % 'openshift-enterprise'
-        ansible_config = os.path.join(self.work_dir, 'ansible.cfg')
+    # @patch('ooinstall.openshift_ansible.run_ansible')
+    # @patch('ooinstall.openshift_ansible.load_system_facts')
+    # def test_ansible_config_specified_cli(self, load_facts_mock, run_ansible_mock):
+    #     load_facts_mock.return_value = (MOCK_FACTS, 0)
+    #     run_ansible_mock.return_value = 0
 
-        self._ansible_config_test(load_facts_mock, run_ansible_mock,
-            config, ansible_config, ansible_config)
+    #     config = SAMPLE_CONFIG % 'openshift-enterprise'
+    #     ansible_config = os.path.join(self.work_dir, 'ansible.cfg')
 
-    @patch('ooinstall.openshift_ansible.run_ansible')
-    @patch('ooinstall.openshift_ansible.load_system_facts')
-    def test_ansible_config_specified_in_installer_config(self,
-        load_facts_mock, run_ansible_mock):
+    #     self._ansible_config_test(load_facts_mock, run_ansible_mock,
+    #         config, ansible_config, ansible_config)
 
-        load_facts_mock.return_value = (MOCK_FACTS, 0)
-        run_ansible_mock.return_value = 0
+    # @patch('ooinstall.openshift_ansible.run_ansible')
+    # @patch('ooinstall.openshift_ansible.load_system_facts')
+    # def test_ansible_config_specified_in_installer_config(self,
+    #     load_facts_mock, run_ansible_mock):
 
-        ansible_config = os.path.join(self.work_dir, 'ansible.cfg')
-        config = SAMPLE_CONFIG % 'openshift-enterprise'
-        config = "%s\nansible_config: %s" % (config, ansible_config)
-        self._ansible_config_test(load_facts_mock, run_ansible_mock,
-            config, None, ansible_config)
+    #     load_facts_mock.return_value = (MOCK_FACTS, 0)
+    #     run_ansible_mock.return_value = 0
 
-    #pylint: disable=too-many-arguments
-    # This method allows for drastically simpler tests to write, and the args
-    # are all useful.
-    def _ansible_config_test(self, load_facts_mock, run_ansible_mock,
-        installer_config, ansible_config_cli=None, expected_result=None):
-        """
-        Utility method for testing the ways you can specify the ansible config.
-        """
+    #     ansible_config = os.path.join(self.work_dir, 'ansible.cfg')
+    #     config = SAMPLE_CONFIG % 'openshift-enterprise'
+    #     config = "%s\nansible_config: %s" % (config, ansible_config)
+    #     self._ansible_config_test(load_facts_mock, run_ansible_mock,
+    #         config, None, ansible_config)
 
-        load_facts_mock.return_value = (MOCK_FACTS, 0)
-        run_ansible_mock.return_value = 0
+    # #pylint: disable=too-many-arguments
+    # # This method allows for drastically simpler tests to write, and the args
+    # # are all useful.
+    # def _ansible_config_test(self, load_facts_mock, run_ansible_mock,
+    #     installer_config, ansible_config_cli=None, expected_result=None):
+    #     """
+    #     Utility method for testing the ways you can specify the ansible config.
+    #     """
 
-        config_file = self.write_config(os.path.join(self.work_dir,
-            'ooinstall.conf'), installer_config)
+    #     load_facts_mock.return_value = (MOCK_FACTS, 0)
+    #     run_ansible_mock.return_value = 0
 
-        self.cli_args.extend(["-c", config_file])
-        if ansible_config_cli:
-            self.cli_args.extend(["--ansible-config", ansible_config_cli])
-        self.cli_args.append("install")
-        result = self.runner.invoke(cli.cli, self.cli_args)
-        self.assert_result(result, 0)
+    #     config_file = self.write_config(os.path.join(self.work_dir,
+    #         'ooinstall.conf'), installer_config)
 
-        # Test the env vars for facts playbook:
-        facts_env_vars = load_facts_mock.call_args[0][2]
-        if expected_result:
-            self.assertEquals(expected_result, facts_env_vars['ANSIBLE_CONFIG'])
-        else:
-            # If user running test has rpm installed, this might be set to default:
-            self.assertTrue('ANSIBLE_CONFIG' not in facts_env_vars or
-                facts_env_vars['ANSIBLE_CONFIG'] == cli.DEFAULT_ANSIBLE_CONFIG)
+    #     self.cli_args.extend(["-c", config_file])
+    #     if ansible_config_cli:
+    #         self.cli_args.extend(["--ansible-config", ansible_config_cli])
+    #     self.cli_args.append("install")
+    #     result = self.runner.invoke(cli.cli, self.cli_args)
+    #     self.assert_result(result, 0)
 
-        # Test the env vars for main playbook:
-        env_vars = run_ansible_mock.call_args[0][2]
-        if expected_result:
-            self.assertEquals(expected_result, env_vars['ANSIBLE_CONFIG'])
-        else:
-            # If user running test has rpm installed, this might be set to default:
-            self.assertTrue('ANSIBLE_CONFIG' not in env_vars or
-                env_vars['ANSIBLE_CONFIG'] == cli.DEFAULT_ANSIBLE_CONFIG)
+    #     # Test the env vars for facts playbook:
+    #     facts_env_vars = load_facts_mock.call_args[0][2]
+    #     if expected_result:
+    #         self.assertEquals(expected_result, facts_env_vars['ANSIBLE_CONFIG'])
+    #     else:
+    #         # If user running test has rpm installed, this might be set to default:
+    #         self.assertTrue('ANSIBLE_CONFIG' not in facts_env_vars or
+    #             facts_env_vars['ANSIBLE_CONFIG'] == cli.DEFAULT_ANSIBLE_CONFIG)
+
+    #     # Test the env vars for main playbook:
+    #     env_vars = run_ansible_mock.call_args[0][2]
+    #     if expected_result:
+    #         self.assertEquals(expected_result, env_vars['ANSIBLE_CONFIG'])
+    #     else:
+    #         # If user running test has rpm installed, this might be set to default:
+    #         #
+    #         # By default we will use the quiet config
+    #         self.assertTrue('ANSIBLE_CONFIG' not in env_vars or
+    #             env_vars['ANSIBLE_CONFIG'] == cli.QUIET_ANSIBLE_CONFIG)
 
     # unattended with bad config file and no installed hosts (without --force)
     @patch('ooinstall.openshift_ansible.run_main_playbook')
@@ -722,7 +742,7 @@ class UnattendedCliTests(OOCliFixture):
 
         # This is an invalid config:
         self.assert_result(result, 1)
-        self.assertTrue("A minimum of 3 Masters are required" in result.output)
+        self.assertTrue("A minimum of 3 masters are required" in result.output)
 
     #unattended with three masters, one node, but no load balancer specified:
     @patch('ooinstall.openshift_ansible.run_main_playbook')
@@ -822,7 +842,7 @@ class AttendedCliTests(OOCliFixture):
     # interactive with config file and some installed some uninstalled hosts
     @patch('ooinstall.openshift_ansible.run_main_playbook')
     @patch('ooinstall.openshift_ansible.load_system_facts')
-    def test_add_nodes(self, load_facts_mock, run_playbook_mock):
+    def test_scaleup_hint(self, load_facts_mock, run_playbook_mock):
 
         # Modify the mock facts to return a version indicating OpenShift
         # is already installed on our master, and the first node.
@@ -846,13 +866,12 @@ class AttendedCliTests(OOCliFixture):
         result = self.runner.invoke(cli.cli,
                                     self.cli_args,
                                     input=cli_input)
-        self.assert_result(result, 0)
 
-        self._verify_load_facts(load_facts_mock)
-        self._verify_run_playbook(run_playbook_mock, 3, 2)
+        # This is testing the install workflow so we want to make sure we
+        # exit with the appropriate hint.
+        self.assertTrue('scaleup' in result.output)
+        self.assert_result(result, 1)
 
-        written_config = read_yaml(self.config_file)
-        self._verify_config_hosts(written_config, 3)
 
     @patch('ooinstall.openshift_ansible.run_main_playbook')
     @patch('ooinstall.openshift_ansible.load_system_facts')
@@ -877,30 +896,30 @@ class AttendedCliTests(OOCliFixture):
         written_config = read_yaml(config_file)
         self._verify_config_hosts(written_config, 3)
 
-    #interactive with config file and all installed hosts
-    @patch('ooinstall.openshift_ansible.run_main_playbook')
-    @patch('ooinstall.openshift_ansible.load_system_facts')
-    def test_get_hosts_to_run_on(self, load_facts_mock, run_playbook_mock):
-        mock_facts = copy.deepcopy(MOCK_FACTS)
-        mock_facts['10.0.0.1']['common']['version'] = "3.0.0"
-        mock_facts['10.0.0.2']['common']['version'] = "3.0.0"
-
-        cli_input = build_input(hosts=[
-            ('10.0.0.1', True, False),
-            ],
-                                      add_nodes=[('10.0.0.2', False, False)],
-                                      ssh_user='root',
-                                      variant_num=1,
-                                      schedulable_masters_ok=True,
-                                      confirm_facts='y',
-                                      storage='10.0.0.1',)
-
-        self._verify_get_hosts_to_run_on(mock_facts, load_facts_mock,
-                                         run_playbook_mock,
-                                         cli_input,
-                                         exp_hosts_len=2,
-                                         exp_hosts_to_run_on_len=2,
-                                         force=False)
+#    #interactive with config file and all installed hosts
+#    @patch('ooinstall.openshift_ansible.run_main_playbook')
+#    @patch('ooinstall.openshift_ansible.load_system_facts')
+#    def test_get_hosts_to_run_on(self, load_facts_mock, run_playbook_mock):
+#        mock_facts = copy.deepcopy(MOCK_FACTS)
+#        mock_facts['10.0.0.1']['common']['version'] = "3.0.0"
+#        mock_facts['10.0.0.2']['common']['version'] = "3.0.0"
+#
+#        cli_input = build_input(hosts=[
+#            ('10.0.0.1', True, False),
+#            ],
+#                                      add_nodes=[('10.0.0.2', False, False)],
+#                                      ssh_user='root',
+#                                      variant_num=1,
+#                                      schedulable_masters_ok=True,
+#                                      confirm_facts='y',
+#                                      storage='10.0.0.1',)
+#
+#        self._verify_get_hosts_to_run_on(mock_facts, load_facts_mock,
+#                                         run_playbook_mock,
+#                                         cli_input,
+#                                         exp_hosts_len=2,
+#                                         exp_hosts_to_run_on_len=2,
+#                                         force=False)
 
     #interactive multimaster: one more node than master
     @patch('ooinstall.openshift_ansible.run_main_playbook')
@@ -1068,26 +1087,6 @@ class AttendedCliTests(OOCliFixture):
         self.assert_inventory_host_var(inventory, 'nodes', '10.0.0.1',
                                        'openshift_schedulable=True')
 
-    #interactive 3.0 install confirm no HA hints
-    @patch('ooinstall.openshift_ansible.run_main_playbook')
-    @patch('ooinstall.openshift_ansible.load_system_facts')
-    def test_ha_hint(self, load_facts_mock, run_playbook_mock):
-        load_facts_mock.return_value = (MOCK_FACTS, 0)
-        run_playbook_mock.return_value = 0
-
-        cli_input = build_input(hosts=[
-            ('10.0.0.1', True, False)],
-                                      ssh_user='root',
-                                      variant_num=3,
-                                      confirm_facts='y',
-                                      storage='10.1.0.1',)
-        self.cli_args.append("install")
-        result = self.runner.invoke(cli.cli, self.cli_args,
-            input=cli_input)
-        self.assert_result(result, 0)
-        print result.output
-        self.assertTrue("NOTE: Add a total of 3 or more Masters to perform an HA installation."
-            not in result.output)
 
     @patch('ooinstall.openshift_ansible.run_main_playbook')
     @patch('ooinstall.openshift_ansible.load_system_facts')

@@ -19,6 +19,10 @@
 
 - name: Create tar of OpenShift examples
   local_action: command tar -C "{{ role_path }}/files/examples/{{ content_version }}/" -cvf "{{ copy_examples_mktemp.stdout }}/openshift-examples.tar" .
+  args:
+    # Disables the following warning:
+    # Consider using unarchive module rather than running tar
+    warn: no
   become: False
   register: copy_examples_tar
 
@@ -73,28 +77,33 @@
   failed_when: "'already exists' not in oex_import_db_templates.stderr and oex_import_db_templates.rc != 0"
   changed_when: false
 
+- name: Remove defunct quickstart template files
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ quickstarts_base }}/nodejs.json"
+    - "{{ quickstarts_base }}/cakephp.json"
+    - "{{ quickstarts_base }}/dancer.json"
+    - "{{ quickstarts_base }}/django.json"
+
+- name: Remove defunct quickstart templates from openshift namespace
+  command: "{{ openshift.common.client_binary }} -n openshift delete templates/{{ item }}"
+  with_items:
+    - nodejs-example
+    - cakephp-example
+    - dancer-example
+    - django-example
+  register: oex_delete_defunct_quickstart_templates
+  failed_when: "'not found' not in oex_delete_defunct_quickstart_templates.stderr and oex_delete_defunct_quickstart_templates.rc != 0"
+  changed_when: false
+
 - name: Import quickstart-templates
   command: >
     {{ openshift.common.client_binary }} {{ openshift_examples_import_command }} -n openshift -f {{ quickstarts_base }}
   when: openshift_examples_load_quickstarts | bool
   register: oex_import_quickstarts
   failed_when: "'already exists' not in oex_import_quickstarts.stderr and oex_import_quickstarts.rc != 0"
-  changed_when: false
-
-- name: Import origin infrastructure-templates
-  command: >
-    {{ openshift.common.client_binary }} {{ openshift_examples_import_command }} -n openshift -f {{ infrastructure_origin_base }}
-  when: openshift_examples_load_centos | bool
-  register: oex_import_infrastructure
-  failed_when: "'already exists' not in oex_import_infrastructure.stderr and oex_import_infrastructure.rc != 0"
-  changed_when: false
-
-- name: Import enterprise infrastructure-templates
-  command: >
-    {{ openshift.common.client_binary }} {{ openshift_examples_import_command }} -n openshift -f {{ infrastructure_enterprise_base }}
-  when: openshift_examples_load_rhel | bool
-  register: oex_import_infrastructure
-  failed_when: "'already exists' not in oex_import_infrastructure.stderr and oex_import_infrastructure.rc != 0"
   changed_when: false
 
 - name: Remove old xPaas template files

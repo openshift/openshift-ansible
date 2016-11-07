@@ -7,3 +7,4 @@ include DESCRIPTION.rst
 # it's already declared in setup.py
 include ooinstall/*
 include ansible.cfg
+include ansible-quiet.cfg

@@ -1,0 +1,11 @@
+# We verified latest rpm available is suitable, so just yum update.
+- name: Upgrade packages
+  action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-{{ component }}{{ openshift_pkg_version }} state=present"
+
+- name: Ensure python-yaml present for config upgrade
+  action: "{{ ansible_pkg_mgr }} name=PyYAML state=present"
+  when: not openshift.common.is_atomic | bool
+
+- name: Restart node service
+  service: name="{{ openshift.common.service_type }}-node" state=restarted
+  when: component == "node"

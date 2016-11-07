@@ -31,7 +31,6 @@
         "selector": {
           "name": "${DATABASE_SERVICE_NAME}"
         },
-        "portalIP": "",
         "type": "ClusterIP",
         "sessionAffinity": "None"
       },
@@ -77,7 +76,7 @@
               ],
               "from": {
                 "kind": "ImageStreamTag",
-                "name": "mongodb:latest",
+                "name": "mongodb:${MONGODB_VERSION}",
                 "namespace": "${NAMESPACE}"
               },
               "lastTriggeredImage": ""
@@ -199,7 +198,7 @@
     },
     {
       "name": "MONGODB_USER",
-      "displayName": "MongoDB User",
+      "displayName": "MongoDB Connection Username",
       "description": "Username for MongoDB user that will be used for accessing the database.",
       "generate": "expression",
       "from": "user[A-Z0-9]{3}",
@@ -207,8 +206,8 @@
     },
     {
       "name": "MONGODB_PASSWORD",
-      "displayName": "MongoDB Password",
-      "description": "Password for the MongoDB user.",
+      "displayName": "MongoDB Connection Password",
+      "description": "Password for the MongoDB connection user.",
       "generate": "expression",
       "from": "[a-zA-Z0-9]{16}",
       "required": true
@@ -234,9 +233,17 @@
       "description": "Volume space available for data, e.g. 512Mi, 2Gi.",
       "value": "1Gi",
       "required": true
+    },
+    {
+      "name": "MONGODB_VERSION",
+      "displayName": "Version of MongoDB Image",
+      "description": "Version of MongoDB image to be used (2.4, 2.6, 3.2 or latest).",
+      "value": "3.2",
+      "required": true
     }
   ],
   "labels": {
     "template": "mongodb-persistent-template"
-  }
+  },
+  "message": "You can connect to the database using MongoDB connection URL mongodb://${MONGODB_USER}:${MONGODB_PASSWORD}@${DATABASE_SERVICE_NAME}/${MONGODB_DATABASE}"
 }

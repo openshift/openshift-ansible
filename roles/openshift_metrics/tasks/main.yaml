@@ -1,64 +1,87 @@
 ---
-- name: Copy Configuration to temporary conf
-  command: >
-    cp {{ openshift.common.config_base }}/master/admin.kubeconfig {{hawkular_tmp_conf}}
-  changed_when: false
+- fail:
+    msg: This role required openshift_master_default_subdomain or openshift_hosted_metrics_public_url be set
+  when: openshift.master.metrics_public_url | default(openshift_hosted_metrics_public_url | default(openshift.master.default_subdomain | default(openshift_master_default_subdomain | default(none)))) is none
 
-- name: Create metrics-deployer Service Account
+- name: Create temp directory for kubeconfig
+  command: mktemp -d /tmp/openshift-ansible-XXXXXX
+  register: mktemp
+  changed_when: False
+
+- name: Record kubeconfig tmp dir
+  set_fact:
+    openshift_metrics_kubeconfig: "{{ mktemp.stdout }}/admin.kubeconfig"
+
+- name: Copy the admin client config(s)
+  command: >
+    cp {{ openshift_master_config_dir }}/admin.kubeconfig {{ openshift_metrics_kubeconfig }}
+  changed_when: False
+
+- name: Set hosted metrics facts
+  openshift_facts:
+    role: hosted
+    openshift_env: "{{ hostvars
+                       | oo_merge_hostvars(vars, inventory_hostname)
+                       | oo_openshift_env }}"
+    openshift_env_structures:
+    - 'openshift.hosted.metrics.*'
+
+- set_fact:
+    # Prefer the master facts over bare variables if present, prefer
+    # metrics_public_url over creating a default using default_subdomain
+    metrics_hostname: "{{ openshift.hosted.metrics.public_url
+                          | default('hawkular-metrics.' ~ (openshift.master.default_subdomain
+                          | default(openshift_master_default_subdomain )))
+                          | oo_hostname_from_url }}"
+    metrics_persistence: "{{ openshift.hosted.metrics.storage_kind | default(none) is not none }}"
+    metrics_dynamic_vol: "{{ openshift.hosted.metrics.storage_kind | default(none) == 'dynamic' }}"
+    metrics_template_dir: "{{ openshift.common.config_base if openshift.common.is_containerized | bool else '/usr/share/openshift' }}/examples/infrastructure-templates/{{ 'origin' if deployment_type == 'origin' else 'enterprise' }}"
+    cassandra_nodes: "{{ ',CASSANDRA_NODES=' ~ openshift.hosted.metrics.cassandra_nodes if 'cassandra' in openshift.hosted.metrics else '' }}"
+    cassandra_pv_size: "{{ ',CASSANDRA_PV_SIZE=' ~ openshift.hosted.metrics.storage_volume_size if openshift.hosted.metrics.storage_volume_size | default(none) is not none else '' }}"
+    image_prefix: "{{ ',IMAGE_PREFIX=' ~ openshift.hosted.metrics.deployer_prefix if 'deployer_prefix' in openshift.hosted.metrics else '' }}"
+    image_version: "{{ ',IMAGE_VERSION=' ~ openshift.hosted.metrics.deployer_version if 'deployer_version' in openshift.hosted.metrics else '' }}"
+
+
+- name: Check for existing metrics pods
   shell: >
-    echo {{ deployer_service_account | to_json | quote }} |
-    {{ openshift.common.client_binary }} create
-    -n openshift-infra
-    --config={{hawkular_tmp_conf}}
-    -f -
-  register: deployer_create_service_account
-  failed_when: "'already exists' not in deployer_create_service_account.stderr and deployer_create_service_account.rc != 0"
-  changed_when: deployer_create_service_account.rc == 0
-
-- name: Create metrics-deployer Secret
-  command: >
     {{ openshift.common.client_binary }}
-    secrets new metrics-deployer
-    nothing=/dev/null
-    --config={{hawkular_tmp_conf}}
-    -n openshift-infra
-  register: deployer_create_secret
-  failed_when: "'already exists' not in deployer_create_secret.stderr and deployer_create_secret.rc !=0"
-  changed_when: deployer_create_secret.rc == 0
+    --config={{ openshift_metrics_kubeconfig }}
+    --namespace openshift-infra
+    get pods -l {{ item }} | grep -q Running
+  register: metrics_pods_status
+  with_items:
+    - metrics-infra=hawkular-metrics
+    - metrics-infra=heapster
+    - metrics-infra=hawkular-cassandra
+  failed_when: false
+  changed_when: false
 
-- name: Configure role/user permissions
-  command: >
-    {{ openshift.common.admin_binary }} {{item}}
-    --config={{hawkular_tmp_conf}}
-  with_items: "{{hawkular_permission_oc_commands}}"
-  register: hawkular_perm_task
-  failed_when: "'already exists' not in hawkular_perm_task.stderr and hawkular_perm_task.rc != 0"
-  changed_when: hawkular_perm_task.rc == 0
-
-- name: Check openshift_master_default_subdomain
-  fail: 
-    msg: "Default subdomain should be defined"
-  when: openshift.master.default_subdomain is not defined
-
-- name: Create Heapster and Hawkular/Cassandra Services
+- name: Check for previous deployer
   shell: >
-   {{ openshift.common.client_binary }} process -f \
-   /usr/share/openshift/examples/infrastructure-templates/{{ hawkular_type }}/metrics-deployer.yaml -v \
-    HAWKULAR_METRICS_HOSTNAME=hawkular-metrics.{{ openshift.master.default_subdomain }},USE_PERSISTENT_STORAGE={{ hawkular_persistence }},METRIC_DURATION={{ openshift.hosted.metrics.duration }},METRIC_RESOLUTION={{ openshift.hosted.metrics.resolution }} \
-    | {{ openshift.common.client_binary }} create -n openshift-infra --config={{hawkular_tmp_conf}} -f -
-  register: oex_heapster_services
-  failed_when: "'already exists' not in oex_heapster_services.stderr and oex_heapster_services.rc != 0"
+    {{ openshift.common.client_binary }}
+    --config={{ openshift_metrics_kubeconfig }}
+    --namespace openshift-infra
+    get pods -l metrics-infra=deployer --sort-by='{.metadata.creationTimestamp}' | tail -1 | grep metrics-deployer-
+  register: metrics_deployer_status
+  failed_when: false
   changed_when: false
 
-- name: Clean temporary config file
-  command: >
-    rm -rf {{hawkular_tmp_conf}}
-  changed_when: false
+- name: Record current deployment status
+  set_fact:
+    greenfield: "{{ not metrics_deployer_status.rc == 0 }}"
+    failed_error: "{{ True if 'Error' in metrics_deployer_status.stdout else False }}"
+    metrics_running: "{{ metrics_pods_status.results | oo_collect(attribute='rc') == [0,0,0] }}"
 
-- name: "Wait for image pull and deployer pod"
-  shell:  "{{ openshift.common.client_binary }} get pods -n openshift-infra | grep metrics-deployer.*Completed"
-  register: result
-  until: result.rc == 0
-  retries: 60
-  delay: 10
+- name: Set deployment mode
+  set_fact:
+    deployment_mode: "{{ 'refresh' if (failed_error | bool or metrics_upgrade | bool) else 'deploy' }}"
 
+# TODO: handle non greenfield deployments in the future
+- include: install.yml
+  when: greenfield
+
+- name: Delete temp directory
+  file:
+    name: "{{ mktemp.stdout }}"
+    state: absent
+  changed_when: False

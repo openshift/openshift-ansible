@@ -1,6 +1,10 @@
 ---
 - name: Check if firewalld is installed
   command: rpm -q firewalld
+  args:
+    # Disables the following warning:
+    # Consider using yum, dnf or zypper module rather than running rpm
+    warn: no
   register: pkg_check
   failed_when: pkg_check.rc > 1
   changed_when: no

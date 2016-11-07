@@ -8,7 +8,6 @@ cert_output_dir: /usr/share/nuage-openshift-monitor
 kube_config: /usr/share/nuage-openshift-monitor/nuage.kubeconfig
 kubemon_yaml: /usr/share/nuage-openshift-monitor/nuage-openshift-monitor.yaml 
 master_config_yaml: "{{ openshift_master_config_dir }}/master-config.yaml"
-nuage_mon_rest_server_port: "{{ nuage_openshift_monitor_rest_server_port | default('9443') }}"
 nuage_mon_rest_server_url: "0.0.0.0:{{ nuage_mon_rest_server_port }}"
 nuage_mon_rest_server_logdir: "{{ nuage_openshift_monitor_log_dir | default('/var/log/nuage-openshift-monitor') }}"
 nuage_mon_log_level: "{{ nuage_openshift_monitor_log_level | default('3') }}"
