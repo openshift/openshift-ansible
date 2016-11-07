@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.38
+Version:        3.2.39
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Nov 07 2016 Scott Dodson <sdodson@redhat.com> 3.2.39-1
+- set defaults for debug_level in template and task (jhcook@gmail.com)
+
 * Fri Nov 04 2016 Scott Dodson <sdodson@redhat.com> 3.2.38-1
 - Restart API service always as well. (dgoodwin@redhat.com)
 - Bump etcd_ca_default_days to 5 years. (abutcher@redhat.com)
