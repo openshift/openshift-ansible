@@ -1,0 +1,29 @@
+- hosts: localhost
+  connection: local
+  become: no
+  gather_facts: no
+  tasks:
+  - include_vars: ../../cluster_hosts.yml
+  - add_host:
+      name: "{{ item }}"
+      groups: l_oo_all_hosts
+    with_items: "{{ g_all_hosts | default([]) }}"
+    changed_when: false
+
+- hosts: l_oo_all_hosts
+  gather_facts: no
+  tasks:
+  - include_vars: ../../cluster_hosts.yml
+
+- include: ../../../common/openshift-cluster/evaluate_groups.yml
+
+- name: Install Metrics
+  hosts: oo_first_master
+  roles:
+  - openshift_metrics
+  vars:
+    openshift_deployment_type: "{{ deployment_type }}"
+    openshift_master_config_dir: "{{ openshift.common.config_base }}/master"
+    openshift_master_default_subdomain: "{{ lookup('oo_option', 'openshift_master_default_subdomain') | default(None, true) }}"
+
+    
