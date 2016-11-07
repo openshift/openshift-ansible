@@ -56,9 +56,9 @@
         {{ avail_disk.stdout }} Kb available.
     when: (embedded_etcd | bool) and (etcd_disk_usage.stdout|int > avail_disk.stdout|int)
 
-  - name: Install etcd (for etcdctl)
-    action: "{{ ansible_pkg_mgr }} name=etcd state=latest"
-    when: not openshift.common.is_atomic | bool
+  - name: Install etcdctl for embedded environments
+    include: embedded_etcdctl.yml
+    when: embedded_etcd
 
   - name: Generate etcd backup
     command: >

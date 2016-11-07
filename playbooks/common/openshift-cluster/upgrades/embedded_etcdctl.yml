@@ -1,0 +1,30 @@
+- name: Install etcd for etcdctl on non RHEL
+  action: "{{ ansible_pkg_mgr }} name=etcd state=latest"
+  when: not openshift.common.is_atomic | bool and ansible_distribution != 'RedHat'
+
+# etcd3 in RHEL 7.3.0 does not Obsolstes: etcd, however etcd3-3.0.12 or later will
+# so until that ships we need to carefully install etcd 3.0 to ensure we get fixes
+# for backing up embedded etcd in 2.3
+# see https://github.com/coreos/etcd/pull/4952 and https://bugzilla.redhat.com/show_bug.cgi?id=1382634
+- name: Check for etcd package
+  rpm_q:
+    name: etcd
+    state: present
+  failed_when: false
+  register: etcd_rpmq
+  when: ansible_distribution == 'RedHat'
+
+- name: Determine if we need to yum swap etcd3 etcd
+  set_fact:
+    etcd2_installed: "{{ etcd_rpmq.installed_versions | default('99') | version_compare('3.0','<') }}"
+  when: ansible_distribution == 'RedHat'
+
+- name: Install etcd3 (for etcdctl)
+  action: "{{ ansible_pkg_mgr }} name=etcd3 state=latest"
+  when: not openshift.common.is_atomic | bool and ansible_distribution == 'RedHat' and not etcd2_installed | bool
+
+- name: Swap etcd3 for etcd
+  command: "yum swap etcd etcd3 -y"
+  args:
+    warn: no
+  when: not openshift.common.is_atomic | bool and ansible_distribution == 'RedHat' and etcd2_installed | bool
