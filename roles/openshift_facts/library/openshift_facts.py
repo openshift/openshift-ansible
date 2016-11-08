@@ -903,8 +903,8 @@ def set_sdn_facts_if_unset(facts, system_facts):
     if 'master' in facts:
         # set defaults for sdn_cluster_network_cidr and sdn_host_subnet_length
         # these might be overridden if they exist in the master config file
-        facts['master']['sdn_cluster_network_cidr'] = '10.128.0.0/14'
-        facts['master']['sdn_host_subnet_length'] = '9'
+        sdn_cluster_network_cidr = '10.128.0.0/14'
+        sdn_host_subnet_length = '9'
 
         master_cfg_path = os.path.join(facts['common']['config_base'],
                                        'master/master-config.yaml')
@@ -914,11 +914,16 @@ def set_sdn_facts_if_unset(facts, system_facts):
 
             if 'networkConfig' in config:
                 if 'clusterNetworkCIDR' in config['networkConfig']:
-                    facts['master']['sdn_cluster_network_cidr'] = \
+                    sdn_cluster_network_cidr = \
                         config['networkConfig']['clusterNetworkCIDR']
                 if 'hostSubnetLength' in config['networkConfig']:
-                    facts['master']['sdn_host_subnet_length'] = \
+                    sdn_host_subnet_length = \
                         config['networkConfig']['hostSubnetLength']
+
+        if 'sdn_cluster_network_cidr' not in facts['master']:
+            facts['master']['sdn_cluster_network_cidr'] = sdn_cluster_network_cidr
+        if 'sdn_host_subnet_length' not in facts['master']:
+            facts['master']['sdn_host_subnet_length'] = sdn_host_subnet_length
 
     if 'node' in facts and 'sdn_mtu' not in facts['node']:
         node_ip = facts['common']['ip']
