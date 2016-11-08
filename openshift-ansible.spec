@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.46
+Version:        3.3.47
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Nov 08 2016 Scott Dodson <sdodson@redhat.com> 3.3.47-1
+- [upgrades] Use etcd3 to backup embedded etcd if possible (sdodson@redhat.com)
+- Add missing symlink for node openvswitch oom fix. (dgoodwin@redhat.com)
+- Bump example release to 3.3. (dgoodwin@redhat.com)
+
 * Fri Nov 04 2016 Scott Dodson <sdodson@redhat.com> 3.3.46-1
 - trouble creating service signer while running upgrade dockerized
   (henning.fjellheim@nb.no)
