@@ -14,7 +14,7 @@
 
 - name: Wait for Node Registration
   command: >
-    {{ openshift.common.client_binary }} get node {{ hostvars[item].openshift.node.nodename }}
+    {{ openshift.common.client_binary }} get node {{ hostvars[item].openshift.common.hostname }}
     --config={{ openshift_manage_node_kubeconfig }}
     -n default
   register: omd_get_node
@@ -26,19 +26,19 @@
 
 - name: Set node schedulability
   command: >
-    {{ openshift.common.client_binary }} adm manage-node {{ hostvars[item].openshift.node.nodename }} --schedulable={{ 'true' if hostvars[item].openshift.node.schedulable | bool else 'false' }}
+    {{ openshift.common.client_binary }} adm manage-node {{ hostvars[item].openshift.common.hostname | lower }} --schedulable={{ 'true' if hostvars[item].openshift.node.schedulable | bool else 'false' }}
     --config={{ openshift_manage_node_kubeconfig }}
     -n default
   with_items: "{{ openshift_nodes }}"
-  when: hostvars[item].openshift.node.nodename is defined
+  when: hostvars[item].openshift.common.hostname is defined
 
 - name: Label nodes
   command: >
-    {{ openshift.common.client_binary }} label --overwrite node {{ hostvars[item].openshift.node.nodename }} {{ hostvars[item].openshift.node.labels | oo_combine_dict  }}
+    {{ openshift.common.client_binary }} label --overwrite node {{ hostvars[item].openshift.common.hostname | lower }} {{ hostvars[item].openshift.node.labels | oo_combine_dict  }}
     --config={{ openshift_manage_node_kubeconfig }}
     -n default
   with_items: "{{ openshift_nodes }}"
-  when: hostvars[item].openshift.node.nodename is defined and 'labels' in hostvars[item].openshift.node and hostvars[item].openshift.node.labels != {}
+  when: hostvars[item].openshift.common.hostname is defined and 'labels' in hostvars[item].openshift.node and hostvars[item].openshift.node.labels != {}
 
 - name: Delete temp directory
   file:
