@@ -33,7 +33,7 @@ networkConfig:
 {% if openshift.node.set_node_ip | bool %}
 nodeIP: {{ openshift.common.ip }}
 {% endif %}
-nodeName: {{ openshift.node.nodename }}
+nodeName: {{ openshift.common.hostname | lower }}
 podManifestConfig:
 servingInfo:
   bindAddress: 0.0.0.0:10250
