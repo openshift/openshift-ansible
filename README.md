@@ -59,7 +59,6 @@ not practical to start over at 1.0.
   - Bring your own host deployments:
       - [OpenShift Enterprise](https://docs.openshift.com/enterprise/latest/install_config/install/advanced_install.html)
       - [OpenShift Origin](https://docs.openshift.org/latest/install_config/install/advanced_install.html)
-      - [Atomic Enterprise](http://github.com/openshift/openshift-ansible/blob/master/README_AEP.md)
 
 - Build
   - [How to build the openshift-ansible rpms](BUILD.md)
