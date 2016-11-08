@@ -39,12 +39,6 @@ not practical to start over at 1.0.
     dnf install -y ansible-2.1.0.0 pyOpenSSL python-cryptography
     ```
 
-  - OSX:
-    ```
-    # Install ansible 2.1.0.0 and python 2
-    brew install ansible python
-    ```
-
 - Setup for a specific cloud:
   - [AWS](http://github.com/openshift/openshift-ansible/blob/master/README_AWS.md)
   - [GCE](http://github.com/openshift/openshift-ansible/blob/master/README_GCE.md)
