@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.39
+Version:        3.2.40
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Nov 08 2016 Scott Dodson <sdodson@redhat.com> 3.2.40-1
+- Always add local dns domain to no_proxy (jawed.khelil@amadeus.com)
+- Automatic commit of package [openshift-ansible] release [3.2.39-1].
+  (sdodson@redhat.com)
+- Template g_all_hosts with_items in 3.3 upgrade. (abutcher@redhat.com)
+
 * Mon Nov 07 2016 Scott Dodson <sdodson@redhat.com> 3.2.39-1
 - set defaults for debug_level in template and task (jhcook@gmail.com)
 
