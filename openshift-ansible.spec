@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.17
+Version:        3.4.18
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,47 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Nov 08 2016 Scott Dodson <sdodson@redhat.com> 3.4.18-1
+- Revert "Revert "Revert openshift.node.nodename changes"" (sdodson@redhat.com)
+- Revert "Revert openshift.node.nodename changes" (sdodson@redhat.com)
+- README: fix markdown formatting (rhcarvalho@gmail.com)
+- Create contribution guide (rhcarvalho@gmail.com)
+- Remove README_AEP.md (rhcarvalho@gmail.com)
+- Install flannel RPM on containerized but not atomic (sdodson@redhat.com)
+- README: move structure overview to the top (rhcarvalho@gmail.com)
+- README: cleanup setup steps (rhcarvalho@gmail.com)
+- README: remove OSX setup requirements (rhcarvalho@gmail.com)
+- Add missing symlink for node openvswitch oom fix. (dgoodwin@redhat.com)
+- README: improve first paragraph (rhcarvalho@gmail.com)
+- README: add links, fix typos (rhcarvalho@gmail.com)
+- README: improve markdown formatting (rhcarvalho@gmail.com)
+- Make it easier to run Python tests (rhcarvalho@gmail.com)
+- FIx flannel var name (jprovazn@redhat.com)
+- Always add local dns domain to no_proxy (jawed.khelil@amadeus.com)
+- Refactor default sdn_cluster_network_cidr and sdn_host_subnet_length
+  (sdodson@redhat.com)
+- Revert "Fix the nodeName of the OpenShift nodes on OpenStack"
+  (sdodson@redhat.com)
+- Revert "Fix OpenStack cloud provider" (sdodson@redhat.com)
+- Revert "Check that OpenStack hostnames are resolvable" (sdodson@redhat.com)
+- set AWS creds task with no_logs (somalley@redhat.com)
+- Change the logic to just compare against masters and nodes.
+  (tbielawa@redhat.com)
+- Append /inventory/README.md to explain what is BYO inventory folder #2742
+  (contact@stephane-klein.info)
+- Remove unused openshift-ansible/inventory/hosts file #2740 (contact@stephane-
+  klein.info)
+- Remove unused playbooks adhoc metrics_setup files #2717 (contact@stephane-
+  klein.info)
+- a-o-i: remove dummy data_file (rhcarvalho@gmail.com)
+- a-o-i: remove script leftover from OpenShift v2 (rhcarvalho@gmail.com)
+- [openstack] updates documentation to show that you need to install shade
+  (douglaskippsmith@gmail.com)
+- default to multizone GCE config (sjenning@redhat.com)
+- Add some tests for utils to get the coverage up. (tbielawa@redhat.com)
+- Update defaults for clusterNetworkCIDR & hostSubnetLength
+  (smunilla@redhat.com)
+
 * Fri Nov 04 2016 Scott Dodson <sdodson@redhat.com> 3.4.17-1
 - Fix indentation for flannel etcd vars (smunilla@redhat.com)
 - Update hosted_templates (sdodson@redhat.com)
