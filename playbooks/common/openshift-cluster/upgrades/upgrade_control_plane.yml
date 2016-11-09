@@ -13,10 +13,23 @@
       groups: etcd_hosts_to_backup
     with_items: "{{ groups.oo_etcd_to_config if groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config | length > 0 else groups.oo_first_master }}"
 
+# If facts cache were for some reason deleted, this fact may not be set, and if not set
+# it will always default to true. This causes problems for the etcd data dir fact detection
+# so we must first make sure this is set correctly before attempting the backup.
+- name: Set master embedded_etcd fact
+  hosts: oo_masters_to_config
+  roles:
+  - openshift_facts
+  tasks:
+  - openshift_facts:
+      role: master
+      local_facts:
+        embedded_etcd: "{{ groups.oo_etcd_to_config | length == 0 }}"
+
 - name: Backup etcd
   hosts: etcd_hosts_to_backup
   vars:
-    embedded_etcd: "{{ hostvars[groups.oo_first_master.0].openshift.master.embedded_etcd }}"
+    embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
     timestamp: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
   roles:
   - openshift_facts
