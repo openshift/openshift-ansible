@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.47
+Version:        3.3.48
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Nov 09 2016 Scott Dodson <sdodson@redhat.com> 3.3.48-1
+- Always add local dns domain to no_proxy (jawed.khelil@amadeus.com)
+- Install flannel RPM on containerized but not atomic (sdodson@redhat.com)
+- Bump ansible requirement to 2.2.0.0-1 (GA) (sdodson@redhat.com)
+- Fix etcd backup failure due to corrupted facts. (dgoodwin@redhat.com)
+
 * Tue Nov 08 2016 Scott Dodson <sdodson@redhat.com> 3.3.47-1
 - [upgrades] Use etcd3 to backup embedded etcd if possible (sdodson@redhat.com)
 - Add missing symlink for node openvswitch oom fix. (dgoodwin@redhat.com)
