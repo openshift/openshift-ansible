@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.40
+Version:        3.2.41
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Nov 09 2016 Scott Dodson <sdodson@redhat.com> 3.2.41-1
+- Install flannel package on containerized but not atomic (sdodson@redhat.com)
+- Bump ansible requirement to 2.2.0.0-1 (GA) (sdodson@redhat.com)
+
 * Tue Nov 08 2016 Scott Dodson <sdodson@redhat.com> 3.2.40-1
 - Always add local dns domain to no_proxy (jawed.khelil@amadeus.com)
 - Automatic commit of package [openshift-ansible] release [3.2.39-1].
