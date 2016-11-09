@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.19
+Version:        3.4.20
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Nov 09 2016 Scott Dodson <sdodson@redhat.com> 3.4.20-1
+- Fix typos in openshift_facts gce cloud provider (sdodson@redhat.com)
+
 * Wed Nov 09 2016 Scott Dodson <sdodson@redhat.com> 3.4.19-1
 - Don't upgrade etcd on backup operations (sdodson@redhat.com)
 - Bump ansible requirement to 2.2.0.0-1 (GA) (sdodson@redhat.com)
