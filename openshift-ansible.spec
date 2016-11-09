@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.18
+Version:        3.4.19
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Nov 09 2016 Scott Dodson <sdodson@redhat.com> 3.4.19-1
+- Don't upgrade etcd on backup operations (sdodson@redhat.com)
+- Bump ansible requirement to 2.2.0.0-1 (GA) (sdodson@redhat.com)
+- Fix etcd backup failure due to corrupted facts. (dgoodwin@redhat.com)
+
 * Tue Nov 08 2016 Scott Dodson <sdodson@redhat.com> 3.4.18-1
 - Revert "Revert "Revert openshift.node.nodename changes"" (sdodson@redhat.com)
 - Revert "Revert openshift.node.nodename changes" (sdodson@redhat.com)
