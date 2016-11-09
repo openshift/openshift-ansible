@@ -79,7 +79,7 @@ openshift_release=v3.4
 # Disable pushing to dockerhub
 #openshift_docker_disable_push_dockerhub=True
 # Items added, as is, to end of /etc/sysconfig/docker OPTIONS
-# Default value: "--log-driver=json-file --log-opt max-size=50m"
+# Default value: "--log-driver=journald --log-opt max-size=50m"
 #openshift_docker_options="-l warn --ipv6=false"
 
 # Specify exact version of Docker to configure or upgrade to.
