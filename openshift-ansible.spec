@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.41
+Version:        3.2.42
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,15 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Nov 10 2016 Scott Dodson <sdodson@redhat.com> 3.2.42-1
+- Automatic commit of package [openshift-ansible] release [3.2.41-1].
+  (sdodson@redhat.com)
+- Install flannel package on containerized but not atomic (sdodson@redhat.com)
+- Bump ansible requirement to 2.2.0.0-1 (GA) (sdodson@redhat.com)
+- Add missing symlink for node openvswitch oom fix. (dgoodwin@redhat.com)
+- Fix containerized upgrade using file that no longer exists.
+  (dgoodwin@redhat.com)
+
 * Wed Nov 09 2016 Scott Dodson <sdodson@redhat.com> 3.2.41-1
 - Install flannel package on containerized but not atomic (sdodson@redhat.com)
 - Bump ansible requirement to 2.2.0.0-1 (GA) (sdodson@redhat.com)
