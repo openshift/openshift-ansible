@@ -1,5 +1,3 @@
-- include_vars: ../../../../roles/openshift_node/vars/main.yml
-
 - name: Update systemd units
   include: ../../../../roles/openshift_node/tasks/systemd_units.yml openshift_version={{ openshift_image_tag }}
 
