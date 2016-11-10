@@ -34,8 +34,10 @@
   hosts: etcd_hosts_to_upgrade
   tasks:
   - name: Record etcd version
-    command: rpm -q --qf '%{version}' etcd
+    command: rpm -qa --qf '%{version}' etcd\*
     register: etcd_installed_version
+    failed_when: false
+    when: not openshift.common.is_containerized | bool
 
 # I really dislike this copy/pasta but I wasn't able to find a way to get it to loop
 # through hosts, then loop through tasks only when appropriate
@@ -46,7 +48,7 @@
     upgrade_version: '2.1'
   tasks:
   - include: rhel_tasks.yml
-    when: etcd_installed_version.stdout | version_compare('2.1','<') and ansible_distribution == 'RedHat'
+    when: etcd_installed_version.stdout | default('99') | version_compare('2.1','<') and ansible_distribution == 'RedHat' and not openshift.common.is_containerized | bool
 
 - name: Upgrade to 2.2
   hosts: etcd_hosts_to_upgrade
@@ -55,7 +57,7 @@
     upgrade_version: '2.2'
   tasks:
   - include: rhel_tasks.yml
-    when: etcd_installed_version.stdout | version_compare('2.2','<') and ansible_distribution == 'RedHat'
+    when: etcd_installed_version.stdout | default('99') | version_compare('2.2','<') and ansible_distribution == 'RedHat' and not openshift.common.is_containerized | bool
 
 - name: Upgrade to 2.3
   hosts: etcd_hosts_to_upgrade
@@ -64,7 +66,7 @@
     upgrade_version: '2.3'
   tasks:
   - include: rhel_tasks.yml
-    when: etcd_installed_version.stdout | version_compare('2.3','<') and ansible_distribution == 'RedHat'
+    when: etcd_installed_version.stdout | default('99') | version_compare('2.3','<') and ansible_distribution == 'RedHat' and not openshift.common.is_containerized | bool
 
 - name: Upgrade to 3.0
   hosts: etcd_hosts_to_upgrade
@@ -73,14 +75,21 @@
     upgrade_version: '3.0'
   tasks:
   - include: rhel_tasks.yml
-    when: etcd_installed_version.stdout | version_compare('3.0','<') and ansible_distribution == 'RedHat'
+    when: etcd_installed_version.stdout | default('99') | version_compare('3.0','<') and ansible_distribution == 'RedHat' and not openshift.common.is_containerized | bool
 
 - name: Upgrade fedora to latest
   hosts: etcd_hosts_to_upgrade
   serial: 1
   tasks:
   - include: fedora_tasks.yml
-    when: ansible_distribution == 'Fedora'
+    when: ansible_distribution == 'Fedora' and not openshift.common.is_containerized | bool
+
+- name: Upgrade containerized hosts to etcd3 image
+  hosts: etcd_hosts_to_upgrade
+  serial: 1
+  tasks:
+  - include: containerized_tasks.yml
+    when: openshift.common.is_containerized | bool
 
 - name: Backup etcd
   include: backup.yml

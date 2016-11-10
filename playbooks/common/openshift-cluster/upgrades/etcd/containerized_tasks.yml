@@ -1,0 +1,39 @@
+---
+- name: Verify cluster is healthy pre-upgrade
+  command: "etcdctl --cert-file /etc/etcd/peer.crt --key-file /etc/etcd/peer.key --ca-file /etc/etcd/ca.crt -C https://{{ openshift.common.hostname }}:2379 cluster-health"
+
+- name: Update systemd unit
+  openshift_facts:
+    role: etcd
+
+- name: Set etcd3 image name
+  set_fact:
+    new_etcd_image: "{{ openshift.etcd.etcd_image | regex_replace('/etcd$','/etcd3') }}"
+
+- name: Pull new etcd image
+  command: "docker pull {{ new_etcd_image }}"
+
+- name: Update to latest etcd image
+  replace:
+    dest: /etc/systemd/system/etcd_container.service
+    regexp: "{{ openshift.etcd.etcd_image }}$"
+    replace: "{{ new_etcd_image }}"
+
+- name: Update etcd package not excluding etcd3
+  systemd:
+    name: etcd_container
+    daemon_reload: yes
+    state: restarted
+
+- name: Verify cluster is healthy
+  command: "etcdctl --cert-file /etc/etcd/peer.crt --key-file /etc/etcd/peer.key --ca-file /etc/etcd/ca.crt -C https://{{ openshift.common.hostname }}:2379 cluster-health"
+  register: etcdctl
+  until: etcdctl.rc == 0
+  retries: 3
+  delay: 10
+
+- name: Store new etcd_image
+  openshift_facts:
+    role: etcd
+    local_facts:
+    - etcd_image: "{{ new_etcd_image }}"
