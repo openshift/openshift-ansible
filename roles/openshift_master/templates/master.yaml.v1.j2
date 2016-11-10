@@ -120,9 +120,6 @@ kubernetesMasterConfig:
 {% if 'kube_admission_plugin_order' in openshift.master %}
     pluginOrderOverride:{{ openshift.master.kube_admission_plugin_order | to_padded_yaml(level=3) }}
 {% endif %}
-{% if 'kube_admission_plugin_config' in openshift.master %}
-    pluginConfig:{{ openshift.master.kube_admission_plugin_config | to_padded_yaml(level=3) }}
-{% endif %}
   apiServerArguments: {{ openshift.master.api_server_args | default(None) | to_padded_yaml( level=2 ) }}
   controllerArguments: {{ openshift.master.controller_args | default(None) | to_padded_yaml( level=2 ) }}
   masterCount: {{ openshift.master.master_count if openshift.master.cluster_method | default(None) == 'native' else 1 }}

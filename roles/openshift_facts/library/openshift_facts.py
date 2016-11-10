@@ -1570,11 +1570,11 @@ def set_proxy_facts(facts):
         # If we're actually defining a proxy config then create kube_admission_plugin_config
         # if it doesn't exist, then merge builddefaults[config] structure
         # into kube_admission_plugin_config
-        if 'kube_admission_plugin_config' not in facts['master']:
-            facts['master']['kube_admission_plugin_config'] = dict()
+        if 'admission_plugin_config' not in facts['master']:
+            facts['master']['admission_plugin_config'] = dict()
         if 'config' in builddefaults and ('http_proxy' in builddefaults or \
                 'https_proxy' in builddefaults):
-            facts['master']['kube_admission_plugin_config'].update(builddefaults['config'])
+            facts['master']['admission_plugin_config'].update(builddefaults['config'])
         facts['builddefaults'] = builddefaults
 
     return facts
