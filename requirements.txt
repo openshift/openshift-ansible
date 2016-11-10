@@ -1,0 +1,2 @@
+ansible>=2.1
+pyOpenSSL
