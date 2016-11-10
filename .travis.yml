@@ -1,0 +1,15 @@
+sudo: false
+
+language: python
+python:
+  - "2.7"
+
+install:
+  - pip install -r requirements.txt
+
+script:
+  # TODO(rhcarvalho): check syntax of other important entrypoint playbooks
+  - ansible-playbook --syntax-check playbooks/byo/config.yml
+  # TODO(rhcarvalho): update make ci to pick up these tests
+  - nosetests --tests=test
+  - cd utils && make ci
