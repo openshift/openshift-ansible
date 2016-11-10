@@ -102,14 +102,6 @@ def migrate_node_facts(facts):
                     facts['node'][param] = facts[role].pop(param)
     return facts
 
-def migrate_local_facts(facts):
-    """ Apply migrations of local facts """
-    migrated_facts = copy.deepcopy(facts)
-    migrated_facts = migrate_docker_facts(migrated_facts)
-    migrated_facts = migrate_common_facts(migrated_facts)
-    migrated_facts = migrate_node_facts(migrated_facts)
-    migrated_facts = migrate_hosted_facts(migrated_facts)
-    return migrated_facts
 
 def migrate_hosted_facts(facts):
     """ Apply migrations for master facts """
@@ -127,6 +119,30 @@ def migrate_hosted_facts(facts):
                 facts['hosted']['registry'] = {}
             facts['hosted']['registry']['selector'] = facts['master'].pop('registry_selector')
     return facts
+
+def migrate_admission_plugin_facts(facts):
+    if 'master' in facts:
+        if 'kube_admission_plugin_config' in facts['master']:
+            if 'admission_plugin_config' not in facts['master']:
+                facts['master']['admission_plugin_config'] = dict()
+            # Merge existing kube_admission_plugin_config with admission_plugin_config.
+            facts['master']['admission_plugin_config'] = merge_facts(facts['master']['admission_plugin_config'],
+                                                                     facts['master']['kube_admission_plugin_config'],
+                                                                     additive_facts_to_overwrite=[],
+                                                                     protected_facts_to_overwrite=[])
+            # Remove kube_admission_plugin_config fact
+            facts['master'].pop('kube_admission_plugin_config', None)
+    return facts
+
+def migrate_local_facts(facts):
+    """ Apply migrations of local facts """
+    migrated_facts = copy.deepcopy(facts)
+    migrated_facts = migrate_docker_facts(migrated_facts)
+    migrated_facts = migrate_common_facts(migrated_facts)
+    migrated_facts = migrate_node_facts(migrated_facts)
+    migrated_facts = migrate_hosted_facts(migrated_facts)
+    migrated_facts = migrate_admission_plugin_facts(migrated_facts)
+    return migrated_facts
 
 def first_ip(network):
     """ Return the first IPv4 address in network
@@ -1567,14 +1583,14 @@ def set_proxy_facts(facts):
             builddefaults['git_http_proxy'] = builddefaults['http_proxy']
         if 'git_https_proxy' not in builddefaults and 'https_proxy' in builddefaults:
             builddefaults['git_https_proxy'] = builddefaults['https_proxy']
-        # If we're actually defining a proxy config then create kube_admission_plugin_config
+        # If we're actually defining a proxy config then create admission_plugin_config
         # if it doesn't exist, then merge builddefaults[config] structure
-        # into kube_admission_plugin_config
-        if 'kube_admission_plugin_config' not in facts['master']:
-            facts['master']['kube_admission_plugin_config'] = dict()
+        # into admission_plugin_config
+        if 'admission_plugin_config' not in facts['master']:
+            facts['master']['admission_plugin_config'] = dict()
         if 'config' in builddefaults and ('http_proxy' in builddefaults or \
                 'https_proxy' in builddefaults):
-            facts['master']['kube_admission_plugin_config'].update(builddefaults['config'])
+            facts['master']['admission_plugin_config'].update(builddefaults['config'])
         facts['builddefaults'] = builddefaults
 
     return facts

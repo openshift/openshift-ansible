@@ -1,7 +1,4 @@
 admissionConfig:
-{% if 'admission_plugin_order' in openshift.master %}
-  pluginOrderOverride:{{ openshift.master.admission_plugin_order | to_padded_yaml(level=2) }}
-{% endif %}
 {% if 'admission_plugin_config' in openshift.master %}
   pluginConfig:{{ openshift.master.admission_plugin_config | to_padded_yaml(level=2) }}
 {% endif %}
@@ -115,13 +112,6 @@ kubernetesMasterConfig:
   apiLevels:
   - v1beta3
   - v1
-{% endif %}
-  admissionConfig:
-{% if 'kube_admission_plugin_order' in openshift.master %}
-    pluginOrderOverride:{{ openshift.master.kube_admission_plugin_order | to_padded_yaml(level=3) }}
-{% endif %}
-{% if 'kube_admission_plugin_config' in openshift.master %}
-    pluginConfig:{{ openshift.master.kube_admission_plugin_config | to_padded_yaml(level=3) }}
 {% endif %}
   apiServerArguments: {{ openshift.master.api_server_args | default(None) | to_padded_yaml( level=2 ) }}
   controllerArguments: {{ openshift.master.controller_args | default(None) | to_padded_yaml( level=2 ) }}
