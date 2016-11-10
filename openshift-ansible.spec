@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.48
+Version:        3.3.49
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Nov 10 2016 Scott Dodson <sdodson@redhat.com> 3.3.49-1
+- Default groups.oo_etcd_to_config when setting embedded_etcd in control plane
+  upgrade. (abutcher@redhat.com)
+
 * Wed Nov 09 2016 Scott Dodson <sdodson@redhat.com> 3.3.48-1
 - Always add local dns domain to no_proxy (jawed.khelil@amadeus.com)
 - Install flannel RPM on containerized but not atomic (sdodson@redhat.com)
