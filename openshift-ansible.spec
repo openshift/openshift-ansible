@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.20
+Version:        3.4.21
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,17 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Nov 10 2016 Scott Dodson <sdodson@redhat.com> 3.4.21-1
+- Add Travis integration (rhcarvalho@gmail.com)
+- Default groups.oo_etcd_to_config when setting embedded_etcd in control plane
+  upgrade. (abutcher@redhat.com)
+- Enable quiet output for all a-o-i commands (tbielawa@redhat.com)
+- Update override cluster_hostname (smunilla@redhat.com)
+- Reconcile role bindings for jenkins pipeline during upgrade.
+  (dgoodwin@redhat.com)
+- Re-sync v1.4 image streams (andrew@andrewklau.com)
+- Port openshift_facts to py3 (misc@redhat.com)
+
 * Wed Nov 09 2016 Scott Dodson <sdodson@redhat.com> 3.4.20-1
 - Fix typos in openshift_facts gce cloud provider (sdodson@redhat.com)
 
