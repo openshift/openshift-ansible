@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.21
+Version:        3.4.22
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Nov 10 2016 Scott Dodson <sdodson@redhat.com> 3.4.22-1
+- Begin requiring Docker 1.12. (dgoodwin@redhat.com)
+
 * Thu Nov 10 2016 Scott Dodson <sdodson@redhat.com> 3.4.21-1
 - Add Travis integration (rhcarvalho@gmail.com)
 - Default groups.oo_etcd_to_config when setting embedded_etcd in control plane
