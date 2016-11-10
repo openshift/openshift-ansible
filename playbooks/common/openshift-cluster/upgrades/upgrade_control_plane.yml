@@ -24,7 +24,7 @@
   - openshift_facts:
       role: master
       local_facts:
-        embedded_etcd: "{{ groups.oo_etcd_to_config | length == 0 }}"
+        embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
 
 - name: Backup etcd
   hosts: etcd_hosts_to_backup
@@ -227,6 +227,12 @@
       --additive-only=true --confirm
     when: origin_reconcile_bindings | bool or ent_reconcile_bindings | bool
     run_once: true
+
+  - name: Reconcile Jenkins Pipeline Role Bindings
+    command: >
+      {{ openshift.common.client_binary }} adm --config={{ openshift.common.config_base }}/master/admin.kubeconfig policy reconcile-cluster-role-bindings system:build-strategy-jenkinspipeline --confirm
+    run_once: true
+    when: openshift.common.version_gte_3_4_or_1_4  | bool
 
   - name: Reconcile Security Context Constraints
     command: >
