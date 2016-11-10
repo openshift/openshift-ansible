@@ -84,7 +84,7 @@ openshift_release=v1.4
 
 # Specify exact version of Docker to configure or upgrade to.
 # Downgrades are not supported and will error out. Be careful when upgrading docker from < 1.10 to > 1.10.
-# docker_version="1.10.3"
+# docker_version="1.12.1"
 
 # Skip upgrading Docker during an OpenShift upgrade, leaves the current Docker version alone.
 # docker_upgrade=False
