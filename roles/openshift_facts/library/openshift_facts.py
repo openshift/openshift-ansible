@@ -832,23 +832,29 @@ def set_version_facts_if_unset(facts):
                 version_gte_3_1_1_or_1_1_1 = LooseVersion(version) >= LooseVersion('1.1.1')
                 version_gte_3_2_or_1_2 = LooseVersion(version) >= LooseVersion('1.2.0')
                 version_gte_3_3_or_1_3 = LooseVersion(version) >= LooseVersion('1.3.0')
+                version_gte_3_4_or_1_4 = LooseVersion(version) >= LooseVersion('1.4.0')
             else:
                 version_gte_3_1_or_1_1 = LooseVersion(version) >= LooseVersion('3.0.2.905')
                 version_gte_3_1_1_or_1_1_1 = LooseVersion(version) >= LooseVersion('3.1.1')
                 version_gte_3_2_or_1_2 = LooseVersion(version) >= LooseVersion('3.1.1.901')
                 version_gte_3_3_or_1_3 = LooseVersion(version) >= LooseVersion('3.3.0')
+                version_gte_3_4_or_1_4 = LooseVersion(version) >= LooseVersion('3.4.0')
         else:
             version_gte_3_1_or_1_1 = True
             version_gte_3_1_1_or_1_1_1 = True
             version_gte_3_2_or_1_2 = True
-            version_gte_3_3_or_1_3 = False
+            version_gte_3_3_or_1_3 = True
+            version_gte_3_4_or_1_4 = False
         facts['common']['version_gte_3_1_or_1_1'] = version_gte_3_1_or_1_1
         facts['common']['version_gte_3_1_1_or_1_1_1'] = version_gte_3_1_1_or_1_1_1
         facts['common']['version_gte_3_2_or_1_2'] = version_gte_3_2_or_1_2
         facts['common']['version_gte_3_3_or_1_3'] = version_gte_3_3_or_1_3
+        facts['common']['version_gte_3_4_or_1_4'] = version_gte_3_4_or_1_4
 
 
-        if version_gte_3_3_or_1_3:
+        if version_gte_3_4_or_1_4:
+            examples_content_version = 'v1.4'
+        elif version_gte_3_3_or_1_3:
             examples_content_version = 'v1.3'
         elif version_gte_3_2_or_1_2:
             examples_content_version = 'v1.2'
