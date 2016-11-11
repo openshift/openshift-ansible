@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.22
+Version:        3.4.23
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Nov 11 2016 Scott Dodson <sdodson@redhat.com> 3.4.23-1
+- Resolve docker and iptables service dependencies (rteague@redhat.com)
+
 * Thu Nov 10 2016 Scott Dodson <sdodson@redhat.com> 3.4.22-1
 - Begin requiring Docker 1.12. (dgoodwin@redhat.com)
 
