@@ -46,11 +46,23 @@
   action: "{{ ansible_pkg_mgr }} name=docker{{ '-' + docker_version if docker_version is defined else '' }} state=present"
   when: not openshift.common.is_atomic | bool
 
+- name: Ensure docker.service.d directory exists
+  file:
+    path: "{{ docker_systemd_dir }}"
+    state: directory
+
+# Extend the default Docker service unit file
+- name: Configure Docker service unit file
+  template:
+    dest: "{{ docker_systemd_dir }}/custom.conf"
+    src: custom.conf.j2
+
 - name: Start the Docker service
-  service:
+  systemd:
     name: docker
     enabled: yes
     state: started
+    daemon_reload: yes
   register: start_result
 
 - set_fact:
