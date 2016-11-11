@@ -7,13 +7,6 @@
 
 """Ansible module for retrieving and setting openshift related facts"""
 
-try:
-    # python2
-    import ConfigParser
-except ImportError:
-    # python3
-    import configparser as ConfigParser
-
 import copy
 import io
 import os
@@ -723,7 +716,7 @@ def set_etcd_facts_if_unset(facts):
             # Add a fake section for parsing:
             ini_str = unicode('[root]\n' + open('/etc/etcd/etcd.conf', 'r').read(), 'utf-8')
             ini_fp = io.StringIO(ini_str)
-            config = ConfigParser.RawConfigParser()
+            config = configparser.RawConfigParser()
             config.readfp(ini_fp)
             etcd_data_dir = config.get('root', 'ETCD_DATA_DIR')
             if etcd_data_dir.startswith('"') and etcd_data_dir.endswith('"'):
@@ -1213,7 +1206,7 @@ def get_hosted_registry_insecure():
         try:
             ini_str = unicode('[root]\n' + open('/etc/sysconfig/docker', 'r').read(), 'utf-8')
             ini_fp = io.StringIO(ini_str)
-            config = ConfigParser.RawConfigParser()
+            config = configparser.RawConfigParser()
             config.readfp(ini_fp)
             options = config.get('root', 'OPTIONS')
             if 'insecure-registry' in options:
@@ -1476,15 +1469,15 @@ def get_local_facts_from_file(filename):
     local_facts = dict()
     try:
         # Handle conversion of INI style facts file to json style
-        ini_facts = ConfigParser.SafeConfigParser()
+        ini_facts = configparser.SafeConfigParser()
         ini_facts.read(filename)
         for section in ini_facts.sections():
             local_facts[section] = dict()
             for key, value in ini_facts.items(section):
                 local_facts[section][key] = value
 
-    except (ConfigParser.MissingSectionHeaderError,
-            ConfigParser.ParsingError):
+    except (configparser.MissingSectionHeaderError,
+            configparser.ParsingError):
         try:
             with open(filename, 'r') as facts_file:
                 local_facts = json.load(facts_file)
@@ -2316,6 +2309,7 @@ from ansible.module_utils.urls import *
 from ansible.module_utils.six import iteritems, itervalues
 from ansible.module_utils._text import to_native
 from ansible.module_utils.six import b
+from ansible.module_utils.six.moves import configparser
 
 if __name__ == '__main__':
     main()
