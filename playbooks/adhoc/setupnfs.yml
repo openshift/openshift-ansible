@@ -6,7 +6,7 @@
   gather_facts: no
   roles:
   - role: openshift_storage_nfs_lvm
-    mount_dir: /exports/stg-black
+    mount_dir: /srv/exports/stg-black
     volume_prefix: "kwoodsontest"
     volume_size: 5
     volume_num_start: 222

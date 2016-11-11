@@ -311,10 +311,10 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # NFS Host Group
 # An NFS volume will be created with path "nfs_directory/volume_name"
 # on the host within the [nfs] host group.  For example, the volume
-# path using these options would be "/exports/registry"
+# path using these options would be "/srv/exports/registry"
 #openshift_hosted_registry_storage_kind=nfs
 #openshift_hosted_registry_storage_access_modes=['ReadWriteMany']
-#openshift_hosted_registry_storage_nfs_directory=/exports
+#openshift_hosted_registry_storage_nfs_directory=/srv/exports
 #openshift_hosted_registry_storage_nfs_options='*(rw,root_squash)'
 #openshift_hosted_registry_storage_volume_name=registry
 #openshift_hosted_registry_storage_volume_size=10Gi
@@ -322,11 +322,11 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # External NFS Host
 # NFS volume must already exist with path "nfs_directory/_volume_name" on
 # the storage_host. For example, the remote volume path using these
-# options would be "nfs.example.com:/exports/registry"
+# options would be "nfs.example.com:/srv/exports/registry"
 #openshift_hosted_registry_storage_kind=nfs
 #openshift_hosted_registry_storage_access_modes=['ReadWriteMany']
 #openshift_hosted_registry_storage_host=nfs.example.com
-#openshift_hosted_registry_storage_nfs_directory=/exports
+#openshift_hosted_registry_storage_nfs_directory=/srv/exports
 #openshift_hosted_registry_storage_volume_name=registry
 #openshift_hosted_registry_storage_volume_size=10Gi
 #
@@ -384,10 +384,10 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Option A - NFS Host Group
 # An NFS volume will be created with path "nfs_directory/volume_name"
 # on the host within the [nfs] host group.  For example, the volume
-# path using these options would be "/exports/metrics"
+# path using these options would be "/srv/exports/metrics"
 #openshift_hosted_metrics_storage_kind=nfs
 #openshift_hosted_metrics_storage_access_modes=['ReadWriteOnce']
-#openshift_hosted_metrics_storage_nfs_directory=/exports
+#openshift_hosted_metrics_storage_nfs_directory=/srv/exports
 #openshift_hosted_metrics_storage_nfs_options='*(rw,root_squash)'
 #openshift_hosted_metrics_storage_volume_name=metrics
 #openshift_hosted_metrics_storage_volume_size=10Gi
@@ -395,11 +395,11 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Option B - External NFS Host
 # NFS volume must already exist with path "nfs_directory/_volume_name" on
 # the storage_host. For example, the remote volume path using these
-# options would be "nfs.example.com:/exports/metrics"
+# options would be "nfs.example.com:/srv/exports/metrics"
 #openshift_hosted_metrics_storage_kind=nfs
 #openshift_hosted_metrics_storage_access_modes=['ReadWriteOnce']
 #openshift_hosted_metrics_storage_host=nfs.example.com
-#openshift_hosted_metrics_storage_nfs_directory=/exports
+#openshift_hosted_metrics_storage_nfs_directory=/srv/exports
 #openshift_hosted_metrics_storage_volume_name=metrics
 #openshift_hosted_metrics_storage_volume_size=10Gi
 #
@@ -422,10 +422,10 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Option A - NFS Host Group
 # An NFS volume will be created with path "nfs_directory/volume_name"
 # on the host within the [nfs] host group.  For example, the volume
-# path using these options would be "/exports/logging"
+# path using these options would be "/srv/exports/logging"
 #openshift_hosted_logging_storage_kind=nfs
 #openshift_hosted_logging_storage_access_modes=['ReadWriteOnce']
-#openshift_hosted_logging_storage_nfs_directory=/exports
+#openshift_hosted_logging_storage_nfs_directory=/srv/exports
 #openshift_hosted_logging_storage_nfs_options='*(rw,root_squash)'
 #openshift_hosted_logging_storage_volume_name=logging
 #openshift_hosted_logging_storage_volume_size=10Gi
@@ -433,11 +433,11 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Option B - External NFS Host
 # NFS volume must already exist with path "nfs_directory/_volume_name" on
 # the storage_host. For example, the remote volume path using these
-# options would be "nfs.example.com:/exports/logging"
+# options would be "nfs.example.com:/srv/exports/logging"
 #openshift_hosted_logging_storage_kind=nfs
 #openshift_hosted_logging_storage_access_modes=['ReadWriteOnce']
 #openshift_hosted_logging_storage_host=nfs.example.com
-#openshift_hosted_logging_storage_nfs_directory=/exports
+#openshift_hosted_logging_storage_nfs_directory=/srv/exports
 #openshift_hosted_logging_storage_volume_name=logging
 #openshift_hosted_logging_storage_volume_size=10Gi
 #

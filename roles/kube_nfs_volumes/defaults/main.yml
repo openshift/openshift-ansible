@@ -10,7 +10,7 @@ nfs_export_options: "*(rw,no_root_squash,insecure,no_subtree_check)"
 
 # Directory, where the created partitions should be mounted. They will be
 # mounted as <mount_dir>/sda1 etc.
-mount_dir: /exports
+mount_dir: /srv/exports
 
 # Force re-partitioning the disks
 force: false

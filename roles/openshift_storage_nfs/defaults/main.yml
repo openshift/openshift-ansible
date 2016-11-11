@@ -4,7 +4,7 @@ openshift:
     registry:
       storage:
         nfs:
-          directory: "/exports"
+          directory: "/srv/exports"
           options: "*(rw,root_squash)"
         volume:
           name: "registry"
@@ -12,7 +12,7 @@ openshift:
       deploy: False
       storage:
         nfs:
-          directory: "/exports"
+          directory: "/srv/exports"
           options: "*(rw,root_squash)"
         volume:
           name: "metrics"

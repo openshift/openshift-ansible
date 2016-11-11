@@ -18,7 +18,7 @@ From this role:
 
 | Name                                            | Default value         |                                                             |
 |-------------------------------------------------|-----------------------|-------------------------------------------------------------|
-| openshift_hosted_registry_storage_nfs_directory | /exports              | Root export directory.                                      |
+| openshift_hosted_registry_storage_nfs_directory | /srv/exports          | Root export directory.                                      |
 | openshift_hosted_registry_storage_volume_name   | registry              | Registry volume within openshift_hosted_registry_volume_dir |
 | openshift_hosted_registry_storage_nfs_options   | *(rw,root_squash)     | NFS options for configured exports.                         |
 
