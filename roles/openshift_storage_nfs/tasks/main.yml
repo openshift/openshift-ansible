@@ -31,6 +31,12 @@
   - "{{ openshift.hosted.metrics }}"
   - "{{ openshift.hosted.logging }}"
 
+- name: Work around https://bugzilla.redhat.com/show_bug.cgi?id=1394395
+  file: path=/var/lib/nfs/{{ item }} state=touch
+  with_items:
+    - etab
+    - rmtab
+  when: openshift.common.is_atomic | bool
 
 - name: Configure exports
   template:
