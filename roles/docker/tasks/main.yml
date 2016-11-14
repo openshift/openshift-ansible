@@ -1,7 +1,4 @@
 ---
-- stat: path=/etc/sysconfig/docker-storage
-  register: docker_storage_check
-
 - name: Get current installed Docker version
   command: "{{ repoquery_cmd }} --installed --qf '%{version}' docker"
   when: not openshift.common.is_atomic | bool
