@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.23
+Version:        3.4.24
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,20 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Nov 14 2016 Scott Dodson <sdodson@redhat.com> 3.4.24-1
+- Actually upgrade host etcdctl no matter what (sdodson@redhat.com)
+- Make etcd containerized upgrade stepwise (sdodson@redhat.com)
+- Fix commit-offsets in version detection for containerized installs
+  (tbielawa@redhat.com)
+- Fix HA upgrade when fact cache deleted. (dgoodwin@redhat.com)
+- Fix openshift_hosted_metrics_deployer_version set_fact. (abutcher@redhat.com)
+- Added dependency of os_firewall to docker role (rteague@redhat.com)
+- Add updates for containerized (sdodson@redhat.com)
+- Add etcd upgrade for RHEL and Fedora (sdodson@redhat.com)
+- Drop /etc/profile.d/etcdctl.sh (sdodson@redhat.com)
+- Move backups to a separate file for re-use (sdodson@redhat.com)
+- Uninstall etcd3 package (sdodson@redhat.com)
+
 * Fri Nov 11 2016 Scott Dodson <sdodson@redhat.com> 3.4.23-1
 - Resolve docker and iptables service dependencies (rteague@redhat.com)
 
