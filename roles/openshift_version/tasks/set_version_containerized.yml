@@ -37,3 +37,8 @@
     openshift_version: "{{ cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0:2][1:] | join('-') if openshift.common.deployment_type == 'origin' else cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0][1:] }}"
   when: openshift_version is defined and openshift_version.split('.') | length == 2
 
+# We finally have the specific version. Now we clean up any strange
+# dangly +c0mm1t-offset tags in the version. See also,
+# openshift_facts.py
+- set_fact:
+    openshift_version: "{{ openshift_version | oo_chomp_commit_offset }}"

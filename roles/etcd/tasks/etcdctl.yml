@@ -1,0 +1,11 @@
+- name: Install etcd for etcdctl
+  action: "{{ ansible_pkg_mgr }} name=etcd state=present"
+  when: not openshift.common.is_atomic | bool
+
+- name: Configure etcd profile.d alises
+  copy:
+    src: etcdctl.sh
+    dest: /etc/profile.d/etcdctl.sh
+    mode: 0755
+    owner: root
+    group: root

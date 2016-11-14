@@ -74,5 +74,8 @@
     enabled: yes
   register: start_result
 
+- include: etcdctl.yml
+  when: openshift_etcd_etcdctl_profile | default(true) | bool
+
 - set_fact:
     etcd_service_status_changed: "{{ start_result | changed }}"
