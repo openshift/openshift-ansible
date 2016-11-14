@@ -29,9 +29,9 @@
 ## TODO: probably should just move this into the backup playbooks, also this
 ## will fail on atomic host. We need to revisit how to do etcd backups there as
 ## the container may be newer than etcdctl on the host. Assumes etcd3 obsoletes etcd (7.3.1)
-- name: Upgrade etcdctl to 3.0 if necessary and able
+- name: Upgrade etcd for etcdctl when not atomic
   action: "{{ ansible_pkg_mgr }} name=etcd ensure=latest"
-  when: openshift.common.is_containerized | bool and not openshift.common.is_atomic | bool and upgrade_version | version_compare('3.0','>=')
+  when: not openshift.common.is_atomic | bool
 
 - name: Verify cluster is healthy
   command: "etcdctl --cert-file /etc/etcd/peer.crt --key-file /etc/etcd/peer.key --ca-file /etc/etcd/ca.crt -C https://{{ openshift.common.hostname }}:2379 cluster-health"
