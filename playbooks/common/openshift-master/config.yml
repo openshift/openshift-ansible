@@ -53,7 +53,7 @@
     when: openshift_hosted_metrics_deployer_prefix is not defined
   - set_fact:
       openshift_hosted_metrics_deployer_version: "{{ lookup('oo_option', 'openshift_hosted_metrics_deployer_version') | default('latest') }}"
-    when: openshift_hosted_metrics_deployer_prefix is not defined
+    when: openshift_hosted_metrics_deployer_version is not defined
   roles:
   - openshift_facts
   post_tasks:

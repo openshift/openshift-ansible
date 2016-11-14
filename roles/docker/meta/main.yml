@@ -9,4 +9,6 @@ galaxy_info:
   - name: EL
     versions:
     - 7
-dependencies: []
+dependencies:
+  - role: os_firewall
+    os_firewall_use_firewalld: False

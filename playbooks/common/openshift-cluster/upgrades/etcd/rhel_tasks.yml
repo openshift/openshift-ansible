@@ -1,0 +1,23 @@
+---
+- name: Verify cluster is healthy pre-upgrade
+  command: "etcdctl --cert-file /etc/etcd/peer.crt --key-file /etc/etcd/peer.key --ca-file /etc/etcd/ca.crt -C https://{{ openshift.common.hostname }}:2379 cluster-health"
+
+- name: Update etcd package but exclude etcd3
+  command: "{{ ansible_pkg_mgr }} install -y etcd-{{ upgrade_version }}\\* --exclude etcd3"
+  when: upgrade_version | version_compare('3.0','<')
+
+- name: Update etcd package not excluding etcd3
+  command: "{{ ansible_pkg_mgr }} install -y etcd3-{{ upgrade_version }}\\*"
+  when: not upgrade_version | version_compare('3.0','<')
+
+- name: Restart etcd
+  service:
+    name: etcd
+    state: restarted
+
+- name: Verify cluster is healthy
+  command: "etcdctl --cert-file /etc/etcd/peer.crt --key-file /etc/etcd/peer.key --ca-file /etc/etcd/ca.crt -C https://{{ openshift.common.hostname }}:2379 cluster-health"
+  register: etcdctl
+  until: etcdctl.rc == 0
+  retries: 3
+  delay: 10

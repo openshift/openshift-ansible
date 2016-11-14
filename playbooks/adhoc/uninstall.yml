@@ -338,6 +338,7 @@
     failed_when: False
     with_items:
     - etcd
+    - etcd3
     - firewalld
 
   - name: Stop additional atomic services
@@ -352,6 +353,7 @@
     when: not is_atomic | bool
     with_items:
     - etcd
+    - etcd3
 
   - shell: systemctl reset-failed
     changed_when: False
@@ -365,6 +367,7 @@
     - /etc/ansible/facts.d/openshift.fact
     - /etc/etcd
     - /etc/systemd/system/etcd_container.service
+    - /etc/profile.d/etcdctl.sh
 
   # Intenationally using rm command over file module because if someone had mounted a filesystem
   # at /var/lib/etcd then the contents was not removed correctly

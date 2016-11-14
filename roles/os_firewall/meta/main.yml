@@ -11,5 +11,6 @@ galaxy_info:
     - 7
   categories:
   - system
+allow_duplicates: yes
 dependencies:
 - { role: openshift_facts }
