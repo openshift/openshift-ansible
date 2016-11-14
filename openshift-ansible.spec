@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.49
+Version:        3.3.50
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Nov 14 2016 Scott Dodson <sdodson@redhat.com> 3.3.50-1
+- Fix HA upgrade when fact cache deleted. (dgoodwin@redhat.com)
+
 * Thu Nov 10 2016 Scott Dodson <sdodson@redhat.com> 3.3.49-1
 - Default groups.oo_etcd_to_config when setting embedded_etcd in control plane
   upgrade. (abutcher@redhat.com)
