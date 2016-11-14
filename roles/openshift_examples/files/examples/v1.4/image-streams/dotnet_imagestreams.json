@@ -12,14 +12,18 @@
             "kind": "ImageStream",
             "apiVersion": "v1",
             "metadata": {
-                "name": "dotnet"
+                "name": "dotnet",
+                "annotations": {
+                    "openshift.io/display-name": ".NET Core"
+                }
             },
             "spec": {
                 "tags": [
                     {
                         "name": "latest",
                         "annotations": {
-                          "description": "Build and run .NET Core 1.0 applications",
+                          "openshift.io/display-name": ".NET Core (Latest)",
+                          "description": "Build and run .NET Core applications on RHEL 7. For more information about using this builder image, including OpenShift considerations, see https://github.com/redhat-developer/s2i-dotnetcore/tree/master/1.0/README.md.\n\nWARNING: By selecting this tag, your application will automatically update to use the latest version of .NET Core available on OpenShift, including major versions updates.",
                           "iconClass": "icon-dotnet",
                           "tags": "builder,.net,dotnet,dotnetcore",
                           "supports":"dotnet",
@@ -34,7 +38,8 @@
                     {
                         "name": "1.0",
                         "annotations": {
-                            "description": "Build and run .NET Core 1.0 applications",
+                            "openshift.io/display-name": ".NET Core 1.0",
+                            "description": "Build and run .NET Core 1.0 applications on RHEL 7. For more information about using this builder image, including OpenShift considerations, see https://github.com/redhat-developer/s2i-dotnetcore/tree/master/1.0/README.md.",
                             "iconClass": "icon-dotnet",
                             "tags": "builder,.net,dotnet,dotnetcore,rh-dotnetcore10",
                             "supports":"dotnet:1.0,dotnet",
