@@ -66,6 +66,15 @@ items:
       - watch
       - delete
       - update
+  - apiVersion: v1
+    kind: ClusterRole
+    metadata:
+      name: rolebinding-reader
+    rules:
+    - resources:
+      - clusterrolebindings
+      verbs:
+      - get
   -
     apiVersion: v1
     kind: RoleBinding
@@ -88,6 +97,17 @@ items:
     subjects:
     - kind: ServiceAccount
       name: logging-deployer
+  -
+    apiVersion: v1
+    kind: RoleBinding
+    metadata:
+      name: logging-elasticsearch-view-role
+    roleRef:
+      kind: ClusterRole
+      name: view
+    subjects:
+    - kind: ServiceAccount
+      name: aggregated-logging-elasticsearch
 -
   apiVersion: "v1"
   kind: "Template"

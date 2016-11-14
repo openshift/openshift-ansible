@@ -86,6 +86,8 @@ objects:
           value: ${HEAPSTER_NODE_ID}
         - name: METRIC_RESOLUTION
           value: ${METRIC_RESOLUTION}
+        - name: STARTUP_TIMEOUT
+          value: ${STARTUP_TIMEOUT}
     dnsPolicy: ClusterFirst
     restartPolicy: Never
     serviceAccount: metrics-deployer
@@ -160,3 +162,7 @@ parameters:
   description: "How often metrics should be gathered. Defaults value of '15s' for 15 seconds"
   name: METRIC_RESOLUTION
   value: "15s"
+-
+  description: "How long in seconds we should wait until Hawkular Metrics and Heapster starts up before attempting a restart"
+  name: STARTUP_TIMEOUT
+  value: "500"
