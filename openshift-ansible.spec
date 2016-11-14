@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.24
+Version:        3.4.25
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Nov 14 2016 Scott Dodson <sdodson@redhat.com> 3.4.25-1
+- Sync logging deployer changes from origin to enterprise (sdodson@redhat.com)
+- Sync latest enterprise/metrics-deployer.yaml (sdodson@redhat.com)
+- Sync latest s2i content (sdodson@redhat.com)
+
 * Mon Nov 14 2016 Scott Dodson <sdodson@redhat.com> 3.4.24-1
 - Actually upgrade host etcdctl no matter what (sdodson@redhat.com)
 - Make etcd containerized upgrade stepwise (sdodson@redhat.com)
