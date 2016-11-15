@@ -35,12 +35,12 @@ openshift_release=v1.3
 # Specify an exact container image tag to install or configure.
 # WARNING: This value will be used for all hosts in containerized environments, even those that have another version installed.
 # This could potentially trigger an upgrade and downtime, so be careful with modifying this value after the cluster is set up.
-#openshift_image_tag=v1.2.0
+#openshift_image_tag=v1.3.1
 
 # Specify an exact rpm version to install or configure.
 # WARNING: This value will be used for all hosts in RPM based environments, even those that have another version installed.
 # This could potentially trigger an upgrade and downtime, so be careful with modifying this value after the cluster is set up.
-#openshift_pkg_version=-1.2.0
+#openshift_pkg_version=-1.3.1
 
 # Install the openshift examples
 #openshift_install_examples=true
@@ -373,6 +373,8 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #
 # By default metrics are not automatically deployed, set this to enable them
 # openshift_hosted_metrics_deploy=true
+# openshift_hosted_metrics_deployer_prefix=openshift/origin-
+# openshift_hosted_metrics_deployer_version=v1.3.1
 #
 # Storage Options
 # If openshift_hosted_metrics_storage_kind is unset then metrics will be stored
