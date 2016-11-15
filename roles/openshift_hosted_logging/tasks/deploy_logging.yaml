@@ -76,7 +76,7 @@
     register: fluentd2_output
     failed_when: "fluentd2_output.rc == 1 and 'exists' not in fluentd2_output.stderr"
 
-  - name: "Add rolebinding-reader to aggregated-logging-elastic-search"
+  - name: "Add rolebinding-reader to aggregated-logging-elasticsearch"
     command: >
       {{ openshift.common.client_binary }} adm --config={{ mktemp.stdout }}/admin.kubeconfig
       policy add-cluster-role-to-user rolebinding-reader \
