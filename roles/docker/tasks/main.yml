@@ -54,17 +54,6 @@
     dest: "{{ docker_systemd_dir }}/custom.conf"
     src: custom.conf.j2
 
-- name: Start the Docker service
-  systemd:
-    name: docker
-    enabled: yes
-    state: started
-    daemon_reload: yes
-  register: start_result
-
-- set_fact:
-    docker_service_status_changed: start_result | changed
-
 - include: udev_workaround.yml
   when: docker_udev_workaround | default(False) | bool
 
@@ -121,5 +110,16 @@
   when: docker_check.stat.isreg is defined and docker_check.stat.isreg
   notify:
     - restart docker
+
+- name: Start the Docker service
+  systemd:
+    name: docker
+    enabled: yes
+    state: started
+    daemon_reload: yes
+  register: start_result
+
+- set_fact:
+    docker_service_status_changed: start_result | changed
 
 - meta: flush_handlers
