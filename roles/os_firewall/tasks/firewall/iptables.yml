@@ -1,64 +1,28 @@
 ---
-- name: Check if firewalld is installed
-  command: rpm -q firewalld
-  args:
-    # Disables the following warning:
-    # Consider using yum, dnf or zypper module rather than running rpm
-    warn: no
-  register: pkg_check
-  failed_when: pkg_check.rc > 1
-  changed_when: no
 
 - name: Ensure firewalld service is not enabled
-  service:
+  systemd:
     name: firewalld
     state: stopped
     enabled: no
-  when: pkg_check.rc == 0
-
-# TODO: submit PR upstream to add mask/unmask to service module
-- name: Mask firewalld service
-  command: systemctl mask firewalld
-  register: result
-  changed_when: "'firewalld' in result.stdout"
-  when: pkg_check.rc == 0
-  ignore_errors: yes
+    masked: yes
+  register: task_result
+  failed_when: "task_result|failed and 'Could not find' not in task_result.msg"
 
 - name: Install iptables packages
   action: "{{ ansible_pkg_mgr }} name={{ item }} state=present"
   with_items:
-  - iptables
-  - iptables-services
-  register: install_result
+    - iptables
+    - iptables-services
   when: not openshift.common.is_atomic | bool
 
-- name: Reload systemd units
-  command: systemctl daemon-reload
-  when: install_result | changed
-
-- name: Determine if iptables service masked
-  command: >
-    systemctl is-enabled {{ item }}
-  with_items:
-  - iptables
-  - ip6tables
-  register: os_firewall_iptables_masked_output
-  changed_when: false
-  failed_when: false
-
-- name: Unmask iptables service
-  command: >
-    systemctl unmask {{ item }}
-  with_items:
-  - iptables
-  - ip6tables
-  when: "'masked' in os_firewall_iptables_masked_output.results | map(attribute='stdout')"
-
 - name: Start and enable iptables service
-  service:
+  systemd:
     name: iptables
     state: started
     enabled: yes
+    masked: no
+    daemon_reload: yes
   register: result
 
 - name: need to pause here, otherwise the iptables service starting can sometimes cause ssh to fail
