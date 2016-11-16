@@ -127,15 +127,21 @@
 
 - name: Preserve Master Proxy Config options
   command: grep PROXY /etc/sysconfig/{{ openshift.common.service_type }}-master
-  register: master_proxy
+  register: master_proxy_result
   failed_when: false
   changed_when: false
 
+- set_fact:
+    master_proxy: "{{ master_proxy_result.stdout_lines | default([]) }}"
+
 - name: Preserve Master AWS options
   command: grep AWS_ /etc/sysconfig/{{ openshift.common.service_type }}-master
-  register: master_aws
+  register: master_aws_result
   failed_when: false
   changed_when: false
+
+- set_fact:
+    master_aws: "{{ master_aws_result.stdout_lines | default([]) }}"
 
 - name: Create the master service env file
   template:
@@ -144,17 +150,3 @@
     backup: true
   notify:
   - restart master
-
-- name: Restore Master Proxy Config Options
-  lineinfile:
-    dest: /etc/sysconfig/{{ openshift.common.service_type }}-master
-    line: "{{ item }}"
-  with_items: "{{ master_proxy.stdout_lines | default([]) }}"
-  when: master_proxy.rc == 0 and 'http_proxy' not in openshift.common and 'https_proxy' not in openshift.common
-
-- name: Restore Master AWS Options
-  lineinfile:
-    dest: /etc/sysconfig/{{ openshift.common.service_type }}-master
-    line: "{{ item }}"
-  with_items: "{{ master_aws.stdout_lines | default([]) }}"
-  when: master_aws.rc == 0 and not (openshift_cloudprovider_kind is defined and openshift_cloudprovider_kind == 'aws' and openshift_cloudprovider_aws_access_key is defined and openshift_cloudprovider_aws_secret_key is defined)
