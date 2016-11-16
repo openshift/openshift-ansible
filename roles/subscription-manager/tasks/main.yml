@@ -114,7 +114,7 @@
 
 - name: "Enable specified repositories"
   command: "/usr/bin/subscription-manager repos --enable={{ item }}"
-  with_items: rhsm_repos
+  with_items: "{{ rhsm_repos }}"
   when:
     - not registered
     - rhsm_repos is defined
