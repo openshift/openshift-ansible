@@ -52,11 +52,11 @@ If mode lines for other editors are needed, please open a GitHub issue.
 === Method Signatures
 
 '''
-[[When-adding-a-new-paramemter-to-an-existing-method-a-default-value-SHOULD-be-used]]
+[[When-adding-a-new-parameter-to-an-existing-method-a-default-value-SHOULD-be-used]]
 [cols="2v,v"]
 |===
-| <<When-adding-a-new-paramemter-to-an-existing-method-a-default-value-SHOULD-be-used, Rule>>
-| When adding a new paramemter to an existing method, a default value SHOULD be used
+| <<When-adding-a-new-parameter-to-an-existing-method-a-default-value-SHOULD-be-used, Rule>>
+| When adding a new parameter to an existing method, a default value SHOULD be used
 |===
 The purpose of this rule is to make it so that method signatures are backwards compatible.
 
@@ -194,7 +194,7 @@ The purpose of this rule is to make it easy to include custom modules in our pla
 | Parameters to Ansible modules SHOULD use the Yaml dictionary format when 3 or more parameters are being passed
 |===
 
-When a module has several parameters that are being passed in, it's hard to see exactly what value each parameter is getting. It is preferred to use the Ansible Yaml syntax to pass in parameters so that it's more clear what values are being passed for each paramemter.
+When a module has several parameters that are being passed in, it's hard to see exactly what value each parameter is getting. It is preferred to use the Ansible Yaml syntax to pass in parameters so that it's more clear what values are being passed for each parameter.
 
 .Bad:
 [source,yaml]
@@ -222,7 +222,7 @@ When a module has several parameters that are being passed in, it's hard to see 
 | Parameters to Ansible modules SHOULD use the Yaml dictionary format when the line length exceeds 120 characters
 |===
 
-Lines that are long quickly become a wall of text that isn't easily parsable. It is preferred to use the Ansible Yaml syntax to pass in parameters so that it's more clear what values are being passed for each paramemter.
+Lines that are long quickly become a wall of text that isn't easily parsable. It is preferred to use the Ansible Yaml syntax to pass in parameters so that it's more clear what values are being passed for each parameter.
 
 .Bad:
 [source,yaml]
@@ -432,7 +432,7 @@ This is very useful when developing and debugging new tasks. It can also signifi
 [[Ansible-Roles-SHOULD-be-named-like-technology_component_subcomponent]]
 [cols="2v,v"]
 |===
-| [[Ansible-Roles-SHOULD-be-named-like-technology_component_subcomponent, Rule]]
+| <<Ansible-Roles-SHOULD-be-named-like-technology_component_subcomponent, Rule>>
 | Ansible Roles SHOULD be named like technology_component[_subcomponent].
 |===
 
