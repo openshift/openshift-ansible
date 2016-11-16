@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.25
+Version:        3.4.26
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,13 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Nov 15 2016 Scott Dodson <sdodson@redhat.com> 3.4.26-1
+- Fix typo (sdodson@redhat.com)
+- Fix a few places where we're not specifying the admin kubeconfig
+  (sdodson@redhat.com)
+- Add rolebinding-reader (sdodson@redhat.com)
+- Docker daemon is started prematurely. (eric.mountain@amadeus.com)
+
 * Mon Nov 14 2016 Scott Dodson <sdodson@redhat.com> 3.4.25-1
 - Sync logging deployer changes from origin to enterprise (sdodson@redhat.com)
 - Sync latest enterprise/metrics-deployer.yaml (sdodson@redhat.com)
