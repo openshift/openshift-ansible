@@ -3,7 +3,7 @@
   when: openshift.common.is_containerized | bool
 
 - name: Install haproxy
-  action: "{{ ansible_pkg_mgr }} name=haproxy state=present"
+  package: name=haproxy state=present
 
 - name: Configure systemd service directory for haproxy
   file:

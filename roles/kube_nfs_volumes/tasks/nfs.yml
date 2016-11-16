@@ -1,6 +1,6 @@
 ---
 - name: Install NFS server
-  action: "{{ ansible_pkg_mgr }} name=nfs-utils state=present"
+  package: name=nfs-utils state=present
   when: not openshift.common.is_containerized | bool
 
 - name: Start rpcbind on Fedora/Red Hat

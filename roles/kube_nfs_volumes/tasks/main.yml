@@ -4,7 +4,10 @@
   when: openshift.common.is_atomic | bool
 
 - name: Install pyparted (RedHat/Fedora)
-  action: "{{ ansible_pkg_mgr }} name=pyparted,python-httplib2 state=present"
+  package: name={{ item }} state=present
+  with_items:
+    - pyparted
+    - python-httplib2
   when: not openshift.common.is_containerized | bool
 
 - name: partition the drives

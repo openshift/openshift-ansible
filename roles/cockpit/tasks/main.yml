@@ -1,6 +1,6 @@
 ---
 - name: Install cockpit-ws
-  action: "{{ ansible_pkg_mgr }} name={{ item }} state=present"
+  package: name={{ item }} state=present
   with_items:
     - cockpit-ws
     - cockpit-shell

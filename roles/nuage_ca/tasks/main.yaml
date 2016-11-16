@@ -1,6 +1,6 @@
 ---
 - name: Install openssl
-  action: "{{ ansible_pkg_mgr }} name=openssl state=present"
+  package: name=openssl state=present
   when: not openshift.common.is_atomic | bool
 
 - name: Create CA directory
@@ -41,6 +41,6 @@
   delegate_to: "{{ nuage_ca_master }}"
 
 - name: Copy SSL config file
-  copy: src=openssl.cnf dest="{{ nuage_ca_dir }}/openssl.cnf" 
+  copy: src=openssl.cnf dest="{{ nuage_ca_dir }}/openssl.cnf"
   run_once: true
   delegate_to: "{{ nuage_ca_master }}"

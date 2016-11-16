@@ -84,7 +84,7 @@
     - firewalld
 
   - name: Remove packages
-    action: "{{ ansible_pkg_mgr }} name={{ item }} state=absent"
+    package: name={{ item }} state=absent
     when: not is_atomic | bool
     with_items:
     - atomic-enterprise
@@ -114,7 +114,7 @@
     - tuned-profiles-origin-node
 
   - name: Remove flannel package
-    action: "{{ ansible_pkg_mgr }} name=flannel state=absent"
+    package: name=flannel state=absent
     when: openshift_use_flannel | default(false) | bool and not is_atomic | bool
 
   - shell: systemctl reset-failed
@@ -247,7 +247,7 @@
     - atomic-openshift-master
 
   - name: Remove packages
-    action: "{{ ansible_pkg_mgr }} name={{ item }} state=absent"
+    package: name={{ item }} state=absent
     when: not is_atomic | bool
     with_items:
     - atomic-enterprise
@@ -349,7 +349,7 @@
     failed_when: false
 
   - name: Remove packages
-    action: "{{ ansible_pkg_mgr }} name={{ item }} state=absent"
+    package: name={{ item }} state=absent
     when: not is_atomic | bool
     with_items:
     - etcd
@@ -388,7 +388,7 @@
     - firewalld
 
   - name: Remove packages
-    action: "{{ ansible_pkg_mgr }} name={{ item }} state=absent"
+    package: name={{ item }} state=absent
     when: not is_atomic | bool
     with_items:
     - haproxy

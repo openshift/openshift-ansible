@@ -1,5 +1,6 @@
+---
 - name: Install Bind
-  action: "{{ ansible_pkg_mgr }} name=bind"
+  package: name=bind state=present
   when: not openshift.common.is_containerized | bool
 
 - name: Create docker build dir

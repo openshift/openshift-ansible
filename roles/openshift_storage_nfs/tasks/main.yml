@@ -1,6 +1,6 @@
 ---
 - name: Install nfs-utils
-  action: "{{ ansible_pkg_mgr }} name=nfs-utils state=present"
+  package: name=nfs-utils state=present
 
 - name: Configure NFS
   lineinfile:

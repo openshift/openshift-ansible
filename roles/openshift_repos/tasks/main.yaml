@@ -12,7 +12,7 @@
   when: not openshift.common.is_containerized | bool
 
 - name: Ensure libselinux-python is installed
-  action: "{{ ansible_pkg_mgr }} name=libselinux-python state=present"
+  package: name=libselinux-python state=present
   when: not openshift.common.is_containerized | bool
 
 - name: Create any additional repos that are defined

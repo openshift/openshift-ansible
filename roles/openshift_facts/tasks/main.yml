@@ -10,12 +10,11 @@
 - set_fact:
     l_is_containerized: "{{ (l_is_atomic | bool) or (containerized | default(false) | bool) }}"
 
-- name: Ensure PyYaml is installed
-  action: "{{ ansible_pkg_mgr }} name=PyYAML state=present"
-  when: not l_is_atomic | bool
-
-- name: Ensure yum-utils is installed
-  action: "{{ ansible_pkg_mgr }} name=yum-utils state=present"
+- name: Ensure PyYaml and yum-utils are installed
+  package: name={{ item }} state=present
+  with_items:
+    - PyYAML
+    - yum-utils
   when: not l_is_atomic | bool
 
 - name: Gather Cluster facts and set is_containerized if needed

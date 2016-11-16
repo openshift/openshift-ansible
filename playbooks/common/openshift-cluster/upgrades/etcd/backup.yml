@@ -42,7 +42,7 @@
     when: (embedded_etcd | bool) and (etcd_disk_usage.stdout|int > avail_disk.stdout|int)
 
   - name: Install etcd (for etcdctl)
-    action: "{{ ansible_pkg_mgr }} name=etcd state=present"
+    package: name=etcd state=present
     when: not openshift.common.is_atomic | bool
 
   - name: Generate etcd backup
