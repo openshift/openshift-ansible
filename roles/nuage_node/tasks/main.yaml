@@ -37,3 +37,5 @@
   notify:
     - restart vrs
     - restart node 
+
+- include: iptables.yml
