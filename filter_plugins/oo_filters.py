@@ -608,8 +608,8 @@ class FilterModule(object):
                           host_type=_get_tag_value(host['group_names'], 'host-type'),
                           sub_host_type=_get_tag_value(host['group_names'], 'sub-host-type'),
                           host={'name': host['inventory_hostname'],
-                                'public IP': host['ansible_ssh_host'],
-                                'private IP': host['ansible_default_ipv4']['address']})
+                                'public IP': host['oo_public_ipv4'],
+                                'private IP': host['oo_private_ipv4']})
             except KeyError:
                 pass
         return clusters
