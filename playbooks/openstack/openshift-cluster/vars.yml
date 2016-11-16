@@ -14,6 +14,8 @@ openstack_ssh_access_from:      "{{ lookup('oo_option', 'ssh_from')          |
                                     default('0.0.0.0/0',                     True) }}"
 openstack_node_port_access_from: "{{ lookup('oo_option', 'node_port_from')   |
                                     default('0.0.0.0/0',                     True) }}"
+openstack_heat_timeout:         "{{ lookup('oo_option', 'heat_timeout')   |
+                                    default('3',                             True) }}"
 openstack_flavor:
   etcd:   "{{ lookup('oo_option', 'etcd_flavor'      ) | default('m1.small',  True) }}"
   master: "{{ lookup('oo_option', 'master_flavor'    ) | default('m1.small',  True) }}"
