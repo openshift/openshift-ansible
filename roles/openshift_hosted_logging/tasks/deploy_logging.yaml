@@ -40,7 +40,7 @@
 
   - name: "Create templates for logging accounts and the deployer"
     command: >
-      {{ openshift.common.client_binary }} create
+      {{ openshift.common.client_binary }} create --config={{ mktemp.stdout }}/admin.kubeconfig
       -f {{ hosted_base }}/logging-deployer.yaml
       --config={{ mktemp.stdout }}/admin.kubeconfig
       -n logging
@@ -49,27 +49,40 @@
     changed_when: "'created' in logging_import_template.stdout"
 
   - name: "Process the logging accounts template"
-    shell:  "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig process logging-deployer-account-template |  {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig create -f -"
+    shell: >
+      {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig
+      process logging-deployer-account-template |  {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig create -f -
     register: process_deployer_accounts
     failed_when: process_deployer_accounts.rc == 1 and 'already exists' not in process_deployer_accounts.stderr
 
   - name: "Set permissions for logging-deployer service account"
     command: >
-      {{ openshift.common.client_binary }} adm --config={{ mktemp.stdout }}/admin.kubeconfig policy add-cluster-role-to-user oauth-editor system:serviceaccount:logging:logging-deployer
+      {{ openshift.common.client_binary }} adm --config={{ mktemp.stdout }}/admin.kubeconfig
+      policy add-cluster-role-to-user oauth-editor system:serviceaccount:logging:logging-deployer
     register: permiss_output
     failed_when: "permiss_output.rc == 1 and 'exists' not in permiss_output.stderr"
 
   - name: "Set permissions for fluentd"
     command: >
-      {{ openshift.common.client_binary }} adm policy add-scc-to-user privileged system:serviceaccount:logging:aggregated-logging-fluentd
+      {{ openshift.common.client_binary }} adm --config={{ mktemp.stdout }}/admin.kubeconfig
+      policy add-scc-to-user privileged system:serviceaccount:logging:aggregated-logging-fluentd
     register: fluentd_output
     failed_when: "fluentd_output.rc == 1 and 'exists' not in fluentd_output.stderr"
 
   - name: "Set additional permissions for fluentd"
     command: >
-      {{ openshift.common.client_binary }} adm policy add-cluster-role-to-user cluster-reader system:serviceaccount:logging:aggregated-logging-fluentd
+      {{ openshift.common.client_binary }} adm policy --config={{ mktemp.stdout }}/admin.kubeconfig
+      add-cluster-role-to-user cluster-reader system:serviceaccount:logging:aggregated-logging-fluentd
     register: fluentd2_output
     failed_when: "fluentd2_output.rc == 1 and 'exists' not in fluentd2_output.stderr"
+
+  - name: "Add rolebinding-reader to aggregated-logging-elasticsearch"
+    command: >
+      {{ openshift.common.client_binary }} adm --config={{ mktemp.stdout }}/admin.kubeconfig
+      policy add-cluster-role-to-user rolebinding-reader \
+      system:serviceaccount:logging:aggregated-logging-elasticsearch
+    register: rolebinding_reader_output
+    failed_when: "rolebinding_reader_output == 1 and 'exists' not in rolebinding_reader_output.stderr"
 
   - name: "Create ConfigMap for deployer parameters"
     command: >
