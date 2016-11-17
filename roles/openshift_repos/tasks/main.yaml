@@ -37,6 +37,7 @@
   when: ansible_os_family == "RedHat" and ansible_distribution != "Fedora"
         and openshift_deployment_type == 'origin'
         and not openshift.common.is_containerized | bool
+        and openshift_enable_origin_repo | default(true)
 
 - name: Configure origin yum repositories RHEL/CentOS
   copy:
@@ -46,3 +47,4 @@
   when: ansible_os_family == "RedHat" and ansible_distribution != "Fedora"
         and openshift_deployment_type == 'origin'
         and not openshift.common.is_containerized | bool
+        and openshift_enable_origin_repo | default(true)
