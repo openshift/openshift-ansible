@@ -34,6 +34,18 @@
     ec2_security_groups: "{{ deployment_vars[deployment_type].security_groups }}"
   when: ec2_security_groups is not defined
 
+- set_fact:
+    openshift_node_labels:
+       region: "{{ ec2_region }}"
+       type: "{{ sub_host_type }}"
+  when: sub_host_type != "default"
+
+- set_fact:
+    openshift_node_labels:
+       region: "{{ ec2_region }}"
+       type: "{{ host_type }}"
+  when: sub_host_type == "default"
+
 - name: Find amis for deployment_type
   ec2_ami_find:
     region: "{{ deployment_vars[deployment_type].region }}"
