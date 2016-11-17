@@ -11,7 +11,7 @@
     "capacity": {
       "storage": "{{ osnl_volume_size }}Gi"
     },
-    "accessModes": [ "ReadWriteMany" ],
+    "accessModes": [ "ReadWriteOnce", "ReadWriteMany" ],
     "persistentVolumeReclaimPolicy": "Recycle",
     "nfs": {
       "Server": "{{ inventory_hostname }}",
