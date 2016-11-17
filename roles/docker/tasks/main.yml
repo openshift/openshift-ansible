@@ -1,7 +1,4 @@
 ---
-- stat: path=/etc/sysconfig/docker-storage
-  register: docker_storage_check
-
 - name: Get current installed Docker version
   command: "{{ repoquery_cmd }} --installed --qf '%{version}' docker"
   when: not openshift.common.is_atomic | bool
@@ -46,15 +43,16 @@
   action: "{{ ansible_pkg_mgr }} name=docker{{ '-' + docker_version if docker_version is defined else '' }} state=present"
   when: not openshift.common.is_atomic | bool
 
-- name: Start the Docker service
-  service:
-    name: docker
-    enabled: yes
-    state: started
-  register: start_result
+- name: Ensure docker.service.d directory exists
+  file:
+    path: "{{ docker_systemd_dir }}"
+    state: directory
 
-- set_fact:
-    docker_service_status_changed: start_result | changed
+# Extend the default Docker service unit file
+- name: Configure Docker service unit file
+  template:
+    dest: "{{ docker_systemd_dir }}/custom.conf"
+    src: custom.conf.j2
 
 - include: udev_workaround.yml
   when: docker_udev_workaround | default(False) | bool
@@ -112,5 +110,16 @@
   when: docker_check.stat.isreg is defined and docker_check.stat.isreg
   notify:
     - restart docker
+
+- name: Start the Docker service
+  systemd:
+    name: docker
+    enabled: yes
+    state: started
+    daemon_reload: yes
+  register: start_result
+
+- set_fact:
+    docker_service_status_changed: start_result | changed
 
 - meta: flush_handlers

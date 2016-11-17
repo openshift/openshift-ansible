@@ -9,6 +9,7 @@
     project_id: "{{ lookup('env', 'gce_project_id') }}"
     zone: "{{ lookup('env', 'zone') }}"
     network: "{{ lookup('env', 'network') }}"
+    subnetwork: "{{ lookup('env', 'subnetwork') | default(omit, True) }}"
 # unsupported in 1.9.+
     #service_account_permissions: "datastore,logging-write"
     tags:

@@ -608,8 +608,8 @@ class FilterModule(object):
                           host_type=_get_tag_value(host['group_names'], 'host-type'),
                           sub_host_type=_get_tag_value(host['group_names'], 'sub-host-type'),
                           host={'name': host['inventory_hostname'],
-                                'public IP': host['ansible_ssh_host'],
-                                'private IP': host['ansible_default_ipv4']['address']})
+                                'public IP': host['oo_public_ipv4'],
+                                'private IP': host['oo_private_ipv4']})
             except KeyError:
                 pass
         return clusters
@@ -889,11 +889,32 @@ class FilterModule(object):
                                           'servers': FilterModule.oo_haproxy_backend_masters(servers_hostvars, nuage_rest_port)})
         return loadbalancer_backends
 
+    @staticmethod
+    def oo_chomp_commit_offset(version):
+        """Chomp any "+git.foo" commit offset string from the given `version`
+        and return the modified version string.
+
+    Ex:
+    - chomp_commit_offset(None)                 => None
+    - chomp_commit_offset(1337)                 => "1337"
+    - chomp_commit_offset("v3.4.0.15+git.derp") => "v3.4.0.15"
+    - chomp_commit_offset("v3.4.0.15")          => "v3.4.0.15"
+    - chomp_commit_offset("v1.3.0+52492b4")     => "v1.3.0"
+        """
+        if version is None:
+            return version
+        else:
+            # Stringify, just in case it's a Number type. Split by '+' and
+            # return the first split. No concerns about strings without a
+            # '+', .split() returns an array of the original string.
+            return str(version).split('+')[0]
+
     def filters(self):
         """ returns a mapping of filters to methods """
         return {
             "oo_select_keys": self.oo_select_keys,
             "oo_select_keys_from_list": self.oo_select_keys_from_list,
+            "oo_chomp_commit_offset": self.oo_chomp_commit_offset,
             "oo_collect": self.oo_collect,
             "oo_flatten": self.oo_flatten,
             "oo_pdb": self.oo_pdb,

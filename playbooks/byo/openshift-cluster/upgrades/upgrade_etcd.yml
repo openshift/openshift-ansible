@@ -1,0 +1,26 @@
+---
+- include: ../../../common/openshift-cluster/verify_ansible_version.yml
+
+- name: Create initial host groups for localhost
+  hosts: localhost
+  connection: local
+  become: no
+  gather_facts: no
+  tags:
+  - always
+  tasks:
+  - include_vars: ../cluster_hosts.yml
+  - add_host:
+      name: "{{ item }}"
+      groups: l_oo_all_hosts
+    with_items: "{{ g_all_hosts | default([]) }}"
+
+- name: Create initial host groups for all hosts
+  hosts: l_oo_all_hosts
+  gather_facts: no
+  tags:
+  - always
+  tasks:
+  - include_vars: ../cluster_hosts.yml
+
+- include: ../../../common/openshift-cluster/upgrades/etcd/main.yml

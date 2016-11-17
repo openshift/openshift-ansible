@@ -13,80 +13,22 @@
       groups: etcd_hosts_to_backup
     with_items: "{{ groups.oo_etcd_to_config if groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config | length > 0 else groups.oo_first_master }}"
 
-- name: Backup etcd
-  hosts: etcd_hosts_to_backup
-  vars:
-    embedded_etcd: "{{ hostvars[groups.oo_first_master.0].openshift.master.embedded_etcd }}"
-    timestamp: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
+# If facts cache were for some reason deleted, this fact may not be set, and if not set
+# it will always default to true. This causes problems for the etcd data dir fact detection
+# so we must first make sure this is set correctly before attempting the backup.
+- name: Set master embedded_etcd fact
+  hosts: oo_masters_to_config
   roles:
   - openshift_facts
   tasks:
-  # Ensure we persist the etcd role for this host in openshift_facts
   - openshift_facts:
-      role: etcd
-      local_facts: {}
-    when: "'etcd' not in openshift"
+      role: master
+      local_facts:
+        embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
+        debug_level: "{{ openshift_master_debug_level | default(openshift.common.debug_level | default(2)) }}"
 
-  - stat: path=/var/lib/openshift
-    register: var_lib_openshift
-
-  - stat: path=/var/lib/origin
-    register: var_lib_origin
-
-  - name: Create origin symlink if necessary
-    file: src=/var/lib/openshift/ dest=/var/lib/origin state=link
-    when: var_lib_openshift.stat.exists == True and var_lib_origin.stat.exists == False
-
-  # TODO: replace shell module with command and update later checks
-  # We assume to be using the data dir for all backups.
-  - name: Check available disk space for etcd backup
-    shell: df --output=avail -k {{ openshift.common.data_dir }} | tail -n 1
-    register: avail_disk
-
-  # TODO: replace shell module with command and update later checks
-  - name: Check current embedded etcd disk usage
-    shell: du -k {{ openshift.etcd.etcd_data_dir }} | tail -n 1 | cut -f1
-    register: etcd_disk_usage
-    when: embedded_etcd | bool
-
-  - name: Abort if insufficient disk space for etcd backup
-    fail:
-      msg: >
-        {{ etcd_disk_usage.stdout }} Kb disk space required for etcd backup,
-        {{ avail_disk.stdout }} Kb available.
-    when: (embedded_etcd | bool) and (etcd_disk_usage.stdout|int > avail_disk.stdout|int)
-
-  - name: Install etcd (for etcdctl)
-    action: "{{ ansible_pkg_mgr }} name=etcd state=latest"
-    when: not openshift.common.is_atomic | bool
-
-  - name: Generate etcd backup
-    command: >
-      etcdctl backup --data-dir={{ openshift.etcd.etcd_data_dir }}
-      --backup-dir={{ openshift.common.data_dir }}/etcd-backup-{{ timestamp }}
-
-  - set_fact:
-      etcd_backup_complete: True
-
-  - name: Display location of etcd backup
-    debug:
-      msg: "Etcd backup created in {{ openshift.common.data_dir }}/etcd-backup-{{ timestamp }}"
-
-
-- name: Gate on etcd backup
-  hosts: localhost
-  connection: local
-  become: no
-  tasks:
-  - set_fact:
-      etcd_backup_completed: "{{ hostvars
-                                 | oo_select_keys(groups.etcd_hosts_to_backup)
-                                 | oo_collect('inventory_hostname', {'etcd_backup_complete': true}) }}"
-  - set_fact:
-      etcd_backup_failed: "{{ groups.etcd_hosts_to_backup | difference(etcd_backup_completed) }}"
-  - fail:
-      msg: "Upgrade cannot continue. The following hosts did not complete etcd backup: {{ etcd_backup_failed | join(',') }}"
-    when: etcd_backup_failed | length > 0
+- name: Backup etcd
+  include: ./etcd/backup.yml
 
 - name: Upgrade master packages
   hosts: oo_masters_to_config
@@ -214,6 +156,12 @@
       --additive-only=true --confirm
     when: origin_reconcile_bindings | bool or ent_reconcile_bindings | bool
     run_once: true
+
+  - name: Reconcile Jenkins Pipeline Role Bindings
+    command: >
+      {{ openshift.common.client_binary }} adm --config={{ openshift.common.config_base }}/master/admin.kubeconfig policy reconcile-cluster-role-bindings system:build-strategy-jenkinspipeline --confirm
+    run_once: true
+    when: openshift.common.version_gte_3_4_or_1_4  | bool
 
   - name: Reconcile Security Context Constraints
     command: >

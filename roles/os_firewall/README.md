@@ -14,7 +14,7 @@ Role Variables
 
 | Name                      | Default |                                        |
 |---------------------------|---------|----------------------------------------|
-| os_firewall_use_firewalld | True    | If false, use iptables                 |
+| os_firewall_use_firewalld | False   | If false, use iptables                 |
 | os_firewall_allow         | []      | List of service,port mappings to allow |
 | os_firewall_deny          | []      | List of service, port mappings to deny |
 
