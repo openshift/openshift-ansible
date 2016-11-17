@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.26
+Version:        3.4.27
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Nov 17 2016 Scott Dodson <sdodson@redhat.com> 3.4.27-1
+- Allow users to disable the origin repo creation (sdodson@redhat.com)
+
 * Tue Nov 15 2016 Scott Dodson <sdodson@redhat.com> 3.4.26-1
 - Fix typo (sdodson@redhat.com)
 - Fix a few places where we're not specifying the admin kubeconfig
