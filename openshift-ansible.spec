@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.27
+Version:        3.4.28
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Nov 18 2016 Scott Dodson <sdodson@redhat.com> 3.4.28-1
+- Create the file in two passes, atomicly copy it over (sdodson@redhat.com)
+- node_dnsmasq -- Set dnsmasq as our only nameserver (sdodson@redhat.com)
+
 * Thu Nov 17 2016 Scott Dodson <sdodson@redhat.com> 3.4.27-1
 - Allow users to disable the origin repo creation (sdodson@redhat.com)
 
