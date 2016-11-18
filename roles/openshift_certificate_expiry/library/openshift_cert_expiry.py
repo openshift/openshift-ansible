@@ -246,7 +246,8 @@ Return:
         'total': len(items),
         'ok': 0,
         'warning': 0,
-        'expired': 0
+        'expired': 0,
+        'total': len(items)
     }
 
     summary_results['expired'] = len([c for c in items if c['health'] == 'expired'])

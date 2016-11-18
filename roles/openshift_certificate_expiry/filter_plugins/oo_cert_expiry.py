@@ -51,9 +51,13 @@ Example playbook usage:
 
         total_warnings = sum([hostvars[h]['check_results']['summary']['warning'] for h in play_hosts])
         total_expired = sum([hostvars[h]['check_results']['summary']['expired'] for h in play_hosts])
+        total_ok = sum([hostvars[h]['check_results']['summary']['ok'] for h in play_hosts])
+        total_total = sum([hostvars[h]['check_results']['summary']['total'] for h in play_hosts])
 
         json_result['summary']['warning'] = total_warnings
         json_result['summary']['expired'] = total_expired
+        json_result['summary']['ok'] = total_ok
+        json_result['summary']['total'] = total_total
 
         return json_result
 
