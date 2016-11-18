@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.53
+Version:        3.3.54
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Nov 18 2016 Scott Dodson <sdodson@redhat.com> 3.3.54-1
+- Create the file in two passes, atomicly copy it over (sdodson@redhat.com)
+- node_dnsmasq -- Set dnsmasq as our only nameserver (sdodson@redhat.com)
+- Only restart dnsmasq if the DNS servers have changed (tbielawa@redhat.com)
+
 * Fri Nov 18 2016 Scott Dodson <sdodson@redhat.com> 3.3.53-1
 - Fix etcd version check for embedded installs (sdodson@redhat.com)
 
