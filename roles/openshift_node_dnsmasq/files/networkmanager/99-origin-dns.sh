@@ -36,6 +36,7 @@ if [[ $2 =~ ^(up|dhcp4-change)$ ]]; then
   UPSTREAM_DNS_TMP=`mktemp`
   UPSTREAM_DNS_TMP_SORTED=`mktemp`
   CURRENT_UPSTREAM_DNS_SORTED=`mktemp`
+  NEW_RESOLV_CONF=`mktemp`
 
   ######################################################################
   # couldn't find an existing method to determine if the interface owns the
@@ -85,13 +86,17 @@ EOF
       systemctl restart dnsmasq
     fi
 
-    sed -i '0,/^nameserver/ s/^nameserver.*$/nameserver '"${def_route_ip}"'/g' /etc/resolv.conf
-
-    if ! grep -q '99-origin-dns.sh' /etc/resolv.conf; then
-      echo "# nameserver updated by /etc/NetworkManager/dispatcher.d/99-origin-dns.sh" >> /etc/resolv.conf
+    # Only if dnsmasq is running properly make it our only nameserver
+    if `systemctl -q is-active dnsmasq.service`; then
+      sed -e '/^nameserver.*$/d' /etc/resolv.conf > ${NEW_RESOLV_CONF}
+      echo "nameserver "${def_route_ip}"" >> ${NEW_RESOLV_CONF}
+      if ! grep -q '99-origin-dns.sh' ${NEW_RESOLV_CONF}; then
+          echo "# nameserver updated by /etc/NetworkManager/dispatcher.d/99-origin-dns.sh" >> ${NEW_RESOLV_CONF}
+      fi
+      cp -Z ${NEW_RESOLV_CONF} /etc/resolv.conf
     fi
   fi
 
   # Clean up after yourself
-  rm -f $UPSTREAM_DNS_TMP $UPSTREAM_DNS_TMP_SORTED $CURRENT_UPSTREAM_DNS_SORTED
+  rm -f $UPSTREAM_DNS_TMP $UPSTREAM_DNS_TMP_SORTED $CURRENT_UPSTREAM_DNS_SORTED $NEW_RESOLV_CONF
 fi
