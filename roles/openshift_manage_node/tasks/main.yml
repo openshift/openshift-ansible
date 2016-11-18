@@ -23,6 +23,7 @@
   delay: 5
   changed_when: false
   with_items: "{{ openshift_nodes }}"
+  when: hostvars[item].openshift.node.nodename is defined
 
 - name: Set node schedulability
   command: >
