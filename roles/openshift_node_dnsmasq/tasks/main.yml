@@ -22,16 +22,16 @@
 
 - name: Deploy additional dnsmasq.conf
   template:
-   src: "{{ openshift_node_dnsmasq_additional_config_file }}"
-   dest: /etc/dnsmasq.d/openshift-ansible.conf
-   owner: root
-   group: root
-   mode: 0644
+    src: "{{ openshift_node_dnsmasq_additional_config_file }}"
+    dest: /etc/dnsmasq.d/openshift-ansible.conf
+    owner: root
+    group: root
+    mode: 0644
   when: openshift_node_dnsmasq_additional_config_file is defined
   notify: restart dnsmasq
 
 - name: Enable dnsmasq
-  service:
+  systemd:
     name: dnsmasq
     enabled: yes
     state: started

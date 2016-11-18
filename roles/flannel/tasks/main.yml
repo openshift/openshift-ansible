@@ -27,7 +27,7 @@
 
 - name: Enable flanneld
   become: yes
-  service:
+  systemd:
     name: flanneld
     state: started
     enabled: yes
