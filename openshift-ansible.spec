@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.42
+Version:        3.2.43
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Nov 18 2016 Scott Dodson <sdodson@redhat.com> 3.2.43-1
+- Fix 3.2 HA upgrade when no master debug_level fact is set.
+  (dgoodwin@redhat.com)
+
 * Thu Nov 10 2016 Scott Dodson <sdodson@redhat.com> 3.2.42-1
 - Automatic commit of package [openshift-ansible] release [3.2.41-1].
   (sdodson@redhat.com)
