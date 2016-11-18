@@ -9,6 +9,7 @@ import sys
 import yaml
 
 from ansible import errors
+from ansible.module_utils._text import to_text
 
 # pylint: disable=no-name-in-module,import-error,wrong-import-order
 from distutils.version import LooseVersion
@@ -386,7 +387,8 @@ class OpenIDIdentityProvider(IdentityProviderOauthBase):
 
         if 'extraAuthorizeParameters' in self._idp:
             if 'include_granted_scopes' in self._idp['extraAuthorizeParameters']:
-                val = ansible_bool(self._idp['extraAuthorizeParameters'].pop('include_granted_scopes'))
+                val = to_text("'{0}'".format(ansible_bool(self._idp['extraAuthroizeParameters']
+                                                          .pop('include_granted_scopes'))).lower())
                 self._idp['extraAuthorizeParameters']['include_granted_scopes'] = val
 
     def validate(self):
