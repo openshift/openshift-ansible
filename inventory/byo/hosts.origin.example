@@ -19,8 +19,14 @@ ansible_ssh_user=root
 # user must be configured for passwordless sudo
 #ansible_become=yes
 
-# Debug level for all OpenShift components (Defaults to 2)
-debug_level=2
+# Debug level for all OpenShift components (defaults to 2)
+openshift_debug_level=2
+
+# Specific debug level for master services if desired (defaults to openshift_debug_level)
+openshift_master_debug_level=2
+
+# Specific debug level for node services if desired (defaults to openshift_debug_level)
+openshift_master_node_level=2
 
 # deployment type valid values are origin, online, atomic-enterprise and openshift-enterprise
 deployment_type=origin

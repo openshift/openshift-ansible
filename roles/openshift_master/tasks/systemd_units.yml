@@ -2,6 +2,16 @@
 # playbooks.  For that reason the ha_svc variables are use set_fact instead of
 # the vars directory on the role.
 
+- name: Ensure openshift_debug_level is set
+  set_fact:
+    openshift_debug_level: "{{ debug_level | default(2) }}"
+  when: openshift_debug_level is not defined
+
+- name: Ensure openshift_master_debug_level is set
+  set_fact:
+    openshift_master_debug_level: "{{ openshift_debug_level | default(2) }}"
+  when: openshift_master_debug_level is not defined
+
 - name: Init HA Service Info
   set_fact:
     containerized_svc_dir: "/usr/lib/systemd/system"

@@ -1,6 +1,4 @@
 ---
-debug_level: 2
-
 deployment_rhel7_ent_base:
   # rhel-7.1, requires cloud access subscription
   image: "{{ lookup('oo_option', 'ec2_image') | default('ami-10251c7a', True) }}"

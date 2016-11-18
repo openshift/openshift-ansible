@@ -1,5 +1,4 @@
 ---
-debug_level: 2
 openstack_infra_heat_stack:     "{{ lookup('oo_option', 'infra_heat_stack' ) |
                                     default('files/heat_stack.yaml',         True) }}"
 openstack_subnet_24_prefix:     "{{ lookup('oo_option', 'subnet_24_prefix'         ) |

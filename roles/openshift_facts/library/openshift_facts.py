@@ -1848,8 +1848,7 @@ class OpenShiftFacts(object):
                                   portal_net='172.30.0.0/16',
                                   client_binary='oc', admin_binary='oadm',
                                   dns_domain='cluster.local',
-                                  install_examples=True,
-                                  debug_level=2)
+                                  install_examples=True)
 
         if 'master' in roles:
             scheduler_predicates = [
