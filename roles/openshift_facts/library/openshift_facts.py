@@ -1931,7 +1931,7 @@ class OpenShiftFacts(object):
                             size='10Gi'
                         ),
                         nfs=dict(
-                            directory='/exports',
+                            directory='/srv/exports',
                             options='*(rw,root_squash)'
                         ),
                         host=None,
@@ -1948,7 +1948,7 @@ class OpenShiftFacts(object):
                             size='10Gi'
                         ),
                         nfs=dict(
-                            directory='/exports',
+                            directory='/srv/exports',
                             options='*(rw,root_squash)'
                         ),
                         host=None,
@@ -1965,7 +1965,7 @@ class OpenShiftFacts(object):
                             size='5Gi'
                         ),
                         nfs=dict(
-                            directory='/exports',
+                            directory='/srv/exports',
                             options='*(rw,root_squash)'),
                         host=None,
                         access_modes=['ReadWriteMany'],

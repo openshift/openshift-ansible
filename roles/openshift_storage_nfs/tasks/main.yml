@@ -1,6 +1,7 @@
 ---
 - name: Install nfs-utils
   action: "{{ ansible_pkg_mgr }} name=nfs-utils state=present"
+  when: not openshift.common.is_atomic
 
 - name: Configure NFS
   lineinfile:

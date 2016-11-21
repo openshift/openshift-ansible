@@ -22,7 +22,7 @@ osnl_nfs_export_options: "*(rw,sync,all_squash)"
 
 # Directory, where the created partitions should be mounted. They will be
 # mounted as <osnl_mount_dir>/<lvm volume name> 
-osnl_mount_dir: /exports/openshift
+osnl_mount_dir: /srv/exports/openshift
 
 # Volume Group to use.
 # This role always assumes that there is enough free space on the volume
@@ -58,7 +58,7 @@ None
 ## Example Playbook
 
 With this playbook, 2 5Gig lvm partitions are created, named stg5g0003 and stg5g0004
-Both of them are mounted into `/exports/openshift` directory.  Both directories are 
+Both of them are mounted into `/srv/exports/openshift` directory.  Both directories are 
 exported via NFS.  json files are created in /root.
 
     - hosts: nfsservers
@@ -67,7 +67,7 @@ exported via NFS.  json files are created in /root.
       gather_facts: no
       roles:
         - role: openshift_storage_nfs_lvm
-          osnl_mount_dir: /exports/openshift
+          osnl_mount_dir: /srv/exports/openshift
           osnl_volume_prefix: "stg"
           osnl_volume_size: 5
           osnl_volume_num_start: 3
@@ -92,7 +92,7 @@ exported via NFS.  json files are created in /root.
       gather_facts: no
       roles:
         - role: openshift_storage_nfs_lvm
-          osnl_mount_dir: /exports/stg
+          osnl_mount_dir: /srv/exports/stg
           osnl_volume_prefix: "stg"
           osnl_volume_size: 5
           osnl_volume_num_start: 3

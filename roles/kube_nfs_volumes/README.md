@@ -23,7 +23,7 @@ nfs_export_options: "*(rw,no_root_squash,insecure,no_subtree_check)"
 
 # Directory, where the created partitions should be mounted. They will be
 # mounted as <mount_dir>/sda1 etc.
-mount_dir: /exports
+mount_dir: /srv/exports
 
 # Comma-separated list of disks to partition.
 # This role always assumes that all partitions on these disks are used as
@@ -56,7 +56,7 @@ None
 ## Example Playbook
 
 With this playbook, `/dev/sdb` is partitioned into 100MiB partitions, all of
-them are mounted into `/exports/sdb<N>` directory and all these directories
+them are mounted into `/srv/exports/sdb<N>` directory and all these directories
 are exported via NFS and added as physical volumes to Kubernetes running at
 `https://10.245.1.2:6443`.
 
