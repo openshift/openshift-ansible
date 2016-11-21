@@ -3,18 +3,51 @@
   command: mktemp -d /tmp/openshift-ansible-XXXXXX
   register: mktemp
   changed_when: False
+  delegate_to: "{{ openshift_master_host }}"
+  run_once: true
 
 - set_fact:
     openshift_manage_node_kubeconfig: "{{ mktemp.stdout }}/admin.kubeconfig"
+  delegate_to: "{{ openshift_master_host }}"
+  run_once: true
 
 - name: Copy the admin client config(s)
   command: >
     cp {{ openshift.common.config_base }}/master/admin.kubeconfig {{ openshift_manage_node_kubeconfig }}
   changed_when: False
+  delegate_to: "{{ openshift_master_host }}"
+  run_once: true
+
+# Necessary because when you're on a node that's also a master the master will be
+# restarted after the node restarts docker and it will take up to 60 seconds for
+# systemd to start the master again
+- name: Wait for master API to become available before proceeding
+  # Using curl here since the uri module requires python-httplib2 and
+  # wait_for port doesn't provide health information.
+  command: >
+    curl --silent --tlsv1.2
+    {% if openshift.common.version_gte_3_2_or_1_2 | bool %}
+    --cacert {{ openshift.common.config_base }}/master/ca-bundle.crt
+    {% else %}
+    --cacert {{ openshift.common.config_base }}/master/ca.crt
+    {% endif %}
+    {{ openshift_node_master_api_url }}/healthz/ready
+  args:
+    # Disables the following warning:
+    # Consider using get_url or uri module rather than running curl
+    warn: no
+  register: api_available_output
+  until: api_available_output.stdout == 'ok'
+  retries: 120
+  delay: 1
+  changed_when: false
+  when: openshift.common.is_containerized | bool
+  delegate_to: "{{ openshift_master_host }}"
+  run_once: true
 
 - name: Wait for Node Registration
   command: >
-    {{ openshift.common.client_binary }} get node {{ hostvars[item].openshift.node.nodename }}
+    {{ openshift.common.client_binary }} get node {{ openshift.node.nodename }}
     --config={{ openshift_manage_node_kubeconfig }}
     -n default
   register: omd_get_node
@@ -22,26 +55,29 @@
   retries: 50
   delay: 5
   changed_when: false
-  with_items: "{{ openshift_nodes }}"
+  when: "'nodename' in openshift.node"
+  delegate_to: "{{ openshift_master_host }}"
 
 - name: Set node schedulability
   command: >
-    {{ openshift.common.client_binary }} adm manage-node {{ hostvars[item].openshift.node.nodename }} --schedulable={{ 'true' if hostvars[item].openshift.node.schedulable | bool else 'false' }}
+    {{ openshift.common.client_binary }} adm manage-node {{ openshift.node.nodename }} --schedulable={{ 'true' if openshift.node.schedulable | bool else 'false' }}
     --config={{ openshift_manage_node_kubeconfig }}
     -n default
-  with_items: "{{ openshift_nodes }}"
-  when: hostvars[item].openshift.node.nodename is defined
+  when: "'nodename' in openshift.node"
+  delegate_to: "{{ openshift_master_host }}"
 
 - name: Label nodes
   command: >
-    {{ openshift.common.client_binary }} label --overwrite node {{ hostvars[item].openshift.node.nodename }} {{ hostvars[item].openshift.node.labels | oo_combine_dict  }}
+    {{ openshift.common.client_binary }} label --overwrite node {{ openshift.node.nodename }} {{ openshift.node.labels | oo_combine_dict  }}
     --config={{ openshift_manage_node_kubeconfig }}
     -n default
-  with_items: "{{ openshift_nodes }}"
-  when: hostvars[item].openshift.node.nodename is defined and 'labels' in hostvars[item].openshift.node and hostvars[item].openshift.node.labels != {}
+  when: "'nodename' in openshift.node and 'labels' in openshift.node and openshift.node.labels != {}"
+  delegate_to: "{{ openshift_master_host }}"
 
 - name: Delete temp directory
   file:
     name: "{{ mktemp.stdout }}"
     state: absent
   changed_when: False
+  delegate_to: "{{ openshift_master_host }}"
+  run_once: true
