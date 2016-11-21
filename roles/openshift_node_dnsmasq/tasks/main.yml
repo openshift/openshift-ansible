@@ -10,7 +10,7 @@
     network_manager_active: "{{ True if 'ActiveState=active' in nm_show.stdout else False }}"
 
 - name: Install dnsmasq
-  action: "{{ ansible_pkg_mgr }} name=dnsmasq state=installed"
+  package: name=dnsmasq state=installed
   when: not openshift.common.is_atomic | bool
 
 - name: Install dnsmasq configuration

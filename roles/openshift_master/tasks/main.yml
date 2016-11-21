@@ -24,7 +24,9 @@
   when: openshift_master_ha | bool and openshift_master_cluster_method == "pacemaker" and openshift.common.is_containerized | bool
 
 - name: Install Master package
-  action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-master{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }} state=present"
+  package:
+    name: "{{ openshift.common.service_type }}-master{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }}"
+    state: present
   when: not openshift.common.is_containerized | bool
 
 - name: Pull master image
@@ -77,7 +79,7 @@
   - restart master controllers
 
 - name: Install httpd-tools if needed
-  action: "{{ ansible_pkg_mgr }} name=httpd-tools state=present"
+  package: name=httpd-tools state=present
   when: (item.kind == 'HTPasswdPasswordIdentityProvider') and
         not openshift.common.is_atomic | bool
   with_items: "{{ openshift.master.identity_providers }}"
@@ -292,7 +294,7 @@
   when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
 
 - name: Install cluster packages
-  action: "{{ ansible_pkg_mgr }} name=pcs state=present"
+  package: name=pcs state=present
   when: openshift_master_ha | bool and openshift.master.cluster_method == 'pacemaker'
     and not openshift.common.is_containerized | bool
   register: install_result
