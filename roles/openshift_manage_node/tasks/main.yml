@@ -47,7 +47,7 @@
 
 - name: Wait for Node Registration
   command: >
-    {{ openshift.common.client_binary }} get node {{ openshift.node.nodename }}
+    {{ hostvars[openshift_master_host].openshift.common.client_binary }} get node {{ openshift.node.nodename }}
     --config={{ openshift_manage_node_kubeconfig }}
     -n default
   register: omd_get_node
@@ -60,7 +60,7 @@
 
 - name: Set node schedulability
   command: >
-    {{ openshift.common.client_binary }} adm manage-node {{ openshift.node.nodename }} --schedulable={{ 'true' if openshift.node.schedulable | bool else 'false' }}
+    {{ hostvars[openshift_master_host].openshift.common.client_binary }} adm manage-node {{ openshift.node.nodename }} --schedulable={{ 'true' if openshift.node.schedulable | bool else 'false' }}
     --config={{ openshift_manage_node_kubeconfig }}
     -n default
   when: "'nodename' in openshift.node"
@@ -68,7 +68,7 @@
 
 - name: Label nodes
   command: >
-    {{ openshift.common.client_binary }} label --overwrite node {{ openshift.node.nodename }} {{ openshift.node.labels | oo_combine_dict  }}
+    {{ hostvars[openshift_master_host].openshift.common.client_binary }} label --overwrite node {{ openshift.node.nodename }} {{ openshift.node.labels | oo_combine_dict  }}
     --config={{ openshift_manage_node_kubeconfig }}
     -n default
   when: "'nodename' in openshift.node and 'labels' in openshift.node and openshift.node.labels != {}"
