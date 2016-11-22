@@ -1,4 +1,5 @@
 #!/bin/bash -x
+# -*- mode: sh; sh-indentation: 2 -*-
 
 # This NetworkManager dispatcher script replicates the functionality of
 # NetworkManager's dns=dnsmasq  however, rather than hardcoding the listening
@@ -28,7 +29,17 @@ cd /etc/sysconfig/network-scripts
 [ -f ../network ] && . ../network
 
 if [[ $2 =~ ^(up|dhcp4-change)$ ]]; then
-  # couldn't find an existing method to determine if the interface owns the 
+  # If the origin-upstream-dns config file changed we need to restart
+  NEEDS_RESTART=0
+  UPSTREAM_DNS='/etc/dnsmasq.d/origin-upstream-dns.conf'
+  # We'll regenerate the dnsmasq origin config in a temp file first
+  UPSTREAM_DNS_TMP=`mktemp`
+  UPSTREAM_DNS_TMP_SORTED=`mktemp`
+  CURRENT_UPSTREAM_DNS_SORTED=`mktemp`
+  NEW_RESOLV_CONF=`mktemp`
+
+  ######################################################################
+  # couldn't find an existing method to determine if the interface owns the
   # default route
   def_route=$(/sbin/ip route list match 0.0.0.0/0 | awk '{print $3 }')
   def_route_int=$(/sbin/ip route get to ${def_route} | awk '{print $3}')
@@ -43,20 +54,49 @@ domain-needed
 server=/cluster.local/172.30.0.1
 server=/30.172.in-addr.arpa/172.30.0.1
 EOF
+      # New config file, must restart
+      NEEDS_RESTART=1
     fi
-    # zero out our upstream servers list and feed it into dnsmasq
-    echo -n > /etc/dnsmasq.d/origin-upstream-dns.conf
+
+    ######################################################################
+    # Generate a new origin dns config file
     for ns in ${IP4_NAMESERVERS}; do
       if [[ ! -z $ns ]]; then
-        echo "server=${ns}" >> /etc/dnsmasq.d/origin-upstream-dns.conf
+        echo "server=${ns}"
       fi
-    done
-    systemctl restart dnsmasq
+    done > $UPSTREAM_DNS_TMP
 
-    sed -i '0,/^nameserver/ s/^nameserver.*$/nameserver '"${def_route_ip}"'/g' /etc/resolv.conf
+    # Sort it in case DNS servers arrived in a different order
+    sort $UPSTREAM_DNS_TMP > $UPSTREAM_DNS_TMP_SORTED
+    sort $UPSTREAM_DNS > $CURRENT_UPSTREAM_DNS_SORTED
 
-    if ! grep -q '99-origin-dns.sh' /etc/resolv.conf; then
-      echo "# nameserver updated by /etc/NetworkManager/dispatcher.d/99-origin-dns.sh" >> /etc/resolv.conf
+    # Compare to the current config file (sorted)
+    NEW_DNS_SUM=`md5sum ${UPSTREAM_DNS_TMP_SORTED} | awk '{print $1}'`
+    CURRENT_DNS_SUM=`md5sum ${CURRENT_UPSTREAM_DNS_SORTED} | awk '{print $1}'`
+
+    if [ "${NEW_DNS_SUM}" != "${CURRENT_DNS_SUM}" ]; then
+      # DNS has changed, copy the temp file to the proper location (-Z
+      # sets default selinux context) and set the restart flag
+      cp -Z $UPSTREAM_DNS_TMP $UPSTREAM_DNS
+      NEEDS_RESTART=1
+    fi
+
+    ######################################################################
+    if [ "${NEEDS_RESTART}" -eq "1" ]; then
+      systemctl restart dnsmasq
+    fi
+
+    # Only if dnsmasq is running properly make it our only nameserver
+    if `systemctl -q is-active dnsmasq.service`; then
+      sed -e '/^nameserver.*$/d' /etc/resolv.conf > ${NEW_RESOLV_CONF}
+      echo "nameserver "${def_route_ip}"" >> ${NEW_RESOLV_CONF}
+      if ! grep -q '99-origin-dns.sh' ${NEW_RESOLV_CONF}; then
+          echo "# nameserver updated by /etc/NetworkManager/dispatcher.d/99-origin-dns.sh" >> ${NEW_RESOLV_CONF}
+      fi
+      cp -Z ${NEW_RESOLV_CONF} /etc/resolv.conf
     fi
   fi
+
+  # Clean up after yourself
+  rm -f $UPSTREAM_DNS_TMP $UPSTREAM_DNS_TMP_SORTED $CURRENT_UPSTREAM_DNS_SORTED $NEW_RESOLV_CONF
 fi
