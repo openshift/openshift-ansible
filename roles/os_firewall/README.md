@@ -31,7 +31,6 @@ Use iptables and open tcp ports 80 and 443:
 ---
 - hosts: servers
   vars:
-    os_firewall_use_firewalld: false
     os_firewall_allow:
     - service: httpd
       port: 80/tcp
@@ -46,6 +45,7 @@ Use firewalld and open tcp port 443 and close previously open tcp port 80:
 ---
 - hosts: servers
   vars:
+    os_firewall_use_firewalld: true
     os_firewall_allow:
     - service: https
       port: 443/tcp
