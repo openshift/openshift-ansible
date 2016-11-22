@@ -50,6 +50,16 @@
   failed_when: "'already exists' not in osmiq_create_cluster_role.stderr and osmiq_create_cluster_role.rc != 0"
   changed_when: osmiq_create_cluster_role.rc == 0
 
+- name: Create Hawkular Metrics Admin Cluster Role
+  shell: >
+    echo {{ manageiq_metrics_admin_clusterrole | to_json | quote }} |
+    {{ openshift.common.client_binary }}
+    --config={{manage_iq_tmp_conf}}
+    create -f -
+  register: oshawkular_create_cluster_role
+  failed_when: "'already exists' not in oshawkular_create_cluster_role.stderr and oshawkular_create_cluster_role.rc != 0"
+  changed_when: oshawkular_create_cluster_role.rc == 0
+
 - name: Configure role/user permissions
   command: >
     {{ openshift.common.client_binary }} adm {{item}}
