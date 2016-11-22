@@ -4,6 +4,7 @@
     systemctl show NetworkManager
   register: nm_show
   changed_when: false
+  ignore_errors: True
 
 - name: Set fact using_network_manager
   set_fact:
