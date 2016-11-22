@@ -139,7 +139,7 @@ class IpTablesManager(object): # pylint: disable=too-many-instance-attributes
                 output = check_output(cmd, stderr=subprocess.STDOUT)
 
                 # break the input rules into rows and columns
-                input_rules = [s.split() for s in output.split('\n')]
+                input_rules = [s.split() for s in to_native(output).split('\n')]
 
                 # Find the last numbered rule
                 last_rule_num = None
@@ -269,5 +269,6 @@ def main():
 # pylint: disable=redefined-builtin, unused-wildcard-import, wildcard-import
 # import module snippets
 from ansible.module_utils.basic import *
+from ansible.module_utils._text import to_native
 if __name__ == '__main__':
     main()
