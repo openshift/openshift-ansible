@@ -48,3 +48,7 @@
     dest: "{{ openshift.common.config_base}}/master/master-config.yaml"
     yaml_key: 'controllerConfig.servicesServingCert.signer.keyFile'
     yaml_value: service-signer.key
+- modify_yaml:
+    dest: "{{ openshift.common.config_base}}/master/master-config.yaml"
+    yaml_key: 'admissionConfig.pluginConfig'
+    yaml_value: "{{ openshift.master.kube_admission_plugin_config | to_padded_yaml(level=2) }}"
