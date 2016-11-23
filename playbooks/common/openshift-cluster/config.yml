@@ -6,6 +6,8 @@
 - include: validate_hostnames.yml
 
 - include: initialize_openshift_version.yml
+  tags:
+  - always
 
 - name: Set oo_options
   hosts: oo_all_hosts
