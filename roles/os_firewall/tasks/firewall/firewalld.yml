@@ -13,7 +13,7 @@
     - iptables
     - ip6tables
   register: task_result
-  failed_when: "task_result|failed and 'Could not find' not in task_result.msg"
+  failed_when: "task_result|failed and 'could not' not in task_result.msg|lower"
 
 - name: Start and enable firewalld service
   systemd:
