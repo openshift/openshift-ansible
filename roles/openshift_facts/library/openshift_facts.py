@@ -820,19 +820,21 @@ def set_version_facts_if_unset(facts):
     """
     if 'common' in facts:
         deployment_type = facts['common']['deployment_type']
-        version = get_openshift_version(facts)
-        if version:
-            facts['common']['version'] = version
+        openshift_version = get_openshift_version(facts)
+        if openshift_version:
+            version = LooseVersion(openshift_version)
+            facts['common']['version'] = openshift_version
+            facts['common']['short_version'] = '.'.join([str(x) for x in version.version[0:2]])
             if deployment_type == 'origin':
-                version_gte_3_1_or_1_1 = LooseVersion(version) >= LooseVersion('1.1.0')
-                version_gte_3_1_1_or_1_1_1 = LooseVersion(version) >= LooseVersion('1.1.1')
-                version_gte_3_2_or_1_2 = LooseVersion(version) >= LooseVersion('1.2.0')
-                version_gte_3_3_or_1_3 = LooseVersion(version) >= LooseVersion('1.3.0')
+                version_gte_3_1_or_1_1 = version >= LooseVersion('1.1.0')
+                version_gte_3_1_1_or_1_1_1 = version >= LooseVersion('1.1.1')
+                version_gte_3_2_or_1_2 = version >= LooseVersion('1.2.0')
+                version_gte_3_3_or_1_3 = version >= LooseVersion('1.3.0')
             else:
-                version_gte_3_1_or_1_1 = LooseVersion(version) >= LooseVersion('3.0.2.905')
-                version_gte_3_1_1_or_1_1_1 = LooseVersion(version) >= LooseVersion('3.1.1')
-                version_gte_3_2_or_1_2 = LooseVersion(version) >= LooseVersion('3.1.1.901')
-                version_gte_3_3_or_1_3 = LooseVersion(version) >= LooseVersion('3.3.0')
+                version_gte_3_1_or_1_1 = version >= LooseVersion('3.0.2.905')
+                version_gte_3_1_1_or_1_1_1 = version >= LooseVersion('3.1.1')
+                version_gte_3_2_or_1_2 = version >= LooseVersion('3.1.1.901')
+                version_gte_3_3_or_1_3 = version >= LooseVersion('3.3.0')
         else:
             version_gte_3_1_or_1_1 = True
             version_gte_3_1_1_or_1_1_1 = True
@@ -842,7 +844,6 @@ def set_version_facts_if_unset(facts):
         facts['common']['version_gte_3_1_1_or_1_1_1'] = version_gte_3_1_1_or_1_1_1
         facts['common']['version_gte_3_2_or_1_2'] = version_gte_3_2_or_1_2
         facts['common']['version_gte_3_3_or_1_3'] = version_gte_3_3_or_1_3
-
 
         if version_gte_3_3_or_1_3:
             examples_content_version = 'v1.3'
@@ -1314,7 +1315,7 @@ def merge_facts(orig, new, additive_facts_to_overwrite, protected_facts_to_overw
             elif key in protected_facts and key not in [x.split('.')[-1] for x in protected_facts_to_overwrite]:
                 # The master count (int) can only increase unless it
                 # has been passed as a protected fact to overwrite.
-                if key == 'master_count':
+                if key == 'master_count' and new[key] is not None and new[key] is not '':
                     if int(value) <= int(new[key]):
                         facts[key] = copy.deepcopy(new[key])
                     else:
@@ -1749,22 +1750,6 @@ class OpenShiftFacts(object):
                                   debug_level=2)
 
         if 'master' in roles:
-            scheduler_predicates = [
-                {"name": "MatchNodeSelector"},
-                {"name": "PodFitsResources"},
-                {"name": "PodFitsPorts"},
-                {"name": "NoDiskConflict"},
-                {"name": "NoVolumeZoneConflict"},
-                {"name": "MaxEBSVolumeCount"},
-                {"name": "MaxGCEPDVolumeCount"},
-                {"name": "Region", "argument": {"serviceAffinity" : {"labels" : ["region"]}}}
-            ]
-            scheduler_priorities = [
-                {"name": "LeastRequestedPriority", "weight": 1},
-                {"name": "SelectorSpreadPriority", "weight": 1},
-                {"name": "Zone", "weight" : 2, "argument": {"serviceAntiAffinity" : {"label": "zone"}}}
-            ]
-
             defaults['master'] = dict(api_use_ssl=True, api_port='8443',
                                       controllers_port='8444',
                                       console_use_ssl=True,
@@ -1781,8 +1766,6 @@ class OpenShiftFacts(object):
                                       access_token_max_seconds=86400,
                                       auth_token_max_seconds=500,
                                       oauth_grant_method='auto',
-                                      scheduler_predicates=scheduler_predicates,
-                                      scheduler_priorities=scheduler_priorities,
                                       dynamic_provisioning_enabled=True,
                                       max_requests_inflight=500)
 
