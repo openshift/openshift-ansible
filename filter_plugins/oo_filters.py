@@ -697,7 +697,7 @@ class FilterModule(object):
                             volume = params['volume']['name']
                             path = directory + '/' + volume
                             size = params['volume']['size']
-                            access_modes = params['access_modes']
+                            access_modes = params['access']['modes']
                             persistent_volume = dict(
                                 name="{0}-volume".format(volume),
                                 capacity=size,
@@ -710,7 +710,7 @@ class FilterModule(object):
                         elif kind == 'openstack':
                             volume = params['volume']['name']
                             size = params['volume']['size']
-                            access_modes = params['access_modes']
+                            access_modes = params['access']['modes']
                             filesystem = params['openstack']['filesystem']
                             volume_id = params['openstack']['volumeID']
                             persistent_volume = dict(
@@ -751,7 +751,7 @@ class FilterModule(object):
                     if kind not in [None, 'object'] and create_pv and create_pvc:
                         volume = params['volume']['name']
                         size = params['volume']['size']
-                        access_modes = params['access_modes']
+                        access_modes = params['access']['modes']
                         persistent_volume_claim = dict(
                             name="{0}-claim".format(volume),
                             capacity=size,
