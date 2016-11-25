@@ -1923,7 +1923,9 @@ class OpenShiftFacts(object):
                             options='*(rw,root_squash)'
                         ),
                         host=None,
-                        access_modes=['ReadWriteOnce'],
+                        access=dict(
+                            modes=['ReadWriteOnce']
+                        ),
                         create_pv=True,
                         create_pvc=False
                     )
@@ -1940,7 +1942,9 @@ class OpenShiftFacts(object):
                             options='*(rw,root_squash)'
                         ),
                         host=None,
-                        access_modes=['ReadWriteOnce'],
+                        access=dict(
+                            modes=['ReadWriteOnce']
+                        ),
                         create_pv=True,
                         create_pvc=False
                     )
@@ -1956,7 +1960,9 @@ class OpenShiftFacts(object):
                             directory='/exports',
                             options='*(rw,root_squash)'),
                         host=None,
-                        access_modes=['ReadWriteMany'],
+                        access=dict(
+                            modes=['ReadWriteMany']
+                        ),
                         create_pv=True,
                         create_pvc=True
                     )
