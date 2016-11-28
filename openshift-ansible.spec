@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.54
+Version:        3.3.55
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,17 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Nov 28 2016 Scott Dodson <sdodson@redhat.com> 3.3.55-1
+- Move infrastructure templates into openshift_hosted_templates role.
+  (abutcher@redhat.com)
+- Reference master binaries when delegating from node hosts which may be
+  containerized. (abutcher@redhat.com)
+- Delegate openshift_manage_node tasks to master host. (abutcher@redhat.com)
+- Allow ansible to continue when a node is unaccessible or fails.
+  (abutcher@redhat.com)
+- Set good version in openshift-ansible/inventory/byo/hosts.origin.example in
+  release-1.3 branch fixes #2806 (contact@stephane-klein.info)
+
 * Fri Nov 18 2016 Scott Dodson <sdodson@redhat.com> 3.3.54-1
 - Create the file in two passes, atomicly copy it over (sdodson@redhat.com)
 - node_dnsmasq -- Set dnsmasq as our only nameserver (sdodson@redhat.com)
