@@ -6,7 +6,7 @@ Ensures docker package is installed, and optionally raises timeout for systemd-u
 Requirements
 ------------
 
-None
+Ansible 2.2
 
 Role Variables
 --------------
