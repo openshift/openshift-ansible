@@ -4,7 +4,7 @@ galaxy_info:
   description: os_firewall
   company: Red Hat, Inc.
   license: Apache License, Version 2.0
-  min_ansible_version: 1.7
+  min_ansible_version: 2.2
   platforms:
     - name: EL
       versions:

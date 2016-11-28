@@ -7,7 +7,7 @@ case (Adding/Removing rules based on protocol and port number).
 Requirements
 ------------
 
-None.
+Ansible 2.2
 
 Role Variables
 --------------
