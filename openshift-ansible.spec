@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.30
+Version:        3.4.31
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Nov 28 2016 Scott Dodson <sdodson@redhat.com> 3.4.31-1
+- Fix invalid embedded etcd fact in etcd upgrade playbook.
+  (dgoodwin@redhat.com)
+
 * Mon Nov 28 2016 Scott Dodson <sdodson@redhat.com> 3.4.30-1
 - Merge kube_admission_plugin_config with admission_plugin_config
   (smunilla@redhat.com)
