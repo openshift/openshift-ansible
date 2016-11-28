@@ -17,10 +17,14 @@
   # not already exist. We could have potentially done a replace --force to
   # create and update in one step.
   - openshift_examples
+  - openshift_hosted_templates
   # Update the existing templates
   - role: openshift_examples
     registry_url: "{{ openshift.master.registry_url }}"
     openshift_examples_import_command: replace
+  - role: openshift_hosted_templates
+    registry_url: "{{ openshift.master.registry_url }}"
+    openshift_hosted_templates_import_command: replace
   pre_tasks:
   - name: Collect all routers
     command: >
