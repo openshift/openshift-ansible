@@ -43,16 +43,18 @@
   package: name=docker{{ '-' + docker_version if docker_version is defined else '' }} state=present
   when: not openshift.common.is_atomic | bool
 
-- name: Ensure docker.service.d directory exists
-  file:
-    path: "{{ docker_systemd_dir }}"
-    state: directory
+- block:
+  # Extend the default Docker service unit file when using iptables-services
+  - name: Ensure docker.service.d directory exists
+    file:
+      path: "{{ docker_systemd_dir }}"
+      state: directory
 
-# Extend the default Docker service unit file
-- name: Configure Docker service unit file
-  template:
-    dest: "{{ docker_systemd_dir }}/custom.conf"
-    src: custom.conf.j2
+  - name: Configure Docker service unit file
+    template:
+      dest: "{{ docker_systemd_dir }}/custom.conf"
+      src: custom.conf.j2
+  when: not os_firewall_use_firewalld | default(True) | bool
 
 - include: udev_workaround.yml
   when: docker_udev_workaround | default(False) | bool
