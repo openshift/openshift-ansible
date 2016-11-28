@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.29
+Version:        3.4.30
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,18 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Nov 28 2016 Scott Dodson <sdodson@redhat.com> 3.4.30-1
+- Merge kube_admission_plugin_config with admission_plugin_config
+  (smunilla@redhat.com)
+- Updating docs for Ansible 2.2 requirements (rteague@redhat.com)
+- Reference master binaries when delegating from node hosts which may be
+  containerized. (abutcher@redhat.com)
+- Add hawkular admin cluster role to management admin (fsimonce@redhat.com)
+- Fix yum/subman version check on Atomic. (dgoodwin@redhat.com)
+- Delegate openshift_manage_node tasks to master host. (abutcher@redhat.com)
+- Allow ansible to continue when a node is unaccessible or fails.
+  (abutcher@redhat.com)
+
 * Fri Nov 18 2016 Scott Dodson <sdodson@redhat.com> 3.4.29-1
 - Check for bad versions of yum and subscription-manager. (dgoodwin@redhat.com)
 
