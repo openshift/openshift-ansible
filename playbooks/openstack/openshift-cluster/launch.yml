@@ -107,6 +107,9 @@
       groups: 'meta-environment_{{ cluster_env }}, meta-host-type_etcd, meta-sub-host-type_default, meta-clusterid_{{ cluster_id }}'
       openshift_node_labels:
         type: "etcd"
+      openstack:
+        public_v4: '{{ item[2] }}'
+        private_v4: '{{ item[1] }}'
     with_together:
       - '{{ parsed_outputs.etcd_names }}'
       - '{{ parsed_outputs.etcd_ips }}'
@@ -121,6 +124,9 @@
       groups: 'meta-environment_{{ cluster_env }}, meta-host-type_master, meta-sub-host-type_default, meta-clusterid_{{ cluster_id }}'
       openshift_node_labels:
         type: "master"
+      openstack:
+        public_v4: '{{ item[2] }}'
+        private_v4: '{{ item[1] }}'
     with_together:
       - '{{ parsed_outputs.master_names }}'
       - '{{ parsed_outputs.master_ips }}'
@@ -135,6 +141,9 @@
       groups: 'meta-environment_{{ cluster_env }}, meta-host-type_node, meta-sub-host-type_compute, meta-clusterid_{{ cluster_id }}'
       openshift_node_labels:
         type: "compute"
+      openstack:
+        public_v4: '{{ item[2] }}'
+        private_v4: '{{ item[1] }}'
     with_together:
       - '{{ parsed_outputs.node_names }}'
       - '{{ parsed_outputs.node_ips }}'
@@ -149,6 +158,9 @@
       groups: 'meta-environment_{{ cluster_env }}, meta-host-type_node, meta-sub-host-type_infra, meta-clusterid_{{ cluster_id }}'
       openshift_node_labels:
         type: "infra"
+      openstack:
+        public_v4: '{{ item[2] }}'
+        private_v4: '{{ item[1] }}'
     with_together:
       - '{{ parsed_outputs.infra_names }}'
       - '{{ parsed_outputs.infra_ips }}'
