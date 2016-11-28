@@ -22,9 +22,14 @@ from distutils.util import strtobool
 from distutils.version import LooseVersion
 import struct
 import socket
-from dbus import SystemBus, Interface
-from dbus.exceptions import DBusException
 
+HAVE_DBUS=False
+try:
+    from dbus import SystemBus, Interface
+    from dbus.exceptions import DBusException
+    HAVE_DBUS=True
+except ImportError:
+    pass
 
 DOCUMENTATION = '''
 ---
@@ -2292,6 +2297,9 @@ def main():
         supports_check_mode=True,
         add_file_common_args=True,
     )
+
+    if not HAVE_DBUS:
+        module.fail_json(msg="This module requires dbus python bindings")
 
     module.params['gather_subset'] = ['hardware', 'network', 'virtual', 'facter']
     module.params['gather_timeout'] = 10
