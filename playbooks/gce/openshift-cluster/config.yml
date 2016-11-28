@@ -23,7 +23,6 @@
     g_sudo: "{{ deployment_vars[deployment_type].become }}"
     g_nodeonmaster: true
     openshift_cluster_id: "{{ cluster_id }}"
-    openshift_debug_level: "{{ debug_level }}"
     openshift_deployment_type: "{{ deployment_type }}"
     openshift_hostname: "{{ gce_private_ip }}"
     openshift_hosted_registry_selector: 'type=infra'

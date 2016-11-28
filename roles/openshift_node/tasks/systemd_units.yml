@@ -1,6 +1,16 @@
 # This file is included both in the openshift_master role and in the upgrade
 # playbooks.
 
+- name: Ensure openshift_debug_level is set
+  set_fact:
+    openshift_debug_level: "{{ debug_level | default(2) }}"
+  when: openshift_debug_level is not defined
+
+- name: Ensure openshift_node_debug_level is set
+  set_fact:
+    openshift_node_debug_level: "{{ openshift_debug_level | default(2) }}"
+  when: openshift_node_debug_level is not defined
+
 - name: Install Node dependencies docker service file
   template:
     dest: "/etc/systemd/system/{{ openshift.common.service_type }}-node-dep.service"
@@ -55,7 +65,7 @@
     create: true
   with_items:
     - regex: '^OPTIONS='
-      line: "OPTIONS=--loglevel={{ openshift.node.debug_level | default(2) }}"
+      line: "OPTIONS=--loglevel={{ openshift_node_debug_level }}"
     - regex: '^CONFIG_FILE='
       line: "CONFIG_FILE={{ openshift.common.config_base }}/node/node-config.yaml"
     - regex: '^IMAGE_VERSION='
