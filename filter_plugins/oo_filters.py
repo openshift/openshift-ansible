@@ -10,7 +10,14 @@ from collections import Mapping
 from distutils.util import strtobool
 from distutils.version import LooseVersion
 from operator import itemgetter
-import OpenSSL.crypto
+
+HAS_OPENSSL=False
+try:
+    import OpenSSL.crypto
+    HAS_OPENSSL=True
+except ImportError:
+    pass
+
 import os
 import pdb
 import pkg_resources
@@ -515,6 +522,9 @@ class FilterModule(object):
 
         if not isinstance(internal_hostnames, list):
             raise errors.AnsibleFilterError("|failed expects internal_hostnames is list")
+
+        if not HAS_OPENSSL:
+            raise errors.AnsibleFilterError("|missing OpenSSL python bindings")
 
         for certificate in certificates:
             if 'names' in certificate.keys():
