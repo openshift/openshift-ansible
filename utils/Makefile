@@ -31,8 +31,6 @@ ASCII2MAN = a2x -D $(dir $@) -d manpage -f manpage $<
 MANPAGES := docs/man/man1/atomic-openshift-installer.1
 VERSION := 1.3
 
-PEPEXCLUDES := E501,E121,E124
-
 sdist: clean
 	python setup.py sdist
 	rm -fR $(SHORTNAME).egg-info
@@ -66,7 +64,7 @@ virtualenv:
 	@echo "# Creating a virtualenv"
 	@echo "#############################################"
 	virtualenv $(NAME)env
-	 . $(NAME)env/bin/activate && pip install setuptools==17.1.1
+	. $(NAME)env/bin/activate && pip install setuptools==17.1.1
 	. $(NAME)env/bin/activate && pip install -r test-requirements.txt
 #       If there are any special things to install do it here
 #       . $(NAME)env/bin/activate && INSTALL STUFF
@@ -75,14 +73,14 @@ ci-unittests:
 	@echo "#############################################"
 	@echo "# Running Unit Tests in virtualenv"
 	@echo "#############################################"
-	. $(NAME)env/bin/activate && nosetests -v --with-coverage --cover-html --cover-min-percentage=70 --cover-package=$(SHORTNAME) test/
+	. $(NAME)env/bin/activate && python setup.py nosetests
 	@echo "VIEW CODE COVERAGE REPORT WITH 'xdg-open cover/index.html' or run 'make viewcover'"
 
 ci-pylint:
 	@echo "#############################################"
 	@echo "# Running PyLint Tests in virtualenv"
 	@echo "#############################################"
-	. $(NAME)env/bin/activate && python -m pylint --rcfile ../git/.pylintrc src/ooinstall/cli_installer.py src/ooinstall/oo_config.py src/ooinstall/openshift_ansible.py src/ooinstall/variants.py ../callback_plugins/openshift_quick_installer.py ../roles/openshift_certificate_expiry/library/openshift_cert_expiry.py
+	. $(NAME)env/bin/activate && python -m pylint --rcfile ../git/.pylintrc $(shell find ../ -name $(NAME)env -prune -o -name test -prune -o -name "*.py" -print)
 
 ci-list-deps:
 	@echo "#############################################"
@@ -90,23 +88,12 @@ ci-list-deps:
 	@echo "#############################################"
 	. $(NAME)env/bin/activate && pip freeze
 
-ci-pyflakes:
-	@echo "#################################################"
-	@echo "# Running Pyflakes Compliance Tests in virtualenv"
-	@echo "#################################################"
-	. $(NAME)env/bin/activate && pyflakes src/ooinstall/*.py
-	. $(NAME)env/bin/activate && pyflakes ../callback_plugins/openshift_quick_installer.py
-	. $(NAME)env/bin/activate && pyflakes ../roles/openshift_certificate_expiry/library/openshift_cert_expiry.py
-
-ci-pep8:
+ci-flake8:
 	@echo "#############################################"
-	@echo "# Running PEP8 Compliance Tests in virtualenv"
+	@echo "# Running Flake8 Compliance Tests in virtualenv"
 	@echo "#############################################"
-	. $(NAME)env/bin/activate && pep8 --ignore=$(PEPEXCLUDES) src/$(SHORTNAME)/
-	. $(NAME)env/bin/activate && pep8 --ignore=$(PEPEXCLUDES) ../callback_plugins/openshift_quick_installer.py
-# This one excludes E402 because it is an ansible module and the
-# boilerplate import statement is expected to be at the bottom
-	. $(NAME)env/bin/activate && pep8 --ignore=$(PEPEXCLUDES),E402 ../roles/openshift_certificate_expiry/library/openshift_cert_expiry.py
+	. $(NAME)env/bin/activate && flake8 --config=setup.cfg ../ --exclude="utils,../inventory"
+	. $(NAME)env/bin/activate && python setup.py flake8 
 
-ci: clean virtualenv ci-list-deps ci-pep8 ci-pylint ci-pyflakes ci-unittests
+ci: clean virtualenv ci-list-deps ci-flake8 ci-pylint ci-unittests
 	:

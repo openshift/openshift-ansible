@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # vim: expandtab:tabstop=4:shiftwidth=4
 # pylint: disable=fixme, missing-docstring
-from subprocess import call, check_output
+import subprocess
 
 DOCUMENTATION = '''
 ---
@@ -29,7 +29,10 @@ class IpTablesAddRuleError(IpTablesError):
 
 
 class IpTablesRemoveRuleError(IpTablesError):
-    pass
+    def __init__(self, chain, msg, cmd, exit_code, output):  # pylint: disable=too-many-arguments, line-too-long, redefined-outer-name
+        super(IpTablesRemoveRuleError, self).__init__(msg, cmd, exit_code,
+                                                      output)
+        self.chain = chain
 
 
 class IpTablesSaveError(IpTablesError):
@@ -37,14 +40,14 @@ class IpTablesSaveError(IpTablesError):
 
 
 class IpTablesCreateChainError(IpTablesError):
-    def __init__(self, chain, msg, cmd, exit_code, output): # pylint: disable=too-many-arguments, line-too-long, redefined-outer-name
+    def __init__(self, chain, msg, cmd, exit_code, output):  # pylint: disable=too-many-arguments, line-too-long, redefined-outer-name
         super(IpTablesCreateChainError, self).__init__(msg, cmd, exit_code,
                                                        output)
         self.chain = chain
 
 
 class IpTablesCreateJumpRuleError(IpTablesError):
-    def __init__(self, chain, msg, cmd, exit_code, output): # pylint: disable=too-many-arguments, line-too-long, redefined-outer-name
+    def __init__(self, chain, msg, cmd, exit_code, output):  # pylint: disable=too-many-arguments, line-too-long, redefined-outer-name
         super(IpTablesCreateJumpRuleError, self).__init__(msg, cmd, exit_code,
                                                           output)
         self.chain = chain
@@ -53,7 +56,7 @@ class IpTablesCreateJumpRuleError(IpTablesError):
 # TODO: implement rollbacks for any events that were successful and an
 # exception was thrown later. For example, when the chain is created
 # successfully, but the add/remove rule fails.
-class IpTablesManager(object): # pylint: disable=too-many-instance-attributes
+class IpTablesManager(object):  # pylint: disable=too-many-instance-attributes
     def __init__(self, module):
         self.module = module
         self.ip_version = module.params['ip_version']
@@ -68,8 +71,7 @@ class IpTablesManager(object): # pylint: disable=too-many-instance-attributes
 
     def save(self):
         try:
-            self.output.append(check_output(self.save_cmd,
-                                            stderr=subprocess.STDOUT))
+            self.output.append(subprocess.check_output(self.save_cmd, stderr=subprocess.STDOUT))
         except subprocess.CalledProcessError as ex:
             raise IpTablesSaveError(
                 msg="Failed to save iptables rules",
@@ -92,7 +94,7 @@ class IpTablesManager(object): # pylint: disable=too-many-instance-attributes
             else:
                 cmd = self.cmd + ['-A'] + rule
                 try:
-                    self.output.append(check_output(cmd))
+                    self.output.append(subprocess.check_output(cmd))
                     self.changed = True
                     self.save()
                 except subprocess.CalledProcessError as ex:
@@ -112,7 +114,7 @@ class IpTablesManager(object): # pylint: disable=too-many-instance-attributes
             else:
                 cmd = self.cmd + ['-D'] + rule
                 try:
-                    self.output.append(check_output(cmd))
+                    self.output.append(subprocess.check_output(cmd))
                     self.changed = True
                     self.save()
                 except subprocess.CalledProcessError as ex:
@@ -123,7 +125,7 @@ class IpTablesManager(object): # pylint: disable=too-many-instance-attributes
 
     def rule_exists(self, rule):
         check_cmd = self.cmd + ['-C'] + rule
-        return True if call(check_cmd) == 0 else False
+        return True if subprocess.call(check_cmd) == 0 else False
 
     def gen_rule(self, port, proto):
         return [self.chain, '-p', proto, '-m', 'state', '--state', 'NEW',
@@ -136,7 +138,7 @@ class IpTablesManager(object): # pylint: disable=too-many-instance-attributes
         else:
             try:
                 cmd = self.cmd + ['-L', self.jump_rule_chain, '--line-numbers']
-                output = check_output(cmd, stderr=subprocess.STDOUT)
+                output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
 
                 # break the input rules into rows and columns
                 input_rules = [s.split() for s in to_native(output).split('\n')]
@@ -155,8 +157,7 @@ class IpTablesManager(object): # pylint: disable=too-many-instance-attributes
                 # Naively assume that if the last row is a REJECT or DROP rule,
                 # then we can insert our rule right before it, otherwise we
                 # assume that we can just append the rule.
-                if (last_rule_num and last_rule_target
-                        and last_rule_target in ['REJECT', 'DROP']):
+                if (last_rule_num and last_rule_target and last_rule_target in ['REJECT', 'DROP']):
                     # insert rule
                     cmd = self.cmd + ['-I', self.jump_rule_chain,
                                       str(last_rule_num)]
@@ -164,7 +165,7 @@ class IpTablesManager(object): # pylint: disable=too-many-instance-attributes
                     # append rule
                     cmd = self.cmd + ['-A', self.jump_rule_chain]
                 cmd += ['-j', self.chain]
-                output = check_output(cmd, stderr=subprocess.STDOUT)
+                output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
                 self.changed = True
                 self.output.append(output)
                 self.save()
@@ -192,8 +193,7 @@ class IpTablesManager(object): # pylint: disable=too-many-instance-attributes
         else:
             try:
                 cmd = self.cmd + ['-N', self.chain]
-                self.output.append(check_output(cmd,
-                                                stderr=subprocess.STDOUT))
+                self.output.append(subprocess.check_output(cmd, stderr=subprocess.STDOUT))
                 self.changed = True
                 self.output.append("Successfully created chain %s" %
                                    self.chain)
@@ -203,26 +203,26 @@ class IpTablesManager(object): # pylint: disable=too-many-instance-attributes
                     chain=self.chain,
                     msg="Failed to create chain: %s" % self.chain,
                     cmd=ex.cmd, exit_code=ex.returncode, output=ex.output
-                    )
+                )
 
     def jump_rule_exists(self):
         cmd = self.cmd + ['-C', self.jump_rule_chain, '-j', self.chain]
-        return True if call(cmd) == 0 else False
+        return True if subprocess.call(cmd) == 0 else False
 
     def chain_exists(self):
         cmd = self.cmd + ['-L', self.chain]
-        return True if call(cmd) == 0 else False
+        return True if subprocess.call(cmd) == 0 else False
 
     def gen_cmd(self):
         cmd = 'iptables' if self.ip_version == 'ipv4' else 'ip6tables'
         return ["/usr/sbin/%s" % cmd]
 
-    def gen_save_cmd(self): # pylint: disable=no-self-use
+    def gen_save_cmd(self):  # pylint: disable=no-self-use
         return ['/usr/libexec/iptables/iptables.init', 'save']
 
 
 def main():
-    module = AnsibleModule(
+    module = AnsibleModule(  # noqa: F405
         argument_spec=dict(
             name=dict(required=True),
             action=dict(required=True, choices=['add', 'remove',
@@ -266,9 +266,9 @@ def main():
                             output=iptables_manager.output)
 
 
-# pylint: disable=redefined-builtin, unused-wildcard-import, wildcard-import
+# pylint: disable=redefined-builtin, unused-wildcard-import, wildcard-import,  wrong-import-position
 # import module snippets
-from ansible.module_utils.basic import *
-from ansible.module_utils._text import to_native
+from ansible.module_utils.basic import *  # noqa: F403,E402
+from ansible.module_utils._text import to_native  # noqa: E402
 if __name__ == '__main__':
     main()

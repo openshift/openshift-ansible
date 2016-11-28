@@ -1,5 +1,6 @@
 #!/usr/bin/python
 #pylint: skip-file
+# flake8: noqa
 #
 # This file is part of Ansible
 #

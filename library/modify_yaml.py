@@ -30,7 +30,7 @@ def set_key(yaml_data, yaml_key, yaml_value):
             ptr[key] = {}
             ptr = ptr[key]
         elif key == yaml_key.split('.')[-1]:
-            if (key in ptr and module.safe_eval(ptr[key]) != yaml_value) or (key not in ptr):
+            if (key in ptr and module.safe_eval(ptr[key]) != yaml_value) or (key not in ptr):  # noqa: F405
                 ptr[key] = yaml_value
                 changes.append((yaml_key, yaml_value))
         else:
@@ -49,7 +49,7 @@ def main():
     # redefined-outer-name
     global module
 
-    module = AnsibleModule(
+    module = AnsibleModule(  # noqa: F405
         argument_spec=dict(
             dest=dict(required=True),
             yaml_key=dict(required=True),
@@ -94,10 +94,11 @@ def main():
     except Exception, e:
         return module.fail_json(msg=str(e))
 
+
 # ignore pylint errors related to the module_utils import
-# pylint: disable=redefined-builtin, unused-wildcard-import, wildcard-import
+# pylint: disable=redefined-builtin, unused-wildcard-import, wildcard-import, wrong-import-position
 # import module snippets
-from ansible.module_utils.basic import *
+from ansible.module_utils.basic import *  # noqa: F402,F403
 
 if __name__ == '__main__':
     main()

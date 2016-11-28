@@ -7,6 +7,7 @@ Custom zabbix filters for use in openshift-ansible
 
 import pdb
 
+
 class FilterModule(object):
     ''' Custom zabbix ansible filters '''
 
@@ -107,7 +108,7 @@ class FilterModule(object):
             for results in data:
                 if cluster == results['item'][0]:
                     results = results['results']
-                    if results and len(results) > 0 and all([results[0].has_key(_key) for _key in keys]):
+                    if results and len(results) > 0 and all([_key in results[0] for _key in keys]):
                         tmp = {}
                         tmp['clusterid'] = cluster
                         for key in keys:
