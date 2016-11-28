@@ -9,6 +9,20 @@ manageiq_cluster_role:
       verbs:
       - '*'
 
+manageiq_metrics_admin_clusterrole:
+  apiVersion: v1
+  kind: ClusterRole
+  metadata:
+    name: hawkular-metrics-admin
+  rules:
+  - apiGroups:
+    - ""
+    resources:
+    - hawkular-metrics
+    - hawkular-alerts
+    verbs:
+    - '*'
+
 manageiq_service_account:
     apiVersion: v1
     kind: ServiceAccount
@@ -31,6 +45,7 @@ manage_iq_tasks:
     - policy add-cluster-role-to-user system:image-puller system:serviceaccount:management-infra:inspector-admin
     - policy add-scc-to-user privileged system:serviceaccount:management-infra:inspector-admin
     - policy add-cluster-role-to-user self-provisioner system:serviceaccount:management-infra:management-admin
+    - policy add-cluster-role-to-user hawkular-metrics-admin system:serviceaccount:management-infra:management-admin
 
 manage_iq_openshift_3_2_tasks:
     - policy add-cluster-role-to-user system:image-auditor system:serviceaccount:management-infra:management-admin
