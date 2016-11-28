@@ -35,7 +35,7 @@ not practical to start over at 1.0.
     ***
 
     Requirements:
-    - Ansible >= 2.1.0 (>= 2.2 is preferred for performance reasons)
+    - Ansible >= 2.2.0
     - Jinja >= 2.7
 
     ***
