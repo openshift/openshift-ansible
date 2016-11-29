@@ -1,0 +1,57 @@
+---
+- name: generate hawkular-metrics replication controller
+  template:
+    src: hawkular_metrics_rc.j2
+    dest: "{{ mktemp.stdout }}/templates/hawkular_metrics_rc.yaml"
+- name: generate hawkular-cassandra replication controllers
+  template:
+    src: hawkular_cassandra_rc.j2
+    dest: "{{ mktemp.stdout }}/templates/hawkular-cassandra-rc{{ item }}.yaml"
+  vars:
+    node: "{{ item }}"
+    master: "{{ (item == '1')|string|lower }}"
+  with_sequence: count={{ hawkular_cassandra_nodes }}
+- name: generate hawkular-cassandra persistent volume claims
+  template:
+    src: pvc.j2
+    dest: "{{ mktemp.stdout }}/templates/hawkular-cassandra-pvc{{ item }}.yaml"
+  vars:
+    obj_name: "{{ hawkular_cassandra_pv_prefix }}-{{ item }}"
+    labels:
+      metrics-infra: hawkular-cassandra
+    access_modes:
+    - ReadWriteOnce
+    size: "{{ hawkular_cassandra_pv_size }}"
+  with_sequence: count={{ hawkular_cassandra_nodes }}
+  when: hawkular_cassandra_storage_type == 'pv'
+- name: generate hawkular-cassandra persistent volume claims (dynamic)
+  template:
+    src: pvc.j2
+    dest: "{{ mktemp.stdout }}/templates/hawkular-cassandra-pvc{{ item }}.yaml"
+  vars:
+    obj_name: "{{ hawkular_cassandra_pv_prefix }}-{{ item }}"
+    labels:
+      metrics-infra: hawkular-cassandra
+    annotations:
+      volume.alpha.kubernetes.io/storage-class: dynamic
+    access_modes:
+    - ReadWriteOnce
+    size: "{{ hawkular_cassandra_pv_size }}"
+  with_sequence: count={{ hawkular_cassandra_nodes }}
+  when: hawkular_cassandra_storage_type == 'dynamic'
+- name: generate the hawkular-metrics route
+  template:
+    src: route.j2
+    dest: "{{ mktemp.stdout }}/templates/hawkular-metrics-route.yaml"
+  vars:
+    name: hawkular-metrics
+    labels:
+      metrics-infra: hawkular-metrics
+    host: hawkular-metrics.example.com
+    to:
+      kind: Service
+      name: hawkular-metrics
+    tls:
+      termination: reencrypt
+      destination_ca_certificate: >
+        {{ hawkular_metrics_secret.results[6].stdout|b64decode }}

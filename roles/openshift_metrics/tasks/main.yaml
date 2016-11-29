@@ -1,0 +1,24 @@
+---
+- name: check that hawkular_metrics_hostname is set
+  fail: msg='the hawkular_metrics_hostname variable is required'
+  when: "{{ hawkular_metrics_hostname is not defined }}"
+- name: check the value of hawkular_cassandra_storage_type
+  fail:
+    msg: >
+      hawkular_cassandra_storage_type ({{ hawkular_cassandra_storage_type }})
+      is invalid, must be one of: emptydir, pv, dynamic
+  when: hawkular_cassandra_storage_type not in hawkular_cassandra_storage_types
+- name: Install Metrics
+  include: "{{ role_path }}/tasks/install_{{ include_file }}.yaml"
+  with_items:
+    - metrics
+    - heapster
+    - hawkular
+  loop_control:
+    loop_var: include_file
+- name: create objects
+  command: >
+    {{ openshift.common.client_binary }} -n '{{ metrics_project }}'
+    apply -f {{ item }}
+  with_fileglob:
+  - "{{ mktemp.stdout }}/templates/*.yaml"

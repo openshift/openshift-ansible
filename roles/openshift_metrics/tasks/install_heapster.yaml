@@ -1,0 +1,3 @@
+---
+- name: Generate heapster replication controller
+  template: src=heapster.j2 dest={{mktemp.stdout}}/templates/metrics-heapster-rc.yaml

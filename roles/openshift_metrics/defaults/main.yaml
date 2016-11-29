@@ -1,0 +1,17 @@
+---
+image_prefix: docker.io/openshift/origin-
+image_version: latest
+master_url: https://kubernetes.default.svc.cluster.local
+
+hawkular_user_write_access: False
+hawkular_cassandra_nodes: 1
+hawkular_cassandra_storage_type: emptydir
+hawkular_cassandra_pv_prefix: metrics-cassandra
+hawkular_cassandra_pv_size: 10Gi
+
+heapster_standalone: False
+heapster_allowed_users: system:master-proxy
+
+metrics_duration: 7
+metrics_resolution: 15s
+metrics_node_id: nodename

@@ -1,0 +1,50 @@
+---
+- name: generate {{ component }} keys
+  command: >
+    {{ openshift.common.admin_binary }} ca create-server-cert
+    --key='{{ mktemp.stdout }}/certs/{{ component }}.key'
+    --cert='{{ mktemp.stdout }}/certs/{{ component }}.crt'
+    --hostnames='{{ hostnames }}'
+    --signer-cert='{{ mktemp.stdout }}/certs/ca.crt'
+    --signer-key='{{ mktemp.stdout }}/certs/ca.key'
+    --signer-serial='{{ mktemp.stdout }}/certs/ca.serial.txt'
+- name: generate {{ component }} certificate
+  shell: >
+    cat
+    '{{ mktemp.stdout|quote }}/certs/{{ component|quote }}.key'
+    '{{ mktemp.stdout|quote }}/certs/{{ component|quote }}.crt'
+    > '{{ mktemp.stdout|quote }}/certs/{{ component|quote }}.pem'
+- name: generate random password for the {{ component }} keystore
+  shell: tr -dc _A-Z-a-z-0-9 < /dev/urandom | head -c15
+  register: keystore_pwd
+- name: create the password file for {{ component }}
+  shell: >
+    echo '{{ keystore_pwd.stdout|quote }}'
+    > '{{ mktemp.stdout }}/certs/{{ component|quote }}-keystore.pwd'
+- name: create the {{ component }} pkcs12 from the pem file
+  command: >
+    openssl pkcs12 -export
+    -in '{{ mktemp.stdout }}/certs/{{ component }}.pem'
+    -out '{{ mktemp.stdout }}/certs/{{ component }}.pkcs12'
+    -name '{{ component }}' -noiter -nomaciter
+    -password 'pass:{{ keystore_pwd.stdout }}'
+- name: create the {{ component }} keystore from the pkcs12 file
+  command: >
+    keytool -v -importkeystore
+    -srckeystore '{{ mktemp.stdout }}/certs/{{ component }}.pkcs12'
+    -srcstoretype PKCS12
+    -destkeystore '{{ mktemp.stdout }}/certs/{{ component }}.keystore'
+    -deststoretype JKS
+    -deststorepass '{{ keystore_pwd.stdout }}'
+    -srcstorepass '{{ keystore_pwd.stdout }}'
+- name: create the {{ component }} certificate
+  command: >
+    keytool -noprompt -export
+    -alias '{{ component }}'
+    -file '{{ mktemp.stdout }}/certs/{{ component }}.cert'
+    -keystore '{{ mktemp.stdout }}/certs/{{ component }}.keystore'
+    -storepass '{{ keystore_pwd.stdout }}'
+- name: generate random password for the {{ component }} truststore
+  shell: >
+    tr -dc _A-Z-a-z-0-9 < /dev/urandom | head -c15
+    > '{{ mktemp.stdout }}/certs/{{ component|quote }}-truststore.pwd'

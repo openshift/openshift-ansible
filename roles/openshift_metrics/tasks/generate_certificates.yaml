@@ -1,0 +1,233 @@
+---
+# TODO idempotency?
+# TODO support providing custom certificates
+- name: create certificate output directory
+  file:
+    path: "{{ mktemp.stdout }}/certs"
+    state: directory
+    mode: 0700
+- name: generate ca certificate chain
+  shell: >
+    {{ openshift.common.admin_binary }} ca create-signer-cert
+    --key='{{ mktemp.stdout }}/certs/ca.key'
+    --cert='{{ mktemp.stdout }}/certs/ca.crt'
+    --serial='{{ mktemp.stdout }}/certs/ca.serial.txt'
+    --name="metrics-signer@$(date +%s)"
+- name: generate heapster key/cert
+  command: >
+    {{ openshift.common.admin_binary }} ca create-server-cert
+    --key='{{ mktemp.stdout }}/certs/heapster.key'
+    --cert='{{ mktemp.stdout }}/certs/heapster.cert'
+    --hostnames=heapster
+    --signer-cert='{{ mktemp.stdout }}/certs/ca.crt'
+    --signer-key='{{ mktemp.stdout }}/certs/ca.key'
+    --signer-serial='{{ mktemp.stdout }}/certs/ca.serial.txt'
+# TODO maybe there's an easier way to get the service accounts' ca crt?
+- name: get heapster service account secrets
+  shell: >
+    {{ openshift.common.client_binary }} -n '{{ metrics_project }}'
+    get serviceaccount/default
+    --template '{{ '{{range .secrets}}{{println .name}}{{end}}' }}'
+    | grep ^default-token-
+  register: sa_secret
+- name: get heapster service account ca
+  command: >
+    {{ openshift.common.client_binary }} -n '{{ metrics_project }}'
+    get 'secret/{{ sa_secret.stdout }}'
+    --template '{{ '{{index .data "ca.crt"}}' }}'
+  register: sa_secret
+- name: read files for the heapster secret
+  command: base64 --wrap 0 "{{ mktemp.stdout }}/certs/heapster.{{ item }}"
+  register: heapster_secret
+  with_items:
+  - cert
+  - key
+- name: generate heapster secret template
+  template:
+    src: secret.j2
+    dest: "{{ mktemp.stdout }}/templates/heapster_secrets.yaml"
+  vars:
+    name: heapster-secrets
+    labels:
+      metrics-infra: heapster
+    data:
+      heapster.cert: "{{ heapster_secret.results[0].stdout }}"
+      heapster.key: "{{ heapster_secret.results[1].stdout }}"
+      heapster.client-ca: "{{ sa_secret.stdout }}"
+      heapster.allowed-users: "{{ heapster_allowed_users|b64encode }}"
+- name: generate hawkular-metrics certificates
+  include: setup_certificate.yaml
+  vars:
+    component: hawkular-metrics
+    hostnames: "hawkular-metrics,{{ hawkular_metrics_hostname }}"
+- name: generate hawkular-cassandra certificates
+  include: setup_certificate.yaml
+  vars:
+    component: hawkular-cassandra
+    hostnames: hawkular-cassandra
+# TODO keytool as dependency?  move key/trust store generation to containers?
+- name: import the hawkular metrics cert into the cassandra truststore
+  shell: >
+    keytool -noprompt -import -v -trustcacerts
+    -alias hawkular-metrics
+    -file '{{ mktemp.stdout|quote }}/certs/hawkular-metrics.cert'
+    -keystore '{{ mktemp.stdout|quote }}/certs/hawkular-cassandra.truststore'
+    -storepass
+    "$(< "{{ mktemp.stdout|quote }}/certs/hawkular-cassandra-truststore.pwd")"
+- name: import the hawkular cassandra cert into the hawkular metrics truststore
+  shell: >
+    keytool -noprompt -import -v -trustcacerts
+    -alias hawkular-cassandra
+    -file '{{ mktemp.stdout }}/certs/hawkular-cassandra.cert'
+    -keystore '{{ mktemp.stdout }}/certs/hawkular-metrics.truststore'
+    -storepass
+    "$(< "{{ mktemp.stdout|quote }}/certs/hawkular-metrics-truststore.pwd")"
+- name: import the hawkular cassandra cert into the cassandra truststore
+  shell: >
+    keytool -noprompt -import -v -trustcacerts
+    -alias hawkular-cassandra
+    -file '{{ mktemp.stdout }}/certs/hawkular-cassandra.cert'
+    -keystore '{{ mktemp.stdout }}/certs/hawkular-cassandra.truststore'
+    -storepass
+    "$(< "{{ mktemp.stdout|quote }}/certs/hawkular-cassandra-truststore.pwd")"
+- name: import the ca certificate into the cassandra truststore
+  shell: >
+    keytool -noprompt -import -v -trustcacerts
+    -alias '{{ item }}'
+    -file '{{ mktemp.stdout }}/certs/ca.crt'
+    -keystore '{{ mktemp.stdout }}/certs/hawkular-cassandra.truststore'
+    -storepass
+    "$(< "{{ mktemp.stdout|quote }}/certs/hawkular-cassandra-truststore.pwd")"
+  with_items:
+  - ca
+  - metricca
+  - cassandraca
+- name: import the ca certificate into the hawkular metrics truststore
+  shell: >
+    keytool -noprompt -import -v -trustcacerts
+    -alias '{{ item }}'
+    -file '{{ mktemp.stdout }}/certs/ca.crt'
+    -keystore '{{ mktemp.stdout }}/certs/hawkular-metrics.truststore'
+    -storepass
+    "$(< "{{ mktemp.stdout|quote }}/certs/hawkular-metrics-truststore.pwd")"
+  with_items:
+  - ca
+  - metricca
+  - cassandraca
+- name: generate password for htpasswd file for hawkular metrics
+  shell: cat /dev/urandom | tr -dc _A-Z-a-z-0-9 | head -c15
+  register: hawkular_metrics_password
+- name: generate password for hawkular metrics jgroups
+  shell: cat /dev/urandom | tr -dc _A-Z-a-z-0-9 | head -c15
+  register: hawkular_metrics_jgroups_password
+- name: generate htpasswd file for hawkular metrics
+  shell: >
+    htpasswd -cb
+    "{{ mktemp.stdout|quote }}/certs/hawkular-metrics.htpasswd" hawkular
+    '{{ hawkular_metrics_password.stdout }}'
+- name: generate the jgroups keystore
+  command: >
+    keytool -genseckey -alias hawkular
+    -keypass {{ hawkular_metrics_jgroups_password.stdout }}
+    -storepass {{ hawkular_metrics_jgroups_password.stdout }}
+    -keyalg Blowfish -keysize 56 -storetype JCEKS
+    -keystore {{ mktemp.stdout }}/certs/hawkular-jgroups.keystore
+- name: read files for the hawkular-metrics secret
+  command: >
+    base64 --wrap 0 "{{ mktemp.stdout }}/certs/{{ item }}"
+  register: hawkular_metrics_secret
+  with_items:
+  - hawkular-metrics.keystore
+  - hawkular-metrics-keystore.pwd
+  - hawkular-metrics.truststore
+  - hawkular-metrics-truststore.pwd
+  - hawkular-metrics.htpasswd
+  - hawkular-metrics.cert
+  - ca.crt
+  - hawkular-cassandra.keystore
+  - hawkular-cassandra-keystore.pwd
+  - hawkular-cassandra.truststore
+  - hawkular-cassandra-truststore.pwd
+  - hawkular-cassandra.pem
+  - hawkular-cassandra.cert
+  - hawkular-jgroups.keystore
+- name: generate hawkular-metrics-secrets secret template
+  template:
+    src: secret.j2
+    dest: "{{ mktemp.stdout }}/templates/hawkular_metrics_secrets.yaml"
+  vars:
+    name: hawkular-metrics-secrets
+    labels:
+      metrics-infra: hawkular-metrics
+    data:
+      hawkular-metrics.keystore: >
+        "{{ hawkular_metrics_secret.results[0].stdout }}"
+      hawkular-metrics.keystore.password: >
+        "{{ hawkular_metrics_secret.results[1].stdout }}"
+      hawkular-metrics.truststore: >
+        "{{ hawkular_metrics_secret.results[2].stdout }}"
+      hawkular-metrics.truststore.password: >
+        "{{ hawkular_metrics_secret.results[3].stdout }}"
+      hawkular-metrics.keystore.alias: "{{ 'hawkular-metrics'|b64encode }}"
+      hawkular-metrics.htpasswd.file: >
+        "{{ hawkular_metrics_secret.results[4].stdout }}"
+      hawkular-metrics.jgroups.keystore.password: >
+        "{{ hawkular_metrics_jgroups_password.stdout|b64encode }}"
+      hawkular-metrics.jgroups.keystore: >
+        "{{ hawkular_metrics_secret.results[13].stdout }}"
+      hawkular-metrics.jgroups.alias: "{{ 'hawkular'|b64encode }}"
+- name: generate hawkular-metrics-certificate secret template
+  template:
+    src: secret.j2
+    dest: "{{ mktemp.stdout }}/templates/hawkular_metrics_certificate.yaml"
+  vars:
+    name: hawkular-metrics-certificate
+    labels:
+      metrics-infra: hawkular-metrics
+    data:
+      hawkular-metrics.certificate: >
+        "{{ hawkular_metrics_secret.results[5].stdout }}"
+      hawkular-metrics-ca.certificate: >
+        "{{ hawkular_metrics_secret.results[6].stdout }}"
+- name: generate hawkular-metrics-account secret template
+  template:
+    src: secret.j2
+    dest: "{{ mktemp.stdout }}/templates/hawkular_metrics_account.yaml"
+  vars:
+    name: hawkular-metrics-account
+    labels:
+      metrics-infra: hawkular-metrics
+    data:
+      hawkular-metrics.username: "{{ 'hawkular'|b64encode }}"
+      hawkular-metrics.password: >
+        "{{ hawkular_metrics_password.stdout|b64encode }}"
+- name: generate cassandra secret template
+  template:
+    src: secret.j2
+    dest: "{{ mktemp.stdout }}/templates/cassandra_secrets.yaml"
+  vars:
+    name: hawkular-cassandra-secrets
+    labels:
+      metrics-infra: hawkular-cassandra
+    data:
+      cassandra.keystore: "{{ hawkular_metrics_secret.results[7].stdout }}"
+      cassandra.keystore.password: >
+        {{ hawkular_metrics_secret.results[8].stdout }}
+      cassandra.keystore.alias: "{{ 'hawkular-cassandra'|b64encode }}"
+      cassandra.truststore: "{{ hawkular_metrics_secret.results[9].stdout }}"
+      cassandra.truststore.password: >
+        {{ hawkular_metrics_secret.results[10].stdout }}
+      cassandra.pem: "{{ hawkular_metrics_secret.results[10].stdout }}"
+- name: generate cassandra-certificate secret template
+  template:
+    src: secret.j2
+    dest: "{{ mktemp.stdout }}/templates/cassandra_certificate.yaml"
+  vars:
+    name: hawkular-cassandra-certificate
+    labels:
+      metrics-infra: hawkular-cassandra
+    data:
+      cassandra.certificate: >
+        {{ hawkular_metrics_secret.results[11].stdout }}
+      cassandra-ca.certificate: >
+        {{ hawkular_metrics_secret.results[7].stdout }}

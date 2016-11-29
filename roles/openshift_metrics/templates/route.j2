@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Route
+metadata:
+  name: {{ name }}
+{% if labels is defined and labels %}
+  labels:
+{% for k, v in labels.iteritems() %}
+    {{ k }}: {{ v }}
+{% endfor %}
+{% endif %}
+spec:
+  host: {{ host }}
+  to:
+    kind: {{ to.kind }}
+    name: {{ to.name }}
+{% if tls is defined %}
+  tls:
+    termination: {{ tls.termination }}
+{% if tls.termination == 'reencrypt' %}
+    destinationCACertificate: |
+{{ tls.destination_ca_certificate|indent(6, true) }}
+{% endif %}
+{% endif %}

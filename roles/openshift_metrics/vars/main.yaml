@@ -1,0 +1,4 @@
+hawkular_cassandra_storage_types:
+- emptydir
+- pv
+- dynamic

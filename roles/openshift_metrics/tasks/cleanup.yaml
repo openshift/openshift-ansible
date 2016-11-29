@@ -1,0 +1,14 @@
+---
+- name: remove metrics components
+  command: >
+    {{ openshift.common.client_binary }} -n '{{ metrics_project }}'
+    delete --selector=metrics-infra
+    all,sa,secrets,templates,routes,pvc,rolebindings,clusterrolebindings
+  register: delete_metrics
+  changed_when: "delete_metrics.stdout != 'No resources found'"
+- name: remove rolebindings
+  command: >
+    {{ openshift.common.client_binary }} -n {{ metrics_project }}
+    delete --ignore-not-found
+    rolebinding/hawkular-view
+    clusterrolebinding/heapster-cluster-reader
