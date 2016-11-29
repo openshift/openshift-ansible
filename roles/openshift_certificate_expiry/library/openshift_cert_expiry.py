@@ -628,10 +628,11 @@ an OpenShift Container Platform cluster
         changed=False
     )
 
+
 ######################################################################
 # It's just the way we do things in Ansible. So disable this warning
 #
 # pylint: disable=wrong-import-position,import-error
-from ansible.module_utils.basic import AnsibleModule
+from ansible.module_utils.basic import AnsibleModule  # noqa: E402
 if __name__ == '__main__':
     main()

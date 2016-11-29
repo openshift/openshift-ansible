@@ -12,6 +12,8 @@
   - node
 
 - include: initialize_openshift_version.yml
+  tags:
+  - always
 
 - name: Set oo_option facts
   hosts: oo_all_hosts

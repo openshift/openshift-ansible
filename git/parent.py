@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# flake8: noqa
+# pylint: skip-file
 '''
   Script to determine if this commit has also
   been merged through the stage branch
@@ -93,4 +95,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

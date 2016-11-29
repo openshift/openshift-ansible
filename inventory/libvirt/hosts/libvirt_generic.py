@@ -1,4 +1,5 @@
 #!/usr/bin/env python2
+# pylint: skip-file
 
 '''
 libvirt external inventory script
