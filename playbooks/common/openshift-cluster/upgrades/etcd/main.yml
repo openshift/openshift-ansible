@@ -14,6 +14,9 @@
   connection: local
   become: no
   tasks:
+  - fail:
+      msg: 'The etcd upgrade playbook does not support upgrading embedded etcd, simply run the normal playbooks and etcd will be upgraded when your master is updated.'
+    when:  "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
   - name: Evaluate etcd_hosts_to_upgrade
     add_host:
       name: "{{ item }}"
