@@ -28,7 +28,7 @@ cd /etc/sysconfig/network-scripts
 
 [ -f ../network ] && . ../network
 
-if [[ $2 =~ ^(up|dhcp4-change)$ ]]; then
+if [[ $2 =~ ^(up|dhcp4-change|dhcp6-change)$ ]]; then
   # If the origin-upstream-dns config file changed we need to restart
   NEEDS_RESTART=0
   UPSTREAM_DNS='/etc/dnsmasq.d/origin-upstream-dns.conf'
