@@ -27,7 +27,7 @@
       logging_elasticsearch_ops_cluster_size: "{{ openshift_hosted_logging_elasticsearch_ops_cluster_size | default(1) }}"
   roles:
   - role: openshift_hosted
-  - role: openshift_metrics
+  - role: openshift_hosted_metrics
     when: openshift_hosted_metrics_deploy | default(false) | bool
   - role: openshift_hosted_logging
     when: openshift_hosted_logging_deploy | default(false) | bool

@@ -6,11 +6,11 @@
 
 - name: Record kubeconfig tmp dir
   set_fact:
-    openshift_metrics_kubeconfig: "{{ mktemp.stdout }}/admin.kubeconfig"
+    openshift_hosted_metrics_kubeconfig: "{{ mktemp.stdout }}/admin.kubeconfig"
 
 - name: Copy the admin client config(s)
   command: >
-    cp {{ openshift_master_config_dir }}/admin.kubeconfig {{ openshift_metrics_kubeconfig }}
+    cp {{ openshift_master_config_dir }}/admin.kubeconfig {{ openshift_hosted_metrics_kubeconfig }}
   changed_when: False
 
 - name: Set hosted metrics facts
@@ -33,7 +33,7 @@
 - name: Check for existing metrics pods
   shell: >
     {{ openshift.common.client_binary }}
-    --config={{ openshift_metrics_kubeconfig }}
+    --config={{ openshift_hosted_metrics_kubeconfig }}
     --namespace openshift-infra
     get pods -l {{ item }} | grep -q Running
   register: metrics_pods_status
@@ -47,7 +47,7 @@
 - name: Check for previous deployer
   shell: >
     {{ openshift.common.client_binary }}
-    --config={{ openshift_metrics_kubeconfig }}
+    --config={{ openshift_hosted_metrics_kubeconfig }}
     --namespace openshift-infra
     get pods -l metrics-infra=deployer --sort-by='{.metadata.creationTimestamp}' | tail -1 | grep metrics-deployer-
   register: metrics_deployer_status
