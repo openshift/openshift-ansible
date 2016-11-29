@@ -10,7 +10,7 @@
   when: not openshift.common.is_containerized | bool
 
 - name: Enable cockpit-ws
-  service:
+  systemd:
     name: cockpit.socket
     enabled: true
     state: started

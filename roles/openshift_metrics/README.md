@@ -5,8 +5,10 @@ OpenShift Metrics Installation
 
 Requirements
 ------------
-It requires subdomain fqdn to be set.
-If persistence is enabled, then it also requires NFS.
+
+* Ansible 2.2
+* It requires subdomain fqdn to be set.
+* If persistence is enabled, then it also requires NFS.
 
 Role Variables
 --------------

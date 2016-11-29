@@ -4,10 +4,16 @@
   when: not openshift.common.is_containerized | bool
 
 - name: Start rpcbind on Fedora/Red Hat
-  service: name=rpcbind state=started enabled=yes
+  systemd:
+    name: rpcbind
+    state: started
+    enabled: yes
 
 - name: Start nfs on Fedora/Red Hat
-  service: name=nfs-server state=started enabled=yes
+  systemd:
+    name: nfs-server
+    state: started
+    enabled: yes
 
 - name: Export the directories
   lineinfile: dest=/etc/exports

@@ -11,7 +11,6 @@
   template:
     dest: "/tmp/dockerbuild/Dockerfile"
     src: Dockerfile
-  register: install_result
   when: openshift.common.is_containerized | bool
 
 - name: Build Bind image
@@ -22,12 +21,7 @@
   template:
     dest: "/etc/systemd/system/named.service"
     src: named.service.j2
-  register: install_result
   when: openshift.common.is_containerized | bool
-
-- name: reload systemd
-  command: /usr/bin/systemctl --system daemon-reload
-  when: openshift.common.is_containerized | bool and install_result | changed
 
 - name: Create bind zone dir
   file: path=/var/named state=directory
@@ -45,7 +39,8 @@
   notify: restart bind
 
 - name: Enable Bind
-  service:
+  systemd:
     name: named
     state: started
     enabled: yes
+    daemon_reload: yes
