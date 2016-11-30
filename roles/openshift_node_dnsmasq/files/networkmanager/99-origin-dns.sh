@@ -48,7 +48,6 @@ if [[ $2 =~ ^(up|dhcp4-change)$ ]]; then
        -n "${IP4_NAMESERVERS}" ]]; then
     if [ ! -f /etc/dnsmasq.d/origin-dns.conf ]; then
       cat << EOF > /etc/dnsmasq.d/origin-dns.conf
-strict-order
 no-resolv
 domain-needed
 server=/cluster.local/172.30.0.1
