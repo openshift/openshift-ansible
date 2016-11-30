@@ -588,7 +588,8 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # be used with 1.0 and 3.0.
 #openshift_use_dnsmasq=False
 # Define an additional dnsmasq.conf file to deploy to /etc/dnsmasq.d/openshift-ansible.conf
-# This is useful for POC environments where DNS may not actually be available yet.
+# This is useful for POC environments where DNS may not actually be available yet or to set
+# options like 'strict-order' to alter dnsmasq configuration.
 #openshift_node_dnsmasq_additional_config_file=/home/bob/ose-dnsmasq.conf
 
 # Global Proxy Configuration
