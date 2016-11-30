@@ -1309,6 +1309,7 @@ def get_openshift_version(facts):
 
     # No need to run this method repeatedly on a system if we already know the
     # version
+    # TODO: We need a way to force reload this after upgrading bits.
     if 'common' in facts:
         if 'version' in facts['common'] and facts['common']['version'] is not None:
             return chomp_commit_offset(facts['common']['version'])
