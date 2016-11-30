@@ -104,9 +104,6 @@
 
 - name: Upgrade master packages
   hosts: oo_masters_to_config
-  handlers:
-  - include: ../../../../roles/openshift_master/handlers/main.yml
-    static: yes
   roles:
   - openshift_facts
   tasks:
@@ -134,6 +131,8 @@
   roles:
   - openshift_facts
   tasks:
+  - include: upgrade_scheduler.yml
+
   - include: "{{ master_config_hook }}"
     when: master_config_hook is defined
 
