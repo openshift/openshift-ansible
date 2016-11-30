@@ -1,4 +1,4 @@
-hawkular_cassandra_storage_types:
+openshift_metrics_hawkular_cassandra_storage_types:
 - emptydir
 - pv
 - dynamic

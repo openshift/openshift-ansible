@@ -27,4 +27,4 @@
     subjects:
     - kind: ServiceAccount
       name: heapster
-      namespace: "{{ metrics_project }}"
+      namespace: "{{ openshift_metrics_project }}"

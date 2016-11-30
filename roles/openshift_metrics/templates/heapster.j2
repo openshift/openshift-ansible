@@ -20,29 +20,29 @@ spec:
       serviceAccountName: heapster
       containers:
       - name: heapster
-        image: {{image_prefix}}metrics-heapster:{{image_version}}
+        image: {{openshift_metrics_image_prefix}}metrics-heapster:{{openshift_metrics_image_version}}
         ports:
         - containerPort: 8082
           name: "http-endpoint"
         command:
         - "heapster-wrapper.sh"
         - "--wrapper.allowed_users_file=/secrets/heapster.allowed-users"
-        - "--source=kubernetes:{{master_url}}?useServiceAccount=true&kubeletHttps=true&kubeletPort=10250"
+        - "--source=kubernetes:{{openshift_metrics_master_url}}?useServiceAccount=true&kubeletHttps=true&kubeletPort=10250"
         - "--tls_cert=/secrets/heapster.cert"
         - "--tls_key=/secrets/heapster.key"
         - "--tls_client_ca=/secrets/heapster.client-ca"
         - "--allowed_users=%allowed_users%"
-        - "--metric_resolution={{metrics_resolution}}"
-{% if not heapster_standalone %}
+        - "--metric_resolution={{openshift_metrics_resolution}}"
+{% if not openshift_metrics_heapster_standalone %}
         - "--wrapper.username_file=/hawkular-account/hawkular-metrics.username"
         - "--wrapper.password_file=/hawkular-account/hawkular-metrics.password"
         - "--wrapper.endpoint_check=https://hawkular-metrics:443/hawkular/metrics/status"
-        - "--sink=hawkular:https://hawkular-metrics:443?tenant=_system&labelToTenant=pod_namespace&labelNodeId={{metrics_node_id}}&caCert=/hawkular-cert/hawkular-metrics-ca.certificate&user=%username%&pass=%password%&filter=label(container_name:^system.slice.*|^user.slice)"
+        - "--sink=hawkular:https://hawkular-metrics:443?tenant=_system&labelToTenant=pod_namespace&labelNodeId={{openshift_metrics_node_id}}&caCert=/hawkular-cert/hawkular-metrics-ca.certificate&user=%username%&pass=%password%&filter=label(container_name:^system.slice.*|^user.slice)"
 {% endif %}
         volumeMounts:
         - name: heapster-secrets
           mountPath: "/secrets"
-{% if not heapster_standalone %}
+{% if not openshift_metrics_heapster_standalone %}
         - name: hawkular-metrics-certificate
           mountPath: "/hawkular-cert"
         - name: hawkular-metrics-account
@@ -56,7 +56,7 @@ spec:
         - name: heapster-secrets
           secret:
             secretName: heapster-secrets
-{% if not heapster_standalone %}
+{% if not openshift_metrics_heapster_standalone %}
         - name: hawkular-metrics-certificate
           secret:
             secretName: hawkular-metrics-certificate

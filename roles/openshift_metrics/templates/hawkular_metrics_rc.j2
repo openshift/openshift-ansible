@@ -18,7 +18,7 @@ spec:
     spec:
       serviceAccount: hawkular
       containers:
-      - image: {{image_prefix}}metrics-hawkular-metrics:{{image_version}}
+      - image: {{openshift_metrics_image_prefix}}metrics-hawkular-metrics:{{openshift_metrics_image_version}}
         name: hawkular-metrics
         ports:
         - name: http-endpoint
@@ -36,7 +36,7 @@ spec:
         - "-Dhawkular.metrics.openshift.auth-methods=openshift-oauth,htpasswd"
         - "-Dhawkular.metrics.openshift.htpasswd-file=/secrets/hawkular-metrics.htpasswd.file"
         - "-Dhawkular.metrics.allowed-cors-access-control-allow-headers=authorization"
-        - "-Dhawkular.metrics.default-ttl={{metrics_duration}}"
+        - "-Dhawkular.metrics.default-ttl={{openshift_metrics_duration}}"
         - "-Dhawkular-alerts.cassandra-nodes=hawkular-cassandra"
         - "-Dhawkular-alerts.cassandra-use-ssl"
         - "-Dhawkular.alerts.openshift.auth-methods=openshift-oauth,htpasswd"
@@ -44,8 +44,8 @@ spec:
         - "-Dhawkular.alerts.allowed-cors-access-control-allow-headers=authorization"
         - "-Dorg.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH=true"
         - "-Dorg.apache.catalina.connector.CoyoteAdapter.ALLOW_BACKSLASH=true"
-        - "-DKUBERNETES_MASTER_URL={{master_url}}"
-        - "-DUSER_WRITE_ACCESS={{hawkular_user_write_access}}"
+        - "-DKUBERNETES_MASTER_URL={{openshift_metrics_master_url}}"
+        - "-DUSER_WRITE_ACCESS={{openshift_metrics_hawkular_user_write_access}}"
         - "--hmw.keystore=/secrets/hawkular-metrics.keystore"
         - "--hmw.truststore=/secrets/hawkular-metrics.truststore"
         - "--hmw.keystore_password_file=/secrets/hawkular-metrics.keystore.password"
@@ -59,7 +59,7 @@ spec:
             fieldRef:
               fieldPath: metadata.namespace
         - name: MASTER_URL
-          value: "{{ master_url }}"
+          value: "{{ openshift_metrics_master_url }}"
         - name: OPENSHIFT_KUBE_PING_NAMESPACE
           valueFrom:
             fieldRef:

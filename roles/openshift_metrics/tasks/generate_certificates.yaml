@@ -25,14 +25,14 @@
 # TODO maybe there's an easier way to get the service accounts' ca crt?
 - name: get heapster service account secrets
   shell: >
-    {{ openshift.common.client_binary }} -n '{{ metrics_project }}'
+    {{ openshift.common.client_binary }} -n '{{ openshift_metrics_project }}'
     get serviceaccount/default
     --template '{{ '{{range .secrets}}{{println .name}}{{end}}' }}'
     | grep ^default-token-
   register: sa_secret
 - name: get heapster service account ca
   command: >
-    {{ openshift.common.client_binary }} -n '{{ metrics_project }}'
+    {{ openshift.common.client_binary }} -n '{{ openshift_metrics_project }}'
     get 'secret/{{ sa_secret.stdout }}'
     --template '{{ '{{index .data "ca.crt"}}' }}'
   register: sa_secret
@@ -54,12 +54,12 @@
       heapster.cert: "{{ heapster_secret.results[0].stdout }}"
       heapster.key: "{{ heapster_secret.results[1].stdout }}"
       heapster.client-ca: "{{ sa_secret.stdout }}"
-      heapster.allowed-users: "{{ heapster_allowed_users|b64encode }}"
+      heapster.allowed-users: "{{ openshift_metrics_heapster_allowed_users|b64encode }}"
 - name: generate hawkular-metrics certificates
   include: setup_certificate.yaml
   vars:
     component: hawkular-metrics
-    hostnames: "hawkular-metrics,{{ hawkular_metrics_hostname }}"
+    hostnames: "hawkular-metrics,{{ openshift_metrics_hawkular_metrics_hostname }}"
 - name: generate hawkular-cassandra certificates
   include: setup_certificate.yaml
   vars:
