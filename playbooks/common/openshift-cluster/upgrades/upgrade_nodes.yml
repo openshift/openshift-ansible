@@ -44,8 +44,13 @@
       {{ hostvars[groups.oo_first_master.0].openshift.common.client_binary }} adm manage-node {{ openshift.common.hostname | lower }} --evacuate --force
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: inventory_hostname in groups.oo_nodes_to_upgrade
+
   tasks:
+
   - include: docker/upgrade.yml
+    vars:
+      # We will restart Docker ourselves after everything is ready:
+      skip_docker_restart: True
     when: l_docker_upgrade is defined and l_docker_upgrade | bool and not openshift.common.is_atomic | bool
 
   - include: "{{ node_config_hook }}"
@@ -57,11 +62,31 @@
        openshift_version: "{{ openshift_pkg_version | default('') }}"
     when: inventory_hostname in groups.oo_nodes_to_upgrade and not openshift.common.is_containerized | bool
 
+  - name: Remove obsolete docker-sdn-ovs.conf
+    file: path=/etc/systemd/system/docker.service.d/docker-sdn-ovs.conf state=absent
+    when: (deployment_type == 'openshift-enterprise' and openshift_release | version_compare('3.4', '>=')) or (deployment_type == 'origin' and openshift_release | version_compare('1.4', '>='))
+
   - include: containerized_node_upgrade.yml
     when: inventory_hostname in groups.oo_nodes_to_upgrade and openshift.common.is_containerized | bool
 
-  - meta: flush_handlers
+  - name: Ensure containerized services stopped before Docker restart
+    service: name={{ item }} state=stopped
+    with_items:
+      - etcd_container
+      - openvswitch
+      - "{{ openshift.common.service_type }}-master"
+      - "{{ openshift.common.service_type }}-master-api"
+      - "{{ openshift.common.service_type }}-master-controllers"
+      - "{{ openshift.common.service_type }}-node"
+    failed_when: false
+    when: openshift.common.is_containerized | bool
 
+  # Mandatory Docker restart, ensure all containerized services are running:
+  - include: docker/restart.yml
+
+  - name: Restart rpm node service
+    service: name="{{ openshift.common.service_type }}-node" state=restarted
+    when: inventory_hostname in groups.oo_nodes_to_upgrade and not openshift.common.is_containerized | bool
   - name: Set node schedulability
     command: >
       {{ hostvars[groups.oo_first_master.0].openshift.common.client_binary }} adm manage-node {{ openshift.common.hostname | lower }} --schedulable=true
