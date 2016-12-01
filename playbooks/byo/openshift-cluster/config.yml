@@ -1,5 +1,7 @@
 ---
 - include: ../../common/openshift-cluster/verify_ansible_version.yml
+  tags:
+  - always
 
 - hosts: localhost
   connection: local
