@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.44
+Version:        3.2.45
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Dec 01 2016 Scott Dodson <sdodson@redhat.com> 3.2.45-1
+- openshift_node_dnsmasq - Remove strict-order option from dnsmasq
+  (sdodson@redhat.com)
+
 * Mon Nov 28 2016 Scott Dodson <sdodson@redhat.com> 3.2.44-1
 - Create the file in two passes, atomicly copy it over (sdodson@redhat.com)
 - node_dnsmasq -- Set dnsmasq as our only nameserver (sdodson@redhat.com)
