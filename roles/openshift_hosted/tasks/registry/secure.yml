@@ -29,7 +29,7 @@
   changed_when: false
 
 - set_fact:
-    docker_registry_route_hostname: "{{ 'docker-registry-default.' ~ (openshift.master.default_subdomain | default('router.default.svc.cluster.local', true)) }}"
+    docker_registry_route_hostname: "{{ 'docker-registry-default.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true)) }}"
 
 - name: Create registry certificates if they do not exist
   command: >

@@ -27,17 +27,11 @@ From this role:
 | openshift_hosted_metrics_resolution             | `10s`                 | Metrics resolution                                          |
 
 
-From openshift_common:
-
-| Name                                  | Default Value  |                                        |
-|---------------------------------------|----------------|----------------------------------------|
-| openshift_master_default_subdomain    | null           | Subdomain FQDN (Mandatory)             |
-
-
 Dependencies
 ------------
 openshift_facts
 openshift_examples
+openshift_master_facts
 
 Example Playbook
 ----------------
