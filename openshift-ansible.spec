@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.31
+Version:        3.4.32
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,20 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Nov 30 2016 Scott Dodson <sdodson@redhat.com> 3.4.32-1
+- Fix typo, s/ensure/state/ (sdodson@redhat.com)
+- Add view permissions to hawkular sa (sdodson@redhat.com)
+- Use multiple '-v's when creating the metrics deployer command
+  (tbielawa@redhat.com)
+- Fix templating (jdetiber@redhat.com)
+- refactor handling of scheduler defaults (jdetiber@redhat.com)
+- fix tagging (jdetiber@redhat.com)
+- do not report changed for group mapping (jdetiber@redhat.com)
+- Cleanup ovs file and restart docker on every upgrade. (dgoodwin@redhat.com)
+- xpaas v1.3.5 (sdodson@redhat.com)
+- etcd upgrade playbook is not currently applicable to embedded etcd installs
+  (sdodson@redhat.com)
+
 * Mon Nov 28 2016 Scott Dodson <sdodson@redhat.com> 3.4.31-1
 - Fix invalid embedded etcd fact in etcd upgrade playbook.
   (dgoodwin@redhat.com)
