@@ -83,15 +83,9 @@
     path: "{{ openshift_master_scheduler_conf }}"
   register: scheduler_config_stat
 
-- block:
-  - set_fact:
-      openshift_master_scheduler_predicates: "{{ lookup('openshift_master_facts_default_predicates') }}"
-    when: "{{ openshift_master_scheduler_predicates is not defined }}"
-
-  - set_fact:
-      openshift_master_scheduler_priorities: "{{ lookup('openshift_master_facts_default_priorities') }}"
-    when: "{{ openshift_master_scheduler_priorities is not defined }}"
-  when: "{{ not scheduler_config_stat.stat.exists }}"
+- set_fact:
+    openshift_master_scheduler_default_predicates: "{{ lookup('openshift_master_facts_default_predicates') }}"
+    openshift_master_scheduler_default_priorities: "{{ lookup('openshift_master_facts_default_priorities') }}"
 
 - block:
   - name: Retrieve current scheduler config
@@ -99,16 +93,14 @@
       src: "{{ openshift_master_scheduler_conf }}"
     register: current_scheduler_config
 
+  - set_fact:
+      openshift_master_scheduler_current_config: "{{ current_scheduler_config.content | b64decode | from_json }}"
+
   - fail:
-      msg: "Could not decode scheduler config"
-    when: "{{ (current_scheduler_config.content | b64decode | from_json).apiVersion | default(none) != 'v1' }}"
+      msg: "Unknown scheduler config apiVersion {{ openshift_master_scheduler_config.apiVersion }}"
+    when: "{{ openshift_master_scheduler_current_config.apiVersion | default(None) != 'v1' }}"
 
   - set_fact:
-      openshift_master_scheduler_predicates: "{{ (current_scheduler_config.content | b64decode | from_json).predicates }}"
-    when: "{{ openshift_master_scheduler_predicates is not defined }}"
-
-  - set_fact:
-      openshift_master_scheduler_priorities: "{{ (current_scheduler_config.content | b64decode | from_json).priorities }}"
-    when: "{{ openshift_master_scheduler_priorities is not defined }}"
-
+      openshift_master_scheduler_current_predicates: "{{ openshift_master_scheduler_current_config.predicates }}"
+      openshift_master_scheduler_current_priorities: "{{ openshift_master_scheduler_current_config.priorities }}"
   when: "{{ scheduler_config_stat.stat.exists }}"
