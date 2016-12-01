@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.55
+Version:        3.3.56
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Dec 01 2016 Scott Dodson <sdodson@redhat.com> 3.3.56-1
+- openshift_node_dnsmasq - Remove strict-order option from dnsmasq
+  (sdodson@redhat.com)
+- Sync latest image stream and templates for v1.3 and v1.4 (sdodson@redhat.com)
+- xpaas v1.3.5 (sdodson@redhat.com)
+
 * Mon Nov 28 2016 Scott Dodson <sdodson@redhat.com> 3.3.55-1
 - Move infrastructure templates into openshift_hosted_templates role.
   (abutcher@redhat.com)
