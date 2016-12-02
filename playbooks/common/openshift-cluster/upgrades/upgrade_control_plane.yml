@@ -62,6 +62,7 @@
     static: yes
   roles:
   - openshift_facts
+  - openshift_master_facts
   tasks:
   - include: "{{ master_config_hook }}"
     when: master_config_hook is defined
