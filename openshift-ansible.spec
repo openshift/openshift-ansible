@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.33
+Version:        3.4.34
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,16 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Dec 05 2016 Scott Dodson <sdodson@redhat.com> 3.4.34-1
+- Conditionalize master config update for admission_plugin_config.
+  (abutcher@redhat.com)
+- node_dnsmasq - restart dnsmasq if it's not currently running
+  (sdodson@redhat.com)
+- upgrade_control_plane.yml: systemd_units.yaml nees the master facts
+  (mchappel@redhat.com)
+- openshift-master/restart : use openshift.common.hostname instead of
+  inventory_hostname (mchappel@redhat.com)
+
 * Thu Dec 01 2016 Scott Dodson <sdodson@redhat.com> 3.4.33-1
 - openshift_node_dnsmasq - Remove strict-order option from dnsmasq
   (sdodson@redhat.com)
