@@ -3,6 +3,7 @@
     dest: "{{ openshift.common.config_base}}/master/master-config.yaml"
     yaml_key: 'admissionConfig.pluginConfig'
     yaml_value: "{{ openshift.master.admission_plugin_config }}"
+  when: "{{ 'admission_plugin_config' in openshift.master }}"
 
 - modify_yaml:
     dest: "{{ openshift.common.config_base}}/master/master-config.yaml"
