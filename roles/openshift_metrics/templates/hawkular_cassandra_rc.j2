@@ -49,6 +49,8 @@ spec:
           value: "{{ master }}"
         - name: CASSANDRA_DATA_VOLUME
           value: "/cassandra_data"
+        - name: JVM_OPTS
+          value: "-Dcassandra.commitlog.ignorereplayerrors=true"
         - name: POD_NAMESPACE
           valueFrom:
             fieldRef:

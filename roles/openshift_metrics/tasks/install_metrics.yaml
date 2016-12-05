@@ -11,7 +11,7 @@
   file: path={{mktemp.stdout}}/templates state=directory mode=0755
   changed_when: False
 
+- include: generate_certificates.yaml
 - include: generate_serviceaccounts.yaml
 - include: generate_services.yaml
-- include: generate_certificates.yaml
 - include: generate_rolebindings.yaml

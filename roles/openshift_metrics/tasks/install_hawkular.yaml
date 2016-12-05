@@ -39,6 +39,9 @@
     size: "{{ openshift_metrics_hawkular_cassandra_pv_size }}"
   with_sequence: count={{ openshift_metrics_hawkular_cassandra_nodes }}
   when: openshift_metrics_hawkular_cassandra_storage_type == 'dynamic'
+- name: read hawkular-metrics route destination ca certificate
+  slurp: src={{ openshift_metrics_certs_dir }}/ca.crt
+  register: metrics_route_dest_ca_cert
 - name: generate the hawkular-metrics route
   template:
     src: route.j2
@@ -47,11 +50,10 @@
     name: hawkular-metrics
     labels:
       metrics-infra: hawkular-metrics
-    host: hawkular-metrics.example.com
+    host: "{{ openshift_metrics_hawkular_metrics_hostname }}"
     to:
       kind: Service
       name: hawkular-metrics
     tls:
       termination: reencrypt
-      destination_ca_certificate: >
-        {{ hawkular_metrics_secret.results[6].stdout|b64decode }}
+      destination_ca_certificate: "{{ metrics_route_dest_ca_cert.content }}"

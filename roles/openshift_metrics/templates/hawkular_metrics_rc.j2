@@ -66,6 +66,8 @@ spec:
               fieldPath: metadata.namespace
         - name: OPENSHIFT_KUBE_PING_LABELS
           value: "metrics-infra=hawkular-metrics,name=hawkular-metrics"
+        - name: STARTUP_TIMEOUT
+          value: "{{ openshift_metrics_startup_timeout }}"
         volumeMounts:
         - name: hawkular-metrics-secrets
           mountPath: "/secrets"

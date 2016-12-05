@@ -27,7 +27,7 @@ spec:
         command:
         - "heapster-wrapper.sh"
         - "--wrapper.allowed_users_file=/secrets/heapster.allowed-users"
-        - "--source=kubernetes:{{openshift_metrics_master_url}}?useServiceAccount=true&kubeletHttps=true&kubeletPort=10250"
+        - "--source=kubernetes.summary_api:${MASTER_URL}?useServiceAccount=true&kubeletHttps=true&kubeletPort=10250"
         - "--tls_cert=/secrets/heapster.cert"
         - "--tls_key=/secrets/heapster.key"
         - "--tls_client_ca=/secrets/heapster.client-ca"
@@ -39,6 +39,9 @@ spec:
         - "--wrapper.endpoint_check=https://hawkular-metrics:443/hawkular/metrics/status"
         - "--sink=hawkular:https://hawkular-metrics:443?tenant=_system&labelToTenant=pod_namespace&labelNodeId={{openshift_metrics_node_id}}&caCert=/hawkular-cert/hawkular-metrics-ca.certificate&user=%username%&pass=%password%&filter=label(container_name:^system.slice.*|^user.slice)"
 {% endif %}
+        env:
+        - name: STARTUP_TIMEOUT
+          value: "{{ openshift_metrics_startup_timeout }}"
         volumeMounts:
         - name: heapster-secrets
           mountPath: "/secrets"

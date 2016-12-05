@@ -55,6 +55,9 @@ For default values, see [`defaults/main.yaml`](defaults/main.yaml).
   override this, make sure to add `system:master-proxy` to the list in order to
   allow horizontal pod autoscaling to function properly.
 
+- `openshift_metrics_startup_timeout`: How long in seconds we should wait until
+  Hawkular Metrics and Heapster starts up before attempting a restart.
+
 - `openshift_metrics_duration`: How many days metrics should be stored for.
 
 - `openshift_metrics_resolution`: How often metrics should be gathered.
