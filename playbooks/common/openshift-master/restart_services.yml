@@ -12,7 +12,7 @@
   become: no
   local_action:
     module: wait_for
-      host="{{ inventory_hostname }}"
+      host="{{ openshift.common.hostname }}"
       state=started
       delay=10
       port="{{ openshift.master.api_port }}"
