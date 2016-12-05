@@ -80,6 +80,10 @@ EOF
       NEEDS_RESTART=1
     fi
 
+    if ! `systemctl -q is-active dnsmasq.service`; then
+      NEEDS_RESTART=1
+    fi
+
     ######################################################################
     if [ "${NEEDS_RESTART}" -eq "1" ]; then
       systemctl restart dnsmasq
