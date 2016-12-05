@@ -1577,10 +1577,10 @@ def set_proxy_facts(facts):
         # If we're actually defining a proxy config then create admission_plugin_config
         # if it doesn't exist, then merge builddefaults[config] structure
         # into admission_plugin_config
-        if 'admission_plugin_config' not in facts['master']:
-            facts['master']['admission_plugin_config'] = dict()
         if 'config' in builddefaults and ('http_proxy' in builddefaults or \
                 'https_proxy' in builddefaults):
+            if 'admission_plugin_config' not in facts['master']:
+                facts['master']['admission_plugin_config'] = dict()
             facts['master']['admission_plugin_config'].update(builddefaults['config'])
         facts['builddefaults'] = builddefaults
 
