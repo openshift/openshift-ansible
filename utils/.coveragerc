@@ -1,0 +1,6 @@
+[run]
+omit=
+    */lib/python*/site-packages/*
+    */encodings/ascii.py
+    */getpass.py
+    */contextlib.py
