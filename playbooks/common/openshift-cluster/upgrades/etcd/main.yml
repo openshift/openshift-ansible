@@ -38,12 +38,12 @@
   tasks:
   - name: Record RPM based etcd version
     command: rpm -qa --qf '%{version}' etcd\*
-    register: etcd_installed_version
+    register: etcd_rpm_version
     failed_when: false
     when: not openshift.common.is_containerized | bool
   - name: Record containerized etcd version
     command: docker exec etcd_container rpm -qa --qf '%{version}' etcd\*
-    register: etcd_installed_version
+    register: etcd_container_version
     failed_when: false
     when: openshift.common.is_containerized | bool
 
@@ -56,7 +56,7 @@
     upgrade_version: '2.1'
   tasks:
   - include: rhel_tasks.yml
-    when: etcd_installed_version.stdout | default('99') | version_compare('2.1','<') and ansible_distribution == 'RedHat' and not openshift.common.is_containerized | bool
+    when: etcd_rpm_version.stdout | default('99') | version_compare('2.1','<') and ansible_distribution == 'RedHat' and not openshift.common.is_containerized | bool
 
 - name: Upgrade RPM hosts to 2.2
   hosts: etcd_hosts_to_upgrade
@@ -65,7 +65,7 @@
     upgrade_version: '2.2'
   tasks:
   - include: rhel_tasks.yml
-    when: etcd_installed_version.stdout | default('99') | version_compare('2.2','<') and ansible_distribution == 'RedHat' and not openshift.common.is_containerized | bool
+    when: etcd_rpm_version.stdout | default('99') | version_compare('2.2','<') and ansible_distribution == 'RedHat' and not openshift.common.is_containerized | bool
 
 - name: Upgrade containerized hosts to 2.2.5
   hosts: etcd_hosts_to_upgrade
@@ -74,7 +74,7 @@
     upgrade_version: 2.2.5
   tasks:
   - include: containerized_tasks.yml
-    when: etcd_installed_version.stdout | default('99') | version_compare('2.2','<') and openshift.common.is_containerized | bool
+    when: etcd_container_version.stdout | default('99') | version_compare('2.2','<') and openshift.common.is_containerized | bool
 
 - name: Upgrade RPM hosts to 2.3
   hosts: etcd_hosts_to_upgrade
@@ -83,7 +83,7 @@
     upgrade_version: '2.3'
   tasks:
   - include: rhel_tasks.yml
-    when: etcd_installed_version.stdout | default('99') | version_compare('2.3','<') and ansible_distribution == 'RedHat' and not openshift.common.is_containerized | bool
+    when: etcd_rpm_version.stdout | default('99') | version_compare('2.3','<') and ansible_distribution == 'RedHat' and not openshift.common.is_containerized | bool
 
 - name: Upgrade containerized hosts to 2.3.7
   hosts: etcd_hosts_to_upgrade
@@ -92,7 +92,7 @@
     upgrade_version: 2.3.7
   tasks:
   - include: containerized_tasks.yml
-    when: etcd_installed_version.stdout | default('99') | version_compare('2.3','<') and openshift.common.is_containerized | bool
+    when: etcd_container_version.stdout | default('99') | version_compare('2.3','<') and openshift.common.is_containerized | bool
 
 - name: Upgrade RPM hosts to 3.0
   hosts: etcd_hosts_to_upgrade
@@ -101,16 +101,16 @@
     upgrade_version: '3.0'
   tasks:
   - include: rhel_tasks.yml
-    when: etcd_installed_version.stdout | default('99') | version_compare('3.0','<') and ansible_distribution == 'RedHat' and not openshift.common.is_containerized | bool
+    when: etcd_rpm_version.stdout | default('99') | version_compare('3.0','<') and ansible_distribution == 'RedHat' and not openshift.common.is_containerized | bool
 
 - name: Upgrade containerized hosts to etcd3 image
   hosts: etcd_hosts_to_upgrade
   serial: 1
   vars:
-    upgrade_version: 3.0.3
+    upgrade_version: 3.0.14
   tasks:
   - include: containerized_tasks.yml
-    when: etcd_installed_version.stdout | default('99') | version_compare('3.0','<') and openshift.common.is_containerized | bool
+    when: etcd_container_version.stdout | default('99') | version_compare('3.0','<') and openshift.common.is_containerized | bool
 
 - name: Upgrade fedora to latest
   hosts: etcd_hosts_to_upgrade
