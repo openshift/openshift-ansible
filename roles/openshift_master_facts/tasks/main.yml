@@ -75,7 +75,7 @@
       api_env_vars: "{{ openshift_master_api_env_vars | default(None) }}"
       controllers_env_vars: "{{ openshift_master_controllers_env_vars | default(None) }}"
       audit_config: "{{ openshift_master_audit_config | default(None) }}"
-      metrics_public_url: "{% if openshift_hosted_metrics_deploy | default(false) %}https://{{ metrics_hostname }}/hawkular/metrics{% endif %}"
+      metrics_public_url: "{{ openshift_hosted_metrics_public_url | default(None) }}"
       scheduler_args: "{{ openshift_master_scheduler_args | default(None) }}"
 
 - name: Determine if scheduler config present
