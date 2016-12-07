@@ -4,6 +4,8 @@
     prev_predicates: "{{ lookup('openshift_master_facts_default_predicates', short_version=openshift_upgrade_min, deployment_type=openshift_deployment_type) }}"
     prev_predicates_no_region: "{{ lookup('openshift_master_facts_default_predicates', short_version=openshift_upgrade_min, deployment_type=openshift_deployment_type, regions_enabled=False) }}"
     default_predicates_no_region: "{{ lookup('openshift_master_facts_default_predicates', regions_enabled=False) }}"
+    # older_predicates are the set of predicates that have previously been
+    # hard-coded into openshift_facts
     older_predicates:
     - - name: MatchNodeSelector
       - name: PodFitsResources
@@ -36,6 +38,8 @@
           serviceAffinity:
             labels:
             - region
+    # older_predicates_no_region are the set of predicates that have previously
+    # been hard-coded into openshift_facts, with the Region predicate removed
     older_predicates_no_region:
     - - name: MatchNodeSelector
       - name: PodFitsResources
@@ -91,6 +95,8 @@
     prev_priorities: "{{ lookup('openshift_master_facts_default_priorities', short_version=openshift_upgrade_min, deployment_type=openshift_deployment_type) }}"
     prev_priorities_no_zone: "{{ lookup('openshift_master_facts_default_priorities', short_version=openshift_upgrade_min, deployment_type=openshift_deployment_type, zones_enabled=False) }}"
     default_priorities_no_zone: "{{ lookup('openshift_master_facts_default_priorities', zones_enabled=False) }}"
+    # older_priorities are the set of priorities that have previously been
+    # hard-coded into openshift_facts
     older_priorities:
     - - name: LeastRequestedPriority
         weight: 1
@@ -101,6 +107,8 @@
         argument:
           serviceAntiAffinity:
             label: zone
+    # older_priorities_no_region are the set of priorities that have previously
+    # been hard-coded into openshift_facts, with the Zone priority removed
     older_priorities_no_zone:
     - - name: LeastRequestedPriority
         weight: 1
@@ -149,8 +157,6 @@
       priorities: "{{ openshift_upgrade_scheduler_priorities
                       | default(openshift_master_scheduler_current_priorities) }}"
   block:
-  # TODO: perform upgrade
-  - debug: var=scheduler_config
   - name: Update scheduler config
     copy:
       content: "{{ scheduler_config | to_nice_json }}"
