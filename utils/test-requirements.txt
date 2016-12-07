@@ -1,0 +1,12 @@
+ansible
+enum
+configparser
+pylint
+nose
+coverage
+mock
+flake8
+PyYAML
+click
+backports.functools_lru_cache
+pyOpenSSL
