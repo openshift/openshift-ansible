@@ -157,3 +157,4 @@ class FilterModule(object):
             "itservice_dependency_builder": self.itservice_dependency_builder,
             "itservice_dep_builder_list": self.itservice_dep_builder_list,
         }
+# flake8: noqa

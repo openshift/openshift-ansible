@@ -72,3 +72,4 @@ class LookupModule(LookupBase):
                 ret.append('')
 
         return ret
+# flake8: noqa

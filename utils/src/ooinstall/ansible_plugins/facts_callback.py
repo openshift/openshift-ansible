@@ -91,3 +91,4 @@ class CallbackModule(CallbackBase):
 
     def v2_playbook_on_stats(self, stats):
         pass
+# flake8: noqa

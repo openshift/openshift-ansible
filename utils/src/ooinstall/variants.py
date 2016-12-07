@@ -73,3 +73,4 @@ def get_variant_version_combos():
         for ver in variant.versions:
             combos.append((variant, ver))
     return combos
+# flake8: noqa

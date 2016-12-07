@@ -3,3 +3,4 @@
 # pylint: disable=missing-docstring
 
 from .oo_config import OOConfig
+# flake8: noqa

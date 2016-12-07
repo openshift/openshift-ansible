@@ -273,3 +273,4 @@ from ansible.module_utils.basic import *
 from ansible.module_utils.splitter import *
 
 main()
+# flake8: noqa

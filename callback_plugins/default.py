@@ -67,3 +67,4 @@ class CallbackModule(DEFAULT_MODULE.CallbackModule):  # pylint: disable=too-few-
             result[key] = value
 
         return output
+# flake8: noqa

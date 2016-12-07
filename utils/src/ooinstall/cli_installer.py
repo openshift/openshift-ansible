@@ -1048,3 +1048,4 @@ if __name__ == '__main__':
     # This is expected behaviour for context passing with click library:
     # pylint: disable=unexpected-keyword-arg
     cli(obj={})
+# flake8: noqa
