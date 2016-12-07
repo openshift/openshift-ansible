@@ -48,17 +48,17 @@ before attempting to pull any of the following images.
         openshift/origin
         openshift/node (node + openshift-sdn + openvswitch rpm for client tools)
         openshift/openvswitch (centos7 + openvswitch rpm, runs ovsdb ovsctl processes)
-        registry.access.redhat.com/rhel7/etcd3
+        registry.access.redhat.com/rhel7/etcd
     OpenShift Enterprise
         openshift3/ose
         openshift3/node
         openshift3/openvswitch
-        registry.access.redhat.com/rhel7/etcd3
+        registry.access.redhat.com/rhel7/etcd
     Atomic Enterprise Platform
         aep3/aep
         aep3/node
         aep3/openvswitch
-        registry.access.redhat.com/rhel7/etcd3
+        registry.access.redhat.com/rhel7/etcd
 
   * note openshift3/* and aep3/* images come from registry.access.redhat.com and
 rely on the --additional-repository flag being set appropriately.
