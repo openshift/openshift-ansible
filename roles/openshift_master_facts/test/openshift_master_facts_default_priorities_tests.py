@@ -200,6 +200,11 @@ class TestOpenShiftMasterFactsDefaultPredicates(object):
             for short_version, deployment_type, default_priorities in TEST_VARS:
                 yield self.check_defaults_short_version_kwarg, short_version, deployment_type, default_priorities, zones_enabled
 
+    def test_trunc_openshift_release(self):
+        for release, deployment_type, default_priorities in TEST_VARS:
+            release = release + '.1'
+            yield self.check_defaults_release, release, deployment_type, default_priorities, False
+
     @raises(AnsibleError)
     def test_unknown_origin_version(self):
         facts = copy.deepcopy(self.default_facts)
