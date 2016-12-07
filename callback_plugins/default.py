@@ -68,3 +68,4 @@ class CallbackModule(DEFAULT_MODULE.CallbackModule):  # pylint: disable=too-few-
 
         return output
 # flake8: noqa
+# pylint: skip-file

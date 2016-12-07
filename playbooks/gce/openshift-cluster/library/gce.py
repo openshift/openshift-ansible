@@ -542,3 +542,4 @@ from ansible.module_utils.gce import *
 if __name__ == '__main__':
     main()
 # flake8: noqa
+# pylint: skip-file

@@ -303,3 +303,4 @@ def run_upgrade_playbook(hosts, playbook, verbose=False):
         facts_env['ANSIBLE_CONFIG'] = CFG.settings['ansible_config']
     return run_ansible(playbook, inventory_file, facts_env, verbose)
 # flake8: noqa
+# pylint: skip-file

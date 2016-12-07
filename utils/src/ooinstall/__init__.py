@@ -4,3 +4,4 @@
 
 from .oo_config import OOConfig
 # flake8: noqa
+# pylint: skip-file

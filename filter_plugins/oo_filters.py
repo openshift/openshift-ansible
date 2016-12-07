@@ -871,3 +871,4 @@ class FilterModule(object):
             "oo_merge_hostvars": self.oo_merge_hostvars,
         }
 # flake8: noqa
+# pylint: skip-file

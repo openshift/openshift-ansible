@@ -74,3 +74,4 @@ def get_variant_version_combos():
             combos.append((variant, ver))
     return combos
 # flake8: noqa
+# pylint: skip-file

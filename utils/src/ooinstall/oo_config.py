@@ -344,3 +344,4 @@ class OOConfig(object):
                 return host
         return None
 # flake8: noqa
+# pylint: skip-file

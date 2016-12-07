@@ -188,3 +188,4 @@ def _json_format_dict(data, pretty=False):
         return json.dumps(data)
 
 LibvirtInventory()
+# pylint: skip-file

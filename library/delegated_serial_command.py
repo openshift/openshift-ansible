@@ -274,3 +274,4 @@ from ansible.module_utils.splitter import *
 
 main()
 # flake8: noqa
+# pylint: skip-file

@@ -298,3 +298,4 @@ class GceInventory(object):
 
 # Run the script
 GceInventory()
+# pylint: skip-file
