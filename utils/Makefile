@@ -59,13 +59,18 @@ docs: $(MANPAGES)
 viewcover:
 	xdg-open cover/index.html
 
-virtualenv:
+# Conditional virtualenv building strategy taken from this great post
+# by Marcel Hellkamp:
+# http://blog.bottlepy.org/2012/07/16/virtualenv-and-makefiles.html
+venv: oo-installenv/bin/activate
+oo-installenv/bin/activate: test-requirements.txt
 	@echo "#############################################"
 	@echo "# Creating a virtualenv"
 	@echo "#############################################"
-	virtualenv $(NAME)env
+	test -d venv || virtualenv $(NAME)env
 	. $(NAME)env/bin/activate && pip install setuptools==17.1.1
 	. $(NAME)env/bin/activate && pip install -r test-requirements.txt
+	touch $(NAME)env/bin/activate
 #       If there are any special things to install do it here
 #       . $(NAME)env/bin/activate && INSTALL STUFF
 
@@ -80,7 +85,7 @@ ci-pylint:
 	@echo "#############################################"
 	@echo "# Running PyLint Tests in virtualenv"
 	@echo "#############################################"
-	. $(NAME)env/bin/activate && python -m pylint --rcfile ../git/.pylintrc $(shell find ../ -name $(NAME)env -prune -o -name test -prune -o -name "*.py" -print)
+	. $(NAME)env/bin/activate && python -m pylint --rcfile ../git/.pylintrc $(shell find ../ -name $(NAME)env -prune -o -name test -prune -o -name "*.py" -print) 2>&1 | grep -E -v '(locally-disabled|file-ignored)'
 
 ci-list-deps:
 	@echo "#############################################"
@@ -93,7 +98,11 @@ ci-flake8:
 	@echo "# Running Flake8 Compliance Tests in virtualenv"
 	@echo "#############################################"
 	. $(NAME)env/bin/activate && flake8 --config=setup.cfg ../ --exclude="utils,../inventory"
-	. $(NAME)env/bin/activate && python setup.py flake8 
+	. $(NAME)env/bin/activate && python setup.py flake8
 
-ci: clean virtualenv ci-list-deps ci-flake8 ci-pylint ci-unittests
-	:
+ci: venv ci-list-deps ci-unittests ci-flake8 ci-pylint
+	@echo
+	@echo "##################################################################################"
+	@echo "VIEW CODE COVERAGE REPORT WITH 'xdg-open cover/index.html' or run 'make viewcover'"
+	@echo "To clean your test environment run 'make clean'"
+	@echo "Other targets you may run with 'make': 'ci-pylint', 'ci-unittests', 'ci-flake8'"
