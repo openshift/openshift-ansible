@@ -39,3 +39,4 @@ class FilterModule(object):
         return {
             "translate_volume_name": self.translate_volume_name,
         }
+# flake8: noqa

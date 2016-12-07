@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# flake8: noqa
 #
 #  python yaml validator for a git commit
 #
@@ -70,4 +71,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

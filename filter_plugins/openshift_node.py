@@ -41,3 +41,4 @@ class FilterModule(object):
     def filters(self):
         ''' returns a mapping of filters to methods '''
         return {'get_dns_ip': self.get_dns_ip}
+# flake8: noqa

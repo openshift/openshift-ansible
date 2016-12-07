@@ -35,3 +35,4 @@ class ModifyYamlTests(unittest.TestCase):
                           ['externalKubernetesClientConnectionOverrides']
                           ['acceptContentTypes'])
 
+# flake8: noqa

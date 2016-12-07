@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # pylint: disable=too-many-lines
+# flake8: noqa
 # -*- coding: utf-8 -*-
 # vim: expandtab:tabstop=4:shiftwidth=4
 # Reason: Disable pylint too-many-lines because we don't want to split up this file.
@@ -2163,3 +2164,4 @@ from ansible.module_utils.urls import *
 
 if __name__ == '__main__':
     main()
+# pylint: skip-file
