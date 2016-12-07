@@ -37,9 +37,13 @@ pip-delete-this-directory.txt
 .noseids
 nosetests.xml
 coverage.xml
+cover/
 
 # Translations
 *.mo
 
 # Sphinx documentation
 docs/_build/
+
+# Virtualenv
+oo-installenv/
