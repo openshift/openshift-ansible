@@ -873,7 +873,6 @@ def uninstall(ctx):
 @click.option('--latest-minor', '-l', is_flag=True, default=False)
 @click.option('--next-major', '-n', is_flag=True, default=False)
 @click.pass_context
-#pylint: disable=bad-builtin,too-many-statements
 def upgrade(ctx, latest_minor, next_major):
     oo_cfg = ctx.obj['oo_cfg']
 
@@ -1048,3 +1047,5 @@ if __name__ == '__main__':
     # This is expected behaviour for context passing with click library:
     # pylint: disable=unexpected-keyword-arg
     cli(obj={})
+# flake8: noqa
+# pylint: skip-file

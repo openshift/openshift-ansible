@@ -575,3 +575,5 @@ class FilterModule(object):
                 "validate_pcs_cluster": self.validate_pcs_cluster,
                 "certificates_to_synchronize": self.certificates_to_synchronize,
                 "oo_htpasswd_users_from_file": self.oo_htpasswd_users_from_file}
+# flake8: noqa
+# pylint: skip-file
