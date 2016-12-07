@@ -41,9 +41,11 @@
         {{ avail_disk.stdout }} Kb available.
     when: (embedded_etcd | bool) and (etcd_disk_usage.stdout|int > avail_disk.stdout|int)
 
-  - name: Install etcd (for etcdctl)
-    action: "{{ ansible_pkg_mgr }} name=etcd state=present"
-    when: not openshift.common.is_atomic | bool
+  # for non containerized etcd is already installed, don't touch it, but for containerized
+  # but not atomic always get the latest
+  - name: Install latest text for containerized but not atomic
+    package: name=etcd state=latest
+    when: not openshift.common.is_atomic | bool and openshift.common.is_containerized
 
   - name: Generate etcd backup
     command: >
