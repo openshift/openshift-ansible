@@ -211,6 +211,11 @@ class TestOpenShiftMasterFactsDefaultPredicates(object):
             for release, deployment_type, default_predicates in TEST_VARS:
                 yield self.check_defaults_deployment_type_kwarg, release, deployment_type, default_predicates, regions_enabled
 
+    def test_trunc_openshift_release(self):
+        for release, deployment_type, default_predicates in TEST_VARS:
+            release = release + '.1'
+            yield self.check_defaults_release, release, deployment_type, default_predicates, False
+
     @raises(AnsibleError)
     def test_unknown_deployment_types(self):
         facts = copy.deepcopy(self.default_facts)
