@@ -1673,7 +1673,7 @@ def set_container_facts_if_unset(facts):
         cli_image = master_image
         node_image = 'openshift3/node'
         ovs_image = 'openshift3/openvswitch'
-        etcd_image = 'registry.access.redhat.com/rhel7/etcd3'
+        etcd_image = 'registry.access.redhat.com/rhel7/etcd'
         pod_image = 'openshift3/ose-pod'
         router_image = 'openshift3/ose-haproxy-router'
         registry_image = 'openshift3/ose-docker-registry'
@@ -1683,7 +1683,7 @@ def set_container_facts_if_unset(facts):
         cli_image = master_image
         node_image = 'aep3_beta/node'
         ovs_image = 'aep3_beta/openvswitch'
-        etcd_image = 'registry.access.redhat.com/rhel7/etcd3'
+        etcd_image = 'registry.access.redhat.com/rhel7/etcd'
         pod_image = 'aep3_beta/aep-pod'
         router_image = 'aep3_beta/aep-haproxy-router'
         registry_image = 'aep3_beta/aep-docker-registry'
@@ -1693,7 +1693,7 @@ def set_container_facts_if_unset(facts):
         cli_image = master_image
         node_image = 'openshift/node'
         ovs_image = 'openshift/openvswitch'
-        etcd_image = 'registry.access.redhat.com/rhel7/etcd3'
+        etcd_image = 'registry.access.redhat.com/rhel7/etcd'
         pod_image = 'openshift/origin-pod'
         router_image = 'openshift/origin-haproxy-router'
         registry_image = 'openshift/origin-docker-registry'
