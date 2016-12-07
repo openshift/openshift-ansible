@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.34
+Version:        3.4.35
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Dec 06 2016 Scott Dodson <sdodson@redhat.com> 3.4.35-1
+- Always install latest etcd for containerized hosts (sdodson@redhat.com)
+- etcd_upgrade : Use different variables for rpm vs container versions
+  (sdodson@redhat.com)
+- Switch back to using etcd rather than etcd3 (sdodson@redhat.com)
+- Update scheduler predicate/priorities vars (jdetiber@redhat.com)
+- fix tags (jdetiber@redhat.com)
+
 * Mon Dec 05 2016 Scott Dodson <sdodson@redhat.com> 3.4.34-1
 - Conditionalize master config update for admission_plugin_config.
   (abutcher@redhat.com)
