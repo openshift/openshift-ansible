@@ -1,6 +1,4 @@
 ---
-- include: ../../common/openshift-cluster/verify_ansible_version.yml
-
 - hosts: localhost
   connection: local
   become: no
@@ -16,7 +14,7 @@
   gather_facts: no
   tasks:
   - include_vars: ../../byo/openshift-cluster/cluster_hosts.yml
-  
+
 - include: ../../common/openshift-cluster/redeploy-certificates.yml
   vars:
     openshift_deployment_type: "{{ deployment_type }}"

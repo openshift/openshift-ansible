@@ -1,6 +1,4 @@
 ---
-- include: ../verify_ansible_version.yml
-
 - hosts: localhost
   connection: local
   become: no
