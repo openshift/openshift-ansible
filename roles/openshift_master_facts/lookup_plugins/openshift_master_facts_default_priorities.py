@@ -36,6 +36,7 @@ class LookupModule(LookupBase):
                     short_version = release[1:]
                 else:
                     short_version = release
+                short_version = '.'.join(short_version.split('.')[0:2])
             elif 'openshift_version' in variables:
                 version = variables['openshift_version']
                 short_version = '.'.join(version.split('.')[0:2])
