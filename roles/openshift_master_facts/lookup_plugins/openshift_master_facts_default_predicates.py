@@ -64,7 +64,6 @@ class LookupModule(LookupBase):
 
         if short_version in ['1.1', '1.2']:
             predicates.append({'name': 'MatchNodeSelector'})
-            predicates.append({'name': 'Hostname'})
 
         if short_version != '1.1':
             predicates.append({'name': 'MaxEBSVolumeCount'})
