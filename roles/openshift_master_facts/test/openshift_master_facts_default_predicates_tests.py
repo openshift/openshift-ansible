@@ -14,7 +14,6 @@ DEFAULT_PREDICATES_1_1 = [
     {'name': 'PodFitsResources'},
     {'name': 'NoDiskConflict'},
     {'name': 'MatchNodeSelector'},
-    {'name': 'Hostname'}
 ]
 
 DEFAULT_PREDICATES_1_2 = [
@@ -23,7 +22,6 @@ DEFAULT_PREDICATES_1_2 = [
     {'name': 'NoDiskConflict'},
     {'name': 'NoVolumeZoneConflict'},
     {'name': 'MatchNodeSelector'},
-    {'name': 'Hostname'},
     {'name': 'MaxEBSVolumeCount'},
     {'name': 'MaxGCEPDVolumeCount'}
 ]
