@@ -1,5 +1,7 @@
 ---
-g_etcd_hosts: "{{ groups.etcd | default([]) }}"
+g_etcd_hosts: "{{ groups.etcd | default([g_master_hosts.0],true) }}"
+
+g_true_etcd_hosts: "{{ groups.etcd | default([]) }}"
 
 g_lb_hosts: "{{ groups.lb | default([]) }}"
 
