@@ -64,8 +64,6 @@
       master_count: "{{ openshift_master_count | default(None) }}"
       controller_lease_ttl: "{{ osm_controller_lease_ttl | default(None) }}"
       master_image: "{{ osm_image | default(None) }}"
-      scheduler_predicates: "{{ openshift_master_scheduler_predicates | default(None) }}"
-      scheduler_priorities: "{{ openshift_master_scheduler_priorities | default(None) }}"
       admission_plugin_order: "{{openshift_master_admission_plugin_order | default(None) }}"
       admission_plugin_config: "{{openshift_master_admission_plugin_config | default(None) }}"
       kube_admission_plugin_order: "{{openshift_master_kube_admission_plugin_order | default(None) }}"
@@ -80,3 +78,30 @@
       controllers_env_vars: "{{ openshift_master_controllers_env_vars | default(None) }}"
       audit_config: "{{ openshift_master_audit_config | default(None) }}"
       metrics_public_url: "{% if openshift_hosted_metrics_deploy | default(false) %}https://{{ metrics_hostname }}/hawkular/metrics{% endif %}"
+
+- name: Determine if scheduler config present
+  stat:
+    path: "{{ openshift_master_scheduler_conf }}"
+  register: scheduler_config_stat
+
+- set_fact:
+    openshift_master_scheduler_default_predicates: "{{ lookup('openshift_master_facts_default_predicates') }}"
+    openshift_master_scheduler_default_priorities: "{{ lookup('openshift_master_facts_default_priorities') }}"
+
+- block:
+  - name: Retrieve current scheduler config
+    slurp:
+      src: "{{ openshift_master_scheduler_conf }}"
+    register: current_scheduler_config
+
+  - set_fact:
+      openshift_master_scheduler_current_config: "{{ current_scheduler_config.content | b64decode | from_json }}"
+
+  - fail:
+      msg: "Unknown scheduler config apiVersion {{ openshift_master_scheduler_config.apiVersion }}"
+    when: "{{ openshift_master_scheduler_current_config.apiVersion | default(None) != 'v1' }}"
+
+  - set_fact:
+      openshift_master_scheduler_current_predicates: "{{ openshift_master_scheduler_current_config.predicates }}"
+      openshift_master_scheduler_current_priorities: "{{ openshift_master_scheduler_current_config.priorities }}"
+  when: "{{ scheduler_config_stat.stat.exists }}"
