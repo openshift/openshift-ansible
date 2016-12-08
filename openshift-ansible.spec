@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.35
+Version:        3.4.36
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Dec 08 2016 Scott Dodson <sdodson@redhat.com> 3.4.36-1
+- Pre-pull master/node/ovs images during upgrade. (dgoodwin@redhat.com)
+- Properly handle x.y.z formatted versions for openshift_release
+  (jdetiber@redhat.com)
+- Remove Hostname from 1.1 and 1.2 predicates (jdetiber@redhat.com)
+- add comments and remove debug code (jdetiber@redhat.com)
+- Handle updating of scheduler config during upgrade (jdetiber@redhat.com)
+
 * Tue Dec 06 2016 Scott Dodson <sdodson@redhat.com> 3.4.35-1
 - Always install latest etcd for containerized hosts (sdodson@redhat.com)
 - etcd_upgrade : Use different variables for rpm vs container versions
