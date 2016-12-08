@@ -38,6 +38,8 @@
   tasks:
   - name: Record RPM based etcd version
     command: rpm -qa --qf '%{version}' etcd\*
+    args:
+      warn: no
     register: etcd_rpm_version
     failed_when: false
     when: not openshift.common.is_containerized | bool
