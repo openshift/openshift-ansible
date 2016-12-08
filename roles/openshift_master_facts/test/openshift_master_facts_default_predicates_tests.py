@@ -14,7 +14,6 @@ DEFAULT_PREDICATES_1_1 = [
     {'name': 'PodFitsResources'},
     {'name': 'NoDiskConflict'},
     {'name': 'MatchNodeSelector'},
-    {'name': 'Hostname'}
 ]
 
 DEFAULT_PREDICATES_1_2 = [
@@ -23,7 +22,6 @@ DEFAULT_PREDICATES_1_2 = [
     {'name': 'NoDiskConflict'},
     {'name': 'NoVolumeZoneConflict'},
     {'name': 'MatchNodeSelector'},
-    {'name': 'Hostname'},
     {'name': 'MaxEBSVolumeCount'},
     {'name': 'MaxGCEPDVolumeCount'}
 ]
@@ -210,6 +208,11 @@ class TestOpenShiftMasterFactsDefaultPredicates(object):
         for regions_enabled in (True, False):
             for release, deployment_type, default_predicates in TEST_VARS:
                 yield self.check_defaults_deployment_type_kwarg, release, deployment_type, default_predicates, regions_enabled
+
+    def test_trunc_openshift_release(self):
+        for release, deployment_type, default_predicates in TEST_VARS:
+            release = release + '.1'
+            yield self.check_defaults_release, release, deployment_type, default_predicates, False
 
     @raises(AnsibleError)
     def test_unknown_deployment_types(self):
