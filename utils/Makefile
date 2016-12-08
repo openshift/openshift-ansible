@@ -78,7 +78,7 @@ ci-unittests:
 	@echo "#############################################"
 	@echo "# Running Unit Tests in virtualenv"
 	@echo "#############################################"
-	. $(NAME)env/bin/activate && python setup.py nosetests
+	. $(NAME)env/bin/activate && python setup.py nosetests --cover-erase
 	@echo "VIEW CODE COVERAGE REPORT WITH 'xdg-open cover/index.html' or run 'make viewcover'"
 
 ci-pylint:
