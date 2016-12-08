@@ -9,6 +9,8 @@
 
 - name: Check if Docker is installed
   command: rpm -q docker
+  args:
+    warn: no
   register: pkg_check
   failed_when: pkg_check.rc > 1
   changed_when: no
