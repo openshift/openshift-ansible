@@ -20,8 +20,8 @@
       openshift_hosted_registry_registryurl: "{{ hostvars[groups.oo_first_master.0].openshift.master.registry_url }}"
     when: "'master' in hostvars[groups.oo_first_master.0].openshift and 'registry_url' in hostvars[groups.oo_first_master.0].openshift.master"
   - set_fact:
-      logging_hostname: "{{ openshift_hosted_logging_hostname | default('kibana.' ~ (openshift.master.default_subdomain | default('router.default.svc.cluster.local', true))) }}"
-      logging_ops_hostname: "{{ openshift_hosted_logging_ops_hostname | default('kibana-ops.' ~ (openshift.master.default_subdomain | default('router.default.svc.cluster.local', true))) }}"
+      logging_hostname: "{{ openshift_hosted_logging_hostname | default('kibana.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true))) }}"
+      logging_ops_hostname: "{{ openshift_hosted_logging_ops_hostname | default('kibana-ops.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true))) }}"
       logging_master_public_url: "{{ openshift_hosted_logging_master_public_url | default(openshift.master.public_api_url) }}"
       logging_elasticsearch_cluster_size: "{{ openshift_hosted_logging_elasticsearch_cluster_size | default(1) }}"
       logging_elasticsearch_ops_cluster_size: "{{ openshift_hosted_logging_elasticsearch_ops_cluster_size | default(1) }}"
