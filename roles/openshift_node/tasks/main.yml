@@ -44,6 +44,8 @@
 
 - name: Check for tuned package
   command: rpm -q tuned
+  args:
+    warn: no
   register: tuned_installed
   changed_when: false
   failed_when: false
