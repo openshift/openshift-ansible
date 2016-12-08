@@ -41,9 +41,12 @@
     static: yes
   roles:
   - openshift_facts
+  - openshift_master_facts
   tasks:
   - include: rpm_upgrade.yml component=master
     when: "{{ not openshift.common.is_containerized | bool }}"
+
+  - include: upgrade_scheduler.yml
 
   - include: "{{ master_config_hook }}"
     when: "{{ master_config_hook is defined }}"

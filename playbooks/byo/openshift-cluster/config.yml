@@ -1,5 +1,7 @@
 ---
 - include: ../../common/openshift-cluster/verify_ansible_version.yml
+  tags:
+  - always
 
 - hosts: localhost
   connection: local
@@ -11,6 +13,7 @@
       name: "{{ item }}"
       groups: l_oo_all_hosts
     with_items: "{{ g_all_hosts | default([]) }}"
+    changed_when: no
 
 - hosts: l_oo_all_hosts
   gather_facts: no

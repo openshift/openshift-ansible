@@ -39,7 +39,6 @@ clean:
 	@find . -type f -regex ".*\.py[co]$$" -delete
 	@find . -type f \( -name "*~" -or -name "#*" \) -delete
 	@rm -fR build dist rpm-build MANIFEST htmlcov .coverage cover ooinstall.egg-info oo-install
-	@rm -fR $(NAME)env
 
 
 # To force a rebuild of the docs run 'touch' on any *.in file under
@@ -100,7 +99,7 @@ ci-flake8:
 	. $(NAME)env/bin/activate && flake8 --config=setup.cfg ../ --exclude="utils,../inventory"
 	. $(NAME)env/bin/activate && python setup.py flake8
 
-ci: venv ci-list-deps ci-unittests ci-flake8 ci-pylint
+ci: clean venv ci-list-deps ci-unittests ci-flake8 ci-pylint
 	@echo
 	@echo "##################################################################################"
 	@echo "VIEW CODE COVERAGE REPORT WITH 'xdg-open cover/index.html' or run 'make viewcover'"
