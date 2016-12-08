@@ -13,6 +13,14 @@
     ha_svc_template_path: "docker-cluster"
   when: openshift.common.is_containerized | bool
 
+# This is the image used for both HA and non-HA clusters:
+- name: Pre-pull master image
+  command: >
+    docker pull {{ openshift.master.master_image }}:{{ openshift_image_tag }}
+  register: pull_result
+  changed_when: "'Downloaded newer image' in pull_result.stdout"
+  when: openshift.common.is_containerized | bool
+
 # workaround for missing systemd unit files
 - name: Create the systemd unit files
   template:
