@@ -29,7 +29,7 @@
 
 - name: Backup etcd
   include: ./etcd/backup.yml
-  when: openshift_upgrade_skip_etcd_backup | default(false) | bool
+  when: not openshift_upgrade_skip_etcd_backup | default(false) | bool
 
 - name: Upgrade master packages
   hosts: oo_masters_to_config
