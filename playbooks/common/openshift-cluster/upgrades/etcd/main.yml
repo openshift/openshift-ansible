@@ -9,24 +9,30 @@
   tags:
   - always
 
+# We use two groups one for hosts we're upgrading which doesn't include embedded etcd
+# The other for backing up which includes the embedded etcd host, there's no need to
+# upgrade embedded etcd that just happens when the master is updated.
 - name: Evaluate additional groups for upgrade
   hosts: localhost
   connection: local
   become: no
   tasks:
-  - fail:
-      msg: 'The etcd upgrade playbook does not support upgrading embedded etcd, simply run the normal playbooks and etcd will be upgraded when your master is updated.'
-    when:  "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
   - name: Evaluate etcd_hosts_to_upgrade
     add_host:
       name: "{{ item }}"
-      groups: etcd_hosts_to_upgrade, etcd_hosts_to_backup
+      groups: etcd_hosts_to_upgrade
+    with_items: "{{ groups.oo_etcd_to_config if groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config | length > 0 else [] }}"
+  - name: Evaluate etcd_hosts_to_backup
+    add_host:
+      name: "{{ item }}"
+      groups: etcd_hosts_to_backup
     with_items: "{{ groups.oo_etcd_to_config if groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config | length > 0 else groups.oo_first_master }}"
 
 - name: Backup etcd before upgrading anything
   include: backup.yml
   vars:
     backup_tag: "pre-upgrade-"
+  when: openshift_upgrade_etcd_backup | default(true) | bool
 
 - name: Drop etcdctl profiles
   hosts: etcd_hosts_to_upgrade
@@ -123,3 +129,4 @@
   include: backup.yml
   vars:
     backup_tag: "post-3.0-"
+  when: openshift_upgrade_etcd_backup | default(true) | bool

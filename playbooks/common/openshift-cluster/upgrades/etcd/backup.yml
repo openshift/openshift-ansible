@@ -41,11 +41,15 @@
         {{ avail_disk.stdout }} Kb available.
     when: (embedded_etcd | bool) and (etcd_disk_usage.stdout|int > avail_disk.stdout|int)
 
-  # for non containerized etcd is already installed, don't touch it, but for containerized
-  # but not atomic always get the latest
-  - name: Install latest text for containerized but not atomic
+  # TODO - Refactor containerized backup to use etcd_container to backup the data so we don't rely on
+  # the host's etcdctl binary which may be of a different version.
+
+  # for non containerized and non embedded we should have the correct version of etcd installed already
+  # For embedded we need to use the latest because OCP 3.3 uses a version of etcd that can only be backed
+  # up with etcd-3.x
+  - name: Install latest etcd for containerized or embedded
     package: name=etcd state=latest
-    when: not openshift.common.is_atomic | bool and openshift.common.is_containerized
+    when: ( openshift.common.is_containerized and not openshift.common.is_atomic ) or embedded_etcd | bool
 
   - name: Generate etcd backup
     command: >
