@@ -22,6 +22,7 @@
 
 
 NAME := oo-install
+VENV := $(NAME)env
 TESTPACKAGE := oo-install
 SHORTNAME := ooinstall
 
@@ -39,7 +40,7 @@ clean:
 	@find . -type f -regex ".*\.py[co]$$" -delete
 	@find . -type f \( -name "*~" -or -name "#*" \) -delete
 	@rm -fR build dist rpm-build MANIFEST htmlcov .coverage cover ooinstall.egg-info oo-install
-	@rm -fR $(NAME)env
+	@rm -fR $(VENV)
 
 
 # To force a rebuild of the docs run 'touch' on any *.in file under
@@ -62,45 +63,45 @@ viewcover:
 # Conditional virtualenv building strategy taken from this great post
 # by Marcel Hellkamp:
 # http://blog.bottlepy.org/2012/07/16/virtualenv-and-makefiles.html
-venv: oo-installenv/bin/activate
-oo-installenv/bin/activate: test-requirements.txt
+$(VENV): $(VENV)/bin/activate
+$(VENV)/bin/activate: test-requirements.txt
 	@echo "#############################################"
 	@echo "# Creating a virtualenv"
 	@echo "#############################################"
-	test -d venv || virtualenv $(NAME)env
-	. $(NAME)env/bin/activate && pip install setuptools==17.1.1
-	. $(NAME)env/bin/activate && pip install -r test-requirements.txt
-	touch $(NAME)env/bin/activate
+	test -d $(VENV) || virtualenv $(VENV)
+	. $(VENV)/bin/activate && pip install setuptools==17.1.1
+	. $(VENV)/bin/activate && pip install -r test-requirements.txt
+	touch $(VENV)/bin/activate
 #       If there are any special things to install do it here
-#       . $(NAME)env/bin/activate && INSTALL STUFF
+#       . $(VENV)/bin/activate && INSTALL STUFF
 
-ci-unittests:
+ci-unittests: $(VENV)
 	@echo "#############################################"
 	@echo "# Running Unit Tests in virtualenv"
 	@echo "#############################################"
-	. $(NAME)env/bin/activate && python setup.py nosetests --cover-erase
+	. $(VENV)/bin/activate && python setup.py nosetests
 	@echo "VIEW CODE COVERAGE REPORT WITH 'xdg-open cover/index.html' or run 'make viewcover'"
 
-ci-pylint:
+ci-pylint: $(VENV)
 	@echo "#############################################"
 	@echo "# Running PyLint Tests in virtualenv"
 	@echo "#############################################"
-	. $(NAME)env/bin/activate && python -m pylint --rcfile ../git/.pylintrc $(shell find ../ -name $(NAME)env -prune -o -name test -prune -o -name "*.py" -print) 2>&1 | grep -E -v '(locally-disabled|file-ignored)'
+	. $(VENV)/bin/activate && python -m pylint --rcfile ../git/.pylintrc $(shell find ../ -name $(VENV) -prune -o -name ooinstall.egg-info -prune -o -name test -prune -o -name "*.py" -print)
 
-ci-list-deps:
+ci-list-deps: $(VENV)
 	@echo "#############################################"
 	@echo "# Listing all pip deps"
 	@echo "#############################################"
-	. $(NAME)env/bin/activate && pip freeze
+	. $(VENV)/bin/activate && pip freeze
 
-ci-flake8:
+ci-flake8: $(VENV)
 	@echo "#############################################"
 	@echo "# Running Flake8 Compliance Tests in virtualenv"
 	@echo "#############################################"
-	. $(NAME)env/bin/activate && flake8 --config=setup.cfg ../ --exclude="utils,../inventory"
-	. $(NAME)env/bin/activate && python setup.py flake8
+	. $(VENV)/bin/activate && flake8 --config=setup.cfg ../ --exclude="utils,../inventory"
+	. $(VENV)/bin/activate && python setup.py flake8
 
-ci: venv ci-list-deps ci-unittests ci-flake8 ci-pylint
+ci: ci-list-deps ci-unittests ci-flake8 ci-pylint
 	@echo
 	@echo "##################################################################################"
 	@echo "VIEW CODE COVERAGE REPORT WITH 'xdg-open cover/index.html' or run 'make viewcover'"
