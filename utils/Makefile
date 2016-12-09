@@ -75,33 +75,33 @@ $(VENV)/bin/activate: test-requirements.txt
 #       If there are any special things to install do it here
 #       . $(VENV)/bin/activate && INSTALL STUFF
 
-ci-unittests:
+ci-unittests: $(VENV)
 	@echo "#############################################"
 	@echo "# Running Unit Tests in virtualenv"
 	@echo "#############################################"
-	. $(VENV)/bin/activate && python setup.py nosetests --cover-erase
+	. $(VENV)/bin/activate && python setup.py nosetests
 	@echo "VIEW CODE COVERAGE REPORT WITH 'xdg-open cover/index.html' or run 'make viewcover'"
 
-ci-pylint:
+ci-pylint: $(VENV)
 	@echo "#############################################"
 	@echo "# Running PyLint Tests in virtualenv"
 	@echo "#############################################"
 	. $(VENV)/bin/activate && python -m pylint --rcfile ../git/.pylintrc $(shell find ../ -name $(VENV) -prune -o -name ooinstall.egg-info -prune -o -name test -prune -o -name "*.py" -print)
 
-ci-list-deps:
+ci-list-deps: $(VENV)
 	@echo "#############################################"
 	@echo "# Listing all pip deps"
 	@echo "#############################################"
 	. $(VENV)/bin/activate && pip freeze
 
-ci-flake8:
+ci-flake8: $(VENV)
 	@echo "#############################################"
 	@echo "# Running Flake8 Compliance Tests in virtualenv"
 	@echo "#############################################"
 	. $(VENV)/bin/activate && flake8 --config=setup.cfg ../ --exclude="utils,../inventory"
 	. $(VENV)/bin/activate && python setup.py flake8
 
-ci: $(VENV) ci-list-deps ci-unittests ci-flake8 ci-pylint
+ci: ci-list-deps ci-unittests ci-flake8 ci-pylint
 	@echo
 	@echo "##################################################################################"
 	@echo "VIEW CODE COVERAGE REPORT WITH 'xdg-open cover/index.html' or run 'make viewcover'"
