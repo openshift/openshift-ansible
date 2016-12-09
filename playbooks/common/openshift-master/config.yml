@@ -99,8 +99,8 @@
   - openshift_facts:
       role: master
       local_facts:
-          session_auth_secrets: "{{ openshift_master_session_auth_secrets | default(openshift.master.session_auth_secrets | default(None)) }}"
-          session_encryption_secrets: "{{ openshift_master_session_encryption_secrets | default(openshift.master.session_encryption_secrets | default(None)) }}"
+        session_auth_secrets: "{{ openshift_master_session_auth_secrets | default(openshift.master.session_auth_secrets | default(None)) }}"
+        session_encryption_secrets: "{{ openshift_master_session_encryption_secrets | default(openshift.master.session_encryption_secrets | default(None)) }}"
 
 - name: Generate master session secrets
   hosts: oo_first_master

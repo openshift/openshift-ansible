@@ -32,6 +32,10 @@ ASCII2MAN = a2x -D $(dir $@) -d manpage -f manpage $<
 MANPAGES := docs/man/man1/atomic-openshift-installer.1
 VERSION := 1.3
 
+# YAMLFILES: Skipping all '/files/' folders due to conflicting yaml file definitions
+YAMLFILES = $(shell find ../ -name $(VENV) -prune -o \( -name '*.yml' -o -name '*.yaml' \) ! -path "*/files/*" 2>&1)
+PYFILES = $(shell find ../ -name $(VENV) -prune -o -name ooinstall.egg-info -prune -o -name test -prune -o -name "*.py" -print)
+
 sdist: clean
 	python setup.py sdist
 	rm -fR $(SHORTNAME).egg-info
@@ -86,7 +90,13 @@ ci-pylint: $(VENV)
 	@echo "#############################################"
 	@echo "# Running PyLint Tests in virtualenv"
 	@echo "#############################################"
-	. $(VENV)/bin/activate && python -m pylint --rcfile ../git/.pylintrc $(shell find ../ -name $(VENV) -prune -o -name ooinstall.egg-info -prune -o -name test -prune -o -name "*.py" -print)
+	. $(VENV)/bin/activate && python -m pylint --rcfile ../git/.pylintrc $(PYFILES)
+
+ci-yamllint: $(VENV)
+	@echo "#############################################"
+	@echo "# Running yamllint Tests in virtualenv"
+	@echo "#############################################"
+	@. $(VENV)/bin/activate && yamllint -c ../git/.yamllint $(YAMLFILES)
 
 ci-list-deps: $(VENV)
 	@echo "#############################################"
@@ -101,9 +111,9 @@ ci-flake8: $(VENV)
 	. $(VENV)/bin/activate && flake8 --config=setup.cfg ../ --exclude="utils,../inventory"
 	. $(VENV)/bin/activate && python setup.py flake8
 
-ci: ci-list-deps ci-unittests ci-flake8 ci-pylint
+ci: ci-list-deps ci-unittests ci-flake8 ci-pylint ci-yamllint
 	@echo
 	@echo "##################################################################################"
 	@echo "VIEW CODE COVERAGE REPORT WITH 'xdg-open cover/index.html' or run 'make viewcover'"
 	@echo "To clean your test environment run 'make clean'"
-	@echo "Other targets you may run with 'make': 'ci-pylint', 'ci-unittests', 'ci-flake8'"
+	@echo "Other targets you may run with 'make': 'ci-pylint', 'ci-unittests', 'ci-flake8', 'ci-yamllint'"

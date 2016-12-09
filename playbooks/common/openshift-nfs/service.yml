@@ -15,4 +15,4 @@
   connection: ssh
   gather_facts: no
   tasks:
-    - service: name=nfs-server state="{{ new_cluster_state }}"
+  - service: name=nfs-server state="{{ new_cluster_state }}"

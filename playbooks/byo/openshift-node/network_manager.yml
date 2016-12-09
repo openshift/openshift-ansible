@@ -13,24 +13,24 @@
 - hosts: l_oo_all_hosts
   become: yes
   tasks:
-    - name: install NetworkManager
-      package:
-        name: 'NetworkManager'
-        state: present
+  - name: install NetworkManager
+    package:
+      name: 'NetworkManager'
+      state: present
 
-    - name: configure NetworkManager
-      lineinfile:
-        dest: "/etc/sysconfig/network-scripts/ifcfg-{{ ansible_default_ipv4['interface'] }}"
-        regexp: '^{{ item }}='
-        line: '{{ item }}=yes'
-        state: present
-        create: yes
-      with_items:
-        - 'USE_PEERDNS'
-        - 'NM_CONTROLLED'
+  - name: configure NetworkManager
+    lineinfile:
+      dest: "/etc/sysconfig/network-scripts/ifcfg-{{ ansible_default_ipv4['interface'] }}"
+      regexp: '^{{ item }}='
+      line: '{{ item }}=yes'
+      state: present
+      create: yes
+    with_items:
+    - 'USE_PEERDNS'
+    - 'NM_CONTROLLED'
 
-    - name: enable and start NetworkManager
-      service:
-        name: 'NetworkManager'
-        state: started
-        enabled: yes
+  - name: enable and start NetworkManager
+    service:
+      name: 'NetworkManager'
+      state: started
+      enabled: yes

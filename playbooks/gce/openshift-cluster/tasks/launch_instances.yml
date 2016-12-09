@@ -10,7 +10,7 @@
     zone: "{{ lookup('env', 'zone') }}"
     network: "{{ lookup('env', 'network') }}"
     subnetwork: "{{ lookup('env', 'subnetwork') | default(omit, True) }}"
-# unsupported in 1.9.+
+    # unsupported in 1.9.+
     #service_account_permissions: "datastore,logging-write"
     tags:
       - created-by-{{ lookup('env', 'LOGNAME') | regex_replace('[^a-z0-9]+', '') | default(cluster, true) }}

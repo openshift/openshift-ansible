@@ -1,3 +1,4 @@
+---
 - name: Additional master configuration
   hosts: oo_first_master
   vars:

@@ -1,3 +1,4 @@
+---
 nuage_ca_master: "{{ groups.oo_first_master.0 }}"
 nuage_ca_master_crt_dir: /usr/share/nuage-openshift-certificates
 

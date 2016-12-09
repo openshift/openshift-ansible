@@ -4,11 +4,11 @@
   when: openshift_use_openshift_sdn | default(true) | bool and openshift_use_flannel | default(false) | bool
 
 - fail:
-   msg: Nuage sdn can not be used with openshift sdn, set openshift_use_openshift_sdn=false if you want to use nuage
+    msg: Nuage sdn can not be used with openshift sdn, set openshift_use_openshift_sdn=false if you want to use nuage
   when: openshift_use_openshift_sdn | default(true) | bool and openshift_use_nuage | default(false) | bool
 
 - fail:
-   msg: Nuage sdn can not be used with flannel
+    msg: Nuage sdn can not be used with flannel
   when: openshift_use_flannel | default(false) | bool and openshift_use_nuage | default(false) | bool
 
 - fail:
@@ -46,4 +46,3 @@
   command: >
     hostnamectl set-hostname {{ openshift.common.hostname }}
   when: openshift_set_hostname | default(set_hostname_default) | bool
-

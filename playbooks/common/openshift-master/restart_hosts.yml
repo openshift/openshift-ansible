@@ -1,3 +1,4 @@
+---
 - name: Restart master system
   # https://github.com/ansible/ansible/issues/10616
   shell: sleep 2 && shutdown -r now "OpenShift Ansible master rolling restart"

@@ -26,13 +26,12 @@
           maintenance_type: "0"
           output: extend
           hostids: "{{ oo_hostids.split(',') | default([]) }}"
-#groupids: "{{ oo_groupids.split(',') | default([]) }}"
+          #groupids: "{{ oo_groupids.split(',') | default([]) }}"
           timeperiods:
-          - start_time: "{{ oo_start }}"
-            period: "{{ oo_stop }}"
+            - start_time: "{{ oo_start }}"
+              period: "{{ oo_stop }}"
           selectTimeperiods: extend
 
       register: maintenance
 
     - debug: var=maintenance
-

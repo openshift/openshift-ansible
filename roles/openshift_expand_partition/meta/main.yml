@@ -13,6 +13,6 @@ galaxy_info:
     versions:
     - all
   categories:
-    - openshift
-    - cloud
+  - openshift
+  - cloud
 dependencies: []

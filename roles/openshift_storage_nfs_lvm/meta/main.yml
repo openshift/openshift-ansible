@@ -13,5 +13,5 @@ galaxy_info:
     versions:
     - all
   categories:
-    - openshift
+  - openshift
 dependencies: []
