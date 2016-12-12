@@ -1,3 +1,4 @@
+---
 - fail:
     msg: >
       Object Storage Provider: {{ openshift.hosted.registry.storage.provider }}

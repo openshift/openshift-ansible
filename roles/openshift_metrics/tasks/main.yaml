@@ -38,9 +38,9 @@
     get pods -l {{ item }} | grep -q Running
   register: metrics_pods_status
   with_items:
-    - metrics-infra=hawkular-metrics
-    - metrics-infra=heapster
-    - metrics-infra=hawkular-cassandra
+  - metrics-infra=hawkular-metrics
+  - metrics-infra=heapster
+  - metrics-infra=hawkular-cassandra
   failed_when: false
   changed_when: false
 

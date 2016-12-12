@@ -1,3 +1,4 @@
+---
 # This file is included both in the openshift_master role and in the upgrade
 # playbooks.  For that reason the ha_svc variables are use set_fact instead of
 # the vars directory on the role.

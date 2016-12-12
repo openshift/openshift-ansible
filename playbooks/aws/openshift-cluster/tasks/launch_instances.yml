@@ -125,21 +125,21 @@
 
 - set_fact:
     logrotate:
-        - name: syslog
-          path: |
-            /var/log/cron
-            /var/log/maillog
-            /var/log/messages
-            /var/log/secure
-            /var/log/spooler"
-          options:
-            - daily
-            - rotate 7
-            - compress
-            - sharedscripts
-            - missingok
-          scripts:
-            postrotate: "/bin/kill -HUP `cat /var/run/syslogd.pid 2> /dev/null` 2> /dev/null || true"
+    - name: syslog
+      path: |
+        /var/log/cron
+        /var/log/maillog
+        /var/log/messages
+        /var/log/secure
+        /var/log/spooler"
+      options:
+      - daily
+      - rotate 7
+      - compress
+      - sharedscripts
+      - missingok
+      scripts:
+        postrotate: "/bin/kill -HUP `cat /var/run/syslogd.pid 2> /dev/null` 2> /dev/null || true"
 
 - name: Add new instances groups and variables
   add_host:

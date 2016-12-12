@@ -134,5 +134,5 @@
   retries: 30
   delay: 1
   with_together:
-  - '{{ instances }}'
-  - '{{ ips }}'
+    - '{{ instances }}'
+    - '{{ ips }}'

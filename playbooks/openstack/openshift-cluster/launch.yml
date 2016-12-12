@@ -111,9 +111,9 @@
         public_v4: '{{ item[2] }}'
         private_v4: '{{ item[1] }}'
     with_together:
-      - '{{ parsed_outputs.etcd_names }}'
-      - '{{ parsed_outputs.etcd_ips }}'
-      - '{{ parsed_outputs.etcd_floating_ips }}'
+    - '{{ parsed_outputs.etcd_names }}'
+    - '{{ parsed_outputs.etcd_ips }}'
+    - '{{ parsed_outputs.etcd_floating_ips }}'
 
   - name: Add new master instances groups and variables
     add_host:
@@ -128,9 +128,9 @@
         public_v4: '{{ item[2] }}'
         private_v4: '{{ item[1] }}'
     with_together:
-      - '{{ parsed_outputs.master_names }}'
-      - '{{ parsed_outputs.master_ips }}'
-      - '{{ parsed_outputs.master_floating_ips }}'
+    - '{{ parsed_outputs.master_names }}'
+    - '{{ parsed_outputs.master_ips }}'
+    - '{{ parsed_outputs.master_floating_ips }}'
 
   - name: Add new node instances groups and variables
     add_host:
@@ -145,9 +145,9 @@
         public_v4: '{{ item[2] }}'
         private_v4: '{{ item[1] }}'
     with_together:
-      - '{{ parsed_outputs.node_names }}'
-      - '{{ parsed_outputs.node_ips }}'
-      - '{{ parsed_outputs.node_floating_ips }}'
+    - '{{ parsed_outputs.node_names }}'
+    - '{{ parsed_outputs.node_ips }}'
+    - '{{ parsed_outputs.node_floating_ips }}'
 
   - name: Add new infra instances groups and variables
     add_host:
@@ -162,18 +162,18 @@
         public_v4: '{{ item[2] }}'
         private_v4: '{{ item[1] }}'
     with_together:
-      - '{{ parsed_outputs.infra_names }}'
-      - '{{ parsed_outputs.infra_ips }}'
-      - '{{ parsed_outputs.infra_floating_ips }}'
+    - '{{ parsed_outputs.infra_names }}'
+    - '{{ parsed_outputs.infra_ips }}'
+    - '{{ parsed_outputs.infra_floating_ips }}'
 
   - name: Wait for ssh
     wait_for:
       host: '{{ item }}'
       port: 22
     with_flattened:
-      - '{{ parsed_outputs.master_floating_ips }}'
-      - '{{ parsed_outputs.node_floating_ips }}'
-      - '{{ parsed_outputs.infra_floating_ips }}'
+    - '{{ parsed_outputs.master_floating_ips }}'
+    - '{{ parsed_outputs.node_floating_ips }}'
+    - '{{ parsed_outputs.infra_floating_ips }}'
 
   - name: Wait for user setup
     command: 'ssh -o StrictHostKeyChecking=no -o PasswordAuthentication=no -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null {{ deployment_vars[deployment_type].ssh_user }}@{{ item }} echo {{ deployment_vars[deployment_type].ssh_user }} user is setup'
@@ -182,9 +182,9 @@
     retries: 30
     delay: 1
     with_flattened:
-      - '{{ parsed_outputs.master_floating_ips }}'
-      - '{{ parsed_outputs.node_floating_ips }}'
-      - '{{ parsed_outputs.infra_floating_ips }}'
+    - '{{ parsed_outputs.master_floating_ips }}'
+    - '{{ parsed_outputs.node_floating_ips }}'
+    - '{{ parsed_outputs.infra_floating_ips }}'
 
 - include: update.yml
 

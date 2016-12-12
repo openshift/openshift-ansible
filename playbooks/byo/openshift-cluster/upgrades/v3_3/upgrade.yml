@@ -97,4 +97,3 @@
     node_config_hook: "v3_3/node_config_upgrade.yml"
 
 - include: ../../../../common/openshift-cluster/upgrades/post_control_plane.yml
-

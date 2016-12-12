@@ -1,13 +1,14 @@
+---
 manageiq_cluster_role:
-    apiVersion: v1
-    kind: ClusterRole
-    metadata:
-      name: management-infra-admin
-    rules:
-    - resources:
-      - pods/proxy
-      verbs:
-      - '*'
+  apiVersion: v1
+  kind: ClusterRole
+  metadata:
+    name: management-infra-admin
+  rules:
+  - resources:
+    - pods/proxy
+    verbs:
+    - '*'
 
 manageiq_metrics_admin_clusterrole:
   apiVersion: v1
@@ -24,28 +25,28 @@ manageiq_metrics_admin_clusterrole:
     - '*'
 
 manageiq_service_account:
-    apiVersion: v1
-    kind: ServiceAccount
-    metadata:
-      name: management-admin
+  apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    name: management-admin
 
 manageiq_image_inspector_service_account:
-    apiVersion: v1
-    kind: ServiceAccount
-    metadata:
-      name: inspector-admin
+  apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    name: inspector-admin
 
 manage_iq_tmp_conf: /tmp/manageiq_admin.kubeconfig
 
 manage_iq_tasks:
-    - policy add-role-to-user -n management-infra admin -z management-admin
-    - policy add-role-to-user -n management-infra management-infra-admin -z management-admin
-    - policy add-cluster-role-to-user cluster-reader system:serviceaccount:management-infra:management-admin
-    - policy add-scc-to-user privileged system:serviceaccount:management-infra:management-admin
-    - policy add-cluster-role-to-user system:image-puller system:serviceaccount:management-infra:inspector-admin
-    - policy add-scc-to-user privileged system:serviceaccount:management-infra:inspector-admin
-    - policy add-cluster-role-to-user self-provisioner system:serviceaccount:management-infra:management-admin
-    - policy add-cluster-role-to-user hawkular-metrics-admin system:serviceaccount:management-infra:management-admin
+- policy add-role-to-user -n management-infra admin -z management-admin
+- policy add-role-to-user -n management-infra management-infra-admin -z management-admin
+- policy add-cluster-role-to-user cluster-reader system:serviceaccount:management-infra:management-admin
+- policy add-scc-to-user privileged system:serviceaccount:management-infra:management-admin
+- policy add-cluster-role-to-user system:image-puller system:serviceaccount:management-infra:inspector-admin
+- policy add-scc-to-user privileged system:serviceaccount:management-infra:inspector-admin
+- policy add-cluster-role-to-user self-provisioner system:serviceaccount:management-infra:management-admin
+- policy add-cluster-role-to-user hawkular-metrics-admin system:serviceaccount:management-infra:management-admin
 
 manage_iq_openshift_3_2_tasks:
-    - policy add-cluster-role-to-user system:image-auditor system:serviceaccount:management-infra:management-admin
+- policy add-cluster-role-to-user system:image-auditor system:serviceaccount:management-infra:management-admin

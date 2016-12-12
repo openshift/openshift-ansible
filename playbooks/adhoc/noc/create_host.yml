@@ -16,7 +16,7 @@
           host: ctr_test_kwoodson
           filter:
             host:
-            -  ctr_kwoodson_test_tmpl
+              - ctr_kwoodson_test_tmpl
 
       register: tmpl_results
 
@@ -39,21 +39,20 @@
         params:
           host: ctr_test_kwoodson
           interfaces:
-          - type: 1
-            main: 1
-            useip: 1
-            ip: 127.0.0.1
-            dns: ""
-            port: 10050
+            - type: 1
+              main: 1
+              useip: 1
+              ip: 127.0.0.1
+              dns: ""
+              port: 10050
           groups:
-          - groupid: 1
+            - groupid: 1
           templates: "{{ tmpl_results.results | oo_collect('templateid') | oo_build_zabbix_list_dict('templateid') }}"
           output: extend
           filter:
             host:
-            -  ctr_test_kwoodson
+              - ctr_test_kwoodson
 
       register: host_results
 
     - debug: var=host_results
-
