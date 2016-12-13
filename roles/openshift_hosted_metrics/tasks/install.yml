@@ -128,5 +128,5 @@
   modify_yaml:
     dest: "{{ openshift.common.config_base }}/master/master-config.yaml"
     yaml_key: assetConfig.metricsPublicURL
-    yaml_value: "{{ openshift_hosted_metrics_public_url }}"
+    yaml_value: "{{ openshift_hosted_metrics_deploy_url }}"
   notify: restart master
