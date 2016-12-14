@@ -218,7 +218,7 @@ class IpTablesManager(object):  # pylint: disable=too-many-instance-attributes
         return ["/usr/sbin/%s" % cmd]
 
     def gen_save_cmd(self):  # pylint: disable=no-self-use
-        return ['/usr/libexec/iptables/iptables.init', 'save']
+        return ['cd /etc/sysconfig/iptables.d/; /sbin/iptables-save', '/etc/sysconfig/iptables.d/origin']
 
 
 def main():
