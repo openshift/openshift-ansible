@@ -2,20 +2,31 @@
 - name: check that hawkular_metrics_hostname is set
   fail: msg='the openshift_metrics_hawkular_metrics_hostname variable is required'
   when: "{{ openshift_metrics_hawkular_metrics_hostname is not defined }}"
+
 - name: check the value of openshift_metrics_hawkular_cassandra_storage_type
   fail:
     msg: >
       openshift_metrics_hawkular_cassandra_storage_type ({{ openshift_metrics_hawkular_cassandra_storage_type }})
       is invalid, must be one of: emptydir, pv, dynamic
   when: openshift_metrics_hawkular_cassandra_storage_type not in openshift_metrics_hawkular_cassandra_storage_types
-- name: Install Metrics
-  include: "{{ role_path }}/tasks/install_{{ include_file }}.yaml"
-  with_items:
-    - metrics
-    - heapster
-    - hawkular
-  loop_control:
-    loop_var: include_file
+
+- name: Create temp directory for doing work in
+  command: mktemp -td openshift-metrics-ansible-XXXXXX
+  register: mktemp
+  changed_when: False
+
+- debug: msg="Created temp dir {{mktemp.stdout}}"
+
+- name: Create temp directory for all our templates
+  file: path={{mktemp.stdout}}/templates state=directory mode=0755
+  changed_when: False
+
+- include: "{{role_path}}/tasks/install_metrics.yaml"
+  when: openshift_metrics_install_metrics | default(false) | bool
+
+- include: "{{role_path}}/tasks/uninstall_metrics.yaml"
+  when: not openshift_metrics_install_metrics | default(false) | bool
+
 - name: create objects
   command: >
     {{ openshift.common.client_binary }} -n '{{ openshift_metrics_project }}'
