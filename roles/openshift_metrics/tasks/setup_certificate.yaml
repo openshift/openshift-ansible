@@ -2,6 +2,7 @@
 - name: generate {{ component }} keys
   command: >
     {{ openshift.common.admin_binary }} ca create-server-cert
+    --config={{ mktemp.stdout }}/admin.kubeconfig
     --key='{{ openshift_metrics_certs_dir }}/{{ component }}.key'
     --cert='{{ openshift_metrics_certs_dir }}/{{ component }}.crt'
     --hostnames='{{ hostnames }}'

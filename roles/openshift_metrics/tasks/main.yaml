@@ -1,7 +1,7 @@
 ---
 - name: check that hawkular_metrics_hostname is set
   fail: msg='the openshift_metrics_hawkular_metrics_hostname variable is required'
-  when: "{{ openshift_metrics_hawkular_metrics_hostname is not defined }}"
+  when: openshift_metrics_hawkular_metrics_hostname is not defined
 
 - name: check the value of openshift_metrics_hawkular_cassandra_storage_type
   fail:
@@ -21,6 +21,13 @@
   file: path={{mktemp.stdout}}/templates state=directory mode=0755
   changed_when: False
 
+- name: Copy the admin client config(s)
+  command: >
+     cp {{ openshift.common.config_base}}/master/admin.kubeconfig {{ mktemp.stdout }}/admin.kubeconfig
+  changed_when: False
+  check_mode: no
+  tags: metrics_init
+
 - include: "{{role_path}}/tasks/install_metrics.yaml"
   when: openshift_metrics_install_metrics | default(false) | bool
 
@@ -29,7 +36,8 @@
 
 - name: create objects
   command: >
-    {{ openshift.common.client_binary }} -n '{{ openshift_metrics_project }}'
+    {{ openshift.common.client_binary }} -n {{ openshift_metrics_project }}
+    --config={{ mktemp.stdout }}/admin.kubeconfig
     apply -f {{ item }}
   with_fileglob:
   - "{{ mktemp.stdout }}/templates/*.yaml"

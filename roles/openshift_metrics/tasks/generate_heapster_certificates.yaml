@@ -2,13 +2,15 @@
 - name: generate heapster key/cert
   command: >
     {{ openshift.common.admin_binary }} ca create-server-cert
+    --config={{ mktemp.stdout }}/admin.kubeconfig
     --key='{{ openshift_metrics_certs_dir }}/heapster.key'
     --cert='{{ openshift_metrics_certs_dir }}/heapster.cert'
     --hostnames=heapster
     --signer-cert='{{ openshift_metrics_certs_dir }}/ca.crt'
     --signer-key='{{ openshift_metrics_certs_dir }}/ca.key'
     --signer-serial='{{ openshift_metrics_certs_dir }}/ca.serial.txt'
-  when: not '{{ openshift_metrics_certs_dir }}/heapster.key'|exists
+  when: not '{{ openshift_metrics_certs_dir }}/heapster.key' | exists
+
 - when: "'secret/heapster-secrets' not in metrics_secrets.stdout_lines"
   block:
   - name: read files for the heapster secret
