@@ -102,61 +102,57 @@
   loop_control:
     loop_var: node_name
 
-- shell: certs=""; for cert in $(echo logging-es{,-ops}); do certs=$certs,dns:$cert; done; echo $certs
-  register: elasticsearch_certs
-  check_mode: no
+- name: Check for jks-generator service account
+  command: >
+    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get serviceaccount/jks-generator --no-headers -n {{openshift_logging_namespace}}
+  register: serviceaccount_result
+  ignore_errors: yes
+  when: not ansible_check_mode
 
-- shell: certs=""; for cert in $(echo logging-es{,-ops}{,-cluster}{,.logging.svc.cluster.local}); do certs=$certs,dns:$cert; done; echo $certs
-  register: logging_es_certs
-  check_mode: no
+- name: Create jks-generator service account
+  command: >
+    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig create serviceaccount jks-generator -n {{openshift_logging_namespace}}
+  when: not ansible_check_mode and "not found" in serviceaccount_result.stderr
 
-#- shell: index=2; certs=""; for cert in $(echo logging-es{,-ops}); do certs=$certs,DNS.$index=$cert; index=$(($index+1)); done; echo $certs
-#  register: elasticsearch_certs
-#  check_mode: no
+- name: Check for hostmount-anyuid scc entry
+  shell: >
+    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get scc hostmount-anyuid -o go-template='{{ '{{' }}.users{{ '}}' }}' |
+    grep system:serviceaccount:{{openshift_logging_namespace}}:jks-generator
+  register: scc_result
+  ignore_errors: yes
+  when: not ansible_check_mode
 
-#- shell: index=2; certs=""; for cert in $(echo logging-es{,-ops}{,-cluster}{,.logging.svc.cluster.local}); do certs=$certs,DNS.$index=$cert; index=$(($index+1)); done; echo $certs
-#  register: logging_es_certs
-#  check_mode: no
+- name: Add to hostmount-anyuid scc
+  command: >
+    {{ openshift.common.admin_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig policy add-scc-to-user hostmount-anyuid -z jks-generator -n {{openshift_logging_namespace}}
+  when: not ansible_check_mode and scc_result.rc == 1
 
-- name: Generate PKCS12 chains
-#  include: generate_pkcs12.yaml component='system.admin'
-  include: generate_jks_chain.yaml component='system.admin'
+- name: Copy jks script
+  copy:
+    src: generate-jks.sh
+    dest: "{{generated_certs_dir}}/generate-jks.sh"
 
-- name: Generate PKCS12 chains
-#  include: generate_pkcs12.yaml component={{node.name}} oid={{node.oid | default(False)}} chain_certs={{node.certs}}
-  include: generate_jks_chain.yaml component={{node.name}} oid={{node.oid | default(False)}} chain_certs={{node.certs}}
-  with_items:
-    - {name: 'elasticsearch', oid: True, certs: '{{elasticsearch_certs.stdout}}'}
-    - {name: 'logging-es', certs: '{{logging_es_certs.stdout}}'}
-  loop_control:
-    loop_var: node
-# This should be handled within the ES image instead... ---
-#- name: Copy jks script
-#  copy:
-#    src: generate-jks.sh
-#    dest: "{{etcd_generated_certs_dir}}/logging"
+- name: Generate JKS chains
+  template:
+    src: jks_pod.j2
+    dest: "{{mktemp.stdout}}/jks_pod.yaml"
 
-#- name: Generate JKS chains
-#  template:
-#    src: job.j2
-#    dest: "{{mktemp.stdout}}/jks_job.yaml"
+- name: create pod
+  shell: >
+    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig create -f {{mktemp.stdout}}/jks_pod.yaml -n {{openshift_logging_namespace}}
+  register: podoutput
 
-#- name: kick off job
-#  shell: >
-#    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig create -f {{mktemp.stdout}}/jks_job.yaml -n {{logging_namespace}}
-#  register: podoutput
+- shell: >
+    echo {{podoutput.stdout}} | awk -v podname='\\\".*\\\"' '{print $2}'
+  register: podname
 
-#- shell: >
-#    echo {{podoutput.stdout}} | awk -v podname='\\\".*\\\"' '{print $2}'
-#  register: podname
+- shell: >
+    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get pod {{podname.stdout}} -o go-template='{{ '{{' }}index .status "phase"{{ '}}' }}' -n {{openshift_logging_namespace}}
+  register: result
+  until: result.stdout.find("Succeeded") != -1
+  retries: 5
+  delay: 10
 
-#- action: shell >
-#    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig oc get pod/{{podname.stdout}} -o go-template='{{ '{{' }}index .status "phase"{{ '}}' }}' -n {{logging_namespace}}
-#  register: result
-#  until: result.stdout.find("Succeeded") != -1
-#  retries: 5
-#  delay: 10
-# --- This should be handled within the ES image instead...
 - name: Generate proxy session
   shell: tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 200
   register: session_secret
