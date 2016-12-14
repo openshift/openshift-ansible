@@ -5,8 +5,19 @@
 #
 # The AWS access/secret keys should be the keys of a separate user (not your main user), containing only the necessary S3 access role.
 # The 'clusterid' is the short name of your cluster.
+#
+# This playbook should be limited to one openshift master
 
-- hosts: tag_clusterid_{{ clusterid }}:&tag_host-type_openshift-master
+- hosts: localhost
+  gather_facts: no
+  become: no
+  tasks:
+  - add_host:
+      name: "{{ (groups['tag_clusterid_' ~ clusterid] | union(groups['tag_host-type_openshift-master']))[0] }}"
+      group: oo_first_master
+
+
+- hosts: oo_first_master
   remote_user: root
   gather_facts: False
 
