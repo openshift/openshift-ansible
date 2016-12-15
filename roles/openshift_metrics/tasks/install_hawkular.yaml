@@ -3,6 +3,7 @@
   template:
     src: hawkular_metrics_rc.j2
     dest: "{{ mktemp.stdout }}/templates/hawkular_metrics_rc.yaml"
+
 - name: generate hawkular-cassandra replication controllers
   template:
     src: hawkular_cassandra_rc.j2
@@ -45,6 +46,7 @@
 - name: read hawkular-metrics route destination ca certificate
   slurp: src={{ openshift_metrics_certs_dir }}/ca.crt
   register: metrics_route_dest_ca_cert
+
 - name: generate the hawkular-metrics route
   template:
     src: route.j2

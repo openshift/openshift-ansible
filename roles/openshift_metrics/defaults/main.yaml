@@ -1,9 +1,11 @@
 ---
+openshift_metrics_start_cluster: True
 openshift_metrics_install_metrics: True
 openshift_metrics_image_prefix: docker.io/openshift/origin-
 openshift_metrics_image_version: latest
 openshift_metrics_master_url: https://kubernetes.default.svc.cluster.local
 openshift_metrics_project: openshift-infra
+openshift_metrics_certs_dir: "{{ openshift.common.config_base }}/master/metrics"
 openshift_metrics_startup_timeout: 500
 openshift_metrics_certs_dir: "{{ openshift.common.config_base }}/master/metrics"
 
