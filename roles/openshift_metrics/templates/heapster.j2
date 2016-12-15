@@ -42,6 +42,35 @@ spec:
         env:
         - name: STARTUP_TIMEOUT
           value: "{{ openshift_metrics_startup_timeout }}"
+{% if ((openshift_metrics_heapster_limits_cpu is defined and openshift_metrics_heapster_limits_cpu is not none) 
+   or (openshift_metrics_heapster_limits_memory is defined and openshift_metrics_heapster_limits_memory is not none)
+   or (openshift_metrics_heapster_requests_cpu is defined and openshift_metrics_heapster_requests_cpu is not none)
+   or (openshift_metrics_heapster_requests_memory is defined and openshift_metrics_heapster_requests_memory is not none)) 
+%}
+        resources:
+{% if (openshift_metrics_heapster_limits_cpu is not none
+   or openshift_metrics_heapster_limits_memory is not none)
+%}
+          limits:
+{% if openshift_metrics_heapster_limits_cpu is not none %}
+            cpu: "{{openshift_metrics_heapster_limits_cpu}}"
+{% endif %}
+{% if openshift_metrics_heapster_limits_memory is not none %}
+            memory: "{{openshift_metrics_heapster_limits_memory}}"
+{% endif %}
+{% endif %}
+{% if (openshift_metrics_heapster_requests_cpu is not none 
+   or openshift_metrics_heapster_requests_memory is not none) 
+%}
+          requests:
+{% if openshift_metrics_heapster_requests_cpu is not none %}
+            cpu: "{{openshift_metrics_heapster_requests_cpu}}"
+{% endif %}
+{% if openshift_metrics_heapster_requests_memory is not none %}
+            memory: "{{openshift_metrics_heapster_requests_memory}}"
+{% endif %}
+{% endif %}
+{% endif %}
         volumeMounts:
         - name: heapster-secrets
           mountPath: "/secrets"

@@ -64,6 +64,17 @@ For default values, see [`defaults/main.yaml`](defaults/main.yaml).
 
 - `openshift_metrics_resolution`: How often metrics should be gathered.
 
+## Additional variables to control resource limits
+Each metrics component (hawkular, cassandra, heapster) can specify a cpu and memory limits and requests by setting
+the corresponding role variable:
+```
+openshift_metrics_<COMPONENT>_(limits|requests)_(memory|cpu): <VALUE>
+```
+e.g
+```
+openshift_metrics_cassandra_limits_memory: 1G
+openshift_metrics_hawkular_requests_cpu: 100
+```
 
 Dependencies
 ------------

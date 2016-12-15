@@ -73,6 +73,35 @@ spec:
           mountPath: "/secrets"
         - name: hawkular-metrics-client-secrets
           mountPath: "/client-secrets"
+{% if ((openshift_metrics_hawkular_limits_cpu is defined and openshift_metrics_hawkular_limits_cpu is not none) 
+   or (openshift_metrics_hawkular_limits_memory is defined and openshift_metrics_hawkular_limits_memory is not none)
+   or (openshift_metrics_hawkular_requests_cpu is defined and openshift_metrics_hawkular_requests_cpu is not none)
+   or (openshift_metrics_hawkular_requests_memory is defined and openshift_metrics_hawkular_requests_memory is not none)) 
+%}
+        resources:
+{% if (openshift_metrics_hawkular_limits_cpu is not none
+   or openshift_metrics_hawkular_limits_memory is not none)
+%}
+          limits:
+{% if openshift_metrics_hawkular_limits_cpu is not none %}
+            cpu: "{{openshift_metrics_hawkular_limits_cpu}}"
+{% endif %}
+{% if openshift_metrics_hawkular_limits_memory is not none %}
+            memory: "{{openshift_metrics_hawkular_limits_memory}}"
+{% endif %}
+{% endif %}
+{% if (openshift_metrics_hawkular_requests_cpu is not none 
+   or openshift_metrics_hawkular_requests_memory is not none) 
+%}
+          requests:
+{% if openshift_metrics_hawkular_requests_cpu is not none %}
+            cpu: "{{openshift_metrics_hawkular_requests_cpu}}"
+{% endif %}
+{% if openshift_metrics_hawkular_requests_memory is not none %}
+            memory: "{{openshift_metrics_hawkular_requests_memory}}"
+{% endif %}
+{% endif %}
+{% endif %}
         readinessProbe:
           exec:
             command:
