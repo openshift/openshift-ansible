@@ -33,18 +33,20 @@ For default values, see [`defaults/main.yaml`](defaults/main.yaml).
   any user will be able to write metrics to the system which can affect
   performance and use Cassandra disk usage to unpredictably increase.
 
-- `openshift_metrics_hawkular_cassandra_nodes`: The number of Cassandra Nodes to deploy for the
+- `openshift_metrics_hawkular_replicas:` The number of replicas for Hawkular metrics.
+
+- `openshift_metrics_cassandra_nodes`: The number of Cassandra Nodes to deploy for the
   initial cluster.
 
-- `openshift_metrics_hawkular_cassandra_storage_type`: Use `emptydir` for ephemeral storage (for
+- `openshift_metrics_cassandra_storage_type`: Use `emptydir` for ephemeral storage (for
   testing), `pv` to use persistent volumes (which need to be created before the
   installation) or `dynamic` for dynamic persistent volumes.
 
-- `openshift_metrics_hawkular_cassandra_pv_prefix`: The name of persistent volume claims created
+- `openshift_metrics_cassandra_pv_prefix`: The name of persistent volume claims created
   for cassandra will be this with a serial number appended to the end, starting
   from 1.
 
-- `openshift_metrics_hawkular_cassandra_pv_size`: The persistent volume size for each of the
+- `openshift_metrics_cassandra_pv_size`: The persistent volume size for each of the
   Cassandra  nodes.
 
 - `openshift_metrics_heapster_standalone`: Deploy only heapster, without the Hawkular Metrics and

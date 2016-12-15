@@ -85,11 +85,11 @@ spec:
         terminationGracePeriodSeconds: 1800
       volumes:
       - name: cassandra-data
-{% if openshift_metrics_hawkular_cassandra_storage_type == 'emptydir' %}
+{% if openshift_metrics_cassandra_storage_type == 'emptydir' %}
         emptyDir: {}
 {% else %}
         persistentVolumeClaim:
-          claimName: "{{ openshift_metrics_hawkular_cassandra_pv_prefix }}-{{ node }}"
+          claimName: "{{ openshift_metrics_cassandra_pv_prefix }}-{{ node }}"
 {% endif %}
       - name: hawkular-cassandra-secrets
         secret:

@@ -7,10 +7,12 @@ openshift_metrics_project: openshift-infra
 openshift_metrics_startup_timeout: 500
 
 openshift_metrics_hawkular_user_write_access: False
-openshift_metrics_hawkular_cassandra_nodes: 1
-openshift_metrics_hawkular_cassandra_storage_type: emptydir
-openshift_metrics_hawkular_cassandra_pv_prefix: metrics-cassandra
-openshift_metrics_hawkular_cassandra_pv_size: 10Gi
+openshift_metrics_hawkular_replicas: 1
+
+openshift_metrics_cassandra_nodes: 1
+openshift_metrics_cassandra_storage_type: emptydir
+openshift_metrics_cassandra_pv_prefix: metrics-cassandra
+openshift_metrics_cassandra_pv_size: 10Gi
 openshift_metrics_certs_dir: "{{ openshift.common.config_base }}/master/metrics"
 
 openshift_metrics_heapster_standalone: False

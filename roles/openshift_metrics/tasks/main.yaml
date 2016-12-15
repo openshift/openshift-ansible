@@ -3,12 +3,12 @@
   fail: msg='the openshift_metrics_hawkular_metrics_hostname variable is required'
   when: openshift_metrics_hawkular_metrics_hostname is not defined
 
-- name: check the value of openshift_metrics_hawkular_cassandra_storage_type
+- name: check the value of openshift_metrics_cassandra_storage_type
   fail:
     msg: >
-      openshift_metrics_hawkular_cassandra_storage_type ({{ openshift_metrics_hawkular_cassandra_storage_type }})
+      openshift_metrics_cassandra_storage_type ({{ openshift_metrics_cassandra_storage_type }})
       is invalid, must be one of: emptydir, pv, dynamic
-  when: openshift_metrics_hawkular_cassandra_storage_type not in openshift_metrics_hawkular_cassandra_storage_types
+  when: openshift_metrics_cassandra_storage_type not in openshift_metrics_cassandra_storage_types
 
 - name: Create temp directory for doing work in
   command: mktemp -td openshift-metrics-ansible-XXXXXX
