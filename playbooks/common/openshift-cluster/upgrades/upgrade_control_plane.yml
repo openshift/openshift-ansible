@@ -51,6 +51,14 @@
 
 - include: create_service_signer_cert.yml
 
+# Set openshift_master_facts separately. In order to reconcile
+# admission_config's, we currently must run openshift_master_facts and
+# then run openshift_facts.
+- name: Set OpenShift master facts
+  hosts: oo_masters_to_config
+  roles:
+  - openshift_master_facts
+
 - name: Upgrade master config and systemd units
   hosts: oo_masters_to_config
   handlers:
@@ -58,8 +66,9 @@
     static: yes
   roles:
   - openshift_facts
-  - openshift_master_facts
-  tasks:
+  post_tasks:
+  - include_vars: ../../../../roles/openshift_master_facts/vars/main.yml
+
   - include: upgrade_scheduler.yml
 
   - include: "{{ master_config_hook }}"
