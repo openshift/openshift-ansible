@@ -92,6 +92,8 @@
     - atomic-enterprise-sdn-ovs
     - atomic-openshift
     - atomic-openshift-clients
+    - atomic-openshift-excluder
+    - atomic-openshift-docker-excluder
     - atomic-openshift-node
     - atomic-openshift-sdn-ovs
     - cockpit-bridge
@@ -105,6 +107,8 @@
     - openshift-sdn-ovs
     - openvswitch
     - origin
+    - origin-excluder
+    - origin-docker-excluder
     - origin-clients
     - origin-node
     - origin-sdn-ovs
@@ -254,6 +258,8 @@
     - atomic-enterprise-master
     - atomic-openshift
     - atomic-openshift-clients
+    - atomic-openshift-excluder
+    - atomic-openshift-docker-excluder
     - atomic-openshift-master
     - cockpit-bridge
     - cockpit-docker
@@ -265,6 +271,8 @@
     - openshift-master
     - origin
     - origin-clients
+    - origin-excluder
+    - origin-docker-excluder
     - origin-master
     - pacemaker
     - pcs
