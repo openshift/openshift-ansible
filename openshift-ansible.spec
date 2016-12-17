@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.38
+Version:        3.4.39
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Dec 16 2016 Scott Dodson <sdodson@redhat.com> 3.4.39-1
+- Add master config hook for 3.4 upgrade and fix facts ordering for config hook
+  run. (abutcher@redhat.com)
+- The next registry.access.redhat.com/rhel7/etcd image will be 3.0.15
+  (sdodson@redhat.com)
+
 * Mon Dec 12 2016 Scott Dodson <sdodson@redhat.com> 3.4.38-1
 - Make both backup and upgrade optional (sdodson@redhat.com)
 - [upgrades] Upgrade etcd by default (sdodson@redhat.com)
