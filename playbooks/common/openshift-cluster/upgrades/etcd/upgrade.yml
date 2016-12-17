@@ -75,7 +75,7 @@
   hosts: etcd_hosts_to_upgrade
   serial: 1
   vars:
-    upgrade_version: 3.0.14
+    upgrade_version: 3.0.15
   tasks:
   - include: containerized_tasks.yml
     when: etcd_container_version.stdout | default('99') | version_compare('3.0','<') and openshift.common.is_containerized | bool
