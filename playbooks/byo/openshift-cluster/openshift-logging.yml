@@ -1,4 +1,9 @@
 ---
+#
+# This playbook is a preview of upcoming changes for installing
+# Hosted logging on.  See inventory/byo/hosts.*.example for the
+# currently supported method.
+#
 - include: ../../common/openshift-cluster/verify_ansible_version.yml
 
 - name: Create initial host groups for localhost
