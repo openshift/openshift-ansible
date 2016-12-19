@@ -43,7 +43,7 @@ Currently we support re-labeling nodes but we don't re-schedule running pods nor
 
 ```
 oadm manage-node --schedulable=false ${NODE}
-oadm manage-node --evacuate ${NODE}
+oadm manage-node --drain ${NODE}
 oadm manage-node --schedulable=true ${NODE}
 ````
 

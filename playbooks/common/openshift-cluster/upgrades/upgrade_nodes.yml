@@ -1,5 +1,5 @@
 ---
-- name: Evacuate and upgrade nodes
+- name: Drain and upgrade nodes
   hosts: oo_nodes_to_upgrade
   # This var must be set with -e on invocation, as it is not a per-host inventory var
   # and is evaluated early. Values such as "20%" can also be used.
@@ -39,9 +39,9 @@
     retries: 3
     delay: 1
 
-  - name: Evacuate Node for Kubelet upgrade
+  - name: Drain Node for Kubelet upgrade
     command: >
-      {{ hostvars[groups.oo_first_master.0].openshift.common.client_binary }} adm manage-node {{ openshift.node.nodename | lower }} --evacuate --force
+      {{ hostvars[groups.oo_first_master.0].openshift.common.client_binary }} adm manage-node {{ openshift.node.nodename | lower }} --drain --force
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: inventory_hostname in groups.oo_nodes_to_upgrade
 
