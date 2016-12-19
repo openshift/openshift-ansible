@@ -13,6 +13,10 @@ roles_path = roles/
 # Set the log_path
 log_path = /tmp/ansible.log
 
+# prints a descriptive summary of failed tasks
+callback_plugins = ./callback_plugins
+stdout_callback = default_plus_summary
+
 # Uncomment to use the provided BYO inventory
 #hostfile = inventory/byo/hosts
 
