@@ -25,15 +25,22 @@ EXAMPLES = '''
 def set_key(yaml_data, yaml_key, yaml_value):
     changes = []
     ptr = yaml_data
+    final_key = yaml_key.split('.')[-1]
     for key in yaml_key.split('.'):
-        if key not in ptr and key != yaml_key.split('.')[-1]:
+        # Key isn't present and we're not on the final key. Set to empty dictionary.
+        if key not in ptr and key != final_key:
             ptr[key] = {}
             ptr = ptr[key]
-        elif key == yaml_key.split('.')[-1]:
-            if (key in ptr and module.safe_eval(ptr[key]) != yaml_value) or (key not in ptr):
+        # Current key is the final key. Update value.
+        elif key == final_key:
+            if (key in ptr and module.safe_eval(ptr[key]) != yaml_value) or (key not in ptr):  # noqa: F405
                 ptr[key] = yaml_value
                 changes.append((yaml_key, yaml_value))
         else:
+            # Next value is None and we're not on the final key.
+            # Turn value into an empty dictionary.
+            if ptr[key] is None and key != final_key:
+                ptr[key] = {}
             ptr = ptr[key]
     return changes
 
@@ -71,21 +78,18 @@ def main():
     yaml.add_representer(type(None), none_representer)
 
     try:
-
-        yaml_file = open(dest)
-        yaml_data = yaml.safe_load(yaml_file.read())
-        yaml_file.close()
+        with open(dest) as yaml_file:
+            yaml_data = yaml.safe_load(yaml_file.read())
 
         changes = set_key(yaml_data, yaml_key, yaml_value)
 
         if len(changes) > 0:
             if backup:
                 module.backup_local(dest)
-            yaml_file = open(dest, 'w')
-            yaml_string = yaml.dump(yaml_data, default_flow_style=False)
-            yaml_string = yaml_string.replace('\'\'', '""')
-            yaml_file.write(yaml_string)
-            yaml_file.close()
+            with open(dest, 'w') as yaml_file:
+                yaml_string = yaml.dump(yaml_data, default_flow_style=False)
+                yaml_string = yaml_string.replace('\'\'', '""')
+                yaml_file.write(yaml_string)
 
         return module.exit_json(changed=(len(changes) > 0), changes=changes)
 
