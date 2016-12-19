@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.39
+Version:        3.4.40
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Dec 19 2016 Scott Dodson <sdodson@redhat.com> 3.4.40-1
+- modify_yaml: handle None value during update. (abutcher@redhat.com)
+
 * Fri Dec 16 2016 Scott Dodson <sdodson@redhat.com> 3.4.39-1
 - Add master config hook for 3.4 upgrade and fix facts ordering for config hook
   run. (abutcher@redhat.com)
