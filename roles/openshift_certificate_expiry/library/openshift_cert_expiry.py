@@ -371,7 +371,7 @@ an OpenShift Container Platform cluster
         ######################################################################
         # Load the certificate and the CA, parse their expiration dates into
         # datetime objects so we can manipulate them later
-        for _, v in cert_meta.iteritems():
+        for _, v in cert_meta.items():
             with open(v, 'r') as fp:
                 cert = fp.read()
                 cert_subject, cert_expiry_date, time_remaining = load_and_handle_cert(cert, now)
@@ -654,9 +654,13 @@ an OpenShift Container Platform cluster
     # will be at the front of the list and certificates which will
     # expire later are at the end. Router and registry certs should be
     # limited to just 1 result, so don't bother sorting those.
-    check_results['ocp_certs'] = sorted(check_results['ocp_certs'], cmp=lambda x, y: cmp(x['days_remaining'], y['days_remaining']))
-    check_results['kubeconfigs'] = sorted(check_results['kubeconfigs'], cmp=lambda x, y: cmp(x['days_remaining'], y['days_remaining']))
-    check_results['etcd'] = sorted(check_results['etcd'], cmp=lambda x, y: cmp(x['days_remaining'], y['days_remaining']))
+    def cert_key(item):
+        ''' return the days_remaining key '''
+        return item['days_remaining']
+
+    check_results['ocp_certs'] = sorted(check_results['ocp_certs'], key=cert_key)
+    check_results['kubeconfigs'] = sorted(check_results['kubeconfigs'], key=cert_key)
+    check_results['etcd'] = sorted(check_results['etcd'], key=cert_key)
 
     # This module will never change anything, but we might want to
     # change the return code parameter if there is some catastrophic

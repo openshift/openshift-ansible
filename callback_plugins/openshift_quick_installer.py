@@ -36,30 +36,13 @@ What's different:
 """
 
 from __future__ import (absolute_import, print_function)
-import imp
-import os
 import sys
 from ansible import constants as C
+from ansible.plugins.callback import CallbackBase
 from ansible.utils.color import colorize, hostcolor
-ANSIBLE_PATH = imp.find_module('ansible')[1]
-DEFAULT_PATH = os.path.join(ANSIBLE_PATH, 'plugins/callback/default.py')
-DEFAULT_MODULE = imp.load_source(
-    'ansible.plugins.callback.default',
-    DEFAULT_PATH
-)
-
-try:
-    from ansible.plugins.callback import CallbackBase
-    BASECLASS = CallbackBase
-except ImportError:  # < ansible 2.1
-    BASECLASS = DEFAULT_MODULE.CallbackModule
 
 
-reload(sys)
-sys.setdefaultencoding('utf-8')
-
-
-class CallbackModule(DEFAULT_MODULE.CallbackModule):
+class CallbackModule(CallbackBase):
 
     """
     Ansible callback plugin

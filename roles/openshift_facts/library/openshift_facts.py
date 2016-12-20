@@ -26,6 +26,8 @@ import struct
 import socket
 from distutils.util import strtobool
 from distutils.version import LooseVersion
+from six import string_types
+from six import text_type
 
 # ignore pylint errors related to the module_utils import
 # pylint: disable=redefined-builtin, unused-wildcard-import, wildcard-import
@@ -87,7 +89,7 @@ def migrate_docker_facts(facts):
     # log_options was originally meant to be a comma separated string, but
     # we now prefer an actual list, with backward compatibility:
     if 'log_options' in facts['docker'] and \
-            isinstance(facts['docker']['log_options'], basestring):
+            isinstance(facts['docker']['log_options'], string_types):
         facts['docker']['log_options'] = facts['docker']['log_options'].split(",")
 
     return facts
@@ -226,7 +228,7 @@ def choose_hostname(hostnames=None, fallback=''):
         return hostname
 
     ip_regex = r'\A\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\Z'
-    ips = [i for i in hostnames if i is not None and isinstance(i, basestring) and re.match(ip_regex, i)]
+    ips = [i for i in hostnames if i is not None and isinstance(i, string_types) and re.match(ip_regex, i)]
     hosts = [i for i in hostnames if i is not None and i != '' and i not in ips]
 
     for host_list in (hosts, ips):
@@ -363,7 +365,7 @@ def normalize_aws_facts(metadata, facts):
         var_map = {'ips': 'local-ipv4s', 'public_ips': 'public-ipv4s'}
         for ips_var, int_var in iteritems(var_map):
             ips = interface.get(int_var)
-            if isinstance(ips, basestring):
+            if isinstance(ips, string_types):
                 int_info[ips_var] = [ips]
             else:
                 int_info[ips_var] = ips
@@ -772,7 +774,7 @@ def set_etcd_facts_if_unset(facts):
         # Read ETCD_DATA_DIR from /etc/etcd/etcd.conf:
         try:
             # Add a fake section for parsing:
-            ini_str = unicode('[root]\n' + open('/etc/etcd/etcd.conf', 'r').read(), 'utf-8')
+            ini_str = text_type('[root]\n' + open('/etc/etcd/etcd.conf', 'r').read(), 'utf-8')
             ini_fp = io.StringIO(ini_str)
             config = ConfigParser.RawConfigParser()
             config.readfp(ini_fp)
@@ -1280,15 +1282,14 @@ def get_hosted_registry_insecure():
     hosted_registry_insecure = None
     if os.path.exists('/etc/sysconfig/docker'):
         try:
-            ini_str = unicode('[root]\n' + open('/etc/sysconfig/docker', 'r').read(), 'utf-8')
+            ini_str = text_type('[root]\n' + open('/etc/sysconfig/docker', 'r').read(), 'utf-8')
             ini_fp = io.StringIO(ini_str)
             config = ConfigParser.RawConfigParser()
             config.readfp(ini_fp)
             options = config.get('root', 'OPTIONS')
             if 'insecure-registry' in options:
                 hosted_registry_insecure = True
-        # pylint: disable=bare-except
-        except:
+        except Exception:  # pylint: disable=broad-except
             pass
     return hosted_registry_insecure
 
@@ -1449,7 +1450,7 @@ def merge_facts(orig, new, additive_facts_to_overwrite, protected_facts_to_overw
             if key in inventory_json_facts:
                 # Watchout for JSON facts that sometimes load as strings.
                 # (can happen if the JSON contains a boolean)
-                if isinstance(new[key], basestring):
+                if isinstance(new[key], string_types):
                     facts[key] = yaml.safe_load(new[key])
                 else:
                     facts[key] = copy.deepcopy(new[key])
@@ -1511,7 +1512,7 @@ def merge_facts(orig, new, additive_facts_to_overwrite, protected_facts_to_overw
     for key in new_keys:
         # Watchout for JSON facts that sometimes load as strings.
         # (can happen if the JSON contains a boolean)
-        if key in inventory_json_facts and isinstance(new[key], basestring):
+        if key in inventory_json_facts and isinstance(new[key], string_types):
             facts[key] = yaml.safe_load(new[key])
         else:
             facts[key] = copy.deepcopy(new[key])
@@ -1614,7 +1615,7 @@ def set_proxy_facts(facts):
     if 'common' in facts:
         common = facts['common']
         if 'http_proxy' in common or 'https_proxy' in common:
-            if 'no_proxy' in common and isinstance(common['no_proxy'], basestring):
+            if 'no_proxy' in common and isinstance(common['no_proxy'], string_types):
                 common['no_proxy'] = common['no_proxy'].split(",")
             elif 'no_proxy' not in common:
                 common['no_proxy'] = []
@@ -1636,7 +1637,7 @@ def set_proxy_facts(facts):
         if 'https_proxy' not in builddefaults and 'https_proxy' in common:
             builddefaults['https_proxy'] = common['https_proxy']
         # make no_proxy into a list if it's not
-        if 'no_proxy' in builddefaults and isinstance(builddefaults['no_proxy'], basestring):
+        if 'no_proxy' in builddefaults and isinstance(builddefaults['no_proxy'], string_types):
             builddefaults['no_proxy'] = builddefaults['no_proxy'].split(",")
         if 'no_proxy' not in builddefaults and 'no_proxy' in common:
             builddefaults['no_proxy'] = common['no_proxy']
@@ -2220,12 +2221,12 @@ class OpenShiftFacts(object):
                 key = '{0}_registries'.format(cat)
                 if key in new_local_facts['docker']:
                     val = new_local_facts['docker'][key]
-                    if isinstance(val, basestring):
+                    if isinstance(val, string_types):
                         val = [x.strip() for x in val.split(',')]
                     new_local_facts['docker'][key] = list(set(val) - set(['']))
             # Convert legacy log_options comma sep string to a list if present:
             if 'log_options' in new_local_facts['docker'] and \
-                    isinstance(new_local_facts['docker']['log_options'], basestring):
+                    isinstance(new_local_facts['docker']['log_options'], string_types):
                 new_local_facts['docker']['log_options'] = new_local_facts['docker']['log_options'].split(',')
 
         new_local_facts = self.remove_empty_facts(new_local_facts)
