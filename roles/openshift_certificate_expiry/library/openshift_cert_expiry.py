@@ -4,17 +4,13 @@
 
 """For details on this module see DOCUMENTATION (below)"""
 
-# router/registry cert grabbing
-import subprocess
-# etcd config file
-import ConfigParser
-# Expiration parsing
 import datetime
-# File path stuff
 import os
-# Config file parsing
+import subprocess
+
+from six.moves import configparser
+
 import yaml
-# Certificate loading
 import OpenSSL.crypto
 
 DOCUMENTATION = '''
@@ -260,7 +256,10 @@ Return:
 # This is our module MAIN function after all, so there's bound to be a
 # lot of code bundled up into one block
 #
-# pylint: disable=too-many-locals,too-many-locals,too-many-statements,too-many-branches
+# Reason: These checks are disabled because the issue was introduced
+# during a period where the pylint checks weren't enabled for this file
+# Status: temporarily disabled pending future refactoring
+# pylint: disable=too-many-locals,too-many-statements,too-many-branches
 def main():
     """This module examines certificates (in various forms) which compose
 an OpenShift Container Platform cluster
@@ -479,13 +478,17 @@ an OpenShift Container Platform cluster
     etcd_cert_params.append('dne')
     try:
         with open('/etc/etcd/etcd.conf', 'r') as fp:
-            etcd_config = ConfigParser.ConfigParser()
+            etcd_config = configparser.ConfigParser()
+            # Reason: This check is disabled because the issue was introduced
+            # during a period where the pylint checks weren't enabled for this file
+            # Status: temporarily disabled pending future refactoring
+            # pylint: disable=deprecated-method
             etcd_config.readfp(FakeSecHead(fp))
 
         for param in etcd_cert_params:
             try:
                 etcd_certs_to_check.add(etcd_config.get('ETCD', param))
-            except ConfigParser.NoOptionError:
+            except configparser.NoOptionError:
                 # That parameter does not exist, oh well...
                 pass
     except IOError:

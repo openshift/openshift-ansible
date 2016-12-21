@@ -61,11 +61,11 @@ class LibvirtInventory(object):
         self.parse_cli_args()
 
         if self.args.host:
-            print _json_format_dict(self.get_host_info(), self.args.pretty)
+            print(_json_format_dict(self.get_host_info(), self.args.pretty))
         elif self.args.list:
-            print _json_format_dict(self.get_inventory(), self.args.pretty)
+            print(_json_format_dict(self.get_inventory(), self.args.pretty))
         else:  # default action with no options
-            print _json_format_dict(self.get_inventory(), self.args.pretty)
+            print(_json_format_dict(self.get_inventory(), self.args.pretty))
 
     def read_settings(self):
         ''' Reads the settings from the libvirt.ini file '''
@@ -115,12 +115,12 @@ class LibvirtInventory(object):
 
         conn = libvirt.openReadOnly(self.libvirt_uri)
         if conn is None:
-            print "Failed to open connection to %s" % self.libvirt_uri
+            print("Failed to open connection to %s" % self.libvirt_uri)
             sys.exit(1)
 
         domains = conn.listAllDomains()
         if domains is None:
-            print "Failed to list domains for connection %s" % self.libvirt_uri
+            print("Failed to list domains for connection %s" % self.libvirt_uri)
             sys.exit(1)
 
         for domain in domains:

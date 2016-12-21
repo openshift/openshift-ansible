@@ -1,5 +1,4 @@
 [MASTER]
-
 # Specify a configuration file.
 #rcfile=
 
@@ -7,12 +6,9 @@
 # pygtk.require().
 #init-hook=
 
-# Profiled execution.
-#profile=no
-
 # Add files or directories to the blacklist. They should be base names, not
 # paths.
-ignore=CVS
+ignore=CVS,setup.py
 
 # Pickle collected data for later comparisons.
 persistent=no
@@ -20,14 +16,6 @@ persistent=no
 # List of plugins (as comma separated values of python modules names) to load,
 # usually to register additional checkers.
 load-plugins=
-
-# Deprecated. It was used to include message's id in output. Use --msg-template
-# instead.
-#include-ids=no
-
-# Deprecated. It was used to include symbolic ids of messages in output. Use
-# --msg-template instead.
-#symbols=no
 
 # Use multiple processes to speed up Pylint.
 jobs=1
@@ -58,7 +46,8 @@ confidence=
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
-# multiple time. See also the "--disable" option for examples.
+# multiple time (only on the command line, not in the configuration file where
+# it should appear only once). See also the "--disable" option for examples.
 #enable=
 
 # Disable the message, report, category or checker with the given id(s). You
@@ -70,8 +59,7 @@ confidence=
 # --enable=similarities". If you want to run only the classes checker, but have
 # no Warning level messages displayed, use"--disable=all --enable=classes
 # --disable=W"
-# w0511 - fixme - disabled because TODOs are acceptable
-disable=E1608,W1627,E1601,E1603,E1602,E1605,E1604,E1607,E1606,W1621,W1620,W1623,W1622,W1625,W1624,W1609,W1608,W1607,W1606,W1605,W1604,W1603,W1602,W1601,W1639,W1640,I0021,W1638,I0020,W1618,W1619,W1630,W1626,W1637,W1634,W1635,W1610,W1611,W1612,W1613,W1614,W1615,W1616,W1617,W1632,W1633,W0704,W1628,W1629,W1636,W0511,R0801,locally-disabled,file-ignored
+disable=import-star-module-level,old-octal-literal,oct-method,print-statement,unpacking-in-except,parameter-unpacking,backtick,old-raise-syntax,old-ne-operator,long-suffix,dict-view-method,dict-iter-method,metaclass-assignment,next-method-called,raising-string,indexing-exception,raw_input-builtin,long-builtin,file-builtin,execfile-builtin,coerce-builtin,cmp-builtin,buffer-builtin,basestring-builtin,apply-builtin,filter-builtin-not-iterating,using-cmp-argument,useless-suppression,range-builtin-not-iterating,suppressed-message,no-absolute-import,old-division,cmp-method,reload-builtin,zip-builtin-not-iterating,intern-builtin,unichr-builtin,reduce-builtin,standarderror-builtin,unicode-builtin,xrange-builtin,coerce-method,delslice-method,getslice-method,setslice-method,input-builtin,round-builtin,hex-method,nonzero-method,map-builtin-not-iterating
 
 
 [REPORTS]
@@ -96,20 +84,24 @@ reports=no
 # (RP0004).
 evaluation=10.0 - ((float(5 * error + warning + refactor + convention) / statement) * 10)
 
-# Add a comment according to your evaluation note. This is used by the global
-# evaluation report (RP0004).
-#comment=no
-
 # Template used to display messages. This is a python new-style format string
 # used to format the message information. See doc for all details
 #msg-template=
 
 
-[LOGGING]
+[SIMILARITIES]
 
-# Logging modules to check that the string format arguments are in logging
-# function parameter format
-logging-modules=logging
+# Minimum lines number of a similarity.
+min-similarity-lines=4
+
+# Ignore comments when computing similarities.
+ignore-comments=yes
+
+# Ignore docstrings when computing similarities.
+ignore-docstrings=yes
+
+# Ignore imports when computing similarities.
+ignore-imports=yes
 
 
 [BASIC]
@@ -192,26 +184,100 @@ method-name-hint=[a-z_][a-z0-9_]{2,30}$
 
 # Regular expression which should only match function or class names that do
 # not require a docstring.
-no-docstring-rgx=__.*__
+no-docstring-rgx=^_
 
 # Minimum line length for functions/classes that require docstrings, shorter
 # ones are exempt.
 docstring-min-length=-1
 
 
-[SIMILARITIES]
+[ELIF]
 
-# Minimum lines number of a similarity.
-min-similarity-lines=0
+# Maximum number of nested blocks for function / method body
+max-nested-blocks=5
 
-# Ignore comments when computing similarities.
-ignore-comments=yes
 
-# Ignore docstrings when computing similarities.
-ignore-docstrings=yes
+[MISCELLANEOUS]
 
-# Ignore imports when computing similarities.
-ignore-imports=yes
+# List of note tags to take in consideration, separated by a comma.
+notes=FIXME,XXX,TODO
+
+
+[TYPECHECK]
+
+# Tells whether missing members accessed in mixin class should be ignored. A
+# mixin class is detected if its name ends with "mixin" (case insensitive).
+ignore-mixin-members=yes
+
+# List of module names for which member attributes should not be checked
+# (useful for modules/projects where namespaces are manipulated during runtime
+# and thus existing member attributes cannot be deduced by static analysis. It
+# supports qualified module names, as well as Unix pattern matching.
+ignored-modules=
+
+# List of classes names for which member attributes should not be checked
+# (useful for classes with attributes dynamically set). This supports can work
+# with qualified names.
+ignored-classes=
+
+# List of members which are set dynamically and missed by pylint inference
+# system, and so shouldn't trigger E1101 when accessed. Python regular
+# expressions are accepted.
+generated-members=
+
+
+[SPELLING]
+
+# Spelling dictionary name. Available dictionaries: en_ZW (myspell), en_NG
+# (myspell), en_NA (myspell), en_NZ (myspell), en_PH (myspell), en_AG
+# (myspell), en_BW (myspell), en_IE (myspell), en_ZM (myspell), en_DK
+# (myspell), en_CA (myspell), en_GH (myspell), en_IN (myspell), en_BZ
+# (myspell), en_MW (myspell), en_TT (myspell), en_JM (myspell), en_GB
+# (myspell), en_ZA (myspell), en_SG (myspell), en_AU (myspell), en_US
+# (myspell), en_BS (myspell), en_HK (myspell).
+spelling-dict=
+
+# List of comma separated words that should not be checked.
+spelling-ignore-words=
+
+# A path to a file that contains private dictionary; one word per line.
+spelling-private-dict-file=
+
+# Tells whether to store unknown words to indicated private dictionary in
+# --spelling-private-dict-file option instead of raising a message.
+spelling-store-unknown-words=no
+
+
+[FORMAT]
+
+# Maximum number of characters on a single line.
+max-line-length=120
+
+# Regexp for a line that is allowed to be longer than the limit.
+ignore-long-lines=^\s*(# )?<?https?://\S+>?$
+
+# Allow the body of an if to be on the same line as the test if there is no
+# else.
+single-line-if-stmt=no
+
+# List of optional constructs for which whitespace checking is disabled. `dict-
+# separator` is used to allow tabulation in dicts, etc.: {1  : 1,\n222: 2}.
+# `trailing-comma` allows a space between comma and closing bracket: (a, ).
+# `empty-line` allows space-only lines.
+no-space-check=trailing-comma,dict-separator
+
+# Maximum number of lines in a module
+max-module-lines=1000
+
+# String used as indentation unit. This is usually "    " (4 spaces) or "\t" (1
+# tab).
+indent-string='    '
+
+# Number of spaces of indent required inside a hanging  or continued line.
+indent-after-paren=4
+
+# Expected format of line ending, e.g. empty (any line ending), LF or CRLF.
+expected-line-ending-format=
 
 
 [VARIABLES]
@@ -232,81 +298,27 @@ additional-builtins=
 callbacks=cb_,_cb
 
 
-[TYPECHECK]
+[LOGGING]
 
-# Tells whether missing members accessed in mixin class should be ignored. A
-# mixin class is detected if its name ends with "mixin" (case insensitive).
-ignore-mixin-members=yes
-
-# List of module names for which member attributes should not be checked
-# (useful for modules/projects where namespaces are manipulated during runtime
-# and thus existing member attributes cannot be deduced by static analysis
-ignored-modules=
-
-# List of classes names for which member attributes should not be checked
-# (useful for classes with attributes dynamically set).
-ignored-classes=SQLObject
-
-# When zope mode is activated, add a predefined set of Zope acquired attributes
-# to generated-members.
-#zope=no
-
-# List of members which are set dynamically and missed by pylint inference
-# system, and so shouldn't trigger E0201 when accessed. Python regular
-# expressions are accepted.
-generated-members=REQUEST,acl_users,aq_parent
+# Logging modules to check that the string format arguments are in logging
+# function parameter format
+logging-modules=logging
 
 
-[SPELLING]
+[CLASSES]
 
-# Spelling dictionary name. Available dictionaries: none. To make it working
-# install python-enchant package.
-spelling-dict=
+# List of method names used to declare (i.e. assign) instance attributes.
+defining-attr-methods=__init__,__new__,setUp
 
-# List of comma separated words that should not be checked.
-spelling-ignore-words=
+# List of valid names for the first argument in a class method.
+valid-classmethod-first-arg=cls
 
-# A path to a file that contains private dictionary; one word per line.
-spelling-private-dict-file=
+# List of valid names for the first argument in a metaclass class method.
+valid-metaclass-classmethod-first-arg=mcs
 
-# Tells whether to store unknown words to indicated private dictionary in
-# --spelling-private-dict-file option instead of raising a message.
-spelling-store-unknown-words=no
-
-
-[MISCELLANEOUS]
-
-# List of note tags to take in consideration, separated by a comma.
-notes=FIXME,XXX,TODO
-
-
-[FORMAT]
-
-# Maximum number of characters on a single line.
-max-line-length=120
-
-# Regexp for a line that is allowed to be longer than the limit.
-ignore-long-lines=^\s*(# )?<?https?://\S+>?$
-
-# Allow the body of an if to be on the same line as the test if there is no
-# else.
-single-line-if-stmt=no
-
-# List of optional constructs for which whitespace checking is disabled
-no-space-check=trailing-comma,dict-separator
-
-# Maximum number of lines in a module
-max-module-lines=1000
-
-# String used as indentation unit. This is usually " " (4 spaces) or "\t" (1
-# tab).
-indent-string='    '
-
-# Number of spaces of indent required inside a hanging or continued line.
-indent-after-paren=4
-
-# Expected format of line ending, e.g. empty (any line ending), LF or CRLF.
-expected-line-ending-format=
+# List of member names, which should be excluded from the protected access
+# warning.
+exclude-protected=_asdict,_fields,_replace,_source,_make
 
 
 [DESIGN]
@@ -342,21 +354,8 @@ min-public-methods=2
 # Maximum number of public methods for a class (see R0904).
 max-public-methods=20
 
-
-[CLASSES]
-
-# List of method names used to declare (i.e. assign) instance attributes.
-defining-attr-methods=__init__,__new__,setUp
-
-# List of valid names for the first argument in a class method.
-valid-classmethod-first-arg=cls
-
-# List of valid names for the first argument in a metaclass class method.
-valid-metaclass-classmethod-first-arg=mcs
-
-# List of member names, which should be excluded from the protected access
-# warning.
-exclude-protected=_asdict,_fields,_replace,_source,_make
+# Maximum number of boolean expressions in a if statement
+max-bool-expr=5
 
 
 [IMPORTS]
