@@ -1,0 +1,24 @@
+---
+# Ansible 2.2 required
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  vars:
+    l_config_subdir: "{{ molecule_docker_config_subdir | default('base') }}"
+    molecule_docker_image: "openshift-ansible-tests-{{ l_config_subdir }}:latest"
+    l_start_command: "{{ 'start master' if l_config_subdir.startswith('origin-') else 'sleep infinity'}}"
+  tasks:
+    - name: Build an Ansible compatible image
+      docker_image:
+        path: "{{ l_config_subdir }}"
+        name: "{{ molecule_docker_image }}"
+
+    - name: Create molecule instance(s)
+      docker_container:
+        name: "{{ item }}"
+        hostname: "{{ item }}"
+        image: "{{ molecule_docker_image }}"
+        state: started
+        recreate: no
+        command: "{{ l_start_command }}"
+      with_items: "{{ groups.test_group }}"

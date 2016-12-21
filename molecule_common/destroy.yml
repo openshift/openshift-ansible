@@ -1,0 +1,13 @@
+---
+# Ansible 2.2 required
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  vars:
+    molecule_scenario_basename: "{{ molecule_scenario_directory | basename }}"
+  tasks:
+    - name: Destroy molecule instance(s)
+      docker_container:
+        name: "{{ item }}"
+        state: absent
+      with_items: "{{ groups.test_group }}"

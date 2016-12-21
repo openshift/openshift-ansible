@@ -1,0 +1,4 @@
+# Functional deps
+git+https://github.com/detiber/molecule@v2_tweaks
+pytest-xdist
+docker-py==1.10.6

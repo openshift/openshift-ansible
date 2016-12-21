@@ -1,0 +1,10 @@
+---
+- hosts: test_group
+  roles:
+  - role: openshift_facts
+  post_tasks:
+  - name: verify expected results
+    assert:
+      that:
+      - openshift | default(none) is not none
+      - openshift.common | default(none) is not none

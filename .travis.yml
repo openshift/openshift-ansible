@@ -1,5 +1,8 @@
 ---
-sudo: false
+sudo: required
+
+services:
+  - docker
 
 language: python
 
@@ -16,7 +19,13 @@ before_cache:
 env:
   - TEST_DIR=root TEST_TYPE=lint
   - TEST_DIR=root TEST_TYPE=unit
+  - TEST_DIR=root TEST_TYPE=functional
   - TEST_DIR=utils
+
+matrix:
+  exclude:
+    - python: "3.5"
+      env: TEST_DIR=root TEST_TYPE=functional
 
 install:
   - pip install tox-travis

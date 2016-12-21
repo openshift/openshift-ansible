@@ -3,11 +3,14 @@
 """
 from __future__ import print_function
 
-import os
 import fnmatch
+import glob
+import os
 import re
 import sys
+
 import yaml
+import sh
 
 # Always prefer setuptools over distutils
 from setuptools import setup, Command
@@ -228,6 +231,50 @@ class UnsupportedCommand(Command):
         print("Unsupported command for openshift-ansible")
 
 
+class MoleculeTests(Command):
+    ''' Command for running molecule tests '''
+    description = "Run molecule tests"
+    user_options = []
+
+    def initialize_options(self):
+        ''' initialize_options '''
+        pass
+
+    def finalize_options(self):
+        ''' finalize_options '''
+        pass
+
+    # Reason: This method needs to be an instance method to conform to the
+    # overridden method's signature
+    # Status: permanently disabled
+    # pylint: disable=no-self-use
+    def run(self):
+        ''' run command '''
+        molecule_dirs = glob.glob('roles/*/molecule')
+
+        print("Found:\n{0}".format(yaml.dump(molecule_dirs, default_flow_style=False)))
+
+        errors = ""
+        warnings = ""
+
+        for role in molecule_dirs:
+            role = os.path.dirname(role)
+            print("Testing: {0}".format(role))
+
+            try:
+                print(sh.molecule.test(_cwd=role))  # pylint: disable=no-member
+            except sh.ErrorReturnCode as err:
+                print(err.stdout)
+                errors += err.stdout
+
+        if len(warnings) > 0:
+            print("Warnings:\n{0}\n".format(warnings))
+
+        if len(errors) > 0:
+            print("Errors:\n{0}\n".format(errors))
+            sys.exit(1)
+
+
 setup(
     name='openshift-ansible',
     license="Apache 2.0",
@@ -242,6 +289,7 @@ setup(
         'lint': OpenShiftAnsiblePylint,
         'yamllint': OpenShiftAnsibleYamlLint,
         'generate_validation': OpenShiftAnsibleGenerateValidation,
+        'molecule_tests': MoleculeTests,
     },
     packages=[],
 )
