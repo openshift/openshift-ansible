@@ -1,0 +1,4 @@
+---
+# Starting Point for OpenShift Installation and Configuration
+- include: prerequisites.yml
+  tags: [prerequisites]

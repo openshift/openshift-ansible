@@ -1,0 +1,31 @@
+---
+- name: create stack
+  ignore_errors: False
+  register: stack_create
+  os_stack:
+    name: "{{ stack_name }}"
+    state: present
+    template: 'roles/openstack-stack/files/heat_stack.yaml'
+    wait: yes
+    parameters:
+      cluster_env: "{{ dns_domain }}"
+      cluster_id: "{{ stack_name }}"
+      subnet_24_prefix: "{{ subnet_prefix }}"
+      dns_nameservers: "{{ dns_nameservers }}"
+      external_net: "{{ external_network }}"
+      ssh_public_key: "{{ ssh_public_key }}"
+      num_etcd: "{{ num_etcd }}"
+      num_masters: "{{ num_masters }}"
+      num_nodes: "{{ num_nodes }}"
+      num_infra: "{{ num_infra }}"
+      num_dns: "{{ num_dns }}"
+      etcd_image: "{{ openstack_image }}"
+      master_image: "{{ openstack_image }}"
+      node_image: "{{ openstack_image }}"
+      infra_image: "{{ openstack_image }}"
+      dns_image: "{{ openstack_image }}"
+      etcd_flavor: "{{ etcd_flavor }}"
+      master_flavor: "{{ master_flavor }}"
+      node_flavor: "{{ node_flavor }}"
+      infra_flavor: "{{ infra_flavor }}"
+      dns_flavor: "{{ dns_flavor }}"

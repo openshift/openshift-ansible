@@ -15,6 +15,11 @@
     env_id: "{{ env_id | default(default_env_id) }}"
   delegate_to: localhost
 
+- name: Set Dynamic Inventory Filters
+  shell: >
+    export OS_INV_FILTER_KEY=clusterid && OS_INV_FILTER_VALUE={{ env_id }}
+  delegate_to: localhost
+
 - name: Updating DNS domain to include env_id (if not empty)
   set_fact:
     full_dns_domain: "{{ (env_id|trim == '') | ternary(dns_domain, env_id + '.' + dns_domain) }}"
