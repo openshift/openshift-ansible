@@ -46,7 +46,7 @@ clean:
 	@find . -type f \( -name "*~" -or -name "#*" \) -delete
 	@rm -fR build dist rpm-build MANIFEST htmlcov .coverage cover ooinstall.egg-info oo-install
 	@rm -fR $(VENV)
-
+	@rm -fR .tox
 
 # To force a rebuild of the docs run 'touch' on any *.in file under
 # docs/man/man1/
@@ -84,41 +84,27 @@ ci-unittests: $(VENV)
 	@echo "#############################################"
 	@echo "# Running Unit Tests in virtualenv"
 	@echo "#############################################"
-	. $(VENV)/bin/activate && tox -e py27-unit
-	. $(VENV)/bin/activate && tox -e py35-unit
+	. $(VENV)/bin/activate && detox -e py27-unit,py35-unit
 	@echo "VIEW CODE COVERAGE REPORT WITH 'xdg-open cover/index.html' or run 'make viewcover'"
 
 ci-pylint: $(VENV)
 	@echo "#############################################"
 	@echo "# Running PyLint Tests in virtualenv"
 	@echo "#############################################"
-	. $(VENV)/bin/activate && python -m pylint --rcfile ../git/.pylintrc $(PYFILES)
-
-ci-yamllint: $(VENV)
-	@echo "#############################################"
-	@echo "# Running yamllint Tests in virtualenv"
-	@echo "#############################################"
-	@. $(VENV)/bin/activate && yamllint -c ../git/.yamllint $(YAMLFILES)
-
-ci-list-deps: $(VENV)
-	@echo "#############################################"
-	@echo "# Listing all pip deps"
-	@echo "#############################################"
-	. $(VENV)/bin/activate && pip freeze
+	. $(VENV)/bin/activate && detox -e py27-pylint,py35-pylint
 
 ci-flake8: $(VENV)
 	@echo "#############################################"
 	@echo "# Running Flake8 Compliance Tests in virtualenv"
 	@echo "#############################################"
-	. $(VENV)/bin/activate && tox -e py27-flake8
-	. $(VENV)/bin/activate && tox -e py35-flake8
+	. $(VENV)/bin/activate && detox -e py27-flake8,py35-flake8
 
-ci-tox:
-	. $(VENV)/bin/activate && tox
+ci-tox: $(VENV)
+	. $(VENV)/bin/activate && detox
 
-ci: ci-list-deps ci-tox ci-pylint ci-yamllint
+ci: ci-tox
 	@echo
 	@echo "##################################################################################"
 	@echo "VIEW CODE COVERAGE REPORT WITH 'xdg-open cover/index.html' or run 'make viewcover'"
 	@echo "To clean your test environment run 'make clean'"
-	@echo "Other targets you may run with 'make': 'ci-pylint', 'ci-tox', 'ci-unittests', 'ci-flake8', 'ci-yamllint'"
+	@echo "Other targets you may run with 'make': 'ci-pylint', 'ci-tox', 'ci-unittests', 'ci-flake8'"

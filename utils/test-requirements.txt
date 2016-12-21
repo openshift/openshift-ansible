@@ -1,6 +1,7 @@
 ansible
 configparser
 pylint
+setuptools-lint
 nose
 coverage
 mock
@@ -11,3 +12,4 @@ backports.functools_lru_cache
 pyOpenSSL
 yamllint
 tox
+detox
