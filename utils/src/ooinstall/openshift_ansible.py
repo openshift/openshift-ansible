@@ -1,5 +1,7 @@
 # pylint: disable=bad-continuation,missing-docstring,no-self-use,invalid-name,global-statement,global-variable-not-assigned
 
+from __future__ import (absolute_import, print_function)
+
 import socket
 import subprocess
 import sys
@@ -107,12 +109,12 @@ def write_inventory_vars(base_inventory, lb):
     global CFG
     base_inventory.write('\n[OSEv3:vars]\n')
 
-    for variable, value in CFG.settings.iteritems():
+    for variable, value in CFG.settings.items():
         inventory_var = VARIABLES_MAP.get(variable, None)
         if inventory_var and value:
             base_inventory.write('{}={}\n'.format(inventory_var, value))
 
-    for variable, value in CFG.deployment.variables.iteritems():
+    for variable, value in CFG.deployment.variables.items():
         inventory_var = VARIABLES_MAP.get(variable, variable)
         if value:
             base_inventory.write('{}={}\n'.format(inventory_var, value))
@@ -152,11 +154,11 @@ def write_inventory_vars(base_inventory, lb):
                              "'baseurl': '{}', "
                              "'enabled': 1, 'gpgcheck': 0}}]\n".format(os.environ['OO_INSTALL_PUDDLE_REPO']))
 
-    for name, role_obj in CFG.deployment.roles.iteritems():
+    for name, role_obj in CFG.deployment.roles.items():
         if role_obj.variables:
             group_name = ROLES_TO_GROUPS_MAP.get(name, name)
             base_inventory.write("\n[{}:vars]\n".format(group_name))
-            for variable, value in role_obj.variables.iteritems():
+            for variable, value in role_obj.variables.items():
                 inventory_var = VARIABLES_MAP.get(variable, variable)
                 if value:
                     base_inventory.write('{}={}\n'.format(inventory_var, value))
@@ -193,7 +195,7 @@ def write_host(host, role, inventory, schedulable=None):
             facts += ' {}={}'.format(HOST_VARIABLES_MAP.get(prop), getattr(host, prop))
 
     if host.other_variables:
-        for variable, value in host.other_variables.iteritems():
+        for variable, value in host.other_variables.items():
             facts += " {}={}".format(variable, value)
 
     if host.node_labels and role == 'node':
@@ -212,7 +214,7 @@ def write_host(host, role, inventory, schedulable=None):
         if os.geteuid() != 0:
             no_pwd_sudo = subprocess.call(['sudo', '-n', 'echo', 'openshift'])
             if no_pwd_sudo == 1:
-                print 'The atomic-openshift-installer requires sudo access without a password.'
+                print('The atomic-openshift-installer requires sudo access without a password.')
                 sys.exit(1)
             facts += ' ansible_become=yes'
 
@@ -245,9 +247,9 @@ def load_system_facts(inventory_file, os_facts_path, env_vars, verbose=False):
         installer_log.debug("Going to try to read this file: %s", CFG.settings['ansible_callback_facts_yaml'])
         try:
             callback_facts = yaml.safe_load(callback_facts_file)
-        except yaml.YAMLError, exc:
-            print "Error in {}".format(CFG.settings['ansible_callback_facts_yaml']), exc
-            print "Try deleting and rerunning the atomic-openshift-installer"
+        except yaml.YAMLError as exc:
+            print("Error in {}".format(CFG.settings['ansible_callback_facts_yaml']), exc)
+            print("Try deleting and rerunning the atomic-openshift-installer")
             sys.exit(1)
 
     return callback_facts, 0

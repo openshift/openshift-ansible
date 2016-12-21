@@ -6,22 +6,14 @@ Custom filters for use in openshift-master
 '''
 import copy
 import sys
-import yaml
+
+from distutils.version import LooseVersion  # pylint: disable=no-name-in-module,import-error
 
 from ansible import errors
+from ansible.plugins.filter.core import to_bool as ansible_bool
+from six import string_types
 
-# pylint: disable=no-name-in-module,import-error,wrong-import-order
-from distutils.version import LooseVersion
-try:
-    # ansible-2.1
-    from ansible.plugins.filter.core import to_bool as ansible_bool
-except ImportError:
-    try:
-        # ansible-2.0.x
-        from ansible.runner.filter_plugins.core import bool as ansible_bool
-    except ImportError:
-        # ansible-1.9.x
-        from ansible.plugins.filter.core import bool as ansible_bool
+import yaml
 
 
 class IdentityProviderBase(object):
@@ -513,7 +505,7 @@ class FilterModule(object):
                            'master3.example.com']
                returns True
         '''
-        if not issubclass(type(data), basestring):
+        if not issubclass(type(data), string_types):
             raise errors.AnsibleFilterError("|failed expects data is a string or unicode")
         if not issubclass(type(masters), list):
             raise errors.AnsibleFilterError("|failed expects masters is a list")
@@ -558,7 +550,7 @@ class FilterModule(object):
     def oo_htpasswd_users_from_file(file_contents):
         ''' return a dictionary of htpasswd users from htpasswd file contents '''
         htpasswd_entries = {}
-        if not isinstance(file_contents, basestring):
+        if not isinstance(file_contents, string_types):
             raise errors.AnsibleFilterError("failed, expects to filter on a string")
         for line in file_contents.splitlines():
             user = None

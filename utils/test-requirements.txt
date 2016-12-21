@@ -1,5 +1,4 @@
 ansible
-enum
 configparser
 pylint
 nose
@@ -11,3 +10,4 @@ click
 backports.functools_lru_cache
 pyOpenSSL
 yamllint
+tox

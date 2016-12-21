@@ -19,6 +19,7 @@ from distutils.version import LooseVersion
 from operator import itemgetter
 from ansible.parsing.yaml.dumper import AnsibleDumper
 from urlparse import urlparse
+from six import string_types
 
 HAS_OPENSSL = False
 try:
@@ -120,7 +121,7 @@ class FilterModule(object):
             raise errors.AnsibleFilterError("|failed expects hostvars is dictionary or object")
         if not isinstance(variables, dict):
             raise errors.AnsibleFilterError("|failed expects variables is a dictionary")
-        if not isinstance(inventory_hostname, basestring):
+        if not isinstance(inventory_hostname, string_types):
             raise errors.AnsibleFilterError("|failed expects inventory_hostname is a string")
         # pylint: disable=no-member
         ansible_version = pkg_resources.get_distribution("ansible").version
@@ -215,7 +216,7 @@ class FilterModule(object):
         """
         if not isinstance(data, list):
             raise errors.AnsibleFilterError("|failed expects first param is a list")
-        if not all(isinstance(x, basestring) for x in data):
+        if not all(isinstance(x, string_types) for x in data):
             raise errors.AnsibleFilterError("|failed expects first param is a list"
                                             " of strings")
         retval = [prepend + s for s in data]
@@ -362,7 +363,7 @@ class FilterModule(object):
         if not isinstance(data, list):
             raise errors.AnsibleFilterError("|failed expects to filter on a list")
 
-        if not isinstance(filter_attr, basestring):
+        if not isinstance(filter_attr, string_types):
             raise errors.AnsibleFilterError("|failed expects filter_attr is a str or unicode")
 
         # Gather up the values for the list of keys passed in
@@ -401,9 +402,9 @@ class FilterModule(object):
         """
         if not isinstance(nodes, list):
             raise errors.AnsibleFilterError("failed expects to filter on a list")
-        if not isinstance(label, basestring):
+        if not isinstance(label, string_types):
             raise errors.AnsibleFilterError("failed expects label to be a string")
-        if value is not None and not isinstance(value, basestring):
+        if value is not None and not isinstance(value, string_types):
             raise errors.AnsibleFilterError("failed expects value to be a string")
 
         def label_filter(node):
@@ -419,7 +420,7 @@ class FilterModule(object):
             else:
                 return False
 
-            if isinstance(labels, basestring):
+            if isinstance(labels, string_types):
                 labels = yaml.safe_load(labels)
             if not isinstance(labels, dict):
                 raise errors.AnsibleFilterError(
@@ -518,7 +519,7 @@ class FilterModule(object):
                            "cafile": "/etc/origin/master/named_certificates/custom-ca-2.crt",
                            "names": [ "some-hostname.com" ] }]
         """
-        if not isinstance(named_certs_dir, basestring):
+        if not isinstance(named_certs_dir, string_types):
             raise errors.AnsibleFilterError("|failed expects named_certs_dir is str or unicode")
 
         if not isinstance(internal_hostnames, list):
@@ -545,7 +546,7 @@ class FilterModule(object):
                     if cert.get_extension(i).get_short_name() == 'subjectAltName':
                         for name in str(cert.get_extension(i)).replace('DNS:', '').split(', '):
                             certificate['names'].append(name)
-            except:
+            except Exception:
                 raise errors.AnsibleFilterError(("|failed to parse certificate '%s', " % certificate['certfile'] +
                                                  "please specify certificate names in host inventory"))
 
@@ -670,7 +671,7 @@ class FilterModule(object):
 
         migrations = {'openshift_router_selector': 'openshift_hosted_router_selector',
                       'openshift_registry_selector': 'openshift_hosted_registry_selector'}
-        for old_fact, new_fact in migrations.iteritems():
+        for old_fact, new_fact in migrations.items():
             if old_fact in facts and new_fact not in facts:
                 facts[new_fact] = facts[old_fact]
         return facts
@@ -781,7 +782,7 @@ class FilterModule(object):
         """
         if not isinstance(rpms, list):
             raise errors.AnsibleFilterError("failed expects to filter on a list")
-        if openshift_version is not None and not isinstance(openshift_version, basestring):
+        if openshift_version is not None and not isinstance(openshift_version, string_types):
             raise errors.AnsibleFilterError("failed expects openshift_version to be a string")
 
         rpms_31 = []
@@ -800,9 +801,9 @@ class FilterModule(object):
         """
         if not isinstance(pods, list):
             raise errors.AnsibleFilterError("failed expects to filter on a list")
-        if not isinstance(deployment_type, basestring):
+        if not isinstance(deployment_type, string_types):
             raise errors.AnsibleFilterError("failed expects deployment_type to be a string")
-        if not isinstance(component, basestring):
+        if not isinstance(component, string_types):
             raise errors.AnsibleFilterError("failed expects component to be a string")
 
         image_prefix = 'openshift/origin-'
@@ -843,7 +844,7 @@ class FilterModule(object):
             Ex. v3.2.0.10 -> -3.2.0.10
                 v1.2.0-rc1 -> -1.2.0
         """
-        if not isinstance(version, basestring):
+        if not isinstance(version, string_types):
             raise errors.AnsibleFilterError("|failed expects a string or unicode")
         if version.startswith("v"):
             version = version[1:]
@@ -861,7 +862,7 @@ class FilterModule(object):
 
             Ex: https://ose3-master.example.com/v1/api -> ose3-master.example.com
         """
-        if not isinstance(url, basestring):
+        if not isinstance(url, string_types):
             raise errors.AnsibleFilterError("|failed expects a string or unicode")
         parse_result = urlparse(url)
         if parse_result.netloc != '':

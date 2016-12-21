@@ -95,7 +95,7 @@ def main():
 
     # ignore broad-except error to avoid stack trace to ansible user
     # pylint: disable=broad-except
-    except Exception, e:
+    except Exception as e:
         return module.fail_json(msg=str(e))
 
 

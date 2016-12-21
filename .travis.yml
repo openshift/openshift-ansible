@@ -1,9 +1,13 @@
 ---
 sudo: false
 
+cache:
+  - pip
+
 language: python
 python:
   - "2.7"
+  - "3.5"
 
 install:
   - pip install -r requirements.txt
