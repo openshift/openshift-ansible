@@ -1,6 +1,6 @@
 ---
 - name: restart openvswitch
-  service: name=openvswitch state=restarted
+  systemd: name=openvswitch state=restarted
   when: (not skip_node_svc_handlers | default(False) | bool) and not (ovs_service_status_changed | default(false) | bool) and openshift.common.use_openshift_sdn | bool
   notify:
   - restart openvswitch pause
@@ -10,5 +10,5 @@
   when: (not skip_node_svc_handlers | default(False) | bool) and openshift.common.is_containerized | bool
 
 - name: restart node
-  service: name={{ openshift.common.service_type }}-node state=restarted
+  systemd: name={{ openshift.common.service_type }}-node state=restarted
   when: (not skip_node_svc_handlers | default(False) | bool) and not (node_service_status_changed | default(false) | bool)

@@ -1,3 +1,4 @@
+---
 # Playbook to upgrade Docker to the max allowable version for an OpenShift cluster.
 #
 # Currently only supports upgrading 1.9.x to >= 1.10.x.

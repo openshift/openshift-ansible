@@ -8,10 +8,9 @@ create persistent volumes.
 
 ## Requirements
 
-* NFS server with NFS, iptables, and everything setup.
-
+* Ansible 2.2
+* NFS server with NFS, iptables, and everything setup
 * A lvm volume group created on the nfs server (default: openshiftvg)
-
 * The lvm volume needs to have as much free space as you are allocating
 
 ## Role Variables

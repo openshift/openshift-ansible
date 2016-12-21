@@ -6,6 +6,7 @@ Custom filters for use in openshift-node
 '''
 from ansible import errors
 
+
 class FilterModule(object):
     ''' Custom ansible filters for use by openshift_node role'''
 
@@ -23,7 +24,7 @@ class FilterModule(object):
             raise errors.AnsibleFilterError("|failed expects hostvars is a dict")
 
         # We always use what they've specified if they've specified a value
-        if openshift_dns_ip != None:
+        if openshift_dns_ip is not None:
             return openshift_dns_ip
 
         if bool(hostvars['openshift']['common']['use_dnsmasq']):

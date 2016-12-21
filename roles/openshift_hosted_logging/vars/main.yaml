@@ -1,3 +1,4 @@
+---
 tr_or_ohlip: "{{ openshift_hosted_logging_deployer_prefix | default(target_registry) | default(None) }}"
 ip_kv: "{{ '-p IMAGE_PREFIX=' ~ tr_or_ohlip | quote if tr_or_ohlip != '' else '' }}"
 iv_kv: "{{ '-p IMAGE_VERSION=' ~ openshift_hosted_logging_deployer_version | quote if openshift_hosted_logging_deployer_version | default(none) is not none else '' }}"

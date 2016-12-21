@@ -22,7 +22,7 @@
   tasks:
 
   - name: Check for AWS creds
-    fail: 
+    fail:
       msg: "Couldn't find {{ item }} creds in ENV"
     when: "{{ item }} == ''"
     with_items:

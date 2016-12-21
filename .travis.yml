@@ -1,3 +1,4 @@
+---
 sudo: false
 
 language: python
@@ -10,6 +11,4 @@ install:
 script:
   # TODO(rhcarvalho): check syntax of other important entrypoint playbooks
   - ansible-playbook --syntax-check playbooks/byo/config.yml
-  # TODO(rhcarvalho): update make ci to pick up these tests
-  - nosetests --tests=test
   - cd utils && make ci

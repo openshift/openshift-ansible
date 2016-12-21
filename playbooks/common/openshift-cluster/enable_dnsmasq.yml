@@ -59,7 +59,7 @@
   vars:
     openshift_deployment_type: "{{ deployment_type }}"
   roles:
-    - openshift_node_dnsmasq
+  - openshift_node_dnsmasq
   post_tasks:
   - modify_yaml:
       dest: "{{ openshift.common.config_base }}/node/node-config.yaml"

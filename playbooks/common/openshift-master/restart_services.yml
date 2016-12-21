@@ -1,3 +1,4 @@
+---
 - name: Restart master
   service:
     name: "{{ openshift.common.service_type }}-master"

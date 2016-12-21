@@ -1,3 +1,4 @@
+---
 ####
 #
 # OSE 3.0.z did not have 'oadm policy add-scc-to-user'.
@@ -9,7 +10,7 @@
     path: /tmp/openshift
     state: directory
     owner: root
-    mode: 700
+    mode: 0700
 
 - name: Create service account configs
   template:

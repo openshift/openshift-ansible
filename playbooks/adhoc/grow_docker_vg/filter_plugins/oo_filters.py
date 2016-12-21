@@ -33,7 +33,6 @@ class FilterModule(object):
 
         return None
 
-
     def filters(self):
         ''' returns a mapping of filters to methods '''
         return {

@@ -9,19 +9,20 @@ import sys
 import yaml
 
 from ansible import errors
-from distutils.version import LooseVersion
 
-# pylint: disable=no-name-in-module,import-error
+# pylint: disable=no-name-in-module,import-error,wrong-import-order
+from distutils.version import LooseVersion
 try:
     # ansible-2.1
     from ansible.plugins.filter.core import to_bool as ansible_bool
 except ImportError:
     try:
-        #ansible-2.0.x
+        # ansible-2.0.x
         from ansible.runner.filter_plugins.core import bool as ansible_bool
     except ImportError:
         # ansible-1.9.x
         from ansible.plugins.filter.core import bool as ansible_bool
+
 
 class IdentityProviderBase(object):
     """ IdentityProviderBase
@@ -388,7 +389,6 @@ class OpenIDIdentityProvider(IdentityProviderOauthBase):
                 val = ansible_bool(self._idp['extraAuthorizeParameters'].pop('include_granted_scopes'))
                 self._idp['extraAuthorizeParameters']['include_granted_scopes'] = val
 
-
     def validate(self):
         ''' validate this idp instance '''
         IdentityProviderOauthBase.validate(self)
@@ -495,7 +495,6 @@ class FilterModule(object):
             idp_inst.set_provider_items()
             idp_list.append(idp_inst)
 
-
         IdentityProviderBase.validate_idp_list(idp_list, openshift_version, deployment_type)
         return yaml.safe_dump([idp.to_dict() for idp in idp_list], default_flow_style=False)
 
@@ -574,7 +573,6 @@ class FilterModule(object):
                 raise errors.AnsibleFilterError(error_msg)
             htpasswd_entries[user] = passwd
         return htpasswd_entries
-
 
     def filters(self):
         ''' returns a mapping of filters to methods '''

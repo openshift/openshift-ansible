@@ -204,7 +204,7 @@
       cp {{ openshift.common.config_base }}/master//admin.kubeconfig {{ mktemp.stdout }}/admin.kubeconfig
     changed_when: False
 
-- name: Serially evacuate all nodes to trigger redeployments
+- name: Serially drain all nodes to trigger redeployments
   hosts: oo_nodes_to_config
   serial: 1
   any_errors_fatal: true
@@ -222,7 +222,7 @@
       was_schedulable: "{{ 'unschedulable' not in (node_output.stdout | from_json).spec }}"
     when: openshift_certificates_redeploy_ca | default(false) | bool
 
-  - name: Prepare for node evacuation
+  - name: Prepare for node draining
     command: >
       {{ openshift.common.client_binary }} adm --config={{ hostvars[groups.oo_first_master.0].mktemp.stdout }}/admin.kubeconfig
       manage-node {{ openshift.common.hostname | lower }}
@@ -230,11 +230,11 @@
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: openshift_certificates_redeploy_ca | default(false) | bool and was_schedulable | bool
 
-  - name: Evacuate node
+  - name: Drain node
     command: >
       {{ openshift.common.client_binary }} adm --config={{ hostvars[groups.oo_first_master.0].mktemp.stdout }}/admin.kubeconfig
       manage-node {{ openshift.common.hostname | lower }}
-      --evacuate --force
+      --drain --force
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: openshift_certificates_redeploy_ca | default(false) | bool and was_schedulable | bool
 

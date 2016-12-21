@@ -1,3 +1,4 @@
+---
 # Work around ini_file create option in 2.2 which defaults to no
 - name: Create cloud config file
   file:

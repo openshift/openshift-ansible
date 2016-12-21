@@ -8,6 +8,11 @@ IMAGE_VERSION={{ openshift_image_tag }}
 AWS_ACCESS_KEY_ID={{ openshift_cloudprovider_aws_access_key }}
 AWS_SECRET_ACCESS_KEY={{ openshift_cloudprovider_aws_secret_key }}
 {% endif %}
+{% if not (openshift_cloudprovider_kind is defined and openshift_cloudprovider_kind == 'aws' and openshift_cloudprovider_aws_access_key is defined and openshift_cloudprovider_aws_secret_key is defined) %}
+{% for item in master_aws %}
+{{ item }}
+{% endfor %}
+{% endif %}
 
 {% if 'api_env_vars' in openshift.master or 'controllers_env_vars' in openshift.master -%}
 {% for key, value in openshift.master.api_env_vars.items() | default([]) | union(openshift.master.controllers_env_vars.items() | default([])) -%}
@@ -25,4 +30,9 @@ HTTPS_PROXY={{ openshift.common.https_proxy | default('')}}
 {% endif %}
 {% if 'no_proxy' in openshift.common %}
 NO_PROXY={{ openshift.common.no_proxy | default('') | join(',') }},{{ openshift.common.portal_net }},{{ openshift.master.sdn_cluster_network_cidr }}
+{% endif %}
+{% if not ('https_proxy' in openshift.common or 'https_proxy' in openshift.common or 'no_proxy' in openshift.common) %}
+{% for item in master_proxy %}
+{{ item }}
+{% endfor %}
 {% endif %}

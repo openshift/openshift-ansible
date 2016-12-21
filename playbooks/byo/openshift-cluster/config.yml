@@ -1,8 +1,4 @@
 ---
-- include: ../../common/openshift-cluster/verify_ansible_version.yml
-  tags:
-  - always
-
 - name: Create initial host groups for localhost
   hosts: localhost
   connection: local

@@ -56,7 +56,7 @@ def main():
     # redefined-outer-name
     global module
 
-    module = AnsibleModule(
+    module = AnsibleModule(  # noqa: F405
         argument_spec=dict(
             dest=dict(required=True),
             yaml_key=dict(required=True),
@@ -98,10 +98,11 @@ def main():
     except Exception, e:
         return module.fail_json(msg=str(e))
 
+
 # ignore pylint errors related to the module_utils import
-# pylint: disable=redefined-builtin, unused-wildcard-import, wildcard-import
+# pylint: disable=redefined-builtin, unused-wildcard-import, wildcard-import, wrong-import-position
 # import module snippets
-from ansible.module_utils.basic import *
+from ansible.module_utils.basic import *  # noqa: F402,F403
 
 if __name__ == '__main__':
     main()

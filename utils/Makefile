@@ -22,6 +22,7 @@
 
 
 NAME := oo-install
+VENV := $(NAME)env
 TESTPACKAGE := oo-install
 SHORTNAME := ooinstall
 
@@ -31,7 +32,9 @@ ASCII2MAN = a2x -D $(dir $@) -d manpage -f manpage $<
 MANPAGES := docs/man/man1/atomic-openshift-installer.1
 VERSION := 1.3
 
-PEPEXCLUDES := E501,E121,E124
+# YAMLFILES: Skipping all '/files/' folders due to conflicting yaml file definitions
+YAMLFILES = $(shell find ../ -name $(VENV) -prune -o \( -name '*.yml' -o -name '*.yaml' \) ! -path "*/files/*" 2>&1)
+PYFILES = $(shell find ../ -name $(VENV) -prune -o -name ooinstall.egg-info -prune -o -name test -prune -o -name "*.py" -print)
 
 sdist: clean
 	python setup.py sdist
@@ -41,7 +44,7 @@ clean:
 	@find . -type f -regex ".*\.py[co]$$" -delete
 	@find . -type f \( -name "*~" -or -name "#*" \) -delete
 	@rm -fR build dist rpm-build MANIFEST htmlcov .coverage cover ooinstall.egg-info oo-install
-	@rm -fR $(NAME)env
+	@rm -fR $(VENV)
 
 
 # To force a rebuild of the docs run 'touch' on any *.in file under
@@ -61,52 +64,56 @@ docs: $(MANPAGES)
 viewcover:
 	xdg-open cover/index.html
 
-virtualenv:
+# Conditional virtualenv building strategy taken from this great post
+# by Marcel Hellkamp:
+# http://blog.bottlepy.org/2012/07/16/virtualenv-and-makefiles.html
+$(VENV): $(VENV)/bin/activate
+$(VENV)/bin/activate: test-requirements.txt
 	@echo "#############################################"
 	@echo "# Creating a virtualenv"
 	@echo "#############################################"
-	virtualenv $(NAME)env
-	 . $(NAME)env/bin/activate && pip install setuptools==17.1.1
-	. $(NAME)env/bin/activate && pip install -r test-requirements.txt
+	test -d $(VENV) || virtualenv $(VENV)
+	. $(VENV)/bin/activate && pip install setuptools==17.1.1
+	. $(VENV)/bin/activate && pip install -r test-requirements.txt
+	touch $(VENV)/bin/activate
 #       If there are any special things to install do it here
-#       . $(NAME)env/bin/activate && INSTALL STUFF
+#       . $(VENV)/bin/activate && INSTALL STUFF
 
-ci-unittests:
+ci-unittests: $(VENV)
 	@echo "#############################################"
 	@echo "# Running Unit Tests in virtualenv"
 	@echo "#############################################"
-	. $(NAME)env/bin/activate && nosetests -v --with-coverage --cover-html --cover-min-percentage=70 --cover-package=$(SHORTNAME) test/
+	. $(VENV)/bin/activate && python setup.py nosetests
 	@echo "VIEW CODE COVERAGE REPORT WITH 'xdg-open cover/index.html' or run 'make viewcover'"
 
-ci-pylint:
+ci-pylint: $(VENV)
 	@echo "#############################################"
 	@echo "# Running PyLint Tests in virtualenv"
 	@echo "#############################################"
-	. $(NAME)env/bin/activate && python -m pylint --rcfile ../git/.pylintrc src/ooinstall/cli_installer.py src/ooinstall/oo_config.py src/ooinstall/openshift_ansible.py src/ooinstall/variants.py ../callback_plugins/openshift_quick_installer.py ../roles/openshift_certificate_expiry/library/openshift_cert_expiry.py
+	. $(VENV)/bin/activate && python -m pylint --rcfile ../git/.pylintrc $(PYFILES)
 
-ci-list-deps:
+ci-yamllint: $(VENV)
+	@echo "#############################################"
+	@echo "# Running yamllint Tests in virtualenv"
+	@echo "#############################################"
+	@. $(VENV)/bin/activate && yamllint -c ../git/.yamllint $(YAMLFILES)
+
+ci-list-deps: $(VENV)
 	@echo "#############################################"
 	@echo "# Listing all pip deps"
 	@echo "#############################################"
-	. $(NAME)env/bin/activate && pip freeze
+	. $(VENV)/bin/activate && pip freeze
 
-ci-pyflakes:
-	@echo "#################################################"
-	@echo "# Running Pyflakes Compliance Tests in virtualenv"
-	@echo "#################################################"
-	. $(NAME)env/bin/activate && pyflakes src/ooinstall/*.py
-	. $(NAME)env/bin/activate && pyflakes ../callback_plugins/openshift_quick_installer.py
-	. $(NAME)env/bin/activate && pyflakes ../roles/openshift_certificate_expiry/library/openshift_cert_expiry.py
-
-ci-pep8:
+ci-flake8: $(VENV)
 	@echo "#############################################"
-	@echo "# Running PEP8 Compliance Tests in virtualenv"
+	@echo "# Running Flake8 Compliance Tests in virtualenv"
 	@echo "#############################################"
-	. $(NAME)env/bin/activate && pep8 --ignore=$(PEPEXCLUDES) src/$(SHORTNAME)/
-	. $(NAME)env/bin/activate && pep8 --ignore=$(PEPEXCLUDES) ../callback_plugins/openshift_quick_installer.py
-# This one excludes E402 because it is an ansible module and the
-# boilerplate import statement is expected to be at the bottom
-	. $(NAME)env/bin/activate && pep8 --ignore=$(PEPEXCLUDES),E402 ../roles/openshift_certificate_expiry/library/openshift_cert_expiry.py
+	. $(VENV)/bin/activate && flake8 --config=setup.cfg ../ --exclude="utils,../inventory"
+	. $(VENV)/bin/activate && python setup.py flake8
 
-ci: clean virtualenv ci-list-deps ci-pep8 ci-pylint ci-pyflakes ci-unittests
-	:
+ci: ci-list-deps ci-unittests ci-flake8 ci-pylint ci-yamllint
+	@echo
+	@echo "##################################################################################"
+	@echo "VIEW CODE COVERAGE REPORT WITH 'xdg-open cover/index.html' or run 'make viewcover'"
+	@echo "To clean your test environment run 'make clean'"
+	@echo "Other targets you may run with 'make': 'ci-pylint', 'ci-unittests', 'ci-flake8', 'ci-yamllint'"

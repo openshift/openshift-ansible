@@ -14,9 +14,9 @@
   gather_facts: no
   tasks:
   - include_vars: openshift-cluster/cluster_hosts.yml
-  
-- include: ../common/openshift-cluster/evaluate_groups.yml 
-  
+
+- include: ../common/openshift-cluster/evaluate_groups.yml
+
 - hosts: l_oo_all_hosts
   vars:
     openshift_deployment_type: "{{ deployment_type }}"

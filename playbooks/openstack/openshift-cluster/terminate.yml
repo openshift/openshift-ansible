@@ -1,3 +1,4 @@
+---
 - name: Terminate instance(s)
   hosts: localhost
   become: no

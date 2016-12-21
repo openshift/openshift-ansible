@@ -10,7 +10,7 @@ import shutil
 import os.path
 
 # pylint: disable=redefined-builtin,wildcard-import,unused-wildcard-import
-from ansible.module_utils.basic import *
+from ansible.module_utils.basic import *  # noqa: F403
 
 
 DOCUMENTATION = '''
@@ -40,7 +40,7 @@ class BinarySyncer(object):
         self.bin_dir = '/usr/local/bin'
         self.image = image
         self.tag = tag
-        self.temp_dir = None # TBD
+        self.temp_dir = None  # TBD
 
     def sync(self):
         container_name = "openshift-cli-%s" % random.randint(1, 100000)
@@ -110,7 +110,7 @@ class BinarySyncer(object):
 
 
 def main():
-    module = AnsibleModule(
+    module = AnsibleModule(  # noqa: F405
         argument_spec=dict(
             image=dict(required=True),
             tag=dict(required=True),
