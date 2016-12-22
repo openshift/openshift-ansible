@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.40
+Version:        3.4.41
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Dec 22 2016 Scott Dodson <sdodson@redhat.com> 3.4.41-1
+- Revert "Pre-pull master/node/ovs images during upgrade."
+  (dgoodwin@redhat.com)
+
 * Mon Dec 19 2016 Scott Dodson <sdodson@redhat.com> 3.4.40-1
 - modify_yaml: handle None value during update. (abutcher@redhat.com)
 
