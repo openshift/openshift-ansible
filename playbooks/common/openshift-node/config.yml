@@ -83,6 +83,12 @@
     - service: OpenShift OVS sdn
       port: 4789/udp
       when: openshift.node.use_openshift_sdn | bool
+    - service: Kubernetes service NodePort TCP
+      port: "{{ openshift_node_port_range }}/tcp"
+      when: openshift_node_port_range | bool
+    - service: Kubernetes service NodePort UDP
+      port: "{{ openshift_node_port_range }}/udp"
+      when: openshift_node_port_range | bool
   - role: openshift_node
 
 - name: Configure nodes
@@ -122,6 +128,12 @@
     - service: OpenShift OVS sdn
       port: 4789/udp
       when: openshift.node.use_openshift_sdn | bool
+    - service: Kubernetes service NodePort TCP
+      port: "{{ openshift_node_port_range }}/tcp"
+      when: openshift_node_port_range | bool
+    - service: Kubernetes service NodePort UDP
+      port: "{{ openshift_node_port_range }}/udp"
+      when: openshift_node_port_range | bool
   - role: openshift_node
 
 - name: Additional node config
