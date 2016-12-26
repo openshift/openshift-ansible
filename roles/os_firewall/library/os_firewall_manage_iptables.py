@@ -127,7 +127,7 @@ class IpTablesManager(object): # pylint: disable=too-many-instance-attributes
 
     def gen_rule(self, port, proto):
         return [self.chain, '-p', proto, '-m', 'state', '--state', 'NEW',
-                '-m', proto, '--dport', str(port), '-j', 'ACCEPT']
+                '-m', proto, '--dport', port_as_argument(port), '-j', 'ACCEPT']
 
     def create_jump(self):
         if self.check_mode:
@@ -221,6 +221,14 @@ class IpTablesManager(object): # pylint: disable=too-many-instance-attributes
         return ['/usr/libexec/iptables/iptables.init', 'save']
 
 
+def port_as_argument(port):
+    if isinstance(port, int):
+        return str(port)
+    if isinstance(port, basestring):
+        return port.replace('-', ":")
+    return port
+
+
 def main():
     module = AnsibleModule(
         argument_spec=dict(
@@ -231,7 +239,7 @@ def main():
             create_jump_rule=dict(required=False, type='bool', default=True),
             jump_rule_chain=dict(required=False, default='INPUT'),
             protocol=dict(required=False, choices=['tcp', 'udp']),
-            port=dict(required=False, type='int'),
+            port=dict(required=False, type='str'),
             ip_version=dict(required=False, default='ipv4',
                             choices=['ipv4', 'ipv6']),
         ),
