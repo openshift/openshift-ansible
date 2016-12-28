@@ -1957,7 +1957,7 @@ class OpenShiftFacts(object):
 
         if 'docker' in roles:
             docker = dict(disable_push_dockerhub=False,
-                          options='--log-driver=json-file --log-opt max-size=50m')
+                          options='--log-driver=journald --log-opt max-size=50m')
             version_info = get_docker_version_info()
             if version_info is not None:
                 docker['api_version'] = version_info['api_version']
