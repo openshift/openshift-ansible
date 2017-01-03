@@ -142,6 +142,38 @@
     dest: "{{ etcd_cert_config_dir }}"
   when: etcd_server_certs_missing | bool
 
+- name: Create a tarball of the etcd ca certs
+  command: >
+    tar -czvf {{ etcd_generated_certs_dir }}/{{ etcd_ca_name }}.tgz
+      -C {{ etcd_ca_dir }} .
+  args:
+    creates: "{{ etcd_generated_certs_dir }}/{{ etcd_ca_name }}.tgz"
+    warn: no
+  when: etcd_server_certs_missing | bool
+  delegate_to: "{{ etcd_ca_host }}"
+
+- name: Retrieve etcd ca cert tarball
+  fetch:
+    src: "{{ etcd_generated_certs_dir }}/{{ etcd_ca_name }}.tgz"
+    dest: "{{ g_etcd_server_mktemp.stdout }}/"
+    flat: yes
+    fail_on_missing: yes
+    validate_checksum: yes
+  when: etcd_server_certs_missing | bool
+  delegate_to: "{{ etcd_ca_host }}"
+
+- name: Ensure ca directory exists
+  file:
+    path: "{{ etcd_ca_dir }}"
+    state: directory
+  when: etcd_server_certs_missing | bool
+
+- name: Unarchive etcd ca cert tarballs
+  unarchive:
+    src: "{{ g_etcd_server_mktemp.stdout }}/{{ etcd_ca_name }}.tgz"
+    dest: "{{ etcd_ca_dir }}"
+  when: etcd_server_certs_missing | bool
+
 - name: Delete temporary directory
   file: name={{ g_etcd_server_mktemp.stdout }} state=absent
   become: no
