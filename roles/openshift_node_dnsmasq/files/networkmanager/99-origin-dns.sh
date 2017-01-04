@@ -51,7 +51,7 @@ if [[ $2 =~ ^(up|dhcp4-change|dhcp6-change)$ ]]; then
 no-resolv
 domain-needed
 server=/cluster.local/172.30.0.1
-server=/30.172.in-addr.arpa/172.30.0.1
+server=/in-addr.arpa/172.30.0.1
 EOF
       # New config file, must restart
       NEEDS_RESTART=1
@@ -62,6 +62,7 @@ EOF
     for ns in ${IP4_NAMESERVERS}; do
       if [[ ! -z $ns ]]; then
         echo "server=${ns}"
+        echo "server=/in-addr.arpa/${ns}"
       fi
     done > $UPSTREAM_DNS_TMP
 

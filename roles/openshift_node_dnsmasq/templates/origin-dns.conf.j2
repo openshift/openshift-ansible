@@ -1,3 +1,4 @@
 no-resolv
 domain-needed
 server=/{{ openshift.common.dns_domain }}/{{ openshift.common.kube_svc_ip }}
+server=/in-addr.arpa/{{ openshift.common.kube_svc_ip }}
