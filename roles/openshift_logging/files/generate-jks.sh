@@ -97,7 +97,7 @@ function generate_JKS_client_cert() {
     keytool -certreq \
         -alias      $NODE_NAME \
         -keystore   $dir/$NODE_NAME.jks \
-        -file       $dir/$NODE_NAME.csr \
+        -file       $dir/$NODE_NAME.jks.csr \
         -keyalg     rsa \
         -keypass $ks_pass \
         -storepass $ks_pass \
@@ -105,9 +105,9 @@ function generate_JKS_client_cert() {
 
     echo Sign certificate request with CA
     openssl ca \
-        -in "$dir/$NODE_NAME.csr" \
+        -in "$dir/$NODE_NAME.jks.csr" \
         -notext \
-        -out "$dir/$NODE_NAME.crt" \
+        -out "$dir/$NODE_NAME.jks.crt" \
         -config $dir/signing.conf \
         -extensions v3_req \
         -batch \
@@ -124,7 +124,7 @@ function generate_JKS_client_cert() {
 
     keytool \
         -import \
-        -file $dir/$NODE_NAME.crt \
+        -file $dir/$NODE_NAME.jks.crt \
         -keystore $dir/$NODE_NAME.jks \
         -storepass $ks_pass \
         -noprompt \
