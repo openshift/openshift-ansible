@@ -15,4 +15,6 @@
   tasks:
   - include_vars: ../../byo/openshift-cluster/cluster_hosts.yml
 
+- include: ../../common/openshift-cluster/evaluate_groups.yml
+- include: ../../common/openshift-master/validate_restart.yml
 - include: ../../common/openshift-master/restart.yml

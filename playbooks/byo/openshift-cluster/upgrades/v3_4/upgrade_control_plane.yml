@@ -71,6 +71,10 @@
   tags:
   - pre_upgrade
 
+- include: ../../../../common/openshift-master/validate_restart.yml
+  tags:
+  - pre_upgrade
+
 - include: ../../../../common/openshift-cluster/upgrades/pre/verify_upgrade_targets.yml
   tags:
   - pre_upgrade
