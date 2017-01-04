@@ -17,4 +17,4 @@ script:
   # TODO(rhcarvalho): check syntax of other important entrypoint playbooks
   - ansible-playbook --syntax-check playbooks/byo/config.yml
   - tox
-  - cd utils && make ci
+  - cd utils && tox
