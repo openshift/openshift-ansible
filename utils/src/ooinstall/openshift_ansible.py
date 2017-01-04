@@ -212,7 +212,7 @@ def write_host(host, role, inventory, schedulable=None):
     if installer_host in [host.connect_to, host.hostname, host.public_hostname]:
         facts += ' ansible_connection=local'
         if os.geteuid() != 0:
-            no_pwd_sudo = subprocess.call(['sudo', '-n', 'echo', 'openshift'])
+            no_pwd_sudo = subprocess.call(['sudo', '-n', 'echo', '-n'])
             if no_pwd_sudo == 1:
                 print('The atomic-openshift-installer requires sudo access without a password.')
                 sys.exit(1)
