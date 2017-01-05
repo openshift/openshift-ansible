@@ -4,6 +4,8 @@ g_all_hosts: "{{ groups['tag_clusterid-' ~ cluster_id] | default([])
 
 g_etcd_hosts: "{{ g_all_hosts | intersect(groups['tag_host-type-etcd'] | default([])) }}"
 
+g_new_etcd_hosts: "{{ g_all_hosts | intersect(groups['tag_host-type-new_etcd'] | default([])) }}"
+
 g_lb_hosts: "{{ g_all_hosts | intersect(groups['tag_host-type-lb'] | default([])) }}"
 
 g_nfs_hosts: "{{ g_all_hosts | intersect(groups['tag_host-type-nfs'] | default([])) }}"

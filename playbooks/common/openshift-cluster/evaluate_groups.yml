@@ -5,10 +5,10 @@
   become: no
   gather_facts: no
   tasks:
-  - name: Evaluate groups - g_etcd_hosts required
+  - name: Evaluate groups - g_etcd_hosts or g_new_etcd_hosts required
     fail:
-      msg: This playbook requires g_etcd_hosts to be set
-    when: g_etcd_hosts is not defined
+      msg: This playbook requires g_etcd_hosts or g_new_etcd_hosts to be set
+    when: "{{ g_etcd_hosts is not defined and g_new_etcd_hosts is not defined}}"
 
   - name: Evaluate groups - g_master_hosts or g_new_master_hosts required
     fail:
@@ -65,6 +65,15 @@
       ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
       ansible_become: "{{ g_sudo | default(omit) }}"
     when: g_master_hosts|length > 0
+    changed_when: no
+
+  - name: Evaluate oo_new_etcd_to_config
+    add_host:
+      name: "{{ item }}"
+      groups: oo_new_etcd_to_config
+      ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
+      ansible_become: "{{ g_sudo | default(omit) }}"
+    with_items: "{{ g_new_etcd_hosts | default([]) }}"
     changed_when: no
 
   - name: Evaluate oo_masters_to_config
