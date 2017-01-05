@@ -269,8 +269,9 @@ The only thing we change here is adding `log_only=True` to the
         self._display.display("", screen_only=True)
 
         # Some plays are conditional and won't run (such as load
-        # balancers) if they aren't required. Let the user know about
-        # this to avoid potential confusion.
+        # balancers) if they aren't required. Sometimes plays are
+        # conditionally included later in the run. Let the user know
+        # about this to avoid potential confusion.
         if self.plays_total_ran != self.plays_count:
-            print("Installation Complete: Note: Play count is an estimate and some were skipped because your install does not require them")
+            print("Installation Complete: Note: Play count is only an estimate, some plays may have been skipped or dynamically added")
             self._display.display("", screen_only=True)
