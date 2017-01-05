@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.41
+Version:        3.4.42
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Jan 05 2017 Scott Dodson <sdodson@redhat.com> 3.4.42-1
+- Don't upgrade etcd on atomic host, ever. (sdodson@redhat.com)
+- Update CFME template to point to GA build (simaishi@redhat.com)
+- Don't upgrade etcd on atomic host, ever. (sdodson@redhat.com)
+- Add templates for CFME Beta pod images (simaishi@redhat.com)
+
 * Thu Dec 22 2016 Scott Dodson <sdodson@redhat.com> 3.4.41-1
 - Revert "Pre-pull master/node/ovs images during upgrade."
   (dgoodwin@redhat.com)
