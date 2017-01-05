@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.42
+Version:        3.4.43
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Jan 05 2017 Scott Dodson <sdodson@redhat.com> 3.4.43-1
+- logging-deployer pull fixes from origin-aggregated-logging/#317
+  (sdodson@redhat.com)
+
 * Thu Jan 05 2017 Scott Dodson <sdodson@redhat.com> 3.4.42-1
 - Don't upgrade etcd on atomic host, ever. (sdodson@redhat.com)
 - Update CFME template to point to GA build (simaishi@redhat.com)
