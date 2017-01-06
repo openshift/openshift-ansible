@@ -2,24 +2,3 @@
 openshift_master_config_dir: "{{ openshift.common.config_base }}/master"
 openshift_master_config_file: "{{ openshift_master_config_dir }}/master-config.yaml"
 openshift_master_scheduler_conf: "{{ openshift_master_config_dir }}/scheduler.json"
-
-builddefaults_yaml:
-  BuildDefaults:
-    configuration:
-      apiVersion: v1
-      kind: BuildDefaultsConfig
-      gitHTTPProxy: "{{ openshift.master.builddefaults_git_http_proxy | default(omit, true) }}"
-      gitHTTPSProxy: "{{ openshift.master.builddefaults_git_https_proxy | default(omit, true) }}"
-      env:
-      - name: HTTP_PROXY
-        value: "{{ openshift.master.builddefaults_http_proxy | default(omit, true) }}"
-      - name: HTTPS_PROXY
-        value: "{{ openshift.master.builddefaults_https_proxy | default(omit, true) }}"
-      - name: NO_PROXY
-        value: "{{ openshift.master.builddefaults_no_proxy | default(omit, true) | join(',') }}"
-      - name: http_proxy
-        value: "{{ openshift.master.builddefaults_http_proxy | default(omit, true) }}"
-      - name: https_proxy
-        value: "{{ openshift.master.builddefaults_https_proxy | default(omit, true) }}"
-      - name: no_proxy
-        value: "{{ openshift.master.builddefaults_no_proxy | default(omit, true) | join(',') }}"

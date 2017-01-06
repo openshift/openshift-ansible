@@ -23,6 +23,7 @@ dependencies:
 - role: openshift_clock
 - role: openshift_cloud_provider
 - role: openshift_builddefaults
+- role: openshift_buildoverrides
 - role: os_firewall
   os_firewall_allow:
   - service: api server https
