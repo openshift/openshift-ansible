@@ -3,20 +3,20 @@
 Ansible callback plugin.
 '''
 
-from ansible.plugins.callback.default import CallbackModule as CallbackModule_default
+from ansible.plugins.callback import CallbackBase
 from ansible import constants as C
 from ansible.utils.color import stringc
 
 
-class CallbackModule(CallbackModule_default):
+class CallbackModule(CallbackBase):
     '''
-    This is like the default callback plugin, but also stores results and
-    summarizes failures.
+    This callback plugin stores task results and summarizes failures.
     '''
 
     CALLBACK_VERSION = 2.0
-    CALLBACK_TYPE = 'stdout'
-    CALLBACK_NAME = 'default_plus_summary'
+    CALLBACK_TYPE = 'aggregate'
+    CALLBACK_NAME = 'failure_summary'
+    CALLBACK_NEEDS_WHITELIST = False
 
     def __init__(self):
         super(CallbackModule, self).__init__()
