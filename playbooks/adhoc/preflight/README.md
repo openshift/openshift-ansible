@@ -36,15 +36,7 @@ against your inventory file. Here is the step-by-step:
     $ cd openshift-ansible
     ```
 
-2. Configure a custom callback plugin to get a summary of problems at the end of
-the playbook run:
-
-    ```console
-    $ export ANSIBLE_CALLBACK_PLUGINS=callback_plugins \
-             ANSIBLE_STDOUT_CALLBACK=default_plus_summary
-    ```
-
-3. Run the playbook:
+2. Run the playbook:
 
     ```console
     $ ansible-playbook -i <inventory file> playbooks/adhoc/preflight/check.yml

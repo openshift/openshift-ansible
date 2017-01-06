@@ -1,0 +1,47 @@
+---
+# determine if yum install of master pkgs will work
+- when:
+    - not containerized
+  block:
+
+    - name: main packages for enterprise
+      when:
+        - deployment_type == "openshift-enterprise"
+      check_yum_update:
+        packages:
+          - atomic-openshift
+          - atomic-openshift-clients
+          - atomic-openshift-master
+      register: r
+
+    - set_fact:
+        oo_preflight_check_results: "{{ oo_preflight_check_results + [r|combine({'_task': 'main packages for enterprise'})] }}"
+
+    - name: main packages for origin
+      when:
+        - deployment_type == "origin"
+      check_yum_update:
+        packages:
+          - origin
+          - origin-clients
+          - origin-master
+      register: r
+
+    - set_fact:
+        oo_preflight_check_results: "{{ oo_preflight_check_results + [r|combine({'_task': 'main packages for origin'})] }}"
+
+    - name: other master packages
+      check_yum_update:
+        packages:
+          - etcd
+          - bash-completion
+          - cockpit-bridge
+          - cockpit-docker
+          - cockpit-kubernetes
+          - cockpit-shell
+          - cockpit-ws
+          - httpd-tools
+      register: r
+
+    - set_fact:
+        oo_preflight_check_results: "{{ oo_preflight_check_results + [r|combine({'_task': 'other master packages'})] }}"

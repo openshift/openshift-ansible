@@ -11,6 +11,8 @@ from ansible.utils.color import stringc
 class CallbackModule(CallbackBase):
     '''
     This callback plugin stores task results and summarizes failures.
+    The file name is prefixed with `zz_` to make this plugin be loaded last by
+    Ansible, thus making its output the last thing that users see.
     '''
 
     CALLBACK_VERSION = 2.0

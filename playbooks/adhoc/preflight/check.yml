@@ -1,159 +1,32 @@
 ---
 - hosts: OSEv3
   gather_facts: no
-  tasks:
-    - set_fact:
-        deployment_type: "{{ deployment_type | default('openshift-enterprise') }}"
-        containerized: "{{ containerized | default('no') | bool }}"
-        openshift_release: "{{ openshift_release | default('3.3') }}"
-        oo_preflight_check_results: "{{ oo_preflight_check_results | default([]) }}"
+  roles:
+    - openshift_preflight/facts
 
 - hosts: OSEv3
-  name: check content available on all hosts
+  name: checks that apply to all hosts
   gather_facts: no
   ignore_errors: yes
-  tasks:
-    - when:
-        - not containerized
-      block:
-
-        - name: determine if yum update will work
-          action: check_yum_update
-          register: r
-
-        - set_fact:
-            oo_preflight_check_results: "{{ oo_preflight_check_results + [r|combine({'_task': 'check content available on all hosts'})] }}"
-
-        - name: determine if expected version matches what is available
-          aos_version:
-            version: "{{ openshift_release }}"
-          when:
-            - deployment_type == "openshift-enterprise"
-          register: r
-
-        - set_fact:
-            oo_preflight_check_results: "{{ oo_preflight_check_results + [r|combine({'_task': 'determine if expected version matches what is available'})] }}"
+  roles:
+    - openshift_preflight/common
 
 - hosts: masters
-  name: determine if yum install of master pkgs will work
+  name: checks that apply to masters
   gather_facts: no
   ignore_errors: yes
-  tasks:
-    - when:
-        - not containerized
-      block:
-
-        - name: main packages for enterprise
-          when:
-            - deployment_type == "openshift-enterprise"
-          check_yum_update:
-            packages:
-              - atomic-openshift
-              - atomic-openshift-clients
-              - atomic-openshift-master
-          register: r
-
-        - set_fact:
-            oo_preflight_check_results: "{{ oo_preflight_check_results + [r|combine({'_task': 'main packages for enterprise'})] }}"
-
-        - name: main packages for origin
-          when:
-            - deployment_type == "origin"
-          check_yum_update:
-            packages:
-              - origin
-              - origin-clients
-              - origin-master
-          register: r
-
-        - set_fact:
-            oo_preflight_check_results: "{{ oo_preflight_check_results + [r|combine({'_task': 'main packages for origin'})] }}"
-
-        - name: other master packages
-          check_yum_update:
-            packages:
-              - etcd
-              - bash-completion
-              - cockpit-bridge
-              - cockpit-docker
-              - cockpit-kubernetes
-              - cockpit-shell
-              - cockpit-ws
-              - httpd-tools
-          register: r
-
-        - set_fact:
-            oo_preflight_check_results: "{{ oo_preflight_check_results + [r|combine({'_task': 'other master packages'})] }}"
+  roles:
+    - openshift_preflight/masters
 
 - hosts: nodes
-  name: determine if yum install of node pkgs will work
+  name: checks that apply to nodes
   gather_facts: no
   ignore_errors: yes
-  tasks:
-    - when:
-        - not containerized
-      block:
-
-        - name: main packages for enterprise
-          when:
-            - deployment_type == "openshift-enterprise"
-          check_yum_update:
-            packages:
-              - atomic-openshift
-              - atomic-openshift-node
-              - atomic-openshift-sdn-ovs
-          register: r
-
-        - set_fact:
-            oo_preflight_check_results: "{{ oo_preflight_check_results + [r|combine({'_task': 'main packages for enterprise'})] }}"
-
-        - name: main packages for origin
-          when:
-            - deployment_type == "origin"
-          check_yum_update:
-            packages:
-              - origin
-              - origin-node
-              - origin-sdn-ovs
-          register: r
-
-        - set_fact:
-            oo_preflight_check_results: "{{ oo_preflight_check_results + [r|combine({'_task': 'main packages for origin'})] }}"
-
-        - name: other node packages
-          check_yum_update:
-            packages:
-              - docker
-              - PyYAML
-              - firewalld
-              - iptables
-              - iptables-services
-              - nfs-utils
-              - ntp
-              - yum-utils
-              - dnsmasq
-              - libselinux-python
-              - ceph-common
-              - glusterfs-fuse
-              - iscsi-initiator-utils
-              - pyparted
-              - python-httplib2
-              - openssl
-              - flannel
-              - bind
-          register: r
-
-        - set_fact:
-            oo_preflight_check_results: "{{ oo_preflight_check_results + [r|combine({'_task': 'other node packages'})] }}"
+  roles:
+    - openshift_preflight/nodes
 
 - hosts: OSEv3
   name: verify check results
   gather_facts: no
-  tasks:
-
-    - set_fact:
-        oo_preflight_check_failures: "{{ oo_preflight_check_results | select('failed', 'equalto', True) | list }}"
-
-    - name: ensure all checks succeed
-      action: fail
-      when: oo_preflight_check_failures
+  roles:
+    - openshift_preflight/verify_status
