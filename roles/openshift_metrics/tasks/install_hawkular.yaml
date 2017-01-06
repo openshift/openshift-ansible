@@ -1,8 +1,27 @@
 ---
+- shell: >
+    {{ openshift.common.client_binary }} -n {{ openshift_metrics_project }}
+    --config={{ mktemp.stdout }}/admin.kubeconfig
+    get rc hawkular-metrics --template=\{\{.spec.replicas\}\} || echo 0
+  register: hawkular_metrics_replica_count
+  changed_when: false
+
 - name: generate hawkular-metrics replication controller
   template:
     src: hawkular_metrics_rc.j2
     dest: "{{ mktemp.stdout }}/templates/hawkular_metrics_rc.yaml"
+  vars:
+     replica_count: "{{hawkular_metrics_replica_count.stdout}}"
+
+- shell: >
+    {{ openshift.common.client_binary }} -n {{ openshift_metrics_project }}
+    --config={{ mktemp.stdout }}/admin.kubeconfig
+    get rc hawkular-cassandra-{{node}} --template=\{\{.spec.replicas\}\} || echo 0
+  vars:
+    node: "{{ item }}"
+  register: cassandra_replica_count
+  changed_when: false
+  with_sequence: count={{ openshift_metrics_cassandra_replicas }}
 
 - name: generate hawkular-cassandra replication controllers
   template:
@@ -11,6 +30,7 @@
   vars:
     node: "{{ item }}"
     master: "{{ (item == '1')|string|lower }}"
+    replica_count: "{{cassandra_replica_count.results[item|int - 1].stdout}}"
   with_sequence: count={{ openshift_metrics_cassandra_replicas }}
 
 - name: generate hawkular-cassandra persistent volume claims

@@ -9,7 +9,7 @@ metadata:
 spec:
   selector:
     name: hawkular-cassandra-{{ node }}
-  replicas: 0
+  replicas: {{replica_count}}
   template:
     version: v1
     metadata:
