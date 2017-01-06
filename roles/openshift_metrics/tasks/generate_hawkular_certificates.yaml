@@ -3,7 +3,7 @@
   include: setup_certificate.yaml
   vars:
     component: hawkular-metrics
-    hostnames: "hawkular-metrics,{{ openshift_metrics_hawkular_metrics_hostname }}"
+    hostnames: "hawkular-metrics,{{ openshift_metrics_hawkular_hostname }}"
 - name: generate hawkular-cassandra certificates
   include: setup_certificate.yaml
   vars:

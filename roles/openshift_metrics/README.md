@@ -25,17 +25,17 @@ For default values, see [`defaults/main.yaml`](defaults/main.yaml).
 - `openshift_metrics_image_version`: Specify version for metrics components; e.g. for
   "openshift/origin-metrics-deployer:v1.1", set version "v1.1".
 
-- `openshift_metrics_master_url`: Internal URL for the master, for authentication retrieval.
+- `openshift_metrics_hawkular_cert:` The certificate used for re-encrypting the route
+  to Hawkular metrics.  The certificate must contain the hostname used by the route.
+  The default router certificate will be used if unspecified
 
-- `openshift_metrics_hawkular_user_write_access`: If user accounts should be able to write
-  metrics.  Defaults to 'false' so that only Heapster can write metrics and not
-  individual users.  It is recommended to disable user write access, if enabled
-  any user will be able to write metrics to the system which can affect
-  performance and use Cassandra disk usage to unpredictably increase.
+- `openshift_metrics_hawkular_key:` The key used with the Hawkular certificate
+
+- `openshift_metrics_hawkular_ca:` An optional certificate used to sign the Hawkular certificate.
 
 - `openshift_metrics_hawkular_replicas:` The number of replicas for Hawkular metrics.
 
-- `openshift_metrics_cassandra_nodes`: The number of Cassandra Nodes to deploy for the
+- `openshift_metrics_cassandra_replicas`: The number of Cassandra nodes to deploy for the
   initial cluster.
 
 - `openshift_metrics_cassandra_storage_type`: Use `emptydir` for ephemeral storage (for

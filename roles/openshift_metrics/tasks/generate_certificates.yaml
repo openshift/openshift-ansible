@@ -4,6 +4,7 @@
     path: "{{ openshift_metrics_certs_dir }}"
     state: directory
     mode: 0700
+
 - name: list existing secrets
   command: >
     {{ openshift.common.client_binary }} -n {{ openshift_metrics_project }}
@@ -11,6 +12,7 @@
     get secrets -o name
   register: metrics_secrets
   changed_when: false
+
 - name: generate ca certificate chain
   shell: >
     {{ openshift.common.admin_binary }} ca create-signer-cert

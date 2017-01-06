@@ -11,7 +11,7 @@
   vars:
     node: "{{ item }}"
     master: "{{ (item == '1')|string|lower }}"
-  with_sequence: count={{ openshift_metrics_cassandra_nodes }}
+  with_sequence: count={{ openshift_metrics_cassandra_replicas }}
 
 - name: generate hawkular-cassandra persistent volume claims
   template:
@@ -24,7 +24,7 @@
     access_modes:
     - ReadWriteOnce
     size: "{{ openshift_metrics_cassandra_pv_size }}"
-  with_sequence: count={{ openshift_metrics_cassandra_nodes }}
+  with_sequence: count={{ openshift_metrics_cassandra_replicas }}
   when: openshift_metrics_cassandra_storage_type == 'pv'
 
 - name: generate hawkular-cassandra persistent volume claims (dynamic)
@@ -40,25 +40,38 @@
     access_modes:
     - ReadWriteOnce
     size: "{{ openshift_metrics_cassandra_pv_size }}"
-  with_sequence: count={{ openshift_metrics_cassandra_nodes }}
+  with_sequence: count={{ openshift_metrics_cassandra_replicas }}
   when: openshift_metrics_cassandra_storage_type == 'dynamic'
 
 - name: read hawkular-metrics route destination ca certificate
   slurp: src={{ openshift_metrics_certs_dir }}/ca.crt
   register: metrics_route_dest_ca_cert
 
-- name: generate the hawkular-metrics route
-  template:
-    src: route.j2
-    dest: "{{ mktemp.stdout }}/templates/hawkular-metrics-route.yaml"
-  vars:
-    name: hawkular-metrics
-    labels:
-      metrics-infra: hawkular-metrics
-    host: "{{ openshift_metrics_hawkular_metrics_hostname }}"
-    to:
-      kind: Service
+- block:
+  - set_fact: hawkular_key={{ lookup('file', openshift_metrics_hawkular_key) }}
+    when: openshift_metrics_hawkular_key | exists
+
+  - set_fact: hawkular_cert={{ lookup('file', openshift_metrics_hawkular_cert) }}
+    when: openshift_metrics_hawkular_cert | exists
+
+  - set_fact: hawkular_ca={{ lookup('file', openshift_metrics_hawkular_ca) }}
+    when: openshift_metrics_hawkular_ca | exists
+
+  - name: generate the hawkular-metrics route
+    template:
+      src: route.j2
+      dest: "{{ mktemp.stdout }}/templates/hawkular-metrics-route.yaml"
+    vars:
       name: hawkular-metrics
-    tls:
-      termination: reencrypt
-      destination_ca_certificate: "{{ metrics_route_dest_ca_cert.content }}"
+      labels:
+        metrics-infra: hawkular-metrics
+      host: "{{ openshift_metrics_hawkular_hostname }}"
+      to:
+        kind: Service
+        name: hawkular-metrics
+      tls:
+        termination: reencrypt
+        key: "{{ hawkular_key | default('') }}"
+        certificate: "{{ hawkular_cert | default('') }}"
+        ca_certificate: "{{ hawkular_ca | default('') }}"
+        destination_ca_certificate: "{{ metrics_route_dest_ca_cert.content | b64decode }}"
