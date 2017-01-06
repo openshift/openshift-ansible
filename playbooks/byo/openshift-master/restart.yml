@@ -17,4 +17,14 @@
 
 - include: ../../common/openshift-cluster/evaluate_groups.yml
 - include: ../../common/openshift-master/validate_restart.yml
-- include: ../../common/openshift-master/restart.yml
+
+- name: Restart masters
+  hosts: oo_masters_to_config
+  vars:
+    openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
+  serial: 1
+  tasks:
+  - include: restart_hosts.yml
+    when: openshift.common.rolling_restart_mode == 'system'
+  - include: restart_services.yml
+    when: openshift.common.rolling_restart_mode == 'services'

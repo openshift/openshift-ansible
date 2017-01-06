@@ -30,14 +30,6 @@
 - name: Upgrade and backup etcd
   include: ./etcd/main.yml
 
-- name: Upgrade master packages
-  hosts: oo_masters_to_config
-  roles:
-  - openshift_facts
-  tasks:
-  - include: rpm_upgrade.yml component=master
-    when: not openshift.common.is_containerized | bool
-
 # Create service signer cert when missing. Service signer certificate
 # is added to master config in the master config hook for v3_3.
 - name: Determine if service signer cert must be created
@@ -59,14 +51,20 @@
   roles:
   - openshift_master_facts
 
-- name: Upgrade master config and systemd units
+- name: Upgrade master
   hosts: oo_masters_to_config
+  vars:
+    openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
+  serial: 1
   handlers:
   - include: ../../../../roles/openshift_master/handlers/main.yml
     static: yes
   roles:
   - openshift_facts
   post_tasks:
+  - include: rpm_upgrade.yml component=master
+    when: not openshift.common.is_containerized | bool
+
   - include_vars: ../../../../roles/openshift_master_facts/vars/main.yml
 
   - include: upgrade_scheduler.yml
@@ -104,9 +102,12 @@
       state: link
     when: ca_crt_stat.stat.isreg and not ca_bundle_stat.stat.exists
 
-- name: Set master update status to complete
-  hosts: oo_masters_to_config
-  tasks:
+  - include: ../../openshift-master/restart_hosts.yml
+    when: openshift.common.rolling_restart_mode == 'system'
+
+  - include: ../../openshift-master/restart_services.yml
+    when: openshift.common.rolling_restart_mode == 'services'
+
   - set_fact:
       master_update_complete: True
 
@@ -127,10 +128,6 @@
   - fail:
       msg: "Upgrade cannot continue. The following masters did not finish updating: {{ master_update_failed | join(',') }}"
     when: master_update_failed | length > 0
-
-# We are now ready to restart master services (or entire system
-# depending on openshift_rolling_restart_mode):
-- include: ../../openshift-master/restart.yml
 
 ###############################################################################
 # Reconcile Cluster Roles, Cluster Role Bindings and Security Context Constraints
