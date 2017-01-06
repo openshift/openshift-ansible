@@ -49,7 +49,7 @@ def main():  # pylint: disable=missing-docstring,too-many-branches
         bail('Error with yum repository configuration: %s' % e)
     #   3. other/unknown
     #    * just report the problem verbatim
-    except:  # pylint: disable=bare-except
+    except:  # pylint: disable=bare-except; # noqa
         bail('Unexpected error with yum repository: %s' % sys.exc_info()[1])
 
     packages = module.params['packages']
@@ -59,7 +59,7 @@ def main():  # pylint: disable=missing-docstring,too-many-branches
             yb.install(name=pkg)
         except yum.Errors.InstallError as e:  # pylint: disable=invalid-name
             no_such_pkg.append(pkg)
-        except:  # pylint: disable=bare-except
+        except:  # pylint: disable=bare-except; # noqa
             bail('Unexpected error with yum install/update: %s' %
                  sys.exc_info()[1])
     if not packages:
@@ -75,7 +75,7 @@ def main():  # pylint: disable=missing-docstring,too-many-branches
 
     try:
         txn_result, txn_msgs = yb.buildTransaction()
-    except:  # pylint: disable=bare-except
+    except:  # pylint: disable=bare-except; # noqa
         bail('Unexpected error during dependency resolution for yum update: \n %s' %
              sys.exc_info()[1])
 
