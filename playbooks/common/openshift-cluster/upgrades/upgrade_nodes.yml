@@ -39,7 +39,7 @@
     retries: 3
     delay: 1
 
-  - name: Drain Node for Kubelet upgrade
+  - name: Evacuate Node for Kubelet upgrade
     command: >
       {{ hostvars[groups.oo_first_master.0].openshift.common.client_binary }} adm manage-node {{ openshift.common.hostname | lower }} --drain --force
     delegate_to: "{{ groups.oo_first_master.0 }}"
@@ -96,5 +96,3 @@
     until: node_sched.rc == 0
     retries: 3
     delay: 1
-
-
