@@ -3,6 +3,8 @@
 Ansible module for partitioning.
 """
 
+from __future__ import print_function
+
 # There is no pyparted on our Jenkins worker
 # pylint: disable=import-error
 import parted
@@ -131,7 +133,7 @@ def partition(diskname, specs, force=False, check_mode=False):
         disk = None
 
     if disk and len(disk.partitions) > 0 and not force:
-        print "skipping", diskname
+        print("skipping", diskname)
         return 0
 
     # create new partition table, wiping all existing data
@@ -220,7 +222,7 @@ def main():
 
     try:
         specs = parse_spec(sizes)
-    except ValueError, ex:
+    except ValueError as ex:
         err = "Error parsing sizes=" + sizes + ": " + str(ex)
         module.fail_json(msg=err)
 
@@ -229,7 +231,7 @@ def main():
     for disk in disks.split(","):
         try:
             changed_count += partition(disk, specs, force, module.check_mode)
-        except Exception, ex:
+        except Exception as ex:
             err = "Error creating partitions on " + disk + ": " + str(ex)
             raise
             # module.fail_json(msg=err)

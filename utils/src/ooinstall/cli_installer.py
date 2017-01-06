@@ -501,7 +501,7 @@ def get_variant_and_version(multi_master=False):
 
     i = 1
     combos = get_variant_version_combos()
-    for (variant, version) in combos:
+    for (variant, _) in combos:
         message = "%s\n(%s) %s" % (message, i, variant.description)
         i = i + 1
     message = "%s\n" % message

@@ -2,12 +2,13 @@
 # repo. We will work on these over time.
 # pylint: disable=bad-continuation,missing-docstring,no-self-use,invalid-name
 
-import cStringIO
 import os
 import unittest
 import tempfile
 import shutil
 import yaml
+
+from six.moves import cStringIO
 
 from ooinstall.oo_config import OOConfig, Host, OOConfigInvalidHostError
 import ooinstall.openshift_ansible
@@ -244,7 +245,7 @@ class HostTests(OOInstallFixture):
         }
 
         new_node = Host(**yaml_props)
-        inventory = cStringIO.StringIO()
+        inventory = cStringIO()
         # This is what the 'write_host' function generates. write_host
         # has no return value, it just writes directly to the file
         # 'inventory' which in this test-case is a StringIO object
@@ -285,7 +286,7 @@ class HostTests(OOInstallFixture):
     #     }
 
     #     new_node = Host(**yaml_props)
-    #     inventory = cStringIO.StringIO()
+    #     inventory = cStringIO()
 
     #     # This is what the original 'write_host' function will
     #     # generate. write_host has no return value, it just writes

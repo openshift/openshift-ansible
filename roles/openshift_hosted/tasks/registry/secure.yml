@@ -34,9 +34,9 @@
 - name: Create registry certificates if they do not exist
   command: >
     {{ openshift.common.client_binary }} adm ca create-server-cert
-    --signer-cert=/etc/origin/master/ca.crt
-    --signer-key=/etc/origin/master/ca.key
-    --signer-serial=/etc/origin/master/ca.serial.txt
+    --signer-cert={{ openshift_master_config_dir }}/ca.crt
+    --signer-key={{ openshift_master_config_dir }}/ca.key
+    --signer-serial={{ openshift_master_config_dir }}/ca.serial.txt
     --hostnames="{{ docker_registry_service_ip.stdout }},docker-registry.default.svc.cluster.local,{{ docker_registry_route_hostname }}"
     --cert={{ openshift_master_config_dir }}/registry.crt
     --key={{ openshift_master_config_dir }}/registry.key
@@ -65,12 +65,12 @@
 - name: Determine if registry-certificates secret volume attached
   command: >
     {{ openshift.common.client_binary }} get dc/docker-registry
-    -o jsonpath='{.spec.template.spec.volumes[*].secret.secretName}'
+    -o jsonpath='{.spec.template.spec.volumes[?(@.secret)].secret.secretName}'
     --config={{ openshift_hosted_kubeconfig }}
     -n default
   register: docker_registry_volumes
   changed_when: false
-  failed_when: "'secretName is not found' not in docker_registry_volumes.stdout and docker_registry_volumes.rc != 0"
+  failed_when: "docker_registry_volumes.stdout != '' and 'secretName is not found' not in docker_registry_volumes.stdout and docker_registry_volumes.rc != 0"
 
 - name: Attach registry-certificates secret volume
   command: >
