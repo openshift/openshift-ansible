@@ -65,7 +65,11 @@ TEST_VARS = [
     ('1.3', 'origin', DEFAULT_PREDICATES_1_3),
     ('3.3', 'openshift-enterprise', DEFAULT_PREDICATES_1_3),
     ('1.4', 'origin', DEFAULT_PREDICATES_1_4),
-    ('3.4', 'openshift-enterprise', DEFAULT_PREDICATES_1_4)
+    ('3.4', 'openshift-enterprise', DEFAULT_PREDICATES_1_4),
+    ('1.5', 'origin', DEFAULT_PREDICATES_1_4),
+    ('3.5', 'openshift-enterprise', DEFAULT_PREDICATES_1_4),
+    ('1.6', 'origin', DEFAULT_PREDICATES_1_4),
+    ('3.6', 'openshift-enterprise', DEFAULT_PREDICATES_1_4),
 ]
 
 
