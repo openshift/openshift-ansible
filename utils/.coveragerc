@@ -1,0 +1,5 @@
+[run]
+omit=
+    */lib/python*/site-packages/*
+    */lib/python*/*
+    /usr/*

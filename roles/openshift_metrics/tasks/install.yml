@@ -89,7 +89,7 @@
   set_fact:
     deployer_cmd: "{{ openshift.common.client_binary }} process -f \
       {{ hosted_base }}/metrics-deployer.yaml -v \
-      HAWKULAR_METRICS_HOSTNAME={{ metrics_hostname }} \
+      HAWKULAR_METRICS_HOSTNAME={{ g_metrics_hostname }} \
       -v USE_PERSISTENT_STORAGE={{metrics_persistence | string | lower }} \
       -v DYNAMICALLY_PROVISION_STORAGE={{metrics_dynamic_vol | string | lower }} \
       -v METRIC_DURATION={{ openshift.hosted.metrics.duration }} \
@@ -128,12 +128,5 @@
   modify_yaml:
     dest: "{{ openshift.common.config_base }}/master/master-config.yaml"
     yaml_key: assetConfig.metricsPublicURL
-    yaml_value: "https://{{ metrics_hostname }}/hawkular/metrics"
+    yaml_value: "{{ openshift_hosted_metrics_public_url }}"
   notify: restart master
-
-- name: Store metrics public_url
-  openshift_facts:
-    role: master
-    local_facts:
-      metrics_public_url: "https://{{ metrics_hostname }}/hawkular/metrics"
-  when: deploy_result | changed

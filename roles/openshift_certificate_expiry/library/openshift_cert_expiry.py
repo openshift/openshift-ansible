@@ -371,7 +371,7 @@ an OpenShift Container Platform cluster
         ######################################################################
         # Load the certificate and the CA, parse their expiration dates into
         # datetime objects so we can manipulate them later
-        for _, v in cert_meta.iteritems():
+        for _, v in cert_meta.items():
             with open(v, 'r') as fp:
                 cert = fp.read()
                 cert_subject, cert_expiry_date, time_remaining = load_and_handle_cert(cert, now)
@@ -467,7 +467,11 @@ an OpenShift Container Platform cluster
 
     ######################################################################
     # Check etcd certs
+    #
+    # Two things to check: 'external' etcd, and embedded etcd.
     ######################################################################
+    # FIRST: The 'external' etcd
+    #
     # Some values may be duplicated, make this a set for now so we
     # unique them all
     etcd_certs_to_check = set([])
@@ -506,6 +510,43 @@ an OpenShift Container Platform cluster
             classify_cert(expire_check_result, now, time_remaining, expire_window, etcd_certs)
 
     ######################################################################
+    # Now the embedded etcd
+    ######################################################################
+    try:
+        with open('/etc/origin/master/master-config.yaml', 'r') as fp:
+            cfg = yaml.load(fp)
+    except IOError:
+        # Not present
+        pass
+    else:
+        if cfg.get('etcdConfig', {}).get('servingInfo', {}).get('certFile', None) is not None:
+            # This is embedded
+            etcd_crt_name = cfg['etcdConfig']['servingInfo']['certFile']
+        else:
+            # Not embedded
+            etcd_crt_name = None
+
+        if etcd_crt_name is not None:
+            # etcd_crt_name is relative to the location of the
+            # master-config.yaml file
+            cfg_path = os.path.dirname(fp.name)
+            etcd_cert = os.path.join(cfg_path, etcd_crt_name)
+            with open(etcd_cert, 'r') as etcd_fp:
+                (cert_subject,
+                 cert_expiry_date,
+                 time_remaining) = load_and_handle_cert(etcd_fp.read(), now)
+
+                expire_check_result = {
+                    'cert_cn': cert_subject,
+                    'path': etcd_fp.name,
+                    'expiry': cert_expiry_date,
+                    'days_remaining': time_remaining.days,
+                    'health': None,
+                }
+
+                classify_cert(expire_check_result, now, time_remaining, expire_window, etcd_certs)
+
+    ######################################################################
     # /Check etcd certs
     ######################################################################
 
@@ -523,7 +564,7 @@ an OpenShift Container Platform cluster
     ######################################################################
     # First the router certs
     try:
-        router_secrets_raw = subprocess.Popen('oc get secret router-certs -o yaml'.split(),
+        router_secrets_raw = subprocess.Popen('oc get -n default secret router-certs -o yaml'.split(),
                                               stdout=subprocess.PIPE)
         router_ds = yaml.load(router_secrets_raw.communicate()[0])
         router_c = router_ds['data']['tls.crt']
@@ -552,7 +593,7 @@ an OpenShift Container Platform cluster
     ######################################################################
     # Now for registry
     try:
-        registry_secrets_raw = subprocess.Popen('oc get secret registry-certificates -o yaml'.split(),
+        registry_secrets_raw = subprocess.Popen('oc get -n default secret registry-certificates -o yaml'.split(),
                                                 stdout=subprocess.PIPE)
         registry_ds = yaml.load(registry_secrets_raw.communicate()[0])
         registry_c = registry_ds['data']['registry.crt']
@@ -613,9 +654,13 @@ an OpenShift Container Platform cluster
     # will be at the front of the list and certificates which will
     # expire later are at the end. Router and registry certs should be
     # limited to just 1 result, so don't bother sorting those.
-    check_results['ocp_certs'] = sorted(check_results['ocp_certs'], cmp=lambda x, y: cmp(x['days_remaining'], y['days_remaining']))
-    check_results['kubeconfigs'] = sorted(check_results['kubeconfigs'], cmp=lambda x, y: cmp(x['days_remaining'], y['days_remaining']))
-    check_results['etcd'] = sorted(check_results['etcd'], cmp=lambda x, y: cmp(x['days_remaining'], y['days_remaining']))
+    def cert_key(item):
+        ''' return the days_remaining key '''
+        return item['days_remaining']
+
+    check_results['ocp_certs'] = sorted(check_results['ocp_certs'], key=cert_key)
+    check_results['kubeconfigs'] = sorted(check_results['kubeconfigs'], key=cert_key)
+    check_results['etcd'] = sorted(check_results['etcd'], key=cert_key)
 
     # This module will never change anything, but we might want to
     # change the return code parameter if there is some catastrophic
@@ -628,10 +673,11 @@ an OpenShift Container Platform cluster
         changed=False
     )
 
+
 ######################################################################
 # It's just the way we do things in Ansible. So disable this warning
 #
 # pylint: disable=wrong-import-position,import-error
-from ansible.module_utils.basic import AnsibleModule
+from ansible.module_utils.basic import AnsibleModule  # noqa: E402
 if __name__ == '__main__':
     main()

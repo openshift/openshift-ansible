@@ -9,7 +9,7 @@ available.
 """
 
 # pylint: disable=redefined-builtin,wildcard-import,unused-wildcard-import
-from ansible.module_utils.basic import *
+from ansible.module_utils.basic import *  # noqa: F403
 
 DOCUMENTATION = """
 ---
@@ -35,16 +35,17 @@ EXAMPLES = """
 
 RPM_BINARY = '/bin/rpm'
 
+
 def main():
     """
     Checks rpm -q for the named package and returns the installed packages
     or None if not installed.
     """
-    module = AnsibleModule(
+    module = AnsibleModule(  # noqa: F405
         argument_spec=dict(
             name=dict(required=True),
             state=dict(default='present', choices=['present', 'absent'])
-            ),
+        ),
         supports_check_mode=True
     )
 
@@ -65,6 +66,7 @@ def main():
         module.exit_json(changed=False, installed_versions=installed)
     else:
         module.fail_json(msg="%s is installed", installed_versions=installed)
+
 
 if __name__ == '__main__':
     main()

@@ -37,7 +37,7 @@
   vars:
     cli_volume_type: gp2
     cli_volume_size: 200
-#    cli_volume_iops: "{{ 30 * cli_volume_size }}"
+    #cli_volume_iops: "{{ 30 * cli_volume_size }}"
 
   pre_tasks:
   - fail:
@@ -65,7 +65,7 @@
 
   - name: fail if we don't detect devicemapper
     fail:
-      msg:  The "Storage Driver" in "docker info" is not set to "devicemapper"! Please investigate manually.
+      msg: The "Storage Driver" in "docker info" is not set to "devicemapper"! Please investigate manually.
     when: device_mapper_check.rc == 1
 
   # docker-storage-setup creates a docker-pool as the lvm.  I am using docker-pool lvm to test
@@ -80,7 +80,7 @@
 
   - name: fail if we don't find a docker volume group
     fail:
-      msg:  Unable to find docker volume group. Please investigate manually.
+      msg: Unable to find docker volume group. Please investigate manually.
     when: docker_vg_name.stdout_lines|length != 1
 
   # docker-storage-setup creates a docker-pool as the lvm.  I am using docker-pool lvm to test
@@ -95,7 +95,7 @@
 
   - name: fail if we don't find a docker physical volume
     fail:
-      msg:  Unable to find docker physical volume. Please investigate manually.
+      msg: Unable to find docker physical volume. Please investigate manually.
     when: docker_pv_name.stdout_lines|length != 1
 
 

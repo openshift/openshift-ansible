@@ -10,12 +10,11 @@
 - set_fact:
     l_is_containerized: "{{ (l_is_atomic | bool) or (containerized | default(false) | bool) }}"
 
-- name: Ensure PyYaml is installed
-  action: "{{ ansible_pkg_mgr }} name=PyYAML state=present"
-  when: not l_is_atomic | bool
-
-- name: Ensure yum-utils is installed
-  action: "{{ ansible_pkg_mgr }} name=yum-utils state=present"
+- name: Ensure PyYaml and yum-utils are installed
+  package: name={{ item }} state=present
+  with_items:
+    - PyYAML
+    - yum-utils
   when: not l_is_atomic | bool
 
 - name: Gather Cluster facts and set is_containerized if needed
@@ -38,6 +37,8 @@
       no_proxy: "{{ openshift_no_proxy | default(None) }}"
       generate_no_proxy_hosts: "{{ openshift_generate_no_proxy_hosts | default(True) }}"
       no_proxy_internal_hostnames: "{{ openshift_no_proxy_internal_hostnames | default(None) }}"
+      sdn_network_plugin_name: "{{ os_sdn_network_plugin_name | default(None) }}"
+      use_openshift_sdn: "{{ openshift_use_openshift_sdn | default(None) }}"
 
 - name: Set repoquery command
   set_fact:

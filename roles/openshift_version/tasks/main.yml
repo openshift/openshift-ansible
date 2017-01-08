@@ -22,7 +22,7 @@
 
 - set_fact:
     openshift_image_tag: "{{ 'v' + openshift_image_tag }}"
-  when: openshift_image_tag is defined and openshift_image_tag[0] != 'v'
+  when: openshift_image_tag is defined and openshift_image_tag[0] != 'v' and openshift_image_tag != 'latest'
 
 - set_fact:
     openshift_pkg_version: "{{ '-' + openshift_pkg_version }}"

@@ -1,3 +1,4 @@
+---
 - name: Backup etcd
   hosts: etcd_hosts_to_backup
   vars:

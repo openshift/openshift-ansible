@@ -1,5 +1,7 @@
 # pylint: disable=bad-continuation,missing-docstring,no-self-use,invalid-name,too-many-instance-attributes,too-few-public-methods
 
+from __future__ import (absolute_import, print_function)
+
 import os
 import sys
 import logging
@@ -50,7 +52,7 @@ Error loading config. {}.
 See https://docs.openshift.com/enterprise/latest/install_config/install/quick_install.html#defining-an-installation-configuration-file
 for information on creating a configuration file or delete {} and re-run the installer.
 """
-    print message.format(error, path)
+    print(message.format(error, path))
 
 
 class OOConfigFileError(Exception):
@@ -103,7 +105,7 @@ class Host(object):
             # If the property is defined (not None or False), export it:
             if getattr(self, prop):
                 d[prop] = getattr(self, prop)
-        for variable, value in self.other_variables.iteritems():
+        for variable, value in self.other_variables.items():
             d[variable] = value
 
         return d
@@ -256,16 +258,16 @@ class OOConfig(object):
                 # Parse the hosts into DTO objects:
                 for host in host_list:
                     host['other_variables'] = {}
-                    for variable, value in host.iteritems():
+                    for variable, value in host.items():
                         if variable not in HOST_VARIABLES_BLACKLIST:
                             host['other_variables'][variable] = value
                     self.deployment.hosts.append(Host(**host))
 
                 # Parse the roles into Objects
-                for name, variables in role_list.iteritems():
+                for name, variables in role_list.items():
                     self.deployment.roles.update({name: Role(name, variables)})
 
-        except IOError, ferr:
+        except IOError as ferr:
             raise OOConfigFileError('Cannot open config file "{}": {}'.format(ferr.filename,
                                                                               ferr.strerror))
         except yaml.scanner.ScannerError:
@@ -354,14 +356,13 @@ class OOConfig(object):
         self.settings['ansible_inventory_path'] = \
             '{}/hosts'.format(os.path.dirname(self.config_path))
 
-        # pylint: disable=consider-iterating-dictionary
-        # Disabled because we shouldn't alter the container we're
-        # iterating over
-        #
         # clean up any empty sets
-        for setting in self.settings.keys():
+        empty_keys = []
+        for setting in self.settings:
             if not self.settings[setting]:
-                self.settings.pop(setting)
+                empty_keys.append(setting)
+        for key in empty_keys:
+            self.settings.pop(key)
 
         installer_log.debug("Updated OOConfig settings: %s", self.settings)
 
@@ -410,7 +411,7 @@ class OOConfig(object):
         for host in self.deployment.hosts:
             p_settings['deployment']['hosts'].append(host.to_dict())
 
-        for name, role in self.deployment.roles.iteritems():
+        for name, role in self.deployment.roles.items():
             p_settings['deployment']['roles'][name] = role.variables
 
         for setting in self.deployment.variables:
@@ -424,7 +425,7 @@ class OOConfig(object):
             if self.settings['ansible_inventory_directory'] != self._default_ansible_inv_dir():
                 p_settings['ansible_inventory_directory'] = self.settings['ansible_inventory_directory']
         except KeyError as e:
-            print "Error persisting settings: {}".format(e)
+            print("Error persisting settings: {}".format(e))
             sys.exit(0)
 
         return p_settings

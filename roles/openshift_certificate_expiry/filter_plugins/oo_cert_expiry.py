@@ -5,29 +5,6 @@
 Custom filters for use in openshift-ansible
 """
 
-from ansible import errors
-from collections import Mapping
-from distutils.util import strtobool
-from distutils.version import LooseVersion
-from operator import itemgetter
-import OpenSSL.crypto
-import os
-import pdb
-import pkg_resources
-import re
-import json
-import yaml
-from ansible.parsing.yaml.dumper import AnsibleDumper
-from urlparse import urlparse
-
-try:
-    # ansible-2.2
-    # ansible.utils.unicode.to_unicode is deprecated in ansible-2.2,
-    # ansible.module_utils._text.to_text should be used instead.
-    from ansible.module_utils._text import to_text
-except ImportError:
-    # ansible-2.1
-    from ansible.utils.unicode import to_unicode as to_text
 
 # Disabling too-many-public-methods, since filter methods are necessarily
 # public
@@ -74,12 +51,15 @@ Example playbook usage:
 
         total_warnings = sum([hostvars[h]['check_results']['summary']['warning'] for h in play_hosts])
         total_expired = sum([hostvars[h]['check_results']['summary']['expired'] for h in play_hosts])
+        total_ok = sum([hostvars[h]['check_results']['summary']['ok'] for h in play_hosts])
+        total_total = sum([hostvars[h]['check_results']['summary']['total'] for h in play_hosts])
 
         json_result['summary']['warning'] = total_warnings
         json_result['summary']['expired'] = total_expired
+        json_result['summary']['ok'] = total_ok
+        json_result['summary']['total'] = total_total
 
         return json_result
-
 
     def filters(self):
         """ returns a mapping of filters to methods """

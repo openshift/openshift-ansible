@@ -41,7 +41,7 @@
 
   - name: Evacuate Node for Kubelet upgrade
     command: >
-      {{ hostvars[groups.oo_first_master.0].openshift.common.client_binary }} adm manage-node {{ openshift.common.hostname | lower }} --evacuate --force
+      {{ hostvars[groups.oo_first_master.0].openshift.common.client_binary }} adm manage-node {{ openshift.common.hostname | lower }} --drain --force
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: inventory_hostname in groups.oo_nodes_to_upgrade
 
@@ -58,8 +58,8 @@
 
   - include: rpm_upgrade.yml
     vars:
-       component: "node"
-       openshift_version: "{{ openshift_pkg_version | default('') }}"
+      component: "node"
+      openshift_version: "{{ openshift_pkg_version | default('') }}"
     when: inventory_hostname in groups.oo_nodes_to_upgrade and not openshift.common.is_containerized | bool
 
   - name: Remove obsolete docker-sdn-ovs.conf
@@ -72,12 +72,12 @@
   - name: Ensure containerized services stopped before Docker restart
     service: name={{ item }} state=stopped
     with_items:
-      - etcd_container
-      - openvswitch
-      - "{{ openshift.common.service_type }}-master"
-      - "{{ openshift.common.service_type }}-master-api"
-      - "{{ openshift.common.service_type }}-master-controllers"
-      - "{{ openshift.common.service_type }}-node"
+    - etcd_container
+    - openvswitch
+    - "{{ openshift.common.service_type }}-master"
+    - "{{ openshift.common.service_type }}-master-api"
+    - "{{ openshift.common.service_type }}-master-controllers"
+    - "{{ openshift.common.service_type }}-node"
     failed_when: false
     when: openshift.common.is_containerized | bool
 

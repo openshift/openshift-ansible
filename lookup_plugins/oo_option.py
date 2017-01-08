@@ -30,8 +30,10 @@ except ImportError:
         def __init__(self, basedir=None, runner=None, **kwargs):
             self.runner = runner
             self.basedir = self.runner.basedir
+
             def get_basedir(self, variables):
                 return self.basedir
+
 
 # Reason: disable too-few-public-methods because the `run` method is the only
 #     one required by the Ansible API

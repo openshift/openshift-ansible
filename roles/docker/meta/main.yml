@@ -10,5 +10,5 @@ galaxy_info:
     versions:
     - 7
 dependencies:
-  - role: os_firewall
-    os_firewall_use_firewalld: False
+- role: os_firewall
+  os_firewall_use_firewalld: False

@@ -3,7 +3,7 @@
   when: openshift.common.is_containerized | bool
 
 - name: Install haproxy
-  action: "{{ ansible_pkg_mgr }} name=haproxy state=present"
+  package: name=haproxy state=present
 
 - name: Configure systemd service directory for haproxy
   file:
@@ -27,11 +27,6 @@
     option: LimitNOFILE
     value: "{{ openshift_loadbalancer_limit_nofile | default(100000) }}"
   notify: restart haproxy
-  register: nofile_limit_result
-
-- name: Reload systemd if needed
-  command: systemctl daemon-reload
-  when: nofile_limit_result | changed
 
 - name: Configure haproxy
   template:
@@ -43,10 +38,11 @@
   notify: restart haproxy
 
 - name: Enable and start haproxy
-  service:
+  systemd:
     name: haproxy
     state: started
     enabled: yes
+    daemon_reload: yes
   register: start_result
 
 - set_fact:

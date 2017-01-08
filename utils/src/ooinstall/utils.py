@@ -1,3 +1,5 @@
+# pylint: disable=missing-docstring,invalid-name
+
 import logging
 import re
 
@@ -8,6 +10,7 @@ installer_log = logging.getLogger('installer')
 def debug_env(env):
     for k in sorted(env.keys()):
         if k.startswith("OPENSHIFT") or k.startswith("ANSIBLE") or k.startswith("OO"):
+            # pylint: disable=logging-format-interpolation
             installer_log.debug("{key}: {value}".format(
                 key=k, value=env[k]))
 

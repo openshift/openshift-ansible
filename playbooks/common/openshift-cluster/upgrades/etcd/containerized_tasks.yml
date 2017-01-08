@@ -30,7 +30,7 @@
 ## will fail on atomic host. We need to revisit how to do etcd backups there as
 ## the container may be newer than etcdctl on the host. Assumes etcd3 obsoletes etcd (7.3.1)
 - name: Upgrade etcd for etcdctl when not atomic
-  action: "{{ ansible_pkg_mgr }} name=etcd state=latest"
+  package: name=etcd state=latest
   when: not openshift.common.is_atomic | bool
 
 - name: Verify cluster is healthy

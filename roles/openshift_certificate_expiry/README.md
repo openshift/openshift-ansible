@@ -9,7 +9,7 @@ include:
 * Master/Node Service Certificates
 * Router/Registry Service Certificates from etcd secrets
 * Master/Node/Router/Registry/Admin `kubeconfig`s
-* Etcd certificates
+* Etcd certificates (including embedded)
 
 This role pairs well with the redeploy certificates playbook:
 
@@ -111,12 +111,16 @@ There are two top-level keys in the saved JSON results, `data` and
 `summary`.
 
 The `data` key is a hash where the keys are the names of each host
-examined and the values are the check results for each respective
-host.
+examined and the values are the check results for the certificates
+identified on each respective host.
 
-The `summary` key is a hash that summarizes the number of certificates
-expiring within the configured warning window and the number of
-already expired certificates.
+The `summary` key is a hash that summarizes the total number of
+certificates:
+
+* examined on the entire cluster
+* OK
+* expiring within the configured warning window
+* already expired
 
 The example below is abbreviated to save space:
 
@@ -193,7 +197,9 @@ The example below is abbreviated to save space:
     },
     "summary": {
         "warning": 6,
-        "expired": 0
+        "expired": 0,
+        "total": 7,
+        "ok": 1
     }
 }
 ```

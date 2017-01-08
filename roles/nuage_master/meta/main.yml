@@ -1,10 +1,10 @@
 ---
 galaxy_info:
-  author: Vishal Patil 
+  author: Vishal Patil
   description:
   company: Nuage Networks
   license: Apache License, Version 2.0
-  min_ansible_version: 1.8
+  min_ansible_version: 2.2
   platforms:
   - name: EL
     versions:
@@ -13,10 +13,10 @@ galaxy_info:
   - cloud
   - system
 dependencies:
-  - role: nuage_ca
-  - role: nuage_common
-  - role: openshift_etcd_client_certificates
-  - role: os_firewall
-    os_firewall_allow:
-    - service: openshift-monitor 
-      port: "{{ nuage_mon_rest_server_port }}/tcp"
+- role: nuage_ca
+- role: nuage_common
+- role: openshift_etcd_client_certificates
+- role: os_firewall
+  os_firewall_allow:
+  - service: openshift-monitor
+    port: "{{ nuage_mon_rest_server_port }}/tcp"

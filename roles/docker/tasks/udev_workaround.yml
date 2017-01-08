@@ -21,10 +21,4 @@
     owner: root
     mode: "0644"
   notify:
-  - restart udev
-  register: udevw_override_conf
-
-- name: reload systemd config files
-  command: systemctl daemon-reload
-  when: udevw_override_conf | changed
- 
+    - restart udev

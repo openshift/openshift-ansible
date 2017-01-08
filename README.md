@@ -37,12 +37,14 @@ not practical to start over at 1.0.
     Requirements:
     - Ansible >= 2.2.0
     - Jinja >= 2.7
+    - pyOpenSSL
+    - python-lxml
 
     ***
 
     Fedora:
     ```
-    dnf install -y ansible pyOpenSSL python-cryptography
+    dnf install -y ansible pyOpenSSL python-cryptography python-lxml
     ```
 
 2. Setup for a specific cloud:

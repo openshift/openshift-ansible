@@ -9,7 +9,7 @@
       additional_registries: "{{ openshift_docker_additional_registries | default(None) }}"
       blocked_registries: "{{ openshift_docker_blocked_registries | default(None) }}"
       insecure_registries: "{{ openshift_docker_insecure_registries | default(None) }}"
-      log_driver:  "{{ openshift_docker_log_driver | default(None) }}"
+      log_driver: "{{ openshift_docker_log_driver | default(None) }}"
       log_options: "{{ openshift_docker_log_options | default(None) }}"
       options: "{{ openshift_docker_options | default(None) }}"
       disable_push_dockerhub: "{{ openshift_disable_push_dockerhub | default(None) }}"

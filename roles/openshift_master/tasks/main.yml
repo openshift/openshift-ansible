@@ -24,7 +24,9 @@
   when: openshift_master_ha | bool and openshift_master_cluster_method == "pacemaker" and openshift.common.is_containerized | bool
 
 - name: Install Master package
-  action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-master{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }} state=present"
+  package:
+    name: "{{ openshift.common.service_type }}-master{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }}"
+    state: present
   when: not openshift.common.is_containerized | bool
 
 - name: Pull master image
@@ -62,9 +64,9 @@
   args:
     creates: "{{ openshift_master_policy }}"
   notify:
-  - restart master
-  - restart master api
-  - restart master controllers
+    - restart master
+    - restart master api
+    - restart master controllers
 
 - name: Create the scheduler config
   copy:
@@ -72,12 +74,12 @@
     dest: "{{ openshift_master_scheduler_conf }}"
     backup: true
   notify:
-  - restart master
-  - restart master api
-  - restart master controllers
+    - restart master
+    - restart master api
+    - restart master controllers
 
 - name: Install httpd-tools if needed
-  action: "{{ ansible_pkg_mgr }} name=httpd-tools state=present"
+  package: name=httpd-tools state=present
   when: (item.kind == 'HTPasswdPasswordIdentityProvider') and
         not openshift.common.is_atomic | bool
   with_items: "{{ openshift.master.identity_providers }}"
@@ -145,8 +147,8 @@
     mode: 0600
   when: openshift.master.session_auth_secrets is defined and openshift.master.session_encryption_secrets is defined
   notify:
-  - restart master
-  - restart master api
+    - restart master
+    - restart master api
 
 - set_fact:
     translated_identity_providers: "{{ openshift.master.identity_providers | translate_idps('v1', openshift.common.version, openshift.common.deployment_type) }}"
@@ -161,9 +163,9 @@
     group: root
     mode: 0600
   notify:
-  - restart master
-  - restart master api
-  - restart master controllers
+    - restart master
+    - restart master api
+    - restart master controllers
 
 - include: set_loopback_context.yml
   when: openshift.common.version_gte_3_2_or_1_2
@@ -177,7 +179,10 @@
 # https://github.com/openshift/origin/issues/6065
 # https://github.com/openshift/origin/issues/6447
 - name: Start and enable master
-  service: name={{ openshift.common.service_type }}-master enabled=yes state=started
+  systemd:
+    name: "{{ openshift.common.service_type }}-master"
+    enabled: yes
+    state: started
   when: not openshift_master_ha | bool
   register: start_result
   until: not start_result | failed
@@ -185,29 +190,30 @@
   delay: 60
   notify: Verify API Server
 
-- name: Check for non-HA master service presence
-  command: systemctl show {{ openshift.common.service_type }}-master.service
-  register: master_svc_show
-  changed_when: false
-  failed_when: false
-
 - name: Stop and disable non-HA master when running HA
-  service:
+  systemd:
     name: "{{ openshift.common.service_type }}-master"
     enabled: no
     state: stopped
-  when: openshift_master_ha | bool and master_svc_show.rc == 0 and 'LoadState=not-found' not in master_svc_show.stdout
+  when: openshift_master_ha | bool
+  register: task_result
+  failed_when: "task_result|failed and 'could not' not in task_result.msg|lower"
 
 - set_fact:
     master_service_status_changed: "{{ start_result | changed }}"
   when: not openshift_master_ha | bool
 
 - name: Mask master service
-  command: systemctl mask {{ openshift.common.service_type }}-master
-  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and not openshift.common.is_containerized | bool
+  systemd:
+    name: "{{ openshift.common.service_type }}-master"
+    masked: yes
+  when: >
+    openshift_master_ha | bool and
+    openshift.master.cluster_method == 'native' and
+    not openshift.common.is_containerized | bool
 
 - name: Start and enable master api on first master
-  service:
+  systemd:
     name: "{{ openshift.common.service_type }}-master-api"
     enabled: yes
     state: started
@@ -226,7 +232,7 @@
   when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
 
 - name: Start and enable master api all masters
-  service:
+  systemd:
     name: "{{ openshift.common.service_type }}-master-api"
     enabled: yes
     state: started
@@ -262,7 +268,7 @@
   when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and master_api_service_status_changed | bool
 
 - name: Start and enable master controller on first master
-  service:
+  systemd:
     name: "{{ openshift.common.service_type }}-master-controllers"
     enabled: yes
     state: started
@@ -272,12 +278,13 @@
   retries: 1
   delay: 60
 
-- pause:
+- name: Wait for master controller service to start on first master
+  pause:
     seconds: 15
   when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
 
 - name: Start and enable master controller on all masters
-  service:
+  systemd:
     name: "{{ openshift.common.service_type }}-master-controllers"
     enabled: yes
     state: started
@@ -292,13 +299,16 @@
   when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
 
 - name: Install cluster packages
-  action: "{{ ansible_pkg_mgr }} name=pcs state=present"
+  package: name=pcs state=present
   when: openshift_master_ha | bool and openshift.master.cluster_method == 'pacemaker'
     and not openshift.common.is_containerized | bool
   register: install_result
 
 - name: Start and enable cluster service
-  service: name=pcsd enabled=yes state=started
+  systemd:
+    name: pcsd
+    enabled: yes
+    state: started
   when: openshift_master_ha | bool and openshift.master.cluster_method == 'pacemaker'
     and not openshift.common.is_containerized | bool
 

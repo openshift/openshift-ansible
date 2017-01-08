@@ -2,9 +2,9 @@
 - name: update ca trust
   command: update-ca-trust
   notify:
-  - restart docker after updating ca trust
+    - restart docker after updating ca trust
 
 - name: restart docker after updating ca trust
-  service:
+  systemd:
     name: docker
     state: restarted
