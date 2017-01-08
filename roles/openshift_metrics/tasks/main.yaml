@@ -1,8 +1,4 @@
 ---
-- fail:
-    msg: This role required openshift_master_default_subdomain or openshift_hosted_metrics_public_url be set
-  when: openshift.master.metrics_public_url | default(openshift_hosted_metrics_public_url | default(openshift.master.default_subdomain | default(openshift_master_default_subdomain | default(none)))) is none
-
 - name: Create temp directory for kubeconfig
   command: mktemp -d /tmp/openshift-ansible-XXXXXX
   register: mktemp
@@ -27,12 +23,6 @@
     - 'openshift.hosted.metrics.*'
 
 - set_fact:
-    # Prefer the master facts over bare variables if present, prefer
-    # metrics_public_url over creating a default using default_subdomain
-    metrics_hostname: "{{ openshift.hosted.metrics.public_url
-                          | default('hawkular-metrics.' ~ (openshift.master.default_subdomain
-                          | default(openshift_master_default_subdomain )))
-                          | oo_hostname_from_url }}"
     metrics_persistence: "{{ openshift.hosted.metrics.storage_kind | default(none) is not none }}"
     metrics_dynamic_vol: "{{ openshift.hosted.metrics.storage_kind | default(none) == 'dynamic' }}"
     metrics_template_dir: "{{ openshift.common.config_base if openshift.common.is_containerized | bool else '/usr/share/openshift' }}/examples/infrastructure-templates/{{ 'origin' if deployment_type == 'origin' else 'enterprise' }}"
@@ -48,9 +38,9 @@
     get pods -l {{ item }} | grep -q Running
   register: metrics_pods_status
   with_items:
-    - metrics-infra=hawkular-metrics
-    - metrics-infra=heapster
-    - metrics-infra=hawkular-cassandra
+  - metrics-infra=hawkular-metrics
+  - metrics-infra=heapster
+  - metrics-infra=hawkular-cassandra
   failed_when: false
   changed_when: false
 

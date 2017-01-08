@@ -17,18 +17,8 @@
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_ssh_host: "{{ hostvars[item].ansible_ssh_host | default(item) }}"
       ansible_become: "{{ deployment_vars[deployment_type].become }}"
+      oo_public_ipv4: "{{ hostvars[item].openstack.public_v4 }}"
+      oo_private_ipv4: "{{ hostvars[item].openstack.private_v4 }}"
     with_items: "{{ groups[scratch_group] | default([]) | difference(['localhost']) }}"
-
-- name: List Hosts
-  hosts: oo_list_hosts
-
-- name: List Hosts
-  hosts: localhost
-  become: no
-  connection: local
-  gather_facts: no
-  vars_files:
-  - vars.yml
-  tasks:
   - debug:
       msg: "{{ hostvars | oo_select_keys(groups[scratch_group] | default([])) | oo_pretty_print_cluster('meta-') }}"

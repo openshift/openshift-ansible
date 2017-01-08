@@ -11,8 +11,8 @@ system) on the disks!
 
 ## Requirements
 
+* Ansible 2.2
 * Running Kubernetes with NFS persistent volume support (on a remote machine).
-
 * Works only on RHEL/Fedora-like distros.
 
 ## Role Variables

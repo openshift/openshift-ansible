@@ -65,13 +65,13 @@ class OOCliFixture(OOInstallFixture):
 
     def assert_result(self, result, exit_code):
         if result.exit_code != exit_code:
-            print "Unexpected result from CLI execution"
-            print "Exit code: %s" % result.exit_code
-            print "Exception: %s" % result.exception
-            print result.exc_info
+            print("Unexpected result from CLI execution")
+            print("Exit code: %s" % result.exit_code)
+            print("Exception: %s" % result.exception)
+            print(result.exc_info)
             import traceback
             traceback.print_exception(*result.exc_info)
-            print "Output:\n%s" % result.output
+            print("Output:\n%s" % result.output)
             self.fail("Exception during CLI execution")
 
     def _verify_load_facts(self, load_facts_mock):

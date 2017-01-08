@@ -1,24 +1,32 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 # vim: expandtab:tabstop=4:shiftwidth=4
+# pylint: disable=no-name-in-module, import-error, wrong-import-order, ungrouped-imports
 """
 Custom filters for use in openshift-ansible
 """
-
-from ansible import errors
-from collections import Mapping
-from distutils.util import strtobool
-from distutils.version import LooseVersion
-from operator import itemgetter
-import OpenSSL.crypto
 import os
 import pdb
 import pkg_resources
 import re
 import json
 import yaml
+
+from ansible import errors
+from collections import Mapping
+from distutils.util import strtobool
+from distutils.version import LooseVersion
+from operator import itemgetter
 from ansible.parsing.yaml.dumper import AnsibleDumper
 from urlparse import urlparse
+from six import string_types
+
+HAS_OPENSSL = False
+try:
+    import OpenSSL.crypto
+    HAS_OPENSSL = True
+except ImportError:
+    pass
 
 try:
     # ansible-2.2
@@ -28,6 +36,7 @@ try:
 except ImportError:
     # ansible-2.1
     from ansible.utils.unicode import to_unicode as to_text
+
 
 # Disabling too-many-public-methods, since filter methods are necessarily
 # public
@@ -66,7 +75,6 @@ class FilterModule(object):
                 break
 
         return ptr
-
 
     @staticmethod
     def oo_flatten(data):
@@ -113,7 +121,7 @@ class FilterModule(object):
             raise errors.AnsibleFilterError("|failed expects hostvars is dictionary or object")
         if not isinstance(variables, dict):
             raise errors.AnsibleFilterError("|failed expects variables is a dictionary")
-        if not isinstance(inventory_hostname, basestring):
+        if not isinstance(inventory_hostname, string_types):
             raise errors.AnsibleFilterError("|failed expects inventory_hostname is a string")
         # pylint: disable=no-member
         ansible_version = pkg_resources.get_distribution("ansible").version
@@ -156,7 +164,7 @@ class FilterModule(object):
         else:
             retval = [FilterModule.get_attr(d, attribute) for d in data]
 
-        retval = [val for val in retval if val != None]
+        retval = [val for val in retval if val is not None]
 
         return retval
 
@@ -208,7 +216,7 @@ class FilterModule(object):
         """
         if not isinstance(data, list):
             raise errors.AnsibleFilterError("|failed expects first param is a list")
-        if not all(isinstance(x, basestring) for x in data):
+        if not all(isinstance(x, string_types) for x in data):
             raise errors.AnsibleFilterError("|failed expects first param is a list"
                                             " of strings")
         retval = [prepend + s for s in data]
@@ -234,6 +242,7 @@ class FilterModule(object):
            arrange them as a string 'key=value key=value'
         """
         if not isinstance(data, dict):
+            # pylint: disable=line-too-long
             raise errors.AnsibleFilterError("|failed expects first param is a dict [oo_combine_dict]. Got %s. Type: %s" % (str(data), str(type(data))))
 
         return out_joiner.join([in_joiner.join([k, str(v)]) for k, v in data.items()])
@@ -286,6 +295,7 @@ class FilterModule(object):
                 }
         """
         if not isinstance(data, dict):
+            # pylint: disable=line-too-long
             raise errors.AnsibleFilterError("|failed expects first param is a dict [oo_ec2_volume_def]. Got %s. Type: %s" % (str(data), str(type(data))))
         if host_type not in ['master', 'node', 'etcd']:
             raise errors.AnsibleFilterError("|failed expects etcd, master or node"
@@ -353,7 +363,7 @@ class FilterModule(object):
         if not isinstance(data, list):
             raise errors.AnsibleFilterError("|failed expects to filter on a list")
 
-        if not isinstance(filter_attr, basestring):
+        if not isinstance(filter_attr, string_types):
             raise errors.AnsibleFilterError("|failed expects filter_attr is a str or unicode")
 
         # Gather up the values for the list of keys passed in
@@ -392,9 +402,9 @@ class FilterModule(object):
         """
         if not isinstance(nodes, list):
             raise errors.AnsibleFilterError("failed expects to filter on a list")
-        if not isinstance(label, basestring):
+        if not isinstance(label, string_types):
             raise errors.AnsibleFilterError("failed expects label to be a string")
-        if value is not None and not isinstance(value, basestring):
+        if value is not None and not isinstance(value, string_types):
             raise errors.AnsibleFilterError("failed expects value to be a string")
 
         def label_filter(node):
@@ -410,7 +420,7 @@ class FilterModule(object):
             else:
                 return False
 
-            if isinstance(labels, basestring):
+            if isinstance(labels, string_types):
                 labels = yaml.safe_load(labels)
             if not isinstance(labels, dict):
                 raise errors.AnsibleFilterError(
@@ -419,7 +429,6 @@ class FilterModule(object):
             return label in labels and (value is None or labels[label] == value)
 
         return [n for n in nodes if label_filter(n)]
-
 
     @staticmethod
     def oo_parse_heat_stack_outputs(data):
@@ -510,11 +519,14 @@ class FilterModule(object):
                            "cafile": "/etc/origin/master/named_certificates/custom-ca-2.crt",
                            "names": [ "some-hostname.com" ] }]
         """
-        if not isinstance(named_certs_dir, basestring):
+        if not isinstance(named_certs_dir, string_types):
             raise errors.AnsibleFilterError("|failed expects named_certs_dir is str or unicode")
 
         if not isinstance(internal_hostnames, list):
             raise errors.AnsibleFilterError("|failed expects internal_hostnames is list")
+
+        if not HAS_OPENSSL:
+            raise errors.AnsibleFilterError("|missing OpenSSL python bindings")
 
         for certificate in certificates:
             if 'names' in certificate.keys():
@@ -534,7 +546,7 @@ class FilterModule(object):
                     if cert.get_extension(i).get_short_name() == 'subjectAltName':
                         for name in str(cert.get_extension(i)).replace('DNS:', '').split(', '):
                             certificate['names'].append(name)
-            except:
+            except Exception:
                 raise errors.AnsibleFilterError(("|failed to parse certificate '%s', " % certificate['certfile'] +
                                                  "please specify certificate names in host inventory"))
 
@@ -582,8 +594,8 @@ class FilterModule(object):
                     returns 'value2'
             """
             for tag in tags:
-                if tag[:len(prefix)+len(key)] == prefix + key:
-                    return tag[len(prefix)+len(key)+1:]
+                if tag[:len(prefix) + len(key)] == prefix + key:
+                    return tag[len(prefix) + len(key) + 1:]
             raise KeyError(key)
 
         def _add_host(clusters,
@@ -608,8 +620,8 @@ class FilterModule(object):
                           host_type=_get_tag_value(host['group_names'], 'host-type'),
                           sub_host_type=_get_tag_value(host['group_names'], 'sub-host-type'),
                           host={'name': host['inventory_hostname'],
-                                'public IP': host['ansible_ssh_host'],
-                                'private IP': host['ansible_default_ipv4']['address']})
+                                'public IP': host['oo_public_ipv4'],
+                                'private IP': host['oo_private_ipv4']})
             except KeyError:
                 pass
         return clusters
@@ -659,13 +671,13 @@ class FilterModule(object):
 
         migrations = {'openshift_router_selector': 'openshift_hosted_router_selector',
                       'openshift_registry_selector': 'openshift_hosted_registry_selector'}
-        for old_fact, new_fact in migrations.iteritems():
+        for old_fact, new_fact in migrations.items():
             if old_fact in facts and new_fact not in facts:
                 facts[new_fact] = facts[old_fact]
         return facts
 
     @staticmethod
-    # pylint: disable=too-many-branches
+    # pylint: disable=too-many-branches, too-many-nested-blocks
     def oo_persistent_volumes(hostvars, groups, persistent_volumes=None):
         """ Generate list of persistent volumes based on oo_openshift_env
             storage options set in host variables.
@@ -674,10 +686,10 @@ class FilterModule(object):
             raise errors.AnsibleFilterError("|failed expects hostvars is a dict")
         if not issubclass(type(groups), dict):
             raise errors.AnsibleFilterError("|failed expects groups is a dict")
-        if persistent_volumes != None and not issubclass(type(persistent_volumes), list):
+        if persistent_volumes is not None and not issubclass(type(persistent_volumes), list):
             raise errors.AnsibleFilterError("|failed expects persistent_volumes is a list")
 
-        if persistent_volumes == None:
+        if persistent_volumes is None:
             persistent_volumes = []
         if 'hosted' in hostvars['openshift']:
             for component in hostvars['openshift']['hosted']:
@@ -685,10 +697,10 @@ class FilterModule(object):
                     params = hostvars['openshift']['hosted'][component]['storage']
                     kind = params['kind']
                     create_pv = params['create_pv']
-                    if kind != None and create_pv:
+                    if kind is not None and create_pv:
                         if kind == 'nfs':
                             host = params['host']
-                            if host == None:
+                            if host is None:
                                 if 'oo_nfs_to_config' in groups and len(groups['oo_nfs_to_config']) > 0:
                                     host = groups['oo_nfs_to_config'][0]
                                 else:
@@ -697,7 +709,7 @@ class FilterModule(object):
                             volume = params['volume']['name']
                             path = directory + '/' + volume
                             size = params['volume']['size']
-                            access_modes = params['access_modes']
+                            access_modes = params['access']['modes']
                             persistent_volume = dict(
                                 name="{0}-volume".format(volume),
                                 capacity=size,
@@ -710,7 +722,7 @@ class FilterModule(object):
                         elif kind == 'openstack':
                             volume = params['volume']['name']
                             size = params['volume']['size']
-                            access_modes = params['access_modes']
+                            access_modes = params['access']['modes']
                             filesystem = params['openstack']['filesystem']
                             volume_id = params['openstack']['volumeID']
                             persistent_volume = dict(
@@ -736,10 +748,10 @@ class FilterModule(object):
         """
         if not issubclass(type(hostvars), dict):
             raise errors.AnsibleFilterError("|failed expects hostvars is a dict")
-        if persistent_volume_claims != None and not issubclass(type(persistent_volume_claims), list):
+        if persistent_volume_claims is not None and not issubclass(type(persistent_volume_claims), list):
             raise errors.AnsibleFilterError("|failed expects persistent_volume_claims is a list")
 
-        if persistent_volume_claims == None:
+        if persistent_volume_claims is None:
             persistent_volume_claims = []
         if 'hosted' in hostvars['openshift']:
             for component in hostvars['openshift']['hosted']:
@@ -751,7 +763,7 @@ class FilterModule(object):
                     if kind not in [None, 'object'] and create_pv and create_pvc:
                         volume = params['volume']['name']
                         size = params['volume']['size']
-                        access_modes = params['access_modes']
+                        access_modes = params['access']['modes']
                         persistent_volume_claim = dict(
                             name="{0}-claim".format(volume),
                             capacity=size,
@@ -770,12 +782,12 @@ class FilterModule(object):
         """
         if not isinstance(rpms, list):
             raise errors.AnsibleFilterError("failed expects to filter on a list")
-        if openshift_version is not None and not isinstance(openshift_version, basestring):
+        if openshift_version is not None and not isinstance(openshift_version, string_types):
             raise errors.AnsibleFilterError("failed expects openshift_version to be a string")
 
         rpms_31 = []
         for rpm in rpms:
-            if not 'atomic' in rpm:
+            if 'atomic' not in rpm:
                 rpm = rpm.replace("openshift", "atomic-openshift")
             if openshift_version:
                 rpm = rpm + openshift_version
@@ -789,9 +801,9 @@ class FilterModule(object):
         """
         if not isinstance(pods, list):
             raise errors.AnsibleFilterError("failed expects to filter on a list")
-        if not isinstance(deployment_type, basestring):
+        if not isinstance(deployment_type, string_types):
             raise errors.AnsibleFilterError("failed expects deployment_type to be a string")
-        if not isinstance(component, basestring):
+        if not isinstance(component, string_types):
             raise errors.AnsibleFilterError("failed expects component to be a string")
 
         image_prefix = 'openshift/origin-'
@@ -806,7 +818,7 @@ class FilterModule(object):
             for container in pod['spec']['containers']:
                 if re.search(image_regex, container['image']):
                     matching_pods.append(pod)
-                    break # stop here, don't add a pod more than once
+                    break  # stop here, don't add a pod more than once
 
         return matching_pods
 
@@ -817,7 +829,7 @@ class FilterModule(object):
         for host in hosts:
             try:
                 retval.append(hostvars[host])
-            except errors.AnsibleError as _:
+            except errors.AnsibleError:
                 # host does not exist
                 pass
 
@@ -832,7 +844,7 @@ class FilterModule(object):
             Ex. v3.2.0.10 -> -3.2.0.10
                 v1.2.0-rc1 -> -1.2.0
         """
-        if not isinstance(version, basestring):
+        if not isinstance(version, string_types):
             raise errors.AnsibleFilterError("|failed expects a string or unicode")
         if version.startswith("v"):
             version = version[1:]
@@ -850,7 +862,7 @@ class FilterModule(object):
 
             Ex: https://ose3-master.example.com/v1/api -> ose3-master.example.com
         """
-        if not isinstance(url, basestring):
+        if not isinstance(url, string_types):
             raise errors.AnsibleFilterError("|failed expects a string or unicode")
         parse_result = urlparse(url)
         if parse_result.netloc != '':
@@ -859,6 +871,7 @@ class FilterModule(object):
             # netloc wasn't parsed, assume url was missing scheme and path
             return parse_result.path
 
+    # pylint: disable=invalid-name, missing-docstring, unused-argument
     @staticmethod
     def oo_openshift_loadbalancer_frontends(api_port, servers_hostvars, use_nuage=False, nuage_rest_port=None):
         loadbalancer_frontends = [{'name': 'atomic-openshift-api',
@@ -874,6 +887,7 @@ class FilterModule(object):
                                            'default_backend': 'nuage-monitor'})
         return loadbalancer_frontends
 
+    # pylint: disable=invalid-name, missing-docstring
     @staticmethod
     def oo_openshift_loadbalancer_backends(api_port, servers_hostvars, use_nuage=False, nuage_rest_port=None):
         loadbalancer_backends = [{'name': 'atomic-openshift-api',
@@ -882,6 +896,7 @@ class FilterModule(object):
                                   'balance': 'source',
                                   'servers': FilterModule.oo_haproxy_backend_masters(servers_hostvars, api_port)}]
         if bool(strtobool(str(use_nuage))) and nuage_rest_port is not None:
+            # pylint: disable=line-too-long
             loadbalancer_backends.append({'name': 'nuage-monitor',
                                           'mode': 'tcp',
                                           'option': 'tcplog',

@@ -14,17 +14,39 @@ except ImportError:
     # python3
     import configparser as ConfigParser
 
+# pylint: disable=no-name-in-module, import-error, wrong-import-order
 import copy
+import errno
+import json
+import re
 import io
 import os
 import yaml
-from distutils.util import strtobool
-from distutils.version import LooseVersion
 import struct
 import socket
-from dbus import SystemBus, Interface
-from dbus.exceptions import DBusException
+from distutils.util import strtobool
+from distutils.version import LooseVersion
+from six import string_types
+from six import text_type
 
+# ignore pylint errors related to the module_utils import
+# pylint: disable=redefined-builtin, unused-wildcard-import, wildcard-import
+# import module snippets
+from ansible.module_utils.basic import *  # noqa: F403
+from ansible.module_utils.facts import *  # noqa: F403
+from ansible.module_utils.urls import *  # noqa: F403
+from ansible.module_utils.six import iteritems, itervalues
+from ansible.module_utils.six.moves.urllib.parse import urlparse, urlunparse
+from ansible.module_utils._text import to_native
+
+HAVE_DBUS = False
+
+try:
+    from dbus import SystemBus, Interface
+    from dbus.exceptions import DBusException
+    HAVE_DBUS = True
+except ImportError:
+    pass
 
 DOCUMENTATION = '''
 ---
@@ -53,6 +75,7 @@ def migrate_docker_facts(facts):
     }
     if 'docker' not in facts:
         facts['docker'] = {}
+    # pylint: disable=consider-iterating-dictionary
     for role in params.keys():
         if role in facts:
             for param in params[role]:
@@ -66,10 +89,11 @@ def migrate_docker_facts(facts):
     # log_options was originally meant to be a comma separated string, but
     # we now prefer an actual list, with backward compatibility:
     if 'log_options' in facts['docker'] and \
-            isinstance(facts['docker']['log_options'], basestring):
+            isinstance(facts['docker']['log_options'], string_types):
         facts['docker']['log_options'] = facts['docker']['log_options'].split(",")
 
     return facts
+
 
 # TODO: We should add a generic migration function that takes source and destination
 # paths and does the right thing rather than one function for common, one for node, etc.
@@ -81,12 +105,14 @@ def migrate_common_facts(facts):
     }
     if 'common' not in facts:
         facts['common'] = {}
+    # pylint: disable=consider-iterating-dictionary
     for role in params.keys():
         if role in facts:
             for param in params[role]:
                 if param in facts[role]:
                     facts['common'][param] = facts[role].pop(param)
     return facts
+
 
 def migrate_node_facts(facts):
     """ Migrate facts from various roles into node """
@@ -95,6 +121,7 @@ def migrate_node_facts(facts):
     }
     if 'node' not in facts:
         facts['node'] = {}
+    # pylint: disable=consider-iterating-dictionary
     for role in params.keys():
         if role in facts:
             for param in params[role]:
@@ -120,7 +147,9 @@ def migrate_hosted_facts(facts):
             facts['hosted']['registry']['selector'] = facts['master'].pop('registry_selector')
     return facts
 
+
 def migrate_admission_plugin_facts(facts):
+    """ Apply migrations for admission plugin facts """
     if 'master' in facts:
         if 'kube_admission_plugin_config' in facts['master']:
             if 'admission_plugin_config' not in facts['master']:
@@ -134,6 +163,7 @@ def migrate_admission_plugin_facts(facts):
             facts['master'].pop('kube_admission_plugin_config', None)
     return facts
 
+
 def migrate_local_facts(facts):
     """ Apply migrations of local facts """
     migrated_facts = copy.deepcopy(facts)
@@ -144,6 +174,7 @@ def migrate_local_facts(facts):
     migrated_facts = migrate_admission_plugin_facts(migrated_facts)
     return migrated_facts
 
+
 def first_ip(network):
     """ Return the first IPv4 address in network
 
@@ -152,12 +183,13 @@ def first_ip(network):
         Returns:
             str: first IPv4 address
     """
-    atoi = lambda addr: struct.unpack("!I", socket.inet_aton(addr))[0]
-    itoa = lambda addr: socket.inet_ntoa(struct.pack("!I", addr))
+    atoi = lambda addr: struct.unpack("!I", socket.inet_aton(addr))[0]  # noqa: E731
+    itoa = lambda addr: socket.inet_ntoa(struct.pack("!I", addr))  # noqa: E731
 
     (address, netmask) = network.split('/')
     netmask_i = (0xffffffff << (32 - atoi(netmask))) & 0xffffffff
     return itoa((atoi(address) & netmask_i) + 1)
+
 
 def hostname_valid(hostname):
     """ Test if specified hostname should be considered valid
@@ -170,6 +202,7 @@ def hostname_valid(hostname):
     if (not hostname or
             hostname.startswith('localhost') or
             hostname.endswith('localdomain') or
+            hostname.endswith('novalocal') or
             len(hostname.split('.')) < 2):
         return False
 
@@ -195,11 +228,8 @@ def choose_hostname(hostnames=None, fallback=''):
         return hostname
 
     ip_regex = r'\A\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\Z'
-    ips = [i for i in hostnames
-           if (i is not None and isinstance(i, basestring)
-               and re.match(ip_regex, i))]
-    hosts = [i for i in hostnames
-             if i is not None and i != '' and i not in ips]
+    ips = [i for i in hostnames if i is not None and isinstance(i, string_types) and re.match(ip_regex, i)]
+    hosts = [i for i in hostnames if i is not None and i != '' and i not in ips]
 
     for host_list in (hosts, ips):
         for host in host_list:
@@ -219,11 +249,11 @@ def query_metadata(metadata_url, headers=None, expect_json=False):
         Returns:
             dict or list: metadata request result
     """
-    result, info = fetch_url(module, metadata_url, headers=headers)
+    result, info = fetch_url(module, metadata_url, headers=headers)  # noqa: F405
     if info['status'] != 200:
         raise OpenShiftFactsMetadataUnavailableError("Metadata unavailable")
     if expect_json:
-        return module.from_json(to_native(result.read()))
+        return module.from_json(to_native(result.read()))  # noqa: F405
     else:
         return [to_native(line.strip()) for line in result.readlines()]
 
@@ -335,7 +365,7 @@ def normalize_aws_facts(metadata, facts):
         var_map = {'ips': 'local-ipv4s', 'public_ips': 'public-ipv4s'}
         for ips_var, int_var in iteritems(var_map):
             ips = interface.get(int_var)
-            if isinstance(ips, basestring):
+            if isinstance(ips, string_types):
                 int_info[ips_var] = [ips]
             else:
                 int_info[ips_var] = ips
@@ -422,6 +452,7 @@ def normalize_provider_facts(provider, metadata):
         facts = normalize_openstack_facts(metadata, facts)
     return facts
 
+
 def set_flannel_facts_if_unset(facts):
     """ Set flannel facts if not already present in facts dict
             dict: the facts dict updated with the flannel facts if
@@ -438,6 +469,7 @@ def set_flannel_facts_if_unset(facts):
             use_flannel = False
             facts['common']['use_flannel'] = use_flannel
     return facts
+
 
 def set_nuage_facts_if_unset(facts):
     """ Set nuage facts if not already present in facts dict
@@ -456,6 +488,7 @@ def set_nuage_facts_if_unset(facts):
             facts['common']['use_nuage'] = use_nuage
     return facts
 
+
 def set_node_schedulability(facts):
     """ Set schedulable facts if not already present in facts dict
         Args:
@@ -472,6 +505,7 @@ def set_node_schedulability(facts):
             else:
                 facts['node']['schedulable'] = True
     return facts
+
 
 def set_selectors(facts):
     """ Set selectors facts if not already present in facts dict
@@ -509,6 +543,7 @@ def set_selectors(facts):
 
     return facts
 
+
 def set_dnsmasq_facts_if_unset(facts):
     """ Set dnsmasq facts if not already present in facts
     Args:
@@ -527,6 +562,7 @@ def set_dnsmasq_facts_if_unset(facts):
                 facts['master']['dns_port'] = 53
 
     return facts
+
 
 def set_project_cfg_facts_if_unset(facts):
     """ Set Project Configuration facts if not already present in facts dict
@@ -555,6 +591,7 @@ def set_project_cfg_facts_if_unset(facts):
 
     return facts
 
+
 def set_identity_providers_if_unset(facts):
     """ Set identity_providers fact if not already present in facts dict
 
@@ -580,6 +617,7 @@ def set_identity_providers_if_unset(facts):
             facts['master']['identity_providers'] = [identity_provider]
 
     return facts
+
 
 def set_url_facts_if_unset(facts):
     """ Set url facts if not already present in facts dict
@@ -640,7 +678,6 @@ def set_url_facts_if_unset(facts):
                                                                    host,
                                                                    ports[prefix]))
 
-
         r_lhn = "{0}:{1}".format(hostname, ports['api']).replace('.', '-')
         r_lhu = "system:openshift-master/{0}:{1}".format(api_hostname, ports['api']).replace('.', '-')
         facts['master'].setdefault('loopback_cluster_name', r_lhn)
@@ -655,6 +692,7 @@ def set_url_facts_if_unset(facts):
                                                                    console_path))
 
     return facts
+
 
 def set_aggregate_facts(facts):
     """ Set aggregate facts
@@ -733,7 +771,7 @@ def set_etcd_facts_if_unset(facts):
         # Read ETCD_DATA_DIR from /etc/etcd/etcd.conf:
         try:
             # Add a fake section for parsing:
-            ini_str = unicode('[root]\n' + open('/etc/etcd/etcd.conf', 'r').read(), 'utf-8')
+            ini_str = text_type('[root]\n' + open('/etc/etcd/etcd.conf', 'r').read(), 'utf-8')
             ini_fp = io.StringIO(ini_str)
             config = ConfigParser.RawConfigParser()
             config.readfp(ini_fp)
@@ -750,6 +788,7 @@ def set_etcd_facts_if_unset(facts):
             pass
 
     return facts
+
 
 def set_deployment_facts_if_unset(facts):
     """ Set Facts that vary based on deployment_type. This currently
@@ -831,6 +870,7 @@ def set_deployment_facts_if_unset(facts):
 
     return facts
 
+
 def set_version_facts_if_unset(facts):
     """ Set version facts. This currently includes common.version and
         common.version_gte_3_1_or_1_1.
@@ -879,7 +919,6 @@ def set_version_facts_if_unset(facts):
         facts['common']['version_gte_3_5_or_1_5'] = version_gte_3_5_or_1_5
         facts['common']['version_gte_3_6_or_1_6'] = version_gte_3_6_or_1_6
 
-
         if version_gte_3_4_or_1_4:
             examples_content_version = 'v1.4'
         elif version_gte_3_3_or_1_3:
@@ -894,6 +933,7 @@ def set_version_facts_if_unset(facts):
         facts['common']['examples_content_version'] = examples_content_version
 
     return facts
+
 
 def set_manageiq_facts_if_unset(facts):
     """ Set manageiq facts. This currently includes common.use_manageiq.
@@ -915,6 +955,7 @@ def set_manageiq_facts_if_unset(facts):
 
     return facts
 
+
 def set_sdn_facts_if_unset(facts, system_facts):
     """ Set sdn facts if not already present in facts dict
 
@@ -925,6 +966,7 @@ def set_sdn_facts_if_unset(facts, system_facts):
             dict: the facts dict updated with the generated sdn facts if they
                   were not already present
     """
+    # pylint: disable=too-many-branches
     if 'common' in facts:
         use_sdn = facts['common']['use_openshift_sdn']
         if not (use_sdn == '' or isinstance(use_sdn, bool)):
@@ -974,6 +1016,7 @@ def set_sdn_facts_if_unset(facts, system_facts):
 
     return facts
 
+
 def migrate_oauth_template_facts(facts):
     """
     Migrate an old oauth template fact to a newer format if it's present.
@@ -992,6 +1035,7 @@ def migrate_oauth_template_facts(facts):
         elif 'login' not in facts['master']['oauth_templates']:
             facts['master']['oauth_templates']['login'] = facts['master']['oauth_template']
     return facts
+
 
 def format_url(use_ssl, hostname, port, path=''):
     """ Format url based on ssl flag, hostname, port and path
@@ -1014,6 +1058,7 @@ def format_url(use_ssl, hostname, port, path=''):
         # pylint: disable=undefined-variable
         url = urlunparse((scheme, netloc, path, '', '', ''))
     return url
+
 
 def get_current_config(facts):
     """ Get current openshift config
@@ -1044,10 +1089,9 @@ def get_current_config(facts):
             )
 
         kubeconfig_path = os.path.join(kubeconfig_dir, '.kubeconfig')
-        if (os.path.isfile('/usr/bin/openshift')
-                and os.path.isfile(kubeconfig_path)):
+        if os.path.isfile('/usr/bin/openshift') and os.path.isfile(kubeconfig_path):
             try:
-                _, output, _ = module.run_command(
+                _, output, _ = module.run_command(  # noqa: F405
                     ["/usr/bin/openshift", "ex", "config", "view", "-o",
                      "json", "--kubeconfig=%s" % kubeconfig_path],
                     check_rc=False
@@ -1077,6 +1121,7 @@ def get_current_config(facts):
                 pass
 
     return current_config
+
 
 def build_kubelet_args(facts):
     """Build node kubelet_args
@@ -1122,6 +1167,7 @@ values provided as a list. Hence the gratuitous use of ['foo'] below.
             #
             # map() seems to be returning an itertools.imap object
             # instead of a list. We cast it to a list ourselves.
+            # pylint: disable=unnecessary-lambda
             labels_str = list(map(lambda x: '='.join(x), facts['node']['labels'].items()))
             if labels_str != '':
                 kubelet_args['node-labels'] = labels_str
@@ -1131,6 +1177,7 @@ values provided as a list. Hence the gratuitous use of ['foo'] below.
         if kubelet_args != {}:
             facts = merge_facts({'node': {'kubelet_args': kubelet_args}}, facts, [], [])
     return facts
+
 
 def build_controller_args(facts):
     """ Build master controller_args """
@@ -1153,6 +1200,7 @@ def build_controller_args(facts):
             facts = merge_facts({'master': {'controller_args': controller_args}}, facts, [], [])
     return facts
 
+
 def build_api_server_args(facts):
     """ Build master api_server_args """
     cloud_cfg_path = os.path.join(facts['common']['config_base'],
@@ -1174,6 +1222,7 @@ def build_api_server_args(facts):
             facts = merge_facts({'master': {'api_server_args': api_server_args}}, facts, [], [])
     return facts
 
+
 def is_service_running(service):
     """ Queries systemd through dbus to see if the service is running """
     service_running = False
@@ -1193,6 +1242,7 @@ def is_service_running(service):
 
     return service_running
 
+
 def get_version_output(binary, version_cmd):
     """ runs and returns the version output for a command """
     cmd = []
@@ -1203,8 +1253,9 @@ def get_version_output(binary, version_cmd):
             cmd.append(item)
 
     if os.path.isfile(cmd[0]):
-        _, output, _ = module.run_command(cmd)
+        _, output, _ = module.run_command(cmd)  # noqa: F405
     return output
+
 
 def get_docker_version_info():
     """ Parses and returns the docker version info """
@@ -1218,6 +1269,7 @@ def get_docker_version_info():
             }
     return result
 
+
 def get_hosted_registry_insecure():
     """ Parses OPTIONS from /etc/sysconfig/docker to determine if the
         registry is currently insecure.
@@ -1225,16 +1277,17 @@ def get_hosted_registry_insecure():
     hosted_registry_insecure = None
     if os.path.exists('/etc/sysconfig/docker'):
         try:
-            ini_str = unicode('[root]\n' + open('/etc/sysconfig/docker', 'r').read(), 'utf-8')
+            ini_str = text_type('[root]\n' + open('/etc/sysconfig/docker', 'r').read(), 'utf-8')
             ini_fp = io.StringIO(ini_str)
             config = ConfigParser.RawConfigParser()
             config.readfp(ini_fp)
             options = config.get('root', 'OPTIONS')
             if 'insecure-registry' in options:
                 hosted_registry_insecure = True
-        except:
+        except Exception:  # pylint: disable=broad-except
             pass
     return hosted_registry_insecure
+
 
 def get_openshift_version(facts):
     """ Get current version of openshift on the host.
@@ -1258,7 +1311,7 @@ def get_openshift_version(facts):
             return chomp_commit_offset(facts['common']['version'])
 
     if os.path.isfile('/usr/bin/openshift'):
-        _, output, _ = module.run_command(['/usr/bin/openshift', 'version'])
+        _, output, _ = module.run_command(['/usr/bin/openshift', 'version'])  # noqa: F405
         version = parse_openshift_version(output)
     elif 'common' in facts and 'is_containerized' in facts['common']:
         version = get_container_openshift_version(facts)
@@ -1267,7 +1320,7 @@ def get_openshift_version(facts):
     # This can be very slow and may get re-run multiple times, so we only use this
     # if other methods failed to find a version.
     if not version and os.path.isfile('/usr/local/bin/openshift'):
-        _, output, _ = module.run_command(['/usr/local/bin/openshift', 'version'])
+        _, output, _ = module.run_command(['/usr/local/bin/openshift', 'version'])  # noqa: F405
         version = parse_openshift_version(output)
 
     return chomp_commit_offset(version)
@@ -1351,15 +1404,16 @@ def apply_provider_facts(facts, provider_facts):
 
         facts['common'][h_var] = choose_hostname(
             [provider_facts['network'].get(h_var)],
-            facts['common'][ip_var]
+            facts['common'][h_var]
         )
 
     facts['provider'] = provider_facts
     return facts
 
+
 # Disabling pylint too many branches. This function needs refactored
 # but is a very core part of openshift_facts.
-# pylint: disable=too-many-branches
+# pylint: disable=too-many-branches, too-many-nested-blocks
 def merge_facts(orig, new, additive_facts_to_overwrite, protected_facts_to_overwrite):
     """ Recursively merge facts dicts
 
@@ -1391,7 +1445,7 @@ def merge_facts(orig, new, additive_facts_to_overwrite, protected_facts_to_overw
             if key in inventory_json_facts:
                 # Watchout for JSON facts that sometimes load as strings.
                 # (can happen if the JSON contains a boolean)
-                if isinstance(new[key], basestring):
+                if isinstance(new[key], string_types):
                     facts[key] = yaml.safe_load(new[key])
                 else:
                     facts[key] = copy.deepcopy(new[key])
@@ -1432,12 +1486,14 @@ def merge_facts(orig, new, additive_facts_to_overwrite, protected_facts_to_overw
                     if int(value) <= int(new[key]):
                         facts[key] = copy.deepcopy(new[key])
                     else:
-                        module.fail_json(msg='openshift_facts received a lower value for openshift.master.master_count')
+                        # pylint: disable=line-too-long
+                        module.fail_json(msg='openshift_facts received a lower value for openshift.master.master_count')  # noqa: F405
                 # ha (bool) can not change unless it has been passed
                 # as a protected fact to overwrite.
                 if key == 'ha':
                     if safe_get_bool(value) != safe_get_bool(new[key]):
-                        module.fail_json(msg='openshift_facts received a different value for openshift.master.ha')
+                        # pylint: disable=line-too-long
+                        module.fail_json(msg='openshift_facts received a different value for openshift.master.ha')  # noqa: F405
                     else:
                         facts[key] = value
             # No other condition has been met. Overwrite the old fact
@@ -1451,11 +1507,12 @@ def merge_facts(orig, new, additive_facts_to_overwrite, protected_facts_to_overw
     for key in new_keys:
         # Watchout for JSON facts that sometimes load as strings.
         # (can happen if the JSON contains a boolean)
-        if key in inventory_json_facts and isinstance(new[key], basestring):
+        if key in inventory_json_facts and isinstance(new[key], string_types):
             facts[key] = yaml.safe_load(new[key])
         else:
             facts[key] = copy.deepcopy(new[key])
     return facts
+
 
 def save_local_facts(filename, facts):
     """ Save local facts
@@ -1472,7 +1529,7 @@ def save_local_facts(filename, facts):
             if exception.errno != errno.EEXIST:  # but it is okay if it is already there
                 raise  # pass any other exceptions up the chain
         with open(filename, 'w') as fact_file:
-            fact_file.write(module.jsonify(facts))
+            fact_file.write(module.jsonify(facts))  # noqa: F405
         os.chmod(filename, 0o600)
     except (IOError, OSError) as ex:
         raise OpenShiftFactsFileWriteError(
@@ -1508,6 +1565,7 @@ def get_local_facts_from_file(filename):
 
     return local_facts
 
+
 def sort_unique(alist):
     """ Sorts and de-dupes a list
 
@@ -1525,6 +1583,7 @@ def sort_unique(alist):
 
     return out
 
+
 def safe_get_bool(fact):
     """ Get a boolean fact safely.
 
@@ -1534,6 +1593,7 @@ def safe_get_bool(fact):
             bool: given fact as a bool
     """
     return bool(strtobool(str(fact)))
+
 
 def set_proxy_facts(facts):
     """ Set global proxy facts and promote defaults from http_proxy, https_proxy,
@@ -1550,13 +1610,11 @@ def set_proxy_facts(facts):
     if 'common' in facts:
         common = facts['common']
         if 'http_proxy' in common or 'https_proxy' in common:
-            if 'no_proxy' in common and \
-                isinstance(common['no_proxy'], basestring):
+            if 'no_proxy' in common and isinstance(common['no_proxy'], string_types):
                 common['no_proxy'] = common['no_proxy'].split(",")
             elif 'no_proxy' not in common:
                 common['no_proxy'] = []
-            if 'generate_no_proxy_hosts' in common and \
-                safe_get_bool(common['generate_no_proxy_hosts']):
+            if 'generate_no_proxy_hosts' in common and safe_get_bool(common['generate_no_proxy_hosts']):
                 if 'no_proxy_internal_hostnames' in common:
                     common['no_proxy'].extend(common['no_proxy_internal_hostnames'].split(','))
             # We always add local dns domain and ourselves no matter what
@@ -1574,7 +1632,7 @@ def set_proxy_facts(facts):
         if 'https_proxy' not in builddefaults and 'https_proxy' in common:
             builddefaults['https_proxy'] = common['https_proxy']
         # make no_proxy into a list if it's not
-        if 'no_proxy' in builddefaults and isinstance(builddefaults['no_proxy'], basestring):
+        if 'no_proxy' in builddefaults and isinstance(builddefaults['no_proxy'], string_types):
             builddefaults['no_proxy'] = builddefaults['no_proxy'].split(",")
         if 'no_proxy' not in builddefaults and 'no_proxy' in common:
             builddefaults['no_proxy'] = common['no_proxy']
@@ -1585,14 +1643,15 @@ def set_proxy_facts(facts):
         # If we're actually defining a proxy config then create admission_plugin_config
         # if it doesn't exist, then merge builddefaults[config] structure
         # into admission_plugin_config
-        if 'config' in builddefaults and ('http_proxy' in builddefaults or \
-                'https_proxy' in builddefaults):
+        if 'config' in builddefaults and ('http_proxy' in builddefaults or
+                                          'https_proxy' in builddefaults):
             if 'admission_plugin_config' not in facts['master']:
                 facts['master']['admission_plugin_config'] = dict()
             facts['master']['admission_plugin_config'].update(builddefaults['config'])
         facts['builddefaults'] = builddefaults
 
     return facts
+
 
 # pylint: disable=too-many-statements
 def set_container_facts_if_unset(facts):
@@ -1665,6 +1724,7 @@ def set_container_facts_if_unset(facts):
 
     return facts
 
+
 def set_installed_variant_rpm_facts(facts):
     """ Set RPM facts of installed variant
         Args:
@@ -1679,13 +1739,12 @@ def set_installed_variant_rpm_facts(facts):
                        ['{0}-{1}'.format(base_rpm, r) for r in optional_rpms] + \
                        ['tuned-profiles-%s-node' % base_rpm]
         for rpm in variant_rpms:
-            exit_code, _, _ = module.run_command(['rpm', '-q', rpm])
+            exit_code, _, _ = module.run_command(['rpm', '-q', rpm])  # noqa: F405
             if exit_code == 0:
                 installed_rpms.append(rpm)
 
     facts['common']['installed_variant_rpms'] = installed_rpms
     return facts
-
 
 
 class OpenShiftFactsInternalError(Exception):
@@ -1755,12 +1814,12 @@ class OpenShiftFacts(object):
         try:
             # ansible-2.1
             # pylint: disable=too-many-function-args,invalid-name
-            self.system_facts = ansible_facts(module, ['hardware', 'network', 'virtual', 'facter'])
+            self.system_facts = ansible_facts(module, ['hardware', 'network', 'virtual', 'facter'])  # noqa: F405
             for (k, v) in self.system_facts.items():
                 self.system_facts["ansible_%s" % k.replace('-', '_')] = v
         except UnboundLocalError:
             # ansible-2.2
-            self.system_facts = get_all_facts(module)['ansible_facts']
+            self.system_facts = get_all_facts(module)['ansible_facts']  # noqa: F405
 
         self.facts = self.generate_facts(local_facts,
                                          additive_facts_to_overwrite,
@@ -1792,7 +1851,6 @@ class OpenShiftFacts(object):
                                             openshift_env_structures,
                                             protected_facts_to_overwrite)
         roles = local_facts.keys()
-
 
         if 'common' in local_facts and 'deployment_type' in local_facts['common']:
             deployment_type = local_facts['common']['deployment_type']
@@ -1847,7 +1905,7 @@ class OpenShiftFacts(object):
         """
         defaults = {}
         ip_addr = self.system_facts['ansible_default_ipv4']['address']
-        exit_code, output, _ = module.run_command(['hostname', '-f'])
+        exit_code, output, _ = module.run_command(['hostname', '-f'])  # noqa: F405
         hostname_f = output.strip() if exit_code == 0 else ''
         hostname_values = [hostname_f, self.system_facts['ansible_nodename'],
                            self.system_facts['ansible_fqdn']]
@@ -1905,7 +1963,7 @@ class OpenShiftFacts(object):
             defaults['docker'] = docker
 
         if 'clock' in roles:
-            exit_code, _, _ = module.run_command(['rpm', '-q', 'chrony'])
+            exit_code, _, _ = module.run_command(['rpm', '-q', 'chrony'])  # noqa: F405
             chrony_installed = bool(exit_code == 0)
             defaults['clock'] = dict(
                 enabled=True,
@@ -1931,7 +1989,9 @@ class OpenShiftFacts(object):
                             options='*(rw,root_squash)'
                         ),
                         host=None,
-                        access_modes=['ReadWriteOnce'],
+                        access=dict(
+                            modes=['ReadWriteOnce']
+                        ),
                         create_pv=True,
                         create_pvc=False
                     )
@@ -1948,7 +2008,9 @@ class OpenShiftFacts(object):
                             options='*(rw,root_squash)'
                         ),
                         host=None,
-                        access_modes=['ReadWriteOnce'],
+                        access=dict(
+                            modes=['ReadWriteOnce']
+                        ),
                         create_pv=True,
                         create_pvc=False
                     )
@@ -1964,7 +2026,9 @@ class OpenShiftFacts(object):
                             directory='/exports',
                             options='*(rw,root_squash)'),
                         host=None,
-                        access_modes=['ReadWriteMany'],
+                        access=dict(
+                            modes=['ReadWriteMany']
+                        ),
                         create_pv=True,
                         create_pvc=True
                     )
@@ -1990,7 +2054,7 @@ class OpenShiftFacts(object):
 
         # TODO: this is not exposed through module_utils/facts.py in ansible,
         # need to create PR for ansible to expose it
-        bios_vendor = get_file_content(
+        bios_vendor = get_file_content(  # noqa: F405
             '/sys/devices/virtual/dmi/id/bios_vendor'
         )
         if bios_vendor == 'Google':
@@ -2005,8 +2069,7 @@ class OpenShiftFacts(object):
             if metadata:
                 metadata['project']['attributes'].pop('sshKeys', None)
                 metadata['instance'].pop('serviceAccounts', None)
-        elif (virt_type == 'xen' and virt_role == 'guest'
-              and re.match(r'.*\.amazon$', product_version)):
+        elif virt_type == 'xen' and virt_role == 'guest' and re.match(r'.*\.amazon$', product_version):
             provider = 'aws'
             metadata_url = 'http://169.254.169.254/latest/meta-data/'
             metadata = get_provider_metadata(metadata_url)
@@ -2067,7 +2130,7 @@ class OpenShiftFacts(object):
 
         # Determine if any of the provided variable structures match the fact.
         matching_structure = None
-        if openshift_env_structures != None:
+        if openshift_env_structures is not None:
             for structure in openshift_env_structures:
                 if re.match(structure, openshift_env_fact):
                     matching_structure = structure
@@ -2091,7 +2154,7 @@ class OpenShiftFacts(object):
 
     # Disabling too-many-branches and too-many-locals.
     # This should be cleaned up as a TODO item.
-    #pylint: disable=too-many-branches, too-many-locals
+    # pylint: disable=too-many-branches, too-many-locals
     def init_local_facts(self, facts=None,
                          additive_facts_to_overwrite=None,
                          openshift_env=None,
@@ -2119,7 +2182,7 @@ class OpenShiftFacts(object):
         if facts is not None:
             facts_to_set[self.role] = facts
 
-        if openshift_env != {} and openshift_env != None:
+        if openshift_env != {} and openshift_env is not None:
             for fact, value in iteritems(openshift_env):
                 oo_env_facts = dict()
                 current_level = oo_env_facts
@@ -2148,16 +2211,16 @@ class OpenShiftFacts(object):
 
         if 'docker' in new_local_facts:
             # remove duplicate and empty strings from registry lists
-            for cat in  ['additional', 'blocked', 'insecure']:
+            for cat in ['additional', 'blocked', 'insecure']:
                 key = '{0}_registries'.format(cat)
                 if key in new_local_facts['docker']:
                     val = new_local_facts['docker'][key]
-                    if isinstance(val, basestring):
+                    if isinstance(val, string_types):
                         val = [x.strip() for x in val.split(',')]
                     new_local_facts['docker'][key] = list(set(val) - set(['']))
             # Convert legacy log_options comma sep string to a list if present:
             if 'log_options' in new_local_facts['docker'] and \
-                    isinstance(new_local_facts['docker']['log_options'], basestring):
+                    isinstance(new_local_facts['docker']['log_options'], string_types):
                 new_local_facts['docker']['log_options'] = new_local_facts['docker']['log_options'].split(',')
 
         new_local_facts = self.remove_empty_facts(new_local_facts)
@@ -2165,7 +2228,7 @@ class OpenShiftFacts(object):
         if new_local_facts != local_facts:
             self.validate_local_facts(new_local_facts)
             changed = True
-            if not module.check_mode:
+            if not module.check_mode:  # noqa: F405
                 save_local_facts(self.filename, new_local_facts)
 
         self.changed = changed
@@ -2198,10 +2261,10 @@ class OpenShiftFacts(object):
         invalid_facts = self.validate_master_facts(facts, invalid_facts)
         if invalid_facts:
             msg = 'Invalid facts detected:\n'
+            # pylint: disable=consider-iterating-dictionary
             for key in invalid_facts.keys():
                 msg += '{0}: {1}\n'.format(key, invalid_facts[key])
-            module.fail_json(msg=msg,
-                             changed=self.changed)
+            module.fail_json(msg=msg, changed=self.changed)  # noqa: F405
 
     # disabling pylint errors for line-too-long since we're dealing
     # with best effort reduction of error messages here.
@@ -2253,13 +2316,14 @@ class OpenShiftFacts(object):
                                                                            'Secrets must be 16, 24, or 32 characters in length.')
         return invalid_facts
 
+
 def main():
     """ main """
     # disabling pylint errors for global-variable-undefined and invalid-name
     # for 'global module' usage, since it is required to use ansible_facts
     # pylint: disable=global-variable-undefined, invalid-name
     global module
-    module = AnsibleModule(
+    module = AnsibleModule(  # noqa: F405
         argument_spec=dict(
             role=dict(default='common', required=False,
                       choices=OpenShiftFacts.known_roles),
@@ -2273,16 +2337,19 @@ def main():
         add_file_common_args=True,
     )
 
-    module.params['gather_subset'] = ['hardware', 'network', 'virtual', 'facter']
-    module.params['gather_timeout'] = 10
-    module.params['filter'] = '*'
+    if not HAVE_DBUS:
+        module.fail_json(msg="This module requires dbus python bindings")  # noqa: F405
 
-    role = module.params['role']
-    local_facts = module.params['local_facts']
-    additive_facts_to_overwrite = module.params['additive_facts_to_overwrite']
-    openshift_env = module.params['openshift_env']
-    openshift_env_structures = module.params['openshift_env_structures']
-    protected_facts_to_overwrite = module.params['protected_facts_to_overwrite']
+    module.params['gather_subset'] = ['hardware', 'network', 'virtual', 'facter']  # noqa: F405
+    module.params['gather_timeout'] = 10  # noqa: F405
+    module.params['filter'] = '*'  # noqa: F405
+
+    role = module.params['role']  # noqa: F405
+    local_facts = module.params['local_facts']  # noqa: F405
+    additive_facts_to_overwrite = module.params['additive_facts_to_overwrite']  # noqa: F405
+    openshift_env = module.params['openshift_env']  # noqa: F405
+    openshift_env_structures = module.params['openshift_env_structures']  # noqa: F405
+    protected_facts_to_overwrite = module.params['protected_facts_to_overwrite']  # noqa: F405
 
     fact_file = '/etc/ansible/facts.d/openshift.fact'
 
@@ -2294,24 +2361,15 @@ def main():
                                      openshift_env_structures,
                                      protected_facts_to_overwrite)
 
-    file_params = module.params.copy()
+    file_params = module.params.copy()  # noqa: F405
     file_params['path'] = fact_file
-    file_args = module.load_file_common_arguments(file_params)
-    changed = module.set_fs_attributes_if_different(file_args,
+    file_args = module.load_file_common_arguments(file_params)  # noqa: F405
+    changed = module.set_fs_attributes_if_different(file_args,  # noqa: F405
                                                     openshift_facts.changed)
 
-    return module.exit_json(changed=changed,
+    return module.exit_json(changed=changed,  # noqa: F405
                             ansible_facts=openshift_facts.facts)
 
-# ignore pylint errors related to the module_utils import
-# pylint: disable=redefined-builtin, unused-wildcard-import, wildcard-import
-# import module snippets
-from ansible.module_utils.basic import *
-from ansible.module_utils.facts import *
-from ansible.module_utils.urls import *
-from ansible.module_utils.six import iteritems, itervalues
-from ansible.module_utils._text import to_native
-from ansible.module_utils.six import b
 
 if __name__ == '__main__':
     main()

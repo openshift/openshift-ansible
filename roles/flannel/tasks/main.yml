@@ -1,7 +1,7 @@
 ---
 - name: Install flannel
   become: yes
-  action: "{{ ansible_pkg_mgr }} name=flannel state=present"
+  package: name=flannel state=present
   when: not openshift.common.is_atomic | bool
 
 - name: Set flannel etcd options
@@ -27,7 +27,7 @@
 
 - name: Enable flanneld
   become: yes
-  service:
+  systemd:
     name: flanneld
     state: started
     enabled: yes

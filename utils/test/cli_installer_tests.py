@@ -4,7 +4,8 @@
 
 import copy
 import os
-import ConfigParser
+
+from six.moves import configparser
 
 import ooinstall.cli_installer as cli
 
@@ -408,7 +409,7 @@ class UnattendedCliTests(OOCliFixture):
         result = self.runner.invoke(cli.cli, self.cli_args)
 
         if result.exception is None or result.exit_code != 1:
-            print "Exit code: %s" % result.exit_code
+            print("Exit code: %s" % result.exit_code)
             self.fail("Unexpected CLI return")
 
     # unattended with config file and all installed hosts (with --force)
@@ -523,7 +524,7 @@ class UnattendedCliTests(OOCliFixture):
         self.assert_result(result, 0)
 
         # Check the inventory file looks as we would expect:
-        inventory = ConfigParser.ConfigParser(allow_no_value=True)
+        inventory = configparser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, 'hosts'))
         self.assertEquals('root',
             inventory.get('OSEv3:vars', 'ansible_ssh_user'))
@@ -566,7 +567,7 @@ class UnattendedCliTests(OOCliFixture):
         self.assertEquals('3.3', written_config['variant_version'])
 
         # Make sure the correct value was passed to ansible:
-        inventory = ConfigParser.ConfigParser(allow_no_value=True)
+        inventory = configparser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, 'hosts'))
         self.assertEquals('openshift-enterprise',
             inventory.get('OSEv3:vars', 'deployment_type'))
@@ -594,7 +595,7 @@ class UnattendedCliTests(OOCliFixture):
         # and written to disk:
         self.assertEquals('3.3', written_config['variant_version'])
 
-        inventory = ConfigParser.ConfigParser(allow_no_value=True)
+        inventory = configparser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, 'hosts'))
         self.assertEquals('openshift-enterprise',
             inventory.get('OSEv3:vars', 'deployment_type'))
@@ -830,7 +831,7 @@ class AttendedCliTests(OOCliFixture):
         written_config = read_yaml(self.config_file)
         self._verify_config_hosts(written_config, 4)
 
-        inventory = ConfigParser.ConfigParser(allow_no_value=True)
+        inventory = configparser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, 'hosts'))
         self.assert_inventory_host_var(inventory, 'nodes', '10.0.0.1',
                                  'openshift_schedulable=False')
@@ -949,7 +950,7 @@ class AttendedCliTests(OOCliFixture):
         written_config = read_yaml(self.config_file)
         self._verify_config_hosts(written_config, 6)
 
-        inventory = ConfigParser.ConfigParser(allow_no_value=True)
+        inventory = configparser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, 'hosts'))
         self.assert_inventory_host_var(inventory, 'nodes', '10.0.0.1',
                                        'openshift_schedulable=False')
@@ -990,7 +991,7 @@ class AttendedCliTests(OOCliFixture):
         written_config = read_yaml(self.config_file)
         self._verify_config_hosts(written_config, 5)
 
-        inventory = ConfigParser.ConfigParser(allow_no_value=True)
+        inventory = configparser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, 'hosts'))
         self.assert_inventory_host_var(inventory, 'nodes', '10.0.0.1',
                                        'openshift_schedulable=True')
@@ -1082,7 +1083,7 @@ class AttendedCliTests(OOCliFixture):
         written_config = read_yaml(self.config_file)
         self._verify_config_hosts(written_config, 1)
 
-        inventory = ConfigParser.ConfigParser(allow_no_value=True)
+        inventory = configparser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, 'hosts'))
         self.assert_inventory_host_var(inventory, 'nodes', '10.0.0.1',
                                        'openshift_schedulable=True')
@@ -1116,7 +1117,7 @@ class AttendedCliTests(OOCliFixture):
         written_config = read_yaml(self.config_file)
         self._verify_config_hosts(written_config, 4)
 
-        inventory = ConfigParser.ConfigParser(allow_no_value=True)
+        inventory = configparser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, 'hosts'))
         self.assert_inventory_host_var(inventory, 'nodes', '10.0.0.1',
                                  'openshift_schedulable=False')

@@ -1,0 +1,36 @@
+---
+- hosts: localhost
+  connection: local
+  become: no
+  gather_facts: no
+  tasks:
+  - include_vars: ../../byo/openshift-cluster/cluster_hosts.yml
+  - add_host:
+      name: "{{ item }}"
+      groups: l_oo_all_hosts
+    with_items: "{{ g_all_hosts }}"
+
+- hosts: l_oo_all_hosts
+  become: yes
+  tasks:
+  - name: install NetworkManager
+    package:
+      name: 'NetworkManager'
+      state: present
+
+  - name: configure NetworkManager
+    lineinfile:
+      dest: "/etc/sysconfig/network-scripts/ifcfg-{{ ansible_default_ipv4['interface'] }}"
+      regexp: '^{{ item }}='
+      line: '{{ item }}=yes'
+      state: present
+      create: yes
+    with_items:
+    - 'USE_PEERDNS'
+    - 'NM_CONTROLLED'
+
+  - name: enable and start NetworkManager
+    service:
+      name: 'NetworkManager'
+      state: started
+      enabled: yes

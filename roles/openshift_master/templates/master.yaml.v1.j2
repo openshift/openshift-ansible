@@ -15,8 +15,8 @@ assetConfig:
 {% if 'logging_public_url' in openshift.master %}
   loggingPublicURL: {{ openshift.master.logging_public_url }}
 {% endif %}
-{% if 'metrics_public_url' in openshift.master %}
-  metricsPublicURL: {{ openshift.master.metrics_public_url }}
+{% if openshift_hosted_metrics_deploy | default(false) | bool %}
+  metricsPublicURL: {{ openshift_hosted_metrics_public_url }}
 {% endif %}
 {% if 'extension_scripts' in openshift.master %}
   extensionScripts: {{ openshift.master.extension_scripts | to_padded_yaml(1, 2) }}
@@ -121,6 +121,7 @@ kubernetesMasterConfig:
   proxyClientInfo:
     certFile: master.proxy-client.crt
     keyFile: master.proxy-client.key
+  schedulerArguments: {{ openshift_master_scheduler_args | default(None) | to_padded_yaml( level=3 ) }}
   schedulerConfigFile: {{ openshift_master_scheduler_conf }}
   servicesNodePortRange: ""
   servicesSubnet: {{ openshift.common.portal_net }}
@@ -148,7 +149,7 @@ masterPublicURL: {{ openshift.master.public_api_url }}
 networkConfig:
   clusterNetworkCIDR: {{ openshift.master.sdn_cluster_network_cidr }}
   hostSubnetLength: {{ openshift.master.sdn_host_subnet_length }}
-{% if openshift.common.use_openshift_sdn or openshift.common.use_nuage %}
+{% if openshift.common.use_openshift_sdn or openshift.common.use_nuage or openshift.common.sdn_network_plugin_name == 'cni' %}
   networkPluginName: {{ openshift.common.sdn_network_plugin_name }}
 {% endif %}
 # serviceNetworkCIDR must match kubernetesMasterConfig.servicesSubnet
@@ -201,7 +202,7 @@ projectConfig:
     mcsLabelsPerProject: {{ openshift.master.mcs_labels_per_project }}
     uidAllocatorRange: "{{ openshift.master.uid_allocator_range  }}"
 routingConfig:
-  subdomain:  "{{ openshift.master.default_subdomain | default("") }}"
+  subdomain:  "{{ openshift_master_default_subdomain | default("") }}"
 serviceAccountConfig:
   limitSecretReferences: false
   managedNames:

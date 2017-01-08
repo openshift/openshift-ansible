@@ -6,10 +6,10 @@ OpenShift NFS Server Installation
 Requirements
 ------------
 
-This role is intended to be applied to the [nfs] host group which is
+* Ansible 2.2
+* This role is intended to be applied to the [nfs] host group which is
 separate from OpenShift infrastructure components.
-
-Requires access to the 'nfs-utils' package.
+* Requires access to the 'nfs-utils' package.
 
 Role Variables
 --------------

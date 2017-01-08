@@ -5,20 +5,9 @@
 Custom filters for use in openshift-ansible
 '''
 
-import pdb
-
 
 class FilterModule(object):
     ''' Custom ansible filters '''
-
-    @staticmethod
-    def oo_pdb(arg):
-        ''' This pops you into a pdb instance where arg is the data passed in
-            from the filter.
-            Ex: "{{ hostvars | oo_pdb }}"
-        '''
-        pdb.set_trace()
-        return arg
 
     @staticmethod
     def translate_volume_name(volumes, target_volume):
@@ -32,7 +21,6 @@ class FilterModule(object):
                 return vol["id"]
 
         return None
-
 
     def filters(self):
         ''' returns a mapping of filters to methods '''

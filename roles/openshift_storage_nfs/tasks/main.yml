@@ -1,6 +1,6 @@
 ---
 - name: Install nfs-utils
-  action: "{{ ansible_pkg_mgr }} name=nfs-utils state=present"
+  package: name=nfs-utils state=present
 
 - name: Configure NFS
   lineinfile:
@@ -10,7 +10,7 @@
   register: nfs_config
 
 - name: Restart nfs-config
-  service: name=nfs-config state=restarted
+  systemd: name=nfs-config state=restarted
   when: nfs_config | changed
 
 - name: Ensure exports directory exists
@@ -26,9 +26,9 @@
     owner: nfsnobody
     group: nfsnobody
   with_items:
-  - "{{ openshift.hosted.registry }}"
-  - "{{ openshift.hosted.metrics }}"
-  - "{{ openshift.hosted.logging }}"
+    - "{{ openshift.hosted.registry }}"
+    - "{{ openshift.hosted.metrics }}"
+    - "{{ openshift.hosted.logging }}"
 
 
 - name: Configure exports
@@ -36,7 +36,7 @@
     dest: /etc/exports.d/openshift-ansible.exports
     src: exports.j2
   notify:
-  - restart nfs-server
+    - restart nfs-server
 
 # Now that we're putting our exports in our own file clean up the old ones
 - name: register exports
@@ -51,16 +51,14 @@
   with_items: "{{ exports_out.stdout_lines | default([]) }}"
   when: exports_out.rc == 0
   notify:
-  - restart nfs-server
+    - restart nfs-server
 
 - name: Enable and start services
-  service:
-    name: "{{ item }}"
+  systemd:
+    name: nfs-server
     state: started
     enabled: yes
   register: start_result
-  with_items:
-  - nfs-server
 
 - set_fact:
     nfs_service_status_changed: "{{ start_result | changed }}"

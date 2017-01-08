@@ -6,7 +6,8 @@ Configures an etcd cluster for an arbitrary number of hosts
 Requirements
 ------------
 
-This role assumes it's being deployed on a RHEL/Fedora based host with package
+* Ansible 2.2
+* This role assumes it's being deployed on a RHEL/Fedora based host with package
 named 'etcd' available via yum or dnf (conditionally).
 
 Role Variables

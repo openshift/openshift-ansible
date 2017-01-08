@@ -116,6 +116,7 @@
     ansible_become: "{{ deployment_vars[deployment_type].become }}"
     groups: "tag_environment-{{ cluster_env }}, tag_host-type-{{ type }}, tag_sub-host-type-{{ g_sub_host_type }}, tag_clusterid-{{ cluster_id }}"
     openshift_node_labels: "{{ node_label }}"
+    libvirt_ip_address: "{{ item.1 }}"
   with_together:
     - '{{ instances }}'
     - '{{ ips }}'
@@ -133,5 +134,5 @@
   retries: 30
   delay: 1
   with_together:
-  - '{{ instances }}'
-  - '{{ ips }}'
+    - '{{ instances }}'
+    - '{{ ips }}'

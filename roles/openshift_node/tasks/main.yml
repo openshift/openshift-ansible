@@ -2,48 +2,62 @@
 # TODO: allow for overriding default ports where possible
 - fail:
     msg: "SELinux is disabled, This deployment type requires that SELinux is enabled."
-  when: (not ansible_selinux or ansible_selinux.status != 'enabled') and deployment_type in ['enterprise', 'online', 'atomic-enterprise', 'openshift-enterprise']
+  when: >
+    (not ansible_selinux or ansible_selinux.status != 'enabled') and
+    deployment_type in ['enterprise', 'online', 'atomic-enterprise', 'openshift-enterprise']
 
 - name: Set node facts
   openshift_facts:
     role: "{{ item.role }}"
     local_facts: "{{ item.local_facts }}"
   with_items:
-  # Reset node labels to an empty dictionary.
-  - role: node
-    local_facts:
-      labels: {}
-  - role: node
-    local_facts:
-      annotations: "{{ openshift_node_annotations | default(none) }}"
-      debug_level: "{{ openshift_node_debug_level | default(openshift.common.debug_level) }}"
-      iptables_sync_period: "{{ openshift_node_iptables_sync_period | default(None) }}"
-      kubelet_args: "{{ openshift_node_kubelet_args | default(None) }}"
-      labels: "{{ lookup('oo_option', 'openshift_node_labels') | default( openshift_node_labels | default(none), true) }}"
-      registry_url: "{{ oreg_url | default(none) }}"
-      schedulable: "{{ openshift_schedulable | default(openshift_scheduleable) | default(None) }}"
-      sdn_mtu: "{{ openshift_node_sdn_mtu | default(None) }}"
-      storage_plugin_deps: "{{ osn_storage_plugin_deps | default(None) }}"
-      set_node_ip: "{{ openshift_set_node_ip | default(None) }}"
-      node_image: "{{ osn_image | default(None) }}"
-      ovs_image: "{{ osn_ovs_image | default(None) }}"
-      proxy_mode: "{{ openshift_node_proxy_mode | default('iptables') }}"
-      local_quota_per_fsgroup: "{{ openshift_node_local_quota_per_fsgroup | default(None) }}"
-      dns_ip: "{{ openshift_dns_ip | default(none) | get_dns_ip(hostvars[inventory_hostname])}}"
-      env_vars: "{{ openshift_node_env_vars | default(None) }}"
+    # Reset node labels to an empty dictionary.
+    - role: node
+      local_facts:
+        labels: {}
+    - role: node
+      local_facts:
+        annotations: "{{ openshift_node_annotations | default(none) }}"
+        debug_level: "{{ openshift_node_debug_level | default(openshift.common.debug_level) }}"
+        iptables_sync_period: "{{ openshift_node_iptables_sync_period | default(None) }}"
+        kubelet_args: "{{ openshift_node_kubelet_args | default(None) }}"
+        labels: "{{ lookup('oo_option', 'openshift_node_labels') | default( openshift_node_labels | default(none), true) }}"
+        registry_url: "{{ oreg_url | default(none) }}"
+        schedulable: "{{ openshift_schedulable | default(openshift_scheduleable) | default(None) }}"
+        sdn_mtu: "{{ openshift_node_sdn_mtu | default(None) }}"
+        storage_plugin_deps: "{{ osn_storage_plugin_deps | default(None) }}"
+        set_node_ip: "{{ openshift_set_node_ip | default(None) }}"
+        node_image: "{{ osn_image | default(None) }}"
+        ovs_image: "{{ osn_ovs_image | default(None) }}"
+        proxy_mode: "{{ openshift_node_proxy_mode | default('iptables') }}"
+        local_quota_per_fsgroup: "{{ openshift_node_local_quota_per_fsgroup | default(None) }}"
+        dns_ip: "{{ openshift_dns_ip | default(none) | get_dns_ip(hostvars[inventory_hostname])}}"
+        env_vars: "{{ openshift_node_env_vars | default(None) }}"
 
 # We have to add tuned-profiles in the same transaction otherwise we run into depsolving
 # problems because the rpms don't pin the version properly. This was fixed in 3.1 packaging.
 - name: Install Node package
-  action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-node{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }},tuned-profiles-{{ openshift.common.service_type }}-node{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }} state=present"
+  package:
+    name: "{{ openshift.common.service_type }}-node{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }},tuned-profiles-{{ openshift.common.service_type }}-node{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }}"
+    state: present
   when: not openshift.common.is_containerized | bool
+
+- name: Check for tuned package
+  command: rpm -q tuned
+  args:
+    warn: no
+  register: tuned_installed
+  changed_when: false
+  failed_when: false
 
 - name: Set atomic-guest tuned profile
   command: "tuned-adm profile atomic-guest"
-  when: openshift.common.is_atomic | bool
+  when: tuned_installed.rc == 0 and openshift.common.is_atomic | bool
 
 - name: Install sdn-ovs package
-  action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-sdn-ovs{{ openshift_pkg_version | oo_image_tag_to_rpm_version(include_dash=True) }} state=present"
+  package:
+    name: "{{ openshift.common.service_type }}-sdn-ovs{{ openshift_pkg_version | oo_image_tag_to_rpm_version(include_dash=True) }}"
+    state: present
   when: openshift.common.use_openshift_sdn and not openshift.common.is_containerized | bool
 
 - name: Pull node image
@@ -70,12 +84,20 @@
   sysctl: name="net.ipv4.ip_forward" value=1 sysctl_set=yes state=present reload=yes
 
 - name: Start and enable openvswitch docker service
-  service: name=openvswitch.service enabled=yes state=started
+  systemd:
+    name: openvswitch.service
+    enabled: yes
+    state: started
   when: openshift.common.is_containerized | bool and openshift.common.use_openshift_sdn | bool
   register: ovs_start_result
 
 - set_fact:
     ovs_service_status_changed: "{{ ovs_start_result | changed }}"
+
+- file:
+    dest: "{{ (openshift_node_kubelet_args|default({'config':None})).config}}"
+    state: directory
+  when: openshift_node_kubelet_args is defined and 'config' in openshift_node_kubelet_args
 
 # TODO: add the validate parameter when there is a validation command to run
 - name: Create the Node config
@@ -87,7 +109,7 @@
     group: root
     mode: 0600
   notify:
-  - restart node
+    - restart node
 
 - name: Configure AWS Cloud Provider Settings
   lineinfile:
@@ -103,7 +125,7 @@
   no_log: True
   when: "openshift_cloudprovider_kind is defined and openshift_cloudprovider_kind == 'aws' and openshift_cloudprovider_aws_access_key is defined and openshift_cloudprovider_aws_secret_key is defined"
   notify:
-  - restart node
+    - restart node
 
 - name: Configure Node Environment Variables
   lineinfile:
@@ -113,7 +135,7 @@
     create: true
   with_dict: "{{ openshift.node.env_vars | default({}) }}"
   notify:
-  - restart node
+    - restart node
 
 - name: NFS storage plugin configuration
   include: storage_plugins/nfs.yml
@@ -153,11 +175,17 @@
   when: openshift.common.is_containerized | bool
 
 - name: Start and enable node dep
-  service: name={{ openshift.common.service_type }}-node-dep enabled=yes state=started
+  systemd:
+    name: "{{ openshift.common.service_type }}-node-dep"
+    enabled: yes
+    state: started
   when: openshift.common.is_containerized | bool
 
 - name: Start and enable node
-  service: name={{ openshift.common.service_type }}-node enabled=yes state=started
+  systemd:
+    name: "{{ openshift.common.service_type }}-node"
+    enabled: yes
+    state: started
   register: node_start_result
   until: not node_start_result | failed
   retries: 1

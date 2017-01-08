@@ -2,7 +2,7 @@
 
 = openshift-ansible Best Practices Guide
 
-The purpose of this guide is to describe the preferred patterns and best practices used in this repository (both in ansible and python).
+The purpose of this guide is to describe the preferred patterns and best practices used in this repository (both in Ansible and Python).
 
 It is important to note that this repository may not currently comply with all best practices, but the intention is that it will.
 
@@ -52,11 +52,11 @@ If mode lines for other editors are needed, please open a GitHub issue.
 === Method Signatures
 
 '''
-[[When-adding-a-new-paramemter-to-an-existing-method-a-default-value-SHOULD-be-used]]
+[[When-adding-a-new-parameter-to-an-existing-method-a-default-value-SHOULD-be-used]]
 [cols="2v,v"]
 |===
-| <<When-adding-a-new-paramemter-to-an-existing-method-a-default-value-SHOULD-be-used, Rule>>
-| When adding a new paramemter to an existing method, a default value SHOULD be used
+| <<When-adding-a-new-parameter-to-an-existing-method-a-default-value-SHOULD-be-used, Rule>>
+| When adding a new parameter to an existing method, a default value SHOULD be used
 |===
 The purpose of this rule is to make it so that method signatures are backwards compatible.
 
@@ -76,7 +76,7 @@ def add_person(first_name, last_name, age=None):
 
 
 === PyLint
-http://www.pylint.org/[PyLint] is used in an attempt to keep the python code as clean and as manageable as possible. The build bot runs each pull request through PyLint and any warnings or errors cause the build bot to fail the pull request.
+http://www.pylint.org/[PyLint] is used in an attempt to keep the Python code as clean and as manageable as possible. The build bot runs each pull request through PyLint and any warnings or errors cause the build bot to fail the pull request.
 
 '''
 [[PyLint-rules-MUST-NOT-be-disabled-on-a-whole-file]]
@@ -194,7 +194,7 @@ The purpose of this rule is to make it easy to include custom modules in our pla
 | Parameters to Ansible modules SHOULD use the Yaml dictionary format when 3 or more parameters are being passed
 |===
 
-When a module has several parameters that are being passed in, it's hard to see exactly what value each parameter is getting. It is preferred to use the Ansible Yaml syntax to pass in parameters so that it's more clear what values are being passed for each paramemter.
+When a module has several parameters that are being passed in, it's hard to see exactly what value each parameter is getting. It is preferred to use the Ansible Yaml syntax to pass in parameters so that it's more clear what values are being passed for each parameter.
 
 .Bad:
 [source,yaml]
@@ -222,7 +222,7 @@ When a module has several parameters that are being passed in, it's hard to see 
 | Parameters to Ansible modules SHOULD use the Yaml dictionary format when the line length exceeds 120 characters
 |===
 
-Lines that are long quickly become a wall of text that isn't easily parsable. It is preferred to use the Ansible Yaml syntax to pass in parameters so that it's more clear what values are being passed for each paramemter.
+Lines that are long quickly become a wall of text that isn't easily parsable. It is preferred to use the Ansible Yaml syntax to pass in parameters so that it's more clear what values are being passed for each parameter.
 
 .Bad:
 [source,yaml]
@@ -338,9 +338,9 @@ If an Ansible role requires certain variables to be set, it's best to check for 
 [cols="2v,v"]
 |===
 | <<Ansible-tasks-SHOULD-NOT-be-used-in-ansible-playbooks-Instead-use-pre_tasks-and-post_tasks, Rule>>
-| Ansible tasks SHOULD NOT be used in ansible playbooks. Instead, use pre_tasks and post_tasks.
+| Ansible tasks SHOULD NOT be used in Ansible playbooks. Instead, use pre_tasks and post_tasks.
 |===
-An Ansible play is defined as a Yaml dictionary. Because of that, ansible doesn't know if the play's tasks list or roles list was specified first. Therefore Ansible always runs tasks after roles.
+An Ansible play is defined as a Yaml dictionary. Because of that, Ansible doesn't know if the play's tasks list or roles list was specified first. Therefore Ansible always runs tasks after roles.
 
 This can be quite confusing if the tasks list is defined in the playbook before the roles list because people assume in order execution in Ansible.
 
@@ -432,7 +432,7 @@ This is very useful when developing and debugging new tasks. It can also signifi
 [[Ansible-Roles-SHOULD-be-named-like-technology_component_subcomponent]]
 [cols="2v,v"]
 |===
-| [[Ansible-Roles-SHOULD-be-named-like-technology_component_subcomponent, Rule]]
+| <<Ansible-Roles-SHOULD-be-named-like-technology_component_subcomponent, Rule>>
 | Ansible Roles SHOULD be named like technology_component[_subcomponent].
 |===
 
@@ -484,31 +484,23 @@ If you want to use default with variables that evaluate to false you have to set
 ----
 
 
-In other words, normally the `default` filter will only replace the value if it's undefined. By setting the second parameter to `true`, it will also replace the value if it defaults to a false value in python, so None, empty list, empty string, etc.
+In other words, normally the `default` filter will only replace the value if it's undefined. By setting the second parameter to `true`, it will also replace the value if it defaults to a false value in Python, so None, empty list, empty string, etc.
 
 This is almost always more desirable than an empty list, string, etc.
 
 === Yum and DNF
 '''
-[[Package-installation-MUST-use-ansible-action-module-to-abstract-away-dnf-yum]]
+[[Package-installation-MUST-use-ansible-package-module-to-abstract-away-dnf-yum]]
 [cols="2v,v"]
 |===
-| <<Package-installation-MUST-use-ansible-action-module-to-abstract-away-dnf-yum, Rule>>
-| Package installation MUST use ansible action module to abstract away dnf/yum.
+| <<Package-installation-MUST-use-ansible-package-module-to-abstract-away-dnf-yum, Rule>>
+| Package installation MUST use Ansible `package` module to abstract away dnf/yum.
 |===
 
-[[Package-installation-MUST-use-name-and-state-present-rather-than-pkg-and-state-installed-respectively]]
-[cols="2v,v"]
-|===
-| <<Package-installation-MUST-use-name-and-state-present-rather-than-pkg-and-state-installed-respectively, Rule>>
-| Package installation MUST use name= and state=present rather than pkg= and state=installed respectively.
-|===
+The Ansible `package` module calls the associated package manager for the underlying OS.
 
-This is done primarily because if you're registering the result of the
-installation and you have two conditional tasks based on whether or not yum or
-dnf are in use you'll end up inadvertently overwriting the value. It also
-reduces duplication. name= and state=present are common between dnf and yum
-modules.
+.Reference
+* https://docs.ansible.com/ansible/package_module.html[Ansible package module]
 
 .Bad:
 [source,yaml]
@@ -516,12 +508,12 @@ modules.
 ---
 # tasks.yml
 - name: Install etcd (for etcdctl)
-  yum: name=etcd state=latest"
+  yum: name=etcd state=latest
   when: "ansible_pkg_mgr == yum"
   register: install_result
 
 - name: Install etcd (for etcdctl)
-  dnf: name=etcd state=latest"
+  dnf: name=etcd state=latest
   when: "ansible_pkg_mgr == dnf"
   register: install_result
 ----
@@ -533,6 +525,6 @@ modules.
 ---
 # tasks.yml
 - name: Install etcd (for etcdctl)
-  action: "{{ ansible_pkg_mgr }} name=etcd state=latest"
+  package: name=etcd state=latest
   register: install_result
-  ----
+----

@@ -6,7 +6,8 @@ Configure flannel on openshift nodes
 Requirements
 ------------
 
-This role assumes it's being deployed on a RHEL/Fedora based host with package
+* Ansible 2.2
+* This role assumes it's being deployed on a RHEL/Fedora based host with package
 named 'flannel' available via yum or dnf (conditionally), in version superior
 to 0.3.
 

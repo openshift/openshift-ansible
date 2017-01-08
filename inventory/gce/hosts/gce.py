@@ -1,4 +1,5 @@
 #!/usr/bin/env python2
+# pylint: skip-file
 # Copyright 2013 Google Inc.
 #
 # This file is part of Ansible
