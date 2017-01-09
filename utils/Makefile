@@ -30,7 +30,8 @@ SHORTNAME := ooinstall
 # directory of the target file ($@), kinda like `dirname`.
 ASCII2MAN = a2x -D $(dir $@) -d manpage -f manpage $<
 MANPAGES := docs/man/man1/atomic-openshift-installer.1
-VERSION := 1.3
+# slipped into the manpage template before a2x processing
+VERSION := 1.4
 
 # YAMLFILES: Skipping all '/files/' folders due to conflicting yaml file definitions
 YAMLFILES = $(shell find ../ -name $(VENV) -prune -o -name .tox -prune -o \( -name '*.yml' -o -name '*.yaml' \) ! -path "*/files/*" -print 2>&1)
