@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.43
+Version:        3.4.44
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Jan 09 2017 Scott Dodson <sdodson@redhat.com> 3.4.44-1
+- Use registry.access.redhat.com/rhel7/etcd instead of etcd3
+  (sdodson@redhat.com)
+
 * Thu Jan 05 2017 Scott Dodson <sdodson@redhat.com> 3.4.43-1
 - logging-deployer pull fixes from origin-aggregated-logging/#317
   (sdodson@redhat.com)
