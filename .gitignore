@@ -25,3 +25,5 @@ ansible.cfg
 .tox
 .coverage
 *.egg-info
+.eggs
+cover

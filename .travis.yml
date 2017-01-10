@@ -11,8 +11,10 @@ python:
 
 install:
   - pip install -r requirements.txt
+  - pip install tox-travis
 
 script:
   # TODO(rhcarvalho): check syntax of other important entrypoint playbooks
   - ansible-playbook --syntax-check playbooks/byo/config.yml
-  - cd utils && make ci
+  - tox
+  - cd utils && tox
