@@ -1955,6 +1955,7 @@ class OpenShiftFacts(object):
                                       auth_token_max_seconds=500,
                                       oauth_grant_method='auto',
                                       dynamic_provisioning_enabled=True,
+                                      hostpath_provisioning_enabled=False,
                                       max_requests_inflight=500)
 
         if 'node' in roles:
