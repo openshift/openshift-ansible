@@ -19,3 +19,4 @@ hawkular_persistence: "{% if openshift.hosted.metrics.storage.kind != None %}tru
 hawkular_type: "{{ 'origin' if deployment_type == 'origin' else 'enterprise' }}"
 
 metrics_upgrade: openshift.hosted.metrics.upgrade | default(False)
+openshift_master_config_dir: "{{ openshift.common.config_base }}/master"
