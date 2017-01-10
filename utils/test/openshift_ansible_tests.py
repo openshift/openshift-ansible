@@ -66,7 +66,6 @@ class TestOpenShiftAnsible(unittest.TestCase):
 
         inventory = configparser.ConfigParser(allow_no_value=True)
         inventory.read(self.inventory)
-        print(inventory.sections())
         self.assertTrue(inventory.has_section('masters:vars'))
         self.assertEquals('blue', inventory.get('masters:vars', 'color'))
         self.assertTrue(inventory.has_section('nodes:vars'))
