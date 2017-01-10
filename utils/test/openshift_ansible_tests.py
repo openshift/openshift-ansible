@@ -16,7 +16,7 @@ variant: openshift-enterprise
 variant_version: 3.3
 version: v2
 deployment:
-    ansible_ssh_user: root
+    ansible_ssh_user: cloud-user
     hosts: []
     roles:
         master:
