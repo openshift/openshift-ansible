@@ -1256,6 +1256,13 @@ def is_service_running(service):
     return service_running
 
 
+def rpm_rebuilddb():
+    """
+    Runs rpm --rebuilddb to ensure the db is in good shape.
+    """
+    module.run_command(['/usr/bin/rpm', '--rebuilddb'])  # noqa: F405
+
+
 def get_version_output(binary, version_cmd):
     """ runs and returns the version output for a command """
     cmd = []
@@ -1966,6 +1973,11 @@ class OpenShiftFacts(object):
         if 'docker' in roles:
             docker = dict(disable_push_dockerhub=False,
                           options='--log-driver=json-file --log-opt max-size=50m')
+            # NOTE: This is a workaround for a dnf output racecondition that can occur in
+            # some situations. See https://bugzilla.redhat.com/show_bug.cgi?id=918184
+            if self.system_facts['ansible_pkg_mgr'] == 'dnf':
+                rpm_rebuilddb()
+
             version_info = get_docker_version_info()
             if version_info is not None:
                 docker['api_version'] = version_info['api_version']
