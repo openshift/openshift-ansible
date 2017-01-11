@@ -104,14 +104,14 @@ class OpenShiftAnsibleYamlLint(Command):
                         first = False
 
                     print(format_method(problem, yaml_file))
-                    if problem.level == linter.PROBLEM_LEVELS['error']:
+                    if problem.level == linter.PROBLEM_LEVELS[2]:
                         has_errors = True
-                    elif problem.level == linter.PROBLEM_LEVELS['warning']:
+                    elif problem.level == linter.PROBLEM_LEVELS[1]:
                         has_warnings = True
 
-        assert not has_errors, 'yamllint errors found'
-        assert not has_warnings, 'yamllint warnings found'
-
+        if has_errors or has_warnings:
+            print('yammlint issues found')
+            exit(1)
 
 class OpenShiftAnsiblePylint(PylintCommand):
     ''' Class to override the default behavior of PylintCommand '''
