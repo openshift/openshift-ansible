@@ -31,7 +31,7 @@
 
   - name: Drain Node for Kubelet upgrade
     command: >
-      {{ openshift.common.client_binary }} adm manage-node {{ openshift.node.nodename }} --drain --force
+      {{ openshift.common.client_binary }} adm manage-node {{ openshift.node.nodename }} {{ openshift.common.evacuate_or_drain }} --force
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: l_docker_upgrade is defined and l_docker_upgrade | bool and inventory_hostname in groups.oo_nodes_to_upgrade
 

@@ -867,6 +867,20 @@ def set_deployment_facts_if_unset(facts):
     return facts
 
 
+def set_evacuate_or_drain_option(facts):
+    """OCP before 1.5/3.5 used '--evacuate'. As of 1.5/3.5 OCP uses
+'--drain'. Let's make that a fact for easy reference later.
+    """
+    if facts['common']['version_gte_3_5_or_1_5']:
+        # New-style
+        facts['common']['evacuate_or_drain'] = '--drain'
+    else:
+        # Old-style
+        facts['common']['evacuate_or_drain'] = '--evacuate'
+
+    return facts
+
+
 def set_version_facts_if_unset(facts):
     """ Set version facts. This currently includes common.version and
         common.version_gte_3_1_or_1_1.
@@ -1898,6 +1912,7 @@ class OpenShiftFacts(object):
         facts = build_controller_args(facts)
         facts = build_api_server_args(facts)
         facts = set_version_facts_if_unset(facts)
+        facts = set_evacuate_or_drain_option(facts)
         facts = set_dnsmasq_facts_if_unset(facts)
         facts = set_manageiq_facts_if_unset(facts)
         facts = set_aggregate_facts(facts)
