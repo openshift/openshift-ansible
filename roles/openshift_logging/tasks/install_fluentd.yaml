@@ -1,14 +1,23 @@
 ---
-- shell: >
+- command: >
     echo "{{ (openshift_logging_use_ops) | ternary(openshift_logging_es_ops_host, openshift_logging_es_host) }}"
   register: fluentd_ops_host
   check_mode: no
 
-- shell: >
+- command: >
     echo "{{ (openshift_logging_use_ops) | ternary(openshift_logging_es_ops_port, openshift_logging_es_port) }}"
   register: fluentd_ops_port
   check_mode: no
 
+- command: >
+    echo "{{openshift_logging_fluentd_nodeselector.keys()[0]}}"
+  register: openshift_logging_fluentd_nodeselector_key
+  check_mode: no
+
+- command: >
+    echo "{{openshift_logging_fluentd_nodeselector.values()[0]}}"
+  register: openshift_logging_fluentd_nodeselector_value
+  check_mode: no
 
 - name: Generating Fluentd daemonset
   template: src=fluentd.j2 dest={{mktemp.stdout}}/templates/logging-fluentd.yaml
@@ -19,6 +28,8 @@
     daemonset_serviceAccount: aggregated-logging-fluentd
     ops_host: "{{ fluentd_ops_host.stdout }}"
     ops_port: "{{ fluentd_ops_port.stdout }}"
+    fluentd_nodeselector_key: "{{openshift_logging_fluentd_nodeselector_key.stdout}}"
+    fluentd_nodeselector_value: "{{openshift_logging_fluentd_nodeselector_value.stdout}}"
   check_mode: no
 
 - name: "Set permissions for fluentd"

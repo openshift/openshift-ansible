@@ -33,7 +33,7 @@ openshift_logging_kibana_ops_proxy_debug: false
 openshift_logging_kibana_ops_proxy_cpu_limit: null
 openshift_logging_kibana_ops_proxy_memory_limit: null
 
-openshift_logging_fluentd_nodeselector: '"logging-infra-fluentd": "true"'
+openshift_logging_fluentd_nodeselector: {'logging-infra-fluentd': 'true'}
 openshift_logging_fluentd_cpu_limit: 100m
 openshift_logging_fluentd_memory_limit: 512Mi
 openshift_logging_fluentd_es_copy: false

@@ -31,14 +31,10 @@
   register: signing_conf_file
   check_mode: no
 
-- block:
-  - copy: src=signing.conf dest={{generated_certs_dir}}/signing.conf
-    check_mode: no
-
-  - lineinfile: "dest={{generated_certs_dir}}/signing.conf regexp='# Top dir$' line='dir                     = {{generated_certs_dir}}               # Top dir'"
-    check_mode: no
-  when:
-    - not signing_conf_file.stat.exists
+- template: src=signing.conf.j2 dest={{generated_certs_dir}}/signing.conf
+  vars:
+    - top_dir: '{{generated_certs_dir}}'
+  when: not signing_conf_file.stat.exists
 
 - include: procure_server_certs.yaml
   loop_control:
@@ -48,19 +44,6 @@
     - procure_component: kibana-ops
     - procure_component: kibana-internal
       hostnames: "kibana, kibana-ops, {{openshift_logging_kibana_hostname}}, {{openshift_logging_kibana_ops_hostname}}"
-
-# - include: procure_server_certs.yaml
-#   vars:
-#     - procure_component: kibana
-
-# - include: procure_server_certs.yaml
-#   vars:
-#     - procure_component: kibana-ops
-
-# - include: procure_server_certs.yaml
-#   vars:
-#     - procure_component: kibana-internal
-#     - hostnames: "kibana, kibana-ops, {{openshift_logging_kibana_hostname}}, {{openshift_logging_kibana_ops_hostname}}"
 
 - name: Copy proxy TLS configuration file
   copy: src=server-tls.json dest={{generated_certs_dir}}/server-tls.json
@@ -116,8 +99,8 @@
 
 - name: Check for hostmount-anyuid scc entry
   shell: >
-    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get scc hostmount-anyuid -o go-template='{{ '{{' }}.users{{ '}}' }}' |
-    grep system:serviceaccount:{{openshift_logging_namespace}}:jks-generator
+    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get scc hostmount-anyuid -o jsonpath='{.users}' |
+    grep system:serviceaccount:{{openshift_logging_namespace | quote}}:jks-generator
   register: scc_result
   ignore_errors: yes
   when: not ansible_check_mode
@@ -131,34 +114,33 @@
   copy:
     src: generate-jks.sh
     dest: "{{generated_certs_dir}}/generate-jks.sh"
+  check_mode: no
 
 - name: Generate JKS chains
   template:
     src: jks_pod.j2
     dest: "{{mktemp.stdout}}/jks_pod.yaml"
+  check_mode: no
 
 - name: create pod
-  shell: >
-    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig create -f {{mktemp.stdout}}/jks_pod.yaml -n {{openshift_logging_namespace}}
+  command: >
+    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig create -f {{mktemp.stdout}}/jks_pod.yaml -n {{openshift_logging_namespace}} -o name
   register: podoutput
+  check_mode: no
 
-- shell: >
-    echo {{podoutput.stdout}} | awk -v podname='\\\".*\\\"' '{print $2}'
-  register: podname
-
-- shell: >
-    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get pod {{podname.stdout}} -o go-template='{{ '{{' }}index .status "phase"{{ '}}' }}' -n {{openshift_logging_namespace}}
+- command: >
+    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get {{podoutput.stdout}} -o jsonpath='{.status.phase}' -n {{openshift_logging_namespace}}
   register: result
   until: result.stdout.find("Succeeded") != -1
   retries: 5
   delay: 10
 
 - name: Generate proxy session
-  shell: tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 200
+  command: echo {{'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'|random_word(200)}}
   register: session_secret
   check_mode: no
 
 - name: Generate oauth client secret
-  shell: tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 64
+  command: echo {{'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'|random_word(64)}}
   register: oauth_secret
   check_mode: no

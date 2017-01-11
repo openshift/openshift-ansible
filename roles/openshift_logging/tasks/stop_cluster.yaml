@@ -1,14 +1,14 @@
 ---
-- shell: >
-    echo "{{openshift_logging_fluentd_nodeselector}}" | cut -d':' -f1
+- command: >
+    echo "{{openshift_logging_fluentd_nodeselector.keys()[0]}}"
   register: openshift_logging_fluentd_nodeselector_key
 
-- shell: >
-    echo "{{openshift_logging_fluentd_nodeselector}}" | cut -d' ' -f2
+- command: >
+    echo "{{openshift_logging_fluentd_nodeselector.values()[0]}}"
   register: openshift_logging_fluentd_nodeselector_value
 
-- shell: >
-    {{openshift.common.client_binary}} --config={{mktemp.stdout}}/admin.kubeconfig get node -o name | sed "s,^node/,,g"
+- command: >
+    {{openshift.common.client_binary}} --config={{mktemp.stdout}}/admin.kubeconfig get node -o jsonpath='{.items[*].metadata.name}'
   register: fluentd_hosts
   when: "'--all' in openshift_logging_fluentd_hosts"
 
@@ -22,7 +22,7 @@
   loop_control:
     loop_var: fluentd_host
 
-- shell: >
+- command: >
     {{openshift.common.client_binary}} --config={{mktemp.stdout}}/admin.kubeconfig get dc -l component=es -o name -n {{openshift_logging_namespace}}
   register: es_dc
 
@@ -34,7 +34,7 @@
   loop_control:
     loop_var: object
 
-- shell: >
+- command: >
     {{openshift.common.client_binary}} --config={{mktemp.stdout}}/admin.kubeconfig get dc -l component=kibana -o name -n {{openshift_logging_namespace}}
   register: kibana_dc
 
@@ -46,7 +46,7 @@
   loop_control:
     loop_var: object
 
-- shell: >
+- command: >
     {{openshift.common.client_binary}} --config={{mktemp.stdout}}/admin.kubeconfig get dc -l component=curator -o name -n {{openshift_logging_namespace}}
   register: curator_dc
 
@@ -58,7 +58,7 @@
   loop_control:
     loop_var: object
 
-- shell: >
+- command: >
     {{openshift.common.client_binary}} --config={{mktemp.stdout}}/admin.kubeconfig get dc -l component=es-ops -o name -n {{openshift_logging_namespace}}
   register: es_dc
 
@@ -71,7 +71,7 @@
     loop_var: object
   when: openshift_logging_use_ops
 
-- shell: >
+- command: >
     {{openshift.common.client_binary}} --config={{mktemp.stdout}}/admin.kubeconfig get dc -l component=kibana-ops -o name -n {{openshift_logging_namespace}}
   register: kibana_dc
 
@@ -84,7 +84,7 @@
     loop_var: object
   when: openshift_logging_use_ops
 
-- shell: >
+- command: >
     {{openshift.common.client_binary}} --config={{mktemp.stdout}}/admin.kubeconfig get dc -l component=curator-ops -o name -n {{openshift_logging_namespace}}
   register: curator_dc
 
