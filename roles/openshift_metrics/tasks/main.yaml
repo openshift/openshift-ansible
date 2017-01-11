@@ -4,8 +4,6 @@
   register: mktemp
   changed_when: False
 
-- debug: msg="Created temp dir {{mktemp.stdout}}"
-
 - name: Create temp directory for all our templates
   file: path={{mktemp.stdout}}/templates state=directory mode=0755
   changed_when: False
@@ -17,8 +15,8 @@
   check_mode: no
   tags: metrics_init
 
-- include: "{{role_path}}/tasks/install_metrics.yaml"
+- include: install_metrics.yaml
   when: openshift_metrics_install_metrics | default(false) | bool
 
-- include: "{{role_path}}/tasks/uninstall_metrics.yaml"
+- include: uninstall_metrics.yaml
   when: not openshift_metrics_install_metrics | default(false) | bool

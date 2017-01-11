@@ -1,5 +1,5 @@
 ---
-- shell: >
+- command: >
     {{openshift.common.client_binary}} 
     --config={{mktemp.stdout}}/admin.kubeconfig 
     get rc 
@@ -18,7 +18,7 @@
   loop_control:
     loop_var: object
 
-- shell: >
+- command: >
     {{openshift.common.client_binary}} 
     --config={{mktemp.stdout}}/admin.kubeconfig 
     get rc
@@ -36,7 +36,7 @@
   loop_control:
     loop_var: object
 
-- shell: >
+- command: >
     {{openshift.common.client_binary}} --config={{mktemp.stdout}}/admin.kubeconfig 
     get rc
     -o name

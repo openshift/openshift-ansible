@@ -12,6 +12,8 @@
     subjects:
     - kind: ServiceAccount
       name: hawkular
+  changed_when: no
+
 - name: generate cluster-reader role binding for the heapster service account
   template:
     src: rolebinding.j2
@@ -28,3 +30,4 @@
     - kind: ServiceAccount
       name: heapster
       namespace: "{{ openshift_metrics_project }}"
+  changed_when: no

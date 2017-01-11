@@ -1,12 +1,13 @@
 ---
 - shell: >
-    {{ openshift.common.client_binary }} -n {{ openshift_metrics_project }}
+    {{ openshift.common.client_binary }} -n {{ openshift_metrics_project | quote }}
     --config={{ mktemp.stdout }}/admin.kubeconfig
-    get rc heapster --template=\{\{.spec.replicas\}\} || echo 0
+    get rc heapster -o jsonpath='{.spec.replicas}' || echo 0
   register: heapster_replica_count
-  changed_when: false
+  changed_when: no
 
 - name: Generate heapster replication controller
   template: src=heapster.j2 dest={{mktemp.stdout}}/templates/metrics-heapster-rc.yaml
   vars:
     replica_count: "{{heapster_replica_count.stdout}}"
+  changed_when: no

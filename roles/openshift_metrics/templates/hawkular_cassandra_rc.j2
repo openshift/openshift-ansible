@@ -75,25 +75,25 @@ spec:
    or (openshift_metrics_cassandra_requests_memory is defined and openshift_metrics_cassandra_requests_memory is not none)) 
 %}
         resources:
-{% if (openshift_metrics_cassandra_limits_cpu is not none
-   or openshift_metrics_cassandra_limits_memory is not none)
+{%      if (openshift_metrics_cassandra_limits_cpu is not none
+        or openshift_metrics_cassandra_limits_memory is not none)
 %}
           limits:
-{% if openshift_metrics_cassandra_limits_cpu is not none %}
+{%        if openshift_metrics_cassandra_limits_cpu is not none %}
             cpu: "{{openshift_metrics_cassandra_limits_cpu}}"
 {% endif %}
-{% if openshift_metrics_cassandra_limits_memory is not none %}
+{%        if openshift_metrics_cassandra_limits_memory is not none %}
             memory: "{{openshift_metrics_cassandra_limits_memory}}"
 {% endif %}
 {% endif %}
-{% if (openshift_metrics_cassandra_requests_cpu is not none 
-   or openshift_metrics_cassandra_requests_memory is not none) 
+{%        if (openshift_metrics_cassandra_requests_cpu is not none 
+          or openshift_metrics_cassandra_requests_memory is not none) 
 %}
           requests:
-{% if openshift_metrics_cassandra_requests_cpu is not none %}
+{%        if openshift_metrics_cassandra_requests_cpu is not none %}
             cpu: "{{openshift_metrics_cassandra_requests_cpu}}"
 {% endif %}
-{% if openshift_metrics_cassandra_requests_memory is not none %}
+{%        if openshift_metrics_cassandra_requests_memory is not none %}
             memory: "{{openshift_metrics_cassandra_requests_memory}}"
 {% endif %}
 {% endif %}
@@ -114,9 +114,9 @@ spec:
         terminationGracePeriodSeconds: 1800
       volumes:
       - name: cassandra-data
-{% if openshift_metrics_cassandra_storage_type == 'emptydir' %}
+{%      if openshift_metrics_cassandra_storage_type == 'emptydir' %}
         emptyDir: {}
-{% else %}
+{%      else %}
         persistentVolumeClaim:
           claimName: "{{ openshift_metrics_cassandra_pv_prefix }}-{{ node }}"
 {% endif %}

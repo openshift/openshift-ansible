@@ -1,8 +1,8 @@
 ---
 - shell: >
-    {{ openshift.common.client_binary }} -n {{ openshift_metrics_project }}
+    {{ openshift.common.client_binary }} -n {{ openshift_metrics_project | quote }}
     --config={{ mktemp.stdout }}/admin.kubeconfig
-    get rc hawkular-metrics --template=\{\{.spec.replicas\}\} || echo 0
+    get rc hawkular-metrics -o jsonpath='{.spec.replicas}' || echo 0
   register: hawkular_metrics_replica_count
   changed_when: false
 
@@ -12,16 +12,17 @@
     dest: "{{ mktemp.stdout }}/templates/hawkular_metrics_rc.yaml"
   vars:
      replica_count: "{{hawkular_metrics_replica_count.stdout}}"
+  changed_when: false
 
 - shell: >
-    {{ openshift.common.client_binary }} -n {{ openshift_metrics_project }}
+    {{ openshift.common.client_binary }} -n {{ openshift_metrics_project | quote }}
     --config={{ mktemp.stdout }}/admin.kubeconfig
-    get rc hawkular-cassandra-{{node}} --template=\{\{.spec.replicas\}\} || echo 0
+    get rc hawkular-cassandra-{{node}} -o jsonpath='{.spec.replicas}' || echo 0
   vars:
     node: "{{ item }}"
   register: cassandra_replica_count
-  changed_when: false
   with_sequence: count={{ openshift_metrics_cassandra_replicas }}
+  changed_when: false
 
 - name: generate hawkular-cassandra replication controllers
   template:
@@ -32,6 +33,7 @@
     master: "{{ (item == '1')|string|lower }}"
     replica_count: "{{cassandra_replica_count.results[item|int - 1].stdout}}"
   with_sequence: count={{ openshift_metrics_cassandra_replicas }}
+  changed_when: false
 
 - name: generate hawkular-cassandra persistent volume claims
   template:
@@ -46,6 +48,7 @@
     size: "{{ openshift_metrics_cassandra_pv_size }}"
   with_sequence: count={{ openshift_metrics_cassandra_replicas }}
   when: openshift_metrics_cassandra_storage_type == 'pv'
+  changed_when: false
 
 - name: generate hawkular-cassandra persistent volume claims (dynamic)
   template:
@@ -62,20 +65,25 @@
     size: "{{ openshift_metrics_cassandra_pv_size }}"
   with_sequence: count={{ openshift_metrics_cassandra_replicas }}
   when: openshift_metrics_cassandra_storage_type == 'dynamic'
+  changed_when: false
 
 - name: read hawkular-metrics route destination ca certificate
   slurp: src={{ openshift_metrics_certs_dir }}/ca.crt
   register: metrics_route_dest_ca_cert
+  changed_when: false
 
 - block:
   - set_fact: hawkular_key={{ lookup('file', openshift_metrics_hawkular_key) }}
     when: openshift_metrics_hawkular_key | exists
+    changed_when: false
 
   - set_fact: hawkular_cert={{ lookup('file', openshift_metrics_hawkular_cert) }}
     when: openshift_metrics_hawkular_cert | exists
+    changed_when: false
 
   - set_fact: hawkular_ca={{ lookup('file', openshift_metrics_hawkular_ca) }}
     when: openshift_metrics_hawkular_ca | exists
+    changed_when: false
 
   - name: generate the hawkular-metrics route
     template:
@@ -95,3 +103,4 @@
         certificate: "{{ hawkular_cert | default('') }}"
         ca_certificate: "{{ hawkular_ca | default('') }}"
         destination_ca_certificate: "{{ metrics_route_dest_ca_cert.content | b64decode }}"
+    changed_when: false

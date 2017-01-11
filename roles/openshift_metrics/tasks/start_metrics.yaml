@@ -1,5 +1,5 @@
 ---
-- shell: >
+- command: >
     {{openshift.common.client_binary}} 
     --config={{mktemp.stdout}}/admin.kubeconfig 
     get rc 
@@ -7,6 +7,7 @@
     -o name 
     -n {{openshift_metrics_project}}
   register: metrics_cassandra_rc
+  changed_when: no
 
 - name: Start Hawkular Cassandra
   include: scale.yaml
@@ -16,7 +17,7 @@
   loop_control:
     loop_var: object
 
-- shell: >
+- command: >
     {{openshift.common.client_binary}} 
     --config={{mktemp.stdout}}/admin.kubeconfig 
     get rc 
@@ -24,6 +25,7 @@
     -o name 
     -n {{openshift_metrics_project}}
   register: metrics_metrics_rc
+  changed_when: no
 
 - name: Start Hawkular Metrics
   include: scale.yaml
@@ -33,7 +35,7 @@
   loop_control:
     loop_var: object
 
-- shell: >
+- command: >
     {{openshift.common.client_binary}} 
     --config={{mktemp.stdout}}/admin.kubeconfig 
     get rc 

@@ -10,6 +10,7 @@
     labels:
       metrics-infra: "{{obj_name}}"
       name: "{{obj_name}}"
+  changed_when: no
 
 - name: Generate service for hawkular-metrics
   template: src=service.j2 dest={{mktemp.stdout}}/templates/metrics-{{obj_name}}-svc.yaml
@@ -22,6 +23,7 @@
     labels:
       metrics-infra: "{{obj_name}}"
       name: "{{obj_name}}"
+  changed_when: no
 
 - name: Generate services for cassandra
   template: src=service.j2 dest={{mktemp.stdout}}/templates/metrics-{{obj_name}}-svc.yaml
@@ -41,3 +43,5 @@
   with_items:
     - cassandra
     - cassandra-nodes
+  changed_when: no
+

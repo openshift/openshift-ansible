@@ -10,19 +10,22 @@
     --signer-key='{{ openshift_metrics_certs_dir }}/ca.key'
     --signer-serial='{{ openshift_metrics_certs_dir }}/ca.serial.txt'
   when: not '{{ openshift_metrics_certs_dir }}/{{ component }}.key'|exists
+
 - name: generate {{ component }} certificate
   shell: >
     cat
-    '{{ openshift_metrics_certs_dir }}/{{ component|quote }}.key'
-    '{{ openshift_metrics_certs_dir }}/{{ component|quote }}.crt'
-    > '{{ openshift_metrics_certs_dir }}/{{ component|quote }}.pem'
+    '{{ openshift_metrics_certs_dir | quote }}/{{ component|quote }}.key'
+    '{{ openshift_metrics_certs_dir | quote }}/{{ component|quote }}.crt'
+    > '{{ openshift_metrics_certs_dir | quote }}/{{ component|quote }}.pem'
   when: not '{{ openshift_metrics_certs_dir }}/{{ component }}.pem'|exists
+
 - name: generate random password for the {{ component }} keystore
   shell: >
     tr -dc _A-Z-a-z-0-9 < /dev/urandom | head -c15
-    > '{{ openshift_metrics_certs_dir }}/{{ component|quote }}-keystore.pwd'
+    > '{{ openshift_metrics_certs_dir | quote }}/{{ component|quote }}-keystore.pwd'
   when: >
     not '{{ openshift_metrics_certs_dir }}/{{ component }}-keystore.pwd'|exists
+
 - name: create the {{ component }} pkcs12 from the pem file
   command: >
     openssl pkcs12 -export
@@ -32,22 +35,24 @@
     -password
     'file:{{ openshift_metrics_certs_dir }}/{{ component }}-keystore.pwd'
   when: not '{{ openshift_metrics_certs_dir }}/{{ component }}.pkcs12'|exists
+
 - name: create the {{ component }} keystore from the pkcs12 file
   shell: >
     p=$(< {{ openshift_metrics_certs_dir }}/{{ component }}-keystore.pwd)
     &&
     keytool -v -importkeystore
-    -srckeystore '{{ openshift_metrics_certs_dir }}/{{ component }}.pkcs12'
+    -srckeystore '{{ openshift_metrics_certs_dir | quote }}/{{ component | quote }}.pkcs12'
     -srcstoretype PKCS12
-    -destkeystore '{{ openshift_metrics_certs_dir }}/{{ component }}.keystore'
+    -destkeystore '{{ openshift_metrics_certs_dir | quote }}/{{ component | quote}}.keystore'
     -deststoretype JKS
     -deststorepass "$p"
     -srcstorepass "$p"
   when: not '{{ openshift_metrics_certs_dir }}/{{ component }}.keystore'|exists
+
 - name: generate random password for the {{ component }} truststore
   shell: >
     tr -dc _A-Z-a-z-0-9 < /dev/urandom | head -c15
-    > '{{ openshift_metrics_certs_dir }}/{{ component|quote }}-truststore.pwd'
+    > '{{ openshift_metrics_certs_dir | quote }}/{{ component|quote }}-truststore.pwd'
   when: >
     not
-    '{{ openshift_metrics_certs_dir }}/{{ component }}-truststore.pwd'|exists
+    '{{ openshift_metrics_certs_dir | quote }}/{{ component| quote  }}-truststore.pwd'|exists
