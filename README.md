@@ -3,30 +3,48 @@
 
 # OpenShift Ansible
 
-This repository contains [Ansible](https://www.ansible.com/) code to install,
-upgrade and manage [OpenShift](https://www.openshift.com/) clusters.
+This repository contains [Ansible](https://www.ansible.com/) roles and
+playbooks to install, upgrade, and manage
+[OpenShift](https://www.openshift.com/) clusters.
 
-**Note**: the Ansible playbooks in this repository require an RPM package that
-provides `docker`. Currently, the RPMs from
-[dockerproject.org](https://dockerproject.org/) do not provide this requirement,
-though they may in the future. This limitation is being tracked by
+**Note**: the Ansible playbooks in this repository require an RPM
+package that provides `docker`. Currently, the RPMs from
+[dockerproject.org](https://dockerproject.org/) do not provide this
+requirement, though they may in the future. This limitation is being
+tracked by
 [#2720](https://github.com/openshift/openshift-ansible/issues/2720).
 
-## Branches and tags
+## Getting the correct version
 
-The [master branch](https://github.com/openshift/openshift-ansible/tree/master)
-tracks our current work and should be compatible with both [Origin master
-branch](https://github.com/openshift/origin/tree/master) and the [most recent
-Origin stable release](https://github.com/openshift/origin/releases). Currently
-that's v1.5 and v1.4. In addition to the master branch, we maintain stable
-branches corresponding to upstream Origin releases, e.g.:
-[release-1.2](https://github.com/openshift/openshift-ansible/tree/release-1.2).
-The most recent branch will often receive minor feature backports and fixes.
-Older branches will receive only critical fixes.
+The
+[master branch](https://github.com/openshift/openshift-ansible/tree/master)
+tracks our current work **in development** and should be compatible
+with the
+[Origin master branch](https://github.com/openshift/origin/tree/master)
+(code in development).
 
-Releases are tagged periodically from active branches and are versioned 3.x
-corresponding to Origin releases 1.x. We unfortunately started with 3.0 and it's
-not practical to start over at 1.0.
+In addition to the master branch, we maintain stable branches
+corresponding to upstream Origin releases, e.g.: we guarantee an
+openshift-ansible 3.2 release will fully support an origin
+[1.2 release](https://github.com/openshift/openshift-ansible/tree/release-1.2).
+The most recent branch will often receive minor feature backports and
+fixes.  Older branches will receive only critical fixes.
+
+**Getting the right openshift-ansible release**
+
+Follow this release pattern and you can't go wrong:
+
+| Origin        | OpenShift-Ansible |
+| ------------- | ----------------- |
+| 1.3           | 3.3               |
+| 1.4           | 3.4               |
+| 1.*X*         | 3.*X*             |
+
+If you're running from the openshift-ansible **master branch** we can
+only guarantee compatibility with the newest origin releases **in
+development**. Use a branch corresponding to your origin version if
+you are not running a stable release.
+
 
 ## Setup
 
