@@ -78,7 +78,7 @@
     {{ openshift.common.client_binary }}
     --config={{ openshift_metrics_kubeconfig }}
     --namespace openshift-infra
-    secrets new metrics-deployer nothing=/dev/null
+    secrets new metrics-deployer {{ openshift_hosted_metrics_secret_vars | default('nothing=/dev/null') }}
   register: metrics_deployer_secret
   changed_when: metrics_deployer_secret.rc == 0
   failed_when: "metrics_deployer_secret.rc == 1 and 'already exists' not in metrics_deployer_secret.stderr"
@@ -91,6 +91,7 @@
       {{ hosted_base }}/metrics-deployer.yaml -v \
       HAWKULAR_METRICS_HOSTNAME={{ g_metrics_hostname }} \
       -v USE_PERSISTENT_STORAGE={{metrics_persistence | string | lower }} \
+      {{ '-v CASSANDRA_PV_SIZE=' ~ openshift.hosted.metrics.storage_volume_size | quote if openshift.hosted.metrics.storage_volume_size | default(none) is not none else '' }} \
       -v DYNAMICALLY_PROVISION_STORAGE={{metrics_dynamic_vol | string | lower }} \
       -v METRIC_DURATION={{ openshift.hosted.metrics.duration }} \
       -v METRIC_RESOLUTION={{ openshift.hosted.metrics.resolution }}

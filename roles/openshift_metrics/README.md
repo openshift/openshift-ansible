@@ -25,6 +25,8 @@ From this role:
 | openshift_hosted_metrics_storage_nfs_options    | `*(rw,root_squash)`   | NFS options for configured exports.                         |
 | openshift_hosted_metrics_duration               | `7`                   | Metrics query duration                                      |
 | openshift_hosted_metrics_resolution             | `10s`                 | Metrics resolution                                          |
+| openshift_hosted_metrics_secret_vars            | `/dev/null`           | hawkular-metrics.pem=/path/to/hm.pem ...                    |
+
 
 
 Dependencies
