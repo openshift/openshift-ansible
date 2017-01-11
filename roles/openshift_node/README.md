@@ -47,6 +47,8 @@ oadm manage-node --drain ${NODE}
 oadm manage-node --schedulable=true ${NODE}
 ````
 
+> If you are using version less than 1.5/3.5 you must replace `--drain` with `--evacuate`.
+
 
 TODO
 

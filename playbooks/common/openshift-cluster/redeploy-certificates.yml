@@ -234,7 +234,7 @@
     command: >
       {{ openshift.common.client_binary }} adm --config={{ hostvars[groups.oo_first_master.0].mktemp.stdout }}/admin.kubeconfig
       manage-node {{ openshift.node.nodename }}
-      --drain --force
+      {{ openshift.common.evacuate_or_drain }} --force
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: openshift_certificates_redeploy_ca | default(false) | bool and was_schedulable | bool
 
