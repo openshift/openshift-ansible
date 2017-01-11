@@ -6,6 +6,8 @@ This role determines if OpenShift node certificates must be created, delegates c
 Requirements
 ------------
 
+* Ansible 2.2
+
 Role Variables
 --------------
 

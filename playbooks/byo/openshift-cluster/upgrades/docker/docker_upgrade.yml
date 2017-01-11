@@ -1,4 +1,4 @@
-
+---
 - name: Check for appropriate Docker versions
   hosts: oo_masters_to_config:oo_nodes_to_upgrade:oo_etcd_to_config
   roles:
@@ -18,20 +18,20 @@
 # If a node fails, halt everything, the admin will need to clean up and we
 # don't want to carry on, potentially taking out every node. The playbook can safely be re-run
 # and will not take any action on a node already running the requested docker version.
-- name: Evacuate and upgrade nodes
+- name: Drain and upgrade nodes
   hosts: oo_masters_to_config:oo_nodes_to_upgrade:oo_etcd_to_config
   serial: 1
   any_errors_fatal: true
   tasks:
-  - name: Prepare for Node evacuation
+  - name: Prepare for Node draining
     command: >
       {{ openshift.common.client_binary }} adm manage-node {{ openshift.node.nodename }} --schedulable=false
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: l_docker_upgrade is defined and l_docker_upgrade | bool and inventory_hostname in groups.oo_nodes_to_upgrade
 
-  - name: Evacuate Node for Kubelet upgrade
+  - name: Drain Node for Kubelet upgrade
     command: >
-      {{ openshift.common.client_binary }} adm manage-node {{ openshift.node.nodename }} --evacuate --force
+      {{ openshift.common.client_binary }} adm manage-node {{ openshift.node.nodename }} {{ openshift.common.evacuate_or_drain }} --force
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: l_docker_upgrade is defined and l_docker_upgrade | bool and inventory_hostname in groups.oo_nodes_to_upgrade
 
@@ -42,6 +42,4 @@
     command: >
       {{ openshift.common.client_binary }} adm manage-node {{ openshift.node.nodename }} --schedulable=true
     delegate_to: "{{ groups.oo_first_master.0 }}"
-    when: openshift.node.schedulable | bool
     when: l_docker_upgrade is defined and l_docker_upgrade | bool and inventory_hostname in groups.oo_nodes_to_upgrade and openshift.node.schedulable | bool
-

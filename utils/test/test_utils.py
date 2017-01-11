@@ -2,6 +2,7 @@
 Unittests for ooinstall utils.
 """
 
+import six
 import unittest
 import logging
 import sys
@@ -28,9 +29,6 @@ class TestUtils(unittest.TestCase):
             mock.call('OO_FOO: bar'),
         ]
 
-        # python 2.x has assertItemsEqual, python 3.x has assertCountEqual
-        if sys.version_info.major > 3:
-            self.assertItemsEqual = self.assertCountEqual
 
     ######################################################################
     # Validate ooinstall.utils.debug_env functionality
@@ -40,7 +38,6 @@ class TestUtils(unittest.TestCase):
 
         with mock.patch('ooinstall.utils.installer_log') as _il:
             debug_env(self.debug_all_params)
-            print _il.debug.call_args_list
 
             # Debug was called for each item we expect
             self.assertEqual(
@@ -48,7 +45,8 @@ class TestUtils(unittest.TestCase):
                 _il.debug.call_count)
 
             # Each item we expect was logged
-            self.assertItemsEqual(
+            six.assertCountEqual(
+                self,
                 self.expected,
                 _il.debug.call_args_list)
 
@@ -67,7 +65,8 @@ class TestUtils(unittest.TestCase):
                 _il.debug.call_count,
                 len(debug_some_params))
 
-            self.assertItemsEqual(
+            six.assertCountEqual(
+                self,
                 self.expected,
                 _il.debug.call_args_list)
 

@@ -68,7 +68,7 @@ Show the usage help and exit.
 COMMANDS
 --------
 
-**atomic-openshift-installer** has three modes of operation:
+**atomic-openshift-installer** has four modes of operation:
 
 * **install**
 * **uninstall**

@@ -1,3 +1,8 @@
+---
+openshift_master_config_dir: "{{ openshift.common.config_base }}/master"
+openshift_master_config_file: "{{ openshift_master_config_dir }}/master-config.yaml"
+openshift_master_scheduler_conf: "{{ openshift_master_config_dir }}/scheduler.json"
+
 builddefaults_yaml:
   BuildDefaults:
     configuration:
@@ -18,8 +23,3 @@ builddefaults_yaml:
         value: "{{ openshift.master.builddefaults_https_proxy | default(omit, true) }}"
       - name: no_proxy
         value: "{{ openshift.master.builddefaults_no_proxy | default(omit, true) | join(',') }}"
-
-metrics_hostname: "{{ openshift_hosted_metrics_public_url
-                    | default('hawkular-metrics.' ~ (openshift.master.default_subdomain
-                    | default(openshift_master_default_subdomain )))
-                    | oo_hostname_from_url }}"

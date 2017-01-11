@@ -18,4 +18,3 @@
     dest: "{{ openshift.common.config_base}}/node/node-config.yaml"
     yaml_key: 'masterClientConnectionOverrides.qps'
     yaml_value: 20
-

@@ -4,11 +4,40 @@ galaxy_info:
   description: Master
   company: Red Hat, Inc.
   license: Apache License, Version 2.0
-  min_ansible_version: 2.1
+  min_ansible_version: 2.2
   platforms:
   - name: EL
     versions:
     - 7
   categories:
   - cloud
-dependencies: []
+dependencies:
+- role: openshift_master_facts
+- role: openshift_hosted_facts
+- role: openshift_master_certificates
+- role: openshift_etcd_client_certificates
+  etcd_cert_subdir: "openshift-master-{{ openshift.common.hostname }}"
+  etcd_cert_config_dir: "{{ openshift.common.config_base }}/master"
+  etcd_cert_prefix: "master.etcd-"
+  when: groups.oo_etcd_to_config | default([]) | length != 0
+- role: openshift_clock
+- role: openshift_cloud_provider
+- role: openshift_builddefaults
+- role: os_firewall
+  os_firewall_allow:
+  - service: api server https
+    port: "{{ openshift.master.api_port }}/tcp"
+  - service: api controllers https
+    port: "{{ openshift.master.controllers_port }}/tcp"
+  - service: skydns tcp
+    port: "{{ openshift.master.dns_port }}/tcp"
+  - service: skydns udp
+    port: "{{ openshift.master.dns_port }}/udp"
+- role: os_firewall
+  os_firewall_allow:
+  - service: etcd embedded
+    port: 4001/tcp
+  when: groups.oo_etcd_to_config | default([]) | length == 0
+- role: nickhammond.logrotate
+- role: nuage_master
+  when: openshift.common.use_nuage | bool

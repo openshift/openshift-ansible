@@ -21,3 +21,9 @@ multi_inventory.yaml
 ansible.cfg
 *.retry
 .vscode/*
+.cache
+.tox
+.coverage
+*.egg-info
+.eggs
+cover

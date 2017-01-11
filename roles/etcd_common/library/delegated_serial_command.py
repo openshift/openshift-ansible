@@ -24,12 +24,9 @@
 
 ''' delegated_serial_command '''
 
-import copy
-import sys
 import datetime
+import errno
 import glob
-import traceback
-import re
 import shlex
 import os
 import fcntl
@@ -133,6 +130,7 @@ OPTIONS = {'chdir': None,
            'lockfile': None,
            'timeout': None}
 
+
 def check_command(commandline):
     ''' Check provided command '''
     arguments = {'chown': 'owner', 'chmod': 'mode', 'chgrp': 'group',
@@ -160,7 +158,7 @@ def check_command(commandline):
 # pylint: disable=too-many-statements,too-many-branches,too-many-locals
 def main():
     ''' Main module function '''
-    module = AnsibleModule(
+    module = AnsibleModule(  # noqa: F405
         argument_spec=dict(
             _uses_shell=dict(type='bool', default=False),
             command=dict(required=True),
@@ -220,9 +218,9 @@ def main():
             )
 
     if removes:
-    # do not run the command if the line contains removes=filename
-    # and the filename does not exist.  This allows idempotence
-    # of command executions.
+        # do not run the command if the line contains removes=filename
+        # and the filename does not exist.  This allows idempotence
+        # of command executions.
         path = os.path.expanduser(removes)
         if not glob.glob(path):
             module.exit_json(
@@ -268,7 +266,9 @@ def main():
         iterated=iterated
     )
 
+
 # import module snippets
-from ansible.module_utils.basic import *
+# pylint: disable=wrong-import-position
+from ansible.module_utils.basic import *  # noqa: F402,F403
 
 main()

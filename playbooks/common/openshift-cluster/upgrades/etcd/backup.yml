@@ -1,7 +1,8 @@
+---
 - name: Backup etcd
   hosts: etcd_hosts_to_backup
   vars:
-    embedded_etcd: "{{ hostvars[groups.oo_first_master.0].openshift.master.embedded_etcd }}"
+    embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
     timestamp: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
   roles:
   - openshift_facts
@@ -41,9 +42,28 @@
         {{ avail_disk.stdout }} Kb available.
     when: (embedded_etcd | bool) and (etcd_disk_usage.stdout|int > avail_disk.stdout|int)
 
-  - name: Install etcd (for etcdctl)
-    action: "{{ ansible_pkg_mgr }} name=etcd state=present"
-    when: not openshift.common.is_atomic | bool
+  # For non containerized and non embedded we should have the correct version of
+  # etcd installed already. So don't do anything.
+  #
+  # For embedded or containerized we need to use the latest because OCP 3.3 uses
+  # a version of etcd that can only be backed up with etcd-3.x and if it's
+  # containerized then etcd version may be newer than that on the host so
+  # upgrade it.
+  #
+  # On atomic we have neither yum nor dnf so ansible throws a hard to debug error
+  # if you use package there, like this: "Could not find a module for unknown."
+  # see https://bugzilla.redhat.com/show_bug.cgi?id=1408668
+  #
+  # TODO - We should refactor all containerized backups to use the containerized
+  # version of etcd to perform the backup rather than relying on the host's
+  # binaries. Until we do that we'll continue to have problems backing up etcd
+  # when atomic host has an older version than the version that's running in the
+  # container whether that's embedded or not
+  - name: Install latest etcd for containerized or embedded
+    package:
+      name: etcd
+      state: latest
+    when: ( embedded_etcd | bool or openshift.common.is_containerized ) and not openshift.common.is_atomic
 
   - name: Generate etcd backup
     command: >

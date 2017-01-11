@@ -56,7 +56,7 @@
 
   - name: fail if we don't detect loopback
     fail:
-      msg:  loopback not detected! Please investigate manually.
+      msg: loopback not detected! Please investigate manually.
     when: loop_device_check.rc == 1
 
   - name: stop zagg client monitoring container
@@ -139,4 +139,3 @@
     register: dockerstart
 
   - debug: var=dockerstart
-

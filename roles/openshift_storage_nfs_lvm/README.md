@@ -8,10 +8,9 @@ create persistent volumes.
 
 ## Requirements
 
-* NFS server with NFS, iptables, and everything setup.
-
+* Ansible 2.2
+* NFS server with NFS, iptables, and everything setup
 * A lvm volume group created on the nfs server (default: openshiftvg)
-
 * The lvm volume needs to have as much free space as you are allocating
 
 ## Role Variables
@@ -49,6 +48,13 @@ osnl_volume_num_start: 3
 # How many volumes/partitions to build, with the size we stated.
 osnl_number_of_volumes: 2
 
+# osnl_volume_reclaim_policy
+# Volume reclaim policy of a PersistentVolume tells the cluster
+# what to do with the volume after it is released.
+#
+# Valid values are "Retain" or "Recycle" (default).
+osnl_volume_reclaim_policy: "Recycle"
+
 ```
 
 ## Dependencies
@@ -72,6 +78,7 @@ exported via NFS.  json files are created in /root.
           osnl_volume_size: 5
           osnl_volume_num_start: 3
           osnl_number_of_volumes: 2
+          osnl_volume_reclaim_policy: "Recycle"
 
 
 ## Full example
@@ -97,6 +104,7 @@ exported via NFS.  json files are created in /root.
           osnl_volume_size: 5
           osnl_volume_num_start: 3
           osnl_number_of_volumes: 2
+          osnl_volume_reclaim_policy: "Recycle"
 
 * Run the playbook:
     ```

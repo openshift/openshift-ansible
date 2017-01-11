@@ -1,5 +1,20 @@
+---
 # This file is included both in the openshift_master role and in the upgrade
 # playbooks.
+
+- name: Pre-pull node image
+  command: >
+    docker pull {{ openshift.node.node_image }}:{{ openshift_image_tag }}
+  register: pull_result
+  changed_when: "'Downloaded newer image' in pull_result.stdout"
+  when: openshift.common.is_containerized | bool
+
+- name: Pre-pull openvswitch image
+  command: >
+    docker pull {{ openshift.node.ovs_image }}:{{ openshift_image_tag }}
+  register: pull_result
+  changed_when: "'Downloaded newer image' in pull_result.stdout"
+  when: openshift.common.is_containerized | bool and openshift.common.use_openshift_sdn | bool
 
 - name: Install Node dependencies docker service file
   template:
@@ -54,12 +69,12 @@
     line: "{{ item.line }}"
     create: true
   with_items:
-    - regex: '^OPTIONS='
-      line: "OPTIONS=--loglevel={{ openshift.node.debug_level | default(2) }}"
-    - regex: '^CONFIG_FILE='
-      line: "CONFIG_FILE={{ openshift.common.config_base }}/node/node-config.yaml"
-    - regex: '^IMAGE_VERSION='
-      line: "IMAGE_VERSION={{ openshift_image_tag }}"
+  - regex: '^OPTIONS='
+    line: "OPTIONS=--loglevel={{ openshift.node.debug_level | default(2) }}"
+  - regex: '^CONFIG_FILE='
+    line: "CONFIG_FILE={{ openshift.common.config_base }}/node/node-config.yaml"
+  - regex: '^IMAGE_VERSION='
+    line: "IMAGE_VERSION={{ openshift_image_tag }}"
   notify:
   - restart node
 
@@ -70,12 +85,12 @@
     line: "{{ item.line }}"
     create: true
   with_items:
-    - regex: '^HTTP_PROXY='
-      line: "HTTP_PROXY={{ openshift.common.http_proxy | default('') }}"
-    - regex: '^HTTPS_PROXY='
-      line: "HTTPS_PROXY={{ openshift.common.https_proxy | default('') }}"
-    - regex: '^NO_PROXY='
-      line: "NO_PROXY={{ openshift.common.no_proxy | default([]) | join(',') }},{{ openshift.common.portal_net }},{{ hostvars[groups.oo_first_master.0].openshift.master.sdn_cluster_network_cidr }}"
+  - regex: '^HTTP_PROXY='
+    line: "HTTP_PROXY={{ openshift.common.http_proxy | default('') }}"
+  - regex: '^HTTPS_PROXY='
+    line: "HTTPS_PROXY={{ openshift.common.https_proxy | default('') }}"
+  - regex: '^NO_PROXY='
+    line: "NO_PROXY={{ openshift.common.no_proxy | default([]) | join(',') }},{{ openshift.common.portal_net }},{{ hostvars[groups.oo_first_master.0].openshift.master.sdn_cluster_network_cidr }}"
   when: ('http_proxy' in openshift.common and openshift.common.http_proxy != '')
   notify:
   - restart node

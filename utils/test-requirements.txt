@@ -1,7 +1,7 @@
-enum
+ansible
 configparser
 pylint
-pep8
+setuptools-lint
 nose
 coverage
 mock
@@ -10,3 +10,6 @@ PyYAML
 click
 backports.functools_lru_cache
 pyOpenSSL
+yamllint
+tox
+detox

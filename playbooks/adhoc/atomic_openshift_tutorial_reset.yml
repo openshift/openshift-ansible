@@ -19,7 +19,7 @@
       changed_when: False
       failed_when: False
 
-    - shell:  docker images -q |xargs docker rmi
+    - shell: docker images -q |xargs docker rmi
       changed_when: False
       failed_when: False
 

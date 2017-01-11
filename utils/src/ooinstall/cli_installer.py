@@ -501,7 +501,7 @@ def get_variant_and_version(multi_master=False):
 
     i = 1
     combos = get_variant_version_combos()
-    for (variant, version) in combos:
+    for (variant, _) in combos:
         message = "%s\n(%s) %s" % (message, i, variant.description)
         i = i + 1
     message = "%s\n" % message
@@ -1124,6 +1124,20 @@ def scaleup(ctx, gen_inventory):
 
     click.echo('Welcome to the OpenShift Enterprise 3 Scaleup utility.')
 
+    # Scaleup requires manual data entry. Therefore, we do not support
+    # unattended operations.
+    if unattended:
+        msg = """
+---
+
+The 'scaleup' operation does not support unattended
+functionality. Re-run the installer without the '-u' or '--unattended'
+option to continue.
+"""
+        click.echo(msg)
+        sys.exit(1)
+
+    # Resume normal scaleup workflow
     print_installation_summary(installed_hosts,
                                oo_cfg.settings['variant_version'],
                                verbose=False,)

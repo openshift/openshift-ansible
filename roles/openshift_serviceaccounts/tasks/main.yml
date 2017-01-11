@@ -1,3 +1,4 @@
+---
 - name: test if service accounts exists
   command: >
       {{ openshift.common.client_binary }} get sa {{ item }} -n {{ openshift_serviceaccounts_namespace }}

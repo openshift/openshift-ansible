@@ -60,30 +60,8 @@
     when: "{{ (openshift_http_proxy is defined or openshift_https_proxy is defined) and
             openshift_generate_no_proxy_hosts | default(True) | bool }}"
   roles:
-  - role: openshift_common
-  - role: openshift_clock
-  - role: openshift_docker
-  - role: openshift_node_certificates
-    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
-  - role: openshift_cloud_provider
-  - role: openshift_node_dnsmasq
-    when: openshift.common.use_dnsmasq | bool
-  - role: os_firewall
-    os_firewall_allow:
-    - service: Kubernetes kubelet
-      port: 10250/tcp
-    - service: http
-      port: 80/tcp
-    - service: https
-      port: 443/tcp
-    - service: Openshift kubelet ReadOnlyPort
-      port: 10255/tcp
-    - service: Openshift kubelet ReadOnlyPort udp
-      port: 10255/udp
-    - service: OpenShift OVS sdn
-      port: 4789/udp
-      when: openshift.node.use_openshift_sdn | bool
   - role: openshift_node
+    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
 
 - name: Configure nodes
   hosts: oo_nodes_to_config:!oo_containerized_master_nodes
@@ -99,30 +77,8 @@
     when: "{{ (openshift_http_proxy is defined or openshift_https_proxy is defined) and
             openshift_generate_no_proxy_hosts | default(True) | bool }}"
   roles:
-  - role: openshift_common
-  - role: openshift_clock
-  - role: openshift_docker
-  - role: openshift_node_certificates
-    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
-  - role: openshift_cloud_provider
-  - role: openshift_node_dnsmasq
-    when: openshift.common.use_dnsmasq | bool
-  - role: os_firewall
-    os_firewall_allow:
-    - service: Kubernetes kubelet
-      port: 10250/tcp
-    - service: http
-      port: 80/tcp
-    - service: https
-      port: 443/tcp
-    - service: Openshift kubelet ReadOnlyPort
-      port: 10255/tcp
-    - service: Openshift kubelet ReadOnlyPort udp
-      port: 10255/udp
-    - service: OpenShift OVS sdn
-      port: 4789/udp
-      when: openshift.node.use_openshift_sdn | bool
   - role: openshift_node
+    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
 
 - name: Additional node config
   hosts: oo_nodes_to_config
@@ -139,6 +95,8 @@
   - role: nuage_node
     when: openshift.common.use_nuage | bool
   - role: nickhammond.logrotate
+  - role: openshift_manage_node
+    openshift_master_host: "{{ groups.oo_first_master.0 }}"
   tasks:
   - name: Create group for deployment type
     group_by: key=oo_nodes_deployment_type_{{ openshift.common.deployment_type }}
@@ -152,35 +110,3 @@
   tasks:
   - file: name={{ mktemp.stdout }} state=absent
     changed_when: False
-
-- name: Set node schedulability
-  hosts: oo_first_master
-  vars:
-    openshift_nodes: "{{ groups.oo_nodes_to_config | default([]) }}"
-  pre_tasks:
-  # Necessary because when you're on a node that's also a master the master will be
-  # restarted after the node restarts docker and it will take up to 60 seconds for
-  # systemd to start the master again
-  - name: Wait for master API to become available before proceeding
-    # Using curl here since the uri module requires python-httplib2 and
-    # wait_for port doesn't provide health information.
-    command: >
-      curl --silent --tlsv1.2
-      {% if openshift.common.version_gte_3_2_or_1_2 | bool %}
-      --cacert {{ openshift.common.config_base }}/master/ca-bundle.crt
-      {% else %}
-      --cacert {{ openshift.common.config_base }}/master/ca.crt
-      {% endif %}
-      {{ openshift.master.api_url }}/healthz/ready
-    args:
-      # Disables the following warning:
-      # Consider using get_url or uri module rather than running curl
-      warn: no
-    register: api_available_output
-    until: api_available_output.stdout == 'ok'
-    retries: 120
-    delay: 1
-    changed_when: false
-    when: openshift.common.is_containerized | bool
-  roles:
-  - openshift_manage_node

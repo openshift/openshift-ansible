@@ -1,4 +1,32 @@
 ---
+
+# Ensure the default sub-domain is set:
+- name: Migrate legacy osm_default_subdomain fact
+  set_fact:
+    openshift_master_default_subdomain: "{{ osm_default_subdomain | default(None) }}"
+  when: openshift_master_default_subdomain is not defined
+
+- fail:
+    msg: openshift_master_default_subdomain must be set to deploy metrics
+  when: openshift_hosted_metrics_deploy | default(false) | bool and openshift_master_default_subdomain | default("") == ""
+
+# NOTE: These metrics variables are unfortunately needed by both the master and the metrics roles
+# to properly configure the master-config.yaml file.
+#
+# NOTE: Today only changing the hostname for the metrics public URL is supported, the
+# path must stay consistent. As such if openshift_hosted_metrics_public_url is set in
+# inventory, we extract the hostname, and then reset openshift_hosted_metrics_public_url
+# to the format that we know is valid. (This may change in future)
+- set_fact:
+    g_metrics_hostname: "{{ openshift_hosted_metrics_public_url
+                        | default('hawkular-metrics.' ~ (openshift_master_default_subdomain))
+                        | oo_hostname_from_url }}"
+  when: openshift_hosted_metrics_deploy | default(false) | bool
+
+- set_fact:
+    openshift_hosted_metrics_public_url: "https://{{ g_metrics_hostname }}/hawkular/metrics"
+  when: openshift_hosted_metrics_deploy | default(false) | bool
+
 - name: Set master facts
   openshift_facts:
     role: master
@@ -49,7 +77,6 @@
       oauth_grant_method: "{{ openshift_master_oauth_grant_method | default(None) }}"
       sdn_cluster_network_cidr: "{{ osm_cluster_network_cidr | default(None) }}"
       sdn_host_subnet_length: "{{ osm_host_subnet_length | default(None) }}"
-      default_subdomain: "{{ openshift_master_default_subdomain | default(osm_default_subdomain | default(None), true) }}"
       custom_cors_origins: "{{ osm_custom_cors_origins | default(None) }}"
       default_node_selector: "{{ osm_default_node_selector | default(None) }}"
       project_request_message: "{{ osm_project_request_message | default(None) }}"
@@ -64,13 +91,9 @@
       master_count: "{{ openshift_master_count | default(None) }}"
       controller_lease_ttl: "{{ osm_controller_lease_ttl | default(None) }}"
       master_image: "{{ osm_image | default(None) }}"
-      scheduler_predicates: "{{ openshift_master_scheduler_predicates | default(None) }}"
-      scheduler_priorities: "{{ openshift_master_scheduler_priorities | default(None) }}"
-      admission_plugin_order: "{{openshift_master_admission_plugin_order | default(None) }}"
       admission_plugin_config: "{{openshift_master_admission_plugin_config | default(None) }}"
-      kube_admission_plugin_order: "{{openshift_master_kube_admission_plugin_order | default(None) }}"
-      kube_admission_plugin_config: "{{openshift_master_kube_admission_plugin_config | default(None) }}"
-      oauth_template: "{{ openshift_master_oauth_template | default(None) }}" # deprecated in origin 1.2 / OSE 3.2
+      kube_admission_plugin_config: "{{openshift_master_kube_admission_plugin_config | default(None) }}"  # deprecated, merged with admission_plugin_config
+      oauth_template: "{{ openshift_master_oauth_template | default(None) }}"  # deprecated in origin 1.2 / OSE 3.2
       oauth_templates: "{{ openshift_master_oauth_templates | default(None) }}"
       oauth_always_show_provider_selection: "{{ openshift_master_oauth_always_show_provider_selection | default(None) }}"
       image_policy_config: "{{ openshift_master_image_policy_config | default(None) }}"
@@ -79,5 +102,31 @@
       api_env_vars: "{{ openshift_master_api_env_vars | default(None) }}"
       controllers_env_vars: "{{ openshift_master_controllers_env_vars | default(None) }}"
       audit_config: "{{ openshift_master_audit_config | default(None) }}"
-      metrics_public_url: "{% if openshift_hosted_metrics_deploy | default(false) %}https://{{ metrics_hostname }}/hawkular/metrics{% endif %}"
       scheduler_args: "{{ openshift_master_scheduler_args | default(None) }}"
+
+- name: Determine if scheduler config present
+  stat:
+    path: "{{ openshift_master_scheduler_conf }}"
+  register: scheduler_config_stat
+
+- set_fact:
+    openshift_master_scheduler_default_predicates: "{{ lookup('openshift_master_facts_default_predicates') }}"
+    openshift_master_scheduler_default_priorities: "{{ lookup('openshift_master_facts_default_priorities') }}"
+
+- block:
+  - name: Retrieve current scheduler config
+    slurp:
+      src: "{{ openshift_master_scheduler_conf }}"
+    register: current_scheduler_config
+
+  - set_fact:
+      openshift_master_scheduler_current_config: "{{ current_scheduler_config.content | b64decode | from_json }}"
+
+  - fail:
+      msg: "Unknown scheduler config apiVersion {{ openshift_master_scheduler_config.apiVersion }}"
+    when: "{{ openshift_master_scheduler_current_config.apiVersion | default(None) != 'v1' }}"
+
+  - set_fact:
+      openshift_master_scheduler_current_predicates: "{{ openshift_master_scheduler_current_config.predicates }}"
+      openshift_master_scheduler_current_priorities: "{{ openshift_master_scheduler_current_config.priorities }}"
+  when: "{{ scheduler_config_stat.stat.exists }}"
