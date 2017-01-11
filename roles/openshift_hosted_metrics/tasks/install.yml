@@ -3,7 +3,7 @@
 - name: Test if metrics-deployer service account exists
   command: >
     {{ openshift.common.client_binary }}
-    --config={{ openshift_metrics_kubeconfig }}
+    --config={{ openshift_hosted_metrics_kubeconfig }}
     --namespace=openshift-infra
     get serviceaccount metrics-deployer -o json
   register: serviceaccount
@@ -14,7 +14,7 @@
   shell: >
     echo {{ metrics_deployer_sa | to_json | quote }} |
     {{ openshift.common.client_binary }}
-    --config={{ openshift_metrics_kubeconfig }}
+    --config={{ openshift_hosted_metrics_kubeconfig }}
     --namespace openshift-infra
     create -f -
   when: serviceaccount.rc == 1
@@ -22,7 +22,7 @@
 - name: Test edit permissions
   command: >
     {{ openshift.common.client_binary }}
-    --config={{ openshift_metrics_kubeconfig }}
+    --config={{ openshift_hosted_metrics_kubeconfig }}
     --namespace openshift-infra
     get rolebindings -o jsonpath='{.items[?(@.metadata.name == "edit")].userNames}'
   register: edit_rolebindings
@@ -31,7 +31,7 @@
 - name: Add edit permission to the openshift-infra project to metrics-deployer SA
   command: >
     {{ openshift.common.client_binary }} adm
-    --config={{ openshift_metrics_kubeconfig }}
+    --config={{ openshift_hosted_metrics_kubeconfig }}
     --namespace openshift-infra
     policy add-role-to-user edit
     system:serviceaccount:openshift-infra:metrics-deployer
@@ -40,7 +40,7 @@
 - name: Test hawkular view permissions
   command: >
     {{ openshift.common.client_binary }}
-    --config={{ openshift_metrics_kubeconfig }}
+    --config={{ openshift_hosted_metrics_kubeconfig }}
     --namespace openshift-infra
     get rolebindings -o jsonpath='{.items[?(@.metadata.name == "view")].userNames}'
   register: view_rolebindings
@@ -49,7 +49,7 @@
 - name: Add view permissions to hawkular SA
   command: >
       {{ openshift.common.client_binary }} adm
-      --config={{ openshift_metrics_kubeconfig }}
+      --config={{ openshift_hosted_metrics_kubeconfig }}
       --namespace openshift-infra
       policy add-role-to-user view
       system:serviceaccount:openshift-infra:hawkular
@@ -58,7 +58,7 @@
 - name: Test cluster-reader permissions
   command: >
     {{ openshift.common.client_binary }}
-    --config={{ openshift_metrics_kubeconfig }}
+    --config={{ openshift_hosted_metrics_kubeconfig }}
     --namespace openshift-infra
     get clusterrolebindings -o jsonpath='{.items[?(@.metadata.name == "cluster-reader")].userNames}'
   register: cluster_reader_clusterrolebindings
@@ -67,7 +67,7 @@
 - name: Add cluster-reader permission to the openshift-infra project to heapster SA
   command: >
     {{ openshift.common.client_binary }} adm
-    --config={{ openshift_metrics_kubeconfig }}
+    --config={{ openshift_hosted_metrics_kubeconfig }}
     --namespace openshift-infra
     policy add-cluster-role-to-user cluster-reader
     system:serviceaccount:openshift-infra:heapster
@@ -76,7 +76,7 @@
 - name: Create metrics-deployer secret
   command: >
     {{ openshift.common.client_binary }}
-    --config={{ openshift_metrics_kubeconfig }}
+    --config={{ openshift_hosted_metrics_kubeconfig }}
     --namespace openshift-infra
     secrets new metrics-deployer nothing=/dev/null
   register: metrics_deployer_secret
@@ -98,7 +98,7 @@
       {{ image_version }} \
       -v MODE={{ deployment_mode }} \
         | {{ openshift.common.client_binary }} --namespace openshift-infra \
-        --config={{ openshift_metrics_kubeconfig }} \
+        --config={{ openshift_hosted_metrics_kubeconfig }} \
         create -o name -f -"
 
 - name: Deploy Metrics
@@ -116,7 +116,7 @@
   shell: >
     {{ openshift.common.client_binary }}
     --namespace openshift-infra
-    --config={{ openshift_metrics_kubeconfig }}
+    --config={{ openshift_hosted_metrics_kubeconfig }}
     get {{ deploy_metrics.stdout }}
   register: deploy_result
   until: "{{ 'Completed' in deploy_result.stdout }}"

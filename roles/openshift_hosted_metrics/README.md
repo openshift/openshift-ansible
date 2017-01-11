@@ -40,7 +40,7 @@ Example Playbook
 - name: Configure openshift-metrics
   hosts: oo_first_master
   roles:
-  - role: openshift_metrics
+  - role: openshift_hosted_metrics
 ```
 
 License
