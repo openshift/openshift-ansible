@@ -38,7 +38,6 @@ class TestUtils(unittest.TestCase):
 
         with mock.patch('ooinstall.utils.installer_log') as _il:
             debug_env(self.debug_all_params)
-            print(_il.debug.call_args_list)
 
             # Debug was called for each item we expect
             self.assertEqual(

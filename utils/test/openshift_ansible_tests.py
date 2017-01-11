@@ -58,7 +58,6 @@ class TestOpenShiftAnsible(unittest.TestCase):
         self.assertTrue(inventory.has_option('new_nodes', 'new_node1'))
 
     def test_write_inventory_vars_role_vars(self):
-        print(yaml.dump(openshift_ansible.CFG.deployment.roles))
         with open(self.inventory, 'w') as inv:
             openshift_ansible.CFG.deployment.roles['master'].variables={'color': 'blue'}
             openshift_ansible.CFG.deployment.roles['node'].variables={'color': 'green'}
