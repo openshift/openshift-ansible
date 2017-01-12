@@ -1,10 +1,10 @@
 ---
 - command: >
-    {{openshift.common.client_binary}} 
-    --config={{mktemp.stdout}}/admin.kubeconfig 
-    get rc 
-    -l metrics-infra=hawkular-cassandra 
-    -o name 
+    {{openshift.common.client_binary}}
+    --config={{mktemp.stdout}}/admin.kubeconfig
+    get rc
+    -l metrics-infra=hawkular-cassandra
+    -o name
     -n {{openshift_metrics_project}}
   register: metrics_cassandra_rc
   changed_when: no
@@ -18,11 +18,11 @@
     loop_var: object
 
 - command: >
-    {{openshift.common.client_binary}} 
-    --config={{mktemp.stdout}}/admin.kubeconfig 
-    get rc 
-    -l metrics-infra=hawkular-metrics 
-    -o name 
+    {{openshift.common.client_binary}}
+    --config={{mktemp.stdout}}/admin.kubeconfig
+    get rc
+    -l metrics-infra=hawkular-metrics
+    -o name
     -n {{openshift_metrics_project}}
   register: metrics_metrics_rc
   changed_when: no
@@ -36,11 +36,11 @@
     loop_var: object
 
 - command: >
-    {{openshift.common.client_binary}} 
-    --config={{mktemp.stdout}}/admin.kubeconfig 
-    get rc 
+    {{openshift.common.client_binary}}
+    --config={{mktemp.stdout}}/admin.kubeconfig
+    get rc
     -l metrics-infra=heapster
-    -o name 
+    -o name
     -n {{openshift_metrics_project}}
   register: metrics_heapster_rc
   check_mode: no

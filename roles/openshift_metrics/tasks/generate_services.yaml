@@ -41,7 +41,6 @@
       name: hawkular-cassandra
     headless: "{{ item == 'cassandra-nodes' }}"
   with_items:
-    - cassandra
-    - cassandra-nodes
+  - cassandra
+  - cassandra-nodes
   changed_when: no
-

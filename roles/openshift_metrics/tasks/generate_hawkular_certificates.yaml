@@ -211,7 +211,7 @@
         {{ hawkular_secrets['hawkular-metrics.pwd'] }}
   when: name not in metrics_secrets.stdout_lines
   changed_when: no
-  
+
 - name: generate cassandra secret template
   template:
     src: secret.j2

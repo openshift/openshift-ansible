@@ -25,10 +25,10 @@
     --config={{ mktemp.stdout }}/admin.kubeconfig
     apply -f {{ item }}
   with_fileglob:
-  - "{{ mktemp.stdout }}/templates/*.yaml"
+    - "{{ mktemp.stdout }}/templates/*.yaml"
 
 - name: Scaling up cluster
   include: start_metrics.yaml
   tags: openshift_metrics_start_cluster
   when:
-  - openshift_metrics_start_cluster | default(true) | bool
+    - openshift_metrics_start_cluster | default(true) | bool

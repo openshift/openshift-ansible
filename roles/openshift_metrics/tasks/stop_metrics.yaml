@@ -1,10 +1,10 @@
 ---
 - command: >
-    {{openshift.common.client_binary}} 
-    --config={{mktemp.stdout}}/admin.kubeconfig 
-    get rc 
+    {{openshift.common.client_binary}}
+    --config={{mktemp.stdout}}/admin.kubeconfig
+    get rc
     -l metrics-infra=heapster
-    -o name 
+    -o name
     -n {{openshift_metrics_project}}
   register: metrics_heapster_rc
   changed_when: "'No resources found' not in metrics_heapster_rc.stderr"
@@ -19,11 +19,11 @@
     loop_var: object
 
 - command: >
-    {{openshift.common.client_binary}} 
-    --config={{mktemp.stdout}}/admin.kubeconfig 
+    {{openshift.common.client_binary}}
+    --config={{mktemp.stdout}}/admin.kubeconfig
     get rc
     -l metrics-infra=hawkular-metrics
-    -o name 
+    -o name
     -n {{openshift_metrics_project}}
   register: metrics_hawkular_rc
   changed_when: "'No resources found' not in metrics_hawkular_rc.stderr"
@@ -37,10 +37,10 @@
     loop_var: object
 
 - command: >
-    {{openshift.common.client_binary}} --config={{mktemp.stdout}}/admin.kubeconfig 
+    {{openshift.common.client_binary}} --config={{mktemp.stdout}}/admin.kubeconfig
     get rc
     -o name
-    -l metrics-infra=hawkular-cassandra 
+    -l metrics-infra=hawkular-cassandra
     -n {{openshift_metrics_project}}
   register: metrics_cassandra_rc
   changed_when: "'No resources found' not in metrics_cassandra_rc.stderr"

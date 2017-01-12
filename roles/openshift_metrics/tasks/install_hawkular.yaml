@@ -11,7 +11,7 @@
     src: hawkular_metrics_rc.j2
     dest: "{{ mktemp.stdout }}/templates/hawkular_metrics_rc.yaml"
   vars:
-     replica_count: "{{hawkular_metrics_replica_count.stdout}}"
+    replica_count: "{{hawkular_metrics_replica_count.stdout}}"
   changed_when: false
 
 - shell: >
