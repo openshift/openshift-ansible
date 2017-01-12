@@ -17,6 +17,7 @@ from yamllint.config import YamlLintConfig
 from yamllint.cli import Format
 from yamllint import linter
 
+
 def find_files(base_dir, exclude_dirs, include_dirs, file_regex):
     ''' find files matching file_regex '''
     found = []
@@ -111,7 +112,8 @@ class OpenShiftAnsibleYamlLint(Command):
 
         if has_errors or has_warnings:
             print('yammlint issues found')
-            exit(1)
+            raise SystemExit(1)
+
 
 class OpenShiftAnsiblePylint(PylintCommand):
     ''' Class to override the default behavior of PylintCommand '''
