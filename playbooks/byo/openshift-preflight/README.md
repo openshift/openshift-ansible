@@ -1,4 +1,4 @@
-# Preflight checks
+# OpenShift preflight checks
 
 Here we provide an Ansible playbook for detecting potential roadblocks prior to
 an install or upgrade.
@@ -39,5 +39,5 @@ against your inventory file. Here is the step-by-step:
 2. Run the playbook:
 
     ```console
-    $ ansible-playbook -i <inventory file> playbooks/adhoc/preflight/check.yml
+    $ ansible-playbook -i <inventory file> playbooks/byo/openshift-preflight/check.yml
     ```
