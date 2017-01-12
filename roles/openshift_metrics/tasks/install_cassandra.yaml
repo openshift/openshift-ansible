@@ -1,0 +1,54 @@
+---
+- shell: >
+    {{ openshift.common.client_binary }} -n {{ openshift_metrics_project | quote }}
+    --config={{ mktemp.stdout }}/admin.kubeconfig
+    get rc hawkular-cassandra-{{node}} -o jsonpath='{.spec.replicas}' || echo 0
+  vars:
+    node: "{{ item }}"
+  register: cassandra_replica_count
+  with_sequence: count={{ openshift_metrics_cassandra_replicas }}
+  changed_when: false
+  failed_when: false
+
+- name: generate hawkular-cassandra replication controllers
+  template:
+    src: hawkular_cassandra_rc.j2
+    dest: "{{ mktemp.stdout }}/templates/hawkular-cassandra-rc{{ item }}.yaml"
+  vars:
+    node: "{{ item }}"
+    master: "{{ (item == '1')|string|lower }}"
+    replica_count: "{{cassandra_replica_count.results[item|int - 1].stdout}}"
+  with_sequence: count={{ openshift_metrics_cassandra_replicas }}
+  changed_when: false
+
+- name: generate hawkular-cassandra persistent volume claims
+  template:
+    src: pvc.j2
+    dest: "{{ mktemp.stdout }}/templates/hawkular-cassandra-pvc{{ item }}.yaml"
+  vars:
+    obj_name: "{{ openshift_metrics_cassandra_pv_prefix }}-{{ item }}"
+    labels:
+      metrics-infra: hawkular-cassandra
+    access_modes:
+    - ReadWriteOnce
+    size: "{{ openshift_metrics_cassandra_pv_size }}"
+  with_sequence: count={{ openshift_metrics_cassandra_replicas }}
+  when: openshift_metrics_cassandra_storage_type == 'pv'
+  changed_when: false
+
+- name: generate hawkular-cassandra persistent volume claims (dynamic)
+  template:
+    src: pvc.j2
+    dest: "{{ mktemp.stdout }}/templates/hawkular-cassandra-pvc{{ item }}.yaml"
+  vars:
+    obj_name: "{{ openshift_metrics_cassandra_pv_prefix }}-{{ item }}"
+    labels:
+      metrics-infra: hawkular-cassandra
+    annotations:
+      volume.alpha.kubernetes.io/storage-class: dynamic
+    access_modes:
+    - ReadWriteOnce
+    size: "{{ openshift_metrics_cassandra_pv_size }}"
+  with_sequence: count={{ openshift_metrics_cassandra_replicas }}
+  when: openshift_metrics_cassandra_storage_type == 'dynamic'
+  changed_when: false

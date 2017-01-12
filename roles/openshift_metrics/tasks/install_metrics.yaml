@@ -16,6 +16,7 @@
     - support
     - heapster
     - hawkular
+    - cassandra
   loop_control:
     loop_var: include_file
 

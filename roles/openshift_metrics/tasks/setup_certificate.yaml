@@ -11,20 +11,28 @@
     --signer-serial='{{ openshift_metrics_certs_dir }}/ca.serial.txt'
   when: not '{{ openshift_metrics_certs_dir }}/{{ component }}.key'|exists
 
+- slurp: src={{item}}
+  register: component_certs
+  with_items:
+    - '{{ openshift_metrics_certs_dir | quote }}/{{ component|quote }}.key'
+    - '{{ openshift_metrics_certs_dir | quote }}/{{ component|quote }}.crt'
+  when: not '{{ openshift_metrics_certs_dir }}/{{ component }}.pem'|exists
+
 - name: generate {{ component }} certificate
-  shell: >
-    cat
-    '{{ openshift_metrics_certs_dir | quote }}/{{ component|quote }}.key'
-    '{{ openshift_metrics_certs_dir | quote }}/{{ component|quote }}.crt'
-    > '{{ openshift_metrics_certs_dir | quote }}/{{ component|quote }}.pem'
+  copy:
+    dest: '{{ openshift_metrics_certs_dir }}/{{ component }}.pem'
+    content: "{{ component_certs.results | map(attribute='content') | map('b64decode') | join('')  }}"
   when: not '{{ openshift_metrics_certs_dir }}/{{ component }}.pem'|exists
 
 - name: generate random password for the {{ component }} keystore
-  shell: >
-    tr -dc _A-Z-a-z-0-9 < /dev/urandom | head -c15
-    > '{{ openshift_metrics_certs_dir | quote }}/{{ component|quote }}-keystore.pwd'
+  copy:
+      content: "{{ 15 | oo_random_word }}"
+      dest: '{{ openshift_metrics_certs_dir | quote }}/{{ component|quote }}-keystore.pwd'
   when: >
     not '{{ openshift_metrics_certs_dir }}/{{ component }}-keystore.pwd'|exists
+  
+- slurp: src={{ openshift_metrics_certs_dir | quote }}/{{ component|quote }}-keystore.pwd
+  register: keystore_password
 
 - name: create the {{ component }} pkcs12 from the pem file
   command: >
@@ -32,27 +40,24 @@
     -in '{{ openshift_metrics_certs_dir }}/{{ component }}.pem'
     -out '{{ openshift_metrics_certs_dir }}/{{ component }}.pkcs12'
     -name '{{ component }}' -noiter -nomaciter
-    -password
-    'file:{{ openshift_metrics_certs_dir }}/{{ component }}-keystore.pwd'
+    -password 'pass:{{keystore_password.content | b64decode }}'
   when: not '{{ openshift_metrics_certs_dir }}/{{ component }}.pkcs12'|exists
 
 - name: create the {{ component }} keystore from the pkcs12 file
-  shell: >
-    p=$(< {{ openshift_metrics_certs_dir }}/{{ component }}-keystore.pwd)
-    &&
+  command: >
     keytool -v -importkeystore
     -srckeystore '{{ openshift_metrics_certs_dir | quote }}/{{ component | quote }}.pkcs12'
     -srcstoretype PKCS12
     -destkeystore '{{ openshift_metrics_certs_dir | quote }}/{{ component | quote}}.keystore'
     -deststoretype JKS
-    -deststorepass "$p"
-    -srcstorepass "$p"
+    -deststorepass '{{keystore_password.content | b64decode }}'
+    -srcstorepass '{{keystore_password.content | b64decode }}'
   when: not '{{ openshift_metrics_certs_dir }}/{{ component }}.keystore'|exists
 
 - name: generate random password for the {{ component }} truststore
-  shell: >
-    tr -dc _A-Z-a-z-0-9 < /dev/urandom | head -c15
-    > '{{ openshift_metrics_certs_dir | quote }}/{{ component|quote }}-truststore.pwd'
+  copy:
+      content: "{{ 15 | oo_random_word }}"
+      dest: '{{ openshift_metrics_certs_dir | quote }}/{{ component|quote }}-truststore.pwd'
   when: >
     not
     '{{ openshift_metrics_certs_dir | quote }}/{{ component| quote  }}-truststore.pwd'|exists
