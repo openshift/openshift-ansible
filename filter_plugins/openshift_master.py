@@ -161,7 +161,7 @@ class LDAPPasswordIdentityProvider(IdentityProviderBase):
             AnsibleFilterError:
     """
     def __init__(self, api_version, idp):
-        IdentityProviderBase.__init__(self, api_version, idp)
+        super(self.__class__, self).__init__(api_version, idp)
         self._allow_additional = False
         self._required += [['attributes'], ['url'], ['insecure']]
         self._optional += [['ca'],
@@ -176,7 +176,7 @@ class LDAPPasswordIdentityProvider(IdentityProviderBase):
 
     def validate(self):
         ''' validate this idp instance '''
-        IdentityProviderBase.validate(self)
+        super(self.__class__, self).validate()
         if not isinstance(self.provider['attributes'], dict):
             raise errors.AnsibleFilterError("|failed attributes for provider "
                                             "{0} must be a dictionary".format(self.__class__.__name__))
@@ -206,7 +206,7 @@ class KeystonePasswordIdentityProvider(IdentityProviderBase):
             AnsibleFilterError:
     """
     def __init__(self, api_version, idp):
-        IdentityProviderBase.__init__(self, api_version, idp)
+        super(self.__class__, self).__init__(api_version, idp)
         self._allow_additional = False
         self._required += [['url'], ['domainName', 'domain_name']]
         self._optional += [['ca'], ['certFile', 'cert_file'], ['keyFile', 'key_file']]
@@ -225,7 +225,7 @@ class RequestHeaderIdentityProvider(IdentityProviderBase):
             AnsibleFilterError:
     """
     def __init__(self, api_version, idp):
-        IdentityProviderBase.__init__(self, api_version, idp)
+        super(self.__class__, self).__init__(api_version, idp)
         self._allow_additional = False
         self._required += [['headers']]
         self._optional += [['challengeURL', 'challenge_url'],
@@ -238,7 +238,7 @@ class RequestHeaderIdentityProvider(IdentityProviderBase):
 
     def validate(self):
         ''' validate this idp instance '''
-        IdentityProviderBase.validate(self)
+        super(self.__class__, self).validate()
         if not isinstance(self.provider['headers'], list):
             raise errors.AnsibleFilterError("|failed headers for provider {0} "
                                             "must be a list".format(self.__class__.__name__))
@@ -257,7 +257,7 @@ class AllowAllPasswordIdentityProvider(IdentityProviderBase):
             AnsibleFilterError:
     """
     def __init__(self, api_version, idp):
-        IdentityProviderBase.__init__(self, api_version, idp)
+        super(self.__class__, self).__init__(api_version, idp)
         self._allow_additional = False
 
 
@@ -274,7 +274,7 @@ class DenyAllPasswordIdentityProvider(IdentityProviderBase):
             AnsibleFilterError:
     """
     def __init__(self, api_version, idp):
-        IdentityProviderBase.__init__(self, api_version, idp)
+        super(self.__class__, self).__init__(api_version, idp)
         self._allow_additional = False
 
 
@@ -291,7 +291,7 @@ class HTPasswdPasswordIdentityProvider(IdentityProviderBase):
             AnsibleFilterError:
     """
     def __init__(self, api_version, idp):
-        IdentityProviderBase.__init__(self, api_version, idp)
+        super(self.__class__, self).__init__(api_version, idp)
         self._allow_additional = False
         self._required += [['file', 'filename', 'fileName', 'file_name']]
 
@@ -316,7 +316,7 @@ class BasicAuthPasswordIdentityProvider(IdentityProviderBase):
             AnsibleFilterError:
     """
     def __init__(self, api_version, idp):
-        IdentityProviderBase.__init__(self, api_version, idp)
+        super(self.__class__, self).__init__(api_version, idp)
         self._allow_additional = False
         self._required += [['url']]
         self._optional += [['ca'], ['certFile', 'cert_file'], ['keyFile', 'key_file']]
@@ -335,13 +335,13 @@ class IdentityProviderOauthBase(IdentityProviderBase):
             AnsibleFilterError:
     """
     def __init__(self, api_version, idp):
-        IdentityProviderBase.__init__(self, api_version, idp)
+        super(self.__class__, self).__init__(api_version, idp)
         self._allow_additional = False
         self._required += [['clientID', 'client_id'], ['clientSecret', 'client_secret']]
 
     def validate(self):
         ''' validate this idp instance '''
-        IdentityProviderBase.validate(self)
+        super(self.__class__, self).validate()
         if self.challenge:
             raise errors.AnsibleFilterError("|failed provider {0} does not "
                                             "allow challenge authentication".format(self.__class__.__name__))
