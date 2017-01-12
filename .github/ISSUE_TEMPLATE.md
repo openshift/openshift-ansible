@@ -1,13 +1,31 @@
 #### Description
-Please provide a brief description of your issue.
+
+Provide a brief description of your issue here. For example:
+
+> On a multi master install, if the first master goes down we can no
+> longer scaleup the cluster with new nodes or masters.
+
 
 ##### Version
-If you're operating from a git clone provide the output of `git describe`. If
-you're running from playbooks installed via RPM or atomic-openshift-utils `rpm
--q atomic-openshift-utils openshift-ansible`. Please also provide your version
-of ansible, `ansible --version`. Please the output between the code block below.
+
+Please put the following version information in the code block
+indicated below.
+
+* Your ansible version per `ansible --version`
+
+If you're operating from a **git clone**:
+
+* The output of `git describe`
+
+If you're running from playbooks installed via RPM or
+`atomic-openshift-utils`
+
+* The output of `rpm -q atomic-openshift-utils openshift-ansible`
+
+Place the output between the code block below:
+
 ```
-Please place output here
+VERSION INFORMATION HERE PLEASE
 ```
 
 ##### Steps To Reproduce
@@ -15,20 +33,32 @@ Please place output here
 2. [step 2]
 
 
-##### Current Result
+##### Expected Results
+Describe what you expected to happen.
+
 ```
 Example command and output or error messages
 ```
 
-##### Expected Result
+##### Observed Results
+Describe what is actually happening.
+
 ```
 Example command and output or error messages
 ```
+
+For long output or logs, consider using a [gist](https://gist.github.com/)
+
 
 ##### Additional Information
+
+Provide any additional information which may help us diagnose the
+issue.
+
+* Your operating system and version, ie: RHEL 7.2, Fedora 23 (`$ cat /etc/redhat-release`)
+* Your inventory file (especially any non-standard configuration parameters)
+* Sample code, etc
+
 ```
-Your operating system and version, ie: RHEL 7.2, Fedora 23]
-Your inventory file
-Sample code, etc
-code, etc
+EXTRA INFORMATION GOES HERE
 ```
