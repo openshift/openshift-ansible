@@ -3,33 +3,18 @@
 - when: not openshift.common.is_containerized | bool
   block:
 
-    - name: main packages for enterprise
-      when:
-        - deployment_type == "openshift-enterprise"
+    - name: main node packages availability
       check_yum_update:
         packages:
-          - atomic-openshift
-          - atomic-openshift-node
-          - atomic-openshift-sdn-ovs
+          - "{{ openshift.common.service_type }}"
+          - "{{ openshift.common.service_type }}-node"
+          - "{{ openshift.common.service_type }}-sdn-ovs"
       register: r
 
     - set_fact:
-        oo_preflight_check_results: "{{ oo_preflight_check_results + [r|combine({'_task': 'main packages for enterprise'})] }}"
+        oo_preflight_check_results: "{{ oo_preflight_check_results + [r|combine({'_task': 'main node packages availability'})] }}"
 
-    - name: main packages for origin
-      when:
-        - deployment_type == "origin"
-      check_yum_update:
-        packages:
-          - origin
-          - origin-node
-          - origin-sdn-ovs
-      register: r
-
-    - set_fact:
-        oo_preflight_check_results: "{{ oo_preflight_check_results + [r|combine({'_task': 'main packages for origin'})] }}"
-
-    - name: other node packages
+    - name: other node packages availability
       check_yum_update:
         packages:
           - docker
@@ -53,4 +38,4 @@
       register: r
 
     - set_fact:
-        oo_preflight_check_results: "{{ oo_preflight_check_results + [r|combine({'_task': 'other node packages'})] }}"
+        oo_preflight_check_results: "{{ oo_preflight_check_results + [r|combine({'_task': 'other node packages availability'})] }}"
