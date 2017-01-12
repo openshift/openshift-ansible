@@ -176,7 +176,6 @@ class LDAPPasswordIdentityProvider(IdentityProviderBase):
 
     def validate(self):
         ''' validate this idp instance '''
-        super(self.__class__, self).validate()
         if not isinstance(self.provider['attributes'], dict):
             raise errors.AnsibleFilterError("|failed attributes for provider "
                                             "{0} must be a dictionary".format(self.__class__.__name__))
@@ -238,7 +237,6 @@ class RequestHeaderIdentityProvider(IdentityProviderBase):
 
     def validate(self):
         ''' validate this idp instance '''
-        super(self.__class__, self).validate()
         if not isinstance(self.provider['headers'], list):
             raise errors.AnsibleFilterError("|failed headers for provider {0} "
                                             "must be a list".format(self.__class__.__name__))
@@ -341,7 +339,6 @@ class IdentityProviderOauthBase(IdentityProviderBase):
 
     def validate(self):
         ''' validate this idp instance '''
-        super(self.__class__, self).validate()
         if self.challenge:
             raise errors.AnsibleFilterError("|failed provider {0} does not "
                                             "allow challenge authentication".format(self.__class__.__name__))
