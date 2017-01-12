@@ -27,6 +27,7 @@
   command: ls -1 {{mktemp.stdout}}/templates/
   register: logging_objects
   check_mode: no
+  changed_when: no
 
 - name: Creating API objects from generated templates
   command: >

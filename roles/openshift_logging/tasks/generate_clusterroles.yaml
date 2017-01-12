@@ -8,3 +8,4 @@
         verbs:
           - get
   check_mode: no
+  changed_when: no

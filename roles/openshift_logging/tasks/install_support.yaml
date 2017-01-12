@@ -6,6 +6,7 @@
   register: logging_project_result
   ignore_errors: yes
   when: not ansible_check_mode
+  changed_when: no
 
 - name: "Create logging project"
   command: >
@@ -37,9 +38,10 @@
 - name: Generate kibana-proxy oauth client
   template: src=oauth-client.j2 dest={{mktemp.stdout}}/templates/oauth-client.yaml
   vars:
-    secret: "{{oauth_secret.stdout}}"
-  when: oauth_secret.stdout is defined
+    secret: "{{oauth_secret}}"
+  when: oauth_secret is defined
   check_mode: no
+  changed_when: no
 
 - include: generate_clusterroles.yaml
 

@@ -5,6 +5,7 @@
   register: replica_count
   failed_when: replica_count.rc == 1 and 'exists' not in replica_count.stderr
   when: not ansible_check_mode
+  changed_when: no
 
 - command: >
     {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig scale {{object}}
@@ -24,3 +25,4 @@
   when:
     - not ansible_check_mode
     - replica_count.stdout|int != desired
+  changed_when: no

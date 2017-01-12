@@ -26,6 +26,7 @@
     - not openshift_logging_es_pvc_dynamic
     - es_pvc_pool is defined
   check_mode: no
+  changed_when: no
 
 - name: Generating PersistentVolumeClaims - Dynamic
   template: src=pvc.j2 dest={{mktemp.stdout}}/templates/logging-{{obj_name}}-pvc.yaml
@@ -45,3 +46,4 @@
     - openshift_logging_es_pvc_dynamic
     - es_pvc_pool is defined
   check_mode: no
+  changed_when: no

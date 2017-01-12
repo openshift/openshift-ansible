@@ -38,6 +38,7 @@
   check_mode: no
   when:
     - "{{ openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | length < openshift_logging_es_cluster_size }}"
+  changed_when: no
 
 # --------- Tasks for Operation clusters ---------
 
@@ -103,3 +104,4 @@
     - openshift_logging_use_ops
     - "{{ openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys() | length < openshift_logging_es_ops_cluster_size }}"
   check_mode: no
+  changed_when: no

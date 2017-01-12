@@ -11,6 +11,7 @@
       provider: openshift
       component: es
   check_mode: no
+  changed_when: no
 
 - name: Generating logging-es-cluster service
   template: src=service.j2 dest={{mktemp.stdout}}/templates/logging-es-cluster-svc.yaml
@@ -24,6 +25,7 @@
       provider: openshift
       component: es
   check_mode: no
+  changed_when: no
 
 - name: Generating logging-kibana service
   template: src=service.j2 dest={{mktemp.stdout}}/templates/logging-kibana-svc.yaml
@@ -37,6 +39,7 @@
       provider: openshift
       component: kibana
   check_mode: no
+  changed_when: no
 
 - name: Generating logging-es-ops service
   template: src=service.j2 dest={{mktemp.stdout}}/templates/logging-es-ops-svc.yaml
@@ -51,6 +54,7 @@
       component: es-ops
   when: openshift_logging_use_ops
   check_mode: no
+  changed_when: no
 
 - name: Generating logging-es-ops-cluster service
   template: src=service.j2 dest={{mktemp.stdout}}/templates/logging-es-ops-cluster-svc.yaml
@@ -65,6 +69,7 @@
       component: es-ops
   when: openshift_logging_use_ops
   check_mode: no
+  changed_when: no
 
 - name: Generating logging-kibana-ops service
   template: src=service.j2 dest={{mktemp.stdout}}/templates/logging-kibana-ops-svc.yaml
@@ -79,3 +84,4 @@
       component: kibana-ops
   when: openshift_logging_use_ops
   check_mode: no
+  changed_when: no

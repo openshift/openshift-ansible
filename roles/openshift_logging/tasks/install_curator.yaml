@@ -1,4 +1,20 @@
 ---
+- command: >
+    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get dc/logging-curator
+    -o jsonpath='{.spec.replicas}' -n {{openshift_logging_namespace}}
+  register: curator_replica_count
+  when: not ansible_check_mode
+  ignore_errors: yes
+  changed_when: no
+
+- command: >
+    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get dc/logging-curator-ops
+    -o jsonpath='{.spec.replicas}' -n {{openshift_logging_namespace}}
+  register: curator_ops_replica_count
+  when: not ansible_check_mode
+  ignore_errors: yes
+  changed_when: no
+
 - name: Generate curator deploymentconfig
   template: src=curator.j2 dest={{mktemp.stdout}}/templates/logging-curator-dc.yaml
   vars:
@@ -10,7 +26,9 @@
     es_port: "{{openshift_logging_es_port}}"
     curator_cpu_limit: "{{openshift_logging_curator_cpu_limit }}"
     curator_memory_limit: "{{openshift_logging_curator_memory_limit }}"
+    replicas: "{{curator_replica_count.stdout | default (1)}}"
   check_mode: no
+  changed_when: no
 
 - name: Generate OPS curator deploymentconfig
   template: src=curator.j2 dest={{mktemp.stdout}}/templates/logging-curator-ops-dc.yaml
@@ -23,5 +41,7 @@
     es_port: "{{openshift_logging_es_ops_port}}"
     curator_cpu_limit: "{{openshift_logging_curator_ops_cpu_limit }}"
     curator_memory_limit: "{{openshift_logging_curator_ops_memory_limit }}"
+    replicas: "{{curator_ops_replica_count.stdout | default (1)}}"
   when: openshift_logging_use_ops
   check_mode: no
+  changed_when: no

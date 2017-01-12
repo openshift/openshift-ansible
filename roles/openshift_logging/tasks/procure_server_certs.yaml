@@ -10,14 +10,12 @@
   check_mode: no
 
 - name: Trying to discover server cert variable name for {{ cert_info.procure_component }}
-  command: echo "{{ lookup('env', '{{cert_info.procure_component}}' + '_crt') }}"
-  register: procure_component_crt
+  set_fact: procure_component_crt={{ lookup('env', '{{cert_info.procure_component}}' + '_crt') }}
   when: cert_info.hostnames is undefined and {{ cert_info.procure_component }}_crt is defined and {{ cert_info.procure_component }}_key is defined
   check_mode: no
 
 - name: Trying to discover the server key variable name for {{ cert_info.procure_component }}
-  command: echo "{{ lookup('env', '{{cert_info.procure_component}}' + '_key') }}"
-  register: procure_component_key
+  set_fact: procure_component_key={{ lookup('env', '{{cert_info.procure_component}}' + '_key') }}
   when: cert_info.hostnames is undefined and {{ cert_info.procure_component }}_crt is defined and {{ cert_info.procure_component }}_key is defined
   check_mode: no
 

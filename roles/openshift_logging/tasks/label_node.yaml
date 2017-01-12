@@ -5,6 +5,7 @@
   register: label_value
   failed_when: label_value.rc == 1 and 'exists' not in label_value.stderr
   when: not ansible_check_mode
+  changed_when: no
 
 - command: >
     {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig label node {{host}} {{label}}={{value}} --overwrite

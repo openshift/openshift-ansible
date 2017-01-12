@@ -8,7 +8,7 @@ metadata:
     deployment: "{{deploy_name}}"
     logging-infra: "{{logging_component}}"
 spec:
-  replicas: 0
+  replicas: {{replicas|default(0)}}
   selector:
     provider: openshift
     component: "{{component}}"

@@ -9,3 +9,4 @@
       - kind: ServiceAccount
         name: aggregated-logging-elasticsearch
   check_mode: no
+  changed_when: no

@@ -10,3 +10,4 @@
         name: "{{acct_name}}"
         namespace: "{{openshift_logging_namespace}}"
   check_mode: no
+  changed_when: no

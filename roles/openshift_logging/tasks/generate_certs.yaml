@@ -91,6 +91,7 @@
   register: serviceaccount_result
   ignore_errors: yes
   when: not ansible_check_mode
+  changed_when: no
 
 - name: Create jks-generator service account
   command: >
@@ -98,35 +99,59 @@
   when: not ansible_check_mode and "not found" in serviceaccount_result.stderr
 
 - name: Check for hostmount-anyuid scc entry
-  shell: >
-    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get scc hostmount-anyuid -o jsonpath='{.users}' |
-    grep system:serviceaccount:{{openshift_logging_namespace | quote}}:jks-generator
+  command: >
+    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get scc hostmount-anyuid -o jsonpath='{.users}'
   register: scc_result
-  ignore_errors: yes
   when: not ansible_check_mode
+  changed_when: no
 
 - name: Add to hostmount-anyuid scc
   command: >
     {{ openshift.common.admin_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig policy add-scc-to-user hostmount-anyuid -z jks-generator -n {{openshift_logging_namespace}}
-  when: not ansible_check_mode and scc_result.rc == 1
+  when:
+    - not ansible_check_mode
+    - scc_result.stdout.find("system:serviceaccount:{{openshift_logging_namespace}}:jks-generator") == -1
 
-- name: Copy jks script
+- name: Copy JKS generation script
   copy:
     src: generate-jks.sh
     dest: "{{generated_certs_dir}}/generate-jks.sh"
   check_mode: no
 
-- name: Generate JKS chains
+- name: Generate JKS pod template
   template:
     src: jks_pod.j2
     dest: "{{mktemp.stdout}}/jks_pod.yaml"
   check_mode: no
+  changed_when: no
 
-- name: create pod
+# check if pod generated files exist -- if they all do don't run the pod
+- name: Checking for elasticsearch.jks
+  stat: path="{{generated_certs_dir}}/elasticsearch.jks"
+  register: elasticsearch_jks
+  check_mode: no
+
+- name: Checking for logging-es.jks
+  stat: path="{{generated_certs_dir}}/logging-es.jks"
+  register: logging_es_jks
+  check_mode: no
+
+- name: Checking for system.admin.jks
+  stat: path="{{generated_certs_dir}}/system.admin.jks"
+  register: system_admin_jks
+  check_mode: no
+
+- name: Checking for truststore.jks
+  stat: path="{{generated_certs_dir}}/truststore.jks"
+  register: truststore_jks
+  check_mode: no
+
+- name: create JKS generation pod
   command: >
     {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig create -f {{mktemp.stdout}}/jks_pod.yaml -n {{openshift_logging_namespace}} -o name
   register: podoutput
   check_mode: no
+  when: not elasticsearch_jks.stat.exists or not logging_es_jks.stat.exists or not system_admin_jks.stat.exists or not truststore_jks.stat.exists
 
 - command: >
     {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get {{podoutput.stdout}} -o jsonpath='{.status.phase}' -n {{openshift_logging_namespace}}
@@ -134,13 +159,13 @@
   until: result.stdout.find("Succeeded") != -1
   retries: 5
   delay: 10
+  changed_when: no
+  when: not elasticsearch_jks.stat.exists or not logging_es_jks.stat.exists or not system_admin_jks.stat.exists or not truststore_jks.stat.exists
 
 - name: Generate proxy session
-  command: echo {{'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'|random_word(200)}}
-  register: session_secret
+  set_fact: session_secret={{'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'|random_word(200)}}
   check_mode: no
 
 - name: Generate oauth client secret
-  command: echo {{'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'|random_word(64)}}
-  register: oauth_secret
+  set_fact: oauth_secret={{'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'|random_word(64)}}
   check_mode: no
