@@ -1,7 +1,6 @@
 ---
 # determine if yum install of master pkgs will work
-- when:
-    - not containerized
+- when: not openshift.common.is_containerized | bool
   block:
 
     - name: main packages for enterprise

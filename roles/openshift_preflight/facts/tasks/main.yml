@@ -1,7 +1,4 @@
 ---
 - name: set common variables
   set_fact:
-    deployment_type: "{{ deployment_type | default('openshift-enterprise') }}"
-    containerized: "{{ containerized | default('no') | bool }}"
-    openshift_release: "{{ openshift_release | default('3.3') }}"
     oo_preflight_check_results: "{{ oo_preflight_check_results | default([]) }}"

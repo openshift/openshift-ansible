@@ -1,6 +1,5 @@
 ---
 - hosts: OSEv3
-  gather_facts: no
   roles:
     - openshift_preflight/facts
 

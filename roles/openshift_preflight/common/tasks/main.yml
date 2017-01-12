@@ -1,7 +1,6 @@
 ---
 # check content available on all hosts
-- when:
-    - not containerized
+- when: not openshift.common.is_containerized | bool
   block:
 
     - name: determine if yum update will work
