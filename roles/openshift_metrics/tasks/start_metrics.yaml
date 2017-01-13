@@ -43,7 +43,7 @@
     -o name
     -n {{openshift_metrics_project}}
   register: metrics_heapster_rc
-  check_mode: no
+  changed_when: no
 
 - name: Start Heapster
   include: scale.yaml
