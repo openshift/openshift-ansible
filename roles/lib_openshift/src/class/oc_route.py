@@ -64,6 +64,7 @@ class OCRoute(OpenShiftCLI):
         skip = []
         return not Utils.check_def_equal(self.config.data, self.route.yaml_dict, skip_keys=skip, debug=True)
 
+    # pylint: disable=too-many-return-statements,too-many-branches
     @staticmethod
     def run_ansible(params, files, check_mode=False):
         ''' run the idempotent asnible code

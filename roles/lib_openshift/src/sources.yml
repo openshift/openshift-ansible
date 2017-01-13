@@ -1,0 +1,18 @@
+---
+oc_route.py:
+- doc/license
+- lib/import.py
+- doc/route
+- ../../lib_utils/src/class/yedit.py
+- lib/base.py
+- lib/route.py
+- class/oc_route.py
+- ansible/oc_route.py
+oc_edit.py:
+- doc/license
+- lib/import.py
+- doc/edit
+- ../../lib_utils/src/class/yedit.py
+- lib/base.py
+- class/oc_edit.py
+- ansible/oc_edit.py

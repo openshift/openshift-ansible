@@ -1,9 +1,7 @@
 # pylint: skip-file
 # flake8: noqa
-'''
-   OpenShiftCLI class that wraps the oc commands in a subprocess
-'''
 # pylint: disable=too-many-lines
+# noqa: E301,E302,E303,T001
 
 
 class OpenShiftCLIError(Exception):
@@ -213,7 +211,7 @@ class OpenShiftCLI(object):
         err = None
 
         if self.verbose:
-            print ' '.join(cmds)
+            print(' '.join(cmds))
 
         proc = subprocess.Popen(cmds,
                                 stdin=subprocess.PIPE,
@@ -232,14 +230,14 @@ class OpenShiftCLI(object):
                     try:
                         rval['results'] = json.loads(stdout)
                     except ValueError as err:
-                        if "No JSON object could be decoded" in err.message:
-                            err = err.message
+                        if "No JSON object could be decoded" in str(err):
+                            err = str(err)
                 elif output_type == 'raw':
                     rval['results'] = stdout
 
             if self.verbose:
-                print stdout
-                print stderr
+                print(stdout)
+                print(stderr)
 
             if err:
                 rval.update({"err": err,
@@ -350,50 +348,50 @@ class Utils(object):
             if isinstance(value, list):
                 if key not in user_def:
                     if debug:
-                        print 'User data does not have key [%s]' % key
-                        print 'User data: %s' % user_def
+                        print('User data does not have key [%s]' % key)
+                        print('User data: %s' % user_def)
                     return False
 
                 if not isinstance(user_def[key], list):
                     if debug:
-                        print 'user_def[key] is not a list key=[%s] user_def[key]=%s' % (key, user_def[key])
+                        print('user_def[key] is not a list key=[%s] user_def[key]=%s' % (key, user_def[key]))
                     return False
 
                 if len(user_def[key]) != len(value):
                     if debug:
-                        print "List lengths are not equal."
-                        print "key=[%s]: user_def[%s] != value[%s]" % (key, len(user_def[key]), len(value))
-                        print "user_def: %s" % user_def[key]
-                        print "value: %s" % value
+                        print("List lengths are not equal.")
+                        print("key=[%s]: user_def[%s] != value[%s]" % (key, len(user_def[key]), len(value)))
+                        print("user_def: %s" % user_def[key])
+                        print("value: %s" % value)
                     return False
 
                 for values in zip(user_def[key], value):
                     if isinstance(values[0], dict) and isinstance(values[1], dict):
                         if debug:
-                            print 'sending list - list'
-                            print type(values[0])
-                            print type(values[1])
+                            print('sending list - list')
+                            print(type(values[0]))
+                            print(type(values[1]))
                         result = Utils.check_def_equal(values[0], values[1], skip_keys=skip_keys, debug=debug)
                         if not result:
-                            print 'list compare returned false'
+                            print('list compare returned false')
                             return False
 
                     elif value != user_def[key]:
                         if debug:
-                            print 'value should be identical'
-                            print value
-                            print user_def[key]
+                            print('value should be identical')
+                            print(value)
+                            print(user_def[key])
                         return False
 
             # recurse on a dictionary
             elif isinstance(value, dict):
                 if key not in user_def:
                     if debug:
-                        print "user_def does not have key [%s]" % key
+                        print("user_def does not have key [%s]" % key)
                     return False
                 if not isinstance(user_def[key], dict):
                     if debug:
-                        print "dict returned false: not instance of dict"
+                        print("dict returned false: not instance of dict")
                     return False
 
                 # before passing ensure keys match
@@ -401,31 +399,31 @@ class Utils(object):
                 user_values = set(user_def[key].keys()) - set(skip)
                 if api_values != user_values:
                     if debug:
-                        print "keys are not equal in dict"
-                        print api_values
-                        print user_values
+                        print("keys are not equal in dict")
+                        print(api_values)
+                        print(user_values)
                     return False
 
                 result = Utils.check_def_equal(user_def[key], value, skip_keys=skip_keys, debug=debug)
                 if not result:
                     if debug:
-                        print "dict returned false"
-                        print result
+                        print("dict returned false")
+                        print(result)
                     return False
 
             # Verify each key, value pair is the same
             else:
                 if key not in user_def or value != user_def[key]:
                     if debug:
-                        print "value not equal; user_def does not have key"
-                        print key
-                        print value
+                        print("value not equal; user_def does not have key")
+                        print(key)
+                        print(value)
                         if key in user_def:
-                            print user_def[key]
+                            print(user_def[key])
                     return False
 
         if debug:
-            print 'returning true'
+            print('returning true')
         return True
 
 

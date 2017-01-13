@@ -1,5 +1,6 @@
 # flake8: noqa
 # pylint: skip-file
+# noqa: E301,E302
 
 
 class YeditException(Exception):
@@ -7,6 +8,7 @@ class YeditException(Exception):
     pass
 
 
+# pylint: disable=too-many-public-methods
 class Yedit(object):
     ''' Class to modify yaml files '''
     re_valid_key = r"(((\[-?\d+\])|([0-9a-zA-Z%s/_-]+)).?)+$"

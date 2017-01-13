@@ -1,6 +1,7 @@
 # flake8: noqa
 # pylint: skip-file
 
+
 # pylint: disable=too-many-branches
 def main():
     ''' ansible oc module for secrets '''

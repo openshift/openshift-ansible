@@ -3,10 +3,10 @@
 
 DOCUMENTATION = '''
 ---
-module: yedit
-short_description: Create, modify, and idempotently manage yaml files.
+module: oc_route
+short_description: Create, modify, and idempotently manage openshift routes.
 description:
-  - Modify yaml files programmatically.
+  - Manage openshift route objects programmatically.
 options:
   state:
     description:

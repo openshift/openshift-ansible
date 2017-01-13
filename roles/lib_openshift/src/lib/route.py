@@ -1,5 +1,6 @@
 # pylint: skip-file
 # flake8: noqa
+# noqa: E302,E301
 
 
 # pylint: disable=too-many-instance-attributes
