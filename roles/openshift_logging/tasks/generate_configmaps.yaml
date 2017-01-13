@@ -6,16 +6,11 @@
       when: es_logging_contents is undefined
       changed_when: no
 
-    - copy:
-        src: elasticsearch.yml
+    - template:
+        src: elasticsearch.yml.j2
         dest: "{{mktemp.stdout}}/elasticsearch.yml"
-      when: es_config_contents is undefined
-      changed_when: no
-
-    - lineinfile:
-        dest: "{{mktemp.stdout}}/elasticsearch.yml"
-        regexp: '^openshift\.operations\.allow_cluster_reader(.)*$'
-        line: "\nopenshift.operations.allow_cluster_reader: {{openshift_logging_es_ops_allow_cluster_reader | lower}}"
+      vars:
+        - allow_cluster_reader: "{{openshift_logging_es_ops_allow_cluster_reader | lower | default('false')}}"
       when: es_config_contents is undefined
       changed_when: no
 

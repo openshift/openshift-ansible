@@ -42,6 +42,7 @@ openshift.searchguard:
   keystore.path: /etc/elasticsearch/secret/admin.jks
   truststore.path: /etc/elasticsearch/secret/searchguard.truststore
 
+openshift.operations.allow_cluster_reader: {{allow_cluster_reader | default ('false')}}
 
 path:
   data: /elasticsearch/persistent/${CLUSTER_NAME}/data
