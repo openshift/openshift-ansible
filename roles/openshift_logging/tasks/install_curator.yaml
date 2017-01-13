@@ -11,7 +11,9 @@
     {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get dc/logging-curator-ops
     -o jsonpath='{.spec.replicas}' -n {{openshift_logging_namespace}}
   register: curator_ops_replica_count
-  when: not ansible_check_mode
+  when:
+    - not ansible_check_mode
+    - openshift_logging_use_ops
   ignore_errors: yes
   changed_when: no
 

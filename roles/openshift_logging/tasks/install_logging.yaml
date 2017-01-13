@@ -23,16 +23,15 @@
   loop_control:
     loop_var: install_component
 
-- name: Register API objects from generated templates
-  command: ls -1 {{mktemp.stdout}}/templates/
-  register: logging_objects
-  check_mode: no
-  changed_when: no
-
-- name: Creating API objects from generated templates
-  command: >
-    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig apply -f {{mktemp.stdout}}/templates/{{file}} -n {{openshift_logging_namespace}}
-  with_items: "{{logging_objects.stdout_lines | sort}}"
+- name: Create objects
+  include: oc_apply.yaml
+  vars:
+    - kubeconfig: "{{ mktemp.stdout }}/admin.kubeconfig"
+    - namespace: "{{ openshift_logging_namespace }}"
+    - file_name: "{{ file }}"
+    - file_content: "{{ lookup('file', file) | from_yaml }}"
+  with_fileglob:
+    - "{{ mktemp.stdout }}/templates/*.yaml"
   loop_control:
     loop_var: file
   when: not ansible_check_mode
