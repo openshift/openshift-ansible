@@ -1,6 +1,7 @@
 # flake8: noqa
 # pylint: skip-file
 
+
 class YeditException(Exception):
     ''' Exception class for Yedit '''
     pass
@@ -426,6 +427,48 @@ class Yedit(object):
 
         return (False, self.yaml_dict)
 
+    @staticmethod
+    def get_curr_value(invalue, val_type):
+        '''return the current value'''
+        if invalue is None:
+            return None
+
+        curr_value = invalue
+        if val_type == 'yaml':
+            curr_value = yaml.load(invalue)
+        elif val_type == 'json':
+            curr_value = json.loads(invalue)
+
+        return curr_value
+
+    @staticmethod
+    def parse_value(inc_value, vtype=''):
+        '''determine value type passed'''
+        true_bools = ['y', 'Y', 'yes', 'Yes', 'YES', 'true', 'True', 'TRUE',
+                      'on', 'On', 'ON', ]
+        false_bools = ['n', 'N', 'no', 'No', 'NO', 'false', 'False', 'FALSE',
+                       'off', 'Off', 'OFF']
+
+        # It came in as a string but you didn't specify value_type as string
+        # we will convert to bool if it matches any of the above cases
+        if isinstance(inc_value, str) and 'bool' in vtype:
+            if inc_value not in true_bools and inc_value not in false_bools:
+                raise YeditException('Not a boolean type. str=[%s] vtype=[%s]'
+                                     % (inc_value, vtype))
+        elif isinstance(inc_value, bool) and 'str' in vtype:
+            inc_value = str(inc_value)
+
+        # If vtype is not str then go ahead and attempt to yaml load it.
+        if isinstance(inc_value, str) and 'str' not in vtype:
+            try:
+                inc_value = yaml.load(inc_value)
+            except Exception:
+                raise YeditException('Could not determine type of incoming ' +
+                                     'value. value=[%s] vtype=[%s]'
+                                     % (type(inc_value), vtype))
+
+        return inc_value
+
     # pylint: disable=too-many-return-statements,too-many-branches
     @staticmethod
     def run_ansible(module):
@@ -446,8 +489,8 @@ class Yedit(object):
 
         if module.params['state'] == 'list':
             if module.params['content']:
-                content = parse_value(module.params['content'],
-                                      module.params['content_type'])
+                content = Yedit.parse_value(module.params['content'],
+                                            module.params['content_type'])
                 yamlfile.yaml_dict = content
 
             if module.params['key']:
@@ -457,8 +500,8 @@ class Yedit(object):
 
         elif module.params['state'] == 'absent':
             if module.params['content']:
-                content = parse_value(module.params['content'],
-                                      module.params['content_type'])
+                content = Yedit.parse_value(module.params['content'],
+                                            module.params['content_type'])
                 yamlfile.yaml_dict = content
 
             if module.params['update']:
@@ -475,8 +518,8 @@ class Yedit(object):
         elif module.params['state'] == 'present':
             # check if content is different than what is in the file
             if module.params['content']:
-                content = parse_value(module.params['content'],
-                                      module.params['content_type'])
+                content = Yedit.parse_value(module.params['content'],
+                                            module.params['content_type'])
 
                 # We had no edits to make and the contents are the same
                 if yamlfile.yaml_dict == content and \
@@ -489,12 +532,13 @@ class Yedit(object):
 
             # we were passed a value; parse it
             if module.params['value']:
-                value = parse_value(module.params['value'],
-                                    module.params['value_type'])
+                value = Yedit.parse_value(module.params['value'],
+                                          module.params['value_type'])
                 key = module.params['key']
                 if module.params['update']:
                     # pylint: disable=line-too-long
-                    curr_value = get_curr_value(parse_value(module.params['curr_value']), module.params['curr_value_format'])  # noqa: #501
+                    curr_value = Yedit.get_curr_value(Yedit.parse_value(module.params['curr_value']),  # noqa: E501
+                                                      module.params['curr_value_format'])  # noqa: E501
 
                     rval = yamlfile.update(key, value, module.params['index'], curr_value)  # noqa: E501
 
