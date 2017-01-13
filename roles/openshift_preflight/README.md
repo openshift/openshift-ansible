@@ -24,9 +24,8 @@ Example Playbook
 ```yaml
 ---
 - hosts: OSEv3
-  gather_facts: no
   roles:
-    - openshift_preflight/facts
+    - openshift_preflight/init
 
 - hosts: OSEv3
   name: checks that apply to all hosts
