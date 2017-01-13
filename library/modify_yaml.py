@@ -6,6 +6,11 @@
 
 import yaml
 
+# ignore pylint errors related to the module_utils import
+# pylint: disable=redefined-builtin, unused-wildcard-import, wildcard-import
+from ansible.module_utils.basic import *  # noqa: F402,F403
+
+
 DOCUMENTATION = '''
 ---
 module: modify_yaml
@@ -21,8 +26,18 @@ EXAMPLES = '''
 '''
 
 
-# pylint: disable=missing-docstring
 def set_key(yaml_data, yaml_key, yaml_value):
+    ''' Updates a parsed yaml structure setting a key to a value.
+
+        :param yaml_data: yaml structure to modify.
+        :type yaml_data: dict
+        :param yaml_key: Key to modify.
+        :type yaml_key: mixed
+        :param yaml_value: Value use for yaml_key.
+        :type yaml_value: mixed
+        :returns: Changes to the yaml_data structure
+        :rtype: dict(tuple())
+    '''
     changes = []
     ptr = yaml_data
     final_key = yaml_key.split('.')[-1]
@@ -75,6 +90,7 @@ def main():
     # pylint: disable=missing-docstring, unused-argument
     def none_representer(dumper, data):
         return yaml.ScalarNode(tag=u'tag:yaml.org,2002:null', value=u'')
+
     yaml.add_representer(type(None), none_representer)
 
     try:
@@ -95,14 +111,9 @@ def main():
 
     # ignore broad-except error to avoid stack trace to ansible user
     # pylint: disable=broad-except
-    except Exception as e:
-        return module.fail_json(msg=str(e))
+    except Exception as error:
+        return module.fail_json(msg=str(error))
 
-
-# ignore pylint errors related to the module_utils import
-# pylint: disable=redefined-builtin, unused-wildcard-import, wildcard-import, wrong-import-position
-# import module snippets
-from ansible.module_utils.basic import *  # noqa: F402,F403
 
 if __name__ == '__main__':
     main()
