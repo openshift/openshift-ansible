@@ -1,0 +1,4 @@
+DEVS=/dev/sdb
+VG=docker-vol
+DATA_SIZE=95%VG
+EXTRA_DOCKER_STORAGE_OPTIONS="--storage-opt dm.basesize=3G"
