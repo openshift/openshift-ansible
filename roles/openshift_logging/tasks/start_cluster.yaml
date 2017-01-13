@@ -39,7 +39,7 @@
 - name: start kibana
   include: scale.yaml
   vars:
-    desired: 1
+    desired: "{{ openshift_logging_kibana_replica_count | default (1) }}"
   with_items: "{{kibana_dc.stdout_lines}}"
   loop_control:
     loop_var: object
@@ -82,7 +82,7 @@
 - name: start kibana-ops
   include: scale.yaml
   vars:
-    desired: 1
+    desired: "{{ openshift_logging_kibana_ops_replica_count | default (1) }}"
   with_items: "{{kibana_dc.stdout_lines}}"
   loop_control:
     loop_var: object

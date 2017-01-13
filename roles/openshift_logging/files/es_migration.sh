@@ -1,5 +1,3 @@
-#! bin/bash
-
 CA=${1:-/etc/openshift/logging/ca.crt}
 KEY=${2:-/etc/openshift/logging/system.admin.key}
 CERT=${3:-/etc/openshift/logging/system.admin.crt}

@@ -25,6 +25,7 @@ openshift_logging_kibana_memory_limit: null
 openshift_logging_kibana_proxy_debug: false
 openshift_logging_kibana_proxy_cpu_limit: null
 openshift_logging_kibana_proxy_memory_limit: null
+openshift_logging_kibana_replica_count: 1
 
 openshift_logging_kibana_ops_hostname: "kibana-ops.{{openshift.common.dns_domain}}"
 openshift_logging_kibana_ops_cpu_limit: null
@@ -32,6 +33,7 @@ openshift_logging_kibana_ops_memory_limit: null
 openshift_logging_kibana_ops_proxy_debug: false
 openshift_logging_kibana_ops_proxy_cpu_limit: null
 openshift_logging_kibana_ops_proxy_memory_limit: null
+openshift_logging_kibana_ops_replica_count: 1
 
 openshift_logging_fluentd_nodeselector: {'logging-infra-fluentd': 'true'}
 openshift_logging_fluentd_cpu_limit: 100m

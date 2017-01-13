@@ -1,5 +1,6 @@
 ---
-- command: >
+- name: Check Kibana current replica count
+  command: >
     {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get dc/logging-kibana
     -o jsonpath='{.spec.replicas}' -n {{openshift_logging_namespace}}
   register: kibana_replica_count
@@ -7,7 +8,8 @@
   ignore_errors: yes
   changed_when: no
 
-- command: >
+- name: Check Kibana ops current replica count
+  command: >
     {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get dc/logging-kibana-ops
     -o jsonpath='{.spec.replicas}' -n {{openshift_logging_namespace}}
   register: kibana_ops_replica_count
