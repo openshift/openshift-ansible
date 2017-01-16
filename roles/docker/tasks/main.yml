@@ -15,14 +15,6 @@
     msg: "Docker {{ docker_version }} requested, but >= 1.9.1 is required."
   when: docker_version is defined and docker_version | version_compare('1.9.1', '<')
 
-- name: Get latest available version of Docker
-  command: >
-    {{ repoquery_cmd }} --qf '%{version}' "docker"
-  register: avail_docker_version
-  failed_when: false
-  changed_when: false
-  when: docker_version is defined and not openshift.common.is_atomic | bool
-
 # If a docker_version was requested, sanity check that we can install or upgrade to it, and
 # no downgrade is required.
 - name: Fail if Docker version requested but downgrade is required
