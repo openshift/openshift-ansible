@@ -108,10 +108,6 @@
                                      | oo_select_keys(groups['oo_etcd_to_config'] | default([]))
                                      | oo_collect('openshift.common.hostname')
                                      | default(none, true) }}"
-    openshift_master_hostnames: "{{ hostvars
-                                    | oo_select_keys(groups['oo_masters_to_config'] | default([]))
-                                    | oo_collect('openshift.common.all_hostnames')
-                                    | oo_flatten | unique }}"
     openshift_certificates_redeploy: true
   - role: openshift_etcd_client_certificates
     etcd_certificates_redeploy: true
