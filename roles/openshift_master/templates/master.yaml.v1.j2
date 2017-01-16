@@ -123,7 +123,7 @@ kubernetesMasterConfig:
     keyFile: master.proxy-client.key
   schedulerArguments: {{ openshift_master_scheduler_args | default(None) | to_padded_yaml( level=3 ) }}
   schedulerConfigFile: {{ openshift_master_scheduler_conf }}
-  servicesNodePortRange: ""
+  servicesNodePortRange: "{{ openshift_node_port_range | default("") }}"
   servicesSubnet: {{ openshift.common.portal_net }}
   staticNodeNames: {{ openshift_node_ips | default([], true) }}
 {% endif %}
