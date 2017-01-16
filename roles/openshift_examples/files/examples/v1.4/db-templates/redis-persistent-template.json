@@ -2,31 +2,20 @@
   "kind": "Template",
   "apiVersion": "v1",
   "metadata": {
-    "name": "postgresql-ephemeral",
+    "name": "redis-persistent",
     "creationTimestamp": null,
     "annotations": {
-      "openshift.io/display-name": "PostgreSQL (Ephemeral)",
-      "description": "PostgreSQL database service, without persistent storage. For more information about using this template, including OpenShift considerations, see https://github.com/sclorg/postgresql-container/blob/master/9.5.\n\nWARNING: Any data stored will be lost upon pod destruction. Only use this template for testing",
-      "iconClass": "icon-postgresql",
-      "tags": "database,postgresql"
+      "openshift.io/display-name": "Redis (Persistent)",
+      "description": "Redis in-memory data structure store, with persistent storage. For more information about using this template, including OpenShift considerations, see https://github.com/sclorg/redis-container/blob/master/3.2.\n\nNOTE: You must have persistent volumes available in your cluster to use this template.",
+      "iconClass": "icon-redis",
+      "tags": "database,redis"
     }
   },
-  "message": "The following service(s) have been created in your project: ${DATABASE_SERVICE_NAME}.\n\n       Username: ${POSTGRESQL_USER}\n       Password: ${POSTGRESQL_PASSWORD}\n  Database Name: ${POSTGRESQL_DATABASE}\n Connection URL: mysql://${DATABASE_SERVICE_NAME}:5432/\n\nFor more information about using this template, including OpenShift considerations, see https://github.com/sclorg/postgresql-container/blob/master/9.5.",
+  "message": "The following service(s) have been created in your project: ${DATABASE_SERVICE_NAME}.\n\n       Password: ${REDIS_PASSWORD}\n Connection URL: redis://${DATABASE_SERVICE_NAME}:6379/\n\nFor more information about using this template, including OpenShift considerations, see https://github.com/sclorg/redis-container/blob/master/3.2.",
   "labels": {
-    "template": "postgresql-ephemeral-template"
+    "template": "redis-persistent-template"
   },
   "objects": [
-    {
-      "kind": "Secret",
-      "apiVersion": "v1",
-      "metadata": {
-        "name": "${DATABASE_SERVICE_NAME}"
-      },
-      "stringData" : {
-        "database-user" : "${POSTGRESQL_USER}",
-        "database-password" : "${POSTGRESQL_PASSWORD}"
-      }
-    },
     {
       "kind": "Service",
       "apiVersion": "v1",
@@ -37,10 +26,10 @@
       "spec": {
         "ports": [
           {
-            "name": "postgresql",
+            "name": "redis",
             "protocol": "TCP",
-            "port": 5432,
-            "targetPort": 5432,
+            "port": 6379,
+            "targetPort": 6379,
             "nodePort": 0
           }
         ],
@@ -52,6 +41,23 @@
       },
       "status": {
         "loadBalancer": {}
+      }
+    },
+    {
+      "kind": "PersistentVolumeClaim",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${DATABASE_SERVICE_NAME}"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "${VOLUME_CAPACITY}"
+          }
+        }
       }
     },
     {
@@ -71,11 +77,11 @@
             "imageChangeParams": {
               "automatic": true,
               "containerNames": [
-                "postgresql"
+                "redis"
               ],
               "from": {
                 "kind": "ImageStreamTag",
-                "name": "postgresql:${POSTGRESQL_VERSION}",
+                "name": "redis:${REDIS_VERSION}",
                 "namespace": "${NAMESPACE}"
               },
               "lastTriggeredImage": ""
@@ -99,11 +105,11 @@
           "spec": {
             "containers": [
               {
-                "name": "postgresql",
+                "name": "redis",
                 "image": " ",
                 "ports": [
                   {
-                    "containerPort": 5432,
+                    "containerPort": 6379,
                     "protocol": "TCP"
                   }
                 ],
@@ -111,38 +117,20 @@
                   "timeoutSeconds": 1,
                   "initialDelaySeconds": 5,
                   "exec": {
-                    "command": [ "/bin/sh", "-i", "-c", "psql -h 127.0.0.1 -U $POSTGRESQL_USER -q -d $POSTGRESQL_DATABASE -c 'SELECT 1'"]
+                    "command": [ "/bin/sh", "-i", "-c", "test \"$(redis-cli -h 127.0.0.1 -a $REDIS_PASSWORD ping)\" == \"PONG\""]
                   }
                 },
                 "livenessProbe": {
                   "timeoutSeconds": 1,
                   "initialDelaySeconds": 30,
                   "tcpSocket": {
-                    "port": 5432
+                    "port": 6379
                   }
                 },
                 "env": [
                   {
-                    "name": "POSTGRESQL_USER",
-                    "valueFrom": {
-                      "secretKeyRef" : {
-                        "name" : "${DATABASE_SERVICE_NAME}",
-                        "key" : "database-user"
-                      }
-                    }
-                  },
-                  {
-                    "name": "POSTGRESQL_PASSWORD",
-                    "valueFrom": {
-                      "secretKeyRef" : {
-                        "name" : "${DATABASE_SERVICE_NAME}",
-                        "key" : "database-password"
-                      }
-                    }
-                  },
-                  {
-                    "name": "POSTGRESQL_DATABASE",
-                    "value": "${POSTGRESQL_DATABASE}"
+                    "name": "REDIS_PASSWORD",
+                    "value": "${REDIS_PASSWORD}"
                   }
                 ],
                 "resources": {
@@ -153,7 +141,7 @@
                 "volumeMounts": [
                   {
                     "name": "${DATABASE_SERVICE_NAME}-data",
-                    "mountPath": "/var/lib/pgsql/data"
+                    "mountPath": "/var/lib/redis/data"
                   }
                 ],
                 "terminationMessagePath": "/dev/termination-log",
@@ -168,8 +156,8 @@
             "volumes": [
               {
                 "name": "${DATABASE_SERVICE_NAME}-data",
-                "emptyDir": {
-                  "medium": ""
+                "persistentVolumeClaim": {
+                  "claimName": "${DATABASE_SERVICE_NAME}"
                 }
               }
             ],
@@ -198,37 +186,29 @@
       "name": "DATABASE_SERVICE_NAME",
       "displayName": "Database Service Name",
       "description": "The name of the OpenShift Service exposed for the database.",
-      "value": "postgresql",
+      "value": "redis",
       "required": true
     },
     {
-      "name": "POSTGRESQL_USER",
-      "displayName": "PostgreSQL Connection Username",
-      "description": "Username for PostgreSQL user that will be used for accessing the database.",
-      "generate": "expression",
-      "from": "user[A-Z0-9]{3}",
-      "required": true
-    },
-    {
-      "name": "POSTGRESQL_PASSWORD",
-      "displayName": "PostgreSQL Connection Password",
-      "description": "Password for the PostgreSQL connection user.",
+      "name": "REDIS_PASSWORD",
+      "displayName": "Redis Connection Password",
+      "description": "Password for the Redis connection user.",
       "generate": "expression",
       "from": "[a-zA-Z0-9]{16}",
       "required": true
     },
     {
-      "name": "POSTGRESQL_DATABASE",
-      "displayName": "PostgreSQL Database Name",
-      "description": "Name of the PostgreSQL database accessed.",
-      "value": "sampledb",
+      "name": "VOLUME_CAPACITY",
+      "displayName": "Volume Capacity",
+      "description": "Volume space available for data, e.g. 512Mi, 2Gi.",
+      "value": "1Gi",
       "required": true
     },
     {
-      "name": "POSTGRESQL_VERSION",
-      "displayName": "Version of PostgreSQL Image",
-      "description": "Version of PostgreSQL image to be used (9.2, 9.4, 9.5 or latest).",
-      "value": "9.5",
+      "name": "REDIS_VERSION",
+      "displayName": "Version of Redis Image",
+      "description": "Version of Redis image to be used (3.2 or latest).",
+      "value": "3.2",
       "required": true
     }
   ]
