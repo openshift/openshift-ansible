@@ -89,6 +89,21 @@ openshift_release=v3.4
 # Skip upgrading Docker during an OpenShift upgrade, leaves the current Docker version alone.
 # docker_upgrade=False
 
+
+# Upgrade Hooks
+#
+# Hooks are available to run custom tasks at various points during a cluster
+# upgrade. Each hook should point to a file with Ansible tasks defined. Suggest using
+# absolute paths, if not the path will be treated as relative to the file where the
+# hook is actually used.
+#
+# Tasks to run before each master is upgraded:
+# openshift_upgrade_pre_master_hook=/usr/share/custom/pre_master.yml
+#
+# Tasks to run after each master is upgraded:
+# openshift_upgrade_post_master_hook=/usr/share/custom/post_master.yml
+
+
 # Alternate image format string, useful if you've got your own registry mirror
 #oreg_url=example.com/openshift3/ose-${component}:${version}
 # If oreg_url points to a registry other than registry.access.redhat.com we can
