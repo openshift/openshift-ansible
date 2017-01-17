@@ -30,7 +30,6 @@
                                               | oo_collect(attribute='stat.exists')
                                               | list)) }}"
 
-
 - name: Ensure the generated_configs directory present
   file:
     path: "{{ openshift_master_generated_config_dir }}"
@@ -41,28 +40,32 @@
 
 - name: Create the master server certificate
   command: >
-    {{ openshift.common.admin_binary }} ca create-server-cert
+    {{ hostvars[openshift_ca_host].openshift.common.admin_binary }} ca create-server-cert
     {% for named_ca_certificate in openshift.master.named_certificates | default([]) | oo_collect('cafile') %}
     --certificate-authority {{ named_ca_certificate }}
     {% endfor %}
-    --hostnames={{ openshift.common.all_hostnames | join(',') }}
-    --cert={{ openshift_master_generated_config_dir }}/master.server.crt
-    --key={{ openshift_master_generated_config_dir }}/master.server.key
+    --hostnames={{ hostvars[item].openshift.common.all_hostnames | join(',') }}
+    --cert={{ openshift_generated_configs_dir }}/master-{{ hostvars[item].openshift.common.hostname }}/master.server.crt
+    --key={{ openshift_generated_configs_dir }}/master-{{ hostvars[item].openshift.common.hostname }}/master.server.key
     --signer-cert={{ openshift_ca_cert }}
     --signer-key={{ openshift_ca_key }}
     --signer-serial={{ openshift_ca_serial }}
     --overwrite=false
-  when: "{{ master_certs_missing | bool and inventory_hostname != openshift_ca_host }}"
+  with_items: "{{ hostvars
+                  | oo_select_keys(groups['oo_masters_to_config'])
+                  | oo_collect(attribute='inventory_hostname', filters={'master_certs_missing':True})
+                  | difference([openshift_ca_host])}}"
   delegate_to: "{{ openshift_ca_host }}"
+  run_once: true
 
 - name: Generate the master client config
   command: >
-    {{ openshift.common.admin_binary }} create-api-client-config
+    {{ hostvars[openshift_ca_host].openshift.common.admin_binary }} create-api-client-config
       {% for named_ca_certificate in openshift.master.named_certificates | default([]) | oo_collect('cafile') %}
       --certificate-authority {{ named_ca_certificate }}
       {% endfor %}
       --certificate-authority={{ openshift_ca_cert }}
-      --client-dir={{ openshift_master_generated_config_dir }}
+      --client-dir={{ openshift_generated_configs_dir }}/master-{{ hostvars[item].openshift.common.hostname }}
       --groups=system:masters,system:openshift-master
       --master={{ openshift.master.api_url }}
       --public-master={{ openshift.master.public_api_url }}
@@ -72,9 +75,13 @@
       --user=system:openshift-master
       --basename=openshift-master
   args:
-    creates: "{{ openshift_master_generated_config_dir }}/openshift-master.kubeconfig"
-  when: master_certs_missing | bool and inventory_hostname != openshift_ca_host
+    creates: "{{ openshift_generated_configs_dir }}/master-{{ hostvars[item].openshift.common.hostname }}/openshift-master.kubeconfig"
+  with_items: "{{ hostvars
+                  | oo_select_keys(groups['oo_masters_to_config'])
+                  | oo_collect(attribute='inventory_hostname', filters={'master_certs_missing':True})
+                  | difference([openshift_ca_host])}}"
   delegate_to: "{{ openshift_ca_host }}"
+  run_once: true
 
 - file:
     src: "{{ openshift_master_config_dir }}/{{ item }}"
