@@ -31,7 +31,7 @@
   yum:
     name: subscription-manager
     state: present
-    
+
 - name: RedHat subscriptions
   redhat_subscription:
     username: "{{ rhel_subscription_user }}"
