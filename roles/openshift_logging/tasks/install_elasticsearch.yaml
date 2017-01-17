@@ -5,7 +5,7 @@
     es_pvc_names: "{{openshift_logging_facts.elasticsearch.pvcs.keys()}}"
     es_dc_names: "{{openshift_logging_facts.elasticsearch.deploymentconfigs.keys()}}"
   when:
-   - "{{ openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | length < openshift_logging_es_cluster_size }}"
+    - "{{ openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | length < openshift_logging_es_cluster_size }}"
 
 - name: Init pool of DeploymentConfig names for Elasticsearch
   set_fact: es_dc_pool={{es_dc_pool | default([]) + [deploy_name]}}
@@ -16,7 +16,7 @@
     deploy_name: "{{deploy_name_prefix}}-{{'abcdefghijklmnopqrstuvwxyz0123456789'|random_word(8)}}"
   with_sequence: count={{(openshift_logging_es_cluster_size - openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | length) | abs}}
   when:
-   - "{{ openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | length < openshift_logging_es_cluster_size }}"
+    - "{{ openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | length < openshift_logging_es_cluster_size }}"
   check_mode: no
 
 

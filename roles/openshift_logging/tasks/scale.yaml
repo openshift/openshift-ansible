@@ -23,6 +23,6 @@
   retries: 30
   delay: 10
   when:
-    - not ansible_check_mode
-    - replica_count.stdout|int != desired
+  - not ansible_check_mode
+  - replica_count.stdout|int != desired
   changed_when: no
