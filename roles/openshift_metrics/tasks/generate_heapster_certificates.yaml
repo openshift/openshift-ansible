@@ -1,0 +1,41 @@
+---
+- name: generate heapster key/cert
+  command: >
+    {{ openshift.common.admin_binary }} ca create-server-cert
+    --config={{ mktemp.stdout }}/admin.kubeconfig
+    --key='{{ openshift_metrics_certs_dir }}/heapster.key'
+    --cert='{{ openshift_metrics_certs_dir }}/heapster.cert'
+    --hostnames=heapster
+    --signer-cert='{{ openshift_metrics_certs_dir }}/ca.crt'
+    --signer-key='{{ openshift_metrics_certs_dir }}/ca.key'
+    --signer-serial='{{ openshift_metrics_certs_dir }}/ca.serial.txt'
+  when: not '{{ openshift_metrics_certs_dir }}/heapster.key' | exists
+
+- when: "'secret/heapster-secrets' not in metrics_secrets.stdout_lines"
+  block:
+  - name: read files for the heapster secret
+    slurp: src={{ item }}
+    register: heapster_secret
+    with_items:
+    - "{{ openshift_metrics_certs_dir }}/heapster.cert"
+    - "{{ openshift_metrics_certs_dir }}/heapster.key"
+    - "{{ client_ca }}"
+    vars:
+      custom_ca: "{{ openshift_metrics_certs_dir }}/heapster_client_ca.crt"
+      default_ca: "{{ openshift.common.config_base }}/master/ca-bundle.crt"
+      client_ca: "{{ custom_ca|exists|ternary(custom_ca, default_ca) }}"
+  - name: generate heapster secret template
+    template:
+      src: secret.j2
+      dest: "{{ mktemp.stdout }}/templates/heapster_secrets.yaml"
+      force: no
+    vars:
+      name: heapster-secrets
+      labels:
+        metrics-infra: heapster
+      data:
+        heapster.cert: "{{ heapster_secret.results[0].content }}"
+        heapster.key: "{{ heapster_secret.results[1].content }}"
+        heapster.client-ca: "{{ heapster_secret.results[2].content }}"
+        heapster.allowed-users: >
+          {{ openshift_metrics_heapster_allowed_users|b64encode }}

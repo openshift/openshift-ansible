@@ -1,0 +1,33 @@
+---
+- name: generate view role binding for the hawkular service account
+  template:
+    src: rolebinding.j2
+    dest: "{{ mktemp.stdout }}/templates/hawkular-rolebinding.yaml"
+  vars:
+    obj_name: hawkular-view
+    labels:
+      metrics-infra: hawkular
+    roleRef:
+      name: view
+    subjects:
+    - kind: ServiceAccount
+      name: hawkular
+  changed_when: no
+
+- name: generate cluster-reader role binding for the heapster service account
+  template:
+    src: rolebinding.j2
+    dest: "{{ mktemp.stdout }}/templates/heapster-rolebinding.yaml"
+  vars:
+    cluster: True
+    obj_name: heapster-cluster-reader
+    labels:
+      metrics-infra: heapster
+    roleRef:
+      kind: ClusterRole
+      name: cluster-reader
+    subjects:
+    - kind: ServiceAccount
+      name: heapster
+      namespace: "{{ openshift_metrics_project }}"
+  changed_when: no

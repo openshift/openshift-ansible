@@ -1,0 +1,30 @@
+---
+- command: >
+    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get {{object}}
+    -o jsonpath='{.spec.replicas}' -n {{openshift_metrics_project}}
+  register: replica_count
+  failed_when: "replica_count.rc == 1 and 'exists' not in replica_count.stderr"
+  when: not ansible_check_mode
+  changed_when: no
+
+- command: >
+    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig scale {{object}}
+    --replicas={{desired}} -n {{openshift_metrics_project}}
+  register: scale_result
+  failed_when: scale_result.rc == 1 and 'exists' not in scale_result.stderr
+  when:
+  - replica_count.stdout != (desired | string)
+  - not ansible_check_mode
+  changed_when: no
+
+- name: Waiting for {{object}} to scale to {{desired}}
+  command: >
+    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig
+    get {{object}} -n {{openshift_metrics_project|quote}} -o jsonpath='{.status.replicas}'
+  register: replica_counts
+  until: replica_counts.stdout.find("{{desired}}") != -1
+  retries: 30
+  delay: 10
+  when:
+  - replica_count.stdout != (desired | string)
+  - not ansible_check_mode

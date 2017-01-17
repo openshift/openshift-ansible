@@ -11,6 +11,7 @@ import pkg_resources
 import re
 import json
 import yaml
+import random
 
 from ansible import errors
 from collections import Mapping
@@ -922,6 +923,16 @@ Ex:
         return str(version).split('+')[0]
 
 
+def oo_random_word(length, source='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'):
+    """Generates a random string of given length from a set of alphanumeric characters.
+       The default source uses [a-z][A-Z][0-9]
+       Ex:
+       - oo_random_word(3)                => aB9
+       - oo_random_word(4, source='012')  => 0123
+    """
+    return ''.join(random.choice(source) for i in range(length))
+
+
 class FilterModule(object):
     """ Custom ansible filter mapping """
 
@@ -961,4 +972,5 @@ class FilterModule(object):
             "oo_openshift_loadbalancer_frontends": oo_openshift_loadbalancer_frontends,
             "oo_openshift_loadbalancer_backends": oo_openshift_loadbalancer_backends,
             "to_padded_yaml": to_padded_yaml,
+            "oo_random_word": oo_random_word
         }

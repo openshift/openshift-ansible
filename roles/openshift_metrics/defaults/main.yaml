@@ -1,0 +1,48 @@
+---
+openshift_metrics_start_cluster: True
+openshift_metrics_install_metrics: True
+openshift_metrics_image_prefix: docker.io/openshift/origin-
+openshift_metrics_image_version: latest
+openshift_metrics_startup_timeout: 500
+
+openshift_metrics_hawkular_replicas: 1
+openshift_metrics_hawkular_limits_memory: 2.5G
+openshift_metrics_hawkular_limits_cpu: null
+openshift_metrics_hawkular_requests_memory: 1.5G
+openshift_metrics_hawkular_requests_cpu: null
+openshift_metrics_hawkular_cert: ""
+openshift_metrics_hawkular_key: ""
+openshift_metrics_hawkular_ca: ""
+
+openshift_metrics_cassandra_replicas: 1
+openshift_metrics_cassandra_storage_type: emptydir
+openshift_metrics_cassandra_pv_size: 10Gi
+openshift_metrics_cassandra_limits_memory: 2G
+openshift_metrics_cassandra_limits_cpu: null
+openshift_metrics_cassandra_requests_memory: 1G
+openshift_metrics_cassandra_requests_cpu: null
+
+openshift_metrics_heapster_standalone: False
+openshift_metrics_heapster_limits_memory: 3.75G
+openshift_metrics_heapster_limits_cpu: null
+openshift_metrics_heapster_requests_memory: 0.9375G
+openshift_metrics_heapster_requests_cpu: null
+
+openshift_metrics_duration: 7
+openshift_metrics_resolution: 15s
+
+#####
+# Caution should be taken for the following defaults before
+# overriding the values here
+#####
+
+openshift_metrics_certs_dir: "{{ openshift.common.config_base }}/master/metrics"
+openshift_metrics_master_url: https://kubernetes.default.svc.cluster.local
+openshift_metrics_node_id: nodename
+openshift_metrics_project: openshift-infra
+
+openshift_metrics_cassandra_pv_prefix: metrics-cassandra
+
+openshift_metrics_hawkular_user_write_access: False
+
+openshift_metrics_heapster_allowed_users: system:master-proxy

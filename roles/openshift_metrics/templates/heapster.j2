@@ -1,0 +1,98 @@
+apiVersion: "v1"
+kind: "ReplicationController"
+metadata:
+  name: heapster
+  labels:
+    metrics-infra: heapster
+    name: heapster
+spec:
+  selector:
+    name: heapster
+  replicas: {{replica_count}}
+  template:
+    version: v1
+    metadata:
+      name: heapster
+      labels:
+        metrics-infra: heapster
+        name: heapster
+    spec:
+      serviceAccountName: heapster
+      containers:
+      - name: heapster
+        image: {{openshift_metrics_image_prefix}}metrics-heapster:{{openshift_metrics_image_version}}
+        ports:
+        - containerPort: 8082
+          name: "http-endpoint"
+        command:
+        - "heapster-wrapper.sh"
+        - "--wrapper.allowed_users_file=/secrets/heapster.allowed-users"
+        - "--source=kubernetes.summary_api:${MASTER_URL}?useServiceAccount=true&kubeletHttps=true&kubeletPort=10250"
+        - "--tls_cert=/secrets/heapster.cert"
+        - "--tls_key=/secrets/heapster.key"
+        - "--tls_client_ca=/secrets/heapster.client-ca"
+        - "--allowed_users=%allowed_users%"
+        - "--metric_resolution={{openshift_metrics_resolution}}"
+{% if not openshift_metrics_heapster_standalone %}
+        - "--wrapper.username_file=/hawkular-account/hawkular-metrics.username"
+        - "--wrapper.password_file=/hawkular-account/hawkular-metrics.password"
+        - "--wrapper.endpoint_check=https://hawkular-metrics:443/hawkular/metrics/status"
+        - "--sink=hawkular:https://hawkular-metrics:443?tenant=_system&labelToTenant=pod_namespace&labelNodeId={{openshift_metrics_node_id}}&caCert=/hawkular-cert/hawkular-metrics-ca.certificate&user=%username%&pass=%password%&filter=label(container_name:^system.slice.*|^user.slice)"
+{% endif %}
+        env:
+        - name: STARTUP_TIMEOUT
+          value: "{{ openshift_metrics_startup_timeout }}"
+{% if ((openshift_metrics_heapster_limits_cpu is defined and openshift_metrics_heapster_limits_cpu is not none) 
+   or (openshift_metrics_heapster_limits_memory is defined and openshift_metrics_heapster_limits_memory is not none)
+   or (openshift_metrics_heapster_requests_cpu is defined and openshift_metrics_heapster_requests_cpu is not none)
+   or (openshift_metrics_heapster_requests_memory is defined and openshift_metrics_heapster_requests_memory is not none)) 
+%}
+        resources:
+{% if (openshift_metrics_heapster_limits_cpu is not none
+   or openshift_metrics_heapster_limits_memory is not none)
+%}
+          limits:
+{% if openshift_metrics_heapster_limits_cpu is not none %}
+            cpu: "{{openshift_metrics_heapster_limits_cpu}}"
+{% endif %}
+{% if openshift_metrics_heapster_limits_memory is not none %}
+            memory: "{{openshift_metrics_heapster_limits_memory}}"
+{% endif %}
+{% endif %}
+{% if (openshift_metrics_heapster_requests_cpu is not none 
+   or openshift_metrics_heapster_requests_memory is not none) 
+%}
+          requests:
+{% if openshift_metrics_heapster_requests_cpu is not none %}
+            cpu: "{{openshift_metrics_heapster_requests_cpu}}"
+{% endif %}
+{% if openshift_metrics_heapster_requests_memory is not none %}
+            memory: "{{openshift_metrics_heapster_requests_memory}}"
+{% endif %}
+{% endif %}
+{% endif %}
+        volumeMounts:
+        - name: heapster-secrets
+          mountPath: "/secrets"
+{% if not openshift_metrics_heapster_standalone %}
+        - name: hawkular-metrics-certificate
+          mountPath: "/hawkular-cert"
+        - name: hawkular-metrics-account
+          mountPath: "/hawkular-account"
+        readinessProbe:
+          exec:
+            command:
+            - "/opt/heapster-readiness.sh"
+{% endif %}
+      volumes:
+        - name: heapster-secrets
+          secret:
+            secretName: heapster-secrets
+{% if not openshift_metrics_heapster_standalone %}
+        - name: hawkular-metrics-certificate
+          secret:
+            secretName: hawkular-metrics-certificate
+        - name: hawkular-metrics-account
+          secret:
+            secretName: hawkular-metrics-account
+{% endif %}

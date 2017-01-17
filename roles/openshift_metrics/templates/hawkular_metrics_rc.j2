@@ -1,0 +1,119 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: hawkular-metrics
+  labels:
+    metrics-infra: hawkular-metrics
+    name: hawkular-metrics
+spec:
+  selector:
+    name: hawkular-metrics
+  replicas: {{replica_count}}
+  template:
+    version: v1
+    metadata:
+      labels:
+        metrics-infra: hawkular-metrics
+        name: hawkular-metrics
+    spec:
+      serviceAccount: hawkular
+      containers:
+      - image: {{openshift_metrics_image_prefix}}metrics-hawkular-metrics:{{openshift_metrics_image_version}}
+        name: hawkular-metrics
+        ports:
+        - name: http-endpoint
+          containerPort: 8080
+        - name: https-endpoint
+          containerPort: 8443
+        - name: ping
+          containerPort: 8888
+        command:
+        - "/opt/hawkular/scripts/hawkular-metrics-wrapper.sh"
+        - "-b"
+        - 0.0.0.0
+        - "-Dhawkular.metrics.cassandra.nodes=hawkular-cassandra"
+        - "-Dhawkular.metrics.cassandra.use-ssl"
+        - "-Dhawkular.metrics.openshift.auth-methods=openshift-oauth,htpasswd"
+        - "-Dhawkular.metrics.openshift.htpasswd-file=/secrets/hawkular-metrics.htpasswd.file"
+        - "-Dhawkular.metrics.allowed-cors-access-control-allow-headers=authorization"
+        - "-Dhawkular.metrics.default-ttl={{openshift_metrics_duration}}"
+        - "-Dhawkular-alerts.cassandra-nodes=hawkular-cassandra"
+        - "-Dhawkular-alerts.cassandra-use-ssl"
+        - "-Dhawkular.alerts.openshift.auth-methods=openshift-oauth,htpasswd"
+        - "-Dhawkular.alerts.openshift.htpasswd-file=/secrets/hawkular-metrics.htpasswd.file"
+        - "-Dhawkular.alerts.allowed-cors-access-control-allow-headers=authorization"
+        - "-Dorg.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH=true"
+        - "-Dorg.apache.catalina.connector.CoyoteAdapter.ALLOW_BACKSLASH=true"
+        - "-DKUBERNETES_MASTER_URL={{openshift_metrics_master_url}}"
+        - "-DUSER_WRITE_ACCESS={{openshift_metrics_hawkular_user_write_access}}"
+        - "--hmw.keystore=/secrets/hawkular-metrics.keystore"
+        - "--hmw.truststore=/secrets/hawkular-metrics.truststore"
+        - "--hmw.keystore_password_file=/secrets/hawkular-metrics.keystore.password"
+        - "--hmw.truststore_password_file=/secrets/hawkular-metrics.truststore.password"
+        - "--hmw.jgroups_keystore=/secrets/hawkular-metrics.jgroups.keystore"
+        - "--hmw.jgroups_keystore_password_file=/secrets/hawkular-metrics.jgroups.keystore.password"
+        - "--hmw.jgroups_alias_file=/secrets/hawkular-metrics.jgroups.alias"
+        env:
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: MASTER_URL
+          value: "{{ openshift_metrics_master_url }}"
+        - name: OPENSHIFT_KUBE_PING_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: OPENSHIFT_KUBE_PING_LABELS
+          value: "metrics-infra=hawkular-metrics,name=hawkular-metrics"
+        - name: STARTUP_TIMEOUT
+          value: "{{ openshift_metrics_startup_timeout }}"
+        volumeMounts:
+        - name: hawkular-metrics-secrets
+          mountPath: "/secrets"
+        - name: hawkular-metrics-client-secrets
+          mountPath: "/client-secrets"
+{% if ((openshift_metrics_hawkular_limits_cpu is defined and openshift_metrics_hawkular_limits_cpu is not none) 
+   or (openshift_metrics_hawkular_limits_memory is defined and openshift_metrics_hawkular_limits_memory is not none)
+   or (openshift_metrics_hawkular_requests_cpu is defined and openshift_metrics_hawkular_requests_cpu is not none)
+   or (openshift_metrics_hawkular_requests_memory is defined and openshift_metrics_hawkular_requests_memory is not none)) 
+%}
+        resources:
+{% if (openshift_metrics_hawkular_limits_cpu is not none
+   or openshift_metrics_hawkular_limits_memory is not none)
+%}
+          limits:
+{% if openshift_metrics_hawkular_limits_cpu is not none %}
+            cpu: "{{openshift_metrics_hawkular_limits_cpu}}"
+{% endif %}
+{% if openshift_metrics_hawkular_limits_memory is not none %}
+            memory: "{{openshift_metrics_hawkular_limits_memory}}"
+{% endif %}
+{% endif %}
+{% if (openshift_metrics_hawkular_requests_cpu is not none 
+   or openshift_metrics_hawkular_requests_memory is not none) 
+%}
+          requests:
+{% if openshift_metrics_hawkular_requests_cpu is not none %}
+            cpu: "{{openshift_metrics_hawkular_requests_cpu}}"
+{% endif %}
+{% if openshift_metrics_hawkular_requests_memory is not none %}
+            memory: "{{openshift_metrics_hawkular_requests_memory}}"
+{% endif %}
+{% endif %}
+{% endif %}
+        readinessProbe:
+          exec:
+            command:
+            - "/opt/hawkular/scripts/hawkular-metrics-readiness.py"
+        livenessProbe:
+          exec:
+            command:
+            - "/opt/hawkular/scripts/hawkular-metrics-liveness.py"
+      volumes:
+      - name: hawkular-metrics-secrets
+        secret:
+          secretName: hawkular-metrics-secrets
+      - name: hawkular-metrics-client-secrets
+        secret:
+          secretName: hawkular-metrics-account

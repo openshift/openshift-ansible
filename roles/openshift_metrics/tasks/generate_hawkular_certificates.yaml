@@ -1,0 +1,166 @@
+---
+- name: generate hawkular-metrics certificates
+  include: setup_certificate.yaml
+  vars:
+    component: hawkular-metrics
+    hostnames: "hawkular-metrics,{{ openshift_metrics_hawkular_hostname }}"
+  changed_when: no
+
+- name: generate hawkular-cassandra certificates
+  include: setup_certificate.yaml
+  vars:
+    component: hawkular-cassandra
+    hostnames: hawkular-cassandra
+  changed_when: no
+
+- slurp: src={{ openshift_metrics_certs_dir }}/hawkular-cassandra-truststore.pwd
+  register: cassandra_truststore_password
+
+- slurp: src={{ openshift_metrics_certs_dir }}/hawkular-metrics-truststore.pwd
+  register: hawkular_truststore_password
+
+- name: generate password for hawkular metrics and jgroups
+  copy:
+    dest: '{{ openshift_metrics_certs_dir }}/{{ item }}.pwd'
+    content: "{{ 15 | oo_random_word }}"
+  with_items:
+  - hawkular-metrics
+  - hawkular-jgroups-keystore
+  when: not '{{ openshift_metrics_certs_dir }}/{{ item }}.pwd'|exists
+
+- name: generate htpasswd file for hawkular metrics
+  shell: >
+    htpasswd -ci
+    '{{ openshift_metrics_certs_dir }}/hawkular-metrics.htpasswd' hawkular
+    < '{{ openshift_metrics_certs_dir }}/hawkular-metrics.pwd'
+  when: >
+    not '{{ openshift_metrics_certs_dir }}/hawkular-metrics.htpasswd'|exists
+
+- include: import_jks_certs.yaml
+
+- name: read files for the hawkular-metrics secret
+  shell: >
+    printf '%s: ' '{{ item }}'
+    && base64 --wrap 0 '{{ openshift_metrics_certs_dir }}/{{ item }}'
+  register: hawkular_secrets
+  with_items:
+  - ca.crt
+  - hawkular-metrics.crt
+  - hawkular-metrics.keystore
+  - hawkular-metrics-keystore.pwd
+  - hawkular-metrics.truststore
+  - hawkular-metrics-truststore.pwd
+  - hawkular-metrics.pwd
+  - hawkular-metrics.htpasswd
+  - hawkular-jgroups.keystore
+  - hawkular-jgroups-keystore.pwd
+  - hawkular-cassandra.crt
+  - hawkular-cassandra.pem
+  - hawkular-cassandra.keystore
+  - hawkular-cassandra-keystore.pwd
+  - hawkular-cassandra.truststore
+  - hawkular-cassandra-truststore.pwd
+  changed_when: false
+
+- set_fact:
+    hawkular_secrets: |
+      {{ hawkular_secrets.results|map(attribute='stdout')|join('
+      ')|from_yaml }}
+
+- name: generate hawkular-metrics-secrets secret template
+  template:
+    src: secret.j2
+    dest: "{{ mktemp.stdout }}/templates/hawkular_metrics_secrets.yaml"
+  vars:
+    name: hawkular-metrics-secrets
+    labels:
+      metrics-infra: hawkular-metrics
+    data:
+      hawkular-metrics.keystore: >
+        {{ hawkular_secrets['hawkular-metrics.keystore'] }}
+      hawkular-metrics.keystore.password: >
+        {{ hawkular_secrets['hawkular-metrics-keystore.pwd'] }}
+      hawkular-metrics.truststore: >
+        {{ hawkular_secrets['hawkular-metrics.truststore'] }}
+      hawkular-metrics.truststore.password: >
+        {{ hawkular_secrets['hawkular-metrics-truststore.pwd'] }}
+      hawkular-metrics.keystore.alias: "{{ 'hawkular-metrics'|b64encode }}"
+      hawkular-metrics.htpasswd.file: >
+        {{ hawkular_secrets['hawkular-metrics.htpasswd'] }}
+      hawkular-metrics.jgroups.keystore: >
+        {{ hawkular_secrets['hawkular-jgroups.keystore'] }}
+      hawkular-metrics.jgroups.keystore.password: >
+        {{ hawkular_secrets['hawkular-jgroups-keystore.pwd'] }}
+      hawkular-metrics.jgroups.alias: "{{ 'hawkular'|b64encode }}"
+  when: name not in metrics_secrets.stdout_lines
+  changed_when: no
+
+- name: generate hawkular-metrics-certificate secret template
+  template:
+    src: secret.j2
+    dest: "{{ mktemp.stdout }}/templates/hawkular_metrics_certificate.yaml"
+  vars:
+    name: hawkular-metrics-certificate
+    labels:
+      metrics-infra: hawkular-metrics
+    data:
+      hawkular-metrics.certificate: >
+        {{ hawkular_secrets['hawkular-metrics.crt'] }}
+      hawkular-metrics-ca.certificate: >
+        {{ hawkular_secrets['ca.crt'] }}
+  when: name not in metrics_secrets.stdout_lines
+  changed_when: no
+
+- name: generate hawkular-metrics-account secret template
+  template:
+    src: secret.j2
+    dest: "{{ mktemp.stdout }}/templates/hawkular_metrics_account.yaml"
+  vars:
+    name: hawkular-metrics-account
+    labels:
+      metrics-infra: hawkular-metrics
+    data:
+      hawkular-metrics.username: "{{ 'hawkular'|b64encode }}"
+      hawkular-metrics.password: >
+        {{ hawkular_secrets['hawkular-metrics.pwd'] }}
+  when: name not in metrics_secrets.stdout_lines
+  changed_when: no
+
+- name: generate cassandra secret template
+  template:
+    src: secret.j2
+    dest: "{{ mktemp.stdout }}/templates/cassandra_secrets.yaml"
+  vars:
+    name: hawkular-cassandra-secrets
+    labels:
+      metrics-infra: hawkular-cassandra
+    data:
+      cassandra.keystore: >
+        {{ hawkular_secrets['hawkular-cassandra.keystore'] }}
+      cassandra.keystore.password: >
+        {{ hawkular_secrets['hawkular-cassandra-keystore.pwd'] }}
+      cassandra.keystore.alias: "{{ 'hawkular-cassandra'|b64encode }}"
+      cassandra.truststore: >
+        {{ hawkular_secrets['hawkular-cassandra.truststore'] }}
+      cassandra.truststore.password: >
+        {{ hawkular_secrets['hawkular-cassandra-truststore.pwd'] }}
+      cassandra.pem: >
+        {{ hawkular_secrets['hawkular-cassandra.pem'] }}
+  when: name not in metrics_secrets
+  changed_when: no
+
+- name: generate cassandra-certificate secret template
+  template:
+    src: secret.j2
+    dest: "{{ mktemp.stdout }}/templates/cassandra_certificate.yaml"
+  vars:
+    name: hawkular-cassandra-certificate
+    labels:
+      metrics-infra: hawkular-cassandra
+    data:
+      cassandra.certificate: >
+        {{ hawkular_secrets['hawkular-cassandra.crt'] }}
+      cassandra-ca.certificate: >
+        {{ hawkular_secrets['hawkular-cassandra.pem'] }}
+  when: name not in metrics_secrets.stdout_lines
+  changed_when: no

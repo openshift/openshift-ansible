@@ -1,0 +1,19 @@
+---
+- name: stop metrics
+  include: stop_metrics.yaml
+
+- name: remove metrics components
+  command: >
+    {{ openshift.common.client_binary }} -n {{ openshift_metrics_project }} --config={{ mktemp.stdout }}/admin.kubeconfig
+    delete --ignore-not-found --selector=metrics-infra
+    all,sa,secrets,templates,routes,pvc,rolebindings,clusterrolebindings
+  register: delete_metrics
+  changed_when: "delete_metrics.stdout != 'No resources found'"
+
+- name: remove rolebindings
+  command: >
+    {{ openshift.common.client_binary }} -n {{ openshift_metrics_project }} --config={{ mktemp.stdout }}/admin.kubeconfig
+    delete --ignore-not-found
+    rolebinding/hawkular-view
+    clusterrolebinding/heapster-cluster-reader
+  changed_when: "delete_metrics.stdout != 'No resources found'"

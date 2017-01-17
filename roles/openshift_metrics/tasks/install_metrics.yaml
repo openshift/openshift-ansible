@@ -1,0 +1,37 @@
+---
+- name: Check that hawkular_metrics_hostname is set
+  fail: msg='the openshift_metrics_hawkular_hostname variable is required'
+  when: openshift_metrics_hawkular_hostname is not defined
+
+- name: Check the value of openshift_metrics_cassandra_storage_type
+  fail:
+    msg: >
+      openshift_metrics_cassandra_storage_type ({{ openshift_metrics_cassandra_storage_type }})
+      is invalid, must be one of: emptydir, pv, dynamic
+  when: openshift_metrics_cassandra_storage_type not in openshift_metrics_cassandra_storage_types
+
+- name: Install Metrics
+  include: "{{ role_path }}/tasks/install_{{ include_file }}.yaml"
+  with_items:
+    - support
+    - heapster
+    - hawkular
+    - cassandra
+  loop_control:
+    loop_var: include_file
+
+- name: Create objects
+  include: oc_apply.yaml
+  vars:
+    kubeconfig: "{{ mktemp.stdout }}/admin.kubeconfig"
+    namespace: "{{ openshift_metrics_project }}"
+    file_name: "{{ item }}"
+    file_content: "{{ lookup('file',item) | from_yaml }}"
+  with_fileglob:
+    - "{{ mktemp.stdout }}/templates/*.yaml"
+
+- name: Scaling up cluster
+  include: start_metrics.yaml
+  tags: openshift_metrics_start_cluster
+  when:
+    - openshift_metrics_start_cluster | default(true) | bool

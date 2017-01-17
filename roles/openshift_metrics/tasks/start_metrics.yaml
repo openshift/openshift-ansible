@@ -1,0 +1,54 @@
+---
+- command: >
+    {{openshift.common.client_binary}}
+    --config={{mktemp.stdout}}/admin.kubeconfig
+    get rc
+    -l metrics-infra=hawkular-cassandra
+    -o name
+    -n {{openshift_metrics_project}}
+  register: metrics_cassandra_rc
+  changed_when: no
+
+- name: Start Hawkular Cassandra
+  include: scale.yaml
+  vars:
+    desired: 1
+  with_items: "{{metrics_cassandra_rc.stdout_lines}}"
+  loop_control:
+    loop_var: object
+
+- command: >
+    {{openshift.common.client_binary}}
+    --config={{mktemp.stdout}}/admin.kubeconfig
+    get rc
+    -l metrics-infra=hawkular-metrics
+    -o name
+    -n {{openshift_metrics_project}}
+  register: metrics_metrics_rc
+  changed_when: no
+
+- name: Start Hawkular Metrics
+  include: scale.yaml
+  vars:
+    desired: "{{openshift_metrics_hawkular_replicas}}"
+  with_items: "{{metrics_metrics_rc.stdout_lines}}"
+  loop_control:
+    loop_var: object
+
+- command: >
+    {{openshift.common.client_binary}}
+    --config={{mktemp.stdout}}/admin.kubeconfig
+    get rc
+    -l metrics-infra=heapster
+    -o name
+    -n {{openshift_metrics_project}}
+  register: metrics_heapster_rc
+  changed_when: no
+
+- name: Start Heapster
+  include: scale.yaml
+  vars:
+    desired: 1
+  with_items: "{{metrics_heapster_rc.stdout_lines}}"
+  loop_control:
+    loop_var: object
