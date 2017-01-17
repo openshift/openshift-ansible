@@ -15,6 +15,7 @@
       no_proxy: "{{ openshift_builddefaults_no_proxy | default(None) }}"
       git_http_proxy: "{{ openshift_builddefaults_git_http_proxy | default(None) }}"
       git_https_proxy: "{{ openshift_builddefaults_git_https_proxy | default(None) }}"
+      git_no_proxy: "{{ openshift_builddefaults_git_no_proxy | default(None) }}"
 
 - name: Set builddefaults config structure
   openshift_facts:

@@ -1465,7 +1465,9 @@ def merge_facts(orig, new, additive_facts_to_overwrite, protected_facts_to_overw
     # here, just completely overwrite with the new if they are present there.
     inventory_json_facts = ['admission_plugin_config',
                             'kube_admission_plugin_config',
-                            'image_policy_config']
+                            'image_policy_config',
+                            "builddefaults",
+                            "buildoverrides"]
 
     facts = dict()
     for key, value in iteritems(orig):
@@ -1625,11 +1627,7 @@ def safe_get_bool(fact):
 
 
 def set_proxy_facts(facts):
-    """ Set global proxy facts and promote defaults from http_proxy, https_proxy,
-        no_proxy to the more specific builddefaults and builddefaults_git vars.
-           1. http_proxy, https_proxy, no_proxy
-           2. builddefaults_*
-           3. builddefaults_git_*
+    """ Set global proxy facts
 
         Args:
             facts(dict): existing facts
@@ -1651,6 +1649,21 @@ def set_proxy_facts(facts):
             common['no_proxy'].append(common['hostname'])
             common['no_proxy'] = sort_unique(common['no_proxy'])
         facts['common'] = common
+    return facts
+
+
+def set_builddefaults_facts(facts):
+    """ Set build defaults including setting proxy values from http_proxy, https_proxy,
+        no_proxy to the more specific builddefaults and builddefaults_git vars.
+           1. http_proxy, https_proxy, no_proxy
+           2. builddefaults_*
+           3. builddefaults_git_*
+
+        Args:
+            facts(dict): existing facts
+        Returns:
+            facts(dict): Updated facts with missing values
+    """
 
     if 'builddefaults' in facts:
         builddefaults = facts['builddefaults']
@@ -1660,24 +1673,42 @@ def set_proxy_facts(facts):
             builddefaults['http_proxy'] = common['http_proxy']
         if 'https_proxy' not in builddefaults and 'https_proxy' in common:
             builddefaults['https_proxy'] = common['https_proxy']
-        # make no_proxy into a list if it's not
-        if 'no_proxy' in builddefaults and isinstance(builddefaults['no_proxy'], string_types):
-            builddefaults['no_proxy'] = builddefaults['no_proxy'].split(",")
         if 'no_proxy' not in builddefaults and 'no_proxy' in common:
             builddefaults['no_proxy'] = common['no_proxy']
+
+        # Create git specific facts from generic values, if git specific values are
+        # not defined.
         if 'git_http_proxy' not in builddefaults and 'http_proxy' in builddefaults:
             builddefaults['git_http_proxy'] = builddefaults['http_proxy']
         if 'git_https_proxy' not in builddefaults and 'https_proxy' in builddefaults:
             builddefaults['git_https_proxy'] = builddefaults['https_proxy']
-        # If we're actually defining a proxy config then create admission_plugin_config
-        # if it doesn't exist, then merge builddefaults[config] structure
-        # into admission_plugin_config
-        if 'config' in builddefaults and ('http_proxy' in builddefaults or
-                                          'https_proxy' in builddefaults):
+        if 'git_no_proxy' not in builddefaults and 'no_proxy' in builddefaults:
+            builddefaults['git_no_proxy'] = builddefaults['no_proxy']
+        # If we're actually defining a builddefaults config then create admission_plugin_config
+        # then merge builddefaults[config] structure into admission_plugin_config
+        if 'config' in builddefaults:
             if 'admission_plugin_config' not in facts['master']:
                 facts['master']['admission_plugin_config'] = dict()
             facts['master']['admission_plugin_config'].update(builddefaults['config'])
-        facts['builddefaults'] = builddefaults
+    return facts
+
+
+def set_buildoverrides_facts(facts):
+    """ Set build overrides
+
+        Args:
+            facts(dict): existing facts
+        Returns:
+            facts(dict): Updated facts with missing values
+    """
+    if 'buildoverrides' in facts:
+        buildoverrides = facts['buildoverrides']
+        # If we're actually defining a buildoverrides config then create admission_plugin_config
+        # then merge buildoverrides[config] structure into admission_plugin_config
+        if 'config' in buildoverrides:
+            if 'admission_plugin_config' not in facts['master']:
+                facts['master']['admission_plugin_config'] = dict()
+            facts['master']['admission_plugin_config'].update(buildoverrides['config'])
 
     return facts
 
@@ -1816,6 +1847,7 @@ class OpenShiftFacts(object):
             OpenShiftFactsUnsupportedRoleError:
     """
     known_roles = ['builddefaults',
+                   'buildoverrides',
                    'clock',
                    'cloudprovider',
                    'common',
@@ -1920,6 +1952,8 @@ class OpenShiftFacts(object):
         facts = set_aggregate_facts(facts)
         facts = set_etcd_facts_if_unset(facts)
         facts = set_proxy_facts(facts)
+        facts = set_builddefaults_facts(facts)
+        facts = set_buildoverrides_facts(facts)
         if not safe_get_bool(facts['common']['is_containerized']):
             facts = set_installed_variant_rpm_facts(facts)
         facts = set_nodename(facts)

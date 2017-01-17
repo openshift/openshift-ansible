@@ -1,0 +1,15 @@
+---
+#- name: Set buildoverrides
+#  openshift_facts:
+#    role: buildoverrides
+#    local_facts:
+#      force_pull: "{{ openshift_buildoverrides_force_pull | default(None) }}"
+#      image_labels: "{{ openshift_buildoverrides_image_labels | default(None) }}"
+#      nodeselectors: "{{ openshift_buildoverrides_nodeselectors | default(None) }}"
+#      annotations: "{{ openshift_buildoverrides_annotations | default(None) }}"
+
+- name: Set buildoverrides config structure
+  openshift_facts:
+    role: buildoverrides
+    local_facts:
+      config: "{{ openshift_buildoverrides_json | default(buildoverrides_yaml) }}"

@@ -1,0 +1,10 @@
+---
+buildoverrides_yaml:
+  BuildOverrides:
+    configuration:
+      apiVersion: v1
+      kind: BuildOverridesConfig
+      forcePull: "{{ openshift_buildoverrides_force_pull | default('', true) }}"
+      imageLabels: "{{ openshift_buildoverrides_image_labels | default(None) }}"
+      nodeSelector: "{{ openshift_buildoverrides_nodeselectors | default(None) }}"
+      annotations: "{{ openshift_buildoverrides_annotations | default(None) }}"
