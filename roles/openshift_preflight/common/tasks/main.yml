@@ -1,0 +1,21 @@
+---
+# check content available on all hosts
+- when: not openshift.common.is_containerized | bool
+  block:
+
+    - name: determine if yum update will work
+      action: check_yum_update
+      register: r
+
+    - set_fact:
+        oo_preflight_check_results: "{{ oo_preflight_check_results + [r|combine({'_task': 'determine if yum update will work'})] }}"
+
+    - name: determine if expected version matches what is available
+      aos_version:
+        version: "{{ openshift_release }}"
+      when:
+        - deployment_type == "openshift-enterprise"
+      register: r
+
+    - set_fact:
+        oo_preflight_check_results: "{{ oo_preflight_check_results + [r|combine({'_task': 'determine if expected version matches what is available'})] }}"

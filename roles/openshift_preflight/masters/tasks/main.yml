@@ -1,0 +1,31 @@
+---
+# determine if yum install of master pkgs will work
+- when: not openshift.common.is_containerized | bool
+  block:
+
+    - name: main master packages availability
+      check_yum_update:
+        packages:
+          - "{{ openshift.common.service_type }}"
+          - "{{ openshift.common.service_type }}-clients"
+          - "{{ openshift.common.service_type }}-master"
+      register: r
+
+    - set_fact:
+        oo_preflight_check_results: "{{ oo_preflight_check_results + [r|combine({'_task': 'main master packages availability'})] }}"
+
+    - name: other master packages availability
+      check_yum_update:
+        packages:
+          - etcd
+          - bash-completion
+          - cockpit-bridge
+          - cockpit-docker
+          - cockpit-kubernetes
+          - cockpit-shell
+          - cockpit-ws
+          - httpd-tools
+      register: r
+
+    - set_fact:
+        oo_preflight_check_results: "{{ oo_preflight_check_results + [r|combine({'_task': 'other master packages availability'})] }}"

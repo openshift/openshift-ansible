@@ -1,0 +1,4 @@
+---
+- name: set common variables
+  set_fact:
+    oo_preflight_check_results: "{{ oo_preflight_check_results | default([]) }}"

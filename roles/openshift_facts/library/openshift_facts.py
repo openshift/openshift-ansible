@@ -1246,10 +1246,10 @@ def build_api_server_args(facts):
 def is_service_running(service):
     """ Queries systemd through dbus to see if the service is running """
     service_running = False
-    bus = SystemBus()
-    systemd = bus.get_object('org.freedesktop.systemd1', '/org/freedesktop/systemd1')
-    manager = Interface(systemd, dbus_interface='org.freedesktop.systemd1.Manager')
     try:
+        bus = SystemBus()
+        systemd = bus.get_object('org.freedesktop.systemd1', '/org/freedesktop/systemd1')
+        manager = Interface(systemd, dbus_interface='org.freedesktop.systemd1.Manager')
         service_unit = service if service.endswith('.service') else manager.GetUnit('{0}.service'.format(service))
         service_proxy = bus.get_object('org.freedesktop.systemd1', str(service_unit))
         service_properties = Interface(service_proxy, dbus_interface='org.freedesktop.DBus.Properties')
@@ -1258,6 +1258,8 @@ def is_service_running(service):
         if service_load_state == 'loaded' and service_active_state == 'active':
             service_running = True
     except DBusException:
+        # TODO: do not swallow exception, as it may be hiding useful debugging
+        # information.
         pass
 
     return service_running
