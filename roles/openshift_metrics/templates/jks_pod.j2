@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    metrics-infra: support
+  generateName: jks-cert-gen-
+spec:
+  containers:
+  - name: jks-cert-gen
+    image: {{openshift_metrics_image_prefix}}metrics-deployer:{{openshift_metrics_image_version}}
+    imagePullPolicy: Always
+    command: ["sh",  "{{openshift_metrics_certs_dir}}/import_jks_certs.sh"]
+    securityContext:
+      runAsUser: 0
+    volumeMounts:
+    - mountPath: {{openshift_metrics_certs_dir}}
+      name: certmount
+    env:
+    - name: CERT_DIR
+      value: {{openshift_metrics_certs_dir}}
+    - name: METRICS_KEYSTORE_PASSWD
+      value: {{metrics_keystore_passwd}}
+    - name: CASSANDRA_KEYSTORE_PASSWD
+      value: {{cassandra_keystore_passwd}}
+    - name: METRICS_TRUSTSTORE_PASSWD
+      value: {{metrics_truststore_passwd}}
+    - name: CASSANDRA_TRUSTSTORE_PASSWD
+      value: {{cassandra_truststore_passwd}}
+    - name: hawkular_cassandra_alias
+      value: {{cassandra_keystore_passwd}}
+    - name: JGROUPS_PASSWD
+      value: {{jgroups_passwd}}
+  restartPolicy: Never
+  serviceAccount: jks-generator
+  volumes:
+  - hostPath:
+      path: "{{openshift_metrics_certs_dir}}"
+    name: certmount

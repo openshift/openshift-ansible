@@ -1,12 +1,13 @@
 ---
 - name: Checking generation of {{file_content.kind}} {{file_content.metadata.name}}
   command: >
-    {{ openshift.common.client_binary }} 
+    {{ openshift.common.client_binary }}
     --config={{ kubeconfig }}
     get {{file_content.kind}} {{file_content.metadata.name}}
-    -o jsonpath='{.metadata.resourceVersion}' 
+    -o jsonpath='{.metadata.resourceVersion}'
     -n {{namespace}}
   register: generation_init
+  failed_when: false
   changed_when: no
 
 - name: Applying {{file_name}}
@@ -22,7 +23,7 @@
   command: >
     {{ openshift.common.client_binary }} --config={{ kubeconfig }}
     get {{file_content.kind}} {{file_content.metadata.name}}
-    -o jsonpath='{.metadata.resourceVersion}' 
+    -o jsonpath='{.metadata.resourceVersion}'
     -n {{namespace}}
   register: version_changed
   vars:

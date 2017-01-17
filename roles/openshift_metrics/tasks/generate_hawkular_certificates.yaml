@@ -13,93 +13,16 @@
     hostnames: hawkular-cassandra
   changed_when: no
 
-- slurp: src={{ openshift_metrics_certs_dir|quote }}/hawkular-cassandra-truststore.pwd
+- slurp: src={{ openshift_metrics_certs_dir }}/hawkular-cassandra-truststore.pwd
   register: cassandra_truststore_password
 
-- name: check existing aliases on the hawkular-cassandra truststore
-  shell: >
-    keytool -noprompt -list
-    -keystore {{ openshift_metrics_certs_dir|quote }}/hawkular-cassandra.truststore
-    -storepass {{cassandra_truststore_password.content | b64decode }}
-    | sed -n '7~2s/,.*$//p'
-  register: hawkular_cassandra_truststore_aliases
-  changed_when: false
-
-- slurp: src={{ openshift_metrics_certs_dir|quote }}/hawkular-metrics-truststore.pwd
+- slurp: src={{ openshift_metrics_certs_dir }}/hawkular-metrics-truststore.pwd
   register: hawkular_truststore_password
 
-- name: check existing aliases on the hawkular-metrics truststore
-  shell: >
-    keytool -noprompt -list
-    -keystore {{ openshift_metrics_certs_dir|quote }}/hawkular-metrics.truststore
-    -storepass {{ hawkular_truststore_password.content | b64decode }}
-    | sed -n '7~2s/,.*$//p'
-  register: hawkular_metrics_truststore_aliases
-  changed_when: false
-
-- name: import the hawkular metrics cert into the cassandra truststore
-  command: >
-    keytool -noprompt -import -v -trustcacerts
-    -alias hawkular-metrics
-    -file '{{ openshift_metrics_certs_dir }}/hawkular-metrics.crt'
-    -keystore '{{ openshift_metrics_certs_dir }}/hawkular-cassandra.truststore'
-    -storepass {{cassandra_truststore_password.content | b64decode }}
-  when: >
-    'hawkular-metrics' not in
-    hawkular_cassandra_truststore_aliases.stdout_lines
-
-- name: import the hawkular cassandra cert into the hawkular metrics truststore
-  command: >
-    keytool -noprompt -import -v -trustcacerts
-    -alias hawkular-cassandra
-    -file '{{ openshift_metrics_certs_dir }}/hawkular-cassandra.crt'
-    -keystore '{{ openshift_metrics_certs_dir }}/hawkular-metrics.truststore'
-    -storepass {{ hawkular_truststore_password.content | b64decode }}
-  when: >
-    'hawkular-cassandra' not in
-    hawkular_metrics_truststore_aliases.stdout_lines
-
-- name: import the hawkular cassandra cert into the cassandra truststore
-  command: >
-    keytool -noprompt -import -v -trustcacerts
-    -alias hawkular-cassandra
-    -file '{{ openshift_metrics_certs_dir }}/hawkular-cassandra.crt'
-    -keystore '{{ openshift_metrics_certs_dir }}/hawkular-cassandra.truststore'
-    -storepass {{cassandra_truststore_password.content | b64decode }}
-  when: >
-    'hawkular-cassandra' not in
-    hawkular_cassandra_truststore_aliases.stdout_lines
-
-- name: import the ca certificate into the cassandra truststore
-  command: >
-    keytool -noprompt -import -v -trustcacerts
-    -alias '{{ item }}'
-    -file '{{ openshift_metrics_certs_dir }}/ca.crt'
-    -keystore '{{ openshift_metrics_certs_dir }}/hawkular-cassandra.truststore'
-    -storepass {{cassandra_truststore_password.content | b64decode }}
-  with_items:
-  - ca
-  - metricca
-  - cassandraca
-  when: item not in hawkular_cassandra_truststore_aliases.stdout_lines
-
-- name: import the ca certificate into the hawkular metrics truststore
-  command: >
-    keytool -noprompt -import -v -trustcacerts
-    -alias '{{ item }}'
-    -file '{{ openshift_metrics_certs_dir }}/ca.crt'
-    -keystore '{{ openshift_metrics_certs_dir }}/hawkular-metrics.truststore'
-    -storepass {{ hawkular_truststore_password.content | b64decode }}
-  with_items:
-  - ca
-  - metricca
-  - cassandraca
-  when: item not in hawkular_metrics_truststore_aliases.stdout_lines
-
 - name: generate password for hawkular metrics and jgroups
-  shell: >
-    tr -dc _A-Z-a-z-0-9 < /dev/urandom | head -c15
-    > '{{ openshift_metrics_certs_dir }}/{{ item }}.pwd'
+  copy:
+    dest: '{{ openshift_metrics_certs_dir }}/{{ item }}.pwd'
+    content: "{{ 15 | oo_random_word }}"
   with_items:
   - hawkular-metrics
   - hawkular-jgroups-keystore
@@ -113,15 +36,7 @@
   when: >
     not '{{ openshift_metrics_certs_dir }}/hawkular-metrics.htpasswd'|exists
 
-- name: generate the jgroups keystore
-  shell: >
-    p=$(< '{{ openshift_metrics_certs_dir }}/hawkular-jgroups-keystore.pwd' )
-    &&
-    keytool -genseckey -alias hawkular
-    -keypass "$p" -storepass "$p" -keyalg Blowfish -keysize 56 -storetype JCEKS
-    -keystore '{{ openshift_metrics_certs_dir }}/hawkular-jgroups.keystore'
-  when: >
-    not '{{ openshift_metrics_certs_dir }}/hawkular-jgroups.keystore'|exists
+- include: import_jks_certs.yaml
 
 - name: read files for the hawkular-metrics secret
   shell: >

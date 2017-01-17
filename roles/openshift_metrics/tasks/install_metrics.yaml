@@ -23,10 +23,10 @@
 - name: Create objects
   include: oc_apply.yaml
   vars:
-      kubeconfig: "{{ mktemp.stdout }}/admin.kubeconfig"
-      namespace: "{{ openshift_metrics_project }}"
-      file_name: "{{ item }}"
-      file_content: "{{ lookup('file',item) | from_yaml }}"
+    kubeconfig: "{{ mktemp.stdout }}/admin.kubeconfig"
+    namespace: "{{ openshift_metrics_project }}"
+    file_name: "{{ item }}"
+    file_content: "{{ lookup('file',item) | from_yaml }}"
   with_fileglob:
     - "{{ mktemp.stdout }}/templates/*.yaml"
 

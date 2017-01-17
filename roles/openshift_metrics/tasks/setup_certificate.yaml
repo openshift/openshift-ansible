@@ -26,11 +26,11 @@
 
 - name: generate random password for the {{ component }} keystore
   copy:
-      content: "{{ 15 | oo_random_word }}"
-      dest: '{{ openshift_metrics_certs_dir | quote }}/{{ component|quote }}-keystore.pwd'
+    content: "{{ 15 | oo_random_word }}"
+    dest: '{{ openshift_metrics_certs_dir }}/{{ component }}-keystore.pwd'
   when: >
     not '{{ openshift_metrics_certs_dir }}/{{ component }}-keystore.pwd'|exists
-  
+
 - slurp: src={{ openshift_metrics_certs_dir | quote }}/{{ component|quote }}-keystore.pwd
   register: keystore_password
 
@@ -43,21 +43,10 @@
     -password 'pass:{{keystore_password.content | b64decode }}'
   when: not '{{ openshift_metrics_certs_dir }}/{{ component }}.pkcs12'|exists
 
-- name: create the {{ component }} keystore from the pkcs12 file
-  command: >
-    keytool -v -importkeystore
-    -srckeystore '{{ openshift_metrics_certs_dir | quote }}/{{ component | quote }}.pkcs12'
-    -srcstoretype PKCS12
-    -destkeystore '{{ openshift_metrics_certs_dir | quote }}/{{ component | quote}}.keystore'
-    -deststoretype JKS
-    -deststorepass '{{keystore_password.content | b64decode }}'
-    -srcstorepass '{{keystore_password.content | b64decode }}'
-  when: not '{{ openshift_metrics_certs_dir }}/{{ component }}.keystore'|exists
-
 - name: generate random password for the {{ component }} truststore
   copy:
-      content: "{{ 15 | oo_random_word }}"
-      dest: '{{ openshift_metrics_certs_dir | quote }}/{{ component|quote }}-truststore.pwd'
+    content: "{{ 15 | oo_random_word }}"
+    dest: '{{ openshift_metrics_certs_dir | quote }}/{{ component|quote }}-truststore.pwd'
   when: >
     not
     '{{ openshift_metrics_certs_dir | quote }}/{{ component| quote  }}-truststore.pwd'|exists

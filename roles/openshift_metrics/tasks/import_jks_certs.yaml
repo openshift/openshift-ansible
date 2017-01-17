@@ -1,0 +1,120 @@
+---
+- name: Check for jks-generator service account
+  command: >
+    {{ openshift.common.client_binary }}
+    --config={{ mktemp.stdout }}/admin.kubeconfig
+    -n {{openshift_metrics_project}}
+    get serviceaccount/jks-generator --no-headers
+  register: serviceaccount_result
+  ignore_errors: yes
+  when: not ansible_check_mode
+  changed_when: no
+
+- name: Create jks-generator service account
+  command: >
+    {{ openshift.common.client_binary }}
+    --config={{ mktemp.stdout }}/admin.kubeconfig
+    -n {{openshift_metrics_project}}
+    create serviceaccount jks-generator
+  when: not ansible_check_mode and "not found" in serviceaccount_result.stderr
+
+- name: Check for hostmount-anyuid scc entry
+  command: >
+    {{ openshift.common.client_binary }}
+    --config={{ mktemp.stdout }}/admin.kubeconfig
+    get scc hostmount-anyuid
+    -o jsonpath='{.users}'
+  register: scc_result
+  when: not ansible_check_mode
+  changed_when: no
+
+- name: Add to hostmount-anyuid scc
+  command: >
+    {{ openshift.common.admin_binary }}
+    --config={{ mktemp.stdout }}/admin.kubeconfig
+    -n {{openshift_metrics_project}}
+    policy add-scc-to-user hostmount-anyuid
+    -z jks-generator
+  when:
+    - not ansible_check_mode
+    - scc_result.stdout.find("system:serviceaccount:{{openshift_metrics_project}}:jks-generator") == -1
+
+- name: Copy JKS generation script
+  copy:
+    src: import_jks_certs.sh
+    dest: "{{openshift_metrics_certs_dir}}/import_jks_certs.sh"
+  check_mode: no
+
+- slurp: src={{ openshift_metrics_certs_dir }}/hawkular-metrics-keystore.pwd
+  register: metrics_keystore_password
+
+- slurp: src={{ openshift_metrics_certs_dir }}/hawkular-cassandra-keystore.pwd
+  register: cassandra_keystore_password
+
+- slurp: src={{ openshift_metrics_certs_dir }}/hawkular-jgroups-keystore.pwd
+  register: jgroups_keystore_password
+
+- name: Generate JKS pod template
+  template:
+    src: jks_pod.j2
+    dest: "{{mktemp.stdout}}/jks_pod.yaml"
+  vars:
+    metrics_keystore_passwd: "{{metrics_keystore_password.content}}"
+    cassandra_keystore_passwd: "{{cassandra_keystore_password.content}}"
+    metrics_truststore_passwd: "{{hawkular_truststore_password.content}}"
+    cassandra_truststore_passwd: "{{cassandra_truststore_password.content}}"
+    jgroups_passwd: "{{jgroups_keystore_password.content}}"
+  check_mode: no
+  changed_when: no
+
+- stat: path="{{openshift_metrics_certs_dir}}/hawkular-metrics.keystore"
+  register: metrics_keystore
+  check_mode: no
+
+- stat: path="{{openshift_metrics_certs_dir}}/hawkular-cassandra.keystore"
+  register: cassandra_keystore
+  check_mode: no
+
+- stat: path="{{openshift_metrics_certs_dir}}/hawkular-cassandra.truststore"
+  register: cassandra_truststore
+  check_mode: no
+
+- stat: path="{{openshift_metrics_certs_dir}}/hawkular-metrics.truststore"
+  register: metrics_truststore
+  check_mode: no
+
+- stat: path="{{openshift_metrics_certs_dir}}/hawkular-jgroups.keystore"
+  register: jgroups_keystore
+  check_mode: no
+
+- name: create JKS pod
+  command: >
+    {{ openshift.common.client_binary }}
+    --config={{ mktemp.stdout }}/admin.kubeconfig
+    -n {{openshift_metrics_project}}
+    create -f {{mktemp.stdout}}/jks_pod.yaml
+    -o name
+  register: podoutput
+  check_mode: no
+  when: not metrics_keystore.stat.exists or
+        not metrics_truststore.stat.exists or
+        not cassandra_keystore.stat.exists or
+        not cassandra_truststore.stat.exists or
+        not jgroups_keystore.stat.exists
+
+- command: >
+    {{ openshift.common.client_binary }}
+    --config={{ mktemp.stdout }}/admin.kubeconfig
+    -n {{openshift_metrics_project}}
+    get {{podoutput.stdout}}
+    -o jsonpath='{.status.phase}'
+  register: result
+  until: result.stdout.find("Succeeded") != -1
+  retries: 5
+  delay: 10
+  changed_when: no
+  when: not metrics_keystore.stat.exists or
+        not metrics_truststore.stat.exists or
+        not cassandra_keystore.stat.exists or
+        not cassandra_truststore.stat.exists or
+        not jgroups_keystore.stat.exists

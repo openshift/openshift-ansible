@@ -922,7 +922,8 @@ Ex:
         # '+', .split() returns an array of the original string.
         return str(version).split('+')[0]
 
-def oo_random_word(length,source='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'):
+
+def oo_random_word(length, source='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'):
     """Generates a random string of given length from a set of alphanumeric characters.
        The default source uses [a-z][A-Z][0-9]
        Ex:
@@ -930,6 +931,7 @@ def oo_random_word(length,source='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRST
        - oo_random_word(4, source='012')  => 0123
     """
     return ''.join(random.choice(source) for i in range(length))
+
 
 class FilterModule(object):
     """ Custom ansible filter mapping """
