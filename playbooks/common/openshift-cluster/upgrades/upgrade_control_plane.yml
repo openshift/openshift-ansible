@@ -108,14 +108,15 @@
       state: link
     when: ca_crt_stat.stat.isreg and not ca_bundle_stat.stat.exists
 
+  # NOTE: We run user provided hooks prior to restarting the system or services.
+  - include: "{{ openshift_upgrade_post_master_hook }}"
+    when: openshift_upgrade_post_master_hook is defined
+
   - include: ../../openshift-master/restart_hosts.yml
     when: openshift.common.rolling_restart_mode == 'system'
 
   - include: ../../openshift-master/restart_services.yml
     when: openshift.common.rolling_restart_mode == 'services'
-
-  - include: "{{ openshift_upgrade_post_master_hook }}"
-    when: openshift_upgrade_post_master_hook is defined
 
   - set_fact:
       master_update_complete: True
