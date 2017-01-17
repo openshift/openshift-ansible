@@ -4,6 +4,7 @@
   vars:
     embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
     timestamp: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
+    etcdctl_command: "{{ 'etcdctl' if not openshift.common.is_containerized or embedded_etcd else 'docker exec etcd_container etcdctl' }}"
   roles:
   - openshift_facts
   tasks:
@@ -67,7 +68,7 @@
 
   - name: Generate etcd backup
     command: >
-      etcdctl backup --data-dir={{ openshift.etcd.etcd_data_dir }}
+      {{ etcdctl_command }} backup --data-dir={{ openshift.etcd.etcd_data_dir }}
       --backup-dir={{ openshift.common.data_dir }}/etcd-backup-{{ backup_tag | default('') }}{{ timestamp }}
 
   - set_fact:
