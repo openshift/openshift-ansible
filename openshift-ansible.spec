@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.57
+Version:        3.3.59
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,29 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Jan 18 2017 Scott Dodson <sdodson@redhat.com> 3.3.59-1
+- Ensure serial certificate generation for node and master certificates.
+  (abutcher@redhat.com)
+- Create individual serving cert and loopback kubeconfig for additional
+  masters. (abutcher@redhat.com)
+- Add RHAMP and update v1.3 content (sdodson@redhat.com)
+- Update example sync script (sdodson@redhat.com)
+- removing kind from account template (sdodson@redhat.com)
+- Add future versions to openshift_facts (ccoleman@redhat.com)
+- Fix access_modes initialization (luis.fernandezalvarez@epfl.ch)
+- Properly handle x.y.z formatted versions for openshift_release
+  (jdetiber@redhat.com)
+- fix role dependencies (jdetiber@redhat.com)
+- Remove Hostname from 1.1 and 1.2 predicates (jdetiber@redhat.com)
+- add comments and remove debug code (jdetiber@redhat.com)
+- Handle updating of scheduler config during upgrade (jdetiber@redhat.com)
+- Fix templating (jdetiber@redhat.com)
+- Update scheduler predicate/priorities vars (jdetiber@redhat.com)
+- fix tags (jdetiber@redhat.com)
+- refactor handling of scheduler defaults (jdetiber@redhat.com)
+- fix tagging (jdetiber@redhat.com)
+- do not report changed for group mapping (jdetiber@redhat.com)
+
 * Mon Dec 05 2016 Scott Dodson <sdodson@redhat.com> 3.3.57-1
 - node_dnsmasq - restart dnsmasq if it's not currently running
   (sdodson@redhat.com)
