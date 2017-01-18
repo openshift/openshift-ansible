@@ -5,13 +5,32 @@
   register: pull_result
   changed_when: "'Pulling layer' in pull_result.stdout"
 
+- name: Check Master system container package
+  command: >
+    atomic containers list --no-trunc -a -f container={{ openshift.common.service_type }}-master
+  register: result
+
+- name: Update Master system container package
+  command: >
+    atomic containers update {{ openshift.common.service_type }}-master
+  register: update_result
+  changed_when: "'Extracting' in update_result.stdout"
+  when:
+    - ("master" in result.stdout)
+    - (openshift.common.version is defined) and (openshift.common.version == openshift_version) | bool
+
 - name: Uninstall Master system container package
   command: >
     atomic uninstall {{ openshift.common.service_type }}-master
   failed_when: False
-  when: openshift.common.version != openshift_version
+  when:
+    - ("master" in result.stdout)
+    - (openshift.common.version is not defined) or (openshift.common.version != openshift_version) | bool
 
 - name: Install Master system container package
   command: >
     atomic install --system --name={{ openshift.common.service_type }}-master {{ openshift.common.system_images_registry }}/{{ openshift.master.master_system_image }}:{{ openshift_image_tag }}
-  when: openshift.common.version != openshift_version
+  when:
+    - (openshift.common.version is not defined) or (openshift.common.version != openshift_version) or ("master" not in result.stdout) | bool
+  notify:
+    - restart master
