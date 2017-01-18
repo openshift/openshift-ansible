@@ -6,7 +6,7 @@ from __future__ import print_function
 import os
 import fnmatch
 import re
-
+import subprocess
 import yaml
 
 # Always prefer setuptools over distutils
@@ -146,6 +146,47 @@ class OpenShiftAnsiblePylint(PylintCommand):
         return func(*func_args, **func_kwargs)
 
 
+class OpenShiftAnsibleGenerateValidation(Command):
+    ''' Command to run generated module validation'''
+    description = "Run generated module validation"
+    user_options = []
+
+    def initialize_options(self):
+        ''' initialize_options '''
+        pass
+
+    def finalize_options(self):
+        ''' finalize_options '''
+        pass
+
+    # self isn't used but I believe is required when it is called.
+    # pylint: disable=no-self-use
+    def run(self):
+        ''' run command '''
+        # find the files that call generate
+        generate_files = find_files('roles',
+                                    ['inventory',
+                                     'test',
+                                     'playbooks',
+                                     'utils'],
+                                    None,
+                                    'generate.py')
+
+        # call them with --verify
+        errors = False
+        for gen in generate_files:
+            print('Checking generated module code: {0}'.format(gen))
+            try:
+                subprocess.call([gen, '--verify'])
+            except subprocess.CalledProcessError as cpe:
+                print(cpe)
+                errors = True
+
+        if errors:
+            print('Found errors while generating module code.')
+            raise SystemExit(1)
+
+
 class UnsupportedCommand(Command):
     ''' Basic Command to override unsupported commands '''
     user_options = []
@@ -188,6 +229,7 @@ setup(
         'sdist': UnsupportedCommand,
         'lint': OpenShiftAnsiblePylint,
         'yamllint': OpenShiftAnsibleYamlLint,
+        'generate_validation': OpenShiftAnsibleGenerateValidation,
     },
     packages=[],
 )
