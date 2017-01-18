@@ -951,14 +951,14 @@ class OpenShiftCLI(object):
                     try:
                         rval['results'] = json.loads(stdout)
                     except ValueError as err:
-                        if "No JSON object could be decoded" in str(err):
-                            err = str(err)
+                        if "No JSON object could be decoded" in err.args:
+                            err = err.args
                 elif output_type == 'raw':
                     rval['results'] = stdout
 
             if self.verbose:
-                print(stdout)
-                print(stderr)
+                print("STDOUT: {0}".format(stdout))
+                print("STDERR: {0}".format(stderr))
 
             if err:
                 rval.update({"err": err,
