@@ -1,0 +1,40 @@
+---
+- fail:
+    msg: Only one Fluentd nodeselector key pair should be provided
+  when: "{{ openshift_logging_fluentd_nodeselector.keys() | count }} > 1"
+
+
+- name: Create temp directory for doing work in
+  command: mktemp -d /tmp/openshift-logging-ansible-XXXXXX
+  register: mktemp
+  changed_when: False
+  check_mode: no
+  tags: logging_init
+
+- debug: msg="Created temp dir {{mktemp.stdout}}"
+
+- name: Copy the admin client config(s)
+  command: >
+    cp {{ openshift_master_config_dir }}/admin.kubeconfig {{ mktemp.stdout }}/admin.kubeconfig
+  changed_when: False
+  check_mode: no
+  tags: logging_init
+
+- include: "{{ role_path }}/tasks/install_logging.yaml"
+  when: openshift_logging_install_logging | default(false) | bool
+
+- include: "{{ role_path }}/tasks/upgrade_logging.yaml"
+  when: openshift_logging_upgrade_logging | default(false) | bool
+
+- include: "{{ role_path }}/tasks/delete_logging.yaml"
+  when:
+    - not openshift_logging_install_logging | default(false) | bool
+    - not openshift_logging_upgrade_logging | default(false) | bool
+
+- name: Delete temp directory
+  file:
+    name: "{{ mktemp.stdout }}"
+    state: absent
+  tags: logging_cleanup
+  changed_when: False
+  check_mode: no

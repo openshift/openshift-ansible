@@ -1,0 +1,104 @@
+---
+- command: >
+    {{openshift.common.client_binary}} --config={{mktemp.stdout}}/admin.kubeconfig get node -o jsonpath='{.items[*].metadata.name}'
+  register: fluentd_hosts
+  when: "'--all' in openshift_logging_fluentd_hosts"
+  check_mode: no
+  changed_when: no
+
+- name: start fluentd
+  include: label_node.yaml
+  vars:
+    host: "{{fluentd_host}}"
+    label: "{{openshift_logging_fluentd_nodeselector.keys()[0]}}"
+    value: "{{openshift_logging_fluentd_nodeselector.values()[0]}}"
+  with_items: "{{(fluentd_hosts.stdout_lines is defined) | ternary(fluentd_hosts.stdout_lines, openshift_logging_fluentd_hosts)}}"
+  loop_control:
+    loop_var: fluentd_host
+
+- command: >
+    {{openshift.common.client_binary}} --config={{mktemp.stdout}}/admin.kubeconfig get dc -l component=es -o name -n {{openshift_logging_namespace}}
+  register: es_dc
+  check_mode: no
+  changed_when: no
+
+- name: start elasticsearch
+  include: scale.yaml
+  vars:
+    desired: 1
+  with_items: "{{es_dc.stdout_lines}}"
+  loop_control:
+    loop_var: object
+
+- command: >
+    {{openshift.common.client_binary}} --config={{mktemp.stdout}}/admin.kubeconfig get dc -l component=kibana -o name -n {{openshift_logging_namespace}}
+  register: kibana_dc
+  check_mode: no
+  changed_when: no
+
+- name: start kibana
+  include: scale.yaml
+  vars:
+    desired: "{{ openshift_logging_kibana_replica_count | default (1) }}"
+  with_items: "{{kibana_dc.stdout_lines}}"
+  loop_control:
+    loop_var: object
+
+- command: >
+    {{openshift.common.client_binary}} --config={{mktemp.stdout}}/admin.kubeconfig get dc -l component=curator -o name -n {{openshift_logging_namespace}}
+  register: curator_dc
+  check_mode: no
+  changed_when: no
+
+- name: start curator
+  include: scale.yaml
+  vars:
+    desired: 1
+  with_items: "{{curator_dc.stdout_lines}}"
+  loop_control:
+    loop_var: object
+
+- command: >
+    {{openshift.common.client_binary}} --config={{mktemp.stdout}}/admin.kubeconfig get dc -l component=es-ops -o name -n {{openshift_logging_namespace}}
+  register: es_dc
+  check_mode: no
+  changed_when: no
+
+- name: start elasticsearch-ops
+  include: scale.yaml
+  vars:
+    desired: 1
+  with_items: "{{es_dc.stdout_lines}}"
+  loop_control:
+    loop_var: object
+  when: openshift_logging_use_ops
+
+- command: >
+    {{openshift.common.client_binary}} --config={{mktemp.stdout}}/admin.kubeconfig get dc -l component=kibana-ops -o name -n {{openshift_logging_namespace}}
+  register: kibana_dc
+  check_mode: no
+  changed_when: no
+
+- name: start kibana-ops
+  include: scale.yaml
+  vars:
+    desired: "{{ openshift_logging_kibana_ops_replica_count | default (1) }}"
+  with_items: "{{kibana_dc.stdout_lines}}"
+  loop_control:
+    loop_var: object
+  when: openshift_logging_use_ops
+
+- command: >
+    {{openshift.common.client_binary}} --config={{mktemp.stdout}}/admin.kubeconfig get dc -l component=curator-ops -o name -n {{openshift_logging_namespace}}
+  register: curator_dc
+  check_mode: no
+  changed_when: no
+
+- name: start curator-ops
+  include: scale.yaml
+  vars:
+    desired: 1
+  with_items: "{{curator_dc.stdout_lines}}"
+  loop_control:
+    loop_var: object
+  when: openshift_logging_use_ops

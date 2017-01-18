@@ -1,0 +1,21 @@
+---
+- name: Generating logging routes
+  template: src=route_reencrypt.j2 dest={{mktemp.stdout}}/templates/logging-{{route_info.name}}-route.yaml
+  tags: routes
+  vars:
+    obj_name: "{{route_info.name}}"
+    route_host: "{{route_info.host}}"
+    service_name: "{{route_info.name}}"
+    tls_ca_cert: "{{key_pairs | entry_from_named_pair('ca_file')| b64decode }}"
+    tls_dest_ca_cert: "{{key_pairs | entry_from_named_pair('ca_file')| b64decode }}"
+    labels:
+      component: support
+      logging-infra: support
+      provider: openshift
+  with_items:
+    - {name: logging-kibana, host: "{{openshift_logging_kibana_hostname}}"}
+    - {name: logging-kibana-ops, host: "{{openshift_logging_kibana_ops_hostname}}"}
+  loop_control:
+    loop_var: route_info
+  when: (route_info.name == 'logging-kibana-ops' and openshift_logging_use_ops) or route_info.name == 'logging-kibana'
+  changed_when: no

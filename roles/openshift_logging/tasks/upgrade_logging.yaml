@@ -1,0 +1,41 @@
+---
+- name: Stop the Cluster
+  include: stop_cluster.yaml
+
+- name: Upgrade logging
+  include: install_logging.yaml
+  vars:
+    start_cluster: False
+
+# start ES so that we can run migrate script
+- command: >
+    {{openshift.common.client_binary}} --config={{mktemp.stdout}}/admin.kubeconfig get dc -l component=es -o name -n {{openshift_logging_namespace}}
+  register: es_dc
+  check_mode: no
+
+- name: start elasticsearch
+  include: scale.yaml
+  vars:
+    desired: 1
+  with_items: "{{es_dc.stdout_lines}}"
+  loop_control:
+    loop_var: object
+
+- command: >
+    {{ openshift.common.client_binary}} --config={{mktemp.stdout}}/admin.kubeconfig get pods -n {{openshift_logging_namespace}} -l component=es -o jsonpath='{.items[?(@.status.phase == "Running")].metadata.name}'
+  register: running_pod
+  until: running_pod.stdout != ''
+  retries: 30
+  delay: 10
+  changed_when: no
+  check_mode: no
+
+- name: Run upgrade script
+  script: es_migration.sh {{openshift.common.config_base}}/logging/ca.crt {{openshift.common.config_base}}/logging/system.admin.key {{openshift.common.config_base}}/logging/system.admin.crt {{openshift_logging_es_host}} {{openshift_logging_es_port}} {{openshift_logging_namespace}}
+  register: script_output
+  changed_when:
+    - script_output.rc == 0
+    - script_output.stdout.find("skipping update_for_uuid") == -1 or script_output.stdout.find("skipping update_for_common_data_model") == -1
+
+- name: Start up rest of cluster
+  include: start_cluster.yaml

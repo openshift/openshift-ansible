@@ -1,0 +1,49 @@
+---
+- name: Gather OpenShift Logging Facts
+  openshift_logging_facts:
+    oc_bin: "{{openshift.common.client_binary}}"
+    admin_kubeconfig: "{{mktemp.stdout}}/admin.kubeconfig"
+    openshift_logging_namespace: "{{openshift_logging_namespace}}"
+  tags: logging_facts
+  check_mode: no
+
+- name: Validate Elasticsearch cluster size
+  fail: msg="The openshift_logging_es_cluster_size may not be scaled down more than 1 less (or 0) the number of Elasticsearch nodes already deployed"
+  when: "{{openshift_logging_facts.elasticsearch.deploymentconfigs | length - openshift_logging_es_cluster_size | abs > 1}}"
+
+- name: Install logging
+  include: "{{ role_path }}/tasks/install_{{ install_component }}.yaml"
+  when: openshift_hosted_logging_install | default(true) | bool
+  with_items:
+    - support
+    - elasticsearch
+    - kibana
+    - curator
+    - fluentd
+  loop_control:
+    loop_var: install_component
+
+- name: Create objects
+  include: oc_apply.yaml
+  vars:
+    - kubeconfig: "{{ mktemp.stdout }}/admin.kubeconfig"
+    - namespace: "{{ openshift_logging_namespace }}"
+    - file_name: "{{ file }}"
+    - file_content: "{{ lookup('file', file) | from_yaml }}"
+  with_fileglob:
+    - "{{ mktemp.stdout }}/templates/*.yaml"
+  loop_control:
+    loop_var: file
+  when: not ansible_check_mode
+
+- name: Printing out objects to create
+  debug: msg="{{lookup('file', file)|quote}}"
+  with_fileglob:
+    - "{{mktemp.stdout}}/templates/*.yaml"
+  loop_control:
+    loop_var: file
+  when: ansible_check_mode
+
+- name: Scaling up cluster
+  include: start_cluster.yaml
+  when: start_cluster | default(true) | bool

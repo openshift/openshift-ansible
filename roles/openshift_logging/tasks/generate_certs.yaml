@@ -1,0 +1,217 @@
+---
+# we will ensure our secrets and configmaps are set up here first
+- name: Checking for ca.key
+  stat: path="{{generated_certs_dir}}/ca.key"
+  register: ca_key_file
+  check_mode: no
+
+- name: Checking for ca.crt
+  stat: path="{{generated_certs_dir}}/ca.crt"
+  register: ca_cert_file
+  check_mode: no
+
+- name: Checking for ca.serial.txt
+  stat: path="{{generated_certs_dir}}/ca.serial.txt"
+  register: ca_serial_file
+  check_mode: no
+
+- name: Generate certificates
+  command: >
+    {{ openshift.common.admin_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig ca create-signer-cert
+    --key={{generated_certs_dir}}/ca.key --cert={{generated_certs_dir}}/ca.crt
+    --serial={{generated_certs_dir}}/ca.serial.txt --name=logging-signer-test
+  check_mode: no
+  when:
+    - not ca_key_file.stat.exists
+    - not ca_cert_file.stat.exists
+    - not ca_serial_file.stat.exists
+
+- name: Checking for signing.conf
+  stat: path="{{generated_certs_dir}}/signing.conf"
+  register: signing_conf_file
+  check_mode: no
+
+- template: src=signing.conf.j2 dest={{generated_certs_dir}}/signing.conf
+  vars:
+    - top_dir: '{{generated_certs_dir}}'
+  when: not signing_conf_file.stat.exists
+
+- include: procure_server_certs.yaml
+  loop_control:
+    loop_var: cert_info
+  with_items:
+    - procure_component: kibana
+    - procure_component: kibana-ops
+    - procure_component: kibana-internal
+      hostnames: "kibana, kibana-ops, {{openshift_logging_kibana_hostname}}, {{openshift_logging_kibana_ops_hostname}}"
+
+- name: Copy proxy TLS configuration file
+  copy: src=server-tls.json dest={{generated_certs_dir}}/server-tls.json
+  when: server_tls_json is undefined
+  check_mode: no
+
+- name: Copy proxy TLS configuration file
+  copy: content="{{server_tls_json}}" dest={{generated_certs_dir}}/server-tls.json
+  when: server_tls_json is defined
+  check_mode: no
+
+- name: Checking for ca.db
+  stat: path="{{generated_certs_dir}}/ca.db"
+  register: ca_db_file
+  check_mode: no
+
+- copy: content="" dest={{generated_certs_dir}}/ca.db
+  check_mode: no
+  when:
+    - not ca_db_file.stat.exists
+
+- name: Checking for ca.crt.srl
+  stat: path="{{generated_certs_dir}}/ca.crt.srl"
+  register: ca_cert_srl_file
+  check_mode: no
+
+- copy: content="" dest={{generated_certs_dir}}/ca.crt.srl
+  check_mode: no
+  when:
+    - not ca_cert_srl_file.stat.exists
+
+- name: Generate PEM certs
+  include: generate_pems.yaml component={{node_name}}
+  with_items:
+    - system.logging.fluentd
+    - system.logging.kibana
+    - system.logging.curator
+    - system.admin
+  loop_control:
+    loop_var: node_name
+
+- name: Check for jks-generator service account
+  command: >
+    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get serviceaccount/jks-generator --no-headers -n {{openshift_logging_namespace}}
+  register: serviceaccount_result
+  ignore_errors: yes
+  when: not ansible_check_mode
+  changed_when: no
+
+- name: Create jks-generator service account
+  command: >
+    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig create serviceaccount jks-generator -n {{openshift_logging_namespace}}
+  when: not ansible_check_mode and "not found" in serviceaccount_result.stderr
+
+- name: Check for hostmount-anyuid scc entry
+  command: >
+    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get scc hostmount-anyuid -o jsonpath='{.users}'
+  register: scc_result
+  when: not ansible_check_mode
+  changed_when: no
+
+- name: Add to hostmount-anyuid scc
+  command: >
+    {{ openshift.common.admin_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig policy add-scc-to-user hostmount-anyuid -z jks-generator -n {{openshift_logging_namespace}}
+  when:
+    - not ansible_check_mode
+    - scc_result.stdout.find("system:serviceaccount:{{openshift_logging_namespace}}:jks-generator") == -1
+
+- name: Copy JKS generation script
+  copy:
+    src: generate-jks.sh
+    dest: "{{generated_certs_dir}}/generate-jks.sh"
+  check_mode: no
+
+- name: Generate JKS pod template
+  template:
+    src: jks_pod.j2
+    dest: "{{mktemp.stdout}}/jks_pod.yaml"
+  check_mode: no
+  changed_when: no
+
+# check if pod generated files exist -- if they all do don't run the pod
+- name: Checking for elasticsearch.jks
+  stat: path="{{generated_certs_dir}}/elasticsearch.jks"
+  register: elasticsearch_jks
+  check_mode: no
+
+- name: Checking for logging-es.jks
+  stat: path="{{generated_certs_dir}}/logging-es.jks"
+  register: logging_es_jks
+  check_mode: no
+
+- name: Checking for system.admin.jks
+  stat: path="{{generated_certs_dir}}/system.admin.jks"
+  register: system_admin_jks
+  check_mode: no
+
+- name: Checking for truststore.jks
+  stat: path="{{generated_certs_dir}}/truststore.jks"
+  register: truststore_jks
+  check_mode: no
+
+- name: create JKS generation pod
+  command: >
+    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig create -f {{mktemp.stdout}}/jks_pod.yaml -n {{openshift_logging_namespace}} -o name
+  register: podoutput
+  check_mode: no
+  when: not elasticsearch_jks.stat.exists or not logging_es_jks.stat.exists or not system_admin_jks.stat.exists or not truststore_jks.stat.exists
+
+- command: >
+    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get {{podoutput.stdout}} -o jsonpath='{.status.phase}' -n {{openshift_logging_namespace}}
+  register: result
+  until: result.stdout.find("Succeeded") != -1
+  retries: 5
+  delay: 10
+  changed_when: no
+  when: not elasticsearch_jks.stat.exists or not logging_es_jks.stat.exists or not system_admin_jks.stat.exists or not truststore_jks.stat.exists
+
+# check for secret/logging-kibana-proxy
+- command: >
+    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get secret/logging-kibana-proxy -n {{openshift_logging_namespace}} -o jsonpath='{.data.oauth-secret}'
+  register: kibana_secret_oauth_check
+  ignore_errors: yes
+  changed_when: no
+  check_mode: no
+
+- command: >
+    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get secret/logging-kibana-proxy -n {{openshift_logging_namespace}} -o jsonpath='{.data.session-secret}'
+  register: kibana_secret_session_check
+  ignore_errors: yes
+  changed_when: no
+  check_mode: no
+
+# check for oauthclient secret
+- command: >
+    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get oauthclient/kibana-proxy -n {{openshift_logging_namespace}} -o jsonpath='{.secret}'
+  register: oauth_secret_check
+  ignore_errors: yes
+  changed_when: no
+  check_mode: no
+
+# set or generate as needed
+- name: Generate proxy session
+  set_fact: session_secret={{'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'|random_word(200)}}
+  check_mode: no
+  when:
+    - kibana_secret_session_check.stdout is not defined or kibana_secret_session_check.stdout == ''
+
+- name: Generate proxy session
+  set_fact: session_secret={{kibana_secret_session_check.stdout | b64decode }}
+  check_mode: no
+  when:
+    - kibana_secret_session_check.stdout is defined
+    - kibana_secret_session_check.stdout != ''
+
+- name: Generate oauth client secret
+  set_fact: oauth_secret={{'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'|random_word(64)}}
+  check_mode: no
+  when: kibana_secret_oauth_check.stdout is not defined or kibana_secret_oauth_check.stdout == ''
+    or oauth_secret_check.stdout is not defined or oauth_secret_check.stdout == ''
+    or kibana_secret_oauth_check.stdout | b64decode != oauth_secret_check.stdout
+
+- name: Generate oauth client secret
+  set_fact: oauth_secret={{kibana_secret_oauth_check.stdout | b64decode}}
+  check_mode: no
+  when:
+    - kibana_secret_oauth_check is defined
+    - kibana_secret_oauth_check.stdout != ''
+    - oauth_secret_check.stdout is defined
+    - oauth_secret_check.stdout != ''
+    - kibana_secret_oauth_check.stdout | b64decode == oauth_secret_check.stdout
