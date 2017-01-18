@@ -87,7 +87,7 @@ All certificates (healthy or not) are included in the results:
     openshift_certificate_expiry_save_json_results: yes
     openshift_certificate_expiry_generate_html_report: yes
     openshift_certificate_expiry_show_all: yes
- roles:
+  roles:
     - role: openshift_certificate_expiry
 ```
 
