@@ -606,17 +606,39 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_generate_no_proxy_hosts=True
 #
 # These options configure the BuildDefaults admission controller which injects
-# environment variables into Builds. These values will default to the global proxy
-# config values. You only need to set these if they differ from the global settings
-# above. See BuildDefaults
-# documentation at https://docs.openshift.org/latest/admin_guide/build_defaults_overrides.html
+# configuration into Builds. Proxy related values will default to the global proxy
+# config values. You only need to set these if they differ from the global proxy settings.
+# See BuildDefaults documentation at
+# https://docs.openshift.org/latest/admin_guide/build_defaults_overrides.html
 #openshift_builddefaults_http_proxy=http://USER:PASSWORD@HOST:PORT
 #openshift_builddefaults_https_proxy=https://USER:PASSWORD@HOST:PORT
-#openshift_builddefaults_no_proxy=build_defaults
+#openshift_builddefaults_no_proxy=mycorp.com
 #openshift_builddefaults_git_http_proxy=http://USER:PASSWORD@HOST:PORT
 #openshift_builddefaults_git_https_proxy=https://USER:PASSWORD@HOST:PORT
-# Or you may optionally define your own serialized as json
-#openshift_builddefaults_json='{"BuildDefaults":{"configuration":{"kind":"BuildDefaultsConfig","apiVersion":"v1","gitHTTPSProxy":"http://proxy.example.com.redhat.com:3128","gitHTTPProxy":"http://proxy.example.com.redhat.com:3128","env":[{"name":"HTTP_PROXY","value":"http://proxy.example.com.redhat.com:3128"},{"name":"HTTPS_PROXY","value":"http://proxy.example.com.redhat.com:3128"},{"name":"NO_PROXY","value":"ose3-master.example.com"}]}}'
+#openshift_builddefaults_git_no_proxy=mycorp.com
+#openshift_builddefaults_image_labels=[{'name':'imagelabelname1','value':'imagelabelvalue1'}]
+#openshift_builddefaults_nodeselectors={'nodelabel1':'nodelabelvalue1'}
+#openshift_builddefaults_annotations={'annotationkey1':'annotationvalue1'}
+#openshift_builddefaults_resources_requests_cpu=100m
+#openshift_builddefaults_resources_requests_memory=256m
+#openshift_builddefaults_resources_limits_cpu=1000m
+#openshift_builddefaults_resources_limits_memory=512m
+
+# Or you may optionally define your own build defaults configuration serialized as json
+#openshift_builddefaults_json='{"BuildDefaults":{"configuration":{"apiVersion":"v1","env":[{"name":"HTTP_PROXY","value":"http://proxy.example.com.redhat.com:3128"},{"name":"NO_PROXY","value":"ose3-master.example.com"}],"gitHTTPProxy":"http://proxy.example.com:3128","gitNoProxy":"ose3-master.example.com","kind":"BuildDefaultsConfig"}}}'
+
+# These options configure the BuildOverrides admission controller which injects
+# configuration into Builds.
+# See BuildOverrides documentation at
+# https://docs.openshift.org/latest/admin_guide/build_defaults_overrides.html
+#openshift_buildoverrides_force_pull=true
+#openshift_buildoverrides_image_labels=[{'name':'imagelabelname1','value':'imagelabelvalue1'}]
+#openshift_buildoverrides_nodeselectors={'nodelabel1':'nodelabelvalue1'}
+#openshift_buildoverrides_annotations={'annotationkey1':'annotationvalue1'}
+
+# Or you may optionally define your own build overrides configuration serialized as json
+#openshift_buildoverrides_json='{"BuildOverrides":{"configuration":{"apiVersion":"v1","kind":"BuildDefaultsConfig","forcePull":"true"}}}'
+
 # masterConfig.volumeConfig.dynamicProvisioningEnabled, configurable as of 1.2/3.2, enabled by default
 #openshift_master_dynamic_provisioning_enabled=False
 
