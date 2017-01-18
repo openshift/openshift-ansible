@@ -529,7 +529,9 @@ class FilterModule(object):
         ''' Return certificates to synchronize based on facts. '''
         if not issubclass(type(hostvars), dict):
             raise errors.AnsibleFilterError("|failed expects hostvars is a dict")
-        certs = ['admin.crt',
+        certs = ['ca.crt',
+                 'ca.key',
+                 'admin.crt',
                  'admin.key',
                  'admin.kubeconfig',
                  'master.kubelet-client.crt',
