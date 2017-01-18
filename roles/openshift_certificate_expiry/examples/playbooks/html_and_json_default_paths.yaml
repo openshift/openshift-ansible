@@ -1,0 +1,12 @@
+---
+# Generate HTML and JSON artifacts in their default paths:
+
+- name: Check cert expirys
+  hosts: nodes:masters:etcd
+  become: yes
+  gather_facts: no
+  vars:
+    openshift_certificate_expiry_generate_html_report: yes
+    openshift_certificate_expiry_save_json_results: yes
+  roles:
+    - role: openshift_certificate_expiry
