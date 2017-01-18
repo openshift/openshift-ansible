@@ -7,12 +7,19 @@
   ignore_errors: true
   become: yes
 
-# Ensure the api_port is available.
-- name: Wait for master API to come back online
-  become: no
+- name: Wait for master to restart
   local_action:
     module: wait_for
-      host="{{ openshift.common.hostname }}"
+      host="{{ inventory_hostname }}"
       state=started
       delay=10
-      port="{{ openshift.master.api_port }}"
+  become: no
+
+# Now that ssh is back up we can wait for API on the remote system,
+# avoiding some potential connection issues from local system:
+- name: Wait for master API to come back online
+  wait_for:
+    host: "{{ openshift.common.hostname }}"
+    state: started
+    delay: 10
+    port: "{{ openshift.master.api_port }}"
