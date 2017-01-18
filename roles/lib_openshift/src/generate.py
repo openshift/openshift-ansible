@@ -5,8 +5,8 @@
 
 import argparse
 import os
-import six
 import yaml
+import six
 
 OPENSHIFT_ANSIBLE_PATH = os.path.dirname(os.path.realpath(__file__))
 OPENSHIFT_ANSIBLE_SOURCES_PATH = os.path.join(OPENSHIFT_ANSIBLE_PATH, 'sources.yml')  # noqa: E501

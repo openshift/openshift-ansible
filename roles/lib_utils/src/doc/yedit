@@ -102,6 +102,12 @@ options:
     required: false
     default: true
     aliases: []
+  separator:
+    description:
+    - The separator being used when parsing strings.
+    required: false
+    default: '.'
+    aliases: []
 author:
 - "Kenny Woodson <kwoodson@redhat.com>"
 extends_documentation_fragment: []

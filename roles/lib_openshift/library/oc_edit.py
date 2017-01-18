@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # pylint: disable=missing-docstring
+# flake8: noqa: T001
 #     ___ ___ _  _ ___ ___    _ _____ ___ ___
 #    / __| __| \| | __| _ \  /_\_   _| __|   \
 #   | (_ | _|| .` | _||   / / _ \| | | _|| |) |
@@ -23,116 +24,120 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+'''
+   OpenShiftCLI class that wraps the oc commands in a subprocess
+'''
+# pylint: disable=too-many-lines
 
-# pylint: disable=wrong-import-order
+from __future__ import print_function
+import atexit
 import json
 import os
 import re
+import shutil
+import subprocess
 # pylint: disable=import-error
 import ruamel.yaml as yaml
-import shutil
 from ansible.module_utils.basic import AnsibleModule
 
 DOCUMENTATION = '''
 ---
-module: yedit
-short_description: Create, modify, and idempotently manage yaml files.
+module: oc_edit
+short_description: Modify, and idempotently manage openshift objects.
 description:
-  - Modify yaml files programmatically.
+  - Modify openshift objects programmatically.
 options:
   state:
     description:
-    - State represents whether to create, modify, delete, or list yaml
+    - Currently present is only supported state.
     required: true
     default: present
-    choices: ["present", "absent", "list"]
+    choices: ["present"]
+    aliases: []
+  kubeconfig:
+    description:
+    - The path for the kubeconfig file to use for authentication
+    required: false
+    default: /etc/origin/master/admin.kubeconfig
     aliases: []
   debug:
     description:
-    - Turn on debug information.
+    - Turn on debug output.
     required: false
-    default: false
+    default: False
     aliases: []
-  src:
+  name:
     description:
-    - The file that is the target of the modifications.
+    - Name of the object that is being queried.
     required: false
     default: None
+    aliases: []
+  namespace:
+    description:
+    - The namespace where the object lives.
+    required: false
+    default: str
+    aliases: []
+  kind:
+    description:
+    - The kind attribute of the object.
+    required: True
+    default: None
+    choices:
+    - bc
+    - buildconfig
+    - configmaps
+    - dc
+    - deploymentconfig
+    - imagestream
+    - imagestreamtag
+    - is
+    - istag
+    - namespace
+    - project
+    - projects
+    - node
+    - ns
+    - persistentvolume
+    - pv
+    - rc
+    - replicationcontroller
+    - routes
+    - scc
+    - secret
+    - securitycontextconstraints
+    - service
+    - svc
+    aliases: []
+  file_name:
+    description:
+    - The file name in which to edit
+    required: false
+    default: None
+    aliases: []
+  file_format:
+    description:
+    - The format of the file being edited.
+    required: false
+    default: yaml
     aliases: []
   content:
     description:
-    - Content represents the yaml content you desire to work with.  This
-    - could be the file contents to write or the inmemory data to modify.
+    - Content of the file
     required: false
     default: None
     aliases: []
-  content_type:
+  force:
     description:
-    - The python type of the content parameter.
+    - Whether or not to force the operation
     required: false
-    default: 'dict'
+    default: None
     aliases: []
-  key:
+  separator:
     description:
-    - The path to the value you wish to modify. Emtpy string means the top of
-    - the document.
+    - The separator format for the edit.
     required: false
-    default: ''
-    aliases: []
-  value:
-    description:
-    - The incoming value of parameter 'key'.
-    required: false
-    default:
-    aliases: []
-  value_type:
-    description:
-    - The python type of the incoming value.
-    required: false
-    default: ''
-    aliases: []
-  update:
-    description:
-    - Whether the update should be performed on a dict/hash or list/array
-    - object.
-    required: false
-    default: false
-    aliases: []
-  append:
-    description:
-    - Whether to append to an array/list. When the key does not exist or is
-    - null, a new array is created. When the key is of a non-list type,
-    - nothing is done.
-    required: false
-    default: false
-    aliases: []
-  index:
-    description:
-    - Used in conjunction with the update parameter.  This will update a
-    - specific index in an array/list.
-    required: false
-    default: false
-    aliases: []
-  curr_value:
-    description:
-    - Used in conjunction with the update parameter.  This is the current
-    - value of 'key' in the yaml file.
-    required: false
-    default: false
-    aliases: []
-  curr_value_format:
-    description:
-    - Format of the incoming current value.
-    choices: ["yaml", "json", "str"]
-    required: false
-    default: false
-    aliases: []
-  backup:
-    description:
-    - Whether to make a backup copy of the current file when performing an
-    - edit.
-    required: false
-    default: true
+    default: '.'
     aliases: []
 author:
 - "Kenny Woodson <kwoodson@redhat.com>"
@@ -140,27 +145,13 @@ extends_documentation_fragment: []
 '''
 
 EXAMPLES = '''
-# Simple insert of key, value
-- name: insert simple key, value
-  yedit:
-    src: somefile.yml
-    key: test
-    value: somevalue
-    state: present
-# Results:
-# test: somevalue
-
-# Multilevel insert of key, value
-- name: insert simple key, value
-  yedit:
-    src: somefile.yml
-    key: a#b#c
-    value: d
-    state: present
-# Results:
-# a:
-#   b:
-#     c: d
+oc_edit:
+  kind: rc
+  name: hawkular-cassandra-rc
+  namespace: openshift-infra
+  content:
+    spec.template.spec.containers[0].resources.limits.memory: 512
+    spec.template.spec.containers[0].resources.requests.memory: 256
 '''
 # noqa: E301,E302
 
@@ -726,43 +717,595 @@ class Yedit(object):
                         'state': "present"}
 
         return {'failed': True, 'msg': 'Unkown state passed'}
+# pylint: disable=too-many-lines
+# noqa: E301,E302,E303,T001
 
 
-# pylint: disable=too-many-branches
+class OpenShiftCLIError(Exception):
+    '''Exception class for openshiftcli'''
+    pass
+
+
+# pylint: disable=too-few-public-methods
+class OpenShiftCLI(object):
+    ''' Class to wrap the command line tools '''
+    def __init__(self,
+                 namespace,
+                 kubeconfig='/etc/origin/master/admin.kubeconfig',
+                 verbose=False,
+                 all_namespaces=False):
+        ''' Constructor for OpenshiftCLI '''
+        self.namespace = namespace
+        self.verbose = verbose
+        self.kubeconfig = kubeconfig
+        self.all_namespaces = all_namespaces
+
+    # Pylint allows only 5 arguments to be passed.
+    # pylint: disable=too-many-arguments
+    def _replace_content(self, resource, rname, content, force=False, sep='.'):
+        ''' replace the current object with the content '''
+        res = self._get(resource, rname)
+        if not res['results']:
+            return res
+
+        fname = '/tmp/%s' % rname
+        yed = Yedit(fname, res['results'][0], separator=sep)
+        changes = []
+        for key, value in content.items():
+            changes.append(yed.put(key, value))
+
+        if any([change[0] for change in changes]):
+            yed.write()
+
+            atexit.register(Utils.cleanup, [fname])
+
+            return self._replace(fname, force)
+
+        return {'returncode': 0, 'updated': False}
+
+    def _replace(self, fname, force=False):
+        '''return all pods '''
+        cmd = ['-n', self.namespace, 'replace', '-f', fname]
+        if force:
+            cmd.append('--force')
+        return self.openshift_cmd(cmd)
+
+    def _create_from_content(self, rname, content):
+        '''return all pods '''
+        fname = '/tmp/%s' % rname
+        yed = Yedit(fname, content=content)
+        yed.write()
+
+        atexit.register(Utils.cleanup, [fname])
+
+        return self._create(fname)
+
+    def _create(self, fname):
+        '''return all pods '''
+        return self.openshift_cmd(['create', '-f', fname, '-n', self.namespace])
+
+    def _delete(self, resource, rname, selector=None):
+        '''return all pods '''
+        cmd = ['delete', resource, rname, '-n', self.namespace]
+        if selector:
+            cmd.append('--selector=%s' % selector)
+
+        return self.openshift_cmd(cmd)
+
+    def _process(self, template_name, create=False, params=None, template_data=None):  # noqa: E501
+        '''return all pods '''
+        cmd = ['process', '-n', self.namespace]
+        if template_data:
+            cmd.extend(['-f', '-'])
+        else:
+            cmd.append(template_name)
+        if params:
+            param_str = ["%s=%s" % (key, value) for key, value in params.items()]
+            cmd.append('-v')
+            cmd.extend(param_str)
+
+        results = self.openshift_cmd(cmd, output=True, input_data=template_data)
+
+        if results['returncode'] != 0 or not create:
+            return results
+
+        fname = '/tmp/%s' % template_name
+        yed = Yedit(fname, results['results'])
+        yed.write()
+
+        atexit.register(Utils.cleanup, [fname])
+
+        return self.openshift_cmd(['-n', self.namespace, 'create', '-f', fname])
+
+    def _get(self, resource, rname=None, selector=None):
+        '''return a resource by name '''
+        cmd = ['get', resource]
+        if selector:
+            cmd.append('--selector=%s' % selector)
+        if self.all_namespaces:
+            cmd.extend(['--all-namespaces'])
+        elif self.namespace:
+            cmd.extend(['-n', self.namespace])
+
+        cmd.extend(['-o', 'json'])
+
+        if rname:
+            cmd.append(rname)
+
+        rval = self.openshift_cmd(cmd, output=True)
+
+        # Ensure results are retuned in an array
+        if 'items' in rval:
+            rval['results'] = rval['items']
+        elif not isinstance(rval['results'], list):
+            rval['results'] = [rval['results']]
+
+        return rval
+
+    def _schedulable(self, node=None, selector=None, schedulable=True):
+        ''' perform oadm manage-node scheduable '''
+        cmd = ['manage-node']
+        if node:
+            cmd.extend(node)
+        else:
+            cmd.append('--selector=%s' % selector)
+
+        cmd.append('--schedulable=%s' % schedulable)
+
+        return self.openshift_cmd(cmd, oadm=True, output=True, output_type='raw')  # noqa: E501
+
+    def _list_pods(self, node=None, selector=None, pod_selector=None):
+        ''' perform oadm manage-node evacuate '''
+        cmd = ['manage-node']
+        if node:
+            cmd.extend(node)
+        else:
+            cmd.append('--selector=%s' % selector)
+
+        if pod_selector:
+            cmd.append('--pod-selector=%s' % pod_selector)
+
+        cmd.extend(['--list-pods', '-o', 'json'])
+
+        return self.openshift_cmd(cmd, oadm=True, output=True, output_type='raw')
+
+    # pylint: disable=too-many-arguments
+    def _evacuate(self, node=None, selector=None, pod_selector=None, dry_run=False, grace_period=None, force=False):
+        ''' perform oadm manage-node evacuate '''
+        cmd = ['manage-node']
+        if node:
+            cmd.extend(node)
+        else:
+            cmd.append('--selector=%s' % selector)
+
+        if dry_run:
+            cmd.append('--dry-run')
+
+        if pod_selector:
+            cmd.append('--pod-selector=%s' % pod_selector)
+
+        if grace_period:
+            cmd.append('--grace-period=%s' % int(grace_period))
+
+        if force:
+            cmd.append('--force')
+
+        cmd.append('--evacuate')
+
+        return self.openshift_cmd(cmd, oadm=True, output=True, output_type='raw')
+
+    def _import_image(self, url=None, name=None, tag=None):
+        ''' perform image import '''
+        cmd = ['import-image']
+
+        image = '{0}'.format(name)
+        if tag:
+            image += ':{0}'.format(tag)
+
+        cmd.append(image)
+
+        if url:
+            cmd.append('--from={0}/{1}'.format(url, image))
+
+        cmd.append('-n{0}'.format(self.namespace))
+
+        cmd.append('--confirm')
+        return self.openshift_cmd(cmd)
+
+    # pylint: disable=too-many-arguments
+    def openshift_cmd(self, cmd, oadm=False, output=False, output_type='json', input_data=None):
+        '''Base command for oc '''
+        cmds = []
+        if oadm:
+            cmds = ['/usr/bin/oadm']
+        else:
+            cmds = ['/usr/bin/oc']
+
+        cmds.extend(cmd)
+
+        rval = {}
+        results = ''
+        err = None
+
+        if self.verbose:
+            print(' '.join(cmds))
+
+        proc = subprocess.Popen(cmds,
+                                stdin=subprocess.PIPE,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE,
+                                env={'KUBECONFIG': self.kubeconfig})
+
+        stdout, stderr = proc.communicate(input_data)
+        rval = {"returncode": proc.returncode,
+                "results": results,
+                "cmd": ' '.join(cmds)}
+
+        if proc.returncode == 0:
+            if output:
+                if output_type == 'json':
+                    try:
+                        rval['results'] = json.loads(stdout)
+                    except ValueError as err:
+                        if "No JSON object could be decoded" in err.args:
+                            err = err.args
+                elif output_type == 'raw':
+                    rval['results'] = stdout
+
+            if self.verbose:
+                print("STDOUT: {0}".format(stdout))
+                print("STDERR: {0}".format(stderr))
+
+            if err:
+                rval.update({"err": err,
+                             "stderr": stderr,
+                             "stdout": stdout,
+                             "cmd": cmds})
+
+        else:
+            rval.update({"stderr": stderr,
+                         "stdout": stdout,
+                         "results": {}})
+
+        return rval
+
+
+class Utils(object):
+    ''' utilities for openshiftcli modules '''
+    @staticmethod
+    def create_file(rname, data, ftype='yaml'):
+        ''' create a file in tmp with name and contents'''
+        path = os.path.join('/tmp', rname)
+        with open(path, 'w') as fds:
+            if ftype == 'yaml':
+                fds.write(yaml.dump(data, Dumper=yaml.RoundTripDumper))
+
+            elif ftype == 'json':
+                fds.write(json.dumps(data))
+            else:
+                fds.write(data)
+
+        # Register cleanup when module is done
+        atexit.register(Utils.cleanup, [path])
+        return path
+
+    @staticmethod
+    def create_files_from_contents(content, content_type=None):
+        '''Turn an array of dict: filename, content into a files array'''
+        if not isinstance(content, list):
+            content = [content]
+        files = []
+        for item in content:
+            path = Utils.create_file(item['path'], item['data'], ftype=content_type)
+            files.append({'name': os.path.basename(path), 'path': path})
+        return files
+
+    @staticmethod
+    def cleanup(files):
+        '''Clean up on exit '''
+        for sfile in files:
+            if os.path.exists(sfile):
+                if os.path.isdir(sfile):
+                    shutil.rmtree(sfile)
+                elif os.path.isfile(sfile):
+                    os.remove(sfile)
+
+    @staticmethod
+    def exists(results, _name):
+        ''' Check to see if the results include the name '''
+        if not results:
+            return False
+
+        if Utils.find_result(results, _name):
+            return True
+
+        return False
+
+    @staticmethod
+    def find_result(results, _name):
+        ''' Find the specified result by name'''
+        rval = None
+        for result in results:
+            if 'metadata' in result and result['metadata']['name'] == _name:
+                rval = result
+                break
+
+        return rval
+
+    @staticmethod
+    def get_resource_file(sfile, sfile_type='yaml'):
+        ''' return the service file '''
+        contents = None
+        with open(sfile) as sfd:
+            contents = sfd.read()
+
+        if sfile_type == 'yaml':
+            contents = yaml.load(contents, yaml.RoundTripLoader)
+        elif sfile_type == 'json':
+            contents = json.loads(contents)
+
+        return contents
+
+    # Disabling too-many-branches.  This is a yaml dictionary comparison function
+    # pylint: disable=too-many-branches,too-many-return-statements,too-many-statements
+    @staticmethod
+    def check_def_equal(user_def, result_def, skip_keys=None, debug=False):
+        ''' Given a user defined definition, compare it with the results given back by our query.  '''
+
+        # Currently these values are autogenerated and we do not need to check them
+        skip = ['metadata', 'status']
+        if skip_keys:
+            skip.extend(skip_keys)
+
+        for key, value in result_def.items():
+            if key in skip:
+                continue
+
+            # Both are lists
+            if isinstance(value, list):
+                if key not in user_def:
+                    if debug:
+                        print('User data does not have key [%s]' % key)
+                        print('User data: %s' % user_def)
+                    return False
+
+                if not isinstance(user_def[key], list):
+                    if debug:
+                        print('user_def[key] is not a list key=[%s] user_def[key]=%s' % (key, user_def[key]))
+                    return False
+
+                if len(user_def[key]) != len(value):
+                    if debug:
+                        print("List lengths are not equal.")
+                        print("key=[%s]: user_def[%s] != value[%s]" % (key, len(user_def[key]), len(value)))
+                        print("user_def: %s" % user_def[key])
+                        print("value: %s" % value)
+                    return False
+
+                for values in zip(user_def[key], value):
+                    if isinstance(values[0], dict) and isinstance(values[1], dict):
+                        if debug:
+                            print('sending list - list')
+                            print(type(values[0]))
+                            print(type(values[1]))
+                        result = Utils.check_def_equal(values[0], values[1], skip_keys=skip_keys, debug=debug)
+                        if not result:
+                            print('list compare returned false')
+                            return False
+
+                    elif value != user_def[key]:
+                        if debug:
+                            print('value should be identical')
+                            print(value)
+                            print(user_def[key])
+                        return False
+
+            # recurse on a dictionary
+            elif isinstance(value, dict):
+                if key not in user_def:
+                    if debug:
+                        print("user_def does not have key [%s]" % key)
+                    return False
+                if not isinstance(user_def[key], dict):
+                    if debug:
+                        print("dict returned false: not instance of dict")
+                    return False
+
+                # before passing ensure keys match
+                api_values = set(value.keys()) - set(skip)
+                user_values = set(user_def[key].keys()) - set(skip)
+                if api_values != user_values:
+                    if debug:
+                        print("keys are not equal in dict")
+                        print(api_values)
+                        print(user_values)
+                    return False
+
+                result = Utils.check_def_equal(user_def[key], value, skip_keys=skip_keys, debug=debug)
+                if not result:
+                    if debug:
+                        print("dict returned false")
+                        print(result)
+                    return False
+
+            # Verify each key, value pair is the same
+            else:
+                if key not in user_def or value != user_def[key]:
+                    if debug:
+                        print("value not equal; user_def does not have key")
+                        print(key)
+                        print(value)
+                        if key in user_def:
+                            print(user_def[key])
+                    return False
+
+        if debug:
+            print('returning true')
+        return True
+
+
+class OpenShiftCLIConfig(object):
+    '''Generic Config'''
+    def __init__(self, rname, namespace, kubeconfig, options):
+        self.kubeconfig = kubeconfig
+        self.name = rname
+        self.namespace = namespace
+        self._options = options
+
+    @property
+    def config_options(self):
+        ''' return config options '''
+        return self._options
+
+    def to_option_list(self):
+        '''return all options as a string'''
+        return self.stringify()
+
+    def stringify(self):
+        ''' return the options hash as cli params in a string '''
+        rval = []
+        for key, data in self.config_options.items():
+            if data['include'] \
+               and (data['value'] or isinstance(data['value'], int)):
+                rval.append('--%s=%s' % (key.replace('_', '-'), data['value']))
+
+        return rval
+
+
+class Edit(OpenShiftCLI):
+    ''' Class to wrap the oc command line tools
+    '''
+    # pylint: disable=too-many-arguments
+    def __init__(self,
+                 kind,
+                 namespace,
+                 resource_name=None,
+                 kubeconfig='/etc/origin/master/admin.kubeconfig',
+                 separator='.',
+                 verbose=False):
+        ''' Constructor for OpenshiftOC '''
+        super(Edit, self).__init__(namespace, kubeconfig)
+        self.namespace = namespace
+        self.kind = kind
+        self.name = resource_name
+        self.kubeconfig = kubeconfig
+        self.separator = separator
+        self.verbose = verbose
+
+    def get(self):
+        '''return a secret by name '''
+        return self._get(self.kind, self.name)
+
+    def update(self, file_name, content, force=False, content_type='yaml'):
+        '''run update '''
+        if file_name:
+            if content_type == 'yaml':
+                data = yaml.load(open(file_name))
+            elif content_type == 'json':
+                data = json.loads(open(file_name).read())
+
+            changes = []
+            yed = Yedit(filename=file_name, content=data, separator=self.separator)
+            for key, value in content.items():
+                changes.append(yed.put(key, value))
+
+            if any([not change[0] for change in changes]):
+                return {'returncode': 0, 'updated': False}
+
+            yed.write()
+
+            atexit.register(Utils.cleanup, [file_name])
+
+            return self._replace(file_name, force=force)
+
+        return self._replace_content(self.kind, self.name, content, force=force, sep=self.separator)
+
+    @staticmethod
+    def run_ansible(params, check_mode):
+        '''run the ansible idempotent code'''
+
+        ocedit = Edit(params['kind'],
+                      params['namespace'],
+                      params['name'],
+                      kubeconfig=params['kubeconfig'],
+                      separator=params['separator'],
+                      verbose=params['debug'])
+
+        api_rval = ocedit.get()
+
+        ########
+        # Create
+        ########
+        if not Utils.exists(api_rval['results'], params['name']):
+            return {"failed": True, 'msg': api_rval}
+
+        ########
+        # Update
+        ########
+        if check_mode:
+            return {'changed': True, 'msg': 'CHECK_MODE: Would have performed edit'}
+
+        api_rval = ocedit.update(params['file_name'],
+                                 params['content'],
+                                 params['force'],
+                                 params['file_format'])
+
+        if api_rval['returncode'] != 0:
+            return {"failed": True, 'msg': api_rval}
+
+        if 'updated' in api_rval and not api_rval['updated']:
+            return {"changed": False, 'results': api_rval, 'state': 'present'}
+
+        # return the created object
+        api_rval = ocedit.get()
+
+        if api_rval['returncode'] != 0:
+            return {"failed": True, 'msg': api_rval}
+
+        return {"changed": True, 'results': api_rval, 'state': 'present'}
+
+
 def main():
-    ''' ansible oc module for secrets '''
+    '''
+    ansible oc module for editing objects
+    '''
 
     module = AnsibleModule(
         argument_spec=dict(
+            kubeconfig=dict(default='/etc/origin/master/admin.kubeconfig', type='str'),
             state=dict(default='present', type='str',
-                       choices=['present', 'absent', 'list']),
+                       choices=['present']),
             debug=dict(default=False, type='bool'),
-            src=dict(default=None, type='str'),
-            content=dict(default=None),
-            content_type=dict(default='dict', choices=['dict']),
-            key=dict(default='', type='str'),
-            value=dict(),
-            value_type=dict(default='', type='str'),
-            update=dict(default=False, type='bool'),
-            append=dict(default=False, type='bool'),
-            index=dict(default=None, type='int'),
-            curr_value=dict(default=None, type='str'),
-            curr_value_format=dict(default='yaml',
-                                   choices=['yaml', 'json', 'str'],
-                                   type='str'),
-            backup=dict(default=True, type='bool'),
+            namespace=dict(default='default', type='str'),
+            name=dict(default=None, required=True, type='str'),
+            kind=dict(required=True,
+                      type='str',
+                      choices=['dc', 'deploymentconfig',
+                               'rc', 'replicationcontroller',
+                               'svc', 'service',
+                               'scc', 'securitycontextconstraints',
+                               'ns', 'namespace', 'project', 'projects',
+                               'is', 'imagestream',
+                               'istag', 'imagestreamtag',
+                               'bc', 'buildconfig',
+                               'routes',
+                               'node',
+                               'secret',
+                               'pv', 'persistentvolume']),
+            file_name=dict(default=None, type='str'),
+            file_format=dict(default='yaml', type='str'),
+            content=dict(default=None, required=True, type='dict'),
+            force=dict(default=False, type='bool'),
             separator=dict(default='.', type='str'),
         ),
-        mutually_exclusive=[["curr_value", "index"], ['update', "append"]],
-        required_one_of=[["content", "src"]],
+        supports_check_mode=True,
     )
 
-    rval = Yedit.run_ansible(module)
-    if 'failed' in rval and rval['failed']:
+    rval = Edit.run_ansible(module.params, module.check_mode)
+    if 'failed' in rval:
         module.fail_json(**rval)
 
     module.exit_json(**rval)
-
 
 if __name__ == '__main__':
     main()
