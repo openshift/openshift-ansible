@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.54
+Version:        3.4.55
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Jan 18 2017 Scott Dodson <sdodson@redhat.com> 3.4.55-1
+- Automatic commit of package [openshift-ansible] release [3.4.54-1].
+  (sdodson@redhat.com)
+- Ensure serial certificate generation for node and master certificates.
+  (abutcher@redhat.com)
+- Create individual serving cert and loopback kubeconfig for additional
+  masters. (abutcher@redhat.com)
+
 * Wed Jan 18 2017 Scott Dodson <sdodson@redhat.com> 3.4.54-1
 - Update example sync script (sdodson@redhat.com)
 - Update v1.4 content, add api-gateway (sdodson@redhat.com)
