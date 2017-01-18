@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.53
+Version:        3.4.54
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,18 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Jan 18 2017 Scott Dodson <sdodson@redhat.com> 3.4.54-1
+- Update example sync script (sdodson@redhat.com)
+- Update v1.4 content, add api-gateway (sdodson@redhat.com)
+- Support openshift_node_port_range for configuring service NodePorts
+  (ccoleman@redhat.com)
+- Move role dependencies out of playbooks for openshift_master, openshift_node
+  and openshift_hosted. (abutcher@redhat.com)
+- should be libvirt. :-) (zhang.wanmin@zte.com.cn)
+- Fix repo defaults (sdodson@redhat.com)
+- Use registry.access.redhat.com/rhel7/etcd instead of etcd3
+  (sdodson@redhat.com)
+
 * Sun Jan 08 2017 Scott Dodson <sdodson@redhat.com> 3.4.53-1
 - Revert "Deprecate node 'evacuation' with 'drain'" (sdodson@redhat.com)
 - Re-add when condition which was removed mistakenly in #3036
