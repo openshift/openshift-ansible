@@ -49,7 +49,7 @@
     - copy:
         content: "{{curator_config_contents}}"
         dest: "{{mktemp.stdout}}/curator.yml"
-      when: curator_config_contenets is defined
+      when: curator_config_contents is defined
       changed_when: no
 
     - command: >

@@ -105,9 +105,9 @@ class OpenshiftLoggingFacts(OCBaseCommand):
 
     def add_facts_for(self, comp, kind, name=None, facts=None):
         ''' Add facts for the provided kind '''
-        if comp in self.facts is False:
+        if comp not in self.facts:
             self.facts[comp] = dict()
-        if kind in self.facts[comp] is False:
+        if kind not in self.facts[comp]:
             self.facts[comp][kind] = dict()
         if name:
             self.facts[comp][kind][name] = facts
