@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.5.0
+Version:        3.5.1
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -250,6 +250,124 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Jan 18 2017 Scott Dodson <sdodson@redhat.com> 3.5.1-1
+- More reliable wait for master after full host reboot. (dgoodwin@redhat.com)
+- kubelet must have rw to cgroups for pod/qos cgroups to function
+  (decarr@redhat.com)
+- Adding a few updates for python27,35 compatibility (kwoodson@redhat.com)
+- update examples to cover build default/override configuration
+  (bparees@redhat.com)
+- Fix yaml lint in easy-mode playbook (tbielawa@redhat.com)
+- Removed trailing spaces from line #34 (kunallimaye@gmail.com)
+- Install subscription-manager to fix issue-3102 (kunallimaye@gmail.com)
+- Changing formatting for issue#2244 update (kunallimaye@gmail.com)
+- Addressing Travis errors (ewolinet@redhat.com)
+- Adding --verfiy to generate script. (kwoodson@redhat.com)
+- v1.3 Add RHAMP (sdodson@redhat.com)
+- Update v1.4 content, add api-gateway (sdodson@redhat.com)
+- Add v1.5 content (sdodson@redhat.com)
+- Update example sync script (sdodson@redhat.com)
+- use pod to generate keystores (#14) (jcantrill@users.noreply.github.com)
+- Ensure serial certificate generation for node and master certificates.
+  (abutcher@redhat.com)
+- [Cert Expiry] Add serial numbers, include example PBs, docs
+  (tbielawa@redhat.com)
+- properly set changes when oc apply (jcantril@redhat.com)
+- additional cr fixes (jcantril@redhat.com)
+- metrics fixes for yamlint (jcantril@redhat.com)
+- additional code reviews (jcantril@redhat.com)
+- set replicas to current value so not to disrupt current pods (#13)
+  (jcantrill@users.noreply.github.com)
+- User provided certs pushed from control. vars reorg (#12)
+  (jcantrill@users.noreply.github.com)
+- update vars to allow scaling of components (#9)
+  (jcantrill@users.noreply.github.com)
+- allow definition of cpu/memory limits/resources (#11)
+  (jcantrill@users.noreply.github.com)
+- rename variables to be less extraneous (#10)
+  (jcantrill@users.noreply.github.com)
+- copy admin cert for use in subsequent tasks (#8)
+  (jcantrill@users.noreply.github.com)
+- Add tasks to uninstall metrics (#7) (jcantrill@users.noreply.github.com)
+- Custom certificates (#5) (bbarcaro@redhat.com)
+- prefix vars with metrics role (#4) (jcantrill@users.noreply.github.com)
+- Bruno Barcarol Guimarães work to move metrics to ansible from deployer
+  (jcantril@redhat.com)
+- Adding oc_edit module to lib_openshift. (kwoodson@redhat.com)
+- Create individual serving cert and loopback kubeconfig for additional
+  masters. (abutcher@redhat.com)
+- add configuration for build default+overrides settings (bparees@redhat.com)
+- delete idempotent (ewolinet@redhat.com)
+- additional comments addressed (ewolinet@redhat.com)
+- Updating upgrade_logging to be more idempotent (ewolinet@redhat.com)
+- Using oc_apply task for idempotent (ewolinet@redhat.com)
+- Removing shell module calls and cleaning up changed (ewolinet@redhat.com)
+- lib_openshift modules.  This is the first one. oc_route.
+  (kwoodson@redhat.com)
+- Updated modify_yaml with docstring and clarifications (smilner@redhat.com)
+- Rename subrole facts -> init (rhcarvalho@gmail.com)
+- Move Python modules into role (rhcarvalho@gmail.com)
+- Document playbook directories (rhcarvalho@gmail.com)
+- Document bin/cluster tool (rhcarvalho@gmail.com)
+- keys should be lowercase according to the spec (jf.cron0@gmail.com)
+- filter: Removed unused validation calls (smilner@redhat.com)
+- Updated initializer usage in filters (smilner@redhat.com)
+- fix when statement indentation, cast to bool (jf.cron0@gmail.com)
+- add openshift_facts as role dependency (jf.cron0@gmail.com)
+- Added setup.py to flake8 tests (smilner@redhat.com)
+- Do not default registry storage kind to 'nfs' when 'nfs' group exists.
+  (abutcher@redhat.com)
+- Fix inconsistent task name (rhcarvalho@gmail.com)
+- Reduce code duplication using variable (rhcarvalho@gmail.com)
+- Another proposed update to the issue template (tbielawa@redhat.com)
+- Replace custom variables with openshift_facts (rhcarvalho@gmail.com)
+- Catch DBus exceptions on class initialization (rhcarvalho@gmail.com)
+- addressing comments (ewolinet@redhat.com)
+- Move playbook to BYO (rhcarvalho@gmail.com)
+- Fix typo in inventory README.md (lberk@redhat.com)
+- Refactor preflight check into roles (rhcarvalho@gmail.com)
+- Make flake8 (py35) happy on bare except (rhcarvalho@gmail.com)
+- Make callback plugin an always-on aggregate plugin (rhcarvalho@gmail.com)
+- Add RPM checks as an adhoc playbook (rhcarvalho@gmail.com)
+- first swing at release version wording (timbielawa@gmail.com)
+- Correct tox to run on Travis (rteague@redhat.com)
+- Adding ability to systematically modify yaml from ansible.
+  (kwoodson@redhat.com)
+- oo_filters: Moved static methods to functions (smilner@redhat.com)
+- Correct return code compairison for yamllint (rteague@redhat.com)
+- Add a fact to select --evacuate or --drain based on your OCP version
+  (tbielawa@redhat.com)
+- Update branch status (sdodson@redhat.com)
+- rename openshift_metrics to openshift_hosted_metrics (jcantril@redhat.com)
+- Update aws dynamic inventory (lhuard@amadeus.com)
+- improve issue template (sdodson@redhat.com)
+- cleanup: Removed debug prints from tests (smilner@redhat.com)
+- remove debug statement from test (jdetiber@redhat.com)
+- Support openshift_node_port_range for configuring service NodePorts
+  (ccoleman@redhat.com)
+- Workaround for dnf+docker version race condition (smilner@redhat.com)
+- use etcdctl from the container when containerized=True (gscrivan@redhat.com)
+- Partial uninstall (sejug@redhat.com)
+- increase test coverage (jdetiber@redhat.com)
+- Update aws dynamic inventory (lhuard@amadeus.com)
+- update travis to use tox for utils (jdetiber@redhat.com)
+- More toxification (jdetiber@redhat.com)
+- add test for utils to bump coverage (jdetiber@redhat.com)
+- The scaleup subcommand does not support the unattended option
+  (tbielawa@redhat.com)
+- Move role dependencies out of playbooks for openshift_master, openshift_node
+  and openshift_hosted. (abutcher@redhat.com)
+- Remove unused file (rhcarvalho@gmail.com)
+- Remove unused file (rhcarvalho@gmail.com)
+- Remove spurious argument (rhcarvalho@gmail.com)
+- Fixing collision of system.admin cert generation (ewolinet@redhat.com)
+- minor updates for code reviews, remove unused params (jcantril@redhat.com)
+- Updating to use deployer pod to generate JKS chain instead
+  (ewolinet@redhat.com)
+- Creating openshift_logging role for deploying Aggregated Logging without a
+  deployer image (ewolinet@redhat.com)
+- Begin requiring Docker 1.12. (dgoodwin@redhat.com)
+
 * Mon Jan 09 2017 Scott Dodson <sdodson@redhat.com> 3.5.0-1
 - Update manpage version. (tbielawa@redhat.com)
 - Fix openshift_image_tag=latest. (abutcher@redhat.com)
