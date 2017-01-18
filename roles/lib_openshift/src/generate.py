@@ -10,6 +10,7 @@ import six
 
 OPENSHIFT_ANSIBLE_PATH = os.path.dirname(os.path.realpath(__file__))
 OPENSHIFT_ANSIBLE_SOURCES_PATH = os.path.join(OPENSHIFT_ANSIBLE_PATH, 'sources.yml')  # noqa: E501
+LIBRARY = os.path.join(OPENSHIFT_ANSIBLE_PATH, '..', 'library/')
 
 
 class GenerateAnsibleException(Exception):
@@ -42,22 +43,29 @@ def generate(parts):
     return data
 
 
+def get_sources():
+    '''return the path to the generate sources'''
+    return yaml.load(open(OPENSHIFT_ANSIBLE_SOURCES_PATH).read())
+
+
+def verify():
+    '''verify if the generated code matches the library code'''
+    for fname, parts in get_sources().items():
+        data = generate(parts)
+        fname = os.path.join(LIBRARY, fname)
+        if not open(fname).read() == data.getvalue():
+            raise GenerateAnsibleException('Generated content does not match for %s' % fname)
+
+
 def main():
     ''' combine the necessary files to create the ansible module '''
     args = parse_args()
+    if args.verify:
+        verify()
 
-    library = os.path.join(OPENSHIFT_ANSIBLE_PATH, '..', 'library/')
-    sources = yaml.load(open(OPENSHIFT_ANSIBLE_SOURCES_PATH).read())
-
-    for fname, parts in sources.items():
+    for fname, parts in get_sources().items():
         data = generate(parts)
-        fname = os.path.join(library, fname)
-        if args.verify:
-            if not open(fname).read() == data.getvalue():
-                raise GenerateAnsibleException('Generated content does not match for %s' % fname)
-
-            continue
-
+        fname = os.path.join(LIBRARY, fname)
         with open(fname, 'w') as afd:
             afd.seek(0)
             afd.write(data.getvalue())

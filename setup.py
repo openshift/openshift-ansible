@@ -6,7 +6,7 @@ from __future__ import print_function
 import os
 import fnmatch
 import re
-import subprocess
+import sys
 import yaml
 
 # Always prefer setuptools over distutils
@@ -170,21 +170,31 @@ class OpenShiftAnsibleGenerateValidation(Command):
                                      'playbooks',
                                      'utils'],
                                     None,
-                                    'generate.py')
+                                    'generate.py$')
 
-        # call them with --verify
+        if len(generate_files) < 1:
+            print('Did not find any code generation.  Please verify module code generation.')  # noqa: E501
+            raise SystemExit(1)
+
         errors = False
         for gen in generate_files:
             print('Checking generated module code: {0}'.format(gen))
             try:
-                subprocess.call([gen, '--verify'])
-            except subprocess.CalledProcessError as cpe:
-                print(cpe)
+                sys.path.insert(0, os.path.dirname(gen))
+                # we are importing dynamically.  This isn't in
+                # the python path.
+                # pylint: disable=import-error
+                import generate
+                generate.verify()
+            except generate.GenerateAnsibleException as gae:
+                print(gae.args)
                 errors = True
 
         if errors:
             print('Found errors while generating module code.')
             raise SystemExit(1)
+
+        print('\nAll generate scripts passed.\n')
 
 
 class UnsupportedCommand(Command):
