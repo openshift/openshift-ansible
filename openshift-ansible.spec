@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.21
+Version:        3.4.53
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,285 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sun Jan 08 2017 Scott Dodson <sdodson@redhat.com> 3.4.53-1
+- Revert "Deprecate node 'evacuation' with 'drain'" (sdodson@redhat.com)
+- Re-add when condition which was removed mistakenly in #3036
+  (maszulik@redhat.com)
+- Fix jsonpath expected output when checking registry volume secrets
+  (maszulik@redhat.com)
+- logging-deployer pull fixes from origin-aggregated-logging/#317
+  (sdodson@redhat.com)
+- Don't upgrade etcd on atomic host, ever. (sdodson@redhat.com)
+- Fix jsonpath expected output when checking registry volume secrets
+  (maszulik@redhat.com)
+- Enable repos defined in openshift_additional_repos by default
+  (sdodson@redhat.com)
+- Hush the sudo privs check in oo-installer (tbielawa@redhat.com)
+- Add future versions to openshift_facts (ccoleman@redhat.com)
+- Cast openshift_enable_origin_repo to bool. (abutcher@redhat.com)
+- Update CFME template to point to GA build (simaishi@redhat.com)
+- Add templates for CFME Beta pod images (simaishi@redhat.com)
+- Add osnl_volume_reclaim_policy variable to nfs_lvm role
+  (ando.roots@bigbank.ee)
+- remove duplicate filter name and oo_pdb (jdetiber@redhat.com)
+- remove old Ops tooling (jdetiber@redhat.com)
+- enable pip cache for travis (jdetiber@redhat.com)
+- python3 support, add tox for better local testing against multiple python
+  versions (jdetiber@redhat.com)
+- modify_yaml: handle None value during update. (abutcher@redhat.com)
+- Update the openshift-certificate-expiry README to reflect latest changes
+  (tbielawa@redhat.com)
+- Deprecate node 'evacuation' with 'drain' (tbielawa@redhat.com)
+- Add master config hook for 3.4 upgrade and fix facts ordering for config hook
+  run. (abutcher@redhat.com)
+- The next registry.access.redhat.com/rhel7/etcd image will be 3.0.15
+  (sdodson@redhat.com)
+- [uninstall] Remove excluder packages (sdodson@redhat.com)
+- Check embedded etcd certs now, too (tbielawa@redhat.com)
+- Include 'total' and 'ok' in check results (tbielawa@redhat.com)
+- Fix access_modes initialization (luis.fernandezalvarez@epfl.ch)
+- Updated OpenShift Master iptables rules (rteague@redhat.com)
+- YAML Linting (rteague@redhat.com)
+- Make both backup and upgrade optional (sdodson@redhat.com)
+- [upgrades] Upgrade etcd by default (sdodson@redhat.com)
+- upgrades - Fix logic error about when to backup etcd (sdodson@redhat.com)
+- Limit node certificate SAN to node hostnames/ips. (abutcher@redhat.com)
+- Make 'cover-erase' a config file setting. Move VENT target to pre-req for all
+  ci-* targets (tbielawa@redhat.com)
+- Fixes to 'make ci' (tbielawa@redhat.com)
+- Resolved lint issues (rteague@redhat.com)
+- Minimum Ansible version check (rteague@redhat.com)
+- Removed verify_ansible_version playbook refs (rteague@redhat.com)
+- Fix coverage not appending new data (tbielawa@redhat.com)
+- Drop 3.2 upgrade playbooks. (dgoodwin@redhat.com)
+- Silence warnings when using rpm directly (dag@wieers.com)
+- Silence warnings when using rpm directly (dag@wieers.com)
+- Silence warnings when using rpm directly (dag@wieers.com)
+- Remove Hostname from 1.1 and 1.2 predicates (jdetiber@redhat.com)
+- Properly handle x.y.z formatted versions for openshift_release
+  (jdetiber@redhat.com)
+- etcd_upgrade: Simplify package installation (sdodson@redhat.com)
+- Speed up 'make ci' and trim the output (tbielawa@redhat.com)
+- add comments and remove debug code (jdetiber@redhat.com)
+- Pre-pull master/node/ovs images during upgrade. (dgoodwin@redhat.com)
+- Handle updating of scheduler config during upgrade (jdetiber@redhat.com)
+- Fix templating (jdetiber@redhat.com)
+- test updates (jdetiber@redhat.com)
+- Always install latest etcd for containerized hosts (sdodson@redhat.com)
+- etcd_upgrade : Use different variables for rpm vs container versions
+  (sdodson@redhat.com)
+- Switch back to using etcd rather than etcd3 (sdodson@redhat.com)
+- node_dnsmasq - restart dnsmasq if it's not currently running
+  (sdodson@redhat.com)
+- Conditionalize master config update for admission_plugin_config.
+  (abutcher@redhat.com)
+- upgrade_control_plane.yml: systemd_units.yaml nees the master facts
+  (mchappel@redhat.com)
+- openshift-master/restart : use openshift.common.hostname instead of
+  inventory_hostname (mchappel@redhat.com)
+- Update scheduler predicate/priorities vars (jdetiber@redhat.com)
+- fix tags (jdetiber@redhat.com)
+- openshift_node_dnsmasq - Remove strict-order option from dnsmasq
+  (sdodson@redhat.com)
+- Fix metricsPublicURL only being set correctly on first master.
+  (dgoodwin@redhat.com)
+- Explictly set etcd vars for byo scaleup (smunilla@redhat.com)
+- Cleanup ovs file and restart docker on every upgrade. (dgoodwin@redhat.com)
+- Sync latest image stream and templates for v1.3 and v1.4 (sdodson@redhat.com)
+- xpaas v1.3.5 (sdodson@redhat.com)
+- Ansible version check update (tbielawa@redhat.com)
+- allow 'latest' origin_image_tag (sjenning@redhat.com)
+- Remove duplicate when key (rteague@redhat.com)
+- refactor handling of scheduler defaults (jdetiber@redhat.com)
+- update tests and flake8/pylint fixes (jdetiber@redhat.com)
+- fix tagging (jdetiber@redhat.com)
+- do not report changed for group mapping (jdetiber@redhat.com)
+- fix selinux issues with etcd container (dusty@dustymabe.com)
+- etcd upgrade playbook is not currently applicable to embedded etcd installs
+  (sdodson@redhat.com)
+- Fix invalid embedded etcd fact in etcd upgrade playbook.
+  (dgoodwin@redhat.com)
+- Gracefully handle OpenSSL module absence (misc@redhat.com)
+- Refactored to use Ansible systemd module (rteague@redhat.com)
+- Updating docs for Ansible 2.2 requirements (rteague@redhat.com)
+- Fix the list done after cluster creation on libvirt and OpenStack
+  (lhuard@amadeus.com)
+- Set nameservers on DHCPv6 event (alexandre.lossent@cern.ch)
+- Systemd `systemctl show` workaround (rteague@redhat.com)
+- Verify the presence of dbus python binding (misc@redhat.com)
+- Update README.md (jf.cron0@gmail.com)
+- Reference master binaries when delegating from node hosts which may be
+  containerized. (abutcher@redhat.com)
+- Merge kube_admission_plugin_config with admission_plugin_config
+  (smunilla@redhat.com)
+- Added a BYO playbook for configuring NetworkManager on nodes
+  (skuznets@redhat.com)
+- Make the role work on F25 Cloud (misc@redhat.com)
+- Make os_firewall_manage_iptables run on python3 (misc@redhat.com)
+- Modified the error message being checked for (vishal.patil@nuagenetworks.net)
+- Only run tuned-adm if tuned exists. (dusty@dustymabe.com)
+- Delegate openshift_manage_node tasks to master host. (abutcher@redhat.com)
+- Fix rare failure to deploy new registry/router after upgrade.
+  (dgoodwin@redhat.com)
+- Refactor os_firewall role (rteague@redhat.com)
+- Allow ansible to continue when a node is unaccessible or fails.
+  (abutcher@redhat.com)
+- Create the file in two passes, atomicly copy it over (sdodson@redhat.com)
+- Escape LOGNAME variable according to GCE rules (jacek.suchenia@ocado.com)
+- node_dnsmasq -- Set dnsmasq as our only nameserver (sdodson@redhat.com)
+- Refactor to use Ansible package module (rteague@redhat.com)
+- Allow users to disable the origin repo creation (sdodson@redhat.com)
+- Fix yum/subman version check on Atomic. (dgoodwin@redhat.com)
+- Check for bad versions of yum and subscription-manager. (dgoodwin@redhat.com)
+- Corrected syntax and typos (rteague@redhat.com)
+- Fix GCE cluster creation (lhuard@amadeus.com)
+- Optimize the cloud-specific list.yml playbooks (lhuard@amadeus.com)
+- Added ip forwarding for nuage (vishal.patil@nuagenetworks.net)
+- Add view permissions to hawkular sa (sdodson@redhat.com)
+- Use multiple '-v's when creating the metrics deployer command
+  (tbielawa@redhat.com)
+- Change to allow cni deployments without openshift SDN (yfauser@vmware.com)
+- [openstack] allows timeout option for heat create stack
+  (douglaskippsmith@gmail.com)
+- Add hawkular admin cluster role to management admin (fsimonce@redhat.com)
+- Prevent useless master by reworking template for master service enf file
+  (jkhelil@gmail.com)
+- support 3rd party scheduler (jannleno1@gmail.com)
+- Add nuage rest server port to haproxy firewall rules. (abutcher@redhat.com)
+- storage/nfs_lvm: Also export as ReadWriteOnce (walters@verbum.org)
+
+* Thu Jan 05 2017 Scott Dodson <sdodson@redhat.com> 3.4.43-1
+- logging-deployer pull fixes from origin-aggregated-logging/#317
+  (sdodson@redhat.com)
+
+* Thu Jan 05 2017 Scott Dodson <sdodson@redhat.com> 3.4.42-1
+- Don't upgrade etcd on atomic host, ever. (sdodson@redhat.com)
+- Update CFME template to point to GA build (simaishi@redhat.com)
+- Don't upgrade etcd on atomic host, ever. (sdodson@redhat.com)
+- Add templates for CFME Beta pod images (simaishi@redhat.com)
+
+* Thu Dec 22 2016 Scott Dodson <sdodson@redhat.com> 3.4.41-1
+- Revert "Pre-pull master/node/ovs images during upgrade."
+  (dgoodwin@redhat.com)
+
+* Mon Dec 19 2016 Scott Dodson <sdodson@redhat.com> 3.4.40-1
+- modify_yaml: handle None value during update. (abutcher@redhat.com)
+
+* Fri Dec 16 2016 Scott Dodson <sdodson@redhat.com> 3.4.39-1
+- Add master config hook for 3.4 upgrade and fix facts ordering for config hook
+  run. (abutcher@redhat.com)
+- The next registry.access.redhat.com/rhel7/etcd image will be 3.0.15
+  (sdodson@redhat.com)
+
+* Mon Dec 12 2016 Scott Dodson <sdodson@redhat.com> 3.4.38-1
+- Make both backup and upgrade optional (sdodson@redhat.com)
+- [upgrades] Upgrade etcd by default (sdodson@redhat.com)
+
+* Thu Dec 08 2016 Scott Dodson <sdodson@redhat.com> 3.4.37-1
+- etcd_upgrade: Simplify package installation (sdodson@redhat.com)
+
+* Thu Dec 08 2016 Scott Dodson <sdodson@redhat.com> 3.4.36-1
+- Pre-pull master/node/ovs images during upgrade. (dgoodwin@redhat.com)
+- Properly handle x.y.z formatted versions for openshift_release
+  (jdetiber@redhat.com)
+- Remove Hostname from 1.1 and 1.2 predicates (jdetiber@redhat.com)
+- add comments and remove debug code (jdetiber@redhat.com)
+- Handle updating of scheduler config during upgrade (jdetiber@redhat.com)
+
+* Tue Dec 06 2016 Scott Dodson <sdodson@redhat.com> 3.4.35-1
+- Always install latest etcd for containerized hosts (sdodson@redhat.com)
+- etcd_upgrade : Use different variables for rpm vs container versions
+  (sdodson@redhat.com)
+- Switch back to using etcd rather than etcd3 (sdodson@redhat.com)
+- Update scheduler predicate/priorities vars (jdetiber@redhat.com)
+- fix tags (jdetiber@redhat.com)
+
+* Mon Dec 05 2016 Scott Dodson <sdodson@redhat.com> 3.4.34-1
+- Conditionalize master config update for admission_plugin_config.
+  (abutcher@redhat.com)
+- node_dnsmasq - restart dnsmasq if it's not currently running
+  (sdodson@redhat.com)
+- upgrade_control_plane.yml: systemd_units.yaml nees the master facts
+  (mchappel@redhat.com)
+- openshift-master/restart : use openshift.common.hostname instead of
+  inventory_hostname (mchappel@redhat.com)
+
+* Thu Dec 01 2016 Scott Dodson <sdodson@redhat.com> 3.4.33-1
+- openshift_node_dnsmasq - Remove strict-order option from dnsmasq
+  (sdodson@redhat.com)
+
+* Wed Nov 30 2016 Scott Dodson <sdodson@redhat.com> 3.4.32-1
+- Fix typo, s/ensure/state/ (sdodson@redhat.com)
+- Add view permissions to hawkular sa (sdodson@redhat.com)
+- Use multiple '-v's when creating the metrics deployer command
+  (tbielawa@redhat.com)
+- Fix templating (jdetiber@redhat.com)
+- refactor handling of scheduler defaults (jdetiber@redhat.com)
+- fix tagging (jdetiber@redhat.com)
+- do not report changed for group mapping (jdetiber@redhat.com)
+- Cleanup ovs file and restart docker on every upgrade. (dgoodwin@redhat.com)
+- xpaas v1.3.5 (sdodson@redhat.com)
+- etcd upgrade playbook is not currently applicable to embedded etcd installs
+  (sdodson@redhat.com)
+
+* Mon Nov 28 2016 Scott Dodson <sdodson@redhat.com> 3.4.31-1
+- Fix invalid embedded etcd fact in etcd upgrade playbook.
+  (dgoodwin@redhat.com)
+
+* Mon Nov 28 2016 Scott Dodson <sdodson@redhat.com> 3.4.30-1
+- Merge kube_admission_plugin_config with admission_plugin_config
+  (smunilla@redhat.com)
+- Updating docs for Ansible 2.2 requirements (rteague@redhat.com)
+- Reference master binaries when delegating from node hosts which may be
+  containerized. (abutcher@redhat.com)
+- Add hawkular admin cluster role to management admin (fsimonce@redhat.com)
+- Fix yum/subman version check on Atomic. (dgoodwin@redhat.com)
+- Delegate openshift_manage_node tasks to master host. (abutcher@redhat.com)
+- Allow ansible to continue when a node is unaccessible or fails.
+  (abutcher@redhat.com)
+
+* Fri Nov 18 2016 Scott Dodson <sdodson@redhat.com> 3.4.29-1
+- Check for bad versions of yum and subscription-manager. (dgoodwin@redhat.com)
+
+* Fri Nov 18 2016 Scott Dodson <sdodson@redhat.com> 3.4.28-1
+- Create the file in two passes, atomicly copy it over (sdodson@redhat.com)
+- node_dnsmasq -- Set dnsmasq as our only nameserver (sdodson@redhat.com)
+
+* Thu Nov 17 2016 Scott Dodson <sdodson@redhat.com> 3.4.27-1
+- Allow users to disable the origin repo creation (sdodson@redhat.com)
+
+* Tue Nov 15 2016 Scott Dodson <sdodson@redhat.com> 3.4.26-1
+- Fix typo (sdodson@redhat.com)
+- Fix a few places where we're not specifying the admin kubeconfig
+  (sdodson@redhat.com)
+- Add rolebinding-reader (sdodson@redhat.com)
+- Docker daemon is started prematurely. (eric.mountain@amadeus.com)
+
+* Mon Nov 14 2016 Scott Dodson <sdodson@redhat.com> 3.4.25-1
+- Sync logging deployer changes from origin to enterprise (sdodson@redhat.com)
+- Sync latest enterprise/metrics-deployer.yaml (sdodson@redhat.com)
+- Sync latest s2i content (sdodson@redhat.com)
+
+* Mon Nov 14 2016 Scott Dodson <sdodson@redhat.com> 3.4.24-1
+- Actually upgrade host etcdctl no matter what (sdodson@redhat.com)
+- Make etcd containerized upgrade stepwise (sdodson@redhat.com)
+- Fix commit-offsets in version detection for containerized installs
+  (tbielawa@redhat.com)
+- Fix HA upgrade when fact cache deleted. (dgoodwin@redhat.com)
+- Fix openshift_hosted_metrics_deployer_version set_fact. (abutcher@redhat.com)
+- Added dependency of os_firewall to docker role (rteague@redhat.com)
+- Add updates for containerized (sdodson@redhat.com)
+- Add etcd upgrade for RHEL and Fedora (sdodson@redhat.com)
+- Drop /etc/profile.d/etcdctl.sh (sdodson@redhat.com)
+- Move backups to a separate file for re-use (sdodson@redhat.com)
+- Uninstall etcd3 package (sdodson@redhat.com)
+
+* Fri Nov 11 2016 Scott Dodson <sdodson@redhat.com> 3.4.23-1
+- Resolve docker and iptables service dependencies (rteague@redhat.com)
+
+* Thu Nov 10 2016 Scott Dodson <sdodson@redhat.com> 3.4.22-1
+- Begin requiring Docker 1.12. (dgoodwin@redhat.com)
+
 * Thu Nov 10 2016 Scott Dodson <sdodson@redhat.com> 3.4.21-1
 - Add Travis integration (rhcarvalho@gmail.com)
 - Default groups.oo_etcd_to_config when setting embedded_etcd in control plane
