@@ -1,5 +1,6 @@
 ---
-- hosts: localhost
+- name: Create l_oo_all_hosts group
+  hosts: localhost
   connection: local
   become: no
   gather_facts: no
@@ -10,7 +11,8 @@
       groups: l_oo_all_hosts
     with_items: "{{ g_all_hosts | default([]) }}"
 
-- hosts: l_oo_all_hosts
+- name: Include g_*_hosts vars for hosts in group l_oo_all_hosts
+  hosts: l_oo_all_hosts
   gather_facts: no
   tasks:
   - include_vars: ../../../byo/openshift-cluster/cluster_hosts.yml
@@ -46,3 +48,14 @@
     when: openshift_docker_log_options is not defined
 
 - include: ../initialize_facts.yml
+
+- name: Ensure clean repo cache in the event repos have been changed manually
+  hosts: oo_all_hosts
+  tags:
+  - pre_upgrade
+  tasks:
+  - name: Clean package cache
+    command: "{{ ansible_pkg_mgr }} clean all"
+    when: not openshift.common.is_atomic | bool
+    args:
+      warn: no
