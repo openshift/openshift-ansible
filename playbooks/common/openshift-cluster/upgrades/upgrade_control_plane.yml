@@ -65,6 +65,9 @@
   - openshift_facts
   post_tasks:
 
+  - debug: msg="Running pre-master upgrade hook {{ openshift_upgrade_pre_master_hook }}"
+    when: openshift_upgrade_pre_master_hook is defined
+
   - include: "{{ openshift_upgrade_pre_master_hook }}"
     when: openshift_upgrade_pre_master_hook is defined
 
@@ -109,6 +112,9 @@
     when: ca_crt_stat.stat.isreg and not ca_bundle_stat.stat.exists
 
   # NOTE: We run user provided hooks prior to restarting the system or services.
+  - debug: msg="Running post-master upgrade hook {{ openshift_upgrade_post_master_hook }}"
+    when: openshift_upgrade_post_master_hook is defined
+
   - include: "{{ openshift_upgrade_post_master_hook }}"
     when: openshift_upgrade_post_master_hook is defined
 
