@@ -1,6 +1,4 @@
 ---
-- include: ../openshift-cluster/evaluate_groups.yml
-
 - name: Validate configuration for rolling restart
   hosts: oo_masters_to_config
   roles:
@@ -65,14 +63,3 @@
   - set_fact:
       current_host: "{{ exists.stat.exists }}"
     when: openshift.common.rolling_restart_mode == 'system'
-
-- name: Restart masters
-  hosts: oo_masters_to_config
-  vars:
-    openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
-  serial: 1
-  tasks:
-  - include: restart_hosts.yml
-    when: openshift.common.rolling_restart_mode == 'system'
-  - include: restart_services.yml
-    when: openshift.common.rolling_restart_mode == 'services'
