@@ -47,14 +47,14 @@ class OpenShiftCLI(object):
         return {'returncode': 0, 'updated': False}
 
     def _replace(self, fname, force=False):
-        '''return all pods '''
+        '''replace the current object with oc replace'''
         cmd = ['-n', self.namespace, 'replace', '-f', fname]
         if force:
             cmd.append('--force')
         return self.openshift_cmd(cmd)
 
     def _create_from_content(self, rname, content):
-        '''return all pods '''
+        '''create a temporary file and then call oc create on it'''
         fname = '/tmp/%s' % rname
         yed = Yedit(fname, content=content)
         yed.write()
@@ -64,11 +64,11 @@ class OpenShiftCLI(object):
         return self._create(fname)
 
     def _create(self, fname):
-        '''return all pods '''
+        '''call oc create on a filename'''
         return self.openshift_cmd(['create', '-f', fname, '-n', self.namespace])
 
     def _delete(self, resource, rname, selector=None):
-        '''return all pods '''
+        '''call oc delete on a resource'''
         cmd = ['delete', resource, rname, '-n', self.namespace]
         if selector:
             cmd.append('--selector=%s' % selector)
@@ -76,7 +76,14 @@ class OpenShiftCLI(object):
         return self.openshift_cmd(cmd)
 
     def _process(self, template_name, create=False, params=None, template_data=None):  # noqa: E501
-        '''return all pods '''
+        '''process a template
+
+           template_name: the name of the template to process
+           create: whether to send to oc create after processing
+           params: the parameters for the template
+           template_data: the incoming template's data; instead of a file
+        '''
+
         cmd = ['process', '-n', self.namespace]
         if template_data:
             cmd.extend(['-f', '-'])
@@ -138,7 +145,12 @@ class OpenShiftCLI(object):
         return self.openshift_cmd(cmd, oadm=True, output=True, output_type='raw')  # noqa: E501
 
     def _list_pods(self, node=None, selector=None, pod_selector=None):
-        ''' perform oadm manage-node evacuate '''
+        ''' perform oadm list pods
+
+            node: the node in which to list pods
+            selector: the label selector filter if provided
+            pod_selector: the pod selector filter if provided
+        '''
         cmd = ['manage-node']
         if node:
             cmd.extend(node)

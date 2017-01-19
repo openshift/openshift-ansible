@@ -42,17 +42,17 @@ from ansible.module_utils.basic import AnsibleModule
 
 DOCUMENTATION = '''
 ---
-module: oc_edit
-short_description: Modify, and idempotently manage openshift objects.
+module: oc_obj
+short_description: Generic interface to openshift objects
 description:
-  - Modify openshift objects programmatically.
+  - Manage openshift objects programmatically.
 options:
   state:
     description:
     - Currently present is only supported state.
     required: true
     default: present
-    choices: ["present"]
+    choices: ["present", "absent", "list"]
     aliases: []
   kubeconfig:
     description:
@@ -78,52 +78,33 @@ options:
     required: false
     default: str
     aliases: []
+  all_namespace:
+    description:
+    - The namespace where the object lives.
+    required: false
+    default: false
+    aliases: []
   kind:
     description:
-    - The kind attribute of the object.
+    - The kind attribute of the object. e.g. dc, bc, svc, route
     required: True
     default: None
-    choices:
-    - bc
-    - buildconfig
-    - configmaps
-    - dc
-    - deploymentconfig
-    - imagestream
-    - imagestreamtag
-    - is
-    - istag
-    - namespace
-    - project
-    - projects
-    - node
-    - ns
-    - persistentvolume
-    - pv
-    - rc
-    - replicationcontroller
-    - routes
-    - scc
-    - secret
-    - securitycontextconstraints
-    - service
-    - svc
     aliases: []
-  file_name:
+  files:
     description:
-    - The file name in which to edit
+    - A list of files provided for object
     required: false
     default: None
     aliases: []
-  file_format:
+  delete_after:
     description:
-    - The format of the file being edited.
+    - Whether or not to delete the files after processing them.
     required: false
-    default: yaml
+    default: false
     aliases: []
   content:
     description:
-    - Content of the file
+    - Content of the object being managed.
     required: false
     default: None
     aliases: []
@@ -133,11 +114,11 @@ options:
     required: false
     default: None
     aliases: []
-  separator:
+  selector:
     description:
-    - The separator format for the edit.
+    - Selector that gets added to the query.
     required: false
-    default: '.'
+    default: None
     aliases: []
 author:
 - "Kenny Woodson <kwoodson@redhat.com>"
@@ -145,13 +126,11 @@ extends_documentation_fragment: []
 '''
 
 EXAMPLES = '''
-oc_edit:
-  kind: rc
-  name: hawkular-cassandra-rc
-  namespace: openshift-infra
-  content:
-    spec.template.spec.containers[0].resources.limits.memory: 512
-    spec.template.spec.containers[0].resources.requests.memory: 256
+oc_obj:
+  kind: dc
+  name: router
+  namespace: default
+register: router_output
 '''
 # noqa: E301,E302
 
@@ -1184,136 +1163,224 @@ class OpenShiftCLIConfig(object):
         return rval
 
 
-class Edit(OpenShiftCLI):
-    ''' Class to wrap the oc command line tools
-    '''
+# pylint: disable=too-many-instance-attributes
+class OCObject(OpenShiftCLI):
+    ''' Class to wrap the oc command line tools '''
+
+    # pylint allows 5. we need 6
     # pylint: disable=too-many-arguments
     def __init__(self,
                  kind,
                  namespace,
-                 resource_name=None,
+                 rname=None,
+                 selector=None,
                  kubeconfig='/etc/origin/master/admin.kubeconfig',
-                 separator='.',
-                 verbose=False):
+                 verbose=False,
+                 all_namespaces=False):
         ''' Constructor for OpenshiftOC '''
-        super(Edit, self).__init__(namespace, kubeconfig)
-        self.namespace = namespace
+        super(OCObject, self).__init__(namespace, kubeconfig,
+                                       all_namespaces=all_namespaces)
         self.kind = kind
-        self.name = resource_name
+        self.namespace = namespace
+        self.name = rname
+        self.selector = selector
         self.kubeconfig = kubeconfig
-        self.separator = separator
         self.verbose = verbose
 
     def get(self):
-        '''return a secret by name '''
-        return self._get(self.kind, self.name)
+        '''return a kind by name '''
+        results = self._get(self.kind, rname=self.name, selector=self.selector)
+        if results['returncode'] != 0 and 'stderr' in results and \
+           '\"%s\" not found' % self.name in results['stderr']:
+            results['returncode'] = 0
 
-    def update(self, file_name, content, force=False, content_type='yaml'):
-        '''run update '''
-        if file_name:
-            if content_type == 'yaml':
-                data = yaml.load(open(file_name))
-            elif content_type == 'json':
-                data = json.loads(open(file_name).read())
+        return results
 
-            changes = []
-            yed = Yedit(filename=file_name, content=data, separator=self.separator)
-            for key, value in content.items():
-                changes.append(yed.put(key, value))
+    def delete(self):
+        '''return all pods '''
+        return self._delete(self.kind, self.name)
 
-            if any([not change[0] for change in changes]):
-                return {'returncode': 0, 'updated': False}
+    def create(self, files=None, content=None):
+        '''
+           Create a config
 
-            yed.write()
+           NOTE: This creates the first file OR the first conent.
+           TODO: Handle all files and content passed in
+        '''
+        if files:
+            return self._create(files[0])
 
-            atexit.register(Utils.cleanup, [file_name])
+        content['data'] = yaml.dump(content['data'])
+        content_file = Utils.create_files_from_contents(content)[0]
 
-            return self._replace(file_name, force=force)
+        return self._create(content_file['path'])
 
-        return self._replace_content(self.kind, self.name, content, force=force, sep=self.separator)
+    # pylint: disable=too-many-function-args
+    def update(self, files=None, content=None, force=False):
+        '''update a current openshift object
 
+           This receives a list of file names or content
+           and takes the first and calls replace.
+
+           TODO: take an entire list
+        '''
+        if files:
+            return self._replace(files[0], force)
+
+        if content and 'data' in content:
+            content = content['data']
+
+        return self.update_content(content, force)
+
+    def update_content(self, content, force=False):
+        '''update an object through using the content param'''
+        return self._replace_content(self.kind, self.name, content, force=force)
+
+    def needs_update(self, files=None, content=None, content_type='yaml'):
+        ''' check to see if we need to update '''
+        objects = self.get()
+        if objects['returncode'] != 0:
+            return objects
+
+        # pylint: disable=no-member
+        data = None
+        if files:
+            data = Utils.get_resource_file(files[0], content_type)
+        elif content and 'data' in content:
+            data = content['data']
+        else:
+            data = content
+
+            # if equal then no need.  So not equal is True
+        return not Utils.check_def_equal(data, objects['results'][0], skip_keys=None, debug=False)
+
+    # pylint: disable=too-many-return-statements,too-many-branches
     @staticmethod
-    def run_ansible(params, check_mode):
-        '''run the ansible idempotent code'''
+    def run_ansible(params, check_mode=False):
+        '''perform the ansible idempotent code'''
 
-        ocedit = Edit(params['kind'],
-                      params['namespace'],
-                      params['name'],
-                      kubeconfig=params['kubeconfig'],
-                      separator=params['separator'],
-                      verbose=params['debug'])
+        ocobj = OCObject(params['kind'],
+                         params['namespace'],
+                         params['name'],
+                         params['selector'],
+                         kubeconfig=params['kubeconfig'],
+                         verbose=params['debug'],
+                         all_namespaces=params['all_namespaces'])
 
-        api_rval = ocedit.get()
+        state = params['state']
+
+        api_rval = ocobj.get()
+
+        #####
+        # Get
+        #####
+        if state == 'list':
+            return {'changed': False, 'results': api_rval, 'state': 'list'}
+
+        if not params['name']:
+            return {'failed': True, 'msg': 'Please specify a name when state is absent|present.'}  # noqa: E501
 
         ########
-        # Create
+        # Delete
         ########
-        if not Utils.exists(api_rval['results'], params['name']):
-            return {"failed": True, 'msg': api_rval}
+        if state == 'absent':
+            if not Utils.exists(api_rval['results'], params['name']):
+                return {'changed': False, 'state': 'absent'}
 
-        ########
-        # Update
-        ########
-        if check_mode:
-            return {'changed': True, 'msg': 'CHECK_MODE: Would have performed edit'}
+            if check_mode:
+                return {'changed': True, 'msg': 'CHECK_MODE: Would have performed a delete'}
 
-        api_rval = ocedit.update(params['file_name'],
-                                 params['content'],
-                                 params['force'],
-                                 params['file_format'])
+            api_rval = ocobj.delete()
 
-        if api_rval['returncode'] != 0:
-            return {"failed": True, 'msg': api_rval}
+            return {'changed': True, 'results': api_rval, 'state': 'absent'}
 
-        if 'updated' in api_rval and not api_rval['updated']:
-            return {"changed": False, 'results': api_rval, 'state': 'present'}
+        if state == 'present':
+            ########
+            # Create
+            ########
+            if not Utils.exists(api_rval['results'], params['name']):
 
-        # return the created object
-        api_rval = ocedit.get()
+                if check_mode:
+                    return {'changed': True, 'msg': 'CHECK_MODE: Would have performed a create'}
 
-        if api_rval['returncode'] != 0:
-            return {"failed": True, 'msg': api_rval}
+                # Create it here
+                api_rval = ocobj.create(params['files'], params['content'])
+                if api_rval['returncode'] != 0:
+                    return {'failed': True, 'msg': api_rval}
 
-        return {"changed": True, 'results': api_rval, 'state': 'present'}
+                # return the created object
+                api_rval = ocobj.get()
+
+                if api_rval['returncode'] != 0:
+                    return {'failed': True, 'msg': api_rval}
+
+                # Remove files
+                if params['files'] and params['delete_after']:
+                    Utils.cleanup(params['files'])
+
+                return {'changed': True, 'results': api_rval, 'state': "present"}
+
+            ########
+            # Update
+            ########
+            # if a file path is passed, use it.
+            update = ocobj.needs_update(params['files'], params['content'])
+            if not isinstance(update, bool):
+                return {'failed': True, 'msg': update}
+
+            # No changes
+            if not update:
+                if params['files'] and params['delete_after']:
+                    Utils.cleanup(params['files'])
+
+                return {'changed': False, 'results': api_rval['results'][0], 'state': "present"}
+
+            if check_mode:
+                return {'changed': True, 'msg': 'CHECK_MODE: Would have performed an update.'}
+
+            api_rval = ocobj.update(params['files'],
+                                    params['content'],
+                                    params['force'])
 
 
+            if api_rval['returncode'] != 0:
+                return {'failed': True, 'msg': api_rval}
+
+            # return the created object
+            api_rval = ocobj.get()
+
+            if api_rval['returncode'] != 0:
+                return {'failed': True, 'msg': api_rval}
+
+            return {'changed': True, 'results': api_rval, 'state': "present"}
+
+# pylint: disable=too-many-branches
 def main():
     '''
-    ansible oc module for editing objects
+    ansible oc module for services
     '''
 
     module = AnsibleModule(
         argument_spec=dict(
             kubeconfig=dict(default='/etc/origin/master/admin.kubeconfig', type='str'),
             state=dict(default='present', type='str',
-                       choices=['present']),
+                       choices=['present', 'absent', 'list']),
             debug=dict(default=False, type='bool'),
             namespace=dict(default='default', type='str'),
-            name=dict(default=None, required=True, type='str'),
-            kind=dict(required=True,
-                      type='str',
-                      choices=['dc', 'deploymentconfig',
-                               'rc', 'replicationcontroller',
-                               'svc', 'service',
-                               'scc', 'securitycontextconstraints',
-                               'ns', 'namespace', 'project', 'projects',
-                               'is', 'imagestream',
-                               'istag', 'imagestreamtag',
-                               'bc', 'buildconfig',
-                               'routes',
-                               'node',
-                               'secret',
-                               'pv', 'persistentvolume']),
-            file_name=dict(default=None, type='str'),
-            file_format=dict(default='yaml', type='str'),
-            content=dict(default=None, required=True, type='dict'),
+            all_namespaces=dict(defaul=False, type='bool'),
+            name=dict(default=None, type='str'),
+            files=dict(default=None, type='list'),
+            kind=dict(required=True, type='str'),
+            delete_after=dict(default=False, type='bool'),
+            content=dict(default=None, type='dict'),
             force=dict(default=False, type='bool'),
-            separator=dict(default='.', type='str'),
+            selector=dict(default=None, type='str'),
         ),
+        mutually_exclusive=[["content", "files"]],
+
         supports_check_mode=True,
     )
-
-    rval = Edit.run_ansible(module.params, module.check_mode)
+    rval = OCObject.run_ansible(module.params, module.check_mode)
     if 'failed' in rval:
         module.fail_json(**rval)
 
