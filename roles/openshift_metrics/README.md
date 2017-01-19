@@ -8,7 +8,7 @@ Requirements
 
 The following variables need to be set and will be validated:
 
-- `openshift_metrics_hostname`: hostname used on the hawkular metrics route.
+- `openshift_metrics_hawkular_hostname`: hostname used on the hawkular metrics route.
 
 - `openshift_metrics_project`: project (i.e. namespace) where the components will be
   deployed.
