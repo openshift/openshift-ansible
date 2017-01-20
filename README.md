@@ -74,6 +74,12 @@ you are not running a stable release.
       - [OpenShift Enterprise](https://docs.openshift.com/enterprise/latest/install_config/install/advanced_install.html)
       - [OpenShift Origin](https://docs.openshift.org/latest/install_config/install/advanced_install.html)
 
+
+## Installer Hooks
+
+See the [hooks documentation](HOOKS.md).
+
+
 ## Contributing
 
 See the [contribution guide](CONTRIBUTING.md).
