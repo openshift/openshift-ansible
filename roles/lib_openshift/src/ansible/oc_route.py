@@ -40,6 +40,8 @@ def main():
             key_content=dict(default=None, type='str'),
             service_name=dict(default=None, type='str'),
             host=dict(default=None, type='str'),
+            wildcard_policy=dict(default=None, type='str'),
+            weight=dict(default=None, type='int'),
         ),
         mutually_exclusive=[('dest_cacert_path', 'dest_cacert_content'),
                             ('cacert_path', 'cacert_content'),

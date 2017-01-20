@@ -88,7 +88,9 @@ class OCRoute(OpenShiftCLI):
                               files['key']['value'],
                               params['host'],
                               params['tls_termination'],
-                              params['service_name'])
+                              params['service_name'],
+                              params['wildcard_policy'],
+                              params['weight'])
 
         oc_route = OCRoute(rconfig, verbose=params['debug'])
 
@@ -131,13 +133,13 @@ class OCRoute(OpenShiftCLI):
                 api_rval = oc_route.create()
 
                 if api_rval['returncode'] != 0:
-                    return {'failed': True, 'results': api_rval, 'state': "present"}  # noqa: E501
+                    return {'failed': True, 'msg': api_rval, 'state': "present"}  # noqa: E501
 
                 # return the created object
                 api_rval = oc_route.get()
 
                 if api_rval['returncode'] != 0:
-                    return {'failed': True, 'results': api_rval, 'state': "present"}  # noqa: E501
+                    return {'failed': True, 'msg': api_rval, 'state': "present"}  # noqa: E501
 
                 return {'changed': True, 'results': api_rval, 'state': "present"}  # noqa: E501
 
@@ -152,13 +154,13 @@ class OCRoute(OpenShiftCLI):
                 api_rval = oc_route.update()
 
                 if api_rval['returncode'] != 0:
-                    return {'failed': True, 'results': api_rval, 'state': "present"}  # noqa: E501
+                    return {'failed': True, 'msg': api_rval, 'state': "present"}  # noqa: E501
 
                 # return the created object
                 api_rval = oc_route.get()
 
                 if api_rval['returncode'] != 0:
-                    return {'failed': True, 'results': api_rval, 'state': "present"}  # noqa: E501
+                    return {'failed': True, 'msg': api_rval, 'state': "present"}  # noqa: E501
 
                 return {'changed': True, 'results': api_rval, 'state': "present"}  # noqa: E501
 

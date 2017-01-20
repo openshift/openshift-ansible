@@ -42,17 +42,17 @@ from ansible.module_utils.basic import AnsibleModule
 
 DOCUMENTATION = '''
 ---
-module: oc_route
-short_description: Create, modify, and idempotently manage openshift routes.
+module: oc_version
+short_description: Return the current openshift version
 description:
-  - Manage openshift route objects programmatically.
+  - Return the openshift installed version.  `oc version`
 options:
   state:
     description:
-    - State represents whether to create, modify, delete, or list
+    - Currently list is only supported state.
     required: true
-    default: present
-    choices: ["present", "absent", "list"]
+    default: list
+    choices: ["list"]
     aliases: []
   kubeconfig:
     description:
@@ -66,96 +66,16 @@ options:
     required: false
     default: False
     aliases: []
-  name:
-    description:
-    - Name of the object that is being queried.
-    required: false
-    default: None
-    aliases: []
-  namespace:
-    description:
-    - The namespace where the object lives.
-    required: false
-    default: str
-    aliases: []
-  tls_termination:
-    description:
-    - The options for termination. e.g. reencrypt
-    required: false
-    default: None
-    aliases: []
-  dest_cacert_path:
-    description:
-    - The path to the dest_cacert
-    required: false
-    default: None
-    aliases: []
-  cacert_path:
-    description:
-    - The path to the cacert
-    required: false
-    default: None
-    aliases: []
-  cert_path:
-    description:
-    - The path to the cert
-    required: false
-    default: None
-    aliases: []
-  key_path:
-    description:
-    - The path to the key
-    required: false
-    default: None
-    aliases: []
-  dest_cacert_content:
-    description:
-    - The dest_cacert content
-    required: false
-    default: None
-    aliases: []
-  cacert_content:
-    description:
-    - The cacert content
-    required: false
-    default: None
-    aliases: []
-  cert_content:
-    description:
-    - The cert content
-    required: false
-    default: None
-    aliases: []
-  service_name:
-    description:
-    - The name of the service that this route points to.
-    required: false
-    default: None
-    aliases: []
-  host:
-    description:
-    - The host that the route will use. e.g. myapp.x.y.z
-    required: false
-    default: None
-    aliases: []
 author:
 - "Kenny Woodson <kwoodson@redhat.com>"
 extends_documentation_fragment: []
 '''
 
 EXAMPLES = '''
-- name: Configure certificates for reencrypt route
-  oc_route:
-    name: myapproute
-    namespace: awesomeapp
-    cert_path: "/etc/origin/master/named_certificates/myapp_cert
-    key_path: "/etc/origin/master/named_certificates/myapp_key
-    cacert_path: "/etc/origin/master/named_certificates/myapp_cacert
-    dest_cacert_content:  "{{ dest_cacert_content }}"
-    service_name: myapp_php
-    host: myapp.awesomeapp.openshift.com
-    tls_termination: reencrypt
-  run_once: true
+oc_version:
+- name: get oc version
+  oc_version:
+  register: oc_version
 '''
 # noqa: E301,E302
 
@@ -1241,373 +1161,71 @@ class OpenShiftCLIConfig(object):
 
         return rval
 
-# noqa: E302,E301
 
 
 # pylint: disable=too-many-instance-attributes
-class RouteConfig(object):
-    ''' Handle route options '''
+class OCVersion(OpenShiftCLI):
+    ''' Class to wrap the oc command line tools '''
+    # pylint allows 5
     # pylint: disable=too-many-arguments
     def __init__(self,
-                 sname,
-                 namespace,
-                 kubeconfig,
-                 destcacert=None,
-                 cacert=None,
-                 cert=None,
-                 key=None,
-                 host=None,
-                 tls_termination=None,
-                 service_name=None,
-                 wildcard_policy=None,
-                 weight=None):
-        ''' constructor for handling route options '''
-        self.kubeconfig = kubeconfig
-        self.name = sname
-        self.namespace = namespace
-        self.host = host
-        self.tls_termination = tls_termination
-        self.destcacert = destcacert
-        self.cacert = cacert
-        self.cert = cert
-        self.key = key
-        self.service_name = service_name
-        self.data = {}
-        self.wildcard_policy = wildcard_policy
-        if wildcard_policy is None:
-            self.wildcard_policy = 'None'
-        self.weight = weight
-        if weight is None:
-            self.weight = 100
-
-        self.create_dict()
-
-    def create_dict(self):
-        ''' return a service as a dict '''
-        self.data['apiVersion'] = 'v1'
-        self.data['kind'] = 'Route'
-        self.data['metadata'] = {}
-        self.data['metadata']['name'] = self.name
-        self.data['metadata']['namespace'] = self.namespace
-        self.data['spec'] = {}
-
-        self.data['spec']['host'] = self.host
-
-        if self.tls_termination:
-            self.data['spec']['tls'] = {}
-
-            if self.tls_termination == 'reencrypt':
-                self.data['spec']['tls']['destinationCACertificate'] = self.destcacert
-            self.data['spec']['tls']['key'] = self.key
-            self.data['spec']['tls']['caCertificate'] = self.cacert
-            self.data['spec']['tls']['certificate'] = self.cert
-            self.data['spec']['tls']['termination'] = self.tls_termination
-
-        self.data['spec']['to'] = {'kind': 'Service',
-                                   'name': self.service_name,
-                                   'weight': self.weight}
-
-        self.data['spec']['wildcardPolicy'] = self.wildcard_policy
-
-# pylint: disable=too-many-instance-attributes,too-many-public-methods
-class Route(Yedit):
-    ''' Class to wrap the oc command line tools '''
-    wildcard_policy = "spec.wildcardPolicy"
-    host_path = "spec.host"
-    service_path = "spec.to.name"
-    weight_path = "spec.to.weight"
-    cert_path = "spec.tls.certificate"
-    cacert_path = "spec.tls.caCertificate"
-    destcacert_path = "spec.tls.destinationCACertificate"
-    termination_path = "spec.tls.termination"
-    key_path = "spec.tls.key"
-    kind = 'route'
-
-    def __init__(self, content):
-        '''Route constructor'''
-        super(Route, self).__init__(content=content)
-
-    def get_destcacert(self):
-        ''' return cert '''
-        return self.get(Route.destcacert_path)
-
-    def get_cert(self):
-        ''' return cert '''
-        return self.get(Route.cert_path)
-
-    def get_key(self):
-        ''' return key '''
-        return self.get(Route.key_path)
-
-    def get_cacert(self):
-        ''' return cacert '''
-        return self.get(Route.cacert_path)
-
-    def get_service(self):
-        ''' return service name '''
-        return self.get(Route.service_path)
-
-    def get_weight(self):
-        ''' return service weight '''
-        return self.get(Route.weight_path)
-
-    def get_termination(self):
-        ''' return tls termination'''
-        return self.get(Route.termination_path)
-
-    def get_host(self):
-        ''' return host '''
-        return self.get(Route.host_path)
-
-    def get_wildcard_policy(self):
-        ''' return wildcardPolicy '''
-        return self.get(Route.wildcard_policy)
-
-
-# pylint: disable=too-many-instance-attributes
-class OCRoute(OpenShiftCLI):
-    ''' Class to wrap the oc command line tools '''
-    kind = 'route'
-
-    def __init__(self,
                  config,
-                 verbose=False):
-        ''' Constructor for OCVolume '''
-        super(OCRoute, self).__init__(config.namespace, config.kubeconfig)
-        self.config = config
-        self.namespace = config.namespace
-        self._route = None
-
-    @property
-    def route(self):
-        ''' property function for route'''
-        if not self._route:
-            self.get()
-        return self._route
-
-    @route.setter
-    def route(self, data):
-        ''' setter function for route '''
-        self._route = data
-
-    def exists(self):
-        ''' return whether a route exists '''
-        if self.route:
-            return True
-
-        return False
+                 debug):
+        ''' Constructor for OCVersion '''
+        super(OCVersion, self).__init__(None, config)
+        self.debug = debug
 
     def get(self):
-        '''return route information '''
-        result = self._get(self.kind, self.config.name)
-        if result['returncode'] == 0:
-            self.route = Route(content=result['results'][0])
-        elif 'routes \"%s\" not found' % self.config.name in result['stderr']:
-            result['returncode'] = 0
-            result['results'] = [{}]
+        '''get and return version information '''
 
-        return result
+        results = {}
 
-    def delete(self):
-        '''delete the object'''
-        return self._delete(self.kind, self.config.name)
+        version_results = self._version()
 
-    def create(self):
-        '''create the object'''
-        return self._create_from_content(self.config.name, self.config.data)
+        if version_results['returncode'] == 0:
+            filtered_vers = Utils.filter_versions(version_results['results'])
+            custom_vers = Utils.add_custom_versions(filtered_vers)
 
-    def update(self):
-        '''update the object'''
-        # need to update the tls information and the service name
-        return self._replace_content(self.kind, self.config.name, self.config.data)
+            results['returncode'] = version_results['returncode']
+            results.update(filtered_vers)
+            results.update(custom_vers)
 
-    def needs_update(self):
-        ''' verify an update is needed '''
-        skip = []
-        return not Utils.check_def_equal(self.config.data, self.route.yaml_dict, skip_keys=skip, debug=True)
+            return results
 
-    # pylint: disable=too-many-return-statements,too-many-branches
+        raise OpenShiftCLIError('Problem detecting openshift version.')
+
     @staticmethod
-    def run_ansible(params, files, check_mode=False):
-        ''' run the idempotent asnible code
+    def run_ansible(params):
+        '''run the idempotent ansible code'''
+        oc_version = OCVersion(params['kubeconfig'], params['debug'])
 
-            params comes from the ansible portion for this module
-            files: a dictionary for the certificates
-                   {'cert': {'path': '',
-                             'content': '',
-                             'value': ''
-                            }
-                   }
-            check_mode: does the module support check mode.  (module.check_mode)
-        '''
+        if params['state'] == 'list':
 
-        rconfig = RouteConfig(params['name'],
-                              params['namespace'],
-                              params['kubeconfig'],
-                              files['destcacert']['value'],
-                              files['cacert']['value'],
-                              files['cert']['value'],
-                              files['key']['value'],
-                              params['host'],
-                              params['tls_termination'],
-                              params['service_name'],
-                              params['wildcard_policy'],
-                              params['weight'])
+            #pylint: disable=protected-access
+            result = oc_version.get()
+            return {'state': params['state'],
+                    'results': result,
+                    'changed': False}
 
-        oc_route = OCRoute(rconfig, verbose=params['debug'])
-
-        state = params['state']
-
-        api_rval = oc_route.get()
-
-        #####
-        # Get
-        #####
-        if state == 'list':
-            return {'changed': False,
-                    'results': api_rval['results'],
-                    'state': 'list'}
-
-        ########
-        # Delete
-        ########
-        if state == 'absent':
-            if oc_route.exists():
-
-                if check_mode:
-                    return {'changed': False, 'msg': 'CHECK_MODE: Would have performed a delete.'}  # noqa: E501
-
-                api_rval = oc_route.delete()
-
-                return {'changed': True, 'results': api_rval, 'state': "absent"}  # noqa: E501
-            return {'changed': False, 'state': 'absent'}
-
-        if state == 'present':
-            ########
-            # Create
-            ########
-            if not oc_route.exists():
-
-                if check_mode:
-                    return {'changed': True, 'msg': 'CHECK_MODE: Would have performed a create.'}  # noqa: E501
-
-                # Create it here
-                api_rval = oc_route.create()
-
-                if api_rval['returncode'] != 0:
-                    return {'failed': True, 'msg': api_rval, 'state': "present"}  # noqa: E501
-
-                # return the created object
-                api_rval = oc_route.get()
-
-                if api_rval['returncode'] != 0:
-                    return {'failed': True, 'msg': api_rval, 'state': "present"}  # noqa: E501
-
-                return {'changed': True, 'results': api_rval, 'state': "present"}  # noqa: E501
-
-            ########
-            # Update
-            ########
-            if oc_route.needs_update():
-
-                if check_mode:
-                    return {'changed': True, 'msg': 'CHECK_MODE: Would have performed an update.'}  # noqa: E501
-
-                api_rval = oc_route.update()
-
-                if api_rval['returncode'] != 0:
-                    return {'failed': True, 'msg': api_rval, 'state': "present"}  # noqa: E501
-
-                # return the created object
-                api_rval = oc_route.get()
-
-                if api_rval['returncode'] != 0:
-                    return {'failed': True, 'msg': api_rval, 'state': "present"}  # noqa: E501
-
-                return {'changed': True, 'results': api_rval, 'state': "present"}  # noqa: E501
-
-            return {'changed': False, 'results': api_rval, 'state': "present"}
-
-        # catch all
-        return {'failed': True, 'msg': "Unknown State passed"}
-
-
-def get_cert_data(path, content):
-    '''get the data for a particular value'''
-    if not path and not content:
-        return None
-
-    rval = None
-    if path and os.path.exists(path) and os.access(path, os.R_OK):
-        rval = open(path).read()
-    elif content:
-        rval = content
-
-    return rval
-
-
-# pylint: disable=too-many-branches
 def main():
-    '''
-    ansible oc module for route
-    '''
+    ''' ansible oc module for version '''
+
     module = AnsibleModule(
         argument_spec=dict(
             kubeconfig=dict(default='/etc/origin/master/admin.kubeconfig', type='str'),
-            state=dict(default='present', type='str',
-                       choices=['present', 'absent', 'list']),
+            state=dict(default='list', type='str',
+                       choices=['list']),
             debug=dict(default=False, type='bool'),
-            name=dict(default=None, required=True, type='str'),
-            namespace=dict(default=None, required=True, type='str'),
-            tls_termination=dict(default=None, type='str'),
-            dest_cacert_path=dict(default=None, type='str'),
-            cacert_path=dict(default=None, type='str'),
-            cert_path=dict(default=None, type='str'),
-            key_path=dict(default=None, type='str'),
-            dest_cacert_content=dict(default=None, type='str'),
-            cacert_content=dict(default=None, type='str'),
-            cert_content=dict(default=None, type='str'),
-            key_content=dict(default=None, type='str'),
-            service_name=dict(default=None, type='str'),
-            host=dict(default=None, type='str'),
-            wildcard_policy=dict(default=None, type='str'),
-            weight=dict(default=None, type='int'),
         ),
-        mutually_exclusive=[('dest_cacert_path', 'dest_cacert_content'),
-                            ('cacert_path', 'cacert_content'),
-                            ('cert_path', 'cert_content'),
-                            ('key_path', 'key_content'), ],
         supports_check_mode=True,
     )
-    files = {'destcacert': {'path': module.params['dest_cacert_path'],
-                            'content': module.params['dest_cacert_content'],
-                            'value': None, },
-             'cacert': {'path': module.params['cacert_path'],
-                        'content': module.params['cacert_content'],
-                        'value': None, },
-             'cert': {'path': module.params['cert_path'],
-                      'content': module.params['cert_content'],
-                      'value': None, },
-             'key': {'path': module.params['key_path'],
-                     'content': module.params['key_content'],
-                     'value': None, }, }
 
-    if module.params['tls_termination']:
-        for key, option in files.items():
-            if key == 'destcacert' and module.params['tls_termination'] != 'reencrypt':
-                continue
+    rval = OCVersion.run_ansible(module.params)
+    if 'failed' in rval:
+        module.fail_json(**rval)
 
-            option['value'] = get_cert_data(option['path'], option['content'])
 
-            if not option['value']:
-                module.fail_json(msg='Verify that you pass a value for %s' % key)
-
-    results = OCRoute.run_ansible(module.params, files, module.check_mode)
-
-    if 'failed' in results:
-        module.fail_json(**results)
-
-    module.exit_json(**results)
+    module.exit_json(**rval)
 
 
 if __name__ == '__main__':
