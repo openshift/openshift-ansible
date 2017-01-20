@@ -115,14 +115,6 @@
                 },
                 "env": [
                   {
-                    "name": "OPENSHIFT_ENABLE_OAUTH",
-                    "value": "${ENABLE_OAUTH}"
-                  },
-                  {
-                    "name": "OPENSHIFT_ENABLE_REDIRECT_PROMPT",
-                    "value": "true"
-                  },
-                  {
                     "name": "KUBERNETES_MASTER",
                     "value": "https://kubernetes.default:443"
                   },
@@ -260,12 +252,6 @@
       "displayName": "Jenkins JNLP Service Name",
       "description": "The name of the service used for master/slave communication.",
       "value": "jenkins-jnlp"
-    },
-    {
-      "name": "ENABLE_OAUTH",
-      "displayName": "Enable OAuth in Jenkins",
-      "description": "Whether to enable OAuth OpenShift integration. If false, the static account 'admin' will be initialized with the password 'password'.",
-      "value": "true"
     },
     {
       "name": "MEMORY_LIMIT",
