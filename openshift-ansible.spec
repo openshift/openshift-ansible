@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.59
+Version:        3.3.60
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Jan 20 2017 Scott Dodson <sdodson@redhat.com> 3.3.60-1
+- jenkins v1.3 templates should not enable oauth (gmontero@redhat.com)
+
 * Wed Jan 18 2017 Scott Dodson <sdodson@redhat.com> 3.3.59-1
 - Ensure serial certificate generation for node and master certificates.
   (abutcher@redhat.com)
