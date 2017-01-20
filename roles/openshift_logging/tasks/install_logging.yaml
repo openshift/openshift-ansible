@@ -23,15 +23,24 @@
   loop_control:
     loop_var: install_component
 
+- find: paths={{ mktemp.stdout }}/templates patterns=*.yaml
+  register: object_def_files
+  changed_when: no
+
+- slurp: src={{item.path}}
+  register: object_defs
+  with_items: "{{object_def_files.files}}"
+  changed_when: no
+
 - name: Create objects
   include: oc_apply.yaml
   vars:
     - kubeconfig: "{{ mktemp.stdout }}/admin.kubeconfig"
     - namespace: "{{ openshift_logging_namespace }}"
-    - file_name: "{{ file }}"
-    - file_content: "{{ lookup('file', file) | from_yaml }}"
-  with_fileglob:
-    - "{{ mktemp.stdout }}/templates/*.yaml"
+    - file_name: "{{ file.source }}"
+    - file_content: "{{ file.content | b64decode | from_yaml }}"
+  with_items:
+    - "{{ object_defs.results }}"
   loop_control:
     loop_var: file
   when: not ansible_check_mode
