@@ -85,45 +85,11 @@
   loop_control:
     loop_var: node_name
 
-- name: Check for jks-generator service account
-  command: >
-    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get serviceaccount/jks-generator --no-headers -n {{openshift_logging_namespace}}
-  register: serviceaccount_result
-  ignore_errors: yes
-  when: not ansible_check_mode
-  changed_when: no
-
-- name: Create jks-generator service account
-  command: >
-    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig create serviceaccount jks-generator -n {{openshift_logging_namespace}}
-  when: not ansible_check_mode and "not found" in serviceaccount_result.stderr
-
-- name: Check for hostmount-anyuid scc entry
-  command: >
-    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get scc hostmount-anyuid -o jsonpath='{.users}'
-  register: scc_result
-  when: not ansible_check_mode
-  changed_when: no
-
-- name: Add to hostmount-anyuid scc
-  command: >
-    {{ openshift.common.admin_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig policy add-scc-to-user hostmount-anyuid -z jks-generator -n {{openshift_logging_namespace}}
-  when:
-    - not ansible_check_mode
-    - scc_result.stdout.find("system:serviceaccount:{{openshift_logging_namespace}}:jks-generator") == -1
-
 - name: Copy JKS generation script
   copy:
     src: generate-jks.sh
     dest: "{{generated_certs_dir}}/generate-jks.sh"
   check_mode: no
-
-- name: Generate JKS pod template
-  template:
-    src: jks_pod.j2
-    dest: "{{mktemp.stdout}}/jks_pod.yaml"
-  check_mode: no
-  changed_when: no
 
 # check if pod generated files exist -- if they all do don't run the pod
 - name: Checking for elasticsearch.jks
@@ -146,20 +112,20 @@
   register: truststore_jks
   check_mode: no
 
-- name: create JKS generation pod
+- name: create JKS generation container
   command: >
-    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig create -f {{mktemp.stdout}}/jks_pod.yaml -n {{openshift_logging_namespace}} -o name
-  register: podoutput
+    docker run
+    -u 0
+    -e "PROJECT={{openshift_logging_namespace}}"
+    -e "CERT_DIR={{generated_certs_dir}}"
+    -v "{{generated_certs_dir}}:{{generated_certs_dir}}"
+    --name "jks_gen_{{'abcdefghijklmnopqrstuvwxyz0123456789'|random_word(10)}}"
+    --entrypoint="/bin/bash"
+    "{{openshift_logging_image_prefix}}logging-deployer:{{openshift_logging_image_version}}"
+    "{{generated_certs_dir}}/generate-jks.sh"
+  register: container_output
   check_mode: no
-  when: not elasticsearch_jks.stat.exists or not logging_es_jks.stat.exists or not system_admin_jks.stat.exists or not truststore_jks.stat.exists
-
-- command: >
-    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get {{podoutput.stdout}} -o jsonpath='{.status.phase}' -n {{openshift_logging_namespace}}
-  register: result
-  until: result.stdout.find("Succeeded") != -1
-  retries: 5
-  delay: 10
-  changed_when: no
+  become: yes
   when: not elasticsearch_jks.stat.exists or not logging_es_jks.stat.exists or not system_admin_jks.stat.exists or not truststore_jks.stat.exists
 
 # check for secret/logging-kibana-proxy
