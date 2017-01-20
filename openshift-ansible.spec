@@ -18,6 +18,7 @@ Requires:      python2
 Requires:      python-six
 Requires:      tar
 Requires:      openshift-ansible-docs = %{version}-%{release}
+Requires:      java-1.8.0-openjdk-headless
 
 %description
 Openshift and Atomic Enterprise Ansible

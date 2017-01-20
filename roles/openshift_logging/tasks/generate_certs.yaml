@@ -85,40 +85,8 @@
   loop_control:
     loop_var: node_name
 
-- name: Copy JKS generation script
-  copy:
-    src: generate-jks.sh
-    dest: "{{generated_certs_dir}}/generate-jks.sh"
-  check_mode: no
-
-# check if pod generated files exist -- if they all do don't run the pod
-- name: Checking for elasticsearch.jks
-  stat: path="{{generated_certs_dir}}/elasticsearch.jks"
-  register: elasticsearch_jks
-  check_mode: no
-
-- name: Checking for logging-es.jks
-  stat: path="{{generated_certs_dir}}/logging-es.jks"
-  register: logging_es_jks
-  check_mode: no
-
-- name: Checking for system.admin.jks
-  stat: path="{{generated_certs_dir}}/system.admin.jks"
-  register: system_admin_jks
-  check_mode: no
-
-- name: Checking for truststore.jks
-  stat: path="{{generated_certs_dir}}/truststore.jks"
-  register: truststore_jks
-  check_mode: no
-
-- name: Run JKS generation script
-  script: generate-jks.sh {{generate_certs_dir}} {{openshift_logging_namespace}}
-  register: script_output
-  check_mode: no
-  become: yes
-  changed_when: script_output.RC == "0"
-  when: not elasticsearch_jks.stat.exists or not logging_es_jks.stat.exists or not system_admin_jks.stat.exists or not truststore_jks.stat.exists
+- name: Creating necessary JKS certs
+  include: generate_jks.yaml
 
 # check for secret/logging-kibana-proxy
 - command: >

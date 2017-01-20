@@ -7,7 +7,7 @@ a single host, it will create any missing certificates and API objects that the 
 [logging deployer](https://github.com/openshift/origin-aggregated-logging/tree/master/deployer) does.
 
 This role requires that the control host it is run on has Java installed as part of keystore
-generation for Elasticsearch (it uses JKS).
+generation for Elasticsearch (it uses JKS) as well as openssl to sign certificates.
 
 As part of the installation, it is recommended that you add the Fluentd node selector label
 to the list of persisted [node labels](https://docs.openshift.org/latest/install_config/install/advanced_install.html#configuring-node-host-labels).
