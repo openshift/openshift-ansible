@@ -112,20 +112,12 @@
   register: truststore_jks
   check_mode: no
 
-- name: create JKS generation container
-  command: >
-    docker run
-    -u 0
-    -e "PROJECT={{openshift_logging_namespace}}"
-    -e "CERT_DIR={{generated_certs_dir}}"
-    -v "{{generated_certs_dir}}:{{generated_certs_dir}}"
-    --name "jks_gen_{{'abcdefghijklmnopqrstuvwxyz0123456789'|random_word(10)}}"
-    --entrypoint="/bin/bash"
-    "{{openshift_logging_image_prefix}}logging-deployer:{{openshift_logging_image_version}}"
-    "{{generated_certs_dir}}/generate-jks.sh"
-  register: container_output
+- name: Run JKS generation script
+  script: generate-jks.sh {{generate_certs_dir}} {{openshift_logging_namespace}}
+  register: script_output
   check_mode: no
   become: yes
+  changed_when: script_output.RC == "0"
   when: not elasticsearch_jks.stat.exists or not logging_es_jks.stat.exists or not system_admin_jks.stat.exists or not truststore_jks.stat.exists
 
 # check for secret/logging-kibana-proxy
