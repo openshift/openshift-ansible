@@ -2,7 +2,7 @@
 haproxy_frontends:
 - name: main
   binds:
-  - "*:8443"
+  - "*:{{ openshift_master_api_port | default(8443) }}"
   default_backend: default
 
 haproxy_backends:
