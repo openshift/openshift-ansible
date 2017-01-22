@@ -12,6 +12,7 @@
     l_is_openvswitch_system_container: "{{ (use_openvswitch_system_container | default(use_system_containers) | bool) }}"
     l_is_node_system_container: "{{ (use_node_system_container | default(use_system_containers) | bool) }}"
     l_is_master_system_container: "{{ (use_master_system_container | default(use_system_containers) | bool) }}"
+    l_is_etcd_system_container: "{{ (use_etcd_system_container | default(use_system_containers) | bool) }}"
 
 - name: Ensure various deps are installed
   package: name={{ item }} state=present
@@ -33,6 +34,7 @@
       is_openvswitch_system_container: "{{ l_is_openvswitch_system_container | default(false) }}"
       is_node_system_container: "{{ l_is_node_system_container | default(false) }}"
       is_master_system_container: "{{ l_is_master_system_container | default(false) }}"
+      is_etcd_system_container: "{{ l_is_etcd_system_container | default(false) }}"
       system_images_registry: "{{ system_images_registry | default('') }}"
       public_hostname: "{{ openshift_public_hostname | default(None) }}"
       public_ip: "{{ openshift_public_ip | default(None) }}"

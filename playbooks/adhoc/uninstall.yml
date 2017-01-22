@@ -164,9 +164,12 @@
     - atomic-enterprise
     - origin
 
-  - shell: atomic uninstall openvswitch
+  - shell: atomic uninstall "{{ item }}"
     changed_when: False
     failed_when: False
+    with_items:
+    - etcd
+    - openvswitch
 
   - shell: find /var/lib/origin/openshift.local.volumes -type d -exec umount {} \; 2>/dev/null || true
     changed_when: False

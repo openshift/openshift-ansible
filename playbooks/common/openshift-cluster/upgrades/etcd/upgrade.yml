@@ -14,6 +14,16 @@
     register: etcd_container_version
     failed_when: false
     when: openshift.common.is_containerized | bool
+  - name: Record containerized etcd version
+    command: docker exec etcd_container rpm -qa --qf '%{version}' etcd\*
+    register: etcd_container_version
+    failed_when: false
+    when: openshift.common.is_containerized | bool and not openshift.common.is_etcd_system_container | bool
+  - name: Record containerized etcd version
+    command: runc exec etcd_container rpm -qa --qf '%{version}' etcd\*
+    register: etcd_container_version
+    failed_when: false
+    when: openshift.common.is_containerized | bool and openshift.common.is_etcd_system_container | bool
 
 # I really dislike this copy/pasta but I wasn't able to find a way to get it to loop
 # through hosts, then loop through tasks only when appropriate
