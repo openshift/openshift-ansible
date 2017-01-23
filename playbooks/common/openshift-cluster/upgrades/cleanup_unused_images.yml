@@ -1,4 +1,9 @@
 ---
+# Included from playbooks/byo/openshift-cluster/upgrades/v3_3/upgrade.yml
+#
+# All of these tasks have the same WHEN condition. Maybe this playbook
+# should only be included based on that same condition?
+
 - name: Check Docker image count
   shell: "docker images -aq | wc -l"
   register: docker_image_count
