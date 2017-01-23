@@ -44,7 +44,7 @@
 # This really should be a role. Param list seems pretty short
 # * first master
 # * oo_masters_to_config
-# 
+#
 #
 # ALL tasks within have the same when condition. Make the include
 # statement run based on that same condition.
@@ -74,6 +74,9 @@
 
   - include_vars: ../../../../roles/openshift_master_facts/vars/main.yml
 
+# Still trying to wrap my head around this. I think it's a really long
+# way to set a few variables. Maybe some of those should be put into
+# vars files? It would make the code logic distinct from the data.
   - include: upgrade_scheduler.yml
 
   - include: "{{ master_config_hook }}"

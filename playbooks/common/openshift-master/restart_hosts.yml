@@ -15,6 +15,9 @@
       delay=10
   become: no
 
+# Another place that we could be using the "Verify API Server" type
+# task from roles/openshift_master/handlers/main.yml as a pluggable
+# role.
 # Now that ssh is back up we can wait for API on the remote system,
 # avoiding some potential connection issues from local system:
 - name: Wait for master API to come back online
