@@ -7,6 +7,7 @@
 - name: Create temp directory for all our templates
   file: path={{mktemp.stdout}}/templates state=directory mode=0755
   changed_when: False
+  when: "{{ openshift_metrics_install_metrics | bool }}"
 
 - name: Copy the admin client config(s)
   command: >
@@ -15,8 +16,4 @@
   check_mode: no
   tags: metrics_init
 
-- include: install_metrics.yaml
-  when: openshift_metrics_install_metrics | default(false) | bool
-
-- include: uninstall_metrics.yaml
-  when: not openshift_metrics_install_metrics | default(false) | bool
+- include: "{{ (openshift_metrics_install_metrics | bool) | ternary('install_metrics.yaml','uninstall_metrics.yaml') }}"
