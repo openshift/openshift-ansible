@@ -1,0 +1,19 @@
+#!/usr/bin/ansible-playbook --module-path=../../../library/
+# ./oc_scale.yml -e "cli_master_test=$OPENSHIFT_MASTER
+---
+- hosts: "{{ cli_master_test }}"
+  gather_facts: no
+  user: root
+  tasks:
+  - name: list oc scale for default router dc
+    oc_scale:
+      state: list
+      name: router
+      namespace: default
+      kind: dc
+    register: scaleout
+  - debug: var=scaleout
+
+  - assert:
+      that: "scaleout.results.results[0]['metadata']['name'] == 'test'"
+      msg: route create failed
