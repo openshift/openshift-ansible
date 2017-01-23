@@ -34,6 +34,8 @@ oc_scale.py:
 - doc/scale
 - ../../lib_utils/src/class/yedit.py
 - lib/base.py
+- lib/deploymentconfig.py
+- lib/replicationcontroller.py
 - class/oc_scale.py
 - ansible/oc_scale.py
 oc_version.py:

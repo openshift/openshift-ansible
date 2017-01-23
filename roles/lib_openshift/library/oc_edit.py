@@ -842,11 +842,10 @@ class OpenShiftCLI(object):
         cmd = ['get', resource]
         if selector:
             cmd.append('--selector=%s' % selector)
+        elif rname:
+            cmd.append(rname)
 
         cmd.extend(['-o', 'json'])
-
-        if rname:
-            cmd.append(rname)
 
         rval = self.openshift_cmd(cmd, output=True)
 

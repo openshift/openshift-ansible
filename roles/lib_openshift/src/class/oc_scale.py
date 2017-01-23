@@ -58,6 +58,7 @@ class OCScale(OpenShiftCLI):
         ''' verify whether an update is needed '''
         return self.resource.needs_update_replicas(self.replicas)
 
+    # pylint: disable=too-many-return-statements
     @staticmethod
     def run_ansible(params, check_mode):
         '''perform the idempotent ansible logic'''

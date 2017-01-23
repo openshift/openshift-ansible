@@ -18,7 +18,7 @@ def main():
         ),
         supports_check_mode=True,
     )
-    rval = OCScale.run_ansible(params, module.check_mode)
+    rval = OCScale.run_ansible(module.params, module.check_mode)
     if 'failed' in rval:
         module.fail_json(**rval)
 
