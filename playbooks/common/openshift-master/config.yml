@@ -75,17 +75,6 @@
         ha: "{{ openshift_master_ha | default(groups.oo_masters | length > 1) }}"
         master_count: "{{ openshift_master_count | default(groups.oo_masters | length) }}"
 
-- name: Create temp directory for syncing certs
-  hosts: localhost
-  connection: local
-  become: no
-  gather_facts: no
-  tasks:
-  - name: Create local temp directory for syncing certs
-    local_action: command mktemp -d /tmp/openshift-ansible-XXXXXXX
-    register: g_master_mktemp
-    changed_when: False
-
 - name: Determine if session secrets must be generated
   hosts: oo_first_master
   roles:
@@ -117,7 +106,6 @@
   hosts: oo_masters_to_config
   any_errors_fatal: true
   vars:
-    sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
     openshift_master_ha: "{{ openshift.master.ha }}"
     openshift_master_count: "{{ openshift.master.master_count }}"
     openshift_master_session_auth_secrets: "{{ hostvars[groups.oo_first_master.0].openshift.master.session_auth_secrets }}"
@@ -143,13 +131,4 @@
   post_tasks:
   - name: Create group for deployment type
     group_by: key=oo_masters_deployment_type_{{ openshift.common.deployment_type }}
-    changed_when: False
-
-- name: Delete temporary directory on localhost
-  hosts: localhost
-  connection: local
-  become: no
-  gather_facts: no
-  tasks:
-  - file: name={{ g_master_mktemp.stdout }} state=absent
     changed_when: False
