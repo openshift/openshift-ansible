@@ -16,17 +16,6 @@
   },
   "objects": [
     {
-      "kind": "Secret",
-      "apiVersion": "v1",
-      "metadata": {
-        "name": "${NAME}"
-      },
-      "stringData" : {
-        "databaseUser" : "${DATABASE_USER}",
-        "databasePassword" : "${DATABASE_PASSWORD}"
-      }
-    },
-    {
       "kind": "Service",
       "apiVersion": "v1",
       "metadata": {
@@ -126,10 +115,7 @@
               "secret": "${GITHUB_WEBHOOK_SECRET}"
             }
           }
-        ],
-        "postCommit": {
-          "script": "perl -I extlib/lib/perl5 -I lib t/*"
-        }
+        ]
       }
     },
     {
@@ -204,21 +190,11 @@
                   },
                   {
                     "name": "MYSQL_USER",
-                    "valueFrom": {
-                      "secretKeyRef" : {
-                        "name" : "${NAME}",
-                        "key" : "databaseUser"
-                      }
-                    }
+                    "value": "${DATABASE_USER}"
                   },
                   {
                     "name": "MYSQL_PASSWORD",
-                    "valueFrom": {
-                      "secretKeyRef" : {
-                        "name" : "${NAME}",
-                        "key" : "databasePassword"
-                      }
-                    }
+                    "value": "${DATABASE_PASSWORD}"
                   },
                   {
                     "name": "MYSQL_DATABASE",
@@ -348,21 +324,11 @@
                 "env": [
                   {
                     "name": "MYSQL_USER",
-                    "valueFrom": {
-                      "secretKeyRef" : {
-                        "name" : "${NAME}",
-                        "key" : "databaseUser"
-                      }
-                    }
+                    "value": "${DATABASE_USER}"
                   },
                   {
                     "name": "MYSQL_PASSWORD",
-                    "valueFrom": {
-                      "secretKeyRef" : {
-                        "name" : "${NAME}",
-                        "key" : "databasePassword"
-                      }
-                    }
+                    "value": "${DATABASE_PASSWORD}"
                   },
                   {
                       "name": "MYSQL_DATABASE",
@@ -439,6 +405,18 @@
       "description": "A secret string used to configure the GitHub webhook.",
       "generate": "expression",
       "from": "[a-zA-Z0-9]{40}"
+    },
+    {
+      "name": "ADMIN_USERNAME",
+      "displayName": "Administrator Username",
+      "generate": "expression",
+      "from": "admin[A-Z0-9]{3}"
+    },
+    {
+      "name": "ADMIN_PASSWORD",
+      "displayName": "Administrator Password",
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{8}"
     },
     {
       "name": "DATABASE_SERVICE_NAME",

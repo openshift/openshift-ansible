@@ -16,20 +16,6 @@
   },
   "objects": [
     {
-      "kind": "Secret",
-      "apiVersion": "v1",
-      "metadata": {
-        "name": "${NAME}"
-      },
-      "stringData" : {
-        "databaseUser" : "${DATABASE_USER}",
-        "databasePassword" : "${DATABASE_PASSWORD}",
-        "applicationUser" : "${APPLICATION_USER}",
-        "applicationPassword" : "${APPLICATION_PASSWORD}",
-        "keyBase" : "${SECRET_KEY_BASE}"
-      }
-    },
-    {
       "kind": "Service",
       "apiVersion": "v1",
       "metadata": {
@@ -221,21 +207,11 @@
                   },
                   {
                     "name": "POSTGRESQL_USER",
-                    "valueFrom": {
-                      "secretKeyRef" : {
-                        "name" : "${NAME}",
-                        "key" : "databaseUser"
-                      }
-                    }
+                    "value": "${DATABASE_USER}"
                   },
                   {
                     "name": "POSTGRESQL_PASSWORD",
-                    "valueFrom": {
-                      "secretKeyRef" : {
-                        "name" : "${NAME}",
-                        "key" : "databasePassword"
-                      }
-                    }
+                    "value": "${DATABASE_PASSWORD}"
                   },
                   {
                     "name": "POSTGRESQL_DATABASE",
@@ -243,12 +219,7 @@
                   },
                   {
                     "name": "SECRET_KEY_BASE",
-                    "valueFrom": {
-                      "secretKeyRef" : {
-                        "name" : "${NAME}",
-                        "key" : "keyBase"
-                      }
-                    }
+                    "value": "${SECRET_KEY_BASE}"
                   },
                   {
                     "name": "POSTGRESQL_MAX_CONNECTIONS",
@@ -264,21 +235,11 @@
                   },
                   {
                     "name": "APPLICATION_USER",
-                    "valueFrom": {
-                      "secretKeyRef" : {
-                        "name" : "${NAME}",
-                        "key" : "applicationUser"
-                      }
-                    }
+                    "value": "${APPLICATION_USER}"
                   },
                   {
                     "name": "APPLICATION_PASSWORD",
-                    "valueFrom": {
-                      "secretKeyRef" : {
-                        "name" : "${NAME}",
-                        "key" : "applicationPassword"
-                      }
-                    }
+                    "value": "${APPLICATION_PASSWORD}"
                   },
                   {
                     "name": "RAILS_ENV",
