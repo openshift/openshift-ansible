@@ -24,6 +24,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+# -*- -*- -*- Begin included fragment: lib/import.py -*- -*- -*-
 '''
    OpenShiftCLI class that wraps the oc commands in a subprocess
 '''
@@ -39,6 +41,10 @@ import subprocess
 # pylint: disable=import-error
 import ruamel.yaml as yaml
 from ansible.module_utils.basic import AnsibleModule
+
+# -*- -*- -*- End included fragment: lib/import.py -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: doc/obj -*- -*- -*-
 
 DOCUMENTATION = '''
 ---
@@ -132,6 +138,10 @@ oc_obj:
   namespace: default
 register: router_output
 '''
+
+# -*- -*- -*- End included fragment: doc/obj -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: ../../lib_utils/src/class/yedit.py -*- -*- -*-
 # noqa: E301,E302
 
 
@@ -696,6 +706,10 @@ class Yedit(object):
                         'state': "present"}
 
         return {'failed': True, 'msg': 'Unkown state passed'}
+
+# -*- -*- -*- End included fragment: ../../lib_utils/src/class/yedit.py -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: lib/base.py -*- -*- -*-
 # pylint: disable=too-many-lines
 # noqa: E301,E302,E303,T001
 
@@ -1217,6 +1231,10 @@ class OpenShiftCLIConfig(object):
         return rval
 
 
+# -*- -*- -*- End included fragment: lib/base.py -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: class/oc_obj.py -*- -*- -*-
+
 # pylint: disable=too-many-instance-attributes
 class OCObject(OpenShiftCLI):
     ''' Class to wrap the oc command line tools '''
@@ -1408,6 +1426,10 @@ class OCObject(OpenShiftCLI):
 
             return {'changed': True, 'results': api_rval, 'state': "present"}
 
+# -*- -*- -*- End included fragment: class/oc_obj.py -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: ansible/oc_obj.py -*- -*- -*-
+
 # pylint: disable=too-many-branches
 def main():
     '''
@@ -1442,3 +1464,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+# -*- -*- -*- End included fragment: ansible/oc_obj.py -*- -*- -*-
