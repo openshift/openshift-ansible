@@ -16,17 +16,6 @@
   },
   "objects": [
     {
-      "kind": "Secret",
-      "apiVersion": "v1",
-      "metadata": {
-        "name": "${NAME}"
-      },
-      "stringData" : {
-        "databaseUser" : "${DATABASE_USER}",
-        "databasePassword" : "${DATABASE_PASSWORD}"
-      }
-    },
-    {
       "kind": "Service",
       "apiVersion": "v1",
       "metadata": {
@@ -215,21 +204,11 @@
                   },
                   {
                     "name": "DATABASE_USER",
-                    "valueFrom": {
-                      "secretKeyRef" : {
-                        "name" : "${NAME}",
-                        "key" : "databaseUser"
-                      }
-                    }
+                    "value": "${DATABASE_USER}"
                   },
                   {
                     "name": "DATABASE_PASSWORD",
-                    "valueFrom": {
-                      "secretKeyRef" : {
-                        "name" : "${NAME}",
-                        "key" : "databasePassword"
-                      }
-                    }
+                    "value": "${DATABASE_PASSWORD}"
                   },
                   {
                     "name": "APP_CONFIG",
@@ -335,21 +314,11 @@
                 "env": [
                   {
                     "name": "POSTGRESQL_USER",
-                    "valueFrom": {
-                      "secretKeyRef" : {
-                        "name" : "${NAME}",
-                        "key" : "databaseUser"
-                      }
-                    }
+                    "value": "${DATABASE_USER}"
                   },
                   {
                     "name": "POSTGRESQL_PASSWORD",
-                    "valueFrom": {
-                      "secretKeyRef" : {
-                        "name" : "${NAME}",
-                        "key" : "databasePassword"
-                      }
-                    }
+                    "value": "${DATABASE_PASSWORD}"
                   },
                   {
                     "name": "POSTGRESQL_DATABASE",
