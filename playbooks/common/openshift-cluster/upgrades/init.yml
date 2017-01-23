@@ -1,3 +1,9 @@
+# Included from: playbooks/byo/openshift-cluster/upgrades/v3_*/upgrade.yaml
+#
+# Since this playbook is called multiple times from different sources, it would
+# make sense to move it into a role and rename it to something like
+#'upgrade-init-and-gather-facts' to be move specific to what it does
+
 ---
 - name: Create l_oo_all_hosts group
   hosts: localhost

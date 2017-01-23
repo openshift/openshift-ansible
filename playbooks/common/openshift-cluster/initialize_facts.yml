@@ -1,4 +1,10 @@
 ---
+# Included from: playbooks/common/openshift-cluster/upgrades/init.yaml
+#
+# This calls openshift_facts on every host....
+# If we change our logic around so that each component will check the facts it needs
+# on the host it is being run against only, it should become less of a behemoth
+
 - name: Ensure that all non-node hosts are accessible
   hosts: oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config:oo_nfs_to_config
   any_errors_fatal: true

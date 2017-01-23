@@ -1,4 +1,10 @@
 ---
+# Included from: playbooks/common/openshift-cluster/upgrades/init.yaml
+#
+# This is called from init while overwriting values it just set in 'cluster_hosts'
+# This playbook also seems to be a misnomer -- it is called 'evaluate_groups' but
+# it is adding hosts and groups instead
+
 - name: Populate config host groups
   hosts: localhost
   connection: local
