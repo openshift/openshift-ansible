@@ -151,5 +151,7 @@
   become: no
   gather_facts: no
   tasks:
-  - file: name={{ g_master_mktemp.stdout }} state=absent
+  - file:
+      path: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
+      state: absent
     changed_when: False
