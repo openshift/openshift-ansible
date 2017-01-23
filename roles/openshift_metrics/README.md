@@ -5,6 +5,10 @@ OpenShift Metrics Installation
 
 Requirements
 ------------
+This role has the following dependencies:
+
+- Java is required on the control node to generate keystores for the Java components
+- httpd-tools is required on the control node to generate various passwords for the metrics components
 
 The following variables need to be set and will be validated:
 
