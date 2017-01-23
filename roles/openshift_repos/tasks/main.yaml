@@ -1,4 +1,15 @@
 ---
+# Included from: playbooks/byo/openshift-cluster/upgrades/v3_*/upgrade
+#
+# This is called if tasks with the tag 'pre_upgrade' would be executed
+# This role ensures that the libselinux-python package is installed instead of
+# making it a dependency/requirement.
+# It relies on the fact 'openshift.common.is_containerized' to be set by
+# openshift_facts instead of discovering it here. It seems that all these
+# tasks have the same 'when: not openshift.common.is_containerized' which probably
+# could be moved up to the originating role call. Also other tasks can be
+# combined into blocks with common 'when' statements.
+
 # TODO: Add flag for enabling EPEL repo, default to false
 
 # TODO: Add subscription-management config, with parameters
