@@ -1,6 +1,10 @@
 #! /bin/sh
 set -ex
 
+function usage() {
+  echo Usage: `basename $0` cert_directory [logging_namespace] 1>&2
+}
+
 function generate_JKS_chain() {
     dir=${SCRATCH_DIR:-_output}
     ADD_OID=$1
@@ -147,8 +151,14 @@ function createTruststore() {
     -noprompt -alias sig-ca
 }
 
-dir="$CERT_DIR"
+if [ $# -lt 1 ]; then
+  usage
+  exit 1
+fi
+
+dir=$1
 SCRATCH_DIR=$dir
+PROJECT=${2:-logging}
 
 if [[ ! -f $dir/system.admin.jks || -z "$(keytool -list -keystore $dir/system.admin.jks -storepass kspass | grep sig-ca)" ]]; then
   generate_JKS_client_cert "system.admin"
