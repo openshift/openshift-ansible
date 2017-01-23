@@ -87,30 +87,33 @@
   - name: Update systemd units
     include: ../../../../roles/openshift_master/tasks/systemd_units.yml
 
-  - name: Check for ca-bundle.crt
-    stat:
-      path: "{{ openshift.common.config_base }}/master/ca-bundle.crt"
-    register: ca_bundle_stat
-    failed_when: false
+# Collect this into a simple role? Params
+#
+# * config base
+   - name: Check for ca-bundle.crt
+     stat:
+       path: "{{ openshift.common.config_base }}/master/ca-bundle.crt"
+     register: ca_bundle_stat
+     failed_when: false
 
-  - name: Check for ca.crt
-    stat:
-      path: "{{ openshift.common.config_base }}/master/ca.crt"
-    register: ca_crt_stat
-    failed_when: false
+   - name: Check for ca.crt
+     stat:
+       path: "{{ openshift.common.config_base }}/master/ca.crt"
+     register: ca_crt_stat
+     failed_when: false
 
-  - name: Migrate ca.crt to ca-bundle.crt
-    command: mv ca.crt ca-bundle.crt
-    args:
-      chdir: "{{ openshift.common.config_base }}/master"
-    when: ca_crt_stat.stat.isreg and not ca_bundle_stat.stat.exists
+   - name: Migrate ca.crt to ca-bundle.crt
+     command: mv ca.crt ca-bundle.crt
+     args:
+       chdir: "{{ openshift.common.config_base }}/master"
+     when: ca_crt_stat.stat.isreg and not ca_bundle_stat.stat.exists
 
-  - name: Link ca.crt to ca-bundle.crt
-    file:
-      src: "{{ openshift.common.config_base }}/master/ca-bundle.crt"
-      path: "{{ openshift.common.config_base }}/master/ca.crt"
-      state: link
-    when: ca_crt_stat.stat.isreg and not ca_bundle_stat.stat.exists
+   - name: Link ca.crt to ca-bundle.crt
+     file:
+       src: "{{ openshift.common.config_base }}/master/ca-bundle.crt"
+       path: "{{ openshift.common.config_base }}/master/ca.crt"
+       state: link
+     when: ca_crt_stat.stat.isreg and not ca_bundle_stat.stat.exists
 
   - include: ../../openshift-master/restart_hosts.yml
     when: openshift.common.rolling_restart_mode == 'system'
