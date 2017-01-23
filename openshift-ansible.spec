@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.60
+Version:        3.3.61
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Jan 23 2017 Scott Dodson <sdodson@redhat.com> 3.3.61-1
+- Re-add RHAMP v1.3 content (sdodson@redhat.com)
+- Revert "Add RHAMP and update v1.3 content" (sdodson@redhat.com)
+- Use openshift.common.hostname rather than inventory_hostname during upgrades
+  (mchappel@redhat.com)
+
 * Fri Jan 20 2017 Scott Dodson <sdodson@redhat.com> 3.3.60-1
 - jenkins v1.3 templates should not enable oauth (gmontero@redhat.com)
 
