@@ -744,7 +744,7 @@ class OpenShiftCLI(object):
 
     def _replace(self, fname, force=False):
         '''replace the current object with oc replace'''
-        cmd = ['-n', self.namespace, 'replace', '-f', fname]
+        cmd = ['replace', '-f', fname]
         if force:
             cmd.append('--force')
         return self.openshift_cmd(cmd)
@@ -761,11 +761,11 @@ class OpenShiftCLI(object):
 
     def _create(self, fname):
         '''call oc create on a filename'''
-        return self.openshift_cmd(['create', '-f', fname, '-n', self.namespace])
+        return self.openshift_cmd(['create', '-f', fname])
 
     def _delete(self, resource, rname, selector=None):
         '''call oc delete on a resource'''
-        cmd = ['delete', resource, rname, '-n', self.namespace]
+        cmd = ['delete', resource, rname]
         if selector:
             cmd.append('--selector=%s' % selector)
 
@@ -779,8 +779,7 @@ class OpenShiftCLI(object):
            params: the parameters for the template
            template_data: the incoming template's data; instead of a file
         '''
-
-        cmd = ['process', '-n', self.namespace]
+        cmd = ['process']
         if template_data:
             cmd.extend(['-f', '-'])
         else:
@@ -801,17 +800,13 @@ class OpenShiftCLI(object):
 
         atexit.register(Utils.cleanup, [fname])
 
-        return self.openshift_cmd(['-n', self.namespace, 'create', '-f', fname])
+        return self.openshift_cmd(['create', '-f', fname])
 
     def _get(self, resource, rname=None, selector=None):
         '''return a resource by name '''
         cmd = ['get', resource]
         if selector:
             cmd.append('--selector=%s' % selector)
-        if self.all_namespaces:
-            cmd.extend(['--all-namespaces'])
-        elif self.namespace:
-            cmd.extend(['-n', self.namespace])
 
         cmd.extend(['-o', 'json'])
 
@@ -885,6 +880,10 @@ class OpenShiftCLI(object):
 
         return self.openshift_cmd(cmd, oadm=True, output=True, output_type='raw')
 
+    def _version(self):
+        ''' return the openshift version'''
+        return self.openshift_cmd(['version'], output=True, output_type='raw')
+
     def _import_image(self, url=None, name=None, tag=None):
         ''' perform image import '''
         cmd = ['import-image']
@@ -903,7 +902,7 @@ class OpenShiftCLI(object):
         cmd.append('--confirm')
         return self.openshift_cmd(cmd)
 
-    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments,too-many-branches
     def openshift_cmd(self, cmd, oadm=False, output=False, output_type='json', input_data=None):
         '''Base command for oc '''
         cmds = []
@@ -911,6 +910,11 @@ class OpenShiftCLI(object):
             cmds = ['/usr/bin/oadm']
         else:
             cmds = ['/usr/bin/oc']
+
+        if self.all_namespaces:
+            cmds.extend(['--all-namespaces'])
+        elif self.namespace:
+            cmds.extend(['-n', self.namespace])
 
         cmds.extend(cmd)
 
@@ -1036,6 +1040,56 @@ class Utils(object):
             contents = json.loads(contents)
 
         return contents
+
+    @staticmethod
+    def filter_versions(stdout):
+        ''' filter the oc version output '''
+
+        version_dict = {}
+        version_search = ['oc', 'openshift', 'kubernetes']
+
+        for line in stdout.strip().split('\n'):
+            for term in version_search:
+                if not line:
+                    continue
+                if line.startswith(term):
+                    version_dict[term] = line.split()[-1]
+
+        # horrible hack to get openshift version in Openshift 3.2
+        #  By default "oc version in 3.2 does not return an "openshift" version
+        if "openshift" not in version_dict:
+            version_dict["openshift"] = version_dict["oc"]
+
+        return version_dict
+
+    @staticmethod
+    def add_custom_versions(versions):
+        ''' create custom versions strings '''
+
+        versions_dict = {}
+
+        for tech, version in versions.items():
+            # clean up "-" from version
+            if "-" in version:
+                version = version.split("-")[0]
+
+            if version.startswith('v'):
+                versions_dict[tech + '_numeric'] = version[1:].split('+')[0]
+                # "v3.3.0.33" is what we have, we want "3.3"
+                versions_dict[tech + '_short'] = version[1:4]
+
+        return versions_dict
+
+    @staticmethod
+    def openshift_installed():
+        ''' check if openshift is installed '''
+        import yum
+
+        yum_base = yum.YumBase()
+        if yum_base.rpmdb.searchNevra(name='atomic-openshift'):
+            return True
+
+        return False
 
     # Disabling too-many-branches.  This is a yaml dictionary comparison function
     # pylint: disable=too-many-branches,too-many-return-statements,too-many-statements

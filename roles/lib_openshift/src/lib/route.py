@@ -17,7 +17,9 @@ class RouteConfig(object):
                  key=None,
                  host=None,
                  tls_termination=None,
-                 service_name=None):
+                 service_name=None,
+                 wildcard_policy=None,
+                 weight=None):
         ''' constructor for handling route options '''
         self.kubeconfig = kubeconfig
         self.name = sname
@@ -30,6 +32,12 @@ class RouteConfig(object):
         self.key = key
         self.service_name = service_name
         self.data = {}
+        self.wildcard_policy = wildcard_policy
+        if wildcard_policy is None:
+            self.wildcard_policy = 'None'
+        self.weight = weight
+        if weight is None:
+            self.weight = 100
 
         self.create_dict()
 
@@ -54,14 +62,19 @@ class RouteConfig(object):
             self.data['spec']['tls']['certificate'] = self.cert
             self.data['spec']['tls']['termination'] = self.tls_termination
 
-        self.data['spec']['to'] = {'kind': 'Service', 'name': self.service_name}
+        self.data['spec']['to'] = {'kind': 'Service',
+                                   'name': self.service_name,
+                                   'weight': self.weight}
 
+        self.data['spec']['wildcardPolicy'] = self.wildcard_policy
 
 # pylint: disable=too-many-instance-attributes,too-many-public-methods
 class Route(Yedit):
     ''' Class to wrap the oc command line tools '''
+    wildcard_policy = "spec.wildcardPolicy"
     host_path = "spec.host"
     service_path = "spec.to.name"
+    weight_path = "spec.to.weight"
     cert_path = "spec.tls.certificate"
     cacert_path = "spec.tls.caCertificate"
     destcacert_path = "spec.tls.destinationCACertificate"
@@ -93,6 +106,10 @@ class Route(Yedit):
         ''' return service name '''
         return self.get(Route.service_path)
 
+    def get_weight(self):
+        ''' return service weight '''
+        return self.get(Route.weight_path)
+
     def get_termination(self):
         ''' return tls termination'''
         return self.get(Route.termination_path)
@@ -100,3 +117,7 @@ class Route(Yedit):
     def get_host(self):
         ''' return host '''
         return self.get(Route.host_path)
+
+    def get_wildcard_policy(self):
+        ''' return wildcardPolicy '''
+        return self.get(Route.wildcard_policy)
