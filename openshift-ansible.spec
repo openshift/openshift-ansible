@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.55
+Version:        3.4.56
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Jan 23 2017 Scott Dodson <sdodson@redhat.com> 3.4.56-1
+- g_master_mktemp in openshift-master conflicts with
+  openshift_master_certificates (rmeggins@redhat.com)
+- Use openshift.common.hostname when verifying API port available.
+  (abutcher@redhat.com)
+- Add a fact to select --evacuate or --drain based on your OCP version
+  (tbielawa@redhat.com)
+
 * Wed Jan 18 2017 Scott Dodson <sdodson@redhat.com> 3.4.55-1
 - Automatic commit of package [openshift-ansible] release [3.4.54-1].
   (sdodson@redhat.com)
