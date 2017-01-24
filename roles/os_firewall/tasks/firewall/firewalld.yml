@@ -1,7 +1,8 @@
 ---
 - name: Install firewalld packages
-  package: name=firewalld state=present
-  when: not openshift.common.is_containerized | bool
+  package:
+    name: firewalld
+    state: present
 
 - name: Ensure iptables services are not enabled
   systemd:
