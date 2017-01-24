@@ -1690,7 +1690,19 @@ def set_builddefaults_facts(facts):
             if 'admission_plugin_config' not in facts['master']:
                 facts['master']['admission_plugin_config'] = dict()
             facts['master']['admission_plugin_config'].update(builddefaults['config'])
+            # if the user didn't actually provide proxy values, delete the proxy env variable defaults.
+            delete_empty_keys(facts['master']['admission_plugin_config']['BuildDefaults']['configuration']['env'])
+
     return facts
+
+
+def delete_empty_keys(keylist):
+    count=0
+    c=len(keylist)
+    for i in range(0,c):
+        if len(keylist[i-count]['value'])==0:
+            del keylist[i-count]
+            count+=1
 
 
 def set_buildoverrides_facts(facts):
