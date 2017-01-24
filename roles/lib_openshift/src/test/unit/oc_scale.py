@@ -10,10 +10,10 @@
 #
 # OK
 
-import mock
 import os
 import sys
 import unittest
+import mock
 
 # Removing invalid variable names for tests so that I can
 # keep them brief
@@ -24,25 +24,6 @@ import unittest
 module_path = os.path.join('/'.join(os.path.realpath(__file__).split('/')[:-4]), 'library')  # noqa: E501
 sys.path.insert(0, module_path)
 from oc_scale import OCScale  # noqa: E402
-
-
-# pylint: disable=unused-argument
-def oc_cmd_mock(cmd, oadm=False, output=False, output_type='json', input_data=None):
-    '''mock command for openshift_cmd'''
-    version = '''oc v3.4.0.39
-kubernetes v1.4.0+776c994
-features: Basic-Auth GSSAPI Kerberos SPNEGO
-
-Server https://internal.api.opstest.openshift.com
-openshift v3.4.0.39
-kubernetes v1.4.0+776c994
-'''
-    if 'version' in cmd:
-        return {'stderr': None,
-                'stdout': version,
-                'returncode': 0,
-                'results': version,
-                'cmd': cmd}
 
 
 class OCScaleTest(unittest.TestCase):
@@ -65,7 +46,6 @@ class OCScaleTest(unittest.TestCase):
                   'kubeconfig': '/etc/origin/master/admin.kubeconfig',
                   'debug': False}
 
-
         dc = '''{"kind": "DeploymentConfig",
                "apiVersion": "v1",
                "metadata": {
@@ -85,13 +65,10 @@ class OCScaleTest(unittest.TestCase):
                }
            }'''
 
-
         mock_openshift_cmd.side_effect = [
             {"cmd": '/usr/bin/oc get dc router -n default',
              'results': dc,
-             'returncode': 0,
-            }
-        ]
+             'returncode': 0}]
 
         results = OCScale.run_ansible(params, False)
 
@@ -108,7 +85,6 @@ class OCScaleTest(unittest.TestCase):
                   'kind': 'dc',
                   'kubeconfig': '/etc/origin/master/admin.kubeconfig',
                   'debug': False}
-
 
         dc = '''{"kind": "DeploymentConfig",
                "apiVersion": "v1",
@@ -129,16 +105,13 @@ class OCScaleTest(unittest.TestCase):
                }
            }'''
 
-
         mock_openshift_cmd.side_effect = [
             {"cmd": '/usr/bin/oc get dc router -n default',
              'results': dc,
-             'returncode': 0,
-            },
+             'returncode': 0},
             {"cmd": '/usr/bin/oc create -f /tmp/router -n default',
              'results': '',
-             'returncode': 0,
-            },
+             'returncode': 0}
         ]
 
         results = OCScale.run_ansible(params, False)

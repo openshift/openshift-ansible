@@ -10,10 +10,10 @@ description:
 options:
   state:
     description:
-    - State represents whether to create, modify, delete, or list
+    - State represents whether to scale or list the current replicas
     required: true
     default: present
-    choices: ["present", "absent", "list"]
+    choices: ["present", "list"]
     aliases: []
   kubeconfig:
     description:

@@ -41,9 +41,13 @@ class OCScale(OpenShiftCLI):
         vol = self._get(self.kind, self.name)
         if vol['returncode'] == 0:
             if self.kind == 'dc':
+                # The resource returned from a query could be an rc or dc.
+                # pylint: disable=redefined-variable-type
                 self.resource = DeploymentConfig(content=vol['results'][0])
                 vol['results'] = [self.resource.get_replicas()]
             if self.kind == 'rc':
+                # The resource returned from a query could be an rc or dc.
+                # pylint: disable=redefined-variable-type
                 self.resource = ReplicationController(content=vol['results'][0])
                 vol['results'] = [self.resource.get_replicas()]
 

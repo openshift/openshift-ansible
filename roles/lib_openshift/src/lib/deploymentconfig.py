@@ -1,4 +1,6 @@
 # pylint: skip-file
+# flake8: noqa
+
 
 # pylint: disable=too-many-public-methods
 class DeploymentConfig(Yedit):
@@ -60,7 +62,7 @@ spec:
     volume_mounts_path = "spec.template.spec.containers[0].volumeMounts"
 
     def __init__(self, content=None):
-        ''' Constructor for OpenshiftOC '''
+        ''' Constructor for deploymentconfig '''
         if not content:
             content = DeploymentConfig.default_deployment_config
 
@@ -210,7 +212,7 @@ spec:
         exist_volumes = self.get_volumes()
         del_idx = None
         for idx, exist_volume in enumerate(exist_volumes):
-            if exist_volume.has_key('name') and exist_volume['name'] == volume['name']:
+            if 'name' in exist_volume and exist_volume['name'] == volume['name']:
                 del_idx = idx
                 break
 
@@ -220,7 +222,7 @@ spec:
 
         del_idx = None
         for idx, exist_volume_mount in enumerate(exist_volume_mounts):
-            if exist_volume_mount.has_key('name') and exist_volume_mount['name'] == volume['name']:
+            if 'name' in exist_volume_mount and exist_volume_mount['name'] == volume['name']:
                 del_idx = idx
                 break
 
@@ -287,7 +289,7 @@ spec:
         # update the volume mount
         for exist_vol_mount in exist_volume_mounts:
             if exist_vol_mount['name'] == volume_mount['name']:
-                if exist_vol_mount.has_key('mountPath') and \
+                if 'mountPath' in exist_vol_mount and \
                    str(exist_vol_mount['mountPath']) != str(volume_mount['mountPath']):
                     exist_vol_mount['mountPath'] = volume_mount['mountPath']
                     modified = True
@@ -306,27 +308,27 @@ spec:
         results = []
         results.append(exist_volume['name'] == volume['name'])
 
-        if volume.has_key('secret'):
-            results.append(exist_volume.has_key('secret'))
+        if 'secret' in volume:
+            results.append('secret' in exist_volume)
             results.append(exist_volume['secret']['secretName'] == volume['secret']['secretName'])
             results.append(exist_volume_mount['name'] == volume_mount['name'])
             results.append(exist_volume_mount['mountPath'] == volume_mount['mountPath'])
 
-        elif volume.has_key('emptyDir'):
+        elif 'emptyDir' in volume:
             results.append(exist_volume_mount['name'] == volume['name'])
             results.append(exist_volume_mount['mountPath'] == volume_mount['mountPath'])
 
-        elif volume.has_key('persistentVolumeClaim'):
+        elif 'persistentVolumeClaim' in volume:
             pvc = 'persistentVolumeClaim'
-            results.append(exist_volume.has_key(pvc))
+            results.append(pvc in exist_volume)
             if results[-1]:
                 results.append(exist_volume[pvc]['claimName'] == volume[pvc]['claimName'])
 
-                if volume[pvc].has_key('claimSize'):
+                if 'claimSize' in volume[pvc]:
                     results.append(exist_volume[pvc]['claimSize'] == volume[pvc]['claimSize'])
 
-        elif volume.has_key('hostpath'):
-            results.append(exist_volume.has_key('hostPath'))
+        elif 'hostpath' in volume:
+            results.append('hostPath' in exist_volume)
             results.append(exist_volume['hostPath']['path'] == volume_mount['mountPath'])
 
         return not all(results)

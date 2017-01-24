@@ -5,30 +5,30 @@
   gather_facts: no
   user: root
   tasks:
-#  - name: list oc scale for default router dc
-#    oc_scale:
-#      state: list
-#      name: router
-#      namespace: default
-#      kind: dc
-#    register: scaleout
-#  - debug: var=scaleout
-#
-#  - assert:
-#      that:
-#      - "'result' in scaleout"
-#      - scaleout.result > 0
-#      msg: "Did not find 'result' in returned value or result not > 0."
-#
-#  - name: get the rc for router
-#    oc_obj:
-#      state: list
-#      kind: dc
-#      namespace: default
-#      selector: router=router
-#    register: rcout
-#  - debug:
-#      msg: "{{ rcout.results.results[0]['items'][-1]['metadata']['name'] }}"
+  - name: list oc scale for default router dc
+    oc_scale:
+      state: list
+      name: router
+      namespace: default
+      kind: dc
+    register: scaleout
+  - debug: var=scaleout
+
+  - assert:
+      that:
+      - "'result' in scaleout"
+      - scaleout.result > 0
+      msg: "Did not find 'result' in returned value or result not > 0."
+
+  - name: get the rc for router
+    oc_obj:
+      state: list
+      kind: dc
+      namespace: default
+      selector: router=router
+    register: rcout
+  - debug:
+      msg: "{{ rcout.results.results[0]['items'][-1]['metadata']['name'] }}"
 
   - name: scale dc to 1
     oc_scale:

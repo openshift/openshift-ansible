@@ -1,4 +1,6 @@
 # pylint: skip-file
+# flake8: noqa
+
 
 # pylint: disable=too-many-public-methods
 class ReplicationController(DeploymentConfig):
@@ -10,5 +12,5 @@ class ReplicationController(DeploymentConfig):
     volume_mounts_path = "spec.template.spec.containers[0].volumeMounts"
 
     def __init__(self, content):
-        ''' Constructor for OpenshiftOC '''
+        ''' Constructor for ReplicationController '''
         super(ReplicationController, self).__init__(content=content)
