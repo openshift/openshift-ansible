@@ -114,5 +114,3 @@ function import_certs() {
 }
 
 import_certs
-
-exit 0
