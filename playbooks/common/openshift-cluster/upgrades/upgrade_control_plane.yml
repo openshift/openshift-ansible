@@ -51,6 +51,8 @@
   roles:
   - openshift_master_facts
 
+# The main master upgrade play. Should handle all changes to the system in one pass, with
+# support for optional hooks to be defined.
 - name: Upgrade master
   hosts: oo_masters_to_config
   vars:
@@ -62,6 +64,14 @@
   roles:
   - openshift_facts
   post_tasks:
+
+  # Run the pre-upgrade hook if defined:
+  - debug: msg="Running master pre-upgrade hook {{ openshift_master_upgrade_pre_hook }}"
+    when: openshift_master_upgrade_pre_hook is defined
+
+  - include: "{{ openshift_master_upgrade_pre_hook }}"
+    when: openshift_master_upgrade_pre_hook is defined
+
   - include: rpm_upgrade.yml component=master
     when: not openshift.common.is_containerized | bool
 
@@ -102,11 +112,25 @@
       state: link
     when: ca_crt_stat.stat.isreg and not ca_bundle_stat.stat.exists
 
+  # Run the upgrade hook prior to restarting services/system if defined:
+  - debug: msg="Running master upgrade hook {{ openshift_master_upgrade_hook }}"
+    when: openshift_master_upgrade_hook is defined
+
+  - include: "{{ openshift_master_upgrade_hook }}"
+    when: openshift_master_upgrade_hook is defined
+
   - include: ../../openshift-master/restart_hosts.yml
     when: openshift.common.rolling_restart_mode == 'system'
 
   - include: ../../openshift-master/restart_services.yml
     when: openshift.common.rolling_restart_mode == 'services'
+
+  # Run the post-upgrade hook if defined:
+  - debug: msg="Running master post-upgrade hook {{ openshift_master_upgrade_post_hook }}"
+    when: openshift_master_upgrade_post_hook is defined
+
+  - include: "{{ openshift_master_upgrade_post_hook }}"
+    when: openshift_master_upgrade_post_hook is defined
 
   - set_fact:
       master_update_complete: True
