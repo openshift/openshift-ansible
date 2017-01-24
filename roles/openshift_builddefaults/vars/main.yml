@@ -23,7 +23,6 @@ builddefaults_yaml:
       imageLabels: "{{ openshift_builddefaults_image_labels | default(None) }}"
       nodeSelector: "{{ openshift_builddefaults_nodeselectors | default(None) }}"
       annotations: "{{ openshift_builddefaults_annotations | default(None) }}"
-      #resources: "{{ openshift.builddefaults.resources | default(None) }}"
       resources:
         requests:
           cpu: "{{ openshift_builddefaults_resources_requests_cpu | default(None) }}"
