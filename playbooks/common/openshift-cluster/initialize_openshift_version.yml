@@ -1,4 +1,9 @@
 ---
+# Included from: playbooks/byo/openshift-cluster/upgrades/v3_*/upgrade
+#
+# This is called if tasks with the tag 'pre_upgrade' would be executed
+
+
 # NOTE: requires openshift_facts be run
 - hosts: l_oo_all_hosts
   gather_facts: no
