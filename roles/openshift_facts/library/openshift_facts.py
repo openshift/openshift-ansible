@@ -1697,12 +1697,29 @@ def set_builddefaults_facts(facts):
 
 
 def delete_empty_keys(keylist):
-    count=0
-    c=len(keylist)
-    for i in range(0,c):
-        if len(keylist[i-count]['value'])==0:
-            del keylist[i-count]
-            count+=1
+    """ Delete dictionary elements from keylist where "value" is empty.
+
+        Args:
+          keylist(list): A list of builddefault configuration envs.
+
+        Returns:
+          none
+
+        Example:
+          keylist = [{'name': 'HTTP_PROXY', 'value': 'http://file.rdu.redhat.com:3128'},
+                     {'name': 'HTTPS_PROXY', 'value': 'http://file.rdu.redhat.com:3128'},
+                     {'name': 'NO_PROXY', 'value': ''}]
+
+          After calling delete_empty_keys the provided list is modified to become:
+
+                    [{'name': 'HTTP_PROXY', 'value': 'http://file.rdu.redhat.com:3128'},
+                     {'name': 'HTTPS_PROXY', 'value': 'http://file.rdu.redhat.com:3128'}]
+    """
+    count = 0
+    for i in range(0, len(keylist)):
+        if len(keylist[i - count]['value']) == 0:
+            del keylist[i - count]
+            count += 1
 
 
 def set_buildoverrides_facts(facts):
