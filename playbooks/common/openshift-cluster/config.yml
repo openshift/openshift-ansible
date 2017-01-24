@@ -38,6 +38,9 @@
   - set_fact:
       openshift_docker_log_options: "{{ lookup('oo_option', 'docker_log_options') }}"
     when: openshift_docker_log_options is not defined
+  - set_fact:
+      openshift_docker_selinux_enabled: "{{ lookup('oo_option', 'docker_selinux_enabled') }}"
+    when: openshift_docker_selinux_enabled is not defined
 
 - include: ../openshift-etcd/config.yml
   tags:
