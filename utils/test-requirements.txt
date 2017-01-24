@@ -13,3 +13,5 @@ pyOpenSSL
 yamllint
 tox
 detox
+# Temporary work-around for flake8 vs maccabe version conflict
+mccabe==0.5.3
