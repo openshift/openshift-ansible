@@ -16,6 +16,11 @@
   register: task_result
   failed_when: "task_result|failed and 'could not' not in task_result.msg|lower"
 
+- name: Wait 10 seconds after disabling iptables
+  pause:
+    seconds: 10
+  when: task_result | changed
+
 - name: Start and enable firewalld service
   systemd:
     name: firewalld
