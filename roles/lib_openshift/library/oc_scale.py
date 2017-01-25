@@ -24,6 +24,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+# -*- -*- -*- Begin included fragment: lib/import.py -*- -*- -*-
 '''
    OpenShiftCLI class that wraps the oc commands in a subprocess
 '''
@@ -39,6 +41,10 @@ import subprocess
 # pylint: disable=import-error
 import ruamel.yaml as yaml
 from ansible.module_utils.basic import AnsibleModule
+
+# -*- -*- -*- End included fragment: lib/import.py -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: doc/scale -*- -*- -*-
 
 DOCUMENTATION = '''
 ---
@@ -107,6 +113,10 @@ EXAMPLES = '''
     namespace: my-php-app
     replicas: 2
 '''
+
+# -*- -*- -*- End included fragment: doc/scale -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: ../../lib_utils/src/class/yedit.py -*- -*- -*-
 # noqa: E301,E302
 
 
@@ -671,6 +681,10 @@ class Yedit(object):
                         'state': "present"}
 
         return {'failed': True, 'msg': 'Unkown state passed'}
+
+# -*- -*- -*- End included fragment: ../../lib_utils/src/class/yedit.py -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: lib/base.py -*- -*- -*-
 # pylint: disable=too-many-lines
 # noqa: E301,E302,E303,T001
 
@@ -1191,6 +1205,10 @@ class OpenShiftCLIConfig(object):
         return rval
 
 
+# -*- -*- -*- End included fragment: lib/base.py -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: lib/deploymentconfig.py -*- -*- -*-
+
 
 # pylint: disable=too-many-public-methods
 class DeploymentConfig(Yedit):
@@ -1528,6 +1546,10 @@ spec:
         current_reps = self.get(DeploymentConfig.replicas_path)
         return not current_reps == replicas
 
+# -*- -*- -*- End included fragment: lib/deploymentconfig.py -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: lib/replicationcontroller.py -*- -*- -*-
+
 
 # pylint: disable=too-many-public-methods
 class ReplicationController(DeploymentConfig):
@@ -1541,6 +1563,10 @@ class ReplicationController(DeploymentConfig):
     def __init__(self, content):
         ''' Constructor for ReplicationController '''
         super(ReplicationController, self).__init__(content=content)
+
+# -*- -*- -*- End included fragment: lib/replicationcontroller.py -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: class/oc_scale.py -*- -*- -*-
 
 # pylint: disable=too-many-instance-attributes
 class OCScale(OpenShiftCLI):
@@ -1649,6 +1675,10 @@ class OCScale(OpenShiftCLI):
 
         return {'failed': True, 'msg': 'Unknown state passed. [{}]'.format(state)}
 
+# -*- -*- -*- End included fragment: class/oc_scale.py -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: ansible/oc_scale.py -*- -*- -*-
+
 def main():
     '''
     ansible oc module for scaling
@@ -1675,3 +1705,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+# -*- -*- -*- End included fragment: ansible/oc_scale.py -*- -*- -*-
