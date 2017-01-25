@@ -1,4 +1,12 @@
 ---
+# Included from: playbooks/byo/openshift-cluster/upgrades/v3_*/upgrade
+#
+# The name of this playbook could be slightly more specific in that its cleaning
+# up unused docker images. So not to be accidentally confused with removing
+# Image Streams within OCP.
+# These tasks should try to be written without using the shell module; it seems
+# that a module should be created to perform the below Docker tasks
+
 - name: Check Docker image count
   shell: "docker images -aq | wc -l"
   register: docker_image_count

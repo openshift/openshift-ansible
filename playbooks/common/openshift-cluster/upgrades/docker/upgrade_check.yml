@@ -1,4 +1,12 @@
 ---
+# Included from: playbooks/common/openshift-cluster/upgrades/pre/verify_docker_upgrade_targets
+#
+# We include this if 'docker_upgrade' is not set, is false, or if we are not installing
+# on atomic (openshift.common.is_atomic)
+# This playbook sets | reads variables to determine if a docker upgrade is needed,
+# however, given the naming convention it isn't clear where the values are set -- e.g.
+# duc_retval_upgrade_needed (docker_upgrade_check) makes it clear where the value
+# is set and what it tells us.
 
 # This snippet determines if a Docker upgrade is required by checking the inventory
 # variables, the available packages, and sets l_docker_upgrade to True if so.

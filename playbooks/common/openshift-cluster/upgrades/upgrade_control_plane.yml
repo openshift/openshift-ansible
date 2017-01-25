@@ -1,4 +1,18 @@
 ---
+# Included from: playbooks/byo/openshift-cluster/upgrades/v3_*/upgrade
+#
+# This playbook makes a call to openshift_facts
+#
+# It is massive...
+# Should this logic be much different than a base install given that we know the
+# intended version we should have at completion? The only extra things I could
+# see us needing would be if we need to migrate anything (i.e. the recent Upgrade
+# with etcd changed the location of user information).
+#
+# Would it make sense to have different roles for each of the components we upgrade|install
+# and let them handle the logic to do restarts, migrations, etc?
+# (TODO: say more?)
+
 ###############################################################################
 # Upgrade Masters
 ###############################################################################
