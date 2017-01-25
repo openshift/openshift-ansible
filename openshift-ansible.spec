@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.5.1
+Version:        3.5.2
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -253,6 +253,67 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Jan 25 2017 Scott Dodson <sdodson@redhat.com> 3.5.2-1
+- Sync latest image streams (sdodson@redhat.com)
+- Fix containerized haproxy config (andrew@andrewklau.com)
+- Allow RHEL subscription for OSE 3.4 (lhuard@amadeus.com)
+- fixes BZ-1415447. Error when stopping heapster.  Modify to be conditional
+  include (jcantril@redhat.com)
+- override nodename for gce with cloudprovider (jdetiber@redhat.com)
+- fixes jks generation, node labeling, and rerunning for oauth secrets
+  (ewolinet@redhat.com)
+- allow openshift_logging role to specify nodeSelectors (jcantril@redhat.com)
+- Remove is_containerized check for firewalld installs (rteague@redhat.com)
+- Clean up pylint for delete_empty_keys. (abutcher@redhat.com)
+- [os_firewall] Fix default iptables args. (abutcher@redhat.com)
+- Add new option 'openshift_docker_selinux_enabled' (rteague@redhat.com)
+- Temporary work-around for flake8 vs maccabe version conflict
+  (tbielawa@redhat.com)
+- do not set empty proxy env variable defaults (bparees@redhat.com)
+- fix BZ1414477. Use keytool on control node and require java
+  (jcantril@redhat.com)
+- Remove unused temporary directory in master config playbook.
+  (abutcher@redhat.com)
+- Added link to HOOKS in README (smilner@redhat.com)
+- HOOKS.md added documenting new hooks (smilner@redhat.com)
+- [os_firewall] Add -w flag to wait for iptables xtables lock.
+  (abutcher@redhat.com)
+- fixes BZ-1414625. Check for httpd-tools and java before install
+  (jcantril@redhat.com)
+- Add a mid upgrade hook, re-prefix variables. (dgoodwin@redhat.com)
+- treat force_pull as a bool (bparees@redhat.com)
+- Adding to ansible spec and changing logging jks generation to be a
+  local_action (ewolinet@redhat.com)
+- Add containzerized haproxy option (andrew@andrewklau.com)
+- Reorder node dnsmasq dependency s.t. networkmanager is restarted after
+  firewall changes have been applied. (abutcher@redhat.com)
+- Removing docker run strategy and make java a requirement for control host
+  (ewolinet@redhat.com)
+- Adding version to lib_openshift (kwoodson@redhat.com)
+- Updating to use docker run instead of scheduling jks gen pod
+  (ewolinet@redhat.com)
+- jenkins v1.3 templates should not enable oauth (gmontero@redhat.com)
+- fix oc_apply to allow running on any control node (jcantril@redhat.com)
+- g_master_mktemp in openshift-master conflicts with
+  openshift_master_certificates (rmeggins@redhat.com)
+- fixes #3127. Get files for oc_apply from remote host (jcantril@redhat.com)
+- Debug message before running hooks. (dgoodwin@redhat.com)
+- Cleaning repo cache earlier (rteague@redhat.com)
+- Added tar as a requirement per BZ1388445 (smilner@redhat.com)
+- fixes BZ141619.  Corrects the variable in the README (jcantril@redhat.com)
+- Run user provided hooks prior to system/service restarts.
+  (dgoodwin@redhat.com)
+- Implement pre/post master upgrade hooks. (dgoodwin@redhat.com)
+- Adding oc_obj to the lib_openshift library (kwoodson@redhat.com)
+- Addressing found issues with logging role (ewolinet@redhat.com)
+- Updated the generate.py scripts for tox and virtualenv. (kwoodson@redhat.com)
+- Adding tox tests for generated code. (kwoodson@redhat.com)
+- Perform master upgrades in a single play serially. (dgoodwin@redhat.com)
+- Validate system restart policy during pre-upgrade. (dgoodwin@redhat.com)
+- Correct consistency between upgrade playbooks (rteague@redhat.com)
+- Wait for nodes to be ready before proceeding with upgrade.
+  (dgoodwin@redhat.com)
+
 * Wed Jan 18 2017 Scott Dodson <sdodson@redhat.com> 3.5.1-1
 - More reliable wait for master after full host reboot. (dgoodwin@redhat.com)
 - kubelet must have rw to cgroups for pod/qos cgroups to function
