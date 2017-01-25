@@ -1032,6 +1032,8 @@ def set_nodename(facts):
     if 'node' in facts and 'common' in facts:
         if 'cloudprovider' in facts and facts['cloudprovider']['kind'] == 'openstack':
             facts['node']['nodename'] = facts['provider']['metadata']['hostname'].replace('.novalocal', '')
+        elif 'cloudprovider' in facts and facts['cloudprovider']['kind'] == 'gce':
+            facts['node']['nodename'] = '.'.split(facts['provider']['metadata']['hostname'])[0]
         else:
             facts['node']['nodename'] = facts['common']['hostname'].lower()
     return facts
