@@ -24,6 +24,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+# -*- -*- -*- Begin included fragment: lib/import.py -*- -*- -*-
 '''
    OpenShiftCLI class that wraps the oc commands in a subprocess
 '''
@@ -39,6 +41,10 @@ import subprocess
 # pylint: disable=import-error
 import ruamel.yaml as yaml
 from ansible.module_utils.basic import AnsibleModule
+
+# -*- -*- -*- End included fragment: lib/import.py -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: doc/edit -*- -*- -*-
 
 DOCUMENTATION = '''
 ---
@@ -153,6 +159,10 @@ oc_edit:
     spec.template.spec.containers[0].resources.limits.memory: 512
     spec.template.spec.containers[0].resources.requests.memory: 256
 '''
+
+# -*- -*- -*- End included fragment: doc/edit -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: ../../lib_utils/src/class/yedit.py -*- -*- -*-
 # noqa: E301,E302
 
 
@@ -717,6 +727,10 @@ class Yedit(object):
                         'state': "present"}
 
         return {'failed': True, 'msg': 'Unkown state passed'}
+
+# -*- -*- -*- End included fragment: ../../lib_utils/src/class/yedit.py -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: lib/base.py -*- -*- -*-
 # pylint: disable=too-many-lines
 # noqa: E301,E302,E303,T001
 
@@ -1238,6 +1252,10 @@ class OpenShiftCLIConfig(object):
         return rval
 
 
+# -*- -*- -*- End included fragment: lib/base.py -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: class/oc_edit.py -*- -*- -*-
+
 class Edit(OpenShiftCLI):
     ''' Class to wrap the oc command line tools
     '''
@@ -1330,6 +1348,10 @@ class Edit(OpenShiftCLI):
 
         return {"changed": True, 'results': api_rval, 'state': 'present'}
 
+# -*- -*- -*- End included fragment: class/oc_edit.py -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: ansible/oc_edit.py -*- -*- -*-
+
 
 def main():
     '''
@@ -1375,3 +1397,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+# -*- -*- -*- End included fragment: ansible/oc_edit.py -*- -*- -*-

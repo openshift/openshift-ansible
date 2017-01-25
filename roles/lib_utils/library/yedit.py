@@ -24,6 +24,8 @@
 # limitations under the License.
 #
 
+# -*- -*- -*- Begin included fragment: class/import.py -*- -*- -*-
+
 # pylint: disable=wrong-import-order
 import json
 import os
@@ -32,6 +34,10 @@ import re
 import ruamel.yaml as yaml
 import shutil
 from ansible.module_utils.basic import AnsibleModule
+
+# -*- -*- -*- End included fragment: class/import.py -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: doc/yedit -*- -*- -*-
 
 DOCUMENTATION = '''
 ---
@@ -168,6 +174,10 @@ EXAMPLES = '''
 #   b:
 #     c: d
 '''
+
+# -*- -*- -*- End included fragment: doc/yedit -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: class/yedit.py -*- -*- -*-
 # noqa: E301,E302
 
 
@@ -733,6 +743,10 @@ class Yedit(object):
 
         return {'failed': True, 'msg': 'Unkown state passed'}
 
+# -*- -*- -*- End included fragment: class/yedit.py -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: ansible/yedit.py -*- -*- -*-
+
 
 # pylint: disable=too-many-branches
 def main():
@@ -772,3 +786,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+# -*- -*- -*- End included fragment: ansible/yedit.py -*- -*- -*-

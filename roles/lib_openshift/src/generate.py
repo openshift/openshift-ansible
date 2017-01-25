@@ -27,19 +27,54 @@ def parse_args():
     return parser.parse_args()
 
 
+def fragment_banner(fragment_path, side, data):
+    """Generate a banner to wrap around file fragments
+
+:param string fragment_path: A path to a module fragment
+:param string side: ONE OF: "header", "footer"
+:param StringIO data: A StringIO object to write the banner to
+"""
+    side_msg = {
+        "header": "Begin included fragment: {}",
+        "footer": "End included fragment: {}"
+    }
+    annotation = side_msg[side].format(fragment_path)
+
+    banner = """
+# -*- -*- -*- {} -*- -*- -*-
+""".format(annotation)
+
+    # Why skip?
+    #
+    # * 'generated' - This is the head of the script, we don't want to
+    #   put comments before the #!shebang
+    #
+    # * 'license' - Wrapping this just seemed like gratuitous extra
+    if ("generated" not in fragment_path) and ("license" not in fragment_path):
+        data.write(banner)
+
+    # Make it self-contained testable
+    return banner
+
+
 def generate(parts):
-    '''generate the source code for the ansible modules'''
+    '''generate the source code for the ansible modules
+
+:param Array parts: An array of paths (strings) to module fragments
+    '''
 
     data = six.StringIO()
     for fpart in parts:
         # first line is pylint disable so skip it
         with open(os.path.join(OPENSHIFT_ANSIBLE_PATH, fpart)) as pfd:
+            fragment_banner(fpart, "header", data)
             for idx, line in enumerate(pfd):
                 if idx in [0, 1] and 'flake8: noqa' in line or 'pylint: skip-file' in line:  # noqa: E501
                     continue
 
                 data.write(line)
 
+            fragment_banner(fpart, "footer", data)
     return data
 
 

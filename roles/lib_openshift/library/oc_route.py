@@ -24,6 +24,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+# -*- -*- -*- Begin included fragment: lib/import.py -*- -*- -*-
 '''
    OpenShiftCLI class that wraps the oc commands in a subprocess
 '''
@@ -39,6 +41,10 @@ import subprocess
 # pylint: disable=import-error
 import ruamel.yaml as yaml
 from ansible.module_utils.basic import AnsibleModule
+
+# -*- -*- -*- End included fragment: lib/import.py -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: doc/route -*- -*- -*-
 
 DOCUMENTATION = '''
 ---
@@ -157,6 +163,10 @@ EXAMPLES = '''
     tls_termination: reencrypt
   run_once: true
 '''
+
+# -*- -*- -*- End included fragment: doc/route -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: ../../lib_utils/src/class/yedit.py -*- -*- -*-
 # noqa: E301,E302
 
 
@@ -721,6 +731,10 @@ class Yedit(object):
                         'state': "present"}
 
         return {'failed': True, 'msg': 'Unkown state passed'}
+
+# -*- -*- -*- End included fragment: ../../lib_utils/src/class/yedit.py -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: lib/base.py -*- -*- -*-
 # pylint: disable=too-many-lines
 # noqa: E301,E302,E303,T001
 
@@ -1241,6 +1255,10 @@ class OpenShiftCLIConfig(object):
 
         return rval
 
+
+# -*- -*- -*- End included fragment: lib/base.py -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: lib/route.py -*- -*- -*-
 # noqa: E302,E301
 
 
@@ -1362,6 +1380,10 @@ class Route(Yedit):
     def get_wildcard_policy(self):
         ''' return wildcardPolicy '''
         return self.get(Route.wildcard_policy)
+
+# -*- -*- -*- End included fragment: lib/route.py -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: class/oc_route.py -*- -*- -*-
 
 
 # pylint: disable=too-many-instance-attributes
@@ -1531,6 +1553,10 @@ class OCRoute(OpenShiftCLI):
         # catch all
         return {'failed': True, 'msg': "Unknown State passed"}
 
+# -*- -*- -*- End included fragment: class/oc_route.py -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: ansible/oc_route.py -*- -*- -*-
+
 
 def get_cert_data(path, content):
     '''get the data for a particular value'''
@@ -1612,3 +1638,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+# -*- -*- -*- End included fragment: ansible/oc_route.py -*- -*- -*-
