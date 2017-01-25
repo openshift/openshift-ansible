@@ -19,6 +19,12 @@
   - iptables
   - ip6tables
   when: "{{ pkg_check.rc == 0 }}"
+  register: task_result
+
+- name: Wait 10 seconds after disabling iptables
+  pause:
+    seconds: 10
+  when: task_result | changed
 
 - name: Reload systemd units
   command: systemctl daemon-reload
