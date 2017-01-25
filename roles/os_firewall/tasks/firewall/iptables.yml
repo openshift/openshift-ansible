@@ -9,6 +9,10 @@
   register: task_result
   failed_when: "task_result|failed and 'could not' not in task_result.msg|lower"
 
+- name: need to pause here, otherwise the firewalld service stopping can sometimes cause ssh to fail
+  pause: seconds=10
+  when: result | changed
+
 - name: Install iptables packages
   package: name={{ item }} state=present
   with_items:
