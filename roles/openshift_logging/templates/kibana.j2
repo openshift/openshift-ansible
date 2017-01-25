@@ -27,6 +27,12 @@ spec:
         component: "{{component}}"
     spec:
       serviceAccountName: aggregated-logging-kibana
+{% if kibana_node_selector is iterable and kibana_node_selector | length > 0 %}
+      nodeSelector:
+{% for key, value in kibana_node_selector.iteritems() %}
+        {{key}}: {{value}}
+{% endfor %}
+{% endif %}
       containers:
         -
           name: "kibana"

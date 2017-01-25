@@ -33,6 +33,7 @@
     volume_names: "{{es_pvc_pool | default([])}}"
     pvc_claim: "{{(volume_names | length > item.0) | ternary(volume_names[item.0], None)}}"
     deploy_name: "{{item.1}}"
+    es_node_selector: "{{openshift_logging_es_nodeselector | default({})}}"
   with_indexed_items:
     - "{{es_dc_pool | default([])}}"
   check_mode: no
@@ -98,6 +99,7 @@
     es_recover_after_nodes: "{{es_ops_recover_after_nodes}}"
     es_recover_expected_nodes: "{{es_ops_recover_expected_nodes}}"
     openshift_logging_es_recover_after_time: "{{openshift_logging_es_ops_recover_after_time}}"
+    es_node_selector: "{{openshift_logging_es_ops_nodeselector | default({})}}"
   with_indexed_items:
     - "{{es_dc_pool_ops | default([])}}"
   when:

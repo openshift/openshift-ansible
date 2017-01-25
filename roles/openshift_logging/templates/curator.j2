@@ -28,6 +28,12 @@ spec:
     spec:
       terminationGracePeriod: 600
       serviceAccountName: aggregated-logging-curator
+{% if curator_node_selector is iterable and curator_node_selector | length > 0 %}
+      nodeSelector:
+{% for key, value in curator_node_selector.iteritems() %}
+        {{key}}: {{value}}
+{% endfor %}
+{% endif %}
       containers:
         -
           name: "curator"
