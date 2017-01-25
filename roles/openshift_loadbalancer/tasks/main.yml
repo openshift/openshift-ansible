@@ -17,7 +17,7 @@
 - name: Create the systemd unit files
   template:
     src: "haproxy.docker.service.j2"
-    dest: "{{ containerized_svc_dir }}/haproxy.service"
+    dest: "/etc/systemd/system/haproxy.service"
   when: openshift.common.is_containerized | bool
   notify: restart haproxy
 
