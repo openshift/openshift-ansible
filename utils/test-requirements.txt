@@ -1,11 +1,10 @@
 ansible
-configparser
-pylint
+# flake8 moved to before setuptools-lint to satisfy mccabe dependency issue
+flake8
 setuptools-lint
 nose
 coverage
 mock
-flake8
 PyYAML
 click
 backports.functools_lru_cache
@@ -13,5 +12,3 @@ pyOpenSSL
 yamllint
 tox
 detox
-# Temporary work-around for flake8 vs maccabe version conflict
-mccabe==0.5.3
