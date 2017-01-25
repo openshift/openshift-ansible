@@ -15,6 +15,12 @@
     state: stopped
     enabled: no
   when: pkg_check.rc == 0
+  register: task_result
+
+- name: Wait 10 seconds after disabling firewalld
+  pause:
+    seconds: 10
+  when: task_result | changed
 
 # TODO: submit PR upstream to add mask/unmask to service module
 - name: Mask firewalld service
