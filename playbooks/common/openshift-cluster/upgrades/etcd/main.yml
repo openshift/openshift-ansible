@@ -22,11 +22,14 @@
       name: "{{ item }}"
       groups: etcd_hosts_to_upgrade
     with_items: "{{ groups.oo_etcd_to_config if groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config | length > 0 else [] }}"
+    changed_when: False
+
   - name: Evaluate etcd_hosts_to_backup
     add_host:
       name: "{{ item }}"
       groups: etcd_hosts_to_backup
     with_items: "{{ groups.oo_etcd_to_config if groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config | length > 0 else groups.oo_first_master }}"
+    changed_when: False
 
 - name: Backup etcd before upgrading anything
   include: backup.yml

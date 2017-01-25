@@ -44,6 +44,7 @@
       ansible_become: "{{ g_sudo | default(omit) }}"
     with_items: "{{ groups.oo_nodes_to_config | default([]) }}"
     when: hostvars[item].openshift.common is defined and hostvars[item].openshift.common.is_containerized | bool and (item in groups.oo_nodes_to_config and item in groups.oo_masters_to_config)
+    changed_when: False
 
 - name: Configure containerized nodes
   hosts: oo_containerized_master_nodes
