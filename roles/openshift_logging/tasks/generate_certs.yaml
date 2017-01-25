@@ -88,56 +88,12 @@
 - name: Creating necessary JKS certs
   include: generate_jks.yaml
 
-# check for secret/logging-kibana-proxy
-- command: >
-    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get secret/logging-kibana-proxy -n {{openshift_logging_namespace}} -o jsonpath='{.data.oauth-secret}'
-  register: kibana_secret_oauth_check
-  ignore_errors: yes
-  changed_when: no
-  check_mode: no
-
-- command: >
-    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get secret/logging-kibana-proxy -n {{openshift_logging_namespace}} -o jsonpath='{.data.session-secret}'
-  register: kibana_secret_session_check
-  ignore_errors: yes
-  changed_when: no
-  check_mode: no
-
-# check for oauthclient secret
-- command: >
-    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get oauthclient/kibana-proxy -n {{openshift_logging_namespace}} -o jsonpath='{.secret}'
-  register: oauth_secret_check
-  ignore_errors: yes
-  changed_when: no
-  check_mode: no
-
-# set or generate as needed
+# TODO: make idempotent
 - name: Generate proxy session
   set_fact: session_secret={{'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'|random_word(200)}}
   check_mode: no
-  when:
-    - kibana_secret_session_check.stdout is not defined or kibana_secret_session_check.stdout == ''
 
-- name: Generate proxy session
-  set_fact: session_secret={{kibana_secret_session_check.stdout | b64decode }}
-  check_mode: no
-  when:
-    - kibana_secret_session_check.stdout is defined
-    - kibana_secret_session_check.stdout != ''
-
+# TODO: make idempotent
 - name: Generate oauth client secret
   set_fact: oauth_secret={{'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'|random_word(64)}}
   check_mode: no
-  when: kibana_secret_oauth_check.stdout is not defined or kibana_secret_oauth_check.stdout == ''
-    or oauth_secret_check.stdout is not defined or oauth_secret_check.stdout == ''
-    or kibana_secret_oauth_check.stdout | b64decode != oauth_secret_check.stdout
-
-- name: Generate oauth client secret
-  set_fact: oauth_secret={{kibana_secret_oauth_check.stdout | b64decode}}
-  check_mode: no
-  when:
-    - kibana_secret_oauth_check is defined
-    - kibana_secret_oauth_check.stdout != ''
-    - oauth_secret_check.stdout is defined
-    - oauth_secret_check.stdout != ''
-    - kibana_secret_oauth_check.stdout | b64decode == oauth_secret_check.stdout
