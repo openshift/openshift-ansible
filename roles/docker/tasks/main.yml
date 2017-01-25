@@ -85,7 +85,7 @@
   - reg_conf_var: HTTPS_PROXY
     reg_fact_val: "{{ docker_https_proxy | default('') }}"
   - reg_conf_var: NO_PROXY
-    reg_fact_val: "{{ docker_no_proxy | default('') | join(',') }}"
+    reg_fact_val: "{{ docker_no_proxy | default('') }}"
   notify:
   - restart docker
   when:
