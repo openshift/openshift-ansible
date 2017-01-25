@@ -81,7 +81,7 @@ class OCSecretTest(unittest.TestCase):
 
         # Making sure our mock was called as we expected
         mock_openshift_cmd.assert_has_calls([
-            mock.call(['get', 'secrets', '-o', 'json', 'secretname'], output=True),
+            mock.call(['get', 'secrets', 'secretname', '-o', 'json'], output=True),
             mock.call(['secrets', 'new', 'secretname', 'somesecret.json=/tmp/somesecret.json']),
         ])
 
