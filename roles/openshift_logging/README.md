@@ -36,6 +36,7 @@ When both `openshift_logging_install_logging` and `openshift_logging_upgrade_log
 - `openshift_logging_curator_cpu_limit`: The amount of CPU to allocate to Curator. Default is '100m'.
 - `openshift_logging_curator_memory_limit`: The amount of memory to allocate to Curator. Unset if not specified.
 - `openshift_logging_curator_nodeselector`: A map of labels (e.g. {"node":"infra","region":"west"} to select the nodes where the curator pod will land.
+- `openshift_logging_image_pull_secret`: The name of an existing pull secret to link to the logging service accounts
 
 - `openshift_logging_kibana_hostname`: The Kibana hostname. Defaults to 'kibana.example.com'.
 - `openshift_logging_kibana_cpu_limit`: The amount of CPU to allocate to Kibana or unset if not specified.

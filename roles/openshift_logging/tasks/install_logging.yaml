@@ -57,6 +57,28 @@
     loop_var: file
   when: ansible_check_mode
 
+  # TODO replace task with oc_secret module that supports
+  # linking when available
+- name: Link Pull Secrets With Service Accounts
+  include: oc_secret.yaml
+  vars:
+    kubeconfig: "{{ mktemp.stdout }}/admin.kubeconfig"
+    subcommand: link
+    service_account: "{{sa_account}}"
+    secret_name: "{{openshift_logging_image_pull_secret}}"
+    add_args: "--for=pull"
+  with_items:
+    - default
+    - aggregated-logging-elasticsearch
+    - aggregated-logging-kibana
+    - aggregated-logging-fluentd
+    - aggregated-logging-curator
+  register: link_pull_secret
+  loop_control:
+    loop_var: sa_account
+  when: openshift_logging_image_pull_secret is defined
+  failed_when: link_pull_secret.rc != 0
+
 - name: Scaling up cluster
   include: start_cluster.yaml
   when: start_cluster | default(true) | bool
