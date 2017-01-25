@@ -27,34 +27,22 @@
   check_mode: no
 
 - name: Create placeholder for previously created JKS certs to prevent recreating...
-  file:
-    path: "{{local_tmp.stdout}}/elasticsearch.jks"
-    state: touch
-    mode: "u=rw,g=r,o=r"
+  local_action: file path="{{local_tmp.stdout}}/elasticsearch.jks" state=touch mode="u=rw,g=r,o=r"
   when: elasticsearch_jks.stat.exists
   changed_when: False
 
 - name: Create placeholder for previously created JKS certs to prevent recreating...
-  file:
-    path: "{{local_tmp.stdout}}/logging-es.jks"
-    state: touch
-    mode: "u=rw,g=r,o=r"
+  local_action: file path="{{local_tmp.stdout}}/logging-es.jks" state=touch mode="u=rw,g=r,o=r"
   when: logging_es_jks.stat.exists
   changed_when: False
 
 - name: Create placeholder for previously created JKS certs to prevent recreating...
-  file:
-    path: "{{local_tmp.stdout}}/system.admin.jks"
-    state: touch
-    mode: "u=rw,g=r,o=r"
+  local_action: file path="{{local_tmp.stdout}}/system.admin.jks" state=touch mode="u=rw,g=r,o=r"
   when: system_admin_jks.stat.exists
   changed_when: False
 
 - name: Create placeholder for previously created JKS certs to prevent recreating...
-  file:
-    path: "{{local_tmp.stdout}}/truststore.jks"
-    state: touch
-    mode: "u=rw,g=r,o=r"
+  local_action: file path="{{local_tmp.stdout}}/truststore.jks" state=touch mode="u=rw,g=r,o=r"
   when: truststore_jks.stat.exists
   changed_when: False
 
@@ -69,15 +57,16 @@
     - ca.serial.txt
     - ca.crl.srl
     - ca.db
+  when: not elasticsearch_jks.stat.exists or not logging_es_jks.stat.exists or not system_admin_jks.stat.exists or not truststore_jks.stat.exists
 
 - local_action: template src=signing.conf.j2 dest={{local_tmp.stdout}}/signing.conf
   vars:
     - top_dir: "{{local_tmp.stdout}}"
+  when: not elasticsearch_jks.stat.exists or not logging_es_jks.stat.exists or not system_admin_jks.stat.exists or not truststore_jks.stat.exists
 
 - name: Run JKS generation script
   local_action: script generate-jks.sh {{local_tmp.stdout}} {{openshift_logging_namespace}}
   check_mode: no
-  become: yes
   when: not elasticsearch_jks.stat.exists or not logging_es_jks.stat.exists or not system_admin_jks.stat.exists or not truststore_jks.stat.exists
 
 - name: Pushing locally generated JKS certs to remote host...
@@ -105,7 +94,5 @@
   when: not truststore_jks.stat.exists
 
 - name: Cleaning up temp dir
-  file:
-    path: "{{local_tmp.stdout}}"
-    state: absent
+  local_action: file path="{{local_tmp.stdout}}" state=absent
   changed_when: False
