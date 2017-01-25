@@ -36,3 +36,13 @@ oc_version.py:
 - lib/base.py
 - class/oc_version.py
 - ansible/oc_version.py
+oc_secret.py:
+- doc/generated
+- doc/license
+- lib/import.py
+- doc/secret
+- ../../lib_utils/src/class/yedit.py
+- lib/base.py
+- lib/secret.py
+- class/oc_secret.py
+- ansible/oc_secret.py
