@@ -1406,7 +1406,7 @@ def merge_facts(orig, new, additive_facts_to_overwrite, protected_facts_to_overw
             dict: the merged facts
     """
     additive_facts = ['named_certificates']
-    protected_facts = ['ha', 'master_count']
+    protected_facts = ['ha']
 
     # Facts we do not ever want to merge. These originate in inventory variables
     # and contain JSON dicts. We don't ever want to trigger a merge
@@ -1457,14 +1457,6 @@ def merge_facts(orig, new, additive_facts_to_overwrite, protected_facts_to_overw
             # it so we will determine if it is okay to change this
             # fact.
             elif key in protected_facts and key not in [x.split('.')[-1] for x in protected_facts_to_overwrite]:
-                # The master count (int) can only increase unless it
-                # has been passed as a protected fact to overwrite.
-                if key == 'master_count' and new[key] is not None and new[key] is not '':
-                    if int(value) <= int(new[key]):
-                        facts[key] = copy.deepcopy(new[key])
-                    else:
-                        # pylint: disable=line-too-long
-                        module.fail_json(msg='openshift_facts received a lower value for openshift.master.master_count')  # noqa: F405
                 # ha (bool) can not change unless it has been passed
                 # as a protected fact to overwrite.
                 if key == 'ha':
