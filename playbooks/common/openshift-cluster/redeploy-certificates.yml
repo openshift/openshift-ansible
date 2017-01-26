@@ -232,9 +232,8 @@
 
   - name: Drain node
     command: >
-      {{ openshift.common.client_binary }} adm --config={{ hostvars[groups.oo_first_master.0].mktemp.stdout }}/admin.kubeconfig
-      manage-node {{ openshift.common.hostname | lower }}
-      {{ openshift.common.evacuate_or_drain }} --force
+      {{ openshift.common.admin_binary }} --config={{ hostvars[groups.oo_first_master.0].mktemp.stdout }}/admin.kubeconfig
+      drain {{ openshift.common.hostname }} --force --delete-local-data
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: openshift_certificates_redeploy_ca | default(false) | bool and was_schedulable | bool
 
