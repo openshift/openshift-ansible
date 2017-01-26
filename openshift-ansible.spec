@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.56
+Version:        3.4.57
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Jan 26 2017 Scott Dodson <sdodson@redhat.com> 3.4.57-1
+- Wait for nodes to be ready before proceeding with upgrade.
+  (dgoodwin@redhat.com)
+- Add 10 second wait after disabling firewalld (sdodson@redhat.com)
+
 * Mon Jan 23 2017 Scott Dodson <sdodson@redhat.com> 3.4.56-1
 - g_master_mktemp in openshift-master conflicts with
   openshift_master_certificates (rmeggins@redhat.com)
