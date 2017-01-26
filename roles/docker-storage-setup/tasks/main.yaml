@@ -1,8 +1,8 @@
 ---
 - name: create the docker-storage-setup config file
   copy:
-     src: docker-storage-setup
-     dest: /etc/sysconfig/docker-storage-setup
-     owner: root
-     group: root
-     mode: 0644
+    src: docker-storage-setup
+    dest: /etc/sysconfig/docker-storage-setup
+    owner: root
+    group: root
+    mode: 0644
