@@ -15,6 +15,7 @@ BuildArch:      noarch
 
 Requires:      ansible >= 2.2.0.0-1
 Requires:      python2
+Requires:      python-six
 Requires:      openshift-ansible-docs = %{version}-%{release}
 
 %description
