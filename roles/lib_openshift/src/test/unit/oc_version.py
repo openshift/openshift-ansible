@@ -13,6 +13,7 @@
 import os
 import sys
 import unittest
+import mock
 
 # Removing invalid variable names for tests so that I can
 # keep them brief
@@ -25,25 +26,6 @@ sys.path.insert(0, module_path)
 from oc_version import OCVersion  # noqa: E402
 
 
-# pylint: disable=unused-argument
-def oc_cmd_mock(cmd, oadm=False, output=False, output_type='json', input_data=None):
-    '''mock command for openshift_cmd'''
-    version = '''oc v3.4.0.39
-kubernetes v1.4.0+776c994
-features: Basic-Auth GSSAPI Kerberos SPNEGO
-
-Server https://internal.api.opstest.openshift.com
-openshift v3.4.0.39
-kubernetes v1.4.0+776c994
-'''
-    if 'version' in cmd:
-        return {'stderr': None,
-                'stdout': version,
-                'returncode': 0,
-                'results': version,
-                'cmd': cmd}
-
-
 class OCVersionTest(unittest.TestCase):
     '''
      Test class for OCVersion
@@ -51,15 +33,31 @@ class OCVersionTest(unittest.TestCase):
 
     def setUp(self):
         ''' setup method will create a file and set to known configuration '''
-        self.oc_ver = OCVersion(None, False)
-        self.oc_ver.openshift_cmd = oc_cmd_mock
+        pass
 
-    def test_get(self):
+    @mock.patch('oc_version.OCVersion.openshift_cmd')
+    def test_get(self, mock_openshift_cmd):
         ''' Testing a get '''
-        results = self.oc_ver.get()
-        self.assertEqual(results['oc_short'], '3.4')
-        self.assertEqual(results['oc_numeric'], '3.4.0.39')
-        self.assertEqual(results['kubernetes_numeric'], '1.4.0')
+        params = {'kubeconfig': '/etc/origin/master/admin.kubeconfig',
+                  'state': 'list',
+                  'debug': False}
+
+        mock_openshift_cmd.side_effect = [
+            {"cmd": "oc version",
+             "results": "oc v3.4.0.39\nkubernetes v1.4.0+776c994\n" +
+                        "features: Basic-Auth GSSAPI Kerberos SPNEGO\n\n" +
+                        "Server https://internal.api.opstest.openshift.com" +
+                        "openshift v3.4.0.39\n" +
+                        "kubernetes v1.4.0+776c994\n",
+             "returncode": 0}
+        ]
+
+        results = OCVersion.run_ansible(params)
+
+        self.assertFalse(results['changed'])
+        self.assertEqual(results['results']['oc_short'], '3.4')
+        self.assertEqual(results['results']['oc_numeric'], '3.4.0.39')
+        self.assertEqual(results['results']['kubernetes_numeric'], '1.4.0')
 
     def tearDown(self):
         '''TearDown method'''

@@ -27,15 +27,6 @@ oc_route.py:
 - lib/route.py
 - class/oc_route.py
 - ansible/oc_route.py
-oc_version.py:
-- doc/generated
-- doc/license
-- lib/import.py
-- doc/version
-- ../../lib_utils/src/class/yedit.py
-- lib/base.py
-- class/oc_version.py
-- ansible/oc_version.py
 oc_secret.py:
 - doc/generated
 - doc/license
@@ -46,3 +37,23 @@ oc_secret.py:
 - lib/secret.py
 - class/oc_secret.py
 - ansible/oc_secret.py
+oc_scale.py:
+- doc/generated
+- doc/license
+- lib/import.py
+- doc/scale
+- ../../lib_utils/src/class/yedit.py
+- lib/base.py
+- lib/deploymentconfig.py
+- lib/replicationcontroller.py
+- class/oc_scale.py
+- ansible/oc_scale.py
+oc_version.py:
+- doc/generated
+- doc/license
+- lib/import.py
+- doc/version
+- ../../lib_utils/src/class/yedit.py
+- lib/base.py
+- class/oc_version.py
+- ansible/oc_version.py

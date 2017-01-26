@@ -44,21 +44,21 @@ from ansible.module_utils.basic import AnsibleModule
 
 # -*- -*- -*- End included fragment: lib/import.py -*- -*- -*-
 
-# -*- -*- -*- Begin included fragment: doc/secret -*- -*- -*-
+# -*- -*- -*- Begin included fragment: doc/scale -*- -*- -*-
 
 DOCUMENTATION = '''
 ---
-module: oc_secret
-short_description: Module to manage openshift secrets
+module: oc_scale
+short_description: Manage openshift services through the scale parameters
 description:
-  - Manage openshift secrets programmatically.
+  - Manage openshift services through scaling them.
 options:
   state:
     description:
-    - If present, the secret will be created if it doesn't exist or updated if different. If absent, the secret will be removed if present. If list, information about the secret will be gathered and returned as part of the Ansible call results.
-    required: false
+    - State represents whether to scale or list the current replicas
+    required: true
     default: present
-    choices: ["present", "absent", "list"]
+    choices: ["present", "list"]
     aliases: []
   kubeconfig:
     description:
@@ -84,35 +84,14 @@ options:
     required: false
     default: default
     aliases: []
-  files:
+  kind:
     description:
-    - A list of files provided for secrets
+    - The kind of object to scale.
     required: false
     default: None
-    aliases: []
-  delete_after:
-    description:
-    - Whether or not to delete the files after processing them.
-    required: false
-    default: false
-    aliases: []
-  contents:
-    description:
-    - Content of the secrets
-    required: false
-    default: None
-    aliases: []
-  force:
-    description:
-    - Whether or not to force the operation
-    required: false
-    default: false
-    aliases: []
-  decode:
-    description:
-    - base64 decode the object
-    required: false
-    default: false
+    choices:
+    - rc
+    - dc
     aliases: []
 author:
 - "Kenny Woodson <kwoodson@redhat.com>"
@@ -120,47 +99,22 @@ extends_documentation_fragment: []
 '''
 
 EXAMPLES = '''
-- name: create secret
-  oc_secret:
-    state: present
+- name: scale down a rc to 0
+  oc_scale:
+    name: my-replication-controller
+    kind: rc
     namespace: openshift-infra
-    name: metrics-deployer
-    files:
-    - name: nothing
-      path: /dev/null
-  register: secretout
-  run_once: true
+    replicas: 0
 
-- name: get ca from hawkular
-  oc_secret:
-    state: list
-    namespace: openshift-infra
-    name:  hawkular-metrics-certificate
-    decode: True
-  register: hawkout
-  run_once: true
-
-- name: Create secrets
-  oc_secret:
-    namespace: mynamespace
-    name: mysecrets
-    contents:
-    - path: data.yml
-      data: "{{ data_content }}"
-    - path: auth-keys
-      data: "{{ auth_keys_content }}"
-    - path: configdata.yml
-      data: "{{ configdata_content }}"
-    - path: cert.crt
-      data: "{{ cert_content }}"
-    - path: key.pem
-      data: "{{ osso_site_key_content }}"
-    - path: ca.cert.pem
-      data: "{{ ca_cert_content }}"
-  register: secretout
+- name: scale up a deploymentconfig to 2
+  oc_scale:
+    name: php
+    kind: dc
+    namespace: my-php-app
+    replicas: 2
 '''
 
-# -*- -*- -*- End included fragment: doc/secret -*- -*- -*-
+# -*- -*- -*- End included fragment: doc/scale -*- -*- -*-
 
 # -*- -*- -*- Begin included fragment: ../../lib_utils/src/class/yedit.py -*- -*- -*-
 # noqa: E301,E302
@@ -1253,345 +1207,503 @@ class OpenShiftCLIConfig(object):
 
 # -*- -*- -*- End included fragment: lib/base.py -*- -*- -*-
 
-# -*- -*- -*- Begin included fragment: lib/secret.py -*- -*- -*-
+# -*- -*- -*- Begin included fragment: lib/deploymentconfig.py -*- -*- -*-
 
-# pylint: disable=too-many-instance-attributes
-class SecretConfig(object):
-    ''' Handle secret options '''
-    # pylint: disable=too-many-arguments
-    def __init__(self,
-                 sname,
-                 namespace,
-                 kubeconfig,
-                 secrets=None):
-        ''' constructor for handling secret options '''
-        self.kubeconfig = kubeconfig
-        self.name = sname
-        self.namespace = namespace
-        self.secrets = secrets
-        self.data = {}
 
-        self.create_dict()
-
-    def create_dict(self):
-        ''' return a secret as a dict '''
-        self.data['apiVersion'] = 'v1'
-        self.data['kind'] = 'Secret'
-        self.data['metadata'] = {}
-        self.data['metadata']['name'] = self.name
-        self.data['metadata']['namespace'] = self.namespace
-        self.data['data'] = {}
-        if self.secrets:
-            for key, value in self.secrets.items():
-                self.data['data'][key] = value
-
-# pylint: disable=too-many-instance-attributes
-class Secret(Yedit):
+# pylint: disable=too-many-public-methods
+class DeploymentConfig(Yedit):
     ''' Class to wrap the oc command line tools '''
-    secret_path = "data"
-    kind = 'secret'
+    default_deployment_config = '''
+apiVersion: v1
+kind: DeploymentConfig
+metadata:
+  name: default_dc
+  namespace: default
+spec:
+  replicas: 0
+  selector:
+    default_dc: default_dc
+  strategy:
+    resources: {}
+    rollingParams:
+      intervalSeconds: 1
+      maxSurge: 0
+      maxUnavailable: 25%
+      timeoutSeconds: 600
+      updatePercent: -25
+      updatePeriodSeconds: 1
+    type: Rolling
+  template:
+    metadata:
+    spec:
+      containers:
+      - env:
+        - name: default
+          value: default
+        image: default
+        imagePullPolicy: IfNotPresent
+        name: default_dc
+        ports:
+        - containerPort: 8000
+          hostPort: 8000
+          protocol: TCP
+          name: default_port
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+      dnsPolicy: ClusterFirst
+      hostNetwork: true
+      nodeSelector:
+        type: compute
+      restartPolicy: Always
+      securityContext: {}
+      serviceAccount: default
+      serviceAccountName: default
+      terminationGracePeriodSeconds: 30
+  triggers:
+  - type: ConfigChange
+'''
 
-    def __init__(self, content):
-        '''secret constructor'''
-        super(Secret, self).__init__(content=content)
-        self._secrets = None
+    replicas_path = "spec.replicas"
+    env_path = "spec.template.spec.containers[0].env"
+    volumes_path = "spec.template.spec.volumes"
+    container_path = "spec.template.spec.containers"
+    volume_mounts_path = "spec.template.spec.containers[0].volumeMounts"
 
-    @property
-    def secrets(self):
-        '''secret property getter'''
-        if self._secrets is None:
-            self._secrets = self.get_secrets()
-        return self._secrets
+    def __init__(self, content=None):
+        ''' Constructor for deploymentconfig '''
+        if not content:
+            content = DeploymentConfig.default_deployment_config
 
-    @secrets.setter
-    def secrets(self):
-        '''secret property setter'''
-        if self._secrets is None:
-            self._secrets = self.get_secrets()
-        return self._secrets
+        super(DeploymentConfig, self).__init__(content=content)
 
-    def get_secrets(self):
-        ''' returns all of the defined secrets '''
-        return self.get(Secret.secret_path) or {}
-
-    def add_secret(self, key, value):
-        ''' add a secret '''
-        if self.secrets:
-            self.secrets[key] = value
+    # pylint: disable=no-member
+    def add_env_value(self, key, value):
+        ''' add key, value pair to env array '''
+        rval = False
+        env = self.get_env_vars()
+        if env:
+            env.append({'name': key, 'value': value})
+            rval = True
         else:
-            self.put(Secret.secret_path, {key: value})
+            result = self.put(DeploymentConfig.env_path, {'name': key, 'value': value})
+            rval = result[0]
 
-        return True
+        return rval
 
-    def delete_secret(self, key):
-        ''' delete secret'''
-        try:
-            del self.secrets[key]
-        except KeyError as _:
+    def exists_env_value(self, key, value):
+        ''' return whether a key, value  pair exists '''
+        results = self.get_env_vars()
+        if not results:
             return False
 
-        return True
+        for result in results:
+            if result['name'] == key and result['value'] == value:
+                return True
 
-    def find_secret(self, key):
-        ''' find secret'''
-        rval = None
-        try:
-            rval = self.secrets[key]
-        except KeyError as _:
-            return None
+        return False
 
-        return {'key': key, 'value': rval}
+    def exists_env_key(self, key):
+        ''' return whether a key, value  pair exists '''
+        results = self.get_env_vars()
+        if not results:
+            return False
 
-    def update_secret(self, key, value):
-        ''' update a secret'''
-        # pylint: disable=no-member
-        if self.secrets.has_key(key):
-            self.secrets[key] = value
+        for result in results:
+            if result['name'] == key:
+                return True
+
+        return False
+
+    def get_env_vars(self):
+        '''return a environment variables '''
+        return self.get(DeploymentConfig.env_path) or []
+
+    def delete_env_var(self, keys):
+        '''delete a list of keys '''
+        if not isinstance(keys, list):
+            keys = [keys]
+
+        env_vars_array = self.get_env_vars()
+        modified = False
+        idx = None
+        for key in keys:
+            for env_idx, env_var in enumerate(env_vars_array):
+                if env_var['name'] == key:
+                    idx = env_idx
+                    break
+
+            if idx:
+                modified = True
+                del env_vars_array[idx]
+
+        if modified:
+            return True
+
+        return False
+
+    def update_env_var(self, key, value):
+        '''place an env in the env var list'''
+
+        env_vars_array = self.get_env_vars()
+        idx = None
+        for env_idx, env_var in enumerate(env_vars_array):
+            if env_var['name'] == key:
+                idx = env_idx
+                break
+
+        if idx:
+            env_vars_array[idx]['value'] = value
         else:
-            self.add_secret(key, value)
+            self.add_env_value(key, value)
 
         return True
 
-# -*- -*- -*- End included fragment: lib/secret.py -*- -*- -*-
+    def exists_volume_mount(self, volume_mount):
+        ''' return whether a volume mount exists '''
+        exist_volume_mounts = self.get_volume_mounts()
 
-# -*- -*- -*- Begin included fragment: class/oc_secret.py -*- -*- -*-
+        if not exist_volume_mounts:
+            return False
+
+        volume_mount_found = False
+        for exist_volume_mount in exist_volume_mounts:
+            if exist_volume_mount['name'] == volume_mount['name']:
+                volume_mount_found = True
+                break
+
+        return volume_mount_found
+
+    def exists_volume(self, volume):
+        ''' return whether a volume exists '''
+        exist_volumes = self.get_volumes()
+
+        volume_found = False
+        for exist_volume in exist_volumes:
+            if exist_volume['name'] == volume['name']:
+                volume_found = True
+                break
+
+        return volume_found
+
+    def find_volume_by_name(self, volume, mounts=False):
+        ''' return the index of a volume '''
+        volumes = []
+        if mounts:
+            volumes = self.get_volume_mounts()
+        else:
+            volumes = self.get_volumes()
+        for exist_volume in volumes:
+            if exist_volume['name'] == volume['name']:
+                return exist_volume
+
+        return None
+
+    def get_replicas(self):
+        ''' return replicas setting '''
+        return self.get(DeploymentConfig.replicas_path)
+
+    def get_volume_mounts(self):
+        '''return volume mount information '''
+        return self.get_volumes(mounts=True)
+
+    def get_volumes(self, mounts=False):
+        '''return volume mount information '''
+        if mounts:
+            return self.get(DeploymentConfig.volume_mounts_path) or []
+
+        return self.get(DeploymentConfig.volumes_path) or []
+
+    def delete_volume_by_name(self, volume):
+        '''delete a volume '''
+        modified = False
+        exist_volume_mounts = self.get_volume_mounts()
+        exist_volumes = self.get_volumes()
+        del_idx = None
+        for idx, exist_volume in enumerate(exist_volumes):
+            if 'name' in exist_volume and exist_volume['name'] == volume['name']:
+                del_idx = idx
+                break
+
+        if del_idx != None:
+            del exist_volumes[del_idx]
+            modified = True
+
+        del_idx = None
+        for idx, exist_volume_mount in enumerate(exist_volume_mounts):
+            if 'name' in exist_volume_mount and exist_volume_mount['name'] == volume['name']:
+                del_idx = idx
+                break
+
+        if del_idx != None:
+            del exist_volume_mounts[idx]
+            modified = True
+
+        return modified
+
+    def add_volume_mount(self, volume_mount):
+        ''' add a volume or volume mount to the proper location '''
+        exist_volume_mounts = self.get_volume_mounts()
+
+        if not exist_volume_mounts and volume_mount:
+            self.put(DeploymentConfig.volume_mounts_path, [volume_mount])
+        else:
+            exist_volume_mounts.append(volume_mount)
+
+    def add_volume(self, volume):
+        ''' add a volume or volume mount to the proper location '''
+        exist_volumes = self.get_volumes()
+        if not volume:
+            return
+
+        if not exist_volumes:
+            self.put(DeploymentConfig.volumes_path, [volume])
+        else:
+            exist_volumes.append(volume)
+
+    def update_replicas(self, replicas):
+        ''' update replicas value '''
+        self.put(DeploymentConfig.replicas_path, replicas)
+
+    def update_volume(self, volume):
+        '''place an env in the env var list'''
+        exist_volumes = self.get_volumes()
+
+        if not volume:
+            return False
+
+        # update the volume
+        update_idx = None
+        for idx, exist_vol in enumerate(exist_volumes):
+            if exist_vol['name'] == volume['name']:
+                update_idx = idx
+                break
+
+        if update_idx != None:
+            exist_volumes[update_idx] = volume
+        else:
+            self.add_volume(volume)
+
+        return True
+
+    def update_volume_mount(self, volume_mount):
+        '''place an env in the env var list'''
+        modified = False
+
+        exist_volume_mounts = self.get_volume_mounts()
+
+        if not volume_mount:
+            return False
+
+        # update the volume mount
+        for exist_vol_mount in exist_volume_mounts:
+            if exist_vol_mount['name'] == volume_mount['name']:
+                if 'mountPath' in exist_vol_mount and \
+                   str(exist_vol_mount['mountPath']) != str(volume_mount['mountPath']):
+                    exist_vol_mount['mountPath'] = volume_mount['mountPath']
+                    modified = True
+                break
+
+        if not modified:
+            self.add_volume_mount(volume_mount)
+            modified = True
+
+        return modified
+
+    def needs_update_volume(self, volume, volume_mount):
+        ''' verify a volume update is needed '''
+        exist_volume = self.find_volume_by_name(volume)
+        exist_volume_mount = self.find_volume_by_name(volume, mounts=True)
+        results = []
+        results.append(exist_volume['name'] == volume['name'])
+
+        if 'secret' in volume:
+            results.append('secret' in exist_volume)
+            results.append(exist_volume['secret']['secretName'] == volume['secret']['secretName'])
+            results.append(exist_volume_mount['name'] == volume_mount['name'])
+            results.append(exist_volume_mount['mountPath'] == volume_mount['mountPath'])
+
+        elif 'emptyDir' in volume:
+            results.append(exist_volume_mount['name'] == volume['name'])
+            results.append(exist_volume_mount['mountPath'] == volume_mount['mountPath'])
+
+        elif 'persistentVolumeClaim' in volume:
+            pvc = 'persistentVolumeClaim'
+            results.append(pvc in exist_volume)
+            if results[-1]:
+                results.append(exist_volume[pvc]['claimName'] == volume[pvc]['claimName'])
+
+                if 'claimSize' in volume[pvc]:
+                    results.append(exist_volume[pvc]['claimSize'] == volume[pvc]['claimSize'])
+
+        elif 'hostpath' in volume:
+            results.append('hostPath' in exist_volume)
+            results.append(exist_volume['hostPath']['path'] == volume_mount['mountPath'])
+
+        return not all(results)
+
+    def needs_update_replicas(self, replicas):
+        ''' verify whether a replica update is needed '''
+        current_reps = self.get(DeploymentConfig.replicas_path)
+        return not current_reps == replicas
+
+# -*- -*- -*- End included fragment: lib/deploymentconfig.py -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: lib/replicationcontroller.py -*- -*- -*-
 
 
-# pylint: disable=wrong-import-position,wrong-import-order
-import base64
+# pylint: disable=too-many-public-methods
+class ReplicationController(DeploymentConfig):
+    ''' Class to wrap the oc command line tools '''
+    replicas_path = "spec.replicas"
+    env_path = "spec.template.spec.containers[0].env"
+    volumes_path = "spec.template.spec.volumes"
+    container_path = "spec.template.spec.containers"
+    volume_mounts_path = "spec.template.spec.containers[0].volumeMounts"
 
-# pylint: disable=too-many-arguments
-class OCSecret(OpenShiftCLI):
-    ''' Class to wrap the oc command line tools
-    '''
+    def __init__(self, content):
+        ''' Constructor for ReplicationController '''
+        super(ReplicationController, self).__init__(content=content)
+
+# -*- -*- -*- End included fragment: lib/replicationcontroller.py -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: class/oc_scale.py -*- -*- -*-
+
+# pylint: disable=too-many-instance-attributes
+class OCScale(OpenShiftCLI):
+    ''' Class to wrap the oc command line tools '''
+
+    # pylint allows 5
+    # pylint: disable=too-many-arguments
     def __init__(self,
+                 resource_name,
                  namespace,
-                 secret_name=None,
-                 decode=False,
+                 replicas,
+                 kind,
                  kubeconfig='/etc/origin/master/admin.kubeconfig',
                  verbose=False):
-        ''' Constructor for OpenshiftOC '''
-        super(OCSecret, self).__init__(namespace, kubeconfig)
+        ''' Constructor for OCScale '''
+        super(OCScale, self).__init__(namespace, kubeconfig)
+        self.kind = kind
+        self.replicas = replicas
+        self.name = resource_name
         self.namespace = namespace
-        self.name = secret_name
         self.kubeconfig = kubeconfig
-        self.decode = decode
         self.verbose = verbose
+        self._resource = None
+
+    @property
+    def resource(self):
+        ''' property function for resource var '''
+        if not self._resource:
+            self.get()
+        return self._resource
+
+    @resource.setter
+    def resource(self, data):
+        ''' setter function for resource var '''
+        self._resource = data
 
     def get(self):
-        '''return a secret by name '''
-        results = self._get('secrets', self.name)
-        results['decoded'] = {}
-        results['exists'] = False
-        if results['returncode'] == 0 and results['results'][0]:
-            results['exists'] = True
-            if self.decode:
-                if results['results'][0].has_key('data'):
-                    for sname, value in results['results'][0]['data'].items():
-                        results['decoded'][sname] = base64.b64decode(value)
+        '''return replicas information '''
+        vol = self._get(self.kind, self.name)
+        if vol['returncode'] == 0:
+            if self.kind == 'dc':
+                # The resource returned from a query could be an rc or dc.
+                # pylint: disable=redefined-variable-type
+                self.resource = DeploymentConfig(content=vol['results'][0])
+                vol['results'] = [self.resource.get_replicas()]
+            if self.kind == 'rc':
+                # The resource returned from a query could be an rc or dc.
+                # pylint: disable=redefined-variable-type
+                self.resource = ReplicationController(content=vol['results'][0])
+                vol['results'] = [self.resource.get_replicas()]
 
-        if results['returncode'] != 0 and '"%s" not found' % self.name in results['stderr']:
-            results['returncode'] = 0
+        return vol
 
-        return results
+    def put(self):
+        '''update replicas into dc '''
+        self.resource.update_replicas(self.replicas)
+        return self._replace_content(self.kind, self.name, self.resource.yaml_dict)
 
-    def delete(self):
-        '''delete a secret by name'''
-        return self._delete('secrets', self.name)
+    def needs_update(self):
+        ''' verify whether an update is needed '''
+        return self.resource.needs_update_replicas(self.replicas)
 
-    def create(self, files=None, contents=None):
-        '''Create a secret '''
-        if not files:
-            files = Utils.create_files_from_contents(contents)
-
-        secrets = ["%s=%s" % (sfile['name'], sfile['path']) for sfile in files]
-        cmd = ['secrets', 'new', self.name]
-        cmd.extend(secrets)
-
-        results = self.openshift_cmd(cmd)
-
-        return results
-
-    def update(self, files, force=False):
-        '''run update secret
-
-           This receives a list of file names and converts it into a secret.
-           The secret is then written to disk and passed into the `oc replace` command.
-        '''
-        secret = self.prep_secret(files)
-        if secret['returncode'] != 0:
-            return secret
-
-        sfile_path = '/tmp/%s' % self.name
-        with open(sfile_path, 'w') as sfd:
-            sfd.write(json.dumps(secret['results']))
-
-        atexit.register(Utils.cleanup, [sfile_path])
-
-        return self._replace(sfile_path, force=force)
-
-    def prep_secret(self, files=None, contents=None):
-        ''' return what the secret would look like if created
-            This is accomplished by passing -ojson.  This will most likely change in the future
-        '''
-        if not files:
-            files = Utils.create_files_from_contents(contents)
-
-        secrets = ["%s=%s" % (sfile['name'], sfile['path']) for sfile in files]
-        cmd = ['-ojson', 'secrets', 'new', self.name]
-        cmd.extend(secrets)
-
-        return self.openshift_cmd(cmd, output=True)
-
+    # pylint: disable=too-many-return-statements
     @staticmethod
-    # pylint: disable=too-many-return-statements,too-many-branches
-    # TODO: This function should be refactored into its individual parts.
     def run_ansible(params, check_mode):
-        '''run the ansible idempotent code'''
+        '''perform the idempotent ansible logic'''
 
-        ocsecret = OCSecret(params['namespace'],
-                            params['name'],
-                            params['decode'],
-                            kubeconfig=params['kubeconfig'],
-                            verbose=params['debug'])
+        oc_scale = OCScale(params['name'],
+                           params['namespace'],
+                           params['replicas'],
+                           params['kind'],
+                           params['kubeconfig'],
+                           verbose=params['debug'])
 
         state = params['state']
 
-        api_rval = ocsecret.get()
+        api_rval = oc_scale.get()
 
         #####
         # Get
         #####
         if state == 'list':
-            return {'changed': False, 'results': api_rval, state: 'list'}
+            return {'changed': False, 'result': api_rval['results'], 'state': 'list'}  # noqa: E501
 
-        if not params['name']:
-            return {'failed': True,
-                    'msg': 'Please specify a name when state is absent|present.'}
-
-        ########
-        # Delete
-        ########
-        if state == 'absent':
-            if not Utils.exists(api_rval['results'], params['name']):
-                return {'changed': False, 'state': 'absent'}
-
-            if check_mode:
-                return {'changed': True, 'msg': 'Would have performed a delete.'}
-
-            api_rval = ocsecret.delete()
-            return {'changed': True, 'results': api_rval, 'state': 'absent'}
-
-        if state == 'present':
-            if params['files']:
-                files = params['files']
-            elif params['contents']:
-                files = Utils.create_files_from_contents(params['contents'])
-            else:
-                return {'failed': True,
-                        'msg': 'Either specify files or contents.'}
-
-            ########
-            # Create
-            ########
-            if not Utils.exists(api_rval['results'], params['name']):
-
-                if check_mode:
-                    return {'changed': True,
-                            'msg': 'Would have performed a create.'}
-
-                api_rval = ocsecret.create(params['files'], params['contents'])
-
-                # Remove files
-                if files and params['delete_after']:
-                    Utils.cleanup([ftmp['path'] for ftmp in files])
-
-                if api_rval['returncode'] != 0:
-                    return {'failed': True,
-                            'msg': api_rval}
-
-                return {'changed': True,
-                        'results': api_rval,
-                        'state': 'present'}
-
+        elif state == 'present':
             ########
             # Update
             ########
-            secret = ocsecret.prep_secret(params['files'], params['contents'])
+            if oc_scale.needs_update():
+                if check_mode:
+                    return {'changed': True, 'result': 'CHECK_MODE: Would have updated.'}  # noqa: E501
+                api_rval = oc_scale.put()
 
-            if secret['returncode'] != 0:
-                return {'failed': True, 'msg': secret}
+                if api_rval['returncode'] != 0:
+                    return {'failed': True, 'msg': api_rval}
 
-            if Utils.check_def_equal(secret['results'], api_rval['results'][0]):
+                # return the created object
+                api_rval = oc_scale.get()
 
-                # Remove files
-                if files and params['delete_after']:
-                    Utils.cleanup([ftmp['path'] for ftmp in files])
+                if api_rval['returncode'] != 0:
+                    return {'failed': True, 'msg': api_rval}
 
-                return {'changed': False,
-                        'results': secret['results'],
-                        'state': 'present'}
+                return {'changed': True, 'result': api_rval['results'], 'state': 'present'}  # noqa: E501
 
-            if check_mode:
-                return {'changed': True,
-                        'msg': 'Would have performed an update.'}
+            return {'changed': False, 'result': api_rval['results'], 'state': 'present'}  # noqa: E501
 
-            api_rval = ocsecret.update(files, force=params['force'])
+        return {'failed': True, 'msg': 'Unknown state passed. [{}]'.format(state)}
 
-            # Remove files
-            if secret and params['delete_after']:
-                Utils.cleanup([ftmp['path'] for ftmp in files])
+# -*- -*- -*- End included fragment: class/oc_scale.py -*- -*- -*-
 
-            if api_rval['returncode'] != 0:
-                return {'failed': True,
-                        'msg': api_rval}
-
-            return {'changed': True,
-                    'results': api_rval,
-                    'state': 'present'}
-
-        return {'failed': True,
-                'changed': False,
-                'msg': 'Unknown state passed. %s' % state,
-                'state': 'unknown'}
-
-# -*- -*- -*- End included fragment: class/oc_secret.py -*- -*- -*-
-
-# -*- -*- -*- Begin included fragment: ansible/oc_secret.py -*- -*- -*-
-
+# -*- -*- -*- Begin included fragment: ansible/oc_scale.py -*- -*- -*-
 
 def main():
     '''
-    ansible oc module for managing OpenShift Secrets
+    ansible oc module for scaling
     '''
 
     module = AnsibleModule(
         argument_spec=dict(
             kubeconfig=dict(default='/etc/origin/master/admin.kubeconfig', type='str'),
-            state=dict(default='present', type='str',
-                       choices=['present', 'absent', 'list']),
+            state=dict(default='present', type='str', choices=['present', 'list']),
             debug=dict(default=False, type='bool'),
+            kind=dict(default='dc', choices=['dc', 'rc'], type='str'),
             namespace=dict(default='default', type='str'),
+            replicas=dict(default=None, type='int'),
             name=dict(default=None, type='str'),
-            files=dict(default=None, type='list'),
-            delete_after=dict(default=False, type='bool'),
-            contents=dict(default=None, type='list'),
-            force=dict(default=False, type='bool'),
-            decode=dict(default=False, type='bool'),
         ),
-        mutually_exclusive=[["contents", "files"]],
-
         supports_check_mode=True,
     )
-
-
-    rval = OCSecret.run_ansible(module.params, module.check_mode)
+    rval = OCScale.run_ansible(module.params, module.check_mode)
     if 'failed' in rval:
         module.fail_json(**rval)
 
     module.exit_json(**rval)
 
+
 if __name__ == '__main__':
     main()
 
-# -*- -*- -*- End included fragment: ansible/oc_secret.py -*- -*- -*-
+# -*- -*- -*- End included fragment: ansible/oc_scale.py -*- -*- -*-
