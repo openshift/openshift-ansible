@@ -324,6 +324,10 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #
 # Disable management of the OpenShift Registry
 #openshift_hosted_manage_registry=false
+#
+# Enable audit logger. An OpenShift integrated registry will add extra records
+# with information about which user got access to the API.
+#openshift_hosted_registry_auth_auditlog=true
 
 # Registry Storage Options
 #

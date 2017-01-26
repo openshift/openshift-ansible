@@ -62,6 +62,10 @@ storage:
 auth:
   openshift:
     realm: openshift
+{% if openshift.common.version_gte_3_5_or_1_5 | bool %}
+    audit:
+      enabled: {{ openshift_hosted_registry_auth_auditlog | default(false) }}
+{% endif %}
 middleware:
 {% if openshift.common.version_gte_3_3_or_1_3 | bool %}
   registry:
