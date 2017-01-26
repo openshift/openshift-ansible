@@ -82,7 +82,7 @@ options:
     description:
     - The namespace where the object lives.
     required: false
-    default: str
+    default: default
     aliases: []
   kind:
     description:
