@@ -131,9 +131,11 @@ class ManageNode(OpenShiftCLI):
                 if isinstance(tmp_result, dict):
                     tmp_nodes.append(tmp_result)
                     continue
-                tmp_nodes.extend(self.get_nodes(name))
+                tmp_nodes.extend(tmp_result)
             nodes = tmp_nodes
 
+        # This is a short circuit based on the way we fetch nodes.
+        # If node is a dict/list then we've already fetched them.
         for node in nodes:
             if isinstance(node, dict) and node.has_key('returncode'):
                 return {'results': nodes, 'returncode': node['returncode']}
@@ -143,10 +145,21 @@ class ManageNode(OpenShiftCLI):
         # node['schedulable'] == self.config.config_options['schedulable']['value']
         if any([node['schedulable'] != self.config.config_options['schedulable']['value'] for node in nodes]):
 
-            return self._schedulable(node=self.config.config_options['node']['value'],
-                                     selector=self.config.config_options['selector']['value'],
-                                     schedulable=self.config.config_options['schedulable']['value'],
-                                    )
+            results = self._schedulable(node=self.config.config_options['node']['value'],
+                                        selector=self.config.config_options['selector']['value'],
+                                        schedulable=self.config.config_options['schedulable']['value'])
+
+            # 'NAME                            STATUS    AGE\\nip-172-31-49-140.ec2.internal   Ready     4h\\n'  # E501
+            # normalize formatting with previous return objects
+            if results['results'].startswith('NAME'):
+                nodes = []
+                # removing header line and trailing new line character of node lines
+                for node_results in results['results'].split('\n')[1:-1]:
+                    parts = node_results.split()
+                    nodes.append({'name': parts[0], 'schedulable': 'Ready' == parts[1]})
+                results['nodes'] = nodes
+
+            return results
 
         results = {}
         results['returncode'] = 0

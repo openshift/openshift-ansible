@@ -14,7 +14,7 @@ def main():
             node=dict(default=None, type='list'),
             selector=dict(default=None, type='str'),
             pod_selector=dict(default=None, type='str'),
-            schedulable=dict(default=False, type='bool'),
+            schedulable=dict(default=None, type='bool'),
             list_pods=dict(default=False, type='bool'),
             evacuate=dict(default=False, type='bool'),
             dry_run=dict(default=False, type='bool'),
