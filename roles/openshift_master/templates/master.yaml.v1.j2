@@ -15,8 +15,8 @@ assetConfig:
 {% if 'logging_public_url' in openshift.master %}
   loggingPublicURL: {{ openshift.master.logging_public_url }}
 {% endif %}
-{% if openshift_hosted_metrics_deploy | default(false) | bool %}
-  metricsPublicURL: {{ openshift_hosted_metrics_public_url }}
+{% if openshift_hosted_metrics_deploy_url is defined %}
+  metricsPublicURL: {{ openshift_hosted_metrics_deploy_url }}
 {% endif %}
 {% if 'extension_scripts' in openshift.master %}
   extensionScripts: {{ openshift.master.extension_scripts | to_padded_yaml(1, 2) }}
