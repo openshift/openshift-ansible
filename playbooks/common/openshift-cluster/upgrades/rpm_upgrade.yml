@@ -6,5 +6,5 @@
   action: "{{ ansible_pkg_mgr }} name=PyYAML state=present"
   when: "{{ not openshift.common.is_atomic | bool }}"
 
-- name: Restart node service
+- name: Restart service
   service: name="{{ openshift.common.service_type }}-{{ component }}" state=restarted
