@@ -19,24 +19,52 @@
 - slurp: src={{ openshift_metrics_certs_dir }}/hawkular-metrics-truststore.pwd
   register: hawkular_truststore_password
 
+- stat: path="{{openshift_metrics_certs_dir}}/{{item}}"
+  register: pwd_file_stat
+  with_items:
+  - hawkular-metrics.pwd
+  - hawkular-metrics.htpasswd
+  - hawkular-jgroups-keystore.pwd
+  changed_when: no
+
+- set_fact:
+    pwd_files: "{{pwd_files | default({}) | combine ({item.item: item.stat}) }}"
+  with_items: "{{pwd_file_stat.results}}"
+  changed_when: no
+
+- name: Create temp directory local on control node
+  local_action: command mktemp -d
+  register: local_tmp
+  changed_when: False
+
 - name: generate password for hawkular metrics and jgroups
-  copy:
-    dest: '{{ openshift_metrics_certs_dir }}/{{ item }}.pwd'
-    content: "{{ 15 | oo_random_word }}"
+  local_action: copy dest="{{ local_tmp.stdout}}/{{ item }}.pwd" content="{{ 15 | oo_random_word }}"
   with_items:
   - hawkular-metrics
   - hawkular-jgroups-keystore
-  when: not '{{ openshift_metrics_certs_dir }}/{{ item }}.pwd'|exists
+  when: "not pwd_files['{{ item }}.pwd'].exists"
 
 - name: generate htpasswd file for hawkular metrics
-  shell: >
-    htpasswd -ci
-    '{{ openshift_metrics_certs_dir }}/hawkular-metrics.htpasswd' hawkular
-    < '{{ openshift_metrics_certs_dir }}/hawkular-metrics.pwd'
-  when: >
-    not '{{ openshift_metrics_certs_dir }}/hawkular-metrics.htpasswd'|exists
+  local_action: >
+    shell htpasswd -ci
+    '{{ local_tmp.stdout }}/hawkular-metrics.htpasswd' hawkular
+    < '{{ local_tmp.stdout }}/hawkular-metrics.pwd'
+  when: "not pwd_files['hawkular-metrics.htpasswd'].exists"
+
+- name: copy local generated passwords to target
+  copy:
+    src: "{{local_tmp.stdout}}/{{item}}"
+    dest: "{{openshift_metrics_certs_dir}}/{{item}}"
+  with_items:
+  - hawkular-metrics.pwd
+  - hawkular-metrics.htpasswd
+  - hawkular-jgroups-keystore.pwd
+  when: "not pwd_files['{{ item }}'].exists"
 
 - include: import_jks_certs.yaml
+
+- local_action: file path="{{local_tmp.stdout}}" state=absent
+  changed_when: False
 
 - name: read files for the hawkular-metrics secret
   shell: >
