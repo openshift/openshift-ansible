@@ -8,7 +8,8 @@
   - always
   tasks:
   - include_vars: ../../byo/openshift-cluster/cluster_hosts.yml
-  - add_host:
+  - name: Evaluate group l_oo_all_hosts
+    add_host:
       name: "{{ item }}"
       groups: l_oo_all_hosts
     with_items: "{{ g_all_hosts | default([]) }}"
