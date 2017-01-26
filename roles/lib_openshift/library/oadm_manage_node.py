@@ -814,11 +814,10 @@ class OpenShiftCLI(object):
         cmd = ['get', resource]
         if selector:
             cmd.append('--selector=%s' % selector)
+        elif rname:
+            cmd.append(rname)
 
         cmd.extend(['-o', 'json'])
-
-        if rname:
-            cmd.append(rname)
 
         rval = self.openshift_cmd(cmd, output=True)
 
@@ -1429,7 +1428,6 @@ class ManageNode(OpenShiftCLI):
             return {'failed': True, 'msg': results}
 
         return {'changed': changed, 'results': results, 'state': "present"}
-
 
 # -*- -*- -*- End included fragment: class/oadm_manage_node.py -*- -*- -*-
 
