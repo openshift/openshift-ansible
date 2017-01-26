@@ -127,7 +127,6 @@ class ManageNodeTest(unittest.TestCase):
                   'dry_run': False,
                   'force': False}
 
-
         node = [{
             "apiVersion": "v1",
             "kind": "Node",
@@ -155,14 +154,13 @@ class ManageNodeTest(unittest.TestCase):
                 "providerID": "aws:///us-east-1c/i-06bb330e55c699b0f",
             }}]
 
-                #"unschedulable": True
         mock_openshift_cmd.side_effect = [
             {"cmd": "/usr/bin/oc get node -o json ip-172-31-49-140.ec2.internal",
              "results": node,
-             "returncode": 0,
-            },
+             "returncode": 0},
             {"cmd": "/usr/bin/oadm manage-node ip-172-31-49-140.ec2.internal --schedulable=False",
-             "results": "NAME                            STATUS    AGE\nip-172-31-49-140.ec2.internal   Ready,SchedulingDisabled     5h\n",
+             "results": "NAME                            STATUS    AGE\n" +
+                        "ip-172-31-49-140.ec2.internal   Ready,SchedulingDisabled     5h\n",
              "returncode": 0}]
         results = ManageNode.run_ansible(params, False)
 

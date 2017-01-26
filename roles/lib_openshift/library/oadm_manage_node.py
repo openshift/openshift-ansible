@@ -1285,7 +1285,7 @@ class ManageNode(OpenShiftCLI):
             _node = {}
             _node['name'] = node['metadata']['name']
             _node['schedulable'] = True
-            if node['spec'].has_key('unschedulable'):
+            if 'unschedulable' in node['spec']:
                 _node['schedulable'] = False
             nodes.append(_node)
 
@@ -1363,9 +1363,9 @@ class ManageNode(OpenShiftCLI):
         # This is a short circuit based on the way we fetch nodes.
         # If node is a dict/list then we've already fetched them.
         for node in nodes:
-            if isinstance(node, dict) and node.has_key('returncode'):
+            if isinstance(node, dict) and 'returncode' in node:
                 return {'results': nodes, 'returncode': node['returncode']}
-            if isinstance(node, list) and node[0].has_key('returncode'):
+            if isinstance(node, list) and 'returncode' in node[0]:
                 return {'results': nodes, 'returncode': node[0]['returncode']}
         # check all the nodes that were returned and verify they are:
         # node['schedulable'] == self.config.config_options['schedulable']['value']
@@ -1382,7 +1382,7 @@ class ManageNode(OpenShiftCLI):
                 # removing header line and trailing new line character of node lines
                 for node_results in results['results'].split('\n')[1:-1]:
                     parts = node_results.split()
-                    nodes.append({'name': parts[0], 'schedulable': 'Ready' == parts[1]})
+                    nodes.append({'name': parts[0], 'schedulable': parts[1] == 'Ready'})
                 results['nodes'] = nodes
 
             return results
@@ -1414,8 +1414,12 @@ class ManageNode(OpenShiftCLI):
         results = None
         changed = False
         if params['schedulable'] != None:
+            if check_mode:
+                # schedulable returns results after the fact.
+                # We need to redo how this works to support check_mode completely.
+                return {'changed': True, 'msg': 'CHECK_MODE: would have called schedulable.'}
             results = oadm_mn.schedulable()
-            if not results.has_key('changed'):
+            if 'changed' not in results:
                 changed = True
 
         if params['evacuate']:
