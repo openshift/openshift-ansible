@@ -11,11 +11,7 @@ class LookupModule(LookupBase):
     def run(self, terms, variables=None, zones_enabled=True, short_version=None,
             deployment_type=None, **kwargs):
 
-        priorities = [
-            {'name': 'LeastRequestedPriority', 'weight': 1},
-            {'name': 'BalancedResourceAllocation', 'weight': 1},
-            {'name': 'SelectorSpreadPriority', 'weight': 1}
-        ]
+        priorities = []
 
         if short_version is None or deployment_type is None:
             if 'openshift' not in variables:
@@ -57,18 +53,51 @@ class LookupModule(LookupBase):
             # convert short_version to origin short_version
             short_version = re.sub('^3.', '1.', short_version)
 
+        if short_version == '1.1':
+            priorities.extend([
+                {'name': 'LeastRequestedPriority', 'weight': 1},
+                {'name': 'BalancedResourceAllocation', 'weight': 1},
+                {'name': 'SelectorSpreadPriority', 'weight': 1}
+            ])
+
+        if short_version == '1.2':
+            priorities.extend([
+                {'name': 'LeastRequestedPriority', 'weight': 1},
+                {'name': 'BalancedResourceAllocation', 'weight': 1},
+                {'name': 'SelectorSpreadPriority', 'weight': 1},
+                {'name': 'NodeAffinityPriority', 'weight': 1}
+            ])
+
+        if short_version == '1.3':
+            priorities.extend([
+                {'name': 'LeastRequestedPriority', 'weight': 1},
+                {'name': 'BalancedResourceAllocation', 'weight': 1},
+                {'name': 'SelectorSpreadPriority', 'weight': 1},
+                {'name': 'NodeAffinityPriority', 'weight': 1},
+                {'name': 'TaintTolerationPriority', 'weight': 1}
+            ])
+
         if short_version == '1.4':
-            priorities.append({'name': 'NodePreferAvoidPodsPriority', 'weight': 10000})
+            priorities.extend([
+                {'name': 'LeastRequestedPriority', 'weight': 1},
+                {'name': 'BalancedResourceAllocation', 'weight': 1},
+                {'name': 'SelectorSpreadPriority', 'weight': 1},
+                {'name': 'NodePreferAvoidPodsPriority', 'weight': 10000},
+                {'name': 'NodeAffinityPriority', 'weight': 1},
+                {'name': 'TaintTolerationPriority', 'weight': 1},
+                {'name': 'InterPodAffinityPriority', 'weight': 1}
+            ])
 
-        # only 1.1 didn't include NodeAffinityPriority
-        if short_version != '1.1':
-            priorities.append({'name': 'NodeAffinityPriority', 'weight': 1})
-
-        if short_version not in ['1.1', '1.2']:
-            priorities.append({'name': 'TaintTolerationPriority', 'weight': 1})
-
-        if short_version not in ['1.1', '1.2', '1.3']:
-            priorities.append({'name': 'InterPodAffinityPriority', 'weight': 1})
+        if short_version in ['1.5', '1.6']:
+            priorities.extend([
+                {'name': 'SelectorSpreadPriority', 'weight': 1},
+                {'name': 'InterPodAffinityPriority', 'weight': 1},
+                {'name': 'LeastRequestedPriority', 'weight': 1},
+                {'name': 'BalancedResourceAllocation', 'weight': 1},
+                {'name': 'NodePreferAvoidPodsPriority', 'weight': 10000},
+                {'name': 'NodeAffinityPriority', 'weight': 1},
+                {'name': 'TaintTolerationPriority', 'weight': 1}
+            ])
 
         if zones_enabled:
             zone_priority = {

@@ -40,6 +40,16 @@ DEFAULT_PRIORITIES_1_4 = [
     {'name': 'InterPodAffinityPriority', 'weight': 1}
 ]
 
+DEFAULT_PRIORITIES_1_5 = [
+    {'name': 'SelectorSpreadPriority', 'weight': 1},
+    {'name': 'InterPodAffinityPriority', 'weight': 1},
+    {'name': 'LeastRequestedPriority', 'weight': 1},
+    {'name': 'BalancedResourceAllocation', 'weight': 1},
+    {'name': 'NodePreferAvoidPodsPriority', 'weight': 10000},
+    {'name': 'NodeAffinityPriority', 'weight': 1},
+    {'name': 'TaintTolerationPriority', 'weight': 1}
+]
+
 ZONE_PRIORITY = {
     'name': 'Zone',
     'argument': {
@@ -58,7 +68,11 @@ TEST_VARS = [
     ('1.3', 'origin', DEFAULT_PRIORITIES_1_3),
     ('3.3', 'openshift-enterprise', DEFAULT_PRIORITIES_1_3),
     ('1.4', 'origin', DEFAULT_PRIORITIES_1_4),
-    ('3.4', 'openshift-enterprise', DEFAULT_PRIORITIES_1_4)
+    ('3.4', 'openshift-enterprise', DEFAULT_PRIORITIES_1_4),
+    ('1.5', 'origin', DEFAULT_PRIORITIES_1_5),
+    ('3.5', 'openshift-enterprise', DEFAULT_PRIORITIES_1_5),
+    ('1.6', 'origin', DEFAULT_PRIORITIES_1_5),
+    ('3.6', 'openshift-enterprise', DEFAULT_PRIORITIES_1_5),
 ]
 
 

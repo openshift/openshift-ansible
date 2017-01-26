@@ -9,6 +9,9 @@ sys.path = [os.path.abspath(os.path.dirname(__file__) + "/../lookup_plugins/")] 
 
 from openshift_master_facts_default_predicates import LookupModule  # noqa: E402
 
+# Predicates ordered according to OpenShift Origin source:
+# origin/vendor/k8s.io/kubernetes/plugin/pkg/scheduler/algorithmprovider/defaults/defaults.go
+
 DEFAULT_PREDICATES_1_1 = [
     {'name': 'PodFitsHostPorts'},
     {'name': 'PodFitsResources'},
@@ -48,6 +51,18 @@ DEFAULT_PREDICATES_1_4 = [
     {'name': 'MatchInterPodAffinity'}
 ]
 
+DEFAULT_PREDICATES_1_5 = [
+    {'name': 'NoVolumeZoneConflict'},
+    {'name': 'MaxEBSVolumeCount'},
+    {'name': 'MaxGCEPDVolumeCount'},
+    {'name': 'MatchInterPodAffinity'},
+    {'name': 'NoDiskConflict'},
+    {'name': 'GeneralPredicates'},
+    {'name': 'PodToleratesNodeTaints'},
+    {'name': 'CheckNodeMemoryPressure'},
+    {'name': 'CheckNodeDiskPressure'},
+]
+
 REGION_PREDICATE = {
     'name': 'Region',
     'argument': {
@@ -66,10 +81,10 @@ TEST_VARS = [
     ('3.3', 'openshift-enterprise', DEFAULT_PREDICATES_1_3),
     ('1.4', 'origin', DEFAULT_PREDICATES_1_4),
     ('3.4', 'openshift-enterprise', DEFAULT_PREDICATES_1_4),
-    ('1.5', 'origin', DEFAULT_PREDICATES_1_4),
-    ('3.5', 'openshift-enterprise', DEFAULT_PREDICATES_1_4),
-    ('1.6', 'origin', DEFAULT_PREDICATES_1_4),
-    ('3.6', 'openshift-enterprise', DEFAULT_PREDICATES_1_4),
+    ('1.5', 'origin', DEFAULT_PREDICATES_1_5),
+    ('3.5', 'openshift-enterprise', DEFAULT_PREDICATES_1_5),
+    ('1.6', 'origin', DEFAULT_PREDICATES_1_5),
+    ('3.6', 'openshift-enterprise', DEFAULT_PREDICATES_1_5),
 ]
 
 

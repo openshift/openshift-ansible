@@ -25,33 +25,15 @@ QUIET_ANSIBLE_CONFIG = '/usr/share/atomic-openshift-utils/ansible-quiet.cfg'
 DEFAULT_PLAYBOOK_DIR = '/usr/share/ansible/openshift-ansible/'
 
 UPGRADE_MAPPINGS = {
-    '3.0': {
-        'minor_version': '3.0',
-        'minor_playbook': 'v3_0_minor/upgrade.yml',
-        'major_version': '3.1',
-        'major_playbook': 'v3_0_to_v3_1/upgrade.yml',
-    },
-    '3.1': {
-        'minor_version': '3.1',
-        'minor_playbook': 'v3_1_minor/upgrade.yml',
-        'major_playbook': 'v3_1_to_v3_2/upgrade.yml',
-        'major_version': '3.2',
-    },
-    '3.2': {
-        'minor_version': '3.2',
-        'minor_playbook': 'v3_2/upgrade.yml',
-        'major_playbook': 'v3_3/upgrade.yml',
-        'major_version': '3.3',
-    },
-    '3.3': {
-        'minor_version': '3.3',
-        'minor_playbook': 'v3_3/upgrade.yml',
-        'major_playbook': 'v3_4/upgrade.yml',
-        'major_version': '3.4',
-    },
     '3.4': {
         'minor_version': '3.4',
         'minor_playbook': 'v3_4/upgrade.yml',
+        'major_playbook': 'v3_5/upgrade.yml',
+        'major_version': '3.5',
+    },
+    '3.5': {
+        'minor_version': '3.5',
+        'minor_playbook': 'v3_5/upgrade.yml',
     },
 }
 
