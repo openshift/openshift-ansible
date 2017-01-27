@@ -44,6 +44,13 @@
     loop_var: file
   when: not ansible_check_mode
 
+- name: Adding Kibana route information to loggingPublicURL
+  modify_yaml:
+    dest: "{{ openshift.common.config_base }}/master/master-config.yaml"
+    yaml_key: assetConfig.loggingPublicURL
+    yaml_value: "https://{{ openshift_logging_kibana_hostname }}"
+  notify: restart master
+
 - name: Printing out objects to create
   debug: msg={{file.content | b64decode }}
   with_items: "{{ object_defs.results }}"
