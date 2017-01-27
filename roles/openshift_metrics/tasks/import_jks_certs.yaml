@@ -29,10 +29,6 @@
   - slurp: src={{ openshift_metrics_certs_dir }}/hawkular-jgroups-keystore.pwd
     register: jgroups_keystore_password
 
-  - local_action: command mktemp -d
-    register: local_tmp
-    changed_when: False
-
   - fetch:
       dest: "{{local_tmp.stdout}}/"
       src: "{{ openshift_metrics_certs_dir }}/{{item}}"
@@ -59,11 +55,6 @@
       dest: "{{openshift_metrics_certs_dir}}/"
       src: "{{item}}"
     with_fileglob: "{{local_tmp.stdout}}/*.*store"
-
-  - file:
-      path: "{{local_tmp.stdout}}"
-      state: absent
-    changed_when: False
 
   when: not metrics_keystore.stat.exists or
         not metrics_truststore.stat.exists or
