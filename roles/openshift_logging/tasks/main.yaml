@@ -12,6 +12,10 @@
 
 - debug: msg="Created temp dir {{mktemp.stdout}}"
 
+- name: Ensuring ruamel.yaml package is on target
+  command: yum install -y ruamel.yaml
+  check_mode: no
+
 - name: Copy the admin client config(s)
   command: >
     cp {{ openshift_master_config_dir }}/admin.kubeconfig {{ mktemp.stdout }}/admin.kubeconfig
