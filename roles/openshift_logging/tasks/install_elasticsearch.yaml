@@ -1,24 +1,30 @@
 ---
+- name: Getting current ES deployment size
+  set_fact: openshift_logging_current_es_size={{ openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | length }}
+
 - name: Generate PersistentVolumeClaims
   include: "{{ role_path}}/tasks/generate_pvcs.yaml"
   vars:
     es_pvc_names: "{{openshift_logging_facts.elasticsearch.pvcs.keys()}}"
     es_dc_names: "{{openshift_logging_facts.elasticsearch.deploymentconfigs.keys()}}"
-  when:
-    - "{{ openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | length < openshift_logging_es_cluster_size }}"
 
+# we should initialize the es_dc_pool with the current keys
 - name: Init pool of DeploymentConfig names for Elasticsearch
-  set_fact: es_dc_pool={{es_dc_pool | default([]) + [deploy_name]}}
+  set_fact: es_dc_pool={{ es_dc_pool | default([]) + [deploy_name] }}
+  with_items: "{{ openshift_logging_facts.elasticsearch.deploymentconfigs.keys() }}"
+  loop_control:
+    loop_var: deploy_name
+
+# This should be used to generate new DC names if necessary
+- name: Create new DeploymentConfig names for Elasticsearch
+  set_fact: es_dc_pool={{es_dc_pool + [deploy_name]}}
   vars:
     component: es
     es_cluster_name: "{{component}}"
     deploy_name_prefix: "logging-{{component}}"
     deploy_name: "{{deploy_name_prefix}}-{{'abcdefghijklmnopqrstuvwxyz0123456789'|random_word(8)}}"
-  with_sequence: count={{(openshift_logging_es_cluster_size - openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | length) | abs}}
-  when:
-    - "{{ openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | length < openshift_logging_es_cluster_size }}"
+  with_sequence: count={{(openshift_logging_es_cluster_size | int - openshift_logging_current_es_size | int) | abs}}
   check_mode: no
-
 
 - name: Generate Elasticsearch DeploymentConfig
   template: src=es.j2 dest={{mktemp.stdout}}/templates/logging-{{deploy_name}}-dc.yaml
@@ -35,13 +41,14 @@
     deploy_name: "{{item.1}}"
     es_node_selector: "{{openshift_logging_es_nodeselector | default({})}}"
   with_indexed_items:
-    - "{{es_dc_pool | default([])}}"
+    - "{{ es_dc_pool }}"
   check_mode: no
-  when:
-    - "{{ openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | length < openshift_logging_es_cluster_size }}"
   changed_when: no
 
 # --------- Tasks for Operation clusters ---------
+
+- name: Getting current ES deployment size
+  set_fact: openshift_logging_current_es_ops_size={{ openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys() | length }}
 
 - name: Validate Elasticsearch cluster size for Ops
   fail: msg="The openshift_logging_es_ops_cluster_size may not be scaled down more than 1 less (or 0) the number of Elasticsearch nodes already deployed"
@@ -65,21 +72,27 @@
     openshift_logging_es_pv_selector: "{{openshift_logging_es_ops_pv_selector}}"
   when:
     - openshift_logging_use_ops
-    - "{{ openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys() | length < openshift_logging_es_ops_cluster_size }}"
   check_mode: no
 
-- name: Init pool of DeploymentConfig names for Elasticsearch for Ops
-  set_fact: es_dc_pool_ops={{es_dc_pool_ops | default([]) + [deploy_name]}}
+- name: Init pool of DeploymentConfig names for Elasticsearch Ops
+  set_fact: es_ops_dc_pool={{ es_ops_dc_pool | default([]) + [deploy_name] }}
+  with_items: "{{ openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys() }}"
+  loop_control:
+    loop_var: deploy_name
+  when:
+    - openshift_logging_use_ops
+
+- name: Create new DeploymentConfig names for Elasticsearch Ops
+  set_fact: es_ops_dc_pool={{es_ops_dc_pool + [deploy_name]}}
   vars:
     component: es-ops
     es_cluster_name: "{{component}}"
     deploy_name_prefix: "logging-{{component}}"
     deploy_name: "{{deploy_name_prefix}}-{{'abcdefghijklmnopqrstuvwxyz0123456789'|random_word(8)}}"
     cluster_size: "{{openshift_logging_es_ops_cluster_size}}"
-  with_sequence: count={{openshift_logging_es_ops_cluster_size - openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys() | length}}
+  with_sequence: count={{ openshift_logging_es_ops_cluster_size | int - openshift_logging_current_es_ops_size | int }}
   when:
     - openshift_logging_use_ops
-    - "{{ openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys() | length < openshift_logging_es_ops_cluster_size }}"
   check_mode: no
 
 - name: Generate Elasticsearch DeploymentConfig for Ops
@@ -101,9 +114,8 @@
     openshift_logging_es_recover_after_time: "{{openshift_logging_es_ops_recover_after_time}}"
     es_node_selector: "{{openshift_logging_es_ops_nodeselector | default({})}}"
   with_indexed_items:
-    - "{{es_dc_pool_ops | default([])}}"
+    - "{{ es_ops_dc_pool | default([]) }}"
   when:
     - openshift_logging_use_ops
-    - "{{ openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys() | length < openshift_logging_es_ops_cluster_size }}"
   check_mode: no
   changed_when: no
