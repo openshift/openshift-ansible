@@ -1,7 +1,7 @@
 ---
 galaxy_info:
   author: OpenShift Red Hat
-  description: OpenShift Embedded Router
+  description: OpenShift Aggregated Logging Role
   company: Red Hat, Inc.
   license: Apache License, Version 2.0
   min_ansible_version: 2.2
@@ -12,4 +12,5 @@ galaxy_info:
   categories:
   - cloud
 dependencies:
+- role: lib_openshift
 - role: openshift_facts

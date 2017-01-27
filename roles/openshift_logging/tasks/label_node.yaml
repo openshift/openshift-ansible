@@ -49,4 +49,4 @@
   - unlabel is defined
   - unlabel
   - not ansible_check_mode
-  - label_value.stdout != ""
+  - label in node_labels.stdout
