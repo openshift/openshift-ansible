@@ -11,9 +11,12 @@
   check_mode: no
 
 - name: Stop Heapster
-  include: scale.yaml
-  vars:
-    desired: 0
+  oc_scale:
+    kind: rc
+    name: "{{object.split('/')[1]}}"
+    kubeconfig: "{{mktemp.stdout}}/admin.kubeconfig"
+    namespace: "{{openshift_metrics_project}}"
+    replicas: 0
   with_items: "{{metrics_heapster_rc.stdout_lines}}"
   loop_control:
     loop_var: object
@@ -29,9 +32,12 @@
   changed_when: "'No resources found' not in metrics_hawkular_rc.stderr"
 
 - name: Stop Hawkular Metrics
-  include: scale.yaml
-  vars:
-    desired: 0
+  oc_scale:
+    kind: rc
+    name: "{{object.split('/')[1]}}"
+    kubeconfig: "{{mktemp.stdout}}/admin.kubeconfig"
+    namespace: "{{openshift_metrics_project}}"
+    replicas: 0
   with_items: "{{metrics_hawkular_rc.stdout_lines}}"
   loop_control:
     loop_var: object
@@ -46,9 +52,12 @@
   changed_when: "'No resources found' not in metrics_cassandra_rc.stderr"
 
 - name: Stop Hawkular Cassandra
-  include: scale.yaml
-  vars:
-    desired: 0
+  oc_scale:
+    kind: rc
+    name: "{{object.split('/')[1]}}"
+    kubeconfig: "{{mktemp.stdout}}/admin.kubeconfig"
+    namespace: "{{openshift_metrics_project}}"
+    replicas: 0
   with_items: "{{metrics_cassandra_rc.stdout_lines}}"
   loop_control:
     loop_var: object

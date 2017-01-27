@@ -10,9 +10,12 @@
   changed_when: no
 
 - name: Start Hawkular Cassandra
-  include: scale.yaml
-  vars:
-    desired: 1
+  oc_scale:
+    kind: rc
+    name: "{{object.split('/')[1]}}"
+    kubeconfig: "{{mktemp.stdout}}/admin.kubeconfig"
+    namespace: "{{openshift_metrics_project}}"
+    replicas: 1
   with_items: "{{metrics_cassandra_rc.stdout_lines}}"
   loop_control:
     loop_var: object
@@ -28,9 +31,12 @@
   changed_when: no
 
 - name: Start Hawkular Metrics
-  include: scale.yaml
-  vars:
-    desired: "{{openshift_metrics_hawkular_replicas}}"
+  oc_scale:
+    kind: rc
+    name: "{{object.split('/')[1]}}"
+    kubeconfig: "{{mktemp.stdout}}/admin.kubeconfig"
+    namespace: "{{openshift_metrics_project}}"
+    replicas: "{{openshift_metrics_hawkular_replicas}}"
   with_items: "{{metrics_metrics_rc.stdout_lines}}"
   loop_control:
     loop_var: object
@@ -46,9 +52,12 @@
   changed_when: no
 
 - name: Start Heapster
-  include: scale.yaml
-  vars:
-    desired: 1
+  oc_scale:
+    kind: rc
+    name: "{{object.split('/')[1]}}"
+    kubeconfig: "{{mktemp.stdout}}/admin.kubeconfig"
+    namespace: "{{openshift_metrics_project}}"
+    replicas: 1
   with_items: "{{metrics_heapster_rc.stdout_lines}}"
   loop_control:
     loop_var: object
