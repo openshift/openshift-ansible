@@ -24,9 +24,12 @@
   changed_when: no
 
 - name: stop elasticsearch
-  include: scale.yaml
-  vars:
-    desired: 0
+  oc_scale:
+    kind: dc
+    name: "{{object.split('/')[1]}}"
+    namespace: "{{openshift_logging_namespace}}"
+    kubeconfig: "{{mktemp.stdout}}/admin.kubeconfig"
+    replicas: 0
   with_items: "{{es_dc.stdout_lines}}"
   loop_control:
     loop_var: object
@@ -37,9 +40,12 @@
   changed_when: no
 
 - name: stop kibana
-  include: scale.yaml
-  vars:
-    desired: 0
+  oc_scale:
+    kind: dc
+    name: "{{object.split('/')[1]}}"
+    namespace: "{{openshift_logging_namespace}}"
+    kubeconfig: "{{mktemp.stdout}}/admin.kubeconfig"
+    replicas: 0
   with_items: "{{kibana_dc.stdout_lines}}"
   loop_control:
     loop_var: object
@@ -50,9 +56,12 @@
   changed_when: no
 
 - name: stop curator
-  include: scale.yaml
-  vars:
-    desired: 0
+  oc_scale:
+    kind: dc
+    name: "{{object.split('/')[1]}}"
+    namespace: "{{openshift_logging_namespace}}"
+    kubeconfig: "{{mktemp.stdout}}/admin.kubeconfig"
+    replicas: 0
   with_items: "{{curator_dc.stdout_lines}}"
   loop_control:
     loop_var: object
@@ -63,9 +72,12 @@
   changed_when: no
 
 - name: stop elasticsearch-ops
-  include: scale.yaml
-  vars:
-    desired: 0
+  oc_scale:
+    kind: dc
+    name: "{{object.split('/')[1]}}"
+    namespace: "{{openshift_logging_namespace}}"
+    kubeconfig: "{{mktemp.stdout}}/admin.kubeconfig"
+    replicas: 0
   with_items: "{{es_dc.stdout_lines}}"
   loop_control:
     loop_var: object
@@ -77,9 +89,12 @@
   changed_when: no
 
 - name: stop kibana-ops
-  include: scale.yaml
-  vars:
-    desired: 0
+  oc_scale:
+    kind: dc
+    name: "{{object.split('/')[1]}}"
+    namespace: "{{openshift_logging_namespace}}"
+    kubeconfig: "{{mktemp.stdout}}/admin.kubeconfig"
+    replicas: 0
   with_items: "{{kibana_dc.stdout_lines}}"
   loop_control:
     loop_var: object
@@ -91,9 +106,12 @@
   changed_when: no
 
 - name: stop curator-ops
-  include: scale.yaml
-  vars:
-    desired: 0
+  oc_scale:
+    kind: dc
+    name: "{{object.split('/')[1]}}"
+    namespace: "{{openshift_logging_namespace}}"
+    kubeconfig: "{{mktemp.stdout}}/admin.kubeconfig"
+    replicas: 0
   with_items: "{{curator_dc.stdout_lines}}"
   loop_control:
     loop_var: object

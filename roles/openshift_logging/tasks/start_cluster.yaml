@@ -26,9 +26,12 @@
   changed_when: no
 
 - name: start elasticsearch
-  include: scale.yaml
-  vars:
-    desired: 1
+  oc_scale:
+    kind: dc
+    name: "{{object.split('/')[1]}}"
+    namespace: "{{openshift_logging_namespace}}"
+    kubeconfig: "{{mktemp.stdout}}/admin.kubeconfig"
+    replicas: 1
   with_items: "{{es_dc.stdout_lines}}"
   loop_control:
     loop_var: object
@@ -40,9 +43,12 @@
   changed_when: no
 
 - name: start kibana
-  include: scale.yaml
-  vars:
-    desired: "{{ openshift_logging_kibana_replica_count | default (1) }}"
+  oc_scale:
+    kind: dc
+    name: "{{object.split('/')[1]}}"
+    namespace: "{{openshift_logging_namespace}}"
+    kubeconfig: "{{mktemp.stdout}}/admin.kubeconfig"
+    replicas: "{{ openshift_logging_kibana_replica_count | default (1) }}"
   with_items: "{{kibana_dc.stdout_lines}}"
   loop_control:
     loop_var: object
@@ -54,9 +60,12 @@
   changed_when: no
 
 - name: start curator
-  include: scale.yaml
-  vars:
-    desired: 1
+  oc_scale:
+    kind: dc
+    name: "{{object.split('/')[1]}}"
+    namespace: "{{openshift_logging_namespace}}"
+    kubeconfig: "{{mktemp.stdout}}/admin.kubeconfig"
+    replicas: 1
   with_items: "{{curator_dc.stdout_lines}}"
   loop_control:
     loop_var: object
@@ -68,9 +77,12 @@
   changed_when: no
 
 - name: start elasticsearch-ops
-  include: scale.yaml
-  vars:
-    desired: 1
+  oc_scale:
+    kind: dc
+    name: "{{object.split('/')[1]}}"
+    namespace: "{{openshift_logging_namespace}}"
+    kubeconfig: "{{mktemp.stdout}}/admin.kubeconfig"
+    replicas: 1
   with_items: "{{es_dc.stdout_lines}}"
   loop_control:
     loop_var: object
@@ -83,9 +95,12 @@
   changed_when: no
 
 - name: start kibana-ops
-  include: scale.yaml
-  vars:
-    desired: "{{ openshift_logging_kibana_ops_replica_count | default (1) }}"
+  oc_scale:
+    kind: dc
+    name: "{{object.split('/')[1]}}"
+    namespace: "{{openshift_logging_namespace}}"
+    kubeconfig: "{{mktemp.stdout}}/admin.kubeconfig"
+    replicas: "{{ openshift_logging_kibana_ops_replica_count | default (1) }}"
   with_items: "{{kibana_dc.stdout_lines}}"
   loop_control:
     loop_var: object
@@ -98,9 +113,12 @@
   changed_when: no
 
 - name: start curator-ops
-  include: scale.yaml
-  vars:
-    desired: 1
+  oc_scale:
+    kind: dc
+    name: "{{object.split('/')[1]}}"
+    namespace: "{{openshift_logging_namespace}}"
+    kubeconfig: "{{mktemp.stdout}}/admin.kubeconfig"
+    replicas: 1
   with_items: "{{curator_dc.stdout_lines}}"
   loop_control:
     loop_var: object
