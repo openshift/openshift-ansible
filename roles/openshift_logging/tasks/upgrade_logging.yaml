@@ -14,9 +14,11 @@
   check_mode: no
 
 - name: start elasticsearch
-  include: scale.yaml
-  vars:
-    desired: 1
+  oc_scale:
+    kind: dc
+    name: "{{object.split('/')[1]}}"
+    namespace: "{{mktemp.stdout}}/admin.kubeconfig"
+    replicas: 1
   with_items: "{{es_dc.stdout_lines}}"
   loop_control:
     loop_var: object
