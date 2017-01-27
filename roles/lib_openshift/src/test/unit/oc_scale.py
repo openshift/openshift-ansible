@@ -119,6 +119,30 @@ class OCScaleTest(unittest.TestCase):
         self.assertFalse(results['changed'])
         self.assertEqual(results['result'][0], 3)
 
+    @mock.patch('oc_scale.OCScale.openshift_cmd')
+    def test_no_dc_scale(self, mock_openshift_cmd):
+        ''' Testing a get '''
+        params = {'name': 'not_there',
+                  'namespace': 'default',
+                  'replicas': 3,
+                  'state': 'present',
+                  'kind': 'dc',
+                  'kubeconfig': '/etc/origin/master/admin.kubeconfig',
+                  'debug': False}
+
+        mock_openshift_cmd.side_effect = [
+            {"cmd": '/usr/bin/oc -n default get dc not_there -o json',
+             'results': [{}],
+             'returncode': 1,
+             'stderr': "Error from server: deploymentconfigs \"not_there\" not found\n",
+             'stdout': ""},
+        ]
+
+        results = OCScale.run_ansible(params, False)
+
+        self.assertTrue(results['failed'])
+        self.assertEqual(results['msg']['returncode'], 1)
+
     def tearDown(self):
         '''TearDown method'''
         pass

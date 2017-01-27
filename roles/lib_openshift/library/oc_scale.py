@@ -1644,6 +1644,8 @@ class OCScale(OpenShiftCLI):
         state = params['state']
 
         api_rval = oc_scale.get()
+        if api_rval['returncode'] != 0:
+            return {'failed': True, 'msg': api_rval}
 
         #####
         # Get

@@ -90,3 +90,22 @@
       - "'results' in pods and 'results' in pods.results"
       - "{{ pods.results.results[0]['items']|length }} == 2"
       msg: "Did not find 1 replica in scale results."
+
+
+  # Test scale on non-existent dc
+  - name: scale non-existent dc
+    oc_scale:
+      name: not_there
+      kind: dc
+      replicas: 2
+    register: scaleout
+    ignore_errors: True
+
+  - debug: var=scaleout
+
+  - assert:
+      that:
+      - scaleout.changed == False
+      - scaleout.msg.returncode == 1
+      - "'msg' in scaleout and 'stderr' in scaleout.msg"
+      msg: "Deploymentconfig exists.  This should error."
