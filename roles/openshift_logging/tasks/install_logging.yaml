@@ -8,8 +8,12 @@
   check_mode: no
 
 - name: Validate Elasticsearch cluster size
-  fail: msg="The openshift_logging_es_cluster_size may not be scaled down more than 1 less (or 0) the number of Elasticsearch nodes already deployed"
-  when: "{{openshift_logging_facts.elasticsearch.deploymentconfigs | length - openshift_logging_es_cluster_size | abs > 1}}"
+  fail: msg="The openshift_logging_es_cluster_size may only be scaled down manually. Please see official documentation on how to do this."
+  when: openshift_logging_facts.elasticsearch.deploymentconfigs | length > openshift_logging_es_cluster_size
+
+- name: Validate Elasticsearch Ops cluster size
+  fail: msg="The openshift_logging_es_ops_cluster_size may only be scaled down manually. Please see official documentation on how to do this."
+  when: openshift_logging_facts.elasticsearch_ops.deploymentconfigs | length > openshift_logging_es_ops_cluster_size
 
 - name: Install logging
   include: "{{ role_path }}/tasks/install_{{ install_component }}.yaml"

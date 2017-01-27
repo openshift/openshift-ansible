@@ -23,7 +23,7 @@
     es_cluster_name: "{{component}}"
     deploy_name_prefix: "logging-{{component}}"
     deploy_name: "{{deploy_name_prefix}}-{{'abcdefghijklmnopqrstuvwxyz0123456789'|random_word(8)}}"
-  with_sequence: count={{(openshift_logging_es_cluster_size | int - openshift_logging_current_es_size | int) | abs}}
+  with_sequence: count={{ openshift_logging_current_es_size | int - openshift_logging_es_cluster_size | int }}
   check_mode: no
 
 - name: Generate Elasticsearch DeploymentConfig
@@ -90,7 +90,7 @@
     deploy_name_prefix: "logging-{{component}}"
     deploy_name: "{{deploy_name_prefix}}-{{'abcdefghijklmnopqrstuvwxyz0123456789'|random_word(8)}}"
     cluster_size: "{{openshift_logging_es_ops_cluster_size}}"
-  with_sequence: count={{ openshift_logging_es_ops_cluster_size | int - openshift_logging_current_es_ops_size | int }}
+  with_sequence: count={{ openshift_logging_current_es_ops_size | int - openshift_logging_es_ops_cluster_size | int }}
   when:
     - openshift_logging_use_ops
   check_mode: no
