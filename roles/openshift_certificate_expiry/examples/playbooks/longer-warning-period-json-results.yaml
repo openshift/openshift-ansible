@@ -1,0 +1,13 @@
+---
+# Change the expiration warning window to 1500 days (good for testing
+# the module out) and save the results as a JSON file:
+
+- name: Check cert expirys
+  hosts: nodes:masters:etcd
+  become: yes
+  gather_facts: no
+  vars:
+    openshift_certificate_expiry_warning_days: 1500
+    openshift_certificate_expiry_save_json_results: yes
+  roles:
+    - role: openshift_certificate_expiry

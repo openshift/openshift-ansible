@@ -122,6 +122,8 @@ A 3-tuple of the form: (certificate_common_name, certificate_expiry_date, certif
     cert_loaded = OpenSSL.crypto.load_certificate(
         OpenSSL.crypto.FILETYPE_PEM, _cert_string)
 
+    cert_serial = cert_loaded.get_serial_number()
+
     ######################################################################
     # Read all possible names from the cert
     cert_subjects = []
@@ -178,7 +180,7 @@ A 3-tuple of the form: (certificate_common_name, certificate_expiry_date, certif
 
     time_remaining = cert_expiry_date - now
 
-    return (cert_subject, cert_expiry_date, time_remaining)
+    return (cert_subject, cert_expiry_date, time_remaining, cert_serial)
 
 
 def classify_cert(cert_meta, now, time_remaining, expire_window, cert_list):
@@ -210,6 +212,7 @@ Return:
         cert_meta['health'] = 'ok'
 
     cert_meta['expiry'] = expiry_str
+    cert_meta['serial_hex'] = hex(int(cert_meta['serial']))
     cert_list.append(cert_meta)
     return cert_list
 
@@ -373,7 +376,10 @@ an OpenShift Container Platform cluster
         for _, v in cert_meta.items():
             with open(v, 'r') as fp:
                 cert = fp.read()
-                cert_subject, cert_expiry_date, time_remaining = load_and_handle_cert(cert, now)
+                (cert_subject,
+                 cert_expiry_date,
+                 time_remaining,
+                 cert_serial) = load_and_handle_cert(cert, now)
 
                 expire_check_result = {
                     'cert_cn': cert_subject,
@@ -381,6 +387,7 @@ an OpenShift Container Platform cluster
                     'expiry': cert_expiry_date,
                     'days_remaining': time_remaining.days,
                     'health': None,
+                    'serial': cert_serial
                 }
 
                 classify_cert(expire_check_result, now, time_remaining, expire_window, ocp_certs)
@@ -420,7 +427,8 @@ an OpenShift Container Platform cluster
         c = cfg['users'][0]['user']['client-certificate-data']
         (cert_subject,
          cert_expiry_date,
-         time_remaining) = load_and_handle_cert(c, now, base64decode=True)
+         time_remaining,
+         cert_serial) = load_and_handle_cert(c, now, base64decode=True)
 
         expire_check_result = {
             'cert_cn': cert_subject,
@@ -428,6 +436,7 @@ an OpenShift Container Platform cluster
             'expiry': cert_expiry_date,
             'days_remaining': time_remaining.days,
             'health': None,
+            'serial': cert_serial
         }
 
         classify_cert(expire_check_result, now, time_remaining, expire_window, kubeconfigs)
@@ -448,7 +457,8 @@ an OpenShift Container Platform cluster
         c = cfg['users'][0]['user']['client-certificate-data']
         (cert_subject,
          cert_expiry_date,
-         time_remaining) = load_and_handle_cert(c, now, base64decode=True)
+         time_remaining,
+         cert_serial) = load_and_handle_cert(c, now, base64decode=True)
 
         expire_check_result = {
             'cert_cn': cert_subject,
@@ -456,6 +466,7 @@ an OpenShift Container Platform cluster
             'expiry': cert_expiry_date,
             'days_remaining': time_remaining.days,
             'health': None,
+            'serial': cert_serial
         }
 
         classify_cert(expire_check_result, now, time_remaining, expire_window, kubeconfigs)
@@ -500,7 +511,8 @@ an OpenShift Container Platform cluster
             c = fp.read()
             (cert_subject,
              cert_expiry_date,
-             time_remaining) = load_and_handle_cert(c, now)
+             time_remaining,
+             cert_serial) = load_and_handle_cert(c, now)
 
             expire_check_result = {
                 'cert_cn': cert_subject,
@@ -508,6 +520,7 @@ an OpenShift Container Platform cluster
                 'expiry': cert_expiry_date,
                 'days_remaining': time_remaining.days,
                 'health': None,
+                'serial': cert_serial
             }
 
             classify_cert(expire_check_result, now, time_remaining, expire_window, etcd_certs)
@@ -537,7 +550,8 @@ an OpenShift Container Platform cluster
             with open(etcd_cert, 'r') as etcd_fp:
                 (cert_subject,
                  cert_expiry_date,
-                 time_remaining) = load_and_handle_cert(etcd_fp.read(), now)
+                 time_remaining,
+                 cert_serial) = load_and_handle_cert(etcd_fp.read(), now)
 
                 expire_check_result = {
                     'cert_cn': cert_subject,
@@ -545,6 +559,7 @@ an OpenShift Container Platform cluster
                     'expiry': cert_expiry_date,
                     'days_remaining': time_remaining.days,
                     'health': None,
+                    'serial': cert_serial
                 }
 
                 classify_cert(expire_check_result, now, time_remaining, expire_window, etcd_certs)
@@ -581,7 +596,8 @@ an OpenShift Container Platform cluster
     else:
         (cert_subject,
          cert_expiry_date,
-         time_remaining) = load_and_handle_cert(router_c, now, base64decode=True)
+         time_remaining,
+         cert_serial) = load_and_handle_cert(router_c, now, base64decode=True)
 
         expire_check_result = {
             'cert_cn': cert_subject,
@@ -589,6 +605,7 @@ an OpenShift Container Platform cluster
             'expiry': cert_expiry_date,
             'days_remaining': time_remaining.days,
             'health': None,
+            'serial': cert_serial
         }
 
         classify_cert(expire_check_result, now, time_remaining, expire_window, router_certs)
@@ -610,7 +627,8 @@ an OpenShift Container Platform cluster
     else:
         (cert_subject,
          cert_expiry_date,
-         time_remaining) = load_and_handle_cert(registry_c, now, base64decode=True)
+         time_remaining,
+         cert_serial) = load_and_handle_cert(registry_c, now, base64decode=True)
 
         expire_check_result = {
             'cert_cn': cert_subject,
@@ -618,6 +636,7 @@ an OpenShift Container Platform cluster
             'expiry': cert_expiry_date,
             'days_remaining': time_remaining.days,
             'health': None,
+            'serial': cert_serial
         }
 
         classify_cert(expire_check_result, now, time_remaining, expire_window, registry_certs)
