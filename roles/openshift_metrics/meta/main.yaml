@@ -15,4 +15,5 @@ galaxy_info:
   categories:
   - openshift
 dependencies:
+- { role: lib_openshift }
 - { role: openshift_facts }
