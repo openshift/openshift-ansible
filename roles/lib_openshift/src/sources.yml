@@ -19,6 +19,16 @@ oc_edit.py:
 - class/oc_edit.py
 - ansible/oc_edit.py
 
+oc_label.py:
+- doc/generated
+- doc/license
+- lib/import.py
+- doc/label
+- ../../lib_utils/src/class/yedit.py
+- lib/base.py
+- class/oc_label.py
+- ansible/oc_label.py
+
 oc_obj.py:
 - doc/generated
 - doc/license

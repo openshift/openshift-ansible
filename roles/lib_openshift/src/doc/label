@@ -1,0 +1,65 @@
+# flake8: noqa
+# pylint: skip-file
+
+DOCUMENTATION = '''
+---
+module: oc_label
+short_description: Create, modify, and idempotently manage openshift object labels.
+description:
+  - Modify openshift labels programmatically.
+options:
+  state:
+    description:
+    - State represents whether to create, modify, delete, or list
+    required: true
+    default: present
+    choices: ["present", "absent", "list", "add"]
+    aliases: []
+  kubeconfig:
+    description:
+    - The path for the kubeconfig file to use for authentication
+    required: false
+    default: /etc/origin/master/admin.kubeconfig
+    aliases: []
+  debug:
+    description:
+    - Turn on debug output.
+    required: false
+    default: False
+    aliases: []
+  kind:
+    description:
+    - The kind of object that can be managed.
+    required: false
+    default: None
+    choices:
+    - node
+    - pod
+    aliases: []
+  labels:
+    description:
+    - The labels to add to the resource.
+    required: false
+    default: None
+    aliases: []
+  selector:
+    description:
+    - The selector to apply to the query
+    required: false
+    default: None
+    aliases: []
+author:
+- "Joel Diaz <jdiaz@redhat.com>"
+extends_documentation_fragment: []
+'''
+
+EXAMPLES = '''
+- name: Add label to node
+  oc_label:
+    name: ip-172-31-5-23.ec2.internal
+    state: add
+    kind: node
+    labels:
+      - key: logging-infra-fluentd
+        value: 'true'
+'''
