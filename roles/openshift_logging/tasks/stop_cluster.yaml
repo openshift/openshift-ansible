@@ -1,9 +1,12 @@
 ---
 - command: >
-    {{openshift.common.client_binary}} --config={{mktemp.stdout}}/admin.kubeconfig get node -o jsonpath='{.items[*].metadata.name}'
+    {{openshift.common.client_binary}} --config={{mktemp.stdout}}/admin.kubeconfig get node -o name
   register: fluentd_hosts
   when: "'--all' in openshift_logging_fluentd_hosts"
   changed_when: no
+
+- set_fact: openshift_logging_fluentd_hosts={{ fluentd_hosts.stdout_lines | regex_replace('node/', '') }}
+  when: "'--all' in openshift_logging_fluentd_hosts"
 
 - name: stop fluentd
   include: label_node.yaml
@@ -11,7 +14,7 @@
     host: "{{fluentd_host}}"
     label: "{{openshift_logging_fluentd_nodeselector.keys()[0]}}"
     unlabel: True
-  with_items: "{{(fluentd_hosts.stdout_lines is defined) | ternary(fluentd_hosts.stdout_lines, openshift_logging_fluentd_hosts)}}"
+  with_items: "{{ openshift_logging_fluentd_hosts }}"
   loop_control:
     loop_var: fluentd_host
 
