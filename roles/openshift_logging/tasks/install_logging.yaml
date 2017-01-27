@@ -32,6 +32,17 @@
   with_items: "{{object_def_files.files | map(attribute='path') | list | sort}}"
   changed_when: no
 
+- oc_obj:
+    state: absent
+    name: "{{item.name}}"
+    kind: "{{item.kind}}"
+    kubeconfig: "{{ mktemp.stdout }}/admin.kubeconfig"
+    namespace: "{{openshift_logging_namespace}}"
+  with_items:
+  - {name: logging-kibana, kind: route}
+  - {name: logging-kibana-ops, kind: route}
+  - {name: kibana-proxy, kind: oauthclient}
+
 - name: Create objects
   include: oc_apply.yaml
   vars:
