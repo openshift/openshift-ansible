@@ -15,8 +15,8 @@
   tags:
   - pre_upgrade
 
-# Configure the upgrade target for the common upgrade tasks:
-- hosts: l_oo_all_hosts
+- name: Configure the upgrade target for the common upgrade tasks
+  hosts: l_oo_all_hosts
   tags:
   - pre_upgrade
   tasks:
