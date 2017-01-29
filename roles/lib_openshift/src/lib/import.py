@@ -12,6 +12,7 @@ import os
 import re
 import shutil
 import subprocess
+import tempfile
 # pylint: disable=import-error
 import ruamel.yaml as yaml
 from ansible.module_utils.basic import AnsibleModule

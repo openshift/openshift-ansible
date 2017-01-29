@@ -49,7 +49,7 @@ class OCObject(OpenShiftCLI):
             return self._create(files[0])
 
         content['data'] = yaml.dump(content['data'])
-        content_file = Utils.create_files_from_contents(content)[0]
+        content_file = Utils.create_tmp_files_from_contents(content)[0]
 
         return self._create(content_file['path'])
 
