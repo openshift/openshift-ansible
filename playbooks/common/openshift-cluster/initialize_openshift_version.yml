@@ -1,6 +1,7 @@
 ---
 # NOTE: requires openshift_facts be run
-- hosts: l_oo_all_hosts
+- name: Verify compatible yum/subscription-manager combination
+  hosts: l_oo_all_hosts
   gather_facts: no
   tasks:
   # See:
