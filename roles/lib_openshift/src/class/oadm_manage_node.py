@@ -22,7 +22,7 @@ class ManageNode(OpenShiftCLI):
     def __init__(self,
                  config,
                  verbose=False):
-        ''' Constructor for OCVolume '''
+        ''' Constructor for ManageNode '''
         super(ManageNode, self).__init__(None, config.kubeconfig)
         self.config = config
 
@@ -89,6 +89,7 @@ class ManageNode(OpenShiftCLI):
         # 3.3 specific
         else:
             # this is gross but I filed a bug...
+            # https://bugzilla.redhat.com/show_bug.cgi?id=1381621
             # build our own json from the output.
             all_pods = json.loads(results['results'])['items']
 

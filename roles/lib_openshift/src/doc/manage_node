@@ -30,7 +30,7 @@ options:
     description:
     - The selector when filtering on node labels
     required: false
-    default: str
+    default: None
     aliases: []
   pod_selector:
     description:
