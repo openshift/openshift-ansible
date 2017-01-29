@@ -1,0 +1,91 @@
+#!/usr/bin/ansible-playbook --module-path=../../../library/
+# ./oc_service.yml -M ../../../library -e "cli_master_test=$OPENSHIFT_MASTER
+---
+- hosts: "{{ cli_master_test }}"
+  gather_facts: no
+  user: root
+  tasks:
+  - name: create the default registry service
+    oc_service:
+      namespace: default
+      name: test-registry
+      ports:
+      - name: 9000-tcp
+        port: 9000
+        protocol: TCP
+        targetPort: 9000
+      selector:
+        test-registtry: default
+      session_affinity: ClientIP
+      service_type: ClusterIP
+    register: svcout
+
+  - assert:
+      that: "svcout.results.results[0]['metadata']['name'] == 'test-registry'"
+      msg: route create failed
+
+  - name: oc_service
+    oc_service:
+      name: test-registry
+      namespace: default
+      state: list
+    register: svc_out
+
+  - assert:
+      that: "svcout.results.results[0]['metadata']['name'] == 'test-registry'"
+      msg: route create failed
+
+
+#  - name: get route
+#    oc_route:
+#      state: list
+#      name: test
+#      namespace: default
+#    register: routeout
+#  - debug: var=routeout
+#
+#  - assert:
+#      that: "routeout.results[0]['metadata']['name'] == 'test'"
+#      msg: get route failed
+#
+#  - name: delete route
+#    oc_route:
+#      state: absent
+#      name: test
+#      namespace: default
+#    register: routeout
+#  - debug: var=routeout
+#
+#  - assert:
+#      that: "routeout.results.returncode == 0"
+#      msg: delete route failed
+#
+#  - name: create route
+#    oc_route:
+#      name: test
+#      namespace: default
+#      tls_termination: edge
+#      cert_content: testing cert
+#      cacert_content: testing cacert
+#      key_content: testing key
+#      service_name: test
+#      host: test.example
+#    register: routeout
+#  - debug: var=routeout
+#
+#  - name: create route noop
+#    oc_route:
+#      name: test
+#      namespace: default
+#      tls_termination: edge
+#      cert_content: testing cert
+#      cacert_content: testing cacert
+#      key_content: testing key
+#      service_name: test
+#      host: test.example
+#    register: routeout
+#  - debug: var=routeout
+#
+#  - assert:
+#      that: "routeout.changed == False"
+#      msg: Route create not idempotent
