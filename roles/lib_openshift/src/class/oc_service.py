@@ -56,6 +56,7 @@ class OCService(OpenShiftCLI):
             result['clusterip'] = self.service.get('spec.clusterIP')
         elif 'services \"%s\" not found' % self.config.name  in result['stderr']:
             result['clusterip'] = ''
+            result['returncode'] = 0
 
         return result
 

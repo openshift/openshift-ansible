@@ -119,14 +119,14 @@ options:
     description:
     - The type of session affinity to use.
     required: false
-    default: None
+    default: 'None'
     aliases: []
   service_type:
     description:
     - The type of service desired.  Each option tells the service to behave accordingly.
     - https://kubernetes.io/docs/user-guide/services/
     required: false
-    default: None
+    default: ClusterIP
     choices:
     - ClusterIP
     - NodePort
@@ -941,18 +941,32 @@ class OpenShiftCLI(object):
         cmd.append('--confirm')
         return self.openshift_cmd(cmd)
 
+    def _run(self, cmds, input_data):
+        ''' Actually executes the command. This makes mocking easier. '''
+        curr_env = os.environ.copy()
+        curr_env.update({'KUBECONFIG': self.kubeconfig})
+        proc = subprocess.Popen(cmds,
+                                stdin=subprocess.PIPE,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE,
+                                env=curr_env)
+
+        stdout, stderr = proc.communicate(input_data)
+
+        return proc.returncode, stdout, stderr
+
     # pylint: disable=too-many-arguments,too-many-branches
     def openshift_cmd(self, cmd, oadm=False, output=False, output_type='json', input_data=None):
         '''Base command for oc '''
         cmds = []
         if oadm:
-            cmds = ['/usr/bin/oadm']
+            cmds = ['oadm']
         else:
-            cmds = ['/usr/bin/oc']
+            cmds = ['oc']
 
         if self.all_namespaces:
             cmds.extend(['--all-namespaces'])
-        elif self.namespace:
+        elif self.namespace is not None and self.namespace.lower() not in ['none', 'emtpy']:  # E501
             cmds.extend(['-n', self.namespace])
 
         cmds.extend(cmd)
@@ -964,18 +978,13 @@ class OpenShiftCLI(object):
         if self.verbose:
             print(' '.join(cmds))
 
-        proc = subprocess.Popen(cmds,
-                                stdin=subprocess.PIPE,
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE,
-                                env={'KUBECONFIG': self.kubeconfig})
+        returncode, stdout, stderr = self._run(cmds, input_data)
 
-        stdout, stderr = proc.communicate(input_data)
-        rval = {"returncode": proc.returncode,
+        rval = {"returncode": returncode,
                 "results": results,
                 "cmd": ' '.join(cmds)}
 
-        if proc.returncode == 0:
+        if returncode == 0:
             if output:
                 if output_type == 'json':
                     try:
@@ -1383,11 +1392,10 @@ class Service(Yedit):
         '''add cluster ip'''
         self.put(Service.portal_ip, pip)
 
-
-
 # -*- -*- -*- End included fragment: lib/service.py -*- -*- -*-
 
 # -*- -*- -*- Begin included fragment: class/oc_service.py -*- -*- -*-
+
 
 # pylint: disable=too-many-instance-attributes
 class OCService(OpenShiftCLI):
@@ -1443,6 +1451,7 @@ class OCService(OpenShiftCLI):
             result['clusterip'] = self.service.get('spec.clusterIP')
         elif 'services \"%s\" not found' % self.config.name  in result['stderr']:
             result['clusterip'] = ''
+            result['returncode'] = 0
 
         return result
 
@@ -1467,7 +1476,92 @@ class OCService(OpenShiftCLI):
         skip = ['clusterIP', 'portalIP']
         return not Utils.check_def_equal(self.user_svc.yaml_dict, self.service.yaml_dict, skip_keys=skip, debug=True)
 
+    @staticmethod
+    def run_ansible(params, check_mode):
+        '''Run the idempotent ansible code'''
+        oc_svc = OCService(params['name'],
+                           params['namespace'],
+                           params['labels'],
+                           params['selector'],
+                           params['clusterip'],
+                           params['portalip'],
+                           params['ports'],
+                           params['session_affinity'],
+                           params['service_type'])
 
+        state = params['state']
+
+        api_rval = oc_svc.get()
+
+        if api_rval['returncode'] != 0:
+            return {'failed': True, 'msg': api_rval}
+
+        #####
+        # Get
+        #####
+        if state == 'list':
+            return {'changed': False, 'results': api_rval, 'state': state}
+
+        ########
+        # Delete
+        ########
+        if state == 'absent':
+            if oc_svc.exists():
+
+                if check_mode:
+                    return {'changed': True,
+                            'msg': 'CHECK_MODE: Would have performed a delete.'}  # noqa: E501
+
+                api_rval = oc_svc.delete()
+
+                return {'changed': True, 'results': api_rval, 'state': state}
+
+            return {'changed': False, 'state': state}
+
+        if state == 'present':
+            ########
+            # Create
+            ########
+            if not oc_svc.exists():
+
+                if check_mode:
+                    return {'changed': True,
+                            'msg': 'CHECK_MODE: Would have performed a create.'}  # noqa: E501
+
+                # Create it here
+                api_rval = oc_svc.create()
+
+                if api_rval['returncode'] != 0:
+                    return {'failed': True, 'msg': api_rval}
+
+                # return the created object
+                api_rval = oc_svc.get()
+
+                if api_rval['returncode'] != 0:
+                    return {'failed': True, 'msg': api_rval}
+
+                return {'changed': True, 'results': api_rval, 'state': state}
+
+            ########
+            # Update
+            ########
+            if oc_svc.needs_update():
+                api_rval = oc_svc.update()
+
+                if api_rval['returncode'] != 0:
+                    return {'failed': True, 'msg': api_rval}
+
+                # return the created object
+                api_rval = oc_svc.get()
+
+                if api_rval['returncode'] != 0:
+                    return {'failed': True, 'msg': api_rval}
+
+                return {'changed': True, 'results': api_rval, 'state': state}
+
+            return {'changed': False, 'results': api_rval, 'state': state}
+
+        return {'failed': True, 'msg': 'UNKNOWN state passed. [%s]' % state}
 
 # -*- -*- -*- End included fragment: class/oc_service.py -*- -*- -*-
 
@@ -1496,92 +1590,15 @@ def main():
         ),
         supports_check_mode=True,
     )
-    oc_svc = OCService(module.params['name'],
-                       module.params['namespace'],
-                       module.params['labels'],
-                       module.params['selector'],
-                       module.params['clusterip'],
-                       module.params['portalip'],
-                       module.params['ports'],
-                       module.params['session_affinity'],
-                       module.params['service_type'])
 
-    state = module.params['state']
+    rval = OCService.run_ansible(module.params, module.check_mode)
+    if 'failed' in rval:
+        return module.fail_json(**rval)
 
-    api_rval = oc_svc.get()
+    return module.exit_json(**rval)
 
-    #####
-    # Get
-    #####
-    if state == 'list':
-        module.exit_json(changed=False, results=api_rval, state="list")
 
-    ########
-    # Delete
-    ########
-    if state == 'absent':
-        if oc_svc.exists():
-
-            if module.check_mode:
-                module.exit_json(changed=False, msg='Would have performed a delete.')
-
-            api_rval = oc_svc.delete()
-
-            module.exit_json(changed=True, results=api_rval, state="absent")
-
-        module.exit_json(changed=False, state="absent")
-
-    if state == 'present':
-        ########
-        # Create
-        ########
-        if not oc_svc.exists():
-
-            if module.check_mode:
-                module.exit_json(changed=False, msg='Would have performed a create.')
-
-            # Create it here
-            api_rval = oc_svc.create()
-
-            if api_rval['returncode'] != 0:
-                module.fail_json(msg=api_rval)
-
-            # return the created object
-            api_rval = oc_svc.get()
-
-            if api_rval['returncode'] != 0:
-                module.fail_json(msg=api_rval)
-
-            module.exit_json(changed=True, results=api_rval, state="present")
-
-        ########
-        # Update
-        ########
-        if oc_svc.needs_update():
-            api_rval = oc_svc.update()
-
-            if api_rval['returncode'] != 0:
-                module.fail_json(msg=api_rval)
-
-            # return the created object
-            api_rval = oc_svc.get()
-
-            if api_rval['returncode'] != 0:
-                module.fail_json(msg=api_rval)
-
-            module.exit_json(changed=True, results=api_rval, state="present")
-
-        module.exit_json(changed=False, results=api_rval, state="present")
-
-    module.exit_json(failed=True,
-                     changed=False,
-                     results='Unknown state passed. %s' % state,
-                     state="unknown")
-
-# pylint: disable=redefined-builtin, unused-wildcard-import, wildcard-import, locally-disabled
-# import module snippets.  This are required
-from ansible.module_utils.basic import *
-
-main()
+if __name__ == '__main__':
+    main()
 
 # -*- -*- -*- End included fragment: ansible/oc_service.py -*- -*- -*-

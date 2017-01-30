@@ -63,17 +63,6 @@ oc_secret.py:
 - class/oc_secret.py
 - ansible/oc_secret.py
 
-oc_service.py:
-- doc/generated
-- doc/license
-- lib/import.py
-- doc/service
-- ../../lib_utils/src/class/yedit.py
-- lib/base.py
-- lib/service.py
-- class/oc_service.py
-- ansible/oc_service.py
-
 oc_serviceaccount.py:
 - doc/generated
 - doc/license
@@ -84,6 +73,17 @@ oc_serviceaccount.py:
 - lib/serviceaccount.py
 - class/oc_serviceaccount.py
 - ansible/oc_serviceaccount.py
+
+oc_service.py:
+- doc/generated
+- doc/license
+- lib/import.py
+- doc/service
+- ../../lib_utils/src/class/yedit.py
+- lib/base.py
+- lib/service.py
+- class/oc_service.py
+- ansible/oc_service.py
 
 oc_version.py:
 - doc/generated

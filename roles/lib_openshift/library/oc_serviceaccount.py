@@ -890,11 +890,13 @@ class OpenShiftCLI(object):
 
     def _run(self, cmds, input_data):
         ''' Actually executes the command. This makes mocking easier. '''
+        curr_env = os.environ.copy()
+        curr_env.update({'KUBECONFIG': self.kubeconfig})
         proc = subprocess.Popen(cmds,
                                 stdin=subprocess.PIPE,
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE,
-                                env={'KUBECONFIG': self.kubeconfig})
+                                env=curr_env)
 
         stdout, stderr = proc.communicate(input_data)
 
@@ -905,9 +907,9 @@ class OpenShiftCLI(object):
         '''Base command for oc '''
         cmds = []
         if oadm:
-            cmds = ['/usr/bin/oadm']
+            cmds = ['oadm']
         else:
-            cmds = ['/usr/bin/oc']
+            cmds = ['oc']
 
         if self.all_namespaces:
             cmds.extend(['--all-namespaces'])
