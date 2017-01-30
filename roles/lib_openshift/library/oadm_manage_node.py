@@ -44,22 +44,15 @@ from ansible.module_utils.basic import AnsibleModule
 
 # -*- -*- -*- End included fragment: lib/import.py -*- -*- -*-
 
-# -*- -*- -*- Begin included fragment: doc/edit -*- -*- -*-
+# -*- -*- -*- Begin included fragment: doc/manage_node -*- -*- -*-
 
 DOCUMENTATION = '''
 ---
-module: oc_edit
-short_description: Modify, and idempotently manage openshift objects.
+module: oadm_manage_node
+short_description: Module to manage openshift nodes
 description:
-  - Modify openshift objects programmatically.
+  - Manage openshift nodes programmatically.
 options:
-  state:
-    description:
-    - Currently present is only supported state.
-    required: true
-    default: present
-    choices: ["present"]
-    aliases: []
   kubeconfig:
     description:
     - The path for the kubeconfig file to use for authentication
@@ -72,78 +65,53 @@ options:
     required: false
     default: False
     aliases: []
-  name:
+  node:
     description:
-    - Name of the object that is being queried.
+    - A list of the nodes being managed
     required: false
     default: None
     aliases: []
-  namespace:
+  selector:
     description:
-    - The namespace where the object lives.
-    required: false
-    default: str
-    aliases: []
-  kind:
-    description:
-    - The kind attribute of the object.
-    required: True
-    default: None
-    choices:
-    - bc
-    - buildconfig
-    - configmaps
-    - dc
-    - deploymentconfig
-    - imagestream
-    - imagestreamtag
-    - is
-    - istag
-    - namespace
-    - project
-    - projects
-    - node
-    - ns
-    - persistentvolume
-    - pv
-    - rc
-    - replicationcontroller
-    - routes
-    - scc
-    - secret
-    - securitycontextconstraints
-    - service
-    - svc
-    aliases: []
-  file_name:
-    description:
-    - The file name in which to edit
+    - The selector when filtering on node labels
     required: false
     default: None
     aliases: []
-  file_format:
+  pod_selector:
     description:
-    - The format of the file being edited.
+    - A selector when filtering on pod labels.
     required: false
-    default: yaml
+    default: None
     aliases: []
-  content:
+  evacuate:
     description:
-    - Content of the file
+    - Remove all pods from a node.
+    required: false
+    default: False
+    aliases: []
+  schedulable:
+    description:
+    - whether or not openshift can schedule pods on this node
+    required: False
+    default: None
+    aliases: []
+  dry_run:
+    description:
+    - This shows the pods that would be migrated if evacuate were called
+    required: False
+    default: False
+    aliases: []
+  grace_period:
+    description:
+    - Grace period (seconds) for pods being deleted.
     required: false
     default: None
     aliases: []
   force:
     description:
-    - Whether or not to force the operation
+    - Whether or not to attempt to force this action in openshift
     required: false
     default: None
-    aliases: []
-  separator:
-    description:
-    - The separator format for the edit.
-    required: false
-    default: '.'
     aliases: []
 author:
 - "Kenny Woodson <kwoodson@redhat.com>"
@@ -151,16 +119,20 @@ extends_documentation_fragment: []
 '''
 
 EXAMPLES = '''
-oc_edit:
-  kind: rc
-  name: hawkular-cassandra-rc
-  namespace: openshift-infra
-  content:
-    spec.template.spec.containers[0].resources.limits.memory: 512
-    spec.template.spec.containers[0].resources.requests.memory: 256
+- name: oadm manage-node --schedulable=true --selector=ops_node=new
+  oadm_manage_node:
+    selector: ops_node=new
+    schedulable: True
+  register: schedout
+
+- name: oadm manage-node my-k8s-node-5 --evacuate
+  oadm_manage_node:
+    node:  my-k8s-node-5
+    evacuate: True
+    force: True
 '''
 
-# -*- -*- -*- End included fragment: doc/edit -*- -*- -*-
+# -*- -*- -*- End included fragment: doc/manage_node -*- -*- -*-
 
 # -*- -*- -*- Begin included fragment: ../../lib_utils/src/class/yedit.py -*- -*- -*-
 # noqa: E301,E302
@@ -1253,148 +1225,253 @@ class OpenShiftCLIConfig(object):
 
 # -*- -*- -*- End included fragment: lib/base.py -*- -*- -*-
 
-# -*- -*- -*- Begin included fragment: class/oc_edit.py -*- -*- -*-
+# -*- -*- -*- Begin included fragment: class/oadm_manage_node.py -*- -*- -*-
 
-class Edit(OpenShiftCLI):
-    ''' Class to wrap the oc command line tools
-    '''
+
+class ManageNodeException(Exception):
+    ''' manage-node exception class '''
+    pass
+
+
+class ManageNodeConfig(OpenShiftCLIConfig):
+    ''' ManageNodeConfig is a DTO for the manage-node command.'''
+    def __init__(self, kubeconfig, node_options):
+        super(ManageNodeConfig, self).__init__(None, None, kubeconfig, node_options)
+
+
+# pylint: disable=too-many-instance-attributes
+class ManageNode(OpenShiftCLI):
+    ''' Class to wrap the oc command line tools '''
+
+    # pylint allows 5
     # pylint: disable=too-many-arguments
     def __init__(self,
-                 kind,
-                 namespace,
-                 resource_name=None,
-                 kubeconfig='/etc/origin/master/admin.kubeconfig',
-                 separator='.',
+                 config,
                  verbose=False):
-        ''' Constructor for OpenshiftOC '''
-        super(Edit, self).__init__(namespace, kubeconfig)
-        self.namespace = namespace
-        self.kind = kind
-        self.name = resource_name
-        self.kubeconfig = kubeconfig
-        self.separator = separator
-        self.verbose = verbose
+        ''' Constructor for ManageNode '''
+        super(ManageNode, self).__init__(None, config.kubeconfig)
+        self.config = config
 
-    def get(self):
-        '''return a secret by name '''
-        return self._get(self.kind, self.name)
+    def evacuate(self):
+        ''' formulate the params and run oadm manage-node '''
+        return self._evacuate(node=self.config.config_options['node']['value'],
+                              selector=self.config.config_options['selector']['value'],
+                              pod_selector=self.config.config_options['pod_selector']['value'],
+                              dry_run=self.config.config_options['dry_run']['value'],
+                              grace_period=self.config.config_options['grace_period']['value'],
+                              force=self.config.config_options['force']['value'],
+                             )
+    def get_nodes(self, node=None, selector=''):
+        '''perform oc get node'''
+        _node = None
+        _sel = None
+        if node:
+            _node = node
+        if selector:
+            _sel = selector
 
-    def update(self, file_name, content, force=False, content_type='yaml'):
-        '''run update '''
-        if file_name:
-            if content_type == 'yaml':
-                data = yaml.load(open(file_name))
-            elif content_type == 'json':
-                data = json.loads(open(file_name).read())
+        results = self._get('node', rname=_node, selector=_sel)
+        if results['returncode'] != 0:
+            return results
 
-            changes = []
-            yed = Yedit(filename=file_name, content=data, separator=self.separator)
-            for key, value in content.items():
-                changes.append(yed.put(key, value))
+        nodes = []
+        items = None
+        if results['results'][0]['kind'] == 'List':
+            items = results['results'][0]['items']
+        else:
+            items = results['results']
 
-            if any([not change[0] for change in changes]):
-                return {'returncode': 0, 'updated': False}
+        for node in items:
+            _node = {}
+            _node['name'] = node['metadata']['name']
+            _node['schedulable'] = True
+            if 'unschedulable' in node['spec']:
+                _node['schedulable'] = False
+            nodes.append(_node)
 
-            yed.write()
+        return nodes
 
-            atexit.register(Utils.cleanup, [file_name])
+    def get_pods_from_node(self, node, pod_selector=None):
+        '''return pods for a node'''
+        results = self._list_pods(node=[node], pod_selector=pod_selector)
 
-            return self._replace(file_name, force=force)
+        if results['returncode'] != 0:
+            return results
 
-        return self._replace_content(self.kind, self.name, content, force=force, sep=self.separator)
+        # When a selector or node is matched it is returned along with the json.
+        # We are going to split the results based on the regexp and then
+        # load the json for each matching node.
+        # Before we return we are going to loop over the results and pull out the node names.
+        # {'node': [pod, pod], 'node': [pod, pod]}
+        # 3.2 includes the following lines in stdout: "Listing matched pods on node:"
+        all_pods = []
+        if "Listing matched" in results['results']:
+            listing_match = re.compile('\n^Listing matched.*$\n', flags=re.MULTILINE)
+            pods = listing_match.split(results['results'])
+            for pod in pods:
+                if pod:
+                    all_pods.extend(json.loads(pod)['items'])
+
+        # 3.3 specific
+        else:
+            # this is gross but I filed a bug...
+            # https://bugzilla.redhat.com/show_bug.cgi?id=1381621
+            # build our own json from the output.
+            all_pods = json.loads(results['results'])['items']
+
+        return all_pods
+
+    def list_pods(self):
+        ''' run oadm manage-node --list-pods'''
+        _nodes = self.config.config_options['node']['value']
+        _selector = self.config.config_options['selector']['value']
+        _pod_selector = self.config.config_options['pod_selector']['value']
+
+        if not _nodes:
+            _nodes = self.get_nodes(selector=_selector)
+        else:
+            _nodes = [{'name': name} for name in _nodes]
+
+        all_pods = {}
+        for node in _nodes:
+            results = self.get_pods_from_node(node['name'], pod_selector=_pod_selector)
+            if isinstance(results, dict):
+                return results
+            all_pods[node['name']] = results
+
+        results = {}
+        results['nodes'] = all_pods
+        results['returncode'] = 0
+        return results
+
+    def schedulable(self):
+        '''oadm manage-node call for making nodes unschedulable'''
+        nodes = self.config.config_options['node']['value']
+        selector = self.config.config_options['selector']['value']
+
+        if not nodes:
+            nodes = self.get_nodes(selector=selector)
+        else:
+            tmp_nodes = []
+            for name in nodes:
+                tmp_result = self.get_nodes(name)
+                if isinstance(tmp_result, dict):
+                    tmp_nodes.append(tmp_result)
+                    continue
+                tmp_nodes.extend(tmp_result)
+            nodes = tmp_nodes
+
+        # This is a short circuit based on the way we fetch nodes.
+        # If node is a dict/list then we've already fetched them.
+        for node in nodes:
+            if isinstance(node, dict) and 'returncode' in node:
+                return {'results': nodes, 'returncode': node['returncode']}
+            if isinstance(node, list) and 'returncode' in node[0]:
+                return {'results': nodes, 'returncode': node[0]['returncode']}
+        # check all the nodes that were returned and verify they are:
+        # node['schedulable'] == self.config.config_options['schedulable']['value']
+        if any([node['schedulable'] != self.config.config_options['schedulable']['value'] for node in nodes]):
+
+            results = self._schedulable(node=self.config.config_options['node']['value'],
+                                        selector=self.config.config_options['selector']['value'],
+                                        schedulable=self.config.config_options['schedulable']['value'])
+
+            # 'NAME                            STATUS    AGE\\nip-172-31-49-140.ec2.internal   Ready     4h\\n'  # E501
+            # normalize formatting with previous return objects
+            if results['results'].startswith('NAME'):
+                nodes = []
+                # removing header line and trailing new line character of node lines
+                for node_results in results['results'].split('\n')[1:-1]:
+                    parts = node_results.split()
+                    nodes.append({'name': parts[0], 'schedulable': parts[1] == 'Ready'})
+                results['nodes'] = nodes
+
+            return results
+
+        results = {}
+        results['returncode'] = 0
+        results['changed'] = False
+        results['nodes'] = nodes
+
+        return results
 
     @staticmethod
     def run_ansible(params, check_mode):
-        '''run the ansible idempotent code'''
+        '''run the idempotent ansible code'''
+        nconfig = ManageNodeConfig(params['kubeconfig'],
+                                   {'node': {'value': params['node'], 'include': True},
+                                    'selector': {'value': params['selector'], 'include': True},
+                                    'pod_selector': {'value': params['pod_selector'], 'include': True},
+                                    'schedulable': {'value': params['schedulable'], 'include': True},
+                                    'list_pods': {'value': params['list_pods'], 'include': True},
+                                    'evacuate': {'value': params['evacuate'], 'include': True},
+                                    'dry_run': {'value': params['dry_run'], 'include': True},
+                                    'force': {'value': params['force'], 'include': True},
+                                    'grace_period': {'value': params['grace_period'], 'include': True},
+                                   })
 
-        ocedit = Edit(params['kind'],
-                      params['namespace'],
-                      params['name'],
-                      kubeconfig=params['kubeconfig'],
-                      separator=params['separator'],
-                      verbose=params['debug'])
+        oadm_mn = ManageNode(nconfig)
+        # Run the oadm manage-node commands
+        results = None
+        changed = False
+        if params['schedulable'] != None:
+            if check_mode:
+                # schedulable returns results after the fact.
+                # We need to redo how this works to support check_mode completely.
+                return {'changed': True, 'msg': 'CHECK_MODE: would have called schedulable.'}
+            results = oadm_mn.schedulable()
+            if 'changed' not in results:
+                changed = True
 
-        api_rval = ocedit.get()
+        if params['evacuate']:
+            results = oadm_mn.evacuate()
+            changed = True
+        elif params['list_pods']:
+            results = oadm_mn.list_pods()
 
-        ########
-        # Create
-        ########
-        if not Utils.exists(api_rval['results'], params['name']):
-            return {"failed": True, 'msg': api_rval}
+        if not results or results['returncode'] != 0:
+            return {'failed': True, 'msg': results}
 
-        ########
-        # Update
-        ########
-        if check_mode:
-            return {'changed': True, 'msg': 'CHECK_MODE: Would have performed edit'}
+        return {'changed': changed, 'results': results, 'state': "present"}
 
-        api_rval = ocedit.update(params['file_name'],
-                                 params['content'],
-                                 params['force'],
-                                 params['file_format'])
+# -*- -*- -*- End included fragment: class/oadm_manage_node.py -*- -*- -*-
 
-        if api_rval['returncode'] != 0:
-            return {"failed": True, 'msg': api_rval}
-
-        if 'updated' in api_rval and not api_rval['updated']:
-            return {"changed": False, 'results': api_rval, 'state': 'present'}
-
-        # return the created object
-        api_rval = ocedit.get()
-
-        if api_rval['returncode'] != 0:
-            return {"failed": True, 'msg': api_rval}
-
-        return {"changed": True, 'results': api_rval, 'state': 'present'}
-
-# -*- -*- -*- End included fragment: class/oc_edit.py -*- -*- -*-
-
-# -*- -*- -*- Begin included fragment: ansible/oc_edit.py -*- -*- -*-
+# -*- -*- -*- Begin included fragment: ansible/oadm_manage_node.py -*- -*- -*-
 
 
 def main():
     '''
-    ansible oc module for editing objects
+    ansible oadm module for manage-node
     '''
 
     module = AnsibleModule(
         argument_spec=dict(
-            kubeconfig=dict(default='/etc/origin/master/admin.kubeconfig', type='str'),
-            state=dict(default='present', type='str',
-                       choices=['present']),
             debug=dict(default=False, type='bool'),
-            namespace=dict(default='default', type='str'),
-            name=dict(default=None, required=True, type='str'),
-            kind=dict(required=True,
-                      type='str',
-                      choices=['dc', 'deploymentconfig',
-                               'rc', 'replicationcontroller',
-                               'svc', 'service',
-                               'scc', 'securitycontextconstraints',
-                               'ns', 'namespace', 'project', 'projects',
-                               'is', 'imagestream',
-                               'istag', 'imagestreamtag',
-                               'bc', 'buildconfig',
-                               'routes',
-                               'node',
-                               'secret',
-                               'pv', 'persistentvolume']),
-            file_name=dict(default=None, type='str'),
-            file_format=dict(default='yaml', type='str'),
-            content=dict(default=None, required=True, type='dict'),
+            kubeconfig=dict(default='/etc/origin/master/admin.kubeconfig', type='str'),
+            node=dict(default=None, type='list'),
+            selector=dict(default=None, type='str'),
+            pod_selector=dict(default=None, type='str'),
+            schedulable=dict(default=None, type='bool'),
+            list_pods=dict(default=False, type='bool'),
+            evacuate=dict(default=False, type='bool'),
+            dry_run=dict(default=False, type='bool'),
             force=dict(default=False, type='bool'),
-            separator=dict(default='.', type='str'),
+            grace_period=dict(default=None, type='int'),
         ),
+        mutually_exclusive=[["selector", "node"], ['evacuate', 'list_pods'], ['list_pods', 'schedulable']],
+        required_one_of=[["node", "selector"]],
+
         supports_check_mode=True,
     )
+    results = ManageNode.run_ansible(module.params, module.check_mode)
 
-    rval = Edit.run_ansible(module.params, module.check_mode)
-    if 'failed' in rval:
-        module.fail_json(**rval)
+    if 'failed' in results:
+        module.fail_json(**results)
 
-    module.exit_json(**rval)
+    module.exit_json(**results)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
 
-# -*- -*- -*- End included fragment: ansible/oc_edit.py -*- -*- -*-
+# -*- -*- -*- End included fragment: ansible/oadm_manage_node.py -*- -*- -*-
