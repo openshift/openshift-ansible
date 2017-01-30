@@ -165,12 +165,7 @@
   retries: 20
   delay: 15
 
-- name: Adding Kibana route information to loggingPublicURL
-  modify_yaml:
-    dest: "{{ openshift.common.config_base }}/master/master-config.yaml"
-    yaml_key: assetConfig.loggingPublicURL
-    yaml_value: "https://{{ openshift_logging_kibana_hostname }}"
-  notify: restart master
+- include: update_master_config.yaml
 
 - debug:
     msg: "Logging components deployed. Note persistent volume for elasticsearch must be setup manually"
