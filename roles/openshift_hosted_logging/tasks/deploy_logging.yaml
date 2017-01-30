@@ -165,6 +165,8 @@
   retries: 20
   delay: 15
 
+- include: update_master_config.yaml
+
 - debug:
     msg: "Logging components deployed. Note persistent volume for elasticsearch must be setup manually"
 
