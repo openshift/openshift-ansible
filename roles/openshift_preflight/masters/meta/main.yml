@@ -1,3 +1,0 @@
----
-dependencies:
-  - role: openshift_preflight/base

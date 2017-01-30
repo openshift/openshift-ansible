@@ -3,6 +3,8 @@
 Ansible callback plugin.
 '''
 
+from pprint import pformat
+
 from ansible.plugins.callback import CallbackBase
 from ansible import constants as C
 from ansible.utils.color import stringc
@@ -79,6 +81,8 @@ def _format_failure(failure):
         (u'Task', task),
         (u'Message', stringc(msg, C.COLOR_ERROR)),
     )
+    if 'checks' in result._result:
+        rows += ((u'Details', stringc(pformat(result._result['checks']), C.COLOR_ERROR)),)
     row_format = '{:10}{}'
     return [row_format.format(header + u':', body) for header, body in rows]
 
