@@ -49,10 +49,10 @@
 - name: Update master-config for publicLoggingURL
   hosts: masters:!oo_first_master
   pre_tasks:
-    - set_fact:
-        logging_hostname: "{{ openshift_hosted_logging_hostname | default('kibana.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true))) }}"
+  - set_fact:
+      logging_hostname: "{{ openshift_hosted_logging_hostname | default('kibana.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true))) }}"
   tasks:
-    - include_role:
-        name: openshift_hosted_logging
-        tasks_from: update_master_config
-      when: openshift_hosted_logging_deploy | default(false) | boola
+  - include_role:
+      name: openshift_hosted_logging
+      tasks_from: update_master_config
+    when: openshift_hosted_logging_deploy | default(false) | boola
