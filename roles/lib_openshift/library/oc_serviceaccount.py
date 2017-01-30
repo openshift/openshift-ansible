@@ -44,19 +44,19 @@ from ansible.module_utils.basic import AnsibleModule
 
 # -*- -*- -*- End included fragment: lib/import.py -*- -*- -*-
 
-# -*- -*- -*- Begin included fragment: doc/route -*- -*- -*-
+# -*- -*- -*- Begin included fragment: doc/serviceaccount -*- -*- -*-
 
 DOCUMENTATION = '''
 ---
-module: oc_route
-short_description: Create, modify, and idempotently manage openshift routes.
+module: oc_serviceaccount
+short_description: Module to manage openshift service accounts
 description:
-  - Manage openshift route objects programmatically.
+  - Manage openshift service accounts programmatically.
 options:
   state:
     description:
-    - State represents whether to create, modify, delete, or list
-    required: true
+    - If present, the service account will be created if it doesn't exist or updated if different. If absent, the service account will be removed if present. If list, information about the service account will be gathered and returned as part of the Ansible call results.
+    required: false
     default: present
     choices: ["present", "absent", "list"]
     aliases: []
@@ -70,77 +70,29 @@ options:
     description:
     - Turn on debug output.
     required: false
-    default: False
+    default: false
     aliases: []
   name:
     description:
-    - Name of the object that is being queried.
-    required: false
+    - Name of the service account.
+    required: true
     default: None
     aliases: []
   namespace:
     description:
-    - The namespace where the object lives.
-    required: false
-    default: str
+    - Namespace of the service account.
+    required: true
+    default: default
     aliases: []
-  tls_termination:
+  secrets:
     description:
-    - The options for termination. e.g. reencrypt
-    required: false
-    default: None
-    aliases: []
-  dest_cacert_path:
-    description:
-    - The path to the dest_cacert
+    - A list of secrets that are associated with the service account.
     required: false
     default: None
     aliases: []
-  cacert_path:
+  image_pull_secrets:
     description:
-    - The path to the cacert
-    required: false
-    default: None
-    aliases: []
-  cert_path:
-    description:
-    - The path to the cert
-    required: false
-    default: None
-    aliases: []
-  key_path:
-    description:
-    - The path to the key
-    required: false
-    default: None
-    aliases: []
-  dest_cacert_content:
-    description:
-    - The dest_cacert content
-    required: false
-    default: None
-    aliases: []
-  cacert_content:
-    description:
-    - The cacert content
-    required: false
-    default: None
-    aliases: []
-  cert_content:
-    description:
-    - The cert content
-    required: false
-    default: None
-    aliases: []
-  service_name:
-    description:
-    - The name of the service that this route points to.
-    required: false
-    default: None
-    aliases: []
-  host:
-    description:
-    - The host that the route will use. e.g. myapp.x.y.z
+    - A list of the image pull secrets that are associated with the service account.
     required: false
     default: None
     aliases: []
@@ -150,21 +102,17 @@ extends_documentation_fragment: []
 '''
 
 EXAMPLES = '''
-- name: Configure certificates for reencrypt route
-  oc_route:
-    name: myapproute
-    namespace: awesomeapp
-    cert_path: "/etc/origin/master/named_certificates/myapp_cert
-    key_path: "/etc/origin/master/named_certificates/myapp_key
-    cacert_path: "/etc/origin/master/named_certificates/myapp_cacert
-    dest_cacert_content:  "{{ dest_cacert_content }}"
-    service_name: myapp_php
-    host: myapp.awesomeapp.openshift.com
-    tls_termination: reencrypt
-  run_once: true
+- name: create registry serviceaccount
+  oc_serviceaccount:
+    name: registry
+    namespace: default
+    secrets:
+    - docker-registry-config
+    - registry-secret
+  register: sa_out
 '''
 
-# -*- -*- -*- End included fragment: doc/route -*- -*- -*-
+# -*- -*- -*- End included fragment: doc/serviceaccount -*- -*- -*-
 
 # -*- -*- -*- Begin included fragment: ../../lib_utils/src/class/yedit.py -*- -*- -*-
 # noqa: E301,E302
@@ -1264,173 +1212,168 @@ class OpenShiftCLIConfig(object):
 
 # -*- -*- -*- End included fragment: lib/base.py -*- -*- -*-
 
-# -*- -*- -*- Begin included fragment: lib/route.py -*- -*- -*-
-# noqa: E302,E301
+# -*- -*- -*- Begin included fragment: lib/serviceaccount.py -*- -*- -*-
 
+class ServiceAccountConfig(object):
+    '''Service account config class
 
-# pylint: disable=too-many-instance-attributes
-class RouteConfig(object):
-    ''' Handle route options '''
+       This class stores the options and returns a default service account
+    '''
+
     # pylint: disable=too-many-arguments
-    def __init__(self,
-                 sname,
-                 namespace,
-                 kubeconfig,
-                 destcacert=None,
-                 cacert=None,
-                 cert=None,
-                 key=None,
-                 host=None,
-                 tls_termination=None,
-                 service_name=None,
-                 wildcard_policy=None,
-                 weight=None):
-        ''' constructor for handling route options '''
-        self.kubeconfig = kubeconfig
+    def __init__(self, sname, namespace, kubeconfig, secrets=None, image_pull_secrets=None):
         self.name = sname
+        self.kubeconfig = kubeconfig
         self.namespace = namespace
-        self.host = host
-        self.tls_termination = tls_termination
-        self.destcacert = destcacert
-        self.cacert = cacert
-        self.cert = cert
-        self.key = key
-        self.service_name = service_name
+        self.secrets = secrets or []
+        self.image_pull_secrets = image_pull_secrets or []
         self.data = {}
-        self.wildcard_policy = wildcard_policy
-        if wildcard_policy is None:
-            self.wildcard_policy = 'None'
-        self.weight = weight
-        if weight is None:
-            self.weight = 100
-
         self.create_dict()
 
     def create_dict(self):
-        ''' return a service as a dict '''
+        ''' return a properly structured volume '''
         self.data['apiVersion'] = 'v1'
-        self.data['kind'] = 'Route'
+        self.data['kind'] = 'ServiceAccount'
         self.data['metadata'] = {}
         self.data['metadata']['name'] = self.name
         self.data['metadata']['namespace'] = self.namespace
-        self.data['spec'] = {}
 
-        self.data['spec']['host'] = self.host
+        self.data['secrets'] = []
+        if self.secrets:
+            for sec in self.secrets:
+                self.data['secrets'].append({"name": sec})
 
-        if self.tls_termination:
-            self.data['spec']['tls'] = {}
+        self.data['imagePullSecrets'] = []
+        if self.image_pull_secrets:
+            for sec in self.image_pull_secrets:
+                self.data['imagePullSecrets'].append({"name": sec})
 
-            if self.tls_termination == 'reencrypt':
-                self.data['spec']['tls']['destinationCACertificate'] = self.destcacert
-            self.data['spec']['tls']['key'] = self.key
-            self.data['spec']['tls']['caCertificate'] = self.cacert
-            self.data['spec']['tls']['certificate'] = self.cert
-            self.data['spec']['tls']['termination'] = self.tls_termination
-
-        self.data['spec']['to'] = {'kind': 'Service',
-                                   'name': self.service_name,
-                                   'weight': self.weight}
-
-        self.data['spec']['wildcardPolicy'] = self.wildcard_policy
-
-# pylint: disable=too-many-instance-attributes,too-many-public-methods
-class Route(Yedit):
+class ServiceAccount(Yedit):
     ''' Class to wrap the oc command line tools '''
-    wildcard_policy = "spec.wildcardPolicy"
-    host_path = "spec.host"
-    service_path = "spec.to.name"
-    weight_path = "spec.to.weight"
-    cert_path = "spec.tls.certificate"
-    cacert_path = "spec.tls.caCertificate"
-    destcacert_path = "spec.tls.destinationCACertificate"
-    termination_path = "spec.tls.termination"
-    key_path = "spec.tls.key"
-    kind = 'route'
+    image_pull_secrets_path = "imagePullSecrets"
+    secrets_path = "secrets"
 
     def __init__(self, content):
-        '''Route constructor'''
-        super(Route, self).__init__(content=content)
+        '''ServiceAccount constructor'''
+        super(ServiceAccount, self).__init__(content=content)
+        self._secrets = None
+        self._image_pull_secrets = None
 
-    def get_destcacert(self):
-        ''' return cert '''
-        return self.get(Route.destcacert_path)
+    @property
+    def image_pull_secrets(self):
+        ''' property for image_pull_secrets '''
+        if self._image_pull_secrets is None:
+            self._image_pull_secrets = self.get(ServiceAccount.image_pull_secrets_path) or []
+        return self._image_pull_secrets
 
-    def get_cert(self):
-        ''' return cert '''
-        return self.get(Route.cert_path)
+    @image_pull_secrets.setter
+    def image_pull_secrets(self, secrets):
+        ''' property for secrets '''
+        self._image_pull_secrets = secrets
 
-    def get_key(self):
-        ''' return key '''
-        return self.get(Route.key_path)
+    @property
+    def secrets(self):
+        ''' property for secrets '''
+        if not self._secrets:
+            self._secrets = self.get(ServiceAccount.secrets_path) or []
+        return self._secrets
 
-    def get_cacert(self):
-        ''' return cacert '''
-        return self.get(Route.cacert_path)
+    @secrets.setter
+    def secrets(self, secrets):
+        ''' property for secrets '''
+        self._secrets = secrets
 
-    def get_service(self):
-        ''' return service name '''
-        return self.get(Route.service_path)
+    def delete_secret(self, inc_secret):
+        ''' remove a secret '''
+        remove_idx = None
+        for idx, sec in enumerate(self.secrets):
+            if sec['name'] == inc_secret:
+                remove_idx = idx
+                break
 
-    def get_weight(self):
-        ''' return service weight '''
-        return self.get(Route.weight_path)
+        if remove_idx:
+            del self.secrets[remove_idx]
+            return True
 
-    def get_termination(self):
-        ''' return tls termination'''
-        return self.get(Route.termination_path)
+        return False
 
-    def get_host(self):
-        ''' return host '''
-        return self.get(Route.host_path)
+    def delete_image_pull_secret(self, inc_secret):
+        ''' remove a image_pull_secret '''
+        remove_idx = None
+        for idx, sec in enumerate(self.image_pull_secrets):
+            if sec['name'] == inc_secret:
+                remove_idx = idx
+                break
 
-    def get_wildcard_policy(self):
-        ''' return wildcardPolicy '''
-        return self.get(Route.wildcard_policy)
+        if remove_idx:
+            del self.image_pull_secrets[remove_idx]
+            return True
 
-# -*- -*- -*- End included fragment: lib/route.py -*- -*- -*-
+        return False
 
-# -*- -*- -*- Begin included fragment: class/oc_route.py -*- -*- -*-
+    def find_secret(self, inc_secret):
+        '''find secret'''
+        for secret in self.secrets:
+            if secret['name'] == inc_secret:
+                return secret
 
+        return None
+
+    def find_image_pull_secret(self, inc_secret):
+        '''find secret'''
+        for secret in self.image_pull_secrets:
+            if secret['name'] == inc_secret:
+                return secret
+
+        return None
+
+    def add_secret(self, inc_secret):
+        '''add secret'''
+        if self.secrets:
+            self.secrets.append({"name": inc_secret})  # pylint: disable=no-member
+        else:
+            self.put(ServiceAccount.secrets_path, [{"name": inc_secret}])
+
+    def add_image_pull_secret(self, inc_secret):
+        '''add image_pull_secret'''
+        if self.image_pull_secrets:
+            self.image_pull_secrets.append({"name": inc_secret})  # pylint: disable=no-member
+        else:
+            self.put(ServiceAccount.image_pull_secrets_path, [{"name": inc_secret}])
+
+# -*- -*- -*- End included fragment: lib/serviceaccount.py -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: class/oc_serviceaccount.py -*- -*- -*-
 
 # pylint: disable=too-many-instance-attributes
-class OCRoute(OpenShiftCLI):
+class OCServiceAccount(OpenShiftCLI):
     ''' Class to wrap the oc command line tools '''
-    kind = 'route'
+    kind = 'sa'
 
+    # pylint allows 5
+    # pylint: disable=too-many-arguments
     def __init__(self,
                  config,
                  verbose=False):
         ''' Constructor for OCVolume '''
-        super(OCRoute, self).__init__(config.namespace, config.kubeconfig)
+        super(OCServiceAccount, self).__init__(config.namespace, config.kubeconfig)
         self.config = config
         self.namespace = config.namespace
-        self._route = None
-
-    @property
-    def route(self):
-        ''' property function for route'''
-        if not self._route:
-            self.get()
-        return self._route
-
-    @route.setter
-    def route(self, data):
-        ''' setter function for route '''
-        self._route = data
+        self.service_account = None
 
     def exists(self):
-        ''' return whether a route exists '''
-        if self.route:
+        ''' return whether a volume exists '''
+        if self.service_account:
             return True
 
         return False
 
     def get(self):
-        '''return route information '''
+        '''return volume information '''
         result = self._get(self.kind, self.config.name)
         if result['returncode'] == 0:
-            self.route = Route(content=result['results'][0])
-        elif 'routes \"%s\" not found' % self.config.name in result['stderr']:
+            self.service_account = ServiceAccount(content=result['results'][0])
+        elif '\"%s\" not found' % self.config.name in result['stderr']:
             result['returncode'] = 0
             result['results'] = [{}]
 
@@ -1447,142 +1390,133 @@ class OCRoute(OpenShiftCLI):
     def update(self):
         '''update the object'''
         # need to update the tls information and the service name
+        for secret in self.config.secrets:
+            result = self.service_account.find_secret(secret)
+            if not result:
+                self.service_account.add_secret(secret)
+
+        for secret in self.config.image_pull_secrets:
+            result = self.service_account.find_image_pull_secret(secret)
+            if not result:
+                self.service_account.add_image_pull_secret(secret)
+
         return self._replace_content(self.kind, self.config.name, self.config.data)
 
     def needs_update(self):
         ''' verify an update is needed '''
-        skip = []
-        return not Utils.check_def_equal(self.config.data, self.route.yaml_dict, skip_keys=skip, debug=True)
+        # since creating an service account generates secrets and imagepullsecrets
+        # check_def_equal will not work
+        # Instead, verify all secrets passed are in the list
+        for secret in self.config.secrets:
+            result = self.service_account.find_secret(secret)
+            if not result:
+                return True
 
-    # pylint: disable=too-many-return-statements,too-many-branches
+        for secret in self.config.image_pull_secrets:
+            result = self.service_account.find_image_pull_secret(secret)
+            if not result:
+                return True
+
+        return False
+
     @staticmethod
-    def run_ansible(params, files, check_mode=False):
-        ''' run the idempotent asnible code
+    # pylint: disable=too-many-return-statements,too-many-branches
+    # TODO: This function should be refactored into its individual parts.
+    def run_ansible(params, check_mode):
+        '''run the ansible idempotent code'''
 
-            params comes from the ansible portion for this module
-            files: a dictionary for the certificates
-                   {'cert': {'path': '',
-                             'content': '',
-                             'value': ''
-                            }
-                   }
-            check_mode: does the module support check mode.  (module.check_mode)
-        '''
+        rconfig = ServiceAccountConfig(params['name'],
+                                       params['namespace'],
+                                       params['kubeconfig'],
+                                       params['secrets'],
+                                       params['image_pull_secrets'],
+                                      )
 
-        rconfig = RouteConfig(params['name'],
-                              params['namespace'],
-                              params['kubeconfig'],
-                              files['destcacert']['value'],
-                              files['cacert']['value'],
-                              files['cert']['value'],
-                              files['key']['value'],
-                              params['host'],
-                              params['tls_termination'],
-                              params['service_name'],
-                              params['wildcard_policy'],
-                              params['weight'])
-
-        oc_route = OCRoute(rconfig, verbose=params['debug'])
+        oc_sa = OCServiceAccount(rconfig,
+                                 verbose=params['debug'])
 
         state = params['state']
 
-        api_rval = oc_route.get()
+        api_rval = oc_sa.get()
 
         #####
         # Get
         #####
         if state == 'list':
-            return {'changed': False,
-                    'results': api_rval['results'],
-                    'state': 'list'}
+            return {'changed': False, 'results': api_rval['results'], 'state': 'list'}
 
         ########
         # Delete
         ########
         if state == 'absent':
-            if oc_route.exists():
+            if oc_sa.exists():
 
                 if check_mode:
-                    return {'changed': False, 'msg': 'CHECK_MODE: Would have performed a delete.'}  # noqa: E501
+                    return {'changed': True, 'msg': 'Would have performed a delete.'}
 
-                api_rval = oc_route.delete()
+                api_rval = oc_sa.delete()
 
-                return {'changed': True, 'results': api_rval, 'state': "absent"}  # noqa: E501
+                return {'changed': True, 'results': api_rval, 'state': 'absent'}
+
             return {'changed': False, 'state': 'absent'}
 
         if state == 'present':
             ########
             # Create
             ########
-            if not oc_route.exists():
+            if not oc_sa.exists():
 
                 if check_mode:
-                    return {'changed': True, 'msg': 'CHECK_MODE: Would have performed a create.'}  # noqa: E501
+                    return {'changed': True, 'msg': 'Would have performed a create.'}
 
                 # Create it here
-                api_rval = oc_route.create()
+                api_rval = oc_sa.create()
 
                 if api_rval['returncode'] != 0:
-                    return {'failed': True, 'msg': api_rval, 'state': "present"}  # noqa: E501
+                    return {'failed': True, 'msg': api_rval}
 
                 # return the created object
-                api_rval = oc_route.get()
+                api_rval = oc_sa.get()
 
                 if api_rval['returncode'] != 0:
-                    return {'failed': True, 'msg': api_rval, 'state': "present"}  # noqa: E501
+                    return {'failed': True, 'msg': api_rval}
 
-                return {'changed': True, 'results': api_rval, 'state': "present"}  # noqa: E501
+                return {'changed': True, 'results': api_rval, 'state': 'present'}
 
             ########
             # Update
             ########
-            if oc_route.needs_update():
-
-                if check_mode:
-                    return {'changed': True, 'msg': 'CHECK_MODE: Would have performed an update.'}  # noqa: E501
-
-                api_rval = oc_route.update()
+            if oc_sa.needs_update():
+                api_rval = oc_sa.update()
 
                 if api_rval['returncode'] != 0:
-                    return {'failed': True, 'msg': api_rval, 'state': "present"}  # noqa: E501
+                    return {'failed': True, 'msg': api_rval}
 
                 # return the created object
-                api_rval = oc_route.get()
+                api_rval = oc_sa.get()
 
                 if api_rval['returncode'] != 0:
-                    return {'failed': True, 'msg': api_rval, 'state': "present"}  # noqa: E501
+                    return {'failed': True, 'msg': api_rval}
 
-                return {'changed': True, 'results': api_rval, 'state': "present"}  # noqa: E501
+                return {'changed': True, 'results': api_rval, 'state': 'present'}
 
-            return {'changed': False, 'results': api_rval, 'state': "present"}
-
-        # catch all
-        return {'failed': True, 'msg': "Unknown State passed"}
-
-# -*- -*- -*- End included fragment: class/oc_route.py -*- -*- -*-
-
-# -*- -*- -*- Begin included fragment: ansible/oc_route.py -*- -*- -*-
+            return {'changed': False, 'results': api_rval, 'state': 'present'}
 
 
-def get_cert_data(path, content):
-    '''get the data for a particular value'''
-    if not path and not content:
-        return None
+        return {'failed': True,
+                'changed': False,
+                'msg': 'Unknown state passed. %s' % state,
+                'state': 'unknown'}
 
-    rval = None
-    if path and os.path.exists(path) and os.access(path, os.R_OK):
-        rval = open(path).read()
-    elif content:
-        rval = content
+# -*- -*- -*- End included fragment: class/oc_serviceaccount.py -*- -*- -*-
 
-    return rval
+# -*- -*- -*- Begin included fragment: ansible/oc_serviceaccount.py -*- -*- -*-
 
-
-# pylint: disable=too-many-branches
 def main():
     '''
     ansible oc module for route
     '''
+
     module = AnsibleModule(
         argument_spec=dict(
             kubeconfig=dict(default='/etc/origin/master/admin.kubeconfig', type='str'),
@@ -1591,58 +1525,19 @@ def main():
             debug=dict(default=False, type='bool'),
             name=dict(default=None, required=True, type='str'),
             namespace=dict(default=None, required=True, type='str'),
-            tls_termination=dict(default=None, type='str'),
-            dest_cacert_path=dict(default=None, type='str'),
-            cacert_path=dict(default=None, type='str'),
-            cert_path=dict(default=None, type='str'),
-            key_path=dict(default=None, type='str'),
-            dest_cacert_content=dict(default=None, type='str'),
-            cacert_content=dict(default=None, type='str'),
-            cert_content=dict(default=None, type='str'),
-            key_content=dict(default=None, type='str'),
-            service_name=dict(default=None, type='str'),
-            host=dict(default=None, type='str'),
-            wildcard_policy=dict(default=None, type='str'),
-            weight=dict(default=None, type='int'),
+            secrets=dict(default=None, type='list'),
+            image_pull_secrets=dict(default=None, type='list'),
         ),
-        mutually_exclusive=[('dest_cacert_path', 'dest_cacert_content'),
-                            ('cacert_path', 'cacert_content'),
-                            ('cert_path', 'cert_content'),
-                            ('key_path', 'key_content'), ],
         supports_check_mode=True,
     )
-    files = {'destcacert': {'path': module.params['dest_cacert_path'],
-                            'content': module.params['dest_cacert_content'],
-                            'value': None, },
-             'cacert': {'path': module.params['cacert_path'],
-                        'content': module.params['cacert_content'],
-                        'value': None, },
-             'cert': {'path': module.params['cert_path'],
-                      'content': module.params['cert_content'],
-                      'value': None, },
-             'key': {'path': module.params['key_path'],
-                     'content': module.params['key_content'],
-                     'value': None, }, }
 
-    if module.params['tls_termination']:
-        for key, option in files.items():
-            if key == 'destcacert' and module.params['tls_termination'] != 'reencrypt':
-                continue
+    rval = OCServiceAccount.run_ansible(module.params, module.check_mode)
+    if 'failed' in rval:
+        module.fail_json(**rval)
 
-            option['value'] = get_cert_data(option['path'], option['content'])
-
-            if not option['value']:
-                module.fail_json(msg='Verify that you pass a value for %s' % key)
-
-    results = OCRoute.run_ansible(module.params, files, module.check_mode)
-
-    if 'failed' in results:
-        module.fail_json(**results)
-
-    module.exit_json(**results)
-
+    module.exit_json(**rval)
 
 if __name__ == '__main__':
     main()
 
-# -*- -*- -*- End included fragment: ansible/oc_route.py -*- -*- -*-
+# -*- -*- -*- End included fragment: ansible/oc_serviceaccount.py -*- -*- -*-

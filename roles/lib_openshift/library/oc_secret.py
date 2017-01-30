@@ -936,6 +936,18 @@ class OpenShiftCLI(object):
         cmd.append('--confirm')
         return self.openshift_cmd(cmd)
 
+    def _run(self, cmds, input_data):
+        ''' Actually executes the command. This makes mocking easier. '''
+        proc = subprocess.Popen(cmds,
+                                stdin=subprocess.PIPE,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE,
+                                env={'KUBECONFIG': self.kubeconfig})
+
+        stdout, stderr = proc.communicate(input_data)
+
+        return proc.returncode, stdout, stderr
+
     # pylint: disable=too-many-arguments,too-many-branches
     def openshift_cmd(self, cmd, oadm=False, output=False, output_type='json', input_data=None):
         '''Base command for oc '''
@@ -959,18 +971,13 @@ class OpenShiftCLI(object):
         if self.verbose:
             print(' '.join(cmds))
 
-        proc = subprocess.Popen(cmds,
-                                stdin=subprocess.PIPE,
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE,
-                                env={'KUBECONFIG': self.kubeconfig})
+        returncode, stdout, stderr = self._run(cmds, input_data)
 
-        stdout, stderr = proc.communicate(input_data)
-        rval = {"returncode": proc.returncode,
+        rval = {"returncode": returncode,
                 "results": results,
                 "cmd": ' '.join(cmds)}
 
-        if proc.returncode == 0:
+        if returncode == 0:
             if output:
                 if output_type == 'json':
                     try:
