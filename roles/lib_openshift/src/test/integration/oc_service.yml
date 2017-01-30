@@ -126,4 +126,3 @@
       - svc_out.results.returncode == 1
       - "'not found' in svc_out.results.stderr"
       msg: service get failed
-

@@ -1269,6 +1269,7 @@ class OpenShiftCLIConfig(object):
 
 # -*- -*- -*- Begin included fragment: lib/service.py -*- -*- -*-
 
+
 # pylint: disable=too-many-instance-attributes
 class ServiceConfig(object):
     ''' Handle service options '''
@@ -1476,6 +1477,7 @@ class OCService(OpenShiftCLI):
         skip = ['clusterIP', 'portalIP']
         return not Utils.check_def_equal(self.user_svc.yaml_dict, self.service.yaml_dict, skip_keys=skip, debug=True)
 
+    # pylint: disable=too-many-return-statements,too-many-branches
     @staticmethod
     def run_ansible(params, check_mode):
         '''Run the idempotent ansible code'''
