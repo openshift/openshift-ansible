@@ -1278,12 +1278,22 @@ def get_docker_version_info():
     """ Parses and returns the docker version info """
     result = None
     if is_service_running('docker'):
-        version_info = yaml.safe_load(get_version_output('/usr/bin/docker', 'version'))
-        if 'Server' in version_info:
-            result = {
-                'api_version': version_info['Server']['API version'],
-                'version': version_info['Server']['Version']
-            }
+        version_output = get_version_output('/usr/bin/docker', 'version')
+        try:
+            version_info = yaml.safe_load(version_output)
+            if 'Server' in version_info:
+                result = {
+                    'api_version': version_info['Server']['API version'],
+                    'version': version_info['Server']['Version']
+                }
+        # PyYAML unable to parse the output of `docker version`
+        except yaml.scanner.ScannerError:
+            raise OpenShiftFactsInternalError('Unable to determine the installed docker version.'
+                                              ' Check the output of `docker version` and ensure that the'
+                                              ' correct version of docker has been installed per the'
+                                              ' host preparation steps in the OpenShift documentation'
+                                              ' at https://docs.openshift.com/.\n\n'
+                                              "Docker version output:\n{0}".format(version_output))
     return result
 
 
