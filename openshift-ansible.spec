@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.47
+Version:        3.2.48
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jan 31 2017 Scott Dodson <sdodson@redhat.com> 3.2.48-1
+- Backport openshift-cert-expiry role to 1.2 (tbielawa@redhat.com)
+- Add 10 second wait after disabling firewalld (sdodson@redhat.com)
+
 * Wed Jan 18 2017 Scott Dodson <sdodson@redhat.com> 3.2.47-1
 - Ensure serial certificate generation for node and master certificates.
   (abutcher@redhat.com)
