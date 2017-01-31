@@ -30,7 +30,12 @@ else:
 
 # Set to minimum required Ansible version
 REQUIRED_VERSION = '2.2.0.0'
-DESCRIPTION = "Supported versions: %s or newer" % REQUIRED_VERSION
+DESCRIPTION = "Supported versions: %s or newer (except 2.2.1.0)" % REQUIRED_VERSION
+FAIL_ON_2_2_1_0 = "There are known issues with Ansible version 2.2.1.0 which " \
+                  "are impacting OpenShift-Ansible. Please use Ansible " \
+                  "version 2.2.0.0 or a version greater than 2.2.1.0. " \
+                  "See this issue for more details: " \
+                  "https://github.com/openshift/openshift-ansible/issues/3111"
 
 
 def version_requirement(version):
@@ -57,4 +62,10 @@ class CallbackModule(CallbackBase):
             display(
                 'FATAL: Current Ansible version (%s) is not supported. %s'
                 % (__version__, DESCRIPTION), color='red')
+            sys.exit(1)
+
+        if __version__ == '2.2.1.0':
+            display(
+                'FATAL: Current Ansible version (%s) is not supported. %s'
+                % (__version__, FAIL_ON_2_2_1_0), color='red')
             sys.exit(1)
