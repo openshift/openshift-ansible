@@ -1,6 +1,7 @@
 # pylint: skip-file
 # flake8: noqa
 
+
 # pylint: disable=too-many-instance-attributes
 class OCLabel(OpenShiftCLI):
     ''' Class to wrap the oc command line tools '''
@@ -22,12 +23,22 @@ class OCLabel(OpenShiftCLI):
         self.kind = kind
         self.kubeconfig = kubeconfig
         self.labels = labels
+        self._curr_labels = None
         self.selector = selector
 
-    def get_current_labels(self):
-        ''' get the current labels on object '''
+    @property
+    def current_labels(self):
+        '''property for the current labels'''
+        if self._curr_labels is None:
+            results = self.get()
+            self._curr_labels = results['labels']
 
-        return self.get()['results']['labels']
+        return self._curr_labels
+
+    @current_labels.setter
+    def current_labels(self, data):
+        '''property setter for current labels'''
+        self._curr_labels = data
 
     def compare_labels(self, host_labels):
         ''' compare incoming labels against current labels'''
@@ -41,9 +52,7 @@ class OCLabel(OpenShiftCLI):
     def all_user_labels_exist(self):
         ''' return whether all the labels already exist '''
 
-        current_labels = self.get_current_labels()
-
-        for current_host_labels in current_labels:
+        for current_host_labels in self.current_labels:
             rbool = self.compare_labels(current_host_labels)
             if rbool == False:
                 return False
@@ -51,9 +60,8 @@ class OCLabel(OpenShiftCLI):
 
     def any_label_exists(self):
         ''' return whether any single label already exists '''
-        current_labels = self.get_current_labels()
 
-        for current_host_labels in current_labels:
+        for current_host_labels in self.current_labels:
             for label in self.labels:
                 if label['key'] in current_host_labels:
                     return True
@@ -72,8 +80,7 @@ class OCLabel(OpenShiftCLI):
         ''' collect all the current label keys '''
 
         current_label_keys = []
-        current_labels = self.get_current_labels()
-        for current_host_labels in current_labels:
+        for current_host_labels in self.current_labels:
             for key in current_host_labels.keys():
                 current_label_keys.append(key)
 
@@ -83,7 +90,6 @@ class OCLabel(OpenShiftCLI):
         ''' return list of labels that are currently stored, but aren't
             in user-provided list '''
 
-        current_labels = self.get_current_labels()
         extra_labels = []
         user_label_keys = self.get_user_keys()
         current_label_keys = self.get_current_label_keys()
@@ -100,7 +106,7 @@ class OCLabel(OpenShiftCLI):
         extra_labels = self.get_extra_current_labels()
 
         if len(extra_labels) > 0:
-                return True
+            return True
         else:
             return False
 
@@ -146,8 +152,9 @@ class OCLabel(OpenShiftCLI):
                 else:
                     label_list.append({})
 
-        result_dict['labels'] = label_list
-        result_dict['item_count'] = len(label_list)
+        self.current_labels = label_list
+        result_dict['labels'] = self.current_labels
+        result_dict['item_count'] = len(self.current_labels)
         result['results'] = result_dict
 
         return result
@@ -155,17 +162,12 @@ class OCLabel(OpenShiftCLI):
     def cmd_template(self):
         ''' boilerplate oc command for modifying lables on this object '''
         # let's build the cmd with what we have passed in
-        cmd = []
-        if self.namespace:
-            cmd = cmd + ["-n", self.namespace]
+        cmd = ["label", self.kind]
 
         if self.selector:
-            cmd = cmd + ["--selector", self.selector]
-
-        cmd = cmd + ["--config", self.kubeconfig, "label", self.kind]
-
-        if self.name:
-            cmd = cmd + [self.name]
+            cmd.extend(["--selector", self.selector])
+        elif self.name:
+            cmd.extend([self.name])
 
         return cmd
 
