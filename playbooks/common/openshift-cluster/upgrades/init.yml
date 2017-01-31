@@ -65,3 +65,17 @@
     when: not openshift.common.is_atomic | bool
     args:
       warn: no
+
+- name: Ensure firewall is not switched during upgrade
+  hosts: oo_all_hosts
+  tasks:
+  - name: Check if iptables is running
+    command: systemctl status iptables
+    ignore_errors: true
+    changed_when: false
+    register: service_iptables_status
+
+  - name: Set fact os_firewall_use_firewalld FALSE for iptables
+    set_fact:
+      os_firewall_use_firewalld: false
+    when: "'Active: active' in service_iptables_status.stdout"

@@ -867,6 +867,7 @@ def set_deployment_facts_if_unset(facts):
     return facts
 
 
+# pylint: disable=too-many-statements
 def set_version_facts_if_unset(facts):
     """ Set version facts. This currently includes common.version and
         common.version_gte_3_1_or_1_1.
@@ -904,8 +905,8 @@ def set_version_facts_if_unset(facts):
             version_gte_3_1_1_or_1_1_1 = True
             version_gte_3_2_or_1_2 = True
             version_gte_3_3_or_1_3 = True
-            version_gte_3_4_or_1_4 = False
-            version_gte_3_5_or_1_5 = False
+            version_gte_3_4_or_1_4 = True
+            version_gte_3_5_or_1_5 = True
             version_gte_3_6_or_1_6 = False
         facts['common']['version_gte_3_1_or_1_1'] = version_gte_3_1_or_1_1
         facts['common']['version_gte_3_1_1_or_1_1_1'] = version_gte_3_1_1_or_1_1_1
@@ -915,7 +916,9 @@ def set_version_facts_if_unset(facts):
         facts['common']['version_gte_3_5_or_1_5'] = version_gte_3_5_or_1_5
         facts['common']['version_gte_3_6_or_1_6'] = version_gte_3_6_or_1_6
 
-        if version_gte_3_4_or_1_4:
+        if version_gte_3_5_or_1_5:
+            examples_content_version = 'v1.5'
+        elif version_gte_3_4_or_1_4:
             examples_content_version = 'v1.4'
         elif version_gte_3_3_or_1_3:
             examples_content_version = 'v1.3'

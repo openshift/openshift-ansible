@@ -52,32 +52,64 @@ class LookupModule(LookupBase):
             # convert short_version to origin short_version
             short_version = re.sub('^3.', '1.', short_version)
 
-        if short_version in ['1.1', '1.2']:
-            predicates.append({'name': 'PodFitsHostPorts'})
-            predicates.append({'name': 'PodFitsResources'})
+        # Predicates ordered according to OpenShift Origin source:
+        # origin/vendor/k8s.io/kubernetes/plugin/pkg/scheduler/algorithmprovider/defaults/defaults.go
 
-        # applies to all known versions
-        predicates.append({'name': 'NoDiskConflict'})
+        if short_version == '1.1':
+            predicates.extend([
+                {'name': 'PodFitsHostPorts'},
+                {'name': 'PodFitsResources'},
+                {'name': 'NoDiskConflict'},
+                {'name': 'MatchNodeSelector'},
+            ])
 
-        # only 1.1 didn't include NoVolumeZoneConflict
-        if short_version != '1.1':
-            predicates.append({'name': 'NoVolumeZoneConflict'})
+        if short_version == '1.2':
+            predicates.extend([
+                {'name': 'PodFitsHostPorts'},
+                {'name': 'PodFitsResources'},
+                {'name': 'NoDiskConflict'},
+                {'name': 'NoVolumeZoneConflict'},
+                {'name': 'MatchNodeSelector'},
+                {'name': 'MaxEBSVolumeCount'},
+                {'name': 'MaxGCEPDVolumeCount'}
+            ])
 
-        if short_version in ['1.1', '1.2']:
-            predicates.append({'name': 'MatchNodeSelector'})
+        if short_version == '1.3':
+            predicates.extend([
+                {'name': 'NoDiskConflict'},
+                {'name': 'NoVolumeZoneConflict'},
+                {'name': 'MaxEBSVolumeCount'},
+                {'name': 'MaxGCEPDVolumeCount'},
+                {'name': 'GeneralPredicates'},
+                {'name': 'PodToleratesNodeTaints'},
+                {'name': 'CheckNodeMemoryPressure'}
+            ])
 
-        if short_version != '1.1':
-            predicates.append({'name': 'MaxEBSVolumeCount'})
-            predicates.append({'name': 'MaxGCEPDVolumeCount'})
+        if short_version == '1.4':
+            predicates.extend([
+                {'name': 'NoDiskConflict'},
+                {'name': 'NoVolumeZoneConflict'},
+                {'name': 'MaxEBSVolumeCount'},
+                {'name': 'MaxGCEPDVolumeCount'},
+                {'name': 'GeneralPredicates'},
+                {'name': 'PodToleratesNodeTaints'},
+                {'name': 'CheckNodeMemoryPressure'},
+                {'name': 'CheckNodeDiskPressure'},
+                {'name': 'MatchInterPodAffinity'}
+            ])
 
-        if short_version not in ['1.1', '1.2']:
-            predicates.append({'name': 'GeneralPredicates'})
-            predicates.append({'name': 'PodToleratesNodeTaints'})
-            predicates.append({'name': 'CheckNodeMemoryPressure'})
-
-        if short_version not in ['1.1', '1.2', '1.3']:
-            predicates.append({'name': 'CheckNodeDiskPressure'})
-            predicates.append({'name': 'MatchInterPodAffinity'})
+        if short_version in ['1.5', '1.6']:
+            predicates.extend([
+                {'name': 'NoVolumeZoneConflict'},
+                {'name': 'MaxEBSVolumeCount'},
+                {'name': 'MaxGCEPDVolumeCount'},
+                {'name': 'MatchInterPodAffinity'},
+                {'name': 'NoDiskConflict'},
+                {'name': 'GeneralPredicates'},
+                {'name': 'PodToleratesNodeTaints'},
+                {'name': 'CheckNodeMemoryPressure'},
+                {'name': 'CheckNodeDiskPressure'},
+            ])
 
         if regions_enabled:
             region_predicate = {

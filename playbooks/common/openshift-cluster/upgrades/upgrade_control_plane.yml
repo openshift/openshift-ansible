@@ -32,7 +32,7 @@
   include: ./etcd/main.yml
 
 # Create service signer cert when missing. Service signer certificate
-# is added to master config in the master config hook for v3_3.
+# is added to master config in the master_config_upgrade hook.
 - name: Determine if service signer cert must be created
   hosts: oo_first_master
   tasks:
