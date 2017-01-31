@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.61
+Version:        3.3.62
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,13 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jan 31 2017 Scott Dodson <sdodson@redhat.com> 3.3.62-1
+- More reliable wait for master after full host reboot. (dgoodwin@redhat.com)
+- Use openshift.common.hostname when verifying API port available.
+  (abutcher@redhat.com)
+- Backport openshift-cert-expiry role to 1.3 (tbielawa@redhat.com)
+- Add 10 second wait after disabling firewalld (sdodson@redhat.com)
+
 * Mon Jan 23 2017 Scott Dodson <sdodson@redhat.com> 3.3.61-1
 - Re-add RHAMP v1.3 content (sdodson@redhat.com)
 - Revert "Add RHAMP and update v1.3 content" (sdodson@redhat.com)
