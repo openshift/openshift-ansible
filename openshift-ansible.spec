@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.57
+Version:        3.4.58
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -250,6 +250,19 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jan 31 2017 Scott Dodson <sdodson@redhat.com> 3.4.58-1
+- More reliable wait for master after full host reboot. (dgoodwin@redhat.com)
+- Backport latest openshift-cert-expiry role updates to 1.4
+  (tbielawa@redhat.com)
+- increase test coverage (jdetiber@redhat.com)
+- add test for utils to bump coverage (jdetiber@redhat.com)
+- update travis to use tox for utils (jdetiber@redhat.com)
+- Correct tox to run on Travis (rteague@redhat.com)
+- flake8 mccabe dependency fix (rteague@redhat.com)
+- Temporary work-around for flake8 vs maccabe version conflict
+  (tbielawa@redhat.com)
+- More toxification (jdetiber@redhat.com)
+
 * Thu Jan 26 2017 Scott Dodson <sdodson@redhat.com> 3.4.57-1
 - Wait for nodes to be ready before proceeding with upgrade.
   (dgoodwin@redhat.com)
