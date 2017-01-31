@@ -1,8 +1,8 @@
 ---
-- set_fact: fluentd_ops_host={{ (openshift_logging_use_ops) | ternary(openshift_logging_es_ops_host, openshift_logging_es_host) }}
+- set_fact: fluentd_ops_host={{ (openshift_logging_use_ops | bool) | ternary(openshift_logging_es_ops_host, openshift_logging_es_host) }}
   check_mode: no
 
-- set_fact: fluentd_ops_port={{ (openshift_logging_use_ops) | ternary(openshift_logging_es_ops_port, openshift_logging_es_port) }}
+- set_fact: fluentd_ops_port={{ (openshift_logging_use_ops | bool) | ternary(openshift_logging_es_ops_port, openshift_logging_es_port) }}
   check_mode: no
 
 - name: Generating Fluentd daemonset
