@@ -31,7 +31,7 @@ class ServiceConfig(object):
         self.create_dict()
 
     def create_dict(self):
-        ''' return a service as a dict '''
+        ''' instantiates a service dict '''
         self.data['apiVersion'] = 'v1'
         self.data['kind'] = 'Service'
         self.data['metadata'] = {}
@@ -63,7 +63,7 @@ class ServiceConfig(object):
 
 # pylint: disable=too-many-instance-attributes,too-many-public-methods
 class Service(Yedit):
-    ''' Class to wrap the oc command line tools '''
+    ''' Class to model the oc service object '''
     port_path = "spec.ports"
     portal_ip = "spec.portalIP"
     cluster_ip = "spec.clusterIP"

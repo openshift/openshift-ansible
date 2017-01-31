@@ -11,7 +11,7 @@ options:
   state:
     description:
     - State represents whether to create, modify, delete, or list
-    required: true
+    required: False
     default: present
     choices: ["present", "absent", "list"]
     aliases: []
@@ -59,7 +59,8 @@ options:
     aliases: []
   portalip:
     description:
-    - The portal ip address to use with this service.
+    - The portal ip(virtual ip) address to use with this service.
+    - "https://docs.openshift.com/enterprise/3.0/architecture/core_concepts/pods_and_services.html#services"
     required: false
     default: None
     aliases: []

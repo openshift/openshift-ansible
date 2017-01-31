@@ -38,18 +38,18 @@ class OCService(OpenShiftCLI):
 
     @service.setter
     def service(self, data):
-        ''' setter function for yedit var '''
+        ''' setter function for service var '''
         self.svc = data
 
     def exists(self):
-        ''' return whether a volume exists '''
+        ''' return whether a service exists '''
         if self.service:
             return True
 
         return False
 
     def get(self):
-        '''return volume information '''
+        '''return service information '''
         result = self._get(self.kind, self.config.name)
         if result['returncode'] == 0:
             self.service = Service(content=result['results'][0])
@@ -61,7 +61,7 @@ class OCService(OpenShiftCLI):
         return result
 
     def delete(self):
-        '''delete the object'''
+        '''delete the service'''
         return self._delete(self.kind, self.config.name)
 
     def create(self):

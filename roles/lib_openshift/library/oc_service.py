@@ -56,7 +56,7 @@ options:
   state:
     description:
     - State represents whether to create, modify, delete, or list
-    required: true
+    required: False
     default: present
     choices: ["present", "absent", "list"]
     aliases: []
@@ -104,7 +104,8 @@ options:
     aliases: []
   portalip:
     description:
-    - The portal ip address to use with this service.
+    - The portal ip(virtual ip) address to use with this service.
+    - "https://docs.openshift.com/enterprise/3.0/architecture/core_concepts/pods_and_services.html#services"
     required: false
     default: None
     aliases: []
@@ -1299,7 +1300,7 @@ class ServiceConfig(object):
         self.create_dict()
 
     def create_dict(self):
-        ''' return a service as a dict '''
+        ''' instantiates a service dict '''
         self.data['apiVersion'] = 'v1'
         self.data['kind'] = 'Service'
         self.data['metadata'] = {}
@@ -1331,7 +1332,7 @@ class ServiceConfig(object):
 
 # pylint: disable=too-many-instance-attributes,too-many-public-methods
 class Service(Yedit):
-    ''' Class to wrap the oc command line tools '''
+    ''' Class to model the oc service object '''
     port_path = "spec.ports"
     portal_ip = "spec.portalIP"
     cluster_ip = "spec.clusterIP"
@@ -1434,18 +1435,18 @@ class OCService(OpenShiftCLI):
 
     @service.setter
     def service(self, data):
-        ''' setter function for yedit var '''
+        ''' setter function for service var '''
         self.svc = data
 
     def exists(self):
-        ''' return whether a volume exists '''
+        ''' return whether a service exists '''
         if self.service:
             return True
 
         return False
 
     def get(self):
-        '''return volume information '''
+        '''return service information '''
         result = self._get(self.kind, self.config.name)
         if result['returncode'] == 0:
             self.service = Service(content=result['results'][0])
@@ -1457,7 +1458,7 @@ class OCService(OpenShiftCLI):
         return result
 
     def delete(self):
-        '''delete the object'''
+        '''delete the service'''
         return self._delete(self.kind, self.config.name)
 
     def create(self):
