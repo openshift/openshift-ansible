@@ -41,7 +41,7 @@ class ActionModule(ActionBase):
             return result
 
         args = self._task.args
-        requested_checks = set(args.get("checks", []))
+        requested_checks = resolve_checks(args.get("checks", []), known_checks.values())
 
         unknown_checks = requested_checks - set(known_checks)
         if unknown_checks:
@@ -93,3 +93,24 @@ class ActionModule(ActionBase):
             known_checks[check_name] = cls(module_executor=self._execute_module)
 
         return known_checks
+
+
+def resolve_checks(names, all_checks):
+    """Returns a set of resolved check names.
+
+    Resolving a check name involves expanding tag references (e.g., '@tag') with
+    all the checks that contain the given tag.
+
+    names should be a sequence of strings.
+
+    all_checks should be a sequence of check classes/instances.
+    """
+    resolved = set()
+    for name in names:
+        if name.startswith("@"):
+            for check in all_checks:
+                if name[1:] in check.tags:
+                    resolved.add(check.name)
+        else:
+            resolved.add(name)
+    return resolved

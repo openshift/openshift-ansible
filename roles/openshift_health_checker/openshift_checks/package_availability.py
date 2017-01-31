@@ -7,6 +7,7 @@ class PackageAvailability(NotContainerized, OpenShiftCheck):
     """Check that required RPM packages are available."""
 
     name = "package_availability"
+    tags = ["preflight"]
 
     def run(self, tmp, task_vars):
         try:

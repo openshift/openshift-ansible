@@ -26,6 +26,15 @@ class OpenShiftCheck(object):
         """The name of this check, usually derived from the class name."""
         return "openshift_check"
 
+    @property
+    def tags(self):
+        """A list of tags that this check satisfy.
+
+        Tags are used to reference multiple checks with a single '@tagname'
+        special check name.
+        """
+        return []
+
     @classmethod
     def is_active(cls, task_vars):  # pylint: disable=unused-argument
         """Returns true if this check applies to the ansible-playbook run."""

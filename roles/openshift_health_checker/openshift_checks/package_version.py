@@ -7,6 +7,7 @@ class PackageVersion(NotContainerized, OpenShiftCheck):
     """Check that available RPM packages match the required versions."""
 
     name = "package_version"
+    tags = ["preflight"]
 
     @classmethod
     def is_active(cls, task_vars):
