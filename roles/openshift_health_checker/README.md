@@ -4,6 +4,8 @@ OpenShift Health Checker
 This role detects common problems with OpenShift installations or with
 environments prior to install.
 
+For more information about creating new checks, see [HOWTO_CHECKS.md](HOWTO_CHECKS.md).
+
 Requirements
 ------------
 
