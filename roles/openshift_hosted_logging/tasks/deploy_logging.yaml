@@ -167,6 +167,16 @@
 
 - include: update_master_config.yaml
 
+- name: "Copy Dashboards for Kibana"
+  copy:
+    src: roles/openshift_hosted_logging/files/dashboard.json
+    dest: ~/manageiq_ops_dashboard.json
+
+- name: "Push Dashboards to Kibana"
+  shell: "curl -X PUT -k -H \"kbn-version: 4.5.4\" -H \"Authorization: Bearer `{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig sa get-token management-admin -n management-infra`\" https://{{ openshift_hosted_logging_ops_hostname }}/elasticsearch/.kibana/dashboard/ManageIQOpsDashboard -d @manageiq_ops_dashboard.json"
+  register: result
+  failed_when: result.rc == 1 or 'Error' in result.stderr
+
 - debug:
     msg: "Logging components deployed. Note persistent volume for elasticsearch must be setup manually"
 
