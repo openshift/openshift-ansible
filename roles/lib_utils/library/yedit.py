@@ -24,18 +24,21 @@
 # limitations under the License.
 #
 
-# -*- -*- -*- Begin included fragment: class/import.py -*- -*- -*-
+# -*- -*- -*- Begin included fragment: lib/import.py -*- -*- -*-
 
-# pylint: disable=wrong-import-order
-import json
-import os
-import re
+# pylint: disable=wrong-import-order,wrong-import-position,unused-import
+
+from __future__ import print_function  # noqa: F401
+import json  # noqa: F401
+import os  # noqa: F401
+import re  # noqa: F401
 # pylint: disable=import-error
-import ruamel.yaml as yaml
-import shutil
+import ruamel.yaml as yaml  # noqa: F401
+import shutil  # noqa: F401
+
 from ansible.module_utils.basic import AnsibleModule
 
-# -*- -*- -*- End included fragment: class/import.py -*- -*- -*-
+# -*- -*- -*- End included fragment: lib/import.py -*- -*- -*-
 
 # -*- -*- -*- Begin included fragment: doc/yedit -*- -*- -*-
 

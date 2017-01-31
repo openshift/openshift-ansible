@@ -8,6 +8,7 @@ oadm_manage_node.py:
 - lib/base.py
 - class/oadm_manage_node.py
 - ansible/oadm_manage_node.py
+
 oc_edit.py:
 - doc/generated
 - doc/license
@@ -17,6 +18,7 @@ oc_edit.py:
 - lib/base.py
 - class/oc_edit.py
 - ansible/oc_edit.py
+
 oc_obj.py:
 - doc/generated
 - doc/license
@@ -26,6 +28,7 @@ oc_obj.py:
 - lib/base.py
 - class/oc_obj.py
 - ansible/oc_obj.py
+
 oc_route.py:
 - doc/generated
 - doc/license
@@ -36,6 +39,7 @@ oc_route.py:
 - lib/route.py
 - class/oc_route.py
 - ansible/oc_route.py
+
 oc_secret.py:
 - doc/generated
 - doc/license
@@ -46,6 +50,7 @@ oc_secret.py:
 - lib/secret.py
 - class/oc_secret.py
 - ansible/oc_secret.py
+
 oc_scale.py:
 - doc/generated
 - doc/license
@@ -57,6 +62,7 @@ oc_scale.py:
 - lib/replicationcontroller.py
 - class/oc_scale.py
 - ansible/oc_scale.py
+
 oc_version.py:
 - doc/generated
 - doc/license
@@ -66,6 +72,7 @@ oc_version.py:
 - lib/base.py
 - class/oc_version.py
 - ansible/oc_version.py
+
 oc_serviceaccount.py:
 - doc/generated
 - doc/license
