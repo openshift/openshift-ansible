@@ -81,7 +81,7 @@
   with_items: "{{es_dc.stdout_lines}}"
   loop_control:
     loop_var: object
-  when: openshift_logging_use_ops
+  when: openshift_logging_use_ops | bool
 
 - command: >
     {{openshift.common.client_binary}} --config={{mktemp.stdout}}/admin.kubeconfig get dc -l component=kibana-ops -o name -n {{openshift_logging_namespace}}
@@ -98,7 +98,7 @@
   with_items: "{{kibana_dc.stdout_lines}}"
   loop_control:
     loop_var: object
-  when: openshift_logging_use_ops
+  when: openshift_logging_use_ops | bool
 
 - command: >
     {{openshift.common.client_binary}} --config={{mktemp.stdout}}/admin.kubeconfig get dc -l component=curator-ops -o name -n {{openshift_logging_namespace}}
@@ -115,4 +115,4 @@
   with_items: "{{curator_dc.stdout_lines}}"
   loop_control:
     loop_var: object
-  when: openshift_logging_use_ops
+  when: openshift_logging_use_ops | bool

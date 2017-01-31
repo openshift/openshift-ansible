@@ -17,5 +17,5 @@
     - {name: logging-kibana-ops, host: "{{openshift_logging_kibana_ops_hostname}}"}
   loop_control:
     loop_var: route_info
-  when: (route_info.name == 'logging-kibana-ops' and openshift_logging_use_ops) or route_info.name == 'logging-kibana'
+  when: (route_info.name == 'logging-kibana-ops' and openshift_logging_use_ops | bool) or route_info.name == 'logging-kibana'
   changed_when: no
