@@ -11,7 +11,7 @@ def main():
                        choices=['present', 'absent', 'list', 'add']),
             debug=dict(default=False, type='bool'),
             kind=dict(default=None, type='str', required=True,
-                          choices=['node', 'pod']),
+                          choices=['node', 'pod', 'namespace']),
             name=dict(default=None, type='str'),
             namespace=dict(default=None, type='str'),
             labels=dict(default=None, type='list'),

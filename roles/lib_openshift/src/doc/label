@@ -4,7 +4,7 @@
 DOCUMENTATION = '''
 ---
 module: oc_label
-short_description: Create, modify, and idempotently manage openshift object labels.
+short_description: Create, modify, and idempotently manage openshift labels.
 description:
   - Modify openshift labels programmatically.
 options:
@@ -30,21 +30,22 @@ options:
   kind:
     description:
     - The kind of object that can be managed.
-    required: false
+    required: True
     default: None
     choices:
     - node
     - pod
+    - namespace
     aliases: []
   labels:
     description:
-    - The labels to add to the resource.
+    - A list of labels to for the resource.
     required: false
     default: None
     aliases: []
   selector:
     description:
-    - The selector to apply to the query
+    - The selector to apply to the resource query
     required: false
     default: None
     aliases: []

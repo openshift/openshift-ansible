@@ -24,6 +24,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+# -*- -*- -*- Begin included fragment: lib/import.py -*- -*- -*-
 '''
    OpenShiftCLI class that wraps the oc commands in a subprocess
 '''
@@ -40,12 +42,16 @@ import subprocess
 import ruamel.yaml as yaml
 from ansible.module_utils.basic import AnsibleModule
 
+# -*- -*- -*- End included fragment: lib/import.py -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: doc/label -*- -*- -*-
+
 DOCUMENTATION = '''
 ---
 module: oc_label
-short_description: Create, modify, and idempotently manage openshift object labels.
+short_description: Create, modify, and idempotently manage openshift labels.
 description:
-  - Manage openshift object labels programmatically.
+  - Modify openshift labels programmatically.
 options:
   state:
     description:
@@ -66,52 +72,47 @@ options:
     required: false
     default: False
     aliases: []
-  name:
-    description:
-    - Name of the object that is being queried.
-    required: false
-    default: None
-    aliases: []
-  namespace:
-    description:
-    - The namespace where the object lives.
-    required: false
-    default: None
-    aliases: []
   kind:
     description:
-    - The kind of OpenShift object being queried (node or pod).
-    required: true
+    - The kind of object that can be managed.
+    required: True
     default: None
-    choices: ["node", "pod"]
+    choices:
+    - node
+    - pod
+    - namespace
     aliases: []
   labels:
     description:
-    - List of label_name=label_value items.
+    - A list of labels to for the resource.
     required: false
     default: None
     aliases: []
   selector:
     description:
-    - XXX
+    - The selector to apply to the resource query
     required: false
     default: None
     aliases: []
 author:
-- "Kenny Woodson <kwoodson@redhat.com>"
+- "Joel Diaz <jdiaz@redhat.com>"
 extends_documentation_fragment: []
 '''
 
 EXAMPLES = '''
 - name: Add label to node
   oc_label:
+    name: ip-172-31-5-23.ec2.internal
     state: add
     kind: node
-    name: ip-172-31-5-23.ec2.internal
     labels:
-    - key: provision_date
-      value: "2017-01-01"
+      - key: logging-infra-fluentd
+        value: 'true'
 '''
+
+# -*- -*- -*- End included fragment: doc/label -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: ../../lib_utils/src/class/yedit.py -*- -*- -*-
 # noqa: E301,E302
 
 
@@ -676,6 +677,10 @@ class Yedit(object):
                         'state': "present"}
 
         return {'failed': True, 'msg': 'Unkown state passed'}
+
+# -*- -*- -*- End included fragment: ../../lib_utils/src/class/yedit.py -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: lib/base.py -*- -*- -*-
 # pylint: disable=too-many-lines
 # noqa: E301,E302,E303,T001
 
@@ -787,11 +792,10 @@ class OpenShiftCLI(object):
         cmd = ['get', resource]
         if selector:
             cmd.append('--selector=%s' % selector)
+        elif rname:
+            cmd.append(rname)
 
         cmd.extend(['-o', 'json'])
-
-        if rname:
-            cmd.append(rname)
 
         rval = self.openshift_cmd(cmd, output=True)
 
@@ -882,6 +886,18 @@ class OpenShiftCLI(object):
         cmd.append('--confirm')
         return self.openshift_cmd(cmd)
 
+    def _run(self, cmds, input_data):
+        ''' Actually executes the command. This makes mocking easier. '''
+        proc = subprocess.Popen(cmds,
+                                stdin=subprocess.PIPE,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE,
+                                env={'KUBECONFIG': self.kubeconfig})
+
+        stdout, stderr = proc.communicate(input_data)
+
+        return proc.returncode, stdout, stderr
+
     # pylint: disable=too-many-arguments,too-many-branches
     def openshift_cmd(self, cmd, oadm=False, output=False, output_type='json', input_data=None):
         '''Base command for oc '''
@@ -893,7 +909,7 @@ class OpenShiftCLI(object):
 
         if self.all_namespaces:
             cmds.extend(['--all-namespaces'])
-        elif self.namespace:
+        elif self.namespace is not None and self.namespace.lower() not in ['none', 'emtpy']:  # E501
             cmds.extend(['-n', self.namespace])
 
         cmds.extend(cmd)
@@ -905,18 +921,13 @@ class OpenShiftCLI(object):
         if self.verbose:
             print(' '.join(cmds))
 
-        proc = subprocess.Popen(cmds,
-                                stdin=subprocess.PIPE,
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE,
-                                env={'KUBECONFIG': self.kubeconfig})
+        returncode, stdout, stderr = self._run(cmds, input_data)
 
-        stdout, stderr = proc.communicate(input_data)
-        rval = {"returncode": proc.returncode,
+        rval = {"returncode": returncode,
                 "results": results,
                 "cmd": ' '.join(cmds)}
 
-        if proc.returncode == 0:
+        if returncode == 0:
             if output:
                 if output_type == 'json':
                     try:
@@ -1196,6 +1207,10 @@ class OpenShiftCLIConfig(object):
 
         return rval
 
+
+# -*- -*- -*- End included fragment: lib/base.py -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: class/oc_label.py -*- -*- -*-
 
 # pylint: disable=too-many-instance-attributes
 class OCLabel(OpenShiftCLI):
@@ -1486,6 +1501,10 @@ class OCLabel(OpenShiftCLI):
                 'results': 'Unknown state passed. %s' % state,
                 'state': "unknown"}
 
+# -*- -*- -*- End included fragment: class/oc_label.py -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: ansible/oc_label.py -*- -*- -*-
+
 def main():
     ''' ansible oc module for labels '''
 
@@ -1496,7 +1515,7 @@ def main():
                        choices=['present', 'absent', 'list', 'add']),
             debug=dict(default=False, type='bool'),
             kind=dict(default=None, type='str', required=True,
-                          choices=['node', 'pod']),
+                          choices=['node', 'pod', 'namespace']),
             name=dict(default=None, type='str'),
             namespace=dict(default=None, type='str'),
             labels=dict(default=None, type='list'),
@@ -1515,3 +1534,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+# -*- -*- -*- End included fragment: ansible/oc_label.py -*- -*- -*-
