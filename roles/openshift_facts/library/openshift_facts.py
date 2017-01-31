@@ -195,8 +195,7 @@ def hostname_valid(hostname):
     if (not hostname or
             hostname.startswith('localhost') or
             hostname.endswith('localdomain') or
-            hostname.endswith('novalocal') or
-            len(hostname.split('.')) < 2):
+            hostname.endswith('novalocal')):
         return False
 
     return True
@@ -332,7 +331,8 @@ def normalize_gce_facts(metadata, facts):
     facts['network']['ip'] = facts['network']['interfaces'][0]['ips'][0]
     pub_ip = facts['network']['interfaces'][0]['public_ips'][0]
     facts['network']['public_ip'] = pub_ip
-    facts['network']['hostname'] = metadata['instance']['hostname']
+    # Split instance hostname from GCE metadata to use the short instance name
+    facts['network']['hostname'] = metadata['instance']['hostname'].split('.')[0]
 
     # TODO: attempt to resolve public_hostname
     facts['network']['public_hostname'] = facts['network']['public_ip']
