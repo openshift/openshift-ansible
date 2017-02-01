@@ -229,3 +229,56 @@
   tasks:
   - include: docker/upgrade.yml
     when: l_docker_upgrade is defined and l_docker_upgrade | bool and not openshift.common.is_atomic | bool
+
+- name: Drain and upgrade master nodes
+  hosts: oo_masters_to_config:&oo_nodes_to_upgrade
+  # This var must be set with -e on invocation, as it is not a per-host inventory var
+  # and is evaluated early. Values such as "20%" can also be used.
+  serial: "{{ openshift_upgrade_nodes_serial | default(1) }}"
+  any_errors_fatal: true
+
+  pre_tasks:
+  # TODO: To better handle re-trying failed upgrades, it would be nice to check if the node
+  # or docker actually needs an upgrade before proceeding. Perhaps best to save this until
+  # we merge upgrade functionality into the base roles and a normal config.yml playbook run.
+  - name: Determine if node is currently scheduleable
+    command: >
+      {{ hostvars[groups.oo_first_master.0].openshift.common.client_binary }} get node {{ openshift.node.nodename | lower }} -o json
+    register: node_output
+    delegate_to: "{{ groups.oo_first_master.0 }}"
+    changed_when: false
+
+  - set_fact:
+      was_schedulable: "{{ 'unschedulable' not in (node_output.stdout | from_json).spec }}"
+
+  - name: Mark node unschedulable
+    command: >
+      {{ hostvars[groups.oo_first_master.0].openshift.common.client_binary }} adm manage-node {{ openshift.node.nodename | lower }} --schedulable=false
+    delegate_to: "{{ groups.oo_first_master.0 }}"
+    # NOTE: There is a transient "object has been modified" error here, allow a couple
+    # retries for a more reliable upgrade.
+    register: node_unsched
+    until: node_unsched.rc == 0
+    retries: 3
+    delay: 1
+
+  - name: Drain Node for Kubelet upgrade
+    command: >
+      {{ hostvars[groups.oo_first_master.0].openshift.common.admin_binary }} drain {{ openshift.node.nodename | lower }} --force --delete-local-data
+    delegate_to: "{{ groups.oo_first_master.0 }}"
+
+  roles:
+  - openshift_facts
+  - docker
+  - openshift_node_upgrade
+
+  post_tasks:
+  - name: Set node schedulability
+    command: >
+      {{ hostvars[groups.oo_first_master.0].openshift.common.client_binary }} adm manage-node {{ openshift.node.nodename | lower }} --schedulable=true
+    delegate_to: "{{ groups.oo_first_master.0 }}"
+    when: was_schedulable | bool
+    register: node_sched
+    until: node_sched.rc == 0
+    retries: 3
+    delay: 1
