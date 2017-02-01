@@ -7,10 +7,12 @@ openshift_master_policy: "{{ openshift_master_config_dir }}/policy.json"
 scheduler_config:
   kind: Policy
   apiVersion: v1
-  predicates: "{{ openshift_master_scheduler_predicates
+  predicates:
+    - "{{ openshift_master_scheduler_predicates
                   | default(openshift_master_scheduler_current_predicates
                             | default(openshift_master_scheduler_default_predicates)) }}"
-  priorities: "{{ openshift_master_scheduler_priorities
+  priorities:
+    - "{{ openshift_master_scheduler_priorities
                   | default(openshift_master_scheduler_current_priorities
                             | default(openshift_master_scheduler_default_priorities)) }}"
 
