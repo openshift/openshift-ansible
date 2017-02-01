@@ -1,4 +1,6 @@
 # pylint: skip-file
+# flake8: noqa
+
 
 # pylint: disable=too-many-instance-attributes
 class Process(OpenShiftCLI):
@@ -150,7 +152,6 @@ class Process(OpenShiftCLI):
             #       the template's existence with the existence of the objects
             #       it describes?
 
-
             # Create it here
                 api_rval = ocprocess.process()
                 if api_rval['returncode'] != 0:
@@ -179,4 +180,7 @@ class Process(OpenShiftCLI):
 
         return {"changed": update, "results": rval, "state": "present"}
 
-    return {"failed": True, "changed": False, "results": 'Unknown state passed ({0}). '.format(state), "state": "unknown")
+    return {"failed": True,
+            "changed": False,
+            "results": 'Unknown state passed ({0}). '.format(state),
+            "state": "unknown")

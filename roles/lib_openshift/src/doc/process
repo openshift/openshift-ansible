@@ -11,7 +11,6 @@ options:
   state:
     description:
     - Currently present is only supported state.
-    required: true
     default: present
     choices: ["present", "absent", "list"]
     aliases: []
@@ -29,19 +28,19 @@ options:
     aliases: []
   template_name:
     description:
-    - Name of the template that is being processed.
+    - Name of the openshift template that is being processed.
     required: false
     default: None
     aliases: []
   namespace:
     description:
-    - The namespace where the object lives.
+    - The namespace where the template lives.
     required: false
-    default: str
+    default: default
     aliases: []
   content:
     description:
-    - Template content to be processed.
+    - Template content that will be processed.
     required: false
     default: None
     aliases: []
@@ -60,13 +59,13 @@ options:
   reconcile:
     description:
     - Whether or not to attempt to determine if there are updates or changes in the incoming template.
-    required: false
     default: true
     aliases: []
 author:
 - "Kenny Woodson <kwoodson@redhat.com>"
 extends_documentation_fragment: []
 '''
+
 EXAMPLES = '''
 - name: process the cloud volume provisioner template with variables
   oc_process:
