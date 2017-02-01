@@ -18,26 +18,6 @@
   failed_when: "'error' in generation_apply.stderr"
   changed_when: no
 
-- name: Removing previous {{file_name}}
-  command: >
-    {{ openshift.common.client_binary }} --config={{ kubeconfig }}
-    delete -f {{ file_name }}
-    -n {{ namespace }}
-  register: generation_delete
-  failed_when: "'error' in generation_delete.stderr"
-  changed_when: no
-  when: "'field is immutable' in generation_apply.stderr"
-
-- name: Applying {{file_name}}
-  command: >
-    {{ openshift.common.client_binary }} --config={{ kubeconfig }}
-    apply -f {{ file_name }}
-    -n {{ namespace }}
-  register: generation_apply
-  failed_when: "'error' in generation_apply.stderr"
-  changed_when: no
-  when: "'field is immutable' in generation_apply.stderr"
-
 - name: Determine change status of {{file_content.kind}} {{file_content.metadata.name}}
   shell: >
     {{ openshift.common.client_binary }} --config={{ kubeconfig }}
@@ -45,5 +25,26 @@
     -o jsonpath='{.metadata.resourceVersion}'
     -n {{namespace}} || echo 0
   register: generation_changed
-  failed_when: "'error' in generation_changed.stderr"
   changed_when: generation_changed.stdout | int  > generation_init.stdout | int
+  when:
+    - "'field is immutable' not in generation_apply.stderr"
+
+- name: Removing previous {{file_name}}
+  command: >
+    {{ openshift.common.client_binary }} --config={{ kubeconfig }}
+    delete -f {{ file_name }}
+    -n {{ namespace }}
+  register: generation_delete
+  failed_when: "'error' in generation_delete.stderr"
+  changed_when: generation_delete.rc == 0
+  when: "'field is immutable' in generation_apply.stderr"
+
+- name: Recreating {{file_name}}
+  command: >
+    {{ openshift.common.client_binary }} --config={{ kubeconfig }}
+    apply -f {{ file_name }}
+    -n {{ namespace }}
+  register: generation_apply
+  failed_when: "'error' in generation_apply.stderr"
+  changed_when: generation_apply.rc == 0
+  when: "'field is immutable' in generation_apply.stderr"
