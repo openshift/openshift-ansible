@@ -6,7 +6,7 @@ TODO
 Requirements
 ------------
 
-TODO
+* Ansible 2.2
 
 Role Variables
 --------------

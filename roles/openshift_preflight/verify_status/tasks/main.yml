@@ -1,0 +1,8 @@
+---
+- name: find check failures
+  set_fact:
+    oo_preflight_check_failures: "{{ oo_preflight_check_results | select('failed', 'equalto', True) | list }}"
+
+- name: ensure all checks succeed
+  action: fail
+  when: oo_preflight_check_failures

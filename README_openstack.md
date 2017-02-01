@@ -25,6 +25,7 @@ On Fedora:
 On RHEL / CentOS:
 ```
   yum install -y ansible python-novaclient python-neutronclient python-heatclient
+  sudo pip install shade
 ```
 
 Configuration
@@ -49,6 +50,7 @@ The following options are used only by `heat_stack.yaml`. They are so used only 
 * `floating_ip_pool` (default to `external`): comma separated list of floating IP pools
 * `ssh_from` (default to `0.0.0.0/0`): IPs authorized to connect to the VMs via ssh
 * `node_port_from` (default to `0.0.0.0/0`): IPs authorized to connect to the services exposed via nodePort
+* `heat_timeout` (default to `3`): Timeout (in minutes) passed to heat for create or update stack.
 
 
 Creating a cluster

@@ -103,7 +103,7 @@ Ansible role variables are defined as variables contained in (or passed into) a 
 [cols="2v,v"]
 |===
 | <<Role-variables-MUST-have-a-prefix-of-atleast-3-characters-See.below.for.specific.naming.rules, Rule>>
-| Role variables MUST have a prefix of atleast 3 characters. See below for specific naming rules.
+| Role variables MUST have a prefix of at least 3 characters. See below for specific naming rules.
 |===
 
 ==== Role with 3 (or more) words in the name

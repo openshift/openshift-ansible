@@ -1,13 +1,13 @@
 ---
 - name: Create directory /usr/share/nuage-openshift-monitor
   become: yes
-  file: path=/usr/share/nuage-openshift-monitor state=directory  
+  file: path=/usr/share/nuage-openshift-monitor state=directory
 
 - name: Create the log directory
   become: yes
   file: path={{ nuage_mon_rest_server_logdir }} state=directory
 
-- name: Install Nuage Openshift Monitor 
+- name: Install Nuage Openshift Monitor
   become: yes
   yum: name={{ nuage_openshift_rpm }} state=present
 
@@ -17,12 +17,12 @@
   become: yes
   fetch: src={{ cert_output_dir }}/{{ item }} dest=/tmp/{{ item }} flat=yes
   with_items:
-        - ca.crt
-        - nuage.crt
-        - nuage.key
-        - nuage.kubeconfig 
+    - ca.crt
+    - nuage.crt
+    - nuage.key
+    - nuage.kubeconfig
 
-- include: certificates.yml 
+- include: certificates.yml
 
 - name: Create nuage-openshift-monitor.yaml
   become: yes

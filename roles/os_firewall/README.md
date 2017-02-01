@@ -4,10 +4,13 @@ OS Firewall
 OS Firewall manages firewalld and iptables firewall settings for a minimal use
 case (Adding/Removing rules based on protocol and port number).
 
+Note: firewalld is not supported on Atomic Host
+https://bugzilla.redhat.com/show_bug.cgi?id=1403331
+
 Requirements
 ------------
 
-None.
+Ansible 2.2
 
 Role Variables
 --------------

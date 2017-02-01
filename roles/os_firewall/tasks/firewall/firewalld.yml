@@ -1,88 +1,51 @@
 ---
 - name: Install firewalld packages
-  action: "{{ ansible_pkg_mgr }} name=firewalld state=present"
-  when: not openshift.common.is_containerized | bool
-  register: install_result
-
-- name: Check if iptables-services is installed
-  command: rpm -q iptables-services
-  register: pkg_check
-  failed_when: pkg_check.rc > 1
-  changed_when: no
+  package:
+    name: firewalld
+    state: present
 
 - name: Ensure iptables services are not enabled
-  service:
+  systemd:
     name: "{{ item }}"
     state: stopped
     enabled: no
+    masked: yes
   with_items:
-  - iptables
-  - ip6tables
-  when: pkg_check.rc == 0
+    - iptables
+    - ip6tables
+  register: task_result
+  failed_when: "task_result|failed and 'could not' not in task_result.msg|lower"
 
-- name: Reload systemd units
-  command: systemctl daemon-reload
-  when: install_result | changed
-
-- name: Determine if firewalld service masked
-  command: >
-    systemctl is-enabled firewalld
-  register: os_firewall_firewalld_masked_output
-  changed_when: false
-  failed_when: false
-
-- name: Unmask firewalld service
-  command: >
-    systemctl unmask firewalld
-  when: os_firewall_firewalld_masked_output.stdout == "masked"
+- name: Wait 10 seconds after disabling iptables
+  pause:
+    seconds: 10
+  when: task_result | changed
 
 - name: Start and enable firewalld service
-  service:
+  systemd:
     name: firewalld
     state: started
     enabled: yes
+    masked: no
+    daemon_reload: yes
   register: result
 
 - name: need to pause here, otherwise the firewalld service starting can sometimes cause ssh to fail
   pause: seconds=10
   when: result | changed
 
-- name: Mask iptables services
-  command: systemctl mask "{{ item }}"
-  register: result
-  changed_when: "'iptables' in result.stdout"
-  with_items:
-  - iptables
-  - ip6tables
-  when: pkg_check.rc == 0
-  ignore_errors: yes
-
-# TODO: Ansible 1.9 will eliminate the need for separate firewalld tasks for
-# enabling rules and making them permanent with the immediate flag
 - name: Add firewalld allow rules
   firewalld:
     port: "{{ item.port }}"
-    permanent: false
-    state: enabled
-  with_items: "{{ os_firewall_allow }}"
-
-- name: Persist firewalld allow rules
-  firewalld:
-    port: "{{ item.port }}"
     permanent: true
+    immediate: true
     state: enabled
   with_items: "{{ os_firewall_allow }}"
 
 - name: Remove firewalld allow rules
   firewalld:
     port: "{{ item.port }}"
-    permanent: false
-    state: disabled
-  with_items: "{{ os_firewall_deny }}"
-
-- name: Persist removal of firewalld allow rules
-  firewalld:
-    port: "{{ item.port }}"
     permanent: true
+    immediate: true
     state: disabled
   with_items: "{{ os_firewall_deny }}"

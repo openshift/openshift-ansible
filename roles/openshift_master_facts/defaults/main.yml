@@ -1,0 +1,2 @@
+---
+openshift_master_default_subdomain: "{{ lookup('oo_option', 'openshift_master_default_subdomain') | default(None, true) }}"

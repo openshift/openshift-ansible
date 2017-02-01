@@ -1,7 +1,4 @@
 ---
-- stat: path=/etc/sysconfig/docker-storage
-  register: docker_storage_check
-
 - name: Get current installed Docker version
   command: "{{ repoquery_cmd }} --installed --qf '%{version}' docker"
   when: not openshift.common.is_atomic | bool
@@ -17,14 +14,6 @@
   fail:
     msg: "Docker {{ docker_version }} requested, but >= 1.9.1 is required."
   when: docker_version is defined and docker_version | version_compare('1.9.1', '<')
-
-- name: Get latest available version of Docker
-  command: >
-    {{ repoquery_cmd }} --qf '%{version}' "docker"
-  register: avail_docker_version
-  failed_when: false
-  changed_when: false
-  when: docker_version is defined and not openshift.common.is_atomic | bool
 
 # If a docker_version was requested, sanity check that we can install or upgrade to it, and
 # no downgrade is required.
@@ -43,18 +32,21 @@
 # Make sure Docker is installed, but does not update a running version.
 # Docker upgrades are handled by a separate playbook.
 - name: Install Docker
-  action: "{{ ansible_pkg_mgr }} name=docker{{ '-' + docker_version if docker_version is defined else '' }} state=present"
+  package: name=docker{{ '-' + docker_version if docker_version is defined else '' }} state=present
   when: not openshift.common.is_atomic | bool
 
-- name: Start the Docker service
-  service:
-    name: docker
-    enabled: yes
-    state: started
-  register: start_result
+- block:
+  # Extend the default Docker service unit file when using iptables-services
+  - name: Ensure docker.service.d directory exists
+    file:
+      path: "{{ docker_systemd_dir }}"
+      state: directory
 
-- set_fact:
-    docker_service_status_changed: start_result | changed
+  - name: Configure Docker service unit file
+    template:
+      dest: "{{ docker_systemd_dir }}/custom.conf"
+      src: custom.conf.j2
+  when: not os_firewall_use_firewalld | default(True) | bool
 
 - include: udev_workaround.yml
   when: docker_udev_workaround | default(False) | bool
@@ -88,29 +80,40 @@
     line: "{{ item.reg_conf_var }}='{{ item.reg_fact_val }}'"
     state: "{{ 'present' if item.reg_fact_val != '' else 'absent'}}"
   with_items:
-    - reg_conf_var: HTTP_PROXY
-      reg_fact_val: "{{ docker_http_proxy | default('') }}"
-    - reg_conf_var: HTTPS_PROXY
-      reg_fact_val: "{{ docker_https_proxy | default('') }}"
-    - reg_conf_var: NO_PROXY
-      reg_fact_val: "{{ docker_no_proxy | default('') | join(',') }}"
+  - reg_conf_var: HTTP_PROXY
+    reg_fact_val: "{{ docker_http_proxy | default('') }}"
+  - reg_conf_var: HTTPS_PROXY
+    reg_fact_val: "{{ docker_https_proxy | default('') }}"
+  - reg_conf_var: NO_PROXY
+    reg_fact_val: "{{ docker_no_proxy | default('') }}"
   notify:
-    - restart docker
+  - restart docker
   when:
-    - docker_check.stat.isreg is defined and docker_check.stat.isreg and '"http_proxy" in openshift.common or "https_proxy" in openshift.common'
+  - docker_check.stat.isreg is defined and docker_check.stat.isreg and '"http_proxy" in openshift.common or "https_proxy" in openshift.common'
 
 - name: Set various Docker options
   lineinfile:
     dest: /etc/sysconfig/docker
     regexp: '^OPTIONS=.*$'
     line: "OPTIONS='\
-      {% if ansible_selinux and ansible_selinux.status == '''enabled''' %} --selinux-enabled{% endif %}\
+      {% if ansible_selinux.status | default(None) == '''enabled''' and docker_selinux_enabled | default(true) %} --selinux-enabled {% endif %}\
       {% if docker_log_driver is defined  %} --log-driver {{ docker_log_driver }}{% endif %}\
       {% if docker_log_options is defined %} {{ docker_log_options |  oo_split() | oo_prepend_strings_in_list('--log-opt ') | join(' ')}}{% endif %}\
       {% if docker_options is defined %} {{ docker_options }}{% endif %}\
       {% if docker_disable_push_dockerhub is defined %} --confirm-def-push={{ docker_disable_push_dockerhub | bool }}{% endif %}'"
   when: docker_check.stat.isreg is defined and docker_check.stat.isreg
   notify:
-    - restart docker
+  - restart docker
+
+- name: Start the Docker service
+  systemd:
+    name: docker
+    enabled: yes
+    state: started
+    daemon_reload: yes
+  register: start_result
+
+- set_fact:
+    docker_service_status_changed: start_result | changed
 
 - meta: flush_handlers

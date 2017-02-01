@@ -4,7 +4,8 @@
 
 import copy
 import os
-import ConfigParser
+
+from six.moves import configparser
 
 import ooinstall.cli_installer as cli
 
@@ -408,7 +409,7 @@ class UnattendedCliTests(OOCliFixture):
         result = self.runner.invoke(cli.cli, self.cli_args)
 
         if result.exception is None or result.exit_code != 1:
-            print "Exit code: %s" % result.exit_code
+            print("Exit code: %s" % result.exit_code)
             self.fail("Unexpected CLI return")
 
     # unattended with config file and all installed hosts (with --force)
@@ -523,7 +524,7 @@ class UnattendedCliTests(OOCliFixture):
         self.assert_result(result, 0)
 
         # Check the inventory file looks as we would expect:
-        inventory = ConfigParser.ConfigParser(allow_no_value=True)
+        inventory = configparser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, 'hosts'))
         self.assertEquals('root',
             inventory.get('OSEv3:vars', 'ansible_ssh_user'))
@@ -566,7 +567,7 @@ class UnattendedCliTests(OOCliFixture):
         self.assertEquals('3.3', written_config['variant_version'])
 
         # Make sure the correct value was passed to ansible:
-        inventory = ConfigParser.ConfigParser(allow_no_value=True)
+        inventory = configparser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, 'hosts'))
         self.assertEquals('openshift-enterprise',
             inventory.get('OSEv3:vars', 'deployment_type'))
@@ -594,7 +595,7 @@ class UnattendedCliTests(OOCliFixture):
         # and written to disk:
         self.assertEquals('3.3', written_config['variant_version'])
 
-        inventory = ConfigParser.ConfigParser(allow_no_value=True)
+        inventory = configparser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, 'hosts'))
         self.assertEquals('openshift-enterprise',
             inventory.get('OSEv3:vars', 'deployment_type'))
@@ -830,7 +831,7 @@ class AttendedCliTests(OOCliFixture):
         written_config = read_yaml(self.config_file)
         self._verify_config_hosts(written_config, 4)
 
-        inventory = ConfigParser.ConfigParser(allow_no_value=True)
+        inventory = configparser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, 'hosts'))
         self.assert_inventory_host_var(inventory, 'nodes', '10.0.0.1',
                                  'openshift_schedulable=False')
@@ -842,7 +843,7 @@ class AttendedCliTests(OOCliFixture):
     # interactive with config file and some installed some uninstalled hosts
     @patch('ooinstall.openshift_ansible.run_main_playbook')
     @patch('ooinstall.openshift_ansible.load_system_facts')
-    def test_add_nodes(self, load_facts_mock, run_playbook_mock):
+    def test_scaleup_hint(self, load_facts_mock, run_playbook_mock):
 
         # Modify the mock facts to return a version indicating OpenShift
         # is already installed on our master, and the first node.
@@ -866,13 +867,12 @@ class AttendedCliTests(OOCliFixture):
         result = self.runner.invoke(cli.cli,
                                     self.cli_args,
                                     input=cli_input)
-        self.assert_result(result, 0)
 
-        self._verify_load_facts(load_facts_mock)
-        self._verify_run_playbook(run_playbook_mock, 3, 2)
+        # This is testing the install workflow so we want to make sure we
+        # exit with the appropriate hint.
+        self.assertTrue('scaleup' in result.output)
+        self.assert_result(result, 1)
 
-        written_config = read_yaml(self.config_file)
-        self._verify_config_hosts(written_config, 3)
 
     @patch('ooinstall.openshift_ansible.run_main_playbook')
     @patch('ooinstall.openshift_ansible.load_system_facts')
@@ -897,30 +897,30 @@ class AttendedCliTests(OOCliFixture):
         written_config = read_yaml(config_file)
         self._verify_config_hosts(written_config, 3)
 
-    #interactive with config file and all installed hosts
-    @patch('ooinstall.openshift_ansible.run_main_playbook')
-    @patch('ooinstall.openshift_ansible.load_system_facts')
-    def test_get_hosts_to_run_on(self, load_facts_mock, run_playbook_mock):
-        mock_facts = copy.deepcopy(MOCK_FACTS)
-        mock_facts['10.0.0.1']['common']['version'] = "3.0.0"
-        mock_facts['10.0.0.2']['common']['version'] = "3.0.0"
-
-        cli_input = build_input(hosts=[
-            ('10.0.0.1', True, False),
-            ],
-                                      add_nodes=[('10.0.0.2', False, False)],
-                                      ssh_user='root',
-                                      variant_num=1,
-                                      schedulable_masters_ok=True,
-                                      confirm_facts='y',
-                                      storage='10.0.0.1',)
-
-        self._verify_get_hosts_to_run_on(mock_facts, load_facts_mock,
-                                         run_playbook_mock,
-                                         cli_input,
-                                         exp_hosts_len=2,
-                                         exp_hosts_to_run_on_len=2,
-                                         force=False)
+#    #interactive with config file and all installed hosts
+#    @patch('ooinstall.openshift_ansible.run_main_playbook')
+#    @patch('ooinstall.openshift_ansible.load_system_facts')
+#    def test_get_hosts_to_run_on(self, load_facts_mock, run_playbook_mock):
+#        mock_facts = copy.deepcopy(MOCK_FACTS)
+#        mock_facts['10.0.0.1']['common']['version'] = "3.0.0"
+#        mock_facts['10.0.0.2']['common']['version'] = "3.0.0"
+#
+#        cli_input = build_input(hosts=[
+#            ('10.0.0.1', True, False),
+#            ],
+#                                      add_nodes=[('10.0.0.2', False, False)],
+#                                      ssh_user='root',
+#                                      variant_num=1,
+#                                      schedulable_masters_ok=True,
+#                                      confirm_facts='y',
+#                                      storage='10.0.0.1',)
+#
+#        self._verify_get_hosts_to_run_on(mock_facts, load_facts_mock,
+#                                         run_playbook_mock,
+#                                         cli_input,
+#                                         exp_hosts_len=2,
+#                                         exp_hosts_to_run_on_len=2,
+#                                         force=False)
 
     #interactive multimaster: one more node than master
     @patch('ooinstall.openshift_ansible.run_main_playbook')
@@ -950,7 +950,7 @@ class AttendedCliTests(OOCliFixture):
         written_config = read_yaml(self.config_file)
         self._verify_config_hosts(written_config, 6)
 
-        inventory = ConfigParser.ConfigParser(allow_no_value=True)
+        inventory = configparser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, 'hosts'))
         self.assert_inventory_host_var(inventory, 'nodes', '10.0.0.1',
                                        'openshift_schedulable=False')
@@ -991,7 +991,7 @@ class AttendedCliTests(OOCliFixture):
         written_config = read_yaml(self.config_file)
         self._verify_config_hosts(written_config, 5)
 
-        inventory = ConfigParser.ConfigParser(allow_no_value=True)
+        inventory = configparser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, 'hosts'))
         self.assert_inventory_host_var(inventory, 'nodes', '10.0.0.1',
                                        'openshift_schedulable=True')
@@ -1083,7 +1083,7 @@ class AttendedCliTests(OOCliFixture):
         written_config = read_yaml(self.config_file)
         self._verify_config_hosts(written_config, 1)
 
-        inventory = ConfigParser.ConfigParser(allow_no_value=True)
+        inventory = configparser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, 'hosts'))
         self.assert_inventory_host_var(inventory, 'nodes', '10.0.0.1',
                                        'openshift_schedulable=True')
@@ -1117,7 +1117,7 @@ class AttendedCliTests(OOCliFixture):
         written_config = read_yaml(self.config_file)
         self._verify_config_hosts(written_config, 4)
 
-        inventory = ConfigParser.ConfigParser(allow_no_value=True)
+        inventory = configparser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, 'hosts'))
         self.assert_inventory_host_var(inventory, 'nodes', '10.0.0.1',
                                  'openshift_schedulable=False')

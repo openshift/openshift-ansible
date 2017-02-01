@@ -3,8 +3,6 @@
 # is localhost, so no hostname value (or public_hostname) value is getting
 # assigned
 
-- include: ../../common/openshift-cluster/verify_ansible_version.yml
-
 - hosts: localhost
   gather_facts: no
   tasks:

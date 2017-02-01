@@ -1,21 +1,77 @@
-[provide a description of the issue]
+### <HTPASSWD_AUTH>
+
+We are aware of the current issues related to htpasswd_auth failures
+Please downgrade to ansible 2.2.0.0 until a fix is released.
+You can track the status of the bug fix in this issue:
+https://github.com/openshift/openshift-ansible/issues/3111
+Please erase this <HTPASSWD_AUTH> section if it does not apply to you.
+
+Thanks - 2017-01-31
+
+### </HTPASSWD_AUTH>
+
+
+#### Description
+
+Provide a brief description of your issue here. For example:
+
+> On a multi master install, if the first master goes down we can no
+> longer scaleup the cluster with new nodes or masters.
+
 
 ##### Version
-[if you're operating from a git clone provide the output of `git describe`]
-[if you're running from playbooks installed via RPM or atomic-openshift-utils `rpm -q atomic-openshift-utils openshift-ansible`]
-[Your version of ansible, `ansible --version`]
 
+Please put the following version information in the code block
+indicated below.
+
+* Your ansible version per `ansible --version`
+
+If you're operating from a **git clone**:
+
+* The output of `git describe`
+
+If you're running from playbooks installed via RPM or
+`atomic-openshift-utils`
+
+* The output of `rpm -q atomic-openshift-utils openshift-ansible`
+
+Place the output between the code block below:
+
+```
+VERSION INFORMATION HERE PLEASE
+```
 
 ##### Steps To Reproduce
 1. [step 1]
 2. [step 2]
 
-##### Current Result
 
-##### Expected Result
+##### Expected Results
+Describe what you expected to happen.
+
+```
+Example command and output or error messages
+```
+
+##### Observed Results
+Describe what is actually happening.
+
+```
+Example command and output or error messages
+```
+
+For long output or logs, consider using a [gist](https://gist.github.com/)
+
 
 ##### Additional Information
-[The exact command you ran]
-[Your operating system and version, ie: RHEL 7.2, Fedora 23]
-[Your inventory file]
-[visit https://docs.openshift.org/latest/welcome/index.html]
+
+Provide any additional information which may help us diagnose the
+issue.
+
+* Your operating system and version, ie: RHEL 7.2, Fedora 23 (`$ cat /etc/redhat-release`)
+* Your inventory file (especially any non-standard configuration parameters)
+* Sample code, etc
+
+```
+EXTRA INFORMATION GOES HERE
+```

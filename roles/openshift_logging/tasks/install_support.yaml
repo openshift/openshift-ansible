@@ -1,0 +1,54 @@
+---
+# This is the base configuration for installing the other components
+- name: Check for logging project already exists
+  command: >
+    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get project {{openshift_logging_namespace}} --no-headers
+  register: logging_project_result
+  ignore_errors: yes
+  when: not ansible_check_mode
+  changed_when: no
+
+- name: "Create logging project"
+  command: >
+    {{ openshift.common.admin_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig new-project {{openshift_logging_namespace}}
+  when: not ansible_check_mode and "not found" in logging_project_result.stderr
+
+- name: Create logging cert directory
+  file: path={{openshift.common.config_base}}/logging state=directory mode=0755
+  changed_when: False
+  check_mode: no
+
+- include: generate_certs.yaml
+  vars:
+    generated_certs_dir: "{{openshift.common.config_base}}/logging"
+
+- name: Create temp directory for all our templates
+  file: path={{mktemp.stdout}}/templates state=directory mode=0755
+  changed_when: False
+  check_mode: no
+
+- include: generate_secrets.yaml
+  vars:
+    generated_certs_dir: "{{openshift.common.config_base}}/logging"
+
+- include: generate_configmaps.yaml
+
+- include: generate_services.yaml
+
+- name: Generate kibana-proxy oauth client
+  template: src=oauth-client.j2 dest={{mktemp.stdout}}/templates/oauth-client.yaml
+  vars:
+    secret: "{{oauth_secret}}"
+  when: oauth_secret is defined
+  check_mode: no
+  changed_when: no
+
+- include: generate_clusterroles.yaml
+
+- include: generate_rolebindings.yaml
+
+- include: generate_clusterrolebindings.yaml
+
+- include: generate_serviceaccounts.yaml
+
+- include: generate_routes.yaml

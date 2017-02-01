@@ -6,7 +6,7 @@ Configure a DNS server serving IPs of all the nodes of the cluster
 Requirements
 ------------
 
-None
+Ansible 2.2
 
 Role Variables
 --------------

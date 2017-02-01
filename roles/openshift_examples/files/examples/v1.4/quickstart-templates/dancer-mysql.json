@@ -4,22 +4,36 @@
   "metadata": {
     "name": "dancer-mysql-example",
     "annotations": {
-      "description": "An example Dancer application with a MySQL database",
-      "tags": "quickstart,perl,dancer,mysql",
+      "openshift.io/display-name": "Dancer + MySQL (Ephemeral)",
+      "description": "An example Dancer application with a MySQL database. For more information about using this template, including OpenShift considerations, see https://github.com/openshift/dancer-ex/blob/master/README.md.\n\nWARNING: Any data stored will be lost upon pod destruction. Only use this template for testing.",
+      "tags": "quickstart,perl,dancer",
       "iconClass": "icon-perl"
     }
   },
+  "message": "The following service(s) have been created in your project: ${NAME}, ${DATABASE_SERVICE_NAME}.\n\nFor more information about using this template, including OpenShift considerations, see https://github.com/openshift/dancer-ex/blob/master/README.md.",
   "labels": {
     "template": "dancer-mysql-example"
   },
   "objects": [
+    {
+      "kind": "Secret",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${NAME}"
+      },
+      "stringData" : {
+        "databaseUser" : "${DATABASE_USER}",
+        "databasePassword" : "${DATABASE_PASSWORD}"
+      }
+    },
     {
       "kind": "Service",
       "apiVersion": "v1",
       "metadata": {
         "name": "${NAME}",
         "annotations": {
-          "description": "Exposes and load balances the application pods"
+          "description": "Exposes and load balances the application pods",
+          "service.alpha.openshift.io/dependencies": "[{\"name\": \"${DATABASE_SERVICE_NAME}\", \"kind\": \"Service\"}]"
         }
       },
       "spec": {
@@ -112,7 +126,10 @@
               "secret": "${GITHUB_WEBHOOK_SECRET}"
             }
           }
-        ]
+        ],
+        "postCommit": {
+          "script": "perl -I extlib/lib/perl5 -I lib t/*"
+        }
       }
     },
     {
@@ -187,11 +204,21 @@
                   },
                   {
                     "name": "MYSQL_USER",
-                    "value": "${DATABASE_USER}"
+                    "valueFrom": {
+                      "secretKeyRef" : {
+                        "name" : "${NAME}",
+                        "key" : "databaseUser"
+                      }
+                    }
                   },
                   {
                     "name": "MYSQL_PASSWORD",
-                    "value": "${DATABASE_PASSWORD}"
+                    "valueFrom": {
+                      "secretKeyRef" : {
+                        "name" : "${NAME}",
+                        "key" : "databasePassword"
+                      }
+                    }
                   },
                   {
                     "name": "MYSQL_DATABASE",
@@ -321,11 +348,21 @@
                 "env": [
                   {
                     "name": "MYSQL_USER",
-                    "value": "${DATABASE_USER}"
+                    "valueFrom": {
+                      "secretKeyRef" : {
+                        "name" : "${NAME}",
+                        "key" : "databaseUser"
+                      }
+                    }
                   },
                   {
                     "name": "MYSQL_PASSWORD",
-                    "value": "${DATABASE_PASSWORD}"
+                    "valueFrom": {
+                      "secretKeyRef" : {
+                        "name" : "${NAME}",
+                        "key" : "databasePassword"
+                      }
+                    }
                   },
                   {
                       "name": "MYSQL_DATABASE",
@@ -402,18 +439,6 @@
       "description": "A secret string used to configure the GitHub webhook.",
       "generate": "expression",
       "from": "[a-zA-Z0-9]{40}"
-    },
-    {
-      "name": "ADMIN_USERNAME",
-      "displayName": "Administrator Username",
-      "generate": "expression",
-      "from": "admin[A-Z0-9]{3}"
-    },
-    {
-      "name": "ADMIN_PASSWORD",
-      "displayName": "Administrator Password",
-      "generate": "expression",
-      "from": "[a-zA-Z0-9]{8}"
     },
     {
       "name": "DATABASE_SERVICE_NAME",

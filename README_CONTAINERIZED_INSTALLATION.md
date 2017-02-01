@@ -31,7 +31,7 @@ native clients.
 The wrapper scripts mount a limited subset of paths, _~/.kube_, _/etc/origin/_,
 and _/tmp_. Be mindful of this when passing in files to be processed by `oc` or
  `oadm`. You may find it easier to redirect input like this :
- 
+
  `oc create -f - < my_file.json`
 
 ## Technical Notes
@@ -59,7 +59,7 @@ before attempting to pull any of the following images.
         aep3/node
         aep3/openvswitch
         registry.access.redhat.com/rhel7/etcd
-        
+
   * note openshift3/* and aep3/* images come from registry.access.redhat.com and
 rely on the --additional-repository flag being set appropriately.
 

@@ -1,0 +1,62 @@
+---
+- name: Gather OpenShift Logging Facts
+  openshift_logging_facts:
+    oc_bin: "{{openshift.common.client_binary}}"
+    admin_kubeconfig: "{{mktemp.stdout}}/admin.kubeconfig"
+    openshift_logging_namespace: "{{openshift_logging_namespace}}"
+  tags: logging_facts
+  check_mode: no
+
+- name: Validate Elasticsearch cluster size
+  fail: msg="The openshift_logging_es_cluster_size may only be scaled down manually. Please see official documentation on how to do this."
+  when: openshift_logging_facts.elasticsearch.deploymentconfigs | length > openshift_logging_es_cluster_size
+
+- name: Validate Elasticsearch Ops cluster size
+  fail: msg="The openshift_logging_es_ops_cluster_size may only be scaled down manually. Please see official documentation on how to do this."
+  when: openshift_logging_facts.elasticsearch_ops.deploymentconfigs | length > openshift_logging_es_ops_cluster_size
+
+- name: Install logging
+  include: "{{ role_path }}/tasks/install_{{ install_component }}.yaml"
+  when: openshift_hosted_logging_install | default(true) | bool
+  with_items:
+    - support
+    - elasticsearch
+    - kibana
+    - curator
+    - fluentd
+  loop_control:
+    loop_var: install_component
+
+- find: paths={{ mktemp.stdout }}/templates patterns=*.yaml
+  register: object_def_files
+  changed_when: no
+
+- slurp: src={{item}}
+  register: object_defs
+  with_items: "{{object_def_files.files | map(attribute='path') | list | sort}}"
+  changed_when: no
+
+- name: Create objects
+  include: oc_apply.yaml
+  vars:
+    - kubeconfig: "{{ mktemp.stdout }}/admin.kubeconfig"
+    - namespace: "{{ openshift_logging_namespace }}"
+    - file_name: "{{ file.source }}"
+    - file_content: "{{ file.content | b64decode | from_yaml }}"
+  with_items: "{{ object_defs.results }}"
+  loop_control:
+    loop_var: file
+  when: not ansible_check_mode
+
+- include: update_master_config.yaml
+
+- name: Printing out objects to create
+  debug: msg={{file.content | b64decode }}
+  with_items: "{{ object_defs.results }}"
+  loop_control:
+    loop_var: file
+  when: ansible_check_mode
+
+- name: Scaling up cluster
+  include: start_cluster.yaml
+  when: start_cluster | default(true) | bool

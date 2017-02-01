@@ -1,3 +1,4 @@
+---
 - hosts: OSEv3
   gather_facts: false
   tasks:

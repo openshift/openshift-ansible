@@ -1,5 +1,5 @@
 ---
-# TODO: does not handle a non-existant cluster gracefully
+# TODO: does not handle a non-existent cluster gracefully
 
 - name: Terminate instance(s)
   hosts: localhost
@@ -68,4 +68,3 @@
       path: '{{ libvirt_storage_pool_path }}/{{ item }}_configdrive/'
       state: absent
     with_items: "{{ groups['oo_hosts_to_terminate'] }}"
-

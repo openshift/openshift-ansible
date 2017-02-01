@@ -67,7 +67,7 @@ pip install --no-index -f file:///$(readlink -f deps) ansible 2>&1 >> $OO_INSTAL
 # TODO: these deps should technically be handled as part of installing ooinstall
 pip install --no-index -f file:///$(readlink -f deps) click 2>&1 >> $OO_INSTALL_LOG
 pip install --no-index ./src/ 2>&1 >> $OO_INSTALL_LOG
-echo "Installation preperation done!" 2>&1 >> $OO_INSTALL_LOG
+echo "Installation preparation done!" 2>&1 >> $OO_INSTALL_LOG
 
 echo "Using `ansible --version`" 2>&1 >> $OO_INSTALL_LOG
 

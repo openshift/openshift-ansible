@@ -8,9 +8,9 @@
     cp {{ openshift.common.config_base }}/master/admin.kubeconfig {{manage_iq_tmp_conf}}
   changed_when: false
 
-- name: Add Managment Infrastructure project
+- name: Add Management Infrastructure project
   command: >
-    {{ openshift.common.admin_binary }} new-project
+    {{ openshift.common.client_binary }} adm new-project
     management-infra
     --description="Management Infrastructure"
     --config={{manage_iq_tmp_conf}}
@@ -50,9 +50,19 @@
   failed_when: "'already exists' not in osmiq_create_cluster_role.stderr and osmiq_create_cluster_role.rc != 0"
   changed_when: osmiq_create_cluster_role.rc == 0
 
+- name: Create Hawkular Metrics Admin Cluster Role
+  shell: >
+    echo {{ manageiq_metrics_admin_clusterrole | to_json | quote }} |
+    {{ openshift.common.client_binary }}
+    --config={{manage_iq_tmp_conf}}
+    create -f -
+  register: oshawkular_create_cluster_role
+  failed_when: "'already exists' not in oshawkular_create_cluster_role.stderr and oshawkular_create_cluster_role.rc != 0"
+  changed_when: oshawkular_create_cluster_role.rc == 0
+
 - name: Configure role/user permissions
   command: >
-    {{ openshift.common.admin_binary }} {{item}}
+    {{ openshift.common.client_binary }} adm {{item}}
     --config={{manage_iq_tmp_conf}}
   with_items: "{{manage_iq_tasks}}"
   register: osmiq_perm_task
@@ -61,7 +71,7 @@
 
 - name: Configure 3_2 role/user permissions
   command: >
-    {{ openshift.common.admin_binary }} {{item}}
+    {{ openshift.common.client_binary }} adm {{item}}
     --config={{manage_iq_tmp_conf}}
   with_items: "{{manage_iq_openshift_3_2_tasks}}"
   register: osmiq_perm_3_2_task

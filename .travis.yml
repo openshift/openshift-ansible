@@ -1,0 +1,20 @@
+---
+sudo: false
+
+cache:
+  - pip
+
+language: python
+python:
+  - "2.7"
+  - "3.5"
+
+install:
+  - pip install -r requirements.txt
+  - pip install tox-travis
+
+script:
+  # TODO(rhcarvalho): check syntax of other important entrypoint playbooks
+  - ansible-playbook --syntax-check playbooks/byo/config.yml
+  - tox
+  - cd utils && tox

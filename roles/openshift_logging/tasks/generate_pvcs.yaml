@@ -1,0 +1,49 @@
+---
+- name: Init pool of PersistentVolumeClaim names
+  set_fact: es_pvc_pool={{es_pvc_pool|default([]) + [pvc_name]}}
+  vars:
+    pvc_name: "{{openshift_logging_es_pvc_prefix}}-{{item| int}}"
+    start: "{{es_pvc_names | map('regex_search',openshift_logging_es_pvc_prefix+'.*')|select('string')|list|length}}"
+  with_sequence: start={{start}} end={{ (start|int > openshift_logging_es_cluster_size - 1) | ternary(start, openshift_logging_es_cluster_size - 1)}}
+  when:
+    - openshift_logging_es_pvc_size | search('^\d.*')
+    - "{{ es_dc_names|default([]) | length < openshift_logging_es_cluster_size }}"
+  check_mode: no
+
+- name: Generating PersistentVolumeClaims
+  template: src=pvc.j2 dest={{mktemp.stdout}}/templates/logging-{{obj_name}}-pvc.yaml
+  vars:
+    obj_name: "{{claim_name}}"
+    size: "{{openshift_logging_es_pvc_size}}"
+    access_modes:
+      - ReadWriteOnce
+    pv_selector: "{{openshift_logging_es_pv_selector}}"
+  with_items:
+    - "{{es_pvc_pool | default([])}}"
+  loop_control:
+    loop_var: claim_name
+  when:
+    - not openshift_logging_es_pvc_dynamic
+    - es_pvc_pool is defined
+  check_mode: no
+  changed_when: no
+
+- name: Generating PersistentVolumeClaims - Dynamic
+  template: src=pvc.j2 dest={{mktemp.stdout}}/templates/logging-{{obj_name}}-pvc.yaml
+  vars:
+    obj_name: "{{claim_name}}"
+    annotations:
+      volume.alpha.kubernetes.io/storage-class: "dynamic"
+    size: "{{openshift_logging_es_pvc_size}}"
+    access_modes:
+      - ReadWriteOnce
+    pv_selector: "{{openshift_logging_es_pv_selector}}"
+  with_items:
+    - "{{es_pvc_pool|default([])}}"
+  loop_control:
+    loop_var: claim_name
+  when:
+    - openshift_logging_es_pvc_dynamic
+    - es_pvc_pool is defined
+  check_mode: no
+  changed_when: no

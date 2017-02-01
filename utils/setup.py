@@ -47,7 +47,7 @@ setup(
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['click', 'PyYAML'],
+    install_requires=['click', 'PyYAML', 'ansible'],
 
     # List additional groups of dependencies here (e.g. development
     # dependencies). You can install these using the following syntax,
@@ -65,11 +65,6 @@ setup(
         'ooinstall': ['ansible.cfg', 'ansible-quiet.cfg', 'ansible_plugins/*'],
     },
 
-    # Although 'package_data' is the preferred approach, in some case you may
-    # need to place data files outside of your packages. See:
-    # http://docs.python.org/3.4/distutils/setupscript.html#installing-additional-files # noqa
-    # In this case, 'data_file' will be installed into '<sys.prefix>/my_data'
-    #data_files=[('my_data', ['data/data_file'])],
     tests_require=['nose'],
 
     test_suite='nose.collector',

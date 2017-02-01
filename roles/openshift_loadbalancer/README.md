@@ -6,6 +6,8 @@ OpenShift HaProxy Loadbalancer Configuration
 Requirements
 ------------
 
+* Ansible 2.2
+
 This role is intended to be applied to the [lb] host group which is
 separate from OpenShift infrastructure components.
 

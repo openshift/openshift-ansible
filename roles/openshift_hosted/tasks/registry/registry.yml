@@ -30,7 +30,7 @@
 
 - name: Create OpenShift registry
   command: >
-    {{ openshift.common.admin_binary }} registry --create
+    {{ openshift.common.client_binary }} adm registry --create
     --config={{ openshift_hosted_kubeconfig }}
     {% if replicas > 1 -%}
     --replicas={{ replicas }}
@@ -53,7 +53,7 @@
 
 - include: secure.yml
   static: no
-  when: replicas | int > 0
+  when: replicas | int > 0 and not (openshift.docker.hosted_registry_insecure | default(false) | bool)
 
 - include: storage/object_storage.yml
   static: no

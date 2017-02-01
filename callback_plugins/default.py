@@ -30,7 +30,7 @@ DEFAULT_MODULE = imp.load_source(
 try:
     from ansible.plugins.callback import CallbackBase
     BASECLASS = CallbackBase
-except ImportError: # < ansible 2.1
+except ImportError:  # < ansible 2.1
     BASECLASS = DEFAULT_MODULE.CallbackModule
 
 
@@ -45,6 +45,10 @@ class CallbackModule(DEFAULT_MODULE.CallbackModule):  # pylint: disable=too-few-
     CALLBACK_TYPE = 'stdout'
     CALLBACK_NAME = 'default'
 
+    def __init__(self, *args, **kwargs):
+        # pylint: disable=non-parent-init-called
+        BASECLASS.__init__(self, *args, **kwargs)
+
     def _dump_results(self, result):
         '''Return the text to output for a result.'''
         result['_ansible_verbose_always'] = True
@@ -54,7 +58,7 @@ class CallbackModule(DEFAULT_MODULE.CallbackModule):  # pylint: disable=too-few-
             if key in result:
                 save[key] = result.pop(key)
 
-        output = BASECLASS._dump_results(self, result) # pylint: disable=protected-access
+        output = BASECLASS._dump_results(self, result)  # pylint: disable=protected-access
 
         for key in ['stdout', 'stderr', 'msg']:
             if key in save and save[key]:

@@ -3,6 +3,8 @@
 Ansible module for partitioning.
 """
 
+from __future__ import print_function
+
 # There is no pyparted on our Jenkins worker
 # pylint: disable=import-error
 import parted
@@ -52,7 +54,7 @@ options:
         partitions. On 1 TiB disk, 10 partitions will be created.
 
       - Example 2: size=100G:1,10G:1 says that ratio of space occupied by 100 GiB
-        partitions and 10 GiB partitions is 1:1. Therefore, on 1 TiB disk, 500 GiB 
+        partitions and 10 GiB partitions is 1:1. Therefore, on 1 TiB disk, 500 GiB
         will be split into five 100 GiB partition and 500 GiB will be split into fifty
         10GiB partitions.
       - size=100G:1,10G:1 = 5x 100 GiB and 50x 10 GiB partitions (on 1 TiB disk).
@@ -60,7 +62,7 @@ options:
       - Example 3: size=200G:1,100G:2 says that the ratio of space occupied by 200 GiB
         partitions and 100GiB partition is 1:2. Therefore, on 1 TiB disk, 1/3
         (300 GiB) should be occupied by 200 GiB partitions. Only one fits there,
-        so only one is created (we always round nr. of partitions *down*). Teh rest
+        so only one is created (we always round nr. of partitions *down*). The rest
         (800 GiB) is split into eight 100 GiB partitions, even though it's more
         than 2/3 of total space - free space is always allocated as much as possible.
       - size=200G:1,100G:2 = 1x 200 GiB and 8x 100 GiB partitions (on 1 TiB disk).
@@ -73,13 +75,14 @@ options:
         and eight 50 GiB partitions (again, 400 GiB).
       - size=200G:1,100G:1,50G:1 = 1x 200 GiB, 4x 100 GiB and 8x 50 GiB partitions
         (on 1 TiB disk).
-        
+
   force:
     description:
       - If True, it will always overwite partition table on the disk and create new one.
       - If False (default), it won't change existing partition tables.
 
 """
+
 
 # It's not class, it's more a simple struct with almost no functionality.
 # pylint: disable=too-few-public-methods
@@ -98,6 +101,7 @@ class PartitionSpec(object):
         """ Set count of parititions of this specification. """
         self.count = count
 
+
 def assign_space(total_size, specs):
     """
     Satisfy all the PartitionSpecs according to their weight.
@@ -112,6 +116,7 @@ def assign_space(total_size, specs):
         spec.set_count(num_blocks)
         total_size -= num_blocks * spec.size
         total_weight -= spec.weight
+
 
 def partition(diskname, specs, force=False, check_mode=False):
     """
@@ -128,7 +133,7 @@ def partition(diskname, specs, force=False, check_mode=False):
         disk = None
 
     if disk and len(disk.partitions) > 0 and not force:
-        print "skipping", diskname
+        print("skipping", diskname)
         return 0
 
     # create new partition table, wiping all existing data
@@ -161,16 +166,17 @@ def partition(diskname, specs, force=False, check_mode=False):
         pass
     return count
 
+
 def parse_spec(text):
     """ Parse string with partition specification. """
     tokens = text.split(",")
     specs = []
     for token in tokens:
-        if not ":" in token:
+        if ":" not in token:
             token += ":1"
 
         (sizespec, weight) = token.split(':')
-        weight = float(weight) # throws exception with reasonable error string
+        weight = float(weight)  # throws exception with reasonable error string
 
         units = {"m": 1, "g": 1 << 10, "t": 1 << 20, "p": 1 << 30}
         unit = units.get(sizespec[-1].lower(), None)
@@ -183,6 +189,7 @@ def parse_spec(text):
         spec = PartitionSpec(int(size * unit), weight)
         specs.append(spec)
     return specs
+
 
 def get_partitions(diskpath):
     """ Return array of partition names for given disk """
@@ -198,7 +205,7 @@ def get_partitions(diskpath):
 
 def main():
     """ Ansible module main method. """
-    module = AnsibleModule(
+    module = AnsibleModule(  # noqa: F405
         argument_spec=dict(
             disks=dict(required=True, type='str'),
             force=dict(required=False, default="no", type='bool'),
@@ -215,7 +222,7 @@ def main():
 
     try:
         specs = parse_spec(sizes)
-    except ValueError, ex:
+    except ValueError as ex:
         err = "Error parsing sizes=" + sizes + ": " + str(ex)
         module.fail_json(msg=err)
 
@@ -224,17 +231,17 @@ def main():
     for disk in disks.split(","):
         try:
             changed_count += partition(disk, specs, force, module.check_mode)
-        except Exception, ex:
+        except Exception as ex:
             err = "Error creating partitions on " + disk + ": " + str(ex)
             raise
-            #module.fail_json(msg=err)
+            # module.fail_json(msg=err)
         partitions += get_partitions(disk)
 
     module.exit_json(changed=(changed_count > 0), ansible_facts={"partition_pool": partitions})
 
-# ignore pylint errors related to the module_utils import
-# pylint: disable=redefined-builtin, unused-wildcard-import, wildcard-import
-# import module snippets
-from ansible.module_utils.basic import *
-main()
 
+# ignore pylint errors related to the module_utils import
+# pylint: disable=redefined-builtin, unused-wildcard-import, wildcard-import, wrong-import-order, wrong-import-position
+# import module snippets
+from ansible.module_utils.basic import *  # noqa: E402,F403
+main()

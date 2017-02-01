@@ -4,7 +4,10 @@
   when: openshift.common.is_atomic | bool
 
 - name: Install pyparted (RedHat/Fedora)
-  action: "{{ ansible_pkg_mgr }} name=pyparted,python-httplib2 state=present"
+  package: name={{ item }} state=present
+  with_items:
+    - pyparted
+    - python-httplib2
   when: not openshift.common.is_containerized | bool
 
 - name: partition the drives
@@ -12,11 +15,11 @@
 
 - name: create filesystem
   filesystem: fstype=ext4 dev=/dev/{{ item.name }}
-  with_items: partition_pool
+  with_items: "{{ partition_pool }}"
 
 - name: mount
   mount: name={{mount_dir}}/{{ item.name }} src=/dev/{{ item.name }} state=mounted fstype=ext4 passno=2
-  with_items: partition_pool
+  with_items: "{{ partition_pool }}"
 
 - include: nfs.yml
 
@@ -28,4 +31,4 @@
     body_format: json
     status_code: 201
     HEADER_Authorization: "Bearer {{ kubernetes_token }}"
-  with_items: partition_pool
+  with_items: "{{ partition_pool }}"

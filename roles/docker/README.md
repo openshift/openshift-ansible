@@ -6,7 +6,7 @@ Ensures docker package is installed, and optionally raises timeout for systemd-u
 Requirements
 ------------
 
-None
+Ansible 2.2
 
 Role Variables
 --------------
@@ -17,7 +17,7 @@ docker_udev_workaround: raises udevd timeout to 5 minutes (https://bugzilla.redh
 Dependencies
 ------------
 
-None
+Depends on the os_firewall role.
 
 Example Playbook
 ----------------

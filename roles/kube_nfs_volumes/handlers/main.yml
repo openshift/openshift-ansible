@@ -1,3 +1,3 @@
 ---
 - name: restart nfs
-  service: name=nfs-server state=restarted
+  systemd: name=nfs-server state=restarted

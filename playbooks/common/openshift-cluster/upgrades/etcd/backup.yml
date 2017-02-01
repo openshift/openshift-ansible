@@ -1,0 +1,94 @@
+---
+- name: Backup etcd
+  hosts: etcd_hosts_to_backup
+  vars:
+    embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
+    timestamp: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
+    etcdctl_command: "{{ 'etcdctl' if not openshift.common.is_containerized or embedded_etcd else 'docker exec etcd_container etcdctl' }}"
+  roles:
+  - openshift_facts
+  tasks:
+  # Ensure we persist the etcd role for this host in openshift_facts
+  - openshift_facts:
+      role: etcd
+      local_facts: {}
+    when: "'etcd' not in openshift"
+
+  - stat: path=/var/lib/openshift
+    register: var_lib_openshift
+
+  - stat: path=/var/lib/origin
+    register: var_lib_origin
+
+  - name: Create origin symlink if necessary
+    file: src=/var/lib/openshift/ dest=/var/lib/origin state=link
+    when: var_lib_openshift.stat.exists == True and var_lib_origin.stat.exists == False
+
+  # TODO: replace shell module with command and update later checks
+  # We assume to be using the data dir for all backups.
+  - name: Check available disk space for etcd backup
+    shell: df --output=avail -k {{ openshift.common.data_dir }} | tail -n 1
+    register: avail_disk
+
+  # TODO: replace shell module with command and update later checks
+  - name: Check current embedded etcd disk usage
+    shell: du -k {{ openshift.etcd.etcd_data_dir }} | tail -n 1 | cut -f1
+    register: etcd_disk_usage
+    when: embedded_etcd | bool
+
+  - name: Abort if insufficient disk space for etcd backup
+    fail:
+      msg: >
+        {{ etcd_disk_usage.stdout }} Kb disk space required for etcd backup,
+        {{ avail_disk.stdout }} Kb available.
+    when: (embedded_etcd | bool) and (etcd_disk_usage.stdout|int > avail_disk.stdout|int)
+
+  # For non containerized and non embedded we should have the correct version of
+  # etcd installed already. So don't do anything.
+  #
+  # For embedded or containerized we need to use the latest because OCP 3.3 uses
+  # a version of etcd that can only be backed up with etcd-3.x and if it's
+  # containerized then etcd version may be newer than that on the host so
+  # upgrade it.
+  #
+  # On atomic we have neither yum nor dnf so ansible throws a hard to debug error
+  # if you use package there, like this: "Could not find a module for unknown."
+  # see https://bugzilla.redhat.com/show_bug.cgi?id=1408668
+  #
+  # TODO - We should refactor all containerized backups to use the containerized
+  # version of etcd to perform the backup rather than relying on the host's
+  # binaries. Until we do that we'll continue to have problems backing up etcd
+  # when atomic host has an older version than the version that's running in the
+  # container whether that's embedded or not
+  - name: Install latest etcd for containerized or embedded
+    package:
+      name: etcd
+      state: latest
+    when: ( embedded_etcd | bool or openshift.common.is_containerized ) and not openshift.common.is_atomic
+
+  - name: Generate etcd backup
+    command: >
+      {{ etcdctl_command }} backup --data-dir={{ openshift.etcd.etcd_data_dir }}
+      --backup-dir={{ openshift.common.data_dir }}/etcd-backup-{{ backup_tag | default('') }}{{ timestamp }}
+
+  - set_fact:
+      etcd_backup_complete: True
+
+  - name: Display location of etcd backup
+    debug:
+      msg: "Etcd backup created in {{ openshift.common.data_dir }}/etcd-backup-{{ backup_tag | default('') }}{{ timestamp }}"
+
+- name: Gate on etcd backup
+  hosts: localhost
+  connection: local
+  become: no
+  tasks:
+  - set_fact:
+      etcd_backup_completed: "{{ hostvars
+                                 | oo_select_keys(groups.etcd_hosts_to_backup)
+                                 | oo_collect('inventory_hostname', {'etcd_backup_complete': true}) }}"
+  - set_fact:
+      etcd_backup_failed: "{{ groups.etcd_hosts_to_backup | difference(etcd_backup_completed) }}"
+  - fail:
+      msg: "Upgrade cannot continue. The following hosts did not complete etcd backup: {{ etcd_backup_failed | join(',') }}"
+    when: etcd_backup_failed | length > 0

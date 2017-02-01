@@ -19,5 +19,5 @@
     when: openshift.common.is_atomic | bool
 
   - fail:
-      msg: This playbook requires access to Docker 1.10 or later
-    when: openshift.common.is_atomic | bool and l_docker_version.avail_version | default(l_docker_version.curr_version, true) | version_compare('1.10','<')
+      msg: This playbook requires access to Docker 1.12 or later
+    when: openshift.common.is_atomic | bool and l_docker_version.avail_version | default(l_docker_version.curr_version, true) | version_compare('1.12','<')

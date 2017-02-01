@@ -15,6 +15,7 @@ LimitNOFILE=131072
 LimitCORE=infinity
 WorkingDirectory={{ openshift.common.data_dir }}
 SyslogIdentifier=atomic-openshift-master-api
+Restart=always
 RestartSec=5s
 
 [Install]

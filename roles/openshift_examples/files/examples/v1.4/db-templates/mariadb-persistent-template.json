@@ -4,12 +4,29 @@
   "metadata": {
     "name": "mariadb-persistent",
     "annotations": {
-      "description": "MariaDB database service, with persistent storage.  Scaling to more than one replica is not supported.  You must have persistent volumes available in your cluster to use this template.",
+      "openshift.io/display-name": "MariaDB (Persistent)",
+      "description": "MariaDB database service, with persistent storage. For more information about using this template, including OpenShift considerations, see https://github.com/sclorg/mariadb-container/blob/master/10.1/README.md.\n\nNOTE: Scaling to more than one replica is not supported. You must have persistent volumes available in your cluster to use this template.",
       "iconClass": "icon-mariadb",
       "tags": "database,mariadb"
     }
   },
+  "message": "The following service(s) have been created in your project: ${DATABASE_SERVICE_NAME}.\n\n       Username: ${MYSQL_USER}\n       Password: ${MYSQL_PASSWORD}\n  Database Name: ${MYSQL_DATABASE}\n Connection URL: mysql://${DATABASE_SERVICE_NAME}:3306/\n\nFor more information about using this template, including OpenShift considerations, see https://github.com/sclorg/mariadb-container/blob/master/10.1/README.md.",
+  "labels": {
+    "template": "mariadb-persistent-template"
+  },
   "objects": [
+    {
+      "kind": "Secret",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${DATABASE_SERVICE_NAME}"
+      },
+      "stringData" : {
+        "database-user" : "${MYSQL_USER}",
+        "database-password" : "${MYSQL_PASSWORD}",
+        "database-root-password" : "${MYSQL_ROOT_PASSWORD}"
+      }
+    },
     {
       "kind": "Service",
       "apiVersion": "v1",
@@ -112,11 +129,30 @@
                 "env": [
                   {
                     "name": "MYSQL_USER",
-                    "value": "${MYSQL_USER}"
+                    "valueFrom": {
+                      "secretKeyRef" : {
+                        "name" : "${DATABASE_SERVICE_NAME}",
+                        "key" : "database-user"
+                      }
+                    }
                   },
                   {
                     "name": "MYSQL_PASSWORD",
-                    "value": "${MYSQL_PASSWORD}"
+                    "valueFrom": {
+                      "secretKeyRef" : {
+                        "name" : "${DATABASE_SERVICE_NAME}",
+                        "key" : "database-password"
+                      }
+                    }
+                  },
+                  {
+                    "name": "MYSQL_ROOT_PASSWORD",
+                    "valueFrom": {
+                      "secretKeyRef" : {
+                        "name" : "${DATABASE_SERVICE_NAME}",
+                        "key" : "database-root-password"
+                      }
+                    }
                   },
                   {
                     "name": "MYSQL_DATABASE",
@@ -188,6 +224,14 @@
       "required": true
     },
     {
+      "name": "MYSQL_ROOT_PASSWORD",
+      "displayName": "MariaDB root Password",
+      "description": "Password for the MariaDB root user.",
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{16}",
+      "required": true
+    },
+    {
       "name": "MYSQL_DATABASE",
       "displayName": "MariaDB Database Name",
       "description": "Name of the MariaDB database accessed.",
@@ -201,8 +245,5 @@
       "value": "1Gi",
       "required": true
     }
-  ],
-  "labels": {
-    "template": "mariadb-persistent-template"
-  }
+  ]
 }

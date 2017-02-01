@@ -6,22 +6,16 @@ Custom filters for use in openshift-master
 '''
 import copy
 import sys
-import yaml
+
+from distutils.version import LooseVersion  # pylint: disable=no-name-in-module,import-error
 
 from ansible import errors
-from distutils.version import LooseVersion
+from ansible.parsing.yaml.dumper import AnsibleDumper
+from ansible.plugins.filter.core import to_bool as ansible_bool
+from six import string_types
 
-# pylint: disable=no-name-in-module,import-error
-try:
-    # ansible-2.1
-    from ansible.plugins.filter.core import to_bool as ansible_bool
-except ImportError:
-    try:
-        #ansible-2.0.x
-        from ansible.runner.filter_plugins.core import bool as ansible_bool
-    except ImportError:
-        # ansible-1.9.x
-        from ansible.plugins.filter.core import bool as ansible_bool
+import yaml
+
 
 class IdentityProviderBase(object):
     """ IdentityProviderBase
@@ -75,7 +69,7 @@ class IdentityProviderBase(object):
 
         valid_mapping_methods = ['add', 'claim', 'generate', 'lookup']
         if self.mapping_method not in valid_mapping_methods:
-            raise errors.AnsibleFilterError("|failed unkown mapping method "
+            raise errors.AnsibleFilterError("|failed unknown mapping method "
                                             "for provider {0}".format(self.__class__.__name__))
         self._required = []
         self._optional = []
@@ -168,7 +162,7 @@ class LDAPPasswordIdentityProvider(IdentityProviderBase):
             AnsibleFilterError:
     """
     def __init__(self, api_version, idp):
-        IdentityProviderBase.__init__(self, api_version, idp)
+        super(self.__class__, self).__init__(api_version, idp)
         self._allow_additional = False
         self._required += [['attributes'], ['url'], ['insecure']]
         self._optional += [['ca'],
@@ -183,7 +177,6 @@ class LDAPPasswordIdentityProvider(IdentityProviderBase):
 
     def validate(self):
         ''' validate this idp instance '''
-        IdentityProviderBase.validate(self)
         if not isinstance(self.provider['attributes'], dict):
             raise errors.AnsibleFilterError("|failed attributes for provider "
                                             "{0} must be a dictionary".format(self.__class__.__name__))
@@ -213,7 +206,7 @@ class KeystonePasswordIdentityProvider(IdentityProviderBase):
             AnsibleFilterError:
     """
     def __init__(self, api_version, idp):
-        IdentityProviderBase.__init__(self, api_version, idp)
+        super(self.__class__, self).__init__(api_version, idp)
         self._allow_additional = False
         self._required += [['url'], ['domainName', 'domain_name']]
         self._optional += [['ca'], ['certFile', 'cert_file'], ['keyFile', 'key_file']]
@@ -232,7 +225,7 @@ class RequestHeaderIdentityProvider(IdentityProviderBase):
             AnsibleFilterError:
     """
     def __init__(self, api_version, idp):
-        IdentityProviderBase.__init__(self, api_version, idp)
+        super(self.__class__, self).__init__(api_version, idp)
         self._allow_additional = False
         self._required += [['headers']]
         self._optional += [['challengeURL', 'challenge_url'],
@@ -245,7 +238,6 @@ class RequestHeaderIdentityProvider(IdentityProviderBase):
 
     def validate(self):
         ''' validate this idp instance '''
-        IdentityProviderBase.validate(self)
         if not isinstance(self.provider['headers'], list):
             raise errors.AnsibleFilterError("|failed headers for provider {0} "
                                             "must be a list".format(self.__class__.__name__))
@@ -264,7 +256,7 @@ class AllowAllPasswordIdentityProvider(IdentityProviderBase):
             AnsibleFilterError:
     """
     def __init__(self, api_version, idp):
-        IdentityProviderBase.__init__(self, api_version, idp)
+        super(self.__class__, self).__init__(api_version, idp)
         self._allow_additional = False
 
 
@@ -281,7 +273,7 @@ class DenyAllPasswordIdentityProvider(IdentityProviderBase):
             AnsibleFilterError:
     """
     def __init__(self, api_version, idp):
-        IdentityProviderBase.__init__(self, api_version, idp)
+        super(self.__class__, self).__init__(api_version, idp)
         self._allow_additional = False
 
 
@@ -298,7 +290,7 @@ class HTPasswdPasswordIdentityProvider(IdentityProviderBase):
             AnsibleFilterError:
     """
     def __init__(self, api_version, idp):
-        IdentityProviderBase.__init__(self, api_version, idp)
+        super(self.__class__, self).__init__(api_version, idp)
         self._allow_additional = False
         self._required += [['file', 'filename', 'fileName', 'file_name']]
 
@@ -323,7 +315,7 @@ class BasicAuthPasswordIdentityProvider(IdentityProviderBase):
             AnsibleFilterError:
     """
     def __init__(self, api_version, idp):
-        IdentityProviderBase.__init__(self, api_version, idp)
+        super(self.__class__, self).__init__(api_version, idp)
         self._allow_additional = False
         self._required += [['url']]
         self._optional += [['ca'], ['certFile', 'cert_file'], ['keyFile', 'key_file']]
@@ -342,13 +334,12 @@ class IdentityProviderOauthBase(IdentityProviderBase):
             AnsibleFilterError:
     """
     def __init__(self, api_version, idp):
-        IdentityProviderBase.__init__(self, api_version, idp)
+        super(self.__class__, self).__init__(api_version, idp)
         self._allow_additional = False
         self._required += [['clientID', 'client_id'], ['clientSecret', 'client_secret']]
 
     def validate(self):
         ''' validate this idp instance '''
-        IdentityProviderBase.validate(self)
         if self.challenge:
             raise errors.AnsibleFilterError("|failed provider {0} does not "
                                             "allow challenge authentication".format(self.__class__.__name__))
@@ -387,7 +378,6 @@ class OpenIDIdentityProvider(IdentityProviderOauthBase):
             if 'include_granted_scopes' in self._idp['extraAuthorizeParameters']:
                 val = ansible_bool(self._idp['extraAuthorizeParameters'].pop('include_granted_scopes'))
                 self._idp['extraAuthorizeParameters']['include_granted_scopes'] = val
-
 
     def validate(self):
         ''' validate this idp instance '''
@@ -495,9 +485,11 @@ class FilterModule(object):
             idp_inst.set_provider_items()
             idp_list.append(idp_inst)
 
-
         IdentityProviderBase.validate_idp_list(idp_list, openshift_version, deployment_type)
-        return yaml.safe_dump([idp.to_dict() for idp in idp_list], default_flow_style=False)
+        return yaml.dump([idp.to_dict() for idp in idp_list],
+                         allow_unicode=True,
+                         default_flow_style=False,
+                         Dumper=AnsibleDumper)
 
     @staticmethod
     def validate_pcs_cluster(data, masters=None):
@@ -514,7 +506,7 @@ class FilterModule(object):
                            'master3.example.com']
                returns True
         '''
-        if not issubclass(type(data), basestring):
+        if not issubclass(type(data), string_types):
             raise errors.AnsibleFilterError("|failed expects data is a string or unicode")
         if not issubclass(type(masters), list):
             raise errors.AnsibleFilterError("|failed expects masters is a list")
@@ -529,7 +521,9 @@ class FilterModule(object):
         ''' Return certificates to synchronize based on facts. '''
         if not issubclass(type(hostvars), dict):
             raise errors.AnsibleFilterError("|failed expects hostvars is a dict")
-        certs = ['admin.crt',
+        certs = ['ca.crt',
+                 'ca.key',
+                 'admin.crt',
                  'admin.key',
                  'admin.kubeconfig',
                  'master.kubelet-client.crt',
@@ -559,7 +553,7 @@ class FilterModule(object):
     def oo_htpasswd_users_from_file(file_contents):
         ''' return a dictionary of htpasswd users from htpasswd file contents '''
         htpasswd_entries = {}
-        if not isinstance(file_contents, basestring):
+        if not isinstance(file_contents, string_types):
             raise errors.AnsibleFilterError("failed, expects to filter on a string")
         for line in file_contents.splitlines():
             user = None
@@ -574,7 +568,6 @@ class FilterModule(object):
                 raise errors.AnsibleFilterError(error_msg)
             htpasswd_entries[user] = passwd
         return htpasswd_entries
-
 
     def filters(self):
         ''' returns a mapping of filters to methods '''

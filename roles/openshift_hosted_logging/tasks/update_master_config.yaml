@@ -1,0 +1,7 @@
+---
+- name: Adding Kibana route information to loggingPublicURL
+  modify_yaml:
+    dest: "{{ openshift.common.config_base }}/master/master-config.yaml"
+    yaml_key: assetConfig.loggingPublicURL
+    yaml_value: "https://{{ logging_hostname }}"
+  notify: restart master

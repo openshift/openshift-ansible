@@ -1,19 +1,25 @@
 ---
-- include: ../verify_ansible_version.yml
-
-- hosts: localhost
+- name: Create initial host groups for localhost
+  hosts: localhost
   connection: local
   become: no
   gather_facts: no
+  tags:
+  - always
   tasks:
   - include_vars: ../../../byo/openshift-cluster/cluster_hosts.yml
-  - add_host:
+  - name: Evaluate group l_oo_all_hosts
+    add_host:
       name: "{{ item }}"
       groups: l_oo_all_hosts
-    with_items: g_all_hosts | default([])
+    with_items: "{{ g_all_hosts | default([]) }}"
+    changed_when: False
 
-- hosts: l_oo_all_hosts
+- name: Create initial host groups for all hosts
+  hosts: l_oo_all_hosts
   gather_facts: no
+  tags:
+  - always
   tasks:
   - include_vars: ../../../byo/openshift-cluster/cluster_hosts.yml
 
@@ -48,3 +54,28 @@
     when: openshift_docker_log_options is not defined
 
 - include: ../initialize_facts.yml
+
+- name: Ensure clean repo cache in the event repos have been changed manually
+  hosts: oo_all_hosts
+  tags:
+  - pre_upgrade
+  tasks:
+  - name: Clean package cache
+    command: "{{ ansible_pkg_mgr }} clean all"
+    when: not openshift.common.is_atomic | bool
+    args:
+      warn: no
+
+- name: Ensure firewall is not switched during upgrade
+  hosts: oo_all_hosts
+  tasks:
+  - name: Check if iptables is running
+    command: systemctl status iptables
+    ignore_errors: true
+    changed_when: false
+    register: service_iptables_status
+
+  - name: Set fact os_firewall_use_firewalld FALSE for iptables
+    set_fact:
+      os_firewall_use_firewalld: false
+    when: "'Active: active' in service_iptables_status.stdout"

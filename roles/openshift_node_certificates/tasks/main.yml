@@ -44,37 +44,43 @@
 
 - name: Generate the node client config
   command: >
-    {{ openshift.common.admin_binary }} create-api-client-config
+    {{ hostvars[openshift_ca_host].openshift.common.client_binary }} adm create-api-client-config
       {% for named_ca_certificate in hostvars[openshift_ca_host].openshift.master.named_certificates | default([]) | oo_collect('cafile') %}
       --certificate-authority {{ named_ca_certificate }}
       {% endfor %}
       --certificate-authority={{ openshift_ca_cert }}
-      --client-dir={{ openshift_node_generated_config_dir }}
+      --client-dir={{ openshift_generated_configs_dir }}/node-{{ hostvars[item].openshift.common.hostname }}
       --groups=system:nodes
       --master={{ hostvars[openshift_ca_host].openshift.master.api_url }}
       --signer-cert={{ openshift_ca_cert }}
       --signer-key={{ openshift_ca_key }}
       --signer-serial={{ openshift_ca_serial }}
-      --user=system:node:{{ openshift.common.hostname }}
+      --user=system:node:{{ hostvars[item].openshift.common.hostname }}
   args:
-    creates: "{{ openshift_node_generated_config_dir }}"
-  when: node_certs_missing | bool
+    creates: "{{ openshift_generated_configs_dir }}/node-{{ hostvars[item].openshift.common.hostname }}"
+  with_items: "{{ hostvars
+                  | oo_select_keys(groups['oo_nodes_to_config'])
+                  | oo_collect(attribute='inventory_hostname', filters={'node_certs_missing':True}) }}"
   delegate_to: "{{ openshift_ca_host }}"
+  run_once: true
 
 - name: Generate the node server certificate
   command: >
-    {{ openshift.common.admin_binary }} ca create-server-cert
-      --cert={{ openshift_node_generated_config_dir }}/server.crt
-      --key={{ openshift_generated_configs_dir }}/node-{{ openshift.common.hostname }}/server.key
-      --overwrite=true
-      --hostnames={{ openshift.common.all_hostnames |join(",") }}
-      --signer-cert={{ openshift_ca_cert }}
-      --signer-key={{ openshift_ca_key }}
-      --signer-serial={{ openshift_ca_serial }}
+    {{ hostvars[openshift_ca_host].openshift.common.client_binary }} adm ca create-server-cert
+    --cert={{ openshift_generated_configs_dir }}/node-{{ hostvars[item].openshift.common.hostname }}/server.crt
+    --key={{ openshift_generated_configs_dir }}/node-{{ hostvars[item].openshift.common.hostname }}/server.key
+    --overwrite=true
+    --hostnames={{ hostvars[item].openshift.common.hostname }},{{ hostvars[item].openshift.common.public_hostname }},{{ hostvars[item].openshift.common.ip }},{{ hostvars[item].openshift.common.public_ip }}
+    --signer-cert={{ openshift_ca_cert }}
+    --signer-key={{ openshift_ca_key }}
+    --signer-serial={{ openshift_ca_serial }}
   args:
-    creates: "{{ openshift_node_generated_config_dir }}/server.crt"
-  when: node_certs_missing | bool
-  delegate_to: "{{ openshift_ca_host}}"
+    creates: "{{ openshift_generated_configs_dir }}/node-{{ hostvars[item].openshift.common.hostname }}/server.crt"
+  with_items: "{{ hostvars
+                  | oo_select_keys(groups['oo_nodes_to_config'])
+                  | oo_collect(attribute='inventory_hostname', filters={'node_certs_missing':True}) }}"
+  delegate_to: "{{ openshift_ca_host }}"
+  run_once: true
 
 - name: Create local temp directory for syncing certs
   local_action: command mktemp -d /tmp/openshift-ansible-XXXXXXX

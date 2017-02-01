@@ -8,7 +8,8 @@ import unittest
 sys.path = [os.path.abspath(os.path.dirname(__file__) + "/../library/")] + sys.path
 
 # pylint: disable=import-error
-from modify_yaml import set_key
+from modify_yaml import set_key  # noqa: E402
+
 
 class ModifyYamlTests(unittest.TestCase):
 
@@ -34,4 +35,3 @@ class ModifyYamlTests(unittest.TestCase):
         self.assertEquals(yaml_value, cfg['masterClients']
                           ['externalKubernetesClientConnectionOverrides']
                           ['acceptContentTypes'])
-

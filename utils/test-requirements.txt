@@ -1,11 +1,14 @@
-enum
-configparser
-pylint
-pep8
+ansible
+# flake8 moved to before setuptools-lint to satisfy mccabe dependency issue
+flake8
+setuptools-lint
 nose
 coverage
 mock
-flake8
 PyYAML
 click
 backports.functools_lru_cache
+pyOpenSSL
+yamllint
+tox
+detox

@@ -17,6 +17,7 @@ requirements: [ ]
 EXAMPLES = '''
 '''
 
+
 def modify_api_levels(level_list, remove, ensure, msg_prepend='',
                       msg_append=''):
     """ modify_api_levels """
@@ -61,7 +62,6 @@ def upgrade_master_3_0_to_3_1(ansible_module, config_base, backup):
     master_cfg_file = open(master_config, 'r')
     config = yaml.safe_load(master_cfg_file.read())
     master_cfg_file.close()
-
 
     # Remove unsupported api versions and ensure supported api versions from
     # master config
@@ -118,7 +118,7 @@ def main():
     # redefined-outer-name
     global module
 
-    module = AnsibleModule(
+    module = AnsibleModule(  # noqa: F405
         argument_spec=dict(
             config_base=dict(required=True),
             from_version=dict(required=True, choices=['3.0']),
@@ -146,13 +146,14 @@ def main():
 
     # ignore broad-except error to avoid stack trace to ansible user
     # pylint: disable=broad-except
-    except Exception, e:
+    except Exception as e:
         return module.fail_json(msg=str(e))
 
+
 # ignore pylint errors related to the module_utils import
-# pylint: disable=redefined-builtin, unused-wildcard-import, wildcard-import
+# pylint: disable=redefined-builtin, unused-wildcard-import, wildcard-import, wrong-import-position
 # import module snippets
-from ansible.module_utils.basic import *
+from ansible.module_utils.basic import *  # noqa: E402,F403
 
 if __name__ == '__main__':
     main()

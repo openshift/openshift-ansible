@@ -9,11 +9,12 @@
       additional_registries: "{{ openshift_docker_additional_registries | default(None) }}"
       blocked_registries: "{{ openshift_docker_blocked_registries | default(None) }}"
       insecure_registries: "{{ openshift_docker_insecure_registries | default(None) }}"
-      log_driver:  "{{ openshift_docker_log_driver | default(None) }}"
+      selinux_enabled: "{{ openshift_docker_selinux_enabled | default(None) }}"
+      log_driver: "{{ openshift_docker_log_driver | default(None) }}"
       log_options: "{{ openshift_docker_log_options | default(None) }}"
       options: "{{ openshift_docker_options | default(None) }}"
       disable_push_dockerhub: "{{ openshift_disable_push_dockerhub | default(None) }}"
-      hosted_registry_insecure: "{{ openshift_docker_hosted_registry_insecure | default(False) }}"
+      hosted_registry_insecure: "{{ openshift_docker_hosted_registry_insecure | default(openshift.docker.hosted_registry_insecure | default(False)) }}"
       hosted_registry_network: "{{ openshift_docker_hosted_registry_network | default(None) }}"
 
 - set_fact:
@@ -23,6 +24,7 @@
                                    | default(omit) }}"
     docker_insecure_registries: "{{ openshift.docker.insecure_registries
                                     | default(omit) }}"
+    docker_selinux_enabled: "{{ openshift.docker.selinux_enabled | default(omit) }}"
     docker_log_driver: "{{ openshift.docker.log_driver | default(omit) }}"
     docker_log_options: "{{ openshift.docker.log_options | default(omit) }}"
     docker_push_dockerhub: "{{ openshift.docker.disable_push_dockerhub

@@ -8,7 +8,9 @@
   when: openshift_master_ca_certificate is defined and ('certfile' not in openshift_master_ca_certificate or 'keyfile' not in openshift_master_ca_certificate)
 
 - name: Install the base package for admin tooling
-  action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }} state=present"
+  package:
+    name: "{{ openshift.common.service_type }}{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }}"
+    state: present
   when: not openshift.common.is_containerized | bool
   register: install_result
   delegate_to: "{{ openshift_ca_host }}"
@@ -80,11 +82,11 @@
 
 - name: Create the master certificates if they do not already exist
   command: >
-    {{ openshift.common.admin_binary }} create-master-certs
+    {{ openshift.common.client_binary }} adm create-master-certs
     {% for named_ca_certificate in openshift.master.named_certificates | default([]) | oo_collect('cafile') %}
     --certificate-authority {{ named_ca_certificate }}
     {% endfor %}
-    --hostnames={{ openshift_master_hostnames | join(',') }}
+    --hostnames={{ openshift.common.all_hostnames | join(',') }}
     --master={{ openshift.master.api_url }}
     --public-master={{ openshift.master.public_api_url }}
     --cert-dir={{ openshift_ca_config_dir }}

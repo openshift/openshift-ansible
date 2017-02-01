@@ -5,11 +5,12 @@
 #
 # This script should be run from openshift-ansible/roles/openshift_examples
 
-XPAAS_VERSION=ose-v1.3.3
-ORIGIN_VERSION=${1:-v1.4}
+XPAAS_VERSION=ose-v1.3.5
+ORIGIN_VERSION=${1:-v1.5}
+RHAMP_TAG=1.0.0.GA
+RHAMP_TEMPLATE=https://raw.githubusercontent.com/3scale/rhamp-openshift-templates/${RHAMP_TAG}/apicast-gateway/apicast-gateway-template.yml
 EXAMPLES_BASE=$(pwd)/files/examples/${ORIGIN_VERSION}
 find ${EXAMPLES_BASE} -name '*.json' -delete
-find ${EXAMPLES_BASE} -name '*.yaml' -delete -exclude registry-console.json
 TEMP=`mktemp -d`
 pushd $TEMP
 
@@ -23,12 +24,13 @@ cp origin-master/examples/jenkins/jenkins-*template.json ${EXAMPLES_BASE}/quicks
 cp origin-master/examples/image-streams/* ${EXAMPLES_BASE}/image-streams/
 mv application-templates-${XPAAS_VERSION}/jboss-image-streams.json ${EXAMPLES_BASE}/xpaas-streams/
 find application-templates-${XPAAS_VERSION}/ -name '*.json' ! -wholename '*secret*' ! -wholename '*demo*' -exec mv {} ${EXAMPLES_BASE}/xpaas-templates/ \;
-wget https://raw.githubusercontent.com/jboss-fuse/application-templates/master/fis-image-streams.json          -O ${EXAMPLES_BASE}/xpaas-streams/fis-image-streams.json
+wget https://raw.githubusercontent.com/jboss-fuse/application-templates/GA/fis-image-streams.json              -O ${EXAMPLES_BASE}/xpaas-streams/fis-image-streams.json
 wget https://raw.githubusercontent.com/redhat-developer/s2i-dotnetcore/master/dotnet_imagestreams.json         -O ${EXAMPLES_BASE}/image-streams/dotnet_imagestreams.json
-wget https://raw.githubusercontent.com/openshift/origin-metrics/master/metrics.yaml                            -O ${EXAMPLES_BASE}/infrastructure-templates/origin/metrics-deployer.yaml
-wget https://raw.githubusercontent.com/openshift/origin-metrics/enterprise/metrics.yaml                        -O ${EXAMPLES_BASE}/infrastructure-templates/enterprise/metrics-deployer.yaml
-wget https://raw.githubusercontent.com/openshift/origin-aggregated-logging/master/deployer/deployer.yaml     -O ${EXAMPLES_BASE}/infrastructure-templates/origin/logging-deployer.yaml
-wget https://raw.githubusercontent.com/openshift/origin-aggregated-logging/enterprise/deployment/deployer.yaml -O ${EXAMPLES_BASE}/infrastructure-templates/enterprise/logging-deployer.yaml
+wget https://raw.githubusercontent.com/openshift/origin-metrics/master/metrics.yaml                            -O ../openshift_hosted_templates/files/${ORIGIN_VERSION}/origin/metrics-deployer.yaml
+wget https://raw.githubusercontent.com/openshift/origin-metrics/enterprise/metrics.yaml                        -O ../openshift_hosted_templates/files/${ORIGIN_VERSION}/enterprise/metrics-deployer.yaml
+wget https://raw.githubusercontent.com/openshift/origin-aggregated-logging/master/deployer/deployer.yaml       -O ../openshift_hosted_templates/files/${ORIGIN_VERSION}/origin/logging-deployer.yaml
+wget https://raw.githubusercontent.com/openshift/origin-aggregated-logging/enterprise/deployment/deployer.yaml -O ../openshift_hosted_templates/files/${ORIGIN_VERSION}/enterprise/logging-deployer.yaml
+wget ${RHAMP_TEMPLATE} -O ${EXAMPLES_BASE}/quickstart-templates/apicast-gateway-template.yml
 
 popd
 git diff files/examples

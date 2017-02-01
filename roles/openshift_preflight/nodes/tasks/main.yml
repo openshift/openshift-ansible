@@ -1,0 +1,41 @@
+---
+# determine if yum install of node pkgs will work
+- when: not openshift.common.is_containerized | bool
+  block:
+
+    - name: main node packages availability
+      check_yum_update:
+        packages:
+          - "{{ openshift.common.service_type }}"
+          - "{{ openshift.common.service_type }}-node"
+          - "{{ openshift.common.service_type }}-sdn-ovs"
+      register: r
+
+    - set_fact:
+        oo_preflight_check_results: "{{ oo_preflight_check_results + [r|combine({'_task': 'main node packages availability'})] }}"
+
+    - name: other node packages availability
+      check_yum_update:
+        packages:
+          - docker
+          - PyYAML
+          - firewalld
+          - iptables
+          - iptables-services
+          - nfs-utils
+          - ntp
+          - yum-utils
+          - dnsmasq
+          - libselinux-python
+          - ceph-common
+          - glusterfs-fuse
+          - iscsi-initiator-utils
+          - pyparted
+          - python-httplib2
+          - openssl
+          - flannel
+          - bind
+      register: r
+
+    - set_fact:
+        oo_preflight_check_results: "{{ oo_preflight_check_results + [r|combine({'_task': 'other node packages availability'})] }}"

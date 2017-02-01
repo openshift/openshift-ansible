@@ -1,0 +1,125 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: hawkular-cassandra-{{ node }}
+  labels:
+    metrics-infra: hawkular-cassandra
+    name: hawkular-cassandra
+    type: hawkular-cassandra
+spec:
+  selector:
+    name: hawkular-cassandra-{{ node }}
+  replicas: {{replica_count}}
+  template:
+    version: v1
+    metadata:
+      labels:
+        metrics-infra: hawkular-cassandra
+        name: hawkular-cassandra-{{ node }}
+        type: hawkular-cassandra
+    spec:
+      serviceAccount: cassandra
+      containers:
+      - image: "{{ openshift_metrics_image_prefix }}metrics-cassandra:{{ openshift_metrics_image_version }}"
+        name: hawkular-cassandra-{{ node }}
+        ports:
+        - name: cql-port
+          containerPort: 9042
+        - name: thift-port
+          containerPort: 9160
+        - name: tcp-port
+          containerPort: 7000
+        - name: ssl-port
+          containerPort: 7001
+        command:
+        - "/opt/apache-cassandra/bin/cassandra-docker.sh"
+        - "--cluster_name=hawkular-metrics"
+        - "--data_volume=/cassandra_data"
+        - "--internode_encryption=all"
+        - "--require_node_auth=true"
+        - "--enable_client_encryption=true"
+        - "--require_client_auth=true"
+        - "--keystore_file=/secret/cassandra.keystore"
+        - "--keystore_password_file=/secret/cassandra.keystore.password"
+        - "--truststore_file=/secret/cassandra.truststore"
+        - "--truststore_password_file=/secret/cassandra.truststore.password"
+        - "--cassandra_pem_file=/secret/cassandra.pem"
+        env:
+        - name: CASSANDRA_MASTER
+          value: "{{ master }}"
+        - name: CASSANDRA_DATA_VOLUME
+          value: "/cassandra_data"
+        - name: JVM_OPTS
+          value: "-Dcassandra.commitlog.ignorereplayerrors=true"
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: MEMORY_LIMIT
+          valueFrom:
+            resourceFieldRef:
+              resource: limits.memory
+        - name: CPU_LIMIT
+          valueFrom:
+            resourceFieldRef:
+              resource: limits.cpu
+              divisor: 1m
+        volumeMounts:
+        - name: cassandra-data
+          mountPath: "/cassandra_data"
+        - name: hawkular-cassandra-secrets
+          mountPath: "/secret"
+{% if ((openshift_metrics_cassandra_limits_cpu is defined and openshift_metrics_cassandra_limits_cpu is not none) 
+   or (openshift_metrics_cassandra_limits_memory is defined and openshift_metrics_cassandra_limits_memory is not none)
+   or (openshift_metrics_cassandra_requests_cpu is defined and openshift_metrics_cassandra_requests_cpu is not none)
+   or (openshift_metrics_cassandra_requests_memory is defined and openshift_metrics_cassandra_requests_memory is not none)) 
+%}
+        resources:
+{%      if (openshift_metrics_cassandra_limits_cpu is not none
+        or openshift_metrics_cassandra_limits_memory is not none)
+%}
+          limits:
+{%        if openshift_metrics_cassandra_limits_cpu is not none %}
+            cpu: "{{openshift_metrics_cassandra_limits_cpu}}"
+{% endif %}
+{%        if openshift_metrics_cassandra_limits_memory is not none %}
+            memory: "{{openshift_metrics_cassandra_limits_memory}}"
+{% endif %}
+{% endif %}
+{%        if (openshift_metrics_cassandra_requests_cpu is not none 
+          or openshift_metrics_cassandra_requests_memory is not none) 
+%}
+          requests:
+{%        if openshift_metrics_cassandra_requests_cpu is not none %}
+            cpu: "{{openshift_metrics_cassandra_requests_cpu}}"
+{% endif %}
+{%        if openshift_metrics_cassandra_requests_memory is not none %}
+            memory: "{{openshift_metrics_cassandra_requests_memory}}"
+{% endif %}
+{% endif %}
+{% endif %}
+        readinessProbe:
+          exec:
+            command:
+            - "/opt/apache-cassandra/bin/cassandra-docker-ready.sh"
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - "/opt/apache-cassandra/bin/cassandra-prestop.sh"
+          postStart:
+            exec:
+              command:
+              - "/opt/apache-cassandra/bin/cassandra-poststart.sh"
+        terminationGracePeriodSeconds: 1800
+      volumes:
+      - name: cassandra-data
+{%      if openshift_metrics_cassandra_storage_type == 'emptydir' %}
+        emptyDir: {}
+{%      else %}
+        persistentVolumeClaim:
+          claimName: "{{ openshift_metrics_cassandra_pv_prefix }}-{{ node }}"
+{% endif %}
+      - name: hawkular-cassandra-secrets
+        secret:
+          secretName: hawkular-cassandra-secrets

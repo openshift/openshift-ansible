@@ -1,0 +1,5 @@
+---
+- name: restart master
+  systemd: name={{ openshift.common.service_type }}-master state=restarted
+  when: (openshift.master.ha is not defined or not openshift.master.ha | bool) and (not (master_service_status_changed | default(false) | bool))
+  notify: Verify API Server

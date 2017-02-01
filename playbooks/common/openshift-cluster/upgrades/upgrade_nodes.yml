@@ -1,5 +1,5 @@
 ---
-- name: Evacuate and upgrade nodes
+- name: Drain and upgrade nodes
   hosts: oo_nodes_to_upgrade
   # This var must be set with -e on invocation, as it is not a per-host inventory var
   # and is evaluated early. Values such as "20%" can also be used.
@@ -17,7 +17,7 @@
   # we merge upgrade functionality into the base roles and a normal config.yml playbook run.
   - name: Determine if node is currently scheduleable
     command: >
-      {{ openshift.common.client_binary }} get node {{ openshift.node.nodename | lower }} -o json
+      {{ hostvars[groups.oo_first_master.0].openshift.common.client_binary }} get node {{ openshift.node.nodename | lower }} -o json
     register: node_output
     delegate_to: "{{ groups.oo_first_master.0 }}"
     changed_when: false
@@ -29,7 +29,7 @@
 
   - name: Mark unschedulable if host is a node
     command: >
-      {{ openshift.common.admin_binary }} manage-node {{ openshift.node.nodename | lower }} --schedulable=false
+      {{ hostvars[groups.oo_first_master.0].openshift.common.client_binary }} adm manage-node {{ openshift.node.nodename | lower }} --schedulable=false
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: inventory_hostname in groups.oo_nodes_to_upgrade
     # NOTE: There is a transient "object has been modified" error here, allow a couple
@@ -39,13 +39,18 @@
     retries: 3
     delay: 1
 
-  - name: Evacuate Node for Kubelet upgrade
+  - name: Drain Node for Kubelet upgrade
     command: >
-      {{ openshift.common.admin_binary }} manage-node {{ openshift.node.nodename | lower }} --evacuate --force
+      {{ hostvars[groups.oo_first_master.0].openshift.common.admin_binary }} drain {{ openshift.node.nodename | lower }} --force --delete-local-data
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: inventory_hostname in groups.oo_nodes_to_upgrade
+
   tasks:
+
   - include: docker/upgrade.yml
+    vars:
+      # We will restart Docker ourselves after everything is ready:
+      skip_docker_restart: True
     when: l_docker_upgrade is defined and l_docker_upgrade | bool and not openshift.common.is_atomic | bool
 
   - include: "{{ node_config_hook }}"
@@ -53,23 +58,69 @@
 
   - include: rpm_upgrade.yml
     vars:
-       component: "node"
-       openshift_version: "{{ openshift_pkg_version | default('') }}"
+      component: "node"
+      openshift_version: "{{ openshift_pkg_version | default('') }}"
     when: inventory_hostname in groups.oo_nodes_to_upgrade and not openshift.common.is_containerized | bool
+
+  - name: Remove obsolete docker-sdn-ovs.conf
+    file: path=/etc/systemd/system/docker.service.d/docker-sdn-ovs.conf state=absent
+    when: (deployment_type == 'openshift-enterprise' and openshift_release | version_compare('3.4', '>=')) or (deployment_type == 'origin' and openshift_release | version_compare('1.4', '>='))
 
   - include: containerized_node_upgrade.yml
     when: inventory_hostname in groups.oo_nodes_to_upgrade and openshift.common.is_containerized | bool
 
-  - meta: flush_handlers
+  - name: Ensure containerized services stopped before Docker restart
+    service: name={{ item }} state=stopped
+    with_items:
+    - etcd_container
+    - openvswitch
+    - "{{ openshift.common.service_type }}-master"
+    - "{{ openshift.common.service_type }}-master-api"
+    - "{{ openshift.common.service_type }}-master-controllers"
+    - "{{ openshift.common.service_type }}-node"
+    failed_when: false
+    when: openshift.common.is_containerized | bool
+
+  - name: Upgrade openvswitch
+    package:
+      name: openvswitch
+      state: latest
+    register: ovs_pkg
+    when: inventory_hostname in groups.oo_nodes_to_upgrade and not openshift.common.is_containerized | bool
+
+  - name: Restart openvswitch
+    systemd:
+      name: openvswitch
+      state: restarted
+    when:
+    - inventory_hostname in groups.oo_nodes_to_upgrade and not openshift.common.is_containerized | bool
+    - ovs_pkg | changed
+
+  # Mandatory Docker restart, ensure all containerized services are running:
+  - include: docker/restart.yml
+
+  - name: Restart rpm node service
+    service: name="{{ openshift.common.service_type }}-node" state=restarted
+    when: inventory_hostname in groups.oo_nodes_to_upgrade and not openshift.common.is_containerized | bool
+
+  - name: Wait for node to be ready
+    command: >
+      {{ hostvars[groups.oo_first_master.0].openshift.common.client_binary }} get node {{ openshift.common.hostname | lower }} --no-headers
+    register: node_output
+    delegate_to: "{{ groups.oo_first_master.0 }}"
+    when: inventory_hostname in groups.oo_nodes_to_upgrade
+    until: "{{ node_output.stdout.split()[1].startswith('Ready')}}"
+    # Give the node two minutes to come back online. Note that we pre-pull images now
+    # so containerized services should restart quickly as well.
+    retries: 24
+    delay: 5
 
   - name: Set node schedulability
     command: >
-      {{ openshift.common.admin_binary }} manage-node {{ openshift.node.nodename | lower }} --schedulable=true
+      {{ hostvars[groups.oo_first_master.0].openshift.common.client_binary }} adm manage-node {{ openshift.node.nodename | lower }} --schedulable=true
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: inventory_hostname in groups.oo_nodes_to_upgrade and was_schedulable | bool
     register: node_sched
     until: node_sched.rc == 0
     retries: 3
     delay: 1
-
-

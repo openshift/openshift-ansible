@@ -53,7 +53,7 @@
     when: openshift_hosted_metrics_deployer_prefix is not defined
   - set_fact:
       openshift_hosted_metrics_deployer_version: "{{ lookup('oo_option', 'openshift_hosted_metrics_deployer_version') | default('latest') }}"
-    when: openshift_hosted_metrics_deployer_prefix is not defined
+    when: openshift_hosted_metrics_deployer_version is not defined
   roles:
   - openshift_facts
   post_tasks:
@@ -74,22 +74,6 @@
         public_console_url: "{{ openshift_master_public_console_url | default(None) }}"
         ha: "{{ openshift_master_ha | default(groups.oo_masters | length > 1) }}"
         master_count: "{{ openshift_master_count | default(groups.oo_masters | length) }}"
-  - openshift_facts:
-      role: hosted
-      openshift_env:
-        openshift_hosted_registry_storage_kind: 'nfs'
-    when: openshift_hosted_registry_storage_kind is not defined and groups.oo_nfs_to_config is defined and groups.oo_nfs_to_config | length > 0
-
-- name: Create temp directory for syncing certs
-  hosts: localhost
-  connection: local
-  become: no
-  gather_facts: no
-  tasks:
-  - name: Create local temp directory for syncing certs
-    local_action: command mktemp -d /tmp/openshift-ansible-XXXXXXX
-    register: g_master_mktemp
-    changed_when: False
 
 - name: Determine if session secrets must be generated
   hosts: oo_first_master
@@ -99,8 +83,8 @@
   - openshift_facts:
       role: master
       local_facts:
-          session_auth_secrets: "{{ openshift_master_session_auth_secrets | default(openshift.master.session_auth_secrets | default(None)) }}"
-          session_encryption_secrets: "{{ openshift_master_session_encryption_secrets | default(openshift.master.session_encryption_secrets | default(None)) }}"
+        session_auth_secrets: "{{ openshift_master_session_auth_secrets | default(openshift.master.session_auth_secrets | default(None)) }}"
+        session_encryption_secrets: "{{ openshift_master_session_encryption_secrets | default(openshift.master.session_encryption_secrets | default(None)) }}"
 
 - name: Generate master session secrets
   hosts: oo_first_master
@@ -122,7 +106,6 @@
   hosts: oo_masters_to_config
   any_errors_fatal: true
   vars:
-    sync_tmpdir: "{{ hostvars.localhost.g_master_mktemp.stdout }}"
     openshift_master_ha: "{{ openshift.master.ha }}"
     openshift_master_count: "{{ openshift.master.master_count }}"
     openshift_master_session_auth_secrets: "{{ hostvars[groups.oo_first_master.0].openshift.master.session_auth_secrets }}"
@@ -133,64 +116,19 @@
                                                 | oo_collect('openshift.common.hostname') | default([]) | join (',')
                                                 }}"
   roles:
-  - role: openshift_master_facts
-  - role: openshift_hosted_facts
-  - role: openshift_master_certificates
+  - role: openshift_master
     openshift_ca_host: "{{ groups.oo_first_master.0 }}"
     openshift_master_etcd_hosts: "{{ hostvars
                                      | oo_select_keys(groups['oo_etcd_to_config'] | default([]))
                                      | oo_collect('openshift.common.hostname')
                                      | default(none, true) }}"
-    openshift_master_hostnames: "{{ hostvars
-                                    | oo_select_keys(groups['oo_masters_to_config'] | default([]))
-                                    | oo_collect('openshift.common.all_hostnames')
-                                    | oo_flatten | unique }}"
-  - role: openshift_etcd_client_certificates
+    openshift_master_hosts: "{{ groups.oo_masters_to_config }}"
     etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
     etcd_cert_subdir: "openshift-master-{{ openshift.common.hostname }}"
     etcd_cert_config_dir: "{{ openshift.common.config_base }}/master"
     etcd_cert_prefix: "master.etcd-"
-    when: groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config
-  - role: openshift_clock
-  - role: openshift_cloud_provider
-  - role: openshift_builddefaults
-  - role: os_firewall
-    os_firewall_allow:
-    - service: etcd embedded
-      port: 4001/tcp
-    - service: api server https
-      port: "{{ openshift.master.api_port }}/tcp"
-    - service: api controllers https
-      port: "{{ openshift.master.controllers_port }}/tcp"
-    - service: skydns tcp
-      port: "{{ openshift.master.dns_port }}/tcp"
-    - service: skydns udp
-      port: "{{ openshift.master.dns_port }}/udp"
-    - service: Fluentd td-agent tcp
-      port: 24224/tcp
-    - service: Fluentd td-agent udp
-      port: 24224/udp
-    - service: pcsd
-      port: 2224/tcp
-    - service: Corosync UDP
-      port: 5404/udp
-    - service: Corosync UDP
-      port: 5405/udp
-  - role: openshift_master
-    openshift_master_hosts: "{{ groups.oo_masters_to_config }}"
-  - role: nickhammond.logrotate
-  - role: nuage_master
-    when: openshift.common.use_nuage | bool
+
   post_tasks:
   - name: Create group for deployment type
     group_by: key=oo_masters_deployment_type_{{ openshift.common.deployment_type }}
-    changed_when: False
-
-- name: Delete temporary directory on localhost
-  hosts: localhost
-  connection: local
-  become: no
-  gather_facts: no
-  tasks:
-  - file: name={{ g_master_mktemp.stdout }} state=absent
     changed_when: False

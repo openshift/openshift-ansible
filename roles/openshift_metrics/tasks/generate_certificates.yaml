@@ -1,0 +1,26 @@
+---
+- name: create certificate output directory
+  file:
+    path: "{{ openshift_metrics_certs_dir }}"
+    state: directory
+    mode: 0700
+
+- name: list existing secrets
+  command: >
+    {{ openshift.common.client_binary }} -n {{ openshift_metrics_project }}
+    --config={{ mktemp.stdout }}/admin.kubeconfig
+    get secrets -o name
+  register: metrics_secrets
+  changed_when: false
+
+- name: generate ca certificate chain
+  shell: >
+    {{ openshift.common.admin_binary }} ca create-signer-cert
+    --config={{ mktemp.stdout }}/admin.kubeconfig
+    --key='{{ openshift_metrics_certs_dir }}/ca.key'
+    --cert='{{ openshift_metrics_certs_dir }}/ca.crt'
+    --serial='{{ openshift_metrics_certs_dir }}/ca.serial.txt'
+    --name="metrics-signer@$(date +%s)"
+  when: not '{{ openshift_metrics_certs_dir }}/ca.key' | exists
+- include: generate_heapster_certificates.yaml
+- include: generate_hawkular_certificates.yaml

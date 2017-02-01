@@ -7,7 +7,7 @@
 - name: Check vars
   hosts: localhost
   gather_facts: false
- 
+
   pre_tasks:
   - fail:
       msg: "Playbook requires host to be set"

@@ -30,7 +30,7 @@ deployment_type=openshift-enterprise
 # use this to lookup the latest exact version of the container images, which is the tag actually used to configure
 # the cluster. For RPM installations we just verify the version detected in your configured repos matches this
 # release.
-openshift_release=v3.2
+openshift_release=v3.4
 
 # Specify an exact container image tag to install or configure.
 # WARNING: This value will be used for all hosts in containerized environments, even those that have another version installed.
@@ -84,10 +84,29 @@ openshift_release=v3.2
 
 # Specify exact version of Docker to configure or upgrade to.
 # Downgrades are not supported and will error out. Be careful when upgrading docker from < 1.10 to > 1.10.
-# docker_version="1.10.3"
+# docker_version="1.12.1"
 
 # Skip upgrading Docker during an OpenShift upgrade, leaves the current Docker version alone.
 # docker_upgrade=False
+
+
+# Upgrade Hooks
+#
+# Hooks are available to run custom tasks at various points during a cluster
+# upgrade. Each hook should point to a file with Ansible tasks defined. Suggest using
+# absolute paths, if not the path will be treated as relative to the file where the
+# hook is actually used.
+#
+# Tasks to run before each master is upgraded.
+# openshift_master_upgrade_pre_hook=/usr/share/custom/pre_master.yml
+#
+# Tasks to run to upgrade the master. These tasks run after the main openshift-ansible
+# upgrade steps, but before we restart system/services.
+# openshift_master_upgrade_hook=/usr/share/custom/master.yml
+#
+# Tasks to run after each master is upgraded and system/services have been restarted.
+# openshift_master_upgrade_post_hook=/usr/share/custom/post_master.yml
+
 
 # Alternate image format string, useful if you've got your own registry mirror
 #oreg_url=example.com/openshift3/ose-${component}:${version}
@@ -351,6 +370,22 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_hosted_registry_pullthrough=true
 #openshift_hosted_registry_acceptschema2=true
 #openshift_hosted_registry_enforcequota=true
+#
+# Any S3 service (Minio, ExoScale, ...): Basically the same as above
+# but with regionendpoint configured
+# S3 bucket must already exist.
+#openshift_hosted_registry_storage_kind=object
+#openshift_hosted_registry_storage_provider=s3
+#openshift_hosted_registry_storage_s3_accesskey=access_key_id
+#openshift_hosted_registry_storage_s3_secretkey=secret_access_key
+#openshift_hosted_registry_storage_s3_regionendpoint=https://myendpoint.example.com/
+#openshift_hosted_registry_storage_s3_bucket=bucket_name
+#openshift_hosted_registry_storage_s3_region=bucket_region
+#openshift_hosted_registry_storage_s3_chunksize=26214400
+#openshift_hosted_registry_storage_s3_rootdirectory=/registry
+#openshift_hosted_registry_pullthrough=true
+#openshift_hosted_registry_acceptschema2=true
+#openshift_hosted_registry_enforcequota=true
 
 # Metrics deployment
 # See: https://docs.openshift.com/enterprise/latest/install_config/cluster_metrics.html
@@ -456,7 +491,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # network blocks should be private and should not conflict with network blocks
 # in your infrastructure that pods may require access to. Can not be changed
 # after deployment.
-#osm_cluster_network_cidr=10.1.0.0/16
+#osm_cluster_network_cidr=10.128.0.0/14
 #openshift_portal_net=172.30.0.0/16
 
 
@@ -476,9 +511,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # the CIDRs reserved for external IPs, nodes, pods, or services.
 #openshift_master_ingress_ip_network_cidr=172.46.0.0/16
 
-# Configure number of bits to allocate to each host’s subnet e.g. 8
-# would mean a /24 network on the host.
-#osm_host_subnet_length=8
+# Configure number of bits to allocate to each host’s subnet e.g. 9
+# would mean a /23 network on the host.
+#osm_host_subnet_length=9
 
 # Configure master API and console ports.
 #openshift_master_api_port=8443
@@ -572,7 +607,8 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # be used with 1.0 and 3.0.
 #openshift_use_dnsmasq=False
 # Define an additional dnsmasq.conf file to deploy to /etc/dnsmasq.d/openshift-ansible.conf
-# This is useful for POC environments where DNS may not actually be available yet.
+# This is useful for POC environments where DNS may not actually be available yet or to set
+# options like 'strict-order' to alter dnsmasq configuration.
 #openshift_node_dnsmasq_additional_config_file=/home/bob/ose-dnsmasq.conf
 
 # Global Proxy Configuration
@@ -589,19 +625,44 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_generate_no_proxy_hosts=True
 #
 # These options configure the BuildDefaults admission controller which injects
-# environment variables into Builds. These values will default to the global proxy
-# config values. You only need to set these if they differ from the global settings
-# above. See BuildDefaults
-# documentation at https://docs.openshift.org/latest/admin_guide/build_defaults_overrides.html
+# configuration into Builds. Proxy related values will default to the global proxy
+# config values. You only need to set these if they differ from the global proxy settings.
+# See BuildDefaults documentation at
+# https://docs.openshift.org/latest/admin_guide/build_defaults_overrides.html
 #openshift_builddefaults_http_proxy=http://USER:PASSWORD@HOST:PORT
 #openshift_builddefaults_https_proxy=https://USER:PASSWORD@HOST:PORT
-#openshift_builddefaults_no_proxy=build_defaults
+#openshift_builddefaults_no_proxy=mycorp.com
 #openshift_builddefaults_git_http_proxy=http://USER:PASSWORD@HOST:PORT
 #openshift_builddefaults_git_https_proxy=https://USER:PASSWORD@HOST:PORT
-# Or you may optionally define your own serialized as json
-#openshift_builddefaults_json='{"BuildDefaults":{"configuration":{"kind":"BuildDefaultsConfig","apiVersion":"v1","gitHTTPSProxy":"http://proxy.example.com.redhat.com:3128","gitHTTPProxy":"http://proxy.example.com.redhat.com:3128","env":[{"name":"HTTP_PROXY","value":"http://proxy.example.com.redhat.com:3128"},{"name":"HTTPS_PROXY","value":"http://proxy.example.com.redhat.com:3128"},{"name":"NO_PROXY","value":"ose3-master.example.com"}]}}'
+#openshift_builddefaults_git_no_proxy=mycorp.com
+#openshift_builddefaults_image_labels=[{'name':'imagelabelname1','value':'imagelabelvalue1'}]
+#openshift_builddefaults_nodeselectors={'nodelabel1':'nodelabelvalue1'}
+#openshift_builddefaults_annotations={'annotationkey1':'annotationvalue1'}
+#openshift_builddefaults_resources_requests_cpu=100m
+#openshift_builddefaults_resources_requests_memory=256m
+#openshift_builddefaults_resources_limits_cpu=1000m
+#openshift_builddefaults_resources_limits_memory=512m
+
+# Or you may optionally define your own build defaults configuration serialized as json
+#openshift_builddefaults_json='{"BuildDefaults":{"configuration":{"apiVersion":"v1","env":[{"name":"HTTP_PROXY","value":"http://proxy.example.com.redhat.com:3128"},{"name":"NO_PROXY","value":"ose3-master.example.com"}],"gitHTTPProxy":"http://proxy.example.com:3128","gitNoProxy":"ose3-master.example.com","kind":"BuildDefaultsConfig"}}}'
+
+# These options configure the BuildOverrides admission controller which injects
+# configuration into Builds.
+# See BuildOverrides documentation at
+# https://docs.openshift.org/latest/admin_guide/build_defaults_overrides.html
+#openshift_buildoverrides_force_pull=true
+#openshift_buildoverrides_image_labels=[{'name':'imagelabelname1','value':'imagelabelvalue1'}]
+#openshift_buildoverrides_nodeselectors={'nodelabel1':'nodelabelvalue1'}
+#openshift_buildoverrides_annotations={'annotationkey1':'annotationvalue1'}
+
+# Or you may optionally define your own build overrides configuration serialized as json
+#openshift_buildoverrides_json='{"BuildOverrides":{"configuration":{"apiVersion":"v1","kind":"BuildDefaultsConfig","forcePull":"true"}}}'
+
 # masterConfig.volumeConfig.dynamicProvisioningEnabled, configurable as of 1.2/3.2, enabled by default
 #openshift_master_dynamic_provisioning_enabled=False
+
+# Admission plugin config
+#openshift_master_admission_plugin_config={"ProjectRequestLimit":{"configuration":{"apiVersion":"v1","kind":"ProjectRequestLimitConfig","limits":[{"selector":{"admin":"true"}},{"maxProjects":"1"}]}},"PodNodeConstraints":{"configuration":{"apiVersion":"v1","kind":"PodNodeConstraintsConfig"}}}
 
 # Configure usage of openshift_clock role.
 #openshift_clock_enabled=true

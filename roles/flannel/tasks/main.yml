@@ -1,24 +1,21 @@
 ---
 - name: Install flannel
   become: yes
-  action: "{{ ansible_pkg_mgr }} name=flannel state=present"
-  when: not openshift.common.is_containerized | bool
+  package: name=flannel state=present
+  when: not openshift.common.is_atomic | bool
 
-- name: Set flannel etcd url
+- name: Set flannel etcd options
   become: yes
   lineinfile:
     dest: /etc/sysconfig/flanneld
     backrefs: yes
-    regexp: "^(FLANNEL_ETCD=)"
-    line: '\1{{ etcd_hosts|join(",") }}'
-
-- name: Set flannel etcd key
-  become: yes
-  lineinfile:
-    dest: /etc/sysconfig/flanneld
-    backrefs: yes
-    regexp: "^(FLANNEL_ETCD_KEY=)"
-    line: '\1{{ flannel_etcd_key }}'
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  with_items:
+    - { regexp: "^(FLANNEL_ETCD=)", line: '\1{{ etcd_hosts|join(",") }}' }
+    - { regexp: "^(FLANNEL_ETCD_ENDPOINTS=)", line: '\1{{ etcd_hosts|join(",") }}' }
+    - { regexp: "^(FLANNEL_ETCD_KEY=)", line: '\1{{ flannel_etcd_key }}' }
+    - { regexp: "^(FLANNEL_ETCD_PREFIX=)", line: '\1{{ flannel_etcd_key }}' }
 
 - name: Set flannel options
   become: yes
@@ -30,7 +27,7 @@
 
 - name: Enable flanneld
   become: yes
-  service:
+  systemd:
     name: flanneld
     state: started
     enabled: yes

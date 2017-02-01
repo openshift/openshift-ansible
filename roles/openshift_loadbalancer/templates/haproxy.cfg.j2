@@ -1,16 +1,20 @@
 # Global settings
 #---------------------------------------------------------------------
 global
+    maxconn     {{ openshift_loadbalancer_global_maxconn | default(20000) }}
+    log         /dev/log local0 info
+{% if openshift.common.is_containerized | bool %}
+    stats socket /var/lib/haproxy/run/haproxy.sock mode 600 level admin
+{% else %}
     chroot      /var/lib/haproxy
     pidfile     /var/run/haproxy.pid
-    maxconn     {{ openshift_loadbalancer_global_maxconn | default(20000) }}
     user        haproxy
     group       haproxy
     daemon
-    log         /dev/log local0 info
 
     # turn on stats unix socket
     stats socket /var/lib/haproxy/stats
+{% endif %}
 
 #---------------------------------------------------------------------
 # common defaults that all the 'listen' and 'backend' sections will
