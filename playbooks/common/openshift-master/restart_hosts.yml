@@ -10,9 +10,10 @@
 - name: Wait for master to restart
   local_action:
     module: wait_for
-      host="{{ inventory_hostname }}"
+      host="{{ ansible_host }}"
       state=started
       delay=10
+      timeout=600
   become: no
 
 # Now that ssh is back up we can wait for API on the remote system,
