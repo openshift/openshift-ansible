@@ -44,15 +44,22 @@ from ansible.module_utils.basic import AnsibleModule
 
 # -*- -*- -*- End included fragment: lib/import.py -*- -*- -*-
 
-# -*- -*- -*- Begin included fragment: doc/manage_node -*- -*- -*-
+# -*- -*- -*- Begin included fragment: doc/service -*- -*- -*-
 
 DOCUMENTATION = '''
 ---
-module: oadm_manage_node
-short_description: Module to manage openshift nodes
+module: oc_service
+short_description: Create, modify, and idempotently manage openshift services.
 description:
-  - Manage openshift nodes programmatically.
+  - Manage openshift service objects programmatically.
 options:
+  state:
+    description:
+    - State represents whether to create, modify, delete, or list
+    required: False
+    default: present
+    choices: ["present", "absent", "list"]
+    aliases: []
   kubeconfig:
     description:
     - The path for the kubeconfig file to use for authentication
@@ -65,53 +72,67 @@ options:
     required: false
     default: False
     aliases: []
-  node:
+  name:
     description:
-    - A list of the nodes being managed
+    - Name of the object that is being queried.
     required: false
     default: None
+    aliases: []
+  namespace:
+    description:
+    - The namespace where the object lives.
+    required: false
+    default: default
     aliases: []
   selector:
     description:
-    - The selector when filtering on node labels
+    - The selector to apply when filtering for services.
     required: false
     default: None
     aliases: []
-  pod_selector:
+  labels:
     description:
-    - A selector when filtering on pod labels.
+    - The labels to apply on the service.
     required: false
     default: None
     aliases: []
-  evacuate:
+  clusterip:
     description:
-    - Remove all pods from a node.
-    required: false
-    default: False
-    aliases: []
-  schedulable:
-    description:
-    - whether or not openshift can schedule pods on this node
-    required: False
-    default: None
-    aliases: []
-  dry_run:
-    description:
-    - This shows the pods that would be migrated if evacuate were called
-    required: False
-    default: False
-    aliases: []
-  grace_period:
-    description:
-    - Grace period (seconds) for pods being deleted.
+    - The cluster ip address to use with this service.
     required: false
     default: None
     aliases: []
-  force:
+  portalip:
     description:
-    - Whether or not to attempt to force this action in openshift
+    - The portal ip(virtual ip) address to use with this service.
+    - "https://docs.openshift.com/enterprise/3.0/architecture/core_concepts/pods_and_services.html#services"
     required: false
     default: None
+    aliases: []
+  ports:
+    description:
+    - A list of the ports that are used for this service.  This includes name, port, protocol, and targetPort.
+    - See examples.
+    required: false
+    default: None
+    aliases: []
+  session_affinity:
+    description:
+    - The type of session affinity to use.
+    required: false
+    default: 'None'
+    aliases: []
+  service_type:
+    description:
+    - The type of service desired.  Each option tells the service to behave accordingly.
+    - https://kubernetes.io/docs/user-guide/services/
+    required: false
+    default: ClusterIP
+    choices:
+    - ClusterIP
+    - NodePort
+    - LoadBalancer
+    - ExternalName
     aliases: []
 author:
 - "Kenny Woodson <kwoodson@redhat.com>"
@@ -119,20 +140,33 @@ extends_documentation_fragment: []
 '''
 
 EXAMPLES = '''
-- name: oadm manage-node --schedulable=true --selector=ops_node=new
-  oadm_manage_node:
-    selector: ops_node=new
-    schedulable: True
-  register: schedout
+- name: get docker-registry service
+  run_once: true
+  oc_service:
+    namespace: default
+    name: docker-registry
+    state: list
+  register: registry_service_out
 
-- name: oadm manage-node my-k8s-node-5 --evacuate
-  oadm_manage_node:
-    node:  my-k8s-node-5
-    evacuate: True
-    force: True
+- name: create the docker-registry service
+  oc_service:
+    namespace: default
+    name: docker-registry
+    ports:
+    - name: 5000-tcp
+      port: 5000
+      protocol: TCP
+      targetPort: 5000
+    selector:
+      docker-registry: default
+    session_affinity: ClientIP
+    service_type: ClusterIP
+  register: svc_out
+  notify:
+  - restart openshift master services
 '''
 
-# -*- -*- -*- End included fragment: doc/manage_node -*- -*- -*-
+# -*- -*- -*- End included fragment: doc/service -*- -*- -*-
 
 # -*- -*- -*- Begin included fragment: ../../lib_utils/src/class/yedit.py -*- -*- -*-
 # noqa: E301,E302
@@ -1234,253 +1268,340 @@ class OpenShiftCLIConfig(object):
 
 # -*- -*- -*- End included fragment: lib/base.py -*- -*- -*-
 
-# -*- -*- -*- Begin included fragment: class/oadm_manage_node.py -*- -*- -*-
-
-
-class ManageNodeException(Exception):
-    ''' manage-node exception class '''
-    pass
-
-
-class ManageNodeConfig(OpenShiftCLIConfig):
-    ''' ManageNodeConfig is a DTO for the manage-node command.'''
-    def __init__(self, kubeconfig, node_options):
-        super(ManageNodeConfig, self).__init__(None, None, kubeconfig, node_options)
+# -*- -*- -*- Begin included fragment: lib/service.py -*- -*- -*-
 
 
 # pylint: disable=too-many-instance-attributes
-class ManageNode(OpenShiftCLI):
+class ServiceConfig(object):
+    ''' Handle service options '''
+    # pylint: disable=too-many-arguments
+    def __init__(self,
+                 sname,
+                 namespace,
+                 ports,
+                 selector=None,
+                 labels=None,
+                 cluster_ip=None,
+                 portal_ip=None,
+                 session_affinity=None,
+                 service_type=None):
+        ''' constructor for handling service options '''
+        self.name = sname
+        self.namespace = namespace
+        self.ports = ports
+        self.selector = selector
+        self.labels = labels
+        self.cluster_ip = cluster_ip
+        self.portal_ip = portal_ip
+        self.session_affinity = session_affinity
+        self.service_type = service_type
+        self.data = {}
+
+        self.create_dict()
+
+    def create_dict(self):
+        ''' instantiates a service dict '''
+        self.data['apiVersion'] = 'v1'
+        self.data['kind'] = 'Service'
+        self.data['metadata'] = {}
+        self.data['metadata']['name'] = self.name
+        self.data['metadata']['namespace'] = self.namespace
+        if self.labels:
+            for lab, lab_value  in self.labels.items():
+                self.data['metadata'][lab] = lab_value
+        self.data['spec'] = {}
+
+        if self.ports:
+            self.data['spec']['ports'] = self.ports
+        else:
+            self.data['spec']['ports'] = []
+
+        if self.selector:
+            self.data['spec']['selector'] = self.selector
+
+        self.data['spec']['sessionAffinity'] = self.session_affinity or 'None'
+
+        if self.cluster_ip:
+            self.data['spec']['clusterIP'] = self.cluster_ip
+
+        if self.portal_ip:
+            self.data['spec']['portalIP'] = self.portal_ip
+
+        if self.service_type:
+            self.data['spec']['type'] = self.service_type
+
+# pylint: disable=too-many-instance-attributes,too-many-public-methods
+class Service(Yedit):
+    ''' Class to model the oc service object '''
+    port_path = "spec.ports"
+    portal_ip = "spec.portalIP"
+    cluster_ip = "spec.clusterIP"
+    kind = 'Service'
+
+    def __init__(self, content):
+        '''Service constructor'''
+        super(Service, self).__init__(content=content)
+
+    def get_ports(self):
+        ''' get a list of ports '''
+        return self.get(Service.port_path) or []
+
+    def add_ports(self, inc_ports):
+        ''' add a port object to the ports list '''
+        if not isinstance(inc_ports, list):
+            inc_ports = [inc_ports]
+
+        ports = self.get_ports()
+        if not ports:
+            self.put(Service.port_path, inc_ports)
+        else:
+            ports.extend(inc_ports)
+
+        return True
+
+    def find_ports(self, inc_port):
+        ''' find a specific port '''
+        for port in self.get_ports():
+            if port['port'] == inc_port['port']:
+                return port
+
+        return None
+
+    def delete_ports(self, inc_ports):
+        ''' remove a port from a service '''
+        if not isinstance(inc_ports, list):
+            inc_ports = [inc_ports]
+
+        ports = self.get(Service.port_path) or []
+
+        if not ports:
+            return True
+
+        removed = False
+        for inc_port in inc_ports:
+            port = self.find_ports(inc_port)
+            if port:
+                ports.remove(port)
+                removed = True
+
+        return removed
+
+    def add_cluster_ip(self, sip):
+        '''add cluster ip'''
+        self.put(Service.cluster_ip, sip)
+
+    def add_portal_ip(self, pip):
+        '''add cluster ip'''
+        self.put(Service.portal_ip, pip)
+
+# -*- -*- -*- End included fragment: lib/service.py -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: class/oc_service.py -*- -*- -*-
+
+
+# pylint: disable=too-many-instance-attributes
+class OCService(OpenShiftCLI):
     ''' Class to wrap the oc command line tools '''
+    kind = 'service'
 
     # pylint allows 5
     # pylint: disable=too-many-arguments
     def __init__(self,
-                 config,
+                 sname,
+                 namespace,
+                 labels,
+                 selector,
+                 cluster_ip,
+                 portal_ip,
+                 ports,
+                 session_affinity,
+                 service_type,
+                 kubeconfig='/etc/origin/master/admin.kubeconfig',
                  verbose=False):
-        ''' Constructor for ManageNode '''
-        super(ManageNode, self).__init__(None, config.kubeconfig)
-        self.config = config
+        ''' Constructor for OCVolume '''
+        super(OCService, self).__init__(namespace, kubeconfig)
+        self.namespace = namespace
+        self.config = ServiceConfig(sname, namespace, ports, selector, labels,
+                                    cluster_ip, portal_ip, session_affinity, service_type)
+        self.user_svc = Service(content=self.config.data)
+        self.svc = None
 
-    def evacuate(self):
-        ''' formulate the params and run oadm manage-node '''
-        return self._evacuate(node=self.config.config_options['node']['value'],
-                              selector=self.config.config_options['selector']['value'],
-                              pod_selector=self.config.config_options['pod_selector']['value'],
-                              dry_run=self.config.config_options['dry_run']['value'],
-                              grace_period=self.config.config_options['grace_period']['value'],
-                              force=self.config.config_options['force']['value'],
-                             )
-    def get_nodes(self, node=None, selector=''):
-        '''perform oc get node'''
-        _node = None
-        _sel = None
-        if node:
-            _node = node
-        if selector:
-            _sel = selector
+    @property
+    def service(self):
+        ''' property function service'''
+        if not self.svc:
+            self.get()
+        return self.svc
 
-        results = self._get('node', rname=_node, selector=_sel)
-        if results['returncode'] != 0:
-            return results
+    @service.setter
+    def service(self, data):
+        ''' setter function for service var '''
+        self.svc = data
 
-        nodes = []
-        items = None
-        if results['results'][0]['kind'] == 'List':
-            items = results['results'][0]['items']
-        else:
-            items = results['results']
+    def exists(self):
+        ''' return whether a service exists '''
+        if self.service:
+            return True
 
-        for node in items:
-            _node = {}
-            _node['name'] = node['metadata']['name']
-            _node['schedulable'] = True
-            if 'unschedulable' in node['spec']:
-                _node['schedulable'] = False
-            nodes.append(_node)
+        return False
 
-        return nodes
+    def get(self):
+        '''return service information '''
+        result = self._get(self.kind, self.config.name)
+        if result['returncode'] == 0:
+            self.service = Service(content=result['results'][0])
+            result['clusterip'] = self.service.get('spec.clusterIP')
+        elif 'services \"%s\" not found' % self.config.name  in result['stderr']:
+            result['clusterip'] = ''
+            result['returncode'] = 0
 
-    def get_pods_from_node(self, node, pod_selector=None):
-        '''return pods for a node'''
-        results = self._list_pods(node=[node], pod_selector=pod_selector)
+        return result
 
-        if results['returncode'] != 0:
-            return results
+    def delete(self):
+        '''delete the service'''
+        return self._delete(self.kind, self.config.name)
 
-        # When a selector or node is matched it is returned along with the json.
-        # We are going to split the results based on the regexp and then
-        # load the json for each matching node.
-        # Before we return we are going to loop over the results and pull out the node names.
-        # {'node': [pod, pod], 'node': [pod, pod]}
-        # 3.2 includes the following lines in stdout: "Listing matched pods on node:"
-        all_pods = []
-        if "Listing matched" in results['results']:
-            listing_match = re.compile('\n^Listing matched.*$\n', flags=re.MULTILINE)
-            pods = listing_match.split(results['results'])
-            for pod in pods:
-                if pod:
-                    all_pods.extend(json.loads(pod)['items'])
+    def create(self):
+        '''create a service '''
+        return self._create_from_content(self.config.name, self.user_svc.yaml_dict)
 
-        # 3.3 specific
-        else:
-            # this is gross but I filed a bug...
-            # https://bugzilla.redhat.com/show_bug.cgi?id=1381621
-            # build our own json from the output.
-            all_pods = json.loads(results['results'])['items']
+    def update(self):
+        '''create a service '''
+        # Need to copy over the portalIP and the serviceIP settings
 
-        return all_pods
+        self.user_svc.add_cluster_ip(self.service.get('spec.clusterIP'))
+        self.user_svc.add_portal_ip(self.service.get('spec.portalIP'))
+        return self._replace_content(self.kind, self.config.name, self.user_svc.yaml_dict)
 
-    def list_pods(self):
-        ''' run oadm manage-node --list-pods'''
-        _nodes = self.config.config_options['node']['value']
-        _selector = self.config.config_options['selector']['value']
-        _pod_selector = self.config.config_options['pod_selector']['value']
+    def needs_update(self):
+        ''' verify an update is needed '''
+        skip = ['clusterIP', 'portalIP']
+        return not Utils.check_def_equal(self.user_svc.yaml_dict, self.service.yaml_dict, skip_keys=skip, debug=True)
 
-        if not _nodes:
-            _nodes = self.get_nodes(selector=_selector)
-        else:
-            _nodes = [{'name': name} for name in _nodes]
-
-        all_pods = {}
-        for node in _nodes:
-            results = self.get_pods_from_node(node['name'], pod_selector=_pod_selector)
-            if isinstance(results, dict):
-                return results
-            all_pods[node['name']] = results
-
-        results = {}
-        results['nodes'] = all_pods
-        results['returncode'] = 0
-        return results
-
-    def schedulable(self):
-        '''oadm manage-node call for making nodes unschedulable'''
-        nodes = self.config.config_options['node']['value']
-        selector = self.config.config_options['selector']['value']
-
-        if not nodes:
-            nodes = self.get_nodes(selector=selector)
-        else:
-            tmp_nodes = []
-            for name in nodes:
-                tmp_result = self.get_nodes(name)
-                if isinstance(tmp_result, dict):
-                    tmp_nodes.append(tmp_result)
-                    continue
-                tmp_nodes.extend(tmp_result)
-            nodes = tmp_nodes
-
-        # This is a short circuit based on the way we fetch nodes.
-        # If node is a dict/list then we've already fetched them.
-        for node in nodes:
-            if isinstance(node, dict) and 'returncode' in node:
-                return {'results': nodes, 'returncode': node['returncode']}
-            if isinstance(node, list) and 'returncode' in node[0]:
-                return {'results': nodes, 'returncode': node[0]['returncode']}
-        # check all the nodes that were returned and verify they are:
-        # node['schedulable'] == self.config.config_options['schedulable']['value']
-        if any([node['schedulable'] != self.config.config_options['schedulable']['value'] for node in nodes]):
-
-            results = self._schedulable(node=self.config.config_options['node']['value'],
-                                        selector=self.config.config_options['selector']['value'],
-                                        schedulable=self.config.config_options['schedulable']['value'])
-
-            # 'NAME                            STATUS    AGE\\nip-172-31-49-140.ec2.internal   Ready     4h\\n'  # E501
-            # normalize formatting with previous return objects
-            if results['results'].startswith('NAME'):
-                nodes = []
-                # removing header line and trailing new line character of node lines
-                for node_results in results['results'].split('\n')[1:-1]:
-                    parts = node_results.split()
-                    nodes.append({'name': parts[0], 'schedulable': parts[1] == 'Ready'})
-                results['nodes'] = nodes
-
-            return results
-
-        results = {}
-        results['returncode'] = 0
-        results['changed'] = False
-        results['nodes'] = nodes
-
-        return results
-
+    # pylint: disable=too-many-return-statements,too-many-branches
     @staticmethod
     def run_ansible(params, check_mode):
-        '''run the idempotent ansible code'''
-        nconfig = ManageNodeConfig(params['kubeconfig'],
-                                   {'node': {'value': params['node'], 'include': True},
-                                    'selector': {'value': params['selector'], 'include': True},
-                                    'pod_selector': {'value': params['pod_selector'], 'include': True},
-                                    'schedulable': {'value': params['schedulable'], 'include': True},
-                                    'list_pods': {'value': params['list_pods'], 'include': True},
-                                    'evacuate': {'value': params['evacuate'], 'include': True},
-                                    'dry_run': {'value': params['dry_run'], 'include': True},
-                                    'force': {'value': params['force'], 'include': True},
-                                    'grace_period': {'value': params['grace_period'], 'include': True},
-                                   })
+        '''Run the idempotent ansible code'''
+        oc_svc = OCService(params['name'],
+                           params['namespace'],
+                           params['labels'],
+                           params['selector'],
+                           params['clusterip'],
+                           params['portalip'],
+                           params['ports'],
+                           params['session_affinity'],
+                           params['service_type'])
 
-        oadm_mn = ManageNode(nconfig)
-        # Run the oadm manage-node commands
-        results = None
-        changed = False
-        if params['schedulable'] != None:
-            if check_mode:
-                # schedulable returns results after the fact.
-                # We need to redo how this works to support check_mode completely.
-                return {'changed': True, 'msg': 'CHECK_MODE: would have called schedulable.'}
-            results = oadm_mn.schedulable()
-            if 'changed' not in results:
-                changed = True
+        state = params['state']
 
-        if params['evacuate']:
-            results = oadm_mn.evacuate()
-            changed = True
-        elif params['list_pods']:
-            results = oadm_mn.list_pods()
+        api_rval = oc_svc.get()
 
-        if not results or results['returncode'] != 0:
-            return {'failed': True, 'msg': results}
+        if api_rval['returncode'] != 0:
+            return {'failed': True, 'msg': api_rval}
 
-        return {'changed': changed, 'results': results, 'state': "present"}
+        #####
+        # Get
+        #####
+        if state == 'list':
+            return {'changed': False, 'results': api_rval, 'state': state}
 
-# -*- -*- -*- End included fragment: class/oadm_manage_node.py -*- -*- -*-
+        ########
+        # Delete
+        ########
+        if state == 'absent':
+            if oc_svc.exists():
 
-# -*- -*- -*- Begin included fragment: ansible/oadm_manage_node.py -*- -*- -*-
+                if check_mode:
+                    return {'changed': True,
+                            'msg': 'CHECK_MODE: Would have performed a delete.'}  # noqa: E501
 
+                api_rval = oc_svc.delete()
+
+                return {'changed': True, 'results': api_rval, 'state': state}
+
+            return {'changed': False, 'state': state}
+
+        if state == 'present':
+            ########
+            # Create
+            ########
+            if not oc_svc.exists():
+
+                if check_mode:
+                    return {'changed': True,
+                            'msg': 'CHECK_MODE: Would have performed a create.'}  # noqa: E501
+
+                # Create it here
+                api_rval = oc_svc.create()
+
+                if api_rval['returncode'] != 0:
+                    return {'failed': True, 'msg': api_rval}
+
+                # return the created object
+                api_rval = oc_svc.get()
+
+                if api_rval['returncode'] != 0:
+                    return {'failed': True, 'msg': api_rval}
+
+                return {'changed': True, 'results': api_rval, 'state': state}
+
+            ########
+            # Update
+            ########
+            if oc_svc.needs_update():
+                api_rval = oc_svc.update()
+
+                if api_rval['returncode'] != 0:
+                    return {'failed': True, 'msg': api_rval}
+
+                # return the created object
+                api_rval = oc_svc.get()
+
+                if api_rval['returncode'] != 0:
+                    return {'failed': True, 'msg': api_rval}
+
+                return {'changed': True, 'results': api_rval, 'state': state}
+
+            return {'changed': False, 'results': api_rval, 'state': state}
+
+        return {'failed': True, 'msg': 'UNKNOWN state passed. [%s]' % state}
+
+# -*- -*- -*- End included fragment: class/oc_service.py -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: ansible/oc_service.py -*- -*- -*-
 
 def main():
     '''
-    ansible oadm module for manage-node
+    ansible oc module for services
     '''
 
     module = AnsibleModule(
         argument_spec=dict(
-            debug=dict(default=False, type='bool'),
             kubeconfig=dict(default='/etc/origin/master/admin.kubeconfig', type='str'),
-            node=dict(default=None, type='list'),
-            selector=dict(default=None, type='str'),
-            pod_selector=dict(default=None, type='str'),
-            schedulable=dict(default=None, type='bool'),
-            list_pods=dict(default=False, type='bool'),
-            evacuate=dict(default=False, type='bool'),
-            dry_run=dict(default=False, type='bool'),
-            force=dict(default=False, type='bool'),
-            grace_period=dict(default=None, type='int'),
+            state=dict(default='present', type='str',
+                       choices=['present', 'absent', 'list']),
+            debug=dict(default=False, type='bool'),
+            namespace=dict(default='default', type='str'),
+            name=dict(default=None, type='str'),
+            labels=dict(default=None, type='dict'),
+            selector=dict(default=None, type='dict'),
+            clusterip=dict(default=None, type='str'),
+            portalip=dict(default=None, type='str'),
+            ports=dict(default=None, type='list'),
+            session_affinity=dict(default='None', type='str'),
+            service_type=dict(default='ClusterIP', type='str'),
         ),
-        mutually_exclusive=[["selector", "node"], ['evacuate', 'list_pods'], ['list_pods', 'schedulable']],
-        required_one_of=[["node", "selector"]],
-
         supports_check_mode=True,
     )
-    results = ManageNode.run_ansible(module.params, module.check_mode)
 
-    if 'failed' in results:
-        module.fail_json(**results)
+    rval = OCService.run_ansible(module.params, module.check_mode)
+    if 'failed' in rval:
+        return module.fail_json(**rval)
 
-    module.exit_json(**results)
+    return module.exit_json(**rval)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
 
-# -*- -*- -*- End included fragment: ansible/oadm_manage_node.py -*- -*- -*-
+# -*- -*- -*- End included fragment: ansible/oc_service.py -*- -*- -*-
