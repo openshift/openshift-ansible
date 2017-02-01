@@ -55,4 +55,4 @@
   - include_role:
       name: openshift_hosted_logging
       tasks_from: update_master_config
-    when: openshift_hosted_logging_deploy | default(false) | boola
+    when: openshift_hosted_logging_deploy | default(false) | bool
