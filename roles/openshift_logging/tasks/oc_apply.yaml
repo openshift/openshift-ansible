@@ -1,12 +1,13 @@
 ---
 - name: Checking generation of {{file_content.kind}} {{file_content.metadata.name}}
-  shell: >
+  command: >
     {{ openshift.common.client_binary }}
     --config={{ kubeconfig }}
     get {{file_content.kind}} {{file_content.metadata.name}}
     -o jsonpath='{.metadata.resourceVersion}'
-    -n {{namespace}} || echo 0
+    -n {{namespace}}
   register: generation_init
+  failed_when: "'not found' not in generation_init.stderr and generation_init.stdout == ''"
   changed_when: no
 
 - name: Applying {{file_name}}
@@ -19,13 +20,14 @@
   changed_when: no
 
 - name: Determine change status of {{file_content.kind}} {{file_content.metadata.name}}
-  shell: >
+  command: >
     {{ openshift.common.client_binary }} --config={{ kubeconfig }}
     get {{file_content.kind}} {{file_content.metadata.name}}
     -o jsonpath='{.metadata.resourceVersion}'
-    -n {{namespace}} || echo 0
+    -n {{namespace}}
   register: generation_changed
-  changed_when: generation_changed.stdout | int  > generation_init.stdout | int
+  failed_when: "'not found' not in generation_changed.stderr and generation_changed.stdout == ''"
+  changed_when: generation_changed.stdout | default (0) | int  > generation_init.stdout | default(0) | int
   when:
     - "'field is immutable' not in generation_apply.stderr"
 
