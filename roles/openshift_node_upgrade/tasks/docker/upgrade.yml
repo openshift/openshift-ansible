@@ -26,7 +26,7 @@
 
 - debug: var=docker_image_count.stdout
 
-  # TODO(jchaloup): put all docker_upgrade_nuke_images into a block with only one condition
+# TODO(jchaloup): put all docker_upgrade_nuke_images into a block with only one condition
 - name: Remove all containers and images
   script: nuke_images.sh
   register: nuke_images_result
