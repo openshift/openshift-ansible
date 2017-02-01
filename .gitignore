@@ -16,7 +16,6 @@ gce.ini
 multi_ec2.yaml
 .vagrant
 .tags*
-/ansible.cfg
 *.retry
 .vscode/*
 .cache
