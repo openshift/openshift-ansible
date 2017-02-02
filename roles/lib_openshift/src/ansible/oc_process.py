@@ -23,7 +23,7 @@ def main():
     )
 
 
-    rval = Process.run_ansible(module.params, module.check_mode)
+    rval = OCProcess.run_ansible(module.params, module.check_mode)
     if 'failed' in rval:
         module.fail_json(**rval)
 

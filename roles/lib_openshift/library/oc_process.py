@@ -902,11 +902,13 @@ class OpenShiftCLI(object):
 
     def _run(self, cmds, input_data):
         ''' Actually executes the command. This makes mocking easier. '''
+        curr_env = os.environ.copy()
+        curr_env.update({'KUBECONFIG': self.kubeconfig})
         proc = subprocess.Popen(cmds,
                                 stdin=subprocess.PIPE,
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE,
-                                env={'KUBECONFIG': self.kubeconfig})
+                                env=curr_env)
 
         stdout, stderr = proc.communicate(input_data)
 
@@ -917,9 +919,9 @@ class OpenShiftCLI(object):
         '''Base command for oc '''
         cmds = []
         if oadm:
-            cmds = ['/usr/bin/oadm']
+            cmds = ['oadm']
         else:
-            cmds = ['/usr/bin/oc']
+            cmds = ['oc']
 
         if self.all_namespaces:
             cmds.extend(['--all-namespaces'])
@@ -1228,7 +1230,7 @@ class OpenShiftCLIConfig(object):
 
 
 # pylint: disable=too-many-instance-attributes
-class Process(OpenShiftCLI):
+class OCProcess(OpenShiftCLI):
     ''' Class to wrap the oc command line tools '''
 
     # pylint allows 5. we need 6
@@ -1242,7 +1244,7 @@ class Process(OpenShiftCLI):
                  tdata=None,
                  verbose=False):
         ''' Constructor for OpenshiftOC '''
-        super(Process, self).__init__(namespace, kubeconfig)
+        super(OCProcess, self).__init__(namespace, kubeconfig)
         self.namespace = namespace
         self.name = tname
         self.data = tdata
@@ -1348,7 +1350,7 @@ class Process(OpenShiftCLI):
     def run_ansible(params, check_mode):
         '''run the ansible idempotent code'''
 
-        ocprocess = Process(params['namespace'],
+        ocprocess = OCProcess(params['namespace'],
                             params['template_name'],
                             params['params'],
                             params['create'],
@@ -1364,7 +1366,7 @@ class Process(OpenShiftCLI):
             if api_rval['returncode'] != 0:
                 return {"failed": True, "msg" : api_rval}
 
-            return {"changed" : False, "results": api_rval, "state": "list")
+            return {"changed" : False, "results": api_rval, "state": "list"}
 
         elif state == 'present':
             if not ocprocess.exists() or not params['reconcile']:
@@ -1382,7 +1384,10 @@ class Process(OpenShiftCLI):
                 if api_rval['returncode'] != 0:
                     return {"failed": True, "msg": api_rval}
 
-                return {"changed": True, "results": api_rval, "state": "present")
+                if params['create']:
+                    return {"changed": True, "results": api_rval, "state": "present"}
+
+                return {"changed": False, "results": api_rval, "state": "present"}
 
         # verify results
         update = False
@@ -1397,18 +1402,14 @@ class Process(OpenShiftCLI):
                 update = True
 
         if not update:
-            return {"changed": update, "results": api_rval, "state": "present")
+            return {"changed": update, "results": api_rval, "state": "present"}
 
         for cmd in rval:
             if cmd['returncode'] != 0:
-                return {"failed": True, "changed": update, "results": rval, "state": "present")
+                return {"failed": True, "changed": update, "results": rval, "state": "present"}
 
         return {"changed": update, "results": rval, "state": "present"}
 
-    return {"failed": True,
-            "changed": False,
-            "results": 'Unknown state passed ({0}). '.format(state),
-            "state": "unknown")
 
 # -*- -*- -*- End included fragment: class/oc_process.py -*- -*- -*-
 
@@ -1436,7 +1437,7 @@ def main():
     )
 
 
-    rval = Process.run_ansible(module.params, module.check_mode)
+    rval = OCProcess.run_ansible(module.params, module.check_mode)
     if 'failed' in rval:
         module.fail_json(**rval)
 

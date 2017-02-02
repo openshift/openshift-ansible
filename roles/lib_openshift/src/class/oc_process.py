@@ -3,7 +3,7 @@
 
 
 # pylint: disable=too-many-instance-attributes
-class Process(OpenShiftCLI):
+class OCProcess(OpenShiftCLI):
     ''' Class to wrap the oc command line tools '''
 
     # pylint allows 5. we need 6
@@ -17,7 +17,7 @@ class Process(OpenShiftCLI):
                  tdata=None,
                  verbose=False):
         ''' Constructor for OpenshiftOC '''
-        super(Process, self).__init__(namespace, kubeconfig)
+        super(OCProcess, self).__init__(namespace, kubeconfig)
         self.namespace = namespace
         self.name = tname
         self.data = tdata
@@ -123,7 +123,7 @@ class Process(OpenShiftCLI):
     def run_ansible(params, check_mode):
         '''run the ansible idempotent code'''
 
-        ocprocess = Process(params['namespace'],
+        ocprocess = OCProcess(params['namespace'],
                             params['template_name'],
                             params['params'],
                             params['create'],
@@ -139,7 +139,7 @@ class Process(OpenShiftCLI):
             if api_rval['returncode'] != 0:
                 return {"failed": True, "msg" : api_rval}
 
-            return {"changed" : False, "results": api_rval, "state": "list")
+            return {"changed" : False, "results": api_rval, "state": "list"}
 
         elif state == 'present':
             if not ocprocess.exists() or not params['reconcile']:
@@ -157,7 +157,10 @@ class Process(OpenShiftCLI):
                 if api_rval['returncode'] != 0:
                     return {"failed": True, "msg": api_rval}
 
-                return {"changed": True, "results": api_rval, "state": "present")
+                if params['create']:
+                    return {"changed": True, "results": api_rval, "state": "present"}
+
+                return {"changed": False, "results": api_rval, "state": "present"}
 
         # verify results
         update = False
@@ -172,15 +175,11 @@ class Process(OpenShiftCLI):
                 update = True
 
         if not update:
-            return {"changed": update, "results": api_rval, "state": "present")
+            return {"changed": update, "results": api_rval, "state": "present"}
 
         for cmd in rval:
             if cmd['returncode'] != 0:
-                return {"failed": True, "changed": update, "results": rval, "state": "present")
+                return {"failed": True, "changed": update, "results": rval, "state": "present"}
 
         return {"changed": update, "results": rval, "state": "present"}
 
-    return {"failed": True,
-            "changed": False,
-            "results": 'Unknown state passed ({0}). '.format(state),
-            "state": "unknown")
