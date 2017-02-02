@@ -7,6 +7,7 @@ The plugin is named with leading `aa_` to ensure this plugin is loaded
 first (alphanumerically) by Ansible.
 """
 import sys
+from subprocess import check_output
 from ansible import __version__
 
 if __version__ < '2.0':
@@ -65,7 +66,11 @@ class CallbackModule(CallbackBase):
             sys.exit(1)
 
         if __version__ == '2.2.1.0':
-            display(
-                'FATAL: Current Ansible version (%s) is not supported. %s'
-                % (__version__, FAIL_ON_2_2_1_0), color='red')
-            sys.exit(1)
+            rpm_ver = str(check_output(["rpm", "-qa", "ansible"]))
+            patched_ansible = '2.2.1.0-2'
+
+            if patched_ansible not in rpm_ver:
+                display(
+                    'FATAL: Current Ansible version (%s) is not supported. %s'
+                    % (__version__, FAIL_ON_2_2_1_0), color='red')
+                sys.exit(1)
