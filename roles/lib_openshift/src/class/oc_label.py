@@ -54,7 +54,7 @@ class OCLabel(OpenShiftCLI):
 
         for current_host_labels in self.current_labels:
             rbool = self.compare_labels(current_host_labels)
-            if rbool == False:
+            if not rbool:
                 return False
         return True
 
@@ -107,8 +107,8 @@ class OCLabel(OpenShiftCLI):
 
         if len(extra_labels) > 0:
             return True
-        else:
-            return False
+
+        return False
 
     def replace(self):
         ''' replace currently stored labels with user provided labels '''
@@ -190,6 +190,7 @@ class OCLabel(OpenShiftCLI):
 
         return self.openshift_cmd(cmd)
 
+    # pylint: disable=too-many-branches,too-many-return-statements
     @staticmethod
     def run_ansible(params, check_mode=False):
         ''' run the idempotent ansible code

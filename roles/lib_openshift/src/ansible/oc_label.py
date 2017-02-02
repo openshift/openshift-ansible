@@ -11,14 +11,14 @@ def main():
                        choices=['present', 'absent', 'list', 'add']),
             debug=dict(default=False, type='bool'),
             kind=dict(default=None, type='str', required=True,
-                          choices=['node', 'pod', 'namespace']),
+                      choices=['node', 'pod', 'namespace']),
             name=dict(default=None, type='str'),
             namespace=dict(default=None, type='str'),
             labels=dict(default=None, type='list'),
             selector=dict(default=None, type='str'),
         ),
         supports_check_mode=True,
-        mutually_exclusive = (['name', 'selector']),
+        mutually_exclusive=(['name', 'selector']),
     )
 
     results = OCLabel.run_ansible(module.params, module.check_mode)

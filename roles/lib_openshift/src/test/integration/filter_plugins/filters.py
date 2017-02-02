@@ -5,6 +5,7 @@
 Custom filters for use in testing
 '''
 
+
 class FilterModule(object):
     ''' Custom ansible filters '''
 

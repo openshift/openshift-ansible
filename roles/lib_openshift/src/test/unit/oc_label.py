@@ -78,7 +78,6 @@ class OCLabelTest(unittest.TestCase):
             }
         }'''
 
-
         mock_cmd.side_effect = [
             (0, ns, ''),
         ]
@@ -166,7 +165,6 @@ class OCLabelTest(unittest.TestCase):
             }
         }'''
 
-
         mock_cmd.side_effect = [
             (0, ns, ''),
             (0, '', ''),
@@ -176,8 +174,8 @@ class OCLabelTest(unittest.TestCase):
         results = OCLabel.run_ansible(params, False)
 
         self.assertTrue(results['changed'])
-        self.assertTrue(results['results']['results']['labels'][0] == \
-                       {'storage_pv_quota': 'False', 'awesomens': 'testinglabel'})
+        self.assertTrue(results['results']['results']['labels'][0] ==
+                        {'storage_pv_quota': 'False', 'awesomens': 'testinglabel'})
 
     def tearDown(self):
         '''TearDown method'''

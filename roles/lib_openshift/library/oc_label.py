@@ -1265,7 +1265,7 @@ class OCLabel(OpenShiftCLI):
 
         for current_host_labels in self.current_labels:
             rbool = self.compare_labels(current_host_labels)
-            if rbool == False:
+            if not rbool:
                 return False
         return True
 
@@ -1318,8 +1318,8 @@ class OCLabel(OpenShiftCLI):
 
         if len(extra_labels) > 0:
             return True
-        else:
-            return False
+
+        return False
 
     def replace(self):
         ''' replace currently stored labels with user provided labels '''
@@ -1401,6 +1401,7 @@ class OCLabel(OpenShiftCLI):
 
         return self.openshift_cmd(cmd)
 
+    # pylint: disable=too-many-branches,too-many-return-statements
     @staticmethod
     def run_ansible(params, check_mode=False):
         ''' run the idempotent ansible code
@@ -1517,14 +1518,14 @@ def main():
                        choices=['present', 'absent', 'list', 'add']),
             debug=dict(default=False, type='bool'),
             kind=dict(default=None, type='str', required=True,
-                          choices=['node', 'pod', 'namespace']),
+                      choices=['node', 'pod', 'namespace']),
             name=dict(default=None, type='str'),
             namespace=dict(default=None, type='str'),
             labels=dict(default=None, type='list'),
             selector=dict(default=None, type='str'),
         ),
         supports_check_mode=True,
-        mutually_exclusive = (['name', 'selector']),
+        mutually_exclusive=(['name', 'selector']),
     )
 
     results = OCLabel.run_ansible(module.params, module.check_mode)

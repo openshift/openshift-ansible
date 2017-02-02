@@ -15,8 +15,8 @@
       msg: "{{ item }} not defined"
     when: "{{ item }} is not defined"
     with_items:
-    - cli_node_test #openshift node to be used to add/remove labels to
-    - cli_master_test #ansible inventory instance to run playbook against
+    - cli_node_test  # openshift node to be used to add/remove labels to
+    - cli_master_test  # ansible inventory instance to run playbook against
 
   tasks:
   - name: delete test labels (start from known starting position)
@@ -321,84 +321,3 @@
     assert:
       that: label_out['results']['labels'][0]['testlabel2'] is not defined
       msg: "{{ label_out }}"
-
-
-
-
-
-
-
-
-
-
-
-#  - name: create route
-#    oc_route:
-#      name: test
-#      namespace: default
-#      tls_termination: edge
-#      cert_content: testing cert
-#      cacert_content: testing cacert
-#      key_content: key content
-#      service_name: test
-#      host: test.example
-#    register: routeout
-#  - debug: var=routeout
-#
-#  - assert:
-#      that: "routeout.results.results[0]['metadata']['name'] == 'test'"
-#      msg: route create failed
-#
-#  - name: get route
-#    oc_route:
-#      state: list
-#      name: test
-#      namespace: default
-#    register: routeout
-#  - debug: var=routeout
-#
-#  - assert:
-#      that: "routeout.results[0]['metadata']['name'] == 'test'"
-#      msg: get route failed
-#
-#  - name: delete route
-#    oc_route:
-#      state: absent
-#      name: test
-#      namespace: default
-#    register: routeout
-#  - debug: var=routeout
-#
-#  - assert:
-#      that: "routeout.results.returncode == 0"
-#      msg: delete route failed
-#
-#  - name: create route
-#    oc_route:
-#      name: test
-#      namespace: default
-#      tls_termination: edge
-#      cert_content: testing cert
-#      cacert_content: testing cacert
-#      key_content: testing key
-#      service_name: test
-#      host: test.example
-#    register: routeout
-#  - debug: var=routeout
-#
-#  - name: create route noop
-#    oc_route:
-#      name: test
-#      namespace: default
-#      tls_termination: edge
-#      cert_content: testing cert
-#      cacert_content: testing cacert
-#      key_content: testing key
-#      service_name: test
-#      host: test.example
-#    register: routeout
-#  - debug: var=routeout
-#
-#  - assert:
-#      that: "routeout.changed == False"
-#      msg: Route create not idempotent
