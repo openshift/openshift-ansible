@@ -30,7 +30,7 @@ class OCProcess(OpenShiftCLI):
     @property
     def template(self):
         '''template property'''
-        if self._template == None:
+        if self._template is None:
             results = self._process(self.name, False, self.params, self.data)
             if results['returncode'] != 0:
                 raise OpenShiftCLIError('Error processing template [%s].' % self.name)
@@ -118,18 +118,18 @@ class OCProcess(OpenShiftCLI):
 
         return obj_results
 
-
+    # pylint: disable=too-many-return-statements
     @staticmethod
     def run_ansible(params, check_mode):
         '''run the ansible idempotent code'''
 
         ocprocess = OCProcess(params['namespace'],
-                            params['template_name'],
-                            params['params'],
-                            params['create'],
-                            kubeconfig=params['kubeconfig'],
-                            tdata=params['content'],
-                            verbose=params['debug'])
+                              params['template_name'],
+                              params['params'],
+                              params['create'],
+                              kubeconfig=params['kubeconfig'],
+                              tdata=params['content'],
+                              verbose=params['debug'])
 
         state = params['state']
 
@@ -142,6 +142,9 @@ class OCProcess(OpenShiftCLI):
             return {"changed" : False, "results": api_rval, "state": "list"}
 
         elif state == 'present':
+            if check_mode and params['create']:
+                return {"changed": True, 'msg': "CHECK_MODE: Would have processed template."}
+
             if not ocprocess.exists() or not params['reconcile']:
             #FIXME: this code will never get run in a way that succeeds when
             #       module.params['reconcile'] is true. Because oc_process doesn't
