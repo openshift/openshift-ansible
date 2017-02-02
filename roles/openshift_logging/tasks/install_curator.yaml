@@ -15,7 +15,7 @@
   register: curator_ops_replica_count
   when:
     - not ansible_check_mode
-    - openshift_logging_use_ops
+    - openshift_logging_use_ops | bool
   ignore_errors: yes
   changed_when: no
 
@@ -48,6 +48,6 @@
     curator_memory_limit: "{{openshift_logging_curator_ops_memory_limit }}"
     replicas: "{{curator_ops_replica_count.stdout | default (0)}}"
     curator_node_selector: "{{openshift_logging_curator_ops_nodeselector | default({}) }}"
-  when: openshift_logging_use_ops
+  when: openshift_logging_use_ops | bool
   check_mode: no
   changed_when: no

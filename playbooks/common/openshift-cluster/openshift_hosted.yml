@@ -54,6 +54,7 @@
   - set_fact:
       logging_hostname: "{{ openshift_hosted_logging_hostname | default('kibana.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true))) }}"
   tasks:
+
   - block:
     - include_role:
         name: openshift_hosted_logging

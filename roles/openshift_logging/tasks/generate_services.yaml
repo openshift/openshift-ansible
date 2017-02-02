@@ -52,7 +52,7 @@
     selector:
       provider: openshift
       component: es-ops
-  when: openshift_logging_use_ops
+  when: openshift_logging_use_ops | bool
   check_mode: no
   changed_when: no
 
@@ -67,7 +67,7 @@
     selector:
       provider: openshift
       component: es-ops
-  when: openshift_logging_use_ops
+  when: openshift_logging_use_ops | bool
   check_mode: no
   changed_when: no
 
@@ -82,6 +82,6 @@
     selector:
       provider: openshift
       component: kibana-ops
-  when: openshift_logging_use_ops
+  when: openshift_logging_use_ops | bool
   check_mode: no
   changed_when: no

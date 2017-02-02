@@ -56,7 +56,7 @@
     es_dcs: "{{openshift_logging_facts.elasticsearch_ops.deploymentconfigs}}"
     cluster_size: "{{openshift_logging_es_ops_cluster_size}}"
   when:
-    - openshift_logging_use_ops
+    - openshift_logging_use_ops | bool
     - "{{es_dcs | length - openshift_logging_es_ops_cluster_size | abs > 1}}"
   check_mode: no
 
@@ -71,7 +71,7 @@
     openshift_logging_es_pvc_dynamic: "{{openshift_logging_es_ops_pvc_dynamic}}"
     openshift_logging_es_pv_selector: "{{openshift_logging_es_ops_pv_selector}}"
   when:
-    - openshift_logging_use_ops
+    - openshift_logging_use_ops | bool
   check_mode: no
 
 - name: Init pool of DeploymentConfig names for Elasticsearch Ops
@@ -80,7 +80,7 @@
   loop_control:
     loop_var: deploy_name
   when:
-    - openshift_logging_use_ops
+    - openshift_logging_use_ops | bool
 
 - name: Create new DeploymentConfig names for Elasticsearch Ops
   set_fact: es_ops_dc_pool={{es_ops_dc_pool | default([]) + [deploy_name]}}
@@ -92,7 +92,7 @@
     cluster_size: "{{openshift_logging_es_ops_cluster_size}}"
   with_sequence: count={{ openshift_logging_es_ops_cluster_size | int - openshift_logging_current_es_ops_size | int }}
   when:
-    - openshift_logging_use_ops
+    - openshift_logging_use_ops | bool
   check_mode: no
 
 - name: Generate Elasticsearch DeploymentConfig for Ops
@@ -116,6 +116,6 @@
   with_indexed_items:
     - "{{ es_ops_dc_pool | default([]) }}"
   when:
-    - openshift_logging_use_ops
+    - openshift_logging_use_ops | bool
   check_mode: no
   changed_when: no
