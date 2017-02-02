@@ -1,0 +1,17 @@
+[Unit]
+After=docker.service
+Requires=docker.service
+PartOf=docker.service
+
+[Service]
+EnvironmentFile=/etc/sysconfig/openvswitch
+ExecStartPre=-/usr/bin/docker rm -f openvswitch
+ExecStart=/usr/bin/docker run --name openvswitch --rm --privileged --net=host --pid=host -v /lib/modules:/lib/modules -v /run:/run -v /sys:/sys:ro -v /etc/origin/openvswitch:/etc/openvswitch {{ openshift.node.ovs_image }}:${IMAGE_VERSION}
+ExecStartPost=/usr/bin/sleep 5
+ExecStop=/usr/bin/docker stop openvswitch
+SyslogIdentifier=openvswitch
+Restart=always
+RestartSec=5s
+
+[Install]
+WantedBy=docker.service

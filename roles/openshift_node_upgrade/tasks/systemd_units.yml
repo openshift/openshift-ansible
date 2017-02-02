@@ -1,0 +1,119 @@
+---
+# input variables
+# - openshift.node.node_image
+# - openshift_image_tag
+# - openshift.common.is_containerized
+# - openshift.node.ovs_image
+# - openshift.common.use_openshift_sdn
+# - openshift.common.service_type
+# - openshift.node.debug_level
+# - openshift.common.config_base
+# - openshift.common.http_proxy
+# - openshift.common.portal_net
+# - openshift.common
+# - openshift.common.http_proxy
+# notify:
+# - restart openvswitch
+# - restart node
+
+# This file is included both in the openshift_master role and in the upgrade
+# playbooks.
+
+- name: Pre-pull node image
+  command: >
+    docker pull {{ openshift.node.node_image }}:{{ openshift_image_tag }}
+  register: pull_result
+  changed_when: "'Downloaded newer image' in pull_result.stdout"
+  when: openshift.common.is_containerized | bool
+
+- name: Pre-pull openvswitch image
+  command: >
+    docker pull {{ openshift.node.ovs_image }}:{{ openshift_image_tag }}
+  register: pull_result
+  changed_when: "'Downloaded newer image' in pull_result.stdout"
+  when: openshift.common.is_containerized | bool and openshift.common.use_openshift_sdn | bool
+
+- name: Install Node dependencies docker service file
+  template:
+    dest: "/etc/systemd/system/{{ openshift.common.service_type }}-node-dep.service"
+    src: openshift.docker.node.dep.service
+  register: install_node_dep_result
+  when: openshift.common.is_containerized | bool
+
+- name: Install Node docker service file
+  template:
+    dest: "/etc/systemd/system/{{ openshift.common.service_type }}-node.service"
+    src: openshift.docker.node.service
+  register: install_node_result
+  when: openshift.common.is_containerized | bool
+
+- name: Create the openvswitch service env file
+  template:
+    src: openvswitch.sysconfig.j2
+    dest: /etc/sysconfig/openvswitch
+  when: openshift.common.is_containerized | bool
+  register: install_ovs_sysconfig
+  notify:
+  - restart openvswitch
+
+# May be a temporary workaround.
+# https://bugzilla.redhat.com/show_bug.cgi?id=1331590
+- name: Create OpenvSwitch service.d directory
+  file: path=/etc/systemd/system/openvswitch.service.d/ state=directory
+  when: openshift.common.use_openshift_sdn | default(true) | bool
+
+- name: Install OpenvSwitch service OOM fix
+  template:
+    dest: "/etc/systemd/system/openvswitch.service.d/01-avoid-oom.conf"
+    src: openvswitch-avoid-oom.conf
+  when: openshift.common.use_openshift_sdn | default(true) | bool
+  register: install_oom_fix_result
+  notify:
+  - restart openvswitch
+
+- name: Install OpenvSwitch docker service file
+  template:
+    dest: "/etc/systemd/system/openvswitch.service"
+    src: openvswitch.docker.service
+  when: openshift.common.is_containerized | bool and openshift.common.use_openshift_sdn | default(true) | bool
+  notify:
+  - restart openvswitch
+
+- name: Configure Node settings
+  lineinfile:
+    dest: /etc/sysconfig/{{ openshift.common.service_type }}-node
+    regexp: "{{ item.regex }}"
+    line: "{{ item.line }}"
+    create: true
+  with_items:
+  - regex: '^OPTIONS='
+    line: "OPTIONS=--loglevel={{ openshift.node.debug_level | default(2) }}"
+  - regex: '^CONFIG_FILE='
+    line: "CONFIG_FILE={{ openshift.common.config_base }}/node/node-config.yaml"
+  - regex: '^IMAGE_VERSION='
+    line: "IMAGE_VERSION={{ openshift_image_tag }}"
+  notify:
+  - restart node
+
+- name: Configure Proxy Settings
+  lineinfile:
+    dest: /etc/sysconfig/{{ openshift.common.service_type }}-node
+    regexp: "{{ item.regex }}"
+    line: "{{ item.line }}"
+    create: true
+  with_items:
+  - regex: '^HTTP_PROXY='
+    line: "HTTP_PROXY={{ openshift.common.http_proxy | default('') }}"
+  - regex: '^HTTPS_PROXY='
+    line: "HTTPS_PROXY={{ openshift.common.https_proxy | default('') }}"
+  - regex: '^NO_PROXY='
+    line: "NO_PROXY={{ openshift.common.no_proxy | default([]) }},{{ openshift.common.portal_net }},{{ hostvars[groups.oo_first_master.0].openshift.master.sdn_cluster_network_cidr }}"
+  when: ('http_proxy' in openshift.common and openshift.common.http_proxy != '')
+  notify:
+  - restart node
+
+- name: Reload systemd units
+  command: systemctl daemon-reload
+  when: (openshift.common.is_containerized | bool and (install_node_result | changed or install_ovs_sysconfig | changed or install_node_dep_result | changed)) or install_oom_fix_result | changed
+  notify:
+  - restart node
