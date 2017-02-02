@@ -93,10 +93,10 @@ spec:
              value: {{master_url}}
             -
              name: "OAP_PUBLIC_MASTER_URL"
-             value: {{public_master_url}}
+             value: {{openshift_logging_master_public_url}}
             -
              name: "OAP_LOGOUT_REDIRECT"
-             value: {{public_master_url}}/console/logout
+             value: {{openshift_logging_master_public_url}}/console/logout
             -
              name: "OAP_MASTER_CA_FILE"
              value: "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"

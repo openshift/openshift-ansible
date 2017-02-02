@@ -1,7 +1,7 @@
 ---
 - hosts: masters[0]
   roles:
-  - role: openshift_hosted_logging
+  - role: openshift_logging
     openshift_hosted_logging_cleanup: no
 
 - name: Update master-config for publicLoggingURL
@@ -11,6 +11,6 @@
       logging_hostname: "{{ openshift_hosted_logging_hostname | default('kibana.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true))) }}"
   tasks:
   - include_role:
-      name: openshift_hosted_logging
+      name: openshift_logging
       tasks_from: update_master_config
     when: openshift_hosted_logging_deploy | default(false) | bool

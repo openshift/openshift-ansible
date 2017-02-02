@@ -27,21 +27,21 @@
       logging_elasticsearch_ops_cluster_size: "{{ openshift_hosted_logging_elasticsearch_ops_cluster_size | default(1) }}"
   roles:
   - role: openshift_hosted
-  - role: openshift_hosted_metrics
+  - role: openshift_metrics
     when: openshift_hosted_metrics_deploy | default(false) | bool
-  - role: openshift_hosted_logging
+  - role: openshift_logging
     when: openshift_hosted_logging_deploy | default(false) | bool
-    openshift_hosted_logging_hostname: "{{ logging_hostname }}"
-    openshift_hosted_logging_ops_hostname: "{{ logging_ops_hostname }}"
-    openshift_hosted_logging_master_public_url: "{{ logging_master_public_url }}"
-    openshift_hosted_logging_elasticsearch_cluster_size: "{{ logging_elasticsearch_cluster_size }}"
-    openshift_hosted_logging_elasticsearch_pvc_dynamic: "{{ 'true' if openshift_hosted_logging_storage_kind | default(none) == 'dynamic' else '' }}"
-    openshift_hosted_logging_elasticsearch_pvc_size: "{{ openshift.hosted.logging.storage.volume.size if openshift_hosted_logging_storage_kind | default(none) in ['dynamic','nfs'] else ''  }}"
-    openshift_hosted_logging_elasticsearch_pvc_prefix: "{{ 'logging-es' if openshift_hosted_logging_storage_kind | default(none) == 'dynamic' else '' }}"
-    openshift_hosted_logging_elasticsearch_ops_cluster_size: "{{ logging_elasticsearch_ops_cluster_size }}"
-    openshift_hosted_logging_elasticsearch_ops_pvc_dynamic: "{{ 'true' if openshift_hosted_logging_storage_kind | default(none) == 'dynamic' else '' }}"
-    openshift_hosted_logging_elasticsearch_ops_pvc_size: "{{ openshift.hosted.logging.storage.volume.size if openshift_hosted_logging_storage_kind | default(none) in ['dynamic','nfs' ] else ''  }}"
-    openshift_hosted_logging_elasticsearch_ops_pvc_prefix: "{{ 'logging-es' if openshift_hosted_logging_storage_kind | default(none) =='dynamic' else '' }}"
+    openshift_logging_kibana_hostname: "{{ logging_hostname }}"
+    openshift_logging_kibana_ops_hostname: "{{ logging_ops_hostname }}"
+    openshift_logging_master_public_url: "{{ logging_master_public_url }}"
+    openshift_logging_es_cluster_size: "{{ logging_elasticsearch_cluster_size }}"
+    openshift_logging_es_pvc_dynamic: "{{ 'true' if openshift_hosted_logging_storage_kind | default(none) == 'dynamic' else '' }}"
+    openshift_logging_es_pvc_size: "{{ openshift.hosted.logging.storage.volume.size if openshift_hosted_logging_storage_kind | default(none) in ['dynamic','nfs'] else ''  }}"
+    openshift_logging_es_pvc_prefix: "{{ 'logging-es' if openshift_hosted_logging_storage_kind | default(none) == 'dynamic' else '' }}"
+    openshift_logging_es_ops_cluster_size: "{{ logging_elasticsearch_ops_cluster_size }}"
+    openshift_logging_es_ops_pvc_dynamic: "{{ 'true' if openshift_hosted_logging_storage_kind | default(none) == 'dynamic' else '' }}"
+    openshift_logging_es_ops_pvc_size: "{{ openshift.hosted.logging.storage.volume.size if openshift_hosted_logging_storage_kind | default(none) in ['dynamic','nfs' ] else ''  }}"
+    openshift_logging_es_ops_pvc_prefix: "{{ 'logging-es' if openshift_hosted_logging_storage_kind | default(none) =='dynamic' else '' }}"
 
   - role: cockpit-ui
     when: ( openshift.common.version_gte_3_3_or_1_3  | bool ) and ( openshift_hosted_manage_registry | default(true) | bool ) and not (openshift.docker.hosted_registry_insecure | default(false) | bool)
