@@ -10,6 +10,7 @@ import yaml
 
 from ansible import errors
 from distutils.version import LooseVersion
+from ansible.parsing.yaml.dumper import AnsibleDumper
 
 # pylint: disable=no-name-in-module,import-error
 try:
@@ -493,7 +494,10 @@ class FilterModule(object):
 
 
         IdentityProviderBase.validate_idp_list(idp_list, openshift_version, deployment_type)
-        return yaml.safe_dump([idp.to_dict() for idp in idp_list], default_flow_style=False)
+        return yaml.dump([idp.to_dict() for idp in idp_list],
+                         allow_unicode=True,
+                         default_flow_style=False,
+                         Dumper=AnsibleDumper)
 
     @staticmethod
     def validate_pcs_cluster(data, masters=None):
