@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.47
+Version:        3.2.49
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Feb 02 2017 Scott Dodson <sdodson@redhat.com> 3.2.49-1
+- Make use of AnsibleDumper in openshift_master filters s.t. we can represent
+  AnsibleUnsafeText when dumping yaml. (abutcher@redhat.com)
+- Persist net.ipv4.ip_forward sysctl entry for openshift nodes
+  (tbielawa@redhat.com)
+- Backport openshift-cert-expiry role to 1.2 (tbielawa@redhat.com)
+- Add 10 second wait after disabling firewalld (sdodson@redhat.com)
+
 * Wed Jan 18 2017 Scott Dodson <sdodson@redhat.com> 3.2.47-1
 - Ensure serial certificate generation for node and master certificates.
   (abutcher@redhat.com)
