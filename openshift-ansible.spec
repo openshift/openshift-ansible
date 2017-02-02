@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.62
+Version:        3.3.63
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Feb 02 2017 Scott Dodson <sdodson@redhat.com> 3.3.63-1
+- Make use of AnsibleDumper in openshift_master filters s.t. we can represent
+  AnsibleUnsafeText when dumping yaml. (abutcher@redhat.com)
+
 * Tue Jan 31 2017 Scott Dodson <sdodson@redhat.com> 3.3.62-1
 - More reliable wait for master after full host reboot. (dgoodwin@redhat.com)
 - Use openshift.common.hostname when verifying API port available.
