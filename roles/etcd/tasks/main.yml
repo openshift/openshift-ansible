@@ -10,11 +10,17 @@
   package: name=etcd state=present
   when: not etcd_is_containerized | bool
 
+- name: Check local etcd image
+  command: >
+    echo `docker images {{ openshift.etcd.etcd_image }}:{{ openshift_image_tag }}` | grep -v grep | grep -w {{ openshift.etcd.etcd_image }} | grep -w {{ openshift_image_tag }}
+  register: check_is_local_etcd_image_not_present
+  when: openshift.common.is_containerized | bool
+
 - name: Pull etcd container
   command: docker pull {{ openshift.etcd.etcd_image }}
   register: pull_result
   changed_when: "'Downloaded newer image' in pull_result.stdout"
-  when: etcd_is_containerized | bool
+  when: etcd_is_containerized | bool and check_is_local_etcd_image_not_present | bool
 
 - name: Install etcd container service file
   template:

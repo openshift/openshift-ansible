@@ -2,6 +2,12 @@
 # This file is included both in the openshift_master role and in the upgrade
 # playbooks.
 
+- name: Check local node image
+  command: >
+    echo `docker images {{ openshift.node.node_image }}:{{ openshift_image_tag }}` | grep -v grep | grep -w {{ openshift.node.node_image }} | grep -w {{ openshift_image_tag }}
+  register: check_is_local_node_image_not_present
+  when: openshift.common.is_containerized | bool and check_is_local_node_image_not_present | bool
+
 - name: Pre-pull node image
   command: >
     docker pull {{ openshift.node.node_image }}:{{ openshift_image_tag }}
@@ -9,12 +15,18 @@
   changed_when: "'Downloaded newer image' in pull_result.stdout"
   when: openshift.common.is_containerized | bool
 
+- name: Check local openvswitch image
+  command: >
+    echo `docker images {{ openshift.node.ovs_image }}:{{ openshift_image_tag }}` | grep -v grep | grep -w {{ openshift.node.ovs_image }} | grep -w {{ openshift_image_tag }}
+  register: check_is_local_ovs_image_not_present
+  when: openshift.common.is_containerized | bool
+
 - name: Pre-pull openvswitch image
   command: >
     docker pull {{ openshift.node.ovs_image }}:{{ openshift_image_tag }}
   register: pull_result
   changed_when: "'Downloaded newer image' in pull_result.stdout"
-  when: openshift.common.is_containerized | bool and openshift.common.use_openshift_sdn | bool
+  when: openshift.common.is_containerized | bool and openshift.common.use_openshift_sdn | bool and check_is_local_ovs_image_not_present | bool
 
 - name: Install Node dependencies docker service file
   template:
