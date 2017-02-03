@@ -3,6 +3,8 @@
   tags:
   - always
 
+- include: ../../common/openshift-cluster/redeploy-certificates/etcd.yml
+
+- include: ../../common/openshift-etcd/restart.yml
+
 - include: ../../common/openshift-master/restart.yml
-  vars:
-    openshift_deployment_type: "{{ deployment_type }}"

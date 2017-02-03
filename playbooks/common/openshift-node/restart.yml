@@ -1,0 +1,47 @@
+---
+- name: Restart nodes
+  hosts: oo_nodes_to_config
+  serial: "{{ openshift_restart_nodes_serial | default(1) }}"
+  tasks:
+  - name: Restart docker
+    service: name=docker state=restarted
+
+  - name: Update docker facts
+    openshift_facts:
+      role: docker
+
+  - name: Restart containerized services
+    service: name={{ item }} state=started
+    with_items:
+    - etcd_container
+    - openvswitch
+    - "{{ openshift.common.service_type }}-master"
+    - "{{ openshift.common.service_type }}-master-api"
+    - "{{ openshift.common.service_type }}-master-controllers"
+    - "{{ openshift.common.service_type }}-node"
+    failed_when: false
+    when: openshift.common.is_containerized | bool
+
+  - name: Wait for master API to come back online
+    wait_for:
+      host: "{{ openshift.common.hostname }}"
+      state: started
+      delay: 10
+      port: "{{ openshift.master.api_port }}"
+    when: inventory_hostname in groups.oo_masters_to_config
+
+  - name: restart node
+    service:
+      name: "{{ openshift.common.service_type }}-node"
+      state: restarted
+
+  - name: Wait for node to be ready
+    command: >
+      {{ hostvars[groups.oo_first_master.0].openshift.common.client_binary }} get node {{ openshift.common.hostname | lower }} --no-headers
+    register: node_output
+    delegate_to: "{{ groups.oo_first_master.0 }}"
+    when: inventory_hostname in groups.oo_nodes_to_config
+    until: "{{ node_output.stdout.split()[1].startswith('Ready')}}"
+    # Give the node two minutes to come back online.
+    retries: 24
+    delay: 5
