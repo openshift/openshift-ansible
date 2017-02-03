@@ -1,6 +1,6 @@
 ---
 - name: Drain and upgrade nodes
-  hosts: oo_nodes_to_upgrade
+  hosts: oo_nodes_to_upgrade:!oo_masters_to_config
   # This var must be set with -e on invocation, as it is not a per-host inventory var
   # and is evaluated early. Values such as "20%" can also be used.
   serial: "{{ openshift_upgrade_nodes_serial | default(1) }}"
@@ -20,7 +20,7 @@
   - set_fact:
       was_schedulable: "{{ 'unschedulable' not in (node_output.stdout | from_json).spec }}"
 
-  - name: Mark unschedulable if host is a node
+  - name: Mark node unschedulable
     command: >
       {{ hostvars[groups.oo_first_master.0].openshift.common.client_binary }} adm manage-node {{ openshift.node.nodename | lower }} --schedulable=false
     delegate_to: "{{ groups.oo_first_master.0 }}"
