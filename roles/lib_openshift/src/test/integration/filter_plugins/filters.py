@@ -7,11 +7,14 @@ Custom filters for use in testing
 
 
 class FilterModule(object):
-    ''' Custom ansible filters '''
+    ''' Custom filters for use in integration testing '''
 
     @staticmethod
     def label_dict_to_key_value_list(label_dict):
-        ''' given a dict of labels/values, return list of key: <key> value: <value> pairs'''
+        ''' Given a dict of labels/values, return list of key: <key> value: <value> pairs
+
+            These are only used in integration testing.
+        '''
 
         label_list = []
         for key in label_dict:

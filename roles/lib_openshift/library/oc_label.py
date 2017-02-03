@@ -55,7 +55,11 @@ description:
 options:
   state:
     description:
-    - State represents whether to create, modify, delete, or list
+    - State controls the action that will be taken with resource
+    - 'present' will create or update and object to the desired state
+    - 'absent' will ensure certain labels are removed
+    - 'list' will read the labels
+    - 'add' will insert labels to the already existing labels
     default: present
     choices: ["present", "absent", "list", "add"]
     aliases: []
@@ -82,7 +86,9 @@ options:
     aliases: []
   labels:
     description:
-    - A list of labels to for the resource.
+    - A list of labels for the resource.
+    - Each list consists of a key and a value.
+    - eg, {'key': 'foo', 'value': 'bar'}
     required: false
     default: None
     aliases: []
@@ -98,7 +104,7 @@ extends_documentation_fragment: []
 '''
 
 EXAMPLES = '''
-- name: Add label to node
+- name: Add a single label to a node's existing labels
   oc_label:
     name: ip-172-31-5-23.ec2.internal
     state: add
@@ -106,6 +112,28 @@ EXAMPLES = '''
     labels:
       - key: logging-infra-fluentd
         value: 'true'
+
+- name: remove a label from a node
+  oc_label:
+    name: ip-172-31-5-23.ec2.internal
+    state: absent
+    kind: node
+    labels:
+      - key: color
+        value: blue
+
+- name: Ensure node has these exact labels
+  oc_label:
+    name: ip-172-31-5-23.ec2.internal
+    state: present
+    kind: node
+    labels:
+      - key: color
+        value: green
+      - key: type
+        value: master
+      - key: environment
+        value: production
 '''
 
 # -*- -*- -*- End included fragment: doc/label -*- -*- -*-
@@ -1517,7 +1545,7 @@ def main():
             state=dict(default='present', type='str',
                        choices=['present', 'absent', 'list', 'add']),
             debug=dict(default=False, type='bool'),
-            kind=dict(default=None, type='str', required=True,
+            kind=dict(default='node', type='str', required=True,
                       choices=['node', 'pod', 'namespace']),
             name=dict(default=None, type='str'),
             namespace=dict(default=None, type='str'),

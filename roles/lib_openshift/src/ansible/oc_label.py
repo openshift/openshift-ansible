@@ -10,7 +10,7 @@ def main():
             state=dict(default='present', type='str',
                        choices=['present', 'absent', 'list', 'add']),
             debug=dict(default=False, type='bool'),
-            kind=dict(default=None, type='str', required=True,
+            kind=dict(default='node', type='str', required=True,
                       choices=['node', 'pod', 'namespace']),
             name=dict(default=None, type='str'),
             namespace=dict(default=None, type='str'),
