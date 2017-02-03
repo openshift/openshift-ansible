@@ -10,3 +10,24 @@
       openshift_hosted_registry_storage_s3_bucket and
       openshift_hosted_registry_storage_s3_region are required
   when: openshift.hosted.registry.storage.s3.bucket | default(none) is none or openshift.hosted.registry.storage.s3.region | default(none) is none
+
+# If cloudfront is being used, fail if we don't have all the required variables
+- assert:
+    that:
+      - "openshift_hosted_registry_storage_s3_cloudfront_baseurl is not defined or openshift_hosted_registry_storage_s3_cloudfront_privatekeyfile | default(none) is not none"
+      - "openshift_hosted_registry_storage_s3_cloudfront_baseurl is not defined or openshift_hosted_registry_storage_s3_cloudfront_keypairid | default(none) is not none"
+    msg: >
+      When openshift_hosted_registry_storage_s3_cloudfront_baseurl is provided
+      openshift_hosted_registry_storage_s3_cloudfront_keypairid and
+      openshift_hosted_registry_storage_s3_cloudfront_privatekeyfile are required
+
+# Copy the cloudfront.pem to the host if the baseurl is given
+- name: Copy cloudfront.pem to the registry
+  copy:
+    src: "{{ openshift_hosted_registry_storage_s3_cloudfront_privatekeyfile }}"
+    dest: /etc/s3-cloudfront/cloudfront.pem
+    backup: true
+    owner: root
+    group: root
+    mode: 0600
+  when: openshift_hosted_registry_storage_s3_cloudfront_baseurl | default(none) is not none
