@@ -20,6 +20,7 @@ Requires:      tar
 Requires:      openshift-ansible-docs = %{version}-%{release}
 Requires:      java-1.8.0-openjdk-headless
 Requires:      httpd-tools
+Requires:      python-ruamel-yaml
 
 %description
 Openshift and Atomic Enterprise Ansible

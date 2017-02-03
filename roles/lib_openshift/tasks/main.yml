@@ -1,0 +1,5 @@
+---
+- name: lib_openshift ensure python-ruamel-yaml package is on target
+  package:
+    name: python-ruamel-yaml
+    state: present
