@@ -14,10 +14,11 @@ import yum  # pylint: disable=import-error
 from ansible.module_utils.basic import AnsibleModule
 
 
-def main():  # pylint: disable=missing-docstring
+def main():  # pylint: disable=missing-docstring,too-many-branches
     module = AnsibleModule(
         argument_spec=dict(
-            version=dict(required=True)
+            prefix=dict(required=True),  # atomic-openshift, origin, ...
+            version=dict(required=True),
         ),
         supports_check_mode=True
     )
@@ -25,19 +26,24 @@ def main():  # pylint: disable=missing-docstring
     def bail(error):  # pylint: disable=missing-docstring
         module.fail_json(msg=error)
 
+    rpm_prefix = module.params['prefix']
+
+    if not rpm_prefix:
+        bail("prefix must not be empty")
+
     yb = yum.YumBase()  # pylint: disable=invalid-name
 
     # search for package versions available for aos pkgs
     expected_pkgs = [
-        'atomic-openshift',
-        'atomic-openshift-master',
-        'atomic-openshift-node',
+        rpm_prefix,
+        rpm_prefix + '-master',
+        rpm_prefix + '-node',
     ]
     try:
         pkgs = yb.pkgSack.returnPackages(patterns=expected_pkgs)
     except yum.Errors.PackageSackError as e:  # pylint: disable=invalid-name
         # you only hit this if *none* of the packages are available
-        bail('Unable to find any atomic-openshift packages. \nCheck your subscription and repo settings. \n%s' % e)
+        bail('Unable to find any OpenShift packages.\nCheck your subscription and repo settings.\n%s' % e)
 
     # determine what level of precision we're expecting for the version
     expected_version = module.params['version']
