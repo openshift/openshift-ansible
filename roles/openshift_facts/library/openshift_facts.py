@@ -1382,7 +1382,8 @@ def get_container_openshift_version(facts):
                     tag = line[len("IMAGE_VERSION="):].strip()
                     # Remove leading "v" and any trailing release info, we just want
                     # a version number here:
-                    version = tag[1:].split("-")[0]
+                    no_v_version = tag[1:] if tag[0] == 'v' else tag
+                    version = no_v_version.split("-")[0]
                     return version
     return None
 
