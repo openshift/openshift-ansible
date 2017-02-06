@@ -2,17 +2,17 @@
   "kind": "Template",
   "apiVersion": "v1",
   "metadata": {
-    "name": "rails-postgresql-example",
+    "name": "django-psql-persistent",
     "annotations": {
-      "openshift.io/display-name": "Rails + PostgreSQL (Ephemeral)",
-      "description": "An example Rails application with a PostgreSQL database. For more information about using this template, including OpenShift considerations, see https://github.com/openshift/rails-ex/blob/master/README.md.\n\nWARNING: Any data stored will be lost upon pod destruction. Only use this template for testing.",
-      "tags": "quickstart,ruby,rails",
-      "iconClass": "icon-ruby"
+      "openshift.io/display-name": "Django + PostgreSQL (Persistent)",
+      "description": "An example Django application with a PostgreSQL database. For more information about using this template, including OpenShift considerations, see https://github.com/openshift/django-ex/blob/master/README.md.",
+      "tags": "quickstart,python,django",
+      "iconClass": "icon-python"
     }
   },
-  "message": "The following service(s) have been created in your project: ${NAME}, ${DATABASE_SERVICE_NAME}.\n\nFor more information about using this template, including OpenShift considerations, see https://github.com/openshift/rails-ex/blob/master/README.md.",
+  "message": "The following service(s) have been created in your project: ${NAME}, ${DATABASE_SERVICE_NAME}.\n\nFor more information about using this template, including OpenShift considerations, see https://github.com/openshift/django-ex/blob/master/README.md.",
   "labels": {
-    "template": "rails-postgresql-example"
+    "template": "django-psql-persistent"
   },
   "objects": [
     {
@@ -24,9 +24,7 @@
       "stringData" : {
         "database-user" : "${DATABASE_USER}",
         "database-password" : "${DATABASE_PASSWORD}",
-        "application-user" : "${APPLICATION_USER}",
-        "application-password" : "${APPLICATION_PASSWORD}",
-        "keybase" : "${SECRET_KEY_BASE}"
+        "django-secret-key" : "${DJANGO_SECRET_KEY}"
       }
     },
     {
@@ -100,12 +98,12 @@
             "from": {
               "kind": "ImageStreamTag",
               "namespace": "${NAMESPACE}",
-              "name": "ruby:2.3"
+              "name": "python:3.5"
             },
             "env": [
               {
-                "name": "RUBYGEM_MIRROR",
-                "value": "${RUBYGEM_MIRROR}"
+                  "name": "PIP_INDEX_URL",
+                  "value": "${PIP_INDEX_URL}"
               }
             ]
           }
@@ -131,7 +129,7 @@
           }
         ],
         "postCommit": {
-          "script": "bundle exec rake test"
+           "script": "./manage.py test"
         }
       }
     },
@@ -146,18 +144,7 @@
       },
       "spec": {
         "strategy": {
-          "type": "Recreate",
-          "recreateParams": {
-            "pre": {
-              "failurePolicy": "Abort",
-              "execNewPod": {
-                "command": [
-                  "./migrate-database.sh"
-                ],
-                "containerName": "${NAME}"
-              }
-            }
-          }
+          "type": "Rolling"
         },
         "triggers": [
           {
@@ -165,7 +152,7 @@
             "imageChangeParams": {
               "automatic": true,
               "containerNames": [
-                "rails-postgresql-example"
+                "django-psql-persistent"
               ],
               "from": {
                 "kind": "ImageStreamTag",
@@ -191,7 +178,7 @@
           "spec": {
             "containers": [
               {
-                "name": "rails-postgresql-example",
+                "name": "django-psql-persistent",
                 "image": " ",
                 "ports": [
                   {
@@ -200,17 +187,17 @@
                 ],
                 "readinessProbe": {
                   "timeoutSeconds": 3,
-                  "initialDelaySeconds": 5,
+                  "initialDelaySeconds": 3,
                   "httpGet": {
-                    "path": "/articles",
+                    "path": "/health",
                     "port": 8080
                   }
                 },
                 "livenessProbe": {
                   "timeoutSeconds": 3,
-                  "initialDelaySeconds": 10,
+                  "initialDelaySeconds": 30,
                   "httpGet": {
-                    "path": "/articles",
+                    "path": "/health",
                     "port": 8080
                   }
                 },
@@ -220,7 +207,15 @@
                     "value": "${DATABASE_SERVICE_NAME}"
                   },
                   {
-                    "name": "POSTGRESQL_USER",
+                    "name": "DATABASE_ENGINE",
+                    "value": "${DATABASE_ENGINE}"
+                  },
+                  {
+                    "name": "DATABASE_NAME",
+                    "value": "${DATABASE_NAME}"
+                  },
+                  {
+                    "name": "DATABASE_USER",
                     "valueFrom": {
                       "secretKeyRef" : {
                         "name" : "${NAME}",
@@ -229,7 +224,7 @@
                     }
                   },
                   {
-                    "name": "POSTGRESQL_PASSWORD",
+                    "name": "DATABASE_PASSWORD",
                     "valueFrom": {
                       "secretKeyRef" : {
                         "name" : "${NAME}",
@@ -238,51 +233,17 @@
                     }
                   },
                   {
-                    "name": "POSTGRESQL_DATABASE",
-                    "value": "${DATABASE_NAME}"
+                    "name": "APP_CONFIG",
+                    "value": "${APP_CONFIG}"
                   },
                   {
-                    "name": "SECRET_KEY_BASE",
+                    "name": "DJANGO_SECRET_KEY",
                     "valueFrom": {
                       "secretKeyRef" : {
                         "name" : "${NAME}",
-                        "key" : "keybase"
+                        "key" : "django-secret-key"
                       }
                     }
-                  },
-                  {
-                    "name": "POSTGRESQL_MAX_CONNECTIONS",
-                    "value": "${POSTGRESQL_MAX_CONNECTIONS}"
-                  },
-                  {
-                    "name": "POSTGRESQL_SHARED_BUFFERS",
-                    "value": "${POSTGRESQL_SHARED_BUFFERS}"
-                  },
-                  {
-                    "name": "APPLICATION_DOMAIN",
-                    "value": "${APPLICATION_DOMAIN}"
-                  },
-                  {
-                    "name": "APPLICATION_USER",
-                    "valueFrom": {
-                      "secretKeyRef" : {
-                        "name" : "${NAME}",
-                        "key" : "application-user"
-                      }
-                    }
-                  },
-                  {
-                    "name": "APPLICATION_PASSWORD",
-                    "valueFrom": {
-                      "secretKeyRef" : {
-                        "name" : "${NAME}",
-                        "key" : "application-password"
-                      }
-                    }
-                  },
-                  {
-                    "name": "RAILS_ENV",
-                    "value": "${RAILS_ENV}"
                   }
                 ],
                 "resources": {
@@ -292,6 +253,23 @@
                 }
               }
             ]
+          }
+        }
+      }
+    },
+    {
+      "kind": "PersistentVolumeClaim",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${DATABASE_SERVICE_NAME}"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "${VOLUME_CAPACITY}"
           }
         }
       }
@@ -364,8 +342,10 @@
           "spec": {
             "volumes": [
               {
-                "name": "data",
-                "emptyDir": {}
+                "name": "${DATABASE_SERVICE_NAME}-data",
+                "persistentVolumeClaim": {
+                  "claimName": "${DATABASE_SERVICE_NAME}"
+                }
               }
             ],
             "containers": [
@@ -375,26 +355,6 @@
                 "ports": [
                   {
                     "containerPort": 5432
-                  }
-                ],
-                "readinessProbe": {
-                  "timeoutSeconds": 1,
-                  "initialDelaySeconds": 5,
-                  "exec": {
-                    "command": [ "/bin/sh", "-i", "-c", "psql -h 127.0.0.1 -U ${POSTGRESQL_USER} -q -d ${POSTGRESQL_DATABASE} -c 'SELECT 1'"]
-                  }
-                },
-                "livenessProbe": {
-                  "timeoutSeconds": 1,
-                  "initialDelaySeconds": 30,
-                  "tcpSocket": {
-                    "port": 5432
-                  }
-                },
-                "volumeMounts": [
-                  {
-                    "name": "data",
-                    "mountPath": "/var/lib/pgsql/data"
                   }
                 ],
                 "env": [
@@ -419,16 +379,28 @@
                   {
                     "name": "POSTGRESQL_DATABASE",
                     "value": "${DATABASE_NAME}"
-                  },
-                  {
-                    "name": "POSTGRESQL_MAX_CONNECTIONS",
-                    "value": "${POSTGRESQL_MAX_CONNECTIONS}"
-                  },
-                  {
-                    "name": "POSTGRESQL_SHARED_BUFFERS",
-                    "value": "${POSTGRESQL_SHARED_BUFFERS}"
                   }
                 ],
+                "volumeMounts": [
+                  {
+                    "name": "${DATABASE_SERVICE_NAME}-data",
+                    "mountPath": "/var/lib/pgsql/data"
+                  }
+                ],
+                "readinessProbe": {
+                  "timeoutSeconds": 1,
+                  "initialDelaySeconds": 5,
+                  "exec": {
+                    "command": [ "/bin/sh", "-i", "-c", "psql -h 127.0.0.1 -U ${POSTGRESQL_USER} -q -d ${POSTGRESQL_DATABASE} -c 'SELECT 1'"]
+                  }
+                },
+                "livenessProbe": {
+                  "timeoutSeconds": 1,
+                  "initialDelaySeconds": 30,
+                  "tcpSocket": {
+                    "port": 5432
+                  }
+                },
                 "resources": {
                   "limits": {
                     "memory": "${MEMORY_POSTGRESQL_LIMIT}"
@@ -447,7 +419,7 @@
       "displayName": "Name",
       "description": "The name assigned to all of the frontend objects defined in this template.",
       "required": true,
-      "value": "rails-postgresql-example"
+      "value": "django-psql-persistent"
     },
     {
       "name": "NAMESPACE",
@@ -460,7 +432,7 @@
       "name": "MEMORY_LIMIT",
       "displayName": "Memory Limit",
       "required": true,
-      "description": "Maximum amount of memory the Rails container can use.",
+      "description": "Maximum amount of memory the Django container can use.",
       "value": "512Mi"
     },
     {
@@ -471,11 +443,18 @@
       "value": "512Mi"
     },
     {
+      "name": "VOLUME_CAPACITY",
+      "displayName": "Volume Capacity",
+      "description": "Volume space available for data, e.g. 512Mi, 2Gi",
+      "value": "1Gi",
+      "required": true
+    },
+    {
       "name": "SOURCE_REPOSITORY_URL",
       "displayName": "Git Repository URL",
       "required": true,
       "description": "The URL of the repository with your application source code.",
-      "value": "https://github.com/openshift/rails-ex.git"
+      "value": "https://github.com/openshift/django-ex.git"
     },
     {
       "name": "SOURCE_REPOSITORY_REF",
@@ -490,7 +469,7 @@
     {
       "name": "APPLICATION_DOMAIN",
       "displayName": "Application Hostname",
-      "description": "The exposed hostname that will route to the Rails service, if left blank a value will be defaulted.",
+      "description": "The exposed hostname that will route to the Django service, if left blank a value will be defaulted.",
       "value": ""
     },
     {
@@ -501,71 +480,52 @@
       "from": "[a-zA-Z0-9]{40}"
     },
     {
-      "name": "SECRET_KEY_BASE",
-      "displayName": "Secret Key",
-      "description": "Your secret key for verifying the integrity of signed cookies.",
-      "generate": "expression",
-      "from": "[a-z0-9]{127}"
-    },
-    {
-      "name": "APPLICATION_USER",
-      "displayName": "Application Username",
-      "required": true,
-      "description": "The application user that is used within the sample application to authorize access on pages.",
-      "value": "openshift"
-    },
-    {
-      "name": "APPLICATION_PASSWORD",
-      "displayName": "Application Password",
-      "required": true,
-      "description": "The application password that is used within the sample application to authorize access on pages.",
-      "value": "secret"
-    },
-    {
-      "name": "RAILS_ENV",
-      "displayName": "Rails Environment",
-      "required": true,
-      "description": "Environment under which the sample application will run. Could be set to production, development or test.",
-      "value": "production"
-    },
-    {
       "name": "DATABASE_SERVICE_NAME",
-      "required": true,
       "displayName": "Database Service Name",
+      "required": true,
       "value": "postgresql"
+    },
+    {
+      "name": "DATABASE_ENGINE",
+      "displayName": "Database Engine",
+      "required": true,
+      "description": "Database engine: postgresql, mysql or sqlite (default).",
+      "value": "postgresql"
+    },
+    {
+      "name": "DATABASE_NAME",
+      "displayName": "Database Name",
+      "required": true,
+      "value": "default"
     },
     {
       "name": "DATABASE_USER",
       "displayName": "Database Username",
-      "generate": "expression",
-      "from": "user[A-Z0-9]{3}"
+      "required": true,
+      "value": "django"
     },
     {
       "name": "DATABASE_PASSWORD",
-      "displayName": "Database Password",
+      "displayName": "Database User Password",
       "generate": "expression",
-      "from": "[a-zA-Z0-9]{8}"
+      "from": "[a-zA-Z0-9]{16}"
     },
     {
-      "name": "DATABASE_NAME",
-      "required": true,
-      "displayName": "Database Name",
-      "value": "root"
+      "name": "APP_CONFIG",
+      "displayName": "Application Configuration File Path",
+      "description": "Relative path to Gunicorn configuration file (optional)."
     },
     {
-      "name": "POSTGRESQL_MAX_CONNECTIONS",
-      "displayName": "Maximum Database Connections",
-      "value": "100"
+      "name": "DJANGO_SECRET_KEY",
+      "displayName": "Django Secret Key",
+      "description": "Set this to a long random string.",
+      "generate": "expression",
+      "from": "[\\w]{50}"
     },
     {
-      "name": "POSTGRESQL_SHARED_BUFFERS",
-      "displayName": "Shared Buffer Amount",
-      "value": "12MB"
-    },
-    {
-      "name": "RUBYGEM_MIRROR",
-      "displayName": "Custom RubyGems Mirror URL",
-      "description": "The custom RubyGems mirror URL",
+      "name": "PIP_INDEX_URL",
+      "displayName": "Custom PyPi Index URL",
+      "description": "The custom PyPi index URL",
       "value": ""
     }
   ]
