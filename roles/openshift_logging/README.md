@@ -25,7 +25,7 @@ When both `openshift_logging_install_logging` and `openshift_logging_upgrade_log
 - `openshift_logging_image_version`: The image version for the logging images to use. Defaults to 'latest'.
 - `openshift_logging_use_ops`: If 'True', set up a second ES and Kibana cluster for infrastructure logs. Defaults to 'False'.
 - `master_url`: The URL for the Kubernetes master, this does not need to be public facing but should be accessible from within the cluster. Defaults to 'https://kubernetes.default.svc.cluster.local'.
-- `public_master_url`: The public facing URL for the Kubernetes master, this is used for Authentication redirection. Defaults to 'https://localhost:8443'.
+- `openshift_logging_master_public_url`: The public facing URL for the Kubernetes master, this is used for Authentication redirection. Defaults to 'https://localhost:8443'.
 - `openshift_logging_namespace`: The namespace that Aggregated Logging will be installed in. Defaults to 'logging'.
 - `openshift_logging_curator_default_days`: The default minimum age (in days) Curator uses for deleting log records. Defaults to '30'.
 - `openshift_logging_curator_run_hour`: The hour of the day that Curator will run at. Defaults to '0'.
