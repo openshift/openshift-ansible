@@ -9,7 +9,9 @@ parameters:
 '''
 
 import sys
+
 import yum  # pylint: disable=import-error
+
 from ansible.module_utils.basic import AnsibleModule
 
 
