@@ -17,6 +17,12 @@ spec:
         name: hawkular-metrics
     spec:
       serviceAccount: hawkular
+{% if node_selector is iterable and node_selector | length > 0 %}
+      nodeSelector:
+{% for key, value in node_selector.iteritems() %}
+        {{key}}: "{{value}}"
+{% endfor %}
+{% endif %}
       containers:
       - image: {{openshift_metrics_image_prefix}}metrics-hawkular-metrics:{{openshift_metrics_image_version}}
         name: hawkular-metrics

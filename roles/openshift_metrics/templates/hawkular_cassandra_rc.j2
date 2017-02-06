@@ -19,6 +19,12 @@ spec:
         type: hawkular-cassandra
     spec:
       serviceAccount: cassandra
+{% if node_selector is iterable and node_selector | length > 0 %}
+      nodeSelector:
+{% for key, value in node_selector.iteritems() %}
+        {{key}}: "{{value}}"
+{% endfor %}
+{% endif %}
       containers:
       - image: "{{ openshift_metrics_image_prefix }}metrics-cassandra:{{ openshift_metrics_image_version }}"
         name: hawkular-cassandra-{{ node }}
