@@ -26,21 +26,26 @@
     registry_url: "{{ openshift.master.registry_url }}"
     openshift_hosted_templates_import_command: replace
   pre_tasks:
+
+  # TODO: remove temp_skip_router_registry_upgrade variable. This is a short term hack
+  # to allow ops to use this control plane upgrade, without triggering router/registry
+  # upgrade which has not yet been synced with their process.
   - name: Collect all routers
     command: >
       {{ oc_cmd }} get pods --all-namespaces -l 'router' -o json
     register: all_routers
     failed_when: false
     changed_when: false
+    when: temp_skip_router_registry_upgrade is not defined
 
   - set_fact: haproxy_routers="{{ (all_routers.stdout | from_json)['items'] | oo_pods_match_component(openshift_deployment_type, 'haproxy-router') | oo_select_keys_from_list(['metadata']) }}"
-    when: all_routers.rc == 0
+    when: all_routers.rc == 0 and temp_skip_router_registry_upgrade is not defined
 
   - set_fact: haproxy_routers=[]
-    when: all_routers.rc != 0
+    when: all_routers.rc != 0 and temp_skip_router_registry_upgrade is not defined
 
   - name: Update router image to current version
-    when: all_routers.rc == 0
+    when: all_routers.rc == 0 and temp_skip_router_registry_upgrade is not defined
     command: >
       {{ oc_cmd }} patch dc/{{ item['labels']['deploymentconfig'] }} -n {{ item['namespace'] }} -p
       '{"spec":{"template":{"spec":{"containers":[{"name":"router","image":"{{ router_image }}","livenessProbe":{"tcpSocket":null,"httpGet":{"path": "/healthz", "port": 1936, "host": "localhost", "scheme": "HTTP"},"initialDelaySeconds":10,"timeoutSeconds":1}}]}}}}'
@@ -53,9 +58,10 @@
     register: _default_registry
     failed_when: false
     changed_when: false
+    when: temp_skip_router_registry_upgrade is not defined
 
   - name: Update registry image to current version
-    when: _default_registry.rc == 0
+    when: _default_registry.rc == 0 and temp_skip_router_registry_upgrade is not defined
     command: >
       {{ oc_cmd }} patch dc/docker-registry -n default -p
       '{"spec":{"template":{"spec":{"containers":[{"name":"registry","image":"{{ registry_image }}"}]}}}}'
