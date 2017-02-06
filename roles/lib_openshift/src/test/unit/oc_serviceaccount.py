@@ -100,9 +100,9 @@ class OCServiceAccountTest(unittest.TestCase):
 
         # Making sure our mock was called as we expected
         mock_cmd.assert_has_calls([
-            mock.call(['/usr/bin/oc', '-n', 'default', 'get', 'sa', 'testserviceaccountname', '-o', 'json'], None),
-            mock.call(['/usr/bin/oc', '-n', 'default', 'create', '-f', '/tmp/testserviceaccountname'], None),
-            mock.call(['/usr/bin/oc', '-n', 'default', 'get', 'sa', 'testserviceaccountname', '-o', 'json'], None),
+            mock.call(['oc', '-n', 'default', 'get', 'sa', 'testserviceaccountname', '-o', 'json'], None),
+            mock.call(['oc', '-n', 'default', 'create', '-f', mock.ANY], None),
+            mock.call(['oc', '-n', 'default', 'get', 'sa', 'testserviceaccountname', '-o', 'json'], None),
         ])
 
     def tearDown(self):

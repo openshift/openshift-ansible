@@ -44,19 +44,19 @@ from ansible.module_utils.basic import AnsibleModule
 
 # -*- -*- -*- End included fragment: lib/import.py -*- -*- -*-
 
-# -*- -*- -*- Begin included fragment: doc/service -*- -*- -*-
+# -*- -*- -*- Begin included fragment: doc/serviceaccount_secret -*- -*- -*-
 
 DOCUMENTATION = '''
 ---
-module: oc_service
-short_description: Create, modify, and idempotently manage openshift services.
+module: oc_serviceaccount_secret
+short_description: Module to manage openshift service account secrets
 description:
-  - Manage openshift service objects programmatically.
+  - Manage openshift service account secrets programmatically.
 options:
   state:
     description:
-    - State represents whether to create, modify, delete, or list
-    required: False
+    - If present, the service account will be linked with the secret if it is not already. If absent, the service account will be unlinked from the secret if it is already linked. If list, information about the service account secrets will be gathered and returned as part of the Ansible call results.
+    required: false
     default: present
     choices: ["present", "absent", "list"]
     aliases: []
@@ -70,69 +70,25 @@ options:
     description:
     - Turn on debug output.
     required: false
-    default: False
+    default: false
     aliases: []
-  name:
+  service_account:
     description:
-    - Name of the object that is being queried.
-    required: false
+    - Name of the service account.
+    required: true
     default: None
     aliases: []
   namespace:
     description:
-    - The namespace where the object lives.
-    required: false
-    default: default
-    aliases: []
-  selector:
-    description:
-    - The selector to apply when filtering for services.
-    required: false
+    - Namespace of the service account and secret.
+    required: true
     default: None
     aliases: []
-  labels:
+  secret:
     description:
-    - The labels to apply on the service.
+    - The secret that should be linked to the service account.
     required: false
     default: None
-    aliases: []
-  clusterip:
-    description:
-    - The cluster ip address to use with this service.
-    required: false
-    default: None
-    aliases: []
-  portalip:
-    description:
-    - The portal ip(virtual ip) address to use with this service.
-    - "https://docs.openshift.com/enterprise/3.0/architecture/core_concepts/pods_and_services.html#services"
-    required: false
-    default: None
-    aliases: []
-  ports:
-    description:
-    - A list of the ports that are used for this service.  This includes name, port, protocol, and targetPort.
-    - See examples.
-    required: false
-    default: None
-    aliases: []
-  session_affinity:
-    description:
-    - The type of session affinity to use.
-    required: false
-    default: 'None'
-    aliases: []
-  service_type:
-    description:
-    - The type of service desired.  Each option tells the service to behave accordingly.
-    - https://kubernetes.io/docs/user-guide/services/
-    required: false
-    default: ClusterIP
-    choices:
-    - ClusterIP
-    - NodePort
-    - LoadBalancer
-    - ExternalName
     aliases: []
 author:
 - "Kenny Woodson <kwoodson@redhat.com>"
@@ -140,33 +96,23 @@ extends_documentation_fragment: []
 '''
 
 EXAMPLES = '''
-- name: get docker-registry service
-  run_once: true
-  oc_service:
-    namespace: default
-    name: docker-registry
-    state: list
-  register: registry_service_out
+  - name: get secrets of a service account
+    oc_serviceaccount_secret:
+      state: list
+      service_account: builder
+      namespace: default
+    register: sasecretout
 
-- name: create the docker-registry service
-  oc_service:
-    namespace: default
-    name: docker-registry
-    ports:
-    - name: 5000-tcp
-      port: 5000
-      protocol: TCP
-      targetPort: 5000
-    selector:
-      docker-registry: default
-    session_affinity: ClientIP
-    service_type: ClusterIP
-  register: svc_out
-  notify:
-  - restart openshift master services
+
+  - name: Link a service account to a specific secret
+    oc_serviceaccount_secret:
+      service_account: builder
+      secret: mynewsecret
+      namespace: default
+    register: sasecretout
 '''
 
-# -*- -*- -*- End included fragment: doc/service -*- -*- -*-
+# -*- -*- -*- End included fragment: doc/serviceaccount_secret -*- -*- -*-
 
 # -*- -*- -*- Begin included fragment: ../../lib_utils/src/class/yedit.py -*- -*- -*-
 # noqa: E301,E302
@@ -1275,311 +1221,282 @@ class OpenShiftCLIConfig(object):
 
 # -*- -*- -*- End included fragment: lib/base.py -*- -*- -*-
 
-# -*- -*- -*- Begin included fragment: lib/service.py -*- -*- -*-
+# -*- -*- -*- Begin included fragment: lib/serviceaccount.py -*- -*- -*-
 
+class ServiceAccountConfig(object):
+    '''Service account config class
 
-# pylint: disable=too-many-instance-attributes
-class ServiceConfig(object):
-    ''' Handle service options '''
+       This class stores the options and returns a default service account
+    '''
+
     # pylint: disable=too-many-arguments
-    def __init__(self,
-                 sname,
-                 namespace,
-                 ports,
-                 selector=None,
-                 labels=None,
-                 cluster_ip=None,
-                 portal_ip=None,
-                 session_affinity=None,
-                 service_type=None):
-        ''' constructor for handling service options '''
+    def __init__(self, sname, namespace, kubeconfig, secrets=None, image_pull_secrets=None):
         self.name = sname
+        self.kubeconfig = kubeconfig
         self.namespace = namespace
-        self.ports = ports
-        self.selector = selector
-        self.labels = labels
-        self.cluster_ip = cluster_ip
-        self.portal_ip = portal_ip
-        self.session_affinity = session_affinity
-        self.service_type = service_type
+        self.secrets = secrets or []
+        self.image_pull_secrets = image_pull_secrets or []
         self.data = {}
-
         self.create_dict()
 
     def create_dict(self):
-        ''' instantiates a service dict '''
+        ''' return a properly structured volume '''
         self.data['apiVersion'] = 'v1'
-        self.data['kind'] = 'Service'
+        self.data['kind'] = 'ServiceAccount'
         self.data['metadata'] = {}
         self.data['metadata']['name'] = self.name
         self.data['metadata']['namespace'] = self.namespace
-        if self.labels:
-            for lab, lab_value  in self.labels.items():
-                self.data['metadata'][lab] = lab_value
-        self.data['spec'] = {}
 
-        if self.ports:
-            self.data['spec']['ports'] = self.ports
-        else:
-            self.data['spec']['ports'] = []
+        self.data['secrets'] = []
+        if self.secrets:
+            for sec in self.secrets:
+                self.data['secrets'].append({"name": sec})
 
-        if self.selector:
-            self.data['spec']['selector'] = self.selector
+        self.data['imagePullSecrets'] = []
+        if self.image_pull_secrets:
+            for sec in self.image_pull_secrets:
+                self.data['imagePullSecrets'].append({"name": sec})
 
-        self.data['spec']['sessionAffinity'] = self.session_affinity or 'None'
-
-        if self.cluster_ip:
-            self.data['spec']['clusterIP'] = self.cluster_ip
-
-        if self.portal_ip:
-            self.data['spec']['portalIP'] = self.portal_ip
-
-        if self.service_type:
-            self.data['spec']['type'] = self.service_type
-
-# pylint: disable=too-many-instance-attributes,too-many-public-methods
-class Service(Yedit):
-    ''' Class to model the oc service object '''
-    port_path = "spec.ports"
-    portal_ip = "spec.portalIP"
-    cluster_ip = "spec.clusterIP"
-    kind = 'Service'
+class ServiceAccount(Yedit):
+    ''' Class to wrap the oc command line tools '''
+    image_pull_secrets_path = "imagePullSecrets"
+    secrets_path = "secrets"
 
     def __init__(self, content):
-        '''Service constructor'''
-        super(Service, self).__init__(content=content)
-
-    def get_ports(self):
-        ''' get a list of ports '''
-        return self.get(Service.port_path) or []
-
-    def add_ports(self, inc_ports):
-        ''' add a port object to the ports list '''
-        if not isinstance(inc_ports, list):
-            inc_ports = [inc_ports]
-
-        ports = self.get_ports()
-        if not ports:
-            self.put(Service.port_path, inc_ports)
-        else:
-            ports.extend(inc_ports)
-
-        return True
-
-    def find_ports(self, inc_port):
-        ''' find a specific port '''
-        for port in self.get_ports():
-            if port['port'] == inc_port['port']:
-                return port
-
-        return None
-
-    def delete_ports(self, inc_ports):
-        ''' remove a port from a service '''
-        if not isinstance(inc_ports, list):
-            inc_ports = [inc_ports]
-
-        ports = self.get(Service.port_path) or []
-
-        if not ports:
-            return True
-
-        removed = False
-        for inc_port in inc_ports:
-            port = self.find_ports(inc_port)
-            if port:
-                ports.remove(port)
-                removed = True
-
-        return removed
-
-    def add_cluster_ip(self, sip):
-        '''add cluster ip'''
-        self.put(Service.cluster_ip, sip)
-
-    def add_portal_ip(self, pip):
-        '''add cluster ip'''
-        self.put(Service.portal_ip, pip)
-
-# -*- -*- -*- End included fragment: lib/service.py -*- -*- -*-
-
-# -*- -*- -*- Begin included fragment: class/oc_service.py -*- -*- -*-
-
-
-# pylint: disable=too-many-instance-attributes
-class OCService(OpenShiftCLI):
-    ''' Class to wrap the oc command line tools '''
-    kind = 'service'
-
-    # pylint allows 5
-    # pylint: disable=too-many-arguments
-    def __init__(self,
-                 sname,
-                 namespace,
-                 labels,
-                 selector,
-                 cluster_ip,
-                 portal_ip,
-                 ports,
-                 session_affinity,
-                 service_type,
-                 kubeconfig='/etc/origin/master/admin.kubeconfig',
-                 verbose=False):
-        ''' Constructor for OCVolume '''
-        super(OCService, self).__init__(namespace, kubeconfig)
-        self.namespace = namespace
-        self.config = ServiceConfig(sname, namespace, ports, selector, labels,
-                                    cluster_ip, portal_ip, session_affinity, service_type)
-        self.user_svc = Service(content=self.config.data)
-        self.svc = None
+        '''ServiceAccount constructor'''
+        super(ServiceAccount, self).__init__(content=content)
+        self._secrets = None
+        self._image_pull_secrets = None
 
     @property
-    def service(self):
-        ''' property function service'''
-        if not self.svc:
-            self.get()
-        return self.svc
+    def image_pull_secrets(self):
+        ''' property for image_pull_secrets '''
+        if self._image_pull_secrets is None:
+            self._image_pull_secrets = self.get(ServiceAccount.image_pull_secrets_path) or []
+        return self._image_pull_secrets
 
-    @service.setter
-    def service(self, data):
-        ''' setter function for service var '''
-        self.svc = data
+    @image_pull_secrets.setter
+    def image_pull_secrets(self, secrets):
+        ''' property for secrets '''
+        self._image_pull_secrets = secrets
 
-    def exists(self):
-        ''' return whether a service exists '''
-        if self.service:
+    @property
+    def secrets(self):
+        ''' property for secrets '''
+        if not self._secrets:
+            self._secrets = self.get(ServiceAccount.secrets_path) or []
+        return self._secrets
+
+    @secrets.setter
+    def secrets(self, secrets):
+        ''' property for secrets '''
+        self._secrets = secrets
+
+    def delete_secret(self, inc_secret):
+        ''' remove a secret '''
+        remove_idx = None
+        for idx, sec in enumerate(self.secrets):
+            if sec['name'] == inc_secret:
+                remove_idx = idx
+                break
+
+        if remove_idx:
+            del self.secrets[remove_idx]
             return True
 
         return False
 
-    def get(self):
-        '''return service information '''
-        result = self._get(self.kind, self.config.name)
-        if result['returncode'] == 0:
-            self.service = Service(content=result['results'][0])
-            result['clusterip'] = self.service.get('spec.clusterIP')
-        elif 'services \"%s\" not found' % self.config.name  in result['stderr']:
-            result['clusterip'] = ''
-            result['returncode'] = 0
+    def delete_image_pull_secret(self, inc_secret):
+        ''' remove a image_pull_secret '''
+        remove_idx = None
+        for idx, sec in enumerate(self.image_pull_secrets):
+            if sec['name'] == inc_secret:
+                remove_idx = idx
+                break
 
-        return result
+        if remove_idx:
+            del self.image_pull_secrets[remove_idx]
+            return True
+
+        return False
+
+    def find_secret(self, inc_secret):
+        '''find secret'''
+        for secret in self.secrets:
+            if secret['name'] == inc_secret:
+                return secret
+
+        return None
+
+    def find_image_pull_secret(self, inc_secret):
+        '''find secret'''
+        for secret in self.image_pull_secrets:
+            if secret['name'] == inc_secret:
+                return secret
+
+        return None
+
+    def add_secret(self, inc_secret):
+        '''add secret'''
+        if self.secrets:
+            self.secrets.append({"name": inc_secret})  # pylint: disable=no-member
+        else:
+            self.put(ServiceAccount.secrets_path, [{"name": inc_secret}])
+
+    def add_image_pull_secret(self, inc_secret):
+        '''add image_pull_secret'''
+        if self.image_pull_secrets:
+            self.image_pull_secrets.append({"name": inc_secret})  # pylint: disable=no-member
+        else:
+            self.put(ServiceAccount.image_pull_secrets_path, [{"name": inc_secret}])
+
+# -*- -*- -*- End included fragment: lib/serviceaccount.py -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: class/oc_serviceaccount_secret.py -*- -*- -*-
+
+class OCServiceAccountSecret(OpenShiftCLI):
+    ''' Class to wrap the oc command line tools '''
+
+    kind = 'sa'
+    def __init__(self, config, verbose=False):
+        ''' Constructor for OpenshiftOC '''
+        super(OCServiceAccountSecret, self).__init__(config.namespace, config.kubeconfig)
+        self.config = config
+        self.verbose = verbose
+        self._service_account = None
+
+    @property
+    def service_account(self):
+        ''' Property for the service account '''
+        if not self._service_account:
+            self.get()
+        return self._service_account
+
+    @service_account.setter
+    def service_account(self, data):
+        ''' setter for the service account '''
+        self._service_account = data
+
+    def exists(self, in_secret):
+        ''' verifies if secret exists in the service account '''
+        result = self.service_account.find_secret(in_secret)
+        if not result:
+            return False
+        return True
+
+    def get(self):
+        ''' get the service account definition from the master '''
+        sao = self._get(OCServiceAccountSecret.kind, self.config.name)
+        if sao['returncode'] == 0:
+            self.service_account = ServiceAccount(content=sao['results'][0])
+            sao['results'] = self.service_account.get('secrets')
+        return sao
 
     def delete(self):
-        '''delete the service'''
-        return self._delete(self.kind, self.config.name)
+        ''' delete secrets '''
 
-    def create(self):
-        '''create a service '''
-        return self._create_from_content(self.config.name, self.user_svc.yaml_dict)
+        modified = []
+        for rem_secret in self.config.secrets:
+            modified.append(self.service_account.delete_secret(rem_secret))
 
-    def update(self):
-        '''create a service '''
-        # Need to copy over the portalIP and the serviceIP settings
+        if any(modified):
+            return self._replace_content(OCServiceAccountSecret.kind, self.config.name, self.service_account.yaml_dict)
 
-        self.user_svc.add_cluster_ip(self.service.get('spec.clusterIP'))
-        self.user_svc.add_portal_ip(self.service.get('spec.portalIP'))
-        return self._replace_content(self.kind, self.config.name, self.user_svc.yaml_dict)
+        return {'returncode': 0, 'changed': False}
 
-    def needs_update(self):
-        ''' verify an update is needed '''
-        skip = ['clusterIP', 'portalIP']
-        return not Utils.check_def_equal(self.user_svc.yaml_dict, self.service.yaml_dict, skip_keys=skip, debug=True)
+    def put(self):
+        ''' place secrets into sa '''
+        modified = False
+        for add_secret in self.config.secrets:
+            if not self.service_account.find_secret(add_secret):
+                self.service_account.add_secret(add_secret)
+                modified = True
 
-    # pylint: disable=too-many-return-statements,too-many-branches
+        if modified:
+            return self._replace_content(OCServiceAccountSecret.kind, self.config.name, self.service_account.yaml_dict)
+
+        return {'returncode': 0, 'changed': False}
+
+
     @staticmethod
+    # pylint: disable=too-many-return-statements,too-many-branches
+    # TODO: This function should be refactored into its individual parts.
     def run_ansible(params, check_mode):
-        '''Run the idempotent ansible code'''
-        oc_svc = OCService(params['name'],
-                           params['namespace'],
-                           params['labels'],
-                           params['selector'],
-                           params['clusterip'],
-                           params['portalip'],
-                           params['ports'],
-                           params['session_affinity'],
-                           params['service_type'])
+        ''' run the ansible idempotent code '''
+
+        sconfig = ServiceAccountConfig(params['service_account'],
+                                       params['namespace'],
+                                       params['kubeconfig'],
+                                       [params['secret']],
+                                       None)
+
+        oc_sa_sec = OCServiceAccountSecret(sconfig, verbose=params['debug'])
 
         state = params['state']
 
-        api_rval = oc_svc.get()
-
-        if api_rval['returncode'] != 0:
-            return {'failed': True, 'msg': api_rval}
+        api_rval = oc_sa_sec.get()
 
         #####
         # Get
         #####
         if state == 'list':
-            return {'changed': False, 'results': api_rval, 'state': state}
+            return {'changed': False, 'results': api_rval['results'], 'state': "list"}
 
         ########
         # Delete
         ########
         if state == 'absent':
-            if oc_svc.exists():
+            if oc_sa_sec.exists(params['secret']):
 
                 if check_mode:
-                    return {'changed': True,
-                            'msg': 'CHECK_MODE: Would have performed a delete.'}  # noqa: E501
+                    return {'changed': True, 'msg': 'Would have removed the " + \
+                            "secret from the service account.'}
 
-                api_rval = oc_svc.delete()
+                api_rval = oc_sa_sec.delete()
 
-                return {'changed': True, 'results': api_rval, 'state': state}
+                return {'changed': True, 'results': api_rval, 'state': "absent"}
 
-            return {'changed': False, 'state': state}
+            return {'changed': False, 'state': "absent"}
 
         if state == 'present':
             ########
             # Create
             ########
-            if not oc_svc.exists():
+            if not oc_sa_sec.exists(params['secret']):
 
                 if check_mode:
-                    return {'changed': True,
-                            'msg': 'CHECK_MODE: Would have performed a create.'}  # noqa: E501
+                    return {'changed': True, 'msg': 'Would have added the ' + \
+                            'secret to the service account.'}
 
                 # Create it here
-                api_rval = oc_svc.create()
-
+                api_rval = oc_sa_sec.put()
                 if api_rval['returncode'] != 0:
                     return {'failed': True, 'msg': api_rval}
 
                 # return the created object
-                api_rval = oc_svc.get()
+                api_rval = oc_sa_sec.get()
 
                 if api_rval['returncode'] != 0:
                     return {'failed': True, 'msg': api_rval}
 
-                return {'changed': True, 'results': api_rval, 'state': state}
+                return {'changed': True, 'results': api_rval, 'state': "present"}
 
-            ########
-            # Update
-            ########
-            if oc_svc.needs_update():
-                api_rval = oc_svc.update()
 
-                if api_rval['returncode'] != 0:
-                    return {'failed': True, 'msg': api_rval}
+            return {'changed': False, 'results': api_rval, 'state': "present"}
 
-                # return the created object
-                api_rval = oc_svc.get()
 
-                if api_rval['returncode'] != 0:
-                    return {'failed': True, 'msg': api_rval}
+        return {'failed': True,
+                'changed': False,
+                'msg': 'Unknown state passed. %s' % state,
+                'state': 'unknown'}
 
-                return {'changed': True, 'results': api_rval, 'state': state}
+# -*- -*- -*- End included fragment: class/oc_serviceaccount_secret.py -*- -*- -*-
 
-            return {'changed': False, 'results': api_rval, 'state': state}
-
-        return {'failed': True, 'msg': 'UNKNOWN state passed. [%s]' % state}
-
-# -*- -*- -*- End included fragment: class/oc_service.py -*- -*- -*-
-
-# -*- -*- -*- Begin included fragment: ansible/oc_service.py -*- -*- -*-
+# -*- -*- -*- Begin included fragment: ansible/oc_serviceaccount_secret.py -*- -*- -*-
 
 def main():
     '''
-    ansible oc module for services
+    ansible oc module to manage service account secrets.
     '''
 
     module = AnsibleModule(
@@ -1588,27 +1505,20 @@ def main():
             state=dict(default='present', type='str',
                        choices=['present', 'absent', 'list']),
             debug=dict(default=False, type='bool'),
-            namespace=dict(default='default', type='str'),
-            name=dict(default=None, type='str'),
-            labels=dict(default=None, type='dict'),
-            selector=dict(default=None, type='dict'),
-            clusterip=dict(default=None, type='str'),
-            portalip=dict(default=None, type='str'),
-            ports=dict(default=None, type='list'),
-            session_affinity=dict(default='None', type='str'),
-            service_type=dict(default='ClusterIP', type='str'),
+            namespace=dict(default=None, required=True, type='str'),
+            secret=dict(default=None, type='str'),
+            service_account=dict(required=True, type='str'),
         ),
         supports_check_mode=True,
     )
 
-    rval = OCService.run_ansible(module.params, module.check_mode)
+    rval = OCServiceAccountSecret.run_ansible(module.params, module.check_mode)
     if 'failed' in rval:
-        return module.fail_json(**rval)
+        module.fail_json(**rval)
 
-    return module.exit_json(**rval)
-
+    module.exit_json(**rval)
 
 if __name__ == '__main__':
     main()
 
-# -*- -*- -*- End included fragment: ansible/oc_service.py -*- -*- -*-
+# -*- -*- -*- End included fragment: ansible/oc_serviceaccount_secret.py -*- -*- -*-

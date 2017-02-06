@@ -338,6 +338,17 @@ class Yedit(object):
 
         return data
 
+    @staticmethod
+    def _write(filename, contents):
+        ''' Actually write the file contents to disk. This helps with mocking. '''
+
+        tmp_filename = filename + '.yedit'
+
+        with open(tmp_filename, 'w') as yfd:
+            yfd.write(contents)
+
+        os.rename(tmp_filename, filename)
+
     def write(self):
         ''' write to file '''
         if not self.filename:
@@ -346,15 +357,11 @@ class Yedit(object):
         if self.backup and self.file_exists():
             shutil.copy(self.filename, self.filename + '.orig')
 
-        tmp_filename = self.filename + '.yedit'
-        with open(tmp_filename, 'w') as yfd:
-            # pylint: disable=no-member
-            if hasattr(self.yaml_dict, 'fa'):
-                self.yaml_dict.fa.set_block_style()
+        # pylint: disable=no-member
+        if hasattr(self.yaml_dict, 'fa'):
+            self.yaml_dict.fa.set_block_style()
 
-            yfd.write(yaml.dump(self.yaml_dict, Dumper=yaml.RoundTripDumper))
-
-        os.rename(tmp_filename, self.filename)
+        Yedit._write(self.filename, yaml.dump(self.yaml_dict, Dumper=yaml.RoundTripDumper))
 
         return (True, self.yaml_dict)
 
