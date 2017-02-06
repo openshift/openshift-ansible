@@ -2,17 +2,17 @@
   "kind": "Template",
   "apiVersion": "v1",
   "metadata": {
-    "name": "rails-postgresql-example",
+    "name": "nodejs-mongo-persistent",
     "annotations": {
-      "openshift.io/display-name": "Rails + PostgreSQL (Ephemeral)",
-      "description": "An example Rails application with a PostgreSQL database. For more information about using this template, including OpenShift considerations, see https://github.com/openshift/rails-ex/blob/master/README.md.\n\nWARNING: Any data stored will be lost upon pod destruction. Only use this template for testing.",
-      "tags": "quickstart,ruby,rails",
-      "iconClass": "icon-ruby"
+      "openshift.io/display-name": "Node.js + MongoDB (Persistent)",
+      "description": "An example Node.js application with a MongoDB database. For more information about using this template, including OpenShift considerations, see https://github.com/openshift/nodejs-ex/blob/master/README.md.",
+      "tags": "quickstart,nodejs",
+      "iconClass": "icon-nodejs"
     }
   },
-  "message": "The following service(s) have been created in your project: ${NAME}, ${DATABASE_SERVICE_NAME}.\n\nFor more information about using this template, including OpenShift considerations, see https://github.com/openshift/rails-ex/blob/master/README.md.",
+  "message": "The following service(s) have been created in your project: ${NAME}, ${DATABASE_SERVICE_NAME}.\n\nFor more information about using this template, including OpenShift considerations, see https://github.com/openshift/nodejs-ex/blob/master/README.md.",
   "labels": {
-    "template": "rails-postgresql-example"
+    "template": "nodejs-mongo-persistent"
   },
   "objects": [
     {
@@ -21,12 +21,10 @@
       "metadata": {
         "name": "${NAME}"
       },
-      "stringData" : {
-        "database-user" : "${DATABASE_USER}",
-        "database-password" : "${DATABASE_PASSWORD}",
-        "application-user" : "${APPLICATION_USER}",
-        "application-password" : "${APPLICATION_PASSWORD}",
-        "keybase" : "${SECRET_KEY_BASE}"
+      "stringData": {
+        "database-user": "${DATABASE_USER}",
+        "database-password": "${DATABASE_PASSWORD}",
+        "database-admin-password" : "${DATABASE_ADMIN_PASSWORD}"
       }
     },
     {
@@ -100,12 +98,12 @@
             "from": {
               "kind": "ImageStreamTag",
               "namespace": "${NAMESPACE}",
-              "name": "ruby:2.3"
+              "name": "nodejs:4"
             },
-            "env": [
+            "env":  [
               {
-                "name": "RUBYGEM_MIRROR",
-                "value": "${RUBYGEM_MIRROR}"
+                "name": "NPM_MIRROR",
+                "value": "${NPM_MIRROR}"
               }
             ]
           }
@@ -128,10 +126,16 @@
             "github": {
               "secret": "${GITHUB_WEBHOOK_SECRET}"
             }
+          },
+          {
+            "type": "Generic",
+            "generic": {
+              "secret": "${GENERIC_WEBHOOK_SECRET}"
+            }
           }
         ],
         "postCommit": {
-          "script": "bundle exec rake test"
+          "script": "npm test"
         }
       }
     },
@@ -146,18 +150,7 @@
       },
       "spec": {
         "strategy": {
-          "type": "Recreate",
-          "recreateParams": {
-            "pre": {
-              "failurePolicy": "Abort",
-              "execNewPod": {
-                "command": [
-                  "./migrate-database.sh"
-                ],
-                "containerName": "${NAME}"
-              }
-            }
-          }
+          "type": "Rolling"
         },
         "triggers": [
           {
@@ -165,7 +158,7 @@
             "imageChangeParams": {
               "automatic": true,
               "containerNames": [
-                "rails-postgresql-example"
+                "nodejs-mongo-persistent"
               ],
               "from": {
                 "kind": "ImageStreamTag",
@@ -191,36 +184,20 @@
           "spec": {
             "containers": [
               {
-                "name": "rails-postgresql-example",
+                "name": "nodejs-mongo-persistent",
                 "image": " ",
                 "ports": [
                   {
                     "containerPort": 8080
                   }
                 ],
-                "readinessProbe": {
-                  "timeoutSeconds": 3,
-                  "initialDelaySeconds": 5,
-                  "httpGet": {
-                    "path": "/articles",
-                    "port": 8080
-                  }
-                },
-                "livenessProbe": {
-                  "timeoutSeconds": 3,
-                  "initialDelaySeconds": 10,
-                  "httpGet": {
-                    "path": "/articles",
-                    "port": 8080
-                  }
-                },
                 "env": [
                   {
                     "name": "DATABASE_SERVICE_NAME",
                     "value": "${DATABASE_SERVICE_NAME}"
                   },
                   {
-                    "name": "POSTGRESQL_USER",
+                    "name": "MONGODB_USER",
                     "valueFrom": {
                       "secretKeyRef" : {
                         "name" : "${NAME}",
@@ -229,7 +206,7 @@
                     }
                   },
                   {
-                    "name": "POSTGRESQL_PASSWORD",
+                    "name": "MONGODB_PASSWORD",
                     "valueFrom": {
                       "secretKeyRef" : {
                         "name" : "${NAME}",
@@ -238,53 +215,35 @@
                     }
                   },
                   {
-                    "name": "POSTGRESQL_DATABASE",
+                    "name": "MONGODB_DATABASE",
                     "value": "${DATABASE_NAME}"
                   },
                   {
-                    "name": "SECRET_KEY_BASE",
+                    "name": "MONGODB_ADMIN_PASSWORD",
                     "valueFrom": {
                       "secretKeyRef" : {
                         "name" : "${NAME}",
-                        "key" : "keybase"
+                        "key" : "database-admin-password"
                       }
                     }
-                  },
-                  {
-                    "name": "POSTGRESQL_MAX_CONNECTIONS",
-                    "value": "${POSTGRESQL_MAX_CONNECTIONS}"
-                  },
-                  {
-                    "name": "POSTGRESQL_SHARED_BUFFERS",
-                    "value": "${POSTGRESQL_SHARED_BUFFERS}"
-                  },
-                  {
-                    "name": "APPLICATION_DOMAIN",
-                    "value": "${APPLICATION_DOMAIN}"
-                  },
-                  {
-                    "name": "APPLICATION_USER",
-                    "valueFrom": {
-                      "secretKeyRef" : {
-                        "name" : "${NAME}",
-                        "key" : "application-user"
-                      }
-                    }
-                  },
-                  {
-                    "name": "APPLICATION_PASSWORD",
-                    "valueFrom": {
-                      "secretKeyRef" : {
-                        "name" : "${NAME}",
-                        "key" : "application-password"
-                      }
-                    }
-                  },
-                  {
-                    "name": "RAILS_ENV",
-                    "value": "${RAILS_ENV}"
                   }
                 ],
+                "readinessProbe": {
+                  "timeoutSeconds": 3,
+                  "initialDelaySeconds": 3,
+                  "httpGet": {
+                    "path": "/pagecount",
+                    "port": 8080
+                  }
+                },
+                "livenessProbe": {
+                  "timeoutSeconds": 3,
+                  "initialDelaySeconds": 30,
+                  "httpGet": {
+                    "path": "/pagecount",
+                    "port": 8080
+                  }
+                },
                 "resources": {
                   "limits": {
                     "memory": "${MEMORY_LIMIT}"
@@ -292,6 +251,23 @@
                 }
               }
             ]
+          }
+        }
+      }
+    },
+    {
+      "kind": "PersistentVolumeClaim",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${DATABASE_SERVICE_NAME}"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "${VOLUME_CAPACITY}"
           }
         }
       }
@@ -308,9 +284,9 @@
       "spec": {
         "ports": [
           {
-            "name": "postgresql",
-            "port": 5432,
-            "targetPort": 5432
+            "name": "mongodb",
+            "port": 27017,
+            "targetPort": 27017
           }
         ],
         "selector": {
@@ -337,12 +313,12 @@
             "imageChangeParams": {
               "automatic": true,
               "containerNames": [
-                "postgresql"
+                "mongodb"
               ],
               "from": {
                 "kind": "ImageStreamTag",
                 "namespace": "${NAMESPACE}",
-                "name": "postgresql:9.5"
+                "name": "mongodb:3.2"
               }
             }
           },
@@ -362,44 +338,18 @@
             }
           },
           "spec": {
-            "volumes": [
-              {
-                "name": "data",
-                "emptyDir": {}
-              }
-            ],
             "containers": [
               {
-                "name": "postgresql",
+                "name": "mongodb",
                 "image": " ",
                 "ports": [
                   {
-                    "containerPort": 5432
-                  }
-                ],
-                "readinessProbe": {
-                  "timeoutSeconds": 1,
-                  "initialDelaySeconds": 5,
-                  "exec": {
-                    "command": [ "/bin/sh", "-i", "-c", "psql -h 127.0.0.1 -U ${POSTGRESQL_USER} -q -d ${POSTGRESQL_DATABASE} -c 'SELECT 1'"]
-                  }
-                },
-                "livenessProbe": {
-                  "timeoutSeconds": 1,
-                  "initialDelaySeconds": 30,
-                  "tcpSocket": {
-                    "port": 5432
-                  }
-                },
-                "volumeMounts": [
-                  {
-                    "name": "data",
-                    "mountPath": "/var/lib/pgsql/data"
+                    "containerPort": 27017
                   }
                 ],
                 "env": [
                   {
-                    "name": "POSTGRESQL_USER",
+                    "name": "MONGODB_USER",
                     "valueFrom": {
                       "secretKeyRef" : {
                         "name" : "${NAME}",
@@ -408,7 +358,7 @@
                     }
                   },
                   {
-                    "name": "POSTGRESQL_PASSWORD",
+                    "name": "MONGODB_PASSWORD",
                     "valueFrom": {
                       "secretKeyRef" : {
                         "name" : "${NAME}",
@@ -417,22 +367,56 @@
                     }
                   },
                   {
-                    "name": "POSTGRESQL_DATABASE",
+                    "name": "MONGODB_DATABASE",
                     "value": "${DATABASE_NAME}"
                   },
                   {
-                    "name": "POSTGRESQL_MAX_CONNECTIONS",
-                    "value": "${POSTGRESQL_MAX_CONNECTIONS}"
-                  },
-                  {
-                    "name": "POSTGRESQL_SHARED_BUFFERS",
-                    "value": "${POSTGRESQL_SHARED_BUFFERS}"
+                    "name": "MONGODB_ADMIN_PASSWORD",
+                    "valueFrom": {
+                      "secretKeyRef" : {
+                        "name" : "${NAME}",
+                        "key" : "database-admin-password"
+                      }
+                    }
                   }
                 ],
+                "readinessProbe": {
+                  "timeoutSeconds": 1,
+                  "initialDelaySeconds": 3,
+                  "exec": {
+                    "command": [
+                      "/bin/sh",
+                      "-i",
+                      "-c",
+                      "mongo 127.0.0.1:27017/$MONGODB_DATABASE -u $MONGODB_USER -p $MONGODB_PASSWORD --eval=\"quit()\""
+                    ]
+                  }
+                },
+                "livenessProbe": {
+                  "timeoutSeconds": 1,
+                  "initialDelaySeconds": 30,
+                  "tcpSocket": {
+                    "port": 27017
+                  }
+                },
                 "resources": {
                   "limits": {
-                    "memory": "${MEMORY_POSTGRESQL_LIMIT}"
+                    "memory": "${MEMORY_MONGODB_LIMIT}"
                   }
+                },
+                "volumeMounts": [
+                  {
+                    "name": "${DATABASE_SERVICE_NAME}-data",
+                    "mountPath": "/var/lib/mongodb/data"
+                  }
+                ]
+              }
+            ],
+            "volumes": [
+              {
+                "name": "${DATABASE_SERVICE_NAME}-data",
+                "persistentVolumeClaim": {
+                  "claimName": "${DATABASE_SERVICE_NAME}"
                 }
               }
             ]
@@ -447,35 +431,42 @@
       "displayName": "Name",
       "description": "The name assigned to all of the frontend objects defined in this template.",
       "required": true,
-      "value": "rails-postgresql-example"
+      "value": "nodejs-mongo-persistent"
     },
     {
       "name": "NAMESPACE",
       "displayName": "Namespace",
-      "required": true,
       "description": "The OpenShift Namespace where the ImageStream resides.",
+      "required": true,
       "value": "openshift"
     },
     {
       "name": "MEMORY_LIMIT",
       "displayName": "Memory Limit",
+      "description": "Maximum amount of memory the Node.js container can use.",
       "required": true,
-      "description": "Maximum amount of memory the Rails container can use.",
       "value": "512Mi"
     },
     {
-      "name": "MEMORY_POSTGRESQL_LIMIT",
-      "displayName": "Memory Limit (PostgreSQL)",
+      "name": "MEMORY_MONGODB_LIMIT",
+      "displayName": "Memory Limit (MongoDB)",
+      "description": "Maximum amount of memory the MongoDB container can use.",
       "required": true,
-      "description": "Maximum amount of memory the PostgreSQL container can use.",
       "value": "512Mi"
+    },
+    {
+      "name": "VOLUME_CAPACITY",
+      "displayName": "Volume Capacity",
+      "description": "Volume space available for data, e.g. 512Mi, 2Gi",
+      "value": "1Gi",
+      "required": true
     },
     {
       "name": "SOURCE_REPOSITORY_URL",
       "displayName": "Git Repository URL",
-      "required": true,
       "description": "The URL of the repository with your application source code.",
-      "value": "https://github.com/openshift/rails-ex.git"
+      "required": true,
+      "value": "https://github.com/openshift/nodejs-ex.git"
     },
     {
       "name": "SOURCE_REPOSITORY_REF",
@@ -490,7 +481,7 @@
     {
       "name": "APPLICATION_DOMAIN",
       "displayName": "Application Hostname",
-      "description": "The exposed hostname that will route to the Rails service, if left blank a value will be defaulted.",
+      "description": "The exposed hostname that will route to the Node.js service, if left blank a value will be defaulted.",
       "value": ""
     },
     {
@@ -501,71 +492,49 @@
       "from": "[a-zA-Z0-9]{40}"
     },
     {
-      "name": "SECRET_KEY_BASE",
-      "displayName": "Secret Key",
-      "description": "Your secret key for verifying the integrity of signed cookies.",
+      "name": "GENERIC_WEBHOOK_SECRET",
+      "displayName": "Generic Webhook Secret",
+      "description": "A secret string used to configure the Generic webhook.",
       "generate": "expression",
-      "from": "[a-z0-9]{127}"
-    },
-    {
-      "name": "APPLICATION_USER",
-      "displayName": "Application Username",
-      "required": true,
-      "description": "The application user that is used within the sample application to authorize access on pages.",
-      "value": "openshift"
-    },
-    {
-      "name": "APPLICATION_PASSWORD",
-      "displayName": "Application Password",
-      "required": true,
-      "description": "The application password that is used within the sample application to authorize access on pages.",
-      "value": "secret"
-    },
-    {
-      "name": "RAILS_ENV",
-      "displayName": "Rails Environment",
-      "required": true,
-      "description": "Environment under which the sample application will run. Could be set to production, development or test.",
-      "value": "production"
+      "from": "[a-zA-Z0-9]{40}"
     },
     {
       "name": "DATABASE_SERVICE_NAME",
-      "required": true,
       "displayName": "Database Service Name",
-      "value": "postgresql"
+      "required": true,
+      "value": "mongodb"
     },
     {
       "name": "DATABASE_USER",
-      "displayName": "Database Username",
+      "displayName": "MongoDB Username",
+      "description": "Username for MongoDB user that will be used for accessing the database.",
       "generate": "expression",
       "from": "user[A-Z0-9]{3}"
     },
     {
       "name": "DATABASE_PASSWORD",
-      "displayName": "Database Password",
+      "displayName": "MongoDB Password",
+      "description": "Password for the MongoDB user.",
       "generate": "expression",
-      "from": "[a-zA-Z0-9]{8}"
+      "from": "[a-zA-Z0-9]{16}"
     },
     {
       "name": "DATABASE_NAME",
-      "required": true,
       "displayName": "Database Name",
-      "value": "root"
+      "required": true,
+      "value": "sampledb"
     },
     {
-      "name": "POSTGRESQL_MAX_CONNECTIONS",
-      "displayName": "Maximum Database Connections",
-      "value": "100"
+      "name": "DATABASE_ADMIN_PASSWORD",
+      "displayName": "Database Administrator Password",
+      "description": "Password for the database admin user.",
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{16}"
     },
     {
-      "name": "POSTGRESQL_SHARED_BUFFERS",
-      "displayName": "Shared Buffer Amount",
-      "value": "12MB"
-    },
-    {
-      "name": "RUBYGEM_MIRROR",
-      "displayName": "Custom RubyGems Mirror URL",
-      "description": "The custom RubyGems mirror URL",
+      "name": "NPM_MIRROR",
+      "displayName": "Custom NPM Mirror URL",
+      "description": "The custom NPM mirror URL",
       "value": ""
     }
   ]

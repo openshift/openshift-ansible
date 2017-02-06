@@ -2,17 +2,17 @@
   "kind": "Template",
   "apiVersion": "v1",
   "metadata": {
-    "name": "rails-postgresql-example",
+    "name": "cakephp-mysql-persistent",
     "annotations": {
-      "openshift.io/display-name": "Rails + PostgreSQL (Ephemeral)",
-      "description": "An example Rails application with a PostgreSQL database. For more information about using this template, including OpenShift considerations, see https://github.com/openshift/rails-ex/blob/master/README.md.\n\nWARNING: Any data stored will be lost upon pod destruction. Only use this template for testing.",
-      "tags": "quickstart,ruby,rails",
-      "iconClass": "icon-ruby"
+      "openshift.io/display-name": "CakePHP + MySQL (Persistent)",
+      "description": "An example CakePHP application with a MySQL database. For more information about using this template, including OpenShift considerations, see https://github.com/openshift/cakephp-ex/blob/master/README.md.",
+      "tags": "quickstart,php,cakephp",
+      "iconClass": "icon-php"
     }
   },
-  "message": "The following service(s) have been created in your project: ${NAME}, ${DATABASE_SERVICE_NAME}.\n\nFor more information about using this template, including OpenShift considerations, see https://github.com/openshift/rails-ex/blob/master/README.md.",
+  "message": "The following service(s) have been created in your project: ${NAME}, ${DATABASE_SERVICE_NAME}.\n\nFor more information about using this template, including OpenShift considerations, see https://github.com/openshift/cake-ex/blob/master/README.md.",
   "labels": {
-    "template": "rails-postgresql-example"
+    "template": "cakephp-mysql-persistent"
   },
   "objects": [
     {
@@ -24,9 +24,9 @@
       "stringData" : {
         "database-user" : "${DATABASE_USER}",
         "database-password" : "${DATABASE_PASSWORD}",
-        "application-user" : "${APPLICATION_USER}",
-        "application-password" : "${APPLICATION_PASSWORD}",
-        "keybase" : "${SECRET_KEY_BASE}"
+        "cakephp-secret-token" : "${CAKEPHP_SECRET_TOKEN}",
+        "cakephp-security-salt" : "${CAKEPHP_SECURITY_SALT}",
+        "cakephp-security-cipher-seed" : "${CAKEPHP_SECURITY_CIPHER_SEED}"
       }
     },
     {
@@ -100,12 +100,12 @@
             "from": {
               "kind": "ImageStreamTag",
               "namespace": "${NAMESPACE}",
-              "name": "ruby:2.3"
+              "name": "php:7.0"
             },
-            "env": [
+            "env":  [
               {
-                "name": "RUBYGEM_MIRROR",
-                "value": "${RUBYGEM_MIRROR}"
+                "name": "COMPOSER_MIRROR",
+                "value": "${COMPOSER_MIRROR}"
               }
             ]
           }
@@ -129,10 +129,7 @@
               "secret": "${GITHUB_WEBHOOK_SECRET}"
             }
           }
-        ],
-        "postCommit": {
-          "script": "bundle exec rake test"
-        }
+        ]
       }
     },
     {
@@ -149,12 +146,12 @@
           "type": "Recreate",
           "recreateParams": {
             "pre": {
-              "failurePolicy": "Abort",
+              "failurePolicy": "Retry",
               "execNewPod": {
                 "command": [
                   "./migrate-database.sh"
                 ],
-                "containerName": "${NAME}"
+                "containerName": "cakephp-mysql-persistent"
               }
             }
           }
@@ -165,7 +162,7 @@
             "imageChangeParams": {
               "automatic": true,
               "containerNames": [
-                "rails-postgresql-example"
+                "cakephp-mysql-persistent"
               ],
               "from": {
                 "kind": "ImageStreamTag",
@@ -191,7 +188,7 @@
           "spec": {
             "containers": [
               {
-                "name": "rails-postgresql-example",
+                "name": "cakephp-mysql-persistent",
                 "image": " ",
                 "ports": [
                   {
@@ -200,17 +197,17 @@
                 ],
                 "readinessProbe": {
                   "timeoutSeconds": 3,
-                  "initialDelaySeconds": 5,
+                  "initialDelaySeconds": 3,
                   "httpGet": {
-                    "path": "/articles",
+                    "path": "/health.php",
                     "port": 8080
                   }
                 },
                 "livenessProbe": {
                   "timeoutSeconds": 3,
-                  "initialDelaySeconds": 10,
+                  "initialDelaySeconds": 30,
                   "httpGet": {
-                    "path": "/articles",
+                    "path": "/",
                     "port": 8080
                   }
                 },
@@ -220,7 +217,15 @@
                     "value": "${DATABASE_SERVICE_NAME}"
                   },
                   {
-                    "name": "POSTGRESQL_USER",
+                    "name": "DATABASE_ENGINE",
+                    "value": "${DATABASE_ENGINE}"
+                  },
+                  {
+                    "name": "DATABASE_NAME",
+                    "value": "${DATABASE_NAME}"
+                  },
+                  {
+                    "name": "DATABASE_USER",
                     "valueFrom": {
                       "secretKeyRef" : {
                         "name" : "${NAME}",
@@ -229,7 +234,7 @@
                     }
                   },
                   {
-                    "name": "POSTGRESQL_PASSWORD",
+                    "name": "DATABASE_PASSWORD",
                     "valueFrom": {
                       "secretKeyRef" : {
                         "name" : "${NAME}",
@@ -238,51 +243,35 @@
                     }
                   },
                   {
-                    "name": "POSTGRESQL_DATABASE",
-                    "value": "${DATABASE_NAME}"
-                  },
-                  {
-                    "name": "SECRET_KEY_BASE",
+                    "name": "CAKEPHP_SECRET_TOKEN",
                     "valueFrom": {
                       "secretKeyRef" : {
                         "name" : "${NAME}",
-                        "key" : "keybase"
+                        "key" : "cakephp-secret-token"
                       }
                     }
                   },
                   {
-                    "name": "POSTGRESQL_MAX_CONNECTIONS",
-                    "value": "${POSTGRESQL_MAX_CONNECTIONS}"
-                  },
-                  {
-                    "name": "POSTGRESQL_SHARED_BUFFERS",
-                    "value": "${POSTGRESQL_SHARED_BUFFERS}"
-                  },
-                  {
-                    "name": "APPLICATION_DOMAIN",
-                    "value": "${APPLICATION_DOMAIN}"
-                  },
-                  {
-                    "name": "APPLICATION_USER",
+                    "name": "CAKEPHP_SECURITY_SALT",
                     "valueFrom": {
                       "secretKeyRef" : {
                         "name" : "${NAME}",
-                        "key" : "application-user"
+                        "key" : "cakephp-security-salt"
                       }
                     }
                   },
                   {
-                    "name": "APPLICATION_PASSWORD",
+                    "name": "CAKEPHP_SECURITY_CIPHER_SEED",
                     "valueFrom": {
                       "secretKeyRef" : {
                         "name" : "${NAME}",
-                        "key" : "application-password"
+                        "key" : "cakephp-security-cipher-seed"
                       }
                     }
                   },
                   {
-                    "name": "RAILS_ENV",
-                    "value": "${RAILS_ENV}"
+                    "name": "OPCACHE_REVALIDATE_FREQ",
+                    "value": "${OPCACHE_REVALIDATE_FREQ}"
                   }
                 ],
                 "resources": {
@@ -292,6 +281,23 @@
                 }
               }
             ]
+          }
+        }
+      }
+    },
+    {
+      "kind": "PersistentVolumeClaim",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${DATABASE_SERVICE_NAME}"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "${VOLUME_CAPACITY}"
           }
         }
       }
@@ -308,9 +314,9 @@
       "spec": {
         "ports": [
           {
-            "name": "postgresql",
-            "port": 5432,
-            "targetPort": 5432
+            "name": "mysql",
+            "port": 3306,
+            "targetPort": 3306
           }
         ],
         "selector": {
@@ -337,12 +343,12 @@
             "imageChangeParams": {
               "automatic": true,
               "containerNames": [
-                "postgresql"
+                "mysql"
               ],
               "from": {
                 "kind": "ImageStreamTag",
                 "namespace": "${NAMESPACE}",
-                "name": "postgresql:9.5"
+                "name": "mysql:5.7"
               }
             }
           },
@@ -364,42 +370,44 @@
           "spec": {
             "volumes": [
               {
-                "name": "data",
-                "emptyDir": {}
+                "name": "${DATABASE_SERVICE_NAME}-data",
+                "persistentVolumeClaim": {
+                  "claimName": "${DATABASE_SERVICE_NAME}"
+                }
               }
             ],
             "containers": [
               {
-                "name": "postgresql",
+                "name": "mysql",
                 "image": " ",
                 "ports": [
                   {
-                    "containerPort": 5432
+                    "containerPort": 3306
+                  }
+                ],
+                "volumeMounts": [
+                  {
+                    "name": "${DATABASE_SERVICE_NAME}-data",
+                    "mountPath": "/var/lib/mysql/data"
                   }
                 ],
                 "readinessProbe": {
                   "timeoutSeconds": 1,
                   "initialDelaySeconds": 5,
                   "exec": {
-                    "command": [ "/bin/sh", "-i", "-c", "psql -h 127.0.0.1 -U ${POSTGRESQL_USER} -q -d ${POSTGRESQL_DATABASE} -c 'SELECT 1'"]
+                    "command": [ "/bin/sh", "-i", "-c", "MYSQL_PWD='${DATABASE_PASSWORD}' mysql -h 127.0.0.1 -u ${DATABASE_USER} -D ${DATABASE_NAME} -e 'SELECT 1'" ]
                   }
                 },
                 "livenessProbe": {
                   "timeoutSeconds": 1,
                   "initialDelaySeconds": 30,
                   "tcpSocket": {
-                    "port": 5432
+                    "port": 3306
                   }
                 },
-                "volumeMounts": [
-                  {
-                    "name": "data",
-                    "mountPath": "/var/lib/pgsql/data"
-                  }
-                ],
                 "env": [
                   {
-                    "name": "POSTGRESQL_USER",
+                    "name": "MYSQL_USER",
                     "valueFrom": {
                       "secretKeyRef" : {
                         "name" : "${NAME}",
@@ -408,7 +416,7 @@
                     }
                   },
                   {
-                    "name": "POSTGRESQL_PASSWORD",
+                    "name": "MYSQL_PASSWORD",
                     "valueFrom": {
                       "secretKeyRef" : {
                         "name" : "${NAME}",
@@ -417,21 +425,13 @@
                     }
                   },
                   {
-                    "name": "POSTGRESQL_DATABASE",
+                    "name": "MYSQL_DATABASE",
                     "value": "${DATABASE_NAME}"
-                  },
-                  {
-                    "name": "POSTGRESQL_MAX_CONNECTIONS",
-                    "value": "${POSTGRESQL_MAX_CONNECTIONS}"
-                  },
-                  {
-                    "name": "POSTGRESQL_SHARED_BUFFERS",
-                    "value": "${POSTGRESQL_SHARED_BUFFERS}"
                   }
                 ],
                 "resources": {
                   "limits": {
-                    "memory": "${MEMORY_POSTGRESQL_LIMIT}"
+                    "memory": "${MEMORY_MYSQL_LIMIT}"
                   }
                 }
               }
@@ -447,35 +447,42 @@
       "displayName": "Name",
       "description": "The name assigned to all of the frontend objects defined in this template.",
       "required": true,
-      "value": "rails-postgresql-example"
+      "value": "cakephp-mysql-persistent"
     },
     {
       "name": "NAMESPACE",
       "displayName": "Namespace",
-      "required": true,
       "description": "The OpenShift Namespace where the ImageStream resides.",
+      "required": true,
       "value": "openshift"
     },
     {
       "name": "MEMORY_LIMIT",
       "displayName": "Memory Limit",
+      "description": "Maximum amount of memory the CakePHP container can use.",
       "required": true,
-      "description": "Maximum amount of memory the Rails container can use.",
       "value": "512Mi"
     },
     {
-      "name": "MEMORY_POSTGRESQL_LIMIT",
-      "displayName": "Memory Limit (PostgreSQL)",
+      "name": "MEMORY_MYSQL_LIMIT",
+      "displayName": "Memory Limit (MySQL)",
+      "description": "Maximum amount of memory the MySQL container can use.",
       "required": true,
-      "description": "Maximum amount of memory the PostgreSQL container can use.",
       "value": "512Mi"
+    },
+    {
+      "name": "VOLUME_CAPACITY",
+      "displayName": "Volume Capacity",
+      "description": "Volume space available for data, e.g. 512Mi, 2Gi",
+      "value": "1Gi",
+      "required": true
     },
     {
       "name": "SOURCE_REPOSITORY_URL",
       "displayName": "Git Repository URL",
-      "required": true,
       "description": "The URL of the repository with your application source code.",
-      "value": "https://github.com/openshift/rails-ex.git"
+      "required": true,
+      "value": "https://github.com/openshift/cakephp-ex.git"
     },
     {
       "name": "SOURCE_REPOSITORY_REF",
@@ -490,7 +497,7 @@
     {
       "name": "APPLICATION_DOMAIN",
       "displayName": "Application Hostname",
-      "description": "The exposed hostname that will route to the Rails service, if left blank a value will be defaulted.",
+      "description": "The exposed hostname that will route to the CakePHP service, if left blank a value will be defaulted.",
       "value": ""
     },
     {
@@ -501,71 +508,67 @@
       "from": "[a-zA-Z0-9]{40}"
     },
     {
-      "name": "SECRET_KEY_BASE",
-      "displayName": "Secret Key",
-      "description": "Your secret key for verifying the integrity of signed cookies.",
-      "generate": "expression",
-      "from": "[a-z0-9]{127}"
-    },
-    {
-      "name": "APPLICATION_USER",
-      "displayName": "Application Username",
-      "required": true,
-      "description": "The application user that is used within the sample application to authorize access on pages.",
-      "value": "openshift"
-    },
-    {
-      "name": "APPLICATION_PASSWORD",
-      "displayName": "Application Password",
-      "required": true,
-      "description": "The application password that is used within the sample application to authorize access on pages.",
-      "value": "secret"
-    },
-    {
-      "name": "RAILS_ENV",
-      "displayName": "Rails Environment",
-      "required": true,
-      "description": "Environment under which the sample application will run. Could be set to production, development or test.",
-      "value": "production"
-    },
-    {
       "name": "DATABASE_SERVICE_NAME",
-      "required": true,
       "displayName": "Database Service Name",
-      "value": "postgresql"
+      "required": true,
+      "value": "mysql"
+    },
+    {
+      "name": "DATABASE_ENGINE",
+      "displayName": "Database Engine",
+      "description": "Database engine: postgresql, mysql or sqlite (default).",
+      "required": true,
+      "value": "mysql"
+    },
+    {
+      "name": "DATABASE_NAME",
+      "displayName": "Database Name",
+      "required": true,
+      "value": "default"
     },
     {
       "name": "DATABASE_USER",
-      "displayName": "Database Username",
-      "generate": "expression",
-      "from": "user[A-Z0-9]{3}"
+      "displayName": "Database User",
+      "required": true,
+      "value": "cakephp"
     },
     {
       "name": "DATABASE_PASSWORD",
       "displayName": "Database Password",
       "generate": "expression",
-      "from": "[a-zA-Z0-9]{8}"
+      "from": "[a-zA-Z0-9]{16}"
     },
     {
-      "name": "DATABASE_NAME",
-      "required": true,
-      "displayName": "Database Name",
-      "value": "root"
+      "name": "CAKEPHP_SECRET_TOKEN",
+      "displayName": "CakePHP secret token",
+      "description": "Set this to a long random string.",
+      "generate": "expression",
+      "from": "[\\w]{50}"
     },
     {
-      "name": "POSTGRESQL_MAX_CONNECTIONS",
-      "displayName": "Maximum Database Connections",
-      "value": "100"
+      "name": "CAKEPHP_SECURITY_SALT",
+      "displayName": "CakePHP Security Salt",
+      "description": "Security salt for session hash.",
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{40}"
     },
     {
-      "name": "POSTGRESQL_SHARED_BUFFERS",
-      "displayName": "Shared Buffer Amount",
-      "value": "12MB"
+      "name": "CAKEPHP_SECURITY_CIPHER_SEED",
+      "displayName": "CakePHP Security Cipher Seed",
+      "description": "Security cipher seed for session hash.",
+      "generate": "expression",
+      "from": "[0-9]{30}"
     },
     {
-      "name": "RUBYGEM_MIRROR",
-      "displayName": "Custom RubyGems Mirror URL",
-      "description": "The custom RubyGems mirror URL",
+      "name": "OPCACHE_REVALIDATE_FREQ",
+      "displayName": "OPcache Revalidation Frequency",
+      "description": "How often to check script timestamps for updates, in seconds. 0 will result in OPcache checking for updates on every request.",
+      "value": "2"
+    },
+    {
+      "name": "COMPOSER_MIRROR",
+      "displayName": "Custom Composer Mirror URL",
+      "description": "The custom Composer mirror URL",
       "value": ""
     }
   ]

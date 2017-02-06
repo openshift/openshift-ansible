@@ -2,17 +2,17 @@
   "kind": "Template",
   "apiVersion": "v1",
   "metadata": {
-    "name": "rails-postgresql-example",
+    "name": "rails-pgsql-persistent",
     "annotations": {
-      "openshift.io/display-name": "Rails + PostgreSQL (Ephemeral)",
-      "description": "An example Rails application with a PostgreSQL database. For more information about using this template, including OpenShift considerations, see https://github.com/openshift/rails-ex/blob/master/README.md.\n\nWARNING: Any data stored will be lost upon pod destruction. Only use this template for testing.",
+      "openshift.io/display-name": "Rails + PostgreSQL (Persistent)",
+      "description": "An example Rails application with a PostgreSQL database. For more information about using this template, including OpenShift considerations, see https://github.com/openshift/rails-ex/blob/master/README.md.",
       "tags": "quickstart,ruby,rails",
       "iconClass": "icon-ruby"
     }
   },
   "message": "The following service(s) have been created in your project: ${NAME}, ${DATABASE_SERVICE_NAME}.\n\nFor more information about using this template, including OpenShift considerations, see https://github.com/openshift/rails-ex/blob/master/README.md.",
   "labels": {
-    "template": "rails-postgresql-example"
+    "template": "rails-pgsql-persistent"
   },
   "objects": [
     {
@@ -165,7 +165,7 @@
             "imageChangeParams": {
               "automatic": true,
               "containerNames": [
-                "rails-postgresql-example"
+                "rails-pgsql-persistent"
               ],
               "from": {
                 "kind": "ImageStreamTag",
@@ -191,7 +191,7 @@
           "spec": {
             "containers": [
               {
-                "name": "rails-postgresql-example",
+                "name": "rails-pgsql-persistent",
                 "image": " ",
                 "ports": [
                   {
@@ -238,10 +238,6 @@
                     }
                   },
                   {
-                    "name": "POSTGRESQL_DATABASE",
-                    "value": "${DATABASE_NAME}"
-                  },
-                  {
                     "name": "SECRET_KEY_BASE",
                     "valueFrom": {
                       "secretKeyRef" : {
@@ -249,6 +245,10 @@
                         "key" : "keybase"
                       }
                     }
+                  },
+                  {
+                    "name": "POSTGRESQL_DATABASE",
+                    "value": "${DATABASE_NAME}"
                   },
                   {
                     "name": "POSTGRESQL_MAX_CONNECTIONS",
@@ -292,6 +292,23 @@
                 }
               }
             ]
+          }
+        }
+      }
+    },
+    {
+      "kind": "PersistentVolumeClaim",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${DATABASE_SERVICE_NAME}"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "${VOLUME_CAPACITY}"
           }
         }
       }
@@ -364,8 +381,10 @@
           "spec": {
             "volumes": [
               {
-                "name": "data",
-                "emptyDir": {}
+                "name": "${DATABASE_SERVICE_NAME}-data",
+                "persistentVolumeClaim": {
+                  "claimName": "${DATABASE_SERVICE_NAME}"
+                }
               }
             ],
             "containers": [
@@ -393,7 +412,7 @@
                 },
                 "volumeMounts": [
                   {
-                    "name": "data",
+                    "name": "${DATABASE_SERVICE_NAME}-data",
                     "mountPath": "/var/lib/pgsql/data"
                   }
                 ],
@@ -447,7 +466,7 @@
       "displayName": "Name",
       "description": "The name assigned to all of the frontend objects defined in this template.",
       "required": true,
-      "value": "rails-postgresql-example"
+      "value": "rails-pgsql-persistent"
     },
     {
       "name": "NAMESPACE",
@@ -469,6 +488,13 @@
       "required": true,
       "description": "Maximum amount of memory the PostgreSQL container can use.",
       "value": "512Mi"
+    },
+    {
+      "name": "VOLUME_CAPACITY",
+      "displayName": "Volume Capacity",
+      "description": "Volume space available for data, e.g. 512Mi, 2Gi",
+      "value": "1Gi",
+      "required": true
     },
     {
       "name": "SOURCE_REPOSITORY_URL",
