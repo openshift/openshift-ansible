@@ -1,5 +1,5 @@
 # pylint: disable=missing-docstring
-from openshift_checks import OpenShiftCheckException
+from openshift_checks import get_var
 
 
 class NotContainerized(object):
@@ -18,7 +18,4 @@ class NotContainerized(object):
 
     @staticmethod
     def is_containerized(task_vars):
-        try:
-            return task_vars["openshift"]["common"]["is_containerized"]
-        except (KeyError, TypeError):
-            raise OpenShiftCheckException("'openshift.common.is_containerized' is undefined")
+        return get_var(task_vars, "openshift", "common", "is_containerized")

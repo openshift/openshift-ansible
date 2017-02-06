@@ -5,8 +5,10 @@ Health checks for OpenShift clusters.
 import os
 from abc import ABCMeta, abstractmethod, abstractproperty
 from importlib import import_module
+import operator
 
 import six
+from six.moves import reduce
 
 
 class OpenShiftCheckException(Exception):
@@ -52,6 +54,22 @@ class OpenShiftCheck(object):
             yield subclass
             for subclass in subclass.subclasses():
                 yield subclass
+
+
+def get_var(task_vars, *keys, **kwargs):
+    """Helper function to get deeply nested values from task_vars.
+
+    Ansible task_vars structures are Python dicts, often mapping strings to
+    other dicts. This helper makes it easier to get a nested value, raising
+    OpenShiftCheckException when a key is not found.
+    """
+    try:
+        value = reduce(operator.getitem, keys, task_vars)
+    except (KeyError, TypeError):
+        if "default" in kwargs:
+            return kwargs["default"]
+        raise OpenShiftCheckException("'{}' is undefined".format(".".join(map(str, keys))))
+    return value
 
 
 # Dynamically import all submodules for the side effect of loading checks.

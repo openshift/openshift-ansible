@@ -1,5 +1,5 @@
 # pylint: disable=missing-docstring
-from openshift_checks import OpenShiftCheck, OpenShiftCheckException
+from openshift_checks import OpenShiftCheck, get_var
 from openshift_checks.mixins import NotContainerized
 
 
@@ -17,10 +17,7 @@ class PackageVersion(NotContainerized, OpenShiftCheck):
         )
 
     def run(self, tmp, task_vars):
-        try:
-            openshift_release = task_vars["openshift_release"]
-        except (KeyError, TypeError):
-            raise OpenShiftCheckException("'openshift_release' is undefined")
+        openshift_release = get_var(task_vars, "openshift_release")
 
         args = {"version": openshift_release}
         return self.module_executor("aos_version", args, tmp, task_vars)

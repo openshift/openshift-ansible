@@ -1,5 +1,5 @@
 # pylint: disable=missing-docstring
-from openshift_checks import OpenShiftCheck, OpenShiftCheckException
+from openshift_checks import OpenShiftCheck, get_var
 from openshift_checks.mixins import NotContainerized
 
 
@@ -10,12 +10,8 @@ class PackageAvailability(NotContainerized, OpenShiftCheck):
     tags = ["preflight"]
 
     def run(self, tmp, task_vars):
-        try:
-            rpm_prefix = task_vars["openshift"]["common"]["service_type"]
-        except (KeyError, TypeError):
-            raise OpenShiftCheckException("'openshift.common.service_type' is undefined")
-
-        group_names = task_vars.get("group_names", [])
+        rpm_prefix = get_var(task_vars, "openshift", "common", "service_type")
+        group_names = get_var(task_vars, "group_names", default=[])
 
         packages = set()
 
