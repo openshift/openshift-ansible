@@ -1,0 +1,12 @@
+---
+- name: disable docker excluder
+  command: "{{ openshift.common.service_type }}-docker-excluder unexclude"
+  when:
+  - docker_excluder_enabled | bool
+  - not openshift.common.is_containerized | bool
+
+- name: disable excluder
+  command: "{{ openshift.common.service_type }}-excluder unexclude"
+  when:
+  - openshift_excluder_enabled | bool
+  - not openshift.common.is_containerized | bool

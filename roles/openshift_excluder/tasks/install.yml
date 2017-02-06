@@ -1,0 +1,16 @@
+---
+- name: Install latest excluder
+  package:
+    name: "{{ openshift.common.service_type }}-excluder"
+    state: latest
+  when:
+  - openshift_excluder_enabled | default(false) | bool
+  - not openshift.common.is_containerized | bool
+
+- name: Install latest docker excluder
+  package:
+    name: "{{ openshift.common.service_type }}-excluder"
+    state: latest
+  when:
+  - docker_excluder_enabled | default(false) | bool
+  - not openshift.common.is_containerized | bool
