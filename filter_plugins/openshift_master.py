@@ -525,13 +525,7 @@ class FilterModule(object):
                  'admin.key',
                  'admin.kubeconfig',
                  'master.kubelet-client.crt',
-                 'master.kubelet-client.key',
-                 'openshift-registry.crt',
-                 'openshift-registry.key',
-                 'openshift-registry.kubeconfig',
-                 'openshift-router.crt',
-                 'openshift-router.key',
-                 'openshift-router.kubeconfig']
+                 'master.kubelet-client.key']
         if bool(include_ca):
             certs += ['ca.crt', 'ca.key']
         if bool(include_keys):
@@ -547,6 +541,13 @@ class FilterModule(object):
         if bool(hostvars['openshift']['common']['version_gte_3_3_or_1_3']):
             certs += ['service-signer.crt',
                       'service-signer.key']
+        if not bool(hostvars['openshift']['common']['version_gte_3_5_or_1_5']):
+            certs += ['openshift-registry.crt',
+                      'openshift-registry.key',
+                      'openshift-registry.kubeconfig',
+                      'openshift-router.crt',
+                      'openshift-router.key',
+                      'openshift-router.kubeconfig']
         return certs
 
     @staticmethod
