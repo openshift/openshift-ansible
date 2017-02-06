@@ -51,3 +51,7 @@
     until: node_sched.rc == 0
     retries: 3
     delay: 1
+
+- include: ../reset_excluder.yml
+  tags:
+  - always

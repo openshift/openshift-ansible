@@ -55,6 +55,8 @@
 
 - include: ../initialize_facts.yml
 
+- include: ../disable_excluder.yml
+
 - name: Ensure clean repo cache in the event repos have been changed manually
   hosts: oo_all_hosts
   tags:

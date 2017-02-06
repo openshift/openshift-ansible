@@ -26,6 +26,10 @@
       openshift_docker_selinux_enabled: "{{ lookup('oo_option', 'docker_selinux_enabled') }}"
     when: openshift_docker_selinux_enabled is not defined
 
+- include: disable_excluder.yml
+  tags:
+  - always
+
 - include: ../openshift-etcd/config.yml
   tags:
   - etcd
