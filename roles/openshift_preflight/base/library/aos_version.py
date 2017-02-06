@@ -10,8 +10,6 @@ Also, determine if the version requested is available down to the
 precision requested.
 '''
 
-# import os
-# import sys
 import yum  # pylint: disable=import-error
 from ansible.module_utils.basic import AnsibleModule
 
@@ -24,19 +22,7 @@ def main():  # pylint: disable=missing-docstring
         supports_check_mode=True
     )
 
-    # NOTE(rhcarvalho): sosiouxme added _unmute, but I couldn't find a case yet
-    # for when it is actually necessary. Leaving it commented out for now,
-    # though this comment and the commented out code related to _unmute should
-    # be deleted later if not proven necessary.
-
-    # sys.stdout = os.devnull  # mute yum so it doesn't break our output
-    # sys.stderr = os.devnull  # mute yum so it doesn't break our output
-
-    # def _unmute():  # pylint: disable=missing-docstring
-    #     sys.stdout = sys.__stdout__
-
     def bail(error):  # pylint: disable=missing-docstring
-        # _unmute()
         module.fail_json(msg=error)
 
     yb = yum.YumBase()  # pylint: disable=invalid-name
@@ -92,7 +78,6 @@ def main():  # pylint: disable=missing-docstring
             msg += '  %s\n' % name
         bail(msg + "There should only be one OpenShift version's repository enabled at a time.")
 
-    # _unmute()
     module.exit_json(changed=False)
 
 

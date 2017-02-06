@@ -8,7 +8,6 @@ parameters:
             If omitted, all installed RPMs are considered for updates.
 '''
 
-# import os
 import sys
 import yum  # pylint: disable=import-error
 from ansible.module_utils.basic import AnsibleModule
@@ -22,18 +21,7 @@ def main():  # pylint: disable=missing-docstring,too-many-branches
         supports_check_mode=True
     )
 
-    # NOTE(rhcarvalho): sosiouxme added _unmute, but I couldn't find a case yet
-    # for when it is actually necessary. Leaving it commented out for now,
-    # though this comment and the commented out code related to _unmute should
-    # be deleted later if not proven necessary.
-
-    # sys.stdout = os.devnull  # mute yum so it doesn't break our output
-
-    # def _unmute():  # pylint: disable=missing-docstring
-    #     sys.stdout = sys.__stdout__
-
     def bail(error):  # pylint: disable=missing-docstring
-        # _unmute()
         module.fail_json(msg=error)
 
     yb = yum.YumBase()  # pylint: disable=invalid-name
@@ -108,7 +96,6 @@ def main():  # pylint: disable=missing-docstring,too-many-branches
         bail('Unknown error(s) from dependency resolution. Exit Code: %d:\n%s' %
              (txn_result, txn_msgs))
 
-    # _unmute()
     module.exit_json(changed=False)
 
 
