@@ -13,6 +13,7 @@
     dest: "{{ mktemp.stdout }}/templates/hawkular_metrics_rc.yaml"
   vars:
     replica_count: "{{hawkular_metrics_replica_count.stdout | default(0)}}"
+    node_selector: "{{openshift_metrics_hawkular_nodeselector | default('') }}"
   changed_when: false
 
 - name: read hawkular-metrics route destination ca certificate

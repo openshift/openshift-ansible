@@ -18,6 +18,7 @@
     node: "{{ item }}"
     master: "{{ (item == '1')|string|lower }}"
     replica_count: "{{cassandra_replica_count.results[item|int - 1].stdout}}"
+    node_selector: "{{openshift_metrics_cassandra_nodeselector | default('') }}"
   with_sequence: count={{ openshift_metrics_cassandra_replicas }}
   changed_when: false
 
