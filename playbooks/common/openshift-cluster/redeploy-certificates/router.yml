@@ -44,25 +44,26 @@
     when: l_router_dc.rc == 0 and 'OPENSHIFT_CA_DATA' in router_env_vars and 'OPENSHIFT_CERT_DATA' in router_env_vars and 'OPENSHIFT_KEY_DATA' in router_env_vars
 
   - block:
-    - name: Generate router certificate
+    - name: Delete existing router certificate secret
       command: >
-        {{ openshift.common.client_binary }} adm ca create-server-cert
-        --hostnames=router.default.svc,router.default.svc.cluster.local
-        --signer-cert={{ openshift.common.config_base }}/master/service-signer.crt
-        --signer-key={{ openshift.common.config_base }}/master/service-signer.key
-        --signer-serial={{ openshift.common.config_base }}/master/ca.serial.txt
-        --cert={{ mktemp.stdout }}/tls.crt
-        --key={{ mktemp.stdout }}/tls.key
-
-    - name: Update router certificates secret
-      shell: >
-        {{ openshift.common.client_binary }} secret new router-certs
-        {{ mktemp.stdout }}/tls.crt
-        {{ mktemp.stdout }}/tls.key
-        --type=kubernetes.io/tls
+        {{ openshift.common.client_binary }} delete secret/router-certs
         --config={{ mktemp.stdout }}/admin.kubeconfig
         -n default
-        -o json | oc replace -f -
+
+    - name: Remove router service annotations
+      command: >
+        {{ openshift.common.client_binary }} annotate service/router
+        service.alpha.openshift.io/serving-cert-secret-name-
+        service.alpha.openshift.io/serving-cert-signed-by-
+        --config={{ mktemp.stdout }}/admin.kubeconfig
+        -n default
+
+    - name: Add serving-cert-secret annotation to router service
+      command: >
+        {{ openshift.common.client_binary }} annotate service/router
+        service.alpha.openshift.io/serving-cert-secret-name=router-certs
+        --config={{ mktemp.stdout }}/admin.kubeconfig
+        -n default
     when: l_router_dc.rc == 0 and 'router-certs' in router_secrets
 
   - name: Redeploy router
