@@ -386,6 +386,12 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_hosted_registry_pullthrough=true
 #openshift_hosted_registry_acceptschema2=true
 #openshift_hosted_registry_enforcequota=true
+#
+# Additional CloudFront Options. When using CloudFront all three
+# of the followingg variables must be defined.
+#openshift_hosted_registry_storage_s3_cloudfront_baseurl=https://myendpoint.cloudfront.net/
+#openshift_hosted_registry_storage_s3_cloudfront_privatekeyfile=/full/path/to/secret.pem
+#openshift_hosted_registry_storage_s3_cloudfront_keypairid=yourpairid
 
 # Metrics deployment
 # See: https://docs.openshift.com/enterprise/latest/install_config/cluster_metrics.html
