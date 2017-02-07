@@ -85,7 +85,7 @@
 # This should NOT replace the CA due to --overwrite=false when a CA already exists.
 - name: Create the master certificates if they do not already exist
   command: >
-    {{ openshift.common.admin_binary }} create-master-certs
+    {{ hostvars[openshift_ca_host].openshift.common.admin_binary }} create-master-certs
     {% for named_ca_certificate in openshift.master.named_certificates | default([]) | oo_collect('cafile') %}
     --certificate-authority {{ named_ca_certificate }}
     {% endfor %}
