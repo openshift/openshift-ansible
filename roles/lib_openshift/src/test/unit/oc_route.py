@@ -35,98 +35,98 @@ class OCRouteTest(unittest.TestCase):
         ''' setup method will create a file and set to known configuration '''
         pass
 
-#    @mock.patch('oc_route.OCRoute._run')
-#    def test_list_route(self, mock_cmd):
-#        ''' Testing getting a route '''
-#
-#        # Arrange
-#
-#        # run_ansible input parameters
-#        params = {
-#            'kubeconfig': '/etc/origin/master/admin.kubeconfig',
-#            'state': 'list',
-#            'debug': False,
-#            'name': 'test',
-#            'namespace': 'default',
-#            'tls_termination': 'passthrough',
-#            'dest_cacert_path': None,
-#            'cacert_path': None,
-#            'cert_path': None,
-#            'key_path': None,
-#            'dest_cacert_content': None,
-#            'cacert_content': None,
-#            'cert_content': None,
-#            'key_content': None,
-#            'service_name': 'testservice',
-#            'host': 'test.openshift.com',
-#            'wildcard_policy': None,
-#            'weight': None,
-#            'port': None
-#        }
-#
-#        route_result ='''{
-#            "kind": "Route",
-#            "apiVersion": "v1",
-#            "metadata": {
-#                "name": "test",
-#                "namespace": "default",
-#                "selfLink": "/oapi/v1/namespaces/default/routes/test",
-#                "uid": "1b127c67-ecd9-11e6-96eb-0e0d9bdacd26",
-#                "resourceVersion": "439182",
-#                "creationTimestamp": "2017-02-07T01:59:48Z"
-#            },
-#            "spec": {
-#                "host": "test.example",
-#                "to": {
-#                    "kind": "Service",
-#                    "name": "test",
-#                    "weight": 100
-#                },
-#                "port": {
-#                    "targetPort": 8443
-#                },
-#                "tls": {
-#                    "termination": "passthrough"
-#                },
-#                "wildcardPolicy": "None"
-#            },
-#            "status": {
-#                "ingress": [
-#                    {
-#                        "host": "test.example",
-#                        "routerName": "router",
-#                        "conditions": [
-#                            {
-#                                "type": "Admitted",
-#                                "status": "True",
-#                                "lastTransitionTime": "2017-02-07T01:59:48Z"
-#                            }
-#                        ],
-#                        "wildcardPolicy": "None"
-#                    }
-#                ]
-#            }
-#        }'''
-#
-#
-#        # Return values of our mocked function call. These get returned once per call.
-#        mock_cmd.side_effect = [
-#            # First call to mock
-#            (0, route_result, ''),
-#        ]
-#
-#        # Act
-#        results = OCRoute.run_ansible(params, False)
-#
-#        # Assert
-#        self.assertFalse(results['changed'])
-#        self.assertEqual(results['state'], 'list')
-#        self.assertEqual(results['results'][0]['metadata']['name'], 'test')
-#
-#        # Making sure our mock was called as we expected
-#        mock_cmd.assert_has_calls([
-#            mock.call(['oc', '-n', 'default', 'get', 'route', 'test', '-o', 'json'], None),
-#        ])
+    @mock.patch('oc_route.OCRoute._run')
+    def test_list_route(self, mock_cmd):
+        ''' Testing getting a route '''
+
+        # Arrange
+
+        # run_ansible input parameters
+        params = {
+            'kubeconfig': '/etc/origin/master/admin.kubeconfig',
+            'state': 'list',
+            'debug': False,
+            'name': 'test',
+            'namespace': 'default',
+            'tls_termination': 'passthrough',
+            'dest_cacert_path': None,
+            'cacert_path': None,
+            'cert_path': None,
+            'key_path': None,
+            'dest_cacert_content': None,
+            'cacert_content': None,
+            'cert_content': None,
+            'key_content': None,
+            'service_name': 'testservice',
+            'host': 'test.openshift.com',
+            'wildcard_policy': None,
+            'weight': None,
+            'port': None
+        }
+
+        route_result ='''{
+            "kind": "Route",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "test",
+                "namespace": "default",
+                "selfLink": "/oapi/v1/namespaces/default/routes/test",
+                "uid": "1b127c67-ecd9-11e6-96eb-0e0d9bdacd26",
+                "resourceVersion": "439182",
+                "creationTimestamp": "2017-02-07T01:59:48Z"
+            },
+            "spec": {
+                "host": "test.example",
+                "to": {
+                    "kind": "Service",
+                    "name": "test",
+                    "weight": 100
+                },
+                "port": {
+                    "targetPort": 8443
+                },
+                "tls": {
+                    "termination": "passthrough"
+                },
+                "wildcardPolicy": "None"
+            },
+            "status": {
+                "ingress": [
+                    {
+                        "host": "test.example",
+                        "routerName": "router",
+                        "conditions": [
+                            {
+                                "type": "Admitted",
+                                "status": "True",
+                                "lastTransitionTime": "2017-02-07T01:59:48Z"
+                            }
+                        ],
+                        "wildcardPolicy": "None"
+                    }
+                ]
+            }
+        }'''
+
+
+        # Return values of our mocked function call. These get returned once per call.
+        mock_cmd.side_effect = [
+            # First call to mock
+            (0, route_result, ''),
+        ]
+
+        # Act
+        results = OCRoute.run_ansible(params, False)
+
+        # Assert
+        self.assertFalse(results['changed'])
+        self.assertEqual(results['state'], 'list')
+        self.assertEqual(results['results'][0]['metadata']['name'], 'test')
+
+        # Making sure our mock was called as we expected
+        mock_cmd.assert_has_calls([
+            mock.call(['oc', '-n', 'default', 'get', 'route', 'test', '-o', 'json'], None),
+        ])
 
     @mock.patch('oc_route.Yedit._write')
     @mock.patch('oc_route.OCRoute._run')
@@ -139,8 +139,7 @@ class OCRouteTest(unittest.TestCase):
         params = {
             'kubeconfig': '/etc/origin/master/admin.kubeconfig',
             'state': 'present',
-            'debug': True,
-            #'debug': False,
+            'debug': False,
             'name': 'test',
             'namespace': 'default',
             'tls_termination': 'edge',
@@ -159,7 +158,7 @@ class OCRouteTest(unittest.TestCase):
             'port': None
         }
 
-        route_result ='''{
+        route_result = '''{
                 "apiVersion": "v1",
                 "kind": "Route",
                 "metadata": {
@@ -222,7 +221,6 @@ metadata:
   namespace: default
   name: test
 '''
-
 
         # Return values of our mocked function call. These get returned once per call.
         mock_cmd.side_effect = [

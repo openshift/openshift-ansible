@@ -94,8 +94,9 @@
     register: routeout
 
   - assert:
-      that: "routeout.changed == True"
-      that: "routeout.results['results'][0]['spec']['port']['targetPort'] == 8443"
+      that:
+      - "routeout.changed == True"
+      - "routeout.results['results'][0]['spec']['port']['targetPort'] == 8443"
       msg: Route create not idempotent
 
   - name: create route
@@ -110,6 +111,7 @@
   - debug: var=routeout
 
   - assert:
-      that: "routeout.changed == True"
-      that: "routeout.results.results[0]['spec']['port']['targetPort'] == 8444"
+      that:
+      - "routeout.changed == True"
+      - "routeout.results.results[0]['spec']['port']['targetPort'] == 8444"
       msg: Route update not idempotent
