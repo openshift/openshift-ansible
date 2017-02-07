@@ -29,3 +29,6 @@
       node_flavor: "{{ node_flavor }}"
       infra_flavor: "{{ infra_flavor }}"
       dns_flavor: "{{ dns_flavor }}"
+      master_volume_size: "{{ master_volume_size }}"
+      app_volume_size: "{{ app_volume_size }}"
+      infra_volume_size: "{{ infra_volume_size }}"
