@@ -1,0 +1,11 @@
+---
+- name: Record excluder state and disable
+  hosts: l_oo_all_hosts
+  gather_facts: no
+  tasks:
+  - include_role:
+      name: openshift_excluder
+      tasks_from: status
+  - include_role:
+      name: openshift_excluder
+      tasks_from: unexclude
