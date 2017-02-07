@@ -1,13 +1,12 @@
 #!/usr/bin/python
 # vim: expandtab:tabstop=4:shiftwidth=4
 '''
-An ansible module for determining if more than one minor version
-of any atomic-openshift package is available, which would indicate
-that multiple repos are enabled for different versions of the same
-thing which may cause problems.
+Ansible module for determining if multiple versions of an OpenShift package are
+available, and if the version requested is available down to the given
+precision.
 
-Also, determine if the version requested is available down to the
-precision requested.
+Multiple versions available suggest that multiple repos are enabled for the
+different versions, which may cause installation problems.
 '''
 
 import yum  # pylint: disable=import-error
