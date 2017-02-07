@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.5.3
+Version:        3.5.4
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -254,6 +254,65 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Feb 06 2017 Scott Dodson <sdodson@redhat.com> 3.5.4-1
+- Bump registry-console to 3.5 (sdodson@redhat.com)
+- Added oc_serviceaccount_secret to lib_openshift. (twiest@redhat.com)
+- fix 1406057. Allow openshift_metrics nodeselectors for components
+  (jcantril@redhat.com)
+- Use service annotations to redeploy router service serving cert signer cert.
+  (abutcher@redhat.com)
+- Move excluder disablement into control plane and node upgrade playbooks
+  (sdodson@redhat.com)
+- Add excluder management to upgrade and config playbooks (sdodson@redhat.com)
+- Add openshift_excluder role (sdodson@redhat.com)
+- Fix RHEL Subscribe std_include path (tbielawa@redhat.com)
+- Remove legacy router/registry certs and client configs from synchronized
+  master certs. (abutcher@redhat.com)
+- Bump registry to 3.4 (sdodson@redhat.com)
+- Sync latest image stream content (sdodson@redhat.com)
+- Support latest for containerized version (gscrivan@redhat.com)
+- Ensure python2-ruamel-yaml is installed (sdodson@redhat.com)
+- openshift_logging link pull secret to serviceaccounts fix unlabel when
+  undeploying (jcantril@redhat.com)
+- fixes 1414625. Fix check of keytool in openshift_metrics role
+  (jcantril@redhat.com)
+- Doc enhancements. (kwoodson@redhat.com)
+- fixes 1417261. Points playbooks to the correct 3.5 roles for logging and
+  metrics (jcantril@redhat.com)
+- Change default docker log driver from json-file to journald.
+  (abutcher@redhat.com)
+- Add logic to verify patched version of Ansible (rteague@redhat.com)
+- Restructure certificate redeploy playbooks (abutcher@redhat.com)
+- Temporary hack to skip router/registry upgrade. (dgoodwin@redhat.com)
+- Fixing linters. (kwoodson@redhat.com)
+- run node upgrade if master is node as part of the control plan upgrade only
+  (jchaloup@redhat.com)
+- Appease yamllint (sdodson@redhat.com)
+- Adding include_role to block to resolve when eval (ewolinet@redhat.com)
+- Updating oc_apply to use command instead of shell (ewolinet@redhat.com)
+- Wrap openshift_hosted_logging include_role within a block.
+  (abutcher@redhat.com)
+- Adding unit test.  Fixed redudant calls to get. (kwoodson@redhat.com)
+- Fixing doc and generating new label with updated base. (kwoodson@redhat.com)
+- oc_label ansible module (jdiaz@redhat.com)
+- Fixing copy pasta comments.  Fixed required in docs. (kwoodson@redhat.com)
+- Fix openshift_hosted_logging bool typo. (abutcher@redhat.com)
+- Updating oc_apply changed_when conditions, fixing filter usage for
+  openshift_hosted_logging playbook (ewolinet@redhat.com)
+- Add default ansible.cfg file (rteague@redhat.com)
+- Move current node upgrade tasks under openshift_node_upgrade role
+  (jchaloup@redhat.com)
+- Fix host when waiting for a master system restart. (dgoodwin@redhat.com)
+- Adding bool filter to when openshift_logging_use_ops evals and updating
+  oc_apply to handle trying to update immutable fields (ewolinet@redhat.com)
+- Fixing for tox tests. (flake8|pylint) (kwoodson@redhat.com)
+- Adding unit test for oc_service.  Added environment fix for non-standard oc
+  installs. (kwoodson@redhat.com)
+- Adding integration tests. (kwoodson@redhat.com)
+- Adding oc_service to lib_openshift. (kwoodson@redhat.com)
+- Sync etcd ca certs from etcd_ca_host to other etcd hosts
+  (jawed.khelil@amadeus.com)
+
 * Tue Jan 31 2017 Scott Dodson <sdodson@redhat.com> 3.5.3-1
 - Adding bool filter to ensure that we correctly set ops host for fluentd
   (ewolinet@redhat.com)
