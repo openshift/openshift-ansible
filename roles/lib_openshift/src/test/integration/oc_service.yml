@@ -123,6 +123,6 @@
   - assert:
       that:
       - svc_out.changed == False
-      - svc_out.results.returncode == 1
+      - svc_out.results.returncode == 0
       - "'not found' in svc_out.results.stderr"
       msg: service get failed
