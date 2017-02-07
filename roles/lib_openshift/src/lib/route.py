@@ -19,7 +19,8 @@ class RouteConfig(object):
                  tls_termination=None,
                  service_name=None,
                  wildcard_policy=None,
-                 weight=None):
+                 weight=None,
+                 port=None):
         ''' constructor for handling route options '''
         self.kubeconfig = kubeconfig
         self.name = sname
@@ -31,6 +32,7 @@ class RouteConfig(object):
         self.cert = cert
         self.key = key
         self.service_name = service_name
+        self.port = port
         self.data = {}
         self.wildcard_policy = wildcard_policy
         if wildcard_policy is None:
@@ -55,12 +57,15 @@ class RouteConfig(object):
         if self.tls_termination:
             self.data['spec']['tls'] = {}
 
+            self.data['spec']['tls']['termination'] = self.tls_termination
+
+            if self.tls_termination != 'passthrough':
+                self.data['spec']['tls']['key'] = self.key
+                self.data['spec']['tls']['caCertificate'] = self.cacert
+                self.data['spec']['tls']['certificate'] = self.cert
+
             if self.tls_termination == 'reencrypt':
                 self.data['spec']['tls']['destinationCACertificate'] = self.destcacert
-            self.data['spec']['tls']['key'] = self.key
-            self.data['spec']['tls']['caCertificate'] = self.cacert
-            self.data['spec']['tls']['certificate'] = self.cert
-            self.data['spec']['tls']['termination'] = self.tls_termination
 
         self.data['spec']['to'] = {'kind': 'Service',
                                    'name': self.service_name,
@@ -68,11 +73,16 @@ class RouteConfig(object):
 
         self.data['spec']['wildcardPolicy'] = self.wildcard_policy
 
+        if self.port:
+            self.data['spec']['port'] = {}
+            self.data['spec']['port']['targetPort'] = self.port
+
 # pylint: disable=too-many-instance-attributes,too-many-public-methods
 class Route(Yedit):
     ''' Class to wrap the oc command line tools '''
     wildcard_policy = "spec.wildcardPolicy"
     host_path = "spec.host"
+    port_path = "spec.port.targetPort"
     service_path = "spec.to.name"
     weight_path = "spec.to.weight"
     cert_path = "spec.tls.certificate"
@@ -117,6 +127,10 @@ class Route(Yedit):
     def get_host(self):
         ''' return host '''
         return self.get(Route.host_path)
+
+    def get_port(self):
+        ''' return port '''
+        return self.get(Route.port_path)
 
     def get_wildcard_policy(self):
         ''' return wildcardPolicy '''

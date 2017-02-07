@@ -2,20 +2,6 @@
 # flake8: noqa
 
 
-def get_cert_data(path, content):
-    '''get the data for a particular value'''
-    if not path and not content:
-        return None
-
-    rval = None
-    if path and os.path.exists(path) and os.access(path, os.R_OK):
-        rval = open(path).read()
-    elif content:
-        rval = content
-
-    return rval
-
-
 # pylint: disable=too-many-branches
 def main():
     '''
@@ -42,6 +28,7 @@ def main():
             host=dict(default=None, type='str'),
             wildcard_policy=dict(default=None, type='str'),
             weight=dict(default=None, type='int'),
+            port=dict(default=None, type='int'),
         ),
         mutually_exclusive=[('dest_cacert_path', 'dest_cacert_content'),
                             ('cacert_path', 'cacert_content'),
@@ -49,30 +36,8 @@ def main():
                             ('key_path', 'key_content'), ],
         supports_check_mode=True,
     )
-    files = {'destcacert': {'path': module.params['dest_cacert_path'],
-                            'content': module.params['dest_cacert_content'],
-                            'value': None, },
-             'cacert': {'path': module.params['cacert_path'],
-                        'content': module.params['cacert_content'],
-                        'value': None, },
-             'cert': {'path': module.params['cert_path'],
-                      'content': module.params['cert_content'],
-                      'value': None, },
-             'key': {'path': module.params['key_path'],
-                     'content': module.params['key_content'],
-                     'value': None, }, }
 
-    if module.params['tls_termination']:
-        for key, option in files.items():
-            if key == 'destcacert' and module.params['tls_termination'] != 'reencrypt':
-                continue
-
-            option['value'] = get_cert_data(option['path'], option['content'])
-
-            if not option['value']:
-                module.fail_json(msg='Verify that you pass a value for %s' % key)
-
-    results = OCRoute.run_ansible(module.params, files, module.check_mode)
+    results = OCRoute.run_ansible(module.params, module.check_mode)
 
     if 'failed' in results:
         module.fail_json(**results)
