@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.5.4
+Version:        3.5.5
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -254,6 +254,13 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Feb 07 2017 Scott Dodson <sdodson@redhat.com> 3.5.5-1
+- Moving to ansible variable. (kwoodson@redhat.com)
+- Specifying port for wait_for call. (kwoodson@redhat.com)
+- Fix playbooks/byo/openshift_facts.yml include path (sdodson@redhat.com)
+- Add missing symlink to roles (rhcarvalho@gmail.com)
+- Copies CloudFront pem file to registry hosts (smilner@redhat.com)
+
 * Mon Feb 06 2017 Scott Dodson <sdodson@redhat.com> 3.5.4-1
 - Bump registry-console to 3.5 (sdodson@redhat.com)
 - Added oc_serviceaccount_secret to lib_openshift. (twiest@redhat.com)
