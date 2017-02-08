@@ -474,7 +474,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # pods are deleted
 #
 # Other Logging Options -- Common items you may wish to reconfigure, for the complete
-# list of options please see roles/openshift_hosted_logging/README.md
+# list of options please see roles/openshift_logging/README.md
 #
 # Configure loggingPublicURL in the master config for aggregate logging, defaults
 # to https://kibana.{{ openshift_master_default_subdomain }}
