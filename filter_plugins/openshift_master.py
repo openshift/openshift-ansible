@@ -162,7 +162,7 @@ class LDAPPasswordIdentityProvider(IdentityProviderBase):
             AnsibleFilterError:
     """
     def __init__(self, api_version, idp):
-        super(self.__class__, self).__init__(api_version, idp)
+        super(LDAPPasswordIdentityProvider, self).__init__(api_version, idp)
         self._allow_additional = False
         self._required += [['attributes'], ['url'], ['insecure']]
         self._optional += [['ca'],
@@ -206,7 +206,7 @@ class KeystonePasswordIdentityProvider(IdentityProviderBase):
             AnsibleFilterError:
     """
     def __init__(self, api_version, idp):
-        super(self.__class__, self).__init__(api_version, idp)
+        super(KeystonePasswordIdentityProvider, self).__init__(api_version, idp)
         self._allow_additional = False
         self._required += [['url'], ['domainName', 'domain_name']]
         self._optional += [['ca'], ['certFile', 'cert_file'], ['keyFile', 'key_file']]
@@ -225,7 +225,7 @@ class RequestHeaderIdentityProvider(IdentityProviderBase):
             AnsibleFilterError:
     """
     def __init__(self, api_version, idp):
-        super(self.__class__, self).__init__(api_version, idp)
+        super(RequestHeaderIdentityProvider, self).__init__(api_version, idp)
         self._allow_additional = False
         self._required += [['headers']]
         self._optional += [['challengeURL', 'challenge_url'],
@@ -256,7 +256,7 @@ class AllowAllPasswordIdentityProvider(IdentityProviderBase):
             AnsibleFilterError:
     """
     def __init__(self, api_version, idp):
-        super(self.__class__, self).__init__(api_version, idp)
+        super(AllowAllPasswordIdentityProvider, self).__init__(api_version, idp)
         self._allow_additional = False
 
 
@@ -273,7 +273,7 @@ class DenyAllPasswordIdentityProvider(IdentityProviderBase):
             AnsibleFilterError:
     """
     def __init__(self, api_version, idp):
-        super(self.__class__, self).__init__(api_version, idp)
+        super(DenyAllPasswordIdentityProvider, self).__init__(api_version, idp)
         self._allow_additional = False
 
 
@@ -290,7 +290,7 @@ class HTPasswdPasswordIdentityProvider(IdentityProviderBase):
             AnsibleFilterError:
     """
     def __init__(self, api_version, idp):
-        super(self.__class__, self).__init__(api_version, idp)
+        super(HTPasswdPasswordIdentityProvider, self).__init__(api_version, idp)
         self._allow_additional = False
         self._required += [['file', 'filename', 'fileName', 'file_name']]
 
@@ -315,7 +315,7 @@ class BasicAuthPasswordIdentityProvider(IdentityProviderBase):
             AnsibleFilterError:
     """
     def __init__(self, api_version, idp):
-        super(self.__class__, self).__init__(api_version, idp)
+        super(BasicAuthPasswordIdentityProvider, self).__init__(api_version, idp)
         self._allow_additional = False
         self._required += [['url']]
         self._optional += [['ca'], ['certFile', 'cert_file'], ['keyFile', 'key_file']]
@@ -334,7 +334,7 @@ class IdentityProviderOauthBase(IdentityProviderBase):
             AnsibleFilterError:
     """
     def __init__(self, api_version, idp):
-        super(self.__class__, self).__init__(api_version, idp)
+        super(IdentityProviderOauthBase, self).__init__(api_version, idp)
         self._allow_additional = False
         self._required += [['clientID', 'client_id'], ['clientSecret', 'client_secret']]
 
