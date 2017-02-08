@@ -1,13 +1,13 @@
 ---
 - name: Create passthrough route for docker-registry
-  command: >
-    {{ openshift.common.client_binary }} create route passthrough
-    --service docker-registry
-    --config={{ openshift_hosted_kubeconfig }}
-    -n default
-  register: create_docker_registry_route
-  changed_when: "'already exists' not in create_docker_registry_route.stderr"
-  failed_when: "'already exists' not in create_docker_registry_route.stderr and create_docker_registry_route.rc != 0"
+  oc_route:
+    kubeconfig: "{{ openshift_hosted_kubeconfig }}"
+    name: docker-registry
+    namespace: default
+    service_name: docker-registry
+    state: present
+    tls_termination: passthrough
+  run_once: true
 
 - name: Determine if registry certificate must be created
   stat:
