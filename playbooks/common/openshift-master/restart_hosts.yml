@@ -14,6 +14,7 @@
       state=started
       delay=10
       timeout=600
+      port="{{ ansible_ssh_port }}"
   become: no
 
 # Now that ssh is back up we can wait for API on the remote system,
