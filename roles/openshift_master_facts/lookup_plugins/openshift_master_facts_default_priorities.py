@@ -88,7 +88,7 @@ class LookupModule(LookupBase):
                 {'name': 'InterPodAffinityPriority', 'weight': 1}
             ])
 
-        if short_version in ['1.5', '1.6']:
+        if short_version in ['1.5', '1.6', 'latest']:
             priorities.extend([
                 {'name': 'SelectorSpreadPriority', 'weight': 1},
                 {'name': 'InterPodAffinityPriority', 'weight': 1},
