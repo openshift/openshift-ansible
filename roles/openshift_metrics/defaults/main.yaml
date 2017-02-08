@@ -17,7 +17,7 @@ openshift_metrics_hawkular_nodeselector: ""
 
 openshift_metrics_cassandra_replicas: 1
 openshift_metrics_cassandra_storage_type: emptydir
-openshift_metrics_cassandra_pv_size: 10Gi
+openshift_metrics_cassandra_pvc_size: 10Gi
 openshift_metrics_cassandra_limits_memory: 2G
 openshift_metrics_cassandra_limits_cpu: null
 openshift_metrics_cassandra_requests_memory: 1G
@@ -44,7 +44,7 @@ openshift_metrics_master_url: https://kubernetes.default.svc.cluster.local
 openshift_metrics_node_id: nodename
 openshift_metrics_project: openshift-infra
 
-openshift_metrics_cassandra_pv_prefix: metrics-cassandra
+openshift_metrics_cassandra_pvc_prefix: metrics-cassandra
 
 openshift_metrics_hawkular_user_write_access: False
 
