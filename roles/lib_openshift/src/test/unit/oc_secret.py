@@ -35,9 +35,10 @@ class OCSecretTest(unittest.TestCase):
         ''' setup method will create a file and set to known configuration '''
         pass
 
+    @mock.patch('oc_secret.Utils.create_tmpfile_copy')
     @mock.patch('oc_secret.Utils._write')
     @mock.patch('oc_secret.OCSecret._run')
-    def test_adding_a_secret(self, mock_cmd, mock_write):
+    def test_adding_a_secret(self, mock_cmd, mock_write, mock_tmpfile_copy):
         ''' Testing adding a secret '''
 
         # Arrange
@@ -62,6 +63,10 @@ class OCSecretTest(unittest.TestCase):
         mock_cmd.side_effect = [
             (1, '', 'Error from server: secrets "testsecretname" not found'),
             (0, 'secret/testsecretname', ''),
+        ]
+
+        mock_tmpfile_copy.side_effect = [
+            '/tmp/mocked_kubeconfig',
         ]
 
         # Act

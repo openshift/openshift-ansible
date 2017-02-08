@@ -711,7 +711,7 @@ class OpenShiftCLI(object):
         ''' Constructor for OpenshiftCLI '''
         self.namespace = namespace
         self.verbose = verbose
-        self.kubeconfig = kubeconfig
+        self.kubeconfig = Utils.create_tmpfile_copy(kubeconfig)
         self.all_namespaces = all_namespaces
 
     # Pylint allows only 5 arguments to be passed.
@@ -997,7 +997,18 @@ class Utils(object):
         return tmp
 
     @staticmethod
-    def create_tmpfile(prefix=None):
+    def create_tmpfile_copy(inc_file):
+        '''create a temporary copy of a file'''
+        tmpfile = Utils.create_tmpfile('lib_openshift-')
+        Utils._write(tmpfile, open(inc_file).read())
+
+        # Cleanup the tmpfile
+        atexit.register(Utils.cleanup, [tmpfile])
+
+        return tmpfile
+
+    @staticmethod
+    def create_tmpfile(prefix='tmp'):
         ''' Generates and returns a temporary file name '''
 
         with tempfile.NamedTemporaryFile(prefix=prefix, delete=False) as tmp:

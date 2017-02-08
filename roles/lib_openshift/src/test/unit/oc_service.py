@@ -36,8 +36,9 @@ class OCServiceTest(unittest.TestCase):
         ''' setup method will create a file and set to known configuration '''
         pass
 
+    @mock.patch('oc_service.Utils.create_tmpfile_copy')
     @mock.patch('oc_service.OCService._run')
-    def test_state_list(self, mock_cmd):
+    def test_state_list(self, mock_cmd, mock_tmpfile_copy):
         ''' Testing a get '''
         params = {'name': 'router',
                   'namespace': 'default',
@@ -108,13 +109,18 @@ class OCServiceTest(unittest.TestCase):
             (0, service, '')
         ]
 
+        mock_tmpfile_copy.side_effect = [
+            '/tmp/mocked_kubeconfig',
+        ]
+
         results = OCService.run_ansible(params, False)
 
         self.assertFalse(results['changed'])
         self.assertEqual(results['results']['results'][0]['metadata']['name'], 'router')
 
+    @mock.patch('oc_service.Utils.create_tmpfile_copy')
     @mock.patch('oc_service.OCService._run')
-    def test_create(self, mock_cmd):
+    def test_create(self, mock_cmd, mock_tmpfile_copy):
         ''' Testing a create service '''
         params = {'name': 'router',
                   'namespace': 'default',
@@ -189,6 +195,10 @@ class OCServiceTest(unittest.TestCase):
             (1, '', 'Error from server: services "router" not found'),
             (0, service, ''),
             (0, service, '')
+        ]
+
+        mock_tmpfile_copy.side_effect = [
+            '/tmp/mocked_kubeconfig',
         ]
 
         results = OCService.run_ansible(params, False)
