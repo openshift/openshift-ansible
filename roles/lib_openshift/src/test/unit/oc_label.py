@@ -35,8 +35,9 @@ class OCLabelTest(unittest.TestCase):
         ''' setup method will create a file and set to known configuration '''
         pass
 
+    @mock.patch('oc_label.Utils.create_tmpfile_copy')
     @mock.patch('oc_label.OCLabel._run')
-    def test_state_list(self, mock_cmd):
+    def test_state_list(self, mock_cmd, mock_tmpfile_copy):
         ''' Testing a label list '''
         params = {'name': 'default',
                   'namespace': 'default',
@@ -82,13 +83,18 @@ class OCLabelTest(unittest.TestCase):
             (0, ns, ''),
         ]
 
+        mock_tmpfile_copy.side_effect = [
+            '/tmp/mocked_kubeconfig',
+        ]
+
         results = OCLabel.run_ansible(params, False)
 
         self.assertFalse(results['changed'])
         self.assertTrue(results['results']['labels'] == [{'storage_pv_quota': 'False'}])
 
+    @mock.patch('oc_label.Utils.create_tmpfile_copy')
     @mock.patch('oc_label.OCLabel._run')
-    def test_state_present(self, mock_cmd):
+    def test_state_present(self, mock_cmd, mock_tmpfile_copy):
         ''' Testing a label list '''
         params = {'name': 'default',
                   'namespace': 'default',
@@ -169,6 +175,10 @@ class OCLabelTest(unittest.TestCase):
             (0, ns, ''),
             (0, '', ''),
             (0, ns1, ''),
+        ]
+
+        mock_tmpfile_copy.side_effect = [
+            '/tmp/mocked_kubeconfig',
         ]
 
         results = OCLabel.run_ansible(params, False)

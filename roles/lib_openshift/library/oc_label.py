@@ -1023,7 +1023,7 @@ class Utils(object):
     @staticmethod
     def create_tmpfile_copy(inc_file):
         '''create a temporary copy of a file'''
-        tmpfile = Utils.create_tmpfile()
+        tmpfile = Utils.create_tmpfile('lib_openshift-')
         Utils._write(tmpfile, open(inc_file).read())
 
         # Cleanup the tmpfile
@@ -1032,7 +1032,7 @@ class Utils(object):
         return tmpfile
 
     @staticmethod
-    def create_tmpfile(prefix=None):
+    def create_tmpfile(prefix='tmp'):
         ''' Generates and returns a temporary file name '''
 
         with tempfile.NamedTemporaryFile(prefix=prefix, delete=False) as tmp:

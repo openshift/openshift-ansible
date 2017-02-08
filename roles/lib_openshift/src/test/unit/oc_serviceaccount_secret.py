@@ -35,9 +35,10 @@ class OCServiceAccountSecretTest(unittest.TestCase):
         ''' setup method will create a file and set to known configuration '''
         pass
 
+    @mock.patch('oc_serviceaccount_secret.Utils.create_tmpfile_copy')
     @mock.patch('oc_serviceaccount_secret.Yedit._write')
     @mock.patch('oc_serviceaccount_secret.OCServiceAccountSecret._run')
-    def test_adding_a_secret_to_a_serviceaccount(self, mock_cmd, mock_write):
+    def test_adding_a_secret_to_a_serviceaccount(self, mock_cmd, mock_write, mock_tmpfile_copy):
         ''' Testing adding a secret to a service account '''
 
         # Arrange
@@ -137,6 +138,10 @@ metadata:
             (0, oc_get_sa_after, ''),  # Fourth call to the mock
         ]
 
+        mock_tmpfile_copy.side_effect = [
+            '/tmp/mocked_kubeconfig',
+        ]
+
         # Act
         results = OCServiceAccountSecret.run_ansible(params, False)
 
@@ -157,9 +162,10 @@ metadata:
             mock.call(mock.ANY, builder_yaml_file)
         ])
 
+    @mock.patch('oc_serviceaccount_secret.Utils.create_tmpfile_copy')
     @mock.patch('oc_serviceaccount_secret.Yedit._write')
     @mock.patch('oc_serviceaccount_secret.OCServiceAccountSecret._run')
-    def test_removing_a_secret_to_a_serviceaccount(self, mock_cmd, mock_write):
+    def test_removing_a_secret_to_a_serviceaccount(self, mock_cmd, mock_write, mock_tmpfile_copy):
         ''' Testing removing a secret to a service account '''
 
         # Arrange
@@ -227,6 +233,10 @@ metadata:
             (0, oc_get_sa_before, ''),  # First call to the mock
             (0, oc_get_sa_before, ''),  # Second call to the mock
             (0, 'serviceaccount "builder" replaced', ''),  # Third call to the mock
+        ]
+
+        mock_tmpfile_copy.side_effect = [
+            '/tmp/mocked_kubeconfig',
         ]
 
         # Act

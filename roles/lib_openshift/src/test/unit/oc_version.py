@@ -35,8 +35,9 @@ class OCVersionTest(unittest.TestCase):
         ''' setup method will create a file and set to known configuration '''
         pass
 
+    @mock.patch('oc_version.Utils.create_tmpfile_copy')
     @mock.patch('oc_version.OCVersion.openshift_cmd')
-    def test_get(self, mock_openshift_cmd):
+    def test_get(self, mock_openshift_cmd, mock_tmpfile_copy):
         ''' Testing a get '''
         params = {'kubeconfig': '/etc/origin/master/admin.kubeconfig',
                   'state': 'list',
@@ -50,6 +51,10 @@ class OCVersionTest(unittest.TestCase):
                         "openshift v3.4.0.39\n" +
                         "kubernetes v1.4.0+776c994\n",
              "returncode": 0}
+        ]
+
+        mock_tmpfile_copy.side_effect = [
+            '/tmp/mocked_kubeconfig',
         ]
 
         results = OCVersion.run_ansible(params)

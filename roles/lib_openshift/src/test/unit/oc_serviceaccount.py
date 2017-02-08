@@ -35,8 +35,9 @@ class OCServiceAccountTest(unittest.TestCase):
         ''' setup method will create a file and set to known configuration '''
         pass
 
+    @mock.patch('oc_serviceaccount.Utils.create_tmpfile_copy')
     @mock.patch('oc_serviceaccount.OCServiceAccount._run')
-    def test_adding_a_serviceaccount(self, mock_cmd):
+    def test_adding_a_serviceaccount(self, mock_cmd, mock_tmpfile_copy):
         ''' Testing adding a serviceaccount '''
 
         # Arrange
@@ -88,6 +89,10 @@ class OCServiceAccountTest(unittest.TestCase):
 
             # Third call to mock
             (0, valid_result_json, ''),
+        ]
+
+        mock_tmpfile_copy.side_effect = [
+            '/tmp/mocked_kubeconfig',
         ]
 
         # Act
