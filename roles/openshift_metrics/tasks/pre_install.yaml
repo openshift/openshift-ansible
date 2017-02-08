@@ -1,0 +1,27 @@
+---
+- name: Check that hawkular_metrics_hostname is set
+  fail: msg='the openshift_metrics_hawkular_hostname variable is required'
+  when: openshift_metrics_hawkular_hostname is not defined
+
+- name: Check the value of openshift_metrics_cassandra_storage_type
+  fail:
+    msg: >
+      openshift_metrics_cassandra_storage_type ({{ openshift_metrics_cassandra_storage_type }})
+      is invalid, must be one of: emptydir, pv, dynamic
+  when:
+  - openshift_metrics_cassandra_storage_type not in openshift_metrics_cassandra_storage_types
+  - "not {{ openshift_metrics_heapster_standalone | bool }}"
+
+- name: create certificate output directory
+  file:
+    path: "{{ openshift_metrics_certs_dir }}"
+    state: directory
+    mode: 0700
+
+- name: list existing secrets
+  command: >
+    {{ openshift.common.client_binary }} -n {{ openshift_metrics_project }}
+    --config={{ mktemp.stdout }}/admin.kubeconfig
+    get secrets -o name
+  register: metrics_secrets
+  changed_when: false
