@@ -242,6 +242,28 @@ def oo_combine_dict(data, in_joiner='=', out_joiner=' '):
     return out_joiner.join([in_joiner.join([k, str(v)]) for k, v in data.items()])
 
 
+def oo_dict_to_list_of_dict(data, key_title='key', value_title='value'):
+    """Take a dict and arrange them as a list of dicts
+
+       Input data:
+       {'region': 'infra', 'test_k': 'test_v'}
+
+       Return data:
+       [{'key': 'region', 'value': 'infra'}, {'key': 'test_k', 'value': 'test_v'}]
+
+       Written for use of the oc_label module
+    """
+    if not isinstance(data, dict):
+        # pylint: disable=line-too-long
+        raise errors.AnsibleFilterError("|failed expects first param is a dict. Got %s. Type: %s" % (str(data), str(type(data))))
+
+    rval = []
+    for label in data.items():
+        rval.append({key_title: label[0], value_title: label[1]})
+
+    return rval
+
+
 def oo_ami_selector(data, image_name):
     """ This takes a list of amis and an image name and attempts to return
         the latest ami.
@@ -951,6 +973,7 @@ class FilterModule(object):
             "oo_ec2_volume_definition": oo_ec2_volume_definition,
             "oo_combine_key_value": oo_combine_key_value,
             "oo_combine_dict": oo_combine_dict,
+            "oo_dict_to_list_of_dict": oo_dict_to_list_of_dict,
             "oo_split": oo_split,
             "oo_filter_list": oo_filter_list,
             "oo_parse_heat_stack_outputs": oo_parse_heat_stack_outputs,
