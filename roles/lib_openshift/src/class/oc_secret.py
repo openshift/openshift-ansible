@@ -48,7 +48,7 @@ class OCSecret(OpenShiftCLI):
     def create(self, files=None, contents=None):
         '''Create a secret '''
         if not files:
-            files = Utils.create_files_from_contents(contents)
+            files = Utils.create_tmp_files_from_contents(contents)
 
         secrets = ["%s=%s" % (sfile['name'], sfile['path']) for sfile in files]
         cmd = ['secrets', 'new', self.name]
@@ -81,7 +81,7 @@ class OCSecret(OpenShiftCLI):
             This is accomplished by passing -ojson.  This will most likely change in the future
         '''
         if not files:
-            files = Utils.create_files_from_contents(contents)
+            files = Utils.create_tmp_files_from_contents(contents)
 
         secrets = ["%s=%s" % (sfile['name'], sfile['path']) for sfile in files]
         cmd = ['-ojson', 'secrets', 'new', self.name]
@@ -132,7 +132,7 @@ class OCSecret(OpenShiftCLI):
             if params['files']:
                 files = params['files']
             elif params['contents']:
-                files = Utils.create_files_from_contents(params['contents'])
+                files = Utils.create_tmp_files_from_contents(params['contents'])
             else:
                 return {'failed': True,
                         'msg': 'Either specify files or contents.'}
@@ -146,7 +146,7 @@ class OCSecret(OpenShiftCLI):
                     return {'changed': True,
                             'msg': 'Would have performed a create.'}
 
-                api_rval = ocsecret.create(params['files'], params['contents'])
+                api_rval = ocsecret.create(files, params['contents'])
 
                 # Remove files
                 if files and params['delete_after']:

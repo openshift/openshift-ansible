@@ -38,6 +38,7 @@ import os
 import re
 import shutil
 import subprocess
+import tempfile
 # pylint: disable=import-error
 import ruamel.yaml as yaml
 from ansible.module_utils.basic import AnsibleModule
@@ -748,7 +749,8 @@ class OpenShiftCLI(object):
         if not res['results']:
             return res
 
-        fname = '/tmp/%s' % rname
+        fname = Utils.create_tmpfile(rname + '-')
+
         yed = Yedit(fname, res['results'][0], separator=sep)
         changes = []
         for key, value in content.items():
@@ -772,7 +774,7 @@ class OpenShiftCLI(object):
 
     def _create_from_content(self, rname, content):
         '''create a temporary file and then call oc create on it'''
-        fname = '/tmp/%s' % rname
+        fname = Utils.create_tmpfile(rname + '-')
         yed = Yedit(fname, content=content)
         yed.write()
 
@@ -815,7 +817,7 @@ class OpenShiftCLI(object):
         if results['returncode'] != 0 or not create:
             return results
 
-        fname = '/tmp/%s' % template_name
+        fname = Utils.create_tmpfile(template_name + '-')
         yed = Yedit(fname, results['results'])
         yed.write()
 
@@ -996,32 +998,50 @@ class OpenShiftCLI(object):
 
 class Utils(object):
     ''' utilities for openshiftcli modules '''
-    @staticmethod
-    def create_file(rname, data, ftype='yaml'):
-        ''' create a file in tmp with name and contents'''
-        path = os.path.join('/tmp', rname)
-        with open(path, 'w') as fds:
-            if ftype == 'yaml':
-                fds.write(yaml.dump(data, Dumper=yaml.RoundTripDumper))
 
-            elif ftype == 'json':
-                fds.write(json.dumps(data))
-            else:
-                fds.write(data)
+    @staticmethod
+    def _write(filename, contents):
+        ''' Actually write the file contents to disk. This helps with mocking. '''
+
+        with open(filename, 'w') as sfd:
+            sfd.write(contents)
+
+    @staticmethod
+    def create_tmp_file_from_contents(rname, data, ftype='yaml'):
+        ''' create a file in tmp with name and contents'''
+
+        tmp = Utils.create_tmpfile(prefix=rname)
+
+        if ftype == 'yaml':
+            Utils._write(tmp, yaml.dump(data, Dumper=yaml.RoundTripDumper))
+        elif ftype == 'json':
+            Utils._write(tmp, json.dumps(data))
+        else:
+            Utils._write(tmp, data)
 
         # Register cleanup when module is done
-        atexit.register(Utils.cleanup, [path])
-        return path
+        atexit.register(Utils.cleanup, [tmp])
+        return tmp
 
     @staticmethod
-    def create_files_from_contents(content, content_type=None):
+    def create_tmpfile(prefix=None):
+        ''' Generates and returns a temporary file name '''
+
+        with tempfile.NamedTemporaryFile(prefix=prefix, delete=False) as tmp:
+            return tmp.name
+
+    @staticmethod
+    def create_tmp_files_from_contents(content, content_type=None):
         '''Turn an array of dict: filename, content into a files array'''
         if not isinstance(content, list):
             content = [content]
         files = []
         for item in content:
-            path = Utils.create_file(item['path'], item['data'], ftype=content_type)
-            files.append({'name': os.path.basename(path), 'path': path})
+            path = Utils.create_tmp_file_from_contents(item['path'] + '-',
+                                                       item['data'],
+                                                       ftype=content_type)
+            files.append({'name': os.path.basename(item['path']),
+                          'path': path})
         return files
 
     @staticmethod
@@ -1298,7 +1318,7 @@ class OCObject(OpenShiftCLI):
             return self._create(files[0])
 
         content['data'] = yaml.dump(content['data'])
-        content_file = Utils.create_files_from_contents(content)[0]
+        content_file = Utils.create_tmp_files_from_contents(content)[0]
 
         return self._create(content_file['path'])
 

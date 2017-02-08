@@ -35,8 +35,9 @@ class OCSecretTest(unittest.TestCase):
         ''' setup method will create a file and set to known configuration '''
         pass
 
-    @mock.patch('oc_secret.OCSecret.openshift_cmd')
-    def test_adding_a_secret(self, mock_openshift_cmd):
+    @mock.patch('oc_secret.Utils._write')
+    @mock.patch('oc_secret.OCSecret._run')
+    def test_adding_a_secret(self, mock_cmd, mock_write):
         ''' Testing adding a secret '''
 
         # Arrange
@@ -45,10 +46,10 @@ class OCSecretTest(unittest.TestCase):
         params = {
             'state': 'present',
             'namespace': 'default',
-            'name': 'secretname',
+            'name': 'testsecretname',
             'contents': [{
                 'path': "/tmp/somesecret.json",
-                'data': "{'one': 1, 'two': 2, 'three', 3}",
+                'data': "{'one': 1, 'two': 2, 'three': 3}",
             }],
             'decode': False,
             'kubeconfig': '/etc/origin/master/admin.kubeconfig',
@@ -58,17 +59,9 @@ class OCSecretTest(unittest.TestCase):
         }
 
         # Return values of our mocked function call. These get returned once per call.
-        mock_openshift_cmd.side_effect = [
-            {
-                "cmd": "/usr/bin/oc get secrets -o json secretname",
-                "results": "",
-                "returncode": 0,
-            },  # oc output for first call to openshift_cmd (oc secrets get)
-            {
-                "cmd": "/usr/bin/oc secrets new secretname somesecret.json=/tmp/somesecret.json",
-                "results": "",
-                "returncode": 0,
-            },  # oc output for second call to openshift_cmd (oc secrets new)
+        mock_cmd.side_effect = [
+            (1, '', 'Error from server: secrets "testsecretname" not found'),
+            (0, 'secret/testsecretname', ''),
         ]
 
         # Act
@@ -80,9 +73,13 @@ class OCSecretTest(unittest.TestCase):
         self.assertEqual(results['state'], 'present')
 
         # Making sure our mock was called as we expected
-        mock_openshift_cmd.assert_has_calls([
-            mock.call(['get', 'secrets', 'secretname', '-o', 'json'], output=True),
-            mock.call(['secrets', 'new', 'secretname', 'somesecret.json=/tmp/somesecret.json']),
+        mock_cmd.assert_has_calls([
+            mock.call(['oc', '-n', 'default', 'get', 'secrets', 'testsecretname', '-o', 'json'], None),
+            mock.call(['oc', '-n', 'default', 'secrets', 'new', 'testsecretname', mock.ANY], None),
+        ])
+
+        mock_write.assert_has_calls([
+            mock.call(mock.ANY, "{'one': 1, 'two': 2, 'three': 3}"),
         ])
 
     def tearDown(self):
