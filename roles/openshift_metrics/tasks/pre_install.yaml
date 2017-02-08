@@ -12,12 +12,6 @@
   - openshift_metrics_cassandra_storage_type not in openshift_metrics_cassandra_storage_types
   - "not {{ openshift_metrics_heapster_standalone | bool }}"
 
-- name: create certificate output directory
-  file:
-    path: "{{ openshift_metrics_certs_dir }}"
-    state: directory
-    mode: 0700
-
 - name: list existing secrets
   command: >
     {{ openshift.common.client_binary }} -n {{ openshift_metrics_project }}
