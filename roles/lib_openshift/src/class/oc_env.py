@@ -1,4 +1,6 @@
 # pylint: skip-file
+# flake8: noqa
+
 
 # pylint: disable=too-many-instance-attributes
 class OCEnv(OpenShiftCLI):
@@ -73,6 +75,7 @@ class OCEnv(OpenShiftCLI):
 
         return self._replace_content(self.kind, self.name, self.resource.yaml_dict)
 
+    # pylint: disable=too-many-return-statements
     @staticmethod
     def run_ansible(params, check_mode):
         '''run the idempotent ansible code'''

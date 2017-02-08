@@ -6,7 +6,7 @@
   user: root
   vars:
     my_env_var:
-      SOMEKEY : SOMEVALUE
+      SOMEKEY: SOMEVALUE
 
     check_env_var:
       name: DEFAULT_CERTIFICATE_DIR

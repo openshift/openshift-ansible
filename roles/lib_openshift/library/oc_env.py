@@ -1603,6 +1603,7 @@ spec:
 
 # -*- -*- -*- Begin included fragment: class/oc_env.py -*- -*- -*-
 
+
 # pylint: disable=too-many-instance-attributes
 class OCEnv(OpenShiftCLI):
     ''' Class to wrap the oc command line tools '''
@@ -1676,6 +1677,7 @@ class OCEnv(OpenShiftCLI):
 
         return self._replace_content(self.kind, self.name, self.resource.yaml_dict)
 
+    # pylint: disable=too-many-return-statements
     @staticmethod
     def run_ansible(params, check_mode):
         '''run the idempotent ansible code'''
