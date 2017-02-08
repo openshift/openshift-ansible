@@ -107,7 +107,7 @@ class OCEnv(OpenShiftCLI):
 
                     api_rval = ocenv.delete()
 
-                    return {'changed': True, 'results': results, 'state': 'absent'}
+                    return {'changed': True, 'state': 'absent'}
 
             return {'changed': False, 'state': 'absent'}
 
@@ -134,9 +134,9 @@ class OCEnv(OpenShiftCLI):
                     if api_rval['returncode'] != 0:
                         return {'failed': True, 'msg': api_rval}
 
-                    return {'changed': True, 'results': results, 'state': 'present'}
+                    return {'changed': True, 'results': api_rval['results'], 'state': 'present'}
 
-            return {'changed': False, 'results': results, 'state': 'present'}
+            return {'changed': False, 'results': api_rval['results'], 'state': 'present'}
 
 
         return {'failed': True,
