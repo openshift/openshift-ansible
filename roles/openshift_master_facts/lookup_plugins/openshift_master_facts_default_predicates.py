@@ -98,7 +98,7 @@ class LookupModule(LookupBase):
                 {'name': 'MatchInterPodAffinity'}
             ])
 
-        if short_version in ['1.5', '1.6']:
+        if short_version in ['1.5', '1.6', 'latest']:
             predicates.extend([
                 {'name': 'NoVolumeZoneConflict'},
                 {'name': 'MaxEBSVolumeCount'},
