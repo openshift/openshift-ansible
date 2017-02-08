@@ -46,6 +46,7 @@
     when: l_router_dc.rc == 0 and 'OPENSHIFT_CA_DATA' in router_env_vars and 'OPENSHIFT_CERT_DATA' in router_env_vars and 'OPENSHIFT_KEY_DATA' in router_env_vars
 
   - block:
+
     - name: Delete existing router certificate secret
       oc_secret:
         kubeconfig: "{{ mktemp.stdout }}/admin.kubeconfig"
