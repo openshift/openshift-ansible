@@ -64,7 +64,7 @@ class OCRouteTest(unittest.TestCase):
             'port': None
         }
 
-        route_result ='''{
+        route_result = '''{
             "kind": "Route",
             "apiVersion": "v1",
             "metadata": {
@@ -107,7 +107,6 @@ class OCRouteTest(unittest.TestCase):
                 ]
             }
         }'''
-
 
         # Return values of our mocked function call. These get returned once per call.
         mock_cmd.side_effect = [
