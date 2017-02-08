@@ -99,6 +99,12 @@ options:
     required: false
     default: None
     aliases: []
+  port:
+    description:
+    - The Name of the service port or number of the container port the route will route traffic to
+    required: false
+    default: None
+    aliases: []
 author:
 - "Kenny Woodson <kwoodson@redhat.com>"
 extends_documentation_fragment: []
