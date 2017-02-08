@@ -43,15 +43,18 @@
   when: False in (docker_registry_certificates_stat_result.results | default([]) | oo_collect(attribute='stat.exists') | list)
 
 - name: Create the secret for the registry certificates
-  command: >
-    {{ openshift.common.client_binary }} secrets new registry-certificates
-    {{ openshift_master_config_dir }}/registry.crt
-    {{ openshift_master_config_dir }}/registry.key
-    --config={{ openshift_hosted_kubeconfig }}
-    -n default
+  oc_secret:
+    kubeconfig: "{{ openshift_hosted_kubeconfig }}"
+    name: registry-certificates
+    namespace: default
+    state: present
+    files:
+    - name: registry.crt
+      path: "{{ openshift_master_config_dir }}/registry.crt"
+    - name: registry.key
+      path: "{{ openshift_master_config_dir }}/registry.key"
   register: create_registry_certificates_secret
-  changed_when: "'already exists' not in create_registry_certificates_secret.stderr"
-  failed_when: "'already exists' not in create_registry_certificates_secret.stderr and create_registry_certificates_secret.rc != 0"
+  run_once: true
 
 - name: "Add the secret to the registry's pod service accounts"
   command: >

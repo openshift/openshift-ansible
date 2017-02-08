@@ -2,6 +2,8 @@
 - name: Update registry certificates
   hosts: oo_first_master
   vars:
+  roles:
+  - lib_openshift
   tasks:
   - name: Create temp directory for kubeconfig
     command: mktemp -d /tmp/openshift-ansible-XXXXXX
@@ -70,13 +72,17 @@
         --key={{ openshift.common.config_base }}/master/registry.key
 
     - name: Update registry certificates secret
-      shell: >
-        {{ openshift.common.client_binary }} secret new registry-certificates
-        {{ openshift.common.config_base }}/master/registry.crt
-        {{ openshift.common.config_base }}/master/registry.key
-        --config={{ mktemp.stdout }}/admin.kubeconfig
-        -n default
-        -o json | oc replace -f -
+      oc_secret:
+        kubeconfig: "{{ mktemp.stdout }}/admin.kubeconfig"
+        name: registry-certificates
+        namespace: default
+        state: present
+        files:
+        - name: registry.crt
+          path: "{{ openshift.common.config_base }}/master/registry.crt"
+        - name: registry.key
+          path: "{{ openshift.common.config_base }}/master/registry.key"
+      run_once: true
     when: l_docker_registry_dc.rc == 0 and 'registry-certificates' in docker_registry_secrets and 'REGISTRY_HTTP_TLS_CERTIFICATE' in docker_registry_env_vars and 'REGISTRY_HTTP_TLS_KEY' in docker_registry_env_vars
 
   - name: Redeploy docker registry
