@@ -487,6 +487,12 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_logging_image_prefix=registry.example.com:8888/openshift3/
 #openshift_logging_image_version=3.3.0
 
+# Registry console deployment
+#
+# Configure the prefix and version for the deployer image
+#openshift_cockpit_deployer_prefix=registry.example.com:8888/openshift3/
+#openshift_cockpit_deployer_version=3.3
+
 # Configure the multi-tenant SDN plugin (default is 'redhat/openshift-ovs-subnet')
 # os_sdn_network_plugin_name='redhat/openshift-ovs-multitenant'
 
