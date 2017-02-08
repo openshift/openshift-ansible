@@ -59,12 +59,16 @@
   delegate_to: "{{ openshift_master_host }}"
 
 - name: Set node schedulability
-  command: >
-    {{ hostvars[openshift_master_host].openshift.common.client_binary }} adm manage-node {{ openshift.node.nodename }} --schedulable={{ 'true' if openshift.node.schedulable | bool else 'false' }}
-    --config={{ openshift_manage_node_kubeconfig }}
-    -n default
-  when: "'nodename' in openshift.node"
+  oadm_manage_node:
+    node: "{{ openshift.node.nodename | lower }}"
+    schedulable: "{{ 'true' if openshift.node.schedulable | bool else 'false' }}"
+    config: "{{ openshift_manage_node_kubeconfig }}"
   delegate_to: "{{ openshift_master_host }}"
+  retries: 10
+  delay: 5
+  register: node_schedulable
+  until: node_schedulable|succeeded
+  when: "'nodename' in openshift.node"
 
 - name: Label nodes
   command: >
