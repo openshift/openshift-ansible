@@ -19,6 +19,17 @@ oc_edit.py:
 - class/oc_edit.py
 - ansible/oc_edit.py
 
+oc_env.py:
+- doc/generated
+- doc/license
+- lib/import.py
+- doc/env
+- ../../lib_utils/src/class/yedit.py
+- lib/base.py
+- lib/deploymentconfig.py
+- class/oc_env.py
+- ansible/oc_env.py
+
 oc_label.py:
 - doc/generated
 - doc/license
