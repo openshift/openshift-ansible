@@ -51,11 +51,11 @@ How to use the Certificate Expiration Checking Role.
 
 Run one of the example playbooks using an inventory file
 representative of your existing cluster. Some example playbooks are
-included in this repo, or you can read on below after this example to
+included in this role, or you can read on below after this example to
 craft you own.
 
 ```
-$ ansible-playbook -v -i HOSTS ./roles/openshift_certificate_expiry/examples/playbooks/easy-mode.yaml
+$ ansible-playbook -v -i HOSTS playbooks/certificate_expiry/easy-mode.yaml
 ```
 
 Using the `easy-mode.yaml` playbook will produce:
@@ -65,16 +65,19 @@ Using the `easy-mode.yaml` playbook will produce:
 * A stylized HTML report in `/tmp/`
 
 
+> **Note:** If you are running from an RPM install use
+> `/usr/share/ansible/openshift-ansible/playbooks/certificate_expiry/easy-mode.yaml`
+> instead
+
 ## More Example Playbooks
 
 > **Note:** These Playbooks are available to run directly out of the
-> [examples/playbooks/](examples/playbooks/) directory.
+> [/playbooks/certificate_expiry/](../../playbooks/certificate_expiry/) directory.
 
 
 This example playbook is great if you're just wanting to **try the
-role out**. This playbook enables HTML and JSON reports. The warning
-window is set very large so you will almost always get results back.
-All certificates (healthy or not) are included in the results:
+role out**. This playbook enables HTML and JSON reports. All
+certificates (healthy or not) are included in the results:
 
 ```yaml
 ---
@@ -83,7 +86,6 @@ All certificates (healthy or not) are included in the results:
   become: yes
   gather_facts: no
   vars:
-    openshift_certificate_expiry_warning_days: 1500
     openshift_certificate_expiry_save_json_results: yes
     openshift_certificate_expiry_generate_html_report: yes
     openshift_certificate_expiry_show_all: yes
@@ -91,11 +93,16 @@ All certificates (healthy or not) are included in the results:
     - role: openshift_certificate_expiry
 ```
 
+**From git:**
 ```
-$ ansible-playbook -v -i HOSTS ./roles/openshift_certificate_expiry/examples/playbooks/easy-mode.yaml
+$ ansible-playbook -v -i HOSTS playbooks/certificate_expiry/easy-mode.yaml
+```
+**From openshift-ansible-playbooks rpm:**
+```
+$ ansible-playbook -v -i HOSTS /usr/share/ansible/openshift-ansible/playbooks/certificate_expiry/easy-mode.yaml
 ```
 
-> [View This Playbook](examples/playbooks/easy-mode.yaml)
+> [View This Playbook](../../playbooks/certificate_expiry/easy-mode.yaml)
 
 ***
 
@@ -111,12 +118,16 @@ Default behavior:
     - role: openshift_certificate_expiry
 ```
 
+**From git:**
 ```
-$ ansible-playbook -v -i HOSTS ./roles/openshift_certificate_expiry/examples/playbooks/default.yaml
+$ ansible-playbook -v -i HOSTS playbooks/certificate_expiry/default.yaml
+```
+**From openshift-ansible-playbooks rpm:**
+```
+$ ansible-playbook -v -i HOSTS /usr/share/ansible/openshift-ansible/playbooks/certificate_expiry/default.yaml
 ```
 
-
-> [View This Playbook](examples/playbooks/default.yaml)
+> [View This Playbook](../../playbooks/certificate_expiry/default.yaml)
 
 ***
 
@@ -136,12 +147,16 @@ Generate HTML and JSON artifacts in their default paths:
     - role: openshift_certificate_expiry
 ```
 
+**From git:**
 ```
-$ ansible-playbook -v -i HOSTS ./roles/openshift_certificate_expiry/examples/playbooks/html_and_json_default_paths.yaml
+$ ansible-playbook -v -i HOSTS playbooks/certificate_expiry/html_and_json_default_paths.yaml
+```
+**From openshift-ansible-playbooks rpm:**
+```
+$ ansible-playbook -v -i HOSTS /usr/share/ansible/openshift-ansible/playbooks/certificate_expiry/html_and_json_default_paths.yaml
 ```
 
-
-> [View This Playbook](examples/playbooks/html_and_json_default_paths.yaml)
+> [View This Playbook](../../playbooks/certificate_expiry/html_and_json_default_paths.yaml)
 
 ***
 
@@ -160,12 +175,16 @@ the module out):
     - role: openshift_certificate_expiry
 ```
 
+**From git:**
 ```
-$ ansible-playbook -v -i HOSTS ./roles/openshift_certificate_expiry/examples/playbooks/longer_warning_period.yaml
+$ ansible-playbook -v -i HOSTS playbooks/certificate_expiry/longer_warning_period.yaml
+```
+**From openshift-ansible-playbooks rpm:**
+```
+$ ansible-playbook -v -i HOSTS /usr/share/ansible/openshift-ansible/playbooks/certificate_expiry/longer_warning_period.yaml
 ```
 
-
-> [View This Playbook](examples/playbooks/longer_warning_period.yaml)
+> [View This Playbook](../../playbooks/certificate_expiry/longer_warning_period.yaml)
 
 ***
 
@@ -185,12 +204,16 @@ the module out) and save the results as a JSON file:
     - role: openshift_certificate_expiry
 ```
 
+**From git:**
 ```
-$ ansible-playbook -v -i HOSTS ./roles/openshift_certificate_expiry/examples/playbooks/longer-warning-period-json-results.yaml
+$ ansible-playbook -v -i HOSTS playbooks/certificate_expiry/longer-warning-period-json-results.yaml
+```
+**From openshift-ansible-playbooks rpm:**
+```
+$ ansible-playbook -v -i HOSTS /usr/share/ansible/openshift-ansible/playbooks/certificate_expiry/longer-warning-period-json-results.yaml
 ```
 
-
-> [View This Playbook](examples/playbooks/longer-warning-period-json-results.yaml)
+> [View This Playbook](../../playbooks/certificate_expiry/longer-warning-period-json-results.yaml)
 
 
 

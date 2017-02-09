@@ -4,8 +4,6 @@
 #
 # This example enables HTML and JSON reports
 #
-# The warning window is set very large so you will almost always get results back
-#
 # All certificates (healthy or not) are included in the results
 
 - name: Check cert expirys
@@ -13,7 +11,6 @@
   become: yes
   gather_facts: no
   vars:
-    openshift_certificate_expiry_warning_days: 1500
     openshift_certificate_expiry_save_json_results: yes
     openshift_certificate_expiry_generate_html_report: yes
     openshift_certificate_expiry_show_all: yes
