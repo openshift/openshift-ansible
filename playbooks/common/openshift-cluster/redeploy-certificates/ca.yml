@@ -160,6 +160,27 @@
       yaml_key: servingInfo.clientCA
       yaml_value: ca-bundle.crt
     when: (g_master_config_output.content|b64decode|from_yaml).servingInfo.clientCA != 'ca-bundle.crt'
+  - modify_yaml:
+      dest: "{{ openshift.common.config_base }}/master/master-config.yaml"
+      yaml_key: etcdClientInfo.ca
+      yaml_value: ca-bundle.crt
+    when:
+    - groups.oo_etcd_to_config | default([]) | length == 0
+    - (g_master_config_output.content|b64decode|from_yaml).etcdClientInfo.ca != 'ca-bundle.crt'
+  - modify_yaml:
+      dest: "{{ openshift.common.config_base }}/master/master-config.yaml"
+      yaml_key: etcdConfig.peerServingInfo.clientCA
+      yaml_value: ca-bundle.crt
+    when:
+    - groups.oo_etcd_to_config | default([]) | length == 0
+    - (g_master_config_output.content|b64decode|from_yaml).etcdConfig.peerServingInfo.clientCA != 'ca-bundle.crt'
+  - modify_yaml:
+      dest: "{{ openshift.common.config_base }}/master/master-config.yaml"
+      yaml_key: etcdConfig.servingInfo.clientCA
+      yaml_value: ca-bundle.crt
+    when:
+    - groups.oo_etcd_to_config | default([]) | length == 0
+    - (g_master_config_output.content|b64decode|from_yaml).etcdConfig.servingInfo.clientCA != 'ca-bundle.crt'
 
 - name: Copy current OpenShift CA to legacy directory
   hosts: oo_masters_to_config
