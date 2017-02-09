@@ -10,11 +10,11 @@
   when: "'--all' in openshift_logging_fluentd_hosts"
 
 - name: start fluentd
-  include: label_node.yaml
-  vars:
-    host: "{{fluentd_host}}"
-    label: "{{openshift_logging_fluentd_nodeselector.keys()[0]}}"
-    value: "{{openshift_logging_fluentd_nodeselector.values()[0]}}"
+  oc_label:
+    name: "{{ fluentd_host }}"
+    kind: node
+    state: add
+    label: "{{ openshift_logging_fluentd_nodeselector | oo_dict_to_list_of_dict }}"
   with_items: "{{ openshift_logging_fluentd_hosts }}"
   loop_control:
     loop_var: fluentd_host
@@ -30,7 +30,6 @@
     kind: dc
     name: "{{object.split('/')[1]}}"
     namespace: "{{openshift_logging_namespace}}"
-    kubeconfig: "{{mktemp.stdout}}/admin.kubeconfig"
     replicas: 1
   with_items: "{{es_dc.stdout_lines}}"
   loop_control:
@@ -47,7 +46,6 @@
     kind: dc
     name: "{{object.split('/')[1]}}"
     namespace: "{{openshift_logging_namespace}}"
-    kubeconfig: "{{mktemp.stdout}}/admin.kubeconfig"
     replicas: "{{ openshift_logging_kibana_replica_count | default (1) }}"
   with_items: "{{kibana_dc.stdout_lines}}"
   loop_control:
@@ -64,7 +62,6 @@
     kind: dc
     name: "{{object.split('/')[1]}}"
     namespace: "{{openshift_logging_namespace}}"
-    kubeconfig: "{{mktemp.stdout}}/admin.kubeconfig"
     replicas: 1
   with_items: "{{curator_dc.stdout_lines}}"
   loop_control:
@@ -81,7 +78,6 @@
     kind: dc
     name: "{{object.split('/')[1]}}"
     namespace: "{{openshift_logging_namespace}}"
-    kubeconfig: "{{mktemp.stdout}}/admin.kubeconfig"
     replicas: 1
   with_items: "{{es_dc.stdout_lines}}"
   loop_control:
@@ -99,7 +95,6 @@
     kind: dc
     name: "{{object.split('/')[1]}}"
     namespace: "{{openshift_logging_namespace}}"
-    kubeconfig: "{{mktemp.stdout}}/admin.kubeconfig"
     replicas: "{{ openshift_logging_kibana_ops_replica_count | default (1) }}"
   with_items: "{{kibana_dc.stdout_lines}}"
   loop_control:
@@ -117,7 +112,6 @@
     kind: dc
     name: "{{object.split('/')[1]}}"
     namespace: "{{openshift_logging_namespace}}"
-    kubeconfig: "{{mktemp.stdout}}/admin.kubeconfig"
     replicas: 1
   with_items: "{{curator_dc.stdout_lines}}"
   loop_control:
