@@ -24,6 +24,7 @@
     namespace: default
     name: docker-registry
     state: list
+    kubeconfig: "{{ openshift_hosted_kubeconfig }}"
   register: docker_registry_service_ip
   changed_when: false
 
@@ -36,7 +37,7 @@
     --signer-cert={{ openshift_master_config_dir }}/ca.crt
     --signer-key={{ openshift_master_config_dir }}/ca.key
     --signer-serial={{ openshift_master_config_dir }}/ca.serial.txt
-    --hostnames="{{ docker_registry_service_ip.results.clusterip }},docker-registry.default.svc.cluster.local,{{ docker_registry_route_hostname }}"
+    --hostnames="{{ (docker_registry_service_ip|from_json)["spec"]["clusterIP"] }},docker-registry.default.svc.cluster.local,{{ docker_registry_route_hostname }}"
     --cert={{ openshift_master_config_dir }}/registry.crt
     --key={{ openshift_master_config_dir }}/registry.key
   when: False in (docker_registry_certificates_stat_result.results | default([]) | oo_collect(attribute='stat.exists') | list)
