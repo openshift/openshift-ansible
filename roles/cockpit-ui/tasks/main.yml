@@ -63,10 +63,12 @@
   changed_when: false
   when: check_docker_registry_exists.rc == 0
 
+# TODO: Need to fix the origin and enterprise templates so that they both respect IMAGE_PREFIX
 - name: Deploy registry-console
   command: >
     {{ openshift.common.client_binary }} new-app --template=registry-console
     {% if openshift_cockpit_deployer_prefix is defined  %}-p IMAGE_PREFIX="{{ openshift_cockpit_deployer_prefix }}"{% endif %}
+    {% if openshift_cockpit_deployer_version is defined  %}-p IMAGE_VERSION="{{ openshift_cockpit_deployer_version }}"{% endif %}
     -p OPENSHIFT_OAUTH_PROVIDER_URL="{{ openshift.master.public_api_url }}"
     -p REGISTRY_HOST="{{ docker_registry_route.stdout }}"
     -p COCKPIT_KUBE_URL="{{ registry_console_cockpit_kube_url.stdout }}"
