@@ -257,8 +257,9 @@ class OCProcessTest(unittest.TestCase):
         ''' setup method will set to known configuration '''
         pass
 
+    @mock.patch('oc_process.Utils.create_tmpfile_copy')
     @mock.patch('oc_process.OCProcess._run')
-    def test_state_list(self, mock_cmd):
+    def test_state_list(self, mock_cmd, mock_tmpfile_copy):
         ''' Testing a get '''
         params = {'template_name': 'mysql-ephermeral',
                   'namespace': 'test',
@@ -274,13 +275,18 @@ class OCProcessTest(unittest.TestCase):
             (0, OCProcessTest.mysql, '')
         ]
 
+        mock_tmpfile_copy.side_effect = [
+            '/tmp/mock_kubeconfig',
+        ]
+
         results = OCProcess.run_ansible(params, False)
 
         self.assertFalse(results['changed'])
         self.assertEqual(results['results']['results'][0]['metadata']['name'], 'mysql-ephemeral')
 
+    @mock.patch('oc_process.Utils.create_tmpfile_copy')
     @mock.patch('oc_process.OCProcess._run')
-    def test_process_no_create(self, mock_cmd):
+    def test_process_no_create(self, mock_cmd, mock_tmpfile_copy):
         ''' Testing a process with no create '''
         params = {'template_name': 'mysql-ephermeral',
                   'namespace': 'test',
@@ -457,6 +463,10 @@ class OCProcessTest(unittest.TestCase):
             (0, OCProcessTest.mysql, ''),
             (0, OCProcessTest.mysql, ''),
             (0, mysqlproc, ''),
+        ]
+
+        mock_tmpfile_copy.side_effect = [
+            '/tmp/mock_kubeconfig',
         ]
 
         results = OCProcess.run_ansible(params, False)
