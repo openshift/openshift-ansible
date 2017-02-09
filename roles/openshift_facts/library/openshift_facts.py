@@ -2081,6 +2081,25 @@ class OpenShiftFacts(object):
                         create_pvc=False
                     )
                 ),
+                loggingops=dict(
+                    storage=dict(
+                        kind=None,
+                        volume=dict(
+                            name='logging-es-ops',
+                            size='10Gi'
+                        ),
+                        nfs=dict(
+                            directory='/exports',
+                            options='*(rw,root_squash)'
+                        ),
+                        host=None,
+                        access=dict(
+                            modes=['ReadWriteOnce']
+                        ),
+                        create_pv=True,
+                        create_pvc=False
+                    )
+                ),
                 logging=dict(
                     storage=dict(
                         kind=None,
