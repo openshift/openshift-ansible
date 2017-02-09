@@ -51,13 +51,16 @@
     command: oc secrets new dockerregistry /root/config.yml
     when: "'dockerregistry' not in secrets.stdout"
 
-  - name: Determine if service account contains secrets
-    command: oc describe serviceaccount/registry
-    register: serviceaccount
+  - name: Load lib_openshift modules
+    include_role:
+      name: lib_openshift
 
   - name: Add secrets to registry service account
-    command: oc secrets add serviceaccount/registry secrets/dockerregistry
-    when: "'dockerregistry' not in serviceaccount.stdout"
+    oc_serviceaccount_secret:
+      service_account: registry
+      secret: dockerregistry
+      namespace: default
+      state: present
 
   - name: Determine if deployment config contains secrets
     command: oc volume dc/docker-registry --list

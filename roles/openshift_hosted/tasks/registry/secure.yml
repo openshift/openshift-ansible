@@ -54,10 +54,12 @@
   failed_when: "'already exists' not in create_registry_certificates_secret.stderr and create_registry_certificates_secret.rc != 0"
 
 - name: "Add the secret to the registry's pod service accounts"
-  command: >
-    {{ openshift.common.client_binary }} secrets add {{ item }} registry-certificates
-    --config={{ openshift_hosted_kubeconfig  }}
-    -n default
+  oc_serviceaccount_secret:
+    service_account: "{{ item }}"
+    secret: registry-certificates
+    namespace: default
+    kubeconfig: "{{ openshift_hosted_kubeconfig  }}"
+    state: present
   with_items:
   - registry
   - default

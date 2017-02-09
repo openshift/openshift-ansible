@@ -53,23 +53,13 @@
     create -f -
   when: secrets.rc == 1
 
-- name: Determine if service account contains secrets
-  command: >
-    {{ openshift.common.client_binary }}
-    --config={{ openshift_hosted_kubeconfig }}
-    --namespace={{ openshift.hosted.registry.namespace | default('default') }}
-    get serviceaccounts registry
-    -o jsonpath='{.secrets[?(@.name=="{{ registry_config_secret_name }}")].name}'
-  register: serviceaccount
-  changed_when: false
-
 - name: Add secrets to registry service account
-  command: >
-    {{ openshift.common.client_binary }}
-    --config={{ openshift_hosted_kubeconfig }}
-    --namespace={{ openshift.hosted.registry.namespace | default('default') }}
-    secrets add serviceaccount/registry secrets/{{ registry_config_secret_name }}
-  when: serviceaccount.stdout == ''
+  oc_serviceaccount_secret:
+    service_account: registry
+    secret: "{{ registry_config_secret_name }}"
+    namespace: "{{ openshift.hosted.registry.namespace | default('default') }}"
+    kubeconfig: "{{ openshift_hosted_kubeconfig }}"
+    state: present
 
 - name: Determine if deployment config contains secrets
   command: >
