@@ -70,9 +70,9 @@
         {{ avail_disk.stdout }} Kb available.
     when: (embedded_etcd | bool) and (etcd_disk_usage.stdout|int > avail_disk.stdout|int)
 
-  - name: Install etcdctl for embedded environments
+  - name: Install etcdctl for for containerized or embedded environments
     include: embedded_etcdctl.yml
-    when: embedded_etcd
+    when: (embedded_etcd or openshift.common.is_containerized)
 
   - name: Generate etcd backup
     command: >
@@ -128,6 +128,10 @@
   handlers:
   - include: ../../../../roles/openshift_master/handlers/main.yml
     static: yes
+  pre_tasks:
+  - set_fact:
+      openshift_master_default_subdomain: "{{ lookup('oo_option', 'openshift_master_default_subdomain') | default(None, true) }}"
+    when: openshift_master_default_subdomain is not defined
   roles:
   - openshift_facts
   - openshift_master_facts
