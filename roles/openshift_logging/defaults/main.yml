@@ -27,6 +27,18 @@ openshift_logging_kibana_proxy_cpu_limit: null
 openshift_logging_kibana_proxy_memory_limit: null
 openshift_logging_kibana_replica_count: 1
 
+#The absolute path on the control node to the cert file to use
+#for the public facing kibana certs
+openshift_logging_kibana_cert: ""
+
+#The absolute path on the control node to the key file to use
+#for the public facing kibana certs
+openshift_logging_kibana_key: ""
+
+#The absolute path on the control node to the CA file to use
+#for the public facing kibana certs
+openshift_logging_kibana_ca: ""
+
 openshift_logging_kibana_ops_hostname: "{{ openshift_hosted_logging_ops_hostname | default(kibana-ops.{{openshift.common.dns_domain}}) }}"
 openshift_logging_kibana_ops_cpu_limit: null
 openshift_logging_kibana_ops_memory_limit: null
