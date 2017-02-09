@@ -46,12 +46,15 @@
 
   # Replace dc/docker-registry certificate secret contents if set.
   - block:
+    - name: Load lib_openshift modules
+      include_role:
+        name: lib_openshift
+
     - name: Retrieve registry service IP
-      command: >
-        {{ openshift.common.client_binary }} get service docker-registry
-        -o jsonpath='{.spec.clusterIP}'
-        --config={{ mktemp.stdout }}/admin.kubeconfig
-        -n default
+      oc_service:
+        namespace: default
+        name: docker-registry
+        state: list
       register: docker_registry_service_ip
       changed_when: false
 
@@ -65,7 +68,7 @@
         --signer-cert={{ openshift.common.config_base }}/master/ca.crt
         --signer-key={{ openshift.common.config_base }}/master/ca.key
         --signer-serial={{ openshift.common.config_base }}/master/ca.serial.txt
-        --hostnames="{{ docker_registry_service_ip.stdout }},docker-registry.default.svc.cluster.local,{{ docker_registry_route_hostname }}"
+        --hostnames="{{ docker_registry_service_ip.results.clusterip }},docker-registry.default.svc.cluster.local,{{ docker_registry_route_hostname }}"
         --cert={{ openshift.common.config_base }}/master/registry.crt
         --key={{ openshift.common.config_base }}/master/registry.key
 
