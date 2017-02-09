@@ -1,21 +1,11 @@
 ---
-- name: test if service accounts exists
-  command: >
-      {{ openshift.common.client_binary }} get sa {{ item }} -n {{ openshift_serviceaccounts_namespace }}
-  with_items: "{{ openshift_serviceaccounts_names }}"
-  failed_when: false
-  changed_when: false
-  register: account_test
-
 - name: create the service account
-  shell: >
-       echo {{ lookup('template', '../templates/serviceaccount.j2')
-       | from_yaml | to_json | quote }} | {{ openshift.common.client_binary }}
-       -n {{ openshift_serviceaccounts_namespace }} create -f -
-  when: item.1.rc != 0
-  with_together:
+  oc_serviceaccount:
+    name: "{{ item }}"
+    namespace: "{{ openshift_serviceaccounts_namespace }}"
+    state: present
+  with_items:
   - "{{ openshift_serviceaccounts_names }}"
-  - "{{ account_test.results }}"
 
 - name: test if scc needs to be updated
   command: >
