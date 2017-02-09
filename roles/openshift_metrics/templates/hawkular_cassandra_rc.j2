@@ -19,6 +19,9 @@ spec:
         type: hawkular-cassandra
     spec:
       serviceAccount: cassandra
+      securityContext:
+        supplementalGroups:
+        - {{openshift_metrics_cassandra_storage_group}}
 {% if node_selector is iterable and node_selector | length > 0 %}
       nodeSelector:
 {% for key, value in node_selector.iteritems() %}
