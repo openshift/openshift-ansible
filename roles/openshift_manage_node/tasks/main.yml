@@ -71,11 +71,17 @@
   when: "'nodename' in openshift.node"
 
 - name: Label nodes
-  command: >
-    {{ hostvars[openshift_master_host].openshift.common.client_binary }} label --overwrite node {{ openshift.node.nodename }} {{ openshift.node.labels | oo_combine_dict  }}
-    --config={{ openshift_manage_node_kubeconfig }}
-    -n default
-  when: "'nodename' in openshift.node and 'labels' in openshift.node and openshift.node.labels != {}"
+  oc_label:
+    name: "{{ openshift.node.nodename }}"
+    kind: node
+    state: add
+    labels: "{{ openshift.node.labels | oo_combine_dict | oo_split(separator=' ') }}"
+    kubeconfig: "{{ openshift_manage_node_kubeconfig }}"
+    namespace: default
+  when:
+    - "'nodename' in openshift.node"
+    - "'labels' in openshift.node"
+    - openshift.node.labels != {}
   delegate_to: "{{ openshift_master_host }}"
 
 - name: Delete temp directory
