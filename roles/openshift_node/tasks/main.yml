@@ -60,6 +60,12 @@
     state: present
   when: openshift.common.use_openshift_sdn and not openshift.common.is_containerized | bool
 
+- name: Install conntrack-tools package
+  package:
+    name: "conntrack-tools"
+    state: present
+  when: not openshift.common.is_containerized | bool
+
 - name: Install the systemd units
   include: systemd_units.yml
 
