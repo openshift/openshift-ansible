@@ -39,16 +39,6 @@ oc_obj.py:
 - class/oc_obj.py
 - ansible/oc_obj.py
 
-oc_process.py:
-- doc/generated
-- doc/license
-- lib/import.py
-- doc/process
-- ../../lib_utils/src/class/yedit.py
-- lib/base.py
-- class/oc_process.py
-- ansible/oc_process.py
-
 oc_route.py:
 - doc/generated
 - doc/license
