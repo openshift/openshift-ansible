@@ -1,4 +1,6 @@
 # pylint: skip-file
+# flake8: noqa
+
 
 # pylint: disable=too-many-instance-attributes
 class ProjectConfig(OpenShiftCLIConfig):

@@ -117,10 +117,6 @@ class OCProjectTest(unittest.TestCase):
 
         ])
 
-        #mock_write.assert_has_calls([
-            #mock.call(mock.ANY, "{'one': 1, 'two': 2, 'three': 3}"),
-        #])
-
     def tearDown(self):
         '''TearDown method'''
         pass

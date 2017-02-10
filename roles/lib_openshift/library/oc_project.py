@@ -1267,6 +1267,7 @@ class OpenShiftCLIConfig(object):
 
 # -*- -*- -*- Begin included fragment: lib/project.py -*- -*- -*-
 
+
 # pylint: disable=too-many-instance-attributes
 class ProjectConfig(OpenShiftCLIConfig):
     ''' project config object '''
