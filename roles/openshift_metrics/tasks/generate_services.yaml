@@ -1,17 +1,4 @@
 ---
-- name: Generate service for heapster
-  template: src=service.j2 dest={{mktemp.stdout}}/templates/metrics-{{obj_name}}-svc.yaml
-  vars:
-    obj_name: heapster
-    ports:
-    - {port: 80, targetPort: http-endpoint}
-    selector:
-      name: "{{obj_name}}"
-    labels:
-      metrics-infra: "{{obj_name}}"
-      name: "{{obj_name}}"
-  changed_when: no
-
 - name: Generate service for hawkular-metrics
   template: src=service.j2 dest={{mktemp.stdout}}/templates/metrics-{{obj_name}}-svc.yaml
   vars:

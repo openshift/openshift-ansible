@@ -46,11 +46,11 @@ For default values, see [`defaults/main.yaml`](defaults/main.yaml).
   testing), `pv` to use persistent volumes (which need to be created before the
   installation) or `dynamic` for dynamic persistent volumes.
 
-- `openshift_metrics_cassandra_pv_prefix`: The name of persistent volume claims created
+- `openshift_metrics_cassandra_pvc_prefix`: The name of persistent volume claims created
   for cassandra will be this with a serial number appended to the end, starting
   from 1.
 
-- `openshift_metrics_cassandra_pv_size`: The persistent volume size for each of the
+- `openshift_metrics_cassandra_pvc_size`: The persistent volume claim size for each of the
   Cassandra  nodes.
 
 - `openshift_metrics_heapster_standalone`: Deploy only heapster, without the Hawkular Metrics and

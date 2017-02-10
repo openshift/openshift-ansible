@@ -45,21 +45,24 @@ from ansible.module_utils.basic import AnsibleModule
 
 # -*- -*- -*- End included fragment: lib/import.py -*- -*- -*-
 
-# -*- -*- -*- Begin included fragment: doc/edit -*- -*- -*-
+# -*- -*- -*- Begin included fragment: doc/process -*- -*- -*-
 
 DOCUMENTATION = '''
 ---
-module: oc_edit
-short_description: Modify, and idempotently manage openshift objects.
+module: oc_process
+short_description: Module to process openshift templates
 description:
-  - Modify openshift objects programmatically.
+  - Process openshift templates programmatically.
 options:
   state:
     description:
-    - Currently present is only supported state.
-    required: true
+    - State has a few different meanings when it comes to process.
+    - state: present - This state runs an `oc process <template>`.  When used in
+    - conjunction with 'create: True' the process will be piped to | oc create -f
+    - state: absent - will remove a template
+    - state: list - will perform an `oc get template <template_name>`
     default: present
-    choices: ["present"]
+    choices: ["present", "absent", "list"]
     aliases: []
   kubeconfig:
     description:
@@ -73,78 +76,40 @@ options:
     required: false
     default: False
     aliases: []
-  name:
+  template_name:
     description:
-    - Name of the object that is being queried.
+    - Name of the openshift template that is being processed.
     required: false
     default: None
     aliases: []
   namespace:
     description:
-    - The namespace where the object lives.
+    - The namespace where the template lives.
     required: false
-    default: str
-    aliases: []
-  kind:
-    description:
-    - The kind attribute of the object.
-    required: True
-    default: None
-    choices:
-    - bc
-    - buildconfig
-    - configmaps
-    - dc
-    - deploymentconfig
-    - imagestream
-    - imagestreamtag
-    - is
-    - istag
-    - namespace
-    - project
-    - projects
-    - node
-    - ns
-    - persistentvolume
-    - pv
-    - rc
-    - replicationcontroller
-    - routes
-    - scc
-    - secret
-    - securitycontextconstraints
-    - service
-    - svc
-    aliases: []
-  file_name:
-    description:
-    - The file name in which to edit
-    required: false
-    default: None
-    aliases: []
-  file_format:
-    description:
-    - The format of the file being edited.
-    required: false
-    default: yaml
+    default: default
     aliases: []
   content:
     description:
-    - Content of the file
+    - Template content that will be processed.
     required: false
     default: None
     aliases: []
-  force:
+  params:
     description:
-    - Whether or not to force the operation
+    - A list of parameters that will be inserted into the template.
     required: false
     default: None
     aliases: []
-  separator:
+  create:
     description:
-    - The separator format for the edit.
-    required: false
-    default: '.'
+    - Whether or not to create the template after being processed. e.g.  oc process | oc create -f -
+    required: False
+    default: False
+    aliases: []
+  reconcile:
+    description:
+    - Whether or not to attempt to determine if there are updates or changes in the incoming template.
+    default: true
     aliases: []
 author:
 - "Kenny Woodson <kwoodson@redhat.com>"
@@ -152,16 +117,19 @@ extends_documentation_fragment: []
 '''
 
 EXAMPLES = '''
-oc_edit:
-  kind: rc
-  name: hawkular-cassandra-rc
-  namespace: openshift-infra
-  content:
-    spec.template.spec.containers[0].resources.limits.memory: 512
-    spec.template.spec.containers[0].resources.requests.memory: 256
+- name: process the cloud volume provisioner template with variables
+  oc_process:
+    namespace: openshift-infra
+    template_name: online-volume-provisioner
+    create: True
+    params:
+      PLAT: rhel7
+  register: processout
+  run_once: true
+- debug: var=processout
 '''
 
-# -*- -*- -*- End included fragment: doc/edit -*- -*- -*-
+# -*- -*- -*- End included fragment: doc/process -*- -*- -*-
 
 # -*- -*- -*- Begin included fragment: ../../lib_utils/src/class/yedit.py -*- -*- -*-
 # noqa: E301,E302
@@ -1300,142 +1268,220 @@ class OpenShiftCLIConfig(object):
 
 # -*- -*- -*- End included fragment: lib/base.py -*- -*- -*-
 
-# -*- -*- -*- Begin included fragment: class/oc_edit.py -*- -*- -*-
+# -*- -*- -*- Begin included fragment: class/oc_process.py -*- -*- -*-
 
-class Edit(OpenShiftCLI):
-    ''' Class to wrap the oc command line tools
-    '''
+
+# pylint: disable=too-many-instance-attributes
+class OCProcess(OpenShiftCLI):
+    ''' Class to wrap the oc command line tools '''
+
+    # pylint allows 5. we need 6
     # pylint: disable=too-many-arguments
     def __init__(self,
-                 kind,
                  namespace,
-                 resource_name=None,
+                 tname=None,
+                 params=None,
+                 create=False,
                  kubeconfig='/etc/origin/master/admin.kubeconfig',
-                 separator='.',
+                 tdata=None,
                  verbose=False):
         ''' Constructor for OpenshiftOC '''
-        super(Edit, self).__init__(namespace, kubeconfig)
+        super(OCProcess, self).__init__(namespace, kubeconfig)
         self.namespace = namespace
-        self.kind = kind
-        self.name = resource_name
+        self.name = tname
+        self.data = tdata
+        self.params = params
+        self.create = create
         self.kubeconfig = kubeconfig
-        self.separator = separator
         self.verbose = verbose
+        self._template = None
+
+    @property
+    def template(self):
+        '''template property'''
+        if self._template is None:
+            results = self._process(self.name, False, self.params, self.data)
+            if results['returncode'] != 0:
+                raise OpenShiftCLIError('Error processing template [%s].' % self.name)
+            self._template = results['results']['items']
+
+        return self._template
 
     def get(self):
-        '''return a secret by name '''
-        return self._get(self.kind, self.name)
+        '''get the template'''
+        results = self._get('template', self.name)
+        if results['returncode'] != 0:
+            # Does the template exist??
+            if 'not found' in results['stderr']:
+                results['returncode'] = 0
+                results['exists'] = False
+                results['results'] = []
 
-    def update(self, file_name, content, force=False, content_type='yaml'):
-        '''run update '''
-        if file_name:
-            if content_type == 'yaml':
-                data = yaml.load(open(file_name))
-            elif content_type == 'json':
-                data = json.loads(open(file_name).read())
+        return results
 
-            changes = []
-            yed = Yedit(filename=file_name, content=data, separator=self.separator)
-            for key, value in content.items():
-                changes.append(yed.put(key, value))
+    def delete(self, obj):
+        '''delete a resource'''
+        return self._delete(obj['kind'], obj['metadata']['name'])
 
-            if any([not change[0] for change in changes]):
-                return {'returncode': 0, 'updated': False}
+    def create_obj(self, obj):
+        '''create a resource'''
+        return self._create_from_content(obj['metadata']['name'], obj)
 
-            yed.write()
+    def process(self, create=None):
+        '''process a template'''
+        do_create = False
+        if create != None:
+            do_create = create
+        else:
+            do_create = self.create
 
-            atexit.register(Utils.cleanup, [file_name])
+        return self._process(self.name, do_create, self.params, self.data)
 
-            return self._replace(file_name, force=force)
+    def exists(self):
+        '''return whether the template exists'''
+        # Always return true if we're being passed template data
+        if self.data:
+            return True
+        t_results = self._get('template', self.name)
 
-        return self._replace_content(self.kind, self.name, content, force=force, sep=self.separator)
+        if t_results['returncode'] != 0:
+            # Does the template exist??
+            if 'not found' in t_results['stderr']:
+                return False
+            else:
+                raise OpenShiftCLIError('Something went wrong. %s' % t_results)
 
+        return True
+
+    def needs_update(self):
+        '''attempt to process the template and return it for comparison with oc objects'''
+        obj_results = []
+        for obj in self.template:
+
+            # build a list of types to skip
+            skip = []
+
+            if obj['kind'] == 'ServiceAccount':
+                skip.extend(['secrets', 'imagePullSecrets'])
+            if obj['kind'] == 'BuildConfig':
+                skip.extend(['lastTriggeredImageID'])
+            if obj['kind'] == 'ImageStream':
+                skip.extend(['generation'])
+            if obj['kind'] == 'DeploymentConfig':
+                skip.extend(['lastTriggeredImage'])
+
+            # fetch the current object
+            curr_obj_results = self._get(obj['kind'], obj['metadata']['name'])
+            if curr_obj_results['returncode'] != 0:
+                # Does the template exist??
+                if 'not found' in curr_obj_results['stderr']:
+                    obj_results.append((obj, True))
+                    continue
+
+            # check the generated object against the existing object
+            if not Utils.check_def_equal(obj, curr_obj_results['results'][0], skip_keys=skip):
+                obj_results.append((obj, True))
+                continue
+
+            obj_results.append((obj, False))
+
+        return obj_results
+
+    # pylint: disable=too-many-return-statements
     @staticmethod
     def run_ansible(params, check_mode):
         '''run the ansible idempotent code'''
 
-        ocedit = Edit(params['kind'],
-                      params['namespace'],
-                      params['name'],
-                      kubeconfig=params['kubeconfig'],
-                      separator=params['separator'],
-                      verbose=params['debug'])
+        ocprocess = OCProcess(params['namespace'],
+                              params['template_name'],
+                              params['params'],
+                              params['create'],
+                              kubeconfig=params['kubeconfig'],
+                              tdata=params['content'],
+                              verbose=params['debug'])
 
-        api_rval = ocedit.get()
+        state = params['state']
 
-        ########
-        # Create
-        ########
-        if not Utils.exists(api_rval['results'], params['name']):
-            return {"failed": True, 'msg': api_rval}
+        api_rval = ocprocess.get()
 
-        ########
-        # Update
-        ########
-        if check_mode:
-            return {'changed': True, 'msg': 'CHECK_MODE: Would have performed edit'}
+        if state == 'list':
+            if api_rval['returncode'] != 0:
+                return {"failed": True, "msg" : api_rval}
 
-        api_rval = ocedit.update(params['file_name'],
-                                 params['content'],
-                                 params['force'],
-                                 params['file_format'])
+            return {"changed" : False, "results": api_rval, "state": "list"}
 
-        if api_rval['returncode'] != 0:
-            return {"failed": True, 'msg': api_rval}
+        elif state == 'present':
+            if check_mode and params['create']:
+                return {"changed": True, 'msg': "CHECK_MODE: Would have processed template."}
 
-        if 'updated' in api_rval and not api_rval['updated']:
-            return {"changed": False, 'results': api_rval, 'state': 'present'}
+            if not ocprocess.exists() or not params['reconcile']:
+            #FIXME: this code will never get run in a way that succeeds when
+            #       module.params['reconcile'] is true. Because oc_process doesn't
+            #       create the actual template, the check of ocprocess.exists()
+            #       is meaningless. Either it's already here and this code
+            #       won't be run, or this code will fail because there is no
+            #       template available for oc process to use. Have we conflated
+            #       the template's existence with the existence of the objects
+            #       it describes?
 
-        # return the created object
-        api_rval = ocedit.get()
+            # Create it here
+                api_rval = ocprocess.process()
+                if api_rval['returncode'] != 0:
+                    return {"failed": True, "msg": api_rval}
 
-        if api_rval['returncode'] != 0:
-            return {"failed": True, 'msg': api_rval}
+                if params['create']:
+                    return {"changed": True, "results": api_rval, "state": "present"}
 
-        return {"changed": True, 'results': api_rval, 'state': 'present'}
+                return {"changed": False, "results": api_rval, "state": "present"}
 
-# -*- -*- -*- End included fragment: class/oc_edit.py -*- -*- -*-
+        # verify results
+        update = False
+        rval = []
+        all_results = ocprocess.needs_update()
+        for obj, status in all_results:
+            if status:
+                ocprocess.delete(obj)
+                results = ocprocess.create_obj(obj)
+                results['kind'] = obj['kind']
+                rval.append(results)
+                update = True
 
-# -*- -*- -*- Begin included fragment: ansible/oc_edit.py -*- -*- -*-
+        if not update:
+            return {"changed": update, "results": api_rval, "state": "present"}
+
+        for cmd in rval:
+            if cmd['returncode'] != 0:
+                return {"failed": True, "changed": update, "results": rval, "state": "present"}
+
+        return {"changed": update, "results": rval, "state": "present"}
+
+
+# -*- -*- -*- End included fragment: class/oc_process.py -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: ansible/oc_process.py -*- -*- -*-
 
 
 def main():
     '''
-    ansible oc module for editing objects
+    ansible oc module for processing templates
     '''
 
     module = AnsibleModule(
         argument_spec=dict(
             kubeconfig=dict(default='/etc/origin/master/admin.kubeconfig', type='str'),
-            state=dict(default='present', type='str',
-                       choices=['present']),
+            state=dict(default='present', type='str', choices=['present', 'list']),
             debug=dict(default=False, type='bool'),
             namespace=dict(default='default', type='str'),
-            name=dict(default=None, required=True, type='str'),
-            kind=dict(required=True,
-                      type='str',
-                      choices=['dc', 'deploymentconfig',
-                               'rc', 'replicationcontroller',
-                               'svc', 'service',
-                               'scc', 'securitycontextconstraints',
-                               'ns', 'namespace', 'project', 'projects',
-                               'is', 'imagestream',
-                               'istag', 'imagestreamtag',
-                               'bc', 'buildconfig',
-                               'routes',
-                               'node',
-                               'secret',
-                               'pv', 'persistentvolume']),
-            file_name=dict(default=None, type='str'),
-            file_format=dict(default='yaml', type='str'),
-            content=dict(default=None, required=True, type='dict'),
-            force=dict(default=False, type='bool'),
-            separator=dict(default='.', type='str'),
+            template_name=dict(default=None, type='str'),
+            content=dict(default=None, type='str'),
+            params=dict(default=None, type='dict'),
+            create=dict(default=False, type='bool'),
+            reconcile=dict(default=True, type='bool'),
         ),
         supports_check_mode=True,
     )
 
-    rval = Edit.run_ansible(module.params, module.check_mode)
+    rval = OCProcess.run_ansible(module.params, module.check_mode)
     if 'failed' in rval:
         module.fail_json(**rval)
 
@@ -1444,4 +1490,4 @@ def main():
 if __name__ == '__main__':
     main()
 
-# -*- -*- -*- End included fragment: ansible/oc_edit.py -*- -*- -*-
+# -*- -*- -*- End included fragment: ansible/oc_process.py -*- -*- -*-

@@ -35,8 +35,9 @@ class ManageNodeTest(unittest.TestCase):
         ''' setup method will create a file and set to known configuration '''
         pass
 
+    @mock.patch('oadm_manage_node.Utils.create_tmpfile_copy')
     @mock.patch('oadm_manage_node.ManageNode.openshift_cmd')
-    def test_list_pods(self, mock_openshift_cmd):
+    def test_list_pods(self, mock_openshift_cmd, mock_tmpfile_copy):
         ''' Testing a get '''
         params = {'node': ['ip-172-31-49-140.ec2.internal'],
                   'schedulable': None,
@@ -106,6 +107,10 @@ class ManageNodeTest(unittest.TestCase):
              "returncode": 0}
         ]
 
+        mock_tmpfile_copy.side_effect = [
+            '/tmp/mocked_kubeconfig',
+        ]
+
         results = ManageNode.run_ansible(params, False)
 
         # returned a single node
@@ -113,8 +118,9 @@ class ManageNodeTest(unittest.TestCase):
         # returned 2 pods
         self.assertTrue(len(results['results']['nodes']['ip-172-31-49-140.ec2.internal']) == 2)
 
+    @mock.patch('oadm_manage_node.Utils.create_tmpfile_copy')
     @mock.patch('oadm_manage_node.ManageNode.openshift_cmd')
-    def test_schedulable_false(self, mock_openshift_cmd):
+    def test_schedulable_false(self, mock_openshift_cmd, mock_tmpfile_copy):
         ''' Testing a get '''
         params = {'node': ['ip-172-31-49-140.ec2.internal'],
                   'schedulable': False,
@@ -162,6 +168,11 @@ class ManageNodeTest(unittest.TestCase):
              "results": "NAME                            STATUS    AGE\n" +
                         "ip-172-31-49-140.ec2.internal   Ready,SchedulingDisabled     5h\n",
              "returncode": 0}]
+
+        mock_tmpfile_copy.side_effect = [
+            '/tmp/mocked_kubeconfig',
+        ]
+
         results = ManageNode.run_ansible(params, False)
 
         self.assertTrue(results['changed'])

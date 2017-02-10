@@ -17,7 +17,7 @@
   oc_scale:
     kind: dc
     name: "{{object.split('/')[1]}}"
-    namespace: "{{mktemp.stdout}}/admin.kubeconfig"
+    namespace: "{{openshift_logging_namespace}}"
     replicas: 1
   with_items: "{{es_dc.stdout_lines}}"
   loop_control:

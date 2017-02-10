@@ -1,8 +1,9 @@
-#!/usr/bin/ansible-playbook
+#!/usr/bin/ansible-playbook --module-path=../../../library/
+#
 # Yedit test so that we can quickly determine if features are working
 # Ensure that the kube-manager.yaml file exists
 #
-# ./yedit_test.yml -M ../../library
+# ./yedit_test.yml
 #
 ---
 - hosts: localhost

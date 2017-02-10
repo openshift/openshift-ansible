@@ -124,7 +124,7 @@ spec:
         emptyDir: {}
 {%      else %}
         persistentVolumeClaim:
-          claimName: "{{ openshift_metrics_cassandra_pv_prefix }}-{{ node }}"
+          claimName: "{{ openshift_metrics_cassandra_pvc_prefix }}-{{ node }}"
 {% endif %}
       - name: hawkular-cassandra-secrets
         secret:

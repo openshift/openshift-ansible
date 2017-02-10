@@ -35,8 +35,9 @@ class OCScaleTest(unittest.TestCase):
         ''' setup method will create a file and set to known configuration '''
         pass
 
+    @mock.patch('oc_scale.Utils.create_tmpfile_copy')
     @mock.patch('oc_scale.OCScale.openshift_cmd')
-    def test_state_list(self, mock_openshift_cmd):
+    def test_state_list(self, mock_openshift_cmd, mock_tmpfile_copy):
         ''' Testing a get '''
         params = {'name': 'router',
                   'namespace': 'default',
@@ -70,13 +71,18 @@ class OCScaleTest(unittest.TestCase):
              'results': dc,
              'returncode': 0}]
 
+        mock_tmpfile_copy.side_effect = [
+            '/tmp/mocked_kubeconfig',
+        ]
+
         results = OCScale.run_ansible(params, False)
 
         self.assertFalse(results['changed'])
         self.assertEqual(results['result'][0], 2)
 
+    @mock.patch('oc_scale.Utils.create_tmpfile_copy')
     @mock.patch('oc_scale.OCScale.openshift_cmd')
-    def test_scale(self, mock_openshift_cmd):
+    def test_scale(self, mock_openshift_cmd, mock_tmpfile_copy):
         ''' Testing a get '''
         params = {'name': 'router',
                   'namespace': 'default',
@@ -114,13 +120,18 @@ class OCScaleTest(unittest.TestCase):
              'returncode': 0}
         ]
 
+        mock_tmpfile_copy.side_effect = [
+            '/tmp/mocked_kubeconfig',
+        ]
+
         results = OCScale.run_ansible(params, False)
 
         self.assertFalse(results['changed'])
         self.assertEqual(results['result'][0], 3)
 
+    @mock.patch('oc_scale.Utils.create_tmpfile_copy')
     @mock.patch('oc_scale.OCScale.openshift_cmd')
-    def test_no_dc_scale(self, mock_openshift_cmd):
+    def test_no_dc_scale(self, mock_openshift_cmd, mock_tmpfile_copy):
         ''' Testing a get '''
         params = {'name': 'not_there',
                   'namespace': 'default',
@@ -136,6 +147,10 @@ class OCScaleTest(unittest.TestCase):
              'returncode': 1,
              'stderr': "Error from server: deploymentconfigs \"not_there\" not found\n",
              'stdout': ""},
+        ]
+
+        mock_tmpfile_copy.side_effect = [
+            '/tmp/mocked_kubeconfig',
         ]
 
         results = OCScale.run_ansible(params, False)

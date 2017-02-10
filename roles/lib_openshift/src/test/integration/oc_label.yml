@@ -1,5 +1,7 @@
 #!/usr/bin/ansible-playbook --module-path=../../../library/
-# ./oc_label.yml -e "cli_master_test=$OPENSHIFT_MASTER -e "cli_node_test=ip-172-0-31-1.ec2"
+#
+# ./oc_label.yml -e "cli_master_test=$OPENSHIFT_MASTER
+#
 ---
 - hosts: "{{ cli_master_test }}"
   gather_facts: no
@@ -15,16 +17,25 @@
       msg: "{{ item }} not defined"
     when: "{{ item }} is not defined"
     with_items:
-    - cli_node_test  # openshift node to be used to add/remove labels to
     - cli_master_test  # ansible inventory instance to run playbook against
 
   tasks:
+  - name: get list of nodes
+    oc_obj:
+      state: list
+      kind: node
+    register: obj_out
+
+  - name: Set the node to work with
+    set_fact:
+      node_to_test: "{{ obj_out['results']['results'][0]['items'][0]['metadata']['name'] }}"
+
   - name: delete test labels (start from known starting position)
     oc_label:
       state: absent
       namespace: "{{ def_namespace }}"
       kind: "{{ def_kind }}"
-      name: "{{ cli_node_test }}"
+      name: "{{ node_to_test }}"
       labels:
       - key: testlabel2
       - key: testlabel3
@@ -34,7 +45,7 @@
       state: list
       namespace: "{{ def_namespace }}"
       kind: "{{ def_kind }}"
-      name: "{{ cli_node_test }}"
+      name: "{{ node_to_test }}"
     register: original_labels
   - name: assert that testlabel2 and testlabel3 test labels don't exist
     assert:
@@ -47,7 +58,7 @@
       state: add
       namespace: "{{ def_namespace }}"
       kind: "{{ def_kind }}"
-      name: "{{ cli_node_test }}"
+      name: "{{ node_to_test }}"
       labels:
       - key: testlabel2
         value: "yes"
@@ -62,7 +73,7 @@
       state: list
       namespace: "{{ def_namespace }}"
       kind: "{{ def_kind }}"
-      name: "{{ cli_node_test }}"
+      name: "{{ node_to_test }}"
     register: label_out
   - name: assert that testlabel2 label actually added
     assert:
@@ -75,7 +86,7 @@
       state: add
       namespace: "{{ def_namespace }}"
       kind: "{{ def_kind }}"
-      name: "{{ cli_node_test }}"
+      name: "{{ node_to_test }}"
       labels:
       - key: testlabel2
         value: "yes"
@@ -90,7 +101,7 @@
       state: add
       namespace: "{{ def_namespace }}"
       kind: "{{ def_kind }}"
-      name: "{{ cli_node_test }}"
+      name: "{{ node_to_test }}"
       labels:
       - key: testlabel2
         value: "different"
@@ -105,7 +116,7 @@
       state: list
       namespace: "{{ def_namespace }}"
       kind: "{{ def_kind }}"
-      name: "{{ cli_node_test }}"
+      name: "{{ node_to_test }}"
     register: label_out
   - name: assert that testlabel2 label actually modified
     assert:
@@ -118,7 +129,7 @@
       state: absent
       namespace: "{{ def_namespace }}"
       kind: "{{ def_kind }}"
-      name: "{{ cli_node_test }}"
+      name: "{{ node_to_test }}"
       labels:
       - key: testlabelnone
     register: label_out
@@ -132,7 +143,7 @@
       state: absent
       namespace: "{{ def_namespace }}"
       kind: "{{ def_kind }}"
-      name: "{{ cli_node_test }}"
+      name: "{{ node_to_test }}"
       labels:
       - key: testlabel2
     register: label_out
@@ -146,7 +157,7 @@
       state: absent
       namespace: "{{ def_namespace }}"
       kind: "{{ def_kind }}"
-      name: "{{ cli_node_test }}"
+      name: "{{ node_to_test }}"
       labels:
       - key: testlabel2
     register: label_out
@@ -160,7 +171,7 @@
       state: list
       namespace: "{{ def_namespace }}"
       kind: "{{ def_kind }}"
-      name: "{{ cli_node_test }}"
+      name: "{{ node_to_test }}"
     register: label_out
   - name: assert label actually deleted
     assert:
@@ -172,7 +183,7 @@
       state: add
       namespace: "{{ def_namespace }}"
       kind: "{{ def_kind }}"
-      name: "{{ cli_node_test }}"
+      name: "{{ node_to_test }}"
       labels:
       - key: testlabel2
         value: "yes"
@@ -189,7 +200,7 @@
       state: list
       namespace: "{{ def_namespace }}"
       kind: "{{ def_kind }}"
-      name: "{{ cli_node_test }}"
+      name: "{{ node_to_test }}"
     register: label_out
   - name: assert that both labels actually exist
     assert:
@@ -204,7 +215,7 @@
       state: absent
       namespace: "{{ def_namespace }}"
       kind: "{{ def_kind }}"
-      name: "{{ cli_node_test }}"
+      name: "{{ node_to_test }}"
       labels:
       - key: testlabel2
       - key: testlabel3
@@ -219,7 +230,7 @@
       state: absent
       namespace: "{{ def_namespace }}"
       kind: "{{ def_kind }}"
-      name: "{{ cli_node_test }}"
+      name: "{{ node_to_test }}"
       labels:
       - key: testlabel2
       - key: testlabel3
@@ -237,7 +248,7 @@
       state: present
       namespace: "{{ def_namespace }}"
       kind: "{{ def_kind }}"
-      name: "{{ cli_node_test }}"
+      name: "{{ node_to_test }}"
       labels: "{{ original_labels_as_key_value_list }}"
     register: label_out
   - name: assert that no changes are made when current list matches existing list
@@ -250,7 +261,7 @@
       state: present
       namespace: "{{ def_namespace }}"
       kind: "{{ def_kind }}"
-      name: "{{ cli_node_test }}"
+      name: "{{ node_to_test }}"
       labels: "{{ original_labels_as_key_value_list + [{'key': 'testlabel2', 'value': 'yes'}] }}"
     register: label_out
   - name: assert that changes were made
@@ -263,7 +274,7 @@
       state: list
       namespace: "{{ def_namespace }}"
       kind: "{{ def_kind }}"
-      name: "{{ cli_node_test }}"
+      name: "{{ node_to_test }}"
     register: label_out
   - name: asssert that new label was actually added
     assert:
@@ -276,7 +287,7 @@
       state: present
       namespace: "{{ def_namespace }}"
       kind: "{{ def_kind }}"
-      name: "{{ cli_node_test }}"
+      name: "{{ node_to_test }}"
       labels: "{{ original_labels_as_key_value_list + [{'key': 'testlabel2', 'value': 'different'}]}}"
     register: label_out
   - name: assert that changes were made when existing key's value is changed
@@ -289,7 +300,7 @@
       state: list
       namespace: "{{ def_namespace }}"
       kind: "{{ def_kind }}"
-      name: "{{ cli_node_test }}"
+      name: "{{ node_to_test }}"
     register: label_out
   - name: asssert that changed label was actually changed
     assert:
@@ -302,7 +313,7 @@
       state: present
       namespace: "{{ def_namespace }}"
       kind: "{{ def_kind }}"
-      name: "{{ cli_node_test }}"
+      name: "{{ node_to_test }}"
       labels: "{{ original_labels_as_key_value_list }}"
     register: label_out
   - name: assert that changes were made
@@ -315,7 +326,7 @@
       state: list
       namespace: "{{ def_namespace }}"
       kind: "{{ def_kind }}"
-      name: "{{ cli_node_test }}"
+      name: "{{ node_to_test }}"
     register: label_out
   - name: asssert that present-removed actually removed
     assert:

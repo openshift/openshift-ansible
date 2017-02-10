@@ -38,6 +38,7 @@ import os
 import re
 import shutil
 import subprocess
+import tempfile
 # pylint: disable=import-error
 import ruamel.yaml as yaml
 from ansible.module_utils.basic import AnsibleModule
@@ -141,6 +142,12 @@ options:
   host:
     description:
     - The host that the route will use. e.g. myapp.x.y.z
+    required: false
+    default: None
+    aliases: []
+  port:
+    description:
+    - The Name of the service port or number of the container port the route will route traffic to
     required: false
     default: None
     aliases: []
@@ -762,7 +769,7 @@ class OpenShiftCLI(object):
         ''' Constructor for OpenshiftCLI '''
         self.namespace = namespace
         self.verbose = verbose
-        self.kubeconfig = kubeconfig
+        self.kubeconfig = Utils.create_tmpfile_copy(kubeconfig)
         self.all_namespaces = all_namespaces
 
     # Pylint allows only 5 arguments to be passed.
@@ -773,7 +780,8 @@ class OpenShiftCLI(object):
         if not res['results']:
             return res
 
-        fname = '/tmp/%s' % rname
+        fname = Utils.create_tmpfile(rname + '-')
+
         yed = Yedit(fname, res['results'][0], separator=sep)
         changes = []
         for key, value in content.items():
@@ -797,7 +805,7 @@ class OpenShiftCLI(object):
 
     def _create_from_content(self, rname, content):
         '''create a temporary file and then call oc create on it'''
-        fname = '/tmp/%s' % rname
+        fname = Utils.create_tmpfile(rname + '-')
         yed = Yedit(fname, content=content)
         yed.write()
 
@@ -840,7 +848,7 @@ class OpenShiftCLI(object):
         if results['returncode'] != 0 or not create:
             return results
 
-        fname = '/tmp/%s' % template_name
+        fname = Utils.create_tmpfile(template_name + '-')
         yed = Yedit(fname, results['results'])
         yed.write()
 
@@ -1021,32 +1029,61 @@ class OpenShiftCLI(object):
 
 class Utils(object):
     ''' utilities for openshiftcli modules '''
-    @staticmethod
-    def create_file(rname, data, ftype='yaml'):
-        ''' create a file in tmp with name and contents'''
-        path = os.path.join('/tmp', rname)
-        with open(path, 'w') as fds:
-            if ftype == 'yaml':
-                fds.write(yaml.dump(data, Dumper=yaml.RoundTripDumper))
 
-            elif ftype == 'json':
-                fds.write(json.dumps(data))
-            else:
-                fds.write(data)
+    @staticmethod
+    def _write(filename, contents):
+        ''' Actually write the file contents to disk. This helps with mocking. '''
+
+        with open(filename, 'w') as sfd:
+            sfd.write(contents)
+
+    @staticmethod
+    def create_tmp_file_from_contents(rname, data, ftype='yaml'):
+        ''' create a file in tmp with name and contents'''
+
+        tmp = Utils.create_tmpfile(prefix=rname)
+
+        if ftype == 'yaml':
+            Utils._write(tmp, yaml.dump(data, Dumper=yaml.RoundTripDumper))
+        elif ftype == 'json':
+            Utils._write(tmp, json.dumps(data))
+        else:
+            Utils._write(tmp, data)
 
         # Register cleanup when module is done
-        atexit.register(Utils.cleanup, [path])
-        return path
+        atexit.register(Utils.cleanup, [tmp])
+        return tmp
 
     @staticmethod
-    def create_files_from_contents(content, content_type=None):
+    def create_tmpfile_copy(inc_file):
+        '''create a temporary copy of a file'''
+        tmpfile = Utils.create_tmpfile('lib_openshift-')
+        Utils._write(tmpfile, open(inc_file).read())
+
+        # Cleanup the tmpfile
+        atexit.register(Utils.cleanup, [tmpfile])
+
+        return tmpfile
+
+    @staticmethod
+    def create_tmpfile(prefix='tmp'):
+        ''' Generates and returns a temporary file name '''
+
+        with tempfile.NamedTemporaryFile(prefix=prefix, delete=False) as tmp:
+            return tmp.name
+
+    @staticmethod
+    def create_tmp_files_from_contents(content, content_type=None):
         '''Turn an array of dict: filename, content into a files array'''
         if not isinstance(content, list):
             content = [content]
         files = []
         for item in content:
-            path = Utils.create_file(item['path'], item['data'], ftype=content_type)
-            files.append({'name': os.path.basename(path), 'path': path})
+            path = Utils.create_tmp_file_from_contents(item['path'] + '-',
+                                                       item['data'],
+                                                       ftype=content_type)
+            files.append({'name': os.path.basename(item['path']),
+                          'path': path})
         return files
 
     @staticmethod
@@ -1293,7 +1330,8 @@ class RouteConfig(object):
                  tls_termination=None,
                  service_name=None,
                  wildcard_policy=None,
-                 weight=None):
+                 weight=None,
+                 port=None):
         ''' constructor for handling route options '''
         self.kubeconfig = kubeconfig
         self.name = sname
@@ -1305,6 +1343,7 @@ class RouteConfig(object):
         self.cert = cert
         self.key = key
         self.service_name = service_name
+        self.port = port
         self.data = {}
         self.wildcard_policy = wildcard_policy
         if wildcard_policy is None:
@@ -1329,12 +1368,15 @@ class RouteConfig(object):
         if self.tls_termination:
             self.data['spec']['tls'] = {}
 
+            self.data['spec']['tls']['termination'] = self.tls_termination
+
+            if self.tls_termination != 'passthrough':
+                self.data['spec']['tls']['key'] = self.key
+                self.data['spec']['tls']['caCertificate'] = self.cacert
+                self.data['spec']['tls']['certificate'] = self.cert
+
             if self.tls_termination == 'reencrypt':
                 self.data['spec']['tls']['destinationCACertificate'] = self.destcacert
-            self.data['spec']['tls']['key'] = self.key
-            self.data['spec']['tls']['caCertificate'] = self.cacert
-            self.data['spec']['tls']['certificate'] = self.cert
-            self.data['spec']['tls']['termination'] = self.tls_termination
 
         self.data['spec']['to'] = {'kind': 'Service',
                                    'name': self.service_name,
@@ -1342,11 +1384,16 @@ class RouteConfig(object):
 
         self.data['spec']['wildcardPolicy'] = self.wildcard_policy
 
+        if self.port:
+            self.data['spec']['port'] = {}
+            self.data['spec']['port']['targetPort'] = self.port
+
 # pylint: disable=too-many-instance-attributes,too-many-public-methods
 class Route(Yedit):
     ''' Class to wrap the oc command line tools '''
     wildcard_policy = "spec.wildcardPolicy"
     host_path = "spec.host"
+    port_path = "spec.port.targetPort"
     service_path = "spec.to.name"
     weight_path = "spec.to.weight"
     cert_path = "spec.tls.certificate"
@@ -1391,6 +1438,10 @@ class Route(Yedit):
     def get_host(self):
         ''' return host '''
         return self.get(Route.host_path)
+
+    def get_port(self):
+        ''' return port '''
+        return self.get(Route.port_path)
 
     def get_wildcard_policy(self):
         ''' return wildcardPolicy '''
@@ -1463,9 +1514,23 @@ class OCRoute(OpenShiftCLI):
         skip = []
         return not Utils.check_def_equal(self.config.data, self.route.yaml_dict, skip_keys=skip, debug=True)
 
+    @staticmethod
+    def get_cert_data(path, content):
+        '''get the data for a particular value'''
+        if not path and not content:
+            return None
+
+        rval = None
+        if path and os.path.exists(path) and os.access(path, os.R_OK):
+            rval = open(path).read()
+        elif content:
+            rval = content
+
+        return rval
+
     # pylint: disable=too-many-return-statements,too-many-branches
     @staticmethod
-    def run_ansible(params, files, check_mode=False):
+    def run_ansible(params, check_mode=False):
         ''' run the idempotent asnible code
 
             params comes from the ansible portion for this module
@@ -1477,6 +1542,30 @@ class OCRoute(OpenShiftCLI):
                    }
             check_mode: does the module support check mode.  (module.check_mode)
         '''
+        files = {'destcacert': {'path': params['dest_cacert_path'],
+                                'content': params['dest_cacert_content'],
+                                'value': None, },
+                 'cacert': {'path': params['cacert_path'],
+                            'content': params['cacert_content'],
+                            'value': None, },
+                 'cert': {'path': params['cert_path'],
+                          'content': params['cert_content'],
+                          'value': None, },
+                 'key': {'path': params['key_path'],
+                         'content': params['key_content'],
+                         'value': None, }, }
+
+        if params['tls_termination'] and params['tls_termination'].lower() != 'passthrough':  # E501
+
+            for key, option in files.items():
+                if key == 'destcacert' and params['tls_termination'] != 'reencrypt':
+                    continue
+
+                option['value'] = OCRoute.get_cert_data(option['path'], option['content'])  # E501
+
+                if not option['value']:
+                    return {'failed': True,
+                            'msg': 'Verify that you pass a value for %s' % key}
 
         rconfig = RouteConfig(params['name'],
                               params['namespace'],
@@ -1489,7 +1578,8 @@ class OCRoute(OpenShiftCLI):
                               params['tls_termination'],
                               params['service_name'],
                               params['wildcard_policy'],
-                              params['weight'])
+                              params['weight'],
+                              params['port'])
 
         oc_route = OCRoute(rconfig, verbose=params['debug'])
 
@@ -1573,20 +1663,6 @@ class OCRoute(OpenShiftCLI):
 # -*- -*- -*- Begin included fragment: ansible/oc_route.py -*- -*- -*-
 
 
-def get_cert_data(path, content):
-    '''get the data for a particular value'''
-    if not path and not content:
-        return None
-
-    rval = None
-    if path and os.path.exists(path) and os.access(path, os.R_OK):
-        rval = open(path).read()
-    elif content:
-        rval = content
-
-    return rval
-
-
 # pylint: disable=too-many-branches
 def main():
     '''
@@ -1613,6 +1689,7 @@ def main():
             host=dict(default=None, type='str'),
             wildcard_policy=dict(default=None, type='str'),
             weight=dict(default=None, type='int'),
+            port=dict(default=None, type='int'),
         ),
         mutually_exclusive=[('dest_cacert_path', 'dest_cacert_content'),
                             ('cacert_path', 'cacert_content'),
@@ -1620,30 +1697,8 @@ def main():
                             ('key_path', 'key_content'), ],
         supports_check_mode=True,
     )
-    files = {'destcacert': {'path': module.params['dest_cacert_path'],
-                            'content': module.params['dest_cacert_content'],
-                            'value': None, },
-             'cacert': {'path': module.params['cacert_path'],
-                        'content': module.params['cacert_content'],
-                        'value': None, },
-             'cert': {'path': module.params['cert_path'],
-                      'content': module.params['cert_content'],
-                      'value': None, },
-             'key': {'path': module.params['key_path'],
-                     'content': module.params['key_content'],
-                     'value': None, }, }
 
-    if module.params['tls_termination']:
-        for key, option in files.items():
-            if key == 'destcacert' and module.params['tls_termination'] != 'reencrypt':
-                continue
-
-            option['value'] = get_cert_data(option['path'], option['content'])
-
-            if not option['value']:
-                module.fail_json(msg='Verify that you pass a value for %s' % key)
-
-    results = OCRoute.run_ansible(module.params, files, module.check_mode)
+    results = OCRoute.run_ansible(module.params, module.check_mode)
 
     if 'failed' in results:
         module.fail_json(**results)

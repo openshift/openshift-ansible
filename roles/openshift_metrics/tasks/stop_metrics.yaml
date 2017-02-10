@@ -41,6 +41,7 @@
   with_items: "{{metrics_hawkular_rc.stdout_lines}}"
   loop_control:
     loop_var: object
+  changed_when: "{{metrics_hawkular_rc | length > 0 }}"
 
 - command: >
     {{openshift.common.client_binary}} --config={{mktemp.stdout}}/admin.kubeconfig
@@ -62,3 +63,4 @@
   loop_control:
     loop_var: object
   when: metrics_cassandra_rc is defined
+  changed_when: "{{metrics_cassandra_rc | length > 0 }}"
