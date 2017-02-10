@@ -36,7 +36,6 @@ class OCProject(OpenShiftCLI):
 
     def get(self):
         '''return project '''
-        #result = self.openshift_cmd(['get', self.kind, self.config.name, '-o', 'json'], output=True, output_type='raw')
         result = self._get(self.kind, self.config.name)
 
         if result['returncode'] == 0:
@@ -90,10 +89,14 @@ class OCProject(OpenShiftCLI):
         # Check rolebindings and policybindings
         return False
 
-    # pylint: disable=too-many-return-statements
+    # pylint: disable=too-many-return-statements,too-many-branches
     @staticmethod
     def run_ansible(params, check_mode):
         '''run the idempotent ansible code'''
+
+        _ns = None
+        if params['node_selector'] is not None:
+            _ns = ','.join(params['node_selector'])
 
         pconfig = ProjectConfig(params['name'],
                                 params['name'],
@@ -102,7 +105,7 @@ class OCProject(OpenShiftCLI):
                                  'admin_role': {'value': params['admin_role'], 'include': True},
                                  'description': {'value': params['description'], 'include': True},
                                  'display_name': {'value': params['display_name'], 'include': True},
-                                 'node_selector': {'value': ','.join(params['node_selector']), 'include': True},
+                                 'node_selector': {'value': _ns, 'include': True},
                                 })
 
         oadm_project = OCProject(pconfig, verbose=params['debug'])
@@ -115,7 +118,7 @@ class OCProject(OpenShiftCLI):
         # Get
         #####
         if state == 'list':
-            exit_json(changed=False, results=api_rval['results'], state="list")
+            return {'changed': False, 'results': api_rval['results'], 'state': state}
 
         ########
         # Delete
