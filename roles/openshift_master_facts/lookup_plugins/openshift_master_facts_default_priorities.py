@@ -53,6 +53,9 @@ class LookupModule(LookupBase):
             # convert short_version to origin short_version
             short_version = re.sub('^3.', '1.', short_version)
 
+        if short_version == 'latest':
+            short_version = '1.6'
+
         if short_version == '1.1':
             priorities.extend([
                 {'name': 'LeastRequestedPriority', 'weight': 1},
