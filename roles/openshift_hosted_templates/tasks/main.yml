@@ -4,6 +4,8 @@
   become: False
   register: copy_hosted_templates_mktemp
   run_once: True
+  # AUDIT:changed_when: not set here because this task actually
+  # creates something
 
 - name: Create tar of OpenShift examples
   local_action: command tar -C "{{ role_path }}/files/{{ content_version }}/{{ hosted_deployment_type }}" -cvf "{{ copy_hosted_templates_mktemp.stdout }}/openshift-hosted-templates.tar" .
@@ -24,6 +26,11 @@
   unarchive:
     src: "{{ copy_hosted_templates_mktemp.stdout }}/openshift-hosted-templates.tar"
     dest: "{{ hosted_base }}/"
+    # AUDIT:changed_when_fix: Testing if setting the mode here will
+    # create one less change. The prior task sets mode to 0755 but in
+    # reality `unarchive` is creating the remote dir w/ permissions
+    # 0765
+    mode: 0755
 
 - name: Cleanup the OpenShift hosted templates temp dir
   become: False
