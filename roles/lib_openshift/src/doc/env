@@ -52,6 +52,13 @@ options:
     - dc
     - pods
     aliases: []
+  env_vars:
+    description:
+    - The environment variables to insert.  The format is a dict of value pairs.
+    - e.g. {key1: value1, key2: value2}) 
+    required: False
+    default: None
+    aliases: []
 author:
 - "Kenny Woodson <kwoodson@redhat.com>"
 extends_documentation_fragment: []

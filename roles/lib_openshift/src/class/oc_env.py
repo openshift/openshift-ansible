@@ -42,16 +42,16 @@ class OCEnv(OpenShiftCLI):
         ''' setter function for resource var'''
         self._resource = data
 
-    def value_exists(self, key, value):
+    def key_value_exists(self, key, value):
         ''' return whether a key, value  pair exists '''
         return self.resource.exists_env_value(key, value)
 
     def key_exists(self, key):
-        ''' return whether a key, value  pair exists '''
+        ''' return whether a key exists '''
         return self.resource.exists_env_key(key)
 
     def get(self):
-        '''return a environment variables '''
+        '''return environment variables '''
         result = self._get(self.kind, self.name)
         if result['returncode'] == 0:
             if self.kind == 'dc':
@@ -60,14 +60,12 @@ class OCEnv(OpenShiftCLI):
         return result
 
     def delete(self):
-        '''return all pods '''
-        #yed.put(OCEnv.container_path[self.kind], env_vars_array)
+        ''' delete environment variables '''
         if self.resource.delete_env_var(self.env_vars.keys()):
             return self._replace_content(self.kind, self.name, self.resource.yaml_dict)
 
         return {'returncode': 0, 'changed': False}
 
-    # pylint: disable=too-many-function-args
     def put(self):
         '''place env vars into dc '''
         for update_key, update_value in self.env_vars.items():
@@ -119,7 +117,7 @@ class OCEnv(OpenShiftCLI):
             # Create
             ########
             for key, value in params.get('env_vars', {}).items():
-                if not ocenv.value_exists(key, value):
+                if not ocenv.key_value_exists(key, value):
 
                     if check_mode:
                         return {'changed': False,
