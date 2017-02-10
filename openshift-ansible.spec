@@ -3,6 +3,10 @@
 %{!?commit:
 %global commit c64d09e528ca433832c6b6e6f5c7734a9cc8ee6f
 }
+# This is inserted to prevent RPM from requiring "/usr/bin/ansible-playbook"
+# The ansible-playbook requirement will be ansibled by the explicit
+#  "Requires: ansible" directive
+%global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
 Version:        3.5.3
