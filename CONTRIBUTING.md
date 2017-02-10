@@ -85,6 +85,24 @@ parallel
 pip install tox detox
 ```
 
+---
+
+Note: before running `tox` or `detox`, ensure that the only virtualenvs within
+the repository root are the ones managed by `tox`, those in a `.tox`
+subdirectory.
+
+Use this command to list paths that are likely part of a virtualenv not managed
+by `tox`:
+
+```
+$ find . -path '*/bin/python' | grep -vF .tox
+```
+
+Extraneous virtualenvs cause tools such as `pylint` to take a very long time
+going through files that are part of the virtualenv.
+
+---
+
 List the test environments available:
 ```
 tox -l
