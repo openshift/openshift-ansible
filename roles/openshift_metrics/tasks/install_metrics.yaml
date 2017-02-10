@@ -34,6 +34,20 @@
     file_content: "{{ item.content | b64decode | from_yaml }}"
   with_items: "{{ object_defs.results }}"
 
+- command: >
+    {{openshift.common.client_binary}}
+    --config={{mktemp.stdout}}/admin.kubeconfig
+    get rc
+    -l metrics-infra
+    -o name
+    -n {{openshift_metrics_project}}
+  register: existing_metrics_rc
+  changed_when: no
+
+- name: Scaling down cluster to recognize changes
+  include: stop_metrics.yaml
+  when: "{{ existing_metrics_rc.stdout_lines | length > 0 }}"
+
 - name: Scaling up cluster
   include: start_metrics.yaml
   tags: openshift_metrics_start_cluster
