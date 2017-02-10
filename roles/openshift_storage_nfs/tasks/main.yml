@@ -29,6 +29,7 @@
     - "{{ openshift.hosted.registry }}"
     - "{{ openshift.hosted.metrics }}"
     - "{{ openshift.hosted.logging }}"
+    - "{{ openshift.hosted.loggingops }}"
 
 
 - name: Configure exports
