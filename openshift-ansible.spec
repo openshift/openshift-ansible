@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.6
+Version:        3.5.7
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -258,6 +258,52 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Feb 10 2017 Scott Dodson <sdodson@redhat.com> 3.5.7-1
+- Provisioning of nfs share and PV for logging ops (efreiber@redhat.com)
+- fix openshift_logging where defaults filter needs quoting
+  (jcantril@redhat.com)
+- bug 1420229. Bounce metrics components to recognize changes on updates or
+  upgrades (jcantril@redhat.com)
+- Ensure etcd client certs are regenerated with embedded etcd.
+  (abutcher@redhat.com)
+- bug 1420425. Allow setting of public facing certs for kibana in
+  openshift_logging role (jcantril@redhat.com)
+- bug 1399523. Ops pvc should have different prefix from non-ops for
+  openshift_logging (jcantril@redhat.com)
+- fix bug 1420204. Default openshift_logging_use_journal to empty so fluentd
+  detects and is consistent with deployer (jcantril@redhat.com)
+- Let pylint use as many CPUs as available (rhcarvalho@gmail.com)
+- Add note about extraneous virtualenvs (rhcarvalho@gmail.com)
+- Removing the /usr/bin/ansible-playbook dependency in in the spec file
+  (mwoodson@redhat.com)
+- use the correct name for the ruamel-yaml python module (jchaloup@redhat.com)
+- node: refactor Docker container tasks in a block (gscrivan@redhat.com)
+- etcd: use as system container (gscrivan@redhat.com)
+- Implement uninstall for system containers (gscrivan@redhat.com)
+- system-containers: implement idempotent update (gscrivan@redhat.com)
+- atomic-openshift: install as a system container (gscrivan@redhat.com)
+- make sure cluster_size is an int for arith. ops (rmeggins@redhat.com)
+- Bug 1420234 - illegal_argument_exception in Kibana UI. (rmeggins@redhat.com)
+- bug 1420538. Allow users to set supplementalGroup for Cassandra
+  (jcantril@redhat.com)
+- bug 1419962. fix openshift_metrics pwd issue after reinstall where cassandra
+  has incorrect pwd exception (jcantril@redhat.com)
+- node: ensure conntrack-tools is installed (gscrivan@redhat.com)
+- Updating defaults to pull from previously defined variable names used in
+  playbooks (ewolinet@redhat.com)
+- fixup! master: latest use same predicates as last version
+  (gscrivan@redhat.com)
+- fixup! master: latest use same priorities as last version
+  (gscrivan@redhat.com)
+- Set image change triggers to auto=true for OCP 3.4 - for v1.5
+  (simaishi@redhat.com)
+- Set image change triggers to auto=true for OCP 3.4
+  (https://github.com/ManageIQ/manageiq-pods/pull/88) (simaishi@redhat.com)
+- master: latest use same predicates as last version (gscrivan@redhat.com)
+- master: latest use same priorities as last version (gscrivan@redhat.com)
+- Reverting commit 3257 and renaming master_url to openshift_logging_master_url
+  (ewolinet@redhat.com)
+
 * Thu Feb 09 2017 Scott Dodson <sdodson@redhat.com> 3.5.6-1
 - Document openshift_cockpit_deployer_prefix and add
   openshift_cockpit_deployer_version (sdodson@redhat.com)
