@@ -14,13 +14,17 @@
   command: docker pull {{ openshift.etcd.etcd_image }}
   register: pull_result
   changed_when: "'Downloaded newer image' in pull_result.stdout"
-  when: etcd_is_containerized | bool
+  when:
+  - etcd_is_containerized | bool
+  - not openshift.common.is_etcd_system_container | bool
 
 - name: Install etcd container service file
   template:
     dest: "/etc/systemd/system/etcd_container.service"
     src: etcd.docker.service
-  when: etcd_is_containerized | bool
+  when:
+  - etcd_is_containerized | bool
+  - not openshift.common.is_etcd_system_container | bool
 
 - name: Ensure etcd datadir exists when containerized
   file:
@@ -36,9 +40,21 @@
     enabled: no
     masked: yes
     daemon_reload: yes
-  when: etcd_is_containerized | bool
+  when:
+  - etcd_is_containerized | bool
+  - not openshift.common.is_etcd_system_container | bool
   register: task_result
   failed_when: "task_result|failed and 'could not' not in task_result.msg|lower"
+
+- name: Install etcd container service file
+  template:
+    dest: "/etc/systemd/system/etcd_container.service"
+    src: etcd.docker.service
+  when: etcd_is_containerized | bool and not openshift.common.is_etcd_system_container | bool
+
+- name: Install Etcd system container
+  include: system_container.yml
+  when: etcd_is_containerized | bool and openshift.common.is_etcd_system_container | bool
 
 - name: Validate permissions on the config dir
   file:
@@ -54,7 +70,7 @@
     dest: /etc/etcd/etcd.conf
     backup: true
   notify:
-    - restart etcd
+  - restart etcd
 
 - name: Enable etcd
   systemd:

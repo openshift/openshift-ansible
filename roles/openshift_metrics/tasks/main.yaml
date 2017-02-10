@@ -9,6 +9,11 @@
   changed_when: False
   when: "{{ openshift_metrics_install_metrics | bool }}"
 
+- name: Create temp directory local on control node
+  local_action: command mktemp -d
+  register: local_tmp
+  changed_when: False
+
 - name: Copy the admin client config(s)
   command: >
      cp {{ openshift.common.config_base}}/master/admin.kubeconfig {{ mktemp.stdout }}/admin.kubeconfig
@@ -17,3 +22,9 @@
   tags: metrics_init
 
 - include: "{{ (openshift_metrics_install_metrics | bool) | ternary('install_metrics.yaml','uninstall_metrics.yaml') }}"
+
+- name: Delete temp directory
+  local_action: file path=local_tmp.stdout state=absent
+  tags: metrics_cleanup
+  changed_when: False
+  check_mode: no

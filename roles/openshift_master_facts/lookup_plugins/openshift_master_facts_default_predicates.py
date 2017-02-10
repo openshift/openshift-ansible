@@ -52,6 +52,9 @@ class LookupModule(LookupBase):
             # convert short_version to origin short_version
             short_version = re.sub('^3.', '1.', short_version)
 
+        if short_version == 'latest':
+            short_version = '1.6'
+
         # Predicates ordered according to OpenShift Origin source:
         # origin/vendor/k8s.io/kubernetes/plugin/pkg/scheduler/algorithmprovider/defaults/defaults.go
 

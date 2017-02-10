@@ -54,10 +54,10 @@
   fail: msg="The openshift_logging_es_ops_cluster_size may not be scaled down more than 1 less (or 0) the number of Elasticsearch nodes already deployed"
   vars:
     es_dcs: "{{openshift_logging_facts.elasticsearch_ops.deploymentconfigs}}"
-    cluster_size: "{{openshift_logging_es_ops_cluster_size}}"
+    cluster_size: "{{openshift_logging_es_ops_cluster_size|int}}"
   when:
     - openshift_logging_use_ops | bool
-    - "{{es_dcs | length - openshift_logging_es_ops_cluster_size | abs > 1}}"
+    - "{{es_dcs | length - openshift_logging_es_ops_cluster_size|int | abs > 1}}"
   check_mode: no
 
 - name: Generate PersistentVolumeClaims for Ops
@@ -66,7 +66,7 @@
     es_pvc_names: "{{openshift_logging_facts.elasticsearch_ops.pvcs.keys()}}"
     es_dc_names: "{{openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys()}}"
     openshift_logging_es_pvc_prefix: "{{openshift_logging_es_ops_pvc_prefix}}"
-    openshift_logging_es_cluster_size: "{{openshift_logging_es_ops_cluster_size}}"
+    openshift_logging_es_cluster_size: "{{openshift_logging_es_ops_cluster_size|int}}"
     openshift_logging_es_pvc_size: "{{openshift_logging_es_ops_pvc_size}}"
     openshift_logging_es_pvc_dynamic: "{{openshift_logging_es_ops_pvc_dynamic}}"
     openshift_logging_es_pv_selector: "{{openshift_logging_es_ops_pv_selector}}"
@@ -89,7 +89,7 @@
     es_cluster_name: "{{component}}"
     deploy_name_prefix: "logging-{{component}}"
     deploy_name: "{{deploy_name_prefix}}-{{'abcdefghijklmnopqrstuvwxyz0123456789'|random_word(8)}}"
-    cluster_size: "{{openshift_logging_es_ops_cluster_size}}"
+    cluster_size: "{{openshift_logging_es_ops_cluster_size|int}}"
   with_sequence: count={{ openshift_logging_es_ops_cluster_size | int - openshift_logging_current_es_ops_size | int }}
   when:
     - openshift_logging_use_ops | bool

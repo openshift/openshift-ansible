@@ -23,6 +23,7 @@ openshift_metrics_cassandra_limits_cpu: null
 openshift_metrics_cassandra_requests_memory: 1G
 openshift_metrics_cassandra_requests_cpu: null
 openshift_metrics_cassandra_nodeselector: ""
+openshift_metrics_cassandra_storage_group: 65534
 
 openshift_metrics_heapster_standalone: False
 openshift_metrics_heapster_limits_memory: 3.75G
@@ -30,6 +31,8 @@ openshift_metrics_heapster_limits_cpu: null
 openshift_metrics_heapster_requests_memory: 0.9375G
 openshift_metrics_heapster_requests_cpu: null
 openshift_metrics_heapster_nodeselector: ""
+
+openshift_metrics_hostname: "hawkular-metrics.{{openshift_master_default_subdomain}}"
 
 openshift_metrics_duration: 7
 openshift_metrics_resolution: 15s
@@ -39,7 +42,6 @@ openshift_metrics_resolution: 15s
 # overriding the values here
 #####
 
-openshift_metrics_certs_dir: "{{ openshift.common.config_base }}/master/metrics"
 openshift_metrics_master_url: https://kubernetes.default.svc.cluster.local
 openshift_metrics_node_id: nodename
 openshift_metrics_project: openshift-infra

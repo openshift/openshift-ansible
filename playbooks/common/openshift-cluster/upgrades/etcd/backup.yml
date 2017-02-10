@@ -4,7 +4,7 @@
   vars:
     embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
     timestamp: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
-    etcdctl_command: "{{ 'etcdctl' if not openshift.common.is_containerized or embedded_etcd else 'docker exec etcd_container etcdctl' }}"
+    etcdctl_command: "{{ 'etcdctl' if not openshift.common.is_containerized or embedded_etcd else 'docker exec etcd_container etcdctl' if not openshift.common.is_etcd_system_container else 'runc exec etcd etcdctl' }}"
   roles:
   - openshift_facts
   tasks:

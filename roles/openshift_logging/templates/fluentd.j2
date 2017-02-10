@@ -61,7 +61,7 @@ spec:
           readOnly: true
         env:
         - name: "K8S_HOST_URL"
-          value: "{{master_url}}"
+          value: "{{openshift_logging_master_url}}"
         - name: "ES_HOST"
           value: "{{openshift_logging_es_host}}"
         - name: "ES_PORT"

@@ -148,6 +148,29 @@
       - vovsbr
     when: "{{ openshift_remove_all | default(true) | bool }}"
 
+  - shell: atomic uninstall "{{ item }}"-master
+    changed_when: False
+    failed_when: False
+    with_items:
+    - openshift-enterprise
+    - atomic-enterprise
+    - origin
+
+  - shell: atomic uninstall "{{ item }}"-node
+    changed_when: False
+    failed_when: False
+    with_items:
+    - openshift-enterprise
+    - atomic-enterprise
+    - origin
+
+  - shell: atomic uninstall "{{ item }}"
+    changed_when: False
+    failed_when: False
+    with_items:
+    - etcd
+    - openvswitch
+
   - shell: find /var/lib/origin/openshift.local.volumes -type d -exec umount {} \; 2>/dev/null || true
     changed_when: False
 
@@ -262,6 +285,9 @@
     - /etc/systemd/system/origin-node.service.wants
     - /var/lib/atomic-enterprise
     - /var/lib/openshift
+
+  - shell: systemctl daemon-reload
+    changed_when: False
 
   - name: restart docker
     service: name=docker state=restarted
