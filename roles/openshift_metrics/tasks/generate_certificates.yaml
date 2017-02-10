@@ -1,11 +1,11 @@
 ---
 - name: generate ca certificate chain
-  shell: >
+  command: >
     {{ openshift.common.admin_binary }} ca create-signer-cert
     --config={{ mktemp.stdout }}/admin.kubeconfig
-    --key='{{ openshift_metrics_certs_dir }}/ca.key'
-    --cert='{{ openshift_metrics_certs_dir }}/ca.crt'
-    --serial='{{ openshift_metrics_certs_dir }}/ca.serial.txt'
+    --key='{{ mktemp.stdout }}/ca.key'
+    --cert='{{ mktemp.stdout }}/ca.crt'
+    --serial='{{ mktemp.stdout }}/ca.serial.txt'
     --name="metrics-signer@$(date +%s)"
-  when: not '{{ openshift_metrics_certs_dir }}/ca.key' | exists
+
 - include: generate_hawkular_certificates.yaml

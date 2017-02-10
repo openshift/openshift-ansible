@@ -42,7 +42,6 @@ openshift_metrics_resolution: 15s
 # overriding the values here
 #####
 
-openshift_metrics_certs_dir: "{{ openshift.common.config_base }}/master/metrics"
 openshift_metrics_master_url: https://kubernetes.default.svc.cluster.local
 openshift_metrics_node_id: nodename
 openshift_metrics_project: openshift-infra

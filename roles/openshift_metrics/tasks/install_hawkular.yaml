@@ -17,7 +17,7 @@
   changed_when: false
 
 - name: read hawkular-metrics route destination ca certificate
-  slurp: src={{ openshift_metrics_certs_dir }}/ca.crt
+  slurp: src={{ mktemp.stdout }}/ca.crt
   register: metrics_route_dest_ca_cert
   changed_when: false
 
