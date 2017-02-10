@@ -26,11 +26,6 @@
   unarchive:
     src: "{{ copy_hosted_templates_mktemp.stdout }}/openshift-hosted-templates.tar"
     dest: "{{ hosted_base }}/"
-    # AUDIT:changed_when_note: Testing if setting the mode here will
-    # create one less change. The prior task sets mode to 0755 but in
-    # reality `unarchive` is creating the remote dir w/ permissions
-    # 0765
-    mode: 0755
 
 - name: Cleanup the OpenShift hosted templates temp dir
   become: False
