@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.5.5
+Version:        3.5.6
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -254,6 +254,36 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Feb 09 2017 Scott Dodson <sdodson@redhat.com> 3.5.6-1
+- Document openshift_cockpit_deployer_prefix and add
+  openshift_cockpit_deployer_version (sdodson@redhat.com)
+- Ensure embedded etcd config uses CA bundle. (abutcher@redhat.com)
+- bug 1420684. On logging upgrade use the correct value for namespace
+  (jcantril@redhat.com)
+- Fixing docs. (kwoodson@redhat.com)
+- Fixing for linters. (kwoodson@redhat.com)
+- Adding test cases. (kwoodson@redhat.com)
+- Fixing docs. (kwoodson@redhat.com)
+- oc process (ihorvath@redhat.com)
+- Reference class instead of self.__class__ within super constructor to avoid
+  calling self forever. (abutcher@redhat.com)
+- Fixing for flake8 spacing. (kwoodson@redhat.com)
+- Fixing tests for linters. (kwoodson@redhat.com)
+- Adding port support for route. (kwoodson@redhat.com)
+- use pvc_size instead of pv_size for openshift_metrics since the role creates
+  claims (jcantril@redhat.com)
+- Added temporary kubeconfig file. Fixed tests to coincide with tmpfile.
+  (kwoodson@redhat.com)
+- fixes 1419839.  Install only heapster for openshift_metrics when heapster
+  standalone flag is set (jcantril@redhat.com)
+- Adding code to copy kubeconfig before running oc commands.
+  (kwoodson@redhat.com)
+- Changed lib_openshift to use real temporary files. (twiest@redhat.com)
+- Fixed ansible module unit and integration tests and added runners.
+  (twiest@redhat.com)
+- [openshift_ca] Reference client binary from openshift_ca_host.
+  (abutcher@redhat.com)
+
 * Tue Feb 07 2017 Scott Dodson <sdodson@redhat.com> 3.5.5-1
 - Moving to ansible variable. (kwoodson@redhat.com)
 - Specifying port for wait_for call. (kwoodson@redhat.com)
