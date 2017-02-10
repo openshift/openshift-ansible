@@ -36,6 +36,14 @@
     - "openshift-master.crt"
     - "openshift-master.key"
     - "openshift-master.kubeconfig"
+  - name: Remove generated etcd client certificates
+    file:
+      path: "{{ openshift.common.config_base }}/master/{{ item }}"
+      state: absent
+    with_items:
+    - "master.etcd-client.crt"
+    - "master.etcd-client.key"
+    when: groups.oo_etcd_to_config | default([]) | length == 0
   roles:
   - role: openshift_master_certificates
     openshift_master_etcd_hosts: "{{ hostvars
