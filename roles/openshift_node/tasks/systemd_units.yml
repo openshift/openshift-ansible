@@ -2,20 +2,6 @@
 # This file is included both in the openshift_master role and in the upgrade
 # playbooks.
 
-- name: Pre-pull node image
-  command: >
-    docker pull {{ openshift.node.node_image }}:{{ openshift_image_tag }}
-  register: pull_result
-  changed_when: "'Downloaded newer image' in pull_result.stdout"
-  when: openshift.common.is_containerized | bool
-
-- name: Pre-pull openvswitch image
-  command: >
-    docker pull {{ openshift.node.ovs_image }}:{{ openshift_image_tag }}
-  register: pull_result
-  changed_when: "'Downloaded newer image' in pull_result.stdout"
-  when: openshift.common.is_containerized | bool and openshift.common.use_openshift_sdn | bool
-
 - name: Install Node dependencies docker service file
   template:
     dest: "/etc/systemd/system/{{ openshift.common.service_type }}-node-dep.service"
@@ -23,12 +9,21 @@
   register: install_node_dep_result
   when: openshift.common.is_containerized | bool
 
-- name: Install Node docker service file
-  template:
-    dest: "/etc/systemd/system/{{ openshift.common.service_type }}-node.service"
-    src: openshift.docker.node.service
-  register: install_node_result
-  when: openshift.common.is_containerized | bool
+- block:
+  - name: Pre-pull node image
+    command: >
+      docker pull {{ openshift.node.node_image }}:{{ openshift_image_tag }}
+    register: pull_result
+    changed_when: "'Downloaded newer image' in pull_result.stdout"
+
+  - name: Install Node docker service file
+    template:
+      dest: "/etc/systemd/system/{{ openshift.common.service_type }}-node.service"
+      src: openshift.docker.node.service
+    register: install_node_result
+  when:
+  - openshift.common.is_containerized | bool
+  - not openshift.common.is_node_system_container | bool
 
 - name: Create the openvswitch service env file
   template:
@@ -38,6 +33,19 @@
   register: install_ovs_sysconfig
   notify:
   - restart openvswitch
+
+- name: Install Node system container
+  include: node_system_container.yml
+  when:
+  - openshift.common.is_containerized | bool
+  - openshift.common.is_node_system_container | bool
+
+- name: Install OpenvSwitch system containers
+  include: openvswitch_system_container.yml
+  when:
+  - openshift.common.use_openshift_sdn | default(true) | bool
+  - openshift.common.is_containerized | bool
+  - openshift.common.is_openvswitch_system_container | bool
 
 # May be a temporary workaround.
 # https://bugzilla.redhat.com/show_bug.cgi?id=1331590
@@ -54,13 +62,23 @@
   notify:
   - restart openvswitch
 
-- name: Install OpenvSwitch docker service file
-  template:
-    dest: "/etc/systemd/system/openvswitch.service"
-    src: openvswitch.docker.service
-  when: openshift.common.is_containerized | bool and openshift.common.use_openshift_sdn | default(true) | bool
-  notify:
-  - restart openvswitch
+- block:
+  - name: Pre-pull openvswitch image
+    command: >
+      docker pull {{ openshift.node.ovs_image }}:{{ openshift_image_tag }}
+    register: pull_result
+    changed_when: "'Downloaded newer image' in pull_result.stdout"
+
+  - name: Install OpenvSwitch docker service file
+    template:
+      dest: "/etc/systemd/system/openvswitch.service"
+      src: openvswitch.docker.service
+    notify:
+    - restart openvswitch
+  when:
+  - openshift.common.is_containerized | bool
+  - openshift.common.use_openshift_sdn | default(true) | bool
+  - not openshift.common.is_openvswitch_system_container | bool
 
 - name: Configure Node settings
   lineinfile:

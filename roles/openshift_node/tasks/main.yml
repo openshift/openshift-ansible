@@ -69,7 +69,7 @@
 - name: Persist net.ipv4.ip_forward sysctl entry
   sysctl: name="net.ipv4.ip_forward" value=1 sysctl_set=yes state=present reload=yes
 
-- name: Start and enable openvswitch docker service
+- name: Start and enable openvswitch service
   systemd:
     name: openvswitch.service
     enabled: yes
