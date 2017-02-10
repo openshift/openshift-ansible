@@ -51,6 +51,9 @@
       '{"spec":{"template":{"spec":{"containers":[{"name":"router","image":"{{ router_image }}","livenessProbe":{"tcpSocket":null,"httpGet":{"path": "/healthz", "port": 1936, "host": "localhost", "scheme": "HTTP"},"initialDelaySeconds":10,"timeoutSeconds":1}}]}}}}'
       --api-version=v1
     with_items: "{{ haproxy_routers }}"
+    # AUDIT:changed_when_note: `false` not being set here. What we
+    # need to do is check the current router image version and see if
+    # this task needs to be ran.
 
   - name: Check for default registry
     command: >
@@ -66,6 +69,9 @@
       {{ oc_cmd }} patch dc/docker-registry -n default -p
       '{"spec":{"template":{"spec":{"containers":[{"name":"registry","image":"{{ registry_image }}"}]}}}}'
       --api-version=v1
+    # AUDIT:changed_when_note: `false` not being set here. What we
+    # need to do is check the current registry image version and see
+    # if this task needs to be ran.
 
 # Check for warnings to be printed at the end of the upgrade:
 - name: Check for warnings
