@@ -4,10 +4,10 @@
   vars:
     pvc_name: "{{openshift_logging_es_pvc_prefix}}-{{item| int}}"
     start: "{{es_pvc_names | map('regex_search',openshift_logging_es_pvc_prefix+'.*')|select('string')|list|length}}"
-  with_sequence: start={{start}} end={{ (start|int > openshift_logging_es_cluster_size - 1) | ternary(start, openshift_logging_es_cluster_size - 1)}}
+  with_sequence: start={{start}} end={{ (start|int > openshift_logging_es_cluster_size|int - 1) | ternary(start, openshift_logging_es_cluster_size|int - 1)}}
   when:
     - openshift_logging_es_pvc_size | search('^\d.*')
-    - "{{ es_dc_names|default([]) | length < openshift_logging_es_cluster_size }}"
+    - "{{ es_dc_names|default([]) | length < openshift_logging_es_cluster_size|int }}"
   check_mode: no
 
 - name: Generating PersistentVolumeClaims
