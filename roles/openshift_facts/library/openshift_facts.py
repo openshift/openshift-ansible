@@ -845,7 +845,7 @@ def set_version_facts_if_unset(facts):
             version_gte_3_1_or_1_1 = True
             version_gte_3_1_1_or_1_1_1 = True
             version_gte_3_2_or_1_2 = True
-            version_gte_3_3_or_1_3 = False
+            version_gte_3_3_or_1_3 = True
             version_gte_3_4_or_1_4 = False
             version_gte_3_5_or_1_5 = False
             version_gte_3_6_or_1_6 = False
