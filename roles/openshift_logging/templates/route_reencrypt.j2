@@ -11,6 +11,14 @@ metadata:
 spec:
   host: {{ route_host }}
   tls:
+{% if tls_key is defined and tls_key | length > 0 %}
+    key: |
+{{ tls_key|indent(6, true) }}
+{% if tls_cert is defined and tls_cert | length > 0 %}
+    certificate: |
+{{ tls_cert|indent(6, true) }}
+{% endif %}
+{% endif %}
     caCertificate: |
 {% for line in tls_ca_cert.split('\n') %}
       {{ line }}

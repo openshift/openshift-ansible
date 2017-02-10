@@ -1,4 +1,20 @@
 ---
+- set_fact: kibana_key={{ lookup('file', openshift_logging_kibana_key) | b64encode }}
+  when: "{{ openshift_logging_kibana_key | trim | length > 0 }}"
+  changed_when: false
+
+- set_fact: kibana_cert={{ lookup('file', openshift_logging_kibana_cert)| b64encode  }}
+  when: "{{openshift_logging_kibana_cert | trim | length > 0}}"
+  changed_when: false
+
+- set_fact: kibana_ca={{ lookup('file', openshift_logging_kibana_ca)| b64encode  }}
+  when: "{{openshift_logging_kibana_ca | trim | length > 0}}"
+  changed_when: false
+
+- set_fact: kibana_ca={{key_pairs | entry_from_named_pair('ca_file') }}
+  when: kibana_ca is not defined
+  changed_when: false
+
 - name: Generating logging routes
   template: src=route_reencrypt.j2 dest={{mktemp.stdout}}/templates/logging-{{route_info.name}}-route.yaml
   tags: routes
@@ -6,7 +22,9 @@
     obj_name: "{{route_info.name}}"
     route_host: "{{route_info.host}}"
     service_name: "{{route_info.name}}"
-    tls_ca_cert: "{{key_pairs | entry_from_named_pair('ca_file')| b64decode }}"
+    tls_key: "{{kibana_key | default('') | b64decode}}"
+    tls_cert: "{{kibana_cert | default('') | b64decode}}"
+    tls_ca_cert: "{{kibana_ca | b64decode}}"
     tls_dest_ca_cert: "{{key_pairs | entry_from_named_pair('ca_file')| b64decode }}"
     labels:
       component: support
