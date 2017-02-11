@@ -1,10 +1,10 @@
 ---
 galaxy_info:
-  author: OpenShift Operations
-  description: OpenShift Service Accounts
+  author: Erez Freiberger
+  description: ManageIQ
   company: Red Hat, Inc.
   license: Apache License, Version 2.0
-  min_ansible_version: 1.9
+  min_ansible_version: 2.1
   platforms:
   - name: EL
     versions:
@@ -12,5 +12,4 @@ galaxy_info:
   categories:
   - cloud
 dependencies:
-- { role: openshift_facts }
-- { role: lib_openshift }
+- role: lib_openshift
