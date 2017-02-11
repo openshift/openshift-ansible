@@ -14,6 +14,7 @@ galaxy_info:
 dependencies:
 - role: openshift_cli
 - role: openshift_hosted_facts
+- role: lib_openshift
 - role: openshift_projects
   openshift_projects: "{{ openshift_additional_projects | default({}) | oo_merge_dicts({'default':{'default_node_selector':''},'openshift-infra':{'default_node_selector':''},'logging':{'default_node_selector':''}}) }}"
 - role: openshift_serviceaccounts
