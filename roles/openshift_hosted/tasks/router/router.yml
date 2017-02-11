@@ -78,3 +78,27 @@
   changed_when: "'service exists' not in openshift_hosted_router_results.stdout"
   failed_when: "openshift_hosted_router_results.rc != 0 and 'service exists' not in openshift_hosted_router_results.stdout and 'deployment_config' not in openshift_hosted_router_results.stderr and 'service' not in openshift_hosted_router_results.stderr"
   when: replicas | int > 0
+
+- command: >
+    {{ openshift.common.client_binary }}
+    {% if openshift.hosted.router.name | default(none) is not none -%}
+    get dc/{{ openshift.hosted.router.name }}
+    {% else %}
+    get dc/router
+    {% endif%}
+    --template=\\{\\{.spec.replicas\\}\\} 
+    --namespace={{ openshift.hosted.router.namespace | default('default') }}
+  register: current_replicas
+  when: replicas | int > 0
+
+- name: Ensure router replica count matches desired
+  command: >
+    {{ openshift.common.client_binary }}
+    scale --replicas={{ replicas }} 
+    {% if openshift.hosted.router.name | default(none) is not none -%}
+    dc/{{ openshift.hosted.router.name }}
+    {% else %}
+    dc/router
+    {% endif%}
+    --namespace={{ openshift.hosted.router.namespace | default('default') }}
+  when: replicas | int > 0 and replicas | int != current_replicas.stdout | int
