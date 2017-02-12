@@ -18,3 +18,6 @@ openshift_master_valid_grant_methods:
 - auto
 - prompt
 - deny
+
+l_is_ha: "{{ openshift.master.ha is defined and openshift.master.ha | bool }}"
+l_is_same_version: "{{ (openshift.common.version is defined) and (openshift.common.version == openshift_version) | bool }}"
