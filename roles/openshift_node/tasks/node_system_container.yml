@@ -16,17 +16,16 @@
   register: update_result
   changed_when: "'Extracting' in update_result.stdout"
   when:
-  - openshift.common.version is defined
-  - openshift.common.version == openshift_version
-  - ("node" in result.stdout) | bool
+  - l_is_same_version
+  - ("node" in result.stdout)
 
 - name: Uninstall Node system container package
   command: >
     atomic uninstall {{ openshift.common.service_type }}-node
   failed_when: False
   when:
-  - (openshift.common.version is not defined) or (openshift.common.version != openshift_version)
-  - ("node" in result.stdout) | bool
+  - not l_is_same_version
+  - ("node" in result.stdout)
 
 - name: Install Node system container package
   command: >
@@ -34,4 +33,4 @@
   register: install_node_result
   changed_when: "'Extracting' in pull_result.stdout"
   when:
-  - (openshift.common.version is not defined) or (openshift.common.version != openshift_version) or ("node" not in result.stdout) | bool
+  - not l_is_same_version or ("node" not in result.stdout) | bool

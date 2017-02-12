@@ -16,8 +16,7 @@
   register: update_result
   changed_when: "'Extracting' in update_result.stdout"
   when:
-  - openshift.common.version is defined
-  - openshift.common.version == openshift_version
+  - l_is_same_version
   - ("openvswitch" in result.stdout) | bool
 
 - name: Uninstall OpenvSwitch system container package
@@ -25,13 +24,13 @@
     atomic uninstall openvswitch
   failed_when: False
   when:
-  - (openshift.common.version is not defined) or (openshift.common.version != openshift_version)
+  - not l_is_same_version
   - ("openvswitch" in result.stdout) | bool
 
 - name: Install OpenvSwitch system container package
   command: >
     atomic install --system --name=openvswitch {{ openshift.common.system_images_registry }}/{{ openshift.node.ovs_system_image }}:{{ openshift_image_tag }}
   when:
-  - (openshift.common.version is not defined) or (openshift.common.version != openshift_version) or ("openvswitch" not in result.stdout) | bool
+  - not l_is_same_version or ("openvswitch" not in result.stdout) | bool
   notify:
   - restart docker
