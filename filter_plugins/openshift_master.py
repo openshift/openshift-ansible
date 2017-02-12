@@ -53,10 +53,10 @@ class IdentityProviderBase(object):
         if 'kind' not in self._idp:
             raise errors.AnsibleFilterError("|failed identity provider missing a kind")
 
-        self.name = self._idp.pop('name')
+        self.name = str(self._idp.pop('name'))
         self.login = ansible_bool(self._idp.pop('login', False))
         self.challenge = ansible_bool(self._idp.pop('challenge', False))
-        self.provider = dict(apiVersion=api_version, kind=self._idp.pop('kind'))
+        self.provider = dict(apiVersion=api_version, kind=str(self._idp.pop('kind')))
 
         mm_keys = ('mappingMethod', 'mapping_method')
         mapping_method = None
