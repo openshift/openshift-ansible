@@ -1,57 +1,49 @@
 #!/usr/bin/python
 # vim: expandtab:tabstop=4:shiftwidth=4
 '''
-An ansible module for determining if more than one minor version
-of any atomic-openshift package is available, which would indicate
-that multiple repos are enabled for different versions of the same
-thing which may cause problems.
+Ansible module for determining if multiple versions of an OpenShift package are
+available, and if the version requested is available down to the given
+precision.
 
-Also, determine if the version requested is available down to the
-precision requested.
+Multiple versions available suggest that multiple repos are enabled for the
+different versions, which may cause installation problems.
 '''
 
-# import os
-# import sys
 import yum  # pylint: disable=import-error
+
 from ansible.module_utils.basic import AnsibleModule
 
 
-def main():  # pylint: disable=missing-docstring
+def main():  # pylint: disable=missing-docstring,too-many-branches
     module = AnsibleModule(
         argument_spec=dict(
-            version=dict(required=True)
+            prefix=dict(required=True),  # atomic-openshift, origin, ...
+            version=dict(required=True),
         ),
         supports_check_mode=True
     )
 
-    # NOTE(rhcarvalho): sosiouxme added _unmute, but I couldn't find a case yet
-    # for when it is actually necessary. Leaving it commented out for now,
-    # though this comment and the commented out code related to _unmute should
-    # be deleted later if not proven necessary.
-
-    # sys.stdout = os.devnull  # mute yum so it doesn't break our output
-    # sys.stderr = os.devnull  # mute yum so it doesn't break our output
-
-    # def _unmute():  # pylint: disable=missing-docstring
-    #     sys.stdout = sys.__stdout__
-
     def bail(error):  # pylint: disable=missing-docstring
-        # _unmute()
         module.fail_json(msg=error)
+
+    rpm_prefix = module.params['prefix']
+
+    if not rpm_prefix:
+        bail("prefix must not be empty")
 
     yb = yum.YumBase()  # pylint: disable=invalid-name
 
     # search for package versions available for aos pkgs
     expected_pkgs = [
-        'atomic-openshift',
-        'atomic-openshift-master',
-        'atomic-openshift-node',
+        rpm_prefix,
+        rpm_prefix + '-master',
+        rpm_prefix + '-node',
     ]
     try:
         pkgs = yb.pkgSack.returnPackages(patterns=expected_pkgs)
     except yum.Errors.PackageSackError as e:  # pylint: disable=invalid-name
         # you only hit this if *none* of the packages are available
-        bail('Unable to find any atomic-openshift packages. \nCheck your subscription and repo settings. \n%s' % e)
+        bail('Unable to find any OpenShift packages.\nCheck your subscription and repo settings.\n%s' % e)
 
     # determine what level of precision we're expecting for the version
     expected_version = module.params['version']
@@ -92,7 +84,6 @@ def main():  # pylint: disable=missing-docstring
             msg += '  %s\n' % name
         bail(msg + "There should only be one OpenShift version's repository enabled at a time.")
 
-    # _unmute()
     module.exit_json(changed=False)
 
 
