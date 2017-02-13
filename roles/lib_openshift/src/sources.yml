@@ -1,4 +1,14 @@
 ---
+oadm_ca.py:
+- doc/generated
+- doc/license
+- lib/import.py
+- doc/certificate_authority
+- ../../lib_utils/src/class/yedit.py
+- lib/base.py
+- class/oadm_certificate_authority.py
+- ansible/oadm_certificate_authority.py
+
 oadm_manage_node.py:
 - doc/generated
 - doc/license

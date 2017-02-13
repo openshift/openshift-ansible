@@ -1,0 +1,96 @@
+# flake8: noqa
+# pylint: skip-file
+
+DOCUMENTATION = '''
+---
+module: oc_secret
+short_description: Module to manage openshift certificate authority
+description:
+  - Wrapper around the openshift `oc adm ca` command.
+options:
+  state:
+    description:
+    - Present is the only supported state.  The state present means that `oc adm ca` will generate a certificate
+    - When create-master-certs is desired then the following parameters are passed.
+    - ['cert_dir', 'hostnames', 'master', 'public_master', 'overwrite', 'signer_name']
+    - When create-key-pair is desired then the following parameters are passed.
+    - ['private_key', 'public_key']
+    - When create-server-cert is desired then the following parameters are passed.
+    - ['cert', 'key', 'signer_cert', 'signer_key', 'signer_serial']
+    required: false
+    default: present
+    choices: ["present"]
+    aliases: []
+  kubeconfig:
+    description:
+    - The path for the kubeconfig file to use for authentication
+    required: false
+    default: /etc/origin/master/admin.kubeconfig
+    aliases: []
+  debug:
+    description:
+    - Turn on debug output.
+    required: false
+    default: False
+    aliases: []
+  cmd:
+    description:
+    - The sub command given for `oc adm ca`
+    required: false
+    default: None
+    choices:
+    - create-master-certs
+    - create-key-pair
+    - create-server-cert
+    aliases: []
+  cert_dir:
+    description:
+    - The directory to place the certificates.
+    required: false
+    default: False
+    aliases: []
+author:
+- "Kenny Woodson <kwoodson@redhat.com>"
+extends_documentation_fragment: []
+'''
+
+EXAMPLES = '''
+- name: create secret
+  oc_secret:
+    state: present
+    namespace: openshift-infra
+    name: metrics-deployer
+    files:
+    - name: nothing
+      path: /dev/null
+  register: secretout
+  run_once: true
+
+- name: get ca from hawkular
+  oc_secret:
+    state: list
+    namespace: openshift-infra
+    name:  hawkular-metrics-certificate
+    decode: True
+  register: hawkout
+  run_once: true
+
+- name: Create secrets
+  oc_secret:
+    namespace: mynamespace
+    name: mysecrets
+    contents:
+    - path: data.yml
+      data: "{{ data_content }}"
+    - path: auth-keys
+      data: "{{ auth_keys_content }}"
+    - path: configdata.yml
+      data: "{{ configdata_content }}"
+    - path: cert.crt
+      data: "{{ cert_content }}"
+    - path: key.pem
+      data: "{{ osso_site_key_content }}"
+    - path: ca.cert.pem
+      data: "{{ ca_cert_content }}"
+  register: secretout
+'''
