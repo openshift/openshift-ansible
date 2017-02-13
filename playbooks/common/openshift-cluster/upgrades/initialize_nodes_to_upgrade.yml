@@ -1,20 +1,17 @@
 ---
 - name: Filter list of nodes to be upgraded if necessary
   hosts: oo_first_master
+
+  roles:
+  - lib_openshift
+
   tasks:
   - name: Retrieve list of openshift nodes matching upgrade label
-    command: >
-      {{ openshift.common.client_binary }}
-      get nodes
-      --config={{ openshift.common.config_base }}/master/admin.kubeconfig
-      --selector={{ openshift_upgrade_nodes_label }}
-      -o jsonpath='{.items[*].metadata.name}'
-    register: matching_nodes
-    changed_when: false
-    when: openshift_upgrade_nodes_label is defined
-
-  - set_fact:
-      nodes_to_upgrade: "{{ matching_nodes.stdout.split(' ') }}"
+    oc_obj:
+      state: list
+      kind: node
+      selector: "{{ openshift_upgrade_nodes_label }}"
+    register: nodes_to_upgrade
     when: openshift_upgrade_nodes_label is defined
 
   # We got a list of nodes with the label, now we need to match these with inventory hosts
@@ -26,7 +23,9 @@
       ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
       ansible_become: "{{ g_sudo | default(omit) }}"
     with_items: " {{ groups['oo_nodes_to_config'] }}"
-    when: openshift_upgrade_nodes_label is defined and hostvars[item].openshift.common.hostname in nodes_to_upgrade
+    when:
+    - openshift_upgrade_nodes_label is defined
+    - hostvars[item].openshift.common.hostname in nodes_to_upgrade.results.results[0]['items'] | map(attribute='metadata.name') | list
     changed_when: false
 
   # Build up the oo_nodes_to_upgrade group, use the list filtered by label if
