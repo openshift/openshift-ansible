@@ -1,13 +1,13 @@
 ---
 - name: Create passthrough route for docker-registry
-  command: >
-    {{ openshift.common.client_binary }} create route passthrough
-    --service docker-registry
-    --config={{ openshift_hosted_kubeconfig }}
-    -n default
-  register: create_docker_registry_route
-  changed_when: "'already exists' not in create_docker_registry_route.stderr"
-  failed_when: "'already exists' not in create_docker_registry_route.stderr and create_docker_registry_route.rc != 0"
+  oc_route:
+    kubeconfig: "{{ openshift_hosted_kubeconfig }}"
+    name: docker-registry
+    namespace: default
+    service_name: docker-registry
+    state: present
+    tls_termination: passthrough
+  run_once: true
 
 - name: Determine if registry certificate must be created
   stat:
@@ -24,6 +24,7 @@
     namespace: default
     name: docker-registry
     state: list
+    kubeconfig: "{{ openshift_hosted_kubeconfig }}"
   register: docker_registry_service_ip
   changed_when: false
 
@@ -36,7 +37,7 @@
     --signer-cert={{ openshift_master_config_dir }}/ca.crt
     --signer-key={{ openshift_master_config_dir }}/ca.key
     --signer-serial={{ openshift_master_config_dir }}/ca.serial.txt
-    --hostnames="{{ docker_registry_service_ip.results.clusterip }},docker-registry.default.svc.cluster.local,{{ docker_registry_route_hostname }}"
+    --hostnames="{{ (docker_registry_service_ip|from_json)["spec"]["clusterIP"] }},docker-registry.default.svc.cluster.local,{{ docker_registry_route_hostname }}"
     --cert={{ openshift_master_config_dir }}/registry.crt
     --key={{ openshift_master_config_dir }}/registry.key
   when: False in (docker_registry_certificates_stat_result.results | default([]) | oo_collect(attribute='stat.exists') | list)

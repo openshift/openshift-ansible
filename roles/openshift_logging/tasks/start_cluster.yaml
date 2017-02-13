@@ -10,11 +10,12 @@
   when: "'--all' in openshift_logging_fluentd_hosts"
 
 - name: start fluentd
-  include: label_node.yaml
-  vars:
-    host: "{{fluentd_host}}"
-    label: "{{openshift_logging_fluentd_nodeselector.keys()[0]}}"
-    value: "{{openshift_logging_fluentd_nodeselector.values()[0]}}"
+  oc_label:
+    name: "{{ fluentd_host }}"
+    kind: node
+    state: add
+    label: "{{ openshift_logging_fluentd_nodeselector }}"
+    kubeconfig: "{{ mktemp.stdout }}/admin.kubeconfig"
   with_items: "{{ openshift_logging_fluentd_hosts }}"
   loop_control:
     loop_var: fluentd_host

@@ -22,12 +22,24 @@
   hosts: oo_masters_to_config:oo_nodes_to_upgrade:oo_etcd_to_config
   serial: 1
   any_errors_fatal: true
+
+  roles:
+  - lib_openshift
+
   tasks:
-  - name: Prepare for Node draining
-    command: >
-      {{ openshift.common.client_binary }} adm manage-node {{ openshift.node.nodename }} --schedulable=false
+  - name: Mark node unschedulable
+    oadm_manage_node:
+      node: "{{ openshift.node.nodename | lower }}"
+      schedulable: False
     delegate_to: "{{ groups.oo_first_master.0 }}"
-    when: l_docker_upgrade is defined and l_docker_upgrade | bool and inventory_hostname in groups.oo_nodes_to_upgrade
+    retries: 10
+    delay: 5
+    register: node_unschedulable
+    until: node_unschedulable|succeeded
+    when:
+    - l_docker_upgrade is defined
+    - l_docker_upgrade | bool
+    - inventory_hostname in groups.oo_nodes_to_upgrade
 
   - name: Drain Node for Kubelet upgrade
     command: >
@@ -39,7 +51,12 @@
     when: l_docker_upgrade is defined and l_docker_upgrade | bool
 
   - name: Set node schedulability
-    command: >
-      {{ openshift.common.client_binary }} adm manage-node {{ openshift.node.nodename }} --schedulable=true
+    oadm_manage_node:
+      node: "{{ openshift.node.nodename | lower }}"
+      schedulable: True
     delegate_to: "{{ groups.oo_first_master.0 }}"
-    when: l_docker_upgrade is defined and l_docker_upgrade | bool and inventory_hostname in groups.oo_nodes_to_upgrade and openshift.node.schedulable | bool
+    retries: 10
+    delay: 5
+    register: node_schedulable
+    until: node_schedulable|succeeded
+    when: node_unschedulable|changed

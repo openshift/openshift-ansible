@@ -57,6 +57,7 @@
         namespace: default
         name: docker-registry
         state: list
+        kubeconfig: "{{ mktemp.stdout }}/admin.kubeconfig"
       register: docker_registry_service_ip
       changed_when: false
 
