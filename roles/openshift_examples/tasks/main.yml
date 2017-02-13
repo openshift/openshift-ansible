@@ -36,7 +36,6 @@
   unarchive:
     src: "{{ copy_examples_mktemp.stdout }}/openshift-examples.tar"
     dest: "{{ examples_base }}/"
-    mode: 0755
 
 - name: Cleanup the OpenShift Examples temp dir
   become: False
