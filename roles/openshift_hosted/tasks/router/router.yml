@@ -86,7 +86,7 @@
     {% else %}
     get dc/router
     {% endif%}
-    --template=\\{\\{.spec.replicas\\}\\} 
+    --template=\\{\\{.spec.replicas\\}\\}
     --namespace={{ openshift.hosted.router.namespace | default('default') }}
   register: current_replicas
   when: replicas | int > 0
@@ -94,7 +94,7 @@
 - name: Ensure router replica count matches desired
   command: >
     {{ openshift.common.client_binary }}
-    scale --replicas={{ replicas }} 
+    scale --replicas={{ replicas }}
     {% if openshift.hosted.router.name | default(none) is not none -%}
     dc/{{ openshift.hosted.router.name }}
     {% else %}
