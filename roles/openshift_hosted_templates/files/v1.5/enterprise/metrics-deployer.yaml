@@ -159,9 +159,9 @@ parameters:
   name: HEAPSTER_NODE_ID
   value: "nodename"
 -
-  description: "How often metrics should be gathered. Defaults value of '15s' for 15 seconds"
+  description: "How often metrics should be gathered. Defaults value of '30s' for 30 seconds"
   name: METRIC_RESOLUTION
-  value: "15s"
+  value: "30s"
 -
   description: "How long in seconds we should wait until Hawkular Metrics and Heapster starts up before attempting a restart"
   name: STARTUP_TIMEOUT
