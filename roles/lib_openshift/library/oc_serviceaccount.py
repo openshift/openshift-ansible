@@ -1396,9 +1396,8 @@ class OCServiceAccount(OpenShiftCLI):
                  config,
                  verbose=False):
         ''' Constructor for OCVolume '''
-        super(OCServiceAccount, self).__init__(config.namespace, config.kubeconfig)
+        super(OCServiceAccount, self).__init__(config.namespace, kubeconfig=config.kubeconfig, verbose=verbose)
         self.config = config
-        self.namespace = config.namespace
         self.service_account = None
 
     def exists(self):

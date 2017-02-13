@@ -1630,13 +1630,10 @@ class OCEnv(OpenShiftCLI):
                  kubeconfig='/etc/origin/master/admin.kubeconfig',
                  verbose=False):
         ''' Constructor for OpenshiftOC '''
-        super(OCEnv, self).__init__(namespace, kubeconfig)
+        super(OCEnv, self).__init__(namespace, kubeconfig=kubeconfig, verbose=verbose)
         self.kind = kind
         self.name = resource_name
-        self.namespace = namespace
         self.env_vars = env_vars
-        self.kubeconfig = kubeconfig
-        self.verbose = verbose
         self._resource = None
 
     @property

@@ -11,9 +11,8 @@ class OCRoute(OpenShiftCLI):
                  config,
                  verbose=False):
         ''' Constructor for OCVolume '''
-        super(OCRoute, self).__init__(config.namespace, config.kubeconfig)
+        super(OCRoute, self).__init__(config.namespace, kubeconfig=config.kubeconfig, verbose=verbose)
         self.config = config
-        self.namespace = config.namespace
         self._route = None
 
     @property
