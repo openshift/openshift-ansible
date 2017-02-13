@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.60
+Version:        3.4.61
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -250,6 +250,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Feb 13 2017 Scott Dodson <sdodson@redhat.com> 3.4.61-1
+- Fix Bug 1419654 Remove legacy config_base fallback to /etc/openshift
+  (sdodson@redhat.com)
+- Set image change triggers to auto=true for OCP 3.4
+  (https://github.com/ManageIQ/manageiq-pods/pull/88) (simaishi@redhat.com)
+
 * Thu Feb 09 2017 Scott Dodson <sdodson@redhat.com> 3.4.60-1
 - Include rpm/git paths in expiry README (tbielawa@redhat.com)
 - Make the cert expiry playbooks runnable (tbielawa@redhat.com)
