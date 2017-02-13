@@ -1,26 +1,33 @@
-FROM rhel7
+# Using playbook2image as a base
+# See https://github.com/aweiteka/playbook2image for details on the image
+# including documentation for the settings/env vars referenced below
+FROM docker.io/aweiteka/playbook2image:latest
 
-MAINTAINER Troy Dawson <tdawson@redhat.com>
+MAINTAINER OpenShift Team <dev@lists.openshift.redhat.com>
 
-LABEL Name="openshift3/installer"
-LABEL Vendor="Red Hat" License=GPLv2+
-LABEL Version="v3.1.1.901"
-LABEL Release="6"
-LABEL BZComponent="aos3-installation-docker"
-LABEL Architecture="x86_64"
-LABEL io.k8s.description="Ansible code and playbooks for installing Openshift Container Platform." \
-      io.k8s.display-name="Openshift Installer" \
-      io.openshift.tags="openshift,installer"
+LABEL name="openshift-ansible" \
+      summary="OpenShift's installation and configuration tool" \
+      description="A containerized openshift-ansible image to let you run playbooks to install, upgrade, maintain and check an OpenShift cluster" \
+      url="https://github.com/openshift/openshift-ansible" \
+      io.k8s.display-name="openshift-ansible" \
+      io.k8s.description="A containerized openshift-ansible image to let you run playbooks to install, upgrade, maintain and check an OpenShift cluster" \
+      io.openshift.expose-services="" \
+      io.openshift.tags="openshift,install,upgrade,ansible"
 
-RUN INSTALL_PKGS="atomic-openshift-utils" && \
-    yum install -y --enablerepo=rhel-7-server-ose-3.2-rpms $INSTALL_PKGS && \
-    rpm -V $INSTALL_PKGS && \
-    yum clean all
+# The playbook to be run is specified via the PLAYBOOK_FILE env var.
+# This sets a default of openshift_facts.yml as it's an informative playbook
+# that can help test that everything is set properly (inventory, sshkeys)
+ENV PLAYBOOK_FILE=playbooks/byo/openshift_facts.yml \
+    OPTS="-v" \
+    INSTALL_OC=true
 
-# Expect user to mount a workdir for container output (installer.cfg, hosts inventory, ansible log)
-VOLUME /var/lib/openshift-installer/
-WORKDIR /var/lib/openshift-installer/
+# playbook2image's assemble script expects the source to be available in
+# /tmp/src (as per the source-to-image specs) so we import it there
+ADD . /tmp/src
 
-RUN mkdir -p /var/lib/openshift-installer/
+# Running the 'assemble' script provided by playbook2image will install
+# dependencies specified in requirements.txt and install the 'oc' client
+# as per the INSTALL_OC environment setting above
+RUN /usr/libexec/s2i/assemble
 
-ENTRYPOINT ["/usr/bin/atomic-openshift-installer", "-c", "/var/lib/openshift-installer/installer.cfg", "--ansible-log-path", "/var/lib/openshift-installer/ansible.log"]
+CMD [ "/usr/libexec/s2i/run" ]

@@ -74,6 +74,9 @@ you are not running a stable release.
       - [OpenShift Enterprise](https://docs.openshift.com/enterprise/latest/install_config/install/advanced_install.html)
       - [OpenShift Origin](https://docs.openshift.org/latest/install_config/install/advanced_install.html)
 
+## Containerized OpenShift Ansible
+
+See [README_CONTAINER_IMAGE.md](README_CONTAINER_IMAGE.md) for information on how to package openshift-ansible as a container image.
 
 ## Installer Hooks
 

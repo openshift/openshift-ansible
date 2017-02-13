@@ -1,0 +1,8 @@
+.*
+bin
+docs
+test
+utils
+**/*.md
+*.spec
+setup*
