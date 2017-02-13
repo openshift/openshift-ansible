@@ -785,8 +785,8 @@ def set_etcd_facts_if_unset(facts):
 
 def set_deployment_facts_if_unset(facts):
     """ Set Facts that vary based on deployment_type. This currently
-        includes common.service_type, common.config_base, master.registry_url,
-        node.registry_url, node.storage_plugin_deps
+        includes common.service_type, master.registry_url, node.registry_url,
+        node.storage_plugin_deps
 
         Args:
             facts (dict): existing facts
@@ -806,22 +806,6 @@ def set_deployment_facts_if_unset(facts):
             elif deployment_type in ['enterprise']:
                 service_type = 'openshift'
             facts['common']['service_type'] = service_type
-        if 'config_base' not in facts['common']:
-            config_base = '/etc/origin'
-            if deployment_type in ['enterprise']:
-                config_base = '/etc/openshift'
-            # Handle upgrade scenarios when symlinks don't yet exist:
-            if not os.path.exists(config_base) and os.path.exists('/etc/openshift'):
-                config_base = '/etc/openshift'
-            facts['common']['config_base'] = config_base
-        if 'data_dir' not in facts['common']:
-            data_dir = '/var/lib/origin'
-            if deployment_type in ['enterprise']:
-                data_dir = '/var/lib/openshift'
-            # Handle upgrade scenarios when symlinks don't yet exist:
-            if not os.path.exists(data_dir) and os.path.exists('/var/lib/openshift'):
-                data_dir = '/var/lib/openshift'
-            facts['common']['data_dir'] = data_dir
 
     if 'docker' in facts:
         deployment_type = facts['common']['deployment_type']
@@ -1929,7 +1913,9 @@ class OpenShiftFacts(object):
                                   client_binary='oc', admin_binary='oadm',
                                   dns_domain='cluster.local',
                                   install_examples=True,
-                                  debug_level=2)
+                                  debug_level=2,
+                                  config_base='/etc/origin',
+                                  data_dir='/var/lib/origin')
 
         if 'master' in roles:
             defaults['master'] = dict(api_use_ssl=True, api_port='8443',
