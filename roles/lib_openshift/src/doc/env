@@ -1,0 +1,83 @@
+# flake8: noqa
+# pylint: skip-file
+
+DOCUMENTATION = '''
+---
+module: oc_env
+short_description: Modify, and idempotently manage openshift environment variables on pods, deploymentconfigs, and replication controllers.
+description:
+  - Modify openshift environment variables programmatically.
+options:
+  state:
+    description:
+    - Supported states, present, absent, list
+    - present - will ensure object is created or updated to the value specified
+    - list - will return a list of environment variables
+    - absent - will remove the environment varibale from the object
+    required: False
+    default: present
+    choices: ["present", 'absent', 'list']
+    aliases: []
+  kubeconfig:
+    description:
+    - The path for the kubeconfig file to use for authentication
+    required: false
+    default: /etc/origin/master/admin.kubeconfig
+    aliases: []
+  debug:
+    description:
+    - Turn on debug output.
+    required: false
+    default: False
+    aliases: []
+  name:
+    description:
+    - Name of the object that is being queried.
+    required: false
+    default: None
+    aliases: []
+  namespace:
+    description:
+    - The namespace where the object lives.
+    required: false
+    default: str
+    aliases: []
+  kind:
+    description:
+    - The kind attribute of the object.
+    required: False
+    default: dc
+    choices:
+    - rc
+    - dc
+    - pods
+    aliases: []
+  env_vars:
+    description:
+    - The environment variables to insert.  The format is a dict of value pairs.
+    - e.g. {key1: value1, key2: value2}) 
+    required: False
+    default: None
+    aliases: []
+author:
+- "Kenny Woodson <kwoodson@redhat.com>"
+extends_documentation_fragment: []
+'''
+
+EXAMPLES = '''
+- name: query a list of env vars on dc
+  oc_env:
+    kind: dc
+    name: myawesomedc
+    namespace: phpapp
+
+- name: Set the following variables.
+  oc_env:
+    kind: dc
+    name: myawesomedc
+    namespace: phpapp
+    env_vars:
+      SUPER_TURBO_MODE: 'true'
+      ENABLE_PORTS: 'false'
+      SERVICE_PORT: 9999
+'''
