@@ -1,118 +1,133 @@
 ---
-- command: >
-    {{openshift.common.client_binary}} --config={{mktemp.stdout}}/admin.kubeconfig get node -o name
-  register: fluentd_hosts
+- name: Retrieve list of fluentd hosts
+  oc_obj:
+    state: list
+    kind: node
   when: "'--all' in openshift_logging_fluentd_hosts"
-  changed_when: no
+  register: fluentd_hosts
 
-- set_fact: openshift_logging_fluentd_hosts={{ fluentd_hosts.stdout_lines | regex_replace('node/', '') }}
+- name: Set fact openshift_logging_fluentd_hosts
+  set_fact:
+    openshift_logging_fluentd_hosts: "{{ fluentd_hosts.results.results[0]['items'] | map(attribute='metadata.name') | list }}"
   when: "'--all' in openshift_logging_fluentd_hosts"
 
 - name: stop fluentd
-  include: label_node.yaml
-  vars:
-    host: "{{fluentd_host}}"
-    label: "{{openshift_logging_fluentd_nodeselector.keys()[0]}}"
-    unlabel: True
+  oc_label:
+    name: "{{ fluentd_host }}"
+    kind: node
+    state: absent
+    label: "{{ openshift_logging_fluentd_nodeselector | oo_dict_to_list_of_dict }}"
   with_items: "{{ openshift_logging_fluentd_hosts }}"
   loop_control:
     loop_var: fluentd_host
 
-- command: >
-    {{openshift.common.client_binary}} --config={{mktemp.stdout}}/admin.kubeconfig get dc -l component=es -o name -n {{openshift_logging_namespace}}
+- name: Retrieve elasticsearch
+  oc_obj:
+    state: list
+    kind: dc
+    selector: "component=es"
+    namespace: "{{openshift_logging_namespace}}"
   register: es_dc
-  changed_when: no
 
 - name: stop elasticsearch
   oc_scale:
     kind: dc
-    name: "{{object.split('/')[1]}}"
+    name: "{{ object }}"
     namespace: "{{openshift_logging_namespace}}"
-    kubeconfig: "{{mktemp.stdout}}/admin.kubeconfig"
     replicas: 0
-  with_items: "{{es_dc.stdout_lines}}"
+  with_items: "{{ es_dc.results.results[0]['items'] | map(attribute='metadata.name') | list }}"
   loop_control:
     loop_var: object
 
-- command: >
-    {{openshift.common.client_binary}} --config={{mktemp.stdout}}/admin.kubeconfig get dc -l component=kibana -o name -n {{openshift_logging_namespace}}
+- name: Retrieve kibana
+  oc_obj:
+    state: list
+    kind: dc
+    selector: "component=kibana"
+    namespace: "{{openshift_logging_namespace}}"
   register: kibana_dc
-  changed_when: no
 
 - name: stop kibana
   oc_scale:
     kind: dc
-    name: "{{object.split('/')[1]}}"
+    name: "{{ object }}"
     namespace: "{{openshift_logging_namespace}}"
-    kubeconfig: "{{mktemp.stdout}}/admin.kubeconfig"
     replicas: 0
-  with_items: "{{kibana_dc.stdout_lines}}"
+  with_items: "{{ kibana_dc.results.results[0]['items'] | map(attribute='metadata.name') | list }}"
   loop_control:
     loop_var: object
 
-- command: >
-    {{openshift.common.client_binary}} --config={{mktemp.stdout}}/admin.kubeconfig get dc -l component=curator -o name -n {{openshift_logging_namespace}}
+- name: Retrieve curator
+  oc_obj:
+    state: list
+    kind: dc
+    selector: "component=curator"
+    namespace: "{{openshift_logging_namespace}}"
   register: curator_dc
-  changed_when: no
 
 - name: stop curator
   oc_scale:
     kind: dc
-    name: "{{object.split('/')[1]}}"
+    name: "{{ object }}"
     namespace: "{{openshift_logging_namespace}}"
-    kubeconfig: "{{mktemp.stdout}}/admin.kubeconfig"
     replicas: 0
-  with_items: "{{curator_dc.stdout_lines}}"
+  with_items: "{{ curator_dc.results.results[0]['items'] | map(attribute='metadata.name') | list }}"
   loop_control:
     loop_var: object
 
-- command: >
-    {{openshift.common.client_binary}} --config={{mktemp.stdout}}/admin.kubeconfig get dc -l component=es-ops -o name -n {{openshift_logging_namespace}}
+- name: Retrieve elasticsearch-ops
+  oc_obj:
+    state: list
+    kind: dc
+    selector: "component=es-ops"
+    namespace: "{{openshift_logging_namespace}}"
   register: es_dc
-  changed_when: no
 
 - name: stop elasticsearch-ops
   oc_scale:
     kind: dc
-    name: "{{object.split('/')[1]}}"
+    name: "{{ object }}"
     namespace: "{{openshift_logging_namespace}}"
-    kubeconfig: "{{mktemp.stdout}}/admin.kubeconfig"
     replicas: 0
-  with_items: "{{es_dc.stdout_lines}}"
+  with_items: "{{ es_dc.results.results[0]['items'] | map(attribute='metadata.name') | list }}"
   loop_control:
     loop_var: object
   when: openshift_logging_use_ops | bool
 
-- command: >
-    {{openshift.common.client_binary}} --config={{mktemp.stdout}}/admin.kubeconfig get dc -l component=kibana-ops -o name -n {{openshift_logging_namespace}}
+- name: Retrieve kibana-ops
+  oc_obj:
+    state: list
+    kind: dc
+    selector: "component=kibana-ops"
+    namespace: "{{openshift_logging_namespace}}"
   register: kibana_dc
-  changed_when: no
 
 - name: stop kibana-ops
   oc_scale:
     kind: dc
-    name: "{{object.split('/')[1]}}"
+    name: "{{ object }}"
     namespace: "{{openshift_logging_namespace}}"
-    kubeconfig: "{{mktemp.stdout}}/admin.kubeconfig"
     replicas: 0
-  with_items: "{{kibana_dc.stdout_lines}}"
+  with_items: "{{ kibana_dc.results.results[0]['items'] | map(attribute='metadata.name') | list }}"
   loop_control:
     loop_var: object
   when: openshift_logging_use_ops | bool
 
-- command: >
-    {{openshift.common.client_binary}} --config={{mktemp.stdout}}/admin.kubeconfig get dc -l component=curator-ops -o name -n {{openshift_logging_namespace}}
+- name: Retrieve curator
+  oc_obj:
+    state: list
+    kind: dc
+    selector: "component=curator-ops"
+    namespace: "{{openshift_logging_namespace}}"
   register: curator_dc
-  changed_when: no
 
 - name: stop curator-ops
   oc_scale:
     kind: dc
-    name: "{{object.split('/')[1]}}"
+    name: "{{ object }}"
     namespace: "{{openshift_logging_namespace}}"
-    kubeconfig: "{{mktemp.stdout}}/admin.kubeconfig"
     replicas: 0
-  with_items: "{{curator_dc.stdout_lines}}"
+  with_items: "{{ curator_dc.results.results[0]['items'] | map(attribute='metadata.name') | list }}"
   loop_control:
     loop_var: object
   when: openshift_logging_use_ops | bool

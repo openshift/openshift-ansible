@@ -1391,7 +1391,7 @@ class OCServiceAccountSecret(OpenShiftCLI):
     kind = 'sa'
     def __init__(self, config, verbose=False):
         ''' Constructor for OpenshiftOC '''
-        super(OCServiceAccountSecret, self).__init__(config.namespace, config.kubeconfig)
+        super(OCServiceAccountSecret, self).__init__(config.namespace, kubeconfig=config.kubeconfig, verbose=verbose)
         self.config = config
         self.verbose = verbose
         self._service_account = None

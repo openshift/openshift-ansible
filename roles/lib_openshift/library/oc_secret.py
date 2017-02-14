@@ -1418,12 +1418,9 @@ class OCSecret(OpenShiftCLI):
                  kubeconfig='/etc/origin/master/admin.kubeconfig',
                  verbose=False):
         ''' Constructor for OpenshiftOC '''
-        super(OCSecret, self).__init__(namespace, kubeconfig)
-        self.namespace = namespace
+        super(OCSecret, self).__init__(namespace, kubeconfig=kubeconfig, verbose=verbose)
         self.name = secret_name
-        self.kubeconfig = kubeconfig
         self.decode = decode
-        self.verbose = verbose
 
     def get(self):
         '''return a secret by name '''

@@ -1,13 +1,13 @@
 ---
 - name: Create passthrough route for docker-registry
-  command: >
-    {{ openshift.common.client_binary }} create route passthrough
-    --service docker-registry
-    --config={{ openshift_hosted_kubeconfig }}
-    -n default
-  register: create_docker_registry_route
-  changed_when: "'already exists' not in create_docker_registry_route.stderr"
-  failed_when: "'already exists' not in create_docker_registry_route.stderr and create_docker_registry_route.rc != 0"
+  oc_route:
+    kubeconfig: "{{ openshift_hosted_kubeconfig }}"
+    name: docker-registry
+    namespace: default
+    service_name: docker-registry
+    state: present
+    tls_termination: passthrough
+  run_once: true
 
 - name: Determine if registry certificate must be created
   stat:
@@ -20,11 +20,10 @@
   failed_when: false
 
 - name: Retrieve registry service IP
-  command: >
-    {{ openshift.common.client_binary }} get service docker-registry
-    -o jsonpath='{.spec.clusterIP}'
-    --config={{ openshift_hosted_kubeconfig }}
-    -n default
+  oc_service:
+    namespace: default
+    name: docker-registry
+    state: list
   register: docker_registry_service_ip
   changed_when: false
 
@@ -37,27 +36,32 @@
     --signer-cert={{ openshift_master_config_dir }}/ca.crt
     --signer-key={{ openshift_master_config_dir }}/ca.key
     --signer-serial={{ openshift_master_config_dir }}/ca.serial.txt
-    --hostnames="{{ docker_registry_service_ip.stdout }},docker-registry.default.svc.cluster.local,{{ docker_registry_route_hostname }}"
+    --hostnames="{{ docker_registry_service_ip.results.clusterip }},docker-registry.default.svc.cluster.local,{{ docker_registry_route_hostname }}"
     --cert={{ openshift_master_config_dir }}/registry.crt
     --key={{ openshift_master_config_dir }}/registry.key
   when: False in (docker_registry_certificates_stat_result.results | default([]) | oo_collect(attribute='stat.exists') | list)
 
 - name: Create the secret for the registry certificates
-  command: >
-    {{ openshift.common.client_binary }} secrets new registry-certificates
-    {{ openshift_master_config_dir }}/registry.crt
-    {{ openshift_master_config_dir }}/registry.key
-    --config={{ openshift_hosted_kubeconfig }}
-    -n default
+  oc_secret:
+    kubeconfig: "{{ openshift_hosted_kubeconfig }}"
+    name: registry-certificates
+    namespace: default
+    state: present
+    files:
+    - name: registry.crt
+      path: "{{ openshift_master_config_dir }}/registry.crt"
+    - name: registry.key
+      path: "{{ openshift_master_config_dir }}/registry.key"
   register: create_registry_certificates_secret
-  changed_when: "'already exists' not in create_registry_certificates_secret.stderr"
-  failed_when: "'already exists' not in create_registry_certificates_secret.stderr and create_registry_certificates_secret.rc != 0"
+  run_once: true
 
 - name: "Add the secret to the registry's pod service accounts"
-  command: >
-    {{ openshift.common.client_binary }} secrets add {{ item }} registry-certificates
-    --config={{ openshift_hosted_kubeconfig  }}
-    -n default
+  oc_serviceaccount_secret:
+    service_account: "{{ item }}"
+    secret: registry-certificates
+    namespace: default
+    kubeconfig: "{{ openshift_hosted_kubeconfig  }}"
+    state: present
   with_items:
   - registry
   - default

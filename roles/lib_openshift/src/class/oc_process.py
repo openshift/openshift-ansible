@@ -17,14 +17,11 @@ class OCProcess(OpenShiftCLI):
                  tdata=None,
                  verbose=False):
         ''' Constructor for OpenshiftOC '''
-        super(OCProcess, self).__init__(namespace, kubeconfig)
-        self.namespace = namespace
+        super(OCProcess, self).__init__(namespace, kubeconfig=kubeconfig, verbose=verbose)
         self.name = tname
         self.data = tdata
         self.params = params
         self.create = create
-        self.kubeconfig = kubeconfig
-        self.verbose = verbose
         self._template = None
 
     @property

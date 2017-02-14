@@ -4,6 +4,8 @@
   become: False
   register: copy_hosted_templates_mktemp
   run_once: True
+  # AUDIT:changed_when: not set here because this task actually
+  # creates something
 
 - name: Create tar of OpenShift examples
   local_action: command tar -C "{{ role_path }}/files/{{ content_version }}/{{ hosted_deployment_type }}" -cvf "{{ copy_hosted_templates_mktemp.stdout }}/openshift-hosted-templates.tar" .

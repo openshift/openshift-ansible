@@ -1,4 +1,5 @@
 ---
+openshift_master_config_dir: "{{ openshift.common.config_base }}/master"
 manageiq_cluster_role:
   apiVersion: v1
   kind: ClusterRole
@@ -23,18 +24,6 @@ manageiq_metrics_admin_clusterrole:
     - hawkular-alerts
     verbs:
     - '*'
-
-manageiq_service_account:
-  apiVersion: v1
-  kind: ServiceAccount
-  metadata:
-    name: management-admin
-
-manageiq_image_inspector_service_account:
-  apiVersion: v1
-  kind: ServiceAccount
-  metadata:
-    name: inspector-admin
 
 manage_iq_tmp_conf: /tmp/manageiq_admin.kubeconfig
 

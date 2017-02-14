@@ -32,10 +32,10 @@ openshift_metrics_heapster_requests_memory: 0.9375G
 openshift_metrics_heapster_requests_cpu: null
 openshift_metrics_heapster_nodeselector: ""
 
-openshift_metrics_hostname: "hawkular-metrics.{{openshift_master_default_subdomain}}"
+openshift_metrics_hawkular_hostname: "hawkular-metrics.{{openshift_master_default_subdomain}}"
 
 openshift_metrics_duration: 7
-openshift_metrics_resolution: 15s
+openshift_metrics_resolution: 30s
 
 #####
 # Caution should be taken for the following defaults before

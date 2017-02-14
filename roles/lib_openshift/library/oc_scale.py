@@ -1629,13 +1629,10 @@ class OCScale(OpenShiftCLI):
                  kubeconfig='/etc/origin/master/admin.kubeconfig',
                  verbose=False):
         ''' Constructor for OCScale '''
-        super(OCScale, self).__init__(namespace, kubeconfig)
+        super(OCScale, self).__init__(namespace, kubeconfig=kubeconfig, verbose=verbose)
         self.kind = kind
         self.replicas = replicas
         self.name = resource_name
-        self.namespace = namespace
-        self.kubeconfig = kubeconfig
-        self.verbose = verbose
         self._resource = None
 
     @property

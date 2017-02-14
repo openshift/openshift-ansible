@@ -23,7 +23,7 @@ class ManageNode(OpenShiftCLI):
                  config,
                  verbose=False):
         ''' Constructor for ManageNode '''
-        super(ManageNode, self).__init__(None, config.kubeconfig)
+        super(ManageNode, self).__init__(None, kubeconfig=config.kubeconfig, verbose=verbose)
         self.config = config
 
     def evacuate(self):

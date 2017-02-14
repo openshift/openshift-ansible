@@ -1,31 +1,12 @@
 ---
 - hosts: OSEv3
+  name: run OpenShift health checks
   roles:
-    - openshift_preflight/init
-
-- hosts: OSEv3
-  name: checks that apply to all hosts
-  gather_facts: no
-  ignore_errors: yes
-  roles:
-    - openshift_preflight/common
-
-- hosts: masters
-  name: checks that apply to masters
-  gather_facts: no
-  ignore_errors: yes
-  roles:
-    - openshift_preflight/masters
-
-- hosts: nodes
-  name: checks that apply to nodes
-  gather_facts: no
-  ignore_errors: yes
-  roles:
-    - openshift_preflight/nodes
-
-- hosts: OSEv3
-  name: verify check results
-  gather_facts: no
-  roles:
-    - openshift_preflight/verify_status
+    - openshift_health_checker
+  post_tasks:
+    # NOTE: we need to use the old "action: name" syntax until
+    # https://github.com/ansible/ansible/issues/20513 is fixed.
+    - action: openshift_health_check
+      args:
+        checks:
+          - '@preflight'

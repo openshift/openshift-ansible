@@ -18,27 +18,15 @@
   failed_when: "'already exists' not in osmiq_create_mi_project.stderr and osmiq_create_mi_project.rc != 0"
   changed_when: osmiq_create_mi_project.rc == 0
 
-- name: Create Admin Service Account
-  shell: >
-    echo {{ manageiq_service_account | to_json | quote }} |
-    {{ openshift.common.client_binary }} create
-    -n management-infra
-    --config={{manage_iq_tmp_conf}}
-    -f -
-  register: osmiq_create_service_account
-  failed_when: "'already exists' not in osmiq_create_service_account.stderr and osmiq_create_service_account.rc != 0"
-  changed_when: osmiq_create_service_account.rc == 0
-
-- name: Create Image Inspector Service Account
-  shell: >
-    echo {{ manageiq_image_inspector_service_account | to_json | quote }} |
-    {{ openshift.common.client_binary }} create
-    -n management-infra
-    --config={{manage_iq_tmp_conf}}
-    -f -
-  register: osmiq_create_service_account
-  failed_when: "'already exists' not in osmiq_create_service_account.stderr and osmiq_create_service_account.rc != 0"
-  changed_when: osmiq_create_service_account.rc == 0
+- name: Create Admin and Image Inspector Service Account
+  oc_serviceaccount:
+    kubeconfig: "{{ openshift_master_config_dir }}/admin.kubeconfig"
+    name: "{{ item }}"
+    namespace: management-infra
+    state: present
+  with_items:
+  - management-admin
+  - inspector-admin
 
 - name: Create Cluster Role
   shell: >
@@ -59,6 +47,9 @@
   register: oshawkular_create_cluster_role
   failed_when: "'already exists' not in oshawkular_create_cluster_role.stderr and oshawkular_create_cluster_role.rc != 0"
   changed_when: oshawkular_create_cluster_role.rc == 0
+  # AUDIT:changed_when_note: Checking the return code is insufficient
+  # here. We really need to verify the if the role even exists before
+  # we run this task.
 
 - name: Configure role/user permissions
   command: >
@@ -68,6 +59,10 @@
   register: osmiq_perm_task
   failed_when: "'already exists' not in osmiq_perm_task.stderr and osmiq_perm_task.rc != 0"
   changed_when: osmiq_perm_task.rc == 0
+  # AUDIT:changed_when_note: Checking the return code is insufficient
+  # here. We really need to compare the current role/user permissions
+  # with their expected state. I think we may have a module for this?
+
 
 - name: Configure 3_2 role/user permissions
   command: >

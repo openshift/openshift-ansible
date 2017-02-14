@@ -16,14 +16,11 @@ class OCObject(OpenShiftCLI):
                  verbose=False,
                  all_namespaces=False):
         ''' Constructor for OpenshiftOC '''
-        super(OCObject, self).__init__(namespace, kubeconfig,
+        super(OCObject, self).__init__(namespace, kubeconfig=kubeconfig, verbose=verbose,
                                        all_namespaces=all_namespaces)
         self.kind = kind
-        self.namespace = namespace
         self.name = rname
         self.selector = selector
-        self.kubeconfig = kubeconfig
-        self.verbose = verbose
 
     def get(self):
         '''return a kind by name '''

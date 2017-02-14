@@ -80,16 +80,15 @@
 
 # delete our service accounts
 - name: delete service accounts
-  command: >
-    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig
-    delete serviceaccount {{ item }} -n {{ openshift_logging_namespace }} --ignore-not-found=true
+  oc_serviceaccount:
+    name: "{{ item }}"
+    namespace: "{{ openshift_logging_namespace }}"
+    state: absent
   with_items:
     - aggregated-logging-elasticsearch
     - aggregated-logging-kibana
     - aggregated-logging-curator
     - aggregated-logging-fluentd
-  register: delete_result
-  changed_when: delete_result.stdout.find("deleted") != -1 and delete_result.rc == 0
 
 # delete our roles
 - name: delete roles

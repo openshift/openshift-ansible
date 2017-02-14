@@ -7,6 +7,8 @@
     command: mktemp -d /tmp/openshift-ansible-XXXXXX
     register: mktemp
     changed_when: false
+  roles:
+  - lib_openshift
 
   - name: Copy admin client config(s)
     command: >
@@ -45,10 +47,12 @@
 
   - block:
     - name: Delete existing router certificate secret
-      command: >
-        {{ openshift.common.client_binary }} delete secret/router-certs
-        --config={{ mktemp.stdout }}/admin.kubeconfig
-        -n default
+      oc_secret:
+        kubeconfig: "{{ mktemp.stdout }}/admin.kubeconfig"
+        name: router-certs
+        namespace: default
+        state: absent
+        run_once: true
 
     - name: Remove router service annotations
       command: >
