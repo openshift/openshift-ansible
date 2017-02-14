@@ -31,7 +31,6 @@
     name: "{{ openshift.node.nodename }}"
     kind: node
     state: list
-    kubeconfig: "{{ openshift.common.config_base }}/master/admin.kubeconfig"
   register: get_node
   until: "'metadata' in get_node.results.results[0]"
   retries: 50
@@ -43,7 +42,6 @@
   oadm_manage_node:
     node: "{{ openshift.node.nodename | lower }}"
     schedulable: "{{ 'true' if openshift.node.schedulable | bool else 'false' }}"
-    kubeconfig: "{{ openshift.common.config_base }}/master/admin.kubeconfig"
   retries: 10
   delay: 5
   register: node_schedulable
@@ -57,7 +55,6 @@
     kind: node
     state: add
     labels: "{{ openshift.node.labels | oo_dict_to_list_of_dict }}"
-    kubeconfig: "{{ openshift.common.config_base }}/master/admin.kubeconfig"
     namespace: default
   when:
     - "'nodename' in openshift.node"
