@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.7
+Version:        3.5.8
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -259,6 +259,47 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Feb 14 2017 Scott Dodson <sdodson@redhat.com> 3.5.8-1
+- Update variant_version (smilner@redhat.com)
+- Add block+when skip to `openshift_facts` tasks (tbielawa@redhat.com)
+- Trying to fix up/audit note some changes (tbielawa@redhat.com)
+- updating defaults for logging and metrics roles (ewolinet@redhat.com)
+- Fix logic for checking docker-registry (rteague@redhat.com)
+- Modify playbooks to use oc_obj module (rteague@redhat.com)
+- oc route commands now using the oc_route module (smilner@redhat.com)
+- Modify playbooks to use oc_label module (rteague@redhat.com)
+- Fix cases where child classes override OpenShiftCLI values
+  (jdetiber@redhat.com)
+- BZ1421860: increase Heapster's metric resolution to 30s (mwringe@redhat.com)
+- BZ1421834: increase the Heapster metric resolution to 30s
+  (mwringe@redhat.com)
+- Fix Bug 1419654 Remove legacy config_base fallback to /etc/openshift
+  (sdodson@redhat.com)
+- Modify playbooks to use oadm_manage_node module (rteague@redhat.com)
+- Removed adhoc s3_registry (smilner@redhat.com)
+- replace 'oc service' command with its lib_openshift equivalent
+  (jchaloup@redhat.com)
+- Add libselinux-python dependency for localhost (sdodson@redhat.com)
+- oc secrets now done via oc_secret module (smilner@redhat.com)
+- More fixes for reboot/wait for hosts. (dgoodwin@redhat.com)
+- Do not hard code package names (rhcarvalho@gmail.com)
+- Refactor code to access values from task_vars (rhcarvalho@gmail.com)
+- oc serviceaccount now done via oc_serviceaccount module (smilner@redhat.com)
+- Include rpm/git paths in expiry README. (tbielawa@redhat.com)
+- Fixing docs, linting, and comments. (kwoodson@redhat.com)
+- Document how to create new checks (rhcarvalho@gmail.com)
+- Introduce tag notation for checks (rhcarvalho@gmail.com)
+- Replace multi-role checks with action plugin (rhcarvalho@gmail.com)
+- Reword module documentation (rhcarvalho@gmail.com)
+- Separate import groups with a blank line (rhcarvalho@gmail.com)
+- Remove commented-out debugging code (rhcarvalho@gmail.com)
+- Replace service account secrets handling with oc_serviceaccount_secret module
+  (jchaloup@redhat.com)
+- Make the cert expiry playbooks runnable (tbielawa@redhat.com)
+- Pleasing the linting bot. (kwoodson@redhat.com)
+- Adding integration tests. (kwoodson@redhat.com)
+- Adding oc_env to lib_openshift. (kwoodson@redhat.com)
+
 * Fri Feb 10 2017 Scott Dodson <sdodson@redhat.com> 3.5.7-1
 - Provisioning of nfs share and PV for logging ops (efreiber@redhat.com)
 - fix openshift_logging where defaults filter needs quoting
