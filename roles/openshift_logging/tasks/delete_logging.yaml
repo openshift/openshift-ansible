@@ -81,7 +81,6 @@
 # delete our service accounts
 - name: delete service accounts
   oc_serviceaccount:
-    kubeconfig: "{{ mktemp.stdout }}/admin.kubeconfig"
     name: "{{ item }}"
     namespace: "{{ openshift_logging_namespace }}"
     state: absent
