@@ -75,3 +75,9 @@
   # so containerized services should restart quickly as well.
   retries: 24
   delay: 5
+  # AUDIT:changed_when: `false` because we are only inspecting the
+  # state of the node, we aren't changing anything (we changed node
+  # service state in the previous task). You could say we shouldn't
+  # override this because something will be changing (the state of a
+  # service), but that should be part of the last task.
+  changed_when: false
