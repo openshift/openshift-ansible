@@ -56,7 +56,7 @@
 
   - name: Update registry image to current version
     when:
-    - _default_registry.rc == 0
+    - _default_registry.results.results[0] != {}
     - temp_skip_router_registry_upgrade is not defined
     command: >
       {{ oc_cmd }} patch dc/docker-registry -n default -p
