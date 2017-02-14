@@ -19,7 +19,7 @@ openshift_logging_curator_memory_limit: null
 openshift_logging_curator_ops_cpu_limit: 100m
 openshift_logging_curator_ops_memory_limit: null
 
-openshift_logging_kibana_hostname: "{{ openshift_hosted_logging_hostname | default(kibana.{{openshift.common.dns_domain}}) }}"
+openshift_logging_kibana_hostname: "{{ openshift_hosted_logging_hostname | default('kibana.{{openshift.common.dns_domain}}') }}"
 openshift_logging_kibana_cpu_limit: null
 openshift_logging_kibana_memory_limit: null
 openshift_logging_kibana_proxy_debug: false
