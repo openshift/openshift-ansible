@@ -58,9 +58,6 @@ spec:
         - "--hmw.truststore=/secrets/hawkular-metrics.truststore"
         - "--hmw.keystore_password_file=/secrets/hawkular-metrics.keystore.password"
         - "--hmw.truststore_password_file=/secrets/hawkular-metrics.truststore.password"
-        - "--hmw.jgroups_keystore=/secrets/hawkular-metrics.jgroups.keystore"
-        - "--hmw.jgroups_keystore_password_file=/secrets/hawkular-metrics.jgroups.keystore.password"
-        - "--hmw.jgroups_alias_file=/secrets/hawkular-metrics.jgroups.alias"
         env:
         - name: POD_NAMESPACE
           valueFrom:
@@ -68,6 +65,8 @@ spec:
               fieldPath: metadata.namespace
         - name: MASTER_URL
           value: "{{ openshift_metrics_master_url }}"
+        - name: JGROUPS_PASSWORD
+          value: "{{ 17 | oo_random_word }}"
         - name: OPENSHIFT_KUBE_PING_NAMESPACE
           valueFrom:
             fieldRef:
@@ -81,10 +80,10 @@ spec:
           mountPath: "/secrets"
         - name: hawkular-metrics-client-secrets
           mountPath: "/client-secrets"
-{% if ((openshift_metrics_hawkular_limits_cpu is defined and openshift_metrics_hawkular_limits_cpu is not none) 
+{% if ((openshift_metrics_hawkular_limits_cpu is defined and openshift_metrics_hawkular_limits_cpu is not none)
    or (openshift_metrics_hawkular_limits_memory is defined and openshift_metrics_hawkular_limits_memory is not none)
    or (openshift_metrics_hawkular_requests_cpu is defined and openshift_metrics_hawkular_requests_cpu is not none)
-   or (openshift_metrics_hawkular_requests_memory is defined and openshift_metrics_hawkular_requests_memory is not none)) 
+   or (openshift_metrics_hawkular_requests_memory is defined and openshift_metrics_hawkular_requests_memory is not none))
 %}
         resources:
 {% if (openshift_metrics_hawkular_limits_cpu is not none
@@ -98,8 +97,8 @@ spec:
             memory: "{{openshift_metrics_hawkular_limits_memory}}"
 {% endif %}
 {% endif %}
-{% if (openshift_metrics_hawkular_requests_cpu is not none 
-   or openshift_metrics_hawkular_requests_memory is not none) 
+{% if (openshift_metrics_hawkular_requests_cpu is not none
+   or openshift_metrics_hawkular_requests_memory is not none)
 %}
           requests:
 {% if openshift_metrics_hawkular_requests_cpu is not none %}
