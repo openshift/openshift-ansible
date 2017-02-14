@@ -1314,13 +1314,10 @@ class Edit(OpenShiftCLI):
                  separator='.',
                  verbose=False):
         ''' Constructor for OpenshiftOC '''
-        super(Edit, self).__init__(namespace, kubeconfig)
-        self.namespace = namespace
+        super(Edit, self).__init__(namespace, kubeconfig=kubeconfig, verbose=verbose)
         self.kind = kind
         self.name = resource_name
-        self.kubeconfig = kubeconfig
         self.separator = separator
-        self.verbose = verbose
 
     def get(self):
         '''return a secret by name '''

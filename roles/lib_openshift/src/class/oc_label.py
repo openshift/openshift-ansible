@@ -17,11 +17,9 @@ class OCLabel(OpenShiftCLI):
                  selector=None,
                  verbose=False):
         ''' Constructor for OCLabel '''
-        super(OCLabel, self).__init__(namespace, kubeconfig)
+        super(OCLabel, self).__init__(namespace, kubeconfig=kubeconfig, verbose=verbose)
         self.name = name
-        self.namespace = namespace
         self.kind = kind
-        self.kubeconfig = kubeconfig
         self.labels = labels
         self._curr_labels = None
         self.selector = selector
