@@ -16,4 +16,3 @@
       {{ openshift.common.client_binary }} adm --config={{ openshift.common.config_base }}/master/admin.kubeconfig
       migrate storage --include=jobs --confirm
     run_once: true
-
