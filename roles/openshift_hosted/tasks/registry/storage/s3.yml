@@ -21,13 +21,27 @@
       openshift_hosted_registry_storage_s3_cloudfront_keypairid and
       openshift_hosted_registry_storage_s3_cloudfront_privatekeyfile are required
 
-# Copy the cloudfront.pem to the host if the baseurl is given
-- name: Copy cloudfront.pem to the registry
-  copy:
-    src: "{{ openshift_hosted_registry_storage_s3_cloudfront_privatekeyfile }}"
-    dest: /etc/s3-cloudfront/cloudfront.pem
-    backup: true
-    owner: root
-    group: root
-    mode: 0600
+
+# Inject the cloudfront private key as a secret when required
+- block:
+
+    - name: Create registry secret for cloudfront
+      oc_secret:
+        state: present
+        namespace: "{{ openshift.hosted.registry.namespace | default('default') }}"
+        name: docker-registry-s3-cloudfront
+        contents:
+          path: cloudfront.pem
+          data: "{{ lookup('file', openshift_hosted_registry_storage_s3_cloudfront_privatekeyfile) }}"
+
+    - name: Add cloudfront secret to the registry deployment config
+      command: >
+        oc volume dc/docker-registry --add --name=cloudfront-vol
+        --namespace="{{ openshift.hosted.registry.namespace | default('default') }}"
+        -m /etc/origin --type=secret --secret-name=docker-registry-s3-cloudfront
+      register: cloudfront_vol_attach
+      failed_when:
+        - "'already exists' not in cloudfront_vol_attach.stderr"
+        - "cloudfront_vol_attach.rc != 0"
+
   when: openshift_hosted_registry_storage_s3_cloudfront_baseurl | default(none) is not none
