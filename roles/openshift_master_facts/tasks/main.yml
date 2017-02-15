@@ -6,7 +6,8 @@
     openshift_master_default_subdomain: "{{ osm_default_subdomain | default(None) }}"
   when: openshift_master_default_subdomain is not defined
 
-- fail:
+- name: Verify required variables are set
+  fail:
     msg: openshift_master_default_subdomain must be set to deploy metrics
   when: openshift_hosted_metrics_deploy | default(false) | bool and openshift_master_default_subdomain | default("") == ""
 
@@ -17,7 +18,8 @@
 # path must stay consistent. As such if openshift_hosted_metrics_public_url is set in
 # inventory, we extract the hostname, and then reset openshift_hosted_metrics_public_url
 # to the format that we know is valid. (This may change in future)
-- set_fact:
+- name: Set g_metrics_hostname
+  set_fact:
     g_metrics_hostname: "{{ openshift_hosted_metrics_public_url
                         | default('hawkular-metrics.' ~ (openshift_master_default_subdomain))
                         | oo_hostname_from_url }}"
@@ -108,7 +110,8 @@
     path: "{{ openshift_master_scheduler_conf }}"
   register: scheduler_config_stat
 
-- set_fact:
+- name: Set Default scheduler predicates and priorities
+  set_fact:
     openshift_master_scheduler_default_predicates: "{{ lookup('openshift_master_facts_default_predicates') }}"
     openshift_master_scheduler_default_priorities: "{{ lookup('openshift_master_facts_default_priorities') }}"
 
@@ -118,14 +121,17 @@
       src: "{{ openshift_master_scheduler_conf }}"
     register: current_scheduler_config
 
-  - set_fact:
+  - name: Set openshift_master_scheduler_current_config
+    set_fact:
       openshift_master_scheduler_current_config: "{{ current_scheduler_config.content | b64decode | from_json }}"
 
-  - fail:
+  - name: Test if scheduler config is readable
+    fail:
       msg: "Unknown scheduler config apiVersion {{ openshift_master_scheduler_config.apiVersion }}"
     when: "{{ openshift_master_scheduler_current_config.apiVersion | default(None) != 'v1' }}"
 
-  - set_fact:
+  - name: Set current scheduler predicates and priorities
+    set_fact:
       openshift_master_scheduler_current_predicates: "{{ openshift_master_scheduler_current_config.predicates }}"
       openshift_master_scheduler_current_priorities: "{{ openshift_master_scheduler_current_config.priorities }}"
   when: "{{ scheduler_config_stat.stat.exists }}"
