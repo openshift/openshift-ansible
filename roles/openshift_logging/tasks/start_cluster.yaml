@@ -16,7 +16,7 @@
     name: "{{ fluentd_host }}"
     kind: node
     state: add
-    label: "{{ openshift_logging_fluentd_nodeselector | oo_dict_to_list_of_dict }}"
+    labels: "{{ openshift_logging_fluentd_nodeselector | oo_dict_to_list_of_dict }}"
   with_items: "{{ openshift_logging_fluentd_hosts }}"
   loop_control:
     loop_var: fluentd_host
