@@ -8,8 +8,7 @@ def main():
 
     module = AnsibleModule(
         argument_spec=dict(
-            state=dict(default='present', type='str',
-                       choices=['present']),
+            state=dict(default='present', type='str', choices=['present']),
             debug=dict(default=False, type='bool'),
             kubeconfig=dict(default='/etc/origin/master/admin.kubeconfig', type='str'),
             cmd=dict(default=None, require=True, type='str'),

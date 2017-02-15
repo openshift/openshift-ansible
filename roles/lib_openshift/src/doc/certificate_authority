@@ -3,7 +3,7 @@
 
 DOCUMENTATION = '''
 ---
-module: oc_secret
+module: oadm_ca
 short_description: Module to manage openshift certificate authority
 description:
   - Wrapper around the openshift `oc adm ca` command.
@@ -19,7 +19,8 @@ options:
     - ['cert', 'key', 'signer_cert', 'signer_key', 'signer_serial']
     required: false
     default: present
-    choices: ["present"]
+    choices: 
+    - present
     aliases: []
   kubeconfig:
     description:
@@ -45,9 +46,82 @@ options:
     aliases: []
   cert_dir:
     description:
-    - The directory to place the certificates.
+    - The certificate data directory.
+    required: false
+    default: None
+    aliases: []
+  cert:
+    description:
+    - The certificate file. Choose a name that indicates what the service is.
+    required: false
+    default: None
+    aliases: []
+  key:
+    description:
+    - The key file. Choose a name that indicates what the service is.
+    required: false
+    default: None
+    aliases: []
+  overwrite:
+    description:
+    - Overwrite existing cert files if found.  If false, any existing file will be left as-is.
     required: false
     default: False
+    aliases: []
+  signer_cert:
+    description:
+    - The signer certificate file.
+    required: false
+    default: None
+    aliases: []
+  signer_key:
+    description:
+    - The signer key file.
+    required: false
+    default: None
+    aliases: []
+  signer_serial:
+    description:
+    - The signer serial file.
+    required: false
+    default: None
+    aliases: []
+  public_key:
+    description:
+    - The public key file used with create-key-pair
+    required: false
+    default: None
+    aliases: []
+  private_key:
+    description:
+    - The private key file used with create-key-pair
+    required: false
+    default: None
+    aliases: []
+    
+  hostnames:
+    description:
+    - Every hostname or IP that server certs should be valid for (comma-delimited list)
+    required: false
+    default: None
+    aliases: []
+  master:
+    description:
+    - The API server's URL
+    required: false
+    default: None
+    aliases: []
+  public_master:
+    description:
+    - The API public facing server's URL (if applicable)
+    required: false
+    default: None
+    aliases: []
+  signer_name:
+    description:
+    - The name to use for the generated signer
+    required: false
+    default: None
     aliases: []
 author:
 - "Kenny Woodson <kwoodson@redhat.com>"
@@ -55,42 +129,13 @@ extends_documentation_fragment: []
 '''
 
 EXAMPLES = '''
-- name: create secret
-  oc_secret:
-    state: present
-    namespace: openshift-infra
-    name: metrics-deployer
-    files:
-    - name: nothing
-      path: /dev/null
-  register: secretout
-  run_once: true
-
-- name: get ca from hawkular
-  oc_secret:
-    state: list
-    namespace: openshift-infra
-    name:  hawkular-metrics-certificate
-    decode: True
-  register: hawkout
-  run_once: true
-
-- name: Create secrets
-  oc_secret:
-    namespace: mynamespace
-    name: mysecrets
-    contents:
-    - path: data.yml
-      data: "{{ data_content }}"
-    - path: auth-keys
-      data: "{{ auth_keys_content }}"
-    - path: configdata.yml
-      data: "{{ configdata_content }}"
-    - path: cert.crt
-      data: "{{ cert_content }}"
-    - path: key.pem
-      data: "{{ osso_site_key_content }}"
-    - path: ca.cert.pem
-      data: "{{ ca_cert_content }}"
-  register: secretout
+- name: Create a self-signed cert
+  oadm_ca:
+    cmd: create-server-cert
+    signer_cert: /etc/origin/master/ca.crt
+    signer_key: /etc/origin/master/ca.key
+    signer_serial: /etc/origin/master/ca.serial.txt
+    hostnames: "registry.test.openshift.com,127.0.0.1,docker-registry.default.svc.cluster.local"
+    cert: /etc/origin/master/registry.crt
+    key: /etc/origin/master/registry.key
 '''
