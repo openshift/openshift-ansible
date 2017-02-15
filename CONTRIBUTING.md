@@ -118,21 +118,21 @@ Run all of the tests in parallel with detox:
 detox
 ```
 
-Running a particular test environment (python 2.7 flake8 tests in this case):
+Running a particular test environment (python 2.7 lint tests in this case):
 ```
-tox -e py27-ansible22-flake8
+tox -e py27-lint
 ```
 
-Running a particular test environment in a clean virtualenv (python 3.5 pylint
+Running a particular test environment in a clean virtualenv (python 3.5 unit
 tests in this case):
 ```
-tox -r -e py35-ansible22-pylint
+tox -r -e py35-unit
 ```
 
 If you want to enter the virtualenv created by tox to do additional
-testing/debugging (py27-flake8 env in this case):
+testing/debugging (py27-lint env in this case):
 ```
-source .tox/py27-ansible22-flake8/bin/activate
+source .tox/py27-lint/bin/activate
 ```
 
 ## Submitting contributions
