@@ -1,20 +1,26 @@
 ---
 sudo: false
 
-cache:
-  - pip
-
 language: python
+
 python:
   - "2.7"
   - "3.5"
 
+cache:
+  - pip
+
+before_cache:
+  - rm ~/.cache/pip/log/debug.log
+
+env:
+  - TEST_DIR=root TEST_TYPE=lint
+  - TEST_DIR=root TEST_TYPE=unit
+  - TEST_DIR=utils
+
 install:
-  - pip install -r requirements.txt
   - pip install tox-travis
 
 script:
-  # TODO(rhcarvalho): check syntax of other important entrypoint playbooks
-  - ansible-playbook --syntax-check playbooks/byo/config.yml
-  - tox
-  - cd utils && tox
+  - if [[ "${TEST_DIR}" == "root" ]]; then tox; fi
+  - if [[ "${TEST_DIR}" == "utils" ]]; then cd utils && tox; fi
