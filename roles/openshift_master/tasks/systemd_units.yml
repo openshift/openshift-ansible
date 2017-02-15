@@ -27,7 +27,9 @@
   template:
     src: "master_docker/master.docker.service.j2"
     dest: "{{ containerized_svc_dir }}/{{ openshift.common.service_type }}-master.service"
-  when: openshift.common.is_containerized | bool and (openshift.master.ha is not defined or not openshift.master.ha | bool and not openshift.common.is_master_system_container | bool)
+  when:
+  - openshift.common.is_containerized | bool and (openshift.master.ha is not defined or not openshift.master.ha) | bool
+  - not openshift.common.is_master_system_container | bool
   register: create_master_unit_file
 
 - command: systemctl daemon-reload
@@ -37,7 +39,9 @@
   template:
     src: "{{ ha_svc_template_path }}/atomic-openshift-master-{{ item }}.service.j2"
     dest: "{{ containerized_svc_dir }}/{{ openshift.common.service_type }}-master-{{ item }}.service"
-  when: openshift.master.ha is defined and openshift.master.ha | bool and openshift_master_cluster_method == "native"
+  when:
+  - openshift.master.ha is defined and openshift.master.ha | bool and openshift_master_cluster_method == "native"
+  - not openshift.common.is_master_system_container | bool
   with_items:
   - api
   - controllers

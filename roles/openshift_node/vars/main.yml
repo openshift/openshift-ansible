@@ -1,0 +1,2 @@
+---
+l_is_same_version: "{{ (openshift.common.version is defined) and (openshift.common.version == openshift_version) | bool }}"
