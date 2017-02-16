@@ -42,6 +42,12 @@
   action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-sdn-ovs{{ openshift_pkg_version | oo_image_tag_to_rpm_version(include_dash=True) }} state=present"
   when: openshift.common.use_openshift_sdn and not openshift.common.is_containerized | bool
 
+- name: Install conntrack-tools package
+  package:
+    name: "conntrack-tools"
+    state: present
+  when: not openshift.common.is_containerized | bool
+
 - name: Pull node image
   command: >
     docker pull {{ openshift.node.node_image }}:{{ openshift_image_tag }}
