@@ -1,0 +1,27 @@
+# flake8: noqa
+# pylint: skip-file
+
+DOCUMENTATION = '''
+---
+module: oc_sdnvalidator
+short_description: Validate SDN objects
+description:
+  - Validate SDN objects
+options:
+  kubeconfig:
+    description:
+    - The path for the kubeconfig file to use for authentication
+    required: false
+    default: /etc/origin/master/admin.kubeconfig
+    aliases: []
+author:
+- "Mo Khan <monis@redhat.com>"
+extends_documentation_fragment: []
+'''
+
+EXAMPLES = '''
+oc_version:
+- name: get oc sdnvalidator
+  sdnvalidator:
+  register: oc_sdnvalidator
+'''
