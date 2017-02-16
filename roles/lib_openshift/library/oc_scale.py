@@ -33,6 +33,7 @@
 
 from __future__ import print_function
 import atexit
+import copy
 import json
 import os
 import re
@@ -40,7 +41,11 @@ import shutil
 import subprocess
 import tempfile
 # pylint: disable=import-error
-import ruamel.yaml as yaml
+try:
+    import ruamel.yaml as yaml
+except ImportError:
+    import yaml
+
 from ansible.module_utils.basic import AnsibleModule
 
 # -*- -*- -*- End included fragment: lib/import.py -*- -*- -*-
@@ -320,7 +325,7 @@ class Yedit(object):
         if hasattr(yaml, 'RoundTripDumper'):
             Yedit._write(self.filename, yaml.dump(self.yaml_dict, Dumper=yaml.RoundTripDumper))
         else:
-            Yedit._write(self.filename, yaml.dump(self.yaml_dict, default_flow_style=False))
+            Yedit._write(self.filename, yaml.safe_dump(self.yaml_dict, default_flow_style=False))
 
         return (True, self.yaml_dict)
 
@@ -363,7 +368,7 @@ class Yedit(object):
                 if hasattr(yaml, 'RoundTripLoader'):
                     self.yaml_dict = yaml.load(contents, yaml.RoundTripLoader)
                 else:
-                    self.yaml_dict = yaml.load(contents)
+                    self.yaml_dict = yaml.safe_load(contents)
                 # pylint: disable=no-member
                 if hasattr(self.yaml_dict, 'fa'):
                     self.yaml_dict.fa.set_block_style()
@@ -1005,7 +1010,10 @@ class Utils(object):
         tmp = Utils.create_tmpfile(prefix=rname)
 
         if ftype == 'yaml':
-            Utils._write(tmp, yaml.dump(data, Dumper=yaml.RoundTripDumper))
+            if hasattr(yaml, 'RoundTripDumper'):
+                Utils._write(tmp, yaml.dump(data, Dumper=yaml.RoundTripDumper))
+            else:
+                Utils._write(tmp, yaml.safe_dump(data, default_flow_style=False))
         elif ftype == 'json':
             Utils._write(tmp, json.dumps(data))
         else:
@@ -1087,7 +1095,10 @@ class Utils(object):
             contents = sfd.read()
 
         if sfile_type == 'yaml':
-            contents = yaml.load(contents, yaml.RoundTripLoader)
+            if hasattr(yaml, 'RoundTripLoader'):
+                contents = yaml.load(contents, yaml.RoundTripLoader)
+            else:
+                contents = yaml.safe_load(contents)
         elif sfile_type == 'json':
             contents = json.loads(contents)
 

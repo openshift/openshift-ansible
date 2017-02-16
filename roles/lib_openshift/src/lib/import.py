@@ -7,6 +7,7 @@
 
 from __future__ import print_function
 import atexit
+import copy
 import json
 import os
 import re
@@ -14,5 +15,9 @@ import shutil
 import subprocess
 import tempfile
 # pylint: disable=import-error
-import ruamel.yaml as yaml
+try:
+    import ruamel.yaml as yaml
+except ImportError:
+    import yaml
+
 from ansible.module_utils.basic import AnsibleModule

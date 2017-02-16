@@ -202,7 +202,7 @@ class Yedit(object):
         if hasattr(yaml, 'RoundTripDumper'):
             Yedit._write(self.filename, yaml.dump(self.yaml_dict, Dumper=yaml.RoundTripDumper))
         else:
-            Yedit._write(self.filename, yaml.dump(self.yaml_dict, default_flow_style=False))
+            Yedit._write(self.filename, yaml.safe_dump(self.yaml_dict, default_flow_style=False))
 
         return (True, self.yaml_dict)
 
@@ -245,7 +245,7 @@ class Yedit(object):
                 if hasattr(yaml, 'RoundTripLoader'):
                     self.yaml_dict = yaml.load(contents, yaml.RoundTripLoader)
                 else:
-                    self.yaml_dict = yaml.load(contents)
+                    self.yaml_dict = yaml.safe_load(contents)
                 # pylint: disable=no-member
                 if hasattr(self.yaml_dict, 'fa'):
                     self.yaml_dict.fa.set_block_style()

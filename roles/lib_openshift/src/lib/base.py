@@ -295,7 +295,10 @@ class Utils(object):
         tmp = Utils.create_tmpfile(prefix=rname)
 
         if ftype == 'yaml':
-            Utils._write(tmp, yaml.dump(data, Dumper=yaml.RoundTripDumper))
+            if hasattr(yaml, 'RoundTripDumper'):
+                Utils._write(tmp, yaml.dump(data, Dumper=yaml.RoundTripDumper))
+            else:
+                Utils._write(tmp, yaml.safe_dump(data, default_flow_style=False))
         elif ftype == 'json':
             Utils._write(tmp, json.dumps(data))
         else:
@@ -377,7 +380,10 @@ class Utils(object):
             contents = sfd.read()
 
         if sfile_type == 'yaml':
-            contents = yaml.load(contents, yaml.RoundTripLoader)
+            if hasattr(yaml, 'RoundTripLoader'):
+                contents = yaml.load(contents, yaml.RoundTripLoader)
+            else:
+                contents = yaml.safe_load(contents)
         elif sfile_type == 'json':
             contents = json.loads(contents)
 
