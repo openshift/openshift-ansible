@@ -47,6 +47,10 @@
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: l_docker_upgrade is defined and l_docker_upgrade | bool and inventory_hostname in groups.oo_nodes_to_upgrade
 
+  - name: Pause for pod rescheduling during docker upgrade
+    pause:
+      seconds: "{{ openshift_node_upgrade_pause | default(30) | int }}"
+
   - include: ../../../../common/openshift-cluster/upgrades/docker/upgrade.yml
     when: l_docker_upgrade is defined and l_docker_upgrade | bool
 

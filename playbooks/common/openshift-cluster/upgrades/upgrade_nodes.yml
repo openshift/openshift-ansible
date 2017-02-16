@@ -29,6 +29,10 @@
       {{ hostvars[groups.oo_first_master.0].openshift.common.admin_binary }} drain {{ openshift.node.nodename | lower }} --force --delete-local-data
     delegate_to: "{{ groups.oo_first_master.0 }}"
 
+  - name: Pause for pod rescheduling during node ugprade
+    pause:
+      seconds: "{{ openshift_node_upgrade_pause | default(30) | int }}"
+
   roles:
   - lib_openshift
   - openshift_facts

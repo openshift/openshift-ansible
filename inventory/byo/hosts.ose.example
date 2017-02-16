@@ -106,6 +106,10 @@ openshift_release=v3.4
 #
 # Tasks to run after each master is upgraded and system/services have been restarted.
 # openshift_master_upgrade_post_hook=/usr/share/custom/post_master.yml
+#
+# Pause this number of seconds after draining each node to wait for rescheduling, this
+# may be too low for your environment, adjust accordingly
+# openshift_node_upgrade_pause=30
 
 
 # Alternate image format string, useful if you've got your own registry mirror
