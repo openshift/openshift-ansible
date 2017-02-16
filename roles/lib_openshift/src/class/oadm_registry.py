@@ -136,12 +136,6 @@ class Registry(OpenShiftCLI):
 
     def prep_registry(self):
         ''' prepare a registry for instantiation '''
-        # In <= 3.4 credentials are used
-        # In >= 3.5 credentials are removed
-        versions = self.version.get()
-        if '3.5' in versions['oc']:
-            self.config.config_options['credentials']['include'] = False
-
         options = self.config.to_option_list()
 
         cmd = ['registry', '-n', self.config.namespace]
@@ -319,8 +313,7 @@ class Registry(OpenShiftCLI):
         rconfig = RegistryConfig(params['name'],
                                  params['namespace'],
                                  params['kubeconfig'],
-                                 {'credentials': {'value': params['credentials'], 'include': True},
-                                  'default_cert': {'value': None, 'include': True},
+                                 {'default_cert': {'value': None, 'include': True},
                                   'images': {'value': params['images'], 'include': True},
                                   'latest_images': {'value': params['latest_images'], 'include': True},
                                   'labels': {'value': params['labels'], 'include': True},
@@ -330,11 +323,12 @@ class Registry(OpenShiftCLI):
                                   'service_account': {'value': params['service_account'], 'include': True},
                                   'registry_type': {'value': params['registry_type'], 'include': False},
                                   'mount_host': {'value': params['mount_host'], 'include': True},
-                                  'volume': {'value': params['mount_host'], 'include': True},
-                                  'template': {'value': params['template'], 'include': True},
+                                  'volume': {'value': '/registry', 'include': True},
                                   'env_vars': {'value': params['env_vars'], 'include': False},
                                   'volume_mounts': {'value': params['volume_mounts'], 'include': False},
                                   'edits': {'value': params['edits'], 'include': False},
+                                  'enforce_quota': {'value': params['enforce_quota'], 'include': True},
+                                  'daemonset': {'value': params['daemonset'], 'include': True},
                                  })
 
 
@@ -366,7 +360,7 @@ class Registry(OpenShiftCLI):
             if not ocregistry.exists():
 
                 if check_mode:
-                    return {'changed': True, 'msg': 'CHECK_MODE: Would have performed a delete.'}
+                    return {'changed': True, 'msg': 'CHECK_MODE: Would have performed a create.'}
 
                 api_rval = ocregistry.create()
 

@@ -3,11 +3,19 @@
 
 DOCUMENTATION = '''
 ---
-module: oadm_manage_node
-short_description: Module to manage openshift nodes
+module: oc_adm_registry
+short_description: Module to manage openshift registry
 description:
-  - Manage openshift nodes programmatically.
+  - Manage openshift registry programmatically.
 options:
+  state:
+    description:
+    - The desired action when managing openshift registry
+    - present - update or create the registry
+    - absent - tear down the registry service and deploymentconfig
+    required: false
+    default: False
+    aliases: []
   kubeconfig:
     description:
     - The path for the kubeconfig file to use for authentication
@@ -29,12 +37,6 @@ options:
   namespace:
     description:
     - The selector when filtering on node labels
-    required: false
-    default: None
-    aliases: []
-  credentials:
-    description:
-    - Path to a .kubeconfig file that will contain the credentials the registry should use to contact the master.
     required: false
     default: None
     aliases: []
@@ -104,18 +106,6 @@ options:
     required: false
     default: None
     aliases: []
-  registry_type:
-    description:
-    - The registry image to use - if you specify --images this flag may be ignored.
-    required: false
-    default: 'docker-registry'
-    aliases: []
-  volume:
-    description:
-    - The volume path to use for registry storage; defaults to /registry which is the default for origin-docker-registry.
-    required: false
-    default: '/registry'
-    aliases: []
   volume_mounts:
     description:
     - The volume mounts for the registry.
@@ -133,6 +123,18 @@ options:
     - A list of modifications to make on the deploymentconfig
     required: false
     default: None
+    aliases: []
+  env_vars:
+    description:
+    - A dictionary of modifications to make on the deploymentconfig. e.g. FOO: BAR
+    required: false
+    default: None
+    aliases: []
+  force:
+    description:
+    - Force a registry update.
+    required: false
+    default: False
     aliases: []
 author:
 - "Kenny Woodson <kwoodson@redhat.com>"

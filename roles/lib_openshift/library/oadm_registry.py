@@ -33,6 +33,7 @@
 
 from __future__ import print_function
 import atexit
+import copy
 import json
 import os
 import re
@@ -40,7 +41,11 @@ import shutil
 import subprocess
 import tempfile
 # pylint: disable=import-error
-import ruamel.yaml as yaml
+try:
+    import ruamel.yaml as yaml
+except ImportError:
+    import yaml
+
 from ansible.module_utils.basic import AnsibleModule
 
 # -*- -*- -*- End included fragment: lib/import.py -*- -*- -*-
@@ -49,11 +54,19 @@ from ansible.module_utils.basic import AnsibleModule
 
 DOCUMENTATION = '''
 ---
-module: oadm_manage_node
-short_description: Module to manage openshift nodes
+module: oc_adm_registry
+short_description: Module to manage openshift registry
 description:
-  - Manage openshift nodes programmatically.
+  - Manage openshift registry programmatically.
 options:
+  state:
+    description:
+    - The desired action when managing openshift registry
+    - present - update or create the registry
+    - absent - tear down the registry service and deploymentconfig
+    required: false
+    default: False
+    aliases: []
   kubeconfig:
     description:
     - The path for the kubeconfig file to use for authentication
@@ -75,12 +88,6 @@ options:
   namespace:
     description:
     - The selector when filtering on node labels
-    required: false
-    default: None
-    aliases: []
-  credentials:
-    description:
-    - Path to a .kubeconfig file that will contain the credentials the registry should use to contact the master.
     required: false
     default: None
     aliases: []
@@ -150,18 +157,6 @@ options:
     required: false
     default: None
     aliases: []
-  registry_type:
-    description:
-    - The registry image to use - if you specify --images this flag may be ignored.
-    required: false
-    default: 'docker-registry'
-    aliases: []
-  volume:
-    description:
-    - The volume path to use for registry storage; defaults to /registry which is the default for origin-docker-registry.
-    required: false
-    default: '/registry'
-    aliases: []
   volume_mounts:
     description:
     - The volume mounts for the registry.
@@ -179,6 +174,18 @@ options:
     - A list of modifications to make on the deploymentconfig
     required: false
     default: None
+    aliases: []
+  env_vars:
+    description:
+    - A dictionary of modifications to make on the deploymentconfig. e.g. FOO: BAR
+    required: false
+    default: None
+    aliases: []
+  force:
+    description:
+    - Force a registry update.
+    required: false
+    default: False
     aliases: []
 author:
 - "Kenny Woodson <kwoodson@redhat.com>"
@@ -432,11 +439,15 @@ class Yedit(object):
         if self.backup and self.file_exists():
             shutil.copy(self.filename, self.filename + '.orig')
 
-        # pylint: disable=no-member
-        if hasattr(self.yaml_dict, 'fa'):
-            self.yaml_dict.fa.set_block_style()
+        if hasattr(yaml, 'RoundTripDumper'):
+            # pylint: disable=no-member
+            if hasattr(self.yaml_dict, 'fa'):
+                self.yaml_dict.fa.set_block_style()
 
-        Yedit._write(self.filename, yaml.dump(self.yaml_dict, Dumper=yaml.RoundTripDumper))
+            # pylint: disable=no-member
+            Yedit._write(self.filename, yaml.dump(self.yaml_dict, Dumper=yaml.RoundTripDumper))
+        else:
+            Yedit._write(self.filename, yaml.safe_dump(self.yaml_dict, default_flow_style=False))
 
         return (True, self.yaml_dict)
 
@@ -476,10 +487,16 @@ class Yedit(object):
         # check if it is yaml
         try:
             if content_type == 'yaml' and contents:
-                self.yaml_dict = yaml.load(contents, yaml.RoundTripLoader)
+                # pylint: disable=no-member
+                if hasattr(yaml, 'RoundTripLoader'):
+                    self.yaml_dict = yaml.load(contents, yaml.RoundTripLoader)
+                else:
+                    self.yaml_dict = yaml.safe_load(contents)
+
                 # pylint: disable=no-member
                 if hasattr(self.yaml_dict, 'fa'):
                     self.yaml_dict.fa.set_block_style()
+
             elif content_type == 'json' and contents:
                 self.yaml_dict = json.loads(contents)
         except yaml.YAMLError as err:
@@ -644,12 +661,19 @@ class Yedit(object):
             return (False, self.yaml_dict)
 
         # deepcopy didn't work
-        tmp_copy = yaml.load(yaml.round_trip_dump(self.yaml_dict,
-                                                  default_flow_style=False),
-                             yaml.RoundTripLoader)
-        # pylint: disable=no-member
-        if hasattr(self.yaml_dict, 'fa'):
-            tmp_copy.fa.set_block_style()
+        if hasattr(yaml, 'round_trip_dump'):
+            # pylint: disable=no-member
+            tmp_copy = yaml.load(yaml.round_trip_dump(self.yaml_dict,
+                                                      default_flow_style=False),
+                                 yaml.RoundTripLoader)
+
+            # pylint: disable=no-member
+            if hasattr(self.yaml_dict, 'fa'):
+                tmp_copy.fa.set_block_style()
+
+        else:
+            tmp_copy = copy.deepcopy(self.yaml_dict)
+
         result = Yedit.add_entry(tmp_copy, path, value, self.separator)
         if not result:
             return (False, self.yaml_dict)
@@ -662,11 +686,17 @@ class Yedit(object):
         ''' create a yaml file '''
         if not self.file_exists():
             # deepcopy didn't work
-            tmp_copy = yaml.load(yaml.round_trip_dump(self.yaml_dict, default_flow_style=False),  # noqa: E501
-                                 yaml.RoundTripLoader)
-            # pylint: disable=no-member
-            if hasattr(self.yaml_dict, 'fa'):
-                tmp_copy.fa.set_block_style()
+            if hasattr(yaml, 'round_trip_dump'):
+                # pylint: disable=no-member
+                tmp_copy = yaml.load(yaml.round_trip_dump(self.yaml_dict, default_flow_style=False),  # noqa: E501
+                                     yaml.RoundTripLoader)
+
+                # pylint: disable=no-member
+                if hasattr(self.yaml_dict, 'fa'):
+                    tmp_copy.fa.set_block_style()
+            else:
+                tmp_copy = copy.deepcopy(self.yaml_dict)
+
             result = Yedit.add_entry(tmp_copy, path, value, self.separator)
             if result:
                 self.yaml_dict = tmp_copy
@@ -1108,7 +1138,12 @@ class Utils(object):
         tmp = Utils.create_tmpfile(prefix=rname)
 
         if ftype == 'yaml':
-            Utils._write(tmp, yaml.dump(data, Dumper=yaml.RoundTripDumper))
+            # pylint: disable=no-member
+            if hasattr(yaml, 'RoundTripDumper'):
+                Utils._write(tmp, yaml.dump(data, Dumper=yaml.RoundTripDumper))
+            else:
+                Utils._write(tmp, yaml.safe_dump(data, default_flow_style=False))
+
         elif ftype == 'json':
             Utils._write(tmp, json.dumps(data))
         else:
@@ -1190,7 +1225,11 @@ class Utils(object):
             contents = sfd.read()
 
         if sfile_type == 'yaml':
-            contents = yaml.load(contents, yaml.RoundTripLoader)
+            # pylint: disable=no-member
+            if hasattr(yaml, 'RoundTripLoader'):
+                contents = yaml.load(contents, yaml.RoundTripLoader)
+            else:
+                contents = yaml.safe_load(contents)
         elif sfile_type == 'json':
             contents = json.loads(contents)
 
@@ -2169,12 +2208,6 @@ class Registry(OpenShiftCLI):
 
     def prep_registry(self):
         ''' prepare a registry for instantiation '''
-        # In <= 3.4 credentials are used
-        # In >= 3.5 credentials are removed
-        versions = self.version.get()
-        if '3.5' in versions['oc']:
-            self.config.config_options['credentials']['include'] = False
-
         options = self.config.to_option_list()
 
         cmd = ['registry', '-n', self.config.namespace]
@@ -2352,8 +2385,7 @@ class Registry(OpenShiftCLI):
         rconfig = RegistryConfig(params['name'],
                                  params['namespace'],
                                  params['kubeconfig'],
-                                 {'credentials': {'value': params['credentials'], 'include': True},
-                                  'default_cert': {'value': None, 'include': True},
+                                 {'default_cert': {'value': None, 'include': True},
                                   'images': {'value': params['images'], 'include': True},
                                   'latest_images': {'value': params['latest_images'], 'include': True},
                                   'labels': {'value': params['labels'], 'include': True},
@@ -2363,11 +2395,12 @@ class Registry(OpenShiftCLI):
                                   'service_account': {'value': params['service_account'], 'include': True},
                                   'registry_type': {'value': params['registry_type'], 'include': False},
                                   'mount_host': {'value': params['mount_host'], 'include': True},
-                                  'volume': {'value': params['mount_host'], 'include': True},
-                                  'template': {'value': params['template'], 'include': True},
+                                  'volume': {'value': '/registry', 'include': True},
                                   'env_vars': {'value': params['env_vars'], 'include': False},
                                   'volume_mounts': {'value': params['volume_mounts'], 'include': False},
                                   'edits': {'value': params['edits'], 'include': False},
+                                  'enforce_quota': {'value': params['enforce_quota'], 'include': True},
+                                  'daemonset': {'value': params['daemonset'], 'include': True},
                                  })
 
 
@@ -2399,7 +2432,7 @@ class Registry(OpenShiftCLI):
             if not ocregistry.exists():
 
                 if check_mode:
-                    return {'changed': True, 'msg': 'CHECK_MODE: Would have performed a delete.'}
+                    return {'changed': True, 'msg': 'CHECK_MODE: Would have performed a create.'}
 
                 api_rval = ocregistry.create()
 
@@ -2444,7 +2477,6 @@ def main():
             name=dict(default=None, required=True, type='str'),
 
             kubeconfig=dict(default='/etc/origin/master/admin.kubeconfig', type='str'),
-            credentials=dict(default='/etc/origin/master/openshift-registry.kubeconfig', type='str'),
             images=dict(default=None, type='str'),
             latest_images=dict(default=False, type='bool'),
             labels=dict(default=None, type='list'),
@@ -2453,15 +2485,12 @@ def main():
             selector=dict(default=None, type='str'),
             service_account=dict(default='registry', type='str'),
             mount_host=dict(default=None, type='str'),
-            registry_type=dict(default='docker-registry', type='str'),
-            template=dict(default=None, type='str'),
-            volume=dict(default='/registry', type='str'),
-            env_vars=dict(default=None, type='dict'),
             volume_mounts=dict(default=None, type='list'),
+            env_vars=dict(default=None, type='dict'),
             edits=dict(default=None, type='list'),
+            enforce_quota=dict(default=False, type='bool'),
             force=dict(default=False, type='bool'),
         ),
-        mutually_exclusive=[["registry_type", "images"]],
 
         supports_check_mode=True,
     )

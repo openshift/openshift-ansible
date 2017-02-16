@@ -15,7 +15,6 @@ def main():
             name=dict(default=None, required=True, type='str'),
 
             kubeconfig=dict(default='/etc/origin/master/admin.kubeconfig', type='str'),
-            credentials=dict(default='/etc/origin/master/openshift-registry.kubeconfig', type='str'),
             images=dict(default=None, type='str'),
             latest_images=dict(default=False, type='bool'),
             labels=dict(default=None, type='list'),
@@ -24,15 +23,12 @@ def main():
             selector=dict(default=None, type='str'),
             service_account=dict(default='registry', type='str'),
             mount_host=dict(default=None, type='str'),
-            registry_type=dict(default='docker-registry', type='str'),
-            template=dict(default=None, type='str'),
-            volume=dict(default='/registry', type='str'),
-            env_vars=dict(default=None, type='dict'),
             volume_mounts=dict(default=None, type='list'),
+            env_vars=dict(default=None, type='dict'),
             edits=dict(default=None, type='list'),
+            enforce_quota=dict(default=False, type='bool'),
             force=dict(default=False, type='bool'),
         ),
-        mutually_exclusive=[["registry_type", "images"]],
 
         supports_check_mode=True,
     )
