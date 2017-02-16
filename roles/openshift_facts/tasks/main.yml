@@ -1,66 +1,52 @@
 ---
-- block:
-  - name: Detecting Operating System
-    stat:
-      path: /run/ostree-booted
-    register: ostree_booted
+- name: Detecting Operating System
+  stat:
+    path: /run/ostree-booted
+  register: ostree_booted
 
-  # Locally setup containerized facts for now
-  - name: Set l_is_atomic
-    set_fact:
-      l_is_atomic: "{{ ostree_booted.stat.exists }}"
-  - name: Set other local variables
-    set_fact:
-      l_is_containerized: "{{ (l_is_atomic | bool) or (containerized | default(false) | bool) }}"
-      l_is_openvswitch_system_container: "{{ (use_openvswitch_system_container | default(use_system_containers) | bool) }}"
-      l_is_node_system_container: "{{ (use_node_system_container | default(use_system_containers) | bool) }}"
-      l_is_master_system_container: "{{ (use_master_system_container | default(use_system_containers) | bool) }}"
-      l_is_etcd_system_container: "{{ (use_etcd_system_container | default(use_system_containers) | bool) }}"
+# Locally setup containerized facts for now
+- set_fact:
+    l_is_atomic: "{{ ostree_booted.stat.exists }}"
+- set_fact:
+    l_is_containerized: "{{ (l_is_atomic | bool) or (containerized | default(false) | bool) }}"
+    l_is_openvswitch_system_container: "{{ (use_openvswitch_system_container | default(use_system_containers) | bool) }}"
+    l_is_node_system_container: "{{ (use_node_system_container | default(use_system_containers) | bool) }}"
+    l_is_master_system_container: "{{ (use_master_system_container | default(use_system_containers) | bool) }}"
+    l_is_etcd_system_container: "{{ (use_etcd_system_container | default(use_system_containers) | bool) }}"
 
-  - name: Ensure various deps are installed
-    package: name={{ item }} state=present
-    with_items: "{{ required_packages }}"
-    when: not l_is_atomic | bool
+- name: Ensure various deps are installed
+  package: name={{ item }} state=present
+  with_items: "{{ required_packages }}"
+  when: not l_is_atomic | bool
 
-  - name: Gather Cluster facts and set is_containerized if needed
-    openshift_facts:
-      role: common
-      local_facts:
-        debug_level: "{{ openshift_debug_level | default(2) }}"
-        # TODO: Deprecate deployment_type in favor of openshift_deployment_type
-        deployment_type: "{{ openshift_deployment_type | default(deployment_type) }}"
-        deployment_subtype: "{{ openshift_deployment_subtype | default(None) }}"
-        cluster_id: "{{ openshift_cluster_id | default('default') }}"
-        hostname: "{{ openshift_hostname | default(None) }}"
-        ip: "{{ openshift_ip | default(None) }}"
-        is_containerized: "{{ l_is_containerized | default(None) }}"
-        is_openvswitch_system_container: "{{ l_is_openvswitch_system_container | default(false) }}"
-        is_node_system_container: "{{ l_is_node_system_container | default(false) }}"
-        is_master_system_container: "{{ l_is_master_system_container | default(false) }}"
-        is_etcd_system_container: "{{ l_is_etcd_system_container | default(false) }}"
-        system_images_registry: "{{ system_images_registry | default('') }}"
-        public_hostname: "{{ openshift_public_hostname | default(None) }}"
-        public_ip: "{{ openshift_public_ip | default(None) }}"
-        portal_net: "{{ openshift_portal_net | default(openshift_master_portal_net) | default(None) }}"
-        http_proxy: "{{ openshift_http_proxy | default(None) }}"
-        https_proxy: "{{ openshift_https_proxy | default(None) }}"
-        no_proxy: "{{ openshift_no_proxy | default(None) }}"
-        generate_no_proxy_hosts: "{{ openshift_generate_no_proxy_hosts | default(True) }}"
-        no_proxy_internal_hostnames: "{{ openshift_no_proxy_internal_hostnames | default(None) }}"
-        sdn_network_plugin_name: "{{ os_sdn_network_plugin_name | default(None) }}"
-        use_openshift_sdn: "{{ openshift_use_openshift_sdn | default(None) }}"
+- name: Gather Cluster facts and set is_containerized if needed
+  openshift_facts:
+    role: common
+    local_facts:
+      debug_level: "{{ openshift_debug_level | default(2) }}"
+      # TODO: Deprecate deployment_type in favor of openshift_deployment_type
+      deployment_type: "{{ openshift_deployment_type | default(deployment_type) }}"
+      deployment_subtype: "{{ openshift_deployment_subtype | default(None) }}"
+      cluster_id: "{{ openshift_cluster_id | default('default') }}"
+      hostname: "{{ openshift_hostname | default(None) }}"
+      ip: "{{ openshift_ip | default(None) }}"
+      is_containerized: "{{ l_is_containerized | default(None) }}"
+      is_openvswitch_system_container: "{{ l_is_openvswitch_system_container | default(false) }}"
+      is_node_system_container: "{{ l_is_node_system_container | default(false) }}"
+      is_master_system_container: "{{ l_is_master_system_container | default(false) }}"
+      is_etcd_system_container: "{{ l_is_etcd_system_container | default(false) }}"
+      system_images_registry: "{{ system_images_registry | default('') }}"
+      public_hostname: "{{ openshift_public_hostname | default(None) }}"
+      public_ip: "{{ openshift_public_ip | default(None) }}"
+      portal_net: "{{ openshift_portal_net | default(openshift_master_portal_net) | default(None) }}"
+      http_proxy: "{{ openshift_http_proxy | default(None) }}"
+      https_proxy: "{{ openshift_https_proxy | default(None) }}"
+      no_proxy: "{{ openshift_no_proxy | default(None) }}"
+      generate_no_proxy_hosts: "{{ openshift_generate_no_proxy_hosts | default(True) }}"
+      no_proxy_internal_hostnames: "{{ openshift_no_proxy_internal_hostnames | default(None) }}"
+      sdn_network_plugin_name: "{{ os_sdn_network_plugin_name | default(None) }}"
+      use_openshift_sdn: "{{ openshift_use_openshift_sdn | default(None) }}"
 
-  - name: Set repoquery command
-    set_fact:
-      repoquery_cmd: "{{ 'dnf repoquery --latest-limit 1 -d 0' if ansible_pkg_mgr == 'dnf' else 'repoquery --plugins' }}"
-
-  # This `when` allows us to skip this expensive block of tasks on
-  # subsequent calls to the `openshift_facts` role. You will notice
-  # speed-ups in proportion to the size of your cluster as this will
-  # skip all tasks on the next calls to the `openshift_facts` role.
-  when:
-  - openshift_facts_init is not defined
-
-- name: Record that openshift_facts has initialized
+- name: Set repoquery command
   set_fact:
-    openshift_facts_init: true
+    repoquery_cmd: "{{ 'dnf repoquery --latest-limit 1 -d 0' if ansible_pkg_mgr == 'dnf' else 'repoquery --plugins' }}"
