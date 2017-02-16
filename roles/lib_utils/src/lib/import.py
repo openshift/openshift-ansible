@@ -14,6 +14,6 @@ import shutil  # noqa: F401
 try:
     import ruamel.yaml as yaml  # noqa: F401
 except ImportError:
-    import yaml
+    import yaml  # noqa: F401
 
 from ansible.module_utils.basic import AnsibleModule

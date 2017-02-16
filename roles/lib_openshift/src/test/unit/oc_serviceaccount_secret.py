@@ -26,10 +26,10 @@ sys.path.insert(0, module_path)
 from oc_serviceaccount_secret import OCServiceAccountSecret  # noqa: E402
 
 try:
-    import ruamel.yaml as yaml
-    YAML_TYPE='ruamel'
+    import ruamel.yaml as yaml  # noqa: EF401
+    YAML_TYPE = 'ruamel'
 except ImportError:
-    YAML_TYPE='pyyaml'
+    YAML_TYPE = 'pyyaml'
 
 
 class OCServiceAccountSecretTest(unittest.TestCase):

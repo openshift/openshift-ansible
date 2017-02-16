@@ -330,12 +330,12 @@ class Yedit(object):
         if self.backup and self.file_exists():
             shutil.copy(self.filename, self.filename + '.orig')
 
-        # pylint: disable=no-member
-        if hasattr(self.yaml_dict, 'fa'):
-            self.yaml_dict.fa.set_block_style()
-
-        # pylint: disable=no-member
         if hasattr(yaml, 'RoundTripDumper'):
+            # pylint: disable=no-member
+            if hasattr(self.yaml_dict, 'fa'):
+                self.yaml_dict.fa.set_block_style()
+
+            # pylint: disable=no-member
             Yedit._write(self.filename, yaml.dump(self.yaml_dict, Dumper=yaml.RoundTripDumper))
         else:
             Yedit._write(self.filename, yaml.safe_dump(self.yaml_dict, default_flow_style=False))
@@ -378,13 +378,16 @@ class Yedit(object):
         # check if it is yaml
         try:
             if content_type == 'yaml' and contents:
+                # pylint: disable=no-member
                 if hasattr(yaml, 'RoundTripLoader'):
                     self.yaml_dict = yaml.load(contents, yaml.RoundTripLoader)
                 else:
                     self.yaml_dict = yaml.safe_load(contents)
+
                 # pylint: disable=no-member
                 if hasattr(self.yaml_dict, 'fa'):
                     self.yaml_dict.fa.set_block_style()
+
             elif content_type == 'json' and contents:
                 self.yaml_dict = json.loads(contents)
         except yaml.YAMLError as err:
@@ -550,6 +553,7 @@ class Yedit(object):
 
         # deepcopy didn't work
         if hasattr(yaml, 'round_trip_dump'):
+            # pylint: disable=no-member
             tmp_copy = yaml.load(yaml.round_trip_dump(self.yaml_dict,
                                                       default_flow_style=False),
                                  yaml.RoundTripLoader)
@@ -574,8 +578,10 @@ class Yedit(object):
         if not self.file_exists():
             # deepcopy didn't work
             if hasattr(yaml, 'round_trip_dump'):
+                # pylint: disable=no-member
                 tmp_copy = yaml.load(yaml.round_trip_dump(self.yaml_dict, default_flow_style=False),  # noqa: E501
                                      yaml.RoundTripLoader)
+
                 # pylint: disable=no-member
                 if hasattr(self.yaml_dict, 'fa'):
                     tmp_copy.fa.set_block_style()
@@ -1023,10 +1029,12 @@ class Utils(object):
         tmp = Utils.create_tmpfile(prefix=rname)
 
         if ftype == 'yaml':
+            # pylint: disable=no-member
             if hasattr(yaml, 'RoundTripDumper'):
                 Utils._write(tmp, yaml.dump(data, Dumper=yaml.RoundTripDumper))
             else:
                 Utils._write(tmp, yaml.safe_dump(data, default_flow_style=False))
+
         elif ftype == 'json':
             Utils._write(tmp, json.dumps(data))
         else:
@@ -1108,6 +1116,7 @@ class Utils(object):
             contents = sfd.read()
 
         if sfile_type == 'yaml':
+            # pylint: disable=no-member
             if hasattr(yaml, 'RoundTripLoader'):
                 contents = yaml.load(contents, yaml.RoundTripLoader)
             else:
