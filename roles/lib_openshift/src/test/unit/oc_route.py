@@ -35,8 +35,9 @@ class OCRouteTest(unittest.TestCase):
         ''' setup method will create a file and set to known configuration '''
         pass
 
+    @mock.patch('oc_route.Utils.create_tmpfile_copy')
     @mock.patch('oc_route.OCRoute._run')
-    def test_list_route(self, mock_cmd):
+    def test_list_route(self, mock_cmd, mock_tmpfile_copy):
         ''' Testing getting a route '''
 
         # Arrange
@@ -114,6 +115,10 @@ class OCRouteTest(unittest.TestCase):
             (0, route_result, ''),
         ]
 
+        mock_tmpfile_copy.side_effect = [
+            '/tmp/mock.kubeconfig',
+        ]
+
         # Act
         results = OCRoute.run_ansible(params, False)
 
@@ -127,11 +132,11 @@ class OCRouteTest(unittest.TestCase):
             mock.call(['oc', '-n', 'default', 'get', 'route', 'test', '-o', 'json'], None),
         ])
 
+    @mock.patch('oc_route.Utils.create_tmpfile_copy')
     @mock.patch('oc_route.Yedit._write')
     @mock.patch('oc_route.OCRoute._run')
-    def test_create_route(self, mock_cmd, mock_write):
+    def test_create_route(self, mock_cmd, mock_write, mock_tmpfile_copy):
         ''' Testing getting a route '''
-
         # Arrange
 
         # run_ansible input parameters
@@ -230,6 +235,10 @@ metadata:
             (0, route_result, ''),
         ]
 
+        mock_tmpfile_copy.side_effect = [
+            '/tmp/mock.kubeconfig',
+        ]
+
         mock_write.assert_has_calls = [
             # First call to mock
             mock.call('/tmp/test', test_route)
@@ -246,7 +255,8 @@ metadata:
         # Making sure our mock was called as we expected
         mock_cmd.assert_has_calls([
             mock.call(['oc', '-n', 'default', 'get', 'route', 'test', '-o', 'json'], None),
-            mock.call(['oc', '-n', 'default', 'create', '-f', '/tmp/test'], None),
+            mock.call(['oc', '-n', 'default', 'create', '-f', mock.ANY], None),
+            mock.call(['oc', '-n', 'default', 'get', 'route', 'test', '-o', 'json'], None),
         ])
 
     def tearDown(self):
