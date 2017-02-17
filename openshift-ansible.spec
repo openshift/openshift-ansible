@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.8
+Version:        3.5.9
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -259,6 +259,39 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Feb 16 2017 Scott Dodson <sdodson@redhat.com> 3.5.9-1
+- Pleasing the linting gods. (kwoodson@redhat.com)
+- Fixed tests for pyyaml vs ruamel.  Added import logic.  Fixed safe load.
+  (kwoodson@redhat.com)
+- update example templates+imagestreams (bparees@redhat.com)
+- Adding fallback support for pyyaml. (kwoodson@redhat.com)
+- bug 1420217. Default ES memory to be compariable to 3.4 deployer
+  (jcantril@redhat.com)
+- initialize oo_nodes_to_upgrade group when running control plane upgrade only
+  (jchaloup@redhat.com)
+- adding some quotes for safety (ewolinet@redhat.com)
+- Revert "Add block+when skip to `openshift_facts` tasks" (abutcher@redhat.com)
+- Add missing full hostname for the Hawkular Metrics certificate (BZ1421060)
+  Fix issue where the signer certificate's name is static, preventing
+  redeployments from being acceptable. (mwringe@redhat.com)
+- fixing use of oc_scale module (ewolinet@redhat.com)
+- fixing default for logging (ewolinet@redhat.com)
+- Fix some lint (jdetiber@redhat.com)
+- Fixed issue where upgrade fails when using daemon sets (e.g. aggregated
+  logging) (adbaldi+ghub@gmail.com)
+- upgrades: fix path to disable_excluder.yml (jchaloup@redhat.com)
+- Add upgrade job step after the entire upgrade performs (maszulik@redhat.com)
+- Ansible Lint cleanup and making filter/lookup plugins used by
+  openshift_master_facts available within the role (jdetiber@redhat.com)
+- node, vars/main.yml: define l_is_ha and l_is_same_version
+  (gscrivan@redhat.com)
+- master, vars/main.yml: define l_is_ha and l_is_same_version
+  (gscrivan@redhat.com)
+- node: simplify when conditionals (gscrivan@redhat.com)
+- openvswitch: simplify when conditionals (gscrivan@redhat.com)
+- uninstall: delete master-api and master-controllers (gscrivan@redhat.com)
+- master: support HA deployments with system containers (gscrivan@redhat.com)
+
 * Tue Feb 14 2017 Scott Dodson <sdodson@redhat.com> 3.5.8-1
 - Update variant_version (smilner@redhat.com)
 - Add block+when skip to `openshift_facts` tasks (tbielawa@redhat.com)
