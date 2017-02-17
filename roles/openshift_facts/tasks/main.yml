@@ -14,6 +14,18 @@
     l_is_master_system_container: "{{ (use_master_system_container | default(use_system_containers) | bool) }}"
     l_is_etcd_system_container: "{{ (use_etcd_system_container | default(use_system_containers) | bool) }}"
 
+- name: Validate python version
+  fail:
+    msg: |
+      openshift-ansible requires Python 3 for {{ ansible_distribution }};
+      For information on enabling Python 3 with Ansible, see https://docs.ansible.com/ansible/python_3_support.html
+  when: ansible_distribution == 'Fedora' and ansible_python['version']['major'] != 3
+
+- name: Validate python version
+  fail:
+    msg: "openshift-ansible requires Python 2 for {{ ansible_distribution }}"
+  when: ansible_distribution != 'Fedora' and ansible_python['version']['major'] != 2
+
 - name: Ensure various deps are installed
   package: name={{ item }} state=present
   with_items: "{{ required_packages }}"
