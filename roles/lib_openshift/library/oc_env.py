@@ -1309,7 +1309,7 @@ class OpenShiftCLIConfig(object):
 
 # pylint: disable=too-many-public-methods
 class DeploymentConfig(Yedit):
-    ''' Class to wrap the oc command line tools '''
+    ''' Class to model an openshift DeploymentConfig'''
     default_deployment_config = '''
 apiVersion: v1
 kind: DeploymentConfig

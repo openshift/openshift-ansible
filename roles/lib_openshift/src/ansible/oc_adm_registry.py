@@ -28,6 +28,9 @@ def main():
             edits=dict(default=None, type='list'),
             enforce_quota=dict(default=False, type='bool'),
             force=dict(default=False, type='bool'),
+            daemonset=dict(default=False, type='bool'),
+            tls_key=dict(default=None, type='str'),
+            tls_certificate=dict(default=None, type='str'),
         ),
 
         supports_check_mode=True,

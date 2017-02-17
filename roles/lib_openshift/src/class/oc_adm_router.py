@@ -21,7 +21,9 @@ class Router(OpenShiftCLI):
            a router consists of 3 or more parts
            - dc/router
            - svc/router
-           - endpoint/router
+           - sa/router
+           - secret/router-certs
+           - clusterrolebinding/router-router-role
         '''
         super(Router, self).__init__('default', router_config.kubeconfig, verbose)
         self.config = router_config
@@ -31,32 +33,30 @@ class Router(OpenShiftCLI):
                              {'kind': 'sa', 'name': self.config.config_options['service_account']['value']},
                              {'kind': 'secret', 'name': self.config.name + '-certs'},
                              {'kind': 'clusterrolebinding', 'name': 'router-' + self.config.name + '-role'},
-                             #{'kind': 'endpoints', 'name': self.config.name},
                             ]
 
-        self.__router_prep = None
+        self.__prepared_router = None
         self.dconfig = None
         self.svc = None
         self._secret = None
         self._serviceaccount = None
         self._rolebinding = None
-        self.get()
 
     @property
-    def router_prep(self):
-        ''' property deploymentconfig'''
-        if self.__router_prep == None:
-            results = self.prepare_router()
+    def prepared_router(self):
+        ''' property for the prepared router'''
+        if self.__prepared_router == None:
+            results = self._prepare_router()
             if not results:
                 raise RouterException('Could not perform router preparation')
-            self.__router_prep = results
+            self.__prepared_router = results
 
-        return self.__router_prep
+        return self.__prepared_router
 
-    @router_prep.setter
-    def router_prep(self, obj):
-        '''set the router prep property'''
-        self.__router_prep = obj
+    @prepared_router.setter
+    def prepared_router(self, obj):
+        '''setter for the prepared_router'''
+        self.__prepared_router = obj
 
     @property
     def deploymentconfig(self):
@@ -70,7 +70,7 @@ class Router(OpenShiftCLI):
 
     @property
     def service(self):
-        ''' property service '''
+        ''' property for service '''
         return self.svc
 
     @service.setter
@@ -90,12 +90,12 @@ class Router(OpenShiftCLI):
 
     @property
     def serviceaccount(self):
-        ''' property secret '''
+        ''' property for serviceaccount '''
         return self._serviceaccount
 
     @serviceaccount.setter
     def serviceaccount(self, config):
-        ''' setter for property secret '''
+        ''' setter for property serviceaccount '''
         self._serviceaccount = config
 
     @property
@@ -173,7 +173,7 @@ class Router(OpenShiftCLI):
 
         return deploymentconfig
 
-    def prepare_router(self):
+    def _prepare_router(self):
         '''prepare router for instantiation'''
         # We need to create the pem file
         router_pem = '/tmp/router.pem'
@@ -199,11 +199,11 @@ class Router(OpenShiftCLI):
         if results['returncode'] != 0 and results['results'].has_key('items'):
             return results
 
-        oc_objects = {'DeploymentConfig': {'obj': None, 'path': None},
-                      'Secret': {'obj': None, 'path': None},
-                      'ServiceAccount': {'obj': None, 'path': None},
-                      'ClusterRoleBinding': {'obj': None, 'path': None},
-                      'Service': {'obj': None, 'path': None},
+        oc_objects = {'DeploymentConfig': {'obj': None, 'path': None, 'update': False},
+                      'Secret': {'obj': None, 'path': None, 'update': False},
+                      'ServiceAccount': {'obj': None, 'path': None, 'update': False},
+                      'ClusterRoleBinding': {'obj': None, 'path': None, 'update': False},
+                      'Service': {'obj': None, 'path': None, 'update': False},
                      }
         # pylint: disable=invalid-sequence-index
         for res in results['results']['items']:
@@ -223,7 +223,7 @@ class Router(OpenShiftCLI):
         if not oc_objects['DeploymentConfig']['obj']:
             return results
 
-        # results will need to get parsed here and modifications added
+        # add modifications added
         oc_objects['DeploymentConfig']['obj'] = self.add_modifications(oc_objects['DeploymentConfig']['obj'])
 
         for oc_type in oc_objects.keys():
@@ -233,11 +233,8 @@ class Router(OpenShiftCLI):
 
     def create(self):
         '''Create a deploymentconfig '''
-        # generate the objects and prepare for instantiation
-        self.prepare_router()
-
         results = []
-        for _, oc_data in self.router_prep.items():
+        for _, oc_data in self.prepared_router.items():
             results.append(self._create(oc_data['path']))
 
         rval = 0
@@ -248,21 +245,18 @@ class Router(OpenShiftCLI):
         return {'returncode': rval, 'results': results}
 
     def update(self):
-        '''run update for the router.  This performs a delete and then create '''
-        parts = self.delete()
-        for part in parts:
-            if part['returncode'] != 0:
-                if part.has_key('stderr') and 'not found' in part['stderr']:
-                    # the object is not there, continue
-                    continue
+        '''run update for the router.  This performs a replace'''
+        results = []
+        for _, oc_data in self.prepared_router.items():
+            if oc_data['update']:
+                results.append(self._replace(oc_data['path']))
 
-                # something went wrong
-                return parts
+        rval = 0
+        for result in results:
+            if result['returncode'] != 0:
+                rval = result['returncode']
 
-        # Ugly built in sleep here.
-        time.sleep(15)
-
-        return self.create()
+        return {'returncode': rval, 'results': results}
 
     # pylint: disable=too-many-return-statements,too-many-branches
     def needs_update(self):
@@ -270,64 +264,58 @@ class Router(OpenShiftCLI):
         if not self.deploymentconfig or not self.service or not self.serviceaccount or not self.secret:
             return True
 
-        oc_objects_prep = self.prepare_router()
-
-        # Since the output from oadm_router is returned as raw
-        # we need to parse it.  The first line is the stats_password in 3.1
-        # Inside of 3.2, it is just json
-
         # ServiceAccount:
-        #   Need to determine the pregenerated ones from the original
+        #   Need to determine changes from the pregenerated ones from the original
         #   Since these are auto generated, we can skip
         skip = ['secrets', 'imagePullSecrets']
-        if not Utils.check_def_equal(oc_objects_prep['ServiceAccount']['obj'].yaml_dict,
+        if not Utils.check_def_equal(self.prepared_router['ServiceAccount']['obj'].yaml_dict,
                                      self.serviceaccount.yaml_dict,
                                      skip_keys=skip,
                                      debug=self.verbose):
-            return True
+            self.prepared_router['ServiceAccount']['update'] = True
 
         # Secret:
-        #   In 3.2 oadm router generates a secret volume for certificates
         #   See if one was generated from our dry-run and verify it if needed
-        if oc_objects_prep['Secret']['obj']:
+        if self.prepared_router['Secret']['obj']:
             if not self.secret:
-                return True
-            if not Utils.check_def_equal(oc_objects_prep['Secret']['obj'].yaml_dict,
+                self.prepared_router['Secret']['update'] = True
+
+            if not Utils.check_def_equal(self.prepared_router['Secret']['obj'].yaml_dict,
                                          self.secret.yaml_dict,
                                          skip_keys=skip,
                                          debug=self.verbose):
-                return True
+                self.prepared_router['Secret']['update'] = True
 
         # Service:
         #   Fix the ports to have protocol=TCP
-        for port in oc_objects_prep['Service']['obj'].get('spec.ports'):
+        for port in self.prepared_router['Service']['obj'].get('spec.ports'):
             port['protocol'] = 'TCP'
 
         skip = ['portalIP', 'clusterIP', 'sessionAffinity', 'type']
-        if not Utils.check_def_equal(oc_objects_prep['Service']['obj'].yaml_dict,
+        if not Utils.check_def_equal(self.prepared_router['Service']['obj'].yaml_dict,
                                      self.service.yaml_dict,
                                      skip_keys=skip,
                                      debug=self.verbose):
-            return True
+            self.prepared_router['Service']['update'] = True
 
         # DeploymentConfig:
         #   Router needs some exceptions.
         #   We do not want to check the autogenerated password for stats admin
         if not self.config.config_options['stats_password']['value']:
-            for idx, env_var in enumerate(oc_objects_prep['DeploymentConfig']['obj'].get(\
+            for idx, env_var in enumerate(self.prepared_router['DeploymentConfig']['obj'].get(\
                         'spec.template.spec.containers[0].env') or []):
                 if env_var['name'] == 'STATS_PASSWORD':
                     env_var['value'] = \
                       self.deploymentconfig.get('spec.template.spec.containers[0].env[%s].value' % idx)
                     break
 
-        #   dry-run doesn't add the protocol to the ports section.  We will manually do that.
-        for idx, port in enumerate(oc_objects_prep['DeploymentConfig']['obj'].get(\
+        # dry-run doesn't add the protocol to the ports section.  We will manually do that.
+        for idx, port in enumerate(self.prepared_router['DeploymentConfig']['obj'].get(\
                         'spec.template.spec.containers[0].ports') or []):
             if not port.has_key('protocol'):
                 port['protocol'] = 'TCP'
 
-        #   These are different when generating
+        # These are different when generating
         skip = ['dnsPolicy',
                 'terminationGracePeriodSeconds',
                 'restartPolicy', 'timeoutSeconds',
@@ -336,11 +324,15 @@ class Router(OpenShiftCLI):
                 'defaultMode',
                ]
 
-        return not Utils.check_def_equal(oc_objects_prep['DeploymentConfig']['obj'].yaml_dict,
+        if not Utils.check_def_equal(self.prepared_router['DeploymentConfig']['obj'].yaml_dict,
                                          self.deploymentconfig.yaml_dict,
                                          skip_keys=skip,
-                                         debug=self.verbose)
+                                         debug=self.verbose):
+            self.prepared_router['DeploymentConfig']['update'] = True
 
+        # Check if any of the parts need updating, if so, return True
+        # else, no need to update
+        return any([self.prepared_router[oc_type]['update'] for oc_type in self.prepared_router.keys()])
 
     @staticmethod
     def run_ansible(params, check_mode):
@@ -386,9 +378,17 @@ class Router(OpenShiftCLI):
                                })
 
 
-        ocrouter = Router(rconfig)
-
         state = params['state']
+
+        ocrouter = Router(rconfig, verbose=params['debug'])
+
+        api_rval = ocrouter.get()
+
+        ########
+        # get
+        ########
+        if state == 'list':
+            return {'changed': False, 'results': api_rval, 'state': state}
 
         ########
         # Delete

@@ -43,12 +43,6 @@ options:
     required: false
     default: default
     aliases: []
-  credentials:
-    description:
-    - Path to a .kubeconfig file that will contain the credentials the registry should use to contact the master.
-    required: false
-    default: None
-    aliases: []
   images:
     description:
     - The image to base this router on - ${component} will be replaced with --type
@@ -159,7 +153,31 @@ options:
     aliases: []
 author:
 - "Kenny Woodson <kwoodson@redhat.com>"
-extends_documentation_fragment: []
+extends_documentation_fragment:
+- There are some exceptions to note when doing the idempotency in this module.
+- The strategy is to use the oc adm router command to generate a default
+- configuration when creating or updating a router.  Often times there
+- differences from the generated template and what is in memory in openshift.
+- We make exceptions to not check these specific values when comparing objects.
+- Here are a list of exceptions:
+- - DeploymentConfig:
+    - dnsPolicy
+    - terminationGracePeriodSeconds
+    - restartPolicy
+    - timeoutSeconds
+    - livenessProbe
+    - readinessProbe
+    - terminationMessagePath
+    - hostPort
+    - defaultMode
+  - Service:
+    - portalIP
+    - clusterIP
+    - sessionAffinity
+    - type
+  - ServiceAccount:
+    - secrets
+    - imagePullSecrets
 '''
 
 EXAMPLES = '''
@@ -184,10 +202,10 @@ EXAMPLES = '''
       action: put
     - key: spec.template.spec.containers[0].resources.limits.memory
       value: 2G
-      action: update
+      action: put
     - key: spec.template.spec.containers[0].resources.requests.memory
       value: 1G
-      action: update
+      action: put
     - key: spec.template.spec.containers[0].env
       value:
         name: EXTENDED_VALIDATION

@@ -1,7 +1,7 @@
 # pylint: skip-file
 
 class Volume(object):
-    ''' Class to wrap the oc command line tools '''
+    ''' Class to model an openshift volume object'''
     volume_mounts_path = {"pod": "spec.containers[0].volumeMounts",
                           "dc":  "spec.template.spec.containers[0].volumeMounts",
                           "rc":  "spec.template.spec.containers[0].volumeMounts",

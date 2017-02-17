@@ -2,19 +2,19 @@
 
 # pylint: disable=too-many-instance-attributes
 class RoleBindingConfig(object):
-    ''' Handle route options '''
+    ''' Handle rolebinding config '''
     # pylint: disable=too-many-arguments
     def __init__(self,
-                 sname,
+                 name,
                  namespace,
                  kubeconfig,
                  group_names=None,
                  role_ref=None,
                  subjects=None,
                  usernames=None):
-        ''' constructor for handling route options '''
+        ''' constructor for handling rolebinding options '''
         self.kubeconfig = kubeconfig
-        self.name = sname
+        self.name = name
         self.namespace = namespace
         self.group_names = group_names
         self.role_ref = role_ref
@@ -25,7 +25,7 @@ class RoleBindingConfig(object):
         self.create_dict()
 
     def create_dict(self):
-        ''' return a service as a dict '''
+        ''' create a default rolebinding as a dict '''
         self.data['apiVersion'] = 'v1'
         self.data['kind'] = 'RoleBinding'
         self.data['groupNames'] = self.group_names
@@ -39,7 +39,7 @@ class RoleBindingConfig(object):
 
 # pylint: disable=too-many-instance-attributes,too-many-public-methods
 class RoleBinding(Yedit):
-    ''' Class to wrap the oc command line tools '''
+    ''' Class to model a rolebinding openshift object'''
     group_names_path = "groupNames"
     role_ref_path = "roleRef"
     subjects_path = "subjects"

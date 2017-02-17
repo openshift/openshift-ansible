@@ -1358,7 +1358,7 @@ class SecretConfig(object):
         self.create_dict()
 
     def create_dict(self):
-        ''' return a secret as a dict '''
+        ''' instantiate a secret as a dict '''
         self.data['apiVersion'] = 'v1'
         self.data['kind'] = 'Secret'
         self.data['metadata'] = {}

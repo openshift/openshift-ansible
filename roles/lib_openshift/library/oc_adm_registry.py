@@ -167,7 +167,7 @@ options:
     description:
     - Use a daemonset instead of a deployment config.
     required: false
-    default: None
+    default: False
     aliases: []
   edits:
     description:
@@ -195,7 +195,6 @@ extends_documentation_fragment: []
 EXAMPLES = '''
 - name: create a secure registry
   oadm_registry:
-    credentials: /etc/origin/master/openshift-registry.kubeconfig
     name: docker-registry
     service_account: registry
     replicas: 2
@@ -1061,7 +1060,7 @@ class OpenShiftCLI(object):
 
         stdout, stderr = proc.communicate(input_data)
 
-        return proc.returncode, stdout, stderr
+        return proc.returncode, stdout.decode(), stderr.decode()
 
     # pylint: disable=too-many-arguments,too-many-branches
     def openshift_cmd(self, cmd, oadm=False, output=False, output_type='json', input_data=None):
@@ -1418,7 +1417,7 @@ class OpenShiftCLIConfig(object):
 
 # pylint: disable=too-many-public-methods
 class DeploymentConfig(Yedit):
-    ''' Class to wrap the oc command line tools '''
+    ''' Class to model an openshift DeploymentConfig'''
     default_deployment_config = '''
 apiVersion: v1
 kind: DeploymentConfig
@@ -1775,7 +1774,7 @@ class SecretConfig(object):
         self.create_dict()
 
     def create_dict(self):
-        ''' return a secret as a dict '''
+        ''' instantiate a secret as a dict '''
         self.data['apiVersion'] = 'v1'
         self.data['kind'] = 'Secret'
         self.data['metadata'] = {}
@@ -1986,7 +1985,7 @@ class Service(Yedit):
 # -*- -*- -*- Begin included fragment: lib/volume.py -*- -*- -*-
 
 class Volume(object):
-    ''' Class to wrap the oc command line tools '''
+    ''' Class to model an openshift volume object'''
     volume_mounts_path = {"pod": "spec.containers[0].volumeMounts",
                           "dc":  "spec.template.spec.containers[0].volumeMounts",
                           "rc":  "spec.template.spec.containers[0].volumeMounts",
@@ -2114,7 +2113,7 @@ class Registry(OpenShiftCLI):
                                {'kind': 'svc', 'name': self.config.name},
                               ]
 
-        self.__registry_prep = None
+        self.__prepared_registry = None
         self.volume_mounts = []
         self.volumes = []
         if self.config.config_options['volume_mounts']['value']:
@@ -2155,24 +2154,24 @@ class Registry(OpenShiftCLI):
         self.svc = config
 
     @property
-    def registry_prep(self):
-        ''' registry_prep property '''
-        if not self.__registry_prep:
-            results = self.prep_registry()
+    def prepared_registry(self):
+        ''' prepared_registry property '''
+        if not self.__prepared_registry:
+            results = self._prepare_registry()
             if not results:
                 raise RegistryException('Could not perform registry preparation.')
-            self.__registry_prep = results
+            self.__prepared_registry = results
 
-        return self.__registry_prep
+        return self.__prepared_registry
 
-    @registry_prep.setter
-    def registry_prep(self, data):
-        ''' setter method for registry_prep attribute '''
-        self.__registry_prep = data
+    @prepared_registry.setter
+    def prepared_registry(self, data):
+        ''' setter method for prepared_registry attribute '''
+        self.__prepared_registry = data
 
-    def force_registry_prep(self):
+    def force_prepare_registry(self):
         '''force a registry prep'''
-        self.registry_prep = None
+        self._prepare_registry = None
 
     def get(self):
         ''' return the self.registry_parts '''
@@ -2206,7 +2205,7 @@ class Registry(OpenShiftCLI):
 
         return parts
 
-    def prep_registry(self):
+    def _prepare_registry(self):
         ''' prepare a registry for instantiation '''
         options = self.config.to_option_list()
 
@@ -2247,14 +2246,18 @@ class Registry(OpenShiftCLI):
         service_file = Utils.create_tmp_file_from_contents('service', service.yaml_dict)
         deployment_file = Utils.create_tmp_file_from_contents('deploymentconfig', deploymentconfig.yaml_dict)
 
-        return {"service": service, "service_file": service_file,
-                "deployment": deploymentconfig, "deployment_file": deployment_file}
+        return {"service": service,
+                "service_file": service_file,
+                "service_update": False,
+                "deployment": deploymentconfig,
+                "deployment_file": deployment_file,
+                "deployment_update": False}
 
     def create(self):
         '''Create a registry'''
         results = []
         for config_file in ['deployment_file', 'service_file']:
-            results.append(self._create(self.registry_prep[config_file]))
+            results.append(self._create(self.prepared_registry[config_file]))
 
         # Clean up returned results
         rval = 0
@@ -2268,7 +2271,7 @@ class Registry(OpenShiftCLI):
     def update(self):
         '''run update for the registry.  This performs a delete and then create '''
         # Store the current service IP
-        self.force_registry_prep()
+        self.force_prepare_registry()
 
         self.get()
         if self.service:
@@ -2279,21 +2282,23 @@ class Registry(OpenShiftCLI):
             if portip:
                 self.portal_ip = portip
 
-        parts = self.delete(complete=False)
-        for part in parts:
-            if part['returncode'] != 0:
-                if part.has_key('stderr') and 'not found' in part['stderr']:
-                    # the object is not there, continue
-                    continue
-                # something went wrong
-                return parts
+        #parts = self.delete(complete=False)
+        #for part in parts:
+        #    if part['returncode'] != 0:
+        #        if part.has_key('stderr') and 'not found' in part['stderr']:
+        #            # the object is not there, continue
+        #            continue
+        #        # something went wrong
+        #        return parts
 
         # Ugly built in sleep here.
         #time.sleep(10)
 
         results = []
-        results.append(self._create(self.registry_prep['deployment_file']))
-        results.append(self._replace(self.registry_prep['service_file']))
+        if self.prepared_registry['deployment_update']:
+            results.append(self._replace(self.prepared_registry['deployment_file']))
+        if self.prepared_registry['service_update']:
+            results.append(self._replace(self.prepared_registry['service_file']))
 
         # Clean up returned results
         rval = 0
@@ -2349,11 +2354,11 @@ class Registry(OpenShiftCLI):
             return True
 
         exclude_list = ['clusterIP', 'portalIP', 'type', 'protocol']
-        if not Utils.check_def_equal(self.registry_prep['service'].yaml_dict,
+        if not Utils.check_def_equal(self.prepared_registry['service'].yaml_dict,
                                      self.service.yaml_dict,
                                      exclude_list,
                                      verbose):
-            return True
+            self.prepared_registry['service_update'] = True
 
         exclude_list = ['dnsPolicy',
                         'terminationGracePeriodSeconds',
@@ -2369,14 +2374,13 @@ class Registry(OpenShiftCLI):
                         'activeDeadlineSeconds', # added in 1.5 for timeouts
                        ]
 
-        if not Utils.check_def_equal(self.registry_prep['deployment'].yaml_dict,
+        if not Utils.check_def_equal(self.prepared_registry['deployment'].yaml_dict,
                                      self.deploymentconfig.yaml_dict,
                                      exclude_list,
                                      verbose):
-            return True
+            self.prepared_registry['deployment_update'] = True
 
-        return False
-
+        return self.prepared_registry['deployment_update'] or self.prepared_registry['service_update'] or False
 
     @staticmethod
     def run_ansible(params, check_mode):
@@ -2385,28 +2389,37 @@ class Registry(OpenShiftCLI):
         rconfig = RegistryConfig(params['name'],
                                  params['namespace'],
                                  params['kubeconfig'],
-                                 {'default_cert': {'value': None, 'include': True},
-                                  'images': {'value': params['images'], 'include': True},
+                                 {'images': {'value': params['images'], 'include': True},
                                   'latest_images': {'value': params['latest_images'], 'include': True},
                                   'labels': {'value': params['labels'], 'include': True},
                                   'ports': {'value': ','.join(params['ports']), 'include': True},
                                   'replicas': {'value': params['replicas'], 'include': True},
                                   'selector': {'value': params['selector'], 'include': True},
                                   'service_account': {'value': params['service_account'], 'include': True},
-                                  'registry_type': {'value': params['registry_type'], 'include': False},
                                   'mount_host': {'value': params['mount_host'], 'include': True},
-                                  'volume': {'value': '/registry', 'include': True},
                                   'env_vars': {'value': params['env_vars'], 'include': False},
                                   'volume_mounts': {'value': params['volume_mounts'], 'include': False},
                                   'edits': {'value': params['edits'], 'include': False},
                                   'enforce_quota': {'value': params['enforce_quota'], 'include': True},
                                   'daemonset': {'value': params['daemonset'], 'include': True},
+                                  'tls_key': {'value': params['tls_key'], 'include': True},
+                                  'tls_certificate': {'value': params['tls_certificate'], 'include': True},
                                  })
 
 
         ocregistry = Registry(rconfig)
 
         state = params['state']
+        ########
+        # get
+        ########
+        if state == 'list':
+            api_rval = ocregistry.get()
+
+            if api_rval['returncode'] != 0:
+                return {'failed': True, 'msg': api_rval}
+
+            return {'changed': False, 'results': api_rval, 'state': state}
 
         ########
         # Delete
@@ -2490,6 +2503,9 @@ def main():
             edits=dict(default=None, type='list'),
             enforce_quota=dict(default=False, type='bool'),
             force=dict(default=False, type='bool'),
+            daemonset=dict(default=False, type='bool'),
+            tls_key=dict(default=None, type='str'),
+            tls_certificate=dict(default=None, type='str'),
         ),
 
         supports_check_mode=True,
