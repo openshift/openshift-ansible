@@ -6,6 +6,6 @@
     --key='{{ mktemp.stdout }}/ca.key'
     --cert='{{ mktemp.stdout }}/ca.crt'
     --serial='{{ mktemp.stdout }}/ca.serial.txt'
-    --name="metrics-signer@$(date +%s)"
+    --name="metrics-signer@{{lookup('pipe','date +%s')}}"
 
 - include: generate_hawkular_certificates.yaml

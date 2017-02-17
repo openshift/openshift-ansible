@@ -25,6 +25,12 @@ module_path = os.path.join('/'.join(os.path.realpath(__file__).split('/')[:-4]),
 sys.path.insert(0, module_path)
 from oc_serviceaccount_secret import OCServiceAccountSecret  # noqa: E402
 
+try:
+    import ruamel.yaml as yaml  # noqa: EF401
+    YAML_TYPE = 'ruamel'
+except ImportError:
+    YAML_TYPE = 'pyyaml'
+
 
 class OCServiceAccountSecretTest(unittest.TestCase):
     '''
@@ -54,8 +60,13 @@ class OCServiceAccountSecretTest(unittest.TestCase):
         }
 
         oc_get_sa_before = '''{
-            "kind": "ServiceAccount",
             "apiVersion": "v1",
+            "imagePullSecrets": [
+                {
+                    "name": "builder-dockercfg-rsrua"
+                }
+            ],
+            "kind": "ServiceAccount",
             "metadata": {
                 "name": "builder",
                 "namespace": "default",
@@ -72,18 +83,18 @@ class OCServiceAccountSecretTest(unittest.TestCase):
                     "name": "builder-token-akqxi"
                 }
 
-            ],
-            "imagePullSecrets": [
-                {
-                    "name": "builder-dockercfg-rsrua"
-                }
             ]
         }
         '''
 
         oc_get_sa_after = '''{
-            "kind": "ServiceAccount",
             "apiVersion": "v1",
+            "imagePullSecrets": [
+                {
+                    "name": "builder-dockercfg-rsrua"
+                }
+            ],
+            "kind": "ServiceAccount",
             "metadata": {
                 "name": "builder",
                 "namespace": "default",
@@ -103,16 +114,10 @@ class OCServiceAccountSecretTest(unittest.TestCase):
                     "name": "newsecret"
                 }
 
-            ],
-            "imagePullSecrets": [
-                {
-                    "name": "builder-dockercfg-rsrua"
-                }
             ]
         }
         '''
-
-        builder_yaml_file = '''\
+        builder_ryaml_file = '''\
 secrets:
 - name: builder-dockercfg-rsrua
 - name: builder-token-akqxi
@@ -128,6 +133,24 @@ metadata:
   creationTimestamp: '2017-02-05T17:02:00Z'
   selfLink: /api/v1/namespaces/default/serviceaccounts/builder
   uid: cf47bca7-ebc4-11e6-b041-0ed9df7abc38
+'''
+
+        builder_pyyaml_file = '''\
+apiVersion: v1
+imagePullSecrets:
+- name: builder-dockercfg-rsrua
+kind: ServiceAccount
+metadata:
+  creationTimestamp: '2017-02-05T17:02:00Z'
+  name: builder
+  namespace: default
+  resourceVersion: '302879'
+  selfLink: /api/v1/namespaces/default/serviceaccounts/builder
+  uid: cf47bca7-ebc4-11e6-b041-0ed9df7abc38
+secrets:
+- name: builder-dockercfg-rsrua
+- name: builder-token-akqxi
+- name: newsecret
 '''
 
         # Return values of our mocked function call. These get returned once per call.
@@ -158,8 +181,12 @@ metadata:
             mock.call(['oc', '-n', 'default', 'get', 'sa', 'builder', '-o', 'json'], None)
         ])
 
+        yaml_file = builder_pyyaml_file
+
+        if YAML_TYPE == 'ruamel':
+            yaml_file = builder_ryaml_file
         mock_write.assert_has_calls([
-            mock.call(mock.ANY, builder_yaml_file)
+            mock.call(mock.ANY, yaml_file)
         ])
 
     @mock.patch('oc_serviceaccount_secret.Utils.create_tmpfile_copy')
@@ -181,8 +208,13 @@ metadata:
         }
 
         oc_get_sa_before = '''{
-            "kind": "ServiceAccount",
             "apiVersion": "v1",
+            "imagePullSecrets": [
+                {
+                    "name": "builder-dockercfg-rsrua"
+                }
+            ],
+            "kind": "ServiceAccount",
             "metadata": {
                 "name": "builder",
                 "namespace": "default",
@@ -202,16 +234,11 @@ metadata:
                     "name": "newsecret"
                 }
 
-            ],
-            "imagePullSecrets": [
-                {
-                    "name": "builder-dockercfg-rsrua"
-                }
             ]
         }
         '''
 
-        builder_yaml_file = '''\
+        builder_ryaml_file = '''\
 secrets:
 - name: builder-dockercfg-rsrua
 - name: builder-token-akqxi
@@ -226,6 +253,23 @@ metadata:
   creationTimestamp: '2017-02-05T17:02:00Z'
   selfLink: /api/v1/namespaces/default/serviceaccounts/builder
   uid: cf47bca7-ebc4-11e6-b041-0ed9df7abc38
+'''
+
+        builder_pyyaml_file = '''\
+apiVersion: v1
+imagePullSecrets:
+- name: builder-dockercfg-rsrua
+kind: ServiceAccount
+metadata:
+  creationTimestamp: '2017-02-05T17:02:00Z'
+  name: builder
+  namespace: default
+  resourceVersion: '302879'
+  selfLink: /api/v1/namespaces/default/serviceaccounts/builder
+  uid: cf47bca7-ebc4-11e6-b041-0ed9df7abc38
+secrets:
+- name: builder-dockercfg-rsrua
+- name: builder-token-akqxi
 '''
 
         # Return values of our mocked function call. These get returned once per call.
@@ -254,8 +298,12 @@ metadata:
             mock.call(['oc', '-n', 'default', 'replace', '-f', mock.ANY], None),
         ])
 
+        yaml_file = builder_pyyaml_file
+
+        if YAML_TYPE == 'ruamel':
+            yaml_file = builder_ryaml_file
         mock_write.assert_has_calls([
-            mock.call(mock.ANY, builder_yaml_file)
+            mock.call(mock.ANY, yaml_file)
         ])
 
     def tearDown(self):

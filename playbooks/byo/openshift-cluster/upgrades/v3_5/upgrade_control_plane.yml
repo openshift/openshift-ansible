@@ -25,6 +25,9 @@
       openshift_upgrade_min: "{{ '1.4' if deployment_type == 'origin' else '3.4' }}"
 
 # Pre-upgrade
+- include: ../../../../common/openshift-cluster/upgrades/initialize_nodes_to_upgrade.yml
+  tags:
+  - pre_upgrade
 
 - name: Update repos on control plane hosts
   hosts: oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config
@@ -104,3 +107,5 @@
 - include: ../../../../common/openshift-cluster/upgrades/upgrade_control_plane.yml
 
 - include: ../../../../common/openshift-cluster/upgrades/post_control_plane.yml
+
+- inlcude: ../../../../common/openshift-cluster/upgrades/v3_5/storage_upgrade.yml

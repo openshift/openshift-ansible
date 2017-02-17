@@ -101,3 +101,5 @@
 - include: ../../../../common/openshift-cluster/upgrades/upgrade_nodes.yml
 
 - include: ../../../../common/openshift-cluster/upgrades/post_control_plane.yml
+
+- inlcude: ../../../../common/openshift-cluster/upgrades/v3_5/storage_upgrade.yml
