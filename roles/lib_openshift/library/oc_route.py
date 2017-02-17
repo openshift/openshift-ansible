@@ -1548,7 +1548,7 @@ class OCRoute(OpenShiftCLI):
     def needs_update(self):
         ''' verify an update is needed '''
         skip = []
-        return not Utils.check_def_equal(self.config.data, self.route.yaml_dict, skip_keys=skip, debug=True)
+        return not Utils.check_def_equal(self.config.data, self.route.yaml_dict, skip_keys=skip, debug=self.verbose)
 
     @staticmethod
     def get_cert_data(path, content):
