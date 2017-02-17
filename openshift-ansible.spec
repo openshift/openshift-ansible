@@ -22,6 +22,11 @@ Requires:      python2
 Requires:      python-six
 Requires:      tar
 Requires:      openshift-ansible-docs = %{version}-%{release}
+Requires:      openshift-ansible-callback-plugins = %{version}-%{release}
+Requires:      openshift-ansible-filter-plugins = %{version}-%{release}
+Requires:      openshift-ansible-lookup-plugins = %{version}-%{release}
+Requires:      openshift-ansible-playbooks = %{version}-%{release}
+Requires:      openshift-ansible-roles = %{version}-%{release}
 Requires:      java-1.8.0-openjdk-headless
 Requires:      httpd-tools
 Requires:      python-ruamel-yaml
@@ -239,7 +244,7 @@ BuildArch:     noarch
 %package -n atomic-openshift-utils
 Summary:       Atomic OpenShift Utilities
 BuildRequires: python-setuptools
-Requires:      %{name}-playbooks >= %{version}
+Requires:      %{name} >= %{version}
 Requires:      python-click
 Requires:      python-setuptools
 Requires:      PyYAML
