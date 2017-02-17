@@ -87,6 +87,7 @@
     register: grep_plugin_order_override
     when: openshift.common.version_gte_3_3_or_1_3 | bool
     changed_when: false
+    failed_when: false
 
   - name: Warn if pluginOrderOverride is in use in master-config.yaml
     debug:
