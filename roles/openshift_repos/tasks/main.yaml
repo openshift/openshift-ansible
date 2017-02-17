@@ -1,50 +1,47 @@
 ---
-# TODO: Add flag for enabling EPEL repo, default to false
-
-# TODO: Add subscription-management config, with parameters
-#       for username, password, poolid(name), and official repos to
-#       enable/disable. Might need to make a module that extends the
-#       subscription management module to take a poolid and enable/disable the
-#       proper repos correctly.
+- name: openshift_repos detect ostree
+  stat:
+    path: /run/ostree-booted
+  register: ostree_booted
 
 - assert:
     that: openshift_deployment_type in known_openshift_deployment_types
-  when: not openshift.common.is_containerized | bool
+    msg: "openshift_deployment_type must be one of {{ known_openshift_deployment_types }}"
 
-- name: Ensure libselinux-python is installed
-  package: name=libselinux-python state=present
-  when: not openshift.common.is_containerized | bool
+- block:
+  - name: Ensure libselinux-python is installed
+    package: name=libselinux-python state=present
 
-- name: Create any additional repos that are defined
-  template:
-    src: yum_repo.j2
-    dest: /etc/yum.repos.d/openshift_additional.repo
-  when: openshift_additional_repos | length > 0 and not openshift.common.is_containerized | bool
-  notify: refresh cache
+  - name: Create any additional repos that are defined
+    template:
+      src: yum_repo.j2
+      dest: /etc/yum.repos.d/openshift_additional.repo
+    when:
+    - openshift_additional_repos | length > 0
+    notify: refresh cache
 
-- name: Remove the additional repos if no longer defined
-  file:
-    dest: /etc/yum.repos.d/openshift_additional.repo
-    state: absent
-  when: openshift_additional_repos | length == 0 and not openshift.common.is_containerized | bool
-  notify: refresh cache
+  - name: Remove the additional repos if no longer defined
+    file:
+      dest: /etc/yum.repos.d/openshift_additional.repo
+      state: absent
+    when:
+    - openshift_additional_repos | length == 0
+    notify: refresh cache
 
-- name: Configure origin gpg keys if needed
-  copy:
-    src: origin/gpg_keys/openshift-ansible-CentOS-SIG-PaaS
-    dest: /etc/pki/rpm-gpg/
-  notify: refresh cache
-  when: ansible_os_family == "RedHat" and ansible_distribution != "Fedora"
-        and openshift_deployment_type == 'origin'
-        and not openshift.common.is_containerized | bool
-        and openshift_enable_origin_repo | default(true) | bool
+  - name: Configure origin gpg keys if needed
+    copy:
+      src: "{{ item.src }}"
+      dest: "{{ item.dest }}"
+    with_items:
+    - src: origin/gpg_keys/openshift-ansible-CentOS-SIG-PaaS
+      dest: /etc/pki/rpm-gpg/
+    - src: origin/repos/openshift-ansible-centos-paas-sig.repo
+      dest: /etc/yum.repos.d/
+    notify: refresh cache
+    when:
+    - ansible_os_family == "RedHat"
+    - ansible_distribution != "Fedora"
+    - openshift_deployment_type == 'origin'
+    - openshift_enable_origin_repo | default(true) | bool
 
-- name: Configure origin yum repositories RHEL/CentOS
-  copy:
-    src: origin/repos/openshift-ansible-centos-paas-sig.repo
-    dest: /etc/yum.repos.d/
-  notify: refresh cache
-  when: ansible_os_family == "RedHat" and ansible_distribution != "Fedora"
-        and openshift_deployment_type == 'origin'
-        and not openshift.common.is_containerized | bool
-        and openshift_enable_origin_repo | default(true) | bool
+  when: not ostree_booted.stat.exists
