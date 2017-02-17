@@ -1,6 +1,6 @@
 # pylint: skip-file
 
-class CertificateAuthorityConfig(OpenShiftCLIConfig):
+class CAServerCertConfig(OpenShiftCLIConfig):
     ''' CertificateAuthorityConfig is a DTO for the oadm ca command '''
     def __init__(self, cmd, kubeconfig, verbose, ca_options):
         super(CertificateAuthorityConfig, self).__init__('ca', None, kubeconfig, ca_options)
@@ -9,13 +9,13 @@ class CertificateAuthorityConfig(OpenShiftCLIConfig):
         self.verbose = verbose
         self._ca = ca_options
 
-class CertificateAuthority(OpenShiftCLI):
+class CAServerCert(OpenShiftCLI):
     ''' Class to wrap the oc command line tools '''
     def __init__(self,
                  config,
                  verbose=False):
         ''' Constructor for oadm ca '''
-        super(CertificateAuthority, self).__init__(None, config.kubeconfig, verbose)
+        super(CAServerCert, self).__init__(None, config.kubeconfig, verbose)
         self.config = config
         self.verbose = verbose
 
@@ -31,7 +31,7 @@ class CertificateAuthority(OpenShiftCLI):
         return None
 
     def create(self):
-        '''Create a deploymentconfig '''
+        '''run openshift ca cmd'''
         options = self.config.to_option_list()
 
         cmd = ['ca']
@@ -61,26 +61,20 @@ class CertificateAuthority(OpenShiftCLI):
     def run_ansible(params, check_mode):
         '''run the idempotent ansible code'''
 
-        config = CertificateAuthorityConfig(params['cmd'],
-                                            params['kubeconfig'],
-                                            params['debug'],
-                                            {'cert_dir':      {'value': params['cert_dir'], 'include': True},
-                                             'cert':          {'value': params['cert'], 'include': True},
-                                             'hostnames':     {'value': ','.join(params['hostnames']), 'include': True},
-                                             'master':        {'value': params['master'], 'include': True},
-                                             'public_master': {'value': params['public_master'], 'include': True},
-                                             'overwrite':     {'value': params['overwrite'], 'include': True},
-                                             'signer_name':   {'value': params['signer_name'], 'include': True},
-                                             'private_key':   {'value': params['private_key'], 'include': True},
-                                             'public_key':    {'value': params['public_key'], 'include': True},
-                                             'key':           {'value': params['key'], 'include': True},
-                                             'signer_cert':   {'value': params['signer_cert'], 'include': True},
-                                             'signer_key':    {'value': params['signer_key'], 'include': True},
-                                             'signer_serial': {'value': params['signer_serial'], 'include': True},
-                                            })
+        config = CAServerCertConfig(params['cmd'],
+                                    params['kubeconfig'],
+                                    params['debug'],
+                                    {'cert':          {'value': params['cert'], 'include': True},
+                                     'hostnames':     {'value': ','.join(params['hostnames']), 'include': True},
+                                     'overwrite':     {'value': params['overwrite'], 'include': True},
+                                     'signer_name':   {'value': params['signer_name'], 'include': True},
+                                     'key':           {'value': params['key'], 'include': True},
+                                     'signer_cert':   {'value': params['signer_cert'], 'include': True},
+                                     'signer_key':    {'value': params['signer_key'], 'include': True},
+                                     'signer_serial': {'value': params['signer_serial'], 'include': True},
+                                    })
 
-
-        oadm_ca = CertificateAuthority(config)
+        server_cert = CAServerCert(config)
 
         state = params['state']
 
@@ -88,21 +82,21 @@ class CertificateAuthority(OpenShiftCLI):
             ########
             # Create
             ########
-            if not oadm_ca.exists() or params['overwrite']:
+            if not server_cert.exists() or params['overwrite']:
 
                 if check_mode:
                     return {'changed': True,
                             'msg': "CHECK_MODE: Would have created the certificate.",
                             'state': state}
 
-                api_rval = oadm_ca.create()
+                api_rval = server_cert.create()
 
                 return {'changed': True, 'results': api_rval, 'state': state}
 
             ########
             # Exists
             ########
-            api_rval = oadm_ca.get()
+            api_rval = server_cert.get()
             return {'changed': False, 'results': api_rval, 'state': state}
 
         return {'failed': True,
