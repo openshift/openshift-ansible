@@ -10,7 +10,7 @@
     return_content: yes
     status_code: 200
   register: api_available_output
-  until: "'ok' in api_available_output.content"
+  until: api_available_output | succeeded
   retries: 120
   delay: 1
   changed_when: false
