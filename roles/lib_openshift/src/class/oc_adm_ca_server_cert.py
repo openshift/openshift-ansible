@@ -3,7 +3,7 @@
 class CAServerCertConfig(OpenShiftCLIConfig):
     ''' CAServerCertConfig is a DTO for the oc adm ca command '''
     def __init__(self, kubeconfig, verbose, ca_options):
-        super(CertificateAuthorityConfig, self).__init__('ca', None, kubeconfig, ca_options)
+        super(CAServerCertConfig, self).__init__('ca', None, kubeconfig, ca_options)
         self.kubeconfig = kubeconfig
         self.verbose = verbose
         self._ca = ca_options
@@ -45,11 +45,11 @@ class CAServerCert(OpenShiftCLI):
         if not os.path.exists(cert_path):
             return False
 
-        # Would prefer pyopenssl but is not installed.  
+        # Would prefer pyopenssl but is not installed.
         # When we verify it is, switch this code
         proc = subprocess.Popen(['openssl', 'x509', '-noout', '-subject', '-in', cert_path],
                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = proc.communicate()
+        stdout, _ = proc.communicate()
         if proc.returncode == 0:
             for var in self.config.config_options['hostnames']['value'].split(','):
                 if var in stdout:
@@ -66,7 +66,6 @@ class CAServerCert(OpenShiftCLI):
                                     {'cert':          {'value': params['cert'], 'include': True},
                                      'hostnames':     {'value': ','.join(params['hostnames']), 'include': True},
                                      'overwrite':     {'value': params['overwrite'], 'include': True},
-                                     'signer_name':   {'value': params['signer_name'], 'include': True},
                                      'key':           {'value': params['key'], 'include': True},
                                      'signer_cert':   {'value': params['signer_cert'], 'include': True},
                                      'signer_key':    {'value': params['signer_key'], 'include': True},

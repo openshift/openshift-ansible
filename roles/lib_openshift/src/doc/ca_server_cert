@@ -53,19 +53,19 @@ options:
     description:
     - The signer certificate file.
     required: false
-    default: None
+    default: /etc/origin/master/ca.crt
     aliases: []
   signer_key:
     description:
     - The signer key file.
     required: false
-    default: None
+    default: /etc/origin/master/ca.key
     aliases: []
   signer_serial:
     description:
     - The signer serial file.
     required: false
-    default: None
+    default: /etc/origin/master/ca.serial.txt
     aliases: []
   hostnames:
     description:

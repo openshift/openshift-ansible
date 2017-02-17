@@ -104,19 +104,19 @@ options:
     description:
     - The signer certificate file.
     required: false
-    default: None
+    default: /etc/origin/master/ca.crt
     aliases: []
   signer_key:
     description:
     - The signer key file.
     required: false
-    default: None
+    default: /etc/origin/master/ca.key
     aliases: []
   signer_serial:
     description:
     - The signer serial file.
     required: false
-    default: None
+    default: /etc/origin/master/ca.serial.txt
     aliases: []
   hostnames:
     description:
@@ -959,7 +959,7 @@ class OpenShiftCLI(object):
 
         stdout, stderr = proc.communicate(input_data)
 
-        return proc.returncode, stdout, stderr
+        return proc.returncode, stdout.decode(), stderr.decode()
 
     # pylint: disable=too-many-arguments,too-many-branches
     def openshift_cmd(self, cmd, oadm=False, output=False, output_type='json', input_data=None):
@@ -1316,7 +1316,7 @@ class OpenShiftCLIConfig(object):
 class CAServerCertConfig(OpenShiftCLIConfig):
     ''' CAServerCertConfig is a DTO for the oc adm ca command '''
     def __init__(self, kubeconfig, verbose, ca_options):
-        super(CertificateAuthorityConfig, self).__init__('ca', None, kubeconfig, ca_options)
+        super(CAServerCertConfig, self).__init__('ca', None, kubeconfig, ca_options)
         self.kubeconfig = kubeconfig
         self.verbose = verbose
         self._ca = ca_options
@@ -1358,11 +1358,11 @@ class CAServerCert(OpenShiftCLI):
         if not os.path.exists(cert_path):
             return False
 
-        # Would prefer pyopenssl but is not installed.  
+        # Would prefer pyopenssl but is not installed.
         # When we verify it is, switch this code
         proc = subprocess.Popen(['openssl', 'x509', '-noout', '-subject', '-in', cert_path],
                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = proc.communicate()
+        stdout, _ = proc.communicate()
         if proc.returncode == 0:
             for var in self.config.config_options['hostnames']['value'].split(','):
                 if var in stdout:
@@ -1379,7 +1379,6 @@ class CAServerCert(OpenShiftCLI):
                                     {'cert':          {'value': params['cert'], 'include': True},
                                      'hostnames':     {'value': ','.join(params['hostnames']), 'include': True},
                                      'overwrite':     {'value': params['overwrite'], 'include': True},
-                                     'signer_name':   {'value': params['signer_name'], 'include': True},
                                      'key':           {'value': params['key'], 'include': True},
                                      'signer_cert':   {'value': params['signer_cert'], 'include': True},
                                      'signer_key':    {'value': params['signer_key'], 'include': True},
@@ -1433,16 +1432,15 @@ def main():
             # oadm ca create-server-cert [options]
             cert=dict(default=None, type='str'),
             key=dict(default=None, type='str'),
-            signer_cert=dict(default=None, type='str'),
-            signer_key=dict(default=None, type='str'),
-            signer_serial=dict(default=None, type='str'),
+            signer_cert=dict(default='/etc/origin/master/ca.crt', type='str'),
+            signer_key=dict(default='/etc/origin/master/ca.key', type='str'),
+            signer_serial=dict(default='/etc/origin/master/ca.serial.txt', type='str'),
             hostnames=dict(default=[], type='list'),
             overwrite=dict(default=False, type='bool'),
         ),
         supports_check_mode=True,
     )
 
-    # pylint: disable=line-too-long
     results = CAServerCert.run_ansible(module.params, module.check_mode)
     if 'failed' in results:
         return module.fail_json(**results)
