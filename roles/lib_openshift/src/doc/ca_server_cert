@@ -3,18 +3,15 @@
 
 DOCUMENTATION = '''
 ---
-module: oadm_ca
-short_description: Module to manage openshift certificate authority
+module: oc_adm_ca_server_cert
+short_description: Module to run openshift oc adm ca create-server-cert
 description:
-  - Wrapper around the openshift `oc adm ca` command.
+  - Wrapper around the openshift `oc adm ca create-server-cert` command.
 options:
   state:
     description:
     - Present is the only supported state.  The state present means that `oc adm ca` will generate a certificate
-    - When create-master-certs is desired then the following parameters are passed.
-    - ['cert_dir', 'hostnames', 'master', 'public_master', 'overwrite', 'signer_name']
-    - When create-key-pair is desired then the following parameters are passed.
-    - ['private_key', 'public_key']
+    - and verify if the hostnames and the ClusterIP exists in the certificate.
     - When create-server-cert is desired then the following parameters are passed.
     - ['cert', 'key', 'signer_cert', 'signer_key', 'signer_serial']
     required: false
@@ -33,22 +30,6 @@ options:
     - Turn on debug output.
     required: false
     default: False
-    aliases: []
-  cmd:
-    description:
-    - The sub command given for `oc adm ca`
-    required: false
-    default: None
-    choices:
-    - create-master-certs
-    - create-key-pair
-    - create-server-cert
-    aliases: []
-  cert_dir:
-    description:
-    - The certificate data directory.
-    required: false
-    default: None
     aliases: []
   cert:
     description:
@@ -86,40 +67,9 @@ options:
     required: false
     default: None
     aliases: []
-  public_key:
-    description:
-    - The public key file used with create-key-pair
-    required: false
-    default: None
-    aliases: []
-  private_key:
-    description:
-    - The private key file used with create-key-pair
-    required: false
-    default: None
-    aliases: []
-    
   hostnames:
     description:
     - Every hostname or IP that server certs should be valid for (comma-delimited list)
-    required: false
-    default: None
-    aliases: []
-  master:
-    description:
-    - The API server's URL
-    required: false
-    default: None
-    aliases: []
-  public_master:
-    description:
-    - The API public facing server's URL (if applicable)
-    required: false
-    default: None
-    aliases: []
-  signer_name:
-    description:
-    - The name to use for the generated signer
     required: false
     default: None
     aliases: []
@@ -130,8 +80,7 @@ extends_documentation_fragment: []
 
 EXAMPLES = '''
 - name: Create a self-signed cert
-  oadm_ca:
-    cmd: create-server-cert
+  oc_adm_ca_server_cert:
     signer_cert: /etc/origin/master/ca.crt
     signer_key: /etc/origin/master/ca.key
     signer_serial: /etc/origin/master/ca.serial.txt

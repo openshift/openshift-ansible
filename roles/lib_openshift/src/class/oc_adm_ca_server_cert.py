@@ -1,16 +1,15 @@
 # pylint: skip-file
 
 class CAServerCertConfig(OpenShiftCLIConfig):
-    ''' CertificateAuthorityConfig is a DTO for the oadm ca command '''
-    def __init__(self, cmd, kubeconfig, verbose, ca_options):
+    ''' CAServerCertConfig is a DTO for the oc adm ca command '''
+    def __init__(self, kubeconfig, verbose, ca_options):
         super(CertificateAuthorityConfig, self).__init__('ca', None, kubeconfig, ca_options)
-        self.cmd = cmd
         self.kubeconfig = kubeconfig
         self.verbose = verbose
         self._ca = ca_options
 
 class CAServerCert(OpenShiftCLI):
-    ''' Class to wrap the oc command line tools '''
+    ''' Class to wrap the oc adm ca create-server-cert command line'''
     def __init__(self,
                  config,
                  verbose=False):
@@ -31,11 +30,10 @@ class CAServerCert(OpenShiftCLI):
         return None
 
     def create(self):
-        '''run openshift ca cmd'''
+        '''run openshift oc adm ca create-server-cert cmd'''
         options = self.config.to_option_list()
 
-        cmd = ['ca']
-        cmd.append(self.config.cmd)
+        cmd = ['ca', 'create-server-cert']
         cmd.extend(options)
 
         return self.openshift_cmd(cmd, oadm=True)
@@ -47,6 +45,8 @@ class CAServerCert(OpenShiftCLI):
         if not os.path.exists(cert_path):
             return False
 
+        # Would prefer pyopenssl but is not installed.  
+        # When we verify it is, switch this code
         proc = subprocess.Popen(['openssl', 'x509', '-noout', '-subject', '-in', cert_path],
                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = proc.communicate()
@@ -61,8 +61,7 @@ class CAServerCert(OpenShiftCLI):
     def run_ansible(params, check_mode):
         '''run the idempotent ansible code'''
 
-        config = CAServerCertConfig(params['cmd'],
-                                    params['kubeconfig'],
+        config = CAServerCertConfig(params['kubeconfig'],
                                     params['debug'],
                                     {'cert':          {'value': params['cert'], 'include': True},
                                      'hostnames':     {'value': ','.join(params['hostnames']), 'include': True},

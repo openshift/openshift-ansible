@@ -33,6 +33,7 @@
 
 from __future__ import print_function
 import atexit
+import copy
 import json
 import os
 import re
@@ -40,7 +41,11 @@ import shutil
 import subprocess
 import tempfile
 # pylint: disable=import-error
-import ruamel.yaml as yaml
+try:
+    import ruamel.yaml as yaml
+except ImportError:
+    import yaml
+
 from ansible.module_utils.basic import AnsibleModule
 
 # -*- -*- -*- End included fragment: lib/import.py -*- -*- -*-
@@ -49,18 +54,15 @@ from ansible.module_utils.basic import AnsibleModule
 
 DOCUMENTATION = '''
 ---
-module: oadm_ca
-short_description: Module to manage openshift certificate authority
+module: oc_adm_ca_server_cert
+short_description: Module to run openshift oc adm ca create-server-cert
 description:
-  - Wrapper around the openshift `oc adm ca` command.
+  - Wrapper around the openshift `oc adm ca create-server-cert` command.
 options:
   state:
     description:
     - Present is the only supported state.  The state present means that `oc adm ca` will generate a certificate
-    - When create-master-certs is desired then the following parameters are passed.
-    - ['cert_dir', 'hostnames', 'master', 'public_master', 'overwrite', 'signer_name']
-    - When create-key-pair is desired then the following parameters are passed.
-    - ['private_key', 'public_key']
+    - and verify if the hostnames and the ClusterIP exists in the certificate.
     - When create-server-cert is desired then the following parameters are passed.
     - ['cert', 'key', 'signer_cert', 'signer_key', 'signer_serial']
     required: false
@@ -79,22 +81,6 @@ options:
     - Turn on debug output.
     required: false
     default: False
-    aliases: []
-  cmd:
-    description:
-    - The sub command given for `oc adm ca`
-    required: false
-    default: None
-    choices:
-    - create-master-certs
-    - create-key-pair
-    - create-server-cert
-    aliases: []
-  cert_dir:
-    description:
-    - The certificate data directory.
-    required: false
-    default: None
     aliases: []
   cert:
     description:
@@ -132,40 +118,9 @@ options:
     required: false
     default: None
     aliases: []
-  public_key:
-    description:
-    - The public key file used with create-key-pair
-    required: false
-    default: None
-    aliases: []
-  private_key:
-    description:
-    - The private key file used with create-key-pair
-    required: false
-    default: None
-    aliases: []
-    
   hostnames:
     description:
     - Every hostname or IP that server certs should be valid for (comma-delimited list)
-    required: false
-    default: None
-    aliases: []
-  master:
-    description:
-    - The API server's URL
-    required: false
-    default: None
-    aliases: []
-  public_master:
-    description:
-    - The API public facing server's URL (if applicable)
-    required: false
-    default: None
-    aliases: []
-  signer_name:
-    description:
-    - The name to use for the generated signer
     required: false
     default: None
     aliases: []
@@ -176,8 +131,7 @@ extends_documentation_fragment: []
 
 EXAMPLES = '''
 - name: Create a self-signed cert
-  oadm_ca:
-    cmd: create-server-cert
+  oc_adm_ca_server_cert:
     signer_cert: /etc/origin/master/ca.crt
     signer_key: /etc/origin/master/ca.key
     signer_serial: /etc/origin/master/ca.serial.txt
@@ -383,11 +337,15 @@ class Yedit(object):
         if self.backup and self.file_exists():
             shutil.copy(self.filename, self.filename + '.orig')
 
-        # pylint: disable=no-member
-        if hasattr(self.yaml_dict, 'fa'):
-            self.yaml_dict.fa.set_block_style()
+        if hasattr(yaml, 'RoundTripDumper'):
+            # pylint: disable=no-member
+            if hasattr(self.yaml_dict, 'fa'):
+                self.yaml_dict.fa.set_block_style()
 
-        Yedit._write(self.filename, yaml.dump(self.yaml_dict, Dumper=yaml.RoundTripDumper))
+            # pylint: disable=no-member
+            Yedit._write(self.filename, yaml.dump(self.yaml_dict, Dumper=yaml.RoundTripDumper))
+        else:
+            Yedit._write(self.filename, yaml.safe_dump(self.yaml_dict, default_flow_style=False))
 
         return (True, self.yaml_dict)
 
@@ -427,10 +385,16 @@ class Yedit(object):
         # check if it is yaml
         try:
             if content_type == 'yaml' and contents:
-                self.yaml_dict = yaml.load(contents, yaml.RoundTripLoader)
+                # pylint: disable=no-member
+                if hasattr(yaml, 'RoundTripLoader'):
+                    self.yaml_dict = yaml.load(contents, yaml.RoundTripLoader)
+                else:
+                    self.yaml_dict = yaml.safe_load(contents)
+
                 # pylint: disable=no-member
                 if hasattr(self.yaml_dict, 'fa'):
                     self.yaml_dict.fa.set_block_style()
+
             elif content_type == 'json' and contents:
                 self.yaml_dict = json.loads(contents)
         except yaml.YAMLError as err:
@@ -595,12 +559,19 @@ class Yedit(object):
             return (False, self.yaml_dict)
 
         # deepcopy didn't work
-        tmp_copy = yaml.load(yaml.round_trip_dump(self.yaml_dict,
-                                                  default_flow_style=False),
-                             yaml.RoundTripLoader)
-        # pylint: disable=no-member
-        if hasattr(self.yaml_dict, 'fa'):
-            tmp_copy.fa.set_block_style()
+        if hasattr(yaml, 'round_trip_dump'):
+            # pylint: disable=no-member
+            tmp_copy = yaml.load(yaml.round_trip_dump(self.yaml_dict,
+                                                      default_flow_style=False),
+                                 yaml.RoundTripLoader)
+
+            # pylint: disable=no-member
+            if hasattr(self.yaml_dict, 'fa'):
+                tmp_copy.fa.set_block_style()
+
+        else:
+            tmp_copy = copy.deepcopy(self.yaml_dict)
+
         result = Yedit.add_entry(tmp_copy, path, value, self.separator)
         if not result:
             return (False, self.yaml_dict)
@@ -613,11 +584,17 @@ class Yedit(object):
         ''' create a yaml file '''
         if not self.file_exists():
             # deepcopy didn't work
-            tmp_copy = yaml.load(yaml.round_trip_dump(self.yaml_dict, default_flow_style=False),  # noqa: E501
-                                 yaml.RoundTripLoader)
-            # pylint: disable=no-member
-            if hasattr(self.yaml_dict, 'fa'):
-                tmp_copy.fa.set_block_style()
+            if hasattr(yaml, 'round_trip_dump'):
+                # pylint: disable=no-member
+                tmp_copy = yaml.load(yaml.round_trip_dump(self.yaml_dict, default_flow_style=False),  # noqa: E501
+                                     yaml.RoundTripLoader)
+
+                # pylint: disable=no-member
+                if hasattr(self.yaml_dict, 'fa'):
+                    tmp_copy.fa.set_block_style()
+            else:
+                tmp_copy = copy.deepcopy(self.yaml_dict)
+
             result = Yedit.add_entry(tmp_copy, path, value, self.separator)
             if result:
                 self.yaml_dict = tmp_copy
@@ -1059,7 +1036,12 @@ class Utils(object):
         tmp = Utils.create_tmpfile(prefix=rname)
 
         if ftype == 'yaml':
-            Utils._write(tmp, yaml.dump(data, Dumper=yaml.RoundTripDumper))
+            # pylint: disable=no-member
+            if hasattr(yaml, 'RoundTripDumper'):
+                Utils._write(tmp, yaml.dump(data, Dumper=yaml.RoundTripDumper))
+            else:
+                Utils._write(tmp, yaml.safe_dump(data, default_flow_style=False))
+
         elif ftype == 'json':
             Utils._write(tmp, json.dumps(data))
         else:
@@ -1141,7 +1123,11 @@ class Utils(object):
             contents = sfd.read()
 
         if sfile_type == 'yaml':
-            contents = yaml.load(contents, yaml.RoundTripLoader)
+            # pylint: disable=no-member
+            if hasattr(yaml, 'RoundTripLoader'):
+                contents = yaml.load(contents, yaml.RoundTripLoader)
+            else:
+                contents = yaml.safe_load(contents)
         elif sfile_type == 'json':
             contents = json.loads(contents)
 
@@ -1328,16 +1314,15 @@ class OpenShiftCLIConfig(object):
 # -*- -*- -*- Begin included fragment: class/oc_adm_ca_server_cert.py -*- -*- -*-
 
 class CAServerCertConfig(OpenShiftCLIConfig):
-    ''' CertificateAuthorityConfig is a DTO for the oadm ca command '''
-    def __init__(self, cmd, kubeconfig, verbose, ca_options):
+    ''' CAServerCertConfig is a DTO for the oc adm ca command '''
+    def __init__(self, kubeconfig, verbose, ca_options):
         super(CertificateAuthorityConfig, self).__init__('ca', None, kubeconfig, ca_options)
-        self.cmd = cmd
         self.kubeconfig = kubeconfig
         self.verbose = verbose
         self._ca = ca_options
 
 class CAServerCert(OpenShiftCLI):
-    ''' Class to wrap the oc command line tools '''
+    ''' Class to wrap the oc adm ca create-server-cert command line'''
     def __init__(self,
                  config,
                  verbose=False):
@@ -1358,11 +1343,10 @@ class CAServerCert(OpenShiftCLI):
         return None
 
     def create(self):
-        '''run openshift ca cmd'''
+        '''run openshift oc adm ca create-server-cert cmd'''
         options = self.config.to_option_list()
 
-        cmd = ['ca']
-        cmd.append(self.config.cmd)
+        cmd = ['ca', 'create-server-cert']
         cmd.extend(options)
 
         return self.openshift_cmd(cmd, oadm=True)
@@ -1374,6 +1358,8 @@ class CAServerCert(OpenShiftCLI):
         if not os.path.exists(cert_path):
             return False
 
+        # Would prefer pyopenssl but is not installed.  
+        # When we verify it is, switch this code
         proc = subprocess.Popen(['openssl', 'x509', '-noout', '-subject', '-in', cert_path],
                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = proc.communicate()
@@ -1388,8 +1374,7 @@ class CAServerCert(OpenShiftCLI):
     def run_ansible(params, check_mode):
         '''run the idempotent ansible code'''
 
-        config = CAServerCertConfig(params['cmd'],
-                                    params['kubeconfig'],
+        config = CAServerCertConfig(params['kubeconfig'],
                                     params['debug'],
                                     {'cert':          {'value': params['cert'], 'include': True},
                                      'hostnames':     {'value': ','.join(params['hostnames']), 'include': True},
