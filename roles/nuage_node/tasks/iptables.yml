@@ -2,7 +2,7 @@
 - name: IPtables | Get iptables rules
   command: iptables -L --wait
   register: iptablesrules
-  always_run: yes
+  check_mode: no
 
 - name: Allow traffic from overlay to underlay
   command: /sbin/iptables --wait -I FORWARD 1 -s {{ hostvars[groups.oo_first_master.0].openshift.master.sdn_cluster_network_cidr }} -j ACCEPT -m comment --comment "nuage-overlay-underlay"
