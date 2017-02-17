@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.9
+Version:        3.5.10
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -259,6 +259,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Feb 16 2017 Scott Dodson <sdodson@redhat.com> 3.5.10-1
+- Don't attempt to install python-ruamel-yaml on atomic (sdodson@redhat.com)
+
 * Thu Feb 16 2017 Scott Dodson <sdodson@redhat.com> 3.5.9-1
 - Pleasing the linting gods. (kwoodson@redhat.com)
 - Fixed tests for pyyaml vs ruamel.  Added import logic.  Fixed safe load.
