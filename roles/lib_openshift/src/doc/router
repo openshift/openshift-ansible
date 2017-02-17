@@ -3,7 +3,7 @@
 
 DOCUMENTATION = '''
 ---
-module: oadm_router
+module: oc_adm_router
 short_description: Module to manage openshift router
 description:
   - Manage openshift router programmatically.

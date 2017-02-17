@@ -9,7 +9,7 @@ oadm_manage_node.py:
 - class/oadm_manage_node.py
 - ansible/oadm_manage_node.py
 
-oadm_registry.py:
+oc_adm_registry.py:
 - doc/generated
 - doc/license
 - lib/import.py
@@ -21,10 +21,10 @@ oadm_registry.py:
 - lib/service.py
 - lib/volume.py
 - class/oc_version.py
-- class/oadm_registry.py
-- ansible/oadm_registry.py
+- class/oc_adm_registry.py
+- ansible/oc_adm_registry.py
 
-oadm_router.py:
+oc_adm_router.py:
 - doc/generated
 - doc/license
 - lib/import.py
@@ -36,8 +36,8 @@ oadm_router.py:
 - lib/serviceaccount.py
 - lib/secret.py
 - lib/rolebinding.py
-- class/oadm_router.py
-- ansible/oadm_router.py
+- class/oc_adm_router.py
+- ansible/oc_adm_router.py
 
 oc_edit.py:
 - doc/generated
