@@ -68,13 +68,17 @@ TEST_VARS = [
 ]
 
 
-def test_openshift_version(priorities_lookup, openshift_version_fixture, zones_enabled):
-    facts, default_priorities = openshift_version_fixture
-    results = priorities_lookup.run(None, variables=facts, zones_enabled=zones_enabled)
+def assert_ok(priorities_lookup, default_priorities, zones_enabled, **kwargs):
+    results = priorities_lookup.run(None, zones_enabled=zones_enabled, **kwargs)
     if zones_enabled:
         assert results == default_priorities + [ZONE_PRIORITY]
     else:
         assert results == default_priorities
+
+
+def test_openshift_version(priorities_lookup, openshift_version_fixture, zones_enabled):
+    facts, default_priorities = openshift_version_fixture
+    assert_ok(priorities_lookup, default_priorities, variables=facts, zones_enabled=zones_enabled)
 
 
 @pytest.fixture(params=TEST_VARS)
@@ -88,11 +92,7 @@ def openshift_version_fixture(request, facts):
 
 def test_openshift_release(priorities_lookup, openshift_release_fixture, zones_enabled):
     facts, default_priorities = openshift_release_fixture
-    results = priorities_lookup.run(None, variables=facts, zones_enabled=zones_enabled)
-    if zones_enabled:
-        assert results == default_priorities + [ZONE_PRIORITY]
-    else:
-        assert results == default_priorities
+    assert_ok(priorities_lookup, default_priorities, variables=facts, zones_enabled=zones_enabled)
 
 
 @pytest.fixture(params=TEST_VARS)
@@ -105,11 +105,7 @@ def openshift_release_fixture(request, facts, release_mod):
 
 def test_short_version(priorities_lookup, short_version_fixture, zones_enabled):
     facts, default_priorities = short_version_fixture
-    results = priorities_lookup.run(None, variables=facts, zones_enabled=zones_enabled)
-    if zones_enabled:
-        assert results == default_priorities + [ZONE_PRIORITY]
-    else:
-        assert results == default_priorities
+    assert_ok(priorities_lookup, default_priorities, variables=facts, zones_enabled=zones_enabled)
 
 
 @pytest.fixture(params=TEST_VARS)
@@ -122,11 +118,7 @@ def short_version_fixture(request, facts):
 
 def test_short_version_kwarg(priorities_lookup, short_version_kwarg_fixture, zones_enabled):
     facts, short_version, default_priorities = short_version_kwarg_fixture
-    results = priorities_lookup.run(None, variables=facts, zones_enabled=zones_enabled, short_version=short_version)
-    if zones_enabled:
-        assert results == default_priorities + [ZONE_PRIORITY]
-    else:
-        assert results == default_priorities
+    assert_ok(priorities_lookup, default_priorities, variables=facts, zones_enabled=zones_enabled, short_version=short_version)
 
 
 @pytest.fixture(params=TEST_VARS)
@@ -138,11 +130,7 @@ def short_version_kwarg_fixture(request, facts):
 
 def test_deployment_type_kwarg(priorities_lookup, deployment_type_kwarg_fixture, zones_enabled):
     facts, deployment_type, default_priorities = deployment_type_kwarg_fixture
-    results = priorities_lookup.run(None, variables=facts, zones_enabled=zones_enabled, deployment_type=deployment_type)
-    if zones_enabled:
-        assert results == default_priorities + [ZONE_PRIORITY]
-    else:
-        assert results == default_priorities
+    assert_ok(priorities_lookup, default_priorities, variables=facts, zones_enabled=zones_enabled, deployment_type=deployment_type)
 
 
 @pytest.fixture(params=TEST_VARS)
@@ -154,11 +142,7 @@ def deployment_type_kwarg_fixture(request, facts):
 
 def test_short_version_deployment_type_kwargs(priorities_lookup, short_version_deployment_type_kwargs_fixture, zones_enabled):
     short_version, deployment_type, default_priorities = short_version_deployment_type_kwargs_fixture
-    results = priorities_lookup.run(None, zones_enabled=zones_enabled, short_version=short_version, deployment_type=deployment_type)
-    if zones_enabled:
-        assert results == default_priorities + [ZONE_PRIORITY]
-    else:
-        assert results == default_priorities
+    assert_ok(priorities_lookup, default_priorities, zones_enabled=zones_enabled, short_version=short_version, deployment_type=deployment_type)
 
 
 @pytest.fixture(params=TEST_VARS)
