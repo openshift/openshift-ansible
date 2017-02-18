@@ -98,9 +98,41 @@ class TestOpenShiftMasterFactsDefaultPredicates(object):
         }
 
     @raises(AnsibleError)
+    def test_missing_openshift_facts(self):
+        facts = {}
+        self.lookup.run(None, variables=facts)
+
+    @raises(AnsibleError)
+    def test_missing_deployment_type(self):
+        facts = copy.deepcopy(self.default_facts)
+        facts['openshift']['common']['short_version'] = '10.10'
+        self.lookup.run(None, variables=facts)
+
+    @raises(AnsibleError)
     def test_missing_short_version_and_missing_openshift_release(self):
         facts = copy.deepcopy(self.default_facts)
         facts['openshift']['common']['deployment_type'] = 'origin'
+        self.lookup.run(None, variables=facts)
+
+    @raises(AnsibleError)
+    def test_unknown_deployment_types(self):
+        facts = copy.deepcopy(self.default_facts)
+        facts['openshift']['common']['short_version'] = '1.1'
+        facts['openshift']['common']['deployment_type'] = 'bogus'
+        self.lookup.run(None, variables=facts)
+
+    @raises(AnsibleError)
+    def test_unknown_origin_version(self):
+        facts = copy.deepcopy(self.default_facts)
+        facts['openshift']['common']['short_version'] = '0.1'
+        facts['openshift']['common']['deployment_type'] = 'origin'
+        self.lookup.run(None, variables=facts)
+
+    @raises(AnsibleError)
+    def test_unknown_ocp_version(self):
+        facts = copy.deepcopy(self.default_facts)
+        facts['openshift']['common']['short_version'] = '0.1'
+        facts['openshift']['common']['deployment_type'] = 'openshift-enterprise'
         self.lookup.run(None, variables=facts)
 
     def check_defaults_short_version(self, short_version, deployment_type, default_predicates,
@@ -215,35 +247,3 @@ class TestOpenShiftMasterFactsDefaultPredicates(object):
         for release, deployment_type, default_predicates in TEST_VARS:
             release = release + '.1'
             yield self.check_defaults_release, release, deployment_type, default_predicates, False
-
-    @raises(AnsibleError)
-    def test_unknown_deployment_types(self):
-        facts = copy.deepcopy(self.default_facts)
-        facts['openshift']['common']['short_version'] = '1.1'
-        facts['openshift']['common']['deployment_type'] = 'bogus'
-        self.lookup.run(None, variables=facts)
-
-    @raises(AnsibleError)
-    def test_unknown_origin_version(self):
-        facts = copy.deepcopy(self.default_facts)
-        facts['openshift']['common']['short_version'] = '0.1'
-        facts['openshift']['common']['deployment_type'] = 'origin'
-        self.lookup.run(None, variables=facts)
-
-    @raises(AnsibleError)
-    def test_unknown_ocp_version(self):
-        facts = copy.deepcopy(self.default_facts)
-        facts['openshift']['common']['short_version'] = '0.1'
-        facts['openshift']['common']['deployment_type'] = 'openshift-enterprise'
-        self.lookup.run(None, variables=facts)
-
-    @raises(AnsibleError)
-    def test_missing_deployment_type(self):
-        facts = copy.deepcopy(self.default_facts)
-        facts['openshift']['common']['short_version'] = '10.10'
-        self.lookup.run(None, variables=facts)
-
-    @raises(AnsibleError)
-    def test_missing_openshift_facts(self):
-        facts = {}
-        self.lookup.run(None, variables=facts)
