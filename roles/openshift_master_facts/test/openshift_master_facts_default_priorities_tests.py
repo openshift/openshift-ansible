@@ -84,6 +84,55 @@ class TestOpenShiftMasterFactsDefaultPredicates(object):
             }
         }
 
+    def test_openshift_version(self):
+        for zones_enabled in (True, False):
+            for release, deployment_type, default_priorities in TEST_VARS:
+                release = release + '.1'
+                yield self.check_defaults_version, release, deployment_type, default_priorities, zones_enabled
+
+    def check_defaults_version(self, release, deployment_type, default_priorities,
+                               zones_enabled):
+        facts = copy.deepcopy(self.default_facts)
+        facts['openshift_version'] = release
+        facts['openshift']['common']['deployment_type'] = deployment_type
+        results = self.lookup.run(None, variables=facts, zones_enabled=zones_enabled)
+        if zones_enabled:
+            assert_equal(results, default_priorities + [ZONE_PRIORITY])
+        else:
+            assert_equal(results, default_priorities)
+
+    def test_release_defaults(self):
+        for zones_enabled in (True, False):
+            for release, deployment_type, default_priorities in TEST_VARS:
+                yield self.check_defaults_release, release, deployment_type, default_priorities, zones_enabled
+
+    def test_v_release_defaults(self):
+        for zones_enabled in (True, False):
+            for release, deployment_type, default_priorities in TEST_VARS:
+                release = 'v' + release
+                yield self.check_defaults_release, release, deployment_type, default_priorities, zones_enabled
+
+    def test_trunc_openshift_release(self):
+        for release, deployment_type, default_priorities in TEST_VARS:
+            release = release + '.1'
+            yield self.check_defaults_release, release, deployment_type, default_priorities, False
+
+    def check_defaults_release(self, release, deployment_type, default_priorities,
+                               zones_enabled):
+        facts = copy.deepcopy(self.default_facts)
+        facts['openshift_release'] = release
+        facts['openshift']['common']['deployment_type'] = deployment_type
+        results = self.lookup.run(None, variables=facts, zones_enabled=zones_enabled)
+        if zones_enabled:
+            assert_equal(results, default_priorities + [ZONE_PRIORITY])
+        else:
+            assert_equal(results, default_priorities)
+
+    def test_short_version_defaults(self):
+        for zones_enabled in (True, False):
+            for short_version, deployment_type, default_priorities in TEST_VARS:
+                yield self.check_defaults_short_version, short_version, deployment_type, default_priorities, zones_enabled
+
     def check_defaults_short_version(self, release, deployment_type,
                                      default_priorities, zones_enabled):
         facts = copy.deepcopy(self.default_facts)
@@ -94,6 +143,11 @@ class TestOpenShiftMasterFactsDefaultPredicates(object):
             assert_equal(results, default_priorities + [ZONE_PRIORITY])
         else:
             assert_equal(results, default_priorities)
+
+    def test_release_kwarg(self):
+        for zones_enabled in (True, False):
+            for short_version, deployment_type, default_priorities in TEST_VARS:
+                yield self.check_defaults_short_version_kwarg, short_version, deployment_type, default_priorities, zones_enabled
 
     def check_defaults_short_version_kwarg(self, release, deployment_type,
                                            default_priorities, zones_enabled):
@@ -107,6 +161,11 @@ class TestOpenShiftMasterFactsDefaultPredicates(object):
         else:
             assert_equal(results, default_priorities)
 
+    def test_deployment_type_kwarg(self):
+        for zones_enabled in (True, False):
+            for short_version, deployment_type, default_priorities in TEST_VARS:
+                yield self.check_defaults_deployment_type_kwarg, short_version, deployment_type, default_priorities, zones_enabled
+
     def check_defaults_deployment_type_kwarg(self, release, deployment_type,
                                              default_priorities, zones_enabled):
         facts = copy.deepcopy(self.default_facts)
@@ -119,6 +178,11 @@ class TestOpenShiftMasterFactsDefaultPredicates(object):
         else:
             assert_equal(results, default_priorities)
 
+    def test_only_kwargs(self):
+        for zones_enabled in (True, False):
+            for short_version, deployment_type, default_priorities in TEST_VARS:
+                yield self.check_defaults_only_kwargs, short_version, deployment_type, default_priorities, zones_enabled
+
     def check_defaults_only_kwargs(self, release, deployment_type,
                                    default_priorities, zones_enabled):
         facts = copy.deepcopy(self.default_facts)
@@ -130,67 +194,3 @@ class TestOpenShiftMasterFactsDefaultPredicates(object):
             assert_equal(results, default_priorities + [ZONE_PRIORITY])
         else:
             assert_equal(results, default_priorities)
-
-    def check_defaults_release(self, release, deployment_type, default_priorities,
-                               zones_enabled):
-        facts = copy.deepcopy(self.default_facts)
-        facts['openshift_release'] = release
-        facts['openshift']['common']['deployment_type'] = deployment_type
-        results = self.lookup.run(None, variables=facts, zones_enabled=zones_enabled)
-        if zones_enabled:
-            assert_equal(results, default_priorities + [ZONE_PRIORITY])
-        else:
-            assert_equal(results, default_priorities)
-
-    def check_defaults_version(self, release, deployment_type, default_priorities,
-                               zones_enabled):
-        facts = copy.deepcopy(self.default_facts)
-        facts['openshift_version'] = release
-        facts['openshift']['common']['deployment_type'] = deployment_type
-        results = self.lookup.run(None, variables=facts, zones_enabled=zones_enabled)
-        if zones_enabled:
-            assert_equal(results, default_priorities + [ZONE_PRIORITY])
-        else:
-            assert_equal(results, default_priorities)
-
-    def test_openshift_version(self):
-        for zones_enabled in (True, False):
-            for release, deployment_type, default_priorities in TEST_VARS:
-                release = release + '.1'
-                yield self.check_defaults_version, release, deployment_type, default_priorities, zones_enabled
-
-    def test_v_release_defaults(self):
-        for zones_enabled in (True, False):
-            for release, deployment_type, default_priorities in TEST_VARS:
-                release = 'v' + release
-                yield self.check_defaults_release, release, deployment_type, default_priorities, zones_enabled
-
-    def test_release_defaults(self):
-        for zones_enabled in (True, False):
-            for release, deployment_type, default_priorities in TEST_VARS:
-                yield self.check_defaults_release, release, deployment_type, default_priorities, zones_enabled
-
-    def test_short_version_defaults(self):
-        for zones_enabled in (True, False):
-            for short_version, deployment_type, default_priorities in TEST_VARS:
-                yield self.check_defaults_short_version, short_version, deployment_type, default_priorities, zones_enabled
-
-    def test_only_kwargs(self):
-        for zones_enabled in (True, False):
-            for short_version, deployment_type, default_priorities in TEST_VARS:
-                yield self.check_defaults_only_kwargs, short_version, deployment_type, default_priorities, zones_enabled
-
-    def test_deployment_type_kwarg(self):
-        for zones_enabled in (True, False):
-            for short_version, deployment_type, default_priorities in TEST_VARS:
-                yield self.check_defaults_deployment_type_kwarg, short_version, deployment_type, default_priorities, zones_enabled
-
-    def test_release_kwarg(self):
-        for zones_enabled in (True, False):
-            for short_version, deployment_type, default_priorities in TEST_VARS:
-                yield self.check_defaults_short_version_kwarg, short_version, deployment_type, default_priorities, zones_enabled
-
-    def test_trunc_openshift_release(self):
-        for release, deployment_type, default_priorities in TEST_VARS:
-            release = release + '.1'
-            yield self.check_defaults_release, release, deployment_type, default_priorities, False

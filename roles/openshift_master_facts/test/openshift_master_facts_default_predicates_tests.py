@@ -96,65 +96,11 @@ class TestOpenShiftMasterFactsDefaultPredicates(object):
             }
         }
 
-    def check_defaults_short_version(self, short_version, deployment_type, default_predicates,
-                                     regions_enabled):
-        facts = copy.deepcopy(self.default_facts)
-        facts['openshift']['common']['short_version'] = short_version
-        facts['openshift']['common']['deployment_type'] = deployment_type
-        results = self.lookup.run(None, variables=facts,
-                                  regions_enabled=regions_enabled)
-        if regions_enabled:
-            assert_equal(results, default_predicates + [REGION_PREDICATE])
-        else:
-            assert_equal(results, default_predicates)
-
-    def check_defaults_short_version_kwarg(self, short_version, deployment_type, default_predicates,
-                                           regions_enabled):
-        facts = copy.deepcopy(self.default_facts)
-        facts['openshift']['common']['deployment_type'] = deployment_type
-        results = self.lookup.run(None, variables=facts,
-                                  regions_enabled=regions_enabled,
-                                  short_version=short_version)
-        if regions_enabled:
-            assert_equal(results, default_predicates + [REGION_PREDICATE])
-        else:
-            assert_equal(results, default_predicates)
-
-    def check_defaults_deployment_type_kwarg(self, short_version, deployment_type,
-                                             default_predicates, regions_enabled):
-        facts = copy.deepcopy(self.default_facts)
-        facts['openshift']['common']['short_version'] = short_version
-        results = self.lookup.run(None, variables=facts,
-                                  regions_enabled=regions_enabled,
-                                  deployment_type=deployment_type)
-        if regions_enabled:
-            assert_equal(results, default_predicates + [REGION_PREDICATE])
-        else:
-            assert_equal(results, default_predicates)
-
-    def check_defaults_only_kwargs(self, short_version, deployment_type,
-                                   default_predicates, regions_enabled):
-        facts = copy.deepcopy(self.default_facts)
-        results = self.lookup.run(None, variables=facts,
-                                  regions_enabled=regions_enabled,
-                                  short_version=short_version,
-                                  deployment_type=deployment_type)
-        if regions_enabled:
-            assert_equal(results, default_predicates + [REGION_PREDICATE])
-        else:
-            assert_equal(results, default_predicates)
-
-    def check_defaults_release(self, release, deployment_type, default_predicates,
-                               regions_enabled):
-        facts = copy.deepcopy(self.default_facts)
-        facts['openshift_release'] = release
-        facts['openshift']['common']['deployment_type'] = deployment_type
-        results = self.lookup.run(None, variables=facts,
-                                  regions_enabled=regions_enabled)
-        if regions_enabled:
-            assert_equal(results, default_predicates + [REGION_PREDICATE])
-        else:
-            assert_equal(results, default_predicates)
+    def test_openshift_version(self):
+        for regions_enabled in (True, False):
+            for release, deployment_type, default_predicates in TEST_VARS:
+                release = release + '.1'
+                yield self.check_defaults_version, release, deployment_type, default_predicates, regions_enabled
 
     def check_defaults_version(self, version, deployment_type, default_predicates,
                                regions_enabled):
@@ -168,43 +114,97 @@ class TestOpenShiftMasterFactsDefaultPredicates(object):
         else:
             assert_equal(results, default_predicates)
 
-    def test_openshift_version(self):
+    def test_release_defaults(self):
         for regions_enabled in (True, False):
             for release, deployment_type, default_predicates in TEST_VARS:
-                release = release + '.1'
-                yield self.check_defaults_version, release, deployment_type, default_predicates, regions_enabled
+                yield self.check_defaults_release, release, deployment_type, default_predicates, regions_enabled
 
     def test_v_release_defaults(self):
         for regions_enabled in (True, False):
             for release, deployment_type, default_predicates in TEST_VARS:
                 yield self.check_defaults_release, 'v' + release, deployment_type, default_predicates, regions_enabled
 
-    def test_release_defaults(self):
-        for regions_enabled in (True, False):
-            for release, deployment_type, default_predicates in TEST_VARS:
-                yield self.check_defaults_release, release, deployment_type, default_predicates, regions_enabled
+    def test_trunc_openshift_release(self):
+        for release, deployment_type, default_predicates in TEST_VARS:
+            release = release + '.1'
+            yield self.check_defaults_release, release, deployment_type, default_predicates, False
+
+    def check_defaults_release(self, release, deployment_type, default_predicates,
+                               regions_enabled):
+        facts = copy.deepcopy(self.default_facts)
+        facts['openshift_release'] = release
+        facts['openshift']['common']['deployment_type'] = deployment_type
+        results = self.lookup.run(None, variables=facts,
+                                  regions_enabled=regions_enabled)
+        if regions_enabled:
+            assert_equal(results, default_predicates + [REGION_PREDICATE])
+        else:
+            assert_equal(results, default_predicates)
 
     def test_short_version_defaults(self):
         for regions_enabled in (True, False):
             for release, deployment_type, default_predicates in TEST_VARS:
                 yield self.check_defaults_short_version, release, deployment_type, default_predicates, regions_enabled
 
+    def check_defaults_short_version(self, short_version, deployment_type, default_predicates,
+                                     regions_enabled):
+        facts = copy.deepcopy(self.default_facts)
+        facts['openshift']['common']['short_version'] = short_version
+        facts['openshift']['common']['deployment_type'] = deployment_type
+        results = self.lookup.run(None, variables=facts,
+                                  regions_enabled=regions_enabled)
+        if regions_enabled:
+            assert_equal(results, default_predicates + [REGION_PREDICATE])
+        else:
+            assert_equal(results, default_predicates)
+
     def test_short_version_kwarg(self):
         for regions_enabled in (True, False):
             for release, deployment_type, default_predicates in TEST_VARS:
                 yield self.check_defaults_short_version_kwarg, release, deployment_type, default_predicates, regions_enabled
 
-    def test_only_kwargs(self):
-        for regions_enabled in (True, False):
-            for release, deployment_type, default_predicates in TEST_VARS:
-                yield self.check_defaults_only_kwargs, release, deployment_type, default_predicates, regions_enabled
+    def check_defaults_short_version_kwarg(self, short_version, deployment_type, default_predicates,
+                                           regions_enabled):
+        facts = copy.deepcopy(self.default_facts)
+        facts['openshift']['common']['deployment_type'] = deployment_type
+        results = self.lookup.run(None, variables=facts,
+                                  regions_enabled=regions_enabled,
+                                  short_version=short_version)
+        if regions_enabled:
+            assert_equal(results, default_predicates + [REGION_PREDICATE])
+        else:
+            assert_equal(results, default_predicates)
 
     def test_deployment_type_kwarg(self):
         for regions_enabled in (True, False):
             for release, deployment_type, default_predicates in TEST_VARS:
                 yield self.check_defaults_deployment_type_kwarg, release, deployment_type, default_predicates, regions_enabled
 
-    def test_trunc_openshift_release(self):
-        for release, deployment_type, default_predicates in TEST_VARS:
-            release = release + '.1'
-            yield self.check_defaults_release, release, deployment_type, default_predicates, False
+    def check_defaults_deployment_type_kwarg(self, short_version, deployment_type,
+                                             default_predicates, regions_enabled):
+        facts = copy.deepcopy(self.default_facts)
+        facts['openshift']['common']['short_version'] = short_version
+        results = self.lookup.run(None, variables=facts,
+                                  regions_enabled=regions_enabled,
+                                  deployment_type=deployment_type)
+        if regions_enabled:
+            assert_equal(results, default_predicates + [REGION_PREDICATE])
+        else:
+            assert_equal(results, default_predicates)
+
+    def test_only_kwargs(self):
+        for regions_enabled in (True, False):
+            for release, deployment_type, default_predicates in TEST_VARS:
+                yield self.check_defaults_only_kwargs, release, deployment_type, default_predicates, regions_enabled
+
+    def check_defaults_only_kwargs(self, short_version, deployment_type,
+                                   default_predicates, regions_enabled):
+        facts = copy.deepcopy(self.default_facts)
+        results = self.lookup.run(None, variables=facts,
+                                  regions_enabled=regions_enabled,
+                                  short_version=short_version,
+                                  deployment_type=deployment_type)
+        if regions_enabled:
+            assert_equal(results, default_predicates + [REGION_PREDICATE])
+        else:
+            assert_equal(results, default_predicates)
