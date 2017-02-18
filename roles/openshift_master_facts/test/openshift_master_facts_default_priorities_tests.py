@@ -2,8 +2,6 @@ import copy
 import os
 import sys
 
-from nose.tools import assert_equal
-
 sys.path.insert(1, os.path.join(os.path.dirname(__file__), os.pardir, "lookup_plugins"))
 
 from openshift_master_facts_default_priorities import LookupModule  # noqa: E402
@@ -97,9 +95,9 @@ class TestOpenShiftMasterFactsDefaultPredicates(object):
         facts['openshift']['common']['deployment_type'] = deployment_type
         results = self.lookup.run(None, variables=facts, zones_enabled=zones_enabled)
         if zones_enabled:
-            assert_equal(results, default_priorities + [ZONE_PRIORITY])
+            assert results == default_priorities + [ZONE_PRIORITY]
         else:
-            assert_equal(results, default_priorities)
+            assert results == default_priorities
 
     def test_release_defaults(self):
         for zones_enabled in (True, False):
@@ -123,9 +121,9 @@ class TestOpenShiftMasterFactsDefaultPredicates(object):
         facts['openshift']['common']['deployment_type'] = deployment_type
         results = self.lookup.run(None, variables=facts, zones_enabled=zones_enabled)
         if zones_enabled:
-            assert_equal(results, default_priorities + [ZONE_PRIORITY])
+            assert results == default_priorities + [ZONE_PRIORITY]
         else:
-            assert_equal(results, default_priorities)
+            assert results == default_priorities
 
     def test_short_version_defaults(self):
         for zones_enabled in (True, False):
@@ -139,9 +137,9 @@ class TestOpenShiftMasterFactsDefaultPredicates(object):
         facts['openshift']['common']['deployment_type'] = deployment_type
         results = self.lookup.run(None, variables=facts, zones_enabled=zones_enabled)
         if zones_enabled:
-            assert_equal(results, default_priorities + [ZONE_PRIORITY])
+            assert results == default_priorities + [ZONE_PRIORITY]
         else:
-            assert_equal(results, default_priorities)
+            assert results == default_priorities
 
     def test_short_version_kwarg(self):
         for zones_enabled in (True, False):
@@ -156,9 +154,9 @@ class TestOpenShiftMasterFactsDefaultPredicates(object):
                                   zones_enabled=zones_enabled,
                                   short_version=short_version)
         if zones_enabled:
-            assert_equal(results, default_priorities + [ZONE_PRIORITY])
+            assert results == default_priorities + [ZONE_PRIORITY]
         else:
-            assert_equal(results, default_priorities)
+            assert results == default_priorities
 
     def test_deployment_type_kwarg(self):
         for zones_enabled in (True, False):
@@ -173,9 +171,9 @@ class TestOpenShiftMasterFactsDefaultPredicates(object):
                                   zones_enabled=zones_enabled,
                                   deployment_type=deployment_type)
         if zones_enabled:
-            assert_equal(results, default_priorities + [ZONE_PRIORITY])
+            assert results == default_priorities + [ZONE_PRIORITY]
         else:
-            assert_equal(results, default_priorities)
+            assert results == default_priorities
 
     def test_only_kwargs(self):
         for zones_enabled in (True, False):
@@ -190,6 +188,6 @@ class TestOpenShiftMasterFactsDefaultPredicates(object):
                                   short_version=short_version,
                                   deployment_type=deployment_type)
         if zones_enabled:
-            assert_equal(results, default_priorities + [ZONE_PRIORITY])
+            assert results == default_priorities + [ZONE_PRIORITY]
         else:
-            assert_equal(results, default_priorities)
+            assert results == default_priorities

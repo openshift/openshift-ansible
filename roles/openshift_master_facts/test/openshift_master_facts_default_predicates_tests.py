@@ -2,8 +2,6 @@ import copy
 import os
 import sys
 
-from nose.tools import assert_equal
-
 sys.path.insert(1, os.path.join(os.path.dirname(__file__), os.pardir, "lookup_plugins"))
 
 from openshift_master_facts_default_predicates import LookupModule  # noqa: E402
@@ -110,9 +108,9 @@ class TestOpenShiftMasterFactsDefaultPredicates(object):
         results = self.lookup.run(None, variables=facts,
                                   regions_enabled=regions_enabled)
         if regions_enabled:
-            assert_equal(results, default_predicates + [REGION_PREDICATE])
+            assert results == default_predicates + [REGION_PREDICATE]
         else:
-            assert_equal(results, default_predicates)
+            assert results == default_predicates
 
     def test_release_defaults(self):
         for regions_enabled in (True, False):
@@ -137,9 +135,9 @@ class TestOpenShiftMasterFactsDefaultPredicates(object):
         results = self.lookup.run(None, variables=facts,
                                   regions_enabled=regions_enabled)
         if regions_enabled:
-            assert_equal(results, default_predicates + [REGION_PREDICATE])
+            assert results == default_predicates + [REGION_PREDICATE]
         else:
-            assert_equal(results, default_predicates)
+            assert results == default_predicates
 
     def test_short_version_defaults(self):
         for regions_enabled in (True, False):
@@ -154,9 +152,9 @@ class TestOpenShiftMasterFactsDefaultPredicates(object):
         results = self.lookup.run(None, variables=facts,
                                   regions_enabled=regions_enabled)
         if regions_enabled:
-            assert_equal(results, default_predicates + [REGION_PREDICATE])
+            assert results == default_predicates + [REGION_PREDICATE]
         else:
-            assert_equal(results, default_predicates)
+            assert results == default_predicates
 
     def test_short_version_kwarg(self):
         for regions_enabled in (True, False):
@@ -171,9 +169,9 @@ class TestOpenShiftMasterFactsDefaultPredicates(object):
                                   regions_enabled=regions_enabled,
                                   short_version=short_version)
         if regions_enabled:
-            assert_equal(results, default_predicates + [REGION_PREDICATE])
+            assert results == default_predicates + [REGION_PREDICATE]
         else:
-            assert_equal(results, default_predicates)
+            assert results == default_predicates
 
     def test_deployment_type_kwarg(self):
         for regions_enabled in (True, False):
@@ -188,9 +186,9 @@ class TestOpenShiftMasterFactsDefaultPredicates(object):
                                   regions_enabled=regions_enabled,
                                   deployment_type=deployment_type)
         if regions_enabled:
-            assert_equal(results, default_predicates + [REGION_PREDICATE])
+            assert results == default_predicates + [REGION_PREDICATE]
         else:
-            assert_equal(results, default_predicates)
+            assert results == default_predicates
 
     def test_only_kwargs(self):
         for regions_enabled in (True, False):
@@ -205,6 +203,6 @@ class TestOpenShiftMasterFactsDefaultPredicates(object):
                                   short_version=short_version,
                                   deployment_type=deployment_type)
         if regions_enabled:
-            assert_equal(results, default_predicates + [REGION_PREDICATE])
+            assert results == default_predicates + [REGION_PREDICATE]
         else:
-            assert_equal(results, default_predicates)
+            assert results == default_predicates
