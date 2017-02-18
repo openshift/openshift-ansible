@@ -244,6 +244,6 @@ class TestOpenShiftMasterFactsDefaultPredicates(object):
         self.lookup.run(None, variables=facts)
 
     @raises(AnsibleError)
-    def testMissingOpenShiftFacts(self):
+    def test_missing_openshift_facts(self):
         facts = {}
         self.lookup.run(None, variables=facts)
