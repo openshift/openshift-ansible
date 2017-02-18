@@ -11,3 +11,4 @@ nose
 coverage
 mock
 pytest
+pytest-cov
