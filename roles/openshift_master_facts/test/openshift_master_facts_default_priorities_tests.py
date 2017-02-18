@@ -1,10 +1,5 @@
-import copy
-import os
-import sys
+import pytest
 
-sys.path.insert(1, os.path.join(os.path.dirname(__file__), os.pardir, "lookup_plugins"))
-
-from openshift_master_facts_default_priorities import LookupModule  # noqa: E402
 
 DEFAULT_PRIORITIES_1_1 = [
     {'name': 'LeastRequestedPriority', 'weight': 1},
@@ -73,120 +68,99 @@ TEST_VARS = [
 ]
 
 
-class TestOpenShiftMasterFactsDefaultPredicates(object):
-    lookup = LookupModule()
-    default_facts = {
-        'openshift': {
-            'common': {}
-        }
-    }
+def test_openshift_version(priorities_lookup, openshift_version_fixture, zones_enabled):
+    facts, default_priorities = openshift_version_fixture
+    results = priorities_lookup.run(None, variables=facts, zones_enabled=zones_enabled)
+    if zones_enabled:
+        assert results == default_priorities + [ZONE_PRIORITY]
+    else:
+        assert results == default_priorities
 
-    def test_openshift_version(self):
-        for zones_enabled in (True, False):
-            for version, deployment_type, default_priorities in TEST_VARS:
-                version = version + '.1'
-                yield self.check_defaults_version, version, deployment_type, default_priorities, zones_enabled
 
-    def check_defaults_version(self, version, deployment_type, default_priorities,
-                               zones_enabled):
-        facts = copy.deepcopy(self.default_facts)
-        facts['openshift_version'] = version
-        facts['openshift']['common']['deployment_type'] = deployment_type
-        results = self.lookup.run(None, variables=facts, zones_enabled=zones_enabled)
-        if zones_enabled:
-            assert results == default_priorities + [ZONE_PRIORITY]
-        else:
-            assert results == default_priorities
+@pytest.fixture(params=TEST_VARS)
+def openshift_version_fixture(request, facts):
+    version, deployment_type, default_priorities = request.param
+    version += '.1'
+    facts['openshift_version'] = version
+    facts['openshift']['common']['deployment_type'] = deployment_type
+    return facts, default_priorities
 
-    def test_release_defaults(self):
-        for zones_enabled in (True, False):
-            for release, deployment_type, default_priorities in TEST_VARS:
-                yield self.check_defaults_release, release, deployment_type, default_priorities, zones_enabled
 
-    def test_v_release_defaults(self):
-        for zones_enabled in (True, False):
-            for release, deployment_type, default_priorities in TEST_VARS:
-                yield self.check_defaults_release, 'v' + release, deployment_type, default_priorities, zones_enabled
+def test_openshift_release(priorities_lookup, openshift_release_fixture, zones_enabled):
+    facts, default_priorities = openshift_release_fixture
+    results = priorities_lookup.run(None, variables=facts, zones_enabled=zones_enabled)
+    if zones_enabled:
+        assert results == default_priorities + [ZONE_PRIORITY]
+    else:
+        assert results == default_priorities
 
-    def test_trunc_openshift_release(self):
-        for release, deployment_type, default_priorities in TEST_VARS:
-            release = release + '.1'
-            yield self.check_defaults_release, release, deployment_type, default_priorities, False
 
-    def check_defaults_release(self, release, deployment_type, default_priorities,
-                               zones_enabled):
-        facts = copy.deepcopy(self.default_facts)
-        facts['openshift_release'] = release
-        facts['openshift']['common']['deployment_type'] = deployment_type
-        results = self.lookup.run(None, variables=facts, zones_enabled=zones_enabled)
-        if zones_enabled:
-            assert results == default_priorities + [ZONE_PRIORITY]
-        else:
-            assert results == default_priorities
+@pytest.fixture(params=TEST_VARS)
+def openshift_release_fixture(request, facts, release_mod):
+    release, deployment_type, default_priorities = request.param
+    facts['openshift_release'] = release_mod(release)
+    facts['openshift']['common']['deployment_type'] = deployment_type
+    return facts, default_priorities
 
-    def test_short_version_defaults(self):
-        for zones_enabled in (True, False):
-            for short_version, deployment_type, default_priorities in TEST_VARS:
-                yield self.check_defaults_short_version, short_version, deployment_type, default_priorities, zones_enabled
 
-    def check_defaults_short_version(self, short_version, deployment_type,
-                                     default_priorities, zones_enabled):
-        facts = copy.deepcopy(self.default_facts)
-        facts['openshift']['common']['short_version'] = short_version
-        facts['openshift']['common']['deployment_type'] = deployment_type
-        results = self.lookup.run(None, variables=facts, zones_enabled=zones_enabled)
-        if zones_enabled:
-            assert results == default_priorities + [ZONE_PRIORITY]
-        else:
-            assert results == default_priorities
+def test_short_version(priorities_lookup, short_version_fixture, zones_enabled):
+    facts, default_priorities = short_version_fixture
+    results = priorities_lookup.run(None, variables=facts, zones_enabled=zones_enabled)
+    if zones_enabled:
+        assert results == default_priorities + [ZONE_PRIORITY]
+    else:
+        assert results == default_priorities
 
-    def test_short_version_kwarg(self):
-        for zones_enabled in (True, False):
-            for short_version, deployment_type, default_priorities in TEST_VARS:
-                yield self.check_defaults_short_version_kwarg, short_version, deployment_type, default_priorities, zones_enabled
 
-    def check_defaults_short_version_kwarg(self, short_version, deployment_type,
-                                           default_priorities, zones_enabled):
-        facts = copy.deepcopy(self.default_facts)
-        facts['openshift']['common']['deployment_type'] = deployment_type
-        results = self.lookup.run(None, variables=facts,
-                                  zones_enabled=zones_enabled,
-                                  short_version=short_version)
-        if zones_enabled:
-            assert results == default_priorities + [ZONE_PRIORITY]
-        else:
-            assert results == default_priorities
+@pytest.fixture(params=TEST_VARS)
+def short_version_fixture(request, facts):
+    short_version, deployment_type, default_priorities = request.param
+    facts['openshift']['common']['short_version'] = short_version
+    facts['openshift']['common']['deployment_type'] = deployment_type
+    return facts, default_priorities
 
-    def test_deployment_type_kwarg(self):
-        for zones_enabled in (True, False):
-            for short_version, deployment_type, default_priorities in TEST_VARS:
-                yield self.check_defaults_deployment_type_kwarg, short_version, deployment_type, default_priorities, zones_enabled
 
-    def check_defaults_deployment_type_kwarg(self, short_version, deployment_type,
-                                             default_priorities, zones_enabled):
-        facts = copy.deepcopy(self.default_facts)
-        facts['openshift']['common']['short_version'] = short_version
-        results = self.lookup.run(None, variables=facts,
-                                  zones_enabled=zones_enabled,
-                                  deployment_type=deployment_type)
-        if zones_enabled:
-            assert results == default_priorities + [ZONE_PRIORITY]
-        else:
-            assert results == default_priorities
+def test_short_version_kwarg(priorities_lookup, short_version_kwarg_fixture, zones_enabled):
+    facts, short_version, default_priorities = short_version_kwarg_fixture
+    results = priorities_lookup.run(None, variables=facts, zones_enabled=zones_enabled, short_version=short_version)
+    if zones_enabled:
+        assert results == default_priorities + [ZONE_PRIORITY]
+    else:
+        assert results == default_priorities
 
-    def test_only_kwargs(self):
-        for zones_enabled in (True, False):
-            for short_version, deployment_type, default_priorities in TEST_VARS:
-                yield self.check_defaults_only_kwargs, short_version, deployment_type, default_priorities, zones_enabled
 
-    def check_defaults_only_kwargs(self, short_version, deployment_type,
-                                   default_priorities, zones_enabled):
-        facts = copy.deepcopy(self.default_facts)
-        results = self.lookup.run(None, variables=facts,
-                                  zones_enabled=zones_enabled,
-                                  short_version=short_version,
-                                  deployment_type=deployment_type)
-        if zones_enabled:
-            assert results == default_priorities + [ZONE_PRIORITY]
-        else:
-            assert results == default_priorities
+@pytest.fixture(params=TEST_VARS)
+def short_version_kwarg_fixture(request, facts):
+    short_version, deployment_type, default_priorities = request.param
+    facts['openshift']['common']['deployment_type'] = deployment_type
+    return facts, short_version, default_priorities
+
+
+def test_deployment_type_kwarg(priorities_lookup, deployment_type_kwarg_fixture, zones_enabled):
+    facts, deployment_type, default_priorities = deployment_type_kwarg_fixture
+    results = priorities_lookup.run(None, variables=facts, zones_enabled=zones_enabled, deployment_type=deployment_type)
+    if zones_enabled:
+        assert results == default_priorities + [ZONE_PRIORITY]
+    else:
+        assert results == default_priorities
+
+
+@pytest.fixture(params=TEST_VARS)
+def deployment_type_kwarg_fixture(request, facts):
+    short_version, deployment_type, default_priorities = request.param
+    facts['openshift']['common']['short_version'] = short_version
+    return facts, deployment_type, default_priorities
+
+
+def test_short_version_deployment_type_kwargs(priorities_lookup, short_version_deployment_type_kwargs_fixture, zones_enabled):
+    short_version, deployment_type, default_priorities = short_version_deployment_type_kwargs_fixture
+    results = priorities_lookup.run(None, zones_enabled=zones_enabled, short_version=short_version, deployment_type=deployment_type)
+    if zones_enabled:
+        assert results == default_priorities + [ZONE_PRIORITY]
+    else:
+        assert results == default_priorities
+
+
+@pytest.fixture(params=TEST_VARS)
+def short_version_deployment_type_kwargs_fixture(request):
+    return request.param
