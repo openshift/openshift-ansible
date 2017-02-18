@@ -5,7 +5,7 @@ import sys
 from ansible.errors import AnsibleError
 from nose.tools import raises, assert_equal
 
-sys.path = [os.path.abspath(os.path.dirname(__file__) + "/../lookup_plugins/")] + sys.path
+sys.path.insert(1, os.path.join(os.path.dirname(__file__), os.pardir, "lookup_plugins"))
 
 from openshift_master_facts_default_predicates import LookupModule  # noqa: E402
 
