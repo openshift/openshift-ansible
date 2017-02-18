@@ -36,6 +36,7 @@ import atexit
 import copy
 import json
 import os
+import sys
 import re
 import shutil
 import subprocess
@@ -943,10 +944,18 @@ class OpenShiftCLI(object):
     def openshift_cmd(self, cmd, oadm=False, output=False, output_type='json', input_data=None):
         '''Base command for oc '''
         cmds = []
-        if oadm:
-            cmds = ['oadm']
+        basecmd = 'oadm' if oadm else 'oc'
+        # https://github.com/openshift/openshift-ansible/issues/3410
+        # oc can be in /usr/local/bin in some cases, but that may not
+        # be in $PATH due to ansible/sudo
+        if sys.version_info[0] == 3:
+            basepath = shutil.which(basecmd) # pylint: disable=no-member
         else:
-            cmds = ['oc']
+            import distutils.spawn
+            basepath = distutils.spawn.find_executable(basecmd) # pylint: disable=no-name-in-module
+        if basepath is None and os.path.isfile('/usr/local/bin/' + basecmd):
+            basecmd = '/usr/local/bin/' + basecmd
+        cmds.append(basecmd)
 
         if self.all_namespaces:
             cmds.extend(['--all-namespaces'])
@@ -962,7 +971,10 @@ class OpenShiftCLI(object):
         if self.verbose:
             print(' '.join(cmds))
 
-        returncode, stdout, stderr = self._run(cmds, input_data)
+        try:
+            returncode, stdout, stderr = self._run(cmds, input_data)
+        except OSError as ex:
+            returncode, stdout, stderr = 1, '', 'Failed to execute {}: {}'.format(subprocess.list2cmdline(cmds), ex)
 
         rval = {"returncode": returncode,
                 "results": results,
