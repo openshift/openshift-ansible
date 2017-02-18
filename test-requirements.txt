@@ -10,3 +10,4 @@ yamllint
 nose
 coverage
 mock
+pytest

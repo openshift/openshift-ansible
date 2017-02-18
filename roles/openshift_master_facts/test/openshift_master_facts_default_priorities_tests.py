@@ -74,13 +74,12 @@ TEST_VARS = [
 
 
 class TestOpenShiftMasterFactsDefaultPredicates(object):
-    def setUp(self):
-        self.lookup = LookupModule()
-        self.default_facts = {
-            'openshift': {
-                'common': {}
-            }
+    lookup = LookupModule()
+    default_facts = {
+        'openshift': {
+            'common': {}
         }
+    }
 
     def test_openshift_version(self):
         for zones_enabled in (True, False):
