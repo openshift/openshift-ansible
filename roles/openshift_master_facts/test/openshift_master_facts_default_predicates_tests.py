@@ -98,9 +98,9 @@ class TestOpenShiftMasterFactsDefaultPredicates(object):
 
     def test_openshift_version(self):
         for regions_enabled in (True, False):
-            for release, deployment_type, default_predicates in TEST_VARS:
-                release = release + '.1'
-                yield self.check_defaults_version, release, deployment_type, default_predicates, regions_enabled
+            for version, deployment_type, default_predicates in TEST_VARS:
+                version = version + '.1'
+                yield self.check_defaults_version, version, deployment_type, default_predicates, regions_enabled
 
     def check_defaults_version(self, version, deployment_type, default_predicates,
                                regions_enabled):
@@ -143,8 +143,8 @@ class TestOpenShiftMasterFactsDefaultPredicates(object):
 
     def test_short_version_defaults(self):
         for regions_enabled in (True, False):
-            for release, deployment_type, default_predicates in TEST_VARS:
-                yield self.check_defaults_short_version, release, deployment_type, default_predicates, regions_enabled
+            for short_version, deployment_type, default_predicates in TEST_VARS:
+                yield self.check_defaults_short_version, short_version, deployment_type, default_predicates, regions_enabled
 
     def check_defaults_short_version(self, short_version, deployment_type, default_predicates,
                                      regions_enabled):
@@ -160,8 +160,8 @@ class TestOpenShiftMasterFactsDefaultPredicates(object):
 
     def test_short_version_kwarg(self):
         for regions_enabled in (True, False):
-            for release, deployment_type, default_predicates in TEST_VARS:
-                yield self.check_defaults_short_version_kwarg, release, deployment_type, default_predicates, regions_enabled
+            for short_version, deployment_type, default_predicates in TEST_VARS:
+                yield self.check_defaults_short_version_kwarg, short_version, deployment_type, default_predicates, regions_enabled
 
     def check_defaults_short_version_kwarg(self, short_version, deployment_type, default_predicates,
                                            regions_enabled):
@@ -177,8 +177,8 @@ class TestOpenShiftMasterFactsDefaultPredicates(object):
 
     def test_deployment_type_kwarg(self):
         for regions_enabled in (True, False):
-            for release, deployment_type, default_predicates in TEST_VARS:
-                yield self.check_defaults_deployment_type_kwarg, release, deployment_type, default_predicates, regions_enabled
+            for short_version, deployment_type, default_predicates in TEST_VARS:
+                yield self.check_defaults_deployment_type_kwarg, short_version, deployment_type, default_predicates, regions_enabled
 
     def check_defaults_deployment_type_kwarg(self, short_version, deployment_type,
                                              default_predicates, regions_enabled):
@@ -194,8 +194,8 @@ class TestOpenShiftMasterFactsDefaultPredicates(object):
 
     def test_only_kwargs(self):
         for regions_enabled in (True, False):
-            for release, deployment_type, default_predicates in TEST_VARS:
-                yield self.check_defaults_only_kwargs, release, deployment_type, default_predicates, regions_enabled
+            for short_version, deployment_type, default_predicates in TEST_VARS:
+                yield self.check_defaults_only_kwargs, short_version, deployment_type, default_predicates, regions_enabled
 
     def check_defaults_only_kwargs(self, short_version, deployment_type,
                                    default_predicates, regions_enabled):
