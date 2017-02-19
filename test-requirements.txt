@@ -9,3 +9,4 @@ PyYAML
 yamllint
 nose
 coverage
+mock

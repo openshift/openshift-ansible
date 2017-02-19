@@ -2,3 +2,4 @@ ansible>=2.2
 six
 pyOpenSSL
 PyYAML
+ruamel.yaml
