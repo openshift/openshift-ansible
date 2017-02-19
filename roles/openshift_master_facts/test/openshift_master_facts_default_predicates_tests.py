@@ -175,23 +175,6 @@ class TestOpenShiftMasterFactsDefaultPredicates(object):
         else:
             assert_equal(results, default_predicates)
 
-    def check_defaults_override_vars(self, release, deployment_type,
-                                     default_predicates, regions_enabled,
-                                     extra_facts=None):
-        facts = copy.deepcopy(self.default_facts)
-        facts['openshift']['common']['short_version'] = release
-        facts['openshift']['common']['deployment_type'] = deployment_type
-        if extra_facts is not None:
-            for fact in extra_facts:
-                facts[fact] = extra_facts[fact]
-        results = self.lookup.run(None, variables=facts,
-                                  regions_enabled=regions_enabled,
-                                  return_set_vars=False)
-        if regions_enabled:
-            assert_equal(results, default_predicates + [REGION_PREDICATE])
-        else:
-            assert_equal(results, default_predicates)
-
     def test_openshift_version(self):
         for regions_enabled in (True, False):
             for release, deployment_type, default_predicates in TEST_VARS:
