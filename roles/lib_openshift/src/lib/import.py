@@ -10,7 +10,6 @@ import atexit
 import copy
 import json
 import os
-import sys
 import re
 import shutil
 import subprocess

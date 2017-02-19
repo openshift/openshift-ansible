@@ -36,7 +36,6 @@ import atexit
 import copy
 import json
 import os
-import sys
 import re
 import shutil
 import subprocess
@@ -783,6 +782,32 @@ class OpenShiftCLIError(Exception):
     pass
 
 
+ADDITIONAL_PATH_LOOKUPS = ['/usr/local/bin', os.path.expanduser('~/bin')]
+
+
+def locate_oc_binary():
+    ''' Find and return oc binary file '''
+    # https://github.com/openshift/openshift-ansible/issues/3410
+    # oc can be in /usr/local/bin in some cases, but that may not
+    # be in $PATH due to ansible/sudo
+    paths = os.environ.get("PATH", os.defpath).split(os.pathsep) + ADDITIONAL_PATH_LOOKUPS
+
+    oc_binary = 'oc'
+
+    # Use shutil.which if it is available, otherwise fallback to a naive path search
+    try:
+        which_result = shutil.which(oc_binary, path=os.pathsep.join(paths))
+        if which_result is not None:
+            oc_binary = which_result
+    except AttributeError:
+        for path in paths:
+            if os.path.exists(os.path.join(path, oc_binary)):
+                oc_binary = os.path.join(path, oc_binary)
+                break
+
+    return oc_binary
+
+
 # pylint: disable=too-few-public-methods
 class OpenShiftCLI(object):
     ''' Class to wrap the command line tools '''
@@ -796,6 +821,7 @@ class OpenShiftCLI(object):
         self.verbose = verbose
         self.kubeconfig = Utils.create_tmpfile_copy(kubeconfig)
         self.all_namespaces = all_namespaces
+        self.oc_binary = locate_oc_binary()
 
     # Pylint allows only 5 arguments to be passed.
     # pylint: disable=too-many-arguments
@@ -997,19 +1023,10 @@ class OpenShiftCLI(object):
     # pylint: disable=too-many-arguments,too-many-branches
     def openshift_cmd(self, cmd, oadm=False, output=False, output_type='json', input_data=None):
         '''Base command for oc '''
-        cmds = []
-        basecmd = 'oadm' if oadm else 'oc'
-        # https://github.com/openshift/openshift-ansible/issues/3410
-        # oc can be in /usr/local/bin in some cases, but that may not
-        # be in $PATH due to ansible/sudo
-        if sys.version_info[0] == 3:
-            basepath = shutil.which(basecmd) # pylint: disable=no-member
-        else:
-            import distutils.spawn
-            basepath = distutils.spawn.find_executable(basecmd) # pylint: disable=no-name-in-module
-        if basepath is None and os.path.isfile('/usr/local/bin/' + basecmd):
-            basecmd = '/usr/local/bin/' + basecmd
-        cmds.append(basecmd)
+        cmds = [self.oc_binary]
+
+        if oadm:
+            cmds.append('adm')
 
         if self.all_namespaces:
             cmds.extend(['--all-namespaces'])
