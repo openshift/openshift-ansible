@@ -864,7 +864,7 @@ def set_version_facts_if_unset(facts):
     if 'common' in facts:
         deployment_type = facts['common']['deployment_type']
         openshift_version = get_openshift_version(facts)
-        if openshift_version:
+        if openshift_version and openshift_version != "latest":
             version = LooseVersion(openshift_version)
             facts['common']['version'] = openshift_version
             facts['common']['short_version'] = '.'.join([str(x) for x in version.version[0:2]])
