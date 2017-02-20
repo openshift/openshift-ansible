@@ -24,3 +24,13 @@
   set_fact:
     full_dns_domain: "{{ (env_id|trim == '') | ternary(dns_domain, env_id + '.' + dns_domain) }}"
   delegate_to: localhost
+
+- name: Set the APP domain for OpenShift use
+  set_fact:
+    openshift_app_domain: "{{ openshift_app_domain | default('apps') }}"
+  delegate_to: localhost
+
+- name: Set the default app domain for routing purposes
+  set_fact:
+    openshift_master_default_subdomain: "{{ openshift_app_domain }}.{{ full_dns_domain }}"
+  delegate_to: localhost
