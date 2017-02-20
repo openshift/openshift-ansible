@@ -1,9 +1,9 @@
 # pylint: disable=missing-docstring
 from openshift_checks import OpenShiftCheck, get_var
-from openshift_checks.mixins import NotContainerized
+from openshift_checks.mixins import NotContainerizedMixin
 
 
-class PackageAvailability(NotContainerized, OpenShiftCheck):
+class PackageAvailability(NotContainerizedMixin, OpenShiftCheck):
     """Check that required RPM packages are available."""
 
     name = "package_availability"
