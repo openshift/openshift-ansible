@@ -1,0 +1,82 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 4 (0x4)
+    Signature Algorithm: sha256WithRSAEncryption
+        Issuer: CN=openshift-signer@1486491158
+        Validity
+            Not Before: Feb  7 18:12:39 2017 GMT
+            Not After : Feb  7 18:12:40 2019 GMT
+        Subject: CN=172.30.0.1
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                Public-Key: (2048 bit)
+                Modulus:
+                    00:e3:89:fa:91:59:67:45:74:b0:82:72:a1:5d:7e:
+                    c9:ad:1b:f1:66:6f:a7:0a:a1:04:fe:fa:4a:45:f3:
+                    6d:ac:c0:cf:02:e5:6d:70:b5:16:74:40:dd:4f:42:
+                    fb:41:d7:1e:2d:30:81:15:ee:d5:ba:0a:df:a2:43:
+                    e1:56:2d:17:6a:fa:c2:db:11:69:60:9e:be:c0:fa:
+                    6e:a3:b1:f2:05:18:5f:cf:ff:2b:3b:17:ed:02:73:
+                    1e:15:4e:49:84:50:da:78:bc:12:6c:38:e2:46:08:
+                    c4:d5:96:18:cf:c1:dc:ab:d6:25:3e:e8:e9:b4:3e:
+                    a3:e9:86:96:d4:89:da:7b:e5:6c:40:a5:dc:d6:e0:
+                    28:6d:e9:a1:0a:52:ca:6b:31:33:71:c5:46:bb:9d:
+                    c2:69:21:de:e2:42:68:29:46:70:27:c5:23:b7:f9:
+                    d1:1d:4a:fe:c1:e9:1b:92:9c:74:35:f9:85:50:41:
+                    a0:35:15:cd:e3:a7:2a:ed:9c:24:2c:7b:23:b6:e4:
+                    76:a6:db:42:e8:98:45:f8:a1:e0:5d:34:72:58:cf:
+                    6c:b1:fb:cb:d8:c7:26:85:31:71:ad:3a:00:96:1b:
+                    2a:f0:cb:87:32:7d:32:f4:33:33:98:02:ba:12:7b:
+                    6f:94:2e:40:b1:cc:53:46:58:ed:c0:76:44:89:cb:
+                    29:17
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            X509v3 Key Usage: critical
+                Digital Signature, Key Encipherment
+            X509v3 Extended Key Usage: 
+                TLS Web Server Authentication
+            X509v3 Basic Constraints: critical
+                CA:FALSE
+            X509v3 Subject Alternative Name: 
+                DNS:kubernetes, DNS:kubernetes.default, DNS:kubernetes.default.svc, DNS:kubernetes.default.svc.cluster.local, DNS:m01.example.com, DNS:openshift, DNS:openshift.default, DNS:openshift.default.svc, DNS:openshift.default.svc.cluster.local, DNS:172.30.0.1, DNS:192.168.122.241, IP Address:172.30.0.1, IP Address:192.168.122.241
+    Signature Algorithm: sha256WithRSAEncryption
+         d2:74:a0:69:51:50:79:4a:09:f5:24:1f:ff:6e:4f:34:e3:ec:
+         eb:51:fd:35:92:86:93:f3:7f:f5:ed:63:08:fb:31:bc:20:ec:
+         02:67:d0:5e:e7:ec:c3:7b:84:e1:5c:7f:8f:40:2e:a8:6d:bc:
+         14:8b:d7:67:f1:23:7a:ae:58:a1:be:b8:4d:bc:02:5a:92:76:
+         35:61:18:d6:d3:b2:fb:6a:eb:36:44:52:97:a7:3b:0b:b9:6a:
+         16:2d:59:4b:5c:14:e9:99:f5:a1:43:6c:38:d1:b0:a8:e0:aa:
+         e2:8d:0a:af:7b:30:50:fa:ed:68:b4:5c:e8:cd:69:85:ee:7a:
+         c8:fc:92:be:ee:8f:3d:84:bb:da:a1:bc:7e:98:38:f9:c0:23:
+         d0:2c:ef:9c:33:fa:b5:d4:97:33:de:1b:6f:54:e4:c5:b0:c8:
+         76:56:7b:8a:3b:16:6a:2c:62:73:d8:25:e4:af:a6:17:bc:08:
+         49:88:54:16:69:10:a7:24:46:80:da:88:13:61:b0:da:85:5e:
+         62:c4:52:b0:aa:91:99:a3:ec:83:12:ba:0f:94:2c:39:e0:1c:
+         6c:d0:fd:5e:c1:4c:78:4d:1b:2a:77:e4:33:86:7a:fb:df:18:
+         85:05:0d:0c:ec:98:e1:28:71:7a:11:cc:c7:b7:ce:d7:3e:fb:
+         27:1c:42:f6
+-----BEGIN CERTIFICATE-----
+MIID7zCCAtegAwIBAgIBBDANBgkqhkiG9w0BAQsFADAmMSQwIgYDVQQDDBtvcGVu
+c2hpZnQtc2lnbmVyQDE0ODY0OTExNTgwHhcNMTcwMjA3MTgxMjM5WhcNMTkwMjA3
+MTgxMjQwWjAVMRMwEQYDVQQDEwoxNzIuMzAuMC4xMIIBIjANBgkqhkiG9w0BAQEF
+AAOCAQ8AMIIBCgKCAQEA44n6kVlnRXSwgnKhXX7JrRvxZm+nCqEE/vpKRfNtrMDP
+AuVtcLUWdEDdT0L7QdceLTCBFe7VugrfokPhVi0XavrC2xFpYJ6+wPpuo7HyBRhf
+z/8rOxftAnMeFU5JhFDaeLwSbDjiRgjE1ZYYz8Hcq9YlPujptD6j6YaW1Inae+Vs
+QKXc1uAobemhClLKazEzccVGu53CaSHe4kJoKUZwJ8Ujt/nRHUr+wekbkpx0NfmF
+UEGgNRXN46cq7ZwkLHsjtuR2pttC6JhF+KHgXTRyWM9ssfvL2McmhTFxrToAlhsq
+8MuHMn0y9DMzmAK6EntvlC5AscxTRljtwHZEicspFwIDAQABo4IBNzCCATMwDgYD
+VR0PAQH/BAQDAgWgMBMGA1UdJQQMMAoGCCsGAQUFBwMBMAwGA1UdEwEB/wQCMAAw
+gf0GA1UdEQSB9TCB8oIKa3ViZXJuZXRlc4ISa3ViZXJuZXRlcy5kZWZhdWx0ghZr
+dWJlcm5ldGVzLmRlZmF1bHQuc3ZjgiRrdWJlcm5ldGVzLmRlZmF1bHQuc3ZjLmNs
+dXN0ZXIubG9jYWyCD20wMS5leGFtcGxlLmNvbYIJb3BlbnNoaWZ0ghFvcGVuc2hp
+ZnQuZGVmYXVsdIIVb3BlbnNoaWZ0LmRlZmF1bHQuc3ZjgiNvcGVuc2hpZnQuZGVm
+YXVsdC5zdmMuY2x1c3Rlci5sb2NhbIIKMTcyLjMwLjAuMYIPMTkyLjE2OC4xMjIu
+MjQxhwSsHgABhwTAqHrxMA0GCSqGSIb3DQEBCwUAA4IBAQDSdKBpUVB5Sgn1JB//
+bk804+zrUf01koaT83/17WMI+zG8IOwCZ9Be5+zDe4ThXH+PQC6obbwUi9dn8SN6
+rlihvrhNvAJaknY1YRjW07L7aus2RFKXpzsLuWoWLVlLXBTpmfWhQ2w40bCo4Kri
+jQqvezBQ+u1otFzozWmF7nrI/JK+7o89hLvaobx+mDj5wCPQLO+cM/q11Jcz3htv
+VOTFsMh2VnuKOxZqLGJz2CXkr6YXvAhJiFQWaRCnJEaA2ogTYbDahV5ixFKwqpGZ
+o+yDEroPlCw54Bxs0P1ewUx4TRsqd+Qzhnr73xiFBQ0M7JjhKHF6EczHt87XPvsn
+HEL2
+-----END CERTIFICATE-----
