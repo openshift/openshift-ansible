@@ -13,7 +13,10 @@
   vars:
     # We will restart Docker ourselves after everything is ready:
     skip_docker_restart: True
-  when: l_docker_upgrade is defined and l_docker_upgrade | bool and not openshift.common.is_atomic | bool
+  when:
+  - l_docker_upgrade is defined
+  - l_docker_upgrade | bool
+  - not openshift.common.is_containerized | bool
 
 - include: "{{ node_config_hook }}"
   when: node_config_hook is defined
@@ -25,14 +28,19 @@
   when: not openshift.common.is_containerized | bool
 
 - name: Remove obsolete docker-sdn-ovs.conf
-  file: path=/etc/systemd/system/docker.service.d/docker-sdn-ovs.conf state=absent
-  when: (deployment_type == 'openshift-enterprise' and openshift_release | version_compare('3.4', '>=')) or (deployment_type == 'origin' and openshift_release | version_compare('1.4', '>='))
+  file:
+    path: "/etc/systemd/system/docker.service.d/docker-sdn-ovs.conf"
+    state: absent
+  when: (deployment_type == 'openshift-enterprise' and openshift_release | version_compare('3.4', '>='))
+     or (deployment_type == 'origin' and openshift_release | version_compare('1.4', '>='))
 
 - include: containerized_node_upgrade.yml
   when: openshift.common.is_containerized | bool
 
 - name: Ensure containerized services stopped before Docker restart
-  service: name={{ item }} state=stopped
+  service:
+    name: "{{ item }}"
+    state: stopped
   with_items:
   - etcd_container
   - openvswitch
@@ -62,22 +70,19 @@
 - include: docker/restart.yml
 
 - name: Restart rpm node service
-  service: name="{{ openshift.common.service_type }}-node" state=restarted
+  service:
+    name: "{{ openshift.common.service_type }}-node"
+    state: restarted
   when: not openshift.common.is_containerized | bool
 
 - name: Wait for node to be ready
-  command: >
-    {{ hostvars[groups.oo_first_master.0].openshift.common.client_binary }} get node {{ openshift.common.hostname | lower }} --no-headers
+  oc_obj:
+    state: list
+    kind: node
+    name: "{{ openshift.common.hostname | lower }}"
   register: node_output
   delegate_to: "{{ groups.oo_first_master.0 }}"
-  until: "{{ node_output.stdout.split()[1].startswith('Ready')}}"
-  # Give the node two minutes to come back online. Note that we pre-pull images now
-  # so containerized services should restart quickly as well.
+  until: node_output.results.results[0].status.conditions | selectattr('type', 'equalto', 'Ready') | map(attribute='status') | join | bool == True
+  # Give the node two minutes to come back online.
   retries: 24
   delay: 5
-  # AUDIT:changed_when: `false` because we are only inspecting the
-  # state of the node, we aren't changing anything (we changed node
-  # service state in the previous task). You could say we shouldn't
-  # override this because something will be changing (the state of a
-  # service), but that should be part of the last task.
-  changed_when: false
