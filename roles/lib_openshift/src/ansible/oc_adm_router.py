@@ -16,6 +16,7 @@ def main():
             name=dict(default='router', type='str'),
 
             kubeconfig=dict(default='/etc/origin/master/admin.kubeconfig', type='str'),
+            default_cert=dict(default=None, type='str'),
             cert_file=dict(default=None, type='str'),
             key_file=dict(default=None, type='str'),
             images=dict(default=None, type='str'), #'openshift3/ose-${component}:${version}'
@@ -47,7 +48,10 @@ def main():
             # edits
             edits=dict(default=[], type='list'),
         ),
-        mutually_exclusive=[["router_type", "images"]],
+        mutually_exclusive=[["router_type", "images"],
+                            ["key_file", "default_cert"],
+                            ["cert_file", "default_cert"],
+                           ],
 
         supports_check_mode=True,
     )

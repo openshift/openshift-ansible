@@ -13,6 +13,7 @@ options:
     - The desired action when managing openshift registry
     - present - update or create the registry
     - absent - tear down the registry service and deploymentconfig
+    - list - returns the current representiation of a registry
     required: false
     default: False
     aliases: []

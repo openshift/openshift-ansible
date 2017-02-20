@@ -13,6 +13,7 @@ options:
     - Whether to create or delete the router
     - present - create the router
     - absent - remove the router
+    - list - return the current representation of a router
     required: false
     default: present
     choices:

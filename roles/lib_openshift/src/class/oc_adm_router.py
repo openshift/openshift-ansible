@@ -1,15 +1,17 @@
 # pylint: skip-file
+# flake8: noqa
 
-import time
 
 class RouterException(Exception):
     ''' Router exception'''
     pass
 
+
 class RouterConfig(OpenShiftCLIConfig):
     ''' RouterConfig is a DTO for the router.  '''
     def __init__(self, rname, namespace, kubeconfig, router_options):
         super(RouterConfig, self).__init__(rname, namespace, kubeconfig, router_options)
+
 
 class Router(OpenShiftCLI):
     ''' Class to wrap the oc command line tools '''
@@ -45,7 +47,7 @@ class Router(OpenShiftCLI):
     @property
     def prepared_router(self):
         ''' property for the prepared router'''
-        if self.__prepared_router == None:
+        if self.__prepared_router is None:
             results = self._prepare_router()
             if not results:
                 raise RouterException('Could not perform router preparation')
@@ -148,7 +150,12 @@ class Router(OpenShiftCLI):
         for part in self.router_parts:
             parts.append(self._delete(part['kind'], part['name']))
 
-        return parts
+        rval = 0
+        for part in parts:
+            if part['returncode'] != 0 and not 'already exist' in part['stderr']:
+                rval = part['returncode']
+
+        return {'returncode': rval, 'results': parts}
 
     def add_modifications(self, deploymentconfig):
         '''modify the deployment config'''
@@ -176,16 +183,17 @@ class Router(OpenShiftCLI):
     def _prepare_router(self):
         '''prepare router for instantiation'''
         # We need to create the pem file
-        router_pem = '/tmp/router.pem'
-        with open(router_pem, 'w') as rfd:
-            rfd.write(open(self.config.config_options['cert_file']['value']).read())
-            rfd.write(open(self.config.config_options['key_file']['value']).read())
-            if self.config.config_options['cacert_file']['value'] and \
-               os.path.exists(self.config.config_options['cacert_file']['value']):
-                rfd.write(open(self.config.config_options['cacert_file']['value']).read())
+        if self.config.config_options['default_cert']['value'] is None:
+            router_pem = '/tmp/router.pem'
+            with open(router_pem, 'w') as rfd:
+                rfd.write(open(self.config.config_options['cert_file']['value']).read())
+                rfd.write(open(self.config.config_options['key_file']['value']).read())
+                if self.config.config_options['cacert_file']['value'] and \
+                   os.path.exists(self.config.config_options['cacert_file']['value']):
+                    rfd.write(open(self.config.config_options['cacert_file']['value']).read())
 
-        atexit.register(Utils.cleanup, [router_pem])
-        self.config.config_options['default_cert']['value'] = router_pem
+            atexit.register(Utils.cleanup, [router_pem])
+            self.config.config_options['default_cert']['value'] = router_pem
 
         options = self.config.to_option_list()
 
@@ -196,7 +204,7 @@ class Router(OpenShiftCLI):
         results = self.openshift_cmd(cmd, oadm=True, output=True, output_type='json')
 
         # pylint: disable=no-member
-        if results['returncode'] != 0 and results['results'].has_key('items'):
+        if results['returncode'] != 0 and 'items' in results['results']:
             return results
 
         oc_objects = {'DeploymentConfig': {'obj': None, 'path': None, 'update': False},
@@ -226,14 +234,16 @@ class Router(OpenShiftCLI):
         # add modifications added
         oc_objects['DeploymentConfig']['obj'] = self.add_modifications(oc_objects['DeploymentConfig']['obj'])
 
-        for oc_type in oc_objects.keys():
-            oc_objects[oc_type]['path'] = Utils.create_tmp_file_from_contents(oc_type, oc_objects[oc_type]['obj'].yaml_dict)
+        for oc_type, oc_data in oc_objects.items():
+            oc_data['path'] = Utils.create_tmp_file_from_contents(oc_type, oc_data['obj'].yaml_dict)
 
         return oc_objects
 
     def create(self):
         '''Create a deploymentconfig '''
         results = []
+
+        # pylint: disable=no-member
         for _, oc_data in self.prepared_router.items():
             results.append(self._create(oc_data['path']))
 
@@ -247,6 +257,8 @@ class Router(OpenShiftCLI):
     def update(self):
         '''run update for the router.  This performs a replace'''
         results = []
+
+        # pylint: disable=no-member
         for _, oc_data in self.prepared_router.items():
             if oc_data['update']:
                 results.append(self._replace(oc_data['path']))
@@ -312,7 +324,7 @@ class Router(OpenShiftCLI):
         # dry-run doesn't add the protocol to the ports section.  We will manually do that.
         for idx, port in enumerate(self.prepared_router['DeploymentConfig']['obj'].get(\
                         'spec.template.spec.containers[0].ports') or []):
-            if not port.has_key('protocol'):
+            if not 'protocol' in port:
                 port['protocol'] = 'TCP'
 
         # These are different when generating
@@ -325,13 +337,14 @@ class Router(OpenShiftCLI):
                ]
 
         if not Utils.check_def_equal(self.prepared_router['DeploymentConfig']['obj'].yaml_dict,
-                                         self.deploymentconfig.yaml_dict,
-                                         skip_keys=skip,
-                                         debug=self.verbose):
+                                     self.deploymentconfig.yaml_dict,
+                                     skip_keys=skip,
+                                     debug=self.verbose):
             self.prepared_router['DeploymentConfig']['update'] = True
 
         # Check if any of the parts need updating, if so, return True
         # else, no need to update
+        # pylint: disable=no-member
         return any([self.prepared_router[oc_type]['update'] for oc_type in self.prepared_router.keys()])
 
     @staticmethod
@@ -341,7 +354,7 @@ class Router(OpenShiftCLI):
         rconfig = RouterConfig(params['name'],
                                params['namespace'],
                                params['kubeconfig'],
-                               {'default_cert': {'value': None, 'include': True},
+                               {'default_cert': {'value': params['default_cert'], 'include': True},
                                 'cert_file': {'value': params['cert_file'], 'include': False},
                                 'key_file': {'value': params['key_file'], 'include': False},
                                 'images': {'value': params['images'], 'include': True},
@@ -400,6 +413,9 @@ class Router(OpenShiftCLI):
             if check_mode:
                 return {'changed': True, 'msg': 'CHECK_MODE: Would have performed a delete.'}
 
+            # In case of delete we return a list of each object
+            # that represents a router and its result in a list
+            # pylint: disable=redefined-variable-type
             api_rval = ocrouter.delete()
 
             return {'changed': True, 'results': api_rval, 'state': state}

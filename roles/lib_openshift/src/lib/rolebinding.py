@@ -1,4 +1,5 @@
 # pylint: skip-file
+# flake8: noqa
 
 # pylint: disable=too-many-instance-attributes
 class RoleBindingConfig(object):
@@ -58,7 +59,7 @@ class RoleBinding(Yedit):
     @property
     def subjects(self):
         ''' subjects property '''
-        if self._subjects == None:
+        if self._subjects is None:
             self._subjects = self.get_subjects()
         return self._subjects
 
@@ -70,7 +71,7 @@ class RoleBinding(Yedit):
     @property
     def role_ref(self):
         ''' role_ref property '''
-        if self._role_ref == None:
+        if self._role_ref is None:
             self._role_ref = self.get_role_ref()
         return self._role_ref
 
@@ -82,7 +83,7 @@ class RoleBinding(Yedit):
     @property
     def group_names(self):
         ''' group_names property '''
-        if self._group_names == None:
+        if self._group_names is None:
             self._group_names = self.get_group_names()
         return self._group_names
 
@@ -94,7 +95,7 @@ class RoleBinding(Yedit):
     @property
     def user_names(self):
         ''' user_names property '''
-        if self._user_names == None:
+        if self._user_names is None:
             self._user_names = self.get_user_names()
         return self._user_names
 
@@ -123,6 +124,7 @@ class RoleBinding(Yedit):
     def add_subject(self, inc_subject):
         ''' add a subject '''
         if self.subjects:
+            # pylint: disable=no-member
             self.subjects.append(inc_subject)
         else:
             self.put(RoleBinding.subjects_path, [inc_subject])
@@ -140,6 +142,7 @@ class RoleBinding(Yedit):
     def add_group_names(self, inc_group_names):
         ''' add a group_names '''
         if self.group_names:
+            # pylint: disable=no-member
             self.group_names.append(inc_group_names)
         else:
             self.put(RoleBinding.group_names_path, [inc_group_names])
@@ -149,6 +152,7 @@ class RoleBinding(Yedit):
     def add_user_name(self, inc_user_name):
         ''' add a username '''
         if self.user_names:
+            # pylint: disable=no-member
             self.user_names.append(inc_user_name)
         else:
             self.put(RoleBinding.user_names_path, [inc_user_name])
@@ -161,6 +165,7 @@ class RoleBinding(Yedit):
     def remove_subject(self, inc_subject):
         ''' remove a subject '''
         try:
+            # pylint: disable=no-member
             self.subjects.remove(inc_subject)
         except ValueError as _:
             return False
@@ -178,6 +183,7 @@ class RoleBinding(Yedit):
     def remove_group_name(self, inc_group_name):
         ''' remove a groupname '''
         try:
+            # pylint: disable=no-member
             self.group_names.remove(inc_group_name)
         except ValueError as _:
             return False
@@ -187,6 +193,7 @@ class RoleBinding(Yedit):
     def remove_user_name(self, inc_user_name):
         ''' remove a username '''
         try:
+            # pylint: disable=no-member
             self.user_names.remove(inc_user_name)
         except ValueError as _:
             return False
@@ -199,6 +206,7 @@ class RoleBinding(Yedit):
     def update_subject(self, inc_subject):
         ''' update a subject '''
         try:
+            # pylint: disable=no-member
             index = self.subjects.index(inc_subject)
         except ValueError as _:
             return self.add_subject(inc_subject)
@@ -210,6 +218,7 @@ class RoleBinding(Yedit):
     def update_group_name(self, inc_group_name):
         ''' update a groupname '''
         try:
+            # pylint: disable=no-member
             index = self.group_names.index(inc_group_name)
         except ValueError as _:
             return self.add_group_names(inc_group_name)
@@ -221,6 +230,7 @@ class RoleBinding(Yedit):
     def update_user_name(self, inc_user_name):
         ''' update a username '''
         try:
+            # pylint: disable=no-member
             index = self.user_names.index(inc_user_name)
         except ValueError as _:
             return self.add_user_name(inc_user_name)
@@ -242,6 +252,7 @@ class RoleBinding(Yedit):
         ''' find a subject '''
         index = None
         try:
+            # pylint: disable=no-member
             index = self.subjects.index(inc_subject)
         except ValueError as _:
             return index
@@ -252,6 +263,7 @@ class RoleBinding(Yedit):
         ''' find a group_name '''
         index = None
         try:
+            # pylint: disable=no-member
             index = self.group_names.index(inc_group_name)
         except ValueError as _:
             return index
@@ -262,6 +274,7 @@ class RoleBinding(Yedit):
         ''' find a user_name '''
         index = None
         try:
+            # pylint: disable=no-member
             index = self.user_names.index(inc_user_name)
         except ValueError as _:
             return index

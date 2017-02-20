@@ -20,7 +20,7 @@ class SecretConfig(object):
         self.create_dict()
 
     def create_dict(self):
-        ''' instantiate a secret as a dict '''
+        ''' assign the correct properties for a secret dict '''
         self.data['apiVersion'] = 'v1'
         self.data['kind'] = 'Secret'
         self.data['metadata'] = {}

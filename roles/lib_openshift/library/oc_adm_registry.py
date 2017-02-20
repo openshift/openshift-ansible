@@ -64,6 +64,7 @@ options:
     - The desired action when managing openshift registry
     - present - update or create the registry
     - absent - tear down the registry service and deploymentconfig
+    - list - returns the current representiation of a registry
     required: false
     default: False
     aliases: []
@@ -1774,7 +1775,7 @@ class SecretConfig(object):
         self.create_dict()
 
     def create_dict(self):
-        ''' instantiate a secret as a dict '''
+        ''' assign the correct properties for a secret dict '''
         self.data['apiVersion'] = 'v1'
         self.data['kind'] = 'Secret'
         self.data['metadata'] = {}
@@ -1845,7 +1846,7 @@ class Secret(Yedit):
     def update_secret(self, key, value):
         ''' update a secret'''
         # pylint: disable=no-member
-        if self.secrets.has_key(key):
+        if key in self.secrets:
             self.secrets[key] = value
         else:
             self.add_secret(key, value)
@@ -2157,7 +2158,7 @@ class Registry(OpenShiftCLI):
     def prepared_registry(self):
         ''' prepared_registry property '''
         if not self.__prepared_registry:
-            results = self._prepare_registry()
+            results = self.prepare_registry()
             if not results:
                 raise RegistryException('Could not perform registry preparation.')
             self.__prepared_registry = results
@@ -2171,13 +2172,14 @@ class Registry(OpenShiftCLI):
 
     def force_prepare_registry(self):
         '''force a registry prep'''
-        self._prepare_registry = None
+        self.__prepared_registry = None
 
     def get(self):
         ''' return the self.registry_parts '''
         self.deploymentconfig = None
         self.service = None
 
+        rval = 0
         for part in self.registry_parts:
             result = self._get(part['kind'], rname=part['name'])
             if result['returncode'] == 0 and part['kind'] == 'dc':
@@ -2185,7 +2187,11 @@ class Registry(OpenShiftCLI):
             elif result['returncode'] == 0 and part['kind'] == 'svc':
                 self.service = Yedit(content=result['results'][0])
 
-        return (self.deploymentconfig, self.service)
+            if result['returncode'] != 0:
+                rval = result['returncode']
+
+
+        return {'returncode': rval, 'deploymentconfig': self.deploymentconfig, 'service': self.service}
 
     def exists(self):
         '''does the object exist?'''
@@ -2203,9 +2209,16 @@ class Registry(OpenShiftCLI):
                 continue
             parts.append(self._delete(part['kind'], part['name']))
 
-        return parts
+        # Clean up returned results
+        rval = 0
+        for part in parts:
+            # pylint: disable=invalid-sequence-index
+            if 'returncode' in part and part['returncode'] != 0:
+                rval = part['returncode']
 
-    def _prepare_registry(self):
+        return {'returncode': rval, 'results': parts}
+
+    def prepare_registry(self):
         ''' prepare a registry for instantiation '''
         options = self.config.to_option_list()
 
@@ -2262,9 +2275,9 @@ class Registry(OpenShiftCLI):
         # Clean up returned results
         rval = 0
         for result in results:
-            if result['returncode'] != 0:
+            # pylint: disable=invalid-sequence-index
+            if 'returncode' in result and result['returncode'] != 0:
                 rval = result['returncode']
-
 
         return {'returncode': rval, 'results': results}
 
@@ -2382,6 +2395,8 @@ class Registry(OpenShiftCLI):
 
         return self.prepared_registry['deployment_update'] or self.prepared_registry['service_update'] or False
 
+    # In the future, we would like to break out each ansible state into a function.
+    # pylint: disable=too-many-branches,too-many-return-statements
     @staticmethod
     def run_ansible(params, check_mode):
         '''run idempotent ansible code'''
@@ -2431,6 +2446,8 @@ class Registry(OpenShiftCLI):
             if check_mode:
                 return {'changed': True, 'msg': 'CHECK_MODE: Would have performed a delete.'}
 
+            # Unsure as to why this is angry with the return type.
+            # pylint: disable=redefined-variable-type
             api_rval = ocregistry.delete()
 
             if api_rval['returncode'] != 0:

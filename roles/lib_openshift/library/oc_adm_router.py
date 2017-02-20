@@ -64,6 +64,7 @@ options:
     - Whether to create or delete the router
     - present - create the router
     - absent - remove the router
+    - list - return the current representation of a router
     required: false
     default: present
     choices:
@@ -2058,7 +2059,7 @@ class SecretConfig(object):
         self.create_dict()
 
     def create_dict(self):
-        ''' instantiate a secret as a dict '''
+        ''' assign the correct properties for a secret dict '''
         self.data['apiVersion'] = 'v1'
         self.data['kind'] = 'Secret'
         self.data['metadata'] = {}
@@ -2129,7 +2130,7 @@ class Secret(Yedit):
     def update_secret(self, key, value):
         ''' update a secret'''
         # pylint: disable=no-member
-        if self.secrets.has_key(key):
+        if key in self.secrets:
             self.secrets[key] = value
         else:
             self.add_secret(key, value)
@@ -2198,7 +2199,7 @@ class RoleBinding(Yedit):
     @property
     def subjects(self):
         ''' subjects property '''
-        if self._subjects == None:
+        if self._subjects is None:
             self._subjects = self.get_subjects()
         return self._subjects
 
@@ -2210,7 +2211,7 @@ class RoleBinding(Yedit):
     @property
     def role_ref(self):
         ''' role_ref property '''
-        if self._role_ref == None:
+        if self._role_ref is None:
             self._role_ref = self.get_role_ref()
         return self._role_ref
 
@@ -2222,7 +2223,7 @@ class RoleBinding(Yedit):
     @property
     def group_names(self):
         ''' group_names property '''
-        if self._group_names == None:
+        if self._group_names is None:
             self._group_names = self.get_group_names()
         return self._group_names
 
@@ -2234,7 +2235,7 @@ class RoleBinding(Yedit):
     @property
     def user_names(self):
         ''' user_names property '''
-        if self._user_names == None:
+        if self._user_names is None:
             self._user_names = self.get_user_names()
         return self._user_names
 
@@ -2263,6 +2264,7 @@ class RoleBinding(Yedit):
     def add_subject(self, inc_subject):
         ''' add a subject '''
         if self.subjects:
+            # pylint: disable=no-member
             self.subjects.append(inc_subject)
         else:
             self.put(RoleBinding.subjects_path, [inc_subject])
@@ -2280,6 +2282,7 @@ class RoleBinding(Yedit):
     def add_group_names(self, inc_group_names):
         ''' add a group_names '''
         if self.group_names:
+            # pylint: disable=no-member
             self.group_names.append(inc_group_names)
         else:
             self.put(RoleBinding.group_names_path, [inc_group_names])
@@ -2289,6 +2292,7 @@ class RoleBinding(Yedit):
     def add_user_name(self, inc_user_name):
         ''' add a username '''
         if self.user_names:
+            # pylint: disable=no-member
             self.user_names.append(inc_user_name)
         else:
             self.put(RoleBinding.user_names_path, [inc_user_name])
@@ -2301,6 +2305,7 @@ class RoleBinding(Yedit):
     def remove_subject(self, inc_subject):
         ''' remove a subject '''
         try:
+            # pylint: disable=no-member
             self.subjects.remove(inc_subject)
         except ValueError as _:
             return False
@@ -2318,6 +2323,7 @@ class RoleBinding(Yedit):
     def remove_group_name(self, inc_group_name):
         ''' remove a groupname '''
         try:
+            # pylint: disable=no-member
             self.group_names.remove(inc_group_name)
         except ValueError as _:
             return False
@@ -2327,6 +2333,7 @@ class RoleBinding(Yedit):
     def remove_user_name(self, inc_user_name):
         ''' remove a username '''
         try:
+            # pylint: disable=no-member
             self.user_names.remove(inc_user_name)
         except ValueError as _:
             return False
@@ -2339,6 +2346,7 @@ class RoleBinding(Yedit):
     def update_subject(self, inc_subject):
         ''' update a subject '''
         try:
+            # pylint: disable=no-member
             index = self.subjects.index(inc_subject)
         except ValueError as _:
             return self.add_subject(inc_subject)
@@ -2350,6 +2358,7 @@ class RoleBinding(Yedit):
     def update_group_name(self, inc_group_name):
         ''' update a groupname '''
         try:
+            # pylint: disable=no-member
             index = self.group_names.index(inc_group_name)
         except ValueError as _:
             return self.add_group_names(inc_group_name)
@@ -2361,6 +2370,7 @@ class RoleBinding(Yedit):
     def update_user_name(self, inc_user_name):
         ''' update a username '''
         try:
+            # pylint: disable=no-member
             index = self.user_names.index(inc_user_name)
         except ValueError as _:
             return self.add_user_name(inc_user_name)
@@ -2382,6 +2392,7 @@ class RoleBinding(Yedit):
         ''' find a subject '''
         index = None
         try:
+            # pylint: disable=no-member
             index = self.subjects.index(inc_subject)
         except ValueError as _:
             return index
@@ -2392,6 +2403,7 @@ class RoleBinding(Yedit):
         ''' find a group_name '''
         index = None
         try:
+            # pylint: disable=no-member
             index = self.group_names.index(inc_group_name)
         except ValueError as _:
             return index
@@ -2402,6 +2414,7 @@ class RoleBinding(Yedit):
         ''' find a user_name '''
         index = None
         try:
+            # pylint: disable=no-member
             index = self.user_names.index(inc_user_name)
         except ValueError as _:
             return index
@@ -2419,16 +2432,17 @@ class RoleBinding(Yedit):
 
 # -*- -*- -*- Begin included fragment: class/oc_adm_router.py -*- -*- -*-
 
-import time
 
 class RouterException(Exception):
     ''' Router exception'''
     pass
 
+
 class RouterConfig(OpenShiftCLIConfig):
     ''' RouterConfig is a DTO for the router.  '''
     def __init__(self, rname, namespace, kubeconfig, router_options):
         super(RouterConfig, self).__init__(rname, namespace, kubeconfig, router_options)
+
 
 class Router(OpenShiftCLI):
     ''' Class to wrap the oc command line tools '''
@@ -2464,7 +2478,7 @@ class Router(OpenShiftCLI):
     @property
     def prepared_router(self):
         ''' property for the prepared router'''
-        if self.__prepared_router == None:
+        if self.__prepared_router is None:
             results = self._prepare_router()
             if not results:
                 raise RouterException('Could not perform router preparation')
@@ -2567,7 +2581,12 @@ class Router(OpenShiftCLI):
         for part in self.router_parts:
             parts.append(self._delete(part['kind'], part['name']))
 
-        return parts
+        rval = 0
+        for part in parts:
+            if part['returncode'] != 0 and not 'already exist' in part['stderr']:
+                rval = part['returncode']
+
+        return {'returncode': rval, 'results': parts}
 
     def add_modifications(self, deploymentconfig):
         '''modify the deployment config'''
@@ -2595,16 +2614,17 @@ class Router(OpenShiftCLI):
     def _prepare_router(self):
         '''prepare router for instantiation'''
         # We need to create the pem file
-        router_pem = '/tmp/router.pem'
-        with open(router_pem, 'w') as rfd:
-            rfd.write(open(self.config.config_options['cert_file']['value']).read())
-            rfd.write(open(self.config.config_options['key_file']['value']).read())
-            if self.config.config_options['cacert_file']['value'] and \
-               os.path.exists(self.config.config_options['cacert_file']['value']):
-                rfd.write(open(self.config.config_options['cacert_file']['value']).read())
+        if self.config.config_options['default_cert']['value'] is None:
+            router_pem = '/tmp/router.pem'
+            with open(router_pem, 'w') as rfd:
+                rfd.write(open(self.config.config_options['cert_file']['value']).read())
+                rfd.write(open(self.config.config_options['key_file']['value']).read())
+                if self.config.config_options['cacert_file']['value'] and \
+                   os.path.exists(self.config.config_options['cacert_file']['value']):
+                    rfd.write(open(self.config.config_options['cacert_file']['value']).read())
 
-        atexit.register(Utils.cleanup, [router_pem])
-        self.config.config_options['default_cert']['value'] = router_pem
+            atexit.register(Utils.cleanup, [router_pem])
+            self.config.config_options['default_cert']['value'] = router_pem
 
         options = self.config.to_option_list()
 
@@ -2615,7 +2635,7 @@ class Router(OpenShiftCLI):
         results = self.openshift_cmd(cmd, oadm=True, output=True, output_type='json')
 
         # pylint: disable=no-member
-        if results['returncode'] != 0 and results['results'].has_key('items'):
+        if results['returncode'] != 0 and 'items' in results['results']:
             return results
 
         oc_objects = {'DeploymentConfig': {'obj': None, 'path': None, 'update': False},
@@ -2645,14 +2665,16 @@ class Router(OpenShiftCLI):
         # add modifications added
         oc_objects['DeploymentConfig']['obj'] = self.add_modifications(oc_objects['DeploymentConfig']['obj'])
 
-        for oc_type in oc_objects.keys():
-            oc_objects[oc_type]['path'] = Utils.create_tmp_file_from_contents(oc_type, oc_objects[oc_type]['obj'].yaml_dict)
+        for oc_type, oc_data in oc_objects.items():
+            oc_data['path'] = Utils.create_tmp_file_from_contents(oc_type, oc_data['obj'].yaml_dict)
 
         return oc_objects
 
     def create(self):
         '''Create a deploymentconfig '''
         results = []
+
+        # pylint: disable=no-member
         for _, oc_data in self.prepared_router.items():
             results.append(self._create(oc_data['path']))
 
@@ -2666,6 +2688,8 @@ class Router(OpenShiftCLI):
     def update(self):
         '''run update for the router.  This performs a replace'''
         results = []
+
+        # pylint: disable=no-member
         for _, oc_data in self.prepared_router.items():
             if oc_data['update']:
                 results.append(self._replace(oc_data['path']))
@@ -2731,7 +2755,7 @@ class Router(OpenShiftCLI):
         # dry-run doesn't add the protocol to the ports section.  We will manually do that.
         for idx, port in enumerate(self.prepared_router['DeploymentConfig']['obj'].get(\
                         'spec.template.spec.containers[0].ports') or []):
-            if not port.has_key('protocol'):
+            if not 'protocol' in port:
                 port['protocol'] = 'TCP'
 
         # These are different when generating
@@ -2744,13 +2768,14 @@ class Router(OpenShiftCLI):
                ]
 
         if not Utils.check_def_equal(self.prepared_router['DeploymentConfig']['obj'].yaml_dict,
-                                         self.deploymentconfig.yaml_dict,
-                                         skip_keys=skip,
-                                         debug=self.verbose):
+                                     self.deploymentconfig.yaml_dict,
+                                     skip_keys=skip,
+                                     debug=self.verbose):
             self.prepared_router['DeploymentConfig']['update'] = True
 
         # Check if any of the parts need updating, if so, return True
         # else, no need to update
+        # pylint: disable=no-member
         return any([self.prepared_router[oc_type]['update'] for oc_type in self.prepared_router.keys()])
 
     @staticmethod
@@ -2760,7 +2785,7 @@ class Router(OpenShiftCLI):
         rconfig = RouterConfig(params['name'],
                                params['namespace'],
                                params['kubeconfig'],
-                               {'default_cert': {'value': None, 'include': True},
+                               {'default_cert': {'value': params['default_cert'], 'include': True},
                                 'cert_file': {'value': params['cert_file'], 'include': False},
                                 'key_file': {'value': params['key_file'], 'include': False},
                                 'images': {'value': params['images'], 'include': True},
@@ -2819,6 +2844,9 @@ class Router(OpenShiftCLI):
             if check_mode:
                 return {'changed': True, 'msg': 'CHECK_MODE: Would have performed a delete.'}
 
+            # In case of delete we return a list of each object
+            # that represents a router and its result in a list
+            # pylint: disable=redefined-variable-type
             api_rval = ocrouter.delete()
 
             return {'changed': True, 'results': api_rval, 'state': state}
@@ -2874,6 +2902,7 @@ def main():
             name=dict(default='router', type='str'),
 
             kubeconfig=dict(default='/etc/origin/master/admin.kubeconfig', type='str'),
+            default_cert=dict(default=None, type='str'),
             cert_file=dict(default=None, type='str'),
             key_file=dict(default=None, type='str'),
             images=dict(default=None, type='str'), #'openshift3/ose-${component}:${version}'
@@ -2905,7 +2934,10 @@ def main():
             # edits
             edits=dict(default=[], type='list'),
         ),
-        mutually_exclusive=[["router_type", "images"]],
+        mutually_exclusive=[["router_type", "images"],
+                            ["key_file", "default_cert"],
+                            ["cert_file", "default_cert"],
+                           ],
 
         supports_check_mode=True,
     )

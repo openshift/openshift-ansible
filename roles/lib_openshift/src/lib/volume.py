@@ -1,4 +1,5 @@
 # pylint: skip-file
+# flake8: noqa
 
 class Volume(object):
     ''' Class to model an openshift volume object'''
