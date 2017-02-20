@@ -1,5 +1,5 @@
 # flake8: noqa
-# pylint: skip-file
+# pylint: disable=undefined-variable,missing-docstring
 # noqa: E301,E302
 
 
@@ -195,10 +195,12 @@ class Yedit(object):
             shutil.copy(self.filename, self.filename + '.orig')
 
         if hasattr(yaml, 'RoundTripDumper'):
+            # AUDIT:no-member makes sense here due to ruamel.YAML/PyYAML usage
             # pylint: disable=no-member
             if hasattr(self.yaml_dict, 'fa'):
                 self.yaml_dict.fa.set_block_style()
 
+            # AUDIT:no-member makes sense here due to ruamel.YAML/PyYAML usage
             # pylint: disable=no-member
             Yedit._write(self.filename, yaml.dump(self.yaml_dict, Dumper=yaml.RoundTripDumper))
         else:
@@ -242,12 +244,14 @@ class Yedit(object):
         # check if it is yaml
         try:
             if content_type == 'yaml' and contents:
+                # AUDIT:no-member makes sense here due to ruamel.YAML/PyYAML usage
                 # pylint: disable=no-member
                 if hasattr(yaml, 'RoundTripLoader'):
                     self.yaml_dict = yaml.load(contents, yaml.RoundTripLoader)
                 else:
                     self.yaml_dict = yaml.safe_load(contents)
 
+                # AUDIT:no-member makes sense here due to ruamel.YAML/PyYAML usage
                 # pylint: disable=no-member
                 if hasattr(self.yaml_dict, 'fa'):
                     self.yaml_dict.fa.set_block_style()
@@ -280,14 +284,16 @@ class Yedit(object):
             return (False, self.yaml_dict)
 
         if isinstance(entry, dict):
-            # pylint: disable=no-member,maybe-no-member
+            # AUDIT:maybe-no-member makes sense due to fuzzy types
+            # pylint: disable=maybe-no-member
             if key_or_item in entry:
                 entry.pop(key_or_item)
                 return (True, self.yaml_dict)
             return (False, self.yaml_dict)
 
         elif isinstance(entry, list):
-            # pylint: disable=no-member,maybe-no-member
+            # AUDIT:maybe-no-member makes sense due to fuzzy types
+            # pylint: disable=maybe-no-member
             ind = None
             try:
                 ind = entry.index(key_or_item)
@@ -355,7 +361,9 @@ class Yedit(object):
         if not isinstance(entry, list):
             return (False, self.yaml_dict)
 
-        # pylint: disable=no-member,maybe-no-member
+        # AUDIT:maybe-no-member makes sense due to loading data from
+        # a serialized format.
+        # pylint: disable=maybe-no-member
         entry.append(value)
         return (True, self.yaml_dict)
 
@@ -368,7 +376,8 @@ class Yedit(object):
             entry = None
 
         if isinstance(entry, dict):
-            # pylint: disable=no-member,maybe-no-member
+            # AUDIT:maybe-no-member makes sense due to fuzzy types
+            # pylint: disable=maybe-no-member
             if not isinstance(value, dict):
                 raise YeditException('Cannot replace key, value entry in ' +
                                      'dict with non-dict type. value=[%s] [%s]' % (value, type(value)))  # noqa: E501
@@ -377,7 +386,8 @@ class Yedit(object):
             return (True, self.yaml_dict)
 
         elif isinstance(entry, list):
-            # pylint: disable=no-member,maybe-no-member
+            # AUDIT:maybe-no-member makes sense due to fuzzy types
+            # pylint: disable=maybe-no-member
             ind = None
             if curr_value:
                 try:
@@ -417,11 +427,13 @@ class Yedit(object):
 
         # deepcopy didn't work
         if hasattr(yaml, 'round_trip_dump'):
+            # AUDIT:no-member makes sense here due to ruamel.YAML/PyYAML usage
             # pylint: disable=no-member
             tmp_copy = yaml.load(yaml.round_trip_dump(self.yaml_dict,
                                                       default_flow_style=False),
                                  yaml.RoundTripLoader)
 
+            # AUDIT:no-member makes sense here due to ruamel.YAML/PyYAML usage
             # pylint: disable=no-member
             if hasattr(self.yaml_dict, 'fa'):
                 tmp_copy.fa.set_block_style()
@@ -442,10 +454,12 @@ class Yedit(object):
         if not self.file_exists():
             # deepcopy didn't work
             if hasattr(yaml, 'round_trip_dump'):
+                # AUDIT:no-member makes sense here due to ruamel.YAML/PyYAML usage
                 # pylint: disable=no-member
                 tmp_copy = yaml.load(yaml.round_trip_dump(self.yaml_dict, default_flow_style=False),  # noqa: E501
                                      yaml.RoundTripLoader)
 
+                # AUDIT:no-member makes sense here due to ruamel.YAML/PyYAML usage
                 # pylint: disable=no-member
                 if hasattr(self.yaml_dict, 'fa'):
                     tmp_copy.fa.set_block_style()

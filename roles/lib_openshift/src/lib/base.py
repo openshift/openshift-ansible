@@ -295,6 +295,7 @@ class Utils(object):
         tmp = Utils.create_tmpfile(prefix=rname)
 
         if ftype == 'yaml':
+            # AUDIT:no-member makes sense here due to ruamel.YAML/PyYAML usage
             # pylint: disable=no-member
             if hasattr(yaml, 'RoundTripDumper'):
                 Utils._write(tmp, yaml.dump(data, Dumper=yaml.RoundTripDumper))
@@ -382,6 +383,7 @@ class Utils(object):
             contents = sfd.read()
 
         if sfile_type == 'yaml':
+            # AUDIT:no-member makes sense here due to ruamel.YAML/PyYAML usage
             # pylint: disable=no-member
             if hasattr(yaml, 'RoundTripLoader'):
                 contents = yaml.load(contents, yaml.RoundTripLoader)

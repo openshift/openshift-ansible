@@ -270,6 +270,7 @@ EXAMPLES = '''
 # -*- -*- -*- End included fragment: doc/router -*- -*- -*-
 
 # -*- -*- -*- Begin included fragment: ../../lib_utils/src/class/yedit.py -*- -*- -*-
+# pylint: disable=undefined-variable,missing-docstring
 # noqa: E301,E302
 
 
@@ -464,14 +465,16 @@ class Yedit(object):
         if self.backup and self.file_exists():
             shutil.copy(self.filename, self.filename + '.orig')
 
-        if hasattr(yaml, 'RoundTripDumper'):
-            # pylint: disable=no-member
-            if hasattr(self.yaml_dict, 'fa'):
-                self.yaml_dict.fa.set_block_style()
+        # Try to set format attributes if supported
+        try:
+            self.yaml_dict.fa.set_block_style()
+        except AttributeError:
+            pass
 
-            # pylint: disable=no-member
+        # Try to use RoundTripDumper if supported.
+        try:
             Yedit._write(self.filename, yaml.dump(self.yaml_dict, Dumper=yaml.RoundTripDumper))
-        else:
+        except AttributeError:
             Yedit._write(self.filename, yaml.safe_dump(self.yaml_dict, default_flow_style=False))
 
         return (True, self.yaml_dict)
@@ -512,15 +515,23 @@ class Yedit(object):
         # check if it is yaml
         try:
             if content_type == 'yaml' and contents:
-                # pylint: disable=no-member
-                if hasattr(yaml, 'RoundTripLoader'):
-                    self.yaml_dict = yaml.load(contents, yaml.RoundTripLoader)
-                else:
+                # Try to set format attributes if supported
+                try:
+                    self.yaml_dict.fa.set_block_style()
+                except AttributeError:
+                    pass
+
+                # Try to use RoundTripLoader if supported.
+                try:
+                    self.yaml_dict = yaml.safe_load(contents, yaml.RoundTripLoader)
+                except AttributeError:
                     self.yaml_dict = yaml.safe_load(contents)
 
-                # pylint: disable=no-member
-                if hasattr(self.yaml_dict, 'fa'):
+                # Try to set format attributes if supported
+                try:
                     self.yaml_dict.fa.set_block_style()
+                except AttributeError:
+                    pass
 
             elif content_type == 'json' and contents:
                 self.yaml_dict = json.loads(contents)
@@ -550,14 +561,16 @@ class Yedit(object):
             return (False, self.yaml_dict)
 
         if isinstance(entry, dict):
-            # pylint: disable=no-member,maybe-no-member
+            # AUDIT:maybe-no-member makes sense due to fuzzy types
+            # pylint: disable=maybe-no-member
             if key_or_item in entry:
                 entry.pop(key_or_item)
                 return (True, self.yaml_dict)
             return (False, self.yaml_dict)
 
         elif isinstance(entry, list):
-            # pylint: disable=no-member,maybe-no-member
+            # AUDIT:maybe-no-member makes sense due to fuzzy types
+            # pylint: disable=maybe-no-member
             ind = None
             try:
                 ind = entry.index(key_or_item)
@@ -625,7 +638,9 @@ class Yedit(object):
         if not isinstance(entry, list):
             return (False, self.yaml_dict)
 
-        # pylint: disable=no-member,maybe-no-member
+        # AUDIT:maybe-no-member makes sense due to loading data from
+        # a serialized format.
+        # pylint: disable=maybe-no-member
         entry.append(value)
         return (True, self.yaml_dict)
 
@@ -638,7 +653,8 @@ class Yedit(object):
             entry = None
 
         if isinstance(entry, dict):
-            # pylint: disable=no-member,maybe-no-member
+            # AUDIT:maybe-no-member makes sense due to fuzzy types
+            # pylint: disable=maybe-no-member
             if not isinstance(value, dict):
                 raise YeditException('Cannot replace key, value entry in ' +
                                      'dict with non-dict type. value=[%s] [%s]' % (value, type(value)))  # noqa: E501
@@ -647,7 +663,8 @@ class Yedit(object):
             return (True, self.yaml_dict)
 
         elif isinstance(entry, list):
-            # pylint: disable=no-member,maybe-no-member
+            # AUDIT:maybe-no-member makes sense due to fuzzy types
+            # pylint: disable=maybe-no-member
             ind = None
             if curr_value:
                 try:
@@ -686,18 +703,19 @@ class Yedit(object):
             return (False, self.yaml_dict)
 
         # deepcopy didn't work
-        if hasattr(yaml, 'round_trip_dump'):
-            # pylint: disable=no-member
+        # Try to use ruamel.yaml and fallback to pyyaml
+        try:
             tmp_copy = yaml.load(yaml.round_trip_dump(self.yaml_dict,
                                                       default_flow_style=False),
                                  yaml.RoundTripLoader)
-
-            # pylint: disable=no-member
-            if hasattr(self.yaml_dict, 'fa'):
-                tmp_copy.fa.set_block_style()
-
-        else:
+        except AttributeError:
             tmp_copy = copy.deepcopy(self.yaml_dict)
+
+        # set the format attributes if available
+        try:
+            tmp_copy.fa.set_block_style()
+        except AttributeError:
+            pass
 
         result = Yedit.add_entry(tmp_copy, path, value, self.separator)
         if not result:
@@ -711,16 +729,19 @@ class Yedit(object):
         ''' create a yaml file '''
         if not self.file_exists():
             # deepcopy didn't work
-            if hasattr(yaml, 'round_trip_dump'):
-                # pylint: disable=no-member
-                tmp_copy = yaml.load(yaml.round_trip_dump(self.yaml_dict, default_flow_style=False),  # noqa: E501
+            # Try to use ruamel.yaml and fallback to pyyaml
+            try:
+                tmp_copy = yaml.load(yaml.round_trip_dump(self.yaml_dict,
+                                                          default_flow_style=False),
                                      yaml.RoundTripLoader)
-
-                # pylint: disable=no-member
-                if hasattr(self.yaml_dict, 'fa'):
-                    tmp_copy.fa.set_block_style()
-            else:
+            except AttributeError:
                 tmp_copy = copy.deepcopy(self.yaml_dict)
+
+            # set the format attributes if available
+            try:
+                tmp_copy.fa.set_block_style()
+            except AttributeError:
+                pass
 
             result = Yedit.add_entry(tmp_copy, path, value, self.separator)
             if result:
@@ -1163,6 +1184,7 @@ class Utils(object):
         tmp = Utils.create_tmpfile(prefix=rname)
 
         if ftype == 'yaml':
+            # AUDIT:no-member makes sense here due to ruamel.YAML/PyYAML usage
             # pylint: disable=no-member
             if hasattr(yaml, 'RoundTripDumper'):
                 Utils._write(tmp, yaml.dump(data, Dumper=yaml.RoundTripDumper))
@@ -1250,6 +1272,7 @@ class Utils(object):
             contents = sfd.read()
 
         if sfile_type == 'yaml':
+            # AUDIT:no-member makes sense here due to ruamel.YAML/PyYAML usage
             # pylint: disable=no-member
             if hasattr(yaml, 'RoundTripLoader'):
                 contents = yaml.load(contents, yaml.RoundTripLoader)
@@ -1635,7 +1658,6 @@ spec:
 
         super(DeploymentConfig, self).__init__(content=content)
 
-    # pylint: disable=no-member
     def add_env_value(self, key, value):
         ''' add key, value pair to env array '''
         rval = False
@@ -2129,7 +2151,6 @@ class Secret(Yedit):
 
     def update_secret(self, key, value):
         ''' update a secret'''
-        # pylint: disable=no-member
         if key in self.secrets:
             self.secrets[key] = value
         else:
