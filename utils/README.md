@@ -1,55 +1,60 @@
-# Running Tests (NEW)
+# Running Tests
 
 Run the command:
 
     make ci
 
-to run an array of unittests locally.
+to run tests and linting tools.
 
 Underneath the covers, we use [tox](http://readthedocs.org/docs/tox/) to manage virtualenvs and run
 tests. Alternatively, tests can be run using [detox](https://pypi.python.org/pypi/detox/) which allows
-for running tests in parallel
-
+for running tests in parallel.
 
 ```
 pip install tox detox
 ```
 
 List the test environments available:
+
 ```
 tox -l
 ```
 
 Run all of the tests with:
+
 ```
 tox
 ```
 
 Run all of the tests in parallel with detox:
+
 ```
 detox
 ```
 
-Running a particular test environment (python 2.7 flake8 tests in this case):
+Run a particular test environment:
+
 ```
-tox -e py27-ansible22-flake8
+tox -e py27-flake8
 ```
 
-Running a particular test environment in a clean virtualenv (python 3.5 pylint
-tests in this case):
+Run a particular test environment in a clean virtualenv:
+
 ```
-tox -r -e py35-ansible22-pylint
+tox -r -e py35-pylint
 ```
 
 If you want to enter the virtualenv created by tox to do additional
-testing/debugging (py27-flake8 env in this case):
+testing/debugging:
+
 ```
-source .tox/py27-ansible22-flake8/bin/activate
+source .tox/py27-flake8/bin/activate
 ```
 
 You will get errors if the log files already exist and can not be
 written to by the current user (`/tmp/ansible.log` and
 `/tmp/installer.txt`). *We're working on it.*
+
 
 # Running From Source
 
@@ -66,17 +71,3 @@ The virtualenv `bin` directory should now be at the start of your
 You can exit the virtualenv with:
 
     $ deactivate
-
-# Testing (OLD)
-
-*This section is deprecated, but still works*
-
-First, run the **virtualenv setup steps** described above.
-
-Install some testing libraries: (we cannot do this via setuptools due to the version virtualenv bundles)
-
-$ pip install mock nose
-
-Then run the tests with:
-
-$ oo-install/bin/nosetests

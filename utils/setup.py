@@ -40,7 +40,7 @@ setup(
     # simple. Or you can use find_packages().
     #packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
     packages=['ooinstall'],
-    package_dir={'ooinstall': 'src/ooinstall'},
+    package_dir={'': 'src'},
 
 
     # List run-time dependencies here.  These will be installed by pip when
@@ -65,9 +65,8 @@ setup(
         'ooinstall': ['ansible.cfg', 'ansible-quiet.cfg', 'ansible_plugins/*'],
     },
 
-    tests_require=['nose'],
-
-    test_suite='nose.collector',
+    setup_requires=['pytest-runner'],
+    tests_require=['pytest'],
 
     # To provide executable scripts, use entry points in preference to the
     # "scripts" keyword. Entry points provide cross-platform support and allow

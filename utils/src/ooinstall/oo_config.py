@@ -176,7 +176,7 @@ class Deployment(object):
 class OOConfig(object):
     default_dir = os.path.normpath(
         os.environ.get('XDG_CONFIG_HOME',
-                       os.environ['HOME'] + '/.config/') + '/openshift/')
+                       os.environ.get('HOME', '') + '/.config/') + '/openshift/')
     default_file = '/installer.cfg.yml'
 
     def __init__(self, config_path):

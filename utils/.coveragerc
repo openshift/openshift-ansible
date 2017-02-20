@@ -1,5 +1,18 @@
 [run]
-omit=
+branch = True
+omit =
     */lib/python*/site-packages/*
     */lib/python*/*
     /usr/*
+    setup.py
+    # TODO(rhcarvalho): this is used to ignore test files from coverage report.
+    # We can make this less generic when we stick with a single test pattern in
+    # the repo.
+    test_*.py
+    *_tests.py
+
+[report]
+fail_under = 73
+
+[html]
+directory = cover
