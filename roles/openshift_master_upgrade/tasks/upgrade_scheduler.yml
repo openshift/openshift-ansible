@@ -1,4 +1,15 @@
 ---
+# input variables:
+# - openshift_upgrade_min
+# - openshift_deployment_type
+# - openshift_master_scheduler_conf
+# - openshift_master_scheduler_current_predicates
+# - openshift_master_scheduler_current_priorities
+# - openshift_master_scheduler_predicates
+# - openshift_master_scheduler_priorities
+# - openshift_master_scheduler_default_predicates
+# - openshift_master_scheduler_default_priorities
+
 # Upgrade predicates
 - vars:
     prev_predicates: "{{ lookup('openshift_master_facts_default_predicates', short_version=openshift_upgrade_min, deployment_type=openshift_deployment_type) }}"
