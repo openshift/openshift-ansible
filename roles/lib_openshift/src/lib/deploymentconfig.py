@@ -68,7 +68,6 @@ spec:
 
         super(DeploymentConfig, self).__init__(content=content)
 
-    # pylint: disable=no-member
     def add_env_value(self, key, value):
         ''' add key, value pair to env array '''
         rval = False

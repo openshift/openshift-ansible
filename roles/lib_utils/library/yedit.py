@@ -35,7 +35,6 @@ import os  # noqa: F401
 import re  # noqa: F401
 import shutil  # noqa: F401
 
-# pylint: disable=import-error
 try:
     import ruamel.yaml as yaml  # noqa: F401
 except ImportError:
@@ -381,16 +380,16 @@ class Yedit(object):
         if self.backup and self.file_exists():
             shutil.copy(self.filename, self.filename + '.orig')
 
-        if hasattr(yaml, 'RoundTripDumper'):
-            # AUDIT:no-member makes sense here due to ruamel.YAML/PyYAML usage
-            # pylint: disable=no-member
-            if hasattr(self.yaml_dict, 'fa'):
-                self.yaml_dict.fa.set_block_style()
+        # Try to set format attributes if supported
+        try:
+            self.yaml_dict.fa.set_block_style()
+        except AttributeError:
+            pass
 
-            # AUDIT:no-member makes sense here due to ruamel.YAML/PyYAML usage
-            # pylint: disable=no-member
+        # Try to use RoundTripDumper if supported.
+        try:
             Yedit._write(self.filename, yaml.dump(self.yaml_dict, Dumper=yaml.RoundTripDumper))
-        else:
+        except AttributeError:
             Yedit._write(self.filename, yaml.safe_dump(self.yaml_dict, default_flow_style=False))
 
         return (True, self.yaml_dict)
@@ -431,17 +430,23 @@ class Yedit(object):
         # check if it is yaml
         try:
             if content_type == 'yaml' and contents:
-                # AUDIT:no-member makes sense here due to ruamel.YAML/PyYAML usage
-                # pylint: disable=no-member
-                if hasattr(yaml, 'RoundTripLoader'):
-                    self.yaml_dict = yaml.load(contents, yaml.RoundTripLoader)
-                else:
+                # Try to set format attributes if supported
+                try:
+                    self.yaml_dict.fa.set_block_style()
+                except AttributeError:
+                    pass
+
+                # Try to use RoundTripLoader if supported.
+                try:
+                    self.yaml_dict = yaml.safe_load(contents, yaml.RoundTripLoader)
+                except AttributeError:
                     self.yaml_dict = yaml.safe_load(contents)
 
-                # AUDIT:no-member makes sense here due to ruamel.YAML/PyYAML usage
-                # pylint: disable=no-member
-                if hasattr(self.yaml_dict, 'fa'):
+                # Try to set format attributes if supported
+                try:
                     self.yaml_dict.fa.set_block_style()
+                except AttributeError:
+                    pass
 
             elif content_type == 'json' and contents:
                 self.yaml_dict = json.loads(contents)
@@ -613,20 +618,19 @@ class Yedit(object):
             return (False, self.yaml_dict)
 
         # deepcopy didn't work
-        if hasattr(yaml, 'round_trip_dump'):
-            # AUDIT:no-member makes sense here due to ruamel.YAML/PyYAML usage
-            # pylint: disable=no-member
+        # Try to use ruamel.yaml and fallback to pyyaml
+        try:
             tmp_copy = yaml.load(yaml.round_trip_dump(self.yaml_dict,
                                                       default_flow_style=False),
                                  yaml.RoundTripLoader)
-
-            # AUDIT:no-member makes sense here due to ruamel.YAML/PyYAML usage
-            # pylint: disable=no-member
-            if hasattr(self.yaml_dict, 'fa'):
-                tmp_copy.fa.set_block_style()
-
-        else:
+        except AttributeError:
             tmp_copy = copy.deepcopy(self.yaml_dict)
+
+        # set the format attributes if available
+        try:
+            tmp_copy.fa.set_block_style()
+        except AttributeError:
+            pass
 
         result = Yedit.add_entry(tmp_copy, path, value, self.separator)
         if not result:
@@ -640,18 +644,19 @@ class Yedit(object):
         ''' create a yaml file '''
         if not self.file_exists():
             # deepcopy didn't work
-            if hasattr(yaml, 'round_trip_dump'):
-                # AUDIT:no-member makes sense here due to ruamel.YAML/PyYAML usage
-                # pylint: disable=no-member
-                tmp_copy = yaml.load(yaml.round_trip_dump(self.yaml_dict, default_flow_style=False),  # noqa: E501
+            # Try to use ruamel.yaml and fallback to pyyaml
+            try:
+                tmp_copy = yaml.load(yaml.round_trip_dump(self.yaml_dict,
+                                                          default_flow_style=False),
                                      yaml.RoundTripLoader)
-
-                # AUDIT:no-member makes sense here due to ruamel.YAML/PyYAML usage
-                # pylint: disable=no-member
-                if hasattr(self.yaml_dict, 'fa'):
-                    tmp_copy.fa.set_block_style()
-            else:
+            except AttributeError:
                 tmp_copy = copy.deepcopy(self.yaml_dict)
+
+            # set the format attributes if available
+            try:
+                tmp_copy.fa.set_block_style()
+            except AttributeError:
+                pass
 
             result = Yedit.add_entry(tmp_copy, path, value, self.separator)
             if result:
