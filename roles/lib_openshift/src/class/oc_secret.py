@@ -29,7 +29,7 @@ class OCSecret(OpenShiftCLI):
         if results['returncode'] == 0 and results['results'][0]:
             results['exists'] = True
             if self.decode:
-                if results['results'][0].has_key('data'):
+                if 'data' in results['results'][0]:
                     for sname, value in results['results'][0]['data'].items():
                         results['decoded'][sname] = base64.b64decode(value)
 
