@@ -63,7 +63,7 @@ When both `openshift_logging_install_logging` and `openshift_logging_upgrade_log
 
 - `openshift_logging_es_cluster_size`: The number of ES cluster members. Defaults to '1'.
 - `openshift_logging_es_cpu_limit`:  The amount of CPU limit for the ES cluster.  Unused if not set
-- `openshift_logging_es_memory_limit`: The amount of RAM that should be assigned to ES. Defaults to '1024Mi'.
+- `openshift_logging_es_memory_limit`: The amount of RAM that should be assigned to ES. Defaults to '8Gi'.
 - `openshift_logging_es_pv_selector`: A key/value map added to a PVC in order to select specific PVs.  Defaults to 'None'.
 - `openshift_logging_es_pvc_dynamic`: Whether or not to add the dynamic PVC annotation for any generated PVCs. Defaults to 'False'.
 - `openshift_logging_es_pvc_size`: The requested size for the ES PVCs, when not provided the role will not generate any PVCs. Defaults to '""'.
@@ -81,7 +81,7 @@ same as above for their non-ops counterparts, but apply to the OPS cluster insta
 - `openshift_logging_es_ops_client_key`: /etc/fluent/keys/key
 - `openshift_logging_es_ops_cluster_size`: 1
 - `openshift_logging_es_ops_cpu_limit`:  The amount of CPU limit for the ES cluster.  Unused if not set
-- `openshift_logging_es_ops_memory_limit`: 1024Mi
+- `openshift_logging_es_ops_memory_limit`: 8Gi
 - `openshift_logging_es_ops_pvc_dynamic`: False
 - `openshift_logging_es_ops_pvc_size`: ""
 - `openshift_logging_es_ops_pvc_prefix`: logging-es-ops
