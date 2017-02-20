@@ -91,7 +91,7 @@ class Secret(Yedit):
     def update_secret(self, key, value):
         ''' update a secret'''
         # pylint: disable=no-member
-        if self.secrets.has_key(key):
+        if key in self.secrets:
             self.secrets[key] = value
         else:
             self.add_secret(key, value)
