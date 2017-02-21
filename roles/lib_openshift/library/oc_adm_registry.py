@@ -195,7 +195,7 @@ extends_documentation_fragment: []
 
 EXAMPLES = '''
 - name: create a secure registry
-  oadm_registry:
+  oc_adm_registry:
     name: docker-registry
     service_account: registry
     replicas: 2

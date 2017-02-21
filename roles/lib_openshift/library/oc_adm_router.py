@@ -234,7 +234,7 @@ extends_documentation_fragment:
 
 EXAMPLES = '''
 - name: create routers
-  oadm_router:
+  oc_adm_router:
     name: router
     service_account: router
     replicas: 2
