@@ -65,9 +65,6 @@ setup(
         'ooinstall': ['ansible.cfg', 'ansible-quiet.cfg', 'ansible_plugins/*'],
     },
 
-    setup_requires=['pytest-runner'],
-    tests_require=['pytest'],
-
     # To provide executable scripts, use entry points in preference to the
     # "scripts" keyword. Entry points provide cross-platform support and allow
     # pip to create the appropriate form of executable for the target platform.
