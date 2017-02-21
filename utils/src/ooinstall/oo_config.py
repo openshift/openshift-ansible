@@ -126,15 +126,6 @@ class Host(object):
         """ Does this host have the etcd role """
         return 'etcd' in self.roles
 
-    def is_etcd_member(self, all_hosts):
-        """ Will this host be a member of a standalone etcd cluster. """
-        if not self.is_master():
-            return False
-        masters = [host for host in all_hosts if host.is_master()]
-        if len(masters) > 1:
-            return True
-        return False
-
     def is_dedicated_node(self):
         """ Will this host be a dedicated node. (not a master) """
         return self.is_node() and not self.is_master()
@@ -185,7 +176,7 @@ class Deployment(object):
 class OOConfig(object):
     default_dir = os.path.normpath(
         os.environ.get('XDG_CONFIG_HOME',
-                       os.environ['HOME'] + '/.config/') + '/openshift/')
+                       os.environ.get('HOME', '') + '/.config/') + '/openshift/')
     default_file = '/installer.cfg.yml'
 
     def __init__(self, config_path):
@@ -435,12 +426,6 @@ class OOConfig(object):
 
     def __str__(self):
         return self.yaml()
-
-    def get_host(self, name):
-        for host in self.deployment.hosts:
-            if host.connect_to == name:
-                return host
-        return None
 
     def get_host_roles_set(self):
         roles_set = set()

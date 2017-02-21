@@ -256,7 +256,7 @@ class YeditTest(unittest.TestCase):
 
     def test_pop_list_item_2(self):
         '''test dict value with none value'''
-        z = range(10)
+        z = list(range(10))
         yed = Yedit(content=z, separator=':')
         yed.pop('', 5)
         z.pop(5)

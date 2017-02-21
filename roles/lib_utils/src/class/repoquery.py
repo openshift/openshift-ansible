@@ -60,7 +60,7 @@ class Repoquery(RepoqueryCLI):
         ''' Gather and present the versions of each package '''
 
         versions_dict = {}
-        versions_dict['available_versions_full'] = formatted_versions.keys()
+        versions_dict['available_versions_full'] = list(formatted_versions.keys())
 
         # set the match version, if called
         if self.match_version:

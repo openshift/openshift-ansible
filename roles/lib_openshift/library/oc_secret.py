@@ -985,7 +985,7 @@ class OpenShiftCLI(object):
 
         stdout, stderr = proc.communicate(input_data)
 
-        return proc.returncode, stdout, stderr
+        return proc.returncode, stdout.decode(), stderr.decode()
 
     # pylint: disable=too-many-arguments,too-many-branches
     def openshift_cmd(self, cmd, oadm=False, output=False, output_type='json', input_data=None):
@@ -1429,7 +1429,7 @@ class Secret(Yedit):
     def update_secret(self, key, value):
         ''' update a secret'''
         # pylint: disable=no-member
-        if self.secrets.has_key(key):
+        if key in self.secrets:
             self.secrets[key] = value
         else:
             self.add_secret(key, value)
@@ -1467,7 +1467,7 @@ class OCSecret(OpenShiftCLI):
         if results['returncode'] == 0 and results['results'][0]:
             results['exists'] = True
             if self.decode:
-                if results['results'][0].has_key('data'):
+                if 'data' in results['results'][0]:
                     for sname, value in results['results'][0]['data'].items():
                         results['decoded'][sname] = base64.b64decode(value)
 

@@ -78,7 +78,7 @@ middleware:
   - name: cloudfront
     options:
       baseurl: {{ openshift_hosted_registry_storage_s3_cloudfront_baseurl }}
-      privatekey: {{ openshift_hosted_registry_storage_s3_cloudfront_privatekeyfile }}
+      privatekey: /etc/origin/cloudfront.pem
       keypairid: {{ openshift_hosted_registry_storage_s3_cloudfront_keypairid }}
 {% elif openshift.common.version_gte_3_3_or_1_3 | bool %}
   storage:

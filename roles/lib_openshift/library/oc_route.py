@@ -995,7 +995,7 @@ class OpenShiftCLI(object):
 
         stdout, stderr = proc.communicate(input_data)
 
-        return proc.returncode, stdout, stderr
+        return proc.returncode, stdout.decode(), stderr.decode()
 
     # pylint: disable=too-many-arguments,too-many-branches
     def openshift_cmd(self, cmd, oadm=False, output=False, output_type='json', input_data=None):
@@ -1548,7 +1548,7 @@ class OCRoute(OpenShiftCLI):
     def needs_update(self):
         ''' verify an update is needed '''
         skip = []
-        return not Utils.check_def_equal(self.config.data, self.route.yaml_dict, skip_keys=skip, debug=True)
+        return not Utils.check_def_equal(self.config.data, self.route.yaml_dict, skip_keys=skip, debug=self.verbose)
 
     @staticmethod
     def get_cert_data(path, content):

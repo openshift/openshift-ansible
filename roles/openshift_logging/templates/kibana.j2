@@ -30,7 +30,7 @@ spec:
 {% if kibana_node_selector is iterable and kibana_node_selector | length > 0 %}
       nodeSelector:
 {% for key, value in kibana_node_selector.iteritems() %}
-        {{key}}: {{value}}
+        {{key}}: "{{value}}"
 {% endfor %}
 {% endif %}
       containers:

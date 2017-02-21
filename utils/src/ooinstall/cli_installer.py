@@ -72,12 +72,6 @@ You might want to override the default subdomain used for exposed routes. If you
     return click.prompt('New default subdomain (ENTER for none)', default='')
 
 
-def list_hosts(hosts):
-    hosts_idx = range(len(hosts))
-    for idx in hosts_idx:
-        click.echo('   {}: {}'.format(idx, hosts[idx]))
-
-
 def collect_hosts(oo_cfg, existing_env=False, masters_set=False, print_summary=True):
     """
         Collect host information from user. This will later be filled in using
@@ -654,20 +648,6 @@ https://docs.openshift.com/enterprise/latest/admin_guide/install/prerequisites.h
         click.clear()
 
     return oo_cfg
-
-
-def get_role_variable(oo_cfg, role_name, variable_name):
-    try:
-        target_role = next(role for role in oo_cfg.deployment.roles if role.name is role_name)
-        target_variable = target_role.variables[variable_name]
-        return target_variable
-    except (StopIteration, KeyError):
-        return None
-
-
-def set_role_variable(oo_cfg, role_name, variable_name, variable_value):
-    target_role = next(role for role in oo_cfg.deployment.roles if role.name is role_name)
-    target_role[variable_name] = variable_value
 
 
 def collect_new_nodes(oo_cfg):

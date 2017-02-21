@@ -152,3 +152,17 @@ are run on a different Jenkins host that is not publicly accessible, however the
 test results are posted to S3 buckets when complete.
 
 The test output of each job is also posted to the Pull Request as comments.
+
+---
+
+## Appendix
+
+### Finding unused Python code
+
+If you are contributing with Python code, you can use the tool
+[`vulture`](https://pypi.python.org/pypi/vulture) to verify that you are not
+introducing unused code by accident.
+
+This tool is not used in an automated form in CI nor otherwise because it may
+produce both false positives and false negatives. Still, it can be helpful to
+detect dead code that escapes our eyes.

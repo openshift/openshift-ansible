@@ -73,6 +73,10 @@ find -L %{buildroot}%{_datadir}/ansible/%{name}/playbooks -name filter_plugins -
 
 # openshift-ansible-roles install
 cp -rp roles %{buildroot}%{_datadir}/ansible/%{name}/
+# openshift_master_facts symlinks filter_plugins/oo_filters.py from ansible_plugins/filter_plugins
+pushd %{buildroot}%{_datadir}/ansible/%{name}/roles/openshift_master_facts/filter_plugins
+ln -sf ../../../../../ansible_plugins/filter_plugins/oo_filters.py oo_filters.py
+popd
 
 # openshift-ansible-filter-plugins install
 cp -rp filter_plugins %{buildroot}%{_datadir}/ansible_plugins/

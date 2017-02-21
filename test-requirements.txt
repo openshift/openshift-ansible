@@ -7,5 +7,7 @@ pylint
 setuptools-lint
 PyYAML
 yamllint
-nose
 coverage
+mock
+pytest
+pytest-cov

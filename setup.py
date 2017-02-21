@@ -13,6 +13,7 @@ import yaml
 from setuptools import setup, Command
 from setuptools_lint.setuptools_command import PylintCommand
 from six import string_types
+from six.moves import reload_module
 from yamllint.config import YamlLintConfig
 from yamllint.cli import Format
 from yamllint import linter
@@ -185,6 +186,7 @@ class OpenShiftAnsibleGenerateValidation(Command):
                 # the python path.
                 # pylint: disable=import-error
                 import generate
+                reload_module(generate)
                 generate.verify()
             except generate.GenerateAnsibleException as gae:
                 print(gae.args)

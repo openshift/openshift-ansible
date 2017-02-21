@@ -26,14 +26,14 @@
   loop_control:
     loop_var: object
 
-- name: Wait for pods to stop
+- name: Wait for pods to start
   oc_obj:
     state: list
-    kind: dc
+    kind: pods
     selector: "component=es"
     namespace: "{{openshift_logging_namespace}}"
   register: running_pod
-  until: running_pod.results.results.items[?(@.status.phase == "Running")].metadata.name != ''
+  until: running_pod.results.results[0]['items'] | selectattr('status.phase', 'equalto', 'Running') | map(attribute='metadata.name') | list | length != 0
   retries: 30
   delay: 10
 
