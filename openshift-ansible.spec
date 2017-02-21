@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.64
+Version:        3.3.65
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,15 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Feb 21 2017 Scott Dodson <sdodson@redhat.com> 3.3.65-1
+- Address cert expiry parsing review comments (tbielawa@redhat.com)
+- Implement fake openssl cert classes (tbielawa@redhat.com)
+- node: ensure conntrack-tools is installed (gscrivan@redhat.com)
+- When running 1.3 playbooks default version_gte_3_3_or_1_3 to true
+  (sdodson@redhat.com)
+- Install etcd for containerized environments as well as embedded.
+  (abutcher@redhat.com)
+
 * Thu Feb 09 2017 Scott Dodson <sdodson@redhat.com> 3.3.64-1
 - Include rpm/git paths in expiry README (tbielawa@redhat.com)
 - Make the cert expiry playbooks runnable (tbielawa@redhat.com)
