@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.12
+Version:        3.5.13
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -263,6 +263,27 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Feb 21 2017 Scott Dodson <sdodson@redhat.com> 3.5.13-1
+- bug 1425321. Default the master api port based on the facts
+  (jcantril@redhat.com)
+- Bug 1420219 - No log entry can be found in Kibana UI after deploying logging
+  stacks with ansible (rmeggins@redhat.com)
+- Address cert expiry parsing review comments (tbielawa@redhat.com)
+- Fix typo (rhcarvalho@gmail.com)
+- Update link to project homepage (rhcarvalho@gmail.com)
+- Implement fake openssl cert classes (tbielawa@redhat.com)
+- Removed oadm_ references in doc. (kwoodson@redhat.com)
+- Remove unused plays (jhadvig@redhat.com)
+- Removed unused code.  Made tests executable. (kwoodson@redhat.com)
+- Fixing docs. Fixed default_cert suggestion. (kwoodson@redhat.com)
+- Renamed modules, fixed docs, renamed variables, and cleaned up logic.
+  (kwoodson@redhat.com)
+- Renaming registry and router roles to oc_adm_ (kwoodson@redhat.com)
+- Fixing registry doc and suggestions. (kwoodson@redhat.com)
+- Adding router and registry to lib_openshift. (kwoodson@redhat.com)
+- bug 142026. Ensure Ops PVC prefix are initialized to empty when ops e…
+  nabled (jcantril@redhat.com)
+
 * Tue Feb 21 2017 Scott Dodson <sdodson@redhat.com> 3.5.12-1
 - Remove pytest-related dependencies from setup.py (rhcarvalho@gmail.com)
 
