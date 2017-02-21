@@ -31,8 +31,8 @@
         namespace: "{{ openshift.hosted.registry.namespace | default('default') }}"
         name: docker-registry-s3-cloudfront
         contents:
-          path: cloudfront.pem
-          data: "{{ lookup('file', openshift_hosted_registry_storage_s3_cloudfront_privatekeyfile) }}"
+          - path: cloudfront.pem
+            data: "{{ lookup('file', openshift_hosted_registry_storage_s3_cloudfront_privatekeyfile) }}"
 
     - name: Add cloudfront secret to the registry deployment config
       command: >
