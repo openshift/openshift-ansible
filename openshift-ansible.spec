@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.10
+Version:        3.5.11
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -263,6 +263,57 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Feb 21 2017 Scott Dodson <sdodson@redhat.com> 3.5.11-1
+- Reverting logic for verify api handler to be uniform with other ways we
+  verify, will be uniformly updated in future (ewolinet@redhat.com)
+- openshift_facts: handle 'latest' version (gscrivan@redhat.com)
+- Surrounding node selector values with quotes (ewolinet@redhat.com)
+- Raise the bar on coverage requirements (rhcarvalho@gmail.com)
+- Accept extra positional arguments in tox (rhcarvalho@gmail.com)
+- Replace nose with pytest (utils) (rhcarvalho@gmail.com)
+- Clean up utils/README.md (rhcarvalho@gmail.com)
+- Replace nose with pytest (rhcarvalho@gmail.com)
+- Extract assertion common to all tests as function (rhcarvalho@gmail.com)
+- Replace nose yield-style tests w/ pytest fixtures (rhcarvalho@gmail.com)
+- Configure pytest to run tests and coverage (rhcarvalho@gmail.com)
+- Fix validation of generated code (rhcarvalho@gmail.com)
+- Make tests run with either nosetests or pytest (rhcarvalho@gmail.com)
+- Replace assert_equal with plain assert (rhcarvalho@gmail.com)
+- Make usage of short_version/release consistent (rhcarvalho@gmail.com)
+- Reorganize tests and helper functions logically (rhcarvalho@gmail.com)
+- Remove test duplication (rhcarvalho@gmail.com)
+- Move similar test cases together (rhcarvalho@gmail.com)
+- Insert paths in the second position of sys.path (rhcarvalho@gmail.com)
+- Rename test for consistency (rhcarvalho@gmail.com)
+- Replace has_key in new modules (smilner@redhat.com)
+- Fix symlink to filter_plugins/oo_filters.py (jchaloup@redhat.com)
+- Correct logic test for running pods (rteague@redhat.com)
+- Temporarily lower the bar for minimum coverage (rhcarvalho@gmail.com)
+- Unset exec bit in tests, add missing requirements (jdetiber@redhat.com)
+- Include missing unit tests to test runner config (rhcarvalho@gmail.com)
+- Fix tests on Python 3 (rhcarvalho@gmail.com)
+- Remove dead code in installer (rhcarvalho@gmail.com)
+- Remove dead code (rhcarvalho@gmail.com)
+- Document how to find dead Python code (rhcarvalho@gmail.com)
+- updating until statments on uri module for api verification
+  (ewolinet@redhat.com)
+- Fixing a bug by removing default debug (kwoodson@redhat.com)
+- Updating to use uri module instead (ewolinet@redhat.com)
+- Updating node playbooks to use oc_obj (rteague@redhat.com)
+- Adding missing handler to resolve error that it was not found
+  (ewolinet@redhat.com)
+- String compatibility for python2,3 (kwoodson@redhat.com)
+- Fix indenting/ordering in router cert redeploy (sdodson@redhat.com)
+- post_control_plane.yml: don't fail on grep (gscrivan@redhat.com)
+- facts/main: Require Python 3 for Fedora, Python 2 everywhere else
+  (walters@verbum.org)
+- Fix typo, add symlinks for roles (sdodson@redhat.com)
+- Resolve deprecation warning (rteague@redhat.com)
+- Revert temporary hack to skip router/registry upgrade. (dgoodwin@redhat.com)
+- Register cloudfront privkey when required (smilner@redhat.com)
+- Removing trailing spaces (esauer@redhat.com)
+- Making router pods scale with infra nodes (esauer@redhat.com)
+
 * Thu Feb 16 2017 Scott Dodson <sdodson@redhat.com> 3.5.10-1
 - Don't attempt to install python-ruamel-yaml on atomic (sdodson@redhat.com)
 
