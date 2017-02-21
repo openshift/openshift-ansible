@@ -16,7 +16,7 @@ setup(
     description="Ansible wrapper for OpenShift Enterprise 3 installation.",
 
     # The project's main homepage.
-    url="http://github.com/openshift/openshift-extras/tree/enterprise-3.0/oo-install",
+    url="https://github.com/openshift/openshift-ansible",
 
     # Author details
     author="openshift@redhat.com",
