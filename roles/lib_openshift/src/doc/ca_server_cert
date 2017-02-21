@@ -73,6 +73,12 @@ options:
     required: false
     default: None
     aliases: []
+  backup:
+    description:
+    - Whether to backup the cert and key files before writing them.
+    required: false
+    default: True
+    aliases: []
 author:
 - "Kenny Woodson <kwoodson@redhat.com>"
 extends_documentation_fragment: []

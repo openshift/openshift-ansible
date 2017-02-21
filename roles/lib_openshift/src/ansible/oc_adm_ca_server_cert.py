@@ -11,7 +11,7 @@ def main():
             state=dict(default='present', type='str', choices=['present']),
             debug=dict(default=False, type='bool'),
             kubeconfig=dict(default='/etc/origin/master/admin.kubeconfig', type='str'),
-            cmd=dict(default=None, require=True, type='str'),
+            backup=dict(default=True, type='bool'),
             # oadm ca create-server-cert [options]
             cert=dict(default=None, type='str'),
             key=dict(default=None, type='str'),

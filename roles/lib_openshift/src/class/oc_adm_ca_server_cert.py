@@ -33,6 +33,17 @@ class CAServerCert(OpenShiftCLI):
 
     def create(self):
         '''run openshift oc adm ca create-server-cert cmd'''
+
+        # Added this here as a safegaurd for stomping on the
+        # cert and key files if they exist
+        if self.config.config_options['backup']['value']:
+            if os.path.exists(self.config.config_options['key']['value']):
+                shutil.copy(self.config.config_options['key']['value'],
+                            "%s.orig" % self.config.config_options['key']['value'])
+            if os.path.exists(self.config.config_options['cert']['value']):
+                shutil.copy(self.config.config_options['cert']['value'],
+                            "%s.orig" % self.config.config_options['cert']['value'])
+
         options = self.config.to_option_list()
 
         cmd = ['ca', 'create-server-cert']
@@ -72,6 +83,7 @@ class CAServerCert(OpenShiftCLI):
                                      'signer_cert':   {'value': params['signer_cert'], 'include': True},
                                      'signer_key':    {'value': params['signer_key'], 'include': True},
                                      'signer_serial': {'value': params['signer_serial'], 'include': True},
+                                     'backup':        {'value': params['backup'], 'include': False},
                                     })
 
         server_cert = CAServerCert(config)
