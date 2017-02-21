@@ -1321,6 +1321,7 @@ class CAServerCertConfig(OpenShiftCLIConfig):
         self.verbose = verbose
         self._ca = ca_options
 
+
 class CAServerCert(OpenShiftCLI):
     ''' Class to wrap the oc adm ca create-server-cert command line'''
     def __init__(self,

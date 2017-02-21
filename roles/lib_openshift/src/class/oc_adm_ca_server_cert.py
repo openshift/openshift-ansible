@@ -1,4 +1,5 @@
 # pylint: skip-file
+# flake8: noqa
 
 class CAServerCertConfig(OpenShiftCLIConfig):
     ''' CAServerCertConfig is a DTO for the oc adm ca command '''
@@ -7,6 +8,7 @@ class CAServerCertConfig(OpenShiftCLIConfig):
         self.kubeconfig = kubeconfig
         self.verbose = verbose
         self._ca = ca_options
+
 
 class CAServerCert(OpenShiftCLI):
     ''' Class to wrap the oc adm ca create-server-cert command line'''
