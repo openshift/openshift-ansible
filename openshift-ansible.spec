@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.63
+Version:        3.4.64
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -250,6 +250,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Feb 21 2017 Scott Dodson <sdodson@redhat.com> 3.4.64-1
+- Address cert expiry parsing review comments (tbielawa@redhat.com)
+- Implement fake openssl cert classes (tbielawa@redhat.com)
+- node: ensure conntrack-tools is installed (gscrivan@redhat.com)
+
 * Wed Feb 15 2017 Scott Dodson <sdodson@redhat.com> 3.4.63-1
 - Add required python-six package to installation (tbielawa@redhat.com)
 - BZ1421860: increase Heapster's metric resolution to 30s (mwringe@redhat.com)
