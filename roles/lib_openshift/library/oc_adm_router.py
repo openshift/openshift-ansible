@@ -50,24 +50,26 @@ from ansible.module_utils.basic import AnsibleModule
 
 # -*- -*- -*- End included fragment: lib/import.py -*- -*- -*-
 
-# -*- -*- -*- Begin included fragment: doc/env -*- -*- -*-
+# -*- -*- -*- Begin included fragment: doc/router -*- -*- -*-
 
 DOCUMENTATION = '''
 ---
-module: oc_env
-short_description: Modify, and idempotently manage openshift environment variables on pods, deploymentconfigs, and replication controllers.
+module: oc_adm_router
+short_description: Module to manage openshift router
 description:
-  - Modify openshift environment variables programmatically.
+  - Manage openshift router programmatically.
 options:
   state:
     description:
-    - Supported states, present, absent, list
-    - present - will ensure object is created or updated to the value specified
-    - list - will return a list of environment variables
-    - absent - will remove the environment varibale from the object
-    required: False
+    - Whether to create or delete the router
+    - present - create the router
+    - absent - remove the router
+    - list - return the current representation of a router
+    required: false
     default: present
-    choices: ["present", 'absent', 'list']
+    choices:
+    - present
+    - absent
     aliases: []
   kubeconfig:
     description:
@@ -83,57 +85,189 @@ options:
     aliases: []
   name:
     description:
-    - Name of the object that is being queried.
+    - The name of the router
     required: false
-    default: None
+    default: router
     aliases: []
   namespace:
     description:
-    - The namespace where the object lives.
+    - The namespace where to manage the router.
     required: false
-    default: str
+    default: default
     aliases: []
-  kind:
+  images:
     description:
-    - The kind attribute of the object.
-    required: False
-    default: dc
-    choices:
-    - rc
-    - dc
-    - pods
+    - The image to base this router on - ${component} will be replaced with --type
+    required: 'openshift3/ose-${component}:${version}'
+    default: None
     aliases: []
-  env_vars:
+  latest_images:
     description:
-    - The environment variables to insert.  The format is a dict of value pairs.
-    - e.g. {key1: value1, key2: value2}) 
+    - If true, attempt to use the latest image for the registry instead of the latest release.
+    required: false
+    default: False
+    aliases: []
+  labels:
+    description:
+    - A set of labels to uniquely identify the registry and its components.
+    required: false
+    default: None
+    aliases: []
+  ports:
+    description:
+    - A list of strings in the 'port:port' format
     required: False
+    default:
+    - 80:80
+    - 443:443
+    aliases: []
+  replicas:
+    description:
+    - The replication factor of the registry; commonly 2 when high availability is desired.
+    required: False
+    default: 1
+    aliases: []
+  selector:
+    description:
+    - Selector used to filter nodes on deployment. Used to run routers on a specific set of nodes.
+    required: False
+    default: None
+    aliases: []
+  service_account:
+    description:
+    - Name of the service account to use to run the router pod.
+    required: False
+    default: router
+    aliases: []
+  router_type:
+    description:
+    - The router image to use - if you specify --images this flag may be ignored.
+    required: false
+    default: haproxy-router
+    aliases: []
+  external_host:
+    description:
+    - If the underlying router implementation connects with an external host, this is the external host's hostname.
+    required: false
+    default: None
+    aliases: []
+  external_host_vserver:
+    description:
+    - If the underlying router implementation uses virtual servers, this is the name of the virtual server for HTTP connections.
+    required: false
+    default: None
+    aliases: []
+  external_host_insecure:
+    description:
+    - If the underlying router implementation connects with an external host
+    - over a secure connection, this causes the router to skip strict certificate verification with the external host.
+    required: false
+    default: False
+    aliases: []
+  external_host_partition_path:
+    description:
+    - If the underlying router implementation uses partitions for control boundaries, this is the path to use for that partition.
+    required: false
+    default: None
+    aliases: []
+  external_host_username:
+    description:
+    - If the underlying router implementation connects with an external host, this is the username for authenticating with the external host.
+    required: false
+    default: None
+    aliases: []
+  external_host_password:
+    description:
+    - If the underlying router implementation connects with an external host, this is the password for authenticating with the external host.
+    required: false
+    default: None
+    aliases: []
+  external_host_private_key:
+    description:
+    - If the underlying router implementation requires an SSH private key, this is the path to the private key file.
+    required: false
+    default: None
+    aliases: []
+  expose_metrics:
+    description:
+    - This is a hint to run an extra container in the pod to expose metrics - the image
+    - will either be set depending on the router implementation or provided with --metrics-image.
+    required: false
+    default: False
+    aliases: []
+  metrics_image:
+    description:
+    - If expose_metrics is specified this is the image to use to run a sidecar container
+    - in the pod exposing metrics. If not set and --expose-metrics is true the image will
+    - depend on router implementation.
+    required: false
     default: None
     aliases: []
 author:
 - "Kenny Woodson <kwoodson@redhat.com>"
-extends_documentation_fragment: []
+extends_documentation_fragment:
+- There are some exceptions to note when doing the idempotency in this module.
+- The strategy is to use the oc adm router command to generate a default
+- configuration when creating or updating a router.  Often times there
+- differences from the generated template and what is in memory in openshift.
+- We make exceptions to not check these specific values when comparing objects.
+- Here are a list of exceptions:
+- - DeploymentConfig:
+    - dnsPolicy
+    - terminationGracePeriodSeconds
+    - restartPolicy
+    - timeoutSeconds
+    - livenessProbe
+    - readinessProbe
+    - terminationMessagePath
+    - hostPort
+    - defaultMode
+  - Service:
+    - portalIP
+    - clusterIP
+    - sessionAffinity
+    - type
+  - ServiceAccount:
+    - secrets
+    - imagePullSecrets
 '''
 
 EXAMPLES = '''
-- name: query a list of env vars on dc
-  oc_env:
-    kind: dc
-    name: myawesomedc
-    namespace: phpapp
-
-- name: Set the following variables.
-  oc_env:
-    kind: dc
-    name: myawesomedc
-    namespace: phpapp
-    env_vars:
-      SUPER_TURBO_MODE: 'true'
-      ENABLE_PORTS: 'false'
-      SERVICE_PORT: 9999
+- name: create routers
+  oc_adm_router:
+    name: router
+    service_account: router
+    replicas: 2
+    namespace: default
+    selector: type=infra
+    cert_file: /etc/origin/master/named_certificates/router.crt
+    key_file: /etc/origin/master/named_certificates/router.key
+    cacert_file: /etc/origin/master/named_certificates/router.ca
+    edits:
+    - key: spec.strategy.rollingParams
+      value:
+        intervalSeconds: 1
+        maxSurge: 50%
+        maxUnavailable: 50%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      action: put
+    - key: spec.template.spec.containers[0].resources.limits.memory
+      value: 2G
+      action: put
+    - key: spec.template.spec.containers[0].resources.requests.memory
+      value: 1G
+      action: put
+    - key: spec.template.spec.containers[0].env
+      value:
+        name: EXTENDED_VALIDATION
+        value: 'false'
+      action: update
+  register: router_out
+  run_once: True
 '''
 
-# -*- -*- -*- End included fragment: doc/env -*- -*- -*-
+# -*- -*- -*- End included fragment: doc/router -*- -*- -*-
 
 # -*- -*- -*- Begin included fragment: ../../lib_utils/src/class/yedit.py -*- -*- -*-
 # noqa: E301,E302
@@ -1304,6 +1438,134 @@ class OpenShiftCLIConfig(object):
 
 # -*- -*- -*- End included fragment: lib/base.py -*- -*- -*-
 
+# -*- -*- -*- Begin included fragment: lib/service.py -*- -*- -*-
+
+
+# pylint: disable=too-many-instance-attributes
+class ServiceConfig(object):
+    ''' Handle service options '''
+    # pylint: disable=too-many-arguments
+    def __init__(self,
+                 sname,
+                 namespace,
+                 ports,
+                 selector=None,
+                 labels=None,
+                 cluster_ip=None,
+                 portal_ip=None,
+                 session_affinity=None,
+                 service_type=None):
+        ''' constructor for handling service options '''
+        self.name = sname
+        self.namespace = namespace
+        self.ports = ports
+        self.selector = selector
+        self.labels = labels
+        self.cluster_ip = cluster_ip
+        self.portal_ip = portal_ip
+        self.session_affinity = session_affinity
+        self.service_type = service_type
+        self.data = {}
+
+        self.create_dict()
+
+    def create_dict(self):
+        ''' instantiates a service dict '''
+        self.data['apiVersion'] = 'v1'
+        self.data['kind'] = 'Service'
+        self.data['metadata'] = {}
+        self.data['metadata']['name'] = self.name
+        self.data['metadata']['namespace'] = self.namespace
+        if self.labels:
+            for lab, lab_value  in self.labels.items():
+                self.data['metadata'][lab] = lab_value
+        self.data['spec'] = {}
+
+        if self.ports:
+            self.data['spec']['ports'] = self.ports
+        else:
+            self.data['spec']['ports'] = []
+
+        if self.selector:
+            self.data['spec']['selector'] = self.selector
+
+        self.data['spec']['sessionAffinity'] = self.session_affinity or 'None'
+
+        if self.cluster_ip:
+            self.data['spec']['clusterIP'] = self.cluster_ip
+
+        if self.portal_ip:
+            self.data['spec']['portalIP'] = self.portal_ip
+
+        if self.service_type:
+            self.data['spec']['type'] = self.service_type
+
+# pylint: disable=too-many-instance-attributes,too-many-public-methods
+class Service(Yedit):
+    ''' Class to model the oc service object '''
+    port_path = "spec.ports"
+    portal_ip = "spec.portalIP"
+    cluster_ip = "spec.clusterIP"
+    kind = 'Service'
+
+    def __init__(self, content):
+        '''Service constructor'''
+        super(Service, self).__init__(content=content)
+
+    def get_ports(self):
+        ''' get a list of ports '''
+        return self.get(Service.port_path) or []
+
+    def add_ports(self, inc_ports):
+        ''' add a port object to the ports list '''
+        if not isinstance(inc_ports, list):
+            inc_ports = [inc_ports]
+
+        ports = self.get_ports()
+        if not ports:
+            self.put(Service.port_path, inc_ports)
+        else:
+            ports.extend(inc_ports)
+
+        return True
+
+    def find_ports(self, inc_port):
+        ''' find a specific port '''
+        for port in self.get_ports():
+            if port['port'] == inc_port['port']:
+                return port
+
+        return None
+
+    def delete_ports(self, inc_ports):
+        ''' remove a port from a service '''
+        if not isinstance(inc_ports, list):
+            inc_ports = [inc_ports]
+
+        ports = self.get(Service.port_path) or []
+
+        if not ports:
+            return True
+
+        removed = False
+        for inc_port in inc_ports:
+            port = self.find_ports(inc_port)
+            if port:
+                ports.remove(port)
+                removed = True
+
+        return removed
+
+    def add_cluster_ip(self, sip):
+        '''add cluster ip'''
+        self.put(Service.cluster_ip, sip)
+
+    def add_portal_ip(self, pip):
+        '''add cluster ip'''
+        self.put(Service.portal_ip, pip)
+
+# -*- -*- -*- End included fragment: lib/service.py -*- -*- -*-
+
 # -*- -*- -*- Begin included fragment: lib/deploymentconfig.py -*- -*- -*-
 
 
@@ -1645,173 +1907,1041 @@ spec:
 
 # -*- -*- -*- End included fragment: lib/deploymentconfig.py -*- -*- -*-
 
-# -*- -*- -*- Begin included fragment: class/oc_env.py -*- -*- -*-
+# -*- -*- -*- Begin included fragment: lib/serviceaccount.py -*- -*- -*-
 
+class ServiceAccountConfig(object):
+    '''Service account config class
 
-# pylint: disable=too-many-instance-attributes
-class OCEnv(OpenShiftCLI):
-    ''' Class to wrap the oc command line tools '''
+       This class stores the options and returns a default service account
+    '''
 
-    container_path = {"pod": "spec.containers[0].env",
-                      "dc":  "spec.template.spec.containers[0].env",
-                      "rc":  "spec.template.spec.containers[0].env",
-                     }
-
-    # pylint allows 5. we need 6
     # pylint: disable=too-many-arguments
-    def __init__(self,
-                 namespace,
-                 kind,
-                 env_vars,
-                 resource_name=None,
-                 kubeconfig='/etc/origin/master/admin.kubeconfig',
-                 verbose=False):
-        ''' Constructor for OpenshiftOC '''
-        super(OCEnv, self).__init__(namespace, kubeconfig=kubeconfig, verbose=verbose)
-        self.kind = kind
-        self.name = resource_name
-        self.env_vars = env_vars
-        self._resource = None
+    def __init__(self, sname, namespace, kubeconfig, secrets=None, image_pull_secrets=None):
+        self.name = sname
+        self.kubeconfig = kubeconfig
+        self.namespace = namespace
+        self.secrets = secrets or []
+        self.image_pull_secrets = image_pull_secrets or []
+        self.data = {}
+        self.create_dict()
+
+    def create_dict(self):
+        ''' instantiate a properly structured volume '''
+        self.data['apiVersion'] = 'v1'
+        self.data['kind'] = 'ServiceAccount'
+        self.data['metadata'] = {}
+        self.data['metadata']['name'] = self.name
+        self.data['metadata']['namespace'] = self.namespace
+
+        self.data['secrets'] = []
+        if self.secrets:
+            for sec in self.secrets:
+                self.data['secrets'].append({"name": sec})
+
+        self.data['imagePullSecrets'] = []
+        if self.image_pull_secrets:
+            for sec in self.image_pull_secrets:
+                self.data['imagePullSecrets'].append({"name": sec})
+
+class ServiceAccount(Yedit):
+    ''' Class to wrap the oc command line tools '''
+    image_pull_secrets_path = "imagePullSecrets"
+    secrets_path = "secrets"
+
+    def __init__(self, content):
+        '''ServiceAccount constructor'''
+        super(ServiceAccount, self).__init__(content=content)
+        self._secrets = None
+        self._image_pull_secrets = None
 
     @property
-    def resource(self):
-        ''' property function for resource var'''
-        if not self._resource:
-            self.get()
-        return self._resource
+    def image_pull_secrets(self):
+        ''' property for image_pull_secrets '''
+        if self._image_pull_secrets is None:
+            self._image_pull_secrets = self.get(ServiceAccount.image_pull_secrets_path) or []
+        return self._image_pull_secrets
 
-    @resource.setter
-    def resource(self, data):
-        ''' setter function for resource var'''
-        self._resource = data
+    @image_pull_secrets.setter
+    def image_pull_secrets(self, secrets):
+        ''' property for secrets '''
+        self._image_pull_secrets = secrets
 
-    def key_value_exists(self, key, value):
-        ''' return whether a key, value  pair exists '''
-        return self.resource.exists_env_value(key, value)
+    @property
+    def secrets(self):
+        ''' property for secrets '''
+        if not self._secrets:
+            self._secrets = self.get(ServiceAccount.secrets_path) or []
+        return self._secrets
 
-    def key_exists(self, key):
-        ''' return whether a key exists '''
-        return self.resource.exists_env_key(key)
+    @secrets.setter
+    def secrets(self, secrets):
+        ''' property for secrets '''
+        self._secrets = secrets
+
+    def delete_secret(self, inc_secret):
+        ''' remove a secret '''
+        remove_idx = None
+        for idx, sec in enumerate(self.secrets):
+            if sec['name'] == inc_secret:
+                remove_idx = idx
+                break
+
+        if remove_idx:
+            del self.secrets[remove_idx]
+            return True
+
+        return False
+
+    def delete_image_pull_secret(self, inc_secret):
+        ''' remove a image_pull_secret '''
+        remove_idx = None
+        for idx, sec in enumerate(self.image_pull_secrets):
+            if sec['name'] == inc_secret:
+                remove_idx = idx
+                break
+
+        if remove_idx:
+            del self.image_pull_secrets[remove_idx]
+            return True
+
+        return False
+
+    def find_secret(self, inc_secret):
+        '''find secret'''
+        for secret in self.secrets:
+            if secret['name'] == inc_secret:
+                return secret
+
+        return None
+
+    def find_image_pull_secret(self, inc_secret):
+        '''find secret'''
+        for secret in self.image_pull_secrets:
+            if secret['name'] == inc_secret:
+                return secret
+
+        return None
+
+    def add_secret(self, inc_secret):
+        '''add secret'''
+        if self.secrets:
+            self.secrets.append({"name": inc_secret})  # pylint: disable=no-member
+        else:
+            self.put(ServiceAccount.secrets_path, [{"name": inc_secret}])
+
+    def add_image_pull_secret(self, inc_secret):
+        '''add image_pull_secret'''
+        if self.image_pull_secrets:
+            self.image_pull_secrets.append({"name": inc_secret})  # pylint: disable=no-member
+        else:
+            self.put(ServiceAccount.image_pull_secrets_path, [{"name": inc_secret}])
+
+# -*- -*- -*- End included fragment: lib/serviceaccount.py -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: lib/secret.py -*- -*- -*-
+
+# pylint: disable=too-many-instance-attributes
+class SecretConfig(object):
+    ''' Handle secret options '''
+    # pylint: disable=too-many-arguments
+    def __init__(self,
+                 sname,
+                 namespace,
+                 kubeconfig,
+                 secrets=None):
+        ''' constructor for handling secret options '''
+        self.kubeconfig = kubeconfig
+        self.name = sname
+        self.namespace = namespace
+        self.secrets = secrets
+        self.data = {}
+
+        self.create_dict()
+
+    def create_dict(self):
+        ''' assign the correct properties for a secret dict '''
+        self.data['apiVersion'] = 'v1'
+        self.data['kind'] = 'Secret'
+        self.data['metadata'] = {}
+        self.data['metadata']['name'] = self.name
+        self.data['metadata']['namespace'] = self.namespace
+        self.data['data'] = {}
+        if self.secrets:
+            for key, value in self.secrets.items():
+                self.data['data'][key] = value
+
+# pylint: disable=too-many-instance-attributes
+class Secret(Yedit):
+    ''' Class to wrap the oc command line tools '''
+    secret_path = "data"
+    kind = 'secret'
+
+    def __init__(self, content):
+        '''secret constructor'''
+        super(Secret, self).__init__(content=content)
+        self._secrets = None
+
+    @property
+    def secrets(self):
+        '''secret property getter'''
+        if self._secrets is None:
+            self._secrets = self.get_secrets()
+        return self._secrets
+
+    @secrets.setter
+    def secrets(self):
+        '''secret property setter'''
+        if self._secrets is None:
+            self._secrets = self.get_secrets()
+        return self._secrets
+
+    def get_secrets(self):
+        ''' returns all of the defined secrets '''
+        return self.get(Secret.secret_path) or {}
+
+    def add_secret(self, key, value):
+        ''' add a secret '''
+        if self.secrets:
+            self.secrets[key] = value
+        else:
+            self.put(Secret.secret_path, {key: value})
+
+        return True
+
+    def delete_secret(self, key):
+        ''' delete secret'''
+        try:
+            del self.secrets[key]
+        except KeyError as _:
+            return False
+
+        return True
+
+    def find_secret(self, key):
+        ''' find secret'''
+        rval = None
+        try:
+            rval = self.secrets[key]
+        except KeyError as _:
+            return None
+
+        return {'key': key, 'value': rval}
+
+    def update_secret(self, key, value):
+        ''' update a secret'''
+        # pylint: disable=no-member
+        if key in self.secrets:
+            self.secrets[key] = value
+        else:
+            self.add_secret(key, value)
+
+        return True
+
+# -*- -*- -*- End included fragment: lib/secret.py -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: lib/rolebinding.py -*- -*- -*-
+
+# pylint: disable=too-many-instance-attributes
+class RoleBindingConfig(object):
+    ''' Handle rolebinding config '''
+    # pylint: disable=too-many-arguments
+    def __init__(self,
+                 name,
+                 namespace,
+                 kubeconfig,
+                 group_names=None,
+                 role_ref=None,
+                 subjects=None,
+                 usernames=None):
+        ''' constructor for handling rolebinding options '''
+        self.kubeconfig = kubeconfig
+        self.name = name
+        self.namespace = namespace
+        self.group_names = group_names
+        self.role_ref = role_ref
+        self.subjects = subjects
+        self.usernames = usernames
+        self.data = {}
+
+        self.create_dict()
+
+    def create_dict(self):
+        ''' create a default rolebinding as a dict '''
+        self.data['apiVersion'] = 'v1'
+        self.data['kind'] = 'RoleBinding'
+        self.data['groupNames'] = self.group_names
+        self.data['metadata']['name'] = self.name
+        self.data['metadata']['namespace'] = self.namespace
+
+        self.data['roleRef'] = self.role_ref
+        self.data['subjects'] = self.subjects
+        self.data['userNames'] = self.usernames
+
+
+# pylint: disable=too-many-instance-attributes,too-many-public-methods
+class RoleBinding(Yedit):
+    ''' Class to model a rolebinding openshift object'''
+    group_names_path = "groupNames"
+    role_ref_path = "roleRef"
+    subjects_path = "subjects"
+    user_names_path = "userNames"
+
+    kind = 'RoleBinding'
+
+    def __init__(self, content):
+        '''RoleBinding constructor'''
+        super(RoleBinding, self).__init__(content=content)
+        self._subjects = None
+        self._role_ref = None
+        self._group_names = None
+        self._user_names = None
+
+    @property
+    def subjects(self):
+        ''' subjects property '''
+        if self._subjects is None:
+            self._subjects = self.get_subjects()
+        return self._subjects
+
+    @subjects.setter
+    def subjects(self, data):
+        ''' subjects property setter'''
+        self._subjects = data
+
+    @property
+    def role_ref(self):
+        ''' role_ref property '''
+        if self._role_ref is None:
+            self._role_ref = self.get_role_ref()
+        return self._role_ref
+
+    @role_ref.setter
+    def role_ref(self, data):
+        ''' role_ref property setter'''
+        self._role_ref = data
+
+    @property
+    def group_names(self):
+        ''' group_names property '''
+        if self._group_names is None:
+            self._group_names = self.get_group_names()
+        return self._group_names
+
+    @group_names.setter
+    def group_names(self, data):
+        ''' group_names property setter'''
+        self._group_names = data
+
+    @property
+    def user_names(self):
+        ''' user_names property '''
+        if self._user_names is None:
+            self._user_names = self.get_user_names()
+        return self._user_names
+
+    @user_names.setter
+    def user_names(self, data):
+        ''' user_names property setter'''
+        self._user_names = data
+
+    def get_group_names(self):
+        ''' return groupNames '''
+        return self.get(RoleBinding.group_names_path) or []
+
+    def get_user_names(self):
+        ''' return usernames '''
+        return self.get(RoleBinding.user_names_path) or []
+
+    def get_role_ref(self):
+        ''' return role_ref '''
+        return self.get(RoleBinding.role_ref_path) or {}
+
+    def get_subjects(self):
+        ''' return subjects '''
+        return self.get(RoleBinding.subjects_path) or []
+
+    #### ADD #####
+    def add_subject(self, inc_subject):
+        ''' add a subject '''
+        if self.subjects:
+            # pylint: disable=no-member
+            self.subjects.append(inc_subject)
+        else:
+            self.put(RoleBinding.subjects_path, [inc_subject])
+
+        return True
+
+    def add_role_ref(self, inc_role_ref):
+        ''' add a role_ref '''
+        if not self.role_ref:
+            self.put(RoleBinding.role_ref_path, {"name": inc_role_ref})
+            return True
+
+        return False
+
+    def add_group_names(self, inc_group_names):
+        ''' add a group_names '''
+        if self.group_names:
+            # pylint: disable=no-member
+            self.group_names.append(inc_group_names)
+        else:
+            self.put(RoleBinding.group_names_path, [inc_group_names])
+
+        return True
+
+    def add_user_name(self, inc_user_name):
+        ''' add a username '''
+        if self.user_names:
+            # pylint: disable=no-member
+            self.user_names.append(inc_user_name)
+        else:
+            self.put(RoleBinding.user_names_path, [inc_user_name])
+
+        return True
+
+    #### /ADD #####
+
+    #### Remove #####
+    def remove_subject(self, inc_subject):
+        ''' remove a subject '''
+        try:
+            # pylint: disable=no-member
+            self.subjects.remove(inc_subject)
+        except ValueError as _:
+            return False
+
+        return True
+
+    def remove_role_ref(self, inc_role_ref):
+        ''' remove a role_ref '''
+        if self.role_ref and self.role_ref['name'] == inc_role_ref:
+            del self.role_ref['name']
+            return True
+
+        return False
+
+    def remove_group_name(self, inc_group_name):
+        ''' remove a groupname '''
+        try:
+            # pylint: disable=no-member
+            self.group_names.remove(inc_group_name)
+        except ValueError as _:
+            return False
+
+        return True
+
+    def remove_user_name(self, inc_user_name):
+        ''' remove a username '''
+        try:
+            # pylint: disable=no-member
+            self.user_names.remove(inc_user_name)
+        except ValueError as _:
+            return False
+
+        return True
+
+    #### /REMOVE #####
+
+    #### UPDATE #####
+    def update_subject(self, inc_subject):
+        ''' update a subject '''
+        try:
+            # pylint: disable=no-member
+            index = self.subjects.index(inc_subject)
+        except ValueError as _:
+            return self.add_subject(inc_subject)
+
+        self.subjects[index] = inc_subject
+
+        return True
+
+    def update_group_name(self, inc_group_name):
+        ''' update a groupname '''
+        try:
+            # pylint: disable=no-member
+            index = self.group_names.index(inc_group_name)
+        except ValueError as _:
+            return self.add_group_names(inc_group_name)
+
+        self.group_names[index] = inc_group_name
+
+        return True
+
+    def update_user_name(self, inc_user_name):
+        ''' update a username '''
+        try:
+            # pylint: disable=no-member
+            index = self.user_names.index(inc_user_name)
+        except ValueError as _:
+            return self.add_user_name(inc_user_name)
+
+        self.user_names[index] = inc_user_name
+
+        return True
+
+    def update_role_ref(self, inc_role_ref):
+        ''' update a role_ref '''
+        self.role_ref['name'] = inc_role_ref
+
+        return True
+
+    #### /UPDATE #####
+
+    #### FIND ####
+    def find_subject(self, inc_subject):
+        ''' find a subject '''
+        index = None
+        try:
+            # pylint: disable=no-member
+            index = self.subjects.index(inc_subject)
+        except ValueError as _:
+            return index
+
+        return index
+
+    def find_group_name(self, inc_group_name):
+        ''' find a group_name '''
+        index = None
+        try:
+            # pylint: disable=no-member
+            index = self.group_names.index(inc_group_name)
+        except ValueError as _:
+            return index
+
+        return index
+
+    def find_user_name(self, inc_user_name):
+        ''' find a user_name '''
+        index = None
+        try:
+            # pylint: disable=no-member
+            index = self.user_names.index(inc_user_name)
+        except ValueError as _:
+            return index
+
+        return index
+
+    def find_role_ref(self, inc_role_ref):
+        ''' find a user_name '''
+        if self.role_ref and self.role_ref['name'] == inc_role_ref['name']:
+            return self.role_ref
+
+        return None
+
+# -*- -*- -*- End included fragment: lib/rolebinding.py -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: class/oc_adm_router.py -*- -*- -*-
+
+
+class RouterException(Exception):
+    ''' Router exception'''
+    pass
+
+
+class RouterConfig(OpenShiftCLIConfig):
+    ''' RouterConfig is a DTO for the router.  '''
+    def __init__(self, rname, namespace, kubeconfig, router_options):
+        super(RouterConfig, self).__init__(rname, namespace, kubeconfig, router_options)
+
+
+class Router(OpenShiftCLI):
+    ''' Class to wrap the oc command line tools '''
+    def __init__(self,
+                 router_config,
+                 verbose=False):
+        ''' Constructor for OpenshiftOC
+
+           a router consists of 3 or more parts
+           - dc/router
+           - svc/router
+           - sa/router
+           - secret/router-certs
+           - clusterrolebinding/router-router-role
+        '''
+        super(Router, self).__init__('default', router_config.kubeconfig, verbose)
+        self.config = router_config
+        self.verbose = verbose
+        self.router_parts = [{'kind': 'dc', 'name': self.config.name},
+                             {'kind': 'svc', 'name': self.config.name},
+                             {'kind': 'sa', 'name': self.config.config_options['service_account']['value']},
+                             {'kind': 'secret', 'name': self.config.name + '-certs'},
+                             {'kind': 'clusterrolebinding', 'name': 'router-' + self.config.name + '-role'},
+                            ]
+
+        self.__prepared_router = None
+        self.dconfig = None
+        self.svc = None
+        self._secret = None
+        self._serviceaccount = None
+        self._rolebinding = None
+
+    @property
+    def prepared_router(self):
+        ''' property for the prepared router'''
+        if self.__prepared_router is None:
+            results = self._prepare_router()
+            if not results:
+                raise RouterException('Could not perform router preparation')
+            self.__prepared_router = results
+
+        return self.__prepared_router
+
+    @prepared_router.setter
+    def prepared_router(self, obj):
+        '''setter for the prepared_router'''
+        self.__prepared_router = obj
+
+    @property
+    def deploymentconfig(self):
+        ''' property deploymentconfig'''
+        return self.dconfig
+
+    @deploymentconfig.setter
+    def deploymentconfig(self, config):
+        ''' setter for property deploymentconfig '''
+        self.dconfig = config
+
+    @property
+    def service(self):
+        ''' property for service '''
+        return self.svc
+
+    @service.setter
+    def service(self, config):
+        ''' setter for property service '''
+        self.svc = config
+
+    @property
+    def secret(self):
+        ''' property secret '''
+        return self._secret
+
+    @secret.setter
+    def secret(self, config):
+        ''' setter for property secret '''
+        self._secret = config
+
+    @property
+    def serviceaccount(self):
+        ''' property for serviceaccount '''
+        return self._serviceaccount
+
+    @serviceaccount.setter
+    def serviceaccount(self, config):
+        ''' setter for property serviceaccount '''
+        self._serviceaccount = config
+
+    @property
+    def rolebinding(self):
+        ''' property rolebinding '''
+        return self._rolebinding
+
+    @rolebinding.setter
+    def rolebinding(self, config):
+        ''' setter for property rolebinding '''
+        self._rolebinding = config
 
     def get(self):
-        '''return environment variables '''
-        result = self._get(self.kind, self.name)
-        if result['returncode'] == 0:
-            if self.kind == 'dc':
-                self.resource = DeploymentConfig(content=result['results'][0])
-                result['results'] = self.resource.get(OCEnv.container_path[self.kind]) or []
-        return result
+        ''' return the self.router_parts '''
+        self.service = None
+        self.deploymentconfig = None
+        self.serviceaccount = None
+        self.secret = None
+        self.rolebinding = None
+        for part in self.router_parts:
+            result = self._get(part['kind'], rname=part['name'])
+            if result['returncode'] == 0 and part['kind'] == 'dc':
+                self.deploymentconfig = DeploymentConfig(result['results'][0])
+            elif result['returncode'] == 0 and part['kind'] == 'svc':
+                self.service = Service(content=result['results'][0])
+            elif result['returncode'] == 0 and part['kind'] == 'sa':
+                self.serviceaccount = ServiceAccount(content=result['results'][0])
+            elif result['returncode'] == 0 and part['kind'] == 'secret':
+                self.secret = Secret(content=result['results'][0])
+            elif result['returncode'] == 0 and part['kind'] == 'clusterrolebinding':
+                self.rolebinding = RoleBinding(content=result['results'][0])
+
+        return {'deploymentconfig': self.deploymentconfig,
+                'service': self.service,
+                'serviceaccount': self.serviceaccount,
+                'secret': self.secret,
+                'clusterrolebinding': self.rolebinding,
+               }
+
+    def exists(self):
+        '''return a whether svc or dc exists '''
+        if self.deploymentconfig and self.service and self.secret and self.serviceaccount:
+            return True
+
+        return False
 
     def delete(self):
-        ''' delete environment variables '''
-        if self.resource.delete_env_var(self.env_vars.keys()):
-            return self._replace_content(self.kind, self.name, self.resource.yaml_dict)
+        '''return all pods '''
+        parts = []
+        for part in self.router_parts:
+            parts.append(self._delete(part['kind'], part['name']))
 
-        return {'returncode': 0, 'changed': False}
+        rval = 0
+        for part in parts:
+            if part['returncode'] != 0 and not 'already exist' in part['stderr']:
+                rval = part['returncode']
 
-    def put(self):
-        '''place env vars into dc '''
-        for update_key, update_value in self.env_vars.items():
-            self.resource.update_env_var(update_key, update_value)
+        return {'returncode': rval, 'results': parts}
 
-        return self._replace_content(self.kind, self.name, self.resource.yaml_dict)
+    def add_modifications(self, deploymentconfig):
+        '''modify the deployment config'''
+        # We want modifications in the form of edits coming in from the module.
+        # Let's apply these here
+        edit_results = []
+        for edit in self.config.config_options['edits'].get('value', []):
+            if edit['action'] == 'put':
+                edit_results.append(deploymentconfig.put(edit['key'],
+                                                         edit['value']))
+            if edit['action'] == 'update':
+                edit_results.append(deploymentconfig.update(edit['key'],
+                                                            edit['value'],
+                                                            edit.get('index', None),
+                                                            edit.get('curr_value', None)))
+            if edit['action'] == 'append':
+                edit_results.append(deploymentconfig.append(edit['key'],
+                                                            edit['value']))
 
-    # pylint: disable=too-many-return-statements
+        if edit_results and not any([res[0] for res in edit_results]):
+            return None
+
+        return deploymentconfig
+
+    def _prepare_router(self):
+        '''prepare router for instantiation'''
+        # We need to create the pem file
+        if self.config.config_options['default_cert']['value'] is None:
+            router_pem = '/tmp/router.pem'
+            with open(router_pem, 'w') as rfd:
+                rfd.write(open(self.config.config_options['cert_file']['value']).read())
+                rfd.write(open(self.config.config_options['key_file']['value']).read())
+                if self.config.config_options['cacert_file']['value'] and \
+                   os.path.exists(self.config.config_options['cacert_file']['value']):
+                    rfd.write(open(self.config.config_options['cacert_file']['value']).read())
+
+            atexit.register(Utils.cleanup, [router_pem])
+            self.config.config_options['default_cert']['value'] = router_pem
+
+        options = self.config.to_option_list()
+
+        cmd = ['router', self.config.name, '-n', self.config.namespace]
+        cmd.extend(options)
+        cmd.extend(['--dry-run=True', '-o', 'json'])
+
+        results = self.openshift_cmd(cmd, oadm=True, output=True, output_type='json')
+
+        # pylint: disable=no-member
+        if results['returncode'] != 0 and 'items' in results['results']:
+            return results
+
+        oc_objects = {'DeploymentConfig': {'obj': None, 'path': None, 'update': False},
+                      'Secret': {'obj': None, 'path': None, 'update': False},
+                      'ServiceAccount': {'obj': None, 'path': None, 'update': False},
+                      'ClusterRoleBinding': {'obj': None, 'path': None, 'update': False},
+                      'Service': {'obj': None, 'path': None, 'update': False},
+                     }
+        # pylint: disable=invalid-sequence-index
+        for res in results['results']['items']:
+            if res['kind'] == 'DeploymentConfig':
+                oc_objects['DeploymentConfig']['obj'] = DeploymentConfig(res)
+            elif res['kind'] == 'Service':
+                oc_objects['Service']['obj'] = Service(res)
+            elif res['kind'] == 'ServiceAccount':
+                oc_objects['ServiceAccount']['obj'] = ServiceAccount(res)
+            elif res['kind'] == 'Secret':
+                oc_objects['Secret']['obj'] = Secret(res)
+            elif res['kind'] == 'ClusterRoleBinding':
+                oc_objects['ClusterRoleBinding']['obj'] = RoleBinding(res)
+
+        # Currently only deploymentconfig needs updating
+        # Verify we got a deploymentconfig
+        if not oc_objects['DeploymentConfig']['obj']:
+            return results
+
+        # add modifications added
+        oc_objects['DeploymentConfig']['obj'] = self.add_modifications(oc_objects['DeploymentConfig']['obj'])
+
+        for oc_type, oc_data in oc_objects.items():
+            oc_data['path'] = Utils.create_tmp_file_from_contents(oc_type, oc_data['obj'].yaml_dict)
+
+        return oc_objects
+
+    def create(self):
+        '''Create a deploymentconfig '''
+        results = []
+
+        # pylint: disable=no-member
+        for _, oc_data in self.prepared_router.items():
+            results.append(self._create(oc_data['path']))
+
+        rval = 0
+        for result in results:
+            if result['returncode'] != 0 and not 'already exist' in result['stderr']:
+                rval = result['returncode']
+
+        return {'returncode': rval, 'results': results}
+
+    def update(self):
+        '''run update for the router.  This performs a replace'''
+        results = []
+
+        # pylint: disable=no-member
+        for _, oc_data in self.prepared_router.items():
+            if oc_data['update']:
+                results.append(self._replace(oc_data['path']))
+
+        rval = 0
+        for result in results:
+            if result['returncode'] != 0:
+                rval = result['returncode']
+
+        return {'returncode': rval, 'results': results}
+
+    # pylint: disable=too-many-return-statements,too-many-branches
+    def needs_update(self):
+        ''' check to see if we need to update '''
+        if not self.deploymentconfig or not self.service or not self.serviceaccount or not self.secret:
+            return True
+
+        # ServiceAccount:
+        #   Need to determine changes from the pregenerated ones from the original
+        #   Since these are auto generated, we can skip
+        skip = ['secrets', 'imagePullSecrets']
+        if not Utils.check_def_equal(self.prepared_router['ServiceAccount']['obj'].yaml_dict,
+                                     self.serviceaccount.yaml_dict,
+                                     skip_keys=skip,
+                                     debug=self.verbose):
+            self.prepared_router['ServiceAccount']['update'] = True
+
+        # Secret:
+        #   See if one was generated from our dry-run and verify it if needed
+        if self.prepared_router['Secret']['obj']:
+            if not self.secret:
+                self.prepared_router['Secret']['update'] = True
+
+            if not Utils.check_def_equal(self.prepared_router['Secret']['obj'].yaml_dict,
+                                         self.secret.yaml_dict,
+                                         skip_keys=skip,
+                                         debug=self.verbose):
+                self.prepared_router['Secret']['update'] = True
+
+        # Service:
+        #   Fix the ports to have protocol=TCP
+        for port in self.prepared_router['Service']['obj'].get('spec.ports'):
+            port['protocol'] = 'TCP'
+
+        skip = ['portalIP', 'clusterIP', 'sessionAffinity', 'type']
+        if not Utils.check_def_equal(self.prepared_router['Service']['obj'].yaml_dict,
+                                     self.service.yaml_dict,
+                                     skip_keys=skip,
+                                     debug=self.verbose):
+            self.prepared_router['Service']['update'] = True
+
+        # DeploymentConfig:
+        #   Router needs some exceptions.
+        #   We do not want to check the autogenerated password for stats admin
+        if not self.config.config_options['stats_password']['value']:
+            for idx, env_var in enumerate(self.prepared_router['DeploymentConfig']['obj'].get(\
+                        'spec.template.spec.containers[0].env') or []):
+                if env_var['name'] == 'STATS_PASSWORD':
+                    env_var['value'] = \
+                      self.deploymentconfig.get('spec.template.spec.containers[0].env[%s].value' % idx)
+                    break
+
+        # dry-run doesn't add the protocol to the ports section.  We will manually do that.
+        for idx, port in enumerate(self.prepared_router['DeploymentConfig']['obj'].get(\
+                        'spec.template.spec.containers[0].ports') or []):
+            if not 'protocol' in port:
+                port['protocol'] = 'TCP'
+
+        # These are different when generating
+        skip = ['dnsPolicy',
+                'terminationGracePeriodSeconds',
+                'restartPolicy', 'timeoutSeconds',
+                'livenessProbe', 'readinessProbe',
+                'terminationMessagePath', 'hostPort',
+                'defaultMode',
+               ]
+
+        if not Utils.check_def_equal(self.prepared_router['DeploymentConfig']['obj'].yaml_dict,
+                                     self.deploymentconfig.yaml_dict,
+                                     skip_keys=skip,
+                                     debug=self.verbose):
+            self.prepared_router['DeploymentConfig']['update'] = True
+
+        # Check if any of the parts need updating, if so, return True
+        # else, no need to update
+        # pylint: disable=no-member
+        return any([self.prepared_router[oc_type]['update'] for oc_type in self.prepared_router.keys()])
+
     @staticmethod
     def run_ansible(params, check_mode):
-        '''run the idempotent ansible code'''
+        '''run ansible idempotent code'''
 
-        ocenv = OCEnv(params['namespace'],
-                      params['kind'],
-                      params['env_vars'],
-                      resource_name=params['name'],
-                      kubeconfig=params['kubeconfig'],
-                      verbose=params['debug'])
+        rconfig = RouterConfig(params['name'],
+                               params['namespace'],
+                               params['kubeconfig'],
+                               {'default_cert': {'value': params['default_cert'], 'include': True},
+                                'cert_file': {'value': params['cert_file'], 'include': False},
+                                'key_file': {'value': params['key_file'], 'include': False},
+                                'images': {'value': params['images'], 'include': True},
+                                'latest_images': {'value': params['latest_images'], 'include': True},
+                                'labels': {'value': params['labels'], 'include': True},
+                                'ports': {'value': ','.join(params['ports']), 'include': True},
+                                'replicas': {'value': params['replicas'], 'include': True},
+                                'selector': {'value': params['selector'], 'include': True},
+                                'service_account': {'value': params['service_account'], 'include': True},
+                                'router_type': {'value': params['router_type'], 'include': False},
+                                'host_network': {'value': params['host_network'], 'include': True},
+                                'external_host': {'value': params['external_host'], 'include': True},
+                                'external_host_vserver': {'value': params['external_host_vserver'],
+                                                          'include': True},
+                                'external_host_insecure': {'value': params['external_host_insecure'],
+                                                           'include': True},
+                                'external_host_partition_path': {'value': params['external_host_partition_path'],
+                                                                 'include': True},
+                                'external_host_username': {'value': params['external_host_username'],
+                                                           'include': True},
+                                'external_host_password': {'value': params['external_host_password'],
+                                                           'include': True},
+                                'external_host_private_key': {'value': params['external_host_private_key'],
+                                                              'include': True},
+                                'expose_metrics': {'value': params['expose_metrics'], 'include': True},
+                                'metrics_image': {'value': params['metrics_image'], 'include': True},
+                                'stats_user': {'value': params['stats_user'], 'include': True},
+                                'stats_password': {'value': params['stats_password'], 'include': True},
+                                'stats_port': {'value': params['stats_port'], 'include': True},
+                                # extra
+                                'cacert_file': {'value': params['cacert_file'], 'include': False},
+                                # edits
+                                'edits': {'value': params['edits'], 'include': False},
+                               })
+
 
         state = params['state']
 
-        api_rval = ocenv.get()
+        ocrouter = Router(rconfig, verbose=params['debug'])
 
-        #####
-        # Get
-        #####
+        api_rval = ocrouter.get()
+
+        ########
+        # get
+        ########
         if state == 'list':
-            return {'changed': False, 'results': api_rval['results'], 'state': "list"}
+            return {'changed': False, 'results': api_rval, 'state': state}
 
         ########
         # Delete
         ########
         if state == 'absent':
-            for key in params.get('env_vars', {}).keys():
-                if ocenv.resource.exists_env_key(key):
+            if not ocrouter.exists():
+                return {'changed': False, 'state': state}
 
-                    if check_mode:
-                        return {'changed': False,
-                                'msg': 'CHECK_MODE: Would have performed a delete.'}
+            if check_mode:
+                return {'changed': True, 'msg': 'CHECK_MODE: Would have performed a delete.'}
 
-                    api_rval = ocenv.delete()
+            # In case of delete we return a list of each object
+            # that represents a router and its result in a list
+            # pylint: disable=redefined-variable-type
+            api_rval = ocrouter.delete()
 
-                    return {'changed': True, 'state': 'absent'}
-
-            return {'changed': False, 'state': 'absent'}
+            return {'changed': True, 'results': api_rval, 'state': state}
 
         if state == 'present':
             ########
             # Create
             ########
-            for key, value in params.get('env_vars', {}).items():
-                if not ocenv.key_value_exists(key, value):
+            if not ocrouter.exists():
 
-                    if check_mode:
-                        return {'changed': False,
-                                'msg': 'CHECK_MODE: Would have performed a create.'}
+                if check_mode:
+                    return {'changed': True, 'msg': 'CHECK_MODE: Would have performed a create.'}
 
-                    # Create it here
-                    api_rval = ocenv.put()
+                api_rval = ocrouter.create()
 
-                    if api_rval['returncode'] != 0:
-                        return {'failed': True, 'msg': api_rval}
+                if api_rval['returncode'] != 0:
+                    return {'failed': True, 'msg': api_rval}
 
-                    # return the created object
-                    api_rval = ocenv.get()
+                return {'changed': True, 'results': api_rval, 'state': state}
 
-                    if api_rval['returncode'] != 0:
-                        return {'failed': True, 'msg': api_rval}
+            ########
+            # Update
+            ########
+            if not ocrouter.needs_update():
+                return {'changed': False, 'state': state}
 
-                    return {'changed': True, 'results': api_rval['results'], 'state': 'present'}
+            if check_mode:
+                return {'changed': False, 'msg': 'CHECK_MODE: Would have performed an update.'}
 
-            return {'changed': False, 'results': api_rval['results'], 'state': 'present'}
+            api_rval = ocrouter.update()
 
+            if api_rval['returncode'] != 0:
+                return {'failed': True, 'msg': api_rval}
 
-        return {'failed': True,
-                'changed': False,
-                'msg': 'Unknown state passed. %s' % state}
+            return {'changed': True, 'results': api_rval, 'state': state}
 
-# -*- -*- -*- End included fragment: class/oc_env.py -*- -*- -*-
+# -*- -*- -*- End included fragment: class/oc_adm_router.py -*- -*- -*-
 
-# -*- -*- -*- Begin included fragment: ansible/oc_env.py -*- -*- -*-
+# -*- -*- -*- Begin included fragment: ansible/oc_adm_router.py -*- -*- -*-
+
 
 def main():
     '''
-    ansible oc module for environment variables
+    ansible oc module for router
     '''
 
     module = AnsibleModule(
         argument_spec=dict(
-            kubeconfig=dict(default='/etc/origin/master/admin.kubeconfig', type='str'),
             state=dict(default='present', type='str',
-                       choices=['present', 'absent', 'list']),
+                       choices=['present', 'absent']),
             debug=dict(default=False, type='bool'),
-            kind=dict(default='rc', choices=['dc', 'rc', 'pods'], type='str'),
             namespace=dict(default='default', type='str'),
-            name=dict(default=None, required=True, type='str'),
-            env_vars=dict(default=None, type='dict'),
+            name=dict(default='router', type='str'),
+
+            kubeconfig=dict(default='/etc/origin/master/admin.kubeconfig', type='str'),
+            default_cert=dict(default=None, type='str'),
+            cert_file=dict(default=None, type='str'),
+            key_file=dict(default=None, type='str'),
+            images=dict(default=None, type='str'), #'openshift3/ose-${component}:${version}'
+            latest_images=dict(default=False, type='bool'),
+            labels=dict(default=None, type='list'),
+            ports=dict(default=['80:80', '443:443'], type='list'),
+            replicas=dict(default=1, type='int'),
+            selector=dict(default=None, type='str'),
+            service_account=dict(default='router', type='str'),
+            router_type=dict(default='haproxy-router', type='str'),
+            host_network=dict(default=True, type='bool'),
+            # external host options
+            external_host=dict(default=None, type='str'),
+            external_host_vserver=dict(default=None, type='str'),
+            external_host_insecure=dict(default=False, type='bool'),
+            external_host_partition_path=dict(default=None, type='str'),
+            external_host_username=dict(default=None, type='str'),
+            external_host_password=dict(default=None, type='str'),
+            external_host_private_key=dict(default=None, type='str'),
+            # Metrics
+            expose_metrics=dict(default=False, type='bool'),
+            metrics_image=dict(default=None, type='str'),
+            # Stats
+            stats_user=dict(default=None, type='str'),
+            stats_password=dict(default=None, type='str'),
+            stats_port=dict(default=1936, type='int'),
+            # extra
+            cacert_file=dict(default=None, type='str'),
+            # edits
+            edits=dict(default=[], type='list'),
         ),
-        mutually_exclusive=[["content", "files"]],
+        mutually_exclusive=[["router_type", "images"],
+                            ["key_file", "default_cert"],
+                            ["cert_file", "default_cert"],
+                           ],
 
         supports_check_mode=True,
     )
-    results = OCEnv.run_ansible(module.params, module.check_mode)
+    results = Router.run_ansible(module.params, module.check_mode)
 
     if 'failed' in results:
         module.fail_json(**results)
@@ -1822,4 +2952,4 @@ def main():
 if __name__ == '__main__':
     main()
 
-# -*- -*- -*- End included fragment: ansible/oc_env.py -*- -*- -*-
+# -*- -*- -*- End included fragment: ansible/oc_adm_router.py -*- -*- -*-

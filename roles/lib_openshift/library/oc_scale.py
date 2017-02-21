@@ -1296,7 +1296,7 @@ class OpenShiftCLIConfig(object):
 
 # pylint: disable=too-many-public-methods
 class DeploymentConfig(Yedit):
-    ''' Class to wrap the oc command line tools '''
+    ''' Class to model an openshift DeploymentConfig'''
     default_deployment_config = '''
 apiVersion: v1
 kind: DeploymentConfig
@@ -1637,7 +1637,12 @@ spec:
 
 # pylint: disable=too-many-public-methods
 class ReplicationController(DeploymentConfig):
-    ''' Class to wrap the oc command line tools '''
+    ''' Class to model a replicationcontroller openshift object.
+
+        Currently we are modeled after a deployment config since they
+        are very similar.  In the future, when the need arises we
+        will add functionality to this class.
+    '''
     replicas_path = "spec.replicas"
     env_path = "spec.template.spec.containers[0].env"
     volumes_path = "spec.template.spec.volumes"
