@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.11
+Version:        3.5.12
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -263,6 +263,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Feb 21 2017 Scott Dodson <sdodson@redhat.com> 3.5.12-1
+- Remove pytest-related dependencies from setup.py (rhcarvalho@gmail.com)
+
 * Tue Feb 21 2017 Scott Dodson <sdodson@redhat.com> 3.5.11-1
 - Reverting logic for verify api handler to be uniform with other ways we
   verify, will be uniformly updated in future (ewolinet@redhat.com)
