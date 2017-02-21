@@ -98,10 +98,6 @@ class Registry(OpenShiftCLI):
         ''' setter method for prepared_registry attribute '''
         self.__prepared_registry = data
 
-    def force_prepare_registry(self):
-        '''force a registry prep'''
-        self.__prepared_registry = None
-
     def get(self):
         ''' return the self.registry_parts '''
         self.deploymentconfig = None
@@ -212,9 +208,6 @@ class Registry(OpenShiftCLI):
     def update(self):
         '''run update for the registry.  This performs a delete and then create '''
         # Store the current service IP
-        self.force_prepare_registry()
-
-        self.get()
         if self.service:
             svcip = self.service.get('spec.clusterIP')
             if svcip:
@@ -222,18 +215,6 @@ class Registry(OpenShiftCLI):
             portip = self.service.get('spec.portalIP')
             if portip:
                 self.portal_ip = portip
-
-        #parts = self.delete(complete=False)
-        #for part in parts:
-        #    if part['returncode'] != 0:
-        #        if part.has_key('stderr') and 'not found' in part['stderr']:
-        #            # the object is not there, continue
-        #            continue
-        #        # something went wrong
-        #        return parts
-
-        # Ugly built in sleep here.
-        #time.sleep(10)
 
         results = []
         if self.prepared_registry['deployment_update']:
@@ -289,7 +270,7 @@ class Registry(OpenShiftCLI):
 
         return deploymentconfig.yaml_dict
 
-    def needs_update(self, verbose=False):
+    def needs_update(self):
         ''' check to see if we need to update '''
         if not self.service or not self.deploymentconfig:
             return True
@@ -298,7 +279,7 @@ class Registry(OpenShiftCLI):
         if not Utils.check_def_equal(self.prepared_registry['service'].yaml_dict,
                                      self.service.yaml_dict,
                                      exclude_list,
-                                     verbose):
+                                     debug=self.verbose):
             self.prepared_registry['service_update'] = True
 
         exclude_list = ['dnsPolicy',
@@ -306,7 +287,6 @@ class Registry(OpenShiftCLI):
                         'restartPolicy', 'timeoutSeconds',
                         'livenessProbe', 'readinessProbe',
                         'terminationMessagePath',
-                        'rollingParams',
                         'securityContext',
                         'imagePullPolicy',
                         'protocol', # ports.portocol: TCP
@@ -318,7 +298,7 @@ class Registry(OpenShiftCLI):
         if not Utils.check_def_equal(self.prepared_registry['deployment'].yaml_dict,
                                      self.deploymentconfig.yaml_dict,
                                      exclude_list,
-                                     verbose):
+                                     debug=self.verbose):
             self.prepared_registry['deployment_update'] = True
 
         return self.prepared_registry['deployment_update'] or self.prepared_registry['service_update'] or False
@@ -350,14 +330,15 @@ class Registry(OpenShiftCLI):
                                  })
 
 
-        ocregistry = Registry(rconfig)
+        ocregistry = Registry(rconfig, params['debug'])
+
+        api_rval = ocregistry.get()
 
         state = params['state']
         ########
         # get
         ########
         if state == 'list':
-            api_rval = ocregistry.get()
 
             if api_rval['returncode'] != 0:
                 return {'failed': True, 'msg': api_rval}
