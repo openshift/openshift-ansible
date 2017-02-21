@@ -11,7 +11,7 @@ import pytest
 # Disable import-error b/c our libraries aren't loaded in jenkins
 # pylint: disable=import-error,wrong-import-position
 # place class in our python path
-module_path = os.path.join('/'.join(os.path.realpath(__file__).split('/')[:-1]), 'library')
+module_path = os.path.join('/'.join(os.path.realpath(__file__).split(os.path.sep)[:-1]), 'library')
 sys.path.insert(0, module_path)
 openshift_cert_expiry = pytest.importorskip("openshift_cert_expiry")
 
@@ -76,10 +76,6 @@ class TestFakeOpenSSLClasses(unittest.TestCase):
             subjects.append('{}={}'.format(name, value))
 
         self.assertEqual('CN=172.30.0.1', ', '.join(subjects))
-
-    def tearDown(self):
-        '''TearDown method'''
-        pass
 
 
 if __name__ == "__main__":

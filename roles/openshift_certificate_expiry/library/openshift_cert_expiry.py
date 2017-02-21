@@ -242,6 +242,8 @@ will be returned
 
 
 # pylint: disable=too-many-locals,too-many-branches
+#
+# TODO: Break this function down into smaller chunks
 def load_and_handle_cert(cert_string, now, base64decode=False, ans_module=None):
     """Load a certificate, split off the good parts, and return some
 useful data
@@ -254,8 +256,8 @@ Params:
 - `ans_module` (AnsibleModule) - The AnsibleModule object for this module (so we can raise errors)
 
 Returns:
-A 3-tuple of the form: (certificate_common_name, certificate_expiry_date, certificate_time_remaining)
-
+A tuple of the form:
+    (cert_subject, cert_expiry_date, time_remaining, cert_serial_number)
     """
     if base64decode:
         _cert_string = cert_string.decode('base-64')
@@ -287,8 +289,9 @@ A 3-tuple of the form: (certificate_common_name, certificate_expiry_date, certif
             ans_module.fail_json(msg="Error: The 'OpenSSL' python library and CLI command were not found on the target host. Unable to parse any certificates. This host will not be included in generated reports.")
         else:
             openssl_decoded = openssl_decoded.communicate()[0]
-            os.remove(path)
             cert_loaded = FakeOpenSSLCertificate(openssl_decoded)
+        finally:
+            os.remove(path)
 
     ######################################################################
     # Read all possible names from the cert
