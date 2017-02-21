@@ -100,6 +100,7 @@ oc_env.py:
 - class/oc_env.py
 - ansible/oc_env.py
 
+
 oc_group.py:
 - doc/generated
 - doc/license
@@ -110,6 +111,16 @@ oc_group.py:
 - lib/group.py
 - class/oc_group.py
 - ansible/oc_group.py
+
+oc_image.py:
+- doc/generated
+- doc/license
+- lib/import.py
+- doc/image
+- ../../lib_utils/src/class/yedit.py
+- lib/base.py
+- class/oc_image.py
+- ansible/oc_image.py
 
 oc_label.py:
 - doc/generated
