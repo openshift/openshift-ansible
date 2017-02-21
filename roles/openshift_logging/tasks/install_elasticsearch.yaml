@@ -5,6 +5,7 @@
 - name: Generate PersistentVolumeClaims
   include: "{{ role_path}}/tasks/generate_pvcs.yaml"
   vars:
+    es_pvc_pool: []
     es_pvc_names: "{{openshift_logging_facts.elasticsearch.pvcs.keys()}}"
     es_dc_names: "{{openshift_logging_facts.elasticsearch.deploymentconfigs.keys()}}"
 
@@ -63,6 +64,7 @@
 - name: Generate PersistentVolumeClaims for Ops
   include: "{{ role_path}}/tasks/generate_pvcs.yaml"
   vars:
+    es_pvc_pool: []
     es_pvc_names: "{{openshift_logging_facts.elasticsearch_ops.pvcs.keys()}}"
     es_dc_names: "{{openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys()}}"
     openshift_logging_es_pvc_prefix: "{{openshift_logging_es_ops_pvc_prefix}}"

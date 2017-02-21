@@ -6,6 +6,6 @@
 
 - name: lib_openshift ensure python-ruamel-yaml package is on target
   package:
-    name: python-ruamel-yaml
+    name: python2-ruamel-yaml
     state: present
   when: not ostree_booted.stat.exists

@@ -38,6 +38,11 @@ gateway:
 
 io.fabric8.elasticsearch.authentication.users: ["system.logging.kibana", "system.logging.fluentd", "system.logging.curator", "system.admin"]
 
+openshift.config:
+  use_common_data_model: true
+  project_index_prefix: "project"
+  time_field_name: "@timestamp"
+
 openshift.searchguard:
   keystore.path: /etc/elasticsearch/secret/admin.jks
   truststore.path: /etc/elasticsearch/secret/searchguard.truststore

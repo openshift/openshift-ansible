@@ -10,7 +10,7 @@ Checks are typically implemented as two parts:
 2. a custom Ansible module in [library/](library), for cases when the modules
    shipped with Ansible do not provide the required functionality.
 
-The checks are called from an Ansible playbooks via the `openshift_health_check`
+The checks are called from Ansible playbooks via the `openshift_health_check`
 action plugin. See
 [playbooks/byo/openshift-preflight/check.yml](../../playbooks/byo/openshift-preflight/check.yml)
 for an example.

@@ -18,7 +18,7 @@ class ServiceAccountConfig(object):
         self.create_dict()
 
     def create_dict(self):
-        ''' return a properly structured volume '''
+        ''' instantiate a properly structured volume '''
         self.data['apiVersion'] = 'v1'
         self.data['kind'] = 'ServiceAccount'
         self.data['metadata'] = {}
