@@ -51,8 +51,10 @@ def main():
         mutually_exclusive=[["router_type", "images"],
                             ["key_file", "default_cert"],
                             ["cert_file", "default_cert"],
+                            ["cacert_file", "default_cert"],
                            ],
 
+        required_together=[['cacert_file', 'cert_file', 'key_file']],
         supports_check_mode=True,
     )
     results = Router.run_ansible(module.params, module.check_mode)

@@ -2611,10 +2611,14 @@ class Router(OpenShiftCLI):
 
         return deploymentconfig
 
+    # pylint: disable=too-many-branches
     def _prepare_router(self):
         '''prepare router for instantiation'''
-        # We need to create the pem file
-        if self.config.config_options['default_cert']['value'] is None:
+        # if cacert, key, and cert were passed, combine them into a pem file
+        if (self.config.config_options['cacert_file']['value'] and
+                self.config.config_options['cert_file']['value'] and
+                self.config.config_options['key_file']['value']):
+
             router_pem = '/tmp/router.pem'
             with open(router_pem, 'w') as rfd:
                 rfd.write(open(self.config.config_options['cert_file']['value']).read())
@@ -2624,7 +2628,12 @@ class Router(OpenShiftCLI):
                     rfd.write(open(self.config.config_options['cacert_file']['value']).read())
 
             atexit.register(Utils.cleanup, [router_pem])
+
             self.config.config_options['default_cert']['value'] = router_pem
+
+        elif self.config.config_options['default_cert']['value'] is None:
+            # No certificate was passed to us.  do not pass one to oc adm router
+            self.config.config_options['default_cert']['include'] = False
 
         options = self.config.to_option_list()
 
@@ -2666,7 +2675,8 @@ class Router(OpenShiftCLI):
         oc_objects['DeploymentConfig']['obj'] = self.add_modifications(oc_objects['DeploymentConfig']['obj'])
 
         for oc_type, oc_data in oc_objects.items():
-            oc_data['path'] = Utils.create_tmp_file_from_contents(oc_type, oc_data['obj'].yaml_dict)
+            if oc_data['obj'] is not None:
+                oc_data['path'] = Utils.create_tmp_file_from_contents(oc_type, oc_data['obj'].yaml_dict)
 
         return oc_objects
 
@@ -2676,7 +2686,8 @@ class Router(OpenShiftCLI):
 
         # pylint: disable=no-member
         for _, oc_data in self.prepared_router.items():
-            results.append(self._create(oc_data['path']))
+            if oc_data['obj'] is not None:
+                results.append(self._create(oc_data['path']))
 
         rval = 0
         for result in results:
@@ -2937,8 +2948,10 @@ def main():
         mutually_exclusive=[["router_type", "images"],
                             ["key_file", "default_cert"],
                             ["cert_file", "default_cert"],
+                            ["cacert_file", "default_cert"],
                            ],
 
+        required_together=[['cacert_file', 'cert_file', 'key_file']],
         supports_check_mode=True,
     )
     results = Router.run_ansible(module.params, module.check_mode)
