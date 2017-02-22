@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.65
+Version:        3.3.66
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Feb 22 2017 Scott Dodson <sdodson@redhat.com> 3.3.66-1
+- Bump ansible requirement to ansible-2.2.1.0-2 (sdodson@redhat.com)
+
 * Tue Feb 21 2017 Scott Dodson <sdodson@redhat.com> 3.3.65-1
 - Address cert expiry parsing review comments (tbielawa@redhat.com)
 - Implement fake openssl cert classes (tbielawa@redhat.com)
