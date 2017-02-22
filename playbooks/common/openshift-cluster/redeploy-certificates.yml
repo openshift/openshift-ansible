@@ -233,7 +233,7 @@
   - name: Drain node
     command: >
       {{ openshift.common.admin_binary }} --config={{ hostvars[groups.oo_first_master.0].mktemp.stdout }}/admin.kubeconfig
-      drain {{ openshift.common.hostname }} --force --delete-local-data
+      drain {{ openshift.common.hostname }} --force --delete-local-data --ignore-daemonsets
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: openshift_certificates_redeploy_ca | default(false) | bool and was_schedulable | bool
 
