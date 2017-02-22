@@ -37,12 +37,15 @@ class CAServerCert(OpenShiftCLI):
         # Added this here as a safegaurd for stomping on the
         # cert and key files if they exist
         if self.config.config_options['backup']['value']:
+            ext = time.strftime("%Y-%m-%d@%H:%M:%S", time.localtime(time.time()))
+            date_str = "%s_" + "%s" % ext
+
             if os.path.exists(self.config.config_options['key']['value']):
                 shutil.copy(self.config.config_options['key']['value'],
-                            "%s.orig" % self.config.config_options['key']['value'])
+                            date_str % self.config.config_options['key']['value'])
             if os.path.exists(self.config.config_options['cert']['value']):
                 shutil.copy(self.config.config_options['cert']['value'],
-                            "%s.orig" % self.config.config_options['cert']['value'])
+                            date_str % self.config.config_options['cert']['value'])
 
         options = self.config.to_option_list()
 
@@ -60,13 +63,28 @@ class CAServerCert(OpenShiftCLI):
 
         # Would prefer pyopenssl but is not installed.
         # When we verify it is, switch this code
-        proc = subprocess.Popen(['openssl', 'x509', '-noout', '-subject', '-in', cert_path],
+        # Here is the code to get the subject and the SAN
+        # openssl x509 -text -noout -certopt \
+        #  no_header,no_version,no_serial,no_signame,no_validity,no_issuer,no_pubkey,no_sigdump,no_aux \
+        #  -in /etc/origin/master/registry.crt
+        # Instead of this solution we will use a regex.
+        cert_names = []
+        hostnames = self.config.config_options['hostnames']['value'].split(',')
+        proc = subprocess.Popen(['openssl', 'x509', '-noout', '-text', '-in', cert_path],
                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, _ = proc.communicate()
+
+        x509output, _ = proc.communicate()
         if proc.returncode == 0:
-            for var in self.config.config_options['hostnames']['value'].split(','):
-                if var in stdout:
-                    return True
+            regex = re.compile(r"^\s*X509v3 Subject Alternative Name:\s*?\n\s*(.*)\s*\n", re.MULTILINE)
+            match = regex.search(x509output)  # E501
+            for entry in re.split(r", *", match.group(1)):
+                if entry.startswith('DNS') or entry.startswith('IP Address'):
+                    cert_names.append(entry.split(':')[1])
+            # now that we have cert names let's compare
+            cert_set = set(cert_names)
+            hname_set = set(hostnames)
+            if cert_set.issubset(hname_set) and hname_set.issubset(cert_set):
+                return True
 
         return False
 
@@ -78,7 +96,7 @@ class CAServerCert(OpenShiftCLI):
                                     params['debug'],
                                     {'cert':          {'value': params['cert'], 'include': True},
                                      'hostnames':     {'value': ','.join(params['hostnames']), 'include': True},
-                                     'overwrite':     {'value': params['overwrite'], 'include': True},
+                                     'overwrite':     {'value': True, 'include': True},
                                      'key':           {'value': params['key'], 'include': True},
                                      'signer_cert':   {'value': params['signer_cert'], 'include': True},
                                      'signer_key':    {'value': params['signer_key'], 'include': True},
@@ -94,7 +112,7 @@ class CAServerCert(OpenShiftCLI):
             ########
             # Create
             ########
-            if not server_cert.exists() or params['overwrite']:
+            if not server_cert.exists() or params['force']:
 
                 if check_mode:
                     return {'changed': True,

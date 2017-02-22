@@ -43,9 +43,9 @@ options:
     required: false
     default: None
     aliases: []
-  overwrite:
+  force:
     description:
-    - Overwrite existing cert files if found.  If false, any existing file will be left as-is.
+    - Force updating of the existing cert and key files
     required: false
     default: False
     aliases: []

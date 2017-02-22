@@ -34,6 +34,8 @@
 from __future__ import print_function
 import atexit
 import copy
+# pylint: disable=unused-import
+import time
 import json
 import os
 import re
