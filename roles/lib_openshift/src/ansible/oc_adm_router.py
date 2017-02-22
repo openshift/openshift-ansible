@@ -51,6 +51,7 @@ def main():
         mutually_exclusive=[["router_type", "images"],
                             ["key_file", "default_cert"],
                             ["cert_file", "default_cert"],
+                            ["cacert_file", "default_cert"],
                            ],
 
         supports_check_mode=True,

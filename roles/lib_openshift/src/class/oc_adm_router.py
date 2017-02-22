@@ -182,8 +182,11 @@ class Router(OpenShiftCLI):
 
     def _prepare_router(self):
         '''prepare router for instantiation'''
-        # We need to create the pem file
-        if self.config.config_options['default_cert']['value'] is None:
+        # if cacert, key, and cert were passed, combine them into a pem file
+        if (self.config.config_options['cacert_file']['value'] and
+             self.config.config_options['cert_file']['value'] and
+             self.config.config_options['key_file']['value']):
+
             router_pem = '/tmp/router.pem'
             with open(router_pem, 'w') as rfd:
                 rfd.write(open(self.config.config_options['cert_file']['value']).read())
@@ -193,7 +196,12 @@ class Router(OpenShiftCLI):
                     rfd.write(open(self.config.config_options['cacert_file']['value']).read())
 
             atexit.register(Utils.cleanup, [router_pem])
+
             self.config.config_options['default_cert']['value'] = router_pem
+
+        elif self.config.config_options['default_cert']['value'] is None:
+            # No certificate was passed to us.  do not pass one to oc adm router
+            self.config.config_options['default_cert']['include'] = False
 
         options = self.config.to_option_list()
 
