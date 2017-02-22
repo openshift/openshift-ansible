@@ -215,7 +215,7 @@ class Router(OpenShiftCLI):
 
         results = self.openshift_cmd(cmd, oadm=True, output=True, output_type='json')
 
-        # pylint: disable=no-member
+        # pylint: disable=maybe-no-member
         if results['returncode'] != 0 or 'items' not in results['results']:
             return results
 
@@ -253,11 +253,19 @@ class Router(OpenShiftCLI):
         return oc_objects
 
     def create(self):
-        '''Create a deploymentconfig '''
+        '''Create a router
+
+           This includes the different parts:
+           - deploymentconfig
+           - service
+           - serviceaccount
+           - secrets
+           - clusterrolebinding
+        '''
         results = []
 
         import time
-        # pylint: disable=no-member
+        # pylint: disable=maybe-no-member
         for _, oc_data in self.prepared_router.items():
             if oc_data['obj'] is not None:
                 time.sleep(1)
@@ -274,7 +282,7 @@ class Router(OpenShiftCLI):
         '''run update for the router.  This performs a replace'''
         results = []
 
-        # pylint: disable=no-member
+        # pylint: disable=maybe-no-member
         for _, oc_data in self.prepared_router.items():
             if oc_data['update']:
                 results.append(self._replace(oc_data['path']))
