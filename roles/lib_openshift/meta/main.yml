@@ -1,6 +1,6 @@
 ---
 galaxy_info:
-  author: TODO
+  author: OpenShift Team
   description: OpenShift Repositories
   company: Red Hat, Inc.
   license: Apache License, Version 2.0
@@ -11,4 +11,5 @@ galaxy_info:
     - 7
   categories:
   - cloud
-dependencies: []
+dependencies:
+- { role: openshift_repos }
