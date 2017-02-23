@@ -14,6 +14,15 @@ LABEL name="openshift-ansible" \
       io.openshift.expose-services="" \
       io.openshift.tags="openshift,install,upgrade,ansible"
 
+USER root
+
+RUN INSTALL_PKGS="skopeo" && \
+    yum install -y --setopt=tsflags=nodocs $INSTALL_PKGS && \
+    rpm -V $INSTALL_PKGS && \
+    yum clean all
+
+USER ${USER_UID}
+
 # The playbook to be run is specified via the PLAYBOOK_FILE env var.
 # This sets a default of openshift_facts.yml as it's an informative playbook
 # that can help test that everything is set properly (inventory, sshkeys)
