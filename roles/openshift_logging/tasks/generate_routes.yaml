@@ -26,6 +26,7 @@
     tls_cert: "{{kibana_cert | default('') | b64decode}}"
     tls_ca_cert: "{{kibana_ca | b64decode}}"
     tls_dest_ca_cert: "{{key_pairs | entry_from_named_pair('ca_file')| b64decode }}"
+    edge_term_policy: "{{openshift_logging_kibana_edge_term_policy | default('') }}"
     labels:
       component: support
       logging-infra: support

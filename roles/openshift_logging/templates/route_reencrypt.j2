@@ -28,6 +28,9 @@ spec:
       {{ line }}
 {% endfor %}
     termination: reencrypt
+{% if edge_term_policy is defined and edge_term_policy | length > 0 %}
+    insecureEdgeTerminationPolicy: {{ edge_term_policy }}
+{% endif %}
   to:
     kind: Service
     name: {{ service_name }}
