@@ -1,0 +1,29 @@
+---
+- name: Netplugin IPtables | Get iptables rules
+  command: iptables -L --wait
+  register: iptablesrules
+  always_run: yes
+
+- name: Netplugin IPtables | Enable iptables at boot
+  service:
+    name: iptables
+    enabled: yes
+    state: started
+
+- name: Netplugin IPtables | Open Netmaster with iptables
+  command: /sbin/iptables -I INPUT 1 -p tcp --dport {{ item }} -j ACCEPT -m comment --comment "contiv"
+  with_items:
+  - "{{ netmaster_port }}"
+  - "{{ contiv_rpc_port1 }}"
+  - "{{ contiv_rpc_port2 }}"
+  - "{{ contiv_rpc_port3 }}"
+  - "{{ contiv_etcd_port }}"
+  - "{{ kube_master_api_port }}"
+  when: iptablesrules.stdout.find("contiv") == -1
+  notify: Save iptables rules
+
+- name: Netplugin IPtables | Open vxlan port with iptables
+  command: /sbin/iptables -I INPUT 1 -p udp --dport 8472 -j ACCEPT -m comment --comment "vxlan"
+
+- name: Netplugin IPtables | Open vxlan port with iptables
+  command: /sbin/iptables -I INPUT 1 -p udp --dport 4789 -j ACCEPT -m comment --comment "vxlan"

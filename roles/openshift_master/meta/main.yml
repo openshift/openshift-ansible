@@ -42,3 +42,6 @@ dependencies:
 - role: nickhammond.logrotate
 - role: nuage_master
   when: openshift.common.use_nuage | bool
+- role: contiv
+  contiv_role: netmaster
+  when: openshift.common.use_contiv | bool
