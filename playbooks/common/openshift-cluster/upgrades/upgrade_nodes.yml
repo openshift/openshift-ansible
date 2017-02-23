@@ -41,7 +41,7 @@
 
   - name: Drain Node for Kubelet upgrade
     command: >
-      {{ hostvars[groups.oo_first_master.0].openshift.common.client_binary }} adm manage-node {{ openshift.common.hostname | lower }} {{ openshift.common.evacuate_or_drain }} --force
+      {{ hostvars[groups.oo_first_master.0].openshift.common.admin_binary }} drain {{ openshift.common.hostname | lower }} --force --delete-local-data --ignore-daemonsets
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: inventory_hostname in groups.oo_nodes_to_upgrade
 
