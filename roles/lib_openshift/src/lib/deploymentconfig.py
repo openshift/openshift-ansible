@@ -189,6 +189,18 @@ spec:
 
         return None
 
+    def get_env_var(self, key):
+        '''return a environment variables '''
+        results = self.get(DeploymentConfig.env_path) or []
+        if not results:
+           return None
+
+        for env_var in results:
+            if env_var['name'] == key:
+                return env_var
+
+        return None
+
     def get_replicas(self):
         ''' return replicas setting '''
         return self.get(DeploymentConfig.replicas_path)
