@@ -484,6 +484,24 @@ def set_nuage_facts_if_unset(facts):
     return facts
 
 
+def set_contiv_facts_if_unset(facts):
+    """ Set contiv facts if not already present in facts dict
+            dict: the facts dict updated with the contiv facts if
+            missing
+        Args:
+            facts (dict): existing facts
+        Returns:
+            dict: the facts dict updated with the contiv
+            facts if they were not already present
+
+    """
+    if 'common' in facts:
+        if 'use_contiv' not in facts['common']:
+            use_contiv = False
+            facts['common']['use_contiv'] = use_contiv
+    return facts
+
+
 def set_node_schedulability(facts):
     """ Set schedulable facts if not already present in facts dict
         Args:
@@ -1938,6 +1956,7 @@ class OpenShiftFacts(object):
         facts = set_project_cfg_facts_if_unset(facts)
         facts = set_flannel_facts_if_unset(facts)
         facts = set_nuage_facts_if_unset(facts)
+        facts = set_contiv_facts_if_unset(facts)
         facts = set_node_schedulability(facts)
         facts = set_selectors(facts)
         facts = set_identity_providers_if_unset(facts)
