@@ -49,8 +49,11 @@ class Router(OpenShiftCLI):
         ''' property for the prepared router'''
         if self.__prepared_router is None:
             results = self._prepare_router()
-            if not results:
-                raise RouterException('Could not perform router preparation')
+            if not results or 'returncode' in results and results['returncode'] != 0:
+                if 'stderr' in results:
+                    raise RouterException('Could not perform router preparation: %s' % results['stderr'])
+
+                raise RouterException('Could not perform router preparation.')
             self.__prepared_router = results
 
         return self.__prepared_router
@@ -212,8 +215,8 @@ class Router(OpenShiftCLI):
 
         results = self.openshift_cmd(cmd, oadm=True, output=True, output_type='json')
 
-        # pylint: disable=no-member
-        if results['returncode'] != 0 and 'items' in results['results']:
+        # pylint: disable=maybe-no-member
+        if results['returncode'] != 0 or 'items' not in results['results']:
             return results
 
         oc_objects = {'DeploymentConfig': {'obj': None, 'path': None, 'update': False},
@@ -250,12 +253,22 @@ class Router(OpenShiftCLI):
         return oc_objects
 
     def create(self):
-        '''Create a deploymentconfig '''
+        '''Create a router
+
+           This includes the different parts:
+           - deploymentconfig
+           - service
+           - serviceaccount
+           - secrets
+           - clusterrolebinding
+        '''
         results = []
 
-        # pylint: disable=no-member
+        import time
+        # pylint: disable=maybe-no-member
         for _, oc_data in self.prepared_router.items():
             if oc_data['obj'] is not None:
+                time.sleep(1)
                 results.append(self._create(oc_data['path']))
 
         rval = 0
@@ -269,7 +282,7 @@ class Router(OpenShiftCLI):
         '''run update for the router.  This performs a replace'''
         results = []
 
-        # pylint: disable=no-member
+        # pylint: disable=maybe-no-member
         for _, oc_data in self.prepared_router.items():
             if oc_data['update']:
                 results.append(self._replace(oc_data['path']))
