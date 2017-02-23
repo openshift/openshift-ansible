@@ -11,6 +11,7 @@
 # OK
 
 import os
+import six
 import sys
 import unittest
 import mock
@@ -23,7 +24,7 @@ import mock
 # place class in our python path
 module_path = os.path.join('/'.join(os.path.realpath(__file__).split('/')[:-4]), 'library')  # noqa: E501
 sys.path.insert(0, module_path)
-from oc_route import OCRoute  # noqa: E402
+from oc_route import OCRoute, locate_oc_binary  # noqa: E402
 
 
 class OCRouteTest(unittest.TestCase):
@@ -35,9 +36,10 @@ class OCRouteTest(unittest.TestCase):
         ''' setup method will create a file and set to known configuration '''
         pass
 
+    @mock.patch('oc_route.locate_oc_binary')
     @mock.patch('oc_route.Utils.create_tmpfile_copy')
     @mock.patch('oc_route.OCRoute._run')
-    def test_list_route(self, mock_cmd, mock_tmpfile_copy):
+    def test_list_route(self, mock_cmd, mock_tmpfile_copy, mock_oc_binary):
         ''' Testing getting a route '''
 
         # Arrange
@@ -115,6 +117,10 @@ class OCRouteTest(unittest.TestCase):
             (0, route_result, ''),
         ]
 
+        mock_oc_binary.side_effect = [
+            'oc'
+        ]
+
         mock_tmpfile_copy.side_effect = [
             '/tmp/mock.kubeconfig',
         ]
@@ -132,10 +138,11 @@ class OCRouteTest(unittest.TestCase):
             mock.call(['oc', '-n', 'default', 'get', 'route', 'test', '-o', 'json'], None),
         ])
 
+    @mock.patch('oc_route.locate_oc_binary')
     @mock.patch('oc_route.Utils.create_tmpfile_copy')
     @mock.patch('oc_route.Yedit._write')
     @mock.patch('oc_route.OCRoute._run')
-    def test_create_route(self, mock_cmd, mock_write, mock_tmpfile_copy):
+    def test_create_route(self, mock_cmd, mock_write, mock_tmpfile_copy, mock_oc_binary):
         ''' Testing getting a route '''
         # Arrange
 
@@ -235,6 +242,10 @@ metadata:
             (0, route_result, ''),
         ]
 
+        mock_oc_binary.side_effect = [
+            'oc'
+        ]
+
         mock_tmpfile_copy.side_effect = [
             '/tmp/mock.kubeconfig',
         ]
@@ -258,6 +269,114 @@ metadata:
             mock.call(['oc', '-n', 'default', 'create', '-f', mock.ANY], None),
             mock.call(['oc', '-n', 'default', 'get', 'route', 'test', '-o', 'json'], None),
         ])
+
+    @unittest.skipIf(six.PY3, 'py2 test only')
+    @mock.patch('os.path.exists')
+    @mock.patch('os.environ.get')
+    def test_binary_lookup_fallback(self, mock_env_get, mock_path_exists):
+        ''' Testing binary lookup fallback '''
+
+        mock_env_get.side_effect = lambda _v, _d: ''
+
+        mock_path_exists.side_effect = lambda _: False
+
+        self.assertEqual(locate_oc_binary(), 'oc')
+
+    @unittest.skipIf(six.PY3, 'py2 test only')
+    @mock.patch('os.path.exists')
+    @mock.patch('os.environ.get')
+    def test_binary_lookup_in_path(self, mock_env_get, mock_path_exists):
+        ''' Testing binary lookup in path '''
+
+        oc_bin = '/usr/bin/oc'
+
+        mock_env_get.side_effect = lambda _v, _d: '/bin:/usr/bin'
+
+        mock_path_exists.side_effect = lambda f: f == oc_bin
+
+        self.assertEqual(locate_oc_binary(), oc_bin)
+
+    @unittest.skipIf(six.PY3, 'py2 test only')
+    @mock.patch('os.path.exists')
+    @mock.patch('os.environ.get')
+    def test_binary_lookup_in_usr_local(self, mock_env_get, mock_path_exists):
+        ''' Testing binary lookup in /usr/local/bin '''
+
+        oc_bin = '/usr/local/bin/oc'
+
+        mock_env_get.side_effect = lambda _v, _d: '/bin:/usr/bin'
+
+        mock_path_exists.side_effect = lambda f: f == oc_bin
+
+        self.assertEqual(locate_oc_binary(), oc_bin)
+
+    @unittest.skipIf(six.PY3, 'py2 test only')
+    @mock.patch('os.path.exists')
+    @mock.patch('os.environ.get')
+    def test_binary_lookup_in_home(self, mock_env_get, mock_path_exists):
+        ''' Testing binary lookup in ~/bin '''
+
+        oc_bin = os.path.expanduser('~/bin/oc')
+
+        mock_env_get.side_effect = lambda _v, _d: '/bin:/usr/bin'
+
+        mock_path_exists.side_effect = lambda f: f == oc_bin
+
+        self.assertEqual(locate_oc_binary(), oc_bin)
+
+    @unittest.skipIf(six.PY2, 'py3 test only')
+    @mock.patch('shutil.which')
+    @mock.patch('os.environ.get')
+    def test_binary_lookup_fallback_py3(self, mock_env_get, mock_shutil_which):
+        ''' Testing binary lookup fallback '''
+
+        mock_env_get.side_effect = lambda _v, _d: ''
+
+        mock_shutil_which.side_effect = lambda _f, path=None: None
+
+        self.assertEqual(locate_oc_binary(), 'oc')
+
+    @unittest.skipIf(six.PY2, 'py3 test only')
+    @mock.patch('shutil.which')
+    @mock.patch('os.environ.get')
+    def test_binary_lookup_in_path_py3(self, mock_env_get, mock_shutil_which):
+        ''' Testing binary lookup in path '''
+
+        oc_bin = '/usr/bin/oc'
+
+        mock_env_get.side_effect = lambda _v, _d: '/bin:/usr/bin'
+
+        mock_shutil_which.side_effect = lambda _f, path=None: oc_bin
+
+        self.assertEqual(locate_oc_binary(), oc_bin)
+
+    @unittest.skipIf(six.PY2, 'py3 test only')
+    @mock.patch('shutil.which')
+    @mock.patch('os.environ.get')
+    def test_binary_lookup_in_usr_local_py3(self, mock_env_get, mock_shutil_which):
+        ''' Testing binary lookup in /usr/local/bin '''
+
+        oc_bin = '/usr/local/bin/oc'
+
+        mock_env_get.side_effect = lambda _v, _d: '/bin:/usr/bin'
+
+        mock_shutil_which.side_effect = lambda _f, path=None: oc_bin
+
+        self.assertEqual(locate_oc_binary(), oc_bin)
+
+    @unittest.skipIf(six.PY2, 'py3 test only')
+    @mock.patch('shutil.which')
+    @mock.patch('os.environ.get')
+    def test_binary_lookup_in_home_py3(self, mock_env_get, mock_shutil_which):
+        ''' Testing binary lookup in ~/bin '''
+
+        oc_bin = os.path.expanduser('~/bin/oc')
+
+        mock_env_get.side_effect = lambda _v, _d: '/bin:/usr/bin'
+
+        mock_shutil_which.side_effect = lambda _f, path=None: oc_bin
+
+        self.assertEqual(locate_oc_binary(), oc_bin)
 
     def tearDown(self):
         '''TearDown method'''
