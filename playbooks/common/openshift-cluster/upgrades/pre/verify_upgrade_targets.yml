@@ -1,4 +1,12 @@
 ---
+# Included from: playbooks/byo/openshift-cluster/upgrades/v3_*/upgrade
+#
+# This is called if tasks with the tag 'pre_upgrade' would be executed
+# This is well structured, it does what its name implies it will do. The only
+# possible change would be that we are explicit in getting 
+# 'openshift.common.version' set within this so it is obvious where it comes
+# from for those that may not be familiar with the playbooks & openshift_facts.
+
 - name: Verify upgrade targets
   hosts: oo_masters_to_config:oo_nodes_to_upgrade
   vars:

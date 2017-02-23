@@ -1,4 +1,13 @@
 ---
+# Included from: playbooks/byo/openshift-cluster/upgrades/v3_*/upgrade
+#
+# This is called if tasks with the tag 'pre_upgrade' would be executed
+# This playbook will fail if certain conditions aren't met with the provided facts
+# it also sets a fact, but not after every fail check has passed
+# It would make sense that these fail tasks be at the top of the playbook/role
+# that actually uses them. With them being here, instead, it is slightly obscured
+# that they are checked for.
+
 - name: Verify upgrade can proceed on first master
   hosts: oo_first_master
   gather_facts: no

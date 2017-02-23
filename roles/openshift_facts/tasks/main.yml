@@ -1,4 +1,9 @@
 ---
+# Included from: playbooks/common/openshift-cluster/initialize_facts
+#
+# This goes out and collects facts using the 'common' role. Misnomer, as this also
+# will ensure deps are installed rather than requiring them.
+
 - name: Detecting Operating System
   stat:
     path: /run/ostree-booted

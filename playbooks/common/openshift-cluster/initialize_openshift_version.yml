@@ -1,4 +1,11 @@
 ---
+# Included from: playbooks/byo/openshift-cluster/upgrades/v3_*/upgrade
+#
+# This is called if tasks with the tag 'pre_upgrade' would be executed
+# "Initialize" is slightly misleading to me as this is gathering facts and verifying
+# there isn't a bad combination of yum and subscription-manager
+
+
 # NOTE: requires openshift_facts be run
 - name: Verify compatible yum/subscription-manager combination
   hosts: l_oo_all_hosts

@@ -1,4 +1,10 @@
 ---
+# Included from: playbooks/common/openshift-cluster/upgrades/init.yaml
+#
+# If this is a variable that should be loaded specifically part of initialization
+# then this should be placed within variables/cluster_hosts.yaml instead of
+# nested under a playbook that isn't in the same structure as where its loaded from
+
 g_etcd_hosts: "{{ groups.etcd | default([]) }}"
 
 g_lb_hosts: "{{ groups.lb | default([]) }}"

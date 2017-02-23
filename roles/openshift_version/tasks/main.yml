@@ -1,4 +1,12 @@
 ---
+# Included from: playbooks/common/openshift-cluster/initialize_openshift_version
+#
+# This role reuses previously set facts and renames them, it also copies values into
+# facts if provided them. This seems redundant and unnecessary. It does do a good job
+# of containing its logic to just collecting verions.
+# It may be more appropriate to be called directly from the role/playbook that
+# directly uses them
+
 # Determine the openshift_version to configure if none has been specified or set previously.
 
 - set_fact:

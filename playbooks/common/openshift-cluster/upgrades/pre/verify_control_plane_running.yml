@@ -1,4 +1,12 @@
 ---
+# Included from: playbooks/byo/openshift-cluster/upgrades/v3_*/upgrade
+#
+# This is called if tasks with the tag 'pre_upgrade' would be executed
+# This makes a call to openshift_facts, even though it was run in the upgrade playbook
+# Although it seems it is just run against the master.  There may be a better way
+# to capture what is in 'openshift.master.ha' than to use hte openshift_facts role
+# -- maybe the module could be broken out for common use
+
 - name: Verify master processes
   hosts: oo_masters_to_config
   roles:

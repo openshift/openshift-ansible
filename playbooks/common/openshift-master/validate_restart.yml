@@ -1,4 +1,10 @@
 ---
+# Included from: playbooks/byo/openshift-cluster/upgrades/v3_*/upgrade
+#
+# This is called if tasks with the tag 'pre_upgrade' would be executed
+# This calls openshift_facts for both the common and master roles.
+# It also has a fail, but it is not the first thing in this playbook.
+
 - name: Validate configuration for rolling restart
   hosts: oo_masters_to_config
   roles:

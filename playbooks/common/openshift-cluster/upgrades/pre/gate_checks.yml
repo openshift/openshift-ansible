@@ -1,4 +1,13 @@
 ---
+# Included from: playbooks/byo/openshift-cluster/upgrades/v3_*/upgrade
+#
+# This is called if tasks with the tag 'pre_upgrade' would be executed
+# This sets a fact, but its unclear whether or not it was used by
+# previous tasks/playbooks in upgrade.yaml.
+# Also based on the playbook name, it is unclear that this is specific to
+# upgrading, unless a user opened up this file they wouldn't know what this was
+# actually doing.
+
 - name: Flag pre-upgrade checks complete for hosts without errors
   hosts: oo_masters_to_config:oo_nodes_to_upgrade:oo_etcd_to_config
   tasks:

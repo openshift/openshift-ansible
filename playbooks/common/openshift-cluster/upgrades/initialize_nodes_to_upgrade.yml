@@ -1,4 +1,12 @@
 ---
+# Included from: playbooks/byo/openshift-cluster/upgrades/v3_*/upgrade
+#
+# This is called if tasks with the tag 'pre_upgrade' would be executed
+# This is also a misnomer -- 'initialize_nodes_to_upgrade' implies
+# that this playbook may do something to the nodes as part of upgrading
+# instead it gathers a list of nodes that will be upgraded and adds
+# them as hosts/groups
+
 - name: Filter list of nodes to be upgraded if necessary
   hosts: oo_first_master
 

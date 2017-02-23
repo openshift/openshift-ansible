@@ -1,4 +1,9 @@
 ---
+# Included from roles/openshift_version
+#
+# This tasks is included if not using a containerized installation
+# It gathers version facts specific to the way we will install
+
 - name: Set rpm version to configure if openshift_pkg_version specified
   set_fact:
     # Expects a leading "-" in inventory, strip it off here, and remove trailing release,
