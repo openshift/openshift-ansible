@@ -18,8 +18,8 @@ from collections import Mapping
 from distutils.util import strtobool
 from distutils.version import LooseVersion
 from operator import itemgetter
+from ansible.module_utils.six.moves.urllib.parse import urlparse
 from ansible.parsing.yaml.dumper import AnsibleDumper
-from urlparse import urlparse
 from six import string_types
 
 HAS_OPENSSL = False
