@@ -120,9 +120,9 @@ options:
     aliases: []
   hostnames:
     description:
-    - Every hostname or IP that server certs should be valid for (comma-delimited list)
+    - Every hostname or IP that server certs should be valid for
     required: false
-    default: None
+    default: []
     aliases: []
   backup:
     description:
