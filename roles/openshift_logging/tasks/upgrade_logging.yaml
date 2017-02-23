@@ -33,7 +33,7 @@
     selector: "component=es"
     namespace: "{{openshift_logging_namespace}}"
   register: running_pod
-  until: running_pod.results.results[0]['items'] | selectattr('status.phase', 'equalto', 'Running') | map(attribute='metadata.name') | list | length != 0
+  until: running_pod.results.results[0]['items'] | selectattr('status.phase', 'match', '^Running$') | map(attribute='metadata.name') | list | length != 0
   retries: 30
   delay: 10
 
