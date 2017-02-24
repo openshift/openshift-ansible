@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.14
+Version:        3.5.15
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -267,6 +267,23 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Feb 24 2017 Scott Dodson <sdodson@redhat.com> 3.5.15-1
+- openshift_hosted: Update tasks to use oc_ modules (rteague@redhat.com)
+- Rebased. (kwoodson@redhat.com)
+- Fixed indentation (kwoodson@redhat.com)
+- Adding get_env_var to deploymentconfig. (kwoodson@redhat.com)
+- Fixed default variables.  Added a fix to generated secret in env var.
+  (kwoodson@redhat.com)
+- Revert "Add centos paas sig common" (sdodson@redhat.com)
+- Fix Quick Installer failed due to a Python method failure
+  (tbielawa@redhat.com)
+- Fix symlink to lookup_plugins/oo_option.py (jchaloup@redhat.com)
+- Prepare for origin moving to OCP version scheme (ccoleman@redhat.com)
+- BZ1414276 - Quote ansible_ssh_user when determining group id
+  (sdodson@redhat.com)
+- bug 1417261. Quote name and secrets in logging templates
+  (jcantril@redhat.com)
+
 * Fri Feb 24 2017 Scott Dodson <sdodson@redhat.com> 3.5.14-1
 - Use 2 and 3 friendly urlparse in oo_filters (smilner@redhat.com)
 - Update v1.5 content (sdodson@redhat.com)
