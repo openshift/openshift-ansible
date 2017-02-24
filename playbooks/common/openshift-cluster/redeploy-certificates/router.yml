@@ -27,6 +27,7 @@
                              | oo_collect('name'))
                              | default([]) }}"
       router_secrets: "{{ ((l_router_dc.stdout | from_json)['spec']['template']['spec']['volumes']
+                            | default([])
                             | oo_collect('secret')
                             | oo_collect('secretName'))
                             | default([]) }}"
