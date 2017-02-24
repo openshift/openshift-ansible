@@ -1453,7 +1453,7 @@ spec:
         '''return a environment variables '''
         results = self.get(DeploymentConfig.env_path) or []
         if not results:
-           return None
+            return None
 
         for env_var in results:
             if env_var['name'] == key:
