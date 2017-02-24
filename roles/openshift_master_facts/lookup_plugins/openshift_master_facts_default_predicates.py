@@ -40,7 +40,7 @@ class LookupModule(LookupBase):
                 # pylint: disable=line-too-long
                 raise AnsibleError("Either OpenShift needs to be installed or openshift_release needs to be specified")
         if deployment_type == 'origin':
-            if short_version not in ['1.1', '1.2', '1.3', '1.4', '1.5', '1.6', 'latest']:
+            if short_version not in ['1.1', '1.2', '1.3', '1.4', '1.5', '1.6', '3.6', 'latest']:
                 raise AnsibleError("Unknown short_version %s" % short_version)
         elif deployment_type == 'openshift-enterprise':
             if short_version not in ['3.1', '3.2', '3.3', '3.4', '3.5', '3.6', 'latest']:
@@ -48,17 +48,17 @@ class LookupModule(LookupBase):
         else:
             raise AnsibleError("Unknown deployment_type %s" % deployment_type)
 
-        if deployment_type == 'openshift-enterprise':
-            # convert short_version to origin short_version
-            short_version = re.sub('^3.', '1.', short_version)
+        if deployment_type == 'origin':
+            # convert short_version to enterpise short_version
+            short_version = re.sub('^1.', '3.', short_version)
 
         if short_version == 'latest':
-            short_version = '1.6'
+            short_version = '3.6'
 
         # Predicates ordered according to OpenShift Origin source:
         # origin/vendor/k8s.io/kubernetes/plugin/pkg/scheduler/algorithmprovider/defaults/defaults.go
 
-        if short_version == '1.1':
+        if short_version == '3.1':
             predicates.extend([
                 {'name': 'PodFitsHostPorts'},
                 {'name': 'PodFitsResources'},
@@ -66,7 +66,7 @@ class LookupModule(LookupBase):
                 {'name': 'MatchNodeSelector'},
             ])
 
-        if short_version == '1.2':
+        if short_version == '3.2':
             predicates.extend([
                 {'name': 'PodFitsHostPorts'},
                 {'name': 'PodFitsResources'},
@@ -77,7 +77,7 @@ class LookupModule(LookupBase):
                 {'name': 'MaxGCEPDVolumeCount'}
             ])
 
-        if short_version == '1.3':
+        if short_version == '3.3':
             predicates.extend([
                 {'name': 'NoDiskConflict'},
                 {'name': 'NoVolumeZoneConflict'},
@@ -88,7 +88,7 @@ class LookupModule(LookupBase):
                 {'name': 'CheckNodeMemoryPressure'}
             ])
 
-        if short_version == '1.4':
+        if short_version == '3.4':
             predicates.extend([
                 {'name': 'NoDiskConflict'},
                 {'name': 'NoVolumeZoneConflict'},
@@ -101,7 +101,7 @@ class LookupModule(LookupBase):
                 {'name': 'MatchInterPodAffinity'}
             ])
 
-        if short_version in ['1.5', '1.6']:
+        if short_version in ['3.5', '3.6']:
             predicates.extend([
                 {'name': 'NoVolumeZoneConflict'},
                 {'name': 'MaxEBSVolumeCount'},

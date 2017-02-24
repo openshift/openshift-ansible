@@ -159,7 +159,7 @@
   become: no
 
 - name: Lookup default group for ansible_ssh_user
-  command: "/usr/bin/id -g {{ ansible_ssh_user }}"
+  command: "/usr/bin/id -g {{ ansible_ssh_user | quote }}"
   changed_when: false
   register: _ansible_ssh_user_gid
 

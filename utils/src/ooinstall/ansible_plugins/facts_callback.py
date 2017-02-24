@@ -5,6 +5,7 @@
 import os
 import yaml
 from ansible.plugins.callback import CallbackBase
+from ansible.parsing.yaml.dumper import AnsibleDumper
 
 
 # pylint: disable=super-init-not-called
@@ -38,7 +39,11 @@ class CallbackModule(CallbackBase):
             facts = abridged_result['result']['ansible_facts']['openshift']
             hosts_yaml = {}
             hosts_yaml[res._host.get_name()] = facts
-            os.write(self.hosts_yaml, yaml.safe_dump(hosts_yaml))
+            to_dump = yaml.dump(hosts_yaml,
+                                allow_unicode=True,
+                                default_flow_style=False,
+                                Dumper=AnsibleDumper)
+            os.write(self.hosts_yaml, to_dump)
 
     def v2_runner_on_skipped(self, res):
         pass
