@@ -105,6 +105,18 @@ spec:
 
         return False
 
+    def get_env_var(self, key):
+        '''return a environment variables '''
+        results = self.get(DeploymentConfig.env_path) or []
+        if not results:
+           return None
+
+        for env_var in results:
+            if env_var['name'] == key:
+                return env_var
+
+        return None
+
     def get_env_vars(self):
         '''return a environment variables '''
         return self.get(DeploymentConfig.env_path) or []
@@ -186,18 +198,6 @@ spec:
         for exist_volume in volumes:
             if exist_volume['name'] == volume['name']:
                 return exist_volume
-
-        return None
-
-    def get_env_var(self, key):
-        '''return a environment variables '''
-        results = self.get(DeploymentConfig.env_path) or []
-        if not results:
-           return None
-
-        for env_var in results:
-            if env_var['name'] == key:
-                return env_var
 
         return None
 
