@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.65
+Version:        3.4.66
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -251,6 +251,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Feb 24 2017 Scott Dodson <sdodson@redhat.com> 3.4.66-1
+- Fix Quick Installer failed due to a Python method failure
+  (tbielawa@redhat.com)
+- Fix Bug 1426705 - Quote ansible_ssh_user when determining group id
+  (sdodson@redhat.com)
+- Add  --ignore-daemonsets to drain operations (sdodson@redhat.com)
+- Correct usage of draining nodes (rteague@redhat.com)
+
 * Wed Feb 22 2017 Scott Dodson <sdodson@redhat.com> 3.4.65-1
 - Require python-pyasn1 > 0.1.9 (sdodson@redhat.com)
 
