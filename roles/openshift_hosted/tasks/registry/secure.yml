@@ -2,14 +2,43 @@
 - name: Set fact docker_registry_route_hostname
   set_fact:
     docker_registry_route_hostname: "{{ 'docker-registry-default.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true)) }}"
+  run_once: true
+
+#- name: Create passthrough route for docker-registry
+#  oc_route:
+#    name: docker-registry
+#    namespace: "{{ openshift_hosted_registry_namespace }}"
+#    service_name: docker-registry
+#    tls_termination: passthrough
+#    host: "{{ docker_registry_route_hostname }}"
+#  run_once: true
+- name: Get the certificate contents for registry
+  local_action:
+    module: slurp
+    src: "{{ item }}"
+  register: openshift_hosted_registry_certificate_content
+  with_items:
+  - "{{ (openshift_hosted_registry_route_certificates | default({'certfile':none})).certfile }}"
+  - "{{ (openshift_hosted_registry_route_certificates | default({'keyfile':none})).keyfile }}"
+  - "{{ (openshift_hosted_registry_route_certificates | default({'cafile':none})).cafile }}"
+  when: openshift_hosted_registry_route_certificates
+
+- debug: var=openshift_hosted_registry_certificate_content
+  when: openshift_hosted_registry_route_certificates
 
 - name: Create passthrough route for docker-registry
   oc_route:
     name: docker-registry
     namespace: "{{ openshift_hosted_registry_namespace }}"
     service_name: docker-registry
-    tls_termination: passthrough
     host: "{{ docker_registry_route_hostname }}"
+    tls_termination: "{{ openshift_hosted_registry_route_termination }}"
+    host: "{{ openshift_hosted_registry_route_host | default(docker_registry_route_hostname) }}"
+    cert_content: "{{ openshift_hosted_registry_certificate_content is defined | ternary(openshift_hosted_registry_certificate_content.results[0].content,omit) }}"
+    key_content: "{{ openshift_hosted_registry_certificate_content is defined | ternary(openshift_hosted_registry_certificate_content.results[0].content, omit) }}"
+    cacert_content: "{{ openshift_hosted_registry_certificate_content is defined | ternary(openshift_hosted_registry_certificate_content.results[0].content, omit) }}"
+    dest_cacert_path: "{{ openshift_hosted_registry_certificate_content is defined | ternary('/etc/origin/master/ca.crt', omit) }}"
+  run_once: true
 
 - name: Retrieve registry service IP
   oc_service:
@@ -17,6 +46,7 @@
     name: docker-registry
     state: list
   register: docker_registry_service_ip
+  run_once: true
 
 - name: Create registry certificates
   oc_adm_ca_server_cert:
