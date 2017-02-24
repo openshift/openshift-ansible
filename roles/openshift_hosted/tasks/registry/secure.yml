@@ -1,132 +1,77 @@
 ---
+- name: Set fact docker_registry_route_hostname
+  set_fact:
+    docker_registry_route_hostname: "{{ 'docker-registry-default.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true)) }}"
+
 - name: Create passthrough route for docker-registry
   oc_route:
-    kubeconfig: "{{ openshift_hosted_kubeconfig }}"
     name: docker-registry
-    namespace: default
+    namespace: "{{ openshift_hosted_registry_namespace }}"
     service_name: docker-registry
-    state: present
     tls_termination: passthrough
-  run_once: true
-
-- name: Determine if registry certificate must be created
-  stat:
-    path: "{{ openshift_master_config_dir }}/{{ item }}"
-  with_items:
-  - registry.crt
-  - registry.key
-  register: docker_registry_certificates_stat_result
-  changed_when: false
-  failed_when: false
+    host: "{{ docker_registry_route_hostname }}"
 
 - name: Retrieve registry service IP
   oc_service:
-    namespace: default
+    namespace: "{{ openshift_hosted_registry_namespace }}"
     name: docker-registry
     state: list
   register: docker_registry_service_ip
-  changed_when: false
 
-- set_fact:
-    docker_registry_route_hostname: "{{ 'docker-registry-default.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true)) }}"
-
-- name: Create registry certificates if they do not exist
-  command: >
-    {{ openshift.common.client_binary }} adm ca create-server-cert
-    --signer-cert={{ openshift_master_config_dir }}/ca.crt
-    --signer-key={{ openshift_master_config_dir }}/ca.key
-    --signer-serial={{ openshift_master_config_dir }}/ca.serial.txt
-    --hostnames="{{ docker_registry_service_ip.results.clusterip }},docker-registry.default.svc.cluster.local,{{ docker_registry_route_hostname }}"
-    --cert={{ openshift_master_config_dir }}/registry.crt
-    --key={{ openshift_master_config_dir }}/registry.key
-  when: False in (docker_registry_certificates_stat_result.results | default([]) | oo_collect(attribute='stat.exists') | list)
+- name: Create registry certificates
+  oc_adm_ca_server_cert:
+    signer_cert: "{{ openshift_master_config_dir }}/ca.crt"
+    signer_key: "{{ openshift_master_config_dir }}/ca.key"
+    signer_serial: "{{ openshift_master_config_dir }}/ca.serial.txt"
+    hostnames:
+    - "{{ docker_registry_service_ip.results.clusterip }}"
+    - docker-registry.default.svc.cluster.local
+    - "{{ docker_registry_route_hostname }}"
+    cert: "{{ openshift_master_config_dir }}/registry.crt"
+    key: "{{ openshift_master_config_dir }}/registry.key"
+  register: server_cert_out
 
 - name: Create the secret for the registry certificates
   oc_secret:
-    kubeconfig: "{{ openshift_hosted_kubeconfig }}"
     name: registry-certificates
-    namespace: default
-    state: present
+    namespace: "{{ openshift_hosted_registry_namespace }}"
     files:
     - name: registry.crt
       path: "{{ openshift_master_config_dir }}/registry.crt"
     - name: registry.key
       path: "{{ openshift_master_config_dir }}/registry.key"
-  register: create_registry_certificates_secret
-  run_once: true
+  register: create_registry_certificates_secret_out
 
-- name: "Add the secret to the registry's pod service accounts"
+- name: Add the secret to the registry's pod service accounts
   oc_serviceaccount_secret:
     service_account: "{{ item }}"
     secret: registry-certificates
-    namespace: default
-    kubeconfig: "{{ openshift_hosted_kubeconfig  }}"
-    state: present
+    namespace: "{{ openshift_hosted_registry_namespace }}"
   with_items:
   - registry
   - default
 
-- name: Determine if registry-certificates secret volume attached
-  command: >
-    {{ openshift.common.client_binary }} get dc/docker-registry
-    -o jsonpath='{.spec.template.spec.volumes[?(@.secret)].secret.secretName}'
-    --config={{ openshift_hosted_kubeconfig }}
-    -n default
-  register: docker_registry_volumes
-  changed_when: false
-  failed_when: "docker_registry_volumes.stdout != '' and 'secretName is not found' not in docker_registry_volumes.stdout and docker_registry_volumes.rc != 0"
+- name: Set facts for secure registry
+  set_fact:
+    registry_secure_volume_mounts:
+    - name: registry-certificates
+      path: /etc/secrets
+      type: secret
+      secret_name: registry-certificates
+    registry_secure_env_vars:
+      REGISTRY_HTTP_TLS_CERTIFICATE: /etc/secrets/registry.crt
+      REGISTRY_HTTP_TLS_KEY: /etc/secrets/registry.key
+    registry_secure_edits:
+    - key: spec.template.spec.containers[0].livenessProbe.httpGet.scheme
+      value: HTTPS
+      action: put
+    - key: spec.template.spec.containers[0].readinessProbe.httpGet.scheme
+      value: HTTPS
+      action: put
 
-- name: Attach registry-certificates secret volume
-  command: >
-   {{ openshift.common.client_binary }} volume dc/docker-registry --add --type=secret
-   --secret-name=registry-certificates
-   -m /etc/secrets
-   --config={{ openshift_hosted_kubeconfig }}
-   -n default
-  when: "'registry-certificates' not in docker_registry_volumes.stdout"
-
-- name: Determine if registry environment variables must be set
-  command: >
-    {{ openshift.common.client_binary }} env dc/docker-registry
-    --list
-    --config={{ openshift_hosted_kubeconfig }}
-    -n default
-  register: docker_registry_env
-  changed_when: false
-
-- name: Configure certificates in registry deplomentConfig
-  command: >
-    {{ openshift.common.client_binary }} env dc/docker-registry
-    REGISTRY_HTTP_TLS_CERTIFICATE=/etc/secrets/registry.crt
-    REGISTRY_HTTP_TLS_KEY=/etc/secrets/registry.key
-    --config={{ openshift_hosted_kubeconfig }}
-    -n default
-  when: "'REGISTRY_HTTP_TLS_CERTIFICATE=/etc/secrets/registry.crt' not in docker_registry_env.stdout or 'REGISTRY_HTTP_TLS_KEY=/etc/secrets/registry.key' not in docker_registry_env.stdout"
-
-- name: Determine if registry liveness probe scheme is HTTPS
-  command: >
-    {{ openshift.common.client_binary }} get dc/docker-registry
-    -o jsonpath='{.spec.template.spec.containers[*].livenessProbe.httpGet.scheme}'
-    --config={{ openshift_hosted_kubeconfig }}
-    -n default
-  register: docker_registry_liveness_probe
-  changed_when: false
-
-# This command is on a single line to preserve patch json.
-- name: Update registry liveness probe from HTTP to HTTPS
-  command: "{{ openshift.common.client_binary }} patch dc/docker-registry --api-version=v1 -p '{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":\"registry\",\"livenessProbe\":{\"httpGet\":{\"scheme\":\"HTTPS\"}}}]}}}}' --config={{ openshift_hosted_kubeconfig }} -n default"
-  when: "'HTTPS' not in docker_registry_liveness_probe.stdout"
-
-- name: Determine if registry readiness probe scheme is HTTPS
-  command: >
-    {{ openshift.common.client_binary }} get dc/docker-registry
-    -o jsonpath='{.spec.template.spec.containers[*].readinessProbe.httpGet.scheme}'
-    --config={{ openshift_hosted_kubeconfig }}
-    -n default
-  register: docker_registry_readiness_probe
-  changed_when: false
-
-# This command is on a single line to preserve patch json.
-- name: Update registry readiness probe from HTTP to HTTPS
-  command: "{{ openshift.common.client_binary }} patch dc/docker-registry --api-version=v1 -p '{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":\"registry\",\"readinessProbe\":{\"httpGet\":{\"scheme\":\"HTTPS\"}}}]}}}}' --config={{ openshift_hosted_kubeconfig }} -n default"
-  when: "'HTTPS' not in docker_registry_readiness_probe.stdout"
+- name: Update openshift_hosted facts with secure registry variables
+  set_fact:
+    openshift_hosted_registry_volumes: "{{ openshift_hosted_registry_volumes | union(registry_secure_volume_mounts) }}"
+    openshift_hosted_registry_env_vars: "{{ openshift_hosted_registry_env_vars | combine(registry_secure_env_vars) }}"
+    openshift_hosted_registry_edits: "{{ openshift_hosted_registry_edits | union(registry_secure_edits) }}"
+    openshift_hosted_registry_force: "{{ openshift_hosted_registry_force | union([server_cert_out.changed]) | union([create_registry_certificates_secret_out.changed]) }}"
