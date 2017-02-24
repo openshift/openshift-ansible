@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.13
+Version:        3.5.14
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -263,6 +263,51 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Feb 24 2017 Scott Dodson <sdodson@redhat.com> 3.5.14-1
+- Use 2 and 3 friendly urlparse in oo_filters (smilner@redhat.com)
+- Update v1.5 content (sdodson@redhat.com)
+- Update v1.4 content (sdodson@redhat.com)
+- xPaaS ose-v1.3.6 (sdodson@redhat.com)
+- initialize_openshift_version: handle excluder packages (gscrivan@redhat.com)
+- Add insecure edge termination policy for kibana. (whearn@redhat.com)
+- Fixing doc for oc_adm_ca_server_cert. (kwoodson@redhat.com)
+- Convert selectattr tests to use 'match' (rteague@redhat.com)
+- Re-generate lib_openshift and lib_utils libraries (sdodson@redhat.com)
+- curator config must be in /etc/curator not /usr/curator (rmeggins@redhat.com)
+- Updated for pylint. Fixed create doc. (kwoodson@redhat.com)
+- Attempt to handle router preparation errors. (kwoodson@redhat.com)
+- Fixing the generate tox tests. (kwoodson@redhat.com)
+- Moving import to local class. (kwoodson@redhat.com)
+- Added required_together.  Added two minor bug fixes for when data is not
+  passed. (kwoodson@redhat.com)
+- fix up ruamel.yaml/pyyaml no-member lint errors (jdetiber@redhat.com)
+- Renamed NotContainerized to NotContainerizedMixin and dropped no-member
+  (smilner@redhat.com)
+- Removed unrequired no-members from yedit and generated code
+  (smilner@redhat.com)
+- Removing reference to oadm.  Moved parameter under general params.
+  (kwoodson@redhat.com)
+- adding tag to update_master_config (ewolinet@redhat.com)
+- CloudFront oc_secret contents should be a list (smilner@redhat.com)
+- lib_openshift oc file lookup improvements (jdetiber@redhat.com)
+- roles/lib_openshift: Handle /usr/local/bin/oc with sudo (walters@verbum.org)
+- if no key, cert, cacert, or default_cert is passed then do not pass to oc
+  (kwoodson@redhat.com)
+- Added backup feature.  Fixed a bug with reading the certificate and verifying
+  names.  Added force option. (kwoodson@redhat.com)
+- Added copy support when modifying cert and key on existence
+  (kwoodson@redhat.com)
+- Small spacing fix. (kwoodson@redhat.com)
+- Updated doc and defined defaults for signer_* (kwoodson@redhat.com)
+- Removing cmd, fixed docs and comments. (kwoodson@redhat.com)
+- Rename of oadm_ca to oc_adm_ca.  Decided to whittle down to the direct call,
+  server_cert. (kwoodson@redhat.com)
+- Fixing doc. (kwoodson@redhat.com)
+- Adding oadm_ca to lib_openshift. (kwoodson@redhat.com)
+- add dependency on openshift_repos (sdodson@redhat.com)
+- Add centos paas sig common (sdodson@redhat.com)
+- Disentangle openshift_repos from openshift_facts (sdodson@redhat.com)
+
 * Tue Feb 21 2017 Scott Dodson <sdodson@redhat.com> 3.5.13-1
 - bug 1425321. Default the master api port based on the facts
   (jcantril@redhat.com)
