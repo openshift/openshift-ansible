@@ -34,9 +34,9 @@ spec:
         - "heapster-wrapper.sh"
         - "--wrapper.allowed_users_file=/secrets/heapster.allowed-users"
         - "--source=kubernetes.summary_api:${MASTER_URL}?useServiceAccount=true&kubeletHttps=true&kubeletPort=10250"
-        - "--tls_cert=/secrets/heapster.cert"
-        - "--tls_key=/secrets/heapster.key"
-        - "--tls_client_ca=/secrets/heapster.client-ca"
+        - "--tls_cert=/heapster-certs/tls.crt"
+        - "--tls_key=/heapster-certs/tls.key"
+        - "--tls_client_ca=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
         - "--allowed_users=%allowed_users%"
         - "--metric_resolution={{openshift_metrics_resolution}}"
 {% if not openshift_metrics_heapster_standalone %}
@@ -80,6 +80,8 @@ spec:
         volumeMounts:
         - name: heapster-secrets
           mountPath: "/secrets"
+        - name: heapster-certs
+          mountPath: "/heapster-certs"
 {% if not openshift_metrics_heapster_standalone %}
         - name: hawkular-metrics-certs
           mountPath: "/hawkular-metrics-certs"
@@ -94,6 +96,9 @@ spec:
         - name: heapster-secrets
           secret:
             secretName: heapster-secrets
+        - name: heapster-certs
+          secret:
+            secretName: heapster-certs
 {% if not openshift_metrics_heapster_standalone %}
         - name: hawkular-metrics-certs
           secret:

@@ -41,6 +41,8 @@
       - {port: 80, targetPort: http-endpoint}
     selector:
       name: "{{obj_name}}"
+    annotations:
+      service.alpha.openshift.io/serving-cert-secret-name: heapster-certs
     labels:
       metrics-infra: "{{obj_name}}"
       name: "{{obj_name}}"
@@ -64,4 +66,4 @@
         namespace: "{{ openshift_metrics_project }}"
   changed_when: no
 
-- include: generate_heapster_certificates.yaml
+- include: generate_heapster_secrets.yaml
