@@ -50,6 +50,7 @@ class OpenShiftCheck(object):
     @classmethod
     def subclasses(cls):
         """Returns a generator of subclasses of this class and its subclasses."""
+        # AUDIT: no-member makes sense due to this having a metaclass
         for subclass in cls.__subclasses__():  # pylint: disable=no-member
             yield subclass
             for subclass in subclass.subclasses():

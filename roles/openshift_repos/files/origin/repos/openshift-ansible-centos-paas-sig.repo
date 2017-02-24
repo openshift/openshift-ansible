@@ -5,6 +5,13 @@ enabled=1
 gpgcheck=1
 gpgkey=file:///etc/pki/rpm-gpg/openshift-ansible-CentOS-SIG-PaaS
 
+[centos-openshift-origin-common]
+name=CentOS OpenShift Origin Common
+baseurl=http://mirror.centos.org/centos/7/paas/x86_64/openshift-origin/common/
+enabled=1
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/openshift-ansible-CentOS-SIG-PaaS
+
 [centos-openshift-origin-testing]
 name=CentOS OpenShift Origin Testing
 baseurl=http://buildlogs.centos.org/centos/7/paas/x86_64/openshift-origin/

@@ -26,6 +26,7 @@ openshift_logging_kibana_proxy_debug: false
 openshift_logging_kibana_proxy_cpu_limit: null
 openshift_logging_kibana_proxy_memory_limit: null
 openshift_logging_kibana_replica_count: 1
+openshift_logging_kibana_edge_term_policy: Redirect
 
 #The absolute path on the control node to the cert file to use
 #for the public facing kibana certs

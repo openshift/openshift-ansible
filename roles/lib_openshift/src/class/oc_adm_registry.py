@@ -154,7 +154,7 @@ class Registry(OpenShiftCLI):
         # probably need to parse this
         # pylint thinks results is a string
         # pylint: disable=no-member
-        if results['returncode'] != 0 and results['results'].has_key('items'):
+        if results['returncode'] != 0 and 'items' in results['results']:
             return results
 
         service = None
@@ -235,7 +235,7 @@ class Registry(OpenShiftCLI):
         # Currently we know that our deployment of a registry requires a few extra modifications
         # Modification 1
         # we need specific environment variables to be set
-        for key, value in self.config.config_options['env_vars']['value'].items():
+        for key, value in self.config.config_options['env_vars'].get('value', {}).items():
             if not deploymentconfig.exists_env_key(key):
                 deploymentconfig.add_env_value(key, value)
             else:

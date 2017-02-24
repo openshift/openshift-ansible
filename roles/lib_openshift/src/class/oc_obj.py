@@ -77,7 +77,6 @@ class OCObject(OpenShiftCLI):
         if objects['returncode'] != 0:
             return objects
 
-        # pylint: disable=no-member
         data = None
         if files:
             data = Utils.get_resource_file(files[0], content_type)

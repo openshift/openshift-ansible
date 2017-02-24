@@ -49,8 +49,11 @@ class Router(OpenShiftCLI):
         ''' property for the prepared router'''
         if self.__prepared_router is None:
             results = self._prepare_router()
-            if not results:
-                raise RouterException('Could not perform router preparation')
+            if not results or 'returncode' in results and results['returncode'] != 0:
+                if 'stderr' in results:
+                    raise RouterException('Could not perform router preparation: %s' % results['stderr'])
+
+                raise RouterException('Could not perform router preparation.')
             self.__prepared_router = results
 
         return self.__prepared_router
@@ -180,10 +183,14 @@ class Router(OpenShiftCLI):
 
         return deploymentconfig
 
+    # pylint: disable=too-many-branches
     def _prepare_router(self):
         '''prepare router for instantiation'''
-        # We need to create the pem file
-        if self.config.config_options['default_cert']['value'] is None:
+        # if cacert, key, and cert were passed, combine them into a pem file
+        if (self.config.config_options['cacert_file']['value'] and
+                self.config.config_options['cert_file']['value'] and
+                self.config.config_options['key_file']['value']):
+
             router_pem = '/tmp/router.pem'
             with open(router_pem, 'w') as rfd:
                 rfd.write(open(self.config.config_options['cert_file']['value']).read())
@@ -193,7 +200,12 @@ class Router(OpenShiftCLI):
                     rfd.write(open(self.config.config_options['cacert_file']['value']).read())
 
             atexit.register(Utils.cleanup, [router_pem])
+
             self.config.config_options['default_cert']['value'] = router_pem
+
+        elif self.config.config_options['default_cert']['value'] is None:
+            # No certificate was passed to us.  do not pass one to oc adm router
+            self.config.config_options['default_cert']['include'] = False
 
         options = self.config.to_option_list()
 
@@ -203,8 +215,8 @@ class Router(OpenShiftCLI):
 
         results = self.openshift_cmd(cmd, oadm=True, output=True, output_type='json')
 
-        # pylint: disable=no-member
-        if results['returncode'] != 0 and 'items' in results['results']:
+        # pylint: disable=maybe-no-member
+        if results['returncode'] != 0 or 'items' not in results['results']:
             return results
 
         oc_objects = {'DeploymentConfig': {'obj': None, 'path': None, 'update': False},
@@ -235,17 +247,29 @@ class Router(OpenShiftCLI):
         oc_objects['DeploymentConfig']['obj'] = self.add_modifications(oc_objects['DeploymentConfig']['obj'])
 
         for oc_type, oc_data in oc_objects.items():
-            oc_data['path'] = Utils.create_tmp_file_from_contents(oc_type, oc_data['obj'].yaml_dict)
+            if oc_data['obj'] is not None:
+                oc_data['path'] = Utils.create_tmp_file_from_contents(oc_type, oc_data['obj'].yaml_dict)
 
         return oc_objects
 
     def create(self):
-        '''Create a deploymentconfig '''
+        '''Create a router
+
+           This includes the different parts:
+           - deploymentconfig
+           - service
+           - serviceaccount
+           - secrets
+           - clusterrolebinding
+        '''
         results = []
 
-        # pylint: disable=no-member
+        import time
+        # pylint: disable=maybe-no-member
         for _, oc_data in self.prepared_router.items():
-            results.append(self._create(oc_data['path']))
+            if oc_data['obj'] is not None:
+                time.sleep(1)
+                results.append(self._create(oc_data['path']))
 
         rval = 0
         for result in results:
@@ -258,7 +282,7 @@ class Router(OpenShiftCLI):
         '''run update for the router.  This performs a replace'''
         results = []
 
-        # pylint: disable=no-member
+        # pylint: disable=maybe-no-member
         for _, oc_data in self.prepared_router.items():
             if oc_data['update']:
                 results.append(self._replace(oc_data['path']))

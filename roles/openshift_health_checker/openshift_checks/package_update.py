@@ -1,9 +1,9 @@
 # pylint: disable=missing-docstring
 from openshift_checks import OpenShiftCheck
-from openshift_checks.mixins import NotContainerized
+from openshift_checks.mixins import NotContainerizedMixin
 
 
-class PackageUpdate(NotContainerized, OpenShiftCheck):
+class PackageUpdate(NotContainerizedMixin, OpenShiftCheck):
     """Check that there are no conflicts in RPM packages."""
 
     name = "package_update"

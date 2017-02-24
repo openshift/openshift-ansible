@@ -11,6 +11,7 @@
 # OK
 
 import os
+import six
 import sys
 import unittest
 import mock
@@ -23,7 +24,7 @@ import mock
 # place class in our python path
 module_path = os.path.join('/'.join(os.path.realpath(__file__).split('/')[:-4]), 'library')  # noqa: E501
 sys.path.insert(0, module_path)
-from oc_serviceaccount_secret import OCServiceAccountSecret  # noqa: E402
+from oc_serviceaccount_secret import OCServiceAccountSecret, locate_oc_binary  # noqa: E402
 
 try:
     import ruamel.yaml as yaml  # noqa: EF401
@@ -41,10 +42,11 @@ class OCServiceAccountSecretTest(unittest.TestCase):
         ''' setup method will create a file and set to known configuration '''
         pass
 
+    @mock.patch('oc_serviceaccount_secret.locate_oc_binary')
     @mock.patch('oc_serviceaccount_secret.Utils.create_tmpfile_copy')
     @mock.patch('oc_serviceaccount_secret.Yedit._write')
     @mock.patch('oc_serviceaccount_secret.OCServiceAccountSecret._run')
-    def test_adding_a_secret_to_a_serviceaccount(self, mock_cmd, mock_write, mock_tmpfile_copy):
+    def test_adding_a_secret_to_a_serviceaccount(self, mock_cmd, mock_write, mock_tmpfile_copy, mock_oc_binary):
         ''' Testing adding a secret to a service account '''
 
         # Arrange
@@ -161,6 +163,10 @@ secrets:
             (0, oc_get_sa_after, ''),  # Fourth call to the mock
         ]
 
+        mock_oc_binary.side_effect = [
+            'oc'
+        ]
+
         mock_tmpfile_copy.side_effect = [
             '/tmp/mocked_kubeconfig',
         ]
@@ -189,10 +195,11 @@ secrets:
             mock.call(mock.ANY, yaml_file)
         ])
 
+    @mock.patch('oc_serviceaccount_secret.locate_oc_binary')
     @mock.patch('oc_serviceaccount_secret.Utils.create_tmpfile_copy')
     @mock.patch('oc_serviceaccount_secret.Yedit._write')
     @mock.patch('oc_serviceaccount_secret.OCServiceAccountSecret._run')
-    def test_removing_a_secret_to_a_serviceaccount(self, mock_cmd, mock_write, mock_tmpfile_copy):
+    def test_removing_a_secret_to_a_serviceaccount(self, mock_cmd, mock_write, mock_tmpfile_copy, mock_oc_binary):
         ''' Testing removing a secret to a service account '''
 
         # Arrange
@@ -279,6 +286,10 @@ secrets:
             (0, 'serviceaccount "builder" replaced', ''),  # Third call to the mock
         ]
 
+        mock_oc_binary.side_effect = [
+            'oc'
+        ]
+
         mock_tmpfile_copy.side_effect = [
             '/tmp/mocked_kubeconfig',
         ]
@@ -305,6 +316,114 @@ secrets:
         mock_write.assert_has_calls([
             mock.call(mock.ANY, yaml_file)
         ])
+
+    @unittest.skipIf(six.PY3, 'py2 test only')
+    @mock.patch('os.path.exists')
+    @mock.patch('os.environ.get')
+    def test_binary_lookup_fallback(self, mock_env_get, mock_path_exists):
+        ''' Testing binary lookup fallback '''
+
+        mock_env_get.side_effect = lambda _v, _d: ''
+
+        mock_path_exists.side_effect = lambda _: False
+
+        self.assertEqual(locate_oc_binary(), 'oc')
+
+    @unittest.skipIf(six.PY3, 'py2 test only')
+    @mock.patch('os.path.exists')
+    @mock.patch('os.environ.get')
+    def test_binary_lookup_in_path(self, mock_env_get, mock_path_exists):
+        ''' Testing binary lookup in path '''
+
+        oc_bin = '/usr/bin/oc'
+
+        mock_env_get.side_effect = lambda _v, _d: '/bin:/usr/bin'
+
+        mock_path_exists.side_effect = lambda f: f == oc_bin
+
+        self.assertEqual(locate_oc_binary(), oc_bin)
+
+    @unittest.skipIf(six.PY3, 'py2 test only')
+    @mock.patch('os.path.exists')
+    @mock.patch('os.environ.get')
+    def test_binary_lookup_in_usr_local(self, mock_env_get, mock_path_exists):
+        ''' Testing binary lookup in /usr/local/bin '''
+
+        oc_bin = '/usr/local/bin/oc'
+
+        mock_env_get.side_effect = lambda _v, _d: '/bin:/usr/bin'
+
+        mock_path_exists.side_effect = lambda f: f == oc_bin
+
+        self.assertEqual(locate_oc_binary(), oc_bin)
+
+    @unittest.skipIf(six.PY3, 'py2 test only')
+    @mock.patch('os.path.exists')
+    @mock.patch('os.environ.get')
+    def test_binary_lookup_in_home(self, mock_env_get, mock_path_exists):
+        ''' Testing binary lookup in ~/bin '''
+
+        oc_bin = os.path.expanduser('~/bin/oc')
+
+        mock_env_get.side_effect = lambda _v, _d: '/bin:/usr/bin'
+
+        mock_path_exists.side_effect = lambda f: f == oc_bin
+
+        self.assertEqual(locate_oc_binary(), oc_bin)
+
+    @unittest.skipIf(six.PY2, 'py3 test only')
+    @mock.patch('shutil.which')
+    @mock.patch('os.environ.get')
+    def test_binary_lookup_fallback_py3(self, mock_env_get, mock_shutil_which):
+        ''' Testing binary lookup fallback '''
+
+        mock_env_get.side_effect = lambda _v, _d: ''
+
+        mock_shutil_which.side_effect = lambda _f, path=None: None
+
+        self.assertEqual(locate_oc_binary(), 'oc')
+
+    @unittest.skipIf(six.PY2, 'py3 test only')
+    @mock.patch('shutil.which')
+    @mock.patch('os.environ.get')
+    def test_binary_lookup_in_path_py3(self, mock_env_get, mock_shutil_which):
+        ''' Testing binary lookup in path '''
+
+        oc_bin = '/usr/bin/oc'
+
+        mock_env_get.side_effect = lambda _v, _d: '/bin:/usr/bin'
+
+        mock_shutil_which.side_effect = lambda _f, path=None: oc_bin
+
+        self.assertEqual(locate_oc_binary(), oc_bin)
+
+    @unittest.skipIf(six.PY2, 'py3 test only')
+    @mock.patch('shutil.which')
+    @mock.patch('os.environ.get')
+    def test_binary_lookup_in_usr_local_py3(self, mock_env_get, mock_shutil_which):
+        ''' Testing binary lookup in /usr/local/bin '''
+
+        oc_bin = '/usr/local/bin/oc'
+
+        mock_env_get.side_effect = lambda _v, _d: '/bin:/usr/bin'
+
+        mock_shutil_which.side_effect = lambda _f, path=None: oc_bin
+
+        self.assertEqual(locate_oc_binary(), oc_bin)
+
+    @unittest.skipIf(six.PY2, 'py3 test only')
+    @mock.patch('shutil.which')
+    @mock.patch('os.environ.get')
+    def test_binary_lookup_in_home_py3(self, mock_env_get, mock_shutil_which):
+        ''' Testing binary lookup in ~/bin '''
+
+        oc_bin = os.path.expanduser('~/bin/oc')
+
+        mock_env_get.side_effect = lambda _v, _d: '/bin:/usr/bin'
+
+        mock_shutil_which.side_effect = lambda _f, path=None: oc_bin
+
+        self.assertEqual(locate_oc_binary(), oc_bin)
 
     def tearDown(self):
         '''TearDown method'''
