@@ -875,7 +875,7 @@ def set_version_facts_if_unset(facts):
                 version_gte_3_3_or_1_3 = version >= LooseVersion('1.3.0')
                 version_gte_3_4_or_1_4 = version >= LooseVersion('1.4.0')
                 version_gte_3_5_or_1_5 = version >= LooseVersion('1.5.0')
-                version_gte_3_6_or_1_6 = version >= LooseVersion('1.6.0')
+                version_gte_3_6_or_1_6 = version >= LooseVersion('3.6.0') or version >= LooseVersion('1.6.0')
             else:
                 version_gte_3_1_or_1_1 = version >= LooseVersion('3.0.2.905')
                 version_gte_3_1_1_or_1_1_1 = version >= LooseVersion('3.1.1')
