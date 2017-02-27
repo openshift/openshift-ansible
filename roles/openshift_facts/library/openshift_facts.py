@@ -193,8 +193,7 @@ def hostname_valid(hostname):
     """
     if (not hostname or
             hostname.startswith('localhost') or
-            hostname.endswith('localdomain') or
-            hostname.endswith('novalocal')):
+            hostname.endswith('localdomain')):
         return False
 
     return True
@@ -1041,10 +1040,13 @@ def set_sdn_facts_if_unset(facts, system_facts):
 def set_nodename(facts):
     """ set nodename """
     if 'node' in facts and 'common' in facts:
-        if 'cloudprovider' in facts and facts['cloudprovider']['kind'] == 'openstack':
-            facts['node']['nodename'] = facts['provider']['metadata']['hostname'].replace('.novalocal', '')
-        elif 'cloudprovider' in facts and facts['cloudprovider']['kind'] == 'gce':
+        if 'cloudprovider' in facts and facts['cloudprovider']['kind'] == 'gce':
             facts['node']['nodename'] = facts['provider']['metadata']['instance']['hostname'].split('.')[0]
+
+        # TODO: The openstack cloudprovider nodename setting was too opinionaed.
+        #       It needs to be generalized before it can be enabled again.
+        # elif 'cloudprovider' in facts and facts['cloudprovider']['kind'] == 'openstack':
+        #     facts['node']['nodename'] = facts['provider']['metadata']['hostname'].replace('.novalocal', '')
         else:
             facts['node']['nodename'] = facts['common']['hostname'].lower()
     return facts
