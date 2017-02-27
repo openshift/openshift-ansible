@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.15
+Version:        3.5.16
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -267,6 +267,17 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Feb 27 2017 Scott Dodson <sdodson@redhat.com> 3.5.16-1
+- [oc_obj] Move namespace argument to end of command. (abutcher@redhat.com)
+- Correct typo in haproxy router collection. (abutcher@redhat.com)
+- Fix issue #3505, add notes about origin upgrade versions support in BYO
+  upgrade README file (contact@stephane-klein.info)
+- Moving replica logic to filter_plugin to fix skipped task variable behavior.
+  (kwoodson@redhat.com)
+- Removed JGroups cert and password generation. (juraci@kroehling.de)
+- openshift_logging default to 2 replicas of primary shards
+  (jcantril@redhat.com)
+
 * Fri Feb 24 2017 Scott Dodson <sdodson@redhat.com> 3.5.15-1
 - openshift_hosted: Update tasks to use oc_ modules (rteague@redhat.com)
 - Rebased. (kwoodson@redhat.com)
