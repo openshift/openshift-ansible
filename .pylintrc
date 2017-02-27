@@ -67,6 +67,13 @@ confidence=
 # no Warning level messages displayed, use"--disable=all --enable=classes
 # --disable=W"
 disable=
+    # disabling rules is not to be reported as a violation
+    locally-disabled,
+    # some files are to be ignored
+    file-ignored,
+    # it is expected to have TODO notes
+    fixme,
+    duplicate-code
 
 
 [REPORTS]
