@@ -10,7 +10,7 @@
 
 - name: set_fact replicas
   set_fact:
-    replicas: "{{ openshift.hosted.router.replicas | default(router_nodes.results.results[0]['items'] | length) }}"
+    replicas: "{{ openshift.hosted.router.replicas|default(None) | get_router_replicas(router_nodes) }}"
 
 - block:
 
