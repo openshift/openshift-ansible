@@ -1,0 +1,10 @@
+---
+- name: Label {{ node }} for Fluentd deployment
+  oc_label:
+    name: "{{ node }}"
+    kind: node
+    state: add
+    labels: "{{ openshift_logging_fluentd_nodeselector | oo_dict_to_list_of_dict }}"
+
+# wait half a second between labels
+- local_action: command sleep {{ openshift_logging_fluentd_label_delay | default('.5') }}

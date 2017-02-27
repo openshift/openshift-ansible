@@ -1,0 +1,194 @@
+---
+- fail:
+    msg: Only one Fluentd nodeselector key pair should be provided
+  when: "{{ openshift_logging_fluentd_nodeselector.keys() | count }} > 1"
+
+- fail:
+    msg: Application logs destination is required
+  when: not openshift_logging_fluentd_app_host or openshift_logging_fluentd_app_host == ''
+
+- fail:
+    msg: Operations logs destination is required
+  when: not openshift_logging_fluentd_ops_host or openshift_logging_fluentd_ops_host == ''
+
+- fail:
+    msg: Invalid deployment type, one of ['hosted', 'secure-aggregator', 'secure-host'] allowed
+  when: not openshift_logging_fluentd_deployment_type in __allowed_fluentd_types
+
+- include: determine_version.yaml
+
+# allow passing in a tempdir
+- name: Create temp directory for doing work in
+  command: mktemp -d /tmp/openshift-logging-ansible-XXXXXX
+  register: mktemp
+  changed_when: False
+
+- set_fact:
+    tempdir: "{{ mktemp.stdout }}"
+
+- name: Create templates subdirectory
+  file:
+    state: directory
+    path: "{{ tempdir }}/templates"
+    mode: 0755
+  changed_when: False
+
+# we want to make sure we have all the necessary components here
+
+# create service account
+- name: Create Fluentd service account
+  oc_serviceaccount:
+    state: present
+    name: "aggregated-logging-fluentd"
+    namespace: "{{ openshift_logging_namespace }}"
+    image_pull_secrets: "{{ openshift_logging_image_pull_secret }}"
+  when: openshift_logging_image_pull_secret != ''
+
+- name: Create Fluentd service account
+  oc_serviceaccount:
+    state: present
+    name: "aggregated-logging-fluentd"
+    namespace: "{{ openshift_logging_namespace }}"
+  when:
+  - openshift_logging_image_pull_secret == ''
+
+# set service account scc
+- name: Set privileged permissions for Fluentd
+  oc_adm_policy_user:
+    namespace: "{{ openshift_logging_namespace }}"
+    resource_kind: scc
+    resource_name: privileged
+    state: present
+    user: "system:serviceaccount:{{ openshift_logging_namespace }}:aggregated-logging-fluentd"
+
+# set service account permissions
+- name: Set cluster-reader permissions for Fluentd
+  oc_adm_policy_user:
+    namespace: "{{ openshift_logging_namespace }}"
+    resource_kind: cluster-role
+    resource_name: cluster-reader
+    state: present
+    user: "system:serviceaccount:{{ openshift_logging_namespace }}:aggregated-logging-fluentd"
+
+# create Fluentd configmap
+- template:
+    src: fluent.conf.j2
+    dest: "{{ tempdir }}/fluent.conf"
+  vars:
+    deploy_type: "{{ openshift_logging_fluentd_deployment_type }}"
+  when: fluentd_config_contents is undefined
+  changed_when: no
+
+- copy:
+    src: fluentd-throttle-config.yaml
+    dest: "{{ tempdir }}/fluentd-throttle-config.yaml"
+  when: fluentd_throttle_contents is undefined
+  changed_when: no
+
+- copy:
+    src: secure-forward.conf
+    dest: "{{ tempdir }}/secure-forward.conf"
+  when: fluentd_securefoward_contents is undefined
+
+  changed_when: no
+
+- copy:
+    content: "{{ fluentd_config_contents }}"
+    dest: "{{ tempdir }}/fluent.conf"
+  when: fluentd_config_contents is defined
+  changed_when: no
+
+- copy:
+    content: "{{ fluentd_throttle_contents }}"
+    dest: "{{ tempdir }}/fluentd-throttle-config.yaml"
+  when: fluentd_throttle_contents is defined
+  changed_when: no
+
+- copy:
+    content: "{{ fluentd_secureforward_contents }}"
+    dest: "{{ tempdir }}/secure-forward.conf"
+  when: fluentd_secureforward_contents is defined
+  changed_when: no
+
+- name: Set Fluentd configmap
+  oc_configmap:
+    state: present
+    name: "logging-fluentd"
+    namespace: "{{ openshift_logging_namespace }}"
+    from_file:
+      fluentd.conf: "{{ tempdir }}/fluent.conf"
+      throttle-config.yaml: "{{ tempdir }}/fluentd-throttle-config.yaml"
+      secure-forward.conf: "{{ tempdir }}/secure-forward.conf"
+
+# create Fluentd secret
+# TODO: add aggregation secrets if necessary
+- name: Set logging-fluentd secret
+  oc_secret:
+    state: present
+    name: logging-fluentd
+    namespace: "{{ openshift_logging_namespace }}"
+    files:
+    - name: ca
+      path: "{{ generated_certs_dir }}/ca.crt"
+    - name: key
+      path: "{{ generated_certs_dir }}/system.logging.fluentd.key"
+    - name: cert
+      path: "{{ generated_certs_dir }}/system.logging.fluentd.crt"
+
+# create Fluentd daemonset
+
+# this should change based on the type of fluentd deployment to be done...
+# TODO: pass in aggregation configurations
+- name: Generate logging-fluentd daemonset definition
+  template:
+    src: fluentd.j2
+    dest: "{{ tempdir }}/templates/logging-fluentd.yaml"
+  vars:
+    daemonset_name: logging-fluentd
+    daemonset_component: fluentd
+    daemonset_container_name: fluentd-elasticsearch
+    daemonset_serviceAccount: aggregated-logging-fluentd
+    app_host: "{{ openshift_logging_fluentd_app_host }}"
+    app_port: "{{ openshift_logging_fluentd_app_port }}"
+    ops_host: "{{ openshift_logging_fluentd_ops_host }}"
+    ops_port: "{{ openshift_logging_fluentd_ops_port }}"
+    fluentd_nodeselector_key: "{{ openshift_logging_fluentd_nodeselector.keys()[0] }}"
+    fluentd_nodeselector_value: "{{ openshift_logging_fluentd_nodeselector.values()[0] }}"
+  check_mode: no
+  changed_when: no
+
+- name: Set logging-fluentd daemonset
+  oc_obj:
+    state: present
+    name: logging-fluentd
+    namespace: "{{ openshift_logging_namespace }}"
+    kind: daemonset
+    files:
+    - "{{ tempdir }}/templates/logging-fluentd.yaml"
+    delete_after: true
+
+# Scale up Fluentd
+- name: Retrieve list of Fluentd hosts
+  oc_obj:
+    state: list
+    kind: node
+  when: "'--all' in openshift_logging_fluentd_hosts"
+  register: fluentd_hosts
+
+- name: Set openshift_logging_fluentd_hosts
+  set_fact:
+    openshift_logging_fluentd_hosts: "{{ fluentd_hosts.results.results[0]['items'] | map(attribute='metadata.name') | list }}"
+  when: "'--all' in openshift_logging_fluentd_hosts"
+
+- include: label_and_wait.yaml
+  vars:
+    node: "{{ fluentd_host }}"
+  with_items: "{{ openshift_logging_fluentd_hosts }}"
+  loop_control:
+    loop_var: fluentd_host
+
+- name: Delete temp directory
+  file:
+    name: "{{ tempdir }}"
+    state: absent
+  changed_when: False

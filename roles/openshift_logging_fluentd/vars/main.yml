@@ -1,0 +1,4 @@
+---
+__latest_fluentd_version: "3_5"
+__allowed_fluentd_versions: ["3_5", "3_6"]
+__allowed_fluentd_types: ["hosted", "secure-aggregator", "secure-host"]

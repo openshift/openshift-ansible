@@ -1,0 +1,3 @@
+---
+__latest_kibana_version: "3_5"
+__allowed_kibana_versions: ["3_5", "3_6"]

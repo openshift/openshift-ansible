@@ -318,7 +318,7 @@ def main():
     ''' The main method '''
     module = AnsibleModule(   # noqa: F405
         argument_spec=dict(
-            admin_kubeconfig={"required": True, "type": "str"},
+            admin_kubeconfig={"default": "/etc/origin/master/admin.kubeconfig", "type": "str"},
             oc_bin={"required": True, "type": "str"},
             openshift_logging_namespace={"required": True, "type": "str"}
         ),

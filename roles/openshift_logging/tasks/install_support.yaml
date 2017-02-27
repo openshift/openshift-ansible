@@ -45,29 +45,3 @@
   file: path={{mktemp.stdout}}/templates state=directory mode=0755
   changed_when: False
   check_mode: no
-
-- include: generate_secrets.yaml
-  vars:
-    generated_certs_dir: "{{openshift.common.config_base}}/logging"
-
-- include: generate_configmaps.yaml
-
-- include: generate_services.yaml
-
-- name: Generate kibana-proxy oauth client
-  template: src=oauth-client.j2 dest={{mktemp.stdout}}/templates/oauth-client.yaml
-  vars:
-    secret: "{{oauth_secret}}"
-  when: oauth_secret is defined
-  check_mode: no
-  changed_when: no
-
-- include: generate_clusterroles.yaml
-
-- include: generate_rolebindings.yaml
-
-- include: generate_clusterrolebindings.yaml
-
-- include: generate_serviceaccounts.yaml
-
-- include: generate_routes.yaml
