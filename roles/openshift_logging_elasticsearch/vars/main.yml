@@ -1,0 +1,12 @@
+---
+__latest_es_version: "3_5"
+__allowed_es_versions: ["3_5", "3_6"]
+__allowed_es_types: ["data-master", "data-client", "master", "client"]
+
+# TODO: integrate these
+openshift_master_config_dir: "{{ openshift.common.config_base }}/master"
+es_node_quorum: "{{ openshift_logging_elasticsearch_replica_count | int/2 + 1 }}"
+es_min_masters_default: "{{ (openshift_logging_elasticsearch_replica_count | int / 2 | round(0,'floor') + 1) | int }}"
+es_min_masters: "{{ (openshift_logging_elasticsearch_replica_count == 1) | ternary(1, es_min_masters_default) }}"
+es_recover_after_nodes: "{{ openshift_logging_elasticsearch_replica_count | int }}"
+es_recover_expected_nodes: "{{ openshift_logging_elasticsearch_replica_count | int }}"

@@ -1,0 +1,117 @@
+apiVersion: extensions/v1beta1
+kind: "DaemonSet"
+metadata:
+  name: "{{ daemonset_name }}"
+  labels:
+    provider: openshift
+    component: "{{ daemonset_component }}"
+    logging-infra: "{{ daemonset_component }}"
+spec:
+  selector:
+    matchLabels:
+      provider: openshift
+      component: "{{ daemonset_component }}"
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      minReadySeconds: 600
+  template:
+    metadata:
+      name: "{{ daemonset_container_name }}"
+      labels:
+        logging-infra: "{{ daemonset_component }}"
+        provider: openshift
+        component: "{{ daemonset_component }}"
+    spec:
+      serviceAccountName: "{{ daemonset_serviceAccount }}"
+      nodeSelector:
+        {{ fluentd_nodeselector_key }}: "{{ fluentd_nodeselector_value }}"
+      containers:
+      - name: "{{ daemonset_container_name }}"
+        image: "{{ openshift_logging_image_prefix }}{{ daemonset_name }}:{{ openshift_logging_image_version }}"
+        imagePullPolicy: Always
+        securityContext:
+          privileged: true
+        resources:
+          limits:
+            cpu: {{ openshift_logging_fluentd_cpu_limit }}
+            memory: {{ openshift_logging_fluentd_memory_limit }}
+        volumeMounts:
+        - name: runlogjournal
+          mountPath: /run/log/journal
+        - name: varlog
+          mountPath: /var/log
+        - name: varlibdockercontainers
+          mountPath: /var/lib/docker/containers
+          readOnly: true
+        - name: config
+          mountPath: /etc/fluent/configs.d/user
+          readOnly: true
+        - name: certs
+          mountPath: /etc/fluent/keys
+          readOnly: true
+        - name: dockerhostname
+          mountPath: /etc/docker-hostname
+          readOnly: true
+        - name: localtime
+          mountPath: /etc/localtime
+          readOnly: true
+        - name: dockercfg
+          mountPath: /etc/sysconfig/docker
+          readOnly: true
+        env:
+        - name: "K8S_HOST_URL"
+          value: "{{ openshift_logging_master_url }}"
+        - name: "ES_HOST"
+          value: "{{ app_host }}"
+        - name: "ES_PORT"
+          value: "{{ app_port }}"
+        - name: "ES_CLIENT_CERT"
+          value: "{{ openshift_logging_es_client_cert }}"
+        - name: "ES_CLIENT_KEY"
+          value: "{{ openshift_logging_es_client_key }}"
+        - name: "ES_CA"
+          value: "{{ openshift_logging_es_ca }}"
+        - name: "OPS_HOST"
+          value: "{{ ops_host }}"
+        - name: "OPS_PORT"
+          value: "{{ ops_port }}"
+        - name: "OPS_CLIENT_CERT"
+          value: "{{ openshift_logging_es_ops_client_cert }}"
+        - name: "OPS_CLIENT_KEY"
+          value: "{{ openshift_logging_es_ops_client_key }}"
+        - name: "OPS_CA"
+          value: "{{ openshift_logging_es_ops_ca }}"
+        - name: "ES_COPY"
+          value: "false"
+        - name: "USE_JOURNAL"
+          value: "{{ openshift_logging_fluentd_use_journal | lower }}"
+        - name: "JOURNAL_SOURCE"
+          value: "{{ openshift_logging_fluentd_journal_source | default('') }}"
+        - name: "JOURNAL_READ_FROM_HEAD"
+          value: "{{ openshift_logging_fluentd_journal_read_from_head | lower }}"
+      volumes:
+      - name: runlogjournal
+        hostPath:
+          path: /run/log/journal
+      - name: varlog
+        hostPath:
+          path: /var/log
+      - name: varlibdockercontainers
+        hostPath:
+          path: /var/lib/docker/containers
+      - name: config
+        configMap:
+          name: logging-fluentd
+      - name: certs
+        secret:
+          secretName: logging-fluentd
+      - name: dockerhostname
+        hostPath:
+          path: /etc/hostname
+      - name: localtime
+        hostPath:
+          path: /etc/localtime
+      - name: dockercfg
+        hostPath:
+          path: /etc/sysconfig/docker

@@ -1,0 +1,122 @@
+---
+- include: determine_version.yaml
+
+# allow passing in a tempdir
+- name: Create temp directory for doing work in
+  command: mktemp -d /tmp/openshift-logging-ansible-XXXXXX
+  register: mktemp
+  changed_when: False
+
+- set_fact:
+    tempdir: "{{ mktemp.stdout }}"
+
+# This may not be necessary in this role
+- name: Create templates subdirectory
+  file:
+    state: directory
+    path: "{{ tempdir }}/templates"
+    mode: 0755
+  changed_when: False
+
+# we want to make sure we have all the necessary components here
+
+# service account
+- name: Create Curator service account
+  oc_serviceaccount:
+    state: present
+    name: "aggregated-logging-curator"
+    namespace: "{{ openshift_logging_namespace }}"
+    image_pull_secrets: "{{ openshift_logging_image_pull_secret }}"
+  when: openshift_logging_image_pull_secret != ''
+
+- name: Create Curator service account
+  oc_serviceaccount:
+    state: present
+    name: "aggregated-logging-curator"
+    namespace: "{{ openshift_logging_namespace }}"
+  when:
+  - openshift_logging_image_pull_secret == ''
+
+# configmap
+- copy:
+    src: curator.yml
+    dest: "{{ tempdir }}/curator.yml"
+  when: curator_config_contents is undefined
+  changed_when: no
+
+- copy:
+    content: "{{ curator_config_contents }}"
+    dest: "{{ tempdir }}/curator.yml"
+  when: curator_config_contents is defined
+  changed_when: no
+
+- name: Set Curator configmap
+  oc_configmap:
+    state: present
+    name: "logging-curator"
+    namespace: "{{ openshift_logging_namespace }}"
+    from_file:
+      config.yaml: "{{ tempdir }}/curator.yml"
+
+# secret
+- name: Set Curator secret
+  oc_secret:
+    state: present
+    name: "logging-curator"
+    namespace: "{{ openshift_logging_namespace }}"
+    files:
+    - name: ca
+      path: "{{ generated_certs_dir }}/ca.crt"
+    - name: key
+      path: "{{ generated_certs_dir }}/system.logging.curator.key"
+    - name: cert
+      path: "{{ generated_certs_dir }}/system.logging.curator.crt"
+
+- set_fact:
+    curator_name: "{{ 'logging-curator' ~ ( (openshift_logging_curator_ops_deployment | default(false) | bool) | ternary('-ops', '') ) }}"
+    curator_component: "{{ 'curator' ~ ( (openshift_logging_curator_ops_deployment | default(false) | bool) | ternary('-ops', '') ) }}"
+
+# DC
+# TODO: scale should not exceed 1
+- name: Generate Curator deploymentconfig
+  template:
+    src: curator.j2
+    dest: "{{ tempdir }}/templates/curator-dc.yaml"
+  vars:
+    component: "{{ curator_component }}"
+    logging_component: curator
+    deploy_name: "{{ curator_name }}"
+    image: "{{openshift_logging_image_prefix}}logging-curator:{{openshift_logging_image_version}}"
+    es_host: "{{ openshift_logging_curator_es_host }}"
+    es_port: "{{ openshift_logging_curator_es_port }}"
+    curator_cpu_limit: "{{ openshift_logging_curator_cpu_limit }}"
+    curator_memory_limit: "{{ openshift_logging_curator_memory_limit }}"
+    replicas: "{{ openshift_logging_curator_replicas | default (0)}}"
+    curator_node_selector: "{{openshift_logging_curator_nodeselector | default({})}}"
+  check_mode: no
+  changed_when: no
+
+- name: Set Curator DC
+  oc_obj:
+    state: present
+    name: "{{ curator_name }}"
+    namespace: "{{ openshift_logging_namespace }}"
+    kind: dc
+    files:
+    - "{{ tempdir }}/templates/curator-dc.yaml"
+    delete_after: true
+
+# scale up
+- name: Start Curator
+  oc_scale:
+    kind: dc
+    name: "{{ curator_name }}"
+    namespace: "{{ openshift_logging_namespace }}"
+    replicas: "{{ openshift_logging_curator_replicas | default (1) }}"
+
+
+- name: Delete temp directory
+  file:
+    name: "{{ tempdir }}"
+    state: absent
+  changed_when: False

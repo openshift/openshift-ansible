@@ -4,9 +4,11 @@
 
 # delete the deployment objects that we had created
 - name: delete logging api objects
-  command: >
-    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig
-    delete {{ item }} --selector logging-infra -n {{ openshift_logging_namespace }} --ignore-not-found=true
+  oc_obj:
+    state: absent
+    kind: "{{ item }}"
+    namespace: "{{ openshift_logging_namespace }}"
+    selector: "logging-infra"
   with_items:
     - dc
     - rc
@@ -15,7 +17,6 @@
     - templates
     - daemonset
   register: delete_result
-  changed_when: delete_result.stdout.find("deleted") != -1 and delete_result.rc == 0
 
 
 # delete the oauthclient
