@@ -72,8 +72,7 @@ disable=
     # some files are to be ignored
     file-ignored,
     # it is expected to have TODO notes
-    fixme,
-    duplicate-code
+    fixme
 
 
 [REPORTS]
