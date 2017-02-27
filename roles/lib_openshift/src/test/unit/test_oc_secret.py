@@ -85,8 +85,8 @@ class OCSecretTest(unittest.TestCase):
 
         # Making sure our mock was called as we expected
         mock_cmd.assert_has_calls([
-            mock.call(['oc', '-n', 'default', 'get', 'secrets', 'testsecretname', '-o', 'json'], None),
-            mock.call(['oc', '-n', 'default', 'secrets', 'new', 'testsecretname', mock.ANY], None),
+            mock.call(['oc', 'get', 'secrets', 'testsecretname', '-o', 'json', '-n', 'default'], None),
+            mock.call(['oc', 'secrets', 'new', 'testsecretname', mock.ANY, '-n', 'default'], None),
         ])
 
         mock_write.assert_has_calls([

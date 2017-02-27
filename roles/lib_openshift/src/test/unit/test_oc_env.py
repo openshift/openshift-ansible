@@ -147,7 +147,7 @@ class OCEnvTest(unittest.TestCase):
 
         # Making sure our mocks were called as we expected
         mock_cmd.assert_has_calls([
-            mock.call(['oc', '-n', 'default', 'get', 'dc', 'router', '-o', 'json'], None),
+            mock.call(['oc', 'get', 'dc', 'router', '-o', 'json', '-n', 'default'], None),
         ])
 
     @mock.patch('oc_env.locate_oc_binary')
@@ -333,7 +333,7 @@ class OCEnvTest(unittest.TestCase):
 
         # Making sure our mocks were called as we expected
         mock_cmd.assert_has_calls([
-            mock.call(['oc', '-n', 'default', 'get', 'dc', 'router', '-o', 'json'], None),
+            mock.call(['oc', 'get', 'dc', 'router', '-o', 'json', '-n', 'default'], None),
         ])
 
     @mock.patch('oc_env.locate_oc_binary')
@@ -448,7 +448,7 @@ class OCEnvTest(unittest.TestCase):
 
         # Making sure our mocks were called as we expected
         mock_cmd.assert_has_calls([
-            mock.call(['oc', '-n', 'default', 'get', 'dc', 'router', '-o', 'json'], None),
+            mock.call(['oc', 'get', 'dc', 'router', '-o', 'json', '-n', 'default'], None),
         ])
 
     @unittest.skipIf(six.PY3, 'py2 test only')
