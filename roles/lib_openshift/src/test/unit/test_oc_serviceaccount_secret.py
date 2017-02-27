@@ -181,10 +181,10 @@ secrets:
 
         # Making sure our mocks were called as we expected
         mock_cmd.assert_has_calls([
-            mock.call(['oc', '-n', 'default', 'get', 'sa', 'builder', '-o', 'json'], None),
-            mock.call(['oc', '-n', 'default', 'get', 'sa', 'builder', '-o', 'json'], None),
-            mock.call(['oc', '-n', 'default', 'replace', '-f', mock.ANY], None),
-            mock.call(['oc', '-n', 'default', 'get', 'sa', 'builder', '-o', 'json'], None)
+            mock.call(['oc', 'get', 'sa', 'builder', '-o', 'json', '-n', 'default'], None),
+            mock.call(['oc', 'get', 'sa', 'builder', '-o', 'json', '-n', 'default'], None),
+            mock.call(['oc', 'replace', '-f', mock.ANY, '-n', 'default'], None),
+            mock.call(['oc', 'get', 'sa', 'builder', '-o', 'json', '-n', 'default'], None)
         ])
 
         yaml_file = builder_pyyaml_file
@@ -304,9 +304,9 @@ secrets:
 
         # Making sure our mocks were called as we expected
         mock_cmd.assert_has_calls([
-            mock.call(['oc', '-n', 'default', 'get', 'sa', 'builder', '-o', 'json'], None),
-            mock.call(['oc', '-n', 'default', 'get', 'sa', 'builder', '-o', 'json'], None),
-            mock.call(['oc', '-n', 'default', 'replace', '-f', mock.ANY], None),
+            mock.call(['oc', 'get', 'sa', 'builder', '-o', 'json', '-n', 'default'], None),
+            mock.call(['oc', 'get', 'sa', 'builder', '-o', 'json', '-n', 'default'], None),
+            mock.call(['oc', 'replace', '-f', mock.ANY, '-n', 'default'], None),
         ])
 
         yaml_file = builder_pyyaml_file

@@ -1023,12 +1023,12 @@ class OpenShiftCLI(object):
         if oadm:
             cmds.append('adm')
 
+        cmds.extend(cmd)
+
         if self.all_namespaces:
             cmds.extend(['--all-namespaces'])
         elif self.namespace is not None and self.namespace.lower() not in ['none', 'emtpy']:  # E501
             cmds.extend(['-n', self.namespace])
-
-        cmds.extend(cmd)
 
         rval = {}
         results = ''
