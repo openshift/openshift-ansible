@@ -1,4 +1,13 @@
 ---
+# set_fact task copied from playbooks/common/openshift-master/config.yml
+# so that openshift_master_default_subdomain has a default value of ""
+# (emptry string). openshift_master_default_subdomain must have a default
+# value for openshift_master_facts to set metrics_public_url.
+# TODO: clean this up.
+- set_fact:
+    openshift_master_default_subdomain: "{{ lookup('oo_option', 'openshift_master_default_subdomain') | default(None, true) }}"
+  when: openshift_master_default_subdomain is not defined
+
 - name: Set master facts
   openshift_facts:
     role: master
