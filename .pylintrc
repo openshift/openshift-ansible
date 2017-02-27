@@ -72,7 +72,12 @@ disable=
     # some files are to be ignored
     file-ignored,
     # it is expected to have TODO notes
-    fixme
+    fixme,
+    # sometimes it's better to have no docstrings than placeholders or incorrect text
+    missing-docstring,
+    # the occurrences of this are usually because of one-character variable names that
+    # may make sense in the context; leave it up to the author / reviewers
+    invalid-name
 
 
 [REPORTS]
