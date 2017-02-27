@@ -15,19 +15,12 @@
   register: metrics_truststore
   check_mode: no
 
-- stat: path="{{mktemp.stdout}}/hawkular-jgroups.keystore"
-  register: jgroups_keystore
-  check_mode: no
-
 - block:
   - slurp: src={{ mktemp.stdout }}/hawkular-metrics-keystore.pwd
     register: metrics_keystore_password
 
   - slurp: src={{ mktemp.stdout }}/hawkular-cassandra-keystore.pwd
     register: cassandra_keystore_password
-
-  - slurp: src={{ mktemp.stdout }}/hawkular-jgroups-keystore.pwd
-    register: jgroups_keystore_password
 
   - fetch:
       dest: "{{local_tmp.stdout}}/"
@@ -48,7 +41,6 @@
       CASSANDRA_KEYSTORE_PASSWD: "{{cassandra_keystore_password.content}}"
       METRICS_TRUSTSTORE_PASSWD: "{{hawkular_truststore_password.content}}"
       CASSANDRA_TRUSTSTORE_PASSWD: "{{cassandra_truststore_password.content}}"
-      JGROUPS_PASSWD: "{{jgroups_keystore_password.content}}"
     changed_when: False
 
   - copy:
@@ -59,5 +51,4 @@
   when: not metrics_keystore.stat.exists or
         not metrics_truststore.stat.exists or
         not cassandra_keystore.stat.exists or
-        not cassandra_truststore.stat.exists or
-        not jgroups_keystore.stat.exists
+        not cassandra_truststore.stat.exists

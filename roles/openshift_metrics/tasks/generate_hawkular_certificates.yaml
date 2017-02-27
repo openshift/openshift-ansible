@@ -24,7 +24,6 @@
   with_items:
   - hawkular-metrics.pwd
   - hawkular-metrics.htpasswd
-  - hawkular-jgroups-keystore.pwd
   changed_when: no
 
 - set_fact:
@@ -32,11 +31,10 @@
   with_items: "{{pwd_file_stat.results}}"
   changed_when: no
 
-- name: generate password for hawkular metrics and jgroups
+- name: generate password for hawkular metrics
   local_action: copy dest="{{ local_tmp.stdout}}/{{ item }}.pwd" content="{{ 15 | oo_random_word }}"
   with_items:
   - hawkular-metrics
-  - hawkular-jgroups-keystore
 
 - name: generate htpasswd file for hawkular metrics
   local_action: >
@@ -51,7 +49,6 @@
   with_items:
   - hawkular-metrics.pwd
   - hawkular-metrics.htpasswd
-  - hawkular-jgroups-keystore.pwd
 
 - include: import_jks_certs.yaml
 
@@ -69,8 +66,6 @@
   - hawkular-metrics-truststore.pwd
   - hawkular-metrics.pwd
   - hawkular-metrics.htpasswd
-  - hawkular-jgroups.keystore
-  - hawkular-jgroups-keystore.pwd
   - hawkular-cassandra.crt
   - hawkular-cassandra.pem
   - hawkular-cassandra.keystore
@@ -104,11 +99,6 @@
       hawkular-metrics.keystore.alias: "{{ 'hawkular-metrics'|b64encode }}"
       hawkular-metrics.htpasswd.file: >
         {{ hawkular_secrets['hawkular-metrics.htpasswd'] }}
-      hawkular-metrics.jgroups.keystore: >
-        {{ hawkular_secrets['hawkular-jgroups.keystore'] }}
-      hawkular-metrics.jgroups.keystore.password: >
-        {{ hawkular_secrets['hawkular-jgroups-keystore.pwd'] }}
-      hawkular-metrics.jgroups.alias: "{{ 'hawkular'|b64encode }}"
   when: name not in metrics_secrets.stdout_lines
   changed_when: no
 
