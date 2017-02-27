@@ -64,13 +64,14 @@
   when:
   - openshift.hosted.registry.storage.kind | default(none) == 'object'
 
-- name: Set facts for persistent volume
+- name: Update openshift_hosted facts for persistent volumes
   set_fact:
+    openshift_hosted_registry_volumes: "{{ openshift_hosted_registry_volumes | union(pvc_volume_mounts) }}"
+  vars:
     pvc_volume_mounts:
     - name: registry-storage
       type: persistentVolumeClaim
       claim_name: "{{ openshift.hosted.registry.storage.volume.name }}-claim"
-    openshift_hosted_registry_volumes: "{{ openshift_hosted_registry_volumes | union(pvc_volume_mounts) }}"
   when:
   - openshift.hosted.registry.storage.kind | default(none) in ['nfs', 'openstack']
 
