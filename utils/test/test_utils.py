@@ -2,13 +2,13 @@
 Unittests for ooinstall utils.
 """
 
-import six
 import unittest
-import logging
-import sys
 import copy
-from ooinstall.utils import debug_env, is_valid_hostname
 import mock
+
+import six
+
+from ooinstall.utils import debug_env, is_valid_hostname
 
 
 class TestUtils(unittest.TestCase):

@@ -409,8 +409,7 @@ class UnattendedCliTests(OOCliFixture):
         result = self.runner.invoke(cli.cli, self.cli_args)
 
         if result.exception is None or result.exit_code != 1:
-            print("Exit code: %s" % result.exit_code)
-            self.fail("Unexpected CLI return")
+            self.fail("Unexpected CLI return. Exit code: %s" % result.exit_code)
 
     # unattended with config file and all installed hosts (with --force)
     @patch('ooinstall.openshift_ansible.run_main_playbook')
