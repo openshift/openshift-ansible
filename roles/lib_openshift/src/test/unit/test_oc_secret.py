@@ -69,9 +69,9 @@ class OCSecretTest(unittest.TestCase):
         results = OCSecret.run_ansible(params, False)
 
         # Assert
-        self.assertTrue(results['changed'])
-        self.assertEqual(results['results']['returncode'], 0)
-        self.assertEqual(results['state'], 'present')
+        assert results['changed']
+        assert results['results']['returncode'] == 0
+        assert results['state'] == 'present'
 
         # Making sure our mock was called as we expected
         mock_cmd.assert_has_calls([
@@ -93,7 +93,7 @@ class OCSecretTest(unittest.TestCase):
 
         mock_path_exists.side_effect = lambda _: False
 
-        self.assertEqual(locate_oc_binary(), 'oc')
+        assert locate_oc_binary() == 'oc'
 
     @unittest.skipIf(six.PY3, 'py2 test only')
     @mock.patch('os.path.exists')
@@ -107,7 +107,7 @@ class OCSecretTest(unittest.TestCase):
 
         mock_path_exists.side_effect = lambda f: f == oc_bin
 
-        self.assertEqual(locate_oc_binary(), oc_bin)
+        assert locate_oc_binary() == oc_bin
 
     @unittest.skipIf(six.PY3, 'py2 test only')
     @mock.patch('os.path.exists')
@@ -121,7 +121,7 @@ class OCSecretTest(unittest.TestCase):
 
         mock_path_exists.side_effect = lambda f: f == oc_bin
 
-        self.assertEqual(locate_oc_binary(), oc_bin)
+        assert locate_oc_binary() == oc_bin
 
     @unittest.skipIf(six.PY3, 'py2 test only')
     @mock.patch('os.path.exists')
@@ -135,7 +135,7 @@ class OCSecretTest(unittest.TestCase):
 
         mock_path_exists.side_effect = lambda f: f == oc_bin
 
-        self.assertEqual(locate_oc_binary(), oc_bin)
+        assert locate_oc_binary() == oc_bin
 
     @unittest.skipIf(six.PY2, 'py3 test only')
     @mock.patch('shutil.which')
@@ -147,7 +147,7 @@ class OCSecretTest(unittest.TestCase):
 
         mock_shutil_which.side_effect = lambda _f, path=None: None
 
-        self.assertEqual(locate_oc_binary(), 'oc')
+        assert locate_oc_binary() == 'oc'
 
     @unittest.skipIf(six.PY2, 'py3 test only')
     @mock.patch('shutil.which')
@@ -161,7 +161,7 @@ class OCSecretTest(unittest.TestCase):
 
         mock_shutil_which.side_effect = lambda _f, path=None: oc_bin
 
-        self.assertEqual(locate_oc_binary(), oc_bin)
+        assert locate_oc_binary() == oc_bin
 
     @unittest.skipIf(six.PY2, 'py3 test only')
     @mock.patch('shutil.which')
@@ -175,7 +175,7 @@ class OCSecretTest(unittest.TestCase):
 
         mock_shutil_which.side_effect = lambda _f, path=None: oc_bin
 
-        self.assertEqual(locate_oc_binary(), oc_bin)
+        assert locate_oc_binary() == oc_bin
 
     @unittest.skipIf(six.PY2, 'py3 test only')
     @mock.patch('shutil.which')
@@ -189,4 +189,4 @@ class OCSecretTest(unittest.TestCase):
 
         mock_shutil_which.side_effect = lambda _f, path=None: oc_bin
 
-        self.assertEqual(locate_oc_binary(), oc_bin)
+        assert locate_oc_binary() == oc_bin

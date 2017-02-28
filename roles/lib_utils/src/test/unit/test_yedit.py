@@ -41,15 +41,15 @@ class YeditTest(unittest.TestCase):
     def test_load(self):
         ''' Testing a get '''
         yed = Yedit('yedit_test.yml')
-        self.assertEqual(yed.yaml_dict, self.data)
+        assert yed.yaml_dict == self.data
 
     def test_write(self):
         ''' Testing a simple write '''
         yed = Yedit('yedit_test.yml')
         yed.put('key1', 1)
         yed.write()
-        self.assertTrue('key1' in yed.yaml_dict)
-        self.assertEqual(yed.yaml_dict['key1'], 1)
+        assert 'key1' in yed.yaml_dict
+        assert yed.yaml_dict['key1'] == 1
 
     def test_write_x_y_z(self):
         '''Testing a write of multilayer key'''
@@ -57,7 +57,7 @@ class YeditTest(unittest.TestCase):
         yed.put('x.y.z', 'modified')
         yed.write()
         yed.load()
-        self.assertEqual(yed.get('x.y.z'), 'modified')
+        assert yed.get('x.y.z') == 'modified'
 
     def test_delete_a(self):
         '''Testing a simple delete '''
@@ -65,7 +65,7 @@ class YeditTest(unittest.TestCase):
         yed.delete('a')
         yed.write()
         yed.load()
-        self.assertTrue('a' not in yed.yaml_dict)
+        assert 'a' not in yed.yaml_dict
 
     def test_delete_b_c(self):
         '''Testing delete of layered key '''
@@ -73,8 +73,8 @@ class YeditTest(unittest.TestCase):
         yed.delete('b:c')
         yed.write()
         yed.load()
-        self.assertTrue('b' in yed.yaml_dict)
-        self.assertFalse('c' in yed.yaml_dict['b'])
+        assert 'b' in yed.yaml_dict
+        assert 'c' not in yed.yaml_dict['b']
 
     def test_create(self):
         '''Testing a create '''
@@ -83,8 +83,8 @@ class YeditTest(unittest.TestCase):
         yed.create('foo', 'bar')
         yed.write()
         yed.load()
-        self.assertTrue('foo' in yed.yaml_dict)
-        self.assertTrue(yed.yaml_dict['foo'] == 'bar')
+        assert 'foo' in yed.yaml_dict
+        assert yed.yaml_dict['foo'] == 'bar'
 
     def test_create_content(self):
         '''Testing a create with content '''
@@ -92,99 +92,99 @@ class YeditTest(unittest.TestCase):
         yed = Yedit("yedit_test.yml", content)
         yed.write()
         yed.load()
-        self.assertTrue('foo' in yed.yaml_dict)
-        self.assertTrue(yed.yaml_dict['foo'], 'bar')
+        assert 'foo' in yed.yaml_dict
+        assert yed.yaml_dict['foo'], 'bar'
 
     def test_array_insert(self):
         '''Testing a create with content '''
         yed = Yedit("yedit_test.yml", separator=':')
         yed.put('b:c:d[0]', 'inject')
-        self.assertTrue(yed.get('b:c:d[0]') == 'inject')
+        assert yed.get('b:c:d[0]') == 'inject'
 
     def test_array_insert_first_index(self):
         '''Testing a create with content '''
         yed = Yedit("yedit_test.yml", separator=':')
         yed.put('b:c:d[0]', 'inject')
-        self.assertTrue(yed.get('b:c:d[1]') == 'f')
+        assert yed.get('b:c:d[1]') == 'f'
 
     def test_array_insert_second_index(self):
         '''Testing a create with content '''
         yed = Yedit("yedit_test.yml", separator=':')
         yed.put('b:c:d[0]', 'inject')
-        self.assertTrue(yed.get('b:c:d[2]') == 'g')
+        assert yed.get('b:c:d[2]') == 'g'
 
     def test_dict_array_dict_access(self):
         '''Testing a create with content'''
         yed = Yedit("yedit_test.yml", separator=':')
         yed.put('b:c:d[0]', [{'x': {'y': 'inject'}}])
-        self.assertTrue(yed.get('b:c:d[0]:[0]:x:y') == 'inject')
+        assert yed.get('b:c:d[0]:[0]:x:y') == 'inject'
 
     def test_dict_array_dict_replace(self):
         '''Testing multilevel delete'''
         yed = Yedit("yedit_test.yml", separator=':')
         yed.put('b:c:d[0]', [{'x': {'y': 'inject'}}])
         yed.put('b:c:d[0]:[0]:x:y', 'testing')
-        self.assertTrue('b' in yed.yaml_dict)
-        self.assertTrue('c' in yed.yaml_dict['b'])
-        self.assertTrue('d' in yed.yaml_dict['b']['c'])
-        self.assertTrue(isinstance(yed.yaml_dict['b']['c']['d'], list))
-        self.assertTrue(isinstance(yed.yaml_dict['b']['c']['d'][0], list))
-        self.assertTrue(isinstance(yed.yaml_dict['b']['c']['d'][0][0], dict))
-        self.assertTrue('y' in yed.yaml_dict['b']['c']['d'][0][0]['x'])
-        self.assertTrue(yed.yaml_dict['b']['c']['d'][0][0]['x']['y'] == 'testing')  # noqa: E501
+        assert 'b' in yed.yaml_dict
+        assert 'c' in yed.yaml_dict['b']
+        assert 'd' in yed.yaml_dict['b']['c']
+        assert isinstance(yed.yaml_dict['b']['c']['d'], list)
+        assert isinstance(yed.yaml_dict['b']['c']['d'][0], list)
+        assert isinstance(yed.yaml_dict['b']['c']['d'][0][0], dict)
+        assert 'y' in yed.yaml_dict['b']['c']['d'][0][0]['x']
+        assert yed.yaml_dict['b']['c']['d'][0][0]['x']['y'] == 'testing'
 
     def test_dict_array_dict_remove(self):
         '''Testing multilevel delete'''
         yed = Yedit("yedit_test.yml", separator=':')
         yed.put('b:c:d[0]', [{'x': {'y': 'inject'}}])
         yed.delete('b:c:d[0]:[0]:x:y')
-        self.assertTrue('b' in yed.yaml_dict)
-        self.assertTrue('c' in yed.yaml_dict['b'])
-        self.assertTrue('d' in yed.yaml_dict['b']['c'])
-        self.assertTrue(isinstance(yed.yaml_dict['b']['c']['d'], list))
-        self.assertTrue(isinstance(yed.yaml_dict['b']['c']['d'][0], list))
-        self.assertTrue(isinstance(yed.yaml_dict['b']['c']['d'][0][0], dict))
-        self.assertFalse('y' in yed.yaml_dict['b']['c']['d'][0][0]['x'])
+        assert 'b' in yed.yaml_dict
+        assert 'c' in yed.yaml_dict['b']
+        assert 'd' in yed.yaml_dict['b']['c']
+        assert isinstance(yed.yaml_dict['b']['c']['d'], list)
+        assert isinstance(yed.yaml_dict['b']['c']['d'][0], list)
+        assert isinstance(yed.yaml_dict['b']['c']['d'][0][0], dict)
+        assert 'y' not in yed.yaml_dict['b']['c']['d'][0][0]['x']
 
     def test_key_exists_in_dict(self):
         '''Testing exist in dict'''
         yed = Yedit("yedit_test.yml", separator=':')
         yed.put('b:c:d[0]', [{'x': {'y': 'inject'}}])
-        self.assertTrue(yed.exists('b:c', 'd'))
+        assert yed.exists('b:c', 'd')
 
     def test_key_exists_in_list(self):
         '''Testing exist in list'''
         yed = Yedit("yedit_test.yml", separator=':')
         yed.put('b:c:d[0]', [{'x': {'y': 'inject'}}])
-        self.assertTrue(yed.exists('b:c:d', [{'x': {'y': 'inject'}}]))
-        self.assertFalse(yed.exists('b:c:d', [{'x': {'y': 'test'}}]))
+        assert yed.exists('b:c:d', [{'x': {'y': 'inject'}}])
+        assert not yed.exists('b:c:d', [{'x': {'y': 'test'}}])
 
     def test_update_to_list_with_index(self):
         '''Testing update to list with index'''
         yed = Yedit("yedit_test.yml", separator=':')
         yed.put('x:y:z', [1, 2, 3])
         yed.update('x:y:z', [5, 6], index=2)
-        self.assertTrue(yed.get('x:y:z') == [1, 2, [5, 6]])
-        self.assertTrue(yed.exists('x:y:z', [5, 6]))
-        self.assertFalse(yed.exists('x:y:z', 4))
+        assert yed.get('x:y:z') == [1, 2, [5, 6]]
+        assert yed.exists('x:y:z', [5, 6])
+        assert not yed.exists('x:y:z', 4)
 
     def test_update_to_list_with_curr_value(self):
         '''Testing update to list with index'''
         yed = Yedit("yedit_test.yml", separator=':')
         yed.put('x:y:z', [1, 2, 3])
         yed.update('x:y:z', [5, 6], curr_value=3)
-        self.assertTrue(yed.get('x:y:z') == [1, 2, [5, 6]])
-        self.assertTrue(yed.exists('x:y:z', [5, 6]))
-        self.assertFalse(yed.exists('x:y:z', 4))
+        assert yed.get('x:y:z') == [1, 2, [5, 6]]
+        assert yed.exists('x:y:z', [5, 6])
+        assert not yed.exists('x:y:z', 4)
 
     def test_update_to_list(self):
         '''Testing update to list'''
         yed = Yedit("yedit_test.yml", separator=':')
         yed.put('x:y:z', [1, 2, 3])
         yed.update('x:y:z', [5, 6])
-        self.assertTrue(yed.get('x:y:z') == [1, 2, 3, [5, 6]])
-        self.assertTrue(yed.exists('x:y:z', [5, 6]))
-        self.assertFalse(yed.exists('x:y:z', 4))
+        assert yed.get('x:y:z') == [1, 2, 3, [5, 6]]
+        assert yed.exists('x:y:z', [5, 6])
+        assert not yed.exists('x:y:z', 4)
 
     def test_append_twice_to_list(self):
         '''Testing append to list'''
@@ -192,59 +192,59 @@ class YeditTest(unittest.TestCase):
         yed.put('x:y:z', [1, 2, 3])
         yed.append('x:y:z', [5, 6])
         yed.append('x:y:z', [5, 6])
-        self.assertTrue(yed.get('x:y:z') == [1, 2, 3, [5, 6], [5, 6]])
-        self.assertFalse(yed.exists('x:y:z', 4))
+        assert yed.get('x:y:z') == [1, 2, 3, [5, 6], [5, 6]]
+        assert not yed.exists('x:y:z', 4)
 
     def test_add_item_to_dict(self):
         '''Testing update to dict'''
         yed = Yedit("yedit_test.yml", separator=':')
         yed.put('x:y:z', {'a': 1, 'b': 2})
         yed.update('x:y:z', {'c': 3, 'd': 4})
-        self.assertTrue(yed.get('x:y:z') == {'a': 1, 'b': 2, 'c': 3, 'd': 4})
-        self.assertTrue(yed.exists('x:y:z', {'c': 3}))
+        assert yed.get('x:y:z') == {'a': 1, 'b': 2, 'c': 3, 'd': 4}
+        assert yed.exists('x:y:z', {'c': 3})
 
     def test_first_level_dict_with_none_value(self):
         '''test dict value with none value'''
         yed = Yedit(content={'a': None}, separator=":")
         yed.put('a:b:c', 'test')
-        self.assertTrue(yed.get('a:b:c') == 'test')
-        self.assertTrue(yed.get('a:b'), {'c': 'test'})
+        assert yed.get('a:b:c') == 'test'
+        assert yed.get('a:b'), {'c': 'test'}
 
     def test_adding_yaml_variable(self):
         '''test dict value with none value'''
         yed = Yedit("yedit_test.yml", separator=':')
         yed.put('z:y', '{{test}}')
-        self.assertTrue(yed.get('z:y') == '{{test}}')
+        assert yed.get('z:y') == '{{test}}'
 
     def test_keys_with_underscore(self):
         '''test dict value with none value'''
         yed = Yedit("yedit_test.yml", separator=':')
         yed.put('z_:y_y', {'test': '{{test}}'})
-        self.assertTrue(yed.get('z_:y_y') == {'test': '{{test}}'})
+        assert yed.get('z_:y_y') == {'test': '{{test}}'}
 
     def test_first_level_array_update(self):
         '''test update on top level array'''
         yed = Yedit(content=[{'a': 1}, {'b': 2}, {'b': 3}], separator=':')
         yed.update('', {'c': 4})
-        self.assertTrue({'c': 4} in yed.get(''))
+        assert {'c': 4} in yed.get('')
 
     def test_first_level_array_delete(self):
         '''test remove top level key'''
         yed = Yedit(content=[{'a': 1}, {'b': 2}, {'b': 3}])
         yed.delete('')
-        self.assertTrue({'b': 3} not in yed.get(''))
+        assert {'b': 3} not in yed.get('')
 
     def test_first_level_array_get(self):
         '''test dict value with none value'''
         yed = Yedit(content=[{'a': 1}, {'b': 2}, {'b': 3}])
         yed.get('')
-        self.assertTrue([{'a': 1}, {'b': 2}, {'b': 3}] == yed.yaml_dict)
+        assert [{'a': 1}, {'b': 2}, {'b': 3}] == yed.yaml_dict
 
     def test_pop_list_item(self):
         '''test dict value with none value'''
         yed = Yedit(content=[{'a': 1}, {'b': 2}, {'b': 3}], separator=':')
         yed.pop('', {'b': 2})
-        self.assertTrue([{'a': 1}, {'b': 3}] == yed.yaml_dict)
+        assert [{'a': 1}, {'b': 3}] == yed.yaml_dict
 
     def test_pop_list_item_2(self):
         '''test dict value with none value'''
@@ -252,13 +252,13 @@ class YeditTest(unittest.TestCase):
         yed = Yedit(content=z, separator=':')
         yed.pop('', 5)
         z.pop(5)
-        self.assertTrue(z == yed.yaml_dict)
+        assert z == yed.yaml_dict
 
     def test_pop_dict_key(self):
         '''test dict value with none value'''
         yed = Yedit(content={'a': {'b': {'c': 1, 'd': 2}}}, separator='#')
         yed.pop('a#b', 'c')
-        self.assertTrue({'a': {'b': {'d': 2}}} == yed.yaml_dict)
+        assert {'a': {'b': {'d': 2}}} == yed.yaml_dict
 
     def test_accessing_path_with_unexpected_objects(self):
         '''test providing source path objects that differ from current object state'''

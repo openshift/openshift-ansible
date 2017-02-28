@@ -105,8 +105,8 @@ class OCServiceTest(unittest.TestCase):
 
         results = OCService.run_ansible(params, False)
 
-        self.assertFalse(results['changed'])
-        self.assertEqual(results['results']['results'][0]['metadata']['name'], 'router')
+        assert not results['changed']
+        assert results['results']['results'][0]['metadata']['name'] == 'router'
 
     @mock.patch('oc_service.Utils.create_tmpfile_copy')
     @mock.patch('oc_service.OCService._run')
@@ -194,9 +194,9 @@ class OCServiceTest(unittest.TestCase):
 
         results = OCService.run_ansible(params, False)
 
-        self.assertTrue(results['changed'])
-        self.assertTrue(results['results']['returncode'] == 0)
-        self.assertEqual(results['results']['results'][0]['metadata']['name'], 'router')
+        assert results['changed']
+        assert results['results']['returncode'] == 0
+        assert results['results']['results'][0]['metadata']['name'] == 'router'
 
     @unittest.skipIf(six.PY3, 'py2 test only')
     @mock.patch('os.path.exists')
@@ -208,7 +208,7 @@ class OCServiceTest(unittest.TestCase):
 
         mock_path_exists.side_effect = lambda _: False
 
-        self.assertEqual(locate_oc_binary(), 'oc')
+        assert locate_oc_binary() == 'oc'
 
     @unittest.skipIf(six.PY3, 'py2 test only')
     @mock.patch('os.path.exists')
@@ -222,7 +222,7 @@ class OCServiceTest(unittest.TestCase):
 
         mock_path_exists.side_effect = lambda f: f == oc_bin
 
-        self.assertEqual(locate_oc_binary(), oc_bin)
+        assert locate_oc_binary() == oc_bin
 
     @unittest.skipIf(six.PY3, 'py2 test only')
     @mock.patch('os.path.exists')
@@ -236,7 +236,7 @@ class OCServiceTest(unittest.TestCase):
 
         mock_path_exists.side_effect = lambda f: f == oc_bin
 
-        self.assertEqual(locate_oc_binary(), oc_bin)
+        assert locate_oc_binary() == oc_bin
 
     @unittest.skipIf(six.PY3, 'py2 test only')
     @mock.patch('os.path.exists')
@@ -250,7 +250,7 @@ class OCServiceTest(unittest.TestCase):
 
         mock_path_exists.side_effect = lambda f: f == oc_bin
 
-        self.assertEqual(locate_oc_binary(), oc_bin)
+        assert locate_oc_binary() == oc_bin
 
     @unittest.skipIf(six.PY2, 'py3 test only')
     @mock.patch('shutil.which')
@@ -262,7 +262,7 @@ class OCServiceTest(unittest.TestCase):
 
         mock_shutil_which.side_effect = lambda _f, path=None: None
 
-        self.assertEqual(locate_oc_binary(), 'oc')
+        assert locate_oc_binary() == 'oc'
 
     @unittest.skipIf(six.PY2, 'py3 test only')
     @mock.patch('shutil.which')
@@ -276,7 +276,7 @@ class OCServiceTest(unittest.TestCase):
 
         mock_shutil_which.side_effect = lambda _f, path=None: oc_bin
 
-        self.assertEqual(locate_oc_binary(), oc_bin)
+        assert locate_oc_binary() == oc_bin
 
     @unittest.skipIf(six.PY2, 'py3 test only')
     @mock.patch('shutil.which')
@@ -290,7 +290,7 @@ class OCServiceTest(unittest.TestCase):
 
         mock_shutil_which.side_effect = lambda _f, path=None: oc_bin
 
-        self.assertEqual(locate_oc_binary(), oc_bin)
+        assert locate_oc_binary() == oc_bin
 
     @unittest.skipIf(six.PY2, 'py3 test only')
     @mock.patch('shutil.which')
@@ -304,7 +304,7 @@ class OCServiceTest(unittest.TestCase):
 
         mock_shutil_which.side_effect = lambda _f, path=None: oc_bin
 
-        self.assertEqual(locate_oc_binary(), oc_bin)
+        assert locate_oc_binary() == oc_bin
 
     @mock.patch('oc_service.Utils.create_tmpfile_copy')
     @mock.patch('oc_service.OCService._run')
@@ -390,10 +390,10 @@ class OCServiceTest(unittest.TestCase):
 
         results = OCService.run_ansible(params, False)
 
-        self.assertTrue(results['changed'])
-        self.assertTrue(results['results']['returncode'] == 0)
-        self.assertEqual(results['results']['results'][0]['metadata']['name'], 'router')
-        self.assertEqual(results['results']['results'][0]['metadata']['labels'], {"component": "some_component", "infra": "true"})
+        assert results['changed']
+        assert results['results']['returncode'] == 0
+        assert results['results']['results'][0]['metadata']['name'] == 'router'
+        assert results['results']['results'][0]['metadata']['labels'] == {"component": "some_component", "infra": "true"}
 
     @mock.patch('oc_service.Utils.create_tmpfile_copy')
     @mock.patch('oc_service.OCService._run')
@@ -480,8 +480,8 @@ class OCServiceTest(unittest.TestCase):
 
         results = OCService.run_ansible(params, False)
 
-        self.assertTrue(results['changed'])
-        self.assertTrue(results['results']['returncode'] == 0)
-        self.assertEqual(results['results']['results'][0]['metadata']['name'], 'router')
-        self.assertEqual(results['results']['results'][0]['metadata']['labels'], {"component": "some_component", "infra": "true"})
-        self.assertEqual(results['results']['results'][0]['spec']['externalIPs'], ["1.2.3.4", "5.6.7.8"])
+        assert results['changed']
+        assert results['results']['returncode'] == 0
+        assert results['results']['results'][0]['metadata']['name'] == 'router'
+        assert results['results']['results'][0]['metadata']['labels'] == {"component": "some_component", "infra": "true"}
+        assert results['results']['results'][0]['spec']['externalIPs'] == ["1.2.3.4", "5.6.7.8"]

@@ -117,9 +117,9 @@ class OCRouteTest(unittest.TestCase):
         results = OCRoute.run_ansible(params, False)
 
         # Assert
-        self.assertFalse(results['changed'])
-        self.assertEqual(results['state'], 'list')
-        self.assertEqual(results['results'][0]['metadata']['name'], 'test')
+        assert not results['changed']
+        assert results['state'] == 'list'
+        assert results['results'][0]['metadata']['name'] == 'test'
 
         # Making sure our mock was called as we expected
         mock_cmd.assert_has_calls([
@@ -247,9 +247,9 @@ metadata:
         results = OCRoute.run_ansible(params, False)
 
         # Assert
-        self.assertTrue(results['changed'])
-        self.assertEqual(results['state'], 'present')
-        self.assertEqual(results['results']['results'][0]['metadata']['name'], 'test')
+        assert results['changed']
+        assert results['state'] == 'present'
+        assert results['results']['results'][0]['metadata']['name'] == 'test'
 
         # Making sure our mock was called as we expected
         mock_cmd.assert_has_calls([
@@ -268,7 +268,7 @@ metadata:
 
         mock_path_exists.side_effect = lambda _: False
 
-        self.assertEqual(locate_oc_binary(), 'oc')
+        assert locate_oc_binary() == 'oc'
 
     @unittest.skipIf(six.PY3, 'py2 test only')
     @mock.patch('os.path.exists')
@@ -282,7 +282,7 @@ metadata:
 
         mock_path_exists.side_effect = lambda f: f == oc_bin
 
-        self.assertEqual(locate_oc_binary(), oc_bin)
+        assert locate_oc_binary() == oc_bin
 
     @unittest.skipIf(six.PY3, 'py2 test only')
     @mock.patch('os.path.exists')
@@ -296,7 +296,7 @@ metadata:
 
         mock_path_exists.side_effect = lambda f: f == oc_bin
 
-        self.assertEqual(locate_oc_binary(), oc_bin)
+        assert locate_oc_binary() == oc_bin
 
     @unittest.skipIf(six.PY3, 'py2 test only')
     @mock.patch('os.path.exists')
@@ -310,7 +310,7 @@ metadata:
 
         mock_path_exists.side_effect = lambda f: f == oc_bin
 
-        self.assertEqual(locate_oc_binary(), oc_bin)
+        assert locate_oc_binary() == oc_bin
 
     @unittest.skipIf(six.PY2, 'py3 test only')
     @mock.patch('shutil.which')
@@ -322,7 +322,7 @@ metadata:
 
         mock_shutil_which.side_effect = lambda _f, path=None: None
 
-        self.assertEqual(locate_oc_binary(), 'oc')
+        assert locate_oc_binary() == 'oc'
 
     @unittest.skipIf(six.PY2, 'py3 test only')
     @mock.patch('shutil.which')
@@ -336,7 +336,7 @@ metadata:
 
         mock_shutil_which.side_effect = lambda _f, path=None: oc_bin
 
-        self.assertEqual(locate_oc_binary(), oc_bin)
+        assert locate_oc_binary() == oc_bin
 
     @unittest.skipIf(six.PY2, 'py3 test only')
     @mock.patch('shutil.which')
@@ -350,7 +350,7 @@ metadata:
 
         mock_shutil_which.side_effect = lambda _f, path=None: oc_bin
 
-        self.assertEqual(locate_oc_binary(), oc_bin)
+        assert locate_oc_binary() == oc_bin
 
     @unittest.skipIf(six.PY2, 'py3 test only')
     @mock.patch('shutil.which')
@@ -364,4 +364,4 @@ metadata:
 
         mock_shutil_which.side_effect = lambda _f, path=None: oc_bin
 
-        self.assertEqual(locate_oc_binary(), oc_bin)
+        assert locate_oc_binary() == oc_bin
