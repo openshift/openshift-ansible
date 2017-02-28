@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.16
+Version:        3.5.17
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -267,6 +267,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Feb 27 2017 Scott Dodson <sdodson@redhat.com> 3.5.17-1
+- Make s3_volume_mount available to set_fact call (smilner@redhat.com)
+- Create hosted registry service (rteague@redhat.com)
+
 * Mon Feb 27 2017 Scott Dodson <sdodson@redhat.com> 3.5.16-1
 - [oc_obj] Move namespace argument to end of command. (abutcher@redhat.com)
 - Correct typo in haproxy router collection. (abutcher@redhat.com)
