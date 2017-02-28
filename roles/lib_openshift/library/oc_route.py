@@ -1594,14 +1594,10 @@ class OCRoute(OpenShiftCLI):
 
     def update(self):
         '''update the object'''
-        # when the host attribute is being updated, we need to delete and recreate
-        if self.config.host != self.route.get_host():
-            import time
-            self.delete()
-            time.sleep(3)
-            return self.create()
-
-        return self._replace_content(self.kind, self.config.name, self.config.data)
+        return self._replace_content(self.kind,
+                                     self.config.name,
+                                     self.config.data,
+                                     force=(self.config.host != self.route.get_host()))
 
     def needs_update(self):
         ''' verify an update is needed '''
