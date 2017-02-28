@@ -196,8 +196,20 @@ class Registry(OpenShiftCLI):
     def create(self):
         '''Create a registry'''
         results = []
-        for config_file in ['deployment_file', 'service_file']:
-            results.append(self._create(self.prepared_registry[config_file]))
+        self.needs_update()
+        # if the object is none, then we need to create it
+        # if the object needs an update, then we should call replace
+        # Handle the deploymentconfig
+        if self.deploymentconfig is None:
+            results.append(self._create(self.prepared_registry['deployment_file']))
+        elif self.prepared_registry['deployment_update']:
+            results.append(self._replace(self.prepared_registry['deployment_file']))
+
+        # Handle the service
+        if self.service is None:
+            results.append(self._create(self.prepared_registry['service_file']))
+        elif self.prepared_registry['service_update']:
+            results.append(self._replace(self.prepared_registry['service_file']))
 
         # Clean up returned results
         rval = 0
@@ -209,7 +221,7 @@ class Registry(OpenShiftCLI):
         return {'returncode': rval, 'results': results}
 
     def update(self):
-        '''run update for the registry.  This performs a delete and then create '''
+        '''run update for the registry.  This performs a replace if required'''
         # Store the current service IP
         if self.service:
             svcip = self.service.get('spec.clusterIP')
@@ -283,14 +295,12 @@ class Registry(OpenShiftCLI):
 
     def needs_update(self):
         ''' check to see if we need to update '''
-        if not self.service or not self.deploymentconfig:
-            return True
-
         exclude_list = ['clusterIP', 'portalIP', 'type', 'protocol']
-        if not Utils.check_def_equal(self.prepared_registry['service'].yaml_dict,
-                                     self.service.yaml_dict,
-                                     exclude_list,
-                                     debug=self.verbose):
+        if self.service is None or \
+                not Utils.check_def_equal(self.prepared_registry['service'].yaml_dict,
+                                          self.service.yaml_dict,
+                                          exclude_list,
+                                          debug=self.verbose):
             self.prepared_registry['service_update'] = True
 
         exclude_list = ['dnsPolicy',
@@ -306,10 +316,11 @@ class Registry(OpenShiftCLI):
                         'activeDeadlineSeconds', # added in 1.5 for timeouts
                        ]
 
-        if not Utils.check_def_equal(self.prepared_registry['deployment'].yaml_dict,
-                                     self.deploymentconfig.yaml_dict,
-                                     exclude_list,
-                                     debug=self.verbose):
+        if self.deploymentconfig is None or \
+                not Utils.check_def_equal(self.prepared_registry['deployment'].yaml_dict,
+                                          self.deploymentconfig.yaml_dict,
+                                          exclude_list,
+                                          debug=self.verbose):
             self.prepared_registry['deployment_update'] = True
 
         return self.prepared_registry['deployment_update'] or self.prepared_registry['service_update'] or False
