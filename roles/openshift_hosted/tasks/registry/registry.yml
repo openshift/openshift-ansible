@@ -53,6 +53,19 @@
     openshift_hosted_registry_force:
     - False
 
+- name: create the default registry service
+  oc_service:
+    namespace: "{{ openshift_hosted_registry_namespace }}"
+    name: "{{ openshift_hosted_registry_name }}"
+    ports:
+    - name: 5000-tcp
+      port: 5000
+      protocol: TCP
+      targetPort: 5000
+    selector: "{{ openshift_hosted_registry_selector }}"
+    session_affinity: ClientIP
+    service_type: ClusterIP
+
 - include: secure.yml
   static: no
   run_once: true

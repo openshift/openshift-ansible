@@ -36,13 +36,14 @@
       - path: cloudfront.pem
         data: "{{ lookup('file', openshift_hosted_registry_storage_s3_cloudfront_privatekeyfile) }}"
 
-  - name: Add cloudfront secret to the registry volumes
+  - name: Append cloudfront secret registry volume to openshift_hosted_registry_volumes
     set_fact:
+      openshift_hosted_registry_volumes: "{{ openshift_hosted_registry_volumes | union(s3_volume_mount) }}"
+    vars:
       s3_volume_mount:
       - name: cloudfront-vol
         path: /etc/origin
         type: secret
         secret_name: docker-registry-s3-cloudfront
-      openshift_hosted_registry_volumes: "{{ openshift_hosted_registry_volumes | union(s3_volume_mount) }}"
 
   when: openshift_hosted_registry_storage_s3_cloudfront_baseurl | default(none) is not none
