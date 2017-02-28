@@ -1010,13 +1010,7 @@ class AttendedCliTests(OOCliFixture):
             full_line = "%s=%s" % (a, b)
             tokens = full_line.split()
             if tokens[0] == host:
-                found = False
-                for token in tokens:
-                    if token == variable:
-                        found = True
-                        continue
-                self.assertTrue("Unable to find %s in line: %s" %
-                                (variable, full_line), found)
+                self.assertTrue(variable in tokens[1:], "Unable to find %s in line: %s" % (variable, full_line))
                 return
         self.fail("unable to find host %s in inventory" % host)
 
