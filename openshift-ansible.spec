@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.17
+Version:        3.5.18
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -267,6 +267,16 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Feb 28 2017 Scott Dodson <sdodson@redhat.com> 3.5.18-1
+- Add 'persistentVolumeClaim' to volume_info type (rteague@redhat.com)
+- node: use the new oc_atomic_container module (gscrivan@redhat.com)
+- master: use the new oc_atomic_container module (gscrivan@redhat.com)
+- etcd: use the new oc_atomic_container module (gscrivan@redhat.com)
+- lib_openshift: new module atomic_container (gscrivan@redhat.com)
+- Re-generate lib_openshift (sdodson@redhat.com)
+- Correct fact creation for pvc (rteague@redhat.com)
+- Add SDNValidator Module (mkhan@redhat.com)
+
 * Mon Feb 27 2017 Scott Dodson <sdodson@redhat.com> 3.5.17-1
 - Make s3_volume_mount available to set_fact call (smilner@redhat.com)
 - Create hosted registry service (rteague@redhat.com)
