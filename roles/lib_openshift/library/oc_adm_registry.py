@@ -2063,20 +2063,21 @@ class Volume(object):
         ''' return a properly structured volume '''
         volume_mount = None
         volume = {'name': volume_info['name']}
-        if volume_info['type'] == 'secret':
+        volume_type = volume_info['type'].lower()
+        if volume_type == 'secret':
             volume['secret'] = {}
             volume[volume_info['type']] = {'secretName': volume_info['secret_name']}
             volume_mount = {'mountPath': volume_info['path'],
                             'name': volume_info['name']}
-        elif volume_info['type'] == 'emptydir':
+        elif volume_type == 'emptydir':
             volume['emptyDir'] = {}
             volume_mount = {'mountPath': volume_info['path'],
                             'name': volume_info['name']}
-        elif volume_info['type'] == 'pvc':
+        elif volume_type == 'pvc' or volume_type == 'persistentvolumeclaim':
             volume['persistentVolumeClaim'] = {}
             volume['persistentVolumeClaim']['claimName'] = volume_info['claimName']
             volume['persistentVolumeClaim']['claimSize'] = volume_info['claimSize']
-        elif volume_info['type'] == 'hostpath':
+        elif volume_type == 'hostpath':
             volume['hostPath'] = {}
             volume['hostPath']['path'] = volume_info['path']
 
