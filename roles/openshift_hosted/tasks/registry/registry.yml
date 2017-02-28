@@ -92,7 +92,6 @@
 
 - name: Create OpenShift registry
   oc_adm_registry:
-#debug: True
     name: "{{ openshift_hosted_registry_name }}"
     namespace: "{{ openshift_hosted_registry_namespace }}"
     selector: "{{ openshift_hosted_registry_selector }}"

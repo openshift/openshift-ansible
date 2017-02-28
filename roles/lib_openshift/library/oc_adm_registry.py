@@ -1387,8 +1387,8 @@ class Utils(object):
                     elif value != user_def[key]:
                         if debug:
                             print('value should be identical')
-                            print(value)
                             print(user_def[key])
+                            print(value)
                         return False
 
             # recurse on a dictionary
@@ -1408,8 +1408,8 @@ class Utils(object):
                 if api_values != user_values:
                     if debug:
                         print("keys are not equal in dict")
-                        print(api_values)
                         print(user_values)
+                        print(api_values)
                     return False
 
                 result = Utils.check_def_equal(user_def[key], value, skip_keys=skip_keys, debug=debug)
@@ -1985,6 +1985,7 @@ class Service(Yedit):
     port_path = "spec.ports"
     portal_ip = "spec.portalIP"
     cluster_ip = "spec.clusterIP"
+    selector_path = 'spec.selector'
     kind = 'Service'
 
     def __init__(self, content):
@@ -1994,6 +1995,10 @@ class Service(Yedit):
     def get_ports(self):
         ''' get a list of ports '''
         return self.get(Service.port_path) or []
+
+    def get_selector(self):
+        ''' get the service selector'''
+        return self.get(Service.selector_path) or {}
 
     def add_ports(self, inc_ports):
         ''' add a port object to the ports list '''
@@ -2243,7 +2248,7 @@ class Registry(OpenShiftCLI):
             if result['returncode'] == 0 and part['kind'] == 'dc':
                 self.deploymentconfig = DeploymentConfig(result['results'][0])
             elif result['returncode'] == 0 and part['kind'] == 'svc':
-                self.service = Yedit(content=result['results'][0])
+                self.service = Service(result['results'][0])
 
             if result['returncode'] != 0:
                 rval = result['returncode']
@@ -2312,6 +2317,9 @@ class Registry(OpenShiftCLI):
             service.put('spec.clusterIP', self.svc_ip)
         if self.portal_ip:
             service.put('spec.portalIP', self.portal_ip)
+
+        # the dry-run doesn't apply the selector correctly
+        service.put('spec.selector', self.service.get_selector())
 
         # need to create the service and the deploymentconfig
         service_file = Utils.create_tmp_file_from_contents('service', service.yaml_dict)

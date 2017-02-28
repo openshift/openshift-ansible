@@ -71,9 +71,6 @@
     - key: spec.strategy.rollingParams.updatePeriodSeconds
       value: 1
       action: put
-    - key: spec.strategy.activeDeadlineSeconds
-      value: 21600
-      action: put
   register: routerout
 
 # This should probably move to module

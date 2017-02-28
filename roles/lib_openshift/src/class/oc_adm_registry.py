@@ -109,7 +109,7 @@ class Registry(OpenShiftCLI):
             if result['returncode'] == 0 and part['kind'] == 'dc':
                 self.deploymentconfig = DeploymentConfig(result['results'][0])
             elif result['returncode'] == 0 and part['kind'] == 'svc':
-                self.service = Yedit(content=result['results'][0])
+                self.service = Service(result['results'][0])
 
             if result['returncode'] != 0:
                 rval = result['returncode']
@@ -178,6 +178,9 @@ class Registry(OpenShiftCLI):
             service.put('spec.clusterIP', self.svc_ip)
         if self.portal_ip:
             service.put('spec.portalIP', self.portal_ip)
+
+        # the dry-run doesn't apply the selector correctly
+        service.put('spec.selector', self.service.get_selector())
 
         # need to create the service and the deploymentconfig
         service_file = Utils.create_tmp_file_from_contents('service', service.yaml_dict)
