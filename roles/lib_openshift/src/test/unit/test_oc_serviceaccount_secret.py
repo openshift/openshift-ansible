@@ -30,10 +30,6 @@ class OCServiceAccountSecretTest(unittest.TestCase):
      Test class for OCServiceAccountSecret
     '''
 
-    def setUp(self):
-        ''' setup method will create a file and set to known configuration '''
-        pass
-
     @mock.patch('oc_serviceaccount_secret.locate_oc_binary')
     @mock.patch('oc_serviceaccount_secret.Utils.create_tmpfile_copy')
     @mock.patch('oc_serviceaccount_secret.Yedit._write')
@@ -416,7 +412,3 @@ secrets:
         mock_shutil_which.side_effect = lambda _f, path=None: oc_bin
 
         self.assertEqual(locate_oc_binary(), oc_bin)
-
-    def tearDown(self):
-        '''TearDown method'''
-        pass

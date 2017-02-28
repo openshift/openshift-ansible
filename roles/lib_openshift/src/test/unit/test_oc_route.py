@@ -24,10 +24,6 @@ class OCRouteTest(unittest.TestCase):
      Test class for OCServiceAccount
     '''
 
-    def setUp(self):
-        ''' setup method will create a file and set to known configuration '''
-        pass
-
     @mock.patch('oc_route.locate_oc_binary')
     @mock.patch('oc_route.Utils.create_tmpfile_copy')
     @mock.patch('oc_route.OCRoute._run')
@@ -369,7 +365,3 @@ metadata:
         mock_shutil_which.side_effect = lambda _f, path=None: oc_bin
 
         self.assertEqual(locate_oc_binary(), oc_bin)
-
-    def tearDown(self):
-        '''TearDown method'''
-        pass

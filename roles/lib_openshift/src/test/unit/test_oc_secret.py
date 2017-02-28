@@ -24,10 +24,6 @@ class OCSecretTest(unittest.TestCase):
      Test class for OCSecret
     '''
 
-    def setUp(self):
-        ''' setup method will create a file and set to known configuration '''
-        pass
-
     @mock.patch('oc_secret.locate_oc_binary')
     @mock.patch('oc_secret.Utils.create_tmpfile_copy')
     @mock.patch('oc_secret.Utils._write')
@@ -192,7 +188,3 @@ class OCSecretTest(unittest.TestCase):
         mock_shutil_which.side_effect = lambda _f, path=None: oc_bin
 
         self.assertEqual(locate_oc_binary(), oc_bin)
-
-    def tearDown(self):
-        '''TearDown method'''
-        pass

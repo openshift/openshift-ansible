@@ -23,10 +23,6 @@ class RepoQueryTest(unittest.TestCase):
      Test class for RepoQuery
     '''
 
-    def setUp(self):
-        ''' setup method for other tests '''
-        pass
-
     @mock.patch('repoquery._run')
     def test_querying_a_package(self, mock_cmd):
         ''' Testing querying a package '''
@@ -69,7 +65,3 @@ class RepoQueryTest(unittest.TestCase):
         mock_cmd.assert_has_calls([
             mock.call(['/usr/bin/repoquery', '--plugins', '--quiet', '--pkgnarrow=repos', '--queryformat=%{version}|%{release}|%{arch}|%{repo}|%{version}-%{release}', 'bash']),
         ])
-
-    def tearDown(self):
-        '''TearDown method'''
-        pass

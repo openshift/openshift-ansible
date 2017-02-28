@@ -246,10 +246,6 @@ class OCProcessTest(unittest.TestCase):
     }
 }'''
 
-    def setUp(self):
-        ''' setup method will set to known configuration '''
-        pass
-
     @mock.patch('oc_process.Utils.create_tmpfile_copy')
     @mock.patch('oc_process.OCProcess._run')
     def test_state_list(self, mock_cmd, mock_tmpfile_copy):
@@ -574,7 +570,3 @@ class OCProcessTest(unittest.TestCase):
         mock_shutil_which.side_effect = lambda _f, path=None: oc_bin
 
         self.assertEqual(locate_oc_binary(), oc_bin)
-
-    def tearDown(self):
-        '''TearDown method'''
-        pass
