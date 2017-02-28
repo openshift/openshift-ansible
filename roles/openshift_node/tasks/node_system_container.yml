@@ -1,36 +1,16 @@
 ---
+- name: Load lib_openshift modules
+  include_role:
+    name: lib_openshift
+
 - name: Pre-pull node system container image
   command: >
     atomic pull --storage=ostree {{ openshift.common.system_images_registry }}/{{ openshift.node.node_system_image }}:{{ openshift_image_tag }}
   register: pull_result
   changed_when: "'Pulling layer' in pull_result.stdout"
 
-- name: Check Node system container package
-  command: >
-    atomic containers list --no-trunc -a -f container={{ openshift.common.service_type }}-node
-  register: result
-
-- name: Update Node system container package
-  command: >
-    atomic containers update {{ openshift.common.service_type }}-node
-  register: update_result
-  changed_when: "'Extracting' in update_result.stdout"
-  when:
-  - l_is_same_version
-  - ("node" in result.stdout)
-
-- name: Uninstall Node system container package
-  command: >
-    atomic uninstall {{ openshift.common.service_type }}-node
-  failed_when: False
-  when:
-  - not l_is_same_version
-  - ("node" in result.stdout)
-
-- name: Install Node system container package
-  command: >
-    atomic install --system --name={{ openshift.common.service_type }}-node {{ openshift.common.system_images_registry }}/{{ openshift.node.node_system_image }}:{{ openshift_image_tag }}
-  register: install_node_result
-  changed_when: "'Extracting' in pull_result.stdout"
-  when:
-  - not l_is_same_version or ("node" not in result.stdout) | bool
+- name: Install or Update node system container
+  oc_atomic_container:
+    name: "{{ openshift.common.service_type }}-node"
+    image: "{{ openshift.common.system_images_registry }}/{{ openshift.node.node_system_image }}:{{ openshift_image_tag }}"
+    state: latest

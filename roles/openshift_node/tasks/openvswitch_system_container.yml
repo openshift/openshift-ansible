@@ -1,36 +1,16 @@
 ---
+- name: Load lib_openshift modules
+  include_role:
+    name: lib_openshift
+
 - name: Pre-pull OpenVSwitch system container image
   command: >
     atomic pull --storage=ostree {{ openshift.common.system_images_registry }}/{{ openshift.node.ovs_system_image }}:{{ openshift_image_tag }}
   register: pull_result
   changed_when: "'Pulling layer' in pull_result.stdout"
 
-- name: Check OpenvSwitch system container package
-  command: >
-    atomic containers list --no-trunc -a -f container=openvswitch
-  register: result
-
-- name: Update OpenvSwitch system container package
-  command: >
-    atomic containers update openvswitch
-  register: update_result
-  changed_when: "'Extracting' in update_result.stdout"
-  when:
-  - l_is_same_version
-  - ("openvswitch" in result.stdout) | bool
-
-- name: Uninstall OpenvSwitch system container package
-  command: >
-    atomic uninstall openvswitch
-  failed_when: False
-  when:
-  - not l_is_same_version
-  - ("openvswitch" in result.stdout) | bool
-
-- name: Install OpenvSwitch system container package
-  command: >
-    atomic install --system --name=openvswitch {{ openshift.common.system_images_registry }}/{{ openshift.node.ovs_system_image }}:{{ openshift_image_tag }}
-  when:
-  - not l_is_same_version or ("openvswitch" not in result.stdout) | bool
-  notify:
-  - restart docker
+- name: Install or Update OpenVSwitch system container
+  oc_atomic_container:
+    name: openvswitch
+    image: "{{ openshift.common.system_images_registry }}/{{ openshift.node.ovs_system_image }}:{{ openshift_image_tag }}"
+    state: latest
