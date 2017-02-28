@@ -24,7 +24,7 @@ import mock
 # place class in our python path
 module_path = os.path.join('/'.join(os.path.realpath(__file__).split('/')[:-4]), 'library')  # noqa: E501
 sys.path.insert(0, module_path)
-from oc_user import OCUser  # noqa: E402
+from oc_user import OCUser, locate_oc_binary  # noqa: E402
 
 
 class OCUserTest(unittest.TestCase):
@@ -36,8 +36,9 @@ class OCUserTest(unittest.TestCase):
         ''' setup method will create a file and set to known configuration '''
         pass
 
+    @mock.patch('oc_user.Utils.create_tmpfile_copy')
     @mock.patch('oc_user.OCUser._run')
-    def test_state_list(self, mock_cmd):
+    def test_state_list(self, mock_cmd, mock_tmpfile_copy):
         ''' Testing a user list '''
         params = {'username': 'testuser@email.com',
                   'state': 'list',
@@ -65,13 +66,18 @@ class OCUserTest(unittest.TestCase):
             (0, user, ''),
         ]
 
+        mock_tmpfile_copy.side_effect = [
+            '/tmp/mocked_kubeconfig',
+        ]
+
         results = OCUser.run_ansible(params, False)
 
         self.assertFalse(results['changed'])
         self.assertTrue(results['results'][0]['metadata']['name'] == "testuser@email.com")
 
+    @mock.patch('oc_user.Utils.create_tmpfile_copy')
     @mock.patch('oc_user.OCUser._run')
-    def test_state_present(self, mock_cmd):
+    def test_state_present(self, mock_cmd, mock_tmpfile_copy):
         ''' Testing a user list '''
         params = {'username': 'testuser@email.com',
                   'state': 'present',
@@ -100,6 +106,10 @@ class OCUserTest(unittest.TestCase):
             (1, '', 'Error from server: users "testuser@email.com" not found'),  # get
             (0, 'user "testuser@email.com" created', ''),  # create
             (0, created_user, ''),  # get
+        ]
+
+        mock_tmpfile_copy.side_effect = [
+            '/tmp/mocked_kubeconfig',
         ]
 
         results = OCUser.run_ansible(params, False)

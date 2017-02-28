@@ -142,8 +142,8 @@
     register: user_out
   - name: assert test group created
     assert:
-      that: user_out['results'][0]['metadata']['name'] == "integration-test-group" and
-            user_out['results'][0]['users'] is not defined
+      that: user_out['results']['results'][0]['metadata']['name'] == "integration-test-group"
+      msg: "{{ user_out }}"
 
   - name: create user with group membership
     oc_user:
