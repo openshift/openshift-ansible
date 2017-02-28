@@ -497,10 +497,12 @@ class UnattendedCliTests(OOCliFixture):
         self.assertEquals(os.path.join(self.work_dir,
             '.ansible/callback_facts.yaml'),
             env_vars['OO_INSTALL_CALLBACK_FACTS_YAML'])
-        self.assertEqual('/tmp/ansible.log', env_vars['ANSIBLE_LOG_PATH'])
+        assert '/tmp/ansible.log' == env_vars['ANSIBLE_LOG_PATH']
         # If user running test has rpm installed, this might be set to default:
-        self.assertTrue('ANSIBLE_CONFIG' not in env_vars or
-            env_vars['ANSIBLE_CONFIG'] == cli.DEFAULT_ANSIBLE_CONFIG)
+        assert (
+            'ANSIBLE_CONFIG' not in env_vars or
+            env_vars['ANSIBLE_CONFIG'] == cli.DEFAULT_ANSIBLE_CONFIG
+        )
 
         # Make sure we ran on the expected masters and nodes:
         hosts = run_playbook_mock.call_args[0][1]
@@ -560,10 +562,10 @@ class UnattendedCliTests(OOCliFixture):
 
         written_config = read_yaml(config_file)
 
-        self.assertEquals('openshift-enterprise', written_config['variant'])
+        assert 'openshift-enterprise' == written_config['variant']
         # We didn't specify a version so the latest should have been assumed,
         # and written to disk:
-        self.assertEquals('3.3', written_config['variant_version'])
+        assert '3.3' == written_config['variant_version']
 
         # Make sure the correct value was passed to ansible:
         inventory = configparser.ConfigParser(allow_no_value=True)
@@ -589,10 +591,10 @@ class UnattendedCliTests(OOCliFixture):
 
         written_config = read_yaml(config_file)
 
-        self.assertEquals('openshift-enterprise', written_config['variant'])
+        assert 'openshift-enterprise' == written_config['variant']
         # Make sure our older version was preserved:
         # and written to disk:
-        self.assertEquals('3.3', written_config['variant_version'])
+        assert '3.3' == written_config['variant_version']
 
         inventory = configparser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, 'hosts'))
@@ -612,9 +614,8 @@ class UnattendedCliTests(OOCliFixture):
         self.cli_args.extend(["-c", config_file, "install"])
         result = self.runner.invoke(cli.cli, self.cli_args)
 
-        self.assertEquals(1, result.exit_code)
-        self.assertTrue("You must specify either an ip or hostname"
-            in result.output)
+        assert 1 == result.exit_code
+        assert "You must specify either an ip or hostname" in result.output
 
     #unattended with three masters, one node, and haproxy
     @patch('ooinstall.openshift_ansible.run_main_playbook')
@@ -919,7 +920,7 @@ class AttendedCliTests(OOCliFixture):
             full_line = "%s=%s" % (a, b)
             tokens = full_line.split()
             if tokens[0] == host:
-                self.assertTrue(variable in tokens[1:], "Unable to find %s in line: %s" % (variable, full_line))
+                assert variable in tokens[1:], "Unable to find %s in line: %s" % (variable, full_line)
                 return
         self.fail("unable to find host %s in inventory" % host)
 

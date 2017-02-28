@@ -85,7 +85,7 @@ class OOCliFixture(OOInstallFixture):
         self.assertEquals(os.path.join(self.work_dir,
                                        '.ansible/callback_facts.yaml'),
                           env_vars['OO_INSTALL_CALLBACK_FACTS_YAML'])
-        self.assertEqual('/tmp/ansible.log', env_vars['ANSIBLE_LOG_PATH'])
+        assert '/tmp/ansible.log' == env_vars['ANSIBLE_LOG_PATH']
 
     def _verify_run_playbook(self, run_playbook_mock, exp_hosts_len, exp_hosts_to_run_on_len):
         """ Check that we ran playbook with expected inputs. """
@@ -139,7 +139,7 @@ class OOCliFixture(OOInstallFixture):
 
         if "If you want to force reinstall" in result.output:
             # verify we exited on seeing installed hosts
-            self.assertEqual(result.exit_code, 1)
+            assert result.exit_code == 1
         else:
             self.assert_result(result, 0)
             self._verify_load_facts(load_facts_mock)

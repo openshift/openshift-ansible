@@ -143,15 +143,14 @@ class OOConfigTests(OOInstallFixture):
         ooconfig = OOConfig(cfg_path)
 
         self.assertEquals(3, len(ooconfig.deployment.hosts))
-        self.assertEquals("master-private.example.com", ooconfig.deployment.hosts[0].connect_to)
-        self.assertEquals("10.0.0.1", ooconfig.deployment.hosts[0].ip)
-        self.assertEquals("master-private.example.com", ooconfig.deployment.hosts[0].hostname)
+        assert "master-private.example.com" == ooconfig.deployment.hosts[0].connect_to
+        assert "10.0.0.1" == ooconfig.deployment.hosts[0].ip
+        assert "master-private.example.com" == ooconfig.deployment.hosts[0].hostname
 
-        self.assertEquals(["10.0.0.1", "10.0.0.2", "10.0.0.3"],
-                          [host.ip for host in ooconfig.deployment.hosts])
+        assert ["10.0.0.1", "10.0.0.2", "10.0.0.3"] == [host.ip for host in ooconfig.deployment.hosts]
 
-        self.assertEquals('openshift-enterprise', ooconfig.settings['variant'])
-        self.assertEquals('v2', ooconfig.settings['version'])
+        assert 'openshift-enterprise' == ooconfig.settings['variant']
+        assert 'v2' == ooconfig.settings['version']
 
     def test_load_bad_config(self):
 
@@ -202,7 +201,7 @@ class OOConfigTests(OOInstallFixture):
 
         assert 'ansible_ssh_user' in written_config['deployment']
         assert 'variant' in written_config
-        self.assertEquals('v2', written_config['version'])
+        assert 'v2' == written_config['version']
 
         # Some advanced settings should not get written out if they
         # were not specified by the user:
@@ -263,6 +262,6 @@ class HostTests(OOInstallFixture):
         node_labels_bad = '''openshift_node_labels={'region': 'infra'}'''  # No quotes around the hash
 
         # The good line is present in the written inventory line
-        self.assertIn(node_labels_expected, legacy_inventory_line)
+        assert node_labels_expected in legacy_inventory_line
         # An unquoted version is not present
-        self.assertNotIn(node_labels_bad, legacy_inventory_line)
+        assert node_labels_bad not in legacy_inventory_line
