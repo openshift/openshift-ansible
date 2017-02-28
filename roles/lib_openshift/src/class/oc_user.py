@@ -19,14 +19,14 @@ class OCUser(OpenShiftCLI):
 
     @property
     def user(self):
-        ''' property function service'''
+        ''' property function user'''
         if not self._user:
             self.get()
         return self._user
 
     @user.setter
     def user(self, data):
-        ''' setter function for yedit var '''
+        ''' setter function for user '''
         self._user = data
 
     def exists(self):

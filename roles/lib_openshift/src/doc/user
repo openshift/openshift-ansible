@@ -37,13 +37,13 @@ options:
     aliases: []
   full_name:
     description:
-    - String with the full name/description of th user.
+    - String with the full name/description of the user.
     required: false
     default: None
     aliases: []
   groups:
     description:
-    - List of groups the user should be a member of.
+    - List of groups the user should be a member of. This does not add/update the legacy 'groups' field in the OpenShift user object, but makes user entries into the appropriate OpenShift group object for the given user.
     required: false
     default: []
     aliases: []
@@ -58,9 +58,71 @@ EXAMPLES = '''
     state: present
     username: johndoe
     full_name "John Doe"
+    groups:
+    - dedicated-admins
+  register: user_johndoe
+
+user_johndoe variable will have contents like:
+ok: [ded-int-aws-master-61034] => {
+    "user_johndoe": {
+        "changed": true,
+        "results": {
+            "cmd": "oc -n default get users johndoe -o json",
+            "results": [
+                {
+                    "apiVersion": "v1",
+                    "fullName": "John DOe",
+                    "groups": null,
+                    "identities": null,
+                    "kind": "User",
+                    "metadata": {
+                        "creationTimestamp": "2017-02-28T15:09:21Z",
+                        "name": "johndoe",
+                        "resourceVersion": "848781",
+                        "selfLink": "/oapi/v1/users/johndoe",
+                        "uid": "e23d3300-fdc7-11e6-9e3e-12822d6b7656"
+                    }
+                }
+            ],
+            "returncode": 0
+        },
+        "state": "present"
+    }
+}
+'groups' is empty because this field is the OpenShift user object's 'group' field.
 
 - name: Ensure user does not exist
   oc_user:
     state: absent
     username: johndoe
+
+- name: List user's info
+  oc_user:
+    state: list
+    username: johndoe
+  register: user_johndoe
+
+user_johndoe will have contents similar to:
+ok: [ded-int-aws-master-61034] => {
+    "user_johndoe": {
+        "changed": false,
+        "results": [
+            {
+                "apiVersion": "v1",
+                "fullName": "John Doe",
+                "groups": null,
+                "identities": null,
+                "kind": "User",
+                "metadata": {
+                    "creationTimestamp": "2017-02-28T15:04:44Z",
+                    "name": "johndoe",
+                    "resourceVersion": "848280",
+                    "selfLink": "/oapi/v1/users/johndoe",
+                    "uid": "3d479ad2-fdc7-11e6-9e3e-12822d6b7656"
+                }
+            }
+        ],
+        "state": "list"
+    }
+}
 '''
