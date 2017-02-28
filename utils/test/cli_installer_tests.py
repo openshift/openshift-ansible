@@ -539,10 +539,10 @@ class UnattendedCliTests(OOCliFixture):
             master_line = item[0]
             if item[1] is not None:
                 master_line = "%s=%s" % (master_line, item[1])
-            self.assertTrue('openshift_ip' in master_line)
-            self.assertTrue('openshift_public_ip' in master_line)
-            self.assertTrue('openshift_hostname' in master_line)
-            self.assertTrue('openshift_public_hostname' in master_line)
+            assert 'openshift_ip' in master_line
+            assert 'openshift_public_ip' in master_line
+            assert 'openshift_hostname' in master_line
+            assert 'openshift_public_hostname' in master_line
 
     @patch('ooinstall.openshift_ansible.run_main_playbook')
     @patch('ooinstall.openshift_ansible.load_system_facts')
@@ -651,7 +651,7 @@ class UnattendedCliTests(OOCliFixture):
 
         # This is an invalid config:
         self.assert_result(result, 1)
-        self.assertTrue("A minimum of 3 masters are required" in result.output)
+        assert "A minimum of 3 masters are required" in result.output
 
     #unattended with three masters, one node, but no load balancer specified:
     @patch('ooinstall.openshift_ansible.run_main_playbook')
@@ -668,7 +668,7 @@ class UnattendedCliTests(OOCliFixture):
 
         # This is not a valid input:
         self.assert_result(result, 1)
-        self.assertTrue('No master load balancer specified in config' in result.output)
+        assert 'No master load balancer specified in config' in result.output
 
     #unattended with three masters, one node, and one of the masters reused as load balancer:
     @patch('ooinstall.openshift_ansible.run_main_playbook')
@@ -778,7 +778,7 @@ class AttendedCliTests(OOCliFixture):
 
         # This is testing the install workflow so we want to make sure we
         # exit with the appropriate hint.
-        self.assertTrue('scaleup' in result.output)
+        assert 'scaleup' in result.output
         self.assert_result(result, 1)
 
 
@@ -869,7 +869,7 @@ class AttendedCliTests(OOCliFixture):
         self.assert_inventory_host_var_unset(inventory, 'nodes', '10.0.0.4',
                                              'openshift_schedulable=True')
 
-        self.assertTrue(inventory.has_section('etcd'))
+        assert inventory.has_section('etcd')
         self.assertEquals(3, len(inventory.items('etcd')))
 
     #interactive multimaster: identical masters and nodes
@@ -932,9 +932,7 @@ class AttendedCliTests(OOCliFixture):
             full_line = "%s=%s" % (a, b)
             tokens = full_line.split()
             if tokens[0] == host:
-                self.assertFalse(("%s=" % variable) in full_line,
-                                 msg='%s host variable was set: %s' %
-                                 (variable, full_line))
+                assert variable + "=" not in full_line
                 return
         self.fail("unable to find host %s in inventory" % host)
 

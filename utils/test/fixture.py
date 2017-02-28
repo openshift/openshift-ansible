@@ -97,13 +97,13 @@ class OOCliFixture(OOInstallFixture):
     def _verify_config_hosts(self, written_config, host_count):
         self.assertEquals(host_count, len(written_config['deployment']['hosts']))
         for host in written_config['deployment']['hosts']:
-            self.assertTrue('hostname' in host)
-            self.assertTrue('public_hostname' in host)
+            assert 'hostname' in host
+            assert 'public_hostname' in host
             if 'preconfigured' not in host:
                 if 'roles' in host:
-                    self.assertTrue('node' in host['roles'] or 'storage' in host['roles'])
-                self.assertTrue('ip' in host)
-                self.assertTrue('public_ip' in host)
+                    assert 'node' in host['roles'] or 'storage' in host['roles']
+                assert 'ip' in host
+                assert 'public_ip' in host
 
     #pylint: disable=too-many-arguments
     def _verify_get_hosts_to_run_on(self, mock_facts, load_facts_mock,

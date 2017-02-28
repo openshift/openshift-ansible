@@ -76,24 +76,24 @@ class TestUtils(unittest.TestCase):
         # A hostname that's empty, None, or more than 255 chars is invalid
         empty_hostname = ''
         res = is_valid_hostname(empty_hostname)
-        self.assertFalse(res)
+        assert not res
 
         none_hostname = None
         res = is_valid_hostname(none_hostname)
-        self.assertFalse(res)
+        assert not res
 
         too_long_hostname = "a" * 256
         res = is_valid_hostname(too_long_hostname)
-        self.assertFalse(res)
+        assert not res
 
     def test_utils_is_valid_hostname_ends_with_dot(self):
         """Verify is_valid_hostname can parse hostnames with trailing periods"""
         hostname = "foo.example.com."
         res = is_valid_hostname(hostname)
-        self.assertTrue(res)
+        assert res
 
     def test_utils_is_valid_hostname_normal_hostname(self):
         """Verify is_valid_hostname can parse regular hostnames"""
         hostname = "foo.example.com"
         res = is_valid_hostname(hostname)
-        self.assertTrue(res)
+        assert res

@@ -195,18 +195,18 @@ class OOConfigTests(OOInstallFixture):
 
         self.assertEquals(3, len(written_config['deployment']['hosts']))
         for h in written_config['deployment']['hosts']:
-            self.assertTrue('ip' in h)
-            self.assertTrue('public_ip' in h)
-            self.assertTrue('hostname' in h)
-            self.assertTrue('public_hostname' in h)
+            assert 'ip' in h
+            assert 'public_ip' in h
+            assert 'hostname' in h
+            assert 'public_hostname' in h
 
-        self.assertTrue('ansible_ssh_user' in written_config['deployment'])
-        self.assertTrue('variant' in written_config)
+        assert 'ansible_ssh_user' in written_config['deployment']
+        assert 'variant' in written_config
         self.assertEquals('v2', written_config['version'])
 
         # Some advanced settings should not get written out if they
         # were not specified by the user:
-        self.assertFalse('ansible_inventory_directory' in written_config)
+        assert 'ansible_inventory_directory' not in written_config
 
 
 class HostTests(OOInstallFixture):

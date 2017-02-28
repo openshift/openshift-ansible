@@ -46,8 +46,8 @@ class TestOpenShiftAnsible(unittest.TestCase):
         openshift_ansible.generate_inventory(hosts)
         inventory = configparser.ConfigParser(allow_no_value=True)
         inventory.read(self.inventory)
-        self.assertTrue(inventory.has_section('new_nodes'))
-        self.assertTrue(inventory.has_option('new_nodes', 'new_node1'))
+        assert inventory.has_section('new_nodes')
+        assert inventory.has_option('new_nodes', 'new_node1')
 
     def test_write_inventory_vars_role_vars(self):
         with open(self.inventory, 'w') as inv:
@@ -57,9 +57,9 @@ class TestOpenShiftAnsible(unittest.TestCase):
 
         inventory = configparser.ConfigParser(allow_no_value=True)
         inventory.read(self.inventory)
-        self.assertTrue(inventory.has_section('masters:vars'))
+        assert inventory.has_section('masters:vars')
         self.assertEquals('blue', inventory.get('masters:vars', 'color'))
-        self.assertTrue(inventory.has_section('nodes:vars'))
+        assert inventory.has_section('nodes:vars')
         self.assertEquals('green', inventory.get('nodes:vars', 'color'))
 
 
