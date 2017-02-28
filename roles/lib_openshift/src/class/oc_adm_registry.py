@@ -120,7 +120,7 @@ class Registry(OpenShiftCLI):
     def exists(self):
         '''does the object exist?'''
         self.get()
-        if self.deploymentconfig or self.service:
+        if self.deploymentconfig and self.service:
             return True
 
         return False
