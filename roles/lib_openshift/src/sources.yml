@@ -49,6 +49,12 @@ oc_adm_router.py:
 - class/oc_adm_router.py
 - ansible/oc_adm_router.py
 
+oc_atomic_container.py:
+- doc/generated
+- doc/license
+- doc/atomic_container
+- ansible/oc_atomic_container.py
+
 oc_edit.py:
 - doc/generated
 - doc/license
@@ -176,3 +182,13 @@ oc_version.py:
 - lib/base.py
 - class/oc_version.py
 - ansible/oc_version.py
+
+oc_sdnvalidator.py:
+- doc/generated
+- doc/license
+- lib/import.py
+- doc/sdnvalidator
+- ../../lib_utils/src/class/yedit.py
+- lib/base.py
+- class/oc_sdnvalidator.py
+- ansible/oc_sdnvalidator.py
