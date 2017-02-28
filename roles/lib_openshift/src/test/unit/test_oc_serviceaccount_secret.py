@@ -1,14 +1,6 @@
-#!/usr/bin/env python2
 '''
  Unit tests for oc secret add
 '''
-# To run:
-# ./oc_serviceaccount_secret.py
-#
-# .
-# Ran 1 test in 0.002s
-#
-# OK
 
 import os
 import six
@@ -428,7 +420,3 @@ secrets:
     def tearDown(self):
         '''TearDown method'''
         pass
-
-
-if __name__ == "__main__":
-    unittest.main()

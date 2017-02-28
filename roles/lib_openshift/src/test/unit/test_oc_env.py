@@ -1,14 +1,6 @@
-#!/usr/bin/env python2
 '''
  Unit tests for oc_env
 '''
-# To run:
-# ./oc_env.py
-#
-# .
-# Ran 1 test in 0.002s
-#
-# OK
 
 import os
 import six
@@ -562,7 +554,3 @@ class OCEnvTest(unittest.TestCase):
     def tearDown(self):
         '''TearDown method'''
         pass
-
-
-if __name__ == "__main__":
-    unittest.main()

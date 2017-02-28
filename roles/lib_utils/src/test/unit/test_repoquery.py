@@ -1,14 +1,6 @@
-#!/usr/bin/env python2
 '''
  Unit tests for repoquery
 '''
-# To run:
-# ./repoquery.py
-#
-# .
-# Ran 1 test in 0.002s
-#
-# OK
 
 import os
 import sys
@@ -81,7 +73,3 @@ class RepoQueryTest(unittest.TestCase):
     def tearDown(self):
         '''TearDown method'''
         pass
-
-
-if __name__ == "__main__":
-    unittest.main()

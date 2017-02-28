@@ -1,14 +1,6 @@
-#!/usr/bin/env python2
 '''
  Unit tests for oc serviceaccount
 '''
-# To run:
-# ./oc_serviceaccount.py
-#
-# .
-# Ran 1 test in 0.002s
-#
-# OK
 
 import os
 import six
@@ -227,7 +219,3 @@ class OCServiceAccountTest(unittest.TestCase):
     def tearDown(self):
         '''TearDown method'''
         pass
-
-
-if __name__ == "__main__":
-    unittest.main()

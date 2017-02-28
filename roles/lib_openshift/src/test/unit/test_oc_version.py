@@ -1,14 +1,6 @@
-#!/usr/bin/env python2
 '''
  Unit tests for oc version
 '''
-# To run
-# python -m unittest version
-#
-# .
-# Ran 1 test in 0.597s
-#
-# OK
 
 import os
 import six
@@ -176,7 +168,3 @@ class OCVersionTest(unittest.TestCase):
     def tearDown(self):
         '''TearDown method'''
         pass
-
-
-if __name__ == "__main__":
-    unittest.main()

@@ -1,14 +1,6 @@
-#!/usr/bin/env python2
 '''
  Unit tests for yedit
 '''
-# To run
-# python -m unittest yedit_test
-#
-# .............................
-# ----------------------------------------------------------------------
-# Ran 29 tests in 0.133s
-# OK
 
 import os
 import sys
@@ -288,7 +280,3 @@ class YeditTest(unittest.TestCase):
     def tearDown(self):
         '''TearDown method'''
         os.unlink(YeditTest.filename)
-
-
-if __name__ == "__main__":
-    unittest.main()

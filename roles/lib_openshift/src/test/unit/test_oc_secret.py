@@ -1,14 +1,6 @@
-#!/usr/bin/env python2
 '''
  Unit tests for oc secret
 '''
-# To run:
-# ./oc_secret.py
-#
-# .
-# Ran 1 test in 0.002s
-#
-# OK
 
 import os
 import six
@@ -204,7 +196,3 @@ class OCSecretTest(unittest.TestCase):
     def tearDown(self):
         '''TearDown method'''
         pass
-
-
-if __name__ == "__main__":
-    unittest.main()

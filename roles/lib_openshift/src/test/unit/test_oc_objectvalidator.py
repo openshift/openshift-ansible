@@ -1,15 +1,6 @@
-#!/usr/bin/env python2
 '''
  Unit tests for oc_objectvalidator
 '''
-# To run
-# ./oc_objectvalidator.py.py
-#
-# ....
-# ----------------------------------------------------------------------
-# Ran 4 tests in 0.002s
-#
-# OK
 
 import os
 import sys
@@ -910,7 +901,3 @@ class OCObjectValidatorTest(unittest.TestCase):
             mock.call(['oc', 'get', 'netnamespace', '-o', 'json', '-n', 'default'], None),
             mock.call(['oc', 'get', 'namespace', '-o', 'json', '-n', 'default'], None),
         ])
-
-
-if __name__ == '__main__':
-    unittest.main()

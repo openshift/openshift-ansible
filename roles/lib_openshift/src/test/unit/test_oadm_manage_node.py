@@ -1,14 +1,6 @@
-#!/usr/bin/env python2
 '''
  Unit tests for oadm_manage_node
 '''
-# To run
-# python -m unittest version
-#
-# .
-# Ran 2 tests in 0.001s
-#
-# OK
 
 import os
 import six
@@ -291,7 +283,3 @@ class ManageNodeTest(unittest.TestCase):
     def tearDown(self):
         '''TearDown method'''
         pass
-
-
-if __name__ == "__main__":
-    unittest.main()
