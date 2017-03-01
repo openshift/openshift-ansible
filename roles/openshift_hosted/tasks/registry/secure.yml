@@ -8,7 +8,7 @@
     backup: True
     dest: "/etc/origin/master/named_certificates/{{ item.value | basename }}"
     src: "{{ item.value }}"
-  when: item.key in ['certfile', 'keyfile', 'cafile'] and item.value is not None
+  when: item.key in ['certfile', 'keyfile', 'cafile'] and item.value
   with_dict: "{{ openshift_hosted_registry_routecertificates }}"
 
 # When certificates are defined we will create the reencrypt
