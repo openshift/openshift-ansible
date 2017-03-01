@@ -6,6 +6,12 @@
 
 - debug: var=openshift_hosted_registry_routecertificates
 
+- debug:
+    msg: "{{ ('cafile' in openshift_hosted_registry_routecertificates) }}"
+
+- debug:
+    msg: "{{ ('cafile' in openshift_hosted_registry_routecertificates) | ternary('THIS IS TRUE', 'THIS IS FALSE') }}"
+
 - name: Get the certificate contents for registry
   copy:
     backup: True
@@ -15,20 +21,38 @@
   with_dict: "{{ openshift_hosted_registry_routecertificates }}"
   when: openshift_hosted_registry_routecertificates
 
-- debug: var=openshift_hosted_registry_route_termination
-
-- name: Create passthrough route for docker-registry
+# When certificates are defined we will create the reencrypt
+# docker-registry route
+- name: Create a reencrypt route for docker-registry
+  run_once: true
   oc_route:
     name: docker-registry
     namespace: "{{ openshift_hosted_registry_namespace }}"
     service_name: docker-registry
     tls_termination: "{{ openshift_hosted_registry_routetermination }}"
     host: "{{ openshift_hosted_registry_routehost | default(docker_registry_route_hostname) }}"
-    cert_path: "{{ ('certfile' in openshift_hosted_registry_routecertificates) | ternary('/etc/origin/master/named_certificates/' ~ (openshift_hosted_registry_routecertificates.certfile | basename), omit) }}"
-    key_path: "{{ ('keyfile' in openshift_hosted_registry_routecertificates) | ternary('/etc/origin/master/named_certificates/' ~ (openshift_hosted_registry_routecertificates.keyfile | basename), omit) }}"
-    cacert_path: "{{ ('cafile' in openshift_hosted_registry_routecertificates) | ternary('/etc/origin/master/named_certificates/' ~ (openshift_hosted_registry_routecertificates.cafile | basename), omit) }}"
-    dest_cacert_path: "{{ (openshift_hosted_registry_routetermination == 'reencrypt') | ternary('/etc/origin/master/ca.crt', omit) }}"
+    cert_path: "/etc/origin/master/named_certificates/{{ openshift_hosted_registry_routecertificates['certfile'] | basename }}"
+    key_path: "/etc/origin/master/named_certificates/{{ openshift_hosted_registry_routecertificates['keyfile'] | basename }}"
+    cacert_path: "/etc/origin/master/named_certificates/{{ openshift_hosted_registry_routecertificates['cafile'] | basename }}"
+    dest_cacert_path: /etc/origin/master/ca.crt
+  when:
+  - "'cafile' in openshift_hosted_registry_routecertificates"
+  - "'certfile' in openshift_hosted_registry_routecertificates"
+  - "'keyfile' in openshift_hosted_registry_routecertificates"
+
+- debug:
+    msg: "{{ openshift_hosted_registry_routehost | default(docker_registry_route_hostname) }}"
+
+# When routetermination is passthrough we will create the route
+- name: Create passthrough route for docker-registry
+  oc_route:
+    name: docker-registry
+    namespace: "{{ openshift_hosted_registry_namespace }}"
+    service_name: docker-registry
+    tls_termination: "{{ openshift_hosted_registry_routetermination }}"
+    host: "{{ openshift_hosted_registry_routehost | ternary(openshift_hosted_registry_routehost, docker_registry_route_hostname) }}"
   run_once: true
+  when: openshift_hosted_registry_routetermination == 'passthrough'
 
 - name: Retrieve registry service IP
   oc_service:
