@@ -33,6 +33,7 @@
 
 from __future__ import print_function
 import atexit
+import copy
 import json
 import os
 import re
@@ -40,7 +41,11 @@ import shutil
 import subprocess
 import tempfile
 # pylint: disable=import-error
-import ruamel.yaml as yaml
+try:
+    import ruamel.yaml as yaml
+except ImportError:
+    import yaml
+
 from ansible.module_utils.basic import AnsibleModule
 
 # -*- -*- -*- End included fragment: lib/import.py -*- -*- -*-
@@ -129,6 +134,7 @@ EXAMPLES = '''
 # -*- -*- -*- End included fragment: doc/project -*- -*- -*-
 
 # -*- -*- -*- Begin included fragment: ../../lib_utils/src/class/yedit.py -*- -*- -*-
+# pylint: disable=undefined-variable,missing-docstring
 # noqa: E301,E302
 
 
@@ -323,11 +329,17 @@ class Yedit(object):
         if self.backup and self.file_exists():
             shutil.copy(self.filename, self.filename + '.orig')
 
-        # pylint: disable=no-member
-        if hasattr(self.yaml_dict, 'fa'):
+        # Try to set format attributes if supported
+        try:
             self.yaml_dict.fa.set_block_style()
+        except AttributeError:
+            pass
 
-        Yedit._write(self.filename, yaml.dump(self.yaml_dict, Dumper=yaml.RoundTripDumper))
+        # Try to use RoundTripDumper if supported.
+        try:
+            Yedit._write(self.filename, yaml.dump(self.yaml_dict, Dumper=yaml.RoundTripDumper))
+        except AttributeError:
+            Yedit._write(self.filename, yaml.safe_dump(self.yaml_dict, default_flow_style=False))
 
         return (True, self.yaml_dict)
 
@@ -367,10 +379,24 @@ class Yedit(object):
         # check if it is yaml
         try:
             if content_type == 'yaml' and contents:
-                self.yaml_dict = yaml.load(contents, yaml.RoundTripLoader)
-                # pylint: disable=no-member
-                if hasattr(self.yaml_dict, 'fa'):
+                # Try to set format attributes if supported
+                try:
                     self.yaml_dict.fa.set_block_style()
+                except AttributeError:
+                    pass
+
+                # Try to use RoundTripLoader if supported.
+                try:
+                    self.yaml_dict = yaml.safe_load(contents, yaml.RoundTripLoader)
+                except AttributeError:
+                    self.yaml_dict = yaml.safe_load(contents)
+
+                # Try to set format attributes if supported
+                try:
+                    self.yaml_dict.fa.set_block_style()
+                except AttributeError:
+                    pass
+
             elif content_type == 'json' and contents:
                 self.yaml_dict = json.loads(contents)
         except yaml.YAMLError as err:
@@ -399,14 +425,16 @@ class Yedit(object):
             return (False, self.yaml_dict)
 
         if isinstance(entry, dict):
-            # pylint: disable=no-member,maybe-no-member
+            # AUDIT:maybe-no-member makes sense due to fuzzy types
+            # pylint: disable=maybe-no-member
             if key_or_item in entry:
                 entry.pop(key_or_item)
                 return (True, self.yaml_dict)
             return (False, self.yaml_dict)
 
         elif isinstance(entry, list):
-            # pylint: disable=no-member,maybe-no-member
+            # AUDIT:maybe-no-member makes sense due to fuzzy types
+            # pylint: disable=maybe-no-member
             ind = None
             try:
                 ind = entry.index(key_or_item)
@@ -474,7 +502,9 @@ class Yedit(object):
         if not isinstance(entry, list):
             return (False, self.yaml_dict)
 
-        # pylint: disable=no-member,maybe-no-member
+        # AUDIT:maybe-no-member makes sense due to loading data from
+        # a serialized format.
+        # pylint: disable=maybe-no-member
         entry.append(value)
         return (True, self.yaml_dict)
 
@@ -487,7 +517,8 @@ class Yedit(object):
             entry = None
 
         if isinstance(entry, dict):
-            # pylint: disable=no-member,maybe-no-member
+            # AUDIT:maybe-no-member makes sense due to fuzzy types
+            # pylint: disable=maybe-no-member
             if not isinstance(value, dict):
                 raise YeditException('Cannot replace key, value entry in ' +
                                      'dict with non-dict type. value=[%s] [%s]' % (value, type(value)))  # noqa: E501
@@ -496,7 +527,8 @@ class Yedit(object):
             return (True, self.yaml_dict)
 
         elif isinstance(entry, list):
-            # pylint: disable=no-member,maybe-no-member
+            # AUDIT:maybe-no-member makes sense due to fuzzy types
+            # pylint: disable=maybe-no-member
             ind = None
             if curr_value:
                 try:
@@ -535,12 +567,20 @@ class Yedit(object):
             return (False, self.yaml_dict)
 
         # deepcopy didn't work
-        tmp_copy = yaml.load(yaml.round_trip_dump(self.yaml_dict,
-                                                  default_flow_style=False),
-                             yaml.RoundTripLoader)
-        # pylint: disable=no-member
-        if hasattr(self.yaml_dict, 'fa'):
+        # Try to use ruamel.yaml and fallback to pyyaml
+        try:
+            tmp_copy = yaml.load(yaml.round_trip_dump(self.yaml_dict,
+                                                      default_flow_style=False),
+                                 yaml.RoundTripLoader)
+        except AttributeError:
+            tmp_copy = copy.deepcopy(self.yaml_dict)
+
+        # set the format attributes if available
+        try:
             tmp_copy.fa.set_block_style()
+        except AttributeError:
+            pass
+
         result = Yedit.add_entry(tmp_copy, path, value, self.separator)
         if not result:
             return (False, self.yaml_dict)
@@ -553,11 +593,20 @@ class Yedit(object):
         ''' create a yaml file '''
         if not self.file_exists():
             # deepcopy didn't work
-            tmp_copy = yaml.load(yaml.round_trip_dump(self.yaml_dict, default_flow_style=False),  # noqa: E501
-                                 yaml.RoundTripLoader)
-            # pylint: disable=no-member
-            if hasattr(self.yaml_dict, 'fa'):
+            # Try to use ruamel.yaml and fallback to pyyaml
+            try:
+                tmp_copy = yaml.load(yaml.round_trip_dump(self.yaml_dict,
+                                                          default_flow_style=False),
+                                     yaml.RoundTripLoader)
+            except AttributeError:
+                tmp_copy = copy.deepcopy(self.yaml_dict)
+
+            # set the format attributes if available
+            try:
                 tmp_copy.fa.set_block_style()
+            except AttributeError:
+                pass
+
             result = Yedit.add_entry(tmp_copy, path, value, self.separator)
             if result:
                 self.yaml_dict = tmp_copy
@@ -713,6 +762,32 @@ class OpenShiftCLIError(Exception):
     pass
 
 
+ADDITIONAL_PATH_LOOKUPS = ['/usr/local/bin', os.path.expanduser('~/bin')]
+
+
+def locate_oc_binary():
+    ''' Find and return oc binary file '''
+    # https://github.com/openshift/openshift-ansible/issues/3410
+    # oc can be in /usr/local/bin in some cases, but that may not
+    # be in $PATH due to ansible/sudo
+    paths = os.environ.get("PATH", os.defpath).split(os.pathsep) + ADDITIONAL_PATH_LOOKUPS
+
+    oc_binary = 'oc'
+
+    # Use shutil.which if it is available, otherwise fallback to a naive path search
+    try:
+        which_result = shutil.which(oc_binary, path=os.pathsep.join(paths))
+        if which_result is not None:
+            oc_binary = which_result
+    except AttributeError:
+        for path in paths:
+            if os.path.exists(os.path.join(path, oc_binary)):
+                oc_binary = os.path.join(path, oc_binary)
+                break
+
+    return oc_binary
+
+
 # pylint: disable=too-few-public-methods
 class OpenShiftCLI(object):
     ''' Class to wrap the command line tools '''
@@ -726,6 +801,7 @@ class OpenShiftCLI(object):
         self.verbose = verbose
         self.kubeconfig = Utils.create_tmpfile_copy(kubeconfig)
         self.all_namespaces = all_namespaces
+        self.oc_binary = locate_oc_binary()
 
     # Pylint allows only 5 arguments to be passed.
     # pylint: disable=too-many-arguments
@@ -922,23 +998,22 @@ class OpenShiftCLI(object):
 
         stdout, stderr = proc.communicate(input_data)
 
-        return proc.returncode, stdout, stderr
+        return proc.returncode, stdout.decode(), stderr.decode()
 
     # pylint: disable=too-many-arguments,too-many-branches
     def openshift_cmd(self, cmd, oadm=False, output=False, output_type='json', input_data=None):
         '''Base command for oc '''
-        cmds = []
+        cmds = [self.oc_binary]
+
         if oadm:
-            cmds = ['oadm']
-        else:
-            cmds = ['oc']
+            cmds.append('adm')
+
+        cmds.extend(cmd)
 
         if self.all_namespaces:
             cmds.extend(['--all-namespaces'])
         elif self.namespace is not None and self.namespace.lower() not in ['none', 'emtpy']:  # E501
             cmds.extend(['-n', self.namespace])
-
-        cmds.extend(cmd)
 
         rval = {}
         results = ''
@@ -947,7 +1022,10 @@ class OpenShiftCLI(object):
         if self.verbose:
             print(' '.join(cmds))
 
-        returncode, stdout, stderr = self._run(cmds, input_data)
+        try:
+            returncode, stdout, stderr = self._run(cmds, input_data)
+        except OSError as ex:
+            returncode, stdout, stderr = 1, '', 'Failed to execute {}: {}'.format(subprocess.list2cmdline(cmds), ex)
 
         rval = {"returncode": returncode,
                 "results": results,
@@ -999,7 +1077,13 @@ class Utils(object):
         tmp = Utils.create_tmpfile(prefix=rname)
 
         if ftype == 'yaml':
-            Utils._write(tmp, yaml.dump(data, Dumper=yaml.RoundTripDumper))
+            # AUDIT:no-member makes sense here due to ruamel.YAML/PyYAML usage
+            # pylint: disable=no-member
+            if hasattr(yaml, 'RoundTripDumper'):
+                Utils._write(tmp, yaml.dump(data, Dumper=yaml.RoundTripDumper))
+            else:
+                Utils._write(tmp, yaml.safe_dump(data, default_flow_style=False))
+
         elif ftype == 'json':
             Utils._write(tmp, json.dumps(data))
         else:
@@ -1081,7 +1165,12 @@ class Utils(object):
             contents = sfd.read()
 
         if sfile_type == 'yaml':
-            contents = yaml.load(contents, yaml.RoundTripLoader)
+            # AUDIT:no-member makes sense here due to ruamel.YAML/PyYAML usage
+            # pylint: disable=no-member
+            if hasattr(yaml, 'RoundTripLoader'):
+                contents = yaml.load(contents, yaml.RoundTripLoader)
+            else:
+                contents = yaml.safe_load(contents)
         elif sfile_type == 'json':
             contents = json.loads(contents)
 
@@ -1272,24 +1361,25 @@ class OpenShiftCLIConfig(object):
 class ProjectConfig(OpenShiftCLIConfig):
     ''' project config object '''
     def __init__(self, rname, namespace, kubeconfig, project_options):
-        super(ProjectConfig, self).__init__(rname, rname, kubeconfig, project_options)
+        super(ProjectConfig, self).__init__(rname, None, kubeconfig, project_options)
+
 
 class Project(Yedit):
     ''' Class to wrap the oc command line tools '''
     annotations_path = "metadata.annotations"
-    kind = 'Service'
+    kind = 'Project'
     annotation_prefix = 'openshift.io/'
 
     def __init__(self, content):
-        '''Service constructor'''
+        '''Project constructor'''
         super(Project, self).__init__(content=content)
 
     def get_annotations(self):
-        ''' get a list of ports '''
+        ''' return the annotations'''
         return self.get(Project.annotations_path) or {}
 
     def add_annotations(self, inc_annos):
-        ''' add a port object to the ports list '''
+        ''' add an annotation to the other annotations'''
         if not isinstance(inc_annos, list):
             inc_annos = [inc_annos]
 
@@ -1304,7 +1394,7 @@ class Project(Yedit):
         return True
 
     def find_annotation(self, key):
-        ''' find a specific port '''
+        ''' find an annotation'''
         annotations = self.get_annotations()
         for anno in annotations:
             if Project.annotation_prefix + key == anno:
@@ -1332,7 +1422,7 @@ class Project(Yedit):
         return removed
 
     def update_annotation(self, key, value):
-        ''' remove an annotation from a project'''
+        ''' remove an annotation for a project'''
         annos = self.get(Project.annotations_path) or {}
 
         if not annos:
@@ -1356,7 +1446,7 @@ class Project(Yedit):
 
 # pylint: disable=too-many-instance-attributes
 class OCProject(OpenShiftCLI):
-    ''' Class to wrap the oc command line tools '''
+    ''' Project Class to manage project/namespace objects'''
     kind = 'namespace'
 
     def __init__(self,
@@ -1438,7 +1528,6 @@ class OCProject(OpenShiftCLI):
         if result != self.config.config_options['node_selector']['value']:
             return True
 
-        # Check rolebindings and policybindings
         return False
 
     # pylint: disable=too-many-return-statements,too-many-branches
@@ -1482,6 +1571,9 @@ class OCProject(OpenShiftCLI):
                     return {'changed': True, 'msg': 'CHECK_MODE: Would have performed a delete.'}
 
                 api_rval = oadm_project.delete()
+
+                if api_rval['returncode'] != 0:
+                    return {'failed': True, 'msg': api_rval}
 
                 return {'changed': True, 'results': api_rval, 'state': state}
 

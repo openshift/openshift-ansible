@@ -6,24 +6,25 @@
 class ProjectConfig(OpenShiftCLIConfig):
     ''' project config object '''
     def __init__(self, rname, namespace, kubeconfig, project_options):
-        super(ProjectConfig, self).__init__(rname, rname, kubeconfig, project_options)
+        super(ProjectConfig, self).__init__(rname, None, kubeconfig, project_options)
+
 
 class Project(Yedit):
     ''' Class to wrap the oc command line tools '''
     annotations_path = "metadata.annotations"
-    kind = 'Service'
+    kind = 'Project'
     annotation_prefix = 'openshift.io/'
 
     def __init__(self, content):
-        '''Service constructor'''
+        '''Project constructor'''
         super(Project, self).__init__(content=content)
 
     def get_annotations(self):
-        ''' get a list of ports '''
+        ''' return the annotations'''
         return self.get(Project.annotations_path) or {}
 
     def add_annotations(self, inc_annos):
-        ''' add a port object to the ports list '''
+        ''' add an annotation to the other annotations'''
         if not isinstance(inc_annos, list):
             inc_annos = [inc_annos]
 
@@ -38,7 +39,7 @@ class Project(Yedit):
         return True
 
     def find_annotation(self, key):
-        ''' find a specific port '''
+        ''' find an annotation'''
         annotations = self.get_annotations()
         for anno in annotations:
             if Project.annotation_prefix + key == anno:
@@ -66,7 +67,7 @@ class Project(Yedit):
         return removed
 
     def update_annotation(self, key, value):
-        ''' remove an annotation from a project'''
+        ''' remove an annotation for a project'''
         annos = self.get(Project.annotations_path) or {}
 
         if not annos:

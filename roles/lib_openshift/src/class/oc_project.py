@@ -4,7 +4,7 @@
 
 # pylint: disable=too-many-instance-attributes
 class OCProject(OpenShiftCLI):
-    ''' Class to wrap the oc command line tools '''
+    ''' Project Class to manage project/namespace objects'''
     kind = 'namespace'
 
     def __init__(self,
@@ -86,7 +86,6 @@ class OCProject(OpenShiftCLI):
         if result != self.config.config_options['node_selector']['value']:
             return True
 
-        # Check rolebindings and policybindings
         return False
 
     # pylint: disable=too-many-return-statements,too-many-branches
@@ -130,6 +129,9 @@ class OCProject(OpenShiftCLI):
                     return {'changed': True, 'msg': 'CHECK_MODE: Would have performed a delete.'}
 
                 api_rval = oadm_project.delete()
+
+                if api_rval['returncode'] != 0:
+                    return {'failed': True, 'msg': api_rval}
 
                 return {'changed': True, 'results': api_rval, 'state': state}
 
