@@ -8,11 +8,12 @@ omit =
     # TODO(rhcarvalho): this is used to ignore test files from coverage report.
     # We can make this less generic when we stick with a single test pattern in
     # the repo.
-    test_*.py
-    *_tests.py
+    */conftest.py
+    */test_*.py
+    */*_tests.py
 
 [report]
-fail_under = 28
+fail_under = 25
 
 [html]
 directory = cover

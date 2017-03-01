@@ -27,3 +27,4 @@ cover/
 .molecule/
 .cache
 pytestdebug.log
+htmlcov/
