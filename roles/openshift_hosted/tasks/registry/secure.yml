@@ -4,14 +4,6 @@
     docker_registry_route_hostname: "{{ 'docker-registry-default.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true)) }}"
   run_once: true
 
-- debug: var=openshift_hosted_registry_routecertificates
-
-- debug:
-    msg: "{{ ('cafile' in openshift_hosted_registry_routecertificates) }}"
-
-- debug:
-    msg: "{{ ('cafile' in openshift_hosted_registry_routecertificates) | ternary('THIS IS TRUE', 'THIS IS FALSE') }}"
-
 - name: Get the certificate contents for registry
   copy:
     backup: True
@@ -39,9 +31,6 @@
   - "'cafile' in openshift_hosted_registry_routecertificates"
   - "'certfile' in openshift_hosted_registry_routecertificates"
   - "'keyfile' in openshift_hosted_registry_routecertificates"
-
-- debug:
-    msg: "{{ openshift_hosted_registry_routehost | default(docker_registry_route_hostname) }}"
 
 # When routetermination is passthrough we will create the route
 - name: Create passthrough route for docker-registry
