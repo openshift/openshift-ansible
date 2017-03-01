@@ -27,6 +27,9 @@
     when: openshift_docker_selinux_enabled is not defined
 
 - include: disable_excluder.yml
+  vars:
+    # the excluders needs to be disabled no matter what status says
+    with_status_check: false
   tags:
   - always
 

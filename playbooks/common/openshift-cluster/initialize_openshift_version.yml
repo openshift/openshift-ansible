@@ -19,6 +19,9 @@
     when: "not openshift.common.is_atomic | bool and 'Plugin \"search-disabled-repos\" requires API 2.7. Supported API is 2.6.' in yum_ver_test.stdout"
 
 - include: disable_excluder.yml
+  vars:
+    # the excluders needs to be disabled no matter what status says
+    with_status_check: false
   tags:
   - always
 
