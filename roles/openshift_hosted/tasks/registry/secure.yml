@@ -4,17 +4,16 @@
     docker_registry_route_hostname: "{{ 'docker-registry-default.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true)) }}"
   run_once: true
 
+- debug: var=openshift_hosted_registry_routecertificates
+
 - name: Get the certificate contents for registry
   copy:
     backup: True
-    dest: "/etc/origin/master/named_certificates/{{ item | basename }}"
-    src: "{{ item }}"
-  register: openshift_hosted_registry_certificate_content
-  with_items:
-  - "{{ (openshift_hosted_registry_route_certificates | default({'certfile':none})).certfile }}"
-  - "{{ (openshift_hosted_registry_route_certificates | default({'keyfile':none})).keyfile }}"
-  - "{{ (openshift_hosted_registry_route_certificates | default({'cafile':none})).cafile }}"
-  when: openshift_hosted_registry_route_certificates
+    dest: "/etc/origin/master/named_certificates/{{ item.value | basename }}"
+    src: "{{ item.value }}"
+  when: item.key in ['certfile', 'keyfile', 'cafile'] and item.value is not None
+  with_dict: "{{ openshift_hosted_registry_routecertificates }}"
+  when: openshift_hosted_registry_routecertificates
 
 - debug: var=openshift_hosted_registry_route_termination
 
@@ -23,12 +22,12 @@
     name: docker-registry
     namespace: "{{ openshift_hosted_registry_namespace }}"
     service_name: docker-registry
-    tls_termination: "{{ openshift_hosted_registry_route_termination }}"
-    host: "{{ openshift_hosted_registry_route_host | default(docker_registry_route_hostname) }}"
-    cert_path: "{{ ('certfile' in openshift_hosted_registry_route_certificates) | ternary('/etc/origin/master/named_certificates/' ~ (openshift_hosted_registry_route_certificates.certfile | basename), omit) }}"
-    key_path: "{{ ('keyfile' in openshift_hosted_registry_route_certificates) | ternary('/etc/origin/master/named_certificates/' ~ (openshift_hosted_registry_route_certificates.keyfile | basename), omit) }}"
-    cacert_path: "{{ ('cafile' in openshift_hosted_registry_route_certificates) | ternary('/etc/origin/master/named_certificates/' ~ (openshift_hosted_registry_route_certificates.cafile | basename), omit) }}"
-    dest_cacert_path: "{{ (openshift_hosted_registry_route_termination == 'reencrypt') | ternary('/etc/origin/master/ca.crt', omit) }}"
+    tls_termination: "{{ openshift_hosted_registry_routetermination }}"
+    host: "{{ openshift_hosted_registry_routehost | default(docker_registry_route_hostname) }}"
+    cert_path: "{{ ('certfile' in openshift_hosted_registry_routecertificates) | ternary('/etc/origin/master/named_certificates/' ~ (openshift_hosted_registry_routecertificates.certfile | basename), omit) }}"
+    key_path: "{{ ('keyfile' in openshift_hosted_registry_routecertificates) | ternary('/etc/origin/master/named_certificates/' ~ (openshift_hosted_registry_routecertificates.keyfile | basename), omit) }}"
+    cacert_path: "{{ ('cafile' in openshift_hosted_registry_routecertificates) | ternary('/etc/origin/master/named_certificates/' ~ (openshift_hosted_registry_routecertificates.cafile | basename), omit) }}"
+    dest_cacert_path: "{{ (openshift_hosted_registry_routetermination == 'reencrypt') | ternary('/etc/origin/master/ca.crt', omit) }}"
   run_once: true
 
 - name: Retrieve registry service IP
