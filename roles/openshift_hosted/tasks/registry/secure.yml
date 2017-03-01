@@ -10,7 +10,6 @@
     src: "{{ item.value }}"
   when: item.key in ['certfile', 'keyfile', 'cafile'] and item.value is not None
   with_dict: "{{ openshift_hosted_registry_routecertificates }}"
-  when: openshift_hosted_registry_routecertificates
 
 # When certificates are defined we will create the reencrypt
 # docker-registry route
