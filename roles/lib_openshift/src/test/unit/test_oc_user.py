@@ -24,7 +24,7 @@ import mock
 # place class in our python path
 module_path = os.path.join('/'.join(os.path.realpath(__file__).split('/')[:-4]), 'library')  # noqa: E501
 sys.path.insert(0, module_path)
-from oc_user import OCUser, locate_oc_binary  # noqa: E402
+from oc_user import OCUser  # noqa: E402
 
 
 class OCUserTest(unittest.TestCase):
