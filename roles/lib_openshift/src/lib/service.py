@@ -67,6 +67,7 @@ class Service(Yedit):
     port_path = "spec.ports"
     portal_ip = "spec.portalIP"
     cluster_ip = "spec.clusterIP"
+    selector_path = 'spec.selector'
     kind = 'Service'
 
     def __init__(self, content):
@@ -76,6 +77,10 @@ class Service(Yedit):
     def get_ports(self):
         ''' get a list of ports '''
         return self.get(Service.port_path) or []
+
+    def get_selector(self):
+        ''' get the service selector'''
+        return self.get(Service.selector_path) or {}
 
     def add_ports(self, inc_ports):
         ''' add a port object to the ports list '''

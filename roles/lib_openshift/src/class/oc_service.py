@@ -22,7 +22,7 @@ class OCService(OpenShiftCLI):
                  kubeconfig='/etc/origin/master/admin.kubeconfig',
                  verbose=False):
         ''' Constructor for OCVolume '''
-        super(OCService, self).__init__(namespace, kubeconfig)
+        super(OCService, self).__init__(namespace, kubeconfig, verbose)
         self.namespace = namespace
         self.config = ServiceConfig(sname, namespace, ports, selector, labels,
                                     cluster_ip, portal_ip, session_affinity, service_type)
@@ -93,7 +93,9 @@ class OCService(OpenShiftCLI):
                            params['portalip'],
                            params['ports'],
                            params['session_affinity'],
-                           params['service_type'])
+                           params['service_type'],
+                           params['kubeconfig'],
+                           params['debug'])
 
         state = params['state']
 

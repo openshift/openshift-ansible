@@ -1317,8 +1317,8 @@ class Utils(object):
                     elif value != user_def[key]:
                         if debug:
                             print('value should be identical')
-                            print(value)
                             print(user_def[key])
+                            print(value)
                         return False
 
             # recurse on a dictionary
@@ -1338,8 +1338,8 @@ class Utils(object):
                 if api_values != user_values:
                     if debug:
                         print("keys are not equal in dict")
-                        print(api_values)
                         print(user_values)
+                        print(api_values)
                     return False
 
                 result = Utils.check_def_equal(user_def[key], value, skip_keys=skip_keys, debug=debug)
@@ -1463,6 +1463,7 @@ class Service(Yedit):
     port_path = "spec.ports"
     portal_ip = "spec.portalIP"
     cluster_ip = "spec.clusterIP"
+    selector_path = 'spec.selector'
     kind = 'Service'
 
     def __init__(self, content):
@@ -1472,6 +1473,10 @@ class Service(Yedit):
     def get_ports(self):
         ''' get a list of ports '''
         return self.get(Service.port_path) or []
+
+    def get_selector(self):
+        ''' get the service selector'''
+        return self.get(Service.selector_path) or {}
 
     def add_ports(self, inc_ports):
         ''' add a port object to the ports list '''
@@ -1546,7 +1551,7 @@ class OCService(OpenShiftCLI):
                  kubeconfig='/etc/origin/master/admin.kubeconfig',
                  verbose=False):
         ''' Constructor for OCVolume '''
-        super(OCService, self).__init__(namespace, kubeconfig)
+        super(OCService, self).__init__(namespace, kubeconfig, verbose)
         self.namespace = namespace
         self.config = ServiceConfig(sname, namespace, ports, selector, labels,
                                     cluster_ip, portal_ip, session_affinity, service_type)
@@ -1617,7 +1622,9 @@ class OCService(OpenShiftCLI):
                            params['portalip'],
                            params['ports'],
                            params['session_affinity'],
-                           params['service_type'])
+                           params['service_type'],
+                           params['kubeconfig'],
+                           params['debug'])
 
         state = params['state']
 
