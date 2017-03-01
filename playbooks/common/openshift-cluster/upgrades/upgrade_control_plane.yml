@@ -176,8 +176,8 @@
       policy reconcile-cluster-roles --additive-only=true --confirm -o name
     register: reconcile_cluster_role_result
     changed_when:
-      - reconcile_cluster_role_result.stdout.length > 0
-      - reconcile_cluster_role_result.rc == 0
+    - reconcile_cluster_role_result.stdout.length > 0
+    - reconcile_cluster_role_result.rc == 0
     run_once: true
 
   - name: Reconcile Cluster Role Bindings
@@ -192,8 +192,8 @@
     when: origin_reconcile_bindings | bool or ent_reconcile_bindings | bool
     register: reconcile_bindings_result
     changed_when:
-      - reconcile_bindings_result.stdout.length > 0
-      - reconcile_bindings_result.rc == 0
+    - reconcile_bindings_result.stdout.length > 0
+    - reconcile_bindings_result.rc == 0
     run_once: true
 
   - name: Reconcile Jenkins Pipeline Role Bindings
@@ -202,8 +202,8 @@
     run_once: true
     register: reconcile_jenkens_role_binding_result
     changed_when:
-      - reconcile_jenkins_role_binding_result.stdout.length > 0
-      - reconcile_jenkins_role_binding_result.rc == 0
+    - reconcile_jenkins_role_binding_result.stdout.length > 0
+    - reconcile_jenkins_role_binding_result.rc == 0
     when: openshift.common.version_gte_3_4_or_1_4  | bool
 
   - name: Reconcile Security Context Constraints
@@ -211,8 +211,8 @@
       {{ openshift.common.client_binary }} adm policy reconcile-sccs --confirm --additive-only=true -o name
     register: reconcile_scc_result
     changed_when:
-      - reconcile_scc_result.stdout.length > 0
-      - reconcile_scc_result.rc == 0
+    - reconcile_scc_result.stdout.length > 0
+    - reconcile_scc_result.rc == 0
     run_once: true
 
   - set_fact:
