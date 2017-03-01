@@ -110,7 +110,7 @@ class OCProjectTest(unittest.TestCase):
         mock_cmd.assert_has_calls([
             mock.call(['oc', 'get', 'namespace', 'operations', '-o', 'json'], None),
             mock.call(['oc', 'get', 'namespace', 'operations', '-o', 'json'], None),
-            mock.call(['oadm', 'new-project', 'operations', '--admin-role=admin',
+            mock.call(['oc', 'adm', 'new-project', 'operations', '--admin-role=admin',
                        '--display-name=operations project', '--description=All things operations project',
                        '--node-selector=ops_only=True'], None),
             mock.call(['oc', 'get', 'namespace', 'operations', '-o', 'json'], None),
