@@ -34,7 +34,7 @@
   - not openshift.common.is_containerized | bool
 
 - name: Record excluder status
-  command: "{{ openshift.common.service_type }}-excluder"
+  command: "{{ openshift.common.service_type }}-excluder status"
   register: excluder_status
   when:
   - "{{ openshift_excluder_installed.installed_versions | default([]) | length > 0 }}"
@@ -42,7 +42,7 @@
   failed_when: false
 
 - name: Record docker excluder status
-  command: "{{ openshift.common.service_type }}-docker-excluder"
+  command: "{{ openshift.common.service_type }}-docker-excluder status"
   register: docker_excluder_status
   when:
   - "{{ docker_excluder_installed.installed_versions | default([]) | length > 0 }}"
