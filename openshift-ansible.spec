@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.67
+Version:        3.3.68
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Mar 02 2017 Scott Dodson <sdodson@redhat.com> 3.3.68-1
+- Add v1.3 FIS templates (sdodson@redhat.com)
+- Ensuring that openshift_master_default_subdomain is defined prior to setting
+  master facts (ewolinet@redhat.com)
+- Stop restarting node after upgrading master rpms. (dgoodwin@redhat.com)
+
 * Fri Feb 24 2017 Scott Dodson <sdodson@redhat.com> 3.3.67-1
 - Fix Quick Installer failed due to a Python method failure
   (tbielawa@redhat.com)
