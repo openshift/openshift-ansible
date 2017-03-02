@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.18
+Version:        3.5.19
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -267,6 +267,26 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Mar 01 2017 Scott Dodson <sdodson@redhat.com> 3.5.19-1
+- removing extra when condition (kwoodson@redhat.com)
+- Removing run_once. (kwoodson@redhat.com)
+- Adding the activeDeadlineSeconds.  Removed debug. (kwoodson@redhat.com)
+- Separating routes so logic is simpler. (kwoodson@redhat.com)
+- Defaulting variables properly to avoid undefined route in dict error.
+  (kwoodson@redhat.com)
+- Add v1.3 FIS templates (sdodson@redhat.com)
+- v1.4 Add FIS templates (sdodson@redhat.com)
+- Add FIS templates (sdodson@redhat.com)
+- Removed duplicate host param. (kwoodson@redhat.com)
+- Fixed failures on create when objects exist. (kwoodson@redhat.com)
+- logging fluentd filter was renamed to viaq (rmeggins@redhat.com)
+- Updating delete/recreate with replace --force. (kwoodson@redhat.com)
+- Fixed logic error.  Ensure both svc and dc exist. (kwoodson@redhat.com)
+- Modified base debug statements.  Fixed oc_secret debug/verbose flag.  Added
+  reencrypt for route. (kwoodson@redhat.com)
+- Adding support for a route with certs and reencrypt. (kwoodson@redhat.com)
+- install the latest excluders (jchaloup@redhat.com)
+
 * Tue Feb 28 2017 Scott Dodson <sdodson@redhat.com> 3.5.18-1
 - Add 'persistentVolumeClaim' to volume_info type (rteague@redhat.com)
 - node: use the new oc_atomic_container module (gscrivan@redhat.com)
