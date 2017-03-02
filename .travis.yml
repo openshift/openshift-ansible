@@ -14,13 +14,12 @@ before_cache:
   - rm ~/.cache/pip/log/debug.log
 
 env:
-  - TEST_DIR=root TEST_TYPE=lint
-  - TEST_DIR=root TEST_TYPE=unit
+  - TEST_DIR=. TEST_TYPE=lint
+  - TEST_DIR=. TEST_TYPE=unit
   - TEST_DIR=utils
 
 install:
   - pip install tox-travis
 
 script:
-  - if [[ "${TEST_DIR}" == "root" ]]; then tox; fi
-  - if [[ "${TEST_DIR}" == "utils" ]]; then cd utils && tox; fi
+  - cd "${TEST_DIR}" && tox
