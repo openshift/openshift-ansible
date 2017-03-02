@@ -24,7 +24,7 @@
 
 - name: Create OpenShift router
   oc_adm_router:
-    name: "{{ openshift.hosted.router.name | default('router') }}"
+    name: "{{ item.name }}"
     replicas: "{{ item.replicas }}"
     namespace: "{{ item.namespace | default('default') }}"
     # This option is not yet implemented
