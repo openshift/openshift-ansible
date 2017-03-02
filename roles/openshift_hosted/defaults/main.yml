@@ -20,6 +20,10 @@ openshift_hosted_routers:
   selector: "{{ openshift_hosted_router_selector }}"
   images: "{{ openshift_hosted_router_image }}"
   edits: "{{ openshift_hosted_router_edits }}"
+  stats_port: 1936
+  ports:
+  - 80:80
+  - 443:443
   certificates: "{{ openshift_hosted_router_certificate | default({}) }}"
 
 

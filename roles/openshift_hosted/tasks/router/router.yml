@@ -36,6 +36,8 @@
     key_file: "{{ ('/etc/origin/master/' ~ (item.certificates.keyfile | basename)) if 'keyfile' in item.certificates else omit }}"
     cacert_file: "{{ ('/etc/origin/master/' ~ (item.certificates.cafile | basename)) if 'cafile' in item.certificates else omit }}"
     edits: "{{ openshift_hosted_router_edits | union(item.edits)  }}"
+    ports: "{{ item.ports }}"
+    stats_port: "{{ item.stats_port }}"
   with_items: "{{ openshift_hosted_routers }}"
   register: routerout
 
