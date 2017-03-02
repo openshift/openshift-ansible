@@ -56,6 +56,13 @@
     openshift_hosted_registry_force:
     - False
 
+- name: oc adm policy add-cluster-role-to-user system:registry system:serviceaccount:default:registry
+  oc_adm_policy_user:
+    user: system:serviceaccount:default:registry
+    resource_kind: cluster-role
+    resource_name: system:registry
+    state: present
+
 - name: create the default registry service
   oc_service:
     namespace: "{{ openshift_hosted_registry_namespace }}"
