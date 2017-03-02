@@ -1119,12 +1119,12 @@ class OpenShiftCLI(object):
         if oadm:
             cmds.append('adm')
 
+        cmds.extend(cmd)
+
         if self.all_namespaces:
             cmds.extend(['--all-namespaces'])
         elif self.namespace is not None and self.namespace.lower() not in ['none', 'emtpy']:  # E501
             cmds.extend(['-n', self.namespace])
-
-        cmds.extend(cmd)
 
         rval = {}
         results = ''
@@ -1387,8 +1387,8 @@ class Utils(object):
                     elif value != user_def[key]:
                         if debug:
                             print('value should be identical')
-                            print(value)
                             print(user_def[key])
+                            print(value)
                         return False
 
             # recurse on a dictionary
@@ -1408,8 +1408,8 @@ class Utils(object):
                 if api_values != user_values:
                     if debug:
                         print("keys are not equal in dict")
-                        print(api_values)
                         print(user_values)
+                        print(api_values)
                     return False
 
                 result = Utils.check_def_equal(user_def[key], value, skip_keys=skip_keys, debug=debug)
@@ -1570,6 +1570,18 @@ spec:
                 return True
 
         return False
+
+    def get_env_var(self, key):
+        '''return a environment variables '''
+        results = self.get(DeploymentConfig.env_path) or []
+        if not results:
+            return None
+
+        for env_var in results:
+            if env_var['name'] == key:
+                return env_var
+
+        return None
 
     def get_env_vars(self):
         '''return a environment variables '''
@@ -1973,6 +1985,7 @@ class Service(Yedit):
     port_path = "spec.ports"
     portal_ip = "spec.portalIP"
     cluster_ip = "spec.clusterIP"
+    selector_path = 'spec.selector'
     kind = 'Service'
 
     def __init__(self, content):
@@ -1982,6 +1995,10 @@ class Service(Yedit):
     def get_ports(self):
         ''' get a list of ports '''
         return self.get(Service.port_path) or []
+
+    def get_selector(self):
+        ''' get the service selector'''
+        return self.get(Service.selector_path) or {}
 
     def add_ports(self, inc_ports):
         ''' add a port object to the ports list '''
@@ -2051,20 +2068,21 @@ class Volume(object):
         ''' return a properly structured volume '''
         volume_mount = None
         volume = {'name': volume_info['name']}
-        if volume_info['type'] == 'secret':
+        volume_type = volume_info['type'].lower()
+        if volume_type == 'secret':
             volume['secret'] = {}
             volume[volume_info['type']] = {'secretName': volume_info['secret_name']}
             volume_mount = {'mountPath': volume_info['path'],
                             'name': volume_info['name']}
-        elif volume_info['type'] == 'emptydir':
+        elif volume_type == 'emptydir':
             volume['emptyDir'] = {}
             volume_mount = {'mountPath': volume_info['path'],
                             'name': volume_info['name']}
-        elif volume_info['type'] == 'pvc':
+        elif volume_type == 'pvc' or volume_type == 'persistentvolumeclaim':
             volume['persistentVolumeClaim'] = {}
             volume['persistentVolumeClaim']['claimName'] = volume_info['claimName']
             volume['persistentVolumeClaim']['claimSize'] = volume_info['claimSize']
-        elif volume_info['type'] == 'hostpath':
+        elif volume_type == 'hostpath':
             volume['hostPath'] = {}
             volume['hostPath']['path'] = volume_info['path']
 
@@ -2231,7 +2249,7 @@ class Registry(OpenShiftCLI):
             if result['returncode'] == 0 and part['kind'] == 'dc':
                 self.deploymentconfig = DeploymentConfig(result['results'][0])
             elif result['returncode'] == 0 and part['kind'] == 'svc':
-                self.service = Yedit(content=result['results'][0])
+                self.service = Service(result['results'][0])
 
             if result['returncode'] != 0:
                 rval = result['returncode']
@@ -2242,7 +2260,7 @@ class Registry(OpenShiftCLI):
     def exists(self):
         '''does the object exist?'''
         self.get()
-        if self.deploymentconfig or self.service:
+        if self.deploymentconfig and self.service:
             return True
 
         return False
@@ -2301,6 +2319,9 @@ class Registry(OpenShiftCLI):
         if self.portal_ip:
             service.put('spec.portalIP', self.portal_ip)
 
+        # the dry-run doesn't apply the selector correctly
+        service.put('spec.selector', self.service.get_selector())
+
         # need to create the service and the deploymentconfig
         service_file = Utils.create_tmp_file_from_contents('service', service.yaml_dict)
         deployment_file = Utils.create_tmp_file_from_contents('deploymentconfig', deploymentconfig.yaml_dict)
@@ -2315,8 +2336,20 @@ class Registry(OpenShiftCLI):
     def create(self):
         '''Create a registry'''
         results = []
-        for config_file in ['deployment_file', 'service_file']:
-            results.append(self._create(self.prepared_registry[config_file]))
+        self.needs_update()
+        # if the object is none, then we need to create it
+        # if the object needs an update, then we should call replace
+        # Handle the deploymentconfig
+        if self.deploymentconfig is None:
+            results.append(self._create(self.prepared_registry['deployment_file']))
+        elif self.prepared_registry['deployment_update']:
+            results.append(self._replace(self.prepared_registry['deployment_file']))
+
+        # Handle the service
+        if self.service is None:
+            results.append(self._create(self.prepared_registry['service_file']))
+        elif self.prepared_registry['service_update']:
+            results.append(self._replace(self.prepared_registry['service_file']))
 
         # Clean up returned results
         rval = 0
@@ -2328,7 +2361,7 @@ class Registry(OpenShiftCLI):
         return {'returncode': rval, 'results': results}
 
     def update(self):
-        '''run update for the registry.  This performs a delete and then create '''
+        '''run update for the registry.  This performs a replace if required'''
         # Store the current service IP
         if self.service:
             svcip = self.service.get('spec.clusterIP')
@@ -2354,6 +2387,14 @@ class Registry(OpenShiftCLI):
 
     def add_modifications(self, deploymentconfig):
         ''' update a deployment config with changes '''
+        # The environment variable for REGISTRY_HTTP_SECRET is autogenerated
+        # We should set the generated deploymentconfig to the in memory version
+        # the following modifications will overwrite if needed
+        if self.deploymentconfig:
+            result = self.deploymentconfig.get_env_var('REGISTRY_HTTP_SECRET')
+            if result:
+                deploymentconfig.update_env_var('REGISTRY_HTTP_SECRET', result['value'])
+
         # Currently we know that our deployment of a registry requires a few extra modifications
         # Modification 1
         # we need specific environment variables to be set
@@ -2394,14 +2435,12 @@ class Registry(OpenShiftCLI):
 
     def needs_update(self):
         ''' check to see if we need to update '''
-        if not self.service or not self.deploymentconfig:
-            return True
-
         exclude_list = ['clusterIP', 'portalIP', 'type', 'protocol']
-        if not Utils.check_def_equal(self.prepared_registry['service'].yaml_dict,
-                                     self.service.yaml_dict,
-                                     exclude_list,
-                                     debug=self.verbose):
+        if self.service is None or \
+                not Utils.check_def_equal(self.prepared_registry['service'].yaml_dict,
+                                          self.service.yaml_dict,
+                                          exclude_list,
+                                          debug=self.verbose):
             self.prepared_registry['service_update'] = True
 
         exclude_list = ['dnsPolicy',
@@ -2417,10 +2456,11 @@ class Registry(OpenShiftCLI):
                         'activeDeadlineSeconds', # added in 1.5 for timeouts
                        ]
 
-        if not Utils.check_def_equal(self.prepared_registry['deployment'].yaml_dict,
-                                     self.deploymentconfig.yaml_dict,
-                                     exclude_list,
-                                     debug=self.verbose):
+        if self.deploymentconfig is None or \
+                not Utils.check_def_equal(self.prepared_registry['deployment'].yaml_dict,
+                                          self.deploymentconfig.yaml_dict,
+                                          exclude_list,
+                                          debug=self.verbose):
             self.prepared_registry['deployment_update'] = True
 
         return self.prepared_registry['deployment_update'] or self.prepared_registry['service_update'] or False
@@ -2547,8 +2587,8 @@ def main():
             service_account=dict(default='registry', type='str'),
             mount_host=dict(default=None, type='str'),
             volume_mounts=dict(default=None, type='list'),
-            env_vars=dict(default=None, type='dict'),
-            edits=dict(default=None, type='list'),
+            env_vars=dict(default={}, type='dict'),
+            edits=dict(default=[], type='list'),
             enforce_quota=dict(default=False, type='bool'),
             force=dict(default=False, type='bool'),
             daemonset=dict(default=False, type='bool'),

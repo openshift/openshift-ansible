@@ -1043,12 +1043,12 @@ class OpenShiftCLI(object):
         if oadm:
             cmds.append('adm')
 
+        cmds.extend(cmd)
+
         if self.all_namespaces:
             cmds.extend(['--all-namespaces'])
         elif self.namespace is not None and self.namespace.lower() not in ['none', 'emtpy']:  # E501
             cmds.extend(['-n', self.namespace])
-
-        cmds.extend(cmd)
 
         rval = {}
         results = ''
@@ -1311,8 +1311,8 @@ class Utils(object):
                     elif value != user_def[key]:
                         if debug:
                             print('value should be identical')
-                            print(value)
                             print(user_def[key])
+                            print(value)
                         return False
 
             # recurse on a dictionary
@@ -1332,8 +1332,8 @@ class Utils(object):
                 if api_values != user_values:
                     if debug:
                         print("keys are not equal in dict")
-                        print(api_values)
                         print(user_values)
+                        print(api_values)
                     return False
 
                 result = Utils.check_def_equal(user_def[key], value, skip_keys=skip_keys, debug=debug)

@@ -1,104 +1,91 @@
 ---
-- fail:
-    msg: "'certfile', 'keyfile' and 'cafile' keys must be specified when supplying the openshift_hosted_router_certificate variable."
-  when: openshift_hosted_router_certificate is defined and ('certfile' not in openshift_hosted_router_certificate or 'keyfile' not in openshift_hosted_router_certificate or 'cafile' not in openshift_hosted_router_certificate)
-
-- name: Read router certificate and key
-  become: no
-  local_action:
-    module: slurp
-    src: "{{ item }}"
-  register: openshift_router_certificate_output
-  # Defaulting dictionary keys to none to avoid deprecation warnings
-  # (future fatal errors) during template evaluation. Dictionary keys
-  # won't be accessed unless openshift_hosted_router_certificate is
-  # defined and has all keys (certfile, keyfile, cafile) which we
-  # check above.
-  with_items:
-  - "{{ (openshift_hosted_router_certificate | default({'certfile':none})).certfile }}"
-  - "{{ (openshift_hosted_router_certificate | default({'keyfile':none})).keyfile }}"
-  - "{{ (openshift_hosted_router_certificate | default({'cafile':none})).cafile }}"
-  when: openshift_hosted_router_certificate is defined
-
-- name: Persist certificate contents
-  openshift_facts:
-    role: hosted
-    openshift_env:
-      openshift_hosted_router_certificate_contents: "{% for certificate in openshift_router_certificate_output.results -%}{{ certificate.content | b64decode }}{% endfor -%}"
-  when: openshift_hosted_router_certificate is defined
-
-- name: Create PEM certificate
-  copy:
-    content: "{{ openshift.hosted.router.certificate.contents }}"
-    dest: "{{ openshift_master_config_dir }}/openshift-router.pem"
-    mode: 0600
-  when: "'certificate' in openshift.hosted.router and 'contents' in openshift.hosted.router.certificate"
-
 - name: Retrieve list of openshift nodes matching router selector
-  command: >
-    {{ openshift.common.client_binary }} --api-version='v1' -o json
-    get nodes -n default --config={{ openshift_hosted_kubeconfig }}
-    --selector={{ openshift.hosted.router.selector | default('') }}
-  register: router_nodes_json
-  changed_when: false
+  oc_obj:
+    state: list
+    kind: node
+    namespace: "{{ openshift.hosted.router.namespace | default('default') }}"
+    selector: "{{ openshift.hosted.router.selector | default(omit) }}"
+  register: router_nodes
   when: openshift.hosted.router.replicas | default(none) is none
 
-- set_fact:
-    replicas: "{{ openshift.hosted.router.replicas | default((router_nodes_json.stdout | default('{\"items\":[]}') | from_json)['items'] | length) }}"
+- name: set_fact replicas
+  set_fact:
+    replicas: "{{ openshift.hosted.router.replicas|default(None) | get_router_replicas(router_nodes) }}"
+
+- block:
+
+  - name: Assert that 'certfile', 'keyfile' and 'cafile' keys provided in openshift_hosted_router_certificate
+    assert:
+      that:
+      - "'certfile' in openshift_hosted_router_certificate"
+      - "'keyfile' in openshift_hosted_router_certificate"
+      - "'cafile' in openshift_hosted_router_certificate"
+      msg: "'certfile', 'keyfile' and 'cafile' keys must be specified when supplying the openshift_hosted_router_certificate variable."
+
+  - name: Read router certificate and key
+    become: no
+    local_action:
+      module: slurp
+      src: "{{ item }}"
+    register: openshift_router_certificate_output
+    # Defaulting dictionary keys to none to avoid deprecation warnings
+    # (future fatal errors) during template evaluation. Dictionary keys
+    # won't be accessed unless openshift_hosted_router_certificate is
+    # defined and has all keys (certfile, keyfile, cafile) which we
+    # check above.
+    with_items:
+    - "{{ (openshift_hosted_router_certificate | default({'certfile':none})).certfile }}"
+    - "{{ (openshift_hosted_router_certificate | default({'keyfile':none})).keyfile }}"
+    - "{{ (openshift_hosted_router_certificate | default({'cafile':none})).cafile }}"
+
+  - name: Persist certificate contents
+    openshift_facts:
+      role: hosted
+      openshift_env:
+        openshift_hosted_router_certificate_contents: "{% for certificate in openshift_router_certificate_output.results -%}{{ certificate.content | b64decode }}{% endfor -%}"
+
+  - name: Create PEM certificate
+    copy:
+      content: "{{ openshift.hosted.router.certificate.contents }}"
+      dest: "{{ openshift_master_config_dir }}/openshift-router.pem"
+      mode: 0600
+
+  when: openshift_hosted_router_certificate is defined
 
 - name: Create OpenShift router
-  command: >
-    {{ openshift.common.client_binary }} adm router --create
-    --config={{ openshift_hosted_kubeconfig }}
-    {% if replicas > 1 -%}
-    --replicas={{ replicas }}
-    {% endif -%}
-    {% if 'certificate' in openshift.hosted.router and 'contents' in openshift.hosted.router.certificate -%}
-    --default-cert={{ openshift_master_config_dir }}/openshift-router.pem
-    {% endif -%}
-    --namespace={{ openshift.hosted.router.namespace | default('default') }}
-    {% if openshift.hosted.router.force_subdomain | default(none) is not none %}
-    --force-subdomain={{ openshift.hosted.router.force_subdomain }}
-    {% endif %}
-    --service-account=router
-    {% if openshift.hosted.router.selector | default(none) is not none -%}
-    --selector='{{ openshift.hosted.router.selector }}'
-    {% endif -%}
-    {% if not openshift.common.version_gte_3_2_or_1_2 | bool -%}
-    --credentials={{ openshift_master_config_dir }}/openshift-router.kubeconfig
-    {% endif -%}
-    {% if openshift.hosted.router.registryurl | default(none) is not none -%}
-    --images='{{ openshift.hosted.router.registryurl }}'
-    {% endif -%}
-    {% if openshift.hosted.router.name | default(none) is not none -%}
-    {{ openshift.hosted.router.name }}
-    {% endif -%}
+  oc_adm_router:
+    name: "{{ openshift.hosted.router.name | default('router') }}"
+    replicas: "{{ replicas }}"
+    namespace: "{{ openshift.hosted.router.namespace | default('default') }}"
+    # This option is not yet implemented
+    # force_subdomain: "{{ openshift.hosted.router.force_subdomain | default(none) }}"
+    service_account: router
+    selector: "{{ openshift.hosted.router.selector | default(none) }}"
+    images: "{{ openshift.hosted.router.registryurl | default(none) }}"
+    default_cert: "{{ openshift_hosted_router_certificate is defined | default(false) | ternary(openshift_master_config_dir + '/openshift-router.pem', omit) }}"
+    # These edits are being specified only to prevent 'changed' on rerun
+    edits:
+    - key: spec.strategy.rollingParams.intervalSeconds
+      value: 1
+      action: put
+    - key: spec.strategy.rollingParams.updatePeriodSeconds
+      value: 1
+      action: put
+    - key: spec.strategy.activeDeadlineSeconds
+      value: 21600
+      action: put
+  register: routerout
 
-  register: openshift_hosted_router_results
-  changed_when: "'service exists' not in openshift_hosted_router_results.stdout"
-  failed_when: "openshift_hosted_router_results.rc != 0 and 'service exists' not in openshift_hosted_router_results.stdout and 'deployment_config' not in openshift_hosted_router_results.stderr and 'service' not in openshift_hosted_router_results.stderr"
-  when: replicas | int > 0
-
-- command: >
-    {{ openshift.common.client_binary }}
-    {% if openshift.hosted.router.name | default(none) is not none -%}
-    get dc/{{ openshift.hosted.router.name }}
-    {% else %}
-    get dc/router
-    {% endif%}
-    --template=\\{\\{.spec.replicas\\}\\}
-    --namespace={{ openshift.hosted.router.namespace | default('default') }}
-  register: current_replicas
-  when: replicas | int > 0
+# This should probably move to module
+- name: wait for deploy
+  pause:
+    seconds: 30
+  when: routerout.changed
 
 - name: Ensure router replica count matches desired
-  command: >
-    {{ openshift.common.client_binary }}
-    scale --replicas={{ replicas }}
-    {% if openshift.hosted.router.name | default(none) is not none -%}
-    dc/{{ openshift.hosted.router.name }}
-    {% else %}
-    dc/router
-    {% endif%}
-    --namespace={{ openshift.hosted.router.namespace | default('default') }}
-  when: replicas | int > 0 and replicas | int != current_replicas.stdout | int
+  oc_scale:
+    kind: dc
+    name: "{{ openshift.hosted.router.name | default('router') }}"
+    namespace: "{{ openshift.hosted.router.namespace | default('default') }}"
+    replicas: "{{ replicas }}"
+  when: replicas | int > 0

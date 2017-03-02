@@ -1,17 +1,16 @@
 ---
+- name: Load lib_openshift modules
+  include_role:
+    name: lib_openshift
+
 - name: Pull etcd system container
   command: atomic pull --storage=ostree {{ openshift.etcd.etcd_image }}
   register: pull_result
   changed_when: "'Pulling layer' in pull_result.stdout"
 
-- name: Check etcd system container package
-  command: >
-    atomic containers list --no-trunc -a -f container=etcd
-  register: result
-
 - name: Set initial Etcd cluster
   set_fact:
-    etcd_initial_cluster: >
+    etcd_initial_cluster: >-
       {% for host in etcd_peers | default([]) -%}
       {% if loop.last -%}
       {{ hostvars[host].etcd_hostname }}={{ etcd_peer_url_scheme }}://{{ hostvars[host].etcd_ip }}:{{ etcd_peer_port }}
@@ -20,44 +19,23 @@
       {%- endif -%}
       {% endfor -%}
 
-- name: Update Etcd system container package
-  command: >
-    atomic containers update
-    --set ETCD_LISTEN_PEER_URLS={{ etcd_listen_peer_urls }}
-    --set ETCD_NAME={{ etcd_hostname }}
-    --set ETCD_INITIAL_CLUSTER={{ etcd_initial_cluster | replace('\n', '') }}
-    --set ETCD_LISTEN_CLIENT_URLS={{ etcd_listen_client_urls }}
-    --set ETCD_INITIAL_ADVERTISE_PEER_URLS={{ etcd_initial_advertise_peer_urls }}
-    --set ETCD_INITIAL_CLUSTER_STATE={{ etcd_initial_cluster_state }}
-    --set ETCD_INITIAL_CLUSTER_TOKEN={{ etcd_initial_cluster_token }}
-    --set ETCD_ADVERTISE_CLIENT_URLS={{ etcd_advertise_client_urls }}
-    --set ETCD_CA_FILE={{ etcd_system_container_conf_dir }}/ca.crt
-    --set ETCD_CERT_FILE={{ etcd_system_container_conf_dir }}/server.crt
-    --set ETCD_KEY_FILE={{ etcd_system_container_conf_dir }}/server.key
-    --set ETCD_PEER_CA_FILE={{ etcd_system_container_conf_dir }}/ca.crt
-    --set ETCD_PEER_CERT_FILE={{ etcd_system_container_conf_dir }}/peer.crt
-    --set ETCD_PEER_KEY_FILE={{ etcd_system_container_conf_dir }}/peer.key
-    etcd
-  when:
-  - ("etcd" in result.stdout)
-
-- name: Install Etcd system container package
-  command: >
-    atomic install --system --name=etcd
-    --set ETCD_LISTEN_PEER_URLS={{ etcd_listen_peer_urls }}
-    --set ETCD_NAME={{ etcd_hostname }}
-    --set ETCD_INITIAL_CLUSTER={{ etcd_initial_cluster | replace('\n', '') }}
-    --set ETCD_LISTEN_CLIENT_URLS={{ etcd_listen_client_urls }}
-    --set ETCD_INITIAL_ADVERTISE_PEER_URLS={{ etcd_initial_advertise_peer_urls }}
-    --set ETCD_INITIAL_CLUSTER_STATE={{ etcd_initial_cluster_state }}
-    --set ETCD_INITIAL_CLUSTER_TOKEN={{ etcd_initial_cluster_token }}
-    --set ETCD_ADVERTISE_CLIENT_URLS={{ etcd_advertise_client_urls }}
-    --set ETCD_CA_FILE={{ etcd_system_container_conf_dir }}/ca.crt
-    --set ETCD_CERT_FILE={{ etcd_system_container_conf_dir }}/server.crt
-    --set ETCD_KEY_FILE={{ etcd_system_container_conf_dir }}/server.key
-    --set ETCD_PEER_CA_FILE={{ etcd_system_container_conf_dir }}/ca.crt
-    --set ETCD_PEER_CERT_FILE={{ etcd_system_container_conf_dir }}/peer.crt
-    --set ETCD_PEER_KEY_FILE={{ etcd_system_container_conf_dir }}/peer.key
-    {{ openshift.etcd.etcd_image }}
-  when:
-  - ("etcd" not in result.stdout)
+- name: Install or Update Etcd system container package
+  oc_atomic_container:
+    name: etcd
+    image: "{{ openshift.etcd.etcd_image }}"
+    state: latest
+    values:
+      - ETCD_LISTEN_PEER_URLS={{ etcd_listen_peer_urls }}
+      - ETCD_NAME={{ etcd_hostname }}
+      - ETCD_INITIAL_CLUSTER={{ etcd_initial_cluster }}
+      - ETCD_LISTEN_CLIENT_URLS={{ etcd_listen_client_urls }}
+      - ETCD_INITIAL_ADVERTISE_PEER_URLS={{ etcd_initial_advertise_peer_urls }}
+      - ETCD_INITIAL_CLUSTER_STATE={{ etcd_initial_cluster_state }}
+      - ETCD_INITIAL_CLUSTER_TOKEN={{ etcd_initial_cluster_token }}
+      - ETCD_ADVERTISE_CLIENT_URLS={{ etcd_advertise_client_urls }}
+      - ETCD_CA_FILE={{ etcd_system_container_conf_dir }}/ca.crt
+      - ETCD_CERT_FILE={{ etcd_system_container_conf_dir }}/server.crt
+      - ETCD_KEY_FILE={{ etcd_system_container_conf_dir }}/server.key
+      - ETCD_PEER_CA_FILE={{ etcd_system_container_conf_dir }}/ca.crt
+      - ETCD_PEER_CERT_FILE={{ etcd_system_container_conf_dir }}/peer.crt
+      - ETCD_PEER_KEY_FILE={{ etcd_system_container_conf_dir }}/peer.key

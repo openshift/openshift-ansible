@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.14
+Version:        3.5.20
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -76,6 +76,10 @@ cp -rp roles %{buildroot}%{_datadir}/ansible/%{name}/
 # openshift_master_facts symlinks filter_plugins/oo_filters.py from ansible_plugins/filter_plugins
 pushd %{buildroot}%{_datadir}/ansible/%{name}/roles/openshift_master_facts/filter_plugins
 ln -sf ../../../../../ansible_plugins/filter_plugins/oo_filters.py oo_filters.py
+popd
+# openshift_master_facts symlinks lookup_plugins/oo_option.py from ansible_plugins/lookup_plugins
+pushd %{buildroot}%{_datadir}/ansible/%{name}/roles/openshift_master_facts/lookup_plugins
+ln -sf ../../../../../ansible_plugins/lookup_plugins/oo_option.py oo_option.py
 popd
 
 # openshift-ansible-filter-plugins install
@@ -263,6 +267,72 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Mar 01 2017 Scott Dodson <sdodson@redhat.com> 3.5.20-1
+- Add ca-bundle.crt to list of certs to synchronize. (abutcher@redhat.com)
+- Do not force custom ca cert deployment. (abutcher@redhat.com)
+
+* Wed Mar 01 2017 Scott Dodson <sdodson@redhat.com> 3.5.19-1
+- removing extra when condition (kwoodson@redhat.com)
+- Removing run_once. (kwoodson@redhat.com)
+- Adding the activeDeadlineSeconds.  Removed debug. (kwoodson@redhat.com)
+- Separating routes so logic is simpler. (kwoodson@redhat.com)
+- Defaulting variables properly to avoid undefined route in dict error.
+  (kwoodson@redhat.com)
+- Add v1.3 FIS templates (sdodson@redhat.com)
+- v1.4 Add FIS templates (sdodson@redhat.com)
+- Add FIS templates (sdodson@redhat.com)
+- Removed duplicate host param. (kwoodson@redhat.com)
+- Fixed failures on create when objects exist. (kwoodson@redhat.com)
+- logging fluentd filter was renamed to viaq (rmeggins@redhat.com)
+- Updating delete/recreate with replace --force. (kwoodson@redhat.com)
+- Fixed logic error.  Ensure both svc and dc exist. (kwoodson@redhat.com)
+- Modified base debug statements.  Fixed oc_secret debug/verbose flag.  Added
+  reencrypt for route. (kwoodson@redhat.com)
+- Adding support for a route with certs and reencrypt. (kwoodson@redhat.com)
+- install the latest excluders (jchaloup@redhat.com)
+
+* Tue Feb 28 2017 Scott Dodson <sdodson@redhat.com> 3.5.18-1
+- Add 'persistentVolumeClaim' to volume_info type (rteague@redhat.com)
+- node: use the new oc_atomic_container module (gscrivan@redhat.com)
+- master: use the new oc_atomic_container module (gscrivan@redhat.com)
+- etcd: use the new oc_atomic_container module (gscrivan@redhat.com)
+- lib_openshift: new module atomic_container (gscrivan@redhat.com)
+- Re-generate lib_openshift (sdodson@redhat.com)
+- Correct fact creation for pvc (rteague@redhat.com)
+- Add SDNValidator Module (mkhan@redhat.com)
+
+* Mon Feb 27 2017 Scott Dodson <sdodson@redhat.com> 3.5.17-1
+- Make s3_volume_mount available to set_fact call (smilner@redhat.com)
+- Create hosted registry service (rteague@redhat.com)
+
+* Mon Feb 27 2017 Scott Dodson <sdodson@redhat.com> 3.5.16-1
+- [oc_obj] Move namespace argument to end of command. (abutcher@redhat.com)
+- Correct typo in haproxy router collection. (abutcher@redhat.com)
+- Fix issue #3505, add notes about origin upgrade versions support in BYO
+  upgrade README file (contact@stephane-klein.info)
+- Moving replica logic to filter_plugin to fix skipped task variable behavior.
+  (kwoodson@redhat.com)
+- Removed JGroups cert and password generation. (juraci@kroehling.de)
+- openshift_logging default to 2 replicas of primary shards
+  (jcantril@redhat.com)
+
+* Fri Feb 24 2017 Scott Dodson <sdodson@redhat.com> 3.5.15-1
+- openshift_hosted: Update tasks to use oc_ modules (rteague@redhat.com)
+- Rebased. (kwoodson@redhat.com)
+- Fixed indentation (kwoodson@redhat.com)
+- Adding get_env_var to deploymentconfig. (kwoodson@redhat.com)
+- Fixed default variables.  Added a fix to generated secret in env var.
+  (kwoodson@redhat.com)
+- Revert "Add centos paas sig common" (sdodson@redhat.com)
+- Fix Quick Installer failed due to a Python method failure
+  (tbielawa@redhat.com)
+- Fix symlink to lookup_plugins/oo_option.py (jchaloup@redhat.com)
+- Prepare for origin moving to OCP version scheme (ccoleman@redhat.com)
+- BZ1414276 - Quote ansible_ssh_user when determining group id
+  (sdodson@redhat.com)
+- bug 1417261. Quote name and secrets in logging templates
+  (jcantril@redhat.com)
+
 * Fri Feb 24 2017 Scott Dodson <sdodson@redhat.com> 3.5.14-1
 - Use 2 and 3 friendly urlparse in oo_filters (smilner@redhat.com)
 - Update v1.5 content (sdodson@redhat.com)

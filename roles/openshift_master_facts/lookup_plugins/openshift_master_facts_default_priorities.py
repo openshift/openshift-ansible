@@ -41,7 +41,7 @@ class LookupModule(LookupBase):
                 raise AnsibleError("Either OpenShift needs to be installed or openshift_release needs to be specified")
 
         if deployment_type == 'origin':
-            if short_version not in ['1.1', '1.2', '1.3', '1.4', '1.5', '1.6', 'latest']:
+            if short_version not in ['1.1', '1.2', '1.3', '1.4', '1.5', '1.6', '3.6', 'latest']:
                 raise AnsibleError("Unknown short_version %s" % short_version)
         elif deployment_type == 'openshift-enterprise':
             if short_version not in ['3.1', '3.2', '3.3', '3.4', '3.5', '3.6', 'latest']:
@@ -49,21 +49,21 @@ class LookupModule(LookupBase):
         else:
             raise AnsibleError("Unknown deployment_type %s" % deployment_type)
 
-        if deployment_type == 'openshift-enterprise':
+        if deployment_type == 'origin':
             # convert short_version to origin short_version
-            short_version = re.sub('^3.', '1.', short_version)
+            short_version = re.sub('^1.', '3.', short_version)
 
         if short_version == 'latest':
-            short_version = '1.6'
+            short_version = '3.6'
 
-        if short_version == '1.1':
+        if short_version == '3.1':
             priorities.extend([
                 {'name': 'LeastRequestedPriority', 'weight': 1},
                 {'name': 'BalancedResourceAllocation', 'weight': 1},
                 {'name': 'SelectorSpreadPriority', 'weight': 1}
             ])
 
-        if short_version == '1.2':
+        if short_version == '3.2':
             priorities.extend([
                 {'name': 'LeastRequestedPriority', 'weight': 1},
                 {'name': 'BalancedResourceAllocation', 'weight': 1},
@@ -71,7 +71,7 @@ class LookupModule(LookupBase):
                 {'name': 'NodeAffinityPriority', 'weight': 1}
             ])
 
-        if short_version == '1.3':
+        if short_version == '3.3':
             priorities.extend([
                 {'name': 'LeastRequestedPriority', 'weight': 1},
                 {'name': 'BalancedResourceAllocation', 'weight': 1},
@@ -80,7 +80,7 @@ class LookupModule(LookupBase):
                 {'name': 'TaintTolerationPriority', 'weight': 1}
             ])
 
-        if short_version == '1.4':
+        if short_version == '3.4':
             priorities.extend([
                 {'name': 'LeastRequestedPriority', 'weight': 1},
                 {'name': 'BalancedResourceAllocation', 'weight': 1},
@@ -91,7 +91,7 @@ class LookupModule(LookupBase):
                 {'name': 'InterPodAffinityPriority', 'weight': 1}
             ])
 
-        if short_version in ['1.5', '1.6']:
+        if short_version in ['3.5', '3.6']:
             priorities.extend([
                 {'name': 'SelectorSpreadPriority', 'weight': 1},
                 {'name': 'InterPodAffinityPriority', 'weight': 1},

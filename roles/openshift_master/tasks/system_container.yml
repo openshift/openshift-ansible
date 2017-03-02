@@ -1,4 +1,8 @@
 ---
+- name: Load lib_openshift modules
+  include_role:
+    name: lib_openshift
+
 - name: Pre-pull master system container image
   command: >
     atomic pull --storage=ostree {{ openshift.common.system_images_registry }}/{{ openshift.master.master_system_image }}:{{ openshift_image_tag }}
@@ -10,68 +14,31 @@
     atomic containers list --no-trunc -a -f container={{ openshift.common.service_type }}-master
   register: result
 
-- name: Update Master system container package
-  command: >
-    atomic containers update {{ openshift.common.service_type }}-master
-  register: update_result
-  changed_when: "'Extracting' in update_result.stdout"
+- name: Install or Update master system container
+  oc_atomic_container:
+    name: "{{ openshift.common.service_type }}-master"
+    image: "{{ openshift.common.system_images_registry }}/{{ openshift.master.master_system_image }}:{{ openshift_image_tag }}"
+    state: latest
   when:
-    - ("master" in result.stdout)
-    - l_is_same_version
     - not l_is_ha
-
-- name: Uninstall Master system container package
-  command: >
-    atomic uninstall {{ openshift.common.service_type }}-master
-  failed_when: False
-  when:
-    - ("master" in result.stdout)
-    - not l_is_same_version
-    - not l_is_ha
-
-- name: Install Master system container package
-  command: >
-    atomic install --system --name={{ openshift.common.service_type }}-master {{ openshift.common.system_images_registry }}/{{ openshift.master.master_system_image }}:{{ openshift_image_tag }}
-  when:
-    - not l_is_same_version or ("master" not in result.stdout) | bool
-    - not l_is_ha
-  notify:
-    - restart master
 
 # HA
-- name: Update Master HA system container package
-  command: >
-    atomic containers update {{ openshift.common.service_type }}-master-{{ item }}
-  register: update_result
-  changed_when: "'Extracting' in update_result.stdout"
-  with_items:
-    - api
-    - controllers
+- name: Install or Update HA api master system container
+  oc_atomic_container:
+    name: "{{ openshift.common.service_type }}-master-api"
+    image: "{{ openshift.common.system_images_registry }}/{{ openshift.master.master_system_image }}:{{ openshift_image_tag }}"
+    state: latest
+    values:
+      - COMMAND=api
   when:
-    - ("master" in result.stdout)
-    - l_is_same_version
     - l_is_ha
 
-- name: Uninstall Master HA system container package
-  command: >
-    atomic uninstall {{ openshift.common.service_type }}-master-{{ item }}
-  failed_when: False
-  with_items:
-    - api
-    - controllers
+- name: Install or Update HA controller master system container
+  oc_atomic_container:
+    name: "{{ openshift.common.service_type }}-master-controllers"
+    image: "{{ openshift.common.system_images_registry }}/{{ openshift.master.master_system_image }}:{{ openshift_image_tag }}"
+    state: latest
+    values:
+      - COMMAND=controllers
   when:
-    - ("master" in result.stdout)
-    - not l_is_same_version
     - l_is_ha
-
-- name: Install Master HA system container package
-  command: >
-    atomic install --system --set COMMAND={{ item }} --name={{ openshift.common.service_type }}-master-{{ item }} {{ openshift.common.system_images_registry }}/{{ openshift.master.master_system_image }}:{{ openshift_image_tag }}
-  with_items:
-    - api
-    - controllers
-  when:
-    - not l_is_same_version or ("master" not in result.stdout) | bool
-    - l_is_ha
-  notify:
-    - restart master

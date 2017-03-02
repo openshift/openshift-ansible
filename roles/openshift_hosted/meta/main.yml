@@ -20,6 +20,7 @@ dependencies:
 - role: openshift_serviceaccounts
   openshift_serviceaccounts_names:
   - router
+  - registry
   openshift_serviceaccounts_namespace: default
   openshift_serviceaccounts_sccs:
   - hostnetwork
