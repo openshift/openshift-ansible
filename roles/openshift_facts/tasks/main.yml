@@ -26,6 +26,25 @@
     msg: "openshift-ansible requires Python 2 for {{ ansible_distribution }}"
   when: ansible_distribution != 'Fedora' and ansible_python['version']['major'] != 2
 
+# Fail as early as possible if Atomic and old version of Docker
+- block:
+
+  # See https://access.redhat.com/articles/2317361
+  # and https://github.com/ansible/ansible/issues/15892
+  # NOTE: the "'s can not be removed at this level else the docker command will fail
+  # NOTE: When ansible >2.2.1.x is used this can be updated per
+  # https://github.com/openshift/openshift-ansible/pull/3475#discussion_r103525121
+  - name: Determine Atomic Host Docker Version
+    shell: 'CURLY="{"; docker version --format "$CURLY{json .Server.Version}}"'
+    register: l_atomic_docker_version
+
+  - assert:
+      msg: Installation on Atomic Host requires Docker 1.12 or later. Please upgrade and restart the Atomic Host.
+      that:
+      - l_atomic_docker_version.stdout | replace('"', '') | version_compare('1.12','>=')
+
+  when: l_is_atomic | bool
+
 - name: Ensure various deps are installed
   package: name={{ item }} state=present
   with_items: "{{ required_packages }}"
