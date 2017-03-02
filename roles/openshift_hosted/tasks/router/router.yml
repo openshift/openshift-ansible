@@ -14,73 +14,29 @@
     openshift_hosted_router_selector: "{{ openshift.hosted.router.selector | default(None) }}"
     openshift_hosted_router_image: "{{ openshift.hosted.router.registryurl }}"
 
-#- block:
-#
-#  - name: Assert that 'certfile', 'keyfile' and 'cafile' keys provided in openshift_hosted_router_certificate
-#    assert:
-#      that:
-#      - "'certfile' in openshift_hosted_router_certificate"
-#      - "'keyfile' in openshift_hosted_router_certificate"
-#      - "'cafile' in openshift_hosted_router_certificate"
-#      msg: "'certfile', 'keyfile' and 'cafile' keys must be specified when supplying the openshift_hosted_router_certificate variable."
-#
-- name: Get the certificate contents for registry
+- name: Get the certificate contents for router
   copy:
     backup: True
-    dest: "/etc/origin/master/{{ item.value | basename }}"
-    src: "{{ item.value }}"
-  when: item.key in ['certfile', 'keyfile', 'cafile'] and item.value is not None
-  with_dict: "{{ openshift_hosted_router_certificates }}"
-#  - name: Read router certificate and key
-#    become: no
-#    local_action:
-#      module: slurp
-#      src: "{{ item }}"
-#    register: openshift_router_certificate_output
-#    # Defaulting dictionary keys to none to avoid deprecation warnings
-#    # (future fatal errors) during template evaluation. Dictionary keys
-#    # won't be accessed unless openshift_hosted_router_certificate is
-#    # defined and has all keys (certfile, keyfile, cafile) which we
-#    # check above.
-#    with_items:
-#    - "{{ (openshift_hosted_router_certificate | default({'certfile':none})).certfile }}"
-#    - "{{ (openshift_hosted_router_certificate | default({'keyfile':none})).keyfile }}"
-#    - "{{ (openshift_hosted_router_certificate | default({'cafile':none})).cafile }}"
-#
-#  - name: Persist certificate contents
-#    openshift_facts:
-#      role: hosted
-#      openshift_env:
-#        openshift_hosted_router_certificate_contents: "{% for certificate in openshift_router_certificate_output.results -%}{{ certificate.content | b64decode }}{% endfor -%}"
-#
-#  - name: Create PEM certificate
-#    copy:
-#      content: "{{ openshift.hosted.router.certificate.contents }}"
-#      dest: "{{ openshift_master_config_dir }}/openshift-router.pem"
-#      mode: 0600
-#
-#
-#  when: openshift_hosted_router_certificate is defined
+    dest: "/etc/origin/master/{{ item | basename }}"
+    src: "{{ item }}"
+  with_items: "{{ openshift_hosted_routers | oo_collect(attribute='certificates') |
+                  oo_select_keys_from_list(['keyfile', 'certfile', 'cafile']) }}"
+
 - name: Create OpenShift router
   oc_adm_router:
     name: "{{ openshift.hosted.router.name | default('router') }}"
-    replicas: "{{ item[0].replicas | default(replicas) }}"
-    namespace: "{{ item[0].namespace | default('default') }}"
+    replicas: "{{ item.replicas }}"
+    namespace: "{{ item.namespace | default('default') }}"
     # This option is not yet implemented
     # force_subdomain: "{{ openshift.hosted.router.force_subdomain | default(none) }}"
-    service_account: "{{ item[0].serviceaccount | default('router') }}"
-    selector: "{{ item[0].selector | default(none) }}"
-    images: "{{ item[0].images | default(omit) }}"
-    cert_file: "{{ ('certfile' in item[1]) |
-      ternary('/etc/origin/master/' ~ (item[1]|default({'certfile':none})).certfile, omit) }}"
-    key_file: "{{ ('keyfile' in item[1]) |
-      ternary('/etc/origin/master/' ~ (item[1]|default({'keyfile':none})).keyfile, omit) }}"
-    cacert_file: "{{ ('cafile' in item[1]) |
-      ternary('/etc/origin/master/' ~ (item[1]|default({'cafile':none})).cafile, omit) }}"
-    edits: "{{ openshift_hosted_router_edits | unon(item[0].edits)  }}"
-  with_together:
-  - openshift_hosted_routers
-  - openshift_hosted_router_certificates
+    service_account: "{{ item.serviceaccount | default('router') }}"
+    selector: "{{ item.selector | default(none) }}"
+    images: "{{ item.images | default(omit) }}"
+    cert_file: "{{ ('/etc/origin/master/' ~ (item.certificates.certfile | basename)) if 'certfile' in item.certificates else omit }}"
+    key_file: "{{ ('/etc/origin/master/' ~ (item.certificates.keyfile | basename)) if 'keyfile' in item.certificates else omit }}"
+    cacert_file: "{{ ('/etc/origin/master/' ~ (item.certificates.cafile | basename)) if 'cafile' in item.certificates else omit }}"
+    edits: "{{ openshift_hosted_router_edits | union(item.edits)  }}"
+  with_items: "{{ openshift_hosted_routers }}"
   register: routerout
 
 # This should probably move to module

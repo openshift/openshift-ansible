@@ -14,11 +14,13 @@ openshift_hosted_router_edits:
 
 openshift_hosted_routers:
 - name: router
-  replicas: "{{ openshift_hosted_router_replicas }}"
+  replicas: "{{ replicas }}"
   namespace: default
   serviceaccount: router
   selector: "{{ openshift_hosted_router_selector }}"
   images: "{{ openshift_hosted_router_image }}"
   edits: "{{ openshift_hosted_router_edits }}"
+  certificates: "{{ openshift_hosted_router_certificate | default({}) }}"
+
 
 openshift_hosted_router_certificates: {}
