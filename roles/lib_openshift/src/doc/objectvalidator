@@ -3,10 +3,10 @@
 
 DOCUMENTATION = '''
 ---
-module: oc_sdnvalidator
-short_description: Validate SDN objects
+module: oc_objectvalidator
+short_description: Validate OpenShift objects
 description:
-  - Validate SDN objects
+  - Validate OpenShift objects
 options:
   kubeconfig:
     description:
@@ -20,8 +20,8 @@ extends_documentation_fragment: []
 '''
 
 EXAMPLES = '''
-oc_version:
-- name: get oc sdnvalidator
-  sdnvalidator:
-  register: oc_sdnvalidator
+oc_objectvalidator:
+- name: run oc_objectvalidator
+  oc_objectvalidator:
+  register: oc_objectvalidator
 '''

@@ -3,7 +3,7 @@
 
 def main():
     '''
-    ansible oc module for validating OpenShift SDN objects
+    ansible oc module for validating OpenShift objects
     '''
 
     module = AnsibleModule(
@@ -14,7 +14,7 @@ def main():
     )
 
 
-    rval = OCSDNValidator.run_ansible(module.params)
+    rval = OCObjectValidator.run_ansible(module.params)
     if 'failed' in rval:
         module.fail_json(**rval)
 
