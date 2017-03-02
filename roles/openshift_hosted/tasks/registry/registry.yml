@@ -65,7 +65,8 @@
       port: 5000
       protocol: TCP
       targetPort: 5000
-    selector: "{{ openshift_hosted_registry_selector }}"
+    selector:
+      docker-registry: default
     session_affinity: ClientIP
     service_type: ClusterIP
 
