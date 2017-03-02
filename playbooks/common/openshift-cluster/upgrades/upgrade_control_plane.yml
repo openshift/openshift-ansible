@@ -176,7 +176,7 @@
       policy reconcile-cluster-roles --additive-only=true --confirm -o name
     register: reconcile_cluster_role_result
     changed_when:
-    - reconcile_cluster_role_result.stdout.length > 0
+    - reconcile_cluster_role_result.stdout != ''
     - reconcile_cluster_role_result.rc == 0
     run_once: true
 
@@ -192,7 +192,7 @@
     when: origin_reconcile_bindings | bool or ent_reconcile_bindings | bool
     register: reconcile_bindings_result
     changed_when:
-    - reconcile_bindings_result.stdout.length > 0
+    - reconcile_bindings_result.stdout != ''
     - reconcile_bindings_result.rc == 0
     run_once: true
 
@@ -200,9 +200,9 @@
     command: >
       {{ openshift.common.client_binary }} adm --config={{ openshift.common.config_base }}/master/admin.kubeconfig policy reconcile-cluster-role-bindings system:build-strategy-jenkinspipeline --confirm -o name
     run_once: true
-    register: reconcile_jenkens_role_binding_result
+    register: reconcile_jenkins_role_binding_result
     changed_when:
-    - reconcile_jenkins_role_binding_result.stdout.length > 0
+    - reconcile_jenkins_role_binding_result.stdout != ''
     - reconcile_jenkins_role_binding_result.rc == 0
     when: openshift.common.version_gte_3_4_or_1_4  | bool
 
@@ -211,7 +211,7 @@
       {{ openshift.common.client_binary }} adm policy reconcile-sccs --confirm --additive-only=true -o name
     register: reconcile_scc_result
     changed_when:
-    - reconcile_scc_result.stdout.length > 0
+    - reconcile_scc_result.stdout != ''
     - reconcile_scc_result.rc == 0
     run_once: true
 
