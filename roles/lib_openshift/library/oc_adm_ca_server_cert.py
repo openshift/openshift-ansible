@@ -1492,6 +1492,9 @@ class CAServerCert(OpenShiftCLI):
 
                 api_rval = server_cert.create()
 
+                if api_rval['returncode'] != 0:
+                    return {'Failed': True, 'msg': api_rval}
+
                 return {'changed': True, 'results': api_rval, 'state': state}
 
             ########
