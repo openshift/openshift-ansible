@@ -60,6 +60,7 @@
   copy:
     src: "{{ item.src }}"
     dest: "{{ openshift_ca_config_dir }}/{{ item.dest }}"
+    force: no
   with_items:
   - src: "{{ (openshift_master_ca_certificate | default({'certfile':none})).certfile }}"
     dest: ca.crt
