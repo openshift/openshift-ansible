@@ -1947,7 +1947,7 @@ class PolicyUser(OpenShiftCLI):
 
             return False
 
-        elif '\"%s\" not found' % self.config.config_options['name']['value'] in results['stderr']:
+        elif self.config.config_options['name']['value'] in results['stderr'] and '" not found' in results['stderr']:
             return False
 
         return results
