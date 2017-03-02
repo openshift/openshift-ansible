@@ -2,6 +2,7 @@
 # etcd server vars
 etcd_conf_dir: "{{ '/etc/etcd' if not openshift.common.is_etcd_system_container else '/var/lib/etcd/etcd.etcd/etc'  }}"
 etcd_system_container_conf_dir: /var/lib/etcd/etc
+etcd_conf_file: "{{ etcd_conf_dir }}/etcd.conf"
 etcd_ca_file: "{{ etcd_conf_dir }}/ca.crt"
 etcd_cert_file: "{{ etcd_conf_dir }}/server.crt"
 etcd_key_file: "{{ etcd_conf_dir }}/server.key"
@@ -33,3 +34,4 @@ etcd_hostname: "{{ inventory_hostname }}"
 etcd_ip: "{{ ansible_default_ipv4.address }}"
 etcd_is_atomic: False
 etcd_is_containerized: False
+etcd_is_thirdparty: False

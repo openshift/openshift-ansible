@@ -14,3 +14,4 @@ etcd_advertise_client_urls: "{{ etcd_url_scheme }}://{{ etcd_ip }}:{{ etcd_clien
 etcd_listen_client_urls: "{{ etcd_url_scheme }}://{{ etcd_ip }}:{{ etcd_client_port }}"
 
 etcd_data_dir: /var/lib/etcd/
+etcd_systemd_dir: "/etc/systemd/system/{{ etcd_service }}.service.d"

@@ -8,7 +8,7 @@
 {% endfor -%}
 {% endmacro -%}
 
-{% if etcd_peers | default([]) | length > 1 %}
+{% if (etcd_peers | default([]) | length > 1) or (etcd_is_thirdparty) %}
 ETCD_NAME={{ etcd_hostname }}
 ETCD_LISTEN_PEER_URLS={{ etcd_listen_peer_urls }}
 {% else %}
@@ -22,6 +22,16 @@ ETCD_LISTEN_CLIENT_URLS={{ etcd_listen_client_urls }}
 #ETCD_MAX_SNAPSHOTS=5
 #ETCD_MAX_WALS=5
 #ETCD_CORS=
+
+{% if etcd_is_thirdparty %}
+#[cluster]
+ETCD_INITIAL_ADVERTISE_PEER_URLS={{ etcd_initial_advertise_peer_urls }}
+
+# TODO: This needs to be altered to support the correct etcd instances
+ETCD_INITIAL_CLUSTER={{ etcd_hostname}}={{ etcd_initial_advertise_peer_urls }}
+ETCD_INITIAL_CLUSTER_STATE={{ etcd_initial_cluster_state }}
+ETCD_INITIAL_CLUSTER_TOKEN=thirdparty-etcd-cluster-1
+{% endif %}
 
 {% if etcd_peers | default([]) | length > 1 %}
 #[cluster]
