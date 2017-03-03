@@ -19,7 +19,7 @@ import pytest
 MODULE_PATH = os.path.realpath(os.path.join(os.path.dirname(__file__), os.pardir,
                                             os.pardir, os.pardir, 'library'))
 sys.path.insert(1, MODULE_PATH)
-import oc_serviceaccount_secret
+import oc_serviceaccount_secret  # noqa: E402
 
 
 @pytest.fixture(params=['PyYAML', 'ruamel.yaml'])
@@ -77,13 +77,9 @@ def service_account():
 
 def test_adding_a_secret_to_a_serviceaccount(yaml_provider, mocker, service_account, builder):
     ''' Testing adding a secret to a service account '''
-    mock_oc_binary = mocker.patch('oc_serviceaccount_secret.locate_oc_binary',
-                                  return_value='oc')
-    mock_tmpfile_copy = mocker.patch('oc_serviceaccount_secret.Utils.create_tmpfile_copy',
-                                     return_value='/tmp/mocked_kubeconfig')
+    mocker.patch('oc_serviceaccount_secret.locate_oc_binary', return_value='oc')
+    mocker.patch('oc_serviceaccount_secret.Utils.create_tmpfile_copy', return_value='/tmp/mocked_kubeconfig')
     spy_write = mocker.spy(oc_serviceaccount_secret.Yedit, '_write')
-    mock_cmd = mocker.patch('oc_serviceaccount_secret.OCServiceAccountSecret._run')
-
     # Arrange
 
     # run_ansible input parameters
@@ -105,13 +101,13 @@ def test_adding_a_secret_to_a_serviceaccount(yaml_provider, mocker, service_acco
 
     builder['secrets'].append(new_secret)
 
-    # Return values of our mocked function call. These get returned once per call.
-    mock_cmd.side_effect = [
-        (0, oc_get_sa_before, ''),  # First call to the mock
-        (0, oc_get_sa_before, ''),  # Second call to the mock
-        (0, 'serviceaccount "builder" replaced', ''),  # Third call to the mock
-        (0, oc_get_sa_after, ''),  # Fourth call to the mock
-    ]
+    mock_cmd = mocker.patch('oc_serviceaccount_secret.OCServiceAccountSecret._run',
+                            side_effect=[
+                                (0, oc_get_sa_before, ''),  # First call to the mock
+                                (0, oc_get_sa_before, ''),  # Second call to the mock
+                                (0, 'serviceaccount "builder" replaced', ''),  # Third call to the mock
+                                (0, oc_get_sa_after, ''),  # Fourth call to the mock
+                            ])
 
     # Act
     results = oc_serviceaccount_secret.OCServiceAccountSecret.run_ansible(params, False)
@@ -136,12 +132,9 @@ def test_adding_a_secret_to_a_serviceaccount(yaml_provider, mocker, service_acco
 
 def test_removing_a_secret_to_a_serviceaccount(yaml_provider, mocker, service_account, builder):
     ''' Testing removing a secret to a service account '''
-    mock_oc_binary = mocker.patch('oc_serviceaccount_secret.locate_oc_binary',
-                                  return_value='oc')
-    mock_tmpfile_copy = mocker.patch('oc_serviceaccount_secret.Utils.create_tmpfile_copy',
-                                     return_value='/tmp/mocked_kubeconfig')
+    mocker.patch('oc_serviceaccount_secret.locate_oc_binary', return_value='oc')
+    mocker.patch('oc_serviceaccount_secret.Utils.create_tmpfile_copy', return_value='/tmp/mocked_kubeconfig')
     spy_write = mocker.spy(oc_serviceaccount_secret.Yedit, '_write')
-    mock_cmd = mocker.patch('oc_serviceaccount_secret.OCServiceAccountSecret._run')
 
     # Arrange
 
@@ -157,17 +150,17 @@ def test_removing_a_secret_to_a_serviceaccount(yaml_provider, mocker, service_ac
 
     new_secret = {'name': 'newsecret'}
 
-    oc_get_sa_after = json.dumps(service_account)
     service_account_before = copy.deepcopy(service_account)
     service_account_before['secrets'].append(new_secret)
     oc_get_sa_before = json.dumps(service_account_before)
 
     # Return values of our mocked function call. These get returned once per call.
-    mock_cmd.side_effect = [
-        (0, oc_get_sa_before, ''),  # First call to the mock
-        (0, oc_get_sa_before, ''),  # Second call to the mock
-        (0, 'serviceaccount "builder" replaced', ''),  # Third call to the mock
-    ]
+    mock_cmd = mocker.patch('oc_serviceaccount_secret.OCServiceAccountSecret._run',
+                            side_effect=[
+                                (0, oc_get_sa_before, ''),  # First call to the mock
+                                (0, oc_get_sa_before, ''),  # Second call to the mock
+                                (0, 'serviceaccount "builder" replaced', ''),  # Third call to the mock
+                            ])
 
     # Act
     results = oc_serviceaccount_secret.OCServiceAccountSecret.run_ansible(params, False)
@@ -176,7 +169,6 @@ def test_removing_a_secret_to_a_serviceaccount(yaml_provider, mocker, service_ac
     assert results['changed'] is True
     assert results['results']['returncode'] == 0
     assert results['state'] == 'absent'
-
 
     # Making sure our mocks were called as we expected
     mock_cmd.assert_has_calls([
@@ -196,11 +188,11 @@ def test_binary_lookup(binary_lookup_test_data, mocker):
     binary_expected = binary_lookup_test_data['binary_expected']
     binaries = binary_lookup_test_data['binaries']
 
-    mocker.patch('os.environ.get', side_effect = lambda _v, _d: path)
+    mocker.patch('os.environ.get', side_effect=lambda _v, _d: path)
 
     if six.PY2:
-        mocker.patch('os.path.exists', side_effect = lambda f: f in binaries)
+        mocker.patch('os.path.exists', side_effect=lambda f: f in binaries)
     else:
-        mocker.patch('shutil.which', side_effect = lambda _f, path=None: which_result)
+        mocker.patch('shutil.which', side_effect=lambda _f, path=None: which_result)
 
     assert oc_serviceaccount_secret.locate_oc_binary() == binary_expected
