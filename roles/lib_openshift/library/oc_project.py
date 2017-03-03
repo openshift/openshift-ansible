@@ -1547,7 +1547,7 @@ class OCProject(OpenShiftCLI):
             _ns = ','.join(params['node_selector'])
 
         pconfig = ProjectConfig(params['name'],
-                                params['name'],
+                                None,
                                 params['kubeconfig'],
                                 {'admin': {'value': params['admin'], 'include': True},
                                  'admin_role': {'value': params['admin_role'], 'include': True},
