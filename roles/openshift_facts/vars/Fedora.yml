@@ -1,0 +1,6 @@
+---
+required_packages:
+  - iproute
+  - python3-dbus
+  - PyYAML
+  - yum-utils

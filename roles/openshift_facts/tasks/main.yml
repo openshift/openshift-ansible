@@ -47,6 +47,12 @@
 
   when: l_is_atomic | bool
 
+- name: Load variables
+  include_vars: "{{ item }}"
+  with_first_found:
+  - "{{ ansible_distribution }}.yml"
+  - "default.yml"
+
 - name: Ensure various deps are installed
   package: name={{ item }} state=present
   with_items: "{{ required_packages }}"
