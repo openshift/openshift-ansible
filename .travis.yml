@@ -27,13 +27,13 @@ script:
 notifications:
   email:
     recipients:
-    - jdetiber@redhat.com
-    - sdodson@redhat.com
+      - jdetiber@redhat.com
+      - sdodson@redhat.com
     on_success: change
     on_failure: always
   irc:
     channels:
-    - chat.freenode.net#openshift-dev
+      - chat.freenode.net#openshift-dev
     on_success: change
     on_failure: always
     template:
