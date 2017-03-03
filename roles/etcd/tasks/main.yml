@@ -26,12 +26,59 @@
   - etcd_is_containerized | bool
   - not openshift.common.is_etcd_system_container | bool
 
-- name: Ensure etcd datadir exists when containerized
+
+# Start secondary etcd instance for third party integrations
+# TODO: Determine an alternative to using thirdparty variable
+
+- name: Create configuration directory
+  file:
+    path: "{{ etcd_conf_dir }}"
+    state: directory
+    mode: 0700
+  when: etcd_is_thirdparty | bool
+
+  # TODO: retest with symlink to confirm it does or does not function
+- name: Copy service file for etcd instance
+  copy:
+    src: /usr/lib/systemd/system/etcd.service
+    dest: "/etc/systemd/system/{{ etcd_service }}.service"
+    remote_src: True
+  when: etcd_is_thirdparty | bool
+
+- name: Create third party etcd service.d directory exists
+  file:
+    path: "{{ etcd_systemd_dir }}"
+    state: directory
+  when: etcd_is_thirdparty | bool
+
+- name: Configure third part etcd service unit file
+  template:
+    dest: "{{ etcd_systemd_dir }}/custom.conf"
+    src: custom.conf.j2
+  when: etcd_is_thirdparty
+
+  # TODO: this task may not be needed with Validate permissions
+- name: Ensure etcd datadir exists
   file:
     path: "{{ etcd_data_dir }}"
     state: directory
     mode: 0700
   when: etcd_is_containerized | bool
+
+- name: Ensure etcd datadir ownership for thirdparty datadir
+  file:
+    path: "{{ etcd_data_dir }}"
+    state: directory
+    mode: 0700
+    owner: etcd
+    group: etcd
+    recurse: True
+  when: etcd_is_thirdparty | bool
+
+  # TODO: Determine if the below reload would work here, for now just reload
+- name:
+  command: systemctl daemon-reload
+  when: etcd_is_thirdparty | bool
 
 - name: Disable system etcd when containerized
   systemd:
@@ -67,7 +114,7 @@
 - name: Write etcd global config file
   template:
     src: etcd.conf.j2
-    dest: /etc/etcd/etcd.conf
+    dest: "{{ etcd_conf_file }}"
     backup: true
   notify:
   - restart etcd

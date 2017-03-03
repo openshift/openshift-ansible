@@ -396,7 +396,8 @@ class Yedit(object):
                     continue
 
                 elif data and not isinstance(data, dict):
-                    return None
+                    raise YeditException("Unexpected item type found while going through key " +
+                                         "path: {} (at key: {})".format(key, dict_key))
 
                 data[dict_key] = {}
                 data = data[dict_key]
@@ -405,7 +406,7 @@ class Yedit(object):
                   int(arr_ind) <= len(data) - 1):
                 data = data[int(arr_ind)]
             else:
-                return None
+                raise YeditException("Unexpected item type found while going through key path: {}".format(key))
 
         if key == '':
             data = item
@@ -418,6 +419,12 @@ class Yedit(object):
         # expected dict entry
         elif key_indexes[-1][1] and isinstance(data, dict):
             data[key_indexes[-1][1]] = item
+
+        # didn't add/update to an existing list, nor add/update key to a dict
+        # so we must have been provided some syntax like a.b.c[<int>] = "data" for a
+        # non-existent array
+        else:
+            raise YeditException("Error adding to object at path: {}".format(key))
 
         return data
 
@@ -1144,12 +1151,12 @@ class OpenShiftCLI(object):
         if oadm:
             cmds.append('adm')
 
+        cmds.extend(cmd)
+
         if self.all_namespaces:
             cmds.extend(['--all-namespaces'])
         elif self.namespace is not None and self.namespace.lower() not in ['none', 'emtpy']:  # E501
             cmds.extend(['-n', self.namespace])
-
-        cmds.extend(cmd)
 
         rval = {}
         results = ''
@@ -1412,8 +1419,8 @@ class Utils(object):
                     elif value != user_def[key]:
                         if debug:
                             print('value should be identical')
-                            print(value)
                             print(user_def[key])
+                            print(value)
                         return False
 
             # recurse on a dictionary
@@ -1433,8 +1440,8 @@ class Utils(object):
                 if api_values != user_values:
                     if debug:
                         print("keys are not equal in dict")
-                        print(api_values)
                         print(user_values)
+                        print(api_values)
                     return False
 
                 result = Utils.check_def_equal(user_def[key], value, skip_keys=skip_keys, debug=debug)
@@ -1558,6 +1565,7 @@ class Service(Yedit):
     port_path = "spec.ports"
     portal_ip = "spec.portalIP"
     cluster_ip = "spec.clusterIP"
+    selector_path = 'spec.selector'
     kind = 'Service'
 
     def __init__(self, content):
@@ -1567,6 +1575,10 @@ class Service(Yedit):
     def get_ports(self):
         ''' get a list of ports '''
         return self.get(Service.port_path) or []
+
+    def get_selector(self):
+        ''' get the service selector'''
+        return self.get(Service.selector_path) or {}
 
     def add_ports(self, inc_ports):
         ''' add a port object to the ports list '''
@@ -2606,6 +2618,21 @@ class Router(OpenShiftCLI):
         ''' setter for property rolebinding '''
         self._rolebinding = config
 
+    def get_object_by_kind(self, kind):
+        '''return the current object kind by name'''
+        if re.match("^(dc|deploymentconfig)$", kind, flags=re.IGNORECASE):
+            return self.deploymentconfig
+        elif re.match("^(svc|service)$", kind, flags=re.IGNORECASE):
+            return self.service
+        elif re.match("^(sa|serviceaccount)$", kind, flags=re.IGNORECASE):
+            return self.serviceaccount
+        elif re.match("secret", kind, flags=re.IGNORECASE):
+            return self.secret
+        elif re.match("clusterrolebinding", kind, flags=re.IGNORECASE):
+            return self.rolebinding
+
+        return None
+
     def get(self):
         ''' return the self.router_parts '''
         self.service = None
@@ -2756,13 +2783,19 @@ class Router(OpenShiftCLI):
            - clusterrolebinding
         '''
         results = []
+        self.needs_update()
 
         import time
         # pylint: disable=maybe-no-member
-        for _, oc_data in self.prepared_router.items():
+        for kind, oc_data in self.prepared_router.items():
             if oc_data['obj'] is not None:
                 time.sleep(1)
-                results.append(self._create(oc_data['path']))
+                if self.get_object_by_kind(kind) is None:
+                    results.append(self._create(oc_data['path']))
+
+                elif oc_data['update']:
+                    results.append(self._replace(oc_data['path']))
+
 
         rval = 0
         for result in results:
@@ -2790,17 +2823,15 @@ class Router(OpenShiftCLI):
     # pylint: disable=too-many-return-statements,too-many-branches
     def needs_update(self):
         ''' check to see if we need to update '''
-        if not self.deploymentconfig or not self.service or not self.serviceaccount or not self.secret:
-            return True
-
         # ServiceAccount:
         #   Need to determine changes from the pregenerated ones from the original
         #   Since these are auto generated, we can skip
         skip = ['secrets', 'imagePullSecrets']
-        if not Utils.check_def_equal(self.prepared_router['ServiceAccount']['obj'].yaml_dict,
-                                     self.serviceaccount.yaml_dict,
-                                     skip_keys=skip,
-                                     debug=self.verbose):
+        if self.serviceaccount is None or \
+                not Utils.check_def_equal(self.prepared_router['ServiceAccount']['obj'].yaml_dict,
+                                          self.serviceaccount.yaml_dict,
+                                          skip_keys=skip,
+                                          debug=self.verbose):
             self.prepared_router['ServiceAccount']['update'] = True
 
         # Secret:
@@ -2809,10 +2840,11 @@ class Router(OpenShiftCLI):
             if not self.secret:
                 self.prepared_router['Secret']['update'] = True
 
-            if not Utils.check_def_equal(self.prepared_router['Secret']['obj'].yaml_dict,
-                                         self.secret.yaml_dict,
-                                         skip_keys=skip,
-                                         debug=self.verbose):
+            if self.secret is None or \
+                    not Utils.check_def_equal(self.prepared_router['Secret']['obj'].yaml_dict,
+                                              self.secret.yaml_dict,
+                                              skip_keys=skip,
+                                              debug=self.verbose):
                 self.prepared_router['Secret']['update'] = True
 
         # Service:
@@ -2821,28 +2853,30 @@ class Router(OpenShiftCLI):
             port['protocol'] = 'TCP'
 
         skip = ['portalIP', 'clusterIP', 'sessionAffinity', 'type']
-        if not Utils.check_def_equal(self.prepared_router['Service']['obj'].yaml_dict,
-                                     self.service.yaml_dict,
-                                     skip_keys=skip,
-                                     debug=self.verbose):
+        if self.service is None or \
+                not Utils.check_def_equal(self.prepared_router['Service']['obj'].yaml_dict,
+                                          self.service.yaml_dict,
+                                          skip_keys=skip,
+                                          debug=self.verbose):
             self.prepared_router['Service']['update'] = True
 
         # DeploymentConfig:
         #   Router needs some exceptions.
         #   We do not want to check the autogenerated password for stats admin
-        if not self.config.config_options['stats_password']['value']:
-            for idx, env_var in enumerate(self.prepared_router['DeploymentConfig']['obj'].get(\
-                        'spec.template.spec.containers[0].env') or []):
-                if env_var['name'] == 'STATS_PASSWORD':
-                    env_var['value'] = \
-                      self.deploymentconfig.get('spec.template.spec.containers[0].env[%s].value' % idx)
-                    break
+        if self.deploymentconfig is not None:
+            if not self.config.config_options['stats_password']['value']:
+                for idx, env_var in enumerate(self.prepared_router['DeploymentConfig']['obj'].get(\
+                            'spec.template.spec.containers[0].env') or []):
+                    if env_var['name'] == 'STATS_PASSWORD':
+                        env_var['value'] = \
+                          self.deploymentconfig.get('spec.template.spec.containers[0].env[%s].value' % idx)
+                        break
 
-        # dry-run doesn't add the protocol to the ports section.  We will manually do that.
-        for idx, port in enumerate(self.prepared_router['DeploymentConfig']['obj'].get(\
-                        'spec.template.spec.containers[0].ports') or []):
-            if not 'protocol' in port:
-                port['protocol'] = 'TCP'
+            # dry-run doesn't add the protocol to the ports section.  We will manually do that.
+            for idx, port in enumerate(self.prepared_router['DeploymentConfig']['obj'].get(\
+                            'spec.template.spec.containers[0].ports') or []):
+                if not 'protocol' in port:
+                    port['protocol'] = 'TCP'
 
         # These are different when generating
         skip = ['dnsPolicy',
@@ -2853,10 +2887,11 @@ class Router(OpenShiftCLI):
                 'defaultMode',
                ]
 
-        if not Utils.check_def_equal(self.prepared_router['DeploymentConfig']['obj'].yaml_dict,
-                                     self.deploymentconfig.yaml_dict,
-                                     skip_keys=skip,
-                                     debug=self.verbose):
+        if self.deploymentconfig is None or \
+                not Utils.check_def_equal(self.prepared_router['DeploymentConfig']['obj'].yaml_dict,
+                                          self.deploymentconfig.yaml_dict,
+                                          skip_keys=skip,
+                                          debug=self.verbose):
             self.prepared_router['DeploymentConfig']['update'] = True
 
         # Check if any of the parts need updating, if so, return True

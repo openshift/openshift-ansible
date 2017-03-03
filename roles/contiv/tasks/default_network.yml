@@ -1,0 +1,15 @@
+---
+- name: Contiv | Wait for netmaster
+  command: 'netctl --netmaster "http://{{ inventory_hostname }}:{{ netmaster_port }}" tenant ls'
+  register: tenant_result
+  until: tenant_result.stdout.find("default") != -1
+  retries: 9
+  delay: 10
+
+- name: Contiv | Check if default-net exists
+  command: 'netctl --netmaster "http://{{ inventory_hostname }}:{{ netmaster_port }}" net ls'
+  register: net_result
+
+- name: Contiv | Create default-net
+  command: 'netctl --netmaster "http://{{ inventory_hostname }}:{{ netmaster_port }}" net create --subnet={{ contiv_default_subnet }} -e {{ contiv_encap_mode }} -p {{ contiv_default_network_tag }} --gateway={{ contiv_default_gw }} default-net'
+  when: net_result.stdout.find("default-net") == -1

@@ -3,13 +3,41 @@
   set_fact:
     docker_registry_route_hostname: "{{ 'docker-registry-default.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true)) }}"
 
+- name: Get the certificate contents for registry
+  copy:
+    backup: True
+    dest: "/etc/origin/master/named_certificates/{{ item.value | basename }}"
+    src: "{{ item.value }}"
+  when: item.key in ['certfile', 'keyfile', 'cafile'] and item.value
+  with_dict: "{{ openshift_hosted_registry_routecertificates }}"
+
+# When certificates are defined we will create the reencrypt
+# docker-registry route
+- name: Create a reencrypt route for docker-registry
+  oc_route:
+    name: docker-registry
+    namespace: "{{ openshift_hosted_registry_namespace }}"
+    service_name: docker-registry
+    tls_termination: "{{ openshift_hosted_registry_routetermination }}"
+    host: "{{ openshift_hosted_registry_routehost | default(docker_registry_route_hostname) }}"
+    cert_path: "/etc/origin/master/named_certificates/{{ openshift_hosted_registry_routecertificates['certfile'] | basename }}"
+    key_path: "/etc/origin/master/named_certificates/{{ openshift_hosted_registry_routecertificates['keyfile'] | basename }}"
+    cacert_path: "/etc/origin/master/named_certificates/{{ openshift_hosted_registry_routecertificates['cafile'] | basename }}"
+    dest_cacert_path: /etc/origin/master/ca.crt
+  when:
+  - "'cafile' in openshift_hosted_registry_routecertificates"
+  - "'certfile' in openshift_hosted_registry_routecertificates"
+  - "'keyfile' in openshift_hosted_registry_routecertificates"
+
+# When routetermination is passthrough we will create the route
 - name: Create passthrough route for docker-registry
   oc_route:
     name: docker-registry
     namespace: "{{ openshift_hosted_registry_namespace }}"
     service_name: docker-registry
-    tls_termination: passthrough
-    host: "{{ docker_registry_route_hostname }}"
+    tls_termination: "{{ openshift_hosted_registry_routetermination }}"
+    host: "{{ openshift_hosted_registry_routehost | ternary(openshift_hosted_registry_routehost, docker_registry_route_hostname) }}"
+  when: openshift_hosted_registry_routetermination == 'passthrough'
 
 - name: Retrieve registry service IP
   oc_service:

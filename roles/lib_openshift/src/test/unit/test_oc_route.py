@@ -135,7 +135,7 @@ class OCRouteTest(unittest.TestCase):
 
         # Making sure our mock was called as we expected
         mock_cmd.assert_has_calls([
-            mock.call(['oc', '-n', 'default', 'get', 'route', 'test', '-o', 'json'], None),
+            mock.call(['oc', 'get', 'route', 'test', '-o', 'json', '-n', 'default'], None),
         ])
 
     @mock.patch('oc_route.locate_oc_binary')
@@ -265,9 +265,9 @@ metadata:
 
         # Making sure our mock was called as we expected
         mock_cmd.assert_has_calls([
-            mock.call(['oc', '-n', 'default', 'get', 'route', 'test', '-o', 'json'], None),
-            mock.call(['oc', '-n', 'default', 'create', '-f', mock.ANY], None),
-            mock.call(['oc', '-n', 'default', 'get', 'route', 'test', '-o', 'json'], None),
+            mock.call(['oc', 'get', 'route', 'test', '-o', 'json', '-n', 'default'], None),
+            mock.call(['oc', 'create', '-f', mock.ANY, '-n', 'default'], None),
+            mock.call(['oc', 'get', 'route', 'test', '-o', 'json', '-n', 'default'], None),
         ])
 
     @unittest.skipIf(six.PY3, 'py2 test only')

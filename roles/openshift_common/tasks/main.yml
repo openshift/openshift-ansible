@@ -12,6 +12,18 @@
   when: openshift_use_flannel | default(false) | bool and openshift_use_nuage | default(false) | bool
 
 - fail:
+    msg: Contiv can not be used with openshift sdn, set openshift_use_openshift_sdn=false if you want to use contiv
+  when: openshift_use_openshift_sdn | default(true) | bool and openshift_use_contiv | default(false) | bool
+
+- fail:
+    msg: Contiv can not be used with flannel
+  when: openshift_use_flannel | default(false) | bool and openshift_use_contiv | default(false) | bool
+
+- fail:
+    msg: Contiv can not be used with nuage
+  when: openshift_use_nuage | default(false) | bool and openshift_use_contiv | default(false) | bool
+
+- fail:
     msg: openshift_hostname must be 64 characters or less
   when: openshift_hostname is defined and openshift_hostname | length > 64
 
@@ -24,6 +36,7 @@
       sdn_network_plugin_name: "{{ os_sdn_network_plugin_name | default(None) }}"
       use_flannel: "{{ openshift_use_flannel | default(None) }}"
       use_nuage: "{{ openshift_use_nuage | default(None) }}"
+      use_contiv: "{{ openshift_use_contiv | default(None) }}"
       use_manageiq: "{{ openshift_use_manageiq | default(None) }}"
       data_dir: "{{ openshift_data_dir | default(None) }}"
       use_dnsmasq: "{{ openshift_use_dnsmasq | default(None) }}"
