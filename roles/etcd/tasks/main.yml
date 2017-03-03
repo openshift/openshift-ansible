@@ -63,10 +63,17 @@
     path: "{{ etcd_data_dir }}"
     state: directory
     mode: 0700
+  when: etcd_is_containerized | bool
+
+- name: Ensure etcd datadir ownership for thirdparty datadir
+  file:
+    path: "{{ etcd_data_dir }}"
+    state: directory
+    mode: 0700
     owner: etcd
     group: etcd
     recurse: True
-  when: etcd_is_containerized | bool or etcd_is_thirdparty | bool
+  when: etcd_is_thirdparty | bool
 
   # TODO: Determine if the below reload would work here, for now just reload
 - name:
