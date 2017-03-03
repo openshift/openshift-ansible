@@ -30,6 +30,7 @@ try:
     import ruamel.yaml as yaml  # noqa: EF401
     YAML_TYPE = 'ruamel'
 except ImportError:
+    import yaml
     YAML_TYPE = 'pyyaml'
 
 
@@ -119,25 +120,8 @@ class OCServiceAccountSecretTest(unittest.TestCase):
             ]
         }
         '''
-        builder_ryaml_file = '''\
-secrets:
-- name: builder-dockercfg-rsrua
-- name: builder-token-akqxi
-- name: newsecret
-kind: ServiceAccount
-imagePullSecrets:
-- name: builder-dockercfg-rsrua
-apiVersion: v1
-metadata:
-  name: builder
-  namespace: default
-  resourceVersion: '302879'
-  creationTimestamp: '2017-02-05T17:02:00Z'
-  selfLink: /api/v1/namespaces/default/serviceaccounts/builder
-  uid: cf47bca7-ebc4-11e6-b041-0ed9df7abc38
-'''
 
-        builder_pyyaml_file = '''\
+        builder_yaml_file = '''\
 apiVersion: v1
 imagePullSecrets:
 - name: builder-dockercfg-rsrua
@@ -187,13 +171,8 @@ secrets:
             mock.call(['oc', 'get', 'sa', 'builder', '-o', 'json', '-n', 'default'], None)
         ])
 
-        yaml_file = builder_pyyaml_file
-
-        if YAML_TYPE == 'ruamel':
-            yaml_file = builder_ryaml_file
-        mock_write.assert_has_calls([
-            mock.call(mock.ANY, yaml_file)
-        ])
+        mock_write.assert_called_once()
+        self.assertEqual(yaml.load(mock_write.call_args[0][1]), yaml.load(builder_yaml_file))
 
     @mock.patch('oc_serviceaccount_secret.locate_oc_binary')
     @mock.patch('oc_serviceaccount_secret.Utils.create_tmpfile_copy')
@@ -245,24 +224,7 @@ secrets:
         }
         '''
 
-        builder_ryaml_file = '''\
-secrets:
-- name: builder-dockercfg-rsrua
-- name: builder-token-akqxi
-kind: ServiceAccount
-imagePullSecrets:
-- name: builder-dockercfg-rsrua
-apiVersion: v1
-metadata:
-  name: builder
-  namespace: default
-  resourceVersion: '302879'
-  creationTimestamp: '2017-02-05T17:02:00Z'
-  selfLink: /api/v1/namespaces/default/serviceaccounts/builder
-  uid: cf47bca7-ebc4-11e6-b041-0ed9df7abc38
-'''
-
-        builder_pyyaml_file = '''\
+        builder_yaml_file = '''\
 apiVersion: v1
 imagePullSecrets:
 - name: builder-dockercfg-rsrua
@@ -309,13 +271,8 @@ secrets:
             mock.call(['oc', 'replace', '-f', mock.ANY, '-n', 'default'], None),
         ])
 
-        yaml_file = builder_pyyaml_file
-
-        if YAML_TYPE == 'ruamel':
-            yaml_file = builder_ryaml_file
-        mock_write.assert_has_calls([
-            mock.call(mock.ANY, yaml_file)
-        ])
+        mock_write.assert_called_once()
+        self.assertEqual(yaml.load(mock_write.call_args[0][1]), yaml.load(builder_yaml_file))
 
     @unittest.skipIf(six.PY3, 'py2 test only')
     @mock.patch('os.path.exists')
