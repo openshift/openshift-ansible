@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.22
+Version:        3.5.23
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,34 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Mar 03 2017 Scott Dodson <sdodson@redhat.com> 3.5.23-1
+- node/sdn: make /var/lib/cni persistent to ensure IPAM allocations stick
+  around across node restart (dcbw@redhat.com)
+- BZ1422348 - Don't install python-ruamel-yaml (sdodson@redhat.com)
+- Re-generate modules (sdodson@redhat.com)
+- Only set ownership to etcd for thirdparty datadir (sdodson@redhat.com)
+- Removing the openshift_master_facts dependency (ewolinet@redhat.com)
+- bug 1420256. Initialize openshift_logging pvc_facts to empty
+  (jcantril@redhat.com)
+- Add oc_adm_policy_user task cluster-role policy (rteague@redhat.com)
+- Correct config for hosted registry (rteague@redhat.com)
+- Fixing checkout for bindings with -binding suffix (jupierce@redhat.com)
+- Leave an empty contiv role directory (sdodson@redhat.com)
+- test fixes for openshift_certificates_expiry (jdetiber@redhat.com)
+- oadm_policy_group/adm_policy_user module (jupierce@redhat.com)
+- Fail on Atomic if docker is too old (smilner@redhat.com)
+- Remove contiv role and playbook from rpm packages (sdodson@redhat.com)
+- Fixed error handling when oc adm ca create-server-cert fails.  Fixed a logic
+  error in secure. (kwoodson@redhat.com)
+- regenerate lib_openshift with yedit exception changes (jdiaz@redhat.com)
+- raise exceptions when walking through object path (jdiaz@redhat.com)
+- Combined (squashed) commit for all changes related to adding Contiv support
+  into Openshift Ansible. This is the first (beta) release of Contiv with
+  Openshift and is only supported for Openshift Origin + Bare metal deployments
+  at the time of this commit. Please refer to the Openshift and Contiv official
+  documentation for details of the level of support for different features and
+  modes of operation. (srampal@cisco.com)
+
 * Thu Mar 02 2017 Scott Dodson <sdodson@redhat.com> 3.5.22-1
 - Automatic commit of package [openshift-ansible] release [3.5.21-1].
   (sdodson@redhat.com)
