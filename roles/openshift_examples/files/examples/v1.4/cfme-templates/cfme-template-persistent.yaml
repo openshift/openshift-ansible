@@ -83,8 +83,10 @@ objects:
         name: ${NAME}
       spec:
         volumes:
-          - emptyDir: {}
+          -
             name: "cfme-app-volume"
+            persistentVolumeClaim:
+              claimName: ${NAME}
         containers:
         - image: cloudforms/cfme-openshift-app:${APPLICATION_IMG_TAG}
           imagePullPolicy: IfNotPresent
@@ -302,8 +304,10 @@ objects:
           name: "${DATABASE_SERVICE_NAME}"
       spec:
         volumes:
-          - emptyDir: {}
+          -
             name: "cfme-pgdb-volume"
+            persistentVolumeClaim:
+              claimName: ${DATABASE_SERVICE_NAME}
         containers:
           -
             name: "postgresql"
