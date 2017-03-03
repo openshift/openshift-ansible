@@ -66,6 +66,8 @@ cp inventory/byo/* docs/example-inventories/
 
 # openshift-ansible-playbooks install
 cp -rp playbooks %{buildroot}%{_datadir}/ansible/%{name}/
+# remove contiv plabooks
+rm -rf %{buildroot}%{_datadir}/ansible/%{name}/playbooks/adhoc/contiv
 
 # BZ1330091
 find -L %{buildroot}%{_datadir}/ansible/%{name}/playbooks -name lookup_plugins -type l -delete
@@ -73,6 +75,8 @@ find -L %{buildroot}%{_datadir}/ansible/%{name}/playbooks -name filter_plugins -
 
 # openshift-ansible-roles install
 cp -rp roles %{buildroot}%{_datadir}/ansible/%{name}/
+# remove contiv role
+rm -rf %{buildroot}%{_datadir}/ansible/%{name}/roles/contiv/*
 # openshift_master_facts symlinks filter_plugins/oo_filters.py from ansible_plugins/filter_plugins
 pushd %{buildroot}%{_datadir}/ansible/%{name}/roles/openshift_master_facts/filter_plugins
 ln -sf ../../../../../ansible_plugins/filter_plugins/oo_filters.py oo_filters.py

@@ -50,31 +50,26 @@ from ansible.module_utils.basic import AnsibleModule
 
 # -*- -*- -*- End included fragment: lib/import.py -*- -*- -*-
 
-# -*- -*- -*- Begin included fragment: doc/ca_server_cert -*- -*- -*-
+# -*- -*- -*- Begin included fragment: doc/policy_user -*- -*- -*-
 
 DOCUMENTATION = '''
 ---
-module: oc_adm_ca_server_cert
-short_description: Module to run openshift oc adm ca create-server-cert
+module: oc_adm_policy_user
+short_description: Module to manage openshift policy for users
 description:
-  - Wrapper around the openshift `oc adm ca create-server-cert` command.
+  - Manage openshift policy for users.
 options:
-  state:
-    description:
-    - Present is the only supported state.  The state present means that `oc adm ca` will generate a certificate
-    - and verify if the hostnames and the ClusterIP exists in the certificate.
-    - When create-server-cert is desired then the following parameters are passed.
-    - ['cert', 'key', 'signer_cert', 'signer_key', 'signer_serial']
-    required: false
-    default: present
-    choices: 
-    - present
-    aliases: []
   kubeconfig:
     description:
     - The path for the kubeconfig file to use for authentication
     required: false
     default: /etc/origin/master/admin.kubeconfig
+    aliases: []
+  namespace:
+    description:
+    - The namespace scope
+    required: false
+    default: None
     aliases: []
   debug:
     description:
@@ -82,53 +77,31 @@ options:
     required: false
     default: False
     aliases: []
-  cert:
+  user:
     description:
-    - The certificate file. Choose a name that indicates what the service is.
-    required: false
+    - The name of the user
+    required: true
     default: None
     aliases: []
-  key:
+  resource_kind:
     description:
-    - The key file. Choose a name that indicates what the service is.
-    required: false
+    - The kind of policy to affect
+    required: true
+    default: None
+    choices: ["role", "cluster-role", "scc"]
+    aliases: []
+  resource_name:
+    description:
+    - The name of the policy
+    required: true
     default: None
     aliases: []
-  force:
+  state:
     description:
-    - Force updating of the existing cert and key files
-    required: false
-    default: False
-    aliases: []
-  signer_cert:
-    description:
-    - The signer certificate file.
-    required: false
-    default: /etc/origin/master/ca.crt
-    aliases: []
-  signer_key:
-    description:
-    - The signer key file.
-    required: false
-    default: /etc/origin/master/ca.key
-    aliases: []
-  signer_serial:
-    description:
-    - The signer serial file.
-    required: false
-    default: /etc/origin/master/ca.serial.txt
-    aliases: []
-  hostnames:
-    description:
-    - Every hostname or IP that server certs should be valid for
-    required: false
-    default: []
-    aliases: []
-  backup:
-    description:
-    - Whether to backup the cert and key files before writing them.
-    required: false
-    default: True
+    - Desired state of the policy
+    required: true
+    default: present
+    choices: ["present", "absent"]
     aliases: []
 author:
 - "Kenny Woodson <kwoodson@redhat.com>"
@@ -136,17 +109,22 @@ extends_documentation_fragment: []
 '''
 
 EXAMPLES = '''
-- name: Create a self-signed cert
-  oc_adm_ca_server_cert:
-    signer_cert: /etc/origin/master/ca.crt
-    signer_key: /etc/origin/master/ca.key
-    signer_serial: /etc/origin/master/ca.serial.txt
-    hostnames: "registry.test.openshift.com,127.0.0.1,docker-registry.default.svc.cluster.local"
-    cert: /etc/origin/master/registry.crt
-    key: /etc/origin/master/registry.key
+- name: oc adm policy remove-scc-from-user an-scc ausername
+  oc_adm_policy_user:
+    user: ausername
+    resource_kind: scc
+    resource_name: an-scc
+    state: absent
+
+- name: oc adm policy add-cluster-role-to-user system:build-strategy-docker ausername
+  oc_adm_policy_user:
+    user: ausername
+    resource_kind: cluster-role
+    resource_name: system:build-strategy-docker
+    state: present
 '''
 
-# -*- -*- -*- End included fragment: doc/ca_server_cert -*- -*- -*-
+# -*- -*- -*- End included fragment: doc/policy_user -*- -*- -*-
 
 # -*- -*- -*- Begin included fragment: ../../lib_utils/src/class/yedit.py -*- -*- -*-
 # pylint: disable=undefined-variable,missing-docstring
@@ -1369,179 +1347,745 @@ class OpenShiftCLIConfig(object):
 
 # -*- -*- -*- End included fragment: lib/base.py -*- -*- -*-
 
-# -*- -*- -*- Begin included fragment: class/oc_adm_ca_server_cert.py -*- -*- -*-
+# -*- -*- -*- Begin included fragment: lib/rolebinding.py -*- -*- -*-
 
-class CAServerCertConfig(OpenShiftCLIConfig):
-    ''' CAServerCertConfig is a DTO for the oc adm ca command '''
-    def __init__(self, kubeconfig, verbose, ca_options):
-        super(CAServerCertConfig, self).__init__('ca', None, kubeconfig, ca_options)
-        self.kubeconfig = kubeconfig
-        self.verbose = verbose
-        self._ca = ca_options
-
-
-class CAServerCert(OpenShiftCLI):
-    ''' Class to wrap the oc adm ca create-server-cert command line'''
+# pylint: disable=too-many-instance-attributes
+class RoleBindingConfig(object):
+    ''' Handle rolebinding config '''
+    # pylint: disable=too-many-arguments
     def __init__(self,
-                 config,
-                 verbose=False):
-        ''' Constructor for oadm ca '''
-        super(CAServerCert, self).__init__(None, config.kubeconfig, verbose)
-        self.config = config
-        self.verbose = verbose
+                 name,
+                 namespace,
+                 kubeconfig,
+                 group_names=None,
+                 role_ref=None,
+                 subjects=None,
+                 usernames=None):
+        ''' constructor for handling rolebinding options '''
+        self.kubeconfig = kubeconfig
+        self.name = name
+        self.namespace = namespace
+        self.group_names = group_names
+        self.role_ref = role_ref
+        self.subjects = subjects
+        self.usernames = usernames
+        self.data = {}
 
-    def get(self):
-        '''get the current cert file
+        self.create_dict()
 
-           If a file exists by the same name in the specified location then the cert exists
-        '''
-        cert = self.config.config_options['cert']['value']
-        if cert and os.path.exists(cert):
-            return open(cert).read()
+    def create_dict(self):
+        ''' create a default rolebinding as a dict '''
+        self.data['apiVersion'] = 'v1'
+        self.data['kind'] = 'RoleBinding'
+        self.data['groupNames'] = self.group_names
+        self.data['metadata']['name'] = self.name
+        self.data['metadata']['namespace'] = self.namespace
+
+        self.data['roleRef'] = self.role_ref
+        self.data['subjects'] = self.subjects
+        self.data['userNames'] = self.usernames
+
+
+# pylint: disable=too-many-instance-attributes,too-many-public-methods
+class RoleBinding(Yedit):
+    ''' Class to model a rolebinding openshift object'''
+    group_names_path = "groupNames"
+    role_ref_path = "roleRef"
+    subjects_path = "subjects"
+    user_names_path = "userNames"
+
+    kind = 'RoleBinding'
+
+    def __init__(self, content):
+        '''RoleBinding constructor'''
+        super(RoleBinding, self).__init__(content=content)
+        self._subjects = None
+        self._role_ref = None
+        self._group_names = None
+        self._user_names = None
+
+    @property
+    def subjects(self):
+        ''' subjects property '''
+        if self._subjects is None:
+            self._subjects = self.get_subjects()
+        return self._subjects
+
+    @subjects.setter
+    def subjects(self, data):
+        ''' subjects property setter'''
+        self._subjects = data
+
+    @property
+    def role_ref(self):
+        ''' role_ref property '''
+        if self._role_ref is None:
+            self._role_ref = self.get_role_ref()
+        return self._role_ref
+
+    @role_ref.setter
+    def role_ref(self, data):
+        ''' role_ref property setter'''
+        self._role_ref = data
+
+    @property
+    def group_names(self):
+        ''' group_names property '''
+        if self._group_names is None:
+            self._group_names = self.get_group_names()
+        return self._group_names
+
+    @group_names.setter
+    def group_names(self, data):
+        ''' group_names property setter'''
+        self._group_names = data
+
+    @property
+    def user_names(self):
+        ''' user_names property '''
+        if self._user_names is None:
+            self._user_names = self.get_user_names()
+        return self._user_names
+
+    @user_names.setter
+    def user_names(self, data):
+        ''' user_names property setter'''
+        self._user_names = data
+
+    def get_group_names(self):
+        ''' return groupNames '''
+        return self.get(RoleBinding.group_names_path) or []
+
+    def get_user_names(self):
+        ''' return usernames '''
+        return self.get(RoleBinding.user_names_path) or []
+
+    def get_role_ref(self):
+        ''' return role_ref '''
+        return self.get(RoleBinding.role_ref_path) or {}
+
+    def get_subjects(self):
+        ''' return subjects '''
+        return self.get(RoleBinding.subjects_path) or []
+
+    #### ADD #####
+    def add_subject(self, inc_subject):
+        ''' add a subject '''
+        if self.subjects:
+            # pylint: disable=no-member
+            self.subjects.append(inc_subject)
+        else:
+            self.put(RoleBinding.subjects_path, [inc_subject])
+
+        return True
+
+    def add_role_ref(self, inc_role_ref):
+        ''' add a role_ref '''
+        if not self.role_ref:
+            self.put(RoleBinding.role_ref_path, {"name": inc_role_ref})
+            return True
+
+        return False
+
+    def add_group_names(self, inc_group_names):
+        ''' add a group_names '''
+        if self.group_names:
+            # pylint: disable=no-member
+            self.group_names.append(inc_group_names)
+        else:
+            self.put(RoleBinding.group_names_path, [inc_group_names])
+
+        return True
+
+    def add_user_name(self, inc_user_name):
+        ''' add a username '''
+        if self.user_names:
+            # pylint: disable=no-member
+            self.user_names.append(inc_user_name)
+        else:
+            self.put(RoleBinding.user_names_path, [inc_user_name])
+
+        return True
+
+    #### /ADD #####
+
+    #### Remove #####
+    def remove_subject(self, inc_subject):
+        ''' remove a subject '''
+        try:
+            # pylint: disable=no-member
+            self.subjects.remove(inc_subject)
+        except ValueError as _:
+            return False
+
+        return True
+
+    def remove_role_ref(self, inc_role_ref):
+        ''' remove a role_ref '''
+        if self.role_ref and self.role_ref['name'] == inc_role_ref:
+            del self.role_ref['name']
+            return True
+
+        return False
+
+    def remove_group_name(self, inc_group_name):
+        ''' remove a groupname '''
+        try:
+            # pylint: disable=no-member
+            self.group_names.remove(inc_group_name)
+        except ValueError as _:
+            return False
+
+        return True
+
+    def remove_user_name(self, inc_user_name):
+        ''' remove a username '''
+        try:
+            # pylint: disable=no-member
+            self.user_names.remove(inc_user_name)
+        except ValueError as _:
+            return False
+
+        return True
+
+    #### /REMOVE #####
+
+    #### UPDATE #####
+    def update_subject(self, inc_subject):
+        ''' update a subject '''
+        try:
+            # pylint: disable=no-member
+            index = self.subjects.index(inc_subject)
+        except ValueError as _:
+            return self.add_subject(inc_subject)
+
+        self.subjects[index] = inc_subject
+
+        return True
+
+    def update_group_name(self, inc_group_name):
+        ''' update a groupname '''
+        try:
+            # pylint: disable=no-member
+            index = self.group_names.index(inc_group_name)
+        except ValueError as _:
+            return self.add_group_names(inc_group_name)
+
+        self.group_names[index] = inc_group_name
+
+        return True
+
+    def update_user_name(self, inc_user_name):
+        ''' update a username '''
+        try:
+            # pylint: disable=no-member
+            index = self.user_names.index(inc_user_name)
+        except ValueError as _:
+            return self.add_user_name(inc_user_name)
+
+        self.user_names[index] = inc_user_name
+
+        return True
+
+    def update_role_ref(self, inc_role_ref):
+        ''' update a role_ref '''
+        self.role_ref['name'] = inc_role_ref
+
+        return True
+
+    #### /UPDATE #####
+
+    #### FIND ####
+    def find_subject(self, inc_subject):
+        ''' find a subject '''
+        index = None
+        try:
+            # pylint: disable=no-member
+            index = self.subjects.index(inc_subject)
+        except ValueError as _:
+            return index
+
+        return index
+
+    def find_group_name(self, inc_group_name):
+        ''' find a group_name '''
+        index = None
+        try:
+            # pylint: disable=no-member
+            index = self.group_names.index(inc_group_name)
+        except ValueError as _:
+            return index
+
+        return index
+
+    def find_user_name(self, inc_user_name):
+        ''' find a user_name '''
+        index = None
+        try:
+            # pylint: disable=no-member
+            index = self.user_names.index(inc_user_name)
+        except ValueError as _:
+            return index
+
+        return index
+
+    def find_role_ref(self, inc_role_ref):
+        ''' find a user_name '''
+        if self.role_ref and self.role_ref['name'] == inc_role_ref['name']:
+            return self.role_ref
 
         return None
 
-    def create(self):
-        '''run openshift oc adm ca create-server-cert cmd'''
+# -*- -*- -*- End included fragment: lib/rolebinding.py -*- -*- -*-
 
-        # Added this here as a safegaurd for stomping on the
-        # cert and key files if they exist
-        if self.config.config_options['backup']['value']:
-            import time
-            ext = time.strftime("%Y-%m-%d@%H:%M:%S", time.localtime(time.time()))
-            date_str = "%s_" + "%s" % ext
+# -*- -*- -*- Begin included fragment: lib/scc.py -*- -*- -*-
 
-            if os.path.exists(self.config.config_options['key']['value']):
-                shutil.copy(self.config.config_options['key']['value'],
-                            date_str % self.config.config_options['key']['value'])
-            if os.path.exists(self.config.config_options['cert']['value']):
-                shutil.copy(self.config.config_options['cert']['value'],
-                            date_str % self.config.config_options['cert']['value'])
 
-        options = self.config.to_option_list()
+# pylint: disable=too-many-instance-attributes
+class SecurityContextConstraintsConfig(object):
+    ''' Handle scc options '''
+    # pylint: disable=too-many-arguments
+    def __init__(self,
+                 sname,
+                 kubeconfig,
+                 options=None,
+                 fs_group='MustRunAs',
+                 default_add_capabilities=None,
+                 groups=None,
+                 priority=None,
+                 required_drop_capabilities=None,
+                 run_as_user='MustRunAsRange',
+                 se_linux_context='MustRunAs',
+                 supplemental_groups='RunAsAny',
+                 users=None,
+                 annotations=None):
+        ''' constructor for handling scc options '''
+        self.kubeconfig = kubeconfig
+        self.name = sname
+        self.options = options
+        self.fs_group = fs_group
+        self.default_add_capabilities = default_add_capabilities
+        self.groups = groups
+        self.priority = priority
+        self.required_drop_capabilities = required_drop_capabilities
+        self.run_as_user = run_as_user
+        self.se_linux_context = se_linux_context
+        self.supplemental_groups = supplemental_groups
+        self.users = users
+        self.annotations = annotations
+        self.data = {}
 
-        cmd = ['ca', 'create-server-cert']
-        cmd.extend(options)
+        self.create_dict()
 
-        return self.openshift_cmd(cmd, oadm=True)
+    def create_dict(self):
+        ''' assign the correct properties for a scc dict '''
+        # allow options
+        if self.options:
+            for key, value in self.options.items():
+                self.data[key] = value
+        else:
+            self.data['allowHostDirVolumePlugin'] = False
+            self.data['allowHostIPC'] = False
+            self.data['allowHostNetwork'] = False
+            self.data['allowHostPID'] = False
+            self.data['allowHostPorts'] = False
+            self.data['allowPrivilegedContainer'] = False
+            self.data['allowedCapabilities'] = None
 
-    def exists(self):
-        ''' check whether the certificate exists and has the clusterIP '''
+        # version
+        self.data['apiVersion'] = 'v1'
+        # kind
+        self.data['kind'] = 'SecurityContextConstraints'
+        # defaultAddCapabilities
+        self.data['defaultAddCapabilities'] = self.default_add_capabilities
+        # fsGroup
+        self.data['fsGroup']['type'] = self.fs_group
+        # groups
+        self.data['groups'] = []
+        if self.groups:
+            self.data['groups'] = self.groups
+        # metadata
+        self.data['metadata'] = {}
+        self.data['metadata']['name'] = self.name
+        if self.annotations:
+            for key, value in self.annotations.items():
+                self.data['metadata'][key] = value
+        # priority
+        self.data['priority'] = self.priority
+        # requiredDropCapabilities
+        self.data['requiredDropCapabilities'] = self.required_drop_capabilities
+        # runAsUser
+        self.data['runAsUser'] = {'type': self.run_as_user}
+        # seLinuxContext
+        self.data['seLinuxContext'] = {'type': self.se_linux_context}
+        # supplementalGroups
+        self.data['supplementalGroups'] = {'type': self.supplemental_groups}
+        # users
+        self.data['users'] = []
+        if self.users:
+            self.data['users'] = self.users
 
-        cert_path = self.config.config_options['cert']['value']
-        if not os.path.exists(cert_path):
+
+# pylint: disable=too-many-instance-attributes,too-many-public-methods,no-member
+class SecurityContextConstraints(Yedit):
+    ''' Class to wrap the oc command line tools '''
+    default_add_capabilities_path = "defaultAddCapabilities"
+    fs_group_path = "fsGroup"
+    groups_path = "groups"
+    priority_path = "priority"
+    required_drop_capabilities_path = "requiredDropCapabilities"
+    run_as_user_path = "runAsUser"
+    se_linux_context_path = "seLinuxContext"
+    supplemental_groups_path = "supplementalGroups"
+    users_path = "users"
+    kind = 'SecurityContextConstraints'
+
+    def __init__(self, content):
+        '''SecurityContextConstraints constructor'''
+        super(SecurityContextConstraints, self).__init__(content=content)
+        self._users = None
+        self._groups = None
+
+    @property
+    def users(self):
+        ''' users property getter '''
+        if self._users is None:
+            self._users = self.get_users()
+        return self._users
+
+    @property
+    def groups(self):
+        ''' groups property getter '''
+        if self._groups is None:
+            self._groups = self.get_groups()
+        return self._groups
+
+    @users.setter
+    def users(self, data):
+        ''' users property setter'''
+        self._users = data
+
+    @groups.setter
+    def groups(self, data):
+        ''' groups property setter'''
+        self._groups = data
+
+    def get_users(self):
+        '''get scc users'''
+        return self.get(SecurityContextConstraints.users_path) or []
+
+    def get_groups(self):
+        '''get scc groups'''
+        return self.get(SecurityContextConstraints.groups_path) or []
+
+    def add_user(self, inc_user):
+        ''' add a user '''
+        if self.users:
+            self.users.append(inc_user)
+        else:
+            self.put(SecurityContextConstraints.users_path, [inc_user])
+
+        return True
+
+    def add_group(self, inc_group):
+        ''' add a group '''
+        if self.groups:
+            self.groups.append(inc_group)
+        else:
+            self.put(SecurityContextConstraints.groups_path, [inc_group])
+
+        return True
+
+    def remove_user(self, inc_user):
+        ''' remove a user '''
+        try:
+            self.users.remove(inc_user)
+        except ValueError as _:
             return False
 
-        # Would prefer pyopenssl but is not installed.
-        # When we verify it is, switch this code
-        # Here is the code to get the subject and the SAN
-        # openssl x509 -text -noout -certopt \
-        #  no_header,no_version,no_serial,no_signame,no_validity,no_issuer,no_pubkey,no_sigdump,no_aux \
-        #  -in /etc/origin/master/registry.crt
-        # Instead of this solution we will use a regex.
-        cert_names = []
-        hostnames = self.config.config_options['hostnames']['value'].split(',')
-        proc = subprocess.Popen(['openssl', 'x509', '-noout', '-text', '-in', cert_path],
-                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        return True
 
-        x509output, _ = proc.communicate()
-        if proc.returncode == 0:
-            regex = re.compile(r"^\s*X509v3 Subject Alternative Name:\s*?\n\s*(.*)\s*\n", re.MULTILINE)
-            match = regex.search(x509output)  # E501
-            for entry in re.split(r", *", match.group(1)):
-                if entry.startswith('DNS') or entry.startswith('IP Address'):
-                    cert_names.append(entry.split(':')[1])
-            # now that we have cert names let's compare
-            cert_set = set(cert_names)
-            hname_set = set(hostnames)
-            if cert_set.issubset(hname_set) and hname_set.issubset(cert_set):
+    def remove_group(self, inc_group):
+        ''' remove a group '''
+        try:
+            self.groups.remove(inc_group)
+        except ValueError as _:
+            return False
+
+        return True
+
+    def update_user(self, inc_user):
+        ''' update a user '''
+        try:
+            index = self.users.index(inc_user)
+        except ValueError as _:
+            return self.add_user(inc_user)
+
+        self.users[index] = inc_user
+
+        return True
+
+    def update_group(self, inc_group):
+        ''' update a group '''
+        try:
+            index = self.groups.index(inc_group)
+        except ValueError as _:
+            return self.add_group(inc_group)
+
+        self.groups[index] = inc_group
+
+        return True
+
+    def find_user(self, inc_user):
+        ''' find a user '''
+        index = None
+        try:
+            index = self.users.index(inc_user)
+        except ValueError as _:
+            return index
+
+        return index
+
+    def find_group(self, inc_group):
+        ''' find a group '''
+        index = None
+        try:
+            index = self.groups.index(inc_group)
+        except ValueError as _:
+            return index
+
+        return index
+
+# -*- -*- -*- End included fragment: lib/scc.py -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: class/oc_adm_policy_user.py -*- -*- -*-
+
+
+class PolicyUserException(Exception):
+    ''' PolicyUser exception'''
+    pass
+
+
+class PolicyUserConfig(OpenShiftCLIConfig):
+    ''' PolicyUserConfig is a DTO for user related policy.  '''
+    def __init__(self, namespace, kubeconfig, policy_options):
+        super(PolicyUserConfig, self).__init__(policy_options['name']['value'],
+                                               namespace, kubeconfig, policy_options)
+        self.kind = self.get_kind()
+        self.namespace = namespace
+
+    def get_kind(self):
+        ''' return the kind we are working with '''
+        if self.config_options['resource_kind']['value'] == 'role':
+            return 'rolebinding'
+        elif self.config_options['resource_kind']['value'] == 'cluster-role':
+            return 'clusterrolebinding'
+        elif self.config_options['resource_kind']['value'] == 'scc':
+            return 'scc'
+
+        return None
+
+
+# pylint: disable=too-many-return-statements
+class PolicyUser(OpenShiftCLI):
+    ''' Class to handle attaching policies to users '''
+
+    def __init__(self,
+                 policy_config,
+                 verbose=False):
+        ''' Constructor for PolicyUser '''
+        super(PolicyUser, self).__init__(policy_config.namespace, policy_config.kubeconfig, verbose)
+        self.config = policy_config
+        self.verbose = verbose
+        self._rolebinding = None
+        self._scc = None
+
+    @property
+    def role_binding(self):
+        ''' role_binding property '''
+        return self._rolebinding
+
+    @role_binding.setter
+    def role_binding(self, binding):
+        ''' setter for role_binding property '''
+        self._rolebinding = binding
+
+    @property
+    def security_context_constraint(self):
+        ''' security_context_constraint property '''
+        return self._scc
+
+    @security_context_constraint.setter
+    def security_context_constraint(self, scc):
+        ''' setter for security_context_constraint property '''
+        self._scc = scc
+
+    def get(self):
+        '''fetch the desired kind'''
+        resource_name = self.config.config_options['name']['value']
+        if resource_name == 'cluster-reader':
+            resource_name += 's'
+
+        # oc adm policy add-... creates policy bindings with the name
+        # "[resource_name]-binding", however some bindings in the system
+        # simply use "[resource_name]". So try both.
+
+        results = self._get(self.config.kind, resource_name)
+        if results['returncode'] == 0:
+            return results
+
+        # Now try -binding naming convention
+        return self._get(self.config.kind, resource_name + "-binding")
+
+    def exists_role_binding(self):
+        ''' return whether role_binding exists '''
+        results = self.get()
+        if results['returncode'] == 0:
+            self.role_binding = RoleBinding(results['results'][0])
+            if self.role_binding.find_user_name(self.config.config_options['user']['value']) != None:
                 return True
 
+            return False
+
+        elif self.config.config_options['name']['value'] in results['stderr'] and '" not found' in results['stderr']:
+            return False
+
+        return results
+
+    def exists_scc(self):
+        ''' return whether scc exists '''
+        results = self.get()
+        if results['returncode'] == 0:
+            self.security_context_constraint = SecurityContextConstraints(results['results'][0])
+
+            if self.security_context_constraint.find_user(self.config.config_options['user']['value']) != None:
+                return True
+
+            return False
+
+        return results
+
+    def exists(self):
+        '''does the object exist?'''
+        if self.config.config_options['resource_kind']['value'] == 'cluster-role':
+            return self.exists_role_binding()
+
+        elif self.config.config_options['resource_kind']['value'] == 'role':
+            return self.exists_role_binding()
+
+        elif self.config.config_options['resource_kind']['value'] == 'scc':
+            return self.exists_scc()
+
         return False
+
+    def perform(self):
+        '''perform action on resource'''
+        cmd = ['policy',
+               self.config.config_options['action']['value'],
+               self.config.config_options['name']['value'],
+               self.config.config_options['user']['value']]
+
+        return self.openshift_cmd(cmd, oadm=True)
 
     @staticmethod
     def run_ansible(params, check_mode):
         '''run the idempotent ansible code'''
 
-        config = CAServerCertConfig(params['kubeconfig'],
-                                    params['debug'],
-                                    {'cert':          {'value': params['cert'], 'include': True},
-                                     'hostnames':     {'value': ','.join(params['hostnames']), 'include': True},
-                                     'overwrite':     {'value': True, 'include': True},
-                                     'key':           {'value': params['key'], 'include': True},
-                                     'signer_cert':   {'value': params['signer_cert'], 'include': True},
-                                     'signer_key':    {'value': params['signer_key'], 'include': True},
-                                     'signer_serial': {'value': params['signer_serial'], 'include': True},
-                                     'backup':        {'value': params['backup'], 'include': False},
-                                    })
-
-        server_cert = CAServerCert(config)
-
         state = params['state']
+
+        action = None
+        if state == 'present':
+            action = 'add-' + params['resource_kind'] + '-to-user'
+        else:
+            action = 'remove-' + params['resource_kind'] + '-from-user'
+
+        nconfig = PolicyUserConfig(params['namespace'],
+                                   params['kubeconfig'],
+                                   {'action': {'value': action, 'include': False},
+                                    'user': {'value': params['user'], 'include': False},
+                                    'resource_kind': {'value': params['resource_kind'], 'include': False},
+                                    'name': {'value': params['resource_name'], 'include': False},
+                                   })
+
+        policyuser = PolicyUser(nconfig, params['debug'])
+
+        # Run the oc adm policy user related command
+
+        ########
+        # Delete
+        ########
+        if state == 'absent':
+            if not policyuser.exists():
+                return {'changed': False, 'state': 'absent'}
+
+            if check_mode:
+                return {'changed': False, 'msg': 'CHECK_MODE: would have performed a delete.'}
+
+            api_rval = policyuser.perform()
+
+            if api_rval['returncode'] != 0:
+                return {'msg': api_rval}
+
+            return {'changed': True, 'results' : api_rval, state:'absent'}
 
         if state == 'present':
             ########
             # Create
             ########
-            if not server_cert.exists() or params['force']:
+            results = policyuser.exists()
+            if isinstance(results, dict) and 'returncode' in results and results['returncode'] != 0:
+                return {'msg': results}
+
+            if not results:
 
                 if check_mode:
-                    return {'changed': True,
-                            'msg': "CHECK_MODE: Would have created the certificate.",
-                            'state': state}
+                    return {'changed': False, 'msg': 'CHECK_MODE: would have performed a create.'}
 
-                api_rval = server_cert.create()
+                api_rval = policyuser.perform()
 
                 if api_rval['returncode'] != 0:
-                    return {'Failed': True, 'msg': api_rval}
+                    return {'msg': api_rval}
 
-                return {'changed': True, 'results': api_rval, 'state': state}
+                return {'changed': True, 'results': api_rval, state: 'present'}
 
-            ########
-            # Exists
-            ########
-            api_rval = server_cert.get()
-            return {'changed': False, 'results': api_rval, 'state': state}
+            return {'changed': False, state: 'present'}
 
-        return {'failed': True,
-                'msg': 'Unknown state passed. %s' % state}
+        return {'failed': True, 'changed': False, 'results': 'Unknown state passed. %s' % state, state: 'unknown'}
 
+# -*- -*- -*- End included fragment: class/oc_adm_policy_user.py -*- -*- -*-
 
-# -*- -*- -*- End included fragment: class/oc_adm_ca_server_cert.py -*- -*- -*-
+# -*- -*- -*- Begin included fragment: ansible/oc_adm_policy_user.py -*- -*- -*-
 
-# -*- -*- -*- Begin included fragment: ansible/oc_adm_ca_server_cert.py -*- -*- -*-
 
 def main():
     '''
-    ansible oc adm module for ca create-server-cert
+    ansible oc adm module for user policy
     '''
 
     module = AnsibleModule(
         argument_spec=dict(
-            state=dict(default='present', type='str', choices=['present']),
+            state=dict(default='present', type='str',
+                       choices=['present', 'absent']),
             debug=dict(default=False, type='bool'),
+            resource_name=dict(required=True, type='str'),
+            namespace=dict(default='default', type='str'),
             kubeconfig=dict(default='/etc/origin/master/admin.kubeconfig', type='str'),
-            backup=dict(default=True, type='bool'),
-            force=dict(default=False, type='bool'),
-            # oc adm ca create-server-cert [options]
-            cert=dict(default=None, type='str'),
-            key=dict(default=None, type='str'),
-            signer_cert=dict(default='/etc/origin/master/ca.crt', type='str'),
-            signer_key=dict(default='/etc/origin/master/ca.key', type='str'),
-            signer_serial=dict(default='/etc/origin/master/ca.serial.txt', type='str'),
-            hostnames=dict(default=[], type='list'),
+
+            user=dict(required=True, type='str'),
+            resource_kind=dict(required=True, choices=['role', 'cluster-role', 'scc'], type='str'),
         ),
         supports_check_mode=True,
     )
 
-    results = CAServerCert.run_ansible(module.params, module.check_mode)
+    results = PolicyUser.run_ansible(module.params, module.check_mode)
+
     if 'failed' in results:
-        return module.fail_json(**results)
+        module.fail_json(**results)
 
-    return module.exit_json(**results)
+    module.exit_json(**results)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
 
-# -*- -*- -*- End included fragment: ansible/oc_adm_ca_server_cert.py -*- -*- -*-
+# -*- -*- -*- End included fragment: ansible/oc_adm_policy_user.py -*- -*- -*-
