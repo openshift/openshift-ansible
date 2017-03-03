@@ -1519,7 +1519,7 @@ class OCProject(OpenShiftCLI):
         else:
             self.project.update_annotation('node-selector', self.project.find_annotation('node-selector'))
 
-        return self._replace_content(self.kind, self.config.namespace, self.project.yaml_dict)
+        return self._replace_content(self.kind, self.config.name, self.project.yaml_dict)
 
     def needs_update(self):
         ''' verify an update is needed '''
@@ -1547,7 +1547,7 @@ class OCProject(OpenShiftCLI):
             _ns = ','.join(params['node_selector'])
 
         pconfig = ProjectConfig(params['name'],
-                                None,
+                                'None',
                                 params['kubeconfig'],
                                 {'admin': {'value': params['admin'], 'include': True},
                                  'admin_role': {'value': params['admin_role'], 'include': True},

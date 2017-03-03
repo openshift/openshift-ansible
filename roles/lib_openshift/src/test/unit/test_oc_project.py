@@ -35,10 +35,11 @@ class OCProjectTest(unittest.TestCase):
         ''' setup method will create a file and set to known configuration '''
         pass
 
+    @mock.patch('oc_project.locate_oc_binary')
     @mock.patch('oc_project.Utils.create_tmpfile_copy')
     @mock.patch('oc_project.Utils._write')
     @mock.patch('oc_project.OCProject._run')
-    def test_adding_a_project(self, mock_cmd, mock_write, mock_tmpfile_copy):
+    def test_adding_a_project(self, mock_cmd, mock_write, mock_tmpfile_copy, mock_loc_oc_bin):
         ''' Testing adding a project '''
 
         # Arrange
@@ -94,6 +95,10 @@ class OCProjectTest(unittest.TestCase):
 
         mock_tmpfile_copy.side_effect = [
             '/tmp/mocked_kubeconfig',
+        ]
+
+        mock_loc_oc_bin.side_effect = [
+            'oc',
         ]
 
         # Act
