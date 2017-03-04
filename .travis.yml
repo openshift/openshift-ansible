@@ -14,15 +14,14 @@ before_cache:
   - rm ~/.cache/pip/log/debug.log
 
 env:
-  - TEST_DIR=. TEST_TYPE=lint
-  - TEST_DIR=. TEST_TYPE=unit
-  - TEST_DIR=utils
+  - TEST_TYPE=lint
+  - TEST_TYPE=unit
 
 install:
   - pip install tox-travis coveralls
 
 script:
-  - cd "${TEST_DIR}" && tox
+  - tox
 
 after_success:
   - coveralls
