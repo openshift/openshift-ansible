@@ -10,13 +10,14 @@ description:
 options:
   state:
     description:
-    - Present is the only supported state.  The state present means that `oc adm ca` will generate a certificate
-    - and verify if the hostnames and the ClusterIP exists in the certificate.
-    - When create-server-cert is desired then the following parameters are passed.
-    - ['cert', 'key', 'signer_cert', 'signer_key', 'signer_serial']
+    - Present is the only supported state.  The state present means that `oc adm ca`
+    - will generate a certificate and verify if the hostnames and the ClusterIP exists
+    - in the certificate.
+    - "When create-server-cert is desired then the following parameters are passed:"
+    - "['cert', 'key', 'signer_cert', 'signer_key', 'signer_serial']"
     required: false
     default: present
-    choices: 
+    choices:
     - present
     aliases: []
   kubeconfig:

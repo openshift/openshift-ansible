@@ -47,8 +47,8 @@ options:
   images:
     description:
     - The image to base this router on - ${component} will be replaced with --type
-    required: 'openshift3/ose-${component}:${version}'
-    default: None
+    required: false
+    default: openshift3/ose-${component}:${version}
     aliases: []
   latest_images:
     description:
@@ -154,31 +154,31 @@ options:
     aliases: []
 author:
 - "Kenny Woodson <kwoodson@redhat.com>"
-extends_documentation_fragment:
-- There are some exceptions to note when doing the idempotency in this module.
-- The strategy is to use the oc adm router command to generate a default
-- configuration when creating or updating a router.  Often times there
-- differences from the generated template and what is in memory in openshift.
-- We make exceptions to not check these specific values when comparing objects.
-- Here are a list of exceptions:
-- - DeploymentConfig:
-    - dnsPolicy
-    - terminationGracePeriodSeconds
-    - restartPolicy
-    - timeoutSeconds
-    - livenessProbe
-    - readinessProbe
-    - terminationMessagePath
-    - hostPort
-    - defaultMode
-  - Service:
-    - portalIP
-    - clusterIP
-    - sessionAffinity
-    - type
-  - ServiceAccount:
-    - secrets
-    - imagePullSecrets
+extends_documentation_fragment: []
+#- There are some exceptions to note when doing the idempotency in this module.
+#- The strategy is to use the oc adm router command to generate a default
+#- configuration when creating or updating a router.  Often times there
+#- differences from the generated template and what is in memory in openshift.
+#- We make exceptions to not check these specific values when comparing objects.
+#- Here are a list of exceptions:
+#- - DeploymentConfig:
+#    - dnsPolicy
+#    - terminationGracePeriodSeconds
+#    - restartPolicy
+#    - timeoutSeconds
+#    - livenessProbe
+#    - readinessProbe
+#    - terminationMessagePath
+#    - hostPort
+#    - defaultMode
+#  - Service:
+#    - portalIP
+#    - clusterIP
+#    - sessionAffinity
+#    - type
+#  - ServiceAccount:
+#    - secrets
+#    - imagePullSecrets
 '''
 
 EXAMPLES = '''
