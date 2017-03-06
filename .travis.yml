@@ -1,20 +1,45 @@
 ---
 sudo: false
 
-cache:
-  - pip
-
 language: python
+
 python:
   - "2.7"
   - "3.5"
 
+cache:
+  - pip
+
+before_cache:
+  - rm ~/.cache/pip/log/debug.log
+
+env:
+  - TEST_TYPE=lint
+  - TEST_TYPE=unit
+
 install:
-  - pip install -r requirements.txt
-  - pip install tox-travis
+  - pip install tox-travis coveralls
 
 script:
-  # TODO(rhcarvalho): check syntax of other important entrypoint playbooks
-  - ansible-playbook --syntax-check playbooks/byo/config.yml
   - tox
-  - cd utils && tox
+
+after_success:
+  - coveralls
+
+notifications:
+  email:
+    recipients:
+      - jdetiber@redhat.com
+      - sdodson@redhat.com
+    on_success: change
+    on_failure: always
+  irc:
+    channels:
+      - chat.freenode.net#openshift-dev
+    on_success: change
+    on_failure: always
+    template:
+      - "%{repository}#%{build_number} (%{branch} - %{commit} : %{author}): %{message}"
+      - "Change view : %{compare_url}"
+      - "Build details : %{build_url}"
+      - "sdodson jdetiber: ^"
