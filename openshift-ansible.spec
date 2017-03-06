@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.67
+Version:        3.4.68
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -250,6 +250,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Mar 06 2017 Scott Dodson <sdodson@redhat.com> 3.4.68-1
+- node/sdn: make /var/lib/cni persistent to ensure IPAM allocations stick
+  around across node restart (dcbw@redhat.com)
+
 * Mon Feb 27 2017 Scott Dodson <sdodson@redhat.com> 3.4.67-1
 - Drop pyasn dependency (sdodson@redhat.com)
 
