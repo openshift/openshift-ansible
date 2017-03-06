@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.68
+Version:        3.4.69
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -250,6 +250,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Mar 06 2017 Scott Dodson <sdodson@redhat.com> 3.4.69-1
+- Automatic commit of package [openshift-ansible] release [3.4.68-1].
+  (sdodson@redhat.com)
+- Backporting #3311 to resolve bz 1427598 (ewolinet@redhat.com)
+
 * Mon Mar 06 2017 Scott Dodson <sdodson@redhat.com> 3.4.68-1
 - node/sdn: make /var/lib/cni persistent to ensure IPAM allocations stick
   around across node restart (dcbw@redhat.com)
