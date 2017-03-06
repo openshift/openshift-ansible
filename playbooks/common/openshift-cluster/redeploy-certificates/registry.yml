@@ -73,6 +73,9 @@
         --hostnames="{{ docker_registry_service_ip.results.clusterip }},docker-registry.default.svc.cluster.local,{{ docker_registry_route_hostname }}"
         --cert={{ openshift.common.config_base }}/master/registry.crt
         --key={{ openshift.common.config_base }}/master/registry.key
+        {% if openshift_version | oo_version_gte_3_5_or_1_5(openshift.common.deployment_type) | bool %}
+        --expire-days={{ openshift_hosted_registry_cert_expire_days | default(730) }}
+        {% endif %}
 
     - name: Update registry certificates secret
       oc_secret:
