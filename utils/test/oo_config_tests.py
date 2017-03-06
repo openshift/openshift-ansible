@@ -143,7 +143,7 @@ class OOConfigTests(OOInstallFixture):
             'ooinstall.conf'), SAMPLE_CONFIG)
         ooconfig = OOConfig(cfg_path)
 
-        self.assertEquals(3, len(ooconfig.deployment.hosts))
+        assert 3 == len(ooconfig.deployment.hosts)
         assert "master-private.example.com" == ooconfig.deployment.hosts[0].connect_to
         assert "10.0.0.1" == ooconfig.deployment.hosts[0].ip
         assert "master-private.example.com" == ooconfig.deployment.hosts[0].hostname
@@ -165,7 +165,7 @@ class OOConfigTests(OOInstallFixture):
             'ooinstall.conf'), SAMPLE_CONFIG)
         ooconfig = OOConfig(cfg_path)
         missing_host_facts = ooconfig.calc_missing_facts()
-        self.assertEquals(0, len(missing_host_facts))
+        assert 0 == len(missing_host_facts)
 
     # Test missing optional facts the user must confirm:
     def test_load_host_incomplete_facts(self):
@@ -173,9 +173,9 @@ class OOConfigTests(OOInstallFixture):
             'ooinstall.conf'), CONFIG_INCOMPLETE_FACTS)
         ooconfig = OOConfig(cfg_path)
         missing_host_facts = ooconfig.calc_missing_facts()
-        self.assertEquals(2, len(missing_host_facts))
-        self.assertEquals(1, len(missing_host_facts['10.0.0.2']))
-        self.assertEquals(3, len(missing_host_facts['10.0.0.3']))
+        assert 2 == len(missing_host_facts)
+        assert 1 == len(missing_host_facts['10.0.0.2'])
+        assert 3 == len(missing_host_facts['10.0.0.3'])
 
     def test_write_config(self):
         cfg_path = self.write_config(os.path.join(self.work_dir,
@@ -189,7 +189,7 @@ class OOConfigTests(OOInstallFixture):
 
 
 
-        self.assertEquals(3, len(written_config['deployment']['hosts']))
+        assert 3 == len(written_config['deployment']['hosts'])
         for h in written_config['deployment']['hosts']:
             assert 'ip' in h
             assert 'public_ip' in h

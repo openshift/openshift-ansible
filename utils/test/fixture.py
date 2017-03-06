@@ -91,11 +91,11 @@ class OOCliFixture(OOInstallFixture):
         """ Check that we ran playbook with expected inputs. """
         hosts = run_playbook_mock.call_args[0][1]
         hosts_to_run_on = run_playbook_mock.call_args[0][2]
-        self.assertEquals(exp_hosts_len, len(hosts))
-        self.assertEquals(exp_hosts_to_run_on_len, len(hosts_to_run_on))
+        assert exp_hosts_len == len(hosts)
+        assert exp_hosts_to_run_on_len == len(hosts_to_run_on)
 
     def _verify_config_hosts(self, written_config, host_count):
-        self.assertEquals(host_count, len(written_config['deployment']['hosts']))
+        assert host_count == len(written_config['deployment']['hosts'])
         for host in written_config['deployment']['hosts']:
             assert 'hostname' in host
             assert 'public_hostname' in host
@@ -148,8 +148,8 @@ class OOCliFixture(OOInstallFixture):
             # Make sure we ran on the expected masters and nodes:
             hosts = run_playbook_mock.call_args[0][1]
             hosts_to_run_on = run_playbook_mock.call_args[0][2]
-            self.assertEquals(exp_hosts_len, len(hosts))
-            self.assertEquals(exp_hosts_to_run_on_len, len(hosts_to_run_on))
+            assert exp_hosts_len == len(hosts)
+            assert exp_hosts_to_run_on_len == len(hosts_to_run_on)
 
 
 #pylint: disable=too-many-arguments,too-many-branches,too-many-statements

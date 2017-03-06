@@ -58,9 +58,9 @@ class TestOpenShiftAnsible(unittest.TestCase):
         inventory = configparser.ConfigParser(allow_no_value=True)
         inventory.read(self.inventory)
         assert inventory.has_section('masters:vars')
-        self.assertEquals('blue', inventory.get('masters:vars', 'color'))
+        assert 'blue' == inventory.get('masters:vars', 'color')
         assert inventory.has_section('nodes:vars')
-        self.assertEquals('green', inventory.get('nodes:vars', 'color'))
+        assert 'green' == inventory.get('nodes:vars', 'color')
 
 
 def generate_hosts(num_hosts, name_prefix, roles=None, new_host=False):

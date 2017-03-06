@@ -507,8 +507,8 @@ class UnattendedCliTests(OOCliFixture):
         # Make sure we ran on the expected masters and nodes:
         hosts = run_playbook_mock.call_args[0][1]
         hosts_to_run_on = run_playbook_mock.call_args[0][2]
-        self.assertEquals(3, len(hosts))
-        self.assertEquals(3, len(hosts_to_run_on))
+        assert 3 == len(hosts)
+        assert 3 == len(hosts_to_run_on)
 
     @patch('ooinstall.openshift_ansible.run_main_playbook')
     @patch('ooinstall.openshift_ansible.load_system_facts')
@@ -533,8 +533,8 @@ class UnattendedCliTests(OOCliFixture):
             inventory.get('OSEv3:vars', 'deployment_type'))
 
         # Check the masters:
-        self.assertEquals(1, len(inventory.items('masters')))
-        self.assertEquals(3, len(inventory.items('nodes')))
+        assert 1 == len(inventory.items('masters'))
+        assert 3 == len(inventory.items('nodes'))
 
         for item in inventory.items('masters'):
             # ansible host lines do NOT parse nicely:
@@ -634,8 +634,8 @@ class UnattendedCliTests(OOCliFixture):
         # Make sure we ran on the expected masters and nodes:
         hosts = run_playbook_mock.call_args[0][1]
         hosts_to_run_on = run_playbook_mock.call_args[0][2]
-        self.assertEquals(6, len(hosts))
-        self.assertEquals(6, len(hosts_to_run_on))
+        assert 6 == len(hosts)
+        assert 6 == len(hosts_to_run_on)
 
     #unattended with two masters, one node, and haproxy
     @patch('ooinstall.openshift_ansible.run_main_playbook')
@@ -704,8 +704,8 @@ class UnattendedCliTests(OOCliFixture):
         # Make sure we ran on the expected masters and nodes:
         hosts = run_playbook_mock.call_args[0][1]
         hosts_to_run_on = run_playbook_mock.call_args[0][2]
-        self.assertEquals(6, len(hosts))
-        self.assertEquals(6, len(hosts_to_run_on))
+        assert 6 == len(hosts)
+        assert 6 == len(hosts_to_run_on)
 
 class AttendedCliTests(OOCliFixture):
 
@@ -871,7 +871,7 @@ class AttendedCliTests(OOCliFixture):
                                              'openshift_schedulable=True')
 
         assert inventory.has_section('etcd')
-        self.assertEquals(3, len(inventory.items('etcd')))
+        assert 3 == len(inventory.items('etcd'))
 
     #interactive multimaster: identical masters and nodes
     @patch('ooinstall.openshift_ansible.run_main_playbook')
@@ -1013,7 +1013,7 @@ class AttendedCliTests(OOCliFixture):
         self._verify_load_facts(load_facts_mock)
 
         # Make sure run playbook wasn't called:
-        self.assertEquals(0, len(run_playbook_mock.mock_calls))
+        assert 0 == len(run_playbook_mock.mock_calls)
 
         written_config = read_yaml(self.config_file)
         self._verify_config_hosts(written_config, 4)
