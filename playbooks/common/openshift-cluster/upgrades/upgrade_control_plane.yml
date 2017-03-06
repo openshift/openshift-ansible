@@ -173,7 +173,11 @@
   - name: Reconcile Cluster Roles
     command: >
       {{ openshift.common.client_binary }} adm --config={{ openshift.common.config_base }}/master/admin.kubeconfig
-      policy reconcile-cluster-roles --additive-only=true --confirm
+      policy reconcile-cluster-roles --additive-only=true --confirm -o name
+    register: reconcile_cluster_role_result
+    changed_when:
+    - reconcile_cluster_role_result.stdout != ''
+    - reconcile_cluster_role_result.rc == 0
     run_once: true
 
   - name: Reconcile Cluster Role Bindings
@@ -184,19 +188,31 @@
       --exclude-groups=system:authenticated:oauth
       --exclude-groups=system:unauthenticated
       --exclude-users=system:anonymous
-      --additive-only=true --confirm
+      --additive-only=true --confirm -o name
     when: origin_reconcile_bindings | bool or ent_reconcile_bindings | bool
+    register: reconcile_bindings_result
+    changed_when:
+    - reconcile_bindings_result.stdout != ''
+    - reconcile_bindings_result.rc == 0
     run_once: true
 
   - name: Reconcile Jenkins Pipeline Role Bindings
     command: >
-      {{ openshift.common.client_binary }} adm --config={{ openshift.common.config_base }}/master/admin.kubeconfig policy reconcile-cluster-role-bindings system:build-strategy-jenkinspipeline --confirm
+      {{ openshift.common.client_binary }} adm --config={{ openshift.common.config_base }}/master/admin.kubeconfig policy reconcile-cluster-role-bindings system:build-strategy-jenkinspipeline --confirm -o name
     run_once: true
+    register: reconcile_jenkins_role_binding_result
+    changed_when:
+    - reconcile_jenkins_role_binding_result.stdout != ''
+    - reconcile_jenkins_role_binding_result.rc == 0
     when: openshift.common.version_gte_3_4_or_1_4  | bool
 
   - name: Reconcile Security Context Constraints
     command: >
-      {{ openshift.common.client_binary }} adm policy reconcile-sccs --confirm --additive-only=true
+      {{ openshift.common.client_binary }} adm policy reconcile-sccs --confirm --additive-only=true -o name
+    register: reconcile_scc_result
+    changed_when:
+    - reconcile_scc_result.stdout != ''
+    - reconcile_scc_result.rc == 0
     run_once: true
 
   - set_fact:
