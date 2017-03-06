@@ -13,10 +13,13 @@ python:
   - "3.5"
 
 install:
-  - pip install tox-travis
+  - pip install tox-travis coveralls
 
 script:
   - tox
+
+after_success:
+  - coveralls
 
 notifications:
   email:
