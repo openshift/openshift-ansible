@@ -61,9 +61,7 @@ class TestUtils(unittest.TestCase):
 
             # The actual number of debug calls was less than the
             # number of items passed to debug_env
-            self.assertLess(
-                _il.debug.call_count,
-                len(debug_some_params))
+            assert _il.debug.call_count < len(debug_some_params)
 
             six.assertCountEqual(
                 self,
