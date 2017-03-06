@@ -31,10 +31,12 @@
     labels:
       metrics-infra: hawkular-cassandra
     access_modes:
-    - ReadWriteOnce
+    - "{{ openshift_metrics_cassandra_pvc_access }}"
     size: "{{ openshift_metrics_cassandra_pvc_size }}"
   with_sequence: count={{ openshift_metrics_cassandra_replicas }}
-  when: openshift_metrics_cassandra_storage_type == 'pv'
+  when:
+  - openshift_metrics_cassandra_storage_type != 'emptydir'
+  - openshift_metrics_cassandra_storage_type != 'dynamic'
   changed_when: false
 
 - name: generate hawkular-cassandra persistent volume claims (dynamic)
@@ -48,7 +50,7 @@
     annotations:
       volume.alpha.kubernetes.io/storage-class: dynamic
     access_modes:
-    - ReadWriteOnce
+    - "{{ openshift_metrics_cassandra_pvc_access }}"
     size: "{{ openshift_metrics_cassandra_pvc_size }}"
   with_sequence: count={{ openshift_metrics_cassandra_replicas }}
   when: openshift_metrics_cassandra_storage_type == 'dynamic'
