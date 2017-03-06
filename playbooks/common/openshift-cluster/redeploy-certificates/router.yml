@@ -51,7 +51,7 @@
         name: router-certs
         namespace: default
         state: absent
-        run_once: true
+      run_once: true
 
     - name: Remove router service annotations
       command: >
