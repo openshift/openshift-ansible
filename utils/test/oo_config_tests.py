@@ -157,12 +157,8 @@ class OOConfigTests(OOInstallFixture):
 
         cfg_path = self.write_config(os.path.join(self.work_dir,
             'ooinstall.conf'), CONFIG_BAD)
-        try:
+        with pytest.raises(OOConfigInvalidHostError):
             OOConfig(cfg_path)
-            assert False
-        except OOConfigInvalidHostError:
-            assert True
-
 
     def test_load_complete_facts(self):
         cfg_path = self.write_config(os.path.join(self.work_dir,
