@@ -1,14 +1,6 @@
-#!/usr/bin/env python2
 '''
  Unit tests for oadm_manage_node
 '''
-# To run
-# python -m unittest version
-#
-# .
-# Ran 2 tests in 0.001s
-#
-# OK
 
 import os
 import six
@@ -31,10 +23,6 @@ class ManageNodeTest(unittest.TestCase):
     '''
      Test class for oadm_manage_node
     '''
-
-    def setUp(self):
-        ''' setup method will create a file and set to known configuration '''
-        pass
 
     @mock.patch('oadm_manage_node.Utils.create_tmpfile_copy')
     @mock.patch('oadm_manage_node.ManageNode.openshift_cmd')
@@ -287,11 +275,3 @@ class ManageNodeTest(unittest.TestCase):
         mock_shutil_which.side_effect = lambda _f, path=None: oc_bin
 
         self.assertEqual(locate_oc_binary(), oc_bin)
-
-    def tearDown(self):
-        '''TearDown method'''
-        pass
-
-
-if __name__ == "__main__":
-    unittest.main()

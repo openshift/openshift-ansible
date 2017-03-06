@@ -1,14 +1,6 @@
-#!/usr/bin/env python2
 '''
  Unit tests for oc service
 '''
-# To run
-# python -m unittest version
-#
-# .
-# Ran 1 test in 0.597s
-#
-# OK
 
 import os
 import six
@@ -32,10 +24,6 @@ class OCServiceTest(unittest.TestCase):
     '''
      Test class for OCService
     '''
-
-    def setUp(self):
-        ''' setup method will create a file and set to known configuration '''
-        pass
 
     @mock.patch('oc_service.Utils.create_tmpfile_copy')
     @mock.patch('oc_service.OCService._run')
@@ -315,11 +303,3 @@ class OCServiceTest(unittest.TestCase):
         mock_shutil_which.side_effect = lambda _f, path=None: oc_bin
 
         self.assertEqual(locate_oc_binary(), oc_bin)
-
-    def tearDown(self):
-        '''TearDown method'''
-        pass
-
-
-if __name__ == "__main__":
-    unittest.main()

@@ -1,14 +1,6 @@
-#!/usr/bin/env python2
 '''
  Unit tests for oc_env
 '''
-# To run:
-# ./oc_env.py
-#
-# .
-# Ran 1 test in 0.002s
-#
-# OK
 
 import os
 import six
@@ -31,10 +23,6 @@ class OCEnvTest(unittest.TestCase):
     '''
      Test class for OCEnv
     '''
-
-    def setUp(self):
-        ''' setup method will create a file and set to known configuration '''
-        pass
 
     @mock.patch('oc_env.locate_oc_binary')
     @mock.patch('oc_env.Utils.create_tmpfile_copy')
@@ -558,11 +546,3 @@ class OCEnvTest(unittest.TestCase):
         mock_shutil_which.side_effect = lambda _f, path=None: oc_bin
 
         self.assertEqual(locate_oc_binary(), oc_bin)
-
-    def tearDown(self):
-        '''TearDown method'''
-        pass
-
-
-if __name__ == "__main__":
-    unittest.main()

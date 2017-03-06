@@ -1,14 +1,6 @@
-#!/usr/bin/env python2
 '''
  Unit tests for oc project
 '''
-# To run:
-# ./oc_secret.py
-#
-# .
-# Ran 1 test in 0.002s
-#
-# OK
 
 import os
 import sys
@@ -30,10 +22,6 @@ class OCProjectTest(unittest.TestCase):
     '''
      Test class for OCSecret
     '''
-
-    def setUp(self):
-        ''' setup method will create a file and set to known configuration '''
-        pass
 
     @mock.patch('oc_project.locate_oc_binary')
     @mock.patch('oc_project.Utils.create_tmpfile_copy')
@@ -120,11 +108,3 @@ class OCProjectTest(unittest.TestCase):
             mock.call(['oc', 'get', 'namespace', 'operations', '-o', 'json'], None),
 
         ])
-
-    def tearDown(self):
-        '''TearDown method'''
-        pass
-
-
-if __name__ == "__main__":
-    unittest.main()
