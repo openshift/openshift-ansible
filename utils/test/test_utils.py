@@ -40,9 +40,7 @@ class TestUtils(unittest.TestCase):
             debug_env(self.debug_all_params)
 
             # Debug was called for each item we expect
-            self.assertEqual(
-                len(self.debug_all_params),
-                _il.debug.call_count)
+            assert len(self.debug_all_params) == _il.debug.call_count
 
             # Each item we expect was logged
             six.assertCountEqual(

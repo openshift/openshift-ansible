@@ -489,14 +489,11 @@ class UnattendedCliTests(OOCliFixture):
         self.assert_result(result, 0)
 
         load_facts_args = load_facts_mock.call_args[0]
-        self.assertEquals(os.path.join(self.work_dir, "hosts"),
-            load_facts_args[0])
-        self.assertEquals(os.path.join(self.work_dir,
-            "playbooks/byo/openshift_facts.yml"), load_facts_args[1])
+        assert os.path.join(self.work_dir, "hosts") == load_facts_args[0]
+        assert os.path.join(self.work_dir, "playbooks/byo/openshift_facts.yml") == load_facts_args[1]
         env_vars = load_facts_args[2]
-        self.assertEquals(os.path.join(self.work_dir,
-            '.ansible/callback_facts.yaml'),
-            env_vars['OO_INSTALL_CALLBACK_FACTS_YAML'])
+        assert os.path.join(self.work_dir,
+            '.ansible/callback_facts.yaml') == env_vars['OO_INSTALL_CALLBACK_FACTS_YAML']
         assert '/tmp/ansible.log' == env_vars['ANSIBLE_LOG_PATH']
         # If user running test has rpm installed, this might be set to default:
         assert (
@@ -527,10 +524,8 @@ class UnattendedCliTests(OOCliFixture):
         # Check the inventory file looks as we would expect:
         inventory = configparser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, 'hosts'))
-        self.assertEquals('root',
-            inventory.get('OSEv3:vars', 'ansible_ssh_user'))
-        self.assertEquals('openshift-enterprise',
-            inventory.get('OSEv3:vars', 'deployment_type'))
+        assert 'root' == inventory.get('OSEv3:vars', 'ansible_ssh_user')
+        assert 'openshift-enterprise' == inventory.get('OSEv3:vars', 'deployment_type')
 
         # Check the masters:
         assert 1 == len(inventory.items('masters'))
@@ -570,8 +565,7 @@ class UnattendedCliTests(OOCliFixture):
         # Make sure the correct value was passed to ansible:
         inventory = configparser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, 'hosts'))
-        self.assertEquals('openshift-enterprise',
-            inventory.get('OSEv3:vars', 'deployment_type'))
+        assert 'openshift-enterprise' == inventory.get('OSEv3:vars', 'deployment_type')
 
     @patch('ooinstall.openshift_ansible.run_main_playbook')
     @patch('ooinstall.openshift_ansible.load_system_facts')
@@ -598,8 +592,7 @@ class UnattendedCliTests(OOCliFixture):
 
         inventory = configparser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, 'hosts'))
-        self.assertEquals('openshift-enterprise',
-            inventory.get('OSEv3:vars', 'deployment_type'))
+        assert 'openshift-enterprise' == inventory.get('OSEv3:vars', 'deployment_type')
 
     # unattended with bad config file and no installed hosts (without --force)
     @patch('ooinstall.openshift_ansible.run_main_playbook')
