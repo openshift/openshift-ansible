@@ -1,0 +1,4 @@
+---
+- name: Ensure openshift_etcd_ca role is called
+  debug:
+    msg: openshift_etcd_ca role was called
