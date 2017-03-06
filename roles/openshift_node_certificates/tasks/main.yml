@@ -66,6 +66,9 @@
     --signer-key={{ openshift_ca_key }}
     --signer-serial={{ openshift_ca_serial }}
     --user=system:node:{{ hostvars[item].openshift.common.hostname }}
+    {% if openshift_version | oo_version_gte_3_5_or_1_5(openshift.common.deployment_type) | bool %}
+    --expire-days={{ openshift_node_cert_expire_days }}
+    {% endif %}
   args:
     creates: "{{ openshift_generated_configs_dir }}/node-{{ hostvars[item].openshift.common.hostname }}"
   with_items: "{{ hostvars
@@ -79,6 +82,9 @@
     {{ hostvars[openshift_ca_host].openshift.common.client_binary }} adm ca create-server-cert
     --cert={{ openshift_generated_configs_dir }}/node-{{ hostvars[item].openshift.common.hostname }}/server.crt
     --key={{ openshift_generated_configs_dir }}/node-{{ hostvars[item].openshift.common.hostname }}/server.key
+    {% if openshift_version | oo_version_gte_3_5_or_1_5(openshift.common.deployment_type) | bool %}
+    --expire-days={{ openshift_node_cert_expire_days }}
+    {% endif %}
     --overwrite=true
     --hostnames={{ hostvars[item].openshift.common.hostname }},{{ hostvars[item].openshift.common.public_hostname }},{{ hostvars[item].openshift.common.ip }},{{ hostvars[item].openshift.common.public_ip }}
     --signer-cert={{ openshift_ca_cert }}
