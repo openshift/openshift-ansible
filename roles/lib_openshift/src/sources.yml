@@ -218,12 +218,12 @@ oc_version.py:
 - class/oc_version.py
 - ansible/oc_version.py
 
-oc_sdnvalidator.py:
+oc_objectvalidator.py:
 - doc/generated
 - doc/license
 - lib/import.py
-- doc/sdnvalidator
+- doc/objectvalidator
 - ../../lib_utils/src/class/yedit.py
 - lib/base.py
-- class/oc_sdnvalidator.py
-- ansible/oc_sdnvalidator.py
+- class/oc_objectvalidator.py
+- ansible/oc_objectvalidator.py
