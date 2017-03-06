@@ -43,10 +43,7 @@ class TestUtils(unittest.TestCase):
             assert len(self.debug_all_params) == _il.debug.call_count
 
             # Each item we expect was logged
-            six.assertCountEqual(
-                self,
-                self.expected,
-                _il.debug.call_args_list)
+            assert sorted(self.expected) == sorted(_il.debug.call_args_list)
 
     def test_utils_debug_env_some_debugged(self):
         """Verify debug_env skips non-wanted env variables"""
@@ -61,10 +58,7 @@ class TestUtils(unittest.TestCase):
             # number of items passed to debug_env
             assert _il.debug.call_count < len(debug_some_params)
 
-            six.assertCountEqual(
-                self,
-                self.expected,
-                _il.debug.call_args_list)
+            assert sorted(self.expected) == sorted(_il.debug.call_args_list)
 
     ######################################################################
     def test_utils_is_valid_hostname_invalid(self):
