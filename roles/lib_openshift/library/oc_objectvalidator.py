@@ -970,7 +970,7 @@ class OpenShiftCLI(object):
 
         rval = {}
         results = ''
-        err = None
+        error = None
 
         if self.verbose:
             print(' '.join(cmds))
@@ -991,7 +991,7 @@ class OpenShiftCLI(object):
                         rval['results'] = json.loads(stdout)
                     except ValueError as err:
                         if "No JSON object could be decoded" in err.args:
-                            err = err.args
+                            error = err.args
                 elif output_type == 'raw':
                     rval['results'] = stdout
 
@@ -999,8 +999,8 @@ class OpenShiftCLI(object):
                 print("STDOUT: {0}".format(stdout))
                 print("STDERR: {0}".format(stderr))
 
-            if err:
-                rval.update({"err": err,
+            if error:
+                rval.update({"err": error,
                              "stderr": stderr,
                              "stdout": stdout,
                              "cmd": cmds})

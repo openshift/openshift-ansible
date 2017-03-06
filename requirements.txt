@@ -1,6 +1,5 @@
 ansible>=2.2
 click
 pyOpenSSL
-# We need to disable ruamel.yaml for now because of test failures
-#ruamel.yaml
+ruamel.yaml
 six
