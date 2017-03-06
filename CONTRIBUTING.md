@@ -72,9 +72,6 @@ See the [RPM build instructions](BUILD.md).
 
 ## Running tests
 
-This section covers how to run tests for the root of this repo, running tests 
-for the oo-install wrapper is described in [utils/README.md](utils/README.md).
-
 We use [tox](http://readthedocs.org/docs/tox/) to manage virtualenvs and run
 tests. Alternatively, tests can be run using
 [detox](https://pypi.python.org/pypi/detox/) which allows for running tests in
@@ -120,19 +117,19 @@ detox
 
 Running a particular test environment (python 2.7 flake8 tests in this case):
 ```
-tox -e py27-ansible22-flake8
+tox -e py27-flake8
 ```
 
 Running a particular test environment in a clean virtualenv (python 3.5 pylint
 tests in this case):
 ```
-tox -r -e py35-ansible22-pylint
+tox -r -e py35-pylint
 ```
 
 If you want to enter the virtualenv created by tox to do additional
 testing/debugging (py27-flake8 env in this case):
 ```
-source .tox/py27-ansible22-flake8/bin/activate
+source .tox/py27-flake8/bin/activate
 ```
 
 ## Submitting contributions
