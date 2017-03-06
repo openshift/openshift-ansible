@@ -1,11 +1,9 @@
-six
-pyOpenSSL
+# flake8 must be listed before pylint to avoid dependency conflicts
 flake8
 flake8-mutable
 flake8-print
 pylint
 setuptools-lint
-PyYAML
 yamllint
 coverage
 mock
