@@ -13,7 +13,7 @@ omit =
     */*_tests.py
 
 [report]
-fail_under = 26
+fail_under = 25
 
 [html]
 directory = cover
