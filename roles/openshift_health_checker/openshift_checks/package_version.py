@@ -10,11 +10,9 @@ class PackageVersion(NotContainerizedMixin, OpenShiftCheck):
     tags = ["preflight"]
 
     def run(self, tmp, task_vars):
-        rpm_prefix = get_var(task_vars, "openshift", "common", "service_type")
-        openshift_release = get_var(task_vars, "openshift_release")
-
         args = {
-            "prefix": rpm_prefix,
-            "version": openshift_release,
+            "requested_openshift_release": get_var(task_vars, "openshift_release", default=''),
+            "openshift_deployment_type": get_var(task_vars, "openshift_deployment_type"),
+            "rpm_prefix": get_var(task_vars, "openshift", "common", "service_type"),
         }
         return self.execute_module("aos_version", args, tmp, task_vars)
