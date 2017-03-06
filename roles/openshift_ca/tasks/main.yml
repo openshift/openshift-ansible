@@ -90,7 +90,7 @@
 # This should NOT replace the CA due to --overwrite=false when a CA already exists.
 - name: Create the master certificates if they do not already exist
   command: >
-    {{ hostvars[openshift_ca_host].openshift.common.client_binary }} adm create-master-certs
+    {{ hostvars[openshift_ca_host].openshift.common.client_binary }} adm ca create-master-certs
     {% for named_ca_certificate in openshift.master.named_certificates | default([]) | oo_collect('cafile') %}
     --certificate-authority {{ named_ca_certificate }}
     {% endfor %}
@@ -101,6 +101,10 @@
     --master={{ openshift.master.api_url }}
     --public-master={{ openshift.master.public_api_url }}
     --cert-dir={{ openshift_ca_config_dir }}
+    {% if openshift_version | oo_version_gte_3_5_or_1_5(openshift.common.deployment_type) | bool %}
+    --expire-days={{ openshift_master_cert_expire_days }}
+    --signer-expire-days={{ openshift_ca_cert_expire_days }}
+    {% endif %}
     --overwrite=false
   when: master_ca_missing | bool or openshift_certificates_redeploy | default(false) | bool
   delegate_to: "{{ openshift_ca_host }}"
