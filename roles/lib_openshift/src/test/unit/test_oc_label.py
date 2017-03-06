@@ -1,14 +1,6 @@
-#!/usr/bin/env python2
 '''
  Unit tests for oc label
 '''
-# To run
-# python -m unittest version
-#
-# .
-# Ran 1 test in 0.597s
-#
-# OK
 
 import os
 import six
@@ -31,10 +23,6 @@ class OCLabelTest(unittest.TestCase):
     '''
      Test class for OCLabel
     '''
-
-    def setUp(self):
-        ''' setup method will create a file and set to known configuration '''
-        pass
 
     @mock.patch('oc_label.Utils.create_tmpfile_copy')
     @mock.patch('oc_label.OCLabel._run')
@@ -295,11 +283,3 @@ class OCLabelTest(unittest.TestCase):
         mock_shutil_which.side_effect = lambda _f, path=None: oc_bin
 
         self.assertEqual(locate_oc_binary(), oc_bin)
-
-    def tearDown(self):
-        '''TearDown method'''
-        pass
-
-
-if __name__ == "__main__":
-    unittest.main()

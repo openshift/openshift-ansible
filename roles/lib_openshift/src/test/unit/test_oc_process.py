@@ -1,14 +1,6 @@
-#!/usr/bin/env python2
 '''
  Unit tests for oc process
 '''
-# To run
-# python -m unittest version
-#
-# .
-# Ran 1 test in 0.597s
-#
-# OK
 
 import os
 import six
@@ -253,10 +245,6 @@ class OCProcessTest(unittest.TestCase):
         "template": "mysql-ephemeral-template"
     }
 }'''
-
-    def setUp(self):
-        ''' setup method will set to known configuration '''
-        pass
 
     @mock.patch('oc_process.Utils.create_tmpfile_copy')
     @mock.patch('oc_process.OCProcess._run')
@@ -582,11 +570,3 @@ class OCProcessTest(unittest.TestCase):
         mock_shutil_which.side_effect = lambda _f, path=None: oc_bin
 
         self.assertEqual(locate_oc_binary(), oc_bin)
-
-    def tearDown(self):
-        '''TearDown method'''
-        pass
-
-
-if __name__ == "__main__":
-    unittest.main()

@@ -1,14 +1,6 @@
-#!/usr/bin/env python2
 '''
  Unit tests for repoquery
 '''
-# To run:
-# ./repoquery.py
-#
-# .
-# Ran 1 test in 0.002s
-#
-# OK
 
 import os
 import sys
@@ -30,10 +22,6 @@ class RepoQueryTest(unittest.TestCase):
     '''
      Test class for RepoQuery
     '''
-
-    def setUp(self):
-        ''' setup method for other tests '''
-        pass
 
     @mock.patch('repoquery._run')
     def test_querying_a_package(self, mock_cmd):
@@ -77,11 +65,3 @@ class RepoQueryTest(unittest.TestCase):
         mock_cmd.assert_has_calls([
             mock.call(['/usr/bin/repoquery', '--plugins', '--quiet', '--pkgnarrow=repos', '--queryformat=%{version}|%{release}|%{arch}|%{repo}|%{version}-%{release}', 'bash']),
         ])
-
-    def tearDown(self):
-        '''TearDown method'''
-        pass
-
-
-if __name__ == "__main__":
-    unittest.main()
