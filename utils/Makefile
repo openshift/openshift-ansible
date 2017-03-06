@@ -23,7 +23,6 @@
 
 NAME := oo-install
 VENV := $(NAME)env
-TESTPACKAGE := oo-install
 SHORTNAME := ooinstall
 
 # This doesn't evaluate until it's called. The -D argument is the
@@ -32,10 +31,6 @@ ASCII2MAN = a2x -D $(dir $@) -d manpage -f manpage $<
 MANPAGES := docs/man/man1/atomic-openshift-installer.1
 # slipped into the manpage template before a2x processing
 VERSION := 1.4
-
-# YAMLFILES: Skipping all '/files/' folders due to conflicting yaml file definitions
-YAMLFILES = $(shell find ../ -name $(VENV) -prune -o -name .tox -prune -o \( -name '*.yml' -o -name '*.yaml' \) ! -path "*/files/*" -print 2>&1)
-PYFILES = $(shell find ../ -name $(VENV) -prune -o -name ooinstall.egg-info -prune -o -name test -prune -o -name .tox -prune -o -name "*.py" -print)
 
 sdist: clean
 	python setup.py sdist

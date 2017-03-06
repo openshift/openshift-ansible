@@ -409,8 +409,7 @@ class UnattendedCliTests(OOCliFixture):
         result = self.runner.invoke(cli.cli, self.cli_args)
 
         if result.exception is None or result.exit_code != 1:
-            print("Exit code: %s" % result.exit_code)
-            self.fail("Unexpected CLI return")
+            self.fail("Unexpected CLI return. Exit code: %s" % result.exit_code)
 
     # unattended with config file and all installed hosts (with --force)
     @patch('ooinstall.openshift_ansible.run_main_playbook')
@@ -599,97 +598,6 @@ class UnattendedCliTests(OOCliFixture):
         inventory.read(os.path.join(self.work_dir, 'hosts'))
         self.assertEquals('openshift-enterprise',
             inventory.get('OSEv3:vars', 'deployment_type'))
-
-    # 2016-09-26 - tbielawa - COMMENTING OUT these tests FOR NOW while
-    # we wait to see if anyone notices that we took away their ability
-    # to set the ansible_config parameter in the command line options
-    # and in the installer config file.
-    #
-    # We have removed the ability to set the ansible config file
-    # manually so that our new quieter output mode is the default and
-    # only output mode.
-    #
-    # RE: https://trello.com/c/DSwwizwP - atomic-openshift-install
-    # should only output relevant information.
-
-    # @patch('ooinstall.openshift_ansible.run_ansible')
-    # @patch('ooinstall.openshift_ansible.load_system_facts')
-    # def test_no_ansible_config_specified(self, load_facts_mock, run_ansible_mock):
-    #     load_facts_mock.return_value = (MOCK_FACTS, 0)
-    #     run_ansible_mock.return_value = 0
-
-    #     config = SAMPLE_CONFIG % 'openshift-enterprise'
-
-    #     self._ansible_config_test(load_facts_mock, run_ansible_mock,
-    #         config, None, None)
-
-    # @patch('ooinstall.openshift_ansible.run_ansible')
-    # @patch('ooinstall.openshift_ansible.load_system_facts')
-    # def test_ansible_config_specified_cli(self, load_facts_mock, run_ansible_mock):
-    #     load_facts_mock.return_value = (MOCK_FACTS, 0)
-    #     run_ansible_mock.return_value = 0
-
-    #     config = SAMPLE_CONFIG % 'openshift-enterprise'
-    #     ansible_config = os.path.join(self.work_dir, 'ansible.cfg')
-
-    #     self._ansible_config_test(load_facts_mock, run_ansible_mock,
-    #         config, ansible_config, ansible_config)
-
-    # @patch('ooinstall.openshift_ansible.run_ansible')
-    # @patch('ooinstall.openshift_ansible.load_system_facts')
-    # def test_ansible_config_specified_in_installer_config(self,
-    #     load_facts_mock, run_ansible_mock):
-
-    #     load_facts_mock.return_value = (MOCK_FACTS, 0)
-    #     run_ansible_mock.return_value = 0
-
-    #     ansible_config = os.path.join(self.work_dir, 'ansible.cfg')
-    #     config = SAMPLE_CONFIG % 'openshift-enterprise'
-    #     config = "%s\nansible_config: %s" % (config, ansible_config)
-    #     self._ansible_config_test(load_facts_mock, run_ansible_mock,
-    #         config, None, ansible_config)
-
-    # #pylint: disable=too-many-arguments
-    # # This method allows for drastically simpler tests to write, and the args
-    # # are all useful.
-    # def _ansible_config_test(self, load_facts_mock, run_ansible_mock,
-    #     installer_config, ansible_config_cli=None, expected_result=None):
-    #     """
-    #     Utility method for testing the ways you can specify the ansible config.
-    #     """
-
-    #     load_facts_mock.return_value = (MOCK_FACTS, 0)
-    #     run_ansible_mock.return_value = 0
-
-    #     config_file = self.write_config(os.path.join(self.work_dir,
-    #         'ooinstall.conf'), installer_config)
-
-    #     self.cli_args.extend(["-c", config_file])
-    #     if ansible_config_cli:
-    #         self.cli_args.extend(["--ansible-config", ansible_config_cli])
-    #     self.cli_args.append("install")
-    #     result = self.runner.invoke(cli.cli, self.cli_args)
-    #     self.assert_result(result, 0)
-
-    #     # Test the env vars for facts playbook:
-    #     facts_env_vars = load_facts_mock.call_args[0][2]
-    #     if expected_result:
-    #         self.assertEquals(expected_result, facts_env_vars['ANSIBLE_CONFIG'])
-    #     else:
-    #         # If user running test has rpm installed, this might be set to default:
-    #         self.assertTrue('ANSIBLE_CONFIG' not in facts_env_vars or
-    #             facts_env_vars['ANSIBLE_CONFIG'] == cli.DEFAULT_ANSIBLE_CONFIG)
-
-    #     # Test the env vars for main playbook:
-    #     env_vars = run_ansible_mock.call_args[0][2]
-    #     if expected_result:
-    #         self.assertEquals(expected_result, env_vars['ANSIBLE_CONFIG'])
-    #     else:
-    #         # If user running test has rpm installed, this might be set to default:
-    #         #
-    #         # By default we will use the quiet config
-    #         self.assertTrue('ANSIBLE_CONFIG' not in env_vars or
-    #             env_vars['ANSIBLE_CONFIG'] == cli.QUIET_ANSIBLE_CONFIG)
 
     # unattended with bad config file and no installed hosts (without --force)
     @patch('ooinstall.openshift_ansible.run_main_playbook')
@@ -1011,13 +919,7 @@ class AttendedCliTests(OOCliFixture):
             full_line = "%s=%s" % (a, b)
             tokens = full_line.split()
             if tokens[0] == host:
-                found = False
-                for token in tokens:
-                    if token == variable:
-                        found = True
-                        continue
-                self.assertTrue("Unable to find %s in line: %s" %
-                                (variable, full_line), found)
+                self.assertTrue(variable in tokens[1:], "Unable to find %s in line: %s" % (variable, full_line))
                 return
         self.fail("unable to find host %s in inventory" % host)
 

@@ -2,7 +2,6 @@ import os
 import unittest
 import tempfile
 import shutil
-import yaml
 
 from six.moves import configparser
 
@@ -40,17 +39,10 @@ class TestOpenShiftAnsible(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.work_dir)
 
-    def generate_hosts(self, num_hosts, name_prefix, roles=None, new_host=False):
-        hosts = []
-        for num in range(1, num_hosts + 1):
-            hosts.append(Host(connect_to=name_prefix + str(num),
-                              roles=roles, new_host=new_host))
-        return hosts
-
     def test_generate_inventory_new_nodes(self):
-        hosts = self.generate_hosts(1, 'master', roles=(['master', 'etcd']))
-        hosts.extend(self.generate_hosts(1, 'node', roles=['node']))
-        hosts.extend(self.generate_hosts(1, 'new_node', roles=['node'], new_host=True))
+        hosts = generate_hosts(1, 'master', roles=(['master', 'etcd']))
+        hosts.extend(generate_hosts(1, 'node', roles=['node']))
+        hosts.extend(generate_hosts(1, 'new_node', roles=['node'], new_host=True))
         openshift_ansible.generate_inventory(hosts)
         inventory = configparser.ConfigParser(allow_no_value=True)
         inventory.read(self.inventory)
@@ -59,8 +51,8 @@ class TestOpenShiftAnsible(unittest.TestCase):
 
     def test_write_inventory_vars_role_vars(self):
         with open(self.inventory, 'w') as inv:
-            openshift_ansible.CFG.deployment.roles['master'].variables={'color': 'blue'}
-            openshift_ansible.CFG.deployment.roles['node'].variables={'color': 'green'}
+            openshift_ansible.CFG.deployment.roles['master'].variables = {'color': 'blue'}
+            openshift_ansible.CFG.deployment.roles['node'].variables = {'color': 'green'}
             openshift_ansible.write_inventory_vars(inv, None)
 
         inventory = configparser.ConfigParser(allow_no_value=True)
@@ -69,3 +61,11 @@ class TestOpenShiftAnsible(unittest.TestCase):
         self.assertEquals('blue', inventory.get('masters:vars', 'color'))
         self.assertTrue(inventory.has_section('nodes:vars'))
         self.assertEquals('green', inventory.get('nodes:vars', 'color'))
+
+
+def generate_hosts(num_hosts, name_prefix, roles=None, new_host=False):
+    hosts = []
+    for num in range(1, num_hosts + 1):
+        hosts.append(Host(connect_to=name_prefix + str(num),
+                          roles=roles, new_host=new_host))
+    return hosts

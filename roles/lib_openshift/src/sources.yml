@@ -130,6 +130,17 @@ oc_process.py:
 - class/oc_process.py
 - ansible/oc_process.py
 
+oc_project.py:
+- doc/generated
+- doc/license
+- lib/import.py
+- doc/project
+- ../../lib_utils/src/class/yedit.py
+- lib/base.py
+- lib/project.py
+- class/oc_project.py
+- ansible/oc_project.py
+
 oc_route.py:
 - doc/generated
 - doc/license

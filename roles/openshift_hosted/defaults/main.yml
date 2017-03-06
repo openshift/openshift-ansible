@@ -1,2 +1,30 @@
 ---
 registry_volume_claim: 'registry-claim'
+
+openshift_hosted_router_edits:
+- key: spec.strategy.rollingParams.intervalSeconds
+  value: 1
+  action: put
+- key: spec.strategy.rollingParams.updatePeriodSeconds
+  value: 1
+  action: put
+- key: spec.strategy.activeDeadlineSeconds
+  value: 21600
+  action: put
+
+openshift_hosted_routers:
+- name: router
+  replicas: "{{ replicas }}"
+  namespace: default
+  serviceaccount: router
+  selector: "{{ openshift_hosted_router_selector }}"
+  images: "{{ openshift_hosted_router_image }}"
+  edits: "{{ openshift_hosted_router_edits }}"
+  stats_port: 1936
+  ports:
+  - 80:80
+  - 443:443
+  certificates: "{{ openshift_hosted_router_certificate | default({}) }}"
+
+
+openshift_hosted_router_certificates: {}

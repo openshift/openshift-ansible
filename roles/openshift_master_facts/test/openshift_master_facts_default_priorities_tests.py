@@ -119,7 +119,9 @@ def short_version_fixture(request, facts):
 
 def test_short_version_kwarg(priorities_lookup, short_version_kwarg_fixture, zones_enabled):
     facts, short_version, default_priorities = short_version_kwarg_fixture
-    assert_ok(priorities_lookup, default_priorities, variables=facts, zones_enabled=zones_enabled, short_version=short_version)
+    assert_ok(
+        priorities_lookup, default_priorities, variables=facts,
+        zones_enabled=zones_enabled, short_version=short_version)
 
 
 @pytest.fixture(params=TEST_VARS)
@@ -131,7 +133,9 @@ def short_version_kwarg_fixture(request, facts):
 
 def test_deployment_type_kwarg(priorities_lookup, deployment_type_kwarg_fixture, zones_enabled):
     facts, deployment_type, default_priorities = deployment_type_kwarg_fixture
-    assert_ok(priorities_lookup, default_priorities, variables=facts, zones_enabled=zones_enabled, deployment_type=deployment_type)
+    assert_ok(
+        priorities_lookup, default_priorities, variables=facts,
+        zones_enabled=zones_enabled, deployment_type=deployment_type)
 
 
 @pytest.fixture(params=TEST_VARS)
@@ -141,9 +145,12 @@ def deployment_type_kwarg_fixture(request, facts):
     return facts, deployment_type, default_priorities
 
 
-def test_short_version_deployment_type_kwargs(priorities_lookup, short_version_deployment_type_kwargs_fixture, zones_enabled):
+def test_short_version_deployment_type_kwargs(
+        priorities_lookup, short_version_deployment_type_kwargs_fixture, zones_enabled):
     short_version, deployment_type, default_priorities = short_version_deployment_type_kwargs_fixture
-    assert_ok(priorities_lookup, default_priorities, zones_enabled=zones_enabled, short_version=short_version, deployment_type=deployment_type)
+    assert_ok(
+        priorities_lookup, default_priorities, zones_enabled=zones_enabled,
+        short_version=short_version, deployment_type=deployment_type)
 
 
 @pytest.fixture(params=TEST_VARS)
