@@ -20,7 +20,7 @@ def priorities_lookup():
 
 
 @pytest.fixture()
-def facts(request):
+def facts():
     return {
         'openshift': {
             'common': {}

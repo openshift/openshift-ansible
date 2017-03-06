@@ -200,8 +200,6 @@ class YeditTest(unittest.TestCase):
         yed.append('x:y:z', [5, 6])
         yed.append('x:y:z', [5, 6])
         self.assertTrue(yed.get('x:y:z') == [1, 2, 3, [5, 6], [5, 6]])
-        # pylint: disable=maybe-no-member
-        self.assertTrue(2 == yed.get('x:y:z').count([5, 6]))
         self.assertFalse(yed.exists('x:y:z', 4))
 
     def test_add_item_to_dict(self):
