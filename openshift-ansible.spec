@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.23
+Version:        3.5.24
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,33 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Mar 06 2017 Scott Dodson <sdodson@redhat.com> 3.5.24-1
+- Lower test coverage percentage. (kwoodson@redhat.com)
+- Mock runs differntly on travis.  Fix the mock test params to be ANY.
+  (kwoodson@redhat.com)
+- Fixed the none namespace.  Fixed tests with latest loc_oc_binary call.
+  (kwoodson@redhat.com)
+- Updating the namespace param to None. (kwoodson@redhat.com)
+- Regenerated code with latest yedit changes. (kwoodson@redhat.com)
+- Fixed tests to align with new naming. (kwoodson@redhat.com)
+- Fixed docs.  Added check for delete failures.  Updated namespace to None.
+  (kwoodson@redhat.com)
+- Fixing linters (kwoodson@redhat.com)
+- Adding integration test.  Fixed issue with node_selector.
+  (kwoodson@redhat.com)
+- Adding oc_project to lib_openshift. (kwoodson@redhat.com)
+- Remove old commented-out tests (rhcarvalho@gmail.com)
+- Remove redundant assertion (rhcarvalho@gmail.com)
+- Fix test (rhcarvalho@gmail.com)
+- Lint utils/test (rhcarvalho@gmail.com)
+- Rewrap long lines (rhcarvalho@gmail.com)
+- Remove unused argument (rhcarvalho@gmail.com)
+- Remove unused Makefile variables (rhcarvalho@gmail.com)
+- Added ports. (kwoodson@redhat.com)
+- Fixed router name to produce 2nd router. (kwoodson@redhat.com)
+- Updated to work with an array of routers. (kwoodson@redhat.com)
+- Adding support for router sharding. (kwoodson@redhat.com)
+
 * Fri Mar 03 2017 Scott Dodson <sdodson@redhat.com> 3.5.23-1
 - node/sdn: make /var/lib/cni persistent to ensure IPAM allocations stick
   around across node restart (dcbw@redhat.com)
