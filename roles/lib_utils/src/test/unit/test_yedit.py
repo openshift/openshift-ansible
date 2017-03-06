@@ -7,6 +7,8 @@ import sys
 import unittest
 import mock
 
+import pytest
+
 # Removing invalid variable names for tests so that I can
 # keep them brief
 # pylint: disable=invalid-name,no-name-in-module
@@ -263,19 +265,19 @@ class YeditTest(unittest.TestCase):
     def test_accessing_path_with_unexpected_objects(self):
         '''test providing source path objects that differ from current object state'''
         yed = Yedit(content={'a': {'b': {'c': ['d', 'e']}}})
-        with self.assertRaises(YeditException):
+        with pytest.raises(YeditException):
             yed.put('a.b.c.d', 'x')
 
     def test_creating_new_objects_with_embedded_list(self):
         '''test creating new objects with an embedded list in the creation path'''
         yed = Yedit(content={'a': {'b': 12}})
-        with self.assertRaises(YeditException):
+        with pytest.raises(YeditException):
             yed.put('new.stuff[0].here', 'value')
 
     def test_creating_new_objects_with_trailing_list(self):
         '''test creating new object(s) where the final piece is a list'''
         yed = Yedit(content={'a': {'b': 12}})
-        with self.assertRaises(YeditException):
+        with pytest.raises(YeditException):
             yed.put('new.stuff.here[0]', 'item')
 
     def test_empty_key_with_int_value(self):

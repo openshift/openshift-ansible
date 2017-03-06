@@ -9,6 +9,7 @@ import shutil
 import yaml
 
 from six.moves import cStringIO
+import pytest
 
 from ooinstall.oo_config import OOConfig, Host, OOConfigInvalidHostError
 import ooinstall.openshift_ansible
@@ -216,7 +217,8 @@ class HostTests(OOInstallFixture):
             'public_hostname': 'a.example.com',
             'master': True
         }
-        self.assertRaises(OOConfigInvalidHostError, Host, **yaml_props)
+        with pytest.raises(OOConfigInvalidHostError):
+            Host(**yaml_props)
 
     def test_load_host_no_master_or_node_specified(self):
         yaml_props = {
@@ -225,7 +227,8 @@ class HostTests(OOInstallFixture):
             'public_ip': '192.168.0.1',
             'public_hostname': 'a.example.com',
         }
-        self.assertRaises(OOConfigInvalidHostError, Host, **yaml_props)
+        with pytest.raises(OOConfigInvalidHostError):
+            Host(**yaml_props)
 
     def test_inventory_file_quotes_node_labels(self):
         """Verify a host entry wraps openshift_node_labels value in double quotes"""
