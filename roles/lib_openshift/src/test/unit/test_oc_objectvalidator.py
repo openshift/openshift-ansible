@@ -71,8 +71,8 @@ class OCObjectValidatorTest(unittest.TestCase):
         results = OCObjectValidator.run_ansible(params)
 
         # Assert
-        self.assertNotIn('failed', results)
-        self.assertEqual(results['msg'], 'All objects are valid.')
+        assert 'failed' not in results
+        assert results['msg'] == 'All objects are valid.'
 
         # Making sure our mock was called as we expected
         mock_cmd.assert_has_calls([
@@ -120,10 +120,10 @@ class OCObjectValidatorTest(unittest.TestCase):
         results = OCObjectValidator.run_ansible(params)
 
         # Assert
-        self.assertTrue(results['failed'])
-        self.assertEqual(results['msg'], 'Failed to GET hostsubnet.')
-        self.assertEqual(results['state'], 'list')
-        self.assertEqual(results['results'], error_results)
+        assert results['failed']
+        assert results['msg'] == 'Failed to GET hostsubnet.'
+        assert results['state'] == 'list'
+        assert results['results'] == error_results
 
         # Making sure our mock was called as we expected
         mock_cmd.assert_has_calls([
@@ -446,8 +446,8 @@ class OCObjectValidatorTest(unittest.TestCase):
         results = OCObjectValidator.run_ansible(params)
 
         # Assert
-        self.assertNotIn('failed', results)
-        self.assertEqual(results['msg'], 'All objects are valid.')
+        assert 'failed' not in results
+        assert results['msg'] == 'All objects are valid.'
 
         # Making sure our mock was called as we expected
         mock_cmd.assert_has_calls([
@@ -910,10 +910,10 @@ class OCObjectValidatorTest(unittest.TestCase):
         results = OCObjectValidator.run_ansible(params)
 
         # Assert
-        self.assertTrue(results['failed'])
-        self.assertIn('All objects are not valid.', results['msg'])
-        self.assertEqual(results['state'], 'list')
-        self.assertEqual(results['results'], invalid_results)
+        assert results['failed']
+        assert 'All objects are not valid.' in results['msg']
+        assert results['state'] == 'list'
+        assert results['results'] == invalid_results
 
         # Making sure our mock was called as we expected
         mock_cmd.assert_has_calls([
