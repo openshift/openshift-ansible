@@ -8,6 +8,8 @@ import sys
 import unittest
 import mock
 
+import pytest
+
 # Removing invalid variable names for tests so that I can
 # keep them brief
 # pylint: disable=invalid-name,no-name-in-module
@@ -463,7 +465,7 @@ class OCProcessTest(unittest.TestCase):
         assert not results['changed']
         assert results['results']['results']['items'][0]['metadata']['name'] == 'testdb'
 
-    @unittest.skipIf(six.PY3, 'py2 test only')
+    @pytest.mark.skipif(six.PY3, reason='py2 test only')
     @mock.patch('os.path.exists')
     @mock.patch('os.environ.get')
     def test_binary_lookup_fallback(self, mock_env_get, mock_path_exists):
@@ -475,7 +477,7 @@ class OCProcessTest(unittest.TestCase):
 
         assert locate_oc_binary() == 'oc'
 
-    @unittest.skipIf(six.PY3, 'py2 test only')
+    @pytest.mark.skipif(six.PY3, reason='py2 test only')
     @mock.patch('os.path.exists')
     @mock.patch('os.environ.get')
     def test_binary_lookup_in_path(self, mock_env_get, mock_path_exists):
@@ -489,7 +491,7 @@ class OCProcessTest(unittest.TestCase):
 
         assert locate_oc_binary() == oc_bin
 
-    @unittest.skipIf(six.PY3, 'py2 test only')
+    @pytest.mark.skipif(six.PY3, reason='py2 test only')
     @mock.patch('os.path.exists')
     @mock.patch('os.environ.get')
     def test_binary_lookup_in_usr_local(self, mock_env_get, mock_path_exists):
@@ -503,7 +505,7 @@ class OCProcessTest(unittest.TestCase):
 
         assert locate_oc_binary() == oc_bin
 
-    @unittest.skipIf(six.PY3, 'py2 test only')
+    @pytest.mark.skipif(six.PY3, reason='py2 test only')
     @mock.patch('os.path.exists')
     @mock.patch('os.environ.get')
     def test_binary_lookup_in_home(self, mock_env_get, mock_path_exists):
@@ -517,7 +519,7 @@ class OCProcessTest(unittest.TestCase):
 
         assert locate_oc_binary() == oc_bin
 
-    @unittest.skipIf(six.PY2, 'py3 test only')
+    @pytest.mark.skipif(six.PY2, reason='py3 test only')
     @mock.patch('shutil.which')
     @mock.patch('os.environ.get')
     def test_binary_lookup_fallback_py3(self, mock_env_get, mock_shutil_which):
@@ -529,7 +531,7 @@ class OCProcessTest(unittest.TestCase):
 
         assert locate_oc_binary() == 'oc'
 
-    @unittest.skipIf(six.PY2, 'py3 test only')
+    @pytest.mark.skipif(six.PY2, reason='py3 test only')
     @mock.patch('shutil.which')
     @mock.patch('os.environ.get')
     def test_binary_lookup_in_path_py3(self, mock_env_get, mock_shutil_which):
@@ -543,7 +545,7 @@ class OCProcessTest(unittest.TestCase):
 
         assert locate_oc_binary() == oc_bin
 
-    @unittest.skipIf(six.PY2, 'py3 test only')
+    @pytest.mark.skipif(six.PY2, reason='py3 test only')
     @mock.patch('shutil.which')
     @mock.patch('os.environ.get')
     def test_binary_lookup_in_usr_local_py3(self, mock_env_get, mock_shutil_which):
@@ -557,7 +559,7 @@ class OCProcessTest(unittest.TestCase):
 
         assert locate_oc_binary() == oc_bin
 
-    @unittest.skipIf(six.PY2, 'py3 test only')
+    @pytest.mark.skipif(six.PY2, reason='py3 test only')
     @mock.patch('shutil.which')
     @mock.patch('os.environ.get')
     def test_binary_lookup_in_home_py3(self, mock_env_get, mock_shutil_which):
