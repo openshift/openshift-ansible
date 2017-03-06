@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.24
+Version:        3.5.25
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,20 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Mar 06 2017 Scott Dodson <sdodson@redhat.com> 3.5.25-1
+- Fix indentation of run_once (sdodson@redhat.com)
+- Update docs for test consolidation and remove the Makefile
+  (jdetiber@redhat.com)
+- Consolidate root/utils tests (jdetiber@redhat.com)
+- Remove dummy setup/teardown methods (rhcarvalho@gmail.com)
+- Clean up test files (rhcarvalho@gmail.com)
+- Remove commented-out test code (rhcarvalho@gmail.com)
+- Make generic OCObjectValidator from OCSDNValidator (mkhan@redhat.com)
+- logging needs openshift_master_facts before openshift_facts
+  (rmeggins@redhat.com)
+- separate out test tool configs from setup.cfg (jdetiber@redhat.com)
+- Dockerfile and docs to run containerized playbooks (pep@redhat.com)
+
 * Mon Mar 06 2017 Scott Dodson <sdodson@redhat.com> 3.5.24-1
 - Lower test coverage percentage. (kwoodson@redhat.com)
 - Mock runs differntly on travis.  Fix the mock test params to be ANY.
