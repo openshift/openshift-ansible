@@ -1,0 +1,3 @@
+---
+openshift_ca_cert_expire_days: 1825
+openshift_master_cert_expire_days: 730
