@@ -1,0 +1,14 @@
+---
+- hosts: test_group
+  pre_tasks:
+  - name: Pre-install python2-ruamel-yaml
+    package:
+      name: http://cbs.centos.org/kojifiles/packages/python-ruamel-yaml/0.12.14/9.el7/x86_64/python2-ruamel-yaml-0.12.14-9.el7.x86_64.rpm
+      state: present
+  - name: symlink /var/lib/origin.local.config
+    file:
+      path: /etc/origin
+      src: /var/lib/origin/openshift.local.config
+      state: link
+  roles:
+  - lib_openshift

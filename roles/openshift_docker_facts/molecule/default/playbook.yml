@@ -1,0 +1,9 @@
+---
+- hosts: all
+  roles:
+  - role: openshift_docker_facts
+  post_tasks:
+  - name: verify expected results
+    assert:
+      that:
+      - openshift.docker | default(none) is not none

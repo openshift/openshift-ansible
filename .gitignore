@@ -24,3 +24,7 @@ multi_ec2.yaml
 *.egg-info
 .eggs
 cover/
+.molecule/
+.cache
+pytestdebug.log
+htmlcov/

@@ -1,0 +1,9 @@
+---
+- hosts: all
+  roles:
+  - role: openshift_master_facts
+  post_tasks:
+  - name: verify expected results
+    assert:
+      that:
+      - openshift.master | default(none) is not none

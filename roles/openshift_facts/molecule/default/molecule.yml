@@ -1,0 +1,25 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: docker
+  options:
+    privileged: yes
+lint:
+  name: ansible-lint
+platforms:
+- name: oa-role-openshift-facts-test
+  groups:
+  - test_group
+provisioner:
+  name: ansible
+  group_vars:
+    test_group:
+      deployment_type: origin
+      openshift_deployment_type: "{{ deployment_type }}"
+scenario:
+  name: default
+  setup: ../../../../molecule_common/create.yml
+  teardown: ../../../../molecule_common/destroy.yml
+verifier:
+  name: testinfra

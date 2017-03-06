@@ -1,12 +1,13 @@
-six
-pyOpenSSL
+# Linter Deps
 flake8
 flake8-mutable
 flake8-print
 pylint
 setuptools-lint
-PyYAML
+sh
 yamllint
+
+# Unit Deps
 coverage
 mock
 pytest
