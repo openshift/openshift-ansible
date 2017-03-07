@@ -300,7 +300,51 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #
 # Disable management of the OpenShift Router
 #openshift_hosted_manage_router=false
-
+#
+# Router sharding support has been added and can be achieved by supplying the correct
+# data to the inventory.  The variable to house the data is openshift_hosted_routers
+# and is in the form of a list.  If no data is passed then a default router will be
+# created.  There are multiple combinations of router sharding.  The one described
+# below supports routers on separate nodes.
+#openshift_hosted_routers:
+#- name: router1
+#  stats_port: 1936
+#  ports:
+#  - 80:80
+#  - 443:443
+#  replicas: 1
+#  namespace: default
+#  serviceaccount: router
+#  selector: type=router1
+#  images: "openshift3/ose-${component}:${version}"
+#  edits: []
+#  certificates:
+#    certfile: /path/to/certificate/abc.crt
+#    keyfile: /path/to/certificate/abc.key
+#    cafile: /path/to/certificate/ca.crt
+#- name: router2
+#  stats_port: 1936
+#  ports:
+#  - 80:80
+#  - 443:443
+#  replicas: 1
+#  namespace: default
+#  serviceaccount: router
+#  selector: type=router2
+#  images: "openshift3/ose-${component}:${version}"
+#  certificates:
+#    certfile: /path/to/certificate/xyz.crt
+#    keyfile: /path/to/certificate/xyz.key
+#    cafile: /path/to/certificate/ca.crt
+#  edits:
+#  # ROUTE_LABELS sets the router to listen for routes
+#  # tagged with the provided values
+#  - key: spec.template.spec.containers[0].env
+#    value:
+#      name: ROUTE_LABELS
+#      value: "route=external"
+#    action: append
+#
 # OpenShift Registry Console Options
 # Override the console image prefix for enterprise deployments, not used in origin
 # default is "registry.access.redhat.com/openshift3/" and the image appended is "registry-console"
