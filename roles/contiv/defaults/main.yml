@@ -2,10 +2,17 @@
 # The version of Contiv binaries to use
 contiv_version: 1.0.0-beta.3-02-21-2017.20-52-42.UTC
 
+# The version of cni binaries
+cni_version: v0.4.0
+
 contiv_default_subnet: "20.1.1.1/24"
 contiv_default_gw: "20.1.1.254"
 # TCP port that Netmaster listens for network connections
 netmaster_port: 9999
+
+# Default for contiv_role
+contiv_role: netmaster
+
 
 # TCP port that Netplugin listens for network connections
 netplugin_port: 6640
@@ -32,6 +39,14 @@ bin_dir: /usr/bin
 
 # Path to the contivk8s cni binary
 cni_bin_dir: /opt/cni/bin
+
+# Path to cni archive download directory
+cni_download_dir: /tmp
+
+# URL for cni binaries
+cni_bin_url_base: "https://github.com/containernetworking/cni/releases/download/"
+cni_bin_url: "{{ cni_bin_url_base }}/{{ cni_version }}/cni-{{ cni_version }}.tbz2"
+
 
 # Contiv config directory
 contiv_config_dir: /opt/contiv/config
