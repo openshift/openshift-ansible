@@ -13,6 +13,8 @@
     l_is_node_system_container: "{{ (use_node_system_container | default(use_system_containers) | bool) }}"
     l_is_master_system_container: "{{ (use_master_system_container | default(use_system_containers) | bool) }}"
     l_is_etcd_system_container: "{{ (use_etcd_system_container | default(use_system_containers) | bool) }}"
+- set_fact:
+    l_any_system_container: "{{ l_is_etcd_system_container or l_is_openvswitch_system_container or l_is_node_system_container or l_is_master_system_container }}"
 
 - name: Validate python version
   fail:
@@ -49,6 +51,13 @@
   package: name={{ item }} state=present
   with_items: "{{ required_packages }}"
   when: not l_is_atomic | bool
+
+- name: Ensure various deps for running system containers are installed
+  package: name={{ item }} state=present
+  with_items: "{{ required_system_containers_packages }}"
+  when:
+  - not l_is_atomic | bool
+  - l_any_system_container | bool
 
 - name: Gather Cluster facts and set is_containerized if needed
   openshift_facts:
