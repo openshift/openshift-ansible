@@ -1,5 +1,5 @@
 # pylint: disable=missing-docstring
-from openshift_checks import OpenShiftCheck, get_var
+from openshift_checks import OpenShiftCheck, get_var, normalized_minor_release
 from openshift_checks.mixins import NotContainerizedMixin
 
 
@@ -12,7 +12,7 @@ class ExcluderUsage(NotContainerizedMixin, OpenShiftCheck):
     def run(self, tmp, task_vars):
         args = {
             "rpm_prefix": get_var(task_vars, "openshift", "common", "service_type"), #origin/atomic-openshift
-            "openshift_release": get_var(task_vars, "openshift_release"),
+            "openshift_release": normalized_minor_release(task_vars),
         }
         return self.module_executor(
                 module_name=ExcluderUsage.name,

@@ -72,6 +72,16 @@ def get_var(task_vars, *keys, **kwargs):
         raise OpenShiftCheckException("'{}' is undefined".format(".".join(map(str, keys))))
     return value
 
+def normalized_release(task_vars):
+    """Helper function to normalize the release format to dotted numbers"""
+    release = str(get_var(task_vars, "openshift_release"))
+    if release.startswith('v'):
+        release = release[1:]  # v3.3 => 3.3
+    return release
+
+def normalized_minor_release(task_vars):
+    """Helper function to normalize the release format into x.y minor release"""
+    return '.'.join(normalized_release(task_vars).split('.')[:2])
 
 # Dynamically import all submodules for the side effect of loading checks.
 

@@ -55,7 +55,7 @@ def main():
     if len(errors) > 0: bail(errors)
 
     # test if docker-excluder status returns non-zero
-    return_code = subprocess.call(prefix+"-docker-excluder", "status")
+    return_code = subprocess.call([prefix+"-docker-excluder", "status"])
     if return_code != 0:
         bail(prefix+"-docker-excluder does not appear to be enabled. This should always be enabled:\n"
                 + prefix+"-docker-excluder exclude" )
