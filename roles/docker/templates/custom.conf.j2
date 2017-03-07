@@ -1,5 +1,5 @@
 # {{ ansible_managed }}
 
 [Unit]
-Requires=iptables.service
+Wants=iptables.service
 After=iptables.service
