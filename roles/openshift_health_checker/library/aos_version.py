@@ -47,8 +47,6 @@ def main():  # pylint: disable=missing-docstring,too-many-branches
 
     # determine what level of precision we're expecting for the version
     expected_version = module.params['version']
-    if expected_version.startswith('v'):  # v3.3 => 3.3
-        expected_version = expected_version[1:]
     num_dots = expected_version.count('.')
 
     pkgs_by_name_version = {}
