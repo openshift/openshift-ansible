@@ -82,6 +82,10 @@
   tags:
   - pre_upgrade
 
+- include: ../../../../common/openshift-cluster/upgrades/v3_5/validator.yml
+  tags:
+  - pre_upgrade
+
 - include: ../../../../common/openshift-cluster/upgrades/pre/gate_checks.yml
   tags:
   - pre_upgrade

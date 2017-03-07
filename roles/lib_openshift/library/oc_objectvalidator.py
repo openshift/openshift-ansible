@@ -1380,7 +1380,16 @@ class OCObjectValidator(OpenShiftCLI):
                 all_invalid[invalid_msg] = invalid
 
         if failed:
-            return {'failed': True, 'msg': 'All objects are not valid.', 'state': 'list', 'results': all_invalid}
+            return {
+                'failed': True,
+                'msg': (
+                    "All objects are not valid.  If you are a supported customer please contact "
+                    "Red Hat Support providing the complete output above. If you are not a customer "
+                    "please contact users@lists.openshift.redhat.com for assistance."
+                    ),
+                'state': 'list',
+                'results': all_invalid
+                }
 
         return {'msg': 'All objects are valid.'}
 

@@ -1,0 +1,18 @@
+---
+###############################################################################
+# Pre upgrade checks for known data problems, if this playbook fails you should
+# contact support. If you're not supported contact users@lists.openshift.com
+#
+# oc_objectvalidator provides these two checks
+# 1 - SDN Data issues, never seen in the wild but known possible due to code audits
+#     https://github.com/openshift/origin/issues/12697
+# 2 - Namespace protections, https://bugzilla.redhat.com/show_bug.cgi?id=1428934
+#
+###############################################################################
+- name: Verify 3.5 specific upgrade checks
+  hosts: oo_first_master
+  roles:
+  - { role: lib_openshift }
+  tasks:
+  - name: Check for invalid namespaces and SDN errors
+    oc_objectvalidator:
