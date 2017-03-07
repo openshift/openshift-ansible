@@ -31,7 +31,7 @@
     curator_cpu_limit: "{{openshift_logging_curator_cpu_limit }}"
     curator_memory_limit: "{{openshift_logging_curator_memory_limit }}"
     replicas: "{{curator_replica_count.stdout | default (0)}}"
-    curator_node_selector: "{{openshift_logging_curator_nodeselector | default({}) }}"
+    curator_node_selector: "{{openshift_logging_curator_nodeselector | default({})}}"
   check_mode: no
   changed_when: no
 

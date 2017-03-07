@@ -32,6 +32,10 @@
   with_sequence: count={{ openshift_logging_es_cluster_size | int - openshift_logging_current_es_size | int }}
   check_mode: no
 
+- set_fact: nodeselector="{{openshift_logging_es_nodeselector | default({}) }}"
+
+- debug: var=nodeselector
+
 - name: Generate Elasticsearch DeploymentConfig
   template: src=es.j2 dest={{mktemp.stdout}}/templates/logging-{{deploy_name}}-dc.yaml
   vars:
@@ -45,7 +49,7 @@
     volume_names: "{{es_pvc_pool | default([])}}"
     pvc_claim: "{{(volume_names | length > item.0) | ternary(volume_names[item.0], None)}}"
     deploy_name: "{{item.1}}"
-    es_node_selector: "{{openshift_logging_es_nodeselector | default({})}}"
+    es_node_selector: "{{openshift_logging_es_nodeselector | default({}) }}"
   with_indexed_items:
     - "{{ es_dc_pool }}"
   check_mode: no
@@ -121,7 +125,7 @@
     es_recover_after_nodes: "{{es_ops_recover_after_nodes}}"
     es_recover_expected_nodes: "{{es_ops_recover_expected_nodes}}"
     openshift_logging_es_recover_after_time: "{{openshift_logging_es_ops_recover_after_time}}"
-    es_node_selector: "{{openshift_logging_es_ops_nodeselector | default({})}}"
+    es_node_selector: "{{openshift_logging_es_ops_nodeselector | default({}) | map_from_pairs }}"
   with_indexed_items:
     - "{{ es_ops_dc_pool | default([]) }}"
   when:

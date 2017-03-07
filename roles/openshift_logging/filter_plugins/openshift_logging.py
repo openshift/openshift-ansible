@@ -27,6 +27,9 @@ def entry_from_named_pair(register_pairs, key):
 
 def map_from_pairs(source, delim="="):
     ''' Returns a dict given the source and delim delimited '''
+    if source == '':
+      return dict()
+
     return dict(source.split(delim) for item in source.split(","))
 
 # pylint: disable=too-few-public-methods
