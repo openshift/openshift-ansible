@@ -33,6 +33,7 @@
 
 from __future__ import print_function
 import atexit
+import collections
 import copy
 import json
 import os
@@ -1283,7 +1284,7 @@ class OpenShiftCLIConfig(object):
         self.kubeconfig = kubeconfig
         self.name = rname
         self.namespace = namespace
-        self._options = options
+        self._options = collections.OrderedDict(options)
 
     @property
     def config_options(self):

@@ -33,6 +33,7 @@
 
 from __future__ import print_function
 import atexit
+import collections
 import copy
 import json
 import os
@@ -1448,7 +1449,7 @@ class OpenShiftCLIConfig(object):
         self.kubeconfig = kubeconfig
         self.name = rname
         self.namespace = namespace
-        self._options = options
+        self._options = collections.OrderedDict(options)
 
     @property
     def config_options(self):
@@ -2266,7 +2267,6 @@ class Registry(OpenShiftCLI):
 
     def exists(self):
         '''does the object exist?'''
-        self.get()
         if self.deploymentconfig and self.service:
             return True
 
@@ -2327,7 +2327,8 @@ class Registry(OpenShiftCLI):
             service.put('spec.portalIP', self.portal_ip)
 
         # the dry-run doesn't apply the selector correctly
-        service.put('spec.selector', self.service.get_selector())
+        if self.service:
+            service.put('spec.selector', self.service.get_selector())
 
         # need to create the service and the deploymentconfig
         service_file = Utils.create_tmp_file_from_contents('service', service.yaml_dict)

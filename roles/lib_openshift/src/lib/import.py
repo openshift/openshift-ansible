@@ -7,6 +7,7 @@
 
 from __future__ import print_function
 import atexit
+import collections
 import copy
 import json
 import os

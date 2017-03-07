@@ -577,7 +577,7 @@ class OpenShiftCLIConfig(object):
         self.kubeconfig = kubeconfig
         self.name = rname
         self.namespace = namespace
-        self._options = options
+        self._options = collections.OrderedDict(options)
 
     @property
     def config_options(self):

@@ -344,7 +344,6 @@ class RouterTest(unittest.TestCase):
             (0, '', ''),
         ]
 
-
         mock_tmpfile_copy.side_effect = [
             '/tmp/mocked_kubeconfig',
         ]
@@ -362,10 +361,10 @@ class RouterTest(unittest.TestCase):
             mock.call(['oc', 'get', 'secret', 'router-certs', '-o', 'json', '-n', 'default'], None),
             mock.call(['oc', 'get', 'clusterrolebinding', 'router-router-role', '-o', 'json', '-n', 'default'], None),
             mock.call(['oc', 'adm', 'router', 'router', '-n', 'default', '--external-host-insecure=False', '--replicas=2', '--selector=type=infra', '--stats-port=1936', '--service-account=router', '--expose-metrics=False', '--ports=80:80,443:443', '--dry-run=True', '-o', 'json', '-n', 'default'], None),
-            mock.call(['oc', 'create', '-f', '/tmp/ClusterRoleBindingyDm_yh', '-n', 'default'], None),
-            mock.call(['oc', 'create', '-f', '/tmp/ServiceAccountbzYs4o', '-n', 'default'], None),
-            mock.call(['oc', 'create', '-f', '/tmp/ServiceWfYdjg', '-n', 'default'], None),
-            mock.call(['oc', 'create', '-f', '/tmp/DeploymentConfigxfIFpn', '-n', 'default'], None)])
+            mock.call(['oc', 'create', '-f', mock.ANY, '-n', 'default'], None),
+            mock.call(['oc', 'create', '-f', mock.ANY, '-n', 'default'], None),
+            mock.call(['oc', 'create', '-f', mock.ANY, '-n', 'default'], None),
+            mock.call(['oc', 'create', '-f', mock.ANY, '-n', 'default'], None)])
 
     @unittest.skipIf(six.PY3, 'py2 test only')
     @mock.patch('os.path.exists')
