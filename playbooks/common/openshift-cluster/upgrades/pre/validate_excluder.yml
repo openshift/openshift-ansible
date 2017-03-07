@@ -1,0 +1,22 @@
+---
+# input variables:
+# - repoquery_cmd
+# - excluder
+# - openshift_upgrade_target
+- name: Get available excluder version
+  command: >
+    {{ repoquery_cmd }} --qf '%{version}' "{{ excluder }}"
+  register: excluder_version
+  failed_when: false
+  changed_when: false
+
+- name: Docker excluder version detected
+  debug:
+    msg: "{{ excluder }}: {{ excluder_version.stdout }}"
+
+- name: Check the available {{ excluder }} version is at most of the upgrade target version
+  fail:
+    msg: "Available {{ excluder }} version {{ excluder_version.stdout }} is higher than the upgrade target version {{ openshift_upgrade_target }}"
+  when:
+    - "{{ excluder_version.stdout != '' }}"
+    - "{{ excluder_version.stdout.split('.')[0:2] | join('.') | version_compare(openshift_upgrade_target, '>', strict=True) }}"

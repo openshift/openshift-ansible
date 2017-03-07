@@ -1,0 +1,4 @@
+---
+# keep the 'current' package or update to 'latest' if available?
+openshift_excluder_package_state: present
+docker_excluder_package_state: present

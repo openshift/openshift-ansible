@@ -1,8 +1,4 @@
 ---
-# Latest versions of the excluders include a status function, old packages dont
-# So, if packages are installed, upgrade them to the latest so we get the status
-# If they're not installed when we should assume they're disabled
-
 - name: Determine if excluder packages are installed
   rpm_q:
     name: "{{ openshift.common.service_type }}-excluder"
@@ -10,49 +6,78 @@
   register: openshift_excluder_installed
   failed_when: false
 
+# docker excluder needs to be enable by default
 - name: Determine if docker packages are installed
   rpm_q:
-    name: "{{ openshift.common.service_type }}-excluder"
+    name: "{{ openshift.common.service_type }}-docker-excluder"
     state: present
   register: docker_excluder_installed
   failed_when: false
 
-- name: Update to latest excluder packages
-  package:
-    name: "{{ openshift.common.service_type }}-excluder"
-    state: latest
+# The excluder status function returns 0 when everything is excluded
+# and 1 if any packages are missing from the exclusions list and outputs a warning to stderr
+# # atomic-openshift-excluder status ; echo $?
+# exclude -- All packages excluded
+# 0
+# # atomic-openshift-excluder unexclude
+# # atomic-openshift-excluder status ; echo $?
+# unexclude -- At least one package not excluded
+# 1
+
+- block:
+  - include: init.yml
+  - block:
+    - name: Record openshift excluder status
+      command: "{{ openshift.common.service_type }}-excluder status"
+      register: excluder_status
+      failed_when: false
+
+    # Even though the openshift excluder is enabled
+    # if the status is non-zero, disabled the excluder
+    - name: Override openshift excluder enablement if the status is non-zero
+      set_fact:
+        disable_openshift_excluder_override: true
+      when:
+      - "{{ excluder_status.rc | default(0) != 0 }}"
+
+    - debug:
+        msg: "Disabling openshift excluder"
+      when:
+      - "{{ excluder_status.rc | default(0) != 0 }}"
+
+    when:
+    - "{{ openshift_excluder_installed.installed_versions | default([]) | length > 0 }}"
+    - "{{ openshift_excluder_on }}"
+
+  - block:
+    - name: Record docker excluder status
+      command: "{{ openshift.common.service_type }}-docker-excluder status"
+      register: docker_excluder_status
+      failed_when: false
+
+    # If the docker excluder is installed and the status is non-zero
+    # always enable the docker excluder
+    - name: Override docker excluder enablement if the status is non-zero
+      set_fact:
+        enable_docker_excluder_override: true
+      when:
+      - "{{ docker_excluder_status.rc | default(0) != 0 }}"
+
+    - debug:
+        msg: "Enabling docker excluder"
+      when:
+      - "{{ docker_excluder_status.rc | default(0) != 0 }}"
+
+    # As the docker excluder status is not satisfied,
+    # re-enable entire docker excluder again
+    # At the same time keep the override set in a case other task would
+    - name: Enable docker excluder
+      command: "{{ openshift.common.service_type }}-docker-excluder exclude"
+
+    # Run the docker excluder status even if the excluder is disabled.
+    # In order to determine of the excluder needs to be enabled.
+    when:
+    - "{{ docker_excluder_installed.installed_versions | default([]) | length > 0 }}"
+
   when:
-  - "{{ openshift_excluder_installed.installed_versions | default([]) | length > 0 }}"
   - not openshift.common.is_containerized | bool
-
-- name: Update to the latest docker-excluder packages
-  package:
-    name: "{{ openshift.common.service_type }}-docker-excluder"
-    state: latest
-  when:
-  - "{{ docker_excluder_installed.installed_versions | default([]) | length > 0 }}"
-  - not openshift.common.is_containerized | bool
-
-- name: Record excluder status
-  command: "{{ openshift.common.service_type }}-excluder"
-  register: excluder_status
-  when:
-  - "{{ openshift_excluder_installed.installed_versions | default([]) | length > 0 }}"
-  - not openshift.common.is_containerized | bool
-  failed_when: false
-
-- name: Record docker excluder status
-  command: "{{ openshift.common.service_type }}-docker-excluder"
-  register: docker_excluder_status
-  when:
-  - "{{ docker_excluder_installed.installed_versions | default([]) | length > 0 }}"
-  - not openshift.common.is_containerized | bool
-  failed_when: false
-
-- name: Set excluder status facts
-  set_fact:
-    docker_excluder_enabled: "{{ 'false' if docker_excluder_status.rc | default(0) == 0 or docker_excluder_installed.installed_versions | default(0) | length == 0 else 'true' }}"
-    openshift_excluder_enabled: "{{ 'false' if docker_excluder_status.rc | default(0) == 0 or openshift_excluder_installed.installed_versions | default(0) | length == 0 else 'true' }}"
-
-- debug: var=docker_excluder_enabled
-- debug: var=openshift_excluder_enabled

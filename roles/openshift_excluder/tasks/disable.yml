@@ -1,0 +1,26 @@
+---
+# input variables
+# - with_status_check
+# - with_install
+# - excluder_package_state
+# - docker_excluder_package_state
+- include: init.yml
+
+# Install any excluder that is enabled
+- include: install.yml
+  vars:
+    # Both docker_excluder_on and openshift_excluder_on are set in openshift_excluder->init task
+    install_docker_excluder: "{{ docker_excluder_on | bool }}"
+    install_openshift_excluder: "{{ openshift_excluder_on | bool }}"
+  when: docker_excluder_on or openshift_excluder_on
+
+  # if the docker excluder is not enabled, we don't care about its status
+  # it the docker excluder is enabled, we install it and in case its status is non-zero
+  # it is enabled no matter what
+
+# Check the current state of all excluders
+- include: status.yml
+  when: with_status_check | default(docker_excluder_on or openshift_excluder_on) | bool
+
+  # And finally adjust an excluder in order to update host components correctly
+- include: adjust.yml

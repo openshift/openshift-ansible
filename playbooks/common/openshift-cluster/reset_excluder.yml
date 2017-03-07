@@ -5,4 +5,4 @@
   tasks:
   - include_role:
       name: openshift_excluder
-      tasks_from: reset
+      tasks_from: enable
