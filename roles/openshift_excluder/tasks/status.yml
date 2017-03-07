@@ -34,7 +34,7 @@
   - not openshift.common.is_containerized | bool
 
 - name: Record excluder status
-  command: "{{ openshift.common.service_type }}-excluder"
+  command: "{{ openshift.common.service_type }}-excluder status"
   register: excluder_status
   when:
   - "{{ openshift_excluder_installed.installed_versions | default([]) | length > 0 }}"
@@ -42,17 +42,29 @@
   failed_when: false
 
 - name: Record docker excluder status
-  command: "{{ openshift.common.service_type }}-docker-excluder"
+  command: "{{ openshift.common.service_type }}-docker-excluder status"
   register: docker_excluder_status
   when:
   - "{{ docker_excluder_installed.installed_versions | default([]) | length > 0 }}"
   - not openshift.common.is_containerized | bool
   failed_when: false
 
+# Unfortunately rpm_q doesn't return installed_versions if there aren't any installed
+#
+# The excluder status function returns 0 when everything is excluded
+# and 1 if any packages are missing from the exclusions list and outputs a warning to stderr
+# # atomic-openshift-excluder status ; echo $?
+# exclude -- All packages excluded
+# 0
+# # atomic-openshift-excluder unexclude
+# # atomic-openshift-excluder status ; echo $?
+# unexclude -- At least one package not excluded
+# 1
+
 - name: Set excluder status facts
   set_fact:
-    docker_excluder_enabled: "{{ 'false' if docker_excluder_status.rc | default(0) == 0 or docker_excluder_installed.installed_versions | default(0) | length == 0 else 'true' }}"
-    openshift_excluder_enabled: "{{ 'false' if docker_excluder_status.rc | default(0) == 0 or openshift_excluder_installed.installed_versions | default(0) | length == 0 else 'true' }}"
+    docker_excluder_enabled: "{{ 'false' if docker_excluder_status.rc | default(0) != 0 or docker_excluder_installed.installed_versions | default(0) | length == 0 else 'true' }}"
+    openshift_excluder_enabled: "{{ 'false' if docker_excluder_status.rc | default(0) != 0 or openshift_excluder_installed.installed_versions | default(0) | length == 0 else 'true' }}"
 
 - debug: var=docker_excluder_enabled
 - debug: var=openshift_excluder_enabled
