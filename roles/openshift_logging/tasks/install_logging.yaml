@@ -78,7 +78,7 @@
     loop_var: sa_account
   when:
   - openshift_logging_image_pull_secret is defined
-  - openshift_logging_image_pull_secret is not None
+  - openshift_logging_image_pull_secret != ''
   failed_when: link_pull_secret.rc != 0
 
 - name: Scaling up cluster

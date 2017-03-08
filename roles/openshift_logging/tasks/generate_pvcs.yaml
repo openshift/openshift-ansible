@@ -6,8 +6,8 @@
     start: "{{es_pvc_names | map('regex_search', es_pvc_prefix+'.*')|select('string')|list|length}}"
   with_sequence: start={{start}} end={{ (start|int > es_cluster_size|int - 1) | ternary(start, es_cluster_size|int - 1)}}
   when:
+    - "{{ es_dc_names|default([]) | length <= es_cluster_size|int }}"
     - es_pvc_size | search('^\d.*')
-    - "{{ es_dc_names|default([]) | length < es_cluster_size|int }}"
   check_mode: no
 
 - name: Generating PersistentVolumeClaims

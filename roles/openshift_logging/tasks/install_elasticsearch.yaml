@@ -32,10 +32,6 @@
   with_sequence: count={{ openshift_logging_es_cluster_size | int - openshift_logging_current_es_size | int }}
   check_mode: no
 
-- set_fact: nodeselector="{{openshift_logging_es_nodeselector | default({}) }}"
-
-- debug: var=nodeselector
-
 - name: Generate Elasticsearch DeploymentConfig
   template: src=es.j2 dest={{mktemp.stdout}}/templates/logging-{{deploy_name}}-dc.yaml
   vars:
