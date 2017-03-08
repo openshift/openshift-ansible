@@ -1,11 +1,20 @@
 ---
-- include: install.yml
-  when: not openshift.common.is_containerized | bool
+# input variables:
+# - enable_docker_excluder
+# - enable_openshift_excluder
+- block:
+  - name: Enable docker excluder
+    command: "{{ openshift.common.service_type }}-docker-excluder exclude"
+    # if the docker override is set, it means the docker excluder needs to be enabled no matter what
+    # if the docker override is not set, the excluder is set based on enable_docker_excluder
+    when:
+    - enable_docker_excluder | default(false) | bool
 
-- name: Enable docker excluder
-  command: "{{ openshift.common.service_type }}-docker-excluder exclude"
-  when: not openshift.common.is_containerized | bool
-
-- name: Enable excluder
-  command: "{{ openshift.common.service_type }}-excluder exclude"
-  when: not openshift.common.is_containerized | bool
+  - name: Enable openshift excluder
+    command: "{{ openshift.common.service_type }}-excluder exclude"
+    # if the openshift override is set, it means the openshift excluder is disabled no matter what
+    # if the openshift override is not set, the excluder is set based on enable_openshift_excluder
+    when:
+    - enable_openshift_excluder | default(false) | bool
+  when:
+  - not openshift.common.is_containerized | bool

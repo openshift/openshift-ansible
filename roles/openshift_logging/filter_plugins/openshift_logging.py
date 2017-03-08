@@ -25,6 +25,14 @@ def entry_from_named_pair(register_pairs, key):
     raise RuntimeError("There was no entry found in the dict that had an item with a name that matched {}".format(key))
 
 
+def map_from_pairs(source, delim="="):
+    ''' Returns a dict given the source and delim delimited '''
+    if source == '':
+        return dict()
+
+    return dict(source.split(delim) for item in source.split(","))
+
+
 # pylint: disable=too-few-public-methods
 class FilterModule(object):
     ''' OpenShift Logging Filters '''
@@ -35,4 +43,5 @@ class FilterModule(object):
         return {
             'random_word': random_word,
             'entry_from_named_pair': entry_from_named_pair,
+            'map_from_pairs': map_from_pairs,
         }

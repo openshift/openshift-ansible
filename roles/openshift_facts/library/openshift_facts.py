@@ -2321,14 +2321,19 @@ class OpenShiftFacts(object):
                                       protected_facts_to_overwrite)
 
         if 'docker' in new_local_facts:
-            # remove duplicate and empty strings from registry lists
+            # remove duplicate and empty strings from registry lists, preserving order
             for cat in ['additional', 'blocked', 'insecure']:
                 key = '{0}_registries'.format(cat)
                 if key in new_local_facts['docker']:
                     val = new_local_facts['docker'][key]
                     if isinstance(val, string_types):
                         val = [x.strip() for x in val.split(',')]
-                    new_local_facts['docker'][key] = list(set(val) - set(['']))
+                    seen = set()
+                    new_local_facts['docker'][key] = list()
+                    for registry in val:
+                        if registry not in seen and registry != '':
+                            seen.add(registry)
+                            new_local_facts['docker'][key].append(registry)
             # Convert legacy log_options comma sep string to a list if present:
             if 'log_options' in new_local_facts['docker'] and \
                     isinstance(new_local_facts['docker']['log_options'], string_types):

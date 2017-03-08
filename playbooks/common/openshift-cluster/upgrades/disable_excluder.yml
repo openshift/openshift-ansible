@@ -1,0 +1,21 @@
+---
+- name: Record excluder state and disable
+  hosts: l_oo_all_hosts
+  gather_facts: no
+  tasks:
+  - include: pre/validate_excluder.yml
+    vars:
+      #repoquery_cmd: repoquery_cmd
+      #openshift_upgrade_target: openshift_upgrade_target
+      excluder: "{{ item }}"
+    with_items:
+    - "{{ openshift.common.service_type }}-docker-excluder"
+    - "{{ openshift.common.service_type }}-excluder"
+
+  # disable excluders based on their status
+  - include_role:
+      name: openshift_excluder
+      tasks_from: disable
+    vars:
+      openshift_excluder_package_state: latest
+      docker_excluder_package_state: latest

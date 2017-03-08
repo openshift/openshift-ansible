@@ -35,7 +35,7 @@
     kibana_proxy_cpu_limit: "{{openshift_logging_kibana_proxy_cpu_limit }}"
     kibana_proxy_memory_limit: "{{openshift_logging_kibana_proxy_memory_limit }}"
     replicas: "{{kibana_replica_count.stdout | default (0)}}"
-    kibana_node_selector: "{{openshift_logging_kibana_nodeselector | default({}) }}"
+    kibana_node_selector: "{{openshift_logging_kibana_nodeselector | default({})}}"
   check_mode: no
   changed_when: no
 
@@ -54,7 +54,7 @@
     kibana_proxy_cpu_limit: "{{openshift_logging_kibana_ops_proxy_cpu_limit }}"
     kibana_proxy_memory_limit: "{{openshift_logging_kibana_ops_proxy_memory_limit }}"
     replicas: "{{kibana_ops_replica_count.stdout | default (0)}}"
-    kibana_node_selector: "{{openshift_logging_kibana_ops_nodeselector | default({}) }}"
+    kibana_node_selector: "{{openshift_logging_kibana_ops_nodeselector | default({})}}"
   when: openshift_logging_use_ops | bool
   check_mode: no
   changed_when: no

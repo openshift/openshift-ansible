@@ -891,7 +891,7 @@ class OCObjectValidatorTest(unittest.TestCase):
 
         # Assert
         self.assertTrue(results['failed'])
-        self.assertEqual(results['msg'], 'All objects are not valid.')
+        self.assertIn('All objects are not valid.', results['msg'])
         self.assertEqual(results['state'], 'list')
         self.assertEqual(results['results'], invalid_results)
 

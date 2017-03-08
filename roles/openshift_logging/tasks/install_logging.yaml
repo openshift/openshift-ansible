@@ -76,7 +76,9 @@
   register: link_pull_secret
   loop_control:
     loop_var: sa_account
-  when: openshift_logging_image_pull_secret is defined
+  when:
+    - openshift_logging_image_pull_secret is defined
+    - openshift_logging_image_pull_secret != ''
   failed_when: link_pull_secret.rc != 0
 
 - name: Scaling up cluster

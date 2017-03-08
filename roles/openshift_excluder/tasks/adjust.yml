@@ -1,0 +1,23 @@
+---
+# Depending on enablement of individual excluders and their status
+# some excluders needs to be disabled, resp. enabled
+# By default, all excluders are disabled unless overrided.
+- block:
+  - include: init.yml
+  # All excluders that are to be enabled are enabled
+  - include: exclude.yml
+    vars:
+      # Enable the docker excluder only if it is overrided
+      enable_docker_excluder: "{{ enable_docker_excluder_override | default(false) | bool }}"
+      # excluder is to be disabled by default
+      enable_openshift_excluder: false
+  # All excluders that are to be disabled are disabled
+  - include: unexclude.yml
+    vars:
+      # If the docker override  is not set, default to the generic behaviour
+      disable_docker_excluder: "{{ not enable_docker_excluder_override | default(not docker_excluder_on) | bool }}"
+      # disable openshift excluder is never overrided to be enabled
+      # disable it if the docker excluder is enabled
+      disable_openshift_excluder: "{{ openshift_excluder_on | bool }}"
+  when:
+  - not openshift.common.is_containerized | bool

@@ -12,6 +12,7 @@
     es_pvc_size: "{{openshift_logging_es_pvc_size}}"
     es_dc_names: "{{openshift_logging_facts.elasticsearch.deploymentconfigs.keys()}}"
     es_cluster_size: "{{openshift_logging_es_cluster_size}}"
+    es_access_modes: "{{ openshift_logging_storage_access_modes }}"
 
 # we should initialize the es_dc_pool with the current keys
 - name: Init pool of DeploymentConfig names for Elasticsearch
@@ -44,7 +45,7 @@
     volume_names: "{{es_pvc_pool | default([])}}"
     pvc_claim: "{{(volume_names | length > item.0) | ternary(volume_names[item.0], None)}}"
     deploy_name: "{{item.1}}"
-    es_node_selector: "{{openshift_logging_es_nodeselector | default({})}}"
+    es_node_selector: "{{openshift_logging_es_nodeselector | default({}) }}"
   with_indexed_items:
     - "{{ es_dc_pool }}"
   check_mode: no
@@ -77,6 +78,7 @@
     es_cluster_size: "{{openshift_logging_es_ops_cluster_size|int}}"
     es_pvc_dynamic: "{{openshift_logging_es_ops_pvc_dynamic | bool}}"
     es_pv_selector: "{{openshift_logging_es_ops_pv_selector}}"
+    es_access_modes: "{{ openshift_logging_storage_access_modes }}"
   when:
     - openshift_logging_use_ops | bool
   check_mode: no
@@ -119,7 +121,7 @@
     es_recover_after_nodes: "{{es_ops_recover_after_nodes}}"
     es_recover_expected_nodes: "{{es_ops_recover_expected_nodes}}"
     openshift_logging_es_recover_after_time: "{{openshift_logging_es_ops_recover_after_time}}"
-    es_node_selector: "{{openshift_logging_es_ops_nodeselector | default({})}}"
+    es_node_selector: "{{openshift_logging_es_ops_nodeselector | default({}) | map_from_pairs }}"
   with_indexed_items:
     - "{{ es_ops_dc_pool | default([]) }}"
   when:
