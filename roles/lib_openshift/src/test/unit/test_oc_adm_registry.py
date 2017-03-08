@@ -208,7 +208,7 @@ class RegistryTest(unittest.TestCase):
     @mock.patch('oc_adm_registry.Utils._write')
     @mock.patch('oc_adm_registry.Utils.create_tmpfile_copy')
     @mock.patch('oc_adm_registry.Registry._run')
-    def test_state_list(self, mock_cmd, mock_tmpfile_copy, mock_write):
+    def test_state_present(self, mock_cmd, mock_tmpfile_copy, mock_write):
         ''' Testing state present '''
         params = {'state': 'present',
                   'debug': False,
@@ -254,9 +254,9 @@ class RegistryTest(unittest.TestCase):
         mock_cmd.assert_has_calls([
             mock.call(['oc', 'get', 'dc', 'docker-registry', '-o', 'json', '-n', 'default'], None),
             mock.call(['oc', 'get', 'svc', 'docker-registry', '-o', 'json', '-n', 'default'], None),
-            mock.call(['oc', 'adm', 'registry', '-n', 'default', '--replicas=1', '--selector=type=infra',
-                       '--enforce-quota=False', '--service-account=registry', '--ports=5000',
-                       '--daemonset=False', '--dry-run=True', '-o', 'json', '-n', 'default'], None),
+            mock.call(['oc', 'adm', 'registry', '--daemonset=False', '--enforce-quota=False',
+                       '--ports=5000', '--replicas=1', '--selector=type=infra',
+                       '--service-account=registry', '--dry-run=True', '-o', 'json', '-n', 'default'], None),
             mock.call(['oc', 'create', '-f', mock.ANY, '-n', 'default'], None),
             mock.call(['oc', 'create', '-f', mock.ANY, '-n', 'default'], None), ])
 

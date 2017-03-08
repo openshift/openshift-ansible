@@ -145,7 +145,7 @@ class Registry(OpenShiftCLI):
         ''' prepare a registry for instantiation '''
         options = self.config.to_option_list()
 
-        cmd = ['registry', '-n', self.config.namespace]
+        cmd = ['registry']
         cmd.extend(options)
         cmd.extend(['--dry-run=True', '-o', 'json'])
 

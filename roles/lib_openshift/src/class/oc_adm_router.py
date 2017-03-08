@@ -224,7 +224,7 @@ class Router(OpenShiftCLI):
 
         options = self.config.to_option_list()
 
-        cmd = ['router', self.config.name, '-n', self.config.namespace]
+        cmd = ['router', self.config.name]
         cmd.extend(options)
         cmd.extend(['--dry-run=True', '-o', 'json'])
 

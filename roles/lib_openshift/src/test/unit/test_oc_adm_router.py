@@ -289,8 +289,8 @@ class RouterTest(unittest.TestCase):
     @mock.patch('oc_adm_router.Utils._write')
     @mock.patch('oc_adm_router.Utils.create_tmpfile_copy')
     @mock.patch('oc_adm_router.Router._run')
-    def test_state_list(self, mock_cmd, mock_tmpfile_copy, mock_write):
-        ''' Testing a get '''
+    def test_state_present(self, mock_cmd, mock_tmpfile_copy, mock_write):
+        ''' Testing a create '''
         params = {'state': 'present',
                   'debug': False,
                   'namespace': 'default',
@@ -357,7 +357,9 @@ class RouterTest(unittest.TestCase):
             mock.call(['oc', 'get', 'sa', 'router', '-o', 'json', '-n', 'default'], None),
             mock.call(['oc', 'get', 'secret', 'router-certs', '-o', 'json', '-n', 'default'], None),
             mock.call(['oc', 'get', 'clusterrolebinding', 'router-router-role', '-o', 'json', '-n', 'default'], None),
-            mock.call(['oc', 'adm', 'router', 'router', '-n', 'default', '--external-host-insecure=False', '--replicas=2', '--selector=type=infra', '--stats-port=1936', '--service-account=router', '--expose-metrics=False', '--ports=80:80,443:443', '--dry-run=True', '-o', 'json', '-n', 'default'], None),
+            mock.call(['oc', 'adm', 'router', 'router', '--expose-metrics=False', '--external-host-insecure=False',
+                       '--ports=80:80,443:443', '--replicas=2', '--selector=type=infra', '--service-account=router',
+                       '--stats-port=1936', '--dry-run=True', '-o', 'json', '-n', 'default'], None),
             mock.call(['oc', 'create', '-f', mock.ANY, '-n', 'default'], None),
             mock.call(['oc', 'create', '-f', mock.ANY, '-n', 'default'], None),
             mock.call(['oc', 'create', '-f', mock.ANY, '-n', 'default'], None),

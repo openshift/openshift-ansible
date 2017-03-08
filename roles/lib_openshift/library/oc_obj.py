@@ -33,7 +33,6 @@
 
 from __future__ import print_function
 import atexit
-import collections
 import copy
 import json
 import os
@@ -1352,7 +1351,7 @@ class OpenShiftCLIConfig(object):
         self.kubeconfig = kubeconfig
         self.name = rname
         self.namespace = namespace
-        self._options = collections.OrderedDict(options)
+        self._options = options
 
     @property
     def config_options(self):
@@ -1366,10 +1365,11 @@ class OpenShiftCLIConfig(object):
     def stringify(self):
         ''' return the options hash as cli params in a string '''
         rval = []
-        for key, data in self.config_options.items():
+        for key in sorted(self.config_options.keys()):
+            data = self.config_options[key]
             if data['include'] \
                and (data['value'] or isinstance(data['value'], int)):
-                rval.append('--%s=%s' % (key.replace('_', '-'), data['value']))
+                rval.append('--{}={}'.format(key.replace('_', '-'), data['value']))
 
         return rval
 
