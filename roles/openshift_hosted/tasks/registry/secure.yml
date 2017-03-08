@@ -57,6 +57,7 @@
     - "{{ docker_registry_route_hostname }}"
     cert: "{{ openshift_master_config_dir }}/registry.crt"
     key: "{{ openshift_master_config_dir }}/registry.key"
+    expire_days: "{{ openshift_hosted_registry_cert_expire_days if openshift_version | oo_version_gte_3_5_or_1_5(openshift.common.deployment_type) | bool else omit }}"
   register: server_cert_out
 
 - name: Create the secret for the registry certificates
