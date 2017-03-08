@@ -3,6 +3,7 @@
 
 # OpenShift Ansible
 
+
 This repository contains [Ansible](https://www.ansible.com/) code to install,
 upgrade and manage [OpenShift](https://www.openshift.com/) clusters.
 
