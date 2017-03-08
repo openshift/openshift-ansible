@@ -20,6 +20,7 @@ def main():
             signer_key=dict(default='/etc/origin/master/ca.key', type='str'),
             signer_serial=dict(default='/etc/origin/master/ca.serial.txt', type='str'),
             hostnames=dict(default=[], type='list'),
+            expire_days=dict(default=None, type='int'),
         ),
         supports_check_mode=True,
     )

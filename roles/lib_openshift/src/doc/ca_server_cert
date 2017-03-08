@@ -79,6 +79,12 @@ options:
     required: false
     default: True
     aliases: []
+  expire_days:
+    description
+    - Validity of the certificate in days
+    required: false
+    default: None
+    aliases: []
 author:
 - "Kenny Woodson <kwoodson@redhat.com>"
 extends_documentation_fragment: []
