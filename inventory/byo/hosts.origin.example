@@ -89,6 +89,8 @@ openshift_release=v1.4
 # Skip upgrading Docker during an OpenShift upgrade, leaves the current Docker version alone.
 # docker_upgrade=False
 
+# Specify exact version of etcd to configure or upgrade to.
+# etcd_version="3.1.0"
 
 # Upgrade Hooks
 #
