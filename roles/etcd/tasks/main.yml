@@ -7,7 +7,7 @@
     etcd_ip: "{{ etcd_ip }}"
 
 - name: Install etcd
-  package: name=etcd state=present
+  package: name=etcd{{ '-' + etcd_version if etcd_version is defined else '' }} state=present
   when: not etcd_is_containerized | bool
 
 - name: Pull etcd container
