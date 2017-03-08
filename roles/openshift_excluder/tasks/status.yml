@@ -78,6 +78,7 @@
     # In order to determine of the excluder needs to be enabled.
     when:
     - "{{ docker_excluder_installed.installed_versions | default([]) | length > 0 }}"
+    - "{{ docker_excluder_on }}"
 
   when:
   - not openshift.common.is_containerized | bool
