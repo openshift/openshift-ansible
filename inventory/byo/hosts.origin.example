@@ -263,6 +263,15 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Override master servingInfo.maxRequestsInFlight
 #openshift_master_max_requests_inflight=500
 
+# Override master and node servingInfo.minTLSVersion and .cipherSuites
+# valid TLS versions are VersionTLS10, VersionTLS11, VersionTLS12
+# example cipher suites override, valid cipher suites are https://golang.org/pkg/crypto/tls/#pkg-constants
+#openshift_master_min_tls_version=VersionTLS12
+#openshift_master_cipher_suites=['TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256', '...']
+#
+#openshift_node_min_tls_version=VersionTLS12
+#openshift_node_cipher_suites=['TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256', '...']
+
 # default storage plugin dependencies to install, by default the ceph and
 # glusterfs plugin dependencies will be installed, if available.
 #osn_storage_plugin_deps=['ceph','glusterfs','iscsi']

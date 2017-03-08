@@ -40,6 +40,15 @@ servingInfo:
   certFile: server.crt
   clientCA: ca.crt
   keyFile: server.key
+{% if openshift_node_min_tls_version is defined %}
+  minTLSVersion: {{ openshift_node_min_tls_version }}
+{% endif %}
+{% if openshift_node_cipher_suites is defined %}
+  cipherSuites:
+{% for cipher_suite in openshift_node_cipher_suites %}
+  - {{ cipher_suite }}
+{% endfor %}
+{% endif %}
 volumeDirectory: {{ openshift.common.data_dir }}/openshift.local.volumes
 proxyArguments:
   proxy-mode:
