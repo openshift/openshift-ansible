@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.25
+Version:        3.5.26
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,32 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Mar 07 2017 Scott Dodson <sdodson@redhat.com> 3.5.26-1
+- Fix pylint/pyflakes errors on master (sdodson@redhat.com)
+- Identify PetSets in 3.4 clusters and fail if any are detected
+  (tbielawa@redhat.com)
+- More logging fixes (ewolinet@redhat.com)
+- - update excluders to latest, in non-upgrade scenarios do not update - check
+  both available excluder versions are at most of upgrade target version - get
+  excluder status through status command - make excluders enablement
+  configurable (jchaloup@redhat.com)
+- Loosely couple docker to iptables service (rteague@redhat.com)
+- Generic message directing people to contact support (sdodson@redhat.com)
+- Fixing plugin, nodeselectors, and secret pull check (ewolinet@redhat.com)
+- Adding into the origin inventory doc. (kwoodson@redhat.com)
+- Add oc_objectvalidator to upgrade check (sdodson@redhat.com)
+- Augmenting documentation for router sharding. (kwoodson@redhat.com)
+- openshift_facts: ensure system containers deps are installed
+  (gscrivan@redhat.com)
+- Preserve order of Docker registries (eric.mountain@amadeus.com)
+- Updating metrics defaults (ewolinet@redhat.com)
+- Enable coveralls.io (jdetiber@redhat.com)
+- Adding some more logging defaults (ewolinet@redhat.com)
+- Updating stdout check for changed_when (ewolinet@redhat.com)
+- Resolving yammlint errors (ewolinet@redhat.com)
+- Adding changed_whens for role, rolebinding, and scc reconciliation based on
+  output from oadm policy command (ewolinet@redhat.com)
+
 * Mon Mar 06 2017 Scott Dodson <sdodson@redhat.com> 3.5.25-1
 - Fix indentation of run_once (sdodson@redhat.com)
 - Update docs for test consolidation and remove the Makefile
