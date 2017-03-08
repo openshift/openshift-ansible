@@ -18,6 +18,12 @@
       msg: Incompatible versions of yum and subscription-manager found. You may need to update yum and yum-utils.
     when: "not openshift.common.is_atomic | bool and 'Plugin \"search-disabled-repos\" requires API 2.7. Supported API is 2.6.' in yum_ver_test.stdout"
 
+- name: Check the excluders are in a proper state
+  hosts: l_oo_all_hosts
+  gather_facts: no
+  tasks:
+    - include: check-excluders.yml
+
 - include: disable_excluder.yml
   vars:
     # the excluders needs to be disabled no matter what status says
