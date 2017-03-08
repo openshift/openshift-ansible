@@ -286,7 +286,6 @@ class RouterTest(unittest.TestCase):
     ]
 }'''
 
-
     @mock.patch('oc_adm_router.Utils._write')
     @mock.patch('oc_adm_router.Utils.create_tmpfile_copy')
     @mock.patch('oc_adm_router.Router._run')
@@ -306,7 +305,6 @@ class RouterTest(unittest.TestCase):
                   'latest_images': None,
                   'clusterip': None,
                   'portalip': None,
-                  'selector': None,
                   'session_affinity': None,
                   'service_type': None,
                   'kubeconfig': '/etc/origin/master/admin.kubeconfig',
@@ -327,8 +325,7 @@ class RouterTest(unittest.TestCase):
                   'stats_user': None,
                   'stats_password': None,
                   'stats_port': 1936,
-                   'edits': []}
-
+                  'edits': []}
 
         mock_cmd.side_effect = [
             (1, '', 'Error from server (NotFound): deploymentconfigs "router" not found'),

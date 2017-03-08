@@ -205,7 +205,6 @@ class RegistryTest(unittest.TestCase):
             }
         ]}'''
 
-
     @mock.patch('oc_adm_registry.Utils._write')
     @mock.patch('oc_adm_registry.Utils.create_tmpfile_copy')
     @mock.patch('oc_adm_registry.Registry._run')
