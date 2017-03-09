@@ -2,6 +2,8 @@
 - name: Getting current ES deployment size
   set_fact: openshift_logging_current_es_size={{ openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | length }}
 
+- set_fact: openshift_logging_es_pvc_prefix="{{ openshift_logging_es_pvc_prefix | default('logging-es') }}"
+
 - name: Generate PersistentVolumeClaims
   include: "{{ role_path}}/tasks/generate_pvcs.yaml"
   vars:
@@ -55,6 +57,8 @@
 
 - name: Getting current ES deployment size
   set_fact: openshift_logging_current_es_ops_size={{ openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys() | length }}
+
+- set_fact: openshift_logging_es_ops_pvc_prefix="{{ openshift_logging_es_ops_pvc_prefix | default('logging-es-ops') }}"
 
 - name: Validate Elasticsearch cluster size for Ops
   fail: msg="The openshift_logging_es_ops_cluster_size may not be scaled down more than 1 less (or 0) the number of Elasticsearch nodes already deployed"
