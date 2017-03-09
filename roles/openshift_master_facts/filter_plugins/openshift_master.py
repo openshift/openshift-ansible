@@ -7,12 +7,16 @@ Custom filters for use in openshift-master
 import copy
 import sys
 
+# pylint import-error disabled because pylint cannot find the package
+# when installed in a virtualenv
 from distutils.version import LooseVersion  # pylint: disable=no-name-in-module,import-error
 
 from ansible import errors
 from ansible.parsing.yaml.dumper import AnsibleDumper
 from ansible.plugins.filter.core import to_bool as ansible_bool
-from six import string_types
+# pylint import-error disabled because pylint cannot find the package
+# when installed in a virtualenv
+from ansible.compat.six import string_types  # pylint: disable=no-name-in-module,import-error
 
 import yaml
 

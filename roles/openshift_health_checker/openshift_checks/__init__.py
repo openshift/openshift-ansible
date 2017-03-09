@@ -2,12 +2,15 @@
 Health checks for OpenShift clusters.
 """
 
+import operator
 import os
+
 from abc import ABCMeta, abstractmethod, abstractproperty
 from importlib import import_module
-import operator
 
-from ansible.module_utils.six.moves import add_metaclass, reduce
+# pylint import-error disabled because pylint cannot find the package
+# when installed in a virtualenv
+from ansible.module_utils.six.moves import add_metaclass, reduce  # pylint: disable=import-error, redefined-builtin
 
 
 class OpenShiftCheckException(Exception):
