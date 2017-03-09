@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.27
+Version:        3.5.28
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Mar 08 2017 Scott Dodson <sdodson@redhat.com> 3.5.28-1
+- openshift_excluders depends on openshift_repos (sdodson@redhat.com)
+- add ability to specify an etcd version (mmckinst@umich.edu)
+- Adding scripts for building and pushing images (bleanhar@redhat.com)
+
 * Wed Mar 08 2017 Scott Dodson <sdodson@redhat.com> 3.5.27-1
 - enable excluders by default (jchaloup@redhat.com)
 - ignore the docker excluder status if it is not enabled by a user
