@@ -10,7 +10,7 @@ import os
 import subprocess
 import yaml
 
-from six.moves import configparser
+from ansible.module_utils.six.moves import configparser
 
 from ansible.module_utils.basic import AnsibleModule
 

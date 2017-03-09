@@ -18,9 +18,9 @@ from collections import Mapping
 from distutils.util import strtobool
 from distutils.version import LooseVersion
 from operator import itemgetter
-from ansible.module_utils.six.moves.urllib.parse import urlparse
 from ansible.parsing.yaml.dumper import AnsibleDumper
 from six import string_types
+from six.moves.urllib.parse import urlparse
 
 HAS_OPENSSL = False
 try:

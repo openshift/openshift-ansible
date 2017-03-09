@@ -19,8 +19,8 @@ import struct
 import socket
 from distutils.util import strtobool
 from distutils.version import LooseVersion
-from six import string_types, text_type
-from six.moves import configparser
+from ansible.module_utils.six import string_types, text_type
+from ansible.module_utils.six.moves import configparser
 
 # ignore pylint errors related to the module_utils import
 # pylint: disable=redefined-builtin, unused-wildcard-import, wildcard-import

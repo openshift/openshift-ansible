@@ -7,8 +7,7 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 from importlib import import_module
 import operator
 
-import six
-from six.moves import reduce
+from ansible.module_utils.six.moves import add_metaclass, reduce
 
 
 class OpenShiftCheckException(Exception):
@@ -16,7 +15,7 @@ class OpenShiftCheckException(Exception):
     pass
 
 
-@six.add_metaclass(ABCMeta)
+@add_metaclass(ABCMeta)
 class OpenShiftCheck(object):
     """A base class for defining checks for an OpenShift cluster environment."""
 
