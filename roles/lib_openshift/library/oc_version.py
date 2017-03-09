@@ -1310,10 +1310,11 @@ class OpenShiftCLIConfig(object):
     def stringify(self):
         ''' return the options hash as cli params in a string '''
         rval = []
-        for key, data in self.config_options.items():
+        for key in sorted(self.config_options.keys()):
+            data = self.config_options[key]
             if data['include'] \
                and (data['value'] or isinstance(data['value'], int)):
-                rval.append('--%s=%s' % (key.replace('_', '-'), data['value']))
+                rval.append('--{}={}'.format(key.replace('_', '-'), data['value']))
 
         return rval
 

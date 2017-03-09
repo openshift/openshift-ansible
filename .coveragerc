@@ -14,7 +14,7 @@ omit =
     */test/*
 
 [report]
-fail_under = 29
+fail_under = 28
 
 [html]
 directory = cover

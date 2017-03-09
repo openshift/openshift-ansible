@@ -1462,10 +1462,11 @@ class OpenShiftCLIConfig(object):
     def stringify(self):
         ''' return the options hash as cli params in a string '''
         rval = []
-        for key, data in self.config_options.items():
+        for key in sorted(self.config_options.keys()):
+            data = self.config_options[key]
             if data['include'] \
                and (data['value'] or isinstance(data['value'], int)):
-                rval.append('--%s=%s' % (key.replace('_', '-'), data['value']))
+                rval.append('--{}={}'.format(key.replace('_', '-'), data['value']))
 
         return rval
 
@@ -2266,7 +2267,6 @@ class Registry(OpenShiftCLI):
 
     def exists(self):
         '''does the object exist?'''
-        self.get()
         if self.deploymentconfig and self.service:
             return True
 
@@ -2293,7 +2293,7 @@ class Registry(OpenShiftCLI):
         ''' prepare a registry for instantiation '''
         options = self.config.to_option_list()
 
-        cmd = ['registry', '-n', self.config.namespace]
+        cmd = ['registry']
         cmd.extend(options)
         cmd.extend(['--dry-run=True', '-o', 'json'])
 
@@ -2327,7 +2327,8 @@ class Registry(OpenShiftCLI):
             service.put('spec.portalIP', self.portal_ip)
 
         # the dry-run doesn't apply the selector correctly
-        service.put('spec.selector', self.service.get_selector())
+        if self.service:
+            service.put('spec.selector', self.service.get_selector())
 
         # need to create the service and the deploymentconfig
         service_file = Utils.create_tmp_file_from_contents('service', service.yaml_dict)
