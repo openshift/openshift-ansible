@@ -18,4 +18,4 @@
       enable_openshift_excluder: "{{ not disable_openshift_excluder_override | default(not openshift_excluder_on) | bool }}"
 
   when:
-  - not openshift.common.is_containerized | bool
+  - not openshift.common.is_atomic | bool

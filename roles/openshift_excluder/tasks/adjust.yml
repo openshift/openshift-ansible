@@ -20,4 +20,4 @@
       # disable it if the docker excluder is enabled
       disable_openshift_excluder: "{{ openshift_excluder_on | bool }}"
   when:
-  - not openshift.common.is_containerized | bool
+  - not openshift.common.is_atomic | bool
