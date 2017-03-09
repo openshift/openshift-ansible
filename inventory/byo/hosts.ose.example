@@ -375,6 +375,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # based on the number of nodes matching the openshift registry selector.
 #openshift_hosted_registry_replicas=2
 #
+# Validity of the auto-generated certificate in days (optional)
+#openshift_hosted_registry_cert_expire_days=730
+#
 # Disable management of the OpenShift Registry
 #openshift_hosted_manage_registry=false
 
@@ -737,6 +740,13 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 
 # Enable API service auditing, available as of 3.2
 #openshift_master_audit_config={"enabled": true}
+
+# Validity of the auto-generated certificates in days.
+# See also openshift_hosted_registry_cert_expire_days above.
+#
+#openshift_ca_cert_expire_days=1825
+#openshift_node_cert_expire_days=730
+#openshift_master_cert_expire_days=730
 
 # host group for masters
 [masters]
