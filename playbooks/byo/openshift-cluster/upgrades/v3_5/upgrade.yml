@@ -50,6 +50,8 @@
   tags:
   - pre_upgrade
 
+# Note: During upgrade the openshift excluder is not unexcluded inside the initialize_openshift_version.yml play.
+#       So it is necassary to run the play after running disable_excluder.yml.
 - include: ../../../../common/openshift-cluster/initialize_openshift_version.yml
   tags:
   - pre_upgrade
