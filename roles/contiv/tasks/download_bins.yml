@@ -25,3 +25,22 @@
     src: "{{ contiv_current_release_directory }}/netplugin-{{ contiv_version }}.tar.bz2"
     dest: "{{ contiv_current_release_directory }}"
     copy: no
+
+- name: Download Bins | Download cni tar file
+  get_url:
+    url: "{{ cni_bin_url }}"
+    dest: "{{ cni_download_dir }}"
+    mode: 0755
+    validate_certs: False
+  environment:
+    http_proxy: "{{ http_proxy|default('') }}"
+    https_proxy: "{{ https_proxy|default('') }}"
+    no_proxy: "{{ no_proxy|default('') }}"
+  register: download_file
+
+- name: Download Bins | Extract cni tar file
+  unarchive:
+    src: "{{ download_file.dest }}"
+    dest: "{{ cni_download_dir }}"
+    copy: no
+  when: download_file.changed

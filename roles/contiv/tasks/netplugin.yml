@@ -43,8 +43,9 @@
 
 - name: Netplugin | Copy CNI loopback bin
   copy:
-    src: loopback
+    src: "{{ cni_download_dir }}/loopback"
     dest: "{{ cni_bin_dir }}/loopback"
+    remote_src: True
     mode: 0755
 
 - name: Netplugin | Ensure kube_plugin_dir and cni/net.d directories exist
