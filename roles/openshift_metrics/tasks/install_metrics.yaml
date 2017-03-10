@@ -34,6 +34,8 @@
     file_content: "{{ item.content | b64decode | from_yaml }}"
   with_items: "{{ object_defs.results }}"
 
+- include: update_master_config.yaml
+
 - command: >
     {{openshift.common.client_binary}}
     --config={{mktemp.stdout}}/admin.kubeconfig
