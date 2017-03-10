@@ -1,0 +1,28 @@
+---
+# input variables:
+# - repoquery_cmd
+# - excluder
+# - openshift_upgrade_target
+- name:
+  debug:
+    msg: "{{ openshift.common.service_type }}"
+
+- name: Determine if openshift excluder package is installed
+  rpm_q:
+    name: "{{ openshift.common.service_type }}-excluder"
+    state: present
+  register: openshift_excluder_installed
+  failed_when: false
+
+- name: "Warn user about {{ openshift.common.service_type }}-excluder being installed but not enabled"
+  pause:
+    prompt: "The {{ openshift.common.service_type }}-excluder is installed but the \"enable_openshift_excluder\" is not set to \"true\". Please, make sure the \"{{ openshift.common.service_type }}-excluder unexclude\" was run. Press ENTER to continue or CTRL-C to abort."
+    seconds: "10"
+  when:
+  - "{{ openshift_excluder_installed.installed_versions | default([]) | length > 0 }}"
+  # If enable_excluders is not defined, it defaults to true (see openshift_excluders/defaults/main.yml).
+  # So if the enable_excluders is set to false, we need to check if enable_openshift_excluder is set to false.
+  # So the openshift excluder is disabled when both enable_excluders is set to false and enable_openshift_excluder is set to false.
+  # If the enable_excluders is set to false, enable_openshift_excluder is set to false automatically.
+  - "{{ (enable_excluders is defined) and (not enable_excluders | bool) }}"
+  - "{{ (enable_openshift_excluder is not defined) or ((enable_openshift_excluder is defined) and (not enable_openshift_excluder | bool)) }}"

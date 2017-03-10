@@ -1,5 +1,5 @@
 ---
-- name: Determine if excluder packages are installed
+- name: Determine if openshift excluder package is installed
   rpm_q:
     name: "{{ openshift.common.service_type }}-excluder"
     state: present
@@ -7,7 +7,7 @@
   failed_when: false
 
 # docker excluder needs to be enable by default
-- name: Determine if docker packages are installed
+- name: Determine if docker excluder packages is installed
   rpm_q:
     name: "{{ openshift.common.service_type }}-docker-excluder"
     state: present
