@@ -26,12 +26,13 @@ def main():
                                    type='str'),
             backup=dict(default=True, type='bool'),
             separator=dict(default='.', type='str'),
+            edits=dict(default=None, type='list'),
         ),
         mutually_exclusive=[["curr_value", "index"], ['update', "append"]],
         required_one_of=[["content", "src"]],
     )
 
-    rval = Yedit.run_ansible(module)
+    rval = Yedit.run_ansible(module.params)
     if 'failed' in rval and rval['failed']:
         module.fail_json(**rval)
 
