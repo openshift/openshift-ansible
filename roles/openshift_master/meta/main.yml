@@ -40,8 +40,6 @@ dependencies:
     port: 4001/tcp
   when: groups.oo_etcd_to_config | default([]) | length == 0
 - role: nickhammond.logrotate
-- role: nuage_master
-  when: openshift.common.use_nuage | bool
 - role: contiv
   contiv_role: netmaster
   when: openshift.common.use_contiv | bool
