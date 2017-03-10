@@ -1,5 +1,5 @@
 '''
- Unit tests for oadm_manage_node
+ Unit tests for oc_adm_manage_node
 '''
 
 import os
@@ -16,16 +16,16 @@ import mock
 # place class in our python path
 module_path = os.path.join('/'.join(os.path.realpath(__file__).split('/')[:-4]), 'library')  # noqa: E501
 sys.path.insert(0, module_path)
-from oadm_manage_node import ManageNode, locate_oc_binary  # noqa: E402
+from oc_adm_manage_node import ManageNode, locate_oc_binary  # noqa: E402
 
 
 class ManageNodeTest(unittest.TestCase):
     '''
-     Test class for oadm_manage_node
+     Test class for oc_adm_manage_node
     '''
 
-    @mock.patch('oadm_manage_node.Utils.create_tmpfile_copy')
-    @mock.patch('oadm_manage_node.ManageNode.openshift_cmd')
+    @mock.patch('oc_adm_manage_node.Utils.create_tmpfile_copy')
+    @mock.patch('oc_adm_manage_node.ManageNode.openshift_cmd')
     def test_list_pods(self, mock_openshift_cmd, mock_tmpfile_copy):
         ''' Testing a get '''
         params = {'node': ['ip-172-31-49-140.ec2.internal'],
@@ -107,8 +107,8 @@ class ManageNodeTest(unittest.TestCase):
         # returned 2 pods
         self.assertTrue(len(results['results']['nodes']['ip-172-31-49-140.ec2.internal']) == 2)
 
-    @mock.patch('oadm_manage_node.Utils.create_tmpfile_copy')
-    @mock.patch('oadm_manage_node.ManageNode.openshift_cmd')
+    @mock.patch('oc_adm_manage_node.Utils.create_tmpfile_copy')
+    @mock.patch('oc_adm_manage_node.ManageNode.openshift_cmd')
     def test_schedulable_false(self, mock_openshift_cmd, mock_tmpfile_copy):
         ''' Testing a get '''
         params = {'node': ['ip-172-31-49-140.ec2.internal'],
