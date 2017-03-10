@@ -4,7 +4,9 @@
 # by end users
 #
 
+# Adding nfs so that we can interpret it later as 'pv'
 openshift_metrics_cassandra_storage_types:
 - emptydir
 - pv
 - dynamic
+- nfs
