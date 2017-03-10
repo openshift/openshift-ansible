@@ -8,3 +8,4 @@ openshift_metrics_cassandra_storage_types:
 - emptydir
 - pv
 - dynamic
+- nfs

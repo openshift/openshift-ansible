@@ -531,7 +531,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #
 # Configure loggingPublicURL in the master config for aggregate logging, defaults
 # to https://kibana.{{ openshift_master_default_subdomain }}
-#openshift_master_logging_public_url=https://kibana.example.com
+#openshift_hosted_logging_hostname=https://kibana.example.com
 # Configure the number of elastic search nodes, unless you're using dynamic provisioning
 # this value must be 1
 #openshift_hosted_logging_elasticsearch_cluster_size=1
