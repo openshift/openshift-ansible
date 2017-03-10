@@ -28,7 +28,7 @@
 
   tasks:
   - name: Mark node unschedulable
-    oadm_manage_node:
+    oc_adm_manage_node:
       node: "{{ openshift.node.nodename | lower }}"
       schedulable: False
     delegate_to: "{{ groups.oo_first_master.0 }}"
@@ -51,7 +51,7 @@
     when: l_docker_upgrade is defined and l_docker_upgrade | bool
 
   - name: Set node schedulability
-    oadm_manage_node:
+    oc_adm_manage_node:
       node: "{{ openshift.node.nodename | lower }}"
       schedulable: True
     delegate_to: "{{ groups.oo_first_master.0 }}"

@@ -54,7 +54,7 @@ from ansible.module_utils.basic import AnsibleModule
 
 DOCUMENTATION = '''
 ---
-module: oadm_manage_node
+module: oc_adm_manage_node
 short_description: Module to manage openshift nodes
 description:
   - Manage openshift nodes programmatically.
@@ -126,13 +126,13 @@ extends_documentation_fragment: []
 
 EXAMPLES = '''
 - name: oadm manage-node --schedulable=true --selector=ops_node=new
-  oadm_manage_node:
+  oc_adm_manage_node:
     selector: ops_node=new
     schedulable: True
   register: schedout
 
 - name: oadm manage-node my-k8s-node-5 --evacuate
-  oadm_manage_node:
+  oc_adm_manage_node:
     node:  my-k8s-node-5
     evacuate: True
     force: True
@@ -1369,7 +1369,7 @@ class OpenShiftCLIConfig(object):
 
 # -*- -*- -*- End included fragment: lib/base.py -*- -*- -*-
 
-# -*- -*- -*- Begin included fragment: class/oadm_manage_node.py -*- -*- -*-
+# -*- -*- -*- Begin included fragment: class/oc_adm_manage_node.py -*- -*- -*-
 
 
 class ManageNodeException(Exception):
@@ -1578,9 +1578,9 @@ class ManageNode(OpenShiftCLI):
 
         return {'changed': changed, 'results': results, 'state': "present"}
 
-# -*- -*- -*- End included fragment: class/oadm_manage_node.py -*- -*- -*-
+# -*- -*- -*- End included fragment: class/oc_adm_manage_node.py -*- -*- -*-
 
-# -*- -*- -*- Begin included fragment: ansible/oadm_manage_node.py -*- -*- -*-
+# -*- -*- -*- Begin included fragment: ansible/oc_adm_manage_node.py -*- -*- -*-
 
 
 def main():
@@ -1618,4 +1618,4 @@ def main():
 if __name__ == "__main__":
     main()
 
-# -*- -*- -*- End included fragment: ansible/oadm_manage_node.py -*- -*- -*-
+# -*- -*- -*- End included fragment: ansible/oc_adm_manage_node.py -*- -*- -*-

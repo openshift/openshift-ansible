@@ -9,15 +9,15 @@ oc_adm_ca_server_cert.py:
 - class/oc_adm_ca_server_cert.py
 - ansible/oc_adm_ca_server_cert.py
 
-oadm_manage_node.py:
+oc_adm_manage_node.py:
 - doc/generated
 - doc/license
 - lib/import.py
 - doc/manage_node
 - ../../lib_utils/src/class/yedit.py
 - lib/base.py
-- class/oadm_manage_node.py
-- ansible/oadm_manage_node.py
+- class/oc_adm_manage_node.py
+- ansible/oc_adm_manage_node.py
 
 oc_adm_policy_user.py:
 - doc/generated

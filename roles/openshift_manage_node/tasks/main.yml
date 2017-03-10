@@ -39,7 +39,7 @@
   delegate_to: "{{ openshift_master_host }}"
 
 - name: Set node schedulability
-  oadm_manage_node:
+  oc_adm_manage_node:
     node: "{{ openshift.node.nodename | lower }}"
     schedulable: "{{ 'true' if openshift.node.schedulable | bool else 'false' }}"
   retries: 10

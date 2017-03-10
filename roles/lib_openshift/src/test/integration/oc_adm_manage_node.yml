@@ -1,6 +1,6 @@
 #!/usr/bin/ansible-playbook --module-path=../../../library/
 #
-# ./oadm_manage_node.yml -e "cli_master_test=$OPENSHIFT_MASTER
+# ./oc_adm_manage_node.yml -e "cli_master_test=$OPENSHIFT_MASTER
 ---
 - hosts: "{{ cli_master_test }}"
   gather_facts: no
@@ -17,7 +17,7 @@
       node_to_test: "{{ obj_out['results']['results'][0]['items'][0]['metadata']['name'] }}"
 
   - name: list pods from a node
-    oadm_manage_node:
+    oc_adm_manage_node:
       list_pods: True
       node:
       - "{{ node_to_test }}"
@@ -29,7 +29,7 @@
       msg: Pod data was not returned
 
   - name: set node to unschedulable
-    oadm_manage_node:
+    oc_adm_manage_node:
       schedulable: False
       node:
       - "{{ node_to_test }}"
@@ -56,7 +56,7 @@
       that: nodeout.results.results[0]['spec']['unschedulable']
 
   - name: set node to schedulable
-    oadm_manage_node:
+    oc_adm_manage_node:
       schedulable: True
       node:
       - "{{ node_to_test }}"

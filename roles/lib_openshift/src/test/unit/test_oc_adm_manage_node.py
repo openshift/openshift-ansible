@@ -1,12 +1,12 @@
 '''
- Unit tests for oadm_manage_node
+ Unit tests for oc_adm_manage_node
 '''
 import json
 
-from lib_openshift.library import oadm_manage_node
+from lib_openshift.library import oc_adm_manage_node
 
-MODULE_UNDER_TEST = oadm_manage_node
-CLASS_UNDER_TEST = oadm_manage_node.ManageNode
+MODULE_UNDER_TEST = oc_adm_manage_node
+CLASS_UNDER_TEST = oc_adm_manage_node.ManageNode
 
 
 def test_list_pods(mock_run_cmd):

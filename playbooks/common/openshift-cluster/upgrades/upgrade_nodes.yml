@@ -15,7 +15,7 @@
   # or docker actually needs an upgrade before proceeding. Perhaps best to save this until
   # we merge upgrade functionality into the base roles and a normal config.yml playbook run.
   - name: Mark node unschedulable
-    oadm_manage_node:
+    oc_adm_manage_node:
       node: "{{ openshift.node.nodename | lower }}"
       schedulable: False
     delegate_to: "{{ groups.oo_first_master.0 }}"
@@ -37,7 +37,7 @@
 
   post_tasks:
   - name: Set node schedulability
-    oadm_manage_node:
+    oc_adm_manage_node:
       node: "{{ openshift.node.nodename | lower }}"
       schedulable: True
     delegate_to: "{{ groups.oo_first_master.0 }}"

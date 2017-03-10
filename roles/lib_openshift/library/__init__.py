@@ -1,6 +1,6 @@
 ''' provide a way to discover modules for tests '''
 __all__ = [
-    'oadm_manage_node',
+    'oc_adm_manage_node',
     'oc_adm_ca_server_cert',
     'oc_adm_policy_group',
     'oc_adm_policy_user',
