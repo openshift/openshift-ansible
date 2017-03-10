@@ -10,8 +10,9 @@ import os
 import subprocess
 import yaml
 
-from six.moves import configparser
-
+# pylint import-error disabled because pylint cannot find the package
+# when installed in a virtualenv
+from ansible.module_utils.six.moves import configparser  # pylint: disable=import-error
 from ansible.module_utils.basic import AnsibleModule
 
 try:

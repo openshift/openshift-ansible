@@ -1,26 +1,32 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 # vim: expandtab:tabstop=4:shiftwidth=4
-# pylint: disable=no-name-in-module, import-error, wrong-import-order, ungrouped-imports
 """
 Custom filters for use in openshift-ansible
 """
+import json
 import os
 import pdb
-import pkg_resources
-import re
-import json
-import yaml
 import random
+import re
+
+from collections import Mapping
+# pylint no-name-in-module and import-error disabled here because pylint
+# fails to properly detect the packages when installed in a virtualenv
+from distutils.util import strtobool  # pylint:disable=no-name-in-module,import-error
+from distutils.version import LooseVersion  # pylint:disable=no-name-in-module,import-error
+from operator import itemgetter
+
+import pkg_resources
+import yaml
 
 from ansible import errors
-from collections import Mapping
-from distutils.util import strtobool
-from distutils.version import LooseVersion
-from operator import itemgetter
-from ansible.module_utils.six.moves.urllib.parse import urlparse
+# pylint no-name-in-module and import-error disabled here because pylint
+# fails to properly detect the packages when installed in a virtualenv
+from ansible.compat.six import string_types  # pylint:disable=no-name-in-module,import-error
+from ansible.compat.six.moves.urllib.parse import urlparse  # pylint:disable=no-name-in-module,import-error
+from ansible.module_utils._text import to_text
 from ansible.parsing.yaml.dumper import AnsibleDumper
-from six import string_types
 
 HAS_OPENSSL = False
 try:
@@ -28,15 +34,6 @@ try:
     HAS_OPENSSL = True
 except ImportError:
     pass
-
-try:
-    # ansible-2.2
-    # ansible.utils.unicode.to_unicode is deprecated in ansible-2.2,
-    # ansible.module_utils._text.to_text should be used instead.
-    from ansible.module_utils._text import to_text
-except ImportError:
-    # ansible-2.1
-    from ansible.utils.unicode import to_unicode as to_text
 
 
 def oo_pdb(arg):
@@ -117,8 +114,7 @@ def oo_merge_hostvars(hostvars, variables, inventory_hostname):
         raise errors.AnsibleFilterError("|failed expects variables is a dictionary")
     if not isinstance(inventory_hostname, string_types):
         raise errors.AnsibleFilterError("|failed expects inventory_hostname is a string")
-    # pylint: disable=no-member
-    ansible_version = pkg_resources.get_distribution("ansible").version
+    ansible_version = pkg_resources.get_distribution("ansible").version  # pylint: disable=maybe-no-member
     merged_hostvars = {}
     if LooseVersion(ansible_version) >= LooseVersion('2.0.0'):
         merged_hostvars = oo_merge_dicts(
