@@ -206,7 +206,7 @@ metadata:
     results = CLASS_UNDER_TEST.run_ansible(params, False)
 
     # Assert
-    assert results['changed']
+    assert results['changed'] is True
     assert results['state'] == 'present'
     assert results['results']['results'][0]['metadata']['name'] == 'test'
 

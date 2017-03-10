@@ -224,7 +224,7 @@ def test_state_present(mock_run_cmd):
 
     results = CLASS_UNDER_TEST.run_ansible(params, False)
 
-    assert results['changed']
+    assert results['changed'] is True
     for result in results['results']['results']:
         assert result['returncode'] == 0
 

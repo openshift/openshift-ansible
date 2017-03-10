@@ -144,5 +144,5 @@ def test_state_present(mock_run_cmd):
 
     results = CLASS_UNDER_TEST.run_ansible(params, False)
 
-    assert results['changed']
+    assert results['changed'] is True
     assert results['results']['results']['labels'][0] == {'storage_pv_quota': 'False', 'awesomens': 'testinglabel'}

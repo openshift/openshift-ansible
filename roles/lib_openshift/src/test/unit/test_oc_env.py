@@ -277,7 +277,7 @@ def test_adding_env_vars(mock_run_cmd):
     results = CLASS_UNDER_TEST.run_ansible(params, False)
 
     # Assert
-    assert results['changed']
+    assert results['changed'] is True
     for env_var in results['results']:
         if env_var == {'name': 'SOMEKEY', 'value': 'SOMEVALUE'}:
             break
@@ -388,7 +388,7 @@ def test_removing_env_vars(mock_run_cmd):
     results = CLASS_UNDER_TEST.run_ansible(params, False)
 
     # Assert
-    assert results['changed']
+    assert results['changed'] is True
     assert results['state'] == 'absent'
 
     # Making sure our mocks were called as we expected

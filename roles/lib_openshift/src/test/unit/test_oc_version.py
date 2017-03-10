@@ -24,7 +24,7 @@ def test_get(mock_run_cmd):
 
     results = CLASS_UNDER_TEST.run_ansible(params)
 
-    results['changed'] is False
+    assert results['changed'] is False
     assert results['results']['oc_short'] == '3.4'
     assert results['results']['oc_numeric'] == '3.4.0.39'
     assert results['results']['kubernetes_numeric'] == '1.4.0'

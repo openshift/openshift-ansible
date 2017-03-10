@@ -134,6 +134,6 @@ def test_schedulable_false(mock_run_cmd):
 
     results = CLASS_UNDER_TEST.run_ansible(params, False)
 
-    assert results['changed']
+    assert results['changed'] is True
     assert results['results']['nodes'][0]['name'] == 'ip-172-31-49-140.ec2.internal'
     assert results['results']['nodes'][0]['schedulable'] is False

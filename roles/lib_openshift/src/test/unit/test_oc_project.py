@@ -68,7 +68,7 @@ def test_adding_a_project(mock_run_cmd):
     results = CLASS_UNDER_TEST.run_ansible(params, False)
 
     # Assert
-    assert results['changed']
+    assert results['changed'] is True
     assert results['results']['returncode'] == 0
     assert results['results']['results']['metadata']['name'] == 'operations'
     assert results['state'] == 'present'
