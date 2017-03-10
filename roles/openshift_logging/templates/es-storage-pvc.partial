@@ -1,0 +1,2 @@
+          persistentVolumeClaim:
+            claimName: {{es_storage['pvc_claim']}}

@@ -103,9 +103,4 @@ spec:
           configMap:
             name: logging-elasticsearch
         - name: elasticsearch-storage
-{% if pvc_claim is defined and pvc_claim | trim | length > 0 %}
-          persistentVolumeClaim:
-            claimName: {{pvc_claim}}
-{% else %}
-          emptyDir: {}
-{% endif %}
+{% include 'es-storage-'+ es_storage['kind'] + '.partial' %}

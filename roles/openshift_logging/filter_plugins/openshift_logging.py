@@ -5,6 +5,18 @@
 import random
 
 
+def es_storage(os_logging_facts, dc_name, pvc_claim, root='elasticsearch'):
+    '''Return a hash with the desired storage for the given ES instance'''
+    deploy_config = os_logging_facts[root]['deploymentconfigs'].get(dc_name)
+    if deploy_config:
+        storage = deploy_config['volumes']['elasticsearch-storage']
+        if storage.get('hostPath'):
+            return dict(kind='hostpath', path=storage.get('hostPath').get('path'))
+    if len(pvc_claim.strip()) > 0:
+        return dict(kind='pvc', pvc_claim=pvc_claim)
+    return dict(kind='emptydir')
+
+
 def random_word(source_alpha, length):
     ''' Returns a random word given the source of characters to pick from and resulting length '''
     return ''.join(random.choice(source_alpha) for i in range(length))
@@ -44,4 +56,5 @@ class FilterModule(object):
             'random_word': random_word,
             'entry_from_named_pair': entry_from_named_pair,
             'map_from_pairs': map_from_pairs,
+            'es_storage': es_storage
         }

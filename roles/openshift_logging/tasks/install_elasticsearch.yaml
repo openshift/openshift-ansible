@@ -44,10 +44,10 @@
     es_cluster_name: "{{component}}"
     es_cpu_limit: "{{openshift_logging_es_cpu_limit }}"
     es_memory_limit: "{{openshift_logging_es_memory_limit}}"
-    volume_names: "{{es_pvc_pool | default([])}}"
-    pvc_claim: "{{(volume_names | length > item.0) | ternary(volume_names[item.0], None)}}"
+    pvc_claim: "{{(es_pvc_pool | length > item.0) | ternary(es_pvc_pool[item.0], None)}}"
     deploy_name: "{{item.1}}"
     es_node_selector: "{{openshift_logging_es_nodeselector | default({}) }}"
+    es_storage: "{{openshift_logging_facts|es_storage(deploy_name, pvc_claim)}}"
   with_indexed_items:
     - "{{ es_dc_pool }}"
   check_mode: no
@@ -115,8 +115,7 @@
     logging_component: elasticsearch
     deploy_name_prefix: "logging-{{component}}"
     image: "{{openshift_logging_image_prefix}}logging-elasticsearch:{{openshift_logging_image_version}}"
-    volume_names: "{{es_pvc_pool | default([])}}"
-    pvc_claim: "{{(volume_names | length > item.0) | ternary(volume_names[item.0], None)}}"
+    pvc_claim: "{{(es_pvc_pool | length > item.0) | ternary(es_pvc_pool[item.0], None)}}"
     deploy_name: "{{item.1}}"
     es_cluster_name: "{{component}}"
     es_cpu_limit: "{{openshift_logging_es_ops_cpu_limit }}"
@@ -125,7 +124,8 @@
     es_recover_after_nodes: "{{es_ops_recover_after_nodes}}"
     es_recover_expected_nodes: "{{es_ops_recover_expected_nodes}}"
     openshift_logging_es_recover_after_time: "{{openshift_logging_es_ops_recover_after_time}}"
-    es_node_selector: "{{openshift_logging_es_ops_nodeselector | default({}) | map_from_pairs }}"
+    es_node_selector: "{{openshift_logging_es_ops_nodeselector | default({}) }}"
+    es_storage: "{{openshift_logging_facts|es_storage(deploy_name, pvc_claim,root='elasticsearch_ops')}}"
   with_indexed_items:
     - "{{ es_ops_dc_pool | default([]) }}"
   when:
