@@ -634,7 +634,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Configure nodeIP in the node config
 # This is needed in cases where node traffic is desired to go over an
 # interface other than the default network interface.
-#openshift_node_set_node_ip=True
+#openshift_set_node_ip=True
 
 # Force setting of system hostname when configuring OpenShift
 # This works around issues related to installations that do not have valid dns
