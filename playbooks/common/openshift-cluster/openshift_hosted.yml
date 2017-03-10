@@ -53,6 +53,8 @@
   pre_tasks:
   - set_fact:
       openshift_logging_kibana_hostname: "{{ openshift_hosted_logging_hostname | default('kibana.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true))) }}"
+  - set_fact:
+      openshift_metrics_hawkular_hostname: "{{ g_metrics_hostname | default('hawkular-metrics.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true))) }}"
   tasks:
 
   - block:
@@ -60,3 +62,9 @@
         name: openshift_logging
         tasks_from: update_master_config
     when: openshift_hosted_logging_deploy | default(false) | bool
+
+  - block:
+    - include_role:
+        name: openshift_metrics
+        tasks_from: update_master_config
+    when: openshift_hosted_metrics_deploy | default(false) | bool
