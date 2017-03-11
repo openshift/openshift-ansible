@@ -467,6 +467,24 @@ def set_flannel_facts_if_unset(facts):
     return facts
 
 
+def set_calico_facts_if_unset(facts):
+    """ Set calico facts if not already present in facts dict
+            dict: the facts dict updated with the calico facts if
+            missing
+        Args:
+            facts (dict): existing facts
+        Returns:
+            dict: the facts dict updated with the calico
+            facts if they were not already present
+
+    """
+    if 'common' in facts:
+        if 'use_calico' not in facts['common']:
+            use_calico = False
+            facts['common']['use_calico'] = use_calico
+    return facts
+
+
 def set_nuage_facts_if_unset(facts):
     """ Set nuage facts if not already present in facts dict
             dict: the facts dict updated with the nuage facts if
@@ -1953,6 +1971,7 @@ class OpenShiftFacts(object):
         facts = set_url_facts_if_unset(facts)
         facts = set_project_cfg_facts_if_unset(facts)
         facts = set_flannel_facts_if_unset(facts)
+        facts = set_calico_facts_if_unset(facts)
         facts = set_nuage_facts_if_unset(facts)
         facts = set_contiv_facts_if_unset(facts)
         facts = set_node_schedulability(facts)

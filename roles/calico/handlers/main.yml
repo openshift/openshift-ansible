@@ -1,0 +1,8 @@
+---
+- name: restart calico
+  become: yes
+  systemd: name=calico state=restarted
+
+- name: restart docker
+  become: yes
+  systemd: name=docker state=restarted

@@ -82,6 +82,8 @@
     etcd_cert_subdir: "openshift-node-{{ openshift.common.hostname }}"
     etcd_cert_config_dir: "{{ openshift.common.config_base }}/node"
     when: openshift.common.use_flannel | bool
+  - role: calico
+    when: openshift.common.use_calico | bool
   - role: nuage_node
     when: openshift.common.use_nuage | bool
   - role: contiv
