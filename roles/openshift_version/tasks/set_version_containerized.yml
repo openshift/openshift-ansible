@@ -4,12 +4,16 @@
     # Expects a leading "v" in inventory, strip it off here unless
     # openshift_image_tag=latest
     openshift_version: "{{ openshift_image_tag[1:].split('-')[0] if openshift_image_tag != 'latest' else openshift_image_tag }}"
-  when: openshift_image_tag is defined and openshift_version is not defined
+  when:
+  - openshift_image_tag is defined
+  - openshift_version is not defined
 
 - name: Set containerized version to configure if openshift_release specified
   set_fact:
     openshift_version: "{{ openshift_release }}"
-  when: openshift_release is defined and openshift_version is not defined
+  when:
+  - openshift_release is defined
+  - openshift_version is not defined
 
 - name: Lookup latest containerized version if no version specified
   command: >
@@ -20,7 +24,10 @@
 # Origin latest = pre-release version (i.e. v1.3.0-alpha.1-321-gb095e3a)
 - set_fact:
     openshift_version: "{{ (cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0:2] | join('-'))[1:] }}"
-  when: openshift_version is not defined and openshift.common.deployment_type == 'origin' and cli_image_version.stdout_lines[0].split('-') | length > 1
+  when:
+  - openshift_version is not defined
+  - openshift.common.deployment_type == 'origin'
+  - cli_image_version.stdout_lines[0].split('-') | length > 1
 
 - set_fact:
     openshift_version: "{{ cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0][1:] }}"
@@ -32,11 +39,15 @@
   command: >
     docker run --rm {{ openshift.common.cli_image }}:v{{ openshift_version }} version
   register: cli_image_version
-  when: openshift_version is defined and openshift_version.split('.') | length == 2
+  when:
+  - openshift_version is defined
+  - openshift_version.split('.') | length == 2
 
 - set_fact:
     openshift_version: "{{ cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0:2][1:] | join('-') if openshift.common.deployment_type == 'origin' else cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0][1:] }}"
-  when: openshift_version is defined and openshift_version.split('.') | length == 2
+  when:
+  - openshift_version is defined
+  - openshift_version.split('.') | length == 2
 
 # We finally have the specific version. Now we clean up any strange
 # dangly +c0mm1t-offset tags in the version. See also,
