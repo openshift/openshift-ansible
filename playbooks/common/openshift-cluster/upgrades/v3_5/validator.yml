@@ -35,7 +35,7 @@
       kind: petsets
     register: l_do_petsets_exist
 
-  - name: FAIL ON Resource migration 'PetSets' unsupported
+  - name: Fail on unsupported resource migration 'PetSets'
     fail:
       msg: >
         PetSet objects were detected in your cluster. These are an
@@ -59,9 +59,9 @@
         migrating to StatefulSets, run this command as a user with
         cluster-admin privileges:
 
-        $ oc get petsets --all-namespaces -o yaml | oc delete -f - --cascale=false
+        $ oc get petsets --all-namespaces -o yaml | oc delete -f - --cascade=false
     when:
     # Search did not fail, valid resource type found
-    - l_do_petsets_exist.results.returncode == "0"
+    - l_do_petsets_exist.results.returncode == 0
     # Items do exist in the search results
     - l_do_petsets_exist.results.results.0['items'] | length > 0
