@@ -6,8 +6,17 @@
       when: es_logging_contents is undefined
       changed_when: no
 
+    - local_action: >
+        copy content="{{ config_source | combine(override_config,recursive=True) | to_nice_yaml }}"
+        dest="{{local_tmp.stdout}}/elasticsearch-gen-template.yml"
+      vars:
+        config_source: "{{lookup('file','templates/elasticsearch.yml.j2') | from_yaml }}"
+        override_config: "{{openshift_logging_es_config | from_yaml}}"
+      when: es_logging_contents is undefined
+      changed_when: no
+
     - template:
-        src: elasticsearch.yml.j2
+        src: "{{local_tmp.stdout}}/elasticsearch-gen-template.yml"
         dest: "{{mktemp.stdout}}/elasticsearch.yml"
       vars:
         - allow_cluster_reader: "{{openshift_logging_es_ops_allow_cluster_reader | lower | default('false')}}"

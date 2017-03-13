@@ -12,6 +12,14 @@
 
 - debug: msg="Created temp dir {{mktemp.stdout}}"
 
+- name: Create local temp directory for doing work in
+  local_action: command mktemp -d /tmp/openshift-logging-ansible-XXXXXX
+  register: local_tmp
+  changed_when: False
+  check_mode: no
+
+- debug: msg="Created local temp dir {{local_tmp.stdout}}"
+
 - name: Copy the admin client config(s)
   command: >
     cp {{ openshift_master_config_dir }}/admin.kubeconfig {{ mktemp.stdout }}/admin.kubeconfig
@@ -37,3 +45,8 @@
   tags: logging_cleanup
   changed_when: False
   check_mode: no
+
+- name: Cleaning up local temp dir
+  local_action: file path="{{local_tmp.stdout}}" state=absent
+  tags: logging_cleanup
+  changed_when: False
