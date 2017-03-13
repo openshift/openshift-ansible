@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.28
+Version:        3.5.29
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,22 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Mar 13 2017 Scott Dodson <sdodson@redhat.com> 3.5.29-1
+- add 'hawkular/metrics' when updating config (jcantril@redhat.com)
+- update all the masters (jcantril@redhat.com)
+- bug 1430661. Update masterConfig metricsPublicURL on install
+  (jcantril@redhat.com)
+- cherry picking from #3616 (ewolinet@redhat.com)
+- Alway generate secret templates and let oc_apply detect if they actually
+  change (ewolinet@redhat.com)
+- Updating defaults for PVC names and surrounding with quotations in templates
+  (ewolinet@redhat.com)
+- updating inventory files to accurately list variable that sets
+  loggingPublicURL (ewolinet@redhat.com)
+- bug 1428249. Use ES hostmount storage if it exists (jcantril@redhat.com)
+- bug 1420425. Allow setting of public facing certs for kibana in
+  openshift_logging role (jcantril@redhat.com)
+
 * Wed Mar 08 2017 Scott Dodson <sdodson@redhat.com> 3.5.28-1
 - openshift_excluders depends on openshift_repos (sdodson@redhat.com)
 - add ability to specify an etcd version (mmckinst@umich.edu)
