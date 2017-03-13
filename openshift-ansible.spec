@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.29
+Version:        3.5.30
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Mar 13 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.30-1
+- Fix typo (sdodson@redhat.com)
+- Fix incorrect comparison when detecting petsets (tbielawa@redhat.com)
+- New role (tbielawa@redhat.com)
+
 * Mon Mar 13 2017 Scott Dodson <sdodson@redhat.com> 3.5.29-1
 - add 'hawkular/metrics' when updating config (jcantril@redhat.com)
 - update all the masters (jcantril@redhat.com)
