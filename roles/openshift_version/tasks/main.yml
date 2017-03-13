@@ -94,6 +94,18 @@
   include: set_version_containerized.yml
   when: is_containerized | bool
 
+# Warn if the user has provided an openshift_image_tag but is not doing a containerized install
+# NOTE: This will need to be modified/removed for future container + rpm installations work.
+- name: Warn if openshift_image_tag is defined when not doing a containerized install
+  debug:
+    msg: >
+      openshift_image_tag is used for containerized installs. If you are trying to
+      specify an image for a non-container install see oreg_url.
+  when:
+  - not is_containerized | bool
+  - openshift_image_tag is defined
+
+
 # At this point we know openshift_version is set appropriately. Now we set
 # openshift_image_tag and openshift_pkg_version, so all roles can always assume
 # each of this variables *will* be set correctly and can use them per their
