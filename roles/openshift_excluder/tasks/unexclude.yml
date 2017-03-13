@@ -1,19 +1,17 @@
 ---
 # input variables:
-# - disable_docker_excluder
-# - disable_openshift_excluder
+# - unexclude_docker_excluder
+# - unexclude_openshift_excluder
 - block:
-  - include: init.yml
-
   - name: disable docker excluder
     command: "{{ openshift.common.service_type }}-docker-excluder unexclude"
     when:
-    - disable_docker_excluder | default(false) | bool
+    - unexclude_docker_excluder | default(false) | bool
 
   - name: disable openshift excluder
     command: "{{ openshift.common.service_type }}-excluder unexclude"
     when:
-    - disable_openshift_excluder | default(false) | bool
+    - unexclude_openshift_excluder | default(false) | bool
 
   when:
-  - not openshift.common.is_containerized | bool
+  - not openshift.common.is_atomic | bool

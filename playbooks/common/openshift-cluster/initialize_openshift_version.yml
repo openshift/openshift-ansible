@@ -18,12 +18,17 @@
       msg: Incompatible versions of yum and subscription-manager found. You may need to update yum and yum-utils.
     when: "not openshift.common.is_atomic | bool and 'Plugin \"search-disabled-repos\" requires API 2.7. Supported API is 2.6.' in yum_ver_test.stdout"
 
+# TODO(jchaloup): find a different way how to make repoquery --qf '%version` atomic-openshift work without disabling the excluders
 - include: disable_excluder.yml
   vars:
     # the excluders needs to be disabled no matter what status says
     with_status_check: false
+    # Only openshift excluder needs to be temporarily disabled
+    # So ignore the docker one
+    enable_docker_excluder: false
   tags:
   - always
+  when: openshift_upgrade_target is not defined
 
 - name: Determine openshift_version to configure on first master
   hosts: oo_first_master
@@ -39,3 +44,13 @@
     openshift_version: "{{ hostvars[groups.oo_first_master.0].openshift_version }}"
   roles:
   - openshift_version
+
+  # Re-enable excluders if they are meant to be enabled (and only during installation, upgrade disables the excluders before this play)
+- include: reset_excluder.yml
+  vars:
+    # Only openshift excluder needs to be re-enabled
+    # So ignore the docker one
+    enable_docker_excluder: false
+  tags:
+  - always
+  when: openshift_upgrade_target is not defined

@@ -60,3 +60,7 @@
 - include: openshift_hosted.yml
   tags:
   - hosted
+
+- include: reset_excluder.yml
+  tags:
+  - always

@@ -13,9 +13,9 @@
   - include: exclude.yml
     vars:
       # Enable the docker excluder only if it is overrided, resp. enabled by default (in that order)
-      enable_docker_excluder: "{{ enable_docker_excluder_override | default(docker_excluder_on) | bool }}"
+      exclude_docker_excluder: "{{ enable_docker_excluder_override | default(docker_excluder_on) | bool }}"
       # Enable the openshift excluder only if it is not overrided, resp. enabled by default (in that order)
-      enable_openshift_excluder: "{{ not disable_openshift_excluder_override | default(not openshift_excluder_on) | bool }}"
+      exclude_openshift_excluder: "{{ not disable_openshift_excluder_override | default(not openshift_excluder_on) | bool }}"
 
   when:
-  - not openshift.common.is_containerized | bool
+  - not openshift.common.is_atomic | bool

@@ -81,4 +81,4 @@
     - "{{ docker_excluder_on }}"
 
   when:
-  - not openshift.common.is_containerized | bool
+  - not openshift.common.is_atomic | bool
