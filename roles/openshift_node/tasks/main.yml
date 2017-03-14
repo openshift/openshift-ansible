@@ -153,7 +153,7 @@
   # Using curl here since the uri module requires python-httplib2 and
   # wait_for port doesn't provide health information.
   command: >
-    curl --silent --cacert {{ openshift.common.config_base }}/node/ca.crt
+    curl --silent --tlsv1.2 --cacert {{ openshift.common.config_base }}/node/ca.crt
     {{ openshift_node_master_api_url }}/healthz/ready
   args:
     # Disables the following warning:
