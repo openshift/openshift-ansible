@@ -1,4 +1,11 @@
 ---
+- name: Create projects
+  oc_project:
+    name: "{{ item.key }}"
+    node_selector:
+    - "{{ item.value.default_node_selector }}"
+  with_dict: "{{ openshift_projects }}"
+
 - include: router/router.yml
   when: openshift_hosted_manage_router | default(true) | bool
 
