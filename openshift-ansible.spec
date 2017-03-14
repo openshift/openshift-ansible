@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.31
+Version:        3.5.32
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Mar 13 2017 Scott Dodson <sdodson@redhat.com> 3.5.32-1
+- Refactor and remove openshift_serviceaccount (rteague@redhat.com)
+
 * Mon Mar 13 2017 Scott Dodson <sdodson@redhat.com> 3.5.31-1
 - Removing openshift_master_facts to resolve bz (ewolinet@redhat.com)
 - enable docker excluder since the time it is installed (jchaloup@redhat.com)
