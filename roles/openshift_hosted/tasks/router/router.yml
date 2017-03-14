@@ -37,6 +37,15 @@
     resource_name: hostnetwork
   with_items: "{{ openshift_hosted_routers }}"
 
+- name: Set additional permissions for router service account
+  oc_adm_policy_user:
+    user: "system:serviceaccount:{{ item.namespace }}:{{ item.serviceaccount }}"
+    namespace: "{{ item.namespace }}"
+    resource_kind: cluster-role
+    resource_name: cluster-reader
+  when: item.namespace == 'default'
+  with_items: "{{ openshift_hosted_routers }}"
+
 - name: Create OpenShift router
   oc_adm_router:
     name: "{{ item.name }}"
