@@ -47,7 +47,7 @@ openshift_metrics_node_id: nodename
 openshift_metrics_project: openshift-infra
 
 openshift_metrics_cassandra_pvc_prefix: "{{ openshift_hosted_metrics_storage_volume_name | default('metrics-cassandra') }}"
-openshift_metrics_cassandra_pvc_access: "{{ openshift_hosted_metrics_storage_access_modes | default('ReadWriteOnce') }}"
+openshift_metrics_cassandra_pvc_access: "{{ openshift_hosted_metrics_storage_access_modes | default(['ReadWriteOnce']) }}"
 
 openshift_metrics_hawkular_user_write_access: False
 
