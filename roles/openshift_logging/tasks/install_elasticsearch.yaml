@@ -4,6 +4,8 @@
 
 - set_fact: openshift_logging_es_pvc_prefix="{{ openshift_logging_es_pvc_prefix | default('logging-es') }}"
 
+- set_fact: es_pvc_pool={{[]}}
+
 - name: Generate PersistentVolumeClaims
   include: "{{ role_path}}/tasks/generate_pvcs.yaml"
   vars:
