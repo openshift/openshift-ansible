@@ -35,6 +35,15 @@ assetConfig:
     keyFile: master.server.key
     maxRequestsInFlight: 0
     requestTimeoutSeconds: 0
+{% if openshift_master_min_tls_version is defined %}
+    minTLSVersion: {{ openshift_master_min_tls_version }}
+{% endif %}
+{% if openshift_master_cipher_suites is defined %}
+    cipherSuites:
+{% for cipher_suite in openshift_master_cipher_suites %}
+    - {{ cipher_suite }}
+{% endfor %}
+{% endif %}
 {% if openshift_master_ha | bool %}
 {% if openshift.master.audit_config | default(none) is not none and openshift.common.version_gte_3_2_or_1_2 | bool %}
 auditConfig:{{ openshift.master.audit_config | to_padded_yaml(level=1) }}
@@ -254,6 +263,15 @@ servingInfo:
 {% for name in named_certificate['names'] %}
     - "{{ name }}"
 {% endfor %}
+{% endfor %}
+{% endif %}
+{% if openshift_master_min_tls_version is defined %}
+  minTLSVersion: {{ openshift_master_min_tls_version }}
+{% endif %}
+{% if openshift_master_cipher_suites is defined %}
+  cipherSuites:
+{% for cipher_suite in openshift_master_cipher_suites %}
+  - {{ cipher_suite }}
 {% endfor %}
 {% endif %}
 volumeConfig:
