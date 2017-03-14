@@ -23,6 +23,9 @@
   vars:
     # the excluders needs to be disabled no matter what status says
     with_status_check: false
+    # Only openshift excluder needs to be temporarily disabled
+    # So ignore the docker one
+    enable_docker_excluder: false
   tags:
   - always
   when: openshift_upgrade_target is not defined
@@ -44,6 +47,10 @@
 
   # Re-enable excluders if they are meant to be enabled (and only during installation, upgrade disables the excluders before this play)
 - include: reset_excluder.yml
+  vars:
+    # Only openshift excluder needs to be re-enabled
+    # So ignore the docker one
+    enable_docker_excluder: false
   tags:
   - always
   when: openshift_upgrade_target is not defined
