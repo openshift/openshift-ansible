@@ -56,12 +56,24 @@
     openshift_hosted_registry_force:
     - False
 
+- name: Create the registry service account
+  oc_serviceaccount:
+    name: "{{ openshift_hosted_registry_serviceaccount }}"
+    namespace: "{{ openshift_hosted_registry_namespace }}"
+
+- name: Grant the registry serivce account access to the appropriate scc
+  oc_adm_policy_user:
+    user: "system:serviceaccount:{{ openshift_hosted_registry_namespace }}:{{ openshift_hosted_registry_serviceaccount }}"
+    namespace: "{{ openshift_hosted_registry_namespace }}"
+    resource_kind: scc
+    resource_name: hostnetwork
+
 - name: oc adm policy add-cluster-role-to-user system:registry system:serviceaccount:default:registry
   oc_adm_policy_user:
-    user: system:serviceaccount:default:registry
+    user: "system:serviceaccount:{{ openshift_hosted_registry_namespace }}:{{ openshift_hosted_registry_serviceaccount }}"
+    namespace: "{{ openshift_hosted_registry_namespace }}"
     resource_kind: cluster-role
     resource_name: system:registry
-    state: present
 
 - name: create the default registry service
   oc_service:

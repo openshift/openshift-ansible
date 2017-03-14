@@ -22,6 +22,21 @@
   with_items: "{{ openshift_hosted_routers | oo_collect(attribute='certificates') |
                   oo_select_keys_from_list(['keyfile', 'certfile', 'cafile']) }}"
 
+- name: Create the router service account(s)
+  oc_serviceaccount:
+    name: "{{ item.serviceaccount }}"
+    namespace: "{{ item.namespace }}"
+    state: present
+  with_items: "{{ openshift_hosted_routers }}"
+
+- name: Grant the router serivce account(s) access to the appropriate scc
+  oc_adm_policy_user:
+    user: "system:serviceaccount:{{ item.namespace }}:{{ item.serviceaccount }}"
+    namespace: "{{ item.namespace }}"
+    resource_kind: scc
+    resource_name: hostnetwork
+  with_items: "{{ openshift_hosted_routers }}"
+
 - name: Create OpenShift router
   oc_adm_router:
     name: "{{ item.name }}"
