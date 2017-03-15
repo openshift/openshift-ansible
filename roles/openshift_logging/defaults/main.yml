@@ -22,7 +22,7 @@ openshift_logging_curator_ops_cpu_limit: 100m
 openshift_logging_curator_ops_memory_limit: null
 openshift_logging_curator_ops_nodeselector: "{{ openshift_hosted_logging_curator_ops_nodeselector | default('') | map_from_pairs }}"
 
-openshift_logging_kibana_hostname: "{{ openshift_hosted_logging_hostname | default('kibana.{{openshift.common.dns_domain}}') }}"
+openshift_logging_kibana_hostname: "{{ openshift_hosted_logging_hostname | default('kibana.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true))) }}"
 openshift_logging_kibana_cpu_limit: null
 openshift_logging_kibana_memory_limit: null
 openshift_logging_kibana_proxy_debug: false
@@ -46,7 +46,7 @@ openshift_logging_kibana_key: ""
 #for the public facing kibana certs
 openshift_logging_kibana_ca: ""
 
-openshift_logging_kibana_ops_hostname: "{{ openshift_hosted_logging_ops_hostname | default('kibana-ops.{{openshift.common.dns_domain}}') }}"
+openshift_logging_kibana_ops_hostname: "{{ openshift_hosted_logging_ops_hostname | default('kibana-ops.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true))) }}"
 openshift_logging_kibana_ops_cpu_limit: null
 openshift_logging_kibana_ops_memory_limit: null
 openshift_logging_kibana_ops_proxy_debug: false
@@ -99,7 +99,7 @@ openshift_logging_es_ops_storage_group: "{{ openshift_hosted_logging_elasticsear
 openshift_logging_es_ops_nodeselector: "{{ openshift_hosted_logging_elasticsearch_ops_nodeselector | default('') | map_from_pairs }}"
 
 # storage related defaults
-openshift_logging_storage_access_modes: "{{ openshift_hosted_logging_storage_access_modes | default('ReadWriteOnce') }}"
+openshift_logging_storage_access_modes: "{{ openshift_hosted_logging_storage_access_modes | default(['ReadWriteOnce']) }}"
 
 
 # following can be uncommented to provide values for configmaps -- take care when providing file contents as it may cause your cluster to not operate correctly
