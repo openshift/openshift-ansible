@@ -47,7 +47,7 @@ popd
 # Base openshift-ansible install
 mkdir -p %{buildroot}%{_datadir}/%{name}
 mkdir -p %{buildroot}%{_datadir}/ansible/%{name}
-mkdir -p %{buildroot}%{_datadir}/ansible_plugins
+mkdir -p %{buildroot}%{_datadir}/ansible/plugins/{filter,callback,lookup}
 cp -rp library %{buildroot}%{_datadir}/ansible/%{name}/
 
 # openshift-ansible-bin install
@@ -77,34 +77,23 @@ find -L %{buildroot}%{_datadir}/ansible/%{name}/playbooks -name filter_plugins -
 cp -rp roles %{buildroot}%{_datadir}/ansible/%{name}/
 # remove contiv role
 rm -rf %{buildroot}%{_datadir}/ansible/%{name}/roles/contiv/*
-# openshift_master_facts symlinks filter_plugins/oo_filters.py from ansible_plugins/filter_plugins
+# openshift_master_facts symlinks filter_plugins/oo_filters.py from ansible/plugins/filter
 pushd %{buildroot}%{_datadir}/ansible/%{name}/roles/openshift_master_facts/filter_plugins
-ln -sf ../../../../../ansible_plugins/filter_plugins/oo_filters.py oo_filters.py
+ln -sf ../../../../../ansible/plugins/filter/oo_filters.py oo_filters.py
 popd
-# openshift_master_facts symlinks lookup_plugins/oo_option.py from ansible_plugins/lookup_plugins
+# openshift_master_facts symlinks lookup_plugins/oo_option.py from ansible/plugins/lookup
 pushd %{buildroot}%{_datadir}/ansible/%{name}/roles/openshift_master_facts/lookup_plugins
-ln -sf ../../../../../ansible_plugins/lookup_plugins/oo_option.py oo_option.py
+ln -sf ../../../../../ansible/plugins/lookup/oo_option.py oo_option.py
 popd
 
 # openshift-ansible-filter-plugins install
-cp -rp filter_plugins %{buildroot}%{_datadir}/ansible_plugins/
+cp -p filter_plugins/* %{buildroot}%{_datadir}/ansible/plugins/filter
 
 # openshift-ansible-lookup-plugins install
-cp -rp lookup_plugins %{buildroot}%{_datadir}/ansible_plugins/
+cp -p lookup_plugins/* %{buildroot}%{_datadir}/ansible/plugins/lookup
 
 # openshift-ansible-callback-plugins install
-cp -rp callback_plugins %{buildroot}%{_datadir}/ansible_plugins/
-
-# create symlinks from /usr/share/ansible/plugins/lookup ->
-# /usr/share/ansible_plugins/lookup_plugins
-pushd %{buildroot}%{_datadir}
-mkdir -p ansible/plugins
-pushd ansible/plugins
-ln -s ../../ansible_plugins/lookup_plugins lookup
-ln -s ../../ansible_plugins/filter_plugins filter
-ln -s ../../ansible_plugins/callback_plugins callback
-popd
-popd
+cp -p callback_plugins/* %{buildroot}%{_datadir}/ansible/plugins/callback
 
 # atomic-openshift-utils install
 pushd utils
@@ -209,8 +198,7 @@ Requires:      pyOpenSSL
 %{summary}.
 
 %files filter-plugins
-%{_datadir}/ansible_plugins/filter_plugins
-%{_datadir}/ansible/plugins/filter
+%{_datadir}/ansible/plugins/filter/*
 
 
 # ----------------------------------------------------------------------------------
@@ -225,8 +213,7 @@ BuildArch:     noarch
 %{summary}.
 
 %files lookup-plugins
-%{_datadir}/ansible_plugins/lookup_plugins
-%{_datadir}/ansible/plugins/lookup
+%{_datadir}/ansible/plugins/lookup/*
 
 
 # ----------------------------------------------------------------------------------
@@ -241,8 +228,7 @@ BuildArch:     noarch
 %{summary}.
 
 %files callback-plugins
-%{_datadir}/ansible_plugins/callback_plugins
-%{_datadir}/ansible/plugins/callback
+%{_datadir}/ansible/plugins/callback/*
 
 # ----------------------------------------------------------------------------------
 # atomic-openshift-utils subpackage
