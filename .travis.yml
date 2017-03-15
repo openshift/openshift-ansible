@@ -20,21 +20,3 @@ script:
 
 after_success:
   - coveralls
-
-notifications:
-  email:
-    recipients:
-      - jdetiber@redhat.com
-      - sdodson@redhat.com
-    on_success: change
-    on_failure: always
-  irc:
-    channels:
-      - chat.freenode.net#openshift-dev
-    on_success: change
-    on_failure: always
-    template:
-      - "%{repository}#%{build_number} (%{branch} - %{commit} : %{author}): %{message}"
-      - "Change view : %{compare_url}"
-      - "Build details : %{build_url}"
-      - "sdodson jdetiber: ^"
