@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.33
+Version:        3.5.34
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,13 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Mar 15 2017 Scott Dodson <sdodson@redhat.com> 3.5.34-1
+- Updating kibana hostname default to be openshift_master_default_subdomain
+  instead of openshift.common.dns_domain (ewolinet@redhat.com)
+- Updating to use pvc access mode as a list (ewolinet@redhat.com)
+- Addressing default pvc prefixes being empty (ewolinet@redhat.com)
+- Updating inventory examples for kibana hostname (ewolinet@redhat.com)
+
 * Wed Mar 15 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.33-1
 - bug 1431935. es_pvc_pool is undefined if you specify 'G' for storage size
   (jcantril@redhat.com)
