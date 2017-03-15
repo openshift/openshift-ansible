@@ -22,6 +22,9 @@
   with_sequence: count={{ openshift_metrics_cassandra_replicas }}
   changed_when: false
 
+- set_fact: openshift_metrics_cassandra_pvc_prefix="hawkular-metrics"
+  when: "not openshift_metrics_cassandra_pvc_prefix or openshift_metrics_cassandra_pvc_prefix == ''"
+
 - name: generate hawkular-cassandra persistent volume claims
   template:
     src: pvc.j2
@@ -30,8 +33,7 @@
     obj_name: "{{ openshift_metrics_cassandra_pvc_prefix }}-{{ item }}"
     labels:
       metrics-infra: hawkular-cassandra
-    access_modes:
-    - "{{ openshift_metrics_cassandra_pvc_access }}"
+    access_modes: "{{ openshift_metrics_cassandra_pvc_access | list }}"
     size: "{{ openshift_metrics_cassandra_pvc_size }}"
   with_sequence: count={{ openshift_metrics_cassandra_replicas }}
   when:
@@ -49,8 +51,7 @@
       metrics-infra: hawkular-cassandra
     annotations:
       volume.alpha.kubernetes.io/storage-class: dynamic
-    access_modes:
-    - "{{ openshift_metrics_cassandra_pvc_access }}"
+    access_modes: "{{ openshift_metrics_cassandra_pvc_access | list }}"
     size: "{{ openshift_metrics_cassandra_pvc_size }}"
   with_sequence: count={{ openshift_metrics_cassandra_replicas }}
   when: openshift_metrics_cassandra_storage_type == 'dynamic'
