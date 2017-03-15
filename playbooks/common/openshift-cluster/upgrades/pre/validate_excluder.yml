@@ -15,11 +15,15 @@
     debug:
       msg: "{{ excluder }}: {{ excluder_version.stdout }}"
 
+  - name: Printing upgrade target version
+    debug:
+      msg: "{{ openshift_upgrade_target }}"
+
   - name: Check the available {{ excluder }} version is at most of the upgrade target version
     fail:
-      msg: "Available {{ excluder }} version {{ excluder_version.stdout }} is higher than the upgrade target version {{ openshift_upgrade_target }}"
+      msg: "Available {{ excluder }} version {{ excluder_version.stdout }} is higher than the upgrade target version"
     when:
     - "{{ excluder_version.stdout != '' }}"
-    - "{{ excluder_version.stdout.split('.')[0:2] | join('.') | version_compare(openshift_upgrade_target, '>', strict=True) }}"
+    - "{{ excluder_version.stdout.split('.')[0:2] | join('.') | version_compare(openshift_upgrade_target.split('.')[0:2] | join('.'), '>', strict=True) }}"
   when:
   - not openshift.common.is_atomic | bool
