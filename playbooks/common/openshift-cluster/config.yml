@@ -54,6 +54,10 @@
   tags:
   - node
 
+- include: ../openshift-glusterfs/config.yml
+  tags:
+  - glusterfs
+
 - include: openshift_hosted.yml
   tags:
   - hosted
