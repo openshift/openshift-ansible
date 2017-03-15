@@ -73,6 +73,9 @@
     - "{{es_dcs | length - openshift_logging_es_ops_cluster_size|int | abs > 1}}"
   check_mode: no
 
+- set_fact: openshift_logging_es_ops_pvc_prefix="logging-es-ops"
+  when: "not openshift_logging_es_ops_pvc_prefix or openshift_logging_es_ops_pvc_prefix == ''"
+
 - set_fact: es_pvc_pool={{[]}}
 
 - name: Generate PersistentVolumeClaims for Ops
