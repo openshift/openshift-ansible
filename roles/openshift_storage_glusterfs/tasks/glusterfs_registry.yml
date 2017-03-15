@@ -1,0 +1,48 @@
+---
+- name: Delete pre-existing GlusterFS registry resources
+  oc_obj:
+    namespace: "{{ openshift_storage_glusterfs_namespace }}"
+    kind: "{{ item.kind }}"
+    name: "{{ item.name | default(omit) }}"
+    selector: "{{ item.selector | default(omit) }}"
+    state: absent
+  with_items:
+  - kind: "svc,ep"
+    name: "glusterfs-registry-endpoints"
+  failed_when: False
+
+- name: Generate GlusterFS registry endpoints
+  template:
+    src: "{{ openshift.common.examples_content_version }}/glusterfs-registry-endpoints.yml.j2"
+    dest: "{{ mktemp.stdout }}/glusterfs-registry-endpoints.yml"
+
+- name: Copy GlusterFS registry service
+  copy:
+    src: "{{ openshift.common.examples_content_version }}/glusterfs-registry-service.yml"
+    dest: "{{ mktemp.stdout }}/glusterfs-registry-service.yml"
+
+- name: Create GlusterFS registry endpoints
+  oc_obj:
+    namespace: "{{ openshift.hosted.registry.namespace | default('default') }}"
+    state: present
+    kind: endpoints
+    name: glusterfs-registry-endpoints
+    files:
+    - "{{ mktemp.stdout }}/glusterfs-registry-endpoints.yml"
+
+- name: Create GlusterFS registry service
+  oc_obj:
+    namespace: "{{ openshift.hosted.registry.namespace | default('default') }}"
+    state: present
+    kind: service
+    name: glusterfs-registry-endpoints
+    files:
+    - "{{ mktemp.stdout }}/glusterfs-registry-service.yml"
+
+- name: Check if GlusterFS registry volume exists
+  command: "heketi-cli -s http://{{ openshift_storage_glusterfs_heketi_url }} --user admin --secret '{{ openshift_storage_glusterfs_heketi_admin_key }}' volume list"
+  register: registry_volume
+
+- name: Create GlusterFS registry volume
+  command: "heketi-cli -s http://{{ openshift_storage_glusterfs_heketi_url }} --user admin --secret '{{ openshift_storage_glusterfs_heketi_admin_key }}' volume create --size={{ openshift.hosted.registry.storage.volume.size | replace('Gi','') }} --name={{ openshift.hosted.registry.storage.glusterfs.path }}"
+  when: "'{{ openshift.hosted.registry.storage.glusterfs.path }}' not in registry_volume.stdout"
