@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.32
+Version:        3.5.33
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Mar 15 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.33-1
+- bug 1431935. es_pvc_pool is undefined if you specify 'G' for storage size
+  (jcantril@redhat.com)
+
 * Mon Mar 13 2017 Scott Dodson <sdodson@redhat.com> 3.5.32-1
 - Refactor and remove openshift_serviceaccount (rteague@redhat.com)
 
