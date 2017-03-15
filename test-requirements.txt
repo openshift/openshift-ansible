@@ -9,3 +9,4 @@ coverage
 mock
 pytest
 pytest-cov
+pytest-mock
