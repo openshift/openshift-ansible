@@ -18,9 +18,5 @@
   # it the docker excluder is enabled, we install it and in case its status is non-zero
   # it is enabled no matter what
 
-# Check the current state of all excluders
-- include: status.yml
-  when: with_status_check | default(docker_excluder_on or openshift_excluder_on) | bool
-
   # And finally adjust an excluder in order to update host components correctly
 - include: adjust.yml
