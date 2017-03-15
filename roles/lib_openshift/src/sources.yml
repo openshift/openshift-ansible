@@ -229,6 +229,18 @@ oc_version.py:
 - class/oc_version.py
 - ansible/oc_version.py
 
+oc_volume.py:
+- doc/generated
+- doc/license
+- lib/import.py
+- doc/volume
+- ../../lib_utils/src/class/yedit.py
+- lib/base.py
+- lib/deploymentconfig.py
+- lib/volume.py
+- class/oc_volume.py
+- ansible/oc_volume.py
+
 oc_objectvalidator.py:
 - doc/generated
 - doc/license

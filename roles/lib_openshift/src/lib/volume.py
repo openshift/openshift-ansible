@@ -1,8 +1,9 @@
 # pylint: skip-file
 # flake8: noqa
 
+
 class Volume(object):
-    ''' Class to model an openshift volume object'''
+    ''' Class to represent the volume object'''
     volume_mounts_path = {"pod": "spec.containers[0].volumeMounts",
                           "dc":  "spec.template.spec.containers[0].volumeMounts",
                           "rc":  "spec.template.spec.containers[0].volumeMounts",
@@ -17,21 +18,22 @@ class Volume(object):
         ''' return a properly structured volume '''
         volume_mount = None
         volume = {'name': volume_info['name']}
-        volume_type = volume_info['type'].lower()
-        if volume_type == 'secret':
+        if volume_info['type'] == 'secret':
             volume['secret'] = {}
             volume[volume_info['type']] = {'secretName': volume_info['secret_name']}
             volume_mount = {'mountPath': volume_info['path'],
                             'name': volume_info['name']}
-        elif volume_type == 'emptydir':
+        elif volume_info['type'] == 'emptydir':
             volume['emptyDir'] = {}
             volume_mount = {'mountPath': volume_info['path'],
                             'name': volume_info['name']}
-        elif volume_type == 'pvc' or volume_type == 'persistentvolumeclaim':
+        elif volume_info['type'] == 'pvc':
             volume['persistentVolumeClaim'] = {}
             volume['persistentVolumeClaim']['claimName'] = volume_info['claimName']
             volume['persistentVolumeClaim']['claimSize'] = volume_info['claimSize']
-        elif volume_type == 'hostpath':
+            volume_mount = {'mountPath': volume_info['path'],
+                            'name': volume_info['name']}
+        elif volume_info['type'] == 'hostpath':
             volume['hostPath'] = {}
             volume['hostPath']['path'] = volume_info['path']
 
