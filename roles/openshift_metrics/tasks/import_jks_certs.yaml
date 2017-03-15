@@ -1,12 +1,4 @@
 ---
-- stat: path="{{mktemp.stdout}}/hawkular-cassandra.keystore"
-  register: cassandra_keystore
-  check_mode: no
-
-- stat: path="{{mktemp.stdout}}/hawkular-cassandra.truststore"
-  register: cassandra_truststore
-  check_mode: no
-
 - stat: path="{{mktemp.stdout}}/hawkular-metrics.keystore"
   register: metrics_keystore
   check_mode: no
@@ -19,9 +11,6 @@
   - slurp: src={{ mktemp.stdout }}/hawkular-metrics-keystore.pwd
     register: metrics_keystore_password
 
-  - slurp: src={{ mktemp.stdout }}/hawkular-cassandra-keystore.pwd
-    register: cassandra_keystore_password
-
   - fetch:
       dest: "{{local_tmp.stdout}}/"
       src: "{{ mktemp.stdout }}/{{item}}"
@@ -29,18 +18,14 @@
     changed_when: False
     with_items:
     - hawkular-metrics.pkcs12
-    - hawkular-cassandra.pkcs12
     - hawkular-metrics.crt
-    - hawkular-cassandra.crt
     - ca.crt
 
   - local_action: command {{role_path}}/files/import_jks_certs.sh
     environment:
       CERT_DIR: "{{local_tmp.stdout}}"
       METRICS_KEYSTORE_PASSWD: "{{metrics_keystore_password.content}}"
-      CASSANDRA_KEYSTORE_PASSWD: "{{cassandra_keystore_password.content}}"
       METRICS_TRUSTSTORE_PASSWD: "{{hawkular_truststore_password.content}}"
-      CASSANDRA_TRUSTSTORE_PASSWD: "{{cassandra_truststore_password.content}}"
     changed_when: False
 
   - copy:
@@ -49,6 +34,4 @@
     with_fileglob: "{{local_tmp.stdout}}/*.*store"
 
   when: not metrics_keystore.stat.exists or
-        not metrics_truststore.stat.exists or
-        not cassandra_keystore.stat.exists or
-        not cassandra_truststore.stat.exists
+        not metrics_truststore.stat.exists
