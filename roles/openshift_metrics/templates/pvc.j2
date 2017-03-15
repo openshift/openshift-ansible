@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{obj_name}}
+  name: "{{obj_name}}"
 {% if labels is not defined %}
   labels:
     logging-infra: support
