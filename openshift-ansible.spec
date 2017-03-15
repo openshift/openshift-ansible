@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.34
+Version:        3.5.35
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Mar 15 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.35-1
+- 
+
 * Wed Mar 15 2017 Scott Dodson <sdodson@redhat.com> 3.5.34-1
 - Updating kibana hostname default to be openshift_master_default_subdomain
   instead of openshift.common.dns_domain (ewolinet@redhat.com)
