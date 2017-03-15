@@ -22,6 +22,15 @@
     - nuage.key
     - nuage.kubeconfig
 
+- name: Copy the certificates and keys
+  become: yes
+  copy: src="/tmp/{{ item }}" dest="{{ cert_output_dir }}/{{ item }}"
+  with_items:
+    - ca.crt
+    - nuage.crt
+    - nuage.key
+    - nuage.kubeconfig
+
 - include: certificates.yml
 
 - name: Create nuage-openshift-monitor.yaml
