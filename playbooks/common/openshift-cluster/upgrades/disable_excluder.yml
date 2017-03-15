@@ -1,6 +1,6 @@
 ---
 - name: Record excluder state and disable
-  hosts: l_oo_all_hosts
+  hosts: oo_masters_to_config:oo_nodes_to_config
   gather_facts: no
   tasks:
   - include: pre/validate_excluder.yml
