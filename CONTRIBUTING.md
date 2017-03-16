@@ -75,7 +75,10 @@ See the [RPM build instructions](BUILD.md).
 We use [tox](http://readthedocs.org/docs/tox/) to manage virtualenvs and run
 tests. Alternatively, tests can be run using
 [detox](https://pypi.python.org/pypi/detox/) which allows for running tests in
-parallel
+parallel.
+
+Note: while `detox` may be useful in development to make use of multiple cores,
+it can be buggy at times and produce flakes, thus we do not use it in our CI.
 
 
 ```
@@ -95,42 +98,89 @@ by `tox`:
 $ find . -path '*/bin/python' | grep -vF .tox
 ```
 
-Extraneous virtualenvs cause tools such as `pylint` to take a very long time
-going through files that are part of the virtualenv.
+The reason for this recommendation is that extraneous virtualenvs cause tools
+such as `pylint` to take a very long time going through files that are part of
+the virtualenv, and test discovery to go through lots of irrelevant files and
+potentially fail.
 
 ---
 
 List the test environments available:
+
 ```
 tox -l
 ```
 
-Run all of the tests with:
+Run all of the tests and linters with:
+
 ```
 tox
 ```
 
-Run all of the tests in parallel with detox:
+Run all of the tests linters in parallel (may flake):
+
 ```
 detox
 ```
 
-Running a particular test environment (python 2.7 flake8 tests in this case):
+### Run only unit tests or some specific linter
+
+Run a particular test environment (`flake8` on Python 2.7 in this case):
+
 ```
 tox -e py27-flake8
 ```
 
-Running a particular test environment in a clean virtualenv (python 3.5 pylint
-tests in this case):
+Run a particular test environment in a clean virtualenv (`pylint` on Python 3.5
+in this case):
+
 ```
-tox -r -e py35-pylint
+tox -re py35-pylint
 ```
 
-If you want to enter the virtualenv created by tox to do additional
+### Tricks
+
+#### Activating a virtualenv managed by tox
+
+If you want to enter a virtualenv created by tox to do additional
 testing/debugging (py27-flake8 env in this case):
+
 ```
 source .tox/py27-flake8/bin/activate
 ```
+
+#### Limiting the unit tests that are run
+
+During development, it might be useful to constantly run just a single test file
+or test method, or to pass custom arguments to `pytest`:
+
+```
+tox -e py27-unit -- path/to/test/file.py
+```
+
+Anything after `--` is passed directly to `pytest`. To learn more about what
+other flags you can use, try:
+
+```
+tox -e py27-unit -- -h
+```
+
+As a practical example, the snippet below shows how to list all tests in a
+certain file, and then execute only one test of interest:
+
+```
+$ tox -e py27-unit -- roles/lib_openshift/src/test/unit/test_oc_project.py --collect-only --no-cov
+...
+collected 1 items
+<Module 'roles/lib_openshift/src/test/unit/test_oc_project.py'>
+  <UnitTestCase 'OCProjectTest'>
+    <TestCaseFunction 'test_adding_a_project'>
+...
+$ tox -e py27-unit -- roles/lib_openshift/src/test/unit/test_oc_project.py -k test_adding_a_project
+```
+
+Among other things, this can be used for instance to see the coverage levels of
+individual modules as we work on improving tests.
 
 ## Submitting contributions
 
