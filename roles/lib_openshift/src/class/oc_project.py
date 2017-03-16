@@ -101,15 +101,18 @@ class OCProject(OpenShiftCLI):
         if params['node_selector'] is not None:
             _ns = ','.join(params['node_selector'])
 
-        pconfig = ProjectConfig(params['name'],
-                                'None',
-                                params['kubeconfig'],
-                                {'admin': {'value': params['admin'], 'include': True},
-                                 'admin_role': {'value': params['admin_role'], 'include': True},
-                                 'description': {'value': params['description'], 'include': True},
-                                 'display_name': {'value': params['display_name'], 'include': True},
-                                 'node_selector': {'value': _ns, 'include': True},
-                                })
+        pconfig = ProjectConfig(
+            params['name'],
+            'None',
+            params['kubeconfig'],
+            {
+                'admin': {'value': params['admin'], 'include': True},
+                'admin_role': {'value': params['admin_role'], 'include': True},
+                'description': {'value': params['description'], 'include': True},
+                'display_name': {'value': params['display_name'], 'include': True},
+                'node_selector': {'value': _ns, 'include': True},
+            },
+        )
 
         oadm_project = OCProject(pconfig, verbose=params['debug'])
 
