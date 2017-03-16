@@ -82,7 +82,7 @@
       path: "{{ openshift.common.config_base }}/master/{{ item }}"
       state: absent
     with_items:
-    - "{{ hostvars[inventory_hostname] | certificates_to_synchronize(include_keys=false) }}"
+    - "{{ hostvars[inventory_hostname] | certificates_to_synchronize(include_keys=false, include_ca=false) }}"
     - "etcd.server.crt"
     - "etcd.server.key"
     - "master.etcd-client.crt"
