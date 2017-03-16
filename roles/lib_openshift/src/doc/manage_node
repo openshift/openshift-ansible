@@ -3,7 +3,7 @@
 
 DOCUMENTATION = '''
 ---
-module: oadm_manage_node
+module: oc_adm_manage_node
 short_description: Module to manage openshift nodes
 description:
   - Manage openshift nodes programmatically.
@@ -75,13 +75,13 @@ extends_documentation_fragment: []
 
 EXAMPLES = '''
 - name: oadm manage-node --schedulable=true --selector=ops_node=new
-  oadm_manage_node:
+  oc_adm_manage_node:
     selector: ops_node=new
     schedulable: True
   register: schedout
 
 - name: oadm manage-node my-k8s-node-5 --evacuate
-  oadm_manage_node:
+  oc_adm_manage_node:
     node:  my-k8s-node-5
     evacuate: True
     force: True
