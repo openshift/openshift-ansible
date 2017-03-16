@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.69
+Version:        3.4.70
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -250,6 +250,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Mar 15 2017 Scott Dodson <sdodson@redhat.com> 3.4.70-1
+- test (sdodson@redhat.com)
+- Adding right bracket in roles/openshift_storage_nfs/tasks/main.yml
+  (ghuang@redhat.com)
+
 * Mon Mar 06 2017 Scott Dodson <sdodson@redhat.com> 3.4.69-1
 - Automatic commit of package [openshift-ansible] release [3.4.68-1].
   (sdodson@redhat.com)
