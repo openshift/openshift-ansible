@@ -39,4 +39,7 @@ ADD . /tmp/src
 # as per the INSTALL_OC environment setting above
 RUN /usr/libexec/s2i/assemble
 
+# Add files for running as a system container
+COPY system-container/root /
+
 CMD [ "/usr/libexec/s2i/run" ]
