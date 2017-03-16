@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.98
+Version:        3.0.99
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -205,6 +205,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Mar 16 2017 Scott Dodson <sdodson@redhat.com> 3.0.99-1
+- Persist net.ipv4.ip_forward sysctl entry for openshift nodes
+  (tbielawa@redhat.com)
+
 * Mon Oct 10 2016 Scott Dodson <sdodson@redhat.com> 3.0.98-1
 - Update service presence checks to work with systemd in RHEL 7.3
   (sdodson@redhat.com)
