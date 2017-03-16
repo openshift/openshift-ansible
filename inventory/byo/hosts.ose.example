@@ -30,17 +30,17 @@ deployment_type=openshift-enterprise
 # use this to lookup the latest exact version of the container images, which is the tag actually used to configure
 # the cluster. For RPM installations we just verify the version detected in your configured repos matches this
 # release.
-openshift_release=v3.4
+openshift_release=v3.5
 
 # Specify an exact container image tag to install or configure.
 # WARNING: This value will be used for all hosts in containerized environments, even those that have another version installed.
 # This could potentially trigger an upgrade and downtime, so be careful with modifying this value after the cluster is set up.
-#openshift_image_tag=v3.2.0.46
+#openshift_image_tag=v3.5.0
 
 # Specify an exact rpm version to install or configure.
 # WARNING: This value will be used for all hosts in RPM based environments, even those that have another version installed.
 # This could potentially trigger an upgrade and downtime, so be careful with modifying this value after the cluster is set up.
-#openshift_pkg_version=-3.2.0.46
+#openshift_pkg_version=-3.5.0
 
 # Install the openshift examples
 #openshift_install_examples=true
