@@ -1547,9 +1547,9 @@ class OCProject(OpenShiftCLI):
     def run_ansible(params, check_mode):
         '''run the idempotent ansible code'''
 
-        _ns = None
+        node_selector = None
         if params['node_selector'] is not None:
-            _ns = ','.join(params['node_selector'])
+            node_selector = ','.join(params['node_selector'])
 
         pconfig = ProjectConfig(
             params['name'],
@@ -1560,7 +1560,7 @@ class OCProject(OpenShiftCLI):
                 'admin_role': {'value': params['admin_role'], 'include': True},
                 'description': {'value': params['description'], 'include': True},
                 'display_name': {'value': params['display_name'], 'include': True},
-                'node_selector': {'value': _ns, 'include': True},
+                'node_selector': {'value': node_selector, 'include': True},
             },
         )
 
