@@ -21,7 +21,7 @@ from oc_route import OCRoute, locate_oc_binary  # noqa: E402
 
 class OCRouteTest(unittest.TestCase):
     '''
-     Test class for OCServiceAccount
+     Test class for OCRoute
     '''
 
     @mock.patch('oc_route.locate_oc_binary')

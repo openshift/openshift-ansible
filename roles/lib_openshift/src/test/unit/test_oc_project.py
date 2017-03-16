@@ -21,7 +21,7 @@ from oc_project import OCProject  # noqa: E402
 
 class OCProjectTest(unittest.TestCase):
     '''
-     Test class for OCSecret
+     Test class for OCProject
     '''
 
     # run_ansible input parameters
