@@ -60,8 +60,19 @@
   - openshift_facts
   - openshift_docker
 
+- include: ../openshift-cluster/disable_excluder.yml
+  vars:
+    # the excluders needs to be disabled no matter what status says
+    with_status_check: false
+  tags:
+  - always
+
 - include: ../openshift-master/config.yml
 
 - include: ../openshift-loadbalancer/config.yml
 
 - include: ../openshift-node/config.yml
+
+- include: ../openshift-cluster/reset_excluder.yml
+  tags:
+  - always
