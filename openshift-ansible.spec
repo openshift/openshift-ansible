@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.2
+Version:        3.6.3
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Mar 17 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.3-1
+- enable docker excluder since the time it is installed (jchaloup@redhat.com)
+
 * Thu Mar 16 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.2-1
 - enable excluders during node/master scaling up (jchaloup@redhat.com)
 - Fixing variable naming for 35 scoping. (kwoodson@redhat.com)
