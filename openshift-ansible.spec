@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.36
+Version:        3.5.37
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,15 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Mar 17 2017 Scott Dodson <sdodson@redhat.com> 3.5.37-1
+- enable excluders during node/master scaling up (jchaloup@redhat.com)
+- Only call excluder playbooks on masters and nodes (sdodson@redhat.com)
+- Since we've decided that we're no longer paying attention to current status
+  remove this as it was toggling things (sdodson@redhat.com)
+- Remove travis notifications (jdetiber@redhat.com)
+- Update versions in example inventories (sdodson@redhat.com)
+- Fix containerized openvswitch race (sdodson@redhat.com)
+
 * Thu Mar 16 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.36-1
 - Add default pvc prefix fix for ops pvcs (ewolinet@redhat.com)
 
