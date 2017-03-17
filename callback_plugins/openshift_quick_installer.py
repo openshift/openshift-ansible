@@ -236,6 +236,63 @@ The only thing we change here is adding `log_only=True` to the
         """
         self._display.display("skipping: no hosts matched", color=C.COLOR_SKIP, log_only=True)
 
+
+
+    ######################################################################
+    # So we can bubble up errors to the top
+    def v2_runner_on_failed(self, result, ignore_errors=False):
+        """I guess this is when an entire task has failed?"""
+
+        if self._play.strategy == 'free' and self._last_task_banner != result._task._uuid:
+            self._print_task_banner(result._task)
+
+        delegated_vars = result._result.get('_ansible_delegated_vars', None)
+        if 'exception' in result._result:
+            if self._display.verbosity < 3:
+                # extract just the actual error message from the exception text
+                error = result._result['exception'].strip().split('\n')[-1]
+                msg = "An exception occurred during task execution. To see the full traceback, use -vvv. The error was: %s" % error
+            else:
+                msg = "An exception occurred during task execution. The full traceback is:\n" + result._result['exception']
+
+            self._display.display(msg, color=C.COLOR_ERROR)
+
+        if result._task.loop and 'results' in result._result:
+            self._process_items(result)
+
+        else:
+            if delegated_vars:
+                self._display.display("fatal: [%s -> %s]: FAILED! => %s" % (result._host.get_name(), delegated_vars['ansible_host'], self._dump_results(result._result)), color=C.COLOR_ERROR)
+            else:
+                self._display.display("fatal: [%s]: FAILED! => %s" % (result._host.get_name(), self._dump_results(result._result)), color=C.COLOR_ERROR)
+
+        if ignore_errors:
+            self._display.display("...ignoring", color=C.COLOR_SKIP)
+
+    def v2_runner_item_on_failed(self, result):
+        """When an item in a task fails."""
+        delegated_vars = result._result.get('_ansible_delegated_vars', None)
+        if 'exception' in result._result:
+            if self._display.verbosity < 3:
+                # extract just the actual error message from the exception text
+                error = result._result['exception'].strip().split('\n')[-1]
+                msg = "An exception occurred during task execution. To see the full traceback, use -vvv. The error was: %s" % error
+            else:
+                msg = "An exception occurred during task execution. The full traceback is:\n" + result._result['exception']
+
+            self._display.display(msg, color=C.COLOR_ERROR)
+
+        msg = "failed: "
+        if delegated_vars:
+            msg += "[%s -> %s]" % (result._host.get_name(), delegated_vars['ansible_host'])
+        else:
+            msg += "[%s]" % (result._host.get_name())
+
+        self._display.display(msg + " (item=%s) => %s" % (self._get_item(result._result), self._dump_results(result._result)), color=C.COLOR_ERROR)
+        self._handle_warnings(result._result)
+
+
+    ######################################################################
     def v2_playbook_on_stats(self, stats):
         """Print the final playbook run stats"""
         self._display.display("", screen_only=True)
