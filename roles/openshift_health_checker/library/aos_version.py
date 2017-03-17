@@ -32,6 +32,7 @@ def main():  # pylint: disable=missing-docstring,too-many-branches
         bail("prefix must not be empty")
 
     yb = yum.YumBase()  # pylint: disable=invalid-name
+    yb.conf.disable_excludes = ["all"]  # assume the openshift excluder will be managed, ignore current state
 
     # search for package versions available for aos pkgs
     expected_pkgs = [

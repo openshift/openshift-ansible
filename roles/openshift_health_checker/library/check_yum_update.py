@@ -27,6 +27,7 @@ def main():  # pylint: disable=missing-docstring,too-many-branches
         module.fail_json(msg=error)
 
     yb = yum.YumBase()  # pylint: disable=invalid-name
+    yb.conf.disable_excludes = ["all"]  # assume the openshift excluder will be managed, ignore current state
     # determine if the existing yum configuration is valid
     try:
         yb.repos.populateSack(mdtype='metadata', cacheonly=1)
