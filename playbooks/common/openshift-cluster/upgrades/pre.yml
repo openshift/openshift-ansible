@@ -243,7 +243,7 @@
   - openshift_facts:
       role: master
       local_facts:
-        embedded_etcd: "{{ groups.oo_etcd_to_config | length == 0 }}"
+        embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
         debug_level: "{{ openshift_master_debug_level | default(openshift.common.debug_level | default(2)) }}"
 
 - name: Backup etcd
