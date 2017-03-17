@@ -152,6 +152,17 @@ oc_project.py:
 - class/oc_project.py
 - ansible/oc_project.py
 
+oc_pvc.py:
+- doc/generated
+- doc/license
+- lib/import.py
+- doc/pvc
+- ../../lib_utils/src/class/yedit.py
+- lib/base.py
+- lib/pvc.py
+- class/oc_pvc.py
+- ansible/oc_pvc.py
+
 oc_route.py:
 - doc/generated
 - doc/license
