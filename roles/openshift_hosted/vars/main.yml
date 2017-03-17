@@ -1,3 +1,13 @@
 ---
 openshift_master_config_dir: "{{ openshift.common.config_base }}/master"
 registry_config_secret_name: registry-config
+
+openshift_default_projects:
+  default:
+    default_node_selector: ''
+  logging:
+    default_node_selector: ''
+  openshift-infra:
+    default_node_selector: ''
+
+openshift_projects: "{{ openshift_additional_projects | default({}) | oo_merge_dicts(openshift_default_projects) }}"
