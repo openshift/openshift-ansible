@@ -486,6 +486,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # your cloud platform use this.
 #openshift_hosted_metrics_storage_kind=dynamic
 #
+# Other Metrics Options -- Common items you may wish to reconfigure, for the complete
+# list of options please see roles/openshift_metrics/README.md
+#
 # Override metricsPublicURL in the master config for cluster metrics
 # Defaults to https://hawkular-metrics.{{openshift_master_default_subdomain}}/hawkular/metrics
 # Currently, you may only alter the hostname portion of the url, alterting the
@@ -532,14 +535,13 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #
 # Configure loggingPublicURL in the master config for aggregate logging, defaults
 # to kibana.{{ openshift_master_default_subdomain }}
-#openshift_hosted_logging_hostname=kibana.example.com
+#openshift_hosted_logging_hostname=logging.apps.example.com
 # Configure the number of elastic search nodes, unless you're using dynamic provisioning
 # this value must be 1
 #openshift_hosted_logging_elasticsearch_cluster_size=1
-#openshift_hosted_logging_hostname=logging.apps.example.com
-# Configure the prefix and version for the deployer image
+# Configure the prefix and version for the component images
 #openshift_hosted_logging_deployer_prefix=registry.example.com:8888/openshift3/
-#openshift_hosted_logging_deployer_version=3.3.0
+#openshift_hosted_logging_deployer_version=3.5.0
 
 # Configure the multi-tenant SDN plugin (default is 'redhat/openshift-ovs-subnet')
 # os_sdn_network_plugin_name='redhat/openshift-ovs-multitenant'
