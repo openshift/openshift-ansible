@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.3
+Version:        3.6.4
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Mar 18 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.4-1
+- Cherry picking from #3689 (ewolinet@redhat.com)
+- Moving projects task within openshift_hosted (rteague@redhat.com)
+- Refactor openshift_projects role (rteague@redhat.com)
+- Add unit tests for existing health checks (rhcarvalho@gmail.com)
+- Do not update when properties when not passed. (kwoodson@redhat.com)
+- change shell to bash in generate_jks.sh (l@lmello.eu.org)
+
 * Fri Mar 17 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.3-1
 - enable docker excluder since the time it is installed (jchaloup@redhat.com)
 
