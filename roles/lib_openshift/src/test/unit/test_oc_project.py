@@ -37,11 +37,9 @@ class OCProjectTest(unittest.TestCase):
         'description': 'All things operations project',
     }
 
-    @mock.patch('oc_project.locate_oc_binary')
-    @mock.patch('oc_project.Utils.create_tmpfile_copy')
-    @mock.patch('oc_project.Utils._write')
+    @mock.patch('oc_project.Utils', autospec=True)
     @mock.patch('oc_project.OCProject._run')
-    def test_adding_a_project(self, mock_cmd, mock_write, mock_tmpfile_copy, mock_loc_oc_bin):
+    def test_adding_a_project(self, mock_cmd, mock_utils):
         ''' Testing adding a project '''
 
         params = copy.deepcopy(OCProjectTest.params)
@@ -83,14 +81,6 @@ class OCProjectTest(unittest.TestCase):
             (0, project_results, ''),  # fetch it
         ]
 
-        mock_tmpfile_copy.side_effect = [
-            '/tmp/mocked_kubeconfig',
-        ]
-
-        mock_loc_oc_bin.side_effect = [
-            'oc',
-        ]
-
         # Act
         results = OCProject.run_ansible(params, False)
 
@@ -110,11 +100,9 @@ class OCProjectTest(unittest.TestCase):
 
         ])
 
-    @mock.patch('oc_project.locate_oc_binary')
-    @mock.patch('oc_project.Utils.create_tmpfile_copy')
-    @mock.patch('oc_project.Utils._write')
+    @mock.patch('oc_project.Utils', autospec=True)
     @mock.patch('oc_project.OCProject._run')
-    def test_modifying_a_project_no_attributes(self, mock_cmd, mock_write, mock_tmpfile_copy, mock_loc_oc_bin):
+    def test_modifying_a_project_no_attributes(self, mock_cmd, mock_utils):
         ''' Testing adding a project '''
         params = copy.deepcopy(self.params)
         params['display_name'] = None
@@ -156,14 +144,6 @@ class OCProjectTest(unittest.TestCase):
             (0, project_results, ''),
         ]
 
-        mock_tmpfile_copy.side_effect = [
-            '/tmp/mocked_kubeconfig',
-        ]
-
-        mock_loc_oc_bin.side_effect = [
-            'oc',
-        ]
-
         # Act
         results = OCProject.run_ansible(params, False)
 
@@ -175,11 +155,9 @@ class OCProjectTest(unittest.TestCase):
             mock.call(['oc', 'get', 'namespace', 'operations', '-o', 'json'], None),
         ])
 
-    @mock.patch('oc_project.locate_oc_binary')
-    @mock.patch('oc_project.Utils.create_tmpfile_copy')
-    @mock.patch('oc_project.Utils._write')
+    @mock.patch('oc_project.Utils', autospec=True)
     @mock.patch('oc_project.OCProject._run')
-    def test_modifying_project_attributes(self, mock_cmd, mock_write, mock_tmpfile_copy, mock_loc_oc_bin):
+    def test_modifying_project_attributes(self, mock_cmd, mock_utils):
         ''' Testing adding a project '''
         params = copy.deepcopy(self.params)
         params['display_name'] = 'updated display name'
@@ -254,12 +232,8 @@ class OCProjectTest(unittest.TestCase):
             (0, mod_project_results, ''),
         ]
 
-        mock_tmpfile_copy.side_effect = [
+        mock_utils.create_tmpfile.side_effect = [
             '/tmp/mocked_kubeconfig',
-        ]
-
-        mock_loc_oc_bin.side_effect = [
-            'oc',
         ]
 
         # Act
