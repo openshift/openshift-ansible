@@ -53,11 +53,11 @@ class CallbackModule(CallbackBase):
         subsequent_extra_indent = u' ' * (initial_indent_len + 10)
 
         for i, failure in enumerate(self.__failures, 1):
-            lines = _format_failure(failure)
-            self._display.display(u'\n{}{}'.format(initial_indent_format.format(i), lines[0]))
-            for line in lines[1:]:
-                line = line.replace(u'\n', u'\n' + subsequent_extra_indent)
-                indented = u'{}{}'.format(subsequent_indent, line)
+            entries = _format_failure(failure)
+            self._display.display(u'\n{}{}'.format(initial_indent_format.format(i), entries[0]))
+            for entry in entries[1:]:
+                entry = entry.replace(u'\n', u'\n' + subsequent_extra_indent)
+                indented = u'{}{}'.format(subsequent_indent, entry)
                 self._display.display(indented)
 
 
@@ -66,8 +66,9 @@ class CallbackModule(CallbackBase):
 # Status: permanently disabled unless Ansible's API changes.
 # pylint: disable=protected-access
 def _format_failure(failure):
-    '''Return a list of pretty-formatted lines describing a failure, including
-    relevant information about it. Line separators are not included.'''
+    '''Return a list of pretty-formatted text entries describing a failure, including
+    relevant information about it. Expect that the list of text entries will be joined
+    by a newline separator when output to the user.'''
     result = failure['result']
     host = result._host.get_name()
     play = _get_play(result._task)
@@ -75,16 +76,29 @@ def _format_failure(failure):
         play = play.get_name()
     task = result._task.get_name()
     msg = result._result.get('msg', u'???')
-    rows = (
+    fields = (
         (u'Host', host),
         (u'Play', play),
         (u'Task', task),
         (u'Message', stringc(msg, C.COLOR_ERROR)),
     )
     if 'checks' in result._result:
-        rows += ((u'Details', stringc(pformat(result._result['checks']), C.COLOR_ERROR)),)
+        fields += ((u'Details', _format_failed_checks(result._result['checks'])),)
     row_format = '{:10}{}'
-    return [row_format.format(header + u':', body) for header, body in rows]
+    return [row_format.format(header + u':', body) for header, body in fields]
+
+
+def _format_failed_checks(checks):
+    '''Return pretty-formatted text describing checks that failed.'''
+    failed_check_msgs = []
+    for check, body in checks.items():
+        if body.get('failed', False):   # only show the failed checks
+            msg = body.get('msg', u"Failed without returning a message")
+            failed_check_msgs.append('check "%s":\n%s' % (check, msg))
+    if failed_check_msgs:
+        return stringc("\n\n".join(failed_check_msgs), C.COLOR_ERROR)
+    else:    # something failed but no checks will admit to it, so dump everything
+        return stringc(pformat(checks), C.COLOR_ERROR)
 
 
 # Reason: disable pylint protected-access because we need to access _*
