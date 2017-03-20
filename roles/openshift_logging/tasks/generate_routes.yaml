@@ -16,12 +16,12 @@
   changed_when: false
 
 - name: Generating logging routes
-  template: src=route_reencrypt.j2 dest={{mktemp.stdout}}/templates/logging-{{route_info.name}}-route.yaml
+  template: src=route_reencrypt.j2 dest={{mktemp.stdout}}/templates/logging-logging-kibana-route.yaml
   tags: routes
   vars:
-    obj_name: "{{route_info.name}}"
-    route_host: "{{route_info.host}}"
-    service_name: "{{route_info.name}}"
+    obj_name: "logging-kibana"
+    route_host: "{{openshift_logging_kibana_hostname}}"
+    service_name: "logging-kibana"
     tls_key: "{{kibana_key | default('') | b64decode}}"
     tls_cert: "{{kibana_cert | default('') | b64decode}}"
     tls_ca_cert: "{{kibana_ca | b64decode}}"
@@ -31,10 +31,47 @@
       component: support
       logging-infra: support
       provider: openshift
-  with_items:
-    - {name: logging-kibana, host: "{{openshift_logging_kibana_hostname}}"}
-    - {name: logging-kibana-ops, host: "{{openshift_logging_kibana_ops_hostname}}"}
-  loop_control:
-    loop_var: route_info
-  when: (route_info.name == 'logging-kibana-ops' and openshift_logging_use_ops | bool) or route_info.name == 'logging-kibana'
+  changed_when: no
+
+- set_fact: kibana_ops_key={{ lookup('file', openshift_logging_kibana_ops_key) | b64encode }}
+  when:
+  - openshift_logging_use_ops | bool
+  - "{{ openshift_logging_kibana_ops_key | trim | length > 0 }}"
+  changed_when: false
+
+- set_fact: kibana_ops_cert={{ lookup('file', openshift_logging_kibana_ops_cert)| b64encode  }}
+  when:
+  - openshift_logging_use_ops | bool
+  - "{{openshift_logging_kibana_ops_cert | trim | length > 0}}"
+  changed_when: false
+
+- set_fact: kibana_ops_ca={{ lookup('file', openshift_logging_kibana_ops_ca)| b64encode  }}
+  when:
+  - openshift_logging_use_ops | bool
+  - "{{openshift_logging_kibana_ops_ca | trim | length > 0}}"
+  changed_when: false
+
+- set_fact: kibana_ops_ca={{key_pairs | entry_from_named_pair('ca_file') }}
+  when:
+  - openshift_logging_use_ops | bool
+  - kibana_ops_ca is not defined
+  changed_when: false
+
+- name: Generating logging ops routes
+  template: src=route_reencrypt.j2 dest={{mktemp.stdout}}/templates/logging-logging-kibana-ops-route.yaml
+  tags: routes
+  vars:
+    obj_name: "logging-kibana-ops"
+    route_host: "{{openshift_logging_kibana_ops_hostname}}"
+    service_name: "logging-kibana-ops"
+    tls_key: "{{kibana_ops_key | default('') | b64decode}}"
+    tls_cert: "{{kibana_ops_cert | default('') | b64decode}}"
+    tls_ca_cert: "{{kibana_ops_ca | b64decode}}"
+    tls_dest_ca_cert: "{{key_pairs | entry_from_named_pair('ca_file')| b64decode }}"
+    edge_term_policy: "{{openshift_logging_kibana_edge_term_policy | default('') }}"
+    labels:
+      component: support
+      logging-infra: support
+      provider: openshift
+  when: openshift_logging_use_ops | bool
   changed_when: no
