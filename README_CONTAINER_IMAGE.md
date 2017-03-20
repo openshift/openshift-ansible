@@ -47,3 +47,26 @@ Here is a detailed explanation of the options used in the command above:
 Further usage examples are available in the [examples directory](examples/) with samples of how to use the image from within OpenShift.
 
 Additional usage information for images built from `playbook2image` like this one can be found in the [playbook2image examples](https://github.com/aweiteka/playbook2image/tree/master/examples).
+
+## Running openshift-ansible as a System Container
+
+Building the System Container: See the [BUILD.md](BUILD.md).
+
+Copy ssh public key of the host machine to master and nodes machines in the cluster.
+
+If the inventory file needs additional files then it can use the path `/var/lib/openshift-installer` in the container as it is bind mounted from the host (controllable with `VAR_LIB_OPENSHIFT_INSTALLER`).
+
+Run the ansible system container:
+
+```sh
+atomic install --system --set INVENTORY_FILE=$(pwd)/inventory.origin openshift/openshift-ansible
+systemctl start openshift-ansible
+```
+
+The `INVENTORY_FILE` variable says to the installer what inventory file on the host will be bind mounted inside the container.  In the example above, a file called `inventory.origin` in the current directory is used as the inventory file for the installer.
+
+And to finally cleanup the container:
+
+```
+atomic uninstall openshift-ansible
+```
