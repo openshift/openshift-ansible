@@ -9,7 +9,7 @@
     vars:
       # Enable the docker excluder only if it is overrided
       # BZ #1430612: docker excluders should be enabled even during installation and upgrade
-      exclude_docker_excluder: "{{ enable_docker_excluder | default(true) | bool }}"
+      exclude_docker_excluder: "{{ docker_excluder_on | bool }}"
       # excluder is to be disabled by default
       exclude_openshift_excluder: false
   # All excluders that are to be disabled are disabled
@@ -20,6 +20,6 @@
       unexclude_docker_excluder: false
       # disable openshift excluder is never overrided to be enabled
       # disable it if the docker excluder is enabled
-      unexclude_openshift_excluder: "{{ openshift_excluder_on | bool }}"
+      unexclude_openshift_excluder: true
   when:
   - not openshift.common.is_atomic | bool
