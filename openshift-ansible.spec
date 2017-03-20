@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.37
+Version:        3.5.38
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,13 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Mar 20 2017 Scott Dodson <sdodson@redhat.com> 3.5.38-1
+- Automatic commit of package [openshift-ansible] release [3.5.37-1].
+  (sdodson@redhat.com)
+- Add router svcacct cluster-reader role (rteague@redhat.com)
+- Updating descriptions and examples (ewolinet@redhat.com)
+- Fix get_router_replicas infrastructure node count. (abutcher@redhat.com)
+
 * Fri Mar 17 2017 Scott Dodson <sdodson@redhat.com> 3.5.37-1
 - enable excluders during node/master scaling up (jchaloup@redhat.com)
 - Only call excluder playbooks on masters and nodes (sdodson@redhat.com)
