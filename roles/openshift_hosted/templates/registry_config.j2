@@ -71,7 +71,7 @@ middleware:
   - name: openshift
     options:
       pullthrough: {{ openshift_hosted_registry_pullthrough | default(true) }}
-      acceptschema2: {{ openshift_hosted_registry_acceptschema2 | default(false) }}
+      acceptschema2: {{ openshift_hosted_registry_acceptschema2 | default(true) }}
       enforcequota: {{ openshift_hosted_registry_enforcequota | default(false) }}
 {% if openshift_hosted_registry_storage_provider | default('') == 's3' and openshift_hosted_registry_storage_s3_cloudfront_baseurl is defined %}
   storage:
