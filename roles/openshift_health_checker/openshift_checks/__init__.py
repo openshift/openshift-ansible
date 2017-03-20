@@ -8,11 +8,8 @@ import os
 from abc import ABCMeta, abstractmethod, abstractproperty
 from importlib import import_module
 
-# add_metaclass is not available in the embedded six from module_utils in Ansible 2.2.1
-from six import add_metaclass
-# pylint import-error disabled because pylint cannot find the package
-# when installed in a virtualenv
-from ansible.module_utils.six.moves import reduce  # pylint: disable=import-error, redefined-builtin
+from ansible.module_utils import six
+from ansible.module_utils.six.moves import reduce  # pylint: disable=import-error,redefined-builtin
 
 
 class OpenShiftCheckException(Exception):
@@ -20,7 +17,7 @@ class OpenShiftCheckException(Exception):
     pass
 
 
-@add_metaclass(ABCMeta)
+@six.add_metaclass(ABCMeta)
 class OpenShiftCheck(object):
     """A base class for defining checks for an OpenShift cluster environment."""
 
