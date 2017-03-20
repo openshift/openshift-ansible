@@ -71,6 +71,12 @@ class CallbackModule(DEFAULT_MODULE.CallbackModule):
     plays_count = 0
     plays_total_ran = 0
 
+    def __init__(self):
+        """Constructor, ensure standard self.*s are set"""
+        self._play = None
+        self._last_task_banner = None
+        super(CallbackModule, self).__init__()
+
     def banner(self, msg, color=None):
         '''Prints a header-looking line with stars taking up to 80 columns
         of width (3 columns, minimum)
@@ -84,6 +90,29 @@ class CallbackModule(DEFAULT_MODULE.CallbackModule):
             star_len = 3
         stars = "*" * star_len
         self._display.display("\n%s %s" % (msg, stars), color=color, log_only=True)
+
+    def _print_task_banner(self, task):
+        """Imported from the upstream 'default' callback"""
+        # args can be specified as no_log in several places: in the task or in
+        # the argument spec.  We can check whether the task is no_log but the
+        # argument spec can't be because that is only run on the target
+        # machine and we haven't run it thereyet at this time.
+        #
+        # So we give people a config option to affect display of the args so
+        # that they can secure this if they feel that their stdout is insecure
+        # (shoulder surfing, logging stdout straight to a file, etc).
+        args = ''
+        if not task.no_log and C.DISPLAY_ARGS_TO_STDOUT:
+            args = ', '.join('%s=%s' % a for a in task.args.items())
+            args = ' %s' % args
+
+        self.banner(u"TASK [%s%s]" % (task.get_name().strip(), args))
+        if self._display.verbosity >= 2:
+            path = task.get_path()
+            if path:
+                self._display.display(u"task path: %s" % path, color=C.COLOR_DEBUG, log_only=True)
+
+        self._last_task_banner = task._uuid
 
     def v2_playbook_on_start(self, playbook):
         """This is basically the start of it all"""
@@ -253,8 +282,6 @@ The only thing we change here is adding `log_only=True` to the
         """
         self._display.display("skipping: no hosts matched", color=C.COLOR_SKIP, log_only=True)
 
-
-
     ######################################################################
     # So we can bubble up errors to the top
     def v2_runner_on_failed(self, result, ignore_errors=False):
@@ -307,7 +334,6 @@ The only thing we change here is adding `log_only=True` to the
 
         self._display.display(msg + " (item=%s) => %s" % (self._get_item(result._result), self._dump_results(result._result)), color=C.COLOR_ERROR)
         self._handle_warnings(result._result)
-
 
     ######################################################################
     def v2_playbook_on_stats(self, stats):
