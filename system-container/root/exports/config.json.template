@@ -131,6 +131,16 @@
             ]
         },
         {
+            "type": "bind",
+            "source": "$VAR_LOG_OPENSHIFT_LOG",
+            "destination": "/var/log/ansible.log",
+            "options": [
+                "bind",
+                "rw",
+                "mode=755"
+            ]
+        },
+        {
             "destination": "/root/.ansible",
             "type": "tmpfs",
             "source": "tmpfs",
