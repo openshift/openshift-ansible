@@ -18,8 +18,6 @@ Facts
 | enable_docker_excluder     | enable_excluders | Enable docker excluder. If not set, the docker excluder is ignored. |
 | enable_openshift_excluder  | enable_excluders | Enable openshift excluder. If not set, the openshift excluder is ignored. |
 | enable_excluders           | None             | Enable all excluders
-| enable_docker_excluder_override     | None | indication the docker excluder needs to be enabled |
-| disable_openshift_excluder_override | None | indication the openshift excluder needs to be disabled |
 
 Role Variables
 --------------

@@ -5,8 +5,6 @@
 - block:
   - name: Enable docker excluder
     command: "{{ openshift.common.service_type }}-docker-excluder exclude"
-    # if the docker override is set, it means the docker excluder needs to be enabled no matter what
-    # if the docker override is not set, the excluder is set based on enable_docker_excluder
     when:
     - exclude_docker_excluder | default(false) | bool
 

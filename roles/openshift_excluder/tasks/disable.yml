@@ -1,7 +1,6 @@
 ---
 # input variables
 # - with_status_check
-# - with_install
 # - excluder_package_state
 # - docker_excluder_package_state
 - include: init.yml
