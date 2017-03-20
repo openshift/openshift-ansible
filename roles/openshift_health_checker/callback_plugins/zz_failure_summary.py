@@ -82,7 +82,15 @@ def _format_failure(failure):
         (u'Message', stringc(msg, C.COLOR_ERROR)),
     )
     if 'checks' in result._result:
-        rows += ((u'Details', stringc(pformat(result._result['checks']), C.COLOR_ERROR)),)
+        failed_check_msgs = ""
+        for check, body in result._result['checks'].items():
+            if 'failed' in body and body['failed']: # only show the failed checks
+                msg = body['msg'] if 'msg' in body else "Failed without returning a message"
+                failed_check_msgs += '\ncheck "%s":\n%s\n' % (check, msg)
+        if failed_check_msgs:
+            rows += ((u'Details', stringc(failed_check_msgs, C.COLOR_ERROR)),)
+        else: # something failed but no checks will admit to it, so dump everything
+            rows += ((u'Details', stringc(pformat(result._result['checks']), C.COLOR_ERROR)),)
     row_format = '{:10}{}'
     return [row_format.format(header + u':', body) for header, body in rows]
 
