@@ -60,8 +60,12 @@
 
 - name: Restart openvswitch
   systemd:
-    name: openvswitch
+    name: "{{ item }}"
     state: restarted
+  with_items:
+  - ovs-vswitchd
+  - ovsdb-server
+  - openvswitch
   when:
   - not openshift.common.is_containerized | bool
   - ovs_pkg | changed
