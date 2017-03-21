@@ -6,14 +6,14 @@
 
   - name: Install docker excluder
     package:
-      name: "{{ openshift.common.service_type }}-docker-excluder"
+      name: "{{ openshift.common.service_type }}-docker-excluder{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) +  '*' }}"
       state: "{{ docker_excluder_package_state }}"
     when:
     - install_docker_excluder | default(true) | bool
 
   - name: Install openshift excluder
     package:
-      name: "{{ openshift.common.service_type }}-excluder"
+      name: "{{ openshift.common.service_type }}-excluder{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) + '*' }}"
       state: "{{ openshift_excluder_package_state }}"
     when:
     - install_openshift_excluder | default(true) | bool
