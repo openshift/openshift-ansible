@@ -26,6 +26,7 @@ class OCVolume(OpenShiftCLI):
                  secret_name,
                  claim_size,
                  claim_name,
+                 configmap_name,
                  kubeconfig='/etc/origin/master/admin.kubeconfig',
                  verbose=False):
         ''' Constructor for OCVolume '''
@@ -36,7 +37,8 @@ class OCVolume(OpenShiftCLI):
                             'path': mount_path,
                             'type': mount_type,
                             'claimSize': claim_size,
-                            'claimName': claim_name}
+                            'claimName': claim_name,
+                            'configmap_name': configmap_name}
         self.volume, self.volume_mount = Volume.create_volume_structure(self.volume_info)
         self.name = resource_name
         self.namespace = namespace
@@ -112,6 +114,8 @@ class OCVolume(OpenShiftCLI):
                              # pvc
                              params['claim_size'],
                              params['claim_name'],
+                             # configmap
+                             params['configmap_name'],
                              kubeconfig=params['kubeconfig'],
                              verbose=params['debug'])
 

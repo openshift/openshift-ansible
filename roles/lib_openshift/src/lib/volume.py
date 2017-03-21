@@ -36,7 +36,7 @@ class Volume(object):
             volume['hostPath']['path'] = volume_info['path']
         elif volume_type == 'configmap':
             volume['configMap'] = {}
-            volume['configMap']['name'] = volume_info['name']
+            volume['configMap']['name'] = volume_info['configmap_name']
             volume_mount = {'mountPath': volume_info['path'],
                             'name': volume_info['name']}
 

@@ -105,6 +105,7 @@ options:
     - hostpath
     - secret
     - pvc
+    - configmap
     aliases: []
   mount_path:
     description:
@@ -127,6 +128,12 @@ options:
   claim_name:
     description:
     - The name of the pv claim
+    required: false
+    default: None
+    aliases: []
+  configmap_name:
+    description:
+    - The name of the configmap
     required: false
     default: None
     aliases: []
@@ -1060,9 +1067,9 @@ class OpenShiftCLI(object):
                 if output_type == 'json':
                     try:
                         rval['results'] = json.loads(stdout)
-                    except ValueError as err:
-                        if "No JSON object could be decoded" in err.args:
-                            err = err.args
+                    except ValueError as verr:
+                        if "No JSON object could be decoded" in verr.args:
+                            err = verr.args
                 elif output_type == 'raw':
                     rval['results'] = stdout
 
@@ -1733,9 +1740,8 @@ spec:
 
 # -*- -*- -*- Begin included fragment: lib/volume.py -*- -*- -*-
 
-
 class Volume(object):
-    ''' Class to represent the volume object'''
+    ''' Class to represent an openshift volume object'''
     volume_mounts_path = {"pod": "spec.containers[0].volumeMounts",
                           "dc":  "spec.template.spec.containers[0].volumeMounts",
                           "rc":  "spec.template.spec.containers[0].volumeMounts",
@@ -1750,24 +1756,28 @@ class Volume(object):
         ''' return a properly structured volume '''
         volume_mount = None
         volume = {'name': volume_info['name']}
-        if volume_info['type'] == 'secret':
+        volume_type = volume_info['type'].lower()
+        if volume_type == 'secret':
             volume['secret'] = {}
             volume[volume_info['type']] = {'secretName': volume_info['secret_name']}
             volume_mount = {'mountPath': volume_info['path'],
                             'name': volume_info['name']}
-        elif volume_info['type'] == 'emptydir':
+        elif volume_type == 'emptydir':
             volume['emptyDir'] = {}
             volume_mount = {'mountPath': volume_info['path'],
                             'name': volume_info['name']}
-        elif volume_info['type'] == 'pvc':
+        elif volume_type == 'pvc' or volume_type == 'persistentvolumeclaim':
             volume['persistentVolumeClaim'] = {}
             volume['persistentVolumeClaim']['claimName'] = volume_info['claimName']
             volume['persistentVolumeClaim']['claimSize'] = volume_info['claimSize']
-            volume_mount = {'mountPath': volume_info['path'],
-                            'name': volume_info['name']}
-        elif volume_info['type'] == 'hostpath':
+        elif volume_type == 'hostpath':
             volume['hostPath'] = {}
             volume['hostPath']['path'] = volume_info['path']
+        elif volume_type == 'configmap':
+            volume['configMap'] = {}
+            volume['configMap']['name'] = volume_info['configmap_name']
+            volume_mount = {'mountPath': volume_info['path'],
+                            'name': volume_info['name']}
 
         return (volume, volume_mount)
 
@@ -1800,6 +1810,7 @@ class OCVolume(OpenShiftCLI):
                  secret_name,
                  claim_size,
                  claim_name,
+                 configmap_name,
                  kubeconfig='/etc/origin/master/admin.kubeconfig',
                  verbose=False):
         ''' Constructor for OCVolume '''
@@ -1810,7 +1821,8 @@ class OCVolume(OpenShiftCLI):
                             'path': mount_path,
                             'type': mount_type,
                             'claimSize': claim_size,
-                            'claimName': claim_name}
+                            'claimName': claim_name,
+                            'configmap_name': configmap_name}
         self.volume, self.volume_mount = Volume.create_volume_structure(self.volume_info)
         self.name = resource_name
         self.namespace = namespace
@@ -1886,6 +1898,8 @@ class OCVolume(OpenShiftCLI):
                              # pvc
                              params['claim_size'],
                              params['claim_name'],
+                             # configmap
+                             params['configmap_name'],
                              kubeconfig=params['kubeconfig'],
                              verbose=params['debug'])
 
@@ -1964,7 +1978,6 @@ class OCVolume(OpenShiftCLI):
 
         return {'failed': True, 'msg': 'Unknown state passed. {}'.format(state)}
 
-
 # -*- -*- -*- End included fragment: class/oc_volume.py -*- -*- -*-
 
 # -*- -*- -*- Begin included fragment: ansible/oc_volume.py -*- -*- -*-
@@ -1985,7 +1998,7 @@ def main():
             vol_name=dict(default=None, type='str'),
             name=dict(default=None, type='str'),
             mount_type=dict(default=None,
-                            choices=['emptydir', 'hostpath', 'secret', 'pvc'],
+                            choices=['emptydir', 'hostpath', 'secret', 'pvc', 'configmap'],
                             type='str'),
             mount_path=dict(default=None, type='str'),
             # secrets require a name
@@ -1993,6 +2006,8 @@ def main():
             # pvc requires a size
             claim_size=dict(default=None, type='str'),
             claim_name=dict(default=None, type='str'),
+            # configmap requires a name
+            configmap_name=dict(default=None, type='str'),
         ),
         supports_check_mode=True,
     )
