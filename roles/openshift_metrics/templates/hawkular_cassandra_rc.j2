@@ -48,11 +48,6 @@ spec:
         - "--require_node_auth=true"
         - "--enable_client_encryption=true"
         - "--require_client_auth=true"
-        - "--keystore_file=/secret/cassandra.keystore"
-        - "--keystore_password_file=/secret/cassandra.keystore.password"
-        - "--truststore_file=/secret/cassandra.truststore"
-        - "--truststore_password_file=/secret/cassandra.truststore.password"
-        - "--cassandra_pem_file=/secret/cassandra.pem"
         env:
         - name: CASSANDRA_MASTER
           value: "{{ master }}"
@@ -60,6 +55,10 @@ spec:
           value: "/cassandra_data"
         - name: JVM_OPTS
           value: "-Dcassandra.commitlog.ignorereplayerrors=true"
+        - name: TRUSTSTORE_NODES_AUTHORITIES
+          value: "/hawkular-cassandra-certs/tls.peer.truststore.crt"
+        - name: TRUSTSTORE_CLIENT_AUTHORITIES
+          value: "/hawkular-cassandra-certs/tls.client.truststore.crt"
         - name: POD_NAMESPACE
           valueFrom:
             fieldRef:
@@ -76,12 +75,12 @@ spec:
         volumeMounts:
         - name: cassandra-data
           mountPath: "/cassandra_data"
-        - name: hawkular-cassandra-secrets
-          mountPath: "/secret"
-{% if ((openshift_metrics_cassandra_limits_cpu is defined and openshift_metrics_cassandra_limits_cpu is not none) 
+        - name: hawkular-cassandra-certs
+          mountPath: "/hawkular-cassandra-certs"
+{% if ((openshift_metrics_cassandra_limits_cpu is defined and openshift_metrics_cassandra_limits_cpu is not none)
    or (openshift_metrics_cassandra_limits_memory is defined and openshift_metrics_cassandra_limits_memory is not none)
    or (openshift_metrics_cassandra_requests_cpu is defined and openshift_metrics_cassandra_requests_cpu is not none)
-   or (openshift_metrics_cassandra_requests_memory is defined and openshift_metrics_cassandra_requests_memory is not none)) 
+   or (openshift_metrics_cassandra_requests_memory is defined and openshift_metrics_cassandra_requests_memory is not none))
 %}
         resources:
 {%      if (openshift_metrics_cassandra_limits_cpu is not none
@@ -95,8 +94,8 @@ spec:
             memory: "{{openshift_metrics_cassandra_limits_memory}}"
 {% endif %}
 {% endif %}
-{%        if (openshift_metrics_cassandra_requests_cpu is not none 
-          or openshift_metrics_cassandra_requests_memory is not none) 
+{%        if (openshift_metrics_cassandra_requests_cpu is not none
+          or openshift_metrics_cassandra_requests_memory is not none)
 %}
           requests:
 {%        if openshift_metrics_cassandra_requests_cpu is not none %}
@@ -129,6 +128,6 @@ spec:
         persistentVolumeClaim:
           claimName: "{{ openshift_metrics_cassandra_pvc_prefix }}-{{ node }}"
 {% endif %}
-      - name: hawkular-cassandra-secrets
+      - name: hawkular-cassandra-certs
         secret:
-          secretName: hawkular-cassandra-secrets
+          secretName: hawkular-cassandra-certs

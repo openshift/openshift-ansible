@@ -13,9 +13,6 @@
     hostnames: hawkular-cassandra
   changed_when: no
 
-- slurp: src={{ mktemp.stdout }}/hawkular-cassandra-truststore.pwd
-  register: cassandra_truststore_password
-
 - slurp: src={{ mktemp.stdout }}/hawkular-metrics-truststore.pwd
   register: hawkular_truststore_password
 
@@ -67,11 +64,8 @@
   - hawkular-metrics.pwd
   - hawkular-metrics.htpasswd
   - hawkular-cassandra.crt
+  - hawkular-cassandra.key
   - hawkular-cassandra.pem
-  - hawkular-cassandra.keystore
-  - hawkular-cassandra-keystore.pwd
-  - hawkular-cassandra.truststore
-  - hawkular-cassandra-truststore.pwd
   changed_when: false
 
 - set_fact:
@@ -136,38 +130,21 @@
 - name: generate cassandra secret template
   template:
     src: secret.j2
-    dest: "{{ mktemp.stdout }}/templates/cassandra_secrets.yaml"
+    dest: "{{ mktemp.stdout }}/templates/hawkular-cassandra-certs.yaml"
   vars:
-    name: hawkular-cassandra-secrets
+    name: hawkular-cassandra-certs
     labels:
-      metrics-infra: hawkular-cassandra
+      metrics-infra: hawkular-cassandra-certs
+    annotations:
+      service.alpha.openshift.io/originating-service-name: hawkular-cassandra
     data:
-      cassandra.keystore: >
-        {{ hawkular_secrets['hawkular-cassandra.keystore'] }}
-      cassandra.keystore.password: >
-        {{ hawkular_secrets['hawkular-cassandra-keystore.pwd'] }}
-      cassandra.keystore.alias: "{{ 'hawkular-cassandra'|b64encode }}"
-      cassandra.truststore: >
-        {{ hawkular_secrets['hawkular-cassandra.truststore'] }}
-      cassandra.truststore.password: >
-        {{ hawkular_secrets['hawkular-cassandra-truststore.pwd'] }}
-      cassandra.pem: >
-        {{ hawkular_secrets['hawkular-cassandra.pem'] }}
-  when: name not in metrics_secrets
-  changed_when: no
-
-- name: generate cassandra-certificate secret template
-  template:
-    src: secret.j2
-    dest: "{{ mktemp.stdout }}/templates/cassandra_certificate.yaml"
-  vars:
-    name: hawkular-cassandra-certificate
-    labels:
-      metrics-infra: hawkular-cassandra
-    data:
-      cassandra.certificate: >
+      tls.crt: >
         {{ hawkular_secrets['hawkular-cassandra.crt'] }}
-      cassandra-ca.certificate: >
-        {{ hawkular_secrets['hawkular-cassandra.pem'] }}
-  when: name not in metrics_secrets.stdout_lines
+      tls.key: >
+        {{ hawkular_secrets['hawkular-cassandra.key'] }}
+      tls.peer.truststore.crt: >
+        {{ hawkular_secrets['hawkular-cassandra.crt'] }}
+      tls.client.truststore.crt: >
+        {{ hawkular_secrets['hawkular-metrics.crt'] }}
+  when: name not in metrics_secrets
   changed_when: no
