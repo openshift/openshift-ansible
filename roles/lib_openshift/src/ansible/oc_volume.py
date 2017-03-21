@@ -17,7 +17,7 @@ def main():
             vol_name=dict(default=None, type='str'),
             name=dict(default=None, type='str'),
             mount_type=dict(default=None,
-                            choices=['emptydir', 'hostpath', 'secret', 'pvc'],
+                            choices=['emptydir', 'hostpath', 'secret', 'pvc', 'configmap'],
                             type='str'),
             mount_path=dict(default=None, type='str'),
             # secrets require a name
@@ -25,6 +25,8 @@ def main():
             # pvc requires a size
             claim_size=dict(default=None, type='str'),
             claim_name=dict(default=None, type='str'),
+            # configmap requires a name
+            configmap_name=dict(default=None, type='str'),
         ),
         supports_check_mode=True,
     )

@@ -80,6 +80,12 @@ options:
     required: false
     default: None
     aliases: []
+  configmap_name:
+    description:
+    - The name of the configmap
+    required: false
+    default: None
+    aliases: []
 author:
 - "Kenny Woodson <kwoodson@redhat.com>"
 extends_documentation_fragment: []
