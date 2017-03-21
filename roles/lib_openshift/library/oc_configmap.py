@@ -1492,6 +1492,10 @@ class OCConfigMap(OpenShiftCLI):
                 return {'changed': True, 'msg': 'CHECK_MODE: Would have performed a delete.'}
 
             api_rval = oc_cm.delete()
+
+            if api_rval['returncode'] != 0:
+                return {'failed': True, 'msg': api_rval}
+
             return {'changed': True, 'results': api_rval, 'state': state}
 
         ########
