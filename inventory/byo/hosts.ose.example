@@ -40,7 +40,7 @@ openshift_release=v3.6
 # Specify an exact rpm version to install or configure.
 # WARNING: This value will be used for all hosts in RPM based environments, even those that have another version installed.
 # This could potentially trigger an upgrade and downtime, so be careful with modifying this value after the cluster is set up.
-#openshift_pkg_version=-3.6.0
+#openshift_pkg_version=3.6.0
 
 # Install the openshift examples
 #openshift_install_examples=true
