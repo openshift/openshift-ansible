@@ -54,6 +54,7 @@ options:
     - hostpath
     - secret
     - pvc
+    - configmap
     aliases: []
   mount_path:
     description:
