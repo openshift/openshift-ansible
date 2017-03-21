@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.4
+Version:        3.6.5
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,18 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Mar 21 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.5-1
+- Attempt to match version of excluders to target version (sdodson@redhat.com)
+- Get rid of adjust.yml (sdodson@redhat.com)
+- Protect against missing commands (sdodson@redhat.com)
+- Simplify excluder enablement logic a bit more (sdodson@redhat.com)
+- Add tito releaser for 3.6 (smunilla@redhat.com)
+- Adding oc_group to lib_openshift (kwoodson@redhat.com)
+- preflight checks: improve user output from checks (lmeyer@redhat.com)
+- preflight checks: bypass RPM excludes (lmeyer@redhat.com)
+- acceptschema2 default: true (aweiteka@redhat.com)
+- Do not require python-six via openshift_facts (rhcarvalho@gmail.com)
+
 * Sat Mar 18 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.4-1
 - Cherry picking from #3689 (ewolinet@redhat.com)
 - Moving projects task within openshift_hosted (rteague@redhat.com)
