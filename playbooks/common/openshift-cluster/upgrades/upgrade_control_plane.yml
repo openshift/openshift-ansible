@@ -64,6 +64,7 @@
     static: yes
   roles:
   - openshift_facts
+  - lib_utils
   post_tasks:
 
   # Run the pre-upgrade hook if defined:
@@ -112,6 +113,13 @@
       path: "{{ openshift.common.config_base }}/master/ca.crt"
       state: link
     when: ca_crt_stat.stat.isreg and not ca_bundle_stat.stat.exists
+
+  - name: Update oreg value
+    yedit:
+      src: "{{ openshift.common.config_base }}/master/master-config.yaml"
+      key: 'imageConfig.format'
+      value: "{{ oreg_url }}"
+    when: oreg_url is defined
 
   # Run the upgrade hook prior to restarting services/system if defined:
   - debug: msg="Running master upgrade hook {{ openshift_master_upgrade_hook }}"
