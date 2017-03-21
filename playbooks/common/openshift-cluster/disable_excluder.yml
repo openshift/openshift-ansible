@@ -1,5 +1,5 @@
 ---
-- name: Record excluder state and disable
+- name: Disable excluders
   hosts: oo_masters_to_config:oo_nodes_to_config
   gather_facts: no
   tasks:
