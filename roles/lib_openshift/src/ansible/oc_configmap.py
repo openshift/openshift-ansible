@@ -14,7 +14,7 @@ def main():
                        choices=['present', 'absent', 'list']),
             debug=dict(default=False, type='bool'),
             namespace=dict(default='default', type='str'),
-            name=dict(default=None, type='str'),
+            name=dict(default=None, required=True, type='str'),
             from_file=dict(default=None, type='dict'),
             from_literal=dict(default=None, type='dict'),
         ),
