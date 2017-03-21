@@ -72,7 +72,7 @@
       - cmout.results.results[0].metadata.name == 'configmaptest'
       - cmout.results.results[0].data.deployment_type == 'online'
       - cmout.results.results[0].data.foo == 'notbar'
-  ###### end create test ###########
+  ###### end update test ###########
 
   ###### delete test ###########
   - name: delete a configmap
