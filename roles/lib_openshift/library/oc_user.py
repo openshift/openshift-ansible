@@ -307,7 +307,8 @@ class Yedit(object):
                     continue
 
                 elif data and not isinstance(data, dict):
-                    return None
+                    raise YeditException("Unexpected item type found while going through key " +
+                                         "path: {} (at key: {})".format(key, dict_key))
 
                 data[dict_key] = {}
                 data = data[dict_key]
@@ -316,7 +317,7 @@ class Yedit(object):
                   int(arr_ind) <= len(data) - 1):
                 data = data[int(arr_ind)]
             else:
-                return None
+                raise YeditException("Unexpected item type found while going through key path: {}".format(key))
 
         if key == '':
             data = item
@@ -329,6 +330,12 @@ class Yedit(object):
         # expected dict entry
         elif key_indexes[-1][1] and isinstance(data, dict):
             data[key_indexes[-1][1]] = item
+
+        # didn't add/update to an existing list, nor add/update key to a dict
+        # so we must have been provided some syntax like a.b.c[<int>] = "data" for a
+        # non-existent array
+        else:
+            raise YeditException("Error adding to object at path: {}".format(key))
 
         return data
 
@@ -1055,12 +1062,12 @@ class OpenShiftCLI(object):
         if oadm:
             cmds.append('adm')
 
+        cmds.extend(cmd)
+
         if self.all_namespaces:
             cmds.extend(['--all-namespaces'])
         elif self.namespace is not None and self.namespace.lower() not in ['none', 'emtpy']:  # E501
             cmds.extend(['-n', self.namespace])
-
-        cmds.extend(cmd)
 
         rval = {}
         results = ''
@@ -1083,9 +1090,9 @@ class OpenShiftCLI(object):
                 if output_type == 'json':
                     try:
                         rval['results'] = json.loads(stdout)
-                    except ValueError as err:
-                        if "No JSON object could be decoded" in err.args:
-                            err = err.args
+                    except ValueError as verr:
+                        if "No JSON object could be decoded" in verr.args:
+                            err = verr.args
                 elif output_type == 'raw':
                     rval['results'] = stdout
 
@@ -1323,8 +1330,8 @@ class Utils(object):
                     elif value != user_def[key]:
                         if debug:
                             print('value should be identical')
-                            print(value)
                             print(user_def[key])
+                            print(value)
                         return False
 
             # recurse on a dictionary
@@ -1344,8 +1351,8 @@ class Utils(object):
                 if api_values != user_values:
                     if debug:
                         print("keys are not equal in dict")
-                        print(api_values)
                         print(user_values)
+                        print(api_values)
                     return False
 
                 result = Utils.check_def_equal(user_def[key], value, skip_keys=skip_keys, debug=debug)
@@ -1391,10 +1398,11 @@ class OpenShiftCLIConfig(object):
     def stringify(self):
         ''' return the options hash as cli params in a string '''
         rval = []
-        for key, data in self.config_options.items():
+        for key in sorted(self.config_options.keys()):
+            data = self.config_options[key]
             if data['include'] \
                and (data['value'] or isinstance(data['value'], int)):
-                rval.append('--%s=%s' % (key.replace('_', '-'), data['value']))
+                rval.append('--{}={}'.format(key.replace('_', '-'), data['value']))
 
         return rval
 
