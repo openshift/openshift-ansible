@@ -33,14 +33,14 @@ options:
   name:
     description:
     - Name of the object that is being queried.
-    required: false
+    required: True
     default: None
     aliases: []
   namespace:
     description:
     - The namespace where the object lives.
     required: false
-    default: str
+    default: default
     aliases: []
   from_file:
     description:

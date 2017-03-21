@@ -84,14 +84,14 @@ options:
   name:
     description:
     - Name of the object that is being queried.
-    required: false
+    required: True
     default: None
     aliases: []
   namespace:
     description:
     - The namespace where the object lives.
     required: false
-    default: str
+    default: default
     aliases: []
   from_file:
     description:
@@ -1553,7 +1553,7 @@ def main():
                        choices=['present', 'absent', 'list']),
             debug=dict(default=False, type='bool'),
             namespace=dict(default='default', type='str'),
-            name=dict(default=None, type='str'),
+            name=dict(default=None, required=True, type='str'),
             from_file=dict(default=None, type='dict'),
             from_literal=dict(default=None, type='dict'),
         ),
