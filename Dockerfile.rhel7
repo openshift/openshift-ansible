@@ -1,26 +1,41 @@
-FROM rhel7
+FROM openshift3/playbook2image
 
-MAINTAINER Troy Dawson <tdawson@redhat.com>
+MAINTAINER OpenShift Team <dev@lists.openshift.redhat.com>
 
-LABEL Name="openshift3/installer"
-LABEL Vendor="Red Hat" License=GPLv2+
-LABEL Version="v3.1.1.901"
-LABEL Release="6"
-LABEL BZComponent="aos3-installation-docker"
-LABEL Architecture="x86_64"
-LABEL io.k8s.description="Ansible code and playbooks for installing Openshift Container Platform." \
-      io.k8s.display-name="Openshift Installer" \
-      io.openshift.tags="openshift,installer"
+LABEL name="openshift3/openshift-ansible" \
+      summary="OpenShift's installation and configuration tool" \
+      description="A containerized openshift-ansible image to let you run playbooks to install, upgrade, maintain and check an OpenShift cluster" \
+      url="https://github.com/openshift/openshift-ansible" \
+      io.k8s.display-name="openshift-ansible" \
+      io.k8s.description="A containerized openshift-ansible image to let you run playbooks to install, upgrade, maintain and check an OpenShift cluster" \
+      io.openshift.expose-services="" \
+      io.openshift.tags="openshift,install,upgrade,ansible" \
+      com.redhat.component="aos3-installation-docker" \
+      version="v3.4.1" \
+      release="1" \
+      architecture="x86_64"
 
-RUN INSTALL_PKGS="atomic-openshift-utils" && \
-    yum install -y --enablerepo=rhel-7-server-ose-3.2-rpms $INSTALL_PKGS && \
-    rpm -V $INSTALL_PKGS && \
+# Playbooks, roles and their dependencies are installed from packages.
+# Unlike in Dockerfile, we don't invoke the 'assemble' script here
+# because all content and dependencies (like 'oc') is already
+# installed via yum.
+USER root
+RUN INSTALL_PKGS="atomic-openshift-utils atomic-openshift-clients" && \
+    yum repolist > /dev/null && \
+    yum-config-manager --enable rhel-7-server-ose-3.4-rpms && \
+    yum install -y $INSTALL_PKGS && \
     yum clean all
 
-# Expect user to mount a workdir for container output (installer.cfg, hosts inventory, ansible log)
-VOLUME /var/lib/openshift-installer/
-WORKDIR /var/lib/openshift-installer/
+USER ${USER_UID}
 
-RUN mkdir -p /var/lib/openshift-installer/
+# The playbook to be run is specified via the PLAYBOOK_FILE env var.
+# This sets a default of openshift_facts.yml as it's an informative playbook
+# that can help test that everything is set properly (inventory, sshkeys).
+# As the playbooks are installed via packages instead of being copied to
+# $APP_HOME by the 'assemble' script, we set the WORK_DIR env var to the
+# location of openshift-ansible.
+ENV PLAYBOOK_FILE=playbooks/byo/openshift_facts.yml \
+    WORK_DIR=/usr/share/ansible/openshift-ansible \
+    OPTS="-v"
 
-ENTRYPOINT ["/usr/bin/atomic-openshift-installer", "-c", "/var/lib/openshift-installer/installer.cfg", "--ansible-log-path", "/var/lib/openshift-installer/ansible.log"]
+CMD [ "/usr/libexec/s2i/run" ]
