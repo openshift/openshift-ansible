@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.68
+Version:        3.3.69
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Mar 21 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.3.69-1
+- Don't replace CA every cert redeploy. (abutcher@redhat.com)
+
 * Thu Mar 02 2017 Scott Dodson <sdodson@redhat.com> 3.3.68-1
 - Add v1.3 FIS templates (sdodson@redhat.com)
 - Ensuring that openshift_master_default_subdomain is defined prior to setting
