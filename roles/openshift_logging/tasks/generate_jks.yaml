@@ -20,12 +20,6 @@
   register: truststore_jks
   check_mode: no
 
-- name: Create temp directory for doing work in
-  local_action: command mktemp -d /tmp/openshift-logging-ansible-XXXXXX
-  register: local_tmp
-  changed_when: False
-  check_mode: no
-
 - name: Create placeholder for previously created JKS certs to prevent recreating...
   local_action: file path="{{local_tmp.stdout}}/elasticsearch.jks" state=touch mode="u=rw,g=r,o=r"
   when: elasticsearch_jks.stat.exists
@@ -92,7 +86,3 @@
     src: "{{local_tmp.stdout}}/truststore.jks"
     dest: "{{generated_certs_dir}}/truststore.jks"
   when: not truststore_jks.stat.exists
-
-- name: Cleaning up temp dir
-  local_action: file path="{{local_tmp.stdout}}" state=absent
-  changed_when: False
