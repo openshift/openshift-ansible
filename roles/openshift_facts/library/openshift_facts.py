@@ -936,7 +936,9 @@ def set_version_facts_if_unset(facts):
         facts['common']['version_gte_3_5_or_1_5'] = version_gte_3_5_or_1_5
         facts['common']['version_gte_3_6_or_1_6'] = version_gte_3_6_or_1_6
 
-        if version_gte_3_5_or_1_5:
+        if version_gte_3_6_or_1_6:
+            examples_content_version = 'v1.6'
+        elif version_gte_3_5_or_1_5:
             examples_content_version = 'v1.5'
         elif version_gte_3_4_or_1_4:
             examples_content_version = 'v1.4'
