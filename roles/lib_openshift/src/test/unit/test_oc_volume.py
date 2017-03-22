@@ -35,6 +35,7 @@ class OCVolumeTest(unittest.TestCase):
               'mount_type': 'pvc',
               'claim_name': 'testclaim',
               'claim_size': '1G',
+              'configmap_name': None,
               'vol_name': 'test-volume',
               'debug': False}
 
@@ -285,8 +286,9 @@ class OCVolumeTest(unittest.TestCase):
         ''' Testing a label list '''
         params = copy.deepcopy(OCVolumeTest.params)
         params.update({'mount_path': '/configmap',
-                      'mount_type': 'configmap',
-                      'vol_name': 'configtest'})
+                       'mount_type': 'configmap',
+                       'configmap_name': 'configtest',
+                       'vol_name': 'configvol'})
 
         dc = '''{
                 "kind": "DeploymentConfig",
@@ -468,7 +470,7 @@ class OCVolumeTest(unittest.TestCase):
                                     }
                                 },
                                 {
-                                    "name": "configtest",
+                                    "name": "configvol",
                                     "configMap": {
                                         "name": "configtest"
                                     }
@@ -485,7 +487,7 @@ class OCVolumeTest(unittest.TestCase):
                                             "mountPath": "/secrets"
                                         },
                                         {
-                                            "name": "configtest",
+                                            "name": "configvol",
                                             "mountPath": "/configmap"
                                         }
                                     ],
@@ -520,7 +522,7 @@ class OCVolumeTest(unittest.TestCase):
         results = OCVolume.run_ansible(params, False)
 
         self.assertTrue(results['changed'])
-        self.assertTrue(results['results']['results'][-1]['name'] == 'configtest')
+        self.assertTrue(results['results']['results'][-1]['name'] == 'configvol')
 
     @unittest.skipIf(six.PY3, 'py2 test only')
     @mock.patch('os.path.exists')
