@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.39
+Version:        3.5.40
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Mar 22 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.40-1
+- Adding option to specify different cert/key/ca for kibana ops route
+  (ewolinet@redhat.com)
+
 * Mon Mar 20 2017 Scott Dodson <sdodson@redhat.com> 3.5.39-1
 - Attempt to match version of excluders to target version (sdodson@redhat.com)
 - Get rid of adjust.yml (sdodson@redhat.com)
