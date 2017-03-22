@@ -59,80 +59,10 @@
   vars:
     openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
   serial: 1
-  handlers:
-  - include: ../../../../roles/openshift_master/handlers/main.yml
-    static: yes
   roles:
   - openshift_facts
+  - openshift_master_upgrade
   post_tasks:
-
-  # Run the pre-upgrade hook if defined:
-  - debug: msg="Running master pre-upgrade hook {{ openshift_master_upgrade_pre_hook }}"
-    when: openshift_master_upgrade_pre_hook is defined
-
-  - include: "{{ openshift_master_upgrade_pre_hook }}"
-    when: openshift_master_upgrade_pre_hook is defined
-
-  - include: rpm_upgrade.yml component=master
-    when: not openshift.common.is_containerized | bool
-
-  - include_vars: ../../../../roles/openshift_master_facts/vars/main.yml
-
-  - include: upgrade_scheduler.yml
-
-  - include: "{{ master_config_hook }}"
-    when: master_config_hook is defined
-
-  - include_vars: ../../../../roles/openshift_master/vars/main.yml
-
-  - name: Update systemd units
-    include: ../../../../roles/openshift_master/tasks/systemd_units.yml
-
-  - name: Check for ca-bundle.crt
-    stat:
-      path: "{{ openshift.common.config_base }}/master/ca-bundle.crt"
-    register: ca_bundle_stat
-    failed_when: false
-
-  - name: Check for ca.crt
-    stat:
-      path: "{{ openshift.common.config_base }}/master/ca.crt"
-    register: ca_crt_stat
-    failed_when: false
-
-  - name: Migrate ca.crt to ca-bundle.crt
-    command: mv ca.crt ca-bundle.crt
-    args:
-      chdir: "{{ openshift.common.config_base }}/master"
-    when: ca_crt_stat.stat.isreg and not ca_bundle_stat.stat.exists
-
-  - name: Link ca.crt to ca-bundle.crt
-    file:
-      src: "{{ openshift.common.config_base }}/master/ca-bundle.crt"
-      path: "{{ openshift.common.config_base }}/master/ca.crt"
-      state: link
-    when: ca_crt_stat.stat.isreg and not ca_bundle_stat.stat.exists
-
-  # Run the upgrade hook prior to restarting services/system if defined:
-  - debug: msg="Running master upgrade hook {{ openshift_master_upgrade_hook }}"
-    when: openshift_master_upgrade_hook is defined
-
-  - include: "{{ openshift_master_upgrade_hook }}"
-    when: openshift_master_upgrade_hook is defined
-
-  - include: ../../openshift-master/restart_hosts.yml
-    when: openshift.common.rolling_restart_mode == 'system'
-
-  - include: ../../openshift-master/restart_services.yml
-    when: openshift.common.rolling_restart_mode == 'services'
-
-  # Run the post-upgrade hook if defined:
-  - debug: msg="Running master post-upgrade hook {{ openshift_master_upgrade_post_hook }}"
-    when: openshift_master_upgrade_post_hook is defined
-
-  - include: "{{ openshift_master_upgrade_post_hook }}"
-    when: openshift_master_upgrade_post_hook is defined
-
   - set_fact:
       master_update_complete: True
 

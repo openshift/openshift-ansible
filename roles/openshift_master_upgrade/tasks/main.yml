@@ -1,0 +1,49 @@
+---
+# input variables:
+# - openshift_master_upgrade_pre_hook
+# - master_config_hook
+# - openshift.common.config_base
+# - openshift_master_upgrade_hook
+# - openshift.common.rolling_restart_mode
+# - openshift_master_upgrade_post_hook
+
+# Run the pre-upgrade hook if defined:
+- debug: msg="Running master pre-upgrade hook {{ openshift_master_upgrade_pre_hook }}"
+  when: openshift_master_upgrade_pre_hook is defined
+
+- include: "{{ openshift_master_upgrade_pre_hook }}"
+  when: openshift_master_upgrade_pre_hook is defined
+
+- include: rpm_upgrade.yml component=master
+  when: not openshift.common.is_containerized | bool
+
+- include: upgrade_scheduler.yml
+
+- include: "{{ master_config_hook }}"
+  when: master_config_hook is defined
+
+- name: Update systemd units
+  include: systemd_units.yml
+
+- name: Bundle certificate
+  include: bundle-cert.yml
+
+# Run the upgrade hook prior to restarting services/system if defined:
+- debug: msg="Running master upgrade hook {{ openshift_master_upgrade_hook }}"
+  when: openshift_master_upgrade_hook is defined
+
+- include: "{{ openshift_master_upgrade_hook }}"
+  when: openshift_master_upgrade_hook is defined
+
+- include: restart_hosts.yml
+  when: openshift.common.rolling_restart_mode == 'system'
+
+- include: restart_services.yml
+  when: openshift.common.rolling_restart_mode == 'services'
+
+# Run the post-upgrade hook if defined:
+- debug: msg="Running master post-upgrade hook {{ openshift_master_upgrade_post_hook }}"
+  when: openshift_master_upgrade_post_hook is defined
+
+- include: "{{ openshift_master_upgrade_post_hook }}"
+  when: openshift_master_upgrade_post_hook is defined
