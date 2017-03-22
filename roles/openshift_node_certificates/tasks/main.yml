@@ -49,6 +49,8 @@
   register: g_master_legacy_ca_result
   delegate_to: "{{ openshift_ca_host }}"
 
+- debug: var=openshift.common.version_gte_3_5_or_1_5
+
 - name: Generate the node client config
   command: >
     {{ hostvars[openshift_ca_host].openshift.common.client_binary }} adm create-api-client-config
