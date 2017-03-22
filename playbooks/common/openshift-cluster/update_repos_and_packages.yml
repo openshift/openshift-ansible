@@ -3,8 +3,6 @@
 
 - name: Subscribe hosts, update repos and update OS packages
   hosts: oo_hosts_to_update
-  vars:
-    openshift_deployment_type: "{{ deployment_type }}"
   roles:
   # Explicitly calling openshift_facts because it appears that when
   # rhel_subscribe is skipped that the openshift_facts dependency for

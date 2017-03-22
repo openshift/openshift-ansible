@@ -64,8 +64,7 @@
     role: common
     local_facts:
       debug_level: "{{ openshift_debug_level | default(2) }}"
-      # TODO: Deprecate deployment_type in favor of openshift_deployment_type
-      deployment_type: "{{ openshift_deployment_type | default(deployment_type) }}"
+      deployment_type: "{{ openshift_deployment_type }}"
       deployment_subtype: "{{ openshift_deployment_subtype | default(None) }}"
       cluster_id: "{{ openshift_cluster_id | default('default') }}"
       hostname: "{{ openshift_hostname | default(None) }}"

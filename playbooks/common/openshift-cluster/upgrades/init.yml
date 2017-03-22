@@ -29,7 +29,6 @@
     g_new_master_hosts: []
     g_new_node_hosts: []
     openshift_cluster_id: "{{ cluster_id | default('default') }}"
-    openshift_deployment_type: "{{ deployment_type }}"
 
 - name: Set oo_options
   hosts: oo_all_hosts

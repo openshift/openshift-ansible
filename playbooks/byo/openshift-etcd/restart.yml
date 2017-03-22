@@ -4,5 +4,3 @@
   - always
 
 - include: ../../common/openshift-etcd/restart.yml
-  vars:
-    openshift_deployment_type: "{{ deployment_type }}"
