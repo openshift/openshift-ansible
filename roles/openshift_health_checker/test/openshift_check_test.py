@@ -1,6 +1,7 @@
 import pytest
 
-from openshift_checks import OpenShiftCheck, get_var, OpenShiftCheckException
+from openshift_checks import OpenShiftCheck, OpenShiftCheckException
+from openshift_checks import load_checks, get_var
 
 
 # Fixtures
@@ -55,6 +56,12 @@ def test_OpenShiftCheck_init():
     assert check.execute_module == execute_module
     # deprecated attribute name
     assert check.module_executor == execute_module
+
+
+def test_load_checks():
+    """Loading checks should load and return Python modules."""
+    modules = load_checks()
+    assert modules
 
 
 @pytest.mark.parametrize("keys,expected", [
