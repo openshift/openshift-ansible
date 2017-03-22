@@ -91,7 +91,7 @@ class ActionModule(ActionBase):
                         check_name,
                         cls.__module__, cls.__name__,
                         other_cls.__module__, other_cls.__name__))
-            known_checks[check_name] = cls(module_executor=self._execute_module)
+            known_checks[check_name] = cls(execute_module=self._execute_module)
 
         return known_checks
 

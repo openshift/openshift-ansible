@@ -11,4 +11,4 @@ class PackageUpdate(NotContainerizedMixin, OpenShiftCheck):
 
     def run(self, tmp, task_vars):
         args = {"packages": []}
-        return self.module_executor("check_yum_update", args, tmp, task_vars)
+        return self.execute_module("check_yum_update", args, tmp, task_vars)

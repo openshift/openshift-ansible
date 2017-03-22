@@ -17,4 +17,4 @@ class PackageVersion(NotContainerizedMixin, OpenShiftCheck):
             "prefix": rpm_prefix,
             "version": openshift_release,
         }
-        return self.module_executor("aos_version", args, tmp, task_vars)
+        return self.execute_module("aos_version", args, tmp, task_vars)
