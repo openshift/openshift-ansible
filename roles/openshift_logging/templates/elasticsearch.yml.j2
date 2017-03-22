@@ -29,6 +29,7 @@ cloud:
 discovery:
   type: kubernetes
   zen.ping.multicast.enabled: false
+  zen.minimum_master_nodes: {{es_min_masters}}
 
 gateway:
   expected_master_nodes: ${NODE_QUORUM}
