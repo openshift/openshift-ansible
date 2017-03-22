@@ -58,6 +58,23 @@ def test_OpenShiftCheck_init():
     assert check.module_executor == execute_module
 
 
+def test_subclasses():
+    """OpenShiftCheck.subclasses should find all subclasses recursively."""
+    class TestCheck1(OpenShiftCheck):
+        pass
+
+    class TestCheck2(OpenShiftCheck):
+        pass
+
+    class TestCheck1A(TestCheck1):
+        pass
+
+    local_subclasses = set([TestCheck1, TestCheck1A, TestCheck2])
+    known_subclasses = set(OpenShiftCheck.subclasses())
+
+    assert local_subclasses - known_subclasses == set(), "local_subclasses should be a subset of known_subclasses"
+
+
 def test_load_checks():
     """Loading checks should load and return Python modules."""
     modules = load_checks()
