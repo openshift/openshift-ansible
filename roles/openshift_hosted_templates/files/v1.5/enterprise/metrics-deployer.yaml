@@ -105,7 +105,7 @@ parameters:
 -
   description: 'Specify version for metrics components; e.g. for "openshift/origin-metrics-deployer:latest", set version "latest"'
   name: IMAGE_VERSION
-  value: "3.4.0"
+  value: "v3.4"
 -
   description: "Internal URL for the master, for authentication retrieval"
   name: MASTER_URL
