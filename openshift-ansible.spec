@@ -21,7 +21,7 @@ Requires:      ansible >= 2.2.0.0-1
 Requires:      python2
 Requires:      python-six
 Requires:      tar
-Requires:      openshift-ansible-docs = %{version}-%{release}
+Requires:      openshift-ansible-docs = %{version}
 Requires:      java-1.8.0-openjdk-headless
 Requires:      httpd-tools
 Requires:      libselinux-python
@@ -250,7 +250,7 @@ BuildArch:     noarch
 %package -n atomic-openshift-utils
 Summary:       Atomic OpenShift Utilities
 BuildRequires: python-setuptools
-Requires:      %{name}-playbooks >= %{version}
+Requires:      %{name}-playbooks = %{version}
 Requires:      python-click
 Requires:      python-setuptools
 Requires:      PyYAML
