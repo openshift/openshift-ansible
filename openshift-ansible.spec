@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.40
+Version:        3.5.41
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Mar 22 2017 Scott Dodson <sdodson@redhat.com> 3.5.41-1
+- Stop all services before upgrading openvswitch (sdodson@redhat.com)
+- openshift_logging calculate min_masters to fail early on split brain
+  (jcantril@redhat.com)
+- Bug 1434300 - Log entries are generated in ES after deployed logging stacks
+  via ansible, but can not be found in kibana. (rmeggins@redhat.com)
+- Make /rootfs mount rslave (sdodson@redhat.com)
+
 * Wed Mar 22 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.40-1
 - Adding option to specify different cert/key/ca for kibana ops route
   (ewolinet@redhat.com)
