@@ -1,8 +1,4 @@
 ---
-- name: Load lib_openshift modules
-  include_role:
-    name: lib_openshift
-
 - name: Pre-pull node system container image
   command: >
     atomic pull --storage=ostree {{ openshift.common.system_images_registry }}/{{ openshift.node.node_system_image }}:{{ openshift_image_tag }}
