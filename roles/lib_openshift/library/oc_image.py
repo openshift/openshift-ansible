@@ -54,7 +54,7 @@ from ansible.module_utils.basic import AnsibleModule
 
 DOCUMENTATION = '''
 ---
-module: oc_label
+module: oc_image
 short_description: Create, modify, and idempotently manage openshift labels.
 description:
   - Modify openshift labels programmatically.
@@ -72,6 +72,12 @@ options:
     - The path for the kubeconfig file to use for authentication
     required: false
     default: /etc/origin/master/admin.kubeconfig
+    aliases: []
+  namespace:
+    description:
+    - The namespace where this object lives
+    required: false
+    default: default
     aliases: []
   debug:
     description:
