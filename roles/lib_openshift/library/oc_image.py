@@ -62,12 +62,10 @@ options:
   state:
     description:
     - State controls the action that will be taken with resource
-    - 'present' will create or update and object to the desired state
-    - 'absent' will ensure certain labels are removed
+    - 'present' will create.  Does _not_ support update.
     - 'list' will read the labels
-    - 'add' will insert labels to the already existing labels
     default: present
-    choices: ["present", "absent", "list", "add"]
+    choices: ["present", "list"]
     aliases: []
   kubeconfig:
     description:
@@ -81,70 +79,50 @@ options:
     required: false
     default: False
     aliases: []
-  kind:
+  registry_url:
     description:
-    - The kind of object that can be managed.
-    default: node
-    choices:
-    - node
-    - pod
-    - namespace
-    aliases: []
-  labels:
-    description:
-    - A list of labels for the resource.
-    - Each list consists of a key and a value.
-    - eg, {'key': 'foo', 'value': 'bar'}
+    - The url for the registry so that openshift can pull the image
     required: false
     default: None
     aliases: []
-  selector:
+  image_name:
     description:
-    - The selector to apply to the resource query
+    - The name of the image being imported
+    required: false
+    default: False
+    aliases: []
+  image_tag:
+    description:
+    - The tag of the image being imported
     required: false
     default: None
     aliases: []
 author:
-- "Joel Diaz <jdiaz@redhat.com>"
+- "Ivan Horvath<ihorvath@redhat.com>"
 extends_documentation_fragment: []
 '''
 
 EXAMPLES = '''
-- name: Add a single label to a node's existing labels
-  oc_label:
-    name: ip-172-31-5-23.ec2.internal
-    state: add
-    kind: node
-    labels:
-      - key: logging-infra-fluentd
-        value: 'true'
+- name: Get an imagestream
+  oc_image:
+    name: php55
+    state: list
+  register: imageout
 
-- name: remove a label from a node
-  oc_label:
-    name: ip-172-31-5-23.ec2.internal
-    state: absent
-    kind: node
-    labels:
-      - key: color
-        value: blue
-
-- name: Ensure node has these exact labels
-  oc_label:
-    name: ip-172-31-5-23.ec2.internal
+- name: create an imagestream
+  oc_image:
     state: present
-    kind: node
-    labels:
-      - key: color
-        value: green
-      - key: type
-        value: master
-      - key: environment
-        value: production
+    image_name: php55
+    image_tag: int
+    registry_url: registry.example.com
+    namespace: default
+  register: imageout
 '''
 
 # -*- -*- -*- End included fragment: doc/image -*- -*- -*-
 
 # -*- -*- -*- Begin included fragment: ../../lib_utils/src/class/yedit.py -*- -*- -*-
+# pylint: disable=undefined-variable,missing-docstring
 # noqa: E301,E302
 
 
@@ -270,7 +248,8 @@ class Yedit(object):
                     continue
 
                 elif data and not isinstance(data, dict):
-                    return None
+                    raise YeditException("Unexpected item type found while going through key " +
+                                         "path: {} (at key: {})".format(key, dict_key))
 
                 data[dict_key] = {}
                 data = data[dict_key]
@@ -279,7 +258,7 @@ class Yedit(object):
                   int(arr_ind) <= len(data) - 1):
                 data = data[int(arr_ind)]
             else:
-                return None
+                raise YeditException("Unexpected item type found while going through key path: {}".format(key))
 
         if key == '':
             data = item
@@ -292,6 +271,12 @@ class Yedit(object):
         # expected dict entry
         elif key_indexes[-1][1] and isinstance(data, dict):
             data[key_indexes[-1][1]] = item
+
+        # didn't add/update to an existing list, nor add/update key to a dict
+        # so we must have been provided some syntax like a.b.c[<int>] = "data" for a
+        # non-existent array
+        else:
+            raise YeditException("Error adding to object at path: {}".format(key))
 
         return data
 
@@ -339,14 +324,16 @@ class Yedit(object):
         if self.backup and self.file_exists():
             shutil.copy(self.filename, self.filename + '.orig')
 
-        if hasattr(yaml, 'RoundTripDumper'):
-            # pylint: disable=no-member
-            if hasattr(self.yaml_dict, 'fa'):
-                self.yaml_dict.fa.set_block_style()
+        # Try to set format attributes if supported
+        try:
+            self.yaml_dict.fa.set_block_style()
+        except AttributeError:
+            pass
 
-            # pylint: disable=no-member
+        # Try to use RoundTripDumper if supported.
+        try:
             Yedit._write(self.filename, yaml.dump(self.yaml_dict, Dumper=yaml.RoundTripDumper))
-        else:
+        except AttributeError:
             Yedit._write(self.filename, yaml.safe_dump(self.yaml_dict, default_flow_style=False))
 
         return (True, self.yaml_dict)
@@ -387,15 +374,23 @@ class Yedit(object):
         # check if it is yaml
         try:
             if content_type == 'yaml' and contents:
-                # pylint: disable=no-member
-                if hasattr(yaml, 'RoundTripLoader'):
-                    self.yaml_dict = yaml.load(contents, yaml.RoundTripLoader)
-                else:
+                # Try to set format attributes if supported
+                try:
+                    self.yaml_dict.fa.set_block_style()
+                except AttributeError:
+                    pass
+
+                # Try to use RoundTripLoader if supported.
+                try:
+                    self.yaml_dict = yaml.safe_load(contents, yaml.RoundTripLoader)
+                except AttributeError:
                     self.yaml_dict = yaml.safe_load(contents)
 
-                # pylint: disable=no-member
-                if hasattr(self.yaml_dict, 'fa'):
+                # Try to set format attributes if supported
+                try:
                     self.yaml_dict.fa.set_block_style()
+                except AttributeError:
+                    pass
 
             elif content_type == 'json' and contents:
                 self.yaml_dict = json.loads(contents)
@@ -425,14 +420,16 @@ class Yedit(object):
             return (False, self.yaml_dict)
 
         if isinstance(entry, dict):
-            # pylint: disable=no-member,maybe-no-member
+            # AUDIT:maybe-no-member makes sense due to fuzzy types
+            # pylint: disable=maybe-no-member
             if key_or_item in entry:
                 entry.pop(key_or_item)
                 return (True, self.yaml_dict)
             return (False, self.yaml_dict)
 
         elif isinstance(entry, list):
-            # pylint: disable=no-member,maybe-no-member
+            # AUDIT:maybe-no-member makes sense due to fuzzy types
+            # pylint: disable=maybe-no-member
             ind = None
             try:
                 ind = entry.index(key_or_item)
@@ -500,7 +497,9 @@ class Yedit(object):
         if not isinstance(entry, list):
             return (False, self.yaml_dict)
 
-        # pylint: disable=no-member,maybe-no-member
+        # AUDIT:maybe-no-member makes sense due to loading data from
+        # a serialized format.
+        # pylint: disable=maybe-no-member
         entry.append(value)
         return (True, self.yaml_dict)
 
@@ -513,7 +512,8 @@ class Yedit(object):
             entry = None
 
         if isinstance(entry, dict):
-            # pylint: disable=no-member,maybe-no-member
+            # AUDIT:maybe-no-member makes sense due to fuzzy types
+            # pylint: disable=maybe-no-member
             if not isinstance(value, dict):
                 raise YeditException('Cannot replace key, value entry in ' +
                                      'dict with non-dict type. value=[%s] [%s]' % (value, type(value)))  # noqa: E501
@@ -522,7 +522,8 @@ class Yedit(object):
             return (True, self.yaml_dict)
 
         elif isinstance(entry, list):
-            # pylint: disable=no-member,maybe-no-member
+            # AUDIT:maybe-no-member makes sense due to fuzzy types
+            # pylint: disable=maybe-no-member
             ind = None
             if curr_value:
                 try:
@@ -561,18 +562,19 @@ class Yedit(object):
             return (False, self.yaml_dict)
 
         # deepcopy didn't work
-        if hasattr(yaml, 'round_trip_dump'):
-            # pylint: disable=no-member
+        # Try to use ruamel.yaml and fallback to pyyaml
+        try:
             tmp_copy = yaml.load(yaml.round_trip_dump(self.yaml_dict,
                                                       default_flow_style=False),
                                  yaml.RoundTripLoader)
-
-            # pylint: disable=no-member
-            if hasattr(self.yaml_dict, 'fa'):
-                tmp_copy.fa.set_block_style()
-
-        else:
+        except AttributeError:
             tmp_copy = copy.deepcopy(self.yaml_dict)
+
+        # set the format attributes if available
+        try:
+            tmp_copy.fa.set_block_style()
+        except AttributeError:
+            pass
 
         result = Yedit.add_entry(tmp_copy, path, value, self.separator)
         if not result:
@@ -586,16 +588,19 @@ class Yedit(object):
         ''' create a yaml file '''
         if not self.file_exists():
             # deepcopy didn't work
-            if hasattr(yaml, 'round_trip_dump'):
-                # pylint: disable=no-member
-                tmp_copy = yaml.load(yaml.round_trip_dump(self.yaml_dict, default_flow_style=False),  # noqa: E501
+            # Try to use ruamel.yaml and fallback to pyyaml
+            try:
+                tmp_copy = yaml.load(yaml.round_trip_dump(self.yaml_dict,
+                                                          default_flow_style=False),
                                      yaml.RoundTripLoader)
-
-                # pylint: disable=no-member
-                if hasattr(self.yaml_dict, 'fa'):
-                    tmp_copy.fa.set_block_style()
-            else:
+            except AttributeError:
                 tmp_copy = copy.deepcopy(self.yaml_dict)
+
+            # set the format attributes if available
+            try:
+                tmp_copy.fa.set_block_style()
+            except AttributeError:
+                pass
 
             result = Yedit.add_entry(tmp_copy, path, value, self.separator)
             if result:
@@ -752,6 +757,32 @@ class OpenShiftCLIError(Exception):
     pass
 
 
+ADDITIONAL_PATH_LOOKUPS = ['/usr/local/bin', os.path.expanduser('~/bin')]
+
+
+def locate_oc_binary():
+    ''' Find and return oc binary file '''
+    # https://github.com/openshift/openshift-ansible/issues/3410
+    # oc can be in /usr/local/bin in some cases, but that may not
+    # be in $PATH due to ansible/sudo
+    paths = os.environ.get("PATH", os.defpath).split(os.pathsep) + ADDITIONAL_PATH_LOOKUPS
+
+    oc_binary = 'oc'
+
+    # Use shutil.which if it is available, otherwise fallback to a naive path search
+    try:
+        which_result = shutil.which(oc_binary, path=os.pathsep.join(paths))
+        if which_result is not None:
+            oc_binary = which_result
+    except AttributeError:
+        for path in paths:
+            if os.path.exists(os.path.join(path, oc_binary)):
+                oc_binary = os.path.join(path, oc_binary)
+                break
+
+    return oc_binary
+
+
 # pylint: disable=too-few-public-methods
 class OpenShiftCLI(object):
     ''' Class to wrap the command line tools '''
@@ -765,6 +796,7 @@ class OpenShiftCLI(object):
         self.verbose = verbose
         self.kubeconfig = Utils.create_tmpfile_copy(kubeconfig)
         self.all_namespaces = all_namespaces
+        self.oc_binary = locate_oc_binary()
 
     # Pylint allows only 5 arguments to be passed.
     # pylint: disable=too-many-arguments
@@ -966,18 +998,17 @@ class OpenShiftCLI(object):
     # pylint: disable=too-many-arguments,too-many-branches
     def openshift_cmd(self, cmd, oadm=False, output=False, output_type='json', input_data=None):
         '''Base command for oc '''
-        cmds = []
+        cmds = [self.oc_binary]
+
         if oadm:
-            cmds = ['oadm']
-        else:
-            cmds = ['oc']
+            cmds.append('adm')
+
+        cmds.extend(cmd)
 
         if self.all_namespaces:
             cmds.extend(['--all-namespaces'])
         elif self.namespace is not None and self.namespace.lower() not in ['none', 'emtpy']:  # E501
             cmds.extend(['-n', self.namespace])
-
-        cmds.extend(cmd)
 
         rval = {}
         results = ''
@@ -986,7 +1017,10 @@ class OpenShiftCLI(object):
         if self.verbose:
             print(' '.join(cmds))
 
-        returncode, stdout, stderr = self._run(cmds, input_data)
+        try:
+            returncode, stdout, stderr = self._run(cmds, input_data)
+        except OSError as ex:
+            returncode, stdout, stderr = 1, '', 'Failed to execute {}: {}'.format(subprocess.list2cmdline(cmds), ex)
 
         rval = {"returncode": returncode,
                 "results": results,
@@ -997,9 +1031,9 @@ class OpenShiftCLI(object):
                 if output_type == 'json':
                     try:
                         rval['results'] = json.loads(stdout)
-                    except ValueError as err:
-                        if "No JSON object could be decoded" in err.args:
-                            err = err.args
+                    except ValueError as verr:
+                        if "No JSON object could be decoded" in verr.args:
+                            err = verr.args
                 elif output_type == 'raw':
                     rval['results'] = stdout
 
@@ -1038,6 +1072,7 @@ class Utils(object):
         tmp = Utils.create_tmpfile(prefix=rname)
 
         if ftype == 'yaml':
+            # AUDIT:no-member makes sense here due to ruamel.YAML/PyYAML usage
             # pylint: disable=no-member
             if hasattr(yaml, 'RoundTripDumper'):
                 Utils._write(tmp, yaml.dump(data, Dumper=yaml.RoundTripDumper))
@@ -1125,6 +1160,7 @@ class Utils(object):
             contents = sfd.read()
 
         if sfile_type == 'yaml':
+            # AUDIT:no-member makes sense here due to ruamel.YAML/PyYAML usage
             # pylint: disable=no-member
             if hasattr(yaml, 'RoundTripLoader'):
                 contents = yaml.load(contents, yaml.RoundTripLoader)
@@ -1235,8 +1271,8 @@ class Utils(object):
                     elif value != user_def[key]:
                         if debug:
                             print('value should be identical')
-                            print(value)
                             print(user_def[key])
+                            print(value)
                         return False
 
             # recurse on a dictionary
@@ -1256,8 +1292,8 @@ class Utils(object):
                 if api_values != user_values:
                     if debug:
                         print("keys are not equal in dict")
-                        print(api_values)
                         print(user_values)
+                        print(api_values)
                     return False
 
                 result = Utils.check_def_equal(user_def[key], value, skip_keys=skip_keys, debug=debug)
@@ -1303,10 +1339,11 @@ class OpenShiftCLIConfig(object):
     def stringify(self):
         ''' return the options hash as cli params in a string '''
         rval = []
-        for key, data in self.config_options.items():
+        for key in sorted(self.config_options.keys()):
+            data = self.config_options[key]
             if data['include'] \
                and (data['value'] or isinstance(data['value'], int)):
-                rval.append('--%s=%s' % (key.replace('_', '-'), data['value']))
+                rval.append('--{}={}'.format(key.replace('_', '-'), data['value']))
 
         return rval
 
@@ -1315,10 +1352,10 @@ class OpenShiftCLIConfig(object):
 
 # -*- -*- -*- Begin included fragment: class/oc_image.py -*- -*- -*-
 
+
 # pylint: disable=too-many-arguments
 class OCImage(OpenShiftCLI):
-    ''' Class to wrap the oc command line tools
-    '''
+    ''' Class to import and create an imagestream object'''
     def __init__(self,
                  namespace,
                  registry_url,
@@ -1326,13 +1363,11 @@ class OCImage(OpenShiftCLI):
                  image_tag,
                  kubeconfig='/etc/origin/master/admin.kubeconfig',
                  verbose=False):
-        ''' Constructor for OpenshiftOC '''
+        ''' Constructor for OCImage'''
         super(OCImage, self).__init__(namespace, kubeconfig)
-        self.namespace = namespace
         self.registry_url = registry_url
         self.image_name = image_name
         self.image_tag = image_tag
-        self.kubeconfig = kubeconfig
         self.verbose = verbose
 
     def get(self):
@@ -1342,21 +1377,21 @@ class OCImage(OpenShiftCLI):
         if results['returncode'] == 0 and results['results'][0]:
             results['exists'] = True
 
-        if results['returncode'] != 0 and '"%s" not found' % self.image_name in results['stderr']:
+        if results['returncode'] != 0 and '"{}" not found'.format(self.image_name) in results['stderr']:
             results['returncode'] = 0
 
         return results
 
     def create(self, url=None, name=None, tag=None):
         '''Create an image '''
-
         return self._import_image(url, name, tag)
 
 
+    # pylint: disable=too-many-return-statements
     @staticmethod
     def run_ansible(params, check_mode):
         ''' run the ansible idempotent code '''
-    
+
         ocimage = OCImage(params['namespace'],
                           params['registry_url'],
                           params['image_name'],
@@ -1376,14 +1411,11 @@ class OCImage(OpenShiftCLI):
                 return {"failed": True, "msg": api_rval}
             return {"changed": False, "results": api_rval, "state": "list"}
 
-        if not params['image_name']:
-            return {"failed": True, "msg": 'Please specify a name when state is absent|present.'}
-
+        ########
+        # Create
+        ########
         if state == 'present':
 
-            ########
-            # Create
-            ########
             if not Utils.exists(api_rval['results'], params['image_name']):
 
                 if check_mode:
@@ -1396,13 +1428,18 @@ class OCImage(OpenShiftCLI):
                 if api_rval['returncode'] != 0:
                     return {"failed": True, "msg": api_rval}
 
-                return {"changed": True, "results": api_rval, "state": "present"}
+                # return the newly created object
+                api_rval = ocimage.get()
 
+                if api_rval['returncode'] != 0:
+                    return {"failed": True, "msg": api_rval}
+
+                return {"changed": True, "results": api_rval, "state": "present"}
 
             # image exists, no change
             return {"changed": False, "results": api_rval, "state": "present"}
 
-        return {"failed": True, "changed": False, "results": "Unknown state passed. {0}".format(state), "state": "unknown"}
+        return {"failed": True, "changed": False, "msg": "Unknown state passed. {0}".format(state)}
 
 # -*- -*- -*- End included fragment: class/oc_image.py -*- -*- -*-
 
@@ -1422,9 +1459,8 @@ def main():
             debug=dict(default=False, type='bool'),
             namespace=dict(default='default', type='str'),
             registry_url=dict(default=None, type='str'),
-            image_name=dict(default=None, type='str'),
+            image_name=dict(default=None, required=True, type='str'),
             image_tag=dict(default=None, type='str'),
-            content_type=dict(default='raw', choices=['yaml', 'json', 'raw'], type='str'),
             force=dict(default=False, type='bool'),
         ),
 
@@ -1432,11 +1468,11 @@ def main():
     )
 
     rval = OCImage.run_ansible(module.params, module.check_mode)
+
     if 'failed' in rval:
         module.fail_json(**rval)
 
     module.exit_json(**rval)
-
 
 if __name__ == '__main__':
     main()

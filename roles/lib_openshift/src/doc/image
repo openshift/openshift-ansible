@@ -11,12 +11,10 @@ options:
   state:
     description:
     - State controls the action that will be taken with resource
-    - 'present' will create or update and object to the desired state
-    - 'absent' will ensure certain labels are removed
+    - 'present' will create.  Does _not_ support update.
     - 'list' will read the labels
-    - 'add' will insert labels to the already existing labels
     default: present
-    choices: ["present", "absent", "list", "add"]
+    choices: ["present", "list"]
     aliases: []
   kubeconfig:
     description:
@@ -30,63 +28,42 @@ options:
     required: false
     default: False
     aliases: []
-  kind:
+  registry_url:
     description:
-    - The kind of object that can be managed.
-    default: node
-    choices:
-    - node
-    - pod
-    - namespace
-    aliases: []
-  labels:
-    description:
-    - A list of labels for the resource.
-    - Each list consists of a key and a value.
-    - eg, {'key': 'foo', 'value': 'bar'}
+    - The url for the registry so that openshift can pull the image
     required: false
     default: None
     aliases: []
-  selector:
+  image_name:
     description:
-    - The selector to apply to the resource query
+    - The name of the image being imported
+    required: false
+    default: False
+    aliases: []
+  image_tag:
+    description:
+    - The tag of the image being imported
     required: false
     default: None
     aliases: []
 author:
-- "Joel Diaz <jdiaz@redhat.com>"
+- "Ivan Horvath<ihorvath@redhat.com>"
 extends_documentation_fragment: []
 '''
 
 EXAMPLES = '''
-- name: Add a single label to a node's existing labels
-  oc_label:
-    name: ip-172-31-5-23.ec2.internal
-    state: add
-    kind: node
-    labels:
-      - key: logging-infra-fluentd
-        value: 'true'
+- name: Get an imagestream
+  oc_image:
+    name: php55
+    state: list
+  register: imageout
 
-- name: remove a label from a node
-  oc_label:
-    name: ip-172-31-5-23.ec2.internal
-    state: absent
-    kind: node
-    labels:
-      - key: color
-        value: blue
-
-- name: Ensure node has these exact labels
-  oc_label:
-    name: ip-172-31-5-23.ec2.internal
+- name: create an imagestream
+  oc_image:
     state: present
-    kind: node
-    labels:
-      - key: color
-        value: green
-      - key: type
-        value: master
-      - key: environment
-        value: production
+    image_name: php55
+    image_tag: int
+    registry_url: registry.example.com
+    namespace: default
+  register: imageout
 '''
