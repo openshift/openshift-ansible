@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.42
+Version:        3.5.43
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Mar 23 2017 Scott Dodson <sdodson@redhat.com> 3.5.43-1
+- Specify enterprise defaults for logging and metrics images
+  (sdodson@redhat.com)
+
 * Thu Mar 23 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.42-1
 - Do not use auto_expand_replicas (lukas.vlcek@gmail.com)
 - Update the failure methods and add required variables/functions
