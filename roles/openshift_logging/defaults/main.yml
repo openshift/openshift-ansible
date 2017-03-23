@@ -54,6 +54,18 @@ openshift_logging_kibana_ops_proxy_cpu_limit: null
 openshift_logging_kibana_ops_proxy_memory_limit: null
 openshift_logging_kibana_ops_replica_count: 1
 
+#The absolute path on the control node to the cert file to use
+#for the public facing ops kibana certs
+openshift_logging_kibana_ops_cert: ""
+
+#The absolute path on the control node to the key file to use
+#for the public facing ops kibana certs
+openshift_logging_kibana_ops_key: ""
+
+#The absolute path on the control node to the CA file to use
+#for the public facing ops kibana certs
+openshift_logging_kibana_ops_ca: ""
+
 openshift_logging_fluentd_nodeselector: "{{ openshift_hosted_logging_fluentd_nodeselector_label | default('logging-infra-fluentd=true') | map_from_pairs }}"
 openshift_logging_fluentd_cpu_limit: 100m
 openshift_logging_fluentd_memory_limit: 512Mi
