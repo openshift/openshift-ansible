@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.6
+Version:        3.6.7
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,19 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Mar 23 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.7-1
+- openshift_logging calculate min_masters to fail early on split brain
+  (jcantril@redhat.com)
+- Fixed linting and configmap_name param (kwoodson@redhat.com)
+- Adding configmap support. (kwoodson@redhat.com)
+- Make /rootfs mount rslave (sdodson@redhat.com)
+- Update imageConfig.format on upgrades to match oreg_url (sdodson@redhat.com)
+- Adding configmap support and adding tests. (kwoodson@redhat.com)
+- Adding oc_volume to lib_openshift. (kwoodson@redhat.com)
+- upgrade: restart ovs-vswitchd and ovsdb-server (gscrivan@redhat.com)
+- Make atomic-openshift-utils require playbooks of the same version
+  (sdodson@redhat.com)
+
 * Wed Mar 22 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.6-1
 - Fix copy-pasta docstrings (rhcarvalho@gmail.com)
 - Rename _ns -> node_selector (rhcarvalho@gmail.com)
