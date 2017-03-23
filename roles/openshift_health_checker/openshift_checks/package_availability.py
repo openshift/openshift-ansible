@@ -9,6 +9,10 @@ class PackageAvailability(NotContainerizedMixin, OpenShiftCheck):
     name = "package_availability"
     tags = ["preflight"]
 
+    @classmethod
+    def is_active(cls, task_vars):
+        return super(PackageAvailability, cls).is_active(task_vars) and task_vars["ansible_pkg_mgr"] == "yum"
+
     def run(self, tmp, task_vars):
         rpm_prefix = get_var(task_vars, "openshift", "common", "service_type")
         group_names = get_var(task_vars, "group_names", default=[])
