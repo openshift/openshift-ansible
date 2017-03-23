@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.71
+Version:        3.4.72
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -250,6 +250,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Mar 23 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.4.72-1
+- Make /rootfs mount rslave (sdodson@redhat.com)
+
 * Tue Mar 21 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.4.71-1
 - Don't replace CA every cert redeploy. (abutcher@redhat.com)
 
