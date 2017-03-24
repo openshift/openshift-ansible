@@ -26,6 +26,8 @@ mv application-templates-${XPAAS_VERSION}/jboss-image-streams.json ${EXAMPLES_BA
 find application-templates-${XPAAS_VERSION}/ -name '*.json' ! -wholename '*secret*' ! -wholename '*demo*' -exec mv {} ${EXAMPLES_BASE}/xpaas-templates/ \;
 wget https://raw.githubusercontent.com/jboss-fuse/application-templates/GA/fis-image-streams.json              -O ${EXAMPLES_BASE}/xpaas-streams/fis-image-streams.json
 wget https://raw.githubusercontent.com/redhat-developer/s2i-dotnetcore/master/dotnet_imagestreams.json         -O ${EXAMPLES_BASE}/image-streams/dotnet_imagestreams.json
+wget https://raw.githubusercontent.com/redhat-developer/s2i-dotnetcore/master/templates/dotnet-example.json           -O ${EXAMPLES_BASE}/quickstart-templates/dotnet-example.json
+wget https://raw.githubusercontent.com/redhat-developer/s2i-dotnetcore/master/templates/dotnet-pgsql-persistent.json    -O ${EXAMPLES_BASE}/quickstart-templates/dotnet-pgsql-persistent.json
 wget https://raw.githubusercontent.com/openshift/origin-metrics/master/metrics.yaml                            -O ../openshift_hosted_templates/files/${ORIGIN_VERSION}/origin/metrics-deployer.yaml
 wget https://raw.githubusercontent.com/openshift/origin-metrics/enterprise/metrics.yaml                        -O ../openshift_hosted_templates/files/${ORIGIN_VERSION}/enterprise/metrics-deployer.yaml
 wget https://raw.githubusercontent.com/openshift/origin-aggregated-logging/master/deployer/deployer.yaml       -O ../openshift_hosted_templates/files/${ORIGIN_VERSION}/origin/logging-deployer.yaml

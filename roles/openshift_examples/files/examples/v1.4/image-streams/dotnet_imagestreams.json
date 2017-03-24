@@ -27,8 +27,9 @@
                           "iconClass": "icon-dotnet",
                           "tags": "builder,.net,dotnet,dotnetcore",
                           "supports":"dotnet",
-                          "sampleRepo": "https://github.com/redhat-developer/s2i-dotnetcore.git",
-                          "sampleContextDir": "1.1/test/asp-net-hello-world"
+                          "sampleRepo": "https://github.com/redhat-developer/s2i-dotnetcore-ex.git",
+                          "sampleContextDir": "app",
+                          "sampleRef": "dotnetcore-1.1"
                         },
                         "from": {
                           "kind": "ImageStreamTag",
@@ -43,8 +44,9 @@
                             "iconClass": "icon-dotnet",
                             "tags": "builder,.net,dotnet,dotnetcore,rh-dotnetcore11",
                             "supports":"dotnet:1.1,dotnet",
-                            "sampleRepo": "https://github.com/redhat-developer/s2i-dotnetcore.git",
-                            "sampleContextDir": "1.1/test/asp-net-hello-world",
+                            "sampleRepo": "https://github.com/redhat-developer/s2i-dotnetcore-ex.git",
+                            "sampleContextDir": "app",
+                            "sampleRef": "dotnetcore-1.1",
                             "version": "1.1"
                         },
                         "from": {
@@ -60,8 +62,9 @@
                             "iconClass": "icon-dotnet",
                             "tags": "builder,.net,dotnet,dotnetcore,rh-dotnetcore10",
                             "supports":"dotnet:1.0,dotnet",
-                            "sampleRepo": "https://github.com/redhat-developer/s2i-dotnetcore.git",
-                            "sampleContextDir": "1.0/test/asp-net-hello-world",
+                            "sampleRepo": "https://github.com/redhat-developer/s2i-dotnetcore-ex.git",
+                            "sampleContextDir": "app",
+                            "sampleRef": "dotnetcore-1.0",
                             "version": "1.0"
                         },
                         "from": {
