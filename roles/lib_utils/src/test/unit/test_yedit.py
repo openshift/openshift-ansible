@@ -5,6 +5,7 @@
 import os
 import sys
 import unittest
+import mock
 
 # Removing invalid variable names for tests so that I can
 # keep them brief
@@ -276,6 +277,91 @@ class YeditTest(unittest.TestCase):
         yed = Yedit(content={'a': {'b': 12}})
         with self.assertRaises(YeditException):
             yed.put('new.stuff.here[0]', 'item')
+
+    def test_empty_key_with_int_value(self):
+        '''test editing top level with not list or dict'''
+        yed = Yedit(content={'a': {'b': 12}})
+        result = yed.put('', 'b')
+        self.assertFalse(result[0])
+
+    def test_setting_separator(self):
+        '''test editing top level with not list or dict'''
+        yed = Yedit(content={'a': {'b': 12}})
+        yed.separator = ':'
+        self.assertEqual(yed.separator, ':')
+
+    def test_remove_all(self):
+        '''test removing all data'''
+        data = Yedit.remove_entry({'a': {'b': 12}}, '')
+        self.assertTrue(data)
+
+    def test_remove_list_entry(self):
+        '''test removing list entry'''
+        data = {'a': {'b': [{'c': 3}]}}
+        results = Yedit.remove_entry(data, 'a.b[0]')
+        self.assertTrue(results)
+        self.assertTrue(data, {'a': {'b': []}})
+
+    def test_parse_value_string_true(self):
+        '''test parse_value'''
+        results = Yedit.parse_value('true', 'str')
+        self.assertEqual(results, 'true')
+
+    def test_parse_value_bool_true(self):
+        '''test parse_value'''
+        results = Yedit.parse_value('true', 'bool')
+        self.assertTrue(results)
+
+    def test_parse_value_bool_exception(self):
+        '''test parse_value'''
+        with self.assertRaises(YeditException):
+            Yedit.parse_value('TTT', 'bool')
+
+    @mock.patch('yedit.Yedit.write')
+    def test_run_ansible_basic(self, mock_write):
+        '''test parse_value'''
+        params = {
+            'src': None,
+            'backup': False,
+            'separator': '.',
+            'state': 'present',
+            'edits': [],
+            'value': None,
+            'key': None,
+            'content': {'a': {'b': {'c': 1}}},
+            'content_type': '',
+        }
+
+        results = Yedit.run_ansible(params)
+
+        mock_write.side_effect = [
+            (True, params['content']),
+        ]
+
+        self.assertFalse(results['changed'])
+
+    @mock.patch('yedit.Yedit.write')
+    def test_run_ansible_and_write(self, mock_write):
+        '''test parse_value'''
+        params = {
+            'src': '/tmp/test',
+            'backup': False,
+            'separator': '.',
+            'state': 'present',
+            'edits': [],
+            'value': None,
+            'key': None,
+            'content': {'a': {'b': {'c': 1}}},
+            'content_type': '',
+        }
+
+        results = Yedit.run_ansible(params)
+
+        mock_write.side_effect = [
+            (True, params['content']),
+        ]
+
+        self.assertTrue(results['changed'])
 
     def tearDown(self):
         '''TearDown method'''

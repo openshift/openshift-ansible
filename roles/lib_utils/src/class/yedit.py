@@ -1,6 +1,5 @@
 # flake8: noqa
-# pylint: disable=undefined-variable,missing-docstring
-# noqa: E301,E302
+# pylint: skip-file
 
 
 class YeditException(Exception):
@@ -34,13 +33,13 @@ class Yedit(object):
 
     @property
     def separator(self):
-        ''' getter method for yaml_dict '''
+        ''' getter method for separator '''
         return self._separator
 
     @separator.setter
-    def separator(self):
-        ''' getter method for yaml_dict '''
-        return self._separator
+    def separator(self, inc_sep):
+        ''' setter method for separator '''
+        self._separator = inc_sep
 
     @property
     def yaml_dict(self):
@@ -454,7 +453,17 @@ class Yedit(object):
             pass
 
         result = Yedit.add_entry(tmp_copy, path, value, self.separator)
-        if not result:
+        if result is None:
+            return (False, self.yaml_dict)
+
+        # When path equals "" it is a special case.
+        # "" refers to the root of the document
+        # Only update the root path (entire document) when its a list or dict
+        if path == '':
+            if isinstance(result, list) or isinstance(result, dict):
+                self.yaml_dict = result
+                return (True, self.yaml_dict)
+
             return (False, self.yaml_dict)
 
         self.yaml_dict = tmp_copy
@@ -480,7 +489,7 @@ class Yedit(object):
                 pass
 
             result = Yedit.add_entry(tmp_copy, path, value, self.separator)
-            if result:
+            if result is not None:
                 self.yaml_dict = tmp_copy
                 return (True, self.yaml_dict)
 
@@ -522,7 +531,7 @@ class Yedit(object):
         # If vtype is not str then go ahead and attempt to yaml load it.
         elif isinstance(inc_value, str) and 'str' not in vtype:
             try:
-                inc_value = yaml.load(inc_value)
+                inc_value = yaml.safe_load(inc_value)
             except Exception:
                 raise YeditException('Could not determine type of incoming ' +
                                      'value. value=[%s] vtype=[%s]'
@@ -654,4 +663,6 @@ class Yedit(object):
                         'result': rval[1],
                         'state': state}
 
+            # We were passed content but no src, key or value, or edits.  Return contents in memory
+            return {'changed': False, 'result': yamlfile.yaml_dict, 'state': state}
         return {'failed': True, 'msg': 'Unkown state passed'}
