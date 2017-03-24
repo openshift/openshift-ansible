@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.7
+Version:        3.6.8
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Mar 24 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.8-1
+- vendor patched upstream docker_container module. (jvallejo@redhat.com)
+- add docker_image_availability check (jvallejo@redhat.com)
+- Do not use auto_expand_replicas (lukas.vlcek@gmail.com)
+- Adding tests to increase TC. (kwoodson@redhat.com)
+- Adding a pvc create test case. (kwoodson@redhat.com)
+- Cherry picking from #3711 (ewolinet@redhat.com)
+
 * Thu Mar 23 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.7-1
 - openshift_logging calculate min_masters to fail early on split brain
   (jcantril@redhat.com)
