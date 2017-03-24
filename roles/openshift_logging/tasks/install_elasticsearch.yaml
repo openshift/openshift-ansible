@@ -53,6 +53,8 @@
     deploy_name: "{{item.1}}"
     es_node_selector: "{{openshift_logging_es_nodeselector | default({}) }}"
     es_storage: "{{openshift_logging_facts|es_storage(deploy_name, pvc_claim)}}"
+    es_number_of_shards: "{{ openshift_logging_es_number_of_shards }}"
+    es_number_of_replicas: "{{ openshift_logging_es_number_of_replicas }}"
   with_indexed_items:
     - "{{ es_dc_pool }}"
   check_mode: no
@@ -134,6 +136,8 @@
     openshift_logging_es_recover_after_time: "{{openshift_logging_es_ops_recover_after_time}}"
     es_node_selector: "{{openshift_logging_es_ops_nodeselector | default({}) }}"
     es_storage: "{{openshift_logging_facts|es_storage(deploy_name, pvc_claim,root='elasticsearch_ops')}}"
+    es_number_of_shards: "{{ openshift_logging_es_ops_number_of_shards }}"
+    es_number_of_replicas: "{{ openshift_logging_es_ops_number_of_replicas }}"
   with_indexed_items:
     - "{{ es_ops_dc_pool | default([]) }}"
   when:
