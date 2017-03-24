@@ -4,7 +4,7 @@ metadata:
   name: "{{obj_name}}"
 {% if labels is not defined %}
   labels:
-    logging-infra: support
+    metrics-infra: support
 {% elif labels %}
   labels:
 {% for key, value in labels.iteritems() %}
