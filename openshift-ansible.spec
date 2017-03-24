@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.43
+Version:        3.5.44
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,15 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Mar 24 2017 Scott Dodson <sdodson@redhat.com> 3.5.44-1
+- Correct a typo in metrics role (sdodson@redhat.com)
+- Fix overriding openshift_{logging,metrics}_image_prefix (sdodson@redhat.com)
+- Revert "fix quoting issues in logging es template" (ewolinet@redhat.com)
+- also missing quotes for number_of_shards and number_of_replicas
+  (rmeggins@redhat.com)
+- es_min_masters must be quoted (rmeggins@redhat.com)
+- Make linter happy (sdodson@redhat.com)
+
 * Thu Mar 23 2017 Scott Dodson <sdodson@redhat.com> 3.5.43-1
 - Specify enterprise defaults for logging and metrics images
   (sdodson@redhat.com)
