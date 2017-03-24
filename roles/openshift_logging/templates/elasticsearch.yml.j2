@@ -6,8 +6,8 @@ script:
   indexed: on
 
 index:
-  number_of_shards: {{ es_number_of_shards | default ('1') }}
-  number_of_replicas: {{ es_number_of_replicas | default ('0') }}
+  number_of_shards: "{{ es_number_of_shards | default ('1') }}"
+  number_of_replicas: "{{ es_number_of_replicas | default ('0') }}"
   unassigned.node_left.delayed_timeout: 2m
   translog:
     flush_threshold_size: 256mb
@@ -28,7 +28,7 @@ cloud:
 discovery:
   type: kubernetes
   zen.ping.multicast.enabled: false
-  zen.minimum_master_nodes: {{es_min_masters}}
+  zen.minimum_master_nodes: "{{es_min_masters}}"
 
 gateway:
   expected_master_nodes: ${NODE_QUORUM}
