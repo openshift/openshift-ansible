@@ -32,6 +32,9 @@ def main():
         required_one_of=[["content", "src"]],
     )
 
+    if module.params['src'] is not None and module.params['key'] in [None, '']:
+        module.fail_json(failed=True, msg='Empty value for parameter key not allowed.')
+
     rval = Yedit.run_ansible(module.params)
     if 'failed' in rval and rval['failed']:
         module.fail_json(**rval)

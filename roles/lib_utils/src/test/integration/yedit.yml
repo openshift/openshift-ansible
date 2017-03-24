@@ -248,4 +248,4 @@
     assert:
       that: results.result == [1, 2, 3, 4]
       msg: "Test: '[1, 2, 3, 4]' != [{{ results.result }}]"
-  ###### end test create multiple list value #####
+      ###### end test create multiple list value #####
