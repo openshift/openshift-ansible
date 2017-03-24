@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.44
+Version:        3.5.45
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Mar 24 2017 Scott Dodson <sdodson@redhat.com> 3.5.45-1
+- Update s2i-dotnetcore content (sdodson@redhat.com)
+
 * Fri Mar 24 2017 Scott Dodson <sdodson@redhat.com> 3.5.44-1
 - Correct a typo in metrics role (sdodson@redhat.com)
 - Fix overriding openshift_{logging,metrics}_image_prefix (sdodson@redhat.com)
