@@ -144,14 +144,14 @@ def oo_collect(data, attribute=None, filters=None):
             returns [1, 2, 3]
     """
     if not isinstance(data, list):
-        raise errors.AnsibleFilterError("|failed expects to filter on a List")
+        raise errors.AnsibleFilterError("oo_collect expects to filter on a List")
 
     if not attribute:
-        raise errors.AnsibleFilterError("|failed expects attribute to be set")
+        raise errors.AnsibleFilterError("oo_collect expects attribute to be set")
 
     if filters is not None:
         if not isinstance(filters, dict):
-            raise errors.AnsibleFilterError("|failed expects filter to be a"
+            raise errors.AnsibleFilterError("oo_collect expects filter to be a"
                                             " dict")
         retval = [get_attr(d, attribute) for d in data if (
             all([d.get(key, None) == filters[key] for key in filters]))]
