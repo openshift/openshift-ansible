@@ -1,0 +1,3 @@
+---
+__openshift_metrics_image_prefix: "{{ openshift_hosted_metrics_deployer_prefix | default('docker.io/openshift/origin-') }}"
+__openshift_metrics_image_version: "{{ openshift_hosted_metrics_deployer_version | default('latest') }}"
