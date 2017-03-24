@@ -51,24 +51,28 @@
   failed_when: false
   when: openshift.common.is_containerized | bool
 
+- name: Stop rpm based services
+  service:
+    name: "{{ item }}"
+    state: stopped
+  with_items:
+  - "{{ openshift.common.service_type }}-node"
+  - openvswitch
+  failed_when: false
+  when: not openshift.common.is_containerized | bool
+
 - name: Upgrade openvswitch
   package:
     name: openvswitch
     state: latest
-  register: ovs_pkg
   when: not openshift.common.is_containerized | bool
 
 - name: Restart openvswitch
   systemd:
-    name: "{{ item }}"
-    state: restarted
-  with_items:
-  - ovs-vswitchd
-  - ovsdb-server
-  - openvswitch
+    name: openvswitch
+    state: started
   when:
   - not openshift.common.is_containerized | bool
-  - ovs_pkg | changed
 
 # Mandatory Docker restart, ensure all containerized services are running:
 - include: docker/restart.yml
