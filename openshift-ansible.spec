@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.8
+Version:        3.6.9
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,23 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Mar 25 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.9-1
+- Found this while searching the metrics role for logging, is this wrong?
+  (sdodson@redhat.com)
+- Fix overriding openshift_{logging,metrics}_image_prefix (sdodson@redhat.com)
+- Make linter happy (sdodson@redhat.com)
+- Specify enterprise defaults for logging and metrics images
+  (sdodson@redhat.com)
+- Update s2i-dotnetcore content (sdodson@redhat.com)
+- Stop all services before upgrading openvswitch (sdodson@redhat.com)
+- Bug 1434300 - Log entries are generated in ES after deployed logging stacks
+  via ansible, but can not be found in kibana. (rmeggins@redhat.com)
+- Adding error checking to the delete. (kwoodson@redhat.com)
+- Updated comment. (kwoodson@redhat.com)
+- Fixed doc.  Updated test to change existing key.  Updated module spec for
+  required name param. (kwoodson@redhat.com)
+- Adding oc_configmap to lib_openshift. (kwoodson@redhat.com)
+
 * Fri Mar 24 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.8-1
 - vendor patched upstream docker_container module. (jvallejo@redhat.com)
 - add docker_image_availability check (jvallejo@redhat.com)
