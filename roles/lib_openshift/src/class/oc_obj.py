@@ -111,14 +111,11 @@ class OCObject(OpenShiftCLI):
         if state == 'list':
             return {'changed': False, 'results': api_rval, 'state': 'list'}
 
-        if not params['name']:
-            return {'failed': True, 'msg': 'Please specify a name when state is absent|present.'}  # noqa: E501
-
         ########
         # Delete
         ########
         if state == 'absent':
-            if not Utils.exists(api_rval['results'], params['name']):
+            if not api_rval['results'] or not api_rval['results'][0]:
                 return {'changed': False, 'state': 'absent'}
 
             if check_mode:
@@ -129,6 +126,9 @@ class OCObject(OpenShiftCLI):
             return {'changed': True, 'results': api_rval, 'state': 'absent'}
 
         if state == 'present':
+            if not params['name']:
+                return {'failed': True, 'msg': 'Please specify a name when state is present.'}  # noqa: E501
+
             ########
             # Create
             ########
