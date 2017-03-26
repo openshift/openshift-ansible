@@ -919,11 +919,13 @@ class OpenShiftCLI(object):
         '''call oc create on a filename'''
         return self.openshift_cmd(['create', '-f', fname])
 
-    def _delete(self, resource, rname, selector=None):
+    def _delete(self, resource, rname=None, selector=None):
         '''call oc delete on a resource'''
-        cmd = ['delete', resource, rname]
+        cmd = ['delete', resource]
         if selector:
             cmd.append('--selector=%s' % selector)
+        elif rname:
+            cmd.append(rname)
 
         return self.openshift_cmd(cmd)
 
