@@ -1455,7 +1455,7 @@ class OCObject(OpenShiftCLI):
 
     def delete(self):
         '''return all pods '''
-        return self._delete(self.kind, self.name)
+        return self._delete(self.kind, self.name, self.selector)
 
     def create(self, files=None, content=None):
         '''
