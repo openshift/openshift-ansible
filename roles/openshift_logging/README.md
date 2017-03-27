@@ -63,6 +63,7 @@ When `False` the `openshift_logging` role will uninstall Aggregated logging.
 - `openshift_logging_es_cluster_size`: The number of ES cluster members. Defaults to '1'.
 - `openshift_logging_es_cpu_limit`:  The amount of CPU limit for the ES cluster.  Unused if not set
 - `openshift_logging_es_memory_limit`: The amount of RAM that should be assigned to ES. Defaults to '8Gi'.
+- `openshift_logging_es_log_appenders`: The list of rootLogger appenders for ES logs which can be: 'file', 'console'. Defaults to 'file'.
 - `openshift_logging_es_pv_selector`: A key/value map added to a PVC in order to select specific PVs.  Defaults to 'None'.
 - `openshift_logging_es_pvc_dynamic`: Whether or not to add the dynamic PVC annotation for any generated PVCs. Defaults to 'False'.
 - `openshift_logging_es_pvc_size`: The requested size for the ES PVCs, when not provided the role will not generate any PVCs. Defaults to '""'.

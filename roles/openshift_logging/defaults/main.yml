@@ -80,6 +80,8 @@ openshift_logging_es_client_cert: /etc/fluent/keys/cert
 openshift_logging_es_client_key: /etc/fluent/keys/key
 openshift_logging_es_cluster_size: "{{ openshift_hosted_logging_elasticsearch_cluster_size | default(1) }}"
 openshift_logging_es_cpu_limit: null
+# the logging appenders for the root loggers to write ES logs. Valid values: 'file', 'console'
+openshift_logging_es_log_appenders: ['file']
 openshift_logging_es_memory_limit: "{{ openshift_hosted_logging_elasticsearch_instance_ram | default('8Gi') }}"
 openshift_logging_es_pv_selector: null
 openshift_logging_es_pvc_dynamic: "{{ openshift_hosted_logging_elasticsearch_pvc_dynamic | default(False) }}"
