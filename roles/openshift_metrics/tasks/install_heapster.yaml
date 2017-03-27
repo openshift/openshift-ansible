@@ -65,3 +65,4 @@
   changed_when: no
 
 - include: generate_heapster_certificates.yaml
+  run_once: True

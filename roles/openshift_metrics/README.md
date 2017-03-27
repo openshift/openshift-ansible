@@ -90,9 +90,10 @@ Example Playbook
 
 ```
 - name: Configure openshift-metrics
-  hosts: oo_first_master
+  hosts: oo_masters_to_config
   roles:
   - role: openshift_metrics
+  run_once: True
 ```
 
 License
