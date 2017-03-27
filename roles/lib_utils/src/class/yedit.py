@@ -55,13 +55,13 @@ class Yedit(object):
     def parse_key(key, sep='.'):
         '''parse the key allowing the appropriate separator'''
         common_separators = list(Yedit.com_sep - set([sep]))
-        return re.findall(Yedit.re_key % ''.join(common_separators), key)
+        return re.findall(Yedit.re_key.format(''.join(common_separators)), key)
 
     @staticmethod
     def valid_key(key, sep='.'):
         '''validate the incoming key'''
         common_separators = list(Yedit.com_sep - set([sep]))
-        if not re.match(Yedit.re_valid_key % ''.join(common_separators), key):
+        if not re.match(Yedit.re_valid_key.format(''.join(common_separators)), key):
             return False
 
         return True
@@ -83,7 +83,7 @@ class Yedit(object):
         key_indexes = Yedit.parse_key(key, sep)
         for arr_ind, dict_key in key_indexes[:-1]:
             if dict_key and isinstance(data, dict):
-                data = data.get(dict_key, None)
+                data = data.get(dict_key)
             elif (arr_ind and isinstance(data, list) and
                   int(arr_ind) <= len(data) - 1):
                 data = data[int(arr_ind)]
@@ -172,7 +172,7 @@ class Yedit(object):
         key_indexes = Yedit.parse_key(key, sep)
         for arr_ind, dict_key in key_indexes:
             if dict_key and isinstance(data, dict):
-                data = data.get(dict_key, None)
+                data = data.get(dict_key)
             elif (arr_ind and isinstance(data, list) and
                   int(arr_ind) <= len(data) - 1):
                 data = data[int(arr_ind)]
@@ -272,7 +272,7 @@ class Yedit(object):
                 self.yaml_dict = json.loads(contents)
         except yaml.YAMLError as err:
             # Error loading yaml or json
-            raise YeditException('Problem with loading yaml file. %s' % err)
+            raise YeditException('Problem with loading yaml file. {}'.format(err))
 
         return self.yaml_dict
 
@@ -391,8 +391,8 @@ class Yedit(object):
             # AUDIT:maybe-no-member makes sense due to fuzzy types
             # pylint: disable=maybe-no-member
             if not isinstance(value, dict):
-                raise YeditException('Cannot replace key, value entry in ' +
-                                     'dict with non-dict type. value=[%s] [%s]' % (value, type(value)))  # noqa: E501
+                raise YeditException('Cannot replace key, value entry in dict with non-dict type. ' +
+                                     'value=[{}] type=[{}]'.format(value, type(value)))
 
             entry.update(value)
             return (True, self.yaml_dict)
@@ -521,7 +521,7 @@ class Yedit(object):
         # we will convert to bool if it matches any of the above cases
         if isinstance(inc_value, str) and 'bool' in vtype:
             if inc_value not in true_bools and inc_value not in false_bools:
-                raise YeditException('Not a boolean type. str=[%s] vtype=[%s]' % (inc_value, vtype))
+                raise YeditException('Not a boolean type. str=[{}] vtype=[{}]'.format(inc_value, vtype))
         elif isinstance(inc_value, bool) and 'str' in vtype:
             inc_value = str(inc_value)
 
@@ -533,9 +533,8 @@ class Yedit(object):
             try:
                 inc_value = yaml.safe_load(inc_value)
             except Exception:
-                raise YeditException('Could not determine type of incoming ' +
-                                     'value. value=[%s] vtype=[%s]'
-                                     % (type(inc_value), vtype))
+                raise YeditException('Could not determine type of incoming value. ' +
+                                     'value=[{}] vtype=[{}]'.format(type(inc_value), vtype))
 
         return inc_value
 
@@ -545,17 +544,18 @@ class Yedit(object):
         results = []
         for edit in edits:
             value = Yedit.parse_value(edit['value'], edit.get('value_type', ''))
-            if 'action' in edit and edit['action'] == 'update':
+            if edit.get('action') == 'update':
                 # pylint: disable=line-too-long
-                curr_value = Yedit.get_curr_value(Yedit.parse_value(edit.get('curr_value', None)),  # noqa: E501
-                                                  edit.get('curr_value_format', None))  # noqa: E501
+                curr_value = Yedit.get_curr_value(
+                    Yedit.parse_value(edit.get('curr_value')),
+                    edit.get('curr_value_format'))
 
                 rval = yamlfile.update(edit['key'],
                                        value,
-                                       edit.get('index', None),
+                                       edit.get('index'),
                                        curr_value)
 
-            elif 'action' in edit and edit['action'] == 'append':
+            elif edit.get('action') == 'append':
                 rval = yamlfile.append(edit['key'], value)
 
             else:
@@ -581,9 +581,8 @@ class Yedit(object):
 
             if yamlfile.yaml_dict is None and state != 'present':
                 return {'failed': True,
-                        'msg': 'Error opening file [%s].  Verify that the ' +
-                               'file exists, that it is has correct' +
-                               ' permissions, and is valid yaml.'}
+                        'msg': 'Error opening file [{}].  Verify that the '.format(params['src']) +
+                               'file exists, that it is has correct permissions, and is valid yaml.'}
 
         if state == 'list':
             if params['content']:
