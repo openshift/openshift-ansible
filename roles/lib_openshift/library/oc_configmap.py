@@ -1524,6 +1524,10 @@ class OCConfigMap(OpenShiftCLI):
         if state == 'list':
             return {'changed': False, 'results': api_rval, 'state': state}
 
+        if not params['name']:
+            return {'failed': True,
+                    'msg': 'Please specify a name when state is absent|present.'}
+
         ########
         # Delete
         ########
