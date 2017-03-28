@@ -51,7 +51,7 @@
     creates: "{{ etcd_generated_certs_dir ~ '/' ~  etcd_cert_subdir ~ '/'
                  ~ etcd_cert_prefix ~ 'client.csr' }}"
   environment:
-    SAN: "IP:{{ etcd_ip }}"
+    SAN: "IP:{{ etcd_ip }},DNS:{{ etcd_hostname }}"
   when: etcd_client_certs_missing | bool
   delegate_to: "{{ etcd_ca_host }}"
 

@@ -1,0 +1,2 @@
+---
+kubeconfig: "{{ openshift.common.config_base }}/master/openshift-master.kubeconfig"

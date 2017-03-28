@@ -1,0 +1,29 @@
+[Unit]
+Description=calico
+After=docker.service
+Requires=docker.service
+
+[Service]
+Restart=always
+ExecStartPre=-/usr/bin/docker rm -f calico-node
+ExecStart=/usr/bin/docker run --net=host --privileged \
+ --name=calico-node \
+ -e WAIT_FOR_DATASTORE=true \
+ -e FELIX_DEFAULTENDPOINTTOHOSTACTION=ACCEPT \
+ -e CALICO_IPV4POOL_IPIP=always \
+ -e FELIX_IPV6SUPPORT=false \
+ -e ETCD_ENDPOINTS={{ etcd_endpoints }} \
+ -v /etc/origin/calico:/etc/origin/calico \
+ -e ETCD_CA_CERT_FILE={{ calico_etcd_ca_cert_file }} \
+ -e ETCD_CERT_FILE={{ calico_etcd_cert_file }} \
+ -e ETCD_KEY_FILE={{ calico_etcd_key_file }} \
+ -e NODENAME={{ openshift.common.hostname }} \
+ -v /var/log/calico:/var/log/calico \
+ -v /lib/modules:/lib/modules \
+ -v /var/run/calico:/var/run/calico \
+ calico/node:v1.1.0
+
+ExecStop=-/usr/bin/docker stop calico-node
+
+[Install]
+WantedBy=multi-user.target

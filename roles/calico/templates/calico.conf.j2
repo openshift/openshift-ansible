@@ -1,0 +1,18 @@
+{
+  "name": "calico",
+  "type": "calico",
+  "ipam": {
+    "type": "calico-ipam"
+  },
+  "etcd_endpoints": "{{ etcd_endpoints }}",
+  "etcd_key_file": "{{ calico_etcd_key_file }}",
+  "etcd_cert_file": "{{ calico_etcd_cert_file }}",
+  "etcd_ca_cert_file": "{{ calico_etcd_ca_cert_file }}",
+  "kubernetes": {
+    "kubeconfig": "{{ kubeconfig }}"
+  },
+  "hostname": "{{ openshift.common.hostname }}",
+  "policy": {
+    "type": "k8s"
+  }
+}
