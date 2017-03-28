@@ -17,7 +17,7 @@ from ansible.plugins.action import ActionBase
 # this callback plugin.
 sys.path.insert(1, os.path.dirname(os.path.dirname(__file__)))
 
-from openshift_checks import OpenShiftCheck, OpenShiftCheckException  # noqa: E402
+from openshift_checks import OpenShiftCheck, OpenShiftCheckException, load_checks  # noqa: E402
 
 
 class ActionModule(ActionBase):
@@ -78,6 +78,8 @@ class ActionModule(ActionBase):
         return result
 
     def load_known_checks(self):
+        load_checks()
+
         known_checks = {}
 
         known_check_classes = set(cls for cls in OpenShiftCheck.subclasses())
@@ -91,7 +93,7 @@ class ActionModule(ActionBase):
                         check_name,
                         cls.__module__, cls.__name__,
                         other_cls.__module__, other_cls.__name__))
-            known_checks[check_name] = cls(module_executor=self._execute_module)
+            known_checks[check_name] = cls(execute_module=self._execute_module)
 
         return known_checks
 

@@ -21,8 +21,13 @@ class OpenShiftCheckException(Exception):
 class OpenShiftCheck(object):
     """A base class for defining checks for an OpenShift cluster environment."""
 
-    def __init__(self, module_executor):
-        self.module_executor = module_executor
+    def __init__(self, execute_module=None, module_executor=None):
+        if execute_module is module_executor is None:
+            raise TypeError(
+                "__init__() takes either execute_module (recommended) "
+                "or module_executor (deprecated), none given")
+        self.execute_module = execute_module or module_executor
+        self.module_executor = self.execute_module
 
     @abstractproperty
     def name(self):
@@ -58,6 +63,21 @@ class OpenShiftCheck(object):
                 yield subclass
 
 
+LOADER_EXCLUDES = (
+    "__init__.py",
+    "mixins.py",
+)
+
+
+def load_checks():
+    """Dynamically import all check modules for the side effect of registering checks."""
+    return [
+        import_module(__package__ + "." + name[:-3])
+        for name in os.listdir(os.path.dirname(__file__))
+        if name.endswith(".py") and name not in LOADER_EXCLUDES
+    ]
+
+
 def get_var(task_vars, *keys, **kwargs):
     """Helper function to get deeply nested values from task_vars.
 
@@ -73,15 +93,3 @@ def get_var(task_vars, *keys, **kwargs):
             return kwargs["default"]
         raise OpenShiftCheckException("'{}' is undefined".format(".".join(map(str, keys))))
     return value
-
-
-# Dynamically import all submodules for the side effect of loading checks.
-
-EXCLUDES = (
-    "__init__.py",
-    "mixins.py",
-)
-
-for name in os.listdir(os.path.dirname(__file__)):
-    if name.endswith(".py") and name not in EXCLUDES:
-        import_module(__package__ + "." + name[:-3])

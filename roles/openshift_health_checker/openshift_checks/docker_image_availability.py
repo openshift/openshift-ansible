@@ -15,6 +15,9 @@ class DockerImageAvailability(OpenShiftCheck):
 
     skopeo_image = "openshift/openshift-ansible"
 
+    # FIXME(juanvallejo): we should consider other possible values of
+    # `deployment_type` (the key here). See
+    # https://github.com/openshift/openshift-ansible/blob/8e26f8c/roles/openshift_repos/vars/main.yml#L7
     docker_image_base = {
         "origin": {
             "repo": "openshift",
@@ -62,9 +65,15 @@ class DockerImageAvailability(OpenShiftCheck):
 
     def required_images(self, task_vars):
         deployment_type = get_var(task_vars, "deployment_type")
+        # FIXME(juanvallejo): we should handle gracefully with a proper error
+        # message when given an unexpected value for `deployment_type`.
         image_base_name = self.docker_image_base[deployment_type]
 
         openshift_release = get_var(task_vars, "openshift_release")
+        # FIXME(juanvallejo): this variable is not required when the
+        # installation is non-containerized. The example inventories have it
+        # commented out. We should handle gracefully and with a proper error
+        # message when this variable is required and not set.
         openshift_image_tag = get_var(task_vars, "openshift_image_tag")
 
         is_containerized = get_var(task_vars, "openshift", "common", "is_containerized")
@@ -104,6 +113,8 @@ class DockerImageAvailability(OpenShiftCheck):
         if result.get("failed", False):
             return []
 
+        # FIXME(juanvallejo): wrong default type, result["info"] is expected to
+        # contain a dictionary (see how we call `docker_info.get` below).
         docker_info = result.get("info", "")
         return [registry.get("Name", "") for registry in docker_info.get("Registries", {})]
 
