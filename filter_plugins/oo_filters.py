@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 # vim: expandtab:tabstop=4:shiftwidth=4
-# pylint: disable=no-name-in-module, import-error, wrong-import-order, ungrouped-imports
+# pylint: disable=no-name-in-module, import-error, wrong-import-order, ungrouped-imports, too-many-lines
 """
 Custom filters for use in openshift-ansible
 """
