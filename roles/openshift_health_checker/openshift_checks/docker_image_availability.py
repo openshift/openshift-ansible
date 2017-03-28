@@ -15,19 +15,24 @@ class DockerImageAvailability(OpenShiftCheck):
 
     skopeo_image = "openshift/openshift-ansible"
 
-    # FIXME(juanvallejo): we should consider other possible values of
-    # `deployment_type` (the key here). See
-    # https://github.com/openshift/openshift-ansible/blob/8e26f8c/roles/openshift_repos/vars/main.yml#L7
-    docker_image_base = {
+    deployment_image_info = {
         "origin": {
-            "repo": "openshift",
-            "image": "origin",
+            "namespace": "openshift",
+            "name": "origin",
         },
         "openshift-enterprise": {
-            "repo": "openshift3",
-            "image": "ose",
+            "namespace": "openshift3",
+            "name": "ose",
         },
     }
+
+    @classmethod
+    def is_active(cls, task_vars):
+        """Skip hosts with unsupported deployment types."""
+        deployment_type = get_var(task_vars, "openshift_deployment_type")
+        has_valid_deployment_type = deployment_type in cls.deployment_image_info
+
+        return super(DockerImageAvailability, cls).is_active(task_vars) and has_valid_deployment_type
 
     def run(self, tmp, task_vars):
         required_images = self.required_images(task_vars)
@@ -41,13 +46,34 @@ class DockerImageAvailability(OpenShiftCheck):
 
         # exit early if Skopeo update fails
         if failed:
+            if "Error connecting: Error while fetching server API version" in msg:
+                msg = (
+                    "It appears Docker is not running.\n"
+                    "Please start Docker on this host before running this check.\n"
+                    "The full error reported was:\n  " + msg
+                    )
+
+            elif "Failed to import docker-py" in msg:
+                msg = (
+                    "The required Python docker-py module is not installed.\n"
+                    "Suggestion: install the python-docker-py package on this host."
+                    )
+            else:
+                msg = "The full message reported by the docker_image module was:\n" + msg
             return {
                 "failed": True,
                 "changed": changed,
-                "msg": "Failed to update Skopeo image ({img_name}). {msg}".format(img_name=self.skopeo_image, msg=msg),
+                "msg": (
+                    "Unable to update the {img_name} image on this host;\n"
+                    "This is required in order to check Docker image availability.\n"
+                    "{msg}"
+                    ).format(img_name=self.skopeo_image, msg=msg),
             }
 
         registries = self.known_docker_registries(task_vars)
+        if not registries:
+            return {"failed": True, "msg": "Unable to retrieve any docker registries."}
+
         available_images = self.available_images(missing_images, registries, task_vars)
         unavailable_images = set(missing_images) - set(available_images)
 
@@ -64,31 +90,24 @@ class DockerImageAvailability(OpenShiftCheck):
         return {"changed": changed}
 
     def required_images(self, task_vars):
-        deployment_type = get_var(task_vars, "deployment_type")
-        # FIXME(juanvallejo): we should handle gracefully with a proper error
-        # message when given an unexpected value for `deployment_type`.
-        image_base_name = self.docker_image_base[deployment_type]
+        deployment_type = get_var(task_vars, "openshift_deployment_type")
+        image_info = self.deployment_image_info[deployment_type]
 
-        openshift_release = get_var(task_vars, "openshift_release")
-        # FIXME(juanvallejo): this variable is not required when the
-        # installation is non-containerized. The example inventories have it
-        # commented out. We should handle gracefully and with a proper error
-        # message when this variable is required and not set.
-        openshift_image_tag = get_var(task_vars, "openshift_image_tag")
+        openshift_release = get_var(task_vars, "openshift_release", default="latest")
+        openshift_image_tag = get_var(task_vars, "openshift_image_tag", default=openshift_release)
+        if openshift_image_tag and openshift_image_tag[0] != 'v':
+            openshift_image_tag = 'v' + openshift_image_tag
 
         is_containerized = get_var(task_vars, "openshift", "common", "is_containerized")
-
-        if is_containerized:
-            images = set(self.containerized_docker_images(image_base_name, openshift_release))
-        else:
-            images = set(self.rpm_docker_images(image_base_name, openshift_release))
+        images = set(self.non_qualified_docker_images(image_info["namespace"], image_info["name"], openshift_release,
+                                                      is_containerized))
 
         # append images with qualified image tags to our list of required images.
         # these are images with a (v0.0.0.0) tag, rather than a standard release
         # format tag (v0.0). We want to check this set in both containerized and
         # non-containerized installations.
         images.update(
-            self.qualified_docker_images(self.image_from_base_name(image_base_name), "v" + openshift_image_tag)
+            self.qualified_docker_images(image_info["namespace"], image_info["name"], openshift_image_tag)
         )
 
         return images
@@ -109,13 +128,10 @@ class DockerImageAvailability(OpenShiftCheck):
 
     def known_docker_registries(self, task_vars):
         result = self.module_executor("docker_info", {}, task_vars)
-
         if result.get("failed", False):
-            return []
+            return False
 
-        # FIXME(juanvallejo): wrong default type, result["info"] is expected to
-        # contain a dictionary (see how we call `docker_info.get` below).
-        docker_info = result.get("info", "")
+        docker_info = result.get("info", {})
         return [registry.get("Name", "") for registry in docker_info.get("Registries", {})]
 
     def available_images(self, images, registries, task_vars):
@@ -148,29 +164,21 @@ class DockerImageAvailability(OpenShiftCheck):
             "cleanup": True,
         }
         result = self.module_executor("docker_container", args, task_vars)
-        return result.get("failed", False)
-
-    def containerized_docker_images(self, base_name, version):
-        return [
-            "{image}:{version}".format(image=self.image_from_base_name(base_name), version=version)
-        ]
+        return not result.get("failed", False)
 
     @staticmethod
-    def rpm_docker_images(base, version):
-        return [
-            "{image_repo}/registry-console:{version}".format(image_repo=base["repo"], version=version)
-        ]
+    def non_qualified_docker_images(namespace, name, version, is_containerized):
+        if is_containerized:
+            return ["{}/{}:{}".format(namespace, name, version)] if name else []
+
+        return ["{}/{}:{}".format(namespace, name, version)] if name else []
 
     @staticmethod
-    def qualified_docker_images(image_name, version):
+    def qualified_docker_images(namespace, name, version):
         return [
-            "{}-{}:{}".format(image_name, component, version)
-            for component in "haproxy-router docker-registry deployer pod".split()
+            "{}/{}-{}:{}".format(namespace, name, suffix, version)
+            for suffix in ["haproxy-router", "docker-registry", "deployer", "pod"]
         ]
-
-    @staticmethod
-    def image_from_base_name(base):
-        return "".join([base["repo"], "/", base["image"]])
 
     # ensures that the skopeo docker image exists, and updates it
     # with latest if image was already present locally.
