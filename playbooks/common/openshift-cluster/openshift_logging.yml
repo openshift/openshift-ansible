@@ -1,11 +1,13 @@
 ---
+- include: evaluate_groups.yml
+
 - name: OpenShift Aggregated Logging
   hosts: oo_first_master
   roles:
   - openshift_logging
 
 - name: Update Master configs
-  hosts: masters:!oo_first_master
+  hosts: oo_masters:!oo_first_master
   tasks:
   - block:
     - include_role:
