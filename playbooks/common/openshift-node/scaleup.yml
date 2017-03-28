@@ -28,9 +28,6 @@
   - openshift_docker
 
 - include: ../openshift-cluster/disable_excluder.yml
-  vars:
-    # the excluders needs to be disabled no matter what status says
-    with_status_check: false
   tags:
   - always
 
