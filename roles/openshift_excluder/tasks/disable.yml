@@ -1,6 +1,5 @@
 ---
 # input variables
-# - with_status_check
 # - excluder_package_state
 # - docker_excluder_package_state
 - include: init.yml
@@ -35,6 +34,6 @@
       unexclude_docker_excluder: false
       # disable openshift excluder is never overrided to be enabled
       # disable it if the docker excluder is enabled
-      unexclude_openshift_excluder: true
+      unexclude_openshift_excluder: "{{ openshift_excluder_on | bool }}"
   when:
   - not openshift.common.is_atomic | bool
