@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.9
+Version:        3.6.10
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,21 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Mar 28 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.10-1
+- Use meta/main.yml for role dependencies (rteague@redhat.com)
+- Upgrade specific rpms instead of just master/node. (dgoodwin@redhat.com)
+- Adding namespace to doc. (kwoodson@redhat.com)
+- Add calico. (djosborne10@gmail.com)
+- Fixing up test cases, linting, and added a return. (kwoodson@redhat.com)
+- first step in ocimage (ihorvath@redhat.com)
+- ocimage (ihorvath@redhat.com)
+- Setting defaults on openshift_hosted. (kwoodson@redhat.com)
+- rebase and regenerate (jdiaz@redhat.com)
+- fix up things flagged by flake8 (jdiaz@redhat.com)
+- clean up and clarify docs/comments (jdiaz@redhat.com)
+- add oc_user ansible module (jdiaz@redhat.com)
+- Fix etcd cert generation (djosborne10@gmail.com)
+
 * Sat Mar 25 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.9-1
 - Found this while searching the metrics role for logging, is this wrong?
   (sdodson@redhat.com)
