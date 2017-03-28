@@ -11,6 +11,8 @@
 #
 # You can run the upgrade_nodes.yml playbook after this to upgrade these components separately.
 #
+- include: ../../initialize_groups.yml
+
 - include: ../../../../common/openshift-cluster/upgrades/init.yml
   tags:
   - pre_upgrade
