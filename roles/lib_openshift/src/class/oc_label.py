@@ -29,7 +29,7 @@ class OCLabel(OpenShiftCLI):
         '''property for the current labels'''
         if self._curr_labels is None:
             results = self.get()
-            self._curr_labels = results['labels']
+            self._curr_labels = results['results']['labels']
 
         return self._curr_labels
 
