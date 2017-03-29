@@ -113,4 +113,3 @@ class OCClusterRoleTest(unittest.TestCase):
             mock.call(['oc', 'create', '-f', mock.ANY], None),
             mock.call(['oc', 'get', 'clusterrole', 'operations', '-o', 'json'], None),
         ])
-

@@ -82,10 +82,10 @@ class OCClusterRole(OpenShiftCLI):
     def run_ansible(params, check_mode):
         '''run the idempotent ansible code'''
 
-        oc_clusterrole  = OCClusterRole(params['name'],
-                                        params['rules'],
-                                        params['kubeconfig'],
-                                        params['debug'])
+        oc_clusterrole = OCClusterRole(params['name'],
+                                       params['rules'],
+                                       params['kubeconfig'],
+                                       params['debug'])
 
         state = params['state']
 
