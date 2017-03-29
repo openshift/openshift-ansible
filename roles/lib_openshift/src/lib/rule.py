@@ -90,6 +90,7 @@ class Rule(object):
 
     def add_resource(self, inc_resource):
         '''add an resource to the resources array'''
+        self.resources.append(inc_resource)
 
     def remove_verb(self, inc_verb):
         '''add a verb to the verbs array'''
@@ -123,10 +124,10 @@ class Rule(object):
 
     def __eq__(self, other):
         '''return whether rules are equal'''
-        return self.attribute_restrictions == other.attribute_restrictions and \
-               self.api_groups == other.api_groups and \
-               self.resources == other.resources and \
-               self.verbs == other.verbs
+        return (self.attribute_restrictions == other.attribute_restrictions and
+               self.api_groups == other.api_groups and
+               self.resources == other.resources and
+               self.verbs == other.verbs)
 
 
     @staticmethod

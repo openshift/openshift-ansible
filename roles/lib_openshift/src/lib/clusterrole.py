@@ -4,7 +4,7 @@
 
 # pylint: disable=too-many-public-methods
 class ClusterRole(Yedit):
-    ''' Class to model an openshift DeploymentConfig'''
+    ''' Class to model an openshift ClusterRole'''
     rules_path = "rules"
 
     def __init__(self, name=None, content=None):
