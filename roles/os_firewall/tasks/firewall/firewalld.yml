@@ -34,6 +34,16 @@
   pause: seconds=10
   when: result | changed
 
+# Fix suspected race between firewalld and polkit BZ1436964
+- name: Wait for polkit action to have been created
+  command: pkaction --action-id=org.fedoraproject.FirewallD1.config.info
+  ignore_errors: true
+  register: pkaction
+  changed_when: false
+  until: pkaction.rc == 0
+  retries: 6
+  delay: 10
+
 - name: Add firewalld allow rules
   firewalld:
     port: "{{ item.port }}"
