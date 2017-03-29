@@ -91,6 +91,10 @@ openshift_release=v1.5
 
 # Specify exact version of etcd to configure or upgrade to.
 # etcd_version="3.1.0"
+# Enable etcd debug logging, defaults to false
+# etcd_debug=true
+# Set etcd log levels by package
+# etcd_log_package_levels="etcdserver=WARNING,security=DEBUG"
 
 # Upgrade Hooks
 #

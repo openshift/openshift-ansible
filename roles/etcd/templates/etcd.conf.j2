@@ -60,3 +60,9 @@ ETCD_PEER_CA_FILE={{ etcd_peer_ca_file }}
 ETCD_PEER_CERT_FILE={{ etcd_peer_cert_file }}
 ETCD_PEER_KEY_FILE={{ etcd_peer_key_file }}
 {% endif -%}
+
+#[logging]
+ETCD_DEBUG="{{ etcd_debug | default(false) | string }}"
+{% if etcd_log_package_levels is defined %}
+ETCD_LOG_PACKAGE_LEVELS="{{ etcd_log_package_levels }}"
+{% endif %}
