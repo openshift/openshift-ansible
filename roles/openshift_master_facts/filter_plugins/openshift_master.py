@@ -16,7 +16,7 @@ from ansible.parsing.yaml.dumper import AnsibleDumper
 from ansible.plugins.filter.core import to_bool as ansible_bool
 # pylint import-error disabled because pylint cannot find the package
 # when installed in a virtualenv
-from ansible.compat.six import string_types  # pylint: disable=no-name-in-module,import-error
+from ansible.module_utils.six import string_types  # pylint: disable=no-name-in-module,import-error
 
 import yaml
 
