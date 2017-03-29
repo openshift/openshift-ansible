@@ -125,9 +125,9 @@ class Rule(object):
     def __eq__(self, other):
         '''return whether rules are equal'''
         return (self.attribute_restrictions == other.attribute_restrictions and
-               self.api_groups == other.api_groups and
-               self.resources == other.resources and
-               self.verbs == other.verbs)
+                self.api_groups == other.api_groups and
+                self.resources == other.resources and
+                self.verbs == other.verbs)
 
 
     @staticmethod
