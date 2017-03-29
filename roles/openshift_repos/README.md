@@ -12,10 +12,10 @@ rhel-7-server-extra-rpms, and rhel-7-server-ose-3.0-rpms repos.
 Role Variables
 --------------
 
-| Name                          | Default value |                                              |
-|-------------------------------|---------------|----------------------------------------------|
-| openshift_deployment_type     | None          | Possible values enterprise, origin, online   |
-| openshift_additional_repos    | {}            | TODO                                         |
+| Name                          | Default value |                                    |
+|-------------------------------|---------------|------------------------------------|
+| openshift_deployment_type     | None          | Possible values enterprise, origin |
+| openshift_additional_repos    | {}            | TODO                               |
 
 Dependencies
 ------------
