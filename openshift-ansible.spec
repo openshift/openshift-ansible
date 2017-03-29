@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.10
+Version:        3.6.11
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,23 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Mar 29 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.11-1
+- Add etcd_debug and etcd_log_package_levels variables (sdodson@redhat.com)
+- Make the OCP available version detection excluder free (jchaloup@redhat.com)
+- Add test scaffold for docker_image_availability.py (rhcarvalho@gmail.com)
+- Add unit tests for package_version.py (rhcarvalho@gmail.com)
+- Add unit tests for package_update.py (rhcarvalho@gmail.com)
+- Add unit tests for package_availability.py (rhcarvalho@gmail.com)
+- Add unit tests for mixins.py (rhcarvalho@gmail.com)
+- Test recursively finding subclasses (rhcarvalho@gmail.com)
+- Test OpenShift health check loader (rhcarvalho@gmail.com)
+- Rename module_executor -> execute_module (rhcarvalho@gmail.com)
+- Use oo_version_gte_3_6+ for future versions and treat 1.x origin as legacy.
+  Add tests. (abutcher@redhat.com)
+- Added 3.5 -> 3.6 upgrade playbooks (skuznets@redhat.com)
+- Add oo_version_gte_X_X_or_Y_Y version comparison filters.
+  (abutcher@redhat.com)
+
 * Tue Mar 28 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.10-1
 - Use meta/main.yml for role dependencies (rteague@redhat.com)
 - Upgrade specific rpms instead of just master/node. (dgoodwin@redhat.com)
