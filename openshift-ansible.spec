@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.45
+Version:        3.5.46
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Mar 29 2017 Scott Dodson <sdodson@redhat.com> 3.5.46-1
+- Correct copy task to use remote source (rteague@redhat.com)
+- Removing initial setting of metrics image prefix/version
+  (ewolinet@redhat.com)
+- Make atomic-openshift-utils require playbooks of the same version
+  (sdodson@redhat.com)
+- Make the OCP available version detection excluder free (jchaloup@redhat.com)
+
 * Fri Mar 24 2017 Scott Dodson <sdodson@redhat.com> 3.5.45-1
 - Update s2i-dotnetcore content (sdodson@redhat.com)
 
