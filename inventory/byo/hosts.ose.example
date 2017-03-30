@@ -462,6 +462,14 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_hosted_registry_storage_s3_cloudfront_baseurl=https://myendpoint.cloudfront.net/
 #openshift_hosted_registry_storage_s3_cloudfront_privatekeyfile=/full/path/to/secret.pem
 #openshift_hosted_registry_storage_s3_cloudfront_keypairid=yourpairid
+#
+# Azure Blob Storage - WIP
+#openshift_hosted_registry_storage_kind=object
+#openshift_hosted_registry_storage_provider=azure_blob
+#openshift_hosted_registry_storage_azure_blob_accountname=acctname
+#openshift_hosted_registry_storage_azure_blob_accountkey=key
+#openshift_hosted_registry_storage_azure_blob_container=container
+#openshift_hosted_registry_storage_azure_blob_realm=realm
 
 # Metrics deployment
 # See: https://docs.openshift.com/enterprise/latest/install_config/cluster_metrics.html

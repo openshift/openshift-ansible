@@ -10,7 +10,7 @@
 - name: Assert implemented openshift.hosted.registry.storage.provider
   assert:
     that:
-    - openshift.hosted.registry.storage.provider not in ['azure_blob', 'swift']
+    - openshift.hosted.registry.storage.provider not in ['swift']
     msg: >
       Support for provider: "{{ openshift.hosted.registry.storage.provider }}"
       not implemented yet
