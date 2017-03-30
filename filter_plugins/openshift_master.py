@@ -525,13 +525,11 @@ class FilterModule(object):
         return valid
 
     @staticmethod
-    def certificates_to_synchronize(hostvars, include_keys=True):
+    def certificates_to_synchronize(hostvars, include_keys=True, include_ca=True):
         ''' Return certificates to synchronize based on facts. '''
         if not issubclass(type(hostvars), dict):
             raise errors.AnsibleFilterError("|failed expects hostvars is a dict")
-        certs = ['ca.crt',
-                 'ca.key',
-                 'admin.crt',
+        certs = ['admin.crt',
                  'admin.key',
                  'admin.kubeconfig',
                  'master.kubelet-client.crt',
@@ -542,6 +540,8 @@ class FilterModule(object):
                  'openshift-router.crt',
                  'openshift-router.key',
                  'openshift-router.kubeconfig']
+        if bool(include_ca):
+            certs += ['ca.crt', 'ca.key']
         if bool(include_keys):
             certs += ['serviceaccounts.private.key',
                       'serviceaccounts.public.key']

@@ -61,7 +61,11 @@ dnsConfig:
   bindNetwork: tcp4
 {% endif %}
 etcdClientInfo:
+{% if openshift.common.version_gte_3_2_or_1_2 | bool %}
+  ca: {{ "ca-bundle.crt" if (openshift.master.embedded_etcd | bool) else "master.etcd-ca.crt" }}
+{% else %}
   ca: {{ "ca.crt" if (openshift.master.embedded_etcd | bool) else "master.etcd-ca.crt" }}
+{% endif %}
   certFile: master.etcd-client.crt
   keyFile: master.etcd-client.key
   urls:
@@ -75,12 +79,20 @@ etcdConfig:
   peerServingInfo:
     bindAddress: {{ openshift.master.bind_addr }}:7001
     certFile: etcd.server.crt
+{% if openshift.common.version_gte_3_2_or_1_2 | bool %}
+    clientCA: ca-bundle.crt
+{% else %}
     clientCA: ca.crt
+{% endif %}
     keyFile: etcd.server.key
   servingInfo:
     bindAddress: {{ openshift.master.bind_addr }}:{{ openshift.master.etcd_port }}
     certFile: etcd.server.crt
+{% if openshift.common.version_gte_3_2_or_1_2 | bool %}
+    clientCA: ca-bundle.crt
+{% else %}
     clientCA: ca.crt
+{% endif %}
     keyFile: etcd.server.key
   storageDirectory: {{ openshift.common.data_dir }}/openshift.local.etcd
 {% endif %}
@@ -98,7 +110,11 @@ imagePolicyConfig:{{ openshift.master.image_policy_config | to_padded_yaml(level
 kind: MasterConfig
 kubeletClientInfo:
 {# TODO: allow user specified kubelet port #}
+{% if openshift.common.version_gte_3_2_or_1_2 | bool %}
+  ca: ca-bundle.crt
+{% else %}
   ca: ca.crt
+{% endif %}
   certFile: master.kubelet-client.crt
   keyFile: master.kubelet-client.key
   port: 10250
@@ -219,7 +235,11 @@ servingInfo:
   bindAddress: {{ openshift.master.bind_addr }}:{{ openshift.master.api_port }}
   bindNetwork: tcp4
   certFile: master.server.crt
+{% if openshift.common.version_gte_3_2_or_1_2 | bool %}
+  clientCA: ca-bundle.crt
+{% else %}
   clientCA: ca.crt
+{% endif %}
   keyFile: master.server.key
   maxRequestsInFlight: {{ openshift.master.max_requests_inflight }}
   requestTimeoutSeconds: 3600

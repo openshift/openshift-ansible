@@ -1,23 +1,7 @@
 ---
-- include: ../common/openshift-cluster/verify_ansible_version.yml
-
-- hosts: localhost
-  connection: local
-  become: no
-  gather_facts: no
-  tasks:
-  - include_vars: openshift-cluster/cluster_hosts.yml
-  - add_host:
-      name: "{{ item }}"
-      groups: l_oo_all_hosts
-    with_items: "{{ g_all_hosts }}"
-
-- hosts: l_oo_all_hosts
-  gather_facts: no
-  tasks:
-  - include_vars: openshift-cluster/cluster_hosts.yml
-
-- include: ../common/openshift-cluster/evaluate_groups.yml
+- include: ../../common/openshift-cluster/std_include.yml
+  tags:
+  - always
 
 - name: Gather Cluster facts
   hosts: OSEv3
