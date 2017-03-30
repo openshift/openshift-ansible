@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.11
+Version:        3.6.12
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,23 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Mar 30 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.12-1
+- Update example inventory files to mention certificate validity parameters.
+  (vsemushi@redhat.com)
+- openshift_hosted: add openshift_hosted_registry_cert_expire_days parameter.
+  (vsemushi@redhat.com)
+- oc_adm_ca_server_cert.py: re-generate. (vsemushi@redhat.com)
+- oc_adm_ca_server_cert: add expire_days parameter. (vsemushi@redhat.com)
+- openshift_ca: add openshift_ca_cert_expire_days and
+  openshift_master_cert_expire_days parameters. (vsemushi@redhat.com)
+- redeploy-certificates/registry.yml: add
+  openshift_hosted_registry_cert_expire_days parameter. (vsemushi@redhat.com)
+- openshift_master_certificates: add openshift_master_cert_expire_days
+  parameter. (vsemushi@redhat.com)
+- openshift_node_certificates: add openshift_node_cert_expire_days parameter.
+  (vsemushi@redhat.com)
+- Update Dockerfile.rhel7 to reflect changes to Dockerfile (pep@redhat.com)
+
 * Wed Mar 29 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.11-1
 - Add etcd_debug and etcd_log_package_levels variables (sdodson@redhat.com)
 - Make the OCP available version detection excluder free (jchaloup@redhat.com)
