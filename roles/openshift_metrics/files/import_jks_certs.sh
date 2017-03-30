@@ -20,8 +20,8 @@ set -ex
 
 function import_certs() {
   dir=$CERT_DIR
-  hawkular_metrics_keystore_password=$(echo $METRICS_KEYSTORE_PASSWD | base64 -d)
-  hawkular_metrics_truststore_password=$(echo $METRICS_TRUSTSTORE_PASSWD | base64 -d)
+  hawkular_metrics_keystore_password=$(echo $METRICS_KEYSTORE_PASSWD | base64 --decode)
+  hawkular_metrics_truststore_password=$(echo $METRICS_TRUSTSTORE_PASSWD | base64 --decode)
   hawkular_alias=`keytool -noprompt -list -keystore $dir/hawkular-metrics.truststore -storepass ${hawkular_metrics_truststore_password} | sed -n '7~2s/,.*$//p'`
 
   if [ ! -f $dir/hawkular-metrics.keystore ]; then
