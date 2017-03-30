@@ -1,0 +1,24 @@
+---
+- name: Check for provisioners project already exists
+  command: >
+    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig get project {{openshift_provisioners_project}} --no-headers
+  register: provisioners_project_result
+  ignore_errors: yes
+  when: not ansible_check_mode
+  changed_when: no
+
+- name: Create provisioners project
+  command: >
+    {{ openshift.common.admin_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig new-project {{openshift_provisioners_project}}
+  when: not ansible_check_mode and "not found" in provisioners_project_result.stderr
+
+- name: Create temp directory for all our templates
+  file: path={{mktemp.stdout}}/templates state=directory mode=0755
+  changed_when: False
+  check_mode: no
+
+- include: generate_secrets.yaml
+
+- include: generate_clusterrolebindings.yaml
+
+- include: generate_serviceaccounts.yaml
