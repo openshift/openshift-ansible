@@ -219,4 +219,33 @@
     assert:
       that: results.result == [1, 2, 3]
       msg: "Test: '[1, 2, 3]' != [{{ results.result }}]"
-###### end test create list value #####
+  ###### end test create list value #####
+
+  ###### test create multiple list value #####
+  - name: test multiple edits
+    yedit:
+      src: "{{ test_file }}"
+      edits:
+      - key: z.x.y
+        value:
+        - 1
+        - 2
+        - 3
+      - key: z.x.y
+        value: 4
+        action: append
+
+  - name: retrieve the key
+    yedit:
+      src: "{{ test_file }}"
+      state: list
+      key: z#x#y
+      separator: '#'
+    register: results
+  - debug: var=results
+
+  - name: Assert that the key was created
+    assert:
+      that: results.result == [1, 2, 3, 4]
+      msg: "Test: '[1, 2, 3, 4]' != [{{ results.result }}]"
+      ###### end test create multiple list value #####

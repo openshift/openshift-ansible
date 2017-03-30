@@ -157,7 +157,7 @@ class OCVolume(OpenShiftCLI):
             if not oc_volume.exists():
 
                 if check_mode:
-                    exit_json(changed=False, msg='Would have performed a create.')
+                    return {'changed': True, 'msg': 'CHECK_MODE: Would have performed a create.'}
 
                 # Create it here
                 api_rval = oc_volume.put()
