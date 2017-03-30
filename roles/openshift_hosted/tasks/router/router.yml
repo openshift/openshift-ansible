@@ -14,6 +14,31 @@
     openshift_hosted_router_selector: "{{ openshift.hosted.router.selector | default(None) }}"
     openshift_hosted_router_image: "{{ openshift.hosted.router.registryurl }}"
 
+# This is for when we desire a cluster signed cert
+# The certificate is generated and placed in master_config_dir/
+- block:
+  - name: generate a default wildcard router certificate
+    oc_adm_ca_server_cert:
+      signer_cert: "{{ openshift_master_config_dir }}/ca.crt"
+      signer_key: "{{ openshift_master_config_dir }}/ca.key"
+      signer_serial: "{{ openshift_master_config_dir }}/ca.serial.txt"
+      hostnames:
+      - "{{ openshift_master_default_subdomain }}"
+      - "*.{{ openshift_master_default_subdomain }}"
+      cert: "{{ ('/etc/origin/master/' ~ (item.certificate.certfile | basename)) if 'certfile' in item.certificate else ((openshift_master_config_dir) ~ '/openshift-router.crt') }}"
+      key: "{{ ('/etc/origin/master/' ~ (item.certificate.keyfile | basename)) if 'keyfile' in item.certificate else ((openshift_master_config_dir) ~ '/openshift-router.key') }}"
+    with_items: "{{ openshift_hosted_routers }}"
+
+  - name: set the openshift_hosted_router_certificate
+    set_fact:
+      openshift_hosted_router_certificate:
+        certfile: "{{ openshift_master_config_dir ~ '/openshift-router.crt' }}"
+        keyfile: "{{ openshift_master_config_dir ~ '/openshift-router.key' }}"
+        cafile: "{{ openshift_master_config_dir ~ '/ca.crt' }}"
+
+  # End Block
+  when: openshift_hosted_router_create_certificate
+
 - name: Get the certificate contents for router
   copy:
     backup: True
@@ -21,6 +46,7 @@
     src: "{{ item }}"
   with_items: "{{ openshift_hosted_routers | oo_collect(attribute='certificate') |
                   oo_select_keys_from_list(['keyfile', 'certfile', 'cafile']) }}"
+  when: not openshift_hosted_router_create_certificate
 
 - name: Create the router service account(s)
   oc_serviceaccount:

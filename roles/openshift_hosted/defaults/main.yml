@@ -28,3 +28,4 @@ openshift_hosted_routers:
 
 
 openshift_hosted_router_certificate: {}
+openshift_hosted_router_create_certificate: False
