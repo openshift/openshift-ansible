@@ -1,0 +1,28 @@
+---
+- name: Standardize on latest variable names
+  no_log: True  # keep task description legible
+  set_fact:
+    # goal is to deprecate deployment_type in favor of openshift_deployment_type.
+    # both will be accepted for now, but code should refer to the new name.
+    # TODO: once this is well-documented, add deprecation notice if using old name.
+    deployment_type: "{{ openshift_deployment_type | default(deployment_type) | default | string }}"
+    openshift_deployment_type: "{{ openshift_deployment_type | default(deployment_type) | default | string }}"
+
+- name: Normalize openshift_release
+  no_log: True  # keep task description legible
+  set_fact:
+    # Normalize release if provided, e.g. "v3.5" => "3.5"
+    # Currently this is not required to be defined for all installs, and the
+    # `openshift_version` role can generally figure out the specific version
+    # that gets installed (e.g. 3.5.0.1). So consider this the user's expressed
+    # intent (if any), not the authoritative version that will be installed.
+    openshift_release: "{{ openshift_release | string | regex_replace('^v', '') }}"
+  when: openshift_release is defined
+
+- name: Ensure a valid deployment type has been given.
+  # this variable is required; complain early and clearly if it is invalid.
+  when: openshift_deployment_type not in known_openshift_deployment_types
+  fail:
+    msg: |-
+      Please set openshift_deployment_type to one of:
+      {{ known_openshift_deployment_types | join(', ') }}

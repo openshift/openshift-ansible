@@ -23,7 +23,7 @@ ansible_ssh_user=root
 debug_level=2
 
 # deployment type valid values are origin, online, atomic-enterprise and openshift-enterprise
-deployment_type=origin
+openshift_deployment_type=origin
 
 # Specify the generic release of OpenShift to install. This is used mainly just during installation, after which we
 # rely on the version running on the first master. Works best for containerized installs where we can usually

@@ -30,7 +30,6 @@
     g_new_master_hosts: []
     g_new_node_hosts: []
     openshift_cluster_id: "{{ cluster_id | default('default') }}"
-    openshift_deployment_type: "{{ deployment_type }}"
 
 - include: ../../../../common/openshift-cluster/upgrades/initialize_nodes_to_upgrade.yml
 

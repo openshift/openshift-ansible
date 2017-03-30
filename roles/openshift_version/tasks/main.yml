@@ -13,14 +13,6 @@
 
 # Normalize some values that we need in a certain format that might be confusing:
 - set_fact:
-    openshift_release: "{{ openshift_release[1:] }}"
-  when: openshift_release is defined and openshift_release[0] == 'v'
-
-- set_fact:
-    openshift_release: "{{ openshift_release | string }}"
-  when: openshift_release is defined
-
-- set_fact:
     openshift_image_tag: "{{ 'v' + openshift_image_tag }}"
   when: openshift_image_tag is defined and openshift_image_tag[0] != 'v' and openshift_image_tag != 'latest'
 

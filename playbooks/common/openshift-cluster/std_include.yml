@@ -22,8 +22,6 @@
   - always
   tasks:
   - include_vars: ../../byo/openshift-cluster/cluster_hosts.yml
-  - set_fact:
-      openshift_deployment_type: "{{ deployment_type }}"
 
 - include: evaluate_groups.yml
   tags:

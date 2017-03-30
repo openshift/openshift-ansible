@@ -56,8 +56,6 @@
     - role: node
       local_facts:
         dns_ip: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
-  vars:
-    openshift_deployment_type: "{{ deployment_type }}"
   roles:
   - openshift_node_dnsmasq
   post_tasks:

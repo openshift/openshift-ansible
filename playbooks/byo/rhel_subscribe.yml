@@ -5,8 +5,6 @@
 
 - name: Subscribe hosts, update repos and update OS packages
   hosts: l_oo_all_hosts
-  vars:
-    openshift_deployment_type: "{{ deployment_type }}"
   roles:
   - role: rhel_subscribe
     when: deployment_type in ['atomic-enterprise', 'enterprise', 'openshift-enterprise'] and

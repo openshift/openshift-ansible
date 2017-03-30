@@ -15,7 +15,7 @@ ansible_become=yes
 # Debug level for all OpenShift components (Defaults to 2)
 debug_level=2
 
-deployment_type=openshift-enterprise
+openshift_deployment_type=openshift-enterprise
 
 openshift_additional_repos=[{'id': 'ose-3.1', 'name': 'ose-3.1', 'baseurl': 'http://pulp.dist.prod.ext.phx2.redhat.com/content/dist/rhel/server/7/7Server/x86_64/ose/3.1/os', 'enabled': 1, 'gpgcheck': 0}]
 

@@ -4,10 +4,6 @@
     path: /run/ostree-booted
   register: ostree_booted
 
-- assert:
-    that: openshift_deployment_type in known_openshift_deployment_types
-    msg: "openshift_deployment_type must be one of {{ known_openshift_deployment_types }}"
-
 - block:
   - name: Ensure libselinux-python is installed
     package: name=libselinux-python state=present
