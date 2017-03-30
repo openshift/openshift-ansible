@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.70
+Version:        3.3.71
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,20 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Mar 30 2017 Scott Dodson <sdodson@redhat.com> 3.3.71-1
+- Default router volumes. (abutcher@redhat.com)
+- Default openshift_master_default_subdomain. (abutcher@redhat.com)
+- Specify namespace for registry secret replacement. (abutcher@redhat.com)
+- Update binary path for registry secret replacement. (abutcher@redhat.com)
+- Ensure etcd client certs are regenerated with embedded etcd.
+  (abutcher@redhat.com)
+- Ensure embedded etcd config uses CA bundle. (abutcher@redhat.com)
+- [openshift_ca] Reference client binary from openshift_ca_host.
+  (abutcher@redhat.com)
+- Use service annotations to redeploy router service serving cert signer cert.
+  (abutcher@redhat.com)
+- Restructure certificate redeploy playbooks (abutcher@redhat.com)
+
 * Tue Mar 28 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.3.70-1
 - Update the failure methods and add required variables/functions
   (tbielawa@redhat.com)
