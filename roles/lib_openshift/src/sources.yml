@@ -89,6 +89,18 @@ oc_configmap.py:
 - class/oc_configmap.py
 - ansible/oc_configmap.py
 
+oc_clusterrole.py:
+- doc/generated
+- doc/license
+- lib/import.py
+- doc/clusterrole
+- ../../lib_utils/src/class/yedit.py
+- lib/base.py
+- lib/rule.py
+- lib/clusterrole.py
+- class/oc_clusterrole.py
+- ansible/oc_clusterrole.py
+
 oc_edit.py:
 - doc/generated
 - doc/license
