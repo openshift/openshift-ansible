@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.53
+Version:        3.2.54
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,22 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Mar 30 2017 Scott Dodson <sdodson@redhat.com> 3.2.54-1
+- Default router volumes. (abutcher@redhat.com)
+- Default openshift_master_default_subdomain. (abutcher@redhat.com)
+- Specify namespace for registry secret replacement. (abutcher@redhat.com)
+- Update binary path for registry secret replacement. (abutcher@redhat.com)
+- Ensure etcd client certs are regenerated with embedded etcd.
+  (abutcher@redhat.com)
+- Ensure embedded etcd config uses CA bundle. (abutcher@redhat.com)
+- [openshift_ca] Reference client binary from openshift_ca_host.
+  (abutcher@redhat.com)
+- Use service annotations to redeploy router service serving cert signer cert.
+  (abutcher@redhat.com)
+- Restructure certificate redeploy playbooks (abutcher@redhat.com)
+- Fix osm_use_cockpit check. (abutcher@redhat.com)
+- Default groups.oo_etcd_to_config in pre upgrade. (abutcher@redhat.com)
+
 * Fri Feb 24 2017 Scott Dodson <sdodson@redhat.com> 3.2.53-1
 - Fix Quick Installer failed due to a Python method failure
   (tbielawa@redhat.com)
