@@ -8,3 +8,4 @@
   systemd:
     name: docker
     state: restarted
+  when: not openshift_certificates_redeploy | default(false) | bool

@@ -1,0 +1,374 @@
+---
+- name: Verify OpenShift version is greater than or equal to 1.2 or 3.2
+  hosts: oo_first_master
+  tasks:
+  - fail:
+      msg: "The current OpenShift version is less than 1.2/3.2 and does not support CA bundles."
+    when: not openshift.common.version_gte_3_2_or_1_2 | bool
+
+- name: Backup existing etcd CA certificate directories
+  hosts: oo_etcd_to_config
+  roles:
+  - etcd_common
+  tasks:
+  - name: Determine if CA certificate directory exists
+    stat:
+      path: "{{ etcd_ca_dir }}"
+    register: etcd_ca_certs_dir_stat
+  - name: Backup generated etcd certificates
+    command: >
+      tar -czf {{ etcd_conf_dir }}/etcd-ca-certificate-backup-{{ ansible_date_time.epoch }}.tgz
+      {{ etcd_ca_dir }}
+    args:
+      warn: no
+    when: etcd_ca_certs_dir_stat.stat.exists | bool
+  - name: Remove CA certificate directory
+    file:
+      path: "{{ etcd_ca_dir }}"
+      state: absent
+    when: etcd_ca_certs_dir_stat.stat.exists | bool
+
+- name: Generate new etcd CA
+  hosts: oo_first_etcd
+  roles:
+  - role: etcd_ca
+    etcd_peers: "{{ groups.oo_etcd_to_config | default([], true) }}"
+    etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
+    etcd_certificates_etcd_hosts: "{{ groups.oo_etcd_to_config | default([], true) }}"
+
+- name: Create temp directory for syncing certs
+  hosts: localhost
+  connection: local
+  become: no
+  gather_facts: no
+  tasks:
+  - name: Create local temp directory for syncing certs
+    local_action: command mktemp -d /tmp/openshift-ansible-XXXXXXX
+    register: g_etcd_mktemp
+    changed_when: false
+
+- name: Distribute etcd CA to etcd hosts
+  hosts: oo_etcd_to_config
+  vars:
+    etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
+  roles:
+  - etcd_common
+  tasks:
+  - name: Create a tarball of the etcd ca certs
+    command: >
+      tar -czvf {{ etcd_conf_dir }}/{{ etcd_ca_name }}.tgz
+        -C {{ etcd_ca_dir }} .
+    args:
+      creates: "{{ etcd_conf_dir }}/{{ etcd_ca_name }}.tgz"
+      warn: no
+    delegate_to: "{{ etcd_ca_host }}"
+    run_once: true
+  - name: Retrieve etcd ca cert tarball
+    fetch:
+      src: "{{ etcd_conf_dir }}/{{ etcd_ca_name }}.tgz"
+      dest: "{{ hostvars['localhost'].g_etcd_mktemp.stdout }}/"
+      flat: yes
+      fail_on_missing: yes
+      validate_checksum: yes
+    delegate_to: "{{ etcd_ca_host }}"
+    run_once: true
+  - name: Ensure ca directory exists
+    file:
+      path: "{{ etcd_ca_dir }}"
+      state: directory
+  - name: Unarchive etcd ca cert tarballs
+    unarchive:
+      src: "{{ hostvars['localhost'].g_etcd_mktemp.stdout }}/{{ etcd_ca_name }}.tgz"
+      dest: "{{ etcd_ca_dir }}"
+  - name: Read current etcd CA
+    slurp:
+      src: "{{ etcd_conf_dir }}/ca.crt"
+    register: g_current_etcd_ca_output
+  - name: Read new etcd CA
+    slurp:
+      src: "{{ etcd_ca_dir }}/ca.crt"
+    register: g_new_etcd_ca_output
+  - copy:
+      content: "{{ (g_new_etcd_ca_output.content|b64decode) + (g_current_etcd_ca_output.content|b64decode) }}"
+      dest: "{{ item }}/ca.crt"
+    with_items:
+    - "{{ etcd_conf_dir }}"
+    - "{{ etcd_ca_dir }}"
+
+- name: Retrieve etcd CA certificate
+  hosts: oo_first_etcd
+  roles:
+  - etcd_common
+  tasks:
+  - name: Retrieve etcd CA certificate
+    fetch:
+      src: "{{ etcd_conf_dir }}/ca.crt"
+      dest: "{{ hostvars['localhost'].g_etcd_mktemp.stdout }}/"
+      flat: yes
+      fail_on_missing: yes
+      validate_checksum: yes
+
+- name: Distribute etcd CA to masters
+  hosts: oo_masters_to_config
+  vars:
+    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
+  tasks:
+  - name: Deploy CA certificate, key, bundle and serial
+    copy:
+      src: "{{ hostvars['localhost'].g_etcd_mktemp.stdout }}/ca.crt"
+      dest: "{{ openshift.common.config_base }}/master/master.etcd-ca.crt"
+    when: groups.oo_etcd_to_config | default([]) | length > 0
+
+- name: Delete temporary directory on localhost
+  hosts: localhost
+  connection: local
+  become: no
+  gather_facts: no
+  tasks:
+  - file:
+      name: "{{ g_etcd_mktemp.stdout }}"
+      state: absent
+    changed_when: false
+
+- include: ../../../common/openshift-etcd/restart.yml
+
+# Update master config when ca-bundle not referenced. Services will be
+# restarted below after new CA certificate has been distributed.
+- name: Ensure ca-bundle.crt is referenced in master configuration
+  hosts: oo_masters_to_config
+  tasks:
+  - slurp:
+      src: "{{ openshift.common.config_base }}/master/master-config.yaml"
+    register: g_master_config_output
+  - modify_yaml:
+      dest: "{{ openshift.common.config_base }}/master/master-config.yaml"
+      yaml_key: kubeletClientInfo.ca
+      yaml_value: ca-bundle.crt
+    when: (g_master_config_output.content|b64decode|from_yaml).kubeletClientInfo.ca != 'ca-bundle.crt'
+  - modify_yaml:
+      dest: "{{ openshift.common.config_base }}/master/master-config.yaml"
+      yaml_key: serviceAccountConfig.masterCA
+      yaml_value: ca-bundle.crt
+    when: (g_master_config_output.content|b64decode|from_yaml).serviceAccountConfig.masterCA != 'ca-bundle.crt'
+  - modify_yaml:
+      dest: "{{ openshift.common.config_base }}/master/master-config.yaml"
+      yaml_key: oauthConfig.masterCA
+      yaml_value: ca-bundle.crt
+    when: (g_master_config_output.content|b64decode|from_yaml).oauthConfig.masterCA != 'ca-bundle.crt'
+  - modify_yaml:
+      dest: "{{ openshift.common.config_base }}/master/master-config.yaml"
+      yaml_key: servingInfo.clientCA
+      yaml_value: ca-bundle.crt
+    when: (g_master_config_output.content|b64decode|from_yaml).servingInfo.clientCA != 'ca-bundle.crt'
+  - modify_yaml:
+      dest: "{{ openshift.common.config_base }}/master/master-config.yaml"
+      yaml_key: etcdClientInfo.ca
+      yaml_value: ca-bundle.crt
+    when:
+    - groups.oo_etcd_to_config | default([]) | length == 0
+    - (g_master_config_output.content|b64decode|from_yaml).etcdClientInfo.ca != 'ca-bundle.crt'
+  - modify_yaml:
+      dest: "{{ openshift.common.config_base }}/master/master-config.yaml"
+      yaml_key: etcdConfig.peerServingInfo.clientCA
+      yaml_value: ca-bundle.crt
+    when:
+    - groups.oo_etcd_to_config | default([]) | length == 0
+    - (g_master_config_output.content|b64decode|from_yaml).etcdConfig.peerServingInfo.clientCA != 'ca-bundle.crt'
+  - modify_yaml:
+      dest: "{{ openshift.common.config_base }}/master/master-config.yaml"
+      yaml_key: etcdConfig.servingInfo.clientCA
+      yaml_value: ca-bundle.crt
+    when:
+    - groups.oo_etcd_to_config | default([]) | length == 0
+    - (g_master_config_output.content|b64decode|from_yaml).etcdConfig.servingInfo.clientCA != 'ca-bundle.crt'
+
+- name: Copy current OpenShift CA to legacy directory
+  hosts: oo_masters_to_config
+  pre_tasks:
+  - name: Create legacy-ca directory
+    file:
+      path: "{{ openshift.common.config_base }}/master/legacy-ca"
+      state: directory
+      mode: 0700
+      owner: root
+      group: root
+  - command: mktemp -u XXXXXX
+    register: g_legacy_ca_mktemp
+    changed_when: false
+  # Copy CA certificate, key, serial and bundle to legacy-ca with a
+  # prefix generated by mktemp, ie. XXXXXX-ca.crt.
+  #
+  # The following roles will pick up all CA certificates matching
+  # /.*-ca.crt/ in the legacy-ca directory and ensure they are present
+  # in the OpenShift CA bundle.
+  # - openshift_ca
+  # - openshift_master_certificates
+  # - openshift_node_certificates
+  - name: Copy current OpenShift CA to legacy directory
+    copy:
+      src: "{{ openshift.common.config_base }}/master/{{ item }}"
+      dest: "{{ openshift.common.config_base }}/master/legacy-ca/{{ g_legacy_ca_mktemp.stdout }}-{{ item }}"
+      remote_src: true
+    # It is possible that redeploying failed and files may be missing.
+    # Ignore errors in this case. Files should have been copied to
+    # legacy-ca directory in previous run.
+    ignore_errors: true
+    with_items:
+    - "ca.crt"
+    - "ca.key"
+    - "ca.serial.txt"
+    - "ca-bundle.crt"
+
+- name: Generate new OpenShift CA certificate
+  hosts: oo_first_master
+  pre_tasks:
+  - name: Create temporary directory for creating new CA certificate
+    command: >
+      mktemp -d /tmp/openshift-ansible-XXXXXXX
+    register: g_new_openshift_ca_mktemp
+    changed_when: false
+  roles:
+  - role: openshift_ca
+    # Set openshift_ca_config_dir to a temporary directory where CA
+    # will be created. We'll replace the existing CA with the CA
+    # created in the temporary directory.
+    openshift_ca_config_dir: "{{ g_new_openshift_ca_mktemp.stdout }}"
+    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
+    openshift_master_hostnames: "{{ hostvars
+                                    | oo_select_keys(groups['oo_masters_to_config'] | default([]))
+                                    | oo_collect('openshift.common.all_hostnames')
+                                    | oo_flatten | unique }}"
+
+- name: Create temp directory for syncing certs
+  hosts: localhost
+  connection: local
+  become: no
+  gather_facts: no
+  tasks:
+  - name: Create local temp directory for syncing certs
+    local_action: command mktemp -d /tmp/openshift-ansible-XXXXXXX
+    register: g_master_mktemp
+    changed_when: false
+
+- name: Retrieve OpenShift CA
+  hosts: oo_first_master
+  vars:
+    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
+  tasks:
+  - name: Retrieve CA certificate, key, bundle and serial
+    fetch:
+      src: "{{ hostvars[openshift_ca_host].g_new_openshift_ca_mktemp.stdout }}/{{ item }}"
+      dest: "{{ hostvars['localhost'].g_master_mktemp.stdout }}/"
+      flat: yes
+      fail_on_missing: yes
+      validate_checksum: yes
+    with_items:
+    - ca.crt
+    - ca.key
+    - ca-bundle.crt
+    - ca.serial.txt
+    delegate_to: "{{ openshift_ca_host }}"
+    run_once: true
+    changed_when: false
+
+- name: Distribute OpenShift CA to masters
+  hosts: oo_masters_to_config
+  vars:
+    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
+  tasks:
+  - name: Deploy CA certificate, key, bundle and serial
+    copy:
+      src: "{{ hostvars['localhost'].g_master_mktemp.stdout }}/{{ item }}"
+      dest: "{{ openshift.common.config_base }}/master/"
+    with_items:
+    - ca.crt
+    - ca.key
+    - ca-bundle.crt
+    - ca.serial.txt
+  - name: Update master client kubeconfig CA data
+    kubeclient_ca:
+      client_path: "{{ openshift.common.config_base }}/master/openshift-master.kubeconfig"
+      ca_path: "{{ openshift.common.config_base }}/master/ca-bundle.crt"
+  - name: Update admin client kubeconfig CA data
+    kubeclient_ca:
+      client_path: "{{ openshift.common.config_base }}/master/admin.kubeconfig"
+      ca_path: "{{ openshift.common.config_base }}/master/ca-bundle.crt"
+  - name: Lookup default group for ansible_ssh_user
+    command: "/usr/bin/id -g {{ ansible_ssh_user }}"
+    changed_when: false
+    register: _ansible_ssh_user_gid
+  - set_fact:
+      client_users: "{{ [ansible_ssh_user, 'root'] | unique }}"
+  - name: Create the client config dir(s)
+    file:
+      path: "~{{ item }}/.kube"
+      state: directory
+      mode: 0700
+      owner: "{{ item }}"
+      group: "{{ 'root' if item == 'root' else _ansible_ssh_user_gid.stdout  }}"
+    with_items: "{{ client_users }}"
+  - name: Copy the admin client config(s)
+    copy:
+      src: "{{ openshift.common.config_base }}/master/admin.kubeconfig"
+      dest: "~{{ item }}/.kube/config"
+      remote_src: yes
+    with_items: "{{ client_users }}"
+  - name: Update the permissions on the admin client config(s)
+    file:
+      path: "~{{ item }}/.kube/config"
+      state: file
+      mode: 0700
+      owner: "{{ item }}"
+      group: "{{ 'root' if item == 'root' else _ansible_ssh_user_gid.stdout  }}"
+    with_items: "{{ client_users }}"
+
+- include: ../../../common/openshift-master/restart.yml
+
+- name: Distribute OpenShift CA certificate to nodes
+  hosts: oo_nodes_to_config
+  vars:
+    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
+  tasks:
+  - copy:
+      src: "{{ hostvars['localhost'].g_master_mktemp.stdout }}/ca-bundle.crt"
+      dest: "{{ openshift.common.config_base }}/node/ca.crt"
+  - name: Copy OpenShift CA to system CA trust
+    copy:
+      src: "{{ item.cert }}"
+      dest: "/etc/pki/ca-trust/source/anchors/{{ item.id }}-{{ item.cert | basename }}"
+      remote_src: yes
+    with_items:
+    - id: openshift
+      cert: "{{ openshift.common.config_base }}/node/ca.crt"
+    notify:
+    - update ca trust
+  - name: Update node client kubeconfig CA data
+    kubeclient_ca:
+      client_path: "{{ openshift.common.config_base }}/node/system:node:{{ openshift.common.hostname }}.kubeconfig"
+      ca_path: "{{ openshift.common.config_base }}/node/ca.crt"
+  handlers:
+  # Normally this handler would restart docker after updating ca
+  # trust. We'll do that when we restart nodes to avoid restarting
+  # docker on all nodes in parallel.
+  - name: update ca trust
+    command: update-ca-trust
+
+- name: Delete temporary directory on CA host
+  hosts: oo_first_master
+  tasks:
+  - file:
+      path: "{{ g_new_openshift_ca_mktemp.stdout }}"
+      state: absent
+
+- name: Delete temporary directory on localhost
+  hosts: localhost
+  connection: local
+  become: no
+  gather_facts: no
+  tasks:
+  - file:
+      name: "{{ g_master_mktemp.stdout }}"
+      state: absent
+    changed_when: false
+
+- include: ../../../common/openshift-node/restart.yml
