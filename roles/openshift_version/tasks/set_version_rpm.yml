@@ -19,6 +19,7 @@
   copy:
     src: /etc/yum.conf
     dest: "{{ yum_conf_temp_file }}"
+    remote_src: True
 
 - name: Clear the exclude= list in the temporary yum.conf
   lineinfile:
