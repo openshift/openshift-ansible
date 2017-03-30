@@ -1,0 +1,19 @@
+---
+- name: Build all the images we need for running integration tests
+  hosts: localhost
+  connection: local
+  tasks:
+
+    - name: test-target-base
+      docker_image:
+        state: present
+        path: ./
+        dockerfile: Dockerfile.test-target-base
+        name: test-target-base
+
+    - name: preflight-aos-package-checks
+      docker_image:
+        state: present
+        pull: no
+        path: ./aos-package-checks
+        name: preflight-aos-package-checks
