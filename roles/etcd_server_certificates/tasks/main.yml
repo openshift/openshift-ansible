@@ -58,6 +58,7 @@
                  ~ etcd_cert_prefix ~ 'server.crt' }}"
   environment:
     SAN: "IP:{{ etcd_ip }}"
+  when: etcd_server_certs_missing | bool
   delegate_to: "{{ etcd_ca_host }}"
 
 - name: Create the peer csr

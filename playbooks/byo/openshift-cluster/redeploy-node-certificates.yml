@@ -1,0 +1,8 @@
+---
+- include: ../../common/openshift-cluster/std_include.yml
+  tags:
+  - always
+
+- include: ../../common/openshift-cluster/redeploy-certificates/nodes.yml
+
+- include: ../../common/openshift-node/restart.yml

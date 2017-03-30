@@ -39,10 +39,9 @@
   run_once: true
 
 - set_fact:
-    master_ca_missing: "{{ true if openshift_certificates_redeploy | default(false) | bool
-                           else False in (g_master_ca_stat_result.results
-                                         | oo_collect(attribute='stat.exists')
-                                         | list) }}"
+    master_ca_missing: "{{ False in (g_master_ca_stat_result.results
+                                     | oo_collect(attribute='stat.exists')
+                                     | list) }}"
   run_once: true
 
 - name: Retain original serviceaccount keys
@@ -59,7 +58,6 @@
   copy:
     src: "{{ item.src }}"
     dest: "{{ openshift_ca_config_dir }}/{{ item.dest }}"
-    force: "{{ true if openshift_certificates_redeploy_ca | default(false) | bool else false }}"
   with_items:
   - src: "{{ (openshift_master_ca_certificate | default({'certfile':none})).certfile }}"
     dest: ca.crt
@@ -71,25 +69,35 @@
 
 - name: Create ca serial
   copy:
-    content: "1"
+    content: "00"
     dest: "{{ openshift_ca_config_dir }}/ca.serial.txt"
-    force: "{{ true if openshift_certificates_redeploy | default(false) | bool else false }}"
+    force: "{{ openshift_certificates_redeploy | default(false) | bool }}"
   when: openshift_master_ca_certificate is defined
   delegate_to: "{{ openshift_ca_host }}"
   run_once: true
 
+- find:
+    paths: "{{ openshift.common.config_base }}/master/legacy-ca/"
+    patterns: ".*-ca.crt"
+    use_regex: true
+  register: g_master_legacy_ca_result
+
+# This should NOT replace the CA due to --overwrite=false when a CA already exists.
 - name: Create the master certificates if they do not already exist
   command: >
-    {{ openshift.common.client_binary }} adm create-master-certs
+    {{ hostvars[openshift_ca_host].openshift.common.client_binary }} adm create-master-certs
     {% for named_ca_certificate in openshift.master.named_certificates | default([]) | oo_collect('cafile') %}
     --certificate-authority {{ named_ca_certificate }}
+    {% endfor %}
+    {% for legacy_ca_certificate in g_master_legacy_ca_result.files | default([]) | oo_collect('path') %}
+    --certificate-authority {{ legacy_ca_certificate }}
     {% endfor %}
     --hostnames={{ openshift.common.all_hostnames | join(',') }}
     --master={{ openshift.master.api_url }}
     --public-master={{ openshift.master.public_api_url }}
     --cert-dir={{ openshift_ca_config_dir }}
     --overwrite=false
-  when: master_ca_missing | bool
+  when: master_ca_missing | bool or openshift_certificates_redeploy | default(false) | bool
   delegate_to: "{{ openshift_ca_host }}"
   run_once: true
 
