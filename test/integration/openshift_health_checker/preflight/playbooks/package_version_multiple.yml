@@ -1,0 +1,26 @@
+---
+- include: ../../setup_container.yml
+  vars:
+    image: preflight-aos-package-checks
+    l_host_vars:
+      openshift_deployment_type: openshift-enterprise
+
+- name: Fails when multiple AOS versions are available
+  hosts: all
+  roles:
+    - openshift_health_checker
+  tasks:
+    - block:
+
+        - include: tasks/enable_repo.yml
+          vars: { repo_name: "ose-3.2" }
+
+        - include: tasks/enable_repo.yml
+          vars: { repo_name: "ose-3.3" }
+
+        - action: openshift_health_check
+          args:
+            checks: [ 'package_version' ]
+
+      always:  # destroy the container whether check passed or not
+        - include: ../../teardown_container.yml
