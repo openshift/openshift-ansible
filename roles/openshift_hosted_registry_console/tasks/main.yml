@@ -1,4 +1,5 @@
 ---
+## this role formally named 'cockpit-ui'
 - block:
   - name: Create passthrough route for docker-registry
     oc_route:
@@ -38,8 +39,12 @@
   - name: Deploy registry-console
     command: >
       {{ openshift.common.client_binary }} new-app --template=registry-console
-      {% if openshift_cockpit_deployer_prefix is defined  %}-p IMAGE_PREFIX="{{ openshift_cockpit_deployer_prefix }}"{% endif %}
-      {% if openshift_cockpit_deployer_version is defined  %}-p IMAGE_VERSION="{{ openshift_cockpit_deployer_version }}"{% endif %}
+      {% if openshift_hosted_registry_console_deployer_prefix | default(openshift_cockpit_deployer_prefix) | default('') != ''  %}
+      -p IMAGE_PREFIX="{{ openshift_hosted_cockpit_deployer_prefix | default(openshift_cockpit_deployer_prefix) }}"
+      {% endif %}
+      {% if openshift_hosted_registry_console_deployer_version | default(openshift_cockpit_deployer_version) | default('') != '' %}
+      -p IMAGE_VERSION="{{ openshift_hosted_registry_console_deployer_prefix | default(openshift_cockpit_deployer_version) }}
+      "{% endif %}
       -p OPENSHIFT_OAUTH_PROVIDER_URL="{{ openshift.master.public_api_url }}"
       -p REGISTRY_HOST="{{ docker_registry_route.results.results[0].spec.host }}"
       -p COCKPIT_KUBE_URL="https://{{ registry_console_cockpit_kube.results.results[0].spec.host }}"
