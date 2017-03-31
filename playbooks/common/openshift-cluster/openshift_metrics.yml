@@ -1,11 +1,4 @@
 ---
-# I believe this violates our rule of either includes or plays.
-# Unfortunately we've documented calling this playbook directly so
-# I'd really like to apply the group mappings here rather than up in byo
-- include: ../../common/openshift-cluster/std_include.yml
-  tags:
-  - always
-
 - name: OpenShift Metrics
   hosts: oo_first_master
   roles:
