@@ -81,7 +81,6 @@ items:
     metadata:
       name: logging-deployer-edit-role
     roleRef:
-      kind: ClusterRole
       name: edit
     subjects:
     - kind: ServiceAccount
@@ -92,7 +91,6 @@ items:
     metadata:
       name: logging-deployer-dsadmin-role
     roleRef:
-      kind: ClusterRole
       name: daemonset-admin
     subjects:
     - kind: ServiceAccount
@@ -103,7 +101,6 @@ items:
     metadata:
       name: logging-elasticsearch-view-role
     roleRef:
-      kind: ClusterRole
       name: view
     subjects:
     - kind: ServiceAccount
