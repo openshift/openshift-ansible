@@ -21,12 +21,15 @@ import pkg_resources
 import yaml
 
 from ansible import errors
-# pylint no-name-in-module and import-error disabled here because pylint
-# fails to properly detect the packages when installed in a virtualenv
-from ansible.compat.six import string_types  # pylint:disable=no-name-in-module,import-error
-from ansible.compat.six.moves.urllib.parse import urlparse  # pylint:disable=no-name-in-module,import-error
-from ansible.module_utils._text import to_text
 from ansible.parsing.yaml.dumper import AnsibleDumper
+
+# ansible.compat.six goes away with Ansible 2.4
+try:
+    from ansible.compat.six import string_types, u
+    from ansible.compat.six.moves.urllib.parse import urlparse
+except ImportError:
+    from ansible.module_utils.six import string_types, u
+    from ansible.module_utils.six.moves.urllib.parse import urlparse
 
 HAS_OPENSSL = False
 try:
@@ -655,11 +658,11 @@ def to_padded_yaml(data, level=0, indent=2, **kw):
         return ""
 
     try:
-        transformed = yaml.dump(data, indent=indent, allow_unicode=True,
-                                default_flow_style=False,
-                                Dumper=AnsibleDumper, **kw)
+        transformed = u(yaml.dump(data, indent=indent, allow_unicode=True,
+                                  default_flow_style=False,
+                                  Dumper=AnsibleDumper, **kw))
         padded = "\n".join([" " * level * indent + line for line in transformed.splitlines()])
-        return to_text("\n{0}".format(padded))
+        return "\n{0}".format(padded)
     except Exception as my_e:
         raise errors.AnsibleFilterError('Failed to convert: %s' % my_e)
 
