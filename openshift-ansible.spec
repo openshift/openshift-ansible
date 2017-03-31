@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.12
+Version:        3.6.13
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,24 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Mar 31 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.13-1
+- fixed decode switch so it works on OSX (stobias@harborfreight.com)
+- Wait for firewalld polkit policy to be defined (sdodson@redhat.com)
+- Correct copy task to use remote source (rteague@redhat.com)
+- validate and normalize inventory variables (lmeyer@redhat.com)
+- Fixed spacing. (kwoodson@redhat.com)
+- Fixed docs.  Fixed add_resource. (kwoodson@redhat.com)
+- Fixing linting for spaces. (kwoodson@redhat.com)
+- Removing initial setting of metrics image prefix and version
+  (ewolinet@redhat.com)
+- Adding clusterrole to the toolbox. (kwoodson@redhat.com)
+- Fixed a bug in oc_volume. (kwoodson@redhat.com)
+- Adding a few more test cases.  Fixed a bug when key was empty. Safeguard
+  against yedit module being passed an empty key (kwoodson@redhat.com)
+- Added the ability to do multiple edits (kwoodson@redhat.com)
+- fix es config merge so template does not need quoting. gen then merge
+  (jcantril@redhat.com)
+
 * Thu Mar 30 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.12-1
 - Update example inventory files to mention certificate validity parameters.
   (vsemushi@redhat.com)
