@@ -14,11 +14,11 @@ openshift_hosted_router_edits:
 
 openshift_hosted_routers:
 - name: router
-  replicas: "{{ replicas }}"
+  replicas: "{{ replicas | default(1) }}"
   namespace: default
   serviceaccount: router
-  selector: "{{ openshift_hosted_router_selector }}"
-  images: "{{ openshift_hosted_router_image }}"
+  selector: "{{ openshift_hosted_router_selector | default(None) }}"
+  images: "{{ openshift_hosted_router_image | default(None)  }}"
   edits: "{{ openshift_hosted_router_edits }}"
   stats_port: 1936
   ports:
