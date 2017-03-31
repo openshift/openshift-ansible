@@ -1182,6 +1182,9 @@ values provided as a list. Hence the gratuitous use of ['foo'] below.
                 if facts['cloudprovider']['kind'] == 'gce':
                     kubelet_args['cloud-provider'] = ['gce']
                     kubelet_args['cloud-config'] = [cloud_cfg_path + '/gce.conf']
+                if facts['cloudprovider']['kind'] == 'azure':
+                    kubelet_args['cloud-provider'] = ['azure']
+                    kubelet_args['cloud-config'] = [cloud_cfg_path + '/azure.conf']
 
         # Automatically add node-labels to the kubeletArguments
         # parameter. See BZ1359848 for additional details.
@@ -1227,6 +1230,9 @@ def build_controller_args(facts):
                 if facts['cloudprovider']['kind'] == 'gce':
                     controller_args['cloud-provider'] = ['gce']
                     controller_args['cloud-config'] = [cloud_cfg_path + '/gce.conf']
+                if facts['cloudprovider']['kind'] == 'azure':
+                    api_server_args['cloud-provider'] = ['azure']
+                    api_server_args['cloud-config'] = [cloud_cfg_path + '/azure.conf']
         if controller_args != {}:
             facts = merge_facts({'master': {'controller_args': controller_args}}, facts, [], [])
     return facts
@@ -1249,6 +1255,9 @@ def build_api_server_args(facts):
                 if facts['cloudprovider']['kind'] == 'gce':
                     api_server_args['cloud-provider'] = ['gce']
                     api_server_args['cloud-config'] = [cloud_cfg_path + '/gce.conf']
+                if facts['cloudprovider']['kind'] == 'azure':
+                    api_server_args['cloud-provider'] = ['azure']
+                    api_server_args['cloud-config'] = [cloud_cfg_path + '/azure.conf']
         if api_server_args != {}:
             facts = merge_facts({'master': {'api_server_args': api_server_args}}, facts, [], [])
     return facts

@@ -1,0 +1,17 @@
+---
+# Work around ini_file create option in 2.2 which defaults to no
+- name: Create Azure config file
+  file:
+    dest: "{{ openshift.common.config_base }}/cloudprovider/azure.conf"
+    state: touch
+    mode: 0660
+    owner: root
+    group: root
+  changed_when: false
+
+- name: Configure Azure cloud provider
+  ini_file:
+    dest: "{{ openshift.common.config_base }}/cloudprovider/azure.conf"
+    section: Global
+    option: multizone
+    value: "true"
