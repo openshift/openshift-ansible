@@ -6,7 +6,7 @@
 # This script should be run from openshift-ansible/roles/openshift_examples
 
 XPAAS_VERSION=ose-v1.3.6
-ORIGIN_VERSION=${1:-v1.5}
+ORIGIN_VERSION=${1:-v1.6}
 RHAMP_TAG=1.0.0.GA
 RHAMP_TEMPLATE=https://raw.githubusercontent.com/3scale/rhamp-openshift-templates/${RHAMP_TAG}/apicast-gateway/apicast-gateway-template.yml
 EXAMPLES_BASE=$(pwd)/files/examples/${ORIGIN_VERSION}
@@ -30,14 +30,15 @@ mv application-templates-${XPAAS_VERSION}/jboss-image-streams.json ${EXAMPLES_BA
 mv application-templates-GA/fis-image-streams.json ${EXAMPLES_BASE}/xpaas-streams/fis-image-streams.json
 mv application-templates-GA/quickstarts/* ${EXAMPLES_BASE}/xpaas-templates/
 find application-templates-${XPAAS_VERSION}/ -name '*.json' ! -wholename '*secret*' ! -wholename '*demo*' -exec mv {} ${EXAMPLES_BASE}/xpaas-templates/ \;
+popd
+
 wget https://raw.githubusercontent.com/redhat-developer/s2i-dotnetcore/master/dotnet_imagestreams.json         -O ${EXAMPLES_BASE}/image-streams/dotnet_imagestreams.json
 wget https://raw.githubusercontent.com/redhat-developer/s2i-dotnetcore/master/templates/dotnet-example.json           -O ${EXAMPLES_BASE}/quickstart-templates/dotnet-example.json
 wget https://raw.githubusercontent.com/redhat-developer/s2i-dotnetcore/master/templates/dotnet-pgsql-persistent.json    -O ${EXAMPLES_BASE}/quickstart-templates/dotnet-pgsql-persistent.json
+wget ${RHAMP_TEMPLATE} -O ${EXAMPLES_BASE}/quickstart-templates/apicast-gateway-template.yml
 wget https://raw.githubusercontent.com/openshift/origin-metrics/master/metrics.yaml                            -O ../openshift_hosted_templates/files/${ORIGIN_VERSION}/origin/metrics-deployer.yaml
 wget https://raw.githubusercontent.com/openshift/origin-metrics/enterprise/metrics.yaml                        -O ../openshift_hosted_templates/files/${ORIGIN_VERSION}/enterprise/metrics-deployer.yaml
 wget https://raw.githubusercontent.com/openshift/origin-aggregated-logging/master/deployer/deployer.yaml       -O ../openshift_hosted_templates/files/${ORIGIN_VERSION}/origin/logging-deployer.yaml
 wget https://raw.githubusercontent.com/openshift/origin-aggregated-logging/enterprise/deployment/deployer.yaml -O ../openshift_hosted_templates/files/${ORIGIN_VERSION}/enterprise/logging-deployer.yaml
-wget ${RHAMP_TEMPLATE} -O ${EXAMPLES_BASE}/quickstart-templates/apicast-gateway-template.yml
 
-popd
 git diff files/examples
