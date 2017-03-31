@@ -8,3 +8,5 @@ es_recover_expected_nodes: "{{openshift_logging_es_cluster_size|int}}"
 es_ops_node_quorum: "{{openshift_logging_es_ops_cluster_size|int/2 + 1}}"
 es_ops_recover_after_nodes: "{{openshift_logging_es_ops_cluster_size|int - 1}}"
 es_ops_recover_expected_nodes: "{{openshift_logging_es_ops_cluster_size|int}}"
+
+es_log_appenders: ['file', 'console']
