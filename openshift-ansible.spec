@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.13
+Version:        3.6.14
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,15 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Apr 01 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.14-1
+- Update v1.5 content (sdodson@redhat.com)
+- Add v1.6 content (sdodson@redhat.com)
+- Fix generated code (sdodson@redhat.com)
+- bug 1432607.  Allow configuration of ES log destination (jcantril@redhat.com)
+- openshift_facts: install python3-dbus package on Fedora nodes.
+  (vsemushi@redhat.com)
+- Remove kube-nfs-volumes role (mawong@redhat.com)
+
 * Fri Mar 31 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.13-1
 - fixed decode switch so it works on OSX (stobias@harborfreight.com)
 - Wait for firewalld polkit policy to be defined (sdodson@redhat.com)
