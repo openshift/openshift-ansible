@@ -179,7 +179,7 @@ class OCProcess(OpenShiftCLI):
 
         for cmd in rval:
             if cmd['returncode'] != 0:
-                return {"failed": True, "changed": update, "results": rval, "state": "present"}
+                return {"failed": True, "changed": update, "msg": rval, "state": "present"}
 
         return {"changed": update, "results": rval, "state": "present"}
 
