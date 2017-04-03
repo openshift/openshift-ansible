@@ -1,0 +1,13 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name:  ups-broker
+  labels:
+    app: ups-broker
+spec:
+  selector:
+    app:  ups-broker
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080

@@ -1,0 +1,3 @@
+---
+__openshift_service_catalog_broker_image_prefix: "registry.access.redhat.com/openshift3/"
+__openshift_service_catalog_broker_image_version: "3.6.0"

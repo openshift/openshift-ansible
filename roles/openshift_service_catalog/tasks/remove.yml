@@ -1,0 +1,56 @@
+---
+- name: Remove Service Catalog APIServer
+  command: >
+    oc delete apiservices.apiregistration.k8s.io/v1alpha1.servicecatalog.k8s.io --ignore-not-found -n kube-service-catalog
+
+- name: Remove Policy Binding
+  command: >
+    oc delete policybindings/kube-system:default -n kube-system --ignore-not-found
+
+# TODO: this module doesn't currently remove this
+#- name: Remove service catalog api service
+#  oc_obj:
+#    state: absent
+#    namespace: "kube-service-catalog"
+#    kind: apiservices.apiregistration.k8s.io
+#    name: v1alpha1.servicecatalog.k8s.io
+
+- name: Remove Service Catalog API Server route
+  oc_obj:
+    state: absent
+    namespace: "kube-service-catalog"
+    kind: route
+    name: apiserver
+
+- name: Remove Service Catalog API Server service
+  oc_obj:
+    state: absent
+    namespace: "kube-service-catalog"
+    kind: service
+    name: apiserver
+
+- name: Remove Service Catalog API Server daemonset
+  oc_obj:
+    state: absent
+    namespace: "kube-service-catalog"
+    kind: daemonset
+    name: apiserver
+
+- name: Remove Controller Manager service
+  oc_obj:
+    state: absent
+    namespace: "kube-service-catalog"
+    kind: service
+    name: controller-manager
+
+- name: Remove Controller Manager deployment
+  oc_obj:
+    state: absent
+    namespace: "kube-service-catalog"
+    kind: deployment
+    name: controller-manager
+
+- name: Remove Service Catalog namespace
+  oc_project:
+    state: absent
+    name: "kube-service-catalog"

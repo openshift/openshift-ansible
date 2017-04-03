@@ -1,0 +1,3 @@
+---
+__openshift_service_catalog_image_prefix: "docker.io/openshift/origin-"
+__openshift_service_catalog_image_version: "latest"
