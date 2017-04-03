@@ -754,12 +754,17 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Enable API service auditing, available as of 3.2
 #openshift_master_audit_config={"basicAuditEnabled": true}
 
-# Validity of the auto-generated certificates in days.
+# Validity of the auto-generated OpenShift certificates in days.
 # See also openshift_hosted_registry_cert_expire_days above.
 #
 #openshift_ca_cert_expire_days=1825
 #openshift_node_cert_expire_days=730
 #openshift_master_cert_expire_days=730
+
+# Validity of the auto-generated external etcd certificates in days.
+# Controls validity for etcd CA, peer, server and client certificates.
+#
+#etcd_ca_default_days=1825
 
 # host group for masters
 [masters]
