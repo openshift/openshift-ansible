@@ -136,7 +136,7 @@ class Router(OpenShiftCLI):
         self.secret = None
         self.rolebinding = None
         for part in self.router_parts:
-            result = self._get(part['kind'], rname=part['name'])
+            result = self._get(part['kind'], name=part['name'])
             if result['returncode'] == 0 and part['kind'] == 'dc':
                 self.deploymentconfig = DeploymentConfig(result['results'][0])
             elif result['returncode'] == 0 and part['kind'] == 'svc':

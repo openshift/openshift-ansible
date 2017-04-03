@@ -1647,7 +1647,7 @@ def main():
             force=dict(default=False, type='bool'),
             selector=dict(default=None, type='str'),
         ),
-        mutually_exclusive=[["content", "files"]],
+        mutually_exclusive=[["content", "files"],["selector", "name"]],
 
         supports_check_mode=True,
     )
