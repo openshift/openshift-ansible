@@ -10,7 +10,7 @@ class OCObject(OpenShiftCLI):
     def __init__(self,
                  kind,
                  namespace,
-                 rname=None,
+                 name=None,
                  selector=None,
                  kubeconfig='/etc/origin/master/admin.kubeconfig',
                  verbose=False,
@@ -19,24 +19,21 @@ class OCObject(OpenShiftCLI):
         super(OCObject, self).__init__(namespace, kubeconfig=kubeconfig, verbose=verbose,
                                        all_namespaces=all_namespaces)
         self.kind = kind
-        self.name = rname
+        self.name = name
         self.selector = selector
 
     def get(self):
         '''return a kind by name '''
-        results = self._get(self.kind, rname=self.name, selector=self.selector)
-        if (results['returncode'] == 0 and 'stderr' in results and
-            'No resources found.' in results['stderr']):
-
-        elif (results['returncode'] != 0 and 'stderr' in results and
+        results = self._get(self.kind, name=self.name, selector=self.selector)
+        if (results['returncode'] != 0 and 'stderr' in results and
            '\"%s\" not found' % self.name in results['stderr']):
             results['returncode'] = 0
 
         return results
 
     def delete(self):
-        '''return all pods '''
-        return self._delete(self.kind, self.name)
+        '''delete the object'''
+        return self._delete(self.kind, name=self.name, selector=self.selector)
 
     def create(self, files=None, content=None):
         '''

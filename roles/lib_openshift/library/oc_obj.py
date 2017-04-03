@@ -912,11 +912,15 @@ class OpenShiftCLI(object):
         '''call oc create on a filename'''
         return self.openshift_cmd(['create', '-f', fname])
 
-    def _delete(self, resource, rname, selector=None):
+    def _delete(self, resource, name=None, selector=None):
         '''call oc delete on a resource'''
-        cmd = ['delete', resource, rname]
-        if selector:
-            cmd.append('--selector=%s' % selector)
+        cmd = ['delete', resource]
+        if selector is not None:
+            cmd.append('--selector={}'.format(selector))
+        elif name is not None:
+            cmd.append(name)
+        else:
+            raise OpenShiftCLIError('Either name or selector is required when calling delete.')
 
         return self.openshift_cmd(cmd)
 
@@ -934,7 +938,7 @@ class OpenShiftCLI(object):
         else:
             cmd.append(template_name)
         if params:
-            param_str = ["%s=%s" % (key, value) for key, value in params.items()]
+            param_str = ["{}={}".format(key, value) for key, value in params.items()]
             cmd.append('-v')
             cmd.extend(param_str)
 
@@ -951,13 +955,13 @@ class OpenShiftCLI(object):
 
         return self.openshift_cmd(['create', '-f', fname])
 
-    def _get(self, resource, rname=None, selector=None):
+    def _get(self, resource, name=None, selector=None):
         '''return a resource by name '''
         cmd = ['get', resource]
-        if selector:
-            cmd.append('--selector=%s' % selector)
-        elif rname:
-            cmd.append(rname)
+        if selector is not None:
+            cmd.append('--selector={}'.format(selector))
+        elif name is not None:
+            cmd.append(name)
 
         cmd.extend(['-o', 'json'])
 
@@ -977,9 +981,9 @@ class OpenShiftCLI(object):
         if node:
             cmd.extend(node)
         else:
-            cmd.append('--selector=%s' % selector)
+            cmd.append('--selector={}'.format(selector))
 
-        cmd.append('--schedulable=%s' % schedulable)
+        cmd.append('--schedulable={}'.format(schedulable))
 
         return self.openshift_cmd(cmd, oadm=True, output=True, output_type='raw')  # noqa: E501
 
@@ -994,10 +998,10 @@ class OpenShiftCLI(object):
         if node:
             cmd.extend(node)
         else:
-            cmd.append('--selector=%s' % selector)
+            cmd.append('--selector={}'.format(selector))
 
         if pod_selector:
-            cmd.append('--pod-selector=%s' % pod_selector)
+            cmd.append('--pod-selector={}'.format(pod_selector))
 
         cmd.extend(['--list-pods', '-o', 'json'])
 
@@ -1010,16 +1014,16 @@ class OpenShiftCLI(object):
         if node:
             cmd.extend(node)
         else:
-            cmd.append('--selector=%s' % selector)
+            cmd.append('--selector={}'.format(selector))
 
         if dry_run:
             cmd.append('--dry-run')
 
         if pod_selector:
-            cmd.append('--pod-selector=%s' % pod_selector)
+            cmd.append('--pod-selector={}'.format(pod_selector))
 
         if grace_period:
-            cmd.append('--grace-period=%s' % int(grace_period))
+            cmd.append('--grace-period={}'.format(int(grace_period)))
 
         if force:
             cmd.append('--force')
@@ -1430,7 +1434,7 @@ class OCObject(OpenShiftCLI):
     def __init__(self,
                  kind,
                  namespace,
-                 rname=None,
+                 name=None,
                  selector=None,
                  kubeconfig='/etc/origin/master/admin.kubeconfig',
                  verbose=False,
@@ -1439,24 +1443,21 @@ class OCObject(OpenShiftCLI):
         super(OCObject, self).__init__(namespace, kubeconfig=kubeconfig, verbose=verbose,
                                        all_namespaces=all_namespaces)
         self.kind = kind
-        self.name = rname
+        self.name = name
         self.selector = selector
 
     def get(self):
         '''return a kind by name '''
-        results = self._get(self.kind, rname=self.name, selector=self.selector)
-        if (results['returncode'] == 0 and 'stderr' in results and
-            'No resources found.' in results['stderr']):
-
-        elif (results['returncode'] != 0 and 'stderr' in results and
+        results = self._get(self.kind, name=self.name, selector=self.selector)
+        if (results['returncode'] != 0 and 'stderr' in results and
            '\"%s\" not found' % self.name in results['stderr']):
             results['returncode'] = 0
 
         return results
 
     def delete(self):
-        '''return all pods '''
-        return self._delete(self.kind, self.name)
+        '''delete the object'''
+        return self._delete(self.kind, name=self.name, selector=self.selector)
 
     def create(self, files=None, content=None):
         '''

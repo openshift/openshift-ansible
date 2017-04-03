@@ -105,7 +105,7 @@ class Registry(OpenShiftCLI):
 
         rval = 0
         for part in self.registry_parts:
-            result = self._get(part['kind'], rname=part['name'])
+            result = self._get(part['kind'], name=part['name'])
             if result['returncode'] == 0 and part['kind'] == 'dc':
                 self.deploymentconfig = DeploymentConfig(result['results'][0])
             elif result['returncode'] == 0 and part['kind'] == 'svc':
