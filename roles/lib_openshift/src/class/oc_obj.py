@@ -25,8 +25,11 @@ class OCObject(OpenShiftCLI):
     def get(self):
         '''return a kind by name '''
         results = self._get(self.kind, rname=self.name, selector=self.selector)
-        if results['returncode'] != 0 and 'stderr' in results and \
-           '\"%s\" not found' % self.name in results['stderr']:
+        if (results['returncode'] == 0 and 'stderr' in results and
+            'No resources found.' in results['stderr']):
+
+        elif (results['returncode'] != 0 and 'stderr' in results and
+           '\"%s\" not found' % self.name in results['stderr']):
             results['returncode'] = 0
 
         return results
@@ -109,24 +112,33 @@ class OCObject(OpenShiftCLI):
         # Get
         #####
         if state == 'list':
-            return {'changed': False, 'results': api_rval, 'state': 'list'}
-
-        if not params['name']:
-            return {'failed': True, 'msg': 'Please specify a name when state is absent|present.'}  # noqa: E501
+            return {'changed': False, 'results': api_rval, 'state': state}
 
         ########
         # Delete
         ########
         if state == 'absent':
-            if not Utils.exists(api_rval['results'], params['name']):
-                return {'changed': False, 'state': 'absent'}
+            # if we were passed a name, verify its not in our results
+            if params['name'] is not None and not Utils.exists(api_rval['results'], params['name']):
+                return {'changed': False, 'state': state}
+
+            # verify results are empty for the selector
+            if params['selector'] is not None and len(api_rval['results']) == 0:
+                return {'changed': False, 'state': state}
 
             if check_mode:
                 return {'changed': True, 'msg': 'CHECK_MODE: Would have performed a delete'}
 
             api_rval = ocobj.delete()
 
-            return {'changed': True, 'results': api_rval, 'state': 'absent'}
+            if api_rval['returncode'] != 0:
+                return {'failed': True, 'msg': api_rval}
+
+            return {'changed': True, 'results': api_rval, 'state': state}
+
+        # create/update: Must define a name beyond this point
+        if not params['name']:
+            return {'failed': True, 'msg': 'Please specify a name when state is present.'}
 
         if state == 'present':
             ########
@@ -152,7 +164,7 @@ class OCObject(OpenShiftCLI):
                 if params['files'] and params['delete_after']:
                     Utils.cleanup(params['files'])
 
-                return {'changed': True, 'results': api_rval, 'state': "present"}
+                return {'changed': True, 'results': api_rval, 'state': state}
 
             ########
             # Update
@@ -167,7 +179,7 @@ class OCObject(OpenShiftCLI):
                 if params['files'] and params['delete_after']:
                     Utils.cleanup(params['files'])
 
-                return {'changed': False, 'results': api_rval['results'][0], 'state': "present"}
+                return {'changed': False, 'results': api_rval['results'][0], 'state': state}
 
             if check_mode:
                 return {'changed': True, 'msg': 'CHECK_MODE: Would have performed an update.'}
@@ -186,4 +198,4 @@ class OCObject(OpenShiftCLI):
             if api_rval['returncode'] != 0:
                 return {'failed': True, 'msg': api_rval}
 
-            return {'changed': True, 'results': api_rval, 'state': "present"}
+            return {'changed': True, 'results': api_rval, 'state': state}
