@@ -109,7 +109,7 @@
       type: persistentVolumeClaim
       claim_name: "{{ openshift.hosted.registry.storage.volume.name }}-claim"
   when:
-  - openshift.hosted.registry.storage.kind | default(none) in ['nfs', 'openstack']
+  - openshift.hosted.registry.storage.kind | default(none) in ['nfs', 'openstack', 'glusterfs']
 
 - name: Create OpenShift registry
   oc_adm_registry:
@@ -123,3 +123,7 @@
     volume_mounts: "{{ openshift_hosted_registry_volumes }}"
     edits: "{{ openshift_hosted_registry_edits }}"
     force: "{{ True|bool in openshift_hosted_registry_force }}"
+
+- include: storage/glusterfs.yml
+  when:
+  - openshift.hosted.registry.storage.kind | default(none) == 'glusterfs'
