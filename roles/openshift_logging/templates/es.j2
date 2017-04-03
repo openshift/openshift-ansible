@@ -95,6 +95,13 @@ spec:
               readOnly: true
             - name: elasticsearch-storage
               mountPath: /elasticsearch/persistent
+          readinessProbe:
+            exec:
+              command:
+              - "/elasticsearch/probe/readiness.sh"
+            initialDelaySeconds: 5
+            timeoutSeconds: 5
+            periodSeconds: 5
       volumes:
         - name: elasticsearch
           secret:
