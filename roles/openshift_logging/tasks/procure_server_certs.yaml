@@ -19,7 +19,7 @@
 
 - name: Trying to discover the server key variable name for {{ cert_info.procure_component }}
   set_fact: procure_component_key={{ lookup('env', '{{cert_info.procure_component}}' + '_key') }}
-  when:   
+  when:
   - cert_info.hostnames is undefined
   - cert_info[ cert_info.procure_component + '_crt' ] is defined
   - cert_info[ cert_info.procure_component + '_key' ] is defined
@@ -33,9 +33,9 @@
      --signer-serial={{generated_certs_dir}}/ca.serial.txt
   check_mode: no
   when:
-    - cert_info.hostnames is defined
-    - not component_key_file.stat.exists
-    - not component_cert_file.stat.exists
+  - cert_info.hostnames is defined
+  - not component_key_file.stat.exists
+  - not component_cert_file.stat.exists
 
 - name: Copying server key for {{ cert_info.procure_component }} to generated certs directory
   copy: content="{{procure_component_key}}" dest={{generated_certs_dir}}/{{cert_info.procure_component}}.key
