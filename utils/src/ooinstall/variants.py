@@ -43,7 +43,7 @@ OSE = Variant('openshift-enterprise', 'OpenShift Container Platform', [
 ])
 
 REG = Variant('openshift-enterprise', 'Registry', [
-    Version('3.4', 'openshift-enterprise', 'registry'),
+    Version('3.5', 'openshift-enterprise', 'registry'),
 ])
 
 origin = Variant('origin', 'OpenShift Origin', [
