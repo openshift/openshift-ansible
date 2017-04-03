@@ -14,3 +14,14 @@ galaxy_info:
   - system
 dependencies:
 - role: openshift_facts
+- role: etcd
+  etcd_service: calico-etcd
+  etcd_is_thirdparty: True
+  etcd_peer_port: 22380
+  etcd_client_port: 22379
+  etcd_conf_dir: /etc/calico-etcd/conf-dir
+  etcd_data_dir: /var/lib/calico-etcd/data-dir
+  etcd_ca_host: "{{ inventory_hostname }}"
+  etcd_cert_config_dir: /etc/calico-etcd/cert-config-dir
+  etcd_url_scheme: http
+  etcd_peer_url_scheme: http
