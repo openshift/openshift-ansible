@@ -73,10 +73,7 @@ class ActionModule(ActionBase):
         load_checks()
 
         known_checks = {}
-
-        known_check_classes = set(cls for cls in OpenShiftCheck.subclasses())
-
-        for cls in known_check_classes:
+        for cls in OpenShiftCheck.subclasses():
             check_name = cls.name
             if check_name in known_checks:
                 other_cls = known_checks[check_name].__class__
@@ -86,7 +83,6 @@ class ActionModule(ActionBase):
                         cls.__module__, cls.__name__,
                         other_cls.__module__, other_cls.__name__))
             known_checks[check_name] = cls(execute_module=self._execute_module)
-
         return known_checks
 
 
