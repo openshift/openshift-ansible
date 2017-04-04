@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.14
+Version:        3.6.15
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Apr 04 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.15-1
+- Document etcd_ca_default_days in example inventories. (abutcher@redhat.com)
+- Fixed a bug. Ansible requires a msg param when module.fail_json.
+  (kwoodson@redhat.com)
+
 * Sat Apr 01 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.14-1
 - Update v1.5 content (sdodson@redhat.com)
 - Add v1.6 content (sdodson@redhat.com)
