@@ -26,7 +26,7 @@ class OCObject(OpenShiftCLI):
         '''return a kind by name '''
         results = self._get(self.kind, name=self.name, selector=self.selector)
         if (results['returncode'] != 0 and 'stderr' in results and
-           '\"%s\" not found' % self.name in results['stderr']):
+                '\"{}\" not found'.format(self.name) in results['stderr']):
             results['returncode'] = 0
 
         return results
