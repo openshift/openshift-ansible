@@ -7,6 +7,12 @@ import yaml
 from ansible.plugins.callback import CallbackBase
 from ansible.parsing.yaml.dumper import AnsibleDumper
 
+# ansible.compat.six goes away with Ansible 2.4
+try:
+    from ansible.compat.six import u
+except ImportError:
+    from ansible.module_utils.six import u
+
 
 # pylint: disable=super-init-not-called
 class CallbackModule(CallbackBase):
@@ -39,10 +45,10 @@ class CallbackModule(CallbackBase):
             facts = abridged_result['result']['ansible_facts']['openshift']
             hosts_yaml = {}
             hosts_yaml[res._host.get_name()] = facts
-            to_dump = yaml.dump(hosts_yaml,
-                                allow_unicode=True,
-                                default_flow_style=False,
-                                Dumper=AnsibleDumper)
+            to_dump = u(yaml.dump(hosts_yaml,
+                                  allow_unicode=True,
+                                  default_flow_style=False,
+                                  Dumper=AnsibleDumper))
             os.write(self.hosts_yaml, to_dump)
 
     def v2_runner_on_skipped(self, res):
