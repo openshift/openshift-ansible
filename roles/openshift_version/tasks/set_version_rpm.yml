@@ -3,7 +3,9 @@
   set_fact:
     # Expects a leading "-" in inventory, strip it off here, and remove trailing release,
     openshift_version: "{{ openshift_pkg_version[1:].split('-')[0] }}"
-  when: openshift_pkg_version is defined and openshift_version is not defined
+  when:
+  - openshift_pkg_version is defined
+  - openshift_version is not defined
 
 # if {{ openshift.common.service_type}}-excluder is enabled,
 # the repoquery for {{ openshift.common.service_type}} will not work.
