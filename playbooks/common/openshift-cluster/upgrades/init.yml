@@ -72,6 +72,7 @@
     command: systemctl status iptables
     ignore_errors: true
     changed_when: false
+    failed_when: false
     register: service_iptables_status
 
   - name: Set fact os_firewall_use_firewalld FALSE for iptables
