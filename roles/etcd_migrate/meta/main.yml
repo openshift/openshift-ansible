@@ -1,0 +1,17 @@
+---
+galaxy_info:
+  author: Jan Chaloupka
+  description: Etcd migration
+  company: Red Hat, Inc.
+  license: Apache License, Version 2.0
+  min_ansible_version: 2.1
+  platforms:
+  - name: EL
+    versions:
+    - 7
+  categories:
+  - cloud
+  - system
+dependencies:
+- { role: etcd_common }
+- { role: lib_utils }
