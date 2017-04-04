@@ -23,7 +23,7 @@
     - name: start container
       docker_container:
         name: "{{ container_name }}"
-        image: "{{ image | default('test-target-base') }}"
+        image: "{{ lookup('env', 'IMAGE_PREFIX') | default('openshift-ansible-integration-', true) }}{{ image | default('test-target-base') }}"
         command: "{{ command | default('sleep 1800') }}"
         recreate: yes
         # NOTE: When/if we need to run containers that are docker hosts as well:
