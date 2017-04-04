@@ -23,8 +23,8 @@ import yaml
 from ansible import errors
 # pylint no-name-in-module and import-error disabled here because pylint
 # fails to properly detect the packages when installed in a virtualenv
-from ansible.compat.six import string_types  # pylint:disable=no-name-in-module,import-error
-from ansible.compat.six.moves.urllib.parse import urlparse  # pylint:disable=no-name-in-module,import-error
+from ansible.module_utils.six import string_types  # pylint:disable=no-name-in-module,import-error
+from ansible.module_utils.six.moves.urllib.parse import urlparse  # pylint:disable=no-name-in-module,import-error
 from ansible.module_utils._text import to_text
 from ansible.parsing.yaml.dumper import AnsibleDumper
 
