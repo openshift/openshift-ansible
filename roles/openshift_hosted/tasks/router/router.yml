@@ -14,13 +14,26 @@
     openshift_hosted_router_selector: "{{ openshift.hosted.router.selector | default(None) }}"
     openshift_hosted_router_image: "{{ openshift.hosted.router.registryurl }}"
 
+- name: Generate wildcard router certificate
+  oc_adm_ca_server_cert:
+    signer_cert: "{{ openshift_master_config_dir }}/ca.crt"
+    signer_key: "{{ openshift_master_config_dir }}/ca.key"
+    signer_serial: "{{ openshift_master_config_dir }}/ca.serial.txt"
+    hostnames:
+      - "{{ openshift_master_default_subdomain }}"
+      - "*.{{ openshift_master_default_subdomain }}"
+    cert: "{{ ('/etc/origin/master/' ~ (item.certificates.certfile | basename)) if 'certfile' in item.certificates else ((openshift_master_config_dir) ~ '/openshift-router.crt') }}"
+    key: "{{ ('/etc/origin/master/' ~ (item.certificates.keyfile | basename)) if 'keyfile' in item.certificates else ((openshift_master_config_dir) ~ '/openshift-router.key') }}"
+  with_items: "{{ openshift_hosted_routers }}"
+  when: (openshift_hosted_router_create_certificate | default(false)) and (not '{{ openshift_master_config_dir }}/openshift-router.key' | exists)
+
 - name: Get the certificate contents for router
   copy:
     backup: True
     dest: "/etc/origin/master/{{ item | basename }}"
     src: "{{ item }}"
-  with_items: "{{ openshift_hosted_routers | oo_collect(attribute='certificates') |
-                  oo_select_keys_from_list(['keyfile', 'certfile', 'cafile']) }}"
+  with_items: "{{ openshift_hosted_routers | oo_collect(attribute='certificates') | oo_select_keys_from_list(['keyfile', 'certfile', 'cafile']) }}"
+  when: not openshift_hosted_router_create_certificate | default(true)
 
 - name: Create the router service account(s)
   oc_serviceaccount:
@@ -56,9 +69,9 @@
     service_account: "{{ item.serviceaccount | default('router') }}"
     selector: "{{ item.selector | default(none) }}"
     images: "{{ item.images | default(omit) }}"
-    cert_file: "{{ ('/etc/origin/master/' ~ (item.certificates.certfile | basename)) if 'certfile' in item.certificates else omit }}"
-    key_file: "{{ ('/etc/origin/master/' ~ (item.certificates.keyfile | basename)) if 'keyfile' in item.certificates else omit }}"
-    cacert_file: "{{ ('/etc/origin/master/' ~ (item.certificates.cafile | basename)) if 'cafile' in item.certificates else omit }}"
+    cert_file: "{{ ('/etc/origin/master/' ~ (item.certificates.certfile | basename)) if 'certfile' in item.certificates else ((openshift_master_config_dir) ~ '/openshift-router.crt') if openshift_hosted_router_create_certificate else omit}}"
+    key_file: "{{ ('/etc/origin/master/' ~ (item.certificates.keyfile | basename)) if 'keyfile' in item.certificates else ((openshift_master_config_dir) ~ '/openshift-router.key') if openshift_hosted_router_create_certificate else omit}}"
+    cacert_file: "{{ ('/etc/origin/master/' ~ (item.certificates.cafile | basename)) if 'cafile' in item.certificates else ((openshift_master_config_dir) ~ '/ca.crt') if openshift_hosted_router_create_certificate else omit}}"
     edits: "{{ openshift_hosted_router_edits | union(item.edits)  }}"
     ports: "{{ item.ports }}"
     stats_port: "{{ item.stats_port }}"
