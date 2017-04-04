@@ -15,9 +15,7 @@ to the list of persisted [node labels](https://docs.openshift.org/latest/install
 ###Required vars:
 
 - `openshift_logging_install_logging`: When `True` the `openshift_logging` role will install Aggregated Logging.
-- `openshift_logging_upgrade_logging`:  When `True` the `openshift_logging` role will upgrade Aggregated Logging.
-
-When both `openshift_logging_install_logging` and `openshift_logging_upgrade_logging` are `False` the `openshift_logging` role will uninstall Aggregated Logging.
+When `False` the `openshift_logging` role will uninstall Aggregated logging.
 
 ###Optional vars:
 
