@@ -2,6 +2,6 @@
 os_firewall_enabled: True
 # firewalld is not supported on Atomic Host
 # https://bugzilla.redhat.com/show_bug.cgi?id=1403331
-os_firewall_use_firewalld: "{{ False if openshift.common.is_atomic | bool else True }}"
+os_firewall_use_firewalld: "{{ False }}"
 os_firewall_allow: []
 os_firewall_deny: []
