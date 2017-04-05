@@ -123,13 +123,13 @@ EXAMPLES = '''
 # -*- -*- -*- Begin included fragment: ../../lib_utils/src/class/yedit.py -*- -*- -*-
 
 
-class YeditException(Exception):
+class YeditException(Exception):  # pragma: no cover
     ''' Exception class for Yedit '''
     pass
 
 
 # pylint: disable=too-many-public-methods
-class Yedit(object):
+class Yedit(object):  # pragma: no cover
     ''' Class to modify yaml files '''
     re_valid_key = r"(((\[-?\d+\])|([0-9a-zA-Z%s/_-]+)).?)+$"
     re_key = r"(?:\[(-?\d+)\])|([0-9a-zA-Z%s/_-]+)"
@@ -1097,7 +1097,7 @@ class OpenShiftCLI(object):
         return rval
 
 
-class Utils(object):
+class Utils(object):  # pragma: no cover
     ''' utilities for openshiftcli modules '''
 
     @staticmethod
