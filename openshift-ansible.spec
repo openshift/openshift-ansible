@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.49
+Version:        3.5.50
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Apr 05 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.50-1
+- bug 1435144. Remove unneeded upgrade in openshift_logging role
+  (jcantril@redhat.com)
+
 * Tue Apr 04 2017 Scott Dodson <sdodson@redhat.com> 3.5.49-1
 - Revert back to iptables as the default for 3.5 (sdodson@redhat.com)
 
