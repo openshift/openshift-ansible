@@ -340,16 +340,6 @@ resources:
           port_range_max: 10250
           remote_mode: remote_group_id
         - direction: ingress
-          protocol: tcp
-          port_range_min: 10255
-          port_range_max: 10255
-          remote_mode: remote_group_id
-        - direction: ingress
-          protocol: udp
-          port_range_min: 10255
-          port_range_max: 10255
-          remote_mode: remote_group_id
-        - direction: ingress
           protocol: udp
           port_range_min: 4789
           port_range_max: 4789
