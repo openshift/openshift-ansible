@@ -45,6 +45,7 @@ being installed after other base components such as OCP)
 1) Fail fast when facts it requires are not available or are invalid
 1) "Make it so" based on provided variables and anything that may be required
 as part of doing such (this should include data migrations)
+1) Have a minimal set of dependencies in meta/main.yml, just enough to do its job
 
 ### Example using decomposition of openshift_logging
 
@@ -115,12 +116,40 @@ openshift_logging/tasks/install_logging.yaml
     name: openshift_logging_kibana
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
+    openshift_logging_kibana_namespace: "{{ openshift_logging_namespace }}"
+    openshift_logging_kibana_master_url: "{{ openshift_logging_master_url }}"
+    openshift_logging_kibana_master_public_url: "{{ openshift_logging_master_public_url }}"
+    openshift_logging_kibana_image_prefix: "{{ openshift_logging_image_prefix }}"
+    openshift_logging_kibana_image_version: "{{ openshift_logging_image_version }}"
+    openshift_logging_kibana_replicas: "{{ openshift_logging_kibana_replica_count }}"
+    openshift_logging_kibana_es_host: "{{ openshift_logging_es_host }}"
+    openshift_logging_kibana_es_port: "{{ openshift_logging_es_port }}"
+    openshift_logging_kibana_image_pull_secret: "{{ openshift_logging_image_pull_secret }}"
 
 - include_role:
     name: openshift_logging_kibana
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
     openshift_logging_kibana_ops_deployment: true
+    openshift_logging_kibana_namespace: "{{ openshift_logging_namespace }}"
+    openshift_logging_kibana_master_url: "{{ openshift_logging_master_url }}"
+    openshift_logging_kibana_master_public_url: "{{ openshift_logging_master_public_url }}"
+    openshift_logging_kibana_image_prefix: "{{ openshift_logging_image_prefix }}"
+    openshift_logging_kibana_image_version: "{{ openshift_logging_image_version }}"
+    openshift_logging_kibana_image_pull_secret: "{{ openshift_logging_image_pull_secret }}"
+    openshift_logging_kibana_es_host: "{{ openshift_logging_es_ops_host }}"
+    openshift_logging_kibana_es_port: "{{ openshift_logging_es_ops_port }}"
+    openshift_logging_kibana_nodeselector: "{{ openshift_logging_kibana_ops_nodeselector }}"
+    openshift_logging_kibana_cpu_limit: "{{ openshift_logging_kibana_ops_cpu_limit }}"
+    openshift_logging_kibana_memory_limit: "{{ openshift_logging_kibana_ops_memory_limit }}"
+    openshift_logging_kibana_hostname: "{{ openshift_logging_kibana_ops_hostname }}"
+    openshift_logging_kibana_replicas: "{{ openshift_logging_kibana_ops_replica_count }}"
+    openshift_logging_kibana_proxy_debug: "{{ openshift_logging_kibana_ops_proxy_debug }}"
+    openshift_logging_kibana_proxy_cpu_limit: "{{ openshift_logging_kibana_ops_proxy_cpu_limit }}"
+    openshift_logging_kibana_proxy_memory_limit: "{{ openshift_logging_kibana_ops_proxy_memory_limit }}"
+    openshift_logging_kibana_cert: "{{ openshift_logging_kibana_ops_cert }}"
+    openshift_logging_kibana_key: "{{ openshift_logging_kibana_ops_key }}"
+    openshift_logging_kibana_ca: "{{ openshift_logging_kibana_ops_ca}}"
   when:
   - openshift_logging_use_ops | bool
 
@@ -130,12 +159,25 @@ openshift_logging/tasks/install_logging.yaml
     name: openshift_logging_curator
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
+    openshift_logging_curator_namespace: "{{ openshift_logging_namespace }}"
+    openshift_logging_curator_master_url: "{{ openshift_logging_master_url }}"
+    openshift_logging_curator_image_prefix: "{{ openshift_logging_image_prefix }}"
+    openshift_logging_curator_image_version: "{{ openshift_logging_image_version }}"
+    openshift_logging_curator_image_pull_secret: "{{ openshift_logging_image_pull_secret }}"
 
 - include_role:
     name: openshift_logging_curator
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
     openshift_logging_curator_ops_deployment: true
+    openshift_logging_curator_namespace: "{{ openshift_logging_namespace }}"
+    openshift_logging_curator_master_url: "{{ openshift_logging_master_url }}"
+    openshift_logging_curator_image_prefix: "{{ openshift_logging_image_prefix }}"
+    openshift_logging_curator_image_version: "{{ openshift_logging_image_version }}"
+    openshift_logging_curator_image_pull_secret: "{{ openshift_logging_image_pull_secret }}"
+    openshift_logging_curator_cpu_limit: "{{ openshift_logging_curator_ops_cpu_limit }}"
+    openshift_logging_curator_memory_limit: "{{ openshift_logging_curator_ops_memory_limit }}"
+    openshift_logging_curator_nodeselector: "{{ openshift_logging_curator_ops_nodeselector }}"
   when:
   - openshift_logging_use_ops | bool
 
@@ -147,6 +189,45 @@ openshift_logging/tasks/install_logging.yaml
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
 
 - include: update_master_config.yaml
+```
+
+openshift_logging_elasticsearch/meta/main.yaml
+```
+---
+galaxy_info:
+  author: OpenShift Red Hat
+  description: OpenShift Aggregated Logging Elasticsearch Component
+  company: Red Hat, Inc.
+  license: Apache License, Version 2.0
+  min_ansible_version: 2.2
+  platforms:
+  - name: EL
+    versions:
+    - 7
+  categories:
+  - cloud
+dependencies:
+- role: lib_openshift
+```
+
+openshift_logging/meta/main.yaml
+```
+---
+galaxy_info:
+  author: OpenShift Red Hat
+  description: OpenShift Aggregated Logging
+  company: Red Hat, Inc.
+  license: Apache License, Version 2.0
+  min_ansible_version: 2.2
+  platforms:
+  - name: EL
+    versions:
+    - 7
+  categories:
+  - cloud
+dependencies:
+- role: lib_openshift
+- role: openshift_facts
 ```
 
 openshift_logging/tasks/install_support.yaml [old]
