@@ -1,6 +1,5 @@
 ---
 - name: Standardize on latest variable names
-  no_log: True  # keep task description legible
   set_fact:
     # goal is to deprecate deployment_type in favor of openshift_deployment_type.
     # both will be accepted for now, but code should refer to the new name.
@@ -8,8 +7,15 @@
     deployment_type: "{{ openshift_deployment_type | default(deployment_type) | default | string }}"
     openshift_deployment_type: "{{ openshift_deployment_type | default(deployment_type) | default | string }}"
 
+- name: Abort when deployment type is invalid
+  # this variable is required; complain early and clearly if it is invalid.
+  when: openshift_deployment_type not in known_openshift_deployment_types
+  fail:
+    msg: |-
+      Please set openshift_deployment_type to one of:
+      {{ known_openshift_deployment_types | join(', ') }}
+
 - name: Normalize openshift_release
-  no_log: True  # keep task description legible
   set_fact:
     # Normalize release if provided, e.g. "v3.5" => "3.5"
     # Currently this is not required to be defined for all installs, and the
@@ -19,10 +25,11 @@
     openshift_release: "{{ openshift_release | string | regex_replace('^v', '') }}"
   when: openshift_release is defined
 
-- name: Ensure a valid deployment type has been given.
-  # this variable is required; complain early and clearly if it is invalid.
-  when: openshift_deployment_type not in known_openshift_deployment_types
+- name: Abort when openshift_release is invalid
+  when:
+    - openshift_release is defined
+    - not openshift_release | match('\d+(\.\d+){1,3}$')
   fail:
     msg: |-
-      Please set openshift_deployment_type to one of:
-      {{ known_openshift_deployment_types | join(', ') }}
+      openshift_release is "{{ openshift_release }}" which is not a valid version string.
+      Please set it to a version string like "3.4".
