@@ -40,24 +40,20 @@ spec:
         - "-Dhawkular.metrics.cassandra.nodes=hawkular-cassandra"
         - "-Dhawkular.metrics.cassandra.use-ssl"
         - "-Dhawkular.metrics.openshift.auth-methods=openshift-oauth,htpasswd"
-        - "-Dhawkular.metrics.openshift.htpasswd-file=/secrets/hawkular-metrics.htpasswd.file"
+        - "-Dhawkular.metrics.openshift.htpasswd-file=/hawkular-account/hawkular-metrics.htpasswd"
         - "-Dhawkular.metrics.allowed-cors-access-control-allow-headers=authorization"
         - "-Dhawkular.metrics.default-ttl={{openshift_metrics_duration}}"
         - "-Dhawkular.metrics.admin-tenant=_hawkular_admin"
         - "-Dhawkular-alerts.cassandra-nodes=hawkular-cassandra"
         - "-Dhawkular-alerts.cassandra-use-ssl"
         - "-Dhawkular.alerts.openshift.auth-methods=openshift-oauth,htpasswd"
-        - "-Dhawkular.alerts.openshift.htpasswd-file=/secrets/hawkular-metrics.htpasswd.file"
+        - "-Dhawkular.alerts.openshift.htpasswd-file=/hawkular-account/hawkular-metrics.htpasswd"
         - "-Dhawkular.alerts.allowed-cors-access-control-allow-headers=authorization"
         - "-Dorg.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH=true"
         - "-Dorg.apache.catalina.connector.CoyoteAdapter.ALLOW_BACKSLASH=true"
         - "-Dcom.datastax.driver.FORCE_NIO=true"
         - "-DKUBERNETES_MASTER_URL={{openshift_metrics_master_url}}"
         - "-DUSER_WRITE_ACCESS={{openshift_metrics_hawkular_user_write_access}}"
-        - "--hmw.keystore=/secrets/hawkular-metrics.keystore"
-        - "--hmw.truststore=/secrets/hawkular-metrics.truststore"
-        - "--hmw.keystore_password_file=/secrets/hawkular-metrics.keystore.password"
-        - "--hmw.truststore_password_file=/secrets/hawkular-metrics.truststore.password"
         env:
         - name: POD_NAMESPACE
           valueFrom:
@@ -67,6 +63,8 @@ spec:
           value: "{{ openshift_metrics_master_url }}"
         - name: JGROUPS_PASSWORD
           value: "{{ 17 | oo_random_word }}"
+        - name: TRUSTSTORE_AUTHORITIES
+          value: "/hawkular-metrics-certs/tls.truststore.crt"
         - name: OPENSHIFT_KUBE_PING_NAMESPACE
           valueFrom:
             fieldRef:
@@ -76,10 +74,10 @@ spec:
         - name: STARTUP_TIMEOUT
           value: "{{ openshift_metrics_startup_timeout }}"
         volumeMounts:
-        - name: hawkular-metrics-secrets
-          mountPath: "/secrets"
-        - name: hawkular-metrics-client-secrets
-          mountPath: "/client-secrets"
+        - name: hawkular-metrics-certs
+          mountPath: "/hawkular-metrics-certs"
+        - name: hawkular-metrics-account
+          mountPath: "/hawkular-account"
 {% if ((openshift_metrics_hawkular_limits_cpu is defined and openshift_metrics_hawkular_limits_cpu is not none)
    or (openshift_metrics_hawkular_limits_memory is defined and openshift_metrics_hawkular_limits_memory is not none)
    or (openshift_metrics_hawkular_requests_cpu is defined and openshift_metrics_hawkular_requests_cpu is not none)
@@ -118,9 +116,9 @@ spec:
             command:
             - "/opt/hawkular/scripts/hawkular-metrics-liveness.py"
       volumes:
-      - name: hawkular-metrics-secrets
+      - name: hawkular-metrics-certs
         secret:
-          secretName: hawkular-metrics-secrets
-      - name: hawkular-metrics-client-secrets
+          secretName: hawkular-metrics-certs
+      - name: hawkular-metrics-account
         secret:
           secretName: hawkular-metrics-account

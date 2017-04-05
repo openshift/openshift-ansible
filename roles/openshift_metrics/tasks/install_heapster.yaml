@@ -20,7 +20,7 @@
 - set_fact:
     heapster_sa_secrets: "{{ heapster_sa_secrets + [item] }}"
   with_items:
-    - hawkular-metrics-certificate
+    - hawkular-metrics-certs
     - hawkular-metrics-account
   when: "not {{ openshift_metrics_heapster_standalone | bool }}"
 
