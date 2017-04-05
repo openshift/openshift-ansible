@@ -1505,6 +1505,9 @@ class CAServerCert(OpenShiftCLI):
         if proc.returncode == 0:
             regex = re.compile(r"^\s*X509v3 Subject Alternative Name:\s*?\n\s*(.*)\s*\n", re.MULTILINE)
             match = regex.search(x509output)  # E501
+            if not match:
+                return False
+
             for entry in re.split(r", *", match.group(1)):
                 if entry.startswith('DNS') or entry.startswith('IP Address'):
                     cert_names.append(entry.split(':')[1])

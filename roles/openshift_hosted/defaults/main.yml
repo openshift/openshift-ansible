@@ -24,8 +24,9 @@ openshift_hosted_routers:
   ports:
   - 80:80
   - 443:443
-  certificates: "{{ openshift_hosted_router_certificate | default({}) }}"
+  certificates: "{{ openshift_hosted_router_certificates | default({}) }}"
 
 
 openshift_hosted_router_certificates: {}
 openshift_hosted_registry_cert_expire_days: 730
+openshift_hosted_router_create_certificate: False
