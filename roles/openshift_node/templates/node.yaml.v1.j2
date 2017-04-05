@@ -44,7 +44,7 @@ networkPluginName: {{ openshift_node_sdn_network_plugin_name }}
 # deprecates networkPluginName above. The two should match.
 networkConfig:
    mtu: {{ openshift.node.sdn_mtu }}
-{% if openshift_node_use_openshift_sdn | bool or openshift_node_use_nuage | bool or openshift_node_use_contiv | bool or openshift_node_sdn_network_plugin_name == 'cni' %}
+{% if openshift_node_use_openshift_sdn | bool or openshift_node_use_nuage | bool or openshift_node_use_contiv | bool or openshift_node_use_kuryr | bool or openshift_node_sdn_network_plugin_name == 'cni' %}
    networkPluginName: {{ openshift_node_sdn_network_plugin_name }}
 {% endif %}
 {% if openshift.node.set_node_ip | bool %}
@@ -67,9 +67,11 @@ servingInfo:
 {% endfor %}
 {% endif %}
 volumeDirectory: {{ openshift_node_data_dir }}/openshift.local.volumes
+{% if not (openshift_node_use_kuryr | default(False)) | bool %}
 proxyArguments:
   proxy-mode:
      - {{ openshift.node.proxy_mode }}
+{% endif %}
 volumeConfig:
   localQuota:
     perFSGroup: {{ openshift.node.local_quota_per_fsgroup }}

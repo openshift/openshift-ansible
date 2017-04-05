@@ -1,0 +1,40 @@
+# More info about the template: https://docs.openstack.org/kuryr-kubernetes/latest/installation/containerized.html#generating-kuryr-resource-definitions-for-kubernetes
+
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    name: kuryr-controller
+  name: kuryr-controller
+  namespace: {{ kuryr_namespace }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: kuryr-controller
+      name: kuryr-controller
+    spec:
+      serviceAccountName: kuryr-controller
+      automountServiceAccountToken: true
+      hostNetwork: true
+      containers:
+      - image: kuryr/controller:latest
+        imagePullPolicy: IfNotPresent
+        name: controller
+        terminationMessagePath: "/dev/termination-log"
+        # FIXME(dulek): This shouldn't be required, but without it selinux is
+        #               complaining about access to kuryr.conf.
+        securityContext:
+          privileged: true
+          runAsUser: 0
+        volumeMounts:
+        - name: config-volume
+          mountPath: "/etc/kuryr/kuryr.conf"
+          subPath: kuryr.conf
+      volumes:
+      - name: config-volume
+        configMap:
+          name: kuryr-config
+          defaultMode: 0666
+      restartPolicy: Always

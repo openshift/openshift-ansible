@@ -1,0 +1,53 @@
+# More info about the template: https://docs.openstack.org/kuryr-kubernetes/latest/installation/containerized.html#generating-kuryr-resource-definitions-for-kubernetes
+
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: kuryr-cni-ds
+  namespace: {{ kuryr_namespace }}
+  labels:
+    tier: node
+    app: kuryr
+spec:
+  template:
+    metadata:
+      labels:
+        tier: node
+        app: kuryr
+    spec:
+      hostNetwork: true
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
+      serviceAccountName: kuryr-controller
+      containers:
+      - name: kuryr-cni
+        image: kuryr/cni:latest
+        imagePullPolicy: IfNotPresent
+        command: [ "cni_ds_init" ]
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: bin
+          mountPath: /opt/cni/bin
+        - name: net-conf
+          mountPath: /etc/cni/net.d
+        - name: config-volume
+          mountPath: /tmp/kuryr/kuryr.conf
+          subPath: kuryr-cni.conf
+        - name: etc
+          mountPath: /etc
+      volumes:
+        - name: bin
+          hostPath:
+            path: {{ cni_bin_dir }}
+        - name: net-conf
+          hostPath:
+            path: /etc/cni/net.d
+        - name: config-volume
+          configMap:
+            name: kuryr-config
+        - name: etc
+          hostPath:
+            path: /etc

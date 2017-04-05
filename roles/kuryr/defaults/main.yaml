@@ -1,0 +1,72 @@
+---
+# Kuryr conf directory
+kuryr_config_dir: /etc/kuryr
+
+# Kuryr username
+kuryr_openstack_username: kuryr
+
+# Kuryr username domain
+kuryr_openstack_user_domain_name: default
+
+# Kuryr username domain
+kuryr_openstack_project_domain_name: default
+
+# Kuryr OpenShift namespace
+kuryr_namespace: kube-system
+
+# Whether to run the cni plugin in debug mode
+kuryr_cni_debug: "false"
+
+# The version of cni binaries
+cni_version: v0.5.2
+
+# Path to bin dir (where kuryr execs get installed)
+bin_dir: /usr/bin
+
+# Path to the cni binaries
+cni_bin_dir: /opt/cni/bin
+
+# URL for cni binaries
+cni_bin_url_base: "https://github.com/containernetworking/cni/releases/download/"
+cni_bin_url: "{{ cni_bin_url_base }}/{{ cni_version }}/cni-{{ cni_version }}.tgz"
+cni_bin_checksum: "71f411080245aa14d0cc06f6824e8039607dd9e9"
+
+# Kuryr ClusterRole definiton
+kuryr_clusterrole:
+  name: kuryrctl
+  state: present
+  rules:
+    - apiGroups:
+        - ""
+      attributeRestrictions: null
+      verbs:
+        - get
+        - list
+        - watch
+      resources:
+        - daemonsets
+        - deployments
+        - deploymentconfigs
+        - endpoints
+        - ingress
+        - nodes
+        - namespaces
+        - pods
+        - projects
+        - routes
+        - services
+    - apiGroups:
+        - ""
+      attributeRestrictions: null
+      verbs:
+        - update
+        - patch
+      resources:
+        - endpoints
+        - ingress
+        - pods
+        - namespaces
+        - nodes
+        - services
+        - services/status
+        - routes

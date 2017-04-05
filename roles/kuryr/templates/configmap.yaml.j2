@@ -1,0 +1,343 @@
+# More info about the template: https://docs.openstack.org/kuryr-kubernetes/latest/installation/containerized.html#generating-kuryr-resource-definitions-for-kubernetes
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kuryr-config
+  namespace: {{ kuryr_namespace }}
+data:
+  kuryr.conf: |+
+    [DEFAULT]
+
+    #
+    # From kuryr_kubernetes
+    #
+
+    # Directory for Kuryr vif binding executables. (string value)
+    #bindir = /usr/libexec/kuryr
+
+    # If set to true, the logging level will be set to DEBUG instead of the default
+    # INFO level. (boolean value)
+    # Note: This option can be changed without restarting.
+    #debug = false
+
+    # DEPRECATED: If set to false, the logging level will be set to WARNING instead
+    # of the default INFO level. (boolean value)
+    # This option is deprecated for removal.
+    # Its value may be silently ignored in the future.
+    #verbose = true
+
+    # The name of a logging configuration file. This file is appended to any
+    # existing logging configuration files. For details about logging configuration
+    # files, see the Python logging module documentation. Note that when logging
+    # configuration files are used then all logging configuration is set in the
+    # configuration file and other logging configuration options are ignored (for
+    # example, logging_context_format_string). (string value)
+    # Note: This option can be changed without restarting.
+    # Deprecated group/name - [DEFAULT]/log_config
+    #log_config_append = <None>
+
+    # Defines the format string for %%(asctime)s in log records. Default:
+    # %(default)s . This option is ignored if log_config_append is set. (string
+    # value)
+    #log_date_format = %Y-%m-%d %H:%M:%S
+
+    # (Optional) Name of log file to send logging output to. If no default is set,
+    # logging will go to stderr as defined by use_stderr. This option is ignored if
+    # log_config_append is set. (string value)
+    # Deprecated group/name - [DEFAULT]/logfile
+    #log_file = /var/log/kuryr/kuryr-controller.log
+
+    # (Optional) The base directory used for relative log_file  paths. This option
+    # is ignored if log_config_append is set. (string value)
+    # Deprecated group/name - [DEFAULT]/logdir
+    #log_dir = <None>
+
+    # Uses logging handler designed to watch file system. When log file is moved or
+    # removed this handler will open a new log file with specified path
+    # instantaneously. It makes sense only if log_file option is specified and
+    # Linux platform is used. This option is ignored if log_config_append is set.
+    # (boolean value)
+    #watch_log_file = false
+
+    # Use syslog for logging. Existing syslog format is DEPRECATED and will be
+    # changed later to honor RFC5424. This option is ignored if log_config_append
+    # is set. (boolean value)
+    #use_syslog = false
+
+    # Syslog facility to receive log lines. This option is ignored if
+    # log_config_append is set. (string value)
+    #syslog_log_facility = LOG_USER
+
+    # Log output to standard error. This option is ignored if log_config_append is
+    # set. (boolean value)
+    #use_stderr = true
+
+    # Format string to use for log messages with context. (string value)
+    #logging_context_format_string = %(asctime)s.%(msecs)03d %(process)d %(levelname)s %(name)s [%(request_id)s %(user_identity)s] %(instance)s%(message)s
+
+    # Format string to use for log messages when context is undefined. (string
+    # value)
+    #logging_default_format_string = %(asctime)s.%(msecs)03d %(process)d %(levelname)s %(name)s [-] %(instance)s%(message)s
+
+    # Additional data to append to log message when logging level for the message
+    # is DEBUG. (string value)
+    #logging_debug_format_suffix = %(funcName)s %(pathname)s:%(lineno)d
+
+    # Prefix each line of exception output with this format. (string value)
+    #logging_exception_prefix = %(asctime)s.%(msecs)03d %(process)d ERROR %(name)s %(instance)s
+
+    # Defines the format string for %(user_identity)s that is used in
+    # logging_context_format_string. (string value)
+    #logging_user_identity_format = %(user)s %(tenant)s %(domain)s %(user_domain)s %(project_domain)s
+
+    # List of package logging levels in logger=LEVEL pairs. This option is ignored
+    # if log_config_append is set. (list value)
+    #default_log_levels = amqp=WARN,amqplib=WARN,boto=WARN,qpid=WARN,sqlalchemy=WARN,suds=INFO,oslo.messaging=INFO,iso8601=WARN,requests.packages.urllib3.connectionpool=WARN,urllib3.connectionpool=WARN,websocket=WARN,requests.packages.urllib3.util.retry=WARN,urllib3.util.retry=WARN,keystonemiddleware=WARN,routes.middleware=WARN,stevedore=WARN,taskflow=WARN,keystoneauth=WARN,oslo.cache=INFO,dogpile.core.dogpile=INFO
+
+    # Enables or disables publication of error events. (boolean value)
+    #publish_errors = false
+
+    # The format for an instance that is passed with the log message. (string
+    # value)
+    #instance_format = "[instance: %(uuid)s] "
+
+    # The format for an instance UUID that is passed with the log message. (string
+    # value)
+    #instance_uuid_format = "[instance: %(uuid)s] "
+
+    # Enables or disables fatal status of deprecations. (boolean value)
+    #fatal_deprecations = false
+
+
+    [binding]
+
+    driver = kuryr.lib.binding.drivers.vlan
+    link_iface = eth0
+
+    [kubernetes]
+
+    #
+    # From kuryr_kubernetes
+    #
+
+    # The root URL of the Kubernetes API (string value)
+    api_root = {{ openshift.master.api_url }}
+
+    # Absolute path to client cert to connect to HTTPS K8S_API (string value)
+    # ssl_client_crt_file = /etc/kuryr/controller.crt
+
+    # Absolute path client key file to connect to HTTPS K8S_API (string value)
+    # ssl_client_key_file = /etc/kuryr/controller.key
+
+    # Absolute path to ca cert file to connect to HTTPS K8S_API (string value)
+    ssl_ca_crt_file = /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+
+    # The token to talk to the k8s API
+    token_file = /var/run/secrets/kubernetes.io/serviceaccount/token
+
+    # HTTPS K8S_API server identity verification (boolean value)
+    # TODO (apuimedo): Make configurable
+    ssl_verify_server_crt = True
+
+    # The driver to determine OpenStack project for pod ports (string value)
+    pod_project_driver = default
+
+    # The driver to determine OpenStack project for services (string value)
+    service_project_driver = default
+
+    # The driver to determine Neutron subnets for pod ports (string value)
+    pod_subnets_driver = default
+
+    # The driver to determine Neutron subnets for services (string value)
+    service_subnets_driver = default
+
+    # The driver to determine Neutron security groups for pods (string value)
+    pod_security_groups_driver = default
+
+    # The driver to determine Neutron security groups for services (string value)
+    service_security_groups_driver = default
+
+    # The driver that provides VIFs for Kubernetes Pods. (string value)
+    pod_vif_driver = nested-vlan
+
+
+    [neutron]
+    # Configuration options for OpenStack Neutron
+
+    #
+    # From kuryr_kubernetes
+    #
+
+    # Authentication URL (string value)
+    auth_url = {{ kuryr_openstack_auth_url }}
+
+    # Authentication type to load (string value)
+    # Deprecated group/name - [neutron]/auth_plugin
+    auth_type = password
+
+    # Domain ID to scope to (string value)
+    user_domain_name = {{ kuryr_openstack_user_domain_name }}
+
+    # User's password (string value)
+    password = {{ kuryr_openstack_password }}
+
+    # Domain name containing project (string value)
+    project_domain_name = {{ kuryr_openstack_project_domain_name }}
+
+    # Project ID to scope to (string value)
+    # Deprecated group/name - [neutron]/tenant-id
+    project_id = {{ kuryr_openstack_project_id }}
+
+    # Token (string value)
+    #token = <None>
+
+    # Trust ID (string value)
+    #trust_id = <None>
+
+    # User's domain id (string value)
+    #user_domain_id = <None>
+
+    # User id (string value)
+    #user_id = <None>
+
+    # Username (string value)
+    # Deprecated group/name - [neutron]/user-name
+    username = {{kuryr_openstack_username }}
+
+    # Whether a plugging operation is failed if the port to plug does not become
+    # active (boolean value)
+    #vif_plugging_is_fatal = false
+
+    # Seconds to wait for port to become active (integer value)
+    #vif_plugging_timeout = 0
+
+    [neutron_defaults]
+
+    pod_security_groups = {{ kuryr_openstack_pod_sg_id }}
+    pod_subnet = {{ kuryr_openstack_pod_subnet_id }}
+    service_subnet = {{ kuryr_openstack_service_subnet_id }}
+    project = {{ kuryr_openstack_pod_project_id }}
+    # TODO (apuimedo): Remove the duplicated line just after this one once the
+    # RDO packaging contains the upstream patch
+    worker_nodes_subnet = {{ kuryr_openstack_worker_nodes_subnet_id }}
+
+    [pod_vif_nested]
+    worker_nodes_subnet = {{ kuryr_openstack_worker_nodes_subnet_id }}
+  kuryr-cni.conf: |+
+    [DEFAULT]
+
+    #
+    # From kuryr_kubernetes
+    #
+    # If set to true, the logging level will be set to DEBUG instead of the default
+    # INFO level. (boolean value)
+    # Note: This option can be changed without restarting.
+    #debug = false
+
+    # The name of a logging configuration file. This file is appended to any
+    # existing logging configuration files. For details about logging configuration
+    # files, see the Python logging module documentation. Note that when logging
+    # configuration files are used then all logging configuration is set in the
+    # configuration file and other logging configuration options are ignored (for
+    # example, logging_context_format_string). (string value)
+    # Note: This option can be changed without restarting.
+    # Deprecated group/name - [DEFAULT]/log_config
+    #log_config_append = <None>
+
+    # Defines the format string for %%(asctime)s in log records. Default:
+    # %(default)s . This option is ignored if log_config_append is set. (string
+    # value)
+    #log_date_format = %Y-%m-%d %H:%M:%S
+
+    # (Optional) Name of log file to send logging output to. If no default is set,
+    # logging will go to stderr as defined by use_stderr. This option is ignored if
+    # log_config_append is set. (string value)
+    # Deprecated group/name - [DEFAULT]/logfile
+    #log_file = /var/log/kuryr/cni.log
+
+    # (Optional) The base directory used for relative log_file  paths. This option
+    # is ignored if log_config_append is set. (string value)
+    # Deprecated group/name - [DEFAULT]/logdir
+    #log_dir = <None>
+
+    # Uses logging handler designed to watch file system. When log file is moved or
+    # removed this handler will open a new log file with specified path
+    # instantaneously. It makes sense only if log_file option is specified and
+    # Linux platform is used. This option is ignored if log_config_append is set.
+    # (boolean value)
+    #watch_log_file = false
+
+    # Use syslog for logging. Existing syslog format is DEPRECATED and will be
+    # changed later to honor RFC5424. This option is ignored if log_config_append
+    # is set. (boolean value)
+    #use_syslog = false
+
+    # Syslog facility to receive log lines. This option is ignored if
+    # log_config_append is set. (string value)
+    #syslog_log_facility = LOG_USER
+
+    # Log output to standard error. This option is ignored if log_config_append is
+    # set. (boolean value)
+    use_stderr = true
+
+    # Format string to use for log messages with context. (string value)
+    #logging_context_format_string = %(asctime)s.%(msecs)03d %(process)d %(levelname)s %(name)s [%(request_id)s %(user_identity)s] %(instance)s%(message)s
+
+    # Format string to use for log messages when context is undefined. (string
+    # value)
+    #logging_default_format_string = %(asctime)s.%(msecs)03d %(process)d %(levelname)s %(name)s [-] %(instance)s%(message)s
+
+    # Additional data to append to log message when logging level for the message
+    # is DEBUG. (string value)
+    #logging_debug_format_suffix = %(funcName)s %(pathname)s:%(lineno)d
+
+    # Prefix each line of exception output with this format. (string value)
+    #logging_exception_prefix = %(asctime)s.%(msecs)03d %(process)d ERROR %(name)s %(instance)s
+
+    # Defines the format string for %(user_identity)s that is used in
+    # logging_context_format_string. (string value)
+    #logging_user_identity_format = %(user)s %(tenant)s %(domain)s %(user_domain)s %(project_domain)s
+
+    # List of package logging levels in logger=LEVEL pairs. This option is ignored
+    # if log_config_append is set. (list value)
+    #default_log_levels = amqp=WARN,amqplib=WARN,boto=WARN,qpid=WARN,sqlalchemy=WARN,suds=INFO,oslo.messaging=INFO,iso8601=WARN,requests.packages.urllib3.connectionpool=WARN,urllib3.connectionpool=WARN,websocket=WARN,requests.packages.urllib3.util.retry=WARN,urllib3.util.retry=WARN,keystonemiddleware=WARN,routes.middleware=WARN,stevedore=WARN,taskflow=WARN,keystoneauth=WARN,oslo.cache=INFO,dogpile.core.dogpile=INFO
+
+    # Enables or disables publication of error events. (boolean value)
+    #publish_errors = false
+
+    # The format for an instance that is passed with the log message. (string
+    # value)
+    #instance_format = "[instance: %(uuid)s] "
+
+    # The format for an instance UUID that is passed with the log message. (string
+    # value)
+    #instance_uuid_format = "[instance: %(uuid)s] "
+
+    # Enables or disables fatal status of deprecations. (boolean value)
+    #fatal_deprecations = false
+
+
+    [binding]
+
+    driver = kuryr.lib.binding.drivers.vlan
+    link_iface = {{ kuryr_cni_link_interface }}
+
+    [kubernetes]
+
+    #
+    # From kuryr_kubernetes
+    #
+
+    # The root URL of the Kubernetes API (string value)
+    api_root = {{ openshift.master.api_url }}
+
+    # The token to talk to the k8s API
+    token_file = /etc/kuryr/token
+
+    # Absolute path to ca cert file to connect to HTTPS K8S_API (string value)
+    ssl_ca_crt_file = /etc/kuryr/ca.crt
+
+    # HTTPS K8S_API server identity verification (boolean value)
+    # TODO (apuimedo): Make configurable
+    ssl_verify_server_crt = True
