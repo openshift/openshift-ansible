@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.15
+Version:        3.6.16
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,34 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Apr 05 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.16-1
+- Removing test coverage for shared code. (kwoodson@redhat.com)
+- Port 10255 unnecessary.  Removing all instances (ccallega@redhat.com)
+- oo_filters: Disable pylint too-many-lines test (jarrpa@redhat.com)
+- oo_collect: Allow list elements to be lists of dict (jarrpa@redhat.com)
+- oc_label: handle case where _get() returns no results (jarrpa@redhat.com)
+- Addressing py27-yamllint (esauer@redhat.com)
+- Add 'docker-registry.default.svc' to cert-redeploy too (sdodson@redhat.com)
+- Support unicode output when dumping yaml (rteague@redhat.com)
+- Add docker-registry.default.svc short name to registry service signing
+  (sdodson@redhat.com)
+- oc_configmap: Add missing check for name (jarrpa@redhat.com)
+- oo_collect: Update comments to show source of failure (jarrpa@redhat.com)
+- openshift_facts: Allow examples_content_version to be set to v1.6
+  (jarrpa@redhat.com)
+- Restart polkitd to workaround a bug in polkitd (sdodson@redhat.com)
+- Add names to openshift_image_tag asserts (smilner@redhat.com)
+- doc: Remove atomic-openshift deployment type (smilner@redhat.com)
+- openshift_version now requires prepended version formats (smilner@redhat.com)
+- Warn if openshift_image_tag is defined by hand for package installs
+  (smilner@redhat.com)
+- Verify openshift_image_tag is valid during openshift_version main
+  (smilner@redhat.com)
+- Add openshift_version fact fallback debug messages (smilner@redhat.com)
+- cleanup: when in openshift_version tasks are multiline (smilner@redhat.com)
+- Compatibility updates to openshift_logging role for ansible 2.2.2.0+
+  (esauer@redhat.com)
+
 * Tue Apr 04 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.15-1
 - Document etcd_ca_default_days in example inventories. (abutcher@redhat.com)
 - Fixed a bug. Ansible requires a msg param when module.fail_json.
