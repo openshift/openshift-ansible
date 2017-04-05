@@ -1,0 +1,2 @@
+---
+is_containerized: "{{ openshift.common.is_containerized | default(False) | bool }}"

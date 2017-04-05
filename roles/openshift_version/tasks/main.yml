@@ -1,9 +1,6 @@
 ---
 # Determine the openshift_version to configure if none has been specified or set previously.
 
-- set_fact:
-    is_containerized: "{{ openshift.common.is_containerized | default(False) | bool }}"
-
 # Block attempts to install origin without specifying some kind of version information.
 # This is because the latest tags for origin are usually alpha builds, which should not
 # be used by default. Users must indicate what they want.
