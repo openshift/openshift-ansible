@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.50
+Version:        3.5.51
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Apr 06 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.51-1
+- Copy v3 data dir when performing backup (sdodson@redhat.com)
+- unexclude excluder if it is to be upgraded and already installed
+  (jchaloup@redhat.com)
+- Add external provisioners playbook starting with aws efs (mawong@redhat.com)
+
 * Wed Apr 05 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.50-1
 - bug 1435144. Remove unneeded upgrade in openshift_logging role
   (jcantril@redhat.com)
