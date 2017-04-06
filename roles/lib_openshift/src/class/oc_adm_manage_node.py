@@ -44,7 +44,7 @@ class ManageNode(OpenShiftCLI):
         if selector:
             _sel = selector
 
-        results = self._get('node', rname=_node, selector=_sel)
+        results = self._get('node', name=_node, selector=_sel)
         if results['returncode'] != 0:
             return results
 

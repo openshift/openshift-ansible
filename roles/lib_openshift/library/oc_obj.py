@@ -912,11 +912,15 @@ class OpenShiftCLI(object):
         '''call oc create on a filename'''
         return self.openshift_cmd(['create', '-f', fname])
 
-    def _delete(self, resource, rname, selector=None):
+    def _delete(self, resource, name=None, selector=None):
         '''call oc delete on a resource'''
-        cmd = ['delete', resource, rname]
-        if selector:
-            cmd.append('--selector=%s' % selector)
+        cmd = ['delete', resource]
+        if selector is not None:
+            cmd.append('--selector={}'.format(selector))
+        elif name is not None:
+            cmd.append(name)
+        else:
+            raise OpenShiftCLIError('Either name or selector is required when calling delete.')
 
         return self.openshift_cmd(cmd)
 
@@ -934,7 +938,7 @@ class OpenShiftCLI(object):
         else:
             cmd.append(template_name)
         if params:
-            param_str = ["%s=%s" % (key, value) for key, value in params.items()]
+            param_str = ["{}={}".format(key, value) for key, value in params.items()]
             cmd.append('-v')
             cmd.extend(param_str)
 
@@ -951,13 +955,13 @@ class OpenShiftCLI(object):
 
         return self.openshift_cmd(['create', '-f', fname])
 
-    def _get(self, resource, rname=None, selector=None):
+    def _get(self, resource, name=None, selector=None):
         '''return a resource by name '''
         cmd = ['get', resource]
-        if selector:
-            cmd.append('--selector=%s' % selector)
-        elif rname:
-            cmd.append(rname)
+        if selector is not None:
+            cmd.append('--selector={}'.format(selector))
+        elif name is not None:
+            cmd.append(name)
 
         cmd.extend(['-o', 'json'])
 
@@ -977,9 +981,9 @@ class OpenShiftCLI(object):
         if node:
             cmd.extend(node)
         else:
-            cmd.append('--selector=%s' % selector)
+            cmd.append('--selector={}'.format(selector))
 
-        cmd.append('--schedulable=%s' % schedulable)
+        cmd.append('--schedulable={}'.format(schedulable))
 
         return self.openshift_cmd(cmd, oadm=True, output=True, output_type='raw')  # noqa: E501
 
@@ -994,10 +998,10 @@ class OpenShiftCLI(object):
         if node:
             cmd.extend(node)
         else:
-            cmd.append('--selector=%s' % selector)
+            cmd.append('--selector={}'.format(selector))
 
         if pod_selector:
-            cmd.append('--pod-selector=%s' % pod_selector)
+            cmd.append('--pod-selector={}'.format(pod_selector))
 
         cmd.extend(['--list-pods', '-o', 'json'])
 
@@ -1010,16 +1014,16 @@ class OpenShiftCLI(object):
         if node:
             cmd.extend(node)
         else:
-            cmd.append('--selector=%s' % selector)
+            cmd.append('--selector={}'.format(selector))
 
         if dry_run:
             cmd.append('--dry-run')
 
         if pod_selector:
-            cmd.append('--pod-selector=%s' % pod_selector)
+            cmd.append('--pod-selector={}'.format(pod_selector))
 
         if grace_period:
-            cmd.append('--grace-period=%s' % int(grace_period))
+            cmd.append('--grace-period={}'.format(int(grace_period)))
 
         if force:
             cmd.append('--force')
@@ -1430,7 +1434,7 @@ class OCObject(OpenShiftCLI):
     def __init__(self,
                  kind,
                  namespace,
-                 rname=None,
+                 name=None,
                  selector=None,
                  kubeconfig='/etc/origin/master/admin.kubeconfig',
                  verbose=False,
@@ -1439,21 +1443,21 @@ class OCObject(OpenShiftCLI):
         super(OCObject, self).__init__(namespace, kubeconfig=kubeconfig, verbose=verbose,
                                        all_namespaces=all_namespaces)
         self.kind = kind
-        self.name = rname
+        self.name = name
         self.selector = selector
 
     def get(self):
         '''return a kind by name '''
-        results = self._get(self.kind, rname=self.name, selector=self.selector)
-        if results['returncode'] != 0 and 'stderr' in results and \
-           '\"%s\" not found' % self.name in results['stderr']:
+        results = self._get(self.kind, name=self.name, selector=self.selector)
+        if (results['returncode'] != 0 and 'stderr' in results and
+                '\"{}\" not found'.format(self.name) in results['stderr']):
             results['returncode'] = 0
 
         return results
 
     def delete(self):
-        '''return all pods '''
-        return self._delete(self.kind, self.name)
+        '''delete the object'''
+        return self._delete(self.kind, name=self.name, selector=self.selector)
 
     def create(self, files=None, content=None):
         '''
@@ -1529,24 +1533,33 @@ class OCObject(OpenShiftCLI):
         # Get
         #####
         if state == 'list':
-            return {'changed': False, 'results': api_rval, 'state': 'list'}
-
-        if not params['name']:
-            return {'failed': True, 'msg': 'Please specify a name when state is absent|present.'}  # noqa: E501
+            return {'changed': False, 'results': api_rval, 'state': state}
 
         ########
         # Delete
         ########
         if state == 'absent':
-            if not Utils.exists(api_rval['results'], params['name']):
-                return {'changed': False, 'state': 'absent'}
+            # if we were passed a name, verify its not in our results
+            if params['name'] is not None and not Utils.exists(api_rval['results'], params['name']):
+                return {'changed': False, 'state': state}
+
+            # verify results are empty for the selector
+            if params['selector'] is not None and len(api_rval['results']) == 0:
+                return {'changed': False, 'state': state}
 
             if check_mode:
                 return {'changed': True, 'msg': 'CHECK_MODE: Would have performed a delete'}
 
             api_rval = ocobj.delete()
 
-            return {'changed': True, 'results': api_rval, 'state': 'absent'}
+            if api_rval['returncode'] != 0:
+                return {'failed': True, 'msg': api_rval}
+
+            return {'changed': True, 'results': api_rval, 'state': state}
+
+        # create/update: Must define a name beyond this point
+        if not params['name']:
+            return {'failed': True, 'msg': 'Please specify a name when state is present.'}
 
         if state == 'present':
             ########
@@ -1572,7 +1585,7 @@ class OCObject(OpenShiftCLI):
                 if params['files'] and params['delete_after']:
                     Utils.cleanup(params['files'])
 
-                return {'changed': True, 'results': api_rval, 'state': "present"}
+                return {'changed': True, 'results': api_rval, 'state': state}
 
             ########
             # Update
@@ -1587,7 +1600,7 @@ class OCObject(OpenShiftCLI):
                 if params['files'] and params['delete_after']:
                     Utils.cleanup(params['files'])
 
-                return {'changed': False, 'results': api_rval['results'][0], 'state': "present"}
+                return {'changed': False, 'results': api_rval['results'][0], 'state': state}
 
             if check_mode:
                 return {'changed': True, 'msg': 'CHECK_MODE: Would have performed an update.'}
@@ -1606,7 +1619,7 @@ class OCObject(OpenShiftCLI):
             if api_rval['returncode'] != 0:
                 return {'failed': True, 'msg': api_rval}
 
-            return {'changed': True, 'results': api_rval, 'state': "present"}
+            return {'changed': True, 'results': api_rval, 'state': state}
 
 # -*- -*- -*- End included fragment: class/oc_obj.py -*- -*- -*-
 
@@ -1634,7 +1647,7 @@ def main():
             force=dict(default=False, type='bool'),
             selector=dict(default=None, type='str'),
         ),
-        mutually_exclusive=[["content", "files"]],
+        mutually_exclusive=[["content", "files"], ["selector", "name"]],
 
         supports_check_mode=True,
     )
