@@ -4,6 +4,14 @@
 # - docker_excluder_package_state
 - include: init.yml
 
+# unexclude the current openshift/origin-excluder if it is installed so it can be updated
+- include: unexclude.yml
+  vars:
+    unexclude_docker_excluder: false
+    unexclude_openshift_excluder: "{{ openshift_excluder_on | bool }}"
+  when:
+  - not openshift.common.is_atomic | bool
+
 # Install any excluder that is enabled
 - include: install.yml
   vars:
