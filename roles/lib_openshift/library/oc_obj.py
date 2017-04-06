@@ -912,11 +912,13 @@ class OpenShiftCLI(object):
         '''call oc create on a filename'''
         return self.openshift_cmd(['create', '-f', fname])
 
-    def _delete(self, resource, rname, selector=None):
+    def _delete(self, resource, rname=None, selector=None):
         '''call oc delete on a resource'''
-        cmd = ['delete', resource, rname]
+        cmd = ['delete', resource]
         if selector:
             cmd.append('--selector=%s' % selector)
+        elif rname:
+            cmd.append(rname)
 
         return self.openshift_cmd(cmd)
 
@@ -1453,7 +1455,7 @@ class OCObject(OpenShiftCLI):
 
     def delete(self):
         '''return all pods '''
-        return self._delete(self.kind, self.name)
+        return self._delete(self.kind, self.name, self.selector)
 
     def create(self, files=None, content=None):
         '''
@@ -1531,14 +1533,11 @@ class OCObject(OpenShiftCLI):
         if state == 'list':
             return {'changed': False, 'results': api_rval, 'state': 'list'}
 
-        if not params['name']:
-            return {'failed': True, 'msg': 'Please specify a name when state is absent|present.'}  # noqa: E501
-
         ########
         # Delete
         ########
         if state == 'absent':
-            if not Utils.exists(api_rval['results'], params['name']):
+            if not api_rval['results'] or not api_rval['results'][0]:
                 return {'changed': False, 'state': 'absent'}
 
             if check_mode:
@@ -1549,6 +1548,9 @@ class OCObject(OpenShiftCLI):
             return {'changed': True, 'results': api_rval, 'state': 'absent'}
 
         if state == 'present':
+            if not params['name']:
+                return {'failed': True, 'msg': 'Please specify a name when state is present.'}  # noqa: E501
+
             ########
             # Create
             ########
