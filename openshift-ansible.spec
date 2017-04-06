@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.16
+Version:        3.6.17
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Apr 06 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.17-1
+- Adding signed router cert and fixing server_cert bug. (kwoodson@redhat.com)
+
 * Wed Apr 05 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.16-1
 - Removing test coverage for shared code. (kwoodson@redhat.com)
 - Port 10255 unnecessary.  Removing all instances (ccallega@redhat.com)
