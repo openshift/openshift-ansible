@@ -85,10 +85,15 @@
       path: "{{ openshift.etcd.etcd_data_dir }}/member/snap/db"
     register: v3_db
 
+  - name: Ensure v3 backup directory exists
+    file:
+      path: "{{ openshift.common.data_dir }}/etcd-backup-{{ backup_tag | default('') }}{{ timestamp }}/member/snap"
+      state: directory
+
   - name: Copy etcd v3 data store
     command: >
-      cp -a {{ openshift.etcd.etcd_data_dir }}/member/snap
-      {{ openshift.common.data_dir }}/etcd-backup-{{ backup_tag | default('') }}{{ timestamp }}/member/
+      cp -a {{ openshift.etcd.etcd_data_dir }}/member/snap/db
+      {{ openshift.common.data_dir }}/etcd-backup-{{ backup_tag | default('') }}{{ timestamp }}/member/snap/
     when: v3_db.stat.exists
 
   - set_fact:
