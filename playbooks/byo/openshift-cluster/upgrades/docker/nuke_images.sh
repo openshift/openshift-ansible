@@ -1,1 +1,0 @@
-../../../../common/openshift-cluster/upgrades/files/nuke_images.sh
