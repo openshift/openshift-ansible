@@ -38,4 +38,6 @@ Here is an example of how to run a containerized `openshift-ansible` playbook th
            -e PLAYBOOK_FILE=playbooks/certificate_expiry/default.yaml \
            openshift/openshift-ansible
 
-The [playbook2image examples](https://github.com/aweiteka/playbook2image/tree/master/examples) provide additional information on how to use an image built from it like this one.
+Further usage examples are available in the [examples directory](examples/).
+
+Additional usage information for images built from `playbook2image` like this one can be found in the [playbook2image examples](https://github.com/aweiteka/playbook2image/tree/master/examples).

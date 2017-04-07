@@ -19,7 +19,6 @@ to be used with an inventory that is representative of the
 cluster. For best results run `ansible-playbook` with the `-v` option.
 
 
-
 # Role Variables
 
 Core variables in this role:
@@ -51,8 +50,8 @@ How to use the Certificate Expiration Checking Role.
 
 Run one of the example playbooks using an inventory file
 representative of your existing cluster. Some example playbooks are
-included in this role, or you can read on below after this example to
-craft you own.
+included in this role, or you can [read on below for more examples](#more-example-playbooks)
+to help you craft you own.
 
 ```
 $ ansible-playbook -v -i HOSTS playbooks/certificate_expiry/easy-mode.yaml
@@ -69,11 +68,47 @@ Using the `easy-mode.yaml` playbook will produce:
 > `/usr/share/ansible/openshift-ansible/playbooks/certificate_expiry/easy-mode.yaml`
 > instead
 
+## Run from a container
+
+The example playbooks that use this role are packaged in the
+[container image for openshift-ansible](../../README_CONTAINER_IMAGE.md), so you
+can run any of them by setting the `PLAYBOOK_FILE` environment variable when
+running an openshift-ansible container.
+
+There are several [examples](../../examples/README.md) in the `examples` directory that run certificate check playbooks from a container running on OpenShift.
+
 ## More Example Playbooks
 
 > **Note:** These Playbooks are available to run directly out of the
 > [/playbooks/certificate_expiry/](../../playbooks/certificate_expiry/) directory.
 
+### Default behavior
+
+This playbook just invokes the certificate expiration check role with default options:
+
+
+```yaml
+---
+- name: Check cert expirys
+  hosts: nodes:masters:etcd
+  become: yes
+  gather_facts: no
+  roles:
+    - role: openshift_certificate_expiry
+```
+
+**From git:**
+```
+$ ansible-playbook -v -i HOSTS playbooks/certificate_expiry/default.yaml
+```
+**From openshift-ansible-playbooks rpm:**
+```
+$ ansible-playbook -v -i HOSTS /usr/share/ansible/openshift-ansible/playbooks/certificate_expiry/default.yaml
+```
+
+> [View This Playbook](../../playbooks/certificate_expiry/default.yaml)
+
+### Easy mode
 
 This example playbook is great if you're just wanting to **try the
 role out**. This playbook enables HTML and JSON reports. All
@@ -104,35 +139,70 @@ $ ansible-playbook -v -i HOSTS /usr/share/ansible/openshift-ansible/playbooks/ce
 
 > [View This Playbook](../../playbooks/certificate_expiry/easy-mode.yaml)
 
-***
+### Easy mode and upload reports to masters
 
-Default behavior:
+This example builds on top of [easy-mode.yaml](#easy-mode) and additionally
+uploads a copy of the generated reports to the masters, with a timestamp in the
+file names.
+
+This is specially useful when the playbook runs from within a container, because
+the reports are generated inside the container and we need a way to access them.
+Uploading a copy of the reports to the masters is one way to make it easy to
+access them. Alternatively you can use the
+[role variables](#role-variables) that control the path of the generated reports
+to point to a container volume (see the [playbook with custom paths](#generate-html-and-json-reports-in-a-custom-path) for an example).
+
+With the container use case in mind, this playbook allows control over some
+options via environment variables:
+
+ - `CERT_EXPIRY_WARN_DAYS`: sets `openshift_certificate_expiry_warning_days`, overriding the role's default.
+ - `COPY_TO_PATH`: path in the masters where generated reports are uploaded.
 
 ```yaml
 ---
-- name: Check cert expirys
+- name: Generate certificate expiration reports
   hosts: nodes:masters:etcd
-  become: yes
   gather_facts: no
+  vars:
+    openshift_certificate_expiry_save_json_results: yes
+    openshift_certificate_expiry_generate_html_report: yes
+    openshift_certificate_expiry_show_all: yes
+    openshift_certificate_expiry_warning_days: "{{ lookup('env', 'CERT_EXPIRY_WARN_DAYS') | default('45', true) }}"
   roles:
     - role: openshift_certificate_expiry
+
+- name: Upload reports to master
+  hosts: masters
+  gather_facts: no
+  vars:
+    destination_path: "{{ lookup('env', 'COPY_TO_PATH') | default('/etc/origin/certificate_expiration_report', true) }}"
+    timestamp: "{{ lookup('pipe', 'date +%Y%m%d') }}"
+  tasks:
+    - name: Create directory in masters
+      file:
+        path: "{{ destination_path }}"
+        state: directory
+    - name: Copy the reports to the masters
+      copy:
+        dest: "{{ destination_path }}/{{ timestamp }}-{{ item }}"
+        src: "/tmp/{{ item }}"
+      with_items:
+        - "cert-expiry-report.html"
+        - "cert-expiry-report.json"
 ```
 
 **From git:**
 ```
-$ ansible-playbook -v -i HOSTS playbooks/certificate_expiry/default.yaml
+$ ansible-playbook -v -i HOSTS playbooks/certificate_expiry/easy-mode-upload.yaml
 ```
 **From openshift-ansible-playbooks rpm:**
 ```
-$ ansible-playbook -v -i HOSTS /usr/share/ansible/openshift-ansible/playbooks/certificate_expiry/default.yaml
+$ ansible-playbook -v -i HOSTS /usr/share/ansible/openshift-ansible/playbooks/certificate_expiry/easy-mode-upload.yaml
 ```
 
-> [View This Playbook](../../playbooks/certificate_expiry/default.yaml)
+> [View This Playbook](../../playbooks/certificate_expiry/easy-mode-upload.yaml)
 
-***
-
-
-Generate HTML and JSON artifacts in their default paths:
+### Generate HTML and JSON artifacts in their default paths
 
 ```yaml
 ---
@@ -158,7 +228,38 @@ $ ansible-playbook -v -i HOSTS /usr/share/ansible/openshift-ansible/playbooks/ce
 
 > [View This Playbook](../../playbooks/certificate_expiry/html_and_json_default_paths.yaml)
 
-***
+### Generate HTML and JSON reports in a custom path
+
+This example customizes the report generation path to point to a specific path (`/var/lib/certcheck`) and uses a date timestamp for the generated files. This allows you to reuse a certain location to keep multiple copies of the reports.
+
+```yaml
+---
+- name: Check cert expirys
+  hosts: nodes:masters:etcd
+  become: yes
+  gather_facts: no
+  vars:
+    openshift_certificate_expiry_generate_html_report: yes
+    openshift_certificate_expiry_save_json_results: yes
+    timestamp: "{{ lookup('pipe', 'date +%Y%m%d') }}"
+    openshift_certificate_expiry_html_report_path: "/var/lib/certcheck/{{ timestamp }}-cert-expiry-report.html"
+    openshift_certificate_expiry_json_results_path: "/var/lib/certcheck/{{ timestamp }}-cert-expiry-report.json"
+  roles:
+    - role: openshift_certificate_expiry
+```
+
+**From git:**
+```
+$ ansible-playbook -v -i HOSTS playbooks/certificate_expiry/html_and_json_timestamp.yaml
+```
+**From openshift-ansible-playbooks rpm:**
+```
+$ ansible-playbook -v -i HOSTS /usr/share/ansible/openshift-ansible/playbooks/certificate_expiry/html_and_json_timestamp.yaml
+```
+
+> [View This Playbook](../../playbooks/certificate_expiry/html_and_json_timestamp.yaml)
+
+### Long warning window
 
 Change the expiration warning window to 1500 days (good for testing
 the module out):
@@ -186,7 +287,7 @@ $ ansible-playbook -v -i HOSTS /usr/share/ansible/openshift-ansible/playbooks/ce
 
 > [View This Playbook](../../playbooks/certificate_expiry/longer_warning_period.yaml)
 
-***
+### Long warning window and JSON report
 
 Change the expiration warning window to 1500 days (good for testing
 the module out) and save the results as a JSON file:
