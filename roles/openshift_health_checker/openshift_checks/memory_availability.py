@@ -1,5 +1,5 @@
 # pylint: disable=missing-docstring
-from openshift_checks import OpenShiftCheck, get_var
+from openshift_checks import OpenShiftCheck, OpenShiftCheckException, get_var
 
 
 class MemoryAvailability(OpenShiftCheck):
@@ -26,6 +26,9 @@ class MemoryAvailability(OpenShiftCheck):
         total_memory = get_var(task_vars, "ansible_memtotal_mb")
 
         recommended_memory_mb = max(self.recommended_memory_mb.get(group, 0) for group in group_names)
+        if not recommended_memory_mb:
+            msg = "Unable to determine recommended memory size for group_name {group_name}"
+            raise OpenShiftCheckException(msg.format(group_name=group_names))
 
         if total_memory < recommended_memory_mb:
             msg = ("Available memory ({available} MB) below recommended storage. "
