@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.18
+Version:        3.6.19
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,13 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Apr 07 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.19-1
+- Add example scheduled certificate check (pep@redhat.com)
+- Switch from ignoring to passing on checks (rteague@redhat.com)
+- Add tests for action plugin (rhcarvalho@gmail.com)
+- Remove unnecessary code (rhcarvalho@gmail.com)
+- Make resolve_checks more strict (rhcarvalho@gmail.com)
+
 * Fri Apr 07 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.18-1
 - master-api: add mount for /var/log (gscrivan@redhat.com)
 - master: add mount for /var/log (gscrivan@redhat.com)
