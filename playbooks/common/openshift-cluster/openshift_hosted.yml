@@ -43,8 +43,13 @@
     openshift_hosted_logging_elasticsearch_ops_pvc_size: "{{ openshift.hosted.logging.storage.volume.size if openshift_hosted_logging_storage_kind | default(none) in ['dynamic','nfs' ] else ''  }}"
     openshift_hosted_logging_elasticsearch_ops_pvc_prefix: "{{ 'logging-es-ops' if openshift_hosted_loggingops_storage_kind | default(none) =='dynamic' else '' }}"
 
-  - role: cockpit-ui
-    when: ( openshift.common.version_gte_3_3_or_1_3  | bool ) and ( openshift_hosted_manage_registry | default(true) | bool ) and not (openshift.docker.hosted_registry_insecure | default(false) | bool)
+  - role: openshift_hosted_registry_console
+    when:
+    - openshift.common.version_gte_3_3_or_1_3  | bool
+    - openshift_hosted_manage_registry | default(true) | bool
+    - openshift_hosted_registry_console_deploy | default(true) | bool
+    - not (openshift.docker.hosted_registry_insecure | default(false) | bool
+
 
 - name: Update master-config for publicLoggingURL
   hosts: oo_masters_to_config:!oo_first_master
