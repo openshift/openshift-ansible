@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.75
+Version:        3.4.76
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -250,6 +250,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Apr 08 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.4.76-1
+- Fix BZ#1439109 (weshi@redhat.com)
+
 * Thu Mar 30 2017 Scott Dodson <sdodson@redhat.com> 3.4.75-1
 - Default router volumes. (abutcher@redhat.com)
 - Specify namespace for registry secret replacement. (abutcher@redhat.com)
