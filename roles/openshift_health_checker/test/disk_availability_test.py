@@ -3,104 +3,153 @@ import pytest
 from openshift_checks.disk_availability import DiskAvailability, OpenShiftCheckException
 
 
-def test_exception_raised_on_empty_ansible_mounts():
+@pytest.mark.parametrize('group_names,is_containerized,is_active', [
+    (['masters'], False, True),
+    # ensure check is skipped on containerized installs
+    (['masters'], True, False),
+    (['nodes'], False, True),
+    (['etcd'], False, True),
+    (['masters', 'nodes'], False, True),
+    (['masters', 'etcd'], False, True),
+    ([], False, False),
+    (['lb'], False, False),
+    (['nfs'], False, False),
+])
+def test_is_active(group_names, is_containerized, is_active):
+    task_vars = dict(
+        group_names=group_names,
+        openshift=dict(common=dict(is_containerized=is_containerized)),
+    )
+    assert DiskAvailability.is_active(task_vars=task_vars) == is_active
+
+
+@pytest.mark.parametrize('ansible_mounts,extra_words', [
+    ([], ['none']), # empty ansible_mounts
+    ([{'mount': '/mnt'}], ['/mnt']), # missing relevant mount paths
+    ([{'mount': '/var'}], ['/var']), # missing size_available
+])
+def test_cannot_determine_available_disk(ansible_mounts, extra_words):
+    task_vars = dict(
+        group_names=['masters'],
+        ansible_mounts=ansible_mounts,
+    )
+    check = DiskAvailability(execute_module=fake_execute_module)
+
     with pytest.raises(OpenShiftCheckException) as excinfo:
-        DiskAvailability(execute_module=NotImplementedError).get_openshift_disk_availability([])
+        check.run(tmp=None, task_vars=task_vars)
 
-    assert "existing volume mounts from ansible_mounts" in str(excinfo.value)
+    for word in 'determine available disk'.split() + extra_words:
+        assert word in str(excinfo.value)
 
 
-@pytest.mark.parametrize("group_name,size_available", [
+@pytest.mark.parametrize('group_names,ansible_mounts', [
     (
-        "masters",
-        41110980608,
+        ['masters'],
+        [{
+            'mount': '/',
+            'size_available': 40 * 10**9 + 1,
+        }],
     ),
     (
-        "nodes",
-        21110980608,
+        ['nodes'],
+        [{
+            'mount': '/',
+            'size_available': 15 * 10**9 + 1,
+        }],
     ),
     (
-        "etcd",
-        21110980608,
+        ['etcd'],
+        [{
+            'mount': '/',
+            'size_available': 20 * 10**9 + 1,
+        }],
+    ),
+    (
+        ['etcd'],
+        [{
+            # not enough space on / ...
+            'mount': '/',
+            'size_available': 0,
+        }, {
+            # ... but enough on /var
+            'mount': '/var',
+            'size_available': 20 * 10**9 + 1,
+        }],
     ),
 ])
-def test_volume_check_with_recommended_diskspace(group_name, size_available):
-    result = DiskAvailability(execute_module=NotImplementedError).run(tmp=None, task_vars=dict(
-        openshift=dict(common=dict(
-            service_type='origin',
-            is_containerized=False,
-        )),
-        group_names=[group_name],
-        ansible_mounts=[{
-            "mount": "/",
-            "size_available": size_available,
-        }]
-    ))
+def test_succeeds_with_recommended_disk_space(group_names, ansible_mounts):
+    task_vars = dict(
+        group_names=group_names,
+        ansible_mounts=ansible_mounts,
+    )
 
-    assert not result['failed']
-    assert not result['msg']
+    check = DiskAvailability(execute_module=fake_execute_module)
+    result = check.run(tmp=None, task_vars=task_vars)
+
+    assert not result.get('failed', False)
 
 
-@pytest.mark.parametrize("group_name,size_available", [
+@pytest.mark.parametrize('group_names,ansible_mounts,extra_words', [
     (
-        "masters",
-        21110980608,
+        ['masters'],
+        [{
+            'mount': '/',
+            'size_available': 1,
+        }],
+        ['0.0 GB'],
     ),
     (
-        "nodes",
-        1110980608,
+        ['nodes'],
+        [{
+            'mount': '/',
+            'size_available': 1 * 10**9,
+        }],
+        ['1.0 GB'],
     ),
     (
-        "etcd",
-        1110980608,
+        ['etcd'],
+        [{
+            'mount': '/',
+            'size_available': 1,
+        }],
+        ['0.0 GB'],
+    ),
+    (
+        ['nodes', 'masters'],
+        [{
+            'mount': '/',
+            # enough space for a node, not enough for a master
+            'size_available': 15 * 10**9 + 1,
+        }],
+        ['15.0 GB'],
+    ),
+    (
+        ['etcd'],
+        [{
+            # enough space on / ...
+            'mount': '/',
+            'size_available': 20 * 10**9 + 1,
+        }, {
+            # .. but not enough on /var
+            'mount': '/var',
+            'size_available': 0,
+        }],
+        ['0.0 GB'],
     ),
 ])
-def test_volume_check_with_insufficient_diskspace(group_name, size_available):
-    result = DiskAvailability(execute_module=NotImplementedError).run(tmp=None, task_vars=dict(
-        openshift=dict(common=dict(
-            service_type='origin',
-            is_containerized=False,
-        )),
-        group_names=[group_name],
-        ansible_mounts=[{
-            "mount": "/",
-            "size_available": size_available,
-        }]
-    ))
+def test_fails_with_insufficient_disk_space(group_names, ansible_mounts, extra_words):
+    task_vars = dict(
+        group_names=group_names,
+        ansible_mounts=ansible_mounts,
+    )
+
+    check = DiskAvailability(execute_module=fake_execute_module)
+    result = check.run(tmp=None, task_vars=task_vars)
 
     assert result['failed']
-    assert "is below recommended storage" in result['msg']
+    for word in 'below recommended'.split() + extra_words:
+        assert word in result['msg']
 
 
-def test_volume_check_with_unsupported_mountpaths():
-    result = DiskAvailability(execute_module=NotImplementedError).run(tmp=None, task_vars=dict(
-        openshift=dict(common=dict(
-            service_type='origin',
-            is_containerized=False,
-        )),
-        group_names=["masters", "nodes"],
-        ansible_mounts=[{
-            "mount": "/unsupported",
-            "size_available": 12345,
-        }]
-    ))
-
-    assert result['failed']
-    assert "0 GB" in result['msg']
-
-
-def test_volume_check_with_invalid_groupname():
-    with pytest.raises(OpenShiftCheckException) as excinfo:
-        result = DiskAvailability(execute_module=NotImplementedError).run(tmp=None, task_vars=dict(
-            openshift=dict(common=dict(
-                service_type='origin',
-                is_containerized=False,
-            )),
-            group_names=["invalid"],
-            ansible_mounts=[{
-                "mount": "/unsupported",
-                "size_available": 12345,
-            }]
-        ))
-
-    assert "'invalid'" in str(excinfo.value)
+def fake_execute_module(*args):
+    raise AssertionError('this function should not be called')
