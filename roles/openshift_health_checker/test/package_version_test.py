@@ -1,3 +1,5 @@
+import pytest
+
 from openshift_checks.package_version import PackageVersion
 
 
@@ -19,3 +21,23 @@ def test_package_version():
     check = PackageVersion(execute_module=execute_module)
     result = check.run(tmp=None, task_vars=task_vars)
     assert result is return_value
+
+
+@pytest.mark.parametrize('group_names,is_containerized,is_active', [
+    (['masters'], False, True),
+    # ensure check is skipped on containerized installs
+    (['masters'], True, False),
+    (['nodes'], False, True),
+    (['masters', 'nodes'], False, True),
+    (['masters', 'etcd'], False, True),
+    ([], False, False),
+    (['etcd'], False, False),
+    (['lb'], False, False),
+    (['nfs'], False, False),
+])
+def test_package_version_skip_when_not_master_nor_node(group_names, is_containerized, is_active):
+    task_vars = dict(
+        group_names=group_names,
+        openshift=dict(common=dict(is_containerized=is_containerized)),
+    )
+    assert PackageVersion.is_active(task_vars=task_vars) == is_active
