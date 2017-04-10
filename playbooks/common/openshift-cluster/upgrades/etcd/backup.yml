@@ -4,6 +4,7 @@
   vars:
     embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
     etcdctl_command: "{{ 'etcdctl' if not openshift.common.is_containerized or embedded_etcd else 'docker exec etcd_container etcdctl' if not openshift.common.is_etcd_system_container else 'runc exec etcd etcdctl' }}"
+    timestamp: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
   roles:
   - openshift_facts
   tasks:
@@ -13,30 +14,20 @@
       local_facts: {}
     when: "'etcd' not in openshift"
   - set_fact:
-      timestamp: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
-
-  - stat: path=/var/lib/openshift
-    register: var_lib_openshift
-
-  - stat: path=/var/lib/origin
-    register: var_lib_origin
-
-  - name: Create origin symlink if necessary
-    file: src=/var/lib/openshift/ dest=/var/lib/origin state=link
-    when: var_lib_openshift.stat.exists == True and var_lib_origin.stat.exists == False
+      etcd_backup_dir: "{{ openshift.etcd.etcd_data_dir }}/openshift-backup-{{ backup_tag | default('') }}{{ timestamp }}"
 
   # TODO: replace shell module with command and update later checks
   # We assume to be using the data dir for all backups.
   - name: Check available disk space for etcd backup
-    shell: df --output=avail -k {{ openshift.common.data_dir }} | tail -n 1
+    shell: df --output=avail -k {{ openshift.etcd.etcd_data_dir }} | tail -n 1
     register: avail_disk
     # AUDIT:changed_when: `false` because we are only inspecting
     # state, not manipulating anything
     changed_when: false
 
   # TODO: replace shell module with command and update later checks
-  - name: Check current embedded etcd disk usage
-    shell: du -k {{ openshift.etcd.etcd_data_dir }} | tail -n 1 | cut -f1
+  - name: Check current etcd disk usage
+    shell: du --exclude='*openshift-backup*' -k {{ openshift.etcd.etcd_data_dir }} | tail -n 1 | cut -f1
     register: etcd_disk_usage
     when: embedded_etcd | bool
     # AUDIT:changed_when: `false` because we are only inspecting
@@ -71,12 +62,12 @@
     package:
       name: etcd
       state: latest
-    when: ( embedded_etcd | bool or openshift.common.is_containerized ) and not openshift.common.is_atomic
+    when: embedded_etcd | bool
 
   - name: Generate etcd backup
     command: >
       {{ etcdctl_command }} backup --data-dir={{ openshift.etcd.etcd_data_dir }}
-      --backup-dir={{ openshift.common.data_dir }}/etcd-backup-{{ backup_tag | default('') }}{{ timestamp }}
+      --backup-dir={{ etcd_backup_dir }}
 
   # According to the docs change you can simply copy snap/db
   # https://github.com/openshift/openshift-docs/commit/b38042de02d9780842dce95cfa0ef45d53b58bc6
@@ -85,15 +76,17 @@
       path: "{{ openshift.etcd.etcd_data_dir }}/member/snap/db"
     register: v3_db
 
+  # TODO: this should be safe to remove now that we've figured out that we were dumping the data
+  # inside the container
   - name: Ensure v3 backup directory exists
     file:
-      path: "{{ openshift.common.data_dir }}/etcd-backup-{{ backup_tag | default('') }}{{ timestamp }}/member/snap"
+      path: "{{ etcd_backup_dir }}/member/snap"
       state: directory
 
   - name: Copy etcd v3 data store
     command: >
       cp -a {{ openshift.etcd.etcd_data_dir }}/member/snap/db
-      {{ openshift.common.data_dir }}/etcd-backup-{{ backup_tag | default('') }}{{ timestamp }}/member/snap/
+      {{ etcd_backup_dir }}/member/snap/
     when: v3_db.stat.exists
 
   - set_fact:
@@ -101,7 +94,7 @@
 
   - name: Display location of etcd backup
     debug:
-      msg: "Etcd backup created in {{ openshift.common.data_dir }}/etcd-backup-{{ backup_tag | default('') }}{{ timestamp }}"
+      msg: "Etcd backup created in {{ etcd_backup_dir }}"
 
 - name: Gate on etcd backup
   hosts: localhost
