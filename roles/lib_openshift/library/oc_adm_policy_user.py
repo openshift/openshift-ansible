@@ -1960,7 +1960,7 @@ class PolicyUser(OpenShiftCLI):
     @property
     def policybindings(self):
         if self._policy_bindings is None:
-            results = self._get('clusterpolicybindings', None)
+            results = self._get('policybindings', None)
             if results['returncode'] != 0:
                 raise OpenShiftCLIError('Could not retrieve policybindings')
             self._policy_bindings = results['results'][0]['items'][0]

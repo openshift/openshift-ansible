@@ -22,7 +22,7 @@ class OCClusterRole(OpenShiftCLI):
     @property
     def clusterrole(self):
         ''' property for clusterrole'''
-        if not self._clusterrole:
+        if self._clusterrole is None:
             self.get()
         return self._clusterrole
 
@@ -58,6 +58,7 @@ class OCClusterRole(OpenShiftCLI):
 
         elif 'clusterrole "{}" not found'.format(self.name) in result['stderr']:
             result['returncode'] = 0
+            self.clusterrole = None
 
         return result
 
@@ -126,6 +127,9 @@ class OCClusterRole(OpenShiftCLI):
 
                 # Create it here
                 api_rval = oc_clusterrole.create()
+
+                if api_rval['returncode'] != 0:
+                    return {'failed': True, 'msg': api_rval}
 
                 # return the created object
                 api_rval = oc_clusterrole.get()
