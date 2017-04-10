@@ -17,7 +17,6 @@
       etcd_backup_dir: "{{ openshift.etcd.etcd_data_dir }}/openshift-backup-{{ backup_tag | default('') }}{{ timestamp }}"
 
   # TODO: replace shell module with command and update later checks
-  # We assume to be using the data dir for all backups.
   - name: Check available disk space for etcd backup
     shell: df --output=avail -k {{ openshift.etcd.etcd_data_dir }} | tail -n 1
     register: avail_disk
@@ -44,25 +43,17 @@
   # For non containerized and non embedded we should have the correct version of
   # etcd installed already. So don't do anything.
   #
-  # For embedded or containerized we need to use the latest because OCP 3.3 uses
-  # a version of etcd that can only be backed up with etcd-3.x and if it's
-  # containerized then etcd version may be newer than that on the host so
-  # upgrade it.
+  # For containerized installs we now exec into etcd_container
   #
-  # On atomic we have neither yum nor dnf so ansible throws a hard to debug error
-  # if you use package there, like this: "Could not find a module for unknown."
-  # see https://bugzilla.redhat.com/show_bug.cgi?id=1408668
-  #
-  # TODO - We should refactor all containerized backups to use the containerized
-  # version of etcd to perform the backup rather than relying on the host's
-  # binaries. Until we do that we'll continue to have problems backing up etcd
-  # when atomic host has an older version than the version that's running in the
-  # container whether that's embedded or not
-  - name: Install latest etcd for containerized or embedded
+  # For embedded non containerized we need to ensure we have the latest version
+  # etcd on the host.
+  - name: Install latest etcd for embedded
     package:
       name: etcd
       state: latest
-    when: embedded_etcd | bool
+    when:
+    - embedded_etcd | bool
+    - not openshift.common.is_atomic | bool
 
   - name: Generate etcd backup
     command: >
@@ -75,13 +66,6 @@
     stat:
       path: "{{ openshift.etcd.etcd_data_dir }}/member/snap/db"
     register: v3_db
-
-  # TODO: this should be safe to remove now that we've figured out that we were dumping the data
-  # inside the container
-  - name: Ensure v3 backup directory exists
-    file:
-      path: "{{ etcd_backup_dir }}/member/snap"
-      state: directory
 
   - name: Copy etcd v3 data store
     command: >
