@@ -9,7 +9,6 @@
     registry_image: "{{  openshift.master.registry_url | replace( '${component}', 'docker-registry' )  | replace ( '${version}', openshift_image_tag ) }}"
     router_image: "{{ openshift.master.registry_url | replace( '${component}', 'haproxy-router' ) | replace ( '${version}', openshift_image_tag ) }}"
     registry_console_image: "{{ openshift.master.registry_url | regex_replace ( '(origin|ose)-\\${component}', 'registry-console') | replace ( '${version}', 'v' ~ openshift.common.short_version ) }}"
-    oc_cmd: "{{ openshift.common.client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig"
 
   pre_tasks:
   - name: Load lib_openshift modules
@@ -23,7 +22,10 @@
       selector: 'router'
     register: all_routers
 
-  - set_fact: haproxy_routers="{{ all_routers.results.results[0]['items'] | oo_pods_match_component(openshift_deployment_type, 'haproxy-router') | oo_select_keys_from_list(['metadata']) }}"
+  - set_fact:
+      haproxy_routers: "{{ all_routers.results.results[0]['items'] |
+                           oo_pods_match_component(openshift_deployment_type, 'haproxy-router') |
+                           oo_select_keys_from_list(['metadata']) }}"
     when:
     - all_routers.results.returncode == 0
 
@@ -32,16 +34,15 @@
     - all_routers.results.returncode != 0
 
   - name: Update router image to current version
+    oc_edit:
+      kind: dc
+      name: "{{ item['labels']['deploymentconfig'] }}"
+      namespace: "{{ item['namespace'] }}"
+      content:
+        spec.template.spec.containers[0].image: "{{ router_image }}"
+    with_items: "{{ haproxy_routers }}"
     when:
     - all_routers.results.returncode == 0
-    command: >
-      {{ oc_cmd }} patch dc/{{ item['labels']['deploymentconfig'] }} -n {{ item['namespace'] }} -p
-      '{"spec":{"template":{"spec":{"containers":[{"name":"router","image":"{{ router_image }}","livenessProbe":{"tcpSocket":null,"httpGet":{"path": "/healthz", "port": 1936, "host": "localhost", "scheme": "HTTP"},"initialDelaySeconds":10,"timeoutSeconds":1}}]}}}}'
-      --api-version=v1
-    with_items: "{{ haproxy_routers }}"
-    # AUDIT:changed_when_note: `false` not being set here. What we
-    # need to do is check the current router image version and see if
-    # this task needs to be ran.
 
   - name: Check for default registry
     oc_obj:
@@ -51,15 +52,14 @@
     register: _default_registry
 
   - name: Update registry image to current version
+    oc_edit:
+      kind: dc
+      name: docker-registry
+      namespace: default
+      content:
+        spec.template.spec.containers[0].image: "{{ registry_image }}"
     when:
     - _default_registry.results.results[0] != {}
-    command: >
-      {{ oc_cmd }} patch dc/docker-registry -n default -p
-      '{"spec":{"template":{"spec":{"containers":[{"name":"registry","image":"{{ registry_image }}"}]}}}}'
-      --api-version=v1
-    # AUDIT:changed_when_note: `false` not being set here. What we
-    # need to do is check the current registry image version and see
-    # if this task needs to be ran.
 
   - name: Check for registry-console
     oc_obj:
