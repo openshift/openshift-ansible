@@ -1,13 +1,16 @@
 ---
 - block:
-  - name: Create passthrough route for docker-registry
+
+  # When openshift_hosted_manage_registry=true the openshift_hosted
+  # role will create the appropriate route for the docker-registry.
+  # When openshift_hosted_manage_registry=false then this code will
+  # not be run.
+  - name: fetch the docker-registry route
     oc_route:
       kubeconfig: "{{ openshift_master_config_dir }}/admin.kubeconfig"
       name: docker-registry
       namespace: default
-      service_name: docker-registry
-      state: present
-      tls_termination: passthrough
+      state: list
     register: docker_registry_route
 
   - name: Create passthrough route for registry-console
@@ -41,7 +44,7 @@
       {% if openshift_cockpit_deployer_prefix is defined  %}-p IMAGE_PREFIX="{{ openshift_cockpit_deployer_prefix }}"{% endif %}
       {% if openshift_cockpit_deployer_version is defined  %}-p IMAGE_VERSION="{{ openshift_cockpit_deployer_version }}"{% endif %}
       -p OPENSHIFT_OAUTH_PROVIDER_URL="{{ openshift.master.public_api_url }}"
-      -p REGISTRY_HOST="{{ docker_registry_route.results.results[0].spec.host }}"
+      -p REGISTRY_HOST="{{ docker_registry_route.results[0].spec.host }}"
       -p COCKPIT_KUBE_URL="https://{{ registry_console_cockpit_kube.results.results[0].spec.host }}"
       --config={{ openshift_hosted_kubeconfig }}
       -n default
