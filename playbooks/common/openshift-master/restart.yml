@@ -1,5 +1,5 @@
 ---
-- include: ../../common/openshift-master/validate_restart.yml
+- include: validate_restart.yml
 
 - name: Restart masters
   hosts: oo_masters_to_config
@@ -12,8 +12,8 @@
   roles:
   - openshift_facts
   post_tasks:
-  - include: ../../common/openshift-master/restart_hosts.yml
+  - include: restart_hosts.yml
     when: openshift_rolling_restart_mode | default('services') == 'system'
 
-  - include: ../../common/openshift-master/restart_services.yml
+  - include: restart_services.yml
     when: openshift_rolling_restart_mode | default('services') == 'services'
