@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.20
+Version:        3.6.21
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Apr 11 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.21-1
+- Adding a query for the existing docker-registry route. (kwoodson@redhat.com)
+- Removing docker-registry route from cockpit-ui. (kwoodson@redhat.com)
+
 * Fri Apr 07 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.20-1
 - Fixed a bug when oc command fails. (kwoodson@redhat.com)
 - openshift_sanitize_inventory: validate release (lmeyer@redhat.com)
