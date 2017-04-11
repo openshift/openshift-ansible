@@ -4,16 +4,19 @@ from openshift_checks.package_version import PackageVersion
 def test_package_version():
     task_vars = dict(
         openshift=dict(common=dict(service_type='origin')),
-        openshift_release='v3.5',
+        openshift_release='3.5',
+        openshift_deployment_type='origin',
     )
     return_value = object()
 
     def execute_module(module_name=None, module_args=None, tmp=None, task_vars=None):
         assert module_name == 'aos_version'
-        assert 'prefix' in module_args
-        assert 'version' in module_args
-        assert module_args['prefix'] == task_vars['openshift']['common']['service_type']
-        assert module_args['version'] == task_vars['openshift_release']
+        assert 'requested_openshift_release' in module_args
+        assert 'openshift_deployment_type' in module_args
+        assert 'rpm_prefix' in module_args
+        assert module_args['requested_openshift_release'] == task_vars['openshift_release']
+        assert module_args['openshift_deployment_type'] == task_vars['openshift_deployment_type']
+        assert module_args['rpm_prefix'] == task_vars['openshift']['common']['service_type']
         return return_value
 
     check = PackageVersion(execute_module=execute_module)
