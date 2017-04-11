@@ -1,5 +1,5 @@
 # pylint: disable=missing-docstring
-from openshift_checks import OpenShiftCheck, OpenShiftCheckException, get_var
+from openshift_checks import OpenShiftCheck, get_var
 
 
 class MemoryAvailability(OpenShiftCheck):
@@ -8,31 +8,37 @@ class MemoryAvailability(OpenShiftCheck):
     name = "memory_availability"
     tags = ["preflight"]
 
-    recommended_memory_mb = {
-        "nodes": 8 * 1000,
-        "masters": 16 * 1000,
-        "etcd": 10 * 1000,
+    # Values taken from the official installation documentation:
+    # https://docs.openshift.org/latest/install_config/install/prerequisites.html#system-requirements
+    recommended_memory_bytes = {
+        "masters": 16 * 10**9,
+        "nodes": 8 * 10**9,
+        "etcd": 20 * 10**9,
     }
 
     @classmethod
     def is_active(cls, task_vars):
-        """Skip hosts that do not have recommended memory space requirements."""
+        """Skip hosts that do not have recommended memory requirements."""
         group_names = get_var(task_vars, "group_names", default=[])
-        has_mem_space_recommendation = bool(set(group_names).intersection(cls.recommended_memory_mb))
-        return super(MemoryAvailability, cls).is_active(task_vars) and has_mem_space_recommendation
+        has_memory_recommendation = bool(set(group_names).intersection(cls.recommended_memory_bytes))
+        return super(MemoryAvailability, cls).is_active(task_vars) and has_memory_recommendation
 
     def run(self, tmp, task_vars):
-        group_names = get_var(task_vars, "group_names", default=[])
-        total_memory = get_var(task_vars, "ansible_memtotal_mb")
+        group_names = get_var(task_vars, "group_names")
+        total_memory_bytes = get_var(task_vars, "ansible_memtotal_mb") * 10**6
 
-        recommended_memory_mb = max(self.recommended_memory_mb.get(group, 0) for group in group_names)
-        if not recommended_memory_mb:
-            msg = "Unable to determine recommended memory size for group_name {group_name}"
-            raise OpenShiftCheckException(msg.format(group_name=group_names))
+        min_memory_bytes = max(self.recommended_memory_bytes.get(name, 0) for name in group_names)
 
-        if total_memory < recommended_memory_mb:
-            msg = ("Available memory ({available} MB) below recommended storage. "
-                   "Minimum required memory: {recommended} MB")
-            return {"failed": True, "msg": msg.format(available=total_memory, recommended=recommended_memory_mb)}
+        if total_memory_bytes < min_memory_bytes:
+            return {
+                'failed': True,
+                'msg': (
+                    'Available memory ({available:.1f} GB) '
+                    'below recommended value ({recommended:.1f} GB)'
+                ).format(
+                    available=float(total_memory_bytes) / 10**9,
+                    recommended=float(min_memory_bytes) / 10**9,
+                ),
+            }
 
-        return {"changed": False}
+        return {}

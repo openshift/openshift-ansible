@@ -1,84 +1,91 @@
 import pytest
 
-from openshift_checks.memory_availability import MemoryAvailability, OpenShiftCheckException
+from openshift_checks.memory_availability import MemoryAvailability
 
 
-@pytest.mark.parametrize('group_names,is_containerized,is_active', [
-    (['masters'], False, True),
-    # ensure check is skipped on containerized installs
-    (['masters'], True, True),
-    (['nodes'], True, True),
-    (['etcd'], False, True),
-    (['masters', 'nodes'], False, True),
-    (['masters', 'etcd'], False, True),
-    ([], False, False),
-    (['lb'], False, False),
-    (['nfs'], False, False),
+@pytest.mark.parametrize('group_names,is_active', [
+    (['masters'], True),
+    (['nodes'], True),
+    (['etcd'], True),
+    (['masters', 'nodes'], True),
+    (['masters', 'etcd'], True),
+    ([], False),
+    (['lb'], False),
+    (['nfs'], False),
 ])
-def test_is_active(group_names, is_containerized, is_active):
+def test_is_active(group_names, is_active):
     task_vars = dict(
         group_names=group_names,
-        openshift=dict(common=dict(is_containerized=is_containerized)),
     )
     assert MemoryAvailability.is_active(task_vars=task_vars) == is_active
 
 
-@pytest.mark.parametrize("group_name,size_available", [
+@pytest.mark.parametrize('group_names,ansible_memtotal_mb', [
     (
-        "masters",
+        ['masters'],
         17200,
     ),
     (
-        "nodes",
+        ['nodes'],
         8200,
     ),
     (
-        "etcd",
-        12200,
+        ['etcd'],
+        22200,
+    ),
+    (
+        ['masters', 'nodes'],
+        17000,
     ),
 ])
-def test_mem_check_with_recommended_memtotal(group_name, size_available):
-    result = MemoryAvailability(execute_module=NotImplementedError).run(tmp=None, task_vars=dict(
-        group_names=[group_name],
-        ansible_memtotal_mb=size_available,
-    ))
+def test_succeeds_with_recommended_memory(group_names, ansible_memtotal_mb):
+    task_vars = dict(
+        group_names=group_names,
+        ansible_memtotal_mb=ansible_memtotal_mb,
+    )
+
+    check = MemoryAvailability(execute_module=fake_execute_module)
+    result = check.run(tmp=None, task_vars=task_vars)
 
     assert not result.get('failed', False)
 
 
-@pytest.mark.parametrize("group_name,size_available", [
+@pytest.mark.parametrize('group_names,ansible_memtotal_mb,extra_words', [
     (
-        "masters",
-        1,
+        ['masters'],
+        0,
+        ['0.0 GB'],
     ),
     (
-        "nodes",
-        2,
+        ['nodes'],
+        100,
+        ['0.1 GB'],
     ),
     (
-        "etcd",
-        3,
+        ['etcd'],
+        -1,
+        ['0.0 GB'],
+    ),
+    (
+        ['nodes', 'masters'],
+        # enough memory for a node, not enough for a master
+        11000,
+        ['11.0 GB'],
     ),
 ])
-def test_mem_check_with_insufficient_memtotal(group_name, size_available):
-    result = MemoryAvailability(execute_module=NotImplementedError).run(tmp=None, task_vars=dict(
-        group_names=[group_name],
-        ansible_memtotal_mb=size_available,
-    ))
+def test_fails_with_insufficient_memory(group_names, ansible_memtotal_mb, extra_words):
+    task_vars = dict(
+        group_names=group_names,
+        ansible_memtotal_mb=ansible_memtotal_mb,
+    )
+
+    check = MemoryAvailability(execute_module=fake_execute_module)
+    result = check.run(tmp=None, task_vars=task_vars)
 
     assert result['failed']
-    assert "below recommended storage" in result['msg']
+    for word in 'below recommended'.split() + extra_words:
+        assert word in result['msg']
 
 
-def test_mem_check_with_invalid_groupname():
-    with pytest.raises(OpenShiftCheckException) as excinfo:
-        result = MemoryAvailability(execute_module=NotImplementedError).run(tmp=None, task_vars=dict(
-            openshift=dict(common=dict(
-                service_type='origin',
-                is_containerized=False,
-            )),
-            group_names=["invalid"],
-            ansible_memtotal_mb=1234567,
-        ))
-
-    assert "'invalid'" in str(excinfo.value)
+def fake_execute_module(*args):
+    raise AssertionError('this function should not be called')

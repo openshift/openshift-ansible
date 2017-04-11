@@ -24,9 +24,9 @@ def test_is_active(group_names, is_containerized, is_active):
 
 
 @pytest.mark.parametrize('ansible_mounts,extra_words', [
-    ([], ['none']), # empty ansible_mounts
-    ([{'mount': '/mnt'}], ['/mnt']), # missing relevant mount paths
-    ([{'mount': '/var'}], ['/var']), # missing size_available
+    ([], ['none']),  # empty ansible_mounts
+    ([{'mount': '/mnt'}], ['/mnt']),  # missing relevant mount paths
+    ([{'mount': '/var'}], ['/var']),  # missing size_available
 ])
 def test_cannot_determine_available_disk(ansible_mounts, extra_words):
     task_vars = dict(
