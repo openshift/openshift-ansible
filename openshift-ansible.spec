@@ -72,6 +72,10 @@ rm -rf %{buildroot}%{_datadir}/ansible/%{name}/playbooks/adhoc/contiv
 find -L %{buildroot}%{_datadir}/ansible/%{name}/playbooks -name lookup_plugins -type l -delete
 find -L %{buildroot}%{_datadir}/ansible/%{name}/playbooks -name filter_plugins -type l -delete
 
+# BZ1330091
+rm %{buildroot}%{_datadir}/ansible/%{name}/playbooks/byo/filter_plugins
+rm %{buildroot}%{_datadir}/ansible/%{name}/playbooks/byo/lookup_plugins
+
 # openshift-ansible-roles install
 cp -rp roles %{buildroot}%{_datadir}/ansible/%{name}/
 # remove contiv role
