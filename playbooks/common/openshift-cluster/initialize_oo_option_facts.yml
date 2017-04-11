@@ -1,0 +1,27 @@
+---
+- name: Set oo_option facts
+  hosts: oo_all_hosts
+  tags:
+  - always
+  tasks:
+  - set_fact:
+      openshift_docker_additional_registries: "{{ lookup('oo_option', 'docker_additional_registries') }}"
+    when: openshift_docker_additional_registries is not defined
+  - set_fact:
+      openshift_docker_insecure_registries: "{{ lookup('oo_option',  'docker_insecure_registries') }}"
+    when: openshift_docker_insecure_registries is not defined
+  - set_fact:
+      openshift_docker_blocked_registries: "{{ lookup('oo_option', 'docker_blocked_registries') }}"
+    when: openshift_docker_blocked_registries is not defined
+  - set_fact:
+      openshift_docker_options: "{{ lookup('oo_option', 'docker_options') }}"
+    when: openshift_docker_options is not defined
+  - set_fact:
+      openshift_docker_log_driver: "{{ lookup('oo_option', 'docker_log_driver') }}"
+    when: openshift_docker_log_driver is not defined
+  - set_fact:
+      openshift_docker_log_options: "{{ lookup('oo_option', 'docker_log_options') }}"
+    when: openshift_docker_log_options is not defined
+  - set_fact:
+      openshift_docker_selinux_enabled: "{{ lookup('oo_option', 'docker_selinux_enabled') }}"
+    when: openshift_docker_selinux_enabled is not defined
