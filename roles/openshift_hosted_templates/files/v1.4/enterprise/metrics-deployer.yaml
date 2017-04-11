@@ -105,7 +105,7 @@ parameters:
 -
   description: 'Specify version for metrics components; e.g. for "openshift/origin-metrics-deployer:latest", set version "latest"'
   name: IMAGE_VERSION
-  value: "3.4.0"
+  value: "v3.4"
 -
   description: "Internal URL for the master, for authentication retrieval"
   name: MASTER_URL
@@ -118,7 +118,7 @@ parameters:
   description: "Can be set to: 'preflight' to perform validation before a deployment; 'deploy' to perform an initial deployment; 'refresh' to delete and redeploy all components but to keep persisted data and routes; 'redeploy' to delete and redeploy everything (losing all data in the process); 'validate' to re-run validations after a deployment"
   name: MODE
   value: "deploy"
-- 
+-
   description: "Set to true to continue even if the deployer runs into an error."
   name: CONTINUE_ON_ERROR
   value: "false"
