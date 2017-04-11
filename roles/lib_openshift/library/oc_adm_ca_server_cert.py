@@ -1508,7 +1508,7 @@ class CAServerCert(OpenShiftCLI):
         x509output, _ = proc.communicate()
         if proc.returncode == 0:
             regex = re.compile(r"^\s*X509v3 Subject Alternative Name:\s*?\n\s*(.*)\s*\n", re.MULTILINE)
-            match = regex.search(x509output)  # E501
+            match = regex.search(x509output.decode())  # E501
             if not match:
                 return False
 
