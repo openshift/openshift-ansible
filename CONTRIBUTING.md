@@ -200,6 +200,9 @@ test results are posted to S3 buckets when complete.
 
 The test output of each job is also posted to the Pull Request as comments.
 
+A trend of the time taken by merge jobs is available at
+https://ci.openshift.redhat.com/jenkins/job/merge_pull_request_openshift_ansible/buildTimeTrend.
+
 ---
 
 ## Appendix

@@ -38,7 +38,7 @@ and _/tmp_. Be mindful of this when passing in files to be processed by `oc` or
 
 ### Requisite Images
 
-Based on your deployment_type the installer will make use of the following
+Based on your `openshift_deployment_type` the installer will make use of the following
 images. Because you may make use of a private repository we've moved the
 configuration of docker additional, insecure, and blocked registries to the
 beginning of the installation process ensuring that these settings are applied
