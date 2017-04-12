@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.52
+Version:        3.5.53
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Apr 10 2017 Scott Dodson <sdodson@redhat.com> 3.5.53-1
+- Cleanup comments and remove extraneous tasks (sdodson@redhat.com)
+- Store backups in /var/lib/etcd/openshift-backup (sdodson@redhat.com)
+- Updating kibana-proxy secret key for server-tls entry (ewolinet@redhat.com)
+
 * Fri Apr 07 2017 Scott Dodson <sdodson@redhat.com> 3.5.52-1
 - Create member/snap directory encase it doesn't exist (sdodson@redhat.com)
 
