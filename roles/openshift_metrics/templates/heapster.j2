@@ -43,15 +43,15 @@ spec:
         - "--wrapper.username_file=/hawkular-account/hawkular-metrics.username"
         - "--wrapper.password_file=/hawkular-account/hawkular-metrics.password"
         - "--wrapper.endpoint_check=https://hawkular-metrics:443/hawkular/metrics/status"
-        - "--sink=hawkular:https://hawkular-metrics:443?tenant=_system&labelToTenant=pod_namespace&labelNodeId={{openshift_metrics_node_id}}&caCert=/hawkular-cert/hawkular-metrics-ca.certificate&user=%username%&pass=%password%&filter=label(container_name:^system.slice.*|^user.slice)"
+        - "--sink=hawkular:https://hawkular-metrics:443?tenant=_system&labelToTenant=pod_namespace&labelNodeId={{openshift_metrics_node_id}}&caCert=/hawkular-metrics-certs/tls.crt&user=%username%&pass=%password%&filter=label(container_name:^system.slice.*|^user.slice)"
 {% endif %}
         env:
         - name: STARTUP_TIMEOUT
           value: "{{ openshift_metrics_startup_timeout }}"
-{% if ((openshift_metrics_heapster_limits_cpu is defined and openshift_metrics_heapster_limits_cpu is not none) 
+{% if ((openshift_metrics_heapster_limits_cpu is defined and openshift_metrics_heapster_limits_cpu is not none)
    or (openshift_metrics_heapster_limits_memory is defined and openshift_metrics_heapster_limits_memory is not none)
    or (openshift_metrics_heapster_requests_cpu is defined and openshift_metrics_heapster_requests_cpu is not none)
-   or (openshift_metrics_heapster_requests_memory is defined and openshift_metrics_heapster_requests_memory is not none)) 
+   or (openshift_metrics_heapster_requests_memory is defined and openshift_metrics_heapster_requests_memory is not none))
 %}
         resources:
 {% if (openshift_metrics_heapster_limits_cpu is not none
@@ -65,8 +65,8 @@ spec:
             memory: "{{openshift_metrics_heapster_limits_memory}}"
 {% endif %}
 {% endif %}
-{% if (openshift_metrics_heapster_requests_cpu is not none 
-   or openshift_metrics_heapster_requests_memory is not none) 
+{% if (openshift_metrics_heapster_requests_cpu is not none
+   or openshift_metrics_heapster_requests_memory is not none)
 %}
           requests:
 {% if openshift_metrics_heapster_requests_cpu is not none %}
@@ -81,8 +81,8 @@ spec:
         - name: heapster-secrets
           mountPath: "/secrets"
 {% if not openshift_metrics_heapster_standalone %}
-        - name: hawkular-metrics-certificate
-          mountPath: "/hawkular-cert"
+        - name: hawkular-metrics-certs
+          mountPath: "/hawkular-metrics-certs"
         - name: hawkular-metrics-account
           mountPath: "/hawkular-account"
         readinessProbe:
@@ -95,9 +95,9 @@ spec:
           secret:
             secretName: heapster-secrets
 {% if not openshift_metrics_heapster_standalone %}
-        - name: hawkular-metrics-certificate
+        - name: hawkular-metrics-certs
           secret:
-            secretName: hawkular-metrics-certificate
+            secretName: hawkular-metrics-certs
         - name: hawkular-metrics-account
           secret:
             secretName: hawkular-metrics-account
