@@ -1,4 +1,13 @@
 ---
+- include: ../../evaluate_groups.yml
+  vars:
+    # Do not allow adding hosts during upgrade.
+    g_new_master_hosts: []
+    g_new_node_hosts: []
+    openshift_cluster_id: "{{ cluster_id | default('default') }}"
+
+- include: ../initialize_nodes_to_upgrade.yml
+
 - name: Check for appropriate Docker versions
   hosts: oo_masters_to_config:oo_nodes_to_upgrade:oo_etcd_to_config
   roles:
@@ -11,7 +20,7 @@
       msg: Cannot upgrade Docker on Atomic operating systems.
     when: openshift.common.is_atomic | bool
 
-  - include: ../../../../common/openshift-cluster/upgrades/docker/upgrade_check.yml
+  - include: upgrade_check.yml
     when: docker_upgrade is not defined or docker_upgrade | bool
 
 
@@ -47,7 +56,7 @@
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: l_docker_upgrade is defined and l_docker_upgrade | bool and inventory_hostname in groups.oo_nodes_to_upgrade
 
-  - include: ../../../../common/openshift-cluster/upgrades/docker/upgrade.yml
+  - include: upgrade.yml
     when: l_docker_upgrade is defined and l_docker_upgrade | bool
 
   - name: Set node schedulability
