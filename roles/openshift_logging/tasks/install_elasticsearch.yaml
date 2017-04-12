@@ -60,8 +60,8 @@
     es_dcs: "{{openshift_logging_facts.elasticsearch_ops.deploymentconfigs}}"
     cluster_size: "{{openshift_logging_es_ops_cluster_size|int}}"
   when:
-    - openshift_logging_use_ops | bool
-    - "{{es_dcs | length - openshift_logging_es_ops_cluster_size|int | abs > 1}}"
+  - openshift_logging_use_ops | bool
+  - "{{es_dcs | length - openshift_logging_es_ops_cluster_size|int | abs > 1}}"
   check_mode: no
 
 - set_fact: openshift_logging_es_ops_pvc_prefix="logging-es-ops"
@@ -88,7 +88,7 @@
   loop_control:
     loop_var: deployment
   when:
-    - openshift_logging_use_ops | bool
+  - openshift_logging_use_ops | bool
 ## if it does not then we should create one that does and attach it
 
 ## create new dc/pvc is needed
@@ -109,4 +109,4 @@
     es_number_of_replicas: "{{ openshift_logging_es_ops_number_of_replicas }}"
   with_sequence: count={{ openshift_logging_es_ops_cluster_size | int - openshift_logging_facts.elasticsearch_ops.deploymentconfigs | count }}
   when:
-    - openshift_logging_use_ops | bool
+  - openshift_logging_use_ops | bool
