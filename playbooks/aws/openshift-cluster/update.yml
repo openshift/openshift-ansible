@@ -30,5 +30,9 @@
     with_items: "{{ g_all_hosts | default([]) }}"
 
 - include: ../../common/openshift-cluster/update_repos_and_packages.yml
+  vars:
+    g_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
+    g_sudo: "{{ deployment_vars[deployment_type].become }}"
+    g_nodeonmaster: true
 
 - include: config.yml
