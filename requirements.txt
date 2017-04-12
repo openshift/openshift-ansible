@@ -1,4 +1,4 @@
-ansible>=2.2
-six
-pyOpenSSL
+ansible==2.2.2.0
+six==1.10.0
+pyOpenSSL==16.2.0
 PyYAML
