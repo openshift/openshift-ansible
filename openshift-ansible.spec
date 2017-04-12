@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.54
+Version:        3.2.55
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Apr 12 2017 Scott Dodson <sdodson@redhat.com> 3.2.55-1
+- Fix playbooks/byo/openshift_facts.yml include path (sdodson@redhat.com)
+
 * Thu Mar 30 2017 Scott Dodson <sdodson@redhat.com> 3.2.54-1
 - Default router volumes. (abutcher@redhat.com)
 - Default openshift_master_default_subdomain. (abutcher@redhat.com)
