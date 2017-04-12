@@ -1,4 +1,17 @@
 ---
+- name: Abort when conflicting deployment type variables are set
+  when:
+    - deployment_type is defined
+    - openshift_deployment_type is defined
+    - openshift_deployment_type != deployment_type
+  fail:
+    msg: |-
+      openshift_deployment_type is set to "{{ openshift_deployment_type }}".
+      deployment_type is set to "{{ deployment_type }}".
+      To avoid unexpected results, this conflict is not allowed.
+      deployment_type is deprecated in favor of openshift_deployment_type.
+      Please specify only openshift_deployment_type, or make both the same.
+
 - name: Standardize on latest variable names
   set_fact:
     # goal is to deprecate deployment_type in favor of openshift_deployment_type.
