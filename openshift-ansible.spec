@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.21
+Version:        3.6.22
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,17 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Apr 12 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.22-1
+- Fixed spelling mistake. (kwoodson@redhat.com)
+- Remove unnecessary folder refs (rteague@redhat.com)
+- Switching commands for modules during upgrade of router and registry.
+  (kwoodson@redhat.com)
+- Fixing a compatibility issue with python 2.7 to 3.5 when reading from
+  subprocess. (kwoodson@redhat.com)
+- Refactor use of initialize_oo_option_facts.yml (rteague@redhat.com)
+- preflight checks: refactor and fix aos_version (lmeyer@redhat.com)
+- Add external provisioners playbook starting with aws efs (mawong@redhat.com)
+
 * Tue Apr 11 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.21-1
 - Adding a query for the existing docker-registry route. (kwoodson@redhat.com)
 - Removing docker-registry route from cockpit-ui. (kwoodson@redhat.com)
