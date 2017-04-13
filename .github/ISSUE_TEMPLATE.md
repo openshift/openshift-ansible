@@ -1,16 +1,3 @@
-### <HTPASSWD_AUTH>
-
-We are aware of the current issues related to htpasswd_auth failures
-Please downgrade to ansible 2.2.0.0 until a fix is released.
-You can track the status of the bug fix in this issue:
-https://github.com/openshift/openshift-ansible/issues/3111
-Please erase this <HTPASSWD_AUTH> section if it does not apply to you.
-
-Thanks - 2017-01-31
-
-### </HTPASSWD_AUTH>
-
-
 #### Description
 
 Provide a brief description of your issue here. For example:
