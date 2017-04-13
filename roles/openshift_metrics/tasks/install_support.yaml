@@ -1,11 +1,11 @@
 ---
-- name: Check control node to see if htpasswd is installed
-  local_action: command which htpasswd
+- name: Check target node to see if htpasswd is installed
+  command: which htpasswd
   register: htpasswd_check
   failed_when: no
   changed_when: no
 
-- fail: msg="'htpasswd' is unavailable. Please install httpd-tools on the control node"
+- fail: msg="'htpasswd' is unavailable. Please install httpd-tools on the target node"
   when: htpasswd_check.rc  == 1
 
 - name: Check control node to see if keytool is installed

@@ -33,25 +33,18 @@
   changed_when: no
 
 - name: generate password for hawkular metrics and jgroups
-  local_action: copy dest="{{ local_tmp.stdout}}/{{ item }}.pwd" content="{{ 15 | oo_random_word }}"
+  copy:
+    dest: "{{ mktemp.stdout }}/{{ item }}.pwd"
+    content: "{{ 15 | oo_random_word }}"
   with_items:
   - hawkular-metrics
   - hawkular-jgroups-keystore
 
 - name: generate htpasswd file for hawkular metrics
-  local_action: >
-    shell htpasswd -ci
-    '{{ local_tmp.stdout }}/hawkular-metrics.htpasswd' hawkular
-    < '{{ local_tmp.stdout }}/hawkular-metrics.pwd'
-
-- name: copy local generated passwords to target
-  copy:
-    src: "{{local_tmp.stdout}}/{{item}}"
-    dest: "{{mktemp.stdout}}/{{item}}"
-  with_items:
-  - hawkular-metrics.pwd
-  - hawkular-metrics.htpasswd
-  - hawkular-jgroups-keystore.pwd
+  shell: >
+    htpasswd -ci
+    '{{ mktemp.stdout }}/hawkular-metrics.htpasswd' hawkular
+    < '{{ mktemp.stdout }}/hawkular-metrics.pwd'
 
 - include: import_jks_certs.yaml
 
