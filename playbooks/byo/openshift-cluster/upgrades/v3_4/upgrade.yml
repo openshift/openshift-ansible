@@ -2,6 +2,8 @@
 #
 # Full Control Plane + Nodes Upgrade
 #
+- include: ../../initialize_groups.yml
+
 - include: ../../../../common/openshift-cluster/upgrades/init.yml
   tags:
   - pre_upgrade
