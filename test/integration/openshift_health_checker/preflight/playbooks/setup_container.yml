@@ -1,0 +1,23 @@
+---
+# Required vars:
+# * name = name of the container to be started
+
+- name: Start CentOS 7 container
+  gather_facts: no
+  hosts: localhost
+  connection: local
+  vars:
+    container_name: openshift_ansible_test_{{ name }}
+  tasks:
+    - name: start container
+      docker_container:
+        name: "{{ container_name }}"
+        image: centos:7
+        command: sleep infinity
+        recreate: yes
+    - name: add host
+      add_host:
+        name: "{{ container_name }}"
+        ansible_connection: docker
+        groups: OSEv3,masters,nodes
+        deployment_type: origin
