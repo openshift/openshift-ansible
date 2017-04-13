@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.53
+Version:        3.5.54
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Apr 13 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.54-1
+- tox tests: pin test requirement versions (lmeyer@redhat.com)
+- master-api: add mount for /var/log (gscrivan@redhat.com)
+- master: add mount for /var/log (gscrivan@redhat.com)
+
 * Mon Apr 10 2017 Scott Dodson <sdodson@redhat.com> 3.5.53-1
 - Cleanup comments and remove extraneous tasks (sdodson@redhat.com)
 - Store backups in /var/lib/etcd/openshift-backup (sdodson@redhat.com)
