@@ -1,14 +1,18 @@
-ansible
+# Versions are pinned to prevent pypi releases arbitrarily breaking
+# tests with new APIs/semantics. We want to update versions deliberately.
+
+ansible==2.2.2.0
 # flake8 moved to before setuptools-lint to satisfy mccabe dependency issue
-flake8
-setuptools-lint
-nose
-coverage
-mock
-PyYAML
-click
-backports.functools_lru_cache
-pyOpenSSL
-yamllint
-tox
-detox
+flake8==3.3.0
+pylint==1.6.5
+setuptools-lint==0.5.2
+nose==1.3.7
+coverage==4.3.4
+mock==2.0.0
+PyYAML==3.12
+click==6.7
+backports.functools_lru_cache==1.3
+pyOpenSSL==16.2.0
+yamllint==1.6.1
+tox==2.7.0
+detox==0.11
