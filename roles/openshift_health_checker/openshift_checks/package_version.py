@@ -9,6 +9,13 @@ class PackageVersion(NotContainerizedMixin, OpenShiftCheck):
     name = "package_version"
     tags = ["preflight"]
 
+    @classmethod
+    def is_active(cls, task_vars):
+        """Skip hosts that do not have package requirements."""
+        group_names = get_var(task_vars, "group_names", default=[])
+        master_or_node = 'masters' in group_names or 'nodes' in group_names
+        return super(PackageVersion, cls).is_active(task_vars) and master_or_node
+
     def run(self, tmp, task_vars):
         args = {
             "requested_openshift_release": get_var(task_vars, "openshift_release", default=''),
