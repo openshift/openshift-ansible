@@ -48,6 +48,25 @@
     loop_var: file
   when: not ansible_check_mode
 
+# TODO: this is only required while the rollingUpdate parameter for the DS is not supported (kube 1.6+)
+- name: Get list of current Fluentd pods
+  oc_obj:
+    state: list
+    kind: pod
+    selector: "component=fluentd"
+    namespace: "{{ openshift_logging_namespace }}"
+  register: fluentd_pods
+
+- name: Delete current Fluentd pods to redeploy
+  oc_obj:
+    state: absent
+    kind: pod
+    name: "{{ object }}"
+    namespace: "{{ openshift_logging_namespace }}"
+  with_items: "{{ fluentd_pods.results.results[0]['items'] | map( attribute='metadata.name' ) | list }}"
+  loop_control:
+    loop_var: object
+
 - include: update_master_config.yaml
 
 - name: Printing out objects to create
