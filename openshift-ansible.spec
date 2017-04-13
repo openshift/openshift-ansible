@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.77
+Version:        3.4.78
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -250,6 +250,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Apr 13 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.4.78-1
+- tox tests: pin test requirement versions (lmeyer@redhat.com)
+
 * Tue Apr 11 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.4.77-1
 - master-api: add mount for /var/log (gscrivan@redhat.com)
 - master: add mount for /var/log (gscrivan@redhat.com)
