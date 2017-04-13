@@ -84,6 +84,33 @@
     value: "{{ oreg_url }}"
   when: oreg_url is defined
 
+# https://docs.openshift.com/container-platform/3.4/admin_guide/overcommit.html#disabling-swap-memory
+- name: Check for swap usage
+  command: grep "^[^#].*swap" /etc/fstab
+  # grep: match any lines which don't begin with '#' and contain 'swap'
+  # command: swapon --summary
+  # Alternate option, however if swap entries are in fstab, swap will be
+  # enabled at boot. Grepping fstab should catch a condition when swap was
+  # disabled, but the fstab entries were not removed.
+  changed_when: false
+  failed_when: false
+  register: swap_result
+
+  # Disable Swap Block
+- block:
+
+  - name: Disable swap
+    command: swapoff --all
+
+  - name: Remove swap entries from /etc/fstab
+    lineinfile:
+      dest: /etc/fstab
+      regexp: 'swap'
+      state: absent
+
+  when: swap_result.stdout_lines | length > 0
+  # End Disable Swap Block
+
 - name: Restart rpm node service
   service:
     name: "{{ openshift.common.service_type }}-node"
