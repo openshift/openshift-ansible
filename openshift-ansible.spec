@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.23
+Version:        3.6.24
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Apr 14 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.24-1
+- tox tests: pin test requirement versions (lmeyer@redhat.com)
+- This is no longer a widely encountered issue (sdodson@redhat.com)
+- Standardize use of byo and common for network_manager.yml
+  (rteague@redhat.com)
+- Disable swap space on nodes at install and upgrade (rteague@redhat.com)
+- Do not check package version on non-master/node (rhcarvalho@gmail.com)
+
 * Thu Apr 13 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.23-1
 - Refactor initialize groups tasks (rteague@redhat.com)
 - tox tests: pin test requirement versions (lmeyer@redhat.com)
