@@ -39,6 +39,11 @@ registry, specify a `glusterfs_registry` group that is populated as the
 `glusterfs_registry` group is specified, the cluster defined by the `glusterfs`
 group will be used.
 
+To swap an existing hosted registry's backend storage for a GlusterFS volume,
+specify `openshift_hosted_registry_storage_glusterfs_swap=True`. To
+additoinally copy any existing contents from an existing hosted registry,
+specify `openshift_hosted_registry_storage_glusterfs_swapcopy=True`.
+
 **NOTE:** For each namespace that is to have access to GlusterFS volumes an
 Enpoints resource pointing to the GlusterFS cluster nodes and a corresponding
 Service resource must be created. If dynamic provisioning using StorageClasses
@@ -89,4 +94,5 @@ See the documentation in the role's directory for further details.
 ## Role: openshift_hosted
 
 The `openshift_hosted` role recognizes `glusterfs` as a possible storage
-backend for a hosted docker registry.
+backend for a hosted docker registry. It will also, if configured, handle the
+swap of an existing registry's backend storage to a GlusterFS volume.

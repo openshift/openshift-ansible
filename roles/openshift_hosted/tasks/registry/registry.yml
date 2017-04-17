@@ -126,4 +126,4 @@
 
 - include: storage/glusterfs.yml
   when:
-  - openshift.hosted.registry.storage.kind | default(none) == 'glusterfs'
+  - openshift.hosted.registry.storage.kind | default(none) == 'glusterfs' or openshift.hosted.registry.storage.glusterfs.swap

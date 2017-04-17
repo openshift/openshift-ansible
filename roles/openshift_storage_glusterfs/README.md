@@ -57,6 +57,13 @@ are an exception:
 | openshift_storage_glusterfs_registry_namespace    | registry namespace    | Default is to use the hosted registry's namespace, otherwise 'default'
 | openshift_storage_glusterfs_registry_nodeselector | 'storagenode=registry'| This allows for the logical separation of the registry GlusterFS cluster from any regular-use GlusterFS clusters
 
+Additionally, this role's behavior responds to the following registry-specific
+variable:
+
+| Name                                         | Default value | Description                                                                  |
+|----------------------------------------------|---------------|------------------------------------------------------------------------------|
+| openshift_hosted_registry_glusterfs_swap     | False         | Whether to swap an existing registry's storage volume for a GlusterFS volume |
+
 Dependencies
 ------------
 

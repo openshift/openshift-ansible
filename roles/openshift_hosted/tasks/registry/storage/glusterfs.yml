@@ -46,6 +46,39 @@
     mode: "2775"
     recurse: True
 
+- block:
+  - name: Activate registry maintenance mode
+    oc_env:
+      namespace: "{{ openshift_hosted_registry_namespace }}"
+      name: "{{ openshift_hosted_registry_name }}"
+      env_vars:
+      - REGISTRY_STORAGE_MAINTENANCE_READONLY_ENABLED: 'true'
+
+  - name: Get first registry pod name
+    set_fact:
+      registry_pod_name: "{{ registry_pods.results.results[0]['items'][0].metadata.name }}"
+
+  - name: Copy current registry contents to new GlusterFS volume
+    command: "oc rsync {{ registry_pod_name }}:/registry/ {{ mktemp.stdout }}/"
+    when: openshift.hosted.registry.storage.glusterfs.swapcopy
+
+  - name: Swap new GlusterFS registry volume
+    oc_volume:
+      namespace: "{{ openshift_hosted_registry_namespace }}"
+      name: "{{ openshift_hosted_registry_name }}"
+      vol_name: registry-storage
+      mount_type: pvc
+      claim_name: "{{ openshift.hosted.registry.storage.volume.name }}-glusterfs-claim"
+
+  - name: Deactivate registry maintenance mode
+    oc_env:
+      namespace: "{{ openshift_hosted_registry_namespace }}"
+      name: "{{ openshift_hosted_registry_name }}"
+      state: absent
+      env_vars:
+      - REGISTRY_STORAGE_MAINTENANCE_READONLY_ENABLED: 'true'
+  when: openshift.hosted.registry.storage.glusterfs.swap
+
 - name: Unmount registry volume
   mount:
     state: unmounted
