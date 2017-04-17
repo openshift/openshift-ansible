@@ -1,3 +1,4 @@
 ---
 __openshift_metrics_image_prefix: "{{ openshift_hosted_metrics_deployer_prefix | default('registry.access.redhat.com/openshift3/') }}"
 __openshift_metrics_image_version: "{{ openshift_hosted_metrics_deployer_version | default ('3.5.0') }}"
+__openshift_metrics_httpd_image: "registry.access.redhat.com/rhscl/httpd-24-rhel7"
