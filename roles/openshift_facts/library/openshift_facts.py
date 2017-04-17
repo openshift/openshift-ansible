@@ -2155,6 +2155,10 @@ class OpenShiftFacts(object):
                         nfs=dict(
                             directory='/exports',
                             options='*(rw,root_squash)'),
+                        glusterfs=dict(
+                            endpoints='glusterfs-registry-endpoints',
+                            path='glusterfs-registry-volume',
+                            readOnly=False),
                         host=None,
                         access=dict(
                             modes=['ReadWriteMany']

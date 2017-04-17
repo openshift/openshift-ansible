@@ -1,0 +1,21 @@
+---
+- name: Open firewall ports for GlusterFS
+  hosts: oo_glusterfs_to_config
+  vars:
+    os_firewall_allow:
+    - service: glusterfs_sshd
+      port: "2222/tcp"
+    - service: glusterfs_daemon
+      port: "24007/tcp"
+    - service: glusterfs_management
+      port: "24008/tcp"
+    - service: glusterfs_bricks
+      port: "49152-49251/tcp"
+  roles:
+  - os_firewall
+
+- name: Configure GlusterFS
+  hosts: oo_first_master
+  roles:
+  - role: openshift_storage_glusterfs
+    when: groups.oo_glusterfs_to_config | default([]) | count > 0

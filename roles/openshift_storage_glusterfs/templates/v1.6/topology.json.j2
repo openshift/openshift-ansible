@@ -1,0 +1,39 @@
+{
+  "clusters": [
+{%- set clusters = {} -%}
+{%- for node in groups.oo_glusterfs_to_config -%}
+  {%- set cluster = hostvars[node].glusterfs_cluster if 'glusterfs_cluster' in node else '1' -%}
+  {%- if cluster in clusters -%}
+    {%- set _dummy = clusters[cluster].append(node) -%}
+  {%- else -%}
+    {%- set _dummy = clusters.update({cluster: [ node, ]}) -%}
+  {%- endif -%}
+{%- endfor -%}
+{%- for cluster in clusters -%}
+    {
+      "nodes": [
+{%- for node in clusters[cluster] -%}
+        {
+          "node": {
+            "hostnames": {
+              "manage": [
+                "{{ hostvars[node].glusterfs_hostname | default(hostvars[node].openshift.common.hostname) }}"
+              ],
+              "storage": [
+                "{{ hostvars[node].glusterfs_ip | default(hostvars[node].openshift.common.ip) }}"
+              ]
+            },
+            "zone": {{ hostvars[node].glusterfs_zone | default(1) }}
+          },
+          "devices": [
+{%- for device in hostvars[node].glusterfs_devices -%}
+            "{{ device }}"{% if not loop.last %},{% endif %}
+{%- endfor -%}
+          ]
+        }{% if not loop.last %},{% endif %}
+{%- endfor -%}
+      ]
+    }{% if not loop.last %},{% endif %}
+{%- endfor -%}
+  ]
+}

@@ -773,6 +773,23 @@ def oo_persistent_volumes(hostvars, groups, persistent_volumes=None):
                                     fsType=filesystem,
                                     volumeID=volume_id)))
                         persistent_volumes.append(persistent_volume)
+                    elif kind == 'glusterfs':
+                        volume = params['volume']['name']
+                        size = params['volume']['size']
+                        access_modes = params['access']['modes']
+                        endpoints = params['glusterfs']['endpoints']
+                        path = params['glusterfs']['path']
+                        read_only = params['glusterfs']['readOnly']
+                        persistent_volume = dict(
+                            name="{0}-volume".format(volume),
+                            capacity=size,
+                            access_modes=access_modes,
+                            storage=dict(
+                                glusterfs=dict(
+                                    endpoints=endpoints,
+                                    path=path,
+                                    readOnly=read_only)))
+                        persistent_volumes.append(persistent_volume)
                     elif not (kind == 'object' or kind == 'dynamic'):
                         msg = "|failed invalid storage kind '{0}' for component '{1}'".format(
                             kind,

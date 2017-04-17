@@ -426,6 +426,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_hosted_registry_storage_openstack_volumeID=3a650b4f-c8c5-4e0a-8ca5-eaee11f16c57
 #openshift_hosted_registry_storage_volume_size=10Gi
 #
+# Native GlusterFS Registry Storage
+#openshift_hosted_registry_storage_kind=glusterfs
+#
 # AWS S3
 #
 # S3 bucket must already exist.

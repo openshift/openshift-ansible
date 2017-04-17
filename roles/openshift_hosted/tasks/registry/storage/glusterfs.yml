@@ -1,0 +1,51 @@
+---
+- name: Wait for registry pods
+  oc_obj:
+    namespace: "{{ openshift_hosted_registry_namespace }}"
+    state: list
+    kind: pod
+    selector: "{{ openshift_hosted_registry_name }}={{ openshift_hosted_registry_namespace }}"
+  register: registry_pods
+  until:
+  - "registry_pods.results.results[0]['items'] | count > 0"
+  # There must be as many matching pods with 'Ready' status True as there are expected replicas
+  - "registry_pods.results.results[0]['items'] | oo_collect(attribute='status.conditions') | oo_collect(attribute='status', filters={'type': 'Ready'}) | map('bool') | select | list | count == openshift_hosted_registry_replicas | int"
+  delay: 10
+  retries: "{{ (600 / 10) | int }}"
+
+- name: Determine registry fsGroup
+  set_fact:
+    openshift_hosted_registry_fsgroup: "{{ registry_pods.results.results[0]['items'][0].spec.securityContext.fsGroup }}"
+
+- name: Create temp mount directory
+  command: mktemp -d /tmp/openshift-glusterfs-registry-XXXXXX
+  register: mktemp
+  changed_when: False
+  check_mode: no
+
+- name: Mount registry volume
+  mount:
+    state: mounted
+    fstype: glusterfs
+    src: "{{ groups.oo_glusterfs_to_config[0] }}:/{{ openshift.hosted.registry.storage.glusterfs.path }}"
+    name: "{{ mktemp.stdout }}"
+
+- name: Set registry volume permissions
+  file:
+    dest: "{{ mktemp.stdout }}"
+    state: directory
+    group: "{{ openshift_hosted_registry_fsgroup }}"
+    mode: "2775"
+    recurse: True
+
+- name: Unmount registry volume
+  mount:
+    state: unmounted
+    name: "{{ mktemp.stdout }}"
+
+- name: Delete temp mount directory
+  file:
+    dest: "{{ mktemp.stdout }}"
+    state: absent
+  changed_when: False
+  check_mode: no

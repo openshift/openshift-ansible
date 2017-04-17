@@ -1,0 +1,17 @@
+---
+openshift_storage_glusterfs_timeout: 300
+openshift_storage_glusterfs_namespace: 'default'
+openshift_storage_glusterfs_is_native: True
+openshift_storage_glusterfs_nodeselector: "{{ openshift_storage_glusterfs_nodeselector_label | default('storagenode=glusterfs') | map_from_pairs }}"
+openshift_storage_glusterfs_image: "{{ 'rhgs3/rhgs-server-rhel7' | quote if deployment_type == 'openshift-enterprise' else 'gluster/gluster-centos' | quote }}"
+openshift_storage_glusterfs_version: 'latest'
+openshift_storage_glusterfs_wipe: False
+openshift_storage_glusterfs_heketi_is_native: True
+openshift_storage_glusterfs_heketi_is_missing: True
+openshift_storage_glusterfs_heketi_deploy_is_missing: True
+openshift_storage_glusterfs_heketi_image: "{{ 'rhgs3/rhgs-volmanager-rhel7' | quote if deployment_type == 'openshift-enterprise' else 'heketi/heketi' | quote }}"
+openshift_storage_glusterfs_heketi_version: 'latest'
+openshift_storage_glusterfs_heketi_admin_key: ''
+openshift_storage_glusterfs_heketi_user_key: ''
+openshift_storage_glusterfs_heketi_topology_load: True
+openshift_storage_glusterfs_heketi_wipe: "{{ openshift_storage_glusterfs_wipe }}"
