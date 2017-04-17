@@ -61,7 +61,7 @@
     name: "{{ openshift_hosted_registry_serviceaccount }}"
     namespace: "{{ openshift_hosted_registry_namespace }}"
 
-- name: Grant the registry serivce account access to the appropriate scc
+- name: Grant the registry service account access to the appropriate scc
   oc_adm_policy_user:
     user: "system:serviceaccount:{{ openshift_hosted_registry_namespace }}:{{ openshift_hosted_registry_serviceaccount }}"
     namespace: "{{ openshift_hosted_registry_namespace }}"
