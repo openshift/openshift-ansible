@@ -1,0 +1,4 @@
+---
+- include: config.yml
+
+- include: ../openshift-cluster/openshift_hosted.yml

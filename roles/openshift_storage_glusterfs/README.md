@@ -15,6 +15,12 @@ The following group is expected to be populated for this role to run:
 
 * `[glusterfs]`
 
+Additionally, the following group may be specified either in addition to or
+instead of the above group to deploy a GlusterFS cluster for use by a natively
+hosted Docker registry:
+
+* `[glusterfs_registry]`
+
 Role Variables
 --------------
 
@@ -38,6 +44,18 @@ GlusterFS cluster into a new or existing OpenShift cluster:
 | openshift_storage_glusterfs_heketi_topology_load | True                    | Load the GlusterFS topology information into heketi
 | openshift_storage_glusterfs_heketi_url           | Undefined               | URL for the heketi REST API, dynamically determined in native mode
 | openshift_storage_glusterfs_heketi_wipe          | False                   | Destroy any existing heketi resources, defaults to the value of `openshift_storage_glusterfs_wipe`
+
+Each role variable also has a corresponding variable to optionally configure a
+separate GlusterFS cluster for use as storage for an integrated Docker
+registry. These variables start with the prefix
+`openshift_storage_glusterfs_registry_` and, for the most part, default to the
+values in their corresponding non-registry variables. The following variables
+are an exception:
+
+| Name                                              | Default value         |                                         |
+|---------------------------------------------------|-----------------------|-----------------------------------------|
+| openshift_storage_glusterfs_registry_namespace    | registry namespace    | Default is to use the hosted registry's namespace, otherwise 'default'
+| openshift_storage_glusterfs_registry_nodeselector | 'storagenode=registry'| This allows for the logical separation of the registry GlusterFS cluster from any regular-use GlusterFS clusters
 
 Dependencies
 ------------
