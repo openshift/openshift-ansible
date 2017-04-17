@@ -130,7 +130,7 @@
       state: absent
     changed_when: false
 
-- include: ../openshift-etcd/restart.yml
+- include: ../../openshift-etcd/restart.yml
 
 # Update master config when ca-bundle not referenced. Services will be
 # restarted below after new CA certificate has been distributed.
@@ -322,7 +322,7 @@
       group: "{{ 'root' if item == 'root' else _ansible_ssh_user_gid.stdout  }}"
     with_items: "{{ client_users }}"
 
-- include: ../openshift-master/restart.yml
+- include: ../../openshift-master/restart.yml
 
 - name: Distribute OpenShift CA certificate to nodes
   hosts: oo_nodes_to_config
@@ -371,4 +371,4 @@
       state: absent
     changed_when: false
 
-- include: ../openshift-node/restart.yml
+- include: ../../openshift-node/restart.yml
