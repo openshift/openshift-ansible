@@ -42,8 +42,9 @@
 
 - name: generate htpasswd file for hawkular metrics
   shell: >
-    htpasswd -ci
-    '{{ mktemp.stdout }}/hawkular-metrics.htpasswd' hawkular
+    docker run -a STDIN -a STDOUT -v "{{ mktemp.stdout }}"
+    rhscl/httpd-24-rhel7 htpasswd -ni hawkular
+    > '{{ mktemp.stdout }}/hawkular-metrics.htpasswd'
     < '{{ mktemp.stdout }}/hawkular-metrics.pwd'
 
 - include: import_jks_certs.yaml
