@@ -1,10 +1,18 @@
 ---
+- name: Get registry DeploymentConfig
+  oc_obj:
+    namespace: "{{ openshift_hosted_registry_namespace }}"
+    state: list
+    kind: dc
+    name: "{{ openshift_hosted_registry_name }}"
+  register: registry_dc
+
 - name: Wait for registry pods
   oc_obj:
     namespace: "{{ openshift_hosted_registry_namespace }}"
     state: list
     kind: pod
-    selector: "{{ openshift_hosted_registry_name }}={{ openshift_hosted_registry_namespace }}"
+    selector: "{% for label, value in registry_dc.results.results[0].spec.selector.iteritems() %}{{ label }}={{ value }}{% if not loop.last %},{% endif %}{% endfor %}"
   register: registry_pods
   until:
   - "registry_pods.results.results[0]['items'] | count > 0"
