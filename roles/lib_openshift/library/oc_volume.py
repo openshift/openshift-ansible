@@ -80,6 +80,18 @@ options:
     required: false
     default: False
     aliases: []
+  name:
+    description:
+    - Name of the object that is being queried.
+    required: false
+    default: None
+    aliases: []
+  vol_name:
+    description:
+    - Name of the volume that is being queried.
+    required: false
+    default: None
+    aliases: []
   namespace:
     description:
     - The name of the namespace where the object lives
