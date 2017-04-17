@@ -62,7 +62,7 @@ ETCD_PEER_KEY_FILE={{ etcd_peer_key_file }}
 {% endif -%}
 
 #[logging]
-ETCD_DEBUG="{{ etcd_debug | default(false) | string }}"
+ETCD_DEBUG="{{ etcd_debug | default(false) | bool | string }}"
 {% if etcd_log_package_levels is defined %}
 ETCD_LOG_PACKAGE_LEVELS="{{ etcd_log_package_levels }}"
 {% endif %}
