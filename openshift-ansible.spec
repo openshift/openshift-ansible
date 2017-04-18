@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.54
+Version:        3.5.55
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,27 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Apr 18 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.55-1
+- Fix indentation (sdodson@redhat.com)
+- Stop all services prior to upgrading, start all services after
+  (sdodson@redhat.com)
+- Adding a query for the existing docker-registry route. (kwoodson@redhat.com)
+- Removing docker-registry route from cockpit-ui. (kwoodson@redhat.com)
+- Add evaluate_groups to openshift_logging (rteague@redhat.com)
+- Updating image logic (ewolinet@redhat.com)
+- Remove check for httpd-tools and update to use docker run to build htpasswd
+  file (ewolinet@redhat.com)
+- make htpasswd tasks remote actions instead of local (ewolinet@redhat.com)
+- Also fix logging (sdodson@redhat.com)
+- Fix trailing ) (sdodson@redhat.com)
+- tox tests: pin test requirement versions (lmeyer@redhat.com)
+- Fix default image tag for enterprise (sdodson@redhat.com)
+- Deleting fluentd pods after DS patching to ensure pods are updated
+  (ewolinet@redhat.com)
+- making yammlint happy (ewolinet@redhat.com)
+- Updating to only create PVC when necessary and attach to the DS, otherwise
+  leave it be (ewolinet@redhat.com)
+
 * Thu Apr 13 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.54-1
 - tox tests: pin test requirement versions (lmeyer@redhat.com)
 - master-api: add mount for /var/log (gscrivan@redhat.com)
