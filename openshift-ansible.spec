@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.25
+Version:        3.6.26
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Apr 18 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.26-1
+- Correct role dependencies (rteague@redhat.com)
+- Allow for GlusterFS to provide registry storage (jarrpa@redhat.com)
+- Integrate GlusterFS into OpenShift installation (jarrpa@redhat.com)
+- GlusterFS playbook and role (jarrpa@redhat.com)
+
 * Mon Apr 17 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.25-1
 - Fix default image tag for enterprise (sdodson@redhat.com)
 - Cast etcd_debug to a boolean (skuznets@redhat.com)
