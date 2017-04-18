@@ -6,20 +6,6 @@
 # - docker_version
 # - skip_docker_restart
 
-# We need docker service up to remove all the images, but these services will keep
-# trying to re-start and thus re-pull the images we're trying to delete.
-- name: Stop containerized services
-  service: name={{ item }} state=stopped
-  with_items:
-    - "{{ openshift.common.service_type }}-master"
-    - "{{ openshift.common.service_type }}-master-api"
-    - "{{ openshift.common.service_type }}-master-controllers"
-    - "{{ openshift.common.service_type }}-node"
-    - etcd_container
-    - openvswitch
-  failed_when: false
-  when: openshift.common.is_containerized | bool
-
 - name: Check Docker image count
   shell: "docker images -aq | wc -l"
   register: docker_image_count
@@ -45,5 +31,4 @@
 - name: Upgrade Docker
   package: name=docker{{ '-' + docker_version }} state=present
 
-- include: restart.yml
-  when: not skip_docker_restart | default(False) | bool
+# starting docker happens back in ../main.yml where it calls ../restart.yml
