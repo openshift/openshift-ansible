@@ -24,10 +24,10 @@
     name: "{{ item }}"
     state: stopped
   with_items:
-    - "{{ openshift.common.service_type }}-master"
-    - "{{ openshift.common.service_type }}-master-controllers"
-    - "{{ openshift.common.service_type }}-master-api"
-    - etcd_container
+  - "{{ openshift.common.service_type }}-master"
+  - "{{ openshift.common.service_type }}-master-controllers"
+  - "{{ openshift.common.service_type }}-master-api"
+  - etcd_container
   failed_when: false
   when: openshift.common.is_containerized | bool
 
