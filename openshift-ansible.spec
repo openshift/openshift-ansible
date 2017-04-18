@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.26
+Version:        3.6.27
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Apr 18 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.27-1
+- repo: start testing PRs on Fedora Atomic Host (jlebon@redhat.com)
+
 * Tue Apr 18 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.26-1
 - Correct role dependencies (rteague@redhat.com)
 - Allow for GlusterFS to provide registry storage (jarrpa@redhat.com)
