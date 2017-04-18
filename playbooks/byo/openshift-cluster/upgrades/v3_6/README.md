@@ -1,11 +1,10 @@
-# v3.5 Major and Minor Upgrade Playbook
+# v3.6 Major and Minor Upgrade Playbook
 
 ## Overview
-This playbook currently performs the
-following steps.
+This playbook currently performs the following steps.
 
  * Upgrade and restart master services
- * Unschedule node.
+ * Unschedule node
  * Upgrade and restart docker
  * Upgrade and restart node services
  * Modifies the subset of the configuration necessary
@@ -15,4 +14,7 @@ following steps.
  * Updates image streams and quickstarts
 
 ## Usage
+
+```
 ansible-playbook -i ~/ansible-inventory openshift-ansible/playbooks/byo/openshift-cluster/upgrades/v3_6/upgrade.yml
+```
