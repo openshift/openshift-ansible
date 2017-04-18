@@ -241,15 +241,9 @@ class RegistryTest(unittest.TestCase):
             (0, '', ''),
         ]
 
-        mock_tmpfile_copy.side_effect = [
-            '/tmp/mocked_kubeconfig',
-            '/tmp/mocked_kubeconfig',
-        ]
+        mock_tmpfile_copy.return_value = '/tmp/mocked_kubeconfig'
 
-        mock_oc_binary.side_effect = [
-            'oc',
-            'oc',
-        ]
+        mock_oc_binary.return_value = 'oc'
 
         results = Registry.run_ansible(params, False)
 
