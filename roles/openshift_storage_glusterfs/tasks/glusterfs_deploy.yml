@@ -29,14 +29,14 @@
     path: /var/lib/glusterd
     state: absent
   delegate_to: "{{ item }}"
-  with_items: "{{ groups.oo_glusterfs_to_config }}"
+  with_items: "{{ groups.oo_glusterfs_to_config | default([]) }}"
   when: openshift_storage_glusterfs_wipe
 
 - name: Get GlusterFS storage devices state
   command: "pvdisplay -C --noheadings -o pv_name,vg_name {% for device in hostvars[item].glusterfs_devices %}{{ device }} {% endfor %}"
   register: devices_info
   delegate_to: "{{ item }}"
-  with_items: "{{ groups.oo_glusterfs_to_config }}"
+  with_items: "{{ groups.oo_glusterfs_to_config | default([]) }}"
   failed_when: False
   when: openshift_storage_glusterfs_wipe
 
@@ -65,7 +65,7 @@
     kind: node
     state: add
     labels: "{{ openshift_storage_glusterfs_nodeselector | oo_dict_to_list_of_dict }}"
-  with_items: "{{ groups.oo_glusterfs_to_config }}"
+  with_items: "{{ groups.oo_glusterfs_to_config | default([]) }}"
   loop_control:
     loop_var: glusterfs_host
 
