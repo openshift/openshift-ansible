@@ -45,6 +45,21 @@
     - procure_component: kibana-internal
       hostnames: "kibana, kibana-ops, {{openshift_logging_kibana_hostname}}, {{openshift_logging_kibana_ops_hostname}}"
 
+- include: procure_server_certs.yaml
+  loop_control:
+    loop_var: cert_info
+  with_items:
+    - procure_component: mux
+      hostnames: "logging-mux, {{openshift_logging_mux_hostname}}"
+  when: openshift_logging_use_mux
+
+- include: procure_shared_key.yaml
+  loop_control:
+    loop_var: shared_key_info
+  with_items:
+    - procure_component: mux
+  when: openshift_logging_use_mux
+
 - name: Copy proxy TLS configuration file
   copy: src=server-tls.json dest={{generated_certs_dir}}/server-tls.json
   when: server_tls_json is undefined
@@ -84,6 +99,14 @@
     - system.admin
   loop_control:
     loop_var: node_name
+
+- name: Generate PEM cert for mux
+  include: generate_pems.yaml component={{node_name}}
+  with_items:
+    - system.logging.mux
+  loop_control:
+    loop_var: node_name
+  when: openshift_logging_use_mux
 
 - name: Creating necessary JKS certs
   include: generate_jks.yaml

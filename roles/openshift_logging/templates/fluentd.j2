@@ -59,6 +59,11 @@ spec:
         - name: dockercfg
           mountPath: /etc/sysconfig/docker
           readOnly: true
+{% if openshift_logging_use_mux_client %}
+        - name: muxcerts
+          mountPath: /etc/fluent/muxkeys
+          readOnly: true
+{% endif %}
         env:
         - name: "K8S_HOST_URL"
           value: "{{openshift_logging_master_url}}"
@@ -122,6 +127,8 @@ spec:
           value: "{{openshift_logging_fluentd_journal_source | default('')}}"
         - name: "JOURNAL_READ_FROM_HEAD"
           value: "{{openshift_logging_fluentd_journal_read_from_head|lower}}"
+        - name: "USE_MUX_CLIENT"
+          value: "{{openshift_logging_use_mux_client| default('false')}}"
       volumes:
       - name: runlogjournal
         hostPath:
@@ -147,3 +154,8 @@ spec:
       - name: dockercfg
         hostPath:
           path: /etc/sysconfig/docker
+{% if openshift_logging_use_mux_client %}
+      - name: muxcerts
+        secret:
+          secretName: logging-mux
+{% endif %}

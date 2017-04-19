@@ -21,6 +21,26 @@
   loop_control:
     loop_var: fluentd_host
 
+- name: Retrieve mux
+  oc_obj:
+    state: list
+    kind: dc
+    selector: "component=mux"
+    namespace: "{{openshift_logging_namespace}}"
+  register: mux_dc
+  when: openshift_logging_use_mux
+
+- name: start mux
+  oc_scale:
+    kind: dc
+    name: "{{ object }}"
+    namespace: "{{openshift_logging_namespace}}"
+    replicas: "{{ openshift_logging_mux_replica_count | default (1) }}"
+  with_items: "{{ mux_dc.results.results[0]['items'] | map(attribute='metadata.name') | list }}"
+  loop_control:
+    loop_var: object
+  when: openshift_logging_use_mux
+
 - name: Retrieve elasticsearch
   oc_obj:
     state: list

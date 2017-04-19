@@ -85,3 +85,35 @@
   when: openshift_logging_use_ops | bool
   check_mode: no
   changed_when: no
+
+- name: Generating logging-mux service for external connections
+  template: src=service.j2 dest={{mktemp.stdout}}/templates/logging-mux-svc.yaml
+  vars:
+    obj_name: logging-mux
+    ports:
+    - {port: "{{openshift_logging_mux_port}}", targetPort: mux-forward, name: mux-forward}
+    labels:
+      logging-infra: support
+    selector:
+      provider: openshift
+      component: mux
+    externalIPs:
+    - "{{ ansible_eth0.ipv4.address }}"
+  check_mode: no
+  changed_when: no
+  when: openshift_logging_mux_allow_external
+
+- name: Generating logging-mux service for intra-cluster connections
+  template: src=service.j2 dest={{mktemp.stdout}}/templates/logging-mux-svc.yaml
+  vars:
+    obj_name: logging-mux
+    ports:
+    - {port: "{{openshift_logging_mux_port}}", targetPort: mux-forward, name: mux-forward}
+    labels:
+      logging-infra: support
+    selector:
+      provider: openshift
+      component: mux
+  check_mode: no
+  changed_when: no
+  when: openshift_logging_use_mux and not openshift_logging_mux_allow_external
