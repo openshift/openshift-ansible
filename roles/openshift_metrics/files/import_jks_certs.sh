@@ -25,10 +25,15 @@ function import_certs() {
   hawkular_metrics_truststore_password=$(echo $METRICS_TRUSTSTORE_PASSWD | base64 -d)
   hawkular_cassandra_truststore_password=$(echo $CASSANDRA_TRUSTSTORE_PASSWD | base64 -d)
   hawkular_jgroups_password=$(echo $JGROUPS_PASSWD | base64 -d)
-  
-  cassandra_alias=`keytool -noprompt -list -keystore $dir/hawkular-cassandra.truststore -storepass ${hawkular_cassandra_truststore_password} | sed -n '7~2s/,.*$//p'`
-  hawkular_alias=`keytool -noprompt -list -keystore $dir/hawkular-metrics.truststore -storepass ${hawkular_metrics_truststore_password} | sed -n '7~2s/,.*$//p'`
-  
+
+  if [ -f $dir/hawkular-cassandra.truststore ]; then
+    cassandra_alias=`keytool -noprompt -list -keystore $dir/hawkular-cassandra.truststore -storepass ${hawkular_cassandra_truststore_password} | sed -n '7~2s/,.*$//p'`
+  fi
+
+  if [ -f $dir/hawkular-metrics.truststore ]; then
+    hawkular_alias=`keytool -noprompt -list -keystore $dir/hawkular-metrics.truststore -storepass ${hawkular_metrics_truststore_password} | sed -n '7~2s/,.*$//p'`
+  fi
+
   if [ ! -f $dir/hawkular-metrics.keystore ]; then
     echo "Creating the Hawkular Metrics keystore from the PEM file"
     keytool -importkeystore -v \
