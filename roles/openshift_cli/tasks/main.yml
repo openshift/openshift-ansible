@@ -5,23 +5,20 @@
 
 - name: Pull CLI Image
   command: >
-    docker pull {{ openshift.common.cli_image }}:{{ openshift_version }}
+    docker pull {{ openshift.common.cli_image }}:{{ openshift_image_tag | default('v3.1') }}
+  register: pull_result
+  changed_when: "'Downloaded newer image' in pull_result.stdout"
   when: openshift.common.is_containerized | bool
 
-- name: Create /usr/local/bin/openshift cli wrapper
-  template:
-    src: openshift.j2
-    dest: /usr/local/bin/openshift
-    mode: 0755
+- name: Copy client binaries/symlinks out of CLI image for use on the host
+  openshift_container_binary_sync:
+    image: "{{ openshift.common.cli_image }}"
+    tag: "{{ openshift_image_tag | default('v3.1') }}"
   when: openshift.common.is_containerized | bool
 
-- name: Create client symlinks
-  file:
-    path: "{{ item }}"
-    state: link
-    src: /usr/local/bin/openshift
-  with_items:
-    - /usr/local/bin/oadm
-    - /usr/local/bin/oc
-    - /usr/local/bin/kubectl
-  when: openshift.common.is_containerized | bool
+- name: Reload facts to pick up installed OpenShift version
+  openshift_facts:
+
+- name: Install bash completion for oc tools
+  action: "{{ ansible_pkg_mgr }} name=bash-completion state=present"
+  when: not openshift.common.is_containerized | bool
