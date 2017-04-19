@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.55
+Version:        3.5.56
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Apr 19 2017 Scott Dodson <sdodson@redhat.com> 3.5.56-1
+- Fix 1441915 (rteague@redhat.com)
+
 * Tue Apr 18 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.55-1
 - Fix indentation (sdodson@redhat.com)
 - Stop all services prior to upgrading, start all services after
