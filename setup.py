@@ -7,6 +7,7 @@ import os
 import fnmatch
 import re
 import sys
+import subprocess
 import yaml
 
 # Always prefer setuptools over distutils
@@ -199,6 +200,52 @@ class OpenShiftAnsibleGenerateValidation(Command):
         print('\nAll generate scripts passed.\n')
 
 
+class OpenShiftAnsibleSyntaxCheck(Command):
+    ''' Command to run Ansible syntax check'''
+    description = "Run Ansible syntax check"
+    user_options = []
+
+    # Colors
+    FAIL = '\033[91m'  # Red
+    ENDC = '\033[0m'  # Reset
+
+    def initialize_options(self):
+        ''' initialize_options '''
+        pass
+
+    def finalize_options(self):
+        ''' finalize_options '''
+        pass
+
+    def run(self):
+        ''' run command '''
+
+        has_errors = False
+
+        for yaml_file in find_files(
+                os.path.join(os.getcwd(), 'playbooks', 'byo'),
+                None, None, r'\.ya?ml$'):
+            with open(yaml_file, 'r') as contents:
+                for line in contents:
+                    # initialize_groups.yml is used to identify entry point playbooks
+                    if re.search(r'initialize_groups\.yml', line):
+                        print('-' * 60)
+                        print('Syntax checking playbook: %s' % yaml_file)
+                        try:
+                            subprocess.check_output(
+                                ['ansible-playbook', '-i localhost,',
+                                 '--syntax-check', yaml_file]
+                            )
+                        except subprocess.CalledProcessError as cpe:
+                            print('{}Execution failed: {}{}'.format(
+                                self.FAIL, cpe, self.ENDC))
+                            has_errors = True
+                        # Break for loop, no need to continue looping lines
+                        break
+        if has_errors:
+            raise SystemExit(1)
+
+
 class UnsupportedCommand(Command):
     ''' Basic Command to override unsupported commands '''
     user_options = []
@@ -242,6 +289,7 @@ setup(
         'lint': OpenShiftAnsiblePylint,
         'yamllint': OpenShiftAnsibleYamlLint,
         'generate_validation': OpenShiftAnsibleGenerateValidation,
+        'ansible_syntax': OpenShiftAnsibleSyntaxCheck,
     },
     packages=[],
 )
