@@ -59,7 +59,7 @@ spec:
         - name: dockercfg
           mountPath: /etc/sysconfig/docker
           readOnly: true
-{% if openshift_logging_use_mux_client %}
+{% if openshift_logging_use_mux_client | bool %}
         - name: muxcerts
           mountPath: /etc/fluent/muxkeys
           readOnly: true
@@ -154,7 +154,7 @@ spec:
       - name: dockercfg
         hostPath:
           path: /etc/sysconfig/docker
-{% if openshift_logging_use_mux_client %}
+{% if openshift_logging_use_mux_client | bool %}
       - name: muxcerts
         secret:
           secretName: logging-mux
