@@ -19,6 +19,17 @@
     },
     "objects": [
         {
+            "kind": "Secret",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${NAME}"
+            },
+            "stringData": {
+                "database-password": "${DATABASE_PASSWORD}",
+                "connect-string": "Host=${DATABASE_SERVICE_NAME};Database=${DATABASE_NAME};Username=${DATABASE_USER};Password=${DATABASE_PASSWORD}"
+            }
+        },
+        {
             "kind": "Service",
             "apiVersion": "v1",
             "metadata": {
@@ -209,7 +220,12 @@
                                 "env": [
                                     {
                                         "name": "ConnectionString",
-                                        "value": "Host=${DATABASE_SERVICE_NAME};Database=${DATABASE_NAME};Username=${DATABASE_USER};Password=${DATABASE_PASSWORD}"
+                                        "valueFrom": {
+                                            "secretKeyRef": {
+                                                "name": "${NAME}",
+                                                "key": "connect-string"
+                                            }
+                                        }
                                     }
                                 ],
                                 "resources": {
@@ -373,7 +389,12 @@
                                     },
                                     {
                                         "name": "POSTGRESQL_PASSWORD",
-                                        "value": "${DATABASE_PASSWORD}"
+                                        "valueFrom": {
+                                            "secretKeyRef": {
+                                                "name": "${NAME}",
+                                                "key": "database-password"
+                                            }
+                                        }
                                     },
                                     {
                                         "name": "POSTGRESQL_DATABASE",
