@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.29
+Version:        3.6.30
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -273,6 +273,21 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Apr 20 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.30-1
+- Add Ansible syntax checks to tox (rteague@redhat.com)
+- Add /etc/sysconfig/etcd to etcd_container (me@fale.io)
+- openshift_version: improve messaging (lmeyer@redhat.com)
+- Simplify memory availability check, review tests (rhcarvalho@gmail.com)
+- Simplify mixin class (rhcarvalho@gmail.com)
+- Simplify disk availability check, review tests (rhcarvalho@gmail.com)
+- add disk and memory availability check tests (jvallejo@redhat.com)
+- add ram and storage preflight check (jvallejo@redhat.com)
+- Fix paths for file includes (rteague@redhat.com)
+- Fix instantiation of action plugin in test fixture (rhcarvalho@gmail.com)
+- Introduce Elasticsearch readiness probe (lukas.vlcek@gmail.com)
+- added a empty file to the contiv empty dir. This allows contiv to be vendored
+  in git (mwoodson@redhat.com)
+
 * Wed Apr 19 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.29-1
 - Create openshift-metrics entrypoint playbook (rteague@redhat.com)
 
