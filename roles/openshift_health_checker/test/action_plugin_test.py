@@ -1,5 +1,7 @@
 import pytest
 
+from ansible.playbook.play_context import PlayContext
+
 from openshift_health_check import ActionModule, resolve_checks
 from openshift_checks import OpenShiftCheckException
 
@@ -34,7 +36,7 @@ def fake_check(name='fake_check', tags=None, is_active=True, run_return=None, ru
 @pytest.fixture
 def plugin():
     task = FakeTask('openshift_health_check', {'checks': ['fake_check']})
-    plugin = ActionModule(task, None, None, None, None, None)
+    plugin = ActionModule(task, None, PlayContext(), None, None, None)
     return plugin
 
 
