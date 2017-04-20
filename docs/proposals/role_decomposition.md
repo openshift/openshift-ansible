@@ -89,12 +89,29 @@ providing the location of the generated certificates to the individual roles.
 
 #### Snippets
 
-openshift_logging/tasks/install_logging.yaml
-```
-- name: Install logging
-  include: "{{ role_path }}/tasks/install_support.yaml"
-  when: openshift_hosted_logging_install | default(true) | bool
+[openshift_logging/tasks/install_logging.yaml](https://github.com/ewolinetz/openshift-ansible/blob/logging_component_subroles/roles/openshift_logging/tasks/install_logging.yaml)
+```yaml
+- name: Gather OpenShift Logging Facts
+  openshift_logging_facts:
+    oc_bin: "{{openshift.common.client_binary}}"
+    openshift_logging_namespace: "{{openshift_logging_namespace}}"
 
+- name: Set logging project
+  oc_project:
+    state: present
+    name: "{{ openshift_logging_namespace }}"
+
+- name: Create logging cert directory
+  file:
+    path: "{{ openshift.common.config_base }}/logging"
+    state: directory
+    mode: 0755
+  changed_when: False
+  check_mode: no
+
+- include: generate_certs.yaml
+  vars:
+    generated_certs_dir: "{{openshift.common.config_base}}/logging"
 
 ## Elasticsearch
 - include_role:
@@ -191,8 +208,8 @@ openshift_logging/tasks/install_logging.yaml
 - include: update_master_config.yaml
 ```
 
-openshift_logging_elasticsearch/meta/main.yaml
-```
+[openshift_logging_elasticsearch/meta/main.yaml](https://github.com/ewolinetz/openshift-ansible/blob/logging_component_subroles/roles/openshift_logging_elasticsearch/meta/main.yaml)
+```yaml
 ---
 galaxy_info:
   author: OpenShift Red Hat
@@ -210,8 +227,8 @@ dependencies:
 - role: lib_openshift
 ```
 
-openshift_logging/meta/main.yaml
-```
+[openshift_logging/meta/main.yaml](https://github.com/ewolinetz/openshift-ansible/blob/logging_component_subroles/roles/openshift_logging/meta/main.yaml)
+```yaml
 ---
 galaxy_info:
   author: OpenShift Red Hat
@@ -230,8 +247,8 @@ dependencies:
 - role: openshift_facts
 ```
 
-openshift_logging/tasks/install_support.yaml [old]
-```
+[openshift_logging/tasks/install_support.yaml - old](https://github.com/openshift/openshift-ansible/blob/master/roles/openshift_logging/tasks/install_support.yaml)
+```yaml
 ---
 # This is the base configuration for installing the other components
 - name: Check for logging project already exists
@@ -286,30 +303,6 @@ openshift_logging/tasks/install_support.yaml [old]
 - include: generate_serviceaccounts.yaml
 
 - include: generate_routes.yaml
-```
-
-openshift_logging/tasks/install_support.yaml [new]
-```
----
-# This is the base configuration for installing the other components
-- name: Set logging project
-  oc_project:
-    state: present
-    name: "{{ openshift_logging_namespace }}"
-
-- name: Create logging cert directory
-  file: path={{openshift.common.config_base}}/logging state=directory mode=0755
-  changed_when: False
-  check_mode: no
-
-- include: generate_certs.yaml
-  vars:
-    generated_certs_dir: "{{openshift.common.config_base}}/logging"
-
-- name: Create temp directory for all our templates
-  file: path={{mktemp.stdout}}/templates state=directory mode=0755
-  changed_when: False
-  check_mode: no
 ```
 
 # Limitations
