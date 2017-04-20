@@ -8,10 +8,18 @@ Requirements
 
 * Ansible 2.2
 
+Host Groups
+-----------
+
+The following group is expected to be populated for this role to run:
+
+* `[glusterfs]`
+
 Role Variables
 --------------
 
-From this role:
+This role has the following variables that control the integration of a
+GlusterFS cluster into a new or existing OpenShift cluster:
 
 | Name                                             | Default value           |                                         |
 |--------------------------------------------------|-------------------------|-----------------------------------------|
@@ -47,6 +55,7 @@ Example Playbook
   hosts: oo_first_master
   roles:
   - role: openshift_storage_glusterfs
+    when: groups.oo_glusterfs_to_config | default([]) | count > 0
 ```
 
 License
