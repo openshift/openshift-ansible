@@ -286,10 +286,11 @@ class RouterTest(unittest.TestCase):
     ]
 }'''
 
+    @mock.patch('oc_adm_router.locate_oc_binary')
     @mock.patch('oc_adm_router.Utils._write')
     @mock.patch('oc_adm_router.Utils.create_tmpfile_copy')
     @mock.patch('oc_adm_router.Router._run')
-    def test_state_present(self, mock_cmd, mock_tmpfile_copy, mock_write):
+    def test_state_present(self, mock_cmd, mock_tmpfile_copy, mock_write, mock_oc_binary):
         ''' Testing a create '''
         params = {'state': 'present',
                   'debug': False,
@@ -343,6 +344,10 @@ class RouterTest(unittest.TestCase):
 
         mock_tmpfile_copy.side_effect = [
             '/tmp/mocked_kubeconfig',
+        ]
+
+        mock_oc_binary.side_effect = [
+            'oc',
         ]
 
         results = Router.run_ansible(params, False)

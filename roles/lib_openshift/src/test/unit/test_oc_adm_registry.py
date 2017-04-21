@@ -205,10 +205,11 @@ class RegistryTest(unittest.TestCase):
             }
         ]}'''
 
+    @mock.patch('oc_adm_registry.locate_oc_binary')
     @mock.patch('oc_adm_registry.Utils._write')
     @mock.patch('oc_adm_registry.Utils.create_tmpfile_copy')
     @mock.patch('oc_adm_registry.Registry._run')
-    def test_state_present(self, mock_cmd, mock_tmpfile_copy, mock_write):
+    def test_state_present(self, mock_cmd, mock_tmpfile_copy, mock_write, mock_oc_binary):
         ''' Testing state present '''
         params = {'state': 'present',
                   'debug': False,
@@ -240,10 +241,9 @@ class RegistryTest(unittest.TestCase):
             (0, '', ''),
         ]
 
-        mock_tmpfile_copy.side_effect = [
-            '/tmp/mocked_kubeconfig',
-            '/tmp/mocked_kubeconfig',
-        ]
+        mock_tmpfile_copy.return_value = '/tmp/mocked_kubeconfig'
+
+        mock_oc_binary.return_value = 'oc'
 
         results = Registry.run_ansible(params, False)
 
