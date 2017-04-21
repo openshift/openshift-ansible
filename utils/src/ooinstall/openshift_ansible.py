@@ -129,8 +129,7 @@ def write_inventory_vars(base_inventory, lb):
             "openshift_master_cluster_public_hostname={}\n".format(lb.public_hostname))
 
     if CFG.settings.get('variant_version', None) == '3.1':
-        # base_inventory.write('openshift_image_tag=v{}\n'.format(CFG.settings.get('variant_version')))
-        base_inventory.write('openshift_image_tag=v{}\n'.format('3.1.1.6'))
+        base_inventory.write('openshift_image_tag=v{}\n'.format(CFG.settings.get('variant_version')))
 
     write_proxy_settings(base_inventory)
 
