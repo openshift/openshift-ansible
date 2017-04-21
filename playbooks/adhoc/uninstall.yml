@@ -125,7 +125,7 @@
       - name: Remove flannel package
         package: name=flannel state=absent
         when: openshift_use_flannel | default(false) | bool
-      when: "{{ not is_atomic | bool }}"
+      when: "not is_atomic | bool"
 
     - shell: systemctl reset-failed
       changed_when: False
@@ -146,7 +146,7 @@
       - lbr0
       - vlinuxbr
       - vovsbr
-    when: "{{ openshift_remove_all | default(true) | bool }}"
+    when: "openshift_remove_all | default(true) | bool"
 
   - shell: atomic uninstall "{{ item }}"-master-api
     changed_when: False
@@ -239,7 +239,7 @@
         changed_when: False
         failed_when: False
         with_items: "{{ images_to_delete.results }}"
-      when: "{{ openshift_uninstall_images | default(True) | bool }}"
+      when: "openshift_uninstall_images | default(True) | bool"
 
     - name: remove sdn drop files
       file:
@@ -252,7 +252,7 @@
       - /etc/sysconfig/openshift-node
       - /etc/sysconfig/openvswitch
       - /run/openshift-sdn
-    when: "{{ openshift_remove_all | default(True) | bool }}"
+    when: "openshift_remove_all | default(True) | bool"
 
   - find: path={{ item }} file_type=file
     register: files
