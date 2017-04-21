@@ -38,28 +38,33 @@
 - name: Check for swap usage
   command: grep "^[^#].*swap" /etc/fstab
   # grep: match any lines which don't begin with '#' and contain 'swap'
-  # command: swapon --summary
-  # Alternate option, however if swap entries are in fstab, swap will be
-  # enabled at boot. Grepping fstab should catch a condition when swap was
-  # disabled, but the fstab entries were not removed.
   changed_when: false
   failed_when: false
   register: swap_result
 
-  # Disable Swap Block
+# Disable Swap Block
 - block:
 
     - name: Disable swap
       command: swapoff --all
 
     - name: Remove swap entries from /etc/fstab
+      replace:
+        dest: /etc/fstab
+        regexp: '(^[^#].*swap.*)'
+        replace: '# \1'
+        backup: yes
+
+    - name: Add notice about disabling swap
       lineinfile:
         dest: /etc/fstab
-        regexp: 'swap'
-        state: absent
+        line: '# OpenShift-Ansible Installer disabled swap per overcommit guidelines'
+        state: present
 
-  when: swap_result.stdout_lines | length > 0
-  # End Disable Swap Block
+  when:
+    - swap_result.stdout_lines | length > 0
+    - openshift_disable_swap | default(true)
+# End Disable Swap Block
 
 # We have to add tuned-profiles in the same transaction otherwise we run into depsolving
 # problems because the rpms don't pin the version properly. This was fixed in 3.1 packaging.
