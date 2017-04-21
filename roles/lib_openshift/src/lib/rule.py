@@ -136,9 +136,9 @@ class Rule(object):
 
         results = []
         for rule in inc_rules:
-            results.append(Rule(rule['apiGroups'],
-                                rule['attributeRestrictions'],
-                                rule['resources'],
-                                rule['verbs']))
+            results.append(Rule(rule.get('apiGroups', ['']),
+                                rule.get('attributeRestrictions', None),
+                                rule.get('resources', []),
+                                rule.get('verbs', [])))
 
         return results

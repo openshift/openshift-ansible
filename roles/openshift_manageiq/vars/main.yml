@@ -1,41 +1,31 @@
 ---
-openshift_master_config_dir: "{{ openshift.common.config_base }}/master"
-manageiq_cluster_role:
-  apiVersion: v1
-  kind: ClusterRole
-  metadata:
-    name: management-infra-admin
-  rules:
-  - resources:
-    - pods/proxy
-    verbs:
-    - '*'
-
-manageiq_metrics_admin_clusterrole:
-  apiVersion: v1
-  kind: ClusterRole
-  metadata:
-    name: hawkular-metrics-admin
-  rules:
-  - apiGroups:
-    - ""
-    resources:
-    - hawkular-metrics
-    - hawkular-alerts
-    verbs:
-    - '*'
-
-manage_iq_tmp_conf: /tmp/manageiq_admin.kubeconfig
-
 manage_iq_tasks:
-- policy add-role-to-user -n management-infra admin -z management-admin
-- policy add-role-to-user -n management-infra management-infra-admin -z management-admin
-- policy add-cluster-role-to-user cluster-reader system:serviceaccount:management-infra:management-admin
-- policy add-scc-to-user privileged system:serviceaccount:management-infra:management-admin
-- policy add-cluster-role-to-user system:image-puller system:serviceaccount:management-infra:inspector-admin
-- policy add-scc-to-user privileged system:serviceaccount:management-infra:inspector-admin
-- policy add-cluster-role-to-user self-provisioner system:serviceaccount:management-infra:management-admin
-- policy add-cluster-role-to-user hawkular-metrics-admin system:serviceaccount:management-infra:management-admin
+- resource_kind: role
+  resource_name: admin
+  user: management-admin
+- resource_kind: role
+  resource_name: management-infra-admin
+  user: management-admin
+- resource_kind: cluster-role
+  resource_name: cluster-reader
+  user: system:serviceaccount:management-infra:management-admin
+- resource_kind: scc
+  resource_name: privileged
+  user: system:serviceaccount:management-infra:management-admin
+- resource_kind: cluster-role
+  resource_name: system:image-puller
+  user: system:serviceaccount:management-infra:inspector-admin
+- resource_kind: scc
+  resource_name: privileged
+  user: system:serviceaccount:management-infra:inspector-admin
+- resource_kind: cluster-role
+  resource_name: self-provisioner
+  user: system:serviceaccount:management-infra:management-admin
+- resource_kind: cluster-role
+  resource_name: hawkular-metrics-admin
+  user: system:serviceaccount:management-infra:management-admin
 
 manage_iq_openshift_3_2_tasks:
-- policy add-cluster-role-to-user system:image-auditor system:serviceaccount:management-infra:management-admin
+- resource_kind: cluster-role
+  resource_name: system:image-auditor
+  user: system:serviceaccount:management-infra:management-admin
