@@ -1,4 +1,14 @@
 ---
+- name: generate ca certificate chain
+  command: >
+    {{ openshift.common.admin_binary }} ca create-signer-cert
+    --config={{ mktemp.stdout }}/admin.kubeconfig
+    --key='{{ mktemp.stdout }}/ca.key'
+    --cert='{{ mktemp.stdout }}/ca.crt'
+    --serial='{{ mktemp.stdout }}/ca.serial.txt'
+    --name="metrics-signer@{{lookup('pipe','date +%s')}}"
+  when: openshift_metrics_heapster_standalone | bool
+
 - name: generate heapster key/cert
   command: >
     {{ openshift.common.admin_binary }} ca create-server-cert
