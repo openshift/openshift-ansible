@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.57
+Version:        3.5.58
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Apr 21 2017 Scott Dodson <sdodson@redhat.com> 3.5.58-1
+- Don't check excluder versions when they're not enabled (sdodson@redhat.com)
+
 * Thu Apr 20 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.57-1
 - Patch to enable import_jks_certs.sh to work on OSX (ccallega@redhat.com)
 
