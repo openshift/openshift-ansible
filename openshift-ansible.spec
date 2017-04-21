@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.31
+Version:        3.6.32
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -273,6 +273,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Apr 21 2017 Scott Dodson <sdodson@redhat.com> 3.6.32-1
+- Don't check excluder versions when they're not enabled (sdodson@redhat.com)
+
 * Fri Apr 21 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.31-1
 - Stop all services prior to upgrading, start all services after
   (sdodson@redhat.com)
