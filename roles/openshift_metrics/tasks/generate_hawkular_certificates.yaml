@@ -42,7 +42,7 @@
 
 - name: generate htpasswd file for hawkular metrics
   shell: >
-    docker run -a STDIN -a STDOUT -v "{{ mktemp.stdout }}"
+    docker run -i -a STDIN -a STDOUT -v "{{ mktemp.stdout }}"
     "{{ openshift_metrics_httpd_image }}" htpasswd -ni hawkular
     > '{{ mktemp.stdout }}/hawkular-metrics.htpasswd'
     < '{{ mktemp.stdout }}/hawkular-metrics.pwd'
