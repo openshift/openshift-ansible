@@ -9,13 +9,16 @@
     name: "{{ openshift.common.service_type }}-master-api"
     state: restarted
   when: openshift_master_ha | bool
-- name: Wait for master API to come back online
-  wait_for:
-    host: "{{ openshift.common.hostname }}"
-    state: started
-    delay: 10
-    port: "{{ openshift.master.api_port }}"
-  when: openshift_master_ha | bool
+# Another place that we could be using the "Verify API Server" type
+# task from roles/openshift_master/handlers/main.yml as a pluggable
+# role.
+ - name: Wait for master API to come back online
+   wait_for:
+     host: "{{ openshift.common.hostname }}"
+     state: started
+     delay: 10
+     port: "{{ openshift.master.api_port }}"
+   when: openshift_master_ha | bool
 - name: Restart master controllers
   service:
     name: "{{ openshift.common.service_type }}-master-controllers"
