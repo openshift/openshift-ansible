@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.58
+Version:        3.5.59
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Apr 24 2017 Scott Dodson <sdodson@redhat.com> 3.5.59-1
+- Update v1.5 content (sdodson@redhat.com)
+
 * Fri Apr 21 2017 Scott Dodson <sdodson@redhat.com> 3.5.58-1
 - Don't check excluder versions when they're not enabled (sdodson@redhat.com)
 
