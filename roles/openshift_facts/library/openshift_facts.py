@@ -59,7 +59,8 @@ def migrate_docker_facts(facts):
             'additional_registries',
             'insecure_registries',
             'blocked_registries',
-            'options'
+            'options',
+            'use_system_container',
         ),
         'node': (
             'log_driver',
@@ -1792,6 +1793,12 @@ def set_container_facts_if_unset(facts):
         deployer_image = 'openshift/origin-deployer'
 
     facts['common']['is_atomic'] = os.path.isfile('/run/ostree-booted')
+    # If openshift_docker_use_system_container is set and is True ....
+    if 'use_system_container' in list(facts['docker'].keys()):
+        if facts['docker']['use_system_container'] is True:
+            # ... set the service name to container-engine-docker
+            facts['docker']['service_name'] = 'container-engine-docker'
+
     if 'is_containerized' not in facts['common']:
         facts['common']['is_containerized'] = facts['common']['is_atomic']
     if 'cli_image' not in facts['common']:
@@ -2072,6 +2079,7 @@ class OpenShiftFacts(object):
             hosted_registry_insecure = get_hosted_registry_insecure()
             if hosted_registry_insecure is not None:
                 docker['hosted_registry_insecure'] = hosted_registry_insecure
+            docker['service_name'] = 'docker'
             defaults['docker'] = docker
 
         if 'clock' in roles:

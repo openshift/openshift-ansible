@@ -1,7 +1,7 @@
 Docker
 =========
 
-Ensures docker package is installed, and optionally raises timeout for systemd-udevd.service to 5 minutes.
+Ensures docker package or system container is installed, and optionally raises timeout for systemd-udevd.service to 5 minutes.
 
 Requirements
 ------------
@@ -11,8 +11,10 @@ Ansible 2.2
 Role Variables
 --------------
 
-udevw_udevd_dir: location of systemd config for systemd-udevd.service
+docker_conf_dir: location of the Docker configuration directory
+docker_systemd_dir location of the systemd directory for Docker
 docker_udev_workaround: raises udevd timeout to 5 minutes (https://bugzilla.redhat.com/show_bug.cgi?id=1272446)
+udevw_udevd_dir: location of systemd config for systemd-udevd.service
 
 Dependencies
 ------------
@@ -26,6 +28,7 @@ Example Playbook
       roles:
       - role: docker
         docker_udev_workaround: "true"
+        docker_use_system_container: False
 
 License
 -------

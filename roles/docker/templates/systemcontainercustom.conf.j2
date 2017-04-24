@@ -1,0 +1,17 @@
+# {{ ansible_managed }}
+
+[Service]
+{%- if docker_http_proxy %}
+ENVIRONMENT=HTTP_PROXY={{ docker_http_proxy }}
+{%- endif -%}
+{%- if docker_https_proxy %}
+ENVIRONMENT=HTTPS_PROXY={{ docker_http_proxy }}
+{%- endif -%}
+{%- if docker_no_proxy %}
+ENVIRONMENT=NO_PROXY={{ docker_no_proxy }}
+{%- endif %}
+{%- if os_firewall_use_firewalld|default(true) %}
+[Unit]
+Wants=iptables.service
+After=iptables.service
+{%- endif %}

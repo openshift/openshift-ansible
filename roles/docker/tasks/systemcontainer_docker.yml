@@ -1,0 +1,135 @@
+---
+# If docker_options are provided we should fail. We should not install docker and ignore
+# the users configuration. NOTE: docker_options == inventory:openshift_docker_options
+- name: Fail quickly if openshift_docker_options are set
+  assert:
+    that:
+      - docker_options is defined
+      - docker_options != ""
+    msg: |
+      Docker via System Container does not allow for the use of the openshift_docker_options
+      variable. If you want to use openshift_docker_options you will need to use the
+      traditional docker package install. Otherwise, comment out openshift_docker_options
+      in your inventory file.
+
+# Used to pull and install the system container
+- name: Ensure atomic is installed
+  package:
+    name: atomic
+    state: present
+  when: not openshift.common.is_atomic | bool
+
+# At the time of writing the atomic command requires runc for it's own use. This
+# task is here in the even that the atomic package ever removes the dependency.
+- name: Ensure runc is installed
+  package:
+    name: runc
+    state: present
+  when: not openshift.common.is_atomic | bool
+
+# If we are on atomic, set http_proxy and https_proxy in /etc/atomic.conf
+- block:
+
+    - name: Add http_proxy to /etc/atomic.conf
+      lineinfile:
+        path: /etc/atomic.conf
+        line: "http_proxy={{ openshift.common.http_proxy | default('') }}"
+      when:
+        - openshift.common.http_proxy is defined
+        - openshift.common.http_proxy != ''
+
+    - name: Add https_proxy to /etc/atomic.conf
+      lineinfile:
+        path: /etc/atomic.conf
+        line: "https_proxy={{ openshift.common.https_proxy | default('') }}"
+      when:
+        - openshift.common.https_proxy is defined
+        - openshift.common.https_proxy != ''
+
+  when: openshift.common.is_atomic | bool
+
+
+- block:
+
+    - name: Set to default prepend
+      set_fact:
+        l_docker_image_prepend: "gscrivano/"
+
+    - name: Use Red Hat Registry for image when distribution is Red Hat
+      set_fact:
+        l_docker_image_prepend: "registry.access.redhat.com/openshift3/"
+      when: ansible_distribution == 'RedHat'
+
+    - name: Use Fedora Registry for image when distribution is Fedora
+      set_fact:
+        l_docker_image_prepend: "registry.fedoraproject.org/"
+      when: ansible_distribution == 'Fedora'
+
+    # For https://github.com/openshift/openshift-ansible/pull/4049#discussion_r114478504
+    - name: Use a testing registry if requested
+      set_fact:
+        l_docker_image_prepend: "{{ openshift.docker.systemcontainer_image_registry_override }}/"
+      when:
+        - openshift.docker.systemcontainer_image_registry_override is defined
+        - openshift.docker.systemcontainer_image_registry_override != ""
+
+    - name: Set the full image name
+      set_fact:
+        l_docker_image: "{{ l_docker_image_prepend }}container-engine-docker:latest"
+
+- name: Pre-pull Container Enginer System Container image
+  command: "atomic pull --storage ostree {{ l_docker_image }}"
+  changed_when: false
+
+# Make sure docker is disabled Errors are ignored as docker may not
+# be installed.
+- name: Disable Docker
+  systemd:
+    name: docker
+    enabled: no
+    state: stopped
+    daemon_reload: yes
+  ignore_errors: True
+
+- name: Ensure docker.service.d directory exists
+  file:
+    path: "{{ docker_systemd_dir }}"
+    state: directory
+
+- name: Ensure /etc/docker directory exists
+  file:
+    path: "{{ docker_conf_dir }}"
+    state: directory
+
+- name: Install Container Enginer System Container
+  oc_atomic_container:
+    name: container-engine-docker
+    image: "container-engine-docker"
+    state: latest
+    values:
+      - "system-package no"
+
+- name: Configure Container Engine Service File
+  template:
+    dest: "{{ docker_systemd_dir }}/custom.conf"
+    src: systemcontainercustom.conf.j2
+
+# Configure container-engine using the daemon.json file
+- name: Configure Container Engine
+  template:
+    dest: "{{ docker_conf }}/daemon.json"
+    src: daemon.json
+
+# Enable and start the container-engine service
+- name: Start the Container Engine service
+  systemd:
+    name: "{{ openshift.docker.service_name }}"
+    enabled: yes
+    state: started
+    daemon_reload: yes
+  register: start_result
+
+- set_fact:
+    docker_service_status_changed: start_result | changed
+
+- meta: flush_handlers
