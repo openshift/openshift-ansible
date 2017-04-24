@@ -66,10 +66,6 @@ These are plugins used in playbooks and roles:
 └── test                Contains tests.
 ```
 
-## Building openshift-ansible RPMs and container images
-
-See the [build instructions in BUILD.md](BUILD.md).
-
 ## Running tests
 
 We use [tox](http://readthedocs.org/docs/tox/) to manage virtualenvs and run
