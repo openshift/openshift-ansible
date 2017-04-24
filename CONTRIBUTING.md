@@ -7,9 +7,9 @@ repository is organized, and how to submit contributions.
 
 Before submitting code changes, get familiarized with these documents:
 
-- [Core Concepts](https://github.com/openshift/openshift-ansible/blob/master/docs/core_concepts_guide.adoc)
-- [Best Practices Guide](https://github.com/openshift/openshift-ansible/blob/master/docs/best_practices_guide.adoc)
-- [Style Guide](https://github.com/openshift/openshift-ansible/blob/master/docs/style_guide.adoc)
+- [Core Concepts](docs/core_concepts_guide.adoc)
+- [Best Practices Guide](docs/best_practices_guide.adoc)
+- [Style Guide](docs/style_guide.adoc)
 - [Repository Structure](docs/repo_structure.md)
 
 ## Running tests
