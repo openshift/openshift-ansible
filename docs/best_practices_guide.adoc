@@ -11,22 +11,6 @@ All new pull requests created against this repository MUST comply with this guid
 This guide complies with https://www.ietf.org/rfc/rfc2119.txt[RFC2119].
 
 
-== Pull Requests
-
-
-
-[[All-pull-requests-MUST-pass-the-build-bot-before-they-are-merged]]
-[cols="2v,v"]
-|===
-| <<All-pull-requests-MUST-pass-the-build-bot-before-they-are-merged, Rule>>
-| All pull requests MUST pass the build bot *before* they are merged.
-|===
-
-The purpose of this rule is to avoid cases where the build bot will fail pull requests for code modified in a previous pull request.
-
-The tooling is flexible enough that exceptions can be made so that the tool the build bot is running will ignore certain areas or certain checks, but the build bot itself must pass for the pull request to be merged.
-
-
 
 == Python
 
