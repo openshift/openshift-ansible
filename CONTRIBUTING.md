@@ -12,25 +12,76 @@ Before submitting code changes, get familiarized with these documents:
 - [Style Guide](docs/style_guide.adoc)
 - [Repository Structure](docs/repo_structure.md)
 
-## Running tests
+Please consider opening an issue or discussing on an existing one if you are
+planning to work on something larger, to make sure your time investment is
+something that can be merged to the repository.
 
-We use [tox](http://readthedocs.org/docs/tox/) to manage virtualenvs and run
-tests. Alternatively, tests can be run using
-[detox](https://pypi.python.org/pypi/detox/) which allows for running tests in
-parallel.
+## Submitting contributions
 
-Note: while `detox` may be useful in development to make use of multiple cores,
-it can be buggy at times and produce flakes, thus we do not use it in our CI.
+1. [Fork](https://help.github.com/articles/fork-a-repo/) this repository and
+   [create a work branch in your fork](https://help.github.com/articles/github-flow/).
+2. Go through the documents mentioned in the [introduction](#introduction).
+3. Make changes and commit. You may want to review your changes and
+   [run tests](#running-tests-and-other-verification-tasks) before pushing your
+   branch.
+4. [Open a Pull Request](https://help.github.com/articles/creating-a-pull-request/).
+   Give it a meaningful title explaining the changes you are proposing, and
+   then add further details in the description.
 
+One of the repository maintainers will then review the PR and trigger tests, and
+possibly start a discussion that goes on until the PR is ready to be merged.
+
+If you get no timely feedback from a project contributor / maintainer, sorry for
+the delay. You can help us speed up triaging, reviewing and eventually merging
+contributions by requesting a review or tagging in a comment
+[someone who has worked on the files](https://help.github.com/articles/tracing-changes-in-a-file/)
+you're proposing changes to.
+
+---
+
+**Note**: during the review process, you may add new commits to address review
+comments or change existing commits. However, before getting your PR merged,
+please [squash commits](https://help.github.com/articles/about-git-rebase/) to a
+minimum set of meaningful commits.
+
+If you've broken your work up into a set of sequential changes and each commit
+pass the tests on their own then that's fine. If you've got commits fixing typos
+or other problems introduced by previous commits in the same PR, then those
+should be squashed before merging.
+
+If you are new to Git, these links might help:
+
+- https://git-scm.com/book/en/v2/Git-Tools-Rewriting-History
+- http://gitready.com/advanced/2009/02/10/squashing-commits-with-rebase.html
+
+---
+
+## Running tests and other verification tasks
+
+We use [`tox`](http://readthedocs.org/docs/tox/) to manage virtualenvs where
+tests and other verification tasks are run. We use
+[`pytest`](https://docs.pytest.org/) as our test runner.
+
+Alternatively to `tox`, one can use
+[`detox`](https://pypi.python.org/pypi/detox/) for running verification tasks in
+parallel. Note that while `detox` may be useful in development to make use of
+multiple cores, it can be buggy at times and produce flakes, thus we do not use
+it in our [CI](docs/continuous_integration.md) jobs.
 
 ```
-pip install tox detox
+pip install tox
+```
+
+To run all tests and verification tasks:
+
+```
+tox
 ```
 
 ---
 
-Note: before running `tox` or `detox`, ensure that the only virtualenvs within
-the repository root are the ones managed by `tox`, those in a `.tox`
+**Note**: before running `tox` or `detox`, ensure that the only virtualenvs
+within the repository root are the ones managed by `tox`, those in a `.tox`
 subdirectory.
 
 Use this command to list paths that are likely part of a virtualenv not managed
@@ -47,45 +98,45 @@ potentially fail.
 
 ---
 
-List the test environments available:
+### Running only specific tasks
+
+The [tox configuration](tox.ini) describes environments based on either Python 2
+or Python 3. Each environment is associated with a command that is executed in
+the context of a virtualenv, with a specific version of Python, installed
+dependencies, environment variables and so on. To list the environments
+available:
 
 ```
 tox -l
 ```
 
-Run all of the tests and linters with:
-
-```
-tox
-```
-
-Run all of the tests linters in parallel (may flake):
-
-```
-detox
-```
-
-### Run only unit tests or some specific linter
-
-Run a particular test environment (`flake8` on Python 2.7 in this case):
+To run the command of a particular environment, e.g., `flake8` on Python 2.7:
 
 ```
 tox -e py27-flake8
 ```
 
-Run a particular test environment in a clean virtualenv (`pylint` on Python 3.5
-in this case):
+To run the command of a particular environment in a clean virtualenv, e.g.,
+`pylint` on Python 3.5:
 
 ```
 tox -re py35-pylint
 ```
 
+The `-r` flag recreates existing environments, useful to force dependencies to
+be reinstalled.
+
+## Appendix
+
 ### Tricks
+
+Here are some useful tips that might improve your workflow while working on this repository.
 
 #### Activating a virtualenv managed by tox
 
-If you want to enter a virtualenv created by tox to do additional
-testing/debugging (py27-flake8 env in this case):
+If you want to enter a virtualenv created by tox to do additional debugging, you
+can activate it just like any other virtualenv (py27-flake8 environment in this
+example):
 
 ```
 source .tox/py27-flake8/bin/activate
@@ -124,32 +175,7 @@ $ tox -e py27-unit -- roles/lib_openshift/src/test/unit/test_oc_project.py -k te
 Among other things, this can be used for instance to see the coverage levels of
 individual modules as we work on improving tests.
 
-## Submitting contributions
-
-1. Go through the guides from the [introduction](#Introduction).
-2. Fork this repository, and create a work branch in your fork.
-3. Make changes and commit. You may want to review your changes and run tests
-   before pushing your branch.
-4. Open a Pull Request.
-
-One of the repository maintainers will then review the PR and submit it for
-testing.
-
-The `default` test job is publicly accessible at
-https://ci.openshift.redhat.com/jenkins/job/openshift-ansible/. The other jobs
-are run on a different Jenkins host that is not publicly accessible, however the
-test results are posted to S3 buckets when complete.
-
-The test output of each job is also posted to the Pull Request as comments.
-
-A trend of the time taken by merge jobs is available at
-https://ci.openshift.redhat.com/jenkins/job/merge_pull_request_openshift_ansible/buildTimeTrend.
-
----
-
-## Appendix
-
-### Finding unused Python code
+#### Finding unused Python code
 
 If you are contributing with Python code, you can use the tool
 [`vulture`](https://pypi.python.org/pypi/vulture) to verify that you are not
