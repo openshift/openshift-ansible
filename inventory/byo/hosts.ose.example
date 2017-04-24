@@ -736,6 +736,10 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Or you may optionally define your own build overrides configuration serialized as json
 #openshift_buildoverrides_json='{"BuildOverrides":{"configuration":{"apiVersion":"v1","kind":"BuildDefaultsConfig","forcePull":"true"}}}'
 
+# Enable template service broker by specifying one of more namespaces whose
+# templates will be served by the broker
+#openshift_template_service_broker_namespaces=['openshift']
+
 # masterConfig.volumeConfig.dynamicProvisioningEnabled, configurable as of 1.2/3.2, enabled by default
 #openshift_master_dynamic_provisioning_enabled=False
 
