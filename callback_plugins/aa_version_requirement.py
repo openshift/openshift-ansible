@@ -7,7 +7,6 @@ The plugin is named with leading `aa_` to ensure this plugin is loaded
 first (alphanumerically) by Ansible.
 """
 import sys
-from subprocess import check_output
 from ansible import __version__
 
 if __version__ < '2.0':
@@ -30,13 +29,8 @@ else:
 
 
 # Set to minimum required Ansible version
-REQUIRED_VERSION = '2.2.0.0'
-DESCRIPTION = "Supported versions: %s or newer (except 2.2.1.0)" % REQUIRED_VERSION
-FAIL_ON_2_2_1_0 = "There are known issues with Ansible version 2.2.1.0 which " \
-                  "are impacting OpenShift-Ansible. Please use Ansible " \
-                  "version 2.2.0.0 or a version greater than 2.2.1.0. " \
-                  "See this issue for more details: " \
-                  "https://github.com/openshift/openshift-ansible/issues/3111"
+REQUIRED_VERSION = '2.2.2.0'
+DESCRIPTION = "Supported versions: %s or newer" % REQUIRED_VERSION
 
 
 def version_requirement(version):
@@ -64,13 +58,3 @@ class CallbackModule(CallbackBase):
                 'FATAL: Current Ansible version (%s) is not supported. %s'
                 % (__version__, DESCRIPTION), color='red')
             sys.exit(1)
-
-        if __version__ == '2.2.1.0':
-            rpm_ver = str(check_output(["rpm", "-qa", "ansible"]))
-            patched_ansible = '2.2.1.0-2'
-
-            if patched_ansible not in rpm_ver:
-                display(
-                    'FATAL: Current Ansible version (%s) is not supported. %s'
-                    % (__version__, FAIL_ON_2_2_1_0), color='red')
-                sys.exit(1)
