@@ -1,23 +1,10 @@
 # Containerized openshift-ansible to run playbooks
 
-The [Dockerfile](Dockerfile) in this repository uses the [playbook2image](https://github.com/aweiteka/playbook2image) source-to-image base image to containerize `openshift-ansible`. The resulting image can run any of the provided playbooks.
+The [Dockerfile](Dockerfile) in this repository uses the [playbook2image](https://github.com/aweiteka/playbook2image) source-to-image base image to containerize `openshift-ansible`. The resulting image can run any of the provided playbooks. See [BUILD.md](BUILD.md) for image build instructions.
 
-**Note**: at this time there are known issues that prevent to run this image for installation/upgrade purposes (i.e. run one of the config/upgrade playbooks) from within one of the hosts that is also an installation target at the same time: if the playbook you want to run attempts to manage the docker daemon and restart it (like install/upgrade playbooks do) this would kill the container itself during its operation.
-
-## Build
-
-To build a container image of `openshift-ansible`:
-
-1. Using standalone **Docker**:
-
-        cd openshift-ansible
-        docker build -t openshift/openshift-ansible .
 The image is designed to **run as a non-root user**. The container's UID is mapped to the username `default` at runtime. Therefore, the container's environment reflects that user's settings, and the configuration should match that. For example `$HOME` is `/opt/app-root/src`, so ssh keys are expected to be under `/opt/app-root/src/.ssh`. If you ran a container as `root` you would have to adjust the container's configuration accordingly, e.g. by placing ssh keys under `/root/.ssh` instead. Nevertheless, the expectation is that containers will be run as non-root; for example, this container image can be run inside OpenShift under the default `restricted` [security context constraint](https://docs.openshift.org/latest/architecture/additional_concepts/authorization.html#security-context-constraints).
 
-1. Using an **OpenShift** build:
-
-        oc new-build docker.io/aweiteka/playbook2image~https://github.com/openshift/openshift-ansible
-        oc describe imagestream openshift-ansible
+**Note**: at this time there are known issues that prevent to run this image for installation/upgrade purposes (i.e. run one of the config/upgrade playbooks) from within one of the hosts that is also an installation target at the same time: if the playbook you want to run attempts to manage the docker daemon and restart it (like install/upgrade playbooks do) this would kill the container itself during its operation.
 
 ## Usage
 

@@ -66,9 +66,9 @@ These are plugins used in playbooks and roles:
 └── test                Contains tests.
 ```
 
-## Building RPMs
+## Building openshift-ansible RPMs and container images
 
-See the [RPM build instructions](BUILD.md).
+See the [build instructions in BUILD.md](BUILD.md).
 
 ## Running tests
 
