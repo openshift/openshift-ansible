@@ -3,6 +3,22 @@
 Thank you for contributing to OpenShift Ansible. This document explains how the
 repository is organized, and how to submit contributions.
 
+**Table of Contents**
+
+<!-- TOC depthFrom:2 depthTo:4 withLinks:1 updateOnSave:1 orderedList:0 -->
+
+- [Introduction](#introduction)
+- [Submitting contributions](#submitting-contributions)
+- [Running tests and other verification tasks](#running-tests-and-other-verification-tasks)
+	- [Running only specific tasks](#running-only-specific-tasks)
+- [Appendix](#appendix)
+	- [Tricks](#tricks)
+		- [Activating a virtualenv managed by tox](#activating-a-virtualenv-managed-by-tox)
+		- [Limiting the unit tests that are run](#limiting-the-unit-tests-that-are-run)
+		- [Finding unused Python code](#finding-unused-python-code)
+
+<!-- /TOC -->
+
 ## Introduction
 
 Before submitting code changes, get familiarized with these documents:
