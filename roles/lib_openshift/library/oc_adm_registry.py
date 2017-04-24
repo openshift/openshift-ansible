@@ -947,6 +947,13 @@ class OpenShiftCLI(object):
 
     def _replace(self, fname, force=False):
         '''replace the current object with oc replace'''
+        # We are removing the 'resourceVersion' to handle
+        # a race condition when modifying oc objects
+        yed = Yedit(fname)
+        results = yed.delete('metadata.resourceVersion')
+        if results[0]:
+            yed.write()
+
         cmd = ['replace', '-f', fname]
         if force:
             cmd.append('--force')
