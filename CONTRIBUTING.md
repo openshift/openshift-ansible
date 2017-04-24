@@ -46,6 +46,8 @@ something that can be merged to the repository.
 
 One of the repository maintainers will then review the PR and trigger tests, and
 possibly start a discussion that goes on until the PR is ready to be merged.
+This process is further explained in the
+[Pull Request process](docs/pull_requests.md) document.
 
 If you get no timely feedback from a project contributor / maintainer, sorry for
 the delay. You can help us speed up triaging, reviewing and eventually merging
