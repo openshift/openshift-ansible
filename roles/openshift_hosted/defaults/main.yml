@@ -24,7 +24,7 @@ openshift_hosted_routers:
   ports:
   - 80:80
   - 443:443
-  certificates: "{{ openshift_hosted_router_certificate | default({}) }}"
+  certificate: "{{ openshift_hosted_router_certificate | default({}) }}"
 
 
-openshift_hosted_router_certificates: {}
+openshift_hosted_router_certificate: {}
