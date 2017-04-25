@@ -254,7 +254,7 @@ class RegistryTest(unittest.TestCase):
         mock_cmd.assert_has_calls([
             mock.call(['oc', 'get', 'dc', 'docker-registry', '-o', 'json', '-n', 'default'], None),
             mock.call(['oc', 'get', 'svc', 'docker-registry', '-o', 'json', '-n', 'default'], None),
-            mock.call(['oc', 'adm', 'registry', '--daemonset=False', '--enforce-quota=False',
+            mock.call(['oc', 'adm', 'registry',
                        '--ports=5000', '--replicas=1', '--selector=type=infra',
                        '--service-account=registry', '--dry-run=True', '-o', 'json', '-n', 'default'], None),
             mock.call(['oc', 'create', '-f', mock.ANY, '-n', 'default'], None),
