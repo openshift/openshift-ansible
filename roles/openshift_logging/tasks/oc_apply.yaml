@@ -6,7 +6,7 @@
     namespace: "{{ namespace }}"
     files:
     - "{{ file_name }}"
-  when: file_content.kind != "Service"
+  when: file_content.kind not in ["Service", "Route"]
 
 ## still need to do this for services until the template logic is replaced by oc_*
 - block:
@@ -49,4 +49,4 @@
     failed_when: "'error' in generation_apply.stderr"
     changed_when: generation_apply.rc == 0
     when: "'field is immutable' in generation_apply.stderr"
-  when: file_content.kind == "Service"
+  when: file_content.kind in ["Service", "Route"]
